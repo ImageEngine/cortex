@@ -77,6 +77,9 @@ import os
 import sys
 import VersionControl
 
+## \todo This uses a python module internal to image engine, and needs replacing.
+# We need to get the image engine wrapper for this script to add the appropriate IECore
+# version into the PYTHONPATH.
 VersionControl.setVersion( "IECore", "!CORE_VERSION!")
 import IECore
 
