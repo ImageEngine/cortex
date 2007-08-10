@@ -1,0 +1,165 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+#include <boost/python.hpp>
+
+#include "IECore/bindings/ParameterBinding.h"
+#include "IECore/bindings/Wrapper.h"
+#include "IECore/TypedParameter.h"
+#include "IECore/CompoundObject.h"
+#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+using namespace std;
+using namespace boost;
+using namespace boost::python;
+using namespace Imath;
+
+namespace IECore
+{
+
+template<typename T>
+class TypedParameterWrap : public TypedParameter<T>, public Wrapper< TypedParameter<T> >
+{
+	protected:
+
+		static boost::intrusive_ptr<TypedData<T> > makeDefault( object defaultValue )
+		{
+			boost::intrusive_ptr<TypedData<T> > defaultData;
+			extract<T> de( defaultValue );
+			if( de.check() )
+			{
+				defaultData = new TypedData<T>( de() );
+			}
+			else
+			{
+				defaultData = extract<TypedData<T> *>( defaultValue )();
+			}
+			return defaultData;
+		}
+
+		static typename TypedParameter<T>::ObjectPresetsMap makePresets( const dict &d )
+		{
+			typename TypedParameter<T>::ObjectPresetsMap p;
+			boost::python::list keys = d.keys();
+			boost::python::list values = d.values();
+			for( int i = 0; i<keys.attr( "__len__" )(); i++ )
+			{
+				extract<T> e( values[i] );
+				if( e.check() )
+				{
+					p.insert( typename TypedParameter<T>::ObjectPresetsMap::value_type( extract<string>( keys[i] )(), new TypedData<T>( e() ) ) );
+				}
+				else
+				{
+					p.insert( typename TypedParameter<T>::ObjectPresetsMap::value_type( extract<string>( keys[i] )(), extract<boost::intrusive_ptr<TypedData<T> > >( values[i] )	() ) );
+				}
+			}
+			return p;
+		}
+
+	public :
+
+		TypedParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv, const dict &p = dict(), bool po = false, CompoundObjectPtr ud = 0 )	
+			:	TypedParameter<T>( n, d, makeDefault( dv ), makePresets( p ), po, ud ), Wrapper< TypedParameter<T> >( self, this ) {};
+		
+		TypedParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv, CompoundObjectPtr ud )	
+			:	TypedParameter<T>( n, d, makeDefault( dv ), typename TypedParameter<T>::ObjectPresetsMap(), false, ud ), Wrapper< TypedParameter<T> >( self, this ) {};
+
+		IE_COREPYTHON_PARAMETERWRAPPERFNS( TypedParameter<T> );
+};
+
+template<typename T>
+static void bindTypedParameter( const char *name )
+{
+	typedef class_< TypedParameter<T>, intrusive_ptr< TypedParameterWrap< T > >, boost::noncopyable, bases<Parameter> > TypedParameterPyClass;
+	TypedParameterPyClass( name, no_init )
+		.def( init< const std::string &, const std::string &, object, optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
+		.def( init< const std::string &, const std::string &, object, CompoundObjectPtr >( args( "name", "description", "defaultValue", "userData") ) )
+		.def( "setTypedValue", &TypedParameter<T>::setTypedValue )
+		.def( "getTypedValue", &TypedParameter<T>::getTypedValue, return_value_policy<copy_const_reference>() )
+		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( TypedParameter<T> )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedParameter<T> )
+	;
+
+	WrapperToPython< intrusive_ptr<TypedParameter<T> > >();
+
+	INTRUSIVE_PTR_PATCH( TypedParameter<T>, typename TypedParameterPyClass );
+	implicitly_convertible<intrusive_ptr<TypedParameter<T> >, ParameterPtr>();
+
+}
+
+void bindTypedParameter()
+{
+	bindTypedParameter<bool>( "BoolParameter" );
+	bindTypedParameter<V2i>( "V2iParameter" );
+	bindTypedParameter<V3i>( "V3iParameter" );
+	bindTypedParameter<V2f>( "V2fParameter" );
+	bindTypedParameter<V3f>( "V3fParameter" );
+	bindTypedParameter<V2d>( "V2dParameter" );
+	bindTypedParameter<V3d>( "V3dParameter" );
+	bindTypedParameter<Color3f>( "Color3fParameter" );
+	bindTypedParameter<Color4f>( "Color4fParameter" );
+	bindTypedParameter<Box2i>( "Box2iParameter" );
+	bindTypedParameter<Box3i>( "Box3iParameter" );
+	bindTypedParameter<Box2f>( "Box2fParameter" );
+	bindTypedParameter<Box3f>( "Box3fParameter" );
+	bindTypedParameter<Box2d>( "Box2dParameter" );
+	bindTypedParameter<Box3d>( "Box3dParameter" );
+	bindTypedParameter<M44f>( "M44fParameter" );
+	bindTypedParameter<M44d>( "M44dParameter" );
+	bindTypedParameter<string>( "StringParameter" );
+
+	bindTypedParameter<vector<int> >( "IntVectorParameter" );
+	bindTypedParameter<vector<float> >( "FloatVectorParameter" );
+	bindTypedParameter<vector<double> >( "DoubleVectorParameter" );
+	bindTypedParameter<vector<string> >( "StringVectorParameter" );
+	bindTypedParameter<vector<V2f> >( "V2fVectorParameter" );
+	bindTypedParameter<vector<V3f> >( "V3fVectorParameter" );
+	bindTypedParameter<vector<V2d> >( "V2dVectorParameter" );
+	bindTypedParameter<vector<V3d> >( "V3dVectorParameter" );
+	bindTypedParameter<vector<Box3f> >( "Box3fVectorParameter" );
+	bindTypedParameter<vector<Box3d> >( "Box3dVectorParameter" );
+	bindTypedParameter<vector<M33f> >( "M33fVectorParameter" );
+	bindTypedParameter<vector<M44f> >( "M44fVectorParameter" );
+	bindTypedParameter<vector<M33d> >( "M33dVectorParameter" );
+	bindTypedParameter<vector<M44d> >( "M44dVectorParameter" );
+	bindTypedParameter<vector<Quatf> >( "QuatfVectorParameter" );
+	bindTypedParameter<vector<Quatd> >( "QuatdVectorParameter" );
+	bindTypedParameter<vector<Color3f> >( "Color3fVectorParameter" );
+	bindTypedParameter<vector<Color4f> >( "Color4fVectorParameter" );
+}
+
+} // namespace IECore

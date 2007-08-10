@@ -1,0 +1,205 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+#include "IECore/JPEGImageWriter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/VectorTypedData.h"
+#include "IECore/ByteOrder.h"
+#include "IECore/ImagePrimitive.h"
+#include "IECore/FileNameParameter.h"
+
+#include "boost/format.hpp"
+
+#include <fstream>
+
+extern "C" {
+#include "jpeglib.h"
+}
+#include <stdio.h>
+
+using namespace IECore;
+using namespace std;
+using namespace boost;
+using namespace Imath;
+
+const Writer::WriterDescription<JPEGImageWriter> JPEGImageWriter::m_writerDescription("jpeg jpg");
+
+JPEGImageWriter::JPEGImageWriter() : 
+	ImageWriter("JPEGImageWriter", "Serializes images to the Joint Photographic Experts Group (JPEG) format")
+{
+}
+
+JPEGImageWriter::JPEGImageWriter(ObjectPtr image, const string &fileName) : 
+	ImageWriter("JPEGImageWriter", "Serializes images to the Joint Photographic Experts Group (JPEG) format")
+{
+	m_objectParameter->setValue( image );
+	m_fileNameParameter->setTypedValue( fileName );
+}
+
+JPEGImageWriter::~JPEGImageWriter()
+{
+}
+
+void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dw)
+{
+	// open the output file
+	FILE *outfile;
+	if((outfile = fopen(fileName().c_str(), "wb")) == NULL) {
+		string err =  "Cannot write to \"" + fileName() + "\"";
+		throw Exception( err );
+	}	
+	
+	// assume an 8-bit RGB image
+	int width  = 1 + dw.max.x - dw.min.x;
+	int height = 1 + dw.max.y - dw.min.y;
+	int spp = 3;
+	//cout << "write image of " << width << "x" << height << endl;
+	
+	// build the buffer
+	unsigned char *image_buffer = new unsigned char[width*height*spp]();
+	unsigned char *row_pointer[1];
+	int row_stride;
+
+	// compression info
+	struct jpeg_compress_struct cinfo;
+
+	struct jpeg_error_mgr jerr;
+	cinfo.err = jpeg_std_error(&jerr);
+	  
+	jpeg_create_compress(&cinfo);
+
+	jpeg_stdio_dest(&cinfo, outfile);
+	
+	cinfo.image_width = width;
+	cinfo.image_height = height;
+	cinfo.input_components = spp;
+	cinfo.in_color_space = JCS_RGB;
+
+	jpeg_set_defaults(&cinfo);
+
+	// should be set as a parameter
+	int quality = 100;
+
+	// force baseline-JPEG (8bit) values with TRUE	
+	jpeg_set_quality(&cinfo, quality, TRUE);
+
+	//cout << "set quality" << endl;
+
+	row_stride = width * 3;
+
+	// add the channels into the header with the appropriate types
+	// channel data is RGB interlaced
+	vector<string>::const_iterator i = names.begin();
+	while(i != names.end())
+	{
+
+		if(!(*i == "R" || *i == "G" || *i == "B"))
+		{
+			cerr << "warning: channel '" << *i << "' not encoded by JPEGImageWriter" << endl;
+			++i;
+			continue;
+			//throw Exception("invalid channel for JPEG writer, channel name is: " + *i);
+		}
+		
+		const char *name = (*i).c_str();
+
+		int offset = *i == "R" ? 0 : *i == "G" ? 1 : 2;
+		
+		// get the image channel
+		DataPtr channelp = image->variables.find(name)->second.data;
+		
+		switch(channelp->typeId())
+		{
+			
+		case FloatVectorDataTypeId:
+		{
+			vector<float> channel = static_pointer_cast<FloatVectorData>(channelp)->readable();
+
+			// convert to 8-bit integer
+			for(int i = 0; i < width*height; ++i)
+			{
+				image_buffer[spp*i + offset] = (unsigned char) (max(0.0, min(255.0, 255.0 * channel[i] + 0.5)));
+			}
+		}
+		break;
+	
+		case UIntVectorDataTypeId:
+		{
+			vector<unsigned int> channel = static_pointer_cast<UIntVectorData>(channelp)->readable();
+			
+			// convert to 8-bit integer
+			for(int i = 0; i < width*height; ++i)
+			{
+				image_buffer[spp*i + offset] = (unsigned char) ((channel[i] + 1) >> 24);
+			}
+		}
+		break;
+			
+		case HalfVectorDataTypeId:
+		{
+			vector<half> channel = static_pointer_cast<HalfVectorData>(channelp)->readable();
+
+			// convert to 8-bit linear integer
+			for(int i = 0; i < width*height; ++i)
+			{
+				image_buffer[spp*i + offset] = (unsigned char) (max(0.0, min(255.0, 255.0 * channel[i] + 0.5)));
+				//image_buffer[spp*i + offset] = (unsigned char) (255.0 * channel[i] + 0.5);
+			}
+		}
+		break;
+			
+		default:
+			throw "invalid data type for JPEG writer, channel type is: " +
+				Object::typeNameFromTypeId(channelp->typeId());
+		}
+		
+		++i;
+	}
+
+	// start the compressor
+	jpeg_start_compress(&cinfo, TRUE);
+	
+	// pass one scanline at a time
+ 	while(cinfo.next_scanline < cinfo.image_height) {
+ 		row_pointer[0] = &image_buffer[cinfo.next_scanline * row_stride];
+ 		jpeg_write_scanlines(&cinfo, row_pointer, 1);
+ 	}
+	
+	jpeg_finish_compress(&cinfo);
+	jpeg_destroy_compress(&cinfo);
+	fclose(outfile);
+	outfile = 0;
+
+	delete [] image_buffer;
+}

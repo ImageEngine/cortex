@@ -1,0 +1,84 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+#include <boost/python.hpp>
+
+#include "IECore/Object.h"
+#include "IECore/bindings/ObjectBinding.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+using namespace boost::python;
+
+namespace IECore
+{
+
+void bindObject()
+{
+	typedef class_<Object, boost::noncopyable, ObjectPtr, bases<RunTimeTyped> > ObjectPyClass;
+	ObjectPyClass( "Object", no_init )
+		.def( self == self )
+		.def( self != self )
+		.def( "copy", &Object::copy )
+		.def( "isType", (bool (*)( const std::string &) )&Object::isType )
+		.def( "isType", (bool (*)( TypeId) )&Object::isType )
+		.staticmethod( "isType" )
+		.def( "isAbstractType", (bool (*)( const std::string &) )&Object::isAbstractType )
+		.def( "isAbstractType", (bool (*)( TypeId) )&Object::isAbstractType )
+		.staticmethod( "isAbstractType" )
+		.def( "create", (ObjectPtr (*)( const std::string &) )&Object::create )
+		.def( "create", (ObjectPtr (*)( TypeId ) )&Object::create )
+		.staticmethod( "create" )
+		.def( "typeIdFromTypeName", &Object::typeIdFromTypeName )
+		.staticmethod( "typeIdFromTypeName" )
+		.def( "typeNameFromTypeId", &Object::typeNameFromTypeId )
+		.staticmethod( "typeNameFromTypeId" )
+		.def( "load", (ObjectPtr (*)( const std::string & ) )&Object::load )
+		.def( "load", (ObjectPtr (*)( IndexedIOInterfacePtr ) )&Object::load )
+		.staticmethod( "load" )
+		.def( "save", (void (Object::*)( IndexedIOInterfacePtr )const )&Object::save )
+		.def( "save", (void (Object::*)( const std::string & )const )&Object::save )
+		.def("memoryUsage", (size_t (Object::*)()const )&Object::memoryUsage, "Returns the number of bytes this instance occupies in memory" )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Object)
+	;
+	
+	INTRUSIVE_PTR_PATCH( Object, ObjectPyClass );
+
+	implicitly_convertible<ObjectPtr, RefCountedPtr>();
+	implicitly_convertible<ObjectPtr, ConstObjectPtr>();
+
+}
+
+}
