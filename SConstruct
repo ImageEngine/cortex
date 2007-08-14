@@ -215,6 +215,7 @@ coreLibrary.addLib('IlmThread')
 coreLibrary.addLib('tiff')
 coreLibrary.addLib('jpeg')
 
+coreLibrary.addLinkFlag( '-pthread' )
 
 # Core library API documentation		
 coreLibrary.doxygen('doc/config/Doxyfile', 'doc/config/header.html', 'doc/config/footer.html')
