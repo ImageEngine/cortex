@@ -476,8 +476,8 @@ FileIndexedIO::Index::NodePtr FileIndexedIO::Index::insert( const IndexedIOPath 
 	Imf::Int64 newId = makeId();	
 	child = new Node(this, newId);
 	
-	m_indexToNodeMap.insert( IndexToNodeMap::value_type( newId, child.get() ) );
-	m_nodeToIndexMap.insert( NodeToIndexMap::value_type( child.get(), newId ) );			
+	m_indexToNodeMap[newId] = child.get();
+	m_nodeToIndexMap[child.get()] = newId;
 		
 	child->m_entry = e;
 	
@@ -492,8 +492,8 @@ FileIndexedIO::Index::Index() : m_root(0), m_prevId(0)
 {
 	m_root = new Node( this, 0 );
 	
-	m_indexToNodeMap.insert( IndexToNodeMap::value_type( 0, m_root.get() ) );
-	m_nodeToIndexMap.insert( NodeToIndexMap::value_type( m_root.get(), 0 ) );	
+	m_indexToNodeMap[0] = m_root.get();
+	m_nodeToIndexMap[m_root.get()] = 0;
 	
 	m_root->m_entry = IndexedIO::Entry("/", IndexedIO::Directory, IndexedIO::Invalid, 0);
 	m_hasChanged = true;
@@ -798,6 +798,11 @@ void FileIndexedIO::Index::write( fstream & f, Node* n )
 	
 	for (Node::ChildMap::const_iterator it = n->m_children.begin(); it != n->m_children.end(); ++it)
 	{
+		/// Check tree consistency before writing
+		assert( it->second->m_parent == n );
+		assert( m_nodeToIndexMap.find( it->second->m_parent ) != m_nodeToIndexMap.end() );
+		assert( m_nodeToIndexMap.find( it->second->m_parent )->second == n->m_id );	
+	
 		write( f, it->second.get() );
 	}		
 }
@@ -953,8 +958,8 @@ void FileIndexedIO::Index::Node::read( fstream &f )
 	delete[] s;
 	m_idx->read(f, m_id );
 
-	m_idx->m_indexToNodeMap.insert( IndexToNodeMap::value_type( m_id, this ) );
-	m_idx->m_nodeToIndexMap.insert( NodeToIndexMap::value_type( this, m_id ) );			
+	m_idx->m_indexToNodeMap[m_id] = this;
+	m_idx->m_nodeToIndexMap[this] = m_id;
 	
 	Imf::Int64 parentId;
 	m_idx->read(f, parentId );
