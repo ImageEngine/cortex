@@ -158,6 +158,32 @@ class TestAttributeCache(unittest.TestCase):
 			self.failIf( cache.contains( obj ) )
 			self.failIf( cache.contains( obj ), "not_in_cache" )
 			
+	def testOverwriting( self ):
+		"""Test AttributeCache overwriting"""
+		cache = None
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Write)
+		cache.write("Object1", "Attribute1", IntData(1) )
+		cache.write("Object2", "Attribute1", IntData(1) )
+		cache.write("Object3", "Attribute1", IntData(1) )
+		
+		
+		cache = None
+		cache = AttributeCache( "./test/AttributeCache.fio", IndexedIOOpenMode.Read)
+		self.assertEqual( len( cache.attributes( "Object1" ) ), 1 )
+		
+		cache = None
+		cache = AttributeCache("./test/AttributeCache.fio", IndexedIOOpenMode.Append)
+		cache.write("Object1", "Attribute1", IntData(1) )
+		cache.write("Object2", "Attribute1", IntData(1) )
+		cache.write("Object3", "Attribute1", IntData(1) )
+		cache.write("Object1", "Attribute2", IntData(2) )		
+		cache.write("Object2", "Attribute2", IntData(2) )
+		cache.write("Object3", "Attribute2", IntData(2) )
+		
+		cache = None
+		cache = AttributeCache( "./test/AttributeCache.fio", IndexedIOOpenMode.Read)
+		self.assertEqual( len( cache.attributes( "Object1" ) ), 2 )
+			
 	def tearDown(self):
 		
 		# cleanup
