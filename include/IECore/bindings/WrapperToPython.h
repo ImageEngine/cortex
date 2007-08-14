@@ -67,7 +67,10 @@ struct WrapperToPython
 	
 	static PyObject* convert( TPtr const &x )
 	{		
-		assert(x);
+		if (!x)
+		{
+			return Py_None;
+		}
 		
 		PyObject* converted = WrapperGarbageCollectorBase::pyObject( x.get() );	
 		if( !converted )
