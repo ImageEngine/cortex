@@ -189,7 +189,8 @@ struct IndexedIOTestSuite : public boost::unit_test::test_suite
 			
 		static boost::shared_ptr<IndexedIOTest<T> > instance(new IndexedIOTest<T>(filenames));
 		
-		//instance->write("./test/data/sqlFiles/0.0.3/osx104.ppc/types.sql");		
+		/// Uncomment this line to write out new test data
+		//instance->write("./test/data/fioFiles/2.8.0/osx104.ppc/types.fio");		
 		
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<float>, instance ) );				
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<double>, instance ) );		

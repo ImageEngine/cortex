@@ -66,6 +66,9 @@ void IndexedIOTestSuite<SQLiteIndexedIO>::getFilenames( FilenameList &filenames 
 	
 	filenames.push_back("./test/data/sqlFiles/2.0.0/rhel4.i686/types.sql");	
 	filenames.push_back("./test/data/sqlFiles/2.0.0/osx104.i686/types.sql");	
+	
+	filenames.push_back("./test/data/fioFiles/2.8.0/rhel4.i686/types.fio");
+	filenames.push_back("./test/data/fioFiles/2.8.0/osx104.i686/types.fio");		
 }
 
 /// float 
