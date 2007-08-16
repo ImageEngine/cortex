@@ -39,6 +39,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/BoxOperators.h"
 
 #include "boost/format.hpp"
 
@@ -168,33 +169,37 @@ void EXRImageReader::readTypedChannel(string name, ImagePrimitivePtr image,
 {	
 	intrusive_ptr<TypedData<vector<T> > > image_channel = image->template createChannel<T>(name);	
 	vector<T> &ic = image_channel->writable();
-
+	
 	// compute the size of the sample values, the stride, and the width
 	int size = sizeof(T);
  	int width = 1 + dataWindow.max.x - dataWindow.min.x;
-	
+
 	Box2i dw = m_header.dataWindow();
 	int datawidth = 1 + dw.max.x - dw.min.x;
 		
 	// copy cropped scanlines into the buffer
  	vector<T> scanline;
  	scanline.resize(datawidth);
+
+	// determine the image data window
+	Box2i idw = dataWindow.isEmpty() ? dw : dataWindow;
+	image->setDataWindow(idw);
+	image->setDisplayWindow(idw);
 	
+	// compute read box
+	Box2i readbox = intersection(dw, idw);
+
 	// read as scanlines
- 	int cl = 0;
-	unsigned int ini = 0;
 
-	// adjust height bounds so that they intersect the image's data window
-	int low_y = max(dataWindow.min.y, dw.min.y);
-	int high_y = min(dataWindow.max.y, dw.max.y);
+	// x-shift for the ImagePrimitive array
+	int dx = readbox.min.x - dataWindow.min.x;
 
-	// adjust cl for the difference between min.y, low_y
-	cl = low_y - dataWindow.min.y;
-
-	int low_x = max(dataWindow.min.x, dw.min.x);
-	int dx = low_x - dataWindow.min.x;
+	// y-shift for the ImagePrimitive array
+	int cl = readbox.min.y - dataWindow.min.y;
 	
-  	for(int sl = low_y; sl <= high_y; ++sl, ++cl) {
+	int readWidth = 1 + readbox.max.x - readbox.min.x;
+
+  	for(int sl = readbox.min.y; sl <= readbox.max.y; ++sl, ++cl) {
 		
 		FrameBuffer fb;
 
@@ -206,12 +211,13 @@ void EXRImageReader::readTypedChannel(string name, ImagePrimitivePtr image,
 		m_inputFile->readPixels(sl, sl);
 
  		// crop the scanline horizontally
-		ini = cl * width + dx;
-		
-		for(int i = dx; i <= width; ++i, ++ini)
- 		{
-			ic[ini] = scanline[i];
-		}
+		unsigned int ini = cl * width + dx;
+
+		// i varies over the intersection of the datawindow x-range and the image x-range
+ 		for(int i = 0; i < readWidth; ++i, ++ini)
+  		{
+ 			ic[ini] = scanline[i];
+ 		}
   	}	
 }
 

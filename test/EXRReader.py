@@ -85,7 +85,8 @@ class TestEXRReader(unittest.TestCase):
 
         def testHalf(self):
 
-		testfile = "test/data/exrFiles/AllHalfValues.exr"
+		testfile = "test/data/exrFiles/redgreen_gradient_piz_256x256.exr"
+		#testfile = "test/data/exrFiles/AllHalfValues.exr"
 		testoutfile = "test/data/exrFiles/AllHalfValues.testoutput.exr"
                 
                 r = IECore.Reader.create(testfile)
@@ -94,13 +95,32 @@ class TestEXRReader(unittest.TestCase):
 		img = r.read()
 		self.assertEqual(type(img), IECore.ImagePrimitive)
 
-		# write test
-		w = IECore.Writer.create(img, testoutfile)
-		self.assertEqual(type(w), IECore.EXRImageWriter)
+		## write test
+		#w = IECore.Writer.create(img, testoutfile)
+		#self.assertEqual(type(w), IECore.EXRImageWriter)
+		#
+		#w.write()
+		## here we might complete the test by comparing against verified output
+		## \todo So why don't we?
 
-		w.write()
-		# here we might complete the test by comparing against verified output
-		# \todo So why don't we?
+
+
+        def testWindowedRead(self):
+
+                # create a reader, read a sub-image
+                r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECore.EXRImageReader)
+		box = IECore.Box2i(IECore.V2i(-100, -100), IECore.V2i(199, 199))
+		r.parameters().dataWindow.setValue(IECore.Box2iData(box))
+
+		# read, verify
+		img = r.read()
+		self.assertEqual(type(img), IECore.ImagePrimitive)
+
+		img.displayWindow = box
+
+		# write back the sub-image
+                IECore.Writer.create(img, 'test/data/exrFiles/redgreen.window.exr').write()
 
 
                 			
