@@ -230,10 +230,15 @@ class FileIndexedIO::Index : public RefCounted
 	
 	protected:
 	
-		static const Imf::Int64 g_magicNumber = 0x0B00B1E5;
+		static const Imf::Int64 g_unversionedMagicNumber = 0x0B00B1E5;
+		static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
+		
+		static const Imf::Int64 g_currentVersion = 1;
+		
+		Imf::Int64 m_version;		
 	
 		bool m_hasChanged;
-	
+		
 		Imf::Int64 m_offset;
 		Imf::Int64 m_next;
 	
@@ -490,6 +495,8 @@ FileIndexedIO::Index::NodePtr FileIndexedIO::Index::insert( const IndexedIOPath 
 
 FileIndexedIO::Index::Index() : m_root(0), m_prevId(0)
 {
+	m_version = g_currentVersion;
+	
 	m_root = new Node( this, 0 );
 	
 	m_indexToNodeMap[0] = m_root.get();
@@ -520,20 +527,31 @@ FileIndexedIO::Index::Index( fstream &f ) : m_prevId(0)
 	f.seekg( 0, std::ios::end);
 	Imf::Int64 end = f.tellg();		
 
-	f.seekg( end - 2*sizeof(Imf::Int64) );
-		
-	read( f, m_offset );
+	f.seekg( end - 1*sizeof(Imf::Int64) );
 	
 	Imf::Int64 magicNumber;
 	read( f, magicNumber );
 	
-	if ( magicNumber != g_magicNumber )
+	if ( magicNumber == g_versionedMagicNumber )
+	{
+		f.seekg( end - 3*sizeof(Imf::Int64) );
+		read( f, m_offset );
+		read( f, m_version );						
+	}
+	else if (magicNumber == g_unversionedMagicNumber )
+	{
+		m_version = 0;
+		
+		f.seekg( end - 2*sizeof(Imf::Int64) );	
+		read( f, m_offset );
+	}
+	else
 	{	
 		throw IOException("Not a FileIndexedIO file");
 	}
-	
+			
 	f.seekg( m_offset );
-
+	
 	Imf::Int64 numNodes;		
 	read( f, numNodes );
 
@@ -586,8 +604,9 @@ void FileIndexedIO::Index::write( fstream & f )
 		write(f, it->second->m_size);
 	}
 	
-	write( f, m_offset );		
-	write( f, g_magicNumber );
+	write( f, m_offset );
+	write( f, m_version );		
+	write( f, g_versionedMagicNumber );
 	
 	m_hasChanged = false;
 }
