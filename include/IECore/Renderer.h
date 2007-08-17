@@ -239,6 +239,7 @@ class Renderer : public RunTimeTyped
 		/// Generic call for executing arbitrary renderer commands. This is intended to allow
 		/// derived classes to support calls such as RiMakeTexture via calls of the form
 		/// renderer->command( "ri:makeTexture", ... ).
+		/// \todo It would be nice if this had a return value of DataPtr.
 		virtual void command( const std::string &name, const CompoundDataMap &parameters ) = 0;
 
 };
