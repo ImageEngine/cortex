@@ -63,6 +63,7 @@ IE_CORE_FORWARDDECLARE( Renderer );
 /// by all subclasses. Also document the prefix: naming convention for passing
 /// renderer specific options and attributes to subclasses without causing errors
 /// in other implementations.
+/// \todo Methods for creating and using instances.
 class Renderer : public RunTimeTyped
 {
 	
