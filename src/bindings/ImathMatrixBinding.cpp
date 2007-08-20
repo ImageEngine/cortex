@@ -41,6 +41,7 @@
 #include <stdexcept>
 
 #include <OpenEXR/ImathMatrix.h>
+#include <OpenEXR/ImathMatrixAlgo.h>
 
 #include "IECore/MatrixAlgo.h"
 #include "IECore/bindings/ImathMatrixBinding.h"
@@ -432,6 +433,8 @@ void bindMatrix44(const char *bindName)
 		.def("createScaled", &createScaled<Matrix44<T>, Vec3<T> > ).staticmethod( "createScaled" )
 		.def("createTranslated", &createTranslated<Matrix44<T>, Vec3<T> > ).staticmethod( "createTranslated" )
 		.def("createRotated", &createRotated<Matrix44<T>, Vec3<T> > ).staticmethod( "createRotated" )
+		.def("createAimed", &Imath::rotationMatrix<T> )
+		.def("createAimed", &Imath::rotationMatrixWithUpDir<T> ).staticmethod( "createAimed" )
 	;
 	
 	def("matrixFromBasis", &matrixFromBasis );

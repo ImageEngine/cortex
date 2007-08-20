@@ -811,6 +811,13 @@ class ImathM44f(unittest.TestCase):
 		m.rotate( V3f( 1, 2, 3 ) )
 		self.assertEqual( m, M44f.createRotated( V3f( 1, 2, 3 ) ) )
 		
+		m = M44f.createAimed( V3f( 1, 0, 0  ), V3f( 0, 1, 0 ) )
+		self.assert_( V3f( 0, 1, 0 ).equalWithAbsError( V3f( 1, 0, 0 ) * m, 0.0000001 ) )
+		
+		m = M44f.createAimed( V3f( 1, 0, 0 ), V3f( 0, 0, 1 ), V3f( 0, 1, 0 ) )
+		self.assert_( V3f( 0, 0, 1 ).equalWithAbsError( V3f( 1, 0, 0 ) * m, 0.0000001 ) )
+		self.assert_( V3f( 0, 1, 0 ).equalWithAbsError( V3f( 0, 1, 0 ) * m, 0.0000001 ) )
+		
 	def testMultMethods( self ) :
 	
 		v = M44f.createTranslated( V3f( 1, 2, 3 ) ).multVecMatrix( V3f( 0 ) )
