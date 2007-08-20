@@ -45,6 +45,42 @@
 
 #include "IECore/FileIndexedIO.h"
 
+
+
+/// \todo Describe what each item actually means!
+
+/// FileFormat ::= Data Index Version MagicNumber
+/// Data ::= DataEntry*
+/// Index ::= StringCache Nodes FreePages IndexOffset
+
+/// StringCache ::= NumStrings String*
+/// NumStrings ::= int64
+/// String ::= StringLength char*
+/// StringLength ::= int64
+
+/// Nodes ::= NumNodes Node*
+/// NumNodes ::= int64
+/// Node ::= EntryType EntryStringCacheID DataType ArrayLength NodeID ParentNodeID DataOffset DataSize
+/// EntryType ::= char
+/// EntryStringCacheID ::= int64
+/// DataType ::= char
+/// ArrayLength ::= int64
+/// NodeID ::= int64
+/// ParentNodeID ::= ParentNodeID
+/// DataOffset ::= int64
+/// DataSize ::= int64
+
+/// FreePages ::= NumFreePages FreePage*
+/// NumFreePages ::= int64
+/// FreePage ::= FreePageOffset FreePageSize
+/// FreePageOffset ::= int64
+/// FreePageSize ::= int64
+/// IndexOffset ::= int64
+
+/// Version ::= int64
+/// MagicNumber ::= int64
+
+
 /// \todo This cache class should be extracted into a public header
 /// so it can be usable all over. The reason it isn't right now is that
 /// it isn't good enough. The principal problem is that we need to find
@@ -161,6 +197,159 @@ using std::fstream;
 using namespace IECore;
 namespace fs = boost::filesystem;
 
+template<typename T>
+void writeLittleEndian( std::fstream &f, T n)
+{
+	T nl = asLittleEndian<>(n);
+	f.write( (char*) &nl, sizeof( T) );
+}
+
+template<typename T>
+void readLittleEndian( std::fstream &f, T &n)
+{
+	T nl;
+	f.read(( char*) &nl, sizeof(T) );
+	
+	if (bigEndian())
+	{
+		n = asBigEndian<>(nl);
+	}
+	else
+	{
+		/// Already little endian
+		n = nl;
+	}
+}
+
+/// \todo We could add a minimum length for strings, below which we don't bother caching them?
+class StringCache
+{
+	
+	public:
+	
+		StringCache()
+		{
+			m_prevId = 0;			
+		}
+		
+		StringCache( fstream &f )
+		{
+			Imf::Int64 sz;
+			readLittleEndian(f, sz);
+			
+			for (Imf::Int64 i = 0; i < sz; ++i)
+			{
+				std::string s;
+				read(f, s);
+				
+				Imf::Int64 id;
+				readLittleEndian<Imf::Int64>( f, id );
+				
+				m_prevId = std::max( id, m_prevId );
+				
+				m_stringToIdMap[s] = id;
+				m_idToStringMap[id] = s;
+			}
+		}
+		
+		void write( fstream &f ) const
+		{
+			Imf::Int64 sz = m_stringToIdMap.size();
+			writeLittleEndian<Imf::Int64>(f, sz );
+			
+			for (StringToIdMap::const_iterator it = m_stringToIdMap.begin();
+				it != m_stringToIdMap.end(); ++it)
+			{
+				write(f, it->first);
+				
+				writeLittleEndian<Imf::Int64>(f, it->second);				
+			}
+			
+		}
+		
+		Imf::Int64 find( const std::string &s, bool errIfNotFound = true )
+		{
+			StringToIdMap::const_iterator it = m_stringToIdMap.find( s );
+			
+			if ( it == m_stringToIdMap.end() )
+			{
+				if (errIfNotFound)
+				{
+					assert(false);
+				}
+				
+				Imf::Int64 id = ++m_prevId;
+				
+				m_stringToIdMap[s] = id;
+				assert( m_stringToIdMap.find(s) != m_stringToIdMap.end() );
+				m_idToStringMap[id] = s;
+				
+				return id;
+			}
+			else
+			{
+				return it->second;
+			}
+		}
+		
+		const std::string &find( const Imf::Int64 &id ) const
+		{
+			IdToStringMap::const_iterator it = m_idToStringMap.find( id );
+			assert( it != m_idToStringMap.end() );
+			
+			return it->second;			
+		}
+		
+		void add( const std::string &s )
+		{
+			(void)find(s, false);
+			
+			assert( m_stringToIdMap.size() == m_idToStringMap.size() );
+		}
+		
+		Imf::Int64 size() const
+		{
+			assert( m_stringToIdMap.size() == m_idToStringMap.size() );
+			return m_stringToIdMap.size();
+		}
+		
+
+	
+	protected:
+	
+		void write( fstream &f, const std::string &s ) const
+		{
+			Imf::Int64 sz = s.size();
+			writeLittleEndian<Imf::Int64>( f, sz );
+			
+			/// Does not include null terminator
+			f.write( s.c_str(), sz * sizeof(char) );
+			
+		}
+		
+		void read( fstream &f, std::string &s ) const
+		{		
+			Imf::Int64 sz;	
+			readLittleEndian<Imf::Int64>( f, sz );
+			
+			char *buf = new char[sz + 1];
+			f.read( buf, sz*sizeof(char));
+			
+			buf[sz] = '\0';
+			s = buf;
+			delete[] buf;			
+		}
+	
+		Imf::Int64 m_prevId;
+		
+		typedef std::map< std::string, Imf::Int64 > StringToIdMap;
+		typedef std::map< Imf::Int64, std::string > IdToStringMap;
+		
+		StringToIdMap m_stringToIdMap;
+		IdToStringMap m_idToStringMap;
+		
+};
+
 /// A tree to represent nodes in a filesystem, along with their locations in a file.
 class FileIndexedIO::Index : public RefCounted
 {
@@ -251,6 +440,9 @@ class FileIndexedIO::Index : public RefCounted
 	
 		IndexToNodeMap m_indexToNodeMap;
 		NodeToIndexMap m_nodeToIndexMap;	
+		
+		
+		StringCache m_stringCache;
 	
 		struct FreePage;
 		
@@ -282,11 +474,7 @@ class FileIndexedIO::Index : public RefCounted
 		Imf::Int64 nodeCount( Node* n );
 	
 		void dump( Node* n, int depth );
-		
-		void write( fstream &f, Imf::Int64 n);
-	
-		void read( fstream &f, Imf::Int64 &n);			
-	
+							
 };
 
 /// A single node within an index
@@ -355,28 +543,6 @@ bool FileIndexedIO::Index::CacheFn::get( const std::string &fullPath, NodePtr &n
 bool FileIndexedIO::Index::hasChanged() const
 {
 	return m_hasChanged;
-}
-
-void FileIndexedIO::Index::write( fstream &f, Imf::Int64 n)
-{
-	Imf::Int64 nl = asLittleEndian<>(n);
-	f.write( (char*) &nl, sizeof( Imf::Int64) );
-}
-	
-void FileIndexedIO::Index::read( fstream &f, Imf::Int64 &n)
-{
-	Imf::Int64 nl;
-	f.read(( char*) &nl, sizeof(Imf::Int64) );
-	
-	if (bigEndian())
-	{
-		n = asBigEndian<>(nl);
-	}
-	else
-	{
-		/// Already little endian
-		n = nl;
-	}
 }
 	
 Imf::Int64 FileIndexedIO::Index::makeId()
@@ -456,6 +622,8 @@ void FileIndexedIO::Index::remove( NodePtr n )
 
 FileIndexedIO::Index::NodePtr FileIndexedIO::Index::insert( const IndexedIOPath &parentPath, IndexedIO::Entry e )
 {	
+	m_stringCache.add( e.m_ID );
+
 	PathParts remainder;
 	NodePtr parent = m_root;
 	bool found = find( parentPath, parent, &remainder );
@@ -466,7 +634,7 @@ FileIndexedIO::Index::NodePtr FileIndexedIO::Index::insert( const IndexedIOPath 
 		for (PathParts::iterator it = remainder.begin(); it != remainder.end(); ++it)
 		{
 			child = new Index::Node( this, makeId() );
-			
+			m_stringCache.add( *it );
 			child->m_entry = IndexedIO::Entry(*it, IndexedIO::Directory, IndexedIO::Invalid, 0);
 			
 			parent->addChild( child );
@@ -502,6 +670,7 @@ FileIndexedIO::Index::Index() : m_root(0), m_prevId(0)
 	m_indexToNodeMap[0] = m_root.get();
 	m_nodeToIndexMap[m_root.get()] = 0;
 	
+	m_stringCache.add("/");
 	m_root->m_entry = IndexedIO::Entry("/", IndexedIO::Directory, IndexedIO::Invalid, 0);
 	m_hasChanged = true;
 	
@@ -530,20 +699,20 @@ FileIndexedIO::Index::Index( fstream &f ) : m_prevId(0)
 	f.seekg( end - 1*sizeof(Imf::Int64) );
 	
 	Imf::Int64 magicNumber;
-	read( f, magicNumber );
+	readLittleEndian<Imf::Int64>( f, magicNumber );
 	
 	if ( magicNumber == g_versionedMagicNumber )
 	{
 		f.seekg( end - 3*sizeof(Imf::Int64) );
-		read( f, m_offset );
-		read( f, m_version );						
+		readLittleEndian<Imf::Int64>( f, m_offset );
+		readLittleEndian<Imf::Int64>( f, m_version );						
 	}
 	else if (magicNumber == g_unversionedMagicNumber )
 	{
 		m_version = 0;
 		
 		f.seekg( end - 2*sizeof(Imf::Int64) );	
-		read( f, m_offset );
+		readLittleEndian<Imf::Int64>( f, m_offset );
 	}
 	else
 	{	
@@ -552,29 +721,31 @@ FileIndexedIO::Index::Index( fstream &f ) : m_prevId(0)
 			
 	f.seekg( m_offset );
 	
+	
+	m_stringCache = StringCache( f );
+	
 	Imf::Int64 numNodes;		
-	read( f, numNodes );
+	readLittleEndian<Imf::Int64>( f, numNodes );
 
 	for (Imf::Int64 i = 0; i < numNodes; i++)
 	{
 		readNode( f );
 	}
 	Imf::Int64 numFreePages;		
-	read( f, numFreePages );
+	readLittleEndian<Imf::Int64>( f, numFreePages );
 	
 
 	for (Imf::Int64 i = 0; i < numFreePages; i++)
 	{
 		Imf::Int64 offset, sz;
-		read( f, offset );
-		read( f, sz );
+		readLittleEndian<Imf::Int64>( f, offset );
+		readLittleEndian<Imf::Int64>( f, sz );
 		
 		addFreePage( offset, sz );
 	}
 	
 	m_next = m_offset;
 }
-	
 
 void FileIndexedIO::Index::write( fstream & f )
 {
@@ -585,9 +756,12 @@ void FileIndexedIO::Index::write( fstream & f )
 	
 	m_offset = indexStart;
 	
+	m_stringCache.write( f );
+	
+	
 	Imf::Int64 numNodes = nodeCount();
 	
-	write(f, numNodes);
+	writeLittleEndian<Imf::Int64>(f, numNodes);
 	
 	write( f, m_root.get() );
 
@@ -595,18 +769,18 @@ void FileIndexedIO::Index::write( fstream & f )
 	Imf::Int64 numFreePages = m_freePagesSize.size();
 
 	// Write out number of free "pages"		
-	write(f, numFreePages);
+	writeLittleEndian<Imf::Int64>(f, numFreePages);
 			
 	/// Write out each free page
 	for ( FreePagesSizeMap::const_iterator it = m_freePagesSize.begin(); it != m_freePagesSize.end(); ++it)
 	{
-		write(f, it->second->m_offset);
-		write(f, it->second->m_size);
+		writeLittleEndian<Imf::Int64>(f, it->second->m_offset);
+		writeLittleEndian<Imf::Int64>(f, it->second->m_size);
 	}
 	
-	write( f, m_offset );
-	write( f, m_version );		
-	write( f, g_versionedMagicNumber );
+	writeLittleEndian<Imf::Int64>( f, m_offset );
+	writeLittleEndian<Imf::Int64>( f, m_version );		
+	writeLittleEndian<Imf::Int64>( f, g_versionedMagicNumber );
 	
 	m_hasChanged = false;
 }
@@ -837,6 +1011,7 @@ void FileIndexedIO::Index::readNode( fstream &f )
 	if (n->m_id == 0)
 	{
 		m_root = n;
+		m_stringCache.add("/");
 	}
 }
 
@@ -927,30 +1102,30 @@ void FileIndexedIO::Index::Node::write( fstream &f )
 {
 	char t = m_entry.entryType();			
 	f.write( &t, sizeof(char) );
-			
-	m_idx->write(f, m_entry.id().size());
-	f.write( m_entry.id().c_str(), m_entry.id().size() );
 	
+	Imf::Int64 id = m_idx->m_stringCache.find( m_entry.id() );
+
+	writeLittleEndian<Imf::Int64>( f, id );
 	
 	t = m_entry.m_dataType;			
 	f.write( &t, sizeof(char) );
 	
-	m_idx->write(f, m_entry.m_arrayLength );
+	writeLittleEndian<Imf::Int64>(f, m_entry.m_arrayLength );
 								
-	m_idx->write(f, m_id);
+	writeLittleEndian<Imf::Int64>(f, m_id);
 	
 	if (m_parent)
 	{					
 		assert( m_idx->m_nodeToIndexMap.find( m_parent ) != m_idx->m_nodeToIndexMap.end() );	
-		m_idx->write(f, m_idx->m_nodeToIndexMap[m_parent]);		
+		writeLittleEndian<Imf::Int64>(f, m_idx->m_nodeToIndexMap[m_parent]);		
 	}
 	else
 	{
-		m_idx->write(f, (Imf::Int64)0);
+		writeLittleEndian<Imf::Int64>(f, (Imf::Int64)0);
 	}
 	
-	m_idx->write(f, m_offset);
-	m_idx->write(f, m_size);
+	writeLittleEndian<Imf::Int64>(f, m_offset);
+	writeLittleEndian<Imf::Int64>(f, m_size);
 }
 
 void FileIndexedIO::Index::Node::read( fstream &f )
@@ -960,28 +1135,40 @@ void FileIndexedIO::Index::Node::read( fstream &f )
 	f.read( &t, sizeof(char) );		
 	m_entry.m_entryType = (IndexedIO::EntryType)t;
 
-	Imf::Int64 entrySize;
-	m_idx->read( f, entrySize );
-	char *s = new char[entrySize+1];
-	f.read( s, entrySize );
-	s[entrySize] = '\0';
+	if (m_idx->m_version >= 1)
+	{
+		Imf::Int64 stringId;
+		
+		readLittleEndian<Imf::Int64>(f, stringId);		
+	
+		m_entry.m_ID = m_idx->m_stringCache.find( stringId );		
+	}
+	else
+	{
+		Imf::Int64 entrySize;
+		readLittleEndian<Imf::Int64>( f, entrySize );
+		char *s = new char[entrySize+1];
+		f.read( s, entrySize );
+		s[entrySize] = '\0';
 
-	m_entry.m_ID = s;
+		m_entry.m_ID = s;
+		delete[] s;
+	}
+		
 	f.read( &t, sizeof(char) );		
 	m_entry.m_dataType = (IndexedIO::DataType)t;
 
 	Imf::Int64 arrayLength;
-	m_idx->read( f, arrayLength );
+	readLittleEndian<Imf::Int64>( f, arrayLength );
 	m_entry.m_arrayLength = arrayLength;			
-	
-	delete[] s;
-	m_idx->read(f, m_id );
+		
+	readLittleEndian<Imf::Int64>(f, m_id );
 
 	m_idx->m_indexToNodeMap[m_id] = this;
 	m_idx->m_nodeToIndexMap[this] = m_id;
 	
 	Imf::Int64 parentId;
-	m_idx->read(f, parentId );
+	readLittleEndian<Imf::Int64>(f, parentId );
 	
 	m_idx->m_prevId = std::max( m_idx->m_prevId, parentId );
 	m_idx->m_prevId = std::max( m_idx->m_prevId, m_id );			
@@ -1004,8 +1191,8 @@ void FileIndexedIO::Index::Node::read( fstream &f )
 	
 	
 		
-	m_idx->read(f, m_offset );
-	m_idx->read(f, m_size );
+	readLittleEndian<Imf::Int64>(f, m_offset );
+	readLittleEndian<Imf::Int64>(f, m_size );
 	
 }
 
