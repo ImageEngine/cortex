@@ -212,7 +212,7 @@ void readLittleEndian( std::fstream &f, T &n)
 	
 	if (bigEndian())
 	{
-		n = asBigEndian<>(nl);
+		n = reverseBytes<>(nl);
 	}
 	else
 	{
@@ -232,7 +232,7 @@ class StringCache
 			m_prevId = 0;			
 		}
 		
-		StringCache( fstream &f )
+		StringCache( fstream &f ) : m_prevId(0)
 		{
 			Imf::Int64 sz;
 			readLittleEndian(f, sz);
