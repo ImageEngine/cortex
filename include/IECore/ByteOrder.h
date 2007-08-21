@@ -42,7 +42,7 @@
 namespace IECore
 {
 
-#ifdef __APPLE__
+#if defined(__PPC__) || defined(__ppc__) || defined(__POWERPC__) || defined(__powerpc__)
 	#define IE_CORE_BIG_ENDIAN
 #else
 	#define IE_CORE_LITTLE_ENDIAN
