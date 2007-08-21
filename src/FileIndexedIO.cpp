@@ -721,8 +721,10 @@ FileIndexedIO::Index::Index( fstream &f ) : m_prevId(0)
 			
 	f.seekg( m_offset );
 	
-	
-	m_stringCache = StringCache( f );
+	if (m_version >= 1)
+	{
+		m_stringCache = StringCache( f );
+	}
 	
 	Imf::Int64 numNodes;		
 	readLittleEndian<Imf::Int64>( f, numNodes );
