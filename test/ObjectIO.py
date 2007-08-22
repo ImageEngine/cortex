@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 import random
 from IECore import *
@@ -145,6 +146,11 @@ class TestObjectIO( unittest.TestCase ) :
 		dd = Object.load( "test/o.sql" )
 		self.assertEqual( d, dd )
 		self.assert_( dd["ONE"].isSame( dd["TWO"] ) )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile("test/o.sql"):
+			os.remove("test/o.sql")
 		
 
 if __name__ == "__main__":

@@ -53,6 +53,24 @@ class TestIndexedIOInterface(unittest.TestCase):
 		io2 = IndexedIOInterface.create( "test/myFile.fs", "/", IndexedIOOpenMode.Write )
 		io2 = IndexedIOInterface.create( "test/myFile.fio", "/", IndexedIOOpenMode.Write )		
 		self.assertRaises(RuntimeError, IndexedIOInterface.create, "myFileWith.invalidExtension", "/", IndexedIOOpenMode.Write )
+		
+	def tearDown(self):
+		
+		if os.path.isfile("test/myFile.sql"):
+			os.remove("test/myFile.sql")
+			
+		for root, dirs, files in os.walk("test/myFile.fs", topdown=Read):
+			
+				for name in files:				
+					os.remove(os.path.join(root, name))
+				for name in dirs:				
+					os.rmdir(os.path.join(root, name))
+					
+		if os.path.isdir("test/myFile.fs"):
+			os.rmdir("test/myFile.fs")
+						
+		if os.path.isfile("test/myFile.fio"):
+			os.remove("test/myFile.fio")	
 
 class TestFileSystemIndexedIO(unittest.TestCase):
 	

@@ -32,8 +32,9 @@
 #
 ##########################################################################
 
-"""Unit test for FloatVectorData binding"""
+"""Unit test for SimpleTypedData binding"""
 
+import os
 import math
 import unittest
 from IECore import *
@@ -250,6 +251,11 @@ class BoolDataTest( unittest.TestCase ) :
 		o.save( "test/o.sql" )
 		oo = Object.load( "test/o.sql" )
 		self.assertEqual( o, oo )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile("test/o.sql"):
+			os.remove("test/o.sql")		
 			
 if __name__ == "__main__":
     unittest.main()   
