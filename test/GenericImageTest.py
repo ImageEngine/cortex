@@ -77,7 +77,7 @@ class TestImageReadersAndWriters(unittest.TestCase):
         for image_type in image_handlers:
             
             # write the file
-            writer = IECore.Writer.create(image, "/tmp/generic_image.%s" % image_type.lower())
+            writer = IECore.Writer.create(image, "test/generic_image.%s" % image_type.lower())
             self.assert_( writer.isInstanceOf( "ImageWriter" ) )
             self.assert_( writer["object"].isInstanceOf( "ObjectParameter" ) )
             self.assertEqual( writer["object"].validTypes(), [IECore.TypeId.ImagePrimitive] )
@@ -86,14 +86,14 @@ class TestImageReadersAndWriters(unittest.TestCase):
             writer.write()
 
             # read the file
-            reader = IECore.Reader.create("/tmp/generic_image.%s" % image_type.lower())
+            reader = IECore.Reader.create("test/generic_image.%s" % image_type.lower())
             self.assert_( reader.isInstanceOf( "ImageReader" ) )
             self.assert_( reader.resultParameter().isInstanceOf( "ObjectParameter" ) )
             self.assertEqual( reader.resultParameter().validTypes(), [IECore.TypeId.ImagePrimitive] )			
             read_image = reader.read()
 
             # write back out to verify
-            IECore.Writer.create(read_image, "/tmp/generic_image.blab.%s" % image_type.lower()).write()
+            IECore.Writer.create(read_image, "test/generic_image.blab.%s" % image_type.lower()).write()
 
             # compare pixel values
             for cn in ["R", "G", "B"]:
@@ -147,15 +147,15 @@ class TestImageReadersAndWriters(unittest.TestCase):
         for image_type in image_handlers:
             
             # write the file
-            IECore.Writer.create(image, "/tmp/generic_image.window.%s" % image_type.lower()).write()
+            IECore.Writer.create(image, "test/generic_image.window.%s" % image_type.lower()).write()
 
             # read the file with a 1/4 area subwindow starting at origin
-            r = IECore.Reader.create("/tmp/generic_image.window.%s" % image_type.lower())
+            r = IECore.Reader.create("test/generic_image.window.%s" % image_type.lower())
             r.parameters().dataWindow.setValue(sub_box)
             read_image = r.read()
 
             # write out the file
-            IECore.Writer.create(read_image, "/tmp/generic_image_cut.%s" % image_type.lower()).write()
+            IECore.Writer.create(read_image, "test/generic_image_cut.%s" % image_type.lower()).write()
 
             # assert proper image extents
 
@@ -218,15 +218,15 @@ class TestImageReadersAndWriters(unittest.TestCase):
         for image_type in image_handlers:
             
             # write the file
-            IECore.Writer.create(image, "/tmp/generic_image.outside.%s" % image_type.lower()).write()
+            IECore.Writer.create(image, "test/generic_image.outside.%s" % image_type.lower()).write()
 
             # read the file with a 1/4 area subwindow starting at origin
-            r = IECore.Reader.create("/tmp/generic_image.outside.%s" % image_type.lower())
+            r = IECore.Reader.create("test/generic_image.outside.%s" % image_type.lower())
             r.parameters().dataWindow.setValue(sub_box)
             read_image = r.read()
 
             # write out the file
-            IECore.Writer.create(read_image, "/tmp/generic_image_outside.%s" % image_type.lower()).write()
+            IECore.Writer.create(read_image, "test/generic_image_outside.%s" % image_type.lower()).write()
 
             # assert proper image extents
             # ...

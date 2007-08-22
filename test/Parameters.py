@@ -770,7 +770,7 @@ class TestDirNameParameter( unittest.TestCase ) :
 		p = DirNameParameter(
 			name = "f",
 			description = "d",
-			defaultValue = "/tmp",
+			defaultValue = "test",
 			check = DirNameParameter.CheckType.MustExist,
 			allowEmptyString = True
 		)
@@ -815,7 +815,7 @@ class TestFileNameParameter( unittest.TestCase ) :
 		for e in p.extensions :
 			p.setValue( StringData( "hello." + e ) )
 
-		p.setValue( StringData( "/tmp" ) )
+		p.setValue( StringData( "test" ) )
 		self.assertRaises( RuntimeError, p.validate )
 
 	def testUserData( self ):
@@ -853,7 +853,7 @@ class TestFileNameParameter( unittest.TestCase ) :
 		p = FileNameParameter(
 			name = "f",
 			description = "d",
-			defaultValue = "/tmp",
+			defaultValue = "test",
 			check = FileNameParameter.CheckType.MustExist,
 			allowEmptyString = True
 		)

@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 from IECore import *
 
@@ -53,17 +54,23 @@ class FileFormatSwitchTest( unittest.TestCase ) :
 			o = ObjectReader( cob ).read()
 			
 			# write out in new format
-			ObjectWriter( o, "/tmp/test.cob" ).write()
+			ObjectWriter( o, "test/test.cob" ).write()
 			
 			# check that new file is not SQLite based
-			self.assertRaises( Exception, SQLiteIndexedIO, "/tmp/test.cob" "/", IndexedIOOpenMode.Read )
+			self.assertRaises( Exception, SQLiteIndexedIO, "test/test.cob" "/", IndexedIOOpenMode.Read )
 			# check that the new is FileIndexedIO based
-			f = FileIndexedIO( "/tmp/test.cob", "/", IndexedIOOpenMode.Read )
+			f = FileIndexedIO( "test/test.cob", "/", IndexedIOOpenMode.Read )
 			
 			# read back object and check equality
-			oo = ObjectReader( "/tmp/test.cob" ).read()
+			oo = ObjectReader( "test/test.cob" ).read()
 			
 			self.assertEqual( o, oo )
+			
+	def tearDown( self ) :
+	
+		if os.path.isfile("test/test.cob") :
+		
+			os.remove("test/test.cob")
 		
 if __name__ == "__main__":
 	unittest.main()

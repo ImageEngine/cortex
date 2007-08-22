@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 
 from IECore import *
@@ -60,9 +61,9 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.keys(), [ 0, 1 ] )
 		self.assertEqual( m.values(), [ PointsPrimitive( 1 ), PointsPrimitive( 1 ) ] )
 
-		m.save( "/tmp/motionPrimitive.sql" )
+		m.save( "test/motionPrimitive.sql" )
 		
-		mm = Object.load( "/tmp/motionPrimitive.sql" )
+		mm = Object.load( "test/motionPrimitive.sql" )
 		self.assertEqual( m, mm )
 		
 		mmm = m.copy()
@@ -77,6 +78,11 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )
 		self.assertEqual( len( m ), 0 )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile( "test/motionPrimitive.sql" ):
+			os.remove( "test/motionPrimitive.sql" )
 		
 if __name__ == "__main__":
     unittest.main()   

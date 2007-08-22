@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 from IECore import *
 
@@ -53,8 +54,8 @@ class TestTransform( unittest.TestCase ) :
 		
 		self.assertEqual( m, mm )
 		
-		Writer.create( mm, "/tmp/transform.cob" ).write()
-		mmm = Reader.create( "/tmp/transform.cob" ).read()
+		Writer.create( mm, "test/transform.cob" ).write()
+		mmm = Reader.create( "test/transform.cob" ).read()
 		
 		self.assertEqual( mm, mmm )
 		
@@ -94,10 +95,18 @@ class TestTransform( unittest.TestCase ) :
 		
 		self.assertEqual( m, mm )
 		
-		Writer.create( mm, "/tmp/motionTransform.cob" ).write()
-		mmm = Reader.create( "/tmp/motionTransform.cob" ).read()
+		Writer.create( mm, "test/motionTransform.cob" ).write()
+		mmm = Reader.create( "test/motionTransform.cob" ).read()
 		
 		self.assertEqual( mm, mmm )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile("test/motionTransform.cob"):
+			os.remove("test/motionTransform.cob")
+			
+		if os.path.isfile("test/transform.cob"):
+			os.remove("test/transform.cob")			
 		
 if __name__ == "__main__":
 	unittest.main()   

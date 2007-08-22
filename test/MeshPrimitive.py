@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 
 from IECore import *
@@ -50,8 +51,8 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.vertexIds, IntVectorData() )
 		self.assertEqual( m.interpolation, "linear" )
 		self.assertEqual( m, m.copy() )
-		m.save( "/tmp/mesh.sql" )
-		mm = Object.load( "/tmp/mesh.sql" )
+		m.save( "test/mesh.sql" )
+		mm = Object.load( "test/mesh.sql" )
 		self.assertEqual( m, mm )
 		
 		vertsPerFace = IntVectorData( [ 3, 3 ] )
@@ -69,9 +70,14 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assert_( not m.vertexIds.isSame( vertexIds ) )
 		self.assertEqual( m.interpolation, "catmullClark" )
 		self.assertEqual( m, m.copy() )
-		m.save( "/tmp/mesh.sql" )
-		mm = Object.load( "/tmp/mesh.sql" )
+		m.save( "test/mesh.sql" )
+		mm = Object.load( "test/mesh.sql" )
 		self.assertEqual( m, mm )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile("test/mesh.sql"):
+			os.remove("test/mesh.sql")
 		
 if __name__ == "__main__":
     unittest.main()   

@@ -50,12 +50,12 @@ class TestFileExaminer( unittest.TestCase ) :
 		e = FileExaminer.create( "test/data/nukeScripts/dependencies.nk" )
 		
 		expectedDependencies = [
-			"/tmp/test.####.tif 3-10",
+			"test/test.####.tif 3-10",
 			"/film/grain/scans/AreDependenciesToo.####.tif 2-75",
-			"/tmp/filesInAGroupMustBeDetected.#.exr 1",
-			"/tmp/testProxy.####.tif 3-10",
-			"/tmp/testNoPadding.#.tif 1-101",
-			"/tmp/testNoFrameNumber.tif",
+			"test/filesInAGroupMustBeDetected.#.exr 1",
+			"test/testProxy.####.tif 3-10",
+			"test/testNoPadding.#.tif 1-101",
+			"test/testNoFrameNumber.tif",
 		]
 		
 		d = e.dependencies()

@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 import sys
 import IECore
@@ -43,10 +44,10 @@ class TestPDCWriter( unittest.TestCase ) :
 		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
 		p = r.read()
 		
-		w = IECore.Writer.create( p, "/tmp/particleShape1.250.pdc" )
+		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
 		w.write()
 		
-		r = IECore.Reader.create( "/tmp/particleShape1.250.pdc" )
+		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
 		p2 = r.read()
 		
 		self.assertEqual( p, p2 )
@@ -56,7 +57,7 @@ class TestPDCWriter( unittest.TestCase ) :
 		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
 		p = r.read()
 		
-		w = IECore.Writer.create( p, "/tmp/particleShape1.250.pdc" )
+		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
 		w.parameters().attributes.setValue( IECore.StringVectorData( ["position"] ) )
 		w.write()
 		
@@ -64,14 +65,14 @@ class TestPDCWriter( unittest.TestCase ) :
 			if k!="position" :
 				del p[k]
 		
-		r = IECore.Reader.create( "/tmp/particleShape1.250.pdc" )
+		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
 		p2 = r.read()
 		
 		self.assertEqual( p, p2 )
 		
 	def testBadObjectException( self ) :
 	
-		w = IECore.PDCParticleWriter( IECore.IntData(10), "/tmp/intData.pdc" )
+		w = IECore.PDCParticleWriter( IECore.IntData(10), "test/intData.pdc" )
 		self.assertRaises( RuntimeError, w.write )
 		
 	def testWriteConstantData( self ) :
@@ -81,13 +82,18 @@ class TestPDCWriter( unittest.TestCase ) :
 		p["v3d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3dData( IECore.V3d( 1, 2, 3 ) ) )
 		p["i"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
 		
-		w = IECore.Writer.create( p, "/tmp/particleShape1.250.pdc" )
+		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
 		w.write()
 		
-		r = IECore.Reader.create( "/tmp/particleShape1.250.pdc" )
+		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
 		p2 = r.read()
 		
 		self.assertEqual( p, p2 )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile( "test/particleShape1.250.pdc" ) :
+			os.remove( "test/particleShape1.250.pdc" )
 		
 if __name__ == "__main__":
 	unittest.main()   

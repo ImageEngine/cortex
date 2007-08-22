@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 from IECore import *
 
@@ -73,9 +74,9 @@ class TestGroup( unittest.TestCase ) :
 		self.assert_( not gg.children()[0].isSame( g.children()[0] ) )
 		self.assert_( not gg.state()[0].isSame( g.state()[0] ) )
 		
-		ObjectWriter( g, "/tmp/group.cob" ).write()
+		ObjectWriter( g, "test/group.cob" ).write()
 		
-		ggg = ObjectReader( "/tmp/group.cob" ).read()
+		ggg = ObjectReader( "test/group.cob" ).read()
 		
 		self.assertEqual( gg, ggg )
 		self.assert_( not gg.children()[0].isSame(ggg.children()[0] ) )
@@ -118,6 +119,11 @@ class TestGroup( unittest.TestCase ) :
 	
 		g = Group()
 		self.assertRaises( Exception, g.addState, MatrixTransform( M44f() ) )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile("test/group.cob"):
+			os.remove("test/group.cob")
 			
 if __name__ == "__main__":
 	unittest.main()

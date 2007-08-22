@@ -31,7 +31,7 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
-
+import os
 import unittest
 from IECore import *
 import IECore
@@ -46,11 +46,16 @@ class VisibleRenderableTest( unittest.TestCase ) :
 		self.assert_( p.isInstanceOf( VisibleRenderable.staticTypeId() ) )
 
 		# save it in the new format, load it again and check they're the same
-		ObjectWriter( p, "/tmp/testMesh.cob" ).write()
+		ObjectWriter( p, "test/testMesh.cob" ).write()
 		
-		pp = ObjectReader( "/tmp/testMesh.cob" ).read()
+		pp = ObjectReader( "test/testMesh.cob" ).read()
 		
 		self.assertEqual( p, pp )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile( "test/testMesh.cob" ):
+			os.remove( "test/testMesh.cob" )
 		
 if __name__ == "__main__":
 	unittest.main()

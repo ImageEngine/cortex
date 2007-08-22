@@ -225,7 +225,7 @@ class parameterTypes( Op ) :
 		assert args.l == Color3fData( Color3f( 1, 0, 0 ) )	 
 		assert args.m == Color4fData( Color4f( 1, 1, 0, 1 ) ) 
 		assert args.o == StringData( "myFile.tif" )  
-		assert args.p == StringData( "/tmp" )	 
+		assert args.p == StringData( "test" )	 
 		assert args.q == BoolData( True )	 
 		assert args.r == StringData( "mySequence.####.tif" ) 
 		assert args.s == Box2dData( Box2d( V2d( -1, -2 ), V2d( 10, 20 ) ) ) 

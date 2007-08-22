@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 import IECore
 
@@ -88,7 +89,12 @@ class TestTurbulence( unittest.TestCase ) :
 		i["g"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["b"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 
-		IECore.Writer.create( i, "/tmp/turbulenceV2ff.exr" ).write()
+		IECore.Writer.create( i, "test/turbulenceV2ff.exr" ).write()
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile( "test/turbulenceV2ff.exr" ) :
+			os.remove( "test/turbulenceV2ff.exr" )
 						
 if __name__ == "__main__":
 	unittest.main()   
