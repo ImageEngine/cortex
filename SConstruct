@@ -181,7 +181,8 @@ coreSources = 		[
 				'src/StateRenderable.cpp',
 				'src/MatrixMotionTransform.cpp',
 				'src/OBJReader.cpp',
-				'src/IECore.cpp',			
+				'src/IECore.cpp',	
+				'src/ObjectInterpolator.cpp',		
 		   ]
 		
 coreIncludes = 		[ 	
@@ -310,6 +311,7 @@ corePythonSources = 	[
 				'src/bindings/MatrixMotionTransformBinding.cpp',
 				'src/bindings/OBJReaderBinding.cpp',
 				'src/bindings/NullObjectBinding.cpp',
+				'src/bindings/ObjectInterpolatorBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

@@ -85,5 +85,6 @@ from VisibleRenderable import *
 from NamespacePollution import *
 from OptionalCompoundParameter import *
 from FileFormatSwitch import *
+from ObjectInterpolation import *
 
 unittest.main()

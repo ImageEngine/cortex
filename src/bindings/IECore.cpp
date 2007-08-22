@@ -110,6 +110,7 @@
 #include "IECore/bindings/MatrixMotionTransformBinding.h"
 #include "IECore/bindings/OBJReaderBinding.h"
 #include "IECore/bindings/NullObjectBinding.h"
+#include "IECore/bindings/ObjectInterpolatorBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -191,6 +192,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindAttributeState();
 	bindOBJReader();
 	bindNullObject();
+	bindObjectInterpolator();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -213,6 +213,9 @@ enum TypeId
 	FirstCoreGLTypeId = 105000,
 	LastCoreGLTypeId = 105999,	
 	
+	FirstCoreRITypeId = 106000,
+	LastCoreRITypeId = 106999,
+
 	LastExtensionTypeId = 399999,
 	// Any TypeIds beyond this point can be considered safe for private internal use.
 	
