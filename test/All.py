@@ -86,5 +86,6 @@ from NamespacePollution import *
 from OptionalCompoundParameter import *
 from FileFormatSwitch import *
 from ObjectInterpolation import *
+from InterpolatedCache import *
 
 unittest.main()

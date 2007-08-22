@@ -182,7 +182,8 @@ coreSources = 		[
 				'src/MatrixMotionTransform.cpp',
 				'src/OBJReader.cpp',
 				'src/IECore.cpp',	
-				'src/ObjectInterpolator.cpp',		
+				'src/ObjectInterpolator.cpp',
+				'src/InterpolatedCache.cpp',	
 		   ]
 		
 coreIncludes = 		[ 	
@@ -312,6 +313,7 @@ corePythonSources = 	[
 				'src/bindings/OBJReaderBinding.cpp',
 				'src/bindings/NullObjectBinding.cpp',
 				'src/bindings/ObjectInterpolatorBinding.cpp',
+				'src/bindings/InterpolatedCacheBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

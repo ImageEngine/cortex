@@ -111,6 +111,7 @@
 #include "IECore/bindings/OBJReaderBinding.h"
 #include "IECore/bindings/NullObjectBinding.h"
 #include "IECore/bindings/ObjectInterpolatorBinding.h"
+#include "IECore/bindings/InterpolatedCacheBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -193,6 +194,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindOBJReader();
 	bindNullObject();
 	bindObjectInterpolator();
+	bindInterpolatedCache();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

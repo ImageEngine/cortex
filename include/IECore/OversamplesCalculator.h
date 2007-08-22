@@ -44,6 +44,8 @@ class OversamplesCalculator
 {
 	public:
 	OversamplesCalculator( double frameRate, int desiredOversamples );
+	/// converts your continuous frame number ( dependent on the frameRate used ) to a time unit this object understands.
+	int frameToTime( double frame ) const;
 	/// finds the nearest supported oversampling rate based on the given frame rate.
 	int actualOversamples() const;
 	/// returns the time unit used for the oversampling computation.

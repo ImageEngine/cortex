@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//	     other contributors to this software may be used to endorse or
+//       other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,65 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-
-#include <math.h>
-#include "IECore/Exception.h"
+#ifndef IE_COREPYTHON_INTERPOLATEDCACHEBINDING_H
+#define IE_COREPYTHON_INTERPOLATEDCACHEBINDING_H
 
 namespace IECore
 {
-
-template<int U>
-OversamplesCalculator<U>::OversamplesCalculator( double frameRate, int desiredOversamples ) :
-	m_frameRate( frameRate ), m_oversamples( desiredOversamples )
-{
-	double step = U / (double)(frameRate * desiredOversamples);
-	while ( fabs(step - floor(step)) > 0.0001 && (m_frameRate * m_oversamples <= (double)U) )
-	{
-		m_oversamples ++;
-		step = (double)U / (m_frameRate * m_oversamples);
-	}
-	
-	if (fabs(step - floor(step)) > 0.0001)
-	{
-		throw IECore::Exception( "Unsupported oversamples/frame rate combination." );
-	}
-	m_step = (int)step;
+void bindInterpolatedCache();
 }
 
-template<int U>
-int OversamplesCalculator<U>::frameToTime( double frame ) const
-{
-	return int(frame * (double)U / m_frameRate);
-}
-
-template<int U>
-int OversamplesCalculator<U>::timeUnit() const
-{
-	return U;
-}
-
-template<int U>
-int OversamplesCalculator<U>::actualOversamples() const
-{
-	return m_oversamples;
-}
-
-template<int U>
-int OversamplesCalculator<U>::stepSize() const
-{
-	return m_step;
-}
-
-template<int U>
-int OversamplesCalculator<U>::stepRound( int time ) const
-{
-	return (int)( time - (time % m_step) );
-}
-
-template<int U>
-double OversamplesCalculator<U>::relativeStepOffset( int time ) const
-{
-	return (double)(time % m_step) / (double)m_step;
-}
-
-} // namespace IECore
+#endif // IE_COREPYTHON_INTERPOLATEDCACHEBINDING_H
