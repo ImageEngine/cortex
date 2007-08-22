@@ -338,8 +338,8 @@ void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const P
 		{
 			const Point &pp = **perm;
 			BaseType dist2 = vecDistance2( p, pp );
-			
-			if (dist2 < maxDistSquared )
+						
+			if( dist2 < maxDistSquared || nearNeighbours.size()<numNeighbours )
 			{
 				NearNeighbour n(*perm, dist2);
 				assert(nearNeighbours.size() <= numNeighbours);				
@@ -383,7 +383,7 @@ void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const P
 		}
 		
 		nearestNNeighboursWalk( firstChild, p, numNeighbours, nearNeighbours, maxDistSquared );
-		if( d*d < maxDistSquared )
+		if( d*d < maxDistSquared || nearNeighbours.size()<numNeighbours )
 		{
 			nearestNNeighboursWalk( secondChild, p, numNeighbours, nearNeighbours, maxDistSquared );
 		}

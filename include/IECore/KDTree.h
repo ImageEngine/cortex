@@ -118,7 +118,7 @@ class KDTree
 					} m_perm;
 				};
 				
-			};
+		};
 		
 		class AxisSort
 		{
@@ -144,7 +144,6 @@ class KDTree
 			
 			bool operator < (const NearNeighbour &other) const { return m_distSqrd > other.m_distSqrd; }
 		};
-
 		
 		void nearestNNeighboursWalk( NodeIndex nodeIndex, const Point &p, unsigned int numNeighbours, std::set<NearNeighbour> &nearNeighbours, BaseType &maxDistSquared ) const;
 		

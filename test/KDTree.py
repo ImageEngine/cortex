@@ -38,8 +38,8 @@ from IECore import *
 
 class TestKDTree:
 	treeSizes = [0, 1, 10, 100]
-	radii = [0.01, 0.05, 0.1]
-	numNeighbours = [1, 4, 10]
+	radii = [0.01, 0.05, 0.1, 1]
+	numNeighbours = [1, 4, 10, 20]
 	
 	def doNearestNeighbour(self, numPoints):
 		
@@ -51,7 +51,8 @@ class TestKDTree:
 			self.assert_(pIdx < numPoints)
 			nearestPt = self.points[pIdx]
 			
-			self.assert_( nearestPt.equalWithRelError(self.points[i], 0.01) )
+			self.assertEqual( pIdx, i )
+			self.assert_( nearestPt.equalWithRelError(self.points[i], 0.00001) )
 	
 	def doNearestNeighbours(self, numPoints):
 		
@@ -71,23 +72,43 @@ class TestKDTree:
 					
 	def doNearestNNeighbours(self, numPoints):
 		
-		self.makeTree(numPoints)
+		self.makeTree( numPoints )
 		
-		for i in range(0, numPoints):
-			for n in self.numNeighbours:
-				pIdxArray = self.tree.nearestNeighbours( self.points[i], n )
+		for i in range(0, numPoints) :
+		
+			for n in self.numNeighbours :
+			
+				testPoint = self.points[i]
+			
+				pIdxArray = self.tree.nearestNNeighbours( testPoint, n )
 				
-				for pIdx in pIdxArray:
+				# check we've been given as many neighbours as we asked for,
+				# or the whole tree if there aren't enough points
+				self.assertEqual( len( pIdxArray ), min( n, numPoints ) )
+				
+				# check that all indices are in range
+				for pIdx in pIdxArray :
+				
 					self.assert_(pIdx >= 0)
 					self.assert_(pIdx < numPoints)
 					
-					for j in range(0, int(numPoints * 0.1) ):
-						randomIdx = int(numPoints*random.random())
-						if not randomIdx in pIdxArray:
-							randomPt = self.points[ randomIdx ]
-							distToRandomPt = (randomPt - self.points[i] ).length()
-							distToNearPt = (self.points[pIdx] - self.points[i]).length()
-							self.assert_( distToRandomPt >= distToNearPt)
+				# check that points are ordered by distance
+				d = ( self.points[pIdxArray[0]] - testPoint ).length()
+				for pIdx in pIdxArray[1:] :
+					
+					dd = ( self.points[pIdx] - testPoint ).length()
+					self.assert_( dd < d )
+					d = dd
+				
+				# check that no points not in neighbours are closer than
+				# the furthest neighbour	
+				furthestNeighbourDistance = (self.points[pIdxArray[0]] - testPoint).length()
+				for i in range( 0, numPoints ) :
+				
+					if not i in pIdxArray :
+					
+						d = (self.points[i] - testPoint).length()
+						self.assert_( d > furthestNeighbourDistance )
 
 class TestKDTreeV2f(unittest.TestCase, TestKDTree):
 		

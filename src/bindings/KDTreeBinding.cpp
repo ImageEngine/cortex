@@ -150,6 +150,7 @@ void bindKDTree(const char *bindName)
 		.def(init< typename KDTreeWrapper<T>::PointDataPtr >() )
 		.def("nearestNeighbour", &KDTreeWrapper<T>::nearestNeighbour )
 		.def("nearestNeighbours", &KDTreeWrapper<T>::nearestNeighbours )
+		.def("nearestNNeighbours", &KDTreeWrapper<T>::nearestNNeighbours )
 		;
 }
 
