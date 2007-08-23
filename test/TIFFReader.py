@@ -92,10 +92,7 @@ class TestTIFFReader(unittest.TestCase):
 		self.assertEqual(type(img), IECore.ImagePrimitive)
 
                 w = IECore.Writer.create(img, testoutfile + '.tif')
-		print 'w is:', w
-		print 'w params:', w.parameters()
 		compressions = w.parameters()['compression'].presets()
-		print 'compressions:', compressions
 		self.assertEqual(type(w), IECore.TIFFImageWriter)
 
 		for compression in compressions.keys():
