@@ -80,6 +80,30 @@ class TestTIFFReader(unittest.TestCase):
 
 		w.write()
 
+        def testCompressionWrite(self):
+
+		testfile =    "test/data/jpg/bluegreen_noise.400x300.jpg"
+		testoutfile = "test/data/tiff/bluegreen_noise.400x300.testoutput"
+
+                r = IECore.Reader.create(testfile)
+		self.assertEqual(type(r), IECore.JPEGImageReader)
+
+		img = r.read()
+		self.assertEqual(type(img), IECore.ImagePrimitive)
+
+                w = IECore.Writer.create(img, testoutfile + '.tif')
+		print 'w is:', w
+		print 'w params:', w.parameters()
+		compressions = w.parameters()['compression'].presets()
+		print 'compressions:', compressions
+		self.assertEqual(type(w), IECore.TIFFImageWriter)
+
+		for compression in compressions.keys():
+			cw = IECore.Writer.create(img, '.'.join([testoutfile, compression, 'tif']))
+			cw.parameters().compression.setValue(compressions[compression])
+			cw.write()
+
+
 
                 			
 if __name__ == "__main__":
