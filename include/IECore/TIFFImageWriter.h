@@ -76,6 +76,7 @@ class TIFFImageWriter : public ImageWriter
 	
 		/// output bitdepth parameter
 		IntParameterPtr m_bitdepthParameter;
+		IntParameterPtr m_compressionParameter;
 
 	void constructParameters();
 };

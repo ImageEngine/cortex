@@ -38,6 +38,8 @@
 #include "IECore/ByteOrder.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/Parameter.h"
+#include "IECore/NumericParameter.h"
 
 #include "IECore/BoxOperators.h"
 #include "boost/format.hpp"
@@ -66,8 +68,21 @@ TIFFImageWriter::TIFFImageWriter(ObjectPtr image, const string & fileName)
 
 void TIFFImageWriter::constructParameters( )
 {
+	// bitdepth parameter
 	m_bitdepthParameter = new IntParameter("bitdepth", "output TIFF bit depth, one of 8, 16, 32; defaults to 16");
 	parameters()->addParameter(m_bitdepthParameter);
+
+	// compression parameter
+	IntParameter::PresetsMap compressionPresets;
+	compressionPresets["none"]    = COMPRESSION_NONE;
+	compressionPresets["lzw"]     = COMPRESSION_LZW;
+	compressionPresets["jpeg"]    = COMPRESSION_JPEG;
+	compressionPresets["deflate"] = COMPRESSION_DEFLATE;
+
+	m_compressionParameter = new IntParameter("compression", "image data compression method",
+															compressionPresets["lzw"], 0, 35535, // min and max magic numbers
+															compressionPresets, true);
+	parameters()->addParameter(m_compressionParameter);
 }
 
 TIFFImageWriter::~TIFFImageWriter()
@@ -106,8 +121,14 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	// compute the number of channels
 	int spp = names.size();
 
+	/// \todo different compression methods have a bearing on other attributes, eg. the strip size
+	/// handle these issues a bit better and perhaps more explicitly here.  also, we should probably
+	/// warn the user in cases where parameter settings are not permitted (eg 16 bit jpeg)
+	int compression = parameters()->parameter<IntParameter>("compression")->getNumericValue();
+	TIFFSetField(tiff_image, TIFFTAG_COMPRESSION, compression);
+
 	// read the bitdepth parameter, default to 16 bits
-	int bits = parameters()->parameter<IntParameter>("bitdepth")->getNumericValue();	
+	int bits = compression == COMPRESSION_JPEG ? 8 : parameters()->parameter<IntParameter>("bitdepth")->getNumericValue();	
 	int bps = bits == 8 || bits == 16 || bits == 32 ? bits : 16;
 	//bits = bits;
 	
@@ -128,12 +149,6 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	TIFFSetField(tiff_image, TIFFTAG_BITSPERSAMPLE, bps);
 	TIFFSetField(tiff_image, TIFFTAG_SAMPLESPERPIXEL, spp);
 	TIFFSetField(tiff_image, TIFFTAG_ROWSPERSTRIP, rows_per_strip);
-
-	/// \todo TIFFTAG_COMPRESSION field should be set from a parameter
-	//TIFFSetField(tiff_image, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
-	//TIFFSetField(tiff_image, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
-	TIFFSetField(tiff_image, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
-	//TIFFSetField(tiff_image, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
 	
 	TIFFSetField(tiff_image, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 	TIFFSetField(tiff_image, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
