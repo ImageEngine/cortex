@@ -928,6 +928,17 @@ class TestObjectParameter( unittest.TestCase ) :
 
 		p = ObjectParameter( name = "name", description = "description", defaultValue = PointsPrimitive( 1 ), type = TypeId.PointsPrimitive )
 		self.assertEqual (p.userData(), CompoundObject() )
+		
+	def testErrorMessage( self ) :
+	
+		p = ObjectParameter( name = "name", description = "description", defaultValue = FloatData( 1 ), types = [TypeId.FloatData] )
+		self.assertEqual( p.valueValid( V3fData( V3f( 1 ) ) )[1], "Object is not of type FloatData" )
+		
+		p = ObjectParameter( name = "name", description = "description", defaultValue = FloatData( 1 ), types = [TypeId.FloatData, TypeId.IntData] )
+		self.assertEqual( p.valueValid( V3fData( V3f( 1 ) ) )[1], "Object is not of type FloatData or IntData" )
+		
+		p = ObjectParameter( name = "name", description = "description", defaultValue = FloatData( 1 ), types = [TypeId.FloatData, TypeId.DoubleData, TypeId.IntData] )
+		self.assertEqual( p.valueValid( V3fData( V3f( 1 ) ) )[1], "Object is not of type FloatData, DoubleData or IntData" )
 										
 if __name__ == "__main__":
         unittest.main()

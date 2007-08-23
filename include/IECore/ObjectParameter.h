@@ -54,6 +54,8 @@ class ObjectParameter : public Parameter
 		
 		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const PresetsMap &presets = PresetsMap(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );
 		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeIdSet &types, const PresetsMap &presets = PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+		/// types must be an array of TypeIds terminated with InvalidTypeId.
+		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsMap &presets = PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
 		
 		/// Returns false if isn't an instance of any type in validTypes(), or any type derived from those types
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;

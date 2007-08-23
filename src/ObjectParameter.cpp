@@ -50,6 +50,16 @@ ObjectParameter::ObjectParameter( const std::string &name, const std::string &de
 {
 
 }
+
+ObjectParameter::ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+	:	Parameter( name, description, defaultValue, presets, presetsOnly, userData )
+{
+	while( *types!=InvalidTypeId )
+	{
+		m_validTypes.insert( *types );
+		types++;
+	}
+}
 		
 bool ObjectParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
 {
@@ -68,26 +78,20 @@ bool ObjectParameter::valueValid( ConstObjectPtr value, std::string *reason ) co
 	
 	if( reason )
 	{
-		if( m_validTypes.size()==1 )
+		*reason = "Object is not of type ";
+		int n = 1; int s = m_validTypes.size();
+		for( TypeIdSet::const_iterator it=m_validTypes.begin(); it!=m_validTypes.end(); it++ )
 		{
-			*reason = "Object is not of type " + Object::typeNameFromTypeId( *m_validTypes.begin() );
-		}
-		else
-		{
-			*reason = "Object is not of type ";
-			unsigned int n = 0;
-			for( TypeIdSet::const_iterator it=m_validTypes.begin(); it!=m_validTypes.end(); it++ )
+			*reason += Object::typeNameFromTypeId( *it );
+			if( n==s - 1 )
 			{
-				*reason += Object::typeNameFromTypeId( *m_validTypes.begin() );
-				if( n==m_validTypes.size() - 2 )
-				{
-					*reason += " or ";
-				}
-				else if( n<m_validTypes.size() - 1 )
-				{
-					*reason += ", ";
-				}
+				*reason += " or ";
 			}
+			else if( n<s )
+			{
+				*reason += ", ";
+			}
+			n++;
 		}
 	}
 	return false;
