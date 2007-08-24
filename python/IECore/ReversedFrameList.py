@@ -32,78 +32,39 @@
 #
 ##########################################################################
 
-import FrameList
+from FrameList import FrameList
+from ReorderedFrameList import ReorderedFrameList
+from EmptyFrameList import EmptyFrameList
 
-## The CompoundFrameList class implements the FrameList interface by storing a
-# set of FrameList objects, and returning an order preserving union of all the frames they represent
-# in its asList() method.
-# 
+## The ReversedFrameList class is a ReorderedFrameList which simply returns
+# the frames from the child list in reverse.
 # \ingroup python
-class CompoundFrameList( FrameList.FrameList ) :
+class ReversedFrameList( ReorderedFrameList ) :
 
-	## Constructs a CompoundFrameList object given an optional list
-	# of FrameList objects. These can subsequently be accessed and modified
-	# via the .frameLists instance attribute.
-	def __init__( self, frameLists = [] ) :
-		
-		self.frameLists = frameLists
+	def __init__( self, frameList = EmptyFrameList() ) :
 	
-	## Implemented to protect the frameLists attribute from being assigned
-	# invalid values.
-	def __setattr__( self, key, value ) :
-	
-		if key=="frameLists" :
-		
-			self.__checkList( value )
-			
-		self.__dict__[key] = value	
+		ReorderedFrameList.__init__( self, frameList )
 
-	
-	def __checkList( self, value ) :
-	
-		if not type( value ) is list :
-
-			raise TypeError( "CompoundFrameList.frameLists must be a list" )
-
-		for f in value :
-
-			if not isinstance( f, FrameList.FrameList ) :
-
-				raise TypeError( "CompoundFrameList.frameLists must contain only FrameList objects" )
-				
-	def __str__( self ) :
-	
-		self.__checkList( self.frameLists )
-		return ", ".join( [ str( l ) for l in self.frameLists ] )
-
-	## Returns all the frames represented by the FrameLists in self.frameLists.
-	# Frames are returned in the order specified by self.frameLists, but duplicate
-	# frames will be omitted.
+	## Returns self.frameList.asList() in reverse.
 	def asList( self ) :
 	
-		self.__checkList( self.frameLists )
-		
-		result = []
-		frameSet = set()
-		for l in self.frameLists :
-			for f in l.asList() :
-				if not f in frameSet :
-					result.append( f )
-					frameSet.add( f )
-		
-		return result
+		l = self.frameList.asList()
+		l.reverse()
+		return l
+
+	@classmethod
+	def suffix( self ) :
+	
+		return "r"
 
 	@staticmethod
 	def parse( s ) :
 	
-		if s.count( "," ) :
-			ss = s.split( "," )
-			try :
-				l = [ FrameList.FrameList.parse( x ) for x in ss ]
-				return CompoundFrameList( l )
-			except :
-				return None
+		l = ReversedFrameList.parseForChildList( s )
+		if l :
+			return ReversedFrameList( l )
 			
 		return None	
 		
-FrameList.FrameList.registerParser( CompoundFrameList.parse )
+FrameList.registerParser( ReversedFrameList.parse )
+

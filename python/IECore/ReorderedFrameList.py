@@ -32,78 +32,62 @@
 #
 ##########################################################################
 
-import FrameList
+from FrameList import FrameList
+from EmptyFrameList import EmptyFrameList
+import re
 
-## The CompoundFrameList class implements the FrameList interface by storing a
-# set of FrameList objects, and returning an order preserving union of all the frames they represent
-# in its asList() method.
-# 
+## The ReorderedFrameList is a base class for any FrameList classes which
+# hold a child FrameList and return some reordering of that list in the
+# asList() method. The child is held as an attribute
+# called frameList, and can be modified directly.
 # \ingroup python
-class CompoundFrameList( FrameList.FrameList ) :
+class ReorderedFrameList( FrameList ) :
 
-	## Constructs a CompoundFrameList object given an optional list
-	# of FrameList objects. These can subsequently be accessed and modified
-	# via the .frameLists instance attribute.
-	def __init__( self, frameLists = [] ) :
-		
-		self.frameLists = frameLists
+	def __init__( self, frameList ) :
 	
-	## Implemented to protect the frameLists attribute from being assigned
+		self.frameList = frameList
+
+	## Implemented to protect the frameList attribute from being assigned
 	# invalid values.
 	def __setattr__( self, key, value ) :
 	
-		if key=="frameLists" :
+		if key=="frameList" :
 		
-			self.__checkList( value )
+			if not isinstance( value, FrameList ) :
+			
+				raise TypeError( "Reordered.frameList must be a FrameList instance" )
 			
 		self.__dict__[key] = value	
 
-	
-	def __checkList( self, value ) :
-	
-		if not type( value ) is list :
-
-			raise TypeError( "CompoundFrameList.frameLists must be a list" )
-
-		for f in value :
-
-			if not isinstance( f, FrameList.FrameList ) :
-
-				raise TypeError( "CompoundFrameList.frameLists must contain only FrameList objects" )
-				
+	## Returns the frame list in a human readable form. Must be implemented in all
+	# subclasses.
 	def __str__( self ) :
+		
+		s = str( self.frameList )
+		if ',' in s :
+			return "(%s)%s" % ( s, self.suffix() )
+		else :
+			return s + self.suffix()
 	
-		self.__checkList( self.frameLists )
-		return ", ".join( [ str( l ) for l in self.frameLists ] )
+	## Each derived class should override this method to define a suffix used in the
+	# string representation of the frame list.
+	@classmethod
+	def suffix( self ) :
+	
+		raise NotImplementedError
 
-	## Returns all the frames represented by the FrameLists in self.frameLists.
-	# Frames are returned in the order specified by self.frameLists, but duplicate
-	# frames will be omitted.
-	def asList( self ) :
+	## This utility can be used by the parse functions in derived classes.
+	# It matches strings like "(...)s" or "...s", where s is the suffix. It
+	# then returns a FrameList parsed from the "..." section.
+	@classmethod
+	def parseForChildList( cls, s ) :
 	
-		self.__checkList( self.frameLists )
-		
-		result = []
-		frameSet = set()
-		for l in self.frameLists :
-			for f in l.asList() :
-				if not f in frameSet :
-					result.append( f )
-					frameSet.add( f )
-		
-		return result
-
-	@staticmethod
-	def parse( s ) :
+		if not s.endswith( cls.suffix() ) :
+			return None
 	
-		if s.count( "," ) :
-			ss = s.split( "," )
-			try :
-				l = [ FrameList.FrameList.parse( x ) for x in ss ]
-				return CompoundFrameList( l )
-			except :
-				return None
-			
-		return None	
+		s = s[:-len(cls.suffix())]
 		
-FrameList.FrameList.registerParser( CompoundFrameList.parse )
+		if (s[0]=='(' and s[-1]==')') or not ',' in s :
+			return FrameList.parse( s )
+		
+		return None
