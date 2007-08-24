@@ -43,6 +43,7 @@ namespace IECore
 ///Provides higher level access to cache files by automatically interpolating data from multiple files.
 ///Or returns the data from the nearest frame if the data cannot be interpolated.
 ///The interface looks like AttributeCache reader functions. It assumes the time is encoded in 6000FPS units.
+///The frame numbers are computed by using OversamplesCalculator6kFPS.
 class InterpolatedCache : public RefCounted
 {
 	public:
@@ -59,10 +60,9 @@ class InterpolatedCache : public RefCounted
 			Cubic
 		};
 
-		///Constructs the cache reader. 
-		///Opens as much cache files as necessary depending on the interpolation type.
-		///pathTemplate must contain "%1" indicating the frame number position in the file name.
-		InterpolatedCache( const std::string &pathTemplate, double frame, Interpolation interpolation = None, int oversamples = 1, double frameRate = 24.0 );
+		///Constructor
+		///pathTemplate must contain "%d" indicating the frame number position in the file name. You can use padding too: %03d for example.
+		InterpolatedCache( const std::string &pathTemplate = "", double frame = 0.0, Interpolation interpolation = None, int oversamples = 1, double frameRate = 24.0 );
 
 		~InterpolatedCache();
 

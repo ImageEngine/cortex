@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-// Partially specialize for Imath::Quat
+// Partially specialize for Imath::Quat. Interpolates through the shortest path.
 template<typename T>
 struct LinearInterpolator< Imath::Quat<T> >
 {
@@ -41,12 +41,19 @@ struct LinearInterpolator< Imath::Quat<T> >
 			const Imath::Quat<T> &y1,
 			double x, 
 			Imath::Quat<T> &result) const
-	{		
-		result = Imath::slerp< T >( y0, y1, static_cast< T >(x) );
+	{
+		if ( (y0 ^ y1) < 0.0 )
+		{
+			result = Imath::slerp< T >( y0, -y1, static_cast< T >(x) );
+		}
+		else
+		{
+			result = Imath::slerp< T >( y0, y1, static_cast< T >(x) );
+		}
 	}
 };
 
-// Partially specialize for Imath::Quat
+// Partially specialize for Imath::Quat. Interpolates through the shortest path.
 template<typename T>
 struct CosineInterpolator< Imath::Quat<T> >
 {
@@ -56,11 +63,11 @@ struct CosineInterpolator< Imath::Quat<T> >
 			Imath::Quat<T> &result) const
 	{		
 		double cx = (1.0 - cos(x * M_PI)) / 2.0;
-		result = Imath::slerp< T >( y0, y1, static_cast< T >(cx) );
+		LinearInterpolator< Imath::Quat<T> >()( y0, y1, static_cast< T >(cx), result );
 	}
 };
 
-// Partially specialize for Imath::Quat
+// Partially specialize for Imath::Quat. Interpolates through the shortest path.
 template<typename T>
 struct CubicInterpolator< Imath::Quat< T > >
 {
@@ -70,7 +77,20 @@ struct CubicInterpolator< Imath::Quat< T > >
 			const Imath::Quat< T > &y3,
 			double x, 
 			Imath::Quat< T > &result) const
-	{		
-		result = Imath::spline< T >( y0, y1, y2, y3, static_cast< T >(x) );
+	{
+		Imath::Quat< T > y1Tmp(y1), y2Tmp(y2), y3Tmp(y3);
+		if ( (y0 ^ y1) < 0.0 )
+		{
+			y1Tmp = -y1;
+		}
+		if ( (y1Tmp ^ y2) < 0.0 )
+		{
+			y2Tmp = -y2;
+		}
+		if ( (y2Tmp ^ y3) < 0.0 )
+		{
+			y3Tmp = -y3;
+		}
+		result = Imath::spline< T >( y0, y1Tmp, y2Tmp, y3Tmp, static_cast< T >(x) );
 	}
 };

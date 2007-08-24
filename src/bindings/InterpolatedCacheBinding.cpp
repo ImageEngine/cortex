@@ -136,7 +136,7 @@ void bindInterpolatedCache()
 		;
 	}
 	interpolatedCacheClass
-		.def( init< const std::string &, double, optional< InterpolatedCache::Interpolation, int, double > >( args("pathTemplate", "frame", "interpolation", "oversamples", "frameRate") ) )
+		.def( init< optional<const std::string &, double, InterpolatedCache::Interpolation, int, double > >( args("pathTemplate", "frame", "interpolation", "oversamples", "frameRate") ) )
 		.def("setPathTemplate", &InterpolatedCache::setPathTemplate )
 		.def("getPathTemplate", &InterpolatedCache::getPathTemplate )
 		.def("setFrame", &InterpolatedCache::setFrame )
