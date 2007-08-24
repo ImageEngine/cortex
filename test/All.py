@@ -88,5 +88,7 @@ from FileFormatSwitch import *
 from ObjectInterpolation import *
 from InterpolatedCache import *
 from TransformationMatrixData import *
+from ReversedFrameList import *
+from BinaryFrameList import *
 
 unittest.main()
