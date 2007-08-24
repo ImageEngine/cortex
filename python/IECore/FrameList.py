@@ -74,7 +74,7 @@ class FrameList :
 		
 		# remove whitespace and brackets from start and end
 		s = s.strip()
-		if (s[0]=='(' and s[-1]==')') :
+		if len(s) and (s[0]=='(' and s[-1]==')') :
 			s = s[1:-1].strip()
 		
 		for p in FrameList.__parsers :
