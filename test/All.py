@@ -87,5 +87,6 @@ from OptionalCompoundParameter import *
 from FileFormatSwitch import *
 from ObjectInterpolation import *
 from InterpolatedCache import *
+from TransformationMatrixData import *
 
 unittest.main()

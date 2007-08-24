@@ -171,7 +171,10 @@ __dataTypesConversionDict = {
 	IECore.Color4fVectorData: (list, False, IECore.Color4f),
 	IECore.Color4dVectorData: (list, False, IECore.Color4d),
 
-	IECore.CompoundData: (dict, True, None)
+	IECore.CompoundData: (dict, True, None),
+
+	IECore.TransformationMatrixfData: ( IECore.TransformationMatrixf, True ),
+	IECore.TransformationMatrixdData: ( IECore.TransformationMatrixd, True ),
 }
 
 ## Function that returns a list of Data derived classes.

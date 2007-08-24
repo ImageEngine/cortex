@@ -184,6 +184,8 @@ coreSources = 		[
 				'src/IECore.cpp',	
 				'src/ObjectInterpolator.cpp',
 				'src/InterpolatedCache.cpp',	
+				'src/TransformationMatrix.cpp',
+				'src/TransformationMatrixData.cpp',
 		   ]
 		
 coreIncludes = 		[ 	
@@ -314,6 +316,8 @@ corePythonSources = 	[
 				'src/bindings/NullObjectBinding.cpp',
 				'src/bindings/ObjectInterpolatorBinding.cpp',
 				'src/bindings/InterpolatedCacheBinding.cpp',
+				'src/bindings/TransformationMatrixBinding.cpp',
+				'src/bindings/TransformationMatrixDataBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

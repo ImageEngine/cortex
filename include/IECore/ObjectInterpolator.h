@@ -42,6 +42,7 @@
 #include "IECore/Object.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/TransformationMatrixData.h"
 #include "IECore/Interpolator.h"
 #include "IECore/Exception.h"
 
@@ -207,6 +208,22 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, double x, Ob
 			Functor<QuatdVectorData>()( x0, x1, x, xRes );
 			break;
 			}
+		case TransformationMatrixfDataTypeId :
+			{
+			TransformationMatrixfDataPtr x0 = boost::static_pointer_cast<TransformationMatrixfData>( y0 );
+			TransformationMatrixfDataPtr x1 = boost::static_pointer_cast<TransformationMatrixfData>( y1 );
+			TransformationMatrixfDataPtr xRes = boost::static_pointer_cast<TransformationMatrixfData>( result );
+			Functor<TransformationMatrixfData>()( x0, x1, x, xRes );
+			break;
+			}
+		case TransformationMatrixdDataTypeId :
+			{
+			TransformationMatrixdDataPtr x0 = boost::static_pointer_cast<TransformationMatrixdData>( y0 );
+			TransformationMatrixdDataPtr x1 = boost::static_pointer_cast<TransformationMatrixdData>( y1 );
+			TransformationMatrixdDataPtr xRes = boost::static_pointer_cast<TransformationMatrixdData>( result );
+			Functor<TransformationMatrixdData>()( x0, x1, x, xRes );
+			break;
+			}
 
 		case Color3fDataTypeId :
 		case Color4fDataTypeId :
@@ -233,7 +250,7 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, double x, Ob
 		case M44fVectorDataTypeId :
 		case M44dVectorDataTypeId :
 			// complex types currently not supported...
-			// \todo help your self implementing interpolation for this types.
+			// \todo help yourself implementing interpolation for this types.
 			return false;
 
 		case BoolDataTypeId :
@@ -452,6 +469,26 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, const Object
 			Functor<QuatdVectorData>()( x0, x1, x2, x3, x, xRes );
 			break;
 			}
+		case TransformationMatrixfDataTypeId :
+			{
+			TransformationMatrixfDataPtr x0 = boost::static_pointer_cast<TransformationMatrixfData>( y0 );
+			TransformationMatrixfDataPtr x1 = boost::static_pointer_cast<TransformationMatrixfData>( y1 );
+			TransformationMatrixfDataPtr x2 = boost::static_pointer_cast<TransformationMatrixfData>( y2 );
+			TransformationMatrixfDataPtr x3 = boost::static_pointer_cast<TransformationMatrixfData>( y3 );
+			TransformationMatrixfDataPtr xRes = boost::static_pointer_cast<TransformationMatrixfData>( result );
+			Functor<TransformationMatrixfData>()( x0, x1, x2, x3, x, xRes );
+			break;
+			}
+		case TransformationMatrixdDataTypeId :
+			{
+			TransformationMatrixdDataPtr x0 = boost::static_pointer_cast<TransformationMatrixdData>( y0 );
+			TransformationMatrixdDataPtr x1 = boost::static_pointer_cast<TransformationMatrixdData>( y1 );
+			TransformationMatrixdDataPtr x2 = boost::static_pointer_cast<TransformationMatrixdData>( y2 );
+			TransformationMatrixdDataPtr x3 = boost::static_pointer_cast<TransformationMatrixdData>( y3 );
+			TransformationMatrixdDataPtr xRes = boost::static_pointer_cast<TransformationMatrixdData>( result );
+			Functor<TransformationMatrixdData>()( x0, x1, x2, x3, x, xRes );
+			break;
+			}
 
 		case Color3fDataTypeId :
 		case Color4fDataTypeId :
@@ -478,7 +515,7 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, const Object
 		case M44fVectorDataTypeId :
 		case M44dVectorDataTypeId :
 			// complex types currently not supported...
-			// \todo help your self implementing interpolation for this types.
+			// \todo help yourself implementing interpolation for this types.
 			return false;
 
 		case BoolDataTypeId :

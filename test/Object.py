@@ -61,7 +61,7 @@ class TestObject( unittest.TestCase ) :
 		notDefinedClasses = set(dataClasses).difference(IECore.getDataDerivedTypes())
 		if len(notDefinedClasses) > 0:
 			raise Exception, "The following classes were not defined on the conversion dictionaire: " + \
-					string.join(map(str, notDefinedClasses), ", ") + ".\nPlease, add them on DataTraits.py"
+					", ".join( map(str, notDefinedClasses) ) + ".\nPlease, add them on DataTraits.py"
 
 	def testTypeIds( self ):
 		"""

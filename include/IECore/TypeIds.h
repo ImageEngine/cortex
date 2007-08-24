@@ -195,6 +195,9 @@ enum TypeId
 	VisibleRenderableTypeId = 152,
 	StateRenderableTypeId = 153,
 	OBJReaderTypeId = 154,
+	TransformationMatrixfDataTypeId = 155,
+	TransformationMatrixdDataTypeId = 156,
+
 	// Remember to update TypeIdBinding.cpp !!!
 
 	

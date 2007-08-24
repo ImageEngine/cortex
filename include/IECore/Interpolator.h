@@ -39,6 +39,7 @@
 #include <vector>
 #include <math.h>
 #include <OpenEXR/ImathQuat.h>
+#include <IECore/TransformationMatrix.h>
 
 #include <IECore/TypedData.h>
 
@@ -84,6 +85,7 @@ struct CubicInterpolator
 
 #include "Interpolator.inl"
 #include "QuatInterpolator.inl"
+#include "TransformationMatrixInterpolator.inl"
 
 } // namespace IECore
 

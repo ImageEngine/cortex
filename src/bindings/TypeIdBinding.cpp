@@ -198,6 +198,8 @@ void bindTypeId()
 		.value("VisibleRenderable", VisibleRenderableTypeId )
 		.value("StateRenderable", StateRenderableTypeId )
 		.value("OBJReader", OBJReaderTypeId)
+		.value("TransformationMatrixfData", TransformationMatrixfDataTypeId)
+		.value("TransformationMatrixdData", TransformationMatrixdDataTypeId)
 	;
 }
 

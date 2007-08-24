@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//	     other contributors to this software may be used to endorse or
+//       other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,45 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/TransformationMatrix.h"
 
-// Partially specialize for Imath::Quat
-template<typename T>
-struct LinearInterpolator< Imath::Quat<T> >
-{
-	void operator()(const Imath::Quat<T> &y0, 
-			const Imath::Quat<T> &y1,
-			double x, 
-			Imath::Quat<T> &result) const
-	{		
-		result = Imath::slerp< T >( y0, y1, static_cast< T >(x) );
-	}
-};
+namespace IECore {
 
-// Partially specialize for Imath::Quat
-template<typename T>
-struct CosineInterpolator< Imath::Quat<T> >
-{
-	void operator()(const Imath::Quat<T> &y0, 
-			const Imath::Quat<T> &y1,
-			double x, 
-			Imath::Quat<T> &result) const
-	{		
-		double cx = (1.0 - cos(x * M_PI)) / 2.0;
-		result = Imath::slerp< T >( y0, y1, static_cast< T >(cx) );
-	}
-};
+template class TransformationMatrix<double>;
+template class TransformationMatrix<float>;
 
-// Partially specialize for Imath::Quat
-template<typename T>
-struct CubicInterpolator< Imath::Quat< T > >
-{
-	void operator()(const Imath::Quat< T > &y0, 
-			const Imath::Quat< T > &y1,
-			const Imath::Quat< T > &y2,
-			const Imath::Quat< T > &y3,
-			double x, 
-			Imath::Quat< T > &result) const
-	{		
-		result = Imath::spline< T >( y0, y1, y2, y3, static_cast< T >(x) );
-	}
-};
+} // namespace IECore

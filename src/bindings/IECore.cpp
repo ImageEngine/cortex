@@ -112,6 +112,8 @@
 #include "IECore/bindings/NullObjectBinding.h"
 #include "IECore/bindings/ObjectInterpolatorBinding.h"
 #include "IECore/bindings/InterpolatedCacheBinding.h"
+#include "IECore/bindings/TransformationMatrixBinding.h"
+#include "IECore/bindings/TransformationMatrixDataBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -195,6 +197,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindNullObject();
 	bindObjectInterpolator();
 	bindInterpolatedCache();
+	bindTransformationMatrix();
+	bindTransformationMatrixData();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
