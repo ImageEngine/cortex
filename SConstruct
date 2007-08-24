@@ -346,6 +346,7 @@ corePythonPy = 	[
 				'python/IECore/ParameterisedOverwriting.py',
 				'python/IECore/RunTimeTypedUtil.py',				
 				'python/IECore/FileSequenceParameter.py',				
+				'python/IECore/FrameListParameter.py',				
 				'python/IECore/ConfigLoader.py',
 				'python/IECore/RemovePrimitiveVariables.py',				
 				'python/IECore/RenamePrimitiveVariables.py',				

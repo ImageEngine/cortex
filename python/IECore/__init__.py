@@ -54,6 +54,7 @@ from FileSequence import FileSequence
 from FileSequenceFunctions import *
 from EmptyFrameList import EmptyFrameList
 from FileSequenceParameter import FileSequenceParameter
+from FrameListParameter import FrameListParameter
 from ClassLoader import ClassLoader
 from RemoteOpLoader import RemoteOpLoader
 from RemovePrimitiveVariables import RemovePrimitiveVariables

@@ -206,6 +206,12 @@ class parameterTypes( Op ) :
 					description = "A v3i",
 					defaultValue = V3iData(),
 				),
+				
+				FrameListParameter(
+					name = "w",
+					description = "A FrameList",
+					defaultValue = "",
+				),
 			]
 		)
 	
@@ -231,7 +237,8 @@ class parameterTypes( Op ) :
 		assert args.s == Box2dData( Box2d( V2d( -1, -2 ), V2d( 10, 20 ) ) ) 
 		assert args.t == Box3fData( Box3f( V3f( -1, -2, -3), V3f( 10, 20, 30) ) ) 		
 		assert args.u == V2iData( V2i( 64, 128 ) )
-		assert args.v == V3iData( V3i( 25, 26, 27 ) )		
-
+		assert args.v == V3iData( V3i( 25, 26, 27 ) )
+		assert self["w"].getFrameListValue().asList() == FrameRange( 0, 500, 250 ).asList()
+		
 		return IntData( 1 )
 

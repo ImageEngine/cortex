@@ -73,6 +73,7 @@ class testParameterParser( unittest.TestCase ) :
 			"-t", "-1", "-2", "-3", "10", "20", "30",
 			"-u", "64", "128",
 			"-v", "25", "26", "27",
+			"-w", "0-500x250",
 			], a.parameters() )
 		
 		a()
@@ -124,6 +125,7 @@ class testParameterParser( unittest.TestCase ) :
 			"-t", "-1", "-2", "-3", "10", "20", "30",
 			"-u", "64", "128",
 			"-v", "25", "26", "27",
+			"-w", "0-500x250",
 			], a.parameters() )
 			
 		a()
