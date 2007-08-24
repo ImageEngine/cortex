@@ -71,7 +71,8 @@ bool DirNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) c
 	}
 	
 	// dir type check
-	if( boost::filesystem::exists( s->readable() ) && !boost::filesystem::is_directory( s->readable() ) )
+	if( boost::filesystem::exists(boost::filesystem::path(s->readable(), boost::filesystem::native)) &&
+		 !boost::filesystem::is_directory(boost::filesystem::path(s->readable(), boost::filesystem::native)))
 	{
 		if( reason )
 		{

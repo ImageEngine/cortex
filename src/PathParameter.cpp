@@ -70,13 +70,18 @@ bool PathParameter::mustNotExist() const
 
 bool PathParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
 {
+	/// \todo in some place where we can get there first, install the default name check:
+	/// boost::filesystem::path::default_name_check(boost::filesystem::path::no_check);
+	/// or
+	/// boost::filesystem::path::default_name_check(boost::filesystem::path::native);
+
 	if( !StringParameter::valueValid( value, reason ) )
 	{
 		return false;
 	}
 	// if the above passed we know we have a string
 	ConstStringDataPtr s = static_pointer_cast<const StringData>( value );
-	
+
 	// empty check
 	if( !allowEmptyString() && s->readable()=="" )
 	{
@@ -99,7 +104,7 @@ bool PathParameter::valueValid( ConstObjectPtr value, std::string *reason ) cons
 	// valid path check
 	try
 	{
-		boost::filesystem::path( s->readable() );
+		boost::filesystem::path( s->readable(), boost::filesystem::native);
 	}
 	catch( ... )
 	{
@@ -109,9 +114,9 @@ bool PathParameter::valueValid( ConstObjectPtr value, std::string *reason ) cons
 		}
 		return false;
 	}
-	
+
 	// existence check
-	if ( boost::filesystem::exists( s->readable() ) )
+	if ( boost::filesystem::exists(boost::filesystem::path( s->readable(), boost::filesystem::native)))
 	{
 		if ( mustNotExist() )
 		{
@@ -133,5 +138,6 @@ bool PathParameter::valueValid( ConstObjectPtr value, std::string *reason ) cons
 			return false;
 		}
 	}
+	
 	return true;
 }
