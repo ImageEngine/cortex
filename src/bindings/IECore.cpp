@@ -111,6 +111,8 @@
 #include "IECore/bindings/OBJReaderBinding.h"
 #include "IECore/bindings/NullObjectBinding.h"
 #include "IECore/bindings/ObjectInterpolatorBinding.h"
+#include "IECore/bindings/PointNormalsOpBinding.h"
+#include "IECore/bindings/PointDensitiesOpBinding.h"
 #include "IECore/bindings/InterpolatedCacheBinding.h"
 #include "IECore/bindings/TransformationMatrixBinding.h"
 #include "IECore/bindings/TransformationMatrixDataBinding.h"
@@ -196,6 +198,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindOBJReader();
 	bindNullObject();
 	bindObjectInterpolator();
+	bindPointNormalsOp();
+	bindPointDensitiesOp();
 	bindInterpolatedCache();
 	bindTransformationMatrix();
 	bindTransformationMatrixData();

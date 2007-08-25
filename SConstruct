@@ -184,6 +184,8 @@ coreSources = 		[
 				'src/IECore.cpp',	
 				'src/ObjectInterpolator.cpp',
 				'src/InterpolatedCache.cpp',	
+				'src/PointNormalsOp.cpp',		
+				'src/PointDensitiesOp.cpp',		
 				'src/TransformationMatrix.cpp',
 				'src/TransformationMatrixData.cpp',
 		   ]
@@ -315,6 +317,8 @@ corePythonSources = 	[
 				'src/bindings/OBJReaderBinding.cpp',
 				'src/bindings/NullObjectBinding.cpp',
 				'src/bindings/ObjectInterpolatorBinding.cpp',
+				'src/bindings/PointNormalsOpBinding.cpp',
+				'src/bindings/PointDensitiesOpBinding.cpp',
 				'src/bindings/InterpolatedCacheBinding.cpp',
 				'src/bindings/TransformationMatrixBinding.cpp',
 				'src/bindings/TransformationMatrixDataBinding.cpp',

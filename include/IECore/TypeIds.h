@@ -197,9 +197,10 @@ enum TypeId
 	OBJReaderTypeId = 154,
 	TransformationMatrixfDataTypeId = 155,
 	TransformationMatrixdDataTypeId = 156,
+	PointNormalsOpTypeId = 157,
+	PointDensitiesOpTypeId = 158,
 
 	// Remember to update TypeIdBinding.cpp !!!
-
 	
 	// If we ever get this far then the core library is too big.
 	LastCoreTypeId = 99999,

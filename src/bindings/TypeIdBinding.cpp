@@ -200,6 +200,8 @@ void bindTypeId()
 		.value("OBJReader", OBJReaderTypeId)
 		.value("TransformationMatrixfData", TransformationMatrixfDataTypeId)
 		.value("TransformationMatrixdData", TransformationMatrixdDataTypeId)
+		.value("PointNormalsOp", PointNormalsOpTypeId)
+		.value("PointDensitiesOp", PointDensitiesOpTypeId)
 	;
 }
 
