@@ -159,7 +159,7 @@ ObjectPtr InterpolatedCache::read( const ObjectHandle &obj, const AttributeHandl
 				}
 				case Cubic:
 				{
-					data = cubicObjectInterpolation(pts[0], pts[1], pts[2], pts[3], m_x );
+					data = cubicObjectInterpolation( pts[0], pts[1], pts[2], pts[3], m_x );
 					break;
 				}
 				default:
@@ -210,15 +210,101 @@ CompoundObjectPtr InterpolatedCache::read( const ObjectHandle &obj )
 ObjectPtr InterpolatedCache::readHeader( const HeaderHandle &hdr )
 {
 	updateCacheFiles();	
-	return m_caches[ m_curFrameIndex ]->readHeader( hdr );
+
+	ObjectPtr data;
+	bool interpolationFailed = false;
+
+	if ( m_useInterpolation )
+	{
+		std::vector< ObjectPtr > pts;
+		for (unsigned int c = 0; c < m_caches.size(); c++)
+		{
+			try
+			{
+				data = m_caches[c]->readHeader( hdr );
+			}
+			catch (IECore::Exception &e)
+			{
+				break;
+			}
+			if ( !data )
+			{
+				break;
+			}
+			pts.push_back( data );
+		}
+
+		if ( pts.size() != m_caches.size() )
+		{
+			interpolationFailed = true;
+		}
+		else
+		{
+			switch (m_interpolation)
+			{
+				case Linear:
+				{
+					data = linearObjectInterpolation( pts[0], pts[1], m_x);
+					break;
+				}
+				case Cosine:
+				{
+					data = cosineObjectInterpolation( pts[0], pts[1], m_x);
+					break;
+				}
+				case Cubic:
+				{
+					data = cubicObjectInterpolation( pts[0], pts[1], pts[2], pts[3], m_x );
+					break;
+				}
+				default:
+					data = 0;
+					break;
+			}
+			if (! data )
+			{
+				data = pts[ m_curFrameIndex ];
+			}
+		}
+	}
+	if ( !m_useInterpolation || interpolationFailed )
+	{
+		try
+		{
+			data = m_caches[ m_curFrameIndex ]->readHeader( hdr );
+		}
+		catch (IECore::Exception &e)
+		{
+			std::string err = (format( "Could not load header %s: %s" ) % hdr % e.what() ).str();
+			throw IOException( err );
+		}
+		if ( !data )
+		{
+			throw IOException( (format( "Could not load header %s." ) % hdr).str() );
+		}
+	}
+
+	return data;
 }
 
 CompoundObjectPtr InterpolatedCache::readHeader( )
 {
-	updateCacheFiles();	
-	return m_caches[ m_curFrameIndex ]->readHeader();
+	updateCacheFiles();
+
+	CompoundObjectPtr dict = new CompoundObject();
+	std::vector<HeaderHandle> hds;
+	headers( hds );
+
+	for (std::vector<HeaderHandle>::const_iterator it = hds.begin(); it != hds.end(); ++it)
+	{
+		ObjectPtr data = readHeader( *it );
+
+		dict->members()[ *it ] = data;
+
+	}
+	return dict;
 }
-	
+
 void InterpolatedCache::objects(std::vector<ObjectHandle> &objs)
 {
 	updateCacheFiles();	

@@ -46,6 +46,7 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		self.assertEqual( linearObjectInterpolation( V3fData( V3f(1) ), V3fData( V3f(2) ), 0.5 ), V3fData( V3f(1.5) ) )
 		self.assertEqual( linearObjectInterpolation( V2dData( V2d(1) ), V2dData( V2d(2) ), 0.5 ), V2dData( V2d(1.5) ) )
 		self.assertEqual( linearObjectInterpolation( V3dData( V3d(1) ), V3dData( V3d(2) ), 0.5 ), V3dData( V3d(1.5) ) )
+		self.assertEqual( linearObjectInterpolation( Box3fData( Box3f( V3f(1), V3f(1) ) ), Box3fData( Box3f( V3f(2), V3f(2) ) ), 0.5 ), Box3fData( Box3f( V3f(1.5), V3f(1.5) ) ) )
 
 	def testVectorLinearInterpolation( self ):
 
@@ -56,7 +57,47 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		self.assertEqual( linearObjectInterpolation( V3fVectorData( [V3f(1)] ), V3fVectorData( [V3f(2)] ), 0.5 ), V3fVectorData( [V3f(1.5)] ) )
 		self.assertEqual( linearObjectInterpolation( V2dVectorData( [V2d(1)] ), V2dVectorData( [V2d(2)] ), 0.5 ), V2dVectorData( [V2d(1.5)] ) )
 		self.assertEqual( linearObjectInterpolation( V3dVectorData( [V3d(1)] ), V3dVectorData( [V3d(2)] ), 0.5 ), V3dVectorData( [V3d(1.5)] ) )
+
+	def __buildTree( self, compoundType, seed ):
+
+		def buildCompound( compoundType, seed ):
+			c = compoundType()
+			intSeed = int( seed )
+			c[ "str" ] = StringData( str(intSeed) )
+			c[ "int" ] = IntData( intSeed )
+			c[ "float" ] = FloatData( seed )
+			c[ "double" ] = DoubleData( seed )
+			c[ "box" ] = Box3fData( Box3f( V3f( seed ), V3f( seed ) ) )
+			c[ "color" ] = Color3fData( Color3f( seed, seed, seed ) )
+			c[ "v3d" ] = V3dData( V3d( seed, seed, seed ) )
+			return c
+
+		c = buildCompound( compoundType, seed )
+		c[ 'first' ] = buildCompound( compoundType, seed )
+		c[ 'first' ][ 'second' ] = buildCompound( compoundType, seed )
+		return c
+
+	def testCompoundDataInterpolation( self ):
+
+		data0 = self.__buildTree( CompoundData, 0 )
+		data1 = self.__buildTree( CompoundData, 1 )
+		data2 = self.__buildTree( CompoundData, 2 )
+		data3 = self.__buildTree( CompoundData, 3 )
+		self.assertEqual( linearObjectInterpolation( data1, data2, 0.5 ), self.__buildTree( CompoundData, 1.5 ) )
+		self.assertEqual( cosineObjectInterpolation( data1, data2, 0.5 ), self.__buildTree( CompoundData, 1.5 ) )
+		self.assertEqual( cubicObjectInterpolation( data0, data1, data2, data3, 0.5 ), self.__buildTree( CompoundData, 1.5 ) )
 		
+	def testCompoundObjectInterpolation( self ):
+
+		data0 = self.__buildTree( CompoundObject, 0 )
+		data1 = self.__buildTree( CompoundObject, 1 )
+		data2 = self.__buildTree( CompoundObject, 2 )
+		data3 = self.__buildTree( CompoundObject, 3 )
+		self.assertEqual( linearObjectInterpolation( data1, data2, 0.5 ), self.__buildTree( CompoundObject, 1.5 ) )
+		self.assertEqual( cosineObjectInterpolation( data1, data2, 0.5 ), self.__buildTree( CompoundObject, 1.5 ) )
+		self.assertEqual( cubicObjectInterpolation( data0, data1, data2, data3, 0.5 ), self.__buildTree( CompoundObject, 1.5 ) )
+
+
 	def testSimpleCosineInterpolation( self ) :
 	
 		self.assertEqual( cosineObjectInterpolation( IntData(1), IntData(2), 0.5 ), None )

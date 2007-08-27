@@ -105,18 +105,22 @@ class InterpolatedCache : public RefCounted
 		///Throws an exception if the requested data is not present in the cache.
 		CompoundObjectPtr read( const ObjectHandle &obj );
 
-		///Read data associated with the specified header from one of the open cache files.
+		///Read data associated with the specified header from the open cache files. 
+		///The result will be interpolated whenever possible. Objects not existent in 
+		///every opened file will not be interpolated and will be returned if they come from the nearest frame.
 		///Throws an exception if the requested header is not present in the cache.
 		ObjectPtr readHeader( const HeaderHandle &hdr );
 
-		///Read all header data present in one of the cache files. 
 		///Creates a CompoundObject with the header names as keys.
+		///Read all header data present in the open cache files. The result will be 
+		///interpolated whenever possible. Objects not existent in every opened file will not be interpolated and
+		///will be returned if they come from the nearest frame. 
 		CompoundObjectPtr readHeader( );
 		
 		///Retrieve the list of object handles from the cache
 		void objects(std::vector<ObjectHandle> &objs);
 
-		///Retrieve the list of header handles from the cache
+		///Retrieve the list of header handles from the cache (from the nearest frame).
 		void headers(std::vector<HeaderHandle> &hds);
 		
 		///Retrieve the list of attribute handles from the specified objects. Throws

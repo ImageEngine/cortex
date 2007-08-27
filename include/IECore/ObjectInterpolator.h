@@ -43,6 +43,8 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/TransformationMatrixData.h"
+#include "IECore/CompoundData.h"
+#include "IECore/CompoundObject.h"
 #include "IECore/Interpolator.h"
 #include "IECore/Exception.h"
 
@@ -58,9 +60,21 @@ ObjectPtr cosineObjectInterpolation( const ObjectPtr &y0, const ObjectPtr &y1, d
 /// Utility function that applies cubic interpolation on objects. Returns a "null" pointer if the Object cannot be interpolated.
 ObjectPtr cubicObjectInterpolation( const ObjectPtr &y0, const ObjectPtr &y1, const ObjectPtr &y2, const ObjectPtr &y3, double x );
 
+
+#define INTERPOLATE2_TYPE( TYPE )												\
+		case TYPE ## TypeId:													\
+			{																	\
+			TYPE ## Ptr x0 = boost::static_pointer_cast<TYPE>( y0 );			\
+			TYPE ## Ptr x1 = boost::static_pointer_cast<TYPE>( y1 );			\
+			TYPE ## Ptr xRes = boost::static_pointer_cast<TYPE>( result );		\
+			Functor<TYPE>()( x0, x1, x, xRes );									\
+			break;																\
+			}
+
 /// Two data points interpolation template function for ObjectPtr.
 /// Gets the typeId from y0 and make the proper conversion if the type is continuous. Otherwise returns false.
 /// Assumes y1 and result has the same type as y0 parameter.
+/// Also interpolates data within CompoundObject and CompoundData. Takes data from y0 if interpolation is not possible.
 template<template<typename T> class Functor>
 bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, double x, ObjectPtr &result )
 {
@@ -72,186 +86,96 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, double x, Ob
 
 	switch( y0->typeId() )
 	{
-		case FloatDataTypeId :
-			{
-			FloatDataPtr x0 = boost::static_pointer_cast<FloatData>( y0 );
-			FloatDataPtr x1 = boost::static_pointer_cast<FloatData>( y1 );
-			FloatDataPtr xRes = boost::static_pointer_cast<FloatData>( result );
-			Functor<FloatData>()( x0, x1, x, xRes );
-			break;
-			}
-		case DoubleDataTypeId :
-			{
-			DoubleDataPtr x0 = boost::static_pointer_cast<DoubleData>( y0 );
-			DoubleDataPtr x1 = boost::static_pointer_cast<DoubleData>( y1 );
-			DoubleDataPtr xRes = boost::static_pointer_cast<DoubleData>( result );
-			Functor<DoubleData>()( x0, x1, x, xRes );
-			break;
-			}
-		case V2fDataTypeId :
-			{
-			V2fDataPtr x0 = boost::static_pointer_cast<V2fData>( y0 );
-			V2fDataPtr x1 = boost::static_pointer_cast<V2fData>( y1 );
-			V2fDataPtr xRes = boost::static_pointer_cast<V2fData>( result );
-			Functor<V2fData>()( x0, x1, x, xRes );
-			break;
-			}
-		case V3fDataTypeId :
-			{
-			V3fDataPtr x0 = boost::static_pointer_cast<V3fData>( y0 );
-			V3fDataPtr x1 = boost::static_pointer_cast<V3fData>( y1 );
-			V3fDataPtr xRes = boost::static_pointer_cast<V3fData>( result );
-			Functor<V3fData>()( x0, x1, x, xRes );
-			break;
-			}
-		case V2dDataTypeId :
-			{
-			V2dDataPtr x0 = boost::static_pointer_cast<V2dData>( y0 );
-			V2dDataPtr x1 = boost::static_pointer_cast<V2dData>( y1 );
-			V2dDataPtr xRes = boost::static_pointer_cast<V2dData>( result );
-			Functor<V2dData>()( x0, x1, x, xRes );
-			break;
-			}
-		case V3dDataTypeId :
-			{
-			V3dDataPtr x0 = boost::static_pointer_cast<V3dData>( y0 );
-			V3dDataPtr x1 = boost::static_pointer_cast<V3dData>( y1 );
-			V3dDataPtr xRes = boost::static_pointer_cast<V3dData>( result );
-			Functor<V3dData>()( x0, x1, x, xRes );
-			break;
-			}
-		case QuatfDataTypeId :
-			{
-			QuatfDataPtr x0 = boost::static_pointer_cast<QuatfData>( y0 );
-			QuatfDataPtr x1 = boost::static_pointer_cast<QuatfData>( y1 );
-			QuatfDataPtr xRes = boost::static_pointer_cast<QuatfData>( result );
-			Functor<QuatfData>()( x0, x1, x, xRes );
-			break;
-			}
-		case QuatdDataTypeId :
-			{
-			QuatdDataPtr x0 = boost::static_pointer_cast<QuatdData>( y0 );
-			QuatdDataPtr x1 = boost::static_pointer_cast<QuatdData>( y1 );
-			QuatdDataPtr xRes = boost::static_pointer_cast<QuatdData>( result );
-			Functor<QuatdData>()( x0, x1, x, xRes );
-			break;
-			}
-		case FloatVectorDataTypeId :
-			{
-			FloatVectorDataPtr x0 = boost::static_pointer_cast<FloatVectorData>( y0 );
-			FloatVectorDataPtr x1 = boost::static_pointer_cast<FloatVectorData>( y1 );
-			FloatVectorDataPtr xRes = boost::static_pointer_cast<FloatVectorData>( result );
-			Functor<FloatVectorData>()( x0, x1, x, xRes );
-			break;
-			}
-		case DoubleVectorDataTypeId :
-			{
-			DoubleVectorDataPtr x0 = boost::static_pointer_cast<DoubleVectorData>( y0 );
-			DoubleVectorDataPtr x1 = boost::static_pointer_cast<DoubleVectorData>( y1 );
-			DoubleVectorDataPtr xRes = boost::static_pointer_cast<DoubleVectorData>( result );
-			Functor<DoubleVectorData>()( x0, x1, x, xRes );
-			break;
-			}
-		case HalfVectorDataTypeId :
-			{
-			HalfVectorDataPtr x0 = boost::static_pointer_cast<HalfVectorData>( y0 );
-			HalfVectorDataPtr x1 = boost::static_pointer_cast<HalfVectorData>( y1 );
-			HalfVectorDataPtr xRes = boost::static_pointer_cast<HalfVectorData>( result );
-			Functor<HalfVectorData>()( x0, x1, x, xRes );
-			break;
-			}
-		case V2fVectorDataTypeId :
-			{
-			V2fVectorDataPtr x0 = boost::static_pointer_cast<V2fVectorData>( y0 );
-			V2fVectorDataPtr x1 = boost::static_pointer_cast<V2fVectorData>( y1 );
-			V2fVectorDataPtr xRes = boost::static_pointer_cast<V2fVectorData>( result );
-			Functor<V2fVectorData>()( x0, x1, x, xRes );
-			break;
-			}
-		case V2dVectorDataTypeId :
-			{
-			V2dVectorDataPtr x0 = boost::static_pointer_cast<V2dVectorData>( y0 );
-			V2dVectorDataPtr x1 = boost::static_pointer_cast<V2dVectorData>( y1 );
-			V2dVectorDataPtr xRes = boost::static_pointer_cast<V2dVectorData>( result );
-			Functor<V2dVectorData>()( x0, x1, x, xRes );
-			break;
-			}
-		case V3fVectorDataTypeId :
-			{
-			V3fVectorDataPtr x0 = boost::static_pointer_cast<V3fVectorData>( y0 );
-			V3fVectorDataPtr x1 = boost::static_pointer_cast<V3fVectorData>( y1 );
-			V3fVectorDataPtr xRes = boost::static_pointer_cast<V3fVectorData>( result );
-			Functor<V3fVectorData>()( x0, x1, x, xRes );
-			break;
-			}
-		case V3dVectorDataTypeId :
-			{
-			V3dVectorDataPtr x0 = boost::static_pointer_cast<V3dVectorData>( y0 );
-			V3dVectorDataPtr x1 = boost::static_pointer_cast<V3dVectorData>( y1 );
-			V3dVectorDataPtr xRes = boost::static_pointer_cast<V3dVectorData>( result );
-			Functor<V3dVectorData>()( x0, x1, x, xRes );
-			break;
-			}
-		case QuatfVectorDataTypeId :
-			{
-			QuatfVectorDataPtr x0 = boost::static_pointer_cast<QuatfVectorData>( y0 );
-			QuatfVectorDataPtr x1 = boost::static_pointer_cast<QuatfVectorData>( y1 );
-			QuatfVectorDataPtr xRes = boost::static_pointer_cast<QuatfVectorData>( result );
-			Functor<QuatfVectorData>()( x0, x1, x, xRes );
-			break;
-			}
-		case QuatdVectorDataTypeId :
-			{
-			QuatdVectorDataPtr x0 = boost::static_pointer_cast<QuatdVectorData>( y0 );
-			QuatdVectorDataPtr x1 = boost::static_pointer_cast<QuatdVectorData>( y1 );
-			QuatdVectorDataPtr xRes = boost::static_pointer_cast<QuatdVectorData>( result );
-			Functor<QuatdVectorData>()( x0, x1, x, xRes );
-			break;
-			}
-		case TransformationMatrixfDataTypeId :
-			{
-			TransformationMatrixfDataPtr x0 = boost::static_pointer_cast<TransformationMatrixfData>( y0 );
-			TransformationMatrixfDataPtr x1 = boost::static_pointer_cast<TransformationMatrixfData>( y1 );
-			TransformationMatrixfDataPtr xRes = boost::static_pointer_cast<TransformationMatrixfData>( result );
-			Functor<TransformationMatrixfData>()( x0, x1, x, xRes );
-			break;
-			}
-		case TransformationMatrixdDataTypeId :
-			{
-			TransformationMatrixdDataPtr x0 = boost::static_pointer_cast<TransformationMatrixdData>( y0 );
-			TransformationMatrixdDataPtr x1 = boost::static_pointer_cast<TransformationMatrixdData>( y1 );
-			TransformationMatrixdDataPtr xRes = boost::static_pointer_cast<TransformationMatrixdData>( result );
-			Functor<TransformationMatrixdData>()( x0, x1, x, xRes );
-			break;
-			}
+		INTERPOLATE2_TYPE( FloatData )
+		INTERPOLATE2_TYPE( DoubleData )
+		INTERPOLATE2_TYPE( V2fData )
+		INTERPOLATE2_TYPE( V3fData )
+		INTERPOLATE2_TYPE( V2dData )
+		INTERPOLATE2_TYPE( V3dData )
+		INTERPOLATE2_TYPE( QuatfData )
+		INTERPOLATE2_TYPE( QuatdData )
+		INTERPOLATE2_TYPE( FloatVectorData )
+		INTERPOLATE2_TYPE( DoubleVectorData )
+		INTERPOLATE2_TYPE( HalfVectorData )
+		INTERPOLATE2_TYPE( V2fVectorData )
+		INTERPOLATE2_TYPE( V2dVectorData )
+		INTERPOLATE2_TYPE( V3fVectorData )
+		INTERPOLATE2_TYPE( V3dVectorData )
+		INTERPOLATE2_TYPE( QuatfVectorData )
+		INTERPOLATE2_TYPE( QuatdVectorData )
+		INTERPOLATE2_TYPE( TransformationMatrixfData )
+		INTERPOLATE2_TYPE( TransformationMatrixdData )
+		INTERPOLATE2_TYPE( Color3fData )
+		INTERPOLATE2_TYPE( Color4fData )
+		INTERPOLATE2_TYPE( Color3dData )
+		INTERPOLATE2_TYPE( Color4dData )
+		INTERPOLATE2_TYPE( Box2fData )
+		INTERPOLATE2_TYPE( Box3fData )
+		INTERPOLATE2_TYPE( Box2dData )
+		INTERPOLATE2_TYPE( Box3dData )
+		INTERPOLATE2_TYPE( M33fData )
+		INTERPOLATE2_TYPE( M33dData )
+		INTERPOLATE2_TYPE( M44fData )
+		INTERPOLATE2_TYPE( M44dData )
+		INTERPOLATE2_TYPE( Color3fVectorData )
+		INTERPOLATE2_TYPE( Color4fVectorData )
+		INTERPOLATE2_TYPE( Color3dVectorData )
+		INTERPOLATE2_TYPE( Color4dVectorData )
+		INTERPOLATE2_TYPE( Box3fVectorData )
+		INTERPOLATE2_TYPE( Box3dVectorData )
+		INTERPOLATE2_TYPE( Box2fVectorData )
+		INTERPOLATE2_TYPE( Box2dVectorData )
+		INTERPOLATE2_TYPE( M33fVectorData )
+		INTERPOLATE2_TYPE( M33dVectorData )
+		INTERPOLATE2_TYPE( M44fVectorData )
+		INTERPOLATE2_TYPE( M44dVectorData )
 
-		case Color3fDataTypeId :
-		case Color4fDataTypeId :
-		case Color3dDataTypeId :
-		case Color4dDataTypeId :
-		case Box2fDataTypeId :
-		case Box3fDataTypeId :
-		case Box2dDataTypeId :
-		case Box3dDataTypeId :
-		case M33fDataTypeId :
-		case M33dDataTypeId :
-		case M44fDataTypeId :
-		case M44dDataTypeId :
-		case Color3fVectorDataTypeId :
-		case Color4fVectorDataTypeId :
-		case Color3dVectorDataTypeId :
-		case Color4dVectorDataTypeId :
-		case Box3fVectorDataTypeId :
-		case Box3dVectorDataTypeId :
-		case Box2fVectorDataTypeId :
-		case Box2dVectorDataTypeId :
-		case M33fVectorDataTypeId :
-		case M33dVectorDataTypeId :
-		case M44fVectorDataTypeId :
-		case M44dVectorDataTypeId :
-			// complex types currently not supported...
-			// \todo help yourself implementing interpolation for this types.
-			return false;
+		case CompoundDataTypeId :
+			{
+			CompoundDataPtr x0 = boost::static_pointer_cast<CompoundData>( y0 );
+			CompoundDataPtr x1 = boost::static_pointer_cast<CompoundData>( y1 );
+			CompoundDataPtr xRes = boost::static_pointer_cast<CompoundData>( result );
+			for ( CompoundDataMap::const_iterator it0 = x0->readable().begin(); it0 != x0->readable().end(); it0++)
+			{
+				CompoundDataMap::const_iterator it1 = x1->readable().find( it0->first );
+				if ( it1 != x1->readable().end() && it0->second->typeId() == it1->second->typeId() )
+				{
+					ObjectPtr resultObj = Object::create( it0->second->typeId() );
+					if ( ObjectInterpolator< Functor >( it0->second, it1->second, x, resultObj ) )
+					{
+						xRes->writable()[ it0->first ] = boost::static_pointer_cast<Data>( resultObj );
+					}
+					else
+					{
+						xRes->writable()[ it0->first ] = it0->second;
+					}
+				}
+			}
+			break;
+			}
+		case CompoundObjectTypeId :
+			{
+			CompoundObjectPtr x0 = boost::static_pointer_cast<CompoundObject>( y0 );
+			CompoundObjectPtr x1 = boost::static_pointer_cast<CompoundObject>( y1 );
+			CompoundObjectPtr xRes = boost::static_pointer_cast<CompoundObject>( result );
+			for ( CompoundObject::ObjectMap::const_iterator it0 = x0->members().begin(); it0 != x0->members().end(); it0++)
+			{
+				CompoundObject::ObjectMap::const_iterator it1 = x1->members().find( it0->first );
+				if ( it1 != x1->members().end() && it0->second->typeId() == it1->second->typeId() )
+				{
+					ObjectPtr resultObj = Object::create( it0->second->typeId() );
+					if ( ObjectInterpolator< Functor >( it0->second, it1->second, x, resultObj ) )
+					{
+						xRes->members()[ it0->first ] = resultObj;
+					}
+					else
+					{
+						xRes->members()[ it0->first ] = it0->second;
+					}
+				}
+			}
+			break;
+			}
 
 		case BoolDataTypeId :
 		case IntDataTypeId :
@@ -284,9 +208,23 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, double x, Ob
 	return true;
 }
 
+#define INTERPOLATE4_TYPE( TYPE )												\
+		case TYPE ## TypeId:													\
+			{																	\
+			TYPE ## Ptr x0 = boost::static_pointer_cast<TYPE>( y0 );			\
+			TYPE ## Ptr x1 = boost::static_pointer_cast<TYPE>( y1 );			\
+			TYPE ## Ptr x2 = boost::static_pointer_cast<TYPE>( y2 );			\
+			TYPE ## Ptr x3 = boost::static_pointer_cast<TYPE>( y3 );			\
+			TYPE ## Ptr xRes = boost::static_pointer_cast<TYPE>( result );		\
+			Functor<TYPE>()( x0, x1, x2, x3, x, xRes );							\
+			break;																\
+			}
+
+
 /// Four data points interpolation template function for ObjectPtr.
 /// Gets the typeId from y0 and make the proper conversion if the type is continuous. Otherwise returns false.
 /// Assumes y1, y2, y3 and result has the same type as y0 parameter.
+/// Also interpolates data within CompoundObject and CompoundData. Takes data from y1 if interpolation is not possible.
 template<template<typename T> class Functor>
 bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, const ObjectPtr &y2, const ObjectPtr & y3, double x, ObjectPtr &result )
 {
@@ -299,224 +237,140 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, const Object
 
 	switch( y0->typeId() )
 	{
-		case FloatDataTypeId :
-			{
-			FloatDataPtr x0 = boost::static_pointer_cast<FloatData>( y0 );
-			FloatDataPtr x1 = boost::static_pointer_cast<FloatData>( y1 );
-			FloatDataPtr x2 = boost::static_pointer_cast<FloatData>( y2 );
-			FloatDataPtr x3 = boost::static_pointer_cast<FloatData>( y3 );
-			FloatDataPtr xRes = boost::static_pointer_cast<FloatData>( result );
-			Functor<FloatData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case DoubleDataTypeId :
-			{
-			DoubleDataPtr x0 = boost::static_pointer_cast<DoubleData>( y0 );
-			DoubleDataPtr x1 = boost::static_pointer_cast<DoubleData>( y1 );
-			DoubleDataPtr x2 = boost::static_pointer_cast<DoubleData>( y2 );
-			DoubleDataPtr x3 = boost::static_pointer_cast<DoubleData>( y3 );
-			DoubleDataPtr xRes = boost::static_pointer_cast<DoubleData>( result );
-			Functor<DoubleData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case V2fDataTypeId :
-			{
-			V2fDataPtr x0 = boost::static_pointer_cast<V2fData>( y0 );
-			V2fDataPtr x1 = boost::static_pointer_cast<V2fData>( y1 );
-			V2fDataPtr x2 = boost::static_pointer_cast<V2fData>( y2 );
-			V2fDataPtr x3 = boost::static_pointer_cast<V2fData>( y3 );
-			V2fDataPtr xRes = boost::static_pointer_cast<V2fData>( result );
-			Functor<V2fData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case V3fDataTypeId :
-			{
-			V3fDataPtr x0 = boost::static_pointer_cast<V3fData>( y0 );
-			V3fDataPtr x1 = boost::static_pointer_cast<V3fData>( y1 );
-			V3fDataPtr x2 = boost::static_pointer_cast<V3fData>( y2 );
-			V3fDataPtr x3 = boost::static_pointer_cast<V3fData>( y3 );
-			V3fDataPtr xRes = boost::static_pointer_cast<V3fData>( result );
-			Functor<V3fData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case V2dDataTypeId :
-			{
-			V2dDataPtr x0 = boost::static_pointer_cast<V2dData>( y0 );
-			V2dDataPtr x1 = boost::static_pointer_cast<V2dData>( y1 );
-			V2dDataPtr x2 = boost::static_pointer_cast<V2dData>( y2 );
-			V2dDataPtr x3 = boost::static_pointer_cast<V2dData>( y3 );
-			V2dDataPtr xRes = boost::static_pointer_cast<V2dData>( result );
-			Functor<V2dData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case V3dDataTypeId :
-			{
-			V3dDataPtr x0 = boost::static_pointer_cast<V3dData>( y0 );
-			V3dDataPtr x1 = boost::static_pointer_cast<V3dData>( y1 );
-			V3dDataPtr x2 = boost::static_pointer_cast<V3dData>( y2 );
-			V3dDataPtr x3 = boost::static_pointer_cast<V3dData>( y3 );
-			V3dDataPtr xRes = boost::static_pointer_cast<V3dData>( result );
-			Functor<V3dData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case QuatfDataTypeId :
-			{
-			QuatfDataPtr x0 = boost::static_pointer_cast<QuatfData>( y0 );
-			QuatfDataPtr x1 = boost::static_pointer_cast<QuatfData>( y1 );
-			QuatfDataPtr x2 = boost::static_pointer_cast<QuatfData>( y2 );
-			QuatfDataPtr x3 = boost::static_pointer_cast<QuatfData>( y3 );
-			QuatfDataPtr xRes = boost::static_pointer_cast<QuatfData>( result );
-			Functor<QuatfData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case QuatdDataTypeId :
-			{
-			QuatdDataPtr x0 = boost::static_pointer_cast<QuatdData>( y0 );
-			QuatdDataPtr x1 = boost::static_pointer_cast<QuatdData>( y1 );
-			QuatdDataPtr x2 = boost::static_pointer_cast<QuatdData>( y2 );
-			QuatdDataPtr x3 = boost::static_pointer_cast<QuatdData>( y3 );
-			QuatdDataPtr xRes = boost::static_pointer_cast<QuatdData>( result );
-			Functor<QuatdData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case FloatVectorDataTypeId :
-			{
-			FloatVectorDataPtr x0 = boost::static_pointer_cast<FloatVectorData>( y0 );
-			FloatVectorDataPtr x1 = boost::static_pointer_cast<FloatVectorData>( y1 );
-			FloatVectorDataPtr x2 = boost::static_pointer_cast<FloatVectorData>( y2 );
-			FloatVectorDataPtr x3 = boost::static_pointer_cast<FloatVectorData>( y3 );
-			FloatVectorDataPtr xRes = boost::static_pointer_cast<FloatVectorData>( result );
-			Functor<FloatVectorData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case DoubleVectorDataTypeId :
-			{
-			DoubleVectorDataPtr x0 = boost::static_pointer_cast<DoubleVectorData>( y0 );
-			DoubleVectorDataPtr x1 = boost::static_pointer_cast<DoubleVectorData>( y1 );
-			DoubleVectorDataPtr x2 = boost::static_pointer_cast<DoubleVectorData>( y2 );
-			DoubleVectorDataPtr x3 = boost::static_pointer_cast<DoubleVectorData>( y3 );
-			DoubleVectorDataPtr xRes = boost::static_pointer_cast<DoubleVectorData>( result );
-			Functor<DoubleVectorData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case HalfVectorDataTypeId :
-			{
-			HalfVectorDataPtr x0 = boost::static_pointer_cast<HalfVectorData>( y0 );
-			HalfVectorDataPtr x1 = boost::static_pointer_cast<HalfVectorData>( y1 );
-			HalfVectorDataPtr x2 = boost::static_pointer_cast<HalfVectorData>( y2 );
-			HalfVectorDataPtr x3 = boost::static_pointer_cast<HalfVectorData>( y3 );
-			HalfVectorDataPtr xRes = boost::static_pointer_cast<HalfVectorData>( result );
-			Functor<HalfVectorData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case V2fVectorDataTypeId :
-			{
-			V2fVectorDataPtr x0 = boost::static_pointer_cast<V2fVectorData>( y0 );
-			V2fVectorDataPtr x1 = boost::static_pointer_cast<V2fVectorData>( y1 );
-			V2fVectorDataPtr x2 = boost::static_pointer_cast<V2fVectorData>( y2 );
-			V2fVectorDataPtr x3 = boost::static_pointer_cast<V2fVectorData>( y3 );
-			V2fVectorDataPtr xRes = boost::static_pointer_cast<V2fVectorData>( result );
-			Functor<V2fVectorData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case V2dVectorDataTypeId :
-			{
-			V2dVectorDataPtr x0 = boost::static_pointer_cast<V2dVectorData>( y0 );
-			V2dVectorDataPtr x1 = boost::static_pointer_cast<V2dVectorData>( y1 );
-			V2dVectorDataPtr x2 = boost::static_pointer_cast<V2dVectorData>( y2 );
-			V2dVectorDataPtr x3 = boost::static_pointer_cast<V2dVectorData>( y3 );
-			V2dVectorDataPtr xRes = boost::static_pointer_cast<V2dVectorData>( result );
-			Functor<V2dVectorData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case V3fVectorDataTypeId :
-			{
-			V3fVectorDataPtr x0 = boost::static_pointer_cast<V3fVectorData>( y0 );
-			V3fVectorDataPtr x1 = boost::static_pointer_cast<V3fVectorData>( y1 );
-			V3fVectorDataPtr x2 = boost::static_pointer_cast<V3fVectorData>( y2 );
-			V3fVectorDataPtr x3 = boost::static_pointer_cast<V3fVectorData>( y3 );
-			V3fVectorDataPtr xRes = boost::static_pointer_cast<V3fVectorData>( result );
-			Functor<V3fVectorData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case V3dVectorDataTypeId :
-			{
-			V3dVectorDataPtr x0 = boost::static_pointer_cast<V3dVectorData>( y0 );
-			V3dVectorDataPtr x1 = boost::static_pointer_cast<V3dVectorData>( y1 );
-			V3dVectorDataPtr x2 = boost::static_pointer_cast<V3dVectorData>( y2 );
-			V3dVectorDataPtr x3 = boost::static_pointer_cast<V3dVectorData>( y3 );
-			V3dVectorDataPtr xRes = boost::static_pointer_cast<V3dVectorData>( result );
-			Functor<V3dVectorData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case QuatfVectorDataTypeId :
-			{
-			QuatfVectorDataPtr x0 = boost::static_pointer_cast<QuatfVectorData>( y0 );
-			QuatfVectorDataPtr x1 = boost::static_pointer_cast<QuatfVectorData>( y1 );
-			QuatfVectorDataPtr x2 = boost::static_pointer_cast<QuatfVectorData>( y2 );
-			QuatfVectorDataPtr x3 = boost::static_pointer_cast<QuatfVectorData>( y3 );
-			QuatfVectorDataPtr xRes = boost::static_pointer_cast<QuatfVectorData>( result );
-			Functor<QuatfVectorData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case QuatdVectorDataTypeId :
-			{
-			QuatdVectorDataPtr x0 = boost::static_pointer_cast<QuatdVectorData>( y0 );
-			QuatdVectorDataPtr x1 = boost::static_pointer_cast<QuatdVectorData>( y1 );
-			QuatdVectorDataPtr x2 = boost::static_pointer_cast<QuatdVectorData>( y2 );
-			QuatdVectorDataPtr x3 = boost::static_pointer_cast<QuatdVectorData>( y3 );
-			QuatdVectorDataPtr xRes = boost::static_pointer_cast<QuatdVectorData>( result );
-			Functor<QuatdVectorData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case TransformationMatrixfDataTypeId :
-			{
-			TransformationMatrixfDataPtr x0 = boost::static_pointer_cast<TransformationMatrixfData>( y0 );
-			TransformationMatrixfDataPtr x1 = boost::static_pointer_cast<TransformationMatrixfData>( y1 );
-			TransformationMatrixfDataPtr x2 = boost::static_pointer_cast<TransformationMatrixfData>( y2 );
-			TransformationMatrixfDataPtr x3 = boost::static_pointer_cast<TransformationMatrixfData>( y3 );
-			TransformationMatrixfDataPtr xRes = boost::static_pointer_cast<TransformationMatrixfData>( result );
-			Functor<TransformationMatrixfData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
-		case TransformationMatrixdDataTypeId :
-			{
-			TransformationMatrixdDataPtr x0 = boost::static_pointer_cast<TransformationMatrixdData>( y0 );
-			TransformationMatrixdDataPtr x1 = boost::static_pointer_cast<TransformationMatrixdData>( y1 );
-			TransformationMatrixdDataPtr x2 = boost::static_pointer_cast<TransformationMatrixdData>( y2 );
-			TransformationMatrixdDataPtr x3 = boost::static_pointer_cast<TransformationMatrixdData>( y3 );
-			TransformationMatrixdDataPtr xRes = boost::static_pointer_cast<TransformationMatrixdData>( result );
-			Functor<TransformationMatrixdData>()( x0, x1, x2, x3, x, xRes );
-			break;
-			}
+		INTERPOLATE4_TYPE( FloatData )
+		INTERPOLATE4_TYPE( DoubleData )
+		INTERPOLATE4_TYPE( V2fData )
+		INTERPOLATE4_TYPE( V3fData )
+		INTERPOLATE4_TYPE( V2dData )
+		INTERPOLATE4_TYPE( V3dData )
+		INTERPOLATE4_TYPE( QuatfData )
+		INTERPOLATE4_TYPE( QuatdData )
+		INTERPOLATE4_TYPE( FloatVectorData )
+		INTERPOLATE4_TYPE( DoubleVectorData )
+		INTERPOLATE4_TYPE( HalfVectorData )
+		INTERPOLATE4_TYPE( V2fVectorData )
+		INTERPOLATE4_TYPE( V2dVectorData )
+		INTERPOLATE4_TYPE( V3fVectorData )
+		INTERPOLATE4_TYPE( V3dVectorData )
+		INTERPOLATE4_TYPE( QuatfVectorData )
+		INTERPOLATE4_TYPE( QuatdVectorData )
+		INTERPOLATE4_TYPE( TransformationMatrixfData )
+		INTERPOLATE4_TYPE( TransformationMatrixdData )
+		INTERPOLATE4_TYPE( Color3fData )
+		INTERPOLATE4_TYPE( Color4fData )
+		INTERPOLATE4_TYPE( Color3dData )
+		INTERPOLATE4_TYPE( Color4dData )
+		INTERPOLATE4_TYPE( Box2fData )
+		INTERPOLATE4_TYPE( Box3fData )
+		INTERPOLATE4_TYPE( Box2dData )
+		INTERPOLATE4_TYPE( Box3dData )
+		INTERPOLATE4_TYPE( M33fData )
+		INTERPOLATE4_TYPE( M33dData )
+		INTERPOLATE4_TYPE( M44fData )
+		INTERPOLATE4_TYPE( M44dData )
+		INTERPOLATE4_TYPE( Color3fVectorData )
+		INTERPOLATE4_TYPE( Color4fVectorData )
+		INTERPOLATE4_TYPE( Color3dVectorData )
+		INTERPOLATE4_TYPE( Color4dVectorData )
+		INTERPOLATE4_TYPE( Box3fVectorData )
+		INTERPOLATE4_TYPE( Box3dVectorData )
+		INTERPOLATE4_TYPE( Box2fVectorData )
+		INTERPOLATE4_TYPE( Box2dVectorData )
+		INTERPOLATE4_TYPE( M33fVectorData )
+		INTERPOLATE4_TYPE( M33dVectorData )
+		INTERPOLATE4_TYPE( M44fVectorData )
+		INTERPOLATE4_TYPE( M44dVectorData )
 
-		case Color3fDataTypeId :
-		case Color4fDataTypeId :
-		case Color3dDataTypeId :
-		case Color4dDataTypeId :
-		case Box2fDataTypeId :
-		case Box3fDataTypeId :
-		case Box2dDataTypeId :
-		case Box3dDataTypeId :
-		case M33fDataTypeId :
-		case M33dDataTypeId :
-		case M44fDataTypeId :
-		case M44dDataTypeId :
-		case Color3fVectorDataTypeId :
-		case Color4fVectorDataTypeId :
-		case Color3dVectorDataTypeId :
-		case Color4dVectorDataTypeId :
-		case Box3fVectorDataTypeId :
-		case Box3dVectorDataTypeId :
-		case Box2fVectorDataTypeId :
-		case Box2dVectorDataTypeId :
-		case M33fVectorDataTypeId :
-		case M33dVectorDataTypeId :
-		case M44fVectorDataTypeId :
-		case M44dVectorDataTypeId :
-			// complex types currently not supported...
-			// \todo help yourself implementing interpolation for this types.
-			return false;
+		case CompoundDataTypeId :
+			{
+			CompoundDataPtr x0 = boost::static_pointer_cast<CompoundData>( y0 );
+			CompoundDataPtr x1 = boost::static_pointer_cast<CompoundData>( y1 );
+			CompoundDataPtr x2 = boost::static_pointer_cast<CompoundData>( y2 );
+			CompoundDataPtr x3 = boost::static_pointer_cast<CompoundData>( y3 );
+			CompoundDataPtr xRes = boost::static_pointer_cast<CompoundData>( result );
+			for ( CompoundDataMap::const_iterator it1 = x1->readable().begin(); it1 != x1->readable().end(); it1++)
+			{
+				CompoundDataMap::const_iterator it0 = x0->readable().find( it1->first );
+				if ( it0 != x0->readable().end() && it0->second->typeId() == it1->second->typeId() )
+				{
+					CompoundDataMap::const_iterator it2 = x2->readable().find( it1->first );
+					if ( it2 != x2->readable().end() && it0->second->typeId() == it2->second->typeId() )
+					{
+						CompoundDataMap::const_iterator it3 = x3->readable().find( it1->first );
+						if ( it3 != x3->readable().end() && it0->second->typeId() == it3->second->typeId() )
+						{
+							ObjectPtr resultObj = Object::create( it1->second->typeId() );
+							if ( ObjectInterpolator< Functor >( it0->second, it1->second, it2->second, it3->second, x, resultObj ) )
+							{
+								xRes->writable()[ it1->first ] = boost::static_pointer_cast<Data>( resultObj );
+							}
+							else
+							{
+								xRes->writable()[ it1->first ] = it1->second;
+							}
+						}
+						else
+						{
+							xRes->writable()[ it1->first ] = it1->second;
+						}
+					}
+					else
+					{
+						xRes->writable()[ it1->first ] = it1->second;
+					}
+				}
+				else
+				{
+					xRes->writable()[ it1->first ] = it1->second;
+				}
+			}
+			break;
+			}
+		case CompoundObjectTypeId :
+			{
+			CompoundObjectPtr x0 = boost::static_pointer_cast<CompoundObject>( y0 );
+			CompoundObjectPtr x1 = boost::static_pointer_cast<CompoundObject>( y1 );
+			CompoundObjectPtr x2 = boost::static_pointer_cast<CompoundObject>( y2 );
+			CompoundObjectPtr x3 = boost::static_pointer_cast<CompoundObject>( y3 );
+			CompoundObjectPtr xRes = boost::static_pointer_cast<CompoundObject>( result );
+			for ( CompoundObject::ObjectMap::const_iterator it1 = x1->members().begin(); it1 != x1->members().end(); it1++)
+			{
+				CompoundObject::ObjectMap::const_iterator it0 = x0->members().find( it1->first );
+				if ( it0 != x0->members().end() && it0->second->typeId() == it1->second->typeId() )
+				{
+					CompoundObject::ObjectMap::const_iterator it2 = x2->members().find( it1->first );
+					if ( it2 != x2->members().end() && it0->second->typeId() == it2->second->typeId() )
+					{
+						CompoundObject::ObjectMap::const_iterator it3 = x3->members().find( it1->first );
+						if ( it3 != x3->members().end() && it0->second->typeId() == it3->second->typeId() )
+						{
+							ObjectPtr resultObj = Object::create( it1->second->typeId() );
+							if ( ObjectInterpolator< Functor >( it0->second, it1->second, it2->second, it3->second, x, resultObj ) )
+							{
+								xRes->members()[ it1->first ] = resultObj;
+							}
+							else
+							{
+								xRes->members()[ it1->first ] = it1->second;
+							}
+						}
+						else
+						{
+							xRes->members()[ it1->first ] = it1->second;
+						}
+					}
+					else
+					{
+						xRes->members()[ it1->first ] = it1->second;
+					}
+				}
+				else
+				{
+					xRes->members()[ it1->first ] = it1->second;
+				}
+			}
+			break;
+			}
 
 		case BoolDataTypeId :
 		case IntDataTypeId :

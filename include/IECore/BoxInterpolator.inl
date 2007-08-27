@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//       other contributors to this software may be used to endorse or
+//	     other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,63 +32,47 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_INTERPOLATOR_H
-#define IE_CORE_INTERPOLATOR_H
 
-#include <cassert>
-#include <vector>
-#include <math.h>
-#include <OpenEXR/ImathQuat.h>
-#include <OpenEXR/ImathBox.h>
-#include <IECore/TransformationMatrix.h>
-
-#include <IECore/TypedData.h>
-
-namespace IECore
+// Partially specialize for Imath::Box.
+template<typename T>
+struct LinearInterpolator< Imath::Box<T> >
 {
-/// A function object which performs linear interpolation
-
-template<typename T>
-struct LinearInterpolator;
-
-template<typename T>
-struct CosineInterpolator;
-
-template<typename T>
-struct CubicInterpolator;
-
-
-template<typename T>
-struct LinearInterpolator
-{
-		/// Interpolate between y0 and y1
-		void operator()(const T &y0, const T &y1, double x, T &result ) const;
-
+	void operator()(const Imath::Box<T> &y0, 
+			const Imath::Box<T> &y1,
+			double x, 
+			Imath::Box<T> &result) const
+	{
+		LinearInterpolator< T >()( y0.min, y1.min, x, result.min );
+		LinearInterpolator< T >()( y0.max, y1.max, x, result.max );
+	}
 };
 
-/// A function object which performs cosine interpolation
+// Partially specialize for Imath::Box.
 template<typename T>
-struct CosineInterpolator
+struct CosineInterpolator< Imath::Box<T> >
 {
-		/// Interpolate between y0 and y1
-		void operator()(const T &y0, const T &y1, double x, T &result ) const;
-
+	void operator()(const Imath::Box<T> &y0, 
+			const Imath::Box<T> &y1,
+			double x, 
+			Imath::Box<T> &result) const
+	{		
+		CosineInterpolator< T >()( y0.min, y1.min, x, result.min );
+		CosineInterpolator< T >()( y0.max, y1.max, x, result.max );
+	}
 };
 
-/// A function object which performs cubic interpolation
+// Partially specialize for Imath::Box.
 template<typename T>
-struct CubicInterpolator
+struct CubicInterpolator< Imath::Box< T > >
 {
-		/// Interpolate between y1 and y2. Requires additional data points on either side.
-		void operator()(const T &y0, const T &y1, const T &y2, T const &y3, double x, T &result ) const;
-
+	void operator()(const Imath::Box< T > &y0, 
+			const Imath::Box< T > &y1,
+			const Imath::Box< T > &y2,
+			const Imath::Box< T > &y3,
+			double x, 
+			Imath::Box< T > &result) const
+	{
+		CubicInterpolator< T >()( y0.min, y1.min, y2.min, y3.min, x, result.min );
+		CubicInterpolator< T >()( y0.max, y1.max, y2.max, y3.max, x, result.max );
+	}
 };
-
-#include "Interpolator.inl"
-#include "QuatInterpolator.inl"
-#include "BoxInterpolator.inl"
-#include "TransformationMatrixInterpolator.inl"
-
-} // namespace IECore
-
-#endif // IE_CORE_INTERPOLATOR_H

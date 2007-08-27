@@ -104,10 +104,10 @@ class TestInterpolatedCache(unittest.TestCase):
 	def testHeaders( self ):
 		"""Test InterpolatedCache headers"""
 
-		cache = InterpolatedCache(self.pathTemplate, frame = 1.2, interpolation = InterpolatedCache.Interpolation.Linear )
+		cache = InterpolatedCache(self.pathTemplate, frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
 		self.assertEqual( cache.headers(), [ "testCache" ] )
 		h = cache.readHeader( "testCache" )
-		self.assertEqual( h, self.__headerCompound( self.__time( 1 ) ) )
+		self.assertEqual( h, self.__headerCompound( ( self.__time( 1 ) + self.__time( 2 ) ) / 2 ) )
 
 	def testAttributes(self):
 		"""Test InterpolatedCache attributes"""
