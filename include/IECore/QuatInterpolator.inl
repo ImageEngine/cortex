@@ -42,13 +42,15 @@ struct LinearInterpolator< Imath::Quat<T> >
 			double x, 
 			Imath::Quat<T> &result) const
 	{
-		if ( (y0 ^ y1) < 0.0 )
+		Imath::Quat< T > y0Tmp( y0.normalized() );
+		Imath::Quat< T > y1Tmp( y1.normalized() );
+		if ( (y0Tmp ^ y1Tmp) < 0.0 )
 		{
-			result = Imath::slerp< T >( y0, -y1, static_cast< T >(x) );
+			result = Imath::slerp< T >( y0Tmp, -y1Tmp, static_cast< T >(x) );
 		}
 		else
 		{
-			result = Imath::slerp< T >( y0, y1, static_cast< T >(x) );
+			result = Imath::slerp< T >( y0Tmp, y1Tmp, static_cast< T >(x) );
 		}
 	}
 };
@@ -61,7 +63,7 @@ struct CosineInterpolator< Imath::Quat<T> >
 			const Imath::Quat<T> &y1,
 			double x, 
 			Imath::Quat<T> &result) const
-	{		
+	{
 		double cx = (1.0 - cos(x * M_PI)) / 2.0;
 		LinearInterpolator< Imath::Quat<T> >()( y0, y1, static_cast< T >(cx), result );
 	}
@@ -78,19 +80,23 @@ struct CubicInterpolator< Imath::Quat< T > >
 			double x, 
 			Imath::Quat< T > &result) const
 	{
-		Imath::Quat< T > y1Tmp(y1), y2Tmp(y2), y3Tmp(y3);
-		if ( (y0 ^ y1) < 0.0 )
+		Imath::Quat< T > y0Tmp( y0.normalized() );
+		Imath::Quat< T > y1Tmp( y1.normalized() );
+		Imath::Quat< T > y2Tmp( y2.normalized() );
+		Imath::Quat< T > y3Tmp( y3.normalized() );
+
+		if ( (y0Tmp ^ y1Tmp) < 0.0 )
 		{
-			y1Tmp = -y1;
+			y1Tmp = -y1Tmp;
 		}
 		if ( (y1Tmp ^ y2) < 0.0 )
 		{
-			y2Tmp = -y2;
+			y2Tmp = -y2Tmp;
 		}
 		if ( (y2Tmp ^ y3) < 0.0 )
 		{
-			y3Tmp = -y3;
+			y3Tmp = -y3Tmp;
 		}
-		result = Imath::spline< T >( y0, y1Tmp, y2Tmp, y3Tmp, static_cast< T >(x) );
+		result = Imath::spline< T >( y0Tmp, y1Tmp, y2Tmp, y3Tmp, static_cast< T >(x) );
 	}
 };
