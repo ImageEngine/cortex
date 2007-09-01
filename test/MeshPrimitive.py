@@ -73,6 +73,9 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m.save( "test/mesh.sql" )
 		mm = Object.load( "test/mesh.sql" )
 		self.assertEqual( m, mm )
+
+		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
+		
 		
 	def tearDown( self ) :
 	

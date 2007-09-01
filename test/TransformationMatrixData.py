@@ -75,8 +75,8 @@ class TransformationMatrixfTest(unittest.TestCase):
 		a = TransformationMatrixf()
 		a.scale = V3f( 2, 2, 2 )
 		self.assertEqual( a.transform, M44f().scale( V3f( 2, 2, 2 ) ) )
-		a.rotate = Quatf( 0.5, 0.5, 0, 0 )
-		self.assertEqual( a.transform, M44f().scale( V3f( 2, 2, 2 ) ) * Quatf( 0.5, 0.5, 0, 0 ).toMatrix44() )
+		a.rotate = Quatf( 0.2, 0.2, 0.2, 0.2 )
+		self.assertEqual( a.transform, M44f().scale( V3f( 2, 2, 2 ) ) * Quatf( 0.2, 0.2, 0.2, 0.2 ).normalized().toMatrix44() )
 
 	def testComparison(self):
 		"""Test TransformationMatrixf comparison"""
@@ -123,8 +123,8 @@ class TransformationMatrixdTest(unittest.TestCase):
 		a = TransformationMatrixd()
 		a.scale = V3d( 2, 2, 2 )
 		self.assertEqual( a.transform, M44d().scale( V3d( 2, 2, 2 ) ) )
-		a.rotate = Quatd( 0.5, 0.5, 0, 0 )
-		self.assertEqual( a.transform, M44d().scale( V3d( 2, 2, 2 ) ) * Quatd( 0.5, 0.5, 0, 0 ).toMatrix44() )
+		a.rotate = Quatd( 0.2, 0.2, 0.2, 0.2 ).normalized()
+		self.assertEqual( a.transform, M44d().scale( V3d( 2, 2, 2 ) ) * Quatd( 0.2, 0.2, 0.2, 0.2 ).normalized().toMatrix44() )
 
 	def testComparison(self):
 		"""Test TransformationMatrixd comparison"""

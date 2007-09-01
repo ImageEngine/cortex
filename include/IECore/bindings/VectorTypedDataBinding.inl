@@ -647,6 +647,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 #define BASIC_VECTOR_BINDING(T, bindName, Tname)																	\
 		typedef TypedData< std::vector< T > > ThisClass;															\
 		typedef boost::intrusive_ptr< ThisClass > ThisClassPtr;														\
+		typedef boost::intrusive_ptr< const ThisClass > ThisConstClassPtr;											\
 		typedef VectorTypedDataFunctions< std::vector<T> > ThisBinder;												\
 																													\
 		typedef class_< ThisClass , boost::intrusive_ptr< ThisClass >, boost::noncopyable, bases<Data> > PyClass;	\
@@ -689,6 +690,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 			;																						\
 			INTRUSIVE_PTR_PATCH( ThisClass, PyClass );												\
 			implicitly_convertible<ThisClassPtr, DataPtr>();										\
+			implicitly_convertible<ThisClassPtr, ThisConstClassPtr>();								\
 		}
 
 // bind a VectorTypedData class that supports simple Math operators (+=, -= and *=)
@@ -706,6 +708,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 			;																						\
 			INTRUSIVE_PTR_PATCH( ThisClass, PyClass );												\
 			implicitly_convertible<ThisClassPtr, DataPtr>();										\
+			implicitly_convertible<ThisClassPtr, ThisConstClassPtr>();								\
 		}
 
 // bind a VectorTypedData class that supports all Math operators (+=, -=, *=, /=)
@@ -725,6 +728,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 			;																						\
 			INTRUSIVE_PTR_PATCH( ThisClass, PyClass );												\
 			implicitly_convertible<ThisClassPtr, DataPtr>();										\
+			implicitly_convertible<ThisClassPtr, ThisConstClassPtr>();								\
 		}
 
 // bind a VectorTypedData class that supports all Math operators (+=, -=, *=, /=, <, >)
@@ -744,6 +748,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 			;																						\
 			INTRUSIVE_PTR_PATCH( ThisClass, PyClass );												\
 			implicitly_convertible<ThisClassPtr, DataPtr>();										\
+			implicitly_convertible<ThisClassPtr, ThisConstClassPtr>();								\
 		}
 
 } // namespace IECore

@@ -63,7 +63,7 @@ coreTestName = "test/IECoreTest"
 
 coreMajorVersion = '2'
 coreMinorVersion = '10'
-corePatchVersion = '1'
+corePatchVersion = '2'
 coreVersion = coreMajorVersion + "." + coreMinorVersion + "." + corePatchVersion
 pythonVersion = '2.5'
 
@@ -170,7 +170,6 @@ coreSources = 		[
 				'src/CINImageReader.cpp',
 		  	   	'src/CINImageWriter.cpp',
 				'src/DPXImageReader.cpp',
-				'src/DPXImageWriter.cpp',
 				'src/BoxOperators.cpp',
 				'src/MeshPrimitive.cpp',
 				'src/MotionPrimitive.cpp',
@@ -294,7 +293,7 @@ corePythonSources = 	[
 				'src/bindings/CINImageReaderBinding.cpp',
 				'src/bindings/CINImageWriterBinding.cpp',
 				'src/bindings/DPXImageReaderBinding.cpp',
-				'src/bindings/DPXImageWriterBinding.cpp',
+			#	'src/bindings/DPXImageWriterBinding.cpp',
 				'src/bindings/PerlinNoiseBinding.cpp',
 				'src/bindings/JPEGImageReaderBinding.cpp',
 				'src/bindings/JPEGImageWriterBinding.cpp',
@@ -359,7 +358,7 @@ corePythonPy = 	[
 				'python/IECore/SequenceLsOp.py',				
 				'python/IECore/SequenceRmOp.py',				
 				'python/IECore/SequenceCpOp.py',				
-				'python/IECore/SequenceConvertOp.py',				
+				#'python/IECore/SequenceConvertOp.py',				
 				'python/IECore/SequenceRenumberOp.py',				
 				'python/IECore/SequenceMvOp.py',				
 				'python/IECore/ReadProcedural.py',				
