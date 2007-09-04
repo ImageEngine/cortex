@@ -199,6 +199,7 @@ enum TypeId
 	TransformationMatrixdDataTypeId = 156,
 	PointNormalsOpTypeId = 157,
 	PointDensitiesOpTypeId = 158,
+	DPXImageWriterTypeId = 159,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	

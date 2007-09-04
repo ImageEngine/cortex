@@ -99,6 +99,7 @@
 #include "IECore/bindings/CINImageReaderBinding.h"
 #include "IECore/bindings/CINImageWriterBinding.h"
 #include "IECore/bindings/DPXImageReaderBinding.h"
+#include "IECore/bindings/DPXImageWriterBinding.h"
 #include "IECore/bindings/JPEGImageReaderBinding.h"
 #include "IECore/bindings/JPEGImageWriterBinding.h"
 #include "IECore/bindings/MeshPrimitiveBinding.h"
@@ -186,6 +187,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCINImageReader();
 	bindCINImageWriter();
 	bindDPXImageReader();
+	bindDPXImageWriter();
 	bindJPEGImageReader();
 	bindJPEGImageWriter();
 	bindMeshPrimitive();
