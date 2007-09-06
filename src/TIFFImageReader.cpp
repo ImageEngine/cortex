@@ -99,7 +99,7 @@ bool TIFFImageReader::canRead(const string & fileName)
 	// check magic number
 	unsigned int magic;
 	in.read((char *) &magic, sizeof(unsigned int));
-	return magic == 0x002a4949 || magic == 0x49492a00;
+	return magic == 0x002a4949 || magic == 0x49492a00 || magic == 0x2a004d4d;
 }
 
 void TIFFImageReader::channelNames(vector<string> & names)
