@@ -44,6 +44,13 @@ struct LinearInterpolator< Imath::Quat<T> >
 	{
 		Imath::Quat< T > y0Tmp( y0.normalized() );
 		Imath::Quat< T > y1Tmp( y1.normalized() );
+
+		if ( y0Tmp == y1Tmp )
+		{
+			result = y0Tmp;
+			return;
+		}		
+
 		if ( (y0Tmp ^ y1Tmp) < 0.0 )
 		{
 			result = Imath::slerp< T >( y0Tmp, -y1Tmp, static_cast< T >(x) );
@@ -84,6 +91,12 @@ struct CubicInterpolator< Imath::Quat< T > >
 		Imath::Quat< T > y1Tmp( y1.normalized() );
 		Imath::Quat< T > y2Tmp( y2.normalized() );
 		Imath::Quat< T > y3Tmp( y3.normalized() );
+
+		if ( y0Tmp == y1Tmp && y0Tmp == y2Tmp && y0Tmp == y3Tmp )
+		{
+			result = y0Tmp;
+			return;
+		}		
 
 		if ( (y0Tmp ^ y1Tmp) < 0.0 )
 		{

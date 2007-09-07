@@ -48,7 +48,7 @@ import glob
 import VersionControl
 import IEEnv
 
-VersionControl.setVersion('IEBuild', '1.5.0')
+VersionControl.setVersion('IEBuild', '1.7.1')
 import IEBuild
 
 envRoot = IEEnv.Environment.rootPath()
@@ -63,7 +63,7 @@ coreTestName = "test/IECoreTest"
 
 coreMajorVersion = '2'
 coreMinorVersion = '10'
-corePatchVersion = '3'
+corePatchVersion = '4'
 coreVersion = coreMajorVersion + "." + coreMinorVersion + "." + corePatchVersion
 pythonVersion = '2.5'
 
@@ -86,6 +86,9 @@ libs['boost']['unit_test_framework'] = 'boost_unit_test_framework'
 libs['boost']['python'] = 'boost_python'
 
 multithreaded = ARGUMENTS.get('MULTITHREADED', 0)
+
+# define optimization in release mode.
+ARGUMENTS[ 'COMPILER_OPTIMIZATION' ] = "-O2"
 
 if multithreaded:
 	for k, v in libs['boost'].items():
@@ -465,10 +468,10 @@ pythonTestEnv["ENV"]["COMPILER_VERSION"] = corePythonModule.getLibrary().getComp
 corePythonTestRun = pythonTestEnv.Command( "test/IECorePythonTest.out", "",  "python"+pythonVersion+" "+ARGUMENTS.get("TESTSCRIPT", "test/All.py") + " -v")
 pythonTestEnv.Depends( corePythonTestRun, corePython )
 
-env.Alias('test', [
-			corePythonTestRun, 
-			coreTestRun
-		  ] )
+if not ARGUMENTS.has_key("TESTSCRIPT"):
+	env.Alias('test', coreTestRun )
+
+env.Alias('test', corePythonTestRun )
 		  
 env.Alias('all', [core, corePython, do] )
   

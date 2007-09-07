@@ -250,6 +250,12 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 		self.assertEqual( c.value.scale, V3d( 2, 3, 4 ) )
 		self.assertEqual( c.value.translate, V3d( 1, 2, 3 ) )
 
+		# try quaternion interpolation... ( there's a bug in gcc 4.0.2 with -O3 that we catch here ).
+		d = TransformationMatrixdData( TransformationMatrixd( V3d(2,3,4), Quatd( 1, 2, 3, 4 ), V3d(1,2,3) ) )
+		e = linearObjectInterpolation( b, d, 0.2 )
+		c = linearObjectInterpolation( d, d, 0.8 )
+		self.assertAlmostEqual( c.value.rotate ^ d.value.rotate.normalized(), 1, 2 )
+
 	def testComparison(self):
 		"""Test TransformationMatrixdData comparison"""
 		a = TransformationMatrixdData()
