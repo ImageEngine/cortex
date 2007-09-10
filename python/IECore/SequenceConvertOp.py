@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 ##########################################################################
 #
 #  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
@@ -32,10 +31,6 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
-
-#import VersionControl
-#VersionControl.setVersion('IECore', '2')
-#from IECore import *
 
 from IECore import *
 
@@ -75,32 +70,16 @@ class SequenceConvertOp( Op ) :
 	def doOperation( self, operands ) :
 	
 		src = self.parameters()["src"].getFileSequenceValue()
-		dst = src.copy() # to get the frameList
+		dst = src.copy()
 		dst.fileName = operands.dst.value
 
-		# if extensions match, simply copy
-		# \todo compare extensions
-		if False:
-			
-			cp(src, dst)
-			
+		# \todo compare extensions, if extensions match, simply copy			
 		# if extensions don't match, read and write
-		else:
-			for (sf, df) in zip(src.fileNames(), dst.fileNames()):
-				#print 'convert %s to %s' % (sf, df)
-				img = Reader.create(sf).read()
-				Writer.create(img, df).write()
+		for (sf, df) in zip(src.fileNames(), dst.fileNames()):
+			img = Reader.create(sf).read()
+			Writer.create(img, df).write()
 			
 		return StringData(dst.fileName)
 
+# magic typeid number
 #makeRunTimeTyped( SequenceConvertOp, 100007, Op )
-
-# if __name__ == '__main__':
-#  	scop = SequenceConvertOp()
-
-# 	# demo: convert dpx files to cineon files
-#  	p = scop.parameters()
-#  	p['src'].setTypedValue('/home/blair/example/sequence/MT001_001_Element001.####.dpx 1-4')
-#  	p['dst'].setTypedValue('/tmp/MT001_001_Element001.####.cin')
-
-#  	scop.operate()
