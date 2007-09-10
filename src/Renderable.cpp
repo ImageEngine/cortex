@@ -56,14 +56,11 @@ void Renderable::copyFrom( ConstObjectPtr other, CopyContext *context )
 void Renderable::save( SaveContext *context ) const
 {
 	BlindDataHolder::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
 }
 
 void Renderable::load( LoadContextPtr context )
 {
 	BlindDataHolder::load( context );
-	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 }
 
 bool Renderable::isEqualTo( ConstObjectPtr other ) const

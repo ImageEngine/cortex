@@ -305,18 +305,17 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		};
 		typedef boost::intrusive_ptr<LoadContext> LoadContextPtr;
 		
-		/// Must be implemented in all derived classes, even if they do not wish to save
-		/// any member data (they may well want to in the future and they have to conform to
-		/// this interface now to allow that). Implementations should first call the parent class
+		/// Must be implemented in all derived classes. Implementations should first call the parent class
 		/// save() method, then call context->container() before filling the returned container with
-		/// their member data.
+		/// their member data. Classes with no member data may omit the call to container(), resulting
+		/// in smaller file sizes.
 		virtual void save( SaveContext *context ) const = 0;
-		/// Must be implemented in all derived classes, even if they do not wish to load any
-		/// member data (see above). Implementations should first call the parent class load() method,
+		/// Must be implemented in all derived classes. Implementations should first call the parent class load() method,
 		/// then call context->container() before loading their member data from that container.
 		/// context is a smart pointer to a reference counted object to allow you to keep the
 		/// context and perform lazy loading at a later date - although this is not yet used
-		/// by any of the core types.
+		/// by any of the core types. A call to context->container() will throw an Exception if the corresponding
+		/// save() method did not create a container.
 		virtual void load( LoadContextPtr context ) = 0;
 		
 		/// The class provided to the memoryUsage() virtual method implemented

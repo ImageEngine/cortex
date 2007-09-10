@@ -56,14 +56,11 @@ void StateRenderable::copyFrom( ConstObjectPtr other, CopyContext *context )
 void StateRenderable::save( SaveContext *context ) const
 {
 	Renderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
 }
 
 void StateRenderable::load( LoadContextPtr context )
 {
 	Renderable::load( context );
-	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 }
 
 bool StateRenderable::isEqualTo( ConstObjectPtr other ) const

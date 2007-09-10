@@ -57,14 +57,11 @@ bool Data::isEqualTo( ConstObjectPtr other ) const
 void Data::save( SaveContext *context ) const
 {
 	Object::save( context );
-	context->container( staticTypeName(), m_ioVersion );
 }
 
 void Data::load( LoadContextPtr context )
 {
 	Object::load( context );
-	unsigned int v = m_ioVersion;
-	context->container( staticTypeName(), v );
 }
 
 void Data::memoryUsage( Object::MemoryAccumulator &a ) const

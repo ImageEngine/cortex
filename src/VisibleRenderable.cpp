@@ -56,14 +56,11 @@ void VisibleRenderable::copyFrom( ConstObjectPtr other, CopyContext *context )
 void VisibleRenderable::save( SaveContext *context ) const
 {
 	Renderable::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
 }
 
 void VisibleRenderable::load( LoadContextPtr context )
 {
 	Renderable::load( context );
-	unsigned int v = m_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 }
 
 bool VisibleRenderable::isEqualTo( ConstObjectPtr other ) const

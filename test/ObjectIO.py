@@ -153,5 +153,34 @@ class TestObjectIO( unittest.TestCase ) :
 			os.remove("test/o.sql")
 		
 
+class TestEmptyContainerOptimisation( unittest.TestCase ) :
+
+	"""Many of the base classes in IECore currently have no data to store
+	in files, but were being allocated a container anyway. This test verifies
+	that an io optimisation that doesn't create empty containers doesn't have
+	any bad side effects. It's also useful to test the impact of the optimisation."""
+
+	def test( self ) :
+	
+		c = CompoundData()
+		
+		for i in range( 0, 1000 ) :
+		
+			d = IntData( i )
+			c[str(i)] = d
+			c[str(i)+"SecondReference"] = d
+		
+		ObjectWriter( c, "test/emptyContainerOptimisation.cob" ).write()
+	
+		c1 = ObjectReader( "test/data/cobFiles/beforeEmptyContainerOptimisation.cob" ).read()
+		c2 = ObjectReader( "test/emptyContainerOptimisation.cob" ).read()
+		
+		self.assertEqual( c1, c2 )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile( "test/emptyContainerOptimisation.cob" ) :
+			os.remove( "test/emptyContainerOptimisation.cob" )	
+	
 if __name__ == "__main__":
     unittest.main()   

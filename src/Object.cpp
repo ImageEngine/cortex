@@ -337,13 +337,10 @@ bool Object::operator!=( const Object &other ) const
 		
 void Object::save( SaveContext *context ) const
 {
-	context->container( staticTypeName(), m_ioVersion );
 }
 
 void Object::load( LoadContextPtr context )
 {
-	unsigned int version = m_ioVersion;
-	context->container( staticTypeName(), version );
 }
 
 size_t Object::memoryUsage() const
