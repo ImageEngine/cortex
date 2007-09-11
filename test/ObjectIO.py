@@ -147,10 +147,35 @@ class TestObjectIO( unittest.TestCase ) :
 		self.assertEqual( d, dd )
 		self.assert_( dd["ONE"].isSame( dd["TWO"] ) )
 		
+	def testSaveInCurrentDir( self ) :
+	
+		o = CompoundData()
+		one = IntData( 1 )
+		o["one"] = one
+		o["two"] = IntData( 2 )
+		o["oneAgain"] = one
+		
+		fio = FileIndexedIO( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		fio.mkdir( "a" )
+		fio.chdir( "a" )
+		d = fio.pwd()
+		o.save( fio )
+		self.assertEqual( fio.pwd(), d )
+		del fio
+		
+		fio = FileIndexedIO( "test/o.fio", "/", IndexedIOOpenMode.Read )
+		fio.chdir( "a" )
+		d = fio.pwd()
+		oo = o.load( fio )
+		self.assertEqual( fio.pwd(), d )
+		
+		self.assertEqual( o, oo )
+		
 	def tearDown( self ) :
 	
-		if os.path.isfile("test/o.sql"):
-			os.remove("test/o.sql")
+		for f in [ "test/o.sql", "test/o.fio" ] :
+			if os.path.isfile( f ) :
+				os.remove( f )
 		
 
 class TestEmptyContainerOptimisation( unittest.TestCase ) :
@@ -159,7 +184,7 @@ class TestEmptyContainerOptimisation( unittest.TestCase ) :
 	in files, but were being allocated a container anyway. This test verifies
 	that an io optimisation that doesn't create empty containers doesn't have
 	any bad side effects. It's also useful to test the impact of the optimisation."""
-
+	
 	def test( self ) :
 	
 		c = CompoundData()
@@ -171,7 +196,7 @@ class TestEmptyContainerOptimisation( unittest.TestCase ) :
 			c[str(i)+"SecondReference"] = d
 		
 		ObjectWriter( c, "test/emptyContainerOptimisation.cob" ).write()
-	
+		
 		c1 = ObjectReader( "test/data/cobFiles/beforeEmptyContainerOptimisation.cob" ).read()
 		c2 = ObjectReader( "test/emptyContainerOptimisation.cob" ).read()
 		

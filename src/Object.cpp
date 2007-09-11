@@ -88,7 +88,7 @@ Object::TypeInformation *Object::typeInformation()
 //////////////////////////////////////////////////////////////////////////////////////////
 
 Object::SaveContext::SaveContext( IndexedIOInterfacePtr ioInterface )
-	:	m_ioInterface( ioInterface ), m_root( "/" ), m_savedObjects( new SavedObjectMap ), m_containerRoots( new ContainerRootsMap )
+	:	m_ioInterface( ioInterface ), m_root( ioInterface->pwd() ), m_savedObjects( new SavedObjectMap ), m_containerRoots( new ContainerRootsMap )
 {
 }
 
@@ -100,58 +100,50 @@ Object::SaveContext::SaveContext( IndexedIOInterfacePtr ioInterface, const Index
 					
 IndexedIOInterfacePtr Object::SaveContext::container( const std::string &typeName, unsigned int ioVersion )
 {
-	IndexedIO::EntryID d = m_ioInterface->pwd();
-	
-		m_ioInterface->chdir( m_root );
 		
-			m_ioInterface->mkdir( typeName );
-			m_ioInterface->chdir( typeName );
-				m_ioInterface->write( "ioVersion", ioVersion );
-				m_ioInterface->mkdir( "data" );
-				m_ioInterface->chdir( "data" );
-					IndexedIOInterfacePtr container = m_ioInterface->resetRoot();
-					(*m_containerRoots)[container] = m_ioInterface->pwd();
-				m_ioInterface->chdir( ".." );
-			m_ioInterface->chdir( ".." );
-			
-		m_ioInterface->chdir( d );
-			 
-	assert( m_ioInterface->pwd()==d );
+	m_ioInterface->chdir( m_root );
+		
+		m_ioInterface->mkdir( typeName );
+		m_ioInterface->chdir( typeName );
+			m_ioInterface->write( "ioVersion", ioVersion );
+			m_ioInterface->mkdir( "data" );
+			m_ioInterface->chdir( "data" );
+				IndexedIOInterfacePtr container = m_ioInterface->resetRoot();
+				(*m_containerRoots)[container] = m_ioInterface->pwd();
+							 
 	return container;
 }
 
 void Object::SaveContext::save( ConstObjectPtr toSave, IndexedIOInterfacePtr container, const IndexedIO::EntryID &name )
 {
-	IndexedIO::EntryID d = container->pwd();
-		
-		SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
-		if( it!=m_savedObjects->end() )
-		{
-			container->write( name, it->second );
-		}
-		else
-		{
-			
-			container->mkdir( name );
-			container->chdir( name );
-				container->write( "type", toSave->typeName() );
-				container->mkdir( "data" );
-				container->chdir( "data" );
-				
-					IndexedIO::EntryID newRoot = (*m_containerRoots)[container] + container->pwd();
-					SaveContext context( m_ioInterface, newRoot, m_savedObjects, m_containerRoots );
-					toSave->save( &context );
-					
-				container->chdir( ".." );
-				
-				(*m_savedObjects)[toSave] = (*m_containerRoots)[container] + container->pwd();
-				
-			container->chdir( ".." );
-			
-			
-		}
+	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
+	if( it!=m_savedObjects->end() )
+	{
+		container->write( name, it->second );
+	}
+	else
+	{
 
-	assert( container->pwd()==d );
+		IndexedIO::EntryID d = container->pwd();
+
+		container->mkdir( name );
+		container->chdir( name );
+		
+			(*m_savedObjects)[toSave] = (*m_containerRoots)[container] + container->pwd();
+			
+			container->write( "type", toSave->typeName() );
+			container->mkdir( "data" );
+			container->chdir( "data" );
+
+				IndexedIO::EntryID newRoot = (*m_containerRoots)[container] + container->pwd();
+				SaveContext context( m_ioInterface, newRoot, m_savedObjects, m_containerRoots );
+				toSave->save( &context );
+
+		container->chdir( d );
+
+		assert( container->pwd()==d );
+
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +162,6 @@ Object::LoadContext::LoadContext( IndexedIOInterfacePtr ioInterface, const Index
 
 IndexedIOInterfacePtr Object::LoadContext::container( const std::string &typeName, unsigned int &ioVersion )
 {
-	IndexedIO::EntryID d = m_ioInterface->pwd();
 	m_ioInterface->chdir( m_root );
 	
 		m_ioInterface->chdir( typeName );
@@ -184,12 +175,7 @@ IndexedIOInterfacePtr Object::LoadContext::container( const std::string &typeNam
 			m_ioInterface->chdir( "data" );
 				IndexedIOInterfacePtr container = m_ioInterface->resetRoot();
 				(*m_containerRoots)[container] = m_ioInterface->pwd();
-			m_ioInterface->chdir( ".." );
-		m_ioInterface->chdir( ".." );
 	
-	m_ioInterface->chdir( d );
-	assert( m_ioInterface->pwd()==d );
-
 	return container;
 }
 
@@ -222,7 +208,6 @@ ObjectPtr Object::LoadContext::loadObject( const IndexedIO::EntryID &path )
 			
 	ObjectPtr result = 0;
 	
-	IndexedIO::EntryID d = m_ioInterface->pwd();
 	m_ioInterface->chdir( m_root );
 	
 		m_ioInterface->chdir( path );
@@ -234,12 +219,8 @@ ObjectPtr Object::LoadContext::loadObject( const IndexedIO::EntryID &path )
 				LoadContextPtr context = new LoadContext( m_ioInterface, m_ioInterface->pwd(), m_loadedObjects, m_containerRoots );
 				result->load( context );
 		
-			m_ioInterface->chdir( ".." );
 			(*m_loadedObjects)[path] = result;
-				
-	m_ioInterface->chdir( d );
-	assert( m_ioInterface->pwd()==d );
-	
+					
 	return result;
 }
 
@@ -300,8 +281,13 @@ void Object::save( const std::string &path ) const
 		
 void Object::save( IndexedIOInterfacePtr ioInterface ) const
 {
-	boost::shared_ptr<SaveContext> context( new SaveContext( ioInterface ) );
-	context->save( this, ioInterface, "object" );
+	// we get a copy of the ioInterface here so the SaveContext can be freed
+	// from always having to balance chdirs() to return to the original
+	// directory after an operation. this results in fewer chdir calls and faster
+	// saving.
+	IndexedIOInterfacePtr i = ioInterface->resetRoot();
+	boost::shared_ptr<SaveContext> context( new SaveContext( i ) );
+	context->save( this, i, "object" );
 }
 
 void Object::copyFrom( ConstObjectPtr toCopy, CopyContext *context )
@@ -456,8 +442,13 @@ std::string Object::typeNameFromTypeId( TypeId typeId )
 
 ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface )
 {
-	LoadContextPtr context( new LoadContext( ioInterface ) );
-	ObjectPtr result = context->load<Object>( ioInterface, "object" );
+	// we get a copy of the ioInterface here so the LoadContext can be freed
+	// from always having to balance chdirs() to return to the original
+	// directory after an operation. this results in fewer chdir calls and faster
+	// loading.
+	IndexedIOInterfacePtr i = ioInterface->resetRoot();
+	LoadContextPtr context( new LoadContext( i ) );
+	ObjectPtr result = context->load<Object>( i, "object" );
 	return result;
 }
 
