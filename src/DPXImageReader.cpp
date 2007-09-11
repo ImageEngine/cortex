@@ -236,9 +236,8 @@ bool DPXImageReader::open()
 		/// \todo should verify that it is a code 50 RGB single image dpx.
 		
 		// seek to the image data offset
-		in.seekg(fi.image_data_offset, ios_base::beg);
-
-
+		in.seekg(fi.image_data_offset, ios_base::beg);		
+		
 		// 
 		// build a LUT based on the transfer enum.  we handle only the
 		// log/printing density and linear

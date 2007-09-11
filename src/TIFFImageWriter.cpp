@@ -153,6 +153,10 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	TIFFSetField(tiff_image, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 	TIFFSetField(tiff_image, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
 	TIFFSetField(tiff_image, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+
+	/// \todo output float tiffs if desired
+	TIFFSetField(tiff_image, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+
 	//PLANARCONFIG_CONTIG    (pixel interlaced)
 	//PLANARCONFIG_SEPARATE  (channel-interleave)
 	

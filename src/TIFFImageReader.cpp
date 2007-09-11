@@ -134,15 +134,16 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 	}
 	
 	// get the TIFF fields
-	uint16 photo, bps, spp, fillorder;
+	uint16 photo, bps, spp, fillorder, sampleformat;
 	uint32 width, height;
 	
 	TIFFGetField(m_tiffImage, TIFFTAG_BITSPERSAMPLE, &bps);
 	TIFFGetField(m_tiffImage, TIFFTAG_PHOTOMETRIC, &photo);
 	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLESPERPIXEL, &spp);
 	TIFFGetField(m_tiffImage, TIFFTAG_FILLORDER, &fillorder);
-
-	// we handle here 8, 16, and 32 bpp with RGB channels in integer space
+	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLEFORMAT, &sampleformat);
+	
+	// we handle here 8, 16, and 32 bpp with RGB channels in integer space, and now float
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGEWIDTH, &width);
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGELENGTH, &height);
 
@@ -166,6 +167,7 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
       read_buffer();
 	}
 	
+	// compute offset to image 
 	int boffset = name == "R" ? 0 : name == "G" ? 1 : name == "B" ? 2 : 3;
 
 	// we form 32 bit float image channel by normalizing the input integer range to [0.0, 1.0]
@@ -180,51 +182,71 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 
 	// compute distance from the read box origin
 	V2i d = readbox.min - dw.min;
-	
-	// read in the buffer
-	for(int y = readbox.min.y; y <= readbox.max.y; ++y)
-	{
-		for(int x = readbox.min.x; x <= readbox.max.x; ++x)
-		{
-			// i is the index of the pixel on the output image channel
-			int i = (y - idw.min.y) * boxwidth(idw) + (x - idw.min.x);
 
-			// di is the index of the pixel in the input image buffer
-			int di = (y - d.y) * boxwidth(dw) + (x - d.x);
-			
-			switch(bps)
+	/// \todo: throw out an exception if the sample format field is mangled.  for now
+	/// we shall assume that a non-floating point TIFF is of integer type
+	if(sampleformat == SAMPLEFORMAT_IEEEFP)
+	{
+		// read in the buffer
+		for(int y = readbox.min.y; y <= readbox.max.y; ++y)
+		{
+			for(int x = readbox.min.x; x <= readbox.max.x; ++x)
 			{
+				// i is the index of the pixel on the output image channel
+				int i = (y - idw.min.y) * boxwidth(idw) + (x - idw.min.x);
 				
-			case 8:
-			{
-				// cast to unsigned byte, divide
-				ic[i] = normalizer * m_buffer[spp * di + boffset];
-			}
-			break;
-			
-			case 16:
-			{
-				// cast to short, divide
-				unsigned short v = *((unsigned short *) m_buffer + spp * di + boffset);
-				ic[i] = normalizer * v;
-			}
-			break;
-			
-			case 32:
-			{
-				// cast to int, divide
-				unsigned int v = *((unsigned int *) m_buffer + spp * di + boffset);
-				ic[i] = normalizer * v;
-			}
-			break;
-			
-			default:
-				throw Exception("unhandled TIFF bit-depth: " + bps);
-				
+				// di is the index of the pixel in the input image buffer
+				int di = (y - d.y) * boxwidth(dw) + (x - d.x);
+
+				ic[i] = (reinterpret_cast<float *>(m_buffer))[spp * di + boffset];
 			}
 		}
 	}
-
+	else
+	{
+		for(int y = readbox.min.y; y <= readbox.max.y; ++y)
+		{
+			for(int x = readbox.min.x; x <= readbox.max.x; ++x)
+			{
+				// i is the index of the pixel on the output image channel
+				int i = (y - idw.min.y) * boxwidth(idw) + (x - idw.min.x);
+				
+				// di is the index of the pixel in the input image buffer
+				int di = (y - d.y) * boxwidth(dw) + (x - d.x);
+				
+				switch(bps)
+				{
+					
+				case 8:
+				{
+					// cast to unsigned byte, divide
+					ic[i] = normalizer * m_buffer[spp * di + boffset];
+				}
+				break;
+				
+				case 16:
+				{
+					// cast to short, divide
+					unsigned short v = *((unsigned short *) m_buffer + spp * di + boffset);
+					ic[i] = normalizer * v;
+				}
+				break;
+				
+				case 32:
+				{
+					// cast to int, divide
+					unsigned int v = *((unsigned int *) m_buffer + spp * di + boffset);
+					ic[i] = normalizer * v;
+				}
+				break;
+				
+				default:
+					throw Exception("unhandled TIFF bit-depth: " + bps);
+					
+				}
+			}
+		}
+	}
 }
 
 /// read in the data to a buffer

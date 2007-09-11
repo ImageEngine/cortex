@@ -76,6 +76,23 @@ CINImageReader::~CINImageReader()
 	delete [] m_buffer;
 }
 
+// void CINImageReader::constructParameters( )
+// {
+// 	// transfer function
+// 	// we should map a string to a functor class
+// 	IntParameter::PresetsMap transferPresets;
+// 	compressionPresets["none"]    = COMPRESSION_NONE;
+// 	compressionPresets["lzw"]     = COMPRESSION_LZW;
+// 	compressionPresets["jpeg"]    = COMPRESSION_JPEG;
+// 	compressionPresets["deflate"] = COMPRESSION_DEFLATE;
+
+// 	m_compressionParameter = new IntParameter("compression", "image data compression method",
+// 															compressionPresets["lzw"], 0, 35535, // min and max magic numbers
+// 															compressionPresets, true);
+// 	parameters()->addParameter(m_compressionParameter);
+// }
+
+
 // partial validity check: assert that the file begins with the CIN magic number
 bool CINImageReader::canRead(const string & fileName)
 {

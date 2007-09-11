@@ -114,8 +114,6 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 	// force baseline-JPEG (8bit) values with TRUE	
 	jpeg_set_quality(&cinfo, quality, TRUE);
 
-	//cout << "set quality" << endl;
-
 	row_stride = width * 3;
 
 	// add the channels into the header with the appropriate types
@@ -161,7 +159,8 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 			// convert to 8-bit integer
 			for(int i = 0; i < width*height; ++i)
 			{
-				image_buffer[spp*i + offset] = (unsigned char) ((channel[i] + 1) >> 24);
+				// \todo: round here
+				image_buffer[spp*i + offset] = (unsigned char) (channel[i] >> 24);
 			}
 		}
 		break;
@@ -174,7 +173,6 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 			for(int i = 0; i < width*height; ++i)
 			{
 				image_buffer[spp*i + offset] = (unsigned char) (max(0.0, min(255.0, 255.0 * channel[i] + 0.5)));
-				//image_buffer[spp*i + offset] = (unsigned char) (255.0 * channel[i] + 0.5);
 			}
 		}
 		break;
