@@ -125,7 +125,8 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// Saves the object.
 		/// \param path The path on which to save - this is passed to
 		/// IndexedIOInterface::create() in order to obtain a suitable
-		/// io interface.
+		/// io interface. In general the ObjectWriter class should be
+		/// used in preference to this method.
 		void save( const std::string &path ) const;
 		/// Saves the object.
 		/// \param ioInterface The ioInterface to use for data output.
@@ -175,6 +176,8 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// Throws an Exception if typeName is not a valid type.
 		static ObjectPtr create( const std::string &typeName );
 		/// Loads a previously save()d object.
+		/// In general the ObjectReader class should be used in
+		/// preference to this one.
 		/// \param path A path passed to IndexedIOInterface::create()
 		/// to make an appropriate IndexedIOInterface for the file type.
 		static ObjectPtr load( const std::string &path );
