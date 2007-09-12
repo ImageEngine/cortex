@@ -103,7 +103,7 @@ class KDTree
 		
 		Permutation m_perm;
 		NodeVector m_nodes;
-		const int m_maxLeafSize;
+		int m_maxLeafSize;
 		PointIterator m_lastPoint;
 	
 };
