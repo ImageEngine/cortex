@@ -88,46 +88,7 @@ class KDTree
 		typedef std::vector<Node> NodeVector;
 		typedef typename NodeVector::size_type NodeIndex;
 	
-		class Node
-		{
-			public :
-				
-				inline void makeLeaf( PermutationIterator permFirst, PermutationIterator permLast );
-				inline void makeBranch( unsigned char cutAxis, BaseType cutValue );
-			
-				inline bool isLeaf() const;
-				inline PointIterator *permFirst() const;
-				inline PointIterator *permLast() const;
-				
-				inline bool isBranch() const;
-				inline unsigned char cutAxis() const;
-				inline BaseType cutValue() const;
-			
-				static NodeIndex rootIndex() { return 1; };
-				static NodeIndex lowChildIndex( NodeIndex index ) { return index * 2; };
-				static NodeIndex highChildIndex( NodeIndex index ) { return index * 2 + 1; };
-				
-			private :
-				
-				unsigned char m_cutAxisAndLeaf;
-				union {
-					BaseType m_cutValue;
-					struct {
-						PointIterator *first;
-						PointIterator *last;
-					} m_perm;
-				};
-				
-		};
-		
-		class AxisSort
-		{
-			public :
-				AxisSort( unsigned int axis );
-				bool operator() ( PointIterator i, PointIterator j );
-			private :
-				unsigned int m_axis;
-		};
+		class AxisSort;
 		
 		unsigned char majorAxis( PermutationConstIterator permFirst, PermutationConstIterator permLast );
 		void build( NodeIndex nodeIndex, PermutationIterator permFirst, PermutationIterator permLast );
@@ -136,20 +97,13 @@ class KDTree
 		
 		void nearestNeighboursWalk( NodeIndex nodeIndex, const Point &p, BaseType r2, std::vector<PointIterator> &nearNeighbours ) const;
 		
-		struct NearNeighbour
-		{
-			NearNeighbour(PointIterator p, BaseType d) : m_point(p), m_distSqrd(d) {}
-			const PointIterator m_point;
-			const BaseType m_distSqrd;
-			
-			bool operator < (const NearNeighbour &other) const { return m_distSqrd > other.m_distSqrd; }
-		};
+		struct NearNeighbour;
 		
 		void nearestNNeighboursWalk( NodeIndex nodeIndex, const Point &p, unsigned int numNeighbours, std::set<NearNeighbour> &nearNeighbours, BaseType &maxDistSquared ) const;
 		
 		Permutation m_perm;
 		NodeVector m_nodes;
-		int m_maxLeafSize;
+		const int m_maxLeafSize;
 		PointIterator m_lastPoint;
 	
 };

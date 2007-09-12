@@ -38,80 +38,115 @@
 
 namespace IECore
 {
+template<class PointIterator>
+class KDTree<PointIterator>::Node
+{
+	public :
+		
+		inline void makeLeaf( PermutationIterator permFirst, PermutationIterator permLast )
+		{
+			m_cutAxisAndLeaf = 255;
+			m_perm.first = &(*permFirst);
+			m_perm.last = &(*permLast);
+		}
+		
+		inline void makeBranch( unsigned char cutAxis, BaseType cutValue )
+		{
+			m_cutAxisAndLeaf = cutAxis;
+			m_cutValue = cutValue;
+		}
 	
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// KDTree::AxisSort
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		inline bool isLeaf() const
+		{
+			return m_cutAxisAndLeaf==255;
+		}
+		
+		inline PointIterator *permFirst() const
+		{
+			return m_perm.first;
+		}
+		
+		inline PointIterator *permLast() const
+		{
+			return m_perm.last;
+		}
+		
+		inline bool isBranch() const
+		{
+			return m_cutAxisAndLeaf!=255;
+		}
+		
+		inline unsigned char cutAxis() const
+		{
+			return m_cutAxisAndLeaf;
+		}
+		
+		inline BaseType cutValue() const
+		{
+			return m_cutValue;
+		}
+	
+		inline static NodeIndex rootIndex()
+		{
+			return 1;
+		}
+		
+		inline static NodeIndex lowChildIndex( NodeIndex index )
+		{
+			return index * 2;
+		}
+		
+		inline static NodeIndex highChildIndex( NodeIndex index )
+		{
+			return index * 2 + 1;
+		}
+				
+	private :
+		
+		unsigned char m_cutAxisAndLeaf;
+		union {
+			BaseType m_cutValue;
+			struct {
+				PointIterator *first;
+				PointIterator *last;
+			} m_perm;
+		};
+		
+};
+		
 template<class PointIterator>
-KDTree<PointIterator>::AxisSort::AxisSort( unsigned int axis )
-	:	m_axis( axis )
+class KDTree<PointIterator>::AxisSort
 {
-}
+	public :
+		AxisSort( unsigned int axis ) : m_axis( axis )
+		{
+		}
+		
+		bool operator() ( PointIterator i, PointIterator j )
+		{
+			return (*i)[m_axis] < (*j)[m_axis];
+		}
+		
+	private :
+		const unsigned int m_axis;
+};
 
 template<class PointIterator>
-bool KDTree<PointIterator>::AxisSort::operator() ( PointIterator i, PointIterator j )
+struct KDTree<PointIterator>::NearNeighbour
 {
-	return (*i)[m_axis] < (*j)[m_axis];
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// KDTree::Node
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<class PointIterator>
-inline void KDTree<PointIterator>::Node::makeLeaf( PermutationIterator permFirst, PermutationIterator permLast )
-{
-	m_cutAxisAndLeaf = 255;
-	m_perm.first = &(*permFirst);
-	m_perm.last = &(*permLast);
-}
-
-template<class PointIterator>
-inline void KDTree<PointIterator>::Node::makeBranch( unsigned char cutAxis, BaseType cutValue )
-{
-	m_cutAxisAndLeaf = cutAxis;
-	m_cutValue = cutValue;
-}
+	NearNeighbour(PointIterator p, BaseType d) : m_point(p), m_distSqrd(d)
+	{
+	}
 			
-template<class PointIterator>
-inline bool KDTree<PointIterator>::Node::isLeaf() const
-{
-	return m_cutAxisAndLeaf==255;
-}
+	bool operator < (const NearNeighbour &other) const
+	{
+		return m_distSqrd > other.m_distSqrd;
+	}
+	
+	const PointIterator m_point;
+	const BaseType m_distSqrd;	
+};	
 
-template<class PointIterator>
-inline PointIterator *KDTree<PointIterator>::Node::permFirst() const
-{
-	return m_perm.first;
-}
-
-template<class PointIterator>
-inline PointIterator *KDTree<PointIterator>::Node::permLast() const
-{
-	return m_perm.last;
-}
-
-template<class PointIterator>
-inline bool KDTree<PointIterator>::Node::isBranch() const
-{
-	return m_cutAxisAndLeaf!=255;
-}
-
-template<class PointIterator>
-inline unsigned char KDTree<PointIterator>::Node::cutAxis() const
-{
-	return m_cutAxisAndLeaf;
-}
-
-template<class PointIterator>
-inline typename KDTree<PointIterator>::BaseType KDTree<PointIterator>::Node::cutValue() const
-{
-	return m_cutValue;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// KDTree
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // initialisation
 
