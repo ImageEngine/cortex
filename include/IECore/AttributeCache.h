@@ -49,9 +49,6 @@ IE_CORE_FORWARDDECLARE( CompoundObject );
 ///A simple means of creating and reading caches of data values which are associated with
 ///notional "Objects" and "Attributes". Will throw an exception derived from IEException if
 ///any errors are encountered.
-///\todo Headers with arbitrary data.
-///\todo remove( ObjectHandle )
-///\todo remove( ObjectHandle, AttributeHandle )
 class AttributeCache : public RefCounted
 {
 	friend class AttributeCacheInitializer;

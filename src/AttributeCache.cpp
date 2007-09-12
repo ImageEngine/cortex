@@ -178,30 +178,31 @@ void AttributeCache::objects(std::vector<AttributeCache::ObjectHandle> &objs)
 		
 bool AttributeCache::contains( const ObjectHandle &obj )
 {
-	std::vector<ObjectHandle> objs;
-	objects(objs);
-	
-	std::vector<ObjectHandle>::const_iterator it = std::find( objs.begin(), objs.end(), obj );
-	
-	return it != objs.end();
+	m_io->chdir("/objects");
+	try
+	{
+		m_io->chdir( obj );
+	} 
+	catch (IECore::Exception &e)
+	{
+		return false;
+	}
+	return true;
 }
-
 
 bool AttributeCache::contains( const ObjectHandle &obj, const AttributeHandle &attr )
 {
-	if (! contains(obj) )
-		return false;
-		
 	m_io->chdir("/objects");
-	m_io->chdir(obj);
-	
-	std::vector<AttributeHandle> attrs;
-	attributes(obj, attrs);
-	
-	std::vector<AttributeHandle>::const_iterator it = std::find( attrs.begin(), attrs.end(), attr );
-	
-	return it != attrs.end();
-		
+	try
+	{
+		m_io->chdir( obj );
+		m_io->chdir( attr );
+	} 
+	catch (IECore::Exception &e)
+	{
+		return false;
+	}
+	return true;
 }
 				
 void AttributeCache::attributes(const ObjectHandle &obj, std::vector<AttributeHandle> &attrs)
