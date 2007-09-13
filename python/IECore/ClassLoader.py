@@ -203,7 +203,9 @@ class ClassLoader :
 							continue
 							
 						c = self.__classes.setdefault( name, { "versions" : [], "imports" : {} } )
-						c["versions"].append( version )
+						
+						if not version in c["versions"]:
+							c["versions"].append( version )						
 						
 						dirsToPrune.add( d )
 					
