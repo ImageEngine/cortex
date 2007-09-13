@@ -103,8 +103,8 @@ class KDTree
 		
 		Permutation m_perm;
 		NodeVector m_nodes;
-		int m_maxLeafSize;
-		PointIterator m_lastPoint;
+		int m_maxLeafSize; /// \todo make const
+		PointIterator m_lastPoint; /// \todo make const
 	
 };
 
