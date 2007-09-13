@@ -82,7 +82,7 @@ class BoundedKDTree
 		Permutation m_perm;
 		NodeVector m_nodes;
 		const int m_maxLeafSize;
-		BoundIterator m_lastBound;
+		const BoundIterator m_lastBound;
 };
 
 typedef BoundedKDTree<std::vector<Imath::Box2f>::const_iterator> Box2fTree;
