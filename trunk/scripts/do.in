@@ -1,0 +1,241 @@
+#!/usr/bin/env python2.5
+
+##########################################################################
+#
+#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are
+#  met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#
+#     * Neither the name of Image Engine Design nor the names of any
+#	     other contributors to this software may be used to endorse or
+#       promote products derived from this software without specific prior
+#       written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+#  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+#  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+#  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+#  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+#  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+##########################################################################
+
+usage = """
+Usage : do [option] [action [actionOptions]]
+
+Examples :
+
+	do -help [action]
+	Print this help.
+	
+	do -help action
+	Print specific help for the specified action.
+	
+	do -help -version v action
+	Print specific help for the specified action.
+	
+	do -listActions
+	List all available actions.
+	
+	do -listActions actionMatch
+	List all actions which contain the specified string somewhere in their name.
+	
+	do -listVersions action
+	List all available versions of the specified action.
+
+	do action -arg1 value1 -arg2 value2
+	Execute the specified action, passing the specified action arguments.
+	
+	do -version v action -arg1 value1 -arg2 value2
+	Execute a specified version of an action, passing the specified arguments.
+	
+	do action -arg1 value1 -arg2 value2 -save filename.ext
+	Execute the specified action, passing the specified action arguments and
+	saving the result in the specified file.
+	
+	do -version v action -arg1 value1 -arg2 value2 -save filename.ext
+	Execute a specified version of an action, passing the specified argument
+	and saving the result in the specified file.
+	
+"""
+
+import os
+import sys
+import VersionControl
+
+## \todo This uses a python module internal to image engine, and needs replacing.
+# We need to get the image engine wrapper for this script to add the appropriate IECore
+# version into the PYTHONPATH.
+VersionControl.setVersion( "IECore", "!CORE_VERSION!")
+import IECore
+
+###############################################################################
+# a coupla useful functions
+###############################################################################
+
+def exitWithUsage( exitCode = 1 ) :
+	sys.stderr.write( usage )
+	sys.exit( exitCode )
+
+def loadAction( args, index ) :
+
+	"""Returns a tuple of action, newIndex where action is a loaded action
+	and newIndex is the index from which to continue parsing. Exits with
+	a helpful message on failure."""
+
+	if args[index]=="-version" :
+		if len( args ) < index + 3 :
+			exitWithUsage()
+		else :
+			actionVersion = args[index+1]
+			actionName = args[index+2]
+			newIndex = index + 3
+	else :
+		actionName = args[index]
+		actionVersion = None
+		newIndex = index + 1
+		
+	if actionVersion :
+		try :
+			actionVersion = int( actionVersion )
+		except :
+			sys.stderr.write( "Version must be an integer" )
+			sys.exit( 1 )
+	
+	if actionName[0]=="-" :
+		exitWithUsage()
+		
+	matchingActionNames = loader.classNames( "*" + actionName )
+	if not len( matchingActionNames ) :
+		sys.stderr.write( "Action \"%s\" does not exist.\n" % actionName )
+		sys.exit( 1 )
+	elif len( matchingActionNames )>1 :
+		sys.stderr.write( "Action name \"%s\" is ambiguous - could be any of the following : \n" % actionName )
+		for n in matchingActionNames :
+			sys.stderr.write( "\t" + n + "\n" )
+		sys.exit( 1 )
+	else :
+		actionName = matchingActionNames[0]
+		
+	actionVersions = loader.versions( actionName )		
+	if not actionVersion :
+		actionVersion = actionVersions[-1]
+		
+	if not actionVersion in actionVersions :
+		sys.stderr.write( "Version \"%s\" of action \"%s\" does not exist.\n" % (actionVersion, actionName) )
+		sys.exit( 1 )	
+				
+	action = loader.load( actionName, actionVersion )()
+	return (action, newIndex)
+
+###############################################################################
+# the rest
+###############################################################################
+
+# check we have at least one argument
+if len( sys.argv ) < 2 :
+	exitWithUsage()
+	
+loader = IECore.ClassLoader.defaultOpLoader()
+# do the right thing based on the first flag	
+if sys.argv[1]=="-help" :
+
+	if len(sys.argv)==2 :
+		exitWithUsage( 1 )
+	
+	else :
+	
+		action, newIndex = loadAction( sys.argv, 2 )
+		if len( sys.argv ) > newIndex :
+			exitWithUsage()
+		
+		formatter = IECore.WrappedTextFormatter( sys.stdout )
+		formatter.paragraph( "Name    : " + action.name + "\n" )
+		formatter.paragraph( action.description + "\n" )
+		formatter.heading( "Parameters" )
+		formatter.indent()
+		for p in action.parameters().values() :
+			IECore.formatParameterHelp( p, formatter )
+		formatter.unindent()
+		sys.exit( 0 )
+		
+elif sys.argv[1]=="-listActions" :
+
+	if len( sys.argv )==2 :
+		actions = loader.classNames()
+	else :
+		actions = loader.classNames( "*" + sys.argv[2] + "*" )
+		
+	for action in actions :
+		sys.stdout.write( action + "\n" )
+		
+	sys.exit( 0 )
+
+elif sys.argv[1]=="-listVersions" :
+
+	if len( sys.argv )!=3 :
+		exitWithUsage()
+
+	else :
+	
+		versions = loader.versions( sys.argv[2] )
+		if not len( versions ) :
+			sys.stderr.write( "Action \"%s\" does not exist." % sys.argv[2] )
+			sys.exit( 1 )
+			
+		for v in versions :
+			sys.stdout.write( v + "\n" )
+		
+		sys.exit( 0 )
+		
+else :
+
+	# either "action" or "-version v action"
+	
+	action, nextArg = loadAction( sys.argv, 1 )
+	
+	# if the last two flags specify saving then we need to remove them
+	# before parsing.
+	
+	actionArgs = sys.argv[nextArg:]
+	saveFileName = ""
+	if len( actionArgs ) > 1 :
+		if actionArgs[-2]=="-save" or actionArgs[-2]=="-write" :
+			saveFileName = actionArgs[-1]
+			actionArgs = actionArgs[:-2]
+				
+	parameters = action.parameters()
+	try :
+
+		IECore.ParameterParser().parse( actionArgs, parameters )
+		result = action()
+		
+		if saveFileName :
+			writer = IECore.Writer.create( result, saveFileName )
+			if writer :
+				writer.write()
+			else :
+				sys.stderr.write( "ERROR : No Writer to save results of type \"%s\" as \"%s\".\n" % ( result.typeName(), saveFileName ) )
+				sys.exit( 1 )
+		else :
+			sys.stdout.write( str( result ) + "\n" )
+			
+	except Exception, e :
+		sys.stderr.write( "ERROR : %s\n" % e )
+		sys.exit( 1 )
+		
+	sys.exit( 0 )
