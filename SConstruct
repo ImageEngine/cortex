@@ -62,8 +62,8 @@ coreTestName = "test/IECoreTest"
 # Versions
 
 coreMajorVersion = '2'
-coreMinorVersion = '10'
-corePatchVersion = '4'
+coreMinorVersion = '11'
+corePatchVersion = '0'
 coreVersion = coreMajorVersion + "." + coreMinorVersion + "." + corePatchVersion
 pythonVersion = '2.5'
 
@@ -248,6 +248,7 @@ corePythonSources = 	[
 				'src/bindings/ImathMatrixBinding.cpp',
 				'src/bindings/ImathColorBinding.cpp',
 				'src/bindings/KDTreeBinding.cpp',
+				'src/bindings/BoundedKDTreeBinding.cpp',
 				'src/bindings/IndexedIOInterfaceBinding.cpp',
 				'src/bindings/DataBinding.cpp',
 				'src/bindings/SimpleTypedDataBinding.cpp',

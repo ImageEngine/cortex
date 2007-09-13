@@ -42,6 +42,7 @@ from Imath import *
 from ImathVectorData import *
 from IndexedIO import *
 from KDTree import *
+from BoundedKDTree import *
 from MessageHandler import *
 from ObjectIO import *
 from Object import *
