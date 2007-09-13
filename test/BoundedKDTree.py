@@ -41,7 +41,7 @@ class TestBoundedKDTree:
 
 	treeSizes = [0, 1, 10, 50, 5000]
 	
-	def doIntersect(self, numBounds):
+	def doIntersectingBounds(self, numBounds):
 		
 		self.makeTree(numBounds)
 		
@@ -52,7 +52,7 @@ class TestBoundedKDTree:
 		for j in range(0, numTests):
 		
 			bound = self.makeBound()			
-			bIdxArray = self.tree.intersect( bound )
+			bIdxArray = self.tree.intersectingBounds( bound )
 				
 			for bIdx in bIdxArray:
 				self.assert_(bIdx >= 0)
@@ -89,11 +89,11 @@ class TestBoundedKDTreeBox3f(unittest.TestCase, TestBoundedKDTree):
 		for t in self.treeSizes:
 			self.makeTree(t)
 			
-	def testIntersect(self):
-		"""Test BoundedKDTreeBox3f intersect"""
+	def testIntersectingBounds(self):
+		"""Test BoundedKDTreeBox3f intersectingBounds"""
 		
 		for t in self.treeSizes:
-			self.doIntersect(t)			
+			self.doIntersectingBounds(t)			
 	
 
 class TestBoundedKDTreeBox3d(unittest.TestCase, TestBoundedKDTree):
@@ -123,11 +123,11 @@ class TestBoundedKDTreeBox3d(unittest.TestCase, TestBoundedKDTree):
 		for t in self.treeSizes:
 			self.makeTree(t)
 			
-	def testIntersect(self):
-		"""Test BoundedKDTreeBox3d intersect"""
+	def testIntersectingBounds(self):
+		"""Test BoundedKDTreeBox3d intersectingBounds"""
 		
 		for t in self.treeSizes:
-			self.doIntersect(t)
+			self.doIntersectingBounds(t)
 	
 class TestBoundedKDTreeBox2f(unittest.TestCase, TestBoundedKDTree):
 
@@ -156,11 +156,11 @@ class TestBoundedKDTreeBox2f(unittest.TestCase, TestBoundedKDTree):
 		for t in self.treeSizes:
 			self.makeTree(t)
 			
-	def testIntersect(self):
-		"""Test BoundedKDTreeBox2f intersect"""
+	def testIntersectingBounds(self):
+		"""Test BoundedKDTreeBox2f intersectingBounds"""
 		
 		for t in self.treeSizes:
-			self.doIntersect(t)	
+			self.doIntersectingBounds(t)	
 			
 
 

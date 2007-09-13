@@ -244,17 +244,17 @@ BoundedKDTree<BoundIterator>::BoundedKDTree( BoundIterator first, BoundIterator 
 
 
 template<class BoundIterator>	
-unsigned int BoundedKDTree<BoundIterator>::intersect( const Bound &b, std::vector<BoundIterator> &intersectingBounds ) const
+unsigned int BoundedKDTree<BoundIterator>::intersectingBounds( const Bound &b, std::vector<BoundIterator> &bounds ) const
 {	
-	intersectingBounds.clear();
+	bounds.clear();
 			
-	intersectWalk(Node::rootIndex(), b, intersectingBounds );
+	intersectingBoundsWalk(Node::rootIndex(), b, bounds );
 	
-	return intersectingBounds.size();
+	return bounds.size();
 }
 
 template<class BoundIterator>	
-void BoundedKDTree<BoundIterator>::intersectWalk(  NodeIndex nodeIndex, const Bound &b, std::vector<BoundIterator> &intersectingBounds ) const
+void BoundedKDTree<BoundIterator>::intersectingBoundsWalk(  NodeIndex nodeIndex, const Bound &b, std::vector<BoundIterator> &bounds ) const
 {
 	const Node &node = m_nodes[nodeIndex];
 	if( node.isLeaf() )
@@ -266,7 +266,7 @@ void BoundedKDTree<BoundIterator>::intersectWalk(  NodeIndex nodeIndex, const Bo
 			
 			if ( bb.intersects(b) )
 			{
-				intersectingBounds.push_back( *perm );
+				bounds.push_back( *perm );
 			}
 		}
 	}
@@ -275,12 +275,12 @@ void BoundedKDTree<BoundIterator>::intersectWalk(  NodeIndex nodeIndex, const Bo
 		NodeIndex firstChild = Node::highChildIndex( nodeIndex );
 		if ( m_nodes[firstChild].bound().intersects(b) )
 		{
-			intersectWalk( firstChild, b, intersectingBounds );
+			intersectingBoundsWalk( firstChild, b, bounds );
 		}
 		NodeIndex secondChild = Node::lowChildIndex( nodeIndex );
 		if ( m_nodes[secondChild].bound().intersects(b) )
 		{
-			intersectWalk( secondChild, b, intersectingBounds );
+			intersectingBoundsWalk( secondChild, b, bounds );
 		}
 	}
 }

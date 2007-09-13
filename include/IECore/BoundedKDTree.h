@@ -60,7 +60,7 @@ class BoundedKDTree
 		BoundedKDTree( BoundIterator first, BoundIterator last, int maxLeafSize=4 );
 		
 		/// Populates the passed vector of iterators with the bounds which intersect "b". Returns the number of bounds found.		
-		unsigned int intersect( const Bound &b, std::vector<BoundIterator> &intersectingBounds ) const;
+		unsigned int intersectingBounds( const Bound &b, std::vector<BoundIterator> &bounds ) const;
 				
 	private :
 		
@@ -77,7 +77,7 @@ class BoundedKDTree
 		unsigned char majorAxis( PermutationConstIterator permFirst, PermutationConstIterator permLast );
 		void build( NodeIndex nodeIndex, PermutationIterator permFirst, PermutationIterator permLast );
 		
-		void intersectWalk( NodeIndex nodeIndex, const Bound &b, std::vector<BoundIterator> &nearNeighbours ) const;
+		void intersectingBoundsWalk( NodeIndex nodeIndex, const Bound &b, std::vector<BoundIterator> &bounds ) const;
 		
 		Permutation m_perm;
 		NodeVector m_nodes;

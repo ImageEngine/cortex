@@ -85,7 +85,7 @@ struct BoundedKDTreeWrapper
 		delete m_tree;
 	}
 	
-	IntVectorDataPtr intersect(const typename T::Bound &b)
+	IntVectorDataPtr intersectingBounds(const typename T::Bound &b)
 	{
 		assert(m_tree);
 		
@@ -93,7 +93,7 @@ struct BoundedKDTreeWrapper
 		
 		BoundArray bounds;
 		
-		unsigned int num = m_tree->intersect(b, bounds);
+		unsigned int num = m_tree->intersectingBounds(b, bounds);
 		
 		IntVectorDataPtr indices = new IntVectorData();
 		
@@ -116,7 +116,7 @@ void bindBoundedKDTree(const char *bindName)
 {
 	class_<BoundedKDTreeWrapper<T>, boost::noncopyable>(bindName, no_init)
 		.def(init< typename BoundedKDTreeWrapper<T>::BoundDataPtr >() )
-		.def("intersect", &BoundedKDTreeWrapper<T>::intersect )
+		.def("intersectingBounds", &BoundedKDTreeWrapper<T>::intersectingBounds )
 	;
 
 }
