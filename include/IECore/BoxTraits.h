@@ -35,6 +35,8 @@
 #ifndef IE_CORE_BOXTRAITS_H
 #define IE_CORE_BOXTRAITS_H
 
+#include <boost/static_assert.hpp>
+
 #include "OpenEXR/ImathBox.h"
 
 namespace IECore
@@ -72,6 +74,29 @@ struct BoxTraits<Imath::Box3d>
 	typedef Imath::V3d BaseType;	
 };
 
+template<>
+struct BoxTraits<Imath::Box2s>
+{
+	typedef Imath::V2s BaseType;
+};
+
+template<>
+struct BoxTraits<Imath::Box2i>
+{
+	typedef Imath::V2i BaseType;
+};
+
+template<>
+struct BoxTraits<Imath::Box2f>
+{
+	typedef Imath::V2f BaseType;	
+};
+
+template<>
+struct BoxTraits<Imath::Box2d>
+{
+	typedef Imath::V2d BaseType;	
+};
 
 } // namespace IECore
 
