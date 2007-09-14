@@ -62,7 +62,7 @@ coreTestName = "test/IECoreTest"
 # Versions
 
 coreMajorVersion = '2'
-coreMinorVersion = '11'
+coreMinorVersion = '12'
 corePatchVersion = '0'
 coreVersion = coreMajorVersion + "." + coreMinorVersion + "." + corePatchVersion
 pythonVersion = '2.5'

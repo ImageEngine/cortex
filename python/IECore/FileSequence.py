@@ -136,9 +136,22 @@ class FileSequence :
 	
 		fileNameTemplate = self.__fileNameTemplate()
 		return fileNameTemplate % frameNumber
+		
+	## Returns the frame number of a filename from this sequence.
+	def frameForFileName( self, fileName ) :
+	
+		prefix = self.getPrefix()
+		suffix = self.getSuffix()
+		
+		if not fileName.startswith( prefix ) or not fileName.endswith( suffix ) :
+		
+			raise RuntimeError( "Filename \"%s\" is not a part of sequence \"%s\".", ( fileName, str( self ) ) )
+			
+		frame = fileName[len(prefix):-len(suffix)]
+		return int( frame )
 
 	## Returns a list of all filenames represented by this object, ordered according to
-	# the ordering of frames in self.frameList."""	
+	# the ordering of frames in self.frameList.
 	def fileNames( self ) :
 	
 		fileNameTemplate = self.__fileNameTemplate()

@@ -167,6 +167,17 @@ class testFileSequence( unittest.TestCase ) :
 		self.assertEqual( s.fileNameForFrame( 2 ), "a.2.tif" )
 		self.assertEqual( s.fileNameForFrame( 201 ), "a.201.tif" )
 		
+	def testFrameForFileName( self ) :
+	
+		s = FileSequence( "a.#.tif", FrameRange( 1, 100 ) )
+		
+		self.assertEqual( s.frameForFileName( "a.10.tif" ), 10 )
+		self.assertEqual( s.frameForFileName( "a.100.tif" ), 100 )
+		
+		self.assertRaises( RuntimeError, s.frameForFileName, "aaa.10.tif" )
+		self.assertRaises( RuntimeError, s.frameForFileName, "a.10.exr" )
+		self.assertRaises( RuntimeError, s.frameForFileName, "a..exr" )
+		
 class testCompoundFrameList( unittest.TestCase ) :
 
 	def testConstructor( self ) :
