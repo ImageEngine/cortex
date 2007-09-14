@@ -33,66 +33,20 @@
 ##########################################################################
 
 import unittest
-from ClassLoader import *
-from AttributeCache import *
-from BlindDataHolder import *
-from CompoundData import *
-from CompoundObject import *
-from Imath import *
-from ImathVectorData import *
-from IndexedIO import *
-from KDTree import *
-from BoundedKDTree import *
-from MessageHandler import *
-from ObjectIO import *
-from Object import *
-from ObjectReader import *
-from ObjectWriter import *
-from ParameterParser import *
-from Parameterised import *
-from Parameters import *
-from PDCReader import *
-from PDCWriter import *
-from SimpleTypedData import *
-from TypedDataAsObject import *
-from VectorData import *
-from FileSequence import *
-from EXRReader import *
-from PointsPrimitive import *
-from EXRReader import *
-from TIFFReader import *
-from ImagePrimitive import *
-from JPEGReader import *
-from PerlinNoise import *
-from Turbulence import *
-from MeshPrimitive import *
-from Shader import *
-from SearchPath import *
-from CachedReader import *
-from Reader import *
-from RunTimeTyped import *
-from Op import *
-from MemoryUsage import *
-from FileSequenceParameter import *
-from WrapperToPython import *
-from RemovePrimitiveVariables import *
-from RenamePrimitiveVariables import *
-from WrapperGarbageCollection import *
-from FormattedParameterHelp import *
-from MotionPrimitive import *
-from Transform import *
-from Group import *
-from VisibleRenderable import *
-from NamespacePollution import *
-from OptionalCompoundParameter import *
-from FileFormatSwitch import *
-from ObjectInterpolation import *
-from InterpolatedCache import *
-from TransformationMatrixData import *
-from ReversedFrameList import *
-from BinaryFrameList import *
-from PointsExpressionOp import *
-from FrameList import *
-from Struct import *
+from IECore import *
 
-unittest.main()
+class TestStruct( unittest.TestCase ) :
+
+	def test( self ) :
+		
+		s = Struct()
+		s.a = 10
+		self.assertEqual( s.a, 10 )
+		
+		s = Struct( b = 20 )
+		self.assertEqual( s.b, 20 )
+		
+
+if __name__ == "__main__":
+	unittest.main()
+	

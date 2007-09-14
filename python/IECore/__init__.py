@@ -73,6 +73,8 @@ from NukeFileExaminer import NukeFileExaminer
 from RIBFileExaminer import RIBFileExaminer
 from FileDependenciesOp import FileDependenciesOp
 from CheckFileDependenciesOp import CheckFileDependenciesOp
+from PointsExpressionOp import PointsExpressionOp
+from Struct import Struct
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *

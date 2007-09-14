@@ -374,6 +374,8 @@ corePythonPy = 	[
 				'python/IECore/NukeFileExaminer.py',		
 				'python/IECore/RIBFileExaminer.py',		
 				'python/IECore/CheckFileDependenciesOp.py',		
+				'python/IECore/PointsExpressionOp.py',		
+				'python/IECore/Struct.py',		
 			]
 
 
