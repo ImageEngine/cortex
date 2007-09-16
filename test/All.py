@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import sys
 
 from ClassLoader import *
 from AttributeCache import *
@@ -104,4 +105,16 @@ if IECore.withSQLite() :
 	from SQLiteIndexedIO import *
 	from FileFormatSwitch import *
 
-unittest.main()
+class SplitStream :
+
+	def __init__( self ) :
+	
+		self.__f = open( "test/results.txt", 'w' )		
+
+	def write( self, l ) :
+
+		sys.stderr.write( l )
+		self.__f.write( l )
+
+unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
+#unittest.main()
