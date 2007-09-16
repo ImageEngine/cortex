@@ -41,6 +41,8 @@
 #include <boost/regex.hpp> 
 #include <boost/filesystem/operations.hpp> 
 
+#include "sqlite/sqlite3.h"
+
 #include "IECore/SQLiteIndexedIO.h"
 
 using namespace IECore;

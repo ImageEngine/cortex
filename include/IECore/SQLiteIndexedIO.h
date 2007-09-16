@@ -40,7 +40,10 @@
 
 #include <boost/regex.hpp>
 
-#include "sqlite/sqlite3.h"
+// forward declaration to avoid including the sqlite headers
+// in the public interface
+struct sqlite3_context;
+struct sqlite3_value;
 
 #include "IndexedIOInterface.h"
 #include "Exception.h"
