@@ -183,14 +183,22 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageWriter();
 	bindEXRImageReader();
 	bindEXRImageWriter();
+	
+#ifdef IECORE_WITH_TIFF	
 	bindTIFFImageReader();
 	bindTIFFImageWriter();
+#endif
+	
 	bindCINImageReader();
 	bindCINImageWriter();
 	bindDPXImageReader();
 	bindDPXImageWriter();
+
+#ifdef IECORE_WITH_JPEG
 	bindJPEGImageReader();
 	bindJPEGImageWriter();
+#endif
+
 	bindMeshPrimitive();
 	bindMotionPrimitive();
 	bindTransform();
@@ -212,4 +220,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
+	def( "withTIFF", &IECore::withTIFF );
+	def( "withJPEG", &IECore::withJPEG );
+	def( "withSQLite", &IECore::withSQLite );
 }

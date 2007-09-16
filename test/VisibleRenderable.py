@@ -40,17 +40,19 @@ class VisibleRenderableTest( unittest.TestCase ) :
 
 	def test( self ) :
 	
-		# load an old (pre VisibleRenderable) file
-		p = ObjectReader( "test/data/cobFiles/meshPrimitiveV0.cob" ).read()
-		self.assert_( p.isInstanceOf( "VisibleRenderable" ) )
-		self.assert_( p.isInstanceOf( VisibleRenderable.staticTypeId() ) )
-
-		# save it in the new format, load it again and check they're the same
-		ObjectWriter( p, "test/testMesh.cob" ).write()
+		if IECore.withSQLite() :
 		
-		pp = ObjectReader( "test/testMesh.cob" ).read()
-		
-		self.assertEqual( p, pp )
+			# load an old (pre VisibleRenderable) file
+			p = ObjectReader( "test/data/cobFiles/meshPrimitiveV0.cob" ).read()
+			self.assert_( p.isInstanceOf( "VisibleRenderable" ) )
+			self.assert_( p.isInstanceOf( VisibleRenderable.staticTypeId() ) )
+	
+			# save it in the new format, load it again and check they're the same
+			ObjectWriter( p, "test/testMesh.cob" ).write()
+			
+			pp = ObjectReader( "test/testMesh.cob" ).read()
+			
+			self.assertEqual( p, pp )
 		
 	def tearDown( self ) :
 	

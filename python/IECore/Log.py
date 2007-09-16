@@ -40,7 +40,7 @@
 
 import os, sys, traceback
 import inspect, string
-from _IECore import *
+from IECore import *
 
 ## Creates and activates a LevelFilteredMessageHandler to filter log messages.
 # Parameters:

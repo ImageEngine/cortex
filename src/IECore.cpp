@@ -64,4 +64,32 @@ const std::string &versionString()
 	return v;
 }
 
+bool withTIFF()
+{
+#ifdef IECORE_WITH_TIFF
+	return true;
+#else
+	return false;
+#endif	
+}
+
+bool withJPEG()
+{
+#ifdef IECORE_WITH_JPEG
+	return true;
+#else
+	return false;
+#endif	
+}
+
+bool withSQLite()
+{
+#ifdef IECORE_WITH_SQLITE
+	return true;
+#else
+	return false;
+#endif	
+}
+
+
 }

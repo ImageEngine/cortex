@@ -42,8 +42,14 @@ class TestReader(unittest.TestCase):
 		e = IECore.Reader.supportedExtensions()
 		for ee in e :
 			self.assert_( type( ee ) is str )
-					
-		for ee in [ "tif", "tiff", "jpeg", "jpg", "exr", "pdc", "cin", "dpx" ] :
+		
+		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob" ]
+		if IECore.withTIFF() :
+			expectedExtensions += [ "tif", "tiff" ]
+		if IECore.withJPEG() :
+			expectedExtensions += [ "jpg", "jpeg" ]
+						
+		for ee in expectedExtensions :
 			self.assert_( ee in e )
 
 	def test( self ) :

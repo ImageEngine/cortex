@@ -217,6 +217,9 @@ coreLibrary.addLib( 'Imath' )
 coreLibrary.addDefine( "IE_CORE_MAJORVERSION", coreMajorVersion )
 coreLibrary.addDefine( "IE_CORE_MINORVERSION", coreMinorVersion )
 coreLibrary.addDefine( "IE_CORE_PATCHVERSION", corePatchVersion )
+coreLibrary.addDefine( "IECORE_WITH_TIFF" )
+coreLibrary.addDefine( "IECORE_WITH_JPEG" )
+coreLibrary.addDefine( "IECORE_WITH_SQL" )
 
 # image library dependencies
 coreLibrary.addLib('IlmImf')

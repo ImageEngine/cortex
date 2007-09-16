@@ -33,6 +33,8 @@
 ##########################################################################
 
 import unittest
+import IECore
+
 from ClassLoader import *
 from AttributeCache import *
 from BlindDataHolder import *
@@ -42,7 +44,7 @@ from Imath import *
 from ImathVectorData import *
 from IndexedIO import *
 from KDTree import *
-from BoundedKDTree import *
+#from BoundedKDTree import *
 from MessageHandler import *
 from ObjectIO import *
 from Object import *
@@ -60,9 +62,7 @@ from FileSequence import *
 from EXRReader import *
 from PointsPrimitive import *
 from EXRReader import *
-from TIFFReader import *
 from ImagePrimitive import *
-from JPEGReader import *
 from PerlinNoise import *
 from Turbulence import *
 from MeshPrimitive import *
@@ -85,7 +85,6 @@ from Group import *
 from VisibleRenderable import *
 from NamespacePollution import *
 from OptionalCompoundParameter import *
-from FileFormatSwitch import *
 from ObjectInterpolation import *
 from InterpolatedCache import *
 from TransformationMatrixData import *
@@ -94,5 +93,15 @@ from BinaryFrameList import *
 from PointsExpressionOp import *
 from FrameList import *
 from Struct import *
+
+if IECore.withTIFF() :
+	from TIFFReader import *
+
+if IECore.withJPEG() :
+	from JPEGReader import *
+
+if IECore.withSQLite() :
+	from SQLiteIndexedIO import *
+	from FileFormatSwitch import *
 
 unittest.main()

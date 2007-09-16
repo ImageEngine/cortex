@@ -34,9 +34,11 @@
 
 ## \defgroup python Python functionality
 #
-# Some parts of the IECore library is defined purely in python. These are shown below.
+# Some parts of the IECore library are defined purely in Python. These are shown below.
 
 from _IECore import *
+# access by a shorter name for convenience
+Msg = MessageHandler
 from RunTimeTypedUtil import *
 from ParameterParser import *
 from Log import *

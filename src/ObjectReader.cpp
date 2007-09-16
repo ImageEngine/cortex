@@ -33,9 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ObjectReader.h"
-#include "IECore/SQLiteIndexedIO.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/FileNameParameter.h"
+
+#ifdef IECORE_WITH_SQLITE
+    #include "IECore/SQLiteIndexedIO.h"
+#endif // IECORE_WITH_SQLITE
 
 #include <cassert>
 
@@ -98,6 +101,7 @@ IndexedIOInterfacePtr ObjectReader::open( const std::string &fileName )
 {
 	IndexedIOInterfacePtr iface;
 	
+#ifdef IECORE_WITH_SQLITE
 	try 
 	{
 		iface = new FileIndexedIO( fileName, "/", IndexedIO::Shared | IndexedIO::Read );
@@ -106,6 +110,9 @@ IndexedIOInterfacePtr ObjectReader::open( const std::string &fileName )
 	{
 		iface = new SQLiteIndexedIO( fileName, "/", IndexedIO::Shared | IndexedIO::Read );
 	}
+#else
+	iface = new FileIndexedIO( fileName, "/", IndexedIO::Shared | IndexedIO::Read );
+#endif
 	
 	return iface;
 }

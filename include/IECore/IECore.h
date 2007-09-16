@@ -50,6 +50,13 @@ int patchVersion();
 /// Returns a string of the form "major.minor.patch"
 const std::string &versionString();
 
+/// Returns true if IECore was build with TIFF support
+bool withTIFF();
+/// Returns true if IECore was built with JPEG support
+bool withJPEG();
+/// Returns true if IECore was built with SQLite suppport
+bool withSQLite();
+
 }
 
 //! \mainpage

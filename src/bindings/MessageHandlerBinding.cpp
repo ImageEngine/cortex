@@ -100,8 +100,6 @@ void bindMessageHandler()
 	WrapperToPython<MessageHandlerPtr>();
 
 	INTRUSIVE_PTR_PATCH( MessageHandler, MessageHandlerPyClass );
-
-	def( "Msg", mh );
 	
 	typedef class_<NullMessageHandler, boost::noncopyable, NullMessageHandlerPtr, bases<MessageHandler> > NullMessageHandlerPyClass;
 	NullMessageHandlerPyClass( "NullMessageHandler" )

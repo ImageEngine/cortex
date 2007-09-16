@@ -43,14 +43,14 @@ class TestObjectIO( unittest.TestCase ) :
 	
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
-		o.save( "test/o.sql" )		
-		oo = Object.load( "test/o.sql" )
+		o.save( "test/o.fio" )		
+		oo = Object.load( "test/o.fio" )
 		self.assertEqual( o.value, oo.value );
 		
 		o = StringData( "hello" )
 		self.assertEqual( o.value, "hello" )
-		o.save( "test/o.sql" )		
-		oo = Object.load( "test/o.sql" )
+		o.save( "test/o.fio" )		
+		oo = Object.load( "test/o.fio" )
 		self.assertEqual( o.value, oo.value );
 		self.assertEqual( o, oo );
 		
@@ -61,8 +61,8 @@ class TestObjectIO( unittest.TestCase ) :
 			o.append( random.randint( -1000, 1000 ) )
 		self.assertEqual( o.size(), 1000 )
 			
-		o.save( "test/o.sql" )
-		oo = Object.load( "test/o.sql" )
+		o.save( "test/o.fio" )
+		oo = Object.load( "test/o.fio" )
 		self.assertEqual( oo.size(), 1000 )
 		
 		for i in range( 0, 1000 ) :
@@ -78,8 +78,8 @@ class TestObjectIO( unittest.TestCase ) :
 		for i in range( 0, s.size() ) :
 			self.assertEqual( s[i], words[i] )
 		
-		s.save( "test/o.sql" )
-		ss = Object.load( "test/o.sql" )
+		s.save( "test/o.fio" )
+		ss = Object.load( "test/o.fio" )
 		self.assertEqual( ss.size(), s.size() )
 		
 		for i in range( 0, s.size() ) :
@@ -94,8 +94,8 @@ class TestObjectIO( unittest.TestCase ) :
 			o.append( V3f( i*3, i*3 + 1, i*3 + 2 ) )
 		self.assertEqual( o.size(), 1000 )
 		
-		o.save( "test/o.sql" )
-		oo = Object.load( "test/o.sql" )
+		o.save( "test/o.fio" )
+		oo = Object.load( "test/o.fio" )
 		self.assertEqual( oo.size(), 1000 )
 		
 		for i in range( 0, 1000 ) :
@@ -107,16 +107,16 @@ class TestObjectIO( unittest.TestCase ) :
 	
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
-		o.save( "test/o.sql" )		
-		oo = Object.load( "test/o.sql" )
+		o.save( "test/o.fio" )		
+		oo = Object.load( "test/o.fio" )
 		self.assertEqual( o.value, oo.value );
 
 		# saving over an existing file should
 		# obliterate it but currently doesn't
 		o = StringData( "hello" )
 		self.assertEqual( o.value, "hello" )
-		o.save( "test/o.sql" )		
-		oo = Object.load( "test/o.sql" )
+		o.save( "test/o.fio" )		
+		oo = Object.load( "test/o.fio" )
 		self.assertEqual( o.value, oo.value );
 
 		self.assertEqual( o, oo );
@@ -128,8 +128,8 @@ class TestObjectIO( unittest.TestCase ) :
 		d["B"] = StringData( "hithere" )
 		self.assertEqual( d["B"].value, "hithere" )
 		
-		d.save( "test/o.sql" )
-		dd = Object.load( "test/o.sql" )
+		d.save( "test/o.fio" )
+		dd = Object.load( "test/o.fio" )
 		self.assertEqual( d, dd )
 		
 	def testMultipleRef( self ) :
@@ -141,9 +141,9 @@ class TestObjectIO( unittest.TestCase ) :
 		
 		self.assert_( d["ONE"].isSame( d["TWO"] ) )
 		
-		d.save( "test/o.sql" )
+		d.save( "test/o.fio" )
 		
-		dd = Object.load( "test/o.sql" )
+		dd = Object.load( "test/o.fio" )
 		self.assertEqual( d, dd )
 		self.assert_( dd["ONE"].isSame( dd["TWO"] ) )
 		
@@ -173,7 +173,7 @@ class TestObjectIO( unittest.TestCase ) :
 		
 	def tearDown( self ) :
 	
-		for f in [ "test/o.sql", "test/o.fio" ] :
+		for f in [ "test/o.fio" ] :
 			if os.path.isfile( f ) :
 				os.remove( f )
 		

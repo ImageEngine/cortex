@@ -75,7 +75,9 @@ void bindIndexedIO()
 	
 	bindIndexedIOInterface("IndexedIOInterface");	
 	bindFileSystemIndexedIO("FileSystemIndexedIO");	
+#ifdef IECORE_WITH_SQLITE
 	bindSQLiteIndexedIO("SQLiteIndexedIO");
+#endif // IECORE_WITH_SQLITE
 	bindFileIndexedIO("FileIndexedIO");	
 }
 
@@ -284,7 +286,7 @@ void bindFileSystemIndexedIO(const char *bindName)
 }
 
 
-
+#ifdef IECORE_WITH_SQLITE
 void bindSQLiteIndexedIO(const char *bindName)
 {	
 	class_< SQLiteIndexedIO, SQLiteIndexedIOPtr, boost::noncopyable, bases<IndexedIOInterface> >(bindName, no_init)
@@ -293,7 +295,7 @@ void bindSQLiteIndexedIO(const char *bindName)
 	
 	implicitly_convertible< SQLiteIndexedIOPtr, IndexedIOInterfacePtr >();
 }
-
+#endif // IECORE_WITH_SQLITE
 
 void bindFileIndexedIO(const char *bindName)
 {	
