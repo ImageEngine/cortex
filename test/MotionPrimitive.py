@@ -61,9 +61,9 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.keys(), [ 0, 1 ] )
 		self.assertEqual( m.values(), [ PointsPrimitive( 1 ), PointsPrimitive( 1 ) ] )
 
-		m.save( "test/motionPrimitive.sql" )
+		m.save( "test/motionPrimitive.fio" )
 		
-		mm = Object.load( "test/motionPrimitive.sql" )
+		mm = Object.load( "test/motionPrimitive.fio" )
 		self.assertEqual( m, mm )
 		
 		mmm = m.copy()
@@ -81,8 +81,8 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		
 	def tearDown( self ) :
 	
-		if os.path.isfile( "test/motionPrimitive.sql" ):
-			os.remove( "test/motionPrimitive.sql" )
+		if os.path.isfile( "test/motionPrimitive.fio" ):
+			os.remove( "test/motionPrimitive.fio" )
 		
 if __name__ == "__main__":
     unittest.main()   

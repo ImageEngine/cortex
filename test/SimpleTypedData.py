@@ -241,15 +241,15 @@ class BoolDataTest( unittest.TestCase ) :
 		o = BoolData( True )
 		self.assertEqual( o.value, True )
 		
-		o.save( "test/o.sql" )
-		oo = Object.load( "test/o.sql" )
+		o.save( "test/o.fio" )
+		oo = Object.load( "test/o.fio" )
 		self.assertEqual( o, oo )
 		
 		o = BoolData( False )
 		self.assertEqual( o.value, False )
 		
-		o.save( "test/o.sql" )
-		oo = Object.load( "test/o.sql" )
+		o.save( "test/o.fio" )
+		oo = Object.load( "test/o.fio" )
 		self.assertEqual( o, oo )
 		
 	def tearDown( self ) :

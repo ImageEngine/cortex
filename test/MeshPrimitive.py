@@ -51,8 +51,8 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.vertexIds, IntVectorData() )
 		self.assertEqual( m.interpolation, "linear" )
 		self.assertEqual( m, m.copy() )
-		m.save( "test/mesh.sql" )
-		mm = Object.load( "test/mesh.sql" )
+		m.save( "test/mesh.fio" )
+		mm = Object.load( "test/mesh.fio" )
 		self.assertEqual( m, mm )
 		
 		vertsPerFace = IntVectorData( [ 3, 3 ] )
@@ -70,8 +70,8 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assert_( not m.vertexIds.isSame( vertexIds ) )
 		self.assertEqual( m.interpolation, "catmullClark" )
 		self.assertEqual( m, m.copy() )
-		m.save( "test/mesh.sql" )
-		mm = Object.load( "test/mesh.sql" )
+		m.save( "test/mesh.fio" )
+		mm = Object.load( "test/mesh.fio" )
 		self.assertEqual( m, mm )
 
 		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
@@ -79,8 +79,8 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		
 	def tearDown( self ) :
 	
-		if os.path.isfile("test/mesh.sql"):
-			os.remove("test/mesh.sql")
+		if os.path.isfile("test/mesh.fio"):
+			os.remove("test/mesh.fio")
 		
 if __name__ == "__main__":
     unittest.main()   

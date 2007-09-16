@@ -49,7 +49,7 @@ class TestBlindDataHolder(unittest.TestCase):
 		b = BlindDataHolder(c)
 		
 		self.assertEqual( b.typeName(), "BlindDataHolder" )
-#		self.failIf( Object.isAbstractType( "BlindDataHolder") )
+		self.failIf( Object.isAbstractType( "BlindDataHolder") )
 		
 	def testBlindData(self):
 		"""Test BlindDataHolder blindData"""
@@ -73,15 +73,15 @@ class TestBlindDataHolder(unittest.TestCase):
 		b1.blindData()["floatData"] = FloatData(1.0)
 		b1.blindData()["intData"] = IntData(-5)
 
-		b1.save("test/BlindDataHolder.sql")
+		b1.save("test/BlindDataHolder.fio")
 
-		b2 = Object.load("test/BlindDataHolder.sql")	
+		b2 = Object.load("test/BlindDataHolder.fio")	
 		self.assertEqual( b1, b2 )
 		
 	def tearDown(self):
 	
-		if os.path.isfile("./test/BlindDataHolder.sql") :
-                        os.remove("./test/BlindDataHolder.sql")
+		if os.path.isfile("./test/BlindDataHolder.fio") :
+                        os.remove("./test/BlindDataHolder.fio")
 
 		
 
