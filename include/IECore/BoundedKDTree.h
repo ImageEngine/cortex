@@ -76,6 +76,7 @@ class BoundedKDTree
 		
 		unsigned char majorAxis( PermutationConstIterator permFirst, PermutationConstIterator permLast );
 		void build( NodeIndex nodeIndex, PermutationIterator permFirst, PermutationIterator permLast );
+		void bound( NodeIndex nodeIndex );
 		
 		void intersectingBoundsWalk( NodeIndex nodeIndex, const Bound &b, std::vector<BoundIterator> &bounds ) const;
 		

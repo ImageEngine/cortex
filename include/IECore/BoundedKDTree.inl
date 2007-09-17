@@ -188,6 +188,30 @@ unsigned char BoundedKDTree<BoundIterator>::majorAxis( PermutationConstIterator 
 }
 
 template<class BoundIterator>
+void BoundedKDTree<BoundIterator>::bound( NodeIndex nodeIndex  )
+{
+	const Node &node = m_nodes[nodeIndex];
+	if( node.isLeaf() )
+	{
+		BoundIterator *permLast = node.permLast();
+		for( BoundIterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		{
+			node.bound().extendBy( **perm );
+		}
+	}
+	else
+	{	
+		assert( node.isBranch() );
+		
+		bound( Node::lowChildIndex( nodeIndex ) );						
+		bound( Node::highChildIndex( nodeIndex ) );
+		node.bound().extendBy( m_nodes[Node::lowChildIndex( nodeIndex )].bound() );
+		node.bound().extendBy( m_nodes[Node::highChildIndex( nodeIndex )].bound() );			
+	}
+}
+
+
+template<class BoundIterator>
 void BoundedKDTree<BoundIterator>::build( NodeIndex nodeIndex, PermutationIterator permFirst, PermutationIterator permLast )
 {
 	// make room for the new node
@@ -208,22 +232,12 @@ void BoundedKDTree<BoundIterator>::build( NodeIndex nodeIndex, PermutationIterat
 		node.makeBranch( cutAxis );
 		
 		build( Node::lowChildIndex( nodeIndex ), permFirst, permMid );						
-		build( Node::highChildIndex( nodeIndex ), permMid, permLast );
-		
-		// extend bound to contain children
-		node.bound().extendBy( m_nodes[Node::lowChildIndex( nodeIndex )].bound() );		
-		node.bound().extendBy( m_nodes[Node::highChildIndex( nodeIndex )].bound() );				
+		build( Node::highChildIndex( nodeIndex ), permMid, permLast );		
 	}
 	else
 	{
 		// leaf node
 		node.makeLeaf( permFirst, permLast );
-		
-		BoundIterator *permLast = node.permLast();
-		for( BoundIterator *perm = node.permFirst(); perm!=permLast; perm++ )
-		{
-			node.bound().extendBy( **perm );
-		}
 	}
 }
 
@@ -240,6 +254,7 @@ BoundedKDTree<BoundIterator>::BoundedKDTree( BoundIterator first, BoundIterator 
 	}
 	
 	build( Node::rootIndex(), m_perm.begin(), m_perm.end() );
+	bound( Node::rootIndex() );
 }
 
 
