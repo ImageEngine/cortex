@@ -163,6 +163,38 @@ class TestBoundedKDTreeBox2f(unittest.TestCase, TestBoundedKDTree):
 			self.doIntersectingBounds(t)	
 			
 
+class TestBoundedKDTreeBox2d(unittest.TestCase, TestBoundedKDTree):
+
+	def makeBound( self ) :
+		b1 = V2d( random.random(), random.random() )
+		b2 = V2d( random.random(), random.random() )
+		bound = Box2d( b1 )
+		bound.extendBy( b2 )
+		
+		return bound
+
+
+	def makeTree(self, numBounds):
+		# Make tree creation repeatable, but different for every size
+		random.seed(100 + 5 * numBounds)
+		self.bounds = Box2dVectorData()
+		
+		for i in range(0, numBounds):
+			self.bounds.append( self.makeBound() )
+				
+		self.tree = Box2dTree( self.bounds )
+	
+	def testConstructors(self):
+		"""Test BoundedKDTreeBox2d constructors"""
+		
+		for t in self.treeSizes:
+			self.makeTree(t)
+			
+	def testIntersectingBounds(self):
+		"""Test BoundedKDTreeBox2d intersectingBounds"""
+		
+		for t in self.treeSizes:
+			self.doIntersectingBounds(t)	
 
 	
 if __name__ == "__main__":
