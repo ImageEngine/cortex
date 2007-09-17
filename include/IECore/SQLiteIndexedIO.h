@@ -43,7 +43,8 @@
 // forward declaration to avoid including the sqlite headers
 // in the public interface
 struct sqlite3_context;
-struct sqlite3_value;
+struct Mem;
+typedef struct Mem sqlite3_value;
 
 #include "IndexedIOInterface.h"
 #include "Exception.h"
