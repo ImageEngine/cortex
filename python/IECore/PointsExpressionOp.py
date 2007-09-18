@@ -84,7 +84,7 @@ class PointsExpressionOp( ModifyOp ) :
 					except :
 						pass
 						
-				self.__vectors["remove"] = IntVectorData( p.numPoints )
+				self.__vectors["remove"] = BoolVectorData( p.numPoints )
 				self.__haveRemovals = False
 				
 			def __getitem__( self, n ) :
@@ -133,7 +133,7 @@ class PointsExpressionOp( ModifyOp ) :
 				try :
 					primVar = pointsPrim[k]
 					if len( primVar.data )==pointsPrim.numPoints :
-						primVar.data = self.__filter( primVar.data, removals )
+						primVar.data = VectorDataFilterOp()( input = primVar.data, filter = removals )
 						pointsPrim[k] = primVar
 						newNumPoints = primVar.data.size()
 				except :
@@ -141,14 +141,5 @@ class PointsExpressionOp( ModifyOp ) :
 					pass
 					
 			pointsPrim.numPoints = newNumPoints
-					
-	def __filter( self, data, remove ) :
-	
-		## \todo Implement in c++
-		result = Object.create( data.typeId() )
-		for i in range( 0, data.size() ) :
-			if not remove[i] :
-				result.append( data[i] )
-		return result
 		
 makeRunTimeTyped( PointsExpressionOp, 100013, ModifyOp )
