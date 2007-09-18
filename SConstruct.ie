@@ -394,6 +394,9 @@ corePythonModule.getLibrary().addLibPath('.')
 corePythonModule.getLibrary().addLib(coreLibName)
 corePythonModule.getLibrary().addLib(libs['boost']['python'])
 corePythonModule.getLibrary().addLibs( coreLibrary.getLibs() )
+corePythonModule.getLibrary().addDefine( "IECORE_WITH_TIFF" )
+corePythonModule.getLibrary().addDefine( "IECORE_WITH_JPEG" )
+corePythonModule.getLibrary().addDefine( "IECORE_WITH_SQL" )
 
 corePythonModule.finalize()
 
