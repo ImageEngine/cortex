@@ -32,30 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
-// regarding redefinition of _POSIX_C_SOURCE
-#include <boost/python.hpp>
-
-#include "IECore/VisibleRenderable.h"
-#include "IECore/bindings/VisibleRenderableBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
-
-using namespace boost::python;
+#ifndef IE_COREPYTHON_HIERARCHICALCACHEBINDING_H
+#define IE_COREPYTHON_HIERARCHICALCACHEBINDING_H
 
 namespace IECore
 {
-
-void bindVisibleRenderable()
-{
-	typedef class_< VisibleRenderable, boost::noncopyable, VisibleRenderablePtr, bases<Renderable> > VisibleRenderablePyClass;
-	VisibleRenderablePyClass("VisibleRenderable", "An abstract class to define objects which create visible results but don't leave renderer state unchanged.", no_init)
-		.def( "bound", &VisibleRenderable::bound )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(VisibleRenderable)
-	;
-	INTRUSIVE_PTR_PATCH( VisibleRenderable, VisibleRenderablePyClass );
-	implicitly_convertible<VisibleRenderablePtr, RenderablePtr>();
-	implicitly_convertible<VisibleRenderablePtr, ConstVisibleRenderablePtr>();
+void bindHierarchicalCache();
 }
 
-}
+#endif // IE_COREPYTHON_HIERARCHICALCACHEBINDING_H

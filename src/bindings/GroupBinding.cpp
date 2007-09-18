@@ -90,6 +90,7 @@ void bindGroup()
 	;
 	INTRUSIVE_PTR_PATCH( Group, GroupPyClass );
 	implicitly_convertible<GroupPtr, VisibleRenderablePtr>();
+	implicitly_convertible<GroupPtr, ConstGroupPtr>();
 }
 
 }

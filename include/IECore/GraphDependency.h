@@ -32,30 +32,44 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
-// regarding redefinition of _POSIX_C_SOURCE
-#include <boost/python.hpp>
+#ifndef IE_CORE_GRAPHDEPENDENCY_H
+#define IE_CORE_GRAPHDEPENDENCY_H
 
-#include "IECore/VisibleRenderable.h"
-#include "IECore/bindings/VisibleRenderableBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
-
-using namespace boost::python;
+#include <IECore/RefCounted.h>
 
 namespace IECore
 {
 
-void bindVisibleRenderable()
+///Abstract template class for lazy computation of dependencies on any kind of graph.
+///The compute virtual method is application dependent.
+///The templated type specifies the key used to identify graph nodes.
+template< typename T>
+class GraphDependency : public RefCounted
 {
-	typedef class_< VisibleRenderable, boost::noncopyable, VisibleRenderablePtr, bases<Renderable> > VisibleRenderablePyClass;
-	VisibleRenderablePyClass("VisibleRenderable", "An abstract class to define objects which create visible results but don't leave renderer state unchanged.", no_init)
-		.def( "bound", &VisibleRenderable::bound )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(VisibleRenderable)
-	;
-	INTRUSIVE_PTR_PATCH( VisibleRenderable, VisibleRenderablePyClass );
-	implicitly_convertible<VisibleRenderablePtr, RenderablePtr>();
-	implicitly_convertible<VisibleRenderablePtr, ConstVisibleRenderablePtr>();
-}
+	public:
 
-}
+		///Triggers recursive computation on all dirty nodes.
+		virtual void update( ) = 0;
+				
+		///Triggers recursive computation on all dirty nodes dependent on the given node including itself.
+		virtual void update( const T &node ) = 0;
+
+		///Set the dirty flag for the given node.
+		virtual void setDirty( const T &node ) = 0;
+
+		///Verifies if a node is set dirty.
+		virtual bool getDirty( const T &node ) = 0;
+
+		///Clear all dirty node flags.
+		virtual void clear() = 0;
+
+	protected:
+
+		///Updates a node. It's guarantee that all dependent nodes are updated.
+		virtual void compute( const T &node ) = 0;
+};
+
+
+} // namespace IECore
+
+#endif //IE_CORE_GRAPHDEPENDENCY_H

@@ -117,6 +117,7 @@
 #include "IECore/bindings/InterpolatedCacheBinding.h"
 #include "IECore/bindings/TransformationMatrixBinding.h"
 #include "IECore/bindings/TransformationMatrixDataBinding.h"
+#include "IECore/bindings/HierarchicalCacheBinding.h"
 #include "IECore/bindings/BoundedKDTreeBinding.h"
 #include "IECore/bindings/VectorDataFilterOpBinding.h"
 #include "IECore/IECore.h"
@@ -215,6 +216,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindInterpolatedCache();
 	bindTransformationMatrix();
 	bindTransformationMatrixData();
+	bindHierarchicalCache();
 	bindBoundedKDTree();
 	bindVectorDataFilterOp();
 	

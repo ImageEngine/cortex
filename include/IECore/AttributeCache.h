@@ -51,8 +51,6 @@ IE_CORE_FORWARDDECLARE( CompoundObject );
 ///any errors are encountered.
 class AttributeCache : public RefCounted
 {
-	friend class AttributeCacheInitializer;
-	
 	public:
 				
 		typedef std::string ObjectHandle;

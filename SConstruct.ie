@@ -192,7 +192,8 @@ coreSources = 		[
 				'src/PointDensitiesOp.cpp',		
 				'src/TransformationMatrix.cpp',
 				'src/TransformationMatrixData.cpp',
-				'src/VectorDataFilterOp.cpp'
+				'src/VectorDataFilterOp.cpp',
+				'src/HierarchicalCache.cpp',
 		   ]
 		
 coreIncludes = 		[ 	
@@ -333,6 +334,7 @@ corePythonSources = 	[
 				'src/bindings/TransformationMatrixBinding.cpp',
 				'src/bindings/TransformationMatrixDataBinding.cpp',
 				'src/bindings/VectorDataFilterOpBinding.cpp',
+				'src/bindings/HierarchicalCacheBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

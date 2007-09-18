@@ -38,6 +38,7 @@ import sys
 
 from ClassLoader import *
 from AttributeCache import *
+from HierarchicalCache import *
 from BlindDataHolder import *
 from CompoundData import *
 from CompoundObject import *

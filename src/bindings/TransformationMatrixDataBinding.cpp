@@ -100,6 +100,7 @@ void bindTypedTransformationMatrixData( const char *bindName )
 	INTRUSIVE_PTR_PATCH( TypedData< TransformationMatrix<T> >, typename ThisPyClass );
 
 	implicitly_convertible< intrusive_ptr< TypedData< TransformationMatrix<T> > >, DataPtr>();
+	implicitly_convertible< intrusive_ptr< TypedData< TransformationMatrix<T> > >, intrusive_ptr< TypedData< TransformationMatrix<T> > const > >();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

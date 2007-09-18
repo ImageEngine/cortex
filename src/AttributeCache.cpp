@@ -51,6 +51,18 @@ AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode
 		m_io->mkdir("/headers");
 		m_io->mkdir("/objects");
 	}
+	if ( mode == IndexedIO::Read )
+	{
+		try
+		{
+			m_io->chdir("/headers");
+			m_io->chdir("/objects");
+		}
+		catch (IECore::Exception &e)
+		{
+			throw Exception("Not an AttributeCache file.");
+		}
+	}
 }
 
 void AttributeCache::write( const ObjectHandle &obj, const AttributeHandle &attr, ObjectPtr data)
