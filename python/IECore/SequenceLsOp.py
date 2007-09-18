@@ -133,7 +133,6 @@ class SequenceLsOp( Op ) :
 		
 			filteredSequences = []
 			extensions = set( ["." + e for e in operands.extensions] )
-			print extensions	
 			for sequence in sequences :
 				root, ext = os.path.splitext( sequence.fileName )
 				if ext in extensions :
