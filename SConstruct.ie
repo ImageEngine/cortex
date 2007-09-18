@@ -407,8 +407,7 @@ corePythonModule.finalize()
 corePython = corePythonModule.getTargets()
 env.Depends( corePython, core )
 
-do = env.Command( "scripts/do", "scripts/do.in", [ "sed 's:!CORE_VERSION!:"+coreMajorVersion+":' < $SOURCE > $TARGET", Chmod( "$TARGET", 0755 ) ] )
-doInstall = env.InstallAs( os.path.join( corePythonModule.getInstallPrefix(), "apps", "do", coreMajorVersion, "do" ), do )
+doInstall = env.InstallAs( os.path.join( corePythonModule.getInstallPrefix(), "apps", "do", coreMajorVersion, "do" ), "scripts/do" )
 
 env.Alias( "install", [ doInstall ] )
 
@@ -486,7 +485,7 @@ if not ARGUMENTS.has_key("TESTSCRIPT"):
 
 env.Alias('test', corePythonTestRun )
 		  
-env.Alias('all', [core, corePython, do] )
+env.Alias('all', [core, corePython] )
   
 Default('all')
 
