@@ -52,6 +52,7 @@ class BoolVectorDataTest( unittest.TestCase ) :
 			b = BoolVectorData( s )
 			self.assertEqual( s, len( b ) )
 			for j in range( 0, len( b ) ) :
+				self.assertEqual( b[j], False )
 				v = random.choice( trueFalse )
 				b[j] = v
 				self.assertEqual( b[j], v )
