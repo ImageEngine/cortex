@@ -201,6 +201,7 @@ enum TypeId
 	PointDensitiesOpTypeId = 158,
 	DPXImageWriterTypeId = 159,
 	BoolVectorDataTypeId = 160,
+	VectorDataFilterOpTypeId = 161,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	

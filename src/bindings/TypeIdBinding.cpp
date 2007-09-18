@@ -204,6 +204,7 @@ void bindTypeId()
 		.value("PointNormalsOp", PointNormalsOpTypeId)
 		.value("PointDensitiesOp", PointDensitiesOpTypeId)
 		.value("BoolVectorData", BoolVectorDataTypeId)
+		.value("VectorDataFilterOp", VectorDataFilterOpTypeId)
 	;
 }
 

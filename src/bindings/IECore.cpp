@@ -118,6 +118,7 @@
 #include "IECore/bindings/TransformationMatrixBinding.h"
 #include "IECore/bindings/TransformationMatrixDataBinding.h"
 #include "IECore/bindings/BoundedKDTreeBinding.h"
+#include "IECore/bindings/VectorDataFilterOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -215,6 +216,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTransformationMatrix();
 	bindTransformationMatrixData();
 	bindBoundedKDTree();
+	bindVectorDataFilterOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
