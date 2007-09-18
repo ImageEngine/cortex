@@ -149,7 +149,11 @@ IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4f, Color4fVectorDataType
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color3<double>, Color3dVectorDataTypeId, Color3dVectorData, double, 3 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4<double>, Color4dVectorDataTypeId, Color4dVectorData, double, 4 )
 
-// the string type needs it's own memoryUsage so we don't use the macro for it's specialisations
+// the string type needs it's own memoryUsage so we don't use the whole macro for it's specialisations
+
+IE_CORE_DEFINEVECTORTYPEDDATACOMMONSPECIALISATION( std::string, StringVectorDataTypeId, StringVectorData )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATAIOSPECIALISATION( string )
+
 template<>
 void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 {
@@ -166,53 +170,67 @@ void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 	accumulator.accumulate( &readable(), sizeof(std::vector<string>) + count );
 }
 
+// the boolean type need it's own io and memoryUsage so we don't use the whole macro for it's specialisations either
+
+IE_CORE_DEFINEVECTORTYPEDDATACOMMONSPECIALISATION( bool, BoolVectorDataTypeId, BoolVectorData )
+
 template<>
-TypeId StringVectorData::typeId() const
+void BoolVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 {
-	return StringVectorDataTypeId;
+	Data::memoryUsage( accumulator );
+	accumulator.accumulate( &readable(), sizeof(std::vector<bool>) + readable().capacity() / 8 );
 }
 
 template<>
-TypeId StringVectorData::staticTypeId()
+void BoolVectorData::save( Object::SaveContext *context ) const
 {
-	return StringVectorDataTypeId;
-}
-
-template<>
-std::string StringVectorData::typeName() const
-{
-	return "StringVectorData";
-}
-
-template<>
-std::string StringVectorData::staticTypeName()
-{
-	return "StringVectorData";
-}
-		
-template<>																						
-void StringVectorData::save( SaveContext *context ) const	
-{																							
 	Data::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
-	container->write( "value", &(readable()[0]), readable().size() );
+	// we can't write out the raw data from inside the vector 'cos it's specialised
+	// to optimise for space, and that means the only access to the data is through
+	// a funny proxy class. so we repack the data into something we can deal with
+	// and write that out instead. essentially i think we're making exactly the same
+	// raw data. rubbish.
+	const std::vector<bool> &b = readable();
+	std::vector<unsigned char> p;
+	unsigned int s = b.size();
+	p.resize( s/8 + 1, 0 );
+
+	for( unsigned int i=0; i<b.size(); i++ )
+	{
+		if( b[i] )
+		{
+			p[i/8] |= 1 << (i % 8);
+		}
+	}
+	
+	container->write( "size", s );
+	container->write( "value", &(p[0]), p.size() );
 }
 
-template<>																						
-void StringVectorData::load( LoadContextPtr context )	
-{																							
+template<>
+void BoolVectorData::load( LoadContextPtr context )
+{
 	Data::load( context );
 	unsigned int v = 0;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	IndexedIO::Entry e = container->ls( "value" );
-	writable().resize( e.arrayLength() );
-	std::string *p = &(writable()[0]);
-	container->read( "value", p, e.arrayLength() );
-}										
-
+	
+	unsigned int s = 0;
+	container->read( "size", s );
+	std::vector<unsigned char> p;
+	p.resize( s / 8 + 1 );
+	unsigned char *value = &(p[0]);
+	container->read( "value", value, p.size() );
+	std::vector<bool> &b = writable();
+	b.resize( s, false );
+	for( unsigned int i=0; i<s; i++ )
+	{
+		b[i] = ( p[i/8] >> (i % 8) ) & 1;
+	}
 }
 	
 // explicitly instantiate each of the types we defined in the public ui.
+template class TypedData<vector<bool> >;
 template class TypedData<vector<half> >;
 template class TypedData<vector<float> >;
 template class TypedData<vector<double> >;
@@ -240,3 +258,5 @@ template class TypedData<vector<M44d> >;
 template class TypedData<vector<Quatf> >;
 template class TypedData<vector<Quatd> >;
 template class TypedData<vector<string> >;
+
+} // namespace IECore

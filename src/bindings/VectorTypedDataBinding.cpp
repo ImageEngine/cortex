@@ -72,9 +72,53 @@ IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( char )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( unsigned char )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( std::string )
 
+// we have to specialise the repr() and str() separately here, because of
+// the whole vector<bool> is not a container thing.
+template<>																
+std::string repr<BoolVectorData>( BoolVectorData &x )					
+{																		
+	std::stringstream s;												
+	s << x.typeName() << "( [ ";										
+	const std::vector<bool> &xd = x.readable();	
+	for( size_t i=0; i<xd.size(); i++ )									
+	{	
+		bool b = xd[i];																
+		s << repr( b );						
+		if( i!=xd.size()-1 )											
+		{																
+			s << ", ";													
+		}																
+	}																	
+	s<< " ] )";															
+	return s.str();														
+}																		
+																		
+																		
+template<>																			
+std::string str<BoolVectorData>( BoolVectorData &x )	
+{																					
+	std::stringstream s;															
+	const std::vector<bool> &xd = x.readable();				
+	for( size_t i=0; i<xd.size(); i++ )												
+	{																				
+		bool b = xd[i];																
+		s << str( b );									
+		if( i!=xd.size()-1 )														
+		{																			
+			s << " ";																
+		}																			
+	}																				
+	return s.str();																	
+}																					
+
 void bindAllVectorTypedData()
 {
 	// basic types
+	BIND_VECTOR_TYPEDDATA( 
+		bool,
+		"BoolVectorData",
+		"bool")
+		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA( 
 		half,
 		"HalfVectorData",

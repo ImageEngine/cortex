@@ -144,6 +144,7 @@ __dataTypesConversionDict = {
 	IECore.M44fData: (IECore.M44f, True),
 	IECore.M44dData: (IECore.M44d, True),
 
+	IECore.BoolVectorData: ( list, False, bool),
 	IECore.CharVectorData: (list, False, str),
 	IECore.UCharVectorData: (list, False, int),
 	IECore.IntVectorData: (list, False, int),

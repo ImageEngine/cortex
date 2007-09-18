@@ -203,6 +203,7 @@ void bindTypeId()
 		.value("TransformationMatrixdData", TransformationMatrixdDataTypeId)
 		.value("PointNormalsOp", PointNormalsOpTypeId)
 		.value("PointDensitiesOp", PointDensitiesOpTypeId)
+		.value("BoolVectorData", BoolVectorDataTypeId)
 	;
 }
 

@@ -48,6 +48,7 @@ namespace IECore
 {
 
 // vectors for basic types
+typedef TypedData< std::vector< bool > > BoolVectorData;
 typedef TypedData< std::vector< half > > HalfVectorData;
 typedef TypedData< std::vector< float > > FloatVectorData;
 typedef TypedData< std::vector< double > > DoubleVectorData;
@@ -79,6 +80,7 @@ typedef TypedData< std::vector< Imath::Color3<double> > > Color3dVectorData;
 typedef TypedData< std::vector< Imath::Color4<double> > > Color4dVectorData;
 
 // pointers to vectors of basic types
+IE_CORE_DECLAREPTR( BoolVectorData );
 IE_CORE_DECLAREPTR( HalfVectorData );
 IE_CORE_DECLAREPTR( FloatVectorData );
 IE_CORE_DECLAREPTR( DoubleVectorData );
