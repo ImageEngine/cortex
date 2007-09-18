@@ -35,7 +35,7 @@
 ## The Struct class provides an incredibly simple container with
 # attribute access defined. It's useful for testing and provides
 # a handy alternative to a dictionary at times.
-class Struct() :
+class Struct:
 
 	def __init__( self, **kwargs ) :
 	
