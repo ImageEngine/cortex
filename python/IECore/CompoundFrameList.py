@@ -74,7 +74,7 @@ class CompoundFrameList( FrameList.FrameList ) :
 	def __str__( self ) :
 	
 		self.__checkList( self.frameLists )
-		return ", ".join( [ str( l ) for l in self.frameLists ] )
+		return ",".join( [ str( l ) for l in self.frameLists ] )
 
 	## Returns all the frames represented by the FrameLists in self.frameLists.
 	# Frames are returned in the order specified by self.frameLists, but duplicate

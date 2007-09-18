@@ -64,7 +64,7 @@ class testBinaryFrameList( unittest.TestCase ) :
 		self.assertEqual( str( r ), "1-11x2b" )
 		
 		r = BinaryFrameList( CompoundFrameList( [ FrameRange( 1, 10 ), FrameRange( 20, 30 ) ] )  )
-		self.assertEqual( str( r ), "(1-10, 20-30)b" )
+		self.assertEqual( str( r ), "(1-10,20-30)b" )
 		
 	def testPreservation( self ) :
 	

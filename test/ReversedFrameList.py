@@ -68,10 +68,10 @@ class testReversedFrameList( unittest.TestCase ) :
 		self.assertEqual( str( r ), "1-11x2r" )
 		
 		r = ReversedFrameList( CompoundFrameList( [ FrameRange( 1, 10 ), FrameRange( 20, 30 ) ] )  )
-		self.assertEqual( str( r ), "(1-10, 20-30)r" )
+		self.assertEqual( str( r ), "(1-10,20-30)r" )
 		
 		r = CompoundFrameList( [ FrameRange( 1, 10 ), ReversedFrameList( FrameRange( 20, 30 ) ) ] )
-		self.assertEqual( str( r ), "1-10, 20-30r" )
+		self.assertEqual( str( r ), "1-10,20-30r" )
 		
 	def testImpactOnOtherParsing( self ) :
 	
