@@ -70,13 +70,24 @@ class SequenceLsOp( Op ) :
 				),
 				StringParameter( 
 					name = "resultType",
-					description = "The format of the result",
+					description = "The type of the result returned.",
 					defaultValue = "string",
 					presets = {
 						"string" : "string",
 						"stringVector" : "stringVector",
 					},
 					presetsOnly = True,
+				),
+				StringParameter(
+					name = "format",
+					description = "The format of the result. This can be used to return strings suitable for viewing a sequence in a particular package.",
+					defaultValue = "<PREFIX><#PADDING><SUFFIX> <FRAMES>",
+					presets = {
+						"shake" : "shake -t <FRAMES> <PREFIX>#<SUFFIX>",
+						"nuke" : "nuke -v <PREFIX>%0<PADDINGSIZE>d<SUFFIX> <FIRST>,<LAST>",
+						"fcheck" : "fcheck -n <FIRST> <LAST> <STEP> <PREFIX><@PADDING><SUFFIX>",
+						"frameCycler" : "framecycler <PREFIX><#PADDING><SUFFIX>",
+					}
 				),
 				StringVectorParameter(
 					name = "extensions",
@@ -129,11 +140,45 @@ class SequenceLsOp( Op ) :
 					filteredSequences.append( sequence )
 		
 			sequences = filteredSequences
+		
+		# reformat the sequences into strings as requested
+		
+		for i in range( 0, len( sequences ) ) :
 			
-		# return the result in the requested format					
+			s = operands.format.value
+			s = s.replace( "<PREFIX>", sequences[i].getPrefix() )
+			
+			pi = s.find( "PADDING>" )
+			if pi > 1 and s[pi-2]=='<' :
+				s = s[:pi-2] + "".ljust( sequences[i].getPadding(), s[pi-1] ) + s[pi+8:]
+			
+			s = s.replace( "<PADDINGSIZE>", str( sequences[i].getPadding() ) )
+			s = s.replace( "<SUFFIX>", sequences[i].getSuffix() )
+			s = s.replace( "<FRAMES>", str( sequences[i].frameList ) )
+			
+			frames = sequences[i].frameList.asList()
+			frames.sort()
+			s = s.replace( "<FIRST>", str( frames[0] ) )
+			s = s.replace( "<LAST>", str( frames[-1] ) )
+			if s.find( "<STEP>" )!=-1 :
+				stepCounts = {}
+				for j in range( 1, len( frames ) ) :
+					step = frames[j] - frames[j-1]
+					stepCounts[step] = stepCounts.setdefault( step, 0 ) + 1
+				m = 0
+				step = 1
+				for k, v in stepCounts.items() :
+					if v > m :
+						step = k
+						m = v
+				s = s.replace( "<STEP>", str( step ) )
+			
+			sequences[i] = s
+			
+		# return the result as the requested type					
 		if operands.resultType.value == "string" :
-			return StringData( "\n".join( [str(s) for s in sequences] ) )
+			return StringData( "\n".join( sequences ) )
 		else :
-			return StringVectorData( [str(s) for s in sequences] )
+			return StringVectorData( sequences )
 
 makeRunTimeTyped( SequenceLsOp, 100006, Op )
