@@ -46,7 +46,7 @@ namespace IECore
 ///Abstract template class for lazy computation of dependencies on a tree graph.
 ///The templated type specifies the key used to identify graph nodes.
 ///It assumes the compute function will propagate the dirty flag to the parent nodes if that is the case.
-///It also assumes the comparison operator "<" always return true when comparing parents to their children. And if parents A < B is true then child(A) < child(B) is also true.
+///It also assumes the comparison operator ">" always return true when comparing children to their parents. Also if A > B is true then child(A) > child(B).
 ///This class holds a list of ordered dirty nodes reflecting the tree dependencies. So care should be taken if the nodes change their connections possibly affecting
 ///the key order.
 template< typename T >
@@ -80,16 +80,6 @@ class TreeGraphDependency : public GraphDependency<T>
 		virtual bool isDescendant( const T &node1, const T &node2 ) const = 0;
 
 	protected:
-
-		// binary operator used for sorting dirty list in descending order.
-		struct TreeOrdering : public std::binary_function< T, T, bool >
-		{
-				bool operator()( const T &lhs, const T &rhs ) const
-				{
-					return rhs < lhs;
-				}
-
-		} m_treeOrdering;
 
 		typedef std::list< T > DirtyList;
 		///Internal list of dirty nodes.

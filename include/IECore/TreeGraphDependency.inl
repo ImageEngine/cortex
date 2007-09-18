@@ -41,23 +41,13 @@ void TreeGraphDependency<T>::update( )
 template< typename T >
 void TreeGraphDependency<T>::update( const T &node )
 {
-	typename DirtyList::iterator i = lower_bound(  m_dirtyNodes.begin(), m_dirtyNodes.end(), node, m_treeOrdering );
+	typename DirtyList::iterator i = lower_bound(  m_dirtyNodes.begin(), m_dirtyNodes.end(), node, std::greater< T >() );
 	update( node, i );
 }
 
 template< typename T >
 void TreeGraphDependency<T>::update( const T &node, typename DirtyList::iterator pos )
 {
-
-/*
-std::cerr << "updateNode: " << node << std::endl;
-std::cerr << ">>----------------------------------------" << std::endl;
-for ( typename DirtyList::iterator a = m_dirtyNodes.begin(); a != m_dirtyNodes.end(); a++)
-{
-	std::cerr << "  " << *a << std::endl;
-}
-std::cerr << "<<----------------------------------------" << std::endl;
-*/
 
 	if ( !m_dirtyNodes.size() )
 	{
@@ -78,16 +68,6 @@ std::cerr << "<<----------------------------------------" << std::endl;
 		{
 			// descendant items should be updated first.
 			update( *childIt, childIt );
-
-/*std::cerr << "after updateNode in child: " << std::endl;
-std::cerr << ">>----------------------------------------" << std::endl;
-for ( typename DirtyList::iterator a = m_dirtyNodes.begin(); a != m_dirtyNodes.end(); a++)
-{
-	std::cerr << "  " << a->c_str() << std::endl;
-}
-std::cerr << "<<----------------------------------------" << std::endl;
-*/
-
 		}
 		else
 		{
@@ -117,7 +97,7 @@ void TreeGraphDependency<T>::setDirty( const T &node )
 template< typename T >
 void TreeGraphDependency<T>::setDirty( const T &node, typename DirtyList::iterator begin )
 {
-	typename DirtyList::iterator i = lower_bound(  begin, m_dirtyNodes.end(), node, m_treeOrdering );
+	typename DirtyList::iterator i = lower_bound(  begin, m_dirtyNodes.end(), node, std::greater< T >() );
 
 	if ( i != m_dirtyNodes.end() )
 	{
@@ -137,7 +117,7 @@ bool TreeGraphDependency<T>::getDirty( const T &node )
 	{
 		return false;
 	}
-	typename DirtyList::iterator it = lower_bound(  m_dirtyNodes.begin(), m_dirtyNodes.end(), node, m_treeOrdering );
+	typename DirtyList::iterator it = lower_bound(  m_dirtyNodes.begin(), m_dirtyNodes.end(), node, std::greater< T >() );
 	if ( it != m_dirtyNodes.end() && *it == node )
 	{
 		return true;
@@ -167,7 +147,7 @@ void TreeGraphDependency<T>::clear( const T &node )
 		return;
 	}
 
-	typename DirtyList::iterator pos = lower_bound(  m_dirtyNodes.begin(), m_dirtyNodes.end(), node, m_treeOrdering );
+	typename DirtyList::iterator pos = lower_bound(  m_dirtyNodes.begin(), m_dirtyNodes.end(), node, std::greater< T >() );
 	while( pos != m_dirtyNodes.begin() )
 	{
 		// check if the given node is connected to the previous item in the ordered list.
@@ -176,15 +156,6 @@ void TreeGraphDependency<T>::clear( const T &node )
 		{
 			// descendant items should be cleaned first.
 			m_dirtyNodes.erase( childIt );
-/*
-std::cerr << "after dirtyNodes erase in child: " << std::endl;
-std::cerr << ">>----------------------------------------" << std::endl;
-for ( typename DirtyList::iterator a = m_dirtyNodes.begin(); a != m_dirtyNodes.end(); a++)
-{
-	std::cerr << "  " << a->c_str() << std::endl;
-}
-std::cerr << "<<----------------------------------------" << std::endl;
-*/
 		}
 		else
 		{

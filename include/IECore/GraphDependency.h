@@ -41,8 +41,9 @@ namespace IECore
 {
 
 ///Abstract template class for lazy computation of dependencies on any kind of graph.
-///The compute virtual method is application dependent.
-///The templated type specifies the key used to identify graph nodes.
+///This class is not supposed to hold the graph itself. It actually should be used by graph objects that
+///contain implicit or explicit dependency connections. The compute virtual method is dependent on the graph it's being used.
+///The templated type T specifies the key used to identify graph nodes.
 template< typename T>
 class GraphDependency : public RefCounted
 {
