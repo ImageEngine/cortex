@@ -54,9 +54,11 @@ class Parameterised : public RunTimeTyped, public ParameterisedInterface
 		
 		/// The base class constructor receives the name and a short description about the Parameterised object created.
 		/// They are usually defined within the derived class constructors.
+		/// \todo Remove name - It doesn't add anything over and above typeName().
 		Parameterised( const std::string name, const std::string description );
 
 		/// Another constructor added later on that gives defines the CompoundParameter object to be hold in this Parameterised instance.
+		/// \todo Remove name - It doesn't add anything over and above typeName().
 		Parameterised( const std::string name, const std::string description, CompoundParameterPtr compoundParameter );
 
 		virtual ~Parameterised();
