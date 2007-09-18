@@ -77,12 +77,22 @@ class SequenceLsOp( Op ) :
 						"stringVector" : "stringVector",
 					},
 					presetsOnly = True,
+				),
+				StringVectorParameter(
+					name = "extensions",
+					description = "A list of file extensions which the sequences must have if they are to be listed. An empty list"
+						"means that any sequence will be listed. The . character should be omitted from the extension.",
+					defaultValue = StringVectorData(),
+					presets = {
+						"images" : StringVectorData( [ "tif", "tiff", "jpg", "jpeg", "exr", "cin", "dpx", "ppm", "png", "gif", "iff" ] )
+					}
 				)
 			]
 		)
 
 	def doOperation( self, operands ) :
 	
+		# recursively find sequences
 		baseDirectory = operands.dir.value
 		if baseDirectory[-1] == '/' :
 			baseDirectory = baseDirectory[:-1]
@@ -107,6 +117,20 @@ class SequenceLsOp( Op ) :
 							s.fileName = os.path.join( relRoot, d, s.fileName )
 							sequences.append( s )
 							
+		# filter sequences based on extension
+		if operands.extensions.size() :
+		
+			filteredSequences = []
+			extensions = set( ["." + e for e in operands.extensions] )
+			print extensions	
+			for sequence in sequences :
+				root, ext = os.path.splitext( sequence.fileName )
+				if ext in extensions :
+					filteredSequences.append( sequence )
+		
+			sequences = filteredSequences
+			
+		# return the result in the requested format					
 		if operands.resultType.value == "string" :
 			return StringData( "\n".join( [str(s) for s in sequences] ) )
 		else :
