@@ -81,5 +81,4 @@ class SequenceConvertOp( Op ) :
 			
 		return StringData(dst.fileName)
 
-# magic typeid number
-#makeRunTimeTyped( SequenceConvertOp, 100007, Op )
+makeRunTimeTyped( SequenceConvertOp, 100014, Op )

@@ -66,6 +66,7 @@ from SequenceLsOp import SequenceLsOp
 from SequenceMvOp import SequenceMvOp
 from SequenceRmOp import SequenceRmOp
 from SequenceRenumberOp import SequenceRenumberOp
+from SequenceConvertOp import SequenceConvertOp
 from FormattedParameterHelp import formatParameterHelp
 from ReadProcedural import ReadProcedural
 from ClassLsOp import ClassLsOp
