@@ -865,6 +865,12 @@ void FileIndexedIO::Index::deallocate( NodePtr n )
 void FileIndexedIO::Index::addFreePage(  Imf::Int64 offset, Imf::Int64 sz )
 {
 	assert( m_freePagesOffset.size() == m_freePagesSize.size() );
+	
+	if (sz == 0)
+	{
+		return;
+	}
+	
 	assert( m_freePagesOffset.find( offset ) == m_freePagesOffset.end() );
 	
 	/// Is there a free page immediately after this?
