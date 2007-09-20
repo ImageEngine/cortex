@@ -35,13 +35,14 @@
 import unittest
 import sys
 from IECore import *
+import IECore
 
 from math import pow
 
 class TestDPXReader(unittest.TestCase):
 
         testfile =    "test/data/dpx/bluegreen_noise.dpx"
-	testoutfile = "test/data/dpx/bluegreen_noise.testoutput.exr"
+	testoutfile = "test/data/dpx/bluegreen_noise.testoutput"
 
         def testConstruction(self):
                 
@@ -59,8 +60,20 @@ class TestDPXReader(unittest.TestCase):
 		self.assertEqual(type(img), IECore.ImagePrimitive)
 
 		# write test (DPX -> EXR)
-                w = IECore.Writer.create(img, self.testoutfile)
+                w = IECore.Writer.create(img, self.testoutfile + '.exr')
 		self.assertEqual(type(w), IECore.EXRImageWriter)
+
+		w.write()
+
+        def testWrite(self):
+
+                r = IECore.Reader.create('test/data/dpx/AA001_022_bgPlate_v001.0011.dpx')
+                #r = IECore.Reader.create('test/data/jpg/bluegreen_noise.400x300.jpg')
+		img = r.read()
+		
+		# write test
+                w = IECore.Writer.create(img, self.testoutfile + '.dpx')
+		self.assertEqual(type(w), IECore.DPXImageWriter)
 
 		w.write()
 

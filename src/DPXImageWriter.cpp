@@ -38,9 +38,9 @@
 #include "IECore/ByteOrder.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
-
-#include "IECore/dpx.h"
 #include "IECore/BoxOperators.h"
+
+#include "IECore/private/dpx.h"
 
 #include "boost/format.hpp"
 

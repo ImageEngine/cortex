@@ -36,10 +36,11 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/ByteOrder.h"
-#include "IECore/cineon.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/BoxOperators.h"
+
+#include "IECore/private/cineon.h"
 
 #include "boost/format.hpp"
 

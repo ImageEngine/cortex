@@ -45,6 +45,8 @@
 #define R32 float
 #define U8 unsigned char
 
+namespace IECore {
+
 typedef struct file_information {
   U32   magic;        /* magic number 0x53445058 (SDPX) or 0x58504453 (XPDS) */
   U32   image_data_offset;/* offset to image data in bytes */
@@ -143,5 +145,7 @@ typedef struct _television_header
     R32 integration_times;   /* integration time(s) */
     U8  reserved[76];        /* reserved for future use (padding) */
 } DPXTelevisionHeader;
+
+};
 
 #endif

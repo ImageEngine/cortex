@@ -39,7 +39,8 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/cineon.h"
+
+#include "IECore/private/cineon.h"
 
 #include "IECore/BoxOperators.h"
 

@@ -40,7 +40,7 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
 
-#include "IECore/dpx.h"
+#include "IECore/private/dpx.h"
 
 #include "IECore/BoxOperators.h"
 

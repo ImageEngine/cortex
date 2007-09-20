@@ -58,6 +58,8 @@
 // if the minimum code value is 0, representing 0.2 log exposure, and the maximum code value is 
 // 1169 representing 3.4 log exposure, then a code value of 584 represents 1.8 log exposure.
 
+namespace IECore {
+
 typedef struct fileinformation {
   U32 magic;                    // Magic number (802A5FD7 - hex) indicates
                                 // the start of image file and byte ordering
@@ -276,5 +278,6 @@ typedef struct motion_picture_information {
   ASCII reserved[740];
 } MotionPictureInformation;
 
+};
 
 #endif
