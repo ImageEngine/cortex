@@ -113,7 +113,6 @@ static void bindTypedObjectParameter( const char *name )
 
 void bindTypedObjectParameter()
 {
-	bindTypedObjectParameter<MeshPrimitive>( "MeshPrimitiveParameter" );
 	bindTypedObjectParameter<Renderable>( "RenderableParameter" );
 	bindTypedObjectParameter<StateRenderable>( "StateRenderableParameter" );
 	bindTypedObjectParameter<AttributeState>( "AttributeStateParameter" );
