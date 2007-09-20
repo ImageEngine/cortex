@@ -194,6 +194,7 @@ coreSources = 		[
 				'src/TransformationMatrixData.cpp',
 				'src/VectorDataFilterOp.cpp',
 				'src/HierarchicalCache.cpp',
+				'src/TypedObjectParameter.cpp',
 		   ]
 		
 coreIncludes = 		[ 	
@@ -335,6 +336,7 @@ corePythonSources = 	[
 				'src/bindings/TransformationMatrixDataBinding.cpp',
 				'src/bindings/VectorDataFilterOpBinding.cpp',
 				'src/bindings/HierarchicalCacheBinding.cpp',
+				'src/bindings/TypedObjectParameterBinding.cpp',				
 			]
 			
 corePythonPy = 	[ 			

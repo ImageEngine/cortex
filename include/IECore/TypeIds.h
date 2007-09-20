@@ -201,7 +201,21 @@ enum TypeId
 	PointDensitiesOpTypeId = 158,
 	DPXImageWriterTypeId = 159,
 	BoolVectorDataTypeId = 160,
-	VectorDataFilterOpTypeId = 161,
+	VectorDataFilterOpTypeId = 161,	
+	RenderableParameterTypeId = 162,
+	StateRenderableParameterTypeId = 163,
+	AttributeStateParameterTypeId = 164,
+	ShaderParameterTypeId = 165,
+	TransformParameterTypeId = 166,
+	MatrixMotionTransformParameterTypeId = 167,
+	MatrixTransformParameterTypeId = 168,
+	VisibleRenderableParameterTypeId = 169,
+	GroupParameterTypeId = 170,
+	MotionPrimitiveParameterTypeId = 171,
+	PrimitiveParameterTypeId = 172,
+	ImagePrimitiveParameterTypeId = 173,
+	MeshPrimitiveParameterTypeId = 174,
+	PointsPrimitiveParameterTypeId = 175,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	

@@ -939,6 +939,93 @@ class TestObjectParameter( unittest.TestCase ) :
 		
 		p = ObjectParameter( name = "name", description = "description", defaultValue = FloatData( 1 ), types = [TypeId.FloatData, TypeId.DoubleData, TypeId.IntData] )
 		self.assertEqual( p.valueValid( V3fData( V3f( 1 ) ) )[1], "Object is not of type FloatData, DoubleData or IntData" )
+		
+class TestTypedObjectParameter( unittest.TestCase ) :
+
+	def testConstructor( self ) :
+	
+		mesh = MeshPrimitive()
+		p = MeshPrimitiveParameter( "n", "d", mesh )
+		self.assertEqual( p.name, "n" )
+		self.assertEqual( p.description, "d" )
+		self.assertEqual( p.defaultValue, mesh )
+		self.assertEqual( p.getValue(), mesh )
+		self.assertEqual( p.userData(), CompoundObject() )
+		
+	def testUserData( self ):
+		compound = CompoundObject()
+		compound["first"] = IntData()
+		compound["second"] = QuatfData()
+		compound["third"] = StringData("test")
+		p = MeshPrimitiveParameter( "name", "description", MeshPrimitive(), userData = compound )
+		self.assertEqual( p.userData(), compound )
+		self.assert_(not p.userData().isSame(compound) )
+		data = p.userData()
+		data["fourth"] = CharData('1')
+		data["first"] = data["fourth"]
+
+	def testPresets( self ) :
+	
+		mesh1 = MeshPrimitive( IntVectorData([3]), IntVectorData([0,1,2]) )
+		mesh2 = MeshPrimitive( IntVectorData([3]), IntVectorData([1,2,3]) )
+		mesh3 = MeshPrimitive( IntVectorData([3]), IntVectorData([2,3,4]) )		
+		
+		p = MeshPrimitiveParameter(
+			name = "n",
+			description = "d",
+			defaultValue = mesh2,
+			presets = {
+				"one" : mesh1,
+				"two" : mesh2,
+				"three" : mesh3,
+			},
+			presetsOnly = True, 
+		)
+		
+		pr = p.presets()
+		self.assertEqual( len( pr ), 3 )
+		self.assertEqual( pr["one"], mesh1 )
+		self.assertEqual( pr["two"], mesh2 )
+		self.assertEqual( pr["three"], mesh3 )
+		
+		p.setValue( "one" )
+		self.assertEqual( p.getValue(), mesh1 )
+	
+	def testPresetsOnly( self ) :
+	
+		mesh1 = MeshPrimitive( IntVectorData([3]), IntVectorData([0,1,2]) )
+		mesh2 = MeshPrimitive( IntVectorData([3]), IntVectorData([1,2,3]) )
+		mesh3 = MeshPrimitive( IntVectorData([3]), IntVectorData([2,3,4]) )
+		
+		mesh4 = MeshPrimitive( IntVectorData([3]), IntVectorData([3,4,5]) )	
+		
+		p = MeshPrimitiveParameter(
+			name = "n",
+			description = "d",
+			defaultValue = mesh2,
+			presets = {
+				"one" : mesh1,
+				"two" : mesh2,
+				"three" : mesh3,
+			},
+			presetsOnly = True, 
+		)
+		
+		self.assertRaises( RuntimeError, p.setValidatedValue, mesh4 )	
+
+		p = MeshPrimitiveParameter(
+			name = "n",
+			description = "d",
+			defaultValue = mesh2,
+			presets = {
+				"one" : mesh1,
+				"two" : mesh2,
+				"three" : mesh3,
+			},
+			presetsOnly = False, 
+		)
+		
+		p.setValue( mesh4 )	
 										
 if __name__ == "__main__":
         unittest.main()
