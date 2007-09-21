@@ -42,6 +42,7 @@
 #include <boost/filesystem/operations.hpp> 
 
 #include "IECore/ByteOrder.h"
+#include "IECore/LRUCache.h"
 
 #include "IECore/FileIndexedIO.h"
 
@@ -79,119 +80,6 @@
 
 /// Version ::= int64
 /// MagicNumber ::= int64
-
-
-/// \todo This cache class should be extracted into a public header
-/// so it can be usable all over. The reason it isn't right now is that
-/// it isn't good enough. The principal problem is that we need to find
-/// a good return type for get() that will work with any Data type in the
-/// three cases we have 1) unable to get the object 2) getting the object
-/// but not putting it in the cache 3) getting the object from the cache.
-template<typename Key, typename Data, typename GetterFn>
-class LRUCache
-{
-	public:
-		typedef typename GetterFn::Cost Cost;
-		
-		typedef std::pair<Data, Cost> DataCost;
-	
-		typedef std::list< std::pair<Key, DataCost> > List;		
-		
-		typedef std::map< Key, typename List::iterator > Cache;
-		
-		Cost m_maxCost;
-		mutable Cost m_currentCost;
-		
-		mutable List m_list;
-		mutable Cache m_cache;
-		
-		LRUCache()
-		{
-			m_maxCost = 500;
-			m_currentCost = Cost();
-		}
-	
-		void clear()
-		{
-			m_currentCost = Cost();
-			m_list.clear();
-			m_cache.clear();
-		}
-		
-		Data get( const Key& key, GetterFn fn ) const
-		{
-			typename Cache::iterator it = m_cache.find( key );
-			
-			if ( it == m_cache.end() )
-			{
-				/// Not found in the cache, so compute the data and its associated cost
-				
-				Data data;
-				Cost cost;
-				bool found = fn.get( key, data, cost );
-				
-				if (found)
-				{
-					if (cost > m_maxCost)
-					{
-						/// Don't store as we'll exceed the maximum cost immediately. So just return
-						/// the data, without modifiying the cache.
-
-						return data;
-					}
-					
-					/// If necessary, clear out any data with a least-recently-used strategy until we
-					/// have enough remaining "cost" to store.
-					while (m_currentCost + cost > m_maxCost)
-					{
-						m_currentCost -= m_list.back().second.second;
-						
-						/// The back of the list contains the LRU entry.
-						m_cache.erase( m_list.back().first );						
-						m_list.pop_back();
-					}
-					
-					/// Update the cost to reflect the storage of the new item
-					m_currentCost += cost;
-					
-					/// Insert the item at the front of the list
-					std::pair<Key, DataCost> listEntry( key, DataCost( data, cost ) );						
-					m_list.push_front( listEntry );
-					
-					/// Add the item to the map
-					std::pair<typename Cache::iterator, bool> it  = m_cache.insert( typename Cache::value_type( key, m_list.begin() ) );
-					
-					assert( m_list.size() == m_cache.size() );
-
-//					/// Return the actual data
-					return (it.first->second)->second.first;					
-				}
-				else
-				{					
-					/// \todo We need a way of returning "NOT FOUND"
-					return Data();
-				}
-			}
-			else
-			{
-				/// Move the entry to the front of the list
-				std::pair<Key, DataCost> listEntry = *(it->second);
-				m_list.erase( it->second );
-				m_list.push_front( listEntry );
-				
-				assert( m_list.size() == m_cache.size() );
-				
-				/// Update the map to reflect the change in list position
-				it->second = m_list.begin();
-
-				/// Return the actual data
-				return (it->second)->second.first;
-				
-			}
-			
-		}
-
-};
 
 using std::fstream;
 using namespace IECore;
@@ -532,6 +420,8 @@ bool FileIndexedIO::Index::CacheFn::get( const std::string &fullPath, NodePtr &n
 	Tokenizer tokens(fullPath, boost::char_separator<char>("/"));
 
 	Tokenizer::iterator t = tokens.begin();
+	
+	node = m_idx->m_root;
 
 	bool found = m_idx->m_root->findInChildren( t, tokens.end(), node );
 	
@@ -559,10 +449,12 @@ bool FileIndexedIO::Index::find( const IndexedIOPath &p, NodePtr &nearest, PathP
 
 	CacheFn fn(this);
 	const std::string &head = p.head();
-	NodePtr data = m_cache.get( head, fn );
+	NodePtr data;
+	bool cacheFound = m_cache.get( head, fn, data );
 
-	if (data)
+	if (cacheFound)
 	{
+		assert( data );
 		tokens = new Tokenizer(p.tail(), boost::char_separator<char>("/"));
 		nearest = data;
 		t = tokens->begin();
@@ -1206,6 +1098,8 @@ void FileIndexedIO::Index::Node::read( fstream &f )
 
 bool FileIndexedIO::Index::Node::find( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest ) const
 {
+	assert( nearest );
+	
 	if (parts == end)
 	{
 		return true;
@@ -1215,6 +1109,7 @@ bool FileIndexedIO::Index::Node::find( Tokenizer::iterator &parts, Tokenizer::it
 		if (*parts == m_entry.id())
 		{			
 			nearest = const_cast<Node*>(this);	
+			assert( nearest );
 
 			return findInChildren( ++parts, end, nearest );
 		
@@ -1228,6 +1123,8 @@ bool FileIndexedIO::Index::Node::find( Tokenizer::iterator &parts, Tokenizer::it
 
 bool FileIndexedIO::Index::Node::findInChildren( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest ) const
 {	
+	assert( nearest );
+	
 	if (parts == end)
 	{
 		return true;

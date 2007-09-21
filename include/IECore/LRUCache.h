@@ -1,0 +1,96 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+#ifndef IE_CORE_LRUCACHE_H
+#define IE_CORE_LRUCACHE_H
+
+#include <map>
+#include <list>
+
+namespace IECore
+{
+
+/// A templated cache with a Least-Recently-Used disposal mechanism. Each item to be retrieved is "calculated"
+/// by a function which can also state the "cost" of that piece of data. The cache has a maximum cost, and
+/// attempts to add any data which would exceed this results in the LRU items being discarded.
+/// Template parameters are the Key to which access the Data, and a GetterFn type which should be a model of:
+/// \code
+///	struct GetterFn
+///	{
+///		typedef int Cost;
+///		// Returns true if the "data" and "cost" arguments were computed from the "key", otherwise returns false
+///		bool get( const Key &key, Data &data, Cost &cost );
+///	};
+/// \endcode
+template<typename Key, typename Data, typename GetterFn>
+class LRUCache
+{
+	public:
+		typedef typename GetterFn::Cost Cost;
+		
+		typedef std::pair<Data, Cost> DataCost;
+	
+		typedef std::list< std::pair<Key, DataCost> > List;		
+		
+		typedef std::map< Key, typename List::iterator > Cache;
+		
+		LRUCache();
+	
+		void clear();
+		
+		/// Set the maximum cost of the items held in the cache, discarding any if necessary
+		void setMaxCost( Cost maxCost );
+		
+		/// Retrieve the item from the cache, computing it if necessary. Returns true if successful and "data" has been set, else
+		/// returns false and the value of "data" is undefined.
+		bool get( const Key& key, GetterFn fn, Data &data ) const;
+		
+	protected:
+	
+		/// Clear out any data with a least-recently-used strategy until the current cost does not exceed the specified cost.
+		void limitCost( Cost cost ) const;
+				
+		Cost m_maxCost;
+		mutable Cost m_currentCost;
+		
+		mutable List m_list;
+		mutable Cache m_cache;
+};
+
+
+} // namespace IECore
+
+#include "IECore/LRUCache.inl"
+
+#endif // IE_CORE_LRUCACHE_H
