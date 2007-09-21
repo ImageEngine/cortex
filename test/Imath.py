@@ -503,6 +503,18 @@ class ImathBox3f(unittest.TestCase):
 		self.failIf( b2.intersects(b1) )
 				
 		self.assertEqual( b2.size(), b2.max - b2.min )
+
+		b = Box3f( V3f(1), V3f(2) )
+		m = M44f()
+		m[0,0]=2
+		m[1,1]=2
+		m[2,2]=2
+		self.assertEqual( b.transform( m ), Box3f( V3f(2), V3f(4) ) )
+		m = M44d()
+		m[0,0]=2
+		m[1,1]=2
+		m[2,2]=2
+		self.assertEqual( b.transform( m ), Box3f( V3f(2), V3f(4) ) )
 		
 class ImathQuatf(unittest.TestCase):
 	def testConstructors(self):

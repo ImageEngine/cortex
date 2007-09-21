@@ -42,6 +42,7 @@
 #include <sstream>
 
 #include <OpenEXR/ImathBox.h>
+#include <OpenEXR/ImathBoxAlgo.h>
 
 #include "IECore/VectorTraits.h"
 #include "IECore/bindings/ImathBoxBinding.h"
@@ -54,14 +55,21 @@ namespace IECore
 {
 		
 template<typename T>
-void bindBox(const char *bindName);
+class_< Box<T> > bindBox(const char *bindName);
 	
 void bindImathBox()
 {
 	bindBox<V2f>("Box2f");
 	bindBox<V2d>("Box2d");
-	bindBox<V3f>("Box3f");
-	bindBox<V3d>("Box3d");
+
+	class_< Box3f > cf = bindBox<V3f>("Box3f");
+	cf.def("transform", &transform<float,float>);
+	cf.def("transform", &transform<float,double>);
+
+	class_< Box3d > cd = bindBox<V3d>("Box3d");
+	cd.def("transform", &transform<double,float>);
+	cd.def("transform", &transform<double,double>);
+
 	bindBox<V2i>("Box2i");
 	bindBox<V3i>("Box3i");
 }
@@ -95,7 +103,7 @@ DEFINEBOXSTRSPECIALISATION( Box2d );
 DEFINEBOXSTRSPECIALISATION( Box3d );
 	
 template<typename T>
-void bindBox(const char *bindName)
+class_< Box<T> > bindBox(const char *bindName)
 {	
 	void (Box<T>::*eb1)(const T&) = &Box<T>::extendBy;
 	void (Box<T>::*eb2)(const Box<T>&) = &Box<T>::extendBy;
@@ -103,8 +111,8 @@ void bindBox(const char *bindName)
 	bool (Box<T>::*i1)(const T&) const = &Box<T>::intersects;
 	bool (Box<T>::*i2)(const Box<T>&) const = &Box<T>::intersects;	
 	
-	class_< Box<T> >(bindName)
-		.def_readwrite("min", &Box<T>::min)
+	class_< Box<T> > myClass(bindName);
+	myClass.def_readwrite("min", &Box<T>::min)
 		.def_readwrite("max", &Box<T>::max)		
 	
 		.def(init<>())
@@ -129,10 +137,11 @@ void bindBox(const char *bindName)
 		.def("hasVolume", &Box<T>::hasVolume)
 
 		.def("dimensions", &VectorTraits<T>::dimensions).staticmethod("dimensions")
-		
+
 		.def( "__str__", &IECore::str<Box<T> > )
 		.def( "__repr__", &IECore::repr<Box<T> > )
 	;
+	return myClass;
 }	
 
 }
