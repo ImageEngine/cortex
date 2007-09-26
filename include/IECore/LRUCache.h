@@ -57,17 +57,18 @@ template<typename Key, typename Data, typename GetterFn>
 class LRUCache
 {
 	public:
+		typedef Key KeyType;
+		typedef Data DataType;
+		typedef GetterFn GetterFnType;
+		
 		typedef typename GetterFn::Cost Cost;
-		
-		typedef std::pair<Data, Cost> DataCost;
-	
-		typedef std::list< std::pair<Key, DataCost> > List;		
-		
-		typedef std::map< Key, typename List::iterator > Cache;
 		
 		LRUCache();
 	
 		void clear();
+		
+		// Erases the given key if it is contained in the cache. Returns whether any item was removed.
+		bool erase( const Key &key );
 		
 		/// Set the maximum cost of the items held in the cache, discarding any if necessary
 		void setMaxCost( Cost maxCost );
@@ -77,6 +78,12 @@ class LRUCache
 		bool get( const Key& key, GetterFn fn, Data &data ) const;
 		
 	protected:
+		
+		typedef std::pair<Data, Cost> DataCost;
+	
+		typedef std::list< std::pair<Key, DataCost> > List;		
+		
+		typedef std::map< Key, typename List::iterator > Cache;
 	
 		/// Clear out any data with a least-recently-used strategy until the current cost does not exceed the specified cost.
 		void limitCost( Cost cost ) const;

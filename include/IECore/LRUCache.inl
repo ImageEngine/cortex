@@ -151,4 +151,24 @@ void LRUCache<Key, Data, GetterFn>::limitCost( Cost cost ) const
 	assert( m_list.size() == m_cache.size() );
 }
 
+
+template<typename Key, typename Data, typename GetterFn>
+bool LRUCache<Key, Data, GetterFn>::erase( const Key &key )
+{
+	typename Cache::iterator it = m_cache.find( key );
+	
+	if ( it == m_cache.end() )
+	{	
+		return false;
+	}
+	
+	m_list.erase( it->second );
+	m_cache.erase( it );
+	
+	assert( m_list.size() == m_cache.size() );
+		
+	return true;	
 }
+
+
+} // namespace IECore
