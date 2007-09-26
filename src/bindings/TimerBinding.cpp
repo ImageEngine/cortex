@@ -45,6 +45,7 @@ namespace IECore {
 void bindTimer()
 {
 	class_<Timer>( "Timer", init<bool>() )
+		.def( init<>() )
 		.def( "start", &Timer::start )
 		.def( "stop", &Timer::stop )
 		.def( "running", &Timer::running )
