@@ -119,6 +119,7 @@ if not "--help" in sys.argv and not "-h" in sys.argv and not e.GetOption( "clean
 e.Append( LIBS= [
 		"boost_filesystem-" + boostVersion,
 		"boost_regex-" + boostVersion,
+		"boost_iostreams-" + boostVersion,
 		"half",
 		"IEx",
 		"Imath",

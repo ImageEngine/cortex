@@ -40,9 +40,9 @@
 #include <set>
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp> 
+#include <boost/iostreams/device/file.hpp> 
 
 #include "IECore/ByteOrder.h"
-#include "IECore/LRUCache.h"
 
 #include "IECore/FileIndexedIO.h"
 
@@ -81,31 +81,30 @@
 /// Version ::= int64
 /// MagicNumber ::= int64
 
-using std::fstream;
 using namespace IECore;
 namespace fs = boost::filesystem;
+namespace io = boost::iostreams;
 
 template<typename T>
-void writeLittleEndian( std::fstream &f, T n)
+void writeLittleEndian( io::file &f, T n )
 {
-	T nl = asLittleEndian<>(n);
-	f.write( (char*) &nl, sizeof( T) );
+	const T nl = asLittleEndian<>(n);
+	f.write( (const char*) &nl, sizeof(T) );
 }
 
 template<typename T>
-void readLittleEndian( std::fstream &f, T &n)
+void readLittleEndian( io::file &f, T &n )
 {
-	T nl;
-	f.read(( char*) &nl, sizeof(T) );
+	static bool g_bigEndian = bigEndian(); // Cache value to prevent unnecessary function calls
+	f.read( (char*) &n, sizeof(T) );
 	
-	if (bigEndian())
+	if (g_bigEndian)
 	{
-		n = reverseBytes<>(nl);
+		n = reverseBytes<>(n);
 	}
 	else
 	{
 		/// Already little endian
-		n = nl;
 	}
 }
 
@@ -120,7 +119,7 @@ class StringCache
 			m_prevId = 0;			
 		}
 		
-		StringCache( fstream &f ) : m_prevId(0)
+		StringCache( io::file &f ) : m_prevId(0)
 		{
 			Imf::Int64 sz;
 			readLittleEndian(f, sz);
@@ -140,7 +139,7 @@ class StringCache
 			}
 		}
 		
-		void write( fstream &f ) const
+		void write( io::file &f ) const
 		{
 			Imf::Int64 sz = m_stringToIdMap.size();
 			writeLittleEndian<Imf::Int64>(f, sz );
@@ -151,8 +150,7 @@ class StringCache
 				write(f, it->first);
 				
 				writeLittleEndian<Imf::Int64>(f, it->second);				
-			}
-			
+			}			
 		}
 		
 		Imf::Int64 find( const std::string &s, bool errIfNotFound = true )
@@ -200,22 +198,19 @@ class StringCache
 			assert( m_stringToIdMap.size() == m_idToStringMap.size() );
 			return m_stringToIdMap.size();
 		}
-		
-
 	
 	protected:
 	
-		void write( fstream &f, const std::string &s ) const
+		void write( io::file &f, const std::string &s ) const
 		{
 			Imf::Int64 sz = s.size();
 			writeLittleEndian<Imf::Int64>( f, sz );
 			
 			/// Does not include null terminator
-			f.write( s.c_str(), sz * sizeof(char) );
-			
+			f.write( s.c_str(), sz * sizeof(char) );			
 		}
 		
-		void read( fstream &f, std::string &s ) const
+		void read( io::file &f, std::string &s ) const
 		{		
 			Imf::Int64 sz;	
 			readLittleEndian<Imf::Int64>( f, sz );
@@ -242,37 +237,19 @@ class StringCache
 class FileIndexedIO::Index : public RefCounted
 {
 	public:
-		class Node;
-		IE_CORE_DECLAREPTR( Node );
+	
+		friend class Node;
 	
 		typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-		typedef std::vector<std::string> PathParts;
-		
-		struct CacheFn
-		{
-			CacheFn( ConstIndexPtr idx ) : m_idx(idx)
-			{
-			}
-			
-			typedef int Cost;
-			
-			bool get( const std::string &fullPath, NodePtr &node, Cost &cost );
-						
-			ConstIndexPtr m_idx;
-		};
-		
-		typedef LRUCache< std::string, NodePtr, CacheFn> Cache;
-		
-		Cache m_cache;
 	
 		/// Construct an empty index
 		Index();
 		
-		/// Construct an index from reading a file stream.
-		Index( fstream &f );
-		virtual ~Index();
-	
+		static bool canRead( const std::string &path );
 		
+		/// Construct an index from reading a file stream.
+		Index( io::file &f );
+		virtual ~Index();
 			
 		NodePtr m_root;	
 		
@@ -280,18 +257,17 @@ class FileIndexedIO::Index : public RefCounted
 		bool hasChanged() const;
 		
 		/// Attempts to find a path in the index. Will seek out the closest node in the hierarchy, and return
-		/// whether or not this node is an exact match for the query. Optionally, it can fill in a list of
-		/// path components which were not successfully matched.					
-		bool find( const IndexedIOPath &p, NodePtr &nearest, PathParts *remainder = 0) const;
+		/// whether or not this node is an exact match for the query.				
+		bool find( const IndexedIOPath &p, NodePtr &nearest, NodePtr topNode ) const;
 				
 		/// Remove a node, and all its subnodes from the index		
 		void remove( NodePtr n );
 	
 		/// Insert a new entry into the index, returning the node which stores it
-		NodePtr insert( const IndexedIOPath &parentPath, IndexedIO::Entry e );
+		NodePtr insert( NodePtr parentNode, IndexedIO::Entry e );
 
 		/// Write the index to a file stream
-		void write( fstream & f );
+		void write( io::file & f );
 	
 		/// Allocate a new chunk of data of the requested size, returning its offset within the file
 		Imf::Int64 allocate( Imf::Int64 sz );
@@ -301,10 +277,7 @@ class FileIndexedIO::Index : public RefCounted
 	
 		/// Return the total number of nodes in the index.
 		Imf::Int64 nodeCount();
-		
-		/// Output the index to stderr, for debugging purposes
-		void dump();	
-	
+					
 	protected:
 	
 		static const Imf::Int64 g_unversionedMagicNumber = 0x0B00B1E5;
@@ -328,8 +301,7 @@ class FileIndexedIO::Index : public RefCounted
 	
 		IndexToNodeMap m_indexToNodeMap;
 		NodeToIndexMap m_nodeToIndexMap;	
-		
-		
+				
 		StringCache m_stringCache;
 	
 		struct FreePage;
@@ -355,20 +327,21 @@ class FileIndexedIO::Index : public RefCounted
 		
 		void deallocateWalk( Node* n );
 		
-		void write( fstream &f, Node* n );
+		void write( io::file &f, Node* n );
 	
-		void readNode( fstream &f );
+		void readNode( io::file &f );
 	
 		Imf::Int64 nodeCount( Node* n );
-	
-		void dump( Node* n, int depth );
 							
 };
 
 /// A single node within an index
-class FileIndexedIO::Index::Node : public RefCounted
+class FileIndexedIO::Node : public RefCounted
 {	
 	public:
+	
+		typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+		typedef std::vector<std::string> PathParts;	
 									
 		/// A unique numeric ID for this node
 		Imf::Int64 m_id;
@@ -398,36 +371,50 @@ class FileIndexedIO::Index::Node : public RefCounted
 		void addChild( NodePtr c );
 	
 		/// Write this node to a stream
-		void write( fstream &f );
+		void write( io::file &f );
 
 		/// Replace the contents of this node with data read from a stream
-		void read( fstream &f );
+		void read( io::file &f );
 		
 		/// Traverse through this node and down its children, removing the front 
 		/// of the list of 'parts' every time we descend through a match.
-		bool find( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest ) const;
+		bool find( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const;
 	
 		/// As above, but just traverse through the children.
-		bool findInChildren( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest ) const;
+		bool findInChildren( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const;
+		
+		NodePtr insert( Tokenizer::iterator &parts, Tokenizer::iterator end );
 		
 	protected:
 		
 		Index *m_idx;
 };
 
-bool FileIndexedIO::Index::CacheFn::get( const std::string &fullPath, NodePtr &node, Cost &cost )
+bool FileIndexedIO::Index::canRead( const std::string &path )
 {
-	Tokenizer tokens(fullPath, boost::char_separator<char>("/"));
-
-	Tokenizer::iterator t = tokens.begin();
+	io::file f( path, std::ios::in | std::ios::binary, std::ios::in);
 	
-	node = m_idx->m_root;
-
-	bool found = m_idx->m_root->findInChildren( t, tokens.end(), node );
+	if (! f.is_open() )
+	{
+		return false;
+	}
+		
+	f.seek( 0, std::ios::end, std::ios::in );
+	Imf::Int64 end = f.seek( 0, std::ios::cur, std::ios::in );
 	
-	cost = std::distance( tokens.begin(), tokens.end() );
+	f.seek( end-1*sizeof(Imf::Int64), std::ios::beg, std::ios::in );
 	
-	return found;			
+	Imf::Int64 magicNumber;
+	readLittleEndian<Imf::Int64>( f, magicNumber );
+	
+	if ( magicNumber == g_versionedMagicNumber || magicNumber == g_unversionedMagicNumber )
+	{
+		return true;				
+	}
+	else 
+	{
+		return false;
+	}	
 }
 
 bool FileIndexedIO::Index::hasChanged() const
@@ -441,46 +428,13 @@ Imf::Int64 FileIndexedIO::Index::makeId()
 	return ++m_prevId;
 }			
 	
-bool FileIndexedIO::Index::find( const IndexedIOPath &p, NodePtr &nearest, PathParts *remainder) const
+bool FileIndexedIO::Index::find( const IndexedIOPath &p, NodePtr &nearest, NodePtr topNode) const
 {	
-	bool found = false;
-	Tokenizer *tokens;
-	Tokenizer::iterator t;
-
-	CacheFn fn(this);
-	const std::string &head = p.head();
-	NodePtr data;
-	bool cacheFound = m_cache.get( head, fn, data );
-
-	if (cacheFound)
-	{
-		assert( data );
-		tokens = new Tokenizer(p.tail(), boost::char_separator<char>("/"));
-		nearest = data;
-		t = tokens->begin();
-		
-		found = (data)->findInChildren( t, tokens->end(), nearest );
-	}
-	else
-	{
-		tokens = new Tokenizer(p.fullPath(), boost::char_separator<char>("/"));
+	Tokenizer tokens(p.fullPath(), boost::char_separator<char>("/"));	
+	Tokenizer::iterator t = tokens.begin();
+	nearest = m_root;
 	
-		t = tokens->begin();
-
-		found = m_root->findInChildren( t, tokens->end(), nearest );
-	}
-	
-	if (!found && remainder)
-	{
-		while(  t != tokens->end() )
-		{
-			remainder->push_back( *t++ );
-		}
-	}
-	
-	delete tokens;
-	
-	return found; 
+	return m_root->findInChildren( t, tokens.end(), nearest, topNode );
 }
 
 void FileIndexedIO::Index::deallocateWalk( Node* n )
@@ -508,49 +462,38 @@ void FileIndexedIO::Index::remove( NodePtr n )
 	{
 		n->m_parent->m_children.erase( n->m_entry.id() );
 	}
-	
-	m_cache.clear();
 }
 
-FileIndexedIO::Index::NodePtr FileIndexedIO::Index::insert( const IndexedIOPath &parentPath, IndexedIO::Entry e )
-{	
-	m_stringCache.add( e.m_ID );
-
-	PathParts remainder;
-	NodePtr parent = m_root;
-	bool found = find( parentPath, parent, &remainder );
-	NodePtr child;
-	
-	if (!found)
-	{			
-		for (PathParts::iterator it = remainder.begin(); it != remainder.end(); ++it)
-		{
-			child = new Index::Node( this, makeId() );
-			m_stringCache.add( *it );
-			child->m_entry = IndexedIO::Entry(*it, IndexedIO::Directory, IndexedIO::Invalid, 0);
-			
-			parent->addChild( child );
-			parent = child;
-		}
-	}
-	else
-	{
-		assert( remainder.size() == 0 );	
-	}
-			
+FileIndexedIO::NodePtr FileIndexedIO::Index::insert( NodePtr parent, IndexedIO::Entry e )
+{		
 	Imf::Int64 newId = makeId();	
-	child = new Node(this, newId);
+	NodePtr child = new Node(this, newId);
 	
 	m_indexToNodeMap[newId] = child.get();
 	m_nodeToIndexMap[child.get()] = newId;
 		
 	child->m_entry = e;
 	
+	m_stringCache.add( e.id() );
+	
 	parent->addChild( child );
 	
 	m_hasChanged = true;
 	
 	return child;
+}
+
+
+FileIndexedIO::NodePtr FileIndexedIO::Node::insert( Tokenizer::iterator &parts, Tokenizer::iterator end )
+{
+	if (parts == end)
+	{
+		return this;
+	}
+	
+	NodePtr child = m_idx->insert( this, IndexedIO::Entry(*parts, IndexedIO::Directory, IndexedIO::Invalid, 0) );
+	
+	return child->insert( ++parts, end );
 }
 
 FileIndexedIO::Index::Index() : m_root(0), m_prevId(0)
@@ -582,20 +525,21 @@ FileIndexedIO::Index::~Index()
 	}
 }
 			
-FileIndexedIO::Index::Index( fstream &f ) : m_prevId(0)
+FileIndexedIO::Index::Index( io::file &f ) : m_prevId(0)
 {
 	m_hasChanged = false;
-	f.seekg( 0, std::ios::end);
-	Imf::Int64 end = f.tellg();		
 
-	f.seekg( end - 1*sizeof(Imf::Int64) );
+	f.seek( 0, std::ios::end, std::ios::in );
+	Imf::Int64 end = f.seek( 0, std::ios::cur, std::ios::in );
+	
+	f.seek( end-1*sizeof(Imf::Int64), std::ios::beg, std::ios::in );
 	
 	Imf::Int64 magicNumber;
 	readLittleEndian<Imf::Int64>( f, magicNumber );
 	
 	if ( magicNumber == g_versionedMagicNumber )
 	{
-		f.seekg( end - 3*sizeof(Imf::Int64) );
+		f.seek( end-3*sizeof(Imf::Int64), std::ios::beg, std::ios::in );
 		readLittleEndian<Imf::Int64>( f, m_offset );
 		readLittleEndian<Imf::Int64>( f, m_version );						
 	}
@@ -603,15 +547,15 @@ FileIndexedIO::Index::Index( fstream &f ) : m_prevId(0)
 	{
 		m_version = 0;
 		
-		f.seekg( end - 2*sizeof(Imf::Int64) );	
+		f.seek( end-2*sizeof(Imf::Int64), std::ios::beg, std::ios::in );
 		readLittleEndian<Imf::Int64>( f, m_offset );
 	}
 	else
 	{	
 		throw IOException("Not a FileIndexedIO file");
 	}
-			
-	f.seekg( m_offset );
+				
+	f.seek( m_offset, std::ios::beg, std::ios::in );
 	
 	if (m_version >= 1)
 	{
@@ -641,12 +585,12 @@ FileIndexedIO::Index::Index( fstream &f ) : m_prevId(0)
 	m_next = m_offset;
 }
 
-void FileIndexedIO::Index::write( fstream & f )
+void FileIndexedIO::Index::write( io::file & f )
 {
 	/// Write index at end
-	fstream::pos_type indexStart = m_next;
+	std::streampos indexStart = m_next;
 	
-	f.seekp( m_next );
+	f.seek( m_next, std::ios_base::beg, std::ios_base::out );
 	
 	m_offset = indexStart;
 	
@@ -678,8 +622,6 @@ void FileIndexedIO::Index::write( fstream & f )
 	
 	m_hasChanged = false;
 }
-
-
 
 Imf::Int64 FileIndexedIO::Index::allocate( Imf::Int64 sz )
 {		
@@ -880,12 +822,7 @@ Imf::Int64 FileIndexedIO::Index::nodeCount()
 	return nodeCount(m_root.get());
 }
 
-void FileIndexedIO::Index::dump()
-{
-	dump(m_root.get(), 0);
-}
-
-void FileIndexedIO::Index::write( fstream & f, Node* n )
+void FileIndexedIO::Index::write( io::file & f, Node* n )
 {
 	n->write( f );
 	
@@ -900,7 +837,7 @@ void FileIndexedIO::Index::write( fstream & f, Node* n )
 	}		
 }
 
-void FileIndexedIO::Index::readNode( fstream &f )
+void FileIndexedIO::Index::readNode( io::file &f )
 {
 	NodePtr n = new Node( this, 0 );
 			
@@ -929,36 +866,7 @@ Imf::Int64 FileIndexedIO::Index::nodeCount( Node* n )
 	return sz;		
 }
 
-void FileIndexedIO::Index::dump( Node* n, int depth )
-{
-	for (int i = 0; i < depth; i++)
-		std::cerr << "..";
-	
-	std::cerr << n->m_entry.id();
-	
-	switch (n->m_entry.entryType())
-	{
-		case IndexedIO::Directory:
-			std::cerr << " (d)";
-			break;
-		case IndexedIO::File:
-			std::cerr << " (f)";
-			break;		
-		default:
-			assert(0);		
-	}
-	
-	std::cerr << std::endl;
-	
-	for (Node::ChildMap::const_iterator it = n->m_children.begin(); it != n->m_children.end(); ++it)
-	{
-		dump( it->second.get(), depth+1 );		
-	}
-
-}
-
-
-FileIndexedIO::Index::Node::Node(Index* idx, Imf::Int64 id) : RefCounted()
+FileIndexedIO::Node::Node(Index* idx, Imf::Int64 id) : RefCounted()
 {
 	m_parent = 0;
 	
@@ -976,11 +884,11 @@ FileIndexedIO::Index::Node::Node(Index* idx, Imf::Int64 id) : RefCounted()
 	m_idx->m_prevId = std::max( m_idx->m_prevId, m_id );					
 }
 
-FileIndexedIO::Index::Node::~Node()
+FileIndexedIO::Node::~Node()
 {
 }
 			
-void FileIndexedIO::Index::Node::addChild( NodePtr c ) 
+void FileIndexedIO::Node::addChild( NodePtr c ) 
 {
 	if (c->m_parent)
 	{
@@ -992,13 +900,12 @@ void FileIndexedIO::Index::Node::addChild( NodePtr c )
 	ChildMap::const_iterator cit = m_children.find( c->m_entry.id() );
 	assert (cit == m_children.end());
 #endif			
-	
-				
+					
 	c->m_parent = this;
 	m_children.insert( std::map< std::string, NodePtr >::value_type( c->m_entry.id(), c) );
 }
 
-void FileIndexedIO::Index::Node::write( fstream &f )
+void FileIndexedIO::Node::write( io::file &f )
 {
 	char t = m_entry.entryType();			
 	f.write( &t, sizeof(char) );
@@ -1028,7 +935,7 @@ void FileIndexedIO::Index::Node::write( fstream &f )
 	writeLittleEndian<Imf::Int64>(f, m_size);
 }
 
-void FileIndexedIO::Index::Node::read( fstream &f )
+void FileIndexedIO::Node::read( io::file &f )
 {
 	char t;
 	
@@ -1073,7 +980,7 @@ void FileIndexedIO::Index::Node::read( fstream &f )
 	m_idx->m_prevId = std::max( m_idx->m_prevId, parentId );
 	m_idx->m_prevId = std::max( m_idx->m_prevId, m_id );			
 
-	IndexToNodeMap::iterator it = m_idx->m_indexToNodeMap.find( parentId );
+	Index::IndexToNodeMap::iterator it = m_idx->m_indexToNodeMap.find( parentId );
 	if (it == m_idx->m_indexToNodeMap.end())
 	{		
 		throw IOException("parentId not found");
@@ -1089,14 +996,11 @@ void FileIndexedIO::Index::Node::read( fstream &f )
 		throw IOException("Non-root node has no parent");
 	}
 	
-	
-		
 	readLittleEndian<Imf::Int64>(f, m_offset );
-	readLittleEndian<Imf::Int64>(f, m_size );
-	
+	readLittleEndian<Imf::Int64>(f, m_size );	
 }
 
-bool FileIndexedIO::Index::Node::find( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest ) const
+bool FileIndexedIO::Node::find( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const
 {
 	assert( nearest );
 	
@@ -1111,8 +1015,20 @@ bool FileIndexedIO::Index::Node::find( Tokenizer::iterator &parts, Tokenizer::it
 			nearest = const_cast<Node*>(this);	
 			assert( nearest );
 
-			return findInChildren( ++parts, end, nearest );
-		
+			return findInChildren( ++parts, end, nearest, topNode );		
+		}
+		else if (*parts == ".")
+		{		
+			return find( ++parts, end, nearest, topNode );			
+		}
+		else if (*parts == "..")
+		{
+			if (m_parent && this != topNode.get() )
+			{
+				nearest = m_parent;	
+				return m_parent->find( ++parts, end, nearest, topNode );	
+			}	
+			return find( ++parts, end, nearest, topNode );
 		}
 		else
 		{
@@ -1121,7 +1037,7 @@ bool FileIndexedIO::Index::Node::find( Tokenizer::iterator &parts, Tokenizer::it
 	}
 }
 
-bool FileIndexedIO::Index::Node::findInChildren( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest ) const
+bool FileIndexedIO::Node::findInChildren( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const
 {	
 	assert( nearest );
 	
@@ -1130,22 +1046,34 @@ bool FileIndexedIO::Index::Node::findInChildren( Tokenizer::iterator &parts, Tok
 		return true;
 	}
 	
+	if (*parts == ".")
+	{		
+		return find( ++parts, end, nearest, topNode );			
+	}
+	else if (*parts == "..")
+	{
+		if (m_parent && this != topNode.get() )
+		{
+			nearest = m_parent;	
+			return m_parent->find( ++parts, end, nearest, topNode );	
+		}
+		return find( ++parts, end, nearest, topNode );
+	}
+	
 	ChildMap::const_iterator cit = m_children.find( *parts );
 	
 	if (cit != m_children.end())
 	{
-		return cit->second->find( parts, end, nearest );
+		return cit->second->find( parts, end, nearest, topNode );
 	}
 	
 	return false;			
 }	
-	
-
 
 class FileIndexedIO::IndexedFile : public RefCounted
 {
 	public:
-		fstream *m_file;
+		io::file *m_file;
 			
 		IndexedFile( const std::string &filename, IndexedIO::OpenMode mode );
 		virtual ~IndexedFile();
@@ -1154,25 +1082,24 @@ class FileIndexedIO::IndexedFile : public RefCounted
 		IndexPtr index() const;
 		
 		/// Seek to a particular node within the file for reading
-		void seekg( Index::NodePtr node );		
+		void seekg( NodePtr node );		
 				
 		/// Write some data to the file. Its position is automatically allocated within the file, and the node
 		/// is updated to record this offset along with its size.
-		void write(Index::NodePtr node, const char *data, Imf::Int64 size);
-	
+		void write(NodePtr node, const char *data, Imf::Int64 size);
+		
 	protected:
 	
 		IndexPtr m_index;
 };
-
 			
 FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO::OpenMode mode )
 {
 	if (mode & IndexedIO::Write)
 	{
-		m_file = new fstream(filename.c_str(), std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+		m_file = new io::file(filename, std::ios::trunc | std::ios::binary);
 		
-		if (m_file->bad() || !m_file->good())
+		if (! m_file->is_open() )
 		{
 			throw IOException(filename);
 		}
@@ -1184,9 +1111,9 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		if (!fs::exists( filename.c_str() ) )
 		{
 			/// Create new file
-			m_file = new fstream(filename.c_str(), std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+			m_file = new io::file(filename.c_str(), std::ios::trunc | std::ios::binary);
 		
-			if (m_file->bad() || !m_file->good())
+			if (! m_file->is_open() )
 			{
 				throw IOException(filename);
 			}
@@ -1196,9 +1123,9 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		else
 		{		
 			/// Read existing file
-			m_file = new fstream(filename.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+			m_file = new io::file(filename.c_str(), std::ios::binary);
 		
-			if (m_file->bad() || !m_file->good())
+			if (! m_file->is_open() )
 			{
 				throw IOException(filename);
 			}
@@ -1208,6 +1135,10 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 			{
 				m_index = new Index(*m_file);
 			} 
+			catch ( Exception &e )
+			{
+				throw;
+			}
 			catch (...)
 			{
 				throw IOException(filename);
@@ -1217,9 +1148,9 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 	else
 	{
 		assert( mode & IndexedIO::Read );
-		m_file = new fstream(filename.c_str(), std::ios::in | std::ios::binary);
+		m_file = new io::file(filename.c_str(), std::ios::binary, std::ios::in);
 		
-		if (m_file->bad() || !m_file->good())
+		if (! m_file->is_open() )
 		{
 			throw IOException(filename);
 		}
@@ -1228,6 +1159,10 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		try 
 		{
 			m_index = new Index(*m_file);
+		}
+		catch ( Exception &e )
+		{
+			throw;
 		} 
 		catch (...)
 		{
@@ -1238,12 +1173,12 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 	assert(m_index);
 }
 
-void FileIndexedIO::IndexedFile::seekg( Index::NodePtr node )	
+void FileIndexedIO::IndexedFile::seekg( NodePtr node )	
 {
 	assert( node->m_entry.entryType() == IndexedIO::File );
 	assert( m_file );
 	
-	m_file->seekg( node->m_offset );							
+	m_file->seek( node->m_offset, std::ios::beg, std::ios::in );							
 }
 
 FileIndexedIO::IndexPtr FileIndexedIO::IndexedFile::index() const
@@ -1265,13 +1200,13 @@ FileIndexedIO::IndexedFile::~IndexedFile()
 	m_file->close();
 }
 
-void FileIndexedIO::IndexedFile::write(Index::NodePtr node, const char *data, Imf::Int64 size)
+void FileIndexedIO::IndexedFile::write(NodePtr node, const char *data, Imf::Int64 size)
 {
 	/// Find next writable location			
 	Imf::Int64 loc = m_index->allocate( size );
 	
 	/// Seek 'write' pointer to writable location
-	m_file->seekp( loc );
+	m_file->seek( loc, std::ios_base::beg, std::ios_base::out );
 	
 	/// Update node with positional information within file
 	node->m_offset = loc;
@@ -1281,8 +1216,6 @@ void FileIndexedIO::IndexedFile::write(Index::NodePtr node, const char *data, Im
 	m_file->write( data, size );
 }
 
-
-
 static IndexedIOInterface::Description<FileIndexedIO> registrar(".fio");
 
 IndexedIOInterfacePtr FileIndexedIO::create(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode)
@@ -1290,12 +1223,28 @@ IndexedIOInterfacePtr FileIndexedIO::create(const std::string &path, const Index
 	return new FileIndexedIO(path, root, mode);
 }
 
+bool FileIndexedIO::canRead( const std::string &path )
+{
+	return Index::canRead( path );
+}
+
 FileIndexedIO::FileIndexedIO(const FileIndexedIO &other, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode  )
 {
 	m_mode = mode;
 	m_file = other.m_file;
+
+	/// \todo No need to pass "root" as a parameter because we can derive it, according to this assert	
+	assert( root == other.m_currentDirectory.fullPath() );
+	
 	m_currentDirectory = IndexedIOPath(root);
-	chdir("/");
+	
+	m_rootDirectoryNode = other.m_currentDirectoryNode;
+	m_currentDirectoryNode = other.m_currentDirectoryNode;
+	
+	assert( m_currentDirectoryNode );	
+	assert( m_rootDirectoryNode );	
+	
+	chdir("/");	
 }
 
 IndexedIOInterfacePtr FileIndexedIO::resetRoot() const
@@ -1316,7 +1265,6 @@ IndexedIOInterfacePtr FileIndexedIO::resetRoot() const
 
 FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode)
 {
-	
 	validateOpenMode(mode);
 	const fs::path p = fs::path(path);
 	const std::string filename = p.native_file_string();
@@ -1328,6 +1276,10 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryID &
 	}
 
 	m_file = new IndexedFile( filename, mode );
+	
+	m_rootDirectoryNode = m_file->index()->m_root;
+	m_file->index()->find( m_currentDirectory.fullPath(), m_rootDirectoryNode, m_rootDirectoryNode );
+	m_currentDirectoryNode = m_rootDirectoryNode;	
 	
 	if (mode & IndexedIO::Read)
 	{
@@ -1347,13 +1299,15 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryID &
 		}
 		
 	} 	
+	
 	chdir("/");		
+	
+	assert( m_currentDirectoryNode );	
+	assert( m_rootDirectoryNode );
 }
 
 FileIndexedIO::~FileIndexedIO()
-{
-
-	
+{	
 }
 
 IndexedIO::EntryID FileIndexedIO::pwd()
@@ -1363,49 +1317,99 @@ IndexedIO::EntryID FileIndexedIO::pwd()
 	return m_currentDirectory.relativePath();
 }
 
+FileIndexedIO::NodePtr FileIndexedIO::insert( const IndexedIO::EntryID &name  )
+{
+	assert( m_currentDirectoryNode );
+	assert( m_rootDirectoryNode );
+	
+	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;	
+	Tokenizer tokens(name, boost::char_separator<char>("/"));
+
+	Tokenizer::iterator t = tokens.begin();
+	
+	NodePtr start = m_currentDirectoryNode;
+	
+	if (name[0] == '/')
+	{
+		start = m_rootDirectoryNode;
+	}
+		
+	NodePtr node = start;	
+	assert(node);
+	
+	bool found = start->findInChildren( t, tokens.end(), node, m_rootDirectoryNode );
+	
+	if (!found)
+	{
+		return node->insert( t, tokens.end() );
+	}
+	
+	return 0;	
+}
+
+
+bool FileIndexedIO::find( const IndexedIO::EntryID &name, NodePtr &node ) const
+{
+	assert( m_currentDirectoryNode );
+	assert( m_rootDirectoryNode );
+	
+	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;	
+	Tokenizer tokens(name, boost::char_separator<char>("/"));
+
+	Tokenizer::iterator t = tokens.begin();
+	
+	NodePtr start = m_currentDirectoryNode;
+	
+	if (name[0] == '/')
+	{
+		start = m_rootDirectoryNode;
+	}
+		
+	node = start;	
+	assert(node);
+	
+	return start->findInChildren( t, tokens.end(), node, m_rootDirectoryNode );
+}
+
 void FileIndexedIO::mkdir(const IndexedIO::EntryID &name)
 {		
 	writable(name);
 	
-	const IndexedIOPath d = m_currentDirectory.appended(name);
-		
-	/// Add to index
-	if (!exists( name ) )
-	{
-		m_file->index()->insert( d.head(), IndexedIO::Entry( d.tail() , IndexedIO::Directory, IndexedIO::Invalid, 0) );
+	NodePtr node = insert( name );
+	if (node)
+	{		
+		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::Directory, IndexedIO::Invalid, 0);
 	}
 }
 
 void FileIndexedIO::chdir(const IndexedIO::EntryID &name)
 {	
+	assert( m_currentDirectoryNode );
 	readable(name);
-	IndexedIOPath d = m_currentDirectory.appended(name);
+
+	NodePtr node;	
+	bool found = find( name, node );
 	
-	if (!exists(d.fullPath(), IndexedIO::Directory))
-	{ 	
+	if (!found || node->m_entry.entryType() != IndexedIO::Directory)
+	{
 		throw IOException(name);
 	}
+
+	m_currentDirectory = m_currentDirectory.appended(name);
+	m_currentDirectoryNode = node;
 	
-	m_currentDirectory = d;
+	assert( m_currentDirectoryNode );
 }
 
 IndexedIO::EntryList FileIndexedIO::ls(IndexedIOFilterPtr f)
 {		
 	readable(".");
 	
+	assert( m_currentDirectoryNode );
+	
 	IndexedIO::EntryList result;
-	
-	IndexedIOPath p = m_currentDirectory;
-	
-	Index::NodePtr nearest = m_file->index()->m_root;
-	bool found = m_file->index()->find( p, nearest );	
-	
-	if (!found)
-	{
-		throw IOException( p.fullPath() );
-	}
-	
-	for ( Index::Node::ChildMap::iterator it = nearest->m_children.begin(); it != nearest->m_children.end(); ++it)
+
+	for ( Node::ChildMap::iterator it = m_currentDirectoryNode->m_children.begin(); it != m_currentDirectoryNode->m_children.end(); ++it)
 	{
 		result.push_back( it->second->m_entry );
 	}
@@ -1425,12 +1429,11 @@ unsigned long FileIndexedIO::rm(const IndexedIO::EntryID &name)
 
 unsigned long FileIndexedIO::rm(const IndexedIO::EntryID &name, bool throwIfNonExistent)
 {
+	assert( m_currentDirectoryNode );
 	writable(name);
 	
-	IndexedIOPath p = m_currentDirectory.appended(name);
-	
-	Index::NodePtr nearest = m_file->index()->m_root;	
-	bool found = m_file->index()->find( p, nearest );		
+	NodePtr node;	
+	bool found = find( name, node );
 	
 	if (!found)
 	{
@@ -1444,24 +1447,20 @@ unsigned long FileIndexedIO::rm(const IndexedIO::EntryID &name, bool throwIfNonE
 		}
 	}
 	
-	m_file->index()->remove( nearest );
+	m_file->index()->remove( node );
+	
+	chdir( m_currentDirectory.relativePath() );
 	
 	return 0;
 }
 
 bool FileIndexedIO::exists(const IndexedIO::EntryID &name) const
 {
+	assert( m_currentDirectoryNode );
 	readable(name);
-		
-	IndexedIOPath p = m_currentDirectory.appended(name);
 	
-	if (p.fullPath() == "/")
-	{
-		return true;
-	}
-	
-	Index::NodePtr nearest = m_file->index()->m_root;
-	return m_file->index()->find( p, nearest );
+	NodePtr node;	
+	return find( name, node );
 }
 
 bool FileIndexedIO::exists(const IndexedIOPath &path, IndexedIO::EntryType e) const
@@ -1471,8 +1470,8 @@ bool FileIndexedIO::exists(const IndexedIOPath &path, IndexedIO::EntryType e) co
 		return true;
 	}
 	
-	Index::NodePtr nearest = m_file->index()->m_root;
-	bool found= m_file->index()->find( path, nearest );
+	NodePtr nearest = m_file->index()->m_root;
+	bool found = m_file->index()->find( path, nearest, nearest );
 	
 	if (!found)
 	{
@@ -1487,18 +1486,18 @@ bool FileIndexedIO::exists(const IndexedIOPath &path, IndexedIO::EntryType e) co
 
 IndexedIO::Entry FileIndexedIO::ls(const IndexedIO::EntryID &name)
 {
+	assert( m_currentDirectoryNode );
 	readable(name);
 
-	IndexedIOPath p = m_currentDirectory.appended(name);
+	NodePtr node;	
+	bool found = find( name, node );
 	
-	Index::NodePtr nearest = m_file->index()->m_root;
-	bool found = m_file->index()->find( p, nearest );
 	if (!found)
 	{
 		throw IOException(name);
 	}
 	
-	return nearest->m_entry;
+	return node->m_entry;
 }
 
 template<typename T>
@@ -1510,19 +1509,27 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned l
 	{
 		rm(name, false);
 	}
+	
+	NodePtr node = insert( name );
+	if (node)
+	{		
 
-	IndexedIOPath p = m_currentDirectory.appended(name);
-
-	unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);	
-	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
+		unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);	
+		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
 	
-	const char *data = IndexedIO::DataFlattenTraits<T*>::flatten(x, arrayLength);
-	assert(data);
+		const char *data = IndexedIO::DataFlattenTraits<T*>::flatten(x, arrayLength);
+		assert(data);
+		
+		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, arrayLength) ;
 	
-	Index::NodePtr node = m_file->index()->insert( p.head(), IndexedIO::Entry( p.tail(), IndexedIO::File, dataType, arrayLength) );
-	m_file->write( node, data, size );
+		m_file->write( node, data, size );
 	
-	IndexedIO::DataFlattenTraits<T*>::free(data);
+		IndexedIO::DataFlattenTraits<T*>::free(data);
+	}
+	else
+	{
+		throw IOException( name );
+	}
 }
 
 template<typename T>
@@ -1534,32 +1541,38 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 	{
 		rm(name, false);
 	}
+
+	NodePtr node = insert( name );
+	if (node)
+	{		
+		unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);	
+		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
 	
-	IndexedIOPath p = m_currentDirectory.appended(name);
+		const char *data = IndexedIO::DataFlattenTraits<T>::flatten(x);
+		assert(data);
+		
+		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, 0) ;
 	
-	unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
-	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
+		m_file->write( node, data, size );
 	
-	const char *data = IndexedIO::DataFlattenTraits<T>::flatten(x);
-	assert(data);
-	
-	Index::NodePtr node = m_file->index()->insert( p.head(), IndexedIO::Entry( p.tail(), IndexedIO::File, dataType, 0) );
-	m_file->write( node, data, size );
-	
-	IndexedIO::DataFlattenTraits<T>::free(data);
+		IndexedIO::DataFlattenTraits<T>::free(data);
+	}
+	else
+	{
+		throw IOException( name );
+	}
 }
 
 template<typename T>
 void FileIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const
 {	
+	assert( m_currentDirectoryNode );
 	readable(name);
 	
-	IndexedIOPath p = m_currentDirectory.appended(name);
+	NodePtr node;	
+	bool found = find( name, node );
 	
-	Index::NodePtr node = m_file->index()->m_root;
-	bool found = m_file->index()->find( p, node );
-	
-	if (!found || node->m_entry.entryType() != IndexedIO::File )
+	if (!found || node->m_entry.entryType() != IndexedIO::File)
 	{
 		throw IOException(name);
 	}
@@ -1577,14 +1590,14 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long ar
 template<typename T>
 void FileIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 {	
+	assert( m_currentDirectoryNode );
 	readable(name);
 
-	IndexedIOPath p = m_currentDirectory.appended(name);
-	Index::NodePtr node = m_file->index()->m_root;
-	bool found = m_file->index()->find( p, node );
+	NodePtr node;	
+	bool found = find( name, node );
 	
-	if (!found || node->m_entry.entryType() != IndexedIO::File )
-	{			
+	if (!found || node->m_entry.entryType() != IndexedIO::File)
+	{
 		throw IOException(name);
 	}
 

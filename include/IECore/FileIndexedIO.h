@@ -50,6 +50,8 @@ class FileIndexedIO : public IndexedIOInterface
 	public:
 		
 		static IndexedIOInterfacePtr create(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
+		
+		static bool canRead( const std::string &path );
 	
 		/// Open an existing device or create a new one
 		FileIndexedIO(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
@@ -107,8 +109,6 @@ class FileIndexedIO : public IndexedIOInterface
 		void read(const IndexedIO::EntryID &name, unsigned int &x);
 		void read(const IndexedIO::EntryID &name, char &x);
 		void read(const IndexedIO::EntryID &name, unsigned char &x);
-		
-		static void stupidTest();
 	
 	protected:
 	
@@ -144,9 +144,17 @@ class FileIndexedIO : public IndexedIOInterface
 		IE_CORE_DECLAREPTR( Index );
 		
 		class IndexedFile;
-		IE_CORE_DECLAREPTR( IndexedFile );
+		IE_CORE_DECLAREPTR( IndexedFile );		
 		
 		IndexedFilePtr m_file;		
+		
+		class Node;
+		IE_CORE_DECLAREPTR( Node );
+		
+		NodePtr m_currentDirectoryNode, m_rootDirectoryNode;
+		
+		bool find( const IndexedIO::EntryID &name, NodePtr &node ) const;
+		NodePtr insert( const IndexedIO::EntryID &name );
 };	
 
 IE_CORE_DECLAREPTR( FileIndexedIO )
