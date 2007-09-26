@@ -73,6 +73,11 @@ bool ObjectReader::canRead( const std::string &fileName )
 	
 	try
 	{
+		if ( FileIndexedIO::canRead( fileName ) )
+		{
+			return true;
+		}
+	
 		io = open(fileName);
 		return true;
 	} 
@@ -109,7 +114,7 @@ IndexedIOInterfacePtr ObjectReader::open( const std::string &fileName )
 	catch (...)
 	{
 		iface = new SQLiteIndexedIO( fileName, "/", IndexedIO::Shared | IndexedIO::Read );
-	}
+	}	
 #else
 	iface = new FileIndexedIO( fileName, "/", IndexedIO::Shared | IndexedIO::Read );
 #endif
