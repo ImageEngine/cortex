@@ -1395,7 +1395,7 @@ void FileIndexedIO::chdir(const IndexedIO::EntryID &name)
 		throw IOException(name);
 	}
 
-	m_currentDirectory = m_currentDirectory.appended(name);
+	m_currentDirectory.append(name);
 	m_currentDirectoryNode = node;
 	
 	assert( m_currentDirectoryNode );
