@@ -70,20 +70,20 @@ void AttributeCache::write( const ObjectHandle &obj, const AttributeHandle &attr
 	m_io->chdir("/objects");
 	m_io->mkdir(obj);
 	m_io->chdir(obj);
-	data->save( m_io->resetRoot(), attr );
+	data->save( m_io, attr );
 }
 
 void AttributeCache::writeHeader( const HeaderHandle &hdr, ObjectPtr data)
 {
 	m_io->chdir("/headers");
-	data->save( m_io->resetRoot(), hdr );
+	data->save( m_io, hdr );
 }
 
 ObjectPtr AttributeCache::read( const ObjectHandle &obj, const AttributeHandle &attr )
 {
 	m_io->chdir("/objects");
 	m_io->chdir(obj);
-	ObjectPtr data = Object::load( m_io->resetRoot(), attr );
+	ObjectPtr data = Object::load( m_io, attr );
 	return data;
 }
 
@@ -100,7 +100,7 @@ CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 	
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		ObjectPtr data = Object::load( m_io->resetRoot(), it->id() );
+		ObjectPtr data = Object::load( m_io, it->id() );
 		dict->members()[ it->id() ] = data;
 	}
 
@@ -110,7 +110,7 @@ CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 ObjectPtr AttributeCache::readHeader( const HeaderHandle &hdr )
 {
 	m_io->chdir("/headers");
-	ObjectPtr data = Object::load( m_io->resetRoot(), hdr );
+	ObjectPtr data = Object::load( m_io, hdr );
 	return data;
 }
 
@@ -126,7 +126,7 @@ CompoundObjectPtr AttributeCache::readHeader( )
 	
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		ObjectPtr data = Object::load( m_io->resetRoot(), it->id() );
+		ObjectPtr data = Object::load( m_io, it->id() );
 		dict->members()[ it->id() ] = data;
 	}
 

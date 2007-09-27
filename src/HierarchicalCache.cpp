@@ -372,7 +372,7 @@ void HierarchicalCache::write( const ObjectHandle &obj, const AttributeHandle &a
 		m_io->chdir( "attributes" );
 	}
 
-	data->save(m_io->resetRoot(), attr);
+	data->save(m_io, attr);
 }
 
 void HierarchicalCache::write( const ObjectHandle &obj, const Imath::M44f &matrix )
@@ -421,7 +421,7 @@ void HierarchicalCache::write( const ObjectHandle &obj, ConstVisibleRenderablePt
 	{
 	}
 	
-	boost::static_pointer_cast<const Object>(shape)->save(m_io->resetRoot(), "shape" );
+	boost::static_pointer_cast<const Object>(shape)->save(m_io, "shape" );
 	m_io->chdir( ".." );
 
 	// ok, so check if this node has children...
@@ -442,7 +442,7 @@ void HierarchicalCache::write( const ObjectHandle &obj, ConstVisibleRenderablePt
 void HierarchicalCache::writeHeader( const HeaderHandle &hdr, ObjectPtr data)
 {
 	m_io->chdir("/HierarchicalCache");
-	data->save(m_io->resetRoot(), hdr);
+	data->save(m_io, hdr);
 }
 
 ObjectPtr HierarchicalCache::read( const ObjectHandle &obj, const AttributeHandle &attr )
@@ -450,7 +450,7 @@ ObjectPtr HierarchicalCache::read( const ObjectHandle &obj, const AttributeHandl
 	IndexedIO::EntryID p;
 	attributesPath( obj, p );
 	m_io->chdir( p );
-	ObjectPtr data = Object::load( m_io->resetRoot(), attr );
+	ObjectPtr data = Object::load( m_io, attr );
 	return data;
 }
 
@@ -467,7 +467,7 @@ CompoundObjectPtr HierarchicalCache::read( const ObjectHandle &obj )
 	
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		ObjectPtr data = Object::load( m_io->resetRoot(), it->id() );
+		ObjectPtr data = Object::load( m_io, it->id() );
 		dict->members()[ it->id() ] = data;
 	}
 
@@ -477,7 +477,7 @@ CompoundObjectPtr HierarchicalCache::read( const ObjectHandle &obj )
 ObjectPtr HierarchicalCache::readHeader( const HeaderHandle &hdr )
 {
 	m_io->chdir("/HierarchicalCache");
-	ObjectPtr data = Object::load( m_io->resetRoot(), hdr );
+	ObjectPtr data = Object::load( m_io, hdr );
 	return data;
 }
 
@@ -493,7 +493,7 @@ CompoundObjectPtr HierarchicalCache::readHeader( )
 	
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		ObjectPtr data = Object::load( m_io->resetRoot(), it->id() );
+		ObjectPtr data = Object::load( m_io, it->id() );
 		dict->members()[ it->id() ] = data;
 	}
 
