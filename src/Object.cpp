@@ -276,7 +276,7 @@ ObjectPtr Object::copy() const
 void Object::save( const std::string &path ) const
 {
 	IndexedIOInterfacePtr i = IndexedIOInterface::create( path, "/", IndexedIO::Write | IndexedIO::Exclusive );
-	save( i );
+	save( i, "object" );
 }
 		
 void Object::save( IndexedIOInterfacePtr ioInterface ) const
@@ -288,6 +288,17 @@ void Object::save( IndexedIOInterfacePtr ioInterface ) const
 	IndexedIOInterfacePtr i = ioInterface->resetRoot();
 	boost::shared_ptr<SaveContext> context( new SaveContext( i ) );
 	context->save( this, i, "object" );
+}
+
+void Object::save( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name ) const
+{
+	// we get a copy of the ioInterface here so the SaveContext can be freed
+	// from always having to balance chdirs() to return to the original
+	// directory after an operation. this results in fewer chdir calls and faster
+	// saving.
+	IndexedIOInterfacePtr i = ioInterface->resetRoot();
+	boost::shared_ptr<SaveContext> context( new SaveContext( i ) );
+	context->save( this, i, name );
 }
 
 void Object::copyFrom( ConstObjectPtr toCopy, CopyContext *context )
@@ -452,6 +463,30 @@ ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface )
 	return result;
 }
 
+ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name )
+{
+	// we get a copy of the ioInterface here so the LoadContext can be freed
+	// from always having to balance chdirs() to return to the original
+	// directory after an operation. this results in fewer chdir calls and faster
+	// loading.
+	try
+	{
+		// first try to load it normally
+		IndexedIOInterfacePtr i = ioInterface->resetRoot();
+		LoadContextPtr context( new LoadContext( i ) );
+		ObjectPtr result = context->load<Object>( i, name );
+		return result;
+	}
+	catch( const IOException &e )
+	{
+		// if that fails then we try to load it using the deprecated function. this
+		// helps with transitioning code from the old interface to the new one.
+		IndexedIOInterfacePtr i = ioInterface->resetRoot();
+		ioInterface->chdir( name );
+		return load( ioInterface );
+	}
+}
+
 ObjectPtr Object::load( const std::string &path )
 {
 	IndexedIOInterfacePtr i = IndexedIOInterface::create( path, "/", IndexedIO::Read | IndexedIO::Exclusive );
@@ -459,5 +494,5 @@ ObjectPtr Object::load( const std::string &path )
 	{
 		return 0;
 	}
-	return load( i );
+	return load( i, "object" );
 }

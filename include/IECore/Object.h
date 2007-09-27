@@ -125,14 +125,20 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// Saves the object.
 		/// \param path The path on which to save - this is passed to
 		/// IndexedIOInterface::create() in order to obtain a suitable
-		/// io interface. In general the ObjectWriter class should be
+		/// io interface.
+		/// \deprecated The ObjectWriter class should be
 		/// used in preference to this method.
 		void save( const std::string &path ) const;
 		/// Saves the object.
 		/// \param ioInterface The ioInterface to use for data output.
 		/// The object will be saved in the current directory of the 
 		/// ioInterface object.
+		/// \deprecated You should use the form below, where a name is
+		/// specified.
 		void save( IndexedIOInterfacePtr ioInterface ) const;
+		/// Saves the object in the current directory of ioInterface, in
+		/// a subdirectory with the specified name.
+		void save( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name ) const;
 		/// Returns true if this object is equal to the other. Should
 		/// be reimplemented appropriately in derived classes, first calling
 		/// your base class isEqualTo() and returning false straight away
@@ -176,16 +182,24 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// Throws an Exception if typeName is not a valid type.
 		static ObjectPtr create( const std::string &typeName );
 		/// Loads a previously save()d object.
-		/// In general the ObjectReader class should be used in
-		/// preference to this one.
 		/// \param path A path passed to IndexedIOInterface::create()
 		/// to make an appropriate IndexedIOInterface for the file type.
+		/// \deprecated The ObjectReader class should be used in
+		/// preference to this one.
 		static ObjectPtr load( const std::string &path );
 		/// Loads a previously save()d object.
 		/// \param ioInterface An io object with the root and 
 		/// current directory at the same point as it was when the
 		/// equivalent call to save() was made.
+		/// \deprecated You should use the form below, which specifies
+		/// a name.
 		static ObjectPtr load( IndexedIOInterfacePtr ioInterface );
+		/// Loads an object previously saved with the given name in the current directory
+		/// of ioInterface. As a convenience this function will also load objects
+		/// saved using the deprecated form of save(), where name specifies the directory which
+		/// was current at the point of saving. This provides useful support when
+		/// transitioning from use of the deprecated function to the new form.
+		static ObjectPtr load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name );
 		/// Returns the corresponding TypeId for the specified
 		/// typeName, or InvalidTypeId if typeName is not a
 		/// registered type.
