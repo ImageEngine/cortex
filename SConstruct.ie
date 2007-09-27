@@ -389,6 +389,7 @@ corePythonPy = 	[
 				'python/IECore/CheckFileDependenciesOp.py',		
 				'python/IECore/PointsExpressionOp.py',		
 				'python/IECore/Struct.py',		
+				'python/IECore/LsHeaderOp.py',
 			]
 
 
@@ -431,6 +432,7 @@ coreOps = [
 	[ "ClassLsOp", "classLs", "common/classes" ],
 	[ "FileDependenciesOp", "depLs", "common/fileSystem" ],
 	[ "CheckFileDependenciesOp", "depCheck", "common/fileSystem" ],
+	[ "LsHeaderOp", "lsHeader", "common/fileSystem" ],
 ]
 
 

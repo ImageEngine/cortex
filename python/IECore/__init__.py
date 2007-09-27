@@ -78,6 +78,7 @@ from FileDependenciesOp import FileDependenciesOp
 from CheckFileDependenciesOp import CheckFileDependenciesOp
 from PointsExpressionOp import PointsExpressionOp
 from Struct import Struct
+from LsHeaderOp import LsHeaderOp
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
