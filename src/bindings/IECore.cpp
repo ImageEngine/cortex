@@ -121,6 +121,7 @@
 #include "IECore/bindings/BoundedKDTreeBinding.h"
 #include "IECore/bindings/VectorDataFilterOpBinding.h"
 #include "IECore/bindings/TypedObjectParameterBinding.h"
+#include "IECore/bindings/HeaderGeneratorBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -221,6 +222,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBoundedKDTree();
 	bindVectorDataFilterOp();
 	bindTypedObjectParameter();	
+	bindHeaderGenerator();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

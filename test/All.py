@@ -95,6 +95,7 @@ from BinaryFrameList import *
 from PointsExpressionOp import *
 from FrameList import *
 from Struct import *
+from HeaderGenerator import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *
