@@ -114,6 +114,12 @@ IndexedIOInterfacePtr Object::SaveContext::container( const std::string &typeNam
 	return container;
 }
 
+IndexedIOInterfacePtr Object::SaveContext::rawContainer()
+{
+	m_ioInterface->chdir( m_root );
+	return m_ioInterface->resetRoot();
+}
+
 void Object::SaveContext::save( ConstObjectPtr toSave, IndexedIOInterfacePtr container, const IndexedIO::EntryID &name )
 {
 	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
@@ -177,6 +183,12 @@ IndexedIOInterfacePtr Object::LoadContext::container( const std::string &typeNam
 				(*m_containerRoots)[container] = m_ioInterface->pwd();
 	
 	return container;
+}
+
+IndexedIOInterfacePtr Object::LoadContext::rawContainer()
+{
+	m_ioInterface->chdir( m_root );
+	return m_ioInterface->resetRoot();
 }
 
 ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOInterfacePtr container, const IndexedIO::EntryID &name )

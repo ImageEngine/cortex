@@ -150,7 +150,7 @@ template <class T>
 void TypedData<T>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
+	IndexedIOInterfacePtr container = context->rawContainer();
 	container->write( "value", readable() );
 }
 
@@ -158,9 +158,19 @@ template <class T>
 void TypedData<T>::load( LoadContextPtr context )
 {
 	Data::load( context );
-	unsigned int v = 0;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	container->read( "value", writable() );
+	try
+	{
+		// optimised format for new files
+		IndexedIOInterfacePtr container = context->rawContainer();
+		container->read( "value", writable() );
+	}
+	catch( ... )
+	{
+		// backwards compatibility with old files
+		unsigned int v = 0;
+		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+		container->read( "value", writable() );	
+	}
 }
 
 template <class T>

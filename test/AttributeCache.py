@@ -186,12 +186,13 @@ class TestAttributeCache(unittest.TestCase):
 		
 	def testNewObjectIO( self ) :
 	
-		"""Test that switching to the object::save( io, name ) form doesn't break old file support."""	
+		"""Test that switching to the object::save( io, name ) form doesn't break old file support,
+		and also that raw container writing for data doesn't break old file support."""	
 		
 		numHeaders = 10
 		numObjects = 1000
 		numV3fs = 3
-				
+						
 		cache = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Write )
 		for h in range( 0, numHeaders ) :
 			
@@ -207,7 +208,7 @@ class TestAttributeCache(unittest.TestCase):
 				cache.write( os, as, V3fData( V3f( 1 ) ) )
 		
 		del cache
-		
+				
 		cache = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
 		for h in cache.headers() :
 			cache.readHeader( h )
@@ -216,19 +217,27 @@ class TestAttributeCache(unittest.TestCase):
 				cache.read( o, a )
 			
 		cache = AttributeCache( "test/data/attributeCaches/lotsOfV3fDataBeforeNamedObjectIO.fio", IndexedIOOpenMode.Read )
-		cache2 = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
+		cache2 = AttributeCache( "test/data/attributeCaches/lotsOfV3fDataBeforeRawContainers.fio", IndexedIOOpenMode.Read )
+		cache3 = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
 		
 		self.assertEqual( cache.headers(), cache2.headers() )
+		self.assertEqual( cache.headers(), cache3.headers() )
 		for h in cache.headers() :
 			self.assertEqual( cache.readHeader( h ), cache2.readHeader( h ) )
+			self.assertEqual( cache.readHeader( h ), cache3.readHeader( h ) )
 		self.assertEqual( cache.readHeader(), cache2.readHeader() )
+		self.assertEqual( cache.readHeader(), cache3.readHeader() )
 		
 		self.assertEqual( cache.objects(), cache2.objects() )
+		self.assertEqual( cache.objects(), cache3.objects() )
 		for o in cache.objects() :
 			self.assertEqual( cache.attributes( o ), cache2.attributes( o ) )
+			self.assertEqual( cache.attributes( o ), cache3.attributes( o ) )
 			for a in cache.attributes( o ) :
 				self.assertEqual( cache.read( o, a ), cache2.read( o, a ) )
+				self.assertEqual( cache.read( o, a ), cache3.read( o, a ) )
 			self.assertEqual( cache.read( o ), cache2.read( o ) )
+			self.assertEqual( cache.read( o ), cache3.read( o ) )
 								
 	def tearDown(self):
 		

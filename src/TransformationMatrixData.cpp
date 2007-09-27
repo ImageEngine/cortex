@@ -71,7 +71,6 @@ namespace IECore {
 	void TypedData<T>::save( SaveContext *context ) const								\
 	{																					\
 		Data::save( context );															\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );	\
 		const T &t = readable();														\
 		BT values[ TRANSFORMATIONMATRIX_SIZE ];											\
 		int i = 0;																		\
@@ -93,20 +92,30 @@ namespace IECore {
 		i += 3;																			\
 		COPYVALUES( values, t.translate, i, 0, 3 )										\
 		i += 3;																			\
-																						\
 		assert( i == TRANSFORMATIONMATRIX_SIZE );										\
 																						\
+		IndexedIOInterfacePtr container = context->rawContainer();						\
 		container->write( "value", (const BT *)&values[0], TRANSFORMATIONMATRIX_SIZE );	\
 	}																					\
 	template<> 																			\
 	void TypedData<T>::load( LoadContextPtr context )									\
 	{																					\
 		Data::load( context );															\
-		unsigned int v = 0;																\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );	\
 		BT values[ TRANSFORMATIONMATRIX_SIZE ];											\
 		BT *p = (BT *)&(values[0]);														\
-		container->read( "value", p, TRANSFORMATIONMATRIX_SIZE );						\
+																						\
+		try																				\
+		{																				\
+			IndexedIOInterfacePtr container = context->rawContainer();					\
+			container->read( "value", p, TRANSFORMATIONMATRIX_SIZE );					\
+		}																				\
+		catch( ... )																	\
+		{																				\
+			unsigned int v = 0;															\
+			IndexedIOInterfacePtr container = context->container( staticTypeName(), v );\
+			container->read( "value", p, TRANSFORMATIONMATRIX_SIZE );					\
+		}																				\
+																						\
 		T &t = writable();																\
 		int i = 0;																		\
 		COPYVALUES( t.scalePivot, values, 0, i, 3 )										\

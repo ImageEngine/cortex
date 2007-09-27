@@ -275,6 +275,16 @@ class Object : public RunTimeTyped, private boost::noncopyable
 				/// Saves an Object instance, saving only a reference in the case that the object has
 				/// already been saved.
 				void save( ConstObjectPtr toSave, IndexedIOInterfacePtr o, const IndexedIO::EntryID &name );
+				/// Returns an interface to an alternative container in which to save class data. This container
+				/// is provided for optimisation reasons and should be used only in extreme cases. The container
+				/// provides no protection from overwriting of your class data by base or derived classes, and
+				/// provides no versioning. Furthermore you can only use raw IndexedIOInterface methods
+				/// for saving in it - SaveContext::save() may not be used and therefore child Objects may not
+				/// be saved. This interface is provided primarily for the SimpleTypedData classes, which save
+				/// very small amounts of unstructured data where the metadata associated with the standard
+				/// container becomes relatively expensive in both disk space and time. Think carefully before
+				/// using this container, it provides performance benefits only in extreme cases!
+				IndexedIOInterfacePtr rawContainer();
 			private :
 				
 				typedef std::map<ConstObjectPtr, IndexedIO::EntryID> SavedObjectMap;
@@ -305,6 +315,10 @@ class Object : public RunTimeTyped, private boost::noncopyable
 				template<class T>
 				/// Load an Object instance previously saved by SaveContext::save().
 				boost::intrusive_ptr<T> load( IndexedIOInterfacePtr container, const IndexedIO::EntryID &name );
+				/// Returns an interface to a raw container created by SaveContext::rawContainer() - please see
+				/// documentation and cautionary notes for that function.
+				IndexedIOInterfacePtr rawContainer();
+
 			private :
 				typedef std::map< IndexedIO::EntryID, ObjectPtr> LoadedObjectMap;
 				typedef std::map<IndexedIOInterfacePtr, IndexedIO::EntryID> ContainerRootsMap;

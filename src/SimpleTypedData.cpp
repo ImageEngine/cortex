@@ -35,6 +35,8 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TypedData.inl"
 
+#include <iostream>
+
 namespace IECore {
 
 #define IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( T, TID, TNAME )		\
@@ -66,7 +68,7 @@ namespace IECore {
 	void TypedData<T>::save( SaveContext *context ) const											\
 	{																								\
 		Data::save( context );																		\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );				\
+		IndexedIOInterfacePtr container = context->rawContainer();									\
 		container->write( "value", (const BT *)&(readable()), N );									\
 	}																								\
 																									\
@@ -74,10 +76,19 @@ namespace IECore {
 	void TypedData<T>::load( LoadContextPtr context )												\
 	{																								\
 		Data::load( context );																		\
-		unsigned int v = 0;																			\
-		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );				\
+		IndexedIOInterfacePtr container;															\
 		BT *p = (BT *)&(writable());																\
-		container->read( "value", p, N );															\
+		try																							\
+		{																							\
+			container = context->rawContainer();													\
+			container->read( "value", p, N );														\
+		}																							\
+		catch( ... )																				\
+		{																							\
+			unsigned int v = 0;																		\
+			container = context->container( staticTypeName(), v );									\
+			container->read( "value", p, N );														\
+		}																							\
 	}																			
 
 #define IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( T, TID, TNAME, BT, N )							\
@@ -128,7 +139,7 @@ template<>
 void TypedData<bool>::save( SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
+	IndexedIOInterfacePtr container = context->rawContainer();
 	unsigned char c = readable();
 	container->write( "value", c );
 }
@@ -137,10 +148,21 @@ template<>
 void TypedData<bool>::load( LoadContextPtr context )
 {
 	Data::load( context );
-	unsigned int v = 0;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	unsigned char c;
-	container->read( "value", c );
+	try
+	{
+		// optimised format for new files
+		IndexedIOInterfacePtr container = context->rawContainer();
+		container->read( "value", c );
+	}
+	catch( ... )
+	{
+		// backwards compatibility with old files
+		unsigned int v = 0;
+		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+		container->read( "value", c );
+	}
+	
 	writable() = c;
 }
 
