@@ -80,13 +80,10 @@ void ObjectWriter::doWrite()
 	header->writable()["ieCoreVersion"] = new StringData( versionString() );
 	header->writable()["typeName"] = new StringData( object()->typeName() );
 	
-	io->mkdir( "header" );
-	io->chdir( "header" );
-		((ObjectPtr)header)->save( io );
-	io->chdir( ".." );
+	((ObjectPtr)header)->save( io, "header" );
 	
 	// write the object
-	object()->save( io );
+	object()->save( io, "object" );
 }
 
 void ObjectWriter::constructParameters()

@@ -92,14 +92,13 @@ bool ObjectReader::canRead( const std::string &fileName )
 ObjectPtr ObjectReader::doOperation( ConstCompoundObjectPtr operands )
 {
 	IndexedIOInterfacePtr io = open(fileName());
-	return Object::load( io );
+	return Object::load( io, "object" );
 }
 
 CompoundDataPtr ObjectReader::readHeader() const
 {
 	IndexedIOInterfacePtr io = open(fileName());
-	io->chdir( "header" );
-	return runTimeCast<CompoundData>( Object::load( io ) );
+	return runTimeCast<CompoundData>( Object::load( io, "header" ) );
 }
 
 IndexedIOInterfacePtr ObjectReader::open( const std::string &fileName )

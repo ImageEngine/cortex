@@ -217,6 +217,15 @@ void HierarchicalCache::objectPath( const ObjectHandle &obj, IndexedIO::EntryID 
 	}
 }
 
+void HierarchicalCache::attributesPath( const ObjectHandle &obj, IndexedIO::EntryID &path )
+{
+	IndexedIO::EntryID ioPath;
+	objectPath( obj, ioPath );
+	fs::path objPath( ioPath );
+	objPath /= "attributes";
+	path = objPath.string();	
+}
+
 void HierarchicalCache::attributePath( const ObjectHandle &obj, const AttributeHandle &attr, IndexedIO::EntryID &path )
 {
 	IndexedIO::EntryID ioPath;
@@ -362,10 +371,8 @@ void HierarchicalCache::write( const ObjectHandle &obj, const AttributeHandle &a
 		m_io->mkdir( "attributes" );
 		m_io->chdir( "attributes" );
 	}
-	m_io->mkdir( attr );
-	m_io->chdir( attr );
 
-	data->save(m_io->resetRoot());
+	data->save(m_io->resetRoot(), attr);
 }
 
 void HierarchicalCache::write( const ObjectHandle &obj, const Imath::M44f &matrix )
@@ -405,26 +412,16 @@ void HierarchicalCache::write( const ObjectHandle &obj, ConstVisibleRenderablePt
 	IndexedIO::EntryID p = guaranteeObject( objName );
 	m_io->chdir( p );
 
+	// first make sure it's not a transform node.
 	try
 	{
-		m_io->chdir( "shape" );
+		m_io->rm( "transformMatrix" );
 	}
-	catch (IECore::Exception &e)
+	catch( ... )
 	{
-		// there's no shape directory...
-
-		// first make sure it's not a transform node.
-		try
-		{
-			m_io->rm( "transformMatrix" );
-		}
-		catch(IECore::Exception &e)
-		{
-		}		
-		m_io->mkdir( "shape" );
-		m_io->chdir( "shape" );
 	}
-	boost::static_pointer_cast<const Object>(shape)->save(m_io->resetRoot());
+	
+	boost::static_pointer_cast<const Object>(shape)->save(m_io->resetRoot(), "shape" );
 	m_io->chdir( ".." );
 
 	// ok, so check if this node has children...
@@ -445,19 +442,15 @@ void HierarchicalCache::write( const ObjectHandle &obj, ConstVisibleRenderablePt
 void HierarchicalCache::writeHeader( const HeaderHandle &hdr, ObjectPtr data)
 {
 	m_io->chdir("/HierarchicalCache");
-	m_io->mkdir(hdr);
-	m_io->chdir(hdr);
-	
-	data->save(m_io->resetRoot());
+	data->save(m_io->resetRoot(), hdr);
 }
 
 ObjectPtr HierarchicalCache::read( const ObjectHandle &obj, const AttributeHandle &attr )
 {
 	IndexedIO::EntryID p;
-	attributePath( obj, attr, p );
+	attributesPath( obj, p );
 	m_io->chdir( p );
-
-	ObjectPtr data = Object::load( m_io->resetRoot() );
+	ObjectPtr data = Object::load( m_io->resetRoot(), attr );
 	return data;
 }
 
@@ -466,22 +459,16 @@ CompoundObjectPtr HierarchicalCache::read( const ObjectHandle &obj )
 	CompoundObjectPtr dict = new CompoundObject();
 
 	IndexedIO::EntryID p;
-	attributePath( obj, "", p );
+	attributesPath( obj, p );
 	m_io->chdir( p );
 
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
 	IndexedIO::EntryList directories = m_io->ls(filter);
 	
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		m_io->chdir( it->id() );
-	
-		ObjectPtr data = Object::load( m_io->resetRoot() );
-
+		ObjectPtr data = Object::load( m_io->resetRoot(), it->id() );
 		dict->members()[ it->id() ] = data;
-
-		m_io->chdir( ".." );
 	}
 
 	return dict;
@@ -490,9 +477,7 @@ CompoundObjectPtr HierarchicalCache::read( const ObjectHandle &obj )
 ObjectPtr HierarchicalCache::readHeader( const HeaderHandle &hdr )
 {
 	m_io->chdir("/HierarchicalCache");
-	m_io->chdir(hdr);
-	ObjectPtr data = Object::load( m_io->resetRoot() );
-
+	ObjectPtr data = Object::load( m_io->resetRoot(), hdr );
 	return data;
 }
 
@@ -508,13 +493,8 @@ CompoundObjectPtr HierarchicalCache::readHeader( )
 	
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
-		m_io->chdir( it->id() );
-	
-		ObjectPtr data = Object::load( m_io->resetRoot() );
-
+		ObjectPtr data = Object::load( m_io->resetRoot(), it->id() );
 		dict->members()[ it->id() ] = data;
-
-		m_io->chdir( ".." );
 	}
 
 	return dict;
@@ -805,15 +785,8 @@ VisibleRenderablePtr HierarchicalCache::loadShape( )
 {
 	try
 	{
-		m_io->chdir( "shape" );
-		IndexedIOInterfacePtr shapeDir = m_io->resetRoot();
-		m_io->chdir( ".." );
-		ObjectPtr data = Object::load( shapeDir );
-		if ( !data || !data->isInstanceOf( VisibleRenderableTypeId ) )
-		{
-			return 0;
-		}
-		return boost::static_pointer_cast< VisibleRenderable >( data );
+		ObjectPtr data = Object::load( m_io, "shape" );
+		return runTimeCast<VisibleRenderable>( data );
 	}
 	catch( IECore::Exception &e)
 	{

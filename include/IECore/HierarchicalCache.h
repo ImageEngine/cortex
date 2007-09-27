@@ -225,7 +225,10 @@ class HierarchicalCache : public RefCounted
 		///Returns the internal IndexedIO path for a given object
 		static void objectPath( const ObjectHandle &obj, IndexedIO::EntryID &path );
 
-		///Returns the internal IndexedIO path for a given object
+		///Returns the internal IndexedIO path to the attributes directory for a given object
+		static void attributesPath( const ObjectHandle &obj, IndexedIO::EntryID &path );
+
+		///Returns the internal IndexedIO path for a given attribute on a given object
 		static void attributePath( const ObjectHandle &obj, const AttributeHandle &attr, IndexedIO::EntryID &path );
 
 		///Guarantees object existence

@@ -183,14 +183,60 @@ class TestAttributeCache(unittest.TestCase):
 		cache = None
 		cache = AttributeCache( "./test/AttributeCache.fio", IndexedIOOpenMode.Read)
 		self.assertEqual( len( cache.attributes( "Object1" ) ), 2 )
+		
+	def testNewObjectIO( self ) :
+	
+		"""Test that switching to the object::save( io, name ) form doesn't break old file support."""	
+		
+		numHeaders = 10
+		numObjects = 1000
+		numV3fs = 3
+				
+		cache = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Write )
+		for h in range( 0, numHeaders ) :
 			
+			hs = "header" + str( h )
+			cache.writeHeader( hs, V3fData( V3f( 2 ) ) )
+			
+		for o in range( 0, numObjects ) :
+		
+			os = "object" + str( o )
+			for a in range( 0, numV3fs ) :
+				
+				as = "attr" + str( a )
+				cache.write( os, as, V3fData( V3f( 1 ) ) )
+		
+		del cache
+		
+		cache = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
+		for h in cache.headers() :
+			cache.readHeader( h )
+		for o in cache.objects() :
+			for a in cache.attributes( o ) :
+				cache.read( o, a )
+			
+		cache = AttributeCache( "test/data/attributeCaches/lotsOfV3fDataBeforeNamedObjectIO.fio", IndexedIOOpenMode.Read )
+		cache2 = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
+		
+		self.assertEqual( cache.headers(), cache2.headers() )
+		for h in cache.headers() :
+			self.assertEqual( cache.readHeader( h ), cache2.readHeader( h ) )
+		self.assertEqual( cache.readHeader(), cache2.readHeader() )
+		
+		self.assertEqual( cache.objects(), cache2.objects() )
+		for o in cache.objects() :
+			self.assertEqual( cache.attributes( o ), cache2.attributes( o ) )
+			for a in cache.attributes( o ) :
+				self.assertEqual( cache.read( o, a ), cache2.read( o, a ) )
+			self.assertEqual( cache.read( o ), cache2.read( o ) )
+								
 	def tearDown(self):
 		
 		# cleanup
 	
-		if os.path.isfile("./test/AttributeCache.fio") :	
-			os.remove("./test/AttributeCache.fio")				
-				
+		for f in [ "./test/AttributeCache.fio", "test/data/attributeCaches/lotsOfV3fData.fio" ] :
+			if os.path.isfile( f ) :	
+				os.remove( f )				
 		
 if __name__ == "__main__":
 	unittest.main()   
