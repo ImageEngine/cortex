@@ -65,7 +65,7 @@ class CachedReader : public RefCounted
 		CachedReader( const SearchPath &paths, size_t maxMemory );
 		
 		/// Searches for the given file and loads it if found.
-		/// Returns 0 if the file cannot be found or no suitable Reader
+		/// Throws an exception in case it cannot be found or no suitable Reader
 		/// exists. The Object is returned with only const access as
 		/// it actually refers to an object within the cache - you must
 		/// call the copy() function on it if you wish to have something

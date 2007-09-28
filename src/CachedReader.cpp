@@ -49,7 +49,7 @@ ConstObjectPtr CachedReader::read( const std::string &file )
 	// if we've failed to read it before then don't try again
 	if( m_unreadables.count( file ) )
 	{
-		return 0;
+		throw Exception( "Unreadable file " + file );
 	}
 
 	// try to find it in the cache
@@ -68,21 +68,33 @@ ConstObjectPtr CachedReader::read( const std::string &file )
 	if( resolvedPath.empty() )
 	{
 		m_unreadables.insert( file );
-		return 0;
+		string pathList;
+		for( list<path>::const_iterator it = m_paths.paths.begin(); it!=m_paths.paths.end(); it++ )
+		{
+			if ( pathList.size() > 0 )
+			{
+				pathList += ":" + it->string();
+			}
+			else
+			{
+				pathList = it->string();
+			}
+		}
+		throw Exception( "Could not find file " + file + " at the following paths: " + pathList );
 	}
 	
 	ReaderPtr r = Reader::create( resolvedPath.string() );
 	if( !r )
 	{
 		m_unreadables.insert( file );
-		return 0;	
+		throw Exception( "No reader for file " + file );
 	}
 	
 	ObjectPtr object = r->read();
 	if( !object )
 	{
 		m_unreadables.insert( file );
-		return 0;
+		throw Exception( "Could not read from file " + file );
 	}
 	
 	// cache it if we can
