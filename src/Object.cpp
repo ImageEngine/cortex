@@ -494,8 +494,8 @@ ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface, const IndexedIO::Entr
 		// if that fails then we try to load it using the deprecated function. this
 		// helps with transitioning code from the old interface to the new one.
 		IndexedIOInterfacePtr i = ioInterface->resetRoot();
-		ioInterface->chdir( name );
-		return load( ioInterface );
+		i->chdir( name );
+		return load( i );
 	}
 }
 
