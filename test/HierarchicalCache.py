@@ -211,7 +211,7 @@ class TestHierarchicalCache(unittest.TestCase):
 			
 			self.assertEqual( dataWritten, dataRead[ obj ] )
 
-		self.assertEqual( set( self.cachedHeaderNames ), set( cache.headers() ) )
+		self.assertEqual( set( self.cachedHeaderNames ).intersection( cache.headers() ), set( self.cachedHeaderNames ) )
 
 	def testAttributes(self):
 		"""Test HierarchicalCache attributes"""
@@ -244,7 +244,8 @@ class TestHierarchicalCache(unittest.TestCase):
 		self.assertEqual( cache.attributes( self.cachedObjectNames[0] ), [ "attrib2" ] )
 		self.assertEqual( cache.attributes( self.cachedObjectNames[3] ), [ "attrib5" ] )
 		self.assertEqual( cache.objects(), [ self.cachedObjectNames[0], self.cachedObjectNames[3] ] )
-		self.assertEqual( cache.headers(), [ self.cachedHeaderNames[1] ] )
+		self.assert_( self.cachedHeaderNames[1] in cache.headers() )
+		self.assert_( not self.cachedHeaderNames[0] in cache.headers() )
 		
 	def testContains(self):
 		"""Test HierarchicalCache contains"""

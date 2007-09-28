@@ -107,7 +107,7 @@ class TestAttributeCache(unittest.TestCase):
 			
 			self.assertEqual( dataWritten, dataRead[ obj ] )
 
-		self.assertEqual( set( self.cachedHeaderNames ), set( cache.headers() ) )
+		self.assertEqual( set( self.cachedHeaderNames ).intersection( cache.headers() ), set( self.cachedHeaderNames ) )
 
 	def testAttributes(self):
 		"""Test AttributeCache attributes"""
@@ -136,7 +136,8 @@ class TestAttributeCache(unittest.TestCase):
 
 		self.assertEqual( cache.attributes( self.cachedObjectNames[0] ), [ "attrib2" ] )
 		self.assertEqual( cache.objects(), [ self.cachedObjectNames[0] ] )
-		self.assertEqual( cache.headers(), [ self.cachedHeaderNames[1] ] )
+		self.assert_( self.cachedHeaderNames[1] in cache.headers() )
+		self.assert_( not self.cachedHeaderNames[0] in cache.headers() )
 		
 		
 	def testContains(self):
@@ -221,12 +222,12 @@ class TestAttributeCache(unittest.TestCase):
 		cache3 = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
 		
 		self.assertEqual( cache.headers(), cache2.headers() )
-		self.assertEqual( cache.headers(), cache3.headers() )
+		self.assertEqual( set( cache.headers() ).intersection( cache3.headers() ), set( cache.headers() ) )
 		for h in cache.headers() :
 			self.assertEqual( cache.readHeader( h ), cache2.readHeader( h ) )
 			self.assertEqual( cache.readHeader( h ), cache3.readHeader( h ) )
 		self.assertEqual( cache.readHeader(), cache2.readHeader() )
-		self.assertEqual( cache.readHeader(), cache3.readHeader() )
+		self.assertEqual( set( cache.readHeader().keys() ).intersection( cache3.readHeader().keys() ), set( cache.readHeader().keys() ) )
 		
 		self.assertEqual( cache.objects(), cache2.objects() )
 		self.assertEqual( cache.objects(), cache3.objects() )
