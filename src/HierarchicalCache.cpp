@@ -45,6 +45,7 @@
 #include <IECore/IndexedIOInterface.h>
 #include <IECore/MessageHandler.h>
 #include <IECore/MatrixTransform.h>
+#include <IECore/HeaderGenerator.h>
 
 using namespace IECore;
 namespace fs = boost::filesystem;
@@ -91,6 +92,11 @@ HierarchicalCache::HierarchicalCache( const std::string &filename, IndexedIO::Op
 	{
 		m_io->mkdir("/HierarchicalCache");
 		m_io->mkdir("/children");
+		CompoundObjectPtr header = HeaderGenerator::header();
+		for ( CompoundObject::ObjectMap::const_iterator it = header->members().begin(); it != header->members().end(); it++ )
+		{
+			writeHeader( it->first, it->second );
+		}
 	}
 	if ( mode == IndexedIO::Read )
 	{

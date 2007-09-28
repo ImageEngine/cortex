@@ -40,6 +40,7 @@
 #include "IECore/CompoundData.h"
 #include "IECore/Object.h"
 #include "IECore/IECore.h"
+#include "IECore/HeaderGenerator.h"
 
 using namespace IECore;
 using namespace std;
@@ -73,12 +74,16 @@ void ObjectWriter::doWrite()
 	// write the header
 	CompoundDataPtr header = static_pointer_cast<CompoundData>( m_headerParameter->getValue()->copy() );
 	
-	const int maxHNameSize = 2048;
-	char hName[maxHNameSize];
-	gethostname( hName, maxHNameSize );
-	header->writable()["host"] = new StringData( hName );
-	header->writable()["ieCoreVersion"] = new StringData( versionString() );
 	header->writable()["typeName"] = new StringData( object()->typeName() );
+
+	CompoundObjectPtr genericHeader = HeaderGenerator::header();
+	for ( CompoundObject::ObjectMap::const_iterator it = genericHeader->members().begin(); it != genericHeader->members().end(); it++ )
+	{
+		if ( it->second->isInstanceOf( Data::staticTypeId() ) )
+		{
+			header->writable()[ it->first ] = static_pointer_cast< Data >( it->second );
+		}
+	}
 	
 	((ObjectPtr)header)->save( io, "header" );
 	

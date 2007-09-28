@@ -34,6 +34,7 @@
 
 #include "IECore/HeaderGenerator.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/CompoundData.h"
 #include "IECore/IECore.h"
 #include <sys/utsname.h>
 #include <unistd.h>
@@ -83,11 +84,13 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 
 	if ( !uname( &name ) )
 	{
-		header->members()["systemName"] = new StringData( name.sysname );
-		header->members()["nodeName"] = new StringData( name.nodename );
-		header->members()["systemRelease"] = new StringData( name.release );
-        header->members()["systemVersion"] = new StringData( name.version );
-		header->members()["machine"] = new StringData( name.machine );
+		CompoundDataPtr compound = new CompoundData();
+		compound->writable()["systemName"] = new StringData( name.sysname );
+		compound->writable()["nodeName"] = new StringData( name.nodename );
+		compound->writable()["systemRelease"] = new StringData( name.release );
+        compound->writable()["systemVersion"] = new StringData( name.version );
+		compound->writable()["machineName"] = new StringData( name.machine );
+		header->members()["host"] = compound;
 	}
 }
 

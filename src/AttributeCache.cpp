@@ -39,6 +39,7 @@
 #include <IECore/AttributeCache.h>
 #include <IECore/VectorTypedData.h>
 #include <IECore/CompoundObject.h>
+#include <IECore/HeaderGenerator.h>
 
 using namespace IECore;
 
@@ -50,6 +51,11 @@ AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode
 	{
 		m_io->mkdir("/headers");
 		m_io->mkdir("/objects");
+		CompoundObjectPtr header = HeaderGenerator::header();
+		for ( CompoundObject::ObjectMap::const_iterator it = header->members().begin(); it != header->members().end(); it++ )
+		{
+			writeHeader( it->first, it->second );
+		}
 	}
 	if ( mode == IndexedIO::Read )
 	{
