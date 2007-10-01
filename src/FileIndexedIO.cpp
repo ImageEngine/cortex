@@ -40,9 +40,16 @@
 #include <set>
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp> 
-#include <boost/iostreams/device/file.hpp> 
+
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 
 #include "IECore/ByteOrder.h"
+
+#include "IECore/MemoryStream.h"
 
 #include "IECore/FileIndexedIO.h"
 
@@ -85,20 +92,21 @@ using namespace IECore;
 namespace fs = boost::filesystem;
 namespace io = boost::iostreams;
 
+typedef io::filtering_stream< io::bidirectional_seekable > FilteredStream;
+
 template<typename T>
-void writeLittleEndian( io::file &f, T n )
+void writeLittleEndian( std::ostream &f, T n )
 {
 	const T nl = asLittleEndian<>(n);
 	f.write( (const char*) &nl, sizeof(T) );
 }
 
 template<typename T>
-void readLittleEndian( io::file &f, T &n )
+void readLittleEndian( std::istream &f, T &n )
 {
-	static bool g_bigEndian = bigEndian(); // Cache value to prevent unnecessary function calls
 	f.read( (char*) &n, sizeof(T) );
 	
-	if (g_bigEndian)
+	if (bigEndian())
 	{
 		n = reverseBytes<>(n);
 	}
@@ -111,7 +119,6 @@ void readLittleEndian( io::file &f, T &n )
 /// \todo We could add a minimum length for strings, below which we don't bother caching them?
 class StringCache
 {
-	
 	public:
 	
 		StringCache()
@@ -119,7 +126,7 @@ class StringCache
 			m_prevId = 0;			
 		}
 		
-		StringCache( io::file &f ) : m_prevId(0)
+		StringCache( std::istream &f ) : m_prevId(0)
 		{
 			Imf::Int64 sz;
 			readLittleEndian(f, sz);
@@ -139,7 +146,7 @@ class StringCache
 			}
 		}
 		
-		void write( io::file &f ) const
+		void write( std::ostream &f ) const
 		{
 			Imf::Int64 sz = m_stringToIdMap.size();
 			writeLittleEndian<Imf::Int64>(f, sz );
@@ -201,7 +208,7 @@ class StringCache
 	
 	protected:
 	
-		void write( io::file &f, const std::string &s ) const
+		void write( std::ostream &f, const std::string &s ) const
 		{
 			Imf::Int64 sz = s.size();
 			writeLittleEndian<Imf::Int64>( f, sz );
@@ -210,7 +217,7 @@ class StringCache
 			f.write( s.c_str(), sz * sizeof(char) );			
 		}
 		
-		void read( io::file &f, std::string &s ) const
+		void read( std::istream &f, std::string &s ) const
 		{		
 			Imf::Int64 sz;	
 			readLittleEndian<Imf::Int64>( f, sz );
@@ -248,7 +255,7 @@ class FileIndexedIO::Index : public RefCounted
 		static bool canRead( const std::string &path );
 		
 		/// Construct an index from reading a file stream.
-		Index( io::file &f );
+		Index( FilteredStream &f );
 		virtual ~Index();
 			
 		NodePtr m_root;	
@@ -267,7 +274,7 @@ class FileIndexedIO::Index : public RefCounted
 		NodePtr insert( NodePtr parentNode, IndexedIO::Entry e );
 
 		/// Write the index to a file stream
-		void write( io::file & f );
+		void write( std::ostream &f );
 	
 		/// Allocate a new chunk of data of the requested size, returning its offset within the file
 		Imf::Int64 allocate( Imf::Int64 sz );
@@ -283,7 +290,7 @@ class FileIndexedIO::Index : public RefCounted
 		static const Imf::Int64 g_unversionedMagicNumber = 0x0B00B1E5;
 		static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
 		
-		static const Imf::Int64 g_currentVersion = 1;
+		static const Imf::Int64 g_currentVersion = 2;
 		
 		Imf::Int64 m_version;		
 	
@@ -327,9 +334,9 @@ class FileIndexedIO::Index : public RefCounted
 		
 		void deallocateWalk( Node* n );
 		
-		void write( io::file &f, Node* n );
+		void write( std::ostream &f, Node* n );
 	
-		void readNode( io::file &f );
+		void readNode( std::istream &f );
 	
 		Imf::Int64 nodeCount( Node* n );
 							
@@ -371,10 +378,10 @@ class FileIndexedIO::Node : public RefCounted
 		void addChild( NodePtr c );
 	
 		/// Write this node to a stream
-		void write( io::file &f );
+		void write( std::ostream &f );
 
 		/// Replace the contents of this node with data read from a stream
-		void read( io::file &f );
+		void read( std::istream &f );
 		
 		/// Traverse through this node and down its children, removing the front 
 		/// of the list of 'parts' every time we descend through a match.
@@ -391,18 +398,23 @@ class FileIndexedIO::Node : public RefCounted
 };
 
 bool FileIndexedIO::Index::canRead( const std::string &path )
-{
-	io::file f( path, std::ios::in | std::ios::binary, std::ios::in);
-	
-	if (! f.is_open() )
+{ 
+	std::fstream d( path.c_str(), std::ios::binary | std::ios::in);
+
+	if (! d.is_open() )
 	{
 		return false;
 	}
-		
-	f.seek( 0, std::ios::end, std::ios::in );
-	Imf::Int64 end = f.seek( 0, std::ios::cur, std::ios::in );
+
+	FilteredStream f;
+	f.push<>( d );
 	
-	f.seek( end-1*sizeof(Imf::Int64), std::ios::beg, std::ios::in );
+	assert( f.is_complete() );
+		
+	f.seekg( 0, std::ios::end );
+	Imf::Int64 end = f.tellg();
+	
+	f.seekg( end-1*sizeof(Imf::Int64), std::ios::beg );
 	
 	Imf::Int64 magicNumber;
 	readLittleEndian<Imf::Int64>( f, magicNumber );
@@ -525,99 +537,131 @@ FileIndexedIO::Index::~Index()
 	}
 }
 			
-FileIndexedIO::Index::Index( io::file &f ) : m_prevId(0)
+FileIndexedIO::Index::Index( FilteredStream &f ) : m_prevId(0)
 {
 	m_hasChanged = false;
 
-	f.seek( 0, std::ios::end, std::ios::in );
-	Imf::Int64 end = f.seek( 0, std::ios::cur, std::ios::in );
+	f.seekg( 0, std::ios::end );
+	Imf::Int64 end = f.tellg();
 	
-	f.seek( end-1*sizeof(Imf::Int64), std::ios::beg, std::ios::in );
+	f.seekg( end-1*sizeof(Imf::Int64), std::ios::beg );
 	
 	Imf::Int64 magicNumber;
 	readLittleEndian<Imf::Int64>( f, magicNumber );
 	
 	if ( magicNumber == g_versionedMagicNumber )
 	{
-		f.seek( end-3*sizeof(Imf::Int64), std::ios::beg, std::ios::in );
+		end -= 3*sizeof(Imf::Int64);
+		f.seekg( end, std::ios::beg );
 		readLittleEndian<Imf::Int64>( f, m_offset );
 		readLittleEndian<Imf::Int64>( f, m_version );						
 	}
 	else if (magicNumber == g_unversionedMagicNumber )
 	{
 		m_version = 0;
-		
-		f.seek( end-2*sizeof(Imf::Int64), std::ios::beg, std::ios::in );
+		end -= 2*sizeof(Imf::Int64);
+		f.seekg( end, std::ios::beg );
 		readLittleEndian<Imf::Int64>( f, m_offset );
 	}
 	else
 	{	
 		throw IOException("Not a FileIndexedIO file");
 	}
-				
-	f.seek( m_offset, std::ios::beg, std::ios::in );
+					
+	f.seekg( m_offset, std::ios::beg );
+	
+	io::filtering_istream decompressingStream;	
+	std::istream *inputStream = &f;
+
+	if (m_version >= 2 )
+	{
+		char *compressedIndex = new char[ end - m_offset ];
+		f.read( compressedIndex, end - m_offset );
+		MemoryStreamSource source( compressedIndex, end - m_offset, true );		
+		decompressingStream.push( io::gzip_decompressor() );
+		decompressingStream.push( source );
+		assert( decompressingStream.is_complete() );
+		
+		inputStream = &decompressingStream;
+	}
 	
 	if (m_version >= 1)
 	{
-		m_stringCache = StringCache( f );
+		m_stringCache = StringCache( *inputStream );
 	}
 	
 	Imf::Int64 numNodes;		
-	readLittleEndian<Imf::Int64>( f, numNodes );
-
+	readLittleEndian<Imf::Int64>( *inputStream, numNodes );
 	for (Imf::Int64 i = 0; i < numNodes; i++)
 	{
-		readNode( f );
+		readNode( *inputStream );
 	}
+
 	Imf::Int64 numFreePages;		
-	readLittleEndian<Imf::Int64>( f, numFreePages );
-	
+	readLittleEndian<Imf::Int64>( *inputStream, numFreePages );
 
 	for (Imf::Int64 i = 0; i < numFreePages; i++)
 	{
 		Imf::Int64 offset, sz;
-		readLittleEndian<Imf::Int64>( f, offset );
-		readLittleEndian<Imf::Int64>( f, sz );
+		readLittleEndian<Imf::Int64>( *inputStream, offset );
+		readLittleEndian<Imf::Int64>( *inputStream, sz );
 		
 		addFreePage( offset, sz );
 	}
-	
+
 	m_next = m_offset;
 }
 
-void FileIndexedIO::Index::write( io::file & f )
+void FileIndexedIO::Index::write( std::ostream & f )
 {
-	/// Write index at end
+	/// Write index at end	
 	std::streampos indexStart = m_next;
 	
-	f.seek( m_next, std::ios_base::beg, std::ios_base::out );
+	f.seekp( m_next, std::ios::beg );
 	
 	m_offset = indexStart;
 	
-	m_stringCache.write( f );
+	MemoryStreamSink sink;
+	io::filtering_ostream compressingStream;
+	compressingStream.push( io::gzip_compressor() );
+	compressingStream.push( sink );
+	assert( compressingStream.is_complete() );
 	
+	m_stringCache.write( compressingStream );
 	
 	Imf::Int64 numNodes = nodeCount();
 	
-	writeLittleEndian<Imf::Int64>(f, numNodes);
+	writeLittleEndian<Imf::Int64>( compressingStream, numNodes);
 	
-	write( f, m_root.get() );
+	write( compressingStream, m_root.get() );
 
 	assert( m_freePagesOffset.size() == m_freePagesSize.size() );			
 	Imf::Int64 numFreePages = m_freePagesSize.size();
 
 	// Write out number of free "pages"		
-	writeLittleEndian<Imf::Int64>(f, numFreePages);
+	writeLittleEndian<Imf::Int64>( compressingStream, numFreePages);
 			
 	/// Write out each free page
 	for ( FreePagesSizeMap::const_iterator it = m_freePagesSize.begin(); it != m_freePagesSize.end(); ++it)
 	{
-		writeLittleEndian<Imf::Int64>(f, it->second->m_offset);
-		writeLittleEndian<Imf::Int64>(f, it->second->m_size);
+		writeLittleEndian<Imf::Int64>( compressingStream, it->second->m_offset );
+		writeLittleEndian<Imf::Int64>( compressingStream, it->second->m_size );
 	}
 	
+	/// To synchronize/close, etc.
+	compressingStream.pop();
+	compressingStream.pop();	
+	
+	char *data=0;
+	std::streamsize sz;
+	sink.get( data, sz );
+	assert( data );
+	assert( sz > 0 );
+	
+	f.write( data, sz );
+		
 	writeLittleEndian<Imf::Int64>( f, m_offset );
-	writeLittleEndian<Imf::Int64>( f, m_version );		
+	writeLittleEndian<Imf::Int64>( f, g_currentVersion );		
 	writeLittleEndian<Imf::Int64>( f, g_versionedMagicNumber );
 	
 	m_hasChanged = false;
@@ -738,8 +782,7 @@ void FileIndexedIO::Index::addFreePage(  Imf::Int64 offset, Imf::Int64 sz )
 		
 		it = m_freePagesOffset.lower_bound( offset  );
 		if (it != m_freePagesOffset.end())
-		{
-		
+		{		
 			assert( m_freePagesOffset.find(it->first) != m_freePagesOffset.end() );
 			assert( it->first != offset );
 			assert( it->second->m_offset  != offset );				
@@ -822,7 +865,7 @@ Imf::Int64 FileIndexedIO::Index::nodeCount()
 	return nodeCount(m_root.get());
 }
 
-void FileIndexedIO::Index::write( io::file & f, Node* n )
+void FileIndexedIO::Index::write( std::ostream &f, Node* n )
 {
 	n->write( f );
 	
@@ -837,7 +880,7 @@ void FileIndexedIO::Index::write( io::file & f, Node* n )
 	}		
 }
 
-void FileIndexedIO::Index::readNode( io::file &f )
+void FileIndexedIO::Index::readNode( std::istream &f )
 {
 	NodePtr n = new Node( this, 0 );
 			
@@ -905,18 +948,19 @@ void FileIndexedIO::Node::addChild( NodePtr c )
 	m_children.insert( std::map< std::string, NodePtr >::value_type( c->m_entry.id(), c) );
 }
 
-void FileIndexedIO::Node::write( io::file &f )
+void FileIndexedIO::Node::write( std::ostream &f )
 {
 	char t = m_entry.entryType();			
 	f.write( &t, sizeof(char) );
 	
 	Imf::Int64 id = m_idx->m_stringCache.find( m_entry.id() );
-
 	writeLittleEndian<Imf::Int64>( f, id );
 	
+	/// \todo no need to write for directories!	
 	t = m_entry.m_dataType;			
 	f.write( &t, sizeof(char) );
-	
+
+	/// \todo no need to write for directories!	
 	writeLittleEndian<Imf::Int64>(f, m_entry.m_arrayLength );
 								
 	writeLittleEndian<Imf::Int64>(f, m_id);
@@ -931,27 +975,28 @@ void FileIndexedIO::Node::write( io::file &f )
 		writeLittleEndian<Imf::Int64>(f, (Imf::Int64)0);
 	}
 	
+	/// \todo no need to write for directories!
 	writeLittleEndian<Imf::Int64>(f, m_offset);
 	writeLittleEndian<Imf::Int64>(f, m_size);
 }
 
-void FileIndexedIO::Node::read( io::file &f )
+void FileIndexedIO::Node::read( std::istream &f )
 {
-	char t;
+	assert( m_idx );
 	
+	char t;	
 	f.read( &t, sizeof(char) );		
 	m_entry.m_entryType = (IndexedIO::EntryType)t;
 
 	if (m_idx->m_version >= 1)
 	{
 		Imf::Int64 stringId;
-		
 		readLittleEndian<Imf::Int64>(f, stringId);		
-	
-		m_entry.m_ID = m_idx->m_stringCache.find( stringId );		
+		m_entry.m_ID = m_idx->m_stringCache.find( stringId );	
 	}
 	else
 	{
+		assert(false);//////////////////////////////////////////
 		Imf::Int64 entrySize;
 		readLittleEndian<Imf::Int64>( f, entrySize );
 		char *s = new char[entrySize+1];
@@ -961,10 +1006,10 @@ void FileIndexedIO::Node::read( io::file &f )
 		m_entry.m_ID = s;
 		delete[] s;
 	}
-		
+
+	/// \todo no need to read for directories!		
 	f.read( &t, sizeof(char) );		
 	m_entry.m_dataType = (IndexedIO::DataType)t;
-
 	Imf::Int64 arrayLength;
 	readLittleEndian<Imf::Int64>( f, arrayLength );
 	m_entry.m_arrayLength = arrayLength;			
@@ -985,7 +1030,7 @@ void FileIndexedIO::Node::read( io::file &f )
 	{		
 		throw IOException("parentId not found");
 	}
-	
+
 	NodePtr parent = it->second ;
 	if (m_id && parent)
 	{
@@ -996,8 +1041,9 @@ void FileIndexedIO::Node::read( io::file &f )
 		throw IOException("Non-root node has no parent");
 	}
 	
+	/// \todo no need to read for directories!	
 	readLittleEndian<Imf::Int64>(f, m_offset );
-	readLittleEndian<Imf::Int64>(f, m_size );	
+	readLittleEndian<Imf::Int64>(f, m_size );
 }
 
 bool FileIndexedIO::Node::find( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const
@@ -1073,7 +1119,8 @@ bool FileIndexedIO::Node::findInChildren( Tokenizer::iterator &parts, Tokenizer:
 class FileIndexedIO::IndexedFile : public RefCounted
 {
 	public:
-		io::file *m_file;
+		FilteredStream *m_stream;
+		std::fstream *m_device;
 			
 		IndexedFile( const std::string &filename, IndexedIO::OpenMode mode );
 		virtual ~IndexedFile();
@@ -1097,12 +1144,16 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 {
 	if (mode & IndexedIO::Write)
 	{
-		m_file = new io::file(filename, std::ios::trunc | std::ios::binary);
+		m_device = new std::fstream(filename.c_str(), std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
 		
-		if (! m_file->is_open() )
+		if (! m_device->is_open() )
 		{
 			throw IOException(filename);
 		}
+		
+		m_stream = new FilteredStream();
+		m_stream->push<>( *m_device );
+		assert( m_stream->is_complete() );
 		
 		m_index = new Index();
 	}		
@@ -1111,29 +1162,37 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		if (!fs::exists( filename.c_str() ) )
 		{
 			/// Create new file
-			m_file = new io::file(filename.c_str(), std::ios::trunc | std::ios::binary);
+			m_device = new std::fstream(filename.c_str(), std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
 		
-			if (! m_file->is_open() )
+			if (! m_device->is_open() )
 			{
 				throw IOException(filename);
 			}
+			
+			m_stream = new FilteredStream();
+			m_stream->push<>( *m_device );
+			assert( m_stream->is_complete() );
 		
 			m_index = new Index();
 		}
 		else
 		{		
 			/// Read existing file
-			m_file = new io::file(filename.c_str(), std::ios::binary);
+			m_device = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in | std::ios::out);
 		
-			if (! m_file->is_open() )
+			if (! m_device->is_open() )
 			{
 				throw IOException(filename);
 			}
-
+			
+			m_stream = new FilteredStream();
+			m_stream->push<>( *m_device );
+			assert( m_stream->is_complete() );
+			
 			/// Read index		
 			try 
 			{
-				m_index = new Index(*m_file);
+				m_index = new Index( *m_stream );
 			} 
 			catch ( Exception &e )
 			{
@@ -1148,17 +1207,21 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 	else
 	{
 		assert( mode & IndexedIO::Read );
-		m_file = new io::file(filename.c_str(), std::ios::binary, std::ios::in);
+		m_device = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in);
 		
-		if (! m_file->is_open() )
+		if (! m_device->is_open() )
 		{
 			throw IOException(filename);
 		}
+		
+		m_stream = new FilteredStream();
+		m_stream->push( *m_device );
+		assert( m_stream->is_complete() );		
 
 		/// Read index		
 		try 
 		{
-			m_index = new Index(*m_file);
+			m_index = new Index( *m_stream );
 		}
 		catch ( Exception &e )
 		{
@@ -1169,16 +1232,19 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 			throw IOException(filename);
 		}
 	}
-	
-	assert(m_index);
+
+	assert( m_device );	
+	assert( m_stream );
+	assert( m_stream->is_complete() );	
+	assert( m_index );
 }
 
 void FileIndexedIO::IndexedFile::seekg( NodePtr node )	
 {
 	assert( node->m_entry.entryType() == IndexedIO::File );
-	assert( m_file );
+	assert( m_stream );
 	
-	m_file->seek( node->m_offset, std::ios::beg, std::ios::in );							
+	m_stream->seekg( node->m_offset, std::ios::beg );
 }
 
 FileIndexedIO::IndexPtr FileIndexedIO::IndexedFile::index() const
@@ -1190,14 +1256,17 @@ FileIndexedIO::IndexPtr FileIndexedIO::IndexedFile::index() const
 
 FileIndexedIO::IndexedFile::~IndexedFile()
 {
-	assert(m_file);
+	assert(m_stream);
 	
 	if (index()->hasChanged())
 	{			
-		index()->write(*m_file);
+		index()->write( *m_stream );
 	}
 	
-	m_file->close();
+	assert( m_stream->auto_close() );
+	
+	delete m_stream;
+	delete m_device;	 
 }
 
 void FileIndexedIO::IndexedFile::write(NodePtr node, const char *data, Imf::Int64 size)
@@ -1206,14 +1275,14 @@ void FileIndexedIO::IndexedFile::write(NodePtr node, const char *data, Imf::Int6
 	Imf::Int64 loc = m_index->allocate( size );
 	
 	/// Seek 'write' pointer to writable location
-	m_file->seek( loc, std::ios_base::beg, std::ios_base::out );
+	m_stream->seekp( loc, std::ios::beg );
 	
 	/// Update node with positional information within file
 	node->m_offset = loc;
 	node->m_size = size;
 	
 	/// Write data		
-	m_file->write( data, size );
+	m_stream->write( data, size );
 }
 
 static IndexedIOInterface::Description<FileIndexedIO> registrar(".fio");
@@ -1231,7 +1300,7 @@ bool FileIndexedIO::canRead( const std::string &path )
 FileIndexedIO::FileIndexedIO(const FileIndexedIO &other, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode  )
 {
 	m_mode = mode;
-	m_file = other.m_file;
+	m_indexedFile = other.m_indexedFile;
 
 	/// \todo No need to pass "root" as a parameter because we can derive it, according to this assert	
 	assert( root == other.m_currentDirectory.fullPath() );
@@ -1275,10 +1344,10 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryID &
 		throw FileNotFoundIOException(filename);
 	}
 
-	m_file = new IndexedFile( filename, mode );
+	m_indexedFile = new IndexedFile( filename, mode );
 	
-	m_rootDirectoryNode = m_file->index()->m_root;
-	m_file->index()->find( m_currentDirectory.fullPath(), m_rootDirectoryNode, m_rootDirectoryNode );
+	m_rootDirectoryNode = m_indexedFile->index()->m_root;
+	m_indexedFile->index()->find( m_currentDirectory.fullPath(), m_rootDirectoryNode, m_rootDirectoryNode );
 	m_currentDirectoryNode = m_rootDirectoryNode;	
 	
 	if (mode & IndexedIO::Read)
@@ -1313,7 +1382,7 @@ FileIndexedIO::~FileIndexedIO()
 IndexedIO::EntryID FileIndexedIO::pwd()
 {
 	readable(".");
-	
+
 	return m_currentDirectory.relativePath();
 }
 
@@ -1447,7 +1516,7 @@ unsigned long FileIndexedIO::rm(const IndexedIO::EntryID &name, bool throwIfNonE
 		}
 	}
 	
-	m_file->index()->remove( node );
+	m_indexedFile->index()->remove( node );
 	
 	chdir( m_currentDirectory.relativePath() );
 	
@@ -1470,8 +1539,8 @@ bool FileIndexedIO::exists(const IndexedIOPath &path, IndexedIO::EntryType e) co
 		return true;
 	}
 	
-	NodePtr nearest = m_file->index()->m_root;
-	bool found = m_file->index()->find( path, nearest, nearest );
+	NodePtr nearest = m_indexedFile->index()->m_root;
+	bool found = m_indexedFile->index()->find( path, nearest, nearest );
 	
 	if (!found)
 	{
@@ -1522,7 +1591,7 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned l
 		
 		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, arrayLength) ;
 	
-		m_file->write( node, data, size );
+		m_indexedFile->write( node, data, size );
 	
 		IndexedIO::DataFlattenTraits<T*>::free(data);
 	}
@@ -1553,7 +1622,7 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 		
 		node->m_entry = IndexedIO::Entry( node->m_entry.id(), IndexedIO::File, dataType, 0) ;
 	
-		m_file->write( node, data, size );
+		m_indexedFile->write( node, data, size );
 	
 		IndexedIO::DataFlattenTraits<T>::free(data);
 	}
@@ -1577,11 +1646,11 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long ar
 		throw IOException(name);
 	}
 	
-	m_file->seekg( node );
+	m_indexedFile->seekg( node );
 	
 	Imf::Int64 size = node->m_size;
 	char *data = new char[size];
-	m_file->m_file->read( data, size );
+	m_indexedFile->m_stream->read( data, size );
 	
 	IndexedIO::DataFlattenTraits<T*>::unflatten( data, x, arrayLength );
 	delete[]data;
@@ -1601,11 +1670,11 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 		throw IOException(name);
 	}
 
-	m_file->seekg( node );
+	m_indexedFile->seekg( node );
 
 	Imf::Int64 size = node->m_size;
 	char *data = new char[size];
-	m_file->m_file->read( data, size );
+	m_indexedFile->m_stream->read( data, size );
 
 	IndexedIO::DataFlattenTraits<T>::unflatten( data, x );
 	delete[]data;

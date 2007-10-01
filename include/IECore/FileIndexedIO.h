@@ -146,7 +146,7 @@ class FileIndexedIO : public IndexedIOInterface
 		class IndexedFile;
 		IE_CORE_DECLAREPTR( IndexedFile );		
 		
-		IndexedFilePtr m_file;		
+		IndexedFilePtr m_indexedFile;		
 		
 		class Node;
 		IE_CORE_DECLAREPTR( Node );
