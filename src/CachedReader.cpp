@@ -49,7 +49,7 @@ ConstObjectPtr CachedReader::read( const std::string &file )
 	// if we've failed to read it before then don't try again
 	if( m_unreadables.count( file ) )
 	{
-		throw Exception( "Unreadable file " + file );
+		throw Exception( "Unreadable file '" + file + "'" );
 	}
 
 	// try to find it in the cache
@@ -80,21 +80,21 @@ ConstObjectPtr CachedReader::read( const std::string &file )
 				pathList = it->string();
 			}
 		}
-		throw Exception( "Could not find file " + file + " at the following paths: " + pathList );
+		throw Exception( "Could not find file '" + file + "' at the following paths: " + pathList );
 	}
 	
 	ReaderPtr r = Reader::create( resolvedPath.string() );
 	if( !r )
 	{
 		m_unreadables.insert( file );
-		throw Exception( "No reader for file " + file );
+		throw Exception( "No reader for file '" + file + "'" );
 	}
 	
 	ObjectPtr object = r->read();
 	if( !object )
 	{
 		m_unreadables.insert( file );
-		throw Exception( "Could not read from file " + file );
+		throw Exception( "Could not read from file '" + file + "'" );
 	}
 	
 	// cache it if we can
