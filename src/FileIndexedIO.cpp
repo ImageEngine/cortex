@@ -955,13 +955,13 @@ void FileIndexedIO::Node::write( std::ostream &f )
 	
 	Imf::Int64 id = m_idx->m_stringCache.find( m_entry.id() );
 	writeLittleEndian<Imf::Int64>( f, id );
-	
-	/// \todo no need to write for directories!	
-	t = m_entry.m_dataType;			
-	f.write( &t, sizeof(char) );
 
-	/// \todo no need to write for directories!	
-	writeLittleEndian<Imf::Int64>(f, m_entry.m_arrayLength );
+	if ( m_entry.entryType() == IndexedIO::File )
+	{
+		t = m_entry.m_dataType;			
+		f.write( &t, sizeof(char) );
+		writeLittleEndian<Imf::Int64>(f, m_entry.m_arrayLength );
+	}
 								
 	writeLittleEndian<Imf::Int64>(f, m_id);
 	
@@ -975,9 +975,11 @@ void FileIndexedIO::Node::write( std::ostream &f )
 		writeLittleEndian<Imf::Int64>(f, (Imf::Int64)0);
 	}
 	
-	/// \todo no need to write for directories!
-	writeLittleEndian<Imf::Int64>(f, m_offset);
-	writeLittleEndian<Imf::Int64>(f, m_size);
+	if ( m_entry.entryType() == IndexedIO::File )
+	{
+		writeLittleEndian<Imf::Int64>(f, m_offset);
+		writeLittleEndian<Imf::Int64>(f, m_size);
+	}
 }
 
 void FileIndexedIO::Node::read( std::istream &f )
@@ -996,7 +998,6 @@ void FileIndexedIO::Node::read( std::istream &f )
 	}
 	else
 	{
-		assert(false);//////////////////////////////////////////
 		Imf::Int64 entrySize;
 		readLittleEndian<Imf::Int64>( f, entrySize );
 		char *s = new char[entrySize+1];
@@ -1007,12 +1008,20 @@ void FileIndexedIO::Node::read( std::istream &f )
 		delete[] s;
 	}
 
-	/// \todo no need to read for directories!		
-	f.read( &t, sizeof(char) );		
-	m_entry.m_dataType = (IndexedIO::DataType)t;
-	Imf::Int64 arrayLength;
-	readLittleEndian<Imf::Int64>( f, arrayLength );
-	m_entry.m_arrayLength = arrayLength;			
+	if ( m_entry.m_entryType == IndexedIO::File || m_idx->m_version < 2 )
+	{
+		f.read( &t, sizeof(char) );		
+		m_entry.m_dataType = (IndexedIO::DataType)t;
+	
+		Imf::Int64 arrayLength;
+		readLittleEndian<Imf::Int64>( f, arrayLength );
+		m_entry.m_arrayLength = arrayLength;			
+	}
+	else
+	{
+		m_entry.m_dataType = IndexedIO::Invalid;
+		m_entry.m_arrayLength = 0;
+	}
 		
 	readLittleEndian<Imf::Int64>(f, m_id );
 
@@ -1041,9 +1050,16 @@ void FileIndexedIO::Node::read( std::istream &f )
 		throw IOException("Non-root node has no parent");
 	}
 	
-	/// \todo no need to read for directories!	
-	readLittleEndian<Imf::Int64>(f, m_offset );
-	readLittleEndian<Imf::Int64>(f, m_size );
+	if ( m_entry.m_entryType == IndexedIO::File || m_idx->m_version < 2 )
+	{
+		readLittleEndian<Imf::Int64>(f, m_offset );
+		readLittleEndian<Imf::Int64>(f, m_size );
+	}
+	else
+	{
+		m_offset = 0;
+		m_size = 0;		
+	}
 }
 
 bool FileIndexedIO::Node::find( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const
