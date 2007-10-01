@@ -50,7 +50,7 @@ class BoundedKDTree
 {
 	public:
 		typedef BoundIterator Iterator;
-		typedef typename std::iterator_traits<BoundIterator>::value_type Bound;;
+		typedef typename std::iterator_traits<BoundIterator>::value_type Bound;
 		typedef typename BoxTraits<Bound>::BaseType BaseType;		
 		
 		/// Creates a tree for the fast searching of bounds.
