@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//	     other contributors to this software may be used to endorse or
+//       other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -167,7 +167,7 @@ unsigned char BoundedKDTree<BoundIterator>::majorAxis( PermutationConstIterator 
 			if( center[i] < min[i] )
 			{
 				min[i] = center[i];
-			}
+			} 
 			if( center[i] > max[i] )
 			{
 				max[i] = center[i];
@@ -203,6 +203,9 @@ void BoundedKDTree<BoundIterator>::bound( NodeIndex nodeIndex  )
 	{	
 		assert( node.isBranch() );
 		
+		assert( Node::lowChildIndex( nodeIndex ) < m_nodes.size() );
+		assert( Node::highChildIndex( nodeIndex ) < m_nodes.size() );		
+		
 		bound( Node::lowChildIndex( nodeIndex ) );						
 		bound( Node::highChildIndex( nodeIndex ) );
 		node.bound().extendBy( m_nodes[Node::lowChildIndex( nodeIndex )].bound() );
@@ -219,6 +222,8 @@ void BoundedKDTree<BoundIterator>::build( NodeIndex nodeIndex, PermutationIterat
 	{
 		m_nodes.resize( nodeIndex+1 );
 	}
+	
+	assert( nodeIndex < m_nodes.size() );
 	
 	Node &node = m_nodes[nodeIndex];
 	
