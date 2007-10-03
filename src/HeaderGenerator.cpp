@@ -32,20 +32,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <sys/utsname.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <time.h>
+
+#include <boost/format.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
 #include "IECore/HeaderGenerator.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/CompoundData.h"
 #include "IECore/IECore.h"
-#include <sys/utsname.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <boost/format.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/posix_time/ptime.hpp>
 
 using namespace std;
 using namespace IECore;
-using namespace boost::posix_time;
+
 
 
 std::vector<HeaderGenerator::DataHeaderFn> HeaderGenerator::m_generators;
@@ -110,7 +112,19 @@ static void userHeaderGenerator( CompoundObjectPtr header )
 
 static void timeStampHeaderGenerator( CompoundObjectPtr header )
 {
-	header->members()["timeStamp"] = new StringData( to_simple_string( second_clock::local_time() ) );
+	time_t tm;
+	time( &tm );
+	
+	/// ctime_r manpage suggest that 26 characters should be enough in all cases
+	char buf[27];
+	std::string strTime ( ctime_r( &tm, &buf[0] ) );
+		
+	assert( strTime.length() <= 26 );
+	
+	/// Remove the newline at the end
+	boost::algorithm::trim_right( strTime );
+			
+	header->members()["timeStamp"] = new StringData( strTime );
 }
 
 static bool resIeCore = HeaderGenerator::registerDataHeaderGenerator( &ieCoreHeaderGenerator );

@@ -82,7 +82,6 @@ libs={}
 libs['boost'] = {}
 libs['boost']['regex'] = 'boost_regex'
 libs['boost']['filesystem'] = 'boost_filesystem'
-libs['boost']['datetime'] = 'boost_date_time'
 libs['boost']['unit_test_framework'] = 'boost_unit_test_framework'
 libs['boost']['python'] = 'boost_python'
 libs['boost']['iostreams'] = 'boost_iostreams'
@@ -219,7 +218,6 @@ if multithreaded:
 coreLibrary.addLib( 'sqlite3' )
 coreLibrary.addLib( libs['boost']['regex'] )
 coreLibrary.addLib( libs['boost']['filesystem'] )
-coreLibrary.addLib( libs['boost']['datetime'] )
 coreLibrary.addLib( libs['boost']['iostreams'] )
 coreLibrary.addLib( 'Iex' )
 coreLibrary.addLib( 'Imath' )
