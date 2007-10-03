@@ -88,7 +88,7 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 		compound->writable()["systemName"] = new StringData( name.sysname );
 		compound->writable()["nodeName"] = new StringData( name.nodename );
 		compound->writable()["systemRelease"] = new StringData( name.release );
-        compound->writable()["systemVersion"] = new StringData( name.version );
+		compound->writable()["systemVersion"] = new StringData( name.version );
 		compound->writable()["machineName"] = new StringData( name.machine );
 		header->members()["host"] = compound;
 	}
@@ -96,7 +96,7 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 
 static void userHeaderGenerator( CompoundObjectPtr header )
 {
-	 uid_t uid = getuid();
+	uid_t uid = getuid();
 	struct passwd *st = getpwuid( uid );
 	if ( st )
 	{
