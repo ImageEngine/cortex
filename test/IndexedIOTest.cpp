@@ -43,10 +43,6 @@
 namespace IECore
 {
 
-void addIndexedIOTest(boost::unit_test::test_suite* test)
-{
-	test->add( new IndexedIOTestSuite<SQLiteIndexedIO>() );
-}
 
 template<>
 void IndexedIOTestSuite<SQLiteIndexedIO>::getFilenames( FilenameList &filenames )
@@ -315,4 +311,10 @@ unsigned char* IndexedIOTestDataTraits<unsigned char*>::value()
 	
 	return v;
 } 
+
+void addIndexedIOTest(boost::unit_test::test_suite* test)
+{
+	test->add( new IndexedIOTestSuite<SQLiteIndexedIO>() );
+}
+
 }
