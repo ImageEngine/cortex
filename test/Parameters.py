@@ -409,7 +409,15 @@ class TestCompoundParameter( unittest.TestCase ) :
 		p.validate()
 
 	def testConstructor( self ) :
-	
+		p = CompoundParameter( "n", "d" )
+		self.assertEqual( p.name, "n" )
+		self.assertEqual( p.description, "d" )
+		self.assertEqual( p.defaultValue, CompoundObject() )
+		self.assertEqual( len( p.keys() ), 0 )
+		self.assertEqual( len( p.values() ), 0 )
+		self.assertEqual( len( p ), 0 )
+		self.assertEqual (p.userData(), CompoundObject() )
+		
 		p = CompoundParameter( "n", "d", [] )
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
