@@ -61,8 +61,6 @@ void bindFileSystemIndexedIO(const char *bindName);
 void bindSQLiteIndexedIO(const char *bindName);
 void bindFileIndexedIO(const char *bindName);
 
-void stupidTest();
-
 void bindIndexedIO()
 {
 	bindIndexedIOEntry("IndexedIOEntry");
