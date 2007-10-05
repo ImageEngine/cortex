@@ -61,6 +61,15 @@ IndexedIOInterfacePtr IndexedIOInterface::create( const std::string &path, const
 	return (it->second)(path, root, mode);
 }
 
+void IndexedIOInterface::supportedExtensions( std::vector<std::string> &extensions )
+{
+	CreatorMap &m = getCreateFns();
+	for( CreatorMap::const_iterator it=m.begin(); it!=m.end(); it++ )
+	{
+		extensions.push_back( it->first.substr( 1 ) );
+	}
+}
+
 void IndexedIOInterface::registerCreator( const std::string &extension, CreatorFn f )
 {
 	CreatorMap &createFns = getCreateFns();

@@ -56,7 +56,7 @@ class IndexedIOInterface;
 typedef boost::intrusive_ptr<IndexedIOInterface> IndexedIOInterfacePtr;
 	
 /// Abstract interface to define operations on a random-access indexed input/output device. All methods throw an instance of IOException,
-/// or one of its sublcasses, if an error is encountered. 
+/// or one of its subclasses, if an error is encountered. 
 class IndexedIOInterface : public RefCounted, private boost::noncopyable
 {
 	public:	
@@ -72,6 +72,10 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// \param mode A bitwise-ORed combination of constants which determine how the file system should be accessed.
 		/// Test
 		static IndexedIOInterfacePtr create( const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
+		
+		/// Fills the passed vector with all the extensions for which an IndexedIOInterface implementation is
+		/// available. Extensions are of the form "fio" - ie without a preceding '.'.
+		static void supportedExtensions( std::vector<std::string> &extensions );
 		
 		/// Static instantation of one of these (with a supported file extension) using a subclass as the template parameter  will register it
 		/// as a supported IndexedIOInterface. This allows read and write operations to be performed generically, with the correct interface to 

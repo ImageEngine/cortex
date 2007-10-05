@@ -185,6 +185,19 @@ struct IndexedIOInterfaceHelper
 		p->read(name, x);
 		return x;
 	}
+	
+	static list supportedExtensions()
+	{
+		list result;
+		std::vector<std::string> e;
+		IndexedIOInterface::supportedExtensions( e );
+		for( unsigned int i=0; i<e.size(); i++ )
+		{
+			result.append( e[i] );
+		}
+		return result;
+	}
+	
 };
 
 void bindIndexedIOInterface(const char *bindName)
@@ -266,7 +279,8 @@ void bindIndexedIOInterface(const char *bindName)
 		.def("write", writeUChar)
 #endif		
 		.def("read", &IndexedIOInterfaceHelper::read)
-		.def("create", &IndexedIOInterface::create ).staticmethod("create")	
+		.def("create", &IndexedIOInterface::create ).staticmethod("create")
+		.def("supportedExtensions", &IndexedIOInterfaceHelper::supportedExtensions ).staticmethod("supportedExtensions")
 	
 	;
 	INTRUSIVE_PTR_PATCH( IndexedIOInterface, IndexedIOInterfacePyClass );

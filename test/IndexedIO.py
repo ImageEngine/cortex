@@ -57,6 +57,16 @@ class TestIndexedIOInterface(unittest.TestCase):
 		
 			io = IndexedIOInterface.create( "test/myFile.sql", "/", IndexedIOOpenMode.Write )
 
+	def testSupportedExtensions( self ) :
+	
+		e = IndexedIOInterface.supportedExtensions()
+		self.assert_( "fio" in e )
+		self.assert_( "fs" in e )
+				
+		if withSQLite() :
+			self.assert_( "sql" in e )
+		else :
+			self.assert_( not "sql" in e )
 		
 	def tearDown(self):
 		
