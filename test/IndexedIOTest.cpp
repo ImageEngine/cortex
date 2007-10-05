@@ -36,6 +36,7 @@
 
 #include <IECore/IndexedIOInterface.h>
 #include <IECore/SQLiteIndexedIO.h>
+#include <IECore/FileIndexedIO.h>
 
 #include "IndexedIOTest.h"
 
@@ -43,6 +44,17 @@
 namespace IECore
 {
 
+template<>
+std::string IndexedIOTestSuite<SQLiteIndexedIO>::extension() const
+{
+	return "sql";
+}
+
+template<>
+std::string IndexedIOTestSuite<FileIndexedIO>::extension() const
+{
+	return "fio";
+}
 
 template<>
 void IndexedIOTestSuite<SQLiteIndexedIO>::getFilenames( FilenameList &filenames )
@@ -61,10 +73,19 @@ void IndexedIOTestSuite<SQLiteIndexedIO>::getFilenames( FilenameList &filenames 
 	filenames.push_back("./test/data/sqlFiles/1.0.0/osx104.i686/types.sql");
 	
 	filenames.push_back("./test/data/sqlFiles/2.0.0/rhel4.i686/types.sql");	
-	filenames.push_back("./test/data/sqlFiles/2.0.0/osx104.i686/types.sql");	
+	filenames.push_back("./test/data/sqlFiles/2.0.0/osx104.i686/types.sql");
 	
-	filenames.push_back("./test/data/fioFiles/2.8.0/rhel4.i686/types.fio");
-	filenames.push_back("./test/data/fioFiles/2.8.0/osx104.i686/types.fio");		
+	filenames.push_back("./test/data/sqlFiles/2.13.0/rhel4.i686/types.sql");	
+	filenames.push_back("./test/data/sqlFiles/2.13.0/osx104.i686/types.sql");		
+}
+
+template<>
+void IndexedIOTestSuite<FileIndexedIO>::getFilenames( FilenameList &filenames )
+{
+	filenames.clear();
+	
+	filenames.push_back("./test/data/fioFiles/2.13.0/rhel4.i686/types.fio");
+	filenames.push_back("./test/data/fioFiles/2.13.0/osx104.i686/types.fio");			
 }
 
 /// float 
@@ -315,6 +336,7 @@ unsigned char* IndexedIOTestDataTraits<unsigned char*>::value()
 void addIndexedIOTest(boost::unit_test::test_suite* test)
 {
 	test->add( new IndexedIOTestSuite<SQLiteIndexedIO>() );
+	test->add( new IndexedIOTestSuite<FileIndexedIO>() );
 }
 
 }

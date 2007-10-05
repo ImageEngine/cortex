@@ -42,8 +42,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+#include <IECore/IECore.h>
 #include <IECore/IndexedIOInterface.h>
-#include <IECore/SQLiteIndexedIO.h>
 
 namespace IECore
 {
@@ -108,6 +108,7 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
+			std::cerr << *it << std::endl;
 			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
 		
 			D v;
@@ -121,6 +122,7 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
+			std::cerr << *it << std::endl;		
 			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
 		
 			D *v = new D[10] ;
@@ -189,8 +191,8 @@ struct IndexedIOTestSuite : public boost::unit_test::test_suite
 			
 		static boost::shared_ptr<IndexedIOTest<T> > instance(new IndexedIOTest<T>(filenames));
 		
-		/// Uncomment this line to write out new test data
-		//instance->write("./test/data/fioFiles/2.8.0/osx104.ppc/types.fio");		
+		/// Uncomment this line to write out new test data - change architecture first
+		//instance->write("./test/data/" + extension() + "Files/" + IECore::versionString() + "/osx104.ppc/types." + extension());		
 		
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<float>, instance ) );				
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<double>, instance ) );		
@@ -214,6 +216,8 @@ struct IndexedIOTestSuite : public boost::unit_test::test_suite
 
 
 	}
+	
+	std::string extension() const;
 	
 	void getFilenames( FilenameList &filenames );
 };
