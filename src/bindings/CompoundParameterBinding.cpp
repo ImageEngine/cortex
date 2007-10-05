@@ -63,7 +63,7 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 			return m;
 		}
 
-		static CompoundObjectPtr compoundObjectFromDict( dict v )
+		static CompoundObjectPtr compoundObjectFromDict( const dict &v )
 		{
 			CompoundObjectPtr x = new CompoundObject;
 			list values = v.values();
@@ -111,20 +111,27 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 
 				// get userData from python dict.
 				extract<dict> listElem(userData);
-				if (listElem.check()) {
+				if (listElem.check())
+				{
 					return compoundObjectFromDict( listElem() );
 				}
 
 				extract<CompoundObjectPtr> elem(userData);
 				// try if elem is an exact CompoundObjectPtr
-				if (elem.check()) {
+				if (elem.check())
+				{
 					ptrUserData = elem();
-				} else {
+				}
+				else
+				{
 					// now try for ConstCompoundObjectPtr
 					extract<ConstCompoundObjectPtr> elem(userData);
-					if (elem.check()) {
+					if (elem.check())
+					{
 						ptrUserData = elem();
-					} else {
+					} 
+					else
+					{
 					   	PyErr_SetString(PyExc_TypeError, "Parameter userData is not an instance of CompoundObject nor a dictionary!");
 					  	throw_error_already_set();
 					}
@@ -140,26 +147,26 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 		{
 			std::vector<ParameterPtr> m = getMembers( members );
 			this->addParameters( m.begin(), m.end() );
-		};
+		}
 
 		CompoundParameterWrap( PyObject *self, const std::string &name, const list &members, const object & userData = object() )
 			:	CompoundParameter( name, "", getUserData( userData ) ), Wrapper< CompoundParameter >( self, this )
 		{
 			std::vector<ParameterPtr> m = getMembers( members );
 			this->addParameters( m.begin(), m.end() );
-		};
+		}
 		
 		CompoundParameterWrap( PyObject *self, const list &members, const object & userData = object() )
 			:	CompoundParameter( "", "", getUserData( userData ) ), Wrapper< CompoundParameter >( self, this )
 		{
 			std::vector<ParameterPtr> m = getMembers( members );
 			this->addParameters( m.begin(), m.end() );
-		};
+		}
 
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( CompoundParameter );
 };
 
-static unsigned int compoundParameterLen( CompoundParameter &o )
+static unsigned int compoundParameterLen( const CompoundParameter &o )
 {
 	return o.parameters().size();
 }
@@ -174,12 +181,12 @@ static ParameterPtr compoundParameterGetItem( CompoundParameter &o, const std::s
 	return result;
 }
 
-static bool compoundParameterContains( CompoundParameter &o, const std::string &n )
+static bool compoundParameterContains( const CompoundParameter &o, const std::string &n )
 {
-	return o.parameter<Parameter>( n );
+	return o.parameter<const Parameter>( n );
 }
 
-static boost::python::list compoundParameterKeys( CompoundParameter &o )
+static boost::python::list compoundParameterKeys( const CompoundParameter &o )
 {
 	boost::python::list result;
 	CompoundParameter::ParameterVector::const_iterator it;
@@ -190,7 +197,7 @@ static boost::python::list compoundParameterKeys( CompoundParameter &o )
 	return result;
 }
 
-static boost::python::list compoundParameterValues( CompoundParameter &o )
+static boost::python::list compoundParameterValues( const CompoundParameter &o )
 {
 	boost::python::list result;
 	CompoundParameter::ParameterVector::const_iterator it;
@@ -201,7 +208,7 @@ static boost::python::list compoundParameterValues( CompoundParameter &o )
 	return result;
 }
 
-static void compoundParameterAddParameters( CompoundParameter &o, boost::python::list p )
+static void compoundParameterAddParameters( CompoundParameter &o, const boost::python::list &p )
 {
 	std::vector<ParameterPtr> pp;
 	boost::python::container_utils::extend_container( pp, p );
