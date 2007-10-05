@@ -32,6 +32,11 @@
 #
 ##########################################################################
 
+import unittest
+import os
+import math
+from IECore import *
+
 class TestSQLiteIndexedIO(unittest.TestCase):
 	
 	badNames = ['*', '!', '&', '^', '@', '#', '$', '(', ')', '<', '+',
