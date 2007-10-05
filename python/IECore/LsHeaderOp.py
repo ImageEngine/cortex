@@ -54,7 +54,7 @@ class LsHeaderOp( Op ) :
 					description = "The file to list the header from.",
 					defaultValue = "",
 					check = FileNameParameter.CheckType.MustExist,
-					extensions = " ".join( ["sql", "fio"] + Reader.supportedExtensions() ),
+					extensions = " ".join( IndexedIOInterface.supportedExtensions() + Reader.supportedExtensions() ),
 					allowEmptyString = False,
 				),
 
