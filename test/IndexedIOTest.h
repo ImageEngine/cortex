@@ -108,7 +108,6 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
-			std::cerr << *it << std::endl;
 			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
 		
 			D v;
@@ -122,7 +121,6 @@ struct IndexedIOTest
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
-			std::cerr << *it << std::endl;		
 			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
 		
 			D *v = new D[10] ;
