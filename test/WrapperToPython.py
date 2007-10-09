@@ -48,6 +48,7 @@ class TestWrapperToPython( unittest.TestCase ) :
 		)
 
 		self.assert_( c["f"].isSame( f ) )
+		self.assert_( c["f"] is f )
 		self.assertEqual( c["f"], f )
 
 if __name__ == "__main__":
