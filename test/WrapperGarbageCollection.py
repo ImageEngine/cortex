@@ -90,5 +90,24 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
 		
+	def test2( self ) :
+	
+		"""This test exposes a bug which caused memory to leak."""
+	
+		RefCounted.collectGarbage()
+		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		
+		class PythonOp( Op ) :
+		
+			def __init__( self ) :
+			
+				Op.__init__( self, "opName", "opDescription", StringParameter( name = "result", description = "", defaultValue = "" ) )
+				self.parameters().addParameter( StringParameter( name = "name", description = "", defaultValue="john" ) )
+				
+		o = PythonOp()
+		del o
+		RefCounted.collectGarbage()
+		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		
 if __name__ == "__main__":
         unittest.main()

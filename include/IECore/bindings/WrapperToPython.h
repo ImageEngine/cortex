@@ -73,7 +73,11 @@ struct WrapperToPython
 		}
 		
 		PyObject* converted = WrapperGarbageCollectorBase::pyObject( x.get() );	
-		if( !converted )
+		if( converted )
+		{
+			Py_INCREF( converted );	
+		}
+		else
 		{
 			using namespace boost::python::objects;
 			
@@ -82,13 +86,11 @@ struct WrapperToPython
 					T, 
 					pointer_holder<TPtr, T> 
 					>
-				>::convert(x);			
+				>::convert(x);
 		}
 		
 		assert(converted);
 
-		// Have observed some nasty crashes if we don't INCREF here!		
-		Py_INCREF( converted );
 		return converted;
 	}
 
