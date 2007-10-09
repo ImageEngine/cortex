@@ -46,7 +46,7 @@ from Imath import *
 from ImathVectorData import *
 from IndexedIO import *
 from KDTree import *
-#from BoundedKDTree import *
+from BoundedKDTree import *
 from MessageHandler import *
 from ObjectIO import *
 from Object import *
@@ -119,4 +119,3 @@ class SplitStream :
 		self.__f.write( l )
 
 unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
-#unittest.main()
