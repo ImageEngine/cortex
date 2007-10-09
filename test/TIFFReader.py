@@ -38,70 +38,67 @@ import IECore
 
 class TestTIFFReader(unittest.TestCase):
 
-        testfile =    "test/data/tiff/rgb_black_circle.256x256.tiff"
+	testfile = "test/data/tiff/rgb_black_circle.256x256.tiff"
 	testoutfile = "test/data/tiff/rgb_black_circle.256x256.testoutput.tif"
 
-        def testConstruction(self):
+	def testConstruction(self):
                 
 		r = IECore.Reader.create(self.testfile)
 		self.assertEqual(type(r), IECore.TIFFImageReader)
-
-        def testRead(self):
-                
-                r = IECore.Reader.create(self.testfile)
+		
+	def testRead(self):
+		
+		r = IECore.Reader.create(self.testfile)
 		self.assertEqual(type(r), IECore.TIFFImageReader)
-
+		
 		r.parameters().dataWindow.setValue(IECore.Box2iData(IECore.Box2i(IECore.V2i(0, 0), IECore.V2i(100, 100))))
-
+		
 		img = r.read()
 		
 		self.assertEqual(type(img), IECore.ImagePrimitive)
-
-		# write test (TIFF -> EXR)
-                w = IECore.Writer.create(img, self.testoutfile)
+		
+		# write test (TIFF -> TIFF)
+		w = IECore.Writer.create(img, self.testoutfile)
 		self.assertEqual(type(w), IECore.TIFFImageWriter)
-
+		
 		w.write()
 
-        def testConvertWrite(self):
-
-		testfile =    "test/data/jpg/bluegreen_noise.400x300.jpg"
+	def testRead(self):
+		
+		testfile = "test/data/tiff/bluegreen_noise.400x300.tif"
 		testoutfile = "test/data/tiff/bluegreen_noise.400x300.testoutput.tif"
-
-                r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
-
+		
+		r = IECore.Reader.create(testfile)
+		self.assertEqual(type(r), IECore.TIFFImageReader)
+		
 		img = r.read()
 		self.assertEqual(type(img), IECore.ImagePrimitive)
-
-		# write test (JPEG -> TIFF)
-                w = IECore.Writer.create(img, testoutfile)
+		
+		# write test (TIFF -> TIFF)
+		w = IECore.Writer.create(img, testoutfile)
 		self.assertEqual(type(w), IECore.TIFFImageWriter)
-
+		
 		w.write()
-
-        def testCompressionWrite(self):
-
-		testfile =    "test/data/jpg/bluegreen_noise.400x300.jpg"
+		
+	def testCompressionWrite(self):
+		
+		testfile =    "test/data/tiff/bluegreen_noise.400x300.tif"
 		testoutfile = "test/data/tiff/bluegreen_noise.400x300.testoutput"
-
-                r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
-
+		
+		r = IECore.Reader.create(testfile)
+		self.assertEqual(type(r), IECore.TIFFImageReader)
+		
 		img = r.read()
 		self.assertEqual(type(img), IECore.ImagePrimitive)
-
-                w = IECore.Writer.create(img, testoutfile + '.tif')
+		
+		w = IECore.Writer.create(img, testoutfile + '.tif')
 		compressions = w.parameters()['compression'].presets()
 		self.assertEqual(type(w), IECore.TIFFImageWriter)
-
+		
 		for compression in compressions.keys():
 			cw = IECore.Writer.create(img, '.'.join([testoutfile, compression, 'tif']))
 			cw.parameters().compression.setValue(compressions[compression])
 			cw.write()
-
-
-
                 			
 if __name__ == "__main__":
 	unittest.main()   
