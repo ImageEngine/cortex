@@ -142,7 +142,7 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 
 	public :
 
-		CompoundParameterWrap( PyObject *self, const std::string &name, const std::string &description, const list &members, const object &userData = object() )
+		CompoundParameterWrap( PyObject *self, const std::string &name, const std::string &description, const list &members = list(), const object &userData = object() )
 			:	CompoundParameter( name, description, getUserData( userData ) ), Wrapper< CompoundParameter >( self, this ) 
 		{
 			std::vector<ParameterPtr> m = getMembers( members );
@@ -220,7 +220,7 @@ void bindCompoundParameter()
 
 	typedef class_< CompoundParameter, intrusive_ptr< CompoundParameterWrap >, boost::noncopyable, bases<Parameter> > CompoundParameterPyClass;
 	CompoundParameterPyClass( "CompoundParameter", no_init )
-		.def( init< const std::string &, const std::string &, const list &, optional<  const object & > >( args( "name", "description", "members", "userData") ) )
+		.def( init< const std::string &, const std::string &, optional<const list &,  const object & > >( args( "name", "description", "members", "userData") ) )
 		.def( init< const std::string &, const list &, optional<  const object & > >( args( "name", "members", "userData") ) )
 		.def( init< const list &, optional<  const object & > >( args( "members", "userData") ) )
 		.def( "__len__", &compoundParameterLen )
