@@ -435,8 +435,10 @@ void bindMatrix44(const char *bindName)
 		.def("createRotated", &createRotated<Matrix44<T>, Vec3<T> > ).staticmethod( "createRotated" )
 		.def("createAimed", &Imath::rotationMatrix<T> )
 		.def("createAimed", &Imath::rotationMatrixWithUpDir<T> ).staticmethod( "createAimed" )
+		.def("createFromBasis", &matrixFromBasis ).staticmethod( "createFromBasis" )
 	;
 	
+	/// \todo deprecate this form in favour of the static createFromBasis method.
 	def("matrixFromBasis", &matrixFromBasis );
 	
 }
