@@ -122,6 +122,8 @@
 #include "IECore/bindings/VectorDataFilterOpBinding.h"
 #include "IECore/bindings/TypedObjectParameterBinding.h"
 #include "IECore/bindings/HeaderGeneratorBinding.h"
+#include "IECore/bindings/PreWorldRenderableBinding.h"
+#include "IECore/bindings/CameraBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -223,6 +225,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindVectorDataFilterOp();
 	bindTypedObjectParameter();	
 	bindHeaderGenerator();
+	bindPreWorldRenderable();
+	bindCamera();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

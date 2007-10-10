@@ -218,7 +218,9 @@ void bindTypeId()
 		.value("PrimitiveParameter", PrimitiveParameterTypeId)
 		.value("ImagePrimitiveParameter", ImagePrimitiveParameterTypeId)
 		.value("MeshPrimitiveParameter", MeshPrimitiveParameterTypeId)
-		.value("PointsPrimitiveParameter", PointsPrimitiveParameterTypeId)		
+		.value("PointsPrimitiveParameter", PointsPrimitiveParameterTypeId)
+		.value("PreWorldRenderable", PreWorldRenderableTypeId)
+		.value("Camera", CameraTypeId)
 	;
 }
 

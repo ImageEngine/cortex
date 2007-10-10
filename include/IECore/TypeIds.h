@@ -216,6 +216,8 @@ enum TypeId
 	ImagePrimitiveParameterTypeId = 173,
 	MeshPrimitiveParameterTypeId = 174,
 	PointsPrimitiveParameterTypeId = 175,
+	PreWorldRenderableTypeId = 176,
+	CameraTypeId = 177,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	

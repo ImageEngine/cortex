@@ -197,7 +197,9 @@ coreSources = 		[
 				'src/HierarchicalCache.cpp',
 				'src/TypedObjectParameter.cpp',
 				'src/HeaderGenerator.cpp',
-				'src/MemoryStream.cpp',				
+				'src/MemoryStream.cpp',
+				'src/PreWorldRenderable.cpp',
+				'src/Camera.cpp',				
 		   ]
 		
 coreIncludes = 		[ 	
@@ -341,7 +343,9 @@ corePythonSources = 	[
 				'src/bindings/VectorDataFilterOpBinding.cpp',
 				'src/bindings/HierarchicalCacheBinding.cpp',
 				'src/bindings/TypedObjectParameterBinding.cpp',		
-				'src/bindings/HeaderGeneratorBinding.cpp',		
+				'src/bindings/HeaderGeneratorBinding.cpp',
+				'src/bindings/PreWorldRenderableBinding.cpp',
+				'src/bindings/CameraBinding.cpp',		
 			]
 			
 corePythonPy = 	[ 			
