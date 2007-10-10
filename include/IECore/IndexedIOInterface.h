@@ -88,6 +88,12 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 							
 		virtual ~IndexedIOInterface();
 		
+		/// Returns the mode with which the interface was created.
+		/// \todo This should be made virtual with the next major version, to provide subclasses with the possibility
+		/// of defining it differently. Having m_mode and m_currentDirectory as data members
+		/// in an interface class seems a little dubious anyway.
+		IndexedIO::OpenMode openMode() const;
+		
 		/// Returns a new interface with the root set to the current directory.
 		virtual IndexedIOInterfacePtr resetRoot() const = 0;
 		

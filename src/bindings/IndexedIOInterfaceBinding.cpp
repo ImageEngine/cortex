@@ -254,6 +254,7 @@ void bindIndexedIOInterface(const char *bindName)
 	
 	typedef class_< IndexedIOInterface, boost::noncopyable, IndexedIOInterfacePtr, bases<RefCounted> > IndexedIOInterfacePyClass;
 	IndexedIOInterfacePyClass( bindName, no_init )
+		.def("openMode", &IndexedIOInterface::openMode)
 		.def("resetRoot", &IndexedIOInterface::resetRoot)
 		.def("chdir", &IndexedIOInterface::chdir)
 		.def("mkdir", &IndexedIOInterface::mkdir)

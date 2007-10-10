@@ -67,6 +67,17 @@ class TestIndexedIOInterface(unittest.TestCase):
 			self.assert_( "sql" in e )
 		else :
 			self.assert_( not "sql" in e )
+	
+	def testOpenMode( self ) :
+	
+		for f in [ "test/myFile.fs", "test/myFile.fio" ] :
+	
+			io = IndexedIOInterface.create( f, "/", IndexedIOOpenMode.Write | IndexedIOOpenMode.Exclusive )
+			self.assertEqual( io.openMode(), IndexedIOOpenMode.Write | IndexedIOOpenMode.Exclusive )
+			del io
+			io = IndexedIOInterface.create( f, "/", IndexedIOOpenMode.Read | IndexedIOOpenMode.Exclusive )
+			self.assertEqual( io.openMode(), IndexedIOOpenMode.Read | IndexedIOOpenMode.Exclusive )
+			del io
 		
 	def tearDown(self):
 		

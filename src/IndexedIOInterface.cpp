@@ -83,6 +83,11 @@ IndexedIOInterface::~IndexedIOInterface()
 {
 }
 
+IndexedIO::OpenMode IndexedIOInterface::openMode() const
+{
+	return m_mode;
+}
+
 void IndexedIOInterface::readable(const IndexedIO::EntryID &name) const
 {
 }
