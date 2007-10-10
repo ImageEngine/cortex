@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_STATERENDERERABLE_H
-#define IE_CORE_STATERENDERERABLE_H
+#ifndef IE_CORE_STATERENDERABLE_H
+#define IE_CORE_STATERENDERABLE_H
 
 #include "IECore/Renderable.h"
 
@@ -61,4 +61,4 @@ IE_CORE_DECLAREPTR( StateRenderable );
 
 }
 
-#endif // IE_CORE_STATERENDERERABLE_H
+#endif // IE_CORE_STATERENDERABLE_H

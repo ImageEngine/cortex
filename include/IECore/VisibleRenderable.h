@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_VISIBLERENDERERABLE_H
-#define IE_CORE_VISIBLERENDERERABLE_H
+#ifndef IE_CORE_VISIBLERENDERABLE_H
+#define IE_CORE_VISIBLERENDERABLE_H
 
 #include "IECore/Renderable.h"
 
@@ -68,4 +68,4 @@ IE_CORE_DECLAREPTR( VisibleRenderable );
 
 }
 
-#endif // IE_CORE_VISIBLERENDERERABLE_H
+#endif // IE_CORE_VISIBLERENDERABLE_H
