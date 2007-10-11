@@ -100,7 +100,7 @@ class TestIndexedIOInterface(unittest.TestCase):
 class TestFileSystemIndexedIO(unittest.TestCase):
 	
 	badNames = ['*', '!', '&', '^', '@', '#', '$', '(', ')', '<', '+',
-		'>', '?', ',', '\', ''', ':', ';', '{', '}', '[',
+		'>', '?', ',', '\', ''', ';', '{', '}', '[',
 		']', '=', '`' ]
 		
 	def testConstructors(self):
@@ -444,7 +444,7 @@ class TestFileSystemIndexedIO(unittest.TestCase):
 class TestFileIndexedIO(unittest.TestCase):
 	
 	badNames = ['*', '!', '&', '^', '@', '#', '$', '(', ')', '<', '+',
-		'>', '?', ',', '\', ''', ':', ';', '{', '}', '[',
+		'>', '?', ',', '\', ''', ';', '{', '}', '[',
 		']', '=', '`' ]
 		
 	def testConstructors(self):

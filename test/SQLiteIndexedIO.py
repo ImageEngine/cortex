@@ -40,7 +40,7 @@ from IECore import *
 class TestSQLiteIndexedIO(unittest.TestCase):
 	
 	badNames = ['*', '!', '&', '^', '@', '#', '$', '(', ')', '<', '+',
-		'>', '?', ',', '\', ''', ':', ';', '{', '}', '[',
+		'>', '?', ',', '\', ''', ';', '{', '}', '[',
 		']', '=', '`' ]
 		
 	def testConstructors(self):

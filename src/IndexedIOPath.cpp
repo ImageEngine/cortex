@@ -294,7 +294,9 @@ void IndexedIOPath::buildRelativePath() const
 
 bool IndexedIOPath::validFilename(const std::string &n)
 {
-	return fs::portable_posix_name(n);
+	static const std::string validChars( "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-:" );
+	
+	return (n.size() != 0) && (n.find_first_not_of( validChars ) == std::string::npos);   
 }
 
 const std::string &IndexedIOPath::rootPath() const
