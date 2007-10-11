@@ -59,7 +59,7 @@ Parameter::PresetsMap parameterPresetsFromDict( const boost::python::dict &prese
 /// derived class. This is pretty standard and follows the boost documentation examples.
 /// The macro is provided as every class to be used as a base class for python subclassing
 /// must define the override, and we don't want to define the same code over and over in
-/// each of the wrapping classes (currently we've only wrapped PathParameter though).
+/// each of the wrapping classes.
 ///
 /// The next bit is more interesting. We'd like to simply bind the virtual Parameter::valueValid()
 /// function in to python at the Parameter base class, and leave it at that. That works fine
