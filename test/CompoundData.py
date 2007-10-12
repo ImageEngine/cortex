@@ -34,6 +34,7 @@
 
 """Unit test for CompoundData binding"""
 
+import os
 import math
 import unittest
 from IECore import *
@@ -203,6 +204,26 @@ class CompoundDataTest(unittest.TestCase):
 		a = UIntData(255)
 		self.assert_(v1["0"] == FloatData(1.2))
 		self.assert_(a == UIntData(255))
+		
+	def testLoadSave(self):
+		"""Test load/save"""	
+		
+		v1 = CompoundData()
+		v1["0"] = FloatData(1.2)
+		v1["1"] = FloatData(2.3)
+		v1["2"] = FloatData(3)
+		v1["some:data"] = FloatData(3)		
+		self.assert_(v1["0"] == FloatData(1.2))
+
+		v1.save("test/CompoundData.fio")
+
+		v2 = Object.load("test/CompoundData.fio")	
+		self.assertEqual( v1, v2 )	
+
+	def tearDown(self):
+        
+		if os.path.isfile("./test/CompoundData.fio") :
+			os.remove("./test/CompoundData.fio")
 
 		
 if __name__ == "__main__":
