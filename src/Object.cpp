@@ -33,8 +33,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/Object.h"
+#include "IECore/IndexedIOPath.h"
 
-#include "boost/filesystem/path.hpp"
 #include "boost/format.hpp"
 
 #include <iostream>
@@ -202,9 +202,10 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOInterfacePtr cont
 	}
 	else
 	{
-		boost::filesystem::path path( (*m_containerRoots)[container] );
-		path /= container->pwd(); path /= name;
-		return loadObject( path.string() );
+		IndexedIOPath path( (*m_containerRoots)[container] );
+		path.append( container->pwd() ); 
+		path.append( name );
+		return loadObject( path.fullPath() );
 	}
 }
 
