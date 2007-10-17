@@ -35,13 +35,13 @@
 import unittest
 import IECore
 
-class TestGlobbedClassLoader( unittest.TestCase ) :
+class TestContextualClassLoader( unittest.TestCase ) :
 
 	def test( self ) :
 	
 		l = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) )
 		
-		gl = IECore.GlobbedClassLoader( classLoader = l )		
+		gl = IECore.ContextualClassLoader( classLoader = l )		
 
 		self.assertEqual( gl.classNames(), ["bad", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", 'stringParsing'] )
 		self.assertEqual( gl.classNames( "*multiply" ), ["maths/multiply", "path.With.Dot/multiply"] )
@@ -57,7 +57,7 @@ class TestGlobbedClassLoader( unittest.TestCase ) :
 	def testContexts( self ) :
 	
 		l = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) )
-		gl = IECore.GlobbedClassLoader( contexts = [ "maths/" ], classLoader = l )
+		gl = IECore.ContextualClassLoader( contexts = [ "maths/" ], classLoader = l )
 		self.assertEqual( gl.classNames(), [ "maths/multiply" ] )
 		o = gl.load( "*multiply" )()
 		self.assertEqual( len( o.parameters() ), 2 )

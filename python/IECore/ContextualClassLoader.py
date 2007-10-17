@@ -39,7 +39,7 @@ from IECore import Msg, msg, ClassLoader, formatParameterHelp, WrappedTextFormat
 # predefined set of class contexts, which are prefixes for the full class name. 
 # It's intended for loading classes derived from Op, ParameterisedProcedural and similar
 # extension classes at specific environments.
-class GlobbedClassLoader :
+class ContextualClassLoader :
 
 	## Creates a GlobbedClassLoader attached to a ClassLoader and restricted to a list of class contexts.
 	def __init__( self, contexts = [ "" ], classLoader = ClassLoader.defaultOpLoader() ) :
@@ -50,9 +50,8 @@ class GlobbedClassLoader :
 	## Returns an alphabetically sorted list
 	# of all the classes found
 	# on the ClassLoader contexts. The optional matchString
-	# is concatenated with the contexts to narrow down
-	# the set of names returned.
-	# The matchString could also contain the long name for the class ( including the context ).
+	# narrows down the set of names returned.
+	# The matchString could contain the long name for the class ( including the contexts ).
 	def classNames( self, matchString = "*" ) :
 
 		allClasses = []

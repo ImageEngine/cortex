@@ -395,7 +395,7 @@ corePythonPy = 	[
 				'python/IECore/PointsExpressionOp.py',		
 				'python/IECore/Struct.py',		
 				'python/IECore/LsHeaderOp.py',
-				'python/IECore/GlobbedClassLoader.py',
+				'python/IECore/ContextualClassLoader.py',
 			]
 
 
