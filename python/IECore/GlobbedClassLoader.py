@@ -52,24 +52,27 @@ class GlobbedClassLoader :
 	# on the ClassLoader contexts. The optional matchString
 	# is concatenated with the contexts to narrow down
 	# the set of names returned.
+	# The matchString could also contain the long name for the class ( including the context ).
 	def classNames( self, matchString = "*" ) :
 
 		allClasses = []
+		classes = self.__classLoader.classNames( matchString )
+
 		for context in self.__contexts:
-			classes = self.__classLoader.classNames( "%s%s" % ( context, matchString) )
-			allClasses.extend( set( classes ).difference( allClasses ) )
+			contextClasses = filter( lambda x: x.startswith( context ), classes )
+			
+			allClasses.extend( set( contextClasses ).difference( allClasses ) )
 
 		allClasses.sort()
 		return allClasses
 
 	def __longClassName( self, name ):
-		classes = self.classNames( name )
+
+		classes = self.classNames( "*" + name )
 		if not len( classes ) :
-			IECore.error( "Class \"%s\" does not exist.\n" % opName )
-			return False
+			raise Exception, ( "Class \"%s\" does not exist.\n" % name )
 		elif len( classes )>1 :
-			IECore.error( "Class name \"%s\" is ambiguous - could be any of the following : \n\t%s" % ( name, "\n\t".join( classes ) ) )
-			return False
+			raise Exception, ( "Class name \"%s\" is ambiguous - could be any of the following : \n\t%s" % ( name, "\n\t".join( classes ) ) )
 		return classes[0]
 
 	## Returns the available versions of the specified
@@ -99,9 +102,11 @@ class GlobbedClassLoader :
 		formatter = WrappedTextFormatter( textIO )
 		formatter.paragraph( "Name    : " + myClass.name + "\n" )
 		formatter.paragraph( myClass.description + "\n" )
-		formatter.heading( "Parameters" )
-		formatter.indent()
-		for p in myClass.parameters().values() :
-			formatParameterHelp( p, formatter )
-		formatter.unindent()
+		if len( myClass.parameters().values() ):
+			formatter.heading( "Parameters" )
+			formatter.indent()
+			for p in myClass.parameters().values() :
+				formatParameterHelp( p, formatter )
+			formatter.unindent()
+		formatter.paragraph( "Path  : " + myClass.path + "  Version  : " + str( myClass.version ) )
 		return textIO.getvalue()

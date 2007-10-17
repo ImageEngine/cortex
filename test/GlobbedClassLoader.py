@@ -52,14 +52,14 @@ class TestGlobbedClassLoader( unittest.TestCase ) :
 		self.assertEqual( len( o.parameters() ), 2 )
 
 		h = gl.help( "maths/multiply" )
-		self.assertEqual( h, 'Name    : multiply\n\nmultiplies two numbers together - in a new and improved version 2!!.\n\nParameters\n----------\n\n    a (Int)\n    -------\n\n    first operand\n\n        Default : 1\n\n        Range : -2147483648 - 2147483647\n\n    b (Int)\n    -------\n\n    second operand\n\n        Default : 2\n\n        Range : -2147483648 - 2147483647\n' )
+		self.assertEqual( h.split( '\n' )[0], 'Name    : multiply' )
 		
 	def testContexts( self ) :
 	
 		l = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) )
 		gl = IECore.GlobbedClassLoader( contexts = [ "maths/" ], classLoader = l )
 		self.assertEqual( gl.classNames(), [ "maths/multiply" ] )
-		o = gl.load( "multiply" )()
+		o = gl.load( "*multiply" )()
 		self.assertEqual( len( o.parameters() ), 2 )
 		
 if __name__ == "__main__":

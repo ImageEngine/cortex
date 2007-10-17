@@ -86,7 +86,7 @@ def exitWithUsage( exitCode = 1 ) :
 	sys.stderr.write( usage )
 	sys.exit( exitCode )
 
-def loadAction( args, index ) :
+def getAction( args, index ) :
 
 	"""Returns a tuple of action, newIndex where action is a loaded action
 	and newIndex is the index from which to continue parsing. Exits with
@@ -113,7 +113,7 @@ def loadAction( args, index ) :
 	
 	if actionName[0]=="-" :
 		exitWithUsage()
-		
+	
 	matchingActionNames = loader.classNames( "*" + actionName )
 	if not len( matchingActionNames ) :
 		sys.stderr.write( "Action \"%s\" does not exist.\n" % actionName )
@@ -133,9 +133,8 @@ def loadAction( args, index ) :
 	if not actionVersion in actionVersions :
 		sys.stderr.write( "Version \"%s\" of action \"%s\" does not exist.\n" % (actionVersion, actionName) )
 		sys.exit( 1 )	
-				
-	action = loader.load( actionName, actionVersion )()
-	return (action, newIndex)
+	
+	return ( actionName, actionVersion, newIndex )			
 
 ###############################################################################
 # the rest
@@ -145,7 +144,7 @@ def loadAction( args, index ) :
 if len( sys.argv ) < 2 :
 	exitWithUsage()
 	
-loader = IECore.ClassLoader.defaultOpLoader()
+loader = IECore.GlobbedClassLoader()
 # do the right thing based on the first flag	
 if sys.argv[1]=="-help" :
 
@@ -154,18 +153,11 @@ if sys.argv[1]=="-help" :
 	
 	else :
 	
-		action, newIndex = loadAction( sys.argv, 2 )
+		actionName, actionVersion, newIndex = getAction( sys.argv, 2 )
 		if len( sys.argv ) > newIndex :
 			exitWithUsage()
 		
-		formatter = IECore.WrappedTextFormatter( sys.stdout )
-		formatter.paragraph( "Name    : " + action.name + "\n" )
-		formatter.paragraph( action.description + "\n" )
-		formatter.heading( "Parameters" )
-		formatter.indent()
-		for p in action.parameters().values() :
-			IECore.formatParameterHelp( p, formatter )
-		formatter.unindent()
+		print loader.help( actionName, actionVersion )
 		sys.exit( 0 )
 		
 elif sys.argv[1]=="-listActions" :
@@ -187,13 +179,18 @@ elif sys.argv[1]=="-listVersions" :
 
 	else :
 	
-		versions = loader.versions( sys.argv[2] )
+		try:
+			versions = loader.versions( sys.argv[2] )
+		except Exception, e:
+			print e
+			sys.exit( 1 )
+
 		if not len( versions ) :
-			sys.stderr.write( "Action \"%s\" does not exist." % sys.argv[2] )
+			sys.stderr.write( "Action \"%s\" does not exist.\n" % sys.argv[2] )
 			sys.exit( 1 )
 			
 		for v in versions :
-			sys.stdout.write( v + "\n" )
+			sys.stdout.write( str(v) + "\n" )
 		
 		sys.exit( 0 )
 		
@@ -201,7 +198,8 @@ else :
 
 	# either "action" or "-version v action"
 	
-	action, nextArg = loadAction( sys.argv, 1 )
+	actionName, actionVersion, nextArg = getAction( sys.argv, 1 )
+	action = loader.load( actionName, actionVersion )()
 	
 	# if the last two flags specify saving then we need to remove them
 	# before parsing.
