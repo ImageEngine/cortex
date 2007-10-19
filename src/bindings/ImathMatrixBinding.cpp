@@ -183,6 +183,106 @@ static V multDirMatrix( const M &m, const V &v )
 	return result;
 }
 
+template<typename M, typename V>
+V extractScaling( const M &m )
+{
+	V s;
+	extractScaling( m, s );
+	return s;
+}
+
+template<typename M>
+M sansScaling2( const M &m )
+{
+	return sansScaling( m, true );
+}
+
+template<typename M>
+void removeScaling( M &m )
+{
+	removeScaling( m, true );
+}
+
+template<typename T>
+tuple extractScalingAndShear33( const Matrix33<T> &m )
+{
+	Vec2<T> scl;
+	T shr;
+	extractScalingAndShear( m, scl, shr );
+	return make_tuple( scl, shr );
+}
+
+template<typename T>
+tuple extractScalingAndShear44( const Matrix44<T> &m )
+{
+	Vec3<T> scl;
+	Vec3<T> shr;
+	extractScalingAndShear( m, scl, shr );
+	return make_tuple( scl, shr );
+}
+
+template<typename M>
+M sansScalingAndShear( const M &m )
+{
+	return sansScalingAndShear( m, true );
+}
+
+template<typename M>
+void removeScalingAndShear( M &m )
+{
+	removeScalingAndShear( m, true );
+}
+
+template<typename T>
+tuple extractAndRemoveScalingAndShear33( Matrix33<T> &m )
+{
+	Vec2<T> scl;
+	T shr;
+	extractAndRemoveScalingAndShear( m, scl, shr, true );
+	return make_tuple( scl, shr );
+}
+
+template<typename T>
+tuple extractAndRemoveScalingAndShear44( Matrix44<T> &m )
+{
+	Vec3<T> scl, shr;
+	extractAndRemoveScalingAndShear( m, scl, shr, true );
+	return make_tuple( scl, shr );
+}
+
+template<typename M, typename V>
+V extractEulerXYZ( const M &m )
+{
+	V r;
+	extractEulerXYZ( m, r );
+	return r;
+}
+
+template<typename M, typename V>
+V extractEulerZYX( const M &m )
+{
+	V r;
+	extractEulerZYX( m, r );
+	return r;
+}
+
+template<typename T>
+tuple extractSHRT44( const Matrix44<T> &m )
+{
+	Vec3<T> s, h, r, t;
+	extractSHRT( m, s, h, r, t, true );
+	return make_tuple( s, h, r, t );
+}
+
+template<typename T>
+tuple extractSHRT33( const Matrix33<T> &m )
+{
+	Vec2<T> s, t;
+	T h, r;
+	extractSHRT( m, s, h, r, t, true );
+	return make_tuple( s, h, r, t );
+}
+
 #define DEFINEMATRIXSTRSPECIALISATION( TYPE, D )														\
 template<>																								\
 string repr<TYPE>( TYPE &x )																			\
@@ -326,6 +426,15 @@ void bindMatrix33(const char *bindName)
 		.def("createScaled", &createScaled<Matrix33<T>, Vec2<T> > ).staticmethod( "createScaled" )
 		.def("createTranslated", &createTranslated<Matrix33<T>, Vec2<T> > ).staticmethod( "createTranslated" )
 		.def("createRotated", &createRotated<Matrix33<T>, T > ).staticmethod( "createRotated" )
+		
+		.def("extractScaling", &extractScaling<Matrix33<T>, Vec2<T> > )
+		.def("sansScaling", (Matrix33<T>(*)( const Matrix33<T> &))&sansScaling2<Matrix33<T> > )
+		.def("removeScaling", &removeScaling<Matrix33<T> > )
+		.def("extractScalingAndShear", &extractScalingAndShear33<T> )
+		.def("sansScalingAndShear", &sansScalingAndShear<Matrix33<T> > )
+		.def("removeScalingAndShear", &removeScalingAndShear<Matrix33<T> > )
+		.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear33<T> )
+		.def("extractSHRT", &extractSHRT33<T> )
 	;
 	
 }
@@ -436,6 +545,18 @@ void bindMatrix44(const char *bindName)
 		.def("createAimed", &Imath::rotationMatrix<T> )
 		.def("createAimed", &Imath::rotationMatrixWithUpDir<T> ).staticmethod( "createAimed" )
 		.def("createFromBasis", &matrixFromBasis ).staticmethod( "createFromBasis" )
+		
+		.def("extractScaling", &extractScaling<Matrix44<T>, Vec3<T> > )
+		.def("sansScaling", &sansScaling2<Matrix44<T> > )
+		.def("removeScaling", &removeScaling<Matrix44<T> > )
+		.def("extractScalingAndShear", &extractScalingAndShear44<T> )
+		.def("sansScalingAndShear", &sansScalingAndShear<Matrix44<T> > )
+		.def("removeScalingAndShear", &removeScalingAndShear<Matrix44<T> > )
+		.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear44<T> )
+		.def("extractEulerXYZ", &extractEulerXYZ<Matrix44<T>, Vec3<T> > )
+		.def("extractEulerXYZ", &extractEulerZYX<Matrix44<T>, Vec3<T> > )
+		.def("extractQuat", &extractQuat<T> )
+		.def("extractSHRT", &extractSHRT44<T> )
 	;
 	
 	/// \todo deprecate this form in favour of the static createFromBasis method.
