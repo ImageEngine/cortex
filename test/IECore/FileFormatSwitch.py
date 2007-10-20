@@ -32,33 +32,45 @@
 #
 ##########################################################################
 
+import os
 import unittest
-import sys
-import IECore
+from IECore import *
 
-class TestObjectReader( unittest.TestCase ) :
+class FileFormatSwitchTest( unittest.TestCase ) :
 
-	def testConstruction( self ) :
+	"""This tests that we can still read SQLiteIndexedIO based .cob files,
+	and that they give us the same results as when using the new format."""
 	
-		r = IECore.Reader.create( "test/data/cobFiles/compoundData.cob" )
-		self.assertEqual( type( r ), IECore.ObjectReader )
-		self.assertEqual( r.fileName.getValue().value, "test/data/cobFiles/compoundData.cob" )
-		
-	def testRead( self ) :
+	def test( self ) :
 	
-		r = IECore.Reader.create( "test/data/cobFiles/compoundData.cob" )
-		self.assertEqual( type( r ), IECore.ObjectReader )
+		sqlBasedCobs = [
+			"test/IECore/data/cobFiles/intDataTenAsSQL.cob",
+			"test/IECore/data/cobFiles/compoundDataAsSQL.cob",
+		]
 		
-		c = r.read()
-		
-		self.assertEqual( len(c), 4 )
-		self.assertEqual( c["banana"].value, 2)
-		self.assertEqual( c["apple"].value, 12)
-		self.assertEqual( c["lemon"].value, -3)
-		self.assertEqual( c["melon"].value, 2.5)				
-				
-		
+		for cob in sqlBasedCobs :
 			
-if __name__ == "__main__":
-	unittest.main()   
+			# read the sql format
+			o = ObjectReader( cob ).read()
+			
+			# write out in new format
+			ObjectWriter( o, "test/test.cob" ).write()
+			
+			# check that new file is not SQLite based
+			self.assertRaises( Exception, SQLiteIndexedIO, "test/test.cob" "/", IndexedIOOpenMode.Read )
+			# check that the new is FileIndexedIO based
+			f = FileIndexedIO( "test/test.cob", "/", IndexedIOOpenMode.Read )
+			
+			# read back object and check equality
+			oo = ObjectReader( "test/test.cob" ).read()
+			
+			self.assertEqual( o, oo )
+			
+	def tearDown( self ) :
 	
+		if os.path.isfile("test/test.cob") :
+		
+			os.remove("test/test.cob")
+		
+if __name__ == "__main__":
+	unittest.main()

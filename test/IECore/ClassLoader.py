@@ -32,69 +32,55 @@
 #
 ##########################################################################
 
-import os
 import unittest
-import sys
 import IECore
 
-class TestPDCWriter( unittest.TestCase ) :
+class TestClassLoader( unittest.TestCase ) :
 
-	def testBasics( self ) :
+	def test( self ) :
 	
-		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
-		p = r.read()
+		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		
-		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
-		w.write()
+		self.assertEqual( l.classNames(), ["bad", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", 'stringParsing'] )
+		self.assertEqual( l.classNames( "p*" ), ["parameterTypes", "path.With.Dot/multiply", "presetParsing"] )
+		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
+		self.assertEqual( l.getDefaultVersion( "presetParsing" ), 1 )
+		self.assertEqual( l.getDefaultVersion( "stringParsing" ), 1 )
+		self.assertEqual( l.versions( "maths/multiply" ), [ 1, 2 ] )
 		
-		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
-		p2 = r.read()
+		o = l.load( "maths/multiply" )()
+		self.assertEqual( len( o.parameters() ), 2 )
 		
-		self.assertEqual( p, p2 )
-		
-	def testFiltering( self ) :
+	def testStaticLoaders( self ) :
 	
-		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
-		p = r.read()
+		l = IECore.ClassLoader.defaultOpLoader()
+		ll = IECore.ClassLoader.defaultOpLoader()
+		self.assert_( l is ll )
+		self.assert_( isinstance( l, IECore.ClassLoader ) )
 		
-		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
-		w.parameters().attributes.setValue( IECore.StringVectorData( ["position"] ) )
-		w.write()
+		l = IECore.ClassLoader.defaultProceduralLoader()
+		ll = IECore.ClassLoader.defaultProceduralLoader()
+		self.assert_( l is ll )
+		self.assert_( isinstance( l, IECore.ClassLoader ) )
 		
-		for k in p.keys() :
-			if k!="position" :
-				del p[k]
-		
-		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
-		p2 = r.read()
-		
-		self.assertEqual( p, p2 )
-		
-	def testBadObjectException( self ) :
+	def testRefresh( self ) :
 	
-		w = IECore.PDCParticleWriter( IECore.IntData(10), "test/intData.pdc" )
-		self.assertRaises( RuntimeError, w.write )
+		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		
-	def testWriteConstantData( self ) :
+		c = l.classNames()
+		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
+		l.setDefaultVersion( "maths/multiply", 1 )
+		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 1 )
+		
+		l.refresh()
+		self.assertEqual( c, l.classNames() )
+		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 1 )
+		
+	def testDotsInPath( self ) :
 	
-		p = IECore.PointsPrimitive( 1 )
-		p["d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.DoubleData( 1 ) )
-		p["v3d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3dData( IECore.V3d( 1, 2, 3 ) ) )
-		p["i"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
+		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		
-		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
-		w.write()
-		
-		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
-		p2 = r.read()
-		
-		self.assertEqual( p, p2 )
-		
-	def tearDown( self ) :
-	
-		if os.path.isfile( "test/particleShape1.250.pdc" ) :
-			os.remove( "test/particleShape1.250.pdc" )
+		c = l.load( "path.With.Dot/multiply" )
 		
 if __name__ == "__main__":
-	unittest.main()   
-	
+        unittest.main()

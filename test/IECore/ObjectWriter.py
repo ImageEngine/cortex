@@ -32,45 +32,44 @@
 #
 ##########################################################################
 
-import os
 import unittest
-from IECore import *
+import sys
+import IECore
+import socket
 
-class FileFormatSwitchTest( unittest.TestCase ) :
+class TestPDCWriter( unittest.TestCase ) :
 
-	"""This tests that we can still read SQLiteIndexedIO based .cob files,
-	and that they give us the same results as when using the new format."""
+	def testBasics( self ) :
 	
-	def test( self ) :
+		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
+		p = r.read()
+		
+		w = IECore.Writer.create( p, "test/compoundData.cob" )
+		w.write()
+		
+		r = IECore.Reader.create( "test/compoundData.cob" )
+		p2 = r.read()
+		
+		self.assertEqual( p, p2 )			
+
+	def testHeader( self ) :
 	
-		sqlBasedCobs = [
-			"test/data/cobFiles/intDataTenAsSQL.cob",
-			"test/data/cobFiles/compoundDataAsSQL.cob",
-		]
+		o = IECore.IntData()
 		
-		for cob in sqlBasedCobs :
-			
-			# read the sql format
-			o = ObjectReader( cob ).read()
-			
-			# write out in new format
-			ObjectWriter( o, "test/test.cob" ).write()
-			
-			# check that new file is not SQLite based
-			self.assertRaises( Exception, SQLiteIndexedIO, "test/test.cob" "/", IndexedIOOpenMode.Read )
-			# check that the new is FileIndexedIO based
-			f = FileIndexedIO( "test/test.cob", "/", IndexedIOOpenMode.Read )
-			
-			# read back object and check equality
-			oo = ObjectReader( "test/test.cob" ).read()
-			
-			self.assertEqual( o, oo )
-			
-	def tearDown( self ) :
-	
-		if os.path.isfile("test/test.cob") :
+		w = IECore.Writer.create( o, "test/intData.cob" )
+		w.header.getValue()["testHeaderData"] = IECore.StringData( "i am part of a header" )
+		w.header.getValue()["testHeaderData2"] = IECore.IntData( 100 )
+		w.write()
 		
-			os.remove("test/test.cob")
+		h = IECore.Reader.create( "test/intData.cob" ).readHeader()
 		
+		for k in w.header.getValue().keys() :
+			self.assertEqual( w.header.getValue()[k], h[k] )
+		
+		self.assertEqual( h["host"].value, socket.gethostname() )
+		self.assertEqual( h["ieCoreVersion"].value, IECore.versionString() )
+		self.assertEqual( h["typeName"].value, "IntData" )
+				
 if __name__ == "__main__":
-	unittest.main()
+	unittest.main()   
+	

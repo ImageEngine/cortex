@@ -34,85 +34,50 @@
 
 import unittest
 import sys
+from IECore import *
 import IECore
 
-class TestJPEGReader(unittest.TestCase):
+from math import pow
 
-	testfile =    "test/data/jpg/bluegreen_noise.400x300.jpg"
-	testoutfile = "test/data/jpg/bluegreen_noise.400x300.testoutput.exr"
+class TestDPXReader(unittest.TestCase):
 
-	def testConstruction(self):
+        testfile =    "test/IECore/data/dpx/bluegreen_noise.dpx"
+	testoutfile = "test/IECore/data/dpx/bluegreen_noise.testoutput"
 
-		v2id = IECore.V2iData(IECore.V2i(20, 20))
-
+        def testConstruction(self):
+                
 		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
+		self.assertEqual(type(r), IECore.DPXImageReader)
 
-	def testRead(self):
 
-		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
+        def testRead(self):
+
+                r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECore.DPXImageReader)
 
 		img = r.read()
-
+		
 		self.assertEqual(type(img), IECore.ImagePrimitive)
 
-		# write test (JPEG -> EXR)
-		w = IECore.Writer.create(img, self.testoutfile)
+		# write test (DPX -> EXR)
+                w = IECore.Writer.create(img, self.testoutfile + '.exr')
 		self.assertEqual(type(w), IECore.EXRImageWriter)
 
 		w.write()
 
-	def testWindowRead(self):
+        def testWrite(self):
 
-		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
-		r.parameters().dataWindow.setValue(IECore.Box2iData(IECore.Box2i(IECore.V2i(60, 60), IECore.V2i(100, 100))))
-
+                r = IECore.Reader.create('test/IECore/data/dpx/AA001_022_bgPlate_v001.0011.dpx')
+                #r = IECore.Reader.create('test/IECore/data/jpg/bluegreen_noise.400x300.jpg')
 		img = r.read()
-
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-
-		# write test (JPEG -> EXR)
-		w = IECore.Writer.create(img, self.testoutfile)
-		self.assertEqual(type(w), IECore.EXRImageWriter)
+		
+		# write test
+                w = IECore.Writer.create(img, self.testoutfile + '.dpx')
+		self.assertEqual(type(w), IECore.DPXImageWriter)
 
 		w.write()
 
-	def testWrite(self):
-
-		testfile =    "test/data/jpg/bluegreen_noise.400x300.jpg"
-		testoutfile = "test/data/jpg/bluegreen_noise.400x300.testoutput.jpg"
-
-		r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
-
-		img = r.read()
-
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-
-		# write test (JPEG -> JPEG)
-		w = IECore.Writer.create(img, testoutfile)
-		self.assertEqual(type(w), IECore.JPEGImageWriter)
-		w.write()
-
-	def testDataWindowWrite(self):
-
-		testfile =    "test/data/exrFiles/redgreen_gradient_piz_256x256.exr"
-		testoutfile = "test/data/jpg/redgreen_gradient_piz_256x256.testoutput_datawindow.jpg"
-
-		# read the EXR (with data window subset)
-		r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.EXRImageReader)
-		img = r.read()
-
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-
-		# write test (EXR -> JPEG) with image-defined data window
-		w = IECore.Writer.create(img, testoutfile)
-		self.assertEqual(type(w), IECore.JPEGImageWriter)
-		w.write()
-
+                			
 if __name__ == "__main__":
 	unittest.main()   
 	

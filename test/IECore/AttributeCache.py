@@ -194,7 +194,7 @@ class TestAttributeCache(unittest.TestCase):
 		numObjects = 1000
 		numV3fs = 3
 						
-		cache = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Write )
+		cache = AttributeCache( "test/IECore/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Write )
 		for h in range( 0, numHeaders ) :
 			
 			hs = "header" + str( h )
@@ -210,16 +210,16 @@ class TestAttributeCache(unittest.TestCase):
 		
 		del cache
 				
-		cache = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
+		cache = AttributeCache( "test/IECore/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
 		for h in cache.headers() :
 			cache.readHeader( h )
 		for o in cache.objects() :
 			for a in cache.attributes( o ) :
 				cache.read( o, a )
 			
-		cache = AttributeCache( "test/data/attributeCaches/lotsOfV3fDataBeforeNamedObjectIO.fio", IndexedIOOpenMode.Read )
-		cache2 = AttributeCache( "test/data/attributeCaches/lotsOfV3fDataBeforeRawContainers.fio", IndexedIOOpenMode.Read )
-		cache3 = AttributeCache( "test/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
+		cache = AttributeCache( "test/IECore/data/attributeCaches/lotsOfV3fDataBeforeNamedObjectIO.fio", IndexedIOOpenMode.Read )
+		cache2 = AttributeCache( "test/IECore/data/attributeCaches/lotsOfV3fDataBeforeRawContainers.fio", IndexedIOOpenMode.Read )
+		cache3 = AttributeCache( "test/IECore/data/attributeCaches/lotsOfV3fData.fio", IndexedIOOpenMode.Read )
 		
 		self.assertEqual( cache.headers(), cache2.headers() )
 		self.assertEqual( set( cache.headers() ).intersection( cache3.headers() ), set( cache.headers() ) )
@@ -244,7 +244,7 @@ class TestAttributeCache(unittest.TestCase):
 		
 		# cleanup
 	
-		for f in [ "./test/AttributeCache.fio", "test/data/attributeCaches/lotsOfV3fData.fio" ] :
+		for f in [ "./test/AttributeCache.fio", "test/IECore/data/attributeCaches/lotsOfV3fData.fio" ] :
 			if os.path.isfile( f ) :	
 				os.remove( f )				
 		

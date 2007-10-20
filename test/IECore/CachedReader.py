@@ -33,39 +33,32 @@
 ##########################################################################
 
 import unittest
-import IECore
 
-class TestReader(unittest.TestCase):
-    
-	def testSupportedExtensions( self ) :
-	
-		e = IECore.Reader.supportedExtensions()
-		for ee in e :
-			self.assert_( type( ee ) is str )
-		
-		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob" ]
-		if IECore.withTIFF() :
-			expectedExtensions += [ "tif", "tiff" ]
-		if IECore.withJPEG() :
-			expectedExtensions += [ "jpg", "jpeg" ]
-						
-		for ee in expectedExtensions :
-			self.assert_( ee in e )
+from IECore import *
+import os
+
+class CachedReaderTest( unittest.TestCase ) :
 
 	def test( self ) :
 	
-		"""
-		check if we can create a reader from a blank file.
-		this should definitely NOT create a valid reader
-		"""
-
-		r = IECore.Reader.create('test/data/null')
-		self.assertEqual( r, None )
-
-		r = IECore.Reader.create('test/data/null.cin')
-		self.assertEqual( r, None )
+		r = CachedReader( SearchPath( "./", ":" ), 100 * 1024 * 1024 )
 		
-                
+		o = r.read( "test/IECore/data/cobFiles/compoundData.cob" )
+		self.assertEqual( o.typeName(), "CompoundData" )
+		self.assertEqual( r.memoryUsage(), o.memoryUsage() )
+		
+		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		self.assertEqual( r.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
+	
+	def testDefault( self ) :
+	
+		os.environ["IECORE_CACHEDREADER_PATHS"] = "a:test:path"
+	
+		r = CachedReader.defaultCachedReader()
+		r2 = CachedReader.defaultCachedReader()
+		self.assert_( r.isSame( r2 ) )
+		self.assertEqual( r.maxMemory, 1024 * 1024 * 100 )
+		self.assertEqual( r.searchPath, SearchPath( "a:test:path", ":" ) )
+		
 if __name__ == "__main__":
-	unittest.main()   
-	        
+    unittest.main()   

@@ -40,14 +40,14 @@ class TestPDCReader( unittest.TestCase ) :
 
 	def testConstruction( self ) :
 	
-		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assert_( r.isInstanceOf( "ParticleReader" ) )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
-		self.assertEqual( r.fileName.getValue().value, "test/data/pdcFiles/particleShape1.250.pdc" )
+		self.assertEqual( r.fileName.getValue().value, "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		
 	def testRead( self ) :
 	
-		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
 		
 		self.assertEqual( r.numParticles(), 25 )
@@ -92,7 +92,7 @@ class TestPDCReader( unittest.TestCase ) :
 			
 	def testFiltering( self ) :
 	
-		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		
 		r.parameters().percentage.setValue( IECore.FloatData( 50 ) )
 		
@@ -104,7 +104,7 @@ class TestPDCReader( unittest.TestCase ) :
 		
 	def testConversion( self ) :
 	
-		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
 		
 		r.parameters().realType.setValue( "float" )
@@ -148,7 +148,7 @@ class TestPDCReader( unittest.TestCase ) :
 		"""Now Readers are Ops, the filename can be changed and read() can be called
 		again. So we need to check that that works."""
 	
-		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
 		
 		r.parameters().realType.setValue( "float" )
@@ -187,7 +187,7 @@ class TestPDCReader( unittest.TestCase ) :
 			self.assert_( abs( p.x ) < 1.1 )
 			self.assert_( abs( p.z ) < 1.1 )
 			
-		r.fileName.setValue( IECore.StringData( "test/data/pdcFiles/10Particles.pdc" ) )
+		r.fileName.setValue( IECore.StringData( "test/IECore/data/pdcFiles/10Particles.pdc" ) )
 		
 		self.assertEqual( r.numParticles(), 10 )
 		c = r.read()

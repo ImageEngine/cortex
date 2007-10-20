@@ -32,54 +32,33 @@
 #
 ##########################################################################
 
-import os
 import unittest
-from IECore import *
+import sys
+import IECore
 
-class TestFileExaminer( unittest.TestCase ) :
+class TestObjectReader( unittest.TestCase ) :
 
-	def testNoExaminer( self ) :
+	def testConstruction( self ) :
 	
-		self.assertEqual( FileExaminer.create( "noExtension" ), None )
-		self.assertEqual( FileExaminer.create( "extensionNot.registered" ), None )
-		self.assertEqual( FileExaminer.allDependencies( "noExtension" ), set() )
-		self.assertEqual( FileExaminer.allDependencies( "extensionNot.registered" ), set() )
-
-	def testNuke( self ) :
+		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
+		self.assertEqual( type( r ), IECore.ObjectReader )
+		self.assertEqual( r.fileName.getValue().value, "test/IECore/data/cobFiles/compoundData.cob" )
 		
-		e = FileExaminer.create( "test/data/nukeScripts/dependencies.nk" )
+	def testRead( self ) :
+	
+		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
+		self.assertEqual( type( r ), IECore.ObjectReader )
 		
-		expectedDependencies = [
-			"test/test.####.tif 3-10",
-			"/film/grain/scans/AreDependenciesToo.####.tif 2-75",
-			"test/filesInAGroupMustBeDetected.#.exr 1",
-			"test/testProxy.####.tif 3-10",
-			"test/testNoPadding.#.tif 1-101",
-			"test/testNoFrameNumber.tif",
-		]
+		c = r.read()
 		
-		d = e.dependencies()
+		self.assertEqual( len(c), 4 )
+		self.assertEqual( c["banana"].value, 2)
+		self.assertEqual( c["apple"].value, 12)
+		self.assertEqual( c["lemon"].value, -3)
+		self.assertEqual( c["melon"].value, 2.5)				
 				
-		self.assertEqual( len( expectedDependencies ), len( d ) )
-		for ed in expectedDependencies :
-			self.assert_( ed in d )
+		
 			
-	def testRIB( self ) :
-	
-		e = FileExaminer.create( "test/data/ribFiles/dependencies.rib" )
-		
-		expectedDependencies = [
-			"aShader.sdl",
-			"/a/texture/file.0001.tdl",
-			"hello.tdl",
-			"aPythonProcedural",
-		]
-		
-		d = e.dependencies()
-				
-		self.assertEqual( len( expectedDependencies ), len( d ) )
-		for ed in expectedDependencies :
-			self.assert_( ed in d )
-					
 if __name__ == "__main__":
-	unittest.main()
+	unittest.main()   
+	

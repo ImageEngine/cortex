@@ -32,74 +32,69 @@
 #
 ##########################################################################
 
+import os
 import unittest
 import sys
 import IECore
 
-class TestTIFFReader(unittest.TestCase):
+class TestPDCWriter( unittest.TestCase ) :
 
-	testfile = "test/data/tiff/rgb_black_circle.256x256.tiff"
-	testoutfile = "test/data/tiff/rgb_black_circle.256x256.testoutput.tif"
-
-	def testConstruction(self):
-                
-		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.TIFFImageReader)
+	def testBasics( self ) :
+	
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		p = r.read()
 		
-	def testRead(self):
-		
-		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.TIFFImageReader)
-		
-		r.parameters().dataWindow.setValue(IECore.Box2iData(IECore.Box2i(IECore.V2i(0, 0), IECore.V2i(100, 100))))
-		
-		img = r.read()
-		
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-		
-		# write test (TIFF -> TIFF)
-		w = IECore.Writer.create(img, self.testoutfile)
-		self.assertEqual(type(w), IECore.TIFFImageWriter)
-		
-		w.write()
-
-	def testRead(self):
-		
-		testfile = "test/data/tiff/bluegreen_noise.400x300.tif"
-		testoutfile = "test/data/tiff/bluegreen_noise.400x300.testoutput.tif"
-		
-		r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.TIFFImageReader)
-		
-		img = r.read()
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-		
-		# write test (TIFF -> TIFF)
-		w = IECore.Writer.create(img, testoutfile)
-		self.assertEqual(type(w), IECore.TIFFImageWriter)
-		
+		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
 		w.write()
 		
-	def testCompressionWrite(self):
+		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		p2 = r.read()
 		
-		testfile =    "test/data/tiff/bluegreen_noise.400x300.tif"
-		testoutfile = "test/data/tiff/bluegreen_noise.400x300.testoutput"
+		self.assertEqual( p, p2 )
 		
-		r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.TIFFImageReader)
+	def testFiltering( self ) :
+	
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		p = r.read()
 		
-		img = r.read()
-		self.assertEqual(type(img), IECore.ImagePrimitive)
+		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
+		w.parameters().attributes.setValue( IECore.StringVectorData( ["position"] ) )
+		w.write()
 		
-		w = IECore.Writer.create(img, testoutfile + '.tif')
-		compressions = w.parameters()['compression'].presets()
-		self.assertEqual(type(w), IECore.TIFFImageWriter)
+		for k in p.keys() :
+			if k!="position" :
+				del p[k]
 		
-		for compression in compressions.keys():
-			cw = IECore.Writer.create(img, '.'.join([testoutfile, compression, 'tif']))
-			cw.parameters().compression.setValue(compressions[compression])
-			cw.write()
-                			
+		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		p2 = r.read()
+		
+		self.assertEqual( p, p2 )
+		
+	def testBadObjectException( self ) :
+	
+		w = IECore.PDCParticleWriter( IECore.IntData(10), "test/intData.pdc" )
+		self.assertRaises( RuntimeError, w.write )
+		
+	def testWriteConstantData( self ) :
+	
+		p = IECore.PointsPrimitive( 1 )
+		p["d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.DoubleData( 1 ) )
+		p["v3d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3dData( IECore.V3d( 1, 2, 3 ) ) )
+		p["i"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
+		
+		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
+		w.write()
+		
+		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		p2 = r.read()
+		
+		self.assertEqual( p, p2 )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile( "test/particleShape1.250.pdc" ) :
+			os.remove( "test/particleShape1.250.pdc" )
+		
 if __name__ == "__main__":
 	unittest.main()   
 	

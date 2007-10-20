@@ -39,7 +39,7 @@ class testParameterParser( unittest.TestCase ) :
 
 	def testMultiply( self ) :
 	
-		l = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) )
+		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		a = l.load( "maths/multiply" )()
 
 		p = a.parameters()
@@ -49,7 +49,7 @@ class testParameterParser( unittest.TestCase ) :
 
 	def testParameterTypes( self ) :
 	
-		a = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) ).load( "parameterTypes" )()
+		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
 		
 		IECore.ParameterParser().parse( [
 			"-a", "10",
@@ -80,7 +80,7 @@ class testParameterParser( unittest.TestCase ) :
 		
 	def testPresetParsing( self ) :
 	
-		a = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) ).load( "presetParsing" )()
+		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "presetParsing" )()
 		
 		IECore.ParameterParser().parse( [
 			"-h", "x",
@@ -91,17 +91,17 @@ class testParameterParser( unittest.TestCase ) :
 		
 	def testReadParsing( self ) :
 	
-		l = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) )
+		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		a = l.load( "maths/multiply" )()
 
 		p = a.parameters()
-		IECore.ParameterParser().parse( ["-a", "read:test/data/cobFiles/intDataTen.cob", "-b", "30" ], p )
+		IECore.ParameterParser().parse( ["-a", "read:test/IECore/data/cobFiles/intDataTen.cob", "-b", "30" ], p )
 		
 		self.assertEqual( a(), IECore.IntData( 300 ) )
 		
 	def testSerialising( self ) :
 	
-		a = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) ).load( "parameterTypes" )()
+		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
 		
 		IECore.ParameterParser().parse( [
 			"-a", "10",
@@ -131,14 +131,14 @@ class testParameterParser( unittest.TestCase ) :
 		a()
 		
 		s = IECore.ParameterParser().serialise( a.parameters() )
-		a = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) ).load( "parameterTypes" )()
+		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
 		IECore.ParameterParser().parse( s, a.parameters() )
 		
 		a()
 		
 	def testStringParsing( self ) :
 	
-		a = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) ).load( "stringParsing" )()
+		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "stringParsing" )()
 		
 		IECore.ParameterParser().parse( [
 			"-emptyString", "",
@@ -149,7 +149,7 @@ class testParameterParser( unittest.TestCase ) :
 		
 		a()
 		
-		a = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) ).load( "stringParsing" )()
+		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "stringParsing" )()
 		
 		IECore.ParameterParser().parse( "-emptyString '' -normalString 'hello' -stringWithSpace 'hello there' -stringWithManySpaces 'hello there old chap'", a.parameters() )
 		

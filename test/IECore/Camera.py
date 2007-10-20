@@ -33,32 +33,51 @@
 ##########################################################################
 
 import unittest
+import os.path
 
 from IECore import *
-import os
 
-class CachedReaderTest( unittest.TestCase ) :
+class TestCamera( unittest.TestCase ) :
 
 	def test( self ) :
 	
-		r = CachedReader( SearchPath( "./", ":" ), 100 * 1024 * 1024 )
+		c = Camera()
+		self.assertEqual( c.getName(), "default" )
+		self.assertEqual( c.getTransform(), None )
+		self.assertEqual( c.parameters(), CompoundData() )
+
+		cc = c.copy()
+		self.assertEqual( cc.getName(), "default" )
+		self.assertEqual( cc.getTransform(), None )
+		self.assertEqual( cc.parameters(), CompoundData() )
+		self.assertEqual( cc, c )
 		
-		o = r.read( "test/data/cobFiles/compoundData.cob" )
-		self.assertEqual( o.typeName(), "CompoundData" )
-		self.assertEqual( r.memoryUsage(), o.memoryUsage() )
+		Writer.create( cc, "test/IECore/data/camera.cob" ).write()
+		ccc = Reader.create( "test/IECore/data/camera.cob" ).read()
 		
-		oo = r.read( "test/data/pdcFiles/particleShape1.250.pdc" )
-		self.assertEqual( r.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
-	
-	def testDefault( self ) :
-	
-		os.environ["IECORE_CACHEDREADER_PATHS"] = "a:test:path"
-	
-		r = CachedReader.defaultCachedReader()
-		r2 = CachedReader.defaultCachedReader()
-		self.assert_( r.isSame( r2 ) )
-		self.assertEqual( r.maxMemory, 1024 * 1024 * 100 )
-		self.assertEqual( r.searchPath, SearchPath( "a:test:path", ":" ) )
+		self.assertEqual( c, ccc )
 		
+		c.setName( "n" )
+		self.assertEqual( c.getName(), "n" )
+		
+		c.setTransform( MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
+		self.assertEqual( c.getTransform(), MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
+		
+		c.parameters()["fov"] = FloatData( 45 )
+		self.assertEqual( c.parameters()["fov"], FloatData( 45 ) )
+		
+		# test copying and saving with some parameters and a transform
+		cc = c.copy()
+		self.assertEqual( cc, c )
+		
+		Writer.create( cc, "test/IECore/data/camera.cob" ).write()
+		ccc = Reader.create( "test/IECore/data/camera.cob" ).read()
+		self.assertEqual( ccc, c )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile( "test/IECore/data/camera.cob" ) :
+			os.remove( "test/IECore/data/camera.cob" )	
+
 if __name__ == "__main__":
-    unittest.main()   
+        unittest.main()

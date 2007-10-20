@@ -197,7 +197,7 @@ class TestEmptyContainerOptimisation( unittest.TestCase ) :
 		
 		ObjectWriter( c, "test/emptyContainerOptimisation.cob" ).write()
 		
-		c1 = ObjectReader( "test/data/cobFiles/beforeEmptyContainerOptimisation.cob" ).read()
+		c1 = ObjectReader( "test/IECore/data/cobFiles/beforeEmptyContainerOptimisation.cob" ).read()
 		c2 = ObjectReader( "test/emptyContainerOptimisation.cob" ).read()
 		
 		self.assertEqual( c1, c2 )

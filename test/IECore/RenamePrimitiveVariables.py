@@ -35,52 +35,29 @@
 import unittest
 import IECore
 
-class TestClassLoader( unittest.TestCase ) :
+class TestRenamePrimVar( unittest.TestCase ) :
 
 	def test( self ) :
 	
-		l = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) )
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		p = r.read()
 		
-		self.assertEqual( l.classNames(), ["bad", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", 'stringParsing'] )
-		self.assertEqual( l.classNames( "p*" ), ["parameterTypes", "path.With.Dot/multiply", "presetParsing"] )
-		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
-		self.assertEqual( l.getDefaultVersion( "presetParsing" ), 1 )
-		self.assertEqual( l.getDefaultVersion( "stringParsing" ), 1 )
-		self.assertEqual( l.versions( "maths/multiply" ), [ 1, 2 ] )
+		self.assert_( "position" in p )
+		self.assert_( "particleId" in p )
 		
-		o = l.load( "maths/multiply" )()
-		self.assertEqual( len( o.parameters() ), 2 )
+		newNames = [ "position P", "particleId id" ]
 		
-	def testStaticLoaders( self ) :
-	
-		l = IECore.ClassLoader.defaultOpLoader()
-		ll = IECore.ClassLoader.defaultOpLoader()
-		self.assert_( l is ll )
-		self.assert_( isinstance( l, IECore.ClassLoader ) )
+		o = IECore.RenamePrimitiveVariables()
+		o["input"].setValue( p )
+		o["names"].setValue( IECore.StringVectorData( newNames ) )
 		
-		l = IECore.ClassLoader.defaultProceduralLoader()
-		ll = IECore.ClassLoader.defaultProceduralLoader()
-		self.assert_( l is ll )
-		self.assert_( isinstance( l, IECore.ClassLoader ) )
-		
-	def testRefresh( self ) :
-	
-		l = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) )
-		
-		c = l.classNames()
-		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
-		l.setDefaultVersion( "maths/multiply", 1 )
-		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 1 )
-		
-		l.refresh()
-		self.assertEqual( c, l.classNames() )
-		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 1 )
-		
-	def testDotsInPath( self ) :
-	
-		l = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) )
-		
-		c = l.load( "path.With.Dot/multiply" )
-		
+		pp = o()
+		self.assertEqual( len( pp ), len( p ) )
+		for n in newNames :
+			ns = n.split()
+			self.assert_( ns[1] in pp )
+			self.assert_( not ns[0] in pp )
+			
 if __name__ == "__main__":
-        unittest.main()
+	unittest.main()   
+	

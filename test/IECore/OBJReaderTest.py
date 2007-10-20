@@ -6,7 +6,7 @@ class TestOBJReader(unittest.TestCase):
 
     def testRead(self):
 
-        self.testfile = 'test/data/obj/triangle.obj'
+        self.testfile = 'test/IECore/data/obj/triangle.obj'
         
         r = IECore.Reader.create(self.testfile)
         self.assertEqual(type(r), IECore.OBJReader)
@@ -15,7 +15,7 @@ class TestOBJReader(unittest.TestCase):
 
     def testReadNormals(self):
 
-        self.testfile = 'test/data/obj/triangle_normals.obj'
+        self.testfile = 'test/IECore/data/obj/triangle_normals.obj'
         
         r = IECore.Reader.create(self.testfile)
         self.assertEqual(type(r), IECore.OBJReader)
@@ -26,7 +26,7 @@ class TestOBJReader(unittest.TestCase):
 
     def testReadNoTexture(self):
 
-        self.testfile = 'test/data/obj/triangle_no_texture.obj'
+        self.testfile = 'test/IECore/data/obj/triangle_no_texture.obj'
         
         r = IECore.Reader.create(self.testfile)
         self.assertEqual(type(r), IECore.OBJReader)
@@ -36,7 +36,7 @@ class TestOBJReader(unittest.TestCase):
 
     def testGroups(self):
 
-        self.testfile = 'test/data/obj/groups.obj'
+        self.testfile = 'test/IECore/data/obj/groups.obj'
         
         r = IECore.Reader.create(self.testfile)
         self.assertEqual(type(r), IECore.OBJReader)

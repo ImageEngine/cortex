@@ -57,7 +57,7 @@ envRoot = IEEnv.Environment.rootPath()
 
 coreName = "IECore"
 corePythonName = 'IECore'
-coreTestName = "test/IECoreTest"
+coreTestName = "test/IECore/IECoreTest"
 
 # Versions
 
@@ -459,12 +459,12 @@ for procedural in coreProcedurals :
 # Core library unit test
 
 coreTestSources = 	[ 
-				'test/KDTreeTest.cpp',
-				'test/IECoreTest.cpp',
-				'test/TypedDataTest.cpp',
-				'test/InterpolatorTest.cpp',
-				'test/IndexedIOTest.cpp',
-				'test/BoostUnitTestTest.cpp',				
+				'test/IECore/KDTreeTest.cpp',
+				'test/IECore/IECoreTest.cpp',
+				'test/IECore/TypedDataTest.cpp',
+				'test/IECore/InterpolatorTest.cpp',
+				'test/IECore/IndexedIOTest.cpp',
+				'test/IECore/BoostUnitTestTest.cpp',				
 			]
 
 coreTestProgram = IEBuild.Program( ARGUMENTS, coreTestName, coreTestSources, coreIncludes )
@@ -480,9 +480,9 @@ coreTestLibPath = coreTestProgramEnv["LIBPATH"]
 
 
 if IEEnv.platform().startswith("osx104"):
-	coreTestRun = env.Command('test/IECoreTest.out', '', 'env DYLD_LIBRARY_PATH=' + ":".join(coreTestLibPath) + ' ' +coreTestName )
+	coreTestRun = env.Command('test/IECore/IECoreTest.out', '', 'env DYLD_LIBRARY_PATH=' + ":".join(coreTestLibPath) + ' ' +coreTestName )
 else:	
-	coreTestRun = env.Command('test/IECoreTest.out', '', 'env LD_LIBRARY_PATH=' + ":".join(coreTestLibPath) + ' ' +coreTestName )
+	coreTestRun = env.Command('test/IECore/IECoreTest.out', '', 'env LD_LIBRARY_PATH=' + ":".join(coreTestLibPath) + ' ' +coreTestName )
 env.Depends( coreTestRun, coreTest )
 
 pythonTestEnv = Environment( ENV=os.environ )
@@ -491,7 +491,7 @@ pythonTestEnv["ENV"]["IEENV_LIBRARY_PREFIX_PATH"] = "./:"+pythonTestEnv["ENV"]["
 pythonTestEnv["ENV"]["COMPILER"] = corePythonModule.getLibrary().getCompiler()
 pythonTestEnv["ENV"]["COMPILER_VERSION"] = corePythonModule.getLibrary().getCompilerVersion()
 
-corePythonTestRun = pythonTestEnv.Command( "test/IECorePythonTest.out", "",  "python"+pythonVersion+" "+ARGUMENTS.get("TESTSCRIPT", "test/All.py") + " -v")
+corePythonTestRun = pythonTestEnv.Command( "test/IECore/IECorePythonTest.out", "",  "python"+pythonVersion+" "+ARGUMENTS.get("TESTSCRIPT", "test/IECore/All.py") + " -v")
 pythonTestEnv.Depends( corePythonTestRun, corePython )
 
 if not ARGUMENTS.has_key("TESTSCRIPT"):

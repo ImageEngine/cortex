@@ -35,47 +35,80 @@
 import unittest
 import sys
 from IECore import *
-import IECore
 
 from math import pow
 
-class TestDPXReader(unittest.TestCase):
+class TestCINReader(unittest.TestCase):
 
-        testfile =    "test/data/dpx/bluegreen_noise.dpx"
-	testoutfile = "test/data/dpx/bluegreen_noise.testoutput"
+        testfile =    "test/IECore/data/cinFiles/bluegreen_noise.cin"
+	testoutfile = "test/IECore/data/cinFiles/bluegreen_noise.testoutput.cin"
 
         def testConstruction(self):
                 
 		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.DPXImageReader)
+		self.assertEqual(type(r), IECore.CINImageReader)
 
 
         def testRead(self):
 
                 r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.DPXImageReader)
+		self.assertEqual(type(r), IECore.CINImageReader)
 
 		img = r.read()
 		
 		self.assertEqual(type(img), IECore.ImagePrimitive)
 
-		# write test (DPX -> EXR)
-                w = IECore.Writer.create(img, self.testoutfile + '.exr')
-		self.assertEqual(type(w), IECore.EXRImageWriter)
+		# write test (CIN -> EXR)
+                w = IECore.Writer.create(img, self.testoutfile)
+		self.assertEqual(type(w), IECore.CINImageWriter)
 
 		w.write()
 
-        def testWrite(self):
 
-                r = IECore.Reader.create('test/data/dpx/AA001_022_bgPlate_v001.0011.dpx')
-                #r = IECore.Reader.create('test/data/jpg/bluegreen_noise.400x300.jpg')
+        def testWindowedRead(self):
+
+		testfile = ["test/IECore/data/cinFiles/bluegreen_noise", "cin"]
+
+		test_file_path = ".".join(testfile)
+		test_outfile_path = ".".join([testfile[0], 'windowtestoutput', testfile[1]])
+
+                # create a reader, read a sub-image
+                r = IECore.Reader.create(test_file_path)
+		self.assertEqual(type(r), IECore.CINImageReader)
+		r.parameters().dataWindow.setValue(Box2iData(Box2i(V2i(100, 100), V2i(199, 199))))
+
+		# read, verify
 		img = r.read()
-		
-		# write test
-                w = IECore.Writer.create(img, self.testoutfile + '.dpx')
-		self.assertEqual(type(w), IECore.DPXImageWriter)
+		self.assertEqual(type(img), IECore.ImagePrimitive)
 
+		# write back the sub-image
+                w = IECore.Writer.create(img, test_outfile_path)
+		self.assertEqual(type(w), IECore.CINImageWriter)
 		w.write()
+
+        def testChannelRead(self):
+
+		testfile = ["test/IECore/data/cinFiles/bluegreen_noise", "cin"]
+
+		test_file_path = ".".join(testfile)
+		test_outfile_path = ".".join([testfile[0], 'channeltestoutput', testfile[1]])
+
+                # create a reader, constrain to a sub-image, R (red) channel
+                r = IECore.Reader.create(test_file_path)
+		self.assertEqual(type(r), IECore.CINImageReader)
+		
+		r.parameters().dataWindow.setValue(Box2iData(Box2i(V2i(100, 100), V2i(199, 199))))
+		r.parameters().channels.setValue(StringVectorData(["R", "G"]))
+
+		# read, verify
+		img = r.read()
+		self.assertEqual(type(img), IECore.ImagePrimitive)
+
+		# write back the sub-image
+                w = IECore.Writer.create(img, test_outfile_path)
+		self.assertEqual(type(w), IECore.CINImageWriter)
+		w.write()
+		
 
                 			
 if __name__ == "__main__":

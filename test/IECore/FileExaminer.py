@@ -32,52 +32,54 @@
 #
 ##########################################################################
 
+import os
 import unittest
-import os.path
-
 from IECore import *
 
-class TestCamera( unittest.TestCase ) :
+class TestFileExaminer( unittest.TestCase ) :
 
-	def test( self ) :
+	def testNoExaminer( self ) :
 	
-		c = Camera()
-		self.assertEqual( c.getName(), "default" )
-		self.assertEqual( c.getTransform(), None )
-		self.assertEqual( c.parameters(), CompoundData() )
+		self.assertEqual( FileExaminer.create( "noExtension" ), None )
+		self.assertEqual( FileExaminer.create( "extensionNot.registered" ), None )
+		self.assertEqual( FileExaminer.allDependencies( "noExtension" ), set() )
+		self.assertEqual( FileExaminer.allDependencies( "extensionNot.registered" ), set() )
 
-		cc = c.copy()
-		self.assertEqual( cc.getName(), "default" )
-		self.assertEqual( cc.getTransform(), None )
-		self.assertEqual( cc.parameters(), CompoundData() )
-		self.assertEqual( cc, c )
+	def testNuke( self ) :
 		
-		Writer.create( cc, "test/data/camera.cob" ).write()
-		ccc = Reader.create( "test/data/camera.cob" ).read()
+		e = FileExaminer.create( "test/IECore/data/nukeScripts/dependencies.nk" )
 		
-		self.assertEqual( c, ccc )
+		expectedDependencies = [
+			"test/test.####.tif 3-10",
+			"/film/grain/scans/AreDependenciesToo.####.tif 2-75",
+			"test/filesInAGroupMustBeDetected.#.exr 1",
+			"test/testProxy.####.tif 3-10",
+			"test/testNoPadding.#.tif 1-101",
+			"test/testNoFrameNumber.tif",
+		]
 		
-		c.setName( "n" )
-		self.assertEqual( c.getName(), "n" )
-		
-		c.setTransform( MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
-		self.assertEqual( c.getTransform(), MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
-		
-		c.parameters()["fov"] = FloatData( 45 )
-		self.assertEqual( c.parameters()["fov"], FloatData( 45 ) )
-		
-		# test copying and saving with some parameters and a transform
-		cc = c.copy()
-		self.assertEqual( cc, c )
-		
-		Writer.create( cc, "test/data/camera.cob" ).write()
-		ccc = Reader.create( "test/data/camera.cob" ).read()
-		self.assertEqual( ccc, c )
-		
-	def tearDown( self ) :
+		d = e.dependencies()
+				
+		self.assertEqual( len( expectedDependencies ), len( d ) )
+		for ed in expectedDependencies :
+			self.assert_( ed in d )
+			
+	def testRIB( self ) :
 	
-		if os.path.isfile( "test/data/camera.cob" ) :
-			os.remove( "test/data/camera.cob" )	
-
+		e = FileExaminer.create( "test/IECore/data/ribFiles/dependencies.rib" )
+		
+		expectedDependencies = [
+			"aShader.sdl",
+			"/a/texture/file.0001.tdl",
+			"hello.tdl",
+			"aPythonProcedural",
+		]
+		
+		d = e.dependencies()
+				
+		self.assertEqual( len( expectedDependencies ), len( d ) )
+		for ed in expectedDependencies :
+			self.assert_( ed in d )
+					
 if __name__ == "__main__":
-        unittest.main()
+	unittest.main()

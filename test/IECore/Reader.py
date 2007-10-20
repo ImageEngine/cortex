@@ -33,16 +33,39 @@
 ##########################################################################
 
 import unittest
-
 import IECore
 
-class TestFormattedParameterHelp( unittest.TestCase ) :
+class TestReader(unittest.TestCase):
+    
+	def testSupportedExtensions( self ) :
+	
+		e = IECore.Reader.supportedExtensions()
+		for ee in e :
+			self.assert_( type( ee ) is str )
+		
+		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob" ]
+		if IECore.withTIFF() :
+			expectedExtensions += [ "tif", "tiff" ]
+		if IECore.withJPEG() :
+			expectedExtensions += [ "jpg", "jpeg" ]
+						
+		for ee in expectedExtensions :
+			self.assert_( ee in e )
 
 	def test( self ) :
 	
-		a = IECore.ClassLoader( IECore.SearchPath( "test/ops", ":" ) ).load( "parameterTypes" )()
-		formatter = IECore.WrappedTextFormatter( open( "/dev/null", "w" ) )
-		IECore.formatParameterHelp( a.parameters(), formatter )
+		"""
+		check if we can create a reader from a blank file.
+		this should definitely NOT create a valid reader
+		"""
 
+		r = IECore.Reader.create('test/IECore/data/null')
+		self.assertEqual( r, None )
+
+		r = IECore.Reader.create('test/IECore/data/null.cin')
+		self.assertEqual( r, None )
+		
+                
 if __name__ == "__main__":
-        unittest.main()
+	unittest.main()   
+	        

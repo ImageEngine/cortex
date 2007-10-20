@@ -34,81 +34,94 @@
 
 import unittest
 import sys
-from IECore import *
+import IECore
 
-from math import pow
+class TestEXRReader(unittest.TestCase):
 
-class TestCINReader(unittest.TestCase):
+        #testfile = "test/IECore/data/exrFiles/float256x256.exr"
+	#testoutfile = "test/IECore/data/exrFiles/testoutput.exr"
 
-        testfile =    "test/data/cinFiles/bluegreen_noise.cin"
-	testoutfile = "test/data/cinFiles/bluegreen_noise.testoutput.cin"
+	testfile = "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.exr"
+	testoutfile = "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.exr"
 
         def testConstruction(self):
                 
 		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.CINImageReader)
+		self.assertEqual(type(r), IECore.EXRImageReader)
 
 
         def testRead(self):
-
+                
                 r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.CINImageReader)
+		self.assertEqual(type(r), IECore.EXRImageReader)
 
 		img = r.read()
-		
-		self.assertEqual(type(img), IECore.ImagePrimitive)
+		#for cn in img.keys():
+		#	print cn	
 
-		# write test (CIN -> EXR)
+		self.assertEqual(type(img), type(IECore.ImagePrimitive() ))
+
+		# write test
                 w = IECore.Writer.create(img, self.testoutfile)
-		self.assertEqual(type(w), IECore.CINImageWriter)
+		self.assertEqual(type(w), IECore.EXRImageWriter)
 
 		w.write()
+		# here we might complete the test by comparing against verified output
+
+
+        def testReadDataWindow(self):
+
+                r = IECore.Reader.create('test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.exr')
+		self.assertEqual(type(r), IECore.EXRImageReader)
+		img = r.read()
+
+		self.assertEqual(type(img), type(IECore.ImagePrimitive()))
+
+		# write test
+                w = IECore.Writer.create(img, 'test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.datawindow.exr')
+		self.assertEqual(type(w), IECore.EXRImageWriter)
+		w.write()
+
+
+        def testHalf(self):
+
+		testfile = "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.exr"
+		#testfile = "test/IECore/data/exrFiles/AllHalfValues.exr"
+		testoutfile = "test/IECore/data/exrFiles/AllHalfValues.testoutput.exr"
+                
+                r = IECore.Reader.create(testfile)
+		self.assertEqual(type(r), IECore.EXRImageReader)
+
+		img = r.read()
+		self.assertEqual(type(img), IECore.ImagePrimitive)
+
+		## write test
+		#w = IECore.Writer.create(img, testoutfile)
+		#self.assertEqual(type(w), IECore.EXRImageWriter)
+		#
+		#w.write()
+		## here we might complete the test by comparing against verified output
+		## \todo So why don't we?
+
 
 
         def testWindowedRead(self):
 
-		testfile = ["test/data/cinFiles/bluegreen_noise", "cin"]
-
-		test_file_path = ".".join(testfile)
-		test_outfile_path = ".".join([testfile[0], 'windowtestoutput', testfile[1]])
-
                 # create a reader, read a sub-image
-                r = IECore.Reader.create(test_file_path)
-		self.assertEqual(type(r), IECore.CINImageReader)
-		r.parameters().dataWindow.setValue(Box2iData(Box2i(V2i(100, 100), V2i(199, 199))))
+                r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECore.EXRImageReader)
+		box = IECore.Box2i(IECore.V2i(-100, -100), IECore.V2i(199, 199))
+		r.parameters().dataWindow.setValue(IECore.Box2iData(box))
 
 		# read, verify
 		img = r.read()
 		self.assertEqual(type(img), IECore.ImagePrimitive)
 
-		# write back the sub-image
-                w = IECore.Writer.create(img, test_outfile_path)
-		self.assertEqual(type(w), IECore.CINImageWriter)
-		w.write()
-
-        def testChannelRead(self):
-
-		testfile = ["test/data/cinFiles/bluegreen_noise", "cin"]
-
-		test_file_path = ".".join(testfile)
-		test_outfile_path = ".".join([testfile[0], 'channeltestoutput', testfile[1]])
-
-                # create a reader, constrain to a sub-image, R (red) channel
-                r = IECore.Reader.create(test_file_path)
-		self.assertEqual(type(r), IECore.CINImageReader)
-		
-		r.parameters().dataWindow.setValue(Box2iData(Box2i(V2i(100, 100), V2i(199, 199))))
-		r.parameters().channels.setValue(StringVectorData(["R", "G"]))
-
-		# read, verify
-		img = r.read()
-		self.assertEqual(type(img), IECore.ImagePrimitive)
+		img.displayWindow = box
 
 		# write back the sub-image
-                w = IECore.Writer.create(img, test_outfile_path)
-		self.assertEqual(type(w), IECore.CINImageWriter)
-		w.write()
-		
+                IECore.Writer.create(img, 'test/IECore/data/exrFiles/redgreen.window.exr').write()
+
 
                 			
 if __name__ == "__main__":

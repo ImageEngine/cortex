@@ -31,40 +31,33 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
-
+import os
 import unittest
+from IECore import *
 import IECore
 
-class TestRemovePrimVar( unittest.TestCase ) :
+class VisibleRenderableTest( unittest.TestCase ) :
 
 	def test( self ) :
 	
-		r = IECore.Reader.create( "test/data/pdcFiles/particleShape1.250.pdc" )
-		p = r.read()
-		numPrimVars = len( p )
+		if IECore.withSQLite() :
 		
-		toRemove = [ "particleId", "mass", "lastWorldVelocity", "worldVelocityInObjectSpace" ]
-		for n in toRemove :
-			self.assert_( n in p )
-		
-		o = IECore.RemovePrimitiveVariables()
-		o["input"].setValue( p )
-		o["names"].setValue( IECore.StringVectorData( toRemove ) )
-		
-		pp = o()
-		self.assertEqual( len( pp ), numPrimVars - len( toRemove ) )
-		for n in toRemove :
-			self.assert_( not n in pp )
-
-		for n in toRemove :
-			self.assert_( not n in pp )
-			
-		self.assert_( not pp.isSame( p ) )
-		
-		o["copyInput"].setValue( IECore.BoolData( False ) )
-		ppp = o()
-		self.assert_( ppp.isSame( p ) )
-			
-if __name__ == "__main__":
-	unittest.main()   
+			# load an old (pre VisibleRenderable) file
+			p = ObjectReader( "test/IECore/data/cobFiles/meshPrimitiveV0.cob" ).read()
+			self.assert_( p.isInstanceOf( "VisibleRenderable" ) )
+			self.assert_( p.isInstanceOf( VisibleRenderable.staticTypeId() ) )
 	
+			# save it in the new format, load it again and check they're the same
+			ObjectWriter( p, "test/testMesh.cob" ).write()
+			
+			pp = ObjectReader( "test/testMesh.cob" ).read()
+			
+			self.assertEqual( p, pp )
+		
+	def tearDown( self ) :
+	
+		if os.path.isfile( "test/testMesh.cob" ):
+			os.remove( "test/testMesh.cob" )
+		
+if __name__ == "__main__":
+	unittest.main()
