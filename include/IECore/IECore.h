@@ -215,6 +215,11 @@ bool withSQLite();
 /// an extension, and use Parameters to control any conversions during the io process.
 /// Currently implementations exist for several common image formats and for the Maya PDC file format.
 ///
+/// \code
+/// ObjectPtr o = Reader::create( "image.jpg" )->read();
+/// Writer::create( o, "image.exr" )->write();
+/// \endcode
+///
 /// \section mainPageRenderingSection Rendering
 ///
 /// IECore defines the Renderer class for the description of scenes to a renderer. Currently
