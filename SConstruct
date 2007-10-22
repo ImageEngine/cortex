@@ -433,7 +433,7 @@ if doConfigure :
 docEnv = Environment()
 docEnv["ENV"]["PATH"] = os.environ["PATH"]
 docs = docEnv.Command( "doc/html/index.html", "", "doxygen doc/config/Doxyfile" )
-docEnv.Depends( docs, glob.glob( "src/*.cpp" ) )
+docEnv.Depends( docs, glob.glob( "src/IECore/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "src/IECoreRI/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "python/IECore/*.py" ) )
 docEnv.Depends( docs, glob.glob( "python/IECoreRI/*.py" ) )	
