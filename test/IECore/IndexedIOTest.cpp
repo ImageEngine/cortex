@@ -61,22 +61,22 @@ void IndexedIOTestSuite<SQLiteIndexedIO>::getFilenames( FilenameList &filenames 
 {
 	filenames.clear();
 	
-	filenames.push_back("./test/data/sqlFiles/0.0.3/rhel4.i686/types.sql");
-	filenames.push_back("./test/data/sqlFiles/0.0.3/osx104.ppc/types.sql");
-	filenames.push_back("./test/data/sqlFiles/0.0.3/osx104.i686/types.sql");
+	filenames.push_back("./test/IECore/data/sqlFiles/0.0.3/rhel4.i686/types.sql");
+	filenames.push_back("./test/IECore/data/sqlFiles/0.0.3/osx104.ppc/types.sql");
+	filenames.push_back("./test/IECore/data/sqlFiles/0.0.3/osx104.i686/types.sql");
 	
-	filenames.push_back("./test/data/sqlFiles/0.1.0/rhel4.i686/types.sql");
-	filenames.push_back("./test/data/sqlFiles/0.1.0/osx104.ppc/types.sql");
-	filenames.push_back("./test/data/sqlFiles/0.1.0/osx104.i686/types.sql");
+	filenames.push_back("./test/IECore/data/sqlFiles/0.1.0/rhel4.i686/types.sql");
+	filenames.push_back("./test/IECore/data/sqlFiles/0.1.0/osx104.ppc/types.sql");
+	filenames.push_back("./test/IECore/data/sqlFiles/0.1.0/osx104.i686/types.sql");
 	
-	filenames.push_back("./test/data/sqlFiles/1.0.0/rhel4.i686/types.sql");	
-	filenames.push_back("./test/data/sqlFiles/1.0.0/osx104.i686/types.sql");
+	filenames.push_back("./test/IECore/data/sqlFiles/1.0.0/rhel4.i686/types.sql");	
+	filenames.push_back("./test/IECore/data/sqlFiles/1.0.0/osx104.i686/types.sql");
 	
-	filenames.push_back("./test/data/sqlFiles/2.0.0/rhel4.i686/types.sql");	
-	filenames.push_back("./test/data/sqlFiles/2.0.0/osx104.i686/types.sql");
+	filenames.push_back("./test/IECore/data/sqlFiles/2.0.0/rhel4.i686/types.sql");	
+	filenames.push_back("./test/IECore/data/sqlFiles/2.0.0/osx104.i686/types.sql");
 	
-	filenames.push_back("./test/data/sqlFiles/2.13.0/rhel4.i686/types.sql");	
-	filenames.push_back("./test/data/sqlFiles/2.13.0/osx104.i686/types.sql");		
+	filenames.push_back("./test/IECore/data/sqlFiles/2.13.0/rhel4.i686/types.sql");	
+	filenames.push_back("./test/IECore/data/sqlFiles/2.13.0/osx104.i686/types.sql");		
 }
 
 template<>
@@ -84,8 +84,8 @@ void IndexedIOTestSuite<FileIndexedIO>::getFilenames( FilenameList &filenames )
 {
 	filenames.clear();
 	
-	filenames.push_back("./test/data/fioFiles/2.13.0/rhel4.i686/types.fio");
-	filenames.push_back("./test/data/fioFiles/2.13.0/osx104.i686/types.fio");			
+	filenames.push_back("./test/IECore/data/fioFiles/2.13.0/rhel4.i686/types.fio");
+	filenames.push_back("./test/IECore/data/fioFiles/2.13.0/osx104.i686/types.fio");			
 }
 
 /// float 
