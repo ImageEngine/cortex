@@ -1302,6 +1302,8 @@ void FileIndexedIO::IndexedFile::write(NodePtr node, const char *data, Imf::Int6
 }
 
 static IndexedIOInterface::Description<FileIndexedIO> registrar(".fio");
+//\todo Create dynamic file extension registration, bind into python and register kiwi extension in kiwi package.
+static IndexedIOInterface::Description<FileIndexedIO> registrarKiwi(".kiwi");
 
 IndexedIOInterfacePtr FileIndexedIO::create(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode)
 {
