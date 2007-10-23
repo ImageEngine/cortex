@@ -73,18 +73,18 @@ class TypedObjectParameter : public ObjectParameter
 		
 		TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsMap &presets = ObjectPresetsMap(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );		
 		
-                //! @name RunTimeTyped functions
-                ////////////////////////////////////
-                //@{
-                virtual TypeId typeId() const;
-                virtual std::string typeName() const;
-                virtual bool isInstanceOf( TypeId typeId ) const;
-                virtual bool isInstanceOf( const std::string &typeName ) const;
-                static TypeId staticTypeId();
-                static std::string staticTypeName();
-                static bool inheritsFrom( TypeId typeId );
-                static bool inheritsFrom( const std::string &typeName );
-                //@}
+		//! @name RunTimeTyped functions
+		////////////////////////////////////
+		//@{
+		virtual TypeId typeId() const;
+		virtual std::string typeName() const;
+		virtual bool isInstanceOf( TypeId typeId ) const;
+		virtual bool isInstanceOf( const std::string &typeName ) const;
+		static TypeId staticTypeId();
+		static std::string staticTypeName();
+		static bool inheritsFrom( TypeId typeId );
+		static bool inheritsFrom( const std::string &typeName );
+		//@}
 		
 		/// Implemented to return true only if value is of type T.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
