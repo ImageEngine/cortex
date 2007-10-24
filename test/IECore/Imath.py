@@ -886,6 +886,145 @@ class ImathColor3Test( unittest.TestCase ) :
 		
 		self.assertEqual( c.dimensions(), 3 )
 		
+class ImathEulerfTest( unittest.TestCase ) :
+
+	def testConstructors(self):
+		"""Test Eulerf constructors"""
+		
+		#
+		e = Eulerf()
+		self.assertEqual( e.x, 0 )
+		self.assertEqual( e.y, 0 )
+		self.assertEqual( e.z, 0 )
+		
+		self.assertEqual( e.order(), Eulerf.Order.Default )
+		self.assertEqual( e.order(), Eulerf.Order.XYZ )
+		
+		#
+		ecopy = Eulerf(e)
+		self.assertEqual( ecopy.x, 0 )
+		self.assertEqual( ecopy.y, 0 )
+		self.assertEqual( ecopy.z, 0 )
+		
+		self.assertEqual( ecopy.order(), Eulerf.Order.Default )
+		self.assertEqual( ecopy.order(), Eulerf.Order.XYZ )
+		
+		#
+		e = Eulerf( Eulerf.Order.ZYX )
+		self.assertEqual( e.order(), Eulerf.Order.ZYX )
+		
+		#
+		e = Eulerf( V3f( 0, 0, 0 ) )
+		self.assertEqual( e.order(), Eulerf.Order.Default )
+		self.assertEqual( e.order(), Eulerf.Order.XYZ )
+		
+		e = Eulerf( V3f( 0, 0, 0 ), Eulerf.Order.ZYX )
+		self.assertEqual( e.order(), Eulerf.Order.ZYX )
+		
+		#		
+		e = Eulerf( 0, 0, 0 )
+		e = Eulerf( V3f( 0, 0, 0 ) )
+		self.assertEqual( e.order(), Eulerf.Order.Default )
+		self.assertEqual( e.order(), Eulerf.Order.XYZ )
+		
+		e = Eulerf( 0, 0, 0, Eulerf.Order.ZYX  )
+		self.assertEqual( e.order(), Eulerf.Order.ZYX )	
+		
+		e = Eulerf( 0, 0, 0, Eulerf.Order.ZYX, Eulerf.InputLayout.XYZLayout )						
+		self.assertEqual( e.order(), Eulerf.Order.ZYX )	
+		
+		#
+		e = Eulerf( M33f() )
+		e = Eulerf( V3f( 0, 0, 0 ) )
+		self.assertEqual( e.order(), Eulerf.Order.Default )
+		self.assertEqual( e.order(), Eulerf.Order.XYZ )
+		
+		e = Eulerf( M33f(), Eulerf.Order.ZYX )
+		self.assertEqual( e.order(), Eulerf.Order.ZYX )		
+		
+		#
+		e = Eulerf( M44f() )
+		e = Eulerf( V3f( 0, 0, 0 ) )
+		self.assertEqual( e.order(), Eulerf.Order.Default )
+		self.assertEqual( e.order(), Eulerf.Order.XYZ )
+		
+		e = Eulerf( M44f(), Eulerf.Order.ZYX )
+		self.assertEqual( e.order(), Eulerf.Order.ZYX )	
+							
+		
+	def testOrder(self):
+		"""Test Eulerf order"""
+	
+		self.assertEqual( len( Eulerf.Order.values ), 24 )
+	
+		e = Eulerf()
+		
+		for order in Eulerf.Order.values.values():
+			self.assert_( Eulerf.legal( order ) )
+			
+			e.setOrder( order )
+			
+			self.assertEqual( e.order(), order )
+			
+	def testMisc(self):
+		"""Test Eulerf miscellaneous"""
+	
+		self.assertEqual( len(Eulerf.Axis.values), 3 )		
+		self.assertEqual( len(Eulerf.InputLayout.values), 2 )
+		
+		self.assert_( V3f in Eulerf.__bases__ )
+		
+	def testExtract(self):
+	
+		"""Test Eulerf extract"""
+	
+		e = Eulerf()
+		e.extract( M33f() )
+		
+		e.extract( M44f() )
+		
+		e.extract( Quatf() )
+		
+		m = e.toMatrix33()
+		m = e.toMatrix44()
+		q = e.toQuat()
+		v = e.toXYZVector()					
+		
+	def testAngleOrder(self):
+	
+		"""Test Eulerf angleOrder"""
+	
+		e = Eulerf()
+		
+		o = e.angleOrder()
+		
+		self.assert_( type(o) is tuple )
+		self.assertEqual( len(o), 3 )
+		
+	def testAngleMapping(self):
+	
+		"""Test Eulerf angleMapping"""
+	
+		e = Eulerf()
+		
+		m = e.angleMapping()
+		
+		self.assert_( type(m) is tuple )
+		self.assertEqual( len(m), 3 )			
+			
+		
+	def testStr(self):
+		"""Test Eulerf str"""
+		
+		e = Eulerf()
+		self.assertEqual( str(e), "0 0 0" )
+		
+	def testRepr(self):
+		"""Test Eulerf repr"""	
+		
+		e = Eulerf()
+		self.assertEqual( repr(e), "Eulerf( 0, 0, 0 )" )
+		
 if __name__ == "__main__":
     unittest.main()   
 

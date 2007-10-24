@@ -259,6 +259,7 @@ corePythonSources = 	[
 				'src/IECore/bindings/ImathQuatBinding.cpp',
 				'src/IECore/bindings/ImathMatrixBinding.cpp',
 				'src/IECore/bindings/ImathColorBinding.cpp',
+				'src/IECore/bindings/ImathEulerBinding.cpp',				
 				'src/IECore/bindings/KDTreeBinding.cpp',
 				'src/IECore/bindings/BoundedKDTreeBinding.cpp',
 				'src/IECore/bindings/IndexedIOInterfaceBinding.cpp',

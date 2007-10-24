@@ -32,29 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IE_COREPYTHON_IMATHEULERBINDING_H
+#define IE_COREPYTHON_IMATHEULERBINDING_H
 
-#include "IECore/bindings/ImathBinding.h"
-#include "IECore/bindings/ImathVecBinding.h"
-#include "IECore/bindings/ImathBoxBinding.h"
-#include "IECore/bindings/ImathQuatBinding.h"
-#include "IECore/bindings/ImathMatrixBinding.h"
-#include "IECore/bindings/ImathColorBinding.h"
-#include "IECore/bindings/ImathEulerBinding.h"
-
-using namespace IECore;
-
-// Binding implementations
-namespace IECore 
+namespace IECore
 {
-	
-void bindImath()
-{
-	bindImathVec();	
-	bindImathBox();
-	bindImathQuat();
-	bindImathMatrix();
-	bindImathColor();
-	bindImathEuler();
+
+void bindImathEuler();
+
 }
 
-}
+#endif // IE_COREPYTHON_IMATHEULERBINDING_H
