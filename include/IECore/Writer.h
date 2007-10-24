@@ -73,8 +73,8 @@ class Writer : public Op
 		
 		/// Creates and returns a Writer appropriate for saving the
 		/// specified object to the specified file (the file extension is
-		/// used to determine format). Returns 0 if no suitable writer can
-		/// be found.
+		/// used to determine format). 
+		/// Throws an Exception if no suitable writer can be found.
 		static WriterPtr create( ObjectPtr object, const std::string &fileName );
 		
 	protected :

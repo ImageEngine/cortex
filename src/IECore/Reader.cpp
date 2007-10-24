@@ -67,6 +67,7 @@ const std::string &Reader::fileName() const
 
 ReaderPtr Reader::create( const std::string &fileName )
 {
+	bool knownExtension = false;
 	ExtensionsToFnsMap *m = extensionsToFns();
 	string ext = extension(boost::filesystem::path(fileName, boost::filesystem::native));
 	if( ext!="" )
@@ -74,6 +75,7 @@ ReaderPtr Reader::create( const std::string &fileName )
 		ExtensionsToFnsMap::const_iterator it = m->find( ext );
 		if( it!=m->end() )
 		{
+			knownExtension = true;
 			if( it->second.canRead( fileName ) )
 			{
 				return it->second.creator( fileName );
@@ -90,7 +92,14 @@ ReaderPtr Reader::create( const std::string &fileName )
 			return( it->second.creator( fileName ) );
 		}
 	}
-	return 0;
+	if ( knownExtension )
+	{
+		throw Exception( string( "Unable to load file '" ) + fileName + "'!" );
+	}
+	else
+	{
+		throw Exception( string( "Unrecognized input file format '") + ext + "'!" );
+	}
 }
 
 void Reader::supportedExtensions( std::vector<std::string> &extensions )

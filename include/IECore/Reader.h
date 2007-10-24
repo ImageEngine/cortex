@@ -73,7 +73,7 @@ class Reader : public Op
 		ObjectPtr read();
 		
 		/// Creates and returns a Reader appropriate to the specified file.
-		/// Returns 0 if no suitable creator is found.
+		/// Throws an Exception if no suitable reader can be found.
 		static ReaderPtr create( const std::string &fileName );
 		
 		/// Fills the passed vector with all the extensions for which a Reader is

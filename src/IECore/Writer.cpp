@@ -118,7 +118,7 @@ WriterPtr Writer::create( ObjectPtr object, const std::string &fileName )
 			}
 		}
 	}
-	return 0;
+	throw Exception( string( "Unrecognized output file format '") + ext + "'!" );
 }
 
 Writer::ExtensionsToFnsMap *Writer::extensionsToFns()
