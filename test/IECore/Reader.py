@@ -59,12 +59,20 @@ class TestReader(unittest.TestCase):
 		this should definitely NOT create a valid reader
 		"""
 
-		r = IECore.Reader.create('test/IECore/data/null')
-		self.assertEqual( r, None )
+		try:
+			IECore.Reader.create('test/IECore/data/null')
+		except:
+			pass
+		else:
+			raise Exception, "Should generate an exception on Reader factory function."
+	
+		try:
+			r = IECore.Reader.create('test/IECore/data/null.cin')
+		except:
+			pass
+		else:
+			raise Exception, "Should generate an exception on Reader factory function."
 
-		r = IECore.Reader.create('test/IECore/data/null.cin')
-		self.assertEqual( r, None )
-		
                 
 if __name__ == "__main__":
 	unittest.main()   
