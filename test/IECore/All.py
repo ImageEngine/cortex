@@ -98,6 +98,7 @@ from Struct import *
 from HeaderGenerator import *
 from Camera import *
 from Curry import *
+from Menus import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

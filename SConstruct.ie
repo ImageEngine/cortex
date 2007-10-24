@@ -397,6 +397,8 @@ corePythonPy = 	[
 				'python/IECore/LsHeaderOp.py',
 				'python/IECore/ContextualClassLoader.py',
 				'python/IECore/curry.py',
+				'python/IECore/MenuItemDefinition.py',
+				'python/IECore/MenuDefinition.py',
 			]
 
 

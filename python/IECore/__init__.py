@@ -81,6 +81,8 @@ from Struct import Struct
 from LsHeaderOp import LsHeaderOp
 from ContextualClassLoader import ContextualClassLoader
 from curry import curry
+from MenuItemDefinition import MenuItemDefinition
+from MenuDefinition import MenuDefinition
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
