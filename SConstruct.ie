@@ -396,6 +396,7 @@ corePythonPy = 	[
 				'python/IECore/Struct.py',		
 				'python/IECore/LsHeaderOp.py',
 				'python/IECore/ContextualClassLoader.py',
+				'python/IECore/curry.py',
 			]
 
 

@@ -80,6 +80,7 @@ from PointsExpressionOp import PointsExpressionOp
 from Struct import Struct
 from LsHeaderOp import LsHeaderOp
 from ContextualClassLoader import ContextualClassLoader
+from curry import curry
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
