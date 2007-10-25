@@ -101,6 +101,8 @@ DEFINEEULERSTRSPECIALISATION( Eulerd );
 template<typename T>
 struct EulerHelper
 {
+	typedef typename Euler<T>::Order OrderType;
+	
 	static tuple angleOrder( Euler<T> &e )
 	{
 		int i, j, k;
@@ -116,6 +118,25 @@ struct EulerHelper
 		
 		return make_tuple( i, j, k );
 	}
+	
+	Vec3<T> simpleXYZRotation( Vec3<T> &xyzRot, const Vec3<T> targetXyzRot )
+	{
+		Euler<T>::simpleXYZRotation( xyzRot, targetXyzRot );
+		
+		return xyzRot;
+	}
+	
+	Vec3<T> nearestRotation( Vec3<T> &xyzRot, const Vec3<T> &targetXyzRot, OrderType order )
+	{
+		Euler<T>::nearestRotation( xyzRot, targetXyzRot, order );
+		
+		return xyzRot;
+	}
+			
+	Vec3<T> nearestRotation( Vec3<T> &xyzRot, const Vec3<T> &targetXyzRot )
+	{
+		return nearestRotation( xyzRot, targetXyzRot, (OrderType)(Euler<T>::XYZ) );
+	}
 };
 
 template<typename T>
@@ -129,7 +150,10 @@ void bindEuler(const char *bindName)
 
 	void (Euler<T>::*extractM33)(const Matrix33<T>&) = &Euler<T>::extract;
 	void (Euler<T>::*extractM44)(const Matrix44<T>&) = &Euler<T>::extract;
-	void (Euler<T>::*extractQuat)(const Quat<T>&) = &Euler<T>::extract;		
+	void (Euler<T>::*extractQuat)(const Quat<T>&) = &Euler<T>::extract;
+	
+	Vec3<T> (EulerHelper<T>::*nearestRotation1)( Vec3<T> &, const Vec3<T> &, OrderType )= &EulerHelper<T>::nearestRotation;
+	Vec3<T> (EulerHelper<T>::*nearestRotation2)( Vec3<T> &, const Vec3<T> & )= &EulerHelper<T>::nearestRotation;	
 
 	object euler = class_< Euler<T>, bases< Vec3<T> > >(bindName)
 	
@@ -168,8 +192,9 @@ void bindEuler(const char *bindName)
 		.def( "angleMapping", &EulerHelper<T>::angleOrder )
 		
 		.def( "angleMod", &Euler<T>::angleMod ).staticmethod("angleMod")
-		.def( "simpleXYZRotation", &Euler<T>::simpleXYZRotation ).staticmethod("simpleXYZRotation")
-		.def( "nearestRotation", &Euler<T>::simpleXYZRotation ).staticmethod("nearestRotation")		
+		.def( "simpleXYZRotation", &EulerHelper<T>::simpleXYZRotation ).staticmethod("simpleXYZRotation")
+		.def( "nearestRotation", nearestRotation1 ).staticmethod("nearestRotation")		
+		.def( "nearestRotation", nearestRotation2 ).staticmethod("nearestRotation")				
 		
 		.def( "makeNear", &Euler<T>::makeNear )
 		
