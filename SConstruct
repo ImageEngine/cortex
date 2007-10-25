@@ -214,7 +214,7 @@ if doConfigure :
 		Exit( 1 )
 
 	if not c.CheckLibWithHeader( env.subst( "boost_filesystem" + env["BOOST_LIB_SUFFIX"] ), "boost/filesystem.hpp", "CXX" ) :
-		sys.stderr.write( "ERROR : unable to find the boost libraries.\n" )
+		sys.stderr.write( "ERROR : unable to find the boost headers.\n" )
 		Exit( 1 )
 		
 	if not c.CheckLibWithHeader( "IlmImf", "OpenEXR/ImfInputFile.h", "CXX" ) :
@@ -232,6 +232,8 @@ env.Append( LIBS = [
 		"IEx",
 		"Imath",
 		"IlmImf",
+		"IlmThread",
+		"z",
 	]
 )
 
