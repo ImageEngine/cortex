@@ -266,6 +266,6 @@ class RendererTest( unittest.TestCase ) :
 		r.setAttribute( "someOtherRenderer:someOtherAttribute", IntData( 10 ) )
 		
 		r.worldEnd()
-
+	
 if __name__ == "__main__":
     unittest.main()   

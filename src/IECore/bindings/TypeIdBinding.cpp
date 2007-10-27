@@ -221,6 +221,7 @@ void bindTypeId()
 		.value("PointsPrimitiveParameter", PointsPrimitiveParameterTypeId)
 		.value("PreWorldRenderable", PreWorldRenderableTypeId)
 		.value("Camera", CameraTypeId)
+		.value("NURBSPrimitive", NURBSPrimitiveTypeId)
 	;
 }
 

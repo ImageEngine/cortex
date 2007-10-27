@@ -97,6 +97,7 @@ from FrameList import *
 from Struct import *
 from HeaderGenerator import *
 from Camera import *
+from NURBS import *
 from Curry import *
 from Menus import *
 

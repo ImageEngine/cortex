@@ -218,6 +218,7 @@ enum TypeId
 	PointsPrimitiveParameterTypeId = 175,
 	PreWorldRenderableTypeId = 176,
 	CameraTypeId = 177,
+	NURBSPrimitiveTypeId = 178,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	
