@@ -145,11 +145,11 @@ void NURBSPrimitive::setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, fl
 	// an order of N demands at least N control points
 	// and numKnots==numControlPoints + order
 	// so we need numKnots>=2*order
-	if( uKnot->readable().size() < uOrder * 2 )
+	if( (int)uKnot->readable().size() < uOrder * 2 )
 	{
 		throw Exception( "Not enough knot values in u direction." );
 	}
-	if( vKnot->readable().size() < vOrder * 2 )
+	if( (int)vKnot->readable().size() < vOrder * 2 )
 	{
 		throw Exception( "Not enough knot values in v direction." );
 	}
