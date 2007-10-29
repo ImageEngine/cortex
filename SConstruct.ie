@@ -199,7 +199,8 @@ coreSources = 		[
 				'src/IECore/HeaderGenerator.cpp',
 				'src/IECore/MemoryStream.cpp',
 				'src/IECore/PreWorldRenderable.cpp',
-				'src/IECore/Camera.cpp',				
+				'src/IECore/Camera.cpp',
+				'src/IECore/NURBSPrimitive.cpp'
 		   ]
 		
 coreIncludes = 		[ 	
@@ -346,7 +347,8 @@ corePythonSources = 	[
 				'src/IECore/bindings/TypedObjectParameterBinding.cpp',		
 				'src/IECore/bindings/HeaderGeneratorBinding.cpp',
 				'src/IECore/bindings/PreWorldRenderableBinding.cpp',
-				'src/IECore/bindings/CameraBinding.cpp',		
+				'src/IECore/bindings/CameraBinding.cpp',
+				'src/IECore/bindings/NURBSPrimitiveBinding.cpp',		
 			]
 			
 corePythonPy = 	[ 			
