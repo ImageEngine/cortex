@@ -42,6 +42,11 @@ namespace IECore
 {
 
 /// Traits class for TypedData internal data structure
+// This templated class was created so that it could define the base data type used
+// in TypedData classes. That happens when the internal structure stored in 
+// the TypedData is made of only one data type, so that it could be addressed as an
+// array of base data type values.
+// Check TypedDataTraits.inl for utility macros that specializes TypedDataTraits.
 template <class T>
 class TypedDataTraits
 {
