@@ -104,8 +104,8 @@ class TestRunTimeTyped( unittest.TestCase ) :
 	
 	def testMakeRunTimeTyped( self ) :
 	
-		# should raise because it's already been registered
-		self.assertRaises( RuntimeError, IECore.makeRunTimeTyped, IECore.FileSequenceParameter, 100000, IECore.PathParameter )
+		# should raise because 100009 is already been registered as OptionalCompoundParameter
+		self.assertRaises( RuntimeError, IECore.makeRunTimeTyped, IECore.FileSequenceParameter, 100009, IECore.PathParameter )
 		
 		self.assertEqual( IECore.TypeId.FileSequenceParameter, IECore.FileSequenceParameter.staticTypeId() )
 		self.assertEqual( IECore.TypeId.FileSequenceParameter, IECore.FileSequenceParameter( "", "" ).typeId() )

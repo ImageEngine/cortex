@@ -39,9 +39,13 @@ import IECore
 # It raises a RuntimeError if a conflicting type is already registered.
 def registerTypeId( className, typeId ) :
 
+
 	# check this type hasn't been registered already
-	if hasattr( IECore.TypeId, className ) :
-		raise RuntimeError( "Type \"%s\" is already registered." % className )
+	if hasattr( IECore.TypeId, className ):
+		if getattr( IECore.TypeId, className ) != typeId:
+			raise RuntimeError( "Type \"%s\" is already registered." % className )
+			
+		return	
 
 	if typeId in IECore.TypeId.values :
 		raise RuntimeError( "TypeId \"%d\" is already registered as \"%s\"." % (typeId, IECore.TypeId.values[typeId] ) )
