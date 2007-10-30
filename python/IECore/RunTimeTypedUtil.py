@@ -57,7 +57,6 @@ def registerTypeId( className, typeId ) :
 # class for it to properly implement the RunTimeTyped interface. It should
 # be called once for all python classes inheriting from RunTimeTyped. It also
 # calls registerTypeId() for you.
-# \todo Allow multiple base classes
 def makeRunTimeTyped( typ, typId, baseClass ) :
 
 	registerTypeId( typ.__name__, typId )
