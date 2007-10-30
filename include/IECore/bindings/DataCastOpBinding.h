@@ -32,25 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TRANSFORMATIONMATRIXDATA_H
-#define IE_CORE_TRANSFORMATIONMATRIXDATA_H
-
-#include "IECore/TypedData.h"
-#include "IECore/TransformationMatrix.h"
+#ifndef IE_COREPYTHON_DATACASTOPBINDING_H
+#define IE_COREPYTHON_DATACASTOPBINDING_H
 
 namespace IECore
 {
-
-// TransformationMatrix data types.
-typedef TypedData < TransformationMatrixf > TransformationMatrixfData;
-typedef TypedData < TransformationMatrixd > TransformationMatrixdData;
-
-// pointer declarations
-IE_CORE_DECLAREPTR( TransformationMatrixfData );
-IE_CORE_DECLAREPTR( TransformationMatrixdData );
-
-#include "IECore/TransformationMatrixDataTraits.inl"
-
+void bindDataCastOp();
 }
 
-#endif // IE_CORE_TRANSFORMATIONMATRIXDATA_H
+#endif // IE_COREPYTHON_DATACASTOPBINDING_H

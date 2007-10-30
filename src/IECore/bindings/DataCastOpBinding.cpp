@@ -32,25 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TRANSFORMATIONMATRIXDATA_H
-#define IE_CORE_TRANSFORMATIONMATRIXDATA_H
+#include <boost/python.hpp>
 
-#include "IECore/TypedData.h"
-#include "IECore/TransformationMatrix.h"
+#include "IECore/DataCastOp.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
-namespace IECore
+using namespace boost;
+using namespace boost::python;
+
+namespace IECore {
+
+void bindDataCastOp()
 {
-
-// TransformationMatrix data types.
-typedef TypedData < TransformationMatrixf > TransformationMatrixfData;
-typedef TypedData < TransformationMatrixd > TransformationMatrixdData;
-
-// pointer declarations
-IE_CORE_DECLAREPTR( TransformationMatrixfData );
-IE_CORE_DECLAREPTR( TransformationMatrixdData );
-
-#include "IECore/TransformationMatrixDataTraits.inl"
+	typedef class_< DataCastOp, DataCastOpPtr, boost::noncopyable, bases<Op> > DataCastOpPyClass;
+	DataCastOpPyClass( "DataCastOp" )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( DataCastOp )
+	;
+	
+	INTRUSIVE_PTR_PATCH( DataCastOp, DataCastOpPyClass );
+	implicitly_convertible<DataCastOpPtr, OpPtr>();	
 
 }
 
-#endif // IE_CORE_TRANSFORMATIONMATRIXDATA_H
+} // namespace IECore

@@ -114,6 +114,8 @@ IE_CORE_DECLAREPTR( M44dData );
 IE_CORE_DECLAREPTR( QuatfData );
 IE_CORE_DECLAREPTR( QuatdData );
 
+#include "IECore/SimpleTypedDataTraits.inl"
+
 } // namespace IECore
 
 #endif // IE_CORE_SIMPLETYPEDDATA_H

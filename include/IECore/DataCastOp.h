@@ -32,25 +32,38 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TRANSFORMATIONMATRIXDATA_H
-#define IE_CORE_TRANSFORMATIONMATRIXDATA_H
+#ifndef IE_CORE_DATACASTOP_H
+#define IE_CORE_DATACASTOP_H
 
-#include "IECore/TypedData.h"
-#include "IECore/TransformationMatrix.h"
+#include "IECore/Op.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/NumericParameter.h"
 
 namespace IECore
 {
 
-// TransformationMatrix data types.
-typedef TypedData < TransformationMatrixf > TransformationMatrixfData;
-typedef TypedData < TransformationMatrixd > TransformationMatrixdData;
+/// The CastDatatOp performs cast convertion on Data types.
+class DataCastOp : public Op
+{
+	public :
+		
+		IE_CORE_DECLARERUNTIMETYPED( DataCastOp, Op );
+		
+		DataCastOp();
+		virtual ~DataCastOp();
+		
+	protected :
 
-// pointer declarations
-IE_CORE_DECLAREPTR( TransformationMatrixfData );
-IE_CORE_DECLAREPTR( TransformationMatrixdData );
+		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+	
+	private :
+		
+		ObjectParameterPtr m_objectParameter;
+		IntParameterPtr m_targetTypeParameter;
+};
 
-#include "IECore/TransformationMatrixDataTraits.inl"
+IE_CORE_DECLAREPTR( DataCastOp );
 
-}
+} // namespace IECore
 
-#endif // IE_CORE_TRANSFORMATIONMATRIXDATA_H
+#endif // IE_CORE_DATACASTOP_H

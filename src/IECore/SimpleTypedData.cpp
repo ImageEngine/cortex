@@ -37,96 +37,51 @@
 
 #include <iostream>
 
-namespace IECore {
+namespace IECore 
+{
 
-#define IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( T, TID, TNAME )		\
-																			\
-	template<>																\
-	TypeId TypedData<T>::typeId() const										\
-	{																		\
-		return TID;															\
-	}																		\
-	template<>																\
-	TypeId TypedData<T>::staticTypeId()										\
-	{																		\
-		return TID;															\
-	}																		\
-	template<>																\
-	std::string TypedData<T>::typeName() const								\
-	{																		\
-		return #TNAME;														\
-	}																		\
-	template<>																\
-	std::string TypedData<T>::staticTypeName()								\
-	{																		\
-		return #TNAME;														\
-	}																		\
+#define IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( TNAME, TID )			\
+	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )			\
 
-#define IE_CORE_DEFINEIMATHTYPEDDATAIOSPECIALISATION( T, BT, N )									\
-																									\
-	template<>																						\
-	void TypedData<T>::save( SaveContext *context ) const											\
-	{																								\
-		Data::save( context );																		\
-		IndexedIOInterfacePtr container = context->rawContainer();									\
-		container->write( "value", (const BT *)&(readable()), N );									\
-	}																								\
-																									\
-	template<>																						\
-	void TypedData<T>::load( LoadContextPtr context )												\
-	{																								\
-		Data::load( context );																		\
-		IndexedIOInterfacePtr container;															\
-		BT *p = (BT *)&(writable());																\
-		try																							\
-		{																							\
-			container = context->rawContainer();													\
-			container->read( "value", p, N );														\
-		}																							\
-		catch( ... )																				\
-		{																							\
-			unsigned int v = 0;																		\
-			container = context->container( staticTypeName(), v );									\
-			container->read( "value", p, N );														\
-		}																							\
-	}																			
-
-#define IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( T, TID, TNAME, BT, N )							\
-	IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( T, TID, TNAME )									\
-	IE_CORE_DEFINEIMATHTYPEDDATAIOSPECIALISATION( T, BT, N )										\
+#define IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( TNAME, TID, N )		\
+	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )			\
+	IE_CORE_DEFINEBASETYPEDDATAIOSPECIALISATION( TNAME, N )				\
 			
-IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( bool, BoolDataTypeId, BoolData )
-IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( float, FloatDataTypeId, FloatData )
-IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( double, DoubleDataTypeId, DoubleData )
-IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( int, IntDataTypeId, IntData )
-IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( long, LongDataTypeId, LongData )
-IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( unsigned int, UIntDataTypeId, UIntData )
-IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( char, CharDataTypeId, CharData )
-IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( unsigned char, UCharDataTypeId, UCharData )
-IE_CORE_DEFINESIMPLETYPEDDATASPECIALISATION( std::string, StringDataTypeId, StringData )
 
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::V2i, V2iDataTypeId, V2iData, int, 2 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::V3i, V3iDataTypeId, V3iData, int, 3 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::V2f, V2fDataTypeId, V2fData, float, 2 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::V3f, V3fDataTypeId, V3fData, float, 3 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::V2d, V2dDataTypeId, V2dData, double, 2 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::V3d, V3dDataTypeId, V3dData, double, 3 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Color3f, Color3fDataTypeId, Color3fData, float, 3 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Color4f, Color4fDataTypeId, Color4fData, float, 4 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Color3<double>, Color3dDataTypeId, Color3dData, double, 3 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Color4<double>, Color4dDataTypeId, Color4dData, double, 4 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Box2i, Box2iDataTypeId, Box2iData, int, 4 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Box3i, Box3iDataTypeId, Box3iData, int, 6 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Box2f, Box2fDataTypeId, Box2fData, float, 4 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Box3f, Box3fDataTypeId, Box3fData, float, 6 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Box2d, Box2dDataTypeId, Box2dData, double, 4 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Box3d, Box3dDataTypeId, Box3dData, double, 6 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::M33f, M33fDataTypeId, M33fData, float, 9 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::M33d, M33dDataTypeId, M33dData, double, 9 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::M44f, M44fDataTypeId, M44fData, float, 16 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::M44d, M44dDataTypeId, M44dData, double, 16 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Quatf, QuatfDataTypeId, QuatfData, float, 4 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Imath::Quatd, QuatdDataTypeId, QuatdData, double, 4 )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( BoolData, BoolDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( FloatData, FloatDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( DoubleData, DoubleDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( IntData, IntDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( LongData, LongDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( UIntData, UIntDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( CharData, CharDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( UCharData, UCharDataTypeId )
+
+IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( StringData, StringDataTypeId )
+IE_CORE_DEFINETYPEDDATANOBASESIZE( StringData )
+
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V2iData, V2iDataTypeId, 2 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V3iData, V3iDataTypeId, 3 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V2fData, V2fDataTypeId, 2 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V3fData, V3fDataTypeId, 3 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V2dData, V2dDataTypeId, 2 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( V3dData, V3dDataTypeId, 3 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Color3fData, Color3fDataTypeId, 3 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Color4fData, Color4fDataTypeId, 4 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Color3dData, Color3dDataTypeId, 3 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Color4dData, Color4dDataTypeId, 4 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Box2iData, Box2iDataTypeId, 4 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Box3iData, Box3iDataTypeId, 6 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Box2fData, Box2fDataTypeId, 4 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Box3fData, Box3fDataTypeId, 6 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Box2dData, Box2dDataTypeId, 4 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Box3dData, Box3dDataTypeId, 6 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( M33fData, M33fDataTypeId, 9 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( M33dData, M33dDataTypeId, 9 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( M44fData, M44fDataTypeId, 16 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( M44dData, M44dDataTypeId, 16 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( QuatfData, QuatfDataTypeId, 4 )
+IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( QuatdData, QuatdDataTypeId, 4 )
 
 template<>
 void StringData::memoryUsage( Object::MemoryAccumulator &accumulator ) const

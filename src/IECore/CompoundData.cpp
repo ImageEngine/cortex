@@ -159,6 +159,8 @@ void CompoundData::load( LoadContextPtr context )
 	container->chdir( ".." );
 }
 
+IE_CORE_DEFINETYPEDDATANOBASESIZE( CompoundData )
+
 }
 
 // Instantiate that bad boy.

@@ -234,5 +234,116 @@ void TypedData<T>::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 	accumulator.accumulate( &readable(), sizeof( T ) );
 }
 
+//////////////////////////////////////////////////////////////////////////////////////
+// low level data access
+//////////////////////////////////////////////////////////////////////////////////////
+
+template <class T>
+bool TypedData<T>::hasBase()
+{
+	return true;
+}
+
+template <class T>
+unsigned long TypedData<T>::baseSize() const
+{
+	if ( !TypedData<T>::hasBase() )
+	{
+		throw Exception( TypedData<T>::staticTypeName() + " has no base type." );
+	}
+	return ( sizeof( T ) / sizeof( typename TypedData<T>::BaseType ) );
+}
+
+template <class T>
+const typename TypedData<T>::BaseType *TypedData<T>::baseReadable() const
+{
+	if ( !TypedData<T>::hasBase() )
+	{
+		throw Exception( TypedData<T>::staticTypeName() + " has no base type." );
+	}
+	return reinterpret_cast< const typename TypedData<T>::BaseType * >( &readable() );
+}
+
+template <class T>
+typename TypedData<T>::BaseType *TypedData<T>::baseWritable()
+{
+	if ( !TypedData<T>::hasBase() )
+	{
+		throw Exception( TypedData<T>::staticTypeName() + " has no base type." );
+	}
+	return reinterpret_cast< typename TypedData<T>::BaseType * >( &writable() );
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+// macros for TypedData function specializations
+//////////////////////////////////////////////////////////////////////////////////////
+
+#define IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )			\
+																			\
+	template<>																\
+	TypeId TNAME::typeId() const											\
+	{																		\
+		return TID;															\
+	}																		\
+	template<>																\
+	TypeId TNAME::staticTypeId()											\
+	{																		\
+		return TID;															\
+	}																		\
+	template<>																\
+	std::string TNAME::typeName() const										\
+	{																		\
+		return #TNAME;														\
+	}																		\
+	template<>																\
+	std::string TNAME::staticTypeName()										\
+	{																		\
+		return #TNAME;														\
+	}																		\
+
+#define IE_CORE_DEFINETYPEDDATANOBASESIZE( TNAME )							\
+	template <>																\
+	bool TNAME::hasBase()													\
+	{																		\
+		return false;														\
+	}																		\
+	template <>																\
+	unsigned long TNAME::baseSize()	const									\
+	{																		\
+		throw Exception( TNAME::staticTypeName() + " has no base type." );	\
+	}																		\
+
+#define IE_CORE_DEFINEBASETYPEDDATAIOSPECIALISATION( TNAME, N )										\
+																									\
+	template<>																						\
+	void TNAME::save( SaveContext *context ) const													\
+	{																								\
+		Data::save( context );																		\
+		assert( baseSize() == N );																	\
+		IndexedIOInterfacePtr container = context->rawContainer();									\
+		container->write( "value", TNAME::baseReadable(), TNAME::baseSize() );						\
+	}																								\
+																									\
+	template<>																						\
+	void TNAME::load( LoadContextPtr context )														\
+	{																								\
+		Data::load( context );																		\
+		assert( ( sizeof( TNAME::ValueType ) / sizeof( TNAME::BaseType ) ) == N );					\
+		IndexedIOInterfacePtr container;															\
+		TNAME::BaseType *p = TNAME::baseWritable();													\
+		try																							\
+		{																							\
+			container = context->rawContainer();													\
+			container->read( "value", p, N );														\
+		}																							\
+		catch( ... )																				\
+		{																							\
+			unsigned int v = 0;																		\
+			container = context->container( staticTypeName(), v );									\
+			container->read( "value", p, N );														\
+		}																							\
+	}																								\
+
+
 } // namespace IECore
 

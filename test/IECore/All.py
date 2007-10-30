@@ -100,6 +100,7 @@ from Camera import *
 from NURBS import *
 from Curry import *
 from Menus import *
+from DataCastOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

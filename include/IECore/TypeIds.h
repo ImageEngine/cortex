@@ -219,6 +219,7 @@ enum TypeId
 	PreWorldRenderableTypeId = 176,
 	CameraTypeId = 177,
 	NURBSPrimitiveTypeId = 178,
+	DataCastOpTypeId = 179,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	

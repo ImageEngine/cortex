@@ -110,6 +110,8 @@ IE_CORE_DECLAREPTR( Color4fVectorData );
 IE_CORE_DECLAREPTR( Color3dVectorData );
 IE_CORE_DECLAREPTR( Color4dVectorData );
 
+#include "IECore/VectorTypedDataTraits.inl"
+
 } // namespace IECore
 
 #endif // IE_CORE_VECTORTYPEDDATA_H

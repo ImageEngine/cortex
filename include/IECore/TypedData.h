@@ -36,9 +36,18 @@
 #define IE_CORE_TYPEDDATA_H
 
 #include "IECore/Data.h"
+#include "IECore/Exception.h"
 
 namespace IECore
 {
+
+/// Traits class for TypedData internal data structure
+template <class T>
+class TypedDataTraits
+{
+	public:
+		typedef void BaseType;
+};
 
 /// A templated class which can be used to wrap useful data
 /// types and containers. The copyFrom() function is implemented
@@ -51,6 +60,10 @@ namespace IECore
 /// you can therefore only use only the typedefs in SimpleTypedData.h,
 /// VectorTypedData.h and CompoundData.h rather than being able
 /// to instantiate the template for arbitrary data types.
+/// It also provides low level access to its data throught functions
+/// like baseReadable, baseWritable and baseSize. They are available
+/// only when the data can be seen as an array of a base type. Use
+/// hasBase for checking that.
 template <class T> 
 class TypedData : public Data
 {
@@ -95,8 +108,24 @@ class TypedData : public Data
 		const T &readable() const;
 		/// get read-write access to the internal data structure.
 		T &writable();
-		
-		
+
+		/// base type used in the internal data structure.		
+		typedef typename TypedDataTraits< TypedData<T> >::BaseType BaseType;
+
+		/// defines whether the internal data structure has a single base type.
+		static bool hasBase();
+
+		/// get low level read-only access to the internal data structure as a reference to the first element on an array of base type.
+		/// Throws an Exception if this type has no single base type.
+		const BaseType *baseReadable() const;
+
+		/// get low level read-write access to the internal data structure as a reference to the first element on an array of base type.
+		/// Throws an Exception if this type has no single base type.
+		BaseType *baseWritable();
+
+		/// return the size of the internal data structure in terms of base type elements.
+		/// Throws an Exception if this type has no single base type.
+		unsigned long baseSize() const;
 		
 	protected:
 	
@@ -124,6 +153,8 @@ class TypedData : public Data
 		typedef boost::intrusive_ptr<DataHolder> DataHolderPtr;
 		DataHolderPtr m_data;
 };
+
+#include "IECore/TypedDataTraits.inl"
 
 } // namespace IECore
 

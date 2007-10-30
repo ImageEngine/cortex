@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECore/VectorTypedData.h"
 #include "IECore/TypedData.inl"
 
@@ -39,120 +41,131 @@ using namespace Imath;
 using namespace std;
 using namespace IECore;
 
-#define IE_CORE_DEFINEVECTORTYPEDDATACOMMONSPECIALISATION( T, TID, TNAME )		\
-	template<>																	\
-	TypeId TypedData< std::vector< T > >::typeId() const						\
-	{																			\
-		return TID;																\
-	}																			\
-	template<>																	\
-	TypeId TypedData< std::vector< T > >::staticTypeId()						\
-	{																			\
-		return TID;																\
-	}																			\
-	template<>																	\
-	std::string TypedData< std::vector< T > >::typeName() const					\
-	{																			\
-		return #TNAME;															\
-	}																			\
-	template<>																	\
-	std::string TypedData< std::vector< T > >::staticTypeName()					\
-	{																			\
-		return #TNAME;															\
-	}																			\
+#define IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )										\
+	template<>																								\
+	void TNAME::memoryUsage( Object::MemoryAccumulator &accumulator ) const			\
+	{																										\
+		Data::memoryUsage( accumulator );																	\
+		accumulator.accumulate( &readable(), sizeof( TNAME::ValueType ) + readable().capacity() * sizeof( TNAME::ValueType::value_type ) );	\
+	}																										\
 
-#define IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( T )										\
-	template<>																							\
-	void TypedData< std::vector< T > >::memoryUsage( Object::MemoryAccumulator &accumulator ) const		\
-	{																									\
-		Data::memoryUsage( accumulator );																\
-		accumulator.accumulate( &readable(), sizeof(std::vector<T>) + readable().capacity() * sizeof(T) );	\
-	}																									\
+#define IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )											\
+	template <>																									\
+	unsigned long TNAME::baseSize()	 const																		\
+	{																											\
+		if ( !TNAME::hasBase() )																				\
+		{																										\
+			throw Exception( TNAME::staticTypeName() + " has no base type." );									\
+		}																										\
+		return ( sizeof( TNAME::ValueType::value_type ) / sizeof( TNAME::BaseType ) ) * this->readable().size();	\
+	}																											\
+	template <>																									\
+	const TNAME::BaseType * TNAME::baseReadable() const															\
+	{																											\
+		if ( !TNAME::hasBase() )																				\
+		{																										\
+			throw Exception( TNAME::staticTypeName() + " has no base type." );									\
+		}																										\
+		return reinterpret_cast< const TNAME::BaseType * >( &(this->readable()[0]) );							\
+	}																											\
+	template <>																									\
+	TNAME::BaseType * TNAME::baseWritable()																		\
+	{																											\
+		if ( !TNAME::hasBase() )																				\
+		{																										\
+			throw Exception( TNAME::staticTypeName() + " has no base type." );									\
+		}																										\
+		return reinterpret_cast< TNAME::BaseType * >( &(this->writable()[0]) );									\
+	}																											\
 
-#define IE_CORE_DEFINESIMPLEVECTORTYPEDDATAIOSPECIALISATION( T )									\
+#define IE_CORE_DEFINENOBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME )								\
 	template<>																						\
-	void TypedData<std::vector<T> >::save( Object::SaveContext *context ) const						\
+	void TNAME::save( Object::SaveContext *context ) const											\
 	{																								\
 		Data::save( context );																		\
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );				\
 		container->write( "value", &(readable()[0]), readable().size() );							\
 	}																								\
 	template<>																						\
-	void TypedData<std::vector<T> >::load( LoadContextPtr context )									\
+	void TNAME::load( LoadContextPtr context )														\
 	{																								\
 		Data::load( context );																		\
 		unsigned int v = 0;																			\
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );				\
 		IndexedIO::Entry e = container->ls( "value" );												\
 		writable().resize( e.arrayLength() );														\
-		T *p = &(writable()[0]);																	\
+		TNAME::ValueType::value_type *p = &(writable()[0]);											\
 		container->read( "value", p, e.arrayLength() );												\
 	}																								\
 	
-#define IE_CORE_DEFINEIMATHVECTORTYPEDDATAIOSPECIALISATION( T, BT, N )								\
+#define IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )								\
 	template<>																						\
-	void TypedData<std::vector<T> >::save( SaveContext *context ) const								\
+	void TNAME::save( SaveContext *context ) const													\
 	{																								\
 		Data::save( context );																		\
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );				\
-		container->write( "value", (const BT *)&(readable()[0]), readable().size() * N );			\
+		assert( ( sizeof( TNAME::ValueType::value_type ) / sizeof( TNAME::BaseType ) ) == N );		\
+		container->write( "value", baseReadable(), baseSize() );									\
 	}																								\
 	template<>																						\
-	void TypedData<std::vector<T> >::load( LoadContextPtr context )									\
+	void TNAME::load( LoadContextPtr context )														\
 	{																								\
 		Data::load( context );																		\
 		unsigned int v = 0;																			\
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );				\
 		IndexedIO::Entry e = container->ls( "value" );												\
 		writable().resize( e.arrayLength() / N );													\
-		BT *p = (BT *)&(writable()[0]);																\
+		TNAME::BaseType *p = baseWritable();														\
 		container->read( "value", p, e.arrayLength() );												\
 	}	
 	
-#define IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( T, TID, TNAME )		\
-	IE_CORE_DEFINEVECTORTYPEDDATACOMMONSPECIALISATION( T, TID, TNAME )			\
-	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( T )					\
-	IE_CORE_DEFINESIMPLEVECTORTYPEDDATAIOSPECIALISATION( T)						\
+#define IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( TNAME, TID )			\
+	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\
+	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
+	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
+	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, 1)				\
 
-#define IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( T, TID, TNAME, BT, N )	\
-	IE_CORE_DEFINEVECTORTYPEDDATACOMMONSPECIALISATION( T, TID, TNAME )				\
-	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( T )						\
-	IE_CORE_DEFINEIMATHVECTORTYPEDDATAIOSPECIALISATION( T, BT, N )					\
+#define IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( TNAME, TID, N )		\
+	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\
+	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
+	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
+	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )				\
 	
 namespace IECore
 {
 // specialisation definitions for vector types...
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( half, HalfVectorDataTypeId, HalfVectorData )
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( float, FloatVectorDataTypeId, FloatVectorData )
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( double, DoubleVectorDataTypeId, DoubleVectorData )
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( int, IntVectorDataTypeId, IntVectorData )
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( unsigned int, UIntVectorDataTypeId, UIntVectorData )
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( long, LongVectorDataTypeId, LongVectorData )
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( char, CharVectorDataTypeId, CharVectorData )
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( unsigned char, UCharVectorDataTypeId, UCharVectorData )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2f, V2fVectorDataTypeId, V2fVectorData, float, 2 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2d, V2dVectorDataTypeId, V2dVectorData, double, 2 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3f, V3fVectorDataTypeId, V3fVectorData, float, 3 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3d, V3dVectorDataTypeId, V3dVectorData, double, 3 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box2f, Box2fVectorDataTypeId, Box2fVectorData, float, 4 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box2d, Box2dVectorDataTypeId, Box2dVectorData, double, 4 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box3f, Box3fVectorDataTypeId, Box3fVectorData, float, 6 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box3d, Box3dVectorDataTypeId, Box3dVectorData, double, 6 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( M33f, M33fVectorDataTypeId, M33fVectorData, float, 9 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( M33d, M33dVectorDataTypeId, M33dVectorData, double, 9 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( M44f, M44fVectorDataTypeId, M44fVectorData, float, 16 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( M44d, M44dVectorDataTypeId, M44dVectorData, double, 16 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Quatf, QuatfVectorDataTypeId, QuatfVectorData, float, 4 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Quatd, QuatdVectorDataTypeId, QuatdVectorData, double, 4 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color3f, Color3fVectorDataTypeId, Color3fVectorData, float, 3 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4f, Color4fVectorDataTypeId, Color4fVectorData, float, 4 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color3<double>, Color3dVectorDataTypeId, Color3dVectorData, double, 3 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4<double>, Color4dVectorDataTypeId, Color4dVectorData, double, 4 )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( FloatVectorData, FloatVectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( HalfVectorData, HalfVectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( DoubleVectorData, DoubleVectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( IntVectorData, IntVectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UIntVectorData, UIntVectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( LongVectorData, LongVectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( CharVectorData, CharVectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UCharVectorData, UCharVectorDataTypeId )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2fVectorData, V2fVectorDataTypeId, 2 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2dVectorData, V2dVectorDataTypeId, 2 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3fVectorData, V3fVectorDataTypeId, 3 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3dVectorData, V3dVectorDataTypeId, 3 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box2fVectorData, Box2fVectorDataTypeId, 4 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box2dVectorData, Box2dVectorDataTypeId, 4 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box3fVectorData, Box3fVectorDataTypeId, 6 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box3dVectorData, Box3dVectorDataTypeId, 6 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( M33fVectorData, M33fVectorDataTypeId, 9 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( M33dVectorData, M33dVectorDataTypeId, 9 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( M44fVectorData, M44fVectorDataTypeId, 16 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( M44dVectorData, M44dVectorDataTypeId, 16 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( QuatfVectorData, QuatfVectorDataTypeId, 4 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( QuatdVectorData, QuatdVectorDataTypeId, 4 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color3fVectorData, Color3fVectorDataTypeId, 3 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4fVectorData, Color4fVectorDataTypeId, 4 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color3dVectorData, Color3dVectorDataTypeId, 3 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4dVectorData, Color4dVectorDataTypeId, 4 )
 
 // the string type needs it's own memoryUsage so we don't use the whole macro for it's specialisations
 
-IE_CORE_DEFINEVECTORTYPEDDATACOMMONSPECIALISATION( std::string, StringVectorDataTypeId, StringVectorData )
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATAIOSPECIALISATION( string )
+IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( StringVectorData, StringVectorDataTypeId )
+IE_CORE_DEFINETYPEDDATANOBASESIZE( StringVectorData )
+IE_CORE_DEFINENOBASEVECTORTYPEDDATAIOSPECIALISATION( StringVectorData )
 
 template<>
 void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
@@ -172,7 +185,9 @@ void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 
 // the boolean type need it's own io and memoryUsage so we don't use the whole macro for it's specialisations either
 
-IE_CORE_DEFINEVECTORTYPEDDATACOMMONSPECIALISATION( bool, BoolVectorDataTypeId, BoolVectorData )
+IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( BoolVectorData, BoolVectorDataTypeId )
+IE_CORE_DEFINETYPEDDATANOBASESIZE( BoolVectorData )
+
 
 template<>
 void BoolVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
@@ -230,9 +245,9 @@ void BoolVectorData::load( LoadContextPtr context )
 }
 	
 // explicitly instantiate each of the types we defined in the public ui.
+template class TypedData<vector<float> >;
 template class TypedData<vector<bool> >;
 template class TypedData<vector<half> >;
-template class TypedData<vector<float> >;
 template class TypedData<vector<double> >;
 template class TypedData<vector<int> >;
 template class TypedData<vector<unsigned int> >;

@@ -32,25 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TRANSFORMATIONMATRIXDATA_H
-#define IE_CORE_TRANSFORMATIONMATRIXDATA_H
+IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( TransformationMatrixfData, float );
+IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( TransformationMatrixdData, double );
 
-#include "IECore/TypedData.h"
-#include "IECore/TransformationMatrix.h"
-
-namespace IECore
-{
-
-// TransformationMatrix data types.
-typedef TypedData < TransformationMatrixf > TransformationMatrixfData;
-typedef TypedData < TransformationMatrixd > TransformationMatrixdData;
-
-// pointer declarations
-IE_CORE_DECLAREPTR( TransformationMatrixfData );
-IE_CORE_DECLAREPTR( TransformationMatrixdData );
-
-#include "IECore/TransformationMatrixDataTraits.inl"
-
-}
-
-#endif // IE_CORE_TRANSFORMATIONMATRIXDATA_H

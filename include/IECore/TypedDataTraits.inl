@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//       other contributors to this software may be used to endorse or
+//	     other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,25 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TRANSFORMATIONMATRIXDATA_H
-#define IE_CORE_TRANSFORMATIONMATRIXDATA_H
 
-#include "IECore/TypedData.h"
-#include "IECore/TransformationMatrix.h"
+#define IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( T, BT )				\
+	template <>																\
+	class TypedDataTraits<T>												\
+	{																		\
+		public:																\
+			typedef BT BaseType;											\
+	};
 
-namespace IECore
-{
-
-// TransformationMatrix data types.
-typedef TypedData < TransformationMatrixf > TransformationMatrixfData;
-typedef TypedData < TransformationMatrixd > TransformationMatrixdData;
-
-// pointer declarations
-IE_CORE_DECLAREPTR( TransformationMatrixfData );
-IE_CORE_DECLAREPTR( TransformationMatrixdData );
-
-#include "IECore/TransformationMatrixDataTraits.inl"
-
-}
-
-#endif // IE_CORE_TRANSFORMATIONMATRIXDATA_H
