@@ -21,7 +21,7 @@ using namespace boost;
 DataCastOp::DataCastOp()
 	:	Op(
 		staticTypeName(),
-		"Performs cast convertion on Data types.",
+		"Performs cast conversion on Data types.",
 		new ObjectParameter(
 			"result",
 			"Converted Data object.",
@@ -496,6 +496,8 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( V3fVector, Box3f )
 				CASTVECTORDATA( V3fVector, FloatVector )
 				CASTVECTORDATA( V3fVector, V3dVector )
+				CASTVECTORDATA( V3fVector, Color3fVector )
+				CASTVECTORDATA( V3fVector, Color3dVector )
 				CASTVECTORDATA( V3fVector, Box3fVector )
 				default:	break;
 			}
@@ -507,6 +509,8 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( V3dVector, Box3d )
 				CASTVECTORDATA( V3dVector, DoubleVector )
 				CASTVECTORDATA( V3dVector, V3fVector )
+				CASTVECTORDATA( V3dVector, Color3fVector )
+				CASTVECTORDATA( V3dVector, Color3dVector )
 				CASTVECTORDATA( V3dVector, Box3dVector )
 				default:	break;
 			}

@@ -55,6 +55,8 @@ class TestDataCastOp( unittest.TestCase ) :
 		self.assertEqual( DataCastOp()( object = FloatVectorData( [ 1, 2, 3 ] ), targetType = int(TypeId.V3fData) ), V3fData( V3f( 1, 2, 3 ) ) ) 
 		self.assertEqual( DataCastOp()( object = Color3fData( Color3f( 1, 2, 3 ) ), targetType = int(TypeId.V3fData) ), V3fData( V3f( 1, 2, 3 ) ) ) 
 		self.assertEqual( DataCastOp()( object = FloatVectorData( [ 1, 1, 1, 2, 2, 2, 3, 3, 3 ] ), targetType = int(TypeId.V3fVectorData) ), V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ) ) 
+		self.assertEqual( DataCastOp()( object = V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ), targetType = int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f(1), Color3f(2), Color3f(3) ] ) ) 
+		self.assertEqual( DataCastOp()( object = V3dVectorData( [ V3d(1), V3d(2), V3d(3) ] ), targetType = int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f(1), Color3f(2), Color3f(3) ] ) ) 
 	
 	def testInvalidConversions( self ) :
 		tests = [
