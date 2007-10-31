@@ -81,6 +81,10 @@ class TestMenus( unittest.TestCase ) :
 		mm = m.reRooted( "/a/" )
 		self.assertEqual( self.paths( mm ), [ "/d" ] )
 		
+		# test clearing
+		m.clear()
+		self.assertEqual( m.items(), [] )
+		
 		
 if __name__ == "__main__":
     unittest.main()   

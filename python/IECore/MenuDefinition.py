@@ -130,6 +130,11 @@ class MenuDefinition :
 		for i in toRemove :
 			del self.__items[i]
 		
+	## Removes all menu items from the definition.
+	def clear( self ) :
+	
+		del self.__items[:]
+		
 	## Returns a list of tuples of the form (path, MenuItemDefinition).
 	# This can be used in realising the menu in a UI toolkit. This list
 	# should be considered read-only - use the other methods to add and
