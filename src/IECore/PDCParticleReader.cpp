@@ -38,6 +38,7 @@
 #include "IECore/ByteOrder.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/Timer.h"
 
 #include "OpenEXR/ImathRandom.h"
 
@@ -374,7 +375,21 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 		case VectorArray :
 			{
 				V3dVectorDataPtr d( new V3dVectorData );
-				d->writable().resize( numParticles() );
+				/// \todo
+				/// by all accounts the line below should be this :
+				///
+				/// d->writable().resize( numParticles() );
+				///
+				/// ie it shouldn't initialize the memory. but for some reason
+				/// that runs far far slower for us (at least an order of magnitude
+				/// slower) when we're in maya or python. we don't know why but it seems
+				/// to be related to libstdc++ (maya has it's own). so we're opting for
+				/// the initialized version - this seems slightly (~10%) slower when the planets
+				/// are aligned correctly, but so much faster when the planets are aligned against
+				/// us, as they seem to be whenever we're coding in maya. testing seems to show that
+				/// this resize problem only occurs with V3d, and not with V3f, or double, or even
+				/// a struct with 3 doubles in, or even a template struct with 3 doubles in.
+				d->writable().resize( numParticles(), V3d( 0 ) );
 				readElements( (double *)&d->writable()[0], it->second.position, numParticles() * 3 );
 				switch( realType() )
 				{
