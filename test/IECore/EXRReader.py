@@ -35,6 +35,7 @@
 import unittest
 import sys
 import IECore
+import os
 
 class TestEXRReader(unittest.TestCase):
 
@@ -63,24 +64,9 @@ class TestEXRReader(unittest.TestCase):
 		w.write()
 		## \todo here we might complete the test by comparing against verified output
 
-
-	def testReadDataWindow(self):
-
-		r = IECore.Reader.create('test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.exr')
-		self.assertEqual(type(r), IECore.EXRImageReader)
-		img = r.read()
-
-		self.assertEqual(type(img), type(IECore.ImagePrimitive()))
-
-		# write test
-		w = IECore.Writer.create(img, 'test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.datawindow.exr')
-		self.assertEqual(type(w), IECore.EXRImageWriter)
-		w.write()
-
 	def testHalf(self):
 
 		testfile = "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.exr"
-		testoutfile = "test/IECore/data/exrFiles/AllHalfValues.testoutput.exr"
 
 		r = IECore.Reader.create(testfile)
 		self.assertEqual(type(r), IECore.EXRImageReader)
@@ -105,6 +91,12 @@ class TestEXRReader(unittest.TestCase):
 		# write back the sub-image
 		IECore.Writer.create(img, 'test/IECore/data/exrFiles/redgreen.window.exr').write()
 
+	def tearDown(self):
+			
+		for f in [ self.testoutfile ] :
+			if os.path.isfile( f ) :	
+				os.remove( f )				
+				
 if __name__ == "__main__":
 	unittest.main()   
 
