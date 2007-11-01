@@ -20,6 +20,13 @@ using namespace std;
 using namespace boost;
 using namespace boost::mpl;
 
+static TypeId inputTypes[] = 
+{
+	V3fVectorDataTypeId,
+	V3dVectorDataTypeId,
+	InvalidTypeId
+};
+
 static TypeId matrixTypes[] = 
 {
 	M33fDataTypeId,
@@ -34,7 +41,7 @@ static TypeId matrixTypes[] =
 MatrixMultiplyOp::MatrixMultiplyOp()
 	:	ModifyOp(
 		staticTypeName(),
-		"Performs cast convertion on Data types.",
+		"Performs inplace matrix multiplication on 3D vector Data types.",
 		new ObjectParameter(
 			"result",
 			"Converted Data object.",
@@ -45,13 +52,13 @@ MatrixMultiplyOp::MatrixMultiplyOp()
 			"object",
 			"The vector object that will be transformed by the matrix.",
 			new NullObject(),
-			DataTypeId
+			&inputTypes[0]
 		)
 	)
 {
 	m_matrixParameter = new ObjectParameter(
 		"matrix",
-		"The matrix used for transformation.",
+		"The matrix or transformation used on the multiplication.",
 		new M44fData(),
 		&matrixTypes[0]
 	);
