@@ -102,6 +102,7 @@ from Curry import *
 from Menus import *
 from DataCastOp import *
 from DataPromoteOp import *
+from MatrixMultiplyOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

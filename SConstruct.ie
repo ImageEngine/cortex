@@ -202,6 +202,7 @@ coreSources = 		[
 				'src/IECore/NURBSPrimitive.cpp',
 				'src/IECore/DataCastOp.cpp',
 				'src/IECore/DataPromoteOp.cpp',		
+				'src/IECore/MatrixMultiplyOp.cpp',
 		   ]
 		
 coreIncludes = 		[ 	
@@ -352,6 +353,7 @@ corePythonSources = 	[
 				'src/IECore/bindings/NURBSPrimitiveBinding.cpp',		
 				'src/IECore/bindings/DataCastOpBinding.cpp',
 				'src/IECore/bindings/DataPromoteOpBinding.cpp',
+				'src/IECore/bindings/MatrixMultiplyOpBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			
@@ -449,6 +451,7 @@ coreOps = [
 	[ "CheckFileDependenciesOp", "depCheck", "common/fileSystem" ],
 	[ "LsHeaderOp", "lsHeader", "common/fileSystem" ],
 	[ "DataCastOp", "dataCast", "common/convertions" ],
+	[ "MatrixMultiplyOp", "matrixMultiply", "common/convertions" ],
 ]
 
 

@@ -221,6 +221,7 @@ enum TypeId
 	NURBSPrimitiveTypeId = 178,
 	DataCastOpTypeId = 179,
 	DataPromoteOpTypeId = 180,
+	MatrixMultiplyOpTypeId = 181,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	

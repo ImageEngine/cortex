@@ -127,6 +127,7 @@
 #include "IECore/bindings/NURBSPrimitiveBinding.h"
 #include "IECore/bindings/DataCastOpBinding.h"
 #include "IECore/bindings/DataPromoteOpBinding.h"
+#include "IECore/bindings/MatrixMultiplyOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -233,6 +234,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindNURBSPrimitive();
 	bindDataCastOp();
 	bindDataPromoteOp();
+	bindMatrixMultiplyOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
