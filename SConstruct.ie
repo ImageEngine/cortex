@@ -201,6 +201,7 @@ coreSources = 		[
 				'src/IECore/Camera.cpp',	
 				'src/IECore/NURBSPrimitive.cpp',
 				'src/IECore/DataCastOp.cpp',
+				'src/IECore/DataPromoteOp.cpp',		
 		   ]
 		
 coreIncludes = 		[ 	
@@ -350,6 +351,7 @@ corePythonSources = 	[
 				'src/IECore/bindings/CameraBinding.cpp',	
 				'src/IECore/bindings/NURBSPrimitiveBinding.cpp',		
 				'src/IECore/bindings/DataCastOpBinding.cpp',
+				'src/IECore/bindings/DataPromoteOpBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

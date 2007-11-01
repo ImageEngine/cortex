@@ -126,6 +126,7 @@
 #include "IECore/bindings/CameraBinding.h"
 #include "IECore/bindings/NURBSPrimitiveBinding.h"
 #include "IECore/bindings/DataCastOpBinding.h"
+#include "IECore/bindings/DataPromoteOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -231,6 +232,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCamera();
 	bindNURBSPrimitive();
 	bindDataCastOp();
+	bindDataPromoteOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

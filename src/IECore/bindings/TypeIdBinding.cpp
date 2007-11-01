@@ -222,6 +222,8 @@ void bindTypeId()
 		.value("PreWorldRenderable", PreWorldRenderableTypeId)
 		.value("Camera", CameraTypeId)
 		.value("NURBSPrimitive", NURBSPrimitiveTypeId)
+		.value("DataCastOp", DataCastOpTypeId)
+		.value("DataPromoteOp", DataPromoteOpTypeId)
 	;
 }
 

@@ -220,6 +220,7 @@ enum TypeId
 	CameraTypeId = 177,
 	NURBSPrimitiveTypeId = 178,
 	DataCastOpTypeId = 179,
+	DataPromoteOpTypeId = 180,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	
