@@ -72,38 +72,86 @@ inline bool bigEndian()
 
 /// Returns a copy of x with reversed byte order.
 template<typename T>
-T reverseBytes( const T &x )
+inline T reverseBytes( const T &x )
 {
 	// needs specialising for each type
 	BOOST_STATIC_ASSERT(sizeof(T)==0);
 }
 
 template<>
-short reverseBytes<short>( const short &x );
+inline short reverseBytes<short>( const short &x )
+{
+	return 	((x & 255) << 8) |
+			((x >> 8) & 255 );
+}
 
 template<>
-unsigned short reverseBytes<unsigned short>( const unsigned short &x );
+inline unsigned short reverseBytes<unsigned short>( const unsigned short &x )
+{
+	return 	((x & 255) << 8) |
+			((x >> 8) & 255 );
+}
 
 template<>
-int reverseBytes<int>( const int &x );
+inline int reverseBytes<int>( const int &x )
+{
+	return 	((x & 255) << 24) |
+			(((x >> 8) & 255 ) << 16 ) |
+			(((x >> 16) & 255 ) << 8 ) |
+			((x >> 24) & 255 );
+}
 
 template<>
-unsigned int reverseBytes<unsigned int>( const unsigned int &x );
+inline unsigned int reverseBytes<unsigned int>( const unsigned int &x )
+{
+	return 	((x & 255) << 24) |
+			(((x >> 8) & 255 ) << 16 ) |
+			(((x >> 16) & 255 ) << 8 ) |
+			((x >> 24) & 255 );
+}
 
 template<>
-float reverseBytes<float>( const float &x );
+inline float reverseBytes<float>( const float &x )
+{
+	union {
+		int i;
+		float f;
+	} xx;
+	xx.f = x;
+	xx.i = reverseBytes( xx.i );
+	return xx.f;
+}
 
 template<>
-Imf::Int64 reverseBytes<Imf::Int64>( const Imf::Int64 &x );
+inline Imf::Int64 reverseBytes<Imf::Int64>( const Imf::Int64 &x )
+{
+	return ((x & 255) << 56) |
+			(((x >> 8) & 255) << 48) |
+			(((x >> 16) & 255 ) << 40 ) |
+			(((x >> 24) & 255 ) << 32 ) |
+			(((x >> 32) & 255 ) << 24 ) |
+			(((x >> 40) & 255 ) << 16 ) |
+			(((x >> 48) & 255 ) << 8 ) |
+			((x >> 56) & 255 );
+}
 
 template<>
-double reverseBytes<double>( const double &x );
+inline double reverseBytes<double>( const double &x )
+{
+	union {
+		Imf::Int64 i;
+		double d;
+	} xx;
+	xx.d = x;
+	xx.i = 	reverseBytes<Imf::Int64>(xx.i);
+	return xx.d;
+}
 
 /// If running on a big endian platform,
 /// returns a copy of x with reversed bytes,
 /// otherwise returns x unchanged.
 template<typename T>
-T asLittleEndian( const T &x )
+inline T asLittleEndian( const T &x )
 {
 	if( bigEndian() )
 	{
@@ -119,7 +167,7 @@ T asLittleEndian( const T &x )
 /// returns a copy of x with reversed bytes,
 /// otherwise returns x unchanged.
 template<typename T>
-T asBigEndian( const T &x )
+inline T asBigEndian( const T &x )
 {
 	if( littleEndian() )
 	{

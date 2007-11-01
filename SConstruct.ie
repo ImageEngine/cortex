@@ -135,7 +135,6 @@ coreSources = 		[
 				'src/IECore/Writer.cpp',
 				'src/IECore/ParticleWriter.cpp',
 				'src/IECore/PDCParticleWriter.cpp',
-				'src/IECore/ByteOrder.cpp',
 				'src/IECore/Parameter.cpp',
 				'src/IECore/NumericParameter.cpp',
 				'src/IECore/TypedParameter.cpp',
@@ -201,7 +200,7 @@ coreSources = 		[
 				'src/IECore/PreWorldRenderable.cpp',
 				'src/IECore/Camera.cpp',	
 				'src/IECore/NURBSPrimitive.cpp',
-				'src/IECore/DataCastOp.cpp',		
+				'src/IECore/DataCastOp.cpp',
 		   ]
 		
 coreIncludes = 		[ 	
