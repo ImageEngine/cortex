@@ -38,77 +38,60 @@ import IECore
 
 class TestEXRReader(unittest.TestCase):
 
-        #testfile = "test/IECore/data/exrFiles/float256x256.exr"
-	#testoutfile = "test/IECore/data/exrFiles/testoutput.exr"
-
 	testfile = "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.exr"
 	testoutfile = "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.exr"
 
-        def testConstruction(self):
-                
+	def testConstruction(self):
+
 		r = IECore.Reader.create(self.testfile)
 		self.assertEqual(type(r), IECore.EXRImageReader)
 
 
-        def testRead(self):
-                
-                r = IECore.Reader.create(self.testfile)
+	def testRead(self) :
+
+		r = IECore.Reader.create(self.testfile)
 		self.assertEqual(type(r), IECore.EXRImageReader)
 
 		img = r.read()
-		#for cn in img.keys():
-		#	print cn	
 
 		self.assertEqual(type(img), type(IECore.ImagePrimitive() ))
 
 		# write test
-                w = IECore.Writer.create(img, self.testoutfile)
+		w = IECore.Writer.create(img, self.testoutfile)
 		self.assertEqual(type(w), IECore.EXRImageWriter)
 
 		w.write()
-		# here we might complete the test by comparing against verified output
+		## \todo here we might complete the test by comparing against verified output
 
 
-        def testReadDataWindow(self):
+	def testReadDataWindow(self):
 
-                r = IECore.Reader.create('test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.exr')
+		r = IECore.Reader.create('test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.exr')
 		self.assertEqual(type(r), IECore.EXRImageReader)
 		img = r.read()
 
 		self.assertEqual(type(img), type(IECore.ImagePrimitive()))
 
 		# write test
-                w = IECore.Writer.create(img, 'test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.datawindow.exr')
+		w = IECore.Writer.create(img, 'test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.datawindow.exr')
 		self.assertEqual(type(w), IECore.EXRImageWriter)
 		w.write()
 
-
-        def testHalf(self):
+	def testHalf(self):
 
 		testfile = "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.exr"
-		#testfile = "test/IECore/data/exrFiles/AllHalfValues.exr"
 		testoutfile = "test/IECore/data/exrFiles/AllHalfValues.testoutput.exr"
-                
-                r = IECore.Reader.create(testfile)
+
+		r = IECore.Reader.create(testfile)
 		self.assertEqual(type(r), IECore.EXRImageReader)
 
 		img = r.read()
 		self.assertEqual(type(img), IECore.ImagePrimitive)
 
-		## write test
-		#w = IECore.Writer.create(img, testoutfile)
-		#self.assertEqual(type(w), IECore.EXRImageWriter)
-		#
-		#w.write()
-		## here we might complete the test by comparing against verified output
-		## \todo So why don't we?
+	def testWindowedRead(self):
 
-
-
-        def testWindowedRead(self):
-
-                # create a reader, read a sub-image
-                r = IECore.Reader.create(self.testfile)
+		# create a reader, read a sub-image
+		r = IECore.Reader.create(self.testfile)
 		self.assertEqual(type(r), IECore.EXRImageReader)
 		box = IECore.Box2i(IECore.V2i(-100, -100), IECore.V2i(199, 199))
 		r.parameters().dataWindow.setValue(IECore.Box2iData(box))
@@ -120,10 +103,8 @@ class TestEXRReader(unittest.TestCase):
 		img.displayWindow = box
 
 		# write back the sub-image
-                IECore.Writer.create(img, 'test/IECore/data/exrFiles/redgreen.window.exr').write()
+		IECore.Writer.create(img, 'test/IECore/data/exrFiles/redgreen.window.exr').write()
 
-
-                			
 if __name__ == "__main__":
 	unittest.main()   
-	
+
