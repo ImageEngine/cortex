@@ -155,7 +155,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 
 	if ( data->typeId() == targetType )
 	{
-		return data;
+		return data->copy();
 	}
 
 	ObjectPtr result = 0;
