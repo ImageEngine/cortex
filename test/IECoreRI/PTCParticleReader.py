@@ -68,8 +68,8 @@ if hasattr( IECoreRI, "PTCParticleReader" ):
 			
 		def testCanRead(self) :
 		
-			self.assertEqual( IECoreRI.PTCParticleReader.canRead( "test/data/test.3Dbake" ), True )
-			self.assertEqual( IECoreRI.PTCParticleReader.canRead( "test/data/sphere.cob" ), False )
+			self.assertEqual( IECoreRI.PTCParticleReader.canRead( "test/IECoreRI/data/test.3Dbake" ), True )
+			self.assertEqual( IECoreRI.PTCParticleReader.canRead( "test/IECoreRI/data/sphere.cob" ), False )
 
 if __name__ == "__main__":
     unittest.main()   
