@@ -484,6 +484,8 @@ class TestCompoundParameter( unittest.TestCase ) :
 		)
 		
 		self.assertEqual( p["i"].name, "i" )
+		self.assertEqual( p.i.name, "i" )
+		self.assertEqual( p.parameter( "i" ).name, "i" )
 			
 	def testPresets( self ) :
 		

@@ -236,6 +236,7 @@ void bindCompoundParameter()
 		.def( "insertParameter", &CompoundParameter::insertParameter )
 		.def( "removeParameter", (void (CompoundParameter::*)(ParameterPtr)) &CompoundParameter::removeParameter )
 		.def( "removeParameter", (void (CompoundParameter::*)(const std::string&)) &CompoundParameter::removeParameter )				
+		.def( "parameter", (ParameterPtr (CompoundParameter::*)(const std::string&)) &CompoundParameter::parameter<Parameter> )				
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( CompoundParameter )
 	;
 
