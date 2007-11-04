@@ -150,6 +150,8 @@ env = Environment(
 	options = o
 )
 
+env["LIBPATH"] = env["LIBPATH"].split( ":" )
+
 if "SAVE_OPTIONS" in ARGUMENTS :
 	o.Save( ARGUMENTS["SAVE_OPTIONS"], env )
 
@@ -277,7 +279,7 @@ else :
 
 testEnv = Environment()
 testEnv["ENV"]["PYTHONPATH"] = "./python"
-testEnv["ENV"][libraryPathEnvVar] = ":".join( [ "./lib", env["LIBPATH"] ] )
+testEnv["ENV"][libraryPathEnvVar] = ":".join( ["./lib"] + env["LIBPATH"] )
 
 ###########################################################################################
 # Build, install and test the core library and bindings
