@@ -67,7 +67,41 @@ def makeRunTimeTyped( typ, typId, baseClass ) :
 
 	# add the staticTypeId and staticTypeName overrides
 	typ.staticTypeId = staticmethod( lambda : typId )
-	typ.staticTypeName = staticmethod( lambda : typ.__name__ )	
+	typ.staticTypeName = staticmethod( lambda : typ.__name__ )
+	
+	# add the inheritsFrom method override
+	def inheritsFrom( t, baseClass ) :
+	
+		if type( t ) is str :
+			if type( baseClass ) is list :
+				for base in baseClass :
+					if base.staticTypeName() == t :
+						return True
+			else:
+				if baseClass.staticTypeName() == t :
+					return True
+		elif type(t) is IECore.TypeId :
+			if type( baseClass ) is list :
+				for base in baseClass :
+					if base.staticTypeId() == t :
+						return True
+			else:
+				if baseClass.staticTypeId() == t :
+					return True
+		else:
+			raise TypeError( "Invalid type specifier ( %s )" % str( t ) )
+			
+		if type( baseClass ) is list :
+			for base in baseClass:
+				if base.inheritsFrom( t ):
+					return True
+		else:	
+			return baseClass.inheritsFrom( t )
+			
+		return False	
+		
+	typ.inheritsFrom = staticmethod( lambda t : inheritsFrom( t, baseClass ) )
+		
 		
 	# add the isInstanceOf method override
 	def isInstanceOf( self, t, baseClass ) :
@@ -75,34 +109,15 @@ def makeRunTimeTyped( typ, typId, baseClass ) :
 		if type( t ) is str :
 			if self.staticTypeName() == t :
 				return True
-			else :
-				return baseClass.isInstanceOf( self, t )
 		elif type( t ) is IECore.TypeId :
 			if self.staticTypeId() == t :
-				return True
-			else :
-				return baseClass.isInstanceOf( self, t )
+				return True				
+		else :
+			raise TypeError( "Invalid type specifier ( %s )" % str( t ) )
 		
-		raise TypeError( "Invalid type specifier ( %s )" % str( t ) )
+		return inheritsFrom( t, baseClass )
 		
 	typ.isInstanceOf = lambda self, t : isInstanceOf( self, t, baseClass )
 	
-	# add the inheritsFrom method override
-	def inheritsFrom( t, baseClass ) :
-	
-		if type( t ) is str :
-			if baseClass.staticTypeName() == t :
-				return True
-			else :
-				return baseClass.inheritsFrom( t )
-		elif type(t) is IECore.TypeId :
-			if baseClass.staticTypeId() == t :
-				return True
-			else :
-				return baseClass.inheritsFrom( t )
-		
-		raise TypeError( "Invalid type specifier ( %s )" % str( t ) )
-		
-	typ.inheritsFrom = staticmethod( lambda t : inheritsFrom( t, baseClass ) )
 	
 __all__ = [ "registerTypeId", "makeRunTimeTyped" ]
