@@ -300,8 +300,8 @@ void bindRenderer()
 	typedef class_< Renderer::Procedural, ProceduralWrapPtr, boost::noncopyable, bases<Parameterised> > ProceduralPyClass;
 	ProceduralPyClass( "Procedural", no_init )
 		.def( init<const std::string &, const std::string &>() )
-		.def( "bound", pure_virtual( &Renderer::Procedural::bound ) )
-		.def( "render", pure_virtual( &Renderer::Procedural::render ) )
+		.def( "bound", &Renderer::Procedural::bound )
+		.def( "render", &Renderer::Procedural::render )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Renderer::Procedural )		
 	;
 	

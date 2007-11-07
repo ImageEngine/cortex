@@ -66,75 +66,85 @@ class InterpolatedCache : public RefCounted
 
 		~InterpolatedCache();
 
-		///Changes the path template for cache files. It could result on file closing and file opening.
+		///Changes the path template for cache files. 
+		// It will not try to load the new files until the read methods are called.
 		void setPathTemplate( const std::string &pathTemplate );
 
 		///Returns the current path template used to open cache files.
 		std::string	getPathTemplate();
 
-		///Advances in time. It could result on file closing and file opening.
+		///Advances in time.
+		// It will not try to load the new files until the read methods are called.
 		void setFrame( double frame );
 
 		///Returns the current frame.
 		double getFrame();
 
 		///Sets the interpolation method.
+		// It will not try to load the new files until the read methods are called.
 		void setInterpolation( Interpolation interpolation );
 
 		///Returns the current interpolation method.
 		Interpolation getInterpolation();
 
 		///Set oversamples
+		// It will not try to load the new files until the read methods are called.
 		void setOversamples( int oversamples );
 
-		///Returns the current oversampling used. Can be different than the value passed to setOversamples.
+		///Returns the current oversampling used.
 		int getOversamples();
 
 		///Change frameRate
+		// It will not try to load the new files until the read methods are called.
 		void setFrameRate( double frameRate );
 
 		///Returns the current frame rate used.
 		double getFrameRate();
 
 		///Read a piece of data associated with the specified object and attribute from the cache.
-		///Throws an exception if the requested data is not present in the cache.
+		///Throws an exception if the requested data is not present in the cache or if the cache file is not found.
 		ObjectPtr read( const ObjectHandle &obj, const AttributeHandle &attr );
 
 		///Read a piece of data associated with the specified object from the cache.
 		///Returns a CompoundObject with attribute as keys.
-		///Throws an exception if the requested data is not present in the cache.
+		///Throws an exception if the requested data is not present in the cache or if the cache file is not found.
 		CompoundObjectPtr read( const ObjectHandle &obj );
 
 		///Read data associated with the specified header from the open cache files. 
 		///The result will be interpolated whenever possible. Objects not existent in 
 		///every opened file will not be interpolated and will be returned if they come from the nearest frame.
-		///Throws an exception if the requested header is not present in the cache.
+		///Throws an exception if the requested header is not present in the cache or if the cache file is not found.
 		ObjectPtr readHeader( const HeaderHandle &hdr );
 
 		///Creates a CompoundObject with the header names as keys.
 		///Read all header data present in the open cache files. The result will be 
 		///interpolated whenever possible. Objects not existent in every opened file will not be interpolated and
 		///will be returned if they come from the nearest frame. 
+		///Throws an exception if the cache file is not found.
 		CompoundObjectPtr readHeader( );
 		
 		///Retrieve the list of object handles from the cache
+		///Throws an exception if the cache file is not found.
 		void objects(std::vector<ObjectHandle> &objs);
 
 		///Retrieve the list of header handles from the cache (from the nearest frame).
+		///Throws an exception if the cache file is not found.
 		void headers(std::vector<HeaderHandle> &hds);
 		
-		///Retrieve the list of attribute handles from the specified objects. Throws
-		///an exception if the object is not within the cache.
+		///Retrieve the list of attribute handles from the specified objects. 
+		// Throws an exception if the object is not within the cache or the cache file is not found.
 		void attributes(const ObjectHandle &obj, std::vector<AttributeHandle> &attrs);
 		
 		///Retrieve the list of attribute handles that match the given regex from the specified objects.
-		/// Throws an exception if the object is not within the cache.
+		// Throws an exception if the object is not within the cache or the cache file is not found.
 		void attributes(const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs);
 
 		///Determines whether or not the cache contains the specified object
+		// Throws an exception if the cache file is not found.
 		bool contains( const ObjectHandle &obj );
 		
 		///Determines whether or not the cache contains the specified object and attribute
+		// Throws an exception if the cache file is not found.
 		bool contains( const ObjectHandle &obj, const AttributeHandle &attr );
 
 	protected:

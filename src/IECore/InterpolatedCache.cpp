@@ -180,12 +180,12 @@ ObjectPtr InterpolatedCache::read( const ObjectHandle &obj, const AttributeHandl
 		}
 		catch (IECore::Exception &e)
 		{
-			std::string err = (format( "Could not load attribute %s from object %s: %s" ) % obj % attr % e.what() ).str();
+			std::string err = (format( "Could not load attribute %s from object %s: %s" ) % attr % obj % e.what() ).str();
 			throw IOException( err );
 		}
 		if ( !data )
 		{
-			throw IOException( (format( "Could not load attribute %s from object %s." ) % obj % attr).str() );
+			throw IOException( (format( "Could not load attribute %s from object %s." ) % attr % obj ).str() );
 		}
 	}
 	return data;
