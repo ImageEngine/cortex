@@ -122,7 +122,7 @@ class PointsExpressionOp( ModifyOp ) :
 		
 			l["i"] = i
 			exec e in g, l
-			
+					
 		# filter out any points if requested
 		removals = l.removals()
 		if removals :
@@ -133,7 +133,7 @@ class PointsExpressionOp( ModifyOp ) :
 				try :
 					primVar = pointsPrim[k]
 					if len( primVar.data )==pointsPrim.numPoints :
-						primVar.data = VectorDataFilterOp()( input = primVar.data, filter = removals )
+						primVar.data = VectorDataFilterOp()( input = primVar.data, filter = removals, invert=True )
 						pointsPrim[k] = primVar
 						newNumPoints = primVar.data.size()
 				except :
