@@ -71,6 +71,10 @@ class MeshPrimitive : public Primitive
 		/// Render the mesh
 		virtual void render( RendererPtr renderer );
 
+		/// Creates a custom box mesh.
+		//\todo Add subdivisions and texture coordinates.
+		static boost::intrusive_ptr< MeshPrimitive > createBox( Imath::Box3f b );
+
 	private:
 
 		static const unsigned int m_ioVersion;

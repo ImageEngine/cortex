@@ -63,6 +63,7 @@ namespace IECore
 			.add_property( "vertexIds", &vertexIds, "A copy of the mesh's list of vertex ids." )
 			.add_property( "interpolation", make_function( &MeshPrimitive::interpolation, return_value_policy<copy_const_reference>() ) )
 			.def( "setTopology", &MeshPrimitive::setTopology )
+			.def( "createBox", &MeshPrimitive::createBox ).staticmethod( "createBox" )
 			.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( MeshPrimitive )
 		;
 		INTRUSIVE_PTR_PATCH( MeshPrimitive, MeshPrimitivePyClass );

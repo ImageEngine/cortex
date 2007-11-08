@@ -227,3 +227,39 @@ void MeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_verticesPerFace );
 	a.accumulate( m_vertexIds );
 }
+
+MeshPrimitivePtr MeshPrimitive::createBox( Box3f b )
+{
+	vector< int > verticesPerFaceVec;
+	vector< int > vertexIdsVec;
+	std::string interpolation = "linear";
+	vector< V3f > p;
+	int verticesPerFace[] = {
+		4, 4, 4, 4, 4, 4
+	};
+	int vertexIds[] = {
+		0,1,2,3,
+		1,4,5,2,
+		4,6,7,5,
+		6,0,3,7,
+		3,2,5,7,
+		0,6,4,1
+	};
+
+	p.push_back( V3f( b.min.x, b.min.y, b.min.z ) );	// 0
+	p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );	// 1
+	p.push_back( V3f( b.max.x, b.max.y, b.min.z ) );	// 2
+	p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );	// 3
+	p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );	// 4
+	p.push_back( V3f( b.max.x, b.max.y, b.max.z ) );	// 5
+	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );	// 6
+	p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );	// 7
+
+	verticesPerFaceVec.resize( sizeof( verticesPerFace ) / sizeof( int ) );
+	memcpy( &verticesPerFaceVec[0], &verticesPerFace[0], sizeof( verticesPerFace ) );
+	
+	vertexIdsVec.resize( sizeof( vertexIds ) / sizeof( int ) );
+	memcpy( &vertexIdsVec[0], &vertexIds[0], sizeof( vertexIds ) );
+
+	return new MeshPrimitive( new IntVectorData(verticesPerFaceVec), new IntVectorData(vertexIdsVec), interpolation, new V3fVectorData(p) );
+}
