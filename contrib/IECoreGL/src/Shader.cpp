@@ -170,7 +170,10 @@ void Shader::parameterNames( std::vector<std::string> &names ) const
 		GLint size = 0;
 		GLenum type = 0;
 		glGetActiveUniform( m_program, i, maxUniformNameLength, 0, &size, &type, &name[0] );
-		names.push_back( &name[0] );
+		if( strncmp( "gl_", &name[0], 3 ) )
+		{
+			names.push_back( &name[0] );
+		}
 	}
 }
 
@@ -373,6 +376,8 @@ bool Shader::valueValid( const std::string &parameterName, IECore::ConstDataPtr 
 				
 void Shader::setParameter( GLint parameterIndex, IECore::ConstDataPtr value )
 {
+	/// \todo We either need to do type checking below before all those casts, or
+	/// state in the documentation that this function will blow up with invalid data.
 	switch( value->typeId() )
 	{
 		case IECore::BoolDataTypeId :
