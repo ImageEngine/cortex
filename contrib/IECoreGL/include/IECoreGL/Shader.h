@@ -45,6 +45,7 @@ namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( Shader );
+IE_CORE_FORWARDDECLARE( Primitive );
 
 /// A class to represent GLSL shaders.
 class Shader : public Bindable
@@ -144,6 +145,13 @@ class Shader : public Bindable
 		//@}
 		
 	private :
+
+		// The Primitive class needs access to the internals of the Shader so it
+		// can set vertex attributes for shader attributes. This functionality 
+		// isn't provided as a public method because there's no way that the Shader
+		// can validate that the right amount of data is being passed - whereas
+		// the Primitive is in a position to do this.
+		friend class Primitive;
 
 		void compile( const std::string &source, GLenum type, GLuint &shader );
 		void release();

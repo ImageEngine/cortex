@@ -93,6 +93,12 @@ class Primitive : public Renderable
 		/// wireframe rendering).
 		virtual void render( ConstStatePtr state, IECore::TypeId style ) const = 0;
 		
+		/// Can be called from a derived class' render() method to set
+		/// varying parameters of the current shader based on the
+		/// data from vertex attributes. This must /not/ be called unless the style
+		/// parameter passed to render is PrimitiveSolid - in all other cases no shader
+		/// is bound and an Exception will result.
+		void setVertexAttributes( ConstStatePtr state ) const;
 		/// Can be called from a derived class' render() method to
 		/// set uniform parameters of the current shader based on a single element of
 		/// data from the vertex attributes. This must /not/ be called unless the
@@ -105,7 +111,7 @@ class Primitive : public Renderable
 		bool depthSortRequested( ConstStatePtr state ) const;
 		
 	private :
-	
+		
 		void setupVertexAttributesAsUniform( Shader *s ) const;
 		mutable struct {
 			Shader *shader;

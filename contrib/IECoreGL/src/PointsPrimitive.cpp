@@ -168,22 +168,27 @@ const T *PointsPrimitive::dataAndStride( typename IECore::TypedData<std::vector<
 }
 	
 void PointsPrimitive::renderPoints( ConstStatePtr state, IECore::TypeId style ) const
-{
+{	
 	const std::vector<V3f> &p = m_points->readable();
 	
 	const Color3f *c = setOrReturnColor();
+	if( style==PrimitiveSolid::staticTypeId() )
+	{
+		setVertexAttributes( state );
+	}
 	
-	glBegin( GL_POINTS );
-		for( unsigned int i=0; i<p.size(); i++ )
-		{
-			if( c )
-			{
-				glColor3f( (*c)[0], (*c)[1], (*c)[2] );
-				c++;
-			}
-			glVertex3f( p[i][0], p[i][1], p[i][2] );
-		}
-	glEnd();
+	glEnableClientState( GL_VERTEX_ARRAY );
+	glVertexPointer( 3, GL_FLOAT, 0, &p[0] );
+	if( c )
+	{
+		glEnableClientState( GL_COLOR_ARRAY );
+		glColorPointer( 3, GL_FLOAT, 0, c );
+	}	
+	
+		glDrawArrays( GL_POINTS, 0, p.size() );
+	
+	glDisableClientState( GL_COLOR_ARRAY );
+	glDisableClientState( GL_VERTEX_ARRAY );
 }
 
 void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) const

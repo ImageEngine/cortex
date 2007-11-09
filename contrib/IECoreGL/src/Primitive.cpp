@@ -39,6 +39,7 @@
 #include "IECoreGL/ShaderStateComponent.h"
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/TextureUnits.h"
+#include "IECoreGL/NumericTraits.h"
 
 #include "IECore/TypedDataDespatch.h"
 #include "IECore/VectorTypedData.h"
@@ -70,6 +71,7 @@ void Primitive::render( ConstStatePtr state ) const
 	setupVertexAttributesAsUniform( shader );
 
 	glPushAttrib( GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
+	glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
 	
 		if( depthSortRequested( state ) )
 		{
@@ -170,6 +172,7 @@ void Primitive::render( ConstStatePtr state ) const
 			glUseProgram( program );
 		}
 		
+	glPopClientAttrib();
 	glPopAttrib();
 }
 
@@ -202,6 +205,59 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	}
 	
 	m_vertexAttributes[name] = data->copy();
+}
+
+struct SetVertexAttributeArgs
+{
+	GLint vertexArrayIndex;
+};
+
+template<typename T>
+struct SetVertexAttribute
+{
+	const void operator() ( typename T::Ptr data, const SetVertexAttributeArgs &args )
+	{
+		GLenum type = NumericTraits<typename T::BaseType>::glType();
+		int elementSize = data->baseSize() / data->readable().size();
+		glEnableVertexAttribArray( args.vertexArrayIndex );
+		glVertexAttribPointer( args.vertexArrayIndex, elementSize, type, false, 0, data->baseReadable() );
+	};
+};
+
+void Primitive::setVertexAttributes( ConstStatePtr state ) const
+{
+	if( !m_vertexAttributes.size() )
+	{
+		return;
+	}
+	
+	Shader *shader = const_cast<Shader *>( state->get<ShaderStateComponent>()->shader().get() );
+	if( !shader )
+	{
+		return;
+	}
+
+	GLint numAttributes = 0;
+	glGetProgramiv( shader->m_program, GL_ACTIVE_ATTRIBUTES, &numAttributes );
+	GLint maxAttributeNameLength = 0;
+	glGetProgramiv( shader->m_program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength ); 
+	vector<char> name; name.resize( maxAttributeNameLength );
+	for( int i=0; i<numAttributes; i++ )
+	{
+		GLint size = 0;
+		GLenum type = 0;
+		glGetActiveAttrib( shader->m_program, i, maxAttributeNameLength, 0, &size, &type, &name[0] );
+		if( size==1 )
+		{
+			VertexAttributeMap::const_iterator it = m_vertexAttributes.find( &name[0] );
+			if( it!=m_vertexAttributes.end() )
+			{
+				SetVertexAttributeArgs a;
+				a.vertexArrayIndex = glGetAttribLocation( shader->m_program, &name[0] );
+				IECore::despatchVectorTypedDataFn<void, SetVertexAttribute>( const_pointer_cast<IECore::Data>( it->second ), a );
+			}
+		}
+	}
 }
 
 void Primitive::setVertexAttributesAsUniforms( unsigned int vertexIndex ) const
@@ -243,6 +299,7 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 					m_vertexToUniform.intDataMap[parameterIndex] = &(static_pointer_cast<const IECore::IntVectorData>( it->second )->readable()[0]);
 					break;
 				default :
+					/// \todo The other types
 					break;
 			}
 		}
