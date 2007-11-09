@@ -65,6 +65,16 @@ class TestShader( unittest.TestCase ) :
 
 	def testParameters( self ) :
 	
+		vertexSource = """
+		attribute float floatAttrib;
+		varying float varyingFloatParm;
+		void main()
+		{
+			gl_Position = ftransform();
+			varyingFloatParm = floatAttrib * gl_Position.x;
+		}
+		"""
+	
 		fragmentSource = """
 		uniform bool boolParm;
 		uniform int intParm;
@@ -92,6 +102,8 @@ class TestShader( unittest.TestCase ) :
 		uniform mat3 mat3Parm;
 		uniform mat4 mat4Parm;
 		
+		varying float varyingFloatParm;
+		
 		void main()
 		{
 			float x = vec4Parm.r + vec3Parm.g + vec2Parm.y + floatParm + float( intParm ) + float( boolParm );
@@ -99,11 +111,11 @@ class TestShader( unittest.TestCase ) :
 			float xxx = float( s.i ) + s.f + texture2D( s2D, vec2Parm );
 			vec4 p = mat4Parm * gl_FragCoord;
 			vec3 pp = mat3Parm * gl_FragCoord.xyz;
-			gl_FragColor = vec4( x + xx + xxx + p.x + pp.x, gl_Color.g, 0.5, 1 );
+			gl_FragColor = vec4( x + xx + xxx + p.x + pp.x, gl_Color.g, varyingFloatParm, 1 );
 		}
 		"""
 
-		s = Shader( "", fragmentSource )
+		s = Shader( vertexSource, fragmentSource )
 		self.assert_( s==s )
 		
 		expectedParameterNamesAndTypes = {
