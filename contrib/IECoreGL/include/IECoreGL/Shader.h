@@ -103,6 +103,8 @@ class Shader : public Bindable
 		/// These calls set shader parameters. They can only be called while
 		/// the Shader is bound (using bind()) as the current shader - Exceptions
 		/// will result if this is not the case.
+		/// \todo Might it be possible just to store the values being set if the
+		/// shader isn't currently bound? And then flush those values on bind().
 		//////////////////////////////////////////////////////////////////////
 		//@{
 		/// Returns true if the specified value is valid for setting the
