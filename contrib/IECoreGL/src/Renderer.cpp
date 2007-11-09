@@ -1039,7 +1039,7 @@ static void addPrimitive( IECoreGL::PrimitivePtr primitive, const IECore::Primit
 	{
 		for( IECore::PrimitiveVariableMap::const_iterator it=primVars.begin(); it!=primVars.end(); it++ )
 		{
-			if( it->second.interpolation==IECore::PrimitiveVariable::Vertex )
+			if( it->second.interpolation==IECore::PrimitiveVariable::Vertex || it->second.interpolation==IECore::PrimitiveVariable::Varying )
 			{
 				try
 				{
