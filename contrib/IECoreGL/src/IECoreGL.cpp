@@ -45,8 +45,10 @@ void IECoreGL::init( bool glAlreadyInitialised )
 	{
 		if( !glAlreadyInitialised )
 		{
-			int argc = 0;
-			char **argv = 0;
+			int argc = 2;
+			// on the mac, glut changes working directory during initialisation
+			// unless you pass the -useWorkingDir option
+			char *argv[] = { "IECoreGL", "-useWorkingDir" };
 			glutInit( &argc, argv );
 			int window = glutCreateWindow( "IECoreGL Initial Window" );
 			glutDestroyWindow( window );
