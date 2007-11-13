@@ -37,6 +37,8 @@
 
 #include "IECore/SearchPath.h"
 
+#include <vector>
+
 using namespace boost;
 using namespace boost::python;
 using namespace boost::filesystem;
@@ -62,7 +64,10 @@ static object getPaths( const SearchPath &s )
 static void setPaths( SearchPath &s, const object &p )
 {
 	s.paths.clear();
-	boost::python::container_utils::extend_container( s.paths, p );
+	std::vector<std::string> ss;
+	boost::python::container_utils::extend_container( ss, p );
+	s.paths.resize( ss.size() );
+	std::copy( ss.begin(), ss.end(), s.paths.begin() );
 }
 
 void bindSearchPath()
