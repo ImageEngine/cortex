@@ -259,6 +259,10 @@ class Renderer : public IECore::Renderer
 		///		and in addition the "patchaspectratio" and "patchrotation" variables. See the 3delight
 		///		documentation for a description of how these can be used.
 		///
+		///		"sphere"
+		///		Rendered as spheres. Supports "width" and "constantwidth" variables to define the
+		///		sizes of the spheres.
+		///
 		///	Constant FloatData "constantwidth"
 		/// 
 		/// Vertex|Varying FloatVectorData "width"
