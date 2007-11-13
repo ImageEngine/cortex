@@ -88,7 +88,7 @@ void Group::render( ConstStatePtr state ) const
 		// can't find a way of pushing the current program as part
 		// of the attribute state, so we have to do it by hand.
 		GLint oldProgram = 0;
-		if( GLEW_VERSION_2_1 )
+		if( GLEW_VERSION_2_0 )
 		{
 			glGetIntegerv( GL_CURRENT_PROGRAM, &oldProgram );
 		}
@@ -107,7 +107,7 @@ void Group::render( ConstStatePtr state ) const
 		{
 			glPopAttrib();
 		}
-		if( GLEW_VERSION_2_1 )
+		if( GLEW_VERSION_2_0 )
 		{
 			glUseProgram( oldProgram );
 		}

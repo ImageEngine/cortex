@@ -92,7 +92,7 @@ void Primitive::render( ConstStatePtr state ) const
 		GLint program = 0;
 		// annoyingly i can't find a way of pushing and popping the
 		// current program so we have to do that ourselves
-		if( GLEW_VERSION_2_1 )
+		if( GLEW_VERSION_2_0 )
 		{
 			glGetIntegerv( GL_CURRENT_PROGRAM, &program );
 		}

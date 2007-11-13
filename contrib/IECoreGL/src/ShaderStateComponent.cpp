@@ -101,7 +101,7 @@ void ShaderStateComponent::bind() const
 	}
 	else
 	{
-		if( GLEW_VERSION_2_1 )
+		if( GLEW_VERSION_2_0 )
 		{
 			glUseProgram( 0 );
 		}

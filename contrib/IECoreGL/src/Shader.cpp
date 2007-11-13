@@ -49,9 +49,9 @@ using namespace std;
 Shader::Shader( const std::string &vertexSource, const std::string &fragmentSource )
 	:	m_vertexShader( 0 ), m_fragmentShader( 0 ), m_program( 0 )
 {
-	if( !GLEW_VERSION_2_1 )
+	if( !GLEW_VERSION_2_0 )
 	{
-		throw Exception( "OpenGL version < 2.1" );
+		throw Exception( "OpenGL version < 2" );
 	}
 
 	compile( vertexSource, GL_VERTEX_SHADER, m_vertexShader );
