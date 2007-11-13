@@ -57,6 +57,8 @@ IE_CORE_FORWARDDECLARE( ShaderLoader );
 /// keeps a cache of loaded shaders, so repeatedly asking
 /// for the same name will always return the same Shader
 /// instance.
+/// \todo Add support for #include statements and other
+/// preprocessing stuff using boost::wave.
 class ShaderLoader : public IECore::RefCounted
 {
 
