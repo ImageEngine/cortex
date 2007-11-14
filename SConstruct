@@ -61,22 +61,18 @@ o.Add(
 	"g++",
 )
 
-o.Add(
-	"CPPPATH",
-	"A colon separated list of paths to search for headers on.",
-	"",
-)
-
-o.Add(
-	"LIBPATH",
-	"A colon separated list of paths to search for libraries on.",
-	"",
-)
+# Boost options
 
 o.Add(
 	"BOOST_INCLUDE_PATH",
 	"The path to the boost include directory.",
 	"/usr/local/include/boost-1_34_1",
+)
+
+o.Add(
+	"BOOST_LIB_PATH",
+	"The path to the boost library directory.",
+	"/usr/local/lib",
 )
 
 o.Add(
@@ -87,33 +83,125 @@ o.Add(
 	"-${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}_${BOOST_PATCH_VERSION}",
 )
 
+# OpenEXR options
+
 o.Add(
 	"OPENEXR_INCLUDE_PATH",
 	"The path to the OpenEXR include directory.",
 	"/usr/local/include/OpenEXR",
 )
 
+o.Add(
+	"OPENEXR_LIB_PATH",
+	"The path to the OpenEXR lib directory.",
+	"/usr/local/lib",
+)
+
+# JPEG options
+
+o.Add(
+	"JPEG_INCLUDE_PATH",
+	"The path to the JPEG include directory.",
+	"/usr/local/include/",
+)
+
+o.Add(
+	"JPEG_LIB_PATH",
+	"The path to the JPEG lib directory.",
+	"/usr/local/lib",
+)
+
+# TIFF options
+
+o.Add(
+	"TIFF_INCLUDE_PATH",
+	"The path to the TIFF include directory.",
+	"/usr/local/include/",
+)
+
+o.Add(
+	"TIFF_LIB_PATH",
+	"The path to the TIFF lib directory.",
+	"/usr/local/lib",
+)
+
+# SQLite options
+
+o.Add(
+	"SQLITE_INCLUDE_PATH",
+	"The path to the SQLITE include directory.",
+	"/usr/local/include/",
+)
+
+o.Add(
+	"SQLITE_LIB_PATH",
+	"The path to the SQLITE lib directory.",
+	"/usr/local/lib",
+)
+
+
+# General path options
+
+o.Add(
+	"CPPPATH",
+	"A colon separated list of paths to search for headers on.",
+	"",
+)
+
+o.Add(
+	"LIBPATH",
+	"A colon separated list of paths to search for libraries on.",
+	"/usr/lib",
+)
+
+
+# Python options
+
 o.Add( 
 	"PYTHON_CONFIG", 
 	"The path to the python-config program for the Python installation you wish to "
 	"build against. This is used to obtain the appropriate compilation and linking "
 	"flags. The default is to look for python-config on the path.",
-	"python-config",
+	"python-config",""
 )
+
+# Renderman options
 
 o.Add(
 	"RMAN_ROOT",
 	"The directory in which your RenderMan renderer is installed.",
-	"",
+	"/usr/local/bin",
 )
+
+# OpenGL options
+
+o.Add(
+	BoolOption( "WITH_GL", "Set this to build the coreGL library in the contrib directory.", False ),
+)
+
+o.Add(
+	"GLEW_INCLUDE_PATH",
+	"The path to the directory with glew.h in it.",
+	"/usr/local/include/GL",
+)
+
+o.Add(
+	"GLEW_LIB_PATH",
+	"The path to the directory with libGLEW in it.",
+	"/usr/local/lib",
+)
+
+# Debug options
 
 o.Add(
 	BoolOption( "DEBUG", "Set this to build without optimisation and with debug symbols.", False ),
 )
 
+# Installation options
+
 o.Add(
 	"IECORE_LIB_SUFFIX",
-	"The suffix for the IECore libraries that are build. This can be used to produce "
+	"The suffix for the IECore libraries that are built. This can be used to produce "
 	"versioned or unversioned libraries.",
 	"-${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}",
 )
@@ -150,8 +238,6 @@ env = Environment(
 	options = o
 )
 
-env["LIBPATH"] = env["LIBPATH"].split( ":" )
-
 if "SAVE_OPTIONS" in ARGUMENTS :
 	o.Save( ARGUMENTS["SAVE_OPTIONS"], env )
 
@@ -166,10 +252,30 @@ env.Append(
     	"-DIE_CORE_PATCHVERSION=$IECORE_PATCH_VERSION",
 	]
 )
-	
-# we use "OpenEXR/x.h" and they use "x.h"
-env.Prepend( CPPPATH = [ os.path.dirname( env["OPENEXR_INCLUDE_PATH"] ) ] )
-env.Prepend( CPPPATH = [ "include", "$BOOST_INCLUDE_PATH", "$OPENEXR_INCLUDE_PATH" ] )
+
+# update the include and lib paths
+env.Prepend(
+	CPPPATH = [
+		"$OPENEXR_INCLUDE_PATH",
+		# we use "OpenEXR/x.h" and they use "x.h"
+		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
+		"$BOOST_INCLUDE_PATH",
+		"$JPEG_INCLUDE_PATH",
+		"$TIFF_INCLUDE_PATH",
+		"$SQLITE_INCLUDE_PATH",
+		"include",
+	],
+	LIBPATH = [
+		"$BOOST_LIB_PATH",
+		"$OPENEXR_LIB_PATH",
+		"$JPEG_LIB_PATH",
+		"$TIFF_LIB_PATH",
+		"$SQLITE_LIB_PATH",
+	],
+	LIBS = [
+		"pthread",
+	],
+)
 
 if env["PLATFORM"]=="darwin" :
 	env.Append( CXXFLAGS = "-Wno-long-double" )
@@ -189,16 +295,20 @@ doConfigure = not "--help" in sys.argv and not "-h" in sys.argv and not env.GetO
 
 if doConfigure :
 
-	c = Configure( env )
+	c = Configure( env ) 
 	
 	if not c.CheckHeader( "boost/version.hpp", "\"\"", "C++" ) :
-		sys.stderr.write( "ERROR : unable to find the boost headers.\n" )
+		sys.stderr.write( "ERROR : unable to find the boost headers, check BOOST_INCLUDE_PATH.\n" )
 		Exit( 1 )
 	
 	# figure out the boost version in use so we can append it to the
 	# library names	if necessary
 	boostVersion = None
 	boostVersionHeader = env.FindFile( "boost/version.hpp", env["CPPPATH"] )
+	if (boostVersionHeader ==None):
+		sys.stderr.write( "ERROR : unable to find the boost headers, check BOOST_INCLUDE_PATH.\n" )
+		Exit( 1 )
+
 	for line in open( str( boostVersionHeader ) ) :
 		m = re.compile( "^#define BOOST_LIB_VERSION \"(.*)\"$" ).match( line )
 		if m  :
@@ -216,11 +326,11 @@ if doConfigure :
 		Exit( 1 )
 
 	if not c.CheckLibWithHeader( env.subst( "boost_filesystem" + env["BOOST_LIB_SUFFIX"] ), "boost/filesystem.hpp", "CXX" ) :
-		sys.stderr.write( "ERROR : unable to find the boost headers.\n" )
+		sys.stderr.write( "ERROR : unable to find the boost libraries - check BOOST_LIB_PATH.\n" )
 		Exit( 1 )
-		
-	if not c.CheckLibWithHeader( "IlmImf", "OpenEXR/ImfInputFile.h", "CXX" ) :
-		sys.stderr.write( "ERROR : unable to find the OpenEXR libraries.\n" )
+
+	if not c.CheckLibWithHeader( "IlmImf", "OpenEXR/ImfInputFile.h", "C++" ) :
+		sys.stderr.write( "ERROR : unable to find the OpenEXR libraries - check OPENEXR_INCLUDE_PATH and OPENEXR_LIB_PATH.\n" )
 		Exit( 1 )
 		
 	c.Finish()
@@ -230,8 +340,8 @@ env.Append( LIBS = [
 		"boost_regex" + env["BOOST_LIB_SUFFIX"],
 		"boost_iostreams" + env["BOOST_LIB_SUFFIX"],
 		"boost_date_time" + env["BOOST_LIB_SUFFIX"],
-		"half",
-		"IEx",
+		"Half",
+		"Iex",
 		"Imath",
 		"IlmImf",
 		"IlmThread",
@@ -279,7 +389,8 @@ else :
 
 testEnv = Environment()
 testEnv["ENV"]["PYTHONPATH"] = "./python"
-testEnv["ENV"][libraryPathEnvVar] = ":".join( ["./lib"] + env["LIBPATH"] )
+
+testEnv["ENV"][libraryPathEnvVar] = ":".join( [ "./lib" ] + env["LIBPATH"] )
 
 ###########################################################################################
 # Build, install and test the core library and bindings
@@ -301,15 +412,17 @@ if doConfigure :
 		c.env.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )
 		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )
 	else :
+		sys.stderr.write( "WARNING: no TIFF library found, no TIFF support, check TIFF_INCLUDE_PATH and TIFF_LIB_PATH.\n" )
 		coreSources.remove( "src/IECore/TIFFImageWriter.cpp" )
 		coreSources.remove( "src/IECore/TIFFImageReader.cpp" )
 		corePythonSources.remove( "src/IECore/bindings/TIFFImageReaderBinding.cpp" )
 		corePythonSources.remove( "src/IECore/bindings/TIFFImageWriterBinding.cpp" )
 		
-	if c.CheckLibWithHeader( "jpeg", "jpeg.h", "CXX" ) :
+	if c.CheckLibWithHeader( "jpeg", ["stdio.h", "jpeglib.h"], "CXX" ) :
 		c.env.Append( CPPFLAGS = '-DIECORE_WITH_JPEG' )
 		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_JPEG' )
 	else :
+		sys.stderr.write( "WARNING: no JPEG library found, no JPEG support, check JPEG_INCLUDE_PATH and JPEG_LIB_PATH.\n" )
 		coreSources.remove( "src/IECore/JPEGImageWriter.cpp" )
 		coreSources.remove( "src/IECore/JPEGImageReader.cpp" )
 		corePythonSources.remove( "src/IECore/bindings/JPEGImageReaderBinding.cpp" )
@@ -318,6 +431,7 @@ if doConfigure :
 	if c.CheckLibWithHeader( "sqlite3", "sqlite/sqlite3.h", "CXX" ) :
 		c.env.Append( CPPFLAGS = "-DIECORE_WITH_SQLITE" )
 	else :
+		sys.stderr.write( "WARNING: no SQLITE library found, no SQLITE support, check SQLITE_INCLUDE_PATH and SQLITE_LIB_PATH\n" )
 		coreSources.remove( "src/IECore/SQLiteIndexedIO.cpp" )
 
 	c.Finish()
@@ -351,6 +465,7 @@ riEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 riEnv.Append(
 	CPPFLAGS = [
+		## \todo This makes no sense now the versions for the two libraries are locked together
     	"-DIE_CORE_MAJOR_VERSION=%d" % ieCoreMajorVersion,
 	]
 )
@@ -373,8 +488,7 @@ if doConfigure :
 	c = Configure( riEnv )
 
 	if not c.CheckLibWithHeader( "3delight", "ri.h", "C" ) :
-	
-		sys.stderr.write( "WARNING : not building IECoreRI.\n" )
+		sys.stderr.write( "WARNING : no 3delight library not found, not building IECoreRI - check RMAN_ROOT.\n" )
 		c.Finish()
 
 	else :
@@ -396,7 +510,7 @@ if doConfigure :
 			riPythonSources.remove( "src/IECoreRI/bindings/PTCParticleReaderBinding.cpp" )
 			riPythonSources.remove( "src/IECoreRI/bindings/PTCParticleWriterBinding.cpp" )
 			
-		if c.CheckFunc(  "RiObjectBeginV", "ri.h" ) :
+		if c.CheckFunc( "RiObjectBeginV" ) :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
 			
@@ -429,6 +543,102 @@ if doConfigure :
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " test/IECoreRI/All.py" )
 		riTestEnv.Depends( riTest, corePythonModule )
 		riTestEnv.Alias( "riTest", riTest )
+
+###########################################################################################
+# Build, install and test the optional CoreGL library and bindings
+###########################################################################################
+
+# because coreGL isn't really stable in terms of api yet it has its own version
+# number. when it moves out of /contrib it'll use the same version number as the
+# main libraries.
+ieCoreGLMajorVersion = 0
+ieCoreGLMinorVersion = 3
+ieCoreGLPatchVersion = 0
+
+if env["WITH_GL"] :
+
+	glEnv = env.Copy()
+	glEnv["IECORE_MAJOR_VERSION"] = ieCoreGLMajorVersion
+	glEnv["IECORE_MINOR_VERSION"] = ieCoreGLMinorVersion
+	glEnv["IECORE_PATCH_VERSION"] = ieCoreGLPatchVersion
+
+	glEnvPrepends = {
+		"CPPPATH" : [
+			"contrib/IECoreGL/include",
+		],
+	}
+	glEnvAppends = {
+		
+		"CPPPATH" : [
+			"contrib/IECoreGL/include",
+			"$GLEW_INCLUDE_PATH",
+		],
+		"CPPFLAGS" : [
+			"-DIE_CORE_MAJOR_VERSION=%d" % ieCoreMajorVersion,
+		],
+		"LIBPATH" : [
+			"$GLEW_LIB_PATH",
+		],
+		"LIBS" : [
+			"GLEW",
+		],
+	
+	}
+		
+	glEnv.Append( **glEnvAppends )
+	glEnv.Prepend( **glEnvPrepends )
+	
+	c = Configure( glEnv )
+	
+	if not c.CheckLibWithHeader( "GLEW", "glew.h", "C" ) :
+	
+		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
+		c.Finish()
+			
+	else :	
+	
+		c.Finish()
+
+		glEnv.Append( LIBS = [ coreLibrary ] )
+	
+		if env["PLATFORM"]=="darwin" :
+			glEnv.Append(
+				FRAMEWORKS = [
+					"OpenGL",
+					"GLUT",
+				]
+			)
+		else :
+			glEnv.Append(
+				LIBS = [
+					"GL",
+					"GLU",
+					"glut",
+				]
+			)
+
+		glSources = glob.glob( "contrib/IECoreGL/src/*.cpp" )
+		glLibrary = glEnv.SharedLibrary( "lib/IECoreGL" + glEnv.subst( "$IECORE_LIB_SUFFIX" ), glSources )
+		glLibraryInstall = glEnv.Install( "$INSTALL_LIB_DIR", glLibrary )
+		glEnv.Alias( "install", glLibraryInstall )
+
+		glHeaders = glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) + glob.glob( "contrib/IECoreGL/include/IECoreGL/*.inl" )
+		glHeaderInstall = glEnv.Install( "$INSTALL_HEADER_DIR/IECoreGL", glHeaders )
+		glEnv.Alias( "install", glHeaderInstall )
+
+		glPythonEnv = pythonEnv.Copy()
+		glPythonEnv.Append( **glEnvAppends )
+		glPythonEnv.Prepend( **glEnvPrepends )
+		glPythonEnv.Append( LIBS = [ coreLibrary, glLibrary ] )
+		glPythonSources = glob.glob( "contrib/IECoreGL/src/bindings/*.cpp" )
+		glPythonModule = glPythonEnv.SharedLibrary( "contrib/IECoreGL/python/IECoreGL/_IECoreGL", glPythonSources )
+		glPythonEnv.Depends( glPythonModule, glLibrary )
+
+		glPythonScripts = glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" )
+		glPythonModuleInstall = glPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )
+		glPythonEnv.Alias( "install", glPythonModuleInstall )
+
+		Default( [ glLibrary, glPythonModule ] )
 		
 ###########################################################################################
 # Documentation
@@ -440,4 +650,4 @@ docs = docEnv.Command( "doc/html/index.html", "", "doxygen doc/config/Doxyfile" 
 docEnv.Depends( docs, glob.glob( "src/IECore/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "src/IECoreRI/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "python/IECore/*.py" ) )
-docEnv.Depends( docs, glob.glob( "python/IECoreRI/*.py" ) )	
+docEnv.Depends( docs, glob.glob( "python/IECoreRI/*.py" ) )
