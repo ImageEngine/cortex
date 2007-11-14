@@ -38,6 +38,10 @@
 
 #include "IECore/MessageHandler.h"
 
+static void nullDisplayFunc()
+{
+}
+
 void IECoreGL::init( bool glAlreadyInitialised )
 {
 	static bool init = false;
@@ -50,7 +54,11 @@ void IECoreGL::init( bool glAlreadyInitialised )
 			// unless you pass the -useWorkingDir option
 			char *argv[] = { "IECoreGL", "-useWorkingDir" };
 			glutInit( &argc, argv );
+			/// \todo We're making a window here to make glut initialise a gl context,
+			/// so that glewInit() works. But we should figure out how to initialise
+			/// GL ourselves and avoid the annoying window popping up at the beginning.
 			int window = glutCreateWindow( "IECoreGL Initial Window" );
+			glutDisplayFunc( nullDisplayFunc );
 			glutDestroyWindow( window );
 		}
 		GLenum initStatus = glewInit();
