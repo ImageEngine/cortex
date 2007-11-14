@@ -33,9 +33,8 @@
 ##########################################################################
 
 import unittest
+import os.path
 
-import VersionControl
-VersionControl.setVersion( "IECore", "2" ) ## \todo need to get version from build config somehow, or have the coreGL module initialise the core module somehow
 from IECore import *
 
 from IECoreGL import *
@@ -47,7 +46,7 @@ class TestImmediateRenderer( unittest.TestCase ) :
 	
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		
 		r.camera( "main", {
 				"projection" : StringData( "perspective" ),

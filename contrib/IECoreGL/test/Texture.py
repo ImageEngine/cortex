@@ -33,9 +33,8 @@
 ##########################################################################
 
 import unittest
+import os.path
 
-import VersionControl
-VersionControl.setVersion( "IECore", "2" ) ## \todo need to get version from build config somehow, or have the coreGL module initialise the core module somehow
 from IECore import *
 
 from IECoreGL import *
@@ -45,7 +44,7 @@ class TestTexture( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 	
-		i = EXRImageReader( "test/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 		
 		t = ColorTexture( i )
 		

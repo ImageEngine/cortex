@@ -34,9 +34,8 @@
 
 import unittest
 import os
+import os.path
 
-import VersionControl
-VersionControl.setVersion( "IECore", "2" ) ## \todo need to get version from build config somehow, or have the coreGL module initialise the core module somehow
 from IECore import *
 
 from IECoreGL import *
@@ -146,7 +145,7 @@ class TestRenderer( unittest.TestCase ) :
 	
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.worldBegin()
 		
 		# we have to make this here so that the shaders that get made are made in the
@@ -176,7 +175,7 @@ class TestRenderer( unittest.TestCase ) :
 		
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.worldBegin()
 		
 		#w = SceneViewer( "scene", r.scene() )
@@ -207,7 +206,7 @@ class TestRenderer( unittest.TestCase ) :
 		
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.worldBegin()
 		
 		#w = SceneViewer( "scene", r.scene() )
@@ -237,7 +236,7 @@ class TestRenderer( unittest.TestCase ) :
 	
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		
 		r.worldBegin()
 		#w = SceneViewer( "scene", r.scene() )		
@@ -247,7 +246,7 @@ class TestRenderer( unittest.TestCase ) :
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		r.concatTransform( M44f.createScaled( V3f( 0.005 ) ) )
 		
-		i = Reader.create( "test/images/numbers.exr" ).read()
+		i = Reader.create( os.path.dirname( __file__ ) + "/images/numbers.exr" ).read()
 		i.render( r )
 		
 		r.worldEnd()
@@ -258,7 +257,7 @@ class TestRenderer( unittest.TestCase ) :
 	
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		
 		r.worldBegin()
 		#w = SceneViewer( "scene", r.scene() )		
@@ -271,7 +270,7 @@ class TestRenderer( unittest.TestCase ) :
 		r.concatTransform( M44f.createScaled( V3f( 0.004 ) ) )
 		
 		r.concatTransform( M44f.createTranslated( V3f( -150, -200, 0 ) ) )
-		i = Reader.create( "test/images/numberWithAlpha.exr" ).read()
+		i = Reader.create( os.path.dirname( __file__ ) + "/images/numberWithAlpha.exr" ).read()
 		i.render( r )
 		
 		r.concatTransform( M44f.createTranslated( V3f( 300, 300, 1 ) ) )
@@ -285,7 +284,7 @@ class TestRenderer( unittest.TestCase ) :
 	
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		
 		r.worldBegin()
 		#w = SceneViewer( "scene", r.scene() )		
@@ -295,7 +294,7 @@ class TestRenderer( unittest.TestCase ) :
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		
 		p = ReadProcedural()
-		p.files["name"].setValue( StringData( "test/models/sphere.cob" ) )
+		p.files["name"].setValue( StringData( os.path.dirname( __file__ ) + "/models/sphere.cob" ) )
 		r.procedural( p )
 		
 		r.worldEnd()

@@ -33,9 +33,8 @@
 ##########################################################################
 
 import unittest
+import os.path
 
-import VersionControl
-VersionControl.setVersion( "IECore", "2" ) ## \todo need to get version from build config somehow, or have the coreGL module initialise the core module somehow
 from IECore import *
 
 from IECoreGL import *
@@ -108,7 +107,7 @@ class TestShader( unittest.TestCase ) :
 		{
 			float x = vec4Parm.r + vec3Parm.g + vec2Parm.y + floatParm + float( intParm ) + float( boolParm );
 			float xx = float( ivec2Parm.x ) + float( ivec3Parm.y ) + float( bvec2Parm.x ) + float( bvec3Parm.y );
-			float xxx = float( s.i ) + s.f + texture2D( s2D, vec2Parm );
+			float xxx = float( s.i ) + s.f + texture2D( s2D, vec2Parm ).r;
 			vec4 p = mat4Parm * gl_FragCoord;
 			vec3 pp = mat3Parm * gl_FragCoord.xyz;
 			gl_FragColor = vec4( x + xx + xxx + p.x + pp.x, gl_Color.g, varyingFloatParm, 1 );
@@ -236,8 +235,8 @@ class TestShader( unittest.TestCase ) :
 		
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
-		r.setOption( "gl:searchPath:texture", StringData( "test/images" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:texture", StringData( os.path.dirname( __file__ ) + "/images" ) )
 		r.worldBegin()
 		
 		# we have to make this here so that the shaders that get made are made in the

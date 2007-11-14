@@ -33,9 +33,8 @@
 ##########################################################################
 
 import unittest
+import os.path
 
-import VersionControl
-VersionControl.setVersion( "IECore", "2" ) ## \todo need to get version from build config somehow, or have the coreGL module initialise the core module somehow
 from IECore import *
 
 from IECoreGL import *
@@ -45,8 +44,8 @@ class TestShaderLoader( unittest.TestCase ) :
 
 	def test( self ) :
 		
-		sp = SearchPath( "test/shaders", ":" )
-		
+		sp = SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
+
 		l = ShaderLoader( sp )
 		
 		s = l.load( "3dLabs/Toon" )	

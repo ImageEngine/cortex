@@ -36,5 +36,5 @@ uniform float greyValue;
 
 void main()
 {
-	gl_FragColor = greyValue;
+	gl_FragColor = vec4( greyValue, greyValue, greyValue, 1 );
 }
