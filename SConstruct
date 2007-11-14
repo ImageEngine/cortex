@@ -256,6 +256,7 @@ env.Append(
 # update the include and lib paths
 env.Prepend(
 	CPPPATH = [
+		"include",
 		"$OPENEXR_INCLUDE_PATH",
 		# we use "OpenEXR/x.h" and they use "x.h"
 		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
@@ -263,7 +264,6 @@ env.Prepend(
 		"$JPEG_INCLUDE_PATH",
 		"$TIFF_INCLUDE_PATH",
 		"$SQLITE_INCLUDE_PATH",
-		"include",
 	],
 	LIBPATH = [
 		"$BOOST_LIB_PATH",
@@ -274,6 +274,10 @@ env.Prepend(
 	],
 	LIBS = [
 		"pthread",
+	],
+	CXXFLAGS = [
+		"-Wall",
+		"-Werror",
 	],
 )
 
@@ -310,7 +314,7 @@ if doConfigure :
 		Exit( 1 )
 
 	for line in open( str( boostVersionHeader ) ) :
-		m = re.compile( "^#define BOOST_LIB_VERSION \"(.*)\"$" ).match( line )
+		m = re.compile( "^#define BOOST_LIB_VERSION \"(.*)\"\s*$" ).match( line )
 		if m  :
 			boostVersion = m.group( 1 )
 		if boostVersion :
@@ -325,11 +329,11 @@ if doConfigure :
 		sys.stderr.write( "ERROR : unable to determine boost version from \"%s\".\n" % boostVersionHeader )
 		Exit( 1 )
 
-	if not c.CheckLibWithHeader( env.subst( "boost_filesystem" + env["BOOST_LIB_SUFFIX"] ), "boost/filesystem.hpp", "CXX" ) :
+	if not c.CheckLibWithHeader( env.subst( "boost_filesystem" + env["BOOST_LIB_SUFFIX"] ), "boost/filesystem/path.hpp", "CXX" ) :
 		sys.stderr.write( "ERROR : unable to find the boost libraries - check BOOST_LIB_PATH.\n" )
 		Exit( 1 )
 
-	if not c.CheckLibWithHeader( "IlmImf", "OpenEXR/ImfInputFile.h", "C++" ) :
+	if not c.CheckLibWithHeader( "Iex", "OpenEXR/ImfInputFile.h", "C++" ) :
 		sys.stderr.write( "ERROR : unable to find the OpenEXR libraries - check OPENEXR_INCLUDE_PATH and OPENEXR_LIB_PATH.\n" )
 		Exit( 1 )
 		
