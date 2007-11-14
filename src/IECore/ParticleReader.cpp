@@ -98,8 +98,9 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 {
 	vector<string> attributes;
 	particleAttributes( attributes );
-	size_t nParticles = numParticles();
-	PointsPrimitivePtr result = new PointsPrimitive( nParticles );
+	PointsPrimitivePtr result = new PointsPrimitive( 0 ); // because of percentage filtering we don't know the number of points until we've loaded an attribute
+	bool haveNumPoints = false;
+	size_t numPoints = 0;
 	for( vector<string>::const_iterator it = attributes.begin(); it!=attributes.end(); it++ )
 	{
 		DataPtr d = readAttribute( *it );
@@ -107,13 +108,17 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 		{
 			// throws if it's not vector data
 			size_t s = despatchVectorTypedDataFn<size_t, VectorTypedDataSize, VectorTypedDataSizeArgs>( d, VectorTypedDataSizeArgs() );
-			if( s==nParticles )
+			if( !haveNumPoints )
 			{
+				numPoints = s;
+			}
+			if( s==numPoints )
+			{			
 				result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Vertex, d ) ) );
 			}
 			else
-			{
-				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % *it % nParticles % s );
+			{			
+				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % *it % numPoints % s );
 			}
 		}
 		catch( ... )
@@ -131,6 +136,7 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 			}
 		}
 	}
+	result->setNumPoints( numPoints );
 	return result;
 }
 

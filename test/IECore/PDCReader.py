@@ -94,13 +94,21 @@ class TestPDCReader( unittest.TestCase ) :
 	
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		
+		attributesToLoad = [ "position", "age" ]
 		r.parameters().percentage.setValue( IECore.FloatData( 50 ) )
+		r.parameters().attributes.setValue( IECore.StringVectorData( attributesToLoad ) )
 		
 		a = r.readAttribute( "position" )
 		# what the acceptable thresholds should be are somewhat debatable,
 		# especially for such a small number of particles
 		self.assert_( len( a ) < 13 )
 		self.assert_( len( a ) > 7 )
+		
+		p = r.read()
+		self.assert_( p.numPoints < 13 )
+		self.assert_( p.numPoints > 7 )
+		for attr in attributesToLoad :
+			self.assertEqual( p.numPoints, p[attr].data.size() )
 		
 	def testConversion( self ) :
 	
