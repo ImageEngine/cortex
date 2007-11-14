@@ -173,7 +173,7 @@ void Renderer::curves( const std::string &interpolation, bool periodic, IECore::
 
 Imath::Box3f Renderer::textExtents( const std::string &t, float width )
 {
-	m_implementation->textExtents( t, width );
+	return m_implementation->textExtents( t, width );
 }
 
 void Renderer::text( const std::string &t, float width )
