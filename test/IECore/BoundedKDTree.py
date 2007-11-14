@@ -41,9 +41,9 @@ class TestBoundedKDTree:
 
 	treeSizes = [0, 1, 10, 50, 5000]
 	
-	def doIntersectingBounds(self, numBounds):
+	def doIntersectingRandomBounds(self, numBounds):
 		
-		self.makeTree(numBounds)
+		self.makeRandomTree(numBounds)
 		
 		numTests = 25
 		if numBounds:
@@ -51,7 +51,7 @@ class TestBoundedKDTree:
 		
 		for j in range(0, numTests):
 		
-			bound = self.makeBound()			
+			bound = self.makeRandomBound()			
 			bIdxArray = self.tree.intersectingBounds( bound )
 				
 			for bIdx in bIdxArray:
@@ -60,11 +60,21 @@ class TestBoundedKDTree:
 				nearestBound = self.bounds[bIdx]
 		
 				self.assert_( nearestBound.intersects( bound ) )
+				
+	def doIntersectingBounds(self, numBounds):
+		
+		self.makeTree(numBounds)
+		
+		bound = self.makeBound()			
+		bIdxArray = self.tree.intersectingBounds( bound )
+			
+		self.assertEqual( len( bIdxArray ), numBounds )	
+
 
 	
 class TestBoundedKDTreeBox3f(unittest.TestCase, TestBoundedKDTree):
 
-	def makeBound( self ) :
+	def makeRandomBound( self ) :
 		b1 = V3f( random.random(), random.random(), random.random() )
 		b2 = V3f( random.random(), random.random(), random.random() )
 		bound = Box3f( b1 )
@@ -72,33 +82,48 @@ class TestBoundedKDTreeBox3f(unittest.TestCase, TestBoundedKDTree):
 		
 		return bound
 		
+	def makeBound( self ) :
+		b1 = V3f( -1, -1, -1 )
+		b2 = V3f( 1, 1, 1 )
+		bound = Box3f( b1, b2 )
+		
+		return bound			
 
-	def makeTree(self, numBounds):
+	def makeRandomTree(self, numBounds):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numBounds)
 		self.bounds = Box3fVectorData()
 		
 		for i in range(0, numBounds):
-			self.bounds.append( self.makeBound() )
+			self.bounds.append( self.makeRandomBound() )
 				
 		self.tree = Box3fTree( self.bounds )
+		
+	def makeTree(self, numBounds):
+		self.bounds = Box3fVectorData()
+		
+		for i in range(0, numBounds):
+			self.bounds.append( self.makeBound() )
+				
+		self.tree = Box3fTree( self.bounds )	
 	
 	def testConstructors(self):
 		"""Test BoundedKDTreeBox3f constructors"""
 		
 		for t in self.treeSizes:
-			self.makeTree(t)
+			self.makeRandomTree(t)
 			
 	def testIntersectingBounds(self):
 		"""Test BoundedKDTreeBox3f intersectingBounds"""
 		
 		for t in self.treeSizes:
+			self.doIntersectingRandomBounds(t)
 			self.doIntersectingBounds(t)			
 	
 
 class TestBoundedKDTreeBox3d(unittest.TestCase, TestBoundedKDTree):
 
-	def makeBound( self ) :
+	def makeRandomBound( self ) :
 		b1 = V3d( random.random(), random.random(), random.random() )
 		b2 = V3d( random.random(), random.random(), random.random() )
 		bound = Box3d( b1 )
@@ -106,94 +131,141 @@ class TestBoundedKDTreeBox3d(unittest.TestCase, TestBoundedKDTree):
 		
 		return bound
 		
+	def makeBound( self ) :
+		b1 = V3d( -1, -1, -1)
+		b2 = V3d( 1, 1, 1 )
+		bound = Box3d( b1, b2 )
+		
+		return bound		
+		
 
-	def makeTree(self, numBounds):
+	def makeRandomTree(self, numBounds):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numBounds)
 		self.bounds = Box3dVectorData()
 		
 		for i in range(0, numBounds):
-			self.bounds.append( self.makeBound() )
+			self.bounds.append( self.makeRandomBound() )
 				
 		self.tree = Box3dTree( self.bounds )
+		
+	def makeTree(self, numBounds):
+		self.bounds = Box3dVectorData()
+		
+		for i in range(0, numBounds):
+			self.bounds.append( self.makeBound() )
+				
+		self.tree = Box3dTree( self.bounds )	
 	
 	def testConstructors(self):
 		"""Test BoundedKDTreeBox3d constructors"""
 		
 		for t in self.treeSizes:
-			self.makeTree(t)
+			self.makeRandomTree(t)
 			
 	def testIntersectingBounds(self):
 		"""Test BoundedKDTreeBox3d intersectingBounds"""
 		
 		for t in self.treeSizes:
+			self.doIntersectingRandomBounds(t)
 			self.doIntersectingBounds(t)
 	
 class TestBoundedKDTreeBox2f(unittest.TestCase, TestBoundedKDTree):
 
-	def makeBound( self ) :
+	def makeRandomBound( self ) :
 		b1 = V2f( random.random(), random.random() )
 		b2 = V2f( random.random(), random.random() )
 		bound = Box2f( b1 )
 		bound.extendBy( b2 )
 		
 		return bound
+		
+	def makeBound( self ) :
+		b1 = V2f( -1, -1 )
+		b2 = V2f( 1, 1 )
+		bound = Box2f( b1, b2 )
+		
+		return bound		
 
 
-	def makeTree(self, numBounds):
+	def makeRandomTree(self, numBounds):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numBounds)
 		self.bounds = Box2fVectorData()
 		
 		for i in range(0, numBounds):
-			self.bounds.append( self.makeBound() )
+			self.bounds.append( self.makeRandomBound() )
 				
 		self.tree = Box2fTree( self.bounds )
+		
+	def makeTree(self, numBounds):
+		self.bounds = Box2fVectorData()
+		
+		for i in range(0, numBounds):
+			self.bounds.append( self.makeBound() )
+				
+		self.tree = Box2fTree( self.bounds )	
 	
 	def testConstructors(self):
 		"""Test BoundedKDTreeBox2f constructors"""
 		
 		for t in self.treeSizes:
-			self.makeTree(t)
+			self.makeRandomTree(t)
 			
 	def testIntersectingBounds(self):
 		"""Test BoundedKDTreeBox2f intersectingBounds"""
 		
 		for t in self.treeSizes:
-			self.doIntersectingBounds(t)	
+			self.doIntersectingRandomBounds(t)	
+			self.doIntersectingBounds(t)				
 			
 
 class TestBoundedKDTreeBox2d(unittest.TestCase, TestBoundedKDTree):
 
-	def makeBound( self ) :
+	def makeRandomBound( self ) :
 		b1 = V2d( random.random(), random.random() )
 		b2 = V2d( random.random(), random.random() )
 		bound = Box2d( b1 )
 		bound.extendBy( b2 )
 		
 		return bound
+		
+	def makeBound( self ) :
+		b1 = V2d( -1, -1 )
+		b2 = V2d( 1, 1 )
+		bound = Box2d( b1, b2 )
+		
+		return bound	
 
-
-	def makeTree(self, numBounds):
+	def makeRandomTree(self, numBounds):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numBounds)
 		self.bounds = Box2dVectorData()
 		
 		for i in range(0, numBounds):
-			self.bounds.append( self.makeBound() )
+			self.bounds.append( self.makeRandomBound() )
 				
 		self.tree = Box2dTree( self.bounds )
+		
+	def makeTree(self, numBounds):
+		self.bounds = Box2dVectorData()
+		
+		for i in range(0, numBounds):
+			self.bounds.append( self.makeBound() )
+				
+		self.tree = Box2dTree( self.bounds )	
 	
 	def testConstructors(self):
 		"""Test BoundedKDTreeBox2d constructors"""
 		
 		for t in self.treeSizes:
-			self.makeTree(t)
+			self.makeRandomTree(t)
 			
 	def testIntersectingBounds(self):
 		"""Test BoundedKDTreeBox2d intersectingBounds"""
 		
 		for t in self.treeSizes:
+			self.doIntersectingRandomBounds(t)
 			self.doIntersectingBounds(t)	
 
 	

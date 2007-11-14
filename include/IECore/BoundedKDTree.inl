@@ -62,9 +62,11 @@ class BoundedKDTree<BoundIterator>::Node
 {
 	public :
 	
-		Node() 
+		Node() : m_cutAxisAndLeaf(0)
 		{
-			m_bound = Bound();
+			m_bound = Bound( BaseType(0.0) );
+			m_perm.first = 0;
+			m_perm.last = 0;			
 		}
 		
 		inline void makeLeaf( PermutationIterator permFirst, PermutationIterator permLast )
@@ -210,7 +212,7 @@ void BoundedKDTree<BoundIterator>::bound( NodeIndex nodeIndex  )
 		bound( Node::highChildIndex( nodeIndex ) );
 		node.bound().extendBy( m_nodes[Node::lowChildIndex( nodeIndex )].bound() );
 		node.bound().extendBy( m_nodes[Node::highChildIndex( nodeIndex )].bound() );			
-	}
+	}	
 }
 
 
@@ -257,7 +259,7 @@ BoundedKDTree<BoundIterator>::BoundedKDTree( BoundIterator first, BoundIterator 
 	{
 		m_perm[i++] = it;
 	}
-	
+		
 	build( Node::rootIndex(), m_perm.begin(), m_perm.end() );
 	bound( Node::rootIndex() );
 }
@@ -304,6 +306,7 @@ void BoundedKDTree<BoundIterator>::intersectingBoundsWalk(  NodeIndex nodeIndex,
 		}
 	}
 }
+
 
 
 } // namespace IECore
