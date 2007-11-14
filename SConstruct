@@ -322,7 +322,7 @@ if doConfigure :
 			break
 			
 	if not boostVersion :
-		sys.stderr.write( "ERROR : unable to determine boost version from \"%s\"." % boostVersionHeader )
+		sys.stderr.write( "ERROR : unable to determine boost version from \"%s\".\n" % boostVersionHeader )
 		Exit( 1 )
 
 	if not c.CheckLibWithHeader( env.subst( "boost_filesystem" + env["BOOST_LIB_SUFFIX"] ), "boost/filesystem.hpp", "CXX" ) :
