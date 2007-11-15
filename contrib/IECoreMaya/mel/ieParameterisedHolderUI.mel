@@ -1,0 +1,238 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+global string $ieCurrentAEParameterisedHolderClass;
+global int $ieCurrentAEParameterisedHolderVersion;
+
+global proc AEieParameterisedHolderTemplate( string $nodeName )
+{
+	editorTemplate -beginScrollLayout;
+	
+		editorTemplate -beginLayout "Class";
+			ieParameterisedHolderUIClassControl();
+		editorTemplate -endLayout;
+		
+		editorTemplate -beginLayout "Parameters";
+			ieParameterisedHolderUIParametersControl();		
+		editorTemplate -endLayout;
+		
+		editorTemplate -beginLayout "Extra Attributes";
+			
+			ieParameterisedHolderUIExtraAttributesControl();
+			
+		editorTemplate -endLayout;
+	
+	editorTemplate -endScrollLayout;	
+
+}
+
+/// Call this function from within an AEtemplate to add a layout for editing the parameters of
+/// a ParameterisedHolder.
+global proc ieParameterisedHolderUIParametersControl()
+{
+	editorTemplate -callCustom "ieParameterisedHolderUIParametersNew" "ieParameterisedHolderUIParametersReplace" "iDontExist";
+}
+
+/// A global dictionary from Attribute Editor parent layouts to ParameterUI objects
+iePython -command "ieAEParameterUIs = {}";
+
+global proc ieParameterisedHolderUIParametersNew( string $attrName )
+{
+	setUITemplate -pushTemplate attributeEditorTemplate;
+	global string $ieCurrentAEParameterisedHolderClass;
+	global int $ieCurrentAEParameterisedHolderVersion;
+
+	string $node = ieAttrNode( $attrName );
+		
+	string $py = "parameterisedHolder = IECoreMaya.ParameterisedHolder( '"+$node+"' )\nparameterised = parameterisedHolder.getParameterised()[0]\nif parameterised: ieAEParameterUIs['" + `setParent -q` + "'] = IECoreMaya.ParameterUI.create( parameterisedHolder, parameterised.parameters() )";
+	iePython -command $py;
+	
+	$ieCurrentAEParameterisedHolderClass = ieParameterisedHolderClassName( $node );
+	$ieCurrentAEParameterisedHolderVersion = ieParameterisedHolderClassVersion( $node );
+	
+	setUITemplate -popTemplate;
+}
+
+global proc ieParameterisedHolderUIParametersReplace( string $attrName )
+{
+	global string $ieCurrentAEParameterisedHolderClass;
+	global int $ieCurrentAEParameterisedHolderVersion;
+	
+	string $node = ieAttrNode( $attrName );
+	
+	string $class = ieParameterisedHolderClassName( $node );
+	int $currentVersion = ieParameterisedHolderClassVersion( $node );
+	
+	if ( $class!="" && $ieCurrentAEParameterisedHolderClass == $class && $ieCurrentAEParameterisedHolderVersion == $currentVersion)
+	{
+		string $py = "parameterisedHolder = IECoreMaya.ParameterisedHolder( '"+$node+"' )\nparameterised = parameterisedHolder.getParameterised()[0]\nif parameterised: ieAEParameterUIs['" + `setParent -q` + "'].replace( parameterisedHolder, parameterised.parameters() )";
+		iePython -command $py;
+	}
+	else
+	{
+		string $currentLayout = `setParent -q`;
+		if (`layout -q -exists $currentLayout`)
+		{
+			string $currentLayoutChildren[] = `layout -q -ca $currentLayout`;
+			
+			if (size($currentLayoutChildren))
+			{
+				deleteUI $currentLayoutChildren;
+			}
+		}
+		
+		ieParameterisedHolderUIParametersNew( $attrName );			
+	}
+}
+
+/// Call this from within an AEtemplate proc to include a control section for displaying the
+/// class name and description and setting the class version.
+global proc ieParameterisedHolderUIClassControl()
+{
+	editorTemplate -callCustom "ieParameterisedHolderUIClassControlNewAndReplace" "ieParameterisedHolderUIClassControlNewAndReplace" "className";
+}
+
+global proc ieParameterisedHolderUIClassControlNewAndReplace( string $attrName )
+{
+	string $node = ieAttrNode( $attrName );
+	
+	string $description = ieParameterisedHolderClassDescription( $node );
+	string $class = ieParameterisedHolderClassName( $node );
+	int $currentVersion = ieParameterisedHolderClassVersion( $node );
+	int $versions[] = ieParameterisedHolderClassVersions( $node );
+	
+	string $controlName = "ieParameterisedHolderUIAEClassControl";
+	if( `control -exists $controlName` )
+	{
+		deleteUI $controlName;
+	}
+	
+	rowLayout -nc 2 $controlName;
+		text -align right -label $class -ann $description;
+		text -align left -font boldLabelFont -label ("v"+$currentVersion);
+		popupMenu;
+			for( $version in $versions )
+			{
+ 				menuItem -label ("v"+$version) -command ("ieParameterisedHolderUIClassControlVersionCallback " + $node + " " + $version);
+			}
+		setParent ..;
+	setParent ..;
+}
+
+global proc ieParameterisedHolderUIClassControlVersionCallback( string $node, string $versionStr )
+{
+	int $versionInt = (int)$versionStr;
+	string $class = ieParameterisedHolderClassName( $node );
+	string $sp = ieParameterisedHolderClassSearchPathEnvVar( $node );
+	ieParameterisedHolderSetParameterised( $node, $class, $versionInt, $sp );
+}
+
+global proc ieParameterisedHolderUIExtraAttributesControl()
+{
+	editorTemplate -callCustom "ieParameterisedHolderUIExtraAttributesNewAndReplace" "ieParameterisedHolderUIExtraAttributesNewAndReplace" "iDontExist";
+	editorTemplate -extraControlsLabel "Do not open" -addExtraControls;
+}
+		
+global proc ieParameterisedHolderUIExtraAttributesNewAndReplace( string $attrName )
+{
+	string $buf[2];
+	tokenize( $attrName, ".", $buf);
+	
+	string $nodeName = $buf[0];
+	string $attrName = $buf[1];
+
+	if (`control -exists ieParameterisedAEExtraAttributes`)
+		deleteUI ieParameterisedAEExtraAttributes;
+		
+	string $dynAttrs[] = `deleteAttr -q $nodeName`;
+	
+	columnLayout ieParameterisedAEExtraAttributes;
+	
+	string $dynAttr;
+	for ($dynAttr in $dynAttrs)
+	{
+		if (match("^parm_", $dynAttr) == "")
+		{
+			attrControlGrp -attribute ($nodeName + "." + $dynAttr);
+		}
+	}
+	
+	/// Set up a little script job that lets us hide Maya's built-in Extra Attributes layout after
+	/// construction of the AE window is complete
+	scriptJob -runOnce true -event "idle" ieParameterisedHolderUIHideExtraAttributes;
+}
+
+global proc ieParameterisedHolderUIHideExtraAttributes()
+{
+	if (`control -exists ieParameterisedAEExtraAttributes`)
+	{
+		/// As "control -q -p" doesn't seem to work we have to look through all of the layouts hunting
+		/// for ieParameterisedAEExtraAttributes to obtain its long name.
+		string $c;
+		for ($c in `lsUI -l -controlLayouts`)
+		{
+			if (match("ieParameterisedAEExtraAttributes$", $c) != "")
+			{
+				string $buf[];
+				tokenize($c, "|", $buf);
+				
+				/// Strip off the last two child layouts, which should leave us at the scrollLayout which
+				/// represents our "Extra Attributes".
+				string $extraAttributesLayout = "";
+				int $i;
+				for ($i = 0; $i < size($buf) - 2; $i++)
+				{
+					if ($i != 0)
+					{
+						$extraAttributesLayout += "|";						
+					}
+					$extraAttributesLayout += $buf[$i];
+				}
+				
+				/// For safety....
+				if (size($extraAttributesLayout))
+				{
+					/// Again for safety....
+					if (`layout -exists $extraAttributesLayout`)
+					{
+						string $children[] = `layout -q -ca $extraAttributesLayout`;
+					
+						/// Hide the last child, which should be the Maya built-in Extra Attributes scrollLayout
+						control -e -manage false $children[size($children)-1];
+					}
+				}				
+			}
+		}
+	}
+}

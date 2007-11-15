@@ -1,0 +1,133 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+
+global proc int ieUnitTestRun(string $testFolder, int $results[])
+{	
+	openMayaPref -errlog true;
+
+	string $testFiles[] = `getFileList -fld $testFolder -fs "*.mel"`;
+	string $testFile;
+
+	for ($testFile in $testFiles)
+	{
+		if ($testFile != "testMain.mel")		
+		{
+			string $buf[];
+			
+			tokenize($testFile, ".", $buf);
+			
+			string $testName = $buf[0];
+			
+			string $cmd = "source \"" + $testFolder + $testFile + "\"";
+		
+			print ($testFile + " ... ");
+			int $err;
+			
+			$err = catch(eval($cmd));
+
+			string $setUpCmd = $testName + "SetUp";
+			if (whatIs($setUpCmd) != "Unknown")
+			{
+				$err = catch(eval($setUpCmd));
+			}
+			
+			global int $testResult = 1;
+			string $runCmd = $testName + "Run";
+			if (whatIs($runCmd) != "Unknown")
+			{				
+				$err = catch(eval("global int $testResult; $testResult = `" + $runCmd + "`"));
+				
+				if ($err == 0)
+				{
+					if ($testResult != 0)
+					{
+						$results[2] = $results[2] + 1;
+						print("FAIL\n");
+					}
+					else
+					{
+						$results[0] = $results[0] + 1;
+						print "ok\n";
+					}					
+				}			
+				else
+				{
+					print "ERROR\n";
+					$results[1] = $results[1] + 1;
+				}
+			}
+			else
+			{
+				print "ERROR\n";
+				$results[1] = $results[1] + 1;
+			}
+			
+			string $tearDownCmd = $testName + "TearDown";
+			if (whatIs($tearDownCmd) != "Unknown")
+			{
+				$err = catch(eval($tearDownCmd));
+			}
+		}
+	}
+	
+	return 0;
+}
+
+global proc ieUnitTest(string $testFolder)
+{	
+	global int $results[3] = {0, 0, 0};	
+	float $startTime = `timerX`;
+	int $err = catch(eval("global int $results[3]; ieUnitTestRun(\"" + $testFolder + "\", $results)"));
+	float $timeElapsed = `timerX -st $startTime`;
+	
+	float $timeRounded = ((int)($timeElapsed * 100.0)) / 100.0;
+	
+	print("\nRan " + ($results[0] + $results[1]) + " tests in " + $timeRounded + " seconds:\n");
+	print("\t" + $results[0] + " passes\n");
+	print("\t" + $results[1] + " errors\n");	
+	print("\t" + $results[2] + " failures\n");
+	print("\n");		
+	
+	$err = $err + $results[1] + $results[2];
+		
+	if ($err != 0)
+	{
+			eval("ieSystemExit 1");
+	}
+	else
+	{
+			eval("ieSystemExit 0");
+	}
+}

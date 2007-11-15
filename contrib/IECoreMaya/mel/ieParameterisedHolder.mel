@@ -1,0 +1,100 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
+/// \file ieParameterisedHolder.mel
+///
+/// This file defines functions which can be used with any of the node types
+/// instantiated from the template ParameterisedHolder class.
+///
+/// \ingroup melgroup
+
+/// Returns the name of the class being held.
+/// \todo Handle case where getParameterised() returns None
+global proc string ieParameterisedHolderClassName( string $nodeName )
+{
+	return `iePython -eval ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).getParameterised()[1]")`;
+}
+
+/// Returns the version of the class being held.
+/// \todo Handle case where getParameterised() returns None
+global proc int ieParameterisedHolderClassVersion( string $nodeName )
+{
+	return (int) `iePython -eval ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).getParameterised()[2]")`;
+}
+
+/// Returns the name of the environment variable which specifies the
+/// searchpaths this node looks for classes on.
+/// \todo Handle case where getParameterised() returns None
+global proc string ieParameterisedHolderClassSearchPathEnvVar( string $nodeName )
+{
+	return `iePython -eval ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).getParameterised()[3]")`;
+}
+
+/// Returns the description for the class being held.
+global proc string ieParameterisedHolderClassDescription( string $nodeName )
+{
+	return `iePython -eval ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).getParameterised()[0].description")`;
+}
+
+/// Returns an int array containing all the valid versions of the class
+/// currently being held by $nodeName.
+global proc int[] ieParameterisedHolderClassVersions( string $nodeName )
+{
+	string $class = ieParameterisedHolderClassName( $nodeName );
+	string $sp = ieParameterisedHolderClassSearchPathEnvVar( $nodeName );
+	$sp = getenv( $sp );
+	iePython -command "import os.path";
+	string $versions = `iePython -eval ("IECore.ClassLoader( IECore.SearchPath( os.path.expandvars('" + $sp + "'), ':' ) ).versions( '" + $class + "' )" )`;
+	string $tokens[];
+	tokenize $versions "[], " $tokens;
+	int $result[];
+	for( $i=0; $i<size($tokens); $i++ )
+	{
+		$result[$i] = $tokens[$i];
+	}
+	return $result;
+}
+
+/// Sets the parameterised class being held by this node. If $classVersion is less than 0 then the default version for that
+/// class will be loaded.
+global proc ieParameterisedHolderSetParameterised( string $nodeName, string $className, int $classVersion, string $searchPathEnvVar )
+{
+	if( $classVersion < 0 )
+	{
+		string $sp = getenv( $searchPathEnvVar );
+		iePython -command "import os.path";
+		$classVersion = (int) `iePython -eval ( "IECore.ClassLoader( IECore.SearchPath(  os.path.expandvars('" + $sp + "'), ':' ) ).getDefaultVersion( '" + $className + "' )" )`;
+	}
+	iePython -cmd ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).setParameterised( '" + $className + "' , " + $classVersion + ", '" + $searchPathEnvVar + "' )");
+}

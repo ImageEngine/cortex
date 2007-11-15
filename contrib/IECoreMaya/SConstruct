@@ -1,0 +1,269 @@
+##########################################################################
+#
+#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are
+#  met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#
+#     * Neither the name of Image Engine Design nor the names of any
+#       other contributors to this software may be used to endorse or
+#       promote products derived from this software without specific prior
+#       written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+#  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+#  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+#  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+#  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+#  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+##########################################################################
+
+
+import os
+import IEEnv
+
+import VersionControl
+VersionControl.setVersion('IEBuild', '1.7.2')
+import IEBuild
+
+name = 'IECoreMaya'
+version = '2.10.0'
+
+coreMajorVersion = '2'
+coreGLMajorVersion = '0'
+coreMayaMajorVersion = '2'
+glewVersion = "1.4.0"
+
+librarySource = [
+	'src/CacheSet.cpp',
+	'src/IECoreMaya.cpp',
+	'src/Converter.cpp',
+	'src/FromMayaConverter.cpp',
+	'src/FromMayaObjectConverter.cpp',
+	'src/FromMayaPlugConverter.cpp',		
+	'src/FromMayaMeshConverter.cpp',
+	'src/Parameter.cpp',
+	'src/ParameterHandler.cpp',	
+	'src/BoolParameterHandler.cpp',
+	'src/NumericParameterHandler.cpp',
+	'src/BoxParameterHandler.cpp',
+	'src/ObjectParameterHandler.cpp',
+	'src/MeshParameterHandler.cpp',	
+	'src/CompoundNumericParameterHandler.cpp',
+	'src/StringParameterHandler.cpp',
+	'src/CompoundParameterHandler.cpp',
+	'src/StringVectorParameterHandler.cpp',
+	'src/StatusException.cpp',
+	'src/FromMayaNumericDataConverter.cpp',	
+	'src/ToMayaObjectConverter.cpp',
+	'src/ToMayaMeshConverter.cpp',	
+	'src/ToMayaPlugConverter.cpp',
+	'src/ToMayaNumericDataConverter.cpp',
+	'src/MayaTime.cpp',
+	'src/ParameterisedHolder.cpp',
+	'src/PythonCmd.cpp',	
+	'src/MayaPythonUtil.cpp',
+	'src/ProceduralHolder.cpp',
+	'src/ProceduralHolderUI.cpp',
+	'src/ParameterisedHolderInterface.cpp',
+	'src/SystemExitCmd.cpp',		
+	'src/MessageHandler.cpp',
+	'src/FromMayaGroupConverter.cpp',
+	'src/NumericTraits.cpp',
+	'src/FromMayaArrayDataConverter.cpp',
+	'src/FromMayaStringPlugConverter.cpp',
+	'src/FromMayaCompoundNumericPlugConverter.cpp',
+	'src/FromMayaNumericPlugConverter.cpp',
+	'src/Convert.cpp',
+	'src/FromMayaRenderableConverterUtil.cpp',
+	'src/ObjectData.cpp',
+	'src/OpHolder.cpp',
+	'src/ObjectMFnDataParameterHandler.cpp',	
+	'src/ToMayaArrayDataConverter.cpp',	
+	'src/PostLoadCallback.cpp',	
+	'src/MayaHeaderGenerator.cpp',
+	'src/FromMayaCameraConverter.cpp',
+	'src/ConverterHolder.cpp',
+]
+
+pythonBindingsSource = [
+	'src/bindings/IECoreMaya.cpp',
+	'src/bindings/ParameterisedHolderBinding.cpp',	
+	'src/bindings/MayaPythonUtilBinding.cpp',
+	'src/bindings/MObjectBinding.cpp',
+	'src/bindings/NodeBinding.cpp',
+	'src/bindings/DagNodeBinding.cpp',
+	'src/bindings/ConverterBinding.cpp',
+	'src/bindings/FromMayaConverterBinding.cpp',
+	'src/bindings/FromMayaPlugConverterBinding.cpp',
+	'src/bindings/PlugBinding.cpp',
+	'src/bindings/FromMayaObjectConverterBinding.cpp',
+	'src/bindings/FromMayaCameraConverterBinding.cpp',
+]
+
+pythonSource = [
+	'python/IECoreMaya/__init__.py',
+	'python/IECoreMaya/ParameterUI.py',	
+	'python/IECoreMaya/DAGPathParameter.py',
+	'python/IECoreMaya/DAGPathVectorParameter.py',
+	'python/IECoreMaya/mayaDo.py',
+	'python/IECoreMaya/ConverterHolder.py',
+	'python/IECoreMaya/createMenu.py',
+]
+
+includePath = [ 'include'
+        ]
+		
+pluginSource = [
+	'src/plugin/Plugin.cpp'
+]
+
+#######################################################################################
+# Library
+#######################################################################################
+
+lib = IEBuild.SharedLibrary(ARGUMENTS, name, version, librarySource, includePath)
+
+lib.setMayaVersion()
+lib.addVersionedDependency("IECore", coreMajorVersion )
+lib.addVersionedDependency("IECoreGL", coreGLMajorVersion )
+lib.addVersionedInclude( "OpenEXR", "1.4.0" )
+lib.addVersionedInclude( "boost", "1.33.1" )
+lib.addVersionedInclude( "glew", glewVersion )
+lib.doxygen('doc/config/Doxyfile', 'doc/config/header.html', 'doc/config/footer.html')
+
+
+pythonVersion='2.5'
+pythonInfo = IEEnv.registry['apps']['python'][pythonVersion][IEEnv.platform()]
+
+lib.addCXXFlag('-fno-strict-aliasing')
+lib.addLinkFlag('-export-dynamic')
+
+lib.addInclude( os.path.join(pythonInfo['location'], lib.getCompiler(), lib.getCompilerVersion(), 'include', "python" + pythonVersion ) )
+lib.addLibPath( os.path.join(pythonInfo['location'], lib.getCompiler(), lib.getCompilerVersion(), 'lib' ) )
+lib.addLib('python' + pythonVersion)
+lib.addLib('boost_python') 
+lib.addLib("OpenMayaAnim")
+lib.addLib("OpenMayaUI")
+lib.addLib("OpenMayaFX")
+lib.addDefine( "IECORE_MAJOR_VERSION", coreMajorVersion )
+lib.addDefine( "IE_INTERNAL_BUILD" )
+
+if IEEnv.platformOS()=="rhel4" :
+	lib.addDefine( "LINUX" )
+
+env = lib.finalize()                  
+
+#######################################################################################
+# Python module
+#######################################################################################
+
+pythonModule = IEBuild.PythonModule( ARGUMENTS, "IECoreMaya", version, pythonBindingsSource, includePath, pythonSource, "python/IECoreMaya" )
+pythonModule.getLibrary().setMayaVersion()
+pythonModule.getLibrary().setCompiler( lib.getCompiler(), lib.getCompilerVersion() )
+pythonModule.getLibrary().addVersionedDependency("IECore", coreMajorVersion)
+pythonModule.getLibrary().addVersionedDependency("IECoreMaya", version)
+pythonModule.getLibrary().addVersionedInclude( "OpenEXR", "1.4.0" )
+pythonModule.getLibrary().addVersionedInclude( "boost", "1.33.1" )
+
+pythonModule.getLibrary().addDefine( "IE_INTERNAL_BUILD" )
+
+if IEEnv.platformOS()=="rhel4" :
+	pythonModule.getLibrary().addDefine( "LINUX" )
+	
+pythonModule.finalize()
+
+#######################################################################################
+# Plugin and mel
+#######################################################################################
+
+plugin = IEBuild.MayaPlugin( ARGUMENTS, "ieCore", version, pluginSource, includePath )
+plugin.addLib("OpenMayaAnim")
+plugin.addLib("OpenMayaUI")
+plugin.addDefine( "IE_INTERNAL_BUILD" )
+plugin.addVersionedDependency( "IECore", coreMajorVersion )
+plugin.addVersionedDependency("IECoreGL", coreGLMajorVersion )
+plugin.addVersionedDependency( "IECoreMaya", version )
+plugin.addVersionedInclude( "OpenEXR", "1.4.0" )
+plugin.addVersionedInclude( "boost", "1.33.1" )
+plugin.useVersionControl('0.0.4')
+plugin.finalize()
+
+mel = IEBuild.MayaMel( ARGUMENTS, name, version )
+mel.addMEL('mel')
+mel.finalize()
+
+mayadoInstall = env.InstallAs( os.path.join( pythonModule.getInstallPrefix(), "apps", "mayado", coreMajorVersion, "mayado" ), "scripts/mayado" )
+
+env.Alias( "install", [ mayadoInstall ] )
+
+
+#######################################################################################
+# Tests
+#######################################################################################
+
+## A simple non-installable Maya plugin. 
+## \todo Should really offer this functionality in IEBuild itself.
+class TestMayaPlugin(IEBuild.MayaPlugin):
+
+        def __init__(self, args, name, version, source, includePath):
+                IEBuild.MayaPlugin.__init__(self, args, name, version, source, includePath)
+		
+	def finalize(self, **kw) :
+		env = IEBuild.SharedLibrary.finalize(self, install = 0, **kw)
+		
+		return env
+	
+
+testPluginSource =	[	"test/src/TestPlugin.cpp",
+				"test/src/TestObjectDataNode.cpp"
+			]
+
+testPlugin = TestMayaPlugin( ARGUMENTS, "ieCoreTest", version, testPluginSource, includePath + ["test/include"] )
+testPlugin.addLib("OpenMayaAnim")
+testPlugin.addLib("OpenMayaUI")
+testPlugin.addVersionedDependency( "IECore", coreMajorVersion )
+testPlugin.addVersionedDependency("IECoreGL", coreGLMajorVersion )
+testPlugin.addVersionedDependency( "IECoreMaya", version )
+testPlugin.addVersionedInclude( "OpenEXR", "1.4.0" )
+testPlugin.addVersionedInclude( "boost", "1.33.1" )
+testPlugin.useVersionControl('0.0.4')
+testPlugin.finalize()
+
+cleanEnv = IEEnv.Environment( os.environ["IEENV_WORKING_PATH"] )
+mayaTestEnv = Environment( ENV=os.environ )
+mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = ".:" + mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"]
+mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./test/mel:" + mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"]
+mayaTestEnv["ENV"]["MAYA_VERSION"] = plugin.getMayaVersion()
+mayaTestEnv["ENV"]["COMPILER"] = plugin.getCompiler()
+mayaTestEnv["ENV"]["COMPILER_VERSION"] = plugin.getCompilerVersion()
+mayaTestEnv["ENV"]["IECOREMAYA_TEST"] = 1
+#mayaTestEnv["ENV"]["LD_DEBUG"] = "files"
+melSymLink1 = mayaTestEnv.Command( "test/mel/IECoreMaya/!VERSION!", "", "mkdir -p test/mel/IECoreMaya; ln -fs ../../../mel $TARGET",  target_factory=Dir  )
+melSymLink2 = mayaTestEnv.Command( "test/mel/IECoreMaya/"+version, "", "mkdir -p test/mel/IECoreMaya; ln -fs ../../../mel $TARGET",  target_factory=Dir  )
+pythonSymLink1 = mayaTestEnv.Command( "test/python/IECoreMaya/"+coreMayaMajorVersion+"/IECoreMaya", "", "mkdir -p test/python/IECoreMaya/"+coreMayaMajorVersion+"; ln -fs ../../../../python/IECoreMaya $TARGET",  target_factory=Dir  )
+pythonSymLink2 = mayaTestEnv.Command( "test/python/IECoreMaya/"+version+"/IECoreMaya", "", "mkdir -p test/python/IECoreMaya/"+version+"; ln -fs ../../../../python/IECoreMaya $TARGET",  target_factory=Dir  )
+
+mayaTestRun = mayaTestEnv.Command( "test/IECoreMaya.out", "", 'maya -batch -command "catch(\`loadPlugin \\\"ieCore-' + version + '.so\\\"\`); catch(\`loadPlugin \\\"ieCoreTest-' + version + '.so\\\"\`); catch(\`eval(\\\"ieUnitTest(\\\\\\\"./test/\\\\\\\")\\\")\`);"')
+
+env.Depends( mayaTestRun, [lib.getTargets(), plugin.getTargets(), testPlugin.getTargets(), pythonModule.getTargets(), melSymLink1, melSymLink2, pythonSymLink1, pythonSymLink2 ] )
+
+env.Alias( 'test', mayaTestRun )
+
+env.Alias( 'all', [lib.getTargets(), plugin.getTargets(), pythonModule.getTargets() ] )
+
+Default('all')
