@@ -162,7 +162,9 @@ void bindVec2(const char *bindName)
 		.def(init<T>())
 		.def(init<T, T>())
 	
-		.def(init<const Vec2<T> &>())
+		.def(init<const Vec2<float> &>())
+		.def(init<const Vec2<double> &>())
+		.def(init<const Vec2<int> &>())
 	
 		.def("setValue", sv1)
 		.def("setValue", sv2)
@@ -248,7 +250,9 @@ void bindVec3(const char *bindName)
 		.def(init<T>())
 		.def(init<T, T, T>())
 	
-		.def(init<const Vec3<T> &>())
+		.def(init<const Vec3<float> &>())
+		.def(init<const Vec3<double> &>())
+		.def(init<const Vec3<int> &>())
 	
 		.def("setValue", sv1)
 		.def("setValue", sv2)

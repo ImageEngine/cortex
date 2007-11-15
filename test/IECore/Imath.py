@@ -51,6 +51,30 @@ class ImathV2f(unittest.TestCase):
 		self.assertEqual(v.x, 2)
 		self.assertEqual(v.y, 3)
 		
+		self.assertEqual( V2f( V2i( 1, 2 ) ), V2f( 1, 2 ) )
+		self.assertEqual( V2f( V2f( 1, 2 ) ), V2f( 1, 2 ) )
+		self.assertEqual( V2f( V2d( 1, 2 ) ), V2f( 1, 2 ) )
+
+		self.assertEqual( V2d( V2i( 1, 2 ) ), V2d( 1, 2 ) )
+		self.assertEqual( V2d( V2f( 1, 2 ) ), V2d( 1, 2 ) )
+		self.assertEqual( V2d( V2d( 1, 2 ) ), V2d( 1, 2 ) )
+
+		self.assertEqual( V2i( V2i( 1, 2 ) ), V2i( 1, 2 ) )
+		self.assertEqual( V2i( V2f( 1, 2 ) ), V2i( 1, 2 ) )
+		self.assertEqual( V2i( V2d( 1, 2 ) ), V2i( 1, 2 ) )
+		
+		self.assertEqual( V3f( V3i( 1, 2, 3 ) ), V3f( 1, 2, 3 ) )
+		self.assertEqual( V3f( V3f( 1, 2, 3 ) ), V3f( 1, 2, 3 ) )
+		self.assertEqual( V3f( V3d( 1, 2, 3 ) ), V3f( 1, 2, 3 ) )
+
+		self.assertEqual( V3d( V3i( 1, 2, 3 ) ), V3d( 1, 2, 3 ) )
+		self.assertEqual( V3d( V3f( 1, 2, 3 ) ), V3d( 1, 2, 3 ) )
+		self.assertEqual( V3d( V3d( 1, 2, 3 ) ), V3d( 1, 2, 3 ) )
+
+		self.assertEqual( V3i( V3i( 1, 2, 3 ) ), V3i( 1, 2, 3 ) )
+		self.assertEqual( V3i( V3f( 1, 2, 3 ) ), V3i( 1, 2, 3 ) )
+		self.assertEqual( V3i( V3d( 1, 2, 3 ) ), V3i( 1, 2, 3 ) )		
+						
 	def testDimensions(self):
 		"""Test V2f dimensions"""
 		
