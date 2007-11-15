@@ -64,7 +64,7 @@ class BoundedKDTree<BoundIterator>::Node
 	
 		Node() : m_cutAxisAndLeaf(0)
 		{
-			m_bound = Bound( BaseType(0.0) );
+			m_bound.makeEmpty();
 			m_perm.first = 0;
 			m_perm.last = 0;			
 		}
@@ -117,10 +117,10 @@ class BoundedKDTree<BoundIterator>::Node
 			return m_bound;
 		}
 		
-		inline Bound bound() const
+		inline const Bound &bound() const
 		{
 			return m_bound;
-		}
+		}		
 	
 		static NodeIndex rootIndex()
 		{
@@ -192,7 +192,12 @@ unsigned char BoundedKDTree<BoundIterator>::majorAxis( PermutationConstIterator 
 template<class BoundIterator>
 void BoundedKDTree<BoundIterator>::bound( NodeIndex nodeIndex  )
 {
-	const Node &node = m_nodes[nodeIndex];
+	assert( nodeIndex < m_nodes.size() );
+	
+	Node &node = m_nodes[nodeIndex];
+	
+	assert( node.bound().isEmpty() );
+	
 	if( node.isLeaf() )
 	{
 		BoundIterator *permLast = node.permLast();

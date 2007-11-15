@@ -83,8 +83,8 @@ class TestBoundedKDTreeBox3f(unittest.TestCase, TestBoundedKDTree):
 		return bound
 		
 	def makeBound( self ) :
-		b1 = V3f( -1, -1, -1 )
-		b2 = V3f( 1, 1, 1 )
+		b1 = V3f( -3, -3, -3 )
+		b2 = V3f( -2, -2, -2 )
 		bound = Box3f( b1, b2 )
 		
 		return bound			
