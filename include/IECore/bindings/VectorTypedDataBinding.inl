@@ -220,6 +220,11 @@ public:
 	{
 		x.writable().resize( s );
 	}
+	
+	static void resizeWithValue( ThisClass &x, size_t s, const data_type &v )
+	{
+		x.writable().resize( s, v );
+	}
 
 	/// binding for append function
 	static void extend(ThisClass &x, boost::python::object v)
@@ -678,6 +683,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 		/*  pop, remove, reverse, sort.*/																			\
 		.def("size", &ThisBinder::len, "s.size()\nReturns the number of elements on s. Same result as the len operator.")	\
 		.def("resize", &ThisBinder::resize, "s.resize( size )\nAdjusts the size of s.")	\
+		.def("resize", &ThisBinder::resizeWithValue, "s.resize( size, value )\nAdjusts the size of s, inserting elements of value as necessary.")	\
 		.def("__str__", &str<ThisClass> )	\
 		.def("__repr__", &repr<ThisClass> )	\
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ThisClass )

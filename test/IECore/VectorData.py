@@ -83,6 +83,13 @@ class BaseVectorDataTest:
 		self.assertEqual( v[0], v2[0] )
 		self.assertEqual( v[1], v2[1] )
 		
+		v = self.vectorFactory()
+		e = self.valueFactory( 10 )
+		v.resize( 100, e )
+		self.assertEqual( v.size(), 100 )
+		for i in range( 0, 100 ) :
+			self.assertEqual( v[i], e )
+		
 	def testAssignment(self):
 		"""Test assignment"""
 		_vector = self.vectorFactory
