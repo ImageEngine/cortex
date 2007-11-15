@@ -277,7 +277,8 @@ env.Prepend(
 	],
 	CXXFLAGS = [
 		"-Wall",
-		"-Werror",
+# removing the flag below till we can fix the warnings coming from boost
+#		"-Werror",
 	],
 )
 
