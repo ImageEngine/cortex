@@ -103,6 +103,7 @@ from Menus import *
 from DataCastOp import *
 from DataPromoteOp import *
 from MatrixMultiplyOp import *
+from PointBoundsOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

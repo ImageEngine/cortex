@@ -203,6 +203,7 @@ coreSources = 		[
 				'src/IECore/DataCastOp.cpp',
 				'src/IECore/DataPromoteOp.cpp',		
 				'src/IECore/MatrixMultiplyOp.cpp',
+				'src/IECore/PointBoundsOp.cpp',
 		   ]
 		
 coreIncludes = 		[ 	
@@ -354,6 +355,7 @@ corePythonSources = 	[
 				'src/IECore/bindings/DataCastOpBinding.cpp',
 				'src/IECore/bindings/DataPromoteOpBinding.cpp',
 				'src/IECore/bindings/MatrixMultiplyOpBinding.cpp',
+				'src/IECore/bindings/PointBoundsOpBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

@@ -128,6 +128,7 @@
 #include "IECore/bindings/DataCastOpBinding.h"
 #include "IECore/bindings/DataPromoteOpBinding.h"
 #include "IECore/bindings/MatrixMultiplyOpBinding.h"
+#include "IECore/bindings/PointBoundsOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -235,6 +236,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDataCastOp();
 	bindDataPromoteOp();
 	bindMatrixMultiplyOp();
+	bindPointBoundsOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

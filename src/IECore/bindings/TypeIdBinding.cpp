@@ -224,6 +224,7 @@ void bindTypeId()
 		.value("NURBSPrimitive", NURBSPrimitiveTypeId)
 		.value("DataCastOp", DataCastOpTypeId)
 		.value("DataPromoteOp", DataPromoteOpTypeId)
+		.value("PointBoundsOp", PointBoundsOpTypeId)
 	;
 }
 
