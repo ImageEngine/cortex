@@ -98,9 +98,11 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 {
 	vector<string> attributes;
 	particleAttributes( attributes );
-	PointsPrimitivePtr result = new PointsPrimitive( 0 ); // because of percentage filtering we don't know the number of points until we've loaded an attribute
+	PointsPrimitivePtr result = new PointsPrimitive( numParticles() );
+	// because of percentage filtering we don't really know the number of points until we've loaded an attribute.
+	// we start off with numParticles() in case there aren't any varying attributes in the cache at all, but replace it
+	// below as soon as we have a revised (percentage filtered) value.
 	bool haveNumPoints = false;
-	size_t numPoints = 0;
 	for( vector<string>::const_iterator it = attributes.begin(); it!=attributes.end(); it++ )
 	{
 		DataPtr d = readAttribute( *it );
@@ -110,15 +112,16 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 			size_t s = despatchVectorTypedDataFn<size_t, VectorTypedDataSize, VectorTypedDataSizeArgs>( d, VectorTypedDataSizeArgs() );
 			if( !haveNumPoints )
 			{
-				numPoints = s;
+				result->setNumPoints( s );
+				haveNumPoints = true;
 			}
-			if( s==numPoints )
+			if( s==result->getNumPoints() )
 			{			
 				result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Vertex, d ) ) );
 			}
 			else
 			{			
-				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % *it % numPoints % s );
+				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % *it % result->getNumPoints() % s );
 			}
 		}
 		catch( ... )
@@ -136,7 +139,6 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 			}
 		}
 	}
-	result->setNumPoints( numPoints );
 	return result;
 }
 
