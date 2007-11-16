@@ -233,28 +233,31 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 		}
 	
 		// draw the scene if asked
-		IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
-		if( scene && request.token()==SceneDrawMode )
+		if( request.token()==SceneDrawMode )
 		{
-			bool popTexture = false;
-			if( request.displayStyle()==M3dView::kGouraudShaded || request.displayStyle()==M3dView::kFlatShaded )
+			IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
+			if( scene )
 			{
-				glPushAttrib( GL_TEXTURE_BIT );
-				popTexture = true;
-				// set up the material. we probably need to do some work to prevent the base state passed to
-				// the scene render from overriding aspects of this
-				MMaterial material = request.material();
-				material.setMaterial( request.multiPath(), request.isTransparent() );
-				if( material.materialIsTextured() )
+				bool popTexture = false;
+				if( request.displayStyle()==M3dView::kGouraudShaded || request.displayStyle()==M3dView::kFlatShaded )
 				{
-					glEnable( GL_TEXTURE_2D );
-					material.applyTexture( view, drawData );
+					glPushAttrib( GL_TEXTURE_BIT );
+					popTexture = true;
+					// set up the material. we probably need to do some work to prevent the base state passed to
+					// the scene render from overriding aspects of this
+					MMaterial material = request.material();
+					material.setMaterial( request.multiPath(), request.isTransparent() );
+					if( material.materialIsTextured() )
+					{
+						glEnable( GL_TEXTURE_2D );
+						material.applyTexture( view, drawData );
+					}
 				}
-			}
-				scene->render( baseState( (M3dView::DisplayStyle)request.displayStyle() ) );
-			if( popTexture )
-			{
-				glPopAttrib();
+					scene->render( baseState( (M3dView::DisplayStyle)request.displayStyle() ) );
+				if( popTexture )
+				{
+					glPopAttrib();
+				}
 			}
 		}
 		
