@@ -41,7 +41,7 @@ from IECore import Msg, msg, ClassLoader, formatParameterHelp, WrappedTextFormat
 # extension classes at specific environments.
 class ContextualClassLoader :
 
-	## Creates a GlobbedClassLoader attached to a ClassLoader and restricted to a list of class contexts.
+	## Creates a ContextualClassLoader attached to a ClassLoader and restricted to a list of class contexts.
 	def __init__( self, contexts = [ "" ], classLoader = ClassLoader.defaultOpLoader() ) :
 	
 		self.__contexts = list( contexts )
