@@ -174,6 +174,7 @@ MStatus ProceduralHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plu
 	{
 		// it's an input to the procedural
 		m_boundDirty = m_sceneDirty = true;
+		childChanged( kBoundingBoxChanged ); // this is necessary to cause maya to redraw
 	}
 	
 	return ParameterisedHolderComponentShape::setDependentsDirty( plug, plugArray );
