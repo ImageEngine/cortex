@@ -360,6 +360,7 @@ corePythonSources = 	[
 			
 corePythonPy = 	[ 			
 				'python/IECore/ClassLoader.py',
+				'python/IECore/ApplicationOpLoader.py',				
 				'python/IECore/RemoteOpLoader.py',
 				'python/IECore/DataTraits.py',
 				'python/IECore/FormattedParameterHelp.py',
