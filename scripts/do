@@ -144,7 +144,7 @@ def getAction( args, index ) :
 if len( sys.argv ) < 2 :
 	exitWithUsage()
 	
-loader = IECore.ContextualClassLoader()
+loader = IECore.ApplicationOpLoader( IECore.ContextualClassLoader() )
 # do the right thing based on the first flag	
 if sys.argv[1]=="-help" :
 
