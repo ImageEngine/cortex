@@ -148,6 +148,7 @@ class Renderer : public IECore::Renderer
 		///
 		///	"ri:readArchive"
 		/// Expects a single StringData parameter called "name", and calls RiReadArchive with it.
+		/// \todo Make a VisibleRenderable subclass to encapsulate a call to this.
 		///
 		/// "objectBegin"
 		/// "ri:objectBegin"
