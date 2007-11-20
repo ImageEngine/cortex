@@ -55,6 +55,8 @@ class Group : public VisibleRenderable
 		typedef std::set<VisibleRenderablePtr> ChildSet;
 		typedef std::set<StateRenderablePtr> StateSet;
 	
+		/// \todo Add a constructor taking a list of children and state
+		/// and an optional transform, and bind it.
 		Group();
 		virtual ~Group();
 				
