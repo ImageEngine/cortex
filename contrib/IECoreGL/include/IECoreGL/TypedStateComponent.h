@@ -87,6 +87,10 @@ class TypedStateComponent : public StateComponent
 		
 };
 
+/// \todo Now there are loads of these typedefs I think they should really be defined in the places
+/// they're used - so PrimitiveBound would be a typedef member in Primitive etc. This would help people
+/// see where StateComponents have effect, and also provide a better location for documenting them. Otherwise
+/// this file has a massive influence over all sorts of disparate bits of the library.
 typedef TypedStateComponent<Imath::Color4f, ColorTypeId> Color;
 typedef TypedStateComponent<bool, PrimitiveBoundTypeId> PrimitiveBound;
 typedef TypedStateComponent<bool, PrimitiveWireframeTypeId> PrimitiveWireframe;
@@ -115,6 +119,17 @@ typedef TypedStateComponent<Imath::Color4f, OutlineColorStateComponentTypeId> Ou
 /// Specifies the color to draw points in
 typedef TypedStateComponent<Imath::Color4f, PointColorStateComponentTypeId> PointColorStateComponent;
 
+enum UseGLPoints
+{
+	ForPointsOnly,
+	ForPointsAndDisks,
+	ForAll
+};
+/// Specifies an override for rendering PointsPrimitives with gl points.
+typedef TypedStateComponent<UseGLPoints, PointsPrimitiveUseGLPointsTypeId> PointsPrimitiveUseGLPoints;
+/// Specifies an attribute for defining the glPointSize of PointsPrimitives rendered as gl points.
+typedef TypedStateComponent<float, PointsPrimitiveGLPointWidthTypeId> PointsPrimitiveGLPointWidth;
+
 struct BlendFactors
 {
 	BlendFactors( GLenum src, GLenum dst );
@@ -141,6 +156,8 @@ IE_CORE_DECLAREPTR( BoundColorStateComponent );
 IE_CORE_DECLAREPTR( WireframeColorStateComponent );
 IE_CORE_DECLAREPTR( OutlineColorStateComponent );
 IE_CORE_DECLAREPTR( PointColorStateComponent );
+IE_CORE_DECLAREPTR( PointsPrimitiveUseGLPoints );
+IE_CORE_DECLAREPTR( PointsPrimitiveGLPointWidth );
 
 } // namespace IECoreGL
 

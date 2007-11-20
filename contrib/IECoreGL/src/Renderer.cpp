@@ -778,6 +778,53 @@ static void blendEquationSetter( const std::string &name, IECore::ConstDataPtr v
 	memberData->implementation->addState( new BlendEquationStateComponent( f ) );
 }
 
+static IECore::ConstDataPtr pointsPrimitiveUseGLPointsGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
+{
+	ConstPointsPrimitiveUseGLPointsPtr b = memberData->implementation->getState<PointsPrimitiveUseGLPoints>();
+	switch( b->value() )
+	{
+		case ForPointsOnly :
+			return new StringData( "forGLPoints" );
+		case ForPointsAndDisks :
+			return new StringData( "forParticlesAndDisks" );
+		case ForAll :
+			return new StringData( "forAll" );
+		default :
+			msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
+			return new StringData( "invalid" );
+	}
+
+}
+
+static void pointsPrimitiveUseGLPointsSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
+{
+	ConstStringDataPtr d = castWithWarning<const StringData>( value, name, "Renderer::setAttribute" );
+	if( !d )
+	{
+		return;
+	}
+	UseGLPoints u;
+	const std::string &v = d->readable();
+	if( v=="forGLPoints" )
+	{
+		u = ForPointsOnly;
+	}
+	else if( v=="forParticlesAndDisks" )
+	{
+		u = ForPointsAndDisks;
+	}
+	else if( v=="forAll" )
+	{
+		u = ForAll;
+	}
+	else
+	{
+		msg( Msg::Error, "Renderer::setAttribute", boost::format( "Unsupported value \"%s\" for attribute \"%s\"." ) % v % name );
+		return;
+	}
+	memberData->implementation->addState( new PointsPrimitiveUseGLPoints( u ) );
+}
+
 static const AttributeSetterMap *attributeSetters()
 {
 	static AttributeSetterMap *a = new AttributeSetterMap;
@@ -804,6 +851,8 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:blend:dstFactor"] = blendFactorSetter;
 		(*a)["gl:blend:equation"] = blendEquationSetter;
 		(*a)["gl:shade:transparent"] = typedAttributeSetter<TransparentShadingStateComponent>;
+		(*a)["gl:pointsPrimitive:useGLPoints"] = pointsPrimitiveUseGLPointsSetter;
+		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeSetter<PointsPrimitiveGLPointWidth>;
 	}
 	return a;
 }
@@ -834,6 +883,8 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:blend:dstFactor"] = blendFactorGetter;
 		(*a)["gl:blend:equation"] = blendEquationGetter;
 		(*a)["gl:shade:transparent"] = typedAttributeGetter<TransparentShadingStateComponent>;
+		(*a)["gl:pointsPrimitive:useGLPoints"] = pointsPrimitiveUseGLPointsGetter;
+		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeGetter<PointsPrimitiveGLPointWidth>;
 	}
 	return a;
 }

@@ -235,5 +235,7 @@ SPECIALISE_AND_INSTANTIATE( BoundColorStateComponent, Color4f, Color4f( 0.36, 0.
 SPECIALISE_AND_INSTANTIATE( WireframeColorStateComponent, Color4f, Color4f( 0.25, 0.6, 0.85, 1 ) );
 SPECIALISE_AND_INSTANTIATE( OutlineColorStateComponent, Color4f, Color4f( 0.85, 0.75, 0.45, 1 ) );
 SPECIALISE_AND_INSTANTIATE( PointColorStateComponent, Color4f, Color4f( 0.85, 0.45, 0, 1 ) );
+SPECIALISE_AND_INSTANTIATE( PointsPrimitiveUseGLPoints, UseGLPoints, ForPointsOnly );
+SPECIALISE_AND_INSTANTIATE( PointsPrimitiveGLPointWidth, float, 1.0f );
 
 } // namespace IECoreGL

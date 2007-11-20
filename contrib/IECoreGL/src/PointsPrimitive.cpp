@@ -107,7 +107,24 @@ void PointsPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 	{
 		m_renderSorted = false;
 	}
-	switch( m_type )
+	
+	Type type = m_type;
+	switch( state->get<PointsPrimitiveUseGLPoints>()->value() )
+	{
+		case ForPointsOnly :
+			break;
+		case ForPointsAndDisks :
+			if( type==Disk )
+			{
+				type = Point;
+			}
+			break;
+		case ForAll :
+			type = Point;
+			break;
+	}
+	
+	switch( type )
 	{
 		case Point :
 			renderPoints( state, style );
@@ -170,6 +187,8 @@ const T *PointsPrimitive::dataAndStride( typename IECore::TypedData<std::vector<
 void PointsPrimitive::renderPoints( ConstStatePtr state, IECore::TypeId style ) const
 {	
 	const std::vector<V3f> &p = m_points->readable();
+	
+	glPointSize( state->get<PointsPrimitiveGLPointWidth>()->value() );
 	
 	const Color3f *c = setOrReturnColor();
 	if( style==PrimitiveSolid::staticTypeId() )

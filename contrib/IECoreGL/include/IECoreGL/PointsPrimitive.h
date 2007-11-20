@@ -48,6 +48,8 @@ class PointsPrimitive : public Primitive
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointsPrimitive, PointsPrimitiveTypeId, Primitive );
 
+		/// \todo We should consider removing the Point enum value and always using the PointsPrimitiveUseGLPoints
+		/// attribute instead.
 		enum Type {
 			Point,	// GL_POINTS
 			Disk,	// camera facing disks
@@ -69,7 +71,6 @@ class PointsPrimitive : public Primitive
 			IECore::ConstFloatVectorDataPtr rotations = 0 );
 			
 		virtual ~PointsPrimitive();
-		
 
 		virtual Imath::Box3f bound() const;
 

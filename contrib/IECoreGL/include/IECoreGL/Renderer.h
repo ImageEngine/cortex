@@ -184,6 +184,28 @@ class Renderer : public IECore::Renderer
 		/// points primitive.
 		///
 		//////////////////////////////////////////////
+		/// PointsPrimitive drawing style
+		//////////////////////////////////////////////
+		///
+		/// "gl:pointsPrimitive:useGLPoints" StringData "forGLPoints"
+		/// Can be used to force the use of lightweight glPoints
+		/// representation of points primitives with types other than "gl:point".
+		/// Valid values are :
+		///
+		///	"forGLPoints"
+		/// Use lightweight points only if type is "gl:point"
+		///
+		/// "forParticlesAndDisks"
+		/// Use lightweight points as a stand in for particle and disk types.
+		///
+		/// "forAll"
+		/// Use lightweight points as a stand in for all point types.
+		///
+		/// "gl:pointsPrimitive:glPointWidth" FloatData 1.0f
+		/// The size of the points (in pixels) used when rendering lightweight
+		/// points.
+		///
+		//////////////////////////////////////////////
 		/// Blending
 		//////////////////////////////////////////////
 		///
