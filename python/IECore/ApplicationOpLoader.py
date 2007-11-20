@@ -127,9 +127,10 @@ def registerMaya():
 				[
 					FileNameParameter(
 						name = "sceneFileName",
-						description = "Name of scene file to open",
-
-						defaultValue = "/home/mark/maya/projects/default/scenes/particleCacheOp.ma"
+						description = "Name of scene file to open",						
+						extensions = "ma mb ma.gz mb.gz",
+						defaultValue = "",						
+						allowEmptyString = False
 					)
 				]
 
@@ -137,6 +138,11 @@ def registerMaya():
 		)
 
 	def doOperation( self, operands, WrappedClass = None ):
+	
+		sceneFileName = self.parameters().maya.sceneFileName.getValue().value
+		
+		if not os.path.exists( sceneFileName ) :
+			raise IOError( "Maya scene file '%s' does not exist." % (sceneFileName) )			
 		
 		operandsFile = tempfile.mkstemp( suffix = ".cob" )
 		resultsFile = tempfile.mkstemp( suffix = ".cob" )
@@ -144,6 +150,7 @@ def registerMaya():
 		result = None
 		try :
 		
+			# Remove Maya-related parameters from the operands now that we have the values we need.
 			cleanOperands = operands.copy()
 			del cleanOperands["maya"]
 			writer = Writer.create( cleanOperands, operandsFile[1] )
@@ -153,14 +160,24 @@ def registerMaya():
 			mel = mel + r'eval("iePython -command \"import sys\"");'	
 			mel = mel + r'eval("iePython -command \"import IECore\"");'
 			mel = mel + r'eval("iePython -command \"import IECoreMaya\"");'	
+			
+			# Read the operands we saved out to a temporary file
 			mel = mel + r'eval("iePython -command \"r = IECore.Reader.create(\'%s\')\"");' % ( operandsFile[1] )
-			mel = mel + r'eval("iePython -command \"operands = r.read()\"");'			
+			mel = mel + r'eval("iePython -command \"operands = r.read()\"");'
+			
+			# Load the Op			
 			mel = mel + r'eval("iePython -command \"opLoader = IECore.ClassLoader.defaultOpLoader()\"");'
 			mel = mel + r'eval("iePython -command \"op = opLoader.load(\'%s\', %d)()\"");' % ( self.path, self.version )
-			mel = mel + r'eval("iePython -command \"op.parameters().setValue( operands)\"");'
+			
+			# Set the operands on the Op
+			mel = mel + r'eval("iePython -command \"op.parameters().setValue( operands )\"");'
+			
+			# Execute the Op
 			mel = mel + r'eval("iePython -command \"result = op()\"");'
-			mel = mel + r'eval("iePython -command \"w = IECore.Writer.create( result, \'%s\')\"");' % ( resultsFile[1] )
-			mel = mel + r'eval("iePython -command \"w.write()\"");'						
+			
+			# Create a Writer for the Op's results and save them to a temporary file
+			mel = mel + r'eval("iePython -command \"if result: w = IECore.Writer.create( result, \'%s\')\"");' % ( resultsFile[1] )
+			mel = mel + r'eval("iePython -command \"if result: w.write()\"");'						
 
 			mel = mel +  'eval("ieSystemExit 0");'
 
@@ -169,15 +186,19 @@ def registerMaya():
 					'Render', 
 					'-preRender', 
 					mel, 
-					self.parameters().maya.sceneFileName.getValue().value
+					sceneFileName
 				]
 			)
 
 			if not exitStatus == 0:	
 				raise RuntimeError( "Error %d executing Render" % (exitStatus) )
 			
-			r = Reader.create( resultsFile[1] )
-			result = r.read()
+			try:
+				# Read the Op's results back from the temporary file
+				r = Reader.create( resultsFile[1] )
+				result = r.read()
+			except:
+				result = None
 				
 		finally:
 		
