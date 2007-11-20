@@ -356,6 +356,7 @@ corePythonSources = 	[
 				'src/IECore/bindings/DataPromoteOpBinding.cpp',
 				'src/IECore/bindings/MatrixMultiplyOpBinding.cpp',
 				'src/IECore/bindings/PointBoundsOpBinding.cpp',
+				'src/IECore/bindings/ImathRandomBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

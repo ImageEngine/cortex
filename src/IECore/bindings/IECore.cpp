@@ -129,6 +129,7 @@
 #include "IECore/bindings/DataPromoteOpBinding.h"
 #include "IECore/bindings/MatrixMultiplyOpBinding.h"
 #include "IECore/bindings/PointBoundsOpBinding.h"
+#include "IECore/bindings/ImathRandomBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -237,6 +238,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDataPromoteOp();
 	bindMatrixMultiplyOp();
 	bindPointBoundsOp();
+	bindImathRandom();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
