@@ -361,7 +361,6 @@ corePythonSources = 	[
 			
 corePythonPy = 	[ 			
 				'python/IECore/ClassLoader.py',
-				'python/IECore/ApplicationOpLoader.py',				
 				'python/IECore/RemoteOpLoader.py',
 				'python/IECore/DataTraits.py',
 				'python/IECore/FormattedParameterHelp.py',
@@ -407,7 +406,6 @@ corePythonPy = 	[
 				'python/IECore/PointsExpressionOp.py',		
 				'python/IECore/Struct.py',		
 				'python/IECore/LsHeaderOp.py',
-				'python/IECore/ContextualClassLoader.py',
 				'python/IECore/curry.py',
 				'python/IECore/MenuItemDefinition.py',
 				'python/IECore/MenuDefinition.py',
@@ -434,10 +432,6 @@ corePythonModule.finalize()
 
 corePython = corePythonModule.getTargets()
 env.Depends( corePython, core )
-
-doInstall = env.InstallAs( os.path.join( corePythonModule.getInstallPrefix(), "apps", "do", coreMajorVersion, "do" ), "scripts/do" )
-
-env.Alias( "install", [ doInstall ] )
 
 # op wrappers
 
