@@ -207,11 +207,6 @@ mel = IEBuild.MayaMel( ARGUMENTS, name, version )
 mel.addMEL('mel')
 mel.finalize()
 
-mayadoInstall = env.InstallAs( os.path.join( pythonModule.getInstallPrefix(), "apps", "mayado", coreMajorVersion, "mayado" ), "scripts/mayado" )
-
-env.Alias( "install", [ mayadoInstall ] )
-
-
 #######################################################################################
 # Tests
 #######################################################################################
