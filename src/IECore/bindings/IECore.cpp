@@ -130,6 +130,7 @@
 #include "IECore/bindings/MatrixMultiplyOpBinding.h"
 #include "IECore/bindings/PointBoundsOpBinding.h"
 #include "IECore/bindings/ImathRandomBinding.h"
+#include "IECore/bindings/RandomRotationOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -239,6 +240,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMatrixMultiplyOp();
 	bindPointBoundsOp();
 	bindImathRandom();
+	bindRandomRotationOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
