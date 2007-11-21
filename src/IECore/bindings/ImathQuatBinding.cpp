@@ -158,6 +158,10 @@ void bindQuat(const char *bindName)
 	
 		.def(self == self)
 		.def(self != self)
+		
+		.def( self * self )
+	
+		.def( ~self )
 	
 		.def("invert", &Quat<T>::invert, return_self<>())
 		.def("inverse", &Quat<T>::inverse)		
