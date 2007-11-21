@@ -79,11 +79,9 @@ from CheckFileDependenciesOp import CheckFileDependenciesOp
 from PointsExpressionOp import PointsExpressionOp
 from Struct import Struct
 from LsHeaderOp import LsHeaderOp
-from ContextualClassLoader import ContextualClassLoader
 from curry import curry
 from MenuItemDefinition import MenuItemDefinition
 from MenuDefinition import MenuDefinition
-from ApplicationOpLoader import ApplicationOpLoader
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
