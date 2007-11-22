@@ -579,7 +579,7 @@ void IECoreRI::RendererImplementation::setAttribute( const std::string &name, IE
 
 void IECoreRI::RendererImplementation::setShadingRateAttribute( const std::string &name, IECore::ConstDataPtr d )
 {
-	ConstFloatDataPtr f = dynamic_pointer_cast<const FloatData>( d );
+	ConstFloatDataPtr f = runTimeCast<const FloatData>( d );
 	if( !f )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "ri:shadingRate attribute expects a FloatData value." );
@@ -591,7 +591,7 @@ void IECoreRI::RendererImplementation::setShadingRateAttribute( const std::strin
 
 void IECoreRI::RendererImplementation::setMatteAttribute( const std::string &name, IECore::ConstDataPtr d )
 {
-	ConstBoolDataPtr f = dynamic_pointer_cast<const BoolData>( d );
+	ConstBoolDataPtr f = runTimeCast<const BoolData>( d );
 	if( !f )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "ri:matte attribute expects a BoolData value." );
@@ -603,7 +603,7 @@ void IECoreRI::RendererImplementation::setMatteAttribute( const std::string &nam
 
 void IECoreRI::RendererImplementation::setColorAttribute( const std::string &name, IECore::ConstDataPtr d )
 {
-	ConstColor3fDataPtr f = dynamic_pointer_cast<const Color3fData>( d );
+	ConstColor3fDataPtr f = runTimeCast<const Color3fData>( d );
 	if( !f )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "ri:color attribute expects a Color3fData value." );
@@ -615,7 +615,7 @@ void IECoreRI::RendererImplementation::setColorAttribute( const std::string &nam
 
 void IECoreRI::RendererImplementation::setOpacityAttribute( const std::string &name, IECore::ConstDataPtr d )
 {
-	ConstColor3fDataPtr f = dynamic_pointer_cast<const Color3fData>( d );
+	ConstColor3fDataPtr f = runTimeCast<const Color3fData>( d );
 	if( !f )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "ri:opacity attribute expects a Color3fData value." );
@@ -627,7 +627,7 @@ void IECoreRI::RendererImplementation::setOpacityAttribute( const std::string &n
 
 void IECoreRI::RendererImplementation::setSidesAttribute( const std::string &name, IECore::ConstDataPtr d )
 {
-	ConstIntDataPtr f = dynamic_pointer_cast<const IntData>( d );
+	ConstIntDataPtr f = runTimeCast<const IntData>( d );
 	if( !f )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "ri:sides attribute expects an IntData value." );
@@ -639,7 +639,7 @@ void IECoreRI::RendererImplementation::setSidesAttribute( const std::string &nam
 
 void IECoreRI::RendererImplementation::setGeometricApproximationAttribute( const std::string &name, IECore::ConstDataPtr d )
 {
-	ConstFloatDataPtr f = dynamic_pointer_cast<const FloatData>( d );
+	ConstFloatDataPtr f = runTimeCast<const FloatData>( d );
 	if( !f )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", format( "%s attribute expects an IntData value." ) % name );
@@ -685,7 +685,7 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 		CompoundDataMap::const_iterator it = s->blindData()->readable().find( "ri:parameterTypeHints" );
 		if( it!=s->blindData()->readable().end() )
 		{
-			if( ConstCompoundDataPtr h = dynamic_pointer_cast<const CompoundData>( it->second ) )
+			if( ConstCompoundDataPtr h = runTimeCast<const CompoundData>( it->second ) )
 			{
 				for( it=h->readable().begin(); it!=h->readable().end(); it++ )
 				{
