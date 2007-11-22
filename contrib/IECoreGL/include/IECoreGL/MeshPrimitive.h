@@ -42,6 +42,7 @@
 namespace IECoreGL
 {
 
+/// \todo Triangulation, fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
 class MeshPrimitive : public Primitive
 {
 
