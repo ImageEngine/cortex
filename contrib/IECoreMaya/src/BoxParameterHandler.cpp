@@ -57,7 +57,7 @@ static ParameterHandler::Description< BoxParameterHandler<V3d> > box3dRegistrar(
 template<typename T>
 MStatus BoxParameterHandler<T>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
-	intrusive_ptr<const IECore::TypedParameter<Box<T> > > p = dynamic_pointer_cast<const IECore::TypedParameter<Box<T> > >( parameter );
+	intrusive_ptr<const IECore::TypedParameter<Box<T> > > p = IECore::runTimeCast<const IECore::TypedParameter<Box<T> > >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -124,7 +124,7 @@ MStatus BoxParameterHandler<T>::update( IECore::ConstParameterPtr parameter, MOb
 template<typename T>
 MObject BoxParameterHandler<T>::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
-	intrusive_ptr<const IECore::TypedParameter<Box<T > > > p = dynamic_pointer_cast<const IECore::TypedParameter<Box<T > > >( parameter );
+	intrusive_ptr<const IECore::TypedParameter<Box<T > > > p = IECore::runTimeCast<const IECore::TypedParameter<Box<T > > >( parameter );
 	if( !p )
 	{
 		return MObject::kNullObj;
@@ -164,7 +164,7 @@ MObject BoxParameterHandler<T>::create( IECore::ConstParameterPtr parameter, con
 template<typename T>
 MStatus BoxParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
-	intrusive_ptr<const IECore::TypedParameter<Box<T> > > p = dynamic_pointer_cast<const IECore::TypedParameter<Box<T> > >( parameter );
+	intrusive_ptr<const IECore::TypedParameter<Box<T> > > p = IECore::runTimeCast<const IECore::TypedParameter<Box<T> > >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -204,7 +204,7 @@ MStatus BoxParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, M
 template<typename T>
 MStatus BoxParameterHandler<T>::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
-	intrusive_ptr<IECore::TypedParameter<Box<T> > > p = dynamic_pointer_cast<IECore::TypedParameter<Box<T> > >( parameter );
+	intrusive_ptr<IECore::TypedParameter<Box<T> > > p = IECore::runTimeCast<IECore::TypedParameter<Box<T> > >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;

@@ -50,7 +50,7 @@ static ParameterHandler::Description< BoolParameterHandler > registrar( IECore::
 
 MStatus BoolParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const 
 {
-	intrusive_ptr<const IECore::BoolParameter> p = dynamic_pointer_cast<const IECore::BoolParameter>( parameter );
+	intrusive_ptr<const IECore::BoolParameter> p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -69,7 +69,7 @@ MStatus BoolParameterHandler::update( IECore::ConstParameterPtr parameter, MObje
 
 MObject BoolParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
-	intrusive_ptr<const IECore::BoolParameter> p = dynamic_pointer_cast<const IECore::BoolParameter>( parameter );
+	intrusive_ptr<const IECore::BoolParameter> p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
 	if( !p )
 	{
 		return MObject::kNullObj;
@@ -83,7 +83,7 @@ MObject BoolParameterHandler::create( IECore::ConstParameterPtr parameter, const
 		
 MStatus BoolParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
-	intrusive_ptr<const IECore::BoolParameter> p = dynamic_pointer_cast<const IECore::BoolParameter>( parameter );
+	intrusive_ptr<const IECore::BoolParameter> p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -94,7 +94,7 @@ MStatus BoolParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPl
 
 MStatus BoolParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
-	intrusive_ptr<IECore::BoolParameter> p = dynamic_pointer_cast<IECore::BoolParameter>( parameter );
+	intrusive_ptr<IECore::BoolParameter> p = IECore::runTimeCast<IECore::BoolParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;

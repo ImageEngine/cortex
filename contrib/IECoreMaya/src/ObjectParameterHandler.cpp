@@ -54,7 +54,7 @@ static ParameterHandler::Description< ObjectParameterHandler > registrar( IECore
 
 MStatus ObjectParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
-	intrusive_ptr<const IECore::ObjectParameter> p = dynamic_pointer_cast<const IECore::ObjectParameter>( parameter );
+	intrusive_ptr<const IECore::ObjectParameter> p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -85,7 +85,7 @@ MStatus ObjectParameterHandler::update( IECore::ConstParameterPtr parameter, MOb
 
 MObject ObjectParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
-	intrusive_ptr<const IECore::ObjectParameter> p = dynamic_pointer_cast<const IECore::ObjectParameter>( parameter );
+	intrusive_ptr<const IECore::ObjectParameter> p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
 	{
 		return MObject::kNullObj;
@@ -101,7 +101,7 @@ MObject ObjectParameterHandler::create( IECore::ConstParameterPtr parameter, con
 	
 MStatus ObjectParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
-	intrusive_ptr<const IECore::ObjectParameter> p = dynamic_pointer_cast<const IECore::ObjectParameter>( parameter );
+	intrusive_ptr<const IECore::ObjectParameter> p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -140,7 +140,7 @@ MStatus ObjectParameterHandler::setValue( IECore::ConstParameterPtr parameter, M
 
 MStatus ObjectParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
-	intrusive_ptr<IECore::ObjectParameter> p = dynamic_pointer_cast<IECore::ObjectParameter>( parameter );
+	intrusive_ptr<IECore::ObjectParameter> p = IECore::runTimeCast<IECore::ObjectParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;

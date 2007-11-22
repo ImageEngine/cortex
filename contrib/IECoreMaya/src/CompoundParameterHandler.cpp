@@ -53,7 +53,7 @@ static ParameterHandler::Description< CompoundParameterHandler > registrar( IECo
 
 MStatus CompoundParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
-	intrusive_ptr<const IECore::CompoundParameter> p = dynamic_pointer_cast<const IECore::CompoundParameter>( parameter );
+	intrusive_ptr<const IECore::CompoundParameter> p = IECore::runTimeCast<const IECore::CompoundParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -123,7 +123,7 @@ MStatus CompoundParameterHandler::update( IECore::ConstParameterPtr parameter, M
 
 MObject CompoundParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
-	intrusive_ptr<const IECore::CompoundParameter> p = dynamic_pointer_cast<const IECore::CompoundParameter>( parameter );
+	intrusive_ptr<const IECore::CompoundParameter> p = IECore::runTimeCast<const IECore::CompoundParameter>( parameter );
 	
 	if( !p || !p->parameters().size())
 	{
@@ -138,7 +138,7 @@ MObject CompoundParameterHandler::create( IECore::ConstParameterPtr parameter, c
 		
 MStatus CompoundParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
-	intrusive_ptr<const IECore::CompoundParameter> p = dynamic_pointer_cast<const IECore::CompoundParameter>( parameter );
+	intrusive_ptr<const IECore::CompoundParameter> p = IECore::runTimeCast<const IECore::CompoundParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -170,7 +170,7 @@ MStatus CompoundParameterHandler::setValue( IECore::ConstParameterPtr parameter,
 
 MStatus CompoundParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
-	intrusive_ptr<IECore::CompoundParameter> p = dynamic_pointer_cast<IECore::CompoundParameter>( parameter );
+	intrusive_ptr<IECore::CompoundParameter> p = IECore::runTimeCast<IECore::CompoundParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;

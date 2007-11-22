@@ -65,7 +65,7 @@ static ParameterHandler::Description< CompoundNumericParameterHandler<Color3f> >
 template<typename T>
 MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
-	intrusive_ptr<const IECore::TypedParameter<T> > p = dynamic_pointer_cast<const IECore::TypedParameter<T> >( parameter );
+	intrusive_ptr<const IECore::TypedParameter<T> > p = IECore::runTimeCast<const IECore::TypedParameter<T> >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -133,7 +133,7 @@ MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr pa
 template<typename T>
 MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
-	intrusive_ptr<const IECore::TypedParameter<T> > p = dynamic_pointer_cast<const IECore::TypedParameter<T> >( parameter );
+	intrusive_ptr<const IECore::TypedParameter<T> > p = IECore::runTimeCast<const IECore::TypedParameter<T> >( parameter );
 	if( !p )
 	{
 		return MObject::kNullObj;
@@ -171,7 +171,7 @@ MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr pa
 template<typename T>
 MStatus CompoundNumericParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
-	intrusive_ptr<const IECore::TypedParameter<T> > p = dynamic_pointer_cast<const IECore::TypedParameter<T> >( parameter );
+	intrusive_ptr<const IECore::TypedParameter<T> > p = IECore::runTimeCast<const IECore::TypedParameter<T> >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -198,7 +198,7 @@ MStatus CompoundNumericParameterHandler<T>::setValue( IECore::ConstParameterPtr 
 template<typename T>
 MStatus CompoundNumericParameterHandler<T>::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
-	intrusive_ptr<IECore::TypedParameter<T> > p = dynamic_pointer_cast<IECore::TypedParameter<T> >( parameter );
+	intrusive_ptr<IECore::TypedParameter<T> > p = IECore::runTimeCast<IECore::TypedParameter<T> >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;

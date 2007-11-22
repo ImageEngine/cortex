@@ -187,7 +187,7 @@ MStatus ProceduralHolder::setProcedural( const std::string &className, int class
 
 IECore::Renderer::ProceduralPtr ProceduralHolder::getProcedural( std::string *className, int *classVersion )
 {
-	return dynamic_pointer_cast<Renderer::Procedural>( getParameterised( className, classVersion ) );
+	return runTimeCast<Renderer::Procedural>( getParameterised( className, classVersion ) );
 }
 
 IECoreGL::ConstScenePtr ProceduralHolder::scene()

@@ -57,7 +57,7 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 {
 	MStatus s;
 	
-	IECore::ConstMeshPrimitivePtr mesh = boost::dynamic_pointer_cast<const IECore::MeshPrimitive>(object());
+	IECore::ConstMeshPrimitivePtr mesh = IECore::runTimeCast<const IECore::MeshPrimitive>(object());
 	assert( mesh );
 		
 	MFloatPointArray vertexArray;
@@ -70,7 +70,7 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 	IECore::PrimitiveVariableMap::const_iterator it = mesh->variables.find("P");
 	if ( it != mesh->variables.end() )
 	{
-		IECore::ConstV3fVectorDataPtr p = boost::dynamic_pointer_cast<const IECore::V3fVectorData>(it->second.data);
+		IECore::ConstV3fVectorDataPtr p = IECore::runTimeCast<const IECore::V3fVectorData>(it->second.data);
 		if (p)
 		{
 			numVertices = p->readable().size();
@@ -83,7 +83,7 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 		}
 		else
 		{
-			IECore::ConstV3dVectorDataPtr p = boost::dynamic_pointer_cast<const IECore::V3dVectorData>(it->second.data);
+			IECore::ConstV3dVectorDataPtr p = IECore::runTimeCast<const IECore::V3dVectorData>(it->second.data);
 			if (p)
 			{
 				numVertices = p->readable().size();

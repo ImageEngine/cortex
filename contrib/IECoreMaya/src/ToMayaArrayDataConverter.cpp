@@ -58,7 +58,7 @@ bool ToMayaArrayDataConverter<F, T>::doConvert( MObject &obj ) const
 {
 	MStatus s;
 	
-	boost::intrusive_ptr< const F > dataPtr = boost::dynamic_pointer_cast<const F>(ToMayaObjectConverter::object());
+	boost::intrusive_ptr< const F > dataPtr = IECore::runTimeCast<const F>(ToMayaObjectConverter::object());
 	assert( dataPtr );
 	
 	typename MArrayTraits<T>::DataFn fnData;

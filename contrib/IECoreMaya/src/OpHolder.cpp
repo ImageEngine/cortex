@@ -169,7 +169,7 @@ IECore::ParameterisedPtr OpHolder<B>::getParameterised( std::string *classNameOu
 		{
 			ParameterisedHolder<B>::m_failedToLoad = true;
 		
-			IECore::OpPtr op = boost::dynamic_pointer_cast<IECore::Op>( ParameterisedHolder<B>::m_parameterised );
+			IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( ParameterisedHolder<B>::m_parameterised );
 		
 			if (op)
 			{
@@ -270,7 +270,7 @@ MStatus OpHolder<B>::setOp( const std::string &className, int classVersion )
 template<typename B>          
 IECore::OpPtr OpHolder<B>::getOp( std::string *className, int *classVersion, std::string *searchPathEnvVar )
 {
-        return boost::dynamic_pointer_cast<IECore::Op>( getParameterised( className, classVersion, searchPathEnvVar ) );       
+        return IECore::runTimeCast<IECore::Op>( getParameterised( className, classVersion, searchPathEnvVar ) );       
 }
 
 

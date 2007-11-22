@@ -115,7 +115,7 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 
 		/// Calls setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" ).
 		MStatus setProcedural( const std::string &className, int classVersion );
-		/// Returns dynamic_pointer_cast<ParameterisedProcedural>( getProcedural( className, classVersion ) ). 
+		/// Returns runTimeCast<ParameterisedProcedural>( getProcedural( className, classVersion ) ). 
 		IECore::Renderer::ProceduralPtr getProcedural( std::string *className = 0, int *classVersion = 0 );
 	
 		/// Returns an up to date scene from the procedural
