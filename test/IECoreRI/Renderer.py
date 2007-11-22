@@ -267,5 +267,17 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 	
+	def testMissingShaders( self ) :
+	
+		"""Check that missing shaders don't throw an exception but print a message instead."""
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/missingShaders.rib" )
+		
+		r.worldBegin()
+		
+		r.shader( "surface", "aShaderWhichDoesntExist", {} )
+		
+		r.worldEnd()
+		
 if __name__ == "__main__":
     unittest.main()   

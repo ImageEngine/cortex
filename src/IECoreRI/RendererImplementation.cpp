@@ -668,7 +668,16 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::
 
 void IECoreRI::RendererImplementation::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	ConstShaderPtr s = dynamic_pointer_cast<const Shader>( m_shaderCache->read( name + ".sdl" ) );
+	ConstShaderPtr s = 0;
+	try 
+	{
+		s = runTimeCast<const Shader>( m_shaderCache->read( name + ".sdl" ) );
+	}
+	catch( ... )
+	{
+		// we don't want exceptions to halt rendering - we'd rather just report the error below
+	}
+	
 	if( s )
 	{
 		AttributeState &state = m_attributeStack.top();
