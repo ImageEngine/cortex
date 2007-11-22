@@ -140,27 +140,34 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 			return ptrUserData;
 		}
 
+		void addParametersFromMembers( const object &members )
+		{
+			for( int i=0; i<members.attr("__len__")(); i++ )
+			{
+				object o = members[i];
+				Parameter &p = extract<Parameter &>( o );
+				this->addParameter( &p );
+			}
+		}
+
 	public :
 
 		CompoundParameterWrap( PyObject *self, const std::string &name, const std::string &description, const list &members = list(), const object &userData = object() )
 			:	CompoundParameter( name, description, getUserData( userData ) ), Wrapper< CompoundParameter >( self, this ) 
 		{
-			std::vector<ParameterPtr> m = getMembers( members );
-			this->addParameters( m.begin(), m.end() );
+			addParametersFromMembers( members );
 		}
 
 		CompoundParameterWrap( PyObject *self, const std::string &name, const list &members, const object & userData = object() )
 			:	CompoundParameter( name, "", getUserData( userData ) ), Wrapper< CompoundParameter >( self, this )
 		{
-			std::vector<ParameterPtr> m = getMembers( members );
-			this->addParameters( m.begin(), m.end() );
+			addParametersFromMembers( members );
 		}
 		
 		CompoundParameterWrap( PyObject *self, const list &members, const object & userData = object() )
 			:	CompoundParameter( "", "", getUserData( userData ) ), Wrapper< CompoundParameter >( self, this )
 		{
-			std::vector<ParameterPtr> m = getMembers( members );
-			this->addParameters( m.begin(), m.end() );
+			addParametersFromMembers( members );
 		}
 
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( CompoundParameter );
