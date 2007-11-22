@@ -36,6 +36,7 @@
 #include "IECoreGL/State.h"
 #include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/BoxPrimitive.h"
+#include "IECoreGL/Exception.h"
 
 #include "IECoreMaya/ProceduralHolderUI.h"
 #include "IECoreMaya/ProceduralHolder.h"
@@ -202,63 +203,73 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 		while( glGetError()!=GL_NO_ERROR )
 		{
 		}
+	
+		try
+		{
 		
-		// maya has already set the color based on the request created
-		// in getDrawRequests(), but we need to transfer that into the base state
-		// we use to draw the scene and the bounding box.
-		Imath::Color4f wc; glGetFloatv( GL_CURRENT_COLOR, wc.getValue() );
-		switch( request.displayStyle() )
-		{
-			case M3dView::kWireFrame :
-				baseState( M3dView::kWireFrame )->add( new IECoreGL::WireframeColorStateComponent( convert<Imath::Color4f>( wc ) ) );
-				break;
-			case M3dView::kPoints :
-				baseState( M3dView::kPoints )->add( new IECoreGL::PointColorStateComponent( convert<Imath::Color4f>( wc ) ) );
-				break;
-			case M3dView::kBoundingBox :
-				baseState( M3dView::kBoundingBox )->add( new IECoreGL::BoundColorStateComponent( convert<Imath::Color4f>( wc ) ) );
-				break;	
-			default :
-				break;
-		}
-	
-		// draw the bound if asked
-		if( request.token()==BoundDrawMode )
-		{
-			IECoreGL::StatePtr wireframeState = baseState( M3dView::kWireFrame );
-			m_boxPrimitive->setBox( convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
-			glPushAttrib( wireframeState->mask() );
-				(boost::static_pointer_cast<IECoreGL::Renderable>( m_boxPrimitive ))->render( wireframeState );
-			glPopAttrib();
-		}
-	
-		// draw the scene if asked
-		if( request.token()==SceneDrawMode )
-		{
-			IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
-			if( scene )
+			// maya has already set the color based on the request created
+			// in getDrawRequests(), but we need to transfer that into the base state
+			// we use to draw the scene and the bounding box.
+			Imath::Color4f wc; glGetFloatv( GL_CURRENT_COLOR, wc.getValue() );
+			switch( request.displayStyle() )
 			{
-				bool popTexture = false;
-				if( request.displayStyle()==M3dView::kGouraudShaded || request.displayStyle()==M3dView::kFlatShaded )
+				case M3dView::kWireFrame :
+					baseState( M3dView::kWireFrame )->add( new IECoreGL::WireframeColorStateComponent( convert<Imath::Color4f>( wc ) ) );
+					break;
+				case M3dView::kPoints :
+					baseState( M3dView::kPoints )->add( new IECoreGL::PointColorStateComponent( convert<Imath::Color4f>( wc ) ) );
+					break;
+				case M3dView::kBoundingBox :
+					baseState( M3dView::kBoundingBox )->add( new IECoreGL::BoundColorStateComponent( convert<Imath::Color4f>( wc ) ) );
+					break;	
+				default :
+					break;
+			}
+
+			// draw the bound if asked
+			if( request.token()==BoundDrawMode )
+			{
+				IECoreGL::StatePtr wireframeState = baseState( M3dView::kWireFrame );
+				m_boxPrimitive->setBox( convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
+				glPushAttrib( wireframeState->mask() );
+					(boost::static_pointer_cast<IECoreGL::Renderable>( m_boxPrimitive ))->render( wireframeState );
+				glPopAttrib();
+			}
+
+			// draw the scene if asked
+			if( request.token()==SceneDrawMode )
+			{
+				IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
+				if( scene )
 				{
-					glPushAttrib( GL_TEXTURE_BIT );
-					popTexture = true;
-					// set up the material. we probably need to do some work to prevent the base state passed to
-					// the scene render from overriding aspects of this
-					MMaterial material = request.material();
-					material.setMaterial( request.multiPath(), request.isTransparent() );
-					if( material.materialIsTextured() )
+					bool popTexture = false;
+					if( request.displayStyle()==M3dView::kGouraudShaded || request.displayStyle()==M3dView::kFlatShaded )
 					{
-						glEnable( GL_TEXTURE_2D );
-						material.applyTexture( view, drawData );
+						glPushAttrib( GL_TEXTURE_BIT );
+						popTexture = true;
+						// set up the material. we probably need to do some work to prevent the base state passed to
+						// the scene render from overriding aspects of this
+						MMaterial material = request.material();
+						material.setMaterial( request.multiPath(), request.isTransparent() );
+						if( material.materialIsTextured() )
+						{
+							glEnable( GL_TEXTURE_2D );
+							material.applyTexture( view, drawData );
+						}
+					}
+						scene->render( baseState( (M3dView::DisplayStyle)request.displayStyle() ) );
+					if( popTexture )
+					{
+						glPopAttrib();
 					}
 				}
-					scene->render( baseState( (M3dView::DisplayStyle)request.displayStyle() ) );
-				if( popTexture )
-				{
-					glPopAttrib();
-				}
 			}
+				
+		}
+		catch( const IECoreGL::Exception &e )
+		{
+			// much better to catch and report this than to let the application die
+			IECore::msg( IECore::Msg::Error, "ProceduralHolderUI::draw", boost::format( "IECoreGL Exception : %s" ) % e.what() );
 		}
 		
 	view.endGL();
