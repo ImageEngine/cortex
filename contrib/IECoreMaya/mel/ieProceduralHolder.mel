@@ -47,6 +47,7 @@
 global proc string ieProceduralHolderCreate( string $name, string $className, int $classVersion )
 {
 	string $node = ieNodeCreateShapeWithParent( $name, "ieProceduralHolder" );
+	sets -add initialShadingGroup $node;
 	ieParameterisedHolderSetParameterised( $node, $className, $classVersion, "IECORE_PROCEDURAL_PATHS" );
 	return $node;
 }
