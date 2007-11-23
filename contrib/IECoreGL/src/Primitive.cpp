@@ -53,6 +53,7 @@ using namespace Imath;
 
 Primitive::Primitive()
 {
+	m_vertexToUniform.shader = 0;
 }
 
 Primitive::~Primitive()
@@ -285,7 +286,7 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 	{
 		return;
 	}
-
+	
 	m_vertexToUniform.intDataMap.clear();
 	
 	for( VertexAttributeMap::const_iterator it=m_vertexAttributes.begin(); it!=m_vertexAttributes.end(); it++ )
@@ -307,7 +308,7 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 		{
 		}
 	}
-	
+		
 	m_vertexToUniform.shader = s;
 }
 
