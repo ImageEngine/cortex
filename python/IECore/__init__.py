@@ -40,7 +40,6 @@ from _IECore import *
 # access by a shorter name for convenience
 Msg = MessageHandler
 from RunTimeTypedUtil import *
-from ParameterParser import *
 from Log import *
 from Formatter import Formatter
 from WrappedTextFormatter import WrappedTextFormatter
@@ -82,6 +81,7 @@ from LsHeaderOp import LsHeaderOp
 from curry import curry
 from MenuItemDefinition import MenuItemDefinition
 from MenuDefinition import MenuDefinition
+from ParameterParser import *
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
