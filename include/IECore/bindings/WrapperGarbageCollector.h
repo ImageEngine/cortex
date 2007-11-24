@@ -38,7 +38,7 @@
 #include <boost/python.hpp>
 #include <iostream>
 #include <cassert>
-#include <list>
+#include <vector>
 
 #include "IECore/RefCounted.h"
 #include "IECore/WrapperGarbageCollectorBase.h"
@@ -46,6 +46,7 @@
 namespace IECore
 {
 
+//\todo Optimize the collect() function. The function is taking too much tests on reference counting when many objects are allocated.
 class WrapperGarbageCollector : public WrapperGarbageCollectorBase
 {
 				
@@ -70,7 +71,7 @@ class WrapperGarbageCollector : public WrapperGarbageCollectorBase
 		
 		static void collect()
 		{
-			std::list<PyObject*> toCollect;
+			std::vector<PyObject*> toCollect;
 			
 			do
 			{
@@ -86,7 +87,7 @@ class WrapperGarbageCollector : public WrapperGarbageCollectorBase
 					}
 				}
 
-				for (std::list<PyObject*>::const_iterator jt = toCollect.begin(); jt != toCollect.end(); ++jt)
+				for (std::vector<PyObject*>::const_iterator jt = toCollect.begin(); jt != toCollect.end(); ++jt)
 				{
 					Py_DECREF( *jt );
 				}
