@@ -225,6 +225,8 @@ void bindTypeId()
 		.value("DataCastOp", DataCastOpTypeId)
 		.value("DataPromoteOp", DataPromoteOpTypeId)
 		.value("PointBoundsOp", PointBoundsOpTypeId)
+		.value("V2iVectorData", V2iVectorDataTypeId)
+		.value("V3iVectorData", V3iVectorDataTypeId)
 	;
 }
 

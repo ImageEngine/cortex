@@ -224,6 +224,8 @@ enum TypeId
 	MatrixMultiplyOpTypeId = 181,
 	PointBoundsOpTypeId = 182,
 	RandomRotationOpTypeId = 183,
+	V2iVectorDataTypeId = 184,
+	V3iVectorDataTypeId = 185,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	

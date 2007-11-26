@@ -62,8 +62,10 @@ typedef TypedData< std::vector< std::string > > StringVectorData;
 // vectors for Imath types
 typedef TypedData< std::vector< Imath::V2f > > V2fVectorData;
 typedef TypedData< std::vector< Imath::V2d > > V2dVectorData;
+typedef TypedData< std::vector< Imath::V2i > > V2iVectorData;
 typedef TypedData< std::vector< Imath::V3f > > V3fVectorData;
 typedef TypedData< std::vector< Imath::V3d > > V3dVectorData;
+typedef TypedData< std::vector< Imath::V3i > > V3iVectorData;
 typedef TypedData< std::vector< Imath::Box2f > > Box2fVectorData;
 typedef TypedData< std::vector< Imath::Box2d > > Box2dVectorData;
 typedef TypedData< std::vector< Imath::Box3f > > Box3fVectorData;
@@ -93,8 +95,10 @@ IE_CORE_DECLAREPTR( StringVectorData );
 // pointers to vectors of Imath types
 IE_CORE_DECLAREPTR( V2fVectorData );
 IE_CORE_DECLAREPTR( V2dVectorData );
+IE_CORE_DECLAREPTR( V2iVectorData );
 IE_CORE_DECLAREPTR( V3fVectorData );
 IE_CORE_DECLAREPTR( V3dVectorData );
+IE_CORE_DECLAREPTR( V3iVectorData );
 IE_CORE_DECLAREPTR( Box2fVectorData );
 IE_CORE_DECLAREPTR( Box2dVectorData );
 IE_CORE_DECLAREPTR( Box3fVectorData );

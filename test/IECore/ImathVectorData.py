@@ -172,6 +172,72 @@ class V2dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		"""Test V2dVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
 
+class V2iVectorDataTest(BaseVectorDataTest, unittest.TestCase):
+
+	def __init__(self, param1):
+		BaseVectorDataTest.__init__(self, V2iVectorData, V2i)
+		unittest.TestCase.__init__(self, param1)
+
+	def testConstructors(self):
+		"""Test V2iVectorData constructors"""
+		BaseVectorDataTest.testConstructors(self)
+	
+	def testResize(self):
+		"""Test V2iVectorData resizing"""
+		BaseVectorDataTest.testResize(self)
+	
+	def testAssignment(self):
+		"""Test V2iVectorData assignment"""
+		BaseVectorDataTest.testAssignment(self)
+				
+	def testNegativeIndexing(self):
+		"""Test V2iVectorData negative indexing"""
+		BaseVectorDataTest.testNegativeIndexing(self)
+	
+	def testCopyOnWrite(self):
+		"""Test V2iVectorData copy-on-write behavior"""
+		BaseVectorDataTest.testCopyOnWrite(self)
+	
+	def testContains(self):
+		"""Test V2iVectorData contains function"""
+		BaseVectorDataTest.testContains(self)
+	
+	def testExtend(self):
+		"""Test V2iVectorData extend function"""
+		BaseVectorDataTest.testExtend(self)
+	
+	def testSlices(self):
+		"""Test V2iVectorData slicing behavior"""
+		BaseVectorDataTest.testSlices(self)
+	
+	def testEquality(self):
+		"""Test V2iVectorData equality function"""
+		BaseVectorDataTest.testEquality(self)
+	
+	def testComparison(self):
+		"""Test V2iVectorData comparison function"""
+		pass
+	
+	def testSumOperations(self):
+		"""Test V2iVectorData sum operations"""
+		BaseVectorDataTest.testSumOperations(self)
+	
+	def testSubOperations(self):
+		"""Test V2iVectorData subtraction operations"""
+		BaseVectorDataTest.testSubOperations(self)
+	
+	def testMultOperations(self):
+		"""Test V2iVectorData multiplication operations"""
+		BaseVectorDataTest.testMultOperations(self)
+		
+	def testDivOperations(self):
+		"""Test V2iVectorData division operations"""
+		BaseVectorDataTest.testDivOperations(self)
+	
+	def testByValueItem(self):
+		"""Test V2iVectorData by value return type"""
+		BaseVectorDataTest.testByValueItem(self)
+		
 class V3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
@@ -304,6 +370,72 @@ class V3dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		"""Test V3dVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
 
+class V3iVectorDataTest(BaseVectorDataTest, unittest.TestCase):
+
+	def __init__(self, param1):
+		BaseVectorDataTest.__init__(self, V3iVectorData, V3i)
+		unittest.TestCase.__init__(self, param1)
+
+	def testConstructors(self):
+		"""Test V3iVectorData constructors"""
+		BaseVectorDataTest.testConstructors(self)
+	
+	def testResize(self):
+		"""Test V3iVectorData resizing"""
+		BaseVectorDataTest.testResize(self)
+	
+	def testAssignment(self):
+		"""Test V3iVectorData assignment"""
+		BaseVectorDataTest.testAssignment(self)
+				
+	def testNegativeIndexing(self):
+		"""Test V3iVectorData negative indexing"""
+		BaseVectorDataTest.testNegativeIndexing(self)
+	
+	def testCopyOnWrite(self):
+		"""Test V3iVectorData copy-on-write behavior"""
+		BaseVectorDataTest.testCopyOnWrite(self)
+	
+	def testContains(self):
+		"""Test V3iVectorData contains function"""
+		BaseVectorDataTest.testContains(self)
+	
+	def testExtend(self):
+		"""Test V3iVectorData extend function"""
+		BaseVectorDataTest.testExtend(self)
+	
+	def testSlices(self):
+		"""Test V3iVectorData slicing behavior"""
+		BaseVectorDataTest.testSlices(self)
+
+	def testEquality(self):
+		"""Test V3iVectorData equality function"""
+		BaseVectorDataTest.testEquality(self)
+	
+	def testComparison(self):
+		"""Test V3iVectorData comparison function"""
+		pass
+	
+	def testSumOperations(self):
+		"""Test V3iVectorData sum operations"""
+		BaseVectorDataTest.testSumOperations(self)
+	
+	def testSubOperations(self):
+		"""Test V3iVectorData subtraction operations"""
+		BaseVectorDataTest.testSubOperations(self)
+	
+	def testMultOperations(self):
+		"""Test V3iVectorData multiplication operations"""
+		BaseVectorDataTest.testMultOperations(self)
+		
+	def testDivOperations(self):
+		"""Test V3iVectorData division operations"""
+		BaseVectorDataTest.testDivOperations(self)
+	
+	def testByValueItem(self):
+		"""Test V3iVectorData by value return type"""
+		BaseVectorDataTest.testByValueItem(self)
+		
 def createBox3f(value):
      return Box3f(V3f(value))
 		

@@ -144,8 +144,10 @@ IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( CharVectorData, CharVectorDat
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UCharVectorData, UCharVectorDataTypeId )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2fVectorData, V2fVectorDataTypeId, 2 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2dVectorData, V2dVectorDataTypeId, 2 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2iVectorData, V2iVectorDataTypeId, 2 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3fVectorData, V3fVectorDataTypeId, 3 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3dVectorData, V3dVectorDataTypeId, 3 )
+IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V3iVectorData, V3iVectorDataTypeId, 3 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box2fVectorData, Box2fVectorDataTypeId, 4 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box2dVectorData, Box2dVectorDataTypeId, 4 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Box3fVectorData, Box3fVectorDataTypeId, 6 )
@@ -256,8 +258,10 @@ template class TypedData<vector<char> >;
 template class TypedData<vector<unsigned char> >;
 template class TypedData<vector<V2f> >;
 template class TypedData<vector<V2d> >;
+template class TypedData<vector<V2i> >;
 template class TypedData<vector<V3f> >;
 template class TypedData<vector<V3d> >;
+template class TypedData<vector<V3i> >;
 template class TypedData<vector<Color3f> >;
 template class TypedData<vector<Color4f> >;
 template class TypedData<vector<Color3<double> > >;
