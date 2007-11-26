@@ -112,10 +112,25 @@ class Primitive : public Renderable
 		
 	private :
 		
+		struct IntData
+		{
+			IntData() {};
+			IntData( const int *d, unsigned int dim ) : data( d ), dimensions( dim ) {};
+			const int *data;
+			unsigned int dimensions;
+		};
+		struct FloatData
+		{
+			FloatData() {};
+			FloatData( const float *d, unsigned int dim ) : data( d ), dimensions( dim ) {};
+			const float *data;
+			unsigned int dimensions;
+		};
 		void setupVertexAttributesAsUniform( Shader *s ) const;
 		mutable struct {
 			Shader *shader;
-			std::map<GLint, const int *> intDataMap;
+			std::map<GLint, IntData> intDataMap;
+			std::map<GLint, FloatData> floatDataMap;
 		} m_vertexToUniform;
 	
 		typedef std::map<std::string, IECore::ConstDataPtr> VertexAttributeMap;

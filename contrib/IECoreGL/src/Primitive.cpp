@@ -40,6 +40,7 @@
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/TextureUnits.h"
 #include "IECoreGL/NumericTraits.h"
+#include "IECoreGL/UniformFunctions.h"
 
 #include "IECore/TypedDataDespatch.h"
 #include "IECore/VectorTypedData.h"
@@ -267,10 +268,15 @@ void Primitive::setVertexAttributesAsUniforms( unsigned int vertexIndex ) const
 	{
 		return;
 	}
-	std::map<GLint, const int *>::const_iterator it;
+	std::map<GLint, IntData>::const_iterator it;
 	for( it=m_vertexToUniform.intDataMap.begin(); it!=m_vertexToUniform.intDataMap.end(); it++ )
 	{
-		m_vertexToUniform.shader->setParameter( it->first, it->second[vertexIndex] );
+		uniformIntFunctions()[it->second.dimensions]( it->first, 1, it->second.data + vertexIndex * it->second.dimensions );
+	}
+	std::map<GLint, FloatData>::const_iterator fit;
+	for( fit=m_vertexToUniform.floatDataMap.begin(); fit!=m_vertexToUniform.floatDataMap.end(); fit++ )
+	{
+		uniformFloatFunctions()[fit->second.dimensions]( fit->first, 1, fit->second.data + vertexIndex * fit->second.dimensions );
 	}
 }
 
@@ -297,10 +303,27 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 			switch( it->second->typeId() )
 			{
 				case IECore::IntVectorDataTypeId :
-					m_vertexToUniform.intDataMap[parameterIndex] = &(static_pointer_cast<const IECore::IntVectorData>( it->second )->readable()[0]);
+					m_vertexToUniform.intDataMap[parameterIndex] = IntData( static_pointer_cast<const IECore::IntVectorData>( it->second )->baseReadable(), 1 );
+					break;					
+				case IECore::V2iVectorDataTypeId :
+					m_vertexToUniform.intDataMap[parameterIndex] = IntData( static_pointer_cast<const IECore::V2iVectorData>( it->second )->baseReadable(), 2 );
 					break;
+				case IECore::V3iVectorDataTypeId :
+					m_vertexToUniform.intDataMap[parameterIndex] = IntData( static_pointer_cast<const IECore::V3iVectorData>( it->second )->baseReadable(), 3 );
+					break;
+				case IECore::FloatVectorDataTypeId :
+					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( static_pointer_cast<const IECore::FloatVectorData>( it->second )->baseReadable(), 1 );
+					break;
+				case IECore::V2fVectorDataTypeId :
+					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( static_pointer_cast<const IECore::V2fVectorData>( it->second )->baseReadable(), 2 );
+					break;
+				case IECore::V3fVectorDataTypeId :
+					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( static_pointer_cast<const IECore::V3fVectorData>( it->second )->baseReadable(), 3 );
+					break;
+				case IECore::Color3fVectorDataTypeId :
+					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( static_pointer_cast<const IECore::Color3fVectorData>( it->second )->baseReadable(), 3 );
+					break;			
 				default :
-					/// \todo The other types
 					break;
 			}
 		}
