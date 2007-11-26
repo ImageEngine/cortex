@@ -47,19 +47,25 @@ using namespace boost::python;
 namespace IECoreGL
 {
 
+static StatePtr defaultState()
+{
+	return new State( State::defaultState() );
+}
+
 void bindState()
 {
-	typedef class_< State, boost::noncopyable, StatePtr, bases< IECore::RunTimeTyped > > StatePyClass;
+	typedef class_< State, StatePtr, boost::noncopyable, bases< Bindable > > StatePyClass;
 	StatePyClass( "State", init<bool>() )
 		.def( "add", (void (State::*)( StatePtr ) )&State::add )
 		.def( "add", (void (State::*)( StateComponentPtr ) )&State::add )
 		.def( "isComplete", &State::isComplete )
+		.def( "defaultState", &defaultState ).staticmethod( "defaultState" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( State )
 	;
 
 	INTRUSIVE_PTR_PATCH( State, StatePyClass );
-	implicitly_convertible<StatePtr, StatePtr>();
-	implicitly_convertible<StatePtr, IECore::RunTimeTypedPtr>();
+	implicitly_convertible<StatePtr, ConstStatePtr>();
+	implicitly_convertible<StatePtr, BindablePtr>();
 
 }
 

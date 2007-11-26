@@ -47,7 +47,7 @@ namespace IECoreGL
 
 void bindOrthographicCamera()
 {
-	typedef class_< OrthographicCamera, OrthographicCameraPtr, boost::noncopyable, Camera> OrthographicCameraPyClass;
+	typedef class_< OrthographicCamera, OrthographicCameraPtr, boost::noncopyable, bases<Camera> > OrthographicCameraPyClass;
 	OrthographicCameraPyClass( "OrthographicCamera", no_init )
 		.def( init<const Imath::M44f &, const Imath::V2i &, const Imath::Box2f &, const Imath::V2f &>( (
 				arg( "transform" ) = Imath::M44f(),
