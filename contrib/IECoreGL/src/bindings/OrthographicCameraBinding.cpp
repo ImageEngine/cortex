@@ -34,6 +34,7 @@
 
 #include <boost/python.hpp>
 
+#include "IECoreGL/State.h"
 #include "IECoreGL/OrthographicCamera.h"
 #include "IECoreGL/bindings/OrthographicCameraBinding.h"
 
@@ -56,6 +57,7 @@ void bindOrthographicCamera()
 				arg( "clippingPlanes" ) = Imath::V2f( 0.1, 1000 )
 			)
 		) )
+		.def( "render", &OrthographicCamera::render )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( OrthographicCamera )
 	;
 

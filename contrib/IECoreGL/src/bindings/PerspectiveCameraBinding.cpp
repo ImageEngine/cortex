@@ -46,11 +46,6 @@ using namespace boost::python;
 namespace IECoreGL
 {
 
-void render( PerspectiveCameraPtr cam, StatePtr state )
-{
-	cam->render( state );
-}
-
 void bindPerspectiveCamera()
 {
 	typedef class_< PerspectiveCamera, PerspectiveCameraPtr, boost::noncopyable, bases< Camera > > PerspectiveCameraPyClass;
@@ -65,7 +60,7 @@ void bindPerspectiveCamera()
 		) )
 		.def( "setFOV", &PerspectiveCamera::setFOV )
 		.def( "getFOV", &PerspectiveCamera::getFOV )
-		.def( "render", &render )
+		.def( "render", &PerspectiveCamera::render )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( PerspectiveCamera )
 	;
 

@@ -49,7 +49,7 @@ namespace IECoreGL
 
 static StatePtr defaultState()
 {
-	return new State( State::defaultState() );
+	return boost::const_pointer_cast< State >( State::defaultState() );
 }
 
 void bindState()
