@@ -75,3 +75,9 @@ void NullObject::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Object::memoryUsage( a );
 }
+
+NullObjectPtr NullObject::defaultNullObject()
+{
+	static NullObjectPtr o = new NullObject();
+	return o;
+}

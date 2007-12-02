@@ -40,6 +40,8 @@
 namespace IECore
 {
 
+IE_CORE_FORWARDDECLARE( NullObject )
+
 /// A fairly odd class for use where an Object is needed
 /// but there's no suitable value - it's current primary use
 /// is for setting invalid values in the children of
@@ -53,13 +55,13 @@ class NullObject : public Object
 		
 		IE_CORE_DECLAREOBJECT( NullObject, Object );
 		
+		static NullObjectPtr defaultNullObject();
+		
 	private :
 
 		static const unsigned int m_ioVersion;	
 
 };
-
-IE_CORE_DECLAREPTR( NullObject )
 
 }
 

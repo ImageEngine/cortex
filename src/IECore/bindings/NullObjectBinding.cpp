@@ -50,6 +50,7 @@ void bindNullObject()
 	NullObjectPyClass( "NullObject", no_init )
 		.def( init<>() )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(NullObject)
+		.def( "defaultNullObject", NullObject::defaultNullObject ).staticmethod( "defaultNullObject" )
 	;
 	
 	INTRUSIVE_PTR_PATCH( NullObject, NullObjectPyClass );
