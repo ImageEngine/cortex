@@ -406,6 +406,7 @@ corePythonEnv = pythonEnv.Copy()
 
 coreSources = glob.glob( "src/IECore/*.cpp" )
 coreHeaders = glob.glob( "include/IECore/*.h" ) + glob.glob( "include/IECore/*.inl" )
+coreBindingHeaders = glob.glob( "include/IECore/bindings/*.h" ) + glob.glob( "include/IECore/bindings/*.inl" )
 corePythonSources = glob.glob( "src/IECore/bindings/*.cpp" )
 corePythonScripts = glob.glob( "python/IECore/*.py" )
 
@@ -447,6 +448,7 @@ coreLibraryInstall = coreEnv.Install( "$INSTALL_LIB_DIR", coreLibrary )
 coreEnv.Alias( "install", coreLibraryInstall )
 
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
+headerInstall += coreEnv.Install( "$INSTALL_HEADER_DIR/IECore/bindings", coreBindingHeaders )
 coreEnv.Alias( "install", headerInstall )
 
 corePythonEnv.Append( LIBS = coreLibrary )
