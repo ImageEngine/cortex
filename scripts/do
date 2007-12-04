@@ -75,6 +75,7 @@ Examples :
 
 import os
 import sys
+import StringIO
 
 import IECore
 
@@ -157,7 +158,22 @@ if sys.argv[1]=="-help" :
 		if len( sys.argv ) > newIndex :
 			exitWithUsage()
 		
-		print loader.help( actionName, actionVersion )
+		c = loader.load( actionName, actionVersion ) ()
+		
+		textIO = StringIO.StringIO()
+		
+		formatter = IECore.WrappedTextFormatter( textIO )
+		formatter.paragraph( "Name    : " + c.name + "\n" )
+		formatter.paragraph( c.description + "\n" )
+		if len( c.parameters().values() ):
+			formatter.heading( "Parameters" )
+			formatter.indent()
+			for p in c.parameters().values() :
+				IECore.formatParameterHelp( p, formatter )
+			formatter.unindent()
+		formatter.paragraph( "Path  : " + c.path + "  Version  : " + str( c.version ) )
+		
+		print textIO.getvalue()
 		sys.exit( 0 )
 		
 elif sys.argv[1]=="-listActions" :
