@@ -39,7 +39,7 @@ import VersionControl
 VersionControl.setVersion( "IEBuild", "1.5.5" )
 import IEBuild
 
-version = "0.4.0"
+version = "0.5.0"
 coreMajorVersion = "2"
 openEXRVersion = "1.4.0"
 boostVersion = "1.33.1"
