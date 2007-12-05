@@ -41,7 +41,7 @@ VersionControl.setVersion('IEBuild', '1.7.2')
 import IEBuild
 
 name = 'IECoreMaya'
-version = '2.10.2'
+version = '2.11.0'
 
 coreMajorVersion = '2'
 coreGLMajorVersion = '0'
