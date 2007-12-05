@@ -37,13 +37,28 @@ import maya.cmds
 import maya.mel
 
 ## Creates a maya menu from an IECore.MenuDefinition. The menu is built dynamically when it's
-# displayed, so the definition can be edited at any time to change the menu.
-def createMenu( definition, parent, label ) :	
+# displayed, so the definition can be edited at any time to change the menu. parent may be a
+# window (in which case the menu is added to the menu bar), a menu (in which case a submenu is created)
+# or a control (in which case a popup menu is created).
+def createMenu( definition, parent, label="", insertAfter=None ) :	
+	
+	menu = None
+	if maya.cmds.window( parent, query=True, exists=True ) :
+		# parent is a window - we're sticking it in the menubar
+		menu = maya.cmds.menu( label=label, parent=parent, tearOff=True )
+	elif maya.cmds.menu( parent, query=True, exists=True ) :
+		# parent is a menu - we're adding a submenu
+		if not (insertAfter is None) :
+			menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True, insertAfter=insertAfter )
+		else :
+			menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True )
+	else :
+		# assume parent is a control which can accept a popup menu 
+		menu = maya.cmds.popupMenu( parent=parent )
 		
-	menu = maya.cmds.menu( label=label, parent=parent, tearOff=True )
 	maya.cmds.menu( menu, edit=True, postMenuCommand = lambda : __postMenu( menu, definition ) )
 	return menu
-
+	
 # We don't know what the extra argument maya wants to pass to callbacks is, so
 # we have to wrap them so we can throw away that argument
 def __callbackWrapper( cb, a ) :
