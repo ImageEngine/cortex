@@ -55,6 +55,7 @@ def loadConfig( searchPaths, localsDict ) :
 				try :
 					execfile( fullFileName, globals(), localsDict )
 				except Exception, m :
+					IECore.debugException("loading config file")
 					IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\"." % ( fullFileName, m ) )
 
 loadConfig( IECore.SearchPath( os.environ.get( "IECORE_CONFIG_PATHS", "" ), ":" ), { "IECore" : IECore } )
