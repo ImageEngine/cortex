@@ -80,7 +80,8 @@ class FileSequenceParameter( IECore.PathParameter ) :
 				return False, "File sequence does not exist"
 			
 		elif self.mustNotExist :
-			if ls( value.value ) :
+			parts = value.value.split(' ')
+			if ls( value[0] ) :
 				return False, "File sequence already exists"
 			
 		return True, ""	
