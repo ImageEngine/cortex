@@ -550,7 +550,7 @@ template<class T>
 static IECore::ConstDataPtr typedAttributeGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
 	typedef IECore::TypedData<typename T::ValueType> DataType;
-	typename T::ConstPtr a = memberData->implementation->getState<T>();
+	typename T::ConstPtr a = memberData->implementation->template getState<T>();
 	return new DataType( a->value() );
 }
 
