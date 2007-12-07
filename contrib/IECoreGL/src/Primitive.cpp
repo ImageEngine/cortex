@@ -271,7 +271,8 @@ void Primitive::setVertexAttributesAsUniforms( unsigned int vertexIndex ) const
 	std::map<GLint, IntData>::const_iterator it;
 	for( it=m_vertexToUniform.intDataMap.begin(); it!=m_vertexToUniform.intDataMap.end(); it++ )
 	{
-		uniformIntFunctions()[it->second.dimensions]( it->first, 1, it->second.data + vertexIndex * it->second.dimensions );
+		assert( sizeof( int )==sizeof( GLint ) );
+		uniformIntFunctions()[it->second.dimensions]( it->first, 1, ((const GLint *)it->second.data) + vertexIndex * it->second.dimensions );
 	}
 	std::map<GLint, FloatData>::const_iterator fit;
 	for( fit=m_vertexToUniform.floatDataMap.begin(); fit!=m_vertexToUniform.floatDataMap.end(); fit++ )

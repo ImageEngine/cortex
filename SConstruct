@@ -238,7 +238,7 @@ o.Add(
 o.Add(
 	"INSTALL_HEADER_DIR",
 	"The directory in which to install headers.",
-	"$INSTALL_PREFIX/include/$IECORE_NAME",
+	"$INSTALL_PREFIX/include",
 )
 
 o.Add(
@@ -250,7 +250,7 @@ o.Add(
 o.Add(
 	"INSTALL_PYTHON_DIR",
 	"The directory in which to install python modules.",
-	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages/$IECORE_NAME",
+	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
 )
 
 o.Add(
