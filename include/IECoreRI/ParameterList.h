@@ -49,7 +49,7 @@ class ParameterList
 
 		/// Construct a new ParameterList given some parameters
 		/// in a map. Note that the ParameterList refers to data within
-		/// the primVars object, and expects that data to exist for as long
+		/// the parameters object, and expects that data to exist for as long
 		/// as you still use the ParameterList (it doesn't copy the list
 		/// for efficiency reasons). If provided, the typeHints map is used
 		/// to resolve the type of ambiguous types such as V3fData, which
@@ -90,6 +90,7 @@ class ParameterList
 		void appendParameter( const std::string &name, IECore::ConstDataPtr d, const std::map<std::string, std::string> *typeHints );
 		std::vector<const char *> m_charPtrs;
 		std::vector<std::string> m_strings;
+		std::vector<int> m_ints;
 		std::vector<const char *> m_tokens;
 		std::vector<const void *> m_values;
 	

@@ -117,6 +117,7 @@ const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d
 		case IntVectorDataTypeId :
 			arraySize = static_pointer_cast<const IntVectorData>( d )->readable().size();
 		case IntDataTypeId :
+		case BoolDataTypeId :
 			return "int";
 		case StringVectorDataTypeId :
 			arraySize = static_pointer_cast<const StringVectorData>( d )->readable().size();
@@ -135,6 +136,11 @@ const void *ParameterList::value( IECore::ConstDataPtr d )
 		const char *v = static_pointer_cast<const StringData>( d )->readable().c_str();
 		m_charPtrs.push_back( v );
 		return &*(m_charPtrs.rbegin());
+	}
+	if( d->typeId()==BoolData::staticTypeId() )
+	{
+		m_ints.push_back( static_pointer_cast<const BoolData>( d )->readable() );
+		return &*(m_ints.rbegin());
 	}
 	
 	try
@@ -159,6 +165,7 @@ void ParameterList::reserveParameters( size_t n )
 {
 	m_strings.reserve( n );
 	m_charPtrs.reserve( n );
+	m_ints.reserve( n );
 }
 
 void ParameterList::appendParameter( const std::string &name, IECore::ConstDataPtr d, const std::map<std::string, std::string> *typeHints )
