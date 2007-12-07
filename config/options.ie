@@ -1,0 +1,95 @@
+##########################################################################
+#
+#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are
+#  met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#
+#     * Neither the name of Image Engine Design nor the names of any
+#       other contributors to this software may be used to endorse or
+#       promote products derived from this software without specific prior
+#       written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+#  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+#  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+#  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+#  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+#  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+##########################################################################
+
+import os
+import sys
+import os.path
+import IEEnv
+
+def getOption( name, default ) :
+
+	result = default
+	for a in sys.argv :
+		if a[:len(name)+1]==name+"=" :	
+			result = a[len(name)+1:]
+
+	return result
+
+# get the compiler location using the registry
+platform = IEEnv.platform()
+compiler = getOption( "COMPILER", "gcc" )
+compilerVersion = getOption( "COMPILER_VERSION", "4.0.2" )
+compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
+
+CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
+
+# set the include paths
+BOOST_INCLUDE_PATH = "/software/tools/include/boost/1.33.1"
+BOOST_LIB_SUFFIX = ""
+OPENEXR_INCLUDE_PATH = "/software/tools/include/OpenEXR/1.4.0"
+TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
+JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
+SQLITE_INCLUDE_PATH = "/software/tools/include/sqlite/3.3.8"
+GLEW_INCLUDE_PATH = '/software/tools/include/glew/1.4.0'
+
+# find the right libraries based on compiler and platform
+LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion 
+
+# ignore python-config stuff and specify it all explicitly ourselves
+pythonVersion = getOption( "PYTHON_VERSION", "2.5" )
+pythonReg = IEEnv.registry['apps']['python'][pythonVersion][IEEnv.platform()]
+PYTHON = "/software/tools/wrappers/python" + pythonVersion
+PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/" + pythonReg["include"] + "/python" + pythonVersion
+PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
+if PYTHON_LINK_FLAGS=="" :
+	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion 
+	
+# find 3delight
+try :
+	RMAN_ROOT = IEEnv.registry["apps"]["3delight"][getOption( "DL_VERSION", os.environ["DL_VERSION"] )][platform]["location"]
+except :
+	pass
+
+# import vars we need to get our doxygen and python wrappers working
+ENV_VARS_TO_IMPORT="PATH PYTHONPATH IEENV_ROOT IEENV_WORKING_PATH IEENV_LIBRARY_PREFIX_PATH DOXYGEN_VERSION"
+
+# make sure the tests can run
+TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
+
+# get the installation locations right
+INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
+INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
+INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
+INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"

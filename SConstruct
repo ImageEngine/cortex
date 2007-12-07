@@ -42,7 +42,7 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=2
-ieCoreMinorVersion=21
+ieCoreMinorVersion=22
 ieCorePatchVersion=0
 
 ###########################################################################################
@@ -160,9 +160,28 @@ o.Add(
 o.Add( 
 	"PYTHON_CONFIG", 
 	"The path to the python-config program for the Python installation you wish to "
-	"build against. This is used to obtain the appropriate compilation and linking "
-	"flags. The default is to look for python-config on the path.",
+	"build against. This is used to automatically obtain the appropriate compilation and linking "
+	"flags, unless you override them with the other PYTHON_ flags. "
+	"The default is to look for python-config on the path.",
 	"python-config",""
+)
+
+o.Add( 
+	"PYTHON",
+	"The path to the python executable. If unspecified this will be discovered automatically using PYTHON_CONFIG.",
+	""
+)
+
+o.Add( 
+	"PYTHON_INCLUDE_PATH",
+	"The path to the python headers. If unspecified this will be discovered automatically using PYTHON_CONFIG.",
+	"",
+)
+
+o.Add(
+	"PYTHON_LINK_FLAGS",
+	"Flags to use when linking python modules. If unspecified this will be discovered automatically using PYTHON_CONFIG.",
+	""
 )
 
 # Renderman options
@@ -197,37 +216,58 @@ o.Add(
 	BoolOption( "DEBUG", "Set this to build without optimisation and with debug symbols.", False ),
 )
 
+# Environment options
+
+o.Add(
+	"ENV_VARS_TO_IMPORT",
+	"By default SCons ignores the environment it is run in, to avoid it contaminating the "
+	"build process. This can be problematic if some of the environment is critical for "
+	"running the applications used during the build. This space separated list of environment "
+	"variables is imported to help overcome these problems.",
+	"",
+)
+
 # Installation options
 
 o.Add(
-	"IECORE_LIB_SUFFIX",
-	"The suffix for the IECore libraries that are built. This can be used to produce "
-	"versioned or unversioned libraries.",
-	"-${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}",
-)
-
-o.Add(
 	"INSTALL_PREFIX",
-	"The prefix under which to install the libraries.",
+	"The prefix under which to install things.",
 	"/usr/local",
 )
 
 o.Add(
 	"INSTALL_HEADER_DIR",
-	"The directory in which to install the headers.",
-	"$INSTALL_PREFIX/include",
+	"The directory in which to install headers.",
+	"$INSTALL_PREFIX/include/$IECORE_NAME",
 )
 
 o.Add(
-	"INSTALL_LIB_DIR",
-	"The directory in which to install the libraries.",
-	"$INSTALL_PREFIX/lib",
+	"INSTALL_LIB_NAME",
+	"The name under which to install the libraries.",
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
 )
 
 o.Add(
 	"INSTALL_PYTHON_DIR",
-	"The directory in which to install the python modules.",
-	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
+	"The directory in which to install python modules.",
+	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages/$IECORE_NAME",
+)
+
+o.Add(
+	"INSTALL_DOC_DIR",
+	"The directory in which to install the documentation.",
+	"$INSTALL_PREFIX/share/cortex",
+)
+
+# Test options
+
+o.Add(
+	"TEST_LIBRARY_PATH_ENV_VAR",
+	"This is a curious one, probably only ever necessary at image engine. It "
+	"specifies the name of an environment variable used to specify the library "
+	"search paths correctly when running the tests. This should probably be left "
+	"unspecified everywhere except image engine.",
+	""
 )
 
 ###########################################################################################
@@ -238,12 +278,18 @@ env = Environment(
 	options = o
 )
 
+for e in env["ENV_VARS_TO_IMPORT"].split() :
+	if e in os.environ :
+		env["ENV"][e] = os.environ[e]
+
 if "SAVE_OPTIONS" in ARGUMENTS :
 	o.Save( ARGUMENTS["SAVE_OPTIONS"], env )
 
 env["IECORE_MAJOR_VERSION"] = ieCoreMajorVersion
 env["IECORE_MINOR_VERSION"] = ieCoreMinorVersion
 env["IECORE_PATCH_VERSION"] = ieCorePatchVersion
+env["IECORE_MAJORMINOR_VERSION"] = "${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}"
+env["IECORE_MAJORMINORPATCH_VERSION"] = "${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}"
 
 env.Append(
 	CPPFLAGS = [
@@ -360,16 +406,40 @@ Help( o.GenerateHelpText( env ) )
 # An environment for building python modules
 ###########################################################################################
 
+def getPythonConfig( env, flags ) :
+
+	f = os.popen( env["PYTHON_CONFIG"] + " " + flags )
+	r = f.read().strip()
+	if f.close() :
+		sys.stderr.write( "ERROR : Error running \"%s\".\n" % env["PYTHON_CONFIG"] )
+		Exit( 1 )
+	return r
+
 pythonEnv = env.Copy()
 
+# decide where python is
+if pythonEnv["PYTHON"]=="" :
+	pythonEnv["PYTHON"] = getPythonConfig( pythonEnv, "--exec-prefix" ) + "/bin/python"
+
+# try to run it to determine version
+pythonExecutable = pythonEnv["PYTHON"]
 try :
-	pythonEnv.Append( CPPFLAGS = os.popen( pythonEnv["PYTHON_CONFIG"] + " --includes" ).read().split() )
-	pythonEnv.Append( SHLINKFLAGS = os.popen( pythonEnv["PYTHON_CONFIG"] + " --ldflags" ).read().split() )
-	pythonExecutable = os.popen( pythonEnv["PYTHON_CONFIG"] + " --exec-prefix" ).read().strip() + "/bin/python"
 	pythonEnv["PYTHON_VERSION"] = os.popen( pythonExecutable + " -c 'import sys; print \"%s.%s\" % sys.version_info[:2]'" ).read().strip()
 except :
-	sys.stderr.write( "ERROR : Unable to run \"%s\".\n" % pythonEnv["PYTHON_CONFIG"] )
+	sys.stderr.write( "ERROR : Unable to determine python version from \"%s\".\n" % pythonExecutable )
 	Exit( 1 )
+
+# get the include path for python if we haven't been told it explicitly
+if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
+	pythonEnv.Append( CPPFLAGS=getPythonConfig( pythonEnv, "--includes" ).split() )
+else :
+	pythonEnv.Append( CPPPATH="$PYTHON_INCLUDE_PATH" )
+
+# get the python link flags
+if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
+	pythonEnv.Append( SHLINKFLAGS = getPythonConfig( pythonEnv, "--ldflags" ).split() )
+else :
+	pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 
 pythonEnv.Append( CPPFLAGS = "-DBOOST_PYTHON_MAX_ARITY=20" )
 pythonEnv.Append( LIBS = [
@@ -382,27 +452,81 @@ pythonEnv["SHLIBSUFFIX"] = ".so"
 
 if pythonEnv["PLATFORM"]=="darwin" :
 	pythonEnv.Append( SHLINKFLAGS = "-single_module" )
-
+	
 ###########################################################################################
 # An environment for running tests
 ###########################################################################################
 
-if env["PLATFORM"]=="darwin" :
-	libraryPathEnvVar = "DYLD_LIBRARY_PATH"
-else :
-	libraryPathEnvVar = "LD_LIBRARY_PATH"
+if env["TEST_LIBRARY_PATH_ENV_VAR"]=="" :
+	if env["PLATFORM"]=="darwin" :
+		env["TEST_LIBRARY_PATH_ENV_VAR"] = "DYLD_LIBRARY_PATH"
+	else :
+		env["TEST_LIBRARY_PATH_ENV_VAR"] = "LD_LIBRARY_PATH"
 
-testEnv = Environment()
+testEnv = env.Copy()
 testEnv["ENV"]["PYTHONPATH"] = "./python"
 
-testEnv["ENV"][libraryPathEnvVar] = ":".join( [ "./lib" ] + env["LIBPATH"] )
+testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = ":".join( [ "./lib" ] + env["LIBPATH"] )
+
+###########################################################################################
+# Helper functions
+###########################################################################################
+
+# Makes versioned symlinks for use during installation
+def makeSymlinks( env, target ) :
+
+	def Link( target, source, env ) :
+	
+		target = str( target[0] )
+		source = str( source[0] )
+		
+		commonPrefix = os.path.commonprefix( [ os.path.dirname( target ), os.path.dirname( source ) ] )
+		relativeSource = source[len(commonPrefix)+1:]
+	
+		os.symlink( relativeSource, target )
+
+	result = []
+	links = {
+		"$IECORE_MAJORMINORPATCH_VERSION" : "$IECORE_MAJORMINOR_VERSION",
+		"$IECORE_MAJORMINOR_VERSION" : "$IECORE_MAJOR_VERSION",
+	}
+		
+	done = False
+	while not done :
+	
+		done = True
+		for key in links.keys() :
+		
+			if target.find( key ) != -1 :
+			
+				linkName = target.replace( key, links[key] )
+				link = env.Command( linkName, target, Link )
+				
+				result.append( link )
+				target = linkName
+				done = False	
+	
+	return result
+
+# Makes versioned symlinks for the library an environment makes.
+# This function is necessary as there's some name munging to get
+# the right prefix and suffix on the library names.
+def makeLibSymlinks( env ) :
+
+	p = coreEnv["INSTALL_LIB_NAME"]
+	d = os.path.dirname( p )
+	n = os.path.basename( p )
+	n = "$SHLIBPREFIX" + n + "$SHLIBSUFFIX"
+	p = os.path.join( d, n )
+	return makeSymlinks( env, p )
+	
 
 ###########################################################################################
 # Build, install and test the core library and bindings
 ###########################################################################################
 
-coreEnv = env.Copy()
-corePythonEnv = pythonEnv.Copy()
+coreEnv = env.Copy( IECORE_NAME="IECore" )
+corePythonEnv = pythonEnv.Copy( IECORE_NAME="IECore" )
 
 coreSources = glob.glob( "src/IECore/*.cpp" )
 coreHeaders = glob.glob( "include/IECore/*.h" ) + glob.glob( "include/IECore/*.inl" )
@@ -436,27 +560,30 @@ if doConfigure :
 			
 	if c.CheckLibWithHeader( "sqlite3", "sqlite/sqlite3.h", "CXX" ) :
 		c.env.Append( CPPFLAGS = "-DIECORE_WITH_SQLITE" )
+		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_SQLITE' )
 	else :
 		sys.stderr.write( "WARNING: no SQLITE library found, no SQLITE support, check SQLITE_INCLUDE_PATH and SQLITE_LIB_PATH\n" )
 		coreSources.remove( "src/IECore/SQLiteIndexedIO.cpp" )
 
 	c.Finish()
 
-coreLibrary = coreEnv.SharedLibrary( "lib/IECore" + coreEnv.subst( "$IECORE_LIB_SUFFIX" ), coreSources )
-
-coreLibraryInstall = coreEnv.Install( "$INSTALL_LIB_DIR", coreLibrary )
-coreEnv.Alias( "install", coreLibraryInstall )
+coreLibrary = coreEnv.SharedLibrary( "lib/" + os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreSources )
+coreLibraryInstall = coreEnv.Install( os.path.dirname( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreLibrary )
+coreLibrarySymlinks = makeLibSymlinks( coreEnv )
+coreEnv.Alias( "install", [ coreLibraryInstall ] + coreLibrarySymlinks )
 
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
 headerInstall += coreEnv.Install( "$INSTALL_HEADER_DIR/IECore/bindings", coreBindingHeaders )
-coreEnv.Alias( "install", headerInstall )
+headerSymlinks = makeSymlinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] )
+coreEnv.Alias( "install", headerInstall + headerSymlinks )
 
-corePythonEnv.Append( LIBS = coreLibrary )
+corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 corePythonModule = corePythonEnv.SharedLibrary( "python/IECore/_IECore", corePythonSources )
 corePythonEnv.Depends( corePythonModule, coreLibrary )
 
 corePythonModuleInstall = corePythonEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
-pythonEnv.Alias( "install", corePythonModuleInstall )
+corePythonModuleSymlinks = makeSymlinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] )
+pythonEnv.Alias( "install", corePythonModuleInstall + corePythonModuleSymlinks )
 
 Default( coreLibrary, corePythonModule )
 
@@ -467,7 +594,7 @@ testEnv.Alias( "coreTest", coreTest )
 # Build, install and test the coreRI library and bindings
 ###########################################################################################
 
-riEnv = env.Copy()
+riEnv = env.Copy( IECORE_NAME = "IECoreRI" )
 riEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 riEnv.Append(
@@ -482,7 +609,7 @@ riEnv.Append(
 	]
 )
 
-riPythonEnv = pythonEnv.Copy()
+riPythonEnv = pythonEnv.Copy( IECORE_NAME = "IECoreRI" )
 riPythonEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 riPythonEnv.Append(
 	LIBS = [
@@ -495,7 +622,7 @@ if doConfigure :
 	c = Configure( riEnv )
 
 	if not c.CheckLibWithHeader( "3delight", "ri.h", "C" ) :
-		sys.stderr.write( "WARNING : no 3delight library not found, not building IECoreRI - check RMAN_ROOT.\n" )
+		sys.stderr.write( "WARNING : no 3delight library found, not building IECoreRI - check RMAN_ROOT.\n" )
 		c.Finish()
 
 	else :
@@ -526,26 +653,34 @@ if doConfigure :
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
 		riEnv.Prepend( LIBPATH = [ "./lib" ] )
-		riEnv.Append( LIBS = coreLibrary )
+		riEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 	
-		riLibrary = riEnv.SharedLibrary( "lib/IECoreRI" + riEnv.subst( "$IECORE_LIB_SUFFIX" ), riSources )
-		riLibraryInstall = riEnv.Install( "$INSTALL_LIB_DIR", riLibrary )
-		riEnv.Alias( "install", riLibraryInstall )
+		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riSources )
+		riLibraryInstall = riEnv.Install( os.path.dirname( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riLibrary )
+		riLibrarySymlinks = makeLibSymlinks( riEnv )
+		riEnv.Alias( "install", riLibraryInstall + riLibrarySymlinks )
 
 		riHeaderInstall = riEnv.Install( "$INSTALL_HEADER_DIR/IECoreRI", riHeaders )
-		riEnv.Alias( "install", riHeaderInstall )
+		riHeaderSymlinks = makeSymlinks( riEnv, riEnv["INSTALL_HEADER_DIR"] )
+		riEnv.Alias( "install", riHeaderInstall + riHeaderSymlinks )
 
-		riPythonEnv.Append( LIBS = [ coreLibrary, riLibrary ] )
+		riPythonEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 		riPythonModule = riPythonEnv.SharedLibrary( "python/IECoreRI/_IECoreRI", riPythonSources )
 		riPythonEnv.Depends( riPythonModule, riLibrary )
 
 		riPythonModuleInstall = riPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreRI", riPythonScripts + riPythonModule )
-		riPythonEnv.Alias( "install", riPythonModuleInstall )
+		riPythonModuleSymlinks = makeSymlinks( riPythonEnv, riPythonEnv["INSTALL_PYTHON_DIR"] )
+		riPythonEnv.Alias( "install", riPythonModuleInstall + riPythonModuleSymlinks )
 
 		Default( [ riLibrary, riPythonModule ] )
 		
 		riTestEnv = testEnv.Copy()
-		riTestEnv["ENV"][libraryPathEnvVar] = riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
+		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " test/IECoreRI/All.py" )
 		riTestEnv.Depends( riTest, corePythonModule )
@@ -563,11 +698,13 @@ ieCoreGLMinorVersion = 3
 ieCoreGLPatchVersion = 0
 
 if env["WITH_GL"] :
-
-	glEnv = env.Copy()
-	glEnv["IECORE_MAJOR_VERSION"] = ieCoreGLMajorVersion
-	glEnv["IECORE_MINOR_VERSION"] = ieCoreGLMinorVersion
-	glEnv["IECORE_PATCH_VERSION"] = ieCoreGLPatchVersion
+	
+	glEnvSets = {
+		"IECORE_NAME" : "IECoreGL",
+		"IECORE_MAJOR_VERSION" : ieCoreGLMajorVersion,
+		"IECORE_MINOR_VERSION" : ieCoreGLMinorVersion,
+		"IECORE_PATCH_VERSION" : ieCoreGLPatchVersion,
+	}
 
 	glEnvPrepends = {
 		"CPPPATH" : [
@@ -591,12 +728,15 @@ if env["WITH_GL"] :
 		],
 	
 	}
-		
+	
+	glEnv = env.Copy( **glEnvSets )
+
 	glEnv.Append( **glEnvAppends )
 	glEnv.Prepend( **glEnvPrepends )
 	
 	c = Configure( glEnv )
 	
+	## \todo We need to check for GLUT here too
 	if not c.CheckLibWithHeader( "GLEW", "glew.h", "C" ) :
 	
 		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
@@ -625,25 +765,33 @@ if env["WITH_GL"] :
 			)
 
 		glSources = glob.glob( "contrib/IECoreGL/src/*.cpp" )
-		glLibrary = glEnv.SharedLibrary( "lib/IECoreGL" + glEnv.subst( "$IECORE_LIB_SUFFIX" ), glSources )
-		glLibraryInstall = glEnv.Install( "$INSTALL_LIB_DIR", glLibrary )
-		glEnv.Alias( "install", glLibraryInstall )
+		glLibrary = glEnv.SharedLibrary( "lib/" + os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glSources )
+		glLibraryInstall = glEnv.Install( os.path.dirname( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glLibrary )
+		glLibrarySymlinks = makeLibSymlinks( glEnv )
+		glEnv.Alias( "install", glLibraryInstall + glLibrarySymlinks )
 
 		glHeaders = glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) + glob.glob( "contrib/IECoreGL/include/IECoreGL/*.inl" )
 		glHeaderInstall = glEnv.Install( "$INSTALL_HEADER_DIR/IECoreGL", glHeaders )
+		glHeaderSymlinks = makeSymlinks( glEnv, glEnv["INSTALL_HEADER_DIR"] )
 		glEnv.Alias( "install", glHeaderInstall )
 
-		glPythonEnv = pythonEnv.Copy()
+		glPythonEnv = pythonEnv.Copy( **glEnvSets )
 		glPythonEnv.Append( **glEnvAppends )
 		glPythonEnv.Prepend( **glEnvPrepends )
-		glPythonEnv.Append( LIBS = [ coreLibrary, glLibrary ] )
+		glPythonEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 		glPythonSources = glob.glob( "contrib/IECoreGL/src/bindings/*.cpp" )
 		glPythonModule = glPythonEnv.SharedLibrary( "contrib/IECoreGL/python/IECoreGL/_IECoreGL", glPythonSources )
 		glPythonEnv.Depends( glPythonModule, glLibrary )
 
 		glPythonScripts = glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" )
 		glPythonModuleInstall = glPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )
-		glPythonEnv.Alias( "install", glPythonModuleInstall )
+		glPythonModuleSymlinks = makeSymlinks( glPythonEnv, glPythonEnv["INSTALL_PYTHON_DIR"] )
+		glPythonEnv.Alias( "install", glPythonModuleInstall + glPythonModuleSymlinks )
 
 		Default( [ glLibrary, glPythonModule ] )
 		
@@ -651,10 +799,15 @@ if env["WITH_GL"] :
 # Documentation
 ###########################################################################################
 
-docEnv = Environment()
+## \todo Have an option for people to point us to their doxygen install, and do
+# Configure checks to be sure it's there
+docEnv = env.Copy()
 docEnv["ENV"]["PATH"] = os.environ["PATH"]
 docs = docEnv.Command( "doc/html/index.html", "", "doxygen doc/config/Doxyfile" )
 docEnv.Depends( docs, glob.glob( "src/IECore/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "src/IECoreRI/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "python/IECore/*.py" ) )
 docEnv.Depends( docs, glob.glob( "python/IECoreRI/*.py" ) )
+
+installDoc = docEnv.Install( "$INSTALL_DOC_DIR", "doc/html" )
+docEnv.Alias( "install", installDoc )
