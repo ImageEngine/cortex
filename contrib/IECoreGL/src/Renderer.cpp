@@ -1279,7 +1279,7 @@ static IECoreGL::ShaderPtr imageShader()
 		"{"
 		"	gl_FragColor = texture2D( texture, gl_TexCoord[0].xy );"
 		"}";
-	bool t = false;
+	static bool t = false;
 	static ShaderPtr s = 0;
 	if( !t )
 	{
@@ -1322,7 +1322,7 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 		{
 			ShaderStateComponent::TexturesMap textures;
 			textures["texture"] = texture;
-			ShaderStateComponentPtr state = new ShaderStateComponent( imageShader(), 0, &textures );
+			ShaderStateComponentPtr state = new ShaderStateComponent( shader, 0, &textures );
 			m_data->implementation->addState( state );
 		}
 	}
@@ -1330,8 +1330,11 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 	{
 		/// \todo Support a fixed pipeline fallback when we have support for a fixed pipeline
 		/// in a StateComponent
+		msg( Msg::Warning, "Renderer::image", "Unable to create shader to display image." );
 	}
 	
+	/// \todo This is completely wrong in terms of bounding box and positioning. It should be fixed to match the
+	/// idea of image bounding box from IECore.
 	QuadPrimitivePtr quad = new QuadPrimitive( dataWindow.size().x + 1, dataWindow.size().y + 1 );
 	m_data->implementation->addPrimitive( quad );
 }
