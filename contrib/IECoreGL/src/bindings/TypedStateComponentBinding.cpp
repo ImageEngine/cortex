@@ -51,9 +51,9 @@ template< typename T >void bindTypedStateComponent(const char *);
 
 void bindTypedStateComponents()
 {
-//	bindTypedStateComponent< Color >( "Color" );
+	bindTypedStateComponent< Color >( "Color" );
 	bindTypedStateComponent< PrimitiveBound >( "PrimitiveBound" );
-/*	bindTypedStateComponent< PrimitiveWireframe >( "PrimitiveWireframe" );
+	bindTypedStateComponent< PrimitiveWireframe >( "PrimitiveWireframe" );
 	bindTypedStateComponent< PrimitiveWireframeWidth >( "PrimitiveWireframeWidth" );
 	bindTypedStateComponent< PrimitiveSolid >( "PrimitiveSolid" );
 	bindTypedStateComponent< PrimitiveOutline >( "PrimitiveOutline" );
@@ -71,18 +71,17 @@ void bindTypedStateComponents()
 	bindTypedStateComponent< PointsPrimitiveUseGLPoints >( "PointsPrimitiveUseGLPoints" );
 	bindTypedStateComponent< PointsPrimitiveGLPointWidth >( "PointsPrimitiveGLPointWidth" );
 	bindTypedStateComponent< BlendFuncStateComponent >( "BlendFuncStateComponent" );
-*/
 }
 
 template< typename T >
 void bindTypedStateComponent( const char *className )
 {
 	typedef class_< T, boost::intrusive_ptr< T >, boost::noncopyable, bases< StateComponent > > TypedStateComponentPyClass;
-	TypedStateComponentPyClass( className, no_init )
+	TypedStateComponentPyClass( className, init< const typename T::ValueType & >() )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( T )
 	;
 
-	INTRUSIVE_PTR_PATCH( T, TypedStateComponentPyClass );
+	INTRUSIVE_PTR_PATCH( T, typename TypedStateComponentPyClass );
 	implicitly_convertible< boost::intrusive_ptr< T >, boost::intrusive_ptr< const T > >();
 	implicitly_convertible< boost::intrusive_ptr< T >, StateComponentPtr>();
 
