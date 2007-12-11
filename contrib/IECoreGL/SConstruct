@@ -109,6 +109,8 @@ pythonModuleSources = [
 	"src/bindings/PerspectiveCameraBinding.cpp",
 	"src/bindings/OrthographicCameraBinding.cpp",
 	"src/bindings/CameraControllerBinding.cpp",
+	"src/bindings/StateComponentBinding.cpp",
+	"src/bindings/TypedStateComponentBinding.cpp",
 ]
 
 pythonModulePythonSources = [

@@ -52,6 +52,7 @@ void bindScene()
 	ScenePyClass( "Scene" )
 		.def( "root", (GroupPtr (Scene::*)() )&Scene::root )
 		.def( "render", (void (Scene::*)() const )&Scene::render )
+		.def( "render", (void (Scene::*)( ConstStatePtr ) const )&Scene::render )
 	;
 
 	INTRUSIVE_PTR_PATCH( Scene, ScenePyClass );

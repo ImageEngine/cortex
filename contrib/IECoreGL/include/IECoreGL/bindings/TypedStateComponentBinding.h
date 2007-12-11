@@ -32,59 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IE_COREGL_TYPEDSTATECOMPONENTBINDING_H
+#define IE_COREGL_TYPEDSTATECOMPONENTBINDING_H
 
-#include "IECoreGL/IECoreGL.h"
-
-#include "IECoreGL/bindings/RendererBinding.h"
-#include "IECoreGL/bindings/BindableBinding.h"
-#include "IECoreGL/bindings/ShaderBinding.h"
-#include "IECoreGL/bindings/TextureBinding.h"
-#include "IECoreGL/bindings/WindowBinding.h"
-#include "IECoreGL/bindings/StateBinding.h"
-#include "IECoreGL/bindings/RenderableBinding.h"
-#include "IECoreGL/bindings/SceneBinding.h"
-#include "IECoreGL/bindings/SceneViewerBinding.h"
-#include "IECoreGL/bindings/ShaderLoaderBinding.h"
-#include "IECoreGL/bindings/TextureLoaderBinding.h"
-#include "IECoreGL/bindings/GroupBinding.h"
-#include "IECoreGL/bindings/FrameBufferBinding.h"
-#include "IECoreGL/bindings/ColorTextureBinding.h"
-#include "IECoreGL/bindings/DepthTextureBinding.h"
-#include "IECoreGL/bindings/CameraBinding.h"
-#include "IECoreGL/bindings/OrthographicCameraBinding.h"
-#include "IECoreGL/bindings/PerspectiveCameraBinding.h"
-#include "IECoreGL/bindings/CameraControllerBinding.h"
-#include "IECoreGL/bindings/StateComponentBinding.h"
-#include "IECoreGL/bindings/TypedStateComponentBinding.h"
-
-using namespace IECoreGL;
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( _IECoreGL )
+namespace IECoreGL
 {
-	bindRenderer();
-	bindBindable();
-	bindShader();
-	bindTexture();
-	bindWindow();
-	bindState();
-	bindRenderable();
-	bindScene();
-	bindSceneViewer();
-	bindShaderLoader();
-	bindTextureLoader();
-	bindGroup();
-	bindFrameBuffer();
-	bindColorTexture();
-	bindDepthTexture();
-	bindCamera();
-	bindOrthographicCamera();
-	bindPerspectiveCamera();
-	bindCameraController();
-	bindStateComponent();
-	bindTypedStateComponents();
-	
-	def( "coreMajorVersion", &coreMajorVersion );
-	def( "init", &IECoreGL::init );
+
+void bindTypedStateComponents();
+
 }
+
+#endif // IE_COREGL_TYPEDSTATECOMPONENTBINDING_H

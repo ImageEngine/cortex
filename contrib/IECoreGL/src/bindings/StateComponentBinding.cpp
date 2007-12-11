@@ -32,59 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECoreGL/IECoreGL.h"
-
-#include "IECoreGL/bindings/RendererBinding.h"
-#include "IECoreGL/bindings/BindableBinding.h"
-#include "IECoreGL/bindings/ShaderBinding.h"
-#include "IECoreGL/bindings/TextureBinding.h"
-#include "IECoreGL/bindings/WindowBinding.h"
-#include "IECoreGL/bindings/StateBinding.h"
-#include "IECoreGL/bindings/RenderableBinding.h"
-#include "IECoreGL/bindings/SceneBinding.h"
-#include "IECoreGL/bindings/SceneViewerBinding.h"
-#include "IECoreGL/bindings/ShaderLoaderBinding.h"
-#include "IECoreGL/bindings/TextureLoaderBinding.h"
-#include "IECoreGL/bindings/GroupBinding.h"
-#include "IECoreGL/bindings/FrameBufferBinding.h"
-#include "IECoreGL/bindings/ColorTextureBinding.h"
-#include "IECoreGL/bindings/DepthTextureBinding.h"
-#include "IECoreGL/bindings/CameraBinding.h"
-#include "IECoreGL/bindings/OrthographicCameraBinding.h"
-#include "IECoreGL/bindings/PerspectiveCameraBinding.h"
-#include "IECoreGL/bindings/CameraControllerBinding.h"
+#include "IECoreGL/StateComponent.h"
 #include "IECoreGL/bindings/StateComponentBinding.h"
-#include "IECoreGL/bindings/TypedStateComponentBinding.h"
 
-using namespace IECoreGL;
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
 using namespace boost::python;
 
-BOOST_PYTHON_MODULE( _IECoreGL )
+namespace IECoreGL
 {
-	bindRenderer();
-	bindBindable();
-	bindShader();
-	bindTexture();
-	bindWindow();
-	bindState();
-	bindRenderable();
-	bindScene();
-	bindSceneViewer();
-	bindShaderLoader();
-	bindTextureLoader();
-	bindGroup();
-	bindFrameBuffer();
-	bindColorTexture();
-	bindDepthTexture();
-	bindCamera();
-	bindOrthographicCamera();
-	bindPerspectiveCamera();
-	bindCameraController();
-	bindStateComponent();
-	bindTypedStateComponents();
-	
-	def( "coreMajorVersion", &coreMajorVersion );
-	def( "init", &IECoreGL::init );
+
+void bindStateComponent()
+{
+	typedef class_< StateComponent, StateComponentPtr, boost::noncopyable, bases< Bindable > > StateComponentPyClass;
+	StateComponentPyClass( "StateComponent", no_init )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( StateComponent )
+	;
+
+	INTRUSIVE_PTR_PATCH( StateComponent, StateComponentPyClass );
+	implicitly_convertible<StateComponentPtr, ConstStateComponentPtr>();
+	implicitly_convertible<StateComponentPtr, BindablePtr>();
+
 }
+
+} // namespace IECoreGL
