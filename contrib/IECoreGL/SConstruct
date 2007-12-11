@@ -34,6 +34,7 @@
 
 import os
 import IEEnv
+import glob
 
 import VersionControl
 VersionControl.setVersion( "IEBuild", "1.5.5" )
@@ -117,6 +118,8 @@ pythonModulePythonSources = [
 	"python/IECoreGL/__init__.py",
 ]
 
+glslHeaders = glob.glob( "glsl/IECoreGL/*.h" )
+
 lib = IEBuild.SharedLibrary( ARGUMENTS, "IECoreGL", version, libSources, ["include"] )
 lib.addVersionedInclude( "boost", boostVersion )
 lib.addVersionedInclude( "glew", glewVersion )
@@ -154,5 +157,9 @@ pythonTestEnv["ENV"]["COMPILER_VERSION"] = pythonModule.getLibrary().getCompiler
 
 pythonTestRun = pythonTestEnv.Command( "test/pythonTest.out", "",  "python"+pythonVersion+" "+ARGUMENTS.get("TESTSCRIPT", "test/All.py") + " -v")
 pythonTestEnv.Depends( pythonTestRun, pythonModule.getTargets() )
+
+glslHeadersInstall = pythonEnv.Install( pythonModule.getInstallPrefix() + "/tools/glsl/IECoreGL/" + version + "/IECoreGL", glslHeaders )
+pythonEnv.Alias( "install", pythonModule.getInstallPrefix() + "/tools/glsl/IECoreGL/" )
+IEBuild.VersionedSymlink.VersionedSymlink.mkLinks( pythonEnv, pythonModule.getInstallPrefix() + "/tools/glsl/IECoreGL", version )
 
 Default( pythonModule.getTargets() )
