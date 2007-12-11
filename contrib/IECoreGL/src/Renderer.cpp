@@ -157,6 +157,8 @@ struct IECoreGL::Renderer::MemberData
 		IECore::CompoundDataMap user;
 		string shaderSearchPath;
 		string shaderSearchPathDefault;
+		string shaderIncludePath;
+		string shaderIncludePathDefault;
 		string textureSearchPath;
 		string textureSearchPathDefault;
 		vector<CameraPtr> cameras;
@@ -182,6 +184,8 @@ IECoreGL::Renderer::Renderer()
 	
 	const char *shaderPath = getenv( "IECOREGL_SHADER_PATHS" );
 	m_data->options.shaderSearchPath = m_data->options.shaderSearchPathDefault = shaderPath ? shaderPath : "";
+	const char *shaderIncludePath = getenv( "IECOREGL_SHADER_INCLUDE_PATHS" );
+	m_data->options.shaderIncludePath = m_data->options.shaderIncludePathDefault = shaderIncludePath ? shaderIncludePath : "";
 	const char *texturePath = getenv( "IECOREGL_TEXTURE_PATHS" );
 	m_data->options.textureSearchPath = m_data->options.textureSearchPathDefault = texturePath ? texturePath : "";
 	
@@ -262,6 +266,19 @@ static IECore::DataPtr shaderSearchPathOptionGetter( const std::string &name, IE
 	return new StringData( memberData->options.shaderSearchPath );
 }
 
+static void shaderIncludePathOptionSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
+{
+	if( ConstStringDataPtr s = castWithWarning<StringData>( value, name, "Renderer::setOption" ) )
+	{
+		memberData->options.shaderIncludePath = s->readable();
+	}
+}
+
+static IECore::DataPtr shaderIncludePathOptionGetter( const std::string &name, IECoreGL::Renderer::MemberData *memberData )
+{
+	return new StringData( memberData->options.shaderIncludePath );
+}
+
 static void textureSearchPathOptionSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
 {
 	if( ConstStringDataPtr s = castWithWarning<StringData>( value, name, "Renderer::setOption" ) )
@@ -284,6 +301,8 @@ static const OptionSetterMap *optionSetters()
 		(*o)["shutter"] = shutterOptionSetter;
 		(*o)["gl:searchPath:shader"] = shaderSearchPathOptionSetter;
 		(*o)["searchPath:shader"] = shaderSearchPathOptionSetter;
+		(*o)["gl:searchPath:shaderInclude"] = shaderIncludePathOptionSetter;
+		(*o)["searchPath:shaderInclude"] = shaderIncludePathOptionSetter;
 		(*o)["gl:searchPath:texture"] = textureSearchPathOptionSetter;
 		(*o)["searchPath:texture"] = textureSearchPathOptionSetter;
 	}
@@ -299,6 +318,8 @@ static const OptionGetterMap *optionGetters()
 		(*o)["shutter"] = shutterOptionGetter;
 		(*o)["gl:searchPath:shader"] = shaderSearchPathOptionGetter;
 		(*o)["searchPath:shader"] = shaderSearchPathOptionGetter;
+		(*o)["gl:searchPath:shaderInclude"] = shaderIncludePathOptionGetter;
+		(*o)["searchPath:shaderInclude"] = shaderIncludePathOptionGetter;
 		(*o)["gl:searchPath:texture"] = textureSearchPathOptionGetter;
 		(*o)["searchPath:texture"] = textureSearchPathOptionGetter;
 	}
@@ -425,14 +446,15 @@ void IECoreGL::Renderer::worldBegin()
 		m_data->implementation = new ImmediateRendererImplementation;
 	}
 	
-	if( m_data->options.shaderSearchPath==m_data->options.shaderSearchPathDefault )
+	if( m_data->options.shaderSearchPath==m_data->options.shaderSearchPathDefault && m_data->options.shaderIncludePath==m_data->options.shaderIncludePathDefault )
 	{
 		// use the shared default cache if we can
 		m_data->shaderLoader = ShaderLoader::defaultShaderLoader();
 	}
 	else
 	{
-		m_data->shaderLoader = new ShaderLoader( IECore::SearchPath( m_data->options.shaderSearchPath, ":" ) );
+		IECore::SearchPath includePaths( m_data->options.shaderIncludePath, ":" );
+		m_data->shaderLoader = new ShaderLoader( IECore::SearchPath( m_data->options.shaderSearchPath, ":" ), &includePaths );
 	}
 	
 	if( m_data->options.textureSearchPath==m_data->options.textureSearchPathDefault )

@@ -68,6 +68,11 @@ class Renderer : public IECore::Renderer
 		/// Specifies a set of colon separated paths on which to search for GLSL shaders. The default
 		/// value is obtained from the environment variable IECOREGL_SHADER_PATHS.
 		///
+		/// "searchPath:shaderInclude" StringData
+		///	"gl:searchPath:shaderInclude" StringData
+		/// Specifies a set of colon separated paths on which to search for include files for GLSL shaders. The default
+		/// value is obtained from the environment variable IECOREGL_SHADER_INCLUDE_PATHS.
+		///
 		/// "searchPath:texture" StringData
 		/// "gl:searchPath:texture" StringData
 		/// Specifies a set of colon separated paths on which to search for textures. The default

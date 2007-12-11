@@ -295,11 +295,24 @@ class TestRenderer( unittest.TestCase ) :
 		
 		p = ReadProcedural()
 		p.files["name"].setValue( StringData( os.path.dirname( __file__ ) + "/models/sphere.cob" ) )
-		r.procedural( p )
+		#r.procedural( p )
 		
 		r.worldEnd()
 	
 		#w.start()
+		
+	def testShader( self ) :
+	
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		
+		r.worldBegin()
+		r.shader( "surface", "failWithoutPreprocessing", {} )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.worldEnd()
+	
 			
 if __name__ == "__main__":
     unittest.main()   
