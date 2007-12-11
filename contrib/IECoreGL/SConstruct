@@ -123,11 +123,13 @@ lib.addVersionedInclude( "glew", glewVersion )
 lib.addVersionedDependency( "IECore", coreMajorVersion )
 lib.addVersionedInclude( "OpenEXR", openEXRVersion )
 lib.addDefine( "IE_CORE_MAJOR_VERSION", coreMajorVersion )
+lib.addCXXFlag( "-Wno-switch" ) # because boost::wave issues this warning
 lib.addLibPath( "/usr/X11R6/lib" )
 lib.addLib( "GL" )
 lib.addLib( "GLU" )
 lib.addLib( "glut" )
 lib.addLib( "GLEW" )
+lib.addLib( "boost_wave" )
 lib.finalize()
 
 pythonModule = IEBuild.PythonModule( ARGUMENTS, "IECoreGL", version, pythonModuleSources, ["include"], pythonModulePythonSources, "python/IECoreGL" )

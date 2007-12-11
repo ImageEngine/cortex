@@ -55,10 +55,23 @@ class TestShaderLoader( unittest.TestCase ) :
 		self.assert_( s.isSame( ss ) )
 		
 		# shader is too complicated for my graphics card
-		#s = l.load( "3dLabs/Mandel" )	
-		#self.assert_( s.typeName()=="Shader" )
+		s = l.load( "3dLabs/Mandel" )	
+		self.assert_( s.typeName()=="Shader" )
 		
 		self.assert_( ShaderLoader.defaultShaderLoader().isSame( ShaderLoader.defaultShaderLoader() ) )
+	
+	def testPreprocessing( self ) :
+	
+		sp = SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
+		psp = SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
+		
+		# this should work
+		l = ShaderLoader( sp, psp )
+		s = l.load( "failWithoutPreprocessing" )
+		
+		# but turning off preprocessing should cause a throw
+		l = ShaderLoader( sp )
+		self.assertRaises( RuntimeError, l.load, "failWithoutPreprocessing" )
 		
 if __name__ == "__main__":
     unittest.main()   

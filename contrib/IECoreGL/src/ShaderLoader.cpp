@@ -37,15 +37,21 @@
 
 #include "IECore/MessageHandler.h"
 
+#include "boost/wave.hpp"
+#include "boost/wave/cpplexer/cpp_lex_token.hpp"
+#include "boost/wave/cpplexer/cpp_lex_iterator.hpp"
+#include "boost/format.hpp"
+
 #include <fstream>
 #include <iostream>
 
 using namespace IECoreGL;
+using namespace IECore;
 using namespace boost::filesystem;
 using namespace std;
 
-ShaderLoader::ShaderLoader( const IECore::SearchPath &searchPaths )
-	:	m_searchPaths( searchPaths )
+ShaderLoader::ShaderLoader( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths )
+	:	m_searchPaths( searchPaths ), m_preprocess( preprocessorSearchPaths ), m_preprocessorSearchPaths( preprocessorSearchPaths ? *preprocessorSearchPaths : SearchPath() )
 {
 }
 
@@ -111,6 +117,42 @@ std::string ShaderLoader::readFile( const std::string &fileName )
 		result += line + "\n";
 	}
 	
+	if( m_preprocess )
+	{
+		try
+		{
+			typedef boost::wave::cpplexer::lex_token<> Token;
+			typedef boost::wave::cpplexer::lex_iterator<Token> LexIterator;
+			typedef boost::wave::context<std::string::iterator, LexIterator> Context;
+
+			Context ctx( result.begin(), result.end(), fileName.c_str() );
+			for( list<path>::const_iterator it=m_preprocessorSearchPaths.paths.begin(); it!=m_preprocessorSearchPaths.paths.end(); it++ )
+			{
+				string p = (*it).string();
+				ctx.add_include_path( p.c_str() );
+			}
+
+			//ctx.add_macro_definition(...);
+
+			Context::iterator_type b = ctx.begin();
+			Context::iterator_type e = ctx.end();
+
+			string processed = "";
+			while( b != e )
+			{
+				processed += (*b).get_value().c_str();
+				b++;
+			}
+
+			result = processed;
+		}
+		catch( boost::wave::cpp_exception &e )
+		{
+			// rethrow but in a nicely formatted form
+			throw Exception( boost::str( boost::format( "Error during preprocessing : %s line %d : %s" ) % e.file_name() % e.line_no() % e.description() ) );
+		}
+	}
+	
 	return result;
 }
 
@@ -121,7 +163,9 @@ ShaderLoaderPtr ShaderLoader::defaultShaderLoader()
 	if( !t )
 	{
 		const char *e = getenv( "IECOREGL_SHADER_PATHS" );
-		t = new ShaderLoader( IECore::SearchPath( e ? e : "", ":" ) );
+		const char *p = getenv( "IECOREGL_SHADER_INCLUDE_PATHS" );
+		IECore::SearchPath pp( p ? p : "", ":" );
+		t = new ShaderLoader( IECore::SearchPath( e ? e : "", ":" ), p ? &pp : 0 );
 	}
 	return t;
 }

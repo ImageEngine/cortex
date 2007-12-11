@@ -48,6 +48,7 @@ void bindShaderLoader()
 {
 	typedef class_< ShaderLoader, ShaderLoaderPtr, boost::noncopyable, bases< IECore::RefCounted > > ShaderLoaderPyClass;
 	ShaderLoaderPyClass( "ShaderLoader", init<const IECore::SearchPath &>() )
+		.def( init<const IECore::SearchPath &, const IECore::SearchPath *>() )
 		.def( "load", &ShaderLoader::load )
 		.def( "clear", &ShaderLoader::clear )
 		.def( "defaultShaderLoader", &ShaderLoader::defaultShaderLoader ).staticmethod( "defaultShaderLoader" )

@@ -67,8 +67,9 @@ class ShaderLoader : public IECore::RefCounted
 		IE_CORE_DECLAREMEMBERPTR( ShaderLoader );
 
 		/// Creates a ShaderLoader which will search for
-		/// source files on the given search paths.
-		ShaderLoader( const IECore::SearchPath &searchPaths );
+		/// source files on the given search paths. If preprocessorSearchPaths is
+		/// specified, then source preprocessing will be performed using boost::wave.
+		ShaderLoader( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths=0 );
 
 		/// Loads the Shader of the specified name. Returns 0
 		/// if no such Shader can be found.
@@ -79,7 +80,10 @@ class ShaderLoader : public IECore::RefCounted
 
 		/// Returns a static ShaderLoader instance that everyone
 		/// can use. This has searchpaths set using the
-		/// IECOREGL_SHADER_PATHS environment variable.
+		/// IECOREGL_SHADER_PATHS environment variable,
+		/// and preprocessor searchpaths set using the
+		/// IECOREGL_SHADER_INCLUDE_PATHS environment
+		/// variable.
 		static ShaderLoaderPtr defaultShaderLoader();
 		
 	private :
@@ -88,6 +92,8 @@ class ShaderLoader : public IECore::RefCounted
 		ShaderMap m_loadedShaders;
 
 		IECore::SearchPath m_searchPaths;
+		bool m_preprocess;
+		IECore::SearchPath m_preprocessorSearchPaths;
 		
 		std::string readFile( const std::string &fileName );
 
