@@ -39,7 +39,7 @@ from IECore import *
 from IECoreGL import *
 init( False )
 
-class TestShader( unittest.TestCase ) :
+class TestWindow( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 	
