@@ -57,7 +57,7 @@ class ImplicitSurfaceFunction : public RefCounted
 		typedef VectorTraits<V> ValueTraits;
 		typedef typename VectorTraits<V>::BaseType ValueBaseType;
 		
-		typedef boost::intrusive_ptr<ImplictSurfaceFunction<P, V> > Ptr;
+		typedef boost::intrusive_ptr<ImplicitSurfaceFunction<P, V> > Ptr;
 		
 		virtual ~ImplicitSurfaceFunction()
 		{
@@ -75,6 +75,11 @@ class ImplicitSurfaceFunction : public RefCounted
 		virtual Value getValue( const Point &p ) = 0;
 	
 };
+
+typedef ImplicitSurfaceFunction<Imath::V3f, float> ImplicitSurfaceFunctionV3ff;
+typedef ImplicitSurfaceFunction<Imath::V3f, double> ImplicitSurfaceFunctionV3fd;
+typedef ImplicitSurfaceFunction<Imath::V3d, float> ImplicitSurfaceFunctionV3df;
+typedef ImplicitSurfaceFunction<Imath::V3d, double> ImplicitSurfaceFunctionV3dd;
 
 }
 
