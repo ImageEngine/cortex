@@ -106,7 +106,7 @@ class PerlinNoise
 {
 
 	public :
-	
+		typedef PerlinNoise<P,V,F> *Ptr;
 		typedef P Point;
 		typedef VectorTraits<P> PointTraits;
 		typedef typename VectorTraits<P>::BaseType PointBaseType;
@@ -128,6 +128,10 @@ class PerlinNoise
 		/// Computes the noise value at the given point. The components
 		/// of the returned value will range from -0.5 to 0.5.
 		inline Value noise( const Point &p ) const;
+		
+		/// Computes the noise value at the given point. The components
+		/// of the returned value will range from -0.5 to 0.5.
+		inline Value operator()( const Point &p ) const;
 
 	private :
 	

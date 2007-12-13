@@ -121,6 +121,12 @@ inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::noise( const P
 }
 
 template<typename P, typename V, typename F>
+inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::operator()( const Point &p ) const
+{
+	return noise( p );
+}
+
+template<typename P, typename V, typename F>
 inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::noiseWalk( int *pi, const P &p, int d ) const
 {
 	if( d==-1 )
