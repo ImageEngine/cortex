@@ -131,6 +131,7 @@
 #include "IECore/bindings/PointBoundsOpBinding.h"
 #include "IECore/bindings/ImathRandomBinding.h"
 #include "IECore/bindings/RandomRotationOpBinding.h"
+#include "IECore/bindings/ImplicitSurfaceFunctionBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -241,6 +242,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointBoundsOp();
 	bindImathRandom();
 	bindRandomRotationOp();
+	bindImplicitSurfaceFunction();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -32,55 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-
-#ifndef IE_CORE_IMPLICITSURFACEFUNCTION_H
-#define IE_CORE_IMPLICITSURFACEFUNCTION_H
-
-#include <cassert>
-
-#include "OpenEXR/ImathVec.h"
-
-#include "IECore/RefCounted.h"
-#include "IECore/VectorTraits.h"
+#ifndef IE_COREPYTHON_IMPLICITSURFACEFUNCTIONBINDING_H
+#define IE_COREPYTHON_IMPLICITSURFACEFUNCTIONBINDING_H
 
 namespace IECore
 {
-
-/// A template to define an implicit surface function, which returns a value of type template parameter V when passed 
-/// a location of type template parameter P
-template<typename P, typename V>
-class ImplicitSurfaceFunction : public RefCounted
-{
-	public:
-		typedef P Point;
-		typedef VectorTraits<P> PointTraits;
-		typedef typename VectorTraits<P>::BaseType PointBaseType;
-		typedef V Value;
-		typedef VectorTraits<V> ValueTraits;
-		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-		
-		typedef boost::intrusive_ptr<ImplicitSurfaceFunction<P, V> > Ptr;
-		
-		virtual ~ImplicitSurfaceFunction()
-		{
-		}
-		
-		/// The operator simply calls the pure virtual method getValue, to allow easier subclassing from
-		/// within Python
-		inline Value operator()( const Point &p )
-		{
-			return getValue( p );
-		}
-				
-		virtual Value getValue( const Point &p ) = 0;
-	
-};
-
-typedef ImplicitSurfaceFunction<Imath::V3f, float> ImplicitSurfaceFunctionV3ff;
-typedef ImplicitSurfaceFunction<Imath::V3f, double> ImplicitSurfaceFunctionV3fd;
-typedef ImplicitSurfaceFunction<Imath::V3d, float> ImplicitSurfaceFunctionV3df;
-typedef ImplicitSurfaceFunction<Imath::V3d, double> ImplicitSurfaceFunctionV3dd;
-
+void bindImplicitSurfaceFunction();
 }
 
-#endif
+#endif // IE_COREPYTHON_IMPLICITSURFACEFUNCTIONBINDING_H

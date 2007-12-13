@@ -104,6 +104,7 @@ from DataCastOp import *
 from DataPromoteOp import *
 from MatrixMultiplyOp import *
 from PointBoundsOp import *
+from ImplicitSurfaceFunction import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

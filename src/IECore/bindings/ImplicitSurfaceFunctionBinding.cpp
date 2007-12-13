@@ -32,55 +32,72 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <boost/python.hpp>
 
-#ifndef IE_CORE_IMPLICITSURFACEFUNCTION_H
-#define IE_CORE_IMPLICITSURFACEFUNCTION_H
+#include "IECore/Exception.h"
 
-#include <cassert>
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/WrapperToPython.h"
 
-#include "OpenEXR/ImathVec.h"
+#include "IECore/ImplicitSurfaceFunction.h"
 
-#include "IECore/RefCounted.h"
-#include "IECore/VectorTraits.h"
+
+using namespace boost;
+using namespace boost::python;
 
 namespace IECore
 {
 
-/// A template to define an implicit surface function, which returns a value of type template parameter V when passed 
-/// a location of type template parameter P
-template<typename P, typename V>
-class ImplicitSurfaceFunction : public RefCounted
+
+template<typename T>
+class ImplicitWrap : 
+	public ImplicitSurfaceFunction<typename T::Point, typename T::Value>, 
+	public Wrapper<ImplicitSurfaceFunction<typename T::Point, typename T::Value> >
 {
-	public:
-		typedef P Point;
-		typedef VectorTraits<P> PointTraits;
-		typedef typename VectorTraits<P>::BaseType PointBaseType;
-		typedef V Value;
-		typedef VectorTraits<V> ValueTraits;
-		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-		
-		typedef boost::intrusive_ptr<ImplicitSurfaceFunction<P, V> > Ptr;
-		
-		virtual ~ImplicitSurfaceFunction()
-		{
-		}
-		
-		/// The operator simply calls the pure virtual method getValue, to allow easier subclassing from
-		/// within Python
-		inline Value operator()( const Point &p )
-		{
-			return getValue( p );
-		}
+	public :
+
+		typedef boost::intrusive_ptr<ImplicitWrap<T> > Ptr;
 				
-		virtual Value getValue( const Point &p ) = 0;
-	
+		ImplicitWrap( PyObject *self ) : ImplicitSurfaceFunction<typename T::Point, typename T::Value >(), Wrapper<ImplicitSurfaceFunction< typename T::Point, typename T::Value> >( self, this )
+		{
+		}
+		
+		virtual ~ImplicitWrap()
+		{
+		}
+		
+		virtual typename T::Value getValue( const typename T::Point &p )
+		{
+			override o = this->get_override( "getValue" );
+			if( o )
+			{
+				return o( p );
+			}
+			else
+			{
+				throw Exception( "getValue() python method not defined" );
+			}
+		};
+
 };
 
-typedef ImplicitSurfaceFunction<Imath::V3f, float> ImplicitSurfaceFunctionV3ff;
-typedef ImplicitSurfaceFunction<Imath::V3f, double> ImplicitSurfaceFunctionV3fd;
-typedef ImplicitSurfaceFunction<Imath::V3d, float> ImplicitSurfaceFunctionV3df;
-typedef ImplicitSurfaceFunction<Imath::V3d, double> ImplicitSurfaceFunctionV3dd;
+template<typename T>
+void bindImplicit( const char *name )
+{
+	typedef class_< T, typename ImplicitWrap<T>::Ptr, boost::noncopyable > ImplicitPyClass;
 
+	ImplicitPyClass( name, no_init )
+		.def( init<> () )
+		.def( "getValue", &T::getValue )		
+	;
 }
 
-#endif
+void bindImplicitSurfaceFunction()
+{
+	bindImplicit<ImplicitSurfaceFunctionV3ff>( "ImplicitSurfaceFunctionV3ff" );
+	bindImplicit<ImplicitSurfaceFunctionV3fd>( "ImplicitSurfaceFunctionV3fd" );
+	bindImplicit<ImplicitSurfaceFunctionV3df>( "ImplicitSurfaceFunctionV3df" );
+	bindImplicit<ImplicitSurfaceFunctionV3dd>( "ImplicitSurfaceFunctionV3dd" );	
+}
+
+} // namespace IECore
