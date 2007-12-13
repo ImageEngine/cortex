@@ -47,7 +47,7 @@ namespace IECore
 /// A template to define an implicit surface function, which returns a value of type template parameter V when passed 
 /// a location of type template parameter P
 template<typename P, typename V>
-class ImplictSurfaceFunction : public RefCounted
+class ImplicitSurfaceFunction : public RefCounted
 {
 	public:
 		typedef P Point;
@@ -59,7 +59,7 @@ class ImplictSurfaceFunction : public RefCounted
 		
 		typedef boost::intrusive_ptr<ImplictSurfaceFunction<P, V> > Ptr;
 		
-		virtual ~ImplictSurfaceFunction()
+		virtual ~ImplicitSurfaceFunction()
 		{
 		}
 		
