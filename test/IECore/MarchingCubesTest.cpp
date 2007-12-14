@@ -34,45 +34,15 @@
 
 #include <iostream>
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
-
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
 #include "MarchingCubesTest.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace IECore;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace IECore
 {
-	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
-	
-	try
-	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-	
-	return test;
+
+void addMarchingCubesTest(boost::unit_test::test_suite* test)
+{
+	test->add( new MarchingCubesTestSuite() );
+	test->add( new MarchingCubesTestSuite() );
+}
+
 }

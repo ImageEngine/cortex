@@ -479,6 +479,7 @@ coreTestSources = 	[
 				'test/IECore/InterpolatorTest.cpp',
 				'test/IECore/IndexedIOTest.cpp',
 				'test/IECore/BoostUnitTestTest.cpp',				
+				'test/IECore/MarchingCubesTest.cpp',
 			]
 
 coreTestProgram = IEBuild.Program( ARGUMENTS, coreTestName, coreTestSources, coreIncludes )
