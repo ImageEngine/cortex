@@ -131,7 +131,7 @@ class MarchingCubes : public RefCounted
 	private:
 	
 		/// Lookup tables.		
-		const char g_cases[256][2] ;
+		const static char g_cases[256][2] ;
 		const static char g_tiling1[16][3] ;
 		const static char g_tiling2[24][6] ;
 		const static char g_test3[24] ;
