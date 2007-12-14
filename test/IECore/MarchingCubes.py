@@ -83,10 +83,12 @@ class TestMarchingCubesd( unittest.TestCase ) :
 			
 				ImplicitSurfaceFunctionV3dd.__init__( self )
 				
+				# \todo We'd like to use a PerlinNoiseV3dd here, but we don't have one yet!
 				self.n = PerlinNoiseV3ff()
 				
 			def getValue( self, p ):
 			
+				# \todo No need to copy to a V3f once we have a PerlinNoiseV3dd
 				return self.n.noise( V3f(p.x, p.y, p.z) )
 		
 		noiseFn = NoiseFunction()	
