@@ -62,7 +62,7 @@ class TestMarchingCubesf( unittest.TestCase ) :
 		marchMax = V3f( 1,  1,  1)
 		marchBound = Box3f( marchMin, marchMax )
 		marchResolution = V3i( 30, 30, 30 )
-		marcher.march( marchBound, marchResolution, 0.0 )
+		marcher.march( marchBound, marchResolution )
 				
 		m = builder.mesh()
 
@@ -70,6 +70,41 @@ class TestMarchingCubesf( unittest.TestCase ) :
 		self.assertEqual( len( m.vertexIds ), 22473 )
 		
 		# \todo Verify that vertex positions are close to original implicit surface function
+		
+		
+class TestMarchingCubesd( unittest.TestCase ) :
+
+	def test( self ) :
+		""" Test MarchingCubesd """
+	
+		class NoiseFunction( ImplicitSurfaceFunctionV3dd ):
+		
+			def __init__( self ) :	
+			
+				ImplicitSurfaceFunctionV3dd.__init__( self )
+				
+				self.n = PerlinNoiseV3ff()
+				
+			def getValue( self, p ):
+			
+				return self.n.noise( V3f(p.x, p.y, p.z) )
+		
+		noiseFn = NoiseFunction()	
+		builder = MeshPrimitiveBuilderf()	
+		marcher = MarchingCubesd( noiseFn, builder )
+				
+		marchMin = V3d(-1, -1, -1)
+		marchMax = V3d( 1,  1,  1)
+		marchBound = Box3d( marchMin, marchMax )
+		marchResolution = V3i( 30, 30, 30 )
+		marcher.march( marchBound, marchResolution, 0.0 )
+				
+		m = builder.mesh()
+
+		self.assertEqual( len( m.verticesPerFace ), 7491 )
+		self.assertEqual( len( m.vertexIds ), 22473 )
+		
+		# \todo Verify that vertex positions are close to original implicit surface function		
 
 
 if __name__ == "__main__":
