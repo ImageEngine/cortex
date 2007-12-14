@@ -73,6 +73,8 @@ MStatus Parameter::setValue( IECore::ConstParameterPtr parameter, MPlug &plug )
 	assert( parameter );
 	assert( ! plug.isNull() );
 	
+	/// \todo Don't attempt to set the plug's value if it's locked, or connected, etc.
+	
 	ConstParameterHandlerPtr h = ParameterHandler::get( parameter );
 	if( !h )
 	{
