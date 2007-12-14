@@ -34,12 +34,7 @@
 
 #include <boost/python.hpp>
 
-#include "IECore/Exception.h"
-
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
-
-#include "IECore/ImplicitSurfaceFunction.h"
+#include "IECore/MeshPrimitiveBuilder.h"
 
 
 using namespace boost;
@@ -48,60 +43,25 @@ using namespace boost::python;
 namespace IECore
 {
 
-
 template<typename T>
-class ImplicitWrap : 
-	public ImplicitSurfaceFunction<typename T::Point, typename T::Value>, 
-	public Wrapper<ImplicitSurfaceFunction<typename T::Point, typename T::Value> >
+void bindMeshPrimitiveBuilder( const char *name )
 {
-	public :
+	typedef class_< T, boost::intrusive_ptr<T>, boost::noncopyable > MeshPrimitiveBuilderPyClass;
 
-		typedef boost::intrusive_ptr<ImplicitWrap<T> > Ptr;
-				
-		ImplicitWrap( PyObject *self ) : ImplicitSurfaceFunction<typename T::Point, typename T::Value >(), Wrapper<ImplicitSurfaceFunction< typename T::Point, typename T::Value> >( self, this )
-		{
-		}
-		
-		virtual ~ImplicitWrap()
-		{
-		}
-		
-		virtual typename T::Value getValue( const typename T::Point &p )
-		{
-			override o = this->get_override( "getValue" );
-			if( o )
-			{
-				return o( p );
-			}
-			else
-			{
-				throw Exception( "getValue() python method not defined" );
-			}
-		};
-
-};
-
-template<typename T>
-void bindImplicit( const char *name )
-{
-	typedef class_< T, typename ImplicitWrap<T>::Ptr, boost::noncopyable > ImplicitPyClass;
-
-	ImplicitPyClass( name, no_init )
+	MeshPrimitiveBuilderPyClass( name, no_init )
 		.def( init<> () )
-		.def( "getValue", &T::getValue )		
+		.def( "addVertex", &T::addVertex )
+		.def( "addTriangle", &T::addTriangle )
+		.def( "mesh", &T::mesh )								
 	;
-	WrapperToPython< typename ImplicitWrap<T>::Ptr >();
 	
-	implicitly_convertible< typename ImplicitWrap<T>::Ptr, typename T::Ptr >();
-	implicitly_convertible< typename T::Ptr, RefCountedPtr>();
+	implicitly_convertible< typename T::Ptr, RefCountedPtr>();	
 }
 
-void bindImplicitSurfaceFunction()
+void bindMeshPrimitiveBuilder()
 {
-	bindImplicit<ImplicitSurfaceFunctionV3ff>( "ImplicitSurfaceFunctionV3ff" );
-	bindImplicit<ImplicitSurfaceFunctionV3fd>( "ImplicitSurfaceFunctionV3fd" );
-	bindImplicit<ImplicitSurfaceFunctionV3df>( "ImplicitSurfaceFunctionV3df" );
-	bindImplicit<ImplicitSurfaceFunctionV3dd>( "ImplicitSurfaceFunctionV3dd" );	
+	bindMeshPrimitiveBuilder< MeshPrimitiveBuilder<float> >( "MeshPrimitiveBuilderf" );
+	bindMeshPrimitiveBuilder< MeshPrimitiveBuilder<double> >( "MeshPrimitiveBuilderd" );
 }
 
 } // namespace IECore

@@ -37,9 +37,8 @@
 #include "IECore/Exception.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 
-#include "IECore/ImplicitSurfaceFunction.h"
+#include "IECore/MarchingCubes.h"
 
 
 using namespace boost;
@@ -48,60 +47,24 @@ using namespace boost::python;
 namespace IECore
 {
 
-
 template<typename T>
-class ImplicitWrap : 
-	public ImplicitSurfaceFunction<typename T::Point, typename T::Value>, 
-	public Wrapper<ImplicitSurfaceFunction<typename T::Point, typename T::Value> >
+void bindMarchingCubes( const char *name )
 {
-	public :
+	typedef class_< T, boost::intrusive_ptr<T>, boost::noncopyable > MarchingCubesPyClass;
 
-		typedef boost::intrusive_ptr<ImplicitWrap<T> > Ptr;
+	MarchingCubesPyClass( name, no_init )
+		.def( init< typename T::ImplicitFnType::Ptr, typename T::MeshBuilderType::Ptr > () )
+		.def( "march", &T::march )
 				
-		ImplicitWrap( PyObject *self ) : ImplicitSurfaceFunction<typename T::Point, typename T::Value >(), Wrapper<ImplicitSurfaceFunction< typename T::Point, typename T::Value> >( self, this )
-		{
-		}
-		
-		virtual ~ImplicitWrap()
-		{
-		}
-		
-		virtual typename T::Value getValue( const typename T::Point &p )
-		{
-			override o = this->get_override( "getValue" );
-			if( o )
-			{
-				return o( p );
-			}
-			else
-			{
-				throw Exception( "getValue() python method not defined" );
-			}
-		};
-
-};
-
-template<typename T>
-void bindImplicit( const char *name )
-{
-	typedef class_< T, typename ImplicitWrap<T>::Ptr, boost::noncopyable > ImplicitPyClass;
-
-	ImplicitPyClass( name, no_init )
-		.def( init<> () )
-		.def( "getValue", &T::getValue )		
 	;
-	WrapperToPython< typename ImplicitWrap<T>::Ptr >();
 	
-	implicitly_convertible< typename ImplicitWrap<T>::Ptr, typename T::Ptr >();
-	implicitly_convertible< typename T::Ptr, RefCountedPtr>();
+	implicitly_convertible< typename T::Ptr, RefCountedPtr>();	
 }
 
-void bindImplicitSurfaceFunction()
+void bindMarchingCubes()
 {
-	bindImplicit<ImplicitSurfaceFunctionV3ff>( "ImplicitSurfaceFunctionV3ff" );
-	bindImplicit<ImplicitSurfaceFunctionV3fd>( "ImplicitSurfaceFunctionV3fd" );
-	bindImplicit<ImplicitSurfaceFunctionV3df>( "ImplicitSurfaceFunctionV3df" );
-	bindImplicit<ImplicitSurfaceFunctionV3dd>( "ImplicitSurfaceFunctionV3dd" );	
+	bindMarchingCubes<MarchingCubes< ImplicitSurfaceFunctionV3ff, MeshPrimitiveBuilder<float> > >( "MarchingCubesf" );
+	bindMarchingCubes<MarchingCubes< ImplicitSurfaceFunctionV3dd, MeshPrimitiveBuilder<float> > >( "MarchingCubesd" );
 }
 
 } // namespace IECore

@@ -360,6 +360,8 @@ corePythonSources = 	[
 				'src/IECore/bindings/ImathRandomBinding.cpp',
 				'src/IECore/bindings/RandomRotationOpBinding.cpp',
 				'src/IECore/bindings/ImplicitSurfaceFunctionBinding.cpp',
+				'src/IECore/bindings/MeshPrimitiveBuilderBinding.cpp',				
+				'src/IECore/bindings/MarchingCubesBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

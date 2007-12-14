@@ -32,76 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include "IECore/Exception.h"
-
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
-
-#include "IECore/ImplicitSurfaceFunction.h"
-
-
-using namespace boost;
-using namespace boost::python;
+#ifndef IE_COREPYTHON_MARCHINGCUBESBINDING_H
+#define IE_COREPYTHON_MARCHINGCUBESBINDING_H
 
 namespace IECore
 {
-
-
-template<typename T>
-class ImplicitWrap : 
-	public ImplicitSurfaceFunction<typename T::Point, typename T::Value>, 
-	public Wrapper<ImplicitSurfaceFunction<typename T::Point, typename T::Value> >
-{
-	public :
-
-		typedef boost::intrusive_ptr<ImplicitWrap<T> > Ptr;
-				
-		ImplicitWrap( PyObject *self ) : ImplicitSurfaceFunction<typename T::Point, typename T::Value >(), Wrapper<ImplicitSurfaceFunction< typename T::Point, typename T::Value> >( self, this )
-		{
-		}
-		
-		virtual ~ImplicitWrap()
-		{
-		}
-		
-		virtual typename T::Value getValue( const typename T::Point &p )
-		{
-			override o = this->get_override( "getValue" );
-			if( o )
-			{
-				return o( p );
-			}
-			else
-			{
-				throw Exception( "getValue() python method not defined" );
-			}
-		};
-
-};
-
-template<typename T>
-void bindImplicit( const char *name )
-{
-	typedef class_< T, typename ImplicitWrap<T>::Ptr, boost::noncopyable > ImplicitPyClass;
-
-	ImplicitPyClass( name, no_init )
-		.def( init<> () )
-		.def( "getValue", &T::getValue )		
-	;
-	WrapperToPython< typename ImplicitWrap<T>::Ptr >();
-	
-	implicitly_convertible< typename ImplicitWrap<T>::Ptr, typename T::Ptr >();
-	implicitly_convertible< typename T::Ptr, RefCountedPtr>();
+void bindMarchingCubes();
 }
 
-void bindImplicitSurfaceFunction()
-{
-	bindImplicit<ImplicitSurfaceFunctionV3ff>( "ImplicitSurfaceFunctionV3ff" );
-	bindImplicit<ImplicitSurfaceFunctionV3fd>( "ImplicitSurfaceFunctionV3fd" );
-	bindImplicit<ImplicitSurfaceFunctionV3df>( "ImplicitSurfaceFunctionV3df" );
-	bindImplicit<ImplicitSurfaceFunctionV3dd>( "ImplicitSurfaceFunctionV3dd" );	
-}
-
-} // namespace IECore
+#endif // IE_COREPYTHON_MARCHINGCUBESBINDING_H
