@@ -32,56 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IE_COREMAYA_MAYAMESHBUILDERBINDING_H
+#define IE_COREMAYA_MAYAMESHBUILDERBINDING_H
 
-#include "maya/MPxNode.h"
-#include "maya/MSelectionList.h"
-#include "maya/MFnDependencyNode.h"
-
-#include "IECore/Parameterised.h"
-
-#include "IECoreMaya/IECoreMaya.h"
-#include "IECoreMaya/bindings/ParameterisedHolderBinding.h"
-#include "IECoreMaya/bindings/MayaPythonUtilBinding.h"
-#include "IECoreMaya/bindings/MObjectBinding.h"
-#include "IECoreMaya/bindings/NodeBinding.h"
-#include "IECoreMaya/bindings/DagNodeBinding.h"
-#include "IECoreMaya/bindings/ConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaPlugConverterBinding.h"
-#include "IECoreMaya/bindings/PlugBinding.h"
-#include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaCameraConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaCameraConverterBinding.h"
-#include "IECoreMaya/bindings/MayaMeshBuilderBinding.h"
-
-using namespace IECore;
-using namespace IECoreMaya;
-
-using namespace boost::python;
-
-/// Maya is built with 2-byte Unicode characters, so we need to ensure
-/// that we're doing the same so that all external symbols resolve correctly at
-/// runtime.
-BOOST_STATIC_ASSERT(sizeof(Py_UNICODE) == 2);
-
-BOOST_PYTHON_MODULE(_IECoreMaya)
+namespace IECoreMaya
 {
-	bindMayaPythonUtil();		
-	bindMObject();
-	bindNode();
-	bindDagNode();
-	bindParameterisedHolder();
-	bindConverter();
-	bindFromMayaConverter();
-	bindFromMayaPlugConverter();
-	bindPlug();
-	bindFromMayaObjectConverter();
-	bindFromMayaCameraConverter();
-	bindMayaMeshBuilder();	
-	
-	def( "majorVersion", &IECoreMaya::majorVersion );
-	def( "minorVersion", &IECoreMaya::minorVersion );
-	def( "patchVersion", &IECoreMaya::patchVersion );
-	def( "versionString", &IECoreMaya::versionString, return_value_policy<copy_const_reference>() );	
+void bindMayaMeshBuilder();
 }
+
+#endif // IE_COREMAYA_MAYAMESHBUILDERBINDING_H

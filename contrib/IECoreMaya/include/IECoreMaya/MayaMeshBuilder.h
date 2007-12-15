@@ -32,56 +32,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
 
-#include "maya/MPxNode.h"
-#include "maya/MSelectionList.h"
-#include "maya/MFnDependencyNode.h"
+#ifndef IE_COREMAYA_MAYAMESHBUILDER_H
+#define IE_COREMAYA_MAYAMESHBUILDER_H
 
-#include "IECore/Parameterised.h"
+#include <cassert>
 
-#include "IECoreMaya/IECoreMaya.h"
-#include "IECoreMaya/bindings/ParameterisedHolderBinding.h"
-#include "IECoreMaya/bindings/MayaPythonUtilBinding.h"
-#include "IECoreMaya/bindings/MObjectBinding.h"
-#include "IECoreMaya/bindings/NodeBinding.h"
-#include "IECoreMaya/bindings/DagNodeBinding.h"
-#include "IECoreMaya/bindings/ConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaPlugConverterBinding.h"
-#include "IECoreMaya/bindings/PlugBinding.h"
-#include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaCameraConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaCameraConverterBinding.h"
-#include "IECoreMaya/bindings/MayaMeshBuilderBinding.h"
+#include "maya/MObject.h"
+#include "maya/MFnMesh.h"
 
-using namespace IECore;
-using namespace IECoreMaya;
+#include "IECore/RefCounted.h"
+#include "IECore/VectorTypedData.h"
 
-using namespace boost::python;
 
-/// Maya is built with 2-byte Unicode characters, so we need to ensure
-/// that we're doing the same so that all external symbols resolve correctly at
-/// runtime.
-BOOST_STATIC_ASSERT(sizeof(Py_UNICODE) == 2);
-
-BOOST_PYTHON_MODULE(_IECoreMaya)
+namespace IECoreMaya
 {
-	bindMayaPythonUtil();		
-	bindMObject();
-	bindNode();
-	bindDagNode();
-	bindParameterisedHolder();
-	bindConverter();
-	bindFromMayaConverter();
-	bindFromMayaPlugConverter();
-	bindPlug();
-	bindFromMayaObjectConverter();
-	bindFromMayaCameraConverter();
-	bindMayaMeshBuilder();	
+
+/// MayaMeshBuilder is a class which allows construction of Maya mesh data, templated
+/// on the base type of the resulting point/normal data (e.g. float or double). 
+template<typename T>
+class MayaMeshBuilder : public IECore::RefCounted
+{
+	public:
 	
-	def( "majorVersion", &IECoreMaya::majorVersion );
-	def( "minorVersion", &IECoreMaya::minorVersion );
-	def( "patchVersion", &IECoreMaya::patchVersion );
-	def( "versionString", &IECoreMaya::versionString, return_value_policy<copy_const_reference>() );	
+		typedef T BaseType;
+	
+		typedef boost::intrusive_ptr<MayaMeshBuilder<T> > Ptr;
+	
+		MayaMeshBuilder( MObject parentOrOwner );		
+		virtual ~MayaMeshBuilder();
+
+		/// Add a vertex position and normal						
+		void addVertex( const Imath::Vec3<T> &p, const Imath::Vec3<T> &n );
+
+		/// Construct a triangle from the 3 specified vertex indices
+		void addTriangle( int v0, int v1, int v2 );
+				
+		/// Retrieve the resultant mesh as MFnMeshData		
+		MObject mesh() const;
+		
+	protected:
+		MObject m_parentOrOwner;
+		
+		struct Data;
+		
+		Data *m_data;		
+
+};       
+
 }
+
+#include "IECoreMaya/MayaMeshBuilder.inl"
+
+#endif // IE_COREMAYA_MAYAMESHBUILDER_H
