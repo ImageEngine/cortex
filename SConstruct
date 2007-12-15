@@ -192,6 +192,14 @@ o.Add(
 	"/usr/local/bin",
 )
 
+# Nuke options
+
+o.Add(
+	"NUKE_ROOT",
+	"The directory in which Nuke is installed.",
+	"/usr/local/foundry/nuke"
+)
+
 # OpenGL options
 
 o.Add(
@@ -794,6 +802,19 @@ if env["WITH_GL"] :
 		glPythonEnv.Alias( "install", glPythonModuleInstall + glPythonModuleSymlinks )
 
 		Default( [ glLibrary, glPythonModule ] )
+
+###########################################################################################
+# Install the coreNuke headers
+###########################################################################################
+
+nukeEnv = env.Copy( IECORE_NAME = "IECoreNuke" )
+nukeEnv.Append( CPPPATH = [ "$NUKE_ROOT/include" ] )
+
+nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
+nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
+nukeHeaderSymlinks = makeSymlinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] )
+nukeEnv.Alias( "installNuke", nukeHeaderInstall + nukeHeaderSymlinks )
+nukeEnv.Alias( "install", nukeHeaderInstall + nukeHeaderSymlinks )
 		
 ###########################################################################################
 # Documentation
