@@ -64,7 +64,7 @@ class MayaMeshSignedDistanceFunction : public IECore::RefCounted
 		
 		virtual ~MayaMeshSignedDistanceFunction();
                               
-                inline Value operator()( const Point &p );
+                Value operator()( const Point &p );
 		
 	protected:	
 	
