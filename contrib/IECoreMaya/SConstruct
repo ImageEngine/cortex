@@ -98,6 +98,7 @@ librarySource = [
 	'src/MayaHeaderGenerator.cpp',
 	'src/FromMayaCameraConverter.cpp',
 	'src/ConverterHolder.cpp',
+	'src/MayaMeshSignedDistanceFunction.cpp',
 ]
 
 pythonBindingsSource = [
