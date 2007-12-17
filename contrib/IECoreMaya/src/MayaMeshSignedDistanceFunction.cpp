@@ -36,7 +36,8 @@ MayaMeshSignedDistanceFunction::Value MayaMeshSignedDistanceFunction::operator()
 	MStatus s = m_fnMesh->getClosestPointAndNormal(
 		testPoint,
 		closestPoint,
-		closestNormal
+		closestNormal,
+		MSpace::kWorld
 	); 
 	
 	if (!s)
