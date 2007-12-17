@@ -62,6 +62,9 @@ class MarchingCubes : public RefCounted
 		typedef typename Imath::Vec3<PointBaseType> Vector;
 		typedef Imath::Box<Vector> BoxType;
 		
+		typedef boost::intrusive_ptr< MarchingCubes<ImplicitFn, MeshBuilder> > Ptr;
+		typedef boost::intrusive_ptr< const MarchingCubes<ImplicitFn, MeshBuilder> > ConstPtr;
+		
 		MarchingCubes( typename ImplicitFn::Ptr fn, typename MeshBuilder::Ptr builder );
 
 		virtual ~MarchingCubes();
