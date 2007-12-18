@@ -48,6 +48,7 @@
 namespace IECoreMaya
 {
 
+/// A model of IEcore::ImplicitSurfaceFunction for creating a signed distance field with respect to world-space Maya mesh.
 class MayaMeshSignedDistanceFunction : public IECore::RefCounted
 {
         public:
@@ -59,7 +60,9 @@ class MayaMeshSignedDistanceFunction : public IECore::RefCounted
                 typedef IECore::VectorTraits<Value>::BaseType ValueBaseType;
                 
                 typedef boost::intrusive_ptr<MayaMeshSignedDistanceFunction> Ptr;
+                typedef boost::intrusive_ptr<const MayaMeshSignedDistanceFunction> ConstPtr;
 		
+		//// Craete the function. The passed MObject must be compatible with the MFnMesh function set
 		MayaMeshSignedDistanceFunction( const MObject &obj );
 		
 		virtual ~MayaMeshSignedDistanceFunction();
