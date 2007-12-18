@@ -62,7 +62,7 @@ coreTestName = "test/IECore/IECoreTest"
 # Versions
 
 coreMajorVersion = '2'
-coreMinorVersion = '22'
+coreMinorVersion = '23'
 corePatchVersion = '0'
 coreVersion = coreMajorVersion + "." + coreMinorVersion + "." + corePatchVersion
 pythonVersion = '2.5'
@@ -360,6 +360,7 @@ corePythonSources = 	[
 				'src/IECore/bindings/ImathRandomBinding.cpp',
 				'src/IECore/bindings/RandomRotationOpBinding.cpp',
 				'src/IECore/bindings/ImplicitSurfaceFunctionBinding.cpp',
+				'src/IECore/bindings/ImplicitSurfaceFunctionCacheBinding.cpp',
 				'src/IECore/bindings/MeshPrimitiveBuilderBinding.cpp',				
 				'src/IECore/bindings/MarchingCubesBinding.cpp',
 			]
