@@ -41,7 +41,7 @@
 
 #include "OpenEXR/ImathVec.h"
 
-#include "IECore/RefCounted.h"
+#include "IECore/ImplicitSurfaceFunction.h"
 #include "IECoreMaya/VectorTraits.h"
 
 
@@ -49,29 +49,26 @@ namespace IECoreMaya
 {
 
 /// A model of IEcore::ImplicitSurfaceFunction for creating a signed distance field with respect to world-space Maya mesh.
-class MayaMeshSignedDistanceFunction : public IECore::RefCounted
+class MayaMeshSignedDistanceFunction : public IECore::ImplicitSurfaceFunction< Imath::V3d, double >
 {
         public:
-                typedef Imath::V3d Point;
-                typedef IECore::VectorTraits<Point> PointTraits;
-                typedef IECore::VectorTraits<Point>::BaseType PointBaseType;
-                typedef double Value;
-                typedef IECore::VectorTraits<Value> ValueTraits;
-                typedef IECore::VectorTraits<Value>::BaseType ValueBaseType;
-                
                 typedef boost::intrusive_ptr<MayaMeshSignedDistanceFunction> Ptr;
                 typedef boost::intrusive_ptr<const MayaMeshSignedDistanceFunction> ConstPtr;
 		
 		//// Craete the function. The passed MObject must be compatible with the MFnMesh function set
-		MayaMeshSignedDistanceFunction( const MObject &obj );
+		MayaMeshSignedDistanceFunction( const MObject &obj, MSpace::Space space = MSpace::kWorld );
 		
 		virtual ~MayaMeshSignedDistanceFunction();
                               
                 Value operator()( const Point &p );
 		
+		virtual Value getValue( const Point &p );
+
+		
 	protected:	
 	
 		MFnMesh *m_fnMesh;
+		MSpace::Space m_space;
 };
 
 }

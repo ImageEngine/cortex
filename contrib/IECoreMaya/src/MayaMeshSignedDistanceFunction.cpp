@@ -6,7 +6,7 @@ using namespace IECore;
 using namespace IECoreMaya;
 
 
-MayaMeshSignedDistanceFunction::MayaMeshSignedDistanceFunction( const MObject &obj )
+MayaMeshSignedDistanceFunction::MayaMeshSignedDistanceFunction( const MObject &obj, MSpace::Space space ) : m_space( space )
 {
 	MStatus s;
 	m_fnMesh = new MFnMesh( obj, &s );
@@ -37,7 +37,7 @@ MayaMeshSignedDistanceFunction::Value MayaMeshSignedDistanceFunction::operator()
 		testPoint,
 		closestPoint,
 		closestNormal,
-		MSpace::kWorld
+		m_space
 	); 
 	
 	if (!s)
@@ -46,4 +46,9 @@ MayaMeshSignedDistanceFunction::Value MayaMeshSignedDistanceFunction::operator()
 	}
 
 	return closestNormal.normal() * ( testPoint - closestPoint );
+}
+
+MayaMeshSignedDistanceFunction::Value MayaMeshSignedDistanceFunction::getValue( const Point &p )
+{
+	return this->operator()(p);
 }
