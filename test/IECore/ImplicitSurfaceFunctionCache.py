@@ -53,7 +53,15 @@ class TestImplicitSurfaceFunctionCache( unittest.TestCase ) :
 				
 		a = ImplicitSurfaceFunctionCacheV3ff( TestFunction(), 0.001 )
 		
-		self.assertEqual( a.getValue( V3f(1,1,1) ), 0.5 )		
+		self.assertEqual( a.getValue( V3f(1,1,1) ), 0.5 )
+		self.assertEqual( a.size(), 1 )
+		a.clear()
+		self.assertEqual( a.size(), 0 )
+		
+		a = ImplicitSurfaceFunctionCacheV3ff( TestFunction() )		
+		
+		self.assertEqual( a.getValue( V3f(1,1,1) ), 0.5 )
+		self.assertEqual( a.size(), 1 )
 			
 				
 	
