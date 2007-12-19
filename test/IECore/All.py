@@ -105,8 +105,9 @@ from DataPromoteOp import *
 from MatrixMultiplyOp import *
 from PointBoundsOp import *
 from ImplicitSurfaceFunction import *
-from ImplicitSurfaceFunctionCache import *
+from CachedImplicitSurfaceFunction import *
 from MarchingCubes import *
+from PointMeshOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

@@ -132,9 +132,10 @@
 #include "IECore/bindings/ImathRandomBinding.h"
 #include "IECore/bindings/RandomRotationOpBinding.h"
 #include "IECore/bindings/ImplicitSurfaceFunctionBinding.h"
-#include "IECore/bindings/ImplicitSurfaceFunctionCacheBinding.h"
+#include "IECore/bindings/CachedImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/MeshPrimitiveBuilderBinding.h"
 #include "IECore/bindings/MarchingCubesBinding.h"
+#include "IECore/bindings/PointMeshOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -246,9 +247,10 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImathRandom();
 	bindRandomRotationOp();
 	bindImplicitSurfaceFunction();
-	bindImplicitSurfaceFunctionCache();	
+	bindCachedImplicitSurfaceFunction();	
 	bindMeshPrimitiveBuilder();
 	bindMarchingCubes();
+	bindPointMeshOp();
 	
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -38,7 +38,7 @@
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
 
-#include "IECore/ImplicitSurfaceFunctionCache.h"
+#include "IECore/CachedImplicitSurfaceFunction.h"
 
 
 using namespace boost;
@@ -49,7 +49,7 @@ namespace IECore
 
 
 template<typename T>
-void bindImplicitSurfaceFunctionCache( const char *name )
+void bindCachedImplicitSurfaceFunction( const char *name )
 {
 	typedef ImplicitSurfaceFunction< typename T::Point, typename T::Value> Base;
 	
@@ -58,9 +58,9 @@ void bindImplicitSurfaceFunctionCache( const char *name )
 		typename T::Ptr, 
 		bases< Base >, 
 		boost::noncopyable 
-	> ImplicitSurfaceFunctionCachePyClass;
+	> CachedImplicitSurfaceFunctionPyClass;
 
-	ImplicitSurfaceFunctionCachePyClass( name, no_init )
+	CachedImplicitSurfaceFunctionPyClass( name, no_init )
 		.def( init< typename Base::Ptr, optional< typename T::PointBaseType > > () )
 		.def( "clear", &T::clear )
 		.def( "size", &T::size )		
@@ -70,12 +70,12 @@ void bindImplicitSurfaceFunctionCache( const char *name )
 	implicitly_convertible< typename T::Ptr, typename Base::Ptr>();
 }
 
-void bindImplicitSurfaceFunctionCache()
+void bindCachedImplicitSurfaceFunction()
 {
-	bindImplicitSurfaceFunctionCache<ImplicitSurfaceFunctionCacheV3ff>( "ImplicitSurfaceFunctionCacheV3ff" );
-	bindImplicitSurfaceFunctionCache<ImplicitSurfaceFunctionCacheV3fd>( "ImplicitSurfaceFunctionCacheV3fd" );
-	bindImplicitSurfaceFunctionCache<ImplicitSurfaceFunctionCacheV3df>( "ImplicitSurfaceFunctionCacheV3df" );
-	bindImplicitSurfaceFunctionCache<ImplicitSurfaceFunctionCacheV3dd>( "ImplicitSurfaceFunctionCacheV3dd" );	
+	bindCachedImplicitSurfaceFunction<CachedImplicitSurfaceFunctionV3ff>( "CachedImplicitSurfaceFunctionV3ff" );
+	bindCachedImplicitSurfaceFunction<CachedImplicitSurfaceFunctionV3fd>( "CachedImplicitSurfaceFunctionV3fd" );
+	bindCachedImplicitSurfaceFunction<CachedImplicitSurfaceFunctionV3df>( "CachedImplicitSurfaceFunctionV3df" );
+	bindCachedImplicitSurfaceFunction<CachedImplicitSurfaceFunctionV3dd>( "CachedImplicitSurfaceFunctionV3dd" );	
 }
 
 } // namespace IECore

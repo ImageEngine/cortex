@@ -226,6 +226,7 @@ enum TypeId
 	RandomRotationOpTypeId = 183,
 	V2iVectorDataTypeId = 184,
 	V3iVectorDataTypeId = 185,
+	PointMeshOpTypeId = 186,	
 
 	// Remember to update TypeIdBinding.cpp !!!
 	

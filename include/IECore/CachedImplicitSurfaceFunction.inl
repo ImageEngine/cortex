@@ -32,12 +32,61 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREPYTHON_IMPLICITSURFACEFUNCTIONCACHEBINDING_H
-#define IE_COREPYTHON_IMPLICITSURFACEFUNCTIONCACHEBINDING_H
-
 namespace IECore
 {
-void bindImplicitSurfaceFunctionCache();
+
+template<typename P, typename V>
+CachedImplicitSurfaceFunction<P,V>::CachedImplicitSurfaceFunction( typename CachedImplicitSurfaceFunction<P,V>::Fn::Ptr fn, PointBaseType tolerance )
+{
+	assert( fn );
+	assert( tolerance >= 0.0 );
+
+	m_fn = fn;
+	m_tolerance = tolerance;			
+}		
+
+template<typename P, typename V>
+typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::operator()( const CachedImplicitSurfaceFunction<P,V>::Point &p )
+{				
+	Key cacheKey(
+		(KeyBaseType)((PointTraits::get(p, 0) - m_tolerance / 0.5) / m_tolerance),
+		(KeyBaseType)((PointTraits::get(p, 1) - m_tolerance / 0.5) / m_tolerance),
+		(KeyBaseType)((PointTraits::get(p, 2) - m_tolerance / 0.5) / m_tolerance)
+	);		
+
+	typename Cache::const_iterator it = m_cache.find( cacheKey );
+	if ( it != m_cache.end() )
+	{
+		return it->m_value;
+	}
+
+	Value v = m_fn->operator()(p);	
+
+	Element e;
+	e.m_key = cacheKey;
+	e.m_value = v;
+
+	m_cache.insert( e );
+
+	return v;						
 }
 
-#endif // IE_COREPYTHON_IMPLICITSURFACEFUNCTIONCACHEBINDING_H
+template<typename P, typename V>
+void CachedImplicitSurfaceFunction<P,V>::clear()
+{
+	m_cache.clear();
+}
+
+template<typename P, typename V>
+typename CachedImplicitSurfaceFunction<P,V>::Cache::size_type CachedImplicitSurfaceFunction<P,V>::size() const
+{
+	return m_cache.size();
+}	
+	
+template<typename P, typename V>
+typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::getValue( const CachedImplicitSurfaceFunction<P,V>::Point &p )
+{
+	return this->operator()(p);
+}
+
+}

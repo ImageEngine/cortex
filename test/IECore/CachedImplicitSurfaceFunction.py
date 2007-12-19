@@ -37,7 +37,7 @@ from IECore import *
 
 
 
-class TestImplicitSurfaceFunctionCache( unittest.TestCase ) :
+class TestCachedImplicitSurfaceFunction( unittest.TestCase ) :
 
 	def test( self ) :
 	
@@ -51,14 +51,14 @@ class TestImplicitSurfaceFunctionCache( unittest.TestCase ) :
 			
 				return 0.5
 				
-		a = ImplicitSurfaceFunctionCacheV3ff( TestFunction(), 0.001 )
+		a = CachedImplicitSurfaceFunctionV3ff( TestFunction(), 0.001 )
 		
 		self.assertEqual( a.getValue( V3f(1,1,1) ), 0.5 )
 		self.assertEqual( a.size(), 1 )
 		a.clear()
 		self.assertEqual( a.size(), 0 )
 		
-		a = ImplicitSurfaceFunctionCacheV3ff( TestFunction() )		
+		a = CachedImplicitSurfaceFunctionV3ff( TestFunction() )		
 		
 		self.assertEqual( a.getValue( V3f(1,1,1) ), 0.5 )
 		self.assertEqual( a.size(), 1 )

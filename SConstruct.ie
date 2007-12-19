@@ -205,6 +205,7 @@ coreSources = 		[
 				'src/IECore/MatrixMultiplyOp.cpp',
 				'src/IECore/PointBoundsOp.cpp',
 				'src/IECore/RandomRotationOp.cpp',
+				'src/IECore/PointMeshOp.cpp',
 		   ]
 		
 coreIncludes = 		[ 	
@@ -360,9 +361,10 @@ corePythonSources = 	[
 				'src/IECore/bindings/ImathRandomBinding.cpp',
 				'src/IECore/bindings/RandomRotationOpBinding.cpp',
 				'src/IECore/bindings/ImplicitSurfaceFunctionBinding.cpp',
-				'src/IECore/bindings/ImplicitSurfaceFunctionCacheBinding.cpp',
+				'src/IECore/bindings/CachedImplicitSurfaceFunctionBinding.cpp',
 				'src/IECore/bindings/MeshPrimitiveBuilderBinding.cpp',				
 				'src/IECore/bindings/MarchingCubesBinding.cpp',
+				'src/IECore/bindings/PointMeshOpBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

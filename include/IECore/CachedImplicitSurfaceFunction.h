@@ -33,8 +33,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#ifndef IE_CORE_IMPLICITSURFACEFUNCTIONCACHE_H
-#define IE_CORE_IMPLICITSURFACEFUNCTIONCACHE_H
+#ifndef IE_CORE_CachedImplicitSurfaceFunction_H
+#define IE_CORE_CachedImplicitSurfaceFunction_H
 
 #include <cassert>
 
@@ -54,7 +54,7 @@ namespace IECore
 /// a location of type template parameter P
 
 template<typename P, typename V>
-class ImplicitSurfaceFunctionCache : public ImplicitSurfaceFunction<P, V>
+class CachedImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 {
 	public:
 	
@@ -66,8 +66,8 @@ class ImplicitSurfaceFunctionCache : public ImplicitSurfaceFunction<P, V>
 		typedef typename VectorTraits<V>::BaseType ValueBaseType;
 		
 		typedef ImplicitSurfaceFunction<P, V> Fn;
-		typedef boost::intrusive_ptr<ImplicitSurfaceFunctionCache<P,V> > Ptr;
-		typedef boost::intrusive_ptr<const ImplicitSurfaceFunctionCache<P,V> > ConstPtr;
+		typedef boost::intrusive_ptr<CachedImplicitSurfaceFunction<P,V> > Ptr;
+		typedef boost::intrusive_ptr<const CachedImplicitSurfaceFunction<P,V> > ConstPtr;
 		
 	protected:
 	
@@ -102,7 +102,7 @@ class ImplicitSurfaceFunctionCache : public ImplicitSurfaceFunction<P, V>
 	public:	
 		
 		
-		ImplicitSurfaceFunctionCache( typename Fn::Ptr fn, PointBaseType tolerance = Imath::limits<PointBaseType>::epsilon() );
+		CachedImplicitSurfaceFunction( typename Fn::Ptr fn, PointBaseType tolerance = Imath::limits<PointBaseType>::epsilon() );
 		
 		/// Returns the value of the underlying function
 		inline Value operator()( const Point &p );
@@ -124,13 +124,13 @@ class ImplicitSurfaceFunctionCache : public ImplicitSurfaceFunction<P, V>
 		
 };
 
-typedef ImplicitSurfaceFunctionCache<Imath::V3f, float> ImplicitSurfaceFunctionCacheV3ff;
-typedef ImplicitSurfaceFunctionCache<Imath::V3f, double> ImplicitSurfaceFunctionCacheV3fd;
-typedef ImplicitSurfaceFunctionCache<Imath::V3d, float> ImplicitSurfaceFunctionCacheV3df;
-typedef ImplicitSurfaceFunctionCache<Imath::V3d, double> ImplicitSurfaceFunctionCacheV3dd;
+typedef CachedImplicitSurfaceFunction<Imath::V3f, float> CachedImplicitSurfaceFunctionV3ff;
+typedef CachedImplicitSurfaceFunction<Imath::V3f, double> CachedImplicitSurfaceFunctionV3fd;
+typedef CachedImplicitSurfaceFunction<Imath::V3d, float> CachedImplicitSurfaceFunctionV3df;
+typedef CachedImplicitSurfaceFunction<Imath::V3d, double> CachedImplicitSurfaceFunctionV3dd;
 
 }
 
-#include "IECore/ImplicitSurfaceFunctionCache.inl"
+#include "IECore/CachedImplicitSurfaceFunction.inl"
 
 #endif
