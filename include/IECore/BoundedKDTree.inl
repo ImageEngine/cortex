@@ -271,7 +271,8 @@ BoundedKDTree<BoundIterator>::BoundedKDTree( BoundIterator first, BoundIterator 
 
 
 template<class BoundIterator>	
-unsigned int BoundedKDTree<BoundIterator>::intersectingBounds( const Bound &b, std::vector<BoundIterator> &bounds ) const
+template<typename S>
+unsigned int BoundedKDTree<BoundIterator>::intersectingBounds( const S &b, std::vector<BoundIterator> &bounds ) const
 {	
 	bounds.clear();
 			
@@ -280,8 +281,9 @@ unsigned int BoundedKDTree<BoundIterator>::intersectingBounds( const Bound &b, s
 	return bounds.size();
 }
 
-template<class BoundIterator>	
-void BoundedKDTree<BoundIterator>::intersectingBoundsWalk(  NodeIndex nodeIndex, const Bound &b, std::vector<BoundIterator> &bounds ) const
+template<class BoundIterator>
+template<typename S>	
+void BoundedKDTree<BoundIterator>::intersectingBoundsWalk(  NodeIndex nodeIndex, const S &b, std::vector<BoundIterator> &bounds ) const
 {
 	const Node &node = m_nodes[nodeIndex];
 	if( node.isLeaf() )
