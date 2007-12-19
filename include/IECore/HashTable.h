@@ -32,58 +32,91 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IE_CORE_HASHTABLE_H
+#define IE_CORE_HASHTABLE_H
+
+#include <iostream>
+#include <cassert>
+#include <string>
+
+#include "boost/static_assert.hpp"
+#include "boost/multi_index_container.hpp"
+#include "boost/multi_index/hashed_index.hpp"
+#include "boost/multi_index/member.hpp"
+
 namespace IECore
 {
 
-template<typename P, typename V>
-CachedImplicitSurfaceFunction<P,V>::CachedImplicitSurfaceFunction( typename CachedImplicitSurfaceFunction<P,V>::Fn::Ptr fn, PointBaseType tolerance )
+
+template<typename T>
+struct Hash
 {
-	assert( fn );
-	assert( tolerance >= 0.0 );
-
-	m_fn = fn;
-	m_tolerance = tolerance;			
-}		
-
-template<typename P, typename V>
-typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::operator()( const CachedImplicitSurfaceFunction<P,V>::Point &p )
-{	
-	/// Offset such that a cell centre is aligned with the origin			
-	Key cacheKey(
-		(KeyBaseType)((PointTraits::get(p, 0) - m_tolerance / 0.5) / m_tolerance),
-		(KeyBaseType)((PointTraits::get(p, 1) - m_tolerance / 0.5) / m_tolerance),
-		(KeyBaseType)((PointTraits::get(p, 2) - m_tolerance / 0.5) / m_tolerance)
-	);		
-
-	typename Cache::const_iterator it = m_cache.find( cacheKey );
-	if ( it != m_cache.end() )
+	size_t operator()( const T &s ) const
 	{		
-		return it->second;
+		return static_cast<size_t>(s);
 	}
+};
 
-	Value v = m_fn->operator()(p);	
-	
-	m_cache.insert( typename Cache::value_type( cacheKey, v ) );
-
-	return v;						
-}
-
-template<typename P, typename V>
-void CachedImplicitSurfaceFunction<P,V>::clear()
+template<typename T>
+struct Hash<T*>
 {
-	m_cache.clear();
-}
+	size_t operator()( const T *s ) const
+	{		
+		return reinterpret_cast<size_t>(s);
+	}
+};
 
-template<typename P, typename V>
-typename CachedImplicitSurfaceFunction<P,V>::Cache::size_type CachedImplicitSurfaceFunction<P,V>::size() const
+template<>
+struct Hash<const char *>
 {
-	return m_cache.size();
-}	
-	
-template<typename P, typename V>
-typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::getValue( const CachedImplicitSurfaceFunction<P,V>::Point &p )
-{
-	return this->operator()(p);
-}
+	/// Dan Bernstein's original string hash
+	size_t operator()( const char *s ) const
+	{	
+		assert(s);
+		size_t hash = 5381;
+		while (*s)
+		{
+			hash = ( ( hash << 5 ) + hash ) + *s++;
+		}
+		
+		return hash;
+	}
+};
 
-}
+template<>
+struct Hash<std::string>
+{
+	/// Dan Bernstein's original string hash
+	size_t operator()( const std::string &s ) const
+	{		
+		size_t hash = 5381;
+		for ( std::string::size_type i = 0; i < s.length(); i++)
+		{
+			hash = ( ( hash << 5 ) + hash ) + s[i];
+		}
+		
+		return hash;
+	}
+};
+
+
+template<typename Key, typename Data, typename HashFn = Hash<Key> >
+struct HashTable : public boost::multi_index::multi_index_container
+		<
+			std::pair< Key, Data >,
+			boost::multi_index::indexed_by<
+				boost::multi_index::hashed_non_unique<
+					boost::multi_index::member<std::pair< Key, Data >, Key, &std::pair< Key, Data >::first>, 
+					HashFn 
+				>
+			>
+		> 
+{
+	typedef Key key_type;
+	typedef Data data_type;
+	typedef std::pair< Key, Data > value_type;	
+};
+
+} // namespace IECore
+
+#endif // IE_CORE_HASHTABLE_H

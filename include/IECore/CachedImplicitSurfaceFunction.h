@@ -38,21 +38,17 @@
 
 #include <cassert>
 
-#include "boost/multi_index_container.hpp"
-#include "boost/multi_index/hashed_index.hpp"
-#include "boost/multi_index/member.hpp"
-
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathLimits.h"
 
 #include "IECore/ImplicitSurfaceFunction.h"
+#include "IECore/HashTable.h"
 
 namespace IECore
 {
 
 /// A template to define an implicit surface function, which returns a value of type template parameter V when passed 
 /// a location of type template parameter P
-
 template<typename P, typename V>
 class CachedImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 {
@@ -73,14 +69,8 @@ class CachedImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 	
 		typedef long KeyBaseType;
 		typedef Imath::Vec3<KeyBaseType> Key;
-	
-		struct Element
-		{
-			Key m_key;			
-			Value m_value;									
-		};
-		
-		struct KeyHash
+			
+		struct Hash
 		{
 			size_t operator()( const Key &t ) const
 			{
@@ -89,15 +79,7 @@ class CachedImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 
 		};
 				
-		typedef boost::multi_index::multi_index_container<
-			Element,
-			boost::multi_index::indexed_by<
-				boost::multi_index::hashed_non_unique<
-					boost::multi_index::member<Element, Key, &Element::m_key>, 
-					KeyHash 
-				>
-			>
-		> Cache;	
+		typedef HashTable< Key, Value, Hash > Cache;	
 				
 	public:	
 		
