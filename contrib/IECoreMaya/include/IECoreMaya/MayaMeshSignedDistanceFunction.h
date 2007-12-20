@@ -55,13 +55,15 @@ class MayaMeshSignedDistanceFunction : public IECore::ImplicitSurfaceFunction< I
                 typedef boost::intrusive_ptr<MayaMeshSignedDistanceFunction> Ptr;
                 typedef boost::intrusive_ptr<const MayaMeshSignedDistanceFunction> ConstPtr;
 		
-		//// Craete the function. The passed MObject must be compatible with the MFnMesh function set
+		//// Create the function. The passed MObject must be compatible with the MFnMesh function set
 		MayaMeshSignedDistanceFunction( const MObject &obj, MSpace::Space space = MSpace::kWorld );
 		
 		virtual ~MayaMeshSignedDistanceFunction();
-                              
+                
+		// Retrieve the signed distance from the mesh at the given point              
                 Value operator()( const Point &p );
 		
+		// Retrieve the signed distance from the mesh at the given point		
 		virtual Value getValue( const Point &p );
 
 		
