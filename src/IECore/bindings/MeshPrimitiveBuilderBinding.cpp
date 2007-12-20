@@ -38,8 +38,6 @@
 
 #include "IECore/MeshPrimitiveBuilder.h"
 
-
-using namespace boost;
 using namespace boost::python;
 
 namespace IECore
@@ -48,7 +46,7 @@ namespace IECore
 template<typename T>
 void bindMeshPrimitiveBuilder( const char *name )
 {
-	typedef class_< T, boost::intrusive_ptr<T>, boost::noncopyable > MeshPrimitiveBuilderPyClass;
+	typedef class_< T, typename T::Ptr, bases<RefCounted>, boost::noncopyable > MeshPrimitiveBuilderPyClass;
 
 	MeshPrimitiveBuilderPyClass( name, no_init )
 		.def( init<> () )
