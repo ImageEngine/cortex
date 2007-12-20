@@ -33,8 +33,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#ifndef IE_CORE_CachedImplicitSurfaceFunction_H
-#define IE_CORE_CachedImplicitSurfaceFunction_H
+#ifndef IE_CORE_CACHEDIMPLICITSURFACEFUNCTION_H
+#define IE_CORE_CACHEDIMPLICITSURFACEFUNCTION_H
 
 #include <cassert>
 
@@ -115,4 +115,4 @@ typedef CachedImplicitSurfaceFunction<Imath::V3d, double> CachedImplicitSurfaceF
 
 #include "IECore/CachedImplicitSurfaceFunction.inl"
 
-#endif
+#endif // IE_CORE_CACHEDIMPLICITSURFACEFUNCTION_H
