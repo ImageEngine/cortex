@@ -84,11 +84,11 @@ class ImplicitWrap :
 template<typename T>
 void bindImplicit( const char *name )
 {
-	typedef class_< T, typename ImplicitWrap<T>::Ptr, boost::noncopyable > ImplicitPyClass;
+	typedef class_< T, typename ImplicitWrap<T>::Ptr, bases<RefCounted>, boost::noncopyable > ImplicitPyClass;
 
 	ImplicitPyClass( name, no_init )
 		.def( init<> () )
-		.def( "getValue", &T::getValue )		
+		.def( "getValue", pure_virtual( &T::getValue ) )		
 	;
 	WrapperToPython< typename ImplicitWrap<T>::Ptr >();
 	INTRUSIVE_PTR_PATCH_TEMPLATE( T, ImplicitPyClass );
