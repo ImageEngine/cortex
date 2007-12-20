@@ -48,7 +48,7 @@
 namespace IECoreMaya
 {
 
-/// A model of IEcore::ImplicitSurfaceFunction for creating a signed distance field with respect to world-space Maya mesh.
+/// A model of IEcore::ImplicitSurfaceFunction for creating a signed distance field with respect to a Maya mesh.
 class MayaMeshSignedDistanceFunction : public IECore::ImplicitSurfaceFunction< Imath::V3d, double >
 {
         public:
