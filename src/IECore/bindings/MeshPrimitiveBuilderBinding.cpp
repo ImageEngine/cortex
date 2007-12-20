@@ -34,6 +34,8 @@
 
 #include <boost/python.hpp>
 
+#include "IECore/bindings/IntrusivePtrPatch.h"
+
 #include "IECore/MeshPrimitiveBuilder.h"
 
 
@@ -54,7 +56,7 @@ void bindMeshPrimitiveBuilder( const char *name )
 		.def( "addTriangle", &T::addTriangle )
 		.def( "mesh", &T::mesh )								
 	;
-	
+	INTRUSIVE_PTR_PATCH_TEMPLATE( T, MeshPrimitiveBuilderPyClass );
 	implicitly_convertible< typename T::Ptr, RefCountedPtr>();	
 }
 

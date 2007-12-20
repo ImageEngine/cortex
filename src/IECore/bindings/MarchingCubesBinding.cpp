@@ -73,6 +73,7 @@ void bindMarchingCubes( const char *name )
 				
 	;
 	
+	INTRUSIVE_PTR_PATCH_TEMPLATE( T, MarchingCubesPyClass );
 	implicitly_convertible< typename T::Ptr, RefCountedPtr>();	
 }
 

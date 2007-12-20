@@ -91,7 +91,7 @@ void bindImplicit( const char *name )
 		.def( "getValue", &T::getValue )		
 	;
 	WrapperToPython< typename ImplicitWrap<T>::Ptr >();
-	
+	INTRUSIVE_PTR_PATCH_TEMPLATE( T, ImplicitPyClass );
 	implicitly_convertible< typename ImplicitWrap<T>::Ptr, typename T::Ptr >();
 	implicitly_convertible< typename T::Ptr, RefCountedPtr>();
 }
