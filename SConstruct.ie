@@ -365,6 +365,7 @@ corePythonSources = 	[
 				'src/IECore/bindings/MeshPrimitiveBuilderBinding.cpp',				
 				'src/IECore/bindings/MarchingCubesBinding.cpp',
 				'src/IECore/bindings/PointMeshOpBinding.cpp',
+				'src/IECore/bindings/CSGImplicitSurfaceFunctionBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			
@@ -511,6 +512,13 @@ pythonTestEnv["ENV"]["PYTHONPATH"] = "python:" + pythonTestEnv["ENV"]["PYTHONPAT
 pythonTestEnv["ENV"]["IEENV_LIBRARY_PREFIX_PATH"] = "./:"+pythonTestEnv["ENV"]["IEENV_LIBRARY_PREFIX_PATH"]
 pythonTestEnv["ENV"]["COMPILER"] = corePythonModule.getLibrary().getCompiler()
 pythonTestEnv["ENV"]["COMPILER_VERSION"] = corePythonModule.getLibrary().getCompilerVersion()
+#pythonTestEnv["ENV"]["IEENV_DEBUG"] = "1"
+#pythonTestEnv["ENV"]["IEENV_DEBUG_PYTHON"] = "1"
+
+pythonTestEnv["ENV"]["IEENV_DEBUGGER"] = "gdb"
+
+pythonTestEnv["ENV"]["IEENV_DEBUGGER"] = "/software/apps/valgrind/3.2.1/rhel4.i686/bin/valgrind"
+pythonTestEnv["ENV"]["IEENV_DEBUGGER_ARGS"] = ""
 
 corePythonTestRun = pythonTestEnv.Command( "test/IECore/IECorePythonTest.out", "",  "python"+pythonVersion+" "+ARGUMENTS.get("TESTSCRIPT", "test/IECore/All.py") + " -v")
 pythonTestEnv.Depends( corePythonTestRun, corePython )

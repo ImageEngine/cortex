@@ -108,6 +108,7 @@ from ImplicitSurfaceFunction import *
 from CachedImplicitSurfaceFunction import *
 from MarchingCubes import *
 from PointMeshOp import *
+from CSGImplicitSurfaceFunction import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

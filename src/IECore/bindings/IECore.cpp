@@ -136,6 +136,7 @@
 #include "IECore/bindings/MeshPrimitiveBuilderBinding.h"
 #include "IECore/bindings/MarchingCubesBinding.h"
 #include "IECore/bindings/PointMeshOpBinding.h"
+#include "IECore/bindings/CSGImplicitSurfaceFunctionBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -246,12 +247,13 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointBoundsOp();
 	bindImathRandom();
 	bindRandomRotationOp();
-	bindImplicitSurfaceFunction();
+	bindImplicitSurfaceFunction();	
 	bindCachedImplicitSurfaceFunction();	
 	bindMeshPrimitiveBuilder();
 	bindMarchingCubes();
 	bindPointMeshOp();
-	
+	bindCSGImplicitSurfaceFunction();
+		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
