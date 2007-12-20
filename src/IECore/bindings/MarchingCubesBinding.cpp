@@ -34,14 +34,9 @@
 
 #include <boost/python.hpp>
 
-#include "IECore/Exception.h"
-
 #include "IECore/bindings/IntrusivePtrPatch.h"
-
 #include "IECore/MarchingCubes.h"
 
-
-using namespace boost;
 using namespace boost::python;
 
 namespace IECore
@@ -57,20 +52,19 @@ struct MarchingCubesHelper
 	
 	static void march2( T& marchingCubes, const typename T::BoxType &bound, const Imath::V3i &res )
 	{
-		marchingCubes.march( bound, res);
+		marchingCubes.march( bound, res );
 	}
 };
 
 template<typename T>
 void bindMarchingCubes( const char *name )
 {
-	typedef class_< T, boost::intrusive_ptr<T>, boost::noncopyable > MarchingCubesPyClass;
+	typedef class_< T, typename T::Ptr, bases<RefCounted>, boost::noncopyable > MarchingCubesPyClass;
 	
 	MarchingCubesPyClass( name, no_init )
 		.def( init< typename T::ImplicitFnType::Ptr, typename T::MeshBuilderType::Ptr > () )
 		.def( "march", &MarchingCubesHelper<T>::march1 )
-		.def( "march", &MarchingCubesHelper<T>::march2 )
-				
+		.def( "march", &MarchingCubesHelper<T>::march2 )				
 	;
 	
 	INTRUSIVE_PTR_PATCH_TEMPLATE( T, MarchingCubesPyClass );
