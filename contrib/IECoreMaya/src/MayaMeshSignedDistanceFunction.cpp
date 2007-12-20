@@ -44,10 +44,7 @@ MayaMeshSignedDistanceFunction::MayaMeshSignedDistanceFunction( const MObject &o
 	MStatus s;
 	m_fnMesh = new MFnMesh( obj, &s );
 
-	if (!s)
-	{
-		throw StatusException(s);
-	}
+	StatusException::throwIfError( s );
 
 	assert( m_fnMesh );						
 }
@@ -73,10 +70,7 @@ MayaMeshSignedDistanceFunction::Value MayaMeshSignedDistanceFunction::operator()
 		m_space
 	); 
 	
-	if (!s)
-	{	
-		throw StatusException( s );
-	}
+	StatusException::throwIfError( s );
 
 	return closestNormal.normal() * ( testPoint - closestPoint );
 }
