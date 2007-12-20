@@ -108,7 +108,8 @@ inline void register_intrusive_ptr_from_python_and_casts(T*, Bases)
 }
 
 // how to use it: create a typedef to the boost.python class_< yourClass > and provide it as the second parameter in this macro.
-#define INTRUSIVE_PTR_PATCH(class, pyClass)		register_intrusive_ptr_from_python_and_casts( (class *)0, pyClass::metadata::bases() )
+#define INTRUSIVE_PTR_PATCH(class, pyClass)			register_intrusive_ptr_from_python_and_casts( (class *)0, pyClass::metadata::bases() )
+#define INTRUSIVE_PTR_PATCH_TEMPLATE(class, pyClass)		register_intrusive_ptr_from_python_and_casts( (class *)0, typename pyClass::metadata::bases() )
 
 } // namespace IECore
 
