@@ -366,6 +366,8 @@ corePythonSources = 	[
 				'src/IECore/bindings/MarchingCubesBinding.cpp',
 				'src/IECore/bindings/PointMeshOpBinding.cpp',
 				'src/IECore/bindings/CSGImplicitSurfaceFunctionBinding.cpp',
+				'src/IECore/bindings/PlaneImplicitSurfaceFunctionBinding.cpp',
+				'src/IECore/bindings/SphereImplicitSurfaceFunctionBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			

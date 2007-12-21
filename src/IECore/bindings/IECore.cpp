@@ -137,6 +137,8 @@
 #include "IECore/bindings/MarchingCubesBinding.h"
 #include "IECore/bindings/PointMeshOpBinding.h"
 #include "IECore/bindings/CSGImplicitSurfaceFunctionBinding.h"
+#include "IECore/bindings/SphereImplicitSurfaceFunctionBinding.h"
+#include "IECore/bindings/PlaneImplicitSurfaceFunctionBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -253,6 +255,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMarchingCubes();
 	bindPointMeshOp();
 	bindCSGImplicitSurfaceFunction();
+	bindSphereImplicitSurfaceFunction();
+	bindPlaneImplicitSurfaceFunction();	
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
