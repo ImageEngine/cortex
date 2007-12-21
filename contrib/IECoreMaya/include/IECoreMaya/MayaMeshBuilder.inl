@@ -79,21 +79,21 @@ MayaMeshBuilder<T>::~MayaMeshBuilder()
 
 
 template<>				
-void MayaMeshBuilder<float>::addVertex( const Imath::V3f &p, const Imath::V3f &n )
+inline void MayaMeshBuilder<float>::addVertex( const Imath::V3f &p, const Imath::V3f &n )
 {
 	m_data->m_P.append( MFloatPoint( p.x, p.y, p.z ) );
 	m_data->m_N.append( MFloatVector( n.x, n.y, n.z ) );	
 }
 
 template<>				
-void MayaMeshBuilder<double>::addVertex( const Imath::V3d &p, const Imath::V3d &n )
+inline void MayaMeshBuilder<double>::addVertex( const Imath::V3d &p, const Imath::V3d &n )
 {
 	m_data->m_P.append( MPoint( p.x, p.y, p.z ) );
 	m_data->m_N.append( MVector( n.x, n.y, n.z ) );	
 }
 
 template<typename T>
-void MayaMeshBuilder<T>::addTriangle( int v0, int v1, int v2 )
+inline void MayaMeshBuilder<T>::addTriangle( int v0, int v1, int v2 )
 {
 	m_data->m_verticesPerFace.append( 3 );
 
@@ -103,7 +103,7 @@ void MayaMeshBuilder<T>::addTriangle( int v0, int v1, int v2 )
 }
 		
 template<typename T>		
-MObject MayaMeshBuilder<T>::mesh() const
+inline MObject MayaMeshBuilder<T>::mesh() const
 {
 	MStatus s;
 	MFnMesh fnMesh;
