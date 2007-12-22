@@ -49,7 +49,7 @@
 #include "IECore/CachedImplicitSurfaceFunction.h"
 #include "IECore/VectorTraits.h"
 #include "IECore/MarchingCubes.h"
-
+#include "IECore/BlobbyImplicitSurfaceFunction.h"
 #include "IECore/PointMeshOp.h"
 
 using namespace IECore;
@@ -186,116 +186,6 @@ ConstBox3dParameterPtr PointMeshOp::boundParameter() const
 	return m_boundParameter;
 }
 
-
-template<typename P, typename V>
-class BlobbyParticleFunction : public ImplicitSurfaceFunction<P, V>
-{
-	public:
-		typedef P Point;
-		typedef VectorTraits<P> PointTraits;
-		typedef typename VectorTraits<P>::BaseType PointBaseType;
-		typedef V Value;
-		typedef VectorTraits<V> ValueTraits;
-		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-		
-		typedef std::vector<P> PointVector;
-		typedef TypedData<PointVector> PointVectorData;
-		
-		typedef Imath::Box<P> Bound;
-		
-		typedef boost::intrusive_ptr< const BlobbyParticleFunction<P, V> > ConstPtr;
-		typedef boost::intrusive_ptr< BlobbyParticleFunction<P, V> > Ptr;
-		
-		BlobbyParticleFunction( typename PointVectorData::ConstPtr p, ConstDoubleVectorDataPtr r, ConstDoubleVectorDataPtr s ) : m_p( p ), m_radius( r ), m_strength( s )
-		{		
-			assert( m_p );
-			assert( m_radius );
-			assert( m_strength );
-			
-			if (m_p->readable().size() != m_radius->readable().size())
-			{
-				throw InvalidArgumentException("Incompatible point/radius data given to PointMeshOp");
-			}
-			if (m_p->readable().size() != m_strength->readable().size())
-			{
-				throw InvalidArgumentException("Incompatible point/strength data given to PointMeshOp");
-			}
-			
-			typename PointVector::const_iterator pit = m_p->readable().begin();
-						
-			std::vector<double>::const_iterator rit = m_radius->readable().begin();			
-			
-			for (; pit != m_p->readable().end(); ++pit, ++rit)
-			{
-				m_bounds.push_back(
-					Bound(
-						*pit - Point( *rit ),
-						*pit + Point( *rit )
-					)
-				);
-			}
-			
-			m_tree = new Tree( m_bounds.begin(), m_bounds.end() );
-			
-			assert( m_tree );			
-		}
-		
-		virtual ~BlobbyParticleFunction()
-		{
-			assert( m_tree );
-			delete m_tree;
-		}
-
-		inline Value operator()( const Point &p )
-		{
-			assert( m_tree );
-			assert( m_p );
-			assert( m_radius );
-			assert( m_strength );
-			
-			std::vector<BoundVectorConstIterator> intersecting;
-			
-			unsigned int numInteresecting = m_tree->intersectingBounds( p, intersecting );
-			(void)numInteresecting;
-			
-			Value totalInfluence = 0.0;
-			
-			for (typename std::vector<BoundVectorConstIterator>::const_iterator it = intersecting.begin(); it != intersecting.end(); ++it)
-			{
-				const int j = (*it - m_bounds.begin() );
-				Point sep = m_p->readable()[ j ] - p;
-				PointBaseType distSqrd = vecDot( sep, sep );
-				PointBaseType dist = sqrt( distSqrd );
-				
-				/// \todo Allow falloff types other than linear
-				PointBaseType invDistNorm = 1.0 - dist / m_radius->readable()[ j ];
-				
-				/// \todo Allow other compositing types
-				totalInfluence = std::max( totalInfluence, Value( invDistNorm * m_strength->readable()[ j ] ) );
-			}
-			
-			return totalInfluence;
-		}
-		
-		virtual Value getValue( const Point &p )
-		{
-			return this->operator()(p);
-		}
-		
-	protected:
-
-		typedef std::vector< Bound > BoundVector;
-		typedef typename BoundVector::const_iterator BoundVectorConstIterator;
-		typedef BoundedKDTree< BoundVectorConstIterator > Tree;
-		
-		typename PointVectorData::ConstPtr m_p;		
-		ConstDoubleVectorDataPtr m_radius;		
-		ConstDoubleVectorDataPtr m_strength;
-
-		BoundVector m_bounds;
-		Tree *m_tree;
-};
-
 ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 {	
 	const double threshold = m_thresholdParameter->getNumericValue();
@@ -322,7 +212,7 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 			{				
 				typedef MarchingCubes< CachedImplicitSurfaceFunction< V3f, float > > Marcher ;								
 				
-				BlobbyParticleFunction< V3f, float >::Ptr fn = new BlobbyParticleFunction< V3f, float > 
+				BlobbyImplicitSurfaceFunction< V3f, float >::Ptr fn = new BlobbyImplicitSurfaceFunction< V3f, float > 
 				( 
 					boost::static_pointer_cast<const V3fVectorData>( points ),
 					boost::static_pointer_cast<const DoubleVectorData>( radius ), 
@@ -346,7 +236,7 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 			{
 				typedef MarchingCubes< CachedImplicitSurfaceFunction< V3d, double > > Marcher ;
 				
-				BlobbyParticleFunction< V3d, double >::Ptr fn = new BlobbyParticleFunction< V3d, double > 
+				BlobbyImplicitSurfaceFunction< V3d, double >::Ptr fn = new BlobbyImplicitSurfaceFunction< V3d, double > 
 				( 
 					boost::static_pointer_cast<const V3dVectorData>( points ),
 					boost::static_pointer_cast<const DoubleVectorData>( radius ), 

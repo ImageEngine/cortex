@@ -227,6 +227,7 @@ enum TypeId
 	V2iVectorDataTypeId = 184,
 	V3iVectorDataTypeId = 185,
 	PointMeshOpTypeId = 186,	
+	ParticleMeshOpTypeId = 187,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	

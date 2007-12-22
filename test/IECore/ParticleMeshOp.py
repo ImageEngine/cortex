@@ -35,78 +35,34 @@
 import unittest
 from IECore import *
 
-class TestPointMeshOp( unittest.TestCase ) :
+class TestParticleMeshOp( unittest.TestCase ) :
 
-	def testFloat( self ) :
+	def testParticleMeshOp( self ) :
+		""" Testing ParticleMeshOp """
 		
-		o = PointMeshOp()
+		o = ParticleMeshOp()
 		
 		points = V3fVectorData()
 		radius = DoubleVectorData()
 		strength = DoubleVectorData()
 		
-		bound = Box3d( V3d( -5, -5, -5 ), V3d( 5, 15, 5) )
-		resolution = V3i( 50, 150, 50 )
-		threshold = 0.1
-		
-		for i in range( 0, 10):
-			points.append( V3f(0, i, 0 ) )
-			radius.append( 3 )
-			strength.append( 1 )
-			
-		self.assertEqual( len(points), 10 )
-		self.assertEqual( len(radius), 10 )
-		self.assertEqual( len(strength), 10 )				
+		bound = Box3d( V3d( -5, -7, -2 ), V3d( 3, 3, 3 ) )
+		resolution = V3i( 50, 150, 50 )				
 		
 		m = o(
-			points = points,
-			radius = radius,
-			strength = strength,
-			threshold = threshold,
-			bound = bound,
-			resolution = resolution
-		)	
-
-		# Verified by eye
-		self.assertEqual( len(m.vertexIds), 60072 )	
-		
-				
-		
-	def testDouble( self ) :
-		
-		o = PointMeshOp()
-		
-		points = V3dVectorData()
-		radius = DoubleVectorData()
-		strength = DoubleVectorData()
-		
-		bound = Box3d( V3d( -5, -5, -5 ), V3d( 5, 15, 5) )
-		resolution = V3i( 50, 150, 50 )
-		threshold = 0.1
-		
-		for i in range( 0, 10):
-			points.append( V3d(0, i, 0 ) )
-			radius.append( 3 )
-			strength.append( 1 )
+			filename = "test/IECore/data/pdcFiles/particleMesh.pdc",
 			
-		self.assertEqual( len(points), 10 )
-		self.assertEqual( len(radius), 10 )
-		self.assertEqual( len(strength), 10 )				
-		
-		m = o(
-			points = points,
-			radius = radius,
-			strength = strength,
-			threshold = threshold,
+			useRadiusAttribute = False,
+			radius = 1.0,
+			
+			threshold = 5.0,
 			bound = bound,
 			resolution = resolution
-		)	
-
-		# Verified by eye
-		self.assertEqual( len(m.vertexIds), 60072 )	
+		)
 		
-				
-
+		# Verified by eye
+		self.assertEqual( len(m.vertexIds), 59436)
+	
 if __name__ == "__main__":
 	unittest.main()
 	

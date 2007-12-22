@@ -206,6 +206,7 @@ coreSources = 		[
 				'src/IECore/PointBoundsOp.cpp',
 				'src/IECore/RandomRotationOp.cpp',
 				'src/IECore/PointMeshOp.cpp',
+				'src/IECore/ParticleMeshOp.cpp',				
 		   ]
 		
 coreIncludes = 		[ 	
@@ -368,6 +369,8 @@ corePythonSources = 	[
 				'src/IECore/bindings/CSGImplicitSurfaceFunctionBinding.cpp',
 				'src/IECore/bindings/PlaneImplicitSurfaceFunctionBinding.cpp',
 				'src/IECore/bindings/SphereImplicitSurfaceFunctionBinding.cpp',
+				'src/IECore/bindings/BlobbyImplicitSurfaceFunctionBinding.cpp',				
+				'src/IECore/bindings/ParticleMeshOpBinding.cpp',
 			]
 			
 corePythonPy = 	[ 			
@@ -462,6 +465,7 @@ coreOps = [
 	[ "DataCastOp", "dataCast", "common/convertions" ],
 	[ "MatrixMultiplyOp", "matrixMultiply", "common/convertions" ],
 	[ "PointMeshOp", "pointMesh", "common/primitive" ],
+	[ "ParticleMeshOp", "particleMesh", "common/primitive" ],	
 ]
 
 
