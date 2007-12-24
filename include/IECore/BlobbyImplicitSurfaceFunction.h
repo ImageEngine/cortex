@@ -64,12 +64,15 @@ class BlobbyImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 		typedef boost::intrusive_ptr< const BlobbyImplicitSurfaceFunction<P, V> > ConstPtr;
 		typedef boost::intrusive_ptr< BlobbyImplicitSurfaceFunction<P, V> > Ptr;
 		
+		/// Construct an implicit surface function from parallel arrays of positions, radii, and strengths
 		BlobbyImplicitSurfaceFunction( typename PointVectorData::ConstPtr p, ConstDoubleVectorDataPtr r, ConstDoubleVectorDataPtr s );
 		
 		virtual ~BlobbyImplicitSurfaceFunction();
 
+		/// Evaluate the function at the specified point
 		inline Value operator()( const Point &p );
-		
+
+		/// Evaluate the function at the specified point		
 		virtual Value getValue( const Point &p );
 		
 	protected:
