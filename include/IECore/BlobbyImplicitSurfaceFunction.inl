@@ -34,6 +34,8 @@
 
 #include <cassert>
 
+#include "IECore/BoxTraits.h"
+
 template<typename P, typename V>	
 BlobbyImplicitSurfaceFunction<P,V>::BlobbyImplicitSurfaceFunction( typename PointVectorData::ConstPtr p, ConstDoubleVectorDataPtr r, ConstDoubleVectorDataPtr s ) : m_p( p ), m_radius( r ), m_strength( s )
 {		
@@ -56,12 +58,13 @@ BlobbyImplicitSurfaceFunction<P,V>::BlobbyImplicitSurfaceFunction( typename Poin
 
 	for (; pit != m_p->readable().end(); ++pit, ++rit)
 	{
-		m_bounds.push_back(
-			Bound(
-				*pit - Point( *rit ),
-				*pit + Point( *rit )
-			)
-		);
+		Point boundMin, boundMax, boundRadius;
+		
+		vecSetAll( boundRadius, *rit );
+		vecSub( *pit, boundRadius, boundMin );
+		vecAdd( *pit, boundRadius, boundMax );		
+		
+		m_bounds.push_back( BoxTraits<Bound>::create( boundMin, boundMax ) );
 	}
 
 	m_tree = new Tree( m_bounds.begin(), m_bounds.end() );
