@@ -42,61 +42,82 @@
 namespace IECore
 {
 
-/// The VectorTraits struct provides a means of using different box
+/// The BoxTypeTraits struct provides a means of deriving the vector base types of different box
 /// classes within templated code. 
+template<typename T>
+struct BoxTypeTraits
+{
+	BOOST_STATIC_ASSERT(sizeof(T)==0);
+};
+
+/// The BoxTraits struct provides a means of using different box classes within templated code. 
 template<typename T>
 struct BoxTraits
 {
-	BOOST_STATIC_ASSERT(sizeof(T)==0);	
+	typedef typename BoxTypeTraits<T>::BaseType BaseType;
+	
+	static T create( const BaseType &min, const BaseType &max )
+	{
+		return T( min, max );
+	}
 };
 
 template<>
-struct BoxTraits<Imath::Box3s>
+struct BoxTypeTraits<Imath::Box3s>
 {
 	typedef Imath::V3s BaseType;
+
 };
 
 template<>
-struct BoxTraits<Imath::Box3i>
+struct BoxTypeTraits<Imath::Box3i>
 {
 	typedef Imath::V3i BaseType;
+
 };
 
 template<>
-struct BoxTraits<Imath::Box3f>
+struct BoxTypeTraits<Imath::Box3f>
 {
-	typedef Imath::V3f BaseType;	
+	typedef Imath::V3f BaseType;
+	
 };
 
 template<>
-struct BoxTraits<Imath::Box3d>
+struct BoxTypeTraits<Imath::Box3d>
 {
 	typedef Imath::V3d BaseType;	
+
 };
 
 template<>
-struct BoxTraits<Imath::Box2s>
+struct BoxTypeTraits<Imath::Box2s>
 {
 	typedef Imath::V2s BaseType;
+	
 };
 
 template<>
-struct BoxTraits<Imath::Box2i>
+struct BoxTypeTraits<Imath::Box2i>
 {
 	typedef Imath::V2i BaseType;
+
 };
 
 template<>
-struct BoxTraits<Imath::Box2f>
+struct BoxTypeTraits<Imath::Box2f>
 {
 	typedef Imath::V2f BaseType;	
+
 };
 
 template<>
-struct BoxTraits<Imath::Box2d>
+struct BoxTypeTraits<Imath::Box2d>
 {
 	typedef Imath::V2d BaseType;	
+	
 };
+
 
 } // namespace IECore
 
