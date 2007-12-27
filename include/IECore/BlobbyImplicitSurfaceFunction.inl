@@ -45,11 +45,11 @@ BlobbyImplicitSurfaceFunction<P,V>::BlobbyImplicitSurfaceFunction( typename Poin
 
 	if (m_p->readable().size() != m_radius->readable().size())
 	{
-		throw InvalidArgumentException("Incompatible point/radius data given to PointMeshOp");
+		throw InvalidArgumentException("Incompatible point/radius data given to BlobbyImplicitSurfaceFunction");
 	}
 	if (m_p->readable().size() != m_strength->readable().size())
 	{
-		throw InvalidArgumentException("Incompatible point/strength data given to PointMeshOp");
+		throw InvalidArgumentException("Incompatible point/strength data given to BlobbyImplicitSurfaceFunction");
 	}
 
 	typename PointVector::const_iterator pit = m_p->readable().begin();
@@ -66,6 +66,8 @@ BlobbyImplicitSurfaceFunction<P,V>::BlobbyImplicitSurfaceFunction( typename Poin
 		
 		m_bounds.push_back( BoxTraits<Bound>::create( boundMin, boundMax ) );
 	}
+
+	assert( m_bounds.size() == m_p->readable().size() );
 
 	m_tree = new Tree( m_bounds.begin(), m_bounds.end() );
 
@@ -93,25 +95,27 @@ typename BlobbyImplicitSurfaceFunction<P,V>::Value BlobbyImplicitSurfaceFunction
 
 	Value totalInfluence = -Imath::limits<Value>::epsilon();
 
-	for (typename std::vector<BoundVectorConstIterator>::const_iterator it = intersecting.begin(); it != intersecting.end(); ++it)
+	for (typename std::vector<BoundVectorConstIterator>::iterator it = intersecting.begin(); it != intersecting.end(); ++it)
 	{
-		const int j = (*it - m_bounds.begin() );
+		const int boundIndex = std::distance<BoundVectorConstIterator>( m_bounds.begin(), *it );
+		assert( boundIndex >= 0 );
+		assert( boundIndex < (int)m_bounds.size() );		
 
 		Point sep;
-		vecSub( m_p->readable()[ j ] , p, sep );
+		vecSub( m_p->readable()[ boundIndex ] , p, sep );
 		PointBaseType distSqrd = vecDot( sep, sep );
 		
-		const Value &b = m_radius->readable()[ j ];	
+		const Value &b = m_radius->readable()[ boundIndex ];	
 
 		/// Osaka University's original "metaballs" function, cheaper than Blinn's s*exp(-b*r*r)
 		PointBaseType dist = sqrt( distSqrd );
 		if ( dist < b / 3.0 )
 		{
-			totalInfluence += m_strength->readable()[ j ] * ( 1.0 - 3.0 * distSqrd / ( b * b ) );
+			totalInfluence += m_strength->readable()[ boundIndex ] * ( 1.0 - 3.0 * distSqrd / ( b * b ) );
 		}
 		else if (dist < b)
 		{
-			totalInfluence += 1.5 * m_strength->readable()[ j ] * ( 1.0 - dist / b ) * ( 1.0 - dist / b );
+			totalInfluence += 1.5 * m_strength->readable()[ boundIndex ] * ( 1.0 - dist / b ) * ( 1.0 - dist / b );
 		}
 	
 	}
