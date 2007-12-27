@@ -36,6 +36,7 @@
 #include <cassert>
 
 #include "IECore/VectorTraits.h"
+#include "IECore/VectorOps.h"
 
 namespace IECore
 {
@@ -50,7 +51,8 @@ class BoundedKDTree<BoundIterator>::AxisSort
 		
 		bool operator() ( BoundIterator i, BoundIterator j )
 		{
-			return i->center()[m_axis] < j->center()[m_axis];
+			return VectorTraits< BaseType >::get( BoxTraits<Bound>::center(*i), m_axis)
+				< VectorTraits< BaseType >::get( BoxTraits<Bound>::center(*j), m_axis);
 		}
 		
 	private :
@@ -64,7 +66,7 @@ class BoundedKDTree<BoundIterator>::Node
 	
 		Node() : m_cutAxisAndLeaf(0)
 		{
-			m_bound.makeEmpty();
+			BoxTraits<Bound>::makeEmpty( m_bound );
 			m_perm.first = 0;
 			m_perm.last = 0;			
 		}
@@ -154,34 +156,33 @@ template<class BoundIterator>
 unsigned char BoundedKDTree<BoundIterator>::majorAxis( PermutationConstIterator permFirst, PermutationConstIterator permLast )
 {
 	BaseType min, max;
-	for( unsigned char i=0; i<VectorTraits<BaseType>::dimensions(); i++ ) {
-		min[i] = Imath::limits<typename BaseType::BaseType>::max();
-		max[i] = Imath::limits<typename BaseType::BaseType>::min();
-	}
+	vecSetAll( min, Imath::limits<typename BaseType::BaseType>::max() );
+	vecSetAll( max, Imath::limits<typename BaseType::BaseType>::min() );	
 	
 	/// \todo Find a better cutting axis
 	for( PermutationConstIterator it=permFirst; it!=permLast; it++ )
 	{
-		BaseType center = (*it)->center();
+		BaseType center = BoxTraits<Bound>::center(**it);
 	
 		for( unsigned char i=0; i<VectorTraits<BaseType>::dimensions(); i++ )
 		{
-			if( center[i] < min[i] )
+			if( VectorTraits<BaseType>::get(center, i) < VectorTraits<BaseType>::get(min, i) )
 			{
-				min[i] = center[i];
+				VectorTraits<BaseType>::set(min, i, VectorTraits<BaseType>::get(center, i) );
 			} 
-			if( center[i] > max[i] )
+			if( VectorTraits<BaseType>::get(center, i) > VectorTraits<BaseType>::get(min, i) )
 			{
-				max[i] = center[i];
+				VectorTraits<BaseType>::set(max, i, VectorTraits<BaseType>::get(center, i) );
 			}
 		}
 		
 	}
 	unsigned char major = 0;
-	BaseType size = max - min;
+	BaseType size;
+	vecSub( max, min, size );
 	for( unsigned char i=1; i<VectorTraits<BaseType>::dimensions(); i++ )
 	{
-		if( size[i] > size[major] )
+		if( VectorTraits<BaseType>::get(size, i) > VectorTraits<BaseType>::get(size, major) )
 		{
 			major = i;
 		}
@@ -196,14 +197,14 @@ void BoundedKDTree<BoundIterator>::bound( NodeIndex nodeIndex  )
 	
 	Node &node = m_nodes[nodeIndex];
 	
-	assert( node.bound().isEmpty() );
+	assert( BoxTraits<Bound>::isEmpty( node.bound() ) );
 	
 	if( node.isLeaf() )
 	{
 		BoundIterator *permLast = node.permLast();
 		for( BoundIterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
-			node.bound().extendBy( **perm );
+			BoxTraits<Bound>::extendBy( node.bound(), **perm );
 		}
 	}
 	else
@@ -215,8 +216,8 @@ void BoundedKDTree<BoundIterator>::bound( NodeIndex nodeIndex  )
 		
 		bound( Node::lowChildIndex( nodeIndex ) );						
 		bound( Node::highChildIndex( nodeIndex ) );
-		node.bound().extendBy( m_nodes[Node::lowChildIndex( nodeIndex )].bound() );
-		node.bound().extendBy( m_nodes[Node::highChildIndex( nodeIndex )].bound() );			
+		BoxTraits<Bound>::extendBy( node.bound(), m_nodes[Node::lowChildIndex( nodeIndex )].bound() );
+		BoxTraits<Bound>::extendBy( node.bound(), m_nodes[Node::highChildIndex( nodeIndex )].bound() );			
 	}	
 }
 
@@ -293,7 +294,7 @@ void BoundedKDTree<BoundIterator>::intersectingBoundsWalk(  NodeIndex nodeIndex,
 		{
 			const Bound &bb = **perm;
 			
-			if ( bb.intersects(b) )
+			if ( BoxTraits<Bound>::intersects( bb, b ) )
 			{
 				bounds.push_back( *perm );
 			}
@@ -302,12 +303,12 @@ void BoundedKDTree<BoundIterator>::intersectingBoundsWalk(  NodeIndex nodeIndex,
 	else
 	{	
 		NodeIndex firstChild = Node::highChildIndex( nodeIndex );
-		if ( m_nodes[firstChild].bound().intersects(b) )
+		if ( BoxTraits<Bound>::intersects( m_nodes[firstChild].bound(), b) )
 		{
 			intersectingBoundsWalk( firstChild, b, bounds );
 		}
 		NodeIndex secondChild = Node::lowChildIndex( nodeIndex );
-		if ( m_nodes[secondChild].bound().intersects(b) )
+		if ( BoxTraits<Bound>::intersects( m_nodes[secondChild].bound(), b) )
 		{
 			intersectingBoundsWalk( secondChild, b, bounds );
 		}
