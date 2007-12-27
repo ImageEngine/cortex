@@ -104,6 +104,12 @@ ParticleMeshOp::ParticleMeshOp()
 		1.0
 	);
 	
+	m_radiusScaleParameter = new DoubleParameter(
+		"radiusScale",
+		"Factor to multiply all radii by",
+		1.0
+	);
+	
 	m_useStrengthAttributeParameter = new BoolParameter(
 		"useStrengthAttribute",
 		"Use per-particle strength",
@@ -119,6 +125,12 @@ ParticleMeshOp::ParticleMeshOp()
 	m_strengthParameter = new DoubleParameter(
 		"strength",
 		"Strength to use when not reading an attribute",
+		1.0
+	);
+	
+	m_strengthScaleParameter = new DoubleParameter(
+		"strengthScale",
+		"Factor to multiply all strength by",
 		1.0
 	);	
 	
@@ -145,9 +157,11 @@ ParticleMeshOp::ParticleMeshOp()
 	parameters()->addParameter( m_useRadiusAttributeParameter );
 	parameters()->addParameter( m_radiusAttributeParameter );
 	parameters()->addParameter( m_radiusParameter );
+	parameters()->addParameter( m_radiusScaleParameter );
 	parameters()->addParameter( m_useStrengthAttributeParameter );
 	parameters()->addParameter( m_strengthAttributeParameter );
 	parameters()->addParameter( m_strengthParameter );
+	parameters()->addParameter( m_strengthScaleParameter );
 	parameters()->addParameter( m_thresholdParameter );
 	parameters()->addParameter( m_resolutionParameter );
 	parameters()->addParameter( m_boundParameter );				
@@ -207,6 +221,16 @@ ConstDoubleParameterPtr ParticleMeshOp::radiusParameter() const
 	return m_radiusParameter;
 }
 
+DoubleParameterPtr ParticleMeshOp::radiusScaleParameter()
+{
+	return m_radiusScaleParameter;
+}
+
+ConstDoubleParameterPtr ParticleMeshOp::radiusScaleParameter() const
+{
+	return m_radiusScaleParameter;
+}
+
 BoolParameterPtr ParticleMeshOp::useStrengthAttributeParameter()
 {
 	return m_useStrengthAttributeParameter;
@@ -235,6 +259,16 @@ DoubleParameterPtr ParticleMeshOp::strengthParameter()
 ConstDoubleParameterPtr ParticleMeshOp::strengthParameter() const
 {
 	return m_strengthParameter;
+}
+
+DoubleParameterPtr ParticleMeshOp::strengthScaleParameter()
+{
+	return m_strengthScaleParameter;
+}
+
+ConstDoubleParameterPtr ParticleMeshOp::strengthScaleParameter() const
+{
+	return m_strengthScaleParameter;
 }
 
 DoubleParameterPtr ParticleMeshOp::thresholdParameter()
@@ -299,15 +333,23 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 		const std::string &radiusAttribute = boost::static_pointer_cast<const StringData>(radiusAttributeData)->readable();	
 		DataPtr radiusData = reader->readAttribute( radiusAttribute );
 		radius = boost::static_pointer_cast< DoubleVectorData >( radiusData );
+		if (!radius)
+		{
+			throw InvalidArgumentException("");
+		}
+		radius = radius->copy();
 	}
 	else
 	{
 		radius = new DoubleVectorData();
 		radius->writable().resize( reader->numParticles(), m_radiusParameter->getNumericValue() );
 	}	
-	if (!radius)
-	{
-		throw InvalidArgumentException("");
+	
+	
+	double radiusScale = m_radiusScaleParameter->getNumericValue();
+	for (DoubleVectorData::ValueType::iterator it = radius->writable().begin(); it != radius->writable().end(); ++it)
+	{	
+		*it *= radiusScale;
 	}
 
 	DoubleVectorDataPtr strength;	
@@ -318,15 +360,22 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 		const std::string &strengthAttribute = boost::static_pointer_cast<const StringData>(strengthAttributeData)->readable();	
 		DataPtr strengthData = reader->readAttribute( strengthAttribute );
 		strength = boost::static_pointer_cast< DoubleVectorData >( strengthData );
+		if (!strength)
+		{
+			throw InvalidArgumentException("");
+		}
+		strength = strength->copy();		
 	}
 	else
 	{
 		strength = new DoubleVectorData();
 		strength->writable().resize( reader->numParticles(), m_strengthParameter->getNumericValue() );	
 	}
-	if (!strength)
-	{
-		throw InvalidArgumentException("");
+
+	double strengthScale = m_strengthScaleParameter->getNumericValue();
+	for (DoubleVectorData::ValueType::iterator it = strength->writable().begin(); it != strength->writable().end(); ++it)
+	{	
+		*it *= strengthScale;
 	}
 		
 	if ( position->readable().size() != reader->numParticles()
@@ -339,8 +388,8 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	PointMeshOpPtr pointMeshOp = new PointMeshOp();	
 		
 	pointMeshOp->pointParameter()->setValue( position->copy() );
-	pointMeshOp->radiusParameter()->setValue( radius->copy() );
-	pointMeshOp->strengthParameter()->setValue( strength->copy() );		
+	pointMeshOp->radiusParameter()->setValue( radius );
+	pointMeshOp->strengthParameter()->setValue( strength );		
 	pointMeshOp->thresholdParameter()->setNumericValue( m_thresholdParameter->getNumericValue() );
 	pointMeshOp->resolutionParameter()->setValue( resolutionParameter()->getValue()->copy() );
 	pointMeshOp->boundParameter()->setValue( boundParameter()->getValue()->copy() );	

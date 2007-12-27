@@ -70,6 +70,9 @@ class ParticleMeshOp : public Op
 				
 		DoubleParameterPtr radiusParameter();
 		ConstDoubleParameterPtr radiusParameter() const;
+		
+		DoubleParameterPtr radiusScaleParameter();
+		ConstDoubleParameterPtr radiusScaleParameter() const;
 				
 		BoolParameterPtr useStrengthAttributeParameter();
 		ConstBoolParameterPtr useStrengthAttributeParameter() const;
@@ -79,6 +82,9 @@ class ParticleMeshOp : public Op
 		
 		DoubleParameterPtr strengthParameter();
 		ConstDoubleParameterPtr strengthParameter() const;
+		
+		DoubleParameterPtr strengthScaleParameter();
+		ConstDoubleParameterPtr strengthScaleParameter() const;
 
 		DoubleParameterPtr thresholdParameter();
 		ConstDoubleParameterPtr thresholdParameter() const;
@@ -87,7 +93,8 @@ class ParticleMeshOp : public Op
 		ConstV3iParameterPtr resolutionParameter() const;
 		
 		Box3dParameterPtr boundParameter();
-		ConstBox3dParameterPtr boundParameter() const;				
+		ConstBox3dParameterPtr boundParameter() const;
+								
 		
 	protected :
 
@@ -107,7 +114,9 @@ class ParticleMeshOp : public Op
 		DoubleParameterPtr m_thresholdParameter;
 		V3iParameterPtr m_resolutionParameter;
 		Box3dParameterPtr m_boundParameter;
-
+		
+		DoubleParameterPtr m_radiusScaleParameter;
+		DoubleParameterPtr m_strengthScaleParameter;
 
 };
 
