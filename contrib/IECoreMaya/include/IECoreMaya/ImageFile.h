@@ -37,8 +37,7 @@
 
 #include "maya/MPxImageFile.h"
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/ImagePrimitive.h"
+#include "IECore/Data.h"
 
 namespace IECoreMaya
 {
