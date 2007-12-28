@@ -120,6 +120,7 @@ __dataTypesConversionDict = {
 	IECore.StringData: (str, True),
 	IECore.FloatData: (float, False),
 	IECore.DoubleData: (float, True),
+	IECore.HalfData: (float, False),	
 
 	IECore.V2fData: (IECore.V2f, True),
 	IECore.V2dData: (IECore.V2d, True),
