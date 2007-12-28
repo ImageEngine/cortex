@@ -69,8 +69,8 @@ class ImageReader : public Reader
 		/// give the user-requested display window
 		Imath::Box2i displayWindow() const;
 
-      /// return true iff all pixels from the data window reported by the file are present
-	   virtual bool isComplete() const { return true; };
+		/// return true iff all pixels from the data window reported by the file are present
+		virtual bool isComplete() const { return true; };
 	
 	protected:
 		
