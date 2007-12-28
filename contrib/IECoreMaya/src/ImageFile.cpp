@@ -68,6 +68,7 @@ void *ImageFile::creator()
 template<typename T>
 static float getFloatData( ConstDataPtr d, int idx )
 {
+	assert( d );
 	assert( idx >= 0 );
 	
 	if ( idx >= (int)(runTimeCast< const T >(d)->readable().size()) )
@@ -81,11 +82,15 @@ static float getFloatData( ConstDataPtr d, int idx )
 template<typename T>
 static float getNormalizedFloatData( ConstDataPtr d, int idx )
 {
+	assert( d );
+
 	return getFloatData<T>( d, idx ) / Imath::limits<typename T::ValueType::value_type>::max();	
 }
 
 static float getFloatDataDespatch( ConstDataPtr d, int idx )
 {
+	assert( d );
+	
 	switch ( d->typeId() )
 	{
 		case FloatVectorDataTypeId:
