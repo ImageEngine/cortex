@@ -65,7 +65,7 @@ class SQLiteIndexedIO::SQLStatement : public RefCounted
 		// Execute the statement so we can then fetch the result
 		inline int		step() const;
 		
-		inline void             reset() const;
+		inline void		reset() const;
 	
 		// Obtain the integer held in the i'th column from the current result
 		inline int		getInt(int i) const;

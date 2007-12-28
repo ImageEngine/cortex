@@ -73,59 +73,59 @@ Parameter::PresetsMap TypedObjectParameter<T>::makePresets( const ObjectPresetsM
 template <typename T> 
 TypeId TypedObjectParameter<T>::typeId() const
 {
-        return staticTypeId();
+	return staticTypeId();
 }
 
 template <typename T> 
 TypeId TypedObjectParameter<T>::staticTypeId()
 {
-        assert( 0 ); // this function must be specialised for each type!
-        return InvalidTypeId;
+	assert( 0 ); // this function must be specialised for each type!
+	return InvalidTypeId;
 }
 
 template <typename T> 
 std::string TypedObjectParameter<T>::typeName() const
 {
-        return staticTypeName();
+	return staticTypeName();
 }
 
 template <typename T> 
 std::string TypedObjectParameter<T>::staticTypeName()
 {
-        assert( 0 ); // this function must be specialised for each type!
-        return "";
+	assert( 0 ); // this function must be specialised for each type!
+	return "";
 }
 
 template<typename T>
 bool TypedObjectParameter<T>::isInstanceOf( TypeId typeId ) const
 {
-        if( typeId==staticTypeId() )
-        {
-                return true;
-        }
-        return ObjectParameter::isInstanceOf( typeId );
+	if( typeId==staticTypeId() )
+	{
+		return true;
+	}
+	return ObjectParameter::isInstanceOf( typeId );
 }
 
 template<typename T>
 bool TypedObjectParameter<T>::isInstanceOf( const std::string &typeName ) const
 {
-        if( typeName==staticTypeName() )
-        {
-                return true;
-        }
-        return ObjectParameter::isInstanceOf( typeName );
+	if( typeName==staticTypeName() )
+	{
+		return true;
+	}
+	return ObjectParameter::isInstanceOf( typeName );
 }
 
 template<typename T>
 bool TypedObjectParameter<T>::inheritsFrom( TypeId typeId )
 {
-        return ObjectParameter::staticTypeId()==typeId ? true : ObjectParameter::inheritsFrom( typeId );
+	return ObjectParameter::staticTypeId()==typeId ? true : ObjectParameter::inheritsFrom( typeId );
 }
 
 template<typename T>
 bool TypedObjectParameter<T>::inheritsFrom( const std::string &typeName )
 {
-        return ObjectParameter::staticTypeName()==typeName ? true : ObjectParameter::inheritsFrom( typeName );
+	return ObjectParameter::staticTypeName()==typeName ? true : ObjectParameter::inheritsFrom( typeName );
 }
 
 
