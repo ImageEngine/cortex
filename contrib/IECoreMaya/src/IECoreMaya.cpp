@@ -59,6 +59,7 @@
 #include "IECoreMaya/MessageHandler.h"
 #include "IECoreMaya/ObjectData.h"
 #include "IECoreMaya/ConverterHolder.h"
+#include "IECoreMaya/ImageFile.h"
 
 namespace IECoreMaya
 {
@@ -155,6 +156,12 @@ MStatus initialize(MFnPlugin &plugin)
 		
 		s = plugin.registerData( ObjectData::typeName, ObjectData::id, ObjectData::creator);
 		
+		MStringArray imageFileExtensions;
+		imageFileExtensions.append( "exr" );
+		
+		s = plugin.registerImageFile( "ieImageFile", ImageFile::creator, imageFileExtensions);
+		assert( s );
+		
 		MString cmd = "source \"IECoreMaya/";
 		cmd += (int)IE_MAJOR_VERSION;
 		cmd += ".";
@@ -198,6 +205,8 @@ MStatus uninitialize(MFnPlugin &plugin)
 		PythonCmd::uninitialize();
 		
 		s = plugin.deregisterData( ObjectData::id );
+		
+		s = plugin.deregisterImageFile( "ieImageFile" );
 	}
 	
 	return s;
