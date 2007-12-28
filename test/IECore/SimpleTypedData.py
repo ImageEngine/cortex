@@ -167,6 +167,24 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assertEqual( str( UCharData() ), "0" )
 		self.assertEqual( repr( UCharData() ), "UCharData( 0 )" )
 		
+	def testHalfData(self):
+		"""Test HalfData"""
+		a = HalfData()
+		self.assert_(type(a) is HalfData)
+		b = HalfData(1)
+		c = b.copy()
+		self.assertEqual(b.value, 1)
+		self.assertEqual(float(b), 1)
+		b.value = 2
+		self.assertEqual(b.value, 2)
+		a = HalfData(2)
+		self.assert_(c < b)
+		self.assert_(not c > b)
+		self.assert_(a == b)
+		self.assert_(not a == c)
+		self.assertEqual( str( HalfData() ), "0" )
+		self.assertEqual( repr( HalfData() ), "HalfData( 0 )" )		
+		
 	def testImathVecTypes(self):
 		
 		types = [

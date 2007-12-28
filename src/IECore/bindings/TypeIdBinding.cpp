@@ -228,7 +228,8 @@ void bindTypeId()
 		.value("V2iVectorData", V2iVectorDataTypeId)
 		.value("V3iVectorData", V3iVectorDataTypeId)
 		.value("PointMeshOp", PointMeshOpTypeId)		
-		.value("ParticleMeshOp", ParticleMeshOpTypeId)			
+		.value("ParticleMeshOp", ParticleMeshOpTypeId)
+		.value("HalfData", HalfDataTypeId)
 	;
 }
 

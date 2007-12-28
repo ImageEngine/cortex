@@ -42,6 +42,7 @@
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathQuat.h"
 #include "OpenEXR/ImathColor.h"
+#include "OpenEXR/half.h"
 
 #include <string>
 
@@ -58,6 +59,7 @@ typedef TypedData < unsigned int > UIntData;
 typedef TypedData < char > CharData;
 typedef TypedData < unsigned char > UCharData;
 typedef TypedData < std::string > StringData;
+typedef TypedData<half> HalfData;
 typedef TypedData<Imath::V2i> V2iData;
 typedef TypedData<Imath::V3i> V3iData;
 typedef TypedData<Imath::V2f> V2fData;
@@ -91,6 +93,7 @@ IE_CORE_DECLAREPTR( UIntData );
 IE_CORE_DECLAREPTR( CharData );
 IE_CORE_DECLAREPTR( UCharData );
 IE_CORE_DECLAREPTR( StringData );
+IE_CORE_DECLAREPTR( HalfData );
 IE_CORE_DECLAREPTR( V2iData );
 IE_CORE_DECLAREPTR( V3iData );
 IE_CORE_DECLAREPTR( V2fData );

@@ -56,6 +56,7 @@ IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( LongData, LongDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( UIntData, UIntDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( CharData, CharDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( UCharData, UCharDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( HalfData, HalfDataTypeId )
 
 IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( StringData, StringDataTypeId )
 IE_CORE_DEFINETYPEDDATANOBASESIZE( StringData )
@@ -130,6 +131,7 @@ template class TypedData<unsigned int>;
 template class TypedData<char>;
 template class TypedData<unsigned char>;
 template class TypedData<std::string>;
+template class TypedData<half>;
 template class TypedData<Imath::V2i>;
 template class TypedData<Imath::V3i>;
 template class TypedData<Imath::V2f>;

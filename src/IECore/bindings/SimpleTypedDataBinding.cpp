@@ -64,6 +64,14 @@ static intrusive_ptr<T> construct()
 	return new T;
 }
 
+/// Half needs explicit initialisation
+template<>
+static intrusive_ptr<HalfData> construct()
+{
+	return new HalfData(0);
+}
+
+
 template<class T>
 static intrusive_ptr<T> constructWithValue( const typename T::ValueType &v )
 {
@@ -211,6 +219,7 @@ DEFINETYPEDDATASTRSPECIALISATION( unsigned int );
 DEFINETYPEDDATASTRSPECIALISATION( float );
 DEFINETYPEDDATASTRSPECIALISATION( double );
 DEFINETYPEDDATASTRSPECIALISATION( string );
+DEFINETYPEDDATASTRSPECIALISATION( half );
 DEFINETYPEDDATASTRSPECIALISATION( V2i );
 DEFINETYPEDDATASTRSPECIALISATION( V2f );
 DEFINETYPEDDATASTRSPECIALISATION( V2d );
@@ -263,6 +272,11 @@ static void bindNumericMethods( class_<T, intrusive_ptr<T>, boost::noncopyable, 
 	c.def( "__cmp__", &cmp<T>, "Comparison operators ( <, >, >=, <= )" );
 }
 
+static void bindHalfMethods( class_<HalfData, intrusive_ptr<HalfData>, boost::noncopyable, bases<Data> > &c )
+{
+	c.def( "__cmp__", &cmp<HalfData>, "Comparison operators ( <, >, >=, <= )" );
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // the one function exposed to the outside world
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -310,6 +324,11 @@ void bindAllSimpleTypedData()
 	ucdc.def( "__int__", &getValue<UCharData> );
 	ucdc.def( "__chr__", &getValue<UCharData> );
 	implicitly_convertible<UCharDataPtr, DataPtr>();
+	
+	class_< HalfData, HalfDataPtr, boost::noncopyable, bases<Data> > hdc = bindSimpleData<HalfData>();
+	bindHalfMethods( hdc );
+	hdc.def( "__float__", &getValue<HalfData> );
+	implicitly_convertible<HalfDataPtr, DataPtr>();
 
 	bindSimpleData<V2iData>();
 	implicitly_convertible<V2iDataPtr, DataPtr>();

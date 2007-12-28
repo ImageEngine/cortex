@@ -69,6 +69,8 @@ ReturnType despatchSimpleTypedDataFn( const DataPtr &data, const Args &functorAr
 			return Functor<UCharData>()( boost::static_pointer_cast<UCharData>( data ), functorArgs );
 		case StringDataTypeId :
 			return Functor<StringData>()( boost::static_pointer_cast<StringData>( data ), functorArgs );
+		case HalfDataTypeId :
+			return Functor<HalfData>()( boost::static_pointer_cast<HalfData>( data ), functorArgs );
 		case V2iDataTypeId :
 			return Functor<V2iData>()( boost::static_pointer_cast<V2iData>( data ), functorArgs );
 		case V3iDataTypeId :
@@ -125,6 +127,8 @@ ReturnType despatchVectorTypedDataFn( const DataPtr &data, const Args &functorAr
 			return Functor<FloatVectorData>()( boost::static_pointer_cast<FloatVectorData>( data ), functorArgs );
 		case DoubleVectorDataTypeId :
 			return Functor<DoubleVectorData>()( boost::static_pointer_cast<DoubleVectorData>( data ), functorArgs );
+		case HalfVectorDataTypeId :
+			return Functor<HalfVectorData>()( boost::static_pointer_cast<HalfVectorData>( data ), functorArgs );	
 		case IntVectorDataTypeId :
 			return Functor<IntVectorData>()( boost::static_pointer_cast<IntVectorData>( data ), functorArgs );
 		case UIntVectorDataTypeId :
