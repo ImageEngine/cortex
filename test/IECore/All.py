@@ -110,6 +110,7 @@ from MarchingCubes import *
 from PointMeshOp import *
 from CSGImplicitSurfaceFunction import *
 from ParticleMeshOp import *
+from TypedPrimitiveOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

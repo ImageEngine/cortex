@@ -141,6 +141,7 @@
 #include "IECore/bindings/PlaneImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/BlobbyImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/ParticleMeshOpBinding.h"
+#include "IECore/bindings/TypedPrimitiveOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -261,6 +262,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPlaneImplicitSurfaceFunction();
 	bindBlobbyImplicitSurfaceFunction();		
 	bindParticleMeshOp();
+	bindTypedPrimitiveOp();	
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -32,33 +32,59 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/PrimitiveOp.h"
+#include <boost/python.hpp>
+
+#include "IECore/TypedPrimitiveOp.h"
+#include "IECore/Parameter.h"
+#include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/NullObject.h"
-#include "IECore/Primitive.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
-using namespace IECore;
 using namespace boost;
+using namespace boost::python;
 
-PrimitiveOp::PrimitiveOp( const std::string name, const std::string description )
-	:	ModifyOp( name, description, new ObjectParameter( "result", "The result", new NullObject, primitiveType() ), new ObjectParameter( "input", "The Primitive to modify", new NullObject, primitiveType() ) )
+namespace IECore
 {
+
+template<typename T>
+class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPrimitiveOpWrap<T> >
+{
+	public :
+	
+		typedef boost::intrusive_ptr< TypedPrimitiveOpWrap<T> > Ptr;
+		
+		TypedPrimitiveOpWrap( PyObject *self, const std::string name, const std::string description ) : TypedPrimitiveOp<T>( name, description ), Wrapper<TypedPrimitiveOpWrap<T> >( self, this )
+		{
+		}
+		
+		virtual void modifyTypedPrimitive( typename T::Ptr object, ConstCompoundObjectPtr operands )
+		{
+			this->get_override( "modifyTypedPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) );
+		}
+
+};
+
+template<typename T>
+static void bindTypedPrimitiveOp( const char *name )
+{
+	typedef class_< TypedPrimitiveOp<T>, typename TypedPrimitiveOpWrap<T>::Ptr, boost::noncopyable, bases<PrimitiveOp> > TypedPrimitiveOpPyClass;
+	TypedPrimitiveOpPyClass( name, no_init )
+		.def( init< const std::string, const std::string>() )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedPrimitiveOp<T> )
+	;
+	
+	WrapperToPython< typename TypedPrimitiveOp<T>::Ptr >();
+
+	INTRUSIVE_PTR_PATCH_TEMPLATE( TypedPrimitiveOp<T>, TypedPrimitiveOpPyClass );
+	implicitly_convertible< typename TypedPrimitiveOp<T>::Ptr , PrimitiveOpPtr>();	
+
 }
 
-PrimitiveOp::~PrimitiveOp()
+void bindTypedPrimitiveOp()
 {
+	bindTypedPrimitiveOp< MeshPrimitive >( "MeshPrimitiveOp" );
 }
 
-void PrimitiveOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands )
-{
-	// static cast is safe as input parameter checks that object is of type primitive
-	// before we're called.
-	modifyPrimitive( static_pointer_cast<Primitive>( object ), operands );
-}
-
-TypeId PrimitiveOp::primitiveType() const
-{
-	return PrimitiveTypeId;
-}
+} // namespace IECore

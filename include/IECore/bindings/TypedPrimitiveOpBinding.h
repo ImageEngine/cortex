@@ -32,33 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/PrimitiveOp.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/NullObject.h"
-#include "IECore/Primitive.h"
+#ifndef IE_COREPYTHON_TYPEDPRIMITIVEOPBINDING_H
+#define IE_COREPYTHON_TYPEDPRIMITIVEOPBINDING_H
 
-using namespace IECore;
-using namespace boost;
-
-PrimitiveOp::PrimitiveOp( const std::string name, const std::string description )
-	:	ModifyOp( name, description, new ObjectParameter( "result", "The result", new NullObject, primitiveType() ), new ObjectParameter( "input", "The Primitive to modify", new NullObject, primitiveType() ) )
+namespace IECore
 {
+void bindTypedPrimitiveOp();
 }
 
-PrimitiveOp::~PrimitiveOp()
-{
-}
-
-void PrimitiveOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands )
-{
-	// static cast is safe as input parameter checks that object is of type primitive
-	// before we're called.
-	modifyPrimitive( static_pointer_cast<Primitive>( object ), operands );
-}
-
-TypeId PrimitiveOp::primitiveType() const
-{
-	return PrimitiveTypeId;
-}
+#endif // IE_COREPYTHON_TYPEDPRIMITIVEOPBINDING_H

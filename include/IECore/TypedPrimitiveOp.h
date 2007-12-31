@@ -32,33 +32,60 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IE_CORE_TYPEDPRIMITIVEOP_H
+#define IE_CORE_TYPEDPRIMITIVEOP_H
+
 #include "IECore/PrimitiveOp.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/NullObject.h"
-#include "IECore/Primitive.h"
+#include "IECore/MeshPrimitive.h"
 
-using namespace IECore;
-using namespace boost;
-
-PrimitiveOp::PrimitiveOp( const std::string name, const std::string description )
-	:	ModifyOp( name, description, new ObjectParameter( "result", "The result", new NullObject, primitiveType() ), new ObjectParameter( "input", "The Primitive to modify", new NullObject, primitiveType() ) )
+namespace IECore
 {
-}
 
-PrimitiveOp::~PrimitiveOp()
+/// The MeshPrimitiveOp class defines a base class for Ops which modify Meshes.
+template<typename T>
+class TypedPrimitiveOp : public PrimitiveOp
 {
-}
+	public :
+	
+		typedef boost::intrusive_ptr< TypedPrimitiveOp<T> > Ptr;
+		typedef boost::intrusive_ptr< const TypedPrimitiveOp<T> > ConstPtr;
+		
+		typedef T PrimitiveType;		
+		
+		TypedPrimitiveOp( const std::string name, const std::string description );
+		virtual ~TypedPrimitiveOp();
+		
+		//! @name RunTimeTyped functions
+                ////////////////////////////////////
+                //@{
+                virtual TypeId typeId() const;
+                virtual std::string typeName() const;
+                virtual bool isInstanceOf( TypeId typeId ) const;
+                virtual bool isInstanceOf( const std::string &typeName ) const;
+                static TypeId staticTypeId();
+                static std::string staticTypeName();
+                static bool inheritsFrom( TypeId typeId );
+                static bool inheritsFrom( const std::string &typeName );
+                //@}
+		
+	protected :
+		
+		/// Must be implemented by all subclasses.
+		virtual void modifyTypedPrimitive( typename T::Ptr typedPrimitive, ConstCompoundObjectPtr operands ) = 0;
+		
+		/// Returns the id of the primitive type operated on by this op
+		virtual TypeId primitiveType() const;
+		
+	private :
+	
+		void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );
+	
+};
 
-void PrimitiveOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands )
-{
-	// static cast is safe as input parameter checks that object is of type primitive
-	// before we're called.
-	modifyPrimitive( static_pointer_cast<Primitive>( object ), operands );
-}
+typedef TypedPrimitiveOp<MeshPrimitive> MeshPrimitiveOp;
+typedef TypedPrimitiveOp<MeshPrimitive>::Ptr MeshPrimitiveOpPtr;
+typedef TypedPrimitiveOp<MeshPrimitive>::ConstPtr ConstMeshPrimitiveOpPtr;
 
-TypeId PrimitiveOp::primitiveType() const
-{
-	return PrimitiveTypeId;
-}
+} // namespace IECore
+
+#endif // IE_CORE_TYPEDPRIMITIVEOP_H
