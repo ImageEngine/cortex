@@ -231,6 +231,8 @@ void ImageFile::populateImage( float* pixels ) const
 	}	
 }
 
+/// \todo Establish why this works perfectly for the viewport, software renderer, and hardware renderer
+/// but NOT the swatch in the attribute editor!
 MStatus ImageFile::load( MImage& image, unsigned int idx )
 {
 	MStatus s;
