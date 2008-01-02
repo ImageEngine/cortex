@@ -43,7 +43,7 @@ using namespace IECore;
 using namespace boost;
 
 PrimitiveOp::PrimitiveOp( const std::string name, const std::string description )
-	:	ModifyOp( name, description, new ObjectParameter( "result", "The result", new NullObject, primitiveType() ), new ObjectParameter( "input", "The Primitive to modify", new NullObject, primitiveType() ) )
+	:	ModifyOp( name, description, new ObjectParameter( "result", "The result", new NullObject, PrimitiveTypeId ), new ObjectParameter( "input", "The Primitive to modify", new NullObject, PrimitiveTypeId ) )
 {
 }
 
@@ -56,9 +56,4 @@ void PrimitiveOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands )
 	// static cast is safe as input parameter checks that object is of type primitive
 	// before we're called.
 	modifyPrimitive( static_pointer_cast<Primitive>( object ), operands );
-}
-
-TypeId PrimitiveOp::primitiveType() const
-{
-	return PrimitiveTypeId;
 }

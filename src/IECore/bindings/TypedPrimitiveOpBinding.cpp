@@ -53,7 +53,7 @@ class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPri
 {
 	public :
 	
-		typedef boost::intrusive_ptr< TypedPrimitiveOpWrap<T> > Ptr;
+		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOpWrap<T> )
 		
 		TypedPrimitiveOpWrap( PyObject *self, const std::string name, const std::string description ) : TypedPrimitiveOp<T>( name, description ), Wrapper<TypedPrimitiveOpWrap<T> >( self, this )
 		{
@@ -69,7 +69,7 @@ class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPri
 template<typename T>
 static void bindTypedPrimitiveOp( const char *name )
 {
-	typedef class_< TypedPrimitiveOp<T>, typename TypedPrimitiveOpWrap<T>::Ptr, boost::noncopyable, bases<PrimitiveOp> > TypedPrimitiveOpPyClass;
+	typedef class_< TypedPrimitiveOp<T>, typename TypedPrimitiveOpWrap<T>::Ptr, boost::noncopyable, bases<ModifyOp> > TypedPrimitiveOpPyClass;
 	TypedPrimitiveOpPyClass( name, no_init )
 		.def( init< const std::string, const std::string>() )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedPrimitiveOp<T> )
@@ -78,7 +78,7 @@ static void bindTypedPrimitiveOp( const char *name )
 	WrapperToPython< typename TypedPrimitiveOp<T>::Ptr >();
 
 	INTRUSIVE_PTR_PATCH_TEMPLATE( TypedPrimitiveOp<T>, TypedPrimitiveOpPyClass );
-	implicitly_convertible< typename TypedPrimitiveOp<T>::Ptr , PrimitiveOpPtr>();	
+	implicitly_convertible< typename TypedPrimitiveOp<T>::Ptr , ModifyOpPtr>();	
 
 }
 

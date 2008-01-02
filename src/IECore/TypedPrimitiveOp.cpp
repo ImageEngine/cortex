@@ -37,7 +37,8 @@
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/PrimitiveOp.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/ModifyOp.h"
 #include "IECore/NullObject.h"
 #include "IECore/MeshPrimitive.h"
 
@@ -45,7 +46,7 @@ using namespace IECore;
 
 template<typename T>
 TypedPrimitiveOp<T>::TypedPrimitiveOp( const std::string name, const std::string description )
-	:	PrimitiveOp( name, description )
+	:	ModifyOp( name, description, new ObjectParameter( "result", "The result", new T(), T::staticTypeId() ), new ObjectParameter( "input", "The Primitive to modify", new T(), T::staticTypeId() ) )
 {
 }
 
@@ -55,7 +56,7 @@ TypedPrimitiveOp<T>::~TypedPrimitiveOp()
 }
 
 template<typename T>
-void TypedPrimitiveOp<T>::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands )
+void TypedPrimitiveOp<T>::modify( ObjectPtr primitive, ConstCompoundObjectPtr operands )
 {
 	typename T::Ptr typedPrimitive = boost::dynamic_pointer_cast<T>( primitive );
 	
@@ -63,12 +64,6 @@ void TypedPrimitiveOp<T>::modifyPrimitive( PrimitivePtr primitive, ConstCompound
 	assert( typedPrimitive );
 
 	modifyTypedPrimitive( typedPrimitive, operands );
-}
-
-template<typename T>
-TypeId TypedPrimitiveOp<T>::primitiveType() const
-{
-	return T::staticTypeId();
 }
 
 template <typename T> 
@@ -104,7 +99,7 @@ bool TypedPrimitiveOp<T>::isInstanceOf( TypeId typeId ) const
 	{
 		return true;
 	}
-	return PrimitiveOp::isInstanceOf( typeId );
+	return ModifyOp::isInstanceOf( typeId );
 }
 
 template<typename T>
@@ -114,19 +109,19 @@ bool TypedPrimitiveOp<T>::isInstanceOf( const std::string &typeName ) const
 	{
 		return true;
 	}
-	return PrimitiveOp::isInstanceOf( typeName );
+	return ModifyOp::isInstanceOf( typeName );
 }
 
 template<typename T>
 bool TypedPrimitiveOp<T>::inheritsFrom( TypeId typeId )
 {
-	return PrimitiveOp::staticTypeId()==typeId ? true : PrimitiveOp::inheritsFrom( typeId );
+	return ModifyOp::staticTypeId()==typeId ? true : ModifyOp::inheritsFrom( typeId );
 }
 
 template<typename T>
 bool TypedPrimitiveOp<T>::inheritsFrom( const std::string &typeName )
 {
-	return PrimitiveOp::staticTypeName()==typeName ? true : PrimitiveOp::inheritsFrom( typeName );
+	return ModifyOp::staticTypeName()==typeName ? true : ModifyOp::inheritsFrom( typeName );
 }
 
 #define IE_CORE_DEFINETYPEDPRIMITIVEOPSPECIALISATION( T, TNAME ) \

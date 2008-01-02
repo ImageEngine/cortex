@@ -43,12 +43,11 @@ namespace IECore
 
 /// The MeshPrimitiveOp class defines a base class for Ops which modify Meshes.
 template<typename T>
-class TypedPrimitiveOp : public PrimitiveOp
+class TypedPrimitiveOp : public ModifyOp
 {
 	public :
 	
-		typedef boost::intrusive_ptr< TypedPrimitiveOp<T> > Ptr;
-		typedef boost::intrusive_ptr< const TypedPrimitiveOp<T> > ConstPtr;
+		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOp<T> )
 		
 		typedef T PrimitiveType;		
 		
@@ -73,18 +72,19 @@ class TypedPrimitiveOp : public PrimitiveOp
 		/// Must be implemented by all subclasses.
 		virtual void modifyTypedPrimitive( typename T::Ptr typedPrimitive, ConstCompoundObjectPtr operands ) = 0;
 		
-		/// Returns the id of the primitive type operated on by this op
-		virtual TypeId primitiveType() const;
-		
 	private :
 	
-		void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );
+		/// Implemented to call modifyTypedPrimitive
+		void modify( ObjectPtr primitive, ConstCompoundObjectPtr operands );
 	
 };
 
-typedef TypedPrimitiveOp<MeshPrimitive> MeshPrimitiveOp;
-typedef TypedPrimitiveOp<MeshPrimitive>::Ptr MeshPrimitiveOpPtr;
-typedef TypedPrimitiveOp<MeshPrimitive>::ConstPtr ConstMeshPrimitiveOpPtr;
+#define IE_CORE_DEFINETYPEDPRIMITIVEOP( TNAME ) \
+	typedef TypedPrimitiveOp<TNAME> (TNAME ## Op); \
+	typedef TypedPrimitiveOp<TNAME>::Ptr (TNAME ## OpPtr); \
+	typedef TypedPrimitiveOp<TNAME>::ConstPtr (Const ## TNAME ## OpPtr);
+	
+IE_CORE_DEFINETYPEDPRIMITIVEOP( MeshPrimitive )	
 
 } // namespace IECore
 

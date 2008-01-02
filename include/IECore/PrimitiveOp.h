@@ -58,9 +58,7 @@ class PrimitiveOp : public ModifyOp
 		/// Implemented to call modifyPrimitive()
 		virtual void modify( ObjectPtr object, ConstCompoundObjectPtr operands );
 		/// Must be implemented by all subclasses.
-		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands ) = 0;
-		/// Returns the id of the primitive type operated on by this op, PrimitiveTypeId
-		virtual TypeId primitiveType() const;
+		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands ) = 0;		
 	
 };
 
