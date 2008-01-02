@@ -250,6 +250,7 @@ mayaTestEnv["ENV"]["MAYA_VERSION"] = plugin.getMayaVersion()
 mayaTestEnv["ENV"]["COMPILER"] = plugin.getCompiler()
 mayaTestEnv["ENV"]["COMPILER_VERSION"] = plugin.getCompilerVersion()
 mayaTestEnv["ENV"]["IECOREMAYA_TEST"] = 1
+mayaTestEnv["ENV"]["IECOREMAYA_MAJOR_VERSION"] = coreMayaMajorVersion
 #mayaTestEnv["ENV"]["LD_DEBUG"] = "files"
 melSymLink1 = mayaTestEnv.Command( "test/mel/IECoreMaya/!VERSION!", "", "mkdir -p test/mel/IECoreMaya; ln -fs ../../../mel $TARGET",  target_factory=Dir  )
 melSymLink2 = mayaTestEnv.Command( "test/mel/IECoreMaya/"+version, "", "mkdir -p test/mel/IECoreMaya; ln -fs ../../../mel $TARGET",  target_factory=Dir  )
