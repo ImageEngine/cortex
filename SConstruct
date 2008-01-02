@@ -706,7 +706,7 @@ ieCoreGLMinorVersion = 3
 ieCoreGLPatchVersion = 0
 
 if env["WITH_GL"] :
-	
+
 	glEnvSets = {
 		"IECORE_NAME" : "IECoreGL",
 		"IECORE_MAJOR_VERSION" : ieCoreGLMajorVersion,
@@ -777,11 +777,13 @@ if env["WITH_GL"] :
 		glLibraryInstall = glEnv.Install( os.path.dirname( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glLibrary )
 		glLibrarySymlinks = makeLibSymlinks( glEnv )
 		glEnv.Alias( "install", glLibraryInstall + glLibrarySymlinks )
+		glEnv.Alias( "installGL", glLibraryInstall + glLibrarySymlinks )
 
 		glHeaders = glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) + glob.glob( "contrib/IECoreGL/include/IECoreGL/*.inl" )
 		glHeaderInstall = glEnv.Install( "$INSTALL_HEADER_DIR/IECoreGL", glHeaders )
 		glHeaderSymlinks = makeSymlinks( glEnv, glEnv["INSTALL_HEADER_DIR"] )
 		glEnv.Alias( "install", glHeaderInstall )
+		glEnv.Alias( "installGL", glHeaderInstall )
 
 		glPythonEnv = pythonEnv.Copy( **glEnvSets )
 		glPythonEnv.Append( **glEnvAppends )
@@ -800,6 +802,7 @@ if env["WITH_GL"] :
 		glPythonModuleInstall = glPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )
 		glPythonModuleSymlinks = makeSymlinks( glPythonEnv, glPythonEnv["INSTALL_PYTHON_DIR"] )
 		glPythonEnv.Alias( "install", glPythonModuleInstall + glPythonModuleSymlinks )
+		glPythonEnv.Alias( "installGL", glPythonModuleInstall + glPythonModuleSymlinks )
 
 		Default( [ glLibrary, glPythonModule ] )
 
