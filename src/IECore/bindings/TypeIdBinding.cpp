@@ -230,6 +230,7 @@ void bindTypeId()
 		.value("PointMeshOp", PointMeshOpTypeId)		
 		.value("ParticleMeshOp", ParticleMeshOpTypeId)
 		.value("HalfData", HalfDataTypeId)
+		.value("MeshPrimitiveOp", MeshPrimitiveOpTypeId)		
 	;
 }
 
