@@ -128,6 +128,10 @@ o.Add(
 # SQLite options
 
 o.Add(
+	BoolOption( "WITH_SQLITE", "Set this to build support for SQLiteIndexedIO.", False ),
+)
+
+o.Add(
 	"SQLITE_INCLUDE_PATH",
 	"The path to the SQLITE include directory.",
 	"/usr/local/include/",
@@ -454,7 +458,7 @@ pythonEnv.Append( LIBS = [
 		"boost_python" + pythonEnv["BOOST_LIB_SUFFIX"],
 	]
 )
-pythonEnv.Append( LIBPATH = [ "./lib" ] )
+pythonEnv.Prepend( LIBPATH = [ "./lib" ] )
 pythonEnv["SHLIBPREFIX"] = ""
 pythonEnv["SHLIBSUFFIX"] = ".so"
 
@@ -566,24 +570,27 @@ if doConfigure :
 		corePythonSources.remove( "src/IECore/bindings/JPEGImageReaderBinding.cpp" )
 		corePythonSources.remove( "src/IECore/bindings/JPEGImageWriterBinding.cpp" )
 			
-	if c.CheckLibWithHeader( "sqlite3", "sqlite/sqlite3.h", "CXX" ) :
+	if coreEnv["WITH_SQLITE"] and c.CheckLibWithHeader( "sqlite3", "sqlite/sqlite3.h", "CXX" ) :
 		c.env.Append( CPPFLAGS = "-DIECORE_WITH_SQLITE" )
 		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_SQLITE' )
 	else :
-		sys.stderr.write( "WARNING: no SQLITE library found, no SQLITE support, check SQLITE_INCLUDE_PATH and SQLITE_LIB_PATH\n" )
 		coreSources.remove( "src/IECore/SQLiteIndexedIO.cpp" )
-
+		if coreEnv["WITH_SQLITE"] :
+			sys.stderr.write( "WARNING: no SQLITE library found, no SQLITE support, check SQLITE_INCLUDE_PATH and SQLITE_LIB_PATH\n" )
+		
 	c.Finish()
 
 coreLibrary = coreEnv.SharedLibrary( "lib/" + os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreSources )
 coreLibraryInstall = coreEnv.Install( os.path.dirname( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreLibrary )
 coreLibrarySymlinks = makeLibSymlinks( coreEnv )
 coreEnv.Alias( "install", [ coreLibraryInstall ] + coreLibrarySymlinks )
+coreEnv.Alias( "installCore", [ coreLibraryInstall ] + coreLibrarySymlinks )
 
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
 headerInstall += coreEnv.Install( "$INSTALL_HEADER_DIR/IECore/bindings", coreBindingHeaders )
 headerSymlinks = makeSymlinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] )
 coreEnv.Alias( "install", headerInstall + headerSymlinks )
+coreEnv.Alias( "installCore", headerInstall + headerSymlinks )
 
 corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 corePythonModule = corePythonEnv.SharedLibrary( "python/IECore/_IECore", corePythonSources )
@@ -591,7 +598,8 @@ corePythonEnv.Depends( corePythonModule, coreLibrary )
 
 corePythonModuleInstall = corePythonEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
 corePythonModuleSymlinks = makeSymlinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] )
-pythonEnv.Alias( "install", corePythonModuleInstall + corePythonModuleSymlinks )
+corePythonEnv.Alias( "install", corePythonModuleInstall + corePythonModuleSymlinks )
+corePythonEnv.Alias( "installCore", corePythonModuleInstall + corePythonModuleSymlinks )
 
 Default( coreLibrary, corePythonModule )
 
@@ -667,10 +675,12 @@ if doConfigure :
 		riLibraryInstall = riEnv.Install( os.path.dirname( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riLibrary )
 		riLibrarySymlinks = makeLibSymlinks( riEnv )
 		riEnv.Alias( "install", riLibraryInstall + riLibrarySymlinks )
+		riEnv.Alias( "installRI", riLibraryInstall + riLibrarySymlinks )
 
 		riHeaderInstall = riEnv.Install( "$INSTALL_HEADER_DIR/IECoreRI", riHeaders )
 		riHeaderSymlinks = makeSymlinks( riEnv, riEnv["INSTALL_HEADER_DIR"] )
 		riEnv.Alias( "install", riHeaderInstall + riHeaderSymlinks )
+		riEnv.Alias( "installRI", riHeaderInstall + riHeaderSymlinks )
 
 		riPythonEnv.Append(
 			LIBS = [
@@ -684,6 +694,7 @@ if doConfigure :
 		riPythonModuleInstall = riPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreRI", riPythonScripts + riPythonModule )
 		riPythonModuleSymlinks = makeSymlinks( riPythonEnv, riPythonEnv["INSTALL_PYTHON_DIR"] )
 		riPythonEnv.Alias( "install", riPythonModuleInstall + riPythonModuleSymlinks )
+		riPythonEnv.Alias( "installRI", riPythonModuleInstall + riPythonModuleSymlinks )
 
 		Default( [ riLibrary, riPythonModule ] )
 		
@@ -732,9 +743,8 @@ if env["WITH_GL"] :
 			"$GLEW_LIB_PATH",
 		],
 		"LIBS" : [
-			"GLEW",
+			"boost_wave",
 		],
-	
 	}
 	
 	glEnv = env.Copy( **glEnvSets )
