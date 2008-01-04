@@ -48,8 +48,8 @@ def getOption( name, default ) :
 
 # get the compiler location using the registry
 platform = IEEnv.platform()
-compiler = getOption( "COMPILER", "gcc" )
-compilerVersion = getOption( "COMPILER_VERSION", "4.0.2" )
+compiler = getOption( "COMPILER", IEEnv.registry["platformDefaults"][platform]["compiler"] )
+compilerVersion = getOption( "COMPILER_VERSION", IEEnv.registry["platformDefaults"][platform]["compilerVersion"]  )
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
 
 CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
