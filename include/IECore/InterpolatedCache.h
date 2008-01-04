@@ -62,6 +62,9 @@ class InterpolatedCache : public RefCounted
 
 		///Constructor
 		///pathTemplate must contain "%d" indicating the frame number position in the file name. You can use padding too: %03d for example.
+		///\todo For consistency with the rest of the library, this should really be taking a FileSequence instead of a format string. We'd
+		/// have to reimplement FileSequence in C++ for that, but there have been several cases where it would've been preferable in C++
+		/// already.
 		InterpolatedCache( const std::string &pathTemplate = "", double frame = 0.0, Interpolation interpolation = None, int oversamples = 1, double frameRate = 24.0 );
 
 		~InterpolatedCache();
