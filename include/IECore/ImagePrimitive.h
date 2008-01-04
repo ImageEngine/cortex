@@ -48,6 +48,8 @@ namespace IECore
 {
 
 /// ImagePrimitive represents an axis-aligned collection of raster data in the form of channels.
+/// \todo Implement the bound() method.
+/// \bug The bound() method is not implemented.
 class ImagePrimitive : public Primitive
 {	  
 
