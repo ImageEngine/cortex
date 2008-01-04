@@ -35,6 +35,7 @@
 #ifndef IECORENUKE_CURVELOOKUP_H
 #define IECORENUKE_CURVELOOKUP_H
 
+#include "DDImage/Animation.h"
 #include "DDImage/Knobs.h"
 
 #include <vector>
