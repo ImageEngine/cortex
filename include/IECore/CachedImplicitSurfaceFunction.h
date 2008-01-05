@@ -36,8 +36,6 @@
 #ifndef IE_CORE_CACHEDIMPLICITSURFACEFUNCTION_H
 #define IE_CORE_CACHEDIMPLICITSURFACEFUNCTION_H
 
-#include <cassert>
-
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathLimits.h"
 

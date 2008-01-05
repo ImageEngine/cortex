@@ -36,8 +36,6 @@
 #ifndef IE_CORE_IMPLICITSURFACEFUNCTION_H
 #define IE_CORE_IMPLICITSURFACEFUNCTION_H
 
-#include <cassert>
-
 #include "OpenEXR/ImathVec.h"
 
 #include "IECore/RefCounted.h"

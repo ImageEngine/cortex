@@ -35,8 +35,6 @@
 #ifndef IE_CORE_MARCHINGCUBES_H
 #define IE_CORE_MARCHINGCUBES_H
 
-#include <cassert>
-
 #include "OpenEXR/ImathVec.h"
 
 #include "IECore/VectorTypedData.h"
