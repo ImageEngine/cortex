@@ -51,7 +51,6 @@ namespace IECore
 /// \todo Utility method to guess the appropriate interpolation for
 /// a given variableSize.
 /// \todo Validation of variableSizes before rendering.
-/// \todo Utility function to perform validation of variableSizes.
 class Primitive : public VisibleRenderable
 {
 	public:
@@ -61,14 +60,20 @@ class Primitive : public VisibleRenderable
 				
 		IE_CORE_DECLAREABSTRACTOBJECT( Primitive, VisibleRenderable );
 		
-		/// Variables a stored as a public map for easy manipulation. The contents of
-		/// the map are not validated until the render() method is called.
+		/// Variables a stored as a public map for easy manipulation.
 		PrimitiveVariableMap variables;
+		
+		/// Returns true if the given primitive variable has the correct size for its interpolation type
+		bool isPrimitiveVariableValid( const PrimitiveVariable &pv );
 
+		/// Returns true if all primitive variables have the correct size for their interpolation type
+		bool arePrimitiveVariablesValid();
+				
 		/// Implemented to return a box containing all the points in the variable
 		/// "P" if it exists.
 		virtual Imath::Box3f bound() const;
 		
+		/// \todo Make const
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) = 0;
 			
 	private:

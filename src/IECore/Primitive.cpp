@@ -34,6 +34,7 @@
 
 #include "IECore/Primitive.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/TypedDataDespatch.h"
 
 using namespace IECore;
 using namespace boost;
@@ -153,4 +154,71 @@ void Primitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	{
 		a.accumulate( it->second.data );
 	}
+}
+
+struct Args
+{
+	size_t m_variableSize;	
+};
+
+template<typename T>
+struct ValidateArraySize
+{
+	bool operator() ( typename T::Ptr data, const Args &args )
+	{
+		typedef typename T::ValueType Vector;
+                
+		const Vector &v = data->readable();
+		
+		return v.size() == args.m_variableSize;
+	}
+};
+
+template<typename T>
+struct ReturnTrue
+{
+	bool operator() ( typename T::Ptr data, void *args )
+	{
+		assert( !args );
+		return true;
+	}
+};
+
+bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv )
+{
+	if (! pv.data )
+	{
+		return false;
+	}
+
+	size_t sz = variableSize( pv.interpolation );
+	
+	try
+	{
+		if ( sz == 1 )
+		{
+			return despatchSimpleTypedDataFn<bool, ReturnTrue, void*>( static_pointer_cast<Data>( pv.data ), 0 );	
+		}	
+	}
+	catch ( InvalidArgumentException &e )
+	{	
+	}
+	
+	Args args;
+	args.m_variableSize = sz;
+		
+	return despatchVectorTypedDataFn<bool, ValidateArraySize, Args>( static_pointer_cast<Data>( pv.data ), args );		
+}
+
+bool Primitive::arePrimitiveVariablesValid()
+{
+	for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
+	{
+		if ( !isPrimitiveVariableValid( it->second ) )
+		{
+			return false;
+		}
+	}
+	
+	return true;
 }

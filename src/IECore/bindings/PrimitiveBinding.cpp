@@ -116,6 +116,8 @@ void bindPrimitive()
 		.def( "__contains__", &contains )
 		.def( "keys", &keys )
 		.def( "values", &values, "Returns a list containing shallow copies of the PrimitiveVariable objects held." )
+		.def( "isPrimitiveVariableValid", &Primitive::isPrimitiveVariableValid)
+		.def( "arePrimitiveVariablesValid", &Primitive::arePrimitiveVariablesValid)
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Primitive)		
 	;
 	INTRUSIVE_PTR_PATCH( Primitive, PrimitivePyClass );
