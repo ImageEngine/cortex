@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,9 @@
 #include <boost/static_assert.hpp>
 
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathBoxAlgo.h"
+
+#include "IECore/VectorTraits.h"
 
 namespace IECore
 {
@@ -47,15 +50,17 @@ namespace IECore
 template<typename T>
 struct BoxTypeTraits
 {
-	BOOST_STATIC_ASSERT(sizeof(T)==0);
+	typedef typename T::BaseType BaseType;
 };
 
 /// The BoxTraits struct provides a means of using different box classes within templated code. The default
 /// implementation is compatible with the Imath library's Box classes.
+/// \todo Separate this out into BoxTraits and BoxOps
 template<typename T>
 struct BoxTraits
 {
 	typedef typename BoxTypeTraits<T>::BaseType BaseType;
+	typedef VectorTraits< typename BoxTypeTraits<T>::BaseType > VectorTraits;
 	
 	/// Create a box from the minimum and maximum corner points
 	static T create( const BaseType &min, const BaseType &max )
