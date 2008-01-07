@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,10 @@
 #ifndef IECORE_TRIANGLEALGO_INL
 #define IECORE_TRIANGLEALGO_INL
 
+#include "OpenEXR/ImathLimits.h"
+
+#include "IECore/VectorOps.h"
+
 namespace IECore
 {
 
@@ -45,9 +49,279 @@ typename Vec::BaseType triangleArea( const Vec &v0, const Vec &v1, const Vec &v2
 }
 
 template<class Vec>
+Vec triangleNormal( const Vec &v0, const Vec &v1, const Vec &v2 )
+{
+	Vec n = (v2-v0).cross(v1-v0);	
+	vecNormalize( n );
+	return n;
+}
+
+template<class Vec>
 Vec trianglePoint( const Vec &v0, const Vec &v1, const Vec &v2, const Imath::Vec3<typename Vec::BaseType> &barycentric )
 {
-	return v0 * barycentric[0] + v1 * barycentric[1] + v2 * barycentric[2];
+	return vecAdd(
+		vecAdd(
+			vecMul( v0, barycentric[0] ),
+			vecMul( v1, barycentric[1] )
+		),
+		vecMul( v2, barycentric[2] )
+	);
+}
+
+/// Implementation derived from Wild Magic (Version 2) Software Library, available
+/// from http://www.geometrictools.com/Downloads/WildMagic2p5.zip under free license
+template<class Vec>
+typename Vec::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric )
+{
+	typedef typename Vec::BaseType Real;
+
+	Vec triOrigin = v0;
+	Vec triEdge0, triEdge1;
+	
+	vecSub( v1, v0, triEdge0 );
+	vecSub( v2, v0, triEdge1 );
+	
+	Vec kDiff;
+	vecSub( triOrigin, p, kDiff );	
+
+	Real a00 = vecDot( triEdge0, triEdge0 );
+	Real a01 = vecDot( triEdge0, triEdge1 );
+	Real a11 = vecDot( triEdge1, triEdge1 );
+	Real b0 = vecDot( kDiff, triEdge0 );
+	Real b1 = vecDot( kDiff, triEdge1 );
+	Real c = vecDot( kDiff, kDiff );
+	Real det = Real(fabs(a00*a11-a01*a01));
+	Real s = a01*b1-a11*b0;
+	Real t = a01*b0-a00*b1;
+	Real distSqrd;
+
+	if ( s + t <= det )
+	{
+		if ( s < Real(0.0) )
+		{
+			if ( t < Real(0.0) )  // region 4
+			{
+				if ( b0 < Real(0.0) )
+				{
+					t = Real(0.0);
+					if ( -b0 >= a00 )
+					{
+						s = Real(1.0);
+						distSqrd = a00+Real(2.0)*b0+c;
+					}
+					else
+					{
+						s = -b0/a00;
+						distSqrd = b0*s+c;
+					}
+				}
+				else
+				{
+					s = Real(0.0);
+					if ( b1 >= Real(0.0) )
+					{
+						t = Real(0.0);
+						distSqrd = c;
+					}
+					else if ( -b1 >= a11 )
+					{
+						t = Real(1.0);
+						distSqrd = a11+Real(2.0)*b1+c;
+					}
+					else
+					{
+						t = -b1/a11;
+						distSqrd = b1*t+c;
+					}
+				}
+			}
+			else  // region 3
+			{
+				s = Real(0.0);
+				if ( b1 >= Real(0.0) )
+				{
+					t = Real(0.0);
+					distSqrd = c;
+				}
+				else if ( -b1 >= a11 )
+				{
+					t = Real(1.0);
+					distSqrd = a11+Real(2.0)*b1+c;
+				}
+				else
+				{
+					t = -b1/a11;
+					distSqrd = b1*t+c;
+				}
+			}
+		}
+		else if ( t < Real(0.0) )  // region 5
+		{
+			t = Real(0.0);
+			if ( b0 >= Real(0.0) )
+			{
+				s = Real(0.0);
+				distSqrd = c;
+			}
+			else if ( -b0 >= a00 )
+			{
+				s = Real(1.0);
+				distSqrd = a00+Real(2.0)*b0+c;
+			}
+			else
+			{
+				s = -b0/a00;
+				distSqrd = b0*s+c;
+			}
+		}
+		else  // region 0
+		{
+			// minimum at interior point
+			if ( det == Real(0.0) )
+			{
+				s = Real(0.0);
+				t = Real(0.0);
+				distSqrd = Imath::limits<Real>::max();
+			}
+			else
+			{
+				Real invDet = Real(1.0)/det;
+				s *= invDet;
+				t *= invDet;
+				distSqrd = s*(a00*s+a01*t+Real(2.0)*b0) +
+				           t*(a01*s+a11*t+Real(2.0)*b1)+c;
+			}
+		}
+	}
+	else
+	{
+		Real tmp0, tmp1, numer, denom;
+
+		if ( s < Real(0.0) )  // region 2
+		{
+			tmp0 = a01 + b0;
+			tmp1 = a11 + b1;
+			if ( tmp1 > tmp0 )
+			{
+				numer = tmp1 - tmp0;
+				denom = a00-Real(2.0)*a01+a11;
+				if ( numer >= denom )
+				{
+					s = Real(1.0);
+					t = Real(0.0);
+					distSqrd = a00+Real(2.0)*b0+c;
+				}
+				else
+				{
+					s = numer/denom;
+					t = Real(1.0) - s;
+					distSqrd = s*(a00*s+a01*t+Real(2.0)*b0) +
+					           t*(a01*s+a11*t+Real(2.0)*b1)+c;
+				}
+			}
+			else
+			{
+				s = Real(0.0);
+				if ( tmp1 <= Real(0.0) )
+				{
+					t = Real(1.0);
+					distSqrd = a11+Real(2.0)*b1+c;
+				}
+				else if ( b1 >= Real(0.0) )
+				{
+					t = Real(0.0);
+					distSqrd = c;
+				}
+				else
+				{
+					t = -b1/a11;
+					distSqrd = b1*t+c;
+				}
+			}
+		}
+		else if ( t < Real(0.0) )  // region 6
+		{
+			tmp0 = a01 + b1;
+			tmp1 = a00 + b0;
+			if ( tmp1 > tmp0 )
+			{
+				numer = tmp1 - tmp0;
+				denom = a00-Real(2.0)*a01+a11;
+				if ( numer >= denom )
+				{
+					t = Real(1.0);
+					s = Real(0.0);
+					distSqrd = a11+Real(2.0)*b1+c;
+				}
+				else
+				{
+					t = numer/denom;
+					s = Real(1.0) - t;
+					distSqrd = s*(a00*s+a01*t+Real(2.0)*b0) +
+					           t*(a01*s+a11*t+Real(2.0)*b1)+c;
+				}
+			}
+			else
+			{
+				t = Real(0.0);
+				if ( tmp1 <= Real(0.0) )
+				{
+					s = Real(1.0);
+					distSqrd = a00+Real(2.0)*b0+c;
+				}
+				else if ( b0 >= Real(0.0) )
+				{
+					s = Real(0.0);
+					distSqrd = c;
+				}
+				else
+				{
+					s = -b0/a00;
+					distSqrd = b0*s+c;
+				}
+			}
+		}
+		else  // region 1
+		{
+			numer = a11 + b1 - a01 - b0;
+			if ( numer <= Real(0.0) )
+			{
+				s = Real(0.0);
+				t = Real(1.0);
+				distSqrd = a11+Real(2.0)*b1+c;
+			}
+			else
+			{
+				denom = a00-Real(2.0)*a01+a11;
+				if ( numer >= denom )
+				{
+					s = Real(1.0);
+					t = Real(0.0);
+					distSqrd = a00+Real(2.0)*b0+c;
+				}
+				else
+				{
+					s = numer/denom;
+					t = Real(1.0) - s;
+					distSqrd = s*(a00*s+a01*t+Real(2.0)*b0) +
+					           t*(a01*s+a11*t+Real(2.0)*b1)+c;
+				}
+			}
+		}
+	}
+
+	barycentric.x = s;
+	barycentric.y = t;
+	barycentric.z = 1 - s - t;
+
+	return Real(fabs(distSqrd));
+}
+
+template<class Vec>
+Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric )
+{
+	triangleClosestBarycentric( v0, v1, v2, p, barycentric );
+	return trianglePoint( v0, v1, v2, barycentric );
 }
 
 } // namespace IECore

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,7 +42,19 @@ template<class Vec>
 typename Vec::BaseType triangleArea( const Vec &v0, const Vec &v1, const Vec &v2 );
 
 template<class Vec>
+Vec triangleNormal( const Vec &v0, const Vec &v1, const Vec &v2 );
+
+template<class Vec>
 Vec trianglePoint( const Vec &v0, const Vec &v1, const Vec &v2, const Imath::Vec3<typename Vec::BaseType> &barycentric );
+
+/// Returns the squared-distance to the closest point on the triangle, and places that point's barycentric coordinates in the 4th argument.
+template<class Vec>
+typename Vec::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric );
+
+/// Returns the closest point on the triangle, and places that point's barycentric coordinates in the 4th argument.
+template<class Vec>
+Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric );
+
 
 } // namespace IECore
 
