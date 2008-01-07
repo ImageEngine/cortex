@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -255,6 +255,8 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// the base class to do the same. When making copies of held member
 		/// data derived from Object, you /must/ use the context object provided,
 		/// rather than calling copy() or copyFrom() yourself.
+		/// \todo Think about adding public access to copyFrom() by providing a small 
+		/// method which creates a new CopyContext, similar to how copy, load, and save work.
 		virtual void copyFrom( ConstObjectPtr other, CopyContext *context ) = 0;
 		
 		/// The class provided to the save() method implemented by subclasses.
