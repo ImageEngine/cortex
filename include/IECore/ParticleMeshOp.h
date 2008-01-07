@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_ParticleMeshOp_H
-#define IE_CORE_ParticleMeshOp_H
+#ifndef IE_CORE_PARTICLEMESHOP_H
+#define IE_CORE_PARTICLEMESHOP_H
 
 #include "IECore/Op.h"
 #include "IECore/FileNameParameter.h"
@@ -124,4 +124,4 @@ IE_CORE_DECLAREPTR( ParticleMeshOp );
 
 } // namespace IECore
 
-#endif // IE_CORE_ParticleMeshOp_H
+#endif // IE_CORE_PARTICLEMESHOP_H
