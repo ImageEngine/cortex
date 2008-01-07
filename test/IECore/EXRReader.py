@@ -41,6 +41,7 @@ class TestEXRReader(unittest.TestCase):
 
 	testfile = "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.exr"
 	testoutfile = "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.testoutput.exr"
+	testwindowoutfile = "test/IECore/data/exrFiles/redgreen.window.exr"
 
 	def testConstruction(self):
 
@@ -89,11 +90,11 @@ class TestEXRReader(unittest.TestCase):
 		img.displayWindow = box
 
 		# write back the sub-image
-		IECore.Writer.create(img, 'test/IECore/data/exrFiles/redgreen.window.exr').write()
+		IECore.Writer.create(img, self.testwindowoutfile).write()
 
 	def tearDown(self):
 			
-		for f in [ self.testoutfile ] :
+		for f in [ self.testoutfile, self.testwindowoutfile ] :
 			if os.path.isfile( f ) :	
 				os.remove( f )				
 				
