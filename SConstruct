@@ -483,21 +483,10 @@ testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = ":".join( [ "./lib" ] + e
 ###########################################################################################
 # Helper functions
 ###########################################################################################
-
+	
 # Makes versioned symlinks for use during installation
-def makeSymlinks( env, target ) :
+def makeSymLinks( env, target ) :
 
-	def Link( target, source, env ) :
-	
-		target = str( target[0] )
-		source = str( source[0] )
-		
-		commonPrefix = os.path.commonprefix( [ os.path.dirname( target ), os.path.dirname( source ) ] )
-		relativeSource = source[len(commonPrefix)+1:]
-	
-		os.symlink( relativeSource, target )
-
-	result = []
 	links = {
 		"$IECORE_MAJORMINORPATCH_VERSION" : "$IECORE_MAJORMINOR_VERSION",
 		"$IECORE_MAJORMINOR_VERSION" : "$IECORE_MAJOR_VERSION",
@@ -512,27 +501,42 @@ def makeSymlinks( env, target ) :
 			if target.find( key ) != -1 :
 			
 				linkName = target.replace( key, links[key] )
-				link = env.Command( linkName, target, Link )
 				
-				result.append( link )
+				makeSymLink( env.subst( linkName ), env.subst( target ) )
+				
 				target = linkName
 				done = False	
-	
-	return result
 
 # Makes versioned symlinks for the library an environment makes.
 # This function is necessary as there's some name munging to get
 # the right prefix and suffix on the library names.
-def makeLibSymlinks( env ) :
+def makeLibSymLinks( env ) :
 
 	p = coreEnv["INSTALL_LIB_NAME"]
 	d = os.path.dirname( p )
 	n = os.path.basename( p )
 	n = "$SHLIBPREFIX" + n + "$SHLIBSUFFIX"
 	p = os.path.join( d, n )
-	return makeSymlinks( env, p )
-	
+	makeSymLinks( env, p )
 
+# Make a symlink pointing from target to source
+def makeSymLink( target, source ) :
+
+	commonPrefix = os.path.commonprefix( [ os.path.dirname( target ), os.path.dirname( source ) ] )
+	relativeSource = source[len(commonPrefix)+1:]
+
+	if os.path.exists( target ) :
+		if os.path.islink( target ) :
+			os.remove( target )
+		else :
+			# there's not a good reason for a non-link file to be here
+			# so we won't delete it on the grounds that we don't know
+			# what's happening
+			sys.stderr.write( "Wanted to make a link at \"%s\", but a file exists there - aborting.\n" % target )
+			Exit( 1 )
+
+	os.symlink( relativeSource, target )
+	
 ###########################################################################################
 # Build, install and test the core library and bindings
 ###########################################################################################
@@ -582,24 +586,24 @@ if doConfigure :
 
 coreLibrary = coreEnv.SharedLibrary( "lib/" + os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreSources )
 coreLibraryInstall = coreEnv.Install( os.path.dirname( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreLibrary )
-coreLibrarySymlinks = makeLibSymlinks( coreEnv )
-coreEnv.Alias( "install", [ coreLibraryInstall ] + coreLibrarySymlinks )
-coreEnv.Alias( "installCore", [ coreLibraryInstall ] + coreLibrarySymlinks )
+coreEnv.AddPostAction( coreLibraryInstall, lambda target, source, env : makeLibSymLinks( coreEnv ) )
+coreEnv.Alias( "install", [ coreLibraryInstall ] )
+coreEnv.Alias( "installCore", [ coreLibraryInstall ] )
 
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
 headerInstall += coreEnv.Install( "$INSTALL_HEADER_DIR/IECore/bindings", coreBindingHeaders )
-headerSymlinks = makeSymlinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] )
-coreEnv.Alias( "install", headerInstall + headerSymlinks )
-coreEnv.Alias( "installCore", headerInstall + headerSymlinks )
+coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
+coreEnv.Alias( "install", headerInstall )
+coreEnv.Alias( "installCore", headerInstall )
 
 corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 corePythonModule = corePythonEnv.SharedLibrary( "python/IECore/_IECore", corePythonSources )
 corePythonEnv.Depends( corePythonModule, coreLibrary )
 
 corePythonModuleInstall = corePythonEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
-corePythonModuleSymlinks = makeSymlinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] )
-corePythonEnv.Alias( "install", corePythonModuleInstall + corePythonModuleSymlinks )
-corePythonEnv.Alias( "installCore", corePythonModuleInstall + corePythonModuleSymlinks )
+corePythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
+corePythonEnv.Alias( "install", corePythonModuleInstall )
+corePythonEnv.Alias( "installCore", corePythonModuleInstall )
 
 Default( coreLibrary, corePythonModule )
 
@@ -673,14 +677,14 @@ if doConfigure :
 	
 		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riSources )
 		riLibraryInstall = riEnv.Install( os.path.dirname( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riLibrary )
-		riLibrarySymlinks = makeLibSymlinks( riEnv )
-		riEnv.Alias( "install", riLibraryInstall + riLibrarySymlinks )
-		riEnv.Alias( "installRI", riLibraryInstall + riLibrarySymlinks )
+		riEnv.AddPostAction( riLibraryInstall, lambda target, source, env : makeLibSymLinks( riEnv ) )
+		riEnv.Alias( "install", riLibraryInstall )
+		riEnv.Alias( "installRI", riLibraryInstall )
 
 		riHeaderInstall = riEnv.Install( "$INSTALL_HEADER_DIR/IECoreRI", riHeaders )
-		riHeaderSymlinks = makeSymlinks( riEnv, riEnv["INSTALL_HEADER_DIR"] )
-		riEnv.Alias( "install", riHeaderInstall + riHeaderSymlinks )
-		riEnv.Alias( "installRI", riHeaderInstall + riHeaderSymlinks )
+		riEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riEnv, riEnv["INSTALL_HEADER_DIR"] ) )
+		riEnv.Alias( "install", riHeaderInstall )
+		riEnv.Alias( "installRI", riHeaderInstall )
 
 		riPythonEnv.Append(
 			LIBS = [
@@ -692,9 +696,9 @@ if doConfigure :
 		riPythonEnv.Depends( riPythonModule, riLibrary )
 
 		riPythonModuleInstall = riPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreRI", riPythonScripts + riPythonModule )
-		riPythonModuleSymlinks = makeSymlinks( riPythonEnv, riPythonEnv["INSTALL_PYTHON_DIR"] )
-		riPythonEnv.Alias( "install", riPythonModuleInstall + riPythonModuleSymlinks )
-		riPythonEnv.Alias( "installRI", riPythonModuleInstall + riPythonModuleSymlinks )
+		riPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riPythonEnv, riPythonEnv["INSTALL_PYTHON_DIR"] ) )
+		riPythonEnv.Alias( "install", riPythonModuleInstall )
+		riPythonEnv.Alias( "installRI", riPythonModuleInstall )
 
 		Default( [ riLibrary, riPythonModule ] )
 		
@@ -713,7 +717,7 @@ if doConfigure :
 # number. when it moves out of /contrib it'll use the same version number as the
 # main libraries.
 ieCoreGLMajorVersion = 0
-ieCoreGLMinorVersion = 3
+ieCoreGLMinorVersion = 5
 ieCoreGLPatchVersion = 0
 
 if env["WITH_GL"] :
@@ -760,7 +764,7 @@ if env["WITH_GL"] :
 		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
 		c.Finish()
 			
-	else :	
+	else :
 	
 		c.Finish()
 
@@ -785,13 +789,13 @@ if env["WITH_GL"] :
 		glSources = glob.glob( "contrib/IECoreGL/src/*.cpp" )
 		glLibrary = glEnv.SharedLibrary( "lib/" + os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glSources )
 		glLibraryInstall = glEnv.Install( os.path.dirname( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glLibrary )
-		glLibrarySymlinks = makeLibSymlinks( glEnv )
-		glEnv.Alias( "install", glLibraryInstall + glLibrarySymlinks )
-		glEnv.Alias( "installGL", glLibraryInstall + glLibrarySymlinks )
+		glEnv.AddPostAction( glLibraryInstall, lambda target, source, env : makeLibSymLinks( glEnv ) )
+		glEnv.Alias( "install", glLibraryInstall )
+		glEnv.Alias( "installGL", glLibraryInstall )
 
 		glHeaders = glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) + glob.glob( "contrib/IECoreGL/include/IECoreGL/*.inl" )
 		glHeaderInstall = glEnv.Install( "$INSTALL_HEADER_DIR/IECoreGL", glHeaders )
-		glHeaderSymlinks = makeSymlinks( glEnv, glEnv["INSTALL_HEADER_DIR"] )
+		glEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_HEADER_DIR"] ) )
 		glEnv.Alias( "install", glHeaderInstall )
 		glEnv.Alias( "installGL", glHeaderInstall )
 
@@ -809,10 +813,10 @@ if env["WITH_GL"] :
 		glPythonEnv.Depends( glPythonModule, glLibrary )
 
 		glPythonScripts = glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" )
-		glPythonModuleInstall = glPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )
-		glPythonModuleSymlinks = makeSymlinks( glPythonEnv, glPythonEnv["INSTALL_PYTHON_DIR"] )
-		glPythonEnv.Alias( "install", glPythonModuleInstall + glPythonModuleSymlinks )
-		glPythonEnv.Alias( "installGL", glPythonModuleInstall + glPythonModuleSymlinks )
+		glPythonModuleInstall = glPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )		
+		glPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glPythonEnv, glPythonEnv["INSTALL_PYTHON_DIR"] ) )
+		glPythonEnv.Alias( "install", glPythonModuleInstall )
+		glPythonEnv.Alias( "installGL", glPythonModuleInstall )
 
 		Default( [ glLibrary, glPythonModule ] )
 
@@ -825,10 +829,11 @@ nukeEnv.Append( CPPPATH = [ "$NUKE_ROOT/include" ] )
 
 nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
 nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
-nukeHeaderSymlinks = makeSymlinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] )
-nukeEnv.Alias( "installNuke", nukeHeaderInstall + nukeHeaderSymlinks )
-nukeEnv.Alias( "install", nukeHeaderInstall + nukeHeaderSymlinks )
-		
+nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
+
+nukeEnv.Alias( "installNuke", nukeHeaderInstall )
+nukeEnv.Alias( "install", nukeHeaderInstall )
+
 ###########################################################################################
 # Documentation
 ###########################################################################################
