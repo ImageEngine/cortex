@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,99 +59,77 @@ class BoundedKDTree<BoundIterator>::AxisSort
 		const unsigned int m_axis;
 };
 
-template<class BoundIterator>
-class BoundedKDTree<BoundIterator>::Node
-{
-	public :
-	
-		Node() : m_cutAxisAndLeaf(0)
-		{
-			BoxTraits<Bound>::makeEmpty( m_bound );
-			m_perm.first = 0;
-			m_perm.last = 0;			
-		}
-		
-		inline void makeLeaf( PermutationIterator permFirst, PermutationIterator permLast )
-		{
-			m_cutAxisAndLeaf = 255;
-			m_perm.first = &(*permFirst);
-			m_perm.last = &(*permLast);
-		}
-		
-		inline void makeBranch( unsigned char cutAxis )
-		{
-			m_cutAxisAndLeaf = cutAxis;
-		}
-	
-		inline bool isLeaf() const
-		{
-			return m_cutAxisAndLeaf==255;
-		}
-		
-		inline BoundIterator *permFirst() const
-		{
-			assert( isLeaf() );
-	
-			return m_perm.first;
-		}
-		
-		inline BoundIterator *permLast() const
-		{
-			assert( isLeaf() );
-	
-			return m_perm.last;
-		}
-				
-		inline bool isBranch() const
-		{
-			return m_cutAxisAndLeaf!=255;
-		}
-		
-		inline unsigned char cutAxis() const
-		{
-			assert( isBranch() );
-	
-			return m_cutAxisAndLeaf;
-		}
-		
-		inline Bound &bound()
-		{
-			return m_bound;
-		}
-		
-		inline const Bound &bound() const
-		{
-			return m_bound;
-		}		
-	
-		static NodeIndex rootIndex()
-		{
-			return 1;
-		}
-		
-		static NodeIndex lowChildIndex( NodeIndex index )
-		{
-			return index * 2;
-		}
-		
-		static NodeIndex highChildIndex( NodeIndex index )
-		{
-			return index * 2 + 1;
-		}
-		
-	private :
-		
-		unsigned char m_cutAxisAndLeaf;
-		
-		Bound m_bound;
-		
-		struct {
-			BoundIterator *first;
-			BoundIterator *last;
-		} m_perm;
-		
-};
 
+template<class BoundIterator>
+BoundedKDTree<BoundIterator>::Node::Node() : m_cutAxisAndLeaf(0)
+{
+	BoxTraits<Bound>::makeEmpty( m_bound );
+	m_perm.first = 0;
+	m_perm.last = 0;			
+}
+
+template<class BoundIterator>
+void BoundedKDTree<BoundIterator>::Node::makeLeaf( PermutationIterator permFirst, PermutationIterator permLast )
+{
+	m_cutAxisAndLeaf = 255;
+	m_perm.first = &(*permFirst);
+	m_perm.last = &(*permLast);
+}
+
+template<class BoundIterator>
+void BoundedKDTree<BoundIterator>::Node::makeBranch( unsigned char cutAxis )
+{
+	m_cutAxisAndLeaf = cutAxis;
+}
+
+template<class BoundIterator>
+bool BoundedKDTree<BoundIterator>::Node::isLeaf() const
+{
+	return m_cutAxisAndLeaf==255;
+}
+
+template<class BoundIterator>
+BoundIterator *BoundedKDTree<BoundIterator>::Node::permFirst() const
+{
+	assert( isLeaf() );
+
+	return m_perm.first;
+}
+
+template<class BoundIterator>
+BoundIterator *BoundedKDTree<BoundIterator>::Node::permLast() const
+{
+	assert( isLeaf() );
+
+	return m_perm.last;
+}
+
+template<class BoundIterator>
+bool BoundedKDTree<BoundIterator>::Node::isBranch() const
+{
+	return m_cutAxisAndLeaf!=255;
+}
+
+template<class BoundIterator>
+unsigned char BoundedKDTree<BoundIterator>::Node::cutAxis() const
+{
+	assert( isBranch() );
+
+	return m_cutAxisAndLeaf;
+}
+
+template<class BoundIterator>
+typename BoundedKDTree<BoundIterator>::Bound &BoundedKDTree<BoundIterator>::Node::bound()
+{
+	return m_bound;
+}
+
+template<class BoundIterator>
+const typename BoundedKDTree<BoundIterator>::Bound &BoundedKDTree<BoundIterator>::Node::bound() const
+{
+	return m_bound;
+}		
+		
 template<class BoundIterator>
 unsigned char BoundedKDTree<BoundIterator>::majorAxis( PermutationConstIterator permFirst, PermutationConstIterator permLast )
 {
@@ -211,13 +189,13 @@ void BoundedKDTree<BoundIterator>::bound( NodeIndex nodeIndex  )
 	{	
 		assert( node.isBranch() );
 		
-		assert( Node::lowChildIndex( nodeIndex ) < m_nodes.size() );
-		assert( Node::highChildIndex( nodeIndex ) < m_nodes.size() );		
+		assert( lowChildIndex( nodeIndex ) < m_nodes.size() );
+		assert( highChildIndex( nodeIndex ) < m_nodes.size() );		
 		
-		bound( Node::lowChildIndex( nodeIndex ) );						
-		bound( Node::highChildIndex( nodeIndex ) );
-		BoxTraits<Bound>::extendBy( node.bound(), m_nodes[Node::lowChildIndex( nodeIndex )].bound() );
-		BoxTraits<Bound>::extendBy( node.bound(), m_nodes[Node::highChildIndex( nodeIndex )].bound() );			
+		bound( lowChildIndex( nodeIndex ) );						
+		bound( highChildIndex( nodeIndex ) );
+		BoxTraits<Bound>::extendBy( node.bound(), m_nodes[lowChildIndex( nodeIndex )].bound() );
+		BoxTraits<Bound>::extendBy( node.bound(), m_nodes[highChildIndex( nodeIndex )].bound() );			
 	}	
 }
 
@@ -244,8 +222,8 @@ void BoundedKDTree<BoundIterator>::build( NodeIndex nodeIndex, PermutationIterat
 		// insert node
 		node.makeBranch( cutAxis );
 		
-		build( Node::lowChildIndex( nodeIndex ), permFirst, permMid );						
-		build( Node::highChildIndex( nodeIndex ), permMid, permLast );		
+		build( lowChildIndex( nodeIndex ), permFirst, permMid );						
+		build( highChildIndex( nodeIndex ), permMid, permLast );		
 	}
 	else
 	{
@@ -266,10 +244,36 @@ BoundedKDTree<BoundIterator>::BoundedKDTree( BoundIterator first, BoundIterator 
 		m_perm[i++] = it;
 	}
 		
-	build( Node::rootIndex(), m_perm.begin(), m_perm.end() );
-	bound( Node::rootIndex() );
+	build( rootIndex(), m_perm.begin(), m_perm.end() );
+	bound( rootIndex() );
 }
 
+template<class BoundIterator>
+const typename BoundedKDTree<BoundIterator>::Node& BoundedKDTree<BoundIterator>::node( NodeIndex idx ) const
+{
+	assert( idx >= 0 );
+	assert( idx < m_nodes.size() );
+
+	return m_nodes[idx];
+}
+
+template<class BoundIterator>
+typename BoundedKDTree<BoundIterator>::NodeIndex BoundedKDTree<BoundIterator>::rootIndex() const
+{
+	return 1;
+}
+
+template<class BoundIterator>
+typename BoundedKDTree<BoundIterator>::NodeIndex BoundedKDTree<BoundIterator>::lowChildIndex( NodeIndex index )
+{
+	return index * 2;
+}
+
+template<class BoundIterator>
+typename BoundedKDTree<BoundIterator>::NodeIndex BoundedKDTree<BoundIterator>::highChildIndex( NodeIndex index )
+{
+	return index * 2 + 1;
+}
 
 template<class BoundIterator>	
 template<typename S>
@@ -277,7 +281,7 @@ unsigned int BoundedKDTree<BoundIterator>::intersectingBounds( const S &b, std::
 {	
 	bounds.clear();
 			
-	intersectingBoundsWalk(Node::rootIndex(), b, bounds );
+	intersectingBoundsWalk(rootIndex(), b, bounds );
 	
 	return bounds.size();
 }
@@ -302,19 +306,17 @@ void BoundedKDTree<BoundIterator>::intersectingBoundsWalk(  NodeIndex nodeIndex,
 	}
 	else
 	{	
-		NodeIndex firstChild = Node::highChildIndex( nodeIndex );
+		NodeIndex firstChild = highChildIndex( nodeIndex );
 		if ( BoxTraits<Bound>::intersects( m_nodes[firstChild].bound(), b) )
 		{
 			intersectingBoundsWalk( firstChild, b, bounds );
 		}
-		NodeIndex secondChild = Node::lowChildIndex( nodeIndex );
+		NodeIndex secondChild = lowChildIndex( nodeIndex );
 		if ( BoxTraits<Bound>::intersects( m_nodes[secondChild].bound(), b) )
 		{
 			intersectingBoundsWalk( secondChild, b, bounds );
 		}
 	}
 }
-
-
 
 } // namespace IECore

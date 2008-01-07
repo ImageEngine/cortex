@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,10 +49,25 @@ template<class BoundIterator>
 class BoundedKDTree
 {
 	public:
+		class Node;
 		typedef BoundIterator Iterator;
 		typedef typename std::iterator_traits<BoundIterator>::value_type Bound;
 		typedef typename BoxTraits<Bound>::BaseType BaseType;		
+	
+	private :
 		
+		typedef std::vector<BoundIterator> Permutation;
+		typedef typename Permutation::iterator PermutationIterator;
+		typedef typename Permutation::const_iterator PermutationConstIterator;
+				
+		
+		typedef std::vector<Node> NodeVector;		
+
+
+	public:
+	
+		typedef typename NodeVector::size_type NodeIndex;
+				
 		/// Creates a tree for the fast searching of bounds.
 		/// Note that the tree does not own the passed bounds -
 		/// it is up to you to ensure that they remain valid and
@@ -62,17 +77,64 @@ class BoundedKDTree
 		/// Populates the passed vector of iterators with the bounds which intersect "b". Returns the number of bounds found.		
 		template<typename S>
 		unsigned int intersectingBounds( const S &b, std::vector<BoundIterator> &bounds ) const;
+		
+		class Node
+		{
+
+			friend class BoundedKDTree<BoundIterator>;
+
+			private:
+
+				inline void makeLeaf( PermutationIterator permFirst, PermutationIterator permLast );
+				inline void makeBranch( unsigned char cutAxis );
 				
-	private :
+				inline Bound &bound();
+				
+			public :
+
+				/// Must be default constructible for use as element within std::vector			
+				Node();			
+
+				inline bool isLeaf() const;
+
+				inline BoundIterator *permFirst() const;
+
+				inline BoundIterator *permLast() const;
+
+				inline bool isBranch() const;
+
+				inline unsigned char cutAxis() const;				
+
+				inline const Bound &bound() const;				
+
+			private :
+
+				unsigned char m_cutAxisAndLeaf;
+
+				Bound m_bound;
+
+				struct
+				{
+					BoundIterator *first;
+					BoundIterator *last;
+				} m_perm;
+
+		};
+	
+		/// Direct access to the index of the root node		
+		NodeIndex rootIndex() const;
 		
-		typedef std::vector<BoundIterator> Permutation;
-		typedef typename Permutation::iterator PermutationIterator;
-		typedef typename Permutation::const_iterator PermutationConstIterator;
+		/// Retrieve the node associated with a given index
+		const Node& node( NodeIndex idx ) const;
 		
-		class Node;
-		typedef std::vector<Node> NodeVector;
-		typedef typename NodeVector::size_type NodeIndex;
-		
+		/// Retrieve the index of the "low" child node
+		static NodeIndex lowChildIndex( NodeIndex index );
+
+		/// Retrieve the index of the "high" child node		
+		static NodeIndex highChildIndex( NodeIndex index );
+
+	private:
+			
 		class AxisSort;
 		
 		unsigned char majorAxis( PermutationConstIterator permFirst, PermutationConstIterator permLast );
