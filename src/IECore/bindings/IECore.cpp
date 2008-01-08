@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -142,6 +142,10 @@
 #include "IECore/bindings/BlobbyImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/ParticleMeshOpBinding.h"
 #include "IECore/bindings/TypedPrimitiveOpBinding.h"
+#include "IECore/bindings/PrimitiveEvaluatorBinding.h"
+#include "IECore/bindings/MeshPrimitiveEvaluatorBinding.h"
+#include "IECore/bindings/PrimitiveImplicitSurfaceFunctionBinding.h"
+#include "IECore/bindings/MeshPrimitiveImplicitSurfaceOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -263,6 +267,10 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBlobbyImplicitSurfaceFunction();		
 	bindParticleMeshOp();
 	bindTypedPrimitiveOp();	
+	bindPrimitiveEvaluator();
+	bindMeshPrimitiveEvaluator();
+	bindPrimitiveImplicitSurfaceFunction();	
+	bindMeshPrimitiveImplicitSurfaceOp();	
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

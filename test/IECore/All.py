@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -110,7 +110,10 @@ from MarchingCubes import *
 from PointMeshOp import *
 from CSGImplicitSurfaceFunction import *
 from ParticleMeshOp import *
-from TypedPrimitiveOp import *
+from PrimitiveEvaluator import *
+from MeshPrimitiveEvaluator import *
+from PrimitiveImplicitSurfaceFunction import *
+from MeshPrimitiveImplicitSurfaceOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

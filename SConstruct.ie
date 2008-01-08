@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -208,6 +208,10 @@ coreSources = 		[
 				'src/IECore/PointMeshOp.cpp',
 				'src/IECore/ParticleMeshOp.cpp',
 				'src/IECore/TypedPrimitiveOp.cpp',				
+				'src/IECore/PrimitiveEvaluator.cpp',
+				'src/IECore/MeshPrimitiveEvaluator.cpp',
+				'src/IECore/PrimitiveImplicitSurfaceFunction.cpp',								
+				'src/IECore/MeshPrimitiveImplicitSurfaceOp.cpp',
 		   ]
 		
 coreIncludes = 		[ 	
@@ -373,6 +377,10 @@ corePythonSources = 	[
 				'src/IECore/bindings/BlobbyImplicitSurfaceFunctionBinding.cpp',				
 				'src/IECore/bindings/ParticleMeshOpBinding.cpp',
 				'src/IECore/bindings/TypedPrimitiveOpBinding.cpp',
+				'src/IECore/bindings/PrimitiveEvaluatorBinding.cpp',
+				'src/IECore/bindings/MeshPrimitiveEvaluatorBinding.cpp',
+				'src/IECore/bindings/PrimitiveImplicitSurfaceFunctionBinding.cpp',
+				'src/IECore/bindings/MeshPrimitiveImplicitSurfaceOpBinding.cpp',				
 			]
 			
 corePythonPy = 	[ 			

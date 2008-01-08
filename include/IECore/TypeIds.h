@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -230,6 +230,9 @@ enum TypeId
 	ParticleMeshOpTypeId = 187,
 	HalfDataTypeId = 188,
 	MeshPrimitiveOpTypeId = 189,		
+	PrimitiveEvaluatorTypeId = 190,
+	MeshPrimitiveEvaluatorTypeId = 191,
+	MeshPrimitiveImplicitSurfaceOpTypeId = 192,
 
 	// Remember to update TypeIdBinding.cpp !!!
 	
