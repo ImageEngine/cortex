@@ -781,7 +781,8 @@ if env["WITH_GL"] :
 	
 		c.Finish()
 
-		glEnv.Append( LIBS = [ coreLibrary ] )
+		# we can't add this earlier as then it's built during the configure stage, and that's no good
+		glEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 	
 		if env["PLATFORM"]=="darwin" :
 			glEnv.Append(
