@@ -75,6 +75,8 @@ namespace
 	PyMethodDef initial_methods[] = { { 0, 0, 0, 0 } };
 }
 
+/// \todo The VersionControl stuff in here is utterly Image Engine specific and
+/// needs fixing for the outside world.
 void PythonCmd::import( const std::string &moduleName, int moduleVersion )
 {
 	
