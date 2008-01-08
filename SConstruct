@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -220,6 +220,18 @@ o.Add(
 	"GLEW_LIB_PATH",
 	"The path to the directory with libGLEW in it.",
 	"/usr/local/lib",
+)
+
+# Maya options
+
+o.Add(
+	BoolOption( "WITH_MAYA", "Set this to build the coreMaya library in the contrib directory.", False ),
+)
+
+o.Add(
+	"MAYA_ROOT",
+	"The path to the root of the maya installation.",
+	"/usr/aw/maya",
 )
 
 # Debug options
@@ -443,9 +455,10 @@ except :
 
 # get the include path for python if we haven't been told it explicitly
 if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
-	pythonEnv.Append( CPPFLAGS=getPythonConfig( pythonEnv, "--includes" ).split() )
+	pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
 else :
-	pythonEnv.Append( CPPPATH="$PYTHON_INCLUDE_PATH" )
+	pythonEnv["PYTHON_INCLUDE_FLAGS"] = "-I$PYTHON_INCLUDE_PATH"
+pythonEnv.Append( CPPFLAGS="$PYTHON_INCLUDE_FLAGS" )
 
 # get the python link flags
 if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
@@ -819,6 +832,108 @@ if env["WITH_GL"] :
 		glPythonEnv.Alias( "installGL", glPythonModuleInstall )
 
 		Default( [ glLibrary, glPythonModule ] )
+
+###########################################################################################
+# Build, install and test the optional coreMaya library and bindings
+###########################################################################################
+
+# because coreMaya isn't really stable in terms of api yet it has its own version
+# number. when it moves out of /contrib it'll use the same version number as the
+# main libraries.
+ieCoreMayaMajorVersion = 2
+ieCoreMayaMinorVersion = 13
+ieCoreMayaPatchVersion = 0
+
+if env["WITH_MAYA"] :
+
+
+	mayaEnvSets = {
+		"IECORE_NAME" : "IECoreMaya",
+		"IECORE_MAJOR_VERSION" : ieCoreMayaMajorVersion,
+		"IECORE_MINOR_VERSION" : ieCoreMayaMinorVersion,
+		"IECORE_PATCH_VERSION" : ieCoreMayaPatchVersion,
+	}
+
+	mayaEnvAppends = {
+		"CPPPATH" : [
+			"$MAYA_ROOT/include",
+			"contrib/IECoreMaya/include",
+			"contrib/IECoreGL/include",
+			"$GLEW_INCLUDE_PATH",
+		],
+		"LIBPATH" : [ "$MAYA_ROOT/lib" ],
+    	"CPPFLAGS" : [
+			## \todo The following will make no sense as soon as CoreMaya is out of contrib
+			# and synced in terms of version number
+			"-DIECORE_MAJOR_VERSION=%d" % ieCoreMajorVersion,
+			"-DIE_MAJOR_VERSION=%d" % ieCoreMayaMajorVersion,
+			"-DIE_MINOR_VERSION=%d" % ieCoreMayaMinorVersion,
+			"-DIE_PATCH_VERSION=%d" % ieCoreMayaPatchVersion,
+			## End of defines we need to remove in future
+			"-D_BOOL",
+			"-DREQUIRE_IOSTREAM",
+			pythonEnv["PYTHON_INCLUDE_FLAGS"],
+		],
+	}
+
+	if env["PLATFORM"]=="posix" :
+		mayaEnvAppends["CPPFLAGS"].append( "-DLINUX" )
+
+	mayaEnv = env.Copy( **mayaEnvSets )
+	mayaEnv.Append( **mayaEnvAppends )
+	
+	mayaPythonEnv = pythonEnv.Copy( **mayaEnvSets )
+	riPythonEnv.Append( **mayaEnvAppends )
+
+	if doConfigure :
+
+		c = Configure( mayaEnv )
+
+		if not c.CheckHeader( "maya/MVectorArray.h" ) :
+		
+			sys.stderr.write( "WARNING : no maya devkit found, not building IECoreMaya - check MAYA_ROOT.\n" )
+			c.Finish()
+
+		else :
+
+			c.Finish()
+			
+			mayaSources = glob.glob( "contrib/IECoreMaya/src/*.cpp" )
+			mayaHeaders = glob.glob( "contrib/IECoreMaya/include/IECoreMaya/*.h" ) + glob.glob( "contrib/IECoreMaya/include/IECoreMaya/*.inl" )
+			mayaPythonSources = glob.glob( "contrib/IECoreMaya/src/IECoreMaya/bindings/*.cpp" )
+			mayaPythonScripts = glob.glob( "contrib/IECoreMaya/python/IECoreMaya/*.py" )
+
+			# we can't append this before configuring, as then it gets built as
+			# part of the configure process
+			mayaEnv.Prepend( LIBPATH = [ "./lib" ] )
+			mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
+			mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), mayaSources )
+			mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), mayaLibrary )
+			mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv ) )
+			mayaEnv.Alias( "install", mayaLibraryInstall )
+			mayaEnv.Alias( "installMaya", mayaLibraryInstall )
+
+			mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
+			mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
+			mayaEnv.Alias( "install", mayaHeaderInstall )
+			mayaEnv.Alias( "installMaya", mayaHeaderInstall )
+
+			mayaPythonEnv.Append(
+				LIBS = [
+					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+					os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				]
+			)
+			mayaPythonModule = mayaPythonEnv.SharedLibrary( "contrib/IECoreMaya/python/IECoreMaya/_IECoreMaya", mayaPythonSources )
+			mayaPythonEnv.Depends( mayaPythonModule, mayaLibrary )
+
+			mayaPythonModuleInstall = mayaPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
+			mayaPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonEnv, mayaPythonEnv["INSTALL_PYTHON_DIR"] ) )
+			mayaPythonEnv.Alias( "install", mayaPythonModuleInstall )
+			mayaPythonEnv.Alias( "installMaya", mayaPythonModuleInstall )
+
+			Default( [ mayaLibrary, mayaPythonModule ] )
 
 ###########################################################################################
 # Install the coreNuke headers
