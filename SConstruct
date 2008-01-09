@@ -937,13 +937,21 @@ if env["WITH_MAYA"] :
 			Default( [ mayaLibrary, mayaPythonModule ] )
 
 ###########################################################################################
-# Install the coreNuke headers
+# Build and install the coreNuke library and headers
 ###########################################################################################
 
 nukeEnv = env.Copy( IECORE_NAME = "IECoreNuke" )
 nukeEnv.Append( CPPPATH = [ "$NUKE_ROOT/include" ] )
 
 nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
+nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
+
+nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeSources )
+nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeLibrary )
+nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv ) )
+nukeEnv.Alias( "install", nukeLibraryInstall )
+nukeEnv.Alias( "installNuke", nukeLibraryInstall )
+			
 nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
 nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
 

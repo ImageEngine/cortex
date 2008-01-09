@@ -87,6 +87,12 @@ try :
 except :
 	pass
 
+# find nuke
+try :
+	NUKE_ROOT = IEEnv.registry["apps"]["nuke"][getOption( "NUKE_VERSION", os.environ["NUKE_VERSION"] )][platform]["location"]
+except :
+	pass
+
 # ask for opengl support
 WITH_GL=1
 
