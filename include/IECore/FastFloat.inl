@@ -44,13 +44,20 @@ namespace IECore
 
 	inline int fastFloat2Int( double v )
 	{
-		 return ( v < 0 ) ? fastFloatRound( v + IECORE_DOUBLEMAGICROUNDEPS ) : fastFloatRound(v-IECORE_DOUBLEMAGICROUNDEPS );
+		 return ( v < 0.0 ) ? fastFloatRound( v + IECORE_DOUBLEMAGICROUNDEPS ) : fastFloatRound(v-IECORE_DOUBLEMAGICROUNDEPS );
 	}
+
+	union FastFloatDoubleLong
+	{
+		double d;
+		long l;
+	};
 
 	inline int fastFloatRound( double v )
 	{
-		v = v + IECORE_DOUBLEMAGIC;
-		return ((long*)&v)[0];
+		FastFloatDoubleLong vv;
+		vv.d = v + IECORE_DOUBLEMAGIC;
+		return vv.l;
 	}
 
 	inline int fastFloatFloor( double v )

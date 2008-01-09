@@ -134,22 +134,22 @@ class TestPerlinNoise( unittest.TestCase ) :
 		
 		IECore.Writer.create( i, "test/perlinV2fColor3f.exr" ).write()
 
-	#def testSpeed( self ) :
-	
-	#	numPoints = 100000
-	#	p = IECore.V3fVectorData( numPoints )
-	#	random.seed( 0 )
-	#	for i in xrange( 0, numPoints ) :
-	#		p[i] = IECore.V3f( random.uniform( -1000, 1000 ), random.uniform( -1000, 1000 ), random.uniform( -1000, 1000 ))
-	#	v = IECore.FloatVectorData( numPoints )
-		
-	#	n = IECore.PerlinNoiseV3ff()
-	#	t = IECore.Timer( True )
-	#	for i in range( 0, 200 ) :
-	#		vv = n.noiseVector( p, v )
-			
-	#	t.stop()
-	#	self.assert_( vv.isSame( v ) )	
+#	def testSpeed( self ) :
+#
+#		numPoints = 100000
+#		p = IECore.V3fVectorData( numPoints )
+#		random.seed( 0 )
+#		for i in xrange( 0, numPoints ) :
+#			p[i] = IECore.V3f( random.uniform( -1000, 1000 ), random.uniform( -1000, 1000 ), random.uniform( -1000, 1000 ))
+#		v = IECore.FloatVectorData( numPoints )
+#
+#		n = IECore.PerlinNoiseV3ff()
+#		t = IECore.Timer( True )
+#		for i in range( 0, 200 ) :
+#			vv = n.noiseVector( p, v )
+#
+#		print t.stop()
+#		self.assert_( vv.isSame( v ) )	
 		
 		# results
 		######################################################
@@ -231,6 +231,35 @@ class TestPerlinNoise( unittest.TestCase ) :
 		#	7.85
 		#	7.78
 		#	7.84		7.8
+		#
+		######################################################
+		# timings made while fixing the bug caused by
+		# fastFloatFloor bugs when compiled with optimisiation.
+		######################################################
+		#
+		# failing fast floor function
+		#
+		# 9.77
+		# 9.76
+		# 9.71
+		# 9.69
+		# 9.75
+		#
+		# passing floor function
+		#
+		# 8.79
+		# 8.83
+		# 8.84
+		# 8.83
+		# 8.84
+		#
+		# fixed fast floor function
+		#
+		# 7.2
+		# 7.19
+		# 7.15
+		# 7.15
+		# 7.18
 		#
 		######################################################
 		
