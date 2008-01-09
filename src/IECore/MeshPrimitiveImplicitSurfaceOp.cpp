@@ -113,6 +113,10 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 	V3i resolution = boost::static_pointer_cast<const V3iData>( resolutionData )->readable();
 	Box< V3d > bound = boost::static_pointer_cast<const Box3dData>( boundData )->readable();
 	
+	resolution.x = std::max( 1, resolution.x );
+	resolution.y = std::max( 1, resolution.y );
+	resolution.z = std::max( 1, resolution.z );		
+	
 	/// Calculate a tolerance which is half the size of the smallest grid division
 	double cacheTolerance = ((bound.max.x - bound.min.x) / (double)resolution.x) / 2.0;
 	cacheTolerance = std::min(cacheTolerance, ((bound.max.y - bound.min.y) / (double)resolution.y) / 2.0 );
@@ -134,17 +138,15 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 		builder
 	);
 
-	m->march( Box3f( bound.min, bound.max ), resolution, threshold );
-	
+	m->march( Box3f( bound.min, bound.max ), resolution, threshold );	
 	MeshPrimitivePtr resultMesh = builder->mesh();
-	
 	typedPrimitive->variables.clear();
-	
+
 	typedPrimitive->setTopology( 
 		resultMesh->verticesPerFace(),
 		resultMesh->vertexIds()
 	);
-	
+
 	typedPrimitive->variables["P"] = PrimitiveVariable( resultMesh->variables["P"].interpolation, resultMesh->variables["P"].data->copy() );
 	typedPrimitive->variables["N"] = PrimitiveVariable( resultMesh->variables["N"].interpolation, resultMesh->variables["N"].data->copy() );	
 			
