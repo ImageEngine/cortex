@@ -50,12 +50,13 @@ class TestCSGImplicitSurfaceFunction( unittest.TestCase ) :
 		marchMax = V3f( 2.5,  2.5,  2.5)
 		marchBound = Box3f( marchMin, marchMax )
 		marchResolution = V3i( 30, 30, 30 )
-		marcher.march( marchBound, marchResolution )
+		marcher.march( marchBound, marchResolution, -0.000001 )
                                 
 		m = builder.mesh()
 		
 		# Verified visually
-		self.assertEqual( len( m.vertexIds ), 5760 )
+		self.assert_( len( m.vertexIds ) > 5700 )
+		self.assert_( len( m.vertexIds ) < 5900 )		
 
 	def testIntersection( self ):
 		""" Test implicit surface CSG intersection """
@@ -78,7 +79,8 @@ class TestCSGImplicitSurfaceFunction( unittest.TestCase ) :
 		m = builder.mesh()
 				
 		# Verified visually
-		self.assertEqual( len( m.vertexIds ), 888 )
+		self.assert_( len( m.vertexIds ) > 850 )
+		self.assert_( len( m.vertexIds ) < 950 )
 	
 	def testDifference( self ):	
 	
@@ -100,7 +102,8 @@ class TestCSGImplicitSurfaceFunction( unittest.TestCase ) :
 		m = builder.mesh()
 		
 		# Verified visually
-		self.assertEqual( len( m.vertexIds ), 3672 )
+		self.assert_( len( m.vertexIds ) > 3600 )
+		self.assert_( len( m.vertexIds ) < 3750 )
 			
 				
 	

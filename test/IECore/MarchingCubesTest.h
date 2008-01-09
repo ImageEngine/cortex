@@ -110,7 +110,7 @@ struct MarchingCubesTest
 		
 		BOOST_CHECK( p );
 		
-		BOOST_CHECK_EQUAL( (int)p->readable().size(), 426 );
+		BOOST_CHECK( (int)p->readable().size() > 400 && (int)p->readable().size() < 450 );
 		
 		for (int i = 0; i < (int)p->readable().size(); i++)
 		{
