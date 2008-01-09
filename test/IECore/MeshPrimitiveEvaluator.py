@@ -79,7 +79,8 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		foundClosest = mpe.closestPoint( V3f( 0, 10, 0 ) + translation , r )
 		
 		self.assert_( foundClosest )
-		self.assertAlmostEqual( ( V3f( -1, 0, -0.5 ) + translation - r.point()).length(), 0 )
+		
+		self.assertAlmostEqual( ( V3f( -0.5, 0, -0.5 ) + translation - r.point()).length(), 0 )
 		self.assertAlmostEqual( math.fabs( r.normal().dot( V3f(0, 1, 0 ) ) ) , 1, places = 3  )
 		
 	def testSphereMesh( self ) :
