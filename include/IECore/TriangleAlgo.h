@@ -55,6 +55,16 @@ typename Vec::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1,
 template<class Vec>
 Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric );
 
+/// Returns information regarding the closest feature on the triangle.
+/// - 0 is the area within the triangle itself
+/// - 1 is the edge connecting v1 and v2
+/// - 2 is vertex v2
+/// - 3 is the edge connecting v0 and v2
+/// - 4 is vertex v0
+/// - 5 is the edge connecting v0 and v1
+/// - 6 is vertex v1
+template<class Vec>
+int triangleClosestFeature( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p );
 
 } // namespace IECore
 
