@@ -310,9 +310,9 @@ typename Vec::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1,
 		}
 	}
 
-	barycentric.x = s;
-	barycentric.y = t;
-	barycentric.z = 1 - s - t;
+	barycentric.y = s;
+	barycentric.z = t;
+	barycentric.x = 1 - s - t;
 
 	return Real(fabs(distSqrd));
 }
