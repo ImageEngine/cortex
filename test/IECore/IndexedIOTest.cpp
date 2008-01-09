@@ -335,7 +335,9 @@ unsigned char* IndexedIOTestDataTraits<unsigned char*>::value()
 
 void addIndexedIOTest(boost::unit_test::test_suite* test)
 {
+#ifdef IECORE_WITH_SQLITE
 	test->add( new IndexedIOTestSuite<SQLiteIndexedIO>() );
+#endif
 	test->add( new IndexedIOTestSuite<FileIndexedIO>() );
 }
 
