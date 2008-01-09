@@ -252,8 +252,7 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh )
 		V3f p1 = m_verts->readable()[ triangleVertexIds[1] ];
 		V3f p2 = m_verts->readable()[ triangleVertexIds[2] ];
 		
-		Box3f bound;
-		bound.extendBy( p0 );	
+		Box3f bound( p0 );
 		bound.extendBy( p1 );		
 		bound.extendBy( p2 );		
 		
