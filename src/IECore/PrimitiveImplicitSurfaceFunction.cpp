@@ -73,6 +73,14 @@ PrimitiveImplicitSurfaceFunction::Value PrimitiveImplicitSurfaceFunction::operat
 		PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );		
 		PrimitiveImplicitSurfaceFunction::Value distance = n.dot( p ) - planeConstant;
 		
+		/// \todo This won't always work with meshes, e.g
+		/// If closest point is a vertex or an edge we need to check faces connected to that component too
+		
+		/// \todo We culd fire a ray at closest point and see how many intsections we get? odd implies
+		/// we're inside, even implies outside	
+		
+		
+		
 		return distance;
 	}
 	else
