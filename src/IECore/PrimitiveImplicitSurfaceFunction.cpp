@@ -58,8 +58,22 @@ PrimitiveImplicitSurfaceFunction::Value PrimitiveImplicitSurfaceFunction::operat
 	bool found = m_evaluator->closestPoint( p, result );
 	
 	if (found)
-	{
-		return result->normal().dot( p - result->point() );
+	{		
+		Point n = result->normal();
+						
+		// Use shading normal if available
+		PrimitiveVariableMap::const_iterator it = m_primitive->variables.find("N");
+		if ( it != m_primitive->variables.end() )
+		{
+			n = result->vectorPrimVar( it->second );
+			
+		}
+		
+		/// Compute signed distance from plane, which is defined by closestPoint and closestNormal
+		PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );		
+		PrimitiveImplicitSurfaceFunction::Value distance = n.dot( p ) - planeConstant;
+		
+		return distance;
 	}
 	else
 	{
