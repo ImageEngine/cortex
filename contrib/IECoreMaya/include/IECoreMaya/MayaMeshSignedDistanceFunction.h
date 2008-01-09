@@ -38,6 +38,9 @@
 #include "maya/MFnMesh.h"
 #include "maya/MPoint.h"
 #include "maya/MVector.h"
+#include "maya/MItMeshPolygon.h"
+#include "maya/MItMeshVertex.h"
+#include "maya/MItMeshEdge.h"
 
 #include "OpenEXR/ImathVec.h"
 
@@ -70,7 +73,11 @@ class MayaMeshSignedDistanceFunction : public IECore::ImplicitSurfaceFunction< I
 	protected:	
 	
 		MFnMesh *m_fnMesh;
-		MSpace::Space m_space;
+		MSpace::Space m_space;	
+		
+		MItMeshPolygon *m_polyIt;
+		MItMeshVertex *m_vertIt;
+		MItMeshEdge *m_edgeIt;		
 };
 
 }
