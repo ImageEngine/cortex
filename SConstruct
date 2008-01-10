@@ -288,6 +288,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_GLSL_HEADER_DIR",
+	"The directory in which to install GLSL headers.",
+	"$INSTALL_PREFIX/glsl",
+)
+
+o.Add(
 	"INSTALL_DOC_DIR",
 	"The directory in which to install the documentation.",
 	"$INSTALL_PREFIX/share/cortex",
@@ -862,7 +868,13 @@ if env["WITH_GL"] :
 		glEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_HEADER_DIR"] ) )
 		glEnv.Alias( "install", glHeaderInstall )
 		glEnv.Alias( "installGL", glHeaderInstall )
-
+		
+		glslHeaders = glob.glob( "contrib/IECoreGL/glsl/IECoreGL/*.h" )
+		glslHeaderInstall = glEnv.Install( "$INSTALL_GLSL_HEADER_DIR/IECoreGL", glslHeaders )
+		glEnv.AddPostAction( "$INSTALL_GLSL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_GLSL_HEADER_DIR"] ) )
+		glEnv.Alias( "install", glslHeaderInstall )
+		glEnv.Alias( "installGL", glslHeaderInstall )
+		
 		glPythonEnv = pythonEnv.Copy( **glEnvSets )
 		glPythonEnv.Append( **glEnvAppends )
 		glPythonEnv.Prepend( **glEnvPrepends )
