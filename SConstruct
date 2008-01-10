@@ -814,6 +814,7 @@ if env["WITH_GL"] :
 		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
+			"./lib",
 		],
 		"LIBS" : [
 			"boost_wave",
