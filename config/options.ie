@@ -111,3 +111,6 @@ INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/$IECORE_NAME/$IECORE_MAJORMI
 INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"
+
+# speed up the build a bit hopefully
+BUILD_CACHEDIR = "/hosts/comp0076/sconsBuildCache"

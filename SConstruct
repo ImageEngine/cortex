@@ -240,6 +240,16 @@ o.Add(
 	BoolOption( "DEBUG", "Set this to build without optimisation and with debug symbols.", False ),
 )
 
+# Build options
+
+o.Add(
+	"BUILD_CACHEDIR",
+	"Specify a directory for SCons to cache build results in. This allows the sharing of build results"
+	"among multiple developers and can significantly reduce build times, particularly when switching"
+	"between multiple compilers and build options.",
+	""
+)
+
 # Environment options
 
 o.Add(
@@ -317,6 +327,9 @@ for e in env["ENV_VARS_TO_IMPORT"].split() :
 
 if "SAVE_OPTIONS" in ARGUMENTS :
 	o.Save( ARGUMENTS["SAVE_OPTIONS"], env )
+
+if env["BUILD_CACHEDIR"] != "" :
+	CacheDir( env["BUILD_CACHEDIR"] )
 
 env["IECORE_MAJOR_VERSION"] = ieCoreMajorVersion
 env["IECORE_MINOR_VERSION"] = ieCoreMinorVersion
