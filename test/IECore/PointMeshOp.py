@@ -45,13 +45,13 @@ class TestPointMeshOp( unittest.TestCase ) :
 		radius = DoubleVectorData()
 		strength = DoubleVectorData()
 		
-		bound = Box3d( V3d( -5, -5, -5 ), V3d( 5, 15, 5) )
-		resolution = V3i( 50, 150, 50 )
+		bound = Box3d( V3d( -1, -1, -1 ), V3d( 1, 15, 1) )
+		resolution = V3i( 10, 80, 10 )
 		threshold = 0.1
 		
 		for i in range( 0, 10):
 			points.append( V3f(0, i, 0 ) )
-			radius.append( 3 )
+			radius.append( 0.8 )
 			strength.append( 1 )
 			
 		self.assertEqual( len(points), 10 )
@@ -68,8 +68,8 @@ class TestPointMeshOp( unittest.TestCase ) :
 		)	
 
 		# Verified by eye
-		self.assertEqual( len(m.vertexIds), 60072 )	
-		
+		self.assert_( len(m.vertexIds) > 9000)	
+		self.assert_( len(m.vertexIds) < 11000)			
 				
 		
 	def testDouble( self ) :
@@ -80,13 +80,13 @@ class TestPointMeshOp( unittest.TestCase ) :
 		radius = DoubleVectorData()
 		strength = DoubleVectorData()
 		
-		bound = Box3d( V3d( -5, -5, -5 ), V3d( 5, 15, 5) )
-		resolution = V3i( 50, 150, 50 )
+		bound = Box3d( V3d( -1, -1, -1 ), V3d( 1, 15, 1) )
+		resolution = V3i( 10, 80, 10 )
 		threshold = 0.1
 		
 		for i in range( 0, 10):
 			points.append( V3d(0, i, 0 ) )
-			radius.append( 3 )
+			radius.append( 0.8 )
 			strength.append( 1 )
 			
 		self.assertEqual( len(points), 10 )
@@ -101,9 +101,10 @@ class TestPointMeshOp( unittest.TestCase ) :
 			bound = bound,
 			resolution = resolution
 		)	
-
+		
 		# Verified by eye
-		self.assertEqual( len(m.vertexIds), 60072 )	
+		self.assert_( len(m.vertexIds) > 9000)	
+		self.assert_( len(m.vertexIds) < 11000)			
 		
 				
 

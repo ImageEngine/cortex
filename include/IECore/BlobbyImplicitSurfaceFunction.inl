@@ -93,7 +93,7 @@ typename BlobbyImplicitSurfaceFunction<P,V>::Value BlobbyImplicitSurfaceFunction
 
 	m_tree->intersectingBounds( p, intersecting );
 
-	Value totalInfluence = -Imath::limits<Value>::epsilon();
+	Value totalInfluence = -1.e-6;
 
 	for (typename std::vector<BoundVectorConstIterator>::iterator it = intersecting.begin(); it != intersecting.end(); ++it)
 	{
@@ -106,18 +106,19 @@ typename BlobbyImplicitSurfaceFunction<P,V>::Value BlobbyImplicitSurfaceFunction
 		PointBaseType distSqrd = vecDot( sep, sep );
 		
 		const Value &b = m_radius->readable()[ boundIndex ];	
-
-		/// Osaka University's original "metaballs" function, cheaper than Blinn's s*exp(-b*r*r)
-		PointBaseType dist = sqrt( distSqrd );
-		if ( dist < b / 3.0 )
+		
+		const Value bSqrd = b * b;
+		
+		if (distSqrd < bSqrd)
 		{
-			totalInfluence += m_strength->readable()[ boundIndex ] * ( 1.0 - 3.0 * distSqrd / ( b * b ) );
+			/// Simple falloff function, similar to metaballs function but faster to compute. Hits zero when b==r, also.
+			totalInfluence += m_strength->readable()[ boundIndex ] * ( 
+				1.0 
+				- (4.0 * distSqrd*distSqrd*distSqrd) / (9.0 * bSqrd * bSqrd * bSqrd)
+				+ (17.0 * distSqrd * distSqrd) / (9.0 * bSqrd * bSqrd)
+				- (22.0 * distSqrd) / (9.0 * bSqrd)
+			);
 		}
-		else if (dist < b)
-		{
-			totalInfluence += 1.5 * m_strength->readable()[ boundIndex ] * ( 1.0 - dist / b ) * ( 1.0 - dist / b );
-		}
-	
 	}
 
 	return totalInfluence;
