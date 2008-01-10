@@ -140,6 +140,54 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			# Vector from closest point to test point should be roughly the same direction as the normal
 			self.assert_( shadingNormal.dot( ( testPt - r.point() ).normalized() ) > 0.5 )
 			
+		rand = Rand48()	
+		
+		# Perform 100 ray intersection queries from inside the sphere, in random directions	
+		for i in range(0, 100):
+		
+			origin = Rand48.solidSpheref(rand) * 0.5
+			direction = Rand48.hollowSpheref(rand)	
+			hit = mpe.intersectionPoint( origin, direction, r )			
+			self.assert_( hit )
+			self.assert_( math.fabs( r.point().length() -1 ) < 0.1 )
+			
+			hits = mpe.intersectionPoints( origin, direction )
+			self.assertEqual( len(hits), 1 )
+			
+			for hit in hits:
+				self.assert_( math.fabs( hit.point().length() -1 ) < 0.1 )
+			
+		# Perform 100 nearest ray intersection queries from outside the sphere, going outwards
+		for i in range(0, 100):
+		
+			direction = Rand48.hollowSpheref(rand)
+			origin = direction * 2
+				
+			hit = mpe.intersectionPoint( origin, direction, r )			
+			self.failIf( hit )
+			
+			hits = mpe.intersectionPoints( origin, direction )
+			self.failIf( hits )
+			
+		# Perform 100 nearest ray intersection queries from outside the sphere, going inwards	
+		for i in range(0, 100):
+		
+			direction = -Rand48.hollowSpheref(rand)
+			origin = -direction * 2
+				
+			hit = mpe.intersectionPoint( origin, direction, r )			
+			self.assert_( hit )
+			self.assert_( math.fabs( r.point().length() -1 ) < 0.1 )
+			
+			hits = mpe.intersectionPoints( origin, direction )
+			
+			# There should be 0, 1, or 2 intersections
+			self.assert_( len(hits) >= 0 )
+			self.assert_( len(hits) <= 2 )
+			
+			for hit in hits:
+				self.assert_( math.fabs( hit.point().length() -1 ) < 0.1 )			
+
 		
 			
 if __name__ == "__main__":

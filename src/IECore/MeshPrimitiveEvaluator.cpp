@@ -35,6 +35,7 @@
 #include <cassert>
 
 #include "OpenEXR/ImathBoxAlgo.h"
+#include "OpenEXR/ImathLineAlgo.h"
 
 #include "IECore/PrimitiveVariable.h"
 #include "IECore/Exception.h"
@@ -161,9 +162,9 @@ T MeshPrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) cons
 
 		case PrimitiveVariable::Vertex :
 		case PrimitiveVariable::Varying:			
-			assert(  m_vertexIds[0] < (int)data->readable().size() );
-			assert(  m_vertexIds[1] < (int)data->readable().size() );
-			assert(  m_vertexIds[2] < (int)data->readable().size() );						
+			assert( m_vertexIds[0] < (int)data->readable().size() );
+			assert( m_vertexIds[1] < (int)data->readable().size() );
+			assert( m_vertexIds[2] < (int)data->readable().size() );						
 			
 			return static_cast<T>( data->readable()[ m_vertexIds[0] ] * m_bary[0] + data->readable()[ m_vertexIds[1] ] * m_bary[1] + data->readable()[ m_vertexIds[2] ] * m_bary[2] );
 
@@ -312,13 +313,45 @@ bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEva
 bool MeshPrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
 	const PrimitiveEvaluator::ResultPtr &result, float maxDistance ) const
 {
-	throw NotImplementedException( __PRETTY_FUNCTION__ );
+	assert( boost::dynamic_pointer_cast< Result >( result ) );
+	
+	if ( m_triangles.size() == 0)
+	{
+		return false;
+	}
+	
+	assert( m_tree );
+	
+	ResultPtr mr = boost::static_pointer_cast< Result >( result );
+	
+	float maxDistSqrd = maxDistance * maxDistance;
+	
+	Imath::Line3f ray;
+	ray.pos = origin;
+	ray.dir = direction.normalized();
+			
+	return intersectionPointWalk( m_tree->rootIndex(), ray, maxDistSqrd, mr );
 }
 			
 int MeshPrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
 	std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance ) const
 {
-	throw NotImplementedException( __PRETTY_FUNCTION__ );
+	if ( m_triangles.size() == 0)
+	{
+		return 0;
+	}
+	
+	assert( m_tree );
+	
+	float maxDistSqrd = maxDistance * maxDistance;
+	
+	Imath::Line3f ray;
+	ray.pos = origin;
+	ray.dir = direction.normalized();
+	
+	intersectionPointsWalk( m_tree->rootIndex(), ray, maxDistSqrd, results );
+		
+	return results.size();
 }
 
 void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const
@@ -402,3 +435,243 @@ void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex no
 		}		
 	}
 }
+
+
+bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result ) const
+{
+	assert( m_tree );
+	
+	const BoundedTriangleTree::Node &node = m_tree->node( nodeIndex );
+	
+	if( node.isLeaf() )
+	{	
+		BoundedTriangleTree::Iterator *permLast = node.permLast();
+		bool intersects = false;
+		
+		for( BoundedTriangleTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		{
+			const BoundedTriangle &bb = **perm;
+			
+			Imath::V3f p[3];
+			p[0] =  m_verts->readable()[ bb.m_vertexIds[0] ];
+			p[1] =  m_verts->readable()[ bb.m_vertexIds[1] ];
+			p[2] =  m_verts->readable()[ bb.m_vertexIds[2] ];
+			
+			V3f hitPoint, bary;			
+			bool front;
+			
+			if ( intersect( ray, p[0], p[1], p[2], hitPoint, bary, front ) )
+			{				
+				float dSqrd = vecDistance2( hitPoint, ray.pos );
+				
+				if (dSqrd < maxDistSqrd)
+				{
+					maxDistSqrd = dSqrd;
+
+					result->m_bary = bary;
+					result->m_vertexIds[0] = bb.m_vertexIds[0];
+					result->m_vertexIds[1] = bb.m_vertexIds[1];
+					result->m_vertexIds[2] = bb.m_vertexIds[2];
+
+					result->m_triangleIdx = bb.m_triangleIndex;				
+
+					result->m_p = hitPoint;
+
+					result->m_n = triangleNormal( p[0], p[1], p[2] );
+					
+					intersects = true;
+				}
+			}						
+		}
+		
+		return intersects;
+	}
+	else
+	{	
+		V3f highHitPoint;
+		bool highHit = intersects(
+			m_tree->node( BoundedTriangleTree::highChildIndex( nodeIndex ) ).bound(),
+			ray, 
+			highHitPoint
+		);
+		
+		V3f lowHitPoint;
+		bool lowHit = intersects(
+			m_tree->node( BoundedTriangleTree::lowChildIndex( nodeIndex ) ).bound(),
+			ray, 
+			lowHitPoint
+		);
+				
+		float dHigh = -1;
+		if ( highHit )
+		{
+			float distSqrd = vecDistance2( highHitPoint, ray.pos );
+			if ( distSqrd > maxDistSqrd )
+			{
+				highHit = false;
+			}
+			else
+			{
+				dHigh = distSqrd;
+			}
+		}
+
+		float dLow = -1;
+		if ( lowHit )
+		{
+			float distSqrd = vecDistance2( lowHitPoint, ray.pos );
+			if ( distSqrd > maxDistSqrd )
+			{
+				lowHit = false;
+			}
+			else
+			{
+				dLow = distSqrd;
+			}
+		}		
+		
+		if (lowHit && highHit)
+		{	
+			/// Descend into the closest intersection first
+						
+			BoundedTriangleTree::NodeIndex firstChild, secondChild;
+			float dSecond;
+			if (dHigh < dLow)
+			{
+				firstChild = BoundedTriangleTree::highChildIndex( nodeIndex );
+				secondChild = BoundedTriangleTree::lowChildIndex( nodeIndex );	
+				dSecond = dLow;		
+			}
+			else
+			{
+				firstChild = BoundedTriangleTree::lowChildIndex( nodeIndex );
+				secondChild = BoundedTriangleTree::highChildIndex( nodeIndex );
+				dSecond = dHigh;			
+			}	
+					
+			bool intersection = intersectionPointWalk( firstChild, ray, maxDistSqrd, result );
+			
+			if (intersection)
+			{
+				float distSqrd = vecDistance2( result->point(), ray.pos );
+				if ( distSqrd > maxDistSqrd )
+				{
+					return intersectionPointWalk( secondChild, ray, maxDistSqrd, result );
+				}
+				else
+				{
+					maxDistSqrd = distSqrd;
+					return true;
+				}
+			}
+			else
+			{
+				return intersectionPointWalk( secondChild, ray, maxDistSqrd, result );
+			}
+				
+		}
+		else if (lowHit)
+		{
+			return intersectionPointWalk( BoundedTriangleTree::lowChildIndex( nodeIndex ), ray, maxDistSqrd, result );
+		}
+		else if (highHit)
+		{
+			return intersectionPointWalk( BoundedTriangleTree::highChildIndex( nodeIndex ), ray, maxDistSqrd, result );
+		}
+		
+		return false;
+	}
+	
+}
+
+void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const
+{
+	assert( m_tree );
+	
+	const BoundedTriangleTree::Node &node = m_tree->node( nodeIndex );
+	
+	if( node.isLeaf() )
+	{
+		BoundedTriangleTree::Iterator *permLast = node.permLast();
+				
+		for( BoundedTriangleTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		{
+			const BoundedTriangle &bb = **perm;
+			
+			Imath::V3f p[3];
+			p[0] =  m_verts->readable()[ bb.m_vertexIds[0] ];
+			p[1] =  m_verts->readable()[ bb.m_vertexIds[1] ];
+			p[2] =  m_verts->readable()[ bb.m_vertexIds[2] ];
+			
+			V3f hitPoint, bary;			
+			bool front;
+			
+			if ( intersect( ray, p[0], p[1], p[2], hitPoint, bary, front ) )
+			{				
+				float dSqrd = vecDistance2( hitPoint, ray.pos );
+				
+				if (dSqrd < maxDistSqrd)
+				{
+					/// Reject points which are too close to existing results
+					bool found = false;
+					std::vector<PrimitiveEvaluator::ResultPtr>::const_iterator it = results.begin();
+					while ( it != results.end() && !found )
+					{
+						if (( (*it)->point() - hitPoint ).length()  < 1.e-6 )
+						{
+							found = true;
+						}
+						++it;
+					}
+					
+					if (!found)
+					{				
+						ResultPtr result = new Result();
+
+						result->m_bary = bary;
+						result->m_vertexIds[0] = bb.m_vertexIds[0];
+						result->m_vertexIds[1] = bb.m_vertexIds[1];
+						result->m_vertexIds[2] = bb.m_vertexIds[2];
+
+						result->m_triangleIdx = bb.m_triangleIndex;				
+
+						result->m_p = hitPoint;
+
+						result->m_n = triangleNormal( p[0], p[1], p[2] );
+
+						results.push_back( result );	
+					}				
+				}
+			}						
+		}		
+	}
+	else
+	{	
+		V3f hitPoint;
+		
+		/// Test highChild bound for intersection, descending into children if necessary
+		bool hit = intersects(
+			m_tree->node( BoundedTriangleTree::highChildIndex( nodeIndex ) ).bound(),
+			ray, 
+			hitPoint
+		);
+				
+		if ( hit && vecDistance2( hitPoint, ray.pos ) < maxDistSqrd )
+		{		
+			intersectionPointsWalk( BoundedTriangleTree::highChildIndex( nodeIndex ), ray, maxDistSqrd, results );
+		}
+			
+		/// Test lowChild bound for intersection, descending into children if necessary				
+		hit = intersects(
+			m_tree->node( BoundedTriangleTree::lowChildIndex( nodeIndex ) ).bound(),
+			ray, 
+			hitPoint
+		);
+				
+		if ( hit && vecDistance2( hitPoint, ray.pos ) < maxDistSqrd )
+		{		
+			intersectionPointsWalk( BoundedTriangleTree::lowChildIndex( nodeIndex ), ray, maxDistSqrd, results );
+		}
+	}	
+}
+
