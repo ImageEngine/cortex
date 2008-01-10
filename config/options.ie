@@ -76,8 +76,8 @@ if PYTHON_LINK_FLAGS=="" :
 	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion 
 	
 # find 3delight
-dlReg = IEEnv.registry["apps"]["3delight"][getOption( "DL_VERSION", os.environ["DL_VERSION"] )][platform]
 try :
+	dlReg = IEEnv.registry["apps"]["3delight"][getOption( "DL_VERSION", os.environ["DL_VERSION"] )][platform]
 	if compiler==dlReg["compiler"] and compilerVersion==dlReg["compilerVersion"] :
 		RMAN_ROOT = dlReg["location"]
 except :
@@ -113,5 +113,8 @@ INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + comp
 INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 
-# speed up the build a bit hopefully
-BUILD_CACHEDIR = "/hosts/comp0076/sconsBuildCache"
+# speed up the build a bit hopefully. we're not doing this on the mac for two reasons. firstly, the macs don't mount /hosts.
+# secondly, scons doesn't recognise that the intel macs are different to the ppc and will try to cache them both the same.
+# we could probably fix both these things if it becomes important.
+if platform=="rhel4.i686" :
+	BUILD_CACHEDIR = "/hosts/comp0076/sconsBuildCache"
