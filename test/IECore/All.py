@@ -129,7 +129,7 @@ class SplitStream :
 
 	def __init__( self ) :
 	
-		self.__f = open( "test/IECore/results.txt", 'w' )		
+		self.__f = open( "test/IECore/resultsPython.txt", 'w' )		
 
 	def write( self, l ) :
 

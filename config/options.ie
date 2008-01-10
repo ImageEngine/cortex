@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -64,7 +64,7 @@ SQLITE_INCLUDE_PATH = "/software/tools/include/sqlite/3.3.8"
 GLEW_INCLUDE_PATH = '/software/tools/include/glew/1.4.0'
 
 # find the right libraries based on compiler and platform
-LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion 
+LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
 
 # ignore python-config stuff and specify it all explicitly ourselves
 pythonVersion = getOption( "PYTHON_VERSION", "2.5" )
@@ -76,8 +76,10 @@ if PYTHON_LINK_FLAGS=="" :
 	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion 
 	
 # find 3delight
+dlReg = IEEnv.registry["apps"]["3delight"][getOption( "DL_VERSION", os.environ["DL_VERSION"] )][platform]
 try :
-	RMAN_ROOT = IEEnv.registry["apps"]["3delight"][getOption( "DL_VERSION", os.environ["DL_VERSION"] )][platform]["location"]
+	if compiler==dlReg["compiler"] and compilerVersion==dlReg["compilerVersion"] :
+		RMAN_ROOT = dlReg["location"]
 except :
 	pass
 	
@@ -101,6 +103,7 @@ ENV_VARS_TO_IMPORT="PATH PYTHONPATH IEENV_ROOT IEENV_WORKING_PATH IEENV_LIBRARY_
 
 # make sure the tests can run
 TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
+TEST_LIBPATH = compilerReg["location"] + "/lib"
 
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )

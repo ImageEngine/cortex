@@ -286,6 +286,13 @@ o.Add(
 # Test options
 
 o.Add(
+	"TEST_LIBPATH",
+	"Additional colon separated paths to be prepended to the library path"
+	"used when running tests.",
+	""
+)
+
+o.Add(
 	"TEST_LIBRARY_PATH_ENV_VAR",
 	"This is a curious one, probably only ever necessary at image engine. It "
 	"specifies the name of an environment variable used to specify the library "
@@ -301,6 +308,8 @@ o.Add(
 env = Environment(
 	options = o
 )
+
+env["LIBPATH"] = env["LIBPATH"].split( ":" )
 
 for e in env["ENV_VARS_TO_IMPORT"].split() :
 	if e in os.environ :
@@ -346,6 +355,7 @@ env.Prepend(
 		"pthread",
 	],
 	CXXFLAGS = [
+		"-pipe",
 		"-Wall",
 # removing the flag below till we can fix the warnings coming from boost
 #		"-Werror",
@@ -482,16 +492,25 @@ if pythonEnv["PLATFORM"]=="darwin" :
 # An environment for running tests
 ###########################################################################################
 
-if env["TEST_LIBRARY_PATH_ENV_VAR"]=="" :
-	if env["PLATFORM"]=="darwin" :
-		env["TEST_LIBRARY_PATH_ENV_VAR"] = "DYLD_LIBRARY_PATH"
-	else :
-		env["TEST_LIBRARY_PATH_ENV_VAR"] = "LD_LIBRARY_PATH"
-
 testEnv = env.Copy()
-testEnv["ENV"]["PYTHONPATH"] = "./python"
 
-testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = ":".join( [ "./lib" ] + env["LIBPATH"] )
+testEnv.Prepend( LIBPATH = [ "./lib" ] )
+
+testEnvLibPath = ":".join( testEnv["LIBPATH"] )
+if testEnv["TEST_LIBPATH"] != "" :
+	testEnvLibPath += ":" + testEnv["TEST_LIBPATH"]
+
+if testEnv["TEST_LIBRARY_PATH_ENV_VAR"]!="" :
+	testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
+
+if env["PLATFORM"]=="darwin" :
+	testEnv["ENV"]["DYLD_LIBRARY_PATH"] = testEnvLibPath
+else :
+	testEnv["ENV"]["LD_LIBRARY_PATH"] = testEnvLibPath
+
+testEnv.Append( LIBS=["boost_unit_test_framework"] )
+
+testEnv["ENV"]["PYTHONPATH"] = "./python"
 
 ###########################################################################################
 # Helper functions
@@ -556,13 +575,16 @@ def makeSymLink( target, source ) :
 
 coreEnv = env.Copy( IECORE_NAME="IECore" )
 corePythonEnv = pythonEnv.Copy( IECORE_NAME="IECore" )
+coreTestEnv = testEnv.Copy()
 
+# lists of sources
 coreSources = glob.glob( "src/IECore/*.cpp" )
 coreHeaders = glob.glob( "include/IECore/*.h" ) + glob.glob( "include/IECore/*.inl" )
 coreBindingHeaders = glob.glob( "include/IECore/bindings/*.h" ) + glob.glob( "include/IECore/bindings/*.inl" )
 corePythonSources = glob.glob( "src/IECore/bindings/*.cpp" )
 corePythonScripts = glob.glob( "python/IECore/*.py" )
 
+# configure checks
 if doConfigure :
 
 	c = Configure( coreEnv )
@@ -590,6 +612,7 @@ if doConfigure :
 	if coreEnv["WITH_SQLITE"] and c.CheckLibWithHeader( "sqlite3", "sqlite/sqlite3.h", "CXX" ) :
 		c.env.Append( CPPFLAGS = "-DIECORE_WITH_SQLITE" )
 		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_SQLITE' )
+		coreTestEnv.Append( CPPFLAGS = '-DIECORE_WITH_SQLITE' )
 	else :
 		coreSources.remove( "src/IECore/SQLiteIndexedIO.cpp" )
 		if coreEnv["WITH_SQLITE"] :
@@ -597,18 +620,21 @@ if doConfigure :
 		
 	c.Finish()
 
+# library
 coreLibrary = coreEnv.SharedLibrary( "lib/" + os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreSources )
 coreLibraryInstall = coreEnv.Install( os.path.dirname( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreLibrary )
 coreEnv.AddPostAction( coreLibraryInstall, lambda target, source, env : makeLibSymLinks( coreEnv ) )
 coreEnv.Alias( "install", [ coreLibraryInstall ] )
 coreEnv.Alias( "installCore", [ coreLibraryInstall ] )
 
+# headers
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
 headerInstall += coreEnv.Install( "$INSTALL_HEADER_DIR/IECore/bindings", coreBindingHeaders )
 coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
 coreEnv.Alias( "install", headerInstall )
 coreEnv.Alias( "installCore", headerInstall )
 
+# python module
 corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 corePythonModule = corePythonEnv.SharedLibrary( "python/IECore/_IECore", corePythonSources )
 corePythonEnv.Depends( corePythonModule, coreLibrary )
@@ -620,8 +646,19 @@ corePythonEnv.Alias( "installCore", corePythonModuleInstall )
 
 Default( coreLibrary, corePythonModule )
 
-coreTest = testEnv.Command( "test/IECore/results.txt", corePythonModule, pythonExecutable + " test/IECore/All.py" )
-testEnv.Alias( "coreTest", coreTest )
+# testing
+
+coreTestEnv.Append(
+	LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+	CPPPATH = [ "test/IECore" ],
+)
+
+coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", glob.glob( "test/IECore/*.cpp" ) )
+coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest >& test/IECore/results.txt" )
+coreTestEnv.Alias( "testCore", coreTest )
+
+corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePythonModule, pythonExecutable + " test/IECore/All.py" )
+coreTestEnv.Alias( "testCorePython", corePythonTest )
 
 ###########################################################################################
 # Build, install and test the coreRI library and bindings
@@ -720,7 +757,7 @@ if doConfigure :
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " test/IECoreRI/All.py" )
 		riTestEnv.Depends( riTest, corePythonModule )
-		riTestEnv.Alias( "riTest", riTest )
+		riTestEnv.Alias( "testRI", riTest )
 
 ###########################################################################################
 # Build, install and test the optional CoreGL library and bindings
