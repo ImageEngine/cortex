@@ -51,6 +51,16 @@ struct PrimitiveEvaluatorHelper
 	{
 		return PrimitiveEvaluator::create( primitive );
 	}
+	
+	static bool intersectionPoint( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, const PrimitiveEvaluator::ResultPtr &result )
+	{
+		return evaluator.intersectionPoint( origin, direction, result );
+	}
+	
+	static bool intersectionPointMaxDist( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, const PrimitiveEvaluator::ResultPtr &result, float maxDist )
+	{
+		return evaluator.intersectionPoint( origin, direction, result, maxDist );
+	}
 
 	static list intersectionPoints( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction )
 	{
@@ -90,12 +100,16 @@ void bindPrimitiveEvaluator()
 	list (*intersectionPoints)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &) = &PrimitiveEvaluatorHelper::intersectionPoints;
 	list (*intersectionPointsMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, float) = &PrimitiveEvaluatorHelper::intersectionPoints;	
 	
+	bool (*intersectionPoint)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, const PrimitiveEvaluator::ResultPtr &) = &PrimitiveEvaluatorHelper::intersectionPoint;
+	bool (*intersectionPointMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, const PrimitiveEvaluator::ResultPtr &, float ) = &PrimitiveEvaluatorHelper::intersectionPointMaxDist;	
+	
 	object p = PrimitiveEvaluatorPyClass ( "PrimitiveEvaluator", no_init )
 		.def( "create", &PrimitiveEvaluatorHelper::create ).staticmethod("create")
 		.def( "createResult", &PrimitiveEvaluator::createResult )
 		.def( "closestPoint", &PrimitiveEvaluator::closestPoint )
 		.def( "pointAtUV", &PrimitiveEvaluator::pointAtUV )
-		.def( "intersectionPoint", &PrimitiveEvaluator::intersectionPoint )
+		.def( "intersectionPoint", intersectionPoint )
+		.def( "intersectionPoint", intersectionPointMaxDist )		
 		.def( "intersectionPoints", intersectionPoints )
 		.def( "intersectionPoints", intersectionPointsMaxDist )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(PrimitiveEvaluator)
