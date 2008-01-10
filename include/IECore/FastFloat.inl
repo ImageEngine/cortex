@@ -70,13 +70,20 @@ namespace IECore
 		return fastFloatRound( v + IECORE_DOUBLEMAGICROUNDEPS );
 	}
 	
+	union FastFloatFloatInt
+	{
+		float f;
+		int i;
+	};
+	
 	// From: http://www.beyond3d.com/articles/fastinvsqrt/
 	inline float fastFloatInvSqrt( float x )
 	{
 		float xhalf = 0.5f * x;
-		int i = *(int*)(&x);
-		i = 0x5f3759df - (i >> 1 );
-		x = *(float*)&i;
+		FastFloatFloatInt u;
+		u.f = x;
+		u.i = 0x5f3759df - (u.i >> 1 );
+		x = u.f;
 		x = x*(1.5f - xhalf*x*x);
 		return x;
 	}
