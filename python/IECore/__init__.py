@@ -77,6 +77,7 @@ from FileDependenciesOp import FileDependenciesOp
 from CheckFileDependenciesOp import CheckFileDependenciesOp
 from PointsExpressionOp import PointsExpressionOp
 from Struct import Struct
+import Enum
 from LsHeaderOp import LsHeaderOp
 from curry import curry
 from MenuItemDefinition import MenuItemDefinition

@@ -95,6 +95,7 @@ from BinaryFrameList import *
 from PointsExpressionOp import *
 from FrameList import *
 from Struct import *
+from Enum import *
 from HeaderGenerator import *
 from Camera import *
 from NURBS import *

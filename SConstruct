@@ -802,6 +802,9 @@ if env["WITH_GL"] :
 		"CPPPATH" : [
 			"contrib/IECoreGL/include",
 		],
+		"LIBPATH" : [
+			"./lib",
+		]
 	}
 	glEnvAppends = {
 		
@@ -814,7 +817,6 @@ if env["WITH_GL"] :
 		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
-			"./lib",
 		],
 		"LIBS" : [
 			"boost_wave",
@@ -1006,20 +1008,33 @@ if env["WITH_MAYA"] :
 nukeEnv = env.Copy( IECORE_NAME = "IECoreNuke" )
 nukeEnv.Append( CPPPATH = [ "$NUKE_ROOT/include" ] )
 
-nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
-nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
+if doConfigure :
 
-nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeSources )
-nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeLibrary )
-nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv ) )
-nukeEnv.Alias( "install", nukeLibraryInstall )
-nukeEnv.Alias( "installNuke", nukeLibraryInstall )
-			
-nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
-nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
+	c = Configure( nukeEnv )
 
-nukeEnv.Alias( "installNuke", nukeHeaderInstall )
-nukeEnv.Alias( "install", nukeHeaderInstall )
+	if not c.CheckHeader( "DDImage/Vector3.h" ) :
+		
+		sys.stderr.write( "WARNING : no nuke devkit found, not building IECoreNuke - check NUKE_ROOT.\n" )
+		c.Finish()
+		
+	else :
+	
+		c.Finish()
+
+		nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
+		nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
+
+		nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeSources )
+		nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeLibrary )
+		nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv ) )
+		nukeEnv.Alias( "install", nukeLibraryInstall )
+		nukeEnv.Alias( "installNuke", nukeLibraryInstall )
+
+		nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
+		nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
+
+		nukeEnv.Alias( "installNuke", nukeHeaderInstall )
+		nukeEnv.Alias( "install", nukeHeaderInstall )
 
 ###########################################################################################
 # Documentation
