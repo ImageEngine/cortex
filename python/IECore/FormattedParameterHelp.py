@@ -127,12 +127,23 @@ def __formatParameter( parm, formatter ) :
 	formatter.indent()
 	
 	d = parm.defaultValue
-	if isinstance( d, IECore.Data ) and hasattr( d, "value" ) :
+	defaultPresetName = None
+	for k, v in parm.presets().items() :
+		if d == v :
+			defaultPresetName = k
+			break
+	
+	if defaultPresetName :
+		formatter.paragraph( "Default : " + defaultPresetName )
+	elif isinstance( d, IECore.Data ) and hasattr( d, "value" ) :
 		formatter.paragraph( "Default : " + str( d.value ) )
 	
 	p = parm.presets()
 	if len( p ) :
-		formatter.paragraph( "Presets : " + " ".join( p.keys() ) )
+		formatter.paragraph( "Presets : " )
+		formatter.indent()
+		formatter.paragraph( "\n".join( p.keys() ) )
+		formatter.unindent()
 		
 	formatter.unindent()
 
