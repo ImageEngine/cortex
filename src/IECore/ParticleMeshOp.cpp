@@ -164,7 +164,10 @@ ParticleMeshOp::ParticleMeshOp()
 	parameters()->addParameter( m_strengthScaleParameter );
 	parameters()->addParameter( m_thresholdParameter );
 	parameters()->addParameter( m_resolutionParameter );
-	parameters()->addParameter( m_boundParameter );				
+	parameters()->addParameter( m_boundParameter );		
+
+	/// \todo Allow use of particle cache sequence, rather than single file
+	/// \todo Add parameter to allow use of bound stored in particle cache		
 }
 
 ParticleMeshOp::~ParticleMeshOp()
