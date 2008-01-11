@@ -48,11 +48,22 @@ def formatParameterHelp( parm, formatter ) :
 
 def __formatNumericParameter( parm, formatter ) :
 
+	## \todo Could this be put somewhere generally useful?
+	def formatFloat( f ) :
+	
+		f = "%.10f" % f
+		f = f.rstrip( "0" )
+		f = f.rstrip( "." )
+		return f
+
 	__formatParameter( parm, formatter )
 	
 	formatter.indent()
 
-	formatter.paragraph( "Range : " + str( parm.minValue ) + " - " + str( parm.maxValue ) )
+	if isinstance( parm, IECore.IntData ) :
+		formatter.paragraph( "Range : " + str( parm.minValue ) + " - " + str( parm.maxValue ) )
+	else :
+		formatter.paragraph( "Range : %s - %s" % ( formatFloat( parm.minValue ), formatFloat( parm.maxValue ) ) )
 
 	formatter.unindent()
 
