@@ -91,6 +91,17 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		p = IECore.FileSequenceParameter( name = "n", description = "d" )
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.IntData( 1 ) )
 		
+	def testExtensions( self ) :
+	
+		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.DontCare, extensions="tif exr jpg" )
+		self.assertEqual( p.extensions, [ "tif", "exr", "jpg" ] )
+		self.assert_( p.valueValid( IECore.StringData( "a.#.tif" ) )[0] )
+		self.assert_( not p.valueValid( IECore.StringData( "a.#.gif" ) )[0] )
+		
+		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "dsds.###" ) )
+		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "dsds.###.gif" ) )
+		p.setValidatedValue( IECore.StringData( "dsds.##.tif" ) )
+
 		
 if __name__ == "__main__":
         unittest.main()

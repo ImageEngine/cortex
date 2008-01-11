@@ -33,6 +33,7 @@
 ##########################################################################
 
 import re
+import os.path
 import _IECore as IECore
 from FileSequence import FileSequence
 from FileSequenceFunctions import ls
@@ -52,10 +53,15 @@ from FrameList import FrameList
 class FileSequenceParameter( IECore.PathParameter ) :
 
 	def __init__( self, name, description, defaultValue = "", allowEmptyString = True, check = IECore.PathParameter.CheckType.DontCare,
-		presets = {}, presetsOnly = False, userData = IECore.CompoundObject() ) :
+		presets = {}, presetsOnly = False, userData = IECore.CompoundObject(), extensions = [] ) :
 		
 		IECore.PathParameter.__init__( self, name, description, defaultValue, allowEmptyString, check, presets, presetsOnly, userData )
 
+		if isinstance( extensions, list ) :
+			self.extensions = extensions
+		else :
+			self.extensions = extensions.split()
+			
 	## Returns true only if the value is StringData and matches the FileSequence.fileNameValidator
 	# pattern. Also checks that the sequence exists or doesn't exist based on the CheckType passed to
 	# the constructor.
@@ -73,6 +79,11 @@ class FileSequenceParameter( IECore.PathParameter ) :
 			
 		if not FileSequence.fileNameValidator().match( value.value ) :
 			return False, "Value must contain one sequence of at least one # character to specify frame number."
+		
+		if len( self.extensions ) :
+			e = os.path.splitext( value.value )[1].lstrip( "." )
+			if not e in self.extensions :
+				return False, "File sequence extension not valid."
 		
 		if self.mustExist :
 			parts = value.value.split(' ')
