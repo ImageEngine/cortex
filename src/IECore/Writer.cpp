@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -119,6 +119,15 @@ WriterPtr Writer::create( ObjectPtr object, const std::string &fileName )
 		}
 	}
 	throw Exception( string( "Unrecognized output file format '") + ext + "'!" );
+}
+
+void Writer::supportedExtensions( std::vector<std::string> &extensions )
+{
+	ExtensionsToFnsMap *m = extensionsToFns();
+	for( ExtensionsToFnsMap::const_iterator it=m->begin(); it!=m->end(); it++ )
+	{
+		extensions.push_back( it->first.substr( 1 ) );
+	}
 }
 
 Writer::ExtensionsToFnsMap *Writer::extensionsToFns()

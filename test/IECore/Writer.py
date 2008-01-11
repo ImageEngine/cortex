@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,55 +32,26 @@
 #
 ##########################################################################
 
-from IECore import *
+import unittest
+import IECore
 
-class SequenceConvertOp( Op ) :
-
-	def __init__( self ) :
+class TestWriter( unittest.TestCase ) :
+    
+	def testSupportedExtensions( self ) :
 	
-		Op.__init__( self, "SequenceConvertOp", "Converts file sequences.",
-			FileSequenceParameter(
-				name = "result",
-				description = "The new file sequence.",
-				defaultValue = "",
-				check = FileSequenceParameter.CheckType.DontCare,
-				allowEmptyString = True,
-			)
-		)
+		e = IECore.Writer.supportedExtensions()
+		for ee in e :
+			self.assert_( type( ee ) is str )
 		
-		self.parameters().addParameters(
-			[
-				FileSequenceParameter(
-					name = "src",
-					description = "The source file sequence.",
-					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustExist,
-					allowEmptyString = False,
-					extensions = Reader.supportedExtensions()
-				),
-				FileSequenceParameter(
-					name = "dst",
-					description = "The destination file sequence.",
-					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustNotExist,
-					allowEmptyString = False,
-					extensions = Writer.supportedExtensions()
-				)
-			]
-		)
+		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob" ]
+		if IECore.withTIFF() :
+			expectedExtensions += [ "tif", "tiff" ]
+		if IECore.withJPEG() :
+			expectedExtensions += [ "jpg", "jpeg" ]
+						
+		for ee in expectedExtensions :
+			self.assert_( ee in e )
 
-	def doOperation( self, operands ) :
-	
-		src = self.parameters()["src"].getFileSequenceValue()
-		dst = src.copy()
-		dst.fileName = operands.dst.value
-
-		# \todo compare extensions, if extensions match, simply copy			
-		# if extensions don't match, read and write
-		for (sf, df) in zip(src.fileNames(), dst.fileNames()):
-			img = Reader.create(sf).read()
-			Writer.create(img, df).write()
-			
-		return StringData(dst.fileName)
-
-makeRunTimeTyped( SequenceConvertOp, 100014, Op )
+if __name__ == "__main__":
+	unittest.main()   
+	        

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,6 +39,7 @@
 #include "IECore/ObjectParameter.h"
 
 #include <map>
+#include <vector>
 
 namespace IECore
 {
@@ -76,6 +77,10 @@ class Writer : public Op
 		/// used to determine format). 
 		/// Throws an Exception if no suitable writer can be found.
 		static WriterPtr create( ObjectPtr object, const std::string &fileName );
+		
+		/// Fills the passed vector with all the extensions for which a Writer is
+		/// available. Extensions are of the form "tif" - ie without a preceding '.'.
+		static void supportedExtensions( std::vector<std::string> &extensions );
 		
 	protected :
 	
