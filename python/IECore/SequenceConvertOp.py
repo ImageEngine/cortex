@@ -38,7 +38,15 @@ class SequenceConvertOp( Op ) :
 
 	def __init__( self ) :
 	
-		Op.__init__( self, "SequenceConvertOp", "Converts file sequences.",
+		Op.__init__( self, "SequenceConvertOp",
+			"This Op converts file sequences from one format to another. "
+			"It supports all input formats for which a reader is available "
+			"(" + " ".join( Reader.supportedExtensions() ) + ") and all output "
+			"formats for which a writer is available (" + " ".join( Reader.supportedExtensions() ) + "). "
+			"Because of it's general nature it doesn't support any additional options such as "
+			"compression types for image formats. Also please note that not all combinations are "
+			"possible - for instance you cannot convert an OBJ to a JPEG."
+			,
 			FileSequenceParameter(
 				name = "result",
 				description = "The new file sequence.",
