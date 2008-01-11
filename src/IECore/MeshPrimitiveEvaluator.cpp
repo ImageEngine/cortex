@@ -336,6 +336,8 @@ bool MeshPrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const 
 int MeshPrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
 	std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance ) const
 {
+	results.clear();
+
 	if ( m_triangles.size() == 0)
 	{
 		return 0;
@@ -530,49 +532,52 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 			}
 		}		
 		
-		if (lowHit && highHit)
+		if (lowHit)
 		{	
-			/// Descend into the closest intersection first
-						
-			BoundedTriangleTree::NodeIndex firstChild, secondChild;
-			float dSecond;
-			if (dHigh < dLow)
+			if (highHit)
 			{
-				firstChild = BoundedTriangleTree::highChildIndex( nodeIndex );
-				secondChild = BoundedTriangleTree::lowChildIndex( nodeIndex );	
-				dSecond = dLow;		
-			}
-			else
-			{
-				firstChild = BoundedTriangleTree::lowChildIndex( nodeIndex );
-				secondChild = BoundedTriangleTree::highChildIndex( nodeIndex );
-				dSecond = dHigh;			
-			}	
-					
-			bool intersection = intersectionPointWalk( firstChild, ray, maxDistSqrd, result );
-			
-			if (intersection)
-			{
-				float distSqrd = vecDistance2( result->point(), ray.pos );
-				if ( distSqrd > maxDistSqrd )
+				/// Descend into the closest intersection first
+
+				BoundedTriangleTree::NodeIndex firstChild, secondChild;
+				float dSecond;
+				if (dHigh < dLow)
 				{
-					return intersectionPointWalk( secondChild, ray, maxDistSqrd, result );
+					firstChild = BoundedTriangleTree::highChildIndex( nodeIndex );
+					secondChild = BoundedTriangleTree::lowChildIndex( nodeIndex );	
+					dSecond = dLow;		
 				}
 				else
 				{
-					maxDistSqrd = distSqrd;
-					return true;
+					firstChild = BoundedTriangleTree::lowChildIndex( nodeIndex );
+					secondChild = BoundedTriangleTree::highChildIndex( nodeIndex );
+					dSecond = dHigh;			
+				}	
+
+				bool intersection = intersectionPointWalk( firstChild, ray, maxDistSqrd, result );
+
+				if (intersection)
+				{
+					float distSqrd = vecDistance2( result->point(), ray.pos );
+					if ( distSqrd > maxDistSqrd )
+					{
+						return intersectionPointWalk( secondChild, ray, maxDistSqrd, result );
+					}
+					else
+					{
+						maxDistSqrd = distSqrd;
+						return true;
+					}
+				}
+				else
+				{
+					return intersectionPointWalk( secondChild, ray, maxDistSqrd, result );
 				}
 			}
 			else
 			{
-				return intersectionPointWalk( secondChild, ray, maxDistSqrd, result );
+				return intersectionPointWalk( BoundedTriangleTree::lowChildIndex( nodeIndex ), ray, maxDistSqrd, result );
 			}
 				
-		}
-		else if (lowHit)
-		{
-			return intersectionPointWalk( BoundedTriangleTree::lowChildIndex( nodeIndex ), ray, maxDistSqrd, result );
 		}
 		else if (highHit)
 		{
@@ -611,36 +616,21 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIn
 				float dSqrd = vecDistance2( hitPoint, ray.pos );
 				
 				if (dSqrd < maxDistSqrd)
-				{
-					/// Reject points which are too close to existing results
-					bool found = false;
-					std::vector<PrimitiveEvaluator::ResultPtr>::const_iterator it = results.begin();
-					while ( it != results.end() && !found )
-					{
-						if (( (*it)->point() - hitPoint ).length()  < 1.e-6 )
-						{
-							found = true;
-						}
-						++it;
-					}
-					
-					if (!found)
-					{				
-						ResultPtr result = new Result();
+				{			
+					ResultPtr result = new Result();
 
-						result->m_bary = bary;
-						result->m_vertexIds[0] = bb.m_vertexIds[0];
-						result->m_vertexIds[1] = bb.m_vertexIds[1];
-						result->m_vertexIds[2] = bb.m_vertexIds[2];
+					result->m_bary = bary;
+					result->m_vertexIds[0] = bb.m_vertexIds[0];
+					result->m_vertexIds[1] = bb.m_vertexIds[1];
+					result->m_vertexIds[2] = bb.m_vertexIds[2];
 
-						result->m_triangleIdx = bb.m_triangleIndex;				
+					result->m_triangleIdx = bb.m_triangleIndex;				
 
-						result->m_p = hitPoint;
+					result->m_p = hitPoint;
 
-						result->m_n = triangleNormal( p[0], p[1], p[2] );
+					result->m_n = triangleNormal( p[0], p[1], p[2] );
 
-						results.push_back( result );	
-					}				
+					results.push_back( result );										
 				}
 			}						
 		}		
