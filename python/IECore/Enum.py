@@ -53,7 +53,7 @@
 
 def create( *names ) :
 
-	class Enum() :
+	class Enum :
 
 		__slots__ = ( "__value" )
 		__names = names
