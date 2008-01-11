@@ -302,6 +302,14 @@ o.Add(
 # Test options
 
 o.Add(
+	"TEST_CORE_SCRIPT",
+	"The python script to run for the core tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"test/IECore/All.py"
+)
+
+o.Add(
 	"TEST_LIBPATH",
 	"Additional colon separated paths to be prepended to the library path"
 	"used when running tests.",
@@ -676,7 +684,7 @@ coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", glob.glob( "tes
 coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest >& test/IECore/results.txt" )
 coreTestEnv.Alias( "testCore", coreTest )
 
-corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePythonModule, pythonExecutable + " test/IECore/All.py" )
+corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePythonModule, pythonExecutable + " $TEST_CORE_SCRIPT" )
 coreTestEnv.Alias( "testCorePython", corePythonTest )
 
 ###########################################################################################
