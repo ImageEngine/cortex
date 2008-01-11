@@ -1012,7 +1012,7 @@ if doConfigure :
 
 	c = Configure( nukeEnv )
 
-	if not c.CheckHeader( "DDImage/Vector3.h" ) :
+	if not c.CheckHeader( "DDImage/Vector3.h", "\"\"", "CXX" ) :
 		
 		sys.stderr.write( "WARNING : no nuke devkit found, not building IECoreNuke - check NUKE_ROOT.\n" )
 		c.Finish()
