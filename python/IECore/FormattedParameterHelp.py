@@ -63,11 +63,20 @@ def __formatNumericParameter( parm, formatter ) :
 	if not parm.presetsOnly :
 	
 		if isinstance( parm, IECore.IntData ) :
-			formatter.paragraph( "Range : " + str( parm.minValue ) + " - " + str( parm.maxValue ) )
+			minValue = str( parm.minValue )
+			maxValue = str( parm.maxValue )
 		else :
-			formatter.paragraph( "Range : %s - %s" % ( formatFloat( parm.minValue ), formatFloat( parm.maxValue ) ) )
-
-	formatter.unindent()
+			minValue = formatFloat( parm.minValue )
+			maxValue = formatFloat( parm.maxValue )
+			
+		if parm.hasMinValue() and parm.hasMaxValue() :
+			formatter.paragraph( "Range : %s - %s" % ( minValue, maxValue ) )
+		elif parm.hasMinValue() :
+			formatter.paragraph( "Min : %s" % minValue )
+		elif parm.hasMaxValue() :
+			formatter.paragraph( "Max : %s" % maxValue )
+		
+		formatter.unindent()
 
 def __formatFileNameParameter( parm, formatter ) :
 
