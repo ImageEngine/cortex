@@ -60,10 +60,12 @@ def __formatNumericParameter( parm, formatter ) :
 	
 	formatter.indent()
 
-	if isinstance( parm, IECore.IntData ) :
-		formatter.paragraph( "Range : " + str( parm.minValue ) + " - " + str( parm.maxValue ) )
-	else :
-		formatter.paragraph( "Range : %s - %s" % ( formatFloat( parm.minValue ), formatFloat( parm.maxValue ) ) )
+	if not parm.presetsOnly :
+	
+		if isinstance( parm, IECore.IntData ) :
+			formatter.paragraph( "Range : " + str( parm.minValue ) + " - " + str( parm.maxValue ) )
+		else :
+			formatter.paragraph( "Range : %s - %s" % ( formatFloat( parm.minValue ), formatFloat( parm.maxValue ) ) )
 
 	formatter.unindent()
 
