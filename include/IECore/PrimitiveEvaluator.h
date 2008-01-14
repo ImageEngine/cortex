@@ -108,6 +108,10 @@ class PrimitiveEvaluator : public RunTimeTyped
 		
 		//! @name Query Functions
 		//@{
+		
+		/// \todo Add something like:
+		/// virtual bool signedDistance( const Imath::V3f &p, float &distance, const ResultPtr &closestPoint ) const;
+		/// With a default implementationw which just checks distance from the plane defined by the closest point and normal.
 
 		/// Find the closest point on the primitive to the given query point. Returns true on success.
 		virtual bool closestPoint( const Imath::V3f &p, const ResultPtr &result ) const =0;
