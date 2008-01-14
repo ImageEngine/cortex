@@ -44,22 +44,25 @@
 namespace IECore
 {
 
-/// A model of ImplicitSurfaceFunction for creating a signed distance field with respect to a Primitive.
+/// A model of ImplicitSurfaceFunction for creating a signed distance field with respect to a Primitive. This will
+/// only work on continuous surfaces, as it expects the signed distance to be computable from only the closest point
+/// and closest normal.
 class PrimitiveImplicitSurfaceFunction : public ImplicitSurfaceFunction< Imath::V3f, float >
 {
         public:
                 typedef boost::intrusive_ptr<PrimitiveImplicitSurfaceFunction> Ptr;
                 typedef boost::intrusive_ptr<const PrimitiveImplicitSurfaceFunction> ConstPtr;
 		
-		//// Create the function. The passed MObject must be compatible with the MFnMesh function set
+		/// Construct the function from the given Primitive. If a PrimitiveEvaluator cannot be created from it an
+		/// InvalidArgumentException is thrown.
 		PrimitiveImplicitSurfaceFunction( PrimitivePtr primitive );
 		
 		virtual ~PrimitiveImplicitSurfaceFunction();
                 
-		// Retrieve the signed distance from the mesh at the given point              
+		// Retrieve the signed distance from the primitive at the given point              
                 Value operator()( const Point &p );
 		
-		// Retrieve the signed distance from the mesh at the given point		
+		// Retrieve the signed distance from the primitive at the given point		
 		virtual Value getValue( const Point &p );
 
 		
