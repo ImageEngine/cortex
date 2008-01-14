@@ -34,7 +34,7 @@
 
 #include "IECore/MeshPrimitiveBuilder.h"
 #include "IECore/MeshPrimitiveImplicitSurfaceOp.h"
-#include "IECore/PrimitiveImplicitSurfaceFunction.h"
+#include "IECore/MeshPrimitiveImplicitSurfaceFunction.h"
 #include "IECore/CachedImplicitSurfaceFunction.h"
 #include "IECore/MarchingCubes.h"
 #include "IECore/ObjectParameter.h"
@@ -126,7 +126,7 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 
 	typedef MarchingCubes< CachedImplicitSurfaceFunction< V3f, float > > Marcher ;								
 				
-	PrimitiveImplicitSurfaceFunctionPtr fn = new PrimitiveImplicitSurfaceFunction( typedPrimitive );
+	MeshPrimitiveImplicitSurfaceFunctionPtr fn = new MeshPrimitiveImplicitSurfaceFunction( typedPrimitive );
 
 	Marcher::Ptr m = new Marcher
 	( 
