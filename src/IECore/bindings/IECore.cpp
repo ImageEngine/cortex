@@ -145,6 +145,7 @@
 #include "IECore/bindings/PrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/MeshPrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/PrimitiveImplicitSurfaceFunctionBinding.h"
+#include "IECore/bindings/MeshPrimitiveImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/MeshPrimitiveImplicitSurfaceOpBinding.h"
 #include "IECore/IECore.h"
 
@@ -270,6 +271,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPrimitiveEvaluator();
 	bindMeshPrimitiveEvaluator();
 	bindPrimitiveImplicitSurfaceFunction();	
+	bindMeshPrimitiveImplicitSurfaceFunction();		
 	bindMeshPrimitiveImplicitSurfaceOp();	
 		
 	def( "majorVersion", &IECore::majorVersion );
