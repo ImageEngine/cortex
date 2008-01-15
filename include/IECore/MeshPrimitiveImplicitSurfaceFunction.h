@@ -68,12 +68,12 @@ class MeshPrimitiveImplicitSurfaceFunction : public PrimitiveImplicitSurfaceFunc
 	
 		typedef int VertexIndex;
 		typedef int TriangleIndex;
-		typedef std::pair<VertexIndex, VertexIndex> Edge;
-		typedef std::map< Edge, std::vector<TriangleIndex> > EdgeConnectivity;
+		typedef std::pair<VertexIndex, VertexIndex> Edge;		
 		
-		EdgeConnectivity m_edgeConnectivity;
+		typedef std::map< Edge, Imath::V3f > EdgeAverageNormals;		
+		EdgeAverageNormals m_edgeAverageNormals;
 	
-		V3fVectorDataPtr m_angleWeightedNormals;
+		V3fVectorDataPtr m_vertexAngleWeightedNormals;
 		
 		ConstV3fVectorDataPtr m_P;				
 };

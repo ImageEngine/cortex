@@ -88,8 +88,8 @@ MeshPrimitiveImplicitSurfaceFunction::MeshPrimitiveImplicitSurfaceFunction(  Mes
 
 	/// Calculate "Angle-weighted pseudo-normal" for each vertex. A description of this, and proof of its validity for use in signed distance functions
 	/// can be found here: www.ann.jussieu.fr/~frey/papiers/PsNormTVCG.pdf
-	m_angleWeightedNormals = new V3fVectorData( );
-	m_angleWeightedNormals->writable().reserve( m_P->readable().size() );
+	m_vertexAngleWeightedNormals = new V3fVectorData( );
+	m_vertexAngleWeightedNormals->writable().reserve( m_P->readable().size() );
 
 	int numVertices = m_P->readable().size();
 
@@ -146,14 +146,18 @@ MeshPrimitiveImplicitSurfaceFunction::MeshPrimitiveImplicitSurfaceFunction(  Mes
 
 		n.normalize();
 
-		assert(m_angleWeightedNormals);
+		assert(m_vertexAngleWeightedNormals);
 
-		m_angleWeightedNormals->writable().push_back( n );
+		m_vertexAngleWeightedNormals->writable().push_back( n );
 	}
 
-	assert( m_angleWeightedNormals->readable().size() == m_P->readable().size()  );
+	assert( m_vertexAngleWeightedNormals->readable().size() == m_P->readable().size()  );
 
-	/// Calculate edge connectivity. For any given pair of (connected) vertices we want to be able to find the faces connected to that edge. 
+	/// Calculate edge connectivity. For any given pair of (connected) vertices we want to be able to find the faces connected to that edge. 	
+	typedef std::map<Edge, std::vector<int> > EdgeConnectivity;
+	
+	EdgeConnectivity edgeConnectivity;
+	
 	it = vertexIds->readable().begin();
 	triangleIndex = 0;
 	while ( it != vertexIds->readable().end() )
@@ -162,27 +166,58 @@ MeshPrimitiveImplicitSurfaceFunction::MeshPrimitiveImplicitSurfaceFunction(  Mes
 		VertexIndex v1 = *it ++;
 		VertexIndex v2 = *it ++;
 		
-		m_edgeConnectivity[ Edge(v0, v1) ].push_back( triangleIndex );
-		m_edgeConnectivity[ Edge(v0, v2) ].push_back( triangleIndex );
-		m_edgeConnectivity[ Edge(v1, v2) ].push_back( triangleIndex );
+		edgeConnectivity[ Edge(v0, v1) ].push_back( triangleIndex );
+		edgeConnectivity[ Edge(v0, v2) ].push_back( triangleIndex );
+		edgeConnectivity[ Edge(v1, v2) ].push_back( triangleIndex );
 		
 		/// Store the same edges going in the opposite direction, too. This doubles our (small) storage overhead but allows for faster lookups.
-		m_edgeConnectivity[ Edge(v1, v0) ].push_back( triangleIndex );
-		m_edgeConnectivity[ Edge(v2, v0) ].push_back( triangleIndex );
-		m_edgeConnectivity[ Edge(v2, v1) ].push_back( triangleIndex );
+		edgeConnectivity[ Edge(v1, v0) ].push_back( triangleIndex );
+		edgeConnectivity[ Edge(v2, v0) ].push_back( triangleIndex );
+		edgeConnectivity[ Edge(v2, v1) ].push_back( triangleIndex );
 
 		triangleIndex ++;
 	}
 
-	/// If there are more than 2 faces connected to any given edge then the mesh is non-manifold, which results in an exception.
-	for (EdgeConnectivity::const_iterator it = m_edgeConnectivity.begin(); it != m_edgeConnectivity.end(); ++it)
+	/// Calculate the average edge normals
+	for (EdgeConnectivity::const_iterator it = edgeConnectivity.begin(); it != edgeConnectivity.end(); ++it)
 	{
-		if (it->second.size() != 2)
+		if (it->second.size() > 2)
 		{
-			// non-manifold
+			/// If there are more than 2 faces connected to any given edge then the mesh is non-manifold, which results in an exception.
 			throw Exception("Non-manifold mesh given to MeshPrimitiveImplicitSurfaceFunction");
 		}
+		else if (it->second.size() == 1)
+		{
+			/// If there are less than 2 faces connected to any given edge then the mesh is not closed, which results in an exception.
+			throw Exception("Mesh given to MeshPrimitiveImplicitSurfaceFunction is not closed");
+		}
+		else
+		{
+			assert( it->second.size() == 2 );
+		}
+		
+		TriangleIndex triangle0 = it->second[0];
+		TriangleIndex triangle1 = it->second[1];
+
+		VertexIndex v00 = vertexIds->readable()[ triangle0 * 3 + 0 ];
+		VertexIndex v01 = vertexIds->readable()[ triangle0 * 3 + 1 ];
+		VertexIndex v02 = vertexIds->readable()[ triangle0 * 3 + 2 ];
+
+		VertexIndex v10 = vertexIds->readable()[ triangle1 * 3 + 0 ];
+		VertexIndex v11 = vertexIds->readable()[ triangle1 * 3 + 1 ];
+		VertexIndex v12 = vertexIds->readable()[ triangle1 * 3 + 2 ];
+		
+		const Imath::V3f &p00 = m_P->readable()[ v00 ];
+		const Imath::V3f &p01 = m_P->readable()[ v01 ];
+		const Imath::V3f &p02 = m_P->readable()[ v02 ];
+		
+		const Imath::V3f &p10 = m_P->readable()[ v10 ];
+		const Imath::V3f &p11 = m_P->readable()[ v11 ];
+		const Imath::V3f &p12 = m_P->readable()[ v12 ];
+		
+		m_edgeAverageNormals[ it->first ] = ( triangleNormal( p00, p01, p02 ) + triangleNormal( p10, p11, p12 ) ) / 2.0f;
 	}
+	
 }
 
 MeshPrimitiveImplicitSurfaceFunction::~MeshPrimitiveImplicitSurfaceFunction()
@@ -271,28 +306,10 @@ MeshPrimitiveImplicitSurfaceFunction::Value MeshPrimitiveImplicitSurfaceFunction
 				edge = Edge( triangleVertexIds[0], triangleVertexIds[2] );
 			}
 
-			EdgeConnectivity::const_iterator it = m_edgeConnectivity.find( edge );
-			assert (it != m_edgeConnectivity.end() );
-			assert (it->second.size() == 2);// manifold
-
-			TriangleIndex triangle0 = it->second[0];
-			TriangleIndex triangle1 = it->second[1];
-			assert( triangle0 == (TriangleIndex)result->triangleIndex() || triangle1 == (TriangleIndex)result->triangleIndex() );
-			VertexIndex v00 = vertexIds->readable()[ triangle0 * 3 + 0 ];
-			VertexIndex v01 = vertexIds->readable()[ triangle0 * 3 + 1 ];
-			VertexIndex v02 = vertexIds->readable()[ triangle0 * 3 + 2 ];
-
-			VertexIndex v10 = vertexIds->readable()[ triangle1 * 3 + 0 ];
-			VertexIndex v11 = vertexIds->readable()[ triangle1 * 3 + 1 ];
-			VertexIndex v12 = vertexIds->readable()[ triangle1 * 3 + 2 ];
-			const Imath::V3f &p00 = m_P->readable()[ v00 ];
-			const Imath::V3f &p01 = m_P->readable()[ v01 ];
-			const Imath::V3f &p02 = m_P->readable()[ v02 ];
-			const Imath::V3f &p10 = m_P->readable()[ v10 ];
-			const Imath::V3f &p11 = m_P->readable()[ v11 ];
-			const Imath::V3f &p12 = m_P->readable()[ v12 ];
-
-			Point n = ( triangleNormal( p00, p01, p02 ) + triangleNormal( p10, p11, p12 ) ) / 2.0f;
+			EdgeAverageNormals::const_iterator it = m_edgeAverageNormals.find( edge );
+			assert (it != m_edgeAverageNormals.end() );
+			
+			const Point &n = it->second;
 			PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );
 			return n.dot( p ) - planeConstant;
 		}
@@ -316,9 +333,9 @@ MeshPrimitiveImplicitSurfaceFunction::Value MeshPrimitiveImplicitSurfaceFunction
 				closestVertex = 1;
 			}
 
-			assert( triangleVertexIds[ closestVertex ] < (int)(m_angleWeightedNormals->readable().size()) );
+			assert( triangleVertexIds[ closestVertex ] < (int)(m_vertexAngleWeightedNormals->readable().size()) );
 			
-			const Point &n = m_angleWeightedNormals->readable()[ triangleVertexIds[ closestVertex ] ];
+			const Point &n = m_vertexAngleWeightedNormals->readable()[ triangleVertexIds[ closestVertex ] ];
 			PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );
 			return n.dot( p ) - planeConstant;
 		}
