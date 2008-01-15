@@ -50,6 +50,12 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 class ParticleMeshOp : public Op
 {
 	public :
+	
+		typedef enum
+		{
+			Resolution = 0,
+			DivisionSize = 1,
+		} GridMethod;
 		
 		IE_CORE_DECLARERUNTIMETYPED( ParticleMeshOp, Op );
 		
@@ -68,11 +74,11 @@ class ParticleMeshOp : public Op
 		StringParameterPtr radiusAttributeParameter();
 		ConstStringParameterPtr radiusAttributeParameter() const;
 				
-		DoubleParameterPtr radiusParameter();
-		ConstDoubleParameterPtr radiusParameter() const;
+		FloatParameterPtr radiusParameter();
+		ConstFloatParameterPtr radiusParameter() const;
 		
-		DoubleParameterPtr radiusScaleParameter();
-		ConstDoubleParameterPtr radiusScaleParameter() const;
+		FloatParameterPtr radiusScaleParameter();
+		ConstFloatParameterPtr radiusScaleParameter() const;
 				
 		BoolParameterPtr useStrengthAttributeParameter();
 		ConstBoolParameterPtr useStrengthAttributeParameter() const;
@@ -80,21 +86,29 @@ class ParticleMeshOp : public Op
 		StringParameterPtr strengthAttributeParameter();
 		ConstStringParameterPtr strengthAttributeParameter() const;
 		
-		DoubleParameterPtr strengthParameter();
-		ConstDoubleParameterPtr strengthParameter() const;
+		FloatParameterPtr strengthParameter();
+		ConstFloatParameterPtr strengthParameter() const;
 		
-		DoubleParameterPtr strengthScaleParameter();
-		ConstDoubleParameterPtr strengthScaleParameter() const;
+		FloatParameterPtr strengthScaleParameter();
+		ConstFloatParameterPtr strengthScaleParameter() const;
 
-		DoubleParameterPtr thresholdParameter();
-		ConstDoubleParameterPtr thresholdParameter() const;
+		FloatParameterPtr thresholdParameter();
+		ConstFloatParameterPtr thresholdParameter() const;
 		
 		V3iParameterPtr resolutionParameter();
 		ConstV3iParameterPtr resolutionParameter() const;
+				
+		Box3fParameterPtr boundParameter();
+		ConstBox3fParameterPtr boundParameter() const;
 		
-		Box3dParameterPtr boundParameter();
-		ConstBox3dParameterPtr boundParameter() const;
-								
+		BoolParameterPtr automaticBoundParameter();
+		BoolParameterPtr automaticBoundParameter() const;
+						
+		IntParameterPtr gridMethodParameter();
+		IntParameterPtr gridMethodParameter() const;
+		
+		V3fParameterPtr divisionSizeParameter();
+		ConstV3fParameterPtr divisionSizeParameter() const;								
 		
 	protected :
 
@@ -106,17 +120,21 @@ class ParticleMeshOp : public Op
 		StringParameterPtr m_positionAttributeParameter;
 		BoolParameterPtr m_useRadiusAttributeParameter;
 		StringParameterPtr m_radiusAttributeParameter;
-		DoubleParameterPtr m_radiusParameter;
+		FloatParameterPtr m_radiusParameter;
 		BoolParameterPtr m_useStrengthAttributeParameter;
 		StringParameterPtr m_strengthAttributeParameter;
-		DoubleParameterPtr m_strengthParameter;
+		FloatParameterPtr m_strengthParameter;
 		
-		DoubleParameterPtr m_thresholdParameter;
+		FloatParameterPtr m_thresholdParameter;
 		V3iParameterPtr m_resolutionParameter;
-		Box3dParameterPtr m_boundParameter;
+		Box3fParameterPtr m_boundParameter;
 		
-		DoubleParameterPtr m_radiusScaleParameter;
-		DoubleParameterPtr m_strengthScaleParameter;
+		FloatParameterPtr m_radiusScaleParameter;
+		FloatParameterPtr m_strengthScaleParameter;
+		
+		BoolParameterPtr m_automaticBoundParameter;
+		IntParameterPtr m_gridMethodParameter;		
+		V3fParameterPtr m_divisionSizeParameter;				
 
 };
 

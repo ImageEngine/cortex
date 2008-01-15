@@ -54,12 +54,13 @@
 #include "IECore/BlobbyImplicitSurfaceFunction.h"
 #include "IECore/ParticleMeshOp.h"
 #include "IECore/PointMeshOp.h"
+#include "IECore/PointBoundsOp.h"
 
 using namespace IECore;
 using namespace Imath;
 using namespace std;
 
-static TypeId resultTypes[] = { MeshPrimitiveTypeId, DoubleVectorDataTypeId, InvalidTypeId };
+static TypeId resultTypes[] = { MeshPrimitiveTypeId, InvalidTypeId };
 
 ParticleMeshOp::ParticleMeshOp()
 	:	Op(
@@ -98,13 +99,13 @@ ParticleMeshOp::ParticleMeshOp()
 		"radiusPP"
 	);
 	
-	m_radiusParameter = new DoubleParameter(
+	m_radiusParameter = new FloatParameter(
 		"radius",
 		"Radius to use when not reading an attribute",
 		1.0
 	);
 	
-	m_radiusScaleParameter = new DoubleParameter(
+	m_radiusScaleParameter = new FloatParameter(
 		"radiusScale",
 		"Factor to multiply all radii by",
 		1.0
@@ -122,19 +123,19 @@ ParticleMeshOp::ParticleMeshOp()
 		"strengthPP"
 	);
 	
-	m_strengthParameter = new DoubleParameter(
+	m_strengthParameter = new FloatParameter(
 		"strength",
 		"Strength to use when not reading an attribute",
 		1.0
 	);
 	
-	m_strengthScaleParameter = new DoubleParameter(
+	m_strengthScaleParameter = new FloatParameter(
 		"strengthScale",
 		"Factor to multiply all strength by",
 		1.0
 	);	
 	
-	m_thresholdParameter = new DoubleParameter(
+	m_thresholdParameter = new FloatParameter(
 		"threshold",
 		"The threshold at which to generate the surface.",
 		0.0
@@ -143,14 +144,40 @@ ParticleMeshOp::ParticleMeshOp()
 	m_resolutionParameter = new V3iParameter(
 		"resolution",
 		"The resolution",
-		V3i( 1, 1, 1 )
+		V3i( 10, 10, 10 )
 	);
 	
-	m_boundParameter = new Box3dParameter(
+	m_automaticBoundParameter = new BoolParameter(
+		"automaticBound",
+		"Enable to calculate the bound automatically. Disable to specify an explicit bound.",
+		true
+	);
+	
+	m_boundParameter = new Box3fParameter(
 		"bound",
 		"The bound",
-		Box3d( V3d( -1, -1, -1 ), V3d( 1, 1, 1 ) )
+		Box3f( V3f( -1, -1, -1 ), V3f( 1, 1, 1 ) )
 	);
+	
+	IntParameter::PresetsMap gridMethodPresets;
+	gridMethodPresets["Resolution"] = Resolution;
+	gridMethodPresets["Division Size"] = DivisionSize;
+	
+	m_gridMethodParameter = new IntParameter(
+		"gridMethod",
+		"s",
+		Resolution,
+		Resolution, 
+		DivisionSize,
+		gridMethodPresets,
+		true		
+	);
+	
+	m_divisionSizeParameter = new V3fParameter(
+		"divisionSize",
+		"The dimensions of each element in the grid",
+		V3f( 1, 1, 1 )
+	);	
 
 	parameters()->addParameter( m_fileNameParameter );
 	parameters()->addParameter( m_positionAttributeParameter );
@@ -163,11 +190,13 @@ ParticleMeshOp::ParticleMeshOp()
 	parameters()->addParameter( m_strengthParameter );
 	parameters()->addParameter( m_strengthScaleParameter );
 	parameters()->addParameter( m_thresholdParameter );
+	parameters()->addParameter( m_gridMethodParameter );	
 	parameters()->addParameter( m_resolutionParameter );
+	parameters()->addParameter( m_divisionSizeParameter );	
+	parameters()->addParameter( m_automaticBoundParameter );		
 	parameters()->addParameter( m_boundParameter );		
 
-	/// \todo Allow use of particle cache sequence, rather than single file
-	/// \todo Add parameter to allow use of bound stored in particle cache		
+	/// \todo Allow use of particle cache sequence, rather than single file	
 }
 
 ParticleMeshOp::~ParticleMeshOp()
@@ -214,22 +243,22 @@ ConstStringParameterPtr ParticleMeshOp::radiusAttributeParameter() const
 	return m_radiusAttributeParameter;
 }
 
-DoubleParameterPtr ParticleMeshOp::radiusParameter()
+FloatParameterPtr ParticleMeshOp::radiusParameter()
 {
 	return m_radiusParameter;
 }
 
-ConstDoubleParameterPtr ParticleMeshOp::radiusParameter() const
+ConstFloatParameterPtr ParticleMeshOp::radiusParameter() const
 {
 	return m_radiusParameter;
 }
 
-DoubleParameterPtr ParticleMeshOp::radiusScaleParameter()
+FloatParameterPtr ParticleMeshOp::radiusScaleParameter()
 {
 	return m_radiusScaleParameter;
 }
 
-ConstDoubleParameterPtr ParticleMeshOp::radiusScaleParameter() const
+ConstFloatParameterPtr ParticleMeshOp::radiusScaleParameter() const
 {
 	return m_radiusScaleParameter;
 }
@@ -254,32 +283,32 @@ ConstStringParameterPtr ParticleMeshOp::strengthAttributeParameter() const
 	return m_strengthAttributeParameter;
 }
 
-DoubleParameterPtr ParticleMeshOp::strengthParameter()
+FloatParameterPtr ParticleMeshOp::strengthParameter()
 {
 	return m_strengthParameter;
 }
 
-ConstDoubleParameterPtr ParticleMeshOp::strengthParameter() const
+ConstFloatParameterPtr ParticleMeshOp::strengthParameter() const
 {
 	return m_strengthParameter;
 }
 
-DoubleParameterPtr ParticleMeshOp::strengthScaleParameter()
+FloatParameterPtr ParticleMeshOp::strengthScaleParameter()
 {
 	return m_strengthScaleParameter;
 }
 
-ConstDoubleParameterPtr ParticleMeshOp::strengthScaleParameter() const
+ConstFloatParameterPtr ParticleMeshOp::strengthScaleParameter() const
 {
 	return m_strengthScaleParameter;
 }
 
-DoubleParameterPtr ParticleMeshOp::thresholdParameter()
+FloatParameterPtr ParticleMeshOp::thresholdParameter()
 {
 	return m_thresholdParameter;
 }
 
-ConstDoubleParameterPtr ParticleMeshOp::thresholdParameter() const
+ConstFloatParameterPtr ParticleMeshOp::thresholdParameter() const
 {
 	return m_thresholdParameter;
 }
@@ -294,14 +323,44 @@ ConstV3iParameterPtr ParticleMeshOp::resolutionParameter() const
 	return m_resolutionParameter;
 }
 
-Box3dParameterPtr ParticleMeshOp::boundParameter()
+Box3fParameterPtr ParticleMeshOp::boundParameter()
 {
 	return m_boundParameter;
 }
 
-ConstBox3dParameterPtr ParticleMeshOp::boundParameter() const
+ConstBox3fParameterPtr ParticleMeshOp::boundParameter() const
 {
 	return m_boundParameter;
+}
+
+BoolParameterPtr ParticleMeshOp::automaticBoundParameter()
+{
+	return m_automaticBoundParameter;
+}
+
+BoolParameterPtr ParticleMeshOp::automaticBoundParameter() const
+{
+	return m_automaticBoundParameter;
+}
+
+IntParameterPtr ParticleMeshOp::gridMethodParameter()
+{
+	return m_gridMethodParameter;
+}
+
+IntParameterPtr ParticleMeshOp::gridMethodParameter() const
+{
+	return m_gridMethodParameter;
+}
+
+V3fParameterPtr ParticleMeshOp::divisionSizeParameter()
+{
+	return m_divisionSizeParameter;
+}
+
+ConstV3fParameterPtr ParticleMeshOp::divisionSizeParameter() const
+{
+	return m_divisionSizeParameter;
 }
 
 ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
@@ -314,7 +373,8 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	ParticleReaderPtr reader = boost::static_pointer_cast< ParticleReader > ( Reader::create( fileName ) );
 	if (!reader)
 	{
-		throw IOException("");
+		
+		throw IOException( "Could not create reader for particle cache file" );
 	}	
 	
 	ConstObjectPtr positionAttributeData = positionAttributeParameter()->getValue();
@@ -325,7 +385,7 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	V3dVectorDataPtr position = boost::static_pointer_cast< V3dVectorData >( positionData );
 	if (!position)
 	{
-		throw InvalidArgumentException("");
+		throw InvalidArgumentException("Could not read position data");
 	}
 		
 	DoubleVectorDataPtr radius;
@@ -338,7 +398,7 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 		radius = boost::static_pointer_cast< DoubleVectorData >( radiusData );
 		if (!radius)
 		{
-			throw InvalidArgumentException("");
+			throw InvalidArgumentException("Could not read radiusPP attribute data");
 		}
 		radius = radius->copy();
 	}
@@ -365,7 +425,7 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 		strength = boost::static_pointer_cast< DoubleVectorData >( strengthData );
 		if (!strength)
 		{
-			throw InvalidArgumentException("");
+			throw InvalidArgumentException("Could not read strengthPP attribute data");
 		}
 		strength = strength->copy();		
 	}
@@ -385,17 +445,61 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 		|| radius->readable().size() != reader->numParticles()
 		|| strength->readable().size() != reader->numParticles() )
 	{
-		throw InvalidArgumentException("");
+		throw InvalidArgumentException("Position/radius/strength array lengths mismatch");
 	}
 	
+	bool automaticBound = boost::static_pointer_cast<const BoolData>(m_automaticBoundParameter->getValue())->readable();
+	Box3f bound;
+	
+	if (automaticBound)
+	{
+		PointBoundsOpPtr pointBoundsOp = new PointBoundsOp();
+		
+		pointBoundsOp->pointParameter()->setValue( positionData );
+		
+		pointBoundsOp->radiusParameter()->setValue( radius );
+				
+		ObjectPtr result = pointBoundsOp->operate();
+		
+		Box3fDataPtr boxResult = runTimeCast<Box3fData> ( result );
+		
+		assert( boxResult );
+		
+		bound = boxResult->readable();
+	}
+	else
+	{
+		bound = boost::static_pointer_cast<const Box3fData>(m_boundParameter->getValue())->readable();
+	}	
+	
+	V3i resolution;
+	int gridMethod = m_gridMethodParameter->getNumericValue();
+	if ( gridMethod == Resolution )
+	{	
+		resolution = boost::static_pointer_cast<const V3iData>(m_resolutionParameter->getValue())->readable();	
+	}
+	else if ( gridMethod == DivisionSize )
+	{
+		V3f divisionSize = boost::static_pointer_cast<const V3fData>(m_divisionSizeParameter->getValue())->readable();
+		
+		resolution.x = (int)((bound.max.x - bound.min.x) / divisionSize.x);
+		resolution.y = (int)((bound.max.y - bound.min.y) / divisionSize.y);
+		resolution.z = (int)((bound.max.z - bound.min.z) / divisionSize.z);				
+		
+	}
+	else
+	{
+		assert( false );
+	}
+			
 	PointMeshOpPtr pointMeshOp = new PointMeshOp();	
 		
 	pointMeshOp->pointParameter()->setValue( position->copy() );
 	pointMeshOp->radiusParameter()->setValue( radius );
 	pointMeshOp->strengthParameter()->setValue( strength );		
 	pointMeshOp->thresholdParameter()->setNumericValue( m_thresholdParameter->getNumericValue() );
-	pointMeshOp->resolutionParameter()->setValue( resolutionParameter()->getValue()->copy() );
-	pointMeshOp->boundParameter()->setValue( boundParameter()->getValue()->copy() );	
-	
+	pointMeshOp->resolutionParameter()->setTypedValue( resolution );
+	pointMeshOp->boundParameter()->setTypedValue( Box3d( bound.min, bound.max ) );	
+
 	return pointMeshOp->operate();
 }
