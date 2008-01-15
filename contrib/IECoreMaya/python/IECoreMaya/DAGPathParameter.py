@@ -41,6 +41,7 @@ Parameter class for specifying Maya DAG paths.
 """
 class DAGPathParameter( IECore.StringParameter ):
 
+	## \todo Use Enum for this
 	class CheckType:
 		
 		DontCare = 0
