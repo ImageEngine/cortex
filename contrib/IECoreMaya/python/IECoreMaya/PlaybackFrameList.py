@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,12 +32,57 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+from IECore import FrameList
+from IECore import Enum
+from  maya.cmds import playbackOptions
 
-from ParameterUI import *
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
-from mayaDo import mayaDo
-from ConverterHolder import ConverterHolder
-from createMenu import createMenu
+## The PlaybackFrameList implements an IECore.FrameList which
+# represents the playback ranges queryable using the maya
+# playbackOptions command.
+#
+# \ingroup mayaPython
+class PlaybackFrameList( FrameList ) :
+
+	Range = Enum.create( "Animation", "Playback" )
+	
+	## Takes a single parameter specifying the Range - either
+	# Range.Animation for the scene frame range or Range.Playback
+	# for the current playback settings. Both these are evaluated
+	# dynamically, so the result of asList() will change if the
+	# settings in maya are changed.
+	def __init__( self, r ) :
+	
+		self.range = r
+	
+	def __str__( self ) :
+	
+		if self.range==self.Range.Animation :
+			return "animation"
+		elif self.range==self.Range.Playback :
+			return "playback"
+		
+		assert( False ) # should never get here
+
+	def asList( self ) :
+	
+		if self.range==self.Range.Animation :
+			first = playbackOptions( query=True, animationStartTime=True )
+			last = playbackOptions( query=True, animationEndTime=True )
+		elif self.range==self.Range.Playback :
+			first = playbackOptions( query=True, minTime=True )
+			last = playbackOptions( query=True, maxTime=True )
+			
+		return range( first, last+1 )
+			
+	@staticmethod
+	def parse( s ) :
+	
+		s = s.strip()
+		if s=="animation" :
+			return PlaybackFrameList( PlaybackFrameList.Range.Animation )
+		elif s=="playback" :
+			return PlaybackFrameList( PlaybackFrameList.Range.Playback )
+		
+		return None		
+	
+FrameList.registerParser( PlaybackFrameList.parse )
