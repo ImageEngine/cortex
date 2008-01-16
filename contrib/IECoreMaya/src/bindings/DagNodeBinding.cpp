@@ -78,5 +78,6 @@ void IECoreMaya::bindDagNode()
 {
 	class_<DagNode, boost::noncopyable, bases<Node> >( "DagNode", init<const char *>() )
 		.def( "fullPathName", &DagNode::fullPathName )
+		.def( "__str__", &DagNode::fullPathName )
 	;
 }

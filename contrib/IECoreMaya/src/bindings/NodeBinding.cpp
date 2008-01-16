@@ -90,6 +90,7 @@ void IECoreMaya::bindNode()
 {
 	class_<Node, boost::noncopyable, bases<MObjectWrapper> >( "Node", init<const char *>() )
 		.def( "name", &Node::name )
+		.def( "__str__", &Node::name )
 		.def( "typeName", &Node::typeName )
 		.def( "plug", &Node::plug, return_value_policy<manage_new_object>() )
 	;
