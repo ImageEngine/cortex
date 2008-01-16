@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECoreMaya/bindings/PlugBinding.h"
+#include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/StatusException.h"
 
 #include "maya/MFnDagNode.h"
@@ -182,7 +183,25 @@ Plug Plug::child( const std::string &name ) const
 
 	throw StatusException( MS::kFailure );
 }
-		
+
+bool Plug::isArray() const
+{
+	return m_plug.isArray();
+}
+
+unsigned Plug::numElements()
+{
+	return m_plug.evaluateNumElements();
+}
+
+Plug Plug::elementByPhysicalIndex( unsigned i) const
+{
+	MStatus s;
+	MPlug p = m_plug.elementByPhysicalIndex( i, &s );
+	StatusException::throwIfError( s );
+	return p;
+}
+				
 ///////////////////////////////////////////////////////////////////////
 // Plug binding
 ///////////////////////////////////////////////////////////////////////
@@ -199,6 +218,11 @@ void IECoreMaya::bindPlug()
 		.def( "fullPathName", &Plug::fullPathName)
 		.def( "partialPathName", &Plug::partialPathName)
 		.def( "childNames", &Plug::childNames)
-		.def( "child", &Plug::child)				
+		.def( "child", &Plug::child)
+		.def( "isArray", &Plug::isArray )		
+		.def( "numElements", &Plug::numElements )		
+		.def( "elementByPhysicalIndex", &Plug::elementByPhysicalIndex )
+		.def( "__len__", &Plug::numElements )
+		.def( "__getitem__", &Plug::elementByPhysicalIndex )		
 	;
 }
