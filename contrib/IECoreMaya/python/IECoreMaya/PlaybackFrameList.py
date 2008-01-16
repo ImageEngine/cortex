@@ -72,7 +72,7 @@ class PlaybackFrameList( FrameList ) :
 			first = playbackOptions( query=True, minTime=True )
 			last = playbackOptions( query=True, maxTime=True )
 			
-		return range( first, last+1 )
+		return range( int( first ), int( last+1 ) )
 			
 	@staticmethod
 	def parse( s ) :
