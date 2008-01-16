@@ -137,7 +137,9 @@ ObjectPtr DataPromoteOp::doOperation( ConstCompoundObjectPtr operands )
 		case FloatVectorDataTypeId :
 			return promote1<FloatVectorData>( static_pointer_cast<const FloatVectorData>( srcData ), targetType );
 		case DoubleVectorDataTypeId :
-			return promote1<DoubleVectorData>( static_pointer_cast<const DoubleVectorData>( srcData ), targetType );	
+			return promote1<DoubleVectorData>( static_pointer_cast<const DoubleVectorData>( srcData ), targetType );
+		case HalfVectorDataTypeId :
+			return promote1<HalfVectorData>( static_pointer_cast<const HalfVectorData>( srcData ), targetType );		
 		default :
 			throw Exception( "Unsupported source data type \"" + srcData->typeName() + "\"." );
 	}

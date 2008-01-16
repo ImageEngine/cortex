@@ -173,6 +173,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 			switch ( targetType )
 			{
 				CASTDATA( Float, Double )
+				CASTDATA( Float, Half )
 				CASTVECTORDATA( Float, FloatVector )
 				default: 	break;
 			}
@@ -181,10 +182,20 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 			switch ( targetType )
 			{
 				CASTDATA( Double, Float )
+				CASTDATA( Double, Half )				
 				CASTVECTORDATA( Double, DoubleVector )
 				default:	break;
 			}
 			break;
+		case HalfDataTypeId:
+			switch ( targetType )
+			{
+				CASTDATA( Half, Float )
+				CASTDATA( Half, Double )				
+				CASTVECTORDATA( Half, HalfVector )
+				default:	break;
+			}
+			break;				
 		case CharDataTypeId:
 			switch ( targetType )
 			{
@@ -443,6 +454,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( FloatVector, Box3f )
 				CASTDATA( FloatVector, TransformationMatrixf )
 				CASTVECTORDATA( FloatVector, IntVector )
+				CASTVECTORDATA( FloatVector, HalfVector )				
 				CASTVECTORDATA( FloatVector, DoubleVector )
 				CASTVECTORDATA( FloatVector, V2fVector )
 				CASTVECTORDATA( FloatVector, V3fVector )
@@ -469,6 +481,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( DoubleVector, Box3d )
 				CASTDATA( DoubleVector, TransformationMatrixd )
 				CASTVECTORDATA( DoubleVector, IntVector )
+				CASTVECTORDATA( DoubleVector, HalfVector )				
 				CASTVECTORDATA( DoubleVector, FloatVector )
 				CASTVECTORDATA( DoubleVector, V2fVector )
 				CASTVECTORDATA( DoubleVector, V3fVector )
@@ -481,6 +494,13 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTVECTORDATA( DoubleVector, Box3dVector )
 				default:	break;
 			}
+		case HalfVectorDataTypeId:
+			switch ( targetType )
+			{
+				CASTDATA( HalfVector, Half )				
+				default:	break;
+			}
+			break;	
 		case IntVectorDataTypeId:
 			switch ( targetType )
 			{
