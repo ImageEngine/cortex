@@ -70,6 +70,11 @@ class TestFrameListParameter( unittest.TestCase ) :
 		self.assertEqual( p.getTypedValue(), "0-100x2" )
 		
 		self.assertEqual( p.getFrameListValue().asList(), IECore.FrameRange(  0, 100, 2 ).asList() )
-		
+	
+	def testDefaultValueAsFrameList( self ) :
+	
+		p = IECore.FrameListParameter( "n", "d", IECore.FrameRange( 0, 10 ) )
+		self.assertEqual( p.getFrameListValue().asList(), range( 0, 11 ) )
+			
 if __name__ == "__main__":
         unittest.main()

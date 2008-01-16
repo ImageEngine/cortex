@@ -47,6 +47,9 @@ class FrameListParameter( IECore.StringParameter ) :
 	def __init__( self, name, description, defaultValue = "", allowEmptyList = True,
 		presets = {}, presetsOnly = False, userData = IECore.CompoundObject() ) :
 		
+		if isinstance( defaultValue, FrameList ) :
+			defaultValue = str( defaultValue )
+		
 		IECore.StringParameter.__init__( self, name, description, defaultValue, presets, presetsOnly, userData )
 		
 		self.__allowEmptyList = allowEmptyList
