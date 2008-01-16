@@ -41,5 +41,6 @@ from PlaybackFrameList import PlaybackFrameList
 from mayaDo import mayaDo
 from ConverterHolder import ConverterHolder
 from createMenu import createMenu
+from BakeTransform import BakeTransform
 from MeshOpHolderUtil import create
 from MeshOpHolderUtil import createUI
