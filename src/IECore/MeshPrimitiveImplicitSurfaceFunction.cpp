@@ -273,8 +273,9 @@ MeshPrimitiveImplicitSurfaceFunction::Value MeshPrimitiveImplicitSurfaceFunction
 		if ( closestIsTriangle )
 		{
 			const Point &n = result->normal();
-			PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );
-			return n.dot( p ) - planeConstant;
+			PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );			
+			PrimitiveImplicitSurfaceFunction::Value sign = n.dot( p ) - planeConstant;									
+			return (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
 		}
 		else  if ( closestIsEdge )
 		{
@@ -310,8 +311,9 @@ MeshPrimitiveImplicitSurfaceFunction::Value MeshPrimitiveImplicitSurfaceFunction
 			assert (it != m_edgeAverageNormals.end() );
 			
 			const Point &n = it->second;
-			PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );
-			return n.dot( p ) - planeConstant;
+			PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );			
+			PrimitiveImplicitSurfaceFunction::Value sign = n.dot( p ) - planeConstant;									
+			return (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
 		}
 		else
 		{
@@ -337,7 +339,8 @@ MeshPrimitiveImplicitSurfaceFunction::Value MeshPrimitiveImplicitSurfaceFunction
 			
 			const Point &n = m_vertexAngleWeightedNormals->readable()[ triangleVertexIds[ closestVertex ] ];
 			PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );
-			return n.dot( p ) - planeConstant;
+			PrimitiveImplicitSurfaceFunction::Value sign = n.dot( p ) - planeConstant;									
+			return (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
 		}
 	}
 	else
