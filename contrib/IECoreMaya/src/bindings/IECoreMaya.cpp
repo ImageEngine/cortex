@@ -60,13 +60,12 @@ using namespace IECoreMaya;
 
 using namespace boost::python;
 
-/// Maya 8.5 is built with 2-byte Unicode characters, Maya 2008 with 4-byte characters.
-/// So we need to ensure that we're doing the same so that all external symbols resolve 
-/// correctly at runtime.
+/// Maya is built with 4-byte Unicode characters, so we need to ensure that we're doing 
+/// the same so that all external symbols resolve correctly at runtime.
 #if ( MAYA_API_VERSION >= 2008 )
+/// \todo Assert for earlier versions too, once installations of Python 2.5 for gcc4.0.2
+/// are built correctly
 BOOST_STATIC_ASSERT(sizeof(Py_UNICODE) == 4);
-#else
-BOOST_STATIC_ASSERT(sizeof(Py_UNICODE) == 2);
 #endif
 
 BOOST_PYTHON_MODULE(_IECoreMaya)
