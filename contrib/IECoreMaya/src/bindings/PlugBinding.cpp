@@ -194,8 +194,13 @@ unsigned Plug::numElements()
 	return m_plug.evaluateNumElements();
 }
 
-Plug Plug::elementByPhysicalIndex( unsigned i) const
+Plug Plug::elementByPhysicalIndex( unsigned i )
 {
+	/// we to need to call numElements so that the plug is up to date
+	/// in the number of elements it has. otherwise we get exceptions
+	/// accessing elements which should exist.
+	numElements();
+	
 	MStatus s;
 	MPlug p = m_plug.elementByPhysicalIndex( i, &s );
 	StatusException::throwIfError( s );

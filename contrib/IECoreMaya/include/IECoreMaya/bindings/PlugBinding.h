@@ -73,7 +73,7 @@ class Plug
 		bool isArray() const;
 		/// Actually calls evaluateNumElements() to be sure of getting the right value.
 		unsigned numElements();
-		Plug elementByPhysicalIndex( unsigned i ) const;
+		Plug elementByPhysicalIndex( unsigned i );
 
 	private :
 	
