@@ -68,14 +68,14 @@ class PointMeshOp : public Op
 		ConstDoubleVectorParameterPtr strengthParameter() const;
 		
 		/// The Parameter that specifies the threshold at which to build the mesh
-		DoubleParameterPtr thresholdParameter();
-		ConstDoubleParameterPtr thresholdParameter() const;
+		FloatParameterPtr thresholdParameter();
+		ConstFloatParameterPtr thresholdParameter() const;
 		
 		V3iParameterPtr resolutionParameter();
 		ConstV3iParameterPtr resolutionParameter() const;
 		
-		Box3dParameterPtr boundParameter();
-		ConstBox3dParameterPtr boundParameter() const;				
+		Box3fParameterPtr boundParameter();
+		ConstBox3fParameterPtr boundParameter() const;				
 		
 	protected :
 
@@ -86,9 +86,9 @@ class PointMeshOp : public Op
 		ObjectParameterPtr m_pointParameter;
 		DoubleVectorParameterPtr m_radiusParameter;		
 		DoubleVectorParameterPtr m_strengthParameter;		
-		DoubleParameterPtr m_thresholdParameter;
+		FloatParameterPtr m_thresholdParameter;
 		V3iParameterPtr m_resolutionParameter;
-		Box3dParameterPtr m_boundParameter;
+		Box3fParameterPtr m_boundParameter;
 
 
 };

@@ -57,7 +57,7 @@ using namespace Imath;
 using namespace std;
 
 static TypeId pointTypes[] = { V3fVectorDataTypeId, V3dVectorDataTypeId, InvalidTypeId };
-static TypeId resultTypes[] = { MeshPrimitiveTypeId, DoubleVectorDataTypeId, InvalidTypeId };
+static TypeId resultTypes[] = { MeshPrimitiveTypeId, InvalidTypeId };
 
 PointMeshOp::PointMeshOp()
 	:	Op(
@@ -90,7 +90,7 @@ PointMeshOp::PointMeshOp()
 		new DoubleVectorData()
 	);	
 	
-	m_thresholdParameter = new DoubleParameter(
+	m_thresholdParameter = new FloatParameter(
 		"threshold",
 		"The threshold at which to generate the surface.",
 		0.0
@@ -102,10 +102,10 @@ PointMeshOp::PointMeshOp()
 		V3i( 1, 1, 1 )
 	);
 	
-	m_boundParameter = new Box3dParameter(
+	m_boundParameter = new Box3fParameter(
 		"bound",
 		"The bound",
-		Box3d( V3d( -1, -1, -1 ), V3d( 1, 1, 1 ) )
+		Box3f( V3d( -1, -1, -1 ), V3d( 1, 1, 1 ) )
 	);
 
 	
@@ -154,12 +154,12 @@ ConstDoubleVectorParameterPtr PointMeshOp::strengthParameter() const
 }
 
 
-DoubleParameterPtr PointMeshOp::thresholdParameter()
+FloatParameterPtr PointMeshOp::thresholdParameter()
 {
 	return m_thresholdParameter;
 }
 
-ConstDoubleParameterPtr PointMeshOp::thresholdParameter() const
+ConstFloatParameterPtr PointMeshOp::thresholdParameter() const
 {
 	return m_thresholdParameter;
 }
@@ -176,19 +176,19 @@ ConstV3iParameterPtr PointMeshOp::resolutionParameter() const
 }
 
 
-Box3dParameterPtr PointMeshOp::boundParameter()
+Box3fParameterPtr PointMeshOp::boundParameter()
 {
 	return m_boundParameter;
 }
 
-ConstBox3dParameterPtr PointMeshOp::boundParameter() const
+ConstBox3fParameterPtr PointMeshOp::boundParameter() const
 {
 	return m_boundParameter;
 }
 
 ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 {	
-	const double threshold = m_thresholdParameter->getNumericValue();
+	const float threshold = m_thresholdParameter->getNumericValue();
 
 	ConstObjectPtr points = pointParameter()->getValue();
 	ConstObjectPtr radius = radiusParameter()->getValue();
@@ -197,7 +197,7 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	ConstObjectPtr boundData = boundParameter()->getValue();
 	
 	V3i resolution = boost::static_pointer_cast<const V3iData>( resolutionData )->readable();
-	Box< V3d > bound = boost::static_pointer_cast<const Box3dData>( boundData )->readable();
+	Box3f bound = boost::static_pointer_cast<const Box3fData>( boundData )->readable();
 	
 	/// Calculate a tolerance which is half the size of the smallest grid division
 	double cacheTolerance = ((bound.max.x - bound.min.x) / (double)resolution.x) / 2.0;
@@ -229,7 +229,7 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 					builder
 				);
 				
-				m->march( Box3f( bound.min, bound.max ), resolution, threshold );
+				m->march( bound, resolution, threshold );
 			}
 			break;
 		case V3dVectorDataTypeId :
@@ -253,7 +253,7 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 					builder
 				);
 				
-				m->march( bound, resolution, threshold );
+				m->march( Box3d( bound.min, bound.max ), resolution, threshold );
 			}
 			break;	
 		default :

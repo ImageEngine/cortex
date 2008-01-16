@@ -50,19 +50,39 @@ namespace IECore
 class MeshPrimitiveImplicitSurfaceOp : public MeshPrimitiveOp
 {
 	public:
+	
+		typedef enum
+		{
+			Resolution = 0,
+			DivisionSize = 1,
+		} GridMethod;			
+	
 		MeshPrimitiveImplicitSurfaceOp();
 		virtual ~MeshPrimitiveImplicitSurfaceOp();
 		
 		IE_CORE_DECLARERUNTIMETYPED( MeshPrimitiveImplicitSurfaceOp, MeshPrimitiveOp );
 		
-		DoubleParameterPtr thresholdParameter();
-		ConstDoubleParameterPtr thresholdParameter() const;
+		FloatParameterPtr thresholdParameter();
+		ConstFloatParameterPtr thresholdParameter() const;
                 
 		V3iParameterPtr resolutionParameter();
 		ConstV3iParameterPtr resolutionParameter() const;
+		
+		Box3fParameterPtr boundParameter();
+		ConstBox3fParameterPtr boundParameter() const;
+		
+		BoolParameterPtr automaticBoundParameter();
+		BoolParameterPtr automaticBoundParameter() const;
+		
+		IntParameterPtr gridMethodParameter();
+		IntParameterPtr gridMethodParameter() const;
                 
-		Box3dParameterPtr boundParameter();
-		ConstBox3dParameterPtr boundParameter() const;
+		V3fParameterPtr divisionSizeParameter();
+		ConstV3fParameterPtr divisionSizeParameter() const;
+                
+		FloatParameterPtr boundExtendParameter();
+		FloatParameterPtr boundExtendParameter() const;  
+
 		
 	protected:
 	
@@ -70,9 +90,14 @@ class MeshPrimitiveImplicitSurfaceOp : public MeshPrimitiveOp
 		
 	private:
 	
-		DoubleParameterPtr m_thresholdParameter;
+		FloatParameterPtr m_thresholdParameter;
 		V3iParameterPtr m_resolutionParameter;
-		Box3dParameterPtr m_boundParameter;	
+		Box3fParameterPtr m_boundParameter;	
+		
+		BoolParameterPtr m_automaticBoundParameter;
+		IntParameterPtr m_gridMethodParameter;          
+		V3fParameterPtr m_divisionSizeParameter;
+		FloatParameterPtr m_boundExtendParameter; 
 	
 };
 

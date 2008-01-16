@@ -237,6 +237,7 @@ MeshPrimitiveImplicitSurfaceFunction::Value MeshPrimitiveImplicitSurfaceFunction
 		/// Is nearest feature an edge, or the triangle itself?
 
 		const float eps = 1.e-6f;
+		
 		bool closestIsTriangle = false;
 		bool closestIsVertex = false;
 		bool closestIsEdge = false;

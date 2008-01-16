@@ -40,13 +40,15 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/VectorTypedData.h"
+#include "IECore/RunTimeTyped.h"
 
 using namespace IECore;
 using namespace Imath;
 
 MeshPrimitiveImplicitSurfaceOp::MeshPrimitiveImplicitSurfaceOp() : MeshPrimitiveOp( staticTypeName(), "A MeshPrimitiveOp to make an offset mesh using an implicit surface" )
 {
-	m_thresholdParameter = new DoubleParameter(
+	m_thresholdParameter = new FloatParameter(
 		"threshold",
 		"The threshold at which to generate the surface.",
 		0.0
@@ -58,29 +60,64 @@ MeshPrimitiveImplicitSurfaceOp::MeshPrimitiveImplicitSurfaceOp() : MeshPrimitive
 		V3i( 1, 1, 1 )
 	);
         
-	m_boundParameter = new Box3dParameter(
-		"bound",
-		"The bound",
-		Box3d( V3d( -1, -1, -1 ), V3d( 1, 1, 1 ) )
+	m_boundExtendParameter = new FloatParameter(
+		"boundExtend",
+		"The bound's radius, even if calculated by automatic bounding, is increased by this amount.",
+		0.0,
+		0.0
 	);
 	
-	/// \todo Parameters for auto-bounding, and setting resolution based on units-per-grid-division
+	m_automaticBoundParameter = new BoolParameter(
+		"automaticBound",
+		"Enable to calculate the bound automatically. Disable to specify an explicit bound.",
+		false
+	);		
 	
+	m_boundParameter = new Box3fParameter(
+		"bound",
+		"The bound",
+		Box3f( V3d( -1, -1, -1 ), V3d( 1, 1, 1 ) )
+	);
+	
+	IntParameter::PresetsMap gridMethodPresets;
+	gridMethodPresets["Resolution"] = Resolution;
+	gridMethodPresets["Division Size"] = DivisionSize;
+	
+	m_gridMethodParameter = new IntParameter(
+		"gridMethod",
+		"s",
+		Resolution,
+		Resolution, 
+		DivisionSize,
+		gridMethodPresets,
+		true		
+	);
+	
+	m_divisionSizeParameter = new V3fParameter(
+		"divisionSize",
+		"The dimensions of each element in the grid",
+		V3f( 1, 1, 1 )
+	);	
+		
 	parameters()->addParameter( m_thresholdParameter );
+	parameters()->addParameter( m_gridMethodParameter );	
 	parameters()->addParameter( m_resolutionParameter );
-	parameters()->addParameter( m_boundParameter );
+	parameters()->addParameter( m_divisionSizeParameter );	
+	parameters()->addParameter( m_automaticBoundParameter );
+	parameters()->addParameter( m_boundExtendParameter );					
+	parameters()->addParameter( m_boundParameter );	
 }
 
 MeshPrimitiveImplicitSurfaceOp::~MeshPrimitiveImplicitSurfaceOp()
 {
 }
 
-DoubleParameterPtr MeshPrimitiveImplicitSurfaceOp::thresholdParameter()
+FloatParameterPtr MeshPrimitiveImplicitSurfaceOp::thresholdParameter()
 {
 	return m_thresholdParameter;
 }
 
-ConstDoubleParameterPtr MeshPrimitiveImplicitSurfaceOp::thresholdParameter() const
+ConstFloatParameterPtr MeshPrimitiveImplicitSurfaceOp::thresholdParameter() const
 {
 	return m_thresholdParameter;
 }
@@ -95,23 +132,133 @@ ConstV3iParameterPtr MeshPrimitiveImplicitSurfaceOp::resolutionParameter() const
 	return m_resolutionParameter;
 }
 
-Box3dParameterPtr MeshPrimitiveImplicitSurfaceOp::boundParameter()
+Box3fParameterPtr MeshPrimitiveImplicitSurfaceOp::boundParameter()
 {
 	return m_boundParameter;
 }
 
-ConstBox3dParameterPtr MeshPrimitiveImplicitSurfaceOp::boundParameter() const
+ConstBox3fParameterPtr MeshPrimitiveImplicitSurfaceOp::boundParameter() const
 {
 	return m_boundParameter;
+}
+
+BoolParameterPtr MeshPrimitiveImplicitSurfaceOp::automaticBoundParameter()
+{
+	return m_automaticBoundParameter;
+}
+
+BoolParameterPtr MeshPrimitiveImplicitSurfaceOp::automaticBoundParameter() const
+{
+	return m_automaticBoundParameter;
+}
+
+IntParameterPtr MeshPrimitiveImplicitSurfaceOp::gridMethodParameter()
+{
+	return m_gridMethodParameter;
+}
+
+IntParameterPtr MeshPrimitiveImplicitSurfaceOp::gridMethodParameter() const
+{
+	return m_gridMethodParameter;
+}
+
+V3fParameterPtr MeshPrimitiveImplicitSurfaceOp::divisionSizeParameter()
+{
+	return m_divisionSizeParameter;
+}
+
+ConstV3fParameterPtr MeshPrimitiveImplicitSurfaceOp::divisionSizeParameter() const
+{
+	return m_divisionSizeParameter;
+}
+
+FloatParameterPtr MeshPrimitiveImplicitSurfaceOp::boundExtendParameter()
+{
+	return m_boundExtendParameter;
+}
+
+FloatParameterPtr MeshPrimitiveImplicitSurfaceOp::boundExtendParameter() const
+{
+	return m_boundExtendParameter;
 }
 
 void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr typedPrimitive, ConstCompoundObjectPtr operands )
 {
-	const double threshold = m_thresholdParameter->getNumericValue();
-	ConstObjectPtr resolutionData = resolutionParameter()->getValue();
-	ConstObjectPtr boundData = boundParameter()->getValue();
-	V3i resolution = boost::static_pointer_cast<const V3iData>( resolutionData )->readable();
-	Box< V3d > bound = boost::static_pointer_cast<const Box3dData>( boundData )->readable();
+	const float threshold = m_thresholdParameter->getNumericValue();
+
+	bool automaticBound = boost::static_pointer_cast<const BoolData>(m_automaticBoundParameter->getValue())->readable();
+	Box3f bound;
+	
+	if (automaticBound)
+	{	
+		bound.makeEmpty();
+		
+		PrimitiveVariableMap::const_iterator it = typedPrimitive->variables.find("P");
+		
+		if (it != typedPrimitive->variables.end())
+		{
+			const DataPtr &verticesData = it->second.data;
+			
+			if (runTimeCast<V3fVectorData>(verticesData))
+			{
+				ConstV3fVectorDataPtr p = runTimeCast<V3fVectorData>(verticesData);
+				
+				for ( V3fVectorData::ValueType::const_iterator it = p->readable().begin(); 
+					it != p->readable().end(); ++it)
+				{
+					bound.extendBy( *it );
+				}
+			}
+			else if (runTimeCast<V3dVectorData>(verticesData))
+			{		
+				ConstV3dVectorDataPtr p = runTimeCast<V3dVectorData>(verticesData);
+				
+				for ( V3dVectorData::ValueType::const_iterator it = p->readable().begin(); 
+					it != p->readable().end(); ++it)
+				{
+					bound.extendBy( *it );
+				}
+			}
+			else
+			{
+				throw InvalidArgumentException("MeshPrimitive has no primitive variable \"P\" of type V3fVectorData/V3dVectorData in MeshPrimitiveImplicitSurfaceOp");
+			}
+		}
+		else
+		{
+			throw InvalidArgumentException("MeshPrimitive has no primitive variable \"P\" in MeshPrimitiveImplicitSurfaceOp");
+		}
+	}
+	else
+	{
+		bound = boost::static_pointer_cast<const Box3fData>(m_boundParameter->getValue())->readable();
+	}
+	
+	float boundExtend = m_boundExtendParameter->getNumericValue();
+	bound.min -= V3f( boundExtend, boundExtend, boundExtend );
+	bound.max += V3f( boundExtend, boundExtend, boundExtend );	
+		
+	
+	V3i resolution;
+	int gridMethod = m_gridMethodParameter->getNumericValue();
+	if ( gridMethod == Resolution )
+	{	
+		resolution = boost::static_pointer_cast<const V3iData>(m_resolutionParameter->getValue())->readable();	
+	}
+	else if ( gridMethod == DivisionSize )
+	{
+		V3f divisionSize = boost::static_pointer_cast<const V3fData>(m_divisionSizeParameter->getValue())->readable();
+		
+		resolution.x = (int)((bound.max.x - bound.min.x) / divisionSize.x);
+		resolution.y = (int)((bound.max.y - bound.min.y) / divisionSize.y);
+		resolution.z = (int)((bound.max.z - bound.min.z) / divisionSize.z);				
+		
+	}
+	else
+	{
+		assert( false );
+	}	
+	
 	
 	resolution.x = std::max( 1, resolution.x );
 	resolution.y = std::max( 1, resolution.y );
@@ -141,7 +288,7 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 	m->march( Box3f( bound.min, bound.max ), resolution, threshold );	
 	MeshPrimitivePtr resultMesh = builder->mesh();
 	typedPrimitive->variables.clear();
-
+	
 	typedPrimitive->setTopology( 
 		resultMesh->verticesPerFace(),
 		resultMesh->vertexIds()

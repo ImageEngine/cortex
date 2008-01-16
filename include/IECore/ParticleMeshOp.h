@@ -108,7 +108,10 @@ class ParticleMeshOp : public Op
 		IntParameterPtr gridMethodParameter() const;
 		
 		V3fParameterPtr divisionSizeParameter();
-		ConstV3fParameterPtr divisionSizeParameter() const;								
+		ConstV3fParameterPtr divisionSizeParameter() const;
+		
+		FloatParameterPtr boundExtendParameter();
+		FloatParameterPtr boundExtendParameter() const;								
 		
 	protected :
 
@@ -134,7 +137,8 @@ class ParticleMeshOp : public Op
 		
 		BoolParameterPtr m_automaticBoundParameter;
 		IntParameterPtr m_gridMethodParameter;		
-		V3fParameterPtr m_divisionSizeParameter;				
+		V3fParameterPtr m_divisionSizeParameter;
+		FloatParameterPtr m_boundExtendParameter;				
 
 };
 

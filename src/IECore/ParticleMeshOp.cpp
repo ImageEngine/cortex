@@ -153,6 +153,13 @@ ParticleMeshOp::ParticleMeshOp()
 		true
 	);
 	
+	m_boundExtendParameter = new FloatParameter(
+		"boundExtend",
+		"The bound's radius, even if calculated by automatic bounding, is increased by this amount.",
+		0.0,
+		0.0
+	);		
+	
 	m_boundParameter = new Box3fParameter(
 		"bound",
 		"The bound",
@@ -193,7 +200,8 @@ ParticleMeshOp::ParticleMeshOp()
 	parameters()->addParameter( m_gridMethodParameter );	
 	parameters()->addParameter( m_resolutionParameter );
 	parameters()->addParameter( m_divisionSizeParameter );	
-	parameters()->addParameter( m_automaticBoundParameter );		
+	parameters()->addParameter( m_automaticBoundParameter );
+	parameters()->addParameter( m_boundExtendParameter );					
 	parameters()->addParameter( m_boundParameter );		
 
 	/// \todo Allow use of particle cache sequence, rather than single file	
@@ -363,6 +371,16 @@ ConstV3fParameterPtr ParticleMeshOp::divisionSizeParameter() const
 	return m_divisionSizeParameter;
 }
 
+FloatParameterPtr ParticleMeshOp::boundExtendParameter()
+{
+	return m_boundExtendParameter;
+}
+
+FloatParameterPtr ParticleMeshOp::boundExtendParameter() const
+{
+	return m_boundExtendParameter;
+}
+
 ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 {	
 	MeshPrimitiveBuilder<float>::Ptr builder = new MeshPrimitiveBuilder<float>();
@@ -470,7 +488,12 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	else
 	{
 		bound = boost::static_pointer_cast<const Box3fData>(m_boundParameter->getValue())->readable();
-	}	
+	}
+	
+	double boundExtend = m_boundExtendParameter->getNumericValue();
+	bound.min -= V3f( boundExtend, boundExtend, boundExtend );
+	bound.max += V3f( boundExtend, boundExtend, boundExtend );	
+		
 	
 	V3i resolution;
 	int gridMethod = m_gridMethodParameter->getNumericValue();
@@ -499,7 +522,7 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	pointMeshOp->strengthParameter()->setValue( strength );		
 	pointMeshOp->thresholdParameter()->setNumericValue( m_thresholdParameter->getNumericValue() );
 	pointMeshOp->resolutionParameter()->setTypedValue( resolution );
-	pointMeshOp->boundParameter()->setTypedValue( Box3d( bound.min, bound.max ) );	
+	pointMeshOp->boundParameter()->setTypedValue( Box3f( bound.min, bound.max ) );	
 
 	return pointMeshOp->operate();
 }

@@ -45,7 +45,7 @@ class TestPointMeshOp( unittest.TestCase ) :
 		radius = DoubleVectorData()
 		strength = DoubleVectorData()
 		
-		bound = Box3d( V3d( -1, -1, -1 ), V3d( 1, 15, 1) )
+		bound = Box3f( V3f( -1, -1, -1 ), V3f( 1, 15, 1) )
 		resolution = V3i( 10, 80, 10 )
 		threshold = 0.1
 		
@@ -80,7 +80,7 @@ class TestPointMeshOp( unittest.TestCase ) :
 		radius = DoubleVectorData()
 		strength = DoubleVectorData()
 		
-		bound = Box3d( V3d( -1, -1, -1 ), V3d( 1, 15, 1) )
+		bound = Box3f( V3f( -1, -1, -1 ), V3f( 1, 15, 1) )
 		resolution = V3i( 10, 80, 10 )
 		threshold = 0.1
 		

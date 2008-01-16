@@ -46,7 +46,7 @@ class TestParticleMeshOp( unittest.TestCase ) :
 		radius = DoubleVectorData()
 		strength = DoubleVectorData()
 		
-		bound = Box3d( V3d( -5, -7, -2 ), V3d( 3, 3, 3 ) )
+		bound = Box3f( V3f( -5, -7, -2 ), V3f( 3, 3, 3 ) )
 		resolution = V3i( 80, 80, 80 )				
 		
 		m = o(
@@ -61,8 +61,8 @@ class TestParticleMeshOp( unittest.TestCase ) :
 		)
 		
 		# Verified by eye
-		self.assert_( len(m.vertexIds) > 43000)
-		self.assert_( len(m.vertexIds) < 45000)		
+		self.assert_( len(m.vertexIds) > 120000)
+		self.assert_( len(m.vertexIds) < 140000)		
 			
 if __name__ == "__main__":
 	unittest.main()

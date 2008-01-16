@@ -57,9 +57,9 @@ class TestMeshPrimitiveImplicitSurfaceOp( unittest.TestCase ) :
 		
 			res = a(
 				resolution = V3i( 20, 20, 20 ),
-				bound = Box3d(
-					V3d( -2, -2, -2 ),
-					V3d(  2,  2,  2 )
+				bound = Box3f(
+					V3f( -2, -2, -2 ),
+					V3f(  2,  2,  2 )
 				),
 				threshold = threshold,
 
