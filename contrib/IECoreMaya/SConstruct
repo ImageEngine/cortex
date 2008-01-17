@@ -130,6 +130,7 @@ pythonSource = [
 	'python/IECoreMaya/createMenu.py',
 	'python/IECoreMaya/BakeTransform.py',
 	'python/IECoreMaya/MeshOpHolderUtil.py',
+	'python/IECoreMaya/ScopedSelection.py',
 ]
 
 includePath = [ 'include'

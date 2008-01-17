@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,16 +32,27 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+import maya.cmds
+import weakref
 
-from ParameterUI import *
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
-from mayaDo import mayaDo
-from ConverterHolder import ConverterHolder
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
+## It's common to need to save the current maya selection, change it, and restore
+# the old selection afterwards. This is error prone, especially when taking exception
+# handling into account. The ScopedSelection object saves the selection when it's
+# created, and restores it when it dies.
+## \todo Cope with objects changing names, being deleted etc - can probably do this
+# by storing DagNode and Node objects.
+class ScopedSelection :
+
+	def __init__( self ) :
+	
+		selection = maya.cmds.ls( selection=True )
+		ScopedSelection.__selections[weakref.ref(self, ScopedSelection.__weakRefCallback)] = selection
+	
+	@classmethod
+	def __weakRefCallback( cls, w ) :
+	
+		maya.cmds.select( cls.__selections[w], replace=True )
+		del cls.__selections[w]
+	
+	__selections = {}
+		
