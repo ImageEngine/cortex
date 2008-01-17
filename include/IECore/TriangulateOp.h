@@ -42,10 +42,10 @@
 namespace IECore
 {
 
-/// An MeshPrimitiveOp to perform triangulation of MeshPrimitives.
+/// A MeshPrimitiveOp to perform triangulation of MeshPrimitives.
 /// \todo Currently we just do a simple "fan" across the face, but we eventually need
 /// to deal with concave polygons, polgons with holes, and non-planar polygons
-class TriangulateOp : public MeshPrimitiveOp
+class TriangulateOp : public TypedPrimitiveOp<MeshPrimitive>
 {
 	public:
 
