@@ -47,7 +47,10 @@
 namespace IECore
 {
 
-class MeshPrimitiveImplicitSurfaceOp : public MeshPrimitiveOp
+/// A MeshPrimitiveOp to create an implicit surface from a MeshPrimitive,
+/// then remesh it using the MarchingCubes algorithm over the given
+/// domain at a specified threshold (iso-value)
+class MeshPrimitiveImplicitSurfaceOp : public TypedPrimitiveOp<MeshPrimitive>
 {
 	public:
 	
