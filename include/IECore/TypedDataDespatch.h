@@ -226,6 +226,23 @@ struct VectorTypedDataAddress
 	}
 };
 
+/// Arguments for the VectorTypedDataClear functor.
+struct VectorTypedDataClearArgs
+{
+};
+
+/// A function for use with despatchVectorTypedDataFn(). It simply
+/// clears the underlying vector.
+template<typename T>
+struct VectorTypedDataClear
+{
+	int operator() ( boost::intrusive_ptr<T> data, VectorTypedDataClearArgs args )
+	{
+		data->writable().clear();
+		return 0;
+	}
+};
+
 }; // namespace IECore
 
 #endif // IE_CORE_TYPEDDATADESPATCH_H
