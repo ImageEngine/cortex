@@ -54,6 +54,9 @@ class DagNode : public Node
 		
 		std::string fullPathName();
 		
+		unsigned numParents();
+		DagNode parent( unsigned int index=0 );
+		
 };
 
 void bindDagNode();
