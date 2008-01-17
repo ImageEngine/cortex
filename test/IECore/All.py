@@ -116,6 +116,7 @@ from MeshPrimitiveEvaluator import *
 from PrimitiveImplicitSurfaceFunction import *
 from MeshPrimitiveImplicitSurfaceOp import *
 from Writer import *
+from TriangulateOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

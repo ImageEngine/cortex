@@ -233,6 +233,7 @@ enum TypeId
 	PrimitiveEvaluatorTypeId = 190,
 	MeshPrimitiveEvaluatorTypeId = 191,
 	MeshPrimitiveImplicitSurfaceOpTypeId = 192,
+	TriangulateOpTypeId = 193,	
 
 	// Remember to update TypeIdBinding.cpp !!!
 	
