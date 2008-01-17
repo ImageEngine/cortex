@@ -47,33 +47,34 @@ TriangulateOp::~TriangulateOp()
 {
 }
 
-struct TriangleDataAppendArgs
+struct TriangleDataRemapArgs
 {
 	DataPtr m_other;
-	int m_i0;
-	int m_i1;
-	int m_i2;
+	const std::vector<int> &m_indices;
 	
-	TriangleDataAppendArgs( DataPtr other, int i0, int i1, int i2 ) : m_other( other ), m_i0( i0 ), m_i1( i1 ), m_i2( i2 )
+	TriangleDataRemapArgs( const std::vector<int> &indices ) : m_indices( indices )
 	{
 	}		
 };
 
-/// A functor for use with despatchVectorTypedDataFn, which appends three elements of specified index from another vector of the same data type.
+/// A functor for use with despatchVectorTypedDataFn, which copies elements from another vector, as specified by an array of indices into that data
 template<typename T>
-struct TriangleDataAppend
+struct TriangleDataRemap
 {
-	int operator() ( boost::intrusive_ptr<T> data, TriangleDataAppendArgs args )
+	size_t operator() ( boost::intrusive_ptr<T> data, TriangleDataRemapArgs args )
 	{		
-		boost::intrusive_ptr<T> otherData = runTimeCast<T>( args.m_other );
+		boost::intrusive_ptr<const T> otherData = runTimeCast<const T>( args.m_other );
 		assert( otherData );
 		
-		data->writable().push_back( otherData->readable()[ args.m_i0 ] );
-		data->writable().push_back( otherData->readable()[ args.m_i1 ] );
-		data->writable().push_back( otherData->readable()[ args.m_i2 ] );				
+		data->writable().clear();
+		data->writable().reserve( args.m_indices.size() );
 		
-		/// We have to return something, unfortunately
-		return 0;
+		for ( std::vector<int>::const_iterator it = args.m_indices.begin(); it != args.m_indices.end(); ++it)
+		{
+			data->writable().push_back( otherData->readable()[ *it ] );
+		}
+				
+		return data->readable().size();
 	}
 };	
 
@@ -102,7 +103,8 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 	
 	IntVectorDataPtr newVerticesPerFace = new IntVectorData();	
 	newVerticesPerFace->writable().reserve( verticesPerFace->readable().size() );
-	
+
+	std::vector<int> faceVaryingIndices;
 	PrimitiveVariableMap fvPrimVars;
 	
 	/// We need to "triangulate" every facevarying primvar as well, so create some empty containers ready to hold
@@ -113,8 +115,6 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 		{
 			fvPrimVars[ it->first ] = it->second;
 			fvPrimVars[ it->first ].data = fvPrimVars[ it->first ].data->copy();
-			
-			despatchVectorTypedDataFn<int, VectorTypedDataClear, VectorTypedDataClearArgs>( fvPrimVars[ it->first ].data , VectorTypedDataClearArgs() );
 		}
 	}
 	
@@ -143,41 +143,31 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 				/// Triangulate the vertices
 				newVertexIds->writable().push_back( v0 );
 				newVertexIds->writable().push_back( v1 );
-				newVertexIds->writable().push_back( v2 );	
+				newVertexIds->writable().push_back( v2 );
 				
-				/// "Triangulate" the face-varying primvar data too
-				/// \todo We can defer the despatched VectorTypedDataFn until the end if we merely maintain a list of
-				/// indices to copy. This will probably speed things up a little.
-				for (PrimitiveVariableMap::iterator it = fvPrimVars.begin(); it != fvPrimVars.end(); ++it)
-				{
-					TriangleDataAppendArgs args( mesh->variables[it->first].data, i0, i1, i2 );
-					despatchVectorTypedDataFn<int, TriangleDataAppend, TriangleDataAppendArgs>( it->second.data, args );
-				}
+				faceVaryingIndices.push_back( i0 );
+				faceVaryingIndices.push_back( i1 );
+				faceVaryingIndices.push_back( i2 );								
 			}			
 		}
 		else 
 		{
 			assert( numFaceVerts == 3 );
 			
-			newVerticesPerFace->writable().push_back( 3 );
-			
 			int i0 = faceVertexIdStart + 0;
 			int i1 = faceVertexIdStart + 1;
 			int i2 = faceVertexIdStart + 2;
+			
+			newVerticesPerFace->writable().push_back( 3 );
 			
 			/// Copy across the vertexId data						
 			newVertexIds->writable().push_back( vertexIds->readable()[ i0 ] );
 			newVertexIds->writable().push_back( vertexIds->readable()[ i1 ] );
 			newVertexIds->writable().push_back( vertexIds->readable()[ i2 ] );
 			
-			/// Copy across the face-varying primvar data too
-			/// \todo We can defer the despatched VectorTypedDataFn until the end if we merely maintain a list of
-			/// indices to copy. This will probably speed things up a little.
-			for (PrimitiveVariableMap::iterator it = fvPrimVars.begin(); it != fvPrimVars.end(); ++it)
-			{
-				TriangleDataAppendArgs args( mesh->variables[it->first].data, i0, i1, i2 );
-				despatchVectorTypedDataFn<int, TriangleDataAppend, TriangleDataAppendArgs>( it->second.data, args );
-			}
+			faceVaryingIndices.push_back( i0 );
+			faceVaryingIndices.push_back( i1 );
+			faceVaryingIndices.push_back( i2 );	
 		}
 		
 		faceVertexIdStart += numFaceVerts;
@@ -185,9 +175,18 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 	}
 
 	mesh->setTopology( newVerticesPerFace, newVertexIds );
-	
+		
+	/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.	
+	assert( faceVaryingIndices.size() == newVertexIds->readable().size() );
+	TriangleDataRemapArgs args( faceVaryingIndices );
 	for (PrimitiveVariableMap::iterator it = fvPrimVars.begin(); it != fvPrimVars.end(); ++it)
 	{
-		mesh->variables[ it->first ].data = it->second.data;
-	}	
+		args.m_other = mesh->variables[it->first].data;
+		
+		size_t primVarSize = despatchVectorTypedDataFn<int, TriangleDataRemap, TriangleDataRemapArgs>( it->second.data, args );
+		assert( primVarSize == faceVaryingIndices.size() );
+		(void)primVarSize;
+		
+		mesh->variables[it->first].data = it->second.data;
+	}			
 }
