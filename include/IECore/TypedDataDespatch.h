@@ -239,6 +239,8 @@ struct VectorTypedDataClear
 	int operator() ( boost::intrusive_ptr<T> data, VectorTypedDataClearArgs args )
 	{
 		data->writable().clear();
+		
+		/// We have to return something, unforunately.
 		return 0;
 	}
 };
