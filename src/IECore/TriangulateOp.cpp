@@ -49,12 +49,12 @@ TriangulateOp::~TriangulateOp()
 
 struct TriangleDataRemapArgs
 {
-	DataPtr m_other;
-	const std::vector<int> &m_indices;
-	
 	TriangleDataRemapArgs( const std::vector<int> &indices ) : m_indices( indices )
 	{
-	}		
+	}
+
+	ConstDataPtr m_other;
+	const std::vector<int> &m_indices;
 };
 
 /// A functor for use with despatchVectorTypedDataFn, which copies elements from another vector, as specified by an array of indices into that data
@@ -62,131 +62,122 @@ template<typename T>
 struct TriangleDataRemap
 {
 	size_t operator() ( boost::intrusive_ptr<T> data, TriangleDataRemapArgs args )
-	{		
+	{
 		boost::intrusive_ptr<const T> otherData = runTimeCast<const T>( args.m_other );
 		assert( otherData );
-		
+
 		data->writable().clear();
 		data->writable().reserve( args.m_indices.size() );
-		
-		for ( std::vector<int>::const_iterator it = args.m_indices.begin(); it != args.m_indices.end(); ++it)
+
+		for ( std::vector<int>::const_iterator it = args.m_indices.begin(); it != args.m_indices.end(); ++it )
 		{
 			data->writable().push_back( otherData->readable()[ *it ] );
 		}
-				
+
 		return data->readable().size();
 	}
-};	
+};
 
 void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
 {
 	bool alreadyTriangulated = true;
 	ConstIntVectorDataPtr verticesPerFace = mesh->verticesPerFace();
 	IntVectorData::ValueType::const_iterator it = verticesPerFace->readable().begin();
-	while (it != verticesPerFace->readable().end() && alreadyTriangulated )
+	while ( it != verticesPerFace->readable().end() && alreadyTriangulated )
 	{
 		if (*it++ != 3)
 		{
 			alreadyTriangulated = false;
 		}
 	}
-	
+
 	if ( alreadyTriangulated )
 	{
 		return;
 	}
-	
-	ConstIntVectorDataPtr vertexIds = mesh->vertexIds();	
-		
+
+	ConstIntVectorDataPtr vertexIds = mesh->vertexIds();
+
 	IntVectorDataPtr newVertexIds = new IntVectorData();
 	newVertexIds->writable().reserve( vertexIds->readable().size() );
-	
-	IntVectorDataPtr newVerticesPerFace = new IntVectorData();	
+
+	IntVectorDataPtr newVerticesPerFace = new IntVectorData();
 	newVerticesPerFace->writable().reserve( verticesPerFace->readable().size() );
 
 	std::vector<int> faceVaryingIndices;
-	PrimitiveVariableMap fvPrimVars;
-	
-	/// We need to "triangulate" every facevarying primvar as well, so create some empty containers ready to hold
-	/// the "triangulated" data.
-	for (PrimitiveVariableMap::const_iterator it = mesh->variables.begin(); it != mesh->variables.end(); ++it)
-	{
-		if ( it->second.interpolation == PrimitiveVariable::FaceVarying )
-		{
-			fvPrimVars[ it->first ] = it->second;
-			fvPrimVars[ it->first ].data = fvPrimVars[ it->first ].data->copy();
-		}
-	}
-	
-	int faceNum = 0;
 	int faceVertexIdStart = 0;
-	for (IntVectorData::ValueType::const_iterator it = verticesPerFace->readable().begin(); it != verticesPerFace->readable().end(); ++it)
+	for ( IntVectorData::ValueType::const_iterator it = verticesPerFace->readable().begin(); it != verticesPerFace->readable().end(); ++it )
 	{
 		int numFaceVerts = *it;
-		
+
 		if ( numFaceVerts > 3 )
 		{
 			const int i0 = faceVertexIdStart + 0;
 			const int v0 = vertexIds->readable()[ i0 ];
-			
-			/// For the time being, just do a simple triangle fan. 			
+
+			/// For the time being, just do a simple triangle fan.
 			for (int i = 1; i < numFaceVerts - 1; i++)
-			{		
+			{
 				int i1 = faceVertexIdStart + ( (i + 0) % numFaceVerts );
-				int i2 = faceVertexIdStart + ( (i + 1) % numFaceVerts );	
+				int i2 = faceVertexIdStart + ( (i + 1) % numFaceVerts );
 				int v1 = vertexIds->readable()[ i1 ];
 				int v2 = vertexIds->readable()[ i2 ];
-				
+
 				/// Create a new triangle
 				newVerticesPerFace->writable().push_back( 3 );
-				
+
 				/// Triangulate the vertices
 				newVertexIds->writable().push_back( v0 );
 				newVertexIds->writable().push_back( v1 );
 				newVertexIds->writable().push_back( v2 );
-				
+
+				/// Store the indices required to rebuild the facevarying primvars
 				faceVaryingIndices.push_back( i0 );
 				faceVaryingIndices.push_back( i1 );
-				faceVaryingIndices.push_back( i2 );								
-			}			
+				faceVaryingIndices.push_back( i2 );
+			}
 		}
-		else 
+		else
 		{
 			assert( numFaceVerts == 3 );
-			
+
 			int i0 = faceVertexIdStart + 0;
 			int i1 = faceVertexIdStart + 1;
 			int i2 = faceVertexIdStart + 2;
-			
+
 			newVerticesPerFace->writable().push_back( 3 );
-			
-			/// Copy across the vertexId data						
+
+			/// Copy across the vertexId data
 			newVertexIds->writable().push_back( vertexIds->readable()[ i0 ] );
 			newVertexIds->writable().push_back( vertexIds->readable()[ i1 ] );
 			newVertexIds->writable().push_back( vertexIds->readable()[ i2 ] );
-			
+
+			/// Store the indices required to rebuild the facevarying primvars
 			faceVaryingIndices.push_back( i0 );
 			faceVaryingIndices.push_back( i1 );
-			faceVaryingIndices.push_back( i2 );	
+			faceVaryingIndices.push_back( i2 );
 		}
-		
+
 		faceVertexIdStart += numFaceVerts;
-		faceNum++;
 	}
 
 	mesh->setTopology( newVerticesPerFace, newVertexIds );
-		
-	/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.	
+
+	/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.
 	assert( faceVaryingIndices.size() == newVertexIds->readable().size() );
 	TriangleDataRemapArgs args( faceVaryingIndices );
-	for (PrimitiveVariableMap::iterator it = fvPrimVars.begin(); it != fvPrimVars.end(); ++it)
+	for ( PrimitiveVariableMap::iterator it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
 	{
-		args.m_other = mesh->variables[it->first].data;
-		
-		size_t primVarSize = despatchVectorTypedDataFn<int, TriangleDataRemap, TriangleDataRemapArgs>( it->second.data, args );
-		assert( primVarSize == faceVaryingIndices.size() );
-		(void)primVarSize;
-		
-		mesh->variables[it->first].data = it->second.data;
-	}			
+		if ( it->second.interpolation == PrimitiveVariable::FaceVarying )
+		{
+			args.m_other = it->second.data;
+			DataPtr data = it->second.data->copy();
+
+			size_t primVarSize = despatchVectorTypedDataFn<int, TriangleDataRemap, TriangleDataRemapArgs>( data, args );
+			assert( primVarSize == faceVaryingIndices.size() );
+			(void)primVarSize;
+
+			it->second.data = data;
+		}
+	}
 }
