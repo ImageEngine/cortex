@@ -112,7 +112,7 @@ namespace IECore
 			virtual const char *type() const throw() { return "Permission Denied"; }			
 	};
 	
-	/// Base class for Invalid Argument exceptions
+	/// A class to represent "not implemented" exceptions
 	class NotImplementedException : public Exception
 	{
 		public:
