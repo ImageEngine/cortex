@@ -92,6 +92,7 @@ MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr pa
 			fnNAttr.setDefault( defValue[0], defValue[1], defValue[2] );
 			break;
 		default :
+			assert( false );
 			return MS::kFailure;
 	}
 	
@@ -157,10 +158,14 @@ MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr pa
 			}
 			else
 			{
-				result = fnNAttr.createPoint( attributeName, attributeName );
+				MObject e0 = fnNAttr.create( attributeName + "X", attributeName + "X", NumericTraits<T>::baseDataType() );
+				MObject e1 = fnNAttr.create( attributeName + "Y", attributeName + "Y", NumericTraits<T>::baseDataType() );
+				MObject e2 = fnNAttr.create( attributeName + "Z", attributeName + "Z", NumericTraits<T>::baseDataType() );
+				result = fnNAttr.create( attributeName, attributeName, e0, e1, e2 );
 			}
 			break;
-		default :	
+		default :
+			assert( false );	
 			result = MObject::kNullObj;
 	}
 	
