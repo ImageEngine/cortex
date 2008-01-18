@@ -38,6 +38,8 @@
 #include <vector>
 
 #include "IECore/TypedPrimitiveOp.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/TypedParameter.h"
 
 namespace IECore
 {
@@ -53,10 +55,19 @@ class TriangulateOp : public TypedPrimitiveOp<MeshPrimitive>
 		virtual ~TriangulateOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( TriangulateOp, MeshPrimitiveOp );
+		
+		BoolParameterPtr throwExceptionsParameter();
+		ConstBoolParameterPtr throwExceptionsParameter() const;		
+		
+		FloatParameterPtr toleranceParameter();
+		ConstFloatParameterPtr toleranceParameter() const;
 
 	protected:
 	
 		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
+		
+		BoolParameterPtr m_throwExceptionsParameter;
+		FloatParameterPtr m_toleranceParameter;
 	
 };
 
@@ -66,3 +77,4 @@ IE_CORE_DECLAREPTR( TriangulateOp );
 } // namespace IECore
 
 #endif // IE_CORE_TRIANGULATEOP_H
+

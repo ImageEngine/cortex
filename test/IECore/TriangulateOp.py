@@ -42,7 +42,6 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 	def testSimple( self ) :
 		""" Test TriangulateOp with a single polygon"""
-	
 
 		verticesPerFace = IntVectorData()
 		verticesPerFace.append( 4 )
@@ -129,7 +128,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 		self.assertEqual ( len( result.vertexIds ), 2280 )	
 
 
-	def testTriangulatedSphere( self ) :
+	def testTriangulatedSphere( self ) :	
 		""" Test TriangulateOp with a triangulated poly sphere"""
 	
 		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()		
@@ -142,6 +141,71 @@ class TestTriangulateOp( unittest.TestCase ) :
 		
 		# As input was already triangulated, the result should be exactly the same
 		self.assertEqual( m, result )
+		
+	def testNonPlanar( self ) :
+		""" Test TriangulateOp with a nonplanar polygon"""
+			
+	
+		verticesPerFace = IntVectorData()
+		verticesPerFace.append( 4 )
+		
+		vertexIds = IntVectorData()
+		vertexIds.append( 0 )
+		vertexIds.append( 1 )
+		vertexIds.append( 2 )
+		vertexIds.append( 3 )
+		
+		P = V3fVectorData()
+		P.append( V3f( -1, 0, -1 ) )
+		P.append( V3f( -1, 0,  1 ) )
+		P.append( V3f(  1, 0,  1 ) )
+		P.append( V3f(  1, 1, -1 ) )
+		
+		m = MeshPrimitive( verticesPerFace, vertexIds )
+		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
+												
+		op = TriangulateOp()
+		
+		op.parameters().input = m
+		
+		# Non-planar faces not supported by default
+		self.assertRaises( RuntimeError, op )
+		
+		op.parameters().throwExceptions = False
+		result = op()
+		
+		
+	def testConcave( self ) :
+		""" Test TriangulateOp with a concave polygon"""
+		
+		verticesPerFace = IntVectorData()
+		verticesPerFace.append( 4 )
+		
+		vertexIds = IntVectorData()
+		vertexIds.append( 0 )
+		vertexIds.append( 1 )
+		vertexIds.append( 2 )
+		vertexIds.append( 3 )
+		
+		P = V3fVectorData()
+		P.append( V3f( -1, 0, -1 ) )
+		P.append( V3f( -1, 0,  1 ) )
+		P.append( V3f(  1, 0,  1 ) )
+		P.append( V3f(  -0.9, 0, -0.9 ) )
+		
+		m = MeshPrimitive( verticesPerFace, vertexIds )
+		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
+												
+		op = TriangulateOp()
+		
+		op.parameters().input = m
+		
+		# Concave faces not supported by default
+		self.assertRaises( RuntimeError, op )
+		
+		op.parameters().throwExceptions = False
+		result = op()
+		
 			
 	
 
