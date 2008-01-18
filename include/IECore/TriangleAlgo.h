@@ -35,6 +35,8 @@
 #ifndef IECORE_TRIANGLEALGO_H
 #define IECORE_TRIANGLEALGO_H
 
+#include "IECore/VectorTraits.h"
+
 namespace IECore
 {
 
@@ -55,7 +57,7 @@ typename Vec::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1,
 template<class Vec>
 Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric );
 
-/// Returns information regarding the closest feature on the triangle.
+/// Returns information regarding the feature region of a barycentric coordinate on the triangle.
 /// - 0 is the area within the triangle itself
 /// - 1 is the edge connecting v1 and v2
 /// - 2 is vertex v2
@@ -63,6 +65,10 @@ Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec
 /// - 4 is vertex v0
 /// - 5 is the edge connecting v0 and v1
 /// - 6 is vertex v1
+template<class Vec>
+int triangleBarycentricFeature( const Vec &barycentric, typename VectorTraits<Vec>::BaseType tolerance = 1.e-6 );
+
+/// Returns the closest feature on the triangle to the given point. The return values are as barycentricFeature.
 template<class Vec>
 int triangleClosestFeature( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p );
 

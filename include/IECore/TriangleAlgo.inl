@@ -38,7 +38,6 @@
 #include "OpenEXR/ImathLimits.h"
 
 #include "IECore/VectorOps.h"
-#include "IECore/VectorTraits.h"
 
 namespace IECore
 {
@@ -325,66 +324,55 @@ Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec
 	return trianglePoint( v0, v1, v2, barycentric );
 }
 
-/// Implementation derived from Wild Magic (Version 2) Software Library, available
-/// from http://www.geometrictools.com/Downloads/WildMagic2p5.zip under free license
+template<class Vec>
+int triangleBarycentricFeature( const Vec &barycentric, typename VectorTraits<Vec>::BaseType tolerance )
+{
+	typedef typename VectorTraits<Vec>::BaseType Real;
+	
+	bool bx = VectorTraits<Vec>::get( barycentric, 0 ) > tolerance;
+	bool by = VectorTraits<Vec>::get( barycentric, 1 ) > tolerance;
+	bool bz = VectorTraits<Vec>::get( barycentric, 2 ) > tolerance;
+	
+	if (bx && by && bz)
+	{
+		return 0;
+	}
+	else if (bx && by)
+	{
+		return 5;
+	}
+	else if (bx && bz)
+	{
+		return 3;
+	}
+	else if (by && bz)
+	{
+		return 1;
+	}
+	else if (bx)
+	{
+		return 4;
+	}
+	else if (by)
+	{
+		return 6;
+	}
+	else
+	{
+		assert(bz);
+		return 2;
+	}	
+}
+
 template<class Vec>
 int triangleClosestFeature( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p )
 {
 	typedef typename VectorTraits<Vec>::BaseType Real;
-
-	Vec triOrigin = v0;
-	Vec triEdge0, triEdge1;
 	
-	vecSub( v1, v0, triEdge0 );
-	vecSub( v2, v0, triEdge1 );
+	Imath::Vec3<Real> barycentric;	
+	triangleClosestPoint( v0, v1, v2, p, barycentric);
 	
-	Vec kDiff;
-	vecSub( triOrigin, p, kDiff );	
-
-	Real a00 = vecDot( triEdge0, triEdge0 );
-	Real a01 = vecDot( triEdge0, triEdge1 );
-	Real a11 = vecDot( triEdge1, triEdge1 );
-	Real b0 = vecDot( kDiff, triEdge0 );
-	Real b1 = vecDot( kDiff, triEdge1 );
-	Real det = Real(fabs(a00*a11-a01*a01));
-	Real s = a01*b1-a11*b0;
-	Real t = a01*b0-a00*b1;
-	
-	if ( s + t <= det )
-	{
-		if ( s < Real(0.0) )
-		{
-			if ( t < Real(0.0) )
-			{
-				return 4;
-			}
-			else
-			{
-				return 3;
-			}
-		}
-		else if ( t < Real(0.0) )
-		{
-			return 5;
-		}		
-	}
-	else
-	{
-		if ( s < Real(0.0) )
-		{
-			return 2;
-		}
-		else if ( t < Real(0.0) )
-		{
-			return 6;
-		}
-		else 
-		{
-			return 1;
-		}
-	}
-	
-	return 0;
+	return triangleBarycentricFeature( barycentric );	
 }
 
 
