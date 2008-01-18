@@ -38,7 +38,7 @@ import os, sys
 """
 Utility function that provides easy access to Ops inside maya using a similar interface as the DO command line.
 It tries to find the actions in the following contexts: (1) maya/<MAYA_MAJOR_VERSION>/<OP>, (2) maya/<MAYA_MAJOR_VERSION>/*/<OP>, (3) maya/<OP> and lastly, (4) */<OP> 
-Returns True if the Op was executes without exceptions and False for any kind of error.
+Returns the Op result if execution succeeds, and None if execution fails for any reason.
 """
 def mayaDo( opName, opVersion = None, help = False, **opArgs ):
 
@@ -96,6 +96,7 @@ def mayaDo( opName, opVersion = None, help = False, **opArgs ):
 		res = myOp( **opArgs )
 	except Exception, e:
 		IECore.error( 'Error executing Op', myOp.name, ':', str(e) )
+		return None
 	else:
 		try:
 			if myOp.userData()['UI']['showResult'].value:
