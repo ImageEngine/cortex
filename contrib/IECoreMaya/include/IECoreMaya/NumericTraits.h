@@ -35,6 +35,8 @@
 #ifndef IE_COREMAYA_NUMERICTRAITS_H
 #define IE_COREMAYA_NUMERICTRAITS_H
 
+#include "boost/static_assert.hpp"
+
 #include "maya/MFnNumericData.h"
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathColor.h"
@@ -48,13 +50,26 @@ template<typename T>
 struct NumericTraits
 {
 	/// Returns the maya data type suitable for representing this type of number.
-	static MFnNumericData::Type dataType() { return MFnNumericData::kInvalid; };
+	static MFnNumericData::Type dataType()
+	{
+		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+		return MFnNumericData::kInvalid;
+	}
+	
 	/// For compound numeric types, returns the maya data type suitable for representing
 	/// a single element of the compound.
-	static MFnNumericData::Type baseDataType() { return MFnNumericData::kInvalid; };
+	static MFnNumericData::Type baseDataType()
+	{
+		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+		return MFnNumericData::kInvalid;
+	}
+	
 	/// Returns whether or not the maya useAsColor() flag should be set on attributes
 	/// representing this kind of data.
-	static bool isColor() { return false; };
+	static bool isColor()
+	{
+		return false;
+	}
 };
 
 template<>
