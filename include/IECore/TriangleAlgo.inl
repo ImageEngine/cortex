@@ -43,7 +43,7 @@ namespace IECore
 {
 
 template<class Vec>
-typename Vec::BaseType triangleArea( const Vec &v0, const Vec &v1, const Vec &v2 )
+typename VectorTraits<Vec>::BaseType triangleArea( const Vec &v0, const Vec &v1, const Vec &v2 )
 {
 	return (v1-v0).cross(v2-v0).length() / 2;
 }
@@ -57,7 +57,7 @@ Vec triangleNormal( const Vec &v0, const Vec &v1, const Vec &v2 )
 }
 
 template<class Vec>
-Vec trianglePoint( const Vec &v0, const Vec &v1, const Vec &v2, const Imath::Vec3<typename Vec::BaseType> &barycentric )
+Vec trianglePoint( const Vec &v0, const Vec &v1, const Vec &v2, const Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric )
 {
 	return vecAdd(
 		vecAdd(
@@ -71,7 +71,7 @@ Vec trianglePoint( const Vec &v0, const Vec &v1, const Vec &v2, const Imath::Vec
 /// Implementation derived from Wild Magic (Version 2) Software Library, available
 /// from http://www.geometrictools.com/Downloads/WildMagic2p5.zip under free license
 template<class Vec>
-typename Vec::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric )
+typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric )
 {
 	typedef typename VectorTraits<Vec>::BaseType Real;
 
@@ -318,7 +318,7 @@ typename Vec::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1,
 }
 
 template<class Vec>
-Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric )
+Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric )
 {
 	triangleClosestBarycentric( v0, v1, v2, p, barycentric );
 	return trianglePoint( v0, v1, v2, barycentric );

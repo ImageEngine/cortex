@@ -41,21 +41,21 @@ namespace IECore
 {
 
 template<class Vec>
-typename Vec::BaseType triangleArea( const Vec &v0, const Vec &v1, const Vec &v2 );
+typename VectorTraits<Vec>::BaseType triangleArea( const Vec &v0, const Vec &v1, const Vec &v2 );
 
 template<class Vec>
 Vec triangleNormal( const Vec &v0, const Vec &v1, const Vec &v2 );
 
 template<class Vec>
-Vec trianglePoint( const Vec &v0, const Vec &v1, const Vec &v2, const Imath::Vec3<typename Vec::BaseType> &barycentric );
+Vec trianglePoint( const Vec &v0, const Vec &v1, const Vec &v2, const Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric );
 
 /// Returns the squared-distance to the closest point on the triangle, and places that point's barycentric coordinates in the 4th argument.
 template<class Vec>
-typename Vec::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric );
+typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric );
 
 /// Returns the closest point on the triangle, and places that point's barycentric coordinates in the 4th argument.
 template<class Vec>
-Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename Vec::BaseType> &barycentric );
+Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric );
 
 /// Returns information regarding the feature region of a barycentric coordinate on the triangle.
 /// - 0 is the area within the triangle itself
