@@ -49,6 +49,21 @@ class TestMessageHandler( unittest.TestCase ) :
 			MessageHandler.pushHandler( NullMessageHandler() )
 		for i in range( 1, 10 ) :
 			MessageHandler.popHandler()
+			
+	def testLevelStringConversion( self ) :
+	
+		ll = [
+			(MessageHandler.Level.Error, "ERROR"),
+			(MessageHandler.Level.Warning, "WARNING"),
+			(MessageHandler.Level.Info, "INFO"),
+			(MessageHandler.Level.Debug, "DEBUG"),
+			(MessageHandler.Level.Invalid, "INVALID"),
+		]
+
+		for l, s in ll :
+			self.assertEqual( MessageHandler.levelAsString( l ), s )
+			self.assertEqual( MessageHandler.stringAsLevel( s ), l )
+			self.assertEqual( MessageHandler.stringAsLevel( s.lower() ), l )
 		
 	def testOutput( self ) :
 	

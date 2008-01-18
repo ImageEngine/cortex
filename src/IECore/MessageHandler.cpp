@@ -35,6 +35,8 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/OStreamMessageHandler.h"
 
+#include "boost/algorithm/string/case_conv.hpp"
+
 #include <iostream>
 
 using namespace std;
@@ -87,7 +89,7 @@ std::stack<MessageHandlerPtr> *MessageHandler::handlerStack()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
-// handler utility functions
+// conversions between level and string
 ///////////////////////////////////////////////////////////////////////////////////////
 
 std::string MessageHandler::levelAsString( Level level )
@@ -102,9 +104,37 @@ std::string MessageHandler::levelAsString( Level level )
 			return "INFO";
 		case Debug :
 			return "DEBUG";
+		default :
+			return "INVALID";
 	}
-	return "INVALID";
 }
+
+MessageHandler::Level MessageHandler::stringAsLevel( const std::string &level )
+{
+	string l = level;
+	boost::to_lower( l );
+	if( l=="error" )
+	{
+		return Error;
+	}
+	else if( l=="warning" )
+	{
+		return Warning;
+	}
+	else if( l=="info" )
+	{
+		return Info;
+	}
+	else if( l=="debug" )
+	{
+		return Debug;
+	}
+	return Invalid;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+// message output shortcuts
+///////////////////////////////////////////////////////////////////////////////////////
 
 void IECore::msg( MessageHandler::Level level, const std::string &context, const std::string &message )
 {

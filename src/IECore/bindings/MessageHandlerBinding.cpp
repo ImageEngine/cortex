@@ -95,6 +95,10 @@ void bindMessageHandler()
 		.staticmethod( "popHandler" )
 		.def( "output", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&MessageHandler::output )
 		.staticmethod( "output" )
+		.def( "levelAsString", MessageHandler::levelAsString )
+		.staticmethod( "levelAsString" )
+		.def( "stringAsLevel", MessageHandler::stringAsLevel )
+		.staticmethod( "stringAsLevel" )
 	;
 	
 	WrapperToPython<MessageHandlerPtr>();
@@ -134,6 +138,7 @@ void bindMessageHandler()
 	typedef class_<LevelFilteredMessageHandler, boost::noncopyable, LevelFilteredMessageHandlerPtr, bases<FilteredMessageHandler> > LevelFilteredMessageHandlerPyClass;
 	LevelFilteredMessageHandlerPyClass( "LevelFilteredMessageHandler", no_init )
 		.def( "__init__", make_constructor( &levelFilteredMessageHandlerConstructor ) )
+		.def( "defaultLevel", &LevelFilteredMessageHandler::defaultLevel ).staticmethod( "defaultLevel" )
 	;
 	INTRUSIVE_PTR_PATCH( LevelFilteredMessageHandler, LevelFilteredMessageHandlerPyClass );
 	implicitly_convertible<LevelFilteredMessageHandlerPtr, FilteredMessageHandlerPtr>();
@@ -145,6 +150,7 @@ void bindMessageHandler()
 		.value( "Warning", MessageHandler::Warning )
 		.value( "Info", MessageHandler::Info )
 		.value( "Debug", MessageHandler::Debug )
+		.value( "Invalid", MessageHandler::Invalid )
 	;
 		
 }

@@ -61,3 +61,22 @@ void LevelFilteredMessageHandler::handle( Level level, const std::string &contex
 
 	m_handler->handle( level, context, message );
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+// default level
+///////////////////////////////////////////////////////////////////////////////////////
+
+MessageHandler::Level LevelFilteredMessageHandler::defaultLevel()
+{
+	const char *l = getenv( "IECORE_LOG_LEVEL" );
+	if( !l )
+	{
+		return Warning;
+	}
+	Level ll = stringAsLevel( l );
+	if( ll!=Invalid )
+	{
+		return ll;
+	}
+	return Warning;
+}

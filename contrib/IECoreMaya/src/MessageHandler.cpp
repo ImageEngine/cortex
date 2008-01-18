@@ -52,6 +52,9 @@ void MessageHandler::handle( Level level, const std::string &context, const std:
 		case MessageHandler::Info :
 		case MessageHandler::Debug :
 			MGlobal::displayInfo( m );
-			break;	
+			break;
+		default :
+			// do nothing for invalid levels
+			break;
 	}
 }

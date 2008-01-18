@@ -43,16 +43,22 @@ namespace IECore
 class LevelFilteredMessageHandler;
 IE_CORE_DECLAREPTR( LevelFilteredMessageHandler );
 
-/// This abstract base class that implements filtering MessageHandler of any kind.
+/// This class implements a FilteredMessageHandler that only passes
+/// messages which have a Level below a certain threshold.
 class LevelFilteredMessageHandler : public FilteredMessageHandler
 {
 	public :
+	
 		/// Creates a message handler that filter messages based on the message level,
 		///  and outputs to another message handler.
 		LevelFilteredMessageHandler( MessageHandlerPtr handler, MessageHandler::Level level );
 		virtual ~LevelFilteredMessageHandler();
 		
 		virtual void handle( Level level, const std::string &context, const std::string &message );
+		
+		/// Returns a message level based on the value of the IECORE_LOG_LEVEL
+		/// environment variable, defaulting to Warning level if it isn't set.
+		static MessageHandler::Level defaultLevel();
 		
 	protected :
 

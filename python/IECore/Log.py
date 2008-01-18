@@ -45,51 +45,48 @@ from IECore import *
 ## Creates and activates a LevelFilteredMessageHandler to filter log messages.
 # Parameters:
 # level: string with the log level. Valid values are: "Debug", "Info", "Warning" and "Error".
-#        If the given level parameter is None, then it will try to get from the env. variable $IE_CORE_LOG_LEVEL.
+#        If the given level parameter is None, then it will try to get from the env. variable $IECORE_LOG_LEVEL.
 #
 # This function is called on IECore initialization.
-# 
+#
+# \todo This should take an enum type as the argument not a string
 def initializeLog(level = None):
+	
 	if level is None:
-		if os.environ.has_key("IE_CORE_LOG_LEVEL"):
-			level = os.environ["IE_CORE_LOG_LEVEL"]
-		else:
-			# by default, log is disabled.
-			level = "Warning"
-	setLogLevelByName( level )
+		level = LevelFilteredMessageHandler.defaultLevel()
+	else:
+		level = MessageHandler.stringAsLevel( level )
+		
+	setLogLevel( level )
 
 ## Set the environment variable and the current LevelFilteredMessageHandler.
 # Parameters:
 # level: a string with the name of the log level as defined in MessageHandler.Level.
 #
-# This function sets the $IE_CORE_LOG_LEVEL environment variable, so child processes will inherit the log level.
+# This function sets the $IECORE_LOG_LEVEL environment variable, so child processes will inherit the log level.
 # If the current message handler is also a LevelFilteredMessageHandler, this function pushes 
 # it from the stack and register the new one.
 # 
 def setLogLevelByName( levelName ):
-	msgLevel = None
-	levels = Msg.Level.values.values()
-	for levelType in levels:
-		if levelName.lower() == levelType.name.lower():
-			msgLevel = levelType
 	
-	if msgLevel is None:
-		raise Exception, "Unrecognized Log level: " + str(levelName)
-
-	setLogLevel( msgLevel )
+	setLogLevel( MessageHandler.stringAsLevel( levelName ) )
 
 ## Set the environment variable and the current LevelFilteredMessageHandler.
 # Parameters:
 # level: MessageHandler.Level value.
 #
-# This function sets the $IE_CORE_LOG_LEVEL environment variable, so child processes will inherit the log level.
+# This function sets the $IECORE_LOG_LEVEL environment variable, so child processes will inherit the log level.
 # If the current message handler is also a LevelFilteredMessageHandler, this function pushes 
 # it from the stack and register the new one.
-# 
+#
+# \todo This function completely unbalances the pushing and popping of handlers by popping
+# an arbitrary number of handlers. I think it should push a single new handler onto the
+# stack and be done with it, otherwise there's no way of popping back to previous states.
 def setLogLevel( level ):
 
-	if os.environ.get("IE_CORE_LOG_LEVEL", "").lower() != level.name.lower():
-		os.environ["IE_CORE_LOG_LEVEL"] = level.name
+	assert( level!=MessageHandler.Level.Invalid )
+
+	os.environ["IECORE_LOG_LEVEL"] = MessageHandler.levelAsString( level )
 
 	current = MessageHandler.popHandler()
 	# remove previous Level filters

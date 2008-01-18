@@ -64,6 +64,7 @@ class MessageHandler : public RefCounted
 			Warning = 1,
 			Info = 2,
 			Debug = 3,
+			Invalid = 4
 		};
 		
 		//! @name Message output
@@ -96,13 +97,17 @@ class MessageHandler : public RefCounted
 		static MessageHandlerPtr popHandler();
 		//@}
 		
-		/// Must be implemented by subclasses to output the message appropriately.	
-		virtual void handle( Level level, const std::string &context, const std::string &message ) = 0;
-		
-	protected :
-	
-		/// Utility function for handlers wanting to represent a message level as a string.
+		//! @name Conversions between Level and string
+		////////////////////////////////////////////////////////
+		//@{
+		/// Returns a readable string representation of the specified message level.
 		static std::string levelAsString( Level level );
+		/// Returns a message level based on the specified string (case is ignored).
+		static Level stringAsLevel( const std::string &level );
+		//@}
+		
+		/// Must be implemented by subclasses to output the message appropriately.	
+		virtual void handle( Level level, const std::string &context, const std::string &message ) = 0;	
 
 	private :
 
