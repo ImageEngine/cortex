@@ -41,6 +41,7 @@
 namespace IECoreMaya
 {
 
+/// \todo Make the capitalisation of DagNode match that of DAGPathParameter
 class DagNode : public Node
 {
 	public :
@@ -55,7 +56,7 @@ class DagNode : public Node
 		std::string fullPathName();
 		
 		unsigned numParents();
-		DagNode parent( unsigned int index=0 );
+		DagNode *parent( unsigned int index=0 );
 		
 };
 

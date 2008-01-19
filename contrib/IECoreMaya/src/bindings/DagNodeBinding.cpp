@@ -76,14 +76,19 @@ unsigned DagNode::numParents()
 	return fnNode.parentCount();
 }
 
-DagNode DagNode::parent( unsigned int index )
+DagNode *DagNode::parent( unsigned int index )
 {
 	
 	MStatus s;
 	MFnDagNode fnNode( object() );
 	MObject p = fnNode.parent( index, &s );
 	StatusException::throwIfError( s );
-	return DagNode( p );
+	return new DagNode( p );
+}
+
+static DagNode *parent2( DagNode &d )
+{
+	return d.parent();
 }
 		
 ///////////////////////////////////////////////////////////////////////
@@ -92,11 +97,13 @@ DagNode DagNode::parent( unsigned int index )
 
 void IECoreMaya::bindDagNode()
 {
+
+
 	class_<DagNode, boost::noncopyable, bases<Node> >( "DagNode", init<const char *>() )
 		.def( "fullPathName", &DagNode::fullPathName )
 		.def( "__str__", &DagNode::fullPathName )
 		.def( "numParents", &DagNode::numParents )
-		.def( "parent", (DagNode (DagNode::*)())&DagNode::parent )
-		.def( "parent", (DagNode (DagNode::*)( unsigned ))&DagNode::parent )
+		.def( "parent", &DagNode::parent, return_value_policy<manage_new_object>() )
+		.def( "parent", &parent2, return_value_policy<manage_new_object>() )
 	;
 }
