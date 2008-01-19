@@ -88,7 +88,7 @@ class BakeTransform( IECore.Op ) :
 			dst = self.dst.getDAGPathValue()
 		else :
 			dst = maya.cmds.createNode( "transform", name=operands.dst.value, skipSelect=True )
-			dst = IECoreMaya.DagNode( dst )
+			dst = IECoreMaya.DagNode( str(dst) )
 
 		worldMatrixPlug = self.src.getDAGPathValue().plug( "worldMatrix" )[0]
 
@@ -97,7 +97,7 @@ class BakeTransform( IECore.Op ) :
 			maya.cmds.currentTime( float( f ) )
 
 			worldMatrix = worldMatrixPlug.convert().value
-
+			
 			e = IECore.Eulerf()
 			e.extract( worldMatrix.rotate )
 
