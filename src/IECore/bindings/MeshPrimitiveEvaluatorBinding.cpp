@@ -55,15 +55,36 @@ struct MeshPrimitiveEvaluatorWrap : public MeshPrimitiveEvaluator, public Wrappe
 	{	
 	}
 	
-	bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::ResultPtr result )
+	void validateResult( PrimitiveEvaluator::ResultPtr result ) const
 	{
 		MeshPrimitiveEvaluator::ResultPtr mr = boost::dynamic_pointer_cast< MeshPrimitiveEvaluator::Result >( result );
 
 		if ( ! mr )
 		{
-			throw InvalidArgumentException("Incorrect result type passed to MeshPrimitiveEvaluator.closestPoint");
+			throw InvalidArgumentException("Incorrect result type passed to MeshPrimitiveEvaluator");
 		}
+	}
+	
+	bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::ResultPtr result )
+	{
+		validateResult( result );
+		
 		return MeshPrimitiveEvaluator::closestPoint( p, result );
+	}
+			
+	bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
+	{
+		validateResult( result );
+		
+		return MeshPrimitiveEvaluator::pointAtUV( uv, result );
+	}
+		
+	bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
+			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const
+	{
+		validateResult( result );
+		
+		return MeshPrimitiveEvaluator::intersectionPoint( origin, direction, result, maxDistance );
 	}
 	
 };
