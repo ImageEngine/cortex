@@ -235,51 +235,19 @@ MeshPrimitiveImplicitSurfaceFunction::Value MeshPrimitiveImplicitSurfaceFunction
 		const Imath::V3f &bary = result->barycentricCoordinates();
 
 		/// Is nearest feature an edge, or the triangle itself?
-
-		const float eps = 1.e-6f;
 		
-		bool closestIsTriangle = false;
-		bool closestIsVertex = false;
-		bool closestIsEdge = false;
-
-		int numNonZeroBarycentrics = 0;
-		if (bary.x > eps)
+		int region = triangleBarycentricFeature( bary );
+		
+		if ( region == 0  )
 		{
-			numNonZeroBarycentrics++;
-		}
-		if (bary.y > eps)
-		{
-			numNonZeroBarycentrics++;
-		}
-		if (bary.z > eps)
-		{
-			numNonZeroBarycentrics++;
-		}
-
-		if (numNonZeroBarycentrics == 3)
-		{
-			closestIsTriangle = true;
-		}
-		else if (numNonZeroBarycentrics == 2)
-		{
-			closestIsEdge = true;
-		}
-		else
-		{
-			closestIsVertex = true;
-		}
-
-		assert( closestIsTriangle || closestIsEdge || closestIsVertex );
-
-		if ( closestIsTriangle )
-		{
+			assert( region == 0 );
 			const Point &n = result->normal();
 			PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );			
 			PrimitiveImplicitSurfaceFunction::Value sign = n.dot( p ) - planeConstant;									
 			return (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
 		}
-		else  if ( closestIsEdge )
-		{
+		else  if ( region % 2 == 1 )
+		{		
 			// Closest feature is an edge, so we need to use the average normal of the adjoining triangles
 			
 			const V3i &triangleVertexIds = result->vertexIds();
@@ -288,24 +256,18 @@ MeshPrimitiveImplicitSurfaceFunction::Value MeshPrimitiveImplicitSurfaceFunction
 			assert( runTimeCast< MeshPrimitive >( m_primitive ) );
 			ConstIntVectorDataPtr vertexIds = (runTimeCast< MeshPrimitive >( m_primitive ))->vertexIds();
 
-			if (bary.x < bary.y)
+			if ( region == 1 )
 			{
-				if (bary.z < bary.x)
-				{
-					edge = Edge( triangleVertexIds[0], triangleVertexIds[1] );
-				}
-				else
-				{
-					edge = Edge( triangleVertexIds[1], triangleVertexIds[2] );
-				}
+				edge = Edge( triangleVertexIds[1], triangleVertexIds[2] );
 			}
-			else if (bary.z < bary.y)
-			{
-				edge = Edge( triangleVertexIds[0], triangleVertexIds[1] );
-			}
-			else
+			else if ( region == 3 )
 			{
 				edge = Edge( triangleVertexIds[0], triangleVertexIds[2] );
+			}
+			else 
+			{
+				assert( region == 5 );
+				edge = Edge( triangleVertexIds[0], triangleVertexIds[1] );
 			}
 
 			EdgeAverageNormals::const_iterator it = m_edgeAverageNormals.find( edge );
@@ -318,24 +280,26 @@ MeshPrimitiveImplicitSurfaceFunction::Value MeshPrimitiveImplicitSurfaceFunction
 		}
 		else
 		{
-			// Closest feature is a vertex, so we need to use the angle weighted normal of the adjoining triangles
-			assert( closestIsVertex );
+			// Closest feature is a vertex, so we need to use the angle weighted normal of the adjoining triangles		
+			assert( region % 2 == 0 );
 
 			const V3i &triangleVertexIds = result->vertexIds();
 			
-			int closestVertex = 2;
-			if (bary.x > bary.y)
+			int closestVertex = 1;
+			if ( region == 2 )
 			{
-				if (bary.x > bary.z)
-				{
-					closestVertex = 0;
-				}
+				closestVertex = 2;
 			}
-			else if (bary.y > bary.z)
+			else if ( region == 4 )
 			{
-				closestVertex = 1;
+				closestVertex = 0;
 			}
-
+			else 
+			{
+				assert( region == 6 );
+				assert( closestVertex = 1 );
+			}			
+			
 			assert( triangleVertexIds[ closestVertex ] < (int)(m_vertexAngleWeightedNormals->readable().size()) );
 			
 			const Point &n = m_vertexAngleWeightedNormals->readable()[ triangleVertexIds[ closestVertex ] ];
