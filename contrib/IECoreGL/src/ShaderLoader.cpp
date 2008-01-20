@@ -126,13 +126,14 @@ std::string ShaderLoader::readFile( const std::string &fileName )
 			typedef boost::wave::context<std::string::iterator, LexIterator> Context;
 
 			Context ctx( result.begin(), result.end(), fileName.c_str() );
+			// set the language so that #line directives aren't inserted (they make the ati shader compiler barf)
+			ctx.set_language( boost::wave::support_normal );
+			
 			for( list<path>::const_iterator it=m_preprocessorSearchPaths.paths.begin(); it!=m_preprocessorSearchPaths.paths.end(); it++ )
 			{
 				string p = (*it).string();
 				ctx.add_include_path( p.c_str() );
 			}
-
-			//ctx.add_macro_definition(...);
 
 			Context::iterator_type b = ctx.begin();
 			Context::iterator_type e = ctx.end();
@@ -152,7 +153,6 @@ std::string ShaderLoader::readFile( const std::string &fileName )
 			throw Exception( boost::str( boost::format( "Error during preprocessing : %s line %d : %s" ) % e.file_name() % e.line_no() % e.description() ) );
 		}
 	}
-	
 	return result;
 }
 
