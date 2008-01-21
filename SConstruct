@@ -681,10 +681,13 @@ coreTestEnv.Append(
 )
 
 coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", glob.glob( "test/IECore/*.cpp" ) )
+
 coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest >& test/IECore/results.txt" )
+NoCache( coreTest )
 coreTestEnv.Alias( "testCore", coreTest )
 
 corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePythonModule, pythonExecutable + " $TEST_CORE_SCRIPT" )
+NoCache( corePythonTest )
 coreTestEnv.Alias( "testCorePython", corePythonTest )
 
 ###########################################################################################
@@ -783,6 +786,7 @@ if doConfigure :
 		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " test/IECoreRI/All.py" )
+		NoCache( riTest )
 		riTestEnv.Depends( riTest, corePythonModule )
 		riTestEnv.Alias( "testRI", riTest )
 
