@@ -46,13 +46,14 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 		
 		rand = Rand48( 1 )	
 		
-		numTests = 500
+		numTests = 50
 		for i in range(0, numTests) :
+
+			center = V3f( 0, 0, 0 )
+			radius = random.uniform( 0.1, 5 )		
+			sphere = SpherePrimitive( radius )
 		
-			center = V3f( random.uniform( -10, 10 ), random.uniform( -10, 10 ), random.uniform( -10, 10 ) )
-			radius = random.uniform( 0.1, 5 )
-		
-			se = SpherePrimitiveEvaluator( center, radius )
+			se = PrimitiveEvaluator.create( sphere )
 			
 			result = se.createResult()
 			
@@ -69,8 +70,8 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 			origin = center + Rand48.solidSpheref(rand) * radius * 0.9			
 			self.assert_( ( origin - center ).length() < radius )
 			
-			# And a random direction
-			direction = Rand48.hollowSpheref(rand)	
+			# And a random (unnormalized!) direction
+			direction = Rand48.hollowSpheref(rand)	* random.uniform( 0.5, 10 )
 			
 			found = se.intersectionPoint( origin, direction, result )
 			if found:

@@ -50,8 +50,8 @@ struct SpherePrimitiveEvaluatorWrap : public SpherePrimitiveEvaluator, public Wr
 {
 	IE_CORE_DECLAREMEMBERPTR( SpherePrimitiveEvaluatorWrap );
 	
-	SpherePrimitiveEvaluatorWrap( PyObject *self, const Imath::V3f &center, float radius )
-	: SpherePrimitiveEvaluator( center, radius ), Wrapper<SpherePrimitiveEvaluatorWrap>( self, this )
+	SpherePrimitiveEvaluatorWrap( PyObject *self, ConstSpherePrimitivePtr sphere )
+	: SpherePrimitiveEvaluator( sphere ), Wrapper<SpherePrimitiveEvaluatorWrap>( self, this )
 	{	
 	}
 	
@@ -93,7 +93,7 @@ void bindSpherePrimitiveEvaluator()
 	typedef class_< SpherePrimitiveEvaluator, SpherePrimitiveEvaluatorWrap::Ptr, bases< PrimitiveEvaluator >, boost::noncopyable > SpherePrimitiveEvaluatorPyClass;
 	
 	object s = SpherePrimitiveEvaluatorPyClass ( "SpherePrimitiveEvaluator", no_init )
-		.def( init< const Imath::V3f &, float > () )
+		.def( init< ConstSpherePrimitivePtr > () )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(SpherePrimitiveEvaluator)
 	;
 	INTRUSIVE_PTR_PATCH( SpherePrimitiveEvaluator, SpherePrimitiveEvaluatorPyClass );

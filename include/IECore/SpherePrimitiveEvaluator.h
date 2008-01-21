@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "IECore/PrimitiveEvaluator.h"
+#include "IECore/SpherePrimitive.h"
 
 namespace IECore
 {
@@ -46,6 +47,8 @@ namespace IECore
 class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 {
 	public:
+	
+		typedef SpherePrimitive PrimitiveType;
 	
 		IE_CORE_DECLARERUNTIMETYPED( SpherePrimitiveEvaluator, PrimitiveEvaluator );
 					
@@ -73,7 +76,6 @@ class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 			protected:
 			
 				Imath::V3f m_p;
-				Imath::V3f m_n;
 							
 				template<typename T>
 				T getPrimVar( const PrimitiveVariable &pv ) const;
@@ -82,9 +84,11 @@ class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 		};
 		IE_CORE_DECLAREPTR( Result );		
 		
-		SpherePrimitiveEvaluator( const Imath::V3f &center, float radius );
+		SpherePrimitiveEvaluator( ConstSpherePrimitivePtr sphere );
 		
 		virtual ~SpherePrimitiveEvaluator();
+		
+		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
 		
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
 		
@@ -100,8 +104,7 @@ class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 		
 	protected:
 	
-		Imath::V3f m_center;
-		float m_radius;
+		ConstSpherePrimitivePtr m_sphere;
 };
 
 IE_CORE_DECLAREPTR( SpherePrimitiveEvaluator );

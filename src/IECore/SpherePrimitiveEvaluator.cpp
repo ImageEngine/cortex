@@ -46,6 +46,16 @@
 using namespace IECore;
 using namespace Imath;
 
+static PrimitiveEvaluator::Description< SpherePrimitiveEvaluator > g_registraar = PrimitiveEvaluator::Description< SpherePrimitiveEvaluator >();
+
+PrimitiveEvaluatorPtr SpherePrimitiveEvaluator::create( ConstPrimitivePtr primitive )
+{
+	ConstSpherePrimitivePtr sphere = runTimeCast< const SpherePrimitive >( primitive );
+	assert ( sphere );
+
+	return new SpherePrimitiveEvaluator( sphere );
+}
+
 SpherePrimitiveEvaluator::Result::Result()
 {
 }
@@ -57,7 +67,7 @@ V3f SpherePrimitiveEvaluator::Result::point() const
 								
 V3f SpherePrimitiveEvaluator::Result::normal() const
 {
-	return m_n;
+	return m_p.normalized();
 }
 
 V2f SpherePrimitiveEvaluator::Result::uv() const
@@ -112,8 +122,11 @@ T SpherePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) co
 	throw NotImplementedException( __PRETTY_FUNCTION__ );
 }
 
-SpherePrimitiveEvaluator::SpherePrimitiveEvaluator( const Imath::V3f &center, float radius ) : m_center( center ), m_radius( radius )
+SpherePrimitiveEvaluator::SpherePrimitiveEvaluator( ConstSpherePrimitivePtr sphere ) 
 {
+	assert( sphere );
+	
+	m_sphere = sphere->copy();
 }
 
 SpherePrimitiveEvaluator::~SpherePrimitiveEvaluator()
@@ -131,8 +144,7 @@ bool SpherePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvalua
 	
 	ResultPtr sr = boost::static_pointer_cast< Result >( result );
 	
-	sr->m_n = (p - m_center).normalized();
-	sr->m_p = (sr->m_n * m_radius) + m_center;
+	sr->m_p = p.normalized() * m_sphere->radius();
 
 	return true;	
 }
@@ -150,10 +162,11 @@ bool SpherePrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, cons
 	assert( boost::dynamic_pointer_cast< Result >( result ) );
 	
 	ResultPtr sr = boost::static_pointer_cast< Result >( result );
-
-	Imath::V3f diff = origin - m_center;
-	float a0 = diff.dot(diff) - m_radius * m_radius;
-	float a1 = direction.dot( diff );
+	
+	Imath::V3f dir = direction.normalized();
+	(void)direction;
+	float a0 = origin.dot( origin ) - m_sphere->radius() * m_sphere->radius();
+	float a1 = dir.dot( origin );
 	float discr = a1 * a1 - a0;
 	
 	if (discr < 0.0)
@@ -167,8 +180,8 @@ bool SpherePrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, cons
 		float t0 = -a1 - root;
 		float t1 = -a1 + root;
 		
-		Imath::V3f p0 = origin + t0 * direction;
-		Imath::V3f p1 = origin + t1 * direction;
+		Imath::V3f p0 = origin + t0 * dir;
+		Imath::V3f p1 = origin + t1 * dir;
 		
 		if ( t0 >= 0.0 )
 		{
@@ -203,7 +216,7 @@ bool SpherePrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, cons
 		
 		if ( t >= 0.0 )
 		{		
-			sr->m_p = origin + t * direction;		
+			sr->m_p = origin + t * dir;		
 		}
 		else
 		{
@@ -213,8 +226,6 @@ bool SpherePrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, cons
 	
 	if ( (sr->m_p - origin).length() < maxDistance)
 	{		
-		sr->m_n = ( sr->m_p - m_center ).normalized();
-		
 		return true;
 	}
 	
@@ -228,9 +239,10 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 {	
 	results.clear();
 
-	Imath::V3f diff = origin - m_center;
-	float a0 = diff.dot(diff) - m_radius * m_radius;
-	float a1 = direction.dot( diff );
+	Imath::V3f dir = direction.normalized();
+	(void)direction;
+	float a0 = origin.dot(origin) - m_sphere->radius() * m_sphere->radius();
+	float a1 = dir.dot( origin );
 	float discr = a1 * a1 - a0;
 	
 	if (discr < 0.0)
@@ -245,13 +257,12 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 		
 		if ( t0 >= 0.0 )
 		{
-			Imath::V3f p0 = origin + t0 * direction;
+			Imath::V3f p0 = origin + t0 * dir;
 			if ( (origin - p0).length() < maxDistance )
 			{
 				ResultPtr r = boost::static_pointer_cast< Result > ( createResult() );
 				r->m_p = p0;
-				r->m_n = ( r->m_p - m_center ).normalized();
-
+				
 				results.push_back( r );
 			}
 		}
@@ -259,13 +270,12 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 		float t1 = -a1 + root;
 		if ( t1 >= 0.0 )
 		{
-			Imath::V3f p1 = origin + t1 * direction;
+			Imath::V3f p1 = origin + t1 * dir;
 			if ( (origin - p1).length() < maxDistance )
 			{
 				ResultPtr r = boost::static_pointer_cast< Result > ( createResult() );
 				r->m_p = p1;
-				r->m_n = ( r->m_p - m_center ).normalized();
-
+				
 				results.push_back( r );
 			}
 		}
@@ -276,12 +286,11 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 		
 		if ( t >= 0.0 )
 		{		
-			Imath::V3f p = origin + t * direction;
+			Imath::V3f p = origin + t * dir;
 			if ( (origin - p).length() < maxDistance )
 			{
 				ResultPtr r = boost::static_pointer_cast< Result > ( createResult() );							
 				r->m_p = p;
-				r->m_n = ( r->m_p - m_center ).normalized();
 
 				results.push_back( r );
 			}	
