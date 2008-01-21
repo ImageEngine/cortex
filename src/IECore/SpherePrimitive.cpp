@@ -35,6 +35,7 @@
 #include "IECore/SpherePrimitive.h"
 #include "IECore/Renderer.h"
 #include "IECore/Exception.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace std;
 using namespace IECore;
