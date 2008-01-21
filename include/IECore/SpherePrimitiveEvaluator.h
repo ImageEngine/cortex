@@ -43,7 +43,8 @@
 namespace IECore
 {
 
-/// An implementation of PrimitiveEvaluator to allow spatial queries to be performed on spheres
+/// An implementation of PrimitiveEvaluator to allow spatial queries to be performed on spheres. 
+/// \todo Currently ignores zMin, zMax, thetaMax parameters, instead assuming that there sphere is whole and facing outwards.
 class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 {
 	public:
