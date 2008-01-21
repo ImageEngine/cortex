@@ -148,6 +148,7 @@
 #include "IECore/bindings/MeshPrimitiveImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/MeshPrimitiveImplicitSurfaceOpBinding.h"
 #include "IECore/bindings/TriangulateOpBinding.h"
+#include "IECore/bindings/SpherePrimitiveEvaluatorBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -275,6 +276,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMeshPrimitiveImplicitSurfaceFunction();		
 	bindMeshPrimitiveImplicitSurfaceOp();	
 	bindTriangulateOp();
+	bindSpherePrimitiveEvaluator();	
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -235,6 +235,7 @@ void bindTypeId()
 		.value("MeshPrimitiveEvaluator", MeshPrimitiveEvaluatorTypeId)		
 		.value("MeshPrimitiveImplicitSurfaceOp", MeshPrimitiveImplicitSurfaceOpTypeId)				
 		.value("TriangulateOp", TriangulateOpTypeId)						
+		.value("SpherePrimitiveEvaluator", SpherePrimitiveEvaluatorTypeId)		
 	;
 }
 
