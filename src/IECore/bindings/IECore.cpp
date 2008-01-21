@@ -159,7 +159,7 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE(_IECore)
 {
-	bindRefCounted();(void)
+	bindRefCounted();
 	bindRunTimeTyped();
 	bindException();
 	bindImath();
