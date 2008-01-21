@@ -72,7 +72,23 @@ V3f SpherePrimitiveEvaluator::Result::normal() const
 
 V2f SpherePrimitiveEvaluator::Result::uv() const
 {
-	throw NotImplementedException( __PRETTY_FUNCTION__ );
+	V3f pn = point().normalized();
+	
+	/// \todo Once we support partial spheres we'll need to get these quantities from the primitive
+	const float zMin = -1.0f;
+	const float zMax = 1.0f;
+	const float thetaMax = 2.0f * M_PI;
+		
+	const float phiMin = asin( zMin );
+	const float phiMax = asin( zMax );		
+	
+	/// Simple rearrangement of equations in Renderman specification
+	float phi = asin( pn.z );	
+	float theta = acos( pn.x / cos(phi) ) ;
+	float u = theta / thetaMax;
+	float v = ( phi - phiMin ) / ( phiMax - phiMin );
+
+	return V2f( u, v );
 }
 
 V3f SpherePrimitiveEvaluator::Result::uTangent() const
@@ -102,10 +118,25 @@ int SpherePrimitiveEvaluator::Result::intPrimVar( const PrimitiveVariable &pv ) 
 
 const std::string &SpherePrimitiveEvaluator::Result::stringPrimVar( const PrimitiveVariable &pv ) const
 {
-	throw NotImplementedException( __PRETTY_FUNCTION__ );
+	ConstStringDataPtr data = runTimeCast< const StringData >( pv.data );
+		
+	if (data)
+	{
+		return data->readable();
+	}	
+	else
+	{
+		ConstStringVectorDataPtr data = runTimeCast< const StringVectorData >( pv.data );
+		
+		if (data)
+		{		
+			return data->readable()[0];
+		}
+	}
+	
+	throw InvalidArgumentException( "Could not retrieve primvar data for SpherePrimitiveEvaluator" );
 }
 	
-
 Color3f SpherePrimitiveEvaluator::Result::colorPrimVar( const PrimitiveVariable &pv ) const
 {
 	return getPrimVar< Color3f >( pv );
@@ -119,7 +150,66 @@ half SpherePrimitiveEvaluator::Result::halfPrimVar( const PrimitiveVariable &pv 
 template<typename T>
 T SpherePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) const
 {
-	throw NotImplementedException( __PRETTY_FUNCTION__ );
+	if ( pv.interpolation == PrimitiveVariable::Constant )
+	{
+		typedef TypedData<T> Data;
+		typedef typename Data::Ptr DataPtr;
+		
+		DataPtr data = runTimeCast< Data >( pv.data );
+		
+		if (data)
+		{
+			return data->readable();
+		}
+	}
+	
+	typedef TypedData< std::vector<T> > VectorData;
+	typedef typename VectorData::Ptr VectorDataPtr;
+	VectorDataPtr data = runTimeCast< VectorData >( pv.data );
+
+	if (!data)
+	{
+		throw InvalidArgumentException( "Could not retrieve primvar data for SpherePrimitiveEvaluator" );
+	}
+
+	switch ( pv.interpolation )
+	{
+		case PrimitiveVariable::Constant :
+		case PrimitiveVariable::Uniform :		
+			assert( data->readable().size() == 1 );
+			
+			return data->readable()[0];
+
+		case PrimitiveVariable::Vertex :
+		case PrimitiveVariable::Varying:
+		case PrimitiveVariable::FaceVarying:
+			{		
+				assert( data->readable().size() == 4 );
+				
+				V2f uvCoord = uv();
+				
+				float u = uvCoord.x;
+				float v = uvCoord.y;
+				
+				/// These match 3delight
+				const T &f00 = data->readable()[0];
+				const T &f10 = data->readable()[1];
+				const T &f01 = data->readable()[2];
+				const T &f11 = data->readable()[3];
+				
+				/// Bilinear interpolation
+				return T( f00 * (1-u) * (1-v) + f10 * u * (1-v) + f01 * (1-u) * v + f11 * u * v );
+			}
+			break;
+		
+		default :
+			/// Unimplemented primvar interpolation
+			assert( false );
+			return T();
+
+	}
+	
+	throw NotImplementedException( __PRETTY_FUNCTION__ );			
 }
 
 SpherePrimitiveEvaluator::SpherePrimitiveEvaluator( ConstSpherePrimitivePtr sphere ) 

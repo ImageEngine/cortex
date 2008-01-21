@@ -52,6 +52,16 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 			center = V3f( 0, 0, 0 )
 			radius = random.uniform( 0.1, 5 )		
 			sphere = SpherePrimitive( radius )
+			
+			# Add some UV data in "bowtie" order - when we read it back it should then match the geometric UVs
+			# if we're doing everything correctly.
+			testData = V3fVectorData()
+			testData.append( V3f( 0, 0, 0 ) )
+			testData.append( V3f( 1, 0, 0 ) )
+			testData.append( V3f( 0, 1, 0 ) )
+			testData.append( V3f( 1, 1, 0 ) )	
+			testPrimVar = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, testData )							
+			sphere["testPrimVar"] = testPrimVar
 		
 			se = PrimitiveEvaluator.create( sphere )
 			
@@ -60,8 +70,19 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 			testPoint = V3f( random.uniform( -10, 10 ), random.uniform( -10, 10 ), random.uniform( -10, 10 ) )
 			
 			found = se.closestPoint( testPoint, result )
-
+			
 			self.assert_( found )
+			
+			uv = result.uv()
+			self.assert_( uv[0] >= 0 )
+			self.assert_( uv[0] <= 1 )
+			self.assert_( uv[1] >= 0 )
+			self.assert_( uv[1] <= 1 )
+			
+			# Make sure our "fake" UVs match the geomtric UVs
+			testPrimVarValue = result.vectorPrimVar( testPrimVar )			
+			self.assertAlmostEqual( testPrimVarValue[0], uv[0], 3 )
+			self.assertAlmostEqual( testPrimVarValue[1], uv[1], 3 )			
 			
 			# The closest point should lie on the sphere
 			self.assert_( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
