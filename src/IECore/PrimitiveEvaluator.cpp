@@ -46,6 +46,7 @@ PrimitiveEvaluator::CreatorMap &PrimitiveEvaluator::getCreateFns()
 void PrimitiveEvaluator::registerCreator( TypeId id, CreatorFn f )
 {
 	assert( f );
+	assert( f != &PrimitiveEvaluator::create );
 	
         CreatorMap &createFns = getCreateFns();
         
