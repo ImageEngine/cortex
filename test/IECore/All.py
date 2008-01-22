@@ -118,6 +118,7 @@ from MeshPrimitiveImplicitSurfaceOp import *
 from Writer import *
 from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
+from SearchReplaceOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *
