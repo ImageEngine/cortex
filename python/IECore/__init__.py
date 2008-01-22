@@ -83,6 +83,7 @@ from curry import curry
 from MenuItemDefinition import MenuItemDefinition
 from MenuDefinition import MenuDefinition
 from ParameterParser import *
+from SearchReplaceOp import SearchReplaceOp
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
