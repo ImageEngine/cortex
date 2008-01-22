@@ -241,7 +241,29 @@ bool SpherePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvalua
 
 bool SpherePrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	throw NotImplementedException( __PRETTY_FUNCTION__ );
+	assert( boost::dynamic_pointer_cast< Result >( result ) );
+	
+	ResultPtr sr = boost::static_pointer_cast< Result >( result );
+	
+	/// \todo Once we support partial spheres we'll need to get these quantities from the primitive
+	const float zMin = -1.0f;
+	const float zMax = 1.0f;
+	const float thetaMax = 2.0f * M_PI;
+	
+	/// This is from the Renderman specification
+	const float phiMin = asin( zMin );
+	const float phiMax = asin( zMax );
+	
+	float phi = phiMin + uv.y  * ( phiMax - phiMin );
+	float theta = uv.x * thetaMax;
+	
+	sr->m_p = m_sphere->radius() * V3f(
+		 cos( theta ) * cos( phi ),
+		 sin( theta ) * cos( phi ),
+		 sin( phi )
+	);
+	
+	return true;		
 }
 
 /// Implementation derived from Wild Magic (Version 2) Software Library, available

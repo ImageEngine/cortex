@@ -73,19 +73,27 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 			
 			self.assert_( found )
 			
+			# The closest point should lie on the sphere
+			self.assert_( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
+			
 			uv = result.uv()
 			self.assert_( uv[0] >= 0 )
 			self.assert_( uv[0] <= 1 )
 			self.assert_( uv[1] >= 0 )
 			self.assert_( uv[1] <= 1 )
 			
-			# Make sure our "fake" UVs match the geomtric UVs
+			# Make sure our "fake" UVs match the geometric UVs
 			testPrimVarValue = result.vectorPrimVar( testPrimVar )			
 			self.assertAlmostEqual( testPrimVarValue[0], uv[0], 3 )
-			self.assertAlmostEqual( testPrimVarValue[1], uv[1], 3 )			
+			self.assertAlmostEqual( testPrimVarValue[1], uv[1], 3 )	
 			
-			# The closest point should lie on the sphere
-			self.assert_( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
+			closestPoint = result.point()
+			
+			found = se.pointAtUV( uv, result )
+			self.assert_( found )
+			
+			self.assertAlmostEqual( result.uv()[0], uv[0], 3 )
+			self.assertAlmostEqual( result.uv()[1], uv[1], 3 )
 									
 			# Pick a random point inside the sphere...
 			origin = center + Rand48.solidSpheref(rand) * radius * 0.9			
