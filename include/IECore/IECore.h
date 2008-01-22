@@ -75,6 +75,7 @@ bool withSQLite();
 /// \ref mainPageParameterisedSection <br>
 /// \ref mainPageIOSection <br>
 /// \ref mainPageRenderingSection <br>
+/// \ref mainPageAlgorithmsSection <br>
 /// \ref mainPagePythonSection <br>
 /// \section mainPageMathSection Math
 ///
@@ -83,12 +84,12 @@ bool withSQLite();
 /// types are designed along similar lines - for example the templated
 /// TransformationMatrix class.
 ///
-/// The VectorTraits and MatrixTraits classes provide a template based mechanism
+/// The \link IECore::VectorTraits VectorTraits \endlink and \link IECore::MatrixTraits MatrixTraits \endlink classes provide a template based mechanism
 /// for querying the dimensions of vector and matrix classes, and for setting and
 /// getting their elements. This allows coding compatible with both the Imath types
 /// and other 3rd party math types. The VectorOps.h and MatrixOps.h files then
 /// provide common operations on top of this lower level access, allowing classes
-/// such as KDTree and PerlinNoise to operate both on native IECore types and
+/// such as \link IECore::KDTree KDTree \endlink and \link IECore::PerlinNoise PerlinNoise \endlink to operate both on native IECore types and
 /// application specific types such as the Maya MPoint and MVector classes.
 /// 
 /// The VectorOps.h and MatrixOps.h code provides a pretty ugly c-style function
@@ -99,7 +100,7 @@ bool withSQLite();
 ///
 /// \section mainPageMemoryManagementSection Memory Management
 ///
-/// IECore uses reference counting for any reasonably complex class. The RefCounted
+/// IECore uses reference counting for any reasonably complex class. The \link IECore::RefCounted RefCounted \endlink
 /// base class provides an internal reference count for the object, and boost::intrusive_ptr
 /// is used most places where raw pointers would otherwise be used. This means that
 /// generally you don't need to worry about memory management - objects die appropriately
@@ -140,7 +141,7 @@ bool withSQLite();
 ///		}
 ///		else
 ///		{
-///			cerr << "I didn't want a goddam " d->typeName() << endl;
+///			cerr << "I didn't want an instance of class " << d->typeName() << endl;
 ///		}
 /// }
 /// \endcode
@@ -150,7 +151,7 @@ bool withSQLite();
 ///
 /// \section mainPageObjectSection The Object class
 ///
-/// The Object class defines methods for serialisation and copying, and
+/// The \link IECore::Object Object \endlink class defines methods for serialisation and copying, and
 /// provides a factory mechanism.
 ///
 /// \code
@@ -164,7 +165,7 @@ bool withSQLite();
 ///
 /// \section mainPageDataSection The Data classes
 ///
-/// The Data classes derive from Object and provide simple wrappers around
+/// The \link IECore::Data Data \endlink classes derive from \link IECore::Object Object \endlink and provide simple wrappers around
 /// basic datatypes and std::vectors of those datatypes. They implement the
 /// copy() method in a lazy manner, so you don't pay for a copy until you
 /// modify it. For this reason, you use the readable() and writable() methods
@@ -184,7 +185,7 @@ bool withSQLite();
 ///
 /// \section mainPageParameterisedSection The Parameter and Parameterised classes
 ///
-/// The Parameter classes provide a means of describing values to be passed to some
+/// The \link IECore::Parameter Parameter \endlink classes provide a means of describing values to be passed to some
 /// process, and the Parameterised class stores a bunch of parameters. Parameters provide
 /// enough information for different host applications to represent them appropriately.
 /// The IECore library provides a means of formatting parameter help for display in the
@@ -192,25 +193,28 @@ bool withSQLite();
 /// allows parameters to be represented as attributes on Maya nodes, and creates custom
 /// attribute editor layouts for them.
 ///
-/// Concrete implementations of the Parameterised class include the Op subclasses, which
+/// Concrete implementations of the \link IECore::Parameterised Parameterised \endlink class include the \link IECore::Op Op \endlink subclasses, which
 /// have an operate() method to compute some result from the input Parameters, the
-/// Procedural classes which define an interface for the rendertime generation of geometry,
-/// and the Reader and Writer classes which are described briefly below.
+/// \link IECore::Procedural Procedural \endlink classes which define an interface for the rendertime generation of geometry,
+/// and the \link IECore::Reader Reader \endlink and \link IECore::Writer Writer \endlink classes which are described briefly below.
 ///
 /// \section mainPageIOSection IO
 ///
 /// As we saw above, Objects have a built in serialisation mechanism. This makes use of
-/// the IndexedIOInterface, which defines a mechanism for the creation of random access
+/// the \link IECore::IndexedIOInterface IndexedIOInterface \endlink, which defines a mechanism for the creation of random access
 /// files containing a hierarchy of named data items. Currently the main implementation
-/// of this interface is FileIndexedIO, with FileSystemIndexedIO implementing a reference
+/// of this interface is \link IECore::FileIndexedIO FileIndexedIO \endlink, with 
+/// \link IECore::FileSystemIndexedIO FileSystemIndexedIO \endlink implementing a reference
 /// solution of use for debugging and the like.
 ///
-/// The AttributeCache and InterpolatedCache sit on top of IndexedIOInterface and provide
+/// The \link IECore::AttributeCache AttributeCache \endlink and \link IECore::InterpolatedCache 
+/// InterpolatedCache \endlink sit on top of IndexedIOInterface and provide
 /// a simple framework useable for vertex caching, transform caching and more - in fact any
 /// Object subclass can be stored as an element of a cache - this is one of the benefits
 /// of combining the object serialisation and random access caching code.
 ///
-/// For input and output of third party file formats there are the Reader and Writer classes.
+/// For input and output of third party file formats there are the \link IECore::Reader 
+/// Reader \endlink and \link IECore::Writer Writer \endlink classes.
 /// These contain factory mechanisms for obtaining Readers and Writers given a filename with
 /// an extension, and use Parameters to control any conversions during the io process.
 /// Currently implementations exist for several common image formats and for the Maya PDC file format.
@@ -222,18 +226,33 @@ bool withSQLite();
 ///
 /// \section mainPageRenderingSection Rendering
 ///
-/// IECore defines the Renderer class for the description of scenes to a renderer. Currently
+/// IECore defines the \link IECore::Renderer Renderer \endlink class for the description of scenes to a renderer. Currently
 /// no concrete implementations exist in the core library itself, but implementations for
 /// RenderMan and OpenGL exist in separate libraries.
 ///
-/// The Renderable class and subclasses such as MeshPrimitive provide objects which can be
-/// manipulated with Ops and which can describe themselves to Renderers.
+/// The Renderable class and subclasses such as \link IECore::MeshPrimitive MeshPrimitive \endlink
+/// provide objects which can be manipulated with Ops and which can describe themselves to Renderers.
+///
+/// \section mainPageAlgorithmsSection Algorithms
+///
+/// \link IECore::KDTree KDTree \endlink and \link IECore::BoundedKDTree BoundedKDTree \endlink
+/// structures allow for fast spatial queries on large data sets.
+///
+/// \link IECore::PerlinNoise PerlinNoise \endlink implements the classic noise function for arbitrary dimensions.
+///
+/// Fast closest point and ray intersection queries can be performed on some of the classes derived
+/// from \link IECore::Primitive Primitive \endlink, using an instance of a 
+/// \link IECore::PrimitiveEvaluator PrimitiveEvaluator \endlink.
+///
+/// A fast, robust implementation of \link IECore::MarchingCubes MarchingCubes \endlink is available for creating meshes from an
+/// \link IECore::ImplicitSurfaceFunction ImplicitSurfaceFunction \endlink.
 ///
 /// \section mainPagePythonSection Python
 ///
-/// All of the IECore C++ classes are bound into Python using the boost::python framework.
+/// All of the IECore C++ classes are bound into Python using the <a href="http://www.boost.org/libs/python/doc/">boost::python</a> framework.
 /// Many can actually be subclassed in python, making it very quick to implement a new Op
 /// or Procedural. Some IECore functionality is implemented directly in Python - for instance
-/// the FileSequence and FrameList classes.
+/// the \link IECore::FileSequence FileSequence \endlink and \link IECore::FrameList
+/// FrameList \endlink classes.
 
 #endif // IE_CORE_CORE_H
