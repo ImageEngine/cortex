@@ -1064,5 +1064,6 @@ docEnv.Depends( docs, glob.glob( "src/IECoreRI/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "python/IECore/*.py" ) )
 docEnv.Depends( docs, glob.glob( "python/IECoreRI/*.py" ) )
 
+# \todo This won't reinstall the documentation if the directory already exists
 installDoc = docEnv.Install( "$INSTALL_DOC_DIR", "doc/html" )
 docEnv.Alias( "install", installDoc )
