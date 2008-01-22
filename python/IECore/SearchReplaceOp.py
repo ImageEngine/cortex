@@ -57,7 +57,7 @@ class SearchReplaceOp( Op ) :
 					name = "source",
 					description = "The source file.",
 					defaultValue = "",
-					extensions = "ma rib shk nuk txt doc",
+					extensions = "ma rib shk nk",
 					check = FileNameParameter.CheckType.MustExist,
 					allowEmptyString = False,
 				),
