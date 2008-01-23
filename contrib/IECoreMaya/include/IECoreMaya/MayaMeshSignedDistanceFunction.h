@@ -51,7 +51,10 @@
 namespace IECoreMaya
 {
 
-/// A model of IEcore::ImplicitSurfaceFunction for creating a signed distance field with respect to a Maya mesh.
+/// A model of IECore::ImplicitSurfaceFunction for creating a signed distance field with respect to a Maya mesh.
+/// \todo Remove class entirely on next major version change
+/// \deprecated IECore::MeshPrimitiveImplicitSurfaceFunction should now be used in preference to this class as it is 
+/// faster and more robust.
 class MayaMeshSignedDistanceFunction : public IECore::ImplicitSurfaceFunction< Imath::V3d, double >
 {
         public:
