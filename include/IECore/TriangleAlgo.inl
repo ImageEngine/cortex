@@ -35,6 +35,8 @@
 #ifndef IECORE_TRIANGLEALGO_INL
 #define IECORE_TRIANGLEALGO_INL
 
+#include <cassert>
+
 #include "OpenEXR/ImathLimits.h"
 
 #include "IECore/VectorOps.h"
