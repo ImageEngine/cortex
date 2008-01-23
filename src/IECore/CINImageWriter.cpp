@@ -208,7 +208,7 @@ void CINImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	{		
 		if(!(*i == "R" || *i == "G" || *i == "B"))
 		{
-			cerr << "warning: channel '" << *i << "' not encoded by CINImageWriter" << endl;
+			msg( Msg::Warning, "CINImageWriter::write", format( "Channel \"%s\" was not encoded." ) % *i );
 			++i;
 			continue;
 			//throw Exception("invalid channel for CIN writer, channel name is: " + *i);
