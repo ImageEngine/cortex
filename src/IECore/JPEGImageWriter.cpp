@@ -124,7 +124,7 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 
 		if(!(*i == "R" || *i == "G" || *i == "B"))
 		{
-			cerr << "warning: channel '" << *i << "' not encoded by JPEGImageWriter" << endl;
+			msg( Msg::Warning, "JPEGImageWriter::write", format( "Channel \"%s\" was not encoded." ) % *i );
 			++i;
 			continue;
 			//throw Exception("invalid channel for JPEG writer, channel name is: " + *i);

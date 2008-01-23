@@ -223,7 +223,7 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	{		
 		if(!(*i == "R" || *i == "G" || *i == "B"))
 		{
-			cerr << "warning: channel '" << *i << "' not encoded by DPXImageWriter" << endl;
+			msg( Msg::Warning, "DPXImageWriter::write", format( "Channel \"%s\" was not encoded." ) % *i );
 			++i;
 			continue;
 		}
