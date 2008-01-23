@@ -70,6 +70,11 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 	{
 		throw InvalidArgumentException( "Invalid zMin/zMax specified for SpherePrimitive" );
 	}
+	
+	if ( fabsf(thetaMax) < 1.e-6 )
+	{
+		throw InvalidArgumentException( "Invalid thetaMax specified for SpherePrimitive" );
+	}
 }
 
 float SpherePrimitive::radius() const
