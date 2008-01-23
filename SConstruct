@@ -50,6 +50,10 @@ ieCorePatchVersion=0
 ###########################################################################################
 
 optionsFile = None
+
+if "CORTEX_OPTIONS_FILE" in os.environ :
+	optionsFile = os.environ["CORTEX_OPTIONS_FILE"]
+	
 if "OPTIONS" in ARGUMENTS :
 	optionsFile = ARGUMENTS["OPTIONS"]
 
