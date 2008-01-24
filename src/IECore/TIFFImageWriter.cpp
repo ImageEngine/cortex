@@ -32,6 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/static_assert.hpp"
+#include "boost/format.hpp"
+
 #include "IECore/TIFFImageWriter.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/VectorTypedData.h"
@@ -42,7 +45,7 @@
 #include "IECore/NumericParameter.h"
 
 #include "IECore/BoxOperators.h"
-#include "boost/format.hpp"
+
 #include "tiffio.h"
 
 using namespace IECore;
@@ -79,9 +82,24 @@ void TIFFImageWriter::constructParameters( )
 	compressionPresets["jpeg"]    = COMPRESSION_JPEG;
 	compressionPresets["deflate"] = COMPRESSION_DEFLATE;
 
+	/// Verify min
+	BOOST_STATIC_ASSERT( COMPRESSION_NONE < COMPRESSION_LZW );	
+	BOOST_STATIC_ASSERT( COMPRESSION_NONE < COMPRESSION_JPEG );		
+	BOOST_STATIC_ASSERT( COMPRESSION_NONE < COMPRESSION_DEFLATE );	
+
+	/// Verify max
+	BOOST_STATIC_ASSERT( COMPRESSION_DEFLATE > COMPRESSION_NONE );	
+	BOOST_STATIC_ASSERT( COMPRESSION_DEFLATE > COMPRESSION_LZW );		
+	BOOST_STATIC_ASSERT( COMPRESSION_DEFLATE > COMPRESSION_JPEG );
+
+
 	m_compressionParameter = new IntParameter("compression", "image data compression method",
-															compressionPresets["lzw"], 0, 35535, // min and max magic numbers
-															compressionPresets, true);
+		compressionPresets["lzw"], 
+		COMPRESSION_NONE,
+		COMPRESSION_DEFLATE,
+		compressionPresets, 
+		true);
+		
 	parameters()->addParameter(m_compressionParameter);
 }
 
@@ -111,7 +129,7 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	TIFF *tiff_image;
 	if((tiff_image = TIFFOpen(fileName().c_str(), "w")) == NULL)
 	{
-		throw Exception(string("could not open '") + fileName() + "' for writing");
+		throw IOException("Could not open '" + fileName() + "' for writing.");
 	}
 
 	// compute the writebox	
@@ -179,6 +197,8 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 
 	case 16:
 	{
+		/// \todo An unsigned short needn't be 16 bits long. Use typedefs from <stdint.h> instead.
+		BOOST_STATIC_ASSERT( sizeof( unsigned short ) == 2 );
 		unsigned short * v = encodeChannels<unsigned short>(image, names, dw);
 		stripEncode(tiff_image, (char *) v, bpc * width * height * spp, strips);
 		delete [] v;
@@ -187,6 +207,8 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	
 	case 32:
 	{
+		/// \todo An unsigned int needn't be 32 bits long. Use typedefs from <stdint.h> instead.
+		BOOST_STATIC_ASSERT( sizeof( unsigned int ) == 4 );
 		unsigned int * v = encodeChannels<unsigned int>(image, names, dw);
 		stripEncode(tiff_image, (char *) v, bpc * width * height * spp, strips);
 		delete [] v;

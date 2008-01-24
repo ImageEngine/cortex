@@ -35,9 +35,13 @@
 #ifndef IECORE_TIFFIMAGEWRITER_INL
 #define IECORE_TIFFIMAGEWRITER_INL
 
+#include "boost/format.hpp"
+
+#include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 
-namespace IECore {
+namespace IECore
+{
 
 template<typename T>
 T * TIFFImageWriter::encodeChannels(ConstImagePrimitivePtr image, std::vector<std::string> & names, const Imath::Box2i & dw)
@@ -59,7 +63,7 @@ T * TIFFImageWriter::encodeChannels(ConstImagePrimitivePtr image, std::vector<st
 	{
 		if(!(*i == "R" || *i == "G" || *i == "B" || *i == "A"))
 		{
-			std::cerr << "warning: channel '" << *i << "' not encoded by TIFFImageWriter" << std::endl;
+			msg( Msg::Warning, "TIFFImageWriter::write", boost::format( "Channel \"%s\" was not encoded." ) % *i );
 			++i;
 			continue;
 			//throw Exception("invalid channel for TIFF writer, channel name is: " + *i);
@@ -75,7 +79,7 @@ T * TIFFImageWriter::encodeChannels(ConstImagePrimitivePtr image, std::vector<st
 			
 		case FloatVectorDataTypeId:
 		{
-			std::vector<float> channel = boost::static_pointer_cast<FloatVectorData>(channelp)->readable();
+			const std::vector<float> &channel = boost::static_pointer_cast<FloatVectorData>(channelp)->readable();
 
 			for(int i = 0; i < width*height; ++i)
 			{
@@ -88,7 +92,7 @@ T * TIFFImageWriter::encodeChannels(ConstImagePrimitivePtr image, std::vector<st
 	
 		case UIntVectorDataTypeId:
 		{
-			std::vector<unsigned int> channel = boost::static_pointer_cast<UIntVectorData>(channelp)->readable();
+			const std::vector<unsigned int> &channel = boost::static_pointer_cast<UIntVectorData>(channelp)->readable();
 			
 			for(int i = 0; i < width*height; ++i)
 			{
@@ -100,7 +104,7 @@ T * TIFFImageWriter::encodeChannels(ConstImagePrimitivePtr image, std::vector<st
 			
 		case HalfVectorDataTypeId:
 		{
-			std::vector<half> channel = boost::static_pointer_cast<HalfVectorData>(channelp)->readable();
+			const std::vector<half> &channel = boost::static_pointer_cast<HalfVectorData>(channelp)->readable();
 
 			for(int i = 0; i < width*height; ++i)
 			{
@@ -114,8 +118,7 @@ T * TIFFImageWriter::encodeChannels(ConstImagePrimitivePtr image, std::vector<st
 			
 		default:
 			delete [] image_buffer;
-			throw "invalid data type for TIFF writer, channel type is: " +
-				Object::typeNameFromTypeId(channelp->typeId());
+			throw InvalidArgumentException( (boost::format( "Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId(channelp->typeId()) % *i).str() );
 		}
 		
 		++i;

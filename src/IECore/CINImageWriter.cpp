@@ -77,7 +77,7 @@ void CINImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	out.open(fileName().c_str());//, "wb");
 	if(!out.is_open())
 	{
-		throw Exception("could not open '" + fileName() + "' for writing");
+		throw IOException("Could not open '" + fileName() + "' for writing.");
 	}
 	
 	// assume an 8-bit RGB image
@@ -97,6 +97,8 @@ void CINImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	fi.variable_header_length = 0;
 	
 	strcpy(fi.version, "V4.5");
+	
+	/// \todo What is the purpose of this?
 	strcpy(fi.file_name, "image-engine.cin");
 
 	// compute the current date and time
@@ -131,14 +133,17 @@ void CINImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 		ci.byte_1 = c+1;
 		ci.bpp = 10;
 
+		/// \todo Establish why we're not calling asLittleEndian or asBigEndian here
 		ci.pixels_per_line = reverseBytes(width);
 		ci.lines_per_image = reverseBytes(height);
 		
+		/// \todo Document these constants
 		ci.min_data_value = 0.0;
 		ci.min_quantity = 0.0;
 		ci.max_data_value = 1023.0;
 		ci.max_quantity = 2.046;
 		
+		/// \todo Establish why we're not calling asLittleEndian or asBigEndian here
 		ci.min_data_value = reverseBytes(ci.min_data_value);
 		ci.min_quantity   = reverseBytes(ci.min_quantity);
 		ci.max_data_value = reverseBytes(ci.max_data_value);
@@ -184,7 +189,7 @@ void CINImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	out.write(reinterpret_cast<char *>(&ioi),  sizeof(ioi));
 
 	// write the data
-	unsigned int *image_buffer = new unsigned int[width * height]();
+	std::vector<unsigned int> image_buffer( width*height, 0 );
 	
 	// build a LUT
 	double film_gamma = 0.6;
@@ -211,64 +216,52 @@ void CINImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 			msg( Msg::Warning, "CINImageWriter::write", format( "Channel \"%s\" was not encoded." ) % *i );
 			++i;
 			continue;
-			//throw Exception("invalid channel for CIN writer, channel name is: " + *i);
 		}
 		
-		const char *name = (*i).c_str();
-
 		int offset = *i == "R" ? 0 : *i == "G" ? 1 : 2;
 		int bpp = 10;
 		unsigned int shift = (32 - bpp) - (offset*bpp);
 		
 		// get the image channel
-		DataPtr channelp = image->variables.find(name)->second.data;
+		DataPtr channelp = image->variables.find( *i )->second.data;
 		
 		switch(channelp->typeId())
 		{
 			
 		case FloatVectorDataTypeId:
 		{
-			vector<float> channel = static_pointer_cast<FloatVectorData>(channelp)->readable();
+			const vector<float> &channel = static_pointer_cast<FloatVectorData>(channelp)->readable();
 
 			// convert the linear float value to 10-bit log
-			for(int i = 0; i < width*height; ++i) {
-
+			for(int i = 0; i < width*height; ++i)
+			{
+				/// \todo Examine the performance of this!
 				where = lower_bound(range.begin(), range.end(), channel[i]);
 				unsigned int log_value = distance(range.begin(), where);
 				image_buffer[i] |= log_value << shift;
 			}
-		}
-		break;
-	
-		case UIntVectorDataTypeId:
-		{
-			throw Exception("CINImageWriter: no unsigned int input channel supported for write");
-// 			vector<unsigned int> channel = static_pointer_cast<UIntVectorData>(channelp)->readable();
-			
-// 			// convert to 8-bit integer
-// 			for(int i = 0; i < width*height; ++i) {
-// 				image_buffer[spp*i + offset] = (unsigned char) ((channel[i] + 1) >> 24);
-// 			}
 		}
 		break;
 			
 		case HalfVectorDataTypeId:
 		{
-			vector<half> channel = static_pointer_cast<HalfVectorData>(channelp)->readable();
+			const vector<half> &channel = static_pointer_cast<HalfVectorData>(channelp)->readable();
 			
 			// convert the linear half value to 10-bit log
 			for(int i = 0; i < width*height; ++i)
 			{
+				/// \todo Examine the performance of this!
 				where = lower_bound(range.begin(), range.end(), channel[i]);
 				unsigned int log_value = distance(range.begin(), where);
 				image_buffer[i] |= log_value << shift;
 			}
 		}
 		break;
+		
+		/// \todo Deal with other channel types, preferably using templates!
 			
 		default:
-			throw "invalid data type for CIN writer, channel type is: " +
-				Object::typeNameFromTypeId(channelp->typeId());
+			throw InvalidArgumentException( (format( "CINImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId(channelp->typeId()) % *i).str() );
 		}
 		
 		++i;
@@ -277,9 +270,9 @@ void CINImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	// write the buffer
 	for(int i = 0; i < width*height; ++i)
 	{
+		/// \todo Why is this call to reverseBytes here? If we want to write in either little endian or big endian format there
+		/// are calls specifically do this, which work regardless of which architecture the code is running on
 		image_buffer[i] = reverseBytes(image_buffer[i]);
 		out.write((const char *) (&image_buffer[i]), sizeof(unsigned int));
 	}
-
-	delete [] image_buffer;	
 }

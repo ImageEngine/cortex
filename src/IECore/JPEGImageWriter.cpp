@@ -75,19 +75,18 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 {
 	// open the output file
 	FILE *outfile;
-	if((outfile = fopen(fileName().c_str(), "wb")) == NULL) {
-		string err =  "Cannot write to \"" + fileName() + "\"";
-		throw Exception( err );
+	if((outfile = fopen(fileName().c_str(), "wb")) == NULL) 
+	{
+		throw IOException("Could not open '" + fileName() + "' for writing.");
 	}	
 	
 	// assume an 8-bit RGB image
 	int width  = 1 + dw.max.x - dw.min.x;
 	int height = 1 + dw.max.y - dw.min.y;
 	int spp = 3;
-	//cout << "write image of " << width << "x" << height << endl;
 	
 	// build the buffer
-	unsigned char *image_buffer = new unsigned char[width*height*spp]();
+	std::vector<unsigned char> image_buffer( width*height*spp, 0 );
 	unsigned char *row_pointer[1];
 	int row_stride;
 
@@ -108,7 +107,7 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 
 	jpeg_set_defaults(&cinfo);
 
-	// should be set as a parameter
+	/// \todo Should be set as a parameter
 	int quality = 100;
 
 	// force baseline-JPEG (8bit) values with TRUE	
@@ -130,19 +129,17 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 			//throw Exception("invalid channel for JPEG writer, channel name is: " + *i);
 		}
 		
-		const char *name = (*i).c_str();
-
 		int offset = *i == "R" ? 0 : *i == "G" ? 1 : 2;
 		
 		// get the image channel
-		DataPtr channelp = image->variables.find(name)->second.data;
+		DataPtr channelp = image->variables.find( *i )->second.data;
 		
 		switch(channelp->typeId())
 		{
 			
 		case FloatVectorDataTypeId:
 		{
-			vector<float> channel = static_pointer_cast<FloatVectorData>(channelp)->readable();
+			const vector<float> &channel = static_pointer_cast<FloatVectorData>(channelp)->readable();
 
 			// convert to 8-bit integer
 			for(int i = 0; i < width*height; ++i)
@@ -154,7 +151,7 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 	
 		case UIntVectorDataTypeId:
 		{
-			vector<unsigned int> channel = static_pointer_cast<UIntVectorData>(channelp)->readable();
+			const vector<unsigned int> &channel = static_pointer_cast<UIntVectorData>(channelp)->readable();
 			
 			// convert to 8-bit integer
 			for(int i = 0; i < width*height; ++i)
@@ -167,7 +164,7 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 			
 		case HalfVectorDataTypeId:
 		{
-			vector<half> channel = static_pointer_cast<HalfVectorData>(channelp)->readable();
+			const vector<half> &channel = static_pointer_cast<HalfVectorData>(channelp)->readable();
 
 			// convert to 8-bit linear integer
 			for(int i = 0; i < width*height; ++i)
@@ -176,10 +173,11 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 			}
 		}
 		break;
+		
+		/// \todo Deal with other channel types, preferably using templates!
 			
-		default:
-			throw "invalid data type for JPEG writer, channel type is: " +
-				Object::typeNameFromTypeId(channelp->typeId());
+		default:			
+			throw InvalidArgumentException( (format( "JPEGImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId(channelp->typeId()) % *i).str() );
 		}
 		
 		++i;
@@ -198,6 +196,4 @@ void JPEGImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr i
 	jpeg_destroy_compress(&cinfo);
 	fclose(outfile);
 	outfile = 0;
-
-	delete [] image_buffer;
 }

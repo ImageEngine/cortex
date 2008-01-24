@@ -77,7 +77,7 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	out.open(fileName().c_str());
 	if(!out.is_open())
 	{
-		throw Exception("could not open '" + fileName() + "' for writing");
+		throw IOException("Could not open '" + fileName() + "' for writing.");
 	}
 	
 	// assume an 8-bit RGB image
@@ -110,6 +110,7 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	// too common and one wonders if many applications detect and use it.  our DPX reader
 	// expects to swap, so let's stay with that.
 	/// \todo generalize and handle the non-byteswap case
+	/// \todo Verify the above comments!
 	fi.magic = 0x58504453;
 
 	// compute data offsets
@@ -124,6 +125,8 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	fi.image_data_offset = reverseBytes(fi.image_data_offset);
 	
 	strcpy((char *) fi.vers, "V2.0");
+	
+	/// \todo Establish the purpose of this
 	strcpy((char *) fi.file_name, "image-engine.dpx");
 
 	// compute the current date and time
@@ -132,9 +135,12 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	struct tm gmt;
 	localtime_r(&t, &gmt);
 
+	/// \todo Not necessarily PST!
 	sprintf((char *) fi.create_time, "%04d:%02d:%02d:%02d:%02d:%02d:PST",
 			  1900 + gmt.tm_year, gmt.tm_mon, gmt.tm_mday,
 			  gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
+			  
+	/// \todo Change these		  
 	sprintf((char *) fi.creator, "image engine vfx for film");
 	sprintf((char *) fi.project, "IECore");
 	sprintf((char *) fi.copyright, "image engine vfx for film");
@@ -148,6 +154,7 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	ii.pixels_per_line = width;
 	ii.lines_per_image_ele = height;
 
+	/// \todo Establish why we're not calling asLittleEndian or asBigEndian here
  	// reverse byte ordering
  	ii.element_number      = reverseBytes(ii.element_number);
  	ii.pixels_per_line     = reverseBytes(ii.pixels_per_line);
@@ -158,18 +165,20 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 		DPXImageInformation::_image_element &ie = ii.image_element[c];
 		ie.data_sign = 0;
 
+		/// \todo Dcoument these constants
 		ie.ref_low_data = 0;
 		ie.ref_low_quantity = 0.0;
 		ie.ref_high_data = 1023;
 		ie.ref_high_quantity = 2.046;
 
+		/// \todo Establish why we're not calling asLittleEndian or asBigEndian here
 		// swap
 		ie.ref_low_data = reverseBytes(ie.ref_low_data);
 		ie.ref_low_quantity = reverseBytes(ie.ref_low_quantity);
 		ie.ref_high_data = reverseBytes(ie.ref_high_data);
 		ie.ref_high_quantity = reverseBytes(ie.ref_high_quantity);
 		
-		
+		/// \todo Dcoument these constants		
 		ie.transfer = 1;
 		ie.packing = 256;
 		ie.bit_size = 10;
@@ -183,6 +192,8 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	//
 	ioi.x_offset = 0;                  // could be dataWindow min.x
 	ioi.y_offset = 0;                  // could be dataWindow min.y
+	
+	/// \todo What does the comment below imply we are leaving out of the header?
 	// other items left out for now
 
 	// write the header
@@ -190,6 +201,8 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	// compute total file size
 	int image_data_size = 4 * width * height;
 	fi.file_size = header_size + image_data_size;
+	
+	/// \todo Why is this call to reverseBytes here?
 	fi.file_size = reverseBytes(fi.file_size);
 	
 	out.write(reinterpret_cast<char *>(&fi),  sizeof(fi));
@@ -199,7 +212,7 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	out.write(reinterpret_cast<char *>(&th),  sizeof(th));
 	
 	// write the data
-	unsigned int *image_buffer = new unsigned int[width * height]();
+	std::vector<unsigned int> image_buffer( width*height, 0 );
 	
 	// build a LUT
 	double film_gamma = 0.6;
@@ -228,56 +241,50 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 			continue;
 		}
 		
-		const char *name = (*i).c_str();
-
 		int offset = *i == "R" ? 0 : *i == "G" ? 1 : 2;
 		int bpp = 10;
 		unsigned int shift = (32 - bpp) - (offset*bpp);
 		
 		// get the image channel
-		DataPtr channelp = image->variables.find(name)->second.data;
+		DataPtr channelp = image->variables.find( *i )->second.data;
 		
 		switch(channelp->typeId())
 		{
 			
 		case FloatVectorDataTypeId:
 		{
-			vector<float> channel = static_pointer_cast<FloatVectorData>(channelp)->readable();
+			const vector<float> &channel = static_pointer_cast<FloatVectorData>(channelp)->readable();
 
 			// convert the linear float value to 10-bit log
-			for(int i = 0; i < width*height; ++i) {
-
+			for(int i = 0; i < width*height; ++i)
+			{
+				/// \todo Examine the performance of this!
 				where = lower_bound(range.begin(), range.end(), channel[i]);
 				unsigned int log_value = distance(range.begin(), where);
 				image_buffer[i] |= log_value << shift;
 			}
-		}
-		break;
-	
-		case UIntVectorDataTypeId:
-		{
-			delete [] image_buffer;
-			throw Exception("DPXImageWriter: no unsigned int input channel supported for write");
 		}
 		break;
 			
 		case HalfVectorDataTypeId:
 		{
-			vector<half> channel = static_pointer_cast<HalfVectorData>(channelp)->readable();
+			const vector<half> &channel = static_pointer_cast<HalfVectorData>(channelp)->readable();
 			
 			// convert the linear half value to 10-bit log
 			for(int i = 0; i < width*height; ++i)
 			{
+				/// \todo Examine the performance of this!
 				where = lower_bound(range.begin(), range.end(), channel[i]);
 				unsigned int log_value = distance(range.begin(), where);
 				image_buffer[i] |= log_value << shift;
 			}
 		}
 		break;
+		
+		/// \todo Deal with other channel types, preferably using templates!
 			
 		default:
-			throw "invalid data type for DPX writer, channel type is: " +
-				Object::typeNameFromTypeId(channelp->typeId());
+			throw InvalidArgumentException( (format( "DPXImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId(channelp->typeId()) % *i).str() );
 		}
 		
 		++i;
@@ -286,9 +293,9 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	// write the buffer
 	for(int i = 0; i < width*height; ++i)
 	{
+		/// \todo Why is this call to reverseBytes here? If we want to write in either little endian or big endian format there
+		/// are calls specifically do this, which work regardless of which architecture the code is running on
 		image_buffer[i] = reverseBytes(image_buffer[i]);
 		out.write((const char *) (&image_buffer[i]), sizeof(unsigned int));
 	}
-
-	delete [] image_buffer;	
 }
