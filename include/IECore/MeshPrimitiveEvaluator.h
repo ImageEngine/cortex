@@ -72,7 +72,7 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 				int                 intPrimVar   ( const PrimitiveVariable &pv ) const;
 				const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const;
 				Imath::Color3f      colorPrimVar ( const PrimitiveVariable &pv ) const;
-				half                halfPrimVar ( const PrimitiveVariable &pv ) const;
+				half                halfPrimVar  ( const PrimitiveVariable &pv ) const;
 	
 				unsigned int        triangleIndex() const;
 				const Imath::V3f   &barycentricCoordinates() const;

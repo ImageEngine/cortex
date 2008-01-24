@@ -72,7 +72,7 @@ class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 				int                 intPrimVar   ( const PrimitiveVariable &pv ) const;
 				const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const;
 				Imath::Color3f      colorPrimVar ( const PrimitiveVariable &pv ) const;
-				half                halfPrimVar ( const PrimitiveVariable &pv ) const;
+				half                halfPrimVar  ( const PrimitiveVariable &pv ) const;
 				
 			protected:
 			

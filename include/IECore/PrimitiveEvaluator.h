@@ -92,7 +92,7 @@ class PrimitiveEvaluator : public RunTimeTyped
 				virtual int                 intPrimVar   ( const PrimitiveVariable &pv ) const =0;
 				virtual const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const =0;
 				virtual Imath::Color3f      colorPrimVar ( const PrimitiveVariable &pv ) const =0;
-				virtual half                halfPrimVar( const PrimitiveVariable &pv ) const =0;
+				virtual half                halfPrimVar  ( const PrimitiveVariable &pv ) const =0;
 				//@}			
 		};
 		IE_CORE_DECLAREPTR( Result );
@@ -112,6 +112,11 @@ class PrimitiveEvaluator : public RunTimeTyped
 		/// \todo Add something like:
 		/// virtual bool signedDistance( const Imath::V3f &p, float &distance, const ResultPtr &closestPoint ) const;
 		/// With a default implementationw which just checks distance from the plane defined by the closest point and normal.
+		
+		/// \todo Add methods like:
+		/// virtual float surfaceArea() const=0;
+		/// virtual float volume() const=0;
+		/// virtual Imath::V3f centerOfGravity() const=0;
 
 		/// Find the closest point on the primitive to the given query point. Returns true on success.
 		virtual bool closestPoint( const Imath::V3f &p, const ResultPtr &result ) const =0;
