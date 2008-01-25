@@ -70,18 +70,59 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		P = V3fVectorData()
 		P.append( V3f( -1, 0,  0 ) + translation )
 		P.append( V3f(  0, 0, -1 ) + translation )
-		P.append( V3f( -1, 0, -1 ) + translation )				
+		P.append( V3f( -1, 0, -1 ) + translation )
+		
+		sOffset = 7
+		s = FloatVectorData()
+		t = FloatVectorData()
+		tOffset = 12
+		
+		for p in P :		
+		
+			s.append( p.x + sOffset )
+			t.append( p.z + tOffset )
+
+		assert( len( P ) == len ( s ) )
+		assert( len( P ) == len ( t ) )		
 		
 		m = MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
+		
+		# We use Varying interpolation here because the tests which use pSphereShape1.cob exercise FaceVarying
+		m["s"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, s )
+		m["t"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, t )
+		
+		
 		mpe = PrimitiveEvaluator.create( m )
 		r = mpe.createResult()
+		
+		# For each point verify that the closest point to it is itself
+		for p in P:
+			foundClosest = mpe.closestPoint( p , r )
+			self.assert_( foundClosest )
+			self.assertAlmostEqual( ( p - r.point() ).length(), 0 )
+		
+		
 		foundClosest = mpe.closestPoint( V3f( 0, 10, 0 ) + translation , r )
 		
 		self.assert_( foundClosest )
 		
 		self.assertAlmostEqual( ( V3f( -0.5, 0, -0.5 ) + translation - r.point()).length(), 0 )
 		self.assertAlmostEqual( math.fabs( r.normal().dot( V3f(0, 1, 0 ) ) ) , 1, places = 3  )
+		
+		# For each point verify that the UV data is exactly what we specified at those vertices
+		for p in P:
+			foundClosest = mpe.closestPoint( p , r )
+			self.assert_( foundClosest )				
+			testUV = V2f( p.x + sOffset, p.z + tOffset )			
+			self.assertAlmostEqual( ( testUV - r.uv() ).length(), 0 )
+			
+			# Now when we looking up that UV in reverse we should get back the point again!
+			found = mpe.pointAtUV( testUV, r )
+			self.assert_( found )
+		
+			self.assertAlmostEqual( ( p - r.point()).length(), 0 )
+		
 		
 	def testSphereMesh( self ) :
 		""" Testing MeshPrimitiveEvaluator with sphere mesh"""	

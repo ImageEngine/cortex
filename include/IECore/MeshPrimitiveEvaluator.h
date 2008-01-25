@@ -40,6 +40,7 @@
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/BoundedKDTree.h"
+#include "IECore/ClassData.h"
 
 namespace IECore
 {
@@ -143,11 +144,17 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		typedef BoundedKDTree< BoundedTriangleVector::iterator > BoundedTriangleTree;
 		
 		BoundedTriangleTree *m_tree;
-		
+				
+		bool pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;				
 		void closestPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const;		
 		bool intersectionPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
 		void intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;		
-
+	
+	public:	
+		
+		/// \todo Move all ExtraData members to here on next major version change
+		struct ExtraData;
+				
 };
 
 IE_CORE_DECLAREPTR( MeshPrimitiveEvaluator );
