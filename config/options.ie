@@ -121,4 +121,4 @@ INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_
 # secondly, scons doesn't recognise that the intel macs are different to the ppc and will try to cache them both the same.
 # we could probably fix both these things if it becomes important.
 if platform=="rhel4.i686" :
-	BUILD_CACHEDIR = "/hosts/comp0076/sconsBuildCache"
+	BUILD_CACHEDIR = "/hosts/comp0028/sconsBuildCache"
