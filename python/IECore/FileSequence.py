@@ -42,6 +42,7 @@ import FrameList
 # actual files - it merely provides a means of generating the names required to do
 # so in a meaningful way.
 # \ingroup python
+# \todo file sequences like 0, 100,101,102,...400 are represented as: 0-100x100,101-400. Should be 0,100-400
 class FileSequence :
 
 	## Constructs a new FileSequence object with the specified fileName, padding and frameList.
