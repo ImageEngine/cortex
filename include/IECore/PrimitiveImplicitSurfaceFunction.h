@@ -66,7 +66,9 @@ class PrimitiveImplicitSurfaceFunction : public ImplicitSurfaceFunction< Imath::
 		virtual Value getValue( const Point &p );
 
 		
-	protected:	
+	protected:
+	
+		PrimitiveImplicitSurfaceFunction();	
 	
 		PrimitivePtr m_primitive;
 		PrimitiveEvaluatorPtr m_evaluator;

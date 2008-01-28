@@ -37,13 +37,29 @@
 
 #include "IECore/TriangleAlgo.h"
 #include "IECore/MeshPrimitiveEvaluator.h"
+#include "IECore/TriangulateOp.h"
 #include "IECore/MeshPrimitiveImplicitSurfaceFunction.h"
 
 using namespace IECore;
 using namespace Imath;
 
-MeshPrimitiveImplicitSurfaceFunction::MeshPrimitiveImplicitSurfaceFunction(  MeshPrimitivePtr mesh ) : PrimitiveImplicitSurfaceFunction( mesh )
+MeshPrimitiveImplicitSurfaceFunction::MeshPrimitiveImplicitSurfaceFunction( MeshPrimitivePtr mesh ) : PrimitiveImplicitSurfaceFunction()
 {
+	TriangulateOpPtr op = new TriangulateOp();
+	op->inputParameter()->setValue( mesh );
+	
+	mesh = runTimeCast< MeshPrimitive > ( op->operate() );
+	
+	m_primitive = mesh;
+	m_evaluator = PrimitiveEvaluator::create( mesh );
+	
+	if (! m_evaluator )
+	{
+		throw InvalidArgumentException( "Cannot create evaluator in MeshPrimitiveImplicitSurfaceFunction" );
+	}
+	
+	nIt = mesh->variables.find("N");
+			
 	PrimitiveVariableMap::const_iterator primVarIt = mesh->variables.find("P");
 
 	// PrimitiveEvaluator in base class assures this

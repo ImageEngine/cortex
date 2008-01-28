@@ -36,6 +36,9 @@
 
 using namespace IECore;
 
+PrimitiveImplicitSurfaceFunction::PrimitiveImplicitSurfaceFunction()
+{
+}
 
 PrimitiveImplicitSurfaceFunction::PrimitiveImplicitSurfaceFunction(  PrimitivePtr primitive ) : m_primitive( primitive )
 {

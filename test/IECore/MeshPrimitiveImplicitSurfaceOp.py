@@ -44,7 +44,7 @@ class TestMeshPrimitiveImplicitSurfaceOp( unittest.TestCase ) :
 		""" Test MeshPrimitiveImplicitSurfaceOp """
 	
 		# Poly sphere of radius 1
-		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob" ).read()
 		radius = 1.0
 				
 		a = MeshPrimitiveImplicitSurfaceOp()
