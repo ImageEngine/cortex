@@ -40,7 +40,7 @@ namespace IECore
 template<>
 Imath::V3f convert( const DD::Image::Vector3 &from )
 {
-	return Imath::V3f();
+	return Imath::V3f( from.x, from.y, from.z );
 }
 
 template<>
