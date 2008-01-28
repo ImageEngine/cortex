@@ -265,7 +265,7 @@ def __setParameters( op, kw ):
 		op.parameters().setValidatedParameterValue( paramName, paramValue )
 	
 
-def __createMeshOpNode( className, classVersion, kw ):
+def __createMeshOpNode( className, classVersion, **kw ):
 
 	modifierNodeName = cmds.createNode( "ieOpHolderNode" )	
 	
@@ -285,7 +285,7 @@ def __applyMeshOp( meshNode, className, classVersion, kw ):
 
 	op = IECore.ClassLoader.defaultOpLoader().load( className, classVersion )
 		
-	__setParameters( op, kw )	
+	__setParameters( op, **kw )	
 	
 	# \todo Apply op and convert result back into original object
 	
@@ -310,9 +310,9 @@ def create( meshDagPath, className, classVersion, **kw):
 		
 		meshNode = meshDagPath.node()
 
-		__applyMeshOp(meshNode, className, classVersion, kw )
+		__applyMeshOp(meshNode, className, classVersion, **kw )
 	else:
-		modifierNode = __createMeshOpNode( className, classVersion, kw )
+		modifierNode = __createMeshOpNode( className, classVersion, **kw )
 
 		__connectNodes( modifierNode, meshDagPath )
 
@@ -331,4 +331,4 @@ def createUI( className, classVersion, **kw ):
 		sel.getDagPath( 0,  meshDagPath)
 		meshDagPath.extendToShape()
 		
-		create( meshDagPath, className, classVersion, kw )
+		create( meshDagPath, className, classVersion, **kw )
