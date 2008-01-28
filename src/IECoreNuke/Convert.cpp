@@ -37,17 +37,17 @@
 namespace IECore
 {
 
-/*template<>
-Imath::V3f convert( const DD:Image::Vector3 &from )
+template<>
+Imath::V3f convert( const DD::Image::Vector3 &from )
 {
-	return Imath::V3f( from.x, from.y, from.z );
+	return Imath::V3f();
 }
 
 template<>
-Imath::V3d convert( const DD:Image::Vector3 &from )
+Imath::V3d convert( const DD::Image::Vector3 &from )
 {
 	return Imath::V3d( from.x, from.y, from.z );
-}*/
+}
 
 template<>
 Imath::M44f convert( const DD::Image::Matrix4 &from )
