@@ -609,10 +609,10 @@ corePythonEnv = pythonEnv.Copy( IECORE_NAME="IECore" )
 coreTestEnv = testEnv.Copy()
 
 # lists of sources
-coreSources = glob.glob( "src/IECore/*.cpp" )
+coreSources = sorted( glob.glob( "src/IECore/*.cpp" ) )
 coreHeaders = glob.glob( "include/IECore/*.h" ) + glob.glob( "include/IECore/*.inl" )
 coreBindingHeaders = glob.glob( "include/IECore/bindings/*.h" ) + glob.glob( "include/IECore/bindings/*.inl" )
-corePythonSources = glob.glob( "src/IECore/bindings/*.cpp" )
+corePythonSources = sorted( glob.glob( "src/IECore/bindings/*.cpp" ) )
 corePythonScripts = glob.glob( "python/IECore/*.py" )
 
 # configure checks
