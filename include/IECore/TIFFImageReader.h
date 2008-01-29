@@ -76,7 +76,7 @@ class TIFFImageReader : public ImageReader
 		// tiff image pointer
 		tiff *m_tiffImage;
 		std::string m_tiffImageFileName;
-		unsigned char *m_buffer;
+		unsigned char *m_buffer; /// \todo Use a std::vector instead
 	
 		// reads the interlaced data into the buffer
 		void read_buffer();
