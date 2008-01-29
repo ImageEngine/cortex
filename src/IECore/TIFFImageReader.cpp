@@ -40,6 +40,7 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
 
+#include "boost/static_assert.hpp"
 #include "boost/format.hpp"
 
 #include "IECore/BoxOperators.h"
@@ -60,13 +61,13 @@ using namespace std;
 const Reader::ReaderDescription<TIFFImageReader> TIFFImageReader::m_readerDescription("tiff tif");
 
 TIFFImageReader::TIFFImageReader()
-	:	ImageReader("TIFFImageReader", "Reads Tagged Image File Format (TIFF) files" ), 
+		:	ImageReader("TIFFImageReader", "Reads Tagged Image File Format (TIFF) files" ),
 		m_tiffImage(0), m_buffer(0)
 {
 }
 
 TIFFImageReader::TIFFImageReader(const string & fileName)
-	:	ImageReader("TIFFImageReader", "Reads Tagged Image File Format (TIFF) files" ), 
+		:	ImageReader("TIFFImageReader", "Reads Tagged Image File Format (TIFF) files" ),
 		m_tiffImage(0), m_buffer(0)
 {
 	m_fileNameParameter->setTypedValue(fileName);
@@ -74,7 +75,7 @@ TIFFImageReader::TIFFImageReader(const string & fileName)
 
 TIFFImageReader::~TIFFImageReader()
 {
-	if(m_tiffImage)
+	if (m_tiffImage)
 	{
 		TIFFClose(m_tiffImage);
 	}
@@ -85,20 +86,22 @@ bool TIFFImageReader::canRead(const string & fileName)
 {
 	// attempt to open the file
 	ifstream in(fileName.c_str());
-	if(!in.is_open())
+	if (!in.is_open())
 	{
 		return false;
 	}
 
 	// check the magic number of the input file
 	// a tiff should have 0x49492a00 / 0x002a4949 from offset 0
-	
+
 	// attempt to open the file
 	in.seekg(0, ios_base::beg);
-	
+
 	// check magic number
 	unsigned int magic;
 	in.read((char *) &magic, sizeof(unsigned int));
+	
+	/// \todo Why the 3 variations here? Surely only 2 are necessary?
 	return magic == 0x002a4949 || magic == 0x49492a00 || magic == 0x2a004d4d;
 }
 
@@ -106,43 +109,42 @@ void TIFFImageReader::channelNames(vector<string> & names)
 {
 	names.clear();
 
-	if(!open())
+	if (!open())
 	{
 		return;
 	}
 
 	uint16 spp;
-	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLESPERPIXEL, &spp);	
-	
+	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLESPERPIXEL, &spp);
+
+	/// \todo
 	// form channel names - hardcoded for now 'til i learn more about TIFF
 	names.push_back("R");
 	names.push_back("G");
 	names.push_back("B");
-	if(spp == 4) { names.push_back("A"); }
-}
-
-V2i dist(const V2i a, const V2i b)
-{
-	return V2i(b.x - a.x, b.y - a.y);
+	if (spp == 4)
+	{
+		names.push_back("A");
+	}
 }
 
 void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Box2i & dataWindow)
 {
-	if(!open())
+	if (!open())
 	{
 		return;
 	}
-	
+
 	// get the TIFF fields
 	uint16 photo, bps, spp, fillorder, sampleformat;
 	uint32 width, height;
-	
+
 	TIFFGetField(m_tiffImage, TIFFTAG_BITSPERSAMPLE, &bps);
 	TIFFGetField(m_tiffImage, TIFFTAG_PHOTOMETRIC, &photo);
 	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLESPERPIXEL, &spp);
 	TIFFGetField(m_tiffImage, TIFFTAG_FILLORDER, &fillorder);
 	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLEFORMAT, &sampleformat);
-	
+
 	// we handle here 8, 16, and 32 bpp with RGB channels in integer space, and now float
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGEWIDTH, &width);
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGELENGTH, &height);
@@ -158,43 +160,46 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 	Box2i idw = dataWindow.isEmpty() ? dw : dataWindow;
 	image->setDataWindow(idw);
 	image->setDisplayWindow(idw);
-	
+
 	// compute read box
 	Box2i readbox = intersection(dw, idw);
-	
-	if(!m_buffer)
+
+	if (!m_buffer)
 	{
-      read_buffer();
+		read_buffer();
 	}
-	
-	// compute offset to image 
+
+	// compute offset to image
 	int boffset = name == "R" ? 0 : name == "G" ? 1 : name == "B" ? 2 : 3;
 
 	// we form 32 bit float image channel by normalizing the input integer range to [0.0, 1.0]
 	double normalizer = 1.0 / ((1 << bps) - 1);
-	
+
 	// copy in the corresponding channel
 	// ugg, perhaps we should move/duplicate the loop inside the switch cases for speed
 	vector<float> & ic = image->createChannel<float>(name)->writable();
 
 	// check for empty box
-	if(readbox.isEmpty()) { return; }
+	if (readbox.isEmpty())
+	{
+		return;
+	}
 
 	// compute distance from the read box origin
 	V2i d = readbox.min - dw.min;
 
 	/// \todo: throw out an exception if the sample format field is mangled.  for now
 	/// we shall assume that a non-floating point TIFF is of integer type
-	if(sampleformat == SAMPLEFORMAT_IEEEFP)
+	if (sampleformat == SAMPLEFORMAT_IEEEFP)
 	{
 		// read in the buffer
-		for(int y = readbox.min.y; y <= readbox.max.y; ++y)
+		for (int y = readbox.min.y; y <= readbox.max.y; ++y)
 		{
-			for(int x = readbox.min.x; x <= readbox.max.x; ++x)
+			for (int x = readbox.min.x; x <= readbox.max.x; ++x)
 			{
 				// i is the index of the pixel on the output image channel
 				int i = (y - idw.min.y) * boxwidth(idw) + (x - idw.min.x);
-				
+
 				// di is the index of the pixel in the input image buffer
 				int di = (y - d.y) * boxwidth(dw) + (x - d.x);
 
@@ -204,45 +209,49 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 	}
 	else
 	{
-		for(int y = readbox.min.y; y <= readbox.max.y; ++y)
+		for (int y = readbox.min.y; y <= readbox.max.y; ++y)
 		{
-			for(int x = readbox.min.x; x <= readbox.max.x; ++x)
+			for (int x = readbox.min.x; x <= readbox.max.x; ++x)
 			{
 				// i is the index of the pixel on the output image channel
 				int i = (y - idw.min.y) * boxwidth(idw) + (x - idw.min.x);
-				
+
 				// di is the index of the pixel in the input image buffer
 				int di = (y - d.y) * boxwidth(dw) + (x - d.x);
-				
-				switch(bps)
+
+				switch (bps)
 				{
-					
+
 				case 8:
 				{
 					// cast to unsigned byte, divide
 					ic[i] = normalizer * m_buffer[spp * di + boffset];
 				}
 				break;
-				
+
 				case 16:
 				{
+					//// \todo should probably be using uint16_t here instead
+					BOOST_STATIC_ASSERT( sizeof( unsigned short ) == 2 );
 					// cast to short, divide
 					unsigned short v = *((unsigned short *) m_buffer + spp * di + boffset);
 					ic[i] = normalizer * v;
 				}
 				break;
-				
+
 				case 32:
 				{
+					//// \todo should probably be using uint32_t here instead
+					BOOST_STATIC_ASSERT( sizeof( unsigned int ) == 4 );
 					// cast to int, divide
 					unsigned int v = *((unsigned int *) m_buffer + spp * di + boffset);
 					ic[i] = normalizer * v;
 				}
 				break;
-				
+
 				default:
 					throw Exception("unhandled TIFF bit-depth: " + bps);
-					
+
 				}
 			}
 		}
@@ -262,34 +271,34 @@ void TIFFImageReader::read_buffer()
 	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLESPERPIXEL, &spp);
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGEWIDTH, &width);
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGELENGTH, &height);
-	
+
 	// get strip size
 	stripSize = TIFFStripSize(m_tiffImage);
 	stripMax = TIFFNumberOfStrips(m_tiffImage);
 	imageOffset = 0;
-	
+
+	/// \todo Is this assumption sound?
 	// assume data is interlaced, just read the whole thing,
 	// then stripe off the channel
 	m_buffer = new unsigned char[(bps / 8) * spp * width * height]();
 
 	// read the image
-	for(stripCount = 0; stripCount < stripMax; stripCount++)
+	for (stripCount = 0; stripCount < stripMax; stripCount++)
 	{
-		// 	extern	int TIFFReadScanline(TIFF*, tdata_t, uint32, tsample_t = 0);
-      if((result = TIFFReadEncodedStrip( m_tiffImage, stripCount, m_buffer + imageOffset, stripSize)) == -1)
+		if ((result = TIFFReadEncodedStrip( m_tiffImage, stripCount, m_buffer + imageOffset, stripSize)) == -1)
 		{
 			throw Exception("TIFF read error on strip number " + stripCount);
 		}
 
-      imageOffset += result;
+		imageOffset += result;
 	}
 }
 
 bool TIFFImageReader::open()
 {
-	if(!m_tiffImage || m_tiffImageFileName != fileName())
+	if (!m_tiffImage || m_tiffImageFileName != fileName())
 	{
-		if(m_tiffImage)
+		if (m_tiffImage)
 		{
 			TIFFClose(m_tiffImage);
 		}
