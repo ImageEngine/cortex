@@ -220,6 +220,9 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			self.assert_( hit )
 			self.assert_( math.fabs( r.point().length() -1 ) < 0.1 )
 			
+			# Make sure we get the nearest point, not the furthest
+			self.assert_( ( origin - r.point() ).length() < 1.1 )
+			
 			hits = mpe.intersectionPoints( origin, direction )
 			
 			# There should be 0, 1, or 2 intersections
@@ -227,7 +230,8 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			self.assert_( len(hits) <= 2 )
 			
 			for hit in hits:
-				self.assert_( math.fabs( hit.point().length() -1 ) < 0.1 )			
+				self.assert_( math.fabs( hit.point().length() - 1 ) < 0.1 )
+				
 
 		
 			
