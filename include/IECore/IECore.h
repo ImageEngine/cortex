@@ -195,7 +195,7 @@ bool withSQLite();
 ///
 /// Concrete implementations of the \link IECore::Parameterised Parameterised \endlink class include the \link IECore::Op Op \endlink subclasses, which
 /// have an operate() method to compute some result from the input Parameters, the
-/// \link IECore::Procedural Procedural \endlink classes which define an interface for the rendertime generation of geometry,
+/// \link IECore::Renderer::Procedural Procedural \endlink classes which define an interface for the rendertime generation of geometry,
 /// and the \link IECore::Reader Reader \endlink and \link IECore::Writer Writer \endlink classes which are described briefly below.
 ///
 /// \section mainPageIOSection IO
