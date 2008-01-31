@@ -270,6 +270,8 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			mpe = PrimitiveEvaluator.create( m )
 			r = mpe.createResult()
 			
+			# Make sure that the closest hit point found with intersectionPoint() is actually the closest, by
+			# comparing long-hand with the list of all intersections.
 			for test in range( 0, numTests ) :
 			
 				origin = V3f( 0, 0, 0 )
