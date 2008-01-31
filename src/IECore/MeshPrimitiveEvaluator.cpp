@@ -710,19 +710,15 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeI
 				}	
 
 				bool intersection = pointAtUVWalk( firstChild, ray, maxDistSqrd, result, hit );
-
+				
 				if (intersection)
-				{
-					float distSqrd = vecDistance2( result->point(), ray.pos );
-					if ( distSqrd > maxDistSqrd )
+				{					
+					if ( dSecond < maxDistSqrd )
 					{
-						return pointAtUVWalk( secondChild, ray, maxDistSqrd, result, hit );
+						pointAtUVWalk( secondChild, ray, maxDistSqrd, result, hit );						
 					}
-					else
-					{
-						maxDistSqrd = distSqrd;
-						return true;
-					}
+					
+					return true;
 				}
 				else
 				{
@@ -878,17 +874,13 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 				bool intersection = intersectionPointWalk( firstChild, ray, maxDistSqrd, result, hit );
 
 				if (intersection)
-				{
-					float distSqrd = vecDistance2( result->point(), ray.pos );
-					if ( distSqrd > maxDistSqrd )
+				{					
+					if ( dSecond < maxDistSqrd )
 					{
-						return intersectionPointWalk( secondChild, ray, maxDistSqrd, result, hit );
+						intersectionPointWalk( secondChild, ray, maxDistSqrd, result, hit );						
 					}
-					else
-					{
-						maxDistSqrd = distSqrd;
-						return true;
-					}
+					
+					return true;
 				}
 				else
 				{

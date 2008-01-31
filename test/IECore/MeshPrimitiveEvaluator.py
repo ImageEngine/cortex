@@ -232,6 +232,84 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			for hit in hits:
 				self.assert_( math.fabs( hit.point().length() - 1 ) < 0.1 )
 				
+				
+	def testRandomTriangles( self ) :	
+		""" Testing MeshPrimitiveEvaluator with random triangles"""	
+	
+		random.seed( 100 )
+		rand = Rand48( 100 )	
+	
+		numConfigurations = 100
+		numTests = 50
+		numTriangles = 250
+		
+		for config in range( 0, numConfigurations ) :
+		
+			P = V3fVectorData()
+			verticesPerFace = IntVectorData()
+			vertexIds = IntVectorData()
+			
+			vertexId = 0
+			
+			for tri in range( 0, numTriangles ) :
+			
+				verticesPerFace.append( 3 )
+			
+				P.append( V3f( random.uniform(-10, 10), random.uniform(-10, 10), random.uniform(-10, 10) ) )
+				P.append( V3f( random.uniform(-10, 10), random.uniform(-10, 10), random.uniform(-10, 10) ) )
+				P.append( V3f( random.uniform(-10, 10), random.uniform(-10, 10), random.uniform(-10, 10) ) )
+				
+				vertexIds.append( vertexId + 0 )
+				vertexIds.append( vertexId + 1 )				
+				vertexIds.append( vertexId + 2 )
+				
+				vertexId = vertexId + 3
+				
+			m = MeshPrimitive( verticesPerFace, vertexIds )
+			m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
+			mpe = PrimitiveEvaluator.create( m )
+			r = mpe.createResult()
+			
+			for test in range( 0, numTests ) :
+			
+				origin = V3f( 0, 0, 0 )
+				direction = Rand48.hollowSpheref(rand)
+				
+				hit = mpe.intersectionPoint( origin, direction, r )			
+				
+				if hit:
+			
+					hits = mpe.intersectionPoints( origin, direction )
+					self.assert_( hits )
+					
+					closestHitDist = 100000
+					
+					closestHit = None
+					
+					for hit in hits :
+					
+						hitDist = ( origin - hit.point() ).length()
+						if hitDist < closestHitDist:
+							
+							closestHitDist = hitDist
+							closestHit = hit
+
+
+					self.assert_( (r.point() - closestHit.point() ).length() < 1.e-4 )
+				else:
+				
+					hits = mpe.intersectionPoints( origin, direction )
+					self.failIf( hits )
+					
+						
+					
+						
+					
+					
+				
+				
+				
+				
 
 		
 			
