@@ -236,7 +236,9 @@ enum TypeId
 	TriangulateOpTypeId = 193,	
 	SpherePrimitiveEvaluatorTypeId = 194,
 	SpherePrimitiveTypeId = 195,
-
+	ConverterTypeId = 196,
+	ToCoreConverterTypeId = 197,
+	
 	// Remember to update TypeIdBinding.cpp !!!
 	
 	// If we ever get this far then the core library is too big.
@@ -256,6 +258,9 @@ enum TypeId
 	
 	FirstCoreRITypeId = 106000,
 	LastCoreRITypeId = 106999,
+	
+	FirstCoreNukeTypeId = 107000,
+	LastCoreNukeTypeId = 107999,
 
 	LastExtensionTypeId = 399999,
 	// Any TypeIds beyond this point can be considered safe for private internal use.

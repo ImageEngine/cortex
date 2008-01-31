@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +32,34 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_FROMMAYACONVERTER_H
-#define IE_COREMAYA_FROMMAYACONVERTER_H
+#ifndef IECORENUKE_FROMNUKECONVERTER_H
+#define IECORENUKE_FROMNUKECONVERTER_H
 
-#include "IECoreMaya/Converter.h"
+#include "IECoreNuke/TypeIds.h"
 
-#include "IECore/Object.h"
-#include "IECore/CompoundObject.h"
+#include "IECore/ToCoreConverter.h"
 
-namespace IECoreMaya
+namespace IECoreNuke
 {
 
-/// The FromMayaConverter class forms an abstract base class for
-/// all classes able to perform some kind of conversion
-/// from a Maya datatype to an IECore datatype.
-/// \todo Derive this from IECore::ToCoreConverter.
-class FromMayaConverter : public Converter
+/// The FromNukeConverter forms a base class for all Converters which
+/// convert from Nuke datatypes to IECore datatypes.
+class FromNukeConverter : public IECore::ToCoreConverter
 {
-
+	
 	public :
-	
-		/// Returns the converted maya object in a suitable IECore
-		/// format.
-		IECore::ObjectPtr convert() const;
 
-	protected:
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromNukeConverter, FromNukeConverterTypeId, IECore::ToCoreConverter );
+
+	protected :
 	
-		FromMayaConverter( const std::string &name, const std::string &description );
+		/// The caller is responsible for ensuring that geo is alive
+		/// for as long as the converter is.
+		FromNukeConverter( const std::string &name, const std::string &description );
+		virtual ~FromNukeConverter();
 	
-		/// Called by convert() to actually perform the operation.
-		/// operands contains the result of parameters()->getValidatedValue() -
-		/// this function will never be called when the contents of the parameters
-		/// are in a bad state. Must be implemented in derived classes.
-		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const = 0;
 };
 
-IE_CORE_DECLAREPTR( FromMayaConverter );
+} // namespace IECoreNuke
 
-}
-
-#endif // IE_COREMAYA_FROMMAYACONVERTER_H
+#endif // IECORENUKE_FROMNUKECONVERTER_H

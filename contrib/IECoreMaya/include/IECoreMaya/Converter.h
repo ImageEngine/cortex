@@ -45,7 +45,7 @@ namespace IECoreMaya
 /// between Maya and IECore datatypes. It derives from
 /// Parameterised and uses the parameter values to
 /// define how conversion is performed.
-/// \todo This should probably go in IECore.
+/// \todo Use the one in IECore instead.
 class Converter : public IECore::Parameterised
 {
 
