@@ -42,7 +42,7 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=2
-ieCoreMinorVersion=25
+ieCoreMinorVersion=26
 ieCorePatchVersion=0
 
 ###########################################################################################
@@ -869,7 +869,7 @@ if env["WITH_GL"] :
 	c = Configure( glEnv )
 	
 	## \todo We need to check for GLUT here too
-	if not c.CheckLibWithHeader( "GLEW", "glew.h", "C" ) :
+	if not c.CheckLibWithHeader( "GLEW", "glew.h", "CXX" ) :
 	
 		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
 		c.Finish()
