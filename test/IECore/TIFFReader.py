@@ -46,7 +46,7 @@ class TestTIFFReader(unittest.TestCase):
 		r = IECore.Reader.create(self.testfile)
 		self.assertEqual(type(r), IECore.TIFFImageReader)
 		
-	def testRead(self):
+	def testRead1(self):
 		
 		r = IECore.Reader.create(self.testfile)
 		self.assertEqual(type(r), IECore.TIFFImageReader)
@@ -63,7 +63,7 @@ class TestTIFFReader(unittest.TestCase):
 		
 		w.write()
 
-	def testRead(self):
+	def testRead2(self):
 		
 		testfile = "test/IECore/data/tiff/bluegreen_noise.400x300.tif"
 		testoutfile = "test/IECore/data/tiff/bluegreen_noise.400x300.testoutput.tif"
@@ -79,6 +79,16 @@ class TestTIFFReader(unittest.TestCase):
 		self.assertEqual(type(w), IECore.TIFFImageWriter)
 		
 		w.write()
+		
+	def testErrors(self):	
+	
+		# We don't currently handle 1-bit tiffs	
+		testfile = "test/IECore/data/tiff/rgb_black_circle.256x256.1bit.tiff"
+		
+		r = IECore.Reader.create(testfile)
+		self.assertEqual(type(r), IECore.TIFFImageReader)
+		
+		self.assertRaises( RuntimeError, r.read )
 		
 	def testCompressionWrite(self):
 		
