@@ -250,7 +250,7 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 				break;
 
 				default:
-					throw Exception("unhandled TIFF bit-depth: " + bps);
+					throw IOException( (boost::format( "Unhandled TIFF bit-depth: %d") % bps).str() );
 
 				}
 			}
@@ -280,14 +280,16 @@ void TIFFImageReader::read_buffer()
 	/// \todo Is this assumption sound?
 	// assume data is interlaced, just read the whole thing,
 	// then stripe off the channel
-	m_buffer = new unsigned char[(bps / 8) * spp * width * height]();
+	
+	size_t bufSize = (size_t)( (float)bps / 8 * spp * width * height );
+	m_buffer = new unsigned char[ bufSize ]();
 
 	// read the image
 	for (stripCount = 0; stripCount < stripMax; stripCount++)
 	{
 		if ((result = TIFFReadEncodedStrip( m_tiffImage, stripCount, m_buffer + imageOffset, stripSize)) == -1)
 		{
-			throw Exception("TIFF read error on strip number " + stripCount);
+			throw IOException( (boost::format( "TIFF read error on strip number %d") % stripCount).str() );
 		}
 
 		imageOffset += result;
