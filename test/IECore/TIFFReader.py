@@ -82,13 +82,14 @@ class TestTIFFReader(unittest.TestCase):
 		
 	def testErrors(self):	
 	
-		# We don't currently handle 1-bit tiffs	
-		testfile = "test/IECore/data/tiff/rgb_black_circle.256x256.1bit.tiff"
+		# We don't currently handle 1-bit, 2-bit, or 4-bit tiffs	
 		
-		r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.TIFFImageReader)
+		for bitDepth in [ 1, 2, 4 ]:
 		
-		self.assertRaises( RuntimeError, r.read )
+			r = IECore.Reader.create( "test/IECore/data/tiff/rgb_black_circle.256x256.%dbit.tiff" % ( bitDepth ) )
+			self.assertEqual(type(r), IECore.TIFFImageReader)
+		
+			self.assertRaises( RuntimeError, r.read )
 		
 	def testCompressionWrite(self):
 		
