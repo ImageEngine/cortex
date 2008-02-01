@@ -42,7 +42,6 @@ from EmptyFrameList import EmptyFrameList
 # the whole sequence, providing earlier information about stuff going on
 # in the middle and end of the sequence.
 # \ingroup python
-n = 0
 class BinaryFrameList( ReorderedFrameList ) :
 
 	def __init__( self, frameList = EmptyFrameList() ) :
