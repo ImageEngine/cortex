@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,10 +37,9 @@ from _IECoreMaya import *
 import re
 
 """
-Parameter class for specifying Maya DAG paths.
+Parameter class for specifying Maya dependency nodes.
 """
-## \todo Dervive from IECoreMaya.NodeParameter
-class DAGPathParameter( IECore.StringParameter ):
+class NodeParameter( IECore.StringParameter ):
 
 	## \todo Use Enum for this
 	class CheckType:
@@ -62,18 +61,18 @@ class DAGPathParameter( IECore.StringParameter ):
 		
 		IECore.StringParameter.__init__( self, name, description, defaultValue, presets, presetsOnly, userData )
 
-		self.__allowEmptyString = allowEmptyString
-		self.__mustExist = bool( check == DAGPathParameter.CheckType.MustExist )
-		self.__mustNotExist = bool( check == DAGPathParameter.CheckType.MustNotExist )
+		self.allowEmptyString = allowEmptyString
+		self.mustExist = bool( check == NodeParameter.CheckType.MustExist )
+		self.mustNotExist = bool( check == NodeParameter.CheckType.MustNotExist )
 		if typeRegex is None:
-			self.__typeRegex = None
+			self.typeRegex = None
 		else:
-			self.__typeRegex = re.compile( typeRegex )
+			self.typeRegex = re.compile( typeRegex )
 			if typeRegexDescription == "":
-				self.__typeRegexDesc = "Invalid type."
+				self.typeRegexDesc = "Invalid type."
 			else:
-				self.__typeRegexDesc = typeRegexDescription
-
+				self.typeRegexDesc = typeRegexDescription
+				
 	"""
 	Defines two attributes: mustExist and mustNotExist and allowEmptyString exactly like PathParameter class.
 	"""
@@ -85,17 +84,17 @@ class DAGPathParameter( IECore.StringParameter ):
 		elif attrName == "allowEmptyString":
 			return self.__allowEmptyString
 		else:
-			return self.__dict__[ attrName ]
+			return self.__dict__[ attrName ]			
 
 	"""
-	Returns a regular expression that matches only valid Maya DAG paths.
+	Returns a regular expression that matches only valid Maya dependency nodes
 	"""
 	@staticmethod
 	def pathValidator():
 		return re.compile( "^(\|?[^\t\n\r\f\v\|]+)+\|?$" )
 
 	"""
-	Returns (True, "") only if the value is a correct DAG path string and also checks that the DAG node exists or doesn't exist 
+	Returns (True, "") only if the value is a correct dependency nodestring and also checks that the node exists or doesn't exist 
 	based on the CheckType passed to the constructor.
 	Otherwise returns (False, errorMessage).
 	"""
@@ -109,48 +108,48 @@ class DAGPathParameter( IECore.StringParameter ):
 			return True, ""
 
 		if not self.pathValidator().match( value.value ) :
-			return False, "Not a valid Maya DAG path."
+			return False, "Not a valid Maya dependency node."
 
 		try:
-			node = DagNode( value.value )
-			node.fullPathName()
+			node = Node( value.value )
+			node.name()
 		except:
-			IECore.debugException("failed to instantiate DagNode from", value.value )
+			IECore.debugException("failed to instantiate Node from", value.value )
 			exist = False
 		else:
 			exist = True
 
-			if not self.__typeRegex is None:
+			if not self.typeRegex is None:
 				nodeType = node.typeName()
-				if self.__typeRegex.match( nodeType ) is None:
-					return False, ("Type '%s' not accepted: " % nodeType) + self.__typeRegexDesc
+				if self.typeRegex.match( nodeType ) is None:
+					return False, ("Type '%s' not accepted: " % nodeType) + self.typeRegexDesc
 
 		if self.mustExist :
 
 			if not exist:
-				return False, "DAG node %s does not exist" % value.value
+				return False, "Node %s does not exist" % value.value
 			
 		elif self.mustNotExist :
 
 			if exist:
-				return False, "DAG node %s already exists" % value.value
+				return False, "Node %s already exists" % value.value
 
 		return True, ""	
 
 	"""
 	Sets the internal StringData value to node.name
 	"""	
-	def setDAGPathValue( self, dagNode ) :
-		self.setValue( IECore.StringData( dagNode.fullPathName() ) )
+	def setNodeValue( self, node ) :
+		self.setValue( IECore.StringData( node.name() ) )
 	
 	"""
-	Gets the internal StringData value and creates a IECoreMaya.DagNode
+	Gets the internal StringData value and creates a IECoreMaya.Node
 	from it. Note that this can return None	if check is DontCare and 
 	no matching node exists in Maya.
 	"""
-	def getDAGPathValue( self ) :
-		dagNodePath = self.getValidatedValue().value
-		dagNode = DagNode( dagNodePath )
-		return dagNode
+	def getNodeValue( self ) :
+		nodeName = self.getValidatedValue().value
+		node = Node( nodeName )
+		return node
 
-IECore.makeRunTimeTyped( DAGPathParameter, 350001, IECore.StringParameter )
+IECore.makeRunTimeTyped( NodeParameter, 350002, IECore.StringParameter )

@@ -121,7 +121,8 @@ pythonBindingsSource = [
 
 pythonSource = [
 	'python/IECoreMaya/__init__.py',
-	'python/IECoreMaya/ParameterUI.py',	
+	'python/IECoreMaya/ParameterUI.py',
+	'python/IECoreMaya/NodeParameter.py',		
 	'python/IECoreMaya/DAGPathParameter.py',
 	'python/IECoreMaya/DAGPathVectorParameter.py',
 	'python/IECoreMaya/mayaDo.py',
