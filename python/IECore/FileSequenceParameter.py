@@ -81,7 +81,7 @@ class FileSequenceParameter( IECore.PathParameter ) :
 			return False, "Value must contain one sequence of at least one # character to specify frame number."
 		
 		if len( self.extensions ) :
-			e = os.path.splitext( value.value )[1].lstrip( "." )
+			e = os.path.splitext( value.value )[1].lstrip( "." ).split(' ')[0]
 			if not e in self.extensions :
 				return False, "File sequence extension not valid."
 		
