@@ -75,7 +75,18 @@ Vec tetrahedronPoint(
 	typename VectorTraits<Vec>::BaseType barycentric[4]
 )
 {
-	return barycentric[0] * v0 + barycentric[1] * v1 + barycentric[2] * v2 + barycentric[3] * v3;
+	return vecAdd( 
+		vecMul( v0, barycentric[0] ), 
+		
+		vecAdd(
+			vecMul( v1, barycentric[1] ),
+			
+			vecAdd(
+				vecMul( v2, barycentric[2] ),
+				vecMul( v3, barycentric[3] ) 
+			)
+		)
+	);
 }
 
 template<typename Vec>
@@ -106,7 +117,8 @@ typename VectorTraits<Vec>::BaseType tetrahedronClosestBarycentric(
 	typename VectorTraits<Vec>::BaseType barycentric[4]
 )
 {
-	Vec centroid = ( v0 + v1 + v2 + v3 ) / 4.0;
+	Vec centroid = vecAdd( v0, vecAdd( v1, vecAdd( v2, v3 ) ) ) / 4.0;
+	
 	Vec closestPoint = p;
 	typename VectorTraits<Vec>::BaseType closestDistSqrd = Imath::limits< typename VectorTraits<Vec>::BaseType >::max();
 	
@@ -119,10 +131,13 @@ typename VectorTraits<Vec>::BaseType tetrahedronClosestBarycentric(
 		Imath::V3i faceIndices = tetrahedronFaceIndices( i );
 		
 		/// Compute a face normal which points away from the tetrahedron's centroid
-		Vec faceNormal = triangleNormal( v[faceIndices[0]], v[faceIndices[1]], v[faceIndices[2]] );		
-		if ( ( v[faceIndices[0]] - centroid ).dot(faceNormal) < 0.0 )
+		Vec faceNormal = triangleNormal( v[faceIndices[0]], v[faceIndices[1]], v[faceIndices[2]] );
+		
+		Vec centroidToFace = vecSub( v[faceIndices[0]], centroid );
+				
+		if ( vecDot(centroidToFace, faceNormal) < 0.0 )
 		{
-			faceNormal = -faceNormal;
+			faceNormal = vecMul( faceNormal, -1.0 );
 		}
 		
 		typename VectorTraits<Vec>::BaseType planeConstant = faceNormal.dot( v[i] );
