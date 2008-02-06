@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -159,6 +159,10 @@ struct VecConvert
 /// least VectorTraits<T>::dimensions() long.
 template<typename T>
 inline T vecConstruct( const typename VectorTraits<T>::BaseType *components );
+
+/// Returns the cross product of v1 and v2, which must be 3-dimensional vectors
+template<typename T>
+inline T vecCross( const T &v1, const T &v2 );
 
 } // namespace IECore
 

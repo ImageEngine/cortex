@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,8 @@
 
 #ifndef IE_CORE_VECTOROPS_INL
 #define IE_CORE_VECTOROPS_INL
+
+#include <cassert>
 
 namespace IECore
 {
@@ -246,7 +248,21 @@ inline T vecConstruct( const typename VectorTraits<T>::BaseType *components )
 	}
 }
 
+template<typename T>
+inline T vecCross( const T &v1, const T &v2 )
+{
+	assert( VectorTraits<T>::dimensions() == 3 );
+	
+	return T(
+		vecGet( v1, 1 ) * vecGet( v2, 2 ) - vecGet( v1, 2 ) * vecGet( v2, 1 ),
+		vecGet( v1, 2 ) * vecGet( v2, 0 ) - vecGet( v1, 0 ) * vecGet( v2, 2 ),
+		vecGet( v1, 0 ) * vecGet( v2, 1 ) - vecGet( v1, 1 ) * vecGet( v2, 0 )
+	);				
+	
+}
+
 } // namespace IECore
 
 
 #endif // IE_CORE_VECTOROPS_INL
+
