@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,8 @@ using namespace IECore;
 namespace IECore
 {
 
+
+/// \todo This doesn't return the literal width! Unfortunately some of the ImageReaders rely on this.
 // compute width of Box2i	
 int boxwidth(const Imath::Box2i & b)
 {
