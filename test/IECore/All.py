@@ -119,6 +119,7 @@ from Writer import *
 from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
 from SearchReplaceOp import *
+from DPXReader import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

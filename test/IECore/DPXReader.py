@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,17 +32,14 @@
 #
 ##########################################################################
 
+import os
 import unittest
-import sys
-from IECore import *
 import IECore
-
-from math import pow
 
 class TestDPXReader(unittest.TestCase):
 
         testfile =    "test/IECore/data/dpx/bluegreen_noise.dpx"
-	testoutfile = "test/IECore/data/dpx/bluegreen_noise.testoutput"
+	testoutfile = "test/IECore/data/dpx/bluegreen_noise.testoutput.dpx"
 
         def testConstruction(self):
                 
@@ -59,23 +56,19 @@ class TestDPXReader(unittest.TestCase):
 		
 		self.assertEqual(type(img), IECore.ImagePrimitive)
 
-		# write test (DPX -> EXR)
-                w = IECore.Writer.create(img, self.testoutfile + '.exr')
-		self.assertEqual(type(w), IECore.EXRImageWriter)
-
-		w.write()
-
-        def testWrite(self):
-
-                r = IECore.Reader.create('test/IECore/data/dpx/AA001_022_bgPlate_v001.0011.dpx')
-                #r = IECore.Reader.create('test/IECore/data/jpg/bluegreen_noise.400x300.jpg')
-		img = r.read()
-		
 		# write test
-                w = IECore.Writer.create(img, self.testoutfile + '.dpx')
+                w = IECore.Writer.create( img, self.testoutfile )
 		self.assertEqual(type(w), IECore.DPXImageWriter)
 
 		w.write()
+		
+        def tearDown(self):
+                
+		# cleanup
+        
+		if os.path.isfile( self.testoutfile ) : 
+			os.remove( self.testoutfile )		
+
 
                 			
 if __name__ == "__main__":
