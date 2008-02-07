@@ -43,6 +43,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/Parameter.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/ScopedTIFFExceptionTranslator.h"
 
 #include "IECore/BoxOperators.h"
 
@@ -72,7 +73,20 @@ TIFFImageWriter::TIFFImageWriter(ObjectPtr image, const string & fileName)
 void TIFFImageWriter::constructParameters( )
 {
 	// bitdepth parameter
-	m_bitdepthParameter = new IntParameter("bitdepth", "output TIFF bit depth, one of 8, 16, 32; defaults to 16");
+	IntParameter::PresetsMap bitDepthPresets;
+	bitDepthPresets["8"] = 8;
+	bitDepthPresets["16"] = 16;	
+	bitDepthPresets["32"] = 32;	
+	
+	m_bitdepthParameter = new IntParameter(
+		"bitdepth", 
+		"Output TIFF bit depth",
+		16,
+		8,
+		32,
+		bitDepthPresets,
+		true);
+		
 	parameters()->addParameter(m_bitdepthParameter);
 
 	// compression parameter
@@ -108,7 +122,7 @@ TIFFImageWriter::~TIFFImageWriter()
 }
 
 void TIFFImageWriter::stripEncode(tiff * tiff_image, char * image_buffer, int image_buffer_size, int strips)
-{
+{	
 	// write the information to the file
 	int offset = 0;
 
@@ -125,6 +139,8 @@ void TIFFImageWriter::stripEncode(tiff * tiff_image, char * image_buffer, int im
 
 void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr image, const Box2i & dw)
 {	
+	ScopedTIFFExceptionTranslator errorHandler( );
+
 	// create the tiff file
 	TIFF *tiff_image;
 	if((tiff_image = TIFFOpen(fileName().c_str(), "w")) == NULL)
