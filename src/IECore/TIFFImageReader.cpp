@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,6 +39,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/ScopedTIFFExceptionTranslator.h"
 
 #include "boost/static_assert.hpp"
 #include "boost/format.hpp"
@@ -75,18 +76,24 @@ TIFFImageReader::TIFFImageReader(const string & fileName)
 
 TIFFImageReader::~TIFFImageReader()
 {
+	delete [] m_buffer;
+	
+	ScopedTIFFExceptionTranslator errorHandler( );
+	
 	if (m_tiffImage)
 	{
 		TIFFClose(m_tiffImage);
 	}
-	delete [] m_buffer;
+	
 }
 
 bool TIFFImageReader::canRead(const string & fileName)
 {
+	ScopedTIFFExceptionTranslator errorHandler( );
+	
 	// attempt to open the file
 	ifstream in(fileName.c_str());
-	if (!in.is_open())
+	if ( !in.is_open() || in.fail() )
 	{
 		return false;
 	}
@@ -96,10 +103,18 @@ bool TIFFImageReader::canRead(const string & fileName)
 
 	// attempt to open the file
 	in.seekg(0, ios_base::beg);
+	if ( in.fail() )
+	{
+		return false;
+	}
 
 	// check magic number
 	unsigned int magic;
 	in.read((char *) &magic, sizeof(unsigned int));
+	if ( in.fail() )
+	{
+		return false;
+	}
 	
 	/// \todo Why the 3 variations here? Surely only 2 are necessary?
 	return magic == 0x002a4949 || magic == 0x49492a00 || magic == 0x2a004d4d;
@@ -130,6 +145,9 @@ void TIFFImageReader::channelNames(vector<string> & names)
 
 void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Box2i & dataWindow)
 {
+	assert( open() );
+	ScopedTIFFExceptionTranslator errorHandler( );
+		
 	if (!open())
 	{
 		return;
@@ -140,14 +158,64 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 	uint32 width, height;
 
 	TIFFGetField(m_tiffImage, TIFFTAG_BITSPERSAMPLE, &bps);
-	TIFFGetField(m_tiffImage, TIFFTAG_PHOTOMETRIC, &photo);
+	TIFFGetFieldDefaulted(m_tiffImage, TIFFTAG_PHOTOMETRIC, &photo);
+	if (! (	photo == PHOTOMETRIC_MINISWHITE ||
+	        photo == PHOTOMETRIC_MINISBLACK ||
+	        photo == PHOTOMETRIC_RGB ||
+	        photo == PHOTOMETRIC_PALETTE ||
+		photo == PHOTOMETRIC_MASK ||
+		photo == PHOTOMETRIC_SEPARATED ||
+		photo == PHOTOMETRIC_YCBCR ||
+		photo == PHOTOMETRIC_CIELAB ||
+		photo == PHOTOMETRIC_ICCLAB ||
+		photo == PHOTOMETRIC_ITULAB ||
+		photo == PHOTOMETRIC_LOGL ||
+		photo == PHOTOMETRIC_LOGLUV
+		 ))
+	{
+		throw IOException( ( boost::format("TiffImageReader: Invalid value (%d) for TIFFTAG_PHOTOMETRIC") % photo ).str() );
+	}	
+			
 	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLESPERPIXEL, &spp);
-	TIFFGetField(m_tiffImage, TIFFTAG_FILLORDER, &fillorder);
-	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLEFORMAT, &sampleformat);
-
-	// we handle here 8, 16, and 32 bpp with RGB channels in integer space, and now float
+	if ( spp == 0 )
+	{
+		throw IOException( ( boost::format("TiffImageReader: Invalid value (%d) for TIFFTAG_SAMPLESPERPIXEL") % spp ).str() );
+	}
+	
+	
+	TIFFGetFieldDefaulted(m_tiffImage, TIFFTAG_FILLORDER, &fillorder);
+	if (!( fillorder == FILLORDER_MSB2LSB || fillorder == FILLORDER_LSB2MSB) )
+	{
+		throw IOException( ( boost::format("TiffImageReader: Invalid value (%d) for TIFFTAG_FILLORDER") % fillorder ).str() );
+	}
+	assert( (bool)( TIFFIsMSB2LSB( m_tiffImage) ) == (bool)( fillorder == FILLORDER_MSB2LSB ));
+	
+		
+	TIFFGetFieldDefaulted(m_tiffImage, TIFFTAG_SAMPLEFORMAT, &sampleformat);
+	if (! (	sampleformat == SAMPLEFORMAT_UINT ||
+	        sampleformat == SAMPLEFORMAT_INT ||
+	        sampleformat == SAMPLEFORMAT_IEEEFP ||
+	        sampleformat == SAMPLEFORMAT_VOID ||
+		sampleformat == SAMPLEFORMAT_COMPLEXINT ||
+		sampleformat == SAMPLEFORMAT_COMPLEXIEEEFP ))
+	{
+		throw IOException( ( boost::format("TiffImageReader: Invalid value (%d) for TIFFTAG_SAMPLEFORMAT") % sampleformat ).str() );
+	}
+		
+	// we handle here 8, 16, and 32 bpp with RGB channels in unsigned integer and float space
+	/// \todo Other formats!
+	
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGEWIDTH, &width);
+	if ( width == 0 )
+	{
+		throw IOException( ( boost::format("TiffImageReader: Invalid value (%d) for TIFFTAG_IMAGEWIDTH") % spp ).str() );
+	}
+	
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGELENGTH, &height);
+	if ( height == 0 )
+	{
+		throw IOException( ( boost::format("TiffImageReader: Invalid value (%d) for TIFFTAG_IMAGELENGTH") % spp ).str() );
+	}
 
 	// compute the data window
 	Box2i dw;
@@ -171,6 +239,11 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 
 	// compute offset to image
 	int boffset = name == "R" ? 0 : name == "G" ? 1 : name == "B" ? 2 : 3;
+	
+	if ( boffset >= spp )
+	{
+		throw IOException( (boost::format( "TiffImageReader: Insufficient samples-per-pixel (%d) for reading channel \"%s\"") % spp % name).str() );
+	}
 
 	// we form 32 bit float image channel by normalizing the input integer range to [0.0, 1.0]
 	double normalizer = 1.0 / ((1 << bps) - 1);
@@ -188,8 +261,6 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 	// compute distance from the read box origin
 	V2i d = readbox.min - dw.min;
 
-	/// \todo: throw out an exception if the sample format field is mangled.  for now
-	/// we shall assume that a non-floating point TIFF is of integer type
 	if (sampleformat == SAMPLEFORMAT_IEEEFP)
 	{
 		// read in the buffer
@@ -207,7 +278,7 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 			}
 		}
 	}
-	else
+	else if ( sampleformat == SAMPLEFORMAT_UINT )
 	{
 		for (int y = readbox.min.y; y <= readbox.max.y; ++y)
 		{
@@ -224,6 +295,7 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 
 				case 8:
 				{
+					/// \todo May need to reverseBytes(), depending on fillOrder and endianness
 					// cast to unsigned byte, divide
 					ic[i] = normalizer * m_buffer[spp * di + boffset];
 				}
@@ -231,6 +303,7 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 
 				case 16:
 				{
+					/// \todo May need to reverseBytes(), depending on fillOrder and endianness
 					//// \todo should probably be using uint16_t here instead
 					BOOST_STATIC_ASSERT( sizeof( unsigned short ) == 2 );
 					// cast to short, divide
@@ -241,6 +314,7 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 
 				case 32:
 				{
+					/// \todo May need to reverseBytes(), depending on fillOrder and endianness
 					//// \todo should probably be using uint32_t here instead
 					BOOST_STATIC_ASSERT( sizeof( unsigned int ) == 4 );
 					// cast to int, divide
@@ -250,17 +324,23 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 				break;
 
 				default:
-					throw IOException( (boost::format( "Unhandled TIFF bit-depth: %d") % bps).str() );
+					throw IOException( (boost::format( "TiffImageReader: Unhandled bit-depth: %d") % bps).str() );
 
 				}
 			}
 		}
+	}
+	else
+	{
+		throw IOException( (boost::format( "TiffImageReader: Unhandled sample format: %d") % sampleformat).str() );
 	}
 }
 
 /// read in the data to a buffer
 void TIFFImageReader::read_buffer()
 {
+	ScopedTIFFExceptionTranslator errorHandler( );
+	
 	uint16 spp, bps;
 	uint32 width, height;
 	tsize_t stripSize;
@@ -271,6 +351,12 @@ void TIFFImageReader::read_buffer()
 	TIFFGetField(m_tiffImage, TIFFTAG_SAMPLESPERPIXEL, &spp);
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGEWIDTH, &width);
 	TIFFGetField(m_tiffImage, TIFFTAG_IMAGELENGTH, &height);
+	
+	/// \todo Support tiled images!
+	if ( TIFFIsTiled( m_tiffImage ) )
+	{
+		throw IOException( "TiffImageReader: Tiled images unsupported" );
+	}
 
 	// get strip size
 	stripSize = TIFFStripSize(m_tiffImage);
@@ -282,6 +368,7 @@ void TIFFImageReader::read_buffer()
 	// then stripe off the channel
 	
 	size_t bufSize = (size_t)( (float)bps / 8 * spp * width * height );
+	assert( bufSize );
 	m_buffer = new unsigned char[ bufSize ]();
 
 	// read the image
@@ -289,7 +376,7 @@ void TIFFImageReader::read_buffer()
 	{
 		if ((result = TIFFReadEncodedStrip( m_tiffImage, stripCount, m_buffer + imageOffset, stripSize)) == -1)
 		{
-			throw IOException( (boost::format( "TIFF read error on strip number %d") % stripCount).str() );
+			throw IOException( (boost::format( "TiffImageReader: Read error on strip number %d") % stripCount).str() );
 		}
 
 		imageOffset += result;
@@ -298,6 +385,8 @@ void TIFFImageReader::read_buffer()
 
 bool TIFFImageReader::open()
 {
+	ScopedTIFFExceptionTranslator errorHandler( );
+
 	if (!m_tiffImage || m_tiffImageFileName != fileName())
 	{
 		if (m_tiffImage)

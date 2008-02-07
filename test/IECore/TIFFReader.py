@@ -32,53 +32,47 @@
 #
 ##########################################################################
 
+import os
+import os.path
 import unittest
 import sys
 import IECore
 
+
 class TestTIFFReader(unittest.TestCase):
 
-	testfile = "test/IECore/data/tiff/rgb_black_circle.256x256.tiff"
-	testoutfile = "test/IECore/data/tiff/rgb_black_circle.256x256.testoutput.tif"
+	testoutfile = "test/IECore/data/tiff/testoutput.tif"
 
 	def testConstruction(self):
                 
-		r = IECore.Reader.create(self.testfile)
+		r = IECore.Reader.create( "test/IECore/data/tiff/rgb_black_circle.256x256.tiff" )
 		self.assertEqual(type(r), IECore.TIFFImageReader)
 		
 	def testRead1(self):
 		
-		r = IECore.Reader.create(self.testfile)
+		r = IECore.Reader.create( "test/IECore/data/tiff/rgb_black_circle.256x256.tiff" )
 		self.assertEqual(type(r), IECore.TIFFImageReader)
 		
 		r.parameters().dataWindow.setValue(IECore.Box2iData(IECore.Box2i(IECore.V2i(0, 0), IECore.V2i(100, 100))))
 		
-		img = r.read()
+		self.assertRaises( RuntimeError, r.read )
 		
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-		
-		# write test (TIFF -> TIFF)
-		w = IECore.Writer.create(img, self.testoutfile)
-		self.assertEqual(type(w), IECore.TIFFImageWriter)
-		
-		w.write()
 
 	def testRead2(self):
+	
+		for f in [ "bluegreen_noise.400x300.tif", "maya.tiff" ] :
+										
+			r = IECore.Reader.create( os.path.join( "test/IECore/data/tiff",  f) )
+			self.assertEqual(type(r), IECore.TIFFImageReader)
 		
-		testfile = "test/IECore/data/tiff/bluegreen_noise.400x300.tif"
-		testoutfile = "test/IECore/data/tiff/bluegreen_noise.400x300.testoutput.tif"
+			img = r.read()
+			self.assertEqual(type(img), IECore.ImagePrimitive)
 		
-		r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.TIFFImageReader)
+			# write test (TIFF -> TIFF)
+			w = IECore.Writer.create(img, self.testoutfile)
+			self.assertEqual(type(w), IECore.TIFFImageWriter)
 		
-		img = r.read()
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-		
-		# write test (TIFF -> TIFF)
-		w = IECore.Writer.create(img, testoutfile)
-		self.assertEqual(type(w), IECore.TIFFImageWriter)
-		
-		w.write()
+			w.write()
 		
 	def testErrors(self):	
 	
@@ -93,23 +87,27 @@ class TestTIFFReader(unittest.TestCase):
 		
 	def testCompressionWrite(self):
 		
-		testfile =    "test/IECore/data/tiff/bluegreen_noise.400x300.tif"
-		testoutfile = "test/IECore/data/tiff/bluegreen_noise.400x300.testoutput"
-		
-		r = IECore.Reader.create(testfile)
+		r = IECore.Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )
 		self.assertEqual(type(r), IECore.TIFFImageReader)
 		
 		img = r.read()
 		self.assertEqual(type(img), IECore.ImagePrimitive)
 		
-		w = IECore.Writer.create(img, testoutfile + '.tif')
+		w = IECore.Writer.create( img, self.testoutfile )
 		compressions = w.parameters()['compression'].presets()
-		self.assertEqual(type(w), IECore.TIFFImageWriter)
+		self.assertEqual( type(w), IECore.TIFFImageWriter )
 		
 		for compression in compressions.keys():
-			cw = IECore.Writer.create(img, '.'.join([testoutfile, compression, 'tif']))
+			cw = IECore.Writer.create(img, '.'.join([self.testoutfile, compression, 'tif']))
 			cw.parameters().compression.setValue(compressions[compression])
 			cw.write()
+			
+	def tearDown(self):
+		
+		# cleanup
+	
+		if os.path.isfile( self.testoutfile ) :	
+			os.remove( self.testoutfile )				
                 			
 if __name__ == "__main__":
 	unittest.main()   
