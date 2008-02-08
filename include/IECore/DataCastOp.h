@@ -52,6 +52,12 @@ class DataCastOp : public Op
 		DataCastOp();
 		virtual ~DataCastOp();
 		
+		ObjectParameterPtr objectParameter();
+		ConstObjectParameterPtr objectParameter() const;
+		
+		IntParameterPtr targetTypeParameter();
+		ConstIntParameterPtr targetTypeParameter() const;		
+		
 	protected :
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );

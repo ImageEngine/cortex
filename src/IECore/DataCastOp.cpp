@@ -85,6 +85,26 @@ DataCastOp::~DataCastOp()
 {
 }
 
+ObjectParameterPtr DataCastOp::objectParameter()
+{
+	return m_objectParameter;
+}
+
+ConstObjectParameterPtr DataCastOp::objectParameter() const
+{
+	return m_objectParameter;
+}
+
+IntParameterPtr DataCastOp::targetTypeParameter()
+{
+	return m_targetTypeParameter;
+}
+
+ConstIntParameterPtr DataCastOp::targetTypeParameter() const
+{
+	return m_targetTypeParameter;
+}
+
 /// A functor suitable for use with stl algorithms such as transform(), allowing
 /// the copying of a container of vectors of type T into a container of vectors of type S.
 template<typename T, typename S>
@@ -384,6 +404,8 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 			{
 				CASTDATA( M44d, M44f )
 				CASTVECTORDATA( M44d, DoubleVector )
+				CASTVECTORDATA( M44d, FloatVector )
+				CASTVECTORDATA( M44d, HalfVector )				
 				default:	break;
 			}
 			break;
@@ -391,7 +413,9 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 			switch ( targetType )
 			{
 				CASTDATA( Quatf, Quatd )
+				CASTVECTORDATA( Quatf, DoubleVector )
 				CASTVECTORDATA( Quatf, FloatVector )
+				CASTVECTORDATA( Quatf, HalfVector )								
 				default:	break;
 			}
 			break;
@@ -400,6 +424,8 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 			{
 				CASTDATA( Quatd, Quatf )
 				CASTVECTORDATA( Quatd, DoubleVector )
+				CASTVECTORDATA( Quatd, FloatVector )
+				CASTVECTORDATA( Quatd, HalfVector )
 				default:	break;
 			}
 			break;
@@ -497,7 +523,19 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 		case HalfVectorDataTypeId:
 			switch ( targetType )
 			{
-				CASTDATA( HalfVector, Half )				
+				CASTDATA( HalfVector, Half )
+				CASTVECTORDATA( HalfVector, IntVector )
+				CASTVECTORDATA( HalfVector, HalfVector )				
+				CASTVECTORDATA( HalfVector, FloatVector )
+				CASTVECTORDATA( HalfVector, V2fVector )
+				CASTVECTORDATA( HalfVector, V3fVector )
+				CASTVECTORDATA( HalfVector, V2dVector )
+				CASTVECTORDATA( HalfVector, V3dVector )
+				CASTVECTORDATA( HalfVector, QuatdVector )
+				CASTVECTORDATA( HalfVector, M33dVector )
+				CASTVECTORDATA( HalfVector, M44dVector )
+				CASTVECTORDATA( HalfVector, Box2dVector )
+				CASTVECTORDATA( HalfVector, Box3dVector )			
 				default:	break;
 			}
 			break;	
