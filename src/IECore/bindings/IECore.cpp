@@ -150,6 +150,7 @@
 #include "IECore/bindings/TriangulateOpBinding.h"
 #include "IECore/bindings/SpherePrimitiveBinding.h"
 #include "IECore/bindings/SpherePrimitiveEvaluatorBinding.h"
+#include "IECore/bindings/InverseDistanceWeightedInterpolationBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -279,6 +280,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTriangulateOp();
 	bindSpherePrimitive();
 	bindSpherePrimitiveEvaluator();
+	bindInverseDistanceWeightedInterpolation();
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

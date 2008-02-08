@@ -120,6 +120,7 @@ from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
 from SearchReplaceOp import *
 from DPXReader import *
+from InverseDistanceWeightedInterpolation import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *
