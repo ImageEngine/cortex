@@ -42,7 +42,10 @@
 namespace IECore
 {
 	
-
+/// The InverseDistanceWeightedInterpolation class provides interpolation of scattered data. It is
+/// templated so that it can operate on a wide variety of point/value types, and uses
+/// the VectorTraits.h and VectorOps.h functionality to assist in this. 
+/// NB. The Value must be default constructible, and define sensible value+value, value/=scalar, and value*scalar operators
 template< typename PointIterator, typename ValueIterator >
 class InverseDistanceWeightedInterpolation
 {
@@ -53,6 +56,9 @@ class InverseDistanceWeightedInterpolation
 		
 		typedef typename std::iterator_traits<ValueIterator>::value_type Value;
 	
+		/// Creates the interpolator. Note that it does not own the passed points or values -
+		/// it is up to you to ensure that they remain valid and unchanged as long as the 
+		/// interpolator is in use.
 		InverseDistanceWeightedInterpolation(
 			PointIterator firstPoint,
 			PointIterator lastPoint, 
@@ -64,17 +70,16 @@ class InverseDistanceWeightedInterpolation
 		
 		virtual ~InverseDistanceWeightedInterpolation();
 		
+		/// Evaluate the interpolated value for the specified point
 		Value operator()( const Point &p ) const;
 			
 			
 	private :
 	
-		typedef KDTree<PointIterator> Tree;
-		
+		typedef KDTree<PointIterator> Tree;		
 		Tree *m_tree;	
 		
-		typedef std::map< PointIterator, ValueIterator > ValueMap;
-		
+		typedef std::map< PointIterator, ValueIterator > ValueMap;		
 		ValueMap m_map;
 		
 		unsigned int m_numNeighbours;
