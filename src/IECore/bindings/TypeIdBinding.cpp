@@ -237,6 +237,8 @@ void bindTypeId()
 		.value("TriangulateOp", TriangulateOpTypeId)						
 		.value("SpherePrimitiveEvaluator", SpherePrimitiveEvaluatorTypeId)
 		.value("SpherePrimitive", SpherePrimitiveTypeId)
+		.value("Converter", ConverterTypeId)		
+		.value("ToCoreConverter", ToCoreConverterTypeId)
 	;
 }
 
