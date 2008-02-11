@@ -247,6 +247,9 @@ bool withSQLite();
 /// A fast, robust implementation of \link IECore::MarchingCubes MarchingCubes \endlink is available for creating meshes from an
 /// \link IECore::ImplicitSurfaceFunction ImplicitSurfaceFunction \endlink.
 ///
+/// A templated class is avaiable to perform \link IECore::InverseDistanceWeightedInterpolation InverseDistanceWeightedInterpolation \endlink from
+/// a set of scattered data points.
+///
 /// \section mainPagePythonSection Python
 ///
 /// All of the IECore C++ classes are bound into Python using the <a href="http://www.boost.org/libs/python/doc/">boost::python</a> framework.
