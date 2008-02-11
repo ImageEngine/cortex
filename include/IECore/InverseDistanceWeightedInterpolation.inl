@@ -49,8 +49,6 @@ InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::InverseDista
 	int maxLeafSize
 ) : m_numNeighbours( numNeighbours )
 {
-	m_tree = new Tree( firstPoint, lastPoint );
-	
 	PointIterator pointIt = firstPoint;
 	ValueIterator valueIt = firstValue;
 	while ( pointIt != lastPoint )
@@ -58,6 +56,8 @@ InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::InverseDista
 		assert( valueIt != lastValue );
 		m_map[pointIt++] = valueIt++;
 	}
+	
+	m_tree = new Tree( firstPoint, lastPoint );
 }
 
 template<typename PointIterator, typename ValueIterator>
@@ -75,7 +75,7 @@ typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Val
 	typedef std::vector<PointIterator> PointIteratorVector;
 	
 	Value result = Value();
-	
+		
 	PointIteratorVector nearNeighbours;
 	unsigned int neighbourCount = m_tree->nearestNNeighbours( p, m_numNeighbours, nearNeighbours );
 	
@@ -119,7 +119,7 @@ typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Val
 			totalNeighbourWeight += neighbourWeight;
 		}
 
-		result /= totalNeighbourWeight;
+		result = result * ( 1.0 / totalNeighbourWeight );
 	}
 	
 	return result;

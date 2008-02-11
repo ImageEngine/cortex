@@ -45,7 +45,7 @@ namespace IECore
 /// The InverseDistanceWeightedInterpolation class provides interpolation of scattered data. It is
 /// templated so that it can operate on a wide variety of point/value types, and uses
 /// the VectorTraits.h and VectorOps.h functionality to assist in this. 
-/// NB. The Value must be default constructible, and define sensible value+value, value/=scalar, and value*scalar operators
+/// NB. The Value must be default constructible, and define sensible value=value+value, and value=value*scalar operators
 template< typename PointIterator, typename ValueIterator >
 class InverseDistanceWeightedInterpolation
 {
@@ -58,7 +58,9 @@ class InverseDistanceWeightedInterpolation
 	
 		/// Creates the interpolator. Note that it does not own the passed points or values -
 		/// it is up to you to ensure that they remain valid and unchanged as long as the 
-		/// interpolator is in use.
+		/// interpolator is in use. 
+		/// \param numNeighbours The amount of nearest-neighbour points to consider when performing interpolation. More usually yields slower, but better results.
+		/// \param maxLeafSize The number of points to store in each KDTree bucket
 		InverseDistanceWeightedInterpolation(
 			PointIterator firstPoint,
 			PointIterator lastPoint, 
@@ -85,14 +87,14 @@ class InverseDistanceWeightedInterpolation
 		unsigned int m_numNeighbours;
 };
 
-typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V2f>::const_iterator, std::vector<float>::const_iterator >  InverseDistanceWeightedInterpolationV2ff;
+typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V2f>::const_iterator, std::vector<float>::const_iterator  > InverseDistanceWeightedInterpolationV2ff;
 typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V2d>::const_iterator, std::vector<double>::const_iterator > InverseDistanceWeightedInterpolationV2dd;
-typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V3f>::const_iterator, std::vector<float>::const_iterator >  InverseDistanceWeightedInterpolationV3ff;
+typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V3f>::const_iterator, std::vector<float>::const_iterator  >  InverseDistanceWeightedInterpolationV3ff;
 typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V3d>::const_iterator, std::vector<double>::const_iterator > InverseDistanceWeightedInterpolationV3dd;
 
-typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V2f>::const_iterator, std::vector<Imath::V2f>::const_iterator >  InverseDistanceWeightedInterpolationV2fV2f;
+typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V2f>::const_iterator, std::vector<Imath::V2f>::const_iterator > InverseDistanceWeightedInterpolationV2fV2f;
 typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V2d>::const_iterator, std::vector<Imath::V2d>::const_iterator > InverseDistanceWeightedInterpolationV2dV2d;
-typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V3f>::const_iterator, std::vector<Imath::V3d>::const_iterator >  InverseDistanceWeightedInterpolationV3fV3f;
+typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V3f>::const_iterator, std::vector<Imath::V3f>::const_iterator > InverseDistanceWeightedInterpolationV3fV3f;
 typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V3d>::const_iterator, std::vector<Imath::V3d>::const_iterator > InverseDistanceWeightedInterpolationV3dV3d;
 
 
