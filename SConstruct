@@ -1053,6 +1053,7 @@ if env["WITH_MAYA"] :
 
 nukeEnv = env.Copy( IECORE_NAME = "IECoreNuke" )
 nukeEnv.Append( CPPPATH = [ "$NUKE_ROOT/include" ] )
+nukeEnv.Prepend( LIBPATH = [ "./lib" ] )
 
 if doConfigure :
 
@@ -1066,6 +1067,9 @@ if doConfigure :
 	else :
 	
 		c.Finish()
+
+		# we can't add this earlier as then it's built during the configure stage, and that's no good
+		nukeEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
 		nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
 		nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
@@ -1096,10 +1100,13 @@ docEnv["ENV"]["PATH"] = os.environ["PATH"]
 docs = docEnv.Command( "doc/html/index.html", "", "doxygen doc/config/Doxyfile" )
 docEnv.Depends( docs, glob.glob( "include/IECore/*.h" ) )
 docEnv.Depends( docs, glob.glob( "include/IECoreRI/*.h" ) )
+docEnv.Depends( docs, glob.glob( "include/IECoreNuke/*.h" ) )
 docEnv.Depends( docs, glob.glob( "src/IECore/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "src/IECoreRI/*.cpp" ) )
+docEnv.Depends( docs, glob.glob( "src/IECoreNuke/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "python/IECore/*.py" ) )
 docEnv.Depends( docs, glob.glob( "python/IECoreRI/*.py" ) )
+docEnv.Depends( docs, glob.glob( "python/IECoreNuke/*.py" ) )
 
 # \todo This won't reinstall the documentation if the directory already exists
 installDoc = docEnv.Install( "$INSTALL_DOC_DIR", "doc/html" )
