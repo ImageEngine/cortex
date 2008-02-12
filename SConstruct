@@ -536,6 +536,10 @@ if testEnv["TEST_LIBRARY_PATH_ENV_VAR"]!="" :
 
 if env["PLATFORM"]=="darwin" :
 	testEnv["ENV"]["DYLD_LIBRARY_PATH"] = testEnvLibPath
+	
+	# Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
+	if not testEnv["DEBUG"] :
+		testEnv.Append( CXXFLAGS = "-O0" )
 else :
 	testEnv["ENV"]["LD_LIBRARY_PATH"] = testEnvLibPath
 
