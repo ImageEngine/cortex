@@ -45,8 +45,9 @@
 #include "OpenEXR/ImfHeader.h"
 #include "OpenEXR/ImfChannelList.h"
 
-namespace IECore {
-  
+namespace IECore
+{
+
 /// The EXRImageReader class reads ILM OpenEXR file formats
 class EXRImageReader : public ImageReader
 {
@@ -59,35 +60,35 @@ class EXRImageReader : public ImageReader
 		EXRImageReader(const std::string & filename);
 
 		virtual ~EXRImageReader();
-	
+
 		static bool canRead(const std::string & filename);
-	
+
 		/// give the channel names into the vector
 		virtual void channelNames(std::vector<std::string> & names);
 
-	   virtual bool isComplete() const;
-	
-	private:
-	
-		virtual void readChannel(std::string name, ImagePrimitivePtr image, const Imath::Box2i &dataWindow);
-	
-		template <typename T>
-		void readTypedChannel(std::string name, ImagePrimitivePtr image, const Imath::Box2i &dataWindow, 
-								 const Imf::Channel &channel);
+		virtual bool isComplete() const;
 
-	
+	private:
+
+		virtual void readChannel(std::string name, ImagePrimitivePtr image, const Imath::Box2i &dataWindow);
+
+		template <typename T>
+		void readTypedChannel(std::string name, ImagePrimitivePtr image, const Imath::Box2i &dataWindow,
+		                      const Imf::Channel &channel);
+
+
 		// filename associator
 		static const ReaderDescription<EXRImageReader> m_readerDescription;
-	
+
 		// EXR consists of a header and pixel data
 		bool open();
 		Imf::Header m_header;
- 		Imf::InputFile *m_inputFile;
-	
+		Imf::InputFile *m_inputFile;
+
 };
-	
+
 IE_CORE_DECLAREPTR(EXRImageReader);
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_EXRIMAGEREADER_H

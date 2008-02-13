@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,12 +45,15 @@
 #include "OpenEXR/ImfCompression.h"
 #include "OpenEXR/ImfChannelList.h"
 
-namespace IECore {
+namespace IECore
+{
 
-/// The EXRImageWriter class serializes images to the OpenEXR HDR image format
+/// The EXRImageWriter class serializes images to the OpenEXR HDR image format.
+/// N.B Both Shake and Nuke seem to assume channel names "R", "G", "B", and "A"
+/// - lowercase do not work as expected.
 class EXRImageWriter : public ImageWriter
 {
-	
+
 	public:
 
 		IE_CORE_DECLARERUNTIMETYPED( EXRImageWriter, ImageWriter )
@@ -59,24 +62,24 @@ class EXRImageWriter : public ImageWriter
 
 		/// construct an EXRImageWriter for the given image and output filename
 		EXRImageWriter(ObjectPtr object, const std::string & fileName);
-        
+
 	private:
-	
+
 		static const WriterDescription<EXRImageWriter> m_writerDescription;
-	
+
 		virtual void writeImage(std::vector<std::string> &names, ConstImagePrimitivePtr image,
-				const Imath::Box2i &dw);
-	
+		                        const Imath::Box2i &dw);
+
 		template<typename T>
-		void writeTypedChannel(const char *name, ConstImagePrimitivePtr image, 
-								  const Imath::Box2i &dw, const std::vector<T> &channel, 
-								  const Imf::PixelType TYPE, Imf::Header &header, 
-								  Imf::FrameBuffer &fb);
-	
+		void writeTypedChannel(const char *name, ConstImagePrimitivePtr image,
+		                       const Imath::Box2i &dw, const std::vector<T> &channel,
+		                       const Imf::PixelType TYPE, Imf::Header &header,
+		                       Imf::FrameBuffer &fb);
+
 };
-	
+
 IE_CORE_DECLAREPTR(EXRImageWriter);
-  
+
 } // namespace IECore
 
 #endif // IE_CORE_EXRIMAGEWRITER_H
