@@ -119,7 +119,10 @@ from Writer import *
 from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
 from SearchReplaceOp import *
+from CINReader import *
+from CINWriter import *
 from DPXReader import *
+from DPXWriter import *
 from InverseDistanceWeightedInterpolation import *
 
 if IECore.withTIFF() :

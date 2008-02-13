@@ -286,7 +286,8 @@ bool CINImageReader::open()
 		double film_gamma = 0.6;
 		int ref_black_val = 95;
 		int ref_white_val = 685;
-		double ref_mult = 0.002 / film_gamma;
+		double quantization_step = 0.002;
+		double ref_mult = quantization_step / film_gamma;
 		
 		// compute black offset
 		double black_offset = pow(10.0, (ref_black_val - ref_white_val) * ref_mult);
@@ -294,7 +295,7 @@ bool CINImageReader::open()
 		// standard lut
 		for(int i = 0; i < 1024; ++i)
 		{
-			float cvf = i <= ref_black_val ? 0.0 : (pow(10.0, (i - ref_white_val) * ref_mult) - black_offset) / (1.0 - black_offset);
+			float cvf = (pow(10.0, (i - ref_white_val) * ref_mult) - black_offset) / (1.0 - black_offset);
 			m_LUT[i] = cvf;
 		}
 
