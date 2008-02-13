@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -127,46 +127,66 @@ void EXRImageReader::readChannel(string name, ImagePrimitivePtr image, const Box
 	{
 		return;
 	}
-
-	// compute the data window to read
-	Box2i dw = dataWindow.isEmpty() ? m_header.dataWindow() : dataWindow;
-	image->setDataWindow(dw);
-
-	// honor the display window from the header
-	if (image->getDisplayWindow().isEmpty())
+	
+	try
 	{
-		image->setDisplayWindow(m_header.displayWindow());
+
+		// compute the data window to read
+		Box2i dw = dataWindow.isEmpty() ? m_header.dataWindow() : dataWindow;
+		image->setDataWindow(dw);
+
+		// honor the display window from the header
+		if (image->getDisplayWindow().isEmpty())
+		{
+			image->setDisplayWindow(m_header.displayWindow());
+		}
+
+		const ChannelList &channels = m_header.channels();
+		const Channel &channel = channels[name.c_str()];
+
+		// get the channel from our Image, compute the size of the channel type
+		// see ImfPixelType.h
+		switch (channel.type)
+		{
+
+		case UINT:  // unsigned int (32 bit)
+			readTypedChannel<unsigned int>(name, image, dw, channel);
+			break;
+
+		case HALF:  // half (16 bit floating point)
+			readTypedChannel<half>        (name, image, dw, channel);
+			break;
+
+		case FLOAT: // float (32 bit floating point)
+			readTypedChannel<float>       (name, image, dw, channel);
+			break;
+
+		default:
+			throw IOException( ( boost::format("EXRImageReader: Invalid data type for channel \"%s\"") % name ).str() );
+		}
+	
+	} 
+	catch ( Exception &e )
+	{
+		throw;
 	}
-
-	const ChannelList &channels = m_header.channels();
-	const Channel &channel = channels[name.c_str()];
-
-	// get the channel from our Image, compute the size of the channel type
-	// see ImfPixelType.h
-	switch (channel.type)
+	catch ( std::exception &e )
 	{
-
-	case UINT:  // unsigned int (32 bit)
-		readTypedChannel<unsigned int>(name, image, dw, channel);
-		break;
-
-	case HALF:  // half (16 bit floating point)
-		readTypedChannel<half>        (name, image, dw, channel);
-		break;
-
-	case FLOAT: // float (32 bit floating point)
-		readTypedChannel<float>       (name, image, dw, channel);
-		break;
-
-	default:
-		throw Exception(string("EXRImageReader::readChannel: channel '" + name + "' is of unknown type"));
+		throw IOException( ( boost::format("EXRImageReader: %s") % e.what() ).str() );
+	}
+	catch ( ... )
+	{
+		throw IOException( "EXRImageReader: Unexpected error" );
 	}
 }
 
+/// \todo pass channel name by reference
 template <typename T>
 void EXRImageReader::readTypedChannel(string name, ImagePrimitivePtr image,
                                       const Box2i & dataWindow, const Channel & channel)
 {
+	assert( image );
+	
 	intrusive_ptr<TypedData<vector<T> > > image_channel = image->template createChannel<T>(name);
 	vector<T> &ic = image_channel->writable();
 
@@ -229,7 +249,8 @@ bool EXRImageReader::open()
 	if (!m_inputFile || fileName() != m_inputFile->fileName())
 	{
 		delete m_inputFile;
-
+		m_inputFile = 0;
+		
 		valid = isOpenExrFile(fileName().c_str());
 		if (valid)
 		{
@@ -238,6 +259,5 @@ bool EXRImageReader::open()
 		}
 	}
 
-	//return true; // not good enough but matches previous behaviour
 	return valid;
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,84 +61,109 @@ EXRImageWriter::EXRImageWriter()
 EXRImageWriter::EXRImageWriter(ObjectPtr image, const string & fileName)
 		: ImageWriter("EXRImageWriter", "Serializes images to the OpenEXR HDR image format" )
 {
+	assert( m_objectParameter );
+	assert( m_fileNameParameter );
+		
 	m_objectParameter->setValue( image );
 	m_fileNameParameter->setTypedValue( fileName );
 }
 
 void EXRImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr image, const Box2i & dw)
 {
+	assert( image );
 
 	// create the header
 	int width  = 1 + dw.max.x - dw.min.x;
 	int height = 1 + dw.max.y - dw.min.y;
-
-	Header header(width, height, 1, Imath::V2f(0.0, 0.0), 1, INCREASING_Y, PIZ_COMPRESSION);
-	header.dataWindow() = dw;
-	header.displayWindow() = image->getDisplayWindow();
-
-	// create the framebuffer
-	FrameBuffer fb;
-
-	// add the channels into the header with the appropriate types
-	vector<string>::const_iterator i = names.begin();
-	while (i != names.end())
+	
+	try
 	{
+		Header header(width, height, 1, Imath::V2f(0.0, 0.0), 1, INCREASING_Y, PIZ_COMPRESSION);
+		header.dataWindow() = dw;
+		header.displayWindow() = image->getDisplayWindow();
 
-		const char *name = (*i).c_str();
+		// create the framebuffer
+		FrameBuffer fb;
 
-		// get the image channel
-		DataPtr channelp = image->variables.find(name)->second.data;
-
-		switch (channelp->typeId())
+		// add the channels into the header with the appropriate types
+		vector<string>::const_iterator i = names.begin();
+		for (vector<string>::const_iterator i = names.begin(); i != names.end(); ++i)
 		{
 
-		case FloatVectorDataTypeId:
-			writeTypedChannel<float>(name, image, dw,
-			                         static_pointer_cast<FloatVectorData>(channelp)->readable(),
-			                         FLOAT, header, fb);
-			break;
+			const char *name = (*i).c_str();
 
-		case UIntVectorDataTypeId:
-			writeTypedChannel<unsigned int>(name, image, dw,
-			                                static_pointer_cast<UIntVectorData>(channelp)->readable(),
-			                                UINT, header, fb);
-			break;
+			// get the image channel
+			PrimitiveVariableMap::const_iterator pit = image->variables.find(name);
+			if ( pit == image->variables.end() )
+			{
+				throw IOException( ( boost::format("EXRImageWriter: Could not find image channel \"%s\"") % name ).str() );
+			}
+			ConstDataPtr channelp = pit->second.data;
 
-		case HalfVectorDataTypeId:
-			writeTypedChannel<half>(name, image, dw,
-			                        static_pointer_cast<HalfVectorData>(channelp)->readable(),
-			                        HALF, header, fb);
-			break;
+			switch (channelp->typeId())
+			{
+			case FloatVectorDataTypeId:
+				writeTypedChannel<float>(name, image, dw,
+			                        	 static_pointer_cast<const FloatVectorData>(channelp)->readable(),
+			                        	 FLOAT, header, fb);
+				break;
 
-		default:
-			throw "invalid data type for EXR writer, channel type is: " +
-			Object::typeNameFromTypeId(channelp->typeId());
-			break;
+			case UIntVectorDataTypeId:
+				writeTypedChannel<unsigned int>(name, image, dw,
+			                                	static_pointer_cast<const UIntVectorData>(channelp)->readable(),
+			                                	UINT, header, fb);
+				break;
+
+			case HalfVectorDataTypeId:
+				writeTypedChannel<half>(name, image, dw,
+			                        	static_pointer_cast<const HalfVectorData>(channelp)->readable(),
+			                        	HALF, header, fb);
+				break;
+
+			default:
+				throw IOException( ( boost::format("EXRImageWriter: Invalid data type \"%s\" for channel \"%s\"") % channelp->typeName() % name ).str() );
+			}
 		}
 
-		++i;
+	
+		// create the output file, write, implicitly close
+		OutputFile out(fileName().c_str(), header);
+
+		out.setFrameBuffer(fb);
+		out.writePixels(height);
 	}
-
-	// create the output file, write, implicitly close
-	OutputFile out(fileName().c_str(), header);
-
-	out.setFrameBuffer(fb);
-	out.writePixels(height);
+	catch ( Exception &e )
+	{
+		throw;
+	} 
+	catch ( std::exception &e )
+	{
+		throw IOException( ( boost::format("EXRImageWriter: %s") % e.what() ).str() );
+	}
+	catch ( ... )
+	{
+		throw IOException( "EXRImageWriter: Unexpected error" );
+	}
 
 }
 
 template<typename T>
 void EXRImageWriter::writeTypedChannel(const char * name, ConstImagePrimitivePtr image, const Box2i & dw,
-                                       const vector<T> & channel, const Imf::PixelType TYPE, Header & header, FrameBuffer & fb)
+                                       const vector<T> & channel, const Imf::PixelType pixelType, Header & header, FrameBuffer & fb)
 {
+	assert( name );
+	
+	/// \todo Remove this unused parameter
+	(void) image;
+	
 	int width  = 1 + dw.max.x - dw.min.x;
 
 	// update the header
-	header.channels().insert(name, Channel(TYPE));
+	header.channels().insert( name, Channel(pixelType));
 
 	const int size = sizeof(T);
 
 	// update the framebuffer
 	char *offset = (char *) (&channel[0] - (dw.min.x + width * dw.min.y));
-	fb.insert(name, Slice(TYPE, offset, size, size * width));
+	fb.insert(name, Slice(pixelType, offset, size, size * width));
 }
