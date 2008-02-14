@@ -130,8 +130,7 @@ void TIFFImageWriter::stripEncode(tiff * tiff_image, char * image_buffer, int im
 	{
 		int tss = TIFFStripSize(tiff_image);
 		int remaining = image_buffer_size - offset;
-		int lc = TIFFWriteEncodedStrip(tiff_image, strip, image_buffer + offset,
-												 tss < remaining ? tss : remaining);
+		int lc = TIFFWriteEncodedStrip(tiff_image, strip, image_buffer + offset, tss < remaining ? tss : remaining);
 		offset += lc;
 	}
 }
@@ -206,6 +205,7 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	case 8:
 	{
 		unsigned char * v = encodeChannels<unsigned char>(image, names, dw);
+		assert( v );
 		stripEncode(tiff_image, (char *) v, bpc * width * height * spp, strips);
 		delete [] v;
 	}
@@ -216,6 +216,7 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 		/// \todo An unsigned short needn't be 16 bits long. Use typedefs from <stdint.h> instead.
 		BOOST_STATIC_ASSERT( sizeof( unsigned short ) == 2 );
 		unsigned short * v = encodeChannels<unsigned short>(image, names, dw);
+		assert( v );
 		stripEncode(tiff_image, (char *) v, bpc * width * height * spp, strips);
 		delete [] v;
 	}
@@ -226,6 +227,7 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 		/// \todo An unsigned int needn't be 32 bits long. Use typedefs from <stdint.h> instead.
 		BOOST_STATIC_ASSERT( sizeof( unsigned int ) == 4 );
 		unsigned int * v = encodeChannels<unsigned int>(image, names, dw);
+		assert( v );		
 		stripEncode(tiff_image, (char *) v, bpc * width * height * spp, strips);
 		delete [] v;
 	}
