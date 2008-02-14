@@ -1049,6 +1049,32 @@ class ImathEulerfTest( unittest.TestCase ) :
 		e = Eulerf()
 		self.assertEqual( repr(e), "Eulerf( 0, 0, 0 )" )
 		
+	def testSimpleXYZRotation(self):
+	
+		e = Eulerf( math.pi * 6, math.pi * 10, -math.pi * 20 )
+		ee = Eulerf( e )
+		t = Eulerf( 0, 0, 0 )
+		
+		es = Eulerf.simpleXYZRotation( e, t )
+		
+		# check that the simple rotations are in an appropriate range
+		for r in es :
+			self.assert_( math.fabs( r ) <= math.pi )
+		
+		# and that the original vector isn't modified in place
+		self.assertEqual( ee, e )
+		
+	def testNearestRotation(self):
+	
+		e = Eulerf( math.pi * 6, math.pi * 10, -math.pi * 20 )
+		ee = Eulerf( e )
+		t = Eulerf( 0, 0, 0 )
+		
+		en = Eulerf.nearestRotation( e, t )
+		
+		# check that the original vector isn't modified in place
+		self.assertEqual( ee, e )	
+		
 if __name__ == "__main__":
     unittest.main()   
 

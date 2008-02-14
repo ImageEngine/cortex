@@ -119,23 +119,24 @@ struct EulerHelper
 		return make_tuple( i, j, k );
 	}
 	
-	static Vec3<T> simpleXYZRotation( Vec3<T> &xyzRot, const Vec3<T> targetXyzRot )
+	static Vec3<T> simpleXYZRotation( Vec3<T> xyzRot, const Vec3<T> &targetXyzRot )
 	{
 		Euler<T>::simpleXYZRotation( xyzRot, targetXyzRot );
 		
 		return xyzRot;
 	}
 	
-	static Vec3<T> nearestRotation( Vec3<T> &xyzRot, const Vec3<T> &targetXyzRot, OrderType order )
+	static Vec3<T> nearestRotation( Vec3<T> xyzRot, const Vec3<T> &targetXyzRot, OrderType order )
 	{
 		Euler<T>::nearestRotation( xyzRot, targetXyzRot, order );
 		
 		return xyzRot;
 	}
 			
-	static Vec3<T> nearestRotation( Vec3<T> &xyzRot, const Vec3<T> &targetXyzRot )
+	static Vec3<T> nearestRotation( Vec3<T> xyzRot, const Vec3<T> &targetXyzRot )
 	{
-		return nearestRotation( xyzRot, targetXyzRot, (OrderType)(Euler<T>::XYZ) );
+		Euler<T>::nearestRotation( xyzRot, targetXyzRot, (OrderType)(Euler<T>::XYZ) );
+		return xyzRot;
 	}
 };
 
@@ -152,8 +153,8 @@ void bindEuler(const char *bindName)
 	void (Euler<T>::*extractM44)(const Matrix44<T>&) = &Euler<T>::extract;
 	void (Euler<T>::*extractQuat)(const Quat<T>&) = &Euler<T>::extract;
 	
-	Vec3<T> (*nearestRotation1)( Vec3<T> &, const Vec3<T> &, OrderType )= &EulerHelper<T>::nearestRotation;
-	Vec3<T> (*nearestRotation2)( Vec3<T> &, const Vec3<T> & )= &EulerHelper<T>::nearestRotation;	
+	Vec3<T> (*nearestRotation1)( Vec3<T>, const Vec3<T> &, OrderType )= &EulerHelper<T>::nearestRotation;
+	Vec3<T> (*nearestRotation2)( Vec3<T>, const Vec3<T> & )= &EulerHelper<T>::nearestRotation;	
 
 	object euler = class_< Euler<T>, bases< Vec3<T> > >(bindName)
 	
