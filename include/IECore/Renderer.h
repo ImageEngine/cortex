@@ -193,6 +193,7 @@ class Renderer : public RunTimeTyped
 		/// Renders some text.
 		virtual void text(const std::string &t, const float width = Imath::limits<float>::max()) = 0;
 		/// Renders an image.
+		/// \todo Clarify the intended use of dataWindow and displayWindow.
 		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders a mesh.
 		virtual void mesh( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds, const std::string &interpolation, const PrimitiveVariableMap &primVars ) = 0;
