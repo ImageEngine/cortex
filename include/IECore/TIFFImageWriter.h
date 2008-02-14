@@ -64,12 +64,13 @@ class TIFFImageWriter : public ImageWriter
 		static const WriterDescription<TIFFImageWriter> m_writerDescription;
 	
 		virtual void writeImage(std::vector<std::string> & names, ConstImagePrimitivePtr image,
-									const Imath::Box2i & dw);
+		                       const Imath::Box2i & dw);
 
 		/// encode channel data to RGB
+		/// \todo Replace use of array here, to prevent memory leaks when exception is thrown
 		template<typename T>
 		T * encodeChannels(ConstImagePrimitivePtr image, std::vector<std::string> & names,
-							 const Imath::Box2i &dw);
+		                   const Imath::Box2i &dw);
 	
 		/// encode the given buffer using the TIFF strip method
 		void stripEncode(tiff * tiff_image, char * image_buffer, int image_buffer_size, int strips);
@@ -78,7 +79,7 @@ class TIFFImageWriter : public ImageWriter
 		IntParameterPtr m_bitdepthParameter;
 		IntParameterPtr m_compressionParameter;
 
-	void constructParameters();
+		void constructParameters();
 };
 
 IE_CORE_DECLAREPTR(TIFFImageWriter);
