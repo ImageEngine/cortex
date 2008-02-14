@@ -62,7 +62,7 @@ PDCParticleWriter::PDCParticleWriter( ObjectPtr object, const std::string &fileN
 }
 
 template<class T, class E, unsigned int n>
-static void writeAttr( ofstream &oStream, intrusive_ptr<T> attr )
+static void writeAttr( ofstream &oStream, typename T::ConstPtr attr )
 {
 	if( bigEndian() )
 	{
@@ -71,7 +71,7 @@ static void writeAttr( ofstream &oStream, intrusive_ptr<T> attr )
 	}
 	else
 	{
-		intrusive_ptr<T> attrCopy = attr->copy();
+		typename T::Ptr attrCopy = attr->copy();
 		typename T::ValueType &v = attrCopy->writable();
 		E *data = (E *)&v[0];
 		for( size_t i=0; i<v.size() * n; i++ )
@@ -84,7 +84,7 @@ static void writeAttr( ofstream &oStream, intrusive_ptr<T> attr )
 }
 
 template<class T, class E, unsigned int n>
-static void writeSimpleAttr( ofstream &oStream, intrusive_ptr<T> attr )
+static void writeSimpleAttr( ofstream &oStream, typename T::ConstPtr attr )
 {
 	if( bigEndian() )
 	{

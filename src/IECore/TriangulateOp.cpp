@@ -100,9 +100,9 @@ struct TriangleDataRemapArgs
 template<typename T>
 struct TriangleDataRemap
 {
-	size_t operator() ( boost::intrusive_ptr<T> data, TriangleDataRemapArgs args )
+	size_t operator() ( typename T::Ptr data, TriangleDataRemapArgs args )
 	{
-		boost::intrusive_ptr<const T> otherData = runTimeCast<const T>( args.m_other );
+		typename T::ConstPtr otherData = runTimeCast<const T>( args.m_other );
 		assert( otherData );
 
 		data->writable().clear();

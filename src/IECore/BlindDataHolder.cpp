@@ -100,7 +100,7 @@ bool BlindDataHolder::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	boost::intrusive_ptr<const BlindDataHolder> tOther = boost::static_pointer_cast<const BlindDataHolder>( other );
+	BlindDataHolder::ConstPtr tOther = boost::static_pointer_cast<const BlindDataHolder>( other );
 	
 	return m_data->isEqualTo( tOther->m_data );
 }

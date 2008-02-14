@@ -113,7 +113,7 @@ struct MultiplyArgs
 template< typename U, typename Enable = void >
 struct MultiplyFunctor
 {
-	void operator() ( boost::intrusive_ptr<U> data, MultiplyArgs args )
+	void operator() ( typename U::Ptr data, MultiplyArgs args )
 	{
 		// empty functor.
 	}
@@ -123,7 +123,7 @@ template< typename U >
 struct MultiplyFunctor< U, typename enable_if< or_< is_same< U, V3fVectorData >, is_same< U, V3dVectorData > > >::type >
 {
 	template< typename T >
-	void multiply( boost::intrusive_ptr<U> data, const T &matrix )
+	void multiply( typename U::Ptr data, const T &matrix )
 	{
 		for ( typename U::ValueType::iterator it = data->writable().begin(); it != data->writable().end(); it++ )
 		{
@@ -132,12 +132,12 @@ struct MultiplyFunctor< U, typename enable_if< or_< is_same< U, V3fVectorData >,
 	}
 
 	template< typename T>
-	void multiply( boost::intrusive_ptr<U> data, const TransformationMatrix<T> &transform )
+	void multiply( typename U::Ptr data, const TransformationMatrix<T> &transform )
 	{
 		multiply( data, transform.transform() );
 	}
 
-	void operator() ( boost::intrusive_ptr<U> data, MultiplyArgs args )
+	void operator() ( typename U::Ptr data, MultiplyArgs args )
 	{
 		ObjectPtr matrixObj = args.operands->members().find( "matrix" )->second;
 		switch ( matrixObj->typeId() )

@@ -245,7 +245,7 @@ void PDCParticleReader::readElements( T *buffer, std::streampos pos, unsigned lo
 }
 
 template<typename T, typename F>
-boost::intrusive_ptr<T> PDCParticleReader::filterAttr( boost::intrusive_ptr<F> attr, float percentage )
+typename T::Ptr PDCParticleReader::filterAttr( typename F::ConstPtr attr, float percentage )
 {
 	if( percentage < 100.0f )
 	{
@@ -253,7 +253,7 @@ boost::intrusive_ptr<T> PDCParticleReader::filterAttr( boost::intrusive_ptr<F> a
 		if( idAttr )
 		{	
 			// percentage filtering (and type conversion if necessary)
-			boost::intrusive_ptr<T> result( new T );
+			typename T::Ptr result( new T );
 			const typename F::ValueType &in = attr->readable();
 			typename T::ValueType &out = result->writable();
 			const vector<double> &ids = idAttr->readable();
@@ -280,7 +280,7 @@ boost::intrusive_ptr<T> PDCParticleReader::filterAttr( boost::intrusive_ptr<F> a
 	if( T::staticTypeId()!=F::staticTypeId() )
 	{
 		// type conversion only
-		boost::intrusive_ptr<T> result( new T );
+		typename T::Ptr result( new T );
 		const typename F::ValueType &in = attr->readable();
 		typename T::ValueType &out = result->writable();
 		out.resize( in.size() );
@@ -289,7 +289,7 @@ boost::intrusive_ptr<T> PDCParticleReader::filterAttr( boost::intrusive_ptr<F> a
 	}
 	
 	// no filtering of any sort needed
-	return boost::intrusive_ptr<T>( (T *)attr.get() );
+	return typename T::Ptr( (T *)attr.get() );
 }
 
 DataPtr PDCParticleReader::readAttribute( const std::string &name )

@@ -154,14 +154,14 @@ T NumericParameter<T>::maxValue() const
 template<typename T>
 T NumericParameter<T>::numericDefaultValue() const
 {
-	intrusive_ptr<const TypedData<T> > v = static_pointer_cast<const TypedData<T> >( defaultValue() );
+	typename TypedData<T>::ConstPtr v = static_pointer_cast<const TypedData<T> >( defaultValue() );
 	return v->readable();
 }
 
 template<typename T>
 T NumericParameter<T>::getNumericValue() const
 {
-	intrusive_ptr<const TypedData<T> > v = runTimeCast<const TypedData<T> >( getValidatedValue() );
+	typename TypedData<T>::ConstPtr v = runTimeCast<const TypedData<T> >( getValidatedValue() );
 	if (!v)
 	{
 		throw Exception( string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"" );

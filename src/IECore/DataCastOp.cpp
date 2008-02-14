@@ -117,10 +117,10 @@ struct CastRawData
 };
 
 template< typename S, typename T >
-static intrusive_ptr< T > 
-castToData( DataPtr array )
+static typename T::Ptr
+castToData( ConstDataPtr array )
 {
-	intrusive_ptr< S > dataArray = static_pointer_cast< S >( array );
+	typename S::ConstPtr dataArray = static_pointer_cast< const S >( array );
 	const typename S::BaseType *source = dataArray->baseReadable();
 	unsigned sourceSize = dataArray->baseSize();
 
@@ -129,7 +129,7 @@ castToData( DataPtr array )
 		throw Exception( "Size mismatch on cast operation!" );
 	}
 
-	intrusive_ptr< T > resultT = new T;
+	typename T::Ptr resultT = new T;
 
 	typename T::BaseType *target = resultT->baseWritable();
 
@@ -138,10 +138,10 @@ castToData( DataPtr array )
 }
 
 template< typename S, typename T >
-static intrusive_ptr< T > 
+static typename T::Ptr
 castToVectorData( DataPtr array )
 {
-	intrusive_ptr< S > dataArray = static_pointer_cast< S >( array );
+	typename S::ConstPtr dataArray = static_pointer_cast< const S >( array );
 	const typename S::BaseType *source = dataArray->baseReadable();
 	unsigned sourceSize = dataArray->baseSize();
 	unsigned targetItemSize = ( sizeof( typename T::ValueType::value_type ) / sizeof( typename T::BaseType ) );
@@ -151,7 +151,7 @@ castToVectorData( DataPtr array )
 		throw Exception( "Size mismatch on cast operation!" );
 	}
 
-	intrusive_ptr< T > resultT = new T;
+	typename T::Ptr resultT = new T;
 	resultT->writable().resize( sourceSize / targetItemSize );
 	typename T::BaseType *target = resultT->baseWritable();
 	std::transform( source, source + sourceSize, target, CastRawData< typename S::BaseType, typename T::BaseType >() );

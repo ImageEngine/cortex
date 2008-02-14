@@ -106,7 +106,7 @@ bool CompoundObject::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	boost::intrusive_ptr<const CompoundObject> tOther = boost::static_pointer_cast<const CompoundObject>( other );
+	CompoundObject::ConstPtr tOther = boost::static_pointer_cast<const CompoundObject>( other );
 	if( m_members.size()!=tOther->m_members.size() )
 	{
 		return false;
