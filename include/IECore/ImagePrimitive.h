@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,6 +50,7 @@ namespace IECore
 /// ImagePrimitive represents an axis-aligned collection of raster data in the form of channels.
 /// \todo Implement the bound() method.
 /// \bug The bound() method is not implemented.
+/// \todo Document the meaning of data and display windows and the use of primvars as channels.
 class ImagePrimitive : public Primitive
 {	  
 
@@ -68,43 +69,59 @@ class ImagePrimitive : public Primitive
 		/// construct an ImagePrimitive with the given data and display window dimensions
 		ImagePrimitive(Imath::Box2i datawindow, Imath::Box2i displaywindow);
 
-		/// return the image data window
-		const Imath::Box2i & getDataWindow() const;
+		/// Returns the data window.
+		const Imath::Box2i &getDataWindow() const;
 	
-		/// get the data window
-		void setDataWindow(const Imath::Box2i & dw);
+		/// Sets the data window - note that this doesn't modify the contents of primitive variables (channels)
+		/// at all - it is the callers responsibilty to keep any data valid.
+		void setDataWindow( const Imath::Box2i &dw );
 	
-		/// return the image display window
-		const Imath::Box2i & getDisplayWindow() const;
+		/// Returns the display window.
+		const Imath::Box2i &getDisplayWindow() const;
 	
-		/// set the display window
-		void setDisplayWindow(const Imath::Box2i & dw);
+		/// Sets the display window.
+		/// \todo Throw on empty windows
+		void setDisplayWindow( const Imath::Box2i &dw );
 	
 		/// give the data window x origin
+		/// \deprecated It's unclear whether this should reference the data window or display window.
+		/// Just use those windows directly instead.
 		const int x() const;
 	
 		/// compute the data window y origin
+		/// \deprecated It's unclear whether this should reference the data window or display window.
+		/// Just use those windows directly instead.
 		const int y() const;
 	
 		/// compute the data window width
+		/// \deprecated It's unclear whether this should reference the data window or display window.
+		/// Just use those windows directly instead.
 		const int width() const;
 	
 		/// compute the data window height
+		/// \deprecated It's unclear whether this should reference the data window or display window.
+		/// Just use those windows directly instead.
 		const int height() const;
 	
 		/// return the data window area
+		/// \deprecated It's unclear whether this should reference the data window or display window.
+		/// Just use those windows directly instead.
 		const int area() const;
 	
-		/// returns 2-d image size for Vertex, Varying, and FaceVarying Interpolation, 1 otherwise
+		/// Returns 2-d image size for Vertex, Varying, and FaceVarying Interpolation, otherwise 1.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation );
 	
-		/// render the image
+		/// Renders the image.
 		virtual void render(RendererPtr renderer);
 	
-		/// place the channel names for this image into the given vector
+		/// Places the channel names for this image into the given vector
+		/// \bug this just copies the primitive variable names - it should also check that
+		/// the number of elements and interpolation makes the primvars suitable for
+		/// use as channels.
 		void channelNames(std::vector<std::string> & names) const;
 	
-		/// create a channel
+		/// Convenience function to create a channel - this simply creates and adds a PrimitiveVariable of the appropriate
+		/// size and returns a pointer to the data within it.
 		template<typename T>
 		boost::intrusive_ptr<TypedData<std::vector<T> > > createChannel(std::string name);
 		
