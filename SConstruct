@@ -831,7 +831,7 @@ ieCoreGLMajorVersion = 0
 ieCoreGLMinorVersion = 6
 ieCoreGLPatchVersion = 0
 
-if env["WITH_GL"] :
+if env["WITH_GL"] and doConfigure :
 
 	glEnvSets = {
 		"IECORE_NAME" : "IECoreGL",
