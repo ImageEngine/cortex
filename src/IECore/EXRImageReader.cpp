@@ -130,7 +130,6 @@ void EXRImageReader::readChannel(string name, ImagePrimitivePtr image, const Box
 	
 	try
 	{
-
 		// compute the data window to read
 		Box2i dw = dataWindow.isEmpty() ? m_header.dataWindow() : dataWindow;
 		image->setDataWindow(dw);
@@ -183,23 +182,23 @@ void EXRImageReader::readChannel(string name, ImagePrimitivePtr image, const Box
 /// \todo pass channel name by reference
 template <typename T>
 void EXRImageReader::readTypedChannel(string name, ImagePrimitivePtr image,
-                                      const Box2i & dataWindow, const Channel & channel)
+                                      const Box2i &dataWindow, const Channel & channel)
 {
 	assert( image );
 	
-	intrusive_ptr<TypedData<vector<T> > > image_channel = image->template createChannel<T>(name);
-	vector<T> &ic = image_channel->writable();
+	typename TypedData<vector<T> >::Ptr imageChannelData = image->template createChannel<T>(name);
+	vector<T> &imageChannel = imageChannelData->writable();
 
 	// compute the size of the sample values, the stride, and the width
 	int size = sizeof(T);
 	int width = 1 + dataWindow.max.x - dataWindow.min.x;
 
 	Box2i dw = m_header.dataWindow();
-	int datawidth = 1 + dw.max.x - dw.min.x;
+	int dataWidth = 1 + dw.max.x - dw.min.x;
 
 	// copy cropped scanlines into the buffer
 	vector<T> scanline;
-	scanline.resize(datawidth);
+	scanline.resize(dataWidth);
 
 	// determine the image data window
 	Box2i idw = dataWindow.isEmpty() ? dw : dataWindow;
@@ -207,25 +206,24 @@ void EXRImageReader::readTypedChannel(string name, ImagePrimitivePtr image,
 	image->setDisplayWindow(idw);
 
 	// compute read box
-	Box2i readbox = intersection(dw, idw);
+	Box2i readBox = intersection(dw, idw);
 
 	// read as scanlines
 
 	// x-shift for the ImagePrimitive array
-	int dx = readbox.min.x - dataWindow.min.x;
+	int dx = readBox.min.x - dataWindow.min.x;
 
 	// y-shift for the ImagePrimitive array
-	int cl = readbox.min.y - dataWindow.min.y;
+	int cl = readBox.min.y - dataWindow.min.y;
 
-	int readWidth = 1 + readbox.max.x - readbox.min.x;
+	int readWidth = 1 + readBox.max.x - readBox.min.x;
 
-	for (int sl = readbox.min.y; sl <= readbox.max.y; ++sl, ++cl)
+	for (int sl = readBox.min.y; sl <= readBox.max.y; ++sl, ++cl)
 	{
-
 		FrameBuffer fb;
 
-		char * scanlinestart = (char *) (&scanline[0] - (dw.min.x + sl*datawidth));
-		fb.insert(name.c_str(), Slice(channel.type, scanlinestart, size, size * datawidth));
+		char * scanlineStart = (char *) (&scanline[0] - (dw.min.x + sl*dataWidth));
+		fb.insert(name.c_str(), Slice(channel.type, scanlineStart, size, size * dataWidth));
 
 		// read the line from the input file
 		m_inputFile->setFrameBuffer(fb);
@@ -237,7 +235,7 @@ void EXRImageReader::readTypedChannel(string name, ImagePrimitivePtr image,
 		// i varies over the intersection of the datawindow x-range and the image x-range
 		for (int i = 0; i < readWidth; ++i, ++ini)
 		{
-			ic[ini] = scanline[i];
+			imageChannel[ini] = scanline[i];
 		}
 	}
 }

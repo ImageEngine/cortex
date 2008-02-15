@@ -121,16 +121,16 @@ TIFFImageWriter::~TIFFImageWriter()
 {
 }
 
-void TIFFImageWriter::stripEncode(tiff * tiff_image, char * image_buffer, int image_buffer_size, int strips)
+void TIFFImageWriter::stripEncode(tiff * tiffImage, char * imageBuffer, int imageBufferSize, int strips)
 {	
 	// write the information to the file
 	int offset = 0;
 
 	for(int strip = 0; strip < strips; ++strip)
 	{
-		int tss = TIFFStripSize(tiff_image);
-		int remaining = image_buffer_size - offset;
-		int lc = TIFFWriteEncodedStrip(tiff_image, strip, image_buffer + offset, tss < remaining ? tss : remaining);
+		int tss = TIFFStripSize(tiffImage);
+		int remaining = imageBufferSize - offset;
+		int lc = TIFFWriteEncodedStrip(tiffImage, strip, imageBuffer + offset, tss < remaining ? tss : remaining);
 		offset += lc;
 	}
 }
@@ -141,8 +141,8 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	ScopedTIFFExceptionTranslator errorHandler( );
 
 	// create the tiff file
-	TIFF *tiff_image;
-	if((tiff_image = TIFFOpen(fileName().c_str(), "w")) == NULL)
+	TIFF *tiffImage;
+	if((tiffImage = TIFFOpen(fileName().c_str(), "w")) == NULL)
 	{
 		throw IOException("Could not open '" + fileName() + "' for writing.");
 	}
@@ -158,7 +158,7 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	/// handle these issues a bit better and perhaps more explicitly here.  also, we should probably
 	/// warn the user in cases where parameter settings are not permitted (eg 16 bit jpeg)
 	int compression = parameters()->parameter<IntParameter>("compression")->getNumericValue();
-	TIFFSetField(tiff_image, TIFFTAG_COMPRESSION, compression);
+	TIFFSetField(tiffImage, TIFFTAG_COMPRESSION, compression);
 
 	// read the bitdepth parameter, default to 16 bits
 	int bits = compression == COMPRESSION_JPEG ? 8 : parameters()->parameter<IntParameter>("bitdepth")->getNumericValue();	
@@ -171,31 +171,31 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	int bpc = bps / 8;
 
 	// number of strips to write.  TIFF's JPEG compression requires rps to be a multiple of 8
-	int rows_per_strip = 8;
+	int rowsPerStrip = 8;
 	
 	// now properly compute # of strips
-	int strips = height / rows_per_strip + (height % rows_per_strip > 0 ? 1 : 0);
+	int strips = height / rowsPerStrip + (height % rowsPerStrip > 0 ? 1 : 0);
 	
 	// set the basic values
-	TIFFSetField(tiff_image, TIFFTAG_IMAGEWIDTH, width);
-	TIFFSetField(tiff_image, TIFFTAG_IMAGELENGTH, height);
-	TIFFSetField(tiff_image, TIFFTAG_BITSPERSAMPLE, bps);
-	TIFFSetField(tiff_image, TIFFTAG_SAMPLESPERPIXEL, spp);
-	TIFFSetField(tiff_image, TIFFTAG_ROWSPERSTRIP, rows_per_strip);
+	TIFFSetField(tiffImage, TIFFTAG_IMAGEWIDTH, width);
+	TIFFSetField(tiffImage, TIFFTAG_IMAGELENGTH, height);
+	TIFFSetField(tiffImage, TIFFTAG_BITSPERSAMPLE, bps);
+	TIFFSetField(tiffImage, TIFFTAG_SAMPLESPERPIXEL, spp);
+	TIFFSetField(tiffImage, TIFFTAG_ROWSPERSTRIP, rowsPerStrip);
 	
-	TIFFSetField(tiff_image, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-	TIFFSetField(tiff_image, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
-	TIFFSetField(tiff_image, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+	TIFFSetField(tiffImage, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+	TIFFSetField(tiffImage, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
+	TIFFSetField(tiffImage, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
 	/// \todo output float tiffs if desired
-	TIFFSetField(tiff_image, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+	TIFFSetField(tiffImage, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
 
 	//PLANARCONFIG_CONTIG    (pixel interlaced)
 	//PLANARCONFIG_SEPARATE  (channel-interleave)
 	
-	TIFFSetField(tiff_image, TIFFTAG_XRESOLUTION, 1);
-	TIFFSetField(tiff_image, TIFFTAG_YRESOLUTION, 1);
-	TIFFSetField(tiff_image, TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE);
+	TIFFSetField(tiffImage, TIFFTAG_XRESOLUTION, 1);
+	TIFFSetField(tiffImage, TIFFTAG_YRESOLUTION, 1);
+	TIFFSetField(tiffImage, TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE);
 
 	//
 	// encode
@@ -206,7 +206,7 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	{
 		unsigned char * v = encodeChannels<unsigned char>(image, names, dw);
 		assert( v );
-		stripEncode(tiff_image, (char *) v, bpc * width * height * spp, strips);
+		stripEncode(tiffImage, (char *) v, bpc * width * height * spp, strips);
 		delete [] v;
 	}
 	break;
@@ -217,7 +217,7 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 		BOOST_STATIC_ASSERT( sizeof( unsigned short ) == 2 );
 		unsigned short * v = encodeChannels<unsigned short>(image, names, dw);
 		assert( v );
-		stripEncode(tiff_image, (char *) v, bpc * width * height * spp, strips);
+		stripEncode(tiffImage, (char *) v, bpc * width * height * spp, strips);
 		delete [] v;
 	}
 	break;
@@ -228,7 +228,7 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 		BOOST_STATIC_ASSERT( sizeof( unsigned int ) == 4 );
 		unsigned int * v = encodeChannels<unsigned int>(image, names, dw);
 		assert( v );		
-		stripEncode(tiff_image, (char *) v, bpc * width * height * spp, strips);
+		stripEncode(tiffImage, (char *) v, bpc * width * height * spp, strips);
 		delete [] v;
 	}
 	break;
@@ -236,6 +236,6 @@ void TIFFImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr 
 	}
 	
 	// close the file
-	TIFFClose(tiff_image);
-	tiff_image = 0;	
+	TIFFClose(tiffImage);
+	tiffImage = 0;	
 }
