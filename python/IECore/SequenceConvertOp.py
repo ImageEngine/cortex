@@ -83,11 +83,17 @@ class SequenceConvertOp( Op ) :
 		dst = src.copy()
 		dst.fileName = operands.dst.value
 
-		# \todo compare extensions, if extensions match, simply copy			
-		# if extensions don't match, read and write
-		for (sf, df) in zip(src.fileNames(), dst.fileNames()):
-			img = Reader.create(sf).read()
-			Writer.create(img, df).write()
+		# compare extensions, if extensions match, simply copy
+		if src.fileName.split('.')[-1] == dst.fileName.split('.')[-1]:
+			cpOp = SequenceCpOp()
+			cpOp['src'] = operands.src
+			cpOp['dst'] = operands.dst
+			cpOp()
+		else:
+			# if extensions don't match, read and write
+			for (sf, df) in zip(src.fileNames(), dst.fileNames()):
+				img = Reader.create(sf).read()
+				Writer.create(img, df).write()
 			
 		return StringData(dst.fileName)
 

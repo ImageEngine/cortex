@@ -42,20 +42,22 @@ import IECore
 # a series of searchpaths. It is expected that these files will then make appropriate
 # calls to objects passed in via the specified localsDict.
 # \ingroup python
-def loadConfig( searchPaths, localsDict ) :
+def loadConfig( searchPaths, localsDict, raiseExceptions = False ) :
 
 	paths = searchPaths.paths
 	paths.reverse()
 	for path in paths :
-	
 		pyExtTest = re.compile( "\.py$" )
 		for dirPath, dirNames, fileNames in os.walk( path ) :
 			for fileName in filter( pyExtTest.search, fileNames ) :
 				fullFileName = os.path.join( dirPath, fileName )
-				try :
+				if raiseExceptions:
 					execfile( fullFileName, globals(), localsDict )
-				except Exception, m :
-					IECore.debugException("loading config file")
-					IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\"." % ( fullFileName, m ) )
+				else:
+					try :
+						execfile( fullFileName, globals(), localsDict )
+					except Exception, m :
+						IECore.debugException("loading config file")
+						IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\"." % ( fullFileName, m ) )
 
 loadConfig( IECore.SearchPath( os.environ.get( "IECORE_CONFIG_PATHS", "" ), ":" ), { "IECore" : IECore } )
