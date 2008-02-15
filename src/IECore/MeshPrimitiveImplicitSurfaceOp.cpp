@@ -63,14 +63,14 @@ MeshPrimitiveImplicitSurfaceOp::MeshPrimitiveImplicitSurfaceOp() : MeshPrimitive
 	m_boundExtendParameter = new FloatParameter(
 		"boundExtend",
 		"The bound's radius, even if calculated by automatic bounding, is increased by this amount.",
-		0.0,
+		0.05,
 		0.0
 	);
 	
 	m_automaticBoundParameter = new BoolParameter(
 		"automaticBound",
 		"Enable to calculate the bound automatically. Disable to specify an explicit bound.",
-		false
+		true
 	);		
 	
 	m_boundParameter = new Box3fParameter(
@@ -96,7 +96,7 @@ MeshPrimitiveImplicitSurfaceOp::MeshPrimitiveImplicitSurfaceOp() : MeshPrimitive
 	m_divisionSizeParameter = new V3fParameter(
 		"divisionSize",
 		"The dimensions of each element in the grid",
-		V3f( 1, 1, 1 )
+		V3f( 10, 10, 10 )
 	);	
 		
 	parameters()->addParameter( m_thresholdParameter );
