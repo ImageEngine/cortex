@@ -38,6 +38,29 @@ import maya.cmds as cmds
 import IECoreMaya
 import IECore
 
+def __getFloat3PlugValue(plug):
+
+	# Retrieve the value as an MObject
+	object = plug.asMObject()
+
+	# Convert the MObject to a float3
+	numDataFn = OpenMaya.MFnNumericData(object)
+	xParam = OpenMaya.MScriptUtil()
+	xParam.createFromDouble(0.0)
+	xPtr = xParam.asFloatPtr()
+	yParam = OpenMaya.MScriptUtil()
+	yParam.createFromDouble(0.0)
+	yPtr = yParam.asFloatPtr()
+	zParam = OpenMaya.MScriptUtil()
+	zParam.createFromDouble(0.0)
+	zPtr = zParam.asFloatPtr()
+	numDataFn.getData3Float(xPtr, yPtr, zPtr)
+	return OpenMaya.MFloatVector(
+		OpenMaya.MScriptUtil(xPtr).asFloat(),
+		OpenMaya.MScriptUtil(yPtr).asFloat(),
+		OpenMaya.MScriptUtil(zPtr).asFloat()
+	)
+
 def __hasTweaks( meshDagPath ):
 
 	fnDN = OpenMaya.MFnDependencyNode( meshDagPath.node() )
@@ -54,7 +77,7 @@ def __hasTweaks( meshDagPath ):
 		for i in range(numElements):
 			tweak = tweakPlug.elementByPhysicalIndex(i)
 			if not tweak.isNull():
-				tweakData = getFloat3PlugValue(tweak)
+				tweakData = __getFloat3PlugValue(tweak)
 				if 0 != tweakData.x or 0 != tweakData.y or 0 != tweakData.z:
 					return True
 					
@@ -109,7 +132,7 @@ def __processUpstreamNode(data, meshDagPath, dgModifier):
 		fDagModifier.deleteNode(data.upstreamNodeTransform)
 		fDagModifier.doIt()
 	
-def __processTweaks(data, dgModifier):
+def __processTweaks(data, dgModifier, modifierNode):
 
 	tweakIndexArray = OpenMaya.MIntArray()
 
@@ -122,7 +145,7 @@ def __processTweaks(data, dgModifier):
 	tweakDstConnectionPlugArray = OpenMaya.MPlugArray()
 	tempPlugArray = OpenMaya.MPlugArray()
 
-	tweakNode = self.dgModifier.createNode("polyTweak")
+	tweakNode = dgModifier.createNode("polyTweak")
 	fnDN.setObject(tweakNode)
 	tweakNodeSrcAttr = fnDN.attribute("output")
 	tweakNodeDestAttr = fnDN.attribute("inputPolymesh")
@@ -247,7 +270,7 @@ def __connectNodes( modifierNode, meshDagPath ):
 	__processUpstreamNode(data, meshDagPath, dgModifier)
 
 	if __hasTweaks( meshDagPath ):	
-		__processTweaks(data, dgModifier)
+		__processTweaks(data, dgModifier, modifierNode)
 	else:
 		modifierDestPlug = OpenMaya.MPlug(modifierNode, data.modifierNodeDestAttr)
 		dgModifier.connect(data.upstreamNodeSrcPlug, modifierDestPlug)			
@@ -299,8 +322,7 @@ def create( meshDagPath, className, classVersion, **kw):
 		sel.getDagPath( 0,  meshDagPath)
 		meshDagPath.extendToShape()
 	
-	constructionHistoryEnabled = 0
-	OpenMaya.MGlobal.executeCommand("constructionHistory -q -tgl", constructionHistoryEnabled)
+	constructionHistoryEnabled = IECoreMaya.mel("constructionHistory -q -tgl").value
 
 	if not __hasHistory( meshDagPath ) and constructionHistoryEnabled == 0:
 	
