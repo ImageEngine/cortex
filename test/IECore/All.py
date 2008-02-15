@@ -124,6 +124,7 @@ from CINWriter import *
 from DPXReader import *
 from DPXWriter import *
 from InverseDistanceWeightedInterpolation import *
+from ImageCropOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *

@@ -239,6 +239,7 @@ void bindTypeId()
 		.value("SpherePrimitive", SpherePrimitiveTypeId)
 		.value("Converter", ConverterTypeId)		
 		.value("ToCoreConverter", ToCoreConverterTypeId)
+		.value("ImageCropOp", ImageCropOpTypeId)
 	;
 }
 

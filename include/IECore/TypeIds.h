@@ -238,6 +238,7 @@ enum TypeId
 	SpherePrimitiveTypeId = 195,
 	ConverterTypeId = 196,
 	ToCoreConverterTypeId = 197,
+	ImageCropOpTypeId = 198,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

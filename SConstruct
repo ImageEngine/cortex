@@ -712,6 +712,7 @@ NoCache( coreTest )
 coreTestEnv.Alias( "testCore", coreTest )
 
 corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePythonModule, pythonExecutable + " $TEST_CORE_SCRIPT" )
+coreTestEnv.Depends( corePythonTest, glob.glob( "test/IECore/*.py" ) )
 NoCache( corePythonTest )
 coreTestEnv.Alias( "testCorePython", corePythonTest )
 
