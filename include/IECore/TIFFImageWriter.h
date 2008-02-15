@@ -73,7 +73,7 @@ class TIFFImageWriter : public ImageWriter
 		                   const Imath::Box2i &dw);
 	
 		/// encode the given buffer using the TIFF strip method
-		void stripEncode(tiff * tiff_image, char * image_buffer, int image_buffer_size, int strips);
+		void stripEncode(tiff * tiffImage, char * imageBuffer, int imageBufferSize, int strips);
 	
 		/// output bitdepth parameter
 		IntParameterPtr m_bitdepthParameter;
