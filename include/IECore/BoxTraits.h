@@ -55,7 +55,6 @@ struct BoxTypeTraits
 
 /// The BoxTraits struct provides a means of using different box classes within templated code. The default
 /// implementation is compatible with the Imath library's Box classes.
-/// \todo Separate this out into BoxTraits and BoxOps
 template<typename T>
 struct BoxTraits
 {
@@ -67,74 +66,97 @@ struct BoxTraits
 	{
 		return T( min, max );
 	}
+	
+	/// Create an empty box
+	static T create()
+	{
+		return T();
+	}
 
 	/// Return the box's minimum corner point
-	static BaseType min( const T& box )
+	static BaseType min( const T &box )
 	{
 		return box.min;
 	}
 
 	/// Return the box's maximum corner point	
-	static BaseType max( const T& box )
+	static BaseType max( const T &box )
 	{
 		return box.max;
-	}	
-	
-	/// Return the dimensions of the box
-	static BaseType size( const T& box )
-	{
-		return box.size();
 	}
 	
-	/// Return the center point of the box
-	static BaseType center( const T& box )
+	static void setMin( T &box, const BaseType &p )
 	{
-		return box.center();
-	}	
+		box.min = p;
+	}
+
+	static void setMax( T &box, const BaseType &p )
+	{
+		box.max = p;
+	}		
 	
 	/// Return true if the box is considered to be empty
-	static bool isEmpty( const T& box )
+	static bool isEmpty( const T &box )
 	{
 		return box.isEmpty();
 	}
 	
 	/// Modify the box such that it is considered to be empty
-	static void makeEmpty( T& box )
+	static void makeEmpty( T &box )
 	{
 		box.makeEmpty();
 		
 		assert( isEmpty(box) );
 	}
 
+	/// Return the dimensions of the box
+	/// \deprecated Use boxSize method from BoxOps instead
+	static BaseType size( const T &box )
+	{
+		return box.size();
+	}
+	
+	/// Return the center point of the box
+	/// \deprecated	Use boxCenter method from BoxOps instead
+	static BaseType center( const T &box )
+	{
+		return box.center();
+	}			
+
 	/// Enlarge the box to include the given point
-	static void extendBy( T& box, const BaseType& p )
+	/// \deprecated	Use boxExtend method from BoxOps instead
+	static void extendBy( T &box, const BaseType &p )
 	{
 		box.extendBy( p );
 		
 		assert( intersects( box, p ) );
 	}
 
-	/// Enlarge the box to include the given box	
-	static void extendBy( T& box, const T& box2 )
+	/// Enlarge the box to include the given box
+	/// \deprecated	Use boxExtend method from BoxOps instead	
+	static void extendBy( T &box, const T &box2 )
 	{
 		box.extendBy( box2 );
 		
 		assert( intersects( box, box2 ) );
 	}
 		
-	/// Return true if the box contains the given box	
-	static bool intersects( const T& box, const BaseType& p )
+	/// Return true if the box contains the given box
+	/// \deprecated	Use boxIntersects method from BoxOps instead	
+	static bool intersects( const T &box, const BaseType &p )
 	{
 		return box.intersects( p );
 	}
 	
 	/// Return true if the two boxes intersect
-	static bool intersects( const T& box, const T& box2 )
+	/// \deprecated	Use boxIntersects method from BoxOps instead	
+	static bool intersects( const T &box, const T &box2 )
 	{
 		assert( box.intersects( box2 ) == box2.intersects( box ) );
 		
 		return box.intersects( box2 );
 	}
+
 };
 
 template<>

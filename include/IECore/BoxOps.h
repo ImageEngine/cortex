@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,32 +32,54 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-//! \file BoxOperators.h
-/// Defines operators which ideally would be already defined in ImathBox.h
+//! \file BoxOps.h
+/// Defines useful functions for dealing with any types which define an
+/// appropriate BoxTraits struct. Although it's much prettier to use
+/// the built in operators and members for a typical box implementation, it's not
+/// particularly practical in much templated code as different box types
+/// define different syntax or semantics for such operations. These functions
+/// give less intuitive syntax but are compatible with any classes for which
+/// a valid BoxTraits specialisation exists.
 
-#ifndef IE_CORE_BOXOPERATORS_H
-#define IE_CORE_BOXOPERATORS_H
+#ifndef IE_CORE_BOXOPS_H
+#define IE_CORE_BOXOPS_H
 
-#include "OpenEXR/ImathBox.h"
-#include <iostream>
+#include <IECore/BoxTraits.h>
+#include <IECore/VectorTraits.h>
 
-namespace IECore {
+namespace IECore
+{
 
-/// Streaming for Imath::Box types
-template<class T>
-std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj );
+/// Returns a vector representing the length of each side of the box
+template<typename T>
+inline typename BoxTraits<T>::BaseType boxSize( const T &box );
 
-/// calculate the intersection of two commensurable boxes
-/// \deprecated
-template <class T>
-Imath::Box<T> intersection(const Imath::Box<T> & a, const Imath::Box<T> & b);
+/// Returns the center point of the box
+template<typename T>
+inline typename BoxTraits<T>::BaseType boxCenter( const T &box );
 
-/// compute integer width of Box2i
-/// \deprecated
-int boxwidth(const Imath::Box2i & b);
-	
+/// Extends the box by the given point
+template<typename T>
+inline void boxExtend( T &box, const typename BoxTraits<T>::BaseType &p );
+
+/// Extends the box by the given box
+template<typename T>
+inline void boxExtend( T &box, const T &box2 );
+
+/// Returns the intersection between two boxes, or the empty box if there is no intersection.
+template <typename T>
+T boxIntersection( const T &box, const T &box2 );
+
+/// Returns true iff the box intersects (contains) the given point
+template <typename T>
+bool boxIntersects( const T &box, const typename BoxTraits<T>::BaseType &p );
+
+/// Returns true iff the box intersects the given box
+template <typename T>
+bool boxIntersects( const T &box, const T &box2 );
+
 } // namespace IECore
 
-#include "IECore/BoxOperators.inl"
+#include "IECore/BoxOps.inl"
 
-#endif // IE_CORE_BOXOPERATOR_H
+#endif // IE_CORE_BOXOPS_H
