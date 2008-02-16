@@ -55,8 +55,8 @@ ImageCropOp::ImageCropOp()
 	:	ModifyOp(
 		staticTypeName(),
 		"Performs cropping over ImagePrimitive objects.\n"
-		"The operation results on an ImagePrimitive with displayWindow equal to the given crop box.\n"
-		"If matchDataWindow if On then the dataWindow will match displayWindow. Otherwise it will be intersected against the given crop box.",
+		"The operation results on an ImagePrimitive with displayWindow equal to the intersection of the given crop box and the original image displayWindow.\n"
+		"If matchDataWindow if On then the dataWindow will match the new displayWindow (new pixels will be filled with zero). Otherwise it will only be intersected against the given crop box.",
 		new ImagePrimitiveParameter(
 			"result",
 			"Cropped image.",
@@ -155,9 +155,10 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 	bool matchDataWindow = m_matchDataWindow->getTypedValue();
 	bool resetOrigin = m_resetOrigin->getTypedValue();
 
+	Imath::Box2i croppedDisplayWindow = intersection( cropBox, image->getDisplayWindow() );
 	Imath::Box2i dataWindow = image->getDataWindow();
-	Imath::Box2i croppedDataWindow = intersection( cropBox, dataWindow );
-	Imath::Box2i newDisplayWindow = cropBox;
+	Imath::Box2i croppedDataWindow = intersection( croppedDisplayWindow, dataWindow );
+	Imath::Box2i newDisplayWindow = croppedDisplayWindow;
 	Imath::Box2i newDataWindow;
 
 	if ( matchDataWindow )
