@@ -61,7 +61,7 @@ class SequenceRenumberOp( Op ) :
 					name = "dst",
 					description = "The destination file sequence. This may be left blank, in which case the source sequence is renumbered in place.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustNotExist,
+					check = FileSequenceParameter.CheckType.DontCare,
 					allowEmptyString = True,
 				),
 				IntParameter(
