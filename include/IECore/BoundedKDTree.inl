@@ -37,6 +37,7 @@
 
 #include "IECore/VectorTraits.h"
 #include "IECore/VectorOps.h"
+#include "IECore/BoxOps.h"
 
 namespace IECore
 {
@@ -51,8 +52,8 @@ class BoundedKDTree<BoundIterator>::AxisSort
 		
 		bool operator() ( BoundIterator i, BoundIterator j )
 		{
-			return VectorTraits< BaseType >::get( BoxTraits<Bound>::center(*i), m_axis)
-				< VectorTraits< BaseType >::get( BoxTraits<Bound>::center(*j), m_axis);
+			return VectorTraits< BaseType >::get( boxCenter(*i), m_axis)
+				< VectorTraits< BaseType >::get( boxCenter(*j), m_axis);
 		}
 		
 	private :
@@ -140,7 +141,7 @@ unsigned char BoundedKDTree<BoundIterator>::majorAxis( PermutationConstIterator 
 	/// \todo Find a better cutting axis
 	for( PermutationConstIterator it=permFirst; it!=permLast; it++ )
 	{
-		BaseType center = BoxTraits<Bound>::center(**it);
+		BaseType center = boxCenter(**it);
 	
 		for( unsigned char i=0; i<VectorTraits<BaseType>::dimensions(); i++ )
 		{
@@ -182,7 +183,7 @@ void BoundedKDTree<BoundIterator>::bound( NodeIndex nodeIndex  )
 		BoundIterator *permLast = node.permLast();
 		for( BoundIterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
-			BoxTraits<Bound>::extendBy( node.bound(), **perm );
+			boxExtend( node.bound(), **perm );
 		}
 	}
 	else
@@ -194,8 +195,8 @@ void BoundedKDTree<BoundIterator>::bound( NodeIndex nodeIndex  )
 		
 		bound( lowChildIndex( nodeIndex ) );						
 		bound( highChildIndex( nodeIndex ) );
-		BoxTraits<Bound>::extendBy( node.bound(), m_nodes[lowChildIndex( nodeIndex )].bound() );
-		BoxTraits<Bound>::extendBy( node.bound(), m_nodes[highChildIndex( nodeIndex )].bound() );			
+		boxExtend( node.bound(), m_nodes[lowChildIndex( nodeIndex )].bound() );
+		boxExtend( node.bound(), m_nodes[highChildIndex( nodeIndex )].bound() );			
 	}	
 }
 
@@ -298,7 +299,7 @@ void BoundedKDTree<BoundIterator>::intersectingBoundsWalk(  NodeIndex nodeIndex,
 		{
 			const Bound &bb = **perm;
 			
-			if ( BoxTraits<Bound>::intersects( bb, b ) )
+			if ( boxIntersects( bb, b ) )
 			{
 				bounds.push_back( *perm );
 			}
@@ -307,12 +308,12 @@ void BoundedKDTree<BoundIterator>::intersectingBoundsWalk(  NodeIndex nodeIndex,
 	else
 	{	
 		NodeIndex firstChild = highChildIndex( nodeIndex );
-		if ( BoxTraits<Bound>::intersects( m_nodes[firstChild].bound(), b) )
+		if ( boxIntersects( m_nodes[firstChild].bound(), b) )
 		{
 			intersectingBoundsWalk( firstChild, b, bounds );
 		}
 		NodeIndex secondChild = lowChildIndex( nodeIndex );
-		if ( BoxTraits<Bound>::intersects( m_nodes[secondChild].bound(), b) )
+		if ( boxIntersects( m_nodes[secondChild].bound(), b) )
 		{
 			intersectingBoundsWalk( secondChild, b, bounds );
 		}
