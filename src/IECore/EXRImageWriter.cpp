@@ -38,17 +38,18 @@
 #include "IECore/ByteOrder.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/BoxOps.h"
 
 #include "boost/format.hpp"
 
 #include <fstream>
 
 using namespace IECore;
-using namespace std;
-using namespace boost;
 
-// ILM
-using namespace Imath;
+using std::string;
+using std::vector;
+
+using Imath::Box2i;
 using namespace Imf;
 
 const Writer::WriterDescription<EXRImageWriter> EXRImageWriter::m_writerDescription("exr");
@@ -58,28 +59,30 @@ EXRImageWriter::EXRImageWriter()
 {
 }
 
-EXRImageWriter::EXRImageWriter(ObjectPtr image, const string & fileName)
+EXRImageWriter::EXRImageWriter(ObjectPtr image, const string &fileName)
 		: ImageWriter("EXRImageWriter", "Serializes images to the OpenEXR HDR image format" )
 {
 	assert( m_objectParameter );
 	assert( m_fileNameParameter );
-		
+
 	m_objectParameter->setValue( image );
 	m_fileNameParameter->setTypedValue( fileName );
 }
 
-void EXRImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr image, const Box2i & dw)
+// \todo "names" should be const
+void EXRImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow)
 {
 	assert( image );
 
 	// create the header
-	int width  = 1 + dw.max.x - dw.min.x;
-	int height = 1 + dw.max.y - dw.min.y;
-	
+	int width  = 1 + boxSize( dataWindow ).x;
+	int height = 1 + boxSize( dataWindow ).y;
+
 	try
 	{
+		/// \todo Add parameters for compression, etc
 		Header header(width, height, 1, Imath::V2f(0.0, 0.0), 1, INCREASING_Y, PIZ_COMPRESSION);
-		header.dataWindow() = dw;
+		header.dataWindow() = dataWindow;
 		header.displayWindow() = image->getDisplayWindow();
 
 		// create the framebuffer
@@ -89,7 +92,6 @@ void EXRImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr i
 		vector<string>::const_iterator i = names.begin();
 		for (vector<string>::const_iterator i = names.begin(); i != names.end(); ++i)
 		{
-
 			const char *name = (*i).c_str();
 
 			// get the image channel
@@ -98,34 +100,38 @@ void EXRImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr i
 			{
 				throw IOException( ( boost::format("EXRImageWriter: Could not find image channel \"%s\"") % name ).str() );
 			}
-			ConstDataPtr channelp = pit->second.data;
 
-			switch (channelp->typeId())
+			ConstDataPtr channelData = pit->second.data;
+			if (!channelData)
+			{
+				throw IOException( ( boost::format("EXRImageWriter: Channel \"%s\" has no data") % name ).str() );
+			}
+
+			switch (channelData->typeId())
 			{
 			case FloatVectorDataTypeId:
-				writeTypedChannel<float>(name, image, dw,
-			                        	 static_pointer_cast<const FloatVectorData>(channelp)->readable(),
-			                        	 FLOAT, header, fb);
+				writeTypedChannel<float>(name, image, dataWindow,
+				                         boost::static_pointer_cast<const FloatVectorData>(channelData)->readable(),
+				                         FLOAT, header, fb);
 				break;
 
 			case UIntVectorDataTypeId:
-				writeTypedChannel<unsigned int>(name, image, dw,
-			                                	static_pointer_cast<const UIntVectorData>(channelp)->readable(),
-			                                	UINT, header, fb);
+				writeTypedChannel<unsigned int>(name, image, dataWindow,
+				                                boost::static_pointer_cast<const UIntVectorData>(channelData)->readable(),
+				                                UINT, header, fb);
 				break;
 
 			case HalfVectorDataTypeId:
-				writeTypedChannel<half>(name, image, dw,
-			                        	static_pointer_cast<const HalfVectorData>(channelp)->readable(),
-			                        	HALF, header, fb);
+				writeTypedChannel<half>(name, image, dataWindow,
+				                        boost::static_pointer_cast<const HalfVectorData>(channelData)->readable(),
+				                        HALF, header, fb);
 				break;
 
 			default:
-				throw IOException( ( boost::format("EXRImageWriter: Invalid data type \"%s\" for channel \"%s\"") % channelp->typeName() % name ).str() );
+				throw IOException( ( boost::format("EXRImageWriter: Invalid data type \"%s\" for channel \"%s\"") % channelData->typeName() % name ).str() );
 			}
 		}
 
-	
 		// create the output file, write, implicitly close
 		OutputFile out(fileName().c_str(), header);
 
@@ -135,7 +141,7 @@ void EXRImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr i
 	catch ( Exception &e )
 	{
 		throw;
-	} 
+	}
 	catch ( std::exception &e )
 	{
 		throw IOException( ( boost::format("EXRImageWriter: %s") % e.what() ).str() );
@@ -148,22 +154,20 @@ void EXRImageWriter::writeImage(vector<string> & names, ConstImagePrimitivePtr i
 }
 
 template<typename T>
-void EXRImageWriter::writeTypedChannel(const char * name, ConstImagePrimitivePtr image, const Box2i & dw,
-                                       const vector<T> & channel, const Imf::PixelType pixelType, Header & header, FrameBuffer & fb)
+void EXRImageWriter::writeTypedChannel(const char *name, ConstImagePrimitivePtr image, const Box2i &dataWindow,
+                                       const vector<T> &channel, const Imf::PixelType pixelType, Header &header, FrameBuffer &fb)
 {
 	assert( name );
-	
+
 	/// \todo Remove this unused parameter
 	(void) image;
-	
-	int width  = 1 + dw.max.x - dw.min.x;
+
+	int width = 1 + dataWindow.max.x - dataWindow.min.x;
 
 	// update the header
-	header.channels().insert( name, Channel(pixelType));
-
-	const int size = sizeof(T);
+	header.channels().insert( name, Channel(pixelType) );
 
 	// update the framebuffer
-	char *offset = (char *) (&channel[0] - (dw.min.x + width * dw.min.y));
-	fb.insert(name, Slice(pixelType, offset, size, size * width));
+	char *offset = (char *) (&channel[0] - (dataWindow.min.x + width * dataWindow.min.y));
+	fb.insert(name, Slice(pixelType, offset, sizeof(T), sizeof(T) * width));
 }

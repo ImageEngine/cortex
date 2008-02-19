@@ -40,11 +40,10 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/ScopedTIFFExceptionTranslator.h"
+#include "IECore/BoxOps.h"
 
 #include "boost/static_assert.hpp"
 #include "boost/format.hpp"
-
-#include "IECore/BoxOperators.h"
 
 #include "tiffio.h"
 
@@ -230,7 +229,7 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 	image->setDisplayWindow(idw);
 
 	// compute read box
-	Box2i readbox = intersection(dw, idw);
+	Box2i readbox = boxIntersection(dw, idw);
 
 	if (!m_buffer)
 	{
@@ -269,10 +268,10 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 			for (int x = readbox.min.x; x <= readbox.max.x; ++x)
 			{
 				// i is the index of the pixel on the output image channel
-				int i = (y - idw.min.y) * boxwidth(idw) + (x - idw.min.x);
+				int i = (y - idw.min.y) * ( 1 + boxSize( idw ).x ) + (x - idw.min.x);
 
 				// di is the index of the pixel in the input image buffer
-				int di = (y - d.y) * boxwidth(dw) + (x - d.x);
+				int di = (y - d.y) * ( 1 + boxSize( dw ).x ) + (x - d.x);
 
 				ic[i] = (reinterpret_cast<float *>(m_buffer))[spp * di + boffset];
 			}
@@ -285,10 +284,10 @@ void TIFFImageReader::readChannel(string name, ImagePrimitivePtr image, const Bo
 			for (int x = readbox.min.x; x <= readbox.max.x; ++x)
 			{
 				// i is the index of the pixel on the output image channel
-				int i = (y - idw.min.y) * boxwidth(idw) + (x - idw.min.x);
+				int i = (y - idw.min.y) * ( 1 + boxSize( idw ).x ) + (x - idw.min.x);
 
 				// di is the index of the pixel in the input image buffer
-				int di = (y - d.y) * boxwidth(dw) + (x - d.x);
+				int di = (y - d.y) * ( 1 + boxSize( dw ).x ) + (x - d.x);
 
 				switch (bps)
 				{
@@ -392,6 +391,7 @@ bool TIFFImageReader::open()
 		if (m_tiffImage)
 		{
 			TIFFClose(m_tiffImage);
+			m_tiffImage = 0;
 		}
 		m_tiffImage = TIFFOpen(fileName().c_str(), "r");
 		m_tiffImageFileName = fileName();

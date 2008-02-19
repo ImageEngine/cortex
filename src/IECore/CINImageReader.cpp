@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,10 +39,9 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/BoxOps.h"
 
 #include "IECore/private/cineon.h"
-
-#include "IECore/BoxOperators.h"
 
 #include "boost/format.hpp"
 
@@ -148,7 +147,7 @@ void CINImageReader::readChannel(string name, ImagePrimitivePtr image, const Box
 	image->setDisplayWindow(idw);
 
 	// compute read box
-	Box2i readbox = intersection(dw, idw);
+	Box2i readbox = boxIntersection(dw, idw);
 	
 	// kinda useless here, we have implicitly assumed log 10 bit in the surrounding code
 	int bpp = 10;
@@ -165,7 +164,6 @@ void CINImageReader::readChannel(string name, ImagePrimitivePtr image, const Box
 	// (convert to half; this datatype has enough room/structure to hold the equivalent
 	//  of the 10bit log values in linear space)
  	vector<half> &ic = image->createChannel<half>(name)->writable();
- 	unsigned short cv;
 
 	// compute distance from the read box origin
 	V2i d = readbox.min - dw.min;
@@ -176,16 +174,16 @@ void CINImageReader::readChannel(string name, ImagePrimitivePtr image, const Box
 		for(int x = readbox.min.x; x <= readbox.max.x; ++x)
 		{
 			// i is the index of the pixel on the output image channel
-			int i = (y - idw.min.y) * boxwidth(idw) + (x - idw.min.x);
+			int i = (y - idw.min.y) * ( 1 + boxSize( idw ).x ) + (x - idw.min.x);
 
 			// di is the index of the pixel in the input image buffer
-			int di = (y - d.y) * boxwidth(dw) + (x - d.x);
+			int di = (y - d.y) * ( 1 + boxSize( dw ).x ) + (x - d.x);
 			
 			// get the cell.  for efficiency, we may wish to swap the bytes in the buffer reader
  			unsigned int cell = reverseBytes(m_buffer[di]);
 			
  			// assume we have 10bit log, two wasted bits aligning to 32 longword
- 			cv = (unsigned short) ((mask & cell) >> (2 + (2 - boffset)*bpp));
+ 			unsigned short cv = (unsigned short) ((mask & cell) >> (2 + (2 - boffset)*bpp));
 			
 			// convert to a linear floating-point value
  			ic[i] = m_LUT[cv];

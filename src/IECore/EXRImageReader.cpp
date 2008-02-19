@@ -39,7 +39,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/BoxOperators.h"
+#include "IECore/BoxOps.h"
 
 #include "boost/format.hpp"
 
@@ -49,19 +49,15 @@
 #include "OpenEXR/ImfTestFile.h"
 
 #include <algorithm>
-
 #include <fstream>
 #include <iostream>
 #include <cassert>
 
 using namespace IECore;
-using namespace boost;
-
-// ILM ns
-using namespace Imath;
 using namespace Imf;
-
 using namespace std;
+
+using Imath::Box2i;
 
 const Reader::ReaderDescription<EXRImageReader> EXRImageReader::m_readerDescription("exr");
 
@@ -71,7 +67,7 @@ EXRImageReader::EXRImageReader() :
 {
 }
 
-EXRImageReader::EXRImageReader(const string & fileName) :
+EXRImageReader::EXRImageReader(const string &fileName) :
 		ImageReader( "EXRImageReader", "Reads ILM OpenEXR file formats" ),
 		m_inputFile(0)
 {
@@ -103,7 +99,7 @@ bool EXRImageReader::isComplete() const
 	return m_inputFile && m_inputFile->isComplete();
 }
 
-void EXRImageReader::channelNames(vector<string> & names)
+void EXRImageReader::channelNames(vector<string> &names)
 {
 	names.clear();
 	if (!open())
@@ -121,15 +117,18 @@ void EXRImageReader::channelNames(vector<string> & names)
 	}
 }
 
-void EXRImageReader::readChannel(string name, ImagePrimitivePtr image, const Box2i & dataWindow)
+/// \todo pass channel name by reference
+void EXRImageReader::readChannel(string name, ImagePrimitivePtr image, const Box2i &dataWindow)
 {
 	if (!open())
 	{
 		return;
 	}
-	
+		
 	try
 	{
+		assert( image );
+	
 		// compute the data window to read
 		Box2i dw = dataWindow.isEmpty() ? m_header.dataWindow() : dataWindow;
 		image->setDataWindow(dw);
@@ -140,24 +139,31 @@ void EXRImageReader::readChannel(string name, ImagePrimitivePtr image, const Box
 			image->setDisplayWindow(m_header.displayWindow());
 		}
 
-		const ChannelList &channels = m_header.channels();
-		const Channel &channel = channels[name.c_str()];
-
-		// get the channel from our Image, compute the size of the channel type
-		// see ImfPixelType.h
-		switch (channel.type)
+		const ChannelList &channels = m_header.channels();	
+		const Channel *channel = channels.findChannel( name.c_str() );
+		
+		if (! channel )
+		{
+			throw IOException( ( boost::format("EXRImageReader: Channel \"%s\" not found") % name ).str() );
+		}
+			
+		assert( channel );		
+		// get the channel from our Image
+		switch (channel->type)
 		{
 
 		case UINT:  // unsigned int (32 bit)
-			readTypedChannel<unsigned int>(name, image, dw, channel);
+			BOOST_STATIC_ASSERT( sizeof( unsigned int ) == 4 );
+			readTypedChannel<unsigned int>(name, image, dw, *channel);
 			break;
 
 		case HALF:  // half (16 bit floating point)
-			readTypedChannel<half>        (name, image, dw, channel);
+			readTypedChannel<half>        (name, image, dw, *channel);
 			break;
 
 		case FLOAT: // float (32 bit floating point)
-			readTypedChannel<float>       (name, image, dw, channel);
+			BOOST_STATIC_ASSERT( sizeof( float ) == 4 );
+			readTypedChannel<float>       (name, image, dw, *channel);
 			break;
 
 		default:
@@ -182,56 +188,62 @@ void EXRImageReader::readChannel(string name, ImagePrimitivePtr image, const Box
 /// \todo pass channel name by reference
 template <typename T>
 void EXRImageReader::readTypedChannel(string name, ImagePrimitivePtr image,
-                                      const Box2i &dataWindow, const Channel & channel)
+                                      const Box2i &dataWindow, const Channel &channel)
 {
 	assert( image );
+	assert( m_inputFile );
 	
 	typename TypedData<vector<T> >::Ptr imageChannelData = image->template createChannel<T>(name);
+	assert( imageChannelData );
 	vector<T> &imageChannel = imageChannelData->writable();
 
 	// compute the size of the sample values, the stride, and the width
-	int size = sizeof(T);
-	int width = 1 + dataWindow.max.x - dataWindow.min.x;
+	int width = 1 + boxSize( dataWindow ).x;
 
 	Box2i dw = m_header.dataWindow();
-	int dataWidth = 1 + dw.max.x - dw.min.x;
+	int dataWidth = 1 + boxSize( dw ).x;
 
 	// copy cropped scanlines into the buffer
 	vector<T> scanline;
 	scanline.resize(dataWidth);
 
 	// determine the image data window
-	Box2i idw = dataWindow.isEmpty() ? dw : dataWindow;
+	const Box2i &idw = dataWindow.isEmpty() ? dw : dataWindow;
 	image->setDataWindow(idw);
 	image->setDisplayWindow(idw);
 
 	// compute read box
-	Box2i readBox = intersection(dw, idw);
+	Box2i readBox = boxIntersection(dw, idw);
 
 	// read as scanlines
-
+	
 	// x-shift for the ImagePrimitive array
 	int dx = readBox.min.x - dataWindow.min.x;
+	assert( dx >= 0 );
 
 	// y-shift for the ImagePrimitive array
 	int cl = readBox.min.y - dataWindow.min.y;
+	assert( dx >= 0 );	
 
-	int readWidth = 1 + readBox.max.x - readBox.min.x;
+	int readWidth = 1 + boxSize( readBox ).x;
 
 	for (int sl = readBox.min.y; sl <= readBox.max.y; ++sl, ++cl)
 	{
 		FrameBuffer fb;
-
-		char * scanlineStart = (char *) (&scanline[0] - (dw.min.x + sl*dataWidth));
-		fb.insert(name.c_str(), Slice(channel.type, scanlineStart, size, size * dataWidth));
+		
+		char *scanlineStart = (char *) (&scanline[0] - (dw.min.x + sl*dataWidth));
+		
+		fb.insert(name.c_str(), Slice(channel.type, scanlineStart, sizeof(T), sizeof(T) * dataWidth));
 
 		// read the line from the input file
 		m_inputFile->setFrameBuffer(fb);
 		m_inputFile->readPixels(sl, sl);
 
 		// crop the scanline horizontally
+		assert( cl * width + dx >= 0 );
 		unsigned int ini = cl * width + dx;
 
+		/// \todo We should maybe use memcpy here for speed? Try timing it first.
 		// i varies over the intersection of the datawindow x-range and the image x-range
 		for (int i = 0; i < readWidth; ++i, ++ini)
 		{
@@ -242,20 +254,19 @@ void EXRImageReader::readTypedChannel(string name, ImagePrimitivePtr image,
 
 bool EXRImageReader::open()
 {
-	bool valid = true;
-
 	if (!m_inputFile || fileName() != m_inputFile->fileName())
 	{
 		delete m_inputFile;
 		m_inputFile = 0;
 		
-		valid = isOpenExrFile(fileName().c_str());
-		if (valid)
+		if ( !isOpenExrFile(fileName().c_str()) )
 		{
-			m_inputFile = new Imf::InputFile(fileName().c_str());
-			m_header = m_inputFile->header();
+			return false;
 		}
+		
+		m_inputFile = new Imf::InputFile(fileName().c_str());
+		m_header = m_inputFile->header();		
 	}
 
-	return valid;
+	return true;
 }
