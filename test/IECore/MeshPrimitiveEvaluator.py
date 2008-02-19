@@ -136,11 +136,18 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		numTriangles = len( m.verticesPerFace )
 		
 		mpe = PrimitiveEvaluator.create( m )
+		
+		maxAbsError = 0.2
+		
+		# Test volume against (theoretical) 4/3 * pi * r^3
+		self.assert_( math.fabs ( 4.0 / 3.0 * math.pi * ( 1.0 * 1.0 * 1.0 ) - mpe.volume()  ) < maxAbsError )
+		
+		# Center of gravity should be at origin
+		self.assert_( mpe.centerOfGravity().length() < maxAbsError )
+		
 		r = mpe.createResult()
 		
 		random.seed( 1 )
-		
-		maxAbsError = 0.2
 		
 		# Perform 100 closest point queries
 		for i in range(0, 100):
