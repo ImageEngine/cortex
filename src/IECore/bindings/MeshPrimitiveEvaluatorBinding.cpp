@@ -96,6 +96,10 @@ void bindMeshPrimitiveEvaluator()
 	object m = MeshPrimitiveEvaluatorPyClass ( "MeshPrimitiveEvaluator", no_init )
 		.def( init< ConstMeshPrimitivePtr > () )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(MeshPrimitiveEvaluator)
+		
+		/// \todo Move these into the base class
+		.def( "volume", &MeshPrimitiveEvaluator::volume )
+		.def( "centerOfGravity", &MeshPrimitiveEvaluator::centerOfGravity )
 	;
 	INTRUSIVE_PTR_PATCH( MeshPrimitiveEvaluator, MeshPrimitiveEvaluatorPyClass );
 	implicitly_convertible<MeshPrimitiveEvaluatorPtr, PrimitiveEvaluatorPtr>();

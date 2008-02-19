@@ -102,7 +102,7 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual ~MeshPrimitiveEvaluator();
 		
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
-		
+						
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
 		
 		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
@@ -112,7 +112,13 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 			
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
-		
+			
+		/// \todo Add to PrimitiveEvaluator, and make virtual
+		float volume() const;	
+
+		/// \todo Add to PrimitiveEvaluator, and make virtual
+		Imath::V3f centerOfGravity() const;
+					
 	protected:
 	
 		ConstMeshPrimitivePtr m_mesh;
@@ -149,6 +155,8 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		void closestPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const;		
 		bool intersectionPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
 		void intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;		
+		
+		void calculateMassProperties();
 	
 	public:	
 		

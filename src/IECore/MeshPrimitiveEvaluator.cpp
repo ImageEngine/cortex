@@ -36,6 +36,7 @@
 
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathLineAlgo.h"
+#include "OpenEXR/ImathMatrix.h"
 
 #include "IECore/PrimitiveVariable.h"
 #include "IECore/Exception.h"
@@ -50,11 +51,20 @@ using namespace Imath;
 
 struct MeshPrimitiveEvaluator::ExtraData
 {	
+	ExtraData() : m_uvTree(0), m_haveMassProperties( false )
+	{
+	}
+
 	BoundedTriangleVector m_uvTriangles;
 	BoundedTriangleTree *m_uvTree;
 	
 	PrimitiveVariable m_u;
-	PrimitiveVariable m_v;	
+	PrimitiveVariable m_v;
+	
+	bool m_haveMassProperties;
+	float m_volume;
+	V3f m_centerOfGravity;	
+	M33f m_inertia;
 };
 
 typedef ClassData< MeshPrimitiveEvaluator, MeshPrimitiveEvaluator::ExtraData*, Deleter<MeshPrimitiveEvaluator::ExtraData*> > MeshPrimitiveEvaluatorClassData;
@@ -369,6 +379,111 @@ MeshPrimitiveEvaluator::~MeshPrimitiveEvaluator()
 	m_uvTree = 0;
 		
 	g_classData.erase( this );
+}
+
+float MeshPrimitiveEvaluator::volume() const
+{
+	ExtraData *extraData = g_classData[this];
+	assert( extraData );	
+	
+	if ( !extraData->m_haveMassProperties )
+	{
+		const_cast<MeshPrimitiveEvaluator*>(this)->calculateMassProperties();
+	}
+	
+	return extraData->m_volume;
+}
+
+Imath::V3f MeshPrimitiveEvaluator::centerOfGravity() const
+{
+	ExtraData *extraData = g_classData[this];
+	assert( extraData );	
+	
+	if ( !extraData->m_haveMassProperties )
+	{
+		const_cast<MeshPrimitiveEvaluator*>(this)->calculateMassProperties();
+	}	
+	
+	return extraData->m_centerOfGravity;
+}
+
+/// Implementation derived from Wild Magic (Version 2) Software Library, available
+/// from http://www.geometrictools.com/Downloads/WildMagic2p5.zip under free license
+void MeshPrimitiveEvaluator::calculateMassProperties()
+{
+	ExtraData *extraData = g_classData[this];
+	assert( extraData );	
+	
+	assert( !extraData->m_haveMassProperties );
+	
+	double integral[10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	
+	IntVectorData::ValueType::const_iterator vertexIdIt = m_mesh->vertexIds()->readable().begin();
+	
+	for ( IntVectorData::ValueType::const_iterator it = m_mesh->verticesPerFace()->readable().begin(); 
+		it != m_mesh->verticesPerFace()->readable().end(); ++it )
+	{	
+		assert ( *it == 3 );	
+		
+		const V3f &p0 = m_verts->readable()[ *vertexIdIt++ ];
+		const V3f &p1 = m_verts->readable()[ *vertexIdIt++ ];
+		const V3f &p2 = m_verts->readable()[ *vertexIdIt++ ];
+		
+		/// Winding order has to be correct here
+		V3f n = ( p2 - p0 ).cross( p1 - p0 );
+		
+		V3f f1, f2, f3, g0, g1, g2;
+		for (int dim = 0; dim < 3; dim++)
+		{
+			double tmp0, tmp1, tmp2;
+
+			tmp0 = p0[dim] + p1[dim];
+			f1[dim] = tmp0 + p2[dim];
+			tmp1 = p0[dim] * p0[dim];
+			tmp2 = tmp1 + p1[dim] * tmp0;
+			f2[dim] = tmp2 + p2[dim] * f1[dim];
+			f3[dim] = p0[dim]*tmp1 + p1[dim]*tmp2 + p2[dim]*f2[dim];
+			g0[dim] = f2[dim] + p0[dim] * (f1[dim] + p0[dim]);
+			g1[dim] = f2[dim] + p1[dim] * (f1[dim] + p1[dim]);
+			g2[dim] = f2[dim] + p2[dim] * (f1[dim] + p2[dim]);
+		}
+		
+		integral[0] += n.x*f1.x;
+		integral[1] += n.x*f2.x;
+		integral[2] += n.y*f2.y;
+		integral[3] += n.z*f2.z;
+		integral[4] += n.x*f3.x;
+		integral[5] += n.y*f3.y;
+		integral[6] += n.z*f3.z;
+		integral[7] += n.x*(p0.y*g0.x + p1.y*g1.x + p2.y*g2.x);
+		integral[8] += n.y*(p0.z*g0.y + p1.z*g1.y + p2.z*g2.y);
+		integral[9] += n.z*(p0.x*g0.z + p1.x*g1.z + p2.x*g2.z);		
+	}
+	
+	integral[0] /= 6.0;
+	integral[1] /= 24.0;
+	integral[2] /= 24.0;
+	integral[3] /= 24.0;
+	integral[4] /= 60.0;
+	integral[5] /= 60.0;
+	integral[6] /= 60.0;
+	integral[7] /= 120.0;
+	integral[8] /= 120.0;
+	integral[9] /= 120.0;
+			
+	extraData->m_volume = integral[0];
+	extraData->m_centerOfGravity = V3f( integral[1], integral[2], integral[3] ) / integral[0];
+	extraData->m_inertia[0][0] = integral[5] + integral[6];
+	extraData->m_inertia[0][1] = -integral[7];
+	extraData->m_inertia[0][2] = -integral[9];
+	extraData->m_inertia[1][0] = extraData->m_inertia[0][1];
+	extraData->m_inertia[1][1] = integral[4] + integral[6];
+	extraData->m_inertia[1][2] = -integral[8];
+	extraData->m_inertia[2][0] = extraData->m_inertia[0][2];
+	extraData->m_inertia[2][1] = extraData->m_inertia[1][2];
+	extraData->m_inertia[2][2] = integral[4] + integral[5];			
+	
+	extraData->m_haveMassProperties = true;
 }
 
 PrimitiveEvaluator::ResultPtr MeshPrimitiveEvaluator::createResult() const
