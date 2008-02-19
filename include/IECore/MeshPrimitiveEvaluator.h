@@ -118,6 +118,9 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 		/// \todo Add to PrimitiveEvaluator, and make virtual
 		Imath::V3f centerOfGravity() const;
+		
+		/// \todo Add to PrimitiveEvaluator, and make virtual
+		float surfaceArea() const;
 					
 	protected:
 	

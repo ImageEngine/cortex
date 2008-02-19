@@ -100,6 +100,7 @@ void bindMeshPrimitiveEvaluator()
 		/// \todo Move these into the base class
 		.def( "volume", &MeshPrimitiveEvaluator::volume )
 		.def( "centerOfGravity", &MeshPrimitiveEvaluator::centerOfGravity )
+		.def( "surfaceArea", &MeshPrimitiveEvaluator::surfaceArea )
 	;
 	INTRUSIVE_PTR_PATCH( MeshPrimitiveEvaluator, MeshPrimitiveEvaluatorPyClass );
 	implicitly_convertible<MeshPrimitiveEvaluatorPtr, PrimitiveEvaluatorPtr>();

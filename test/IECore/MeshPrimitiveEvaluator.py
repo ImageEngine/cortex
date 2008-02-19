@@ -145,6 +145,9 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		# Center of gravity should be at origin
 		self.assert_( mpe.centerOfGravity().length() < maxAbsError )
 		
+		# Test surface area against (theoretical) 4 * pi * r^20
+		self.assert_( math.fabs ( 4.0 * math.pi * ( 1.0 * 1.0  ) - mpe.surfaceArea()  ) < maxAbsError )
+		
 		r = mpe.createResult()
 		
 		random.seed( 1 )

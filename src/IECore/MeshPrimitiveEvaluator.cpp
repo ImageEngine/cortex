@@ -51,7 +51,7 @@ using namespace Imath;
 
 struct MeshPrimitiveEvaluator::ExtraData
 {	
-	ExtraData() : m_uvTree(0), m_haveMassProperties( false )
+	ExtraData() : m_uvTree(0), m_haveMassProperties( false ), m_haveSurfaceArea( false )
 	{
 	}
 
@@ -65,6 +65,9 @@ struct MeshPrimitiveEvaluator::ExtraData
 	float m_volume;
 	V3f m_centerOfGravity;	
 	M33f m_inertia;
+	
+	bool m_haveSurfaceArea;
+	float m_surfaceArea;
 };
 
 typedef ClassData< MeshPrimitiveEvaluator, MeshPrimitiveEvaluator::ExtraData*, Deleter<MeshPrimitiveEvaluator::ExtraData*> > MeshPrimitiveEvaluatorClassData;
@@ -405,6 +408,34 @@ Imath::V3f MeshPrimitiveEvaluator::centerOfGravity() const
 	}	
 	
 	return extraData->m_centerOfGravity;
+}
+
+float MeshPrimitiveEvaluator::surfaceArea() const
+{
+	ExtraData *extraData = g_classData[this];
+	assert( extraData );	
+	
+	if ( !extraData->m_haveSurfaceArea )
+	{
+		extraData->m_surfaceArea = 0.0f;
+		IntVectorData::ValueType::const_iterator vertexIdIt = m_mesh->vertexIds()->readable().begin();
+	
+		for ( IntVectorData::ValueType::const_iterator it = m_mesh->verticesPerFace()->readable().begin(); 
+			it != m_mesh->verticesPerFace()->readable().end(); ++it )
+		{	
+			assert ( *it == 3 );	
+
+			const V3f &p0 = m_verts->readable()[ *vertexIdIt++ ];
+			const V3f &p1 = m_verts->readable()[ *vertexIdIt++ ];
+			const V3f &p2 = m_verts->readable()[ *vertexIdIt++ ];
+			
+			extraData->m_surfaceArea += triangleArea( p0, p1, p2 );
+		}	
+		
+		extraData->m_haveSurfaceArea = true;
+	}	
+	
+	return extraData->m_surfaceArea;
 }
 
 /// Implementation derived from Wild Magic (Version 2) Software Library, available
