@@ -41,6 +41,7 @@ import os
 import re
 import glob
 import shutil
+import os.path
 from EmptyFrameList import EmptyFrameList
 from FrameRange import FrameRange
 from CompoundFrameList import CompoundFrameList
@@ -135,13 +136,13 @@ def mv( sequence1, sequence2 ) :
 
 	if __sequencesClash( sequence1, sequence2 ) :
 		sTmp = sequence1.copy()
-		sTmp.setPrefix( __tmpPrefix() )
-		for src, dst in sequence1.mapTo( sTmp ).items() :
+		sTmp.setPrefix( os.path.join( os.path.dirname( sTmp.getPrefix() ), __tmpPrefix() ) )
+		for src, dst in sequence1.mapTo( sTmp, True ) :
 			shutil.move( src, dst )
-		for src, dst in sTmp.mapTo( sequence2 ).items() :
+		for src, dst in sTmp.mapTo( sequence2, True ) :
 			shutil.move( src, dst )
 	else :
-		for src, dst in sequence1.mapTo( sequence2 ).items() :
+		for src, dst in sequence1.mapTo( sequence2, True ) :
 			shutil.move( src, dst )
 
 ## Copies the set of files specified by sequence1 to the set of files
@@ -153,7 +154,7 @@ def cp( sequence1, sequence2 ) :
 	if __sequencesClash( sequence1, sequence2 ) :
 		raise RuntimeError( "Attempt to copy sequences with common filenames." )
 		
-	for src, dst in sequence1.mapTo( sequence2 ).items() :
+	for src, dst in sequence1.mapTo( sequence2, True ) :
 		shutil.copy( src, dst )
 
 ## Removes all the files specified by the sequence.
@@ -228,6 +229,6 @@ def __tmpPrefix() :
 	h.update( platform.node() ) # computer name
 	h.update( str( os.getpid() ) )
 	h.update( str( time.time() ) )
-	return "ieSequenceTmp" + h.hexdigest()
+	return "ieSequenceTmp" + h.hexdigest() + "."
 
 __all__ = [ "findSequences", "ls", "mv", "cp", "rm", "frameListFromList" ]
