@@ -56,7 +56,7 @@ def findSequences( names ) :
 	# placing each of those in a group of the resulting match.
 	# both $prefix and $suffix may be the empty string and $frameNumber
 	# may be preceded by a minus sign.
-	matchExpression = re.compile( "^(.*?)(-{,1}[0-9]+)([^0-9]*)$" )
+	matchExpression = re.compile( "^([^#]*?)(-{,1}[0-9]+)([^0-9#]*)$" )
 	os.rename
 	# build a mapping from ($prefix, $suffix) to a list of $frameNumbers
 	sequenceMap = {}

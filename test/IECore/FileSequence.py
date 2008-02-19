@@ -36,6 +36,8 @@ import os
 import unittest
 from IECore import *
 
+# \todo use setUp and tearDown to remove directories, also use shutil.rmtree instead of os.system("rm -rf")
+
 class testFrameRange( unittest.TestCase ) :
 
 	def testConstructor( self ) :
@@ -303,6 +305,16 @@ class testLs( unittest.TestCase ) :
 		l = findSequences( [ "a.0001.tif", "b.0010.gif", "b.0011.gif" ] )
 		self.assertEqual( len( l ), 1 )
 		self.assertEqual( l[0], FileSequence( "b.####.gif", FrameRange( 10, 11 ) ) )				
+		
+	def testErrors( self ):	
+	
+		os.system( "rm -rf test/sequences/lsTest" )
+		os.system( "mkdir -p test/sequences/lsTest" )		
+		
+		os.system( "touch test/sequences/lsTest/test100.#.tif.tmp" )
+		l = ls( "test/sequences/lsTest" )		
+		self.assertEqual( len( l ), 0 )
+			
 		
 class testMv( unittest.TestCase ) :
 
