@@ -121,6 +121,12 @@ struct TriangleDataRemap
 
 void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
 {
+
+	if (! mesh->arePrimitiveVariablesValid() )
+	{
+		throw InvalidArgumentException( "Mesh with invalid primitive variables given to TriangulateOp");
+	}
+
 	bool alreadyTriangulated = true;
 	ConstIntVectorDataPtr verticesPerFace = mesh->verticesPerFace();
 	IntVectorData::ValueType::const_iterator it = verticesPerFace->readable().begin();
@@ -319,4 +325,6 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 			it->second.data = data;
 		}
 	}
+	
+	assert( mesh->arePrimitiveVariablesValid() );
 }
