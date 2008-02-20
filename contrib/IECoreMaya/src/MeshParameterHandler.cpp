@@ -82,7 +82,7 @@ MObject MeshParameterHandler::create( IECore::ConstParameterPtr parameter, const
 	MFnGenericAttribute fnGAttr;
 	MObject result = fnGAttr.create( attributeName, attributeName );
 	
-	if ( !update( parameter, result ) );
+	if ( !update( parameter, result ) )
 	{
 		return MObject::kNullObj;
 	}
