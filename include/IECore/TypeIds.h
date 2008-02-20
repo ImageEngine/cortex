@@ -239,6 +239,7 @@ enum TypeId
 	ConverterTypeId = 196,
 	ToCoreConverterTypeId = 197,
 	ImageCropOpTypeId = 198,
+	MeshPrimitiveShrinkWrapOpTypeId = 199,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

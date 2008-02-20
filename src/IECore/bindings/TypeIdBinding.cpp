@@ -240,6 +240,7 @@ void bindTypeId()
 		.value("Converter", ConverterTypeId)		
 		.value("ToCoreConverter", ToCoreConverterTypeId)
 		.value("ImageCropOp", ImageCropOpTypeId)
+		.value("MeshPrimitiveShrinkWrapOp", MeshPrimitiveShrinkWrapOpTypeId)
 	;
 }
 
