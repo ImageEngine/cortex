@@ -125,6 +125,7 @@ from DPXReader import *
 from DPXWriter import *
 from InverseDistanceWeightedInterpolation import *
 from ImageCropOp import *
+from MeshPrimitiveShrinkWrapOp import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *
