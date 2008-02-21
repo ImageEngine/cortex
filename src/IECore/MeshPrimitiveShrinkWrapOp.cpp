@@ -53,22 +53,39 @@ MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( static
 	        new MeshPrimitive()
 	);
 
-	IntParameter::PresetsMap methodPresets;
-	methodPresets["Inside"] = Inside;
-	methodPresets["Outside"] = Outside;
-	methodPresets["Both"] = Both;
+	IntParameter::PresetsMap directionPresets;
+	directionPresets["Inside"] = Inside;
+	directionPresets["Outside"] = Outside;
+	directionPresets["Both"] = Both;
 
-	m_methodParameter = new IntParameter(
-	        "method",
-	        "The method by which rays are cast to find the target mesh.",
+	m_directionParameter = new IntParameter(
+	        "direction",
+	        "The direction by which rays are cast to find the target mesh.",
 	        Both,
 	        Inside,
 	        Both,
+	        directionPresets,
+	        true
+	);
+	
+	IntParameter::PresetsMap methodPresets;
+	methodPresets["Normal"] = Normal;
+	methodPresets["X-axis"] = XAxis;
+	methodPresets["Y-axis"] = YAxis;
+	methodPresets["Z-axis"] = ZAxis;		
+
+	m_methodParameter = new IntParameter(
+	        "method",
+	        "The method by which find the target mesh.",
+	        Normal,
+	        Normal,
+	        ZAxis,
 	        methodPresets,
 	        true
 	);
 
 	parameters()->addParameter( m_targetMeshParameter );
+	parameters()->addParameter( m_directionParameter );
 	parameters()->addParameter( m_methodParameter );
 }
 
@@ -96,8 +113,18 @@ ConstIntParameterPtr MeshPrimitiveShrinkWrapOp::methodParameter() const
 	return m_methodParameter;
 }
 
+IntParameterPtr MeshPrimitiveShrinkWrapOp::directionParameter()
+{
+	return m_directionParameter;
+}
+
+ConstIntParameterPtr MeshPrimitiveShrinkWrapOp::directionParameter() const
+{
+	return m_directionParameter;
+}
+
 template<typename T>
-void MeshPrimitiveShrinkWrapOp::doShrinkWrap( std::vector<T> &vertices, PrimitivePtr sourceMesh, ConstPrimitivePtr targetMesh, Method method )
+void MeshPrimitiveShrinkWrapOp::doShrinkWrap( std::vector<T> &vertices, PrimitivePtr sourceMesh, ConstPrimitivePtr targetMesh, Direction direction, Method method )
 {
 	assert( sourceMesh );
 
@@ -110,10 +137,16 @@ void MeshPrimitiveShrinkWrapOp::doShrinkWrap( std::vector<T> &vertices, Primitiv
 	op->inputParameter()->setValue( sourceMesh );
 	MeshPrimitivePtr triangulatedSourcePrimitive = runTimeCast< MeshPrimitive > ( op->operate() );
 
-	PrimitiveEvaluatorPtr sourceEvaluator = PrimitiveEvaluator::create( triangulatedSourcePrimitive );
-	assert( sourceEvaluator );
-	PrimitiveEvaluator::ResultPtr sourceResult = sourceEvaluator->createResult();
-	assert( sourceResult );
+	PrimitiveEvaluatorPtr sourceEvaluator = 0;
+	PrimitiveEvaluator::ResultPtr sourceResult = 0;
+	
+	if ( method == Normal )
+	{
+		sourceEvaluator = PrimitiveEvaluator::create( triangulatedSourcePrimitive );
+		assert( sourceEvaluator );
+		sourceResult = sourceEvaluator->createResult();
+		assert( sourceResult );
+	}
 
 	PrimitiveEvaluatorPtr targetEvaluator = PrimitiveEvaluator::create( targetMesh );
 	assert( targetEvaluator );
@@ -122,10 +155,10 @@ void MeshPrimitiveShrinkWrapOp::doShrinkWrap( std::vector<T> &vertices, Primitiv
 	assert( insideResult );
 	assert( outsideResult );
 
-	PrimitiveVariableMap::const_iterator it = triangulatedSourcePrimitive->variables.find("N");
+	PrimitiveVariableMap::const_iterator it = triangulatedSourcePrimitive->variables.find( "N" );
 	if (it == sourceMesh->variables.end())
 	{
-		throw InvalidArgumentException("MeshPrimitive has no primitive variable \"N\" in MeshPrimitiveShrinkWrapOp");
+		throw InvalidArgumentException("MeshPrimitive has no primitive variable \"N\" in MeshPrimitiveShrinkWrapOp" );
 	}
 
 	const PrimitiveVariable &nPrimVar = it->second;
@@ -134,22 +167,42 @@ void MeshPrimitiveShrinkWrapOp::doShrinkWrap( std::vector<T> &vertices, Primitiv
 	{
 		T &vertexPosition = *pit;
 
-		sourceEvaluator->closestPoint( vertexPosition, sourceResult );
-		T vertexNormal = sourceResult->vectorPrimVar( nPrimVar );
+		T rayDirection;
+		
+		if ( method == Normal )
+		{
+			assert( sourceEvaluator );
+			assert( sourceResult );
+			sourceEvaluator->closestPoint( vertexPosition, sourceResult );
+			rayDirection = sourceResult->vectorPrimVar( nPrimVar );
+		} 
+		else if ( method == XAxis )
+		{
+			rayDirection = T( 1.0, 0.0, 0.0 );
+		}
+		else if ( method == YAxis )
+		{
+			rayDirection = T( 0.0, 1.0, 0.0 );
+		}
+		else 
+		{
+			assert( method == ZAxis ) ;
+			rayDirection = T( 0.0, 0.0, 1.0 );
+		}
 
 		bool hit = false;
 
-		if ( method == Inside )
+		if ( direction == Inside )
 		{
-			hit = targetEvaluator->intersectionPoint( vertexPosition, -vertexNormal, insideResult );
+			hit = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult );
 			if ( hit )
 			{
 				vertexPosition = insideResult->point();
 			}
 		}
-		else if ( method == Outside )
+		else if ( direction == Outside )
 		{
-			hit = targetEvaluator->intersectionPoint( vertexPosition, vertexNormal, outsideResult );
+			hit = targetEvaluator->intersectionPoint( vertexPosition, rayDirection, outsideResult );
 			if ( hit )
 			{
 				vertexPosition = outsideResult->point();
@@ -157,10 +210,10 @@ void MeshPrimitiveShrinkWrapOp::doShrinkWrap( std::vector<T> &vertices, Primitiv
 		}
 		else
 		{
-			assert( method == Both );
+			assert( direction == Both );
 
-			bool insideHit  = targetEvaluator->intersectionPoint( vertexPosition, -vertexNormal, insideResult  );
-			bool outsideHit = targetEvaluator->intersectionPoint( vertexPosition,  vertexNormal, outsideResult );
+			bool insideHit  = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult  );
+			bool outsideHit = targetEvaluator->intersectionPoint( vertexPosition,  rayDirection, outsideResult );
 
 			/// Choose the closest, or the only, intersection
 			if ( insideHit && outsideHit )
@@ -196,7 +249,7 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, Con
 
 	if (! mesh->arePrimitiveVariablesValid() )
 	{
-		throw InvalidArgumentException( "Mesh with invalid primitive variables given to MeshPrimitiveShrinkWrapOp");
+		throw InvalidArgumentException( "Mesh with invalid primitive variables given to MeshPrimitiveShrinkWrapOp" );
 	}
 
 	MeshPrimitivePtr target = targetMeshParameter()->getTypedValue< MeshPrimitive >( );
@@ -207,7 +260,7 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, Con
 
 	if ( ! target->arePrimitiveVariablesValid() )
 	{
-		throw InvalidArgumentException( "Target mesh with invalid primitive variables given to MeshPrimitiveShrinkWrapOp");
+		throw InvalidArgumentException( "Target mesh with invalid primitive variables given to MeshPrimitiveShrinkWrapOp" );
 	}
 
 	TriangulateOpPtr op = new TriangulateOp();
@@ -215,27 +268,28 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, Con
 	target = runTimeCast< MeshPrimitive > ( op->operate() );
 	assert( target );
 
+	Direction direction = static_cast<Direction>( m_directionParameter->getNumericValue() );
 	Method method = static_cast<Method>( m_methodParameter->getNumericValue() );
 
 	PrimitiveVariableMap::const_iterator it = mesh->variables.find("P");
 	if (it == mesh->variables.end())
 	{
-		throw InvalidArgumentException("MeshPrimitive has no primitive variable \"P\" in MeshPrimitiveShrinkWrapOp");
+		throw InvalidArgumentException("MeshPrimitive has no primitive variable \"P\" in MeshPrimitiveShrinkWrapOp" );
 	}
 
 	const DataPtr &verticesData = it->second.data;
 	if (runTimeCast<V3fVectorData>(verticesData))
 	{
 		V3fVectorDataPtr p = runTimeCast<V3fVectorData>(verticesData);
-		doShrinkWrap<V3f>( p->writable(), mesh, target, method );
+		doShrinkWrap<V3f>( p->writable(), mesh, target, direction, method );
 	}
 	else if (runTimeCast<V3dVectorData>(verticesData))
 	{
 		V3dVectorDataPtr p = runTimeCast<V3dVectorData>(verticesData);
-		doShrinkWrap<V3d>( p->writable(), mesh, target, method );
+		doShrinkWrap<V3d>( p->writable(), mesh, target, direction, method );
 	}
 	else
 	{
-		throw InvalidArgumentException("MeshPrimitive has no primitive variable \"P\" of type V3fVectorData/V3dVectorData in MeshPrimitiveShrinkWrapOp");
+		throw InvalidArgumentException("MeshPrimitive has no primitive variable \"P\" of type V3fVectorData/V3dVectorData in MeshPrimitiveShrinkWrapOp" );
 	}
 }

@@ -66,7 +66,8 @@ class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
 			target = target,			
 			input = m,
 			
-			method = MeshPrimitiveShrinkWrapOp.Method.Both
+			method =  MeshPrimitiveShrinkWrapOp.Method.XAxis,
+			direction = MeshPrimitiveShrinkWrapOp.Direction.Both
 		)
 
 		pData = res["P"].data

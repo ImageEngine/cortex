@@ -55,7 +55,15 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 		{
 			Inside = 0,
 			Outside = 1,
-			Both = 2
+			Both = 2,
+		} Direction;
+		
+		typedef enum
+		{
+			Normal = 0,
+			XAxis = 1,
+			YAxis = 2,
+			ZAxis = 3
 		} Method;
 
 
@@ -68,20 +76,24 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 		MeshPrimitiveParameterPtr targetMeshParameter();
 		ConstMeshPrimitiveParameterPtr targetMeshParameter() const;
 
+		IntParameterPtr directionParameter();
+		ConstIntParameterPtr directionParameter() const;
+		
 		IntParameterPtr methodParameter();
 		ConstIntParameterPtr methodParameter() const;
 
 	protected:
 
 		template<typename T>
-		void doShrinkWrap( std::vector<T> &vertices, PrimitivePtr sourcePrimitive, ConstPrimitivePtr targetPrimitive, Method method );
+		void doShrinkWrap( std::vector<T> &vertices, PrimitivePtr sourcePrimitive, ConstPrimitivePtr targetPrimitive, Direction direction, Method method );
 
 		virtual void modifyTypedPrimitive( MeshPrimitivePtr typedPrimitive, ConstCompoundObjectPtr operands );
 
 	private:
 
 		MeshPrimitiveParameterPtr m_targetMeshParameter;
-		IntParameterPtr m_methodParameter;
+		IntParameterPtr m_directionParameter;
+		IntParameterPtr m_methodParameter;		
 
 };
 

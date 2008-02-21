@@ -58,10 +58,17 @@ void bindMeshPrimitiveShrinkWrapOp()
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( MeshPrimitiveShrinkWrapOp )
 	;
 	
-	enum_< MeshPrimitiveShrinkWrapOp::Method >( "Method" )
+	enum_< MeshPrimitiveShrinkWrapOp::Direction >( "Direction" )
 		.value( "Both", MeshPrimitiveShrinkWrapOp::Both )
 		.value( "Inside", MeshPrimitiveShrinkWrapOp::Inside )
 		.value( "Outside", MeshPrimitiveShrinkWrapOp::Outside )	
+	;
+	
+	enum_< MeshPrimitiveShrinkWrapOp::Method >( "Method" )
+		.value( "Normal", MeshPrimitiveShrinkWrapOp::Normal )
+		.value( "XAxis", MeshPrimitiveShrinkWrapOp::XAxis )
+		.value( "YAxis", MeshPrimitiveShrinkWrapOp::YAxis )
+		.value( "ZAxis", MeshPrimitiveShrinkWrapOp::ZAxis )		
 	;			
 	
 	INTRUSIVE_PTR_PATCH( MeshPrimitiveShrinkWrapOp, MeshPrimitiveShrinkWrapOpPyClass );
