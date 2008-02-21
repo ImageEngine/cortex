@@ -42,7 +42,6 @@
 #include "IECore/MeshPrimitive.h"
 
 #include "maya/MFnGenericAttribute.h"
-
 #include "maya/MFnMeshData.h"
 
 using namespace IECoreMaya;
@@ -66,6 +65,10 @@ MStatus MeshParameterHandler::update( IECore::ConstParameterPtr parameter, MObje
 	}
 	
 	fnGAttr.addAccept( MFnData::kMesh );
+	
+	/// \todo It seems that Maya can crash under certain circumstances when saving as ASCII, usually when dealing with an empty mesh. Try and
+	/// establish why.
+	//fnGAttr.setStorable( false );
 				
 	return MS::kSuccess;
 }
@@ -100,7 +103,7 @@ MStatus MeshParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPl
 	
 	MFnMeshData fnData;
 	MObject data = fnData.create();
-	
+
 	/// \todo Pull in userData from parameter to set up conversion parameters	
 	ToMayaObjectConverterPtr converter = ToMayaObjectConverter::create( p->getValue(), MFn::kMeshData );
 	assert(converter);
@@ -111,7 +114,10 @@ MStatus MeshParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPl
 		return MS::kFailure;
 	}
 	
-	return plug.setValue( data );
+	/// \todo It seems like this can occassionally fail, usually with an empty mesh, but sometimes not. Try to establish exactly why.
+	plug.setValue( data );
+	
+	return MS::kSuccess;
 }
 
 MStatus MeshParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
