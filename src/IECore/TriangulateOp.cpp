@@ -102,6 +102,7 @@ struct TriangleDataRemap
 {
 	size_t operator() ( typename T::Ptr data, TriangleDataRemapArgs args )
 	{
+		assert( data );
 		typename T::ConstPtr otherData = runTimeCast<const T>( args.m_other );
 		assert( otherData );
 
@@ -152,6 +153,8 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 	if (pvIt != mesh->variables.end())
 	{
 		const DataPtr &verticesData = pvIt->second.data;
+		assert( verticesData );
+		
 		if (runTimeCast<V3fVectorData>(verticesData))
 		{
 			p = runTimeCast<V3fVectorData>(verticesData);			
@@ -315,6 +318,7 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 	{
 		if ( it->second.interpolation == PrimitiveVariable::FaceVarying )
 		{
+ 			assert( it->second.data );
 			args.m_other = it->second.data;
 			DataPtr data = it->second.data->copy();
 
