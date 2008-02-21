@@ -43,6 +43,7 @@
 #include "maya/MFnDependencyNode.h"
 #include "maya/MFnAttribute.h"
 #include "maya/MDGModifier.h"
+#include "maya/MGlobal.h"
 
 #include "IECoreMaya/OpHolder.h"
 #include "IECoreMaya/Parameter.h"
@@ -133,8 +134,9 @@ MStatus OpHolder<B>::compute( const MPlug &plug, MDataBlock &block )
 				return MS::kFailure;
 			}
 		} 		
-		catch( IECore::Exception &e )
+		catch( std::exception &e )
 		{
+			MGlobal::displayError( e.what() );
 			return MS::kFailure;
 		}
 		catch( boost::python::error_already_set & )

@@ -139,6 +139,11 @@ void ParameterisedHolderWrapper::setNodeValue( ParameterPtr pa )
 	{	
 		s = IECoreMaya::Parameter::setValue( pa, pl );
 	} 
+	catch ( std::exception &e )
+	{
+		msg( Msg::Error, "ParameterisedHolder::setNodeValue", e.what() );
+		s = MS::kFailure;
+	}
 	catch (...)
 	{
 		msg( Msg::Error, "ParameterisedHolder::setNodeValue", "Caught exception while setting value." );
@@ -160,6 +165,11 @@ void ParameterisedHolderWrapper::setParameterisedValue( ParameterPtr pa )
 	try
 	{	
 		s = IECoreMaya::Parameter::setValue( pl, pa );
+	}
+	catch ( std::exception &e )
+	{
+		msg( Msg::Error, "ParameterisedHolder::setParameterisedValue", e.what() );
+		s = MS::kFailure;
 	} 
 	catch (...)
 	{
