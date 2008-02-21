@@ -174,7 +174,7 @@ T MeshPrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) cons
 	{
 		throw InvalidArgumentException( "Could not retrieve primvar data for MeshPrimitiveEvaluator" );
 	}
-
+	
 	switch ( pv.interpolation )
 	{
 		case PrimitiveVariable::Constant :
@@ -295,8 +295,11 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh )
 		Imath::V3i triangleVertexIds;
 		
 		triangleVertexIds[0] = *vertexIdIt++;
+		assert( triangleVertexIds[0] < (int)( m_verts->readable().size() ) );
 		triangleVertexIds[1] = *vertexIdIt++;		
+		assert( triangleVertexIds[1] < (int)( m_verts->readable().size() ) );		
 		triangleVertexIds[2] = *vertexIdIt++;		
+		assert( triangleVertexIds[2] < (int)( m_verts->readable().size() ) );		
 		
 		const V3f &p0 = m_verts->readable()[ triangleVertexIds[0] ];
 		const V3f &p1 = m_verts->readable()[ triangleVertexIds[1] ];
@@ -454,11 +457,20 @@ void MeshPrimitiveEvaluator::calculateMassProperties()
 	for ( IntVectorData::ValueType::const_iterator it = m_mesh->verticesPerFace()->readable().begin(); 
 		it != m_mesh->verticesPerFace()->readable().end(); ++it )
 	{	
-		assert ( *it == 3 );	
+		assert ( *it == 3 );
 		
-		const V3f &p0 = m_verts->readable()[ *vertexIdIt++ ];
-		const V3f &p1 = m_verts->readable()[ *vertexIdIt++ ];
-		const V3f &p2 = m_verts->readable()[ *vertexIdIt++ ];
+		V3i triangleVertexIds;	
+		
+		triangleVertexIds[0] = *vertexIdIt++;
+		assert( triangleVertexIds[0] < (int)( m_verts->readable().size() ) );
+		triangleVertexIds[1] = *vertexIdIt++;		
+		assert( triangleVertexIds[1] < (int)( m_verts->readable().size() ) );		
+		triangleVertexIds[2] = *vertexIdIt++;		
+		assert( triangleVertexIds[2] < (int)( m_verts->readable().size() ) );
+		
+		const Imath::V3f &p0 = m_verts->readable()[ triangleVertexIds[0] ];
+		const Imath::V3f &p1 = m_verts->readable()[ triangleVertexIds[1] ];
+		const Imath::V3f &p2 = m_verts->readable()[ triangleVertexIds[2] ];		
 		
 		/// Winding order has to be correct here
 		V3f n = ( p2 - p0 ).cross( p1 - p0 );
@@ -640,6 +652,10 @@ void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex no
 		{
 			const BoundedTriangle &bb = **perm;
 			
+			assert( bb.m_vertexIds[0] < (int)( m_verts->readable().size() ) );
+			assert( bb.m_vertexIds[1] < (int)( m_verts->readable().size() ) );			
+			assert( bb.m_vertexIds[2] < (int)( m_verts->readable().size() ) );			
+			
 			V3f bary;
 			float dSqrd = triangleClosestBarycentric( 
 				m_verts->readable()[bb.m_vertexIds[0]], 
@@ -773,6 +789,10 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeI
 					result->m_triangleIdx = bb.m_triangleIndex;				
 
 					result->m_uv = Imath::V2f( hitPoint.x, hitPoint.y );
+					
+					assert( bb.m_vertexIds[0] < (int)( m_verts->readable().size() ) );
+					assert( bb.m_vertexIds[1] < (int)( m_verts->readable().size() ) );			
+					assert( bb.m_vertexIds[2] < (int)( m_verts->readable().size() ) );					
 					
 					const Imath::V3f &p0 = m_verts->readable()[ bb.m_vertexIds[0] ];
 					const Imath::V3f &p1 = m_verts->readable()[ bb.m_vertexIds[1] ];
@@ -909,6 +929,10 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 		for( BoundedTriangleTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
 			const BoundedTriangle &bb = **perm;
+			
+			assert( bb.m_vertexIds[0] < (int)( m_verts->readable().size() ) );
+			assert( bb.m_vertexIds[1] < (int)( m_verts->readable().size() ) );			
+			assert( bb.m_vertexIds[2] < (int)( m_verts->readable().size() ) );
 			
 			const Imath::V3f &p0 = m_verts->readable()[ bb.m_vertexIds[0] ];
 			const Imath::V3f &p1 = m_verts->readable()[ bb.m_vertexIds[1] ];
@@ -1069,6 +1093,10 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIn
 		for( BoundedTriangleTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
 			const BoundedTriangle &bb = **perm;
+			
+			assert( bb.m_vertexIds[0] < (int)( m_verts->readable().size() ) );
+			assert( bb.m_vertexIds[1] < (int)( m_verts->readable().size() ) );			
+			assert( bb.m_vertexIds[2] < (int)( m_verts->readable().size() ) );
 
 			const Imath::V3f &p0 =  m_verts->readable()[ bb.m_vertexIds[0] ];
 			const Imath::V3f &p1 =  m_verts->readable()[ bb.m_vertexIds[1] ];
