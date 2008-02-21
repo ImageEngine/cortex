@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,9 +36,11 @@
 #include "maya/MFnMesh.h"
 #include "maya/MPointArray.h"
 #include "maya/MFloatPointArray.h"
+#include "maya/MFloatVectorArray.h"
 #include "maya/MIntArray.h"
 
 #include "IECore/MeshPrimitive.h"
+#include "IECore/PrimitiveVariable.h"
 
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaMeshConverter.h"
@@ -102,14 +104,9 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 		}	
 	}
 
-#if 0	
-	if (!numVertices)
-	{
-		return true;
-	}
-#endif	
 						
 	IECore::ConstIntVectorDataPtr verticesPerFace = mesh->verticesPerFace();
+	assert( verticesPerFace );
 	int numPolygons = verticesPerFace->readable().size();
 	
 	polygonCounts.setLength( numPolygons );
@@ -119,6 +116,7 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 	}
 	
 	IECore::ConstIntVectorDataPtr vertexIds = mesh->vertexIds();
+	assert( vertexIds );
 	int numPolygonConnects = vertexIds->readable().size();
 	polygonConnects.setLength( numPolygonConnects );
 	for (int i = 0; i < numPolygonConnects; i++)
@@ -132,6 +130,55 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 	{			
 		return false;
 	}
+	
+	it = mesh->variables.find("N");
+	if ( it != mesh->variables.end() )
+	{
+		if (it->second.interpolation == IECore::PrimitiveVariable::FaceVarying )
+		{	
+			MFloatVectorArray vertexNormalsArray;
+			IECore::ConstV3fVectorDataPtr n = IECore::runTimeCast<const IECore::V3fVectorData>(it->second.data);
+			if (n)
+			{
+				int numVertexNormals = n->readable().size();
+
+				vertexNormalsArray.setLength( numVertexNormals );
+				for (int i = 0; i < numVertexNormals; i++)
+				{
+					vertexNormalsArray[i] = IECoreMaya::convert<MFloatVector, Imath::V3f>( n->readable()[i] );
+				}	
+
+				fnMesh.setNormals( vertexNormalsArray );			
+			}
+			else
+			{
+				IECore::ConstV3dVectorDataPtr n = IECore::runTimeCast<const IECore::V3dVectorData>(it->second.data);
+				if (n)
+				{
+					int numVertexNormals = n->readable().size();
+
+					vertexNormalsArray.setLength( numVertexNormals );
+					for (int i = 0; i < numVertexNormals; i++)
+					{
+						vertexNormalsArray[i] = IECoreMaya::convert<MFloatVector, Imath::V3d>( n->readable()[i] );
+					}
+
+					fnMesh.setNormals( vertexNormalsArray );
+
+				}
+				else
+				{
+					/// \todo Warn that N is not of correct type
+				}				
+			}			
+		}
+		else
+		{
+			/// \todo Warn that N is not of correct type		
+		}	
+	}
+	
+	/// \todo UV coordinates, another other primvars
 		
 	return true;
 }
