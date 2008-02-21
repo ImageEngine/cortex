@@ -152,6 +152,7 @@
 #include "IECore/bindings/SpherePrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/InverseDistanceWeightedInterpolationBinding.h"
 #include "IECore/bindings/ImageCropOpBinding.h"
+#include "IECore/bindings/MeshPrimitiveShrinkWrapOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -283,6 +284,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSpherePrimitiveEvaluator();
 	bindInverseDistanceWeightedInterpolation();
 	bindImageCropOp();
+	bindMeshPrimitiveShrinkWrapOp();
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
