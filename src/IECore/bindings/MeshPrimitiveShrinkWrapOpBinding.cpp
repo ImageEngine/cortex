@@ -53,10 +53,16 @@ void bindMeshPrimitiveShrinkWrapOp()
 {
 	
 	typedef class_< MeshPrimitiveShrinkWrapOp, MeshPrimitiveShrinkWrapOpPtr, boost::noncopyable, bases<MeshPrimitiveOp> > MeshPrimitiveShrinkWrapOpPyClass;
-	MeshPrimitiveShrinkWrapOpPyClass( "MeshPrimitiveShrinkWrapOp", no_init )
+	scope opScope = MeshPrimitiveShrinkWrapOpPyClass( "MeshPrimitiveShrinkWrapOp", no_init )
 		.def( init< >() )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( MeshPrimitiveShrinkWrapOp )
 	;
+	
+	enum_< MeshPrimitiveShrinkWrapOp::Method >( "Method" )
+		.value( "Both", MeshPrimitiveShrinkWrapOp::Both )
+		.value( "Inside", MeshPrimitiveShrinkWrapOp::Inside )
+		.value( "Outside", MeshPrimitiveShrinkWrapOp::Outside )	
+	;			
 	
 	INTRUSIVE_PTR_PATCH( MeshPrimitiveShrinkWrapOp, MeshPrimitiveShrinkWrapOpPyClass );
 	implicitly_convertible<MeshPrimitiveShrinkWrapOpPtr, MeshPrimitiveOpPtr>();	
