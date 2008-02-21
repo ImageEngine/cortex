@@ -160,6 +160,8 @@ class TestNumericParameter( unittest.TestCase ) :
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.minValue, 0 )
 		self.assertEqual( p.maxValue, 10 )
+		
+		self.assertRaises( RuntimeError, IntParameter, "name", "description", 15, 0, 10 )
 
 	def testUserData( self ):
 		compound = CompoundObject()

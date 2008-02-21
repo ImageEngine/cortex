@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/static_assert.hpp"
+
 #include "IECore/NumericParameter.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/Exception.h"
 
 using namespace std;
 using namespace IECore;
@@ -59,6 +62,10 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 	T minValue, T maxValue, const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), presetsOnly, userData ), m_min( minValue ), m_max( maxValue )	
 {
+	if ( defaultValue < minValue || defaultValue > maxValue )
+	{
+		throw InvalidArgumentException( "NumericParameter default value outside specified min/max range" );
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +81,7 @@ TypeId NumericParameter<T>::typeId() const
 template <class T> 
 TypeId NumericParameter<T>::staticTypeId()
 {
-	assert( 0 ); // this function must be specialised for each type!
+	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return InvalidTypeId;
 }
 
@@ -87,7 +94,7 @@ std::string NumericParameter<T>::typeName() const
 template <class T> 
 std::string NumericParameter<T>::staticTypeName()
 {
-	assert( 0 ); // this function must be specialised for each type!
+	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
 }
 
