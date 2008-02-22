@@ -64,6 +64,11 @@ class ReadProcedural( Renderer.Procedural ) :
 							name = "frame",
 							description = "The frame number of the files to render. This is substituted for any # characters in the filename.",
 							defaultValue = 1,
+							userData = CompoundObject( {
+								"maya" : {
+									"defaultConnection" : StringData( "time1.outTime" ),
+								}
+							} ),
 						)
 					]
 				),
@@ -149,7 +154,7 @@ class ReadProcedural( Renderer.Procedural ) :
 			else :
 			
 				if shutter[0]==shutter[1] :
-					o = self.__readFile( fileName )
+					o = self.__readFile( fileName[0] )
 					if o :
 						o.render( renderer )
 				else :
@@ -176,7 +181,7 @@ class ReadProcedural( Renderer.Procedural ) :
 		result = []
 		if FileSequence.fileNameValidator().match( args.files.name.value ) :
 			sequence = FileSequence( args.files.name.value, FrameRange( frame, frame ) )
-			if args.motion.blur :
+			if args.motion.blur.value :
 				result.append( ( sequence.fileNameForFrame( frame ), sequence.fileNameForFrame( frame + 1 ) ) )
 			else :
 				result.append( sequence.fileNameForFrame( frame ) )
