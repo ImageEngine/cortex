@@ -41,12 +41,8 @@ namespace IECore
 template<typename N>
 Turbulence<N>::Turbulence( const unsigned int octaves, const Value &gain,
 	const Point &lacunarity, bool turbulent, const N &noise )
+	:	m_octaves( octaves ), m_gain( gain ), m_lacunarity( lacunarity ), m_turbulent( turbulent ), m_noise( noise )
 {
-	setOctaves( octaves );
-	setGain( gain );
-	setLacunarity( lacunarity );
-	setTurbulent( turbulent );
-	setNoise( noise );
 	calculateScaleAndOffset();
 }
 
