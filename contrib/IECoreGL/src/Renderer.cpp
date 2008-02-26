@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,6 +55,7 @@
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/BoxOps.h"
 
 #include <stack>
 
@@ -1355,10 +1356,25 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 		msg( Msg::Warning, "Renderer::image", "Unable to create shader to display image." );
 	}
 	
-	/// \todo This is completely wrong in terms of bounding box and positioning. It should be fixed to match the
-	/// idea of image bounding box from IECore.
-	QuadPrimitivePtr quad = new QuadPrimitive( dataWindow.size().x + 1, dataWindow.size().y + 1 );
-	m_data->implementation->addPrimitive( quad );
+	m_data->implementation->transformBegin();
+	
+		Box3f bound = image->bound();
+		V3f center = bound.center();
+		
+		M44f xform;
+		xform[3][0] = center.x;
+		xform[3][1] = center.y;		
+		xform[3][2] = center.z;
+		
+		xform[0][0] = boxSize( bound ).x ;
+		xform[1][1] = boxSize( bound ).y ;
+		xform[2][2] = 1.0;		
+			
+		m_data->implementation->concatTransform( xform );
+		QuadPrimitivePtr quad = new QuadPrimitive( 1.0, 1.0 );
+		m_data->implementation->addPrimitive( quad );
+		
+	m_data->implementation->transformEnd();	
 }
 
 void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
