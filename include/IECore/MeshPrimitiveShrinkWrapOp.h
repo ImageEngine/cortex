@@ -63,7 +63,8 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 			Normal = 0,
 			XAxis = 1,
 			YAxis = 2,
-			ZAxis = 3
+			ZAxis = 3,
+			DirectionMesh = 4
 		} Method;
 
 
@@ -81,11 +82,14 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 		
 		IntParameterPtr methodParameter();
 		ConstIntParameterPtr methodParameter() const;
+		
+		MeshPrimitiveParameterPtr directionMeshParameter();
+		ConstMeshPrimitiveParameterPtr directionMeshParameter() const;
 
 	protected:
 
 		template<typename T>
-		void doShrinkWrap( std::vector<T> &vertices, PrimitivePtr sourcePrimitive, ConstPrimitivePtr targetPrimitive, Direction direction, Method method );
+		void doShrinkWrap( std::vector<T> &vertices, PrimitivePtr sourcePrimitive, ConstPrimitivePtr targetPrimitive, typename TypedData< std::vector<T> >::ConstPtr directionVerticesData, Direction direction, Method method );
 
 		virtual void modifyTypedPrimitive( MeshPrimitivePtr typedPrimitive, ConstCompoundObjectPtr operands );
 
@@ -93,7 +97,12 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 
 		MeshPrimitiveParameterPtr m_targetMeshParameter;
 		IntParameterPtr m_directionParameter;
-		IntParameterPtr m_methodParameter;		
+		IntParameterPtr m_methodParameter;
+		
+	public:	
+		
+		/// \todo Move all ExtraData members to here on next major version change
+		struct ExtraData;			
 
 };
 
