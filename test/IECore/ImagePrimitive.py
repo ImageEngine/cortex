@@ -40,17 +40,22 @@ class TestImagePrimitive( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 	
-		b = Box2i( V2i( 0, 0 ), V2i( 100, 100 ) )
-		i = ImagePrimitive( b, b )
+		windowMin = V2i( 0, 0 )
+		windowMax = V2i( 100, 100 )
+		w = Box2i( windowMin, windowMax )
+		i = ImagePrimitive( w, w )
 		
-		self.assertEqual( i.dataWindow, b )
-		self.assertEqual( i.displayWindow, b )
-				
-		i.dataWindow = Box2i( V2i( 0, 0 ), V2i( 10, 10 ) )
-		self.assertEqual( i.dataWindow, Box2i( V2i( 0, 0 ), V2i( 10, 10 ) ) )
+		self.assertEqual( i.dataWindow, w )
+		self.assertEqual( i.displayWindow, w )
 		
-		i.displayWindow = Box2i( V2i( 0, 0 ), V2i( 10, 10 ) )
-		self.assertEqual( i.displayWindow, Box2i( V2i( 0, 0 ), V2i( 10, 10 ) ) )
+		self.assertEqual( i.bound(), Box3f( V3f( windowMin.x, windowMin.y, 0.0 ), V3f( windowMax.x + 1, windowMax.y + 1, 0.0 ) ) )
+						
+		i.dataWindow = Box2i( windowMin, V2i( 10, 10 ) )
+		self.assertEqual( i.dataWindow, Box2i( windowMin, V2i( 10, 10 ) ) )
+		self.assertEqual( i.displayWindow, w )		
+		
+		i.displayWindow = Box2i( windowMin, V2i( 10, 10 ) )
+		self.assertEqual( i.displayWindow, Box2i( windowMin, V2i( 10, 10 ) ) )
 		
 if __name__ == "__main__":
     unittest.main()   
