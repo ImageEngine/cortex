@@ -123,6 +123,8 @@ const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d
 			arraySize = static_pointer_cast<const StringVectorData>( d )->readable().size();
 		case StringDataTypeId :
 			return "string";
+		case M44fDataTypeId :
+			return "matrix";
 		default :
 			msg( Msg::Warning, "ParameterList::type", format( "Variable \"%s\" has unsupported datatype." ) % name );
 			return 0;
