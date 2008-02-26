@@ -70,6 +70,8 @@ class Renderer : public IECore::Renderer
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		/// Currently supported options :
 		///
+		/// "camera:resolution" V2iData
+		/// "camera:shutter"
 		///	"shutter"	V2fData()
 		/// "user:*"
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;

@@ -121,6 +121,7 @@ class RendererImplementation : public IECore::Renderer
 		
 		void setShaderSearchPathOption( const std::string &name, IECore::ConstDataPtr d );
 		IECore::ConstDataPtr getShutterOption( const std::string &name ) const;
+		IECore::ConstDataPtr getResolutionOption( const std::string &name ) const;
 		
 		Imath::M44f m_cameraTransform;
 		IECore::CompoundDataMap m_cameraParameters;

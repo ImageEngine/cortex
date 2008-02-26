@@ -120,6 +120,8 @@ void IECoreRI::RendererImplementation::constructCommon()
 	
 	m_setOptionHandlers["ri:searchpath:shader"] = &IECoreRI::RendererImplementation::setShaderSearchPathOption;
 	m_getOptionHandlers["shutter"] = &IECoreRI::RendererImplementation::getShutterOption;
+	m_getOptionHandlers["camera:shutter"] = &IECoreRI::RendererImplementation::getShutterOption;
+	m_getOptionHandlers["camera:resolution"] = &IECoreRI::RendererImplementation::getResolutionOption;
 	
 	m_setAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::setShadingRateAttribute;
 	m_setAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::setMatteAttribute;
@@ -265,6 +267,22 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getShutterOption( const s
 		if( resultType==RxInfoFloat && resultCount==2 )
 		{
 			return new V2fData( V2f( shutter[0], shutter[1] ) );
+		}
+	}
+	return 0;
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getResolutionOption( const std::string &name ) const
+{
+	float format[3];
+	RxInfoType_t resultType;
+	int resultCount;
+	int s = RxOption( "Format", format, 3 * sizeof( float ), &resultType, &resultCount );
+	if( s==0 )
+	{
+		if( resultType==RxInfoFloat && resultCount==3 )
+		{
+			return new V2iData( V2i( (int)format[0], (int)format[1] ) );
 		}
 	}
 	return 0;

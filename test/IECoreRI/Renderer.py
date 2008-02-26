@@ -130,10 +130,14 @@ class RendererTest( unittest.TestCase ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testGetOption.rib" )
 		
+		r.camera( "main", { "resolution" : V2iData( V2i( 1024, 768 ) ) } )
+		
 		r.worldBegin()
 		
 		s = r.getOption( "shutter" )
 		self.assertEqual( s, V2fData( V2f( 0 ) ) )
+		
+		self.assertEqual( r.getOption( "camera:resolution" ), V2iData( V2i( 1024, 768 ) ) )
 		
 		r.worldEnd()
 		
