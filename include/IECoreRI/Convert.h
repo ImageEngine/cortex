@@ -36,12 +36,14 @@
 #define IE_CORERI_CONVERT_H
 
 #include "IECore/Convert.h"
+#include "IECore/Data.h"
 
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathBox.h"
 
 #include "ri.h"
+#include "rx.h"
 
 // Seems ok to specialise inside IECore namespace as Rt types will
 // never exist in there so we can't get clashes.
@@ -56,6 +58,10 @@ Imath::Color3f convert( const RtColor &from );
 
 template<>
 Imath::Box3f convert( const RtBound &from );
+
+/// This function is intended for converting the results of RxAttribute and RxOption
+/// into useful IECore types.
+DataPtr convert( const char *data, RxInfoType_t type, RtInt count );
 
 } // namespace IECore
 

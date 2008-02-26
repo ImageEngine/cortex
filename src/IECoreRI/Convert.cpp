@@ -34,6 +34,8 @@
 
 #include "IECoreRI/Convert.h"
 
+#include "IECore/SimpleTypedData.h"
+
 namespace IECore
 {
 
@@ -53,6 +55,51 @@ template<>
 Imath::Box3f convert( const RtBound &from )
 {
 	return Imath::Box3f( Imath::V3f( from[0], from[2], from[4] ), Imath::V3f( from[1], from[3], from[5] ) );
+}
+
+DataPtr convert( const char *data, RxInfoType_t type, RtInt count )
+{
+	/// \todo Deal with the array cases (but how do we distinguish between a single item and a 1 element array?)
+	switch( type )
+	{
+		case RxInfoFloat :
+			assert( count==1 );
+			return new FloatData( *(float *)data );
+		case RxInfoInteger :
+			assert( count==1 );
+			return new IntData( *(int *)data );
+		case RxInfoStringV :
+			assert( count==1 );
+			return new StringData( *(char **)data );
+		case RxInfoColor :
+			{
+				assert( count==3 );
+				const float *fData = (const float *)data;
+				return new Color3fData( Imath::Color3f( fData[0], fData[1], fData[2] ) );
+			}
+		case RxInfoNormal :
+		case RxInfoVector :
+		case RxInfoPoint :
+			{
+				assert( count==3 );
+				const float *fData = (const float *)data;
+				return new V3fData( Imath::V3f( fData[0], fData[1], fData[2] ) );
+			}
+		case RxInfoMPoint :
+		case RxInfoMatrix :
+			{
+				assert( count==16 );
+				const float *fd = (const float *)data;
+				return new M44fData( Imath::M44f(
+					fd[0], fd[1], fd[2], fd[3],
+					fd[4], fd[5], fd[6], fd[7],
+					fd[8], fd[9], fd[10], fd[11],
+					fd[12], fd[13], fd[14], fd[15]
+				) );
+			}
+		default :
+			return 0;
+	}
 }
 
 } // namespace IECore
