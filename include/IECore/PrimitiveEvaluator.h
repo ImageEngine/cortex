@@ -106,7 +106,7 @@ class PrimitiveEvaluator : public RunTimeTyped
 		/// Create a result instance which is suitable for passing to one of the query methods
 		virtual ResultPtr createResult() const = 0;
 		
-		/// \todo Add:
+		/// \todo Add method:
 		/// virtual ConstPrimitivePtr primitive() const;
 		
 		//! @name Query Functions
@@ -114,9 +114,9 @@ class PrimitiveEvaluator : public RunTimeTyped
 		
 		/// \todo Add something like:
 		/// virtual bool signedDistance( const Imath::V3f &p, float &distance, const ResultPtr &closestPoint ) const;
-		/// With a default implementationw which just checks distance from the plane defined by the closest point and normal.
+		/// With a default implementation which just checks distance from the plane defined by the closest point and normal.
 		
-		/// \todo Add methods like:
+		/// \todo Add methods:
 		/// virtual float surfaceArea() const=0;
 		/// virtual float volume() const=0;
 		/// virtual Imath::V3f centerOfGravity() const=0;
