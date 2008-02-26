@@ -71,7 +71,7 @@ class Renderer : public IECore::Renderer
 		/// Currently supported options :
 		///
 		///	"shutter"	V2fData()
-		///
+		/// "user:*"
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
 
 		/// Currently supported parameters :
@@ -120,6 +120,9 @@ class Renderer : public IECore::Renderer
 		virtual void attributeBegin();
 		virtual void attributeEnd();
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
+		/// Currently supported attributes :
+		///
+		/// "user:*"
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const IECore::CompoundDataMap &parameters );

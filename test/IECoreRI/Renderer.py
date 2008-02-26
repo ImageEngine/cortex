@@ -279,5 +279,41 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 		
+	def testGetUserOption( self ) :
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/getUserOption.rib" )
+		
+		o = {
+			"user:f" : FloatData( 10 ),
+			"user:i" : IntData( 100 ),
+			"user:s" : StringData( "hello" ),
+			"user:c" : Color3fData( Color3f( 1, 0, 0 ) ),
+			"user:v" : V3fData( V3f( 1, 2, 3 ) ),
+			"user:m" : M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ),
+		}
+		
+		for k, v in o.items() :
+		
+			r.setOption( k, v )
+			self.assertEqual( r.getOption( k ), v )
+			
+	def testGetUserAttribute( self ) :
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/getUserAttribute.rib" )
+		
+		o = {
+			"user:f" : FloatData( 10 ),
+			"user:i" : IntData( 100 ),
+			"user:s" : StringData( "hello" ),
+			"user:c" : Color3fData( Color3f( 1, 0, 0 ) ),
+			"user:v" : V3fData( V3f( 1, 2, 3 ) ),
+			"user:m" : M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ),
+		}
+		
+		for k, v in o.items() :
+		
+			r.setAttribute( k, v )
+			self.assertEqual( r.getAttribute( k ), v )		
+		
 if __name__ == "__main__":
     unittest.main()   

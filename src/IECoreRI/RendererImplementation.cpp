@@ -221,6 +221,17 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getOption( const std::str
 		{
 			return (this->*(it->second))( name );
 		}
+		else if( name.compare( 0, 5, "user:" )==0 )
+		{
+			string s( name, 5 );
+			char result[16 * sizeof( RtFloat )]; // enough room for a matrix return type
+			RxInfoType_t resultType;
+			int resultCount;
+			if( 0==RxOption( (char *)name.c_str(), result, 16 * sizeof( RtFloat ), &resultType, &resultCount ) )
+			{
+				return convert( result, resultType, resultCount );
+			}
+		}
 		else
 		{
 			msg( Msg::Warning, "IECoreRI::RendererImplementation::getOption", format( "Unknown option \"%s\"." ) % name );
@@ -657,6 +668,17 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::
 		if( it!=m_getAttributeHandlers.end() )
 		{
 			return (this->*(it->second))( name );
+		}
+		else if( name.compare( 0, 5, "user:" )==0 )
+		{
+			string s( name, 5 );
+			char result[16 * sizeof( RtFloat )]; // enough room for a matrix return type
+			RxInfoType_t resultType;
+			int resultCount;
+			if( 0==RxAttribute( (char *)name.c_str(), result, 16 * sizeof( RtFloat ), &resultType, &resultCount ) )
+			{
+				return convert( result, resultType, resultCount );
+			}
 		}
 		else
 		{
