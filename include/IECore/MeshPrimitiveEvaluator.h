@@ -101,6 +101,9 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		
 		virtual ~MeshPrimitiveEvaluator();
 		
+		/// \todo Add to PrimitiveEvaluator, and make virtual
+		ConstPrimitivePtr primitive() const;
+		
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
 						
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;

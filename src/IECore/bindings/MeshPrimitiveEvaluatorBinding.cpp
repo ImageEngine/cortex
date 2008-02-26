@@ -98,6 +98,7 @@ void bindMeshPrimitiveEvaluator()
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(MeshPrimitiveEvaluator)
 		
 		/// \todo Move these into the base class
+		.def( "primitive", &MeshPrimitiveEvaluator::primitive )
 		.def( "volume", &MeshPrimitiveEvaluator::volume )
 		.def( "centerOfGravity", &MeshPrimitiveEvaluator::centerOfGravity )
 		.def( "surfaceArea", &MeshPrimitiveEvaluator::surfaceArea )

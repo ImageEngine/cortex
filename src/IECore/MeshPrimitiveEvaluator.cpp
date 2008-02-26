@@ -38,6 +38,7 @@
 #include "OpenEXR/ImathLineAlgo.h"
 #include "OpenEXR/ImathMatrix.h"
 
+#include "IECore/BoxOps.h"
 #include "IECore/PrimitiveVariable.h"
 #include "IECore/Exception.h"
 #include "IECore/MeshPrimitiveEvaluator.h"
@@ -237,6 +238,7 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh )
 		throw InvalidArgumentException( "No mesh given to MeshPrimitiveEvaluator");
 	}
 	
+	/// \todo Remove the const_cast once arePrimitiveVariablesValid() is const
 	if (! ( boost::const_pointer_cast< MeshPrimitive >(mesh) )->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "Mesh with invalid primitive variables given to MeshPrimitiveEvaluator");
@@ -385,6 +387,11 @@ MeshPrimitiveEvaluator::~MeshPrimitiveEvaluator()
 	m_uvTree = 0;
 		
 	g_classData.erase( this );
+}
+
+ConstPrimitivePtr MeshPrimitiveEvaluator::primitive() const
+{
+	return m_mesh;
 }
 
 float MeshPrimitiveEvaluator::volume() const
@@ -813,16 +820,18 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeI
 	else
 	{	
 		V3f highHitPoint;
-		bool highHit = intersects(
+		bool highHit = boxIntersects(
 			m_uvTree->node( BoundedTriangleTree::highChildIndex( nodeIndex ) ).bound(),
-			ray, 
+			ray.pos,
+			ray.dir, 
 			highHitPoint
 		);
 		
 		V3f lowHitPoint;
-		bool lowHit = intersects(
+		bool lowHit = boxIntersects(
 			m_uvTree->node( BoundedTriangleTree::lowChildIndex( nodeIndex ) ).bound(),
-			ray, 
+			ray.pos,
+			ray.dir, 
 			lowHitPoint
 		);
 				
@@ -979,16 +988,18 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 	else
 	{	
 		V3f highHitPoint;
-		bool highHit = intersects(
+		bool highHit = boxIntersects(
 			m_tree->node( BoundedTriangleTree::highChildIndex( nodeIndex ) ).bound(),
-			ray, 
+			ray.pos,
+			ray.dir, 
 			highHitPoint
 		);
 		
 		V3f lowHitPoint;
-		bool lowHit = intersects(
+		bool lowHit = boxIntersects(
 			m_tree->node( BoundedTriangleTree::lowChildIndex( nodeIndex ) ).bound(),
-			ray, 
+			ray.pos,
+			ray.dir, 
 			lowHitPoint
 		);
 				
@@ -1142,9 +1153,10 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIn
 		V3f hitPoint;
 		
 		/// Test highChild bound for intersection, descending into children if necessary
-		bool hit = intersects(
+		bool hit = boxIntersects(
 			m_tree->node( BoundedTriangleTree::highChildIndex( nodeIndex ) ).bound(),
-			ray, 
+			ray.pos,
+			ray.dir, 
 			hitPoint
 		);
 				
@@ -1154,9 +1166,10 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIn
 		}
 			
 		/// Test lowChild bound for intersection, descending into children if necessary				
-		hit = intersects(
+		hit = boxIntersects(
 			m_tree->node( BoundedTriangleTree::lowChildIndex( nodeIndex ) ).bound(),
-			ray, 
+			ray.pos,
+			ray.dir, 
 			hitPoint
 		);
 				

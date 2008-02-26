@@ -78,6 +78,16 @@ bool boxIntersects( const T &box, const typename BoxTraits<T>::BaseType &p );
 template <typename T>
 bool boxIntersects( const T &box, const T &box2 );
 
+/// Intersects the box with the given ray. The direction vector must be normalissed. Returns true iff there was an intersection, setting
+/// the "result" argument with the point of intersection accordingly.
+template<typename T>
+bool boxIntersects(
+        const T &box,
+        const typename BoxTraits<T>::BaseType &origin,
+        const typename BoxTraits<T>::BaseType &direction,
+        typename BoxTraits<T>::BaseType &result
+);
+
 } // namespace IECore
 
 #include "IECore/BoxOps.inl"

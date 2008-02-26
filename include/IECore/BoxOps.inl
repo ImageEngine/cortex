@@ -36,6 +36,7 @@
 #define IE_CORE_BOXOPS_INL
 
 #include <cassert>
+#include <vector>
 
 #include <IECore/VectorOps.h>
 
@@ -179,6 +180,110 @@ bool boxIntersects( const T &box, const T &box2 )
 	
 	return true;
 }
+
+/// Based on "Fast Ray-Box Intersection", by Andrew Woo, "Graphics Gems", Academic Press, 1990
+template<typename T>
+bool boxIntersects(
+        const T &box,
+        const typename BoxTraits<T>::BaseType &origin,
+        const typename BoxTraits<T>::BaseType &direction,
+        typename BoxTraits<T>::BaseType &result
+)
+{
+	const char right = 0;
+	const char left = 1;
+	const char middle = 2;
+
+	typedef typename BoxTraits<T>::BaseType Vec;
+	typedef typename VectorTraits<Vec>::BaseType Real;
+
+	Vec minB = BoxTraits<T>::min( box );
+	Vec maxB = BoxTraits<T>::max( box );
+	
+	unsigned int dimension = VectorTraits<Vec>::dimensions();
+	assert( dimension >= 2 );
+
+	bool inside = true;
+	std::vector<char> quadrant;
+	quadrant.resize(dimension);
+	
+	Vec maxT;	
+	Vec candidatePlane;
+
+	for ( unsigned int i = 0; i < dimension; i++ )
+	{
+		if ( vecGet( origin, i ) < vecGet( minB, i ))
+		{
+			quadrant[i] = left;			
+			vecSet( candidatePlane, i, vecGet( minB, i ) );
+			inside = false;
+		}
+		else if (vecGet( origin, i ) > vecGet( maxB, i ))
+		{
+			quadrant[i] = right;
+			vecSet( candidatePlane, i, vecGet( maxB, i ) );
+			inside = false;
+		}
+		else
+		{
+			quadrant[i] = middle;
+		}
+	}
+
+	if ( inside )
+	{
+		result = origin;
+		return true;
+	}
+
+	for ( unsigned int i = 0; i < dimension; i++ )
+	{
+		if ( quadrant[i] != middle && vecGet( direction, i ) != 0. )
+		{
+			vecSet( maxT, i, ( vecGet( candidatePlane, i ) - vecGet( origin, i ) ) / vecGet( direction, i ) );
+		}
+		else
+		{
+			vecSet( maxT, i, -1. );
+		}
+	}
+
+	unsigned int whichPlane = 0;
+
+	for ( unsigned int i = 1; i < dimension; i++ )
+	{
+		if ( vecGet( maxT, whichPlane ) < vecGet( maxT, i ) )
+		{
+			whichPlane = i;
+		}
+	}
+
+	if ( vecGet( maxT, whichPlane ) < 0. )
+	{
+		return false;
+	}
+
+	for ( unsigned int i = 0; i < dimension; i++ )
+	{
+		if ( whichPlane != i )
+		{
+			vecSet( result, i, vecGet( origin, i ) + vecGet( maxT, whichPlane ) * vecGet( direction, i ) );
+
+			if ( vecGet( result, i ) < vecGet( minB, i ) || vecGet( result, i ) > vecGet( maxB, i ) )
+			{
+				return false;
+			}
+		}
+		else
+		{
+			vecSet( result, i, vecGet( candidatePlane, i ) );
+		}
+	}
+
+	return true;
+
+}
+
 
 } // namespace IECore
 
