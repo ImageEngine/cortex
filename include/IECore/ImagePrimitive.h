@@ -51,6 +51,7 @@ namespace IECore
 /// \todo Implement the bound() method.
 /// \bug The bound() method is not implemented.
 /// \todo Document the meaning of data and display windows and the use of primvars as channels.
+/// \todo Establish whether or not image origin and orientation are appropriate for common uses, document it either way
 class ImagePrimitive : public Primitive
 {	  
 
@@ -68,6 +69,9 @@ class ImagePrimitive : public Primitive
 	
 		/// construct an ImagePrimitive with the given data and display window dimensions
 		ImagePrimitive(Imath::Box2i datawindow, Imath::Box2i displaywindow);
+		
+		/// Returns the display window of the image on the XY-plane.
+		virtual Imath::Box3f bound() const;
 
 		/// Returns the data window.
 		const Imath::Box2i &getDataWindow() const;

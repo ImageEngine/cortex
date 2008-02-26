@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -53,7 +53,19 @@ ImagePrimitive::ImagePrimitive(Box2i datawindow, Box2i displaywindow)
 {
 }
 
-const Box2i & ImagePrimitive::getDataWindow() const
+Box3f ImagePrimitive::bound() const
+{
+	/// \todo We might need to include any pixel aspect ratio in this bound
+	
+	/// We add one here because the displayWindow is measured in pixels, and is inclusive. That is, an image
+	/// which has a displayWindow of (0,0)->(0,0) contains exactly one pixel.
+	return Box3f(
+		V3f( m_displayWindow.min.x, m_displayWindow.min.y, 0.0 ),
+		V3f( 1.0f + m_displayWindow.max.x, 1.0f + m_displayWindow.max.y, 0.0 )
+	);
+}
+
+const Box2i &ImagePrimitive::getDataWindow() const
 {
 	return m_dataWindow;
 }
@@ -63,7 +75,7 @@ void ImagePrimitive::setDataWindow(const Box2i &dw)
 	m_dataWindow = dw;
 }
 
-const Box2i & ImagePrimitive::getDisplayWindow() const
+const Box2i &ImagePrimitive::getDisplayWindow() const
 {
 	return m_displayWindow;
 }
