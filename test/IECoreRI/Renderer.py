@@ -84,6 +84,7 @@ class RendererTest( unittest.TestCase ) :
 		r.setOption( "ri:searchpath:shader", StringData( os.environ["SHADER_PATH"] ) )
 		r.setOption( "ri:render:bucketorder", StringData( "zigzag" ) )
 		r.setOption( "user:magicNumber", IntData( 42 ) )
+		r.setOption( "ri:pixelSamples", V2iData( V2i( 8, 8 ) ) )
 		
 		r.worldBegin()
 		

@@ -120,6 +120,7 @@ class RendererImplementation : public IECore::Renderer
 		GetOptionHandlerMap m_getOptionHandlers;
 		
 		void setShaderSearchPathOption( const std::string &name, IECore::ConstDataPtr d );
+		void setPixelSamplesOption( const std::string &name, IECore::ConstDataPtr d );
 		IECore::ConstDataPtr getShutterOption( const std::string &name ) const;
 		IECore::ConstDataPtr getResolutionOption( const std::string &name ) const;
 		

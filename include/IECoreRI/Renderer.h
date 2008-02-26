@@ -67,6 +67,13 @@ class Renderer : public IECore::Renderer
 		
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreRI::Renderer, RendererTypeId, IECore::Renderer );
 
+		/// Implementation specific options :
+		///
+		/// "ri:searchpath:shader" StringData()
+		/// A colon separated list of paths to search for shaders on.
+		///
+		/// "ri:pixelSamples" V2iData()
+		/// Passed to an RiPixelSamples call.
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		/// Currently supported options :
 		///

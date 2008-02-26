@@ -119,6 +119,9 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_shaderCache = new CachedReader( SearchPath( shaderPathE ? shaderPathE : "", ":" ), g_shaderCacheSize );
 	
 	m_setOptionHandlers["ri:searchpath:shader"] = &IECoreRI::RendererImplementation::setShaderSearchPathOption;
+	m_setOptionHandlers["ri:pixelsamples"] = &IECoreRI::RendererImplementation::setPixelSamplesOption;
+	m_setOptionHandlers["ri:pixelSamples"] = &IECoreRI::RendererImplementation::setPixelSamplesOption;
+
 	m_getOptionHandlers["shutter"] = &IECoreRI::RendererImplementation::getShutterOption;
 	m_getOptionHandlers["camera:shutter"] = &IECoreRI::RendererImplementation::getShutterOption;
 	m_getOptionHandlers["camera:resolution"] = &IECoreRI::RendererImplementation::getResolutionOption;
@@ -253,6 +256,18 @@ void IECoreRI::RendererImplementation::setShaderSearchPathOption( const std::str
 	else
 	{
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", "Expected StringData for \"ri:searchpath:shader\"." );	
+	}
+}
+
+void IECoreRI::RendererImplementation::setPixelSamplesOption( const std::string &name, IECore::ConstDataPtr d )
+{
+	if( ConstV2iDataPtr s = runTimeCast<const V2iData>( d ) )
+	{
+		RiPixelSamples( s->readable().x, s->readable().y ); 
+	}
+	else
+	{
+		msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", "Expected V2iData for \"ri:pixelSamples\"." );	
 	}
 }
 
