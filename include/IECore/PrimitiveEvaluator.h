@@ -106,6 +106,9 @@ class PrimitiveEvaluator : public RunTimeTyped
 		/// Create a result instance which is suitable for passing to one of the query methods
 		virtual ResultPtr createResult() const = 0;
 		
+		/// \todo Add:
+		/// virtual ConstPrimitivePtr primitive() const;
+		
 		//! @name Query Functions
 		//@{
 		
