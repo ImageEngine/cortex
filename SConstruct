@@ -819,6 +819,7 @@ if doConfigure :
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " test/IECoreRI/All.py" )
 		NoCache( riTest )
 		riTestEnv.Depends( riTest, corePythonModule )
+		riTestEnv.Depends( riTest, glob.glob( "test/IECoreRI/*.py" ) )
 		riTestEnv.Alias( "testRI", riTest )
 
 ###########################################################################################
