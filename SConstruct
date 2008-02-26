@@ -42,7 +42,7 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=2
-ieCoreMinorVersion=30
+ieCoreMinorVersion=31
 ieCorePatchVersion=0
 
 ###########################################################################################
@@ -830,7 +830,7 @@ if doConfigure :
 # number. when it moves out of /contrib it'll use the same version number as the
 # main libraries.
 ieCoreGLMajorVersion = 0
-ieCoreGLMinorVersion = 6
+ieCoreGLMinorVersion = 7
 ieCoreGLPatchVersion = 0
 
 if env["WITH_GL"] and doConfigure :
