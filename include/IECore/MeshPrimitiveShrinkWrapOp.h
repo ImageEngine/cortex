@@ -46,7 +46,12 @@
 namespace IECore
 {
 
-/// \todo Class docs
+/// An Op to project the vertices of a mesh onto a second mesh, the target mesh, 
+/// by means of raycasting. The direction of the ray for each vertex is
+/// defined by either an (X/Y/Z) axis, the surface normal, or the vector to the
+/// corresponding vertex on a third mesh, the direction mesh. In addition rays can be cast in
+/// both directions ("inside" and "outside") with the closest intersection point being used as
+/// the projected point, or in either one of these directions only.
 class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 {
 	public:
@@ -67,12 +72,10 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 			DirectionMesh = 4
 		} Method;
 
-
 		MeshPrimitiveShrinkWrapOp();
 		virtual ~MeshPrimitiveShrinkWrapOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshPrimitiveShrinkWrapOp, MeshPrimitiveOp );
-
 
 		MeshPrimitiveParameterPtr targetMeshParameter();
 		ConstMeshPrimitiveParameterPtr targetMeshParameter() const;
