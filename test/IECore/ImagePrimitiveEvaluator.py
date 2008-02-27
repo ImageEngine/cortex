@@ -78,6 +78,20 @@ class TestImagePrimitiveEvaluator( unittest.TestCase ) :
 		hits = ipe.intersectionPoints( V3f( 150, 50, 100 ), V3f( 0, 0, -1 ) )
 		self.assertEqual( len(hits), 0 )
 		
+		self.failIf( ipe.pointAtUV( V2f( 1.1, 1.0 ), r ) )
+		self.failIf( ipe.pointAtUV( V2f( 1.0, 1.1 ), r ) )
+		self.failIf( ipe.pointAtUV( V2f( 1.1, 1.1 ), r ) )
+		self.failIf( ipe.pointAtUV( V2f( 1.0, -0.1 ), r ) )
+		self.failIf( ipe.pointAtUV( V2f( -0.1, 1.0 ), r ) )
+		self.failIf( ipe.pointAtUV( V2f( -0.1,  -0.1 ), r ) )
+		
+		self.failIf( ipe.pointAtPixel( V2i( -1, -1 ), r ) )		
+		self.failIf( ipe.pointAtPixel( V2i( -1, 0 ), r ) )
+		self.failIf( ipe.pointAtPixel( V2i( 0, -1 ), r ) )
+		self.failIf( ipe.pointAtPixel( V2i( 0, 100 ), r ) )
+		self.failIf( ipe.pointAtPixel( V2i( 100, 0 ), r ) )		
+		self.failIf( ipe.pointAtPixel( V2i( 100, 100 ), r ) )						
+		
 		
 	def testSimpleImage( self ) :	
 	
