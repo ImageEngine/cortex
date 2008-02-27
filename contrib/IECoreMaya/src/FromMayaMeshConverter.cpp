@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,8 +41,10 @@
 #include "IECore/MeshPrimitive.h"
 #include "IECore/VectorOps.h"
 #include "IECore/CompoundParameter.h"
+#include "IECore/NumericParameter.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/TypedDataDespatch.h"
+#include "IECore/ClassData.h"
 
 #include "maya/MFn.h"
 #include "maya/MFnMesh.h"
@@ -60,9 +62,20 @@ static const TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, Visib
 
 FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaMeshConverter> FromMayaMeshConverter::m_description( fromTypes, toTypes );
 
+struct FromMayaMeshConverter::ExtraData
+{
+	IntParameterPtr m_space;
+};
+
+typedef ClassData< FromMayaMeshConverter, FromMayaMeshConverter::ExtraData*, Deleter<FromMayaMeshConverter::ExtraData*> > FromMayaMeshConverterClassData;
+static FromMayaMeshConverterClassData g_classData;
+
 FromMayaMeshConverter::FromMayaMeshConverter( const MObject &object )
 	:	FromMayaObjectConverter( "FromMayaMeshConverter", "Converts poly meshes to IECore::MeshPrimitive objects.", object )
 {
+	ExtraData *extraData = g_classData.create( this, new ExtraData() );
+	assert( extraData );
+
 	// interpolation
 	StringParameter::PresetsMap interpolationPresets;
 	interpolationPresets["poly"] = "linear";
@@ -148,9 +161,32 @@ FromMayaMeshConverter::FromMayaMeshConverter( const MObject &object )
 	);
 
 	parameters()->addParameter( m_primVarAttrPrefix );
+	
+	IntParameter::PresetsMap spacePresets;
+	spacePresets["Transform"] = Transform;
+	spacePresets["PreTransform"] = PreTransform;
+	spacePresets["PostTransform"] = PostTransform;
+	spacePresets["Object"] = Object;	
+	spacePresets["World"] = World;		
+	extraData->m_space = new IntParameter(
+		"space",
+		"The space obtain the mesh in",
+		Transform,
+		Transform,
+		Object,
+		spacePresets,
+		true
+	);
+		
+	parameters()->addParameter( extraData->m_space );
 
 	FromMayaRenderableConverterUtilPtr m = new FromMayaRenderableConverterUtil();
 	parameters()->addParameters( m->parameters()->orderedParameters().begin(), m->parameters()->orderedParameters().end() );
+}
+
+FromMayaMeshConverter::~FromMayaMeshConverter()
+{
+	g_classData.erase( this );
 }
 
 IECore::V3fVectorDataPtr FromMayaMeshConverter::points() const
@@ -158,7 +194,7 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::points() const
 	MFnMesh fnMesh( object() );
 	
 	MFloatPointArray mPoints;
-	fnMesh.getPoints( mPoints );
+	fnMesh.getPoints( mPoints, space() );
 	
 	V3fVectorDataPtr points = new V3fVectorData;
 	points->writable().resize( mPoints.length() );
@@ -179,7 +215,7 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::normals() const
 	unsigned int normalIndex = 0;
 	for( int i=0; i<numPolygons; i++ )
 	{
-		fnMesh.getFaceVertexNormals( i, faceNormals );
+		fnMesh.getFaceVertexNormals( i, faceNormals, space() );
 		for( int j=faceNormals.length()-1; j>=0; j-- )
 		{
 			normals[normalIndex++] = vecConvert<MVector, V3f>( faceNormals[j] );
@@ -429,4 +465,40 @@ IECore::ObjectPtr FromMayaMeshConverter::doConversion( const MObject &object, IE
 	FromMayaRenderableConverterUtil::addBlindDataAttributes( operands, object, result );
 
 	return result;
+}
+
+IECore::IntParameterPtr FromMayaMeshConverter::spaceParameter()
+{
+	ExtraData *extraData = g_classData[this];
+	assert( extraData );	
+	
+	return extraData->m_space;
+}
+
+IECore::ConstIntParameterPtr FromMayaMeshConverter::spaceParameter() const
+{
+	ExtraData *extraData = g_classData[this];
+	assert( extraData );	
+	
+	return extraData->m_space;
+}
+
+MSpace::Space FromMayaMeshConverter::space() const
+{
+	ExtraData *extraData = g_classData[this];
+	assert( extraData );	
+	
+	Space s = static_cast< Space > ( extraData->m_space->getNumericValue() );
+	
+	switch ( s )
+	{
+		case Transform:     return MSpace::kTransform;
+		case PreTransform:  return MSpace::kPreTransform;
+		case PostTransform: return MSpace::kPostTransform;
+		case Object:        return MSpace::kObject;
+		case World:         return MSpace::kWorld;
+		default:
+			assert( false );
+			return MSpace::kTransform;
+	}
 }

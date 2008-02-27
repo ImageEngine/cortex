@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,10 +38,12 @@
 #include "IECoreMaya/FromMayaObjectConverter.h"
 
 #include "IECore/VectorTypedData.h"
+#include "IECore/NumericParameter.h"
 #include "IECore/TypedParameter.h"
 #include "IECore/Primitive.h"
 
 #include "maya/MString.h"
+#include "maya/MGlobal.h"
 
 namespace IECoreMaya
 {
@@ -49,12 +51,26 @@ namespace IECoreMaya
 /// The FromMayaMeshConverter converts types compatible with
 /// MFnMesh into IECore::MeshPrimitive objects.
 /// \todo Vertex color support. Blind data support?
+/// \todo The "space" parameter should probably go in a base class from which all geometry 
+/// converters inherit
 class FromMayaMeshConverter : public FromMayaObjectConverter
 {
 
 	public :
+	
+		typedef enum
+		{
+			Transform = 0,
+			PreTransform = 1,
+			PostTransform = 2,
+			World = 3,
+			Object = 4
+		} Space;
 
 		FromMayaMeshConverter( const MObject &object );
+		
+		virtual ~FromMayaMeshConverter();
+		
 		
 		/// Returns just the points for the mesh.
 		IECore::V3fVectorDataPtr points() const;
@@ -70,6 +86,12 @@ class FromMayaMeshConverter : public FromMayaObjectConverter
 		/// class to put this functionality in - it can then be shared by
 		/// a future FromMayaNurbsConverter etc.
 		void addPrimVars( IECore::PrimitivePtr primitive, const MString &prefix ) const;
+		
+		IECore::IntParameterPtr spaceParameter();
+		IECore::ConstIntParameterPtr spaceParameter() const;		
+		
+		/// Retrieves the space that the converter's parameters specify
+		MSpace::Space space() const;
 		
 	protected :
 	
@@ -87,6 +109,10 @@ class FromMayaMeshConverter : public FromMayaObjectConverter
 		IECore::FloatVectorDataPtr sOrT( const MString &uvSet, unsigned int index ) const;
 
 		static FromMayaObjectConverterDescription<FromMayaMeshConverter> m_description;
+		
+	public :
+	
+		struct ExtraData;
 
 };
 
