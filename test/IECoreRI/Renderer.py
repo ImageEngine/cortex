@@ -318,7 +318,31 @@ class RendererTest( unittest.TestCase ) :
 		for k, v in o.items() :
 		
 			r.setAttribute( k, v )
-			self.assertEqual( r.getAttribute( k ), v )		
+			self.assertEqual( r.getAttribute( k ), v )
+			
+	def tearDown( self ) :
+	
+		files = [
+			"test/IECoreRI/output/test.rib",
+			"test/IECoreRI/output/testAttributes.rib",
+			"test/IECoreRI/output/testProcedural.rib",
+			"test/IECoreRI/output/testGetOption.rib",
+			"test/IECoreRI/output/testDisplay.rib",
+			"test/IECoreRI/output/testCamera.rib",
+			"test/IECoreRI/output/subdiv.rib",
+			"test/IECoreRI/output/commands.rib",
+			"test/IECoreRI/output/motion.rib",
+			"test/IECoreRI/output/stringPrimVars.rib",
+			"test/IECoreRI/output/transform.rib",
+			"test/IECoreRI/output/missingShaders.rib",
+			"test/IECoreRI/output/getUserOption.rib",
+			"test/IECoreRI/output/getUserAttribute.rib",
+		]
+		
+		for f in files :
+			if os.path.exists( f ):
+				os.remove( f )		
+			
 		
 if __name__ == "__main__":
     unittest.main()   

@@ -35,6 +35,7 @@
 import unittest
 from IECore import *
 import IECoreRI
+import os
 
 class InstancingTest( unittest.TestCase ) :
 
@@ -66,5 +67,16 @@ class InstancingTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 
+	def tearDown( self ) :
+	
+		files = [
+			"test/IECoreRI/output/instancing.rib",
+			"test/IECoreRI/output/instancing2.rib"
+		]
+		
+		for f in files :
+			if os.path.exists( f ):
+				os.remove( f )
+					
 if __name__ == "__main__":
     unittest.main()   
