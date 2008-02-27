@@ -86,6 +86,8 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		
 		bool isAbstractClass();
 		
+		MStatus shouldSave( const MPlug &plug, bool &isSaving );
+		
 		//! @name ParameterisedHolderInterface implementation
 		/////////////////////////////////////////////////////////////////////////////////////////
 		//@{

@@ -60,6 +60,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
 #include "IECore/TypedParameter.h"
+#include "IECore/MeshPrimitive.h"
 
 #include "typeIds/TypeIds.h"
 
@@ -113,6 +114,42 @@ template<typename B>
 bool ParameterisedHolder<B>::isAbstractClass()
 {
 	return true;
+}
+
+template<typename B>
+MStatus ParameterisedHolder<B>::shouldSave( const MPlug &plug, bool &isSaving )
+{
+	/// Maya 8.5 crashes when saving a GenericAttribute (such as that
+	/// created by the MeshParameterHandler) containing an "empty" mesh. 
+	/// This only applies to ASCII files, saving to binary works. Here
+	/// we prevent Maya saving the value.
+	
+	isSaving = true;
+	ParameterPtr parameter = plugParameter( plug );
+	
+	if ( parameter )
+	{
+		ObjectPtr value = parameter->getValue();
+		
+		if (! value )
+		{
+			isSaving = false;
+			return MS::kSuccess;
+		}
+		
+		MeshPrimitivePtr mesh = runTimeCast< MeshPrimitive >( value );
+		if ( mesh )
+		{
+			MeshPrimitivePtr emptyMesh = new MeshPrimitive();
+			if ( mesh->isEqualTo( emptyMesh ) )
+			{			
+				isSaving = false;
+				return MS::kSuccess;
+			}
+		}
+	}
+	
+	return MS::kSuccess;
 }
 
 template<typename B>

@@ -66,10 +66,6 @@ MStatus MeshParameterHandler::update( IECore::ConstParameterPtr parameter, MObje
 	}
 	
 	fnGAttr.addAccept( MFnData::kMesh );
-	
-	/// \todo It seems that Maya can crash under certain circumstances when saving as ASCII, usually when dealing with an empty mesh. Try and
-	/// establish why.
-	//fnGAttr.setStorable( false );
 				
 	return MS::kSuccess;
 }
