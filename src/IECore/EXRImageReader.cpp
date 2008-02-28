@@ -209,12 +209,15 @@ void EXRImageReader::readTypedChannel(string name, ImagePrimitivePtr image,
 
 	// determine the image data window
 	const Box2i &idw = dataWindow.isEmpty() ? dw : dataWindow;
+	
+	/// \bug This completely disregards the display window stored in the EXR file!
 	image->setDataWindow(idw);
 	image->setDisplayWindow(idw);
 
 	// compute read box
 	Box2i readBox = boxIntersection(dw, idw);
 
+	/// \todo The EXR might be tiled!
 	// read as scanlines
 	
 	// x-shift for the ImagePrimitive array
