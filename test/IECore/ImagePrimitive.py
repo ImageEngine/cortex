@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -56,6 +56,26 @@ class TestImagePrimitive( unittest.TestCase ) :
 		
 		i.displayWindow = Box2i( windowMin, V2i( 10, 10 ) )
 		self.assertEqual( i.displayWindow, Box2i( windowMin, V2i( 10, 10 ) ) )
+					
+	def testDataWindow( self ) :			
+	
+		displayWindow = Box2i( V2i( 0, 0 ), V2i( 99, 99 ) )
+		dataWindow = Box2i( V2i( 50, 50), V2i( 99, 99 ) )
+		img = ImagePrimitive( dataWindow, displayWindow )
+		
+		dataWindowArea = 50 * 50
+		R = FloatVectorData( dataWindowArea )
+		G = FloatVectorData( dataWindowArea ) 
+		B = FloatVectorData( dataWindowArea )
+				
+		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, R )
+		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, G )	
+		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, B )
+		
+		self.assert_( img.arePrimitiveVariablesValid() )
+		
+		# \todo Verify behaviour when dataWindow and displayWindow are contradictory or inconsistent
+			
 		
 if __name__ == "__main__":
     unittest.main()   
