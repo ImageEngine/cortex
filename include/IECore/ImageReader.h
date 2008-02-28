@@ -43,20 +43,20 @@ namespace IECore
 
 IE_CORE_FORWARDDECLARE( ImagePrimitive );
 	
-/// The ImageReader class defines an abstract base class for reading sampled images
+/// The ImageReader class defines an abstract base class for reading sampled images.
+/// ImageReader's main purpose is to define a standard set of parameters
+/// which all concrete ImageReader implementations obey.  It also defines some pure virtual functions
+/// which allow interface implementors to focus on image-specific code for loading channels.
 /// \todo Define and support a parameter for conversion of image data type during loading
 class ImageReader : public Reader
 {
 
-	/// ImageReader's main purpose is to define a standard set of parameters
-	/// which all concrete ImageReader implementations obey.  It also defines some pure virtual functions
-	/// which allow interface implementors to focus on image-specific code for loading channels.
-	
 	public:
 
 		IE_CORE_DECLARERUNTIMETYPED( ImageReader, Reader );
 
 		ImageReader( const std::string name, const std::string description );
+		
 		/// place the user-requested channels into the given vector
 		void imageChannels(std::vector<std::string> & names);
 	
@@ -64,13 +64,26 @@ class ImageReader : public Reader
 		virtual void channelNames(std::vector<std::string> & names) = 0;
 
 		/// give the user-requested data window
+		/// \deprecated
 		Imath::Box2i dataWindow() const;
 	
 		/// give the user-requested display window
+		/// \deprecated
 		Imath::Box2i displayWindow() const;
+		
+		Box2iParameterPtr dataWindowParameter();
+		ConstBox2iParameterPtr dataWindowParameter() const;
+		
+		Box2iParameterPtr displayWindowParameter();
+		ConstBox2iParameterPtr displayWindowParameter() const;
 
+		StringVectorParameterPtr channelNamesParameter();
+		ConstStringVectorParameterPtr channelNamesParameter() const;		
+		
 		/// return true iff all pixels from the data window reported by the file are present
 		virtual bool isComplete() const { return true; };
+		
+		/// \todo Add virtual methods to retrieve the display and data windows present in the file
 	
 	protected:
 		
@@ -81,6 +94,9 @@ class ImageReader : public Reader
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
 	
 		/// read the channel identified by the given name.  
+		/// \todo Establish behaviour for if we attempt to read outside the image's data window
+		/// \todo Change to:
+		/// virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow ) = 0;		
 		virtual void readChannel(std::string name, ImagePrimitivePtr image, const Imath::Box2i &dw) = 0;
 	
 		Box2iParameterPtr m_dataWindowParameter;

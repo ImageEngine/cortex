@@ -57,10 +57,10 @@ ImageReader::ImageReader( const std::string name, const std::string description 
 {
 	m_dataWindowParameter = new Box2iParameter("dataWindow",    "image extents to read");
 	m_displayWindowParameter = new Box2iParameter("displayWindow", "image extents to view");
-	
-	m_channelNamesParameter = new StringVectorParameter("channels", 
-		 "The list of channels to load.  No list causes all channels to be loaded.");
-	
+
+	m_channelNamesParameter = new StringVectorParameter("channels",
+	                "The list of channels to load.  No list causes all channels to be loaded.");
+
 	parameters()->addParameter( m_dataWindowParameter );
 	parameters()->addParameter( m_displayWindowParameter );
 	parameters()->addParameter( m_channelNamesParameter );
@@ -68,15 +68,15 @@ ImageReader::ImageReader( const std::string name, const std::string description 
 
 ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 {
-	
+
 	// create our ImagePrimitive
 	ImagePrimitivePtr image = new ImagePrimitive;
-	
-	// fetch all the user-desired channels with 
+
+	// fetch all the user-desired channels with
 	// the derived class' readChannel() implementation
 	vector<string> channels;
 	imageChannels(channels);
-	
+
 	// get the data window:
 	// a user may specify a region different from the image data region,
 	// and we use the empty box to indicate the full image data
@@ -85,13 +85,14 @@ ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 	// the image data window is set by the child class; it is in the position
 	// to know how to determine what the defined extents of its image type are.
 	//image->setDataWindow(dw);
-	
+
 	vector<string>::const_iterator ci = channels.begin();
-	while(ci != channels.end()) {
+	while (ci != channels.end())
+	{
 		readChannel(*ci, image, dw);
 		ci++;
 	}
-	
+
 	return image;
 }
 
@@ -100,21 +101,24 @@ void ImageReader::imageChannels(vector<string> & names)
 {
 	vector<string> allNames;
 	channelNames(allNames);
-	
+
 	ConstStringVectorParameterPtr p = parameters()->parameter<StringVectorParameter>("channels");
 	ConstStringVectorDataPtr d = static_pointer_cast<const StringVectorData>(p->getValue());
-	
+
 	// give all channels when no list is provided
-	if(!d->readable().size()) {
+	if (!d->readable().size())
+	{
 		names = allNames;
 		return;
 	}
-	
-	// otherwise, copy in the requested names from the parameter set.  
+
+	// otherwise, copy in the requested names from the parameter set.
 	// this is intersection(A, D)
 	names.clear();
-	for(vector<string>::const_iterator it = d->readable().begin(); it != d->readable().end(); it++) {
-		if(find(allNames.begin(), allNames.end(), *it) != allNames.end()) {
+	for (vector<string>::const_iterator it = d->readable().begin(); it != d->readable().end(); it++)
+	{
+		if (find(allNames.begin(), allNames.end(), *it) != allNames.end())
+		{
 			names.push_back(*it);
 		}
 	}
@@ -130,4 +134,34 @@ Box2i ImageReader::dataWindow() const
 Box2i ImageReader::displayWindow() const
 {
 	return parameters()->parameter<Box2iParameter>("displayWindow")->getTypedValue();
+}
+
+Box2iParameterPtr ImageReader::dataWindowParameter()
+{
+	return m_dataWindowParameter;
+}
+
+ConstBox2iParameterPtr ImageReader::dataWindowParameter() const
+{
+	return m_dataWindowParameter;
+}
+
+Box2iParameterPtr ImageReader::displayWindowParameter()
+{
+	return m_displayWindowParameter;
+}
+
+ConstBox2iParameterPtr ImageReader::displayWindowParameter() const
+{
+	return m_displayWindowParameter;
+}
+
+StringVectorParameterPtr ImageReader::channelNamesParameter()
+{
+	return m_channelNamesParameter;
+}
+
+ConstStringVectorParameterPtr ImageReader::channelNamesParameter() const
+{
+	return m_channelNamesParameter;
 }
