@@ -68,7 +68,8 @@ class ImagePrimitive : public Primitive
 		ImagePrimitive();
 	
 		/// construct an ImagePrimitive with the given data and display window dimensions
-		ImagePrimitive(Imath::Box2i datawindow, Imath::Box2i displaywindow);
+		/// \todo Change parameters to const references
+		ImagePrimitive( Imath::Box2i dataWindow, Imath::Box2i displayWindow );
 		
 		/// Returns the display window of the image on the XY-plane.
 		virtual Imath::Box3f bound() const;
