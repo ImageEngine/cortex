@@ -89,7 +89,6 @@ void EXRImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 		FrameBuffer fb;
 
 		// add the channels into the header with the appropriate types
-		vector<string>::const_iterator i = names.begin();
 		for (vector<string>::const_iterator i = names.begin(); i != names.end(); ++i)
 		{
 			const char *name = (*i).c_str();
