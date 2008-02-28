@@ -42,14 +42,42 @@
 #include "IECore/PrimitiveVariable.h"
 #include "IECore/Exception.h"
 #include "IECore/ImagePrimitiveEvaluator.h"
+#include "IECore/Deleter.h"
+#include "IECore/ClassData.h"
 
 using namespace IECore;
 using namespace Imath;
 
 static PrimitiveEvaluator::Description< ImagePrimitiveEvaluator > g_registraar = PrimitiveEvaluator::Description< ImagePrimitiveEvaluator >();
 
+struct ImagePrimitiveEvaluator::Result::ExtraData
+{
+	Box2i m_dataWindow;
+};
+
+typedef ClassData< ImagePrimitiveEvaluator::Result, ImagePrimitiveEvaluator::Result::ExtraData*, Deleter<ImagePrimitiveEvaluator::Result::ExtraData*> > ResultClassData;
+static ResultClassData g_resultClassData;
+
+
 ImagePrimitiveEvaluator::Result::Result( const Box3f &bound ) : m_bound( bound )
 {
+	ExtraData *extraData = g_resultClassData.create( this, new ExtraData() );
+	assert( extraData );
+	
+	extraData->m_dataWindow = Box2i( V2i((int)bound.min.x, (int)bound.min.y), V2i( (int)bound.max.x, (int)bound.max.y ) );
+}
+
+ImagePrimitiveEvaluator::Result::Result( const Imath::Box3f &bound, const Imath::Box2i &dataWindow ) : m_bound( bound )
+{
+	ExtraData *extraData = g_resultClassData.create( this, new ExtraData() );
+	assert( extraData );
+	
+	extraData->m_dataWindow = dataWindow;
+}
+
+ImagePrimitiveEvaluator::Result::~Result()
+{
+	g_resultClassData.erase( this );
 }
 
 V3f ImagePrimitiveEvaluator::Result::point() const
@@ -171,10 +199,30 @@ T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) con
 		case PrimitiveVariable::Vertex :
 		case PrimitiveVariable::Varying:
 		case PrimitiveVariable::FaceVarying:
-		{			
-			V2i p = pixel();	
-			int width = static_cast<int>( boxSize( m_bound ).x );
-			int idx = ( p.y * width ) + p.x;					
+		{	
+			ExtraData *extraData = g_resultClassData[ this ];
+			assert( extraData );
+			
+			// \todo Use UV coord instead, and perform bilinear interpolation
+			V2i p = pixel() ;	
+			
+			p = p - extraData->m_dataWindow.min;
+			
+			if ( p.x < 0 || p.y < 0 )
+			{
+				/// \todo Perhaps use a traits class here to specify some "zero" value
+				return T();
+			}
+						
+			int dataWidth = static_cast<int>( boxSize( extraData->m_dataWindow ).x + 1 );
+			int idx = ( p.y * dataWidth ) + p.x;								
+			assert( idx >= 0 );
+			
+			if ( idx >= (int)data->readable().size() )
+			{
+				/// \todo Perhaps use a traits class here to specify some "zero" value
+				return T();
+			}
 			
 			return data->readable()[idx];							
 		}
@@ -221,7 +269,7 @@ ConstPrimitivePtr ImagePrimitiveEvaluator::primitive() const
 
 PrimitiveEvaluator::ResultPtr ImagePrimitiveEvaluator::createResult() const
 {
-	return new Result( m_image->bound() );
+	return new Result( m_image->bound(), m_image->getDataWindow() );
 }
 
 bool ImagePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const

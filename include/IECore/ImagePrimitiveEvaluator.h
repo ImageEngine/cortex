@@ -39,7 +39,6 @@
 
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/ImagePrimitive.h"
-#include "IECore/ClassData.h"
 
 namespace IECore
 {
@@ -59,7 +58,11 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 			
 			public:
 			
+				/// \depracated
 				Result( const Imath::Box3f &bound );
+				
+				Result( const Imath::Box3f &bound, const Imath::Box2i &dataWindow );
+				virtual ~Result();
 	
 				Imath::V3f point() const;								
 				Imath::V3f normal() const;
@@ -82,7 +85,11 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 				Imath::V3f m_p;
 			
 				template<typename T>
-				T getPrimVar( const PrimitiveVariable &pv ) const;			
+				T getPrimVar( const PrimitiveVariable &pv ) const;
+				
+			public:
+			
+				struct ExtraData;			
 			
 		};
 		IE_CORE_DECLAREPTR( Result );		

@@ -93,7 +93,11 @@ class TestImagePrimitiveEvaluator( unittest.TestCase ) :
 		self.failIf( ipe.pointAtPixel( V2i( 100, 100 ), r ) )						
 		
 		
-	def testSimpleImage( self ) :	
+	def testSimpleImage( self ) :
+	
+		return
+	
+		""" Test ImagePrimitiveEvaluator with simple gradient"""	
 	
 		random.seed( 1 )
 	
@@ -188,6 +192,65 @@ class TestImagePrimitiveEvaluator( unittest.TestCase ) :
 				
 			else :
 				lastG = r.floatPrimVar( ipe.G() )
+				
+	def testDataWindow( self ) :			
+	
+		displayWindow = Box2i( V2i( 0, 0 ), V2i( 99, 99 ) )
+		dataWindow = Box2i( V2i( 50, 50), V2i( 99, 99 ) )
+		img = ImagePrimitive( dataWindow, displayWindow )
+		
+		dataWindowArea = 50 * 50
+		R = FloatVectorData( dataWindowArea )
+		G = FloatVectorData( dataWindowArea ) 
+		B = FloatVectorData( dataWindowArea )
+		
+		colorMap = {}
+		offset = 0
+		for y in range( 0, 50 ):
+			for x in range( 0, 50 ) :
+				
+				red = float(x+50) / 100.0
+				green = float(y+50) / 100.0				
+				
+				R[offset] = red
+				G[offset] = green
+				B[offset] = 0.5
+				
+				colorMap[ (x+50,y+50) ] = V3f( red, green, 0.5 )
+				
+				offset = offset + 1				
+									
+		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, R )
+		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, G )	
+		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, B )
+		
+		self.assert_( img.arePrimitiveVariablesValid() )
+		
+		ipe = PrimitiveEvaluator.create( img )		
+		self.assert_( ipe.isInstanceOf( "ImagePrimitiveEvaluator" ) )
+		
+		self.assert_( ipe.R() )
+		self.assert_( ipe.G() )
+		self.assert_( ipe.B() )
+		self.failIf( ipe.A() )
+		
+		r = ipe.createResult()
+		
+		for y in range( 0, 100 ):
+			for x in range( 0, 100 ) :			
+				found = ipe.pointAtPixel( V2i( x, y ), r )
+				self.assert_( found )
+				self.assert_( ( r.point() - V3f( x + 1, y + 1, 0 )).length() < 0.1 )
+		
+				c = V3f( r.floatPrimVar( ipe.R() ), r.floatPrimVar( ipe.G() ), r.floatPrimVar( ipe.B() ) )	
+				
+				expectedColor = V3f( 0, 0, 0 )
+				
+				if (x, y) in colorMap :
+					
+					expectedColor = colorMap[ (x, y) ]
+								
+				self.assert_( ( c - expectedColor ).length() < 0.001 )
 		
 			
 		 
