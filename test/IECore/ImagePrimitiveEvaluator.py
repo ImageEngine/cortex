@@ -93,10 +93,7 @@ class TestImagePrimitiveEvaluator( unittest.TestCase ) :
 		self.failIf( ipe.pointAtPixel( V2i( 100, 100 ), r ) )						
 		
 		
-	def testSimpleImage( self ) :
-	
-		return
-	
+	def testSimpleImage( self ) :	
 		""" Test ImagePrimitiveEvaluator with simple gradient"""	
 	
 		random.seed( 1 )
