@@ -47,101 +47,115 @@
 namespace IECore
 {
 
-/// ImagePrimitive represents an axis-aligned collection of raster data in the form of channels.
-/// \todo Implement the bound() method.
-/// \bug The bound() method is not implemented.
-/// \todo Document the meaning of data and display windows and the use of primvars as channels.
-/// \todo Establish whether or not image origin and orientation are appropriate for common uses, document it either way
-class ImagePrimitive : public Primitive
-{	  
+/// ImagePrimitive represents a 2D bitmap in the form of individual channels, which are stored as primitive variables.
+/// A channel may contain data of half (16-bit float), unsigned int (32-bit integer),
+/// or float (32-bit float) type. The interpretation of these channels broadly matches the EXR
+/// specification. Channels named "R", "G", "B", and "A" have the special meaning of Red, Green,
+/// Blue, and Alpha respectively, but arbitrary channel names are permitted and their interpretation
+/// is left to the application.
 
-	/// A channel may contain data of half (16-bit float), unsigned int (32-bit integer),
-	/// or float (32-bit float) type.  Typically, data is arranged into three colour channels
-	/// named "R" (red), "G" (green), and "B" (blue), however, arbitrary channel names are allowed,
-	/// and their interpretation is left to the application.
-	
+/// Within the channel's data buffers themselves the pixel values are stored in row major order,
+/// that is to say pixels which are adjacent in X (which runs along the "width" of the image) are also
+/// adjacent in memory.
+///
+/// An ImagePrimitive defines both a "display window" and a "data window", both of which are specified in
+/// pixel space. The display window defines the overall size of the image, whereas the data window defines
+/// the specific region for which we hold data. In most cases the data window will be equal to, or a sub-region
+/// of the display window. Outside of the data window the values of the ImagePrimitive's channels are defined
+/// to be zero (i.e. black/transparent). This means that the number of data elements stored in each
+/// channel should equal to the area of the data window.
+///
+/// Pixel-space runs from the display window origin in the top-left corner, to the display window's maximum in
+/// the bottom-right corner. Pixels of ascending X coordinate therefore run left-right, and pixels of ascending
+/// Y coordinate run top-bottom.
+///
+/// UV-space has the same orientation as pixel-space, and is defined to be (0,0) at the origin of the display window
+/// and (1,1) at the maximum of the display window.
+class ImagePrimitive : public Primitive
+{
+
 	public:
-	  
+
 		IE_CORE_DECLAREOBJECT( ImagePrimitive, Primitive );
-	
+
 		/// construct an ImagePrimitive with no area consumed
 		ImagePrimitive();
-	
+
 		/// construct an ImagePrimitive with the given data and display window dimensions
 		/// \todo Change parameters to const references
 		ImagePrimitive( Imath::Box2i dataWindow, Imath::Box2i displayWindow );
-		
+
 		/// Returns the display window of the image on the XY-plane.
 		virtual Imath::Box3f bound() const;
 
 		/// Returns the data window.
 		const Imath::Box2i &getDataWindow() const;
-	
+
 		/// Sets the data window - note that this doesn't modify the contents of primitive variables (channels)
 		/// at all - it is the callers responsibilty to keep any data valid.
 		void setDataWindow( const Imath::Box2i &dw );
-	
+
 		/// Returns the display window.
 		const Imath::Box2i &getDisplayWindow() const;
-	
+
 		/// Sets the display window.
 		/// \todo Throw on empty windows
 		void setDisplayWindow( const Imath::Box2i &dw );
-	
+
 		/// give the data window x origin
 		/// \deprecated It's unclear whether this should reference the data window or display window.
 		/// Just use those windows directly instead.
 		const int x() const;
-	
+
 		/// compute the data window y origin
 		/// \deprecated It's unclear whether this should reference the data window or display window.
 		/// Just use those windows directly instead.
 		const int y() const;
-	
+
 		/// compute the data window width
 		/// \deprecated It's unclear whether this should reference the data window or display window.
 		/// Just use those windows directly instead.
 		const int width() const;
-	
+
 		/// compute the data window height
 		/// \deprecated It's unclear whether this should reference the data window or display window.
 		/// Just use those windows directly instead.
 		const int height() const;
-	
+
 		/// return the data window area
 		/// \deprecated It's unclear whether this should reference the data window or display window.
 		/// Just use those windows directly instead.
 		const int area() const;
-	
+
 		/// Returns 2-d image size for Vertex, Varying, and FaceVarying Interpolation, otherwise 1.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation );
-	
+
 		/// Renders the image.
 		virtual void render(RendererPtr renderer);
-	
+
 		/// Places the channel names for this image into the given vector
 		/// \bug this just copies the primitive variable names - it should also check that
 		/// the number of elements and interpolation makes the primvars suitable for
 		/// use as channels.
 		void channelNames(std::vector<std::string> & names) const;
-	
+
 		/// Convenience function to create a channel - this simply creates and adds a PrimitiveVariable of the appropriate
 		/// size and returns a pointer to the data within it.
 		template<typename T>
 		boost::intrusive_ptr<TypedData<std::vector<T> > > createChannel(std::string name);
-		
+
 	private:
-	
+
 		/// the full parameters for image position and dimension
 		Imath::Box2i m_dataWindow;
-	
+
 		/// a sub-rectangle of the full image
 		Imath::Box2i m_displayWindow;
-	
+
 		static const unsigned int m_ioVersion;
 
-};  
-	
+};
+
 IE_CORE_DECLAREPTR(ImagePrimitive);
 
 }
