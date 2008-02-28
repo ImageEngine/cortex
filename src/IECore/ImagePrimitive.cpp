@@ -49,20 +49,20 @@ ImagePrimitive::ImagePrimitive()
 }
 
 ImagePrimitive::ImagePrimitive(Box2i datawindow, Box2i displaywindow)
-	: m_dataWindow(datawindow), m_displayWindow(displaywindow)
+		: m_dataWindow(datawindow), m_displayWindow(displaywindow)
 {
 }
 
 Box3f ImagePrimitive::bound() const
 {
 	/// \todo We might need to include any pixel aspect ratio in this bound
-	
+
 	/// We add one here because the displayWindow is measured in pixels, and is inclusive. That is, an image
 	/// which has a displayWindow of (0,0)->(0,0) contains exactly one pixel.
 	return Box3f(
-		V3f( m_displayWindow.min.x, m_displayWindow.min.y, 0.0 ),
-		V3f( 1.0f + m_displayWindow.max.x, 1.0f + m_displayWindow.max.y, 0.0 )
-	);
+	               V3f( m_displayWindow.min.x, m_displayWindow.min.y, 0.0 ),
+	               V3f( 1.0f + m_displayWindow.max.x, 1.0f + m_displayWindow.max.y, 0.0 )
+	       );
 }
 
 const Box2i &ImagePrimitive::getDataWindow() const
@@ -111,11 +111,12 @@ const int ImagePrimitive::y() const
 }
 
 void ImagePrimitive::channelNames(vector<string> &names) const
-{  
+{
 	// copy in the names of channels from the map
 	names.clear();
 	PrimitiveVariableMap::const_iterator i = variables.begin();
-	while(i != variables.end()) {
+	while (i != variables.end())
+	{
 		names.push_back(i->first);
 		++i;
 	}
@@ -124,17 +125,17 @@ void ImagePrimitive::channelNames(vector<string> &names) const
 // give the size of the image
 size_t ImagePrimitive::variableSize(PrimitiveVariable::Interpolation interpolation)
 {
-	
-	switch(interpolation) {
-		
+	switch (interpolation)
+	{
+
 	case PrimitiveVariable::Vertex:
 	case PrimitiveVariable::Varying:
 	case PrimitiveVariable::FaceVarying:
 		return area();
-		
+
 	default:
 		return 1;
-		
+
 	}
 }
 
@@ -146,15 +147,17 @@ void ImagePrimitive::render(RendererPtr renderer)
 //
 // handling for serialization
 //
-void ImagePrimitive::copyFrom(ConstObjectPtr rhs, IECore::Object::CopyContext *context ) {
+void ImagePrimitive::copyFrom(ConstObjectPtr rhs, IECore::Object::CopyContext *context )
+{
 	Primitive::copyFrom(rhs, context);
 	const ImagePrimitive *p_rhs = static_cast<const ImagePrimitive *>(rhs.get());
-	
+
 	m_displayWindow = p_rhs->getDisplayWindow();
 	m_dataWindow = p_rhs->getDataWindow();
 }
 
-void ImagePrimitive::save(IECore::Object::SaveContext *context) const {
+void ImagePrimitive::save(IECore::Object::SaveContext *context) const
+{
 	Primitive::save(context);
 	IndexedIOInterfacePtr container = context->container(staticTypeName(), m_ioVersion);
 
@@ -164,10 +167,11 @@ void ImagePrimitive::save(IECore::Object::SaveContext *context) const {
 	container->write("displayWindowMaxY", m_displayWindow.max.y);
 }
 
-void ImagePrimitive::load(IECore::Object::LoadContextPtr context) {
+void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
+{
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
-	
+
 	IndexedIOInterfacePtr container = context->container(staticTypeName(), v);
 
 	container->read("displayWindowMinX", m_displayWindow.min.x);
@@ -176,11 +180,15 @@ void ImagePrimitive::load(IECore::Object::LoadContextPtr context) {
 	container->read("displayWindowMaxY", m_displayWindow.max.y);
 }
 
-bool ImagePrimitive::isEqualTo(ConstObjectPtr rhs) const {
-	if(!Primitive::isEqualTo(rhs)) return false;
-	
+bool ImagePrimitive::isEqualTo(ConstObjectPtr rhs) const
+{
+	if (!Primitive::isEqualTo(rhs))
+	{
+		return false;
+	}
+
 	const ImagePrimitive *p_rhs = static_cast<const ImagePrimitive *>(rhs.get());
-	
+
 	// return true iff we have the same data window.
 	// this is not complete
 	return m_dataWindow == p_rhs->getDataWindow() && m_displayWindow == p_rhs->getDisplayWindow();
