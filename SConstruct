@@ -314,6 +314,14 @@ o.Add(
 )
 
 o.Add(
+	"TEST_RI_SCRIPT",
+	"The python script to run for the renderman tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"test/IECoreRI/All.py"
+)
+
+o.Add(
 	"TEST_LIBPATH",
 	"Additional colon separated paths to be prepended to the library path"
 	"used when running tests.",
@@ -816,7 +824,7 @@ if doConfigure :
 		riTestEnv = testEnv.Copy()
 		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
-		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " test/IECoreRI/All.py" )
+		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " $TEST_RI_SCRIPT" )
 		NoCache( riTest )
 		riTestEnv.Depends( riTest, corePythonModule )
 		riTestEnv.Depends( riTest, glob.glob( "test/IECoreRI/*.py" ) )
