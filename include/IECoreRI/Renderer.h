@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -74,6 +74,9 @@ class Renderer : public IECore::Renderer
 		///
 		/// "ri:pixelSamples" V2iData()
 		/// Passed to an RiPixelSamples call.
+		///
+		/// "ri:*:*"
+		/// Passed to an RiOption call.
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		/// Currently supported options :
 		///
@@ -175,6 +178,10 @@ class Renderer : public IECore::Renderer
 		/// "ri:objectInstance"
 		/// Calls RiObjectInstance. Expects a single StringData parameter called "name", which
 		/// refers to a name previously passed to command( "ri:objectBegin" ).
+		///
+		/// "ri:archiveRecord"
+		/// Makes a call to RiArchiveRecord(). Expects StringData parameters called "type" and
+		/// "record".
 		///
 		/// \todo Implement instancing support through specific calls we add to the IECore::Renderer
 		/// interface definition.

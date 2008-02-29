@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -170,6 +170,7 @@ class RendererImplementation : public IECore::Renderer
 		void objectBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		void objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		void objectInstanceCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
+		void archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		static std::vector<int> g_nLoops;
 };

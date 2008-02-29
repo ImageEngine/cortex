@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,26 +32,41 @@
 #
 ##########################################################################
 
-import sys
+import unittest
+import IECore
+import IECoreRI
+import os.path
+import os
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
+class ArchiveRecordTest( unittest.TestCase ) :
 
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
-
-	def __init__( self ) :
+	def test( self ) :
 	
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )		
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testArchiveRecord.rib" )
+		r.worldBegin()
+		r.command( "ri:archiveRecord", { "type" : IECore.StringData( "verbatim" ), "record" : IECore.StringData( "Geometry \"teapot\"\n" ) } )
+		r.worldEnd()
 
-	def write( self, l ) :
+		l = file( "test/IECoreRI/output/testArchiveRecord.rib" ).readlines()
+		self.assert_( "Geometry \"teapot\"\n" in l )
+		
+	def testFormatCatcher( self ) :
+	
+		# passing printf style format strings in the record would blow up the renderer
+		# so check we're catching those
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testArchiveRecord.rib" )
+		r.worldBegin()
+		r.command( "ri:archiveRecord", { "type" : IECore.StringData( "verbatim" ), "record" : IECore.StringData( "NAUGHTY %s %f" ) } )
+		r.worldEnd()
 
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
+		l = "".join( file( "test/IECoreRI/output/testArchiveRecord.rib" ).readlines() )
+		self.assert_( not "NAUGHTY" in l )
+	
+	def tearDown( self ) :
+	
+		if os.path.exists( "test/IECoreRI/output/testArchiveRecord.rib" ) :
+			os.remove( "test/IECoreRI/output/testArchiveRecord.rib" )
+				
+if __name__ == "__main__":
+    unittest.main()   

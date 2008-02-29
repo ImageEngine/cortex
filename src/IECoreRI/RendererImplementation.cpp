@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,6 +43,7 @@
 #include "IECore/MatrixAlgo.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/format.hpp>
 
 #include <iostream>
 
@@ -143,6 +144,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_commandHandlers["ri:objectEnd"] = &IECoreRI::RendererImplementation::objectEndCommand;
 	m_commandHandlers["objectInstance"] = &IECoreRI::RendererImplementation::objectInstanceCommand;
 	m_commandHandlers["ri:objectInstance"] = &IECoreRI::RendererImplementation::objectInstanceCommand;
+	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
 }
 
 void IECoreRI::RendererImplementation::contextBegin() const
@@ -1033,4 +1035,38 @@ void IECoreRI::RendererImplementation::objectInstanceCommand( const std::string 
 		return;
 	}
 	RiObjectInstance( const_cast<void *>( hIt->second ) );
+}
+
+void IECoreRI::RendererImplementation::archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
+{
+	ConstStringDataPtr typeData;
+	ConstStringDataPtr recordData;
+	CompoundDataMap::const_iterator typeIt = parameters.find( "type" );
+	CompoundDataMap::const_iterator recordIt = parameters.find( "record" );
+	if( typeIt!=parameters.end() )
+	{
+		typeData = runTimeCast<StringData>( typeIt->second );
+	}
+	if( recordIt!=parameters.end() )
+	{
+		recordData = runTimeCast<StringData>( recordIt->second );
+	}
+	
+	if( !(typeData && recordData) )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:archiveRecord command expects StringData values called \"type\" and \"record\"." );
+		return;
+	}
+	
+	// if there are printf style format specifiers in the record then we're in trouble - we're about to pass them through a c interface which
+	// isn't type safe, and not provide any additional arguments for them. try to avoid that by using boost format to catch the problem.
+	try
+	{
+		string tested = boost::format( recordData->readable() ).str();
+		RiArchiveRecord( const_cast<char *>( typeData->readable().c_str() ), const_cast<char *>( tested.c_str() ) );
+	}
+	catch( ... )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:archiveRecord \"record\" parameter appears to contain printf format specifiers." );
+	}
 }
