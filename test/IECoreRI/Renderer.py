@@ -73,10 +73,12 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreRI.Renderer()
 		self.assertEqual( r.typeName(), "IECoreRI::Renderer" )
 
+	## \todo Make this test actually test something
 	def testNoContext( self ) :
 	
 		r = IECoreRI.Renderer()
 
+	## \todo Make this test actually test something
 	def test( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
@@ -100,6 +102,7 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 	
+	## \todo Make this test actually test something
 	def testAttributes( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
@@ -118,6 +121,7 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 		
+	## \todo Make this test actually test something
 	def testProcedural( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testProcedural.rib" )
@@ -142,6 +146,7 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 		
+	## \todo Make this test actually test something
 	def testDisplay( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testDisplay.rib" )
@@ -151,6 +156,7 @@ class RendererTest( unittest.TestCase ) :
 		r.worldBegin()
 		r.worldEnd()
 		
+	## \todo Make this test actually test something
 	def testCamera( self ) :
 	
 		s = M44f()
@@ -179,6 +185,7 @@ class RendererTest( unittest.TestCase ) :
 		r.worldBegin()		
 		r.worldEnd()
 		
+	## \todo Make this test actually test something
 	def testSubDivs( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/subdiv.rib" )
@@ -195,6 +202,7 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 	
+	## \todo Make this test actually test something
 	def testCommands( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/commands.rib" )
@@ -205,6 +213,7 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 		
+	## \todo Make this test actually test something
 	def testMotion( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/motion.rib" )
@@ -219,6 +228,7 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()	
 	
+	## \todo Make this test actually test something
 	def testStringPrimVars( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/stringPrimVars.rib" )	
@@ -259,6 +269,8 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 		
+	## \todo Make this test actually work non-interactively - perhaps install a custom message handler
+	# to ensure that no messages are output during the setAttribute call, and check the rib for unwanted output.
 	def testIgnoreOtherAttributesAndOptions( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/transform.rib" )
