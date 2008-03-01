@@ -42,7 +42,7 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=2
-ieCoreMinorVersion=31
+ieCoreMinorVersion=32
 ieCorePatchVersion=0
 
 ###########################################################################################
@@ -354,8 +354,8 @@ for e in env["ENV_VARS_TO_IMPORT"].split() :
 if "SAVE_OPTIONS" in ARGUMENTS :
 	o.Save( ARGUMENTS["SAVE_OPTIONS"], env )
 
-if env["BUILD_CACHEDIR"] != "" :
-	CacheDir( env["BUILD_CACHEDIR"] )
+#if env["BUILD_CACHEDIR"] != "" :
+#	CacheDir( env["BUILD_CACHEDIR"] )
 
 env["IECORE_MAJOR_VERSION"] = ieCoreMajorVersion
 env["IECORE_MINOR_VERSION"] = ieCoreMinorVersion
