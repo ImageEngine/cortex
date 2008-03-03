@@ -51,6 +51,7 @@ from CompoundFrameList import CompoundFrameList
 from ReorderedFrameList import ReorderedFrameList
 from ReversedFrameList import ReversedFrameList
 from BinaryFrameList import BinaryFrameList
+from ExclusionFrameList import ExclusionFrameList
 from FileSequence import FileSequence
 from FileSequenceFunctions import *
 from EmptyFrameList import EmptyFrameList
