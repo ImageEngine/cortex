@@ -327,14 +327,14 @@ o.Add(
 	"used when running tests.",
 	""
 )
-
+	
 o.Add(
 	"TEST_LIBRARY_PATH_ENV_VAR",
 	"This is a curious one, probably only ever necessary at image engine. It "
 	"specifies the name of an environment variable used to specify the library "
-	"search paths correctly when running the tests. This should probably be left "
-	"unspecified everywhere except image engine.",
-	""
+	"search paths correctly when running the tests. Defaults to LD_LIBRARY_PATH on "
+	"Linux and DYLD_LIBRARY_PATH on OSX.",
+	"DYLD_LIBRARY_PATH" if Environment()["PLATFORM"]=="darwin" else "LD_LIBRARY_PATH"
 )
 
 ###########################################################################################
@@ -539,17 +539,12 @@ testEnvLibPath = ":".join( testEnv["LIBPATH"] )
 if testEnv["TEST_LIBPATH"] != "" :
 	testEnvLibPath += ":" + testEnv["TEST_LIBPATH"]
 
-if testEnv["TEST_LIBRARY_PATH_ENV_VAR"]!="" :
-	testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
+testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
 
-if env["PLATFORM"]=="darwin" :
-	testEnv["ENV"]["DYLD_LIBRARY_PATH"] = testEnvLibPath
-	
+if env["PLATFORM"]=="darwin" :	
 	# Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
 	if not testEnv["DEBUG"] :
 		testEnv.Append( CXXFLAGS = "-O0" )
-else :
-	testEnv["ENV"]["LD_LIBRARY_PATH"] = testEnvLibPath
 
 testEnv.Append( LIBS=["boost_unit_test_framework"] )
 
