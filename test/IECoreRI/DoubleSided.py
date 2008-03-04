@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,27 +32,37 @@
 #
 ##########################################################################
 
-import sys
+import unittest
+import IECore
+import IECoreRI
+import os.path
+import os
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
+class DoubleSidedTest( unittest.TestCase ) :
 
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
-
-	def __init__( self ) :
+	def test( self ) :
 	
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )		
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testDoubleSided.rib" )
+		self.assertEqual( r.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
+		
+		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
+		self.assertEqual( r.getAttribute( "doubleSided" ), IECore.BoolData( False ) )
+		del r
+		
+		l = "".join( file( "test/IECoreRI/output/testDoubleSided.rib" ).readlines() )
+		self.assert_( "Sides 1" in l )
+		
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testDoubleSided.rib" )
+		r.setAttribute( "doubleSided", IECore.BoolData( True ) )
+		del r
+		
+		l = "".join( file( "test/IECoreRI/output/testDoubleSided.rib" ).readlines() )
+		self.assert_( "Sides 2" in l )
+			
+	def tearDown( self ) :
+	
+		if os.path.exists( "test/IECoreRI/output/testDoubleSided.rib" ) :
+			os.remove( "test/IECoreRI/output/testDoubleSided.rib" )
+				
+if __name__ == "__main__":
+    unittest.main()   

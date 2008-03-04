@@ -149,7 +149,9 @@ class RendererImplementation : public IECore::Renderer
 		void setColorAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setOpacityAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setSidesAttribute( const std::string &name, IECore::ConstDataPtr d );
+		void setDoubleSidedAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setGeometricApproximationAttribute( const std::string &name, IECore::ConstDataPtr d );
+		IECore::ConstDataPtr getDoubleSidedAttribute( const std::string &name ) const;
 		
 		struct ProcData
 		{

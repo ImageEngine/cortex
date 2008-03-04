@@ -134,8 +134,11 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["ri:opacity"] = &IECoreRI::RendererImplementation::setOpacityAttribute;
 	m_setAttributeHandlers["opacity"] = &IECoreRI::RendererImplementation::setOpacityAttribute;
 	m_setAttributeHandlers["ri:sides"] = &IECoreRI::RendererImplementation::setSidesAttribute;
+	m_setAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::setDoubleSidedAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:motionFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:focusFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
+
+	m_getAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::getDoubleSidedAttribute;
 
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
 	m_commandHandlers["objectBegin"] = &IECoreRI::RendererImplementation::objectBeginCommand;
@@ -683,6 +686,18 @@ void IECoreRI::RendererImplementation::setSidesAttribute( const std::string &nam
 	RiSides( f->readable() );
 }
 
+void IECoreRI::RendererImplementation::setDoubleSidedAttribute( const std::string &name, IECore::ConstDataPtr d )
+{
+	ConstBoolDataPtr f = runTimeCast<const BoolData>( d );
+	if( !f )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "doubleSided attribute expects a BoolData value." );
+		return;
+	}
+	
+	RiSides( f->readable() ? 2 : 1 );
+}
+
 void IECoreRI::RendererImplementation::setGeometricApproximationAttribute( const std::string &name, IECore::ConstDataPtr d )
 {
 	ConstFloatDataPtr f = runTimeCast<const FloatData>( d );
@@ -720,6 +735,28 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::
 			msg( Msg::Warning, "IECoreRI::RendererImplementation::getAttribute", format( "Unknown attribute \"%s\"." ) % name );
 		}
 	contextEnd();
+	return 0;
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getDoubleSidedAttribute( const std::string &name ) const
+{
+	float result = 2;
+	RxInfoType_t resultType;
+	int resultCount;
+	if( 0==RxAttribute( "Sides", (char *)&result, sizeof( float ), &resultType, &resultCount ) )
+	{
+		if( resultType==RxInfoFloat && resultCount==1 )
+		{
+			if( result==1 )
+			{
+				return new BoolData( false );
+			}
+			else
+			{
+				return new BoolData( true );
+			}
+		}
+	}
 	return 0;
 }
 

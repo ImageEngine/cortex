@@ -155,6 +155,11 @@ class Renderer : public IECore::Renderer
 		/// 
 		/// "ri:sides" IntData
 		/// Passed to RiSides
+		/// \deprecated Use "doubleSided" in preference to "ri:sides"
+		///
+		/// "doubleSided" BoolData
+		/// When true both sides of a primitive are rendered, when false
+		/// only one side is. Defaults to true.
 		///
 		/// "ri:geometricApproximation:motionFactor"
 		/// "ri:geometricApproximation:focusFactor"	FloatData
@@ -163,6 +168,7 @@ class Renderer : public IECore::Renderer
 		/// Currently supported attributes :
 		///
 		/// "user:*"
+		/// "doubleSided"
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const IECore::CompoundDataMap &parameters );
