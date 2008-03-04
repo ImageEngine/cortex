@@ -43,7 +43,8 @@ namespace IECore
 
 IE_CORE_FORWARDDECLARE( MeshPrimitive )
 
-/// MeshPrimitive represents a collection of closed simple polygonal facets
+/// MeshPrimitive represents a collection of closed simple polygonal facets.
+/// \todo Document winding order interpretation.
 class MeshPrimitive : public Primitive
 {	  
 	
