@@ -131,6 +131,34 @@ class Renderer : public IECore::Renderer
 
 		virtual void attributeBegin();
 		virtual void attributeEnd();
+		/// Currently supported attributes :
+		///
+		/// "ri:*:*"
+		/// Passed to an RiAttribute call.
+		///
+		/// "user:*"
+		/// Passed to an RiAttribute( "user", "*", ... ) call.
+		///
+		/// "ri:shadingRate" FloatData
+		/// Passed to RiShadingRate.
+		///
+		/// "ri:matte" BoolData
+		/// Passed to RiMatte.
+		///
+		/// "color"
+		/// "ri:color" Color3fData
+		/// Passed to RiColor
+		///
+		/// "opacity"
+		/// "ri:opacity" Color3fData
+		/// Passed to RiOpacity
+		/// 
+		/// "ri:sides" IntData
+		/// Passed to RiSides
+		///
+		/// "ri:geometricApproximation:motionFactor"
+		/// "ri:geometricApproximation:focusFactor"	FloatData
+		///	Passed to RiGeometricApproximation.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		/// Currently supported attributes :
 		///
