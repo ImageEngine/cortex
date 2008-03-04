@@ -95,7 +95,9 @@ except :
 
 # find nuke
 try :
-	NUKE_ROOT = IEEnv.registry["apps"]["nuke"][getOption( "NUKE_VERSION", os.environ["NUKE_VERSION"] )][platform]["location"]
+	nukeReg = IEEnv.registry["apps"]["nuke"][getOption( "NUKE_VERSION", os.environ["NUKE_VERSION"] )][platform]
+	if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
+		NUKE_ROOT = nukeReg["location"]
 except :
 	pass
 
