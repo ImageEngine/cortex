@@ -41,6 +41,8 @@
 namespace IECore
 {
 
+IE_CORE_FORWARDDECLARE( MeshPrimitive )
+
 /// MeshPrimitive represents a collection of closed simple polygonal facets
 class MeshPrimitive : public Primitive
 {	  
@@ -73,7 +75,10 @@ class MeshPrimitive : public Primitive
 
 		/// Creates a custom box mesh.
 		//\todo Add subdivisions and texture coordinates.
-		static boost::intrusive_ptr< MeshPrimitive > createBox( Imath::Box3f b );
+		static MeshPrimitivePtr createBox( Imath::Box3f b );
+		/// Creates a plane at z=0.
+		//\todo Add subdivisions and texture coordinates.
+		static MeshPrimitivePtr createPlane( Imath::Box2f b );
 
 	private:
 
@@ -85,8 +90,6 @@ class MeshPrimitive : public Primitive
 		std::string m_interpolation;
 			
 };  
-	
-IE_CORE_DECLAREPTR( MeshPrimitive );
 
 }
 

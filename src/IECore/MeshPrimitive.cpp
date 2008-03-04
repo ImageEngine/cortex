@@ -263,3 +263,23 @@ MeshPrimitivePtr MeshPrimitive::createBox( Box3f b )
 
 	return new MeshPrimitive( new IntVectorData(verticesPerFaceVec), new IntVectorData(vertexIdsVec), interpolation, new V3fVectorData(p) );
 }
+
+MeshPrimitivePtr MeshPrimitive::createPlane( Box2f b )
+{
+	IntVectorDataPtr verticesPerFace = new IntVectorData;
+	verticesPerFace->writable().push_back( 4 );
+	
+	IntVectorDataPtr vertexIds = new IntVectorData;
+	vertexIds->writable().push_back( 0 );
+	vertexIds->writable().push_back( 1 );
+	vertexIds->writable().push_back( 2 );
+	vertexIds->writable().push_back( 3 );
+	
+	V3fVectorDataPtr p = new V3fVectorData;
+	p->writable().push_back( V3f( b.min.x, b.min.y, 0 ) );
+	p->writable().push_back( V3f( b.min.x, b.max.y, 0 ) );
+	p->writable().push_back( V3f( b.max.x, b.max.y, 0 ) );
+	p->writable().push_back( V3f( b.max.x, b.min.y, 0 ) );
+	
+	return new MeshPrimitive( verticesPerFace, vertexIds, "linear", p );
+}
