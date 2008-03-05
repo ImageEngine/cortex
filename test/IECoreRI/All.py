@@ -41,6 +41,7 @@ from PTCParticleReader import *
 from PTCParticleWriter import *
 from ArchiveRecord import *
 from DoubleSided import *
+from Orientation import *
 
 ## \todo Should share this class with the other tests rather
 # than duplicating it
