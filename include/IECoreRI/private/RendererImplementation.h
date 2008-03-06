@@ -38,6 +38,8 @@
 #include "IECore/Renderer.h"
 #include "IECore/CachedReader.h"
 
+#include "ri.h"
+
 #include <stack>
 
 namespace IECoreRI
@@ -106,11 +108,7 @@ class RendererImplementation : public IECore::Renderer
 		// Does things common to both constructors
 		void constructCommon();
 	
-		void contextBegin() const;
-		void contextEnd() const;
-		void *m_context;
-		mutable void *m_otherContext;
-		bool m_contextValid;
+		RtContextHandle m_context;
 	
 		typedef void (RendererImplementation::*SetOptionHandler)( const std::string &name, IECore::ConstDataPtr d );
 		typedef IECore::ConstDataPtr (RendererImplementation::*GetOptionHandler)( const std::string &name ) const;
