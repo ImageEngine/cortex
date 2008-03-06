@@ -127,6 +127,7 @@ from InverseDistanceWeightedInterpolation import *
 from ImageCropOp import *
 from MeshPrimitiveShrinkWrapOp import *
 from ImagePrimitiveEvaluator import *
+from FileExaminer import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *
