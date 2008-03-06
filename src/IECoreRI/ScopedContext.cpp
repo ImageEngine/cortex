@@ -36,8 +36,6 @@
 
 using namespace IECoreRI;
 
-#include <iostream>
-using namespace std;
 ScopedContext::ScopedContext( RtContextHandle context )
 	:	m_contextWasNull( context==RI_NULL ), m_previousContext( RiGetContext() )
 {
