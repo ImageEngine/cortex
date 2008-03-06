@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,6 +31,30 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+
+/// The maya relationship editor by default won't show custom shape
+/// nodes in the light linking panels. This is because it uses the
+/// lightLinkingObjectFilter created in $MAYA_LOCATION/scripts/startup/initDefaultFilters.mel,
+/// which in turn references the renderableObjectShapeFilter created in the same
+/// file. The renderableObjectShapeFilter is hardcoded to pass through only certain built
+/// in types, even though the API allows the creation of custom shapes, and the low level light linking
+/// code works fine with those custom shapes. This function munges the lightLinkingObjectFilter
+/// to pass through ieProceduralHolder nodes, so that we can get full light linking functionality
+/// with them.
+global proc ieProceduralHolderUIFixLightLinking()
+{
+	string $l = `rename lightLinkingObjectFilter lightLinkingObjectFilterBeforeIEProcedurals`;
+	string $p = `itemFilter -cls "builtIn" -byType ieProceduralHolder ieProceduralHolderFilter`;
+	itemFilter -union $l ieProceduralHolderFilter -cls "builtIn" lightLinkingObjectFilter;
+}
+// Call the above function once on startup.
+global int $ieProceduralHolderUIFixedLightLinking;
+if( $ieProceduralHolderUIFixedLightLinking==0 )
+{
+	ieProceduralHolderUIFixLightLinking();
+	$ieProceduralHolderUIFixedLightLinking = 1;
+}
+
 
 global proc AEieProceduralHolderTemplate( string $nodeName )
 {
@@ -81,3 +105,4 @@ global proc AEieProceduralHolderTemplate( string $nodeName )
 			
 	editorTemplate -endScrollLayout;	
 }
+
