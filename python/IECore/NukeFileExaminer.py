@@ -89,6 +89,14 @@ class NukeFileExaminer( FileExaminer ) :
 				result.add( self.__convertFileName( fileName, firstFrame, lastFrame ) )
 			if proxyFileName!="" :
 				result.add( self.__convertFileName( proxyFileName, firstFrame, lastFrame ) )
+				
+		# now find read geo nodes
+		readGeoNodes = self.__findNodes( "ReadGeo", lines )
+		for readGeoNode in readGeoNodes :
+			
+			fileName = self.__knobValue( "file", readGeoNode, "" )		
+			if fileName!="" :
+				result.add( self.__convertFileName( fileName, scriptFirstFrame, scriptLastFrame ) )
 			
 		# now find grain nodes
 		grainNodes = self.__findNodes( "ScannedGrain", lines )

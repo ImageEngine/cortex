@@ -56,10 +56,12 @@ class TestFileExaminer( unittest.TestCase ) :
 			"/tmp/testProxy.####.tif 3-10",
 			"/tmp/testNoPadding.#.tif 1-101",
 			"/tmp/testNoFrameNumber.tif",
+			"/tmp/animatedGeo.####.obj 1-101",
+			"/tmp/test/geoNoAnimation.obj",
 		]
 		
 		d = e.dependencies()
-				
+						
 		self.assertEqual( len( expectedDependencies ), len( d ) )
 		for ed in expectedDependencies :
 			self.assert_( ed in d )
