@@ -55,12 +55,6 @@ class Renderer : public IECore::Renderer
 		/// to RiBegin( name.c_str() ) and will subsequently always render to that
 		/// context. If the empty string is passed then RiBegin( 0 ) is called to actually
 		/// render the scene rather than create a rib.
-		/// \bug Due to an apparent bug in lib3delight, the above is not true. Instead
-		/// a new context is made with RiBegin and it is finished with RiEnd in the destructor,
-		/// but no context save/restore is made during Renderer calls - therefore it's only safe
-		/// to have one of these Renderer objects in existence at any given time.
-		/// \todo Fix the context save/restore bug - when doing this check that all appropriate
-		/// functions are actually calling contextBegin()/end(). 
 		Renderer( const std::string &name );
 		
 		virtual ~Renderer();
