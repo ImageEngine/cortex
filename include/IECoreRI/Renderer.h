@@ -80,34 +80,31 @@ class Renderer : public IECore::Renderer
 		/// "user:*"
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
 
-		/// Currently supported parameters :
+		/// \par Standard parameters supported :
 		///
-		/// "transform"			M44fData()
+		/// \li <b>"resolution"</b>
+		/// \li <b>"screenWindow"</b>
+		///	\li <b>"cropWindow"</b>
+		/// \li <b>"projection"</b>
+		/// \li <b>"projection:fov"</b>
+		///	\li <b>"clippingPlanes"</b>
+		/// \li <b>"shutter"</b>
+		///
+		/// \par Implementation specific parameters supported :
+		///
+		/// \li <b>"transform" M44fData()</b><br>
 		/// This overrides the transform specified via the transform*() calls below. It's provided
 		/// to work around a bug that prevents RxTransform() from working when in RIB output mode.
 		///
-		/// "resolution"		V2iData()
-		/// Specifies the image resolution.
-		///
-		/// "screenWindow"		Box2fData()
-		///
-		///	"cropWindow"		Box2fData()
-		///
-		///	"clippingPlanes"	V2fData()
-		///
-		/// "projection"		StringData()
-		///
-		///	"projection:*"
+		///	\li <b>"projection:*"</b><br>
 		/// All parameters matching this naming convention are passed to the RiProjection call.
 		///
-		/// "hider"				StringData()
+		/// \li <b>"hider" StringData()</b><br>
 		///
-		/// "hider:*"
+		/// \li <b>"hider:*"</b><br>
 		/// All parameters matching this naming convention are passed to an RiHider call.
 		///
-		/// "shutter"			V2fData()
 		/// \todo Support moving cameras.
-		/// \todo Move the definitions of common parameters into the core library.
 		virtual void camera( const std::string &name, IECore::CompoundDataMap &parameters );
 		virtual void display( const std::string &name, const std::string &type, const std::string &data, IECore::CompoundDataMap &parameters );
 

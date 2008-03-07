@@ -82,13 +82,14 @@ class Renderer : public IECore::Renderer
 		/// "shutter" V2fData
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
-		/// Supports the following standard parameters :
+		/// \par Standard parameters supported :
 		///
-		///	"projection" (orthographic and perspective)
-		/// "projection:fov" (for perspective cameras)
-		/// "resolution"
-		/// "screenWindow"
-		/// "clippingPlanes"
+		/// \li <b>"resolution"</b>
+		///	\li <b>"projection"</b> (orthographic and perspective)
+		/// \li <b>"projection:fov"</b>
+		/// \li <b>"resolution"</b>
+		/// \li <b>"screenWindow"</b>
+		/// \li <b>"clippingPlanes"</b>
 		virtual void camera( const std::string &name, IECore::CompoundDataMap &parameters );
 		virtual void display( const std::string &name, const std::string &type, const std::string &data, IECore::CompoundDataMap &parameters );
 
