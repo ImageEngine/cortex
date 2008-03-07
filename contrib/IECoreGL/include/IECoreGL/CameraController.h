@@ -45,6 +45,8 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( Camera )
 
+/// \todo Make this work on IECore::Camera instead, and put it in IECore
+/// rather than IECoreGL.
 class CameraController : public IECore::RefCounted
 {
 
