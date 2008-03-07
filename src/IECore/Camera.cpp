@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,8 +35,11 @@
 #include "IECore/Camera.h"
 #include "IECore/Transform.h"
 #include "IECore/Renderer.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace IECore;
+using namespace Imath;
+using namespace std;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(Camera);
 
@@ -181,6 +184,118 @@ const CompoundDataMap &Camera::parameters() const
 CompoundDataPtr Camera::parametersData()
 {
 	return m_parameters;
+}
+
+void Camera::addStandardParameters()
+{
+	// resolution
+	V2i resolution( 0 );
+	CompoundDataMap::const_iterator resIt=parameters().find( "resolution" );
+	if( resIt != parameters().end() && resIt->second->isInstanceOf( V2iDataTypeId ) )
+	{
+		resolution = boost::static_pointer_cast<V2iData>( resIt->second )->readable();
+	}
+	if( resolution.x < 1 || resolution.y < 1 ) 
+	{
+		resolution = V2i( 640, 480 );
+		parameters()["resolution"] = new V2iData( resolution );
+	}
+	
+	// screen window
+	Box2f screenWindow;
+	CompoundDataMap::const_iterator screenWindowIt=parameters().find( "screenWindow" );
+	if( screenWindowIt!=parameters().end() && screenWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
+	{
+		screenWindow = boost::static_pointer_cast<Box2fData>( screenWindowIt->second )->readable();
+	}
+	if( screenWindow.isEmpty() )
+	{
+		float aspectRatio = (float)resolution.x/(float)resolution.y;
+		if( aspectRatio < 1.0f )
+		{
+			screenWindow.min.x = -1;
+			screenWindow.max.x = 1;
+			screenWindow.min.y = -1.0f / aspectRatio;
+			screenWindow.max.y = 1.0f / aspectRatio;
+		}
+		else
+		{
+			screenWindow.min.y = -1;
+			screenWindow.max.y = 1;
+			screenWindow.min.x = -aspectRatio;
+			screenWindow.max.x = aspectRatio;			
+		}
+		parameters()["screenWindow"] = new Box2fData( screenWindow );
+	}
+	
+	// crop window
+	Box2f cropWindow;
+	CompoundDataMap::const_iterator cropWindowIt=parameters().find( "cropWindow" );
+	if( cropWindowIt!=parameters().end() && cropWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
+	{
+		cropWindow = boost::static_pointer_cast<Box2fData>( cropWindowIt->second )->readable();
+	}
+	if( cropWindow.isEmpty() || cropWindow.min.x < 0.0f || cropWindow.min.y < 0.0f ||
+		cropWindow.max.x > 1.0f || cropWindow.max.y > 1.0f )
+	{
+		cropWindow = Box2f( V2f( 0 ), V2f( 1 ) );
+		parameters()["cropWindow"] = new Box2fData( cropWindow );
+	}
+	
+	// projection
+	string projection = "";
+	CompoundDataMap::const_iterator projectionIt=parameters().find( "projection" );
+	if( projectionIt!=parameters().end() && projectionIt->second->isInstanceOf( StringDataTypeId ) )
+	{
+		projection = boost::static_pointer_cast<StringData>( projectionIt->second )->readable();
+	}
+	if( projection=="" )
+	{
+		projection = "orthographic";
+		parameters()["projection"] = new StringData( projection );
+	}
+	
+	// fov
+	if( projection=="perspective" )
+	{
+		float fov = -1.0f;
+		CompoundDataMap::const_iterator fovIt=parameters().find( "projection:fov" );
+		if( fovIt!=parameters().end() && fovIt->second->isInstanceOf( FloatDataTypeId ) )
+		{
+			fov = boost::static_pointer_cast<FloatData>( fovIt->second )->readable();
+		}
+		if( fov < 0.0f )
+		{
+			fov = 90;
+			parameters()["projection:fov"] = new FloatData( fov );
+		}
+	}
+	
+	// clipping planes
+	V2f clippingPlanes( -1.0f );
+	CompoundDataMap::const_iterator clippingIt=parameters().find( "clippingPlanes" );
+	if( clippingIt != parameters().end() && clippingIt->second->isInstanceOf( V2fDataTypeId ) )
+	{
+		clippingPlanes = boost::static_pointer_cast<V2fData>( clippingIt->second )->readable();
+	}
+	if( clippingPlanes[0] < 0.0f || clippingPlanes[1] < 0.0f )
+	{
+		clippingPlanes = V2f( 1.0e-10f, 1.0e38f );
+		parameters()["clippingPlanes"] = new V2fData( clippingPlanes );
+	}
+	
+	// shutter
+	V2f shutter( 1.0f, -1.0f );
+	CompoundDataMap::const_iterator shutterIt=parameters().find( "shutter" );
+	if( shutterIt != parameters().end() && shutterIt->second->isInstanceOf( V2fDataTypeId ) )
+	{
+		shutter = boost::static_pointer_cast<V2fData>( shutterIt->second )->readable();
+	}
+	if( shutter[0] > shutter[1] )
+	{
+		shutter = V2f( 0.0f );
+		parameters()["shutter"] = new V2fData( shutter );
+	}
 }
 
 void Camera::render( RendererPtr renderer )

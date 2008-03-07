@@ -57,6 +57,7 @@ void bindCamera()
 		.def( "setTransform", &Camera::setTransform )
 		.def( "getTransform", (TransformPtr (Camera::*)())&Camera::getTransform )
 		.def( "parameters", &Camera::parametersData )
+		.def( "addStandardParameters", &Camera::addStandardParameters )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Camera )
 	;
 	INTRUSIVE_PTR_PATCH( Camera, CameraPyClass );

@@ -73,6 +73,36 @@ class TestCamera( unittest.TestCase ) :
 		Writer.create( cc, "test/IECore/data/camera.cob" ).write()
 		ccc = Reader.create( "test/IECore/data/camera.cob" ).read()
 		self.assertEqual( ccc, c )
+	
+	def testAddStandardParameters( self ) :
+	
+		c = Camera()
+		c.addStandardParameters()
+		
+		self.assertEqual( c.parameters()["resolution"].value, V2i( 640, 480 ) )
+		aspectRatio = 640.0/480.0
+		self.assertEqual( c.parameters()["screenWindow"].value, Box2f( V2f( -aspectRatio, -1 ), V2f( aspectRatio, 1 ) ) )
+		
+		self.assertEqual( c.parameters()["cropWindow"].value, Box2f( V2f( 0, 0 ), V2f( 1, 1 ) ) )
+		self.assertEqual( c.parameters()["projection"].value, "orthographic" )
+		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 1.0e-10, 1.0e38 ) )
+		self.assertEqual( c.parameters()["shutter"].value, V2f( 0 ) )
+
+		c = Camera()
+		c.parameters()["projection"] = StringData( "perspective" )
+		c.parameters()["resolution"] = V2iData( V2i( 500, 1000 ) )
+		c.parameters()["cropWindow"] = Box2fData( Box2f( V2f( 0.1 ), V2f( 0.9 ) ) )
+		c.parameters()["clippingPlanes"] = V2fData( V2f( 1, 1000 ) )
+		c.parameters()["shutter"] = V2fData( V2f( 1, 2 ) )
+		c.addStandardParameters()
+		self.assertEqual( c.parameters()["resolution"].value, V2i( 500, 1000 ) )
+		self.assertEqual( c.parameters()["screenWindow"].value, Box2f( V2f( -1, -2 ), V2f( 1, 2 ) ) )
+		self.assertEqual( c.parameters()["cropWindow"].value, Box2f( V2f( 0.1 ), V2f( 0.9 ) ) )
+		self.assertEqual( c.parameters()["projection"].value, "perspective" )
+		self.assertEqual( c.parameters()["projection:fov"].value, 90 )
+		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 1, 1000 ) )
+		self.assertEqual( c.parameters()["shutter"].value, V2f( 1, 2 ) )
+	
 		
 	def tearDown( self ) :
 	
