@@ -53,7 +53,7 @@
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded 
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = IECore
+PROJECT_NAME           = Cortex
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. 
 # This could be handy for archiving the generated documentation or 
@@ -462,7 +462,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = include/IECore src/IECore python/IECore include/IECoreRI src/IECoreRI python/IECoreRI include/IECoreNuke src/IECoreNuke
+INPUT                  = include/IECore src/IECore python/IECore include/IECoreRI src/IECoreRI python/IECoreRI include/IECoreNuke src/IECoreNuke contrib/IECoreGL/include/IECoreGL contrib/IECoreGL/src contrib/IECoreGL/python/IECoreGL
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

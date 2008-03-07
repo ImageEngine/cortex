@@ -1121,6 +1121,9 @@ docEnv.Depends( docs, glob.glob( "src/IECoreNuke/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "python/IECore/*.py" ) )
 docEnv.Depends( docs, glob.glob( "python/IECoreRI/*.py" ) )
 docEnv.Depends( docs, glob.glob( "python/IECoreNuke/*.py" ) )
+docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) )
+docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/src/*.cpp" ) )
+docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" ) )
 
 # \todo This won't reinstall the documentation if the directory already exists
 installDoc = docEnv.Install( "$INSTALL_DOC_DIR", "doc/html" )
