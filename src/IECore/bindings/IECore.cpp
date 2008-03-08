@@ -148,6 +148,7 @@
 #include "IECore/bindings/MeshPrimitiveImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/MeshPrimitiveImplicitSurfaceOpBinding.h"
 #include "IECore/bindings/TriangulateOpBinding.h"
+#include "IECore/bindings/InternedBinding.h"
 #include "IECore/bindings/SpherePrimitiveBinding.h"
 #include "IECore/bindings/SpherePrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/InverseDistanceWeightedInterpolationBinding.h"
@@ -281,6 +282,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMeshPrimitiveImplicitSurfaceFunction();		
 	bindMeshPrimitiveImplicitSurfaceOp();	
 	bindTriangulateOp();
+	bindInterned();
 	bindSpherePrimitive();
 	bindSpherePrimitiveEvaluator();
 	bindInverseDistanceWeightedInterpolation();

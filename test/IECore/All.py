@@ -115,6 +115,7 @@ from PrimitiveEvaluator import *
 from MeshPrimitiveEvaluator import *
 from PrimitiveImplicitSurfaceFunction import *
 from MeshPrimitiveImplicitSurfaceOp import *
+from Interned import *
 from Writer import *
 from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
