@@ -95,13 +95,15 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"transform" M44fData()</b><br>
 		/// This overrides the transform specified via the transform*() calls below. It's provided
 		/// to work around a bug that prevents RxTransform() from working when in RIB output mode.
+		/// \deprecated The "transform" parameter should no longer be used as the bug in 3delight
+		/// which required it has now been fixed.
 		///
 		///	\li <b>"projection:*"</b><br>
 		/// All parameters matching this naming convention are passed to the RiProjection call.
 		///
-		/// \li <b>"hider" StringData()</b><br>
+		/// \li <b>"ri:hider" StringData()</b><br>
 		///
-		/// \li <b>"hider:*"</b><br>
+		/// \li <b>"ri:hider:*"</b><br>
 		/// All parameters matching this naming convention are passed to an RiHider call.
 		///
 		/// \todo Support moving cameras.

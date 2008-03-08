@@ -157,35 +157,6 @@ class RendererTest( unittest.TestCase ) :
 		r.worldEnd()
 		
 	## \todo Make this test actually test something
-	def testCamera( self ) :
-	
-		s = M44f()
-		s.scale( V3f( 10 ) )
-	
-		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
-		
-		# we can't use concatTransform to position the camera until
-		# we get support for RxTransformPoints working in rib generation
-		# mode from 3delight - instead we're using the nasty transform
-		# parameter in the list below.
-		#r.concatTransform( s )
-		r.camera( "main", {
-			"resolution" : V2iData( V2i( 1024 ) ),
-			"screenWindow" : Box2fData( Box2f( V2f( -1 ), V2f( 1 ) ) ),
-			"cropWindow" : Box2fData( Box2f( V2f( 0.1, 0.1 ), V2f( 0.9, 0.9 ) ) ),
-			"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
-			"projection" : StringData( "perspective" ),
-			"projection:fov" : FloatData( 45 ),
-			"hider" : StringData( "hidden" ),
-			"hider:jitter" : IntData( 1 ),
-			"shutter" : V2fData( V2f( 0, 0.1 ) ),
-			"transform" : M44fData( s )
-		} )
-		
-		r.worldBegin()		
-		r.worldEnd()
-		
-	## \todo Make this test actually test something
 	def testSubDivs( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/subdiv.rib" )

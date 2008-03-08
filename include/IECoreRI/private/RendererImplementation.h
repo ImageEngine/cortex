@@ -37,6 +37,7 @@
 
 #include "IECore/Renderer.h"
 #include "IECore/CachedReader.h"
+#include "IECore/Camera.h"
 
 #include "ri.h"
 
@@ -122,8 +123,7 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getShutterOption( const std::string &name ) const;
 		IECore::ConstDataPtr getResolutionOption( const std::string &name ) const;
 		
-		Imath::M44f m_cameraTransform;
-		IECore::CompoundDataMap m_cameraParameters;
+		IECore::CameraPtr m_camera;
 		
 		struct AttributeState
 		{
