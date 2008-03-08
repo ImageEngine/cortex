@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -353,6 +353,11 @@ MStatus ParameterisedHolder<B>::setNodeValues()
 				return s;
 			}
 		}
+		catch( std::exception &e )
+		{
+			msg( Msg::Error, "ParameterisedHolder::setNodeValues", boost::format( "Caught exception while setting value : %s" ) % e.what());
+			return MStatus::kFailure;
+		}
 		catch( ... )
 		{
 			msg( Msg::Error, "ParameterisedHolder::setNodeValues", "Caught exception while setting value." );
@@ -385,6 +390,11 @@ MStatus ParameterisedHolder<B>::setParameterisedValues()
 			{
 				return s;
 			}
+		}
+		catch( std::exception &e )
+		{
+			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting value : %s" ) % e.what());
+			return MStatus::kFailure;
 		}
 		catch( ... )
 		{
