@@ -322,6 +322,14 @@ o.Add(
 )
 
 o.Add(
+	"TEST_GL_SCRIPT",
+	"The python script to run for the OpenGL tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"contrib/IECoreGL/test/All.py"
+)
+
+o.Add(
 	"TEST_LIBPATH",
 	"Additional colon separated paths to be prepended to the library path"
 	"used when running tests.",
@@ -954,6 +962,17 @@ if env["WITH_GL"] and doConfigure :
 
 		Default( [ glLibrary, glPythonModule ] )
 
+		glTestEnv = testEnv.Copy()
+		glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + ":contrib/IECoreGL/python"
+		glTestEnv["ENV"]["DISPLAY"] = os.environ["DISPLAY"]
+		glTestEnv["ENV"]["XAUTHORITY"] = os.environ["XAUTHORITY"]
+		
+		glTest = glTestEnv.Command( "contrib/IECoreGL/test/results.txt", glPythonModule, pythonExecutable + " $TEST_GL_SCRIPT" )
+		NoCache( glTest )
+		glTestEnv.Depends( glTest, corePythonModule )
+		glTestEnv.Depends( glTest, glob.glob( "contrib/IECoreGL/test/*.py" ) )
+		glTestEnv.Alias( "testGL", glTest )
+		
 ###########################################################################################
 # Build, install and test the optional coreMaya library and bindings
 ###########################################################################################
