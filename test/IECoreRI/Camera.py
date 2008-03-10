@@ -112,6 +112,43 @@ class CameraTest( unittest.TestCase ) :
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 1 )
 		
+	def testXYOrientation( self ) :
+	
+		# render a red square at x==1, and a green one at y==1
+		
+		r = IECoreRI.Renderer( "" )
+		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
+		r.transformBegin()
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ) } )
+		r.transformEnd()
+		
+		r.worldBegin()
+		r.setAttribute( "color", IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
+		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.75, -0.25 ), IECore.V2f( 1.25, 0.25 ) ) ).render( r )
+		r.setAttribute( "color", IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) )
+		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
+		r.worldEnd()
+		
+		# check we get the colors we'd expect where we expect them
+		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
+		e = IECore.PrimitiveEvaluator.create( i )
+		result = e.createResult()
+		a = e.A()
+		r = e.R()
+		g = e.G()
+		b = e.B()
+		e.pointAtUV( IECore.V2f( 1, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( a ), 1 )
+		self.assertEqual( result.floatPrimVar( r ), 1 )
+		self.assertEqual( result.floatPrimVar( g ), 0 )
+		self.assertEqual( result.floatPrimVar( b ), 0 )
+		e.pointAtUV( IECore.V2f( 0.5, 0 ), result )
+		self.assertEqual( result.floatPrimVar( a ), 1 )
+		self.assertEqual( result.floatPrimVar( r ), 0 )
+		self.assertEqual( result.floatPrimVar( g ), 1 )
+		self.assertEqual( result.floatPrimVar( b ), 0 )
+		
 	def tearDown( self ) :
 	
 		files = [
