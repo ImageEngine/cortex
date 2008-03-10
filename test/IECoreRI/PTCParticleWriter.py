@@ -113,9 +113,21 @@ if hasattr( IECoreRI, "PTCParticleWriter" ):
 			data = []
 			for t in xrange( 0, pointCloud.numPoints ):
 				data.append( IECore.V3f(t) )
+
+			worldToEye = IECore.M44fData( IECore.M44f( 1,2,3,0, 1,2,3,0, 1,2,3,0, 1,2,3,1 ) )
+			worldToNdc = IECore.M44fData( IECore.M44f( 1,0,2,0, 0,1,2,0, 0,0,1,1, 0,0,0,1 ) )
+
 			pointCloud[ "P" ] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( data ) )
 			pointCloud[ "another" ] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( data ) )
-			pointCloud.blindData()["PTCParticleIO"] = IECore.CompoundData( { "xResolution": IECore.FloatData( 640 ), "yResolution": IECore.FloatData( 480 ), "aspectRatio": IECore.FloatData( 1.0 ) } )
+			pointCloud.blindData()["PTCParticleIO"] = IECore.CompoundData( 
+					{	 
+						"xResolution": IECore.FloatData( 640 ), 
+						"yResolution": IECore.FloatData( 480 ), 
+						"aspectRatio": IECore.FloatData( 1.0 ), 
+						"worldToEye": worldToEye, 
+						"worldToNdc": worldToNdc,
+					} 
+			)
 
 			w = IECoreRI.PTCParticleWriter( pointCloud, self.tmpfile )
 			w.write()
@@ -130,8 +142,8 @@ if hasattr( IECoreRI, "PTCParticleWriter" ):
 				if pointCloud[ var ].data != pointCloud2[ var ].data:
 					raise Exception, "Variable %s does not match!" % var
 			
-			#for b in pointCloud.blindData()['PTCParticleIO'].keys():
-			#	self.assertEqual( pointCloud.blindData()[b], pointCloud2.blindData()['PTCParticleIO'][b] )
+			self.assertEqual( worldToEye, pointCloud2.blindData()['PTCParticleIO']['worldToEye'] )
+			self.assertEqual( worldToNdc, pointCloud2.blindData()['PTCParticleIO']['worldToNdc'] )
 	
 
 if __name__ == "__main__":

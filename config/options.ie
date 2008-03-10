@@ -82,9 +82,8 @@ if PYTHON_LINK_FLAGS=="" :
 # find 3delight
 try :
 	dlReg = IEEnv.registry["apps"]["3delight"][getOption( "DL_VERSION", os.environ["DL_VERSION"] )][platform]
-	if compiler==dlReg["compiler"] and compilerVersion==dlReg["compilerVersion"] :
-		RMAN_ROOT = dlReg["location"]
-		os.environ["DELIGHT_CONF"] = "/software/config/3delight"
+	RMAN_ROOT = dlReg["location"]
+	os.environ["DELIGHT_CONF"] = "/software/config/3delight"
 except :
 	pass
 	

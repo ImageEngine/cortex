@@ -51,7 +51,7 @@ using namespace IECore;
 using namespace std;
 using namespace boost;
 
-const Writer::WriterDescription<PTCParticleWriter> PTCParticleWriter::m_writerDescription( "3Dbake 3DWbake" );
+const Writer::WriterDescription<PTCParticleWriter> PTCParticleWriter::m_writerDescription( "3Dbake 3DWbake ptc" );
 
 PTCParticleWriter::PTCParticleWriter( )
 	:	ParticleWriter( "PTCParticleWriter", "Creates files in renderman point cloud format" )

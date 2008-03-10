@@ -60,7 +60,7 @@ using namespace boost;
 using namespace Imath;
 using namespace std;
 
-const Reader::ReaderDescription<PTCParticleReader> PTCParticleReader::m_readerDescription( "3Dbake 3DWbake" );
+const Reader::ReaderDescription<PTCParticleReader> PTCParticleReader::m_readerDescription( "3Dbake 3DWbake ptc" );
 
 PTCParticleReader::PTCParticleReader( )
 	:	ParticleReader( "PTCParticleReader", "Reads Renderman point cloud format" ), m_ptcFile( 0 ), m_userDataBuffer( 0 )
