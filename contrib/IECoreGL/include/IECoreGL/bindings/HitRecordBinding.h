@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/bindings/SceneBinding.h"
-
-#include "IECore/bindings/IntrusivePtrPatch.h"
-
-using namespace boost::python;
+#ifndef IECOREGL_HITRECORDBINDING_H
+#define IECOREGL_HITRECORDBINDING_H
 
 namespace IECoreGL
 {
 
-static list select( Scene &s, const Imath::Box2f &b )
-{
-	std::list<HitRecord> hits;
-	s.select( b, hits );
-	list result;
-	for( std::list<HitRecord>::const_iterator it=hits.begin(); it!=hits.end(); it++ )
-	{
-		result.append( *it );
-	}
-	return result;
-}
-
-void bindScene()
-{
-	typedef class_< Scene, boost::noncopyable, ScenePtr, bases<Renderable> > ScenePyClass;
-	ScenePyClass( "Scene" )
-		.def( "root", (GroupPtr (Scene::*)() )&Scene::root )
-		.def( "render", (void (Scene::*)() const )&Scene::render )
-		.def( "render", (void (Scene::*)( ConstStatePtr ) const )&Scene::render )
-		.def( "select", &select )
-		.def( "setCamera", &Scene::setCamera )
-		.def( "getCamera", (CameraPtr (Scene::*)())&Scene::getCamera )
-	;
-
-	INTRUSIVE_PTR_PATCH( Scene, ScenePyClass );
-	implicitly_convertible<ScenePtr, RenderablePtr>();
-}
+void bindHitRecord();
 
 }
+
+#endif // IECOREGL_HITRECORDBINDING_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/bindings/SceneBinding.h"
+#include "IECoreGL/HitRecord.h"
+#include "IECoreGL/bindings/HitRecordBinding.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 
 namespace IECoreGL
 {
 
-static list select( Scene &s, const Imath::Box2f &b )
+void bindHitRecord()
 {
-	std::list<HitRecord> hits;
-	s.select( b, hits );
-	list result;
-	for( std::list<HitRecord>::const_iterator it=hits.begin(); it!=hits.end(); it++ )
-	{
-		result.append( *it );
-	}
-	return result;
-}
 
-void bindScene()
-{
-	typedef class_< Scene, boost::noncopyable, ScenePtr, bases<Renderable> > ScenePyClass;
-	ScenePyClass( "Scene" )
-		.def( "root", (GroupPtr (Scene::*)() )&Scene::root )
-		.def( "render", (void (Scene::*)() const )&Scene::render )
-		.def( "render", (void (Scene::*)( ConstStatePtr ) const )&Scene::render )
-		.def( "select", &select )
-		.def( "setCamera", &Scene::setCamera )
-		.def( "getCamera", (CameraPtr (Scene::*)())&Scene::getCamera )
+	class_<HitRecord>( "HitRecord", init<const GLuint *>() )
+		.def( init<float, float, const IECore::InternedString &>() )
+		.def_readwrite( "depthMin", &HitRecord::depthMin )
+		.def_readwrite( "depthMax", &HitRecord::depthMax )
+		.def_readwrite( "name", &HitRecord::name )
+		.def( self < self )
+		.def( "offsetToNext", &HitRecord::offsetToNext )
 	;
 
-	INTRUSIVE_PTR_PATCH( Scene, ScenePyClass );
-	implicitly_convertible<ScenePtr, RenderablePtr>();
 }
 
-}
+} // namespace IECoreGL

@@ -35,11 +35,20 @@
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/Group.h"
 #include "IECoreGL/State.h"
+#include "IECoreGL/Camera.h"
+#include "IECoreGL/NameStateComponent.h"
+#include "IECoreGL/Exception.h"
+
+#include "IECore/MessageHandler.h"
+
+#include "OpenEXR/ImathFun.h"
 
 using namespace IECoreGL;
+using namespace Imath;
+using namespace std;
 
 Scene::Scene()
-	:	m_root( new Group )
+	:	m_root( new Group ), m_camera( 0 )
 {
 }
 
@@ -49,6 +58,11 @@ Scene::~Scene()
 
 void Scene::render( ConstStatePtr state ) const
 {
+	if( m_camera )
+	{
+		m_camera->render( state );
+	}
+
 	glPushAttrib( GL_ALL_ATTRIB_BITS );
 
 		State::bindBaseState();
@@ -66,6 +80,85 @@ void Scene::render() const
 Imath::Box3f Scene::bound() const
 {
 	return root()->bound();
+}
+
+unsigned Scene::select( const Imath::Box2f &region, std::list<HitRecord> &hits ) const
+{
+	ConstStatePtr state = State::defaultState();
+	
+	if( m_camera )
+	{
+		m_camera->render( state );
+	}
+	
+	// perform the region framing
+	GLdouble projectionMatrix[16];
+	glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix );
+	GLint viewport[4];
+	glGetIntegerv( GL_VIEWPORT, viewport );
+		
+	V2f regionCenter = region.center();
+	V2f regionSize = region.size();
+	regionCenter.x = viewport[0] + viewport[2] * regionCenter.x;
+	regionCenter.y = viewport[1] + viewport[3] * (1.0f - regionCenter.y);
+	regionSize.x *= viewport[2];
+	regionSize.y *= viewport[3];
+		
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+	gluPickMatrix( regionCenter.x, regionCenter.y, regionSize.x, regionSize.y, viewport );
+	glMultMatrixd( projectionMatrix );
+	glMatrixMode( GL_MODELVIEW );
+	
+	// do the selection render
+	static const unsigned int selectBufferSize = 20000; // enough to select 5000 distinct objects
+	static GLuint selectBuffer[selectBufferSize];
+	glSelectBuffer( selectBufferSize, selectBuffer );
+	glRenderMode( GL_SELECT );
+	
+		glInitNames();
+		glPushName( 0 );
+	
+		glPushAttrib( GL_ALL_ATTRIB_BITS );
+
+			State::bindBaseState();
+			state->bind();
+			root()->render( state );
+
+		glPopAttrib();	
+
+	int numHits = glRenderMode( GL_RENDER );
+	if( numHits < 0 ) 
+	{
+		IECore::msg( IECore::Msg::Warning, "IECoreGL::Scene::select", "Selection buffer overflow." );
+		numHits *= -1;
+	}
+	
+	// get the hits out of the select buffer.
+	GLuint *hitRecord = selectBuffer;
+	for( int i=0; i<numHits; i++ )
+	{
+		HitRecord h( hitRecord );
+		hits.push_back( h );
+		hitRecord += h.offsetToNext();
+	}
+	
+	return numHits;
+}
+
+void Scene::setCamera( CameraPtr camera )
+{
+	m_camera = camera;
+}
+
+CameraPtr Scene::getCamera()
+{
+	return m_camera;
+}
+
+ConstCameraPtr Scene::getCamera() const
+{
+	return m_camera;
 }
 
 GroupPtr Scene::root()

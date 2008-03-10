@@ -46,6 +46,8 @@ IE_CORE_FORWARDDECLARE( CameraController );
 
 /// A simple utility Window class to allow
 /// the viewing of Scene instances.
+/// \todo This shouldn't have it's own camera now the
+/// Scene class has one.
 class SceneViewer : public Window
 {
 

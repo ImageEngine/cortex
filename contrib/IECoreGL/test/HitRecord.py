@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,16 +32,31 @@
 #
 ##########################################################################
 
-from Shader import *
-from State import *
-from ShaderLoader import *
-from Renderer import *
-from Group import *
-from Texture import *
-from ImmediateRenderer import *
-from NameStateComponent import *
-from HitRecord import *
-from Selection import *
+import unittest
+import os.path
 
+from IECore import *
+
+from IECoreGL import *
+init( False )
+
+class TestHitRecord( unittest.TestCase ) :
+
+	def test( self ) :
+	
+		d = HitRecord( 1, 2, InternedString( "hello" ) )
+	
+		self.assertEqual( d.depthMin, 1 )
+		self.assertEqual( d.depthMax, 2 )
+		self.assertEqual( d.name, InternedString( "hello" ) )
+		
+		d2 = HitRecord( 1.5, 2, InternedString( "goodbye" ) )
+	
+		self.assertEqual( d2.depthMin, 1.5 )
+		self.assertEqual( d2.depthMax, 2 )
+		self.assertEqual( d2.name, InternedString( "goodbye" ) )
+		
+		self.assert_( d < d2 )
+		
 if __name__ == "__main__":
     unittest.main()   

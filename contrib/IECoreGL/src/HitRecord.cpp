@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,39 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "IECoreGL/HitRecord.h"
+#include "IECoreGL/NameStateComponent.h"
 
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/bindings/SceneBinding.h"
+#include "IECore/Exception.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "OpenEXR/ImathLimits.h"
 
-using namespace boost::python;
+using namespace IECoreGL;
 
-namespace IECoreGL
+HitRecord::HitRecord( const GLuint *hitRecord )
+	:	name( NameStateComponent::nameFromGLName( hitRecord[3] ) ),
+		depthMin( (float)hitRecord[1]/(float)Imath::limits<GLuint>::max() ),
+		depthMax( (float)hitRecord[2]/(float)Imath::limits<GLuint>::max() )
+
 {
-
-static list select( Scene &s, const Imath::Box2f &b )
-{
-	std::list<HitRecord> hits;
-	s.select( b, hits );
-	list result;
-	for( std::list<HitRecord>::const_iterator it=hits.begin(); it!=hits.end(); it++ )
+	if( hitRecord[0] != 1 )
 	{
-		result.append( *it );
+		throw IECore::Exception( "HitRecord supports only one name." );
 	}
-	return result;
 }
 
-void bindScene()
+HitRecord::HitRecord( float dMin, float dMax, const IECore::InternedString &primName )
+	:	depthMin( dMin ), depthMax( dMax ), name( primName )
 {
-	typedef class_< Scene, boost::noncopyable, ScenePtr, bases<Renderable> > ScenePyClass;
-	ScenePyClass( "Scene" )
-		.def( "root", (GroupPtr (Scene::*)() )&Scene::root )
-		.def( "render", (void (Scene::*)() const )&Scene::render )
-		.def( "render", (void (Scene::*)( ConstStatePtr ) const )&Scene::render )
-		.def( "select", &select )
-		.def( "setCamera", &Scene::setCamera )
-		.def( "getCamera", (CameraPtr (Scene::*)())&Scene::getCamera )
-	;
-
-	INTRUSIVE_PTR_PATCH( Scene, ScenePyClass );
-	implicitly_convertible<ScenePtr, RenderablePtr>();
 }
 
+bool HitRecord::operator < ( const HitRecord &other ) const
+{
+	return depthMin < other.depthMin;
 }
+
+size_t HitRecord::offsetToNext() const
+{
+	return 4;
+}
+

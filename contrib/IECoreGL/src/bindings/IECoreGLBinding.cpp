@@ -58,6 +58,7 @@
 #include "IECoreGL/bindings/StateComponentBinding.h"
 #include "IECoreGL/bindings/TypedStateComponentBinding.h"
 #include "IECoreGL/bindings/NameStateComponentBinding.h"
+#include "IECoreGL/bindings/HitRecordBinding.h"
 
 using namespace IECoreGL;
 using namespace boost::python;
@@ -86,6 +87,7 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindStateComponent();
 	bindTypedStateComponents();
 	bindNameStateComponent();
+	bindHitRecord();
 	
 	def( "coreMajorVersion", &coreMajorVersion );
 	def( "init", &IECoreGL::init );

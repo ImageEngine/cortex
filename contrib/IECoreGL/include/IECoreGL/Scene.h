@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #define IECOREGL_SCENE_H
 
 #include "IECoreGL/Renderable.h"
+#include "IECoreGL/HitRecord.h"
 
 #include <list>
 
@@ -43,6 +44,7 @@ namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( Group );
+IE_CORE_FORWARDDECLARE( Camera );
 
 class Scene : public Renderable
 {
@@ -60,6 +62,21 @@ class Scene : public Renderable
 		void render() const;
 		virtual Imath::Box3f bound() const;
 		
+		/// Fills hits with HitRecords for all primitives which are visible within the specified
+		/// region. The region is specified in NDC space (0,0 at top left) in the same
+		/// way a crop window would be. As with the render() method, if the Scene has a camera
+		/// then that will be used to specify the framing - otherwise you may frame the Scene
+		/// using raw gl calls before calling Scene::select. In either case the region applies.
+		unsigned select( const Imath::Box2f &region, std::list<HitRecord> &hits ) const;
+		
+		/// Sets the camera used to view the scene. If unspecified then
+		/// you may position the scene using raw gl calls before
+		/// calling Scene::render(). If a camera is specified however, then
+		/// the Scene::render() method will set up the camera for you.
+		void setCamera( CameraPtr camera );
+		CameraPtr getCamera();
+		ConstCameraPtr getCamera() const;
+				
 		/// Returns the root node for the scene. The
 		/// scene can be edited by editing the root node.
 		GroupPtr root();
@@ -69,6 +86,7 @@ class Scene : public Renderable
 	private :
 	
 		GroupPtr m_root;
+		CameraPtr m_camera;
 		
 };
 

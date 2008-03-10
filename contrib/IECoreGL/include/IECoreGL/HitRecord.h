@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,50 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECOREGL_HITRECORD_H
+#define IECOREGL_HITRECORD_H
 
-#include "IECoreGL/Scene.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/bindings/SceneBinding.h"
+#include "IECoreGL/GL.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
-
-using namespace boost::python;
+#include "IECore/Interned.h"
 
 namespace IECoreGL
 {
 
-static list select( Scene &s, const Imath::Box2f &b )
+/// The HitRecord struct represents hit records
+/// found in the glSelectBuffer.
+class HitRecord
 {
-	std::list<HitRecord> hits;
-	s.select( b, hits );
-	list result;
-	for( std::list<HitRecord>::const_iterator it=hits.begin(); it!=hits.end(); it++ )
-	{
-		result.append( *it );
-	}
-	return result;
-}
+	
+	public :
 
-void bindScene()
-{
-	typedef class_< Scene, boost::noncopyable, ScenePtr, bases<Renderable> > ScenePyClass;
-	ScenePyClass( "Scene" )
-		.def( "root", (GroupPtr (Scene::*)() )&Scene::root )
-		.def( "render", (void (Scene::*)() const )&Scene::render )
-		.def( "render", (void (Scene::*)( ConstStatePtr ) const )&Scene::render )
-		.def( "select", &select )
-		.def( "setCamera", &Scene::setCamera )
-		.def( "getCamera", (CameraPtr (Scene::*)())&Scene::getCamera )
-	;
+		/// Construct from a hit record in the format specified
+		/// for the OpenGL select buffer. Raises an exception if
+		/// more than one name is specified in the record.
+		HitRecord( const GLuint *hitRecord );
+		HitRecord( float dMin, float dMax, const IECore::InternedString &primName );
+		
+		/// The minimum and maximum depths of the hit, normalised
+		/// in the 0-1 range between the near and far clipping planes.
+		float depthMin;
+		float depthMax;
+		
+		/// Unlike the gl hit record, the HitRecord stores
+		/// only one name - this is because the NameStateComponent
+		/// and the Renderer "name" attribute specify only a single
+		/// name for each primitive rendered.
+		IECore::InternedString name;
 
-	INTRUSIVE_PTR_PATCH( Scene, ScenePyClass );
-	implicitly_convertible<ScenePtr, RenderablePtr>();
-}
+		/// Performs comparison based on the depth.min member.
+		bool operator < ( const HitRecord &other ) const;
 
-}
+		/// Returns the offset to the next hit record in the select
+		/// buffer - this is a constant as the constructor accepts
+		/// only hit records with a single name.
+		size_t offsetToNext() const;
+
+};
+
+} // namespace IECoreGL
+
+#endif // IECOREGL_HITRECORD_H
