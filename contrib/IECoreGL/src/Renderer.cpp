@@ -52,6 +52,7 @@
 #include "IECoreGL/TextureLoader.h"
 #include "IECoreGL/PerspectiveCamera.h"
 #include "IECoreGL/OrthographicCamera.h"
+#include "IECoreGL/NameStateComponent.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -848,6 +849,22 @@ static void pointsPrimitiveUseGLPointsSetter( const std::string &name, IECore::C
 	memberData->implementation->addState( new PointsPrimitiveUseGLPoints( u ) );
 }
 
+static IECore::ConstDataPtr nameGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
+{
+	ConstNameStateComponentPtr n = memberData->implementation->getState<NameStateComponent>();
+	return new StringData( n->name() );
+}
+
+static void nameSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
+{
+	ConstStringDataPtr d = castWithWarning<const StringData>( value, name, "Renderer::setAttribute" );
+	if( !d )
+	{
+		return;
+	}
+	memberData->implementation->addState( new NameStateComponent( d->readable() ) );
+}
+
 static const AttributeSetterMap *attributeSetters()
 {
 	static AttributeSetterMap *a = new AttributeSetterMap;
@@ -876,6 +893,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:shade:transparent"] = typedAttributeSetter<TransparentShadingStateComponent>;
 		(*a)["gl:pointsPrimitive:useGLPoints"] = pointsPrimitiveUseGLPointsSetter;
 		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeSetter<PointsPrimitiveGLPointWidth>;
+		(*a)["name"] = nameSetter;
 	}
 	return a;
 }
@@ -908,6 +926,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:shade:transparent"] = typedAttributeGetter<TransparentShadingStateComponent>;
 		(*a)["gl:pointsPrimitive:useGLPoints"] = pointsPrimitiveUseGLPointsGetter;
 		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeGetter<PointsPrimitiveGLPointWidth>;
+		(*a)["name"] = nameGetter;
 	}
 	return a;
 }

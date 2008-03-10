@@ -84,6 +84,7 @@ enum TypeId
 	PerspectiveCameraTypeId = 105041,
 	PointsPrimitiveUseGLPointsTypeId = 105042,
 	PointsPrimitiveGLPointWidthTypeId = 105043,
+	NameStateComponentTypeId = 105044,
 	/// If we ever get here we should start over again
 	LastCoreGLTypeId = 105999,	
 };	

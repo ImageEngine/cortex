@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,61 +32,32 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECoreGL/IECoreGL.h"
-
-#include "IECoreGL/bindings/RendererBinding.h"
-#include "IECoreGL/bindings/BindableBinding.h"
-#include "IECoreGL/bindings/ShaderBinding.h"
-#include "IECoreGL/bindings/TextureBinding.h"
-#include "IECoreGL/bindings/WindowBinding.h"
-#include "IECoreGL/bindings/StateBinding.h"
-#include "IECoreGL/bindings/RenderableBinding.h"
-#include "IECoreGL/bindings/SceneBinding.h"
-#include "IECoreGL/bindings/SceneViewerBinding.h"
-#include "IECoreGL/bindings/ShaderLoaderBinding.h"
-#include "IECoreGL/bindings/TextureLoaderBinding.h"
-#include "IECoreGL/bindings/GroupBinding.h"
-#include "IECoreGL/bindings/FrameBufferBinding.h"
-#include "IECoreGL/bindings/ColorTextureBinding.h"
-#include "IECoreGL/bindings/DepthTextureBinding.h"
-#include "IECoreGL/bindings/CameraBinding.h"
-#include "IECoreGL/bindings/OrthographicCameraBinding.h"
-#include "IECoreGL/bindings/PerspectiveCameraBinding.h"
-#include "IECoreGL/bindings/CameraControllerBinding.h"
-#include "IECoreGL/bindings/StateComponentBinding.h"
-#include "IECoreGL/bindings/TypedStateComponentBinding.h"
+#include "IECoreGL/NameStateComponent.h"
 #include "IECoreGL/bindings/NameStateComponentBinding.h"
 
-using namespace IECoreGL;
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
 using namespace boost::python;
 
-BOOST_PYTHON_MODULE( _IECoreGL )
+namespace IECoreGL
 {
-	bindRenderer();
-	bindBindable();
-	bindShader();
-	bindTexture();
-	bindWindow();
-	bindState();
-	bindRenderable();
-	bindScene();
-	bindSceneViewer();
-	bindShaderLoader();
-	bindTextureLoader();
-	bindGroup();
-	bindFrameBuffer();
-	bindColorTexture();
-	bindDepthTexture();
-	bindCamera();
-	bindOrthographicCamera();
-	bindPerspectiveCamera();
-	bindCameraController();
-	bindStateComponent();
-	bindTypedStateComponents();
-	bindNameStateComponent();
-	
-	def( "coreMajorVersion", &coreMajorVersion );
-	def( "init", &IECoreGL::init );
+
+void bindNameStateComponent()
+{
+	typedef class_<NameStateComponent, NameStateComponentPtr, boost::noncopyable, bases<StateComponent> > NameStateComponentPyClass;
+	NameStateComponentPyClass( "NameStateComponent", init<optional<const std::string &> >() )
+		.def( "name", &NameStateComponent::name, return_value_policy<copy_const_reference>() )
+		.def( "nameFromGLName", &NameStateComponent::nameFromGLName, return_value_policy<copy_const_reference>() )
+		.staticmethod( "nameFromGLName" )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( NameStateComponent )
+	;
+
+	INTRUSIVE_PTR_PATCH( NameStateComponent, NameStateComponentPyClass );
+	implicitly_convertible<NameStateComponentPtr, StateComponentPtr>();
+
 }
+
+} // namespace IECoreGL

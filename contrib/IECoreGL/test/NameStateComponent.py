@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,14 +32,27 @@
 #
 ##########################################################################
 
-from Shader import *
-from State import *
-from ShaderLoader import *
-from Renderer import *
-from Group import *
-from Texture import *
-from ImmediateRenderer import *
-from NameStateComponent import *
+import unittest
+import os.path
 
+from IECore import *
+
+from IECoreGL import *
+init( False )
+
+class TestNameStateComponent( unittest.TestCase ) :
+
+	def testConstructor( self ) :
+	
+		n = NameStateComponent()
+		self.assertEqual( n.name(), "unnamed" )
+		n = NameStateComponent()
+		self.assertEqual( n.name(), "unnamed" )
+	
+		n = NameStateComponent( "sphere" )
+		self.assertEqual( n.name(), "sphere" )
+		n = NameStateComponent( "sphere" )
+		self.assertEqual( n.name(), "sphere" )
+	
 if __name__ == "__main__":
     unittest.main()   

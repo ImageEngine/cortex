@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -100,6 +100,7 @@ class TestRenderer( unittest.TestCase ) :
 			self.assertEqual( r.getAttribute( "gl:blend:equation" ), StringData( "add" ) )
 			self.assertEqual( r.getAttribute( "gl:shade:transparent" ), BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:primitive:sortForTransparency" ), BoolData( True ) )
+			self.assertEqual( r.getAttribute( "name" ), StringData( "unnamed" ) )
 		
 			r.setAttribute( "color", Color3fData( Color3f( 0, 1, 2 ) ) )
 			self.assertEqual( r.getAttribute( "color" ), Color3fData( Color3f( 0, 1, 2 ) ) )
@@ -138,6 +139,9 @@ class TestRenderer( unittest.TestCase ) :
 			for e in ["add", "subtract", "reverseSubtract", "min", "max"] :
 				r.setAttribute( "gl:blend:equation", StringData( e ) )
 				self.assertEqual( r.getAttribute( "gl:blend:equation" ), StringData( e ) )
+			
+			r.setAttribute( "name", StringData( "sphere" ) )
+			self.assertEqual( r.getAttribute( "name" ), StringData( "sphere" ) )
 				
 			r.worldEnd()
 	
