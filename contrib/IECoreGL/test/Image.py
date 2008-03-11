@@ -51,9 +51,9 @@ class TestImage( unittest.TestCase ) :
 		# we have to make this here so that the shaders that get made are made in the
 		# correct GL context. My understanding is that all shaders should work in all
 		# GL contexts in the address space, but that doesn't seem to be the case.
-		w = SceneViewer( "scene", r.scene() )
+		#w = SceneViewer( "scene", r.scene() )
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		r.concatTransform( M44f.createScaled( V3f( 0.01 ) ) )
 		
 		i = Reader.create( "test/images/colorBarsH512x512.exr" ).read()
@@ -61,7 +61,7 @@ class TestImage( unittest.TestCase ) :
 		
 		r.worldEnd()
 	
-		w.start()
+		#w.start()
 		
 if __name__ == "__main__":
     unittest.main()   
