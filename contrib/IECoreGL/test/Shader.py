@@ -244,7 +244,7 @@ class TestShader( unittest.TestCase ) :
 		# GL contexts in the address space, but that doesn't seem to be the case.
 		#w = SceneViewer( "scene", r.scene() )
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		
 		r.attributeBegin()
 		r.setAttribute( "color", Color3fData( Color3f( 1, 0, 1 ) ) )
