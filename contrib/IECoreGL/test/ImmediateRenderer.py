@@ -44,6 +44,8 @@ class TestImmediateRenderer( unittest.TestCase ) :
 
 	def test( self ) :
 	
+		outputFileName = os.path.dirname( __file__ ) + "/output/testImmediate.tif"
+	
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
@@ -56,11 +58,11 @@ class TestImmediateRenderer( unittest.TestCase ) :
 				"screenWindow" : Box2fData( Box2f( V2f( -0.5 ), V2f( 0.5 ) ) )
 			}
 		)
-		r.display( "/tmp/immediate.tif", "tif", "rgba", {} )
+		r.display( outputFileName, "tif", "rgba", {} )
 		
 		r.worldBegin()
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 0, 0, 1 ) ) } )
 		r.geometry( "sphere", {}, {} )
 		
@@ -69,5 +71,40 @@ class TestImmediateRenderer( unittest.TestCase ) :
 		r.geometry( "sphere", {}, {} )
 		r.worldEnd()
 
+		i = Reader.create( outputFileName ).read()
+		e = PrimitiveEvaluator.create( i )
+		result = e.createResult()
+		a = e.A()
+		r = e.R()
+		g = e.G()
+		b = e.B()
+				
+		e.pointAtUV( V2f( 0.5, 0 ), result )
+		self.assertEqual( result.floatPrimVar( a ), 1 )
+		self.assertEqual( result.floatPrimVar( r ), 1 )
+		self.assertEqual( result.floatPrimVar( g ), 1 )
+		self.assertEqual( result.floatPrimVar( b ), 0 )
+		e.pointAtUV( V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( a ), 1 )
+		self.assertEqual( result.floatPrimVar( r ), 0 )
+		self.assertEqual( result.floatPrimVar( g ), 0 )
+		self.assertEqual( result.floatPrimVar( b ), 1 )
+		e.pointAtUV( V2f( 0, 0 ), result )
+		self.assertEqual( result.floatPrimVar( a ), 0 )
+		self.assertEqual( result.floatPrimVar( r ), 0 )
+		self.assertEqual( result.floatPrimVar( g ), 0 )
+		self.assertEqual( result.floatPrimVar( b ), 0 )
+		
+
+	def tearDown( self ) :
+
+		files = [
+			os.path.dirname( __file__ ) + "/output/testImmediate.tif",
+		]
+		
+		for f in files :
+			if os.path.exists( f ) :
+				os.remove( f )
+				
 if __name__ == "__main__":
     unittest.main()   
