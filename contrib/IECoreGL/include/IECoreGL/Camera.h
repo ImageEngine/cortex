@@ -51,6 +51,8 @@ class Camera : public Renderable
 		/// If screenWindow is specified as an empty box (the default),
 		/// then it'll be calculated to be -1,1 in width and to preserve
 		/// aspect ratio (based on resolution) in height.
+		/// \todo Should make default screenWindow behaviour match that
+		/// in IECore::Camera::addStandardParameters().
 		Camera( const Imath::M44f &transform = Imath::M44f(),
 			const Imath::V2i &resolution = Imath::V2i( 640, 480 ),
 			const Imath::Box2f &screenWindow = Imath::Box2f(),
@@ -59,6 +61,9 @@ class Camera : public Renderable
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Camera, CameraTypeId, Renderable );
 
+		/// Specifies the transform of the camera relative to the world. This class
+		/// will automatically insert a scaling in z at rendertime to compensate for
+		/// the left/right handedness difference between IECore and OpenGL.
 		void setTransform( const Imath::M44f &transform );
 		const Imath::M44f &getTransform() const;
 		
@@ -95,6 +100,8 @@ class Camera : public Renderable
 		//@}
 	
 	protected :
+	
+		void setModelViewMatrix() const;
 	
 		Imath::M44f m_transform;
 		Imath::V2i m_resolution;

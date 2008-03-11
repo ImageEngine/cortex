@@ -42,6 +42,7 @@ from ImmediateRenderer import *
 from NameStateComponent import *
 from HitRecord import *
 from Selection import *
+from Camera import *
 
 if __name__ == "__main__":
     unittest.main()   

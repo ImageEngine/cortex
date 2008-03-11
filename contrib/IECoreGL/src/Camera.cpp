@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -132,4 +132,13 @@ Imath::V3f Camera::upInObjectSpace()
 	V3f up( 0, 1, 0 );
 	obj2Camera.multDirMatrix( up, up );
 	return up;
+}
+
+void Camera::setModelViewMatrix() const
+{
+	M44f inverseMatrix = m_transform.inverse();
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity();
+	glScalef( 1.0f, 1.0f, -1.0f );
+	glMultMatrixf( inverseMatrix.getValue() );
 }

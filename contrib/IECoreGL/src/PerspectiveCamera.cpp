@@ -70,8 +70,5 @@ void PerspectiveCamera::render( ConstStatePtr state ) const
 		r * m_screenWindow.min.y, r * m_screenWindow.max.y,
 		m_clippingPlanes[0], m_clippingPlanes[1] );
 		
-	M44f inverseMatrix = m_transform.inverse();
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity();
-	glMultMatrixf( inverseMatrix.getValue() );
+	setModelViewMatrix();
 }
