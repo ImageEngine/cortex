@@ -145,6 +145,7 @@ class TestRenderer( unittest.TestCase ) :
 				
 			r.worldEnd()
 	
+	## \todo Make this test assert something
 	def testStacks( self ) :
 	
 		r = Renderer()
@@ -157,7 +158,7 @@ class TestRenderer( unittest.TestCase ) :
 		# GL contexts in the address space, but that doesn't seem to be the case.
 		#w = SceneViewer( "scene", r.scene() )
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
 		r.geometry( "sphere", {}, {} )
 		
@@ -175,18 +176,18 @@ class TestRenderer( unittest.TestCase ) :
 		
 	def testStackBug( self ) :
 	
-		# This should produce a yellow sphere in between two red spheres.
+		# This should produce a yellow sphere in between two red spheres. It does in the DeferredRenderer but
+		# currently fails in the ImmediateRenderer.
 		
 		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.setOption( "gl:mode", StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.display( os.path.dirname( __file__ ) + "/output/testStackBug.tif", "tiff", "rgba", {} )
 		r.worldBegin()
-		
-		#w = SceneViewer( "scene", r.scene() )
-		
+				
 		r.shader( "surface", "rgbColor", { "red" : FloatData( 1 ), "green" : FloatData( 0 ), "blue" : FloatData( 0 ) } )
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		
 		r.attributeBegin()
 
@@ -201,53 +202,103 @@ class TestRenderer( unittest.TestCase ) :
 		r.concatTransform( M44f.createTranslated( V3f( 2, 0, 0 ) ) )
 		r.geometry( "sphere", {}, {} )
 		
-		
 		r.worldEnd()
 	
-		#w.start()
+		i = Reader.create( os.path.dirname( __file__ ) + "/output/testStackBug.tif" ).read()
+		e = PrimitiveEvaluator.create( i )
+		result = e.createResult()
+		r = e.R()
+		g = e.G()
+		b = e.B()
+				
+		e.pointAtUV( V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( r ), 1 )
+		self.assertEqual( result.floatPrimVar( g ), 1 )
+		self.assertEqual( result.floatPrimVar( b ), 0 )
+		e.pointAtUV( V2f( 0, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( r ), 1 )
+		self.assertEqual( result.floatPrimVar( g ), 0 )
+		self.assertEqual( result.floatPrimVar( b ), 0 )
+		e.pointAtUV( V2f( 1, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( r ), 1 )
+		self.assertEqual( result.floatPrimVar( g ), 0 )
+		self.assertEqual( result.floatPrimVar( b ), 0 )
 		
 	def testPrimVars( self ) :
 		
 		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.setOption( "gl:mode", StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.display( os.path.dirname( __file__ ) + "/output/testPrimVars.tif", "tiff", "rgba", {} )
 		r.worldBegin()
+				
+		r.shader( "surface", "rgbColor", {} )
 		
-		#w = SceneViewer( "scene", r.scene() )
-		
-		r.shader( "surface", "rgbColor", { "red" : FloatData( 1 ), "green" : FloatData( 0 ), "blue" : FloatData( 0 ) } )
-		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		
 		r.attributeBegin()
 
-		# the central sphere should be yellow
-		r.geometry( "sphere", {}, { "green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ) } )
+		# should make red, green and blue spheres
+		r.geometry( "sphere", {}, {
+				"red" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ),
+				"green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
+				"blue" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
+			}
+		)
 		
 		r.attributeEnd()
 		
 		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
-		r.geometry( "sphere", {}, {} )
+		r.geometry( "sphere", {}, {
+				"red" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
+				"green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ),
+				"blue" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
+			}
+		)
 		
 		r.concatTransform( M44f.createTranslated( V3f( 2, 0, 0 ) ) )
-		r.geometry( "sphere", {}, {} )
+		r.geometry( "sphere", {}, {
+				"red" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
+				"green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
+				"blue" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ),
+			}
+		)
 		
 		r.worldEnd()
 	
-		#w.start()
+		i = Reader.create( os.path.dirname( __file__ ) + "/output/testPrimVars.tif" ).read()
+		e = PrimitiveEvaluator.create( i )
+		result = e.createResult()
+		r = e.R()
+		g = e.G()
+		b = e.B()
 		
+		e.pointAtUV( V2f( 0, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( r ), 0 )
+		self.assertEqual( result.floatPrimVar( g ), 1 )
+		self.assertEqual( result.floatPrimVar( b ), 0 )
+		e.pointAtUV( V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( r ), 1 )
+		self.assertEqual( result.floatPrimVar( g ), 0 )
+		self.assertEqual( result.floatPrimVar( b ), 0 )
+		e.pointAtUV( V2f( 1, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( r ), 0 )
+		self.assertEqual( result.floatPrimVar( g ), 0 )
+		self.assertEqual( result.floatPrimVar( b ), 1 )
+	
+	## \todo Make this asseet something
 	def testImagePrimitive( self ) :
 	
 		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.setOption( "gl:mode", StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.display( os.path.dirname( __file__ ) + "/output/testImage.tif", "tiff", "rgba", {} )
 		
 		r.worldBegin()
-		#w = SceneViewer( "scene", r.scene() )		
 		
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		r.concatTransform( M44f.createScaled( V3f( 0.005 ) ) )
 		
 		i = Reader.create( os.path.dirname( __file__ ) + "/images/numbers.exr" ).read()
@@ -255,8 +306,7 @@ class TestRenderer( unittest.TestCase ) :
 		
 		r.worldEnd()
 	
-		#w.start()
-		
+	## \todo Make this assert something
 	def testAlphaBlending( self ) :
 	
 		r = Renderer()
@@ -270,7 +320,7 @@ class TestRenderer( unittest.TestCase ) :
 		r.setAttribute( "gl:blend:dstFactor", StringData( "one" ) )
 		r.setAttribute( "gl:blend:equation", StringData( "add" ) )
 				
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		r.concatTransform( M44f.createScaled( V3f( 0.004 ) ) )
 		
 		r.concatTransform( M44f.createTranslated( V3f( -150, -200, 0 ) ) )
@@ -284,6 +334,7 @@ class TestRenderer( unittest.TestCase ) :
 	
 		#w.start()
 	
+	## \todo Make this assert something
 	def testProcedural( self ) :
 	
 		r = Renderer()
@@ -295,7 +346,7 @@ class TestRenderer( unittest.TestCase ) :
 		
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
 
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		
 		p = ReadProcedural()
 		p.files["name"].setValue( StringData( os.path.dirname( __file__ ) + "/models/sphere.cob" ) )
@@ -305,6 +356,7 @@ class TestRenderer( unittest.TestCase ) :
 	
 		#w.start()
 		
+	## \todo Make this assert something
 	def testShader( self ) :
 	
 		r = Renderer()
@@ -314,9 +366,20 @@ class TestRenderer( unittest.TestCase ) :
 		
 		r.worldBegin()
 		r.shader( "surface", "failWithoutPreprocessing", {} )
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		r.worldEnd()
 	
-			
+	def tearDown( self ) :
+	
+		files = [
+			os.path.dirname( __file__ ) + "/output/testPrimVars.tif",
+			os.path.dirname( __file__ ) + "/output/testImage.tif",
+			os.path.dirname( __file__ ) + "/output/testStackBug.tif",
+		]
+		
+		for f in files :
+			if os.path.exists( f ) :
+				os.remove( f )
+					
 if __name__ == "__main__":
     unittest.main()   
