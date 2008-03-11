@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,7 @@
 #include "IECoreGL/State.h"
 #include "IECoreGL/StateComponent.h"
 #include "IECoreGL/Primitive.h"
+#include "IECoreGL/Camera.h"
 
 #include "IECore/MessageHandler.h"
 
@@ -51,6 +52,7 @@ DeferredRendererImplementation::DeferredRendererImplementation()
 {
 	m_stateStack.push_back( new State( false ) );
 	m_transformStack.push( M44f() );
+	m_scene = new Scene;
 }
 
 DeferredRendererImplementation::~DeferredRendererImplementation()
@@ -59,7 +61,7 @@ DeferredRendererImplementation::~DeferredRendererImplementation()
 
 void DeferredRendererImplementation::addCamera( CameraPtr camera )
 {
-	IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::addCamera", "Not implemented" );
+	m_scene->setCamera( camera );
 }
 
 void DeferredRendererImplementation::addDisplay( ConstDisplayPtr display )
@@ -69,12 +71,6 @@ void DeferredRendererImplementation::addDisplay( ConstDisplayPtr display )
 
 void DeferredRendererImplementation::worldBegin()
 {
-	if( inWorld() )
-	{
-		IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::worldBegin", "Bad nesting." );
-		return;
-	}
-	
 	if( m_transformStack.size()>1 )
 	{
 		IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::worldBegin", "Mismatched transformBegin/transformEnd detected." );
@@ -84,18 +80,11 @@ void DeferredRendererImplementation::worldBegin()
 	
 	m_stateStack.push_back( new State( false ) );
 	
-	m_scene = new Scene;
 	m_groupStack.push( m_scene->root() ); /// \todo this group should have the attribute state accumulated before worldBegin
 }
 
 void DeferredRendererImplementation::worldEnd()
 {
-	if( !inWorld() )
-	{
-		IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::worldBegin", "Bad nesting." );
-		return;
-	}
-	
 	if( m_transformStack.size()!=1 )
 	{
 		IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::worldEnd", "Bad nesting of transformBegin/transformEnd detected." );
@@ -130,17 +119,7 @@ void DeferredRendererImplementation::transformEnd()
 
 void DeferredRendererImplementation::concatTransform( const Imath::M44f &matrix )
 {
-	if( !inWorld() )
-	{
-		IECore::msg( IECore::Msg::Warning, "DeferredRendererImplementation::concatTransform", "No transforms implemented before worldBegin." );
-		return;
-	}
 	m_transformStack.top() = matrix * m_transformStack.top();
-}
-
-bool DeferredRendererImplementation::inWorld()
-{
-	return m_scene;
 }
 
 void DeferredRendererImplementation::attributeBegin()

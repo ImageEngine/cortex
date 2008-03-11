@@ -42,11 +42,7 @@ class DeferredRendererImplementation : public RendererImplementation
 		virtual void addPrimitive( PrimitivePtr primitive );
 
 		ScenePtr scene();
-
-	protected :
-		
-		bool inWorld();
-		
+				
 	private :
 
 		ScenePtr m_scene;

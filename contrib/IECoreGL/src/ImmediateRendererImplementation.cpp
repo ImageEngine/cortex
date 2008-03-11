@@ -55,8 +55,6 @@ using namespace std;
 ImmediateRendererImplementation::ImmediateRendererImplementation()
 {
 	m_stateStack.push( new State( true ) );
-	/// \todo Support non-square images and then use a completely default camera
-	m_camera = new PerspectiveCamera( M44f(), V2i( 512 ) );
 }
 
 ImmediateRendererImplementation::~ImmediateRendererImplementation()
