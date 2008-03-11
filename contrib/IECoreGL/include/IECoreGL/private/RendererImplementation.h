@@ -27,12 +27,16 @@ class RendererImplementation : public IECore::RunTimeTyped
 		RendererImplementation();
 		virtual ~RendererImplementation();
 
+		/// Guaranteed to be called at least once before worldBegin(),
+		/// and never after worldBegin().
 		virtual void addCamera( CameraPtr camera ) = 0;
+		/// Never called after worldBegin().
 		virtual void addDisplay( ConstDisplayPtr display ) = 0;
 
 		virtual void worldBegin() = 0;
 		virtual void worldEnd() = 0;
 
+		/// Transform calls guaranteed only to be called after worldBegin().
 		virtual void transformBegin() = 0;
 		virtual void transformEnd() = 0;
 		virtual void concatTransform( const Imath::M44f &matrix ) = 0;

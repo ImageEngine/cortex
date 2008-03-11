@@ -53,10 +53,13 @@
 #include "IECoreGL/PerspectiveCamera.h"
 #include "IECoreGL/OrthographicCamera.h"
 #include "IECoreGL/NameStateComponent.h"
+#include "IECoreGL/ToGLCameraConverter.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/BoxOps.h"
+#include "IECore/Camera.h"
+#include "IECore/Transform.h"
 
 #include <stack>
 
@@ -167,6 +170,10 @@ struct IECoreGL::Renderer::MemberData
 		vector<DisplayPtr> displays;
 	} options;
 	
+	/// This is used only before worldBegin, so we can correctly get the transforms for cameras.
+	/// After worldBegin the transform stack is taken care of by the backend implementations.
+	std::stack<Imath::M44f> transformStack;
+	
 	bool inWorld;
 	RendererImplementationPtr implementation;
 	ShaderLoaderPtr shaderLoader;
@@ -190,6 +197,8 @@ IECoreGL::Renderer::Renderer()
 	m_data->options.shaderIncludePath = m_data->options.shaderIncludePathDefault = shaderIncludePath ? shaderIncludePath : "";
 	const char *texturePath = getenv( "IECOREGL_TEXTURE_PATHS" );
 	m_data->options.textureSearchPath = m_data->options.textureSearchPathDefault = texturePath ? texturePath : "";
+	
+	m_data->transformStack.push( M44f() );
 	
 	m_data->inWorld = false;
 	m_data->implementation = 0;
@@ -387,34 +396,26 @@ void IECoreGL::Renderer::camera( const std::string &name, IECore::CompoundDataMa
 {
 	if( m_data->inWorld )
 	{
-		msg( Msg::Warning, "Renderer::camera", "Cameras can not be specified after worldBegin." );
+		msg( Msg::Warning, "IECoreGL::Renderer::camera", "Cameras can not be specified after worldBegin." );
 		return;
 	}
 	
-	CameraPtr camera = 0;
-	string projection = parameterValue<string>( "projection", parameters, "perspective" );
-	if( projection=="orthographic" )
+	try
 	{
-		camera = new OrthographicCamera;
-	}
-	else 
-	{
-		if( projection!="perspective" )
+		IECore::CameraPtr coreCamera = new IECore::Camera( name, 0, new CompoundData( parameters ) );
+		IECoreGL::CameraPtr camera = IECore::runTimeCast<IECoreGL::Camera>( ToGLCameraConverter( coreCamera ).convert() );
+		// we have to store these till worldBegin, as only then are we sure what sort of renderer backend we have
+		if( camera )
 		{
-			msg( Msg::Warning, "Renderer::camera", boost::format( "Unsupported projection \"%s\" - reverting to perspective." ) % projection );
+			camera->setTransform( m_data->transformStack.top() );
+			m_data->options.cameras.push_back( camera );
 		}
-		PerspectiveCameraPtr p = new PerspectiveCamera;
-		float fov = parameterValue<float>( "projection:fov", parameters, 90.0f );
-		p->setFOV( fov );
-		camera = p;
 	}
-	
-	camera->setResolution( parameterValue<V2i>( "resolution", parameters, V2i( 640, 480 ) ) );
-	camera->setScreenWindow( parameterValue<Box2f>( "screenWindow", parameters, Box2f( V2f( -1 ), V2f( 1 ) ) ) );
-	camera->setClippingPlanes( parameterValue<V2f>( "clippingPlanes", parameters, V2f( 0.1f, 10000) ) );
-	
-	// we have to store these till worldBegin, as only then i we sure what sort of renderer backend we have
-	m_data->options.cameras.push_back( camera );
+	catch( const std::exception &e )
+	{
+		msg( Msg::Error, "IECoreGL::Renderer::camera", e.what() );
+		return;
+	}
 }
 
 
@@ -469,9 +470,20 @@ void IECoreGL::Renderer::worldBegin()
 		m_data->textureLoader = new TextureLoader( IECore::SearchPath( m_data->options.textureSearchPath, ":" ) );
 	}
 	
-	for( unsigned int i=0; i<m_data->options.cameras.size(); i++ )
+	if( m_data->options.cameras.size() )
 	{
-		m_data->implementation->addCamera( m_data->options.cameras[i] );
+		for( unsigned int i=0; i<m_data->options.cameras.size(); i++ )
+		{
+			m_data->implementation->addCamera( m_data->options.cameras[i] );
+		}
+	}
+	else
+	{
+		// specify the default camera
+		IECore::CameraPtr defaultCamera = new IECore::Camera();
+		defaultCamera->addStandardParameters();
+		IECoreGL::CameraPtr camera = IECore::runTimeCast<IECoreGL::Camera>( ToGLCameraConverter( defaultCamera ).convert() );
+		m_data->implementation->addCamera( camera );
 	}
 	
 	for( unsigned int i=0; i<m_data->options.displays.size(); i++ )
@@ -508,12 +520,33 @@ ScenePtr IECoreGL::Renderer::scene()
 
 void IECoreGL::Renderer::transformBegin()
 {
-	m_data->implementation->transformBegin();
+	if( m_data->inWorld )
+	{
+		m_data->implementation->transformBegin();
+	}
+	else
+	{
+		m_data->transformStack.push( m_data->transformStack.top() );
+	}
 }
 
 void IECoreGL::Renderer::transformEnd()
 {
-	m_data->implementation->transformEnd();
+	if( m_data->inWorld )
+	{
+		m_data->implementation->transformEnd();
+	}
+	else
+	{
+		if( m_data->transformStack.size() )
+		{
+			m_data->transformStack.pop();
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreGL::Renderer::transformEnd", "Bad nesting detected." );
+		}
+	}
 }
 
 void IECoreGL::Renderer::setTransform( const Imath::M44f &m )
@@ -540,7 +573,14 @@ Imath::M44f IECoreGL::Renderer::getTransform( const std::string &coordinateSyste
 
 void IECoreGL::Renderer::concatTransform( const Imath::M44f &m )
 {
-	m_data->implementation->concatTransform( m );
+	if( m_data->inWorld )
+	{
+		m_data->implementation->concatTransform( m );
+	}
+	else
+	{
+		m_data->transformStack.top() = m * m_data->transformStack.top();
+	}
 }
 
 void IECoreGL::Renderer::coordinateSystem( const std::string &name )
