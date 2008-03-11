@@ -128,6 +128,16 @@ class CameraTest( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( r ), 0 )
 		self.assertEqual( result.floatPrimVar( g ), 1 )
 		self.assertEqual( result.floatPrimVar( b ), 0 )
+	
+	def tearDown( self ) :
+	
+		files = [
+			os.path.dirname( __file__ ) + "/output/testCamera.tif",
+		]
 		
+		for f in files :
+			if os.path.exists( f ) :
+				os.remove( f )
+					
 if __name__ == "__main__":
     unittest.main()
