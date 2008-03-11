@@ -48,15 +48,17 @@ class TestCameraControl( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
 		
 		r.worldBegin()
-		#c = PerspectiveCamera( horizontalFOV = 90 )
-		c = OrthographicCamera()
-		w = SceneViewer( "scene", r.scene(), c )		
+		c = PerspectiveCamera( horizontalFOV = 90 )
+		#c = OrthographicCamera()
+		s = r.scene()
+		s.setCamera( c )
+		w = SceneViewer( "scene", s )		
 		
 		r.setAttribute( "gl:blend:srcFactor", StringData( "one" ) )
 		r.setAttribute( "gl:blend:dstFactor", StringData( "one" ) )
 		r.setAttribute( "gl:blend:equation", StringData( "add" ) )
 				
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		r.concatTransform( M44f.createScaled( V3f( 0.004 ) ) )
 		
 		r.concatTransform( M44f.createTranslated( V3f( -150, -200, 0 ) ) )
