@@ -85,6 +85,8 @@ enum TypeId
 	PointsPrimitiveUseGLPointsTypeId = 105042,
 	PointsPrimitiveGLPointWidthTypeId = 105043,
 	NameStateComponentTypeId = 105044,
+	ToGLConverterTypeId = 105045,
+	ToGLCameraConverterTypeId = 105046,
 	/// If we ever get here we should start over again
 	LastCoreGLTypeId = 105999,	
 };	
