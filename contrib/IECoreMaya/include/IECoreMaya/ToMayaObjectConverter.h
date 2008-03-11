@@ -49,7 +49,7 @@ IE_CORE_DECLAREPTR( ToMayaObjectConverter );
 
 /// The ToMayaObjectConverter class forms a base class for
 /// convertions to MObject datatype.
-/// \todo Have this derive from a new ToMayaConverter class.
+/// \todo Have this derive from a new ToMayaConverter class, which in turn derives from IECore::FromCoreConverter.
 class ToMayaObjectConverter : public Converter
 {
 	
