@@ -49,7 +49,8 @@ IE_CORE_FORWARDDECLARE( FrameBuffer );
 /// When the Texture object dies, it also removes the associated GL texture.
 /// Constructors from various IECore datatypes are provided.
 /// \todo Provide some control over resizing (to power of 2), mipmapping,
-/// filtering etc.
+/// filtering etc. Rather than complicate the constructors in the subclasses
+/// we should probabaly make ToGLTextureConverters with a bunch of parameters.
 class Texture : public Bindable
 {
 	public :
