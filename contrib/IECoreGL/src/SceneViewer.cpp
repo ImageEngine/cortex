@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,10 +44,14 @@ using namespace IECoreGL;
 using namespace Imath;
 using namespace std;
 
-SceneViewer::SceneViewer( const std::string &title, ScenePtr scene, CameraPtr camera )
-	:	Window( title ), m_scene( scene ), m_camera( camera ? camera : new PerspectiveCamera )
+SceneViewer::SceneViewer( const std::string &title, ScenePtr scene )
+	:	Window( title ), m_scene( scene )
 {
-	m_cameraController = new CameraController( m_camera );
+	if( !m_scene->getCamera() )
+	{
+		m_scene->setCamera( new PerspectiveCamera );
+	}
+	m_cameraController = new CameraController( m_scene->getCamera() );
 }
 
 SceneViewer::~SceneViewer()
@@ -65,9 +69,7 @@ void SceneViewer::display()
 	glClearColor( 0.0, 0.0, 0.0, 0.0 );
 	glClearDepth( 1.0 );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	
-	m_camera->render( State::defaultState() );
-	
+		
 	m_scene->render();
 	glutSwapBuffers();
 }
