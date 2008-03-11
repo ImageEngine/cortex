@@ -42,6 +42,7 @@ init( False )
 
 class TestPointsPrimitive( unittest.TestCase ) :
 
+	## \todo Make this actually assert something
 	def testVertexAttributes( self ) :
 	
 		fragmentSource = """
@@ -70,15 +71,15 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		# we have to make this here so that the shaders that get made are made in the
 		# correct GL context. My understanding is that all shaders should work in all
 		# GL contexts in the address space, but that doesn't seem to be the case.
-		w = SceneViewer( "scene", r.scene() )
+		#w = SceneViewer( "scene", r.scene() )
 		
-		r.concatTransform( M44f.createTranslated( V3f( -2, -2, -5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( -2, -2, 5 ) ) )
 		r.shader( "surface", "grey", { "gl:fragmentSource" : StringData( fragmentSource ) } )
 		r.points( numPoints, { "P" : p, "greyTo255" : g } )
 		
 		r.worldEnd()
 	
-		w.start()
+		#w.start()
 		
 if __name__ == "__main__":
     unittest.main()   

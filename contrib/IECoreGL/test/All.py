@@ -44,6 +44,7 @@ from HitRecord import *
 from Selection import *
 from Camera import *
 from Image import *
+from PointsPrimitive import *
 
 if __name__ == "__main__":
     unittest.main()   
