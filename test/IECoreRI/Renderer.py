@@ -118,7 +118,9 @@ class RendererTest( unittest.TestCase ) :
 			( "ri:geometricApproximation:motionFactor", FloatData( 1 ), "GeometricApproximation \"motionfactor\" 1", False ),
 			( "ri:geometricApproximation:focusFactor", FloatData( 1 ), "GeometricApproximation \"focusfactor\" 1", False ),
 			( "ri:cull:hidden", IntData( 0 ), "Attribute \"cull\" \"int hidden\" [ 0 ]", False ),
-			( "name", StringData( "oioi" ), "Attribute \"identifier\" \"string name\" [ \"oioi\" ]", True )
+			( "name", StringData( "oioi" ), "Attribute \"identifier\" \"string name\" [ \"oioi\" ]", True ),
+			## \todo Reinstate the test below when RxAttribute in 3delight starts doing what we want.
+			#( "ri:trace:bias", FloatData( 2 ), "Attribute \"trace\" \"float bias\" [ 2 ]", True ),
 		]
 		
 		for t in tests :

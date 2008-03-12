@@ -655,9 +655,24 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::
 	{
 		return (this->*(it->second))( name );
 	}
+	else if( name.compare( 0, 3, "ri:" )==0 )
+	{
+		size_t i = name.find_first_of( ":", 3 );
+		if( i==string::npos )
+		{
+			msg( Msg::Warning, "IECoreRI::RendererImplementation::getAttribute", format( "Expected attribute name matching \"ri:*:*\" but got \"%s\"." ) % name );
+			return 0;
+		}
+		char result[16 * sizeof( RtFloat )]; // enough room for a matrix return type
+		RxInfoType_t resultType;
+		int resultCount;
+		if( 0==RxAttribute( (char *)name.c_str()+3, result, 16 * sizeof( RtFloat ), &resultType, &resultCount ) )
+		{
+			return convert( result, resultType, resultCount );
+		}
+	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-		string s( name, 5 );
 		char result[16 * sizeof( RtFloat )]; // enough room for a matrix return type
 		RxInfoType_t resultType;
 		int resultCount;
