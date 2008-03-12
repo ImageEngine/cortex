@@ -87,6 +87,8 @@ void Group::render( ConstStatePtr state ) const
 		GLbitfield mask = m_state->mask();
 		// can't find a way of pushing the current program as part
 		// of the attribute state, so we have to do it by hand.
+		/// \todo Perhaps Bindable should have both bind() and unbind()
+		/// methods to make this possible without hacks?
 		GLint oldProgram = 0;
 		if( GLEW_VERSION_2_0 )
 		{
