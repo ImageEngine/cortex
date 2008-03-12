@@ -142,8 +142,10 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::setDoubleSidedAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:motionFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:focusFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
+	m_setAttributeHandlers["name"] = &IECoreRI::RendererImplementation::setNameAttribute;
 
 	m_getAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::getDoubleSidedAttribute;
+	m_getAttributeHandlers["name"] = &IECoreRI::RendererImplementation::getNameAttribute;
 
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
 	m_commandHandlers["objectBegin"] = &IECoreRI::RendererImplementation::objectBeginCommand;
@@ -631,6 +633,18 @@ void IECoreRI::RendererImplementation::setGeometricApproximationAttribute( const
 	RiGeometricApproximation( (char *)s.c_str(), f->readable() );
 }
 
+void IECoreRI::RendererImplementation::setNameAttribute( const std::string &name, IECore::ConstDataPtr d )
+{
+	ConstStringDataPtr f = runTimeCast<const StringData>( d );
+	if( !f )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", format( "%s attribute expects a StringData value." ) % name );
+		return;
+	}
+	ParameterList pl( "name", f );
+	RiAttributeV( "identifier", pl.n(), pl.tokens(), pl.values() );
+}
+
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::string &name ) const
 {
 	ScopedContext scopedContext( m_context );
@@ -674,6 +688,21 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getDoubleSidedAttribute( 
 			{
 				return new BoolData( true );
 			}
+		}
+	}
+	return 0;
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getNameAttribute( const std::string &name ) const
+{
+	char *result = 0;
+	RxInfoType_t resultType;
+	int resultCount;
+	if( 0==RxAttribute( "identifier:name", (char *)&result, sizeof( char * ), &resultType, &resultCount ) )
+	{
+		if( resultType==RxInfoStringV && resultCount==1 )
+		{
+			return new StringData( result );
 		}
 	}
 	return 0;

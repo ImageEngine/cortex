@@ -105,25 +105,29 @@ class RendererTest( unittest.TestCase ) :
 	def testAttributes( self ) :
 	
 		tests = [
-			( "ri:shadingRate", FloatData( 2 ), "ShadingRate 2" ),
-			( "ri:matte", BoolData( 0 ), "Matte 0" ),
-			( "ri:matte", BoolData( 1 ), "Matte 1" ),
-			( "user:whatever", StringData( "whatever" ), "Attribute \"user\" \"string whatever\" [ \"whatever\" ]" ),
-			( "ri:color", Color3fData( Color3f( 0, 1, 1 ) ), "Color [ 0 1 1 ]" ),
-			( "color", Color3fData( Color3f( 1, 2, 3 ) ), "Color [ 1 2 3 ]" ),
-			( "ri:opacity", Color3fData( Color3f( 1, 1, 1 ) ), "Opacity [ 1 1 1 ]" ),
-			( "opacity", Color3fData( Color3f( 0, 1, 0 ) ), "Opacity [ 0 1 0 ]" ),
-			( "ri:sides", IntData( 1 ), "Sides 1" ),
-			( "ri:geometricApproximation:motionFactor", FloatData( 1 ), "GeometricApproximation \"motionfactor\" 1" ),
-			( "ri:geometricApproximation:focusFactor", FloatData( 1 ), "GeometricApproximation \"focusfactor\" 1" ),
-			( "ri:cull:hidden", IntData( 0 ), "Attribute \"cull\" \"int hidden\" [ 0 ]" )
+			# format is : name value expectedRib getAttributeShouldWork
+			( "ri:shadingRate", FloatData( 2 ), "ShadingRate 2", False ),
+			( "ri:matte", BoolData( 0 ), "Matte 0", False ),
+			( "ri:matte", BoolData( 1 ), "Matte 1", False ),
+			( "user:whatever", StringData( "whatever" ), "Attribute \"user\" \"string whatever\" [ \"whatever\" ]", False ),
+			( "ri:color", Color3fData( Color3f( 0, 1, 1 ) ), "Color [ 0 1 1 ]", False ),
+			( "color", Color3fData( Color3f( 1, 2, 3 ) ), "Color [ 1 2 3 ]", False ),
+			( "ri:opacity", Color3fData( Color3f( 1, 1, 1 ) ), "Opacity [ 1 1 1 ]", False ),
+			( "opacity", Color3fData( Color3f( 0, 1, 0 ) ), "Opacity [ 0 1 0 ]", False ),
+			( "ri:sides", IntData( 1 ), "Sides 1", False ),
+			( "ri:geometricApproximation:motionFactor", FloatData( 1 ), "GeometricApproximation \"motionfactor\" 1", False ),
+			( "ri:geometricApproximation:focusFactor", FloatData( 1 ), "GeometricApproximation \"focusfactor\" 1", False ),
+			( "ri:cull:hidden", IntData( 0 ), "Attribute \"cull\" \"int hidden\" [ 0 ]", False ),
+			( "name", StringData( "oioi" ), "Attribute \"identifier\" \"string name\" [ \"oioi\" ]", True )
 		]
 		
 		for t in tests :
 		
 			r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
 			r.worldBegin()
-			r.setAttribute( t[0], t[1] )		
+			r.setAttribute( t[0], t[1] )
+			if t[3] :
+				self.assertEqual( r.getAttribute( t[0] ), t[1] )
 			r.worldEnd()
 			
 			l = "".join( file( "test/IECoreRI/output/testAttributes.rib" ).readlines() )

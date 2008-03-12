@@ -136,6 +136,9 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"doubleSided"</b><br>
 		/// Mapped to an RiSides call.
 		///
+		/// \li <b>"name"</b><br>
+		/// Mapped to an RiAttribute "identifier" "name" call.
+		///
 		/// \li <b>"user:*"</b><br>
 		///
 		/// \par Implementation specific attributes :
@@ -165,8 +168,9 @@ class Renderer : public IECore::Renderer
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		/// \par Currently supported attributes :
 		///
-		/// \li <b>"user:*"
-		/// \li <b>"doubleSided"
+		/// \li <b>"doubleSided"</b>
+		/// \li <b>"name"</b>
+		/// \li <b>"user:*"</b>
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const IECore::CompoundDataMap &parameters );
