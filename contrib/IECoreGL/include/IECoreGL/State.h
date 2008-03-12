@@ -89,6 +89,10 @@ class State : public Bindable
 		/// \todo This is incomplete - add more base state as we find it.
 		/// \todo Also, remove any base state as we add StateComponents which
 		/// specify it.
+		/// \todo Should the StateComponents not get the chance to set the 
+		/// base state themselves? We've got a lot of random disparate stuff
+		/// in this function that might be better placed alongside the
+		/// code that's relying on that state.
 		static void bindBaseState();
 			
 	private :
