@@ -110,41 +110,31 @@ class Renderer : public IECore::Renderer
 
 		virtual void attributeBegin();
 		virtual void attributeEnd();
-		/// Currently supported attributes are :
-		//////////////////////////////////////////////
-		/// Object identity
-		//////////////////////////////////////////////
+		/// \par Standard attributes supported :
+		////////////////////////////////////////////////////////////
 		///
-		/// "name"	StringData "unnamed"
-		/// A descriptive name for the object.
-		///
-		//////////////////////////////////////////////
-		/// Culling
-		//////////////////////////////////////////////
-		/// 
-		/// "doubleSided" BoolData
-		///
-		//////////////////////////////////////////////
-		/// Color and opacity
-		//////////////////////////////////////////////
-		///
-		/// "gl:color"	Color4fData	Color4f( 1.0f )
-		/// Sets the current OpenGL color.
-		///
-		/// "color" Color3fData Color3f( 1.0f )
+		/// \li <b>"color"</b><br>
 		/// Sets the rgb components of the current OpenGL
 		/// color.
-		///
-		/// "opacity" Color3fData Color3f( 1.0f )
+		/// \li <b>"opacity"</b><br>
 		/// Sets the alpha component of the current OpenGL
 		/// color to the average of the rgb components of
 		/// opacity.
 		///
-		//////////////////////////////////////////////
-		/// Shading
-		//////////////////////////////////////////////
+		/// \li <b>"doubleSided"</b>
+		/// \li <b>"name"</b>
 		///
-		/// "gl:shade:transparent" BoolData false
+		/// \par Implementation specific attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"gl:color"	Color4fData	Color4f( 1.0f )</b>
+		/// Sets the current OpenGL color including the
+		/// alpha component.
+		///
+		/// \par Implementation specific shading attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"gl:shade:transparent" BoolData false</b><br>
 		/// Signifies that shading may result in
 		/// transparent results. This is necessary as
 		/// it's nontrivial to determine this
@@ -153,119 +143,111 @@ class Renderer : public IECore::Renderer
 		/// know when transparency is present - for
 		/// example to trigger depth sorting.
 		///
-		//////////////////////////////////////////////
-		/// Primitive drawing style
-		//////////////////////////////////////////////
+		/// \par Implementation specific primitive style attributes :
+		////////////////////////////////////////////////////////////
 		///
-		/// "gl:primitive:wireframe"	BoolData	false
+		/// \li <b>"gl:primitive:wireframe" BoolData false</b><br>
 		/// Draw a wireframe for each primitive.
 		///
-		/// "gl:primitive:wireframeWidth" FloatData	1.0f
+		/// \li <b>"gl:primitive:wireframeWidth" FloatData 1.0f</b><br>
 		/// The line width of the wireframe of the primitive.
 		///
-		/// "gl:primitive:wireframeColor" Color4fData 
+		/// \li <b>"gl:primitive:wireframeColor" Color4fData</b><br>
 		/// The color of the wireframes drawn.
 		///
-		/// "gl:primitive:bound"	BoolData	false
+		/// \li <b>"gl:primitive:bound" BoolData false</b><br>
 		/// Draw a bounding box for each primitive.
 		///
-		/// "gl:primitive:boundColor" Color4fData 
+		/// \li <b>"gl:primitive:boundColor" Color4fData </b><br>
 		/// The color of the bounding boxes drawn.
 		///
-		/// "gl:primitive:filled"		BoolData	true
+		/// \li <b>"gl:primitive:filled" BoolData true</b><br>
 		/// Draw each primitive filled.
 		///
-		/// "gl:primitive:outline"	BoolData	false
+		/// \li <b>"gl:primitive:outline" BoolData false</b><br>
 		/// Draw an outline for each primitive. Note that the results
 		/// of having this on with filled mode off will probably be
 		/// undesirable.
 		///
-		/// "gl:primitive:outlineColor" Color4fData 
+		/// \li <b>"gl:primitive:outlineColor" Color4fData</b><br>
 		/// The color of the outlines drawn.
 		///
-		/// "gl:primitive:outlineWidth" FloatData	1.0f
+		/// \li <b>"gl:primitive:outlineWidth" FloatData 1.0f</b><br>
 		/// The line width of the outlines of the primitive.
 		///
-		/// "gl:primitive:points" BoolData	false
+		/// \li <b>"gl:primitive:points" BoolData false</b><br>
 		/// Draw the vertices of each primitive as points.
 		///
-		/// "gl:primitive:pointWidth" FloatData	1.0f
+		/// \li <b>"gl:primitive:pointWidth" FloatData 1.0f</b><br>
 		/// The width of the points used to draw vertices.
 		///
-		/// "gl:primitive:pointColor" Color4fData 
+		/// \li <b>"gl:primitive:pointColor" Color4fData</b><br>
 		/// The color of the points drawn.
 		///
-		/// "gl:primitive:sortForTransparency" BoolData true
+		/// \li <b>"gl:primitive:sortForTransparency" BoolData true</b><br>
 		/// Causes the individual components of a 
-		/// primitive to be sorted in depth when the
-		/// "gl:shade:hasTransparency" attribute is true.
+		/// primitive to be sorted in depth when the "gl:shade:transparent"
+		/// attribute is true.
 		/// This is currently supported only by the
 		/// points primitive.
 		///
-		//////////////////////////////////////////////
-		/// PointsPrimitive drawing style
-		//////////////////////////////////////////////
+		/// \par Implementation specific points primitive attributes :
+		////////////////////////////////////////////////////////////
 		///
-		/// "gl:pointsPrimitive:useGLPoints" StringData "forGLPoints"
+		/// \li <b>"gl:pointsPrimitive:useGLPoints" StringData "forGLPoints"</b><br>
 		/// Can be used to force the use of lightweight glPoints
 		/// representation of points primitives with types other than "gl:point".
-		/// Valid values are :
+		/// Valid values are :<br><br>
+		///	"forGLPoints"<br>
+		/// Use lightweight points only if type is "gl:point"<br><br>
+		/// "forParticlesAndDisks"<br>
+		/// Use lightweight points as a stand in for particle and disk types.<br><br>
+		/// "forAll"<br>
+		/// Use lightweight points as a stand in for all point types. <br><br>
 		///
-		///	"forGLPoints"
-		/// Use lightweight points only if type is "gl:point"
-		///
-		/// "forParticlesAndDisks"
-		/// Use lightweight points as a stand in for particle and disk types.
-		///
-		/// "forAll"
-		/// Use lightweight points as a stand in for all point types.
-		///
-		/// "gl:pointsPrimitive:glPointWidth" FloatData 1.0f
+		/// \li <b>"gl:pointsPrimitive:glPointWidth" FloatData 1.0f</b><br>
 		/// The size of the points (in pixels) used when rendering lightweight
 		/// points.
 		///
-		//////////////////////////////////////////////
-		/// Blending
-		//////////////////////////////////////////////
+		/// \par Implementation specific blending attributes :
+		////////////////////////////////////////////////////////////
 		///
-		/// "gl:blend:srcFactor" StringData "srcAlpha"
-		///	"gl:blend:dstFactor" StringData "oneMinusSrcAlpha"
+		/// \li <b>"gl:blend:srcFactor" StringData "srcAlpha"</b><br>
+		///	\li <b>"gl:blend:dstFactor" StringData "oneMinusSrcAlpha"</b><br>
 		/// These attributes are mapped onto calls to glBlendFunc.
 		/// They accept only the values below, which
 		/// correspond directly to one of the GLenum blending
-		/// values.
+		/// values.<br><br>
+		///	"zero"<br>
+		/// "one"<br>
+		/// "srcColor"<br>
+		/// "oneMinusSrcColor"<br>
+		/// "dstColor"<br>
+		/// "oneMinusDstColor"<br>
+		/// "srcAlpha"<br>
+		/// "oneMinusSrcAlpha"<br>
+		/// "dstAlpha"<br>
+		/// "oneMinusDstAlpha"<br>
+		/// "constantColor"<br>
+		/// "oneMinusConstantColor"<br>
+		/// "constantAlpha"<br>
+		/// "oneMinusConstantAlpha"<br>
 		///
-		///	"zero"
-		/// "one"
-		/// "srcColor"
-		/// "oneMinusSrcColor"
-		/// "dstColor"
-		/// "oneMinusDstColor"
-		/// "srcAlpha"
-		/// "oneMinusSrcAlpha"
-		/// "dstAlpha"
-		/// "oneMinusDstAlpha"
-		/// "constantColor"
-		/// "oneMinusConstantColor"
-		/// "constantAlpha"
-		/// "oneMinusConstantAlpha"
-		///
-		/// "gl:blend:color" Color4fData 1 1 1 1
+		/// \li <b>"gl:blend:color" Color4fData 1 1 1 1</b><br>
 		/// Used to specify glBlendColor(), only taking effect when using
 		/// either "constantColor" or "oneMinusConstantColor" for one or
 		/// other of the blend factors above.
 		///
-		/// "gl:blend:equation" StringData "add"
+		/// \li <b>"gl:blend:equation" StringData "add"</b><br>
 		/// Controls how the src and dst values are combined after being weighted
 		/// by srcFactor and dstFactor - this maps onto a call to glBlendEquation.
 		/// Valid values are listed below, and map directly onto the corresponding
-		/// GLenum values.
-		///
-		///	"add"
-		/// "subtract"
-		/// "reverseSubtract"
-		/// "min"
-		/// "max"
+		/// GLenum values.<br><br>
+		///	"add"<br>
+		/// "subtract"<br>
+		/// "reverseSubtract"<br>
+		/// "min"<br>
+		/// "max"<br>
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		/// Supports only shader type "surface" or "gl:surface", looking for "name.vert" and  "name.frag" GLSL source files

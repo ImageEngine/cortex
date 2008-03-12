@@ -189,7 +189,29 @@ class Renderer : public RunTimeTyped
 		virtual void attributeBegin() = 0;
 		/// Return to the attribute state saved by the last call to attributeBegin().
 		virtual void attributeEnd() = 0;
-		/// Set the named attribute.
+		/// Sets the named attribute to the specified value.
+		///
+		/// \par Standard Attributes
+		/// <br>
+		/// The following standard attributes should be supported by all implementations
+		/// wherever possible :
+		///
+		///	\li <b>"color"	Color3fData</b><br>
+		/// The color of primitives. Defaults to 1, 1, 1 if not specified.
+		///
+		///	\li <b>"opacity" Color3fData</b><br>
+		/// The opacity of primitives. Defaults to 1, 1, 1 if not specified.
+		///
+		/// \li <b>"doubleSided" BoolData</b><br>
+		/// When true both sides of a primitive are rendered, when false
+		/// only one side is. Defaults to true.
+		///
+		/// \li <b>"name" StringData "unnamed"\li <b>
+		/// A descriptive name for the object.
+		///
+		/// \li <b>"user:*"</b><br>
+		/// Should be stored for later query, but have no other effect upon the
+		/// rendering process.
 		virtual void setAttribute( const std::string &name, ConstDataPtr value ) = 0;
 		/// Return the value of the named attribute.
 		virtual ConstDataPtr getAttribute( const std::string &name ) const = 0;

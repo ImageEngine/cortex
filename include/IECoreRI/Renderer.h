@@ -124,44 +124,49 @@ class Renderer : public IECore::Renderer
 
 		virtual void attributeBegin();
 		virtual void attributeEnd();
-		/// Currently supported attributes :
+		/// \par Standard attributes supported :
+		////////////////////////////////////////////////////////////////////////////
 		///
-		/// "ri:*:*"
+		/// \li <b>"color"</b><br>
+		/// Mapped to an RiColor call.
+		///
+		/// \li <b>"opacity"</b><br>
+		/// Mapped to an RiOpacity call.
+		///
+		/// \li <b>"doubleSided"</b><br>
+		/// Mapped to an RiSides call.
+		///
+		/// \li <b>"user:*"</b><br>
+		///
+		/// \par Implementation specific attributes :
+		////////////////////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"ri:*:*"</b><br>
 		/// Passed to an RiAttribute call.
 		///
-		/// "user:*"
-		/// Passed to an RiAttribute( "user", "*", ... ) call.
-		///
-		/// "ri:shadingRate" FloatData
+		/// \li <b>"ri:shadingRate" FloatData</b><br>
 		/// Passed to RiShadingRate.
 		///
-		/// "ri:matte" BoolData
+		/// \li <b>"ri:matte" BoolData</b><br>
 		/// Passed to RiMatte.
 		///
-		/// "color"
-		/// "ri:color" Color3fData
-		/// Passed to RiColor
+		/// \li <b>"ri:color" Color3fData</b><br>
+		/// \deprecated Use "color" in preference to "ri:color"
 		///
-		/// "opacity"
-		/// "ri:opacity" Color3fData
-		/// Passed to RiOpacity
+		/// \li <b>"ri:opacity" Color3fData</b><br>
+		/// \deprecated Use "opacity" in preference to "ri:opacity"
 		/// 
-		/// "ri:sides" IntData
+		/// \li <b>"ri:sides" IntData</b><br>
 		/// Passed to RiSides
 		/// \deprecated Use "doubleSided" in preference to "ri:sides"
 		///
-		/// "doubleSided" BoolData
-		/// When true both sides of a primitive are rendered, when false
-		/// only one side is. Defaults to true.
-		///
-		/// "ri:geometricApproximation:motionFactor"
-		/// "ri:geometricApproximation:focusFactor"	FloatData
+		/// \li <b>"ri:geometricApproximation:motionFactor" and ri:geometricApproximation:focusFactor" FloatData</b><br>
 		///	Passed to RiGeometricApproximation.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
-		/// Currently supported attributes :
+		/// \par Currently supported attributes :
 		///
-		/// "user:*"
-		/// "doubleSided"
+		/// \li <b>"user:*"
+		/// \li <b>"doubleSided"
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const IECore::CompoundDataMap &parameters );
