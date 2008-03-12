@@ -85,7 +85,7 @@ class TestCamera( unittest.TestCase ) :
 		
 		self.assertEqual( c.parameters()["cropWindow"].value, Box2f( V2f( 0, 0 ), V2f( 1, 1 ) ) )
 		self.assertEqual( c.parameters()["projection"].value, "orthographic" )
-		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 1.0e-10, 1.0e38 ) )
+		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 0.01, 100000 ) )
 		self.assertEqual( c.parameters()["shutter"].value, V2f( 0 ) )
 
 		c = Camera()

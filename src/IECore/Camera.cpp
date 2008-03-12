@@ -280,7 +280,7 @@ void Camera::addStandardParameters()
 	}
 	if( clippingPlanes[0] < 0.0f || clippingPlanes[1] < 0.0f )
 	{
-		clippingPlanes = V2f( 1.0e-10f, 1.0e38f );
+		clippingPlanes = V2f( 0.01f, 100000.0f );
 		parameters()["clippingPlanes"] = new V2fData( clippingPlanes );
 	}
 	

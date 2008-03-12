@@ -122,7 +122,7 @@ class Renderer : public RunTimeTyped
 		/// space. Defaults to 90 degrees if unspecified.
 		///
 		/// \li <b>"clippingPlanes" V2fData</b><br>
-		/// The near and far clipping planes. Defaults to 1.0e-10f, 1.0e38f if unspecified.
+		/// The near and far clipping planes. Defaults to 0.01, 100000 if unspecified.
 		///
 		/// \li <b>"shutter" V2fData</b><br>
 		/// The time interval for which the shutter is open - this is used in conjunction with the
