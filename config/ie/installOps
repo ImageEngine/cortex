@@ -34,21 +34,22 @@
  
 ########################################################################## 
 # 
-# This SConstruct file is intended for use only with Image Engine's 
-# internal build module "IEBuild". This script should be used only for 
-# installing the Ops.
+# This script is supposed to be called from scons. It is intended for use 
+# only with Image Engine's build. It dependns on internal module "IEBuild". 
 # 
 ########################################################################## 
- 
+
+import sys
+
 import VersionControl 
 VersionControl.setVersion('IEBuild', '1.9.1') 
 import IEBuild  
 
-ieCoreMajorVersion=2
-ieCoreMinorVersion=32
-ieCorePatchVersion=0
+ieCoreMajorVersion=ARGUMENTS['MAJOR']
+ieCoreMinorVersion=ARGUMENTS['MINOR']
+ieCorePatchVersion=ARGUMENTS['PATCH']
 
-ieCoreVersion = "%d.%d.%d" % ( ieCoreMajorVersion, ieCoreMinorVersion, ieCorePatchVersion )
+ieCoreVersion = "%s.%s.%s" % ( ieCoreMajorVersion, ieCoreMinorVersion, ieCorePatchVersion )
 
 # op wrappers
 
@@ -72,4 +73,4 @@ coreOps = [
 
 for op in coreOps : 
 
-	IEBuild.OpWrapper( ARGUMENTS, op[0], "IECore", ieCoreVersion, op[2], op[1], str(ieCoreMajorVersion) ).finalize()
+	IEBuild.OpWrapper( ARGUMENTS, op[0], "IECore", ieCoreVersion, op[2], op[1], ieCoreMajorVersion ).finalize()

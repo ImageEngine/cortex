@@ -303,6 +303,46 @@ o.Add(
 	"$INSTALL_PREFIX/share/cortex",
 )
 
+o.Add(
+	"INSTALL_CORE_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the core library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
+o.Add(
+	"INSTALL_CORERI_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreRI library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
+o.Add(
+	"INSTALL_COREGL_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreGL library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
+o.Add(
+	"INSTALL_COREMAYA_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreMaya library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
+o.Add(
+	"INSTALL_CORENUKE_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreNuke library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
 # Test options
 
 o.Add(
@@ -709,6 +749,12 @@ corePythonEnv.Depends( corePythonModuleInstall, coreInstallSync )
 
 Default( coreLibrary, corePythonModule )
 
+# post installation script
+
+if coreEnv["INSTALL_CORE_POST_COMMAND"]!="" :
+	# this is the only way we could find to get a post action to run for an alias
+	corePythonEnv.Alias( "installCore", corePythonModuleInstall, "$INSTALL_CORE_POST_COMMAND" ) 
+
 # testing
 
 coreTestEnv.Append(
@@ -821,6 +867,10 @@ if doConfigure :
 		riPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riPythonEnv, riPythonEnv["INSTALL_PYTHON_DIR"] ) )
 		riPythonEnv.Alias( "install", riPythonModuleInstall )
 		riPythonEnv.Alias( "installRI", riPythonModuleInstall )
+
+		if coreEnv["INSTALL_CORERI_POST_COMMAND"]!="" :
+			# this is the only way we could find to get a post action to run for an alias
+			corePythonEnv.Alias( "installRI", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
 
 		Default( [ riLibrary, riPythonModule ] )
 		
@@ -960,6 +1010,10 @@ if env["WITH_GL"] and doConfigure :
 		glPythonEnv.Alias( "install", glPythonModuleInstall )
 		glPythonEnv.Alias( "installGL", glPythonModuleInstall )
 
+		if coreEnv["INSTALL_COREGL_POST_COMMAND"]!="" :
+			# this is the only way we could find to get a post action to run for an alias
+			corePythonEnv.Alias( "installGL", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
+
 		Default( [ glLibrary, glPythonModule ] )
 
 		glTestEnv = testEnv.Copy()
@@ -1076,6 +1130,10 @@ if env["WITH_MAYA"] :
 			mayaPythonEnv.Alias( "install", mayaPythonModuleInstall )
 			mayaPythonEnv.Alias( "installMaya", mayaPythonModuleInstall )
 
+			if coreEnv["INSTALL_COREMAYA_POST_COMMAND"]!="" :
+				# this is the only way we could find to get a post action to run for an alias
+				corePythonEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
+
 			Default( [ mayaLibrary, mayaPythonModule ] )
 
 ###########################################################################################
@@ -1120,6 +1178,10 @@ if doConfigure :
 		nukeEnv.Alias( "installNuke", nukeHeaderInstall )
 		nukeEnv.Alias( "install", nukeHeaderInstall )
 		
+		if coreEnv["INSTALL_CORENUKE_POST_COMMAND"]!="" :
+			# this is the only way we could find to get a post action to run for an alias
+			corePythonEnv.Alias( "installNuke", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" ) 
+
 		Default( [ nukeLibrary ] )
 
 ###########################################################################################
