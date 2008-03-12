@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -217,6 +217,32 @@ GLbitfield BlendEquationStateComponent::mask() const
 }
 
 template class TypedStateComponent<GLenum, BlendEquationStateComponentTypeId>;
+
+// doubleSided specialisations and instantiations
+//////////////////////////////////////////////////////////////////////
+
+SPECIALISE( DoubleSidedStateComponent, bool, true );
+
+template<>
+void DoubleSidedStateComponent::bind() const
+{
+	if( m_value )
+	{
+		glDisable( GL_CULL_FACE );
+	}
+	else
+	{
+		glEnable( GL_CULL_FACE );
+	}
+}
+
+template<>
+GLbitfield DoubleSidedStateComponent::mask() const
+{
+	return GL_ENABLE_BIT;
+}
+
+template class TypedStateComponent<bool, DoubleSidedStateComponentTypeId>;
 
 // instantiation of simple mask()==0 types
 //////////////////////////////////////////////////////////////////////

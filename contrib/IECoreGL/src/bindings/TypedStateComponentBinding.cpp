@@ -71,6 +71,7 @@ void bindTypedStateComponents()
 	bindTypedStateComponent< PointsPrimitiveUseGLPoints >( "PointsPrimitiveUseGLPoints" );
 	bindTypedStateComponent< PointsPrimitiveGLPointWidth >( "PointsPrimitiveGLPointWidth" );
 	bindTypedStateComponent< BlendFuncStateComponent >( "BlendFuncStateComponent" );
+	bindTypedStateComponent< DoubleSidedStateComponent >( "DoubleSidedStateComponent" );
 }
 
 template< typename T >

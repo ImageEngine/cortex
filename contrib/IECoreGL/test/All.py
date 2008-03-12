@@ -45,6 +45,7 @@ from Selection import *
 from Camera import *
 from Image import *
 from PointsPrimitive import *
+from Orientation import *
 
 if __name__ == "__main__":
     unittest.main()   

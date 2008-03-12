@@ -101,6 +101,7 @@ class TestRenderer( unittest.TestCase ) :
 			self.assertEqual( r.getAttribute( "gl:shade:transparent" ), BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:primitive:sortForTransparency" ), BoolData( True ) )
 			self.assertEqual( r.getAttribute( "name" ), StringData( "unnamed" ) )
+			self.assertEqual( r.getAttribute( "doubleSided" ), BoolData( True ) )
 		
 			r.setAttribute( "color", Color3fData( Color3f( 0, 1, 2 ) ) )
 			self.assertEqual( r.getAttribute( "color" ), Color3fData( Color3f( 0, 1, 2 ) ) )
@@ -142,6 +143,9 @@ class TestRenderer( unittest.TestCase ) :
 			
 			r.setAttribute( "name", StringData( "sphere" ) )
 			self.assertEqual( r.getAttribute( "name" ), StringData( "sphere" ) )
+			
+			r.setAttribute( "doubleSided", BoolData( False ) )
+			self.assertEqual( r.getAttribute( "doubleSided" ), BoolData( False ) )
 				
 			r.worldEnd()
 	

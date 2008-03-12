@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -140,6 +140,9 @@ struct BlendFactors
 
 typedef TypedStateComponent<BlendFactors, BlendFuncStateComponentTypeId> BlendFuncStateComponent;
 
+/// Used to specify enable state of GL_CULL_FACE
+typedef TypedStateComponent<bool, DoubleSidedStateComponentTypeId> DoubleSidedStateComponent;
+
 IE_CORE_DECLAREPTR( Color );
 IE_CORE_DECLAREPTR( PrimitiveBound );
 IE_CORE_DECLAREPTR( PrimitiveWireframe );
@@ -158,6 +161,7 @@ IE_CORE_DECLAREPTR( OutlineColorStateComponent );
 IE_CORE_DECLAREPTR( PointColorStateComponent );
 IE_CORE_DECLAREPTR( PointsPrimitiveUseGLPoints );
 IE_CORE_DECLAREPTR( PointsPrimitiveGLPointWidth );
+IE_CORE_DECLAREPTR( DoubleSidedStateComponent );
 
 } // namespace IECoreGL
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -87,6 +87,7 @@ enum TypeId
 	NameStateComponentTypeId = 105044,
 	ToGLConverterTypeId = 105045,
 	ToGLCameraConverterTypeId = 105046,
+	DoubleSidedStateComponentTypeId = 105047,
 	/// If we ever get here we should start over again
 	LastCoreGLTypeId = 105999,	
 };	

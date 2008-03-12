@@ -934,6 +934,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:pointsPrimitive:useGLPoints"] = pointsPrimitiveUseGLPointsSetter;
 		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeSetter<PointsPrimitiveGLPointWidth>;
 		(*a)["name"] = nameSetter;
+		(*a)["doubleSided"] = typedAttributeSetter<DoubleSidedStateComponent>;
 	}
 	return a;
 }
@@ -967,6 +968,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:pointsPrimitive:useGLPoints"] = pointsPrimitiveUseGLPointsGetter;
 		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeGetter<PointsPrimitiveGLPointWidth>;
 		(*a)["name"] = nameGetter;
+		(*a)["doubleSided"] = typedAttributeGetter<DoubleSidedStateComponent>;
 	}
 	return a;
 }
