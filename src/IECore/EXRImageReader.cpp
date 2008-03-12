@@ -72,6 +72,8 @@ EXRImageReader::EXRImageReader(const string &fileName) :
 		m_inputFile(0)
 {
 	m_fileNameParameter->setTypedValue(fileName);
+	// added so that isComplete works and nothing changes on the class definition... the branch version should fix this.
+	open();
 }
 
 EXRImageReader::~EXRImageReader()

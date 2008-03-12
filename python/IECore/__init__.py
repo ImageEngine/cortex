@@ -85,6 +85,7 @@ from MenuItemDefinition import MenuItemDefinition
 from MenuDefinition import MenuDefinition
 from ParameterParser import *
 from SearchReplaceOp import SearchReplaceOp
+from CheckImagesOp import CheckImagesOp
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
