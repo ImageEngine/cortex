@@ -144,6 +144,8 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["ri:geometricApproximation:focusFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["name"] = &IECoreRI::RendererImplementation::setNameAttribute;
 
+	m_getAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::getShadingRateAttribute;
+	m_getAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::getMatteAttribute;
 	m_getAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::getDoubleSidedAttribute;
 	m_getAttributeHandlers["name"] = &IECoreRI::RendererImplementation::getNameAttribute;
 
@@ -667,6 +669,36 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::
 	else
 	{
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::getAttribute", format( "Unknown attribute \"%s\"." ) % name );
+	}
+	return 0;
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getShadingRateAttribute( const std::string &name ) const
+{
+	float result = 0;
+	RxInfoType_t resultType;
+	int resultCount;
+	if( 0==RxAttribute( "ShadingRate", (char *)&result, sizeof( float ), &resultType, &resultCount ) )
+	{
+		if( resultType==RxInfoFloat && resultCount==1 )
+		{
+			return new FloatData( result );
+		}
+	}
+	return 0;
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getMatteAttribute( const std::string &name ) const
+{
+	float result = 0;
+	RxInfoType_t resultType;
+	int resultCount;
+	if( 0==RxAttribute( "Matte", (char *)&result, sizeof( float ), &resultType, &resultCount ) )
+	{
+		if( resultType==RxInfoFloat && resultCount==1 )
+		{
+			return new BoolData( result > 0.0f );
+		}
 	}
 	return 0;
 }

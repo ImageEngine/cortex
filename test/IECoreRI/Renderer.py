@@ -106,9 +106,9 @@ class RendererTest( unittest.TestCase ) :
 	
 		tests = [
 			# format is : name value expectedRib getAttributeShouldWork
-			( "ri:shadingRate", FloatData( 2 ), "ShadingRate 2", False ),
-			( "ri:matte", BoolData( 0 ), "Matte 0", False ),
-			( "ri:matte", BoolData( 1 ), "Matte 1", False ),
+			( "ri:shadingRate", FloatData( 2 ), "ShadingRate 2", True ),
+			( "ri:matte", BoolData( 0 ), "Matte 0", True ),
+			( "ri:matte", BoolData( 1 ), "Matte 1", True ),
 			( "user:whatever", StringData( "whatever" ), "Attribute \"user\" \"string whatever\" [ \"whatever\" ]", False ),
 			( "ri:color", Color3fData( Color3f( 0, 1, 1 ) ), "Color [ 0 1 1 ]", False ),
 			( "color", Color3fData( Color3f( 1, 2, 3 ) ), "Color [ 1 2 3 ]", False ),

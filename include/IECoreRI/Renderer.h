@@ -171,6 +171,8 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"doubleSided"</b>
 		/// \li <b>"name"</b>
 		/// \li <b>"user:*"</b>
+		/// \li <b>"ri:shadingRate"</b><br>
+		/// \li <b>"ri:matte"</b><br>		
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const IECore::CompoundDataMap &parameters );
