@@ -37,11 +37,11 @@ There will be error messages for each frame that is corrupt or missing and warni
 					defaultValue = True,
 				),
 				IntParameter(
-					name = 'expectedSizeChange',
-					description = "Percentage number that sets what would be considered a normal file size change between the frames. It is enforced from the previous and next frames.\nFor example, 30% means that frame 2 on the sequence 1,2 and 3 cannot be 30% bigger than 1 and 3. Frames that don't pass this test will be shown on the warning messages.",
-					defaultValue = 30,
+					name = 'expectedSizeReduction',
+					description = "Percentage number that sets what would be considered a normal file size reduction between the frames. It is enforced from the previous and next frames.\nFor example, 20% means that frame 1 and 3 on the sequence 1,2 and 3 cannot be smaller than 80% the size of frame 2. Frames that don't pass this test will be shown on the warning messages.",
+					defaultValue = 20,
 					minValue = 0,
-					maxValue = 1000,
+					maxValue = 100,
 				),
 			]
 		)
@@ -49,7 +49,7 @@ There will be error messages for each frame that is corrupt or missing and warni
 	def doOperation( self, args ) :
 
 		checkMissing = args.checkMissingFrames.value
-		maxChange = 1.0 + (args.expectedSizeChange.value / 100.0 )
+		minSizeRatio = 1. - ( args.expectedSizeReduction.value / 100.0 )
 
 		src = self.parameters()["input"].getFileSequenceValue()
 
@@ -92,14 +92,16 @@ There will be error messages for each frame that is corrupt or missing and warni
 			currentSize = ft.st_size
 			if previousSize != -1:
 				currentRatio = float(currentSize)/previousSize
-				if currentRatio > maxChange:
-					warning( "Frame", f, "looks broken because it is \%%d" % int(currentRatio*100), "bigger then frame", previousGoodFrame )
+				if currentRatio < minSizeRatio:
+					warning( "Frame", f, "looks broken because it is %d%%" % int(currentRatio*100), "the size of frame", previousGoodFrame )
 					warningCount += 1
+					continue
 
-				previousRatio = previousSize/float(currentSize)
-				if previousRatio > maxChange:
-					warning( "Frame", f, "looks broken because frame", previousGoodFrame, "is \%%d bigger." % int(currentRatio*100) )
-					warningCount += 1
+				if previousGoodFrame == (f - 1):
+					previousRatio = previousSize/float(currentSize)
+					if previousRatio < minSizeRatio:
+						warning( "Frame", previousGoodFrame, "looks broken because it is %d%%" % int(previousRatio*100), "the size of frame", f )
+						warningCount += 1
 
 			previousSize = currentSize
 			previousGoodFrame = f	
