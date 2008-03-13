@@ -935,6 +935,12 @@ class ImathM44f(unittest.TestCase):
 				
 			mt = m.transposed()
 			self.assertAlmostEqual( d, mt.determinant(), 4 )
+			
+		for i in range( 0, 1000 ) :
+		
+			m = M44f()
+			m.translate( V3f( r(), r(), r() ) )
+			self.assertAlmostEqual( m.determinant(), 1, 10 )
 
 class ImathColor3Test( unittest.TestCase ) :
 
