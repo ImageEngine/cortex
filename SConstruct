@@ -588,6 +588,7 @@ if testEnv["TEST_LIBPATH"] != "" :
 	testEnvLibPath += ":" + testEnv["TEST_LIBPATH"]
 
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
+testEnv["ENV"]["DYLD_LIBRARY_PATH" if Environment()["PLATFORM"]=="darwin" else "LD_LIBRARY_PATH"] = testEnvLibPath
 
 if env["PLATFORM"]=="darwin" :	
 	# Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
