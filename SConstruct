@@ -1018,8 +1018,9 @@ if env["WITH_GL"] and doConfigure :
 
 		glTestEnv = testEnv.Copy()
 		glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + ":contrib/IECoreGL/python"
-		glTestEnv["ENV"]["DISPLAY"] = os.environ["DISPLAY"]
-		glTestEnv["ENV"]["XAUTHORITY"] = os.environ["XAUTHORITY"]
+		for e in ["DISPLAY", "XAUTHORITY"] :
+			if e in os.environ :
+				glTestEnv["ENV"][e] = os.environ[e]
 		
 		glTest = glTestEnv.Command( "contrib/IECoreGL/test/results.txt", glPythonModule, pythonExecutable + " $TEST_GL_SCRIPT" )
 		NoCache( glTest )
