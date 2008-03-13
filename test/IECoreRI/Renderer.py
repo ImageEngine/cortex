@@ -109,7 +109,7 @@ class RendererTest( unittest.TestCase ) :
 			( "ri:shadingRate", FloatData( 2 ), "ShadingRate 2", True ),
 			( "ri:matte", BoolData( 0 ), "Matte 0", True ),
 			( "ri:matte", BoolData( 1 ), "Matte 1", True ),
-			( "user:whatever", StringData( "whatever" ), "Attribute \"user\" \"string whatever\" [ \"whatever\" ]", False ),
+			( "user:whatever", StringData( "whatever" ), "Attribute \"user\" \"string whatever\" [ \"whatever\" ]", True ),
 			( "ri:color", Color3fData( Color3f( 0, 1, 1 ) ), "Color [ 0 1 1 ]", False ),
 			( "color", Color3fData( Color3f( 1, 2, 3 ) ), "Color [ 1 2 3 ]", False ),
 			( "ri:opacity", Color3fData( Color3f( 1, 1, 1 ) ), "Opacity [ 1 1 1 ]", False ),
@@ -119,8 +119,7 @@ class RendererTest( unittest.TestCase ) :
 			( "ri:geometricApproximation:focusFactor", FloatData( 1 ), "GeometricApproximation \"focusfactor\" 1", False ),
 			( "ri:cull:hidden", IntData( 0 ), "Attribute \"cull\" \"int hidden\" [ 0 ]", False ),
 			( "name", StringData( "oioi" ), "Attribute \"identifier\" \"string name\" [ \"oioi\" ]", True ),
-			## \todo Reinstate the test below when RxAttribute in 3delight starts doing what we want.
-			#( "ri:trace:bias", FloatData( 2 ), "Attribute \"trace\" \"float bias\" [ 2 ]", True ),
+			( "ri:trace:bias", FloatData( 2 ), "Attribute \"trace\" \"float bias\" [ 2 ]", True ),
 		]
 		
 		for t in tests :
