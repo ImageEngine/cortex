@@ -435,6 +435,8 @@ void bindMatrix33(const char *bindName)
 		.def("removeScalingAndShear", &removeScalingAndShear<Matrix33<T> > )
 		.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear33<T> )
 		.def("extractSHRT", &extractSHRT33<T> )
+		
+		.def("determinant", (float (*)( const Matrix33<T> & ))&IECore::determinant<T> )
 	;
 	
 }
@@ -557,6 +559,8 @@ void bindMatrix44(const char *bindName)
 		.def("extractEulerXYZ", &extractEulerZYX<Matrix44<T>, Vec3<T> > )
 		.def("extractQuat", &extractQuat<T> )
 		.def("extractSHRT", &extractSHRT44<T> )
+		
+		.def("determinant", (float (*)( const Matrix44<T> & ))&IECore::determinant<T> )
 	;
 	
 	/// \todo deprecate this form in favour of the static createFromBasis method.

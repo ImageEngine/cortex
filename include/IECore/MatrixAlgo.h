@@ -45,8 +45,15 @@ namespace IECore
 
 /// Returns a matrix specified by the orientation of the unit vectors x,y,z and origin o after transformation
 /// by the matrix.
+/// \todo Templatise this so it can be used with M44d too.
 Imath::M44f matrixFromBasis( const Imath::V3f &x, const Imath::V3f &y, const Imath::V3f &z, const Imath::V3f &o );
-	
+
+template<class T>
+float determinant( const Imath::Matrix33<T> &m );
+
+template<class T>
+float determinant( const Imath::Matrix44<T> &m );
+
 } // namespace IECore
 
 #include "IECore/MatrixAlgo.inl"

@@ -750,7 +750,36 @@ class ImathM33f(unittest.TestCase):
 		self.assertEqual( v, V2f( 1, 2 ) )
 		
 		v = M33f.createTranslated( V2f( 1, 2 ) ).multDirMatrix( V2f( 1 ) )
-		self.assertEqual( v, V2f( 1 ) )	
+		self.assertEqual( v, V2f( 1 ) )
+		
+	def testDeterminant( self ) :
+	
+		m = M33f()
+		self.assertAlmostEqual( m.determinant(), 1, 10 )
+		m.scale( V2f( -1, 1 ) )
+		self.assertAlmostEqual( m.determinant(), -1, 10 )
+		m.scale( V2f( 1, -1 ) )
+		self.assertAlmostEqual( m.determinant(), 1, 10 )
+		m.scale( V2f( 3, -1 ) )
+		self.assertAlmostEqual( m.determinant(), -3, 10 )
+		m.scale( V2f( 3, 3 ) )
+		self.assertAlmostEqual( m.determinant(), -27, 10 )
+
+		r = curry( random.uniform, -10, 10 )	
+		for i in range( 0, 1000 ) :
+		
+			m = M33f( r(), r(), r(), r(), r(), r(), r(), r(), r() )
+			d = m.determinant()
+			
+			if math.fabs( d ) > 0.00001 :
+			
+				mi = m.inverse()
+				di = mi.determinant()
+			
+				self.assertAlmostEqual( d, 1/di, 3 )
+				
+			mt = m.transposed()
+			self.assertAlmostEqual( d, mt.determinant(), 6 )
 		
 class ImathM44f(unittest.TestCase):		
 	def testConstructors(self):
@@ -877,6 +906,35 @@ class ImathM44f(unittest.TestCase):
 			o = V3f( 0, 0, 0 ) * m
 			
 			self.assertEqual( matrixFromBasis( x, y, z, o ), m )
+			
+	def testDeterminant( self ) :
+	
+		m = M44f()
+		self.assertAlmostEqual( m.determinant(), 1, 10 )
+		m.scale( V3f( -1, 1, 1 ) )
+		self.assertAlmostEqual( m.determinant(), -1, 10 )
+		m.scale( V3f( 1, -1, 1 ) )
+		self.assertAlmostEqual( m.determinant(), 1, 10 )
+		m.scale( V3f( 3, -1, 1 ) )
+		self.assertAlmostEqual( m.determinant(), -3, 10 )
+		m.scale( V3f( 3, 3, 1 ) )
+		self.assertAlmostEqual( m.determinant(), -27, 10 )
+
+		r = curry( random.uniform, -2, 2 )	
+		for i in range( 0, 1000 ) :
+		
+			m = M44f( r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r() )
+			d = m.determinant()
+			
+			if math.fabs( d ) > 0.00001 :
+			
+				mi = m.inverse()
+				di = mi.determinant()
+			
+				self.assertAlmostEqual( d, 1/di, 4 )
+				
+			mt = m.transposed()
+			self.assertAlmostEqual( d, mt.determinant(), 4 )
 
 class ImathColor3Test( unittest.TestCase ) :
 
