@@ -91,7 +91,33 @@ class OrientationTest( unittest.TestCase ) :
 		a = e.A()
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 0 )
+
+	def testFlippingTransforms( self ) :
 	
+		"""Check that flipping transforms are automatically compensated for."""
+		outputFileName = os.path.dirname( __file__ ) + "/output/testOrientation.tif"
+		# render a single sided plane that shouldn't be backface culled, even though
+		# the negative transform has reversed the winding order
+		r = IECoreRI.Renderer( "" )
+		r.display( outputFileName, "tiff", "rgba", {} )
+		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 256 ) ) } )
+		r.worldBegin()
+		self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( True ) )
+		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
+		r.concatTransform( IECore.M44f.createScaled( IECore.V3f( -1, 1, 1 ) ) )
+		self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( False ) )
+		self.makePlane().render( r )
+		r.worldEnd()
+		
+		# check that something appears in the output image
+		i = IECore.Reader.create( outputFileName ).read()
+		e = IECore.PrimitiveEvaluator.create( i )
+		result = e.createResult()
+		a = e.A()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( a ), 1 )
+			
 	def tearDown( self ) :
 	
 		if os.path.exists( "test/IECoreRI/output/testOrientation.tif" ) :

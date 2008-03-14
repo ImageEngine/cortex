@@ -136,6 +136,9 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"doubleSided"</b><br>
 		/// Mapped to an RiSides call.
 		///
+		/// \li <b>"leftHandedOrientation"</b><br>
+		/// Implemented via RiOrientation.
+		///
 		/// \li <b>"name"</b><br>
 		/// Mapped to an RiAttribute "identifier" "name" call.
 		///
@@ -169,14 +172,13 @@ class Renderer : public IECore::Renderer
 		/// \par Currently supported attributes :
 		///
 		/// \li <b>"doubleSided"</b>
+		/// \li <b>"leftHandedOrientation"</b>
 		/// \li <b>"name"</b>
 		/// \li <b>"user:*"</b>
 		/// \li <b>"ri:shadingRate"</b><br>
 		/// \li <b>"ri:matte"</b><br>
 		/// \li <b>"ri:*:*"</b><br>
 		/// Supports all attributes for which the RxAttribute query works.
-		/// \bug 3delight 7.0.14 seems not to be supporting the documented attributes.
-		/// \todo When 3delight is fixed reinstate the tests in Renderer.py (testAttributes).
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const IECore::CompoundDataMap &parameters );

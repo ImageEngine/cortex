@@ -140,6 +140,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["opacity"] = &IECoreRI::RendererImplementation::setOpacityAttribute;
 	m_setAttributeHandlers["ri:sides"] = &IECoreRI::RendererImplementation::setSidesAttribute;
 	m_setAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::setDoubleSidedAttribute;
+	m_setAttributeHandlers["leftHandedOrientation"] = &IECoreRI::RendererImplementation::setLeftHandedOrientationAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:motionFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:focusFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["name"] = &IECoreRI::RendererImplementation::setNameAttribute;
@@ -147,6 +148,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_getAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::getShadingRateAttribute;
 	m_getAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::getMatteAttribute;
 	m_getAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::getDoubleSidedAttribute;
+	m_getAttributeHandlers["leftHandedOrientation"] = &IECoreRI::RendererImplementation::getLeftHandedOrientationAttribute;
 	m_getAttributeHandlers["name"] = &IECoreRI::RendererImplementation::getNameAttribute;
 
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
@@ -622,6 +624,24 @@ void IECoreRI::RendererImplementation::setDoubleSidedAttribute( const std::strin
 	RiSides( f->readable() ? 2 : 1 );
 }
 
+void IECoreRI::RendererImplementation::setLeftHandedOrientationAttribute( const std::string &name, IECore::ConstDataPtr d )
+{
+	ConstBoolDataPtr f = runTimeCast<const BoolData>( d );
+	if( !f )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "leftHandedOrientation attribute expects a BoolData value." );
+		return;
+	}
+	if( f->readable() )
+	{
+		RiOrientation( "lh" );
+	}
+	else
+	{
+		RiOrientation( "rh" );
+	}
+}
+
 void IECoreRI::RendererImplementation::setGeometricApproximationAttribute( const std::string &name, IECore::ConstDataPtr d )
 {
 	ConstFloatDataPtr f = runTimeCast<const FloatData>( d );
@@ -734,6 +754,28 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getDoubleSidedAttribute( 
 			else
 			{
 				return new BoolData( true );
+			}
+		}
+	}
+	return 0;
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getLeftHandedOrientationAttribute( const std::string &name ) const
+{
+	char *result = 0;
+	RxInfoType_t resultType;
+	int resultCount;
+	if( 0==RxAttribute( "Orientation", (char *)result, sizeof( char * ), &resultType, &resultCount ) )
+	{
+		if( resultType==RxInfoStringV && resultCount==1 )
+		{
+			if( 0==strcmp( result, "lh" ) )
+			{
+				return new BoolData( true );
+			}
+			else
+			{
+				return new BoolData( false );
 			}
 		}
 	}
