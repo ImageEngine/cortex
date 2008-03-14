@@ -39,6 +39,7 @@
 #include "IECoreGL/BoxPrimitive.h"
 #include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/State.h"
+#include "IECoreGL/Camera.h"
 
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/Convert.h"
@@ -213,6 +214,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 			renderer->worldEnd();
 			
 			m_scene = renderer->scene();
+			m_scene->setCamera( 0 );
 		}
 		catch( boost::python::error_already_set )
 		{
