@@ -122,6 +122,7 @@ class Renderer : public IECore::Renderer
 		/// opacity.
 		///
 		/// \li <b>"doubleSided"</b>
+		/// \li <b>"leftHandedOrientation"</b>
 		/// \li <b>"name"</b>
 		///
 		/// \par Implementation specific attributes :

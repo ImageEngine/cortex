@@ -60,6 +60,7 @@
 #include "IECore/BoxOps.h"
 #include "IECore/Camera.h"
 #include "IECore/Transform.h"
+#include "IECore/MatrixAlgo.h"
 
 #include <stack>
 
@@ -534,6 +535,9 @@ void IECoreGL::Renderer::transformEnd()
 {
 	if( m_data->inWorld )
 	{
+		/// \todo We need to reverse the leftHandedOrientation oojamaflip here if the
+		/// old transform is flipped relative to the new one. to do that we have to implement
+		/// getTransform() properly.
 		m_data->implementation->transformEnd();
 	}
 	else
@@ -576,10 +580,16 @@ void IECoreGL::Renderer::concatTransform( const Imath::M44f &m )
 	if( m_data->inWorld )
 	{
 		m_data->implementation->concatTransform( m );
+		if( determinant( m ) < 0.0f )
+		{
+			bool l = m_data->implementation->getState<LeftHandedOrientationStateComponent>()->value();
+			m_data->implementation->addState( new LeftHandedOrientationStateComponent( !l ) );
+		}
 	}
 	else
 	{
 		m_data->transformStack.top() = m * m_data->transformStack.top();
+		
 	}
 }
 
@@ -935,6 +945,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeSetter<PointsPrimitiveGLPointWidth>;
 		(*a)["name"] = nameSetter;
 		(*a)["doubleSided"] = typedAttributeSetter<DoubleSidedStateComponent>;
+		(*a)["leftHandedOrientation"] = typedAttributeSetter<LeftHandedOrientationStateComponent>;
 	}
 	return a;
 }
@@ -969,6 +980,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeGetter<PointsPrimitiveGLPointWidth>;
 		(*a)["name"] = nameGetter;
 		(*a)["doubleSided"] = typedAttributeGetter<DoubleSidedStateComponent>;
+		(*a)["leftHandedOrientation"] = typedAttributeGetter<LeftHandedOrientationStateComponent>;
 	}
 	return a;
 }

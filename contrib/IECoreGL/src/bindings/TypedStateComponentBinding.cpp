@@ -72,6 +72,7 @@ void bindTypedStateComponents()
 	bindTypedStateComponent< PointsPrimitiveGLPointWidth >( "PointsPrimitiveGLPointWidth" );
 	bindTypedStateComponent< BlendFuncStateComponent >( "BlendFuncStateComponent" );
 	bindTypedStateComponent< DoubleSidedStateComponent >( "DoubleSidedStateComponent" );
+	bindTypedStateComponent< LeftHandedOrientationStateComponent >( "LeftHandedOrientationStateComponent" );
 }
 
 template< typename T >
