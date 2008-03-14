@@ -47,6 +47,12 @@ class SequenceLsOp( Op ) :
 				defaultValue = StringVectorData()
 			)
 		)
+
+		self.userData()["UI"] = CompoundObject(
+			{
+				"showResult": BoolData( True ),
+			}
+		)
 		
 		self.parameters().addParameters(
 			[
