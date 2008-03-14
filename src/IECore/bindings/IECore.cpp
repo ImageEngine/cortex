@@ -155,6 +155,7 @@
 #include "IECore/bindings/ImageCropOpBinding.h"
 #include "IECore/bindings/MeshPrimitiveShrinkWrapOpBinding.h"
 #include "IECore/bindings/ImagePrimitiveEvaluatorBinding.h"
+#include "IECore/bindings/ScopedMessageHandlerBinding.h"
 #include "IECore/bindings/MathBinding.h"
 #include "IECore/IECore.h"
 
@@ -290,6 +291,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageCropOp();
 	bindMeshPrimitiveShrinkWrapOp();
 	bindImagePrimitiveEvaluator();
+	bindScopedMessageHandler();
 	bindMath();
 		
 	def( "majorVersion", &IECore::majorVersion );
