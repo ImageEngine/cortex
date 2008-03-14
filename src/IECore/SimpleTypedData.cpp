@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,6 +57,8 @@ IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( UIntData, UIntDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( CharData, CharDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( UCharData, UCharDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( HalfData, HalfDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( ShortData, ShortDataTypeId )
+IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( UShortData, UShortDataTypeId )
 
 IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( StringData, StringDataTypeId )
 IE_CORE_DEFINETYPEDDATANOBASESIZE( StringData )
@@ -122,6 +124,69 @@ void TypedData<bool>::load( LoadContextPtr context )
 	writable() = c;
 }
 
+template<> 
+void TypedData<short>::save( SaveContext *context ) const
+{
+	Data::save( context );
+	IndexedIOInterfacePtr container = context->rawContainer();
+	int c = readable();
+	container->write( "value", c );
+}
+
+template<> 
+void TypedData<short>::load( LoadContextPtr context )
+{
+	Data::load( context );
+	int c;
+	try
+	{
+		// optimised format for new files
+		IndexedIOInterfacePtr container = context->rawContainer();
+		container->read( "value", c );
+	}
+	catch( ... )
+	{
+		// backwards compatibility with old files
+		unsigned int v = 0;
+		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+		container->read( "value", c );
+	}
+	
+	writable() = static_cast<short>( c );
+}
+
+template<> 
+void TypedData<unsigned short>::save( SaveContext *context ) const
+{
+	Data::save( context );
+	IndexedIOInterfacePtr container = context->rawContainer();
+	unsigned int c = readable();
+	container->write( "value", c );
+}
+
+template<> 
+void TypedData<unsigned short>::load( LoadContextPtr context )
+{
+	Data::load( context );
+	unsigned int c;
+	try
+	{
+		// optimised format for new files
+		IndexedIOInterfacePtr container = context->rawContainer();
+		container->read( "value", c );
+	}
+	catch( ... )
+	{
+		// backwards compatibility with old files
+		unsigned int v = 0;
+		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+		container->read( "value", c );
+	}
+	
+	writable() = static_cast<unsigned short>( c );
+}
+
+
 template class TypedData<bool>;
 template class TypedData<float>;
 template class TypedData<double>;
@@ -130,6 +195,8 @@ template class TypedData<long>;
 template class TypedData<unsigned int>;
 template class TypedData<char>;
 template class TypedData<unsigned char>;
+template class TypedData<short>;
+template class TypedData<unsigned short>;
 template class TypedData<std::string>;
 template class TypedData<half>;
 template class TypedData<Imath::V2i>;

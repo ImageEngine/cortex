@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -192,6 +192,8 @@ DEFINENUMERICSTRSPECIALISATION( unsigned int );
 DEFINENUMERICSTRSPECIALISATION( float );
 DEFINENUMERICSTRSPECIALISATION( double );
 DEFINENUMERICSTRSPECIALISATION( half );
+DEFINENUMERICSTRSPECIALISATION( short );
+DEFINENUMERICSTRSPECIALISATION( unsigned short );
 
 #define DEFINETYPEDDATASTRSPECIALISATION( TYPE )														\
 template<>																								\
@@ -218,6 +220,8 @@ DEFINETYPEDDATASTRSPECIALISATION( int );
 DEFINETYPEDDATASTRSPECIALISATION( unsigned int );
 DEFINETYPEDDATASTRSPECIALISATION( float );
 DEFINETYPEDDATASTRSPECIALISATION( double );
+DEFINETYPEDDATASTRSPECIALISATION( short );
+DEFINETYPEDDATASTRSPECIALISATION( unsigned short );
 DEFINETYPEDDATASTRSPECIALISATION( string );
 DEFINETYPEDDATASTRSPECIALISATION( half );
 DEFINETYPEDDATASTRSPECIALISATION( V2i );
@@ -329,6 +333,16 @@ void bindAllSimpleTypedData()
 	bindHalfMethods( hdc );
 	hdc.def( "__float__", &getValue<HalfData> );
 	implicitly_convertible<HalfDataPtr, DataPtr>();
+	
+	class_< ShortData, ShortDataPtr, boost::noncopyable, bases<Data> > shdc = bindSimpleData<ShortData>();
+	bindNumericMethods( shdc );
+	shdc.def( "__int__", &getValue<ShortData> );
+	implicitly_convertible<ShortDataPtr, DataPtr>();
+	
+	class_< UShortData, UShortDataPtr, boost::noncopyable, bases<Data> > ushdc = bindSimpleData<UShortData>();
+	bindNumericMethods( ushdc );
+	ushdc.def( "__int__", &getValue<UShortData> );
+	implicitly_convertible<UShortDataPtr, DataPtr>();	
 
 	bindSimpleData<V2iData>();
 	implicitly_convertible<V2iDataPtr, DataPtr>();

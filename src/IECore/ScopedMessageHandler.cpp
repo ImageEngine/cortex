@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,13 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREPYTHON_VECTORTYPEDDATABINDING_H
-#define IE_COREPYTHON_VECTORTYPEDDATABINDING_H
+#include "IECore/ScopedMessageHandler.h"
+#include "IECore/Exception.h"
 
-namespace IECore
+using namespace IECore;
+
+ScopedMessageHandler::ScopedMessageHandler( MessageHandlerPtr handler )
+	:	m_handler( handler )
 {
-extern void bindAllVectorTypedData();
+	Msg::pushHandler( m_handler );
 }
 
-#endif // IE_COREPYTHON_VECTORTYPEDDATABINDING_H
-
+ScopedMessageHandler::~ScopedMessageHandler()
+{
+	MessageHandlerPtr popped = Msg::popHandler();
+	if( popped!=m_handler )
+	{
+		// something has messed up the nesting
+		Msg::pushHandler( popped );
+		throw Exception( "Bad MessageHandler nesting detected in ScopedMessageHandler::~ScopedMessageHandler" );
+	}
+}
+		

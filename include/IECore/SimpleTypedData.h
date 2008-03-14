@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,6 +58,8 @@ typedef TypedData < long > LongData;
 typedef TypedData < unsigned int > UIntData;
 typedef TypedData < char > CharData;
 typedef TypedData < unsigned char > UCharData;
+typedef TypedData < short > ShortData;
+typedef TypedData < unsigned short > UShortData;
 typedef TypedData < std::string > StringData;
 typedef TypedData<half> HalfData;
 typedef TypedData<Imath::V2i> V2iData;
@@ -94,6 +96,8 @@ IE_CORE_DECLAREPTR( CharData );
 IE_CORE_DECLAREPTR( UCharData );
 IE_CORE_DECLAREPTR( StringData );
 IE_CORE_DECLAREPTR( HalfData );
+IE_CORE_DECLAREPTR( ShortData );
+IE_CORE_DECLAREPTR( UShortData );
 IE_CORE_DECLAREPTR( V2iData );
 IE_CORE_DECLAREPTR( V3iData );
 IE_CORE_DECLAREPTR( V2fData );

@@ -85,7 +85,7 @@ void bindMessageHandler()
 	
 	def( "msg", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&msg );
 	
-	typedef class_<MessageHandler, boost::noncopyable, MessageHandlerWrapPtr> MessageHandlerPyClass;
+	typedef class_<MessageHandler, boost::noncopyable, MessageHandlerWrapPtr, bases<RefCounted> > MessageHandlerPyClass;
 	object mh = MessageHandlerPyClass( "MessageHandler", no_init )
 		.def( init<>() )
 		.def( "handle", pure_virtual( &MessageHandler::handle ) )

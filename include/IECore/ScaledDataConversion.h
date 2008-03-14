@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,13 +32,26 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREPYTHON_VECTORTYPEDDATABINDING_H
-#define IE_COREPYTHON_VECTORTYPEDDATABINDING_H
+#ifndef IE_CORE_SCALEDDATACONVERSION_H
+#define IE_CORE_SCALEDDATACONVERSION_H
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {
-extern void bindAllVectorTypedData();
-}
 
-#endif // IE_COREPYTHON_VECTORTYPEDDATABINDING_H
+/// \todo Verify that we can round trip data where possible
+template<typename F, typename T, typename Enable = void>
+struct ScaledDataConversion
+{
+	T operator()( F f )
+	{
+		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+	}
+};
 
+} // namespace IECore
+
+#include "ScaledDataConversion.inl"
+
+#endif // IE_CORE_SCALEDDATACONVERSION_H

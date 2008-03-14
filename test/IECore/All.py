@@ -61,9 +61,8 @@ from SimpleTypedData import *
 from TypedDataAsObject import *
 from VectorData import *
 from FileSequence import *
-from EXRReader import *
+#from EXRReader import *
 from PointsPrimitive import *
-from EXRReader import *
 from ImagePrimitive import *
 from PerlinNoise import *
 from Turbulence import *
@@ -128,14 +127,17 @@ from InverseDistanceWeightedInterpolation import *
 from ImageCropOp import *
 from MeshPrimitiveShrinkWrapOp import *
 from ImagePrimitiveEvaluator import *
+from CapturingMessageHandler import *
 from FileExaminer import *
 from Math import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *
+	from TIFFImageWriter import *
 
 if IECore.withJPEG() :
 	from JPEGReader import *
+	from JPEGImageWriter import *
 
 if IECore.withSQLite() :
 	from SQLiteIndexedIO import *

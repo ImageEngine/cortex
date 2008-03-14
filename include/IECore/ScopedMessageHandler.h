@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,13 +32,38 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREPYTHON_VECTORTYPEDDATABINDING_H
-#define IE_COREPYTHON_VECTORTYPEDDATABINDING_H
+#ifndef IECORE_SCOPEDMESSAGEHANDLER_H
+#define IECORE_SCOPEDMESSAGEHANDLER_H
+
+#include "IECore/MessageHandler.h"
+
+#include "boost/noncopyable.hpp"
 
 namespace IECore
 {
-extern void bindAllVectorTypedData();
-}
 
-#endif // IE_COREPYTHON_VECTORTYPEDDATABINDING_H
+IE_CORE_DECLAREPTR( MessageHandler );
 
+/// The ScopedMessageHandler does not actually implement the MessageHandler
+/// interface. Instead it provides a simple way of managing the duration for
+/// which another MessageHandler is current.
+class ScopedMessageHandler : public boost::noncopyable
+{
+
+	public :
+	
+		/// Pushes the handler as the current MessageHandler.
+		ScopedMessageHandler( MessageHandlerPtr handler );
+		/// Pops the previously pushed MessageHandler, throwing
+		/// an Exception if it is not the current one.
+		~ScopedMessageHandler();
+		
+	private :
+	
+		MessageHandlerPtr m_handler;
+		
+};
+
+}; // namespace IECore
+
+#endif // IECORE_SCOPEDMESSAGEHANDLER_H

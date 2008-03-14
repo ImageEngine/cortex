@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -183,7 +183,45 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( HalfData() ), "0" )
-		self.assertEqual( repr( HalfData() ), "HalfData( 0 )" )		
+		self.assertEqual( repr( HalfData() ), "HalfData( 0 )" )
+		
+	def testShortData(self):
+		"""Test ShortData"""
+		a = ShortData()
+		self.assert_(type(a) is ShortData)
+		b = ShortData(1)
+		c = b.copy()
+		self.assertEqual(b.value, 1)
+		self.assertEqual(int(b), 1)
+		b.value = 2
+		self.assertEqual(b.value, 2)
+		a = ShortData(2)
+		self.assert_(c < b)
+		self.assert_(not c > b)
+		self.assert_(a == b)
+		self.assert_(not a == c)
+		self.assertEqual( str( ShortData() ), "0" )
+		self.assertEqual( repr( ShortData() ), "ShortData( 0 )" )
+		
+	def testUShortData(self):
+		"""Test UShortData"""
+		a = UShortData()
+		self.assert_(type(a) is UShortData)
+		b = UShortData(1)
+		c = b.copy()
+		self.assertEqual(b.value, 1)
+		self.assertEqual(int(b), 1)
+		b.value = 2
+		self.assertEqual(b.value, 2)
+		a = UShortData(2)
+		self.assert_(c < b)
+		self.assert_(not c > b)
+		self.assert_(a == b)
+		self.assert_(not a == c)
+		self.assertEqual( str( UShortData() ), "0" )
+		self.assertEqual( repr( UShortData() ), "UShortData( 0 )" )	
+		
+			
 		
 	def testImathVecTypes(self):
 		

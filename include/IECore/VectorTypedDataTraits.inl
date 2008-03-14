@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,8 @@ IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( UIntVectorData, unsigned int )
 IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( LongVectorData, long )
 IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( CharVectorData, char )
 IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( UCharVectorData, unsigned char )
+IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( ShortVectorData, short )
+IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( UShortVectorData, unsigned short )
 IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( V2fVectorData, float )
 IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( V2dVectorData, double )
 IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( V2iVectorData, int )

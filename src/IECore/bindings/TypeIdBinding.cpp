@@ -242,7 +242,11 @@ void bindTypeId()
 		.value("ImageCropOp", ImageCropOpTypeId)
 		.value("MeshPrimitiveShrinkWrapOp", MeshPrimitiveShrinkWrapOpTypeId)
 		.value("ImagePrimitiveEvaluator", ImagePrimitiveEvaluatorTypeId)
-		.value("FromCoreConverter", FromCoreConverterTypeId)
+		.value("FromCoreConverter", FromCoreConverterTypeId)		
+		.value("ShortData", ShortDataTypeId )
+		.value("UShortData", UShortDataTypeId )
+		.value("ShortVectorData", ShortVectorDataTypeId )
+		.value("UShortVectorData", UShortVectorDataTypeId )
 	;
 }
 

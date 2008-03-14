@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//       other contributors to this software may be used to endorse or
+//	     other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,13 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREPYTHON_VECTORTYPEDDATABINDING_H
-#define IE_COREPYTHON_VECTORTYPEDDATABINDING_H
+#include <cassert>
 
 namespace IECore
 {
-extern void bindAllVectorTypedData();
+
+template<typename F, typename T, typename C>
+typename T::Ptr DataConvert<F, T, C>::operator()( typename F::ConstPtr f )
+{
+	assert( f );
+
+	typename T::Ptr result = new T();
+	assert( result );
+	result->writable = C( f->readable() );
+
+	return result;
 }
 
-#endif // IE_COREPYTHON_VECTORTYPEDDATABINDING_H
+template<typename F, typename T, typename C>
+typename T::Ptr VectorDataConvert<F, T, C>::operator()( typename F::ConstPtr f )
+{
+	assert( f );
 
+	typename T::Ptr result = new T();
+	assert( result );
+	result->writable().resize( f->readable().size() );
+
+	assert( result->readable().size() == f->readable().size() );
+	std::transform( f->readable().begin(),  f->readable().end(), result->writable().begin(), C() );
+
+	return result;
+}
+
+
+}

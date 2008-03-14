@@ -230,6 +230,20 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				default:	break;
 			}
 			break;
+		case ShortDataTypeId:
+			switch ( targetType )
+			{
+				CASTDATA( Char, UChar )
+				default:	break;
+			}
+			break;
+		case UShortDataTypeId:
+			switch ( targetType )
+			{
+				CASTDATA( UShort, Short )
+				default:	break;
+			}
+			break;	
 		case IntDataTypeId:
 			switch ( targetType )
 			{

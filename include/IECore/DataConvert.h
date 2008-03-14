@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,13 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREPYTHON_VECTORTYPEDDATABINDING_H
-#define IE_COREPYTHON_VECTORTYPEDDATABINDING_H
+#ifndef IE_CORE_DATACONVERT_H
+#define IE_CORE_DATACONVERT_H
 
 namespace IECore
 {
-extern void bindAllVectorTypedData();
-}
 
-#endif // IE_COREPYTHON_VECTORTYPEDDATABINDING_H
+/// \todo C++ tests
+/// \todo Use some "DataTraits" class to automatically enable_if these for "vector" and "simple" data types
 
+template<typename From, typename To, typename Conversion>
+struct DataConvert
+{
+	typename To::Ptr operator()( typename From::ConstPtr from );
+};
+
+template<typename From, typename To, typename Conversion>
+struct VectorDataConvert
+{
+	typename To::Ptr operator()( typename From::ConstPtr from );
+};
+
+} // namespace IECore
+
+#include "DataConvert.inl"
+
+#endif // IE_CORE_DATACONVERT_H

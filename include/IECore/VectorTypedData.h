@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,6 +57,8 @@ typedef TypedData< std::vector< unsigned int > > UIntVectorData;
 typedef TypedData< std::vector< long > > LongVectorData;
 typedef TypedData< std::vector< char > > CharVectorData;
 typedef TypedData< std::vector< unsigned char > > UCharVectorData;
+typedef TypedData< std::vector< short > > ShortVectorData;
+typedef TypedData< std::vector< unsigned short > > UShortVectorData;
 typedef TypedData< std::vector< std::string > > StringVectorData;
 
 // vectors for Imath types
@@ -91,6 +93,8 @@ IE_CORE_DECLAREPTR( UIntVectorData );
 IE_CORE_DECLAREPTR( LongVectorData );
 IE_CORE_DECLAREPTR( CharVectorData );
 IE_CORE_DECLAREPTR( UCharVectorData );
+IE_CORE_DECLAREPTR( ShortVectorData );
+IE_CORE_DECLAREPTR( UShortVectorData );
 IE_CORE_DECLAREPTR( StringVectorData );
 // pointers to vectors of Imath types
 IE_CORE_DECLAREPTR( V2fVectorData );

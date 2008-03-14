@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,6 +70,8 @@ IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( int )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( unsigned int )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( char )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( unsigned char )
+IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( short )
+IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( unsigned short )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( std::string )
 
 // we have to specialise the repr() and str() separately here, because of
@@ -153,6 +155,16 @@ void bindAllVectorTypedData()
 		unsigned char,
 		"UCharVectorData",
 		"unsigned char")
+		
+	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
+		short,
+		"ShortVectorData",
+		"short")
+		
+	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
+		unsigned short,
+		"UShortVectorData",
+		"unsigned short")	
 		
 	BIND_VECTOR_TYPEDDATA (
 		std::string,

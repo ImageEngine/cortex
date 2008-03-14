@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -186,9 +186,12 @@ void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 }
 
 // the boolean type need it's own io and memoryUsage so we don't use the whole macro for it's specialisations either
-
 IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( BoolVectorData, BoolVectorDataTypeId )
 IE_CORE_DEFINETYPEDDATANOBASESIZE( BoolVectorData )
+
+// short and unsigned short data types save/load themelves as int and unsigned int arrays, respectively.
+IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( ShortVectorData, ShortVectorDataTypeId )
+IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( UShortVectorData, UShortVectorDataTypeId )
 
 
 template<>
@@ -245,6 +248,96 @@ void BoolVectorData::load( LoadContextPtr context )
 		b[i] = ( p[i/8] >> (i % 8) ) & 1;
 	}
 }
+
+template<>
+void ShortVectorData::save( Object::SaveContext *context ) const
+{
+	Data::save( context );
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
+	// we can't write out the raw data from inside the vector 'cos it's specialised
+	// to optimise for space, and that means the only access to the data is through
+	// a funny proxy class. so we repack the data into something we can deal with
+	// and write that out instead. essentially i think we're making exactly the same
+	// raw data. rubbish.
+	const std::vector<short> &b = readable();
+	std::vector<int> p;
+	unsigned int s = b.size();
+	p.resize(s);
+
+	for( unsigned int i=0; i<s; i++ )
+	{
+		p[i] = b[i];
+	}
+	
+	container->write( "size", s );
+	container->write( "value", &(p[0]), p.size() );
+}
+
+template<>
+void ShortVectorData::load( LoadContextPtr context )
+{
+	Data::load( context );
+	unsigned int v = 0;
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	
+	unsigned int s = 0;
+	container->read( "size", s );
+	std::vector<int> p;
+	p.resize( s );
+	int *value = &(p[0]);
+	container->read( "value", value, p.size() );
+	std::vector<short> &b = writable();
+	b.resize( s, false );
+	for( unsigned int i=0; i<s; i++ )
+	{
+		b[i] = static_cast< short > ( p[i] );
+	}
+}
+
+template<>
+void UShortVectorData::save( Object::SaveContext *context ) const
+{
+	Data::save( context );
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
+	// we can't write out the raw data from inside the vector 'cos it's specialised
+	// to optimise for space, and that means the only access to the data is through
+	// a funny proxy class. so we repack the data into something we can deal with
+	// and write that out instead. essentially i think we're making exactly the same
+	// raw data. rubbish.
+	const std::vector<unsigned short> &b = readable();
+	std::vector<unsigned int> p;
+	unsigned int s = b.size();
+	p.resize(s);
+
+	for( unsigned int i=0; i<s; i++ )
+	{
+		p[i] = b[i];
+	}
+	
+	container->write( "size", s );
+	container->write( "value", &(p[0]), p.size() );
+}
+
+template<>
+void UShortVectorData::load( LoadContextPtr context )
+{
+	Data::load( context );
+	unsigned int v = 0;
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	
+	unsigned int s = 0;
+	container->read( "size", s );
+	std::vector<unsigned int> p;
+	p.resize( s );
+	unsigned int *value = &(p[0]);
+	container->read( "value", value, p.size() );
+	std::vector<unsigned short> &b = writable();
+	b.resize( s, false );
+	for( unsigned int i=0; i<s; i++ )
+	{
+		b[i] = static_cast< unsigned short > ( p[i] );
+	}
+}
 	
 // explicitly instantiate each of the types we defined in the public ui.
 template class TypedData<vector<float> >;
@@ -256,6 +349,8 @@ template class TypedData<vector<unsigned int> >;
 template class TypedData<vector<long> >;
 template class TypedData<vector<char> >;
 template class TypedData<vector<unsigned char> >;
+template class TypedData<vector<short> >;
+template class TypedData<vector<unsigned short> >;
 template class TypedData<vector<V2f> >;
 template class TypedData<vector<V2d> >;
 template class TypedData<vector<V2i> >;

@@ -126,5 +126,9 @@ class TestMessageHandler( unittest.TestCase ) :
 		self.assertEqual( myHandler.lastContext.value, "context" )
 		self.assertEqual( myHandler.lastMessage.value, "message" )
 		
+	def testIsRefCounted( self ) :
+	
+		self.assert_( issubclass( MessageHandler, RefCounted ) )
+		
 if __name__ == "__main__":
     unittest.main()   

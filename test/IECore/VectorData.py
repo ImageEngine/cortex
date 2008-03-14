@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,7 +32,7 @@
 #
 ##########################################################################
 
-"""Unit test for FloatVectorData binding"""
+"""Unit test for VectorData binding"""
 
 import math
 import unittest
@@ -835,6 +835,138 @@ class UCharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 		"""Test UCharVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
 
+class ShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
+
+	def __init__(self, param1):
+		BaseVectorDataTest.__init__(self, ShortVectorData, int)
+		unittest.TestCase.__init__(self, param1)
+
+	def testConstructors(self):
+		"""Test ShortVectorData constructors"""
+		BaseVectorDataTest.testConstructors(self)
+		
+	def testResize(self):
+		"""Test ShortVectorData resizing"""
+		BaseVectorDataTest.testResize(self)
+				
+	def testAssignment(self):
+		"""Test ShortVectorData assignment"""
+		BaseVectorDataTest.testAssignment(self)
+				
+	def testNegativeIndexing(self):
+		"""Test ShortVectorData negative indexing"""
+		BaseVectorDataTest.testNegativeIndexing(self)
+				
+	def testCopyOnWrite(self):
+		"""Test ShortVectorData copy-on-write behavior"""
+		BaseVectorDataTest.testCopyOnWrite(self)
+				
+	def testContains(self):
+		"""Test ShortVectorData contains function"""
+		BaseVectorDataTest.testContains(self)
+				
+	def testExtend(self):
+		"""Test ShortVectorData extend function"""
+		BaseVectorDataTest.testExtend(self)
+			
+	def testSlices(self):
+		"""Test ShortVectorData slicing behavior"""
+		BaseVectorDataTest.testSlices(self)
+			
+	def testEquality(self):
+		"""Test ShortVectorData equality function"""
+		BaseVectorDataTest.testEquality(self)
+
+	def testComparison(self):
+		"""Test ShortVectorData comparison function"""
+		BaseVectorDataTest.testComparison(self)
+				
+	def testSumOperations(self):
+		"""Test ShortVectorData sum operations"""
+		BaseVectorDataTest.testSumOperations(self)
+		
+	def testSubOperations(self):
+		"""Test ShortVectorData subtraction operations"""
+		BaseVectorDataTest.testSubOperations(self)
+		
+	def testMultOperations(self):
+		"""Test ShortVectorData multiplication operations"""
+		BaseVectorDataTest.testMultOperations(self)
+				
+	def testDivOperations(self):
+		"""Test ShortVectorData division operations"""
+		BaseVectorDataTest.testDivOperations(self)
+				
+	def testByValueItem(self):
+		"""Test ShortVectorData by value return type"""
+		BaseVectorDataTest.testByValueItem(self)
+
+class UShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
+
+	def __init__(self, param1):
+		BaseVectorDataTest.__init__(self, UShortVectorData, int)
+		unittest.TestCase.__init__(self, param1)
+
+	def testConstructors(self):
+		"""Test UShortVectorData constructors"""
+		BaseVectorDataTest.testConstructors(self)
+		
+	def testResize(self):
+		"""Test UShortVectorData resizing"""
+		BaseVectorDataTest.testResize(self)
+				
+	def testAssignment(self):
+		"""Test UShortVectorData assignment"""
+		BaseVectorDataTest.testAssignment(self)
+				
+	def testNegativeIndexing(self):
+		"""Test UShortVectorData negative indexing"""
+		BaseVectorDataTest.testNegativeIndexing(self)
+				
+	def testCopyOnWrite(self):
+		"""Test UShortVectorData copy-on-write behavior"""
+		BaseVectorDataTest.testCopyOnWrite(self)
+				
+	def testContains(self):
+		"""Test UShortVectorData contains function"""
+		BaseVectorDataTest.testContains(self)
+				
+	def testExtend(self):
+		"""Test UShortVectorData extend function"""
+		BaseVectorDataTest.testExtend(self)
+			
+	def testSlices(self):
+		"""Test UShortVectorData slicing behavior"""
+		BaseVectorDataTest.testSlices(self)
+			
+	def testEquality(self):
+		"""Test UShortVectorData equality function"""
+		BaseVectorDataTest.testEquality(self)
+
+	def testComparison(self):
+		"""Test UShortVectorData comparison function"""
+		BaseVectorDataTest.testComparison(self)
+				
+	def testSumOperations(self):
+		"""Test UShortVectorData sum operations"""
+		BaseVectorDataTest.testSumOperations(self)
+		
+	def testSubOperations(self):
+		"""Test UShortVectorData subtraction operations"""
+		BaseVectorDataTest.testSubOperations(self)
+		
+	def testMultOperations(self):
+		"""Test UShortVectorData multiplication operations"""
+		BaseVectorDataTest.testMultOperations(self)
+				
+	def testDivOperations(self):
+		"""Test UShortVectorData division operations"""
+		BaseVectorDataTest.testDivOperations(self)
+				
+	def testByValueItem(self):
+		"""Test UShortVectorData by value return type"""
+		BaseVectorDataTest.testByValueItem(self)
+		
 class StringVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
@@ -919,6 +1051,11 @@ class TestVectorDataStrRepr( unittest.TestCase ) :
 		d = IntVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
 		self.assertEqual( "IntVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
+		
+		l = [ 1, 2, 3 ]
+		d = ShortVectorData( l )
+		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
+		self.assertEqual( "ShortVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
 	
 if __name__ == "__main__":
     unittest.main()   
