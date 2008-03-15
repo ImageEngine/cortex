@@ -147,4 +147,5 @@ void State::bindBaseState()
 	glMaterialfv( GL_FRONT_AND_BACK, GL_EMISSION, black );
 	glShadeModel( GL_SMOOTH );
 	glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
+	glCullFace( GL_BACK );
 }
