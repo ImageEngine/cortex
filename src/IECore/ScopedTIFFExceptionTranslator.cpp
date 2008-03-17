@@ -62,8 +62,8 @@ void ScopedTIFFExceptionTranslator::output(const char* module, const char* fmt, 
 	std::string context = "libtiff";
 	if (module)
 	{
-		context = *module;
-	}
+		context = std::string( module );
+	} 
 	
 	throw IOException( ( boost::format( "%s : %s" ) % context % buf ).str() );
 }
