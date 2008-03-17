@@ -247,6 +247,7 @@ void bindTypeId()
 		.value("UShortData", UShortDataTypeId )
 		.value("ShortVectorData", ShortVectorDataTypeId )
 		.value("UShortVectorData", UShortVectorDataTypeId )
+		.value("PathVectorParameter", PathVectorParameterTypeId )
 	;
 }
 

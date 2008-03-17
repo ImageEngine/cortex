@@ -329,6 +329,7 @@ ParameterParser.registerType( IECore.DoubleParameter.staticTypeId(), ( lambda ar
 ParameterParser.registerType( IECore.StringParameter.staticTypeId(), __parseString, __serialiseString )
 ParameterParser.registerType( IECore.ValidatedStringParameter.staticTypeId(), __parseString, __serialiseString )
 ParameterParser.registerType( IECore.PathParameter.staticTypeId(), __parseString, __serialiseString )
+ParameterParser.registerType( IECore.PathVectorParameter.staticTypeId(), __parseStringArray, __serialiseStringArray )
 ParameterParser.registerType( IECore.FileNameParameter.staticTypeId(), __parseString, __serialiseString )
 ParameterParser.registerType( IECore.DirNameParameter.staticTypeId(), __parseString, __serialiseString )
 ParameterParser.registerType( IECore.FileSequenceParameter.staticTypeId(), __parseString, __serialiseString )

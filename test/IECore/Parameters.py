@@ -1038,6 +1038,42 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 		)
 		
 		p.setValue( mesh4 )	
+
+class TestPathVectorParameter( unittest.TestCase ) :
+
+	def test( self ) :
+	
+		dv = StringVectorData()
+	
+		p = PathVectorParameter(
+			name = "f",
+			description = "d",
+			defaultValue = dv,
+			check = PathVectorParameter.CheckType.MustExist,
+			allowEmptyList = True
+		)
+		
+		self.assertEqual( p.name, "f" )
+		self.assertEqual( p.description, "d" )
+		self.assertEqual( p.mustExist, True )
+		self.assertEqual( p.allowEmptyList, True )
+		self.assertEqual( p.userData(), CompoundObject() )
+		self.assertEqual( p.valueValid()[0], True )
+		p.validate()
+		
+	def testMustNotExist( self ):
+	
+		dv = StringVectorData()
+		dv.append( "/ThisDirectoryDoesNotExist " )
+	
+		p = PathVectorParameter(
+				name = "f",
+				description = "d",
+				defaultValue = dv,
+				check = PathVectorParameter.CheckType.MustExist,
+				allowEmptyList = False,
+		)
+		self.assertRaises( RuntimeError, p.validate )
 										
 if __name__ == "__main__":
         unittest.main()
