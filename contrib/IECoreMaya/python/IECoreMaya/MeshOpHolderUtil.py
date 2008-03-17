@@ -333,24 +333,41 @@ def create( meshDagPath, className, classVersion, **kw):
 		meshNode = meshDagPath.node()
 
 		__applyMeshOp(meshNode, className, classVersion, **kw )
+		
+		return None
 	else:
 		modifierNode = __createMeshOpNode( className, classVersion, **kw )
 
 		__connectNodes( modifierNode, meshDagPath )
+		
+		fnDN = OpenMaya.MFnDependencyNode( modifierNode )
+		
+		return str( fnDN.name() )
 
 
 def createUI( className, classVersion, **kw ):
 
+	# \todo Should we use list selection instead?
 	selectedMeshes = cmds.filterExpand( sm = 12 )
 	
 	if not selectedMeshes:
 		raise RuntimeError( "No mesh selected" )
+		
+	modifierNodes = []
 	
 	for mesh in selectedMeshes:
+	
 		sel = OpenMaya.MSelectionList()
 		sel.add( mesh )
 		meshDagPath = OpenMaya.MDagPath()
 		sel.getDagPath( 0,  meshDagPath)
 		meshDagPath.extendToShape()
 		
-		create( meshDagPath, className, classVersion, **kw )
+		modifierNode = create( meshDagPath, className, classVersion, **kw )
+		
+		if modifierNode :
+		
+			modifierNodes += [ modifierNode ]
+			
+			
+	return modifierNodes	
