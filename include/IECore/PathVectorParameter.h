@@ -82,4 +82,4 @@ IE_CORE_DECLAREPTR( PathVectorParameter )
 
 } // namespace IECore
 
-#endif // IE_CORE_PATHPARAMETER_H
+#endif // IE_CORE_PATHVECTORPARAMETER_H
