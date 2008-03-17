@@ -349,8 +349,11 @@ def create( meshDagPath, className, classVersion, **kw):
 
 def createUI( className, classVersion, **kw ):
 
-	# \todo Should we use list selection instead?
-	selectedMeshes = cmds.filterExpand( sm = 12 )
+	selectedTransforms = cmds.ls( selection = True, type = "transform" ) or []
+	selectedTransformMeshShapes = cmds.listRelatives( selectedTransforms, type = "mesh" ) or []
+	
+	selectedMeshes = cmds.ls( selection = True, type = "mesh" ) or []
+	selectedMeshes += selectedTransformMeshShapes
 	
 	if not selectedMeshes:
 		raise RuntimeError( "No mesh selected" )
