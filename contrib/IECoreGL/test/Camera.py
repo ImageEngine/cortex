@@ -71,7 +71,7 @@ class CameraTest( unittest.TestCase ) :
 		r.display( os.path.dirname( __file__ ) + "/output/testCamera.tif", "tiff", "rgba", {} )
 				
 		r.transformBegin()
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ), "projection" : IECore.StringData( "perspective" ) } )
 		r.transformEnd()
 
@@ -99,7 +99,7 @@ class CameraTest( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.display( os.path.dirname( __file__ ) + "/output/testCamera.tif", "tiff", "rgba", {} )
 		r.transformBegin()
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ) } )
 		r.transformEnd()
 		

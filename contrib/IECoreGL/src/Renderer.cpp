@@ -535,7 +535,7 @@ void IECoreGL::Renderer::transformEnd()
 {
 	if( m_data->inWorld )
 	{
-		/// \todo We need to reverse the leftHandedOrientation oojamaflip here if the
+		/// \todo We need to reverse the rightHandedOrientation oojamaflip here if the
 		/// old transform is flipped relative to the new one. to do that we have to implement
 		/// getTransform() properly.
 		m_data->implementation->transformEnd();
@@ -582,8 +582,8 @@ void IECoreGL::Renderer::concatTransform( const Imath::M44f &m )
 		m_data->implementation->concatTransform( m );
 		if( determinant( m ) < 0.0f )
 		{
-			bool l = m_data->implementation->getState<LeftHandedOrientationStateComponent>()->value();
-			m_data->implementation->addState( new LeftHandedOrientationStateComponent( !l ) );
+			bool l = m_data->implementation->getState<RightHandedOrientationStateComponent>()->value();
+			m_data->implementation->addState( new RightHandedOrientationStateComponent( !l ) );
 		}
 	}
 	else
@@ -945,7 +945,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeSetter<PointsPrimitiveGLPointWidth>;
 		(*a)["name"] = nameSetter;
 		(*a)["doubleSided"] = typedAttributeSetter<DoubleSidedStateComponent>;
-		(*a)["leftHandedOrientation"] = typedAttributeSetter<LeftHandedOrientationStateComponent>;
+		(*a)["rightHandedOrientation"] = typedAttributeSetter<RightHandedOrientationStateComponent>;
 	}
 	return a;
 }
@@ -980,7 +980,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeGetter<PointsPrimitiveGLPointWidth>;
 		(*a)["name"] = nameGetter;
 		(*a)["doubleSided"] = typedAttributeGetter<DoubleSidedStateComponent>;
-		(*a)["leftHandedOrientation"] = typedAttributeGetter<LeftHandedOrientationStateComponent>;
+		(*a)["rightHandedOrientation"] = typedAttributeGetter<RightHandedOrientationStateComponent>;
 	}
 	return a;
 }

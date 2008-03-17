@@ -96,10 +96,12 @@ class CameraTest( unittest.TestCase ) :
 		# render a plane at z = 0 with the camera moved back a touch to see it
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
+		
 		r.transformBegin()
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 		r.camera( "main", {} )
 		r.transformEnd()
+		
 		r.worldBegin()
 		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
 		r.worldEnd()
@@ -119,7 +121,7 @@ class CameraTest( unittest.TestCase ) :
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
 		r.transformBegin()
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ) } )
 		r.transformEnd()
 		

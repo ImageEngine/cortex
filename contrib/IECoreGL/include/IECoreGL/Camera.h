@@ -61,9 +61,7 @@ class Camera : public Renderable
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Camera, CameraTypeId, Renderable );
 
-		/// Specifies the transform of the camera relative to the world. This class
-		/// will automatically insert a scaling in z at rendertime to compensate for
-		/// the left/right handedness difference between IECore and OpenGL.
+		/// Specifies the transform of the camera relative to the world.
 		void setTransform( const Imath::M44f &transform );
 		const Imath::M44f &getTransform() const;
 		

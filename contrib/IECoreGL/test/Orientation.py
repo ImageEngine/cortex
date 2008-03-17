@@ -42,12 +42,12 @@ import math
 
 class OrientationTest( unittest.TestCase ) :
 
-	## Makes a plane on the XY plane which appears with a clockwise winding order when
-	# viewing down the positive Z axis.
+	## Makes a plane on the XY plane which appears with an anticlockwise winding order when
+	# viewing down the negative Z axis.
 	def makePlane( self ) :
 	
 		V = IECore.V3f
-		p = IECore.V3fVectorData( [ V( -1, -1, 0 ), V( -1, 1, 0 ), V( 1, 1, 0 ), V( 1, -1, 0 ) ] )
+		p = IECore.V3fVectorData( [ V( 1, -1, 0 ), V( 1, 1, 0 ), V( -1, 1, 0 ), V( -1, -1, 0 ) ] )
 		nVerts = IECore.IntVectorData( [ 4 ] )
 		vertIds = IECore.IntVectorData( [ 0, 1, 2, 3 ] )
 		
@@ -58,14 +58,14 @@ class OrientationTest( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.worldBegin()
-		self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( True ) )
-		r.setAttribute( "leftHandedOrientation", IECore.BoolData( False ) )
-		self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( False ) )
+		self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( True ) )
+		r.setAttribute( "rightHandedOrientation", IECore.BoolData( False ) )
+		self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( False ) )
 		r.worldEnd()
 
 	def testMesh( self ) :
 	
-		"""Check that clockwise winding order is considered front facing by default."""
+		"""Check that anticlockwise winding order is considered front facing by default."""
 	
 		outputFileName = os.path.dirname( __file__ ) + "/output/testOrientation.tif"
 	
@@ -76,7 +76,7 @@ class OrientationTest( unittest.TestCase ) :
 		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 256 ) ) } )
 		r.worldBegin()
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		self.makePlane().render( r )
 		r.worldEnd()
 		
@@ -95,7 +95,7 @@ class OrientationTest( unittest.TestCase ) :
 		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 256 ) ) } )
 		r.worldBegin()
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		r.concatTransform( IECore.M44f.createRotated( IECore.V3f( 0, math.pi, 0 ) ) )
 		self.makePlane().render( r )
 		r.worldEnd()
@@ -121,11 +121,11 @@ class OrientationTest( unittest.TestCase ) :
 		r.display( outputFileName, "tiff", "rgba", {} )
 		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 256 ) ) } )
 		r.worldBegin()
-		self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( True ) )
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		r.concatTransform( IECore.M44f.createScaled( IECore.V3f( -1, 1, 1 ) ) )
-		self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( False ) )
+		self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( False ) )
 		self.makePlane().render( r )
 		r.worldEnd()
 		
@@ -152,20 +152,20 @@ class OrientationTest( unittest.TestCase ) :
 		r.worldBegin()
 		if 1 :
 		
-			self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( True ) )
 			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			
 			r.transformBegin()
 			if 1 :
 			
 				r.concatTransform( IECore.M44f.createScaled( IECore.V3f( -1, 1, 1 ) ) )
-				self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( False ) )
+				self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( False ) )
 				self.makePlane().render( r )
 			
 			r.transformEnd() ## \todo We need to fix our transformEnd implementation.
 
-			self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( True ) )
 			
 		r.worldEnd()
 		

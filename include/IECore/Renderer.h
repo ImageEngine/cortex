@@ -88,7 +88,7 @@ class Renderer : public RunTimeTyped
 		//@}
 
 		/// Creates a named camera at the position defined by the current transform. The camera
-		/// looks down positive Z, with screen space left to right being positive X and
+		/// looks down negative Z, with screen space left to right being positive X and
 		/// screen space top to bottom being positive Y. The last camera specified before
 		/// worldBegin() is considered to be the camera for rendering through - other cameras
 		/// may be used in implementation specific ways by Renderer subclasses.
@@ -206,11 +206,11 @@ class Renderer : public RunTimeTyped
 		/// When true both sides of a primitive are rendered, when false
 		/// only one side is. Defaults to true.
 		///
-		/// \li <b>"leftHandedOrientation" BoolData</b><br>
+		/// \li <b>"rightHandedOrientation" BoolData</b><br>
 		/// Controls which side of a primitive
 		/// is forward facing. This attribute starts with a value of true,
-		/// because the camera is specified in a left handed coordinate system -
-		/// a value of false specifies that the current orientation is right handed.
+		/// because the camera is specified in a right handed coordinate system -
+		/// a value of false specifies that the current orientation is left handed.
 		/// The renderer will automatically toggle the value whenever a transformation
 		/// flips the sense of the current object space coordinate system (this
 		/// happens when a transform has a negative determinant - typically a
@@ -254,7 +254,7 @@ class Renderer : public RunTimeTyped
 		/// for all primitives - these specify data to vary over the surface of the
 		/// primitive.
 		/// \todo Better documentation for the calls below, particularly in relation
-		/// to the leftHandedOrientation attribute.
+		/// to the rightHandedOrientation attribute.
 		////////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Renders a set of points.
@@ -268,9 +268,9 @@ class Renderer : public RunTimeTyped
 		/// Renders an image.
 		/// \todo Clarify the intended use of dataWindow and displayWindow.
 		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const PrimitiveVariableMap &primVars ) = 0;
-		/// Renders a mesh. The geometric normal of a face will be facing camera if the winding order of its vertices is clockwise from
-		/// the point of view of the camera and the "leftHandedOrientation" attribute is true. If the "leftHandedOrientation" attribute
-		/// is false then faces whose vertices wind /anticlockwise/ with respect to the camera are considered forward facing instead.
+		/// Renders a mesh. The geometric normal of a face will be facing camera if the winding order of its vertices is anticlockwise from
+		/// the point of view of the camera and the "rightHandedOrientation" attribute is true. If the "rightHandedOrientation" attribute
+		/// is false then faces whose vertices wind /clockwise/ with respect to the camera are considered forward facing instead.
 		virtual void mesh( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds, const std::string &interpolation, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders a nurbs surface.
 		virtual void nurbs( int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const PrimitiveVariableMap &primVars ) = 0;

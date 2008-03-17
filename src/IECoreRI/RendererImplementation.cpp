@@ -118,6 +118,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 {
 	m_camera = new Camera;
 	m_camera->addStandardParameters();
+	m_camera->setTransform( new MatrixTransform() );
 
 	m_attributeStack.push( AttributeState() );
 	
@@ -140,7 +141,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["opacity"] = &IECoreRI::RendererImplementation::setOpacityAttribute;
 	m_setAttributeHandlers["ri:sides"] = &IECoreRI::RendererImplementation::setSidesAttribute;
 	m_setAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::setDoubleSidedAttribute;
-	m_setAttributeHandlers["leftHandedOrientation"] = &IECoreRI::RendererImplementation::setLeftHandedOrientationAttribute;
+	m_setAttributeHandlers["rightHandedOrientation"] = &IECoreRI::RendererImplementation::setRightHandedOrientationAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:motionFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:focusFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["name"] = &IECoreRI::RendererImplementation::setNameAttribute;
@@ -148,7 +149,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_getAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::getShadingRateAttribute;
 	m_getAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::getMatteAttribute;
 	m_getAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::getDoubleSidedAttribute;
-	m_getAttributeHandlers["leftHandedOrientation"] = &IECoreRI::RendererImplementation::getLeftHandedOrientationAttribute;
+	m_getAttributeHandlers["rightHandedOrientation"] = &IECoreRI::RendererImplementation::getRightHandedOrientationAttribute;
 	m_getAttributeHandlers["name"] = &IECoreRI::RendererImplementation::getNameAttribute;
 
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
@@ -400,11 +401,10 @@ void IECoreRI::RendererImplementation::worldBegin()
 	RiProjectionV( (char *)projectionD->readable().c_str(), p.n(), p.tokens(), p.values() );
 
 	// transform last
-	if( m_camera->getTransform() )
-	{
-		M44f cameraInverse = m_camera->getTransform()->transform().inverse();
-		setTransform( cameraInverse );
-	}
+	M44f m = m_camera->getTransform()->transform();
+	m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
+	m.invert();
+	setTransform( m );
 	
 	RiWorldBegin();
 }
@@ -447,7 +447,6 @@ void IECoreRI::RendererImplementation::setTransform( const std::string &coordina
 
 Imath::M44f IECoreRI::RendererImplementation::getTransform() const
 {
-	ScopedContext scopedContext( m_context );
 	return getTransform( "object" );
 }
 
@@ -465,6 +464,8 @@ Imath::M44f IECoreRI::RendererImplementation::getTransform( const std::string &c
 		V3f z = convert<Imath::V3f>( p[2] ) - o;
 
 		result = IECore::matrixFromBasis( x, y, z, o );
+		//result.scale( V3f( 1.0f, 1.0f, -1.0f ) );
+		//std::cerr << "GETTRASNFORM " << coordinateSystem << " " << result << std::endl;
 	}
 	else
 	{
@@ -624,21 +625,21 @@ void IECoreRI::RendererImplementation::setDoubleSidedAttribute( const std::strin
 	RiSides( f->readable() ? 2 : 1 );
 }
 
-void IECoreRI::RendererImplementation::setLeftHandedOrientationAttribute( const std::string &name, IECore::ConstDataPtr d )
+void IECoreRI::RendererImplementation::setRightHandedOrientationAttribute( const std::string &name, IECore::ConstDataPtr d )
 {
 	ConstBoolDataPtr f = runTimeCast<const BoolData>( d );
 	if( !f )
 	{
-		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "leftHandedOrientation attribute expects a BoolData value." );
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "rightHandedOrientation attribute expects a BoolData value." );
 		return;
 	}
 	if( f->readable() )
 	{
-		RiOrientation( "lh" );
+		RiOrientation( "rh" );
 	}
 	else
 	{
-		RiOrientation( "rh" );
+		RiOrientation( "lh" );
 	}
 }
 
@@ -760,7 +761,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getDoubleSidedAttribute( 
 	return 0;
 }
 
-IECore::ConstDataPtr IECoreRI::RendererImplementation::getLeftHandedOrientationAttribute( const std::string &name ) const
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getRightHandedOrientationAttribute( const std::string &name ) const
 {
 	char *result = 0;
 	RxInfoType_t resultType;
@@ -769,7 +770,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getLeftHandedOrientationA
 	{
 		if( resultType==RxInfoStringV && resultCount==1 )
 		{
-			if( 0==strcmp( result, "lh" ) )
+			if( 0==strcmp( result, "rh" ) )
 			{
 				return new BoolData( true );
 			}

@@ -88,7 +88,7 @@ enum TypeId
 	ToGLConverterTypeId = 105045,
 	ToGLCameraConverterTypeId = 105046,
 	DoubleSidedStateComponentTypeId = 105047,
-	LeftHandedOrientationStateComponentTypeId = 105048,
+	RightHandedOrientationStateComponentTypeId = 105048,
 	/// If we ever get here we should start over again
 	LastCoreGLTypeId = 105999,	
 };	

@@ -62,7 +62,7 @@ class TestImmediateRenderer( unittest.TestCase ) :
 		
 		r.worldBegin()
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 0, 0, 1 ) ) } )
 		r.geometry( "sphere", {}, {} )
 		

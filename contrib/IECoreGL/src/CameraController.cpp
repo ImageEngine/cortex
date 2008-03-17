@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -85,7 +85,7 @@ void CameraController::reshape( int resolutionX, int resolutionY )
 
 void CameraController::frame( const Imath::Box3f &box )
 {
-	V3f z( 0, 0, 1 );
+	V3f z( 0, 0, -1 );
 	V3f y( 0, 1, 0 );
 	M44f t = m_camera->getTransform();
 	t.multDirMatrix( z, z );
@@ -96,7 +96,7 @@ void CameraController::frame( const Imath::Box3f &box )
 void CameraController::frame( const Imath::Box3f &box, const Imath::V3f &viewDirection, const Imath::V3f &upVector )
 {
 	// make a matrix to centre the camera on the box, with the appropriate view direction
-	M44f cameraMatrix = rotationMatrixWithUpDir( V3f( 0, 0, 1 ), viewDirection, upVector );
+	M44f cameraMatrix = rotationMatrixWithUpDir( V3f( 0, 0, -1 ), viewDirection, upVector );
 	M44f translationMatrix;
 	translationMatrix.translate( box.center() );
 	cameraMatrix *= translationMatrix;
@@ -118,14 +118,14 @@ void CameraController::frame( const Imath::Box3f &box, const Imath::V3f &viewDir
 		
 		m_centreOfInterest = max( z0, z1 ) / tan( M_PI * perspCamera->getFOV() / 360.0 ) + cBox.size().z / 2.0f;
 		
-		cameraMatrix.translate( V3f( 0.0f, 0.0f, -m_centreOfInterest ) );
+		cameraMatrix.translate( V3f( 0.0f, 0.0f, m_centreOfInterest ) );
 	}
 	else
 	{
 		// orthographic. translate to front of box and set screen window
 		// to frame the box, maintaining the aspect ratio of the screen window.
 		m_centreOfInterest = cBox.size().z / 2.0f + m_camera->getClippingPlanes()[0];
-		cameraMatrix.translate( V3f( 0.0f, 0.0f, -m_centreOfInterest ) );
+		cameraMatrix.translate( V3f( 0.0f, 0.0f, m_centreOfInterest ) );
 		
 		float xScale = cBox.size().x / screenWindow.size().x;
 		float yScale = cBox.size().y / screenWindow.size().y;
@@ -168,14 +168,14 @@ void CameraController::tumble( int dx, int dy )
 	V3f yAxis( 0.0f, 1.0f, 0.f );
 	ti.multDirMatrix( yAxis, yAxis );
 	
-	t.translate( V3f( 0.0f, 0.0f, m_centreOfInterest ) );
+	t.translate( V3f( 0.0f, 0.0f, -m_centreOfInterest ) );
 	
-		t.rotate( V3f( dy, 0.0f, 0.0f ) / 100.0f );
+		t.rotate( V3f( -dy, 0.0f, 0.0f ) / 100.0f );
 		M44f yRotate;
-		yRotate.setAxisAngle( yAxis, dx / 100.0f );
+		yRotate.setAxisAngle( yAxis, -dx / 100.0f );
 		t = yRotate * t;
 
-	t.translate( V3f( 0.0f, 0.0f, -m_centreOfInterest ) );
+	t.translate( V3f( 0.0f, 0.0f, m_centreOfInterest ) );
 	
 	m_camera->setTransform( t );
 }
@@ -188,9 +188,9 @@ void CameraController::dolly( int dx, int dy )
 	if( m_camera->isInstanceOf( PerspectiveCamera::staticTypeId() ) )
 	{
 		M44f t = m_camera->getTransform();
-		d *= 2.5f * m_centreOfInterest; // 2.5 is a magic number that just makes the speed nice
+		d *= -2.5f * m_centreOfInterest; // 2.5 is a magic number that just makes the speed nice
 		t.translate( V3f( 0, 0, d ) );
-		m_centreOfInterest -= d;
+		m_centreOfInterest += d;
 		m_camera->setTransform( t );
 	}
 	else

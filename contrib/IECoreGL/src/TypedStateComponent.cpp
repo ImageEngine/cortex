@@ -244,24 +244,24 @@ GLbitfield DoubleSidedStateComponent::mask() const
 
 template class TypedStateComponent<bool, DoubleSidedStateComponentTypeId>;
 
-// LeftHandedOrientation specialisations and instantiations
+// RightHandedOrientation specialisations and instantiations
 //////////////////////////////////////////////////////////////////////
 
-SPECIALISE( LeftHandedOrientationStateComponent, bool, true );
+SPECIALISE( RightHandedOrientationStateComponent, bool, true );
 
 template<>
-void LeftHandedOrientationStateComponent::bind() const
+void RightHandedOrientationStateComponent::bind() const
 {
-	glFrontFace( m_value ? GL_CW : GL_CCW );
+	glFrontFace( m_value ? GL_CCW : GL_CW );
 }
 
 template<>
-GLbitfield LeftHandedOrientationStateComponent::mask() const
+GLbitfield RightHandedOrientationStateComponent::mask() const
 {
 	return GL_POLYGON_BIT;
 }
 
-template class TypedStateComponent<bool, LeftHandedOrientationStateComponentTypeId>;
+template class TypedStateComponent<bool, RightHandedOrientationStateComponentTypeId>;
 
 // instantiation of simple mask()==0 types
 //////////////////////////////////////////////////////////////////////

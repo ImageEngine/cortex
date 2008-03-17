@@ -136,7 +136,7 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"doubleSided"</b><br>
 		/// Mapped to an RiSides call.
 		///
-		/// \li <b>"leftHandedOrientation"</b><br>
+		/// \li <b>"rightHandedOrientation"</b><br>
 		/// Implemented via RiOrientation.
 		///
 		/// \li <b>"name"</b><br>
@@ -172,7 +172,7 @@ class Renderer : public IECore::Renderer
 		/// \par Currently supported attributes :
 		///
 		/// \li <b>"doubleSided"</b>
-		/// \li <b>"leftHandedOrientation"</b>
+		/// \li <b>"rightHandedOrientation"</b>
 		/// \li <b>"name"</b>
 		/// \li <b>"user:*"</b>
 		/// \li <b>"ri:shadingRate"</b><br>

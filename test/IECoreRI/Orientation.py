@@ -41,27 +41,27 @@ import math
 
 class OrientationTest( unittest.TestCase ) :
 
-	## Makes a plane on the XY plane which appears with a clockwise winding order when
-	# viewing down the positive Z axis.
+	## Makes a plane on the XY plane which appears with an anticlockwise winding order when
+	# viewing down the negative Z axis.
 	def makePlane( self ) :
 	
 		V = IECore.V3f
-		p = IECore.V3fVectorData( [ V( -1, -1, 0 ), V( -1, 1, 0 ), V( 1, 1, 0 ), V( 1, -1, 0 ) ] )
+		p = IECore.V3fVectorData( [ V( 1, -1, 0 ), V( 1, 1, 0 ), V( -1, 1, 0 ), V( -1, -1, 0 ) ] )
 		nVerts = IECore.IntVectorData( [ 4 ] )
 		vertIds = IECore.IntVectorData( [ 0, 1, 2, 3 ] )
 		
 		return IECore.MeshPrimitive( nVerts, vertIds, "linear", p )
-
+		
 	def testMesh( self ) :
 	
-		"""Check that clockwise winding order is considered front facing by default."""
+		"""Check that anticlockwise winding order is considered front facing by default."""
 	
 		# render a single sided plane that shouldn't be backface culled
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testOrientation.tif", "tiff", "rgba", {} )
 		r.worldBegin()
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		self.makePlane().render( r )
 		r.worldEnd()
 		
@@ -79,7 +79,7 @@ class OrientationTest( unittest.TestCase ) :
 		r.display( "test/IECoreRI/output/testOrientation.tif", "tiff", "rgba", {} )
 		r.worldBegin()
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		r.concatTransform( IECore.M44f.createRotated( IECore.V3f( 0, math.pi, 0 ) ) )
 		self.makePlane().render( r )
 		r.worldEnd()
@@ -102,11 +102,11 @@ class OrientationTest( unittest.TestCase ) :
 		r.display( outputFileName, "tiff", "rgba", {} )
 		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 256 ) ) } )
 		r.worldBegin()
-		self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( True ) )
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		r.concatTransform( IECore.M44f.createScaled( IECore.V3f( -1, 1, 1 ) ) )
-		self.assertEqual( r.getAttribute( "leftHandedOrientation" ), IECore.BoolData( False ) )
+		self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( False ) )
 		self.makePlane().render( r )
 		r.worldEnd()
 		

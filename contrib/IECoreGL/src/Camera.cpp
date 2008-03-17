@@ -139,6 +139,5 @@ void Camera::setModelViewMatrix() const
 	M44f inverseMatrix = m_transform.inverse();
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
-	glScalef( 1.0f, 1.0f, -1.0f );
 	glMultMatrixf( inverseMatrix.getValue() );
 }

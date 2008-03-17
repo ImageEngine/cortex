@@ -45,10 +45,10 @@ IE_CORE_FORWARDDECLARE( MeshPrimitive )
 
 /// The MeshPrimitive represents a collection of polygonal faces. The faces should
 /// be planar and may not have holes, but can have concavities. By default a polygon
-/// is considered frontfacing if it's vertices wind in a clockwise direction from the
+/// is considered frontfacing if it's vertices wind in an anticlockwise direction from the
 /// point of view of the camera - this can be changed at the point of rendering by
 /// setting attributes in the Renderer. This definition of winding order is the same as
-/// the RenderMan specification, but the opposite of the OpenGL and Maya conventions.
+/// the OpenGL and Maya conventions but the opposite of RenderMan's.
 /// \todo Verify that we're interpreting winding order correctly thoughout Cortex.
 class MeshPrimitive : public Primitive
 {	  

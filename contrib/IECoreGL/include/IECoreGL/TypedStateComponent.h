@@ -142,9 +142,9 @@ typedef TypedStateComponent<BlendFactors, BlendFuncStateComponentTypeId> BlendFu
 
 /// Used to specify enable state of GL_CULL_FACE
 typedef TypedStateComponent<bool, DoubleSidedStateComponentTypeId> DoubleSidedStateComponent;
-/// Used to implement the "leftHandedOrientation" Renderer attribute. Implemented by calling
-/// glFrontFace( GL_CW ) when true and glFrontFace( GL_CCW ) when false. 
-typedef TypedStateComponent<bool, LeftHandedOrientationStateComponentTypeId> LeftHandedOrientationStateComponent;
+/// Used to implement the "rightHandedOrientation" Renderer attribute. Implemented by calling
+/// glFrontFace( GL_CCW ) when true and glFrontFace( GL_CW ) when false. 
+typedef TypedStateComponent<bool, RightHandedOrientationStateComponentTypeId> RightHandedOrientationStateComponent;
 
 IE_CORE_DECLAREPTR( Color );
 IE_CORE_DECLAREPTR( PrimitiveBound );

@@ -148,14 +148,14 @@ class RendererImplementation : public IECore::Renderer
 		void setOpacityAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setSidesAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setDoubleSidedAttribute( const std::string &name, IECore::ConstDataPtr d );
-		void setLeftHandedOrientationAttribute( const std::string &name, IECore::ConstDataPtr d );
+		void setRightHandedOrientationAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setGeometricApproximationAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setNameAttribute( const std::string &name, IECore::ConstDataPtr d );
 
 		IECore::ConstDataPtr getShadingRateAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getMatteAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getDoubleSidedAttribute( const std::string &name ) const;
-		IECore::ConstDataPtr getLeftHandedOrientationAttribute( const std::string &name ) const;
+		IECore::ConstDataPtr getRightHandedOrientationAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getNameAttribute( const std::string &name ) const;
 		
 		struct ProcData

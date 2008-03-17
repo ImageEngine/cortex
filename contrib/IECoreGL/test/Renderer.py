@@ -162,7 +162,7 @@ class TestRenderer( unittest.TestCase ) :
 		# GL contexts in the address space, but that doesn't seem to be the case.
 		#w = SceneViewer( "scene", r.scene() )
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
 		r.geometry( "sphere", {}, {} )
 		
@@ -191,7 +191,7 @@ class TestRenderer( unittest.TestCase ) :
 				
 		r.shader( "surface", "rgbColor", { "red" : FloatData( 1 ), "green" : FloatData( 0 ), "blue" : FloatData( 0 ) } )
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		
 		r.attributeBegin()
 
@@ -238,7 +238,7 @@ class TestRenderer( unittest.TestCase ) :
 				
 		r.shader( "surface", "rgbColor", {} )
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		
 		r.attributeBegin()
 
@@ -290,7 +290,7 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( g ), 0 )
 		self.assertEqual( result.floatPrimVar( b ), 1 )
 	
-	## \todo Make this asseet something
+	## \todo Make this assert something
 	def testImagePrimitive( self ) :
 	
 		r = Renderer()
@@ -302,7 +302,7 @@ class TestRenderer( unittest.TestCase ) :
 		
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
 		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		r.concatTransform( M44f.createScaled( V3f( 0.005 ) ) )
 		
 		i = Reader.create( os.path.dirname( __file__ ) + "/images/numbers.exr" ).read()
@@ -324,7 +324,7 @@ class TestRenderer( unittest.TestCase ) :
 		r.setAttribute( "gl:blend:dstFactor", StringData( "one" ) )
 		r.setAttribute( "gl:blend:equation", StringData( "add" ) )
 				
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		r.concatTransform( M44f.createScaled( V3f( 0.004 ) ) )
 		
 		r.concatTransform( M44f.createTranslated( V3f( -150, -200, 0 ) ) )
@@ -350,7 +350,7 @@ class TestRenderer( unittest.TestCase ) :
 		
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
 
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		
 		p = ReadProcedural()
 		p.files["name"].setValue( StringData( os.path.dirname( __file__ ) + "/models/sphere.cob" ) )
@@ -370,7 +370,7 @@ class TestRenderer( unittest.TestCase ) :
 		
 		r.worldBegin()
 		r.shader( "surface", "failWithoutPreprocessing", {} )
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		r.worldEnd()
 	
 	def tearDown( self ) :
