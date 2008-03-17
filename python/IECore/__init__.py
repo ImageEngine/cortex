@@ -87,6 +87,7 @@ from ParameterParser import *
 from SearchReplaceOp import SearchReplaceOp
 from CapturingMessageHandler import CapturingMessageHandler
 from CheckImagesOp import CheckImagesOp
+from FileSequenceVectorParameter import FileSequenceVectorParameter
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *

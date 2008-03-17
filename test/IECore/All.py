@@ -130,6 +130,7 @@ from ImagePrimitiveEvaluator import *
 from CapturingMessageHandler import *
 from FileExaminer import *
 from Math import *
+from FileSequenceVectorParameter import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *
