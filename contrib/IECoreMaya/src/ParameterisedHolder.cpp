@@ -355,12 +355,12 @@ MStatus ParameterisedHolder<B>::setNodeValues()
 		}
 		catch( std::exception &e )
 		{
-			msg( Msg::Error, "ParameterisedHolder::setNodeValues", boost::format( "Caught exception while setting value : %s" ) % e.what());
+			msg( Msg::Error, "ParameterisedHolder::setNodeValues", boost::format( "Caught exception while setting parameter value to attribute %s : %s" ) % p.name().asChar() % e.what());
 			return MStatus::kFailure;
 		}
 		catch( ... )
 		{
-			msg( Msg::Error, "ParameterisedHolder::setNodeValues", "Caught exception while setting value." );
+			msg( Msg::Error, "ParameterisedHolder::setNodeValues", boost::format( "Caught exception while setting parameter value to attribute %s." ) % p.name().asChar() );
 			return MStatus::kFailure;
 		}
 	}
@@ -393,12 +393,12 @@ MStatus ParameterisedHolder<B>::setParameterisedValues()
 		}
 		catch( std::exception &e )
 		{
-			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting value : %s" ) % e.what());
+			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s : %s" ) % p.name().asChar() % e.what());
 			return MStatus::kFailure;
 		}
 		catch( ... )
 		{
-			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", "Caught exception while setting value." );
+			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s" ) % p.name().asChar() );
 			return MStatus::kFailure;
 		}
 	}
@@ -468,12 +468,19 @@ IECore::ParameterisedPtr ParameterisedHolder<B>::loadClass( const MString &class
 	}
 	catch( error_already_set & )
 	{
+		MFnDependencyNode fnDN( B::thisMObject() );
+	
+		msg( Msg::Error, "ParameterisedHolder::loadClass",
+			boost::format( "Unable to load class \"%s\" version %d into node %s." ) % className.asChar() % classVersion % fnDN.name().asChar());
+			
 		PyErr_Print();
 	}
 	catch( ... )
 	{
+		MFnDependencyNode fnDN( B::thisMObject() );
+	
 		msg( Msg::Error, "ParameterisedHolder::loadClass",
-			boost::format( "Unable to load class \"%s\" version %d." ) % className.asChar() % classVersion );
+			boost::format( "Unable to load class \"%s\" version %d into node %s." ) % className.asChar() % classVersion % fnDN.name().asChar());
 	}
 	return 0;
 }
