@@ -50,6 +50,8 @@ Parameter::Parameter( const std::string &name, const std::string &description, O
 	:	m_name( name ), m_description( description ), m_defaultValue( defaultValue ), m_presetsOnly( presetsOnly ),
 		m_userData( userData ? userData->copy() : new CompoundObject() )
 {
+	assert( defaultValue );
+	
 	for( PresetsMap::const_iterator it=presets.begin(); it!=presets.end(); it++ )
 	{
 		m_presets.insert( PresetsMap::value_type( it->first, it->second->copy() ) );
