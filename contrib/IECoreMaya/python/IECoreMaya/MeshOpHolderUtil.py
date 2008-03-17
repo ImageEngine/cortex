@@ -290,7 +290,9 @@ def __setParameters( op, kw ):
 
 def __createMeshOpNode( className, classVersion, **kw ):
 
-	modifierNodeName = cmds.createNode( "ieOpHolderNode" )	
+	shortClassName = className.split( '/' ).pop()
+
+	modifierNodeName = cmds.createNode( "ieOpHolderNode", name = shortClassName + "#" )	
 	
 	ph = IECoreMaya.ParameterisedHolder( str(modifierNodeName) )	
 	op = ph.setParameterised( className, classVersion, "IECORE_OP_PATHS" )
