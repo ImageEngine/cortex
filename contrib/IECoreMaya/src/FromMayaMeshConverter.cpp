@@ -414,6 +414,8 @@ IECore::ObjectPtr FromMayaMeshConverter::doConversion( const MObject &object, IE
 	{
 		fnMesh.getPolygonVertices( i, polygonVertices );
 		*verticesPerFaceIt++ = polygonVertices.length();
+		/// \todo There's no need to reverse the winding order here - cortex winding order matches maya's.
+		/// When fixing this we need to change the order we iterate in the s,t conversion code too.
 		copy( MArrayIter<MIntArray>::reverseBegin( polygonVertices ), MArrayIter<MIntArray>::reverseEnd( polygonVertices ), vertexIdsIt );
 		vertexIdsIt += polygonVertices.length();
 	}

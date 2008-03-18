@@ -53,6 +53,9 @@ namespace IECoreMaya
 /// \todo Vertex color support. Blind data support?
 /// \todo The "space" parameter should probably go in a base class from which all geometry 
 /// converters inherit
+/// \bug This reverses the winding order unecessarily.
+/// \todo Fix the reversing of winding order for the next major release - not we may be relying on
+/// the reversed order in external code at the moment.
 class FromMayaMeshConverter : public FromMayaObjectConverter
 {
 
