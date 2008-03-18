@@ -238,12 +238,12 @@ MeshPrimitivePtr MeshPrimitive::createBox( Box3f b )
 		4, 4, 4, 4, 4, 4
 	};
 	int vertexIds[] = {
-		0,1,2,3,
-		1,4,5,2,
-		4,6,7,5,
-		6,0,3,7,
-		3,2,5,7,
-		0,6,4,1
+		3,2,1,0,
+		1,2,5,4,
+		4,5,7,6,
+		6,7,3,0,
+		2,3,7,5,
+		0,1,4,6
 	};
 
 	p.push_back( V3f( b.min.x, b.min.y, b.min.z ) );	// 0
@@ -277,9 +277,9 @@ MeshPrimitivePtr MeshPrimitive::createPlane( Box2f b )
 	
 	V3fVectorDataPtr p = new V3fVectorData;
 	p->writable().push_back( V3f( b.min.x, b.min.y, 0 ) );
-	p->writable().push_back( V3f( b.min.x, b.max.y, 0 ) );
-	p->writable().push_back( V3f( b.max.x, b.max.y, 0 ) );
 	p->writable().push_back( V3f( b.max.x, b.min.y, 0 ) );
+	p->writable().push_back( V3f( b.max.x, b.max.y, 0 ) );
+	p->writable().push_back( V3f( b.min.x, b.max.y, 0 ) );
 	
 	return new MeshPrimitive( verticesPerFace, vertexIds, "linear", p );
 }
