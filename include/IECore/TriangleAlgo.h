@@ -43,6 +43,7 @@ namespace IECore
 template<class Vec>
 typename VectorTraits<Vec>::BaseType triangleArea( const Vec &v0, const Vec &v1, const Vec &v2 );
 
+/// \todo Define and check winding order
 template<class Vec>
 Vec triangleNormal( const Vec &v0, const Vec &v1, const Vec &v2 );
 

@@ -81,6 +81,8 @@ MeshPrimitiveImplicitSurfaceFunction::MeshPrimitiveImplicitSurfaceFunction( Mesh
 	}
 #endif
 
+	/// \todo From here one, make sure we're using the correct winding order
+
 	/// Build vertex connectivity. We want to be able to quickly find the list of triangles connected to each vertex.
 	typedef std::map< VertexIndex, std::set<TriangleIndex> > VertexConnectivity;
 	VertexConnectivity vertexConnectivity;
