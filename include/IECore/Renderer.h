@@ -104,7 +104,7 @@ class Renderer : public RunTimeTyped
 		/// \li <b>"screenWindow" Box2fData</b><br>
 		/// The region in screen space which is mapped to the output resolution. If unspecified
 		/// then this should default to -1,1 in the smallest image dimension and the other
-		/// dimension should be sized appropriately to preserve pixel aspect ration.
+		/// dimension should be sized appropriately to preserve pixel aspect ratio.
 		///
 		/// \li <b>"cropWindow" Box2fData</b><br>
 		/// The region in raster space which should actually be rendered - this allows just
