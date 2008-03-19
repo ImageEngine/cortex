@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -102,6 +102,16 @@ MatrixMultiplyOp::MatrixMultiplyOp()
 MatrixMultiplyOp::~MatrixMultiplyOp()
 {
 
+}
+
+ParameterPtr MatrixMultiplyOp::matrixParameter()
+{
+	return m_matrixParameter;
+}
+
+ConstParameterPtr MatrixMultiplyOp::matrixParameter() const
+{
+	return m_matrixParameter;
 }
 
 struct MultiplyArgs

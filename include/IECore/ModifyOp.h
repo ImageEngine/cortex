@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,7 +46,7 @@ namespace IECore
 /// a parameter for the input object, a parameter to define
 /// whether or not the object is modified in place or is copied
 /// and a parameter to disable the operation completely. It's a little
-/// bit naughty to copy it in place but it'll probably be quite handy
+/// bit naughty to modify it in place but it'll probably be quite handy
 /// at times.
 class ModifyOp : public Op
 {
@@ -59,6 +59,12 @@ class ModifyOp : public Op
 		
 		ParameterPtr inputParameter();
 		ConstParameterPtr inputParameter() const;
+		
+		BoolParameterPtr copyParameter();
+		BoolParameterPtr copyParameter() const;
+
+		BoolParameterPtr enableParameter();
+		BoolParameterPtr enableParameter() const;
 		
 	protected :
 
