@@ -86,8 +86,10 @@ from MenuDefinition import MenuDefinition
 from ParameterParser import *
 from SearchReplaceOp import SearchReplaceOp
 from CapturingMessageHandler import CapturingMessageHandler
+from FileSequenceAnalyzerOp import FileSequenceAnalyzerOp
 from CheckImagesOp import CheckImagesOp
 from FileSequenceVectorParameter import FileSequenceVectorParameter
+from FileSequenceGraphOp import FileSequenceGraphOp
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *

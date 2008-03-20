@@ -67,6 +67,8 @@ class Scene : public Renderable
 		/// way a crop window would be. As with the render() method, if the Scene has a camera
 		/// then that will be used to specify the framing - otherwise you may frame the Scene
 		/// using raw gl calls before calling Scene::select. In either case the region applies.
+		/// \todo Have an overload which takes a Box2i specifying a raster space region
+		/// instead.
 		unsigned select( const Imath::Box2f &region, std::list<HitRecord> &hits ) const;
 		
 		/// Sets the camera used to view the scene. If unspecified then

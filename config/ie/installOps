@@ -69,6 +69,7 @@ coreOps = [
 	[ "LsHeaderOp", "lsHeader", "common/fileSystem" ],
 	[ "SearchReplaceOp", "searchReplace", "common/fileSystem" ],
 	[ "CheckImagesOp", "checkImages", "common/fileSystem" ],
+	[ "FileSequenceGraphOp", "fileSequenceGraph", "common/fileSystem" ],
 ]
 
 for op in coreOps : 
