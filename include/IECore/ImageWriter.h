@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,47 +41,49 @@
 #include <vector>
 #include <string>
 
-namespace IECore {
+namespace IECore
+{
 
 IE_CORE_FORWARDDECLARE( ImagePrimitive );
 
 /// abstract base class for serializing images
 class ImageWriter : public Writer
 {
-    
+
 	public:
 
 		IE_CORE_DECLARERUNTIMETYPED( ImageWriter, Writer )
 
 		ImageWriter( const std::string name, const std::string description );
-	
+
 		/// checks that object is an ImagePrimitive instance
-		static bool canWrite(ConstObjectPtr object, const std::string & fileName);
-	
+		static bool canWrite( ConstObjectPtr object, const std::string &fileName );
+
 		/// convenience function to access the channels specified in parameters
-		void imageChannels(std::vector<std::string> & names);
-	
+		void imageChannels( std::vector<std::string> &names );
+
 	protected:
-	
+
 		/// Writes the associated ImagePrimitive. There's no need to reimplement
 		/// this in subclasses - implement writeImage() instead.
 		virtual void doWrite();
-	
+
 		/// return the image object to write
 		ConstImagePrimitivePtr getImage();
 
-		/// write the image.  subclasses implement this method.
-		virtual void writeImage(std::vector<std::string> &names,
-					ConstImagePrimitivePtr image, const Imath::Box2i &dw) = 0;
+		/// write the image. subclasses implement this method.
+		/// \todo make "names" const
+		virtual void writeImage( std::vector<std::string> &names,
+		                         ConstImagePrimitivePtr image, const Imath::Box2i &dataWindow ) = 0;
 
-private :
+	private :
 
-		void constructParameters( void );
-				
-		StringVectorParameterPtr m_channelsParameter;			
+		void constructParameters();
+
+		StringVectorParameterPtr m_channelsParameter;
 
 };
-	
+
 IE_CORE_DECLAREPTR(ImageWriter);
 
 } // namespace IECore

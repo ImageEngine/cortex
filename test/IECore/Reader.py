@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,20 +33,20 @@
 ##########################################################################
 
 import unittest
-import IECore
+from IECore import *
 
 class TestReader(unittest.TestCase):
     
 	def testSupportedExtensions( self ) :
 	
-		e = IECore.Reader.supportedExtensions()
+		e = Reader.supportedExtensions()
 		for ee in e :
 			self.assert_( type( ee ) is str )
 		
-		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob" ]
-		if IECore.withTIFF() :
+		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "obj" ]
+		if withTIFF() :
 			expectedExtensions += [ "tif", "tiff" ]
-		if IECore.withJPEG() :
+		if withJPEG() :
 			expectedExtensions += [ "jpg", "jpeg" ]
 						
 		for ee in expectedExtensions :
@@ -59,19 +59,8 @@ class TestReader(unittest.TestCase):
 		this should definitely NOT create a valid reader
 		"""
 
-		try:
-			IECore.Reader.create('test/IECore/data/null')
-		except:
-			pass
-		else:
-			raise Exception, "Should generate an exception on Reader factory function."
-	
-		try:
-			r = IECore.Reader.create('test/IECore/data/null.cin')
-		except:
-			pass
-		else:
-			raise Exception, "Should generate an exception on Reader factory function."
+		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null' )
+		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null.cin' )
 
                 
 if __name__ == "__main__":

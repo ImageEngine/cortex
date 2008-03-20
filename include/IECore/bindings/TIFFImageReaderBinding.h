@@ -35,8 +35,9 @@
 #ifndef IE_COREPYTHON_TIFFIMAGEREADERBINDING_H
 #define IE_COREPYTHON_TIFFIMAGEREADERBINDING_H
 
-namespace IECore {
-  void bindTIFFImageReader();
+namespace IECore
+{
+void bindTIFFImageReader();
 }
 
 #endif // IE_COREPYTHON_TIFFIMAGEREADERBINDING_H

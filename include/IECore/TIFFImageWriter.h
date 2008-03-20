@@ -35,6 +35,8 @@
 #ifndef IE_CORE_TIFFIMAGEWRITER_H
 #define IE_CORE_TIFFIMAGEWRITER_H
 
+#include <vector>
+
 #include "IECore/ImageWriter.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/NumericParameter.h"
@@ -42,12 +44,13 @@
 
 struct tiff;
 
-namespace IECore {
+namespace IECore
+{
 
 /// The TIFFImageWriter class serializes images to the Tagged Image File Format (TIFF) format
-class TIFFImageWriter : public ImageWriter 
+class TIFFImageWriter : public ImageWriter
 {
-	
+
 	public:
 
 		IE_CORE_DECLARERUNTIMETYPED( TIFFImageWriter, ImageWriter )
@@ -55,37 +58,29 @@ class TIFFImageWriter : public ImageWriter
 		TIFFImageWriter();
 
 		/// construct an TIFFImageWriter for the given image and output filename
-		TIFFImageWriter(ObjectPtr object, const std::string & fileName);
+		TIFFImageWriter( ObjectPtr object, const std::string &fileName );
 
 		virtual ~TIFFImageWriter();
-	
-	private:
-	
-		static const WriterDescription<TIFFImageWriter> m_writerDescription;
-	
-		virtual void writeImage(std::vector<std::string> & names, ConstImagePrimitivePtr image,
-		                       const Imath::Box2i & dw);
 
-		/// encode channel data to RGB
-		/// \todo Replace use of array here, to prevent memory leaks when exception is thrown
+	private:
+
+		static const WriterDescription<TIFFImageWriter> m_writerDescription;
+
+		virtual void writeImage( std::vector<std::string> &names, ConstImagePrimitivePtr image,
+		                         const Imath::Box2i &dataWindow);
+
 		template<typename T>
-		T * encodeChannels(ConstImagePrimitivePtr image, std::vector<std::string> & names,
-		                   const Imath::Box2i &dw);
-	
-		/// encode the given buffer using the TIFF strip method
-		void stripEncode(tiff * tiffImage, char * imageBuffer, int imageBufferSize, int strips);
-	
-		/// output bitdepth parameter
-		IntParameterPtr m_bitdepthParameter;
+		void encodeChannels( ConstImagePrimitivePtr image, const std::vector<std::string> &names,
+		                     const Imath::Box2i &dw, tiff *tiffImage, size_t bufSize, unsigned int numStrips );
+
 		IntParameterPtr m_compressionParameter;
+		IntParameterPtr m_bitDepthParameter;
 
 		void constructParameters();
 };
 
 IE_CORE_DECLAREPTR(TIFFImageWriter);
-  
-} // namespace IECore
 
-#include "IECore/TIFFImageWriter.inl"
+} // namespace IECore
 
 #endif // IE_CORE_TIFFIMAGEWRITER_H

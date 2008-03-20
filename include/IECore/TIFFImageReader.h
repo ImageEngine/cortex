@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,7 +31,6 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
 #ifndef IE_CORE_TIFFIMAGEREADER_H
 #define IE_CORE_TIFFIMAGEREADER_H
 
@@ -42,49 +41,74 @@
 struct tiff;
 
 namespace IECore
-{	
-  
-/// The TIFFImageReader reads Tagged Image File Format (TIFF) files
-/// \todo Support RGBA images
-/// \bug This doesn't set the display window of the loaded image
-class TIFFImageReader : public ImageReader 
 {
-    
+
+/// The TIFFImageReader reads Tagged Image File Format (TIFF) files
+/// \todo Document supported tags and their interpretation
+class TIFFImageReader : public ImageReader
+{
+
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( TIFFImageReader, ImageReader );
 
 		TIFFImageReader();
 		TIFFImageReader(const std::string & filename);
 		virtual ~TIFFImageReader();
-	
-		static bool canRead(const std::string & filename);
-	
-		/// give the channel names into the vector
-		virtual void channelNames(std::vector<std::string> & names);
+
+		static bool canRead( const std::string &filename );
+
+		virtual void channelNames( std::vector<std::string> &names );
+		virtual bool isComplete();
+		virtual Imath::Box2i dataWindow();
+		virtual Imath::Box2i displayWindow();
 
 	private:
-	
-		virtual void readChannel(std::string name, ImagePrimitivePtr image, const Imath::Box2i & dataWindow);
+
+		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow );
 
 		// filename associator
 		static const ReaderDescription<TIFFImageReader> m_readerDescription;
 
-		/// read the image into the buffer with a single pass
-		bool open();
-	
+		/// Opens the file, if necessary, and fills the buffer. Throws an IOException if an error occurs.
+		/// Tries to open the file, returning true on success and false on failure. On success,
+		/// the member data derived from the TIFF's "header" will be valid.
+		/// If throwOnFailure is true then a descriptive Exception is thrown rather than false being returned.
+		bool open( bool throwOnFailure = false );
+
 		// tiff image pointer
 		tiff *m_tiffImage;
 		std::string m_tiffImageFileName;
-		unsigned char *m_buffer; /// \todo Use a std::vector instead
-	
+
+		std::vector<unsigned char> m_buffer;
+
 		// reads the interlaced data into the buffer
-		void read_buffer();
-	
+		void readBuffer();
+
+		Imath::Box2i m_displayWindow;
+		Imath::Box2i m_dataWindow;
+		int m_samplesPerPixel;
+		int m_bitsPerSample;
+		int m_fillOrder;
+		int m_photometricInterpretation;
+		int m_sampleFormat;
+		int m_orientation;
+		int m_planarConfig;
+		std::vector<int> m_extraSamples;
+
+		template<typename T>
+		T tiffField( unsigned int t, T def = T(0) );
+
+		template<typename T>
+		T tiffFieldDefaulted( unsigned int t );
+
+		template<typename T>
+		DataPtr readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow );
+
 };
-	
+
 IE_CORE_DECLAREPTR(TIFFImageReader);
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_TIFFIMAGEREADER_H

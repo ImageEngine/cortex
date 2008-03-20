@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,6 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+#include <cassert>
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <setjmp.h>
+
 #include "IECore/JPEGImageReader.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
@@ -39,6 +46,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/BoxOps.h"
 
 #include "boost/format.hpp"
 
@@ -46,12 +54,6 @@ extern "C"
 {
 #include "jpeglib.h"
 }
-
-#include <algorithm>
-#include <cassert>
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
 
 using namespace IECore;
 using namespace boost;
@@ -61,29 +63,26 @@ using namespace std;
 const Reader::ReaderDescription <JPEGImageReader>
 JPEGImageReader::m_readerDescription ("jpeg jpg");
 
-JPEGImageReader::JPEGImageReader() : 
-	ImageReader( "JPEGImageReader", "Reads Joint Photographic Experts Group (JPEG) files" ),
-	m_buffer(0)
+JPEGImageReader::JPEGImageReader() :
+		ImageReader( "JPEGImageReader", "Reads Joint Photographic Experts Group (JPEG) files" )
 {
 }
 
-JPEGImageReader::JPEGImageReader(const string & fileName) : 
-	ImageReader( "JPEGImageReader", "Reads Joint Photographic Experts Group (JPEG) files" ),
-	m_buffer(0)
+JPEGImageReader::JPEGImageReader(const string & fileName) :
+		ImageReader( "JPEGImageReader", "Reads Joint Photographic Experts Group (JPEG) files" )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }
 
 JPEGImageReader::~JPEGImageReader()
 {
-	delete [] m_buffer;
 }
 
 bool JPEGImageReader::canRead(const string & fileName)
 {
 	// attempt to open the file
 	ifstream in(fileName.c_str());
-	if(!in.is_open())
+	if (!in.is_open())
 	{
 		return false;
 	}
@@ -93,132 +92,233 @@ bool JPEGImageReader::canRead(const string & fileName)
 	unsigned int magic;
 	in.seekg(0, ios_base::beg);
 	in.read((char *) &magic, sizeof(unsigned int));
+
 	return magic == 0xe0ffd8ff || magic == 0xffd8ffe0;
 }
 
-void JPEGImageReader::channelNames(vector<string> & names)
+void JPEGImageReader::channelNames( vector<string> &names )
 {
+	open( true );
 	names.clear();
-	
-	// form channel names - hardcoded for now 'til i learn more about JPEG
-	names.push_back("R");
-	names.push_back("G");
-	names.push_back("B");
-}
 
-void JPEGImageReader::readChannel(string name, ImagePrimitivePtr image,
-											 const Box2i & dataWindow)
-{
-	
-	if(!open())
+	if ( m_numChannels == 3 )
 	{
-		return;
-	}
-
-	int width = m_bufferWidth;
-	int datawidth = m_bufferWidth;
-	int height = m_bufferHeight;
-
-	// compute the data window
-	Box2i dw;
-	if(dataWindow.isEmpty())
-	{
-		// compute image box
-		dw.min.x = 0;
-		dw.min.y = 0;
-		dw.max.x = width - 1;
-		dw.max.y = height - 1;
+		names.push_back("R");
+		names.push_back("G");
+		names.push_back("B");
 	}
 	else
 	{
-		dw = dataWindow;
+		assert ( m_numChannels == 1 );
+		names.push_back("Y");
 	}
-
-	image->setDataWindow(dw);
-	image->setDisplayWindow(dw);
-	
-	int boffset = name == "R" ? 0 : name == "G" ? 1 : 2;
-
-	// copy in the corresponding channel
-	vector<half> &ic = image->createChannel<half>(name)->writable();
-
-	int low_x = max(dw.min.x, 0);
-	int high_x = min(dw.max.x, width-1);
-
-	width = 1 + dw.max.x - dw.min.x;
-	
-	// adjust height bounds so that they intersect the image's data window
-	int low_y = max(dw.min.y, 0);
-	int high_y = min(dw.max.y, height-1);
-
-	// adjust cl for the difference between min.y, low_y
-	int cl = low_y - dw.min.y;
-	int dx = low_x - dw.min.x;
-	
-	unsigned int ini = 0;
-	
-  	for(int sl = low_y; sl <= high_y; ++sl, ++cl) {
-
-		ini = cl * width + dx;
-		for(int i = low_x; i <= high_x; ++i, ++ini)
- 		{
-			ic[ini] = m_buffer[3*(sl*datawidth + i) + boffset] / 255.0f;
-		}
-	}
-		
 }
 
-bool JPEGImageReader::open()
+bool JPEGImageReader::isComplete()
 {
-	if(fileName() != m_bufferFileName)
+	return open( false );
+}
+
+Imath::Box2i JPEGImageReader::dataWindow()
+{
+	open( true );
+
+	return Box2i( V2i( 0, 0 ), V2i( m_bufferWidth - 1, m_bufferHeight - 1 ) );
+}
+
+Imath::Box2i JPEGImageReader::displayWindow()
+{
+	return dataWindow();
+}
+
+DataPtr JPEGImageReader::readChannel( const std::string &name, const Imath::Box2i &dataWindow )
+{
+	open( true );
+
+	int channelOffset = 0;
+	if ( name == "R" )
 	{
-		m_bufferFileName = fileName();
-	
-		delete [] m_buffer;
-		m_buffer = 0;
-		
+		channelOffset = 0;
+	}
+	else if ( name == "G" )
+	{
+		channelOffset = 1;
+	}
+	else if ( name == "B" )
+	{
+		channelOffset = 2;
+	}
+	else if ( name == "Y" )
+	{
+		channelOffset = 0;
+	}
+	else
+	{
+		throw IOException( ( boost::format( "JPEGImageReader: Could not find channel \"%s\" while reading %s" ) % name % m_bufferFileName ).str() );
+	}
+
+	assert( channelOffset < m_numChannels );
+
+	HalfVectorDataPtr dataContainer = new HalfVectorData();
+	HalfVectorData::ValueType &data = dataContainer->writable();
+	int area = ( dataWindow.size().x + 1 ) * ( dataWindow.size().y + 1 );
+	assert( area >= 0 );
+	data.resize( area );
+
+	int dataWidth = 1 + dataWindow.size().x;
+
+	int dataY = 0;
+
+	for ( int y = dataWindow.min.y; y <= dataWindow.max.y; ++y, ++dataY )
+	{
+		HalfVectorData::ValueType::size_type dataOffset = dataY * dataWidth;
+
+		for ( int x = dataWindow.min.x; x <= dataWindow.max.x; ++x, ++dataOffset )
+		{
+			assert( dataOffset < data.size() );
+
+			data[dataOffset] = m_buffer[ m_numChannels * ( y * m_bufferWidth + x ) + channelOffset ] / 255.0f;
+		}
+	}
+
+	return dataContainer;
+}
+
+struct JPEGReaderErrorHandler : public jpeg_error_mgr
+{
+	jmp_buf m_jmpBuffer;
+	char m_errorMessage[JMSG_LENGTH_MAX];
+
+	static void errorExit ( j_common_ptr cinfo )
+	{
+		assert( cinfo );
+		assert( cinfo->err );
+
+		JPEGReaderErrorHandler* errorHandler = static_cast< JPEGReaderErrorHandler* >( cinfo->err );
+		( *cinfo->err->format_message )( cinfo, errorHandler->m_errorMessage );
+		longjmp( errorHandler->m_jmpBuffer, 1 );
+	}
+};
+
+bool JPEGImageReader::open( bool throwOnFailure )
+{
+	if ( fileName() == m_bufferFileName )
+	{
+		return true;
+	}
+
+	m_bufferFileName = fileName();
+	m_buffer.clear();
+
+	FILE *inFile = 0;
+	try
+	{
 		// open the file
-		FILE *inFile = fopen(fileName().c_str(), "rb");
-		if(!inFile)
+		inFile = fopen( m_bufferFileName.c_str(), "rb" );
+		if ( !inFile )
+		{
+			throw IOException( ( boost::format( "JPEGImageReader: Could not open file %s" ) % m_bufferFileName ).str() );
+		}
+
+		struct jpeg_decompress_struct cinfo;
+
+		try
+		{
+			JPEGReaderErrorHandler errorHandler;
+
+			/// Setup error handler
+			cinfo.err = jpeg_std_error( &errorHandler );
+
+			/// Override fatal error and warning handlers
+			errorHandler.error_exit = JPEGReaderErrorHandler::errorExit;
+			errorHandler.output_message = JPEGReaderErrorHandler::errorExit;
+
+			/// If we reach here then libjpeg has called our error handler, in which we've saved a copy of the
+			/// error such that we might throw it as an exception.
+			if ( setjmp( errorHandler.m_jmpBuffer ) )
+			{
+				throw IOException( std::string( "JPEGImageReader: " ) + errorHandler.m_errorMessage );
+			}
+
+			/// Initialize decompressor to read from "inFile"
+			jpeg_create_decompress( &cinfo );
+			jpeg_stdio_src( &cinfo, inFile );
+			jpeg_read_header( &cinfo, TRUE );
+
+			/// Start decompression
+			jpeg_start_decompress( &cinfo );
+
+			m_numChannels = cinfo.output_components;
+
+			if ( m_numChannels != 1 && m_numChannels != 3 )
+			{
+				throw IOException( ( boost::format( "JPEGImageReader: Unsupported number of channels (%d) while opening file %s" ) % m_numChannels % m_bufferFileName ).str() );
+			}
+
+			if ( cinfo.out_color_space == JCS_GRAYSCALE )
+			{
+				assert( m_numChannels == 1 );
+			}
+			else if ( cinfo.out_color_space != JCS_RGB )
+			{
+				throw IOException( ( boost::format( "JPEGImageReader: Unsupported colorspace (%d) while opening file %s" ) % cinfo.out_color_space % m_bufferFileName ).str() );
+			}
+
+			/// Create buffer
+			int rowStride = cinfo.output_width * cinfo.output_components;
+			m_buffer.resize( rowStride * cinfo.output_height, 0 );
+			;
+			m_bufferWidth = cinfo.output_width;
+			m_bufferHeight = cinfo.output_height;
+
+			/// Read scanlines one at a time.
+			while (cinfo.output_scanline < cinfo.output_height)
+			{
+				unsigned char *rowPointer[1] = { &m_buffer[0] + rowStride * cinfo.output_scanline };
+				jpeg_read_scanlines( &cinfo, rowPointer, 1 );
+			}
+
+			/// Finish decompression
+			jpeg_finish_decompress( &cinfo );
+			jpeg_destroy_decompress( &cinfo );
+		}
+		catch ( Exception &e )
+		{
+			jpeg_destroy_decompress( &cinfo );
+
+			throw;
+		}
+		catch ( std::exception &e )
+		{
+			jpeg_destroy_decompress( &cinfo );
+
+			throw IOException( ( boost::format( "JPEGImageReader : %s" ) % e.what() ).str() );
+		}
+		catch ( ... )
+		{
+			jpeg_destroy_decompress( &cinfo );
+
+			throw IOException( "JPEGImageReader: Unexpected error" );
+		}
+
+		fclose( inFile );
+	}
+	catch (...)
+	{
+		if ( inFile )
+		{
+			fclose( inFile );
+		}
+
+		if ( throwOnFailure )
+		{
+			throw;
+		}
+		else
 		{
 			return false;
 		}
-
-		// open the image
-		struct jpeg_decompress_struct cinfo;
-		struct jpeg_error_mgr jerr;
-		
-		cinfo.err = jpeg_std_error(&jerr);
-
-		// initialize decompressor
-		jpeg_create_decompress(&cinfo);
-		jpeg_stdio_src(&cinfo, inFile);
-		jpeg_read_header(&cinfo, TRUE);
-		
-		// start decompression
-		jpeg_start_decompress(&cinfo);
-
-		// create buffer
-		int row_stride = cinfo.output_width * cinfo.output_components;
-		m_buffer = new unsigned char[row_stride * cinfo.output_height]();
-		unsigned char *row_pointer[1];
-		m_bufferWidth = cinfo.output_width;
-		m_bufferHeight = cinfo.output_height;
-
-		// read scanlines one at a time.
-		// \todo: optimize this, probably based on image dimensions
-		while (cinfo.output_scanline < cinfo.output_height)
-		{
-			row_pointer[0] = m_buffer + row_stride * cinfo.output_scanline;
-			jpeg_read_scanlines(&cinfo, row_pointer, 1);
-		}
-
-		// finish decompression
-		jpeg_finish_decompress(&cinfo);
-		jpeg_destroy_decompress(&cinfo);
-
-		fclose(inFile);		
 	}
-	
-	return m_buffer;
+
+	return true;
 }

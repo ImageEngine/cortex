@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,10 +37,11 @@
 
 #include "IECore/Primitive.h"
 
-namespace IECore {
+namespace IECore 
+{
 	
 template<class T>
-boost::intrusive_ptr<TypedData<std::vector<T> > > ImagePrimitive::createChannel(std::string name)
+boost::intrusive_ptr<TypedData<std::vector<T> > > ImagePrimitive::createChannel( std::string name )
 {	
 	// create a new Variable
 	PrimitiveVariable::Interpolation i = PrimitiveVariable::Vertex;

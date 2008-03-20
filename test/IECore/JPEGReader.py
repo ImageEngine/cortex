@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,86 +33,212 @@
 ##########################################################################
 
 import unittest
+import glob
 import sys
-import IECore
+from IECore import *
 
 class TestJPEGReader(unittest.TestCase):
 
-	testfile =    "test/IECore/data/jpg/bluegreen_noise.400x300.jpg"
-	testoutfile = "test/IECore/data/jpg/bluegreen_noise.400x300.testoutput.exr"
+	def testConstruction( self ):
+	
+		r = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" )
+		self.assertEqual( type(r), JPEGImageReader )
+		
+	def testCanRead( self ):
+	
+		self.assert_( JPEGImageReader.canRead( "test/IECore/data/jpg/uvMap.512x256.jpg" ) )
+		self.assert_( JPEGImageReader.canRead( "test/IECore/data/jpg/uvMap.512x256.truncated.jpg" ) )
+		
+	def testIsComplete( self ):	
+	
+		r = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" )
+		self.assertEqual( type(r), JPEGImageReader )
+		
+		self.assert_( r.isComplete() )
+		
+		r = Reader.create( "test/IECore/data/jpg/uvMap.512x256.truncated.jpg" )
+		self.assertEqual( type(r), JPEGImageReader )
+		self.assert_( not r.isComplete() )
+		
+	def testChannelNames( self ):	
+	
+		r = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" )
+		self.assertEqual( type(r), JPEGImageReader )
+		
+		channelNames = r.channelNames()
+		self.assertEqual( len( channelNames ), 3 )
+		self.assert_( "R" in channelNames )
+		self.assert_( "G" in channelNames )
+		self.assert_( "B" in channelNames )
+		
+		r = Reader.create( "test/IECore/data/jpg/greyscaleCheckerBoard.jpg" )
+		self.assertEqual( type(r), JPEGImageReader )
+		channelNames = r.channelNames()
+		self.assertEqual( len( channelNames ), 1 )
+		self.assert_( channelNames[0]=="Y" )
+		
+	def testRead( self ):
 
-	def testConstruction(self):
-
-		v2id = IECore.V2iData(IECore.V2i(20, 20))
-
-		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
-
-	def testRead(self):
-
-		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
-
-		img = r.read()
-
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-
-		# write test (JPEG -> EXR)
-		w = IECore.Writer.create(img, self.testoutfile)
-		self.assertEqual(type(w), IECore.EXRImageWriter)
-
-		w.write()
-
-	def testWindowRead(self):
-
-		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
-		r.parameters().dataWindow.setValue(IECore.Box2iData(IECore.Box2i(IECore.V2i(60, 60), IECore.V2i(100, 100))))
-
-		img = r.read()
-
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-
-		# write test (JPEG -> EXR)
-		w = IECore.Writer.create(img, self.testoutfile)
-		self.assertEqual(type(w), IECore.EXRImageWriter)
-
-		w.write()
-
-	def testWrite(self):
-
-		testfile =    "test/IECore/data/jpg/bluegreen_noise.400x300.jpg"
-		testoutfile = "test/IECore/data/jpg/bluegreen_noise.400x300.testoutput.jpg"
-
-		r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.JPEGImageReader)
+		r = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" )
+		self.assertEqual( type(r), JPEGImageReader )
 
 		img = r.read()
 
-		self.assertEqual(type(img), IECore.ImagePrimitive)
+		self.assertEqual( type(img), ImagePrimitive )
+		
+		self.assertEqual( img.displayWindow, Box2i( V2i( 0, 0 ), V2i( 511, 255 ) ) )
+		self.assertEqual( img.dataWindow, Box2i( V2i( 0, 0 ), V2i( 511, 255 ) ) )
+		
+	def testReadChannel( self ):
+	
+		r = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" )
+		self.assertEqual( type(r), JPEGImageReader )
+		
+		red = r.readChannel( "R" )
+		self.assert_( red )
+				
+		green = r.readChannel( "G" )
+		self.assert_( green )
+		
+		blue = r.readChannel( "B" )
+		self.assert_( blue )				
+		
+		self.assertRaises( RuntimeError, r.readChannel, "NonExistantChannel" )
+		
+		self.assertEqual( len(red), len(green) )	
+		self.assertEqual( len(red), len(blue) )		
+		self.assertEqual( len(red), 512 * 256 )			
 
-		# write test (JPEG -> JPEG)
-		w = IECore.Writer.create(img, testoutfile)
-		self.assertEqual(type(w), IECore.JPEGImageWriter)
-		w.write()
+	def testDataWindowRead( self ):
 
-	def testDataWindowWrite(self):
+		r = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" )
+		self.assertEqual( type(r), JPEGImageReader )
+		
+		dataWindow = Box2i(
+			V2i(360, 160), 
+			V2i(399, 199)
+		)
+		
+		r.parameters().dataWindow.setValue( Box2iData( dataWindow ) )
 
-		testfile =    "test/IECore/data/exrFiles/redgreen_gradient_piz_256x256.exr"
-		testoutfile = "test/IECore/data/jpg/redgreen_gradient_piz_256x256.testoutput_datawindow.jpg"
-
-		# read the EXR (with data window subset)
-		r = IECore.Reader.create(testfile)
-		self.assertEqual(type(r), IECore.EXRImageReader)
 		img = r.read()
 
-		self.assertEqual(type(img), IECore.ImagePrimitive)
+		self.assertEqual( type(img), ImagePrimitive )
+		
+		self.assertEqual( img.dataWindow, dataWindow )
+		self.assertEqual( img.displayWindow, Box2i( V2i( 0, 0 ), V2i( 511, 255 ) ) )
+		
+		self.assertEqual( len(img["R"].data), 40 * 40 )
+		
+		ipe = PrimitiveEvaluator.create( img )
+		self.assert_( ipe.R() )
+		self.assert_( ipe.G() )
+		self.assert_( ipe.B() )
+		self.failIf ( ipe.A() )
+		
+		result = ipe.createResult()
+				
+		# Check that the color at the bottom-right of the image is black - ordinarialy it would
+		# be yellow, but we're deliberately not reading the entire image
+		found = ipe.pointAtPixel( V2i( 511, 255 ), result )
+		self.assert_( found )		
+		color = V3f(
+				result.halfPrimVar( ipe.R() ),
+				result.halfPrimVar( ipe.G() ), 
+				result.halfPrimVar( ipe.B() )
+			)		
+		expectedColor = V3f( 0, 0, 0 )
+		self.assert_( ( color - expectedColor).length() < 1.e-3 )
+		
+		found = ipe.pointAtPixel( V2i( 380, 180 ), result )
+		self.assert_( found )
+		
+		color = V3f(
+				result.halfPrimVar( ipe.R() ),
+				result.halfPrimVar( ipe.G() ), 
+				result.halfPrimVar( ipe.B() )
+			)
+			
+		expectedColor = V3f( 0.8745, 0.85887, 0 )			
+		self.assert_( ( color - expectedColor).length() < 1.e-3 )
+					
+	def testOrientation( self ) :
+		""" Test orientation of JPEG files """
+	
+		img = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" ).read()
+		
+		ipe = PrimitiveEvaluator.create( img )
+		self.assert_( ipe.R() )
+		self.assert_( ipe.G() )
+		self.assert_( ipe.B() )
+		self.failIf ( ipe.A() )
+		
+		result = ipe.createResult()
+		
+		# Floating point differences due to compression (?)
+		# \todo Double check this.
+		colorMap = {
+			V2i( 0 ,    0 ) :  V3f( 0, 0.00392151, 0 ),
+			V2i( 511,   0 ) :  V3f( 0.984375, 0.00784302, 0 ),
+			V2i( 0,   255 ) :  V3f( 0.00784302, 0.992188, 0 ),
+			V2i( 511, 255 ) :  V3f( 1, 1, 0 ),
+		}
+		
+		for point, expectedColor in colorMap.items() :
+		
+			found = ipe.pointAtPixel( point, result )
+			self.assert_( found )
+			
+			color = V3f(
+				result.halfPrimVar( ipe.R() ),
+				result.halfPrimVar( ipe.G() ), 
+				result.halfPrimVar( ipe.B() )
+			)
+						
+			self.assert_( ( color - expectedColor).length() < 1.e-6 )
+			
+	def testErrors( self ):
+	
+		r = JPEGImageReader()
+		self.assertRaises( RuntimeError, r.read )
+			
+		r = JPEGImageReader( "test/IECore/data/tiff/uvMap.512x256.8bit.tif" )
+		self.assertRaises( RuntimeError, r.read )
+		
+	def testAll( self ):
+		
+		fileNames = glob.glob( "test/IECore/data/jpg/*.jpg" ) + glob.glob( "test/IECore/data/jpg/*.jpeg" )
+		
+		expectedFailures = "test/IECore/data/jpg/uvMap.512x256.truncated.jpg"
+		
+		# Silence any warnings while the tests run
+		MessageHandler.pushHandler( NullMessageHandler() )
+		
+		try:
+		
+			for f in fileNames:
 
-		# write test (EXR -> JPEG) with image-defined data window
-		w = IECore.Writer.create(img, testoutfile)
-		self.assertEqual(type(w), IECore.JPEGImageWriter)
-		w.write()
-
+				r = JPEGImageReader( f ) 
+				
+				if f in expectedFailures :
+					
+					self.assertRaises( RuntimeError, r.read )
+					
+				else:
+				
+					img = r.read()
+					self.assertEqual( type(img), ImagePrimitive )
+					self.assert_( img.arePrimitiveVariablesValid() )	
+				
+		except:
+		
+			raise	
+			
+		finally:
+			
+			MessageHandler.popHandler()	
+	
+		
 if __name__ == "__main__":
 	unittest.main()   
 	

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,43 +42,47 @@
 
 using namespace std;
 using namespace IECore;
-using namespace boost;
 using namespace Imath;
 
-ImageWriter::ImageWriter( const std::string name, const std::string description ) : 
+ImageWriter::ImageWriter( const std::string name, const std::string description ) :
 		Writer(name, description, ImagePrimitiveTypeId)
 {
 	m_channelsParameter = new StringVectorParameter("channels", "The list of channels to write.  No list causes all channels to be written." );
 	parameters()->addParameter( m_channelsParameter );
 }
 
-bool ImageWriter::canWrite(ConstObjectPtr image, const string & fileName)
+bool ImageWriter::canWrite( ConstObjectPtr image, const string &fileName )
 {
-	return runTimeCast<const ImagePrimitive>(image);
+	return runTimeCast<const ImagePrimitive>( image );
 }
 
 /// get the user-requested channel names
-void ImageWriter::imageChannels(vector<string> & names)
-{
-	vector<string> allNames;
+void ImageWriter::imageChannels( vector<string> &names )
+{	
 	ConstImagePrimitivePtr image = getImage();
-	image->channelNames(allNames);
+	assert( image );
 	
-	ConstStringVectorParameterPtr p = parameters()->parameter<StringVectorParameter>("channels");
+	vector<string> allNames;
+	image->channelNames( allNames );
+
 	const vector<string> &d = m_channelsParameter->getTypedValue();
-	
+
 	// give all channels when no list is provided
-	if(!d.size()) {
+	if ( !d.size() )
+	{
 		names = allNames;
 		return;
 	}
-	
-	// otherwise, copy in the requested names from the parameter set.  
-	// this is intersection(A, D), possibly with duplicates
+
+	// otherwise, copy in the requested names from the parameter set.
+	// this is intersection(A, D)
 	names.clear();
-	for(vector<string>::const_iterator it = d.begin(); it != d.end(); it++) {
-		if(find(allNames.begin(), allNames.end(), *it) != allNames.end()) {
-			names.push_back(*it);
+	for ( vector<string>::const_iterator it = d.begin(); it != d.end(); it++ )
+	{
+		if ( find( allNames.begin(), allNames.end(), *it ) != allNames.end() &&
+			find( names.begin(), names.end(), *it ) == names.end() )
+		{
+			names.push_back( *it );
 		}
 	}
 }
@@ -86,7 +90,7 @@ void ImageWriter::imageChannels(vector<string> & names)
 ConstImagePrimitivePtr ImageWriter::getImage()
 {
 	/// \todo This case isn't good until we're making the input parameter accept only ImagePrimitive instances
-	return static_pointer_cast<const ImagePrimitive>(object());
+	return boost::static_pointer_cast<const ImagePrimitive>(object());
 }
 
 void ImageWriter::doWrite()
@@ -94,9 +98,16 @@ void ImageWriter::doWrite()
 	// write the image channel data
 	vector<string> channels;
 	imageChannels(channels);
-	
+
 	ConstImagePrimitivePtr image = getImage();
-	Box2i dw = image->getDataWindow();
-	
-	writeImage(channels, image, dw);
+	assert( image );
+
+	if ( !boost::const_pointer_cast<ImagePrimitive>(image)->arePrimitiveVariablesValid() )
+	{
+		throw InvalidArgumentException( "ImageWriter: Invalid primitive variables on image" );
+	}
+
+	Box2i dataWindow = image->getDataWindow();
+
+	writeImage( channels, image, dataWindow );
 }

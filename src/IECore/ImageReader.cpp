@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,19 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ImageReader.h"
-#include "IECore/CompoundData.h"
-#include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/NumericParameter.h"
 #include "IECore/TypedParameter.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/NullObject.h"
-
-#include <algorithm>
+#include "IECore/BoxOps.h"
 
 using namespace std;
 using namespace IECore;
@@ -55,11 +50,26 @@ using namespace Imath;
 ImageReader::ImageReader( const std::string name, const std::string description ) :
 		Reader( name, description, new ObjectParameter( "result", "The loaded object", new NullObject, ImagePrimitive::staticTypeId() ) )
 {
-	m_dataWindowParameter = new Box2iParameter("dataWindow",    "image extents to read");
-	m_displayWindowParameter = new Box2iParameter("displayWindow", "image extents to view");
+	m_dataWindowParameter = new Box2iParameter(
+		"dataWindow",
+		"The area for which data should be loaded. The default value (an empty box) "
+		"is used to specify that the full data window should be loaded. Other values may be specified "
+		"to load just a section of the image."
+	);
 
-	m_channelNamesParameter = new StringVectorParameter("channels",
-	                "The list of channels to load.  No list causes all channels to be loaded.");
+	m_displayWindowParameter = new Box2iParameter(
+		"displayWindow",
+		"The displayWindow for the ImagePrimitive created during loading. The default value (an empty box) "
+		"is used to specify that the displayWindow should be inferred from the file itself. On rare occasions "
+		"it may be useful to specify an alternative using this parameter. Note that this parameter is completely "
+		"independent of the dataWindow parameter."
+	);
+
+	m_channelNamesParameter = new StringVectorParameter( 
+		"channels",
+		"The names of all channels to load from the file. If the list is empty (the default value) "
+		"then all channels are loaded."
+	);
 
 	parameters()->addParameter( m_dataWindowParameter );
 	parameters()->addParameter( m_displayWindowParameter );
@@ -69,38 +79,61 @@ ImageReader::ImageReader( const std::string name, const std::string description 
 ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 {
 
+	Box2i displayWind = displayWindowParameter()->getTypedValue();
+	if( displayWind.isEmpty() )
+	{
+		displayWind = displayWindow();
+	}
+	Box2i dataWind = dataWindowToRead();
+	
+
 	// create our ImagePrimitive
-	ImagePrimitivePtr image = new ImagePrimitive;
+	ImagePrimitivePtr image = new ImagePrimitive( dataWind, displayWind );
 
 	// fetch all the user-desired channels with
+
 	// the derived class' readChannel() implementation
-	vector<string> channels;
-	imageChannels(channels);
 
-	// get the data window:
-	// a user may specify a region different from the image data region,
-	// and we use the empty box to indicate the full image data
-	Box2i dw = dataWindow();
+	vector<string> channelNames;
+	channelsToRead( channelNames );
 
-	// the image data window is set by the child class; it is in the position
-	// to know how to determine what the defined extents of its image type are.
-	//image->setDataWindow(dw);
-
-	vector<string>::const_iterator ci = channels.begin();
-	while (ci != channels.end())
+	vector<string>::const_iterator ci = channelNames.begin();
+	while( ci != channelNames.end() )
 	{
-		readChannel(*ci, image, dw);
+		DataPtr d = readChannel( *ci, dataWind );
+		
+		assert( d  );
+		assert( d->typeId()==FloatVectorDataTypeId || d->typeId()==HalfVectorDataTypeId || d->typeId()==IntVectorDataTypeId );
+		
+		PrimitiveVariable p( PrimitiveVariable::Vertex, d );
+		assert( image->isPrimitiveVariableValid( p ) );
+		
+		image->variables[*ci] = p;
+		
 		ci++;
 	}
 
 	return image;
 }
 
-/// get the user-requested channel names
-void ImageReader::imageChannels(vector<string> & names)
+DataPtr ImageReader::readChannel( const std::string &name )
 {
 	vector<string> allNames;
-	channelNames(allNames);
+	channelNames( allNames );
+
+	if ( find( allNames.begin(), allNames.end(), name ) == allNames.end() )
+	{
+		throw InvalidArgumentException( "Non-existent image channel requested" );
+	}
+
+	Box2i d = dataWindowToRead();
+	return readChannel( name, d );
+}
+
+void ImageReader::channelsToRead( vector<string> &names )
+{
+	vector<string> allNames;
+	channelNames( allNames );
 
 	ConstStringVectorParameterPtr p = parameters()->parameter<StringVectorParameter>("channels");
 	ConstStringVectorDataPtr d = static_pointer_cast<const StringVectorData>(p->getValue());
@@ -124,16 +157,23 @@ void ImageReader::imageChannels(vector<string> & names)
 	}
 }
 
-// get the user-requested data window
-Box2i ImageReader::dataWindow() const
+Imath::Box2i ImageReader::dataWindowToRead()
 {
-	return parameters()->parameter<Box2iParameter>("dataWindow")->getTypedValue();
-}
-
-// get the user-requested display window
-Box2i ImageReader::displayWindow() const
-{
-	return parameters()->parameter<Box2iParameter>("displayWindow")->getTypedValue();
+	Box2i d = dataWindowParameter()->getTypedValue();
+	if( d.isEmpty() )
+	{
+		d = dataWindow();
+	}
+	else
+	{
+		// validate that requested data window is
+		// inside the available data window
+		if( boxIntersection( d, dataWindow() )!=d )
+		{
+			throw Exception( "Requested data window exceeds available data window." );
+		}
+	}
+	return d;
 }
 
 Box2iParameterPtr ImageReader::dataWindowParameter()

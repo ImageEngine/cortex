@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,20 +42,21 @@ using std::string;
 using namespace boost;
 using namespace boost::python;
 
-namespace IECore {
+namespace IECore
+{
 
-  void bindCINImageReader() {
-
-    typedef class_<CINImageReader, CINImageReaderPtr, boost::noncopyable, bases<ImageReader> > CINImageReaderPyClass;
+void bindCINImageReader()
+{
+	typedef class_<CINImageReader, CINImageReaderPtr, boost::noncopyable, bases<ImageReader> > CINImageReaderPyClass;
 
 	CINImageReaderPyClass("CINImageReader", init<>())
 		.def(  init<const std::string &>() )
+		.def( "canRead", &CINImageReader::canRead).staticmethod( "canRead" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CINImageReader)
 	;
-    
-	INTRUSIVE_PTR_PATCH( CINImageReader, CINImageReaderPyClass );
-    implicitly_convertible<CINImageReaderPtr, ImageReaderPtr>();
-  }
-  
-} // namespace IECore
 
+	INTRUSIVE_PTR_PATCH( CINImageReader, CINImageReaderPyClass );
+	implicitly_convertible<CINImageReaderPtr, ImageReaderPtr>();
+}
+
+} // namespace IECore

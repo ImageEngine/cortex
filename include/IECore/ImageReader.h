@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,11 +43,13 @@ namespace IECore
 
 IE_CORE_FORWARDDECLARE( ImagePrimitive );
 	
+
 /// The ImageReader class defines an abstract base class for reading sampled images.
 /// ImageReader's main purpose is to define a standard set of parameters
 /// which all concrete ImageReader implementations obey.  It also defines some pure virtual functions
 /// which allow interface implementors to focus on image-specific code for loading channels.
 /// \todo Define and support a parameter for conversion of image data type during loading
+/// \todo Define and support a parameter for conversion of colourspace during loading
 class ImageReader : public Reader
 {
 
@@ -56,48 +58,64 @@ class ImageReader : public Reader
 		IE_CORE_DECLARERUNTIMETYPED( ImageReader, Reader );
 
 		ImageReader( const std::string name, const std::string description );
-		
-		/// place the user-requested channels into the given vector
-		void imageChannels(std::vector<std::string> & names);
-	
-		/// replace the channel names into the given vector
-		virtual void channelNames(std::vector<std::string> & names) = 0;
 
-		/// give the user-requested data window
-		/// \deprecated
-		Imath::Box2i dataWindow() const;
-	
-		/// give the user-requested display window
-		/// \deprecated
-		Imath::Box2i displayWindow() const;
-		
+		//! @name Parameter accessors
+		/// These provide convenient access to the parameters controlling
+		/// image loading.
+		///////////////////////////////////////////////////////////////
+		//@{
+		/// The parameter specifying the dataWindow of the loaded image.
 		Box2iParameterPtr dataWindowParameter();
 		ConstBox2iParameterPtr dataWindowParameter() const;
-		
+		/// The parameter specifying the displayWindow of the loaded image.
 		Box2iParameterPtr displayWindowParameter();
 		ConstBox2iParameterPtr displayWindowParameter() const;
-
+		/// The parameter specifying the channels to load.
 		StringVectorParameterPtr channelNamesParameter();
-		ConstStringVectorParameterPtr channelNamesParameter() const;		
+		ConstStringVectorParameterPtr channelNamesParameter() const;
+		//@}	
 		
-		/// return true iff all pixels from the data window reported by the file are present
-		virtual bool isComplete() const { return true; };
-		
-		/// \todo Add virtual methods to retrieve the display and data windows present in the file
+		//! @name Image specific reading functions
+		///////////////////////////////////////////////////////////////
+		//@{	
+		/// Fills the passed vector with the names of all channels within the file.
+		virtual void channelNames( std::vector<std::string> &names ) = 0;
+		/// Returns true if the file is complete. Implementations of this function should
+		/// be quick - it's intended as a cheaper alternative to loading the
+		/// whole file to determine completeness.
+		/// \todo Remove this default implementation and implement properly in all derived classes.
+		virtual bool isComplete() { return true; }
+		/// Returns the dataWindow contained in the file. This is the dataWindow that
+		/// will be loaded if the dataWindowParameter() is left at its default value.
+		virtual Imath::Box2i dataWindow() = 0;
+		/// Returns the displayWIndow contained in the file. This is the displayWindow
+		/// that will be loaded if the displayWindowParameter() is left at its default value.
+		virtual Imath::Box2i displayWindow() = 0;
+		/// Reads the specified channel. This function obeys the dataWindowParameter(), so
+		/// that a subsection of the channel will be loaded if requested.
+		DataPtr readChannel( const std::string &name );
+		//@}
 	
 	protected:
 		
-		/// a class implementing this method returns an ImagePrimitive.  this function
-		/// is left open to derivation, but it is suggested to interface implementors that
-		/// the protected methods be coded and to let this base class handle the logic
-		/// for dealing with configuration of subimage, particular channel loading, etc.
+		/// Fills the passed vector with the intersection of channelNames() and
+		/// the channels requested by the user in channelNamesParameter().
+		void channelsToRead( std::vector<std::string> &names );
+		/// Returns the data window that should be loaded, throwing an Exception if it
+		/// isn't wholly inside the available dataWindow().
+		Imath::Box2i dataWindowToRead();
+		
+		/// Implemented using displayWindow(), dataWindow(), channelNames() and readChannel().
+		/// Derived classes should implement those methods rather than reimplement this function.
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
 	
-		/// read the channel identified by the given name.  
-		/// \todo Establish behaviour for if we attempt to read outside the image's data window
-		/// \todo Change to:
-		/// virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow ) = 0;		
-		virtual void readChannel(std::string name, ImagePrimitivePtr image, const Imath::Box2i &dw) = 0;
+		/// Read the specified area from the channel with the specified name - this is called
+		/// by the public readChannel() method and the doOperation() method, and must be implemented
+		/// in all derived classes. It is guaranteed that this function will not be called with
+		/// invalid names or dataWindows which are not wholly within the dataWindow in the file.
+		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow ) = 0;
+	
+	private :
 	
 		Box2iParameterPtr m_dataWindowParameter;
 		Box2iParameterPtr m_displayWindowParameter;

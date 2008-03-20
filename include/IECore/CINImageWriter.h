@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,16 +38,17 @@
 #include "IECore/ImageWriter.h"
 #include "IECore/VectorTypedData.h"
 
-namespace IECore {
+namespace IECore
+{
 
 /// The CINImageWriter class serializes images to the Kodak Cineon 10-bit log image format
 class CINImageWriter : public ImageWriter
 {
 
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( CINImageWriter, ImageWriter )
-	
+
 		CINImageWriter();
 
 		/// construct an CINImageWriter for the given image and output filename
@@ -56,19 +57,24 @@ class CINImageWriter : public ImageWriter
 
 		/// free the resources consumed in serializing the associated image
 		virtual ~CINImageWriter();
-	
+
 	private:
-	
+
 		static const WriterDescription<CINImageWriter> m_writerDescription;
 
 		/// write the associated image
 		virtual void writeImage(std::vector<std::string> &names, ConstImagePrimitivePtr image,
-									const Imath::Box2i &dw);
-	
+		                        const Imath::Box2i &dw);
+					
+		template<typename T>
+		void encodeChannel( ConstDataPtr dataContainer, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, int bitShift, std::vector<unsigned int> &imageBuffer );
+		
+		std::vector<double> m_LUT;		
+
 };
-	
+
 IE_CORE_DECLAREPTR(CINImageWriter);
-  
+
 } // namespace IECore
 
 #endif // IE_CORE_CINIMAGEWRITER_H

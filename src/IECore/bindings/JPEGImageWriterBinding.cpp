@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,23 +38,23 @@
 #include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
-using std::string;
 using namespace boost;
 using namespace boost::python;
 
-namespace IECore {
+namespace IECore
+{
 
-  void bindJPEGImageWriter() {
-    typedef class_<JPEGImageWriter, JPEGImageWriterPtr, boost::noncopyable, bases<ImageWriter> > JPEGImageWriterPyClass;
+void bindJPEGImageWriter()
+{
+	typedef class_<JPEGImageWriter, JPEGImageWriterPtr, boost::noncopyable, bases<ImageWriter> > JPEGImageWriterPyClass;
 
 	JPEGImageWriterPyClass("JPEGImageWriter", init<>())
 		.def( init<ObjectPtr, const std::string &>() )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( JPEGImageWriter )
 	;
-    
-	INTRUSIVE_PTR_PATCH( JPEGImageWriter, JPEGImageWriterPyClass );
-    implicitly_convertible<JPEGImageWriterPtr, JPEGImageWriterPtr>();
-  }
-  
-} // namespace IECore
 
+	INTRUSIVE_PTR_PATCH( JPEGImageWriter, JPEGImageWriterPyClass );
+	implicitly_convertible<JPEGImageWriterPtr, JPEGImageWriterPtr>();
+}
+
+} // namespace IECore

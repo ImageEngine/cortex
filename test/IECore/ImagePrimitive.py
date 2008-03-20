@@ -33,12 +33,14 @@
 ##########################################################################
 
 import unittest
+import os
 
 from IECore import *
 
 class TestImagePrimitive( unittest.TestCase ) :
 
 	def testConstructor( self ) :
+		""" Test ImagePrimitive constructor """
 	
 		windowMin = V2i( 0, 0 )
 		windowMax = V2i( 100, 100 )
@@ -47,8 +49,6 @@ class TestImagePrimitive( unittest.TestCase ) :
 		
 		self.assertEqual( i.dataWindow, w )
 		self.assertEqual( i.displayWindow, w )
-		
-		self.assertEqual( i.bound(), Box3f( V3f( windowMin.x, windowMin.y, 0.0 ), V3f( windowMax.x + 1, windowMax.y + 1, 0.0 ) ) )
 						
 		i.dataWindow = Box2i( windowMin, V2i( 10, 10 ) )
 		self.assertEqual( i.dataWindow, Box2i( windowMin, V2i( 10, 10 ) ) )
@@ -58,6 +58,30 @@ class TestImagePrimitive( unittest.TestCase ) :
 		self.assertEqual( i.displayWindow, Box2i( windowMin, V2i( 10, 10 ) ) )
 					
 	def testDataWindow( self ) :			
+	
+		displayWindow = Box2i( V2i( 0, 0 ), V2i( 99, 99 ) )
+		dataWindow = Box2i( V2i( 50, 50), V2i( 99, 99 ) )
+		img = ImagePrimitive( dataWindow, displayWindow )
+		
+	def testBound( self ) :
+		""" Test ImagePrimitive bound """
+		
+		windowMin = V2i( 0, 0 )
+		windowMax = V2i( 99, 99 )
+		w = Box2i( windowMin, windowMax )
+		i = ImagePrimitive( w, w )
+		
+		self.assertEqual( i.bound(), Box3f( V3f( -50, -50, 0 ), V3f( 50, 50, 0 ) ) )
+		
+		windowMin = V2i( 50, 50 )
+		windowMax = V2i( 99, 99 )
+		w = Box2i( windowMin, windowMax )
+		i = ImagePrimitive( w, w )
+		
+		self.assertEqual( i.bound(), Box3f( V3f( -25, -25, 0 ), V3f( 25, 25, 0 ) ) )	
+					
+	def testDataWindow( self ) :
+		""" Test ImagePrimitive data window """			
 	
 		displayWindow = Box2i( V2i( 0, 0 ), V2i( 99, 99 ) )
 		dataWindow = Box2i( V2i( 50, 50), V2i( 99, 99 ) )
@@ -75,6 +99,91 @@ class TestImagePrimitive( unittest.TestCase ) :
 		self.assert_( img.arePrimitiveVariablesValid() )
 		
 		# \todo Verify behaviour when dataWindow and displayWindow are contradictory or inconsistent
+		
+	def testLoadSave( self ):
+		""" Test ImagePrimitive load/save """
+	
+		windowMin = V2i( 0, 0 )
+		windowMax = V2i( 100, 100 )
+		w = Box2i( windowMin, windowMax )
+		i = ImagePrimitive( w, w )	
+		
+		Writer.create( i, "test/IECore/data/output.cob" ).write()
+		
+		i2 = Reader.create( "test/IECore/data/output.cob" ).read()
+		self.assertEqual( type(i2), ImagePrimitive )
+		
+		self.assertEqual( i.displayWindow, i2.displayWindow )
+		self.assertEqual( i.dataWindow, i2.dataWindow )		
+		
+	def testChannelNames( self ) :	
+	
+		""" Test ImagePrimitive channel names """
+	
+		windowMin = V2i( 0, 0 )
+		windowMax = V2i( 99, 99 )
+		w = Box2i( windowMin, windowMax )
+		i = ImagePrimitive( w, w )
+		
+		r = FloatVectorData()
+		r.resize( 100 * 100 )
+		
+		i["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, r )
+		
+		self.assert_( "R" in i.channelNames() )
+		
+		b = FloatData()
+		
+		i["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, b )
+		
+		self.assert_( "B" in i.channelNames() )
+		
+		self.assert_( i.arePrimitiveVariablesValid() )
+		
+		# Deliberately make a primvar too small!
+		g = FloatVectorData()
+		g.resize( 50 * 100 )
+
+		i["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, g )
+		
+		self.failIf( "G" in i.channelNames() )
+		
+		self.failIf( i.arePrimitiveVariablesValid() )
+		
+	def testCreateChannel( self ):
+	
+		windowMin = V2i( 0, 0 )
+		windowMax = V2i( 99, 99 )
+		w = Box2i( windowMin, windowMax )
+		i = ImagePrimitive( w, w )
+		
+		i.createFloatChannel( "R" )
+		i.createHalfChannel( "G" )
+		i.createUIntChannel( "B" )
+		
+		self.assert_( "R" in i )
+		self.assert_( "G" in i )
+		self.assert_( "B" in i )				
+		
+	def testErrors( self ):
+	
+		windowMin = V2i( 0, 0 )
+		windowMax = V2i( 99, 99 )
+		w = Box2i( windowMin, windowMax )
+		i = ImagePrimitive( w, w )
+		
+		empty = Box2i()
+		
+		self.assertRaises( RuntimeError, setattr, i, "displayWindow", empty )
+		
+		self.assertRaises( RuntimeError, ImagePrimitive, empty, empty )	
+		
+		
+	def tearDown( self ) :
+	
+		if os.path.exists( "test/IECore/data/output.cob" ) :
+		
+			os.remove( "test/IECore/data/output.cob" )	
 			
 		
 if __name__ == "__main__":

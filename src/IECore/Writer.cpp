@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECore/Writer.h"
 #include "IECore/NullObject.h"
 #include "IECore/CompoundObject.h"
@@ -79,6 +81,7 @@ ConstObjectPtr Writer::object() const
 
 void Writer::write()
 {
+	/// \todo Perhaps we should append the fileName() to any exceptions thrown by operate() before re-raising them?
 	operate();
 }
 
@@ -91,9 +94,12 @@ ObjectPtr Writer::doOperation( ConstCompoundObjectPtr operands )
 void Writer::registerWriter( const std::string &extensions, CanWriteFn canWrite, CreatorFn creator )
 {
 	ExtensionsToFnsMap *m = extensionsToFns();
+	assert( m );
 	vector<string> splitExt;
 	split( splitExt, extensions, is_any_of( " " ) );
-	WriterFns w; w.creator = creator; w.canWrite = canWrite;
+	WriterFns w; 
+	w.creator = creator; 
+	w.canWrite = canWrite;
 	for( vector<string>::const_iterator it=splitExt.begin(); it!=splitExt.end(); it++ )
 	{
 		m->insert( ExtensionsToFnsMap::value_type( "." + *it, w ) );
@@ -103,27 +109,34 @@ void Writer::registerWriter( const std::string &extensions, CanWriteFn canWrite,
 WriterPtr Writer::create( ObjectPtr object, const std::string &fileName )
 {
 	string ext = extension(boost::filesystem::path(fileName, boost::filesystem::native));
-	if( ext!="" )
+	
+	ExtensionsToFnsMap *m = extensionsToFns();
+	assert( m );
+	ExtensionsToFnsMap::const_iterator it = m->find( ext );
+
+	if ( it == m->end() )
 	{
-		ExtensionsToFnsMap *m = extensionsToFns();
-		ExtensionsToFnsMap::const_iterator it;
-		for( it=m->begin(); it!=m->end(); it++ )
+		throw Exception( string( "Unrecognized output file format '") + ext + "'!" );
+	}
+
+	for( it=m->begin(); it!=m->end(); it++ )
+	{
+		if( it->first==ext )
 		{
-			if( it->first==ext )
+			if( it->second.canWrite( object, fileName ) )
 			{
-				if( it->second.canWrite( object, fileName ) )
-				{
-					return it->second.creator( object, fileName );
-				}
-			}
+				return it->second.creator( object, fileName );
+			}				
 		}
 	}
-	throw Exception( string( "Unrecognized output file format '") + ext + "'!" );
+
+	throw Exception( string( "Unable to find writer able to write given object to file of type '") + ext + "'!" );
 }
 
 void Writer::supportedExtensions( std::vector<std::string> &extensions )
 {
 	ExtensionsToFnsMap *m = extensionsToFns();
+	assert( m );	
 	for( ExtensionsToFnsMap::const_iterator it=m->begin(); it!=m->end(); it++ )
 	{
 		extensions.push_back( it->first.substr( 1 ) );

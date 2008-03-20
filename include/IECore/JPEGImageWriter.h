@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,8 +37,10 @@
 
 #include "IECore/ImageWriter.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/NumericParameter.h"
 
-namespace IECore {
+namespace IECore
+{
 
 /// The JPEGImageWriter class serializes images to the Joint Photographic Experts Group (JPEG) format
 class JPEGImageWriter : public ImageWriter
@@ -48,25 +50,41 @@ class JPEGImageWriter : public ImageWriter
 		IE_CORE_DECLARERUNTIMETYPED( JPEGImageWriter, ImageWriter )
 
 		JPEGImageWriter();
-	
+
 		/// construct an JPEGImageWriter for the given image and output filename
 		JPEGImageWriter(ObjectPtr object, const std::string & fileName);
 
 		/// free any resources consumed in writing the associated image
 		virtual ~JPEGImageWriter();
-	
+
+		IntParameterPtr qualityParameter();
+		ConstIntParameterPtr qualityParameter() const;
+
 	private:
-	
+
 		static const WriterDescription<JPEGImageWriter> m_writerDescription;
 
 		/// write the image
-		virtual void writeImage(std::vector<std::string> &names, ConstImagePrimitivePtr image,
-									const Imath::Box2i &dw);
-	
+		virtual void writeImage(
+		        std::vector<std::string> &names,
+		        ConstImagePrimitivePtr image,
+		        const Imath::Box2i &dw
+		);
+
+		void constructParameters();
+		
+		template<typename T>
+		void encodeChannel( ConstDataPtr dataContainer, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, int numChannels, int channelOffset, std::vector<unsigned char> &imageBuffer );
+
+	public:
+
+		/// \todo Move all ExtraData members to here on next major version change
+		struct ExtraData;
+
 };
-	
+
 IE_CORE_DECLAREPTR(JPEGImageWriter);
-  
+
 } // namespace IECore
 
 #endif // IE_CORE_JPEGIMAGEWRITER_H

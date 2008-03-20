@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,19 +36,17 @@
 #define IE_CORE_EXRIMAGEREADER_H
 
 #include "IECore/ImageReader.h"
-#include "IECore/VectorTypedData.h"
 
-// ILM
-#include "OpenEXR/Iex.h"
-#include "OpenEXR/ImfInputFile.h"
-#include "OpenEXR/ImfArray.h"
-#include "OpenEXR/ImfHeader.h"
-#include "OpenEXR/ImfChannelList.h"
+namespace Imf
+{
+	class Channel;
+	class InputFile;
+};
 
 namespace IECore
 {
 
-/// The EXRImageReader class reads ILM OpenEXR file formats
+/// The EXRImageReader class reads OpenEXR files.
 class EXRImageReader : public ImageReader
 {
 	public:
@@ -56,38 +54,35 @@ class EXRImageReader : public ImageReader
 		IE_CORE_DECLARERUNTIMETYPED( EXRImageReader, ImageReader );
 
 		EXRImageReader();
-
-		EXRImageReader(const std::string & filename);
+		EXRImageReader( const std::string &filename );
 
 		virtual ~EXRImageReader();
 
-		static bool canRead(const std::string & filename);
+		static bool canRead( const std::string &filename );
 
-		/// give the channel names into the vector
-		virtual void channelNames(std::vector<std::string> & names);
-
-		virtual bool isComplete() const;
+		virtual void channelNames( std::vector<std::string> &names );
+		virtual bool isComplete();
+		virtual Imath::Box2i dataWindow();
+		virtual Imath::Box2i displayWindow();
 
 	private:
 
-		virtual void readChannel(std::string name, ImagePrimitivePtr image, const Imath::Box2i &dataWindow);
+		template<class T>
+		DataPtr readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow, const Imf::Channel *channel );
+		
+		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow );
 
-		template <typename T>
-		void readTypedChannel(std::string name, ImagePrimitivePtr image, const Imath::Box2i &dataWindow,
-		                      const Imf::Channel &channel);
+		static const ReaderDescription<EXRImageReader> g_readerDescription;
 
-
-		// filename associator
-		static const ReaderDescription<EXRImageReader> m_readerDescription;
-
-		// EXR consists of a header and pixel data
-		bool open();
-		Imf::Header m_header;
+		/// Tries to open the file, returning true on success and false on failure. On success,
+		/// m_header and m_inputFile will be valid. If throwOnFailure is true then a descriptive
+		/// Exception is thrown rather than false being returned.
+		bool open( bool throwOnFailure = false );
 		Imf::InputFile *m_inputFile;
 
 };
 
-IE_CORE_DECLAREPTR(EXRImageReader);
+IE_CORE_DECLAREPTR( EXRImageReader );
 
 } // namespace IECore
 

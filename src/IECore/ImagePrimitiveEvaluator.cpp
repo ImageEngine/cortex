@@ -34,6 +34,8 @@
 
 #include <cassert>
 
+#include "boost/format.hpp"
+
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathLineAlgo.h"
 
@@ -132,6 +134,11 @@ int ImagePrimitiveEvaluator::Result::intPrimVar( const PrimitiveVariable &pv ) c
 	return getPrimVar< int >( pv );
 }
 
+unsigned int ImagePrimitiveEvaluator::Result::uintPrimVar( const PrimitiveVariable &pv ) const
+{
+	return getPrimVar< unsigned int >( pv );
+}
+
 const std::string &ImagePrimitiveEvaluator::Result::stringPrimVar( const PrimitiveVariable &pv ) const
 {
 	StringDataPtr data = runTimeCast< StringData >( pv.data );
@@ -163,6 +170,26 @@ half ImagePrimitiveEvaluator::Result::halfPrimVar( const PrimitiveVariable &pv )
 	return getPrimVar< half >( pv );
 }
 
+short ImagePrimitiveEvaluator::Result::shortPrimVar ( const PrimitiveVariable &pv ) const
+{
+	return getPrimVar< short >( pv );
+}
+
+unsigned short ImagePrimitiveEvaluator::Result::ushortPrimVar( const PrimitiveVariable &pv ) const
+{
+	return getPrimVar< unsigned short >( pv );
+}
+
+char ImagePrimitiveEvaluator::Result::charPrimVar ( const PrimitiveVariable &pv ) const
+{
+	return getPrimVar< char >( pv );
+}
+
+unsigned char ImagePrimitiveEvaluator::Result::ucharPrimVar( const PrimitiveVariable &pv ) const
+{
+	return getPrimVar< unsigned char >( pv );
+}
+
 template<typename T>
 T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) const
 {
@@ -185,7 +212,7 @@ T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) con
 
 	if (!data)
 	{
-		throw InvalidArgumentException( "Could not retrieve primvar data for ImagePrimitiveEvaluator" );
+		throw InvalidArgumentException( ( boost::format("ImagePrimitiveEvaluator: Could not retrieve primvar data of type %s or %s " ) % TypedData<T>::staticTypeName() % VectorData::staticTypeName() ).str() );
 	}
 	
 	switch ( pv.interpolation )
@@ -203,27 +230,30 @@ T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) con
 			ExtraData *extraData = g_resultClassData[ this ];
 			assert( extraData );
 			
+			if ( extraData->m_dataWindow.isEmpty() )
+			{
+				/// \todo Perhaps use a traits class here to specify some "zero" value
+				return T();
+			}
+			
 			// \todo Use UV coord instead, and perform bilinear interpolation
 			V2i p = pixel() ;	
 			
 			p = p - extraData->m_dataWindow.min;
 			
-			if ( p.x < 0 || p.y < 0 )
+			int dataWidth = static_cast<int>( extraData->m_dataWindow.size().x + 1 );
+			int dataHeight = static_cast<int>( extraData->m_dataWindow.size().y + 1 );
+			
+			if ( p.x < 0 || p.y < 0 || p.x >= dataWidth || p.y >= dataHeight )
 			{
 				/// \todo Perhaps use a traits class here to specify some "zero" value
 				return T();
 			}
 						
-			int dataWidth = static_cast<int>( boxSize( extraData->m_dataWindow ).x + 1 );
 			int idx = ( p.y * dataWidth ) + p.x;								
 			assert( idx >= 0 );
-			
-			if ( idx >= (int)data->readable().size() )
-			{
-				/// \todo Perhaps use a traits class here to specify some "zero" value
-				return T();
-			}
-			
+			assert( idx < (int)data->readable().size() );
+
 			return data->readable()[idx];							
 		}
 			
@@ -379,7 +409,7 @@ float ImagePrimitiveEvaluator::volume() const
 
 V3f ImagePrimitiveEvaluator::centerOfGravity() const
 {
-	return m_image->bound().center();
+	return Imath::V3f( 0.0, 0.0, 0.0 );
 }
 
 float ImagePrimitiveEvaluator::surfaceArea() const
@@ -407,4 +437,9 @@ PrimitiveVariableMap::const_iterator ImagePrimitiveEvaluator::B() const
 PrimitiveVariableMap::const_iterator ImagePrimitiveEvaluator::A() const
 {
 	return m_image->variables.find( "A" );
+}
+
+PrimitiveVariableMap::const_iterator ImagePrimitiveEvaluator::Y() const
+{
+	return m_image->variables.find( "Y" );
 }

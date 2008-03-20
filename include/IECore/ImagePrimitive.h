@@ -50,10 +50,15 @@ namespace IECore
 /// ImagePrimitive represents a 2D bitmap in the form of individual channels, which are stored as primitive variables.
 /// A channel may contain data of half (16-bit float), unsigned int (32-bit integer),
 /// or float (32-bit float) type. The interpretation of these channels broadly matches the EXR
-/// specification. Channels named "R", "G", "B", and "A" have the special meaning of Red, Green,
-/// Blue, and Alpha respectively, but arbitrary channel names are permitted and their interpretation
-/// is left to the application.
-
+/// specification - the following channel names have the specified special meanings, but arbitrary channel names
+/// are permitted and their interpretation is left to the application :
+///
+///    "R"                      Red<br>
+///    "G"                      Green<br>
+///    "B"                      Blue<br>
+///    "A"                      Alpha<br>
+///    "Y"                      Luminance for greyscale images<br>
+///
 /// Within the channel's data buffers themselves the pixel values are stored in row major order,
 /// that is to say pixels which are adjacent in X (which runs along the "width" of the image) are also
 /// adjacent in memory.
@@ -64,6 +69,9 @@ namespace IECore
 /// of the display window. Outside of the data window the values of the ImagePrimitive's channels are defined
 /// to be zero (i.e. black/transparent). This means that the number of data elements stored in each
 /// channel should equal to the area of the data window.
+///
+/// In object-space, the ImagePrimitive is represented as a unit plane centered on the origin, with scale (width, height) in axes (X, Y).
+/// The normal is pointing down the negative Z-axis.
 ///
 /// Pixel-space runs from the display window origin in the top-left corner, to the display window's maximum in
 /// the bottom-right corner. Pixels of ascending X coordinate therefore run left-right, and pixels of ascending
@@ -78,7 +86,12 @@ class ImagePrimitive : public Primitive
 
 		IE_CORE_DECLAREOBJECT( ImagePrimitive, Primitive );
 
-		/// construct an ImagePrimitive with no area consumed
+
+		/// construct an ImagePrimitive with no area consumed		
+		/// \deprecated There is no default display window which makes sense for an image primitive. We only need this so that we can
+		/// created an object during file reading
+		/// \todo Try and make this constructor protected so that only the Object loading can call it.
+
 		ImagePrimitive();
 
 		/// construct an ImagePrimitive with the given data and display window dimensions
@@ -93,14 +106,14 @@ class ImagePrimitive : public Primitive
 
 		/// Sets the data window - note that this doesn't modify the contents of primitive variables (channels)
 		/// at all - it is the callers responsibilty to keep any data valid.
-		void setDataWindow( const Imath::Box2i &dw );
+
+		void setDataWindow( const Imath::Box2i &dataWindow );
 
 		/// Returns the display window.
 		const Imath::Box2i &getDisplayWindow() const;
 
-		/// Sets the display window.
-		/// \todo Throw on empty windows
-		void setDisplayWindow( const Imath::Box2i &dw );
+		/// Sets the display window. Throws if an empty window is passed.
+		void setDisplayWindow( const Imath::Box2i &displayWindow );
 
 		/// give the data window x origin
 		/// \deprecated It's unclear whether this should reference the data window or display window.
@@ -130,19 +143,22 @@ class ImagePrimitive : public Primitive
 		/// Returns 2-d image size for Vertex, Varying, and FaceVarying Interpolation, otherwise 1.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation );
 
-		/// Renders the image.
-		virtual void render(RendererPtr renderer);
+
+		virtual void render( RendererPtr renderer );
+
 
 		/// Places the channel names for this image into the given vector
 		/// \bug this just copies the primitive variable names - it should also check that
 		/// the number of elements and interpolation makes the primvars suitable for
 		/// use as channels.
-		void channelNames(std::vector<std::string> & names) const;
+		void channelNames( std::vector<std::string> &names ) const;
 
 		/// Convenience function to create a channel - this simply creates and adds a PrimitiveVariable of the appropriate
-		/// size and returns a pointer to the data within it.
+		/// size and returns a pointer to the data within it. The data is not initialized.
+		/// \todo Use typename TypedData<std::vector<T> >::Ptr as return type
+		/// \todo Make channel name a const reference
 		template<typename T>
-		boost::intrusive_ptr<TypedData<std::vector<T> > > createChannel(std::string name);
+		boost::intrusive_ptr<TypedData<std::vector<T> > > createChannel( std::string name );
 
 	private:
 

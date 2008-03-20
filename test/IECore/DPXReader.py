@@ -34,43 +34,84 @@
 
 import os
 import unittest
-import IECore
+import glob
+from IECore import *
 
 class TestDPXReader(unittest.TestCase):
 
-        testfile =    "test/IECore/data/dpx/bluegreen_noise.dpx"
-	testoutfile = "test/IECore/data/dpx/bluegreen_noise.testoutput.dpx"
-
         def testConstruction(self):
                 
-		r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.DPXImageReader)
+		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
+		self.assertEqual( type(r), DPXImageReader )
 
 
         def testRead(self):
 
-                r = IECore.Reader.create(self.testfile)
-		self.assertEqual(type(r), IECore.DPXImageReader)
+		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
+		self.assertEqual( type(r), DPXImageReader )
 
-		img = r.read()
+		img = r.read()		
+		self.assertEqual( type(img), ImagePrimitive )
+
 		
-		self.assertEqual(type(img), IECore.ImagePrimitive)
-
-		# write test
-                w = IECore.Writer.create( img, self.testoutfile )
-		self.assertEqual(type(w), IECore.DPXImageWriter)
-
-		w.write()
+	def testOrientation( self ) :
+		""" Test orientation of Cineon files """
+	
+		img = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" ).read()
 		
-        def tearDown(self):
-                
-		# cleanup
-        
-		if os.path.isfile( self.testoutfile ) : 
-			os.remove( self.testoutfile )		
+		ipe = PrimitiveEvaluator.create( img )
+		self.assert_( ipe.R() )
+		self.assert_( ipe.G() )
+		self.assert_( ipe.B() )
+		self.failIf ( ipe.A() )
+		
+		result = ipe.createResult()
+		
+		colorMap = {
+			V2i( 0 ,    0 ) :  V3f( 0, 0, 0 ),
+			V2i( 511,   0 ) :  V3f( 1, 0, 0 ),
+			V2i( 0,   255 ) :  V3f( 0, 1, 0 ),
+			V2i( 511, 255 ) :  V3f( 1, 1, 0 ),
+		}
+		
+		for point, expectedColor in colorMap.items() :
+		
+			found = ipe.pointAtPixel( point, result )
+			self.assert_( found )
+			
+			color = V3f(
+				result.halfPrimVar( ipe.R() ),
+				result.halfPrimVar( ipe.G() ), 
+				result.halfPrimVar( ipe.B() )
+			)
+						
+			self.assert_( ( color - expectedColor).length() < 1.e-6 )		
+		
+	def testAll( self ):
+		
+		fileNames = glob.glob( "test/IECore/data/dpx/*.dpx" )
+		
+		# Silence any warnings while the tests run
+		MessageHandler.pushHandler( NullMessageHandler() )
+		
+		try:
+		
+			for f in fileNames:
 
-
-                			
+				r = DPXImageReader( f ) 
+				img = r.read()
+				self.assertEqual( type(img), ImagePrimitive )
+				self.assert_( img.arePrimitiveVariablesValid() )	
+				
+		except:
+		
+			raise	
+			
+		finally:
+			
+			MessageHandler.popHandler()		
+							
+			
 if __name__ == "__main__":
 	unittest.main()   
 	

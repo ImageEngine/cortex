@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,18 +42,20 @@ using std::string;
 using namespace boost;
 using namespace boost::python;
 
-namespace IECore {
+namespace IECore
+{
 
-  void bindEXRImageWriter() {
-    typedef class_<EXRImageWriter, EXRImageWriterPtr, boost::noncopyable, bases<ImageWriter> > EXRImageWriterPyClass;
+void bindEXRImageWriter()
+{
+	typedef class_<EXRImageWriter, EXRImageWriterPtr, boost::noncopyable, bases<ImageWriter> > EXRImageWriterPyClass;
 	EXRImageWriterPyClass ("EXRImageWriter", init<>())
 		.def( init<ObjectPtr, const std::string &>() )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(EXRImageWriter)
 	;
-    
+
 	INTRUSIVE_PTR_PATCH( EXRImageWriter, EXRImageWriterPyClass );
-    implicitly_convertible<EXRImageWriterPtr, EXRImageWriterPtr>();
-  }
-  
+	implicitly_convertible<EXRImageWriterPtr, EXRImageWriterPtr>();
+}
+
 } // namespace IECore
 

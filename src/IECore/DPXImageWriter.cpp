@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,6 +39,8 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/BoxOperators.h"
+#include "IECore/DataConvert.h"
+#include "IECore/ScaledDataConversion.h"
 
 #include "IECore/private/dpx.h"
 
@@ -54,12 +56,12 @@ using namespace Imath;
 
 const Writer::WriterDescription<DPXImageWriter> DPXImageWriter::m_writerDescription("dpx");
 
-DPXImageWriter::DPXImageWriter() : 
+DPXImageWriter::DPXImageWriter() :
 		ImageWriter("DPXImageWriter", "Serializes images to Digital Picture eXchange 10-bit log image format")
 {
 }
 
-DPXImageWriter::DPXImageWriter(ObjectPtr image, const string &fileName) : 
+DPXImageWriter::DPXImageWriter( ObjectPtr image, const string &fileName ) :
 		ImageWriter("DPXImageWriter", "Serializes images to Digital Picture eXchange 10-bit log image format")
 {
 	m_objectParameter->setValue( image );
@@ -70,24 +72,80 @@ DPXImageWriter::~DPXImageWriter()
 {
 }
 
-void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dw)
+
+template<typename T>
+void DPXImageWriter::encodeChannel( ConstDataPtr dataContainer, const Box2i &displayWindow, const Box2i &dataWindow, int bitShift, vector<unsigned int> &imageBuffer )
+{
+	const typename T::ValueType &data = static_pointer_cast<const T>( dataContainer )->readable();
+	ScaledDataConversion<typename T::ValueType::value_type, float> converter;
+
+	int displayWidth = displayWindow.size().x + 1;
+	int dataWidth = dataWindow.size().x + 1;
+
+	int dataX = 0;
+	int dataY = 0;
+
+	for ( int y = dataWindow.min.y; y <= dataWindow.max.y; y++, dataY++ )
+	{
+		int dataOffset = dataY * dataWidth + dataX;
+		assert( dataOffset >= 0 );
+
+		for ( int x = dataWindow.min.x; x <= dataWindow.max.x; x++, dataOffset++ )
+		{
+			int pixelIdx = ( y - displayWindow.min.y ) * displayWidth + ( x - displayWindow.min.x );
+
+			assert( pixelIdx >= 0 );
+			assert( pixelIdx < (int)imageBuffer.size() );
+			assert( dataOffset < (int)data.size() );
+
+			vector<double>::iterator where = lower_bound(m_LUT.begin(), m_LUT.end(), converter( data[dataOffset] ) );
+			unsigned int logValue = distance(m_LUT.begin(), where);
+			imageBuffer[ pixelIdx ] |= logValue << bitShift;
+		}
+	}
+}
+
+void DPXImageWriter::writeImage( vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow )
 {
 	// write the dpx in the standard 10bit log format
-	std::ofstream out;
+	ofstream out;
 	out.open(fileName().c_str());
-	if(!out.is_open())
+	if ( !out.is_open() )
 	{
-		throw IOException("Could not open '" + fileName() + "' for writing.");
+		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
 	}
 	
-	// assume an 8-bit RGB image
-	int width  = 1 + dw.max.x - dw.min.x;
-	int height = 1 + dw.max.y - dw.min.y;
+	/// We'd like RGB to be at the front, in that order, because it seems that not all readers support the channel identifiers!
+	vector<string> desiredChannelOrder;
+	desiredChannelOrder.push_back( "R" );
+	desiredChannelOrder.push_back( "G" );
+	desiredChannelOrder.push_back( "B" );
+
+	vector<string> namesCopy = names;
+	vector<string> filteredNames;
+
+	for ( vector<string>::const_iterator it = desiredChannelOrder.begin(); it != desiredChannelOrder.end(); ++it )
+	{
+		vector<string>::iterator res = find( namesCopy.begin(), namesCopy.end(), *it );
+		if ( res != namesCopy.end() )
+		{
+			namesCopy.erase( res );
+			filteredNames.push_back( *it );
+		}
+	}
+
+	for ( vector<string>::const_iterator it = namesCopy.begin(); it != namesCopy.end(); ++it )
+	{
+		filteredNames.push_back( *it );
+	}
+
+	assert( names.size() == filteredNames.size() );
 	
-	//
-	// FileInformation
-	//
-	
+	Box2i displayWindow = image->getDisplayWindow();
+
+	int displayWidth  = 1 + displayWindow.size().x;
+	int displayHeight = 1 + displayWindow.size().y;
+
 	// build the header
 	DPXFileInformation fi;
 	memset(&fi, 0, sizeof(fi));
@@ -104,64 +162,47 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 	DPXTelevisionHeader th;
 	memset(&th, 0, sizeof(th));
 
-
-	// XPDS / swap bytes.
-	// although unswapped bytes would probably be much faster, it doesn't seem to be
-	// too common and one wonders if many applications detect and use it.  our DPX reader
-	// expects to swap, so let's stay with that.
-	/// \todo generalize and handle the non-byteswap case
-	/// \todo Verify the above comments!
-	fi.magic = 0x58504453;
+	fi.magic = asBigEndian<>( 0x53445058 );
 
 	// compute data offsets
 	fi.gen_hdr_size = sizeof(fi) + sizeof(ii) + sizeof(ioi);
-	fi.gen_hdr_size = reverseBytes(fi.gen_hdr_size);
+	fi.gen_hdr_size = asBigEndian<>(fi.gen_hdr_size);
 
 	fi.ind_hdr_size = sizeof(mpf) + sizeof(th);
-	fi.ind_hdr_size = reverseBytes(fi.ind_hdr_size);
-	
+	fi.ind_hdr_size = asBigEndian<>(fi.ind_hdr_size);
+
 	int header_size = sizeof(fi) + sizeof(ii) + sizeof(ioi) + sizeof(mpf) + sizeof(th);
 	fi.image_data_offset = header_size;
-	fi.image_data_offset = reverseBytes(fi.image_data_offset);
-	
+	fi.image_data_offset = asBigEndian<>(fi.image_data_offset);
+
 	strcpy((char *) fi.vers, "V2.0");
-	
-	/// \todo Establish the purpose of this
-	strcpy((char *) fi.file_name, "image-engine.dpx");
+
+	strncpy( (char *) fi.file_name, fileName().c_str(), sizeof( fi.file_name ) );
 
 	// compute the current date and time
 	time_t t;
 	time(&t);
 	struct tm gmt;
 	localtime_r(&t, &gmt);
+	snprintf((char *) fi.create_time,  sizeof( fi.create_time ), "%04d:%02d:%02d:%02d:%02d:%02d:%s",
+	        1900 + gmt.tm_year, gmt.tm_mon, gmt.tm_mday,
+	        gmt.tm_hour, gmt.tm_min, gmt.tm_sec, gmt.tm_zone );
+	
+	snprintf((char *) fi.creator, sizeof( fi.creator ), "cortex");
+	snprintf((char *) fi.project, sizeof( fi.project ), "cortex");
+	snprintf((char *) fi.copyright, sizeof( fi.copyright ), "Unknown");
 
-	/// \todo Not necessarily PST!
-	sprintf((char *) fi.create_time, "%04d:%02d:%02d:%02d:%02d:%02d:PST",
-			  1900 + gmt.tm_year, gmt.tm_mon, gmt.tm_mday,
-			  gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
-			  
-	/// \todo Change these		  
-	sprintf((char *) fi.creator, "image engine vfx for film");
-	sprintf((char *) fi.project, "IECore");
-	sprintf((char *) fi.copyright, "image engine vfx for film");
-	
-	
-	//
-	// ImageInformation;
-	//
 	ii.orientation = 0;    // left-to-right, top-to-bottom
 	ii.element_number = 1;
-	ii.pixels_per_line = width;
-	ii.lines_per_image_ele = height;
+	ii.pixels_per_line = displayWidth;
+	ii.lines_per_image_ele = displayHeight;
 
-	/// \todo Establish why we're not calling asLittleEndian or asBigEndian here
- 	// reverse byte ordering
- 	ii.element_number      = reverseBytes(ii.element_number);
- 	ii.pixels_per_line     = reverseBytes(ii.pixels_per_line);
- 	ii.lines_per_image_ele = reverseBytes(ii.lines_per_image_ele);
+	ii.element_number      = asBigEndian<>(ii.element_number);
+	ii.pixels_per_line     = asBigEndian<>(ii.pixels_per_line);
+	ii.lines_per_image_ele = asBigEndian<>(ii.lines_per_image_ele);
 
- 	for(int c = 0; c < 8; ++c) {
-		
+	for (int c = 0; c < 8; ++c)
+	{
 		DPXImageInformation::_image_element &ie = ii.image_element[c];
 		ie.data_sign = 0;
 
@@ -170,132 +211,164 @@ void DPXImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 		ie.ref_low_quantity = 0.0;
 		ie.ref_high_data = 1023;
 		ie.ref_high_quantity = 2.046;
-
-		/// \todo Establish why we're not calling asLittleEndian or asBigEndian here
-		// swap
-		ie.ref_low_data = reverseBytes(ie.ref_low_data);
-		ie.ref_low_quantity = reverseBytes(ie.ref_low_quantity);
-		ie.ref_high_data = reverseBytes(ie.ref_high_data);
-		ie.ref_high_quantity = reverseBytes(ie.ref_high_quantity);
 		
-		/// \todo Dcoument these constants		
+		ie.ref_low_data = asBigEndian<>(ie.ref_low_data);
+		ie.ref_low_quantity = asBigEndian<>(ie.ref_low_quantity);
+		ie.ref_high_data = asBigEndian<>(ie.ref_high_data);
+		ie.ref_high_quantity = asBigEndian<>(ie.ref_high_quantity);
+
+		/// \todo Dcoument these constants
 		ie.transfer = 1;
 		ie.packing = 256;
 		ie.bit_size = 10;
 		ie.descriptor = 50;
 
 		ie.data_offset = fi.image_data_offset;
- 	}
-	
-	//
-	// ImageOrientation
-	//
-	ioi.x_offset = 0;                  // could be dataWindow min.x
-	ioi.y_offset = 0;                  // could be dataWindow min.y
-	
-	/// \todo What does the comment below imply we are leaving out of the header?
-	// other items left out for now
+	}
 
-	// write the header
-	
-	// compute total file size
-	int image_data_size = 4 * width * height;
+	ioi.x_offset = 0;
+	ioi.y_offset = 0;
+
+	// Write the header
+	int image_data_size = sizeof( unsigned int ) * displayWidth * displayHeight;
 	fi.file_size = header_size + image_data_size;
-	
-	/// \todo Why is this call to reverseBytes here?
-	fi.file_size = reverseBytes(fi.file_size);
-	
+
+	fi.file_size = asBigEndian<>(fi.file_size);
+
 	out.write(reinterpret_cast<char *>(&fi),  sizeof(fi));
+	if ( out.fail() )
+	{
+		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
+	}
+	
 	out.write(reinterpret_cast<char *>(&ii),  sizeof(ii));
+	if ( out.fail() )
+	{
+		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
+	}
+	
 	out.write(reinterpret_cast<char *>(&ioi), sizeof(ioi));
+	if ( out.fail() )
+	{
+		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
+	}
+		
 	out.write(reinterpret_cast<char *>(&mpf), sizeof(mpf));
+	if ( out.fail() )
+	{
+		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
+	}
+		
 	out.write(reinterpret_cast<char *>(&th),  sizeof(th));
-	
-	// write the data
-	std::vector<unsigned int> image_buffer( width*height, 0 );
-	
-	// build a LUT
+	if ( out.fail() )
+	{
+		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
+	}	
+
+	// build a reverse LUT (linear to logarithmic)
 	double film_gamma = 0.6;
 	int ref_white_val = 685;
 	int ref_black_val = 95;
 	double ref_mult = 0.002 / film_gamma;
 	double black_offset = pow(10.0, (ref_black_val - ref_white_val) * ref_mult);
 
-	// build a reverse LUT (linear to logarithmic)
-	vector<double> range(1024);
-	for(int i = 0; i < 1024; ++i) {
-		double v = i + 0.5;
-		range[i] = (pow(10.0, (v - ref_white_val) * ref_mult) - black_offset) / (1.0 - black_offset);
-	}
-	vector<double>::iterator where;
 	
-	// add the channels into the header with the appropriate types
-	// channel data is RGB interlaced
-	vector<string>::const_iterator i = names.begin();
-	while(i != names.end())
-	{		
-		if(!(*i == "R" || *i == "G" || *i == "B"))
+	m_LUT.resize(1024);
+	for (int i = 0; i < 1024; ++i)
+	{
+		double v = i + 0.5;
+		m_LUT[i] = (pow(10.0, (v - ref_white_val) * ref_mult) - black_offset) / (1.0 - black_offset);
+	}
+	
+	// write the data
+	vector<unsigned int> imageBuffer( displayWidth*displayHeight, 0 );
+	
+	int offset = 0;
+	vector<string>::const_iterator i = filteredNames.begin();
+	while (i != filteredNames.end())
+	{
+		if (!(*i == "R" || *i == "G" || *i == "B"))
 		{
 			msg( Msg::Warning, "DPXImageWriter::write", format( "Channel \"%s\" was not encoded." ) % *i );
 			++i;
 			continue;
 		}
 		
-		int offset = *i == "R" ? 0 : *i == "G" ? 1 : 2;
 		int bpp = 10;
 		unsigned int shift = (32 - bpp) - (offset*bpp);
-		
-		// get the image channel
-		DataPtr channelp = image->variables.find( *i )->second.data;
-		
-		switch(channelp->typeId())
-		{
-			
-		case FloatVectorDataTypeId:
-		{
-			const vector<float> &channel = static_pointer_cast<FloatVectorData>(channelp)->readable();
 
-			// convert the linear float value to 10-bit log
-			for(int i = 0; i < width*height; ++i)
-			{
-				/// \todo Examine the performance of this!
-				where = lower_bound(range.begin(), range.end(), channel[i]);
-				unsigned int log_value = distance(range.begin(), where);
-				image_buffer[i] |= log_value << shift;
-			}
-		}
-		break;
-			
-		case HalfVectorDataTypeId:
+		assert( image->variables.find( *i ) != image->variables.end() );
+		DataPtr dataContainer = image->variables.find( *i )->second.data;
+		assert( dataContainer );
+
+		switch (dataContainer->typeId())
 		{
-			const vector<half> &channel = static_pointer_cast<HalfVectorData>(channelp)->readable();
-			
-			// convert the linear half value to 10-bit log
-			for(int i = 0; i < width*height; ++i)
-			{
-				/// \todo Examine the performance of this!
-				where = lower_bound(range.begin(), range.end(), channel[i]);
-				unsigned int log_value = distance(range.begin(), where);
-				image_buffer[i] |= log_value << shift;
-			}
-		}
-		break;
-		
-		/// \todo Deal with other channel types, preferably using templates!
-			
+		case FloatVectorDataTypeId:
+
+			encodeChannel<FloatVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
+		case HalfVectorDataTypeId:
+
+			encodeChannel<HalfVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
+		case DoubleVectorDataTypeId:
+
+			encodeChannel<DoubleVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
+		case LongVectorDataTypeId:
+
+			encodeChannel<LongVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
+		case CharVectorDataTypeId:
+
+			encodeChannel<CharVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
+		case UCharVectorDataTypeId:
+
+			encodeChannel<UCharVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
+		case ShortVectorDataTypeId:
+
+			encodeChannel<ShortVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
+		case UShortVectorDataTypeId:
+
+			encodeChannel<UShortVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
+		case IntVectorDataTypeId:
+
+			encodeChannel<IntVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
+		case UIntVectorDataTypeId:
+
+			encodeChannel<UIntVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
+			break;
+
 		default:
-			throw InvalidArgumentException( (format( "DPXImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId(channelp->typeId()) % *i).str() );
+			throw InvalidArgumentException( (format( "DPXImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId(dataContainer->typeId()) % *i).str() );
 		}
-		
+
 		++i;
+		++offset;
 	}
-	
+
 	// write the buffer
-	for(int i = 0; i < width*height; ++i)
+	for (int i = 0; i < displayWidth * displayHeight; ++i)
 	{
-		/// \todo Why is this call to reverseBytes here? If we want to write in either little endian or big endian format there
-		/// are calls specifically do this, which work regardless of which architecture the code is running on
-		image_buffer[i] = reverseBytes(image_buffer[i]);
-		out.write((const char *) (&image_buffer[i]), sizeof(unsigned int));
+		imageBuffer[i] = asBigEndian<>(imageBuffer[i]);
+		out.write( (const char *) (&imageBuffer[i]), sizeof(unsigned int) );
+		if ( out.fail() )
+		{
+			throw IOException( "DPXImageWriter: Error writing to " + fileName() );
+		}
 	}
 }

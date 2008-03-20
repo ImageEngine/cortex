@@ -150,6 +150,20 @@ struct ImagePrimitiveEvaluatorWrap : public ImagePrimitiveEvaluator, public Wrap
 		}
 	}
 	
+	static object Y( ImagePrimitiveEvaluator &evaluator )
+	{
+		PrimitiveVariableMap::const_iterator it = evaluator.Y();
+		
+		if ( it != evaluator.primitive()->variables.end() )
+		{
+			return object( it->second );
+		}
+		else
+		{
+			return object();
+		}
+	}
+	
 };
 
 void bindImagePrimitiveEvaluator()
@@ -163,6 +177,7 @@ void bindImagePrimitiveEvaluator()
 		.def( "G", &ImagePrimitiveEvaluatorWrap::G )
 		.def( "B", &ImagePrimitiveEvaluatorWrap::B )
 		.def( "A", &ImagePrimitiveEvaluatorWrap::A )
+		.def( "Y", &ImagePrimitiveEvaluatorWrap::Y )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImagePrimitiveEvaluator)
 		
 		/// \todo Move these into the base class
@@ -180,6 +195,12 @@ void bindImagePrimitiveEvaluator()
 		
 		ResultPyClass( "Result", no_init )
 			.def( "pixel", &ImagePrimitiveEvaluator::Result::pixel )
+			.def( "uintPrimVar", &ImagePrimitiveEvaluator::Result::uintPrimVar )
+			.def( "shortPrimVar", &ImagePrimitiveEvaluator::Result::shortPrimVar )
+			.def( "ushortPrimVar", &ImagePrimitiveEvaluator::Result::ushortPrimVar )
+			.def( "charPrimVar", &ImagePrimitiveEvaluator::Result::charPrimVar )
+			.def( "ucharPrimVar", &ImagePrimitiveEvaluator::Result::ucharPrimVar )
+			
 		;
 	
 		INTRUSIVE_PTR_PATCH( ImagePrimitiveEvaluator::Result, ResultPyClass );

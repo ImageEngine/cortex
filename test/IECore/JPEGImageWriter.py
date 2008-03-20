@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,44 +33,13 @@
 ##########################################################################
 
 import unittest
-import sys, os
+import glob
+import sys
+import os
 from IECore import *
 
-from math import pow
+class TestJPEGImageWriter(unittest.TestCase):
 
-class TestDPXWriter(unittest.TestCase):
-	
-	def __verifyImageRGB( self, img ):
-	
-		self.assertEqual( type(img), ImagePrimitive )	
-	
-		topLeft =  img.dataWindow.min - img.displayWindow.min
-		bottomRight = img.dataWindow.max - img.displayWindow.min
-		topRight = V2i( img.dataWindow.max.x, img.dataWindow.min.y) - img.displayWindow.min
-		bottomLeft = V2i( img.dataWindow.min.x, img.dataWindow.max.y) - img.displayWindow.min
-	
-		pixelColorMap = {
-			topLeft : V3f( 0, 0, 0 ),
-			bottomRight : V3f( 1, 1, 0 ),
-			topRight: V3f( 1, 0, 0 ),
-			bottomLeft: V3f( 0, 1, 0 ),			
-		}
-	
-		ipe = PrimitiveEvaluator.create( img )
-		result = ipe.createResult()	
-		
-		for pixelColor in pixelColorMap.items() :
-		
-			found = ipe.pointAtPixel( pixelColor[0], result )
-			self.assert_( found )		
-			color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
-				result.halfPrimVar( ipe.B() )
-			)	
-								
-			self.assert_( ( color - pixelColor[1]).length() < 1.e-3 )
-			
 	def __makeImage( self, dataWindow, displayWindow ) :
 	
 		img = ImagePrimitive( dataWindow, displayWindow )
@@ -98,9 +67,8 @@ class TestDPXWriter(unittest.TestCase):
 		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, B )
 		
 		return img
-				
-	
-	def __makeFloatImage( self, dataWindow, displayWindow, withAlpha = False, dataType = FloatVectorData ) :
+		
+	def __makeGreyscaleImage( self, dataWindow, displayWindow ) :
 	
 		img = ImagePrimitive( dataWindow, displayWindow )
 		
@@ -108,33 +76,62 @@ class TestDPXWriter(unittest.TestCase):
 		h = dataWindow.max.y - dataWindow.min.y + 1
 		
 		area = w * h
-		R = dataType( area )
-		G = dataType( area )		
-		B = dataType( area )
-		
-		if withAlpha:
-			A = dataType( area )
+		Y = FloatVectorData( area )
 		
 		offset = 0
 		for y in range( 0, h ) :
 			for x in range( 0, w ) :
 			
-				R[offset] = float(x) / (w - 1)				
-				G[offset] = float(y) / (h - 1)
-				B[offset] = 0.0
-				if withAlpha:
-					A[offset] = 0.5
+				Y[offset] = float(x) / (w - 1)	* float(y) / (h - 1)			
 				
 				offset = offset + 1				
 		
-		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, R )
-		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, G )		
-		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, B )
+		img["Y"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, Y )
 		
-		if withAlpha:
-			img["A"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, A )
+		return img	
+
+	def testConstruction( self ):
 		
-		return img
+		img = ImagePrimitive()	
+		self.assert_( JPEGImageWriter.canWrite(  img, "test/IECore/data/jpg/output.jpg" ) )		
+		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		self.assertEqual( type(w), JPEGImageWriter )
+		
+	def testQuality ( self ) :
+		
+		w = Box2i(
+			V2i( 0, 0 ),
+			V2i( 99, 99)
+		)	
+	
+		img = self.__makeImage( w, w )				
+		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		self.assertEqual( type(w), JPEGImageWriter )
+		
+		qualitySizeMap = {}
+		lastSize = None
+		for q in [ 0, 10, 50, 80, 100 ]:
+		
+			w.parameters().quality = q
+			
+			if os.path.exists( "test/IECore/data/jpg/output.jpg" ) :
+			
+				os.remove( "test/IECore/data/jpg/output.jpg" )
+				
+			w.write()
+			self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+			
+			size = os.path.getsize( "test/IECore/data/jpg/output.jpg" )
+			qualitySizeMap[q] = size
+						
+			if lastSize :
+			
+				self.assert_( size >= lastSize )
+				
+			lastSize = size
+			
+		self.assert_( qualitySizeMap[100] > qualitySizeMap[0] )	
+			
 		
 	def testWrite( self ) :	
 		
@@ -145,37 +142,39 @@ class TestDPXWriter(unittest.TestCase):
 		
 		dataWindow = displayWindow
 		
-		for dataType in [ FloatVectorData, HalfVectorData, DoubleVectorData ] :
+		img = self.__makeImage( dataWindow, displayWindow )
 		
-			self.setUp()
+		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		self.assertEqual( type(w), JPEGImageWriter )
 		
-			img = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
-			w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
-			self.assertEqual( type(w), DPXImageWriter )
-			w.write()
-		
-			self.assert_( os.path.exists( "test/IECore/data/dpx/output.dpx" ) )
-			
-			# Now we've written the image, verify the rgb
-			
-			img2 = Reader.create( "test/IECore/data/dpx/output.dpx" ).read()
-			self.__verifyImageRGB( img2 )
-			
-			self.tearDown()	
-
-	def testColorConversion(self):
-
-		r = Reader.create( "test/IECore/data/dpx/ramp.dpx" )
-		img = r.read()
-		self.assertEqual( type(img), ImagePrimitive )
-		w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
-		self.assertEqual( type(w), DPXImageWriter )
 		w.write()
-		w = None
-		r = Reader.create( "test/IECore/data/dpx/output.dpx" )
+		
+		self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+		self.assertEqual( os.path.getsize( "test/IECore/data/jpg/output.jpg" ), 4559 )
+		
+	def testGreyscaleWrite( self ) :
+	
+		displayWindow = Box2i(
+			V2i( 0, 0 ),
+			V2i( 199, 99 )
+		)
+		
+		dataWindow = displayWindow	
+		
+		img = self.__makeGreyscaleImage( dataWindow, displayWindow )
+		
+		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		self.assertEqual( type(w), JPEGImageWriter )
+		
+		w.write()
+		
+		self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+		
+		r = Reader.create( "test/IECore/data/jpg/output.jpg" )
 		img2 = r.read()
-		self.assertEqual( type(img2), ImagePrimitive )
-		self.assertEqual( img, img2 )
+		
+		channelNames = r.channelNames()
+		self.assertEqual( len(channelNames), 1 )
 		
 	def testWriteIncomplete( self ) :
 	
@@ -196,11 +195,31 @@ class TestDPXWriter(unittest.TestCase):
 		
 		self.failIf( img.arePrimitiveVariablesValid() )
 		
-		w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
-		self.assertEqual( type(w), DPXImageWriter )
+		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		self.assertEqual( type(w), JPEGImageWriter )
 		
 		self.assertRaises( RuntimeError, w.write )				
-		self.failIf( os.path.exists( "test/IECore/data/dpx/output.dpx" ) )		
+		self.failIf( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+		
+	def testErrors( self ) :
+		
+		displayWindow = Box2i(
+			V2i( 0, 0 ),
+			V2i( 99, 99 )
+		)
+		
+		dataWindow = displayWindow
+		
+		
+		# Try and write an image with the "R" channel of an unsupported type
+		img = self.__makeImage( dataWindow, displayWindow )	
+		img[ "R" ] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, StringData( "hello") )
+		
+		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		self.assertEqual( type(w), JPEGImageWriter )
+		
+		self.assertRaises( RuntimeError, w.write )
+		
 		
 	def testWindowWrite( self ) :	
 	
@@ -216,17 +235,13 @@ class TestDPXWriter(unittest.TestCase):
 			V2i( 199, 199 )
 		)
 		
-		w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
-		self.assertEqual( type(w), DPXImageWriter )		
+		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		self.assertEqual( type(w), JPEGImageWriter )		
 		w.write()
 		
-		w = Writer.create( img, "test/IECore/data/dpx/output2.dpx" )
-		self.assertEqual( type(w), DPXImageWriter )		
-		w.write()
-		
-		self.assert_( os.path.exists( "test/IECore/data/dpx/output.dpx" ) )
+		self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
 				
-		r = Reader.create( "test/IECore/data/dpx/output.dpx" )
+		r = Reader.create( "test/IECore/data/jpg/output.jpg" )
 		img2 = r.read()
 		
 		self.assertEqual( img2.displayWindow.min, V2i( 0, 0 ) )			
@@ -247,10 +262,8 @@ class TestDPXWriter(unittest.TestCase):
 				result.halfPrimVar( ipe.R() ),
 				result.halfPrimVar( ipe.G() ), 
 				result.halfPrimVar( ipe.B() )
-			)
-					
-		# \todo Check	
-		expectedColor = V3f( -0.0056, -0.0056, -0.0056 )
+			)		
+		expectedColor = V3f( 0, 0, 0 )
 		self.assert_( ( color - expectedColor).length() < 1.e-3 )
 		
 		found = ipe.pointAtPixel( V2i( 110, 110 ), result )
@@ -259,23 +272,28 @@ class TestDPXWriter(unittest.TestCase):
 				result.halfPrimVar( ipe.R() ),
 				result.halfPrimVar( ipe.G() ), 
 				result.halfPrimVar( ipe.B() )
-			)	
-				
-		# \todo Check		
-		expectedColor = V3f( 0.911133, 0.911133, 0 )
-		self.assert_( ( color - expectedColor).length() < 1.e-3 )
+			)		
+		expectedColor = V3f( 0.913574, 0.909668, 0 )
+		self.assert_( ( color - expectedColor).length() < 1.e-3 )	
+		
 		
 	def setUp( self ) :
-	
-		if os.path.isfile( "test/IECore/data/dpx/output.dpx") :
-			os.remove( "test/IECore/data/dpx/output.dpx" )				
 
-	def tearDown( self ) :
-	
-		if os.path.isfile( "test/IECore/data/dpx/output.dpx") :
-			os.remove( "test/IECore/data/dpx/output.dpx" )
+		if os.path.exists( "test/IECore/data/jpg/output.jpg" ) :
+			
+			os.remove( "test/IECore/data/jpg/output.jpg" )					
 		
-       			
+		
+	def tearDown( self ) :
+
+		if os.path.exists( "test/IECore/data/jpg/output.jpg" ) :
+			
+			os.remove( "test/IECore/data/jpg/output.jpg" )
+			
+				
+		
+	
+		
 if __name__ == "__main__":
 	unittest.main()   
 	

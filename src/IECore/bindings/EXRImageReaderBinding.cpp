@@ -42,18 +42,23 @@ using std::string;
 using namespace boost;
 using namespace boost::python;
 
-namespace IECore {
+namespace IECore
+{
 
-  void bindEXRImageReader() {
-    typedef class_<EXRImageReader, EXRImageReaderPtr, boost::noncopyable, bases<ImageReader> > EXRImageReaderPyClass;
-	EXRImageReaderPyClass("EXRImageReader", init<>())
+void bindEXRImageReader()
+{
+
+	typedef class_<EXRImageReader, EXRImageReaderPtr, boost::noncopyable, bases<ImageReader> > EXRImageReaderPyClass;
+	EXRImageReaderPyClass( "EXRImageReader", init<>() )
 		.def( init<const std::string &>() )
+		.def( "canRead", &EXRImageReader::canRead ).staticmethod( "canRead" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( EXRImageReader )
 	;
-    
+
 	INTRUSIVE_PTR_PATCH( EXRImageReader, EXRImageReaderPyClass );
-    implicitly_convertible<EXRImageReaderPtr, ImageReaderPtr>();
-  }
+	implicitly_convertible<EXRImageReaderPtr, ImageReaderPtr>();
+	
+}
   
 } // namespace IECore
 

@@ -45,15 +45,29 @@ using namespace boost::python;
 
 namespace IECore {
 
-  void bindImageReader() {
-    typedef class_< ImageReader , ImageReaderPtr, boost::noncopyable, bases<Reader> > ImageReaderPyClass;
-	ImageReaderPyClass("ImageReader", no_init)
-		.def("isComplete", &ImageReader::isComplete)
+static StringVectorDataPtr channelNames( ImageReader &that )
+{
+	StringVectorDataPtr result( new StringVectorData );
+	that.channelNames( result->writable() );
+	return result;
+}
+
+void bindImageReader()
+{
+
+	typedef class_< ImageReader , ImageReaderPtr, boost::noncopyable, bases<Reader> > ImageReaderPyClass;
+	ImageReaderPyClass( "ImageReader", no_init )
+		.def( "isComplete", &ImageReader::isComplete )
+		.def( "channelNames", &channelNames )
+		.def( "dataWindow", &ImageReader::dataWindow )
+		.def( "displayWindow", &ImageReader::displayWindow )
+		.def( "readChannel", (DataPtr (ImageReader::*)( const std::string &))&ImageReader::readChannel )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImageReader)
 	;
 
 	INTRUSIVE_PTR_PATCH( ImageReader, ImageReaderPyClass );
-    implicitly_convertible<ImageReaderPtr, ReaderPtr>();
-  }
+	implicitly_convertible<ImageReaderPtr, ReaderPtr>();
+
+}
   
 } // namespace IECore

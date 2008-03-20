@@ -134,9 +134,11 @@ from FileSequenceVectorParameter import *
 
 if IECore.withTIFF() :
 	from TIFFReader import *
+	from TIFFImageWriter import *
 
 if IECore.withJPEG() :
 	from JPEGReader import *
+	from JPEGImageWriter import *
 
 if IECore.withSQLite() :
 	from SQLiteIndexedIO import *
