@@ -83,7 +83,9 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 {
 	T operator()( F f )
 	{
-		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );		
+		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );
+		f = std::max<F>( f, (F)( -1.0 ) );		
+		f = std::min<F>( f, (F)( 1.0 ) );				
 		float result = static_cast<float>(f) * Imath::limits<T>::max();
 		return static_cast<T>( result + 0.5f );
 	}
@@ -95,7 +97,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 	T operator()( F f )
 	{		
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
-		f = std::max<F>( f, (F)(Imath::limits<T>::min() ) );	
+		f = std::max<F>( f, (F)(Imath::limits<T>::min() ) );
+		f = std::min<F>( f, (F)( 1.0 ) );	
 		float result = static_cast<float>(f) * Imath::limits<T>::max();
 		return static_cast<T>( result + 0.5f );
 	}
