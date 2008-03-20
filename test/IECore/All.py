@@ -61,7 +61,7 @@ from SimpleTypedData import *
 from TypedDataAsObject import *
 from VectorData import *
 from FileSequence import *
-#from EXRReader import *
+from EXRImageReader import *
 from PointsPrimitive import *
 from ImagePrimitive import *
 from PerlinNoise import *
@@ -119,10 +119,10 @@ from Writer import *
 from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
 from SearchReplaceOp import *
-from CINReader import *
-from CINWriter import *
-from DPXReader import *
-from DPXWriter import *
+from CINImageReader import *
+from CINImageWriter import *
+from DPXImageReader import *
+from DPXImageWriter import *
 from InverseDistanceWeightedInterpolation import *
 from ImageCropOp import *
 from MeshPrimitiveShrinkWrapOp import *
@@ -133,11 +133,11 @@ from Math import *
 from FileSequenceVectorParameter import *
 
 if IECore.withTIFF() :
-	from TIFFReader import *
+	from TIFFImageReader import *
 	from TIFFImageWriter import *
 
 if IECore.withJPEG() :
-	from JPEGReader import *
+	from JPEGImageReader import *
 	from JPEGImageWriter import *
 
 if IECore.withSQLite() :
