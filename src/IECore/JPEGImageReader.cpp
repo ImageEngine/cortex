@@ -80,6 +80,8 @@ JPEGImageReader::~JPEGImageReader()
 
 bool JPEGImageReader::canRead(const string & fileName)
 {
+	/// \todo Check for EXIF compatibility?
+	
 	// attempt to open the file
 	ifstream in(fileName.c_str());
 	if (!in.is_open())
