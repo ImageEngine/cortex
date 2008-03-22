@@ -726,6 +726,7 @@ coreEnv.Depends( coreLibraryInstall, coreInstallSync )
 coreEnv.AddPostAction( coreLibraryInstall, lambda target, source, env : makeLibSymLinks( coreEnv ) )
 coreEnv.Alias( "install", [ coreLibraryInstall ] )
 coreEnv.Alias( "installCore", [ coreLibraryInstall ] )
+coreEnv.Alias( "installLib", [ coreLibraryInstall ] )
 
 # headers
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
@@ -846,6 +847,7 @@ if doConfigure :
 		riEnv.AddPostAction( riLibraryInstall, lambda target, source, env : makeLibSymLinks( riEnv ) )
 		riEnv.Alias( "install", riLibraryInstall )
 		riEnv.Alias( "installRI", riLibraryInstall )
+		riEnv.Alias( "installLib", [ riLibraryInstall ] )
 
 		riHeaderInstall = riEnv.Install( "$INSTALL_HEADER_DIR/IECoreRI", riHeaders )
 		riEnv.Depends( riHeaderInstall, coreInstallSync )
@@ -976,6 +978,7 @@ if env["WITH_GL"] and doConfigure :
 		glEnv.AddPostAction( glLibraryInstall, lambda target, source, env : makeLibSymLinks( glEnv ) )
 		glEnv.Alias( "install", glLibraryInstall )
 		glEnv.Alias( "installGL", glLibraryInstall )
+		glEnv.Alias( "installLib", [ glLibraryInstall ] )
 
 		glHeaders = glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) + glob.glob( "contrib/IECoreGL/include/IECoreGL/*.inl" )
 		glHeaderInstall = glEnv.Install( "$INSTALL_HEADER_DIR/IECoreGL", glHeaders )
@@ -1111,6 +1114,7 @@ if env["WITH_MAYA"] :
 			mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv ) )
 			mayaEnv.Alias( "install", mayaLibraryInstall )
 			mayaEnv.Alias( "installMaya", mayaLibraryInstall )
+			mayaEnv.Alias( "installLib", [ mayaLibraryInstall ] )
 
 			mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
 			mayaEnv.Depends( mayaHeaderInstall, coreInstallSync )			
@@ -1172,6 +1176,7 @@ if doConfigure :
 		nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv ) )
 		nukeEnv.Alias( "install", nukeLibraryInstall )
 		nukeEnv.Alias( "installNuke", nukeLibraryInstall )
+		nukeEnv.Alias( "installLib", [ nukeLibraryInstall ] )
 
 		nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
 		nukeEnv.Depends( nukeHeaderInstall, coreInstallSync )
