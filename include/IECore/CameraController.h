@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,58 +32,100 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_CAMERACONTROLLER_H
-#define IECOREGL_CAMERACONTROLLER_H
+#ifndef IECORE_CAMERACONTROLLER_H
+#define IECORE_CAMERACONTROLLER_H
 
-#include "IECore/RefCounted.h"
+#include "IECore/SimpleTypedData.h"
 
-#include "OpenEXR/ImathMatrix.h"
-#include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathVec.h"
 
-namespace IECoreGL
+namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( Camera )
+IE_CORE_FORWARDDECLARE( MatrixTransform )
 
-/// \deprecated Use IECore::CameraController (possibly in conjunction
-/// with ToGLCameraConverter) instead.
-class CameraController : public IECore::RefCounted
+/// The CameraController class provides methods to aid in the use
+/// of the Camera class within the context of a GUI.
+class CameraController
 {
 
-	public :
-
-		CameraController( CameraPtr camera, float centreOfInterest = 5.0f );
-
+	public:
+	
+		CameraController( CameraPtr camera );
+				
 		void setCamera( CameraPtr camera );
 		CameraPtr getCamera();
-		
+
+		/// Positive.
 		void setCentreOfInterest( float centreOfInterest );
 		float getCentreOfInterest();
-		
+
 		/// Changes the camera resolution, modifying the screen window
-		/// to preserve the horizontal framing and change the vertical
+		/// to preserve the horizontal framing and changing the vertical
 		/// framing to maintain aspect ratio.
-		void reshape( int resolutionX, int resolutionY );
-		/// Translates the camera to frame the specified box, keeping the
+		void setResolution( const Imath::V2i &resolution );
+		const Imath::V2i &getResolution() const;
+		
+		/// Moves the camera to frame the specified box, keeping the
 		/// current viewing direction unchanged.
 		void frame( const Imath::Box3f &box );
 		/// Moves the camera to frame the specified box, viewing it from the
 		/// specified direction, and with the specified up vector.
 		void frame( const Imath::Box3f &box, const Imath::V3f &viewDirection,
 			const Imath::V3f &upVector = Imath::V3f( 0, 1, 0 ) );
-		void track( int dx, int dy );
-		void tumble( int dx, int dy );
-		void dolly( int dx, int dy );
 		
-	private :
-	
-		CameraPtr m_camera;
+		/// Computes the points on the near and far clipping planes that correspond
+		/// with the specified raster position. Points are computed in world space.
+		void unproject( const Imath::V2i rasterPosition, Imath::V3f &near, Imath::V3f &far );
+		
+		//! @name Motion
+		/// These functions facilitate the implementation of maya style
+		/// camera movement controls within a UI. All coordinates passed
+		/// are mouse coordinates in raster space (0,0 at top left).
+		//////////////////////////////////////////////////////////////////
+		//@{
+		enum MotionType
+		{
+			None,
+			Track,
+			Tumble,
+			Dolly
+		};
+		/// Starts a motion of the specified type.
+		void motionStart( MotionType motion, const Imath::V2i &startPosition );
+		/// Updates the camera position based on a changed mouse position. Can only
+		/// be called after motionStart() and before motionEnd().
+		void motionUpdate( const Imath::V2i &newPosition );
+		/// End the current motion, ready to call motionStart() again if required.
+		void motionEnd( const Imath::V2i &endPosition );
+		//@}
+		
+	private:
+		
+		void track( const Imath::V2i &p );
+		void tumble( const Imath::V2i &p );
+		void dolly( const Imath::V2i &p );
+		
+		// parts of the camera we manipulate
+		CameraPtr m_camera;		
+		V2iDataPtr m_resolution;
+		Box2fDataPtr m_screenWindow;
+		MatrixTransformPtr m_transform;
+		ConstStringDataPtr m_projection;
+		ConstFloatDataPtr m_fov;
+		ConstV2fDataPtr m_clippingPlanes;
 		float m_centreOfInterest;
+
+		// motion state
+		MotionType m_motionType;
+		Imath::V2i m_motionStart;
+		Imath::M44f m_motionMatrix;
+		float m_motionCentreOfInterest;
+		Imath::Box2f m_motionScreenWindow;
 		
 };
 
-IE_CORE_DECLAREPTR( CameraController );
+}
 
-};
-
-#endif // IECOREGL_CAMERACONTROLLER_H
+#endif // IECORE_CAMERACONTROLLER_H

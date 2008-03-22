@@ -157,6 +157,7 @@
 #include "IECore/bindings/ImagePrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/ScopedMessageHandlerBinding.h"
 #include "IECore/bindings/MathBinding.h"
+#include "IECore/bindings/CameraControllerBinding.h"
 #include "IECore/bindings/PathVectorParameterBinding.h"
 #include "IECore/IECore.h"
 
@@ -294,6 +295,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImagePrimitiveEvaluator();
 	bindScopedMessageHandler();
 	bindMath();
+	bindCameraController();
 	bindPathVectorParameter();
 		
 	def( "majorVersion", &IECore::majorVersion );

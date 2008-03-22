@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,58 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_CAMERACONTROLLER_H
-#define IECOREGL_CAMERACONTROLLER_H
+#ifndef IECOREPYTHON_CAMERACONTROLLERBINDING_H
+#define IECOREPYTHON_CAMERACONTROLLERBINDING_H
 
-#include "IECore/RefCounted.h"
-
-#include "OpenEXR/ImathMatrix.h"
-#include "OpenEXR/ImathBox.h"
-
-namespace IECoreGL
+namespace IECore
 {
 
-IE_CORE_FORWARDDECLARE( Camera )
+void bindCameraController();
 
-/// \deprecated Use IECore::CameraController (possibly in conjunction
-/// with ToGLCameraConverter) instead.
-class CameraController : public IECore::RefCounted
-{
+}
 
-	public :
-
-		CameraController( CameraPtr camera, float centreOfInterest = 5.0f );
-
-		void setCamera( CameraPtr camera );
-		CameraPtr getCamera();
-		
-		void setCentreOfInterest( float centreOfInterest );
-		float getCentreOfInterest();
-		
-		/// Changes the camera resolution, modifying the screen window
-		/// to preserve the horizontal framing and change the vertical
-		/// framing to maintain aspect ratio.
-		void reshape( int resolutionX, int resolutionY );
-		/// Translates the camera to frame the specified box, keeping the
-		/// current viewing direction unchanged.
-		void frame( const Imath::Box3f &box );
-		/// Moves the camera to frame the specified box, viewing it from the
-		/// specified direction, and with the specified up vector.
-		void frame( const Imath::Box3f &box, const Imath::V3f &viewDirection,
-			const Imath::V3f &upVector = Imath::V3f( 0, 1, 0 ) );
-		void track( int dx, int dy );
-		void tumble( int dx, int dy );
-		void dolly( int dx, int dy );
-		
-	private :
-	
-		CameraPtr m_camera;
-		float m_centreOfInterest;
-		
-};
-
-IE_CORE_DECLAREPTR( CameraController );
-
-};
-
-#endif // IECOREGL_CAMERACONTROLLER_H
+#endif // IECOREPYTHON_CAMERACONTROLLERBINDING_H
