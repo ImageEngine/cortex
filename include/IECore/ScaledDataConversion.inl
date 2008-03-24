@@ -35,12 +35,14 @@
 #include <algorithm>
 
 #include "boost/utility/enable_if.hpp"
+#include "boost/mpl/and.hpp"
 #include "boost/mpl/or.hpp"
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/is_signed.hpp"
 #include "boost/type_traits/is_unsigned.hpp"
 #include "boost/type_traits/is_floating_point.hpp"
 
+#include "OpenEXR/half.h"
 #include "OpenEXR/ImathLimits.h"
 
 #include "boost/type_traits/detail/bool_trait_def.hpp"
@@ -58,6 +60,9 @@ namespace IECore
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type >
 {
+	typedef F FromType;
+	typedef T ToType;	
+	
 	T operator()( F f )
 	{
 		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );	
@@ -67,8 +72,11 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> > >::type >
+struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type >
 {
+	typedef F FromType;
+	typedef T ToType;
+
 	T operator()( F f )
 	{
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
@@ -81,6 +89,9 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type >
 {
+	typedef F FromType;
+	typedef T ToType;
+
 	T operator()( F f )
 	{
 		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );
@@ -92,8 +103,11 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> > >::type >
+struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type >
 {
+	typedef F FromType;
+	typedef T ToType;
+
 	T operator()( F f )
 	{		
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
@@ -107,6 +121,9 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_integral<F>, boost::is_floating_point<T> > >::type >
 {
+	typedef F FromType;
+	typedef T ToType;
+
 	T operator()( F f )
 	{
 		float result = static_cast<float>(f) / Imath::limits<F>::max();
@@ -117,6 +134,9 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_floating_point<F>, boost::is_floating_point<T> > >::type >
 {
+	typedef F FromType;
+	typedef T ToType;
+
 	T operator()( F f )
 	{
 		return static_cast<T>( f );
