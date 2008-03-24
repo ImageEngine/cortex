@@ -113,6 +113,16 @@ ConstStateComponentPtr State::get( IECore::TypeId componentType ) const
 	return it->second;
 }
 
+void State::remove( IECore::TypeId componentType )
+{
+	ComponentMap::iterator it = m_components.find( componentType );
+	if( it==m_components.end() )
+	{
+		return;
+	}
+	m_components.erase( it );
+}
+
 bool State::isComplete() const
 {
 	return m_components.size()==creators()->size();

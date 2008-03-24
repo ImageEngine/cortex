@@ -69,7 +69,9 @@ class State : public Bindable
 		typename T::ConstPtr get() const;
 		StateComponentPtr get( IECore::TypeId componentType );
 		ConstStateComponentPtr get( IECore::TypeId componentType ) const;
-		
+		template<typename T> void remove();
+		void remove( IECore::TypeId componentType );
+
 		bool isComplete() const;
 		
 		typedef StateComponentPtr (*CreatorFn)();

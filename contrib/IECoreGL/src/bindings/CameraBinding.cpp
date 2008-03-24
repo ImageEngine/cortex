@@ -47,7 +47,7 @@ namespace IECoreGL
 
 void bindCamera()
 {
-	typedef class_< Camera, CameraPtr, boost::noncopyable, Renderable> CameraPyClass;
+	typedef class_< Camera, CameraPtr, boost::noncopyable, bases< Renderable > > CameraPyClass;
 	CameraPyClass( "Camera", no_init )
 		.def( "setTransform", &Camera::setTransform )
 		.def( "getTransform", &Camera::getTransform, return_value_policy<copy_const_reference>() )
@@ -67,5 +67,5 @@ void bindCamera()
 	INTRUSIVE_PTR_PATCH( Camera, CameraPyClass );
 	implicitly_convertible<CameraPtr, RenderablePtr>();
 }
-	
+
 }

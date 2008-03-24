@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,35 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCAMERACONVERTER_H
-#define IECOREGL_TOGLCAMERACONVERTER_H
-
-#include "IECoreGL/ToGLConverter.h"
-
-#include "IECore/Camera.h"
+#ifndef IE_COREGL_TOGLCONVERTERBINDING_H
+#define IE_COREGL_TOGLCONVERTERBINDING_H
 
 namespace IECoreGL
 {
 
-/// Converts IECore::Camera objects into IECoreGL::Camera objects.
-class ToGLCameraConverter : public ToGLConverter
-{
+void bindToGLConverter();
 
-	public :
-	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToGLCameraConverter, ToGLCameraConverterTypeId, ToGLConverter );
-		
-		ToGLCameraConverter( IECore::ConstCameraPtr toConvert = 0 );
-		virtual ~ToGLCameraConverter();
-		
-	protected :
-	
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
-			
-};
+}
 
-IE_CORE_DECLAREPTR( ToGLCameraConverter );
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_TOGLCAMERACONVERTER_H
+#endif // IE_COREGL_TOGLCONVERTERBINDING_H

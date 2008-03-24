@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,35 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCAMERACONVERTER_H
-#define IECOREGL_TOGLCAMERACONVERTER_H
+#include "boost/python.hpp"
 
 #include "IECoreGL/ToGLConverter.h"
+#include "IECoreGL/bindings/ToGLConverterBinding.h"
 
-#include "IECore/Camera.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+using namespace boost::python;
+using namespace std;
 
 namespace IECoreGL
 {
 
-/// Converts IECore::Camera objects into IECoreGL::Camera objects.
-class ToGLCameraConverter : public ToGLConverter
+void bindToGLConverter()
 {
+	typedef class_< ToGLConverter, ToGLConverterPtr, boost::noncopyable > ToGLConverterPyClass;
+	ToGLConverterPyClass( "ToGLConverter", no_init )
+		.def( "convert", &ToGLConverter::convert )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToGLConverter )
+	;
 
-	public :
-	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToGLCameraConverter, ToGLCameraConverterTypeId, ToGLConverter );
-		
-		ToGLCameraConverter( IECore::ConstCameraPtr toConvert = 0 );
-		virtual ~ToGLCameraConverter();
-		
-	protected :
-	
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
-			
-};
+	INTRUSIVE_PTR_PATCH( ToGLConverter, ToGLConverterPyClass );
+}
 
-IE_CORE_DECLAREPTR( ToGLCameraConverter );
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_TOGLCAMERACONVERTER_H
+}

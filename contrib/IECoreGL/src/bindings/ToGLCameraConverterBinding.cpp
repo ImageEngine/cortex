@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,35 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCAMERACONVERTER_H
-#define IECOREGL_TOGLCAMERACONVERTER_H
+#include "boost/python.hpp"
 
-#include "IECoreGL/ToGLConverter.h"
+#include "IECoreGL/ToGLCameraConverter.h"
+#include "IECoreGL/bindings/ToGLCameraConverterBinding.h"
 
-#include "IECore/Camera.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+using namespace boost::python;
+using namespace std;
 
 namespace IECoreGL
 {
 
-/// Converts IECore::Camera objects into IECoreGL::Camera objects.
-class ToGLCameraConverter : public ToGLConverter
+void bindToGLCameraConverter()
 {
+	typedef class_< ToGLCameraConverter, ToGLCameraConverterPtr, boost::noncopyable, bases<ToGLConverter> > ToGLCameraConverterPyClass;
+	ToGLCameraConverterPyClass( "ToGLCameraConverter", init< IECore::ConstCameraPtr >() )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToGLCameraConverter )
+	;
 
-	public :
-	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToGLCameraConverter, ToGLCameraConverterTypeId, ToGLConverter );
-		
-		ToGLCameraConverter( IECore::ConstCameraPtr toConvert = 0 );
-		virtual ~ToGLCameraConverter();
-		
-	protected :
-	
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
-			
-};
+	INTRUSIVE_PTR_PATCH( ToGLCameraConverter, ToGLCameraConverterPyClass );
+	implicitly_convertible<ToGLCameraConverterPtr, ToGLConverterPtr>();
+}
 
-IE_CORE_DECLAREPTR( ToGLCameraConverter );
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_TOGLCAMERACONVERTER_H
+}

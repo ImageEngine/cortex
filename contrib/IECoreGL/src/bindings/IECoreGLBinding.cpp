@@ -59,6 +59,9 @@
 #include "IECoreGL/bindings/TypedStateComponentBinding.h"
 #include "IECoreGL/bindings/NameStateComponentBinding.h"
 #include "IECoreGL/bindings/HitRecordBinding.h"
+#include "IECoreGL/bindings/ToGLConverterBinding.h"
+#include "IECoreGL/bindings/ToGLCameraConverterBinding.h"
+
 
 using namespace IECoreGL;
 using namespace boost::python;
@@ -88,6 +91,8 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindTypedStateComponents();
 	bindNameStateComponent();
 	bindHitRecord();
+	bindToGLConverter();
+	bindToGLCameraConverter();
 	
 	def( "coreMajorVersion", &coreMajorVersion );
 	def( "init", &IECoreGL::init );
