@@ -88,6 +88,32 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 		std::transform( pl->begin(), pl->end(), p->writable().begin(), IECore::convert<Imath::V3f, DD::Image::Vector3> );
 		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, p );
 	}
+	
+	PrimitiveVariable::Interpolation uvInterpolation = PrimitiveVariable::Vertex;
+	const DD::Image::Attribute *uvAttr = m_geo->get_typed_group_attribute( DD::Image::Group_Points, "uv", DD::Image::VECTOR4_ATTRIB );
+	if( !uvAttr )
+	{
+		uvAttr = m_geo->get_typed_group_attribute( DD::Image::Group_Vertices, "uv", DD::Image::VECTOR4_ATTRIB );
+		uvInterpolation = PrimitiveVariable::FaceVarying;
+	}
+	
+	if( uvAttr )
+	{
+		FloatVectorDataPtr ud = new FloatVectorData();
+		FloatVectorDataPtr vd = new FloatVectorData();
+		std::vector<float> &u = ud->writable();
+		std::vector<float> &v = vd->writable();
+		u.resize( uvAttr->size() );
+		v.resize( uvAttr->size() );
+		unsigned s = uvAttr->size();
+		for( unsigned i=0; i<s; i++ )
+		{
+			u[i] = uvAttr->vector4( i ).x;
+			v[i] = uvAttr->vector4( i ).y;
+		}
+		result->variables["s"] = PrimitiveVariable( uvInterpolation, ud );
+		result->variables["t"] = PrimitiveVariable( uvInterpolation, vd );
+	}
 
 	return result;
 }
