@@ -159,6 +159,7 @@
 #include "IECore/bindings/MathBinding.h"
 #include "IECore/bindings/CameraControllerBinding.h"
 #include "IECore/bindings/PathVectorParameterBinding.h"
+#include "IECore/bindings/ColorTransformOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -297,6 +298,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMath();
 	bindCameraController();
 	bindPathVectorParameter();
+	bindColorTransformOp();
 		
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
