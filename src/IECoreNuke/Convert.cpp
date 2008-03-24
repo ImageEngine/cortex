@@ -38,6 +38,18 @@ namespace IECore
 {
 
 template<>
+Imath::V2f convert( const DD::Image::Vector3 &from )
+{
+	return Imath::V2f( from.x, from.y );
+}
+
+template<>
+Imath::V2d convert( const DD::Image::Vector3 &from )
+{
+	return Imath::V2d( from.x, from.y );
+}
+
+template<>
 Imath::V3f convert( const DD::Image::Vector3 &from )
 {
 	return Imath::V3f( from.x, from.y, from.z );
@@ -45,6 +57,30 @@ Imath::V3f convert( const DD::Image::Vector3 &from )
 
 template<>
 Imath::V3d convert( const DD::Image::Vector3 &from )
+{
+	return Imath::V3d( from.x, from.y, from.z );
+}
+
+template<>
+Imath::V2f convert( const DD::Image::Vector4 &from )
+{
+	return Imath::V2f( from.x, from.y );
+}
+
+template<>
+Imath::V2d convert( const DD::Image::Vector4 &from )
+{
+	return Imath::V2d( from.x, from.y );
+}
+
+template<>
+Imath::V3f convert( const DD::Image::Vector4 &from )
+{
+	return Imath::V3f( from.x, from.y, from.z );
+}
+
+template<>
+Imath::V3d convert( const DD::Image::Vector4 &from )
 {
 	return Imath::V3d( from.x, from.y, from.z );
 }
