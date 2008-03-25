@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,49 +32,48 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#ifndef IE_CORE_LINEARTOCINEONDATACONVERSION_H
+#define IE_CORE_LINEARTOCINEONDATACONVERSION_H
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+#include <vector>
 
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
+#include "IECore/DataConversion.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace IECore;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace IECore
 {
+
+template< typename, typename > class CineonToLinearDataConversion;
+
+/// A class to perform data conversion from linear to Cineon log values
+template<typename F, typename T>
+class LinearToCineonDataConversion : public DataConversion< F, T >
+{	
+	public:
 	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
+		/// "To" data type should be at least 10-bits!
+		BOOST_STATIC_ASSERT( sizeof(T) >= 2 );
+		typedef CineonToLinearDataConversion< T, F >  InverseType;
 	
-	try
-	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+		LinearToCineonDataConversion();
+
+		T operator()( F f );
 	
-	return test;
-}
+	private:
+	
+		const std::vector<float> &lookupTable() const;
+				
+		float m_filmGamma;
+		int m_refWhiteVal;
+		int m_refBlackVal;
+		float m_refMult;
+		float m_blackOffset;
+		
+		mutable std::vector<float> m_LUT;
+		mutable bool m_LUTValid;
+};
+
+} // namespace IECore
+
+#include "IECore/LinearToCineonDataConversion.inl"
+
+#endif // IE_CORE_LINEARTOCINEONDATACONVERSION_H

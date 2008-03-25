@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,49 +32,60 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#ifndef IE_CORE_CINEONTOLINEARDATACONVERSION_INL
+#define IE_CORE_CINEONTOLINEARDATACONVERSION_INL
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+#include <iterator>
+#include <algorithm>
+#include <vector>
+#include <cassert>
 
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
+#include "OpenEXR/ImathLimits.h"
+#include "OpenEXR/ImathMath.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace IECore;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace IECore
 {
+
+template<typename F, typename T>
+CineonToLinearDataConversion<F, T>::CineonToLinearDataConversion() : m_LUT( 1024 )
+{
+	m_filmGamma = 0.6f;
+	m_refWhiteVal = 685;
+	m_refBlackVal = 95;
+	m_refMult = 0.002f / m_filmGamma;
+	m_blackOffset = Imath::Math<float>::pow( 10.0f, ( m_refBlackVal - m_refWhiteVal ) * m_refMult );
 	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
-	
-	try
-	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-	
-	return test;
+	m_LUTValid = false;
 }
+
+template<typename F, typename T>
+T CineonToLinearDataConversion<F, T>::operator()( F f )
+{
+	std::vector<float>::size_type i = static_cast<std::vector<float>::size_type>( f );
+
+	assert( i >= 0 );
+	assert( i < 1024 );
+
+	return lookupTable()[ i ];
+}
+
+template<typename F, typename T>
+const std::vector<float> &CineonToLinearDataConversion<F, T>::lookupTable() const
+{
+	if ( ! m_LUTValid )
+	{		
+		assert( m_LUT.size() == 1024 );
+		for ( unsigned i = 0; i < 1024; ++i )
+		{
+			m_LUT[i] = ( Imath::Math<float>::pow( 10.0f, ( (float)i - m_refWhiteVal ) * m_refMult ) - m_blackOffset ) / ( 1.0f - m_blackOffset );
+		}
+		m_LUTValid = true;	
+	}
+
+	assert( m_LUT.size() == 1024 );
+	return m_LUT;
+}	
+
+} // namespace IECore
+
+#endif // IE_CORE_CINEONTOLINEARDATACONVERSION_INL

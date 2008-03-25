@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,49 +32,66 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#ifndef IE_CORE_DATACONVERSIONTEST_H
+#define IE_CORE_DATACONVERSIONTEST_H
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+#include <cassert>
 
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
+#include "boost/test/unit_test.hpp"
+#include "boost/test/floating_point_comparison.hpp"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "OpenEXR/half.h"
 
-using namespace IECore;
+#include "IECore/IECore.h"
+#include "IECore/CineonToLinearDataConversion.h"
+#include "IECore/LinearToCineonDataConversion.h"
+#include "IECore/CompoundDataConversion.h"
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+using namespace Imath;
+
+namespace IECore
+{
+
+void addDataConversionTest(boost::unit_test::test_suite* test);
+
+struct DataConversionTest
+{	
+	template<typename F, typename T>
+	void testCineonLinear()
+	{
+		typedef CineonToLinearDataConversion< F, T > Func;	
+		CompoundDataConversion< Func, typename Func::InverseType > f;
+	
+		/// Verify that f(f'(i)) == i
+		for ( F i = 0; i < 1024; i++ )
+		{		
+			BOOST_CHECK_EQUAL( f(i), i );
+		}
+	}
+};
+
+struct DataConversionTestSuite : public boost::unit_test::test_suite
 {
 	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
-	
-	try
+	DataConversionTestSuite() : boost::unit_test::test_suite("DataConversionTestSuite")
 	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
+		static boost::shared_ptr<DataConversionTest> instance(new DataConversionTest());
+				
+		void (DataConversionTest::*fn)() = 0;
+		
+		fn = &DataConversionTest::testCineonLinear<unsigned, float>;
+		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		fn = &DataConversionTest::testCineonLinear<unsigned, double>;
+		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		fn = &DataConversionTest::testCineonLinear<short, float>;
+		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		fn = &DataConversionTest::testCineonLinear<short, half>;
+		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
 	}
 	
-	return test;
+};
+
 }
+
+#endif // IE_CORE_DATACONVERSIONTEST_H
+
