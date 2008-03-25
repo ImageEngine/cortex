@@ -40,11 +40,12 @@
 #include "boost/test/unit_test.hpp"
 #include "boost/test/floating_point_comparison.hpp"
 
-#include "OpenEXR/half.h"
-
+#include "IECore/HalfTypeTraits.h"
 #include "IECore/IECore.h"
 #include "IECore/CineonToLinearDataConversion.h"
 #include "IECore/LinearToCineonDataConversion.h"
+#include "IECore/SRGBToLinearDataConversion.h"
+#include "IECore/LinearToSRGBDataConversion.h"
 #include "IECore/CompoundDataConversion.h"
 
 using namespace Imath;
@@ -68,15 +69,34 @@ struct DataConversionTest
 			BOOST_CHECK_EQUAL( f(i), i );
 		}
 	}
+	
+	template<typename T>
+	void testSRGBLinear()
+	{
+		typedef SRGBToLinearDataConversion< T, T > Func;	
+		CompoundDataConversion< Func, typename Func::InverseType > f;
+	
+		/// Verify that f(f'(i)) ~ i
+		for ( T i = T(0); i < T(10); i += T(0.2) )
+		{		
+			BOOST_CHECK_CLOSE( double( f(i) ), double( i ), 1.e-4 );
+		}
+	}
 };
 
 struct DataConversionTestSuite : public boost::unit_test::test_suite
 {
 	
-	DataConversionTestSuite() : boost::unit_test::test_suite("DataConversionTestSuite")
+	DataConversionTestSuite() : boost::unit_test::test_suite( "DataConversionTestSuite" )
 	{
-		static boost::shared_ptr<DataConversionTest> instance(new DataConversionTest());
+		static boost::shared_ptr<DataConversionTest> instance( new DataConversionTest() );
 				
+		testCineonLinear( instance );
+		testSRGBLinear( instance );
+	}		
+	
+	void testCineonLinear( boost::shared_ptr<DataConversionTest> instance )
+	{
 		void (DataConversionTest::*fn)() = 0;
 		
 		fn = &DataConversionTest::testCineonLinear<unsigned, float>;
@@ -89,6 +109,13 @@ struct DataConversionTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
 	}
 	
+	void testSRGBLinear( boost::shared_ptr<DataConversionTest> instance )
+	{
+		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testSRGBLinear<float>, instance ) );		
+		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testSRGBLinear<double>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testSRGBLinear<half>, instance ) );
+	}	
+		
 };
 
 }
