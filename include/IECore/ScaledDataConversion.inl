@@ -42,18 +42,9 @@
 #include "boost/type_traits/is_unsigned.hpp"
 #include "boost/type_traits/is_floating_point.hpp"
 
-#include "OpenEXR/half.h"
 #include "OpenEXR/ImathLimits.h"
 
-#include "boost/type_traits/detail/bool_trait_def.hpp"
-namespace boost
-{
-BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_floating_point,half,true)
-BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_signed,half,true)
-BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_unsigned,half,false)
-}
-#include "boost/type_traits/detail/bool_trait_undef.hpp"
-
+#include "IECore/HalfTypeTraits.h"
 #include "IECore/DataConversion.h"
 
 namespace IECore
