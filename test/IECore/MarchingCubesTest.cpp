@@ -42,7 +42,6 @@ namespace IECore
 void addMarchingCubesTest(boost::unit_test::test_suite* test)
 {
 	test->add( new MarchingCubesTestSuite() );
-	test->add( new MarchingCubesTestSuite() );
 }
 
 }

@@ -42,7 +42,6 @@ namespace IECore
 void addDataConversionTest(boost::unit_test::test_suite* test)
 {
 	test->add( new DataConversionTestSuite() );
-	test->add( new DataConversionTestSuite() );
 }
 
 }
