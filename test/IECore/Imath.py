@@ -776,10 +776,10 @@ class ImathM33f(unittest.TestCase):
 				mi = m.inverse()
 				di = mi.determinant()
 			
-				self.assertAlmostEqual( d, 1/di, 3 )
+				self.assertAlmostEqual( d, 1/di, 1 )
 				
 			mt = m.transposed()
-			self.assertAlmostEqual( d, mt.determinant(), 6 )
+			self.assertAlmostEqual( d, mt.determinant(), 3 )
 		
 class ImathM44f(unittest.TestCase):		
 	def testConstructors(self):
@@ -931,10 +931,10 @@ class ImathM44f(unittest.TestCase):
 				mi = m.inverse()
 				di = mi.determinant()
 			
-				self.assertAlmostEqual( d, 1/di, 4 )
+				self.assertAlmostEqual( d, 1/di, 3 )
 				
 			mt = m.transposed()
-			self.assertAlmostEqual( d, mt.determinant(), 4 )
+			self.assertAlmostEqual( d, mt.determinant(), 3 )
 			
 		for i in range( 0, 1000 ) :
 		
