@@ -61,7 +61,9 @@ template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type >
 {
 	typedef F FromType;
-	typedef T ToType;	
+	typedef T ToType;
+	
+	typedef void InverseType;	
 	
 	T operator()( F f )
 	{
@@ -76,6 +78,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 {
 	typedef F FromType;
 	typedef T ToType;
+	
+	typedef void InverseType;
 
 	T operator()( F f )
 	{
@@ -91,6 +95,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 {
 	typedef F FromType;
 	typedef T ToType;
+	
+	typedef void InverseType;
 
 	T operator()( F f )
 	{
@@ -107,6 +113,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 {
 	typedef F FromType;
 	typedef T ToType;
+	
+	typedef void InverseType;
 
 	T operator()( F f )
 	{		
@@ -123,6 +131,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 {
 	typedef F FromType;
 	typedef T ToType;
+	
+	typedef void InverseType;
 
 	T operator()( F f )
 	{
@@ -136,6 +146,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 {
 	typedef F FromType;
 	typedef T ToType;
+	
+	typedef void InverseType;
 
 	T operator()( F f )
 	{
