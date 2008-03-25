@@ -38,7 +38,9 @@
 #include <vector>
 
 #include "boost/static_assert.hpp"
+#include "boost/type_traits/is_floating_point.hpp"
 
+#include "IECore/HalfTypeTraits.h"
 #include "IECore/DataConversion.h"
 
 namespace IECore
@@ -55,6 +57,8 @@ class CineonToLinearDataConversion : public DataConversion< F, T >
 	
 		/// "From" data type should be at least 10-bits!
 		BOOST_STATIC_ASSERT( sizeof(F) >= 2 );
+		
+		BOOST_STATIC_ASSERT( boost::is_floating_point< T >::value );
 	
 		typedef LinearToCineonDataConversion< T, F > InverseType;
 	
