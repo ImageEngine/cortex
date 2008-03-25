@@ -420,6 +420,8 @@ IECore::ObjectPtr FromMayaMeshConverter::doConversion( const MObject &object, IE
 		vertexIdsIt += polygonVertices.length();
 	}
 
+	/// \todo Allow construction of empty meshes. Currently this MeshPrimitive constructor throws if there are no polygons. So we either need to change
+	/// that behaviour, or call the MeshPrimitive() constructor if there are no polygons.
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIds, m_interpolation->getTypedValue() );
 			
 	if( m_points->getTypedValue() )
