@@ -32,28 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SCALEDDATACONVERSION_H
-#define IE_CORE_SCALEDDATACONVERSION_H
+#ifndef IE_CORE_DATACONVERSION_H
+#define IE_CORE_DATACONVERSION_H
 
-#include "boost/static_assert.hpp"
-
-#include "IECore/DataConversion.h"
+#include <functional>
 
 namespace IECore
 {
 
-/// \todo Verify that we can round trip data where possible
-template<typename F, typename T, typename Enable = void>
-struct ScaledDataConversion : public DataConversion< F, T >
+/// Base class for data conversions
+template<typename F, typename T>
+struct DataConversion : public std::unary_function<F, T>
 {
-	T operator()( F f )
-	{
-		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
-	}
+	typedef F FromType;
+	typedef T ToType;
+	
+	/// The type of the converter that can perform the inverse transformation
+	typedef void InverseType;
 };
 
 } // namespace IECore
 
-#include "ScaledDataConversion.inl"
-
-#endif // IE_CORE_SCALEDDATACONVERSION_H
+#endif // IE_CORE_DATACONVERSION_H

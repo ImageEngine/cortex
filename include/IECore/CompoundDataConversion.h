@@ -38,20 +38,19 @@
 #include "boost/static_assert.hpp"
 #include "boost/type_traits.hpp"
 
+#include "IECore/DataConversion.h"
+
 namespace IECore
 {
 
 /// Performs the conversion "to = C2(C1(from))". Note that the functions are applied in the same order as
 /// specified in the template argument list.
 template<typename C1, typename C2>
-class CompoundDataConversion
+class CompoundDataConversion : public DataConversion< typename C1::FromType, typename C2::ToType >
 {
 	public:
 		/// These two types must be the same, so that the function composition works
 		BOOST_STATIC_ASSERT( (boost::is_same< typename C1::ToType, typename C2::FromType >::value) );
-	
-		typedef typename C1::FromType FromType;
-		typedef typename C2::ToType ToType;
 		
 		/// Inverse defined by the equality: (f o g)'(x) = ( g' o f' )(x)		
 		typedef CompoundDataConversion< typename C2::InverseType, typename C1::InverseType > InverseType;
@@ -63,7 +62,7 @@ class CompoundDataConversion
 		CompoundDataConversion( const C1 &c1, const C2 &c2 );
 
 		/// Perform the conversion
-		ToType operator()( FromType f );
+		typename CompoundDataConversion<C1, C2>::ToType operator()( typename CompoundDataConversion<C1, C2>::FromType f );
 	
 	protected:
 	

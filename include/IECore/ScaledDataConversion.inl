@@ -54,17 +54,14 @@ BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_unsigned,half,false)
 }
 #include "boost/type_traits/detail/bool_trait_undef.hpp"
 
+#include "IECore/DataConversion.h"
+
 namespace IECore
 {
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type >
-{
-	typedef F FromType;
-	typedef T ToType;
-	
-	typedef void InverseType;	
-	
+struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type > : public DataConversion< F, T >
+{	
 	T operator()( F f )
 	{
 		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );	
@@ -74,13 +71,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type >
+struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type > : public DataConversion< F, T >
 {
-	typedef F FromType;
-	typedef T ToType;
-	
-	typedef void InverseType;
-
 	T operator()( F f )
 	{
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
@@ -91,13 +83,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type >
+struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type > : public DataConversion< F, T >
 {
-	typedef F FromType;
-	typedef T ToType;
-	
-	typedef void InverseType;
-
 	T operator()( F f )
 	{
 		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );
@@ -109,13 +96,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type >
+struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type > : public DataConversion< F, T >
 {
-	typedef F FromType;
-	typedef T ToType;
-	
-	typedef void InverseType;
-
 	T operator()( F f )
 	{		
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
@@ -127,13 +109,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_integral<F>, boost::is_floating_point<T> > >::type >
+struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_integral<F>, boost::is_floating_point<T> > >::type > : public DataConversion< F, T >
 {
-	typedef F FromType;
-	typedef T ToType;
-	
-	typedef void InverseType;
-
 	T operator()( F f )
 	{
 		float result = static_cast<float>(f) / Imath::limits<F>::max();
@@ -142,13 +119,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_floating_point<F>, boost::is_floating_point<T> > >::type >
+struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_floating_point<F>, boost::is_floating_point<T> > >::type > : public DataConversion< F, T >
 {
-	typedef F FromType;
-	typedef T ToType;
-	
-	typedef void InverseType;
-
 	T operator()( F f )
 	{
 		return static_cast<T>( f );
