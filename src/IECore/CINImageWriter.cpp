@@ -41,6 +41,8 @@
 #include "IECore/BoxOperators.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
+#include "IECore/CompoundDataConversion.h"
+#include "IECore/LinearToCineonDataConversion.h"
 
 #include "IECore/private/cineon.h"
 
@@ -76,7 +78,11 @@ template<typename T>
 void CINImageWriter::encodeChannel( ConstDataPtr dataContainer, const Box2i &displayWindow, const Box2i &dataWindow, int bitShift, std::vector<unsigned int> &imageBuffer )
 {
 	const typename T::ValueType &data = static_pointer_cast<const T>( dataContainer )->readable();
-	ScaledDataConversion<typename T::ValueType::value_type, float> converter;
+	
+	CompoundDataConversion<
+		ScaledDataConversion<typename T::ValueType::value_type, float>, 
+		LinearToCineonDataConversion<float, unsigned int> 
+	> converter;
 
 	int displayWidth = displayWindow.size().x + 1;
 	int dataWidth = dataWindow.size().x + 1;
@@ -97,9 +103,8 @@ void CINImageWriter::encodeChannel( ConstDataPtr dataContainer, const Box2i &dis
 			assert( pixelIdx < (int)imageBuffer.size() );
 			assert( dataOffset < (int)data.size() );
 
-			vector<double>::iterator where = lower_bound(m_LUT.begin(), m_LUT.end(), converter( data[dataOffset] ) );
-			unsigned int logValue = distance(m_LUT.begin(), where);
-			imageBuffer[ pixelIdx ] |= logValue << bitShift;
+			/// Perform the conversion, and set the appropriate bits in the "cell"
+			imageBuffer[ pixelIdx ] |= converter( data[dataOffset] ) << bitShift;
 		}
 	}
 }
@@ -183,22 +188,7 @@ void CINImageWriter::writeImage( vector<string> &names, ConstImagePrimitivePtr i
 
 	// write the data
 	std::vector<unsigned int> imageBuffer( displayWidth*displayHeight, 0 );
-
-	/// \todo Do we really need to do this every time?
-	// build a LUT
-	double film_gamma = 0.6;
-	int ref_white_val = 685;
-	int ref_black_val = 95;
-	double ref_mult = 0.002 / film_gamma;
-	double black_offset = pow(10.0, (ref_black_val - ref_white_val) * ref_mult);
-
-	m_LUT.resize(1024);
-	for (int i = 0; i < 1024; ++i)
-	{
-		double v = i + 0.5;
-		m_LUT[i] = (pow(10.0, (v - ref_white_val) * ref_mult) - black_offset) / (1.0 - black_offset);
-	}
-
+	
 	vector<string>::const_iterator i = filteredNames.begin();
 	int offset = 0;
 	while (i != filteredNames.end())

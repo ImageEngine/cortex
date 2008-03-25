@@ -85,9 +85,6 @@ class CINImageReader : public ImageReader
 		std::string m_bufferFileName;
 		unsigned int m_bufferWidth, m_bufferHeight;
 		bool m_reverseBytes;
-
-		/// lookup table for converting to linear cs
-		float m_LUT[1024];
 		
 		struct Header;
 		Header *m_header;

@@ -52,7 +52,7 @@ class CINImageWriter : public ImageWriter
 		CINImageWriter();
 
 		/// construct an CINImageWriter for the given image and output filename
-		CINImageWriter(ObjectPtr object, const std::string & fileName);
+		CINImageWriter( ObjectPtr object, const std::string &fileName );
 
 
 		/// free the resources consumed in serializing the associated image
@@ -68,9 +68,6 @@ class CINImageWriter : public ImageWriter
 					
 		template<typename T>
 		void encodeChannel( ConstDataPtr dataContainer, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, int bitShift, std::vector<unsigned int> &imageBuffer );
-		
-		std::vector<double> m_LUT;		
-
 };
 
 IE_CORE_DECLAREPTR(CINImageWriter);

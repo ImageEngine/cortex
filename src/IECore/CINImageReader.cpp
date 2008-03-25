@@ -41,6 +41,8 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/BoxOps.h"
 
+#include "IECore/CineonToLinearDataConversion.h"
+
 #include "IECore/private/cineon.h"
 
 #include "boost/format.hpp"
@@ -176,6 +178,8 @@ DataPtr CINImageReader::readChannel( const string &name, const Imath::Box2i &dat
 		mask = 1 + (mask << 1);
 	}
 	mask <<= ((32 - bpp) - channelOffset * bpp);
+	
+	CineonToLinearDataConversion< unsigned short, half > converter;
 
 	HalfVectorDataPtr dataContainer = new HalfVectorData();
 	HalfVectorData::ValueType &data = dataContainer->writable();
@@ -203,9 +207,7 @@ DataPtr CINImageReader::readChannel( const string &name, const Imath::Box2i &dat
 
 			// assume we have 10bit log, two wasted bits aligning to 32 longword
 			unsigned short cv = (unsigned short) ( ( mask & cell ) >> ( 2 + ( 2 - channelOffset ) * bpp ) );
-			assert ( cv < 1024 );			
-
-			data[dataOffset] = m_LUT[ cv ];
+			data[dataOffset] = converter( cv );
 		}
 	}
 
@@ -374,26 +376,6 @@ bool CINImageReader::open( bool throwOnFailure )
 		if ( in.fail() )
 		{
 			throw IOException( "CINImageReader: Error reading " + fileName() );
-		}
-
-		// build a LUT for 10bit log -> 16bit linear conversion
-
-		// get reference white
-		//double film_gamma = 1.7;
-		double film_gamma = 0.6;
-		int ref_black_val = 95;
-		int ref_white_val = 685;
-		double quantization_step = 0.002;
-		double ref_mult = quantization_step / film_gamma;
-
-		// compute black offset
-		double black_offset = pow(10.0, (ref_black_val - ref_white_val) * ref_mult);
-
-		// standard lut
-		for (int i = 0; i < 1024; ++i)
-		{
-			float cvf = (pow(10.0, (i - ref_white_val) * ref_mult) - black_offset) / (1.0 - black_offset);
-			m_LUT[i] = cvf;
 		}
 
 		// Read the data into the buffer - remember that we're currently packing upto 3 channels into each 32-bit "cell"
