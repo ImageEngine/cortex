@@ -79,11 +79,14 @@ class FileSequenceGraphOp( FileSequenceAnalyzerOp ):
 		graph = Group()
 
 		colors = {
-			'ok': Color3f( 0,0,1 ),
-			'missing': Color3f( 0,1,0  ),
-			'corrupted': Color3f( 1,0,0 ),
-			'suspicious': Color3f( 1,1,0 ),
+			'ok': Color3f( 0.1, 0.7, 0.1 ),
+			'missing': Color3f( 0.5, 0.3, 0.7 ),
+			'corrupted': Color3f( 0.8, 0.3, 0.3 ),
+			'suspicious': Color3f( 1, 1, 0.3 ),
 		}
+
+		# set a value that will be added to the height of every file. So even super small files will be visible on the graph.
+		baseHeight = maxSize/6.
 
 		# create one Group for each frame in the file sequence.
 		for (fi, f) in enumerate(frames):
@@ -93,10 +96,10 @@ class FileSequenceGraphOp( FileSequenceAnalyzerOp ):
 			frameGrp = Group()
 			m = M44f()
 			m.translate( V3f( fi, 0, 0 ) )
-			m.scale( V3f( 1.0, info.get('size', maxSize), 1.0 ) )
+			m.scale( V3f( 1.0, info.get('size', maxSize) + baseHeight, 1.0 ) )
 			frameGrp.setTransform( MatrixTransform( m ) )
 			state = AttributeState()
-			state.attributes['name'] = StringData( "file:/" + info['path'] )
+			state.attributes['name'] = StringData( info['path'] )
 			state.attributes['color'] = Color3fData( colors[ info['type'] ] )
 			frameGrp.addState( state )
 			frameGrp.addChild( mesh )
@@ -104,9 +107,11 @@ class FileSequenceGraphOp( FileSequenceAnalyzerOp ):
 			graph.addChild( frameGrp )
 
 		m = M44f()
-		m.scale( V3f( 1. / len( frames ), (1. / maxSize) / 2., 1. ) )
-		m.translate( V3f( -0.5, -0.25, 0 ) )
+		m.translate( V3f( -1./2., -1./10., 0 ) )
+		m.scale( V3f( 1. / len( frames ), (1. / (maxSize +  + baseHeight)) / 5., 1. ) )
 		graph.setTransform( MatrixTransform( m ) )
+		# Indicate this Renderable object is meant to be a hyperlink to entities on the file system.
+		graph.blindData()['hyperlink'] = StringData('FileSystem')
 		return graph
 
 makeRunTimeTyped( FileSequenceGraphOp, 100020, Op )

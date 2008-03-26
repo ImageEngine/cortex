@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/ToGLConverter.h"
-#include "IECoreGL/bindings/ToGLConverterBinding.h"
+#include "IECore/Object.h"
+#include "IECore/FromCoreConverter.h"
+#include "IECore/bindings/FromCoreConverterBinding.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
@@ -43,19 +44,20 @@
 using namespace boost::python;
 using namespace std;
 
-namespace IECoreGL
+namespace IECore
 {
 
-void bindToGLConverter()
+void bindFromCoreConverter()
 {
-	typedef class_< ToGLConverter, ToGLConverterPtr, boost::noncopyable, bases< IECore::FromCoreConverter > > ToGLConverterPyClass;
-	ToGLConverterPyClass( "ToGLConverter", no_init )
-		.def( "convert", &ToGLConverter::convert )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToGLConverter )
+	typedef class_< FromCoreConverter, FromCoreConverterPtr, boost::noncopyable, bases< Converter > > FromCoreConverterPyClass;
+	FromCoreConverterPyClass( "FromCoreConverter", no_init )
+		.def( "srcParameter", ( ObjectParameterPtr (FromCoreConverter::*)( void ) )&FromCoreConverter::srcParameter )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromCoreConverter )
 	;
 
-	INTRUSIVE_PTR_PATCH( ToGLConverter, ToGLConverterPyClass );
-	implicitly_convertible<ToGLConverterPtr, IECore::FromCoreConverterPtr>();
+	INTRUSIVE_PTR_PATCH( FromCoreConverter, FromCoreConverterPyClass );
+	implicitly_convertible<FromCoreConverterPtr, ConverterPtr>();
+	implicitly_convertible<FromCoreConverterPtr, ConstFromCoreConverterPtr>();
 }
 
 }

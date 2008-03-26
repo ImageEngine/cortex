@@ -32,30 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IE_CORE_CONVERTERBINDING_H
+#define IE_CORE_CONVERTERBINDING_H
 
-#include "IECoreGL/ToGLConverter.h"
-#include "IECoreGL/bindings/ToGLConverterBinding.h"
-
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
-
-using namespace boost::python;
-using namespace std;
-
-namespace IECoreGL
+namespace IECore
 {
 
-void bindToGLConverter()
-{
-	typedef class_< ToGLConverter, ToGLConverterPtr, boost::noncopyable, bases< IECore::FromCoreConverter > > ToGLConverterPyClass;
-	ToGLConverterPyClass( "ToGLConverter", no_init )
-		.def( "convert", &ToGLConverter::convert )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToGLConverter )
-	;
-
-	INTRUSIVE_PTR_PATCH( ToGLConverter, ToGLConverterPyClass );
-	implicitly_convertible<ToGLConverterPtr, IECore::FromCoreConverterPtr>();
-}
+void bindConverter();
 
 }
+
+#endif // IE_CORE_CONVERTERBINDING_H
