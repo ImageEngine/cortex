@@ -40,6 +40,7 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/BoxOps.h"
+#include "IECore/CineonToLinearDataConversion.h"
 
 #include "IECore/private/dpx.h"
 
@@ -158,6 +159,8 @@ DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i
 		mask = 1 + (mask << 1);
 	}
 	mask <<= ((32 - bpp) - channelOffset * bpp);
+	
+	CineonToLinearDataConversion< unsigned short, half > converter;
 
 	HalfVectorDataPtr dataContainer = new HalfVectorData();
 	HalfVectorData::ValueType &data = dataContainer->writable();
@@ -187,7 +190,7 @@ DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i
 			unsigned short cv = (unsigned short) (( mask & cell ) >> ( 2 + ( 2 - channelOffset ) * bpp ) );
 
 			// convert to a linear floating-point value
-			data[dataOffset] = m_LUT[ cv ];
+			data[dataOffset] = converter( cv );
 		}
 	}
 
@@ -245,7 +248,7 @@ bool DPXImageReader::open( bool throwOnFailure )
 
 		if ( m_reverseBytes )
 		{
-			m_header->m_fileInformation.image_data_offset   = reverseBytes(m_header->m_fileInformation.image_data_offset);
+			m_header->m_fileInformation.image_data_offset    = reverseBytes(m_header->m_fileInformation.image_data_offset);
 			m_header->m_imageInformation.element_number      = reverseBytes(m_header->m_imageInformation.element_number);
 			m_header->m_imageInformation.pixels_per_line     = reverseBytes(m_header->m_imageInformation.pixels_per_line);
 			m_header->m_imageInformation.lines_per_image_ele = reverseBytes(m_header->m_imageInformation.lines_per_image_ele);
@@ -261,56 +264,7 @@ bool DPXImageReader::open( bool throwOnFailure )
 		{
 			throw IOException( "DPXImageReader: Error reading " + fileName() );
 		}
-
-		//
-		// build a LUT based on the transfer enum.  we handle only the
-		// log/printing density and linear
-		//
-
-// 		// ugg, assume that there is only one image and it is specified in m_header->m_imageInformation.image_element[0]
-// 		if(m_header->m_imageInformation.image_element[0].transfer == 2)
-// 		{
-// 			// i have noticed that our lone example of linear DPX encoded files has specified
-// 			// ref_low_data, ref_high_data points.  i am under the impression that these specify
-// 			// the black and white points for linear transfer.
-// 			//
-// 			// for example, the SNO plates have values 64 and 965.  however, not having 0 and 1023
-// 			// as points is just wasteful.
-// 			//
-// 			// here instead we will mimic shake and nuke and simply use a ramp over 0 to 1023
-
-// 			// build a different lut for linear transfer
-// 			int ref_black_val = 0;       // m_header->m_imageInformation.image_element[0].ref_low_data;
-// 			int ref_white_val = 1023;    // m_header->m_imageInformation.image_element[0].ref_high_data;
-// 			float spread = ref_white_val - ref_black_val;
-// 			for(int i = 0; i < 1024; ++i)
-// 			{
-// 				float cvf = i <= ref_black_val ? 0.0f : i >= ref_white_val ? 1.0 : (1.0*i - ref_black_val) / spread;
-// 				m_LUT[i] = cvf;
-// 			}
-// 		}
-// 		else
-// 		{
-
-		// build a LUT for 10bit log -> 16bit linear conversion
-
-		// get reference white
-		double film_gamma = 0.6;
-		int ref_black_val = 95;
-		int ref_white_val = 685;
-		double quantization_step = 0.002;
-		double ref_mult = quantization_step / film_gamma;
-
-		// compute black offset
-		double black_offset = pow(10.0, (ref_black_val - ref_white_val) * ref_mult);
-
-		// standard lut
-		for (int i = 0; i < 1024; ++i)
-		{
-			float cvf = (pow(10.0, (i - ref_white_val) * ref_mult) - black_offset) / (1.0 - black_offset);
-			m_LUT[i] = cvf;
-		}
-
+		
 		// Read the data into the buffer - remember that we're currently packing upto 3 channels into each 32-bit "cell"
 		int bufferSize = ( std::max<unsigned int>( 1u, 3 / 3 ) ) * m_bufferWidth * m_bufferHeight;
 		m_buffer.resize( bufferSize, 0 );

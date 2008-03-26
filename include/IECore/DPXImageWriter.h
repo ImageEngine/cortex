@@ -67,9 +67,7 @@ class DPXImageWriter : public ImageWriter
 		/// write the associated image
 		virtual void writeImage( std::vector<std::string> &names, ConstImagePrimitivePtr image,
 		                        const Imath::Box2i &dataWindow );
-					
-		std::vector<double> m_LUT;			
-
+		
 };
 
 IE_CORE_DECLAREPTR(DPXImageWriter);
