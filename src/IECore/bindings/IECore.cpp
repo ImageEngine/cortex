@@ -159,6 +159,7 @@
 #include "IECore/bindings/MathBinding.h"
 #include "IECore/bindings/CameraControllerBinding.h"
 #include "IECore/bindings/PathVectorParameterBinding.h"
+#include "IECore/bindings/TriangleAlgoBinding.h"
 #include "IECore/bindings/ColorTransformOpBinding.h"
 #include "IECore/bindings/ConverterBinding.h"
 #include "IECore/bindings/FromCoreConverterBinding.h"
@@ -300,6 +301,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMath();
 	bindCameraController();
 	bindPathVectorParameter();
+	bindTriangleAlgo();
 	bindColorTransformOp();
 	bindConverter();
 	bindFromCoreConverter();

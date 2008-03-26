@@ -378,6 +378,39 @@ int triangleClosestFeature( const Vec &v0, const Vec &v1, const Vec &v2, const V
 }
 
 
+/// Derived from article at http://www.blackpawn.com/texts/pointinpoly/default.html
+template<class Vec>
+bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p )
+{
+	typedef typename VectorTraits<Vec>::BaseType Real;
+			
+	Vec a = v2 - v0;
+	Vec b = v1 - v0;
+	Vec c = p - v0;
+
+	Real dotAA = a.dot( a );
+	Real dotAB = a.dot( b );
+	Real dotAC = a.dot( c );
+	Real dotBB = b.dot( b );
+	Real dotBC = b.dot( c );
+
+	Real d = Real( 1 ) / ( dotAA * dotBB - dotAB * dotAB );
+	
+	Real u = (dotBB * dotAC - dotAB * dotBC) * d;
+	if( u < Real( 0 ) || u > Real( 1 ) )
+	{
+		return false;
+	}
+
+	Real v = (dotAA * dotBC - dotAB * dotAC) * d;
+	if( v < Real( 0 ) || u + v > Real( 1 ) )
+	{
+		return false;
+	} 
+	
+	return true;
+}
+
 } // namespace IECore
 
 #endif // IECORE_TRIANGLEALGO_INL

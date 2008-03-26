@@ -37,6 +37,8 @@
 
 #include "IECore/VectorTraits.h"
 
+#include "OpenEXR/ImathVec.h"
+
 namespace IECore
 {
 
@@ -72,6 +74,9 @@ int triangleBarycentricFeature( const Vec &barycentric, typename VectorTraits<Ve
 /// Returns the closest feature on the triangle to the given point. The return values are as barycentricFeature.
 template<class Vec>
 int triangleClosestFeature( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p );
+
+template<class Vec>
+bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p );
 
 } // namespace IECore
 
