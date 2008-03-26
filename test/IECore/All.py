@@ -131,7 +131,7 @@ from CapturingMessageHandler import *
 from FileExaminer import *
 from Math import *
 from FileSequenceVectorParameter import *
-from ColorTransformOp import *
+from ColorTransformOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
