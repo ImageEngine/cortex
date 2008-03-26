@@ -35,22 +35,18 @@
 #ifndef IE_CORE_DATACONVERT_H
 #define IE_CORE_DATACONVERT_H
 
+#include "IECore/TypeTraits.h"
+
 namespace IECore
 {
 
 /// \todo C++ tests
-/// \todo Use some "DataTraits" class to automatically enable_if these for "vector" and "simple" data types
-
-template<typename From, typename To, typename Conversion>
+template<typename From, typename To, typename Conversion, typename Enable = void>
 struct DataConvert
 {
 	typename To::Ptr operator()( typename From::ConstPtr from );
-};
-
-template<typename From, typename To, typename Conversion>
-struct VectorDataConvert
-{
-	typename To::Ptr operator()( typename From::ConstPtr from );
+	
+	typename To::Ptr operator()( typename From::ConstPtr from, Conversion &c );
 };
 
 } // namespace IECore

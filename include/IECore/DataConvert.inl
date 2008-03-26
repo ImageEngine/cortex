@@ -34,35 +34,55 @@
 
 #include <cassert>
 
+#include "boost/utility/enable_if.hpp"
+
 namespace IECore
 {
 
 template<typename F, typename T, typename C>
-typename T::Ptr DataConvert<F, T, C>::operator()( typename F::ConstPtr f )
+struct DataConvert< F, T, C, typename boost::enable_if< TypeTraits::IsVectorTypedData<F> >::type >
 {
-	assert( f );
 
-	typename T::Ptr result = new T();
-	assert( result );
-	result->writable = C( f->readable() );
+	typename T::Ptr operator()( typename F::ConstPtr f )
+	{
+		C c;
+		return this->operator()( f, c );
+	}
 
-	return result;
-}
+	typename T::Ptr operator()( typename F::ConstPtr f, C &c )
+	{
+		assert( f );
+
+		typename T::Ptr result = new T();
+		assert( result );
+		result->writable().resize( f->readable().size() );
+
+		assert( result->readable().size() == f->readable().size() );
+		std::transform( f->readable().begin(),  f->readable().end(), result->writable().begin(), c );
+
+		return result;
+	}
+};
 
 template<typename F, typename T, typename C>
-typename T::Ptr VectorDataConvert<F, T, C>::operator()( typename F::ConstPtr f )
+struct DataConvert< F, T, C, typename boost::enable_if< TypeTraits::IsSimpleTypedData<F> >::type >
 {
-	assert( f );
+	typename T::Ptr operator()( typename F::ConstPtr f )
+	{
+		C c;
+		return this->operator()( f, c );
+	}
 
-	typename T::Ptr result = new T();
-	assert( result );
-	result->writable().resize( f->readable().size() );
+	typename T::Ptr operator()( typename F::ConstPtr f, C &c )
+	{
+		assert( f );
 
-	assert( result->readable().size() == f->readable().size() );
-	std::transform( f->readable().begin(),  f->readable().end(), result->writable().begin(), C() );
+		typename T::Ptr result = new T();
+		assert( result );
+		result->writable() = c( f->readable() );
 
-	return result;
-}
-
+		return result;
+	}
+};
 
 }

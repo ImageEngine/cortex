@@ -160,61 +160,61 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 		{
 
 		case FloatVectorDataTypeId:
-			channelData = VectorDataConvert < FloatVectorData, ChannelData, ScaledDataConversion<float, T> >()(
+			channelData = DataConvert < FloatVectorData, ChannelData, ScaledDataConversion<float, T> >()(
 			                      boost::static_pointer_cast<const FloatVectorData>( dataContainer )
 			              );
 			break;
 
 		case LongVectorDataTypeId:
-			channelData = VectorDataConvert< LongVectorData, ChannelData, ScaledDataConversion<long, T> >()(
+			channelData = DataConvert< LongVectorData, ChannelData, ScaledDataConversion<long, T> >()(
 			                      boost::static_pointer_cast<const LongVectorData>( dataContainer )
 			              );
 			break;
 
 		case CharVectorDataTypeId:
-			channelData = VectorDataConvert< CharVectorData, ChannelData, ScaledDataConversion<char, T> >()(
+			channelData = DataConvert< CharVectorData, ChannelData, ScaledDataConversion<char, T> >()(
 			                      boost::static_pointer_cast<const CharVectorData>( dataContainer )
 			              );
 			break;
 
 		case UCharVectorDataTypeId:
-			channelData = VectorDataConvert< UCharVectorData, ChannelData, ScaledDataConversion<unsigned char, T> >()(
+			channelData = DataConvert< UCharVectorData, ChannelData, ScaledDataConversion<unsigned char, T> >()(
 			                      boost::static_pointer_cast<const UCharVectorData>( dataContainer )
 			              );
 			break;
 
 		case DoubleVectorDataTypeId:
-			channelData = VectorDataConvert< DoubleVectorData, ChannelData, ScaledDataConversion<double, T> >()(
+			channelData = DataConvert< DoubleVectorData, ChannelData, ScaledDataConversion<double, T> >()(
 			                      boost::static_pointer_cast<const DoubleVectorData>( dataContainer )
 			              );
 			break;
 
 		case HalfVectorDataTypeId:
-			channelData = VectorDataConvert< HalfVectorData, ChannelData, ScaledDataConversion<half, T> >()(
+			channelData = DataConvert< HalfVectorData, ChannelData, ScaledDataConversion<half, T> >()(
 			                      boost::static_pointer_cast<const HalfVectorData>( dataContainer )
 			              );
 			break;
 
 		case IntVectorDataTypeId:
-			channelData = VectorDataConvert< IntVectorData, ChannelData, ScaledDataConversion<int, T> >()(
+			channelData = DataConvert< IntVectorData, ChannelData, ScaledDataConversion<int, T> >()(
 			                      boost::static_pointer_cast<const IntVectorData>( dataContainer )
 			              );
 			break;
 
 		case UIntVectorDataTypeId:
-			channelData = VectorDataConvert< UIntVectorData, ChannelData, ScaledDataConversion<unsigned int, T> >()(
+			channelData = DataConvert< UIntVectorData, ChannelData, ScaledDataConversion<unsigned int, T> >()(
 			                      boost::static_pointer_cast<const UIntVectorData>( dataContainer )
 			              );
 			break;
 
 		case ShortVectorDataTypeId:
-			channelData = VectorDataConvert< ShortVectorData, ChannelData, ScaledDataConversion<short, T> >()(
+			channelData = DataConvert< ShortVectorData, ChannelData, ScaledDataConversion<short, T> >()(
 			                      boost::static_pointer_cast<const ShortVectorData>( dataContainer )
 			              );
 			break;
 
 		case UShortVectorDataTypeId:
-			channelData = VectorDataConvert< UShortVectorData, ChannelData, ScaledDataConversion<unsigned short, T> >()(
+			channelData = DataConvert< UShortVectorData, ChannelData, ScaledDataConversion<unsigned short, T> >()(
 			                      boost::static_pointer_cast<const UShortVectorData>( dataContainer )
 			              );
 			break;
