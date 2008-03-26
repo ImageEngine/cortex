@@ -46,55 +46,12 @@ using namespace boost::python;
 namespace IECore
 {
 
-struct MeshPrimitiveEvaluatorWrap : public MeshPrimitiveEvaluator, public Wrapper<MeshPrimitiveEvaluatorWrap>
-{
-	IE_CORE_DECLAREMEMBERPTR( MeshPrimitiveEvaluatorWrap );
-	
-	MeshPrimitiveEvaluatorWrap( PyObject *self, ConstMeshPrimitivePtr mesh )
-	: MeshPrimitiveEvaluator( mesh ), Wrapper<MeshPrimitiveEvaluatorWrap>( self, this )
-	{	
-	}
-	
-	void validateResult( PrimitiveEvaluator::ResultPtr result ) const
-	{
-		MeshPrimitiveEvaluator::ResultPtr mr = boost::dynamic_pointer_cast< MeshPrimitiveEvaluator::Result >( result );
-
-		if ( ! mr )
-		{
-			throw InvalidArgumentException("Incorrect result type passed to MeshPrimitiveEvaluator");
-		}
-	}
-	
-	bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::ResultPtr result )
-	{
-		validateResult( result );
-		
-		return MeshPrimitiveEvaluator::closestPoint( p, result );
-	}
-			
-	bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
-	{
-		validateResult( result );
-		
-		return MeshPrimitiveEvaluator::pointAtUV( uv, result );
-	}
-		
-	bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
-			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const
-	{
-		validateResult( result );
-		
-		return MeshPrimitiveEvaluator::intersectionPoint( origin, direction, result, maxDistance );
-	}
-	
-};
-
 void bindMeshPrimitiveEvaluator()
 {
-	typedef class_< MeshPrimitiveEvaluator, MeshPrimitiveEvaluatorWrap::Ptr, bases< PrimitiveEvaluator >, boost::noncopyable > MeshPrimitiveEvaluatorPyClass;
+	typedef class_< MeshPrimitiveEvaluator, MeshPrimitiveEvaluatorPtr, bases< PrimitiveEvaluator >, boost::noncopyable > MeshPrimitiveEvaluatorPyClass;
 	
 	object m = MeshPrimitiveEvaluatorPyClass ( "MeshPrimitiveEvaluator", no_init )
-		.def( init< ConstMeshPrimitivePtr > () )
+		.def( init< MeshPrimitivePtr > () )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(MeshPrimitiveEvaluator)
 		
 		/// \todo Move these into the base class

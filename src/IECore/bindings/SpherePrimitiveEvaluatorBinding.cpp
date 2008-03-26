@@ -46,54 +46,12 @@ using namespace boost::python;
 namespace IECore
 {
 
-struct SpherePrimitiveEvaluatorWrap : public SpherePrimitiveEvaluator, public Wrapper<SpherePrimitiveEvaluatorWrap>
-{
-	IE_CORE_DECLAREMEMBERPTR( SpherePrimitiveEvaluatorWrap );
-	
-	SpherePrimitiveEvaluatorWrap( PyObject *self, ConstSpherePrimitivePtr sphere )
-	: SpherePrimitiveEvaluator( sphere ), Wrapper<SpherePrimitiveEvaluatorWrap>( self, this )
-	{	
-	}
-	
-	void validateResult( PrimitiveEvaluator::ResultPtr result ) const
-	{
-		SpherePrimitiveEvaluator::ResultPtr mr = boost::dynamic_pointer_cast< SpherePrimitiveEvaluator::Result >( result );
-
-		if ( ! mr )
-		{
-			throw InvalidArgumentException("Incorrect result type passed to SpherePrimitiveEvaluator");
-		}
-	}
-	
-	bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::ResultPtr result )
-	{
-		validateResult( result );
-		
-		return SpherePrimitiveEvaluator::closestPoint( p, result );
-	}
-			
-	bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
-	{
-		validateResult( result );
-		
-		return SpherePrimitiveEvaluator::pointAtUV( uv, result );
-	}
-		
-	bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
-			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const
-	{
-		validateResult( result );
-		
-		return SpherePrimitiveEvaluator::intersectionPoint( origin, direction, result, maxDistance );
-	}
-};
-
 void bindSpherePrimitiveEvaluator()
 {
-	typedef class_< SpherePrimitiveEvaluator, SpherePrimitiveEvaluatorWrap::Ptr, bases< PrimitiveEvaluator >, boost::noncopyable > SpherePrimitiveEvaluatorPyClass;
+	typedef class_< SpherePrimitiveEvaluator, SpherePrimitiveEvaluatorPtr, bases< PrimitiveEvaluator >, boost::noncopyable > SpherePrimitiveEvaluatorPyClass;
 	
 	object s = SpherePrimitiveEvaluatorPyClass ( "SpherePrimitiveEvaluator", no_init )
-		.def( init< ConstSpherePrimitivePtr > () )
+		.def( init< SpherePrimitivePtr > () )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(SpherePrimitiveEvaluator)
 	;
 	INTRUSIVE_PTR_PATCH( SpherePrimitiveEvaluator, SpherePrimitiveEvaluatorPyClass );

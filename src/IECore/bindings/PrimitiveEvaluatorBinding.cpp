@@ -52,13 +52,31 @@ struct PrimitiveEvaluatorHelper
 		return PrimitiveEvaluator::create( primitive );
 	}
 	
+	static bool closestPoint( PrimitiveEvaluator &evaluator, const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result )
+	{
+		evaluator.validateResult( result );
+		
+		return evaluator.closestPoint( p, result );
+	}
+			
+	static bool pointAtUV( PrimitiveEvaluator &evaluator, const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result )
+	{
+		evaluator.validateResult( result );
+		
+		return evaluator.pointAtUV( uv, result );
+	}
+		
 	static bool intersectionPoint( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, const PrimitiveEvaluator::ResultPtr &result )
 	{
+		evaluator.validateResult( result );
+	
 		return evaluator.intersectionPoint( origin, direction, result );
 	}
 	
 	static bool intersectionPointMaxDist( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, const PrimitiveEvaluator::ResultPtr &result, float maxDist )
 	{
+		evaluator.validateResult( result );
+	
 		return evaluator.intersectionPoint( origin, direction, result, maxDist );
 	}
 
@@ -106,8 +124,8 @@ void bindPrimitiveEvaluator()
 	object p = PrimitiveEvaluatorPyClass ( "PrimitiveEvaluator", no_init )
 		.def( "create", &PrimitiveEvaluatorHelper::create ).staticmethod("create")
 		.def( "createResult", &PrimitiveEvaluator::createResult )
-		.def( "closestPoint", &PrimitiveEvaluator::closestPoint )
-		.def( "pointAtUV", &PrimitiveEvaluator::pointAtUV )
+		.def( "closestPoint", &PrimitiveEvaluatorHelper::closestPoint )
+		.def( "pointAtUV", &PrimitiveEvaluatorHelper::pointAtUV )
 		.def( "intersectionPoint", intersectionPoint )
 		.def( "intersectionPoint", intersectionPointMaxDist )		
 		.def( "intersectionPoints", intersectionPoints )

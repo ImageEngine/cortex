@@ -139,6 +139,10 @@ class PrimitiveEvaluator : public RunTimeTyped
 		
 		//@}
 		
+		/// Throws an exception if the passed result type is not compatible with the current evaluator
+		/// \todo Make (pure?) virtual. In the meantime do explicit type checking for all derived classes.
+		void validateResult( const ResultPtr &result ) const;
+		
 		/// A class to allow registration of primitive evaluators with the system. Simply declare an instance
 		/// of Description< YourEvaluatorType, YourPrimitiveType >
 		template< typename E, typename P = typename E::PrimitiveType >
@@ -157,8 +161,7 @@ class PrimitiveEvaluator : public RunTimeTyped
 		typedef std::map< TypeId, CreatorFn > CreatorMap;
 		
 		static CreatorMap &getCreateFns();
-		
-		
+				
 };
 
 IE_CORE_DECLAREPTR( PrimitiveEvaluator );

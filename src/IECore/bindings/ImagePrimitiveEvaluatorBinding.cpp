@@ -46,52 +46,14 @@ using namespace boost::python;
 namespace IECore
 {
 
-struct ImagePrimitiveEvaluatorWrap : public ImagePrimitiveEvaluator, public Wrapper<ImagePrimitiveEvaluatorWrap>
+struct ImagePrimitiveEvaluatorHelper
 {
-	IE_CORE_DECLAREMEMBERPTR( ImagePrimitiveEvaluatorWrap );
 	
-	ImagePrimitiveEvaluatorWrap( PyObject *self, ConstImagePrimitivePtr image )
-	: ImagePrimitiveEvaluator( image ), Wrapper<ImagePrimitiveEvaluatorWrap>( self, this )
-	{			
-	}
-	
-	void validateResult( PrimitiveEvaluator::ResultPtr result ) const
+	static bool pointAtPixel( ImagePrimitiveEvaluator &evaluator, const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result )
 	{
-		ImagePrimitiveEvaluator::ResultPtr mr = boost::dynamic_pointer_cast< ImagePrimitiveEvaluator::Result >( result );
-
-		if ( ! mr )
-		{
-			throw InvalidArgumentException("Incorrect result type passed to ImagePrimitiveEvaluator");
-		}
-	}
-	
-	bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::ResultPtr result )
-	{
-		validateResult( result );
+		evaluator.validateResult( result );
 		
-		return ImagePrimitiveEvaluator::closestPoint( p, result );
-	}
-			
-	bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
-	{
-		validateResult( result );
-		
-		return ImagePrimitiveEvaluator::pointAtUV( uv, result );
-	}
-	
-	bool pointAtPixel( const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result ) const
-	{
-		validateResult( result );
-		
-		return ImagePrimitiveEvaluator::pointAtPixel( pixel, result );
-	}
-		
-	bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
-			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const
-	{
-		validateResult( result );
-		
-		return ImagePrimitiveEvaluator::intersectionPoint( origin, direction, result, maxDistance );
+		return evaluator.pointAtPixel( pixel, result );
 	}
 	
 	static object R( ImagePrimitiveEvaluator &evaluator )
@@ -168,16 +130,16 @@ struct ImagePrimitiveEvaluatorWrap : public ImagePrimitiveEvaluator, public Wrap
 
 void bindImagePrimitiveEvaluator()
 {
-	typedef class_< ImagePrimitiveEvaluator, ImagePrimitiveEvaluatorWrap::Ptr, bases< PrimitiveEvaluator >, boost::noncopyable > ImagePrimitiveEvaluatorPyClass;
+	typedef class_< ImagePrimitiveEvaluator, ImagePrimitiveEvaluatorPtr, bases< PrimitiveEvaluator >, boost::noncopyable > ImagePrimitiveEvaluatorPyClass;
 	
 	object m = ImagePrimitiveEvaluatorPyClass ( "ImagePrimitiveEvaluator", no_init )
-		.def( init< ConstImagePrimitivePtr > () )
-		.def( "pointAtPixel", &ImagePrimitiveEvaluator::pointAtPixel )
-		.def( "R", &ImagePrimitiveEvaluatorWrap::R )
-		.def( "G", &ImagePrimitiveEvaluatorWrap::G )
-		.def( "B", &ImagePrimitiveEvaluatorWrap::B )
-		.def( "A", &ImagePrimitiveEvaluatorWrap::A )
-		.def( "Y", &ImagePrimitiveEvaluatorWrap::Y )
+		.def( init< ImagePrimitivePtr > () )
+		.def( "pointAtPixel", &ImagePrimitiveEvaluatorHelper::pointAtPixel )
+		.def( "R", &ImagePrimitiveEvaluatorHelper::R )
+		.def( "G", &ImagePrimitiveEvaluatorHelper::G )
+		.def( "B", &ImagePrimitiveEvaluatorHelper::B )
+		.def( "A", &ImagePrimitiveEvaluatorHelper::A )
+		.def( "Y", &ImagePrimitiveEvaluatorHelper::Y )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImagePrimitiveEvaluator)
 		
 		/// \todo Move these into the base class
