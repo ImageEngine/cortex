@@ -45,6 +45,8 @@ namespace IECore
 /// MeshPrimitiveBuilder is a class which allows incremental construction of IECore::MeshPrimitive meshes, templated
 /// on the base type of the resulting point/normal data (e.g. float or double). Other builders could be created by
 /// using this as a model. One possible client of this class is IECore::MarchingCubes.
+/// \todo This is too specific to MarchingCubes. Some algorithms want to make faces other than triangles, and
+/// some algorithms don't want to supply normals.
 template<typename T>
 class MeshPrimitiveBuilder : public RefCounted
 {
