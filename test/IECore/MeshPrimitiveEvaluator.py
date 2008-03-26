@@ -39,6 +39,22 @@ from IECore import *
 
 class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
+	def testConstructor( self ) :
+	
+		m = MeshPrimitive()
+		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData() )
+		e = MeshPrimitiveEvaluator( m )
+		
+	def testResultTypeValidation( self ) :
+	
+		m = MeshPrimitive()
+		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData() )
+		e = PrimitiveEvaluator.create( m )
+		
+		wrongResultType = PrimitiveEvaluator.create( SpherePrimitive() ).createResult()
+		
+		self.assertRaises( Exception, e.closestPoint, V3f( 0 ), wrongResultType )
+
 	def testEmptyMesh( self ) :
 		""" Testing MeshPrimitiveEvaluator with empty mesh"""
 		
@@ -312,18 +328,6 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 				
 					hits = mpe.intersectionPoints( origin, direction )
 					self.failIf( hits )
-					
-						
-					
-						
-					
-					
-				
-				
-				
-				
-
-		
 			
 if __name__ == "__main__":
 	unittest.main()

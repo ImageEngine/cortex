@@ -39,6 +39,10 @@ from IECore import *
 
 class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 
+	def testConstructor( self ) :
+	
+		e = SpherePrimitiveEvaluator( SpherePrimitive() )
+
 	def testSimple( self ) :
 		""" Test SpherePrimitiveEvaluator """
 
