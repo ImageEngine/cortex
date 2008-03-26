@@ -208,6 +208,14 @@ o.Add(
 	"/usr/local/foundry/nuke"
 )
 
+# Truelight options
+
+o.Add(
+	"TRUELIGHT_ROOT",
+	"The directory in which Truelight is installed.",
+	"/usr/fl/truelight"
+)
+
 # OpenGL options
 
 o.Add(
@@ -343,6 +351,14 @@ o.Add(
 	""
 )
 
+o.Add(
+	"INSTALL_CORETRUELIGHT_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreTruelight library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
 # Test options
 
 o.Add(
@@ -367,6 +383,14 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"contrib/IECoreGL/test/All.py"
+)
+
+o.Add(
+	"TEST_TRUELIGHT_SCRIPT",
+	"The python script to run for the Truelight tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"test/IECoreTruelight/All.py"
 )
 
 o.Add(
@@ -1192,6 +1216,92 @@ if doConfigure :
 		Default( [ nukeLibrary ] )
 
 ###########################################################################################
+# Build and install the coreTruelight library and headers
+###########################################################################################
+
+truelightEnv = env.Copy( IECORE_NAME = "IECoreTruelight" )
+truelightEnv.Append( CPPPATH = [ "$TRUELIGHT_ROOT/include" ] )
+truelightEnv.Prepend( LIBPATH = [
+		"./lib",
+		"$TRUELIGHT_ROOT/lib"
+	]
+)
+truelightEnv.Append( LIBS = [ "truelight" ] )
+
+truelightPythonEnv = pythonEnv.Copy( IECORE_NAME="IECoreTruelight" )
+
+if doConfigure :
+
+	c = Configure( truelightEnv )
+
+	if not c.CheckHeader( "truelight.h", "\"\"", "CXX" ) :
+		
+		sys.stderr.write( "WARNING : no truelight devkit found, not building IECoreTruelight - check TRUELIGHT_ROOT.\n" )
+		c.Finish()
+		
+	else :
+	
+		c.Finish()
+
+		# we can't add this earlier as then it's built during the configure stage, and that's no good
+		truelightEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
+		truelightHeaders = glob.glob( "include/IECoreTruelight/*.h" ) + glob.glob( "include/IECoreTruelight/*.inl" )
+		truelightSources = glob.glob( "src/IECoreTruelight/*.cpp" )
+		truelightPythonSources = glob.glob( "src/IECoreTruelight/bindings/*.cpp" )
+		truelightPythonScripts = glob.glob( "python/IECoreTruelight/*.py" )
+
+		# library
+		truelightLibrary = truelightEnv.SharedLibrary( "lib/" + os.path.basename( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightSources )
+		truelightEnv.Depends( coreInstallSync, truelightLibrary )
+		truelightLibraryInstall = truelightEnv.Install( os.path.dirname( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightLibrary )
+		truelightEnv.Depends( truelightLibraryInstall, coreInstallSync )
+		truelightEnv.AddPostAction( truelightLibraryInstall, lambda target, source, env : makeLibSymLinks( truelightEnv ) )
+		truelightEnv.Alias( "install", truelightLibraryInstall )
+		truelightEnv.Alias( "installTruelight", truelightLibraryInstall )
+		truelightEnv.Alias( "installLib", [ truelightLibraryInstall ] )
+
+		# headers
+		truelightHeaderInstall = truelightEnv.Install( "$INSTALL_HEADER_DIR/IECoreTruelight", truelightHeaders )
+		truelightEnv.Depends( truelightHeaderInstall, coreInstallSync )
+		truelightEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreTruelight", lambda target, source, env : makeSymLinks( truelightEnv, truelightEnv["INSTALL_HEADER_DIR"] ) )
+		truelightEnv.Alias( "installTruelight", truelightHeaderInstall )
+		truelightEnv.Alias( "install", truelightHeaderInstall )
+		
+		# python
+		truelightPythonEnv.Append( LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+
+		truelightPythonModule = truelightPythonEnv.SharedLibrary( "python/IECoreTruelight/_IECoreTruelight", truelightPythonSources )
+		truelightPythonEnv.Depends( coreInstallSync, truelightPythonModule )		
+		truelightPythonEnv.Depends( truelightPythonModule, truelightLibrary )
+		
+		truelightPythonModuleInstall = truelightPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreTruelight", truelightPythonScripts + truelightPythonModule )
+		truelightPythonEnv.Depends( truelightPythonModuleInstall, coreInstallSync )
+		truelightPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreTruelight", lambda target, source, env : makeSymLinks( truelightPythonEnv, truelightPythonEnv["INSTALL_PYTHON_DIR"] ) )
+		truelightPythonEnv.Alias( "install", truelightPythonModuleInstall )
+		truelightPythonEnv.Alias( "installTruelight", truelightPythonModuleInstall )
+		
+		if coreEnv["INSTALL_CORETRUELIGHT_POST_COMMAND"]!="" :
+			# this is the only way we could find to get a post action to run for an alias
+			corePythonEnv.Alias( "installTruelight", truelightLibraryInstall, "$INSTALL_CORETRUELIGHT_POST_COMMAND" ) 
+
+		Default( [ truelightLibrary, truelightPythonModule ] )
+		
+		# tests
+		truelightTestEnv = testEnv.Copy()
+		#riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
+		truelightTestEnv["ENV"]["TRUELIGHT_ROOT"] = truelightEnv.subst( "$TRUELIGHT_ROOT" )
+		truelightTest = truelightTestEnv.Command( "test/IECoreTruelight/results.txt", truelightPythonModule, pythonExecutable + " $TEST_TRUELIGHT_SCRIPT" )
+		NoCache( truelightTest )
+		truelightTestEnv.Depends( truelightTest, truelightPythonModule )
+		truelightTestEnv.Depends( truelightTest, glob.glob( "test/IECoreTruelight/*.py" ) )
+		truelightTestEnv.Alias( "testTruelight", truelightTest )
+		
+###########################################################################################
 # Documentation
 ###########################################################################################
 
@@ -1200,15 +1310,9 @@ if doConfigure :
 docEnv = env.Copy()
 docEnv["ENV"]["PATH"] = os.environ["PATH"]
 docs = docEnv.Command( "doc/html/index.html", "", "doxygen doc/config/Doxyfile" )
-docEnv.Depends( docs, glob.glob( "include/IECore/*.h" ) )
-docEnv.Depends( docs, glob.glob( "include/IECoreRI/*.h" ) )
-docEnv.Depends( docs, glob.glob( "include/IECoreNuke/*.h" ) )
-docEnv.Depends( docs, glob.glob( "src/IECore/*.cpp" ) )
-docEnv.Depends( docs, glob.glob( "src/IECoreRI/*.cpp" ) )
-docEnv.Depends( docs, glob.glob( "src/IECoreNuke/*.cpp" ) )
-docEnv.Depends( docs, glob.glob( "python/IECore/*.py" ) )
-docEnv.Depends( docs, glob.glob( "python/IECoreRI/*.py" ) )
-docEnv.Depends( docs, glob.glob( "python/IECoreNuke/*.py" ) )
+docEnv.Depends( docs, glob.glob( "include/IECore*/*.h" ) )
+docEnv.Depends( docs, glob.glob( "src/IECore*/*.cpp" ) )
+docEnv.Depends( docs, glob.glob( "python/IECore*/*.py" ) )
 docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) )
 docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/src/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" ) )

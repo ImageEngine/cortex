@@ -100,6 +100,13 @@ try :
 		NUKE_ROOT = nukeReg["location"]
 except :
 	pass
+	
+# find truelight
+try :
+	truelightReg = IEEnv.registry["apps"]["truelight"][getOption( "TRUELIGHT_VERSION", os.environ["TRUELIGHT_VERSION"] )][platform]
+	TRUELIGHT_ROOT = truelightReg["location"]
+except :
+	pass
 
 # ask for opengl support
 WITH_GL=1
