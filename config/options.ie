@@ -126,8 +126,11 @@ INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + comp
 INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 
-# set up a post install script to make op wrappers
+# set up a post install script to make op wrappers for IECore
 INSTALL_CORE_POST_COMMAND="scons -f config/ie/installOps INSTALLPREFIX=$INSTALL_PREFIX MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install"
+
+# set up a post install script to make op wrappers for IECoreTruelight
+INSTALL_CORETRUELIGHT_POST_COMMAND="scons -f config/ie/installTruelightOps INSTALLPREFIX=$INSTALL_PREFIX MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install"
 
 # speed up the build a bit hopefully. we're not doing this on the mac for two reasons. firstly, the macs don't mount /hosts.
 # secondly, scons doesn't recognise that the intel macs are different to the ppc and will try to cache them both the same.
