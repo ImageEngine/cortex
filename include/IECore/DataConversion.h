@@ -56,11 +56,17 @@ struct DataConversion : public std::unary_function<F, T>
 	{
 	}
 	
+	T operator()( F f )
+	{
+		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+	}
+	
 	InverseType inverse() const
 	{
 		/// Function is not invertible
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 	}
+	
 };
 
 } // namespace IECore

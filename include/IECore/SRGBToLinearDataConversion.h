@@ -47,6 +47,7 @@ namespace IECore
 /// Forward declaration
 template<typename, typename> class LinearToSRGBDataConversion;
 
+/// A class to perform data conversion from sRGB values to linear
 template<typename F, typename T>
 struct SRGBToLinearDataConversion : public DataConversion< F, T >
 {
@@ -55,8 +56,10 @@ struct SRGBToLinearDataConversion : public DataConversion< F, T >
 
 	typedef LinearToSRGBDataConversion<T, F> InverseType;
 
+	/// Perform the conversion
 	T operator()( F f );
 	
+	/// Returns an instance of a class able to perform the inverse conversion	
 	InverseType inverse() const;
 };
 

@@ -61,11 +61,16 @@ class LinearToCineonDataConversion : public DataConversion< F, T >
 		
 		typedef CineonToLinearDataConversion< T, F >  InverseType;
 	
+		/// Make a default converter with sensible gamma, and black/white points	
 		LinearToCineonDataConversion();
+		
+		/// Make a converter with specified gamma, and black/white points			
 		LinearToCineonDataConversion( float filmGamma, int refWhiteVal, int refBlackVal );
 
+		/// Perform the conversion
 		T operator()( F f );
-		
+
+		/// Returns an instance of a class able to perform the inverse conversion		
 		InverseType inverse() const;
 	
 	private:

@@ -64,6 +64,7 @@ class CompoundDataConversion : public DataConversion< typename C1::FromType, typ
 		/// Perform the conversion
 		typename CompoundDataConversion<C1, C2>::ToType operator()( typename CompoundDataConversion<C1, C2>::FromType f );
 		
+		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;
 	
 	protected:
