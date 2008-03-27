@@ -124,7 +124,7 @@ int MeshPrimitiveEvaluator::Result::intPrimVar( const PrimitiveVariable &pv ) co
 
 const std::string &MeshPrimitiveEvaluator::Result::stringPrimVar( const PrimitiveVariable &pv ) const
 {
-	StringDataPtr data = runTimeCast< StringData >( pv.data );
+	const StringData *data = runTimeCast<StringData>( pv.data.get() );
 		
 	if (data)
 	{
@@ -132,7 +132,7 @@ const std::string &MeshPrimitiveEvaluator::Result::stringPrimVar( const Primitiv
 	}	
 	else
 	{
-		StringVectorDataPtr data = runTimeCast< StringVectorData >( pv.data );
+		const StringVectorData *data = runTimeCast< StringVectorData >( pv.data.get() );
 		
 		if (data)
 		{		
@@ -159,9 +159,8 @@ T MeshPrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) cons
 	if ( pv.interpolation == PrimitiveVariable::Constant )
 	{
 		typedef TypedData<T> Data;
-		typedef typename Data::Ptr DataPtr;
 		
-		DataPtr data = runTimeCast< Data >( pv.data );
+		const Data *data = runTimeCast< Data >( pv.data.get() );
 		
 		if (data)
 		{
@@ -170,8 +169,7 @@ T MeshPrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) cons
 	}
 	
 	typedef TypedData< std::vector<T> > VectorData;
-	typedef typename VectorData::Ptr VectorDataPtr;
-	VectorDataPtr data = runTimeCast< VectorData >( pv.data );
+	const VectorData *data = runTimeCast< VectorData >( pv.data.get() );
 
 	if (!data)
 	{
