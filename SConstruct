@@ -921,7 +921,7 @@ if doConfigure :
 # number. when it moves out of /contrib it'll use the same version number as the
 # main libraries.
 ieCoreGLMajorVersion = 0
-ieCoreGLMinorVersion = 7
+ieCoreGLMinorVersion = 8
 ieCoreGLPatchVersion = 0
 
 if env["WITH_GL"] and doConfigure :
