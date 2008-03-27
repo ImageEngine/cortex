@@ -137,3 +137,5 @@ INSTALL_CORETRUELIGHT_POST_COMMAND="scons -f config/ie/installTruelightOps INSTA
 # we could probably fix both these things if it becomes important.
 if platform=="rhel4.i686" :
 	BUILD_CACHEDIR = "/hosts/wrkpogo01/sconsBuildCache"
+else :	
+	BUILD_CACHEDIR = "/tmp/sconsBuildCache/" + platform
