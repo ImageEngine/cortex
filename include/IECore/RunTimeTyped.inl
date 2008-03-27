@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,20 @@ boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src )
 	if( src->isInstanceOf( T::staticTypeId() ) )
 	{
 		return boost::static_pointer_cast<T>( src );
+	}
+	return 0;
+}
+
+template<typename T, typename S>
+T *runTimeCast( S *src )
+{
+	if( !src )
+	{
+		return 0;
+	}
+	if( src->isInstanceOf( T::staticTypeId() ) )
+	{
+		return static_cast<T *>( src );
 	}
 	return 0;
 }

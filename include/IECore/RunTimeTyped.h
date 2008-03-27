@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -148,6 +148,11 @@ IE_CORE_DECLAREPTR( RunTimeTyped );
 /// both dynamic_cast and boost::dynamic_pointer_cast wherever possible.
 template<typename T, typename S>
 boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src );
+/// Equivalent to dynamic_cast but using the type identification system
+/// implemented in RunTimeTyped. This should be used in preference to
+/// dynamic_cast wherever possible.
+template<typename T, typename S>
+T *runTimeCast( S *src );
 
 } // namespace IECore
 
