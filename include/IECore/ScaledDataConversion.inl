@@ -52,13 +52,20 @@ namespace IECore
 
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type > : public DataConversion< F, T >
-{	
+{
+	typedef ScaledDataConversion< T, F > InverseType;
+	
 	T operator()( F f )
 	{
 		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );	
 		float result = static_cast<float>(f) / Imath::limits<F>::max() * Imath::limits<T>::max();
 		return static_cast<T>( result + 0.5f );
 	}
+	
+	InverseType inverse() const
+	{
+		return InverseType();
+	}		
 };
 
 template<typename F, typename T>
@@ -102,19 +109,33 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_integral<F>, boost::is_floating_point<T> > >::type > : public DataConversion< F, T >
 {
+	typedef ScaledDataConversion< T, F > InverseType;
+
 	T operator()( F f )
 	{
 		float result = static_cast<float>(f) / Imath::limits<F>::max();
 		return static_cast<T>( result );
+	}
+	
+	InverseType inverse() const
+	{
+		return InverseType();
 	}
 };
 
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_floating_point<F>, boost::is_floating_point<T> > >::type > : public DataConversion< F, T >
 {
+	typedef ScaledDataConversion< T, F > InverseType;
+
 	T operator()( F f )
 	{
 		return static_cast<T>( f );
+	}
+	
+	InverseType inverse() const
+	{
+		return InverseType();
 	}
 };
 
