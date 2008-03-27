@@ -1172,7 +1172,8 @@ if env["WITH_MAYA"] :
 
 nukeEnv = env.Copy( IECORE_NAME = "IECoreNuke" )
 nukeEnv.Append( CPPPATH = [ "$NUKE_ROOT/include" ] )
-nukeEnv.Prepend( LIBPATH = [ "./lib" ] )
+nukeEnv.Prepend( LIBPATH = [ "$NUKE_ROOT", "./lib" ] )
+nukeEnv.Append( LIBS = [ "DDImage4.8" ] ) # \todo Obtain correct version somehow
 
 if doConfigure :
 
