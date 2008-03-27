@@ -37,6 +37,8 @@
 
 #include <functional>
 
+#include "boost/static_assert.hpp"
+
 namespace IECore
 {
 
@@ -52,6 +54,12 @@ struct DataConversion : public std::unary_function<F, T>
 	
 	virtual ~DataConversion()
 	{
+	}
+	
+	InverseType inverse() const
+	{
+		/// Function is not invertible
+		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 	}
 };
 

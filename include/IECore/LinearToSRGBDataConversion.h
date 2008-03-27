@@ -56,6 +56,8 @@ struct LinearToSRGBDataConversion : public DataConversion< F, T >
 	typedef SRGBToLinearDataConversion<T, F> InverseType;
 
 	T operator()( F f );
+	
+	InverseType inverse() const;
 };
 
 } // namespace IECore

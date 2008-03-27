@@ -61,12 +61,14 @@ struct DataConversionTest
 	void testCineonLinear()
 	{
 		typedef CineonToLinearDataConversion< F, T > Func;	
-		CompoundDataConversion< Func, typename Func::InverseType > f;
+		
+		Func f;
+		CompoundDataConversion< Func, typename Func::InverseType > f_fi( f, f.inverse() );
 	
 		/// Verify that f(f'(i)) == i
 		for ( F i = 0; i < 1024; i++ )
 		{		
-			BOOST_CHECK_EQUAL( f(i), i );
+			BOOST_CHECK_EQUAL( f_fi(i), i );
 		}
 	}
 	
@@ -75,11 +77,13 @@ struct DataConversionTest
 	{
 		typedef SRGBToLinearDataConversion< T, T > Func;	
 		CompoundDataConversion< Func, typename Func::InverseType > f;
+		typename CompoundDataConversion< Func, typename Func::InverseType >::InverseType fi = f.inverse();		
 	
 		/// Verify that f(f'(i)) ~ i
 		for ( T i = T(0); i < T(10); i += T(0.2) )
 		{		
 			BOOST_CHECK_CLOSE( double( f(i) ), double( i ), 1.e-4 );
+			BOOST_CHECK_CLOSE( double( fi(i) ), double( i ), 1.e-4 );
 		}
 	}
 };

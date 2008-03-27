@@ -64,6 +64,12 @@ T LinearToSRGBDataConversion<F, T>::operator()( F f )
 	}
 }
 
+template<typename F, typename T>
+typename LinearToSRGBDataConversion<F, T>::InverseType LinearToSRGBDataConversion<F, T>::inverse() const
+{
+	return InverseType();
+}
+
 }
 
 #endif // IE_CORE_LINEARTOSRGBDATACONVERSION_INL

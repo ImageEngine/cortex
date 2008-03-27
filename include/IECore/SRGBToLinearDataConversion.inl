@@ -62,6 +62,12 @@ T SRGBToLinearDataConversion<F, T>::operator()( F f )
 	}
 }
 
+template<typename F, typename T>
+typename SRGBToLinearDataConversion<F, T>::InverseType SRGBToLinearDataConversion<F, T>::inverse() const
+{
+	return InverseType();
+}
+
 } // namespace IECore
 
 #endif // IE_CORE_SRGBTOLINEARDATACONVERSION_INL

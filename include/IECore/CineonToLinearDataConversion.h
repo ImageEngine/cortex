@@ -63,8 +63,12 @@ class CineonToLinearDataConversion : public DataConversion< F, T >
 		typedef LinearToCineonDataConversion< T, F > InverseType;
 	
 		CineonToLinearDataConversion();
+		
+		CineonToLinearDataConversion( float filmGamma, int refWhiteVal, int refBlackVal );
 
 		T operator()( F f );
+		
+		InverseType inverse() const;
 	
 	private:
 	
@@ -73,8 +77,6 @@ class CineonToLinearDataConversion : public DataConversion< F, T >
 		float m_filmGamma;
 		int m_refWhiteVal;
 		int m_refBlackVal;
-		float m_refMult;
-		float m_blackOffset;
 		
 		mutable std::vector<float> m_LUT;
 		mutable bool m_LUTValid;
