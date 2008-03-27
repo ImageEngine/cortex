@@ -44,7 +44,6 @@ namespace IECoreNuke
 
 /// The MeshFromNuke class converts Nuke GeoInfo objects
 /// into IECore::MeshPrimitive objects.
-/// \todo Support conversion of UVs and normals.
 class MeshFromNuke : public FromNukeConverter
 {
 

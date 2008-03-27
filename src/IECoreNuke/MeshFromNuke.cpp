@@ -53,6 +53,7 @@ MeshFromNuke::~MeshFromNuke()
 
 IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr operands ) const
 {
+	// topology
 	IntVectorDataPtr verticesPerFaceData = new IntVectorData;
 	IntVectorDataPtr vertexIdsData = new IntVectorData;
 	std::vector<int> &verticesPerFace = verticesPerFaceData->writable();
@@ -81,6 +82,7 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 	
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIdsData, "linear" );
 	
+	// points
 	if( const DD::Image::PointList *pl = m_geo->point_list() )
 	{
 		V3fVectorDataPtr p = new V3fVectorData();
@@ -89,6 +91,7 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, p );
 	}
 	
+	// uvs
 	PrimitiveVariable::Interpolation uvInterpolation = PrimitiveVariable::Vertex;
 	const DD::Image::Attribute *uvAttr = m_geo->get_typed_group_attribute( DD::Image::Group_Points, "uv", DD::Image::VECTOR4_ATTRIB );
 	if( !uvAttr )
@@ -113,6 +116,27 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 		}
 		result->variables["s"] = PrimitiveVariable( uvInterpolation, ud );
 		result->variables["t"] = PrimitiveVariable( uvInterpolation, vd );
+	}
+
+	// normals
+	PrimitiveVariable::Interpolation nInterpolation = PrimitiveVariable::Vertex;
+	const DD::Image::Attribute *nAttr = m_geo->get_typed_group_attribute( DD::Image::Group_Points, "N", DD::Image::NORMAL_ATTRIB );
+	if( !nAttr )
+	{
+		nAttr = m_geo->get_typed_group_attribute( DD::Image::Group_Vertices, "N", DD::Image::NORMAL_ATTRIB );
+		nInterpolation = PrimitiveVariable::FaceVarying;
+	}
+	
+	if( nAttr )
+	{
+		V3fVectorDataPtr nd = new V3fVectorData();
+		std::vector<Imath::V3f> &n = nd->writable();
+		n.resize( nAttr->size() );
+		for( unsigned i=0; i<n.size(); i++ )
+		{
+			n[i] = IECore::convert<Imath::V3f, DD::Image::Vector3>( nAttr->normal( i ) );
+		}
+		result->variables["N"] = PrimitiveVariable( nInterpolation, nd );
 	}
 
 	return result;
