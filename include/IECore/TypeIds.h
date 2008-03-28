@@ -248,6 +248,7 @@ enum TypeId
 	UShortVectorDataTypeId = 205,
 	PathVectorParameterTypeId = 206,	
 	ColorTransformOpTypeId = 207,
+	TransformOpTypeId = 208,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

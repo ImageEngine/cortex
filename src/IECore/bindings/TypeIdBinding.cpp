@@ -248,6 +248,8 @@ void bindTypeId()
 		.value("ShortVectorData", ShortVectorDataTypeId )
 		.value("UShortVectorData", UShortVectorDataTypeId )
 		.value("PathVectorParameter", PathVectorParameterTypeId )
+		.value("ColorTransformOp", ColorTransformOpTypeId )
+		.value("TransformOp", TransformOpTypeId )
 	;
 }
 

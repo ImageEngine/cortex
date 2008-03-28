@@ -133,6 +133,7 @@ from Math import *
 from FileSequenceVectorParameter import *
 from TriangleAlgoTest import *
 from ColorTransformOpTest import *
+from TransformOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

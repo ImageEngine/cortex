@@ -163,6 +163,7 @@
 #include "IECore/bindings/ColorTransformOpBinding.h"
 #include "IECore/bindings/ConverterBinding.h"
 #include "IECore/bindings/FromCoreConverterBinding.h"
+#include "IECore/bindings/TransformOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -305,6 +306,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindColorTransformOp();
 	bindConverter();
 	bindFromCoreConverter();
+	bindTransformOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
