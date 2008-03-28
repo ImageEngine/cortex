@@ -37,6 +37,7 @@
 
 #include "OpenEXR/half.h"
 
+#include "boost/type_traits/is_arithmetic.hpp"
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/is_signed.hpp"
 #include "boost/type_traits/is_unsigned.hpp"
