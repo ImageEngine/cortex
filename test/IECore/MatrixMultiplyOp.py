@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -64,5 +64,35 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 					continue
 				raise Exception, "Error testing vector " + str(type(vector)) + " against matrix " + str(type(matrix)) + ". Resulted " + str( res )
 
+	def testModes( self ) :
+	
+		v = V3fVectorData( [ V3f( 1 ), V3f( 2 ), V3f( 3 ) ] )
+		o = MatrixMultiplyOp()
+		
+		# as points
+		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
+		for i in range( v.size() ) :
+			self.assertEqual( vt[i], v[i] + V3f( 1, 2, 3 ) )
+			
+		# as vectors
+		o.mode.setValue( "vector" )
+		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
+		for i in range( v.size() ) :
+			self.assertEqual( vt[i], v[i] )
+			
+		vt = o( object = v.copy(), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		for i in range( v.size() ) :
+			self.assertEqual( vt[i], v[i] * V3f( 1, 2, 3 ) )
+		
+		# as normals
+		o.mode.setValue( "normal" )
+		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
+		for i in range( v.size() ) :
+			self.assertEqual( vt[i], v[i] )
+			
+		vt = o( object = v.copy(), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		for i in range( v.size() ) :
+			self.assertNotEqual( vt[i], v[i] * V3f( 1, 2, 3 ) )	
+			
 if __name__ == "__main__":
         unittest.main()

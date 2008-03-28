@@ -35,16 +35,15 @@
 #ifndef IE_CORE_MATRIXMULTIPLYOP_H
 #define IE_CORE_MATRIXMULTIPLYOP_H
 
-#include <vector>
-
-#include "OpenEXR/ImathVec.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/ObjectParameter.h"
+#include "IECore/NumericParameter.h"
 
 namespace IECore
 {
 
-/// \todo Add a parameter to allow multiplication as vectors, normals or points
+/// The MatrixMultiplyOp applies a matrix transformation to an array of vectors.
+/// It can transform the vectors as if they were points, vectors or normals.
 class MatrixMultiplyOp : public ModifyOp
 {
 	public :
@@ -54,8 +53,21 @@ class MatrixMultiplyOp : public ModifyOp
 		MatrixMultiplyOp();
 		virtual ~MatrixMultiplyOp();
 
-		ParameterPtr matrixParameter();
-		ConstParameterPtr matrixParameter() const;
+		ObjectParameterPtr matrixParameter();
+		ConstObjectParameterPtr matrixParameter() const;
+		
+		/// An enumeration for the different ways of interpreting
+		/// the vectors to be transformed. These are the acceptable
+		/// values for modeParameter()->setTypedValue().
+		enum Mode
+		{
+			Point = 0,
+			Vector = 1,
+			Normal = 2
+		};
+		
+		IntParameterPtr modeParameter();
+		ConstIntParameterPtr modeParameter() const;
 
 	protected :
 	
@@ -64,6 +76,7 @@ class MatrixMultiplyOp : public ModifyOp
 	private :
 		
 		ObjectParameterPtr m_matrixParameter;
+		IntParameterPtr m_modeParameter;
 
 };
 
