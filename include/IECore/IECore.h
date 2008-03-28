@@ -129,7 +129,7 @@ bool withSQLite();
 /// \section mainPageRTTISection RTTI
 ///
 /// IECore uses its own mechanism for type identification. This comes in the form
-/// of the RunTimeTyped base class, and the runTimeCast function.
+/// of the \link IECore::RunTimeTyped RunTimeTyped \endlink base class, and the runTimeCast function.
 ///
 /// \code
 /// void incrementIntData( ConstDataPtr d )
