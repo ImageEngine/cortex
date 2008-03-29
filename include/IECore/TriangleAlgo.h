@@ -42,6 +42,7 @@
 namespace IECore
 {
 
+/// \todo It might be nice to make a triangle class and make these methods.
 template<class Vec>
 typename VectorTraits<Vec>::BaseType triangleArea( const Vec &v0, const Vec &v1, const Vec &v2 );
 
