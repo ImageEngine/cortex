@@ -36,11 +36,15 @@
 #define IE_CORE_TYPETRAITS_H
 
 #include "boost/static_assert.hpp"
+
 #include "boost/mpl/or.hpp"
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/if.hpp"
 #include "boost/mpl/not.hpp"
 
+#include "boost/type_traits.hpp"
+
+#include "IECore/HalfTypeTraits.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 
@@ -56,6 +60,10 @@ namespace TypeTraits
 template<typename T> struct HasValueType : public boost::false_type {};
 template<typename T> struct HasValueType< TypedData<T> > : public boost::true_type {};
 
+/// HasVectorValueType
+template<typename T> struct HasVectorValueType : public boost::false_type {};
+template<typename T> struct HasVectorValueType< TypedData< std::vector< T > > > : public boost::true_type {};
+
 namespace Detail
 {
 
@@ -66,15 +74,27 @@ struct GetValueType
 };
 
 template <class T>
+struct GetVectorValueType
+{
+	typedef typename T::ValueType::value_type type;
+};
+
+} // namespace Detail
+
+template <class T>
 struct ValueType
 {
-	typedef typename boost::mpl::eval_if< HasValueType<T>, GetValueType<T>, boost::mpl::identity<T> >::type type;
+	typedef typename boost::mpl::eval_if< HasValueType<T>, Detail::GetValueType<T>, boost::mpl::identity<T> >::type type;
+};
+
+template <class T>
+struct VectorValueType
+{
+	typedef typename boost::mpl::eval_if< HasVectorValueType<T>, Detail::GetVectorValueType<T>, boost::mpl::identity<T> >::type type;
 };
 
 BOOST_STATIC_ASSERT( (sizeof( ValueType< M33fData >::type ) == sizeof( M33fData::ValueType ) ) );
 BOOST_STATIC_ASSERT( (sizeof( ValueType< FloatVectorData >::type ) == sizeof( FloatVectorData::ValueType ) ) );
-
-} // namespace Detail
 
 /// IsTypedData
 template<typename T> struct IsTypedData : public boost::false_type {};
@@ -105,7 +125,7 @@ template<typename T> struct IsMatrix : boost::mpl::or_< IsMatrix33<T>, IsMatrix4
 BOOST_STATIC_ASSERT( (IsMatrix< Imath::M33f >::value) );
 BOOST_STATIC_ASSERT( (IsMatrix< Imath::M44d >::value) );
 BOOST_STATIC_ASSERT( (IsMatrix< Detail::GetValueType< M33fData >::type >::value ) );
-BOOST_STATIC_ASSERT( (IsMatrix< Detail::ValueType< M33fData >::type >::value ) );
+BOOST_STATIC_ASSERT( (IsMatrix< ValueType< M33fData >::type >::value ) );
 BOOST_STATIC_ASSERT( (boost::mpl::not_< IsMatrix< Imath::V2i > >::value) );
 
 /// IsVec3
@@ -125,23 +145,40 @@ BOOST_STATIC_ASSERT( (IsVec<Imath::V2d>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVec<int> >::value) );
 
 /// IsMatrixTypedData
-template< typename T > struct IsMatrixTypedData : boost::mpl::and_< IsTypedData<T>, IsMatrix< typename Detail::ValueType<T>::type > > {};
+template< typename T > struct IsMatrixTypedData : boost::mpl::and_< IsTypedData<T>, IsMatrix< typename ValueType<T>::type > > {};
 BOOST_STATIC_ASSERT( (IsMatrixTypedData<M33fData>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsMatrixTypedData<V3fData> >::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsMatrixTypedData<char> >::value) );
 
 /// IsVec2TypedData
-template< typename T > struct IsVec2TypedData : boost::mpl::and_< IsTypedData<T>, IsVec2< typename Detail::ValueType<T>::type > > {};
+template< typename T > struct IsVec2TypedData : boost::mpl::and_< IsTypedData<T>, IsVec2< typename ValueType<T>::type > > {};
 BOOST_STATIC_ASSERT( (IsVec2TypedData<V2fData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVec2TypedData<V3iData> >::value) );
 
 /// IsVec3TypedData
-template< typename T > struct IsVec3TypedData : boost::mpl::and_< IsTypedData<T>, IsVec3< typename Detail::ValueType<T>::type > > {};
+template< typename T > struct IsVec3TypedData : boost::mpl::and_< IsTypedData<T>, IsVec3< typename ValueType<T>::type > > {};
 BOOST_STATIC_ASSERT( (IsVec3TypedData<V3fData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVec3TypedData<V2iData> >::value) );
 
 /// IsVecTypedData
 template< typename T > struct IsVecTypedData : boost::mpl::or_< IsVec2TypedData<T>, IsVec3TypedData<T> > {};
 BOOST_STATIC_ASSERT( (IsVecTypedData<V2iData>::value) );
 BOOST_STATIC_ASSERT( (IsVecTypedData<V3fData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVecTypedData<M33fData> >::value) );
+
+/// IsNumericVectorTypedData
+template< typename T > struct IsNumericVectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, boost::is_arithmetic< typename VectorValueType<T>::type > > {};
+BOOST_STATIC_ASSERT( (IsNumericVectorTypedData<FloatVectorData>::value) );
+BOOST_STATIC_ASSERT( (IsNumericVectorTypedData<UCharVectorData>::value) );
+BOOST_STATIC_ASSERT( (IsNumericVectorTypedData<HalfVectorData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsNumericVectorTypedData<StringVectorData> >::value) );
+
+/// IsNumericSimpleTypedData
+template< typename T > struct IsNumericSimpleTypedData : boost::mpl::and_< IsSimpleTypedData<T>, boost::is_arithmetic< typename ValueType<T>::type > > {};
+BOOST_STATIC_ASSERT( (IsNumericSimpleTypedData<FloatData>::value) );
+BOOST_STATIC_ASSERT( (IsNumericSimpleTypedData<ShortData>::value) );
+BOOST_STATIC_ASSERT( (IsNumericSimpleTypedData<HalfData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsNumericSimpleTypedData<char> >::value) );
 
 } // namespace TypeTraits
 
