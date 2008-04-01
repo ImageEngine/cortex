@@ -32,9 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IE_CORE_DESPATCHTYPEDDATA_INL
+#define IE_CORE_DESPATCHTYPEDDATA_INL
+
+#include "IECore/TypeTraits.h"
+
 namespace IECore
 {
-
 
 namespace Detail
 {
@@ -365,10 +369,110 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 	return despatchTypedData< Functor, Enabler, Detail::DespatchTypedDataExceptionError>( data, functor );
 }
 
+template< class Functor, template<typename> class Enabler >
+typename Functor::ReturnType despatchTypedData( const DataPtr &data )
+{
+	Functor functor;
+	return despatchTypedData< Functor, Enabler, Detail::DespatchTypedDataExceptionError>( data, functor );
+}
+
 template< class Functor >
 typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &functor )
 {
 	return despatchTypedData< Functor, TypeTraits::IsTypedData, Detail::DespatchTypedDataExceptionError>( data, functor );
 }
 
+template< class Functor >
+typename Functor::ReturnType despatchTypedData( const DataPtr &data )
+{
+	Functor functor;
+	return despatchTypedData< Functor, TypeTraits::IsTypedData, Detail::DespatchTypedDataExceptionError>( data, functor );
 }
+
+struct TypedDataSize
+{
+	typedef size_t ReturnType;
+	
+	template<typename T, typename Enable = void>
+	struct TypedDataSizeHelper
+	{
+		ReturnType operator()( typename T::ConstPtr data ) const
+		{
+			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+			return 0;
+		}
+	};
+	
+	template<typename T>
+	ReturnType operator()( typename T::ConstPtr data ) const
+	{
+		assert( data );
+		return TypedDataSizeHelper<T>()( data );
+	}
+};
+
+template<typename T>
+struct TypedDataSize::TypedDataSizeHelper< T, typename boost::enable_if< TypeTraits::IsSimpleTypedData<T> >::type >
+{
+	size_t operator()( typename T::ConstPtr data ) const
+	{
+		assert( data );	
+		return 1;
+	}
+};
+
+template<typename T>
+struct TypedDataSize::TypedDataSizeHelper< T, typename boost::enable_if< TypeTraits::IsVectorTypedData<T> >::type >
+{
+	size_t operator()( typename T::ConstPtr data ) const
+	{
+		assert( data );
+		return data->readable().size();
+	}
+};
+
+struct TypedDataAddress
+{
+	typedef const void *ReturnType;
+	
+	template<typename T, typename Enable = void>
+	struct TypedDataAddressHelper
+	{
+		ReturnType operator()( typename T::ConstPtr data ) const
+		{
+			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+			return 0;
+		}
+	};
+	
+	template<typename T>
+	ReturnType operator()( typename T::ConstPtr data ) const
+	{
+		assert( data );
+		return TypedDataAddressHelper<T>()( data );
+	}
+};
+
+template<typename T>
+struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< TypeTraits::IsSimpleTypedData<T> >::type >
+{
+	const void *operator()( typename T::ConstPtr data ) const
+	{
+		assert( data );	
+		return &( data->readable() );
+	}
+};
+
+template<typename T>
+struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< TypeTraits::IsVectorTypedData<T> >::type >
+{
+	const void *operator()( typename T::ConstPtr data ) const
+	{
+		assert( data );
+		return &*(data->readable().begin());
+	}
+};
+
+}
+
+#endif // IE_CORE_DESPATCHTYPEDDATA_INL
