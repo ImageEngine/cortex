@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ParticleWriter.h"
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/DespatchTypedData.h"
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/TypedParameter.h"
@@ -80,9 +80,11 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 	ConstPointsPrimitivePtr cd = particleObject();
 	for( PrimitiveVariableMap::const_iterator it=cd->variables.begin(); it!=cd->variables.end(); it++ )
 	{
+	
+		/// \todo Remove use of exception handling as means of flow control
 		try
 		{
-			size_t s = despatchVectorTypedDataFn<size_t, VectorTypedDataSize, VectorTypedDataSizeArgs>( it->second.data, VectorTypedDataSizeArgs() );
+			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( it->second.data );
 			if( s==numParticles )
 			{
 				allNames.push_back( it->first );
@@ -98,7 +100,7 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 			// in which case it's suitable for saving as a constant particle attribute
 			try
 			{
-				despatchSimpleTypedDataFn<const void *, SimpleTypedDataAddress, SimpleTypedDataAddressArgs>( it->second.data, SimpleTypedDataAddressArgs() );
+				despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( it->second.data );
 				allNames.push_back( it->first );
 			}
 			catch( ... )

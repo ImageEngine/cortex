@@ -146,10 +146,12 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 	for( vector<string>::const_iterator it = attributes.begin(); it!=attributes.end(); it++ )
 	{
 		DataPtr d = readAttribute( *it );
+		
+		/// \todo Remove use of exception handling as means of flow control
 		try
 		{
 			// throws if it's not vector data
-			size_t s = despatchVectorTypedDataFn<size_t, VectorTypedDataSize, VectorTypedDataSizeArgs>( d, VectorTypedDataSizeArgs() );
+			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( d );
 			if( !haveNumPoints )
 			{
 				result->setNumPoints( s );
@@ -170,7 +172,7 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 			try
 			{
 				// throws if not simple data
-				despatchSimpleTypedDataFn<const void *, SimpleTypedDataAddress, SimpleTypedDataAddressArgs>( d, SimpleTypedDataAddressArgs() );
+				despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( d );
 				result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Constant, d ) ) );
 			}
 			catch( ... )
