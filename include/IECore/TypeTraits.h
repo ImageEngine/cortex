@@ -160,6 +160,11 @@ template< typename T > struct IsVec3TypedData : boost::mpl::and_< IsTypedData<T>
 BOOST_STATIC_ASSERT( (IsVec3TypedData<V3fData>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVec3TypedData<V2iData> >::value) );
 
+/// IsVec3VectorTypedData
+template< typename T > struct IsVec3VectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, IsVec3< typename VectorValueType<T>::type > > {};
+BOOST_STATIC_ASSERT( (IsVec3VectorTypedData<V3iVectorData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVec3VectorTypedData<V3fData> >::value) );
+
 /// IsVecTypedData
 template< typename T > struct IsVecTypedData : boost::mpl::or_< IsVec2TypedData<T>, IsVec3TypedData<T> > {};
 BOOST_STATIC_ASSERT( (IsVecTypedData<V2iData>::value) );

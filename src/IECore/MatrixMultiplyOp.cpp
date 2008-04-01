@@ -44,7 +44,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
 #include "IECore/NullObject.h"
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/DespatchTypedData.h"
 
 #include <cassert>
 
@@ -140,29 +140,19 @@ ConstIntParameterPtr MatrixMultiplyOp::modeParameter() const
 	return m_modeParameter;
 }
 
-struct MultiplyArgs
+struct MultiplyFunctor
 {
+	typedef void ReturnType;
+	
 	DataPtr data;
 	ConstObjectPtr matrix;
 	MatrixMultiplyOp::Mode mode;
-};
-
-template< typename U, typename Enable = void >
-struct MultiplyFunctor
-{
-	void operator() ( typename U::Ptr data, MultiplyArgs args )
-	{
-		// empty functor.
-	}
-};
-
-template< typename U >
-struct MultiplyFunctor< U, typename enable_if< or_< is_same< U, V3fVectorData >, is_same< U, V3dVectorData > > >::type >
-{
-
-	template< typename T >
+	
+	template< typename T, typename U >
 	void multiply33( typename U::Ptr data, const T &matrix, MatrixMultiplyOp::Mode mode )
 	{
+		assert( data );
+		
 		typename U::ValueType::iterator beginIt = data->writable().begin();
 		typename U::ValueType::iterator endIt = data->writable().end();
 		if( mode==MatrixMultiplyOp::Point || mode==MatrixMultiplyOp::Vector )
@@ -184,9 +174,11 @@ struct MultiplyFunctor< U, typename enable_if< or_< is_same< U, V3fVectorData >,
 		}
 	}
 	
-	template< typename T >
+	template< typename T, typename U >
 	void multiply( typename U::Ptr data, const T &matrix, MatrixMultiplyOp::Mode mode )
 	{
+		assert( data );
+	
 		typename U::ValueType::iterator beginIt = data->writable().begin();
 		typename U::ValueType::iterator endIt = data->writable().end();
 		if( mode==MatrixMultiplyOp::Point )
@@ -215,37 +207,41 @@ struct MultiplyFunctor< U, typename enable_if< or_< is_same< U, V3fVectorData >,
 		}
 	}
 
-	void operator() ( typename U::Ptr data, MultiplyArgs args )
+	template<typename U>
+	void operator() ( typename U::Ptr data )
 	{
-		switch ( args.matrix->typeId() )
+		assert( data );
+		
+		switch ( matrix->typeId() )
 		{
 		case M33fDataTypeId:
-			multiply33( data, static_pointer_cast< const M33fData >( args.matrix )->readable(), args.mode );
+			multiply33<M33f, U>( data, static_pointer_cast< const M33fData >( matrix )->readable(), mode );
 			break;
 		case M33dDataTypeId:
-			multiply33( data, static_pointer_cast< const M33dData >( args.matrix )->readable(), args.mode );
+			multiply33<M33d, U>( data, static_pointer_cast< const M33dData >( matrix )->readable(), mode );
 			break;
 		case M44fDataTypeId:
-			multiply( data, static_pointer_cast< const M44fData >( args.matrix )->readable(), args.mode );
+			multiply<M44f, U>( data, static_pointer_cast< const M44fData >( matrix )->readable(), mode );
 			break;
 		case M44dDataTypeId:
-			multiply( data, static_pointer_cast< const M44dData >( args.matrix )->readable(), args.mode );
+			multiply<M44d, U>( data, static_pointer_cast< const M44dData >( matrix )->readable(), mode );
 			break;
 		case TransformationMatrixfDataTypeId:
-			multiply( data, static_pointer_cast< const TransformationMatrixfData >( args.matrix )->readable().transform(), args.mode );
+			multiply<M44f, U>( data, static_pointer_cast< const TransformationMatrixfData >( matrix )->readable().transform(), mode );
 			break;
 		case TransformationMatrixdDataTypeId:
-			multiply( data, static_pointer_cast< const TransformationMatrixdData >( args.matrix )->readable().transform(), args.mode );
+			multiply<M44d, U>( data, static_pointer_cast< const TransformationMatrixdData >( matrix )->readable().transform(), mode );
 			break;
 		default:
 			throw InvalidArgumentException( "Data supplied is not a known matrix type." );
 		}
 	}
+	
 };
 
 void MatrixMultiplyOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 {
 	DataPtr data = static_pointer_cast< Data >( toModify );
-	MultiplyArgs args = { data, m_matrixParameter->getValue(), (Mode)m_modeParameter->getNumericValue() };
-	despatchVectorTypedDataFn< void, MultiplyFunctor, MultiplyArgs>( data, args );
+	MultiplyFunctor func = { data, m_matrixParameter->getValue(), (Mode)m_modeParameter->getNumericValue() };
+	despatchTypedData< MultiplyFunctor, TypeTraits::IsVec3VectorTypedData >( data, func );
 }
