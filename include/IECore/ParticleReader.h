@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,6 +55,29 @@ class ParticleReader : public Reader
 
 		ParticleReader( const std::string name, const std::string description );
 		
+		/// An enum for the values accepted by realTypeParameter().
+		enum RealType
+		{
+			Native = 0,
+			Float = 1,
+			Double = 2,
+		};
+	
+		//! @name Parameter accessors
+		/// These provide more convenient access to parameters than
+		/// by searching the parameters() structure by hand.
+		/////////////////////////////////////////////////////////
+		//@{
+		FloatParameterPtr percentageParameter();
+		ConstFloatParameterPtr percentageParameter() const;
+		IntParameterPtr percentageSeedParameter();
+		ConstIntParameterPtr percentageSeedParameter() const;
+		StringVectorParameterPtr attributesParameter();
+		ConstStringVectorParameterPtr attributesParameter() const;
+		IntParameterPtr realTypeParameter();
+		ConstIntParameterPtr realTypeParameter() const;
+		//@}
+		
 		//! @name Particle specific reading functions.
 		/// These allow more controlled reading than the read()
 		/// method alone. These functions are still affected
@@ -85,13 +108,6 @@ class ParticleReader : public Reader
 		/// in derived classes.
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
 
-		enum RealType
-		{
-			Native = 0,
-			Float = 1,
-			Double = 2,
-		};
-	
 		/// Convenience functions to access the values held in parameters().
 		/// If called from within doOperation they will never throw, but if
 		/// called at any other time they may, due to invalid values in the

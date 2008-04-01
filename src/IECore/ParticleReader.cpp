@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -92,6 +92,46 @@ ParticleReader::ParticleReader( const std::string name, const std::string descri
 	parameters()->addParameter( m_percentageSeedParameter );
 	parameters()->addParameter( m_attributesParameter );
 	parameters()->addParameter( m_realTypeParameter );
+}
+
+FloatParameterPtr ParticleReader::percentageParameter()
+{
+	return m_percentageParameter;
+}
+
+ConstFloatParameterPtr ParticleReader::percentageParameter() const
+{
+	return m_percentageParameter;
+}
+
+IntParameterPtr ParticleReader::percentageSeedParameter()
+{
+	return m_percentageSeedParameter;
+}
+
+ConstIntParameterPtr ParticleReader::percentageSeedParameter() const
+{
+	return m_percentageSeedParameter;
+}
+
+StringVectorParameterPtr ParticleReader::attributesParameter()
+{
+	return m_attributesParameter;
+}
+
+ConstStringVectorParameterPtr ParticleReader::attributesParameter() const
+{
+	return m_attributesParameter;
+}
+
+IntParameterPtr ParticleReader::realTypeParameter()
+{
+	return m_realTypeParameter;
+}
+
+ConstIntParameterPtr ParticleReader::realTypeParameter() const
+{
+	return m_realTypeParameter;
 }
 
 ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
