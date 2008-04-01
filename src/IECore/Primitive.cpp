@@ -32,9 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECore/Primitive.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/DespatchTypedData.h"
 
 using namespace IECore;
 using namespace boost;
@@ -156,30 +159,36 @@ void Primitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	}
 }
 
-struct Args
+struct ValidateArraySize
 {
+	typedef bool ReturnType;
+		
+	ValidateArraySize( size_t sz ) : m_variableSize( sz )
+	{
+	} 
+
+	template<typename T>
+	bool operator() ( typename T::Ptr data )
+	{
+		assert( data );
+                
+		const typename T::ValueType &v = data->readable();
+		
+		return v.size() == m_variableSize;
+	}
+	
+	private:
+	
 	size_t m_variableSize;	
 };
 
-template<typename T>
-struct ValidateArraySize
-{
-	bool operator() ( typename T::Ptr data, const Args &args )
-	{
-		typedef typename T::ValueType Vector;
-                
-		const Vector &v = data->readable();
-		
-		return v.size() == args.m_variableSize;
-	}
-};
-
-template<typename T>
 struct ReturnTrue
 {
-	bool operator() ( typename T::Ptr data, void *args )
+	typedef bool ReturnType;
+	
+	template<typename T>
+	bool operator() ( typename T::Ptr data )
 	{
-		assert( !args );
 		return true;
 	}
 };
@@ -197,17 +206,16 @@ bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv )
 	{
 		if ( sz == 1 )
 		{
-			return despatchSimpleTypedDataFn<bool, ReturnTrue, void*>( static_pointer_cast<Data>( pv.data ), 0 );	
+			ReturnTrue func;
+			return despatchTypedData<ReturnTrue, TypeTraits::IsSimpleTypedData>( static_pointer_cast<Data>( pv.data ), func );	
 		}	
 	}
 	catch ( InvalidArgumentException &e )
 	{	
 	}
 	
-	Args args;
-	args.m_variableSize = sz;
-		
-	return despatchVectorTypedDataFn<bool, ValidateArraySize, Args>( static_pointer_cast<Data>( pv.data ), args );		
+	ValidateArraySize func( sz );
+	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData>( static_pointer_cast<Data>( pv.data ), func );	
 }
 
 bool Primitive::arePrimitiveVariablesValid()
