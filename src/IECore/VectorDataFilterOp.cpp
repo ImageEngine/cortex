@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECore/VectorDataFilterOp.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/ObjectParameter.h"
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/DespatchTypedData.h"
 
 using namespace IECore;
 using namespace boost;
@@ -80,33 +82,35 @@ VectorDataFilterOp::~VectorDataFilterOp()
 {
 }
 
-struct Args
+struct Filter
 {
+	typedef void ReturnType;
+	
 	bool invert;
 	bool clip;
 	const vector<bool> *filter;
-};
 
-template<typename T>
-struct Filter
-{
-	void operator() ( typename T::Ptr data, const Args &args )
+	template<typename T>
+	void operator() ( typename T::Ptr data )
 	{
+		assert( data );
+		assert( filter );
+		
 		typedef typename T::ValueType Vector;
 		
 		const Vector &v = data->readable();
 		Vector vf;
-		typename Vector::const_iterator vIt = v.begin();
-		typename Vector::const_iterator vItEnd = vIt + min( v.size(), args.filter->size() );
-		vector<bool>::const_iterator fIt = args.filter->begin();
+		typename Vector::const_iterator vIt = v.begin();		
+		typename Vector::const_iterator vItEnd = vIt + min( v.size(), filter->size() );
+		vector<bool>::const_iterator fIt = filter->begin();
 		for( ; vIt!=vItEnd; vIt++, fIt++ )
 		{
-			if( *fIt == !args.invert )
+			if( *fIt == !invert )
 			{
 				vf.push_back( *vIt );
 			}
 		}
-		if( !args.clip )
+		if( !clip )
 		{
 			std::copy( vItEnd, v.end(), back_insert_iterator<Vector>( vf ) );
 		}
@@ -116,9 +120,9 @@ struct Filter
 
 void VectorDataFilterOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands )
 {
-	Args args;
-	args.invert = operands->member<BoolData>( "invert" )->readable();
-	args.clip = operands->member<BoolData>( "clip" )->readable();
-	args.filter = &( operands->member<BoolVectorData>( "filter" )->readable() );
-	despatchVectorTypedDataFn<void, Filter, Args>( static_pointer_cast<Data>( object ), args );
+	Filter f;
+	f.invert = operands->member<BoolData>( "invert" )->readable();
+	f.clip = operands->member<BoolData>( "clip" )->readable();
+	f.filter = &( operands->member<BoolVectorData>( "filter" )->readable() );
+	despatchTypedData<Filter, TypeTraits::IsVectorTypedData>( static_pointer_cast<Data>( object ), f );
 }

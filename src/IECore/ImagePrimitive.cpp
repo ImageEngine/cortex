@@ -32,10 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/static_assert.hpp"
+
 #include "IECore/ImagePrimitive.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/Renderer.h"
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/DespatchTypedData.h"
 
 using namespace std;
 using namespace IECore;
@@ -129,31 +132,13 @@ void ImagePrimitive::channelNames( vector<string> &names ) const
 	names.clear();
 	
 	for ( PrimitiveVariableMap::const_iterator i = variables.begin(); i != variables.end(); ++i )
-	{				
-		size_t size = 0;
+	{			
+		const PrimitiveVariable &primVar = i->second;
 		
-		try
-		{
-			VectorTypedDataSizeArgs dummy;
-			
-			size = despatchVectorTypedDataFn<size_t, VectorTypedDataSize, VectorTypedDataSizeArgs>( i->second.data, dummy );
-		}
-		catch ( ... )
-		{
-			try
-			{
-				SimpleTypedDataAddressArgs dummy;
-				if ( despatchSimpleTypedDataFn< bool, SimpleTypedDataAddress, SimpleTypedDataAddressArgs>( i->second.data, dummy ) )
-				{			
-					size = 1;
-				}
-			} 
-			catch ( ... )
-			{
-			}
-		}
+		TypedDataSize func;
+		size_t size = despatchTypedData< TypedDataSize >( primVar.data, func );
 		
-		if ( size == ( const_cast<ImagePrimitive *>(this) )->variableSize( i->second.interpolation ) )
+		if ( size == ( const_cast<ImagePrimitive *>(this) )->variableSize( primVar.interpolation ) )
 		{		
 			names.push_back( i->first );
 		}

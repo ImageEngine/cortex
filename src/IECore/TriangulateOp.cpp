@@ -35,7 +35,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/TriangulateOp.h"
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/DespatchTypedData.h"
 #include "IECore/TriangleAlgo.h"
 #include "IECore/Exception.h"
 #include "IECore/CompoundParameter.h"
@@ -86,35 +86,34 @@ ConstBoolParameterPtr TriangulateOp::throwExceptionsParameter() const
 	return m_throwExceptionsParameter;
 }
 
-struct TriangleDataRemapArgs
+/// A functor for use with despatchTypedData, which copies elements from another vector, as specified by an array of indices into that data
+struct TriangleDataRemap
 {
-	TriangleDataRemapArgs( const std::vector<int> &indices ) : m_indices( indices )
+	typedef size_t ReturnType;
+	
+	TriangleDataRemap( const std::vector<int> &indices ) : m_indices( indices )
 	{
 	}
 
 	ConstDataPtr m_other;
 	const std::vector<int> &m_indices;
-};
 
-/// A functor for use with despatchVectorTypedDataFn, which copies elements from another vector, as specified by an array of indices into that data
-template<typename T>
-struct TriangleDataRemap
-{
-	size_t operator() ( typename T::Ptr data, TriangleDataRemapArgs args )
+	template<typename T>
+	size_t operator() ( typename T::Ptr data )
 	{
 		assert( data );
-		typename T::ConstPtr otherData = runTimeCast<const T>( args.m_other );
+		typename T::ConstPtr otherData = runTimeCast<const T>( m_other );
 		assert( otherData );
 
 		data->writable().clear();
-		data->writable().reserve( args.m_indices.size() );
+		data->writable().reserve( m_indices.size() );
 
-		for ( std::vector<int>::const_iterator it = args.m_indices.begin(); it != args.m_indices.end(); ++it )
+		for ( std::vector<int>::const_iterator it = m_indices.begin(); it != m_indices.end(); ++it )
 		{
 			data->writable().push_back( otherData->readable()[ *it ] );
 		}
 		
-		assert( data->readable().size() == args.m_indices.size() );
+		assert( data->readable().size() == m_indices.size() );
 
 		return data->readable().size();
 	}
@@ -313,16 +312,16 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 
 	/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.
 	assert( faceVaryingIndices.size() == newVertexIds->readable().size() );
-	TriangleDataRemapArgs args( faceVaryingIndices );
+	TriangleDataRemap func( faceVaryingIndices );
 	for ( PrimitiveVariableMap::iterator it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
 	{
 		if ( it->second.interpolation == PrimitiveVariable::FaceVarying )
 		{
  			assert( it->second.data );
-			args.m_other = it->second.data;
+			func.m_other = it->second.data;
 			DataPtr data = it->second.data->copy();
 
-			size_t primVarSize = despatchVectorTypedDataFn<int, TriangleDataRemap, TriangleDataRemapArgs>( data, args );
+			size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data, func );
 			assert( primVarSize == faceVaryingIndices.size() );
 			(void)primVarSize;
 
