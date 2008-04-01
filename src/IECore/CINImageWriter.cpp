@@ -43,6 +43,7 @@
 #include "IECore/ScaledDataConversion.h"
 #include "IECore/CompoundDataConversion.h"
 #include "IECore/LinearToCineonDataConversion.h"
+#include "IECore/DespatchTypedData.h"
 
 #include "IECore/private/cineon.h"
 
@@ -74,40 +75,68 @@ CINImageWriter::~CINImageWriter()
 {
 }
 
-template<typename T>
-void CINImageWriter::encodeChannel( ConstDataPtr dataContainer, const Box2i &displayWindow, const Box2i &dataWindow, int bitShift, std::vector<unsigned int> &imageBuffer )
+struct CINImageWriter::ChannelConverter
 {
-	const typename T::ValueType &data = static_pointer_cast<const T>( dataContainer )->readable();
-	
-	CompoundDataConversion<
-		ScaledDataConversion<typename T::ValueType::value_type, float>, 
-		LinearToCineonDataConversion<float, unsigned int> 
-	> converter;
+	typedef void ReturnType;
 
-	int displayWidth = displayWindow.size().x + 1;
-	int dataWidth = dataWindow.size().x + 1;
+	std::string m_channelName;
+	Box2i m_displayWindow;
+	Box2i m_dataWindow;
+	unsigned int m_bitShift;
+	std::vector<unsigned int> &m_imageBuffer;
 
-	int dataX = 0;
-	int dataY = 0;
-
-	for ( int y = dataWindow.min.y; y <= dataWindow.max.y; y++, dataY++ )
+	ChannelConverter( const std::string &channelName, const Box2i &displayWindow, const Box2i &dataWindow, unsigned int bitShift, std::vector<unsigned int> &imageBuffer  ) 
+	: m_channelName( channelName ), m_displayWindow( displayWindow ), m_dataWindow( dataWindow ), m_bitShift( bitShift ), m_imageBuffer( imageBuffer )
 	{
-		int dataOffset = dataY * dataWidth + dataX;
-		assert( dataOffset >= 0 );
-
-		for ( int x = dataWindow.min.x; x <= dataWindow.max.x; x++, dataOffset++ )
-		{
-			int pixelIdx = ( y - displayWindow.min.y ) * displayWidth + ( x - displayWindow.min.x );
-
-			assert( pixelIdx >= 0 );
-			assert( pixelIdx < (int)imageBuffer.size() );
-			assert( dataOffset < (int)data.size() );
-
-			/// Perform the conversion, and set the appropriate bits in the "cell"
-			imageBuffer[ pixelIdx ] |= converter( data[dataOffset] ) << bitShift;
-		}
 	}
-}
+
+	template<typename T>
+	ReturnType operator()( typename T::Ptr dataContainer )
+	{
+		assert( dataContainer );
+
+		const typename T::ValueType &data = dataContainer->readable();
+	
+		CompoundDataConversion<
+			ScaledDataConversion<typename T::ValueType::value_type, float>, 
+			LinearToCineonDataConversion<float, unsigned int> 
+		> converter;
+
+		int displayWidth = m_displayWindow.size().x + 1;
+		int dataWidth = m_dataWindow.size().x + 1;
+
+		int dataY = 0;
+
+		for ( int y = m_dataWindow.min.y; y <= m_dataWindow.max.y; y++, dataY++ )
+		{
+			int dataOffset = dataY * dataWidth ;
+			assert( dataOffset >= 0 );
+
+			for ( int x = m_dataWindow.min.x; x <= m_dataWindow.max.x; x++, dataOffset++ )
+			{
+				int pixelIdx = ( y - m_displayWindow.min.y ) * displayWidth + ( x - m_displayWindow.min.x );
+
+				assert( pixelIdx >= 0 );
+				assert( pixelIdx < (int)m_imageBuffer.size() );
+				assert( dataOffset < (int)data.size() );
+
+				/// Perform the conversion, and set the appropriate bits in the "cell"
+				m_imageBuffer[ pixelIdx ] |= converter( data[dataOffset] ) << m_bitShift;
+			}
+		}
+	};
+	
+	struct ErrorHandler
+	{
+		template<typename T, typename F>
+		void operator()( typename T::ConstPtr data, const F& functor )
+		{
+			assert( data );
+		
+			throw InvalidArgumentException( ( boost::format( "CINImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+		}
+	};
+};
 
 void CINImageWriter::writeImage( vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow )
 {
@@ -242,63 +271,15 @@ void CINImageWriter::writeImage( vector<string> &names, ConstImagePrimitivePtr i
 		assert( image->variables.find( *i ) != image->variables.end() );
 		DataPtr dataContainer = image->variables.find( *i )->second.data;
 		assert( dataContainer );
-
-		switch (dataContainer->typeId())
-		{
-		case FloatVectorDataTypeId:
-
-			encodeChannel<FloatVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		case HalfVectorDataTypeId:
-
-			encodeChannel<HalfVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		case DoubleVectorDataTypeId:
-
-			encodeChannel<DoubleVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		case LongVectorDataTypeId:
-
-			encodeChannel<LongVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		case CharVectorDataTypeId:
-
-			encodeChannel<CharVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		case UCharVectorDataTypeId:
-
-			encodeChannel<UCharVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		case ShortVectorDataTypeId:
-
-			encodeChannel<ShortVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		case UShortVectorDataTypeId:
-
-			encodeChannel<UShortVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		case IntVectorDataTypeId:
-
-			encodeChannel<IntVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		case UIntVectorDataTypeId:
-
-			encodeChannel<UIntVectorData>( dataContainer, displayWindow, dataWindow, shift, imageBuffer );
-			break;
-
-		default:
-			throw InvalidArgumentException( (format( "CINImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId(dataContainer->typeId()) % *i).str() );
-		}
-
+		
+		ChannelConverter converter( *i, image->getDisplayWindow(), dataWindow, shift, imageBuffer );
+		
+		despatchTypedData<			
+			ChannelConverter, 
+			TypeTraits::IsNumericVectorTypedData,
+			ChannelConverter::ErrorHandler
+		>( dataContainer, converter );	
+		
 		ii.channel_count ++;
 
 		++offset;

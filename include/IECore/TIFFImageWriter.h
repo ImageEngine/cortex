@@ -68,6 +68,9 @@ class TIFFImageWriter : public ImageWriter
 
 		virtual void writeImage( std::vector<std::string> &names, ConstImagePrimitivePtr image,
 		                         const Imath::Box2i &dataWindow);
+					 
+		template<typename ChannelData>
+		struct ChannelConverter;			 
 
 		template<typename T>
 		void encodeChannels( ConstImagePrimitivePtr image, const std::vector<std::string> &names,

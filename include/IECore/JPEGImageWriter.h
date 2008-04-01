@@ -63,6 +63,8 @@ class JPEGImageWriter : public ImageWriter
 	private:
 
 		static const WriterDescription<JPEGImageWriter> m_writerDescription;
+		
+		struct ChannelConverter;
 
 		/// write the image
 		virtual void writeImage(
@@ -72,10 +74,6 @@ class JPEGImageWriter : public ImageWriter
 		);
 
 		void constructParameters();
-		
-		template<typename T>
-		void encodeChannel( ConstDataPtr dataContainer, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, int numChannels, int channelOffset, std::vector<unsigned char> &imageBuffer );
-
 	public:
 
 		/// \todo Move all ExtraData members to here on next major version change

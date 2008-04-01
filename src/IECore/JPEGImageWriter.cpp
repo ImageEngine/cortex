@@ -46,6 +46,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
+#include "IECore/DespatchTypedData.h"
 
 #include "boost/format.hpp"
 
@@ -142,39 +143,63 @@ struct JPEGWriterErrorHandler : public jpeg_error_mgr
 	}
 };
 
-template<typename T>
-void JPEGImageWriter::encodeChannel( ConstDataPtr dataContainer, const Box2i &displayWindow, const Box2i &dataWindow, int numChannels, int channelOffset, std::vector<unsigned char> &imageBuffer )
+struct JPEGImageWriter::ChannelConverter
 {
-	assert( dataContainer );
-	assert( runTimeCast< const T >( dataContainer ) );
-	
-	const typename T::ValueType &data = static_pointer_cast<const T>( dataContainer )->readable();
-	ScaledDataConversion<typename T::ValueType::value_type, unsigned char> converter;
+	typedef void ReturnType;
 
-	int displayWidth = displayWindow.size().x + 1;
-	int dataWidth = dataWindow.size().x + 1;
+	std::string m_channelName;
+	Box2i m_displayWindow;
+	Box2i m_dataWindow;
+	int m_numChannels;
+	int m_channelOffset;
+	std::vector<unsigned char> &m_imageBuffer;
 
-	int dataX = 0;
-	int dataY = 0;
-
-	for ( int y = dataWindow.min.y; y <= dataWindow.max.y; y++, dataY++ )
+	ChannelConverter( const std::string &channelName, const Box2i &displayWindow, const Box2i &dataWindow, int numChannels, int channelOffset, std::vector<unsigned char> &imageBuffer  ) 
+	: m_channelName( channelName ), m_displayWindow( displayWindow ), m_dataWindow( dataWindow ), m_numChannels( numChannels ), m_channelOffset( channelOffset ), m_imageBuffer( imageBuffer )
 	{
-		int dataOffset = dataY * dataWidth + dataX;
-		assert( dataOffset >= 0 );
-
-		for ( int x = dataWindow.min.x; x <= dataWindow.max.x; x++, dataOffset++ )
-		{		
-			int pixelIdx = ( y - displayWindow.min.y ) * displayWidth + ( x - displayWindow.min.x );
-
-			assert( pixelIdx >= 0 );
-			assert( numChannels*pixelIdx + channelOffset < (int)imageBuffer.size() );
-			assert( dataOffset < (int)data.size() );
-
-			// convert to unsigned 8-bit integer				
-			imageBuffer[ numChannels*pixelIdx + channelOffset ] = converter( data[dataOffset] );
-		}
 	}
-}
+
+	template<typename T>
+	ReturnType operator()( typename T::Ptr dataContainer )
+	{
+		assert( dataContainer );
+
+		const typename T::ValueType &data = dataContainer->readable();
+		ScaledDataConversion<typename T::ValueType::value_type, unsigned char> converter;
+
+		int displayWidth = m_displayWindow.size().x + 1;
+		int dataWidth = m_dataWindow.size().x + 1;
+
+		int dataY = 0;
+
+		for ( int y = m_dataWindow.min.y; y <= m_dataWindow.max.y; y++, dataY++ )
+		{
+			int dataOffset = dataY * dataWidth;
+			assert( dataOffset >= 0 );
+
+			for ( int x = m_dataWindow.min.x; x <= m_dataWindow.max.x; x++, dataOffset++ )
+			{		
+				int pixelIdx = ( y - m_displayWindow.min.y ) * displayWidth + ( x - m_displayWindow.min.x );
+
+				assert( pixelIdx >= 0 );
+				assert( m_numChannels*pixelIdx + m_channelOffset < (int)m_imageBuffer.size() );
+				assert( dataOffset < (int)data.size() );
+
+				// convert to unsigned 8-bit integer				
+				m_imageBuffer[ m_numChannels*pixelIdx + m_channelOffset ] = converter( data[dataOffset] );
+			}
+		}
+	};
+	
+	struct ErrorHandler
+	{
+		template<typename T, typename F>
+		void operator()( typename T::ConstPtr data, const F& functor )
+		{
+			throw InvalidArgumentException( ( boost::format( "JPEGImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+		}
+	};
+};
 
 void JPEGImageWriter::writeImage( vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow )
 {
@@ -296,45 +321,15 @@ void JPEGImageWriter::writeImage( vector<string> &names, ConstImagePrimitivePtr 
 			assert( image->variables.find( name ) != image->variables.end() );			
 			DataPtr dataContainer = image->variables.find( name )->second.data;
 			assert( dataContainer );
-
-			switch ( dataContainer->typeId() )
-			{
 			
-			case DoubleVectorDataTypeId:
-				encodeChannel<DoubleVectorData>( dataContainer, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer);
-				break;
+			ChannelConverter converter( *it, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer );
+		
+			despatchTypedData<			
+				ChannelConverter, 
+				TypeTraits::IsNumericVectorTypedData,
+				ChannelConverter::ErrorHandler
+			>( dataContainer, converter );	
 
-			case FloatVectorDataTypeId:
-				encodeChannel<FloatVectorData>( dataContainer, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer);
-				break;
-				
-			case IntVectorDataTypeId:
-				encodeChannel<IntVectorData>( dataContainer, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer);
-				break;	
-				
-			case LongVectorDataTypeId:
-				encodeChannel<LongVectorData>( dataContainer, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer);
-				break;						
-
-			case UIntVectorDataTypeId:
-				encodeChannel<UIntVectorData>( dataContainer, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer);
-				break;
-				
-			case UCharVectorDataTypeId:
-				encodeChannel<UCharVectorData>( dataContainer, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer);
-				break;	
-				
-			case CharVectorDataTypeId:
-				encodeChannel<CharVectorData>( dataContainer, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer);
-				break;	
-
-			case HalfVectorDataTypeId:
-				encodeChannel<HalfVectorData>( dataContainer, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer);
-				break;
-
-			default:
-				throw InvalidArgumentException( (format( "JPEGImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId(dataContainer->typeId()) % name).str() );
-			}
 		}
 
 		// start the compressor

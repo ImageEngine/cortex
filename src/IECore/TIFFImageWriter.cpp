@@ -133,13 +133,13 @@ TIFFImageWriter::~TIFFImageWriter()
 }
 
 template<typename ChannelData>
-struct TIFFConverter
+struct TIFFImageWriter::ChannelConverter
 {
 	typedef typename ChannelData::Ptr ReturnType;
 	
 	std::string m_channelName;
 	
-	TIFFConverter( const std::string &channelName) : m_channelName( channelName )
+	ChannelConverter( const std::string &channelName ) : m_channelName( channelName )
 	{
 	}
 
@@ -159,6 +159,8 @@ struct TIFFConverter
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
+			assert( data );
+		
 			throw InvalidArgumentException( ( boost::format( "TIFFImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
 		}
 	};
@@ -188,12 +190,12 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 		DataPtr dataContainer = image->variables.find(i->c_str())->second.data;
 		assert( dataContainer );
 
-		TIFFConverter<ChannelData> converter( *i );
+		ChannelConverter<ChannelData> converter( *i );
 		
 		typename ChannelData::Ptr channelData = despatchTypedData<			
-			TIFFConverter<ChannelData>, 
+			ChannelConverter<ChannelData>, 
 			TypeTraits::IsNumericVectorTypedData,
-			typename TIFFConverter<ChannelData>::ErrorHandler
+			typename ChannelConverter<ChannelData>::ErrorHandler
 		>( dataContainer, converter );
 
 		assert( channelData );
