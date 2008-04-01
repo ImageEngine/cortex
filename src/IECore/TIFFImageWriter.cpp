@@ -52,6 +52,8 @@
 #include "IECore/ScopedTIFFExceptionTranslator.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/DespatchTypedData.h"
 
 #include "IECore/BoxOperators.h"
 
@@ -130,6 +132,38 @@ TIFFImageWriter::~TIFFImageWriter()
 {
 }
 
+template<typename ChannelData>
+struct TIFFConverter
+{
+	typedef typename ChannelData::Ptr ReturnType;
+	
+	std::string m_channelName;
+	
+	TIFFConverter( const std::string &channelName) : m_channelName( channelName )
+	{
+	}
+
+	template<typename T>
+	ReturnType operator()( typename T::Ptr data )
+	{
+		assert( data );
+			
+		return DataConvert < T, ChannelData, ScaledDataConversion< typename T::ValueType::value_type, typename ChannelData::ValueType::value_type> >()
+		(
+			boost::static_pointer_cast<const T>( data )
+		);
+	};
+	
+	struct ErrorHandler
+	{
+		template<typename T, typename F>
+		void operator()( typename T::ConstPtr data, const F& functor )
+		{
+			throw InvalidArgumentException( ( boost::format( "TIFFImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+		}
+	};
+};
+
 template<typename T>
 void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector<string> &names, const Imath::Box2i &dataWindow, tiff *tiffImage, size_t bufSize, unsigned int numStrips )
 {
@@ -145,8 +179,6 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 
 	typedef TypedData< vector<T> > ChannelData;
 
-	typename ChannelData::Ptr channelData = 0;
-
 	vector<T> imageBuffer( samplesPerPixel * area, 0 );
 
 	// Encode eaech individual channel into the buffer
@@ -156,72 +188,13 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 		DataPtr dataContainer = image->variables.find(i->c_str())->second.data;
 		assert( dataContainer );
 
-		switch (dataContainer->typeId())
-		{
-
-		case FloatVectorDataTypeId:
-			channelData = DataConvert < FloatVectorData, ChannelData, ScaledDataConversion<float, T> >()(
-			                      boost::static_pointer_cast<const FloatVectorData>( dataContainer )
-			              );
-			break;
-
-		case LongVectorDataTypeId:
-			channelData = DataConvert< LongVectorData, ChannelData, ScaledDataConversion<long, T> >()(
-			                      boost::static_pointer_cast<const LongVectorData>( dataContainer )
-			              );
-			break;
-
-		case CharVectorDataTypeId:
-			channelData = DataConvert< CharVectorData, ChannelData, ScaledDataConversion<char, T> >()(
-			                      boost::static_pointer_cast<const CharVectorData>( dataContainer )
-			              );
-			break;
-
-		case UCharVectorDataTypeId:
-			channelData = DataConvert< UCharVectorData, ChannelData, ScaledDataConversion<unsigned char, T> >()(
-			                      boost::static_pointer_cast<const UCharVectorData>( dataContainer )
-			              );
-			break;
-
-		case DoubleVectorDataTypeId:
-			channelData = DataConvert< DoubleVectorData, ChannelData, ScaledDataConversion<double, T> >()(
-			                      boost::static_pointer_cast<const DoubleVectorData>( dataContainer )
-			              );
-			break;
-
-		case HalfVectorDataTypeId:
-			channelData = DataConvert< HalfVectorData, ChannelData, ScaledDataConversion<half, T> >()(
-			                      boost::static_pointer_cast<const HalfVectorData>( dataContainer )
-			              );
-			break;
-
-		case IntVectorDataTypeId:
-			channelData = DataConvert< IntVectorData, ChannelData, ScaledDataConversion<int, T> >()(
-			                      boost::static_pointer_cast<const IntVectorData>( dataContainer )
-			              );
-			break;
-
-		case UIntVectorDataTypeId:
-			channelData = DataConvert< UIntVectorData, ChannelData, ScaledDataConversion<unsigned int, T> >()(
-			                      boost::static_pointer_cast<const UIntVectorData>( dataContainer )
-			              );
-			break;
-
-		case ShortVectorDataTypeId:
-			channelData = DataConvert< ShortVectorData, ChannelData, ScaledDataConversion<short, T> >()(
-			                      boost::static_pointer_cast<const ShortVectorData>( dataContainer )
-			              );
-			break;
-
-		case UShortVectorDataTypeId:
-			channelData = DataConvert< UShortVectorData, ChannelData, ScaledDataConversion<unsigned short, T> >()(
-			                      boost::static_pointer_cast<const UShortVectorData>( dataContainer )
-			              );
-			break;
-
-		default:
-			throw InvalidArgumentException( (boost::format( "TIFFImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId(dataContainer->typeId()) % *i).str() );
-		}
+		TIFFConverter<ChannelData> converter( *i );
+		
+		typename ChannelData::Ptr channelData = despatchTypedData<			
+			TIFFConverter<ChannelData>, 
+			TypeTraits::IsNumericVectorTypedData,
+			typename TIFFConverter<ChannelData>::ErrorHandler
+		>( dataContainer, converter );
 
 		assert( channelData );
 
