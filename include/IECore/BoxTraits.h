@@ -59,7 +59,6 @@ template<typename T>
 struct BoxTraits
 {
 	typedef typename BoxTypeTraits<T>::BaseType BaseType;
-	typedef VectorTraits< typename BoxTypeTraits<T>::BaseType > VectorTraits;
 	
 	/// Create a box from the minimum and maximum corner points
 	static T create( const BaseType &min, const BaseType &max )
