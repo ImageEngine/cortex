@@ -464,8 +464,6 @@ Imath::M44f IECoreRI::RendererImplementation::getTransform( const std::string &c
 		V3f z = convert<Imath::V3f>( p[2] ) - o;
 
 		result = IECore::matrixFromBasis( x, y, z, o );
-		//result.scale( V3f( 1.0f, 1.0f, -1.0f ) );
-		//std::cerr << "GETTRASNFORM " << coordinateSystem << " " << result << std::endl;
 	}
 	else
 	{
