@@ -104,12 +104,8 @@ class TestHierarchicalCache(unittest.TestCase):
 
 		self.assertEqual( len( cache.children( self.cachedObjectNames[0] ) ), 2 )
 		self.assertEqual( len( cache.children( self.undirectlyCachedObjects[0] ) ), 1 )
-		try:
-			cache.children( uncachedObjectNames[0] )
-		except:
-			pass
-		else:
-			raise Exception( "Should generate exception for unexistent objects." )
+		
+		self.assertRaises( RuntimeError, cache.children, self.uncachedObjectNames[0] )
 
 	def testNameFunctions(self):
 		"""Test HierarchicalCache absolute/relative name functions."""
@@ -118,70 +114,26 @@ class TestHierarchicalCache(unittest.TestCase):
 		self.assertEqual( HierarchicalCache.absoluteName( "child", "/parent1/parent2/" ), "/parent1/parent2/child" )
 		self.assertEqual( HierarchicalCache.absoluteName( "child/", "/parent1/parent2/" ), "/parent1/parent2/child" )
 
-		try:
-			HierarchicalCache.absoluteName( "/child", "/parent" )
-		except:
-			pass
-		else:
-			raise Exception( "Should not accept absolute name for child node name." )
-
-		try:
-			HierarchicalCache.absoluteName( "child", "parent" )
-		except:
-			pass
-		else:
-			raise Exception( "Should not accept relative name for child node name." )
-
-		try:
-			HierarchicalCache.absoluteName( "child", "" )
-		except:
-			pass
-		else:
-			raise Exception( "Should not accept empty parent name." )
-
-		try:
-			HierarchicalCache.absoluteName( "child", "." )
-		except:
-			pass
-		else:
-			raise Exception( "Should not accept relative path for parent name." )
+		self.assertRaises( RuntimeError, HierarchicalCache.absoluteName, "/child", "/parent" )
+		self.assertRaises( RuntimeError, HierarchicalCache.absoluteName, "child", "parent" )
+		self.assertRaises( RuntimeError, HierarchicalCache.absoluteName, "child", "" )
+		self.assertRaises( RuntimeError, HierarchicalCache.absoluteName, "child", "." )		
 
 		self.assertEqual( HierarchicalCache.relativeName( "/test" ), "test" )
 		self.assertEqual( HierarchicalCache.relativeName( "/test/" ), "test" )
 		self.assertEqual( HierarchicalCache.relativeName( "/base/test" ), "test" )
 		self.assertEqual( HierarchicalCache.relativeName( "/base/test/" ), "test" )
 
-		try:
-			HierarchicalCache.relativeName( "child" )
-		except:
-			pass
-		else:
-			raise Exception( "Should not accept relative path." )
+		self.assertRaises( RuntimeError, HierarchicalCache.relativeName, "child" )		
+		self.assertRaises( RuntimeError, HierarchicalCache.parentName, "/" )				
 
-		try:		
-			HierarchicalCache.parentName( "/" )
-		except:
-			pass
-		else:
-			raise Exception( "Should raise an exception asking for parent of root node." )
 		self.assertEqual( HierarchicalCache.parentName( "/t" ), "/" )
 		self.assertEqual( HierarchicalCache.parentName( "/base/" ), "/" )
 		self.assertEqual( HierarchicalCache.parentName( "/base/test" ), "/base" )
 		self.assertEqual( HierarchicalCache.parentName( "/base/test/" ), "/base" )
 
-		try:
-			HierarchicalCache.parentName( "base" )
-		except:
-			pass
-		else:
-			raise Exception( "Should not accept relative path." )
-
-		try:
-			HierarchicalCache.parentName( "" )
-		except:
-			pass
-		else:
-			raise Exception( "Should not accept empty path." )
+		self.assertRaises( RuntimeError, HierarchicalCache.parentName, "base" )	
+		self.assertRaises( RuntimeError, HierarchicalCache.parentName, "" )	
 
 		self.assertEqual( HierarchicalCache.rootName(), "/" )
 
