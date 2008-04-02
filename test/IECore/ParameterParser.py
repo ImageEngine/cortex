@@ -155,6 +155,22 @@ class testParameterParser( unittest.TestCase ) :
 		
 		a()
 
+	def testQuotingOnStringParameters( self ):
+
+		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
+
+		a.d = "-hello"
+		a.f = IECore.StringVectorData( [ '-hello', "`~!@#$%^&*( )_+-=[]{ }\\|'\";:/? ", "", "hello" ] )
+
+		oldParams = a.parameters().getValue().copy()
+
+		s = IECore.ParameterParser().serialise( a.parameters() )
+		IECore.ParameterParser().parse( s, a.parameters() )
+					
+		self.assertEqual( a.parameters().getValue().d, oldParams.d )
+		self.assertEqual( a.parameters().getValue().f, oldParams.f )
+
+
 if __name__ == "__main__":
         unittest.main()
 

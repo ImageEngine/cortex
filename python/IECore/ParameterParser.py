@@ -34,6 +34,7 @@
 
 import IECore
 import shlex
+from urllib import quote, unquote
 
 ## This class defines a means of parsing a list of string arguments with respect to a Parameter definition.
 # It's main use is in providing values to be passed to Op instances in the do script. It now also provides
@@ -162,6 +163,27 @@ class ParameterParser :
 		cls.__typesToSerialisers[typeId] = serialiser
 
 ###################################################################################################################
+# quoting and unquoting methods used in string parameters
+###################################################################################################################
+
+def __strUnquote( txt ):
+
+	if txt.startswith("%Q%") and txt.endswith( "%Q%" ):
+		return unquote( txt[ 3: len(txt) - 3 ] )
+
+	return txt
+
+def __strQuote( txt ):
+	
+	quotedTxt = quote( txt )
+	# if the string has special characters, we force the quoted version. Also if it's empty string or starts with '-' to
+	# avoid confusion with parameter names and O.S. parse errors.
+	if txt != quotedTxt or len(txt) == 0 or txt.startswith('-'):
+		return "%Q%" + quotedTxt + "%Q%"
+
+	return txt
+
+###################################################################################################################
 # parsers and serialisers for the built in parameter types
 ###################################################################################################################
 
@@ -266,8 +288,7 @@ def __parseBox( dataType, boxType, elementType, integer, args, parameter ) :
 	parameter.setValidatedValue( dataType( boxType( elementType( *values[:n/2] ), elementType( *values[n/2:] ) ) ) )
 
 def __parseString( args, parameter ) :
-
-	parameter.setValidatedValue( IECore.StringData( args[0] ) )
+	parameter.setValidatedValue( IECore.StringData( __strUnquote(args[0]) ) )
 	del args[0]
 
 def __parseStringArray( args, parameter ) :
@@ -276,10 +297,10 @@ def __parseStringArray( args, parameter ) :
 	foundFlag = False
 	while len( args ) and not foundFlag :
 		a = args[0]
-		if a[0] == "-" :
+		if len(a) and a[0] == "-" :
 			foundFlag = True
 		else :
-			d.append( a )
+			d.append( __strUnquote(a) )
 			del args[0]
 
 	parameter.setValidatedValue( d )
@@ -303,20 +324,18 @@ def __parseNumericArray( dataType, integer, args, parameter ) :
 			except :
 				done = True
 
-	if not d.size() :
-		raise SyntaxError( "Expected at least one numeric value." )
-
 	parameter.setValidatedValue( d )
 
 def __serialiseString( parameter ) :
 
-	return "'" + parameter.getTypedValue() + "'"
+	return "'" + __strQuote(parameter.getTypedValue()) + "'"
 
 def __serialiseStringArray( parameter ) :
 
 	result = []
 	for i in parameter.getValue() :
-		result.append( "'" + i + "'" )	
+		
+		result.append( "'" + __strQuote(i) + "'" )	
 	return " ".join( result )
 
 def __serialiseUsingStr( parameter ) :
