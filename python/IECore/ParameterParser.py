@@ -176,9 +176,9 @@ def __strUnquote( txt ):
 def __strQuote( txt ):
 	
 	quotedTxt = quote( txt )
-	# if the string has special characters, we force the quoted version. Also if it's empty string or starts with '-' to
-	# avoid confusion with parameter names and O.S. parse errors.
-	if txt != quotedTxt or len(txt) == 0 or txt.startswith('-'):
+	# if the string has special characters, we force the quoted version. Also if it's empty string or starts with '-' or 'read:' to
+	# avoid confusion with the parser options, parameter names and O.S. parse errors.
+	if txt != quotedTxt or len(txt) == 0 or txt.startswith('-') or txt.startswith("read:"):
 		return "%Q%" + quotedTxt + "%Q%"
 
 	return txt
