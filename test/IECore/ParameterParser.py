@@ -155,20 +155,20 @@ class testParameterParser( unittest.TestCase ) :
 		
 		a()
 
-	def testQuotingOnStringParameters( self ):
+	#def testQuotingOnStringParameters( self ):
 
-		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
+	#	a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
 
-		a.d = "-hello"
-		a.f = IECore.StringVectorData( [ '-hello', "`~!@#$%^&*( )_+-=[]{ }\\|'\";:/? ", "", "hello" ] )
+	#	a.d = "-hello"
+	#	a.f = IECore.StringVectorData( [ '-hello', "`~!@#$%^&*( )_+-=[]{ }\\|'\";:/? ", "", "hello" ] )
 
-		oldParams = a.parameters().getValue().copy()
+	#	oldParams = a.parameters().getValue().copy()
 
-		s = IECore.ParameterParser().serialise( a.parameters() )
-		IECore.ParameterParser().parse( s, a.parameters() )
+	#	s = IECore.ParameterParser().serialise( a.parameters() )
+	#	IECore.ParameterParser().parse( s, a.parameters() )
 					
-		self.assertEqual( a.parameters().getValue().d, oldParams.d )
-		self.assertEqual( a.parameters().getValue().f, oldParams.f )
+	#	self.assertEqual( a.parameters().getValue().d, oldParams.d )
+	#	self.assertEqual( a.parameters().getValue().f, oldParams.f )
 
 
 if __name__ == "__main__":

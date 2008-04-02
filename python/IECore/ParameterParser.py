@@ -40,6 +40,7 @@ from urllib import quote, unquote
 # It's main use is in providing values to be passed to Op instances in the do script. It now also provides
 # the reverse operation - serialising parameter values into a form which can later be parsed.
 #
+# \todo Enable urllib.quote / unquote methods on string based-parameters. And also it's test case.
 # \ingroup python
 class ParameterParser :
 
@@ -288,7 +289,8 @@ def __parseBox( dataType, boxType, elementType, integer, args, parameter ) :
 	parameter.setValidatedValue( dataType( boxType( elementType( *values[:n/2] ), elementType( *values[n/2:] ) ) ) )
 
 def __parseString( args, parameter ) :
-	parameter.setValidatedValue( IECore.StringData( __strUnquote(args[0]) ) )
+#	parameter.setValidatedValue( IECore.StringData( __strUnquote(args[0]) ) )
+	parameter.setValidatedValue( IECore.StringData( args[0] ) )
 	del args[0]
 
 def __parseStringArray( args, parameter ) :
@@ -300,7 +302,8 @@ def __parseStringArray( args, parameter ) :
 		if len(a) and a[0] == "-" :
 			foundFlag = True
 		else :
-			d.append( __strUnquote(a) )
+#			d.append( __strUnquote(a) )
+			d.append( a )
 			del args[0]
 
 	parameter.setValidatedValue( d )
@@ -328,14 +331,17 @@ def __parseNumericArray( dataType, integer, args, parameter ) :
 
 def __serialiseString( parameter ) :
 
-	return "'" + __strQuote(parameter.getTypedValue()) + "'"
+#	return "'" + __strQuote(parameter.getTypedValue()) + "'"
+	return "'" + parameter.getTypedValue() + "'"
 
 def __serialiseStringArray( parameter ) :
 
 	result = []
 	for i in parameter.getValue() :
 		
-		result.append( "'" + __strQuote(i) + "'" )	
+#		result.append( "'" + __strQuote(i) + "'" )
+		result.append( "'" + i + "'" )
+
 	return " ".join( result )
 
 def __serialiseUsingStr( parameter ) :
