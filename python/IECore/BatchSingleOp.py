@@ -33,6 +33,7 @@
 ##########################################################################
 
 from IECore import *
+from urllib import unquote
 
 # Op for executing another Op multiple times with different parameters.
 class BatchSingleOp( Op ) :
@@ -73,7 +74,7 @@ class BatchSingleOp( Op ) :
 				),
 				StringVectorParameter(
 					name = "opParameters",
-					description = "Sets the parameters of each Op formatted in the same syntax as the DO or GUIDO commands.",
+					description = "Sets the parameters of each Op formatted in the same syntax as the DO or GUIDO commands. It may contain characters coded in hex for example the space character would be %20.",
 					defaultValue = StringVectorData(),
 				),
 				BoolParameter(
@@ -102,7 +103,7 @@ class BatchSingleOp( Op ) :
 		for i in xrange( 0, len(opParameters) ):
 			try:
 				op = opType()
-				pp.parse( opParameters[i], op.parameters() )
+				pp.parse( unquote(opParameters[i]), op.parameters() )
 			except Exception, e:
 				errors.append( "Op %02d: %s" % (i,str(e)) )
 				continue
