@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -282,7 +282,6 @@ class TestHierarchicalCache(unittest.TestCase):
 
 	def testBoundingBox( self ):
 		"""Test HierarchicalCache bound method."""
-		self.tearDown()
 		cache = HierarchicalCache( "./test/HierarchicalCache.fio", IndexedIOOpenMode.Append)
 		t = M44f()
 		t[ 3,2 ] = 1
@@ -308,13 +307,18 @@ class TestHierarchicalCache(unittest.TestCase):
 		self.assertEqual( cache.bound( "/t" ), Box3f( V3f( 0,0,1 ), V3f( 0,1,2 ) ) )
 		cache.remove( "/t" )
 		self.assertEqual( cache.bound( "/" ), Box3f( V3f( 0,0,1 ), V3f( 0,0,1 ) ) )
+		
+	def setUp(self):
+		
+		# cleanup
+		if os.path.isfile("./test/HierarchicalCache.fio") :	
+			os.remove("./test/HierarchicalCache.fio")	
 
 	def tearDown(self):
 		
 		# cleanup
 		if os.path.isfile("./test/HierarchicalCache.fio") :	
 			os.remove("./test/HierarchicalCache.fio")				
-		pass
 				
 		
 if __name__ == "__main__":
