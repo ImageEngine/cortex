@@ -619,7 +619,7 @@ if env["PLATFORM"]=="darwin" :
 	if not testEnv["DEBUG"] :
 		testEnv.Append( CXXFLAGS = "-O0" )
 
-testEnv.Append( LIBS=["boost_unit_test_framework"] )
+testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )
 
 testEnv["ENV"]["PYTHONPATH"] = "./python"
 
