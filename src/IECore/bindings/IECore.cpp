@@ -164,6 +164,7 @@
 #include "IECore/bindings/ConverterBinding.h"
 #include "IECore/bindings/FromCoreConverterBinding.h"
 #include "IECore/bindings/TransformOpBinding.h"
+#include "IECore/bindings/CubicBasisBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -307,6 +308,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindConverter();
 	bindFromCoreConverter();
 	bindTransformOp();
+	bindCubicBasis();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
