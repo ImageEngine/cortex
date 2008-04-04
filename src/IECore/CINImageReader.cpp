@@ -188,18 +188,26 @@ DataPtr CINImageReader::readChannel( const string &name, const Imath::Box2i &dat
 	data.resize( area );
 
 	int dataWidth = 1 + dataWindow.size().x;
+	
+	Box2i wholeDataWindow = this->dataWindow();
+	
+	const int yMin = dataWindow.min.y - wholeDataWindow.min.y;	
+	const int yMax = dataWindow.max.y - wholeDataWindow.min.y;	
+	
+	const int xMin = dataWindow.min.x - wholeDataWindow.min.x;
+	const int xMax = dataWindow.max.x - wholeDataWindow.min.x;			
 
 	int dataY = 0;
-	for ( int y = dataWindow.min.y - this->dataWindow().min.y ; y <= dataWindow.max.y - this->dataWindow().min.y ; ++y, ++dataY )
+	for ( int y = yMin ; y <= yMax ; ++y, ++dataY )
 	{
-		int dataX = 0;
+		HalfVectorData::ValueType::size_type dataOffset = dataY * dataWidth;
+		std::vector<unsigned int>::size_type bufferOffset = y * m_bufferWidth + xMin;
 
-		for ( int x = dataWindow.min.x - this->dataWindow().min.x;  x <= dataWindow.max.x - this->dataWindow().min.x ; ++x, ++dataX  )
+		for ( int x = xMin;  x <= xMax ; ++x, ++dataOffset, ++bufferOffset  )
 		{
-			HalfVectorData::ValueType::size_type dataOffset = dataY * dataWidth + dataX;
 			assert( dataOffset < data.size() );
 
-			unsigned int cell = m_buffer[( y * m_bufferWidth + x )];
+			unsigned int cell = m_buffer[ bufferOffset ];
 			if ( m_reverseBytes )
 			{
 				cell = reverseBytes( cell );
