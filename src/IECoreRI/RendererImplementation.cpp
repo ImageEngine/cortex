@@ -764,7 +764,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getRightHandedOrientation
 	char *result = 0;
 	RxInfoType_t resultType;
 	int resultCount;
-	if( 0==RxAttribute( "Orientation", (char *)result, sizeof( char * ), &resultType, &resultCount ) )
+	if( 0==RxAttribute( "Orientation", &result, sizeof( char * ), &resultType, &resultCount ) )
 	{
 		if( resultType==RxInfoStringV && resultCount==1 )
 		{
