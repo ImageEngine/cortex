@@ -357,7 +357,11 @@ class ParameterUI :
 	def create( node, parameter ) :
 		# \todo Make sure parameter is RTT instanceOf("Parameter")
 
-		uiTypeHint = None	
+		uiTypeHint = None
+		try:
+			uiTypeHint = parameter.userData()['UI']['typeHint'].value
+		except:
+			pass
 	
 		if not ( parameter.typeId(), uiTypeHint ) in ParameterUI.handlers:
 			# \todo Issue a warning
@@ -629,7 +633,32 @@ class FileSequenceParameterUI( PathParameterUI ) :
 						
 						return	
 		
+# Specialized interface for nodes like kiwiRenderer that get the full path plus the file name prefix of a FIO file sequence.
+# \todo Get rid of this once kiwiRenderer and the cache nodes uses FileSequenceParameter instead.
+class CachePathPrefixParameterUI( PathParameterUI ) :
 
+	def __init__( self, node, parameter ):
+	
+		PathParameterUI.__init__( self, node, parameter )
+
+	def openDialog( self ):
+
+		selection = cmds.fileDialog( dm='*.fio' ).encode('ascii')
+			
+		if len(selection):
+			d = os.path.dirname(selection)
+			sequences = ls(d)
+			
+			if sequences:
+			
+				for seq in sequences:
+				
+					if os.path.basename(selection) in seq.fileNames():
+						newValue = seq.getPrefix()
+						if newValue.endswith('.'):
+							self.parameter.setValue( StringData( os.path.join( d, newValue[:len(newValue)-1] ) ) )
+							self.node().setNodeValue( self.parameter )
+							return	
 
 
 class NumericParameterUI( ParameterUI ) :
@@ -957,5 +986,7 @@ ParameterUI.registerUI( TypeId.Color3fParameter, ColorParameterUI )
 ParameterUI.registerUI( TypeId.FileSequenceParameter, FileSequenceParameterUI )
 ParameterUI.registerUI( TypeId.DirNameParameter, DirNameParameterUI )
 ParameterUI.registerUI( TypeId.FileNameParameter, FileNameParameterUI )
+
+ParameterUI.registerUI( TypeId.StringParameter, CachePathPrefixParameterUI, 'cachePathPrefix' )
 
 #\todo Store "collapsed" state of frameLayouts
