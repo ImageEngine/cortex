@@ -260,6 +260,7 @@ class Renderer : public RunTimeTyped
 		/// Renders a set of points.
 		virtual void points( size_t numPoints, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders a set of curves.
+		/// \todo This should take a CubicBasis object instead of a string.
 		virtual void curves( const std::string &interpolation, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) = 0;
 		/// Returns the extents of the given string (under the current font, text-layout characteristics).
 		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max()) = 0;
@@ -281,6 +282,9 @@ class Renderer : public RunTimeTyped
 		/// The Procedural class defines an interface via which the Renderer can
 		/// ask for geometry to be generated in a deferred fashion, at a time
 		/// which is convenient to it.
+		/// \todo I think Procedurals should be simpler than a full blown Parameterised
+		/// class - we might have a ParameterisedProcedural too but at the lower level
+		/// a Procedural class shouldn't dictate how member data is stored.
 		class Procedural : public Parameterised
 		{
 			public :
