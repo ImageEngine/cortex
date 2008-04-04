@@ -66,6 +66,34 @@ inline S CubicBasis<T>::operator() ( typename S::BaseType t, const S &p0, const 
 	coefficients( t, c0, c1, c2, c3 );
 	return c0 * p0 + c1 * p1 + c2 * p2 + c3 * p3;
 }
+
+
+template<typename T>
+bool CubicBasis<T>::operator==( const CubicBasis &rhs ) const
+{
+	return step==rhs.step && matrix==rhs.matrix;
+}
+
+template<typename T>
+bool CubicBasis<T>::operator!=( const CubicBasis &rhs ) const
+{
+	return step!=rhs.step || matrix!=rhs.matrix;
+}
+
+template<typename T>
+const CubicBasis<T> &CubicBasis<T>::linear()
+{
+	static CubicBasis<T> m(
+		MatrixType(
+			 0,  0, -1,  1,
+			 0,  0,  1,  0,
+			 0,  0,  0,  0, 
+			 0,  0,  0,  0
+		),
+		1
+	);
+	return m;
+}
 		
 template<typename T>
 const CubicBasis<T> &CubicBasis<T>::bezier()

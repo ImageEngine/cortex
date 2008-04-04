@@ -60,6 +60,10 @@ class CubicBasis
 		template<class S>
 		inline S operator() ( typename S::BaseType t, const S &p0, const S &p1, const S &p2, const S &p3 ) const;
 		
+		bool operator==( const CubicBasis &rhs ) const;
+		bool operator!=( const CubicBasis &rhs ) const;
+		
+		static const CubicBasis &linear();
 		static const CubicBasis &bezier();
 		static const CubicBasis &bSpline();
 		static const CubicBasis &catmullRom();

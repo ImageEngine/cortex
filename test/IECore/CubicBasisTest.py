@@ -110,7 +110,12 @@ class CubicTest( unittest.TestCase ) :
 			p.append( b( t, p0, p1, p2, p3 ) * 100 )
 			
 		pp = PointsPrimitive( p )
-				
+	
+	def testEquality( self ) :
+	
+		self.assertEqual( CubicBasisf.bezier(), CubicBasisf.bezier() )
+		self.assertNotEqual( CubicBasisf.linear(), CubicBasisf.bezier() )
+	
 if __name__ == "__main__":
     unittest.main()   
 
