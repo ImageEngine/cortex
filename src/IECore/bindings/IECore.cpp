@@ -164,6 +164,7 @@
 #include "IECore/bindings/ConverterBinding.h"
 #include "IECore/bindings/FromCoreConverterBinding.h"
 #include "IECore/bindings/TransformOpBinding.h"
+#include "IECore/bindings/LineSegmentBinding.h"
 #include "IECore/bindings/CubicBasisBinding.h"
 #include "IECore/IECore.h"
 
@@ -308,6 +309,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindConverter();
 	bindFromCoreConverter();
 	bindTransformOp();
+	bindLineSegment();
 	bindCubicBasis();
 
 	def( "majorVersion", &IECore::majorVersion );
