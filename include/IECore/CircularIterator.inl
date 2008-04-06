@@ -139,9 +139,21 @@ bool CircularIterator<Iterator, Container>::operator==( const CircularIterator &
 }
 
 template<typename Iterator, typename Container>
+bool CircularIterator<Iterator, Container>::operator==( const BaseIterator &rhs ) const
+{
+	return m_it==rhs;
+}
+
+template<typename Iterator, typename Container>
 bool CircularIterator<Iterator, Container>::operator!=( const CircularIterator &rhs ) const
 {
 	return m_it!=rhs.m_it;
+}
+
+template<typename Iterator, typename Container>
+bool CircularIterator<Iterator, Container>::operator!=( const BaseIterator &rhs ) const
+{
+	return m_it!=rhs;
 }
 
 template<typename Iterator, typename Container>

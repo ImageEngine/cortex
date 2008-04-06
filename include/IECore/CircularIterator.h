@@ -79,7 +79,10 @@ class CircularIterator
 		pointer operator->() const;
 
 		bool operator==( const CircularIterator &rhs ) const;
+		bool operator==( const BaseIterator &rhs ) const;
+
 		bool operator!=( const CircularIterator &rhs ) const;
+		bool operator!=( const BaseIterator &rhs ) const;
 
 		operator BaseIterator() const;
 
