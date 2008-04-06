@@ -166,6 +166,7 @@
 #include "IECore/bindings/TransformOpBinding.h"
 #include "IECore/bindings/LineSegmentBinding.h"
 #include "IECore/bindings/CubicBasisBinding.h"
+#include "IECore/bindings/TriangulatorBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -311,6 +312,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTransformOp();
 	bindLineSegment();
 	bindCubicBasis();
+	bindTriangulator();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
