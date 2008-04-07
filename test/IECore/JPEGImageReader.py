@@ -159,7 +159,7 @@ class TestJPEGReader(unittest.TestCase):
 				result.halfPrimVar( ipe.B() )
 			)
 			
-		expectedColor = V3f( 0.8745, 0.85887, 0 )			
+		expectedColor = V3f( 0.741211, 0.706055, 0 )	
 		self.assert_( ( color - expectedColor).length() < 1.e-3 )
 					
 	def testOrientation( self ) :
@@ -175,13 +175,11 @@ class TestJPEGReader(unittest.TestCase):
 		
 		result = ipe.createResult()
 		
-		# Floating point differences due to compression (?)
-		# \todo Double check this.
 		colorMap = {
-			V2i( 0 ,    0 ) :  V3f( 0, 0.00392151, 0 ),
-			V2i( 511,   0 ) :  V3f( 0.984375, 0.00784302, 0 ),
-			V2i( 0,   255 ) :  V3f( 0.00784302, 0.992188, 0 ),
-			V2i( 511, 255 ) :  V3f( 1, 1, 0 ),
+			V2i( 0 ,    0 ) :  V3f( 0, 0, 0 ),
+			V2i( 511,   0 ) :  V3f( 0.996, 0, 0 ),
+			V2i( 0,   255 ) :  V3f( 0, 1, 0.004 ),
+			V2i( 511, 255 ) :  V3f( 1, 1, 0.004 ),
 		}
 		
 		for point, expectedColor in colorMap.items() :
@@ -195,7 +193,7 @@ class TestJPEGReader(unittest.TestCase):
 				result.halfPrimVar( ipe.B() )
 			)
 						
-			self.assert_( ( color - expectedColor).length() < 1.e-6 )
+			self.assert_( ( color - expectedColor).length() < 1.e-3 )
 			
 	def testErrors( self ):
 	
