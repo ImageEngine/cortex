@@ -249,6 +249,7 @@ enum TypeId
 	PathVectorParameterTypeId = 206,	
 	ColorTransformOpTypeId = 207,
 	TransformOpTypeId = 208,
+	ImageDiffOpTypeId = 209,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
