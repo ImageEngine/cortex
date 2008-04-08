@@ -166,6 +166,7 @@
 #include "IECore/bindings/TransformOpBinding.h"
 #include "IECore/bindings/LineSegmentBinding.h"
 #include "IECore/bindings/CubicBasisBinding.h"
+#include "IECore/bindings/CurvesPrimitiveBinding.h"
 #include "IECore/bindings/ImageDiffOpBinding.h"
 #include "IECore/bindings/TriangulatorBinding.h"
 #include "IECore/IECore.h"
@@ -313,6 +314,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTransformOp();
 	bindLineSegment();
 	bindCubicBasis();
+	bindCurvesPrimitive();
 	bindImageDiffOp();	
 	bindTriangulator();
 

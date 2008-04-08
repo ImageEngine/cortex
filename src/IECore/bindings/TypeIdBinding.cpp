@@ -250,6 +250,7 @@ void bindTypeId()
 		.value("PathVectorParameter", PathVectorParameterTypeId )
 		.value("ColorTransformOp", ColorTransformOpTypeId )
 		.value("TransformOp", TransformOpTypeId )
+		.value("CurvesPrimitive", CurvesPrimitiveTypeId )
 		.value("ImageDiffOp", ImageDiffOpTypeId )
 	;
 }

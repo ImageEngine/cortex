@@ -250,6 +250,8 @@ enum TypeId
 	ColorTransformOpTypeId = 207,
 	TransformOpTypeId = 208,
 	ImageDiffOpTypeId = 209,
+	CurvesPrimitiveTypeId = 210,
+	CoordinateSystemTypeId = 211,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

@@ -136,6 +136,7 @@ from ColorTransformOpTest import *
 from TransformOpTest import *
 from LineSegmentTest import *
 from CubicBasisTest import *
+from CurvesPrimitiveTest import *
 from ImageDiffOp import *
 from TriangulatorTest import *
 
