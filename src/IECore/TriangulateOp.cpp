@@ -154,6 +154,7 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 		const DataPtr &verticesData = pvIt->second.data;
 		assert( verticesData );
 		
+		/// \todo Use depatchTypedData
 		if (runTimeCast<V3fVectorData>(verticesData))
 		{
 			p = runTimeCast<V3fVectorData>(verticesData);			
