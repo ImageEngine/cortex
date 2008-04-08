@@ -51,6 +51,7 @@ using namespace Imath;
 struct MeshPrimitiveShrinkWrapOp::ExtraData
 {
 	MeshPrimitiveParameterPtr m_directionMeshParameter;
+	FloatParameterPtr m_triangulationToleranceParameter;
 };
 
 typedef ClassData< MeshPrimitiveShrinkWrapOp, MeshPrimitiveShrinkWrapOp::ExtraData*, Deleter<MeshPrimitiveShrinkWrapOp::ExtraData*> > MeshPrimitiveShrinkWrapOpClassData;
@@ -105,11 +106,19 @@ MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( static
 	        "The direction mesh to use when determining where to cast rays",
 	        new MeshPrimitive()
 	);
+	
+	extraData->m_triangulationToleranceParameter = new FloatParameter(
+		"triangulationTolerance",
+		"Set the non-planar and non-convex tolerance for the internal triangulation tests",
+		1.e-6f,
+		0.0f
+	);
 
 	parameters()->addParameter( m_targetMeshParameter );
 	parameters()->addParameter( m_directionParameter );
 	parameters()->addParameter( m_methodParameter );
 	parameters()->addParameter( extraData->m_directionMeshParameter );
+	parameters()->addParameter( extraData->m_triangulationToleranceParameter );
 }
 
 MeshPrimitiveShrinkWrapOp::~MeshPrimitiveShrinkWrapOp()
@@ -161,6 +170,20 @@ ConstMeshPrimitiveParameterPtr MeshPrimitiveShrinkWrapOp::directionMeshParameter
 	return extraData->m_directionMeshParameter;
 }
 
+FloatParameterPtr MeshPrimitiveShrinkWrapOp::triangulationToleranceParameter()
+{
+	ExtraData *extraData = g_classData[this];
+	assert( extraData );		
+	return extraData->m_triangulationToleranceParameter;
+}
+
+ConstFloatParameterPtr MeshPrimitiveShrinkWrapOp::triangulationToleranceParameter() const
+{
+	ExtraData *extraData = g_classData[this];
+	assert( extraData );		
+	return extraData->m_triangulationToleranceParameter;
+}
+
 template<typename T>
 void MeshPrimitiveShrinkWrapOp::doShrinkWrap( std::vector<T> &vertices, PrimitivePtr sourceMesh, ConstPrimitivePtr targetMesh, typename TypedData< std::vector<T> >::ConstPtr directionVerticesData, Direction direction, Method method )
 {
@@ -185,6 +208,7 @@ void MeshPrimitiveShrinkWrapOp::doShrinkWrap( std::vector<T> &vertices, Primitiv
 
 	TriangulateOpPtr op = new TriangulateOp();
 	op->inputParameter()->setValue( sourceMesh );
+	op->toleranceParameter()->setNumericValue( this->triangulationToleranceParameter()->getNumericValue() );
 	MeshPrimitivePtr triangulatedSourcePrimitive = runTimeCast< MeshPrimitive > ( op->operate() );
 
 	PrimitiveEvaluatorPtr sourceEvaluator = 0;

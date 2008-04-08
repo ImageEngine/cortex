@@ -88,6 +88,9 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 		
 		MeshPrimitiveParameterPtr directionMeshParameter();
 		ConstMeshPrimitiveParameterPtr directionMeshParameter() const;
+		
+		FloatParameterPtr triangulationToleranceParameter();
+		ConstFloatParameterPtr triangulationToleranceParameter() const;		
 
 	protected:
 
