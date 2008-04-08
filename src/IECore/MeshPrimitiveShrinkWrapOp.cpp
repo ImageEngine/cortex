@@ -361,7 +361,9 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, Con
 		
 		directionVerticesData = it->second.data;	
 	}
-
+	
+	
+	/// \todo Start using depatchTypedData
 	if (runTimeCast<V3fVectorData>(verticesData))
 	{
 		V3fVectorDataPtr p = runTimeCast<V3fVectorData>(verticesData);

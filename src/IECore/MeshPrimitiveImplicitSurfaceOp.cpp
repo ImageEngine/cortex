@@ -198,7 +198,8 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 		if (it != typedPrimitive->variables.end())
 		{
 			const DataPtr &verticesData = it->second.data;
-			
+						
+			/// \todo Use depatchTypedData
 			if (runTimeCast<V3fVectorData>(verticesData))
 			{
 				ConstV3fVectorDataPtr p = runTimeCast<V3fVectorData>(verticesData);
