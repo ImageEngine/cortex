@@ -65,6 +65,8 @@ void *ImageFile::creator()
 	return new ImageFile;
 }
 
+
+/// \todo Rework using despatchTypedData and ScaledDataConversion
 template<typename T>
 static float getFloatData( ConstDataPtr d, int idx )
 {
