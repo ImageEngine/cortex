@@ -40,7 +40,36 @@ from IECore import *
 
 class TestJPEGImageWriter(unittest.TestCase):
 
-	def __makeImage( self, dataWindow, displayWindow ) :
+	def __verifyImageRGB( self, imgNew, imgOrig ):
+	
+		self.assertEqual( type(imgNew), ImagePrimitive )
+		
+		if "R" in imgOrig :
+			self.assert_( "R" in imgNew )
+			self.assert_( "G" in imgNew )
+			self.assert_( "B" in imgNew )
+			self.failIf( "Y" in imgNew )
+		elif "Y" in imgOrig :	
+			self.assert_( "Y" in imgNew )
+			self.failIf( "R" in imgNew )
+			self.failIf( "G" in imgNew )
+			self.failIf( "B" in imgNew )
+					
+		# We don't expect to find alpha in JPEGs	
+		self.failIf( "A" in imgNew )					
+		
+		op = ImageDiffOp()
+		
+		res = op(
+			imageA = imgNew,
+			imageB = imgOrig,
+			maxError = 0.004,
+			skipMissingChannels = True
+		)
+		
+		self.failIf( res.value )
+		
+	def __makeFloatImage( self, dataWindow, displayWindow, withAlpha = False, dataType = FloatVectorData ) :
 	
 		img = ImagePrimitive( dataWindow, displayWindow )
 		
@@ -48,9 +77,12 @@ class TestJPEGImageWriter(unittest.TestCase):
 		h = dataWindow.max.y - dataWindow.min.y + 1
 		
 		area = w * h
-		R = FloatVectorData( area )
-		G = FloatVectorData( area )		
-		B = FloatVectorData( area )
+		R = dataType( area )
+		G = dataType( area )		
+		B = dataType( area )
+		
+		if withAlpha:
+			A = dataType( area )
 		
 		offset = 0
 		for y in range( 0, h ) :
@@ -59,6 +91,8 @@ class TestJPEGImageWriter(unittest.TestCase):
 				R[offset] = float(x) / (w - 1)				
 				G[offset] = float(y) / (h - 1)
 				B[offset] = 0.0
+				if withAlpha:
+					A[offset] = 0.5
 				
 				offset = offset + 1				
 		
@@ -66,7 +100,38 @@ class TestJPEGImageWriter(unittest.TestCase):
 		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, G )		
 		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, B )
 		
+		if withAlpha:
+			img["A"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, A )
+		
 		return img
+		
+	def __makeIntImage( self, dataWindow, displayWindow, dataType = UIntVectorData, maxInt = 2**32-1 ) :
+	
+		img = ImagePrimitive( dataWindow, displayWindow )
+		
+		w = dataWindow.max.x - dataWindow.min.x + 1
+		h = dataWindow.max.y - dataWindow.min.y + 1
+		
+		area = w * h
+		R = dataType( area )
+		G = dataType( area )		
+		B = dataType( area )
+		
+		offset = 0
+		for y in range( 0, h ) :
+			for x in range( 0, w ) :
+			
+				R[offset] = int( maxInt * float(x) / (w - 1) )
+				G[offset] = int( maxInt * float(y) / (h - 1) )
+				B[offset] = 0
+				
+				offset = offset + 1				
+		
+		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, R )
+		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, G )		
+		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, B )
+		
+		return img	
 		
 	def __makeGreyscaleImage( self, dataWindow, displayWindow ) :
 	
@@ -104,7 +169,7 @@ class TestJPEGImageWriter(unittest.TestCase):
 			V2i( 99, 99)
 		)	
 	
-		img = self.__makeImage( w, w )				
+		img = self.__makeFloatImage( w, w )				
 		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
 		self.assertEqual( type(w), JPEGImageWriter )
 		
@@ -142,16 +207,41 @@ class TestJPEGImageWriter(unittest.TestCase):
 		
 		dataWindow = displayWindow
 		
-		img = self.__makeImage( dataWindow, displayWindow )
+		for dataType in [ FloatVectorData, HalfVectorData, DoubleVectorData ] :
 		
-		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
-		self.assertEqual( type(w), JPEGImageWriter )
+			self.setUp()
 		
-		w.write()
+			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
+			w = Writer.create( imgOrig, "test/IECore/data/jpg/output.jpg" )
+			self.assertEqual( type(w), JPEGImageWriter )
+			w.write()
 		
-		self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
-		self.assertEqual( os.path.getsize( "test/IECore/data/jpg/output.jpg" ), 4559 )
+			self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+			
+			# Now we've written the image, verify the rgb
+			
+			imgNew = Reader.create( "test/IECore/data/jpg/output.jpg" ).read()
+			self.__verifyImageRGB( imgOrig, imgNew )
+			
+			self.tearDown()
+				
+		for dataType in [ ( UIntVectorData, 2**32-1), (UCharVectorData, 2**8-1 ),  (UShortVectorData, 2**16-1 ) ] :
 		
+			self.setUp()
+		
+			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
+			w = Writer.create( imgOrig, "test/IECore/data/jpg/output.jpg" )
+			self.assertEqual( type(w), JPEGImageWriter )
+			w.write()
+		
+			self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+			
+			# Now we've written the image, verify the rgb		
+			imgNew = Reader.create( "test/IECore/data/jpg/output.jpg" ).read()			
+			self.__verifyImageRGB( imgOrig, imgNew )
+			
+			self.tearDown()
+					
 	def testGreyscaleWrite( self ) :
 	
 		displayWindow = Box2i(
@@ -161,9 +251,9 @@ class TestJPEGImageWriter(unittest.TestCase):
 		
 		dataWindow = displayWindow	
 		
-		img = self.__makeGreyscaleImage( dataWindow, displayWindow )
+		imgOrig = self.__makeGreyscaleImage( dataWindow, displayWindow )
 		
-		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		w = Writer.create( imgOrig, "test/IECore/data/jpg/output.jpg" )
 		self.assertEqual( type(w), JPEGImageWriter )
 		
 		w.write()
@@ -171,11 +261,13 @@ class TestJPEGImageWriter(unittest.TestCase):
 		self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
 		
 		r = Reader.create( "test/IECore/data/jpg/output.jpg" )
-		img2 = r.read()
+		imgNew = r.read()
 		
 		channelNames = r.channelNames()
 		self.assertEqual( len(channelNames), 1 )
 		
+		self.__verifyImageRGB( imgNew, imgOrig )
+			
 	def testWriteIncomplete( self ) :
 	
 		displayWindow = Box2i(
@@ -185,7 +277,7 @@ class TestJPEGImageWriter(unittest.TestCase):
 		
 		dataWindow = displayWindow
 		
-		img = self.__makeImage( dataWindow, displayWindow )
+		img = self.__makeFloatImage( dataWindow, displayWindow )
 		
 		# We don't have enough data to fill this dataWindow
 		img.dataWindow = Box2i(
@@ -212,7 +304,7 @@ class TestJPEGImageWriter(unittest.TestCase):
 		
 		
 		# Try and write an image with the "R" channel of an unsupported type
-		img = self.__makeImage( dataWindow, displayWindow )	
+		img = self.__makeFloatImage( dataWindow, displayWindow )	
 		img[ "R" ] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, StringData( "hello") )
 		
 		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
@@ -228,7 +320,7 @@ class TestJPEGImageWriter(unittest.TestCase):
 			V2i( 99, 99 )
 		)
 
-		img = self.__makeImage( dataWindow, dataWindow )
+		img = self.__makeFloatImage( dataWindow, dataWindow )
 		
 		img.displayWindow = Box2i(
 			V2i( -20, -20 ),

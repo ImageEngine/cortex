@@ -40,65 +40,35 @@ from math import pow
 
 class TestDPXWriter(unittest.TestCase):
 	
-	def __verifyImageRGB( self, img ):
+	def __verifyImageRGB( self, imgNew, imgOrig ):
 	
-		self.assertEqual( type(img), ImagePrimitive )	
-	
-		topLeft =  img.dataWindow.min - img.displayWindow.min
-		bottomRight = img.dataWindow.max - img.displayWindow.min
-		topRight = V2i( img.dataWindow.max.x, img.dataWindow.min.y) - img.displayWindow.min
-		bottomLeft = V2i( img.dataWindow.min.x, img.dataWindow.max.y) - img.displayWindow.min
-	
-		pixelColorMap = {
-			topLeft : V3f( 0, 0, 0 ),
-			bottomRight : V3f( 1, 1, 0 ),
-			topRight: V3f( 1, 0, 0 ),
-			bottomLeft: V3f( 0, 1, 0 ),			
-		}
-	
-		ipe = PrimitiveEvaluator.create( img )
-		result = ipe.createResult()	
+		self.assertEqual( type(imgNew), ImagePrimitive )
 		
-		for pixelColor in pixelColorMap.items() :
-		
-			found = ipe.pointAtPixel( pixelColor[0], result )
-			self.assert_( found )		
-			color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
-				result.halfPrimVar( ipe.B() )
-			)	
-								
-			self.assert_( ( color - pixelColor[1]).length() < 1.e-3 )
+		if "R" in imgOrig :
+			self.assert_( "R" in imgNew )
 			
-	def __makeImage( self, dataWindow, displayWindow ) :
-	
-		img = ImagePrimitive( dataWindow, displayWindow )
-		
-		w = dataWindow.max.x - dataWindow.min.x + 1
-		h = dataWindow.max.y - dataWindow.min.y + 1
-		
-		area = w * h
-		R = FloatVectorData( area )
-		G = FloatVectorData( area )		
-		B = FloatVectorData( area )
-		
-		offset = 0
-		for y in range( 0, h ) :
-			for x in range( 0, w ) :
+		if "G" in imgOrig :
+			self.assert_( "G" in imgNew )
 			
-				R[offset] = float(x) / (w - 1)				
-				G[offset] = float(y) / (h - 1)
-				B[offset] = 0.0
-				
-				offset = offset + 1				
+		if "B" in imgOrig :
+			self.assert_( "B" in imgNew )
+			
+		if "A" in imgOrig :
+			self.assert_( "A" in imgNew )					
+			
+		if "Y" in imgOrig :
+			self.assert_( "Y" in imgNew )			
 		
-		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, R )
-		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, G )		
-		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, B )
+		op = ImageDiffOp()
 		
-		return img
-				
+		res = op(
+			imageA = imgNew,
+			imageB = imgOrig,
+			maxError = 0.002,
+			skipMissingChannels = True
+		)
+		
+		self.failIf( res.value )
 	
 	def __makeFloatImage( self, dataWindow, displayWindow, withAlpha = False, dataType = FloatVectorData ) :
 	
@@ -136,6 +106,34 @@ class TestDPXWriter(unittest.TestCase):
 		
 		return img
 		
+	def __makeIntImage( self, dataWindow, displayWindow, dataType = UIntVectorData, maxInt = 2**32-1 ) :
+	
+		img = ImagePrimitive( dataWindow, displayWindow )
+		
+		w = dataWindow.max.x - dataWindow.min.x + 1
+		h = dataWindow.max.y - dataWindow.min.y + 1
+		
+		area = w * h
+		R = dataType( area )
+		G = dataType( area )		
+		B = dataType( area )
+		
+		offset = 0
+		for y in range( 0, h ) :
+			for x in range( 0, w ) :
+			
+				R[offset] = int( maxInt * float(x) / (w - 1) )
+				G[offset] = int( maxInt * float(y) / (h - 1) )
+				B[offset] = 0
+				
+				offset = offset + 1				
+		
+		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, R )
+		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, G )		
+		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, B )
+		
+		return img		
+		
 	def testWrite( self ) :	
 		
 		displayWindow = Box2i(
@@ -149,8 +147,8 @@ class TestDPXWriter(unittest.TestCase):
 		
 			self.setUp()
 		
-			img = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
-			w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
+			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
+			w = Writer.create( imgOrig, "test/IECore/data/dpx/output.dpx" )
 			self.assertEqual( type(w), DPXImageWriter )
 			w.write()
 		
@@ -158,24 +156,41 @@ class TestDPXWriter(unittest.TestCase):
 			
 			# Now we've written the image, verify the rgb
 			
-			img2 = Reader.create( "test/IECore/data/dpx/output.dpx" ).read()
-			self.__verifyImageRGB( img2 )
+			imgNew = Reader.create( "test/IECore/data/dpx/output.dpx" ).read()
+			self.__verifyImageRGB( imgOrig, imgNew )
 			
-			self.tearDown()	
+			self.tearDown()
+				
+		for dataType in [ ( UIntVectorData, 2**32-1), (UCharVectorData, 2**8-1 ),  (UShortVectorData, 2**16-1 ) ] :
+		
+			self.setUp()
+		
+			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
+			w = Writer.create( imgOrig, "test/IECore/data/dpx/output.dpx" )
+			self.assertEqual( type(w), DPXImageWriter )
+			w.write()
+		
+			self.assert_( os.path.exists( "test/IECore/data/dpx/output.dpx" ) )
+			
+			# Now we've written the image, verify the rgb		
+			imgNew = Reader.create( "test/IECore/data/dpx/output.dpx" ).read()			
+			self.__verifyImageRGB( imgOrig, imgNew )
+			
+			self.tearDown()
 
 	def testColorConversion(self):
 
 		r = Reader.create( "test/IECore/data/dpx/ramp.dpx" )
-		img = r.read()
-		self.assertEqual( type(img), ImagePrimitive )
-		w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
+		imgOrig = r.read()
+		self.assertEqual( type(imgOrig), ImagePrimitive )
+		w = Writer.create( imgOrig, "test/IECore/data/dpx/output.dpx" )
 		self.assertEqual( type(w), DPXImageWriter )
 		w.write()
 		w = None
 		r = Reader.create( "test/IECore/data/dpx/output.dpx" )
-		img2 = r.read()
-		self.assertEqual( type(img2), ImagePrimitive )
-		self.assertEqual( img, img2 )
+		imgNew = r.read()
+		self.assertEqual( type(imgNew), ImagePrimitive )
+		self.assertEqual( imgOrig, imgNew )
 		
 	def testWriteIncomplete( self ) :
 	
@@ -186,17 +201,17 @@ class TestDPXWriter(unittest.TestCase):
 		
 		dataWindow = displayWindow
 		
-		img = self.__makeImage( dataWindow, displayWindow )
+		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
 		
 		# We don't have enough data to fill this dataWindow
-		img.dataWindow = Box2i(
+		imgOrig.dataWindow = Box2i(
 			V2i( 0, 0 ),
 			V2i( 199, 199 )
 		)
 		
-		self.failIf( img.arePrimitiveVariablesValid() )
+		self.failIf( imgOrig.arePrimitiveVariablesValid() )
 		
-		w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
+		w = Writer.create( imgOrig, "test/IECore/data/dpx/output.dpx" )
 		self.assertEqual( type(w), DPXImageWriter )
 		
 		self.assertRaises( RuntimeError, w.write )				
@@ -209,30 +224,30 @@ class TestDPXWriter(unittest.TestCase):
 			V2i( 99, 99 )
 		)
 
-		img = self.__makeImage( dataWindow, dataWindow )
+		imgOrig = self.__makeFloatImage( dataWindow, dataWindow )
 		
-		img.displayWindow = Box2i(
+		imgOrig.displayWindow = Box2i(
 			V2i( -20, -20 ),
 			V2i( 199, 199 )
 		)
 		
-		w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
+		w = Writer.create( imgOrig, "test/IECore/data/dpx/output.dpx" )
 		self.assertEqual( type(w), DPXImageWriter )		
 		w.write()
 		
-		w = Writer.create( img, "test/IECore/data/dpx/output2.dpx" )
+		w = Writer.create( imgOrig, "test/IECore/data/dpx/output2.dpx" )
 		self.assertEqual( type(w), DPXImageWriter )		
 		w.write()
 		
 		self.assert_( os.path.exists( "test/IECore/data/dpx/output.dpx" ) )
 				
 		r = Reader.create( "test/IECore/data/dpx/output.dpx" )
-		img2 = r.read()
+		imgNew = r.read()
 		
-		self.assertEqual( img2.displayWindow.min, V2i( 0, 0 ) )			
-		self.assertEqual( img2.displayWindow.max, V2i( 219, 219 ) )
+		self.assertEqual( imgNew.displayWindow.min, V2i( 0, 0 ) )			
+		self.assertEqual( imgNew.displayWindow.max, V2i( 219, 219 ) )
 		
-		ipe = PrimitiveEvaluator.create( img2 )
+		ipe = PrimitiveEvaluator.create( imgNew )
 		self.assert_( ipe.R() )
 		self.assert_( ipe.G() )
 		self.assert_( ipe.B() )
