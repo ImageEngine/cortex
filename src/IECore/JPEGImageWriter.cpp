@@ -42,7 +42,6 @@
 #include "IECore/ByteOrder.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/ClassData.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
@@ -64,26 +63,15 @@ using namespace Imath;
 
 const Writer::WriterDescription<JPEGImageWriter> JPEGImageWriter::m_writerDescription("jpeg jpg");
 
-struct JPEGImageWriter::ExtraData
-{
-	IntParameterPtr m_qualityParameter;
-};
-
-typedef ClassData< JPEGImageWriter, JPEGImageWriter::ExtraData*, Deleter<JPEGImageWriter::ExtraData*> > JPEGImageWriterClassData;
-static JPEGImageWriterClassData g_classData;
-
-
 JPEGImageWriter::JPEGImageWriter() :
 		ImageWriter("JPEGImageWriter", "Serializes images to the Joint Photographic Experts Group (JPEG) format")
 {
-	g_classData.create( this, new ExtraData() );
 	constructParameters();
 }
 
 JPEGImageWriter::JPEGImageWriter(ObjectPtr image, const string &fileName) :
 		ImageWriter("JPEGImageWriter", "Serializes images to the Joint Photographic Experts Group (JPEG) format")
 {
-	g_classData.create( this, new ExtraData() );
 	constructParameters();
 	m_objectParameter->setValue( image );
 	m_fileNameParameter->setTypedValue( fileName );
@@ -91,10 +79,7 @@ JPEGImageWriter::JPEGImageWriter(ObjectPtr image, const string &fileName) :
 
 void JPEGImageWriter::constructParameters()
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );
-
-	extraData->m_qualityParameter = new IntParameter(
+	m_qualityParameter = new IntParameter(
 	        "quality",
 	        "The quality at which to compress the JPEG. 100 yields the largest file size, but best quality image.",
 	        100,
@@ -102,28 +87,21 @@ void JPEGImageWriter::constructParameters()
 	        100
 	);
 
-	parameters()->addParameter( extraData->m_qualityParameter );
+	parameters()->addParameter( m_qualityParameter );
 }
 
 JPEGImageWriter::~JPEGImageWriter()
 {
-	g_classData.erase( this );
 }
 
 IntParameterPtr JPEGImageWriter::qualityParameter()
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );
-
-	return extraData->m_qualityParameter;
+	return m_qualityParameter;
 }
 
 ConstIntParameterPtr JPEGImageWriter::qualityParameter() const
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );
-
-	return extraData->m_qualityParameter;
+	return m_qualityParameter;
 }
 
 

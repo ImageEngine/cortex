@@ -105,6 +105,8 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 		MeshPrimitiveParameterPtr m_targetMeshParameter;
 		IntParameterPtr m_directionParameter;
 		IntParameterPtr m_methodParameter;
+		MeshPrimitiveParameterPtr m_directionMeshParameter;
+		FloatParameterPtr m_triangulationToleranceParameter;
 		
 	public:	
 		

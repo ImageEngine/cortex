@@ -43,25 +43,13 @@
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/VectorOps.h"
 #include "IECore/TriangulateOp.h"
-#include "IECore/ClassData.h"
 
 using namespace IECore;
 using namespace Imath;
 
-struct MeshPrimitiveShrinkWrapOp::ExtraData
-{
-	MeshPrimitiveParameterPtr m_directionMeshParameter;
-	FloatParameterPtr m_triangulationToleranceParameter;
-};
-
-typedef ClassData< MeshPrimitiveShrinkWrapOp, MeshPrimitiveShrinkWrapOp::ExtraData*, Deleter<MeshPrimitiveShrinkWrapOp::ExtraData*> > MeshPrimitiveShrinkWrapOpClassData;
-static MeshPrimitiveShrinkWrapOpClassData g_classData;
 
 MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( staticTypeName(), "A MeshPrimitiveOp to shrink-wrap one mesh onto another" )
 {
-	ExtraData *extraData = g_classData.create( this, new ExtraData() );
-	assert( extraData );
-
 	m_targetMeshParameter = new MeshPrimitiveParameter(
 	        "target",
 	        "The target mesh to shrink-wrap onto.",
@@ -99,15 +87,14 @@ MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( static
 	        methodPresets,
 	        true
 	);
-	
-	
-	extraData->m_directionMeshParameter = new MeshPrimitiveParameter(
+		
+	m_directionMeshParameter = new MeshPrimitiveParameter(
 	        "directionMesh",
 	        "The direction mesh to use when determining where to cast rays",
 	        new MeshPrimitive()
 	);
 	
-	extraData->m_triangulationToleranceParameter = new FloatParameter(
+	m_triangulationToleranceParameter = new FloatParameter(
 		"triangulationTolerance",
 		"Set the non-planar and non-convex tolerance for the internal triangulation tests",
 		1.e-6f,
@@ -117,13 +104,12 @@ MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( static
 	parameters()->addParameter( m_targetMeshParameter );
 	parameters()->addParameter( m_directionParameter );
 	parameters()->addParameter( m_methodParameter );
-	parameters()->addParameter( extraData->m_directionMeshParameter );
-	parameters()->addParameter( extraData->m_triangulationToleranceParameter );
+	parameters()->addParameter( m_directionMeshParameter );
+	parameters()->addParameter( m_triangulationToleranceParameter );
 }
 
 MeshPrimitiveShrinkWrapOp::~MeshPrimitiveShrinkWrapOp()
 {
-	g_classData.erase( this );
 }
 
 MeshPrimitiveParameterPtr MeshPrimitiveShrinkWrapOp::targetMeshParameter()
@@ -158,30 +144,22 @@ ConstIntParameterPtr MeshPrimitiveShrinkWrapOp::directionParameter() const
 
 MeshPrimitiveParameterPtr MeshPrimitiveShrinkWrapOp::directionMeshParameter()
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );		
-	return extraData->m_directionMeshParameter;
+	return m_directionMeshParameter;
 }
 
 ConstMeshPrimitiveParameterPtr MeshPrimitiveShrinkWrapOp::directionMeshParameter() const
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );		
-	return extraData->m_directionMeshParameter;
+	return m_directionMeshParameter;
 }
 
 FloatParameterPtr MeshPrimitiveShrinkWrapOp::triangulationToleranceParameter()
-{
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );		
-	return extraData->m_triangulationToleranceParameter;
+{	
+	return m_triangulationToleranceParameter;
 }
 
 ConstFloatParameterPtr MeshPrimitiveShrinkWrapOp::triangulationToleranceParameter() const
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );		
-	return extraData->m_triangulationToleranceParameter;
+	return m_triangulationToleranceParameter;
 }
 
 template<typename T>

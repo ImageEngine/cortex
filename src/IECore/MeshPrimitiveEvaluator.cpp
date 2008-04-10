@@ -47,34 +47,9 @@
 #include "IECore/TriangleAlgo.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/Deleter.h"
-#include "IECore/ClassData.h"
 
 using namespace IECore;
 using namespace Imath;
-
-struct MeshPrimitiveEvaluator::ExtraData
-{	
-	ExtraData() : m_uvTree(0), m_haveMassProperties( false ), m_haveSurfaceArea( false )
-	{
-	}
-
-	BoundedTriangleVector m_uvTriangles;
-	BoundedTriangleTree *m_uvTree;
-	
-	PrimitiveVariable m_u;
-	PrimitiveVariable m_v;
-	
-	bool m_haveMassProperties;
-	float m_volume;
-	V3f m_centerOfGravity;	
-	M33f m_inertia;
-	
-	bool m_haveSurfaceArea;
-	float m_surfaceArea;
-};
-
-typedef ClassData< MeshPrimitiveEvaluator, MeshPrimitiveEvaluator::ExtraData*, Deleter<MeshPrimitiveEvaluator::ExtraData*> > MeshPrimitiveEvaluatorClassData;
-static MeshPrimitiveEvaluatorClassData g_classData;
 
 static PrimitiveEvaluator::Description< MeshPrimitiveEvaluator > g_registraar = PrimitiveEvaluator::Description< MeshPrimitiveEvaluator >();
 
@@ -231,7 +206,7 @@ const V3i &MeshPrimitiveEvaluator::Result::vertexIds() const
 	return m_vertexIds;
 }
 
-MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh )
+MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m_uvTree(0), m_haveMassProperties( false ), m_haveSurfaceArea( false )
 {	
 	if (! mesh )
 	{
@@ -259,13 +234,6 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh )
 	{	
 		throw InvalidArgumentException( "Mesh given to MeshPrimitiveEvaluator has no \"P\" primvar of type V3fVectorData");
 	}
-	
-	ExtraData *extraData = g_classData.create( this, new ExtraData() );
-	assert( extraData );
-	BoundedTriangleTree*    &m_uvTree      = extraData->m_uvTree;
-	BoundedTriangleVector   &m_uvTriangles = extraData->m_uvTriangles;
-	PrimitiveVariable       &m_u           = extraData->m_u;
-	PrimitiveVariable       &m_v           = extraData->m_v;	
 	
 	m_u.interpolation = PrimitiveVariable::Invalid;	
 	primVarIt = m_mesh->variables.find("s");	
@@ -379,13 +347,8 @@ MeshPrimitiveEvaluator::~MeshPrimitiveEvaluator()
 	delete m_tree;
 	m_tree = 0;
 	
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );	
-	BoundedTriangleTree* &m_uvTree = extraData->m_uvTree;
 	delete m_uvTree;
 	m_uvTree = 0;
-		
-	g_classData.erase( this );
 }
 
 ConstPrimitivePtr MeshPrimitiveEvaluator::primitive() const
@@ -395,38 +358,29 @@ ConstPrimitivePtr MeshPrimitiveEvaluator::primitive() const
 
 float MeshPrimitiveEvaluator::volume() const
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );	
-	
-	if ( !extraData->m_haveMassProperties )
+	if ( !m_haveMassProperties )
 	{
 		const_cast<MeshPrimitiveEvaluator*>(this)->calculateMassProperties();
 	}
 	
-	return extraData->m_volume;
+	return m_volume;
 }
 
 Imath::V3f MeshPrimitiveEvaluator::centerOfGravity() const
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );	
-	
-	if ( !extraData->m_haveMassProperties )
+	if ( !m_haveMassProperties )
 	{
 		const_cast<MeshPrimitiveEvaluator*>(this)->calculateMassProperties();
 	}	
 	
-	return extraData->m_centerOfGravity;
+	return m_centerOfGravity;
 }
 
 float MeshPrimitiveEvaluator::surfaceArea() const
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );	
-	
-	if ( !extraData->m_haveSurfaceArea )
+	if ( !m_haveSurfaceArea )
 	{
-		extraData->m_surfaceArea = 0.0f;
+		m_surfaceArea = 0.0f;
 		IntVectorData::ValueType::const_iterator vertexIdIt = m_mesh->vertexIds()->readable().begin();
 	
 		for ( IntVectorData::ValueType::const_iterator it = m_mesh->verticesPerFace()->readable().begin(); 
@@ -438,23 +392,20 @@ float MeshPrimitiveEvaluator::surfaceArea() const
 			const V3f &p1 = m_verts->readable()[ *vertexIdIt++ ];
 			const V3f &p2 = m_verts->readable()[ *vertexIdIt++ ];
 			
-			extraData->m_surfaceArea += triangleArea( p0, p1, p2 );
+			m_surfaceArea += triangleArea( p0, p1, p2 );
 		}	
 		
-		extraData->m_haveSurfaceArea = true;
+		m_haveSurfaceArea = true;
 	}	
 	
-	return extraData->m_surfaceArea;
+	return m_surfaceArea;
 }
 
 /// Implementation derived from Wild Magic (Version 2) Software Library, available
 /// from http://www.geometrictools.com/Downloads/WildMagic2p5.zip under free license
 void MeshPrimitiveEvaluator::calculateMassProperties()
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );	
-	
-	assert( !extraData->m_haveMassProperties );
+	assert( !m_haveMassProperties );
 	
 	double integral[10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	
@@ -520,19 +471,19 @@ void MeshPrimitiveEvaluator::calculateMassProperties()
 	integral[8] /= 120.0;
 	integral[9] /= 120.0;
 			
-	extraData->m_volume = integral[0];
-	extraData->m_centerOfGravity = V3f( integral[1], integral[2], integral[3] ) / integral[0];
-	extraData->m_inertia[0][0] = integral[5] + integral[6];
-	extraData->m_inertia[0][1] = -integral[7];
-	extraData->m_inertia[0][2] = -integral[9];
-	extraData->m_inertia[1][0] = extraData->m_inertia[0][1];
-	extraData->m_inertia[1][1] = integral[4] + integral[6];
-	extraData->m_inertia[1][2] = -integral[8];
-	extraData->m_inertia[2][0] = extraData->m_inertia[0][2];
-	extraData->m_inertia[2][1] = extraData->m_inertia[1][2];
-	extraData->m_inertia[2][2] = integral[4] + integral[5];			
+	m_volume = integral[0];
+	m_centerOfGravity = V3f( integral[1], integral[2], integral[3] ) / integral[0];
+	m_inertia[0][0] = integral[5] + integral[6];
+	m_inertia[0][1] = -integral[7];
+	m_inertia[0][2] = -integral[9];
+	m_inertia[1][0] = m_inertia[0][1];
+	m_inertia[1][1] = integral[4] + integral[6];
+	m_inertia[1][2] = -integral[8];
+	m_inertia[2][0] = m_inertia[0][2];
+	m_inertia[2][1] = m_inertia[1][2];
+	m_inertia[2][2] = integral[4] + integral[5];			
 	
-	extraData->m_haveMassProperties = true;
+	m_haveMassProperties = true;
 }
 
 PrimitiveEvaluator::ResultPtr MeshPrimitiveEvaluator::createResult() const
@@ -563,10 +514,6 @@ bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluato
 bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
 {
 	assert( boost::dynamic_pointer_cast< Result >( result ) );
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );	
-	
-	BoundedTriangleVector &m_uvTriangles = extraData->m_uvTriangles;	
 	
 	if ( ! m_uvTriangles.size() )
 	{
@@ -574,7 +521,7 @@ bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEva
 	}
 
 #ifndef NDEBUG	
-	BoundedTriangleTree* &m_uvTree = extraData->m_uvTree;		
+	BoundedTriangleTree* &m_uvTree = m_uvTree;		
 	assert( m_uvTree );
 #endif	
 	
@@ -643,11 +590,6 @@ int MeshPrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, const 
 
 void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );
-	
-	PrimitiveVariable &m_u  = extraData->m_u;
-	PrimitiveVariable &m_v  = extraData->m_v;
 	assert( m_tree );
 	
 	const BoundedTriangleTree::Node &node = m_tree->node( nodeIndex );
@@ -740,18 +682,11 @@ void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex no
 }
 
 bool MeshPrimitiveEvaluator::pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const
-{
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );
-	
-	PrimitiveVariable &m_u  = extraData->m_u;
-	PrimitiveVariable &m_v  = extraData->m_v;
-	BoundedTriangleTree*    &m_uvTree = extraData->m_uvTree;
-	
+{	
 	assert( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid);	
 	assert( m_uvTree );
 	
-	const BoundedTriangleTree::Node &node = g_classData[this]->m_uvTree->node( nodeIndex );
+	const BoundedTriangleTree::Node &node = m_uvTree->node( nodeIndex );
 	
 	if( node.isLeaf() )
 	{	
@@ -919,12 +854,6 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeI
 
 bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );
-	
-	PrimitiveVariable &m_u  = extraData->m_u;
-	PrimitiveVariable &m_v  = extraData->m_v;
-	
 	assert( m_tree );
 	
 	const BoundedTriangleTree::Node &node = m_tree->node( nodeIndex );
@@ -1086,12 +1015,6 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 
 void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const
 {
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );
-	
-	PrimitiveVariable &m_u  = extraData->m_u;
-	PrimitiveVariable &m_v  = extraData->m_v;
-
 	assert( m_tree );
 	
 	const BoundedTriangleTree::Node &node = m_tree->node( nodeIndex );

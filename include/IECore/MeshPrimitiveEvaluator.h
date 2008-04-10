@@ -40,7 +40,6 @@
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/BoundedKDTree.h"
-#include "IECore/ClassData.h"
 
 namespace IECore
 {
@@ -165,11 +164,20 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		void intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;		
 		
 		void calculateMassProperties();
-	
-	public:	
 		
-		/// \todo Move all ExtraData members to here on next major version change
-		struct ExtraData;
+		BoundedTriangleVector m_uvTriangles;
+		BoundedTriangleTree *m_uvTree;
+
+		PrimitiveVariable m_u;
+		PrimitiveVariable m_v;
+
+		mutable bool m_haveMassProperties;
+		mutable float m_volume;
+		mutable Imath::V3f m_centerOfGravity;	
+		mutable Imath::M33f m_inertia;
+
+		mutable bool m_haveSurfaceArea;
+		mutable float m_surfaceArea;
 				
 };
 

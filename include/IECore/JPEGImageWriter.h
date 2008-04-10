@@ -74,10 +74,8 @@ class JPEGImageWriter : public ImageWriter
 		);
 
 		void constructParameters();
-	public:
-
-		/// \todo Move all ExtraData members to here on next major version change
-		struct ExtraData;
+		
+		IntParameterPtr m_qualityParameter;
 
 };
 

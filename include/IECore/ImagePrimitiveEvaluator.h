@@ -57,9 +57,6 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 			friend class ImagePrimitiveEvaluator;
 			
 			public:
-			
-				/// \depracated
-				Result( const Imath::Box3f &bound );
 				
 				Result( const Imath::Box3f &bound, const Imath::Box2i &dataWindow );
 				virtual ~Result();
@@ -88,13 +85,10 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 			
 				Imath::Box3f m_bound;
 				Imath::V3f m_p;
+				Imath::Box2i m_dataWindow;
 			
 				template<typename T>
 				T getPrimVar( const PrimitiveVariable &pv ) const;
-				
-			public:
-			
-				struct ExtraData;			
 			
 		};
 		IE_CORE_DECLAREPTR( Result );		
