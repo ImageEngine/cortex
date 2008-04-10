@@ -41,8 +41,8 @@ import re
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
-ieCoreMajorVersion=2
-ieCoreMinorVersion=39
+ieCoreMajorVersion=3
+ieCoreMinorVersion=0
 ieCorePatchVersion=0
 
 ###########################################################################################
@@ -920,8 +920,8 @@ if doConfigure :
 # because coreGL isn't really stable in terms of api yet it has its own version
 # number. when it moves out of /contrib it'll use the same version number as the
 # main libraries.
-ieCoreGLMajorVersion = 0
-ieCoreGLMinorVersion = 8
+ieCoreGLMajorVersion = 1
+ieCoreGLMinorVersion = 0
 ieCoreGLPatchVersion = 0
 
 if env["WITH_GL"] and doConfigure :
@@ -1063,8 +1063,8 @@ if env["WITH_GL"] and doConfigure :
 # because coreMaya isn't really stable in terms of api yet it has its own version
 # number. when it moves out of /contrib it'll use the same version number as the
 # main libraries.
-ieCoreMayaMajorVersion = 2
-ieCoreMayaMinorVersion = 13
+ieCoreMayaMajorVersion = 3
+ieCoreMayaMinorVersion = 0
 ieCoreMayaPatchVersion = 0
 
 if env["WITH_MAYA"] :

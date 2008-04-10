@@ -40,12 +40,16 @@ import VersionControl
 VersionControl.setVersion('IEBuild', '1.7.2')
 import IEBuild
 
-name = 'IECoreMaya'
-version = '2.18.0'
+if ARGUMENTS.get("INSTALLPREFIX",  os.path.expanduser( "~" ) ) != os.path.expanduser( "~" ) :
 
-coreMajorVersion = '2'
-coreGLMajorVersion = '0'
-coreMayaMajorVersion = '2'
+	raise RuntimeError( "Cannot install to anywhere but " + os.path.expanduser( "~" ) + "!" )
+
+name = 'IECoreMaya'
+version = '3.0.0'
+
+coreMajorVersion = '3'
+coreGLMajorVersion = '1'
+coreMayaMajorVersion = '3'
 glewVersion = "1.4.0"
 
 librarySource = [

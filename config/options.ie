@@ -120,6 +120,11 @@ TEST_LIBPATH = compilerReg["location"] + "/lib"
 
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
+
+if INSTALL_PREFIX != os.path.expanduser( "~" ) :
+
+	raise RuntimeError( "Cannot install to anywhere but " + os.path.expanduser( "~" ) + "!" )
+
 INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
