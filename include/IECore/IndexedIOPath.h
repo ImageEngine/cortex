@@ -83,6 +83,8 @@ class IndexedIOPath
 		
 		std::string tail() const;
 		
+		bool hasRootDirectory() const;
+		
 	protected:
 	
 		void buildPath() const;
