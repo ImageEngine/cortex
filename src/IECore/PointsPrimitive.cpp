@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -114,7 +114,7 @@ void PointsPrimitive::setNumPoints( size_t n )
 	m_numPoints = n;
 }
 
-size_t PointsPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation )
+size_t PointsPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch( interpolation )
 	{

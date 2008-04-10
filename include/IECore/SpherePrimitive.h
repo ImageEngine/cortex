@@ -77,7 +77,7 @@ class SpherePrimitive : public Primitive
 		
 		//@}
 	
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation );
+		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
 		/// Render the sphere
 		virtual void render( RendererPtr renderer );

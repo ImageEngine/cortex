@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -168,7 +168,7 @@ struct ValidateArraySize
 	} 
 
 	template<typename T>
-	bool operator() ( typename T::Ptr data )
+	bool operator() ( typename T::ConstPtr data )
 	{
 		assert( data );
                 
@@ -187,13 +187,13 @@ struct ReturnTrue
 	typedef bool ReturnType;
 	
 	template<typename T>
-	bool operator() ( typename T::Ptr data )
+	bool operator() ( typename T::ConstPtr data )
 	{
 		return true;
 	}
 };
 
-bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv )
+bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv ) const
 {
 	if (! pv.data )
 	{
@@ -207,7 +207,7 @@ bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv )
 		if ( sz == 1 )
 		{
 			ReturnTrue func;
-			return despatchTypedData<ReturnTrue, TypeTraits::IsSimpleTypedData>( static_pointer_cast<Data>( pv.data ), func );	
+			return despatchTypedData<ReturnTrue, TypeTraits::IsSimpleTypedData>( pv.data, func );	
 		}	
 	}
 	catch ( InvalidArgumentException &e )
@@ -215,10 +215,10 @@ bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv )
 	}
 	
 	ValidateArraySize func( sz );
-	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData>( static_pointer_cast<Data>( pv.data ), func );	
+	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData>( pv.data, func );	
 }
 
-bool Primitive::arePrimitiveVariablesValid()
+bool Primitive::arePrimitiveVariablesValid() const
 {
 	for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
 	{

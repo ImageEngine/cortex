@@ -59,7 +59,7 @@ class CurvesPrimitive : public Primitive
 		
 		virtual void render( RendererPtr renderer );
 		/// Follows the RenderMan specification for variable sizes.
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation );
+		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 	
 	protected :
 		

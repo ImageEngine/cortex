@@ -146,7 +146,7 @@ void ImagePrimitive::channelNames( vector<string> &names ) const
 }
 
 // give the size of the image
-size_t ImagePrimitive::variableSize( PrimitiveVariable::Interpolation interpolation )
+size_t ImagePrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch (interpolation)
 	{

@@ -117,7 +117,7 @@ void SpherePrimitive::setThetaMax( float tm )
 	m_thetaMax = tm;
 }
 
-size_t SpherePrimitive::variableSize( PrimitiveVariable::Interpolation interpolation )
+size_t SpherePrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch(interpolation)
 	{

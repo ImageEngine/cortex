@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,17 +64,16 @@ class Primitive : public VisibleRenderable
 		PrimitiveVariableMap variables;
 		
 		/// Returns true if the given primitive variable has the correct size for its interpolation type
-		bool isPrimitiveVariableValid( const PrimitiveVariable &pv );
+		bool isPrimitiveVariableValid( const PrimitiveVariable &pv ) const;
 
 		/// Returns true if all primitive variables have the correct size for their interpolation type
-		bool arePrimitiveVariablesValid();
+		bool arePrimitiveVariablesValid() const;
 				
 		/// Implemented to return a box containing all the points in the variable
 		/// "P" if it exists.
 		virtual Imath::Box3f bound() const;
 		
-		/// \todo Make const
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) = 0;
+		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const = 0;
 			
 	private:
 	

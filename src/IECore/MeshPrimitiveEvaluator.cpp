@@ -238,8 +238,7 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh )
 		throw InvalidArgumentException( "No mesh given to MeshPrimitiveEvaluator");
 	}
 	
-	/// \todo Remove the const_cast once arePrimitiveVariablesValid() is const
-	if (! ( boost::const_pointer_cast< MeshPrimitive >(mesh) )->arePrimitiveVariablesValid() )
+	if (! mesh->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "Mesh with invalid primitive variables given to MeshPrimitiveEvaluator");
 	}

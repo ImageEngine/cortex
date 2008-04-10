@@ -122,7 +122,7 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 	m_interpolation = interpolation;
 }
 		
-size_t MeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation )
+size_t MeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch(interpolation)
 	{

@@ -197,7 +197,7 @@ void CurvesPrimitive::render( RendererPtr renderer )
 	renderer->curves( interpolation, m_periodic, m_vertsPerCurve, variables );
 }
 
-size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation )
+size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch( interpolation )
 	{

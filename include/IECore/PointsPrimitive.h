@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,7 +67,7 @@ class PointsPrimitive : public Primitive
 		
 		/// Returns numPoints() for Vertex, Varying, and FaceVarying interpolations,
 		/// and 1 for all other types.
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation );
+		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 		
 		virtual void render( RendererPtr renderer );
 	

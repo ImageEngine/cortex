@@ -102,7 +102,7 @@ void ImageWriter::doWrite()
 	ConstImagePrimitivePtr image = getImage();
 	assert( image );
 
-	if ( !boost::const_pointer_cast<ImagePrimitive>(image)->arePrimitiveVariablesValid() )
+	if ( !image->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "ImageWriter: Invalid primitive variables on image" );
 	}

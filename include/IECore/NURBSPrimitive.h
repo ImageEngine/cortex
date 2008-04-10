@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,7 +75,7 @@ class NURBSPrimitive : public Primitive
 			int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax );
 		//@}
 	
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation );
+		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
 		virtual void render( RendererPtr renderer );
 

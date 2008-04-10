@@ -94,6 +94,7 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 
 	protected:
 
+		/// \todo The meaning of this template parameter needs changing if we're gong to use depatchTypedData
 		template<typename T>
 		void doShrinkWrap( std::vector<T> &vertices, PrimitivePtr sourcePrimitive, ConstPrimitivePtr targetPrimitive, typename TypedData< std::vector<T> >::ConstPtr directionVerticesData, Direction direction, Method method );
 

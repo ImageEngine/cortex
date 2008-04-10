@@ -279,8 +279,7 @@ ImagePrimitiveEvaluator::ImagePrimitiveEvaluator( ConstImagePrimitivePtr image )
 		throw InvalidArgumentException( "No image given to ImagePrimitiveEvaluator");
 	}
 	
-	/// \todo Remove the const_cast once arePrimitiveVariablesValid() is const
-	if (! ( boost::const_pointer_cast< ImagePrimitive >(image) )->arePrimitiveVariablesValid() )
+	if (! image->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "Image with invalid primitive variables given to ImagePrimitiveEvaluator");
 	}

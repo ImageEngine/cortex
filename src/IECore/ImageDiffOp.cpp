@@ -180,8 +180,7 @@ ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 	assert( imageA );
 	assert( imageB );
 	
-	/// \todo Remove const_cast once arePrimitiveVariablesValid is const
-	if ( !boost::const_pointer_cast<ImagePrimitive>(imageA)->arePrimitiveVariablesValid() || !boost::const_pointer_cast<ImagePrimitive>(imageB)->arePrimitiveVariablesValid() )
+	if ( !imageA->arePrimitiveVariablesValid() || !imageB->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "ImageDiffOp: Image with invalid primitive variables specified as input parameter" );
 	}
