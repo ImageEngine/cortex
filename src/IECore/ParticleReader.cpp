@@ -43,7 +43,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/NullObject.h"
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/DespatchTypedData.h"
 
 #include <algorithm>
 
