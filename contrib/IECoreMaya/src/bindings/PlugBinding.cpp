@@ -217,8 +217,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS( PlugWrapperConverterOverloads, converter
 void IECoreMaya::bindPlug()
 {
 	class_<Plug>( "Plug", init<const std::string &>() )
-		.def( "converter", (FromMayaConverterPtr (Plug::*)( TypeId ))&Plug::converter, PlugWrapperConverterOverloads() )
-		.def( "convert", (ObjectPtr (Plug::*)( TypeId ))&Plug::convert, PlugWrapperConvertOverloads() )
+		.def( "converter", (FromMayaConverterPtr (Plug::*)( IECore::TypeId ))&Plug::converter, PlugWrapperConverterOverloads() )
+		.def( "convert", (ObjectPtr (Plug::*)( IECore::TypeId ))&Plug::convert, PlugWrapperConvertOverloads() )
 		.def( "name", &Plug::name)
 		.def( "fullPathName", &Plug::fullPathName)
 		.def( "__str__", &Plug::fullPathName )

@@ -55,7 +55,6 @@ glewVersion = "1.4.0"
 librarySource = [
 	'src/CacheSet.cpp',
 	'src/IECoreMaya.cpp',
-	'src/Converter.cpp',
 	'src/FromMayaConverter.cpp',
 	'src/FromMayaObjectConverter.cpp',
 	'src/FromMayaPlugConverter.cpp',		
@@ -115,7 +114,6 @@ pythonBindingsSource = [
 	'src/bindings/MObjectBinding.cpp',
 	'src/bindings/NodeBinding.cpp',
 	'src/bindings/DagNodeBinding.cpp',
-	'src/bindings/ConverterBinding.cpp',
 	'src/bindings/FromMayaConverterBinding.cpp',
 	'src/bindings/FromMayaPlugConverterBinding.cpp',
 	'src/bindings/PlugBinding.cpp',

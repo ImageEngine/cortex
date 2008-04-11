@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,7 @@
 #include "IECoreMaya/bindings/FromMayaPlugConverterBinding.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace IECoreMaya;
 using namespace boost::python;
@@ -48,6 +49,7 @@ void IECoreMaya::bindFromMayaPlugConverter()
 
 	FromMayaPlugConverterPyClass( "FromMayaPlugConverter", no_init )
 		.def( "convert", &FromMayaPlugConverter::convert )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaPlugConverter )
 	;
 	
 	INTRUSIVE_PTR_PATCH( FromMayaPlugConverter, FromMayaPlugConverterPyClass );

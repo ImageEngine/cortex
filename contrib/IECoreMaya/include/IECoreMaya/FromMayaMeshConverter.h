@@ -61,6 +61,8 @@ class FromMayaMeshConverter : public FromMayaObjectConverter
 
 	public :
 	
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaMeshConverter, FromMayaMeshConverterTypeId, FromMayaObjectConverter );
+
 		typedef enum
 		{
 			Transform = 0,

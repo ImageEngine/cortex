@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@ namespace IECoreMaya
 
 /// This template class can convert from various maya array data types
 /// into various IECore TypedVectorData types.
+/// \todo Shorten name, implement RunTimeTyped interface.
 template<typename F, typename T>
 class FromMayaArrayDataConverter : public FromMayaObjectConverter
 {
@@ -49,7 +50,7 @@ class FromMayaArrayDataConverter : public FromMayaObjectConverter
 	public :
 	
 		FromMayaArrayDataConverter( const MObject &object );
-
+		
 	protected :
 	
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;

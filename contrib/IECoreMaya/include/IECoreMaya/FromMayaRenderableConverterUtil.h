@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 #ifndef IE_COREMAYA_FROMMAYARENDERABLECONVERTERUTIL_H
 #define IE_COREMAYA_FROMMAYARENDERABLECONVERTERUTIL_H
 
-#include "IECoreMaya/Converter.h"
+#include "IECore/Converter.h"
 
 #include "IECore/CompoundObject.h"
 #include "IECore/TypedParameter.h"
@@ -49,7 +49,7 @@ namespace IECoreMaya
 /// The FromMayaRenderableConverterUtil provides utility functions shared by converters to Renderable derived classes.
 // Converts attributes to blindData dictionary and also the maya full node name.
 // \todo Create a base class for FromMayaGroupConverter and FromMayaMeshConverter with this functionality.
-class FromMayaRenderableConverterUtil : public Converter
+class FromMayaRenderableConverterUtil : public IECore::Converter
 {
 
 	public :

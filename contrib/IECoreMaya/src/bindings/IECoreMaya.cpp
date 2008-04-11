@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,7 +46,6 @@
 #include "IECoreMaya/bindings/MObjectBinding.h"
 #include "IECoreMaya/bindings/NodeBinding.h"
 #include "IECoreMaya/bindings/DagNodeBinding.h"
-#include "IECoreMaya/bindings/ConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaPlugConverterBinding.h"
 #include "IECoreMaya/bindings/PlugBinding.h"
@@ -75,7 +74,6 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindNode();
 	bindDagNode();
 	bindParameterisedHolder();
-	bindConverter();
 	bindFromMayaConverter();
 	bindFromMayaPlugConverter();
 	bindPlug();

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,6 +58,8 @@ class FromMayaPlugConverter : public FromMayaConverter
 
 	public :
 
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaPlugConverter, FromMayaPlugConverterTypeId, FromMayaConverter );
+
 		/// Constructs a new converter which will do a slightly arbitrary
 		/// conversion of the data in plug, with no control over the sort
 		/// of object being returned.
@@ -79,6 +81,8 @@ class FromMayaPlugConverter : public FromMayaConverter
 	protected :
 
 		/// Should be implemented by all derived classes to convert the value in plug().
+		/// \todo Implement this in a manner similar to FromMayaObjectConverter (forward on
+		/// to a pure virtual function).
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 
 		/// Creating a static instance of one of these (templated on your converter type)

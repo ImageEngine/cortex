@@ -40,6 +40,7 @@
 namespace IECoreMaya
 {
 
+/// \todo Shorten name, implement RunTimeTyped interface.
 template<typename F, typename T> 
 class FromMayaCompoundNumericPlugConverter : public FromMayaPlugConverter
 {

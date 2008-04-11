@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,7 +54,7 @@ using namespace IECore;
 using namespace Imath;
 
 static const MFn::Type fromTypes[] = { MFn::kCamera, MFn::kInvalid };
-static const TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, PreWorldRenderableTypeId, CameraTypeId };
+static const IECore::TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, PreWorldRenderableTypeId, CameraTypeId };
 
 FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaCameraConverter> FromMayaCameraConverter::m_description( fromTypes, toTypes );
 

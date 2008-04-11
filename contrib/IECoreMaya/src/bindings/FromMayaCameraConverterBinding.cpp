@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,7 @@
 #include "IECoreMaya/bindings/FromMayaCameraConverterBinding.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace IECoreMaya;
 using namespace boost::python;
@@ -47,6 +48,7 @@ void IECoreMaya::bindFromMayaCameraConverter()
 	typedef class_<FromMayaCameraConverter, FromMayaCameraConverterPtr, boost::noncopyable, bases<FromMayaObjectConverter> > FromMayaCameraConverterPyClass;
 
 	FromMayaCameraConverterPyClass( "FromMayaCameraConverter", no_init )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaCameraConverter )
 	;
 	
 	INTRUSIVE_PTR_PATCH( FromMayaCameraConverter, FromMayaCameraConverterPyClass );

@@ -34,6 +34,8 @@
 
 #include "IECoreMaya/FromMayaObjectConverter.h"
 
+#include "IECore/CompoundObject.h"
+
 using namespace IECoreMaya;
 using namespace IECore;
 

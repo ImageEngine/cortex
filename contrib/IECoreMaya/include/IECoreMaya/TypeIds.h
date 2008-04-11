@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,32 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_CONVERTER_H
-#define IE_COREMAYA_CONVERTER_H
-
-#include "IECore/Parameterised.h"
+#ifndef IECOREMAYA_TYPEIDS_H
+#define IECOREMAYA_TYPEIDS_H
 
 namespace IECoreMaya
 {
 
-/// The Converter class forms a base class for
-/// all classes able to perform some kind of conversion
-/// between Maya and IECore datatypes. It derives from
-/// Parameterised and uses the parameter values to
-/// define how conversion is performed.
-/// \todo Use the one in IECore instead.
-class Converter : public IECore::Parameterised
+enum TypeId
 {
+	
+	FromMayaConverterTypeId = 109000,
+	FromMayaObjectConverterTypeId = 109001,
+	FromMayaPlugConverterTypeId = 109002,
+	FromMayaMeshConverterTypeId = 109003,
+	FromMayaCameraConverterTypeId = 109004,
+	FromMayaGroupConverterTypeId = 109005,
+	FromMayaNumericDataConverterTypeId = 109006,
+	FromMayaNumericPlugConverterTypeId = 109007,
+	FromMayaPointsPrimitiveConverterTypeId = 109008,
+	FromMayaStringPlugConverterTypeId = 109009,
+	LastTypeId = 109999
 
-	protected :
-	
-		/// Not much point in making one of these.
-		Converter( const std::string &name, const std::string &description );
-	
 };
-
-IE_CORE_DECLAREPTR( Converter );
 
 } // namespace IECoreMaya
 
-#endif // IE_COREMAYA_CONVERTER_H
+#endif // IECOREMAYA_TYPEIDS_H

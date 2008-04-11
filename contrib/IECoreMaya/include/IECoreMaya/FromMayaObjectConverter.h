@@ -54,6 +54,8 @@ class FromMayaObjectConverter : public FromMayaConverter
 	
 	public :
 
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaObjectConverter, FromMayaObjectConverterTypeId, FromMayaConverter );
+
 		/// The MObject which will be converted by the convert() function.
 		/// Will return MObject::kNullObj if objectIsAlive() is false.
 		const MObject &object() const;

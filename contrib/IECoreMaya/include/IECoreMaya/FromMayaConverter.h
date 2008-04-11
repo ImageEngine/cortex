@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,10 +35,9 @@
 #ifndef IE_COREMAYA_FROMMAYACONVERTER_H
 #define IE_COREMAYA_FROMMAYACONVERTER_H
 
-#include "IECoreMaya/Converter.h"
+#include "IECoreMaya/TypeIds.h"
 
-#include "IECore/Object.h"
-#include "IECore/CompoundObject.h"
+#include "IECore/ToCoreConverter.h"
 
 namespace IECoreMaya
 {
@@ -46,25 +45,19 @@ namespace IECoreMaya
 /// The FromMayaConverter class forms an abstract base class for
 /// all classes able to perform some kind of conversion
 /// from a Maya datatype to an IECore datatype.
-/// \todo Derive this from IECore::ToCoreConverter.
-class FromMayaConverter : public Converter
+class FromMayaConverter : public IECore::ToCoreConverter
 {
 
 	public :
 	
-		/// Returns the converted maya object in a suitable IECore
-		/// format.
-		IECore::ObjectPtr convert() const;
-
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaConverter, FromMayaConverterTypeId, IECore::ToCoreConverter );
+		
 	protected:
 	
 		FromMayaConverter( const std::string &name, const std::string &description );
+		
+		virtual ~FromMayaConverter();
 	
-		/// Called by convert() to actually perform the operation.
-		/// operands contains the result of parameters()->getValidatedValue() -
-		/// this function will never be called when the contents of the parameters
-		/// are in a bad state. Must be implemented in derived classes.
-		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const = 0;
 };
 
 IE_CORE_DECLAREPTR( FromMayaConverter );

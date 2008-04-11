@@ -45,6 +45,7 @@ namespace IECoreMaya
 
 /// The FromMayaTransformationMatrixConverter converts types compatible with
 /// MFnMatrixData  into IECore::TransformationMatrixData.
+/// \todo Shorten name, implement RunTimeTyped interface.
 template<typename T>
 class FromMayaTransformationMatrixConverter : public FromMayaObjectConverter
 {

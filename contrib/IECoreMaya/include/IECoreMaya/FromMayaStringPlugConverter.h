@@ -45,6 +45,8 @@ class FromMayaStringPlugConverter : public FromMayaPlugConverter
 
 	public :
 	
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaStringPlugConverter, FromMayaStringPlugConverterTypeId, FromMayaPlugConverter );
+
 		FromMayaStringPlugConverter( const MPlug &plug );
 		
 	protected :

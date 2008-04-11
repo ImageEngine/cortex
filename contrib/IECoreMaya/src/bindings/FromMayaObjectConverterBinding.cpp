@@ -38,6 +38,7 @@
 #include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace IECoreMaya;
 using namespace boost::python;
@@ -47,6 +48,7 @@ void IECoreMaya::bindFromMayaObjectConverter()
 	typedef class_<FromMayaObjectConverter, FromMayaObjectConverterPtr, boost::noncopyable, bases<FromMayaConverter> > FromMayaObjectConverterPyClass;
 
 	FromMayaObjectConverterPyClass( "FromMayaObjectConverter", no_init )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaObjectConverter )
 	;
 	
 	INTRUSIVE_PTR_PATCH( FromMayaObjectConverter, FromMayaObjectConverterPyClass );

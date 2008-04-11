@@ -42,10 +42,13 @@
 namespace IECoreMaya
 {
 
+/// \todo This should be named FromMayaFluidsConverter or something.
 class FromMayaPointsPrimitiveConverter : public FromMayaObjectConverter
 {
 	
 	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaPointsPrimitiveConverter, FromMayaPointsPrimitiveConverterTypeId, FromMayaObjectConverter );
 
 		FromMayaPointsPrimitiveConverter( const MObject &object );
 		

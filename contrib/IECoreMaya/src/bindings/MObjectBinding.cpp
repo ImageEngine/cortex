@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -125,7 +125,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS( MObjectWrapperConverterOverloads, conver
 void IECoreMaya::bindMObject()
 {
 	class_<MObjectWrapper, boost::noncopyable>( "MObject", init<const char *>() )
-		.def( "convert", (ObjectPtr (MObjectWrapper::*)( TypeId ))&MObjectWrapper::convert, MObjectWrapperConvertOverloads() )
-		.def( "converter", (FromMayaConverterPtr (MObjectWrapper::*)( TypeId ))&MObjectWrapper::converter, MObjectWrapperConverterOverloads() )
+		.def( "convert", (ObjectPtr (MObjectWrapper::*)( IECore::TypeId ))&MObjectWrapper::convert, MObjectWrapperConvertOverloads() )
+		.def( "converter", (FromMayaConverterPtr (MObjectWrapper::*)( IECore::TypeId ))&MObjectWrapper::converter, MObjectWrapperConverterOverloads() )
 	;
 }

@@ -58,7 +58,7 @@ using namespace std;
 using namespace Imath;
 
 static const MFn::Type fromTypes[] = { MFn::kMesh, MFn::kMeshData, MFn::kInvalid };
-static const TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, VisibleRenderableTypeId, PrimitiveTypeId, MeshPrimitiveTypeId, InvalidTypeId };
+static const IECore::TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, VisibleRenderableTypeId, PrimitiveTypeId, MeshPrimitiveTypeId, InvalidTypeId };
 
 FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaMeshConverter> FromMayaMeshConverter::m_description( fromTypes, toTypes );
 

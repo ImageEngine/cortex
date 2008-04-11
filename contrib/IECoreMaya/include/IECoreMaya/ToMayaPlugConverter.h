@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 #ifndef IE_COREMAYA_TOMAYAPLUGCONVERTER_H
 #define IE_COREMAYA_TOMAYAPLUGCONVERTER_H
 
-#include "IECoreMaya/Converter.h"
+#include "IECore/Converter.h"
 
 #include "IECore/Object.h"
 
@@ -51,7 +51,7 @@ namespace IECoreMaya
 /// \todo Add factory style create() functions and a registration mechanism so you can
 /// ask for converters from different sorts of data, and then implement subclasses to make
 /// a proper job of doing the conversion.
-class ToMayaPlugConverter : public Converter
+class ToMayaPlugConverter : public IECore::Converter
 {
 
 	public :
