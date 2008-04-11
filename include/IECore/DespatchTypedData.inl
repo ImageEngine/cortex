@@ -36,6 +36,7 @@
 #define IE_CORE_DESPATCHTYPEDDATA_INL
 
 #include "IECore/TypeTraits.h"
+#include "IECore/PrimitiveVariable.h"
 
 namespace IECore
 {
@@ -86,6 +87,14 @@ struct DespatchTypedDataExceptionError
 
 } // namespace Detail
 
+
+struct DespatchTypedDataIgnoreError
+{
+	template<typename T, typename F>
+	void operator()( typename T::ConstPtr data, const F& functor )
+	{
+	}
+};
 
 template< class Functor, template<typename> class Enabler, typename ErrorHandler >
 typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &functor, ErrorHandler &errorHandler )
@@ -470,6 +479,44 @@ struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< T
 	{
 		assert( data );
 		return &*(data->readable().begin());
+	}
+};
+
+struct TypedDataInterpolation
+{
+	typedef PrimitiveVariable::Interpolation ReturnType;
+	
+	template< typename T, typename Enable = void >
+	struct TypedDataInterpolationHelper
+	{
+		ReturnType operator()( typename T::ConstPtr d ) const
+		{
+			return PrimitiveVariable::Invalid;
+		}
+	};
+	
+	template< typename T >
+	ReturnType operator()( typename T::ConstPtr d ) const
+	{
+		return TypedDataInterpolationHelper<T>()( d );
+	}
+};
+
+template< typename T >
+struct TypedDataInterpolation::TypedDataInterpolationHelper<T, typename boost::enable_if< TypeTraits::IsVectorTypedData<T> >::type >
+{
+	ReturnType operator()( typename T::ConstPtr d ) const
+	{
+		return PrimitiveVariable::Vertex;
+	}
+};
+
+template< typename T >
+struct TypedDataInterpolation::TypedDataInterpolationHelper<T, typename boost::enable_if< TypeTraits::IsSimpleTypedData<T> >::type >
+{
+	ReturnType operator()( typename T::ConstPtr d ) const
+	{
+		return PrimitiveVariable::Constant;
 	}
 };
 
