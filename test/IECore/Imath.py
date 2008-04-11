@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -905,7 +905,7 @@ class ImathM44f(unittest.TestCase):
 			z = m.multDirMatrix( V3f( 0, 0, 1 ) )
 			o = V3f( 0, 0, 0 ) * m
 			
-			self.assertEqual( matrixFromBasis( x, y, z, o ), m )
+			self.assertEqual( M44f.createFromBasis( x, y, z, o ), m )
 			
 	def testDeterminant( self ) :
 	
