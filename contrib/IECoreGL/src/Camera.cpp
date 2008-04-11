@@ -109,6 +109,19 @@ Imath::M44f Camera::matrix()
 	return obj2Camera;
 }
 
+Imath::M44f Camera::projectionMatrix()
+{
+	Imath::M44f projection;
+	glGetFloatv( GL_PROJECTION_MATRIX, projection.getValue() );
+	return projection;
+}
+
+bool Camera::perspectiveProjection()
+{
+	M44f p = projectionMatrix();
+	return p[2][3] != 0.0f;
+}
+
 Imath::V3f Camera::positionInObjectSpace()
 {
 	Imath::M44f obj2Camera = matrix();

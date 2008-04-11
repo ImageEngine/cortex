@@ -86,6 +86,10 @@ class Camera : public Renderable
 		/// The matrix that converts from the current GL object space
 		/// to camera space (the GL_MODELVIEW_MATRIX).
 		static Imath::M44f matrix();
+		/// The projection matrix (the GL_PROJECTION_MATRIX).
+		static Imath::M44f projectionMatrix();
+		/// True if the camera performs a perspective projection.
+		static bool perspectiveProjection();
 		/// Calculates the position of the current GL camera
 		/// relative to the current GL transform.
 		static Imath::V3f positionInObjectSpace();
