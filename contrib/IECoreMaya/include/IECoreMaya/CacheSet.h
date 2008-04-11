@@ -42,6 +42,7 @@ namespace IECoreMaya
 {
 /// A Maya set base node which encapsulates basic funtionality required of
 /// cache sets.
+/// \todo Does this really belong in Cortex?
 class CacheSet : public MPxObjectSet
 {
 	public:

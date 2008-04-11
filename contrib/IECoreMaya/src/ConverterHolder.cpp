@@ -34,8 +34,7 @@
 
 #include "IECoreMaya/ConverterHolder.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
-
-#include "typeIds/TypeIds.h"
+#include "IECoreMaya/MayaTypeIds.h"
 
 #include "IECore/Object.h"
 

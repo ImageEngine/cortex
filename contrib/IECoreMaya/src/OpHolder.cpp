@@ -47,6 +47,7 @@
 
 #include "IECoreMaya/OpHolder.h"
 #include "IECoreMaya/Parameter.h"
+#include "IECoreMaya/MayaTypeIds.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/CompoundParameter.h"
@@ -54,8 +55,6 @@
 #include "IECore/TypedParameter.h"
 
 #include "IECore/Parameterised.h"
-
-#include "typeIds/TypeIds.h"
 
 using namespace IECore;
 using namespace IECoreMaya;

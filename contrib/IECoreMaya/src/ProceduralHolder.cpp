@@ -43,12 +43,11 @@
 
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/Convert.h"
+#include "IECoreMaya/MayaTypeIds.h"
 
 #include "IECore/VectorOps.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
-
-#include "typeIds/TypeIds.h"
 
 #include "maya/MFnNumericAttribute.h"
 

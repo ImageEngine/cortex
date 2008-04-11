@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,27 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_TYPEIDS_H
-#define IE_COREMAYA_TYPEIDS_H
+#ifndef IECOREMAYA_MAYATYPEIDS_H
+#define IECOREMAYA_MAYATYPEIDS_H
 
-enum
+namespace IECoreMaya
 {
-#ifdef IE_INTERNAL_BUILD
-	/// \todo On next major version change, use external typeIds instead.
-	/// \todo Remember to also update global typeIds.h file
-	CacheSetId = 0xAA000,
-	ObjectDataId = 0xAB00A,
-	ProceduralHolderId = 0xAB017,
-	ParameterisedHolderLocatorId = 0xAB018,
-	ParameterisedHolderDeformerId = 0xAB019,
-	ParameterisedHolderFieldId = 0xAB01A,
-	ParameterisedHolderSetId = 0xAB01B,
-	OpHolderNodeId = 0xAB01C,
-	ConverterHolderId = 0xAB01E,
-	ParameterisedHolderSurfaceShapeId = 0xAB01F,
-	ParameterisedHolderComponentShapeId = 0xAB020,
-	ParameterisedHolderNodeId = 0xB0006,
-#else
+
+/// An enum for all the MTypeId values used by
+/// the nodes and datatypes of IECoreMaya. Note that these
+/// are maya type ids and are distinct from the IECore::TypeId
+/// enumeration. The range here was obtained by Andrew Chapman
+/// and is set aside specifically for the Cortex project.
+enum MayaTypeId
+{
+
 	CacheSetId = 0x00110DC0,
 	ObjectDataId = 0x00110DC1,
 	ParameterisedHolderLocatorId = 0x00110DC2,
@@ -67,7 +60,9 @@ enum
 	ProceduralHolderId = 0x00110DCB,
 	
 	LastId = 0x00110E3F,
-#endif	
+
 };
 
-#endif
+} // namespace IECoreMaya
+
+#endif // IECOREMAYA_MAYATYPEIDS_H

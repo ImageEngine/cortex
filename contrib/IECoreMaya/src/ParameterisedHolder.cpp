@@ -55,14 +55,13 @@
 #include "IECoreMaya/ParameterisedHolder.h"
 #include "IECoreMaya/Parameter.h"
 #include "IECoreMaya/PythonCmd.h"
+#include "IECoreMaya/MayaTypeIds.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
 #include "IECore/TypedParameter.h"
 #include "IECore/MeshPrimitive.h"
-
-#include "typeIds/TypeIds.h"
 
 #include <stdlib.h>
 

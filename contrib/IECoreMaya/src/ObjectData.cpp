@@ -34,9 +34,8 @@
 
 #include <cassert>
 
-#include "typeIds/TypeIds.h"
-
 #include "IECoreMaya/ObjectData.h"
+#include "IECoreMaya/MayaTypeIds.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
