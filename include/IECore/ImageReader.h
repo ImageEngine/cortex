@@ -83,8 +83,7 @@ class ImageReader : public Reader
 		/// Returns true if the file is complete. Implementations of this function should
 		/// be quick - it's intended as a cheaper alternative to loading the
 		/// whole file to determine completeness.
-		/// \todo Remove this default implementation and implement properly in all derived classes.
-		virtual bool isComplete() { return true; }
+		virtual bool isComplete() = 0;
 		/// Returns the dataWindow contained in the file. This is the dataWindow that
 		/// will be loaded if the dataWindowParameter() is left at its default value.
 		virtual Imath::Box2i dataWindow() = 0;
