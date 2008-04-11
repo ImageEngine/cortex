@@ -52,10 +52,10 @@ inline void CubicBasis<T>::coefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const
 {
 	S t2 = t * t;
 	S t3 = t2 * t;
-	c0 = matrix[0][0] * t3 + matrix[0][1] * t2 + matrix[0][2] * t + matrix[0][3];
-	c1 = matrix[1][0] * t3 + matrix[1][1] * t2 + matrix[1][2] * t + matrix[1][3];
-	c2 = matrix[2][0] * t3 + matrix[2][1] * t2 + matrix[2][2] * t + matrix[2][3];
-	c3 = matrix[3][0] * t3 + matrix[3][1] * t2 + matrix[3][2] * t + matrix[3][3];
+	c0 = matrix[0][0] * t3 + matrix[1][0] * t2 + matrix[2][0] * t + matrix[3][0];
+	c1 = matrix[0][1] * t3 + matrix[1][1] * t2 + matrix[2][1] * t + matrix[3][1];
+	c2 = matrix[0][2] * t3 + matrix[1][2] * t2 + matrix[2][2] * t + matrix[3][2];
+	c3 = matrix[0][3] * t3 + matrix[1][3] * t2 + matrix[2][3] * t + matrix[3][3];
 }
 
 template<typename T>
