@@ -170,6 +170,7 @@
 #include "IECore/bindings/ImageDiffOpBinding.h"
 #include "IECore/bindings/TriangulatorBinding.h"
 #include "IECore/bindings/BezierAlgoBinding.h"
+#include "IECore/bindings/ToCoreConverterBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -319,6 +320,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageDiffOp();	
 	bindTriangulator();
 	bindBezierAlgo();
+	bindToCoreConverter();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
