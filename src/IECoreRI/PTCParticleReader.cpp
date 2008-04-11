@@ -275,29 +275,19 @@ ObjectPtr PTCParticleReader::doOperation( ConstCompoundObjectPtr operands )
 			continue;
 		}
 		
-		/// \todo There are cleaner ways of doing this with depatchTypedData
-		
 		DataPtr d = itData->second;
-		try
+		
+		PrimitiveVariable::Interpolation interp = despatchTypedData< TypedDataInterpolation, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );
+		
+		if ( interp == PrimitiveVariable::Invalid )
 		{
-			// throws if it's not vector data
-			despatchTypedData< TypedDataAddress, TypeTraits::IsVectorTypedData >( boost::const_pointer_cast<Data>( d ) );
-			result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Vertex, d ) ) );
+			msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to unsupported type \"%s\"." ) % *it % d->typeName() );
 		}
-		catch( ... )
+		else
 		{
-			// not vector data, maybe it's some sort of constant data
-			try
-			{
-				// throws if not simple data
-				despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( boost::const_pointer_cast<Data>( d ) );
-				result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Constant, d ) ) );
-			}
-			catch( ... )
-			{
-				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to unsupported type \"%s\"." ) % *it % d->typeName() );
-			}
+			result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( interp, d ) ) );
 		}
+		
 	}
 
 	// set blindData in the PointPrimitive object.

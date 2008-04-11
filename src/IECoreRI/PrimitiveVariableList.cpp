@@ -157,22 +157,5 @@ const void *PrimitiveVariableList::value( IECore::DataPtr d )
 		return &*(m_charPtrs.rbegin());
 	}
 	
-	/// \todo There are cleaner ways of doing this with despatchTypedData
-	try
-	{
-		return despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( boost::const_pointer_cast<Data>( d ) );
-	}
-	catch( ... )
-	{
-	}
-	
-
-	try
-	{
-		return despatchTypedData< TypedDataAddress, TypeTraits::IsVectorTypedData >( boost::const_pointer_cast<Data>( d ) );
-	}
-	catch( ... )
-	{
-	}
-	return 0;
+	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );	
 }

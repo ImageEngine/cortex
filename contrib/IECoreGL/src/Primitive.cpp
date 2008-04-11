@@ -190,15 +190,7 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 		throw Exception( typeName() + " does not support vertex attributes." );
 	}
 	
-	size_t s = 0;
-	try
-	{
-		s = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsVectorTypedData >( boost::const_pointer_cast<IECore::Data>( data ) );
-	}
-	catch( const std::exception &e )
-	{
-		throw Exception( "Data provided is not suitable for use as a vertex attribute." );
-	}
+	size_t s = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsTypedData >( boost::const_pointer_cast<IECore::Data>( data ) );
 
 	size_t rightSize = vertexAttributeSize();
 	if( s!=rightSize )
@@ -209,7 +201,7 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	m_vertexAttributes[name] = data->copy();
 }
 
-struct SetVertexAttribute
+struct Primitive::SetVertexAttribute
 {
 	typedef const void ReturnType;
 	
