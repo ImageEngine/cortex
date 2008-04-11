@@ -139,6 +139,7 @@ from CubicBasisTest import *
 from CurvesPrimitiveTest import *
 from ImageDiffOp import *
 from TriangulatorTest import *
+from BezierAlgoTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

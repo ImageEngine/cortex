@@ -169,6 +169,7 @@
 #include "IECore/bindings/CurvesPrimitiveBinding.h"
 #include "IECore/bindings/ImageDiffOpBinding.h"
 #include "IECore/bindings/TriangulatorBinding.h"
+#include "IECore/bindings/BezierAlgoBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -317,6 +318,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurvesPrimitive();
 	bindImageDiffOp();	
 	bindTriangulator();
+	bindBezierAlgo();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
