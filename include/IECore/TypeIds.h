@@ -278,6 +278,9 @@ enum TypeId
 	
 	FirstCoreTruelightTypeId = 108000,
 	LastCoreTruelightTypeId = 108999,
+	
+	FirstCoreMayaTypeId = 109000,
+	LastCoreMayaTypeId = 109999,
 
 	LastExtensionTypeId = 399999,
 	// Any TypeIds beyond this point can be considered safe for private internal use.
