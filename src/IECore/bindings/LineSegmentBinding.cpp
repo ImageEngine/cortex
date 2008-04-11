@@ -68,6 +68,8 @@ static void bind( const char *name )
 		.def( "closestPoints", &closestPoints<L> )
 		.def( "distanceTo", (typename L::BaseType (L::*)( const Vec & ) const)&L::distanceTo )
 		.def( "distanceTo", (typename L::BaseType (L::*)( const L & ) const)&L::distanceTo )
+		.def( "distance2To", (typename L::BaseType (L::*)( const Vec & ) const)&L::distance2To )
+		.def( "distance2To", (typename L::BaseType (L::*)( const L & ) const)&L::distance2To )
 	;
 
 }

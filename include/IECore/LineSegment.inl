@@ -134,11 +134,25 @@ typename LineSegment<T>::BaseType LineSegment<T>::distanceTo( const T &point ) c
 }
 
 template<class T>
+typename LineSegment<T>::BaseType LineSegment<T>::distance2To( const T &point ) const
+{
+	return (closestPointTo( point ) - point).length2();
+}
+
+template<class T>
 typename LineSegment<T>::BaseType LineSegment<T>::distanceTo( const LineSegment &line ) const
 {
 	T a, b;
 	a = closestPoints( line, b );
 	return (a-b).length();
+}
+
+template<class T>
+typename LineSegment<T>::BaseType LineSegment<T>::distance2To( const LineSegment &line ) const
+{
+	T a, b;
+	a = closestPoints( line, b );
+	return (a-b).length2();
 }
 
 } // namespace IECore

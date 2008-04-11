@@ -83,7 +83,11 @@ class LineSegment
 		T closestPoints( const LineSegment &line, T &otherPoint ) const;
 		
 		BaseType distanceTo( const T &point ) const;
+		/// Returns the shortest squared distance to the point.
+		BaseType distance2To( const T &point ) const;
 		BaseType distanceTo( const LineSegment &line ) const;
+		/// Returns the shortest squared distance to the line.
+		BaseType distance2To( const LineSegment &line ) const;
 		
 };
 
