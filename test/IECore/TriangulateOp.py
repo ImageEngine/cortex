@@ -155,11 +155,11 @@ class TestTriangulateOp( unittest.TestCase ) :
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
 		
-		P = V3fVectorData()
-		P.append( V3f( -1, 0, -1 ) )
-		P.append( V3f( -1, 0,  1 ) )
-		P.append( V3f(  1, 0,  1 ) )
-		P.append( V3f(  1, 1, -1 ) )
+		P = V3dVectorData()
+		P.append( V3d( -1, 0, -1 ) )
+		P.append( V3d( -1, 0,  1 ) )
+		P.append( V3d(  1, 0,  1 ) )
+		P.append( V3d(  1, 1, -1 ) )
 		
 		m = MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
@@ -187,11 +187,11 @@ class TestTriangulateOp( unittest.TestCase ) :
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
 		
-		P = V3fVectorData()
-		P.append( V3f( -1, 0, -1 ) )
-		P.append( V3f( -1, 0,  1 ) )
-		P.append( V3f(  1, 0,  1 ) )
-		P.append( V3f(  -0.9, 0, -0.9 ) )
+		P = V3dVectorData()
+		P.append( V3d( -1, 0, -1 ) )
+		P.append( V3d( -1, 0,  1 ) )
+		P.append( V3d(  1, 0,  1 ) )
+		P.append( V3d(  -0.9, 0, -0.9 ) )
 		
 		m = MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
@@ -205,6 +205,35 @@ class TestTriangulateOp( unittest.TestCase ) :
 		
 		op.parameters().throwExceptions = False
 		result = op()
+		
+	def testErrors( self ):
+		""" Test TriangulateOp with invalid P data """
+				
+		verticesPerFace = IntVectorData()
+		verticesPerFace.append( 4 )
+		
+		vertexIds = IntVectorData()
+		vertexIds.append( 0 )
+		vertexIds.append( 1 )
+		vertexIds.append( 2 )
+		vertexIds.append( 3 )
+		
+		P = FloatVectorData()
+		P.append( 1 )
+		P.append( 2 )
+		P.append( 3 )
+		P.append( 4 )
+		
+		m = MeshPrimitive( verticesPerFace, vertexIds )
+		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
+												
+		op = TriangulateOp()
+		
+		op.parameters().input = m
+		
+		# FloatVectorData not valid for "P"
+		self.assertRaises( RuntimeError, op )	
+		
 		
 			
 	
