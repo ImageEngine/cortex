@@ -161,7 +161,7 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		bool intersectionPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
 		void intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;		
 		
-		void calculateMassProperties();
+		void calculateMassProperties() const;
 		
 		BoundedTriangleVector m_uvTriangles;
 		BoundedTriangleTree *m_uvTree;

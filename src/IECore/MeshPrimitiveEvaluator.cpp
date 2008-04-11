@@ -360,7 +360,7 @@ float MeshPrimitiveEvaluator::volume() const
 {
 	if ( !m_haveMassProperties )
 	{
-		const_cast<MeshPrimitiveEvaluator*>(this)->calculateMassProperties();
+		calculateMassProperties();
 	}
 	
 	return m_volume;
@@ -370,7 +370,7 @@ Imath::V3f MeshPrimitiveEvaluator::centerOfGravity() const
 {
 	if ( !m_haveMassProperties )
 	{
-		const_cast<MeshPrimitiveEvaluator*>(this)->calculateMassProperties();
+		calculateMassProperties();
 	}	
 	
 	return m_centerOfGravity;
@@ -403,7 +403,7 @@ float MeshPrimitiveEvaluator::surfaceArea() const
 
 /// Implementation derived from Wild Magic (Version 2) Software Library, available
 /// from http://www.geometrictools.com/Downloads/WildMagic2p5.zip under free license
-void MeshPrimitiveEvaluator::calculateMassProperties()
+void MeshPrimitiveEvaluator::calculateMassProperties() const
 {
 	assert( !m_haveMassProperties );
 	
