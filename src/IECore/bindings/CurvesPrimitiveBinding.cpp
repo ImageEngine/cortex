@@ -58,9 +58,9 @@ void bindCurvesPrimitive()
 		.def( "verticesPerCurve", &verticesPerFace, "A copy of the list of vertices per curve." )
 		.def( "basis", &CurvesPrimitive::basis, return_value_policy<copy_const_reference>() )
 		.def( "periodic", &CurvesPrimitive::periodic )
-		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation ))&CurvesPrimitive::variableSize )
-		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation, unsigned ))&CurvesPrimitive::variableSize )
-		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned ))&CurvesPrimitive::numSegments )
+		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation )const)&CurvesPrimitive::variableSize )
+		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation, unsigned )const)&CurvesPrimitive::variableSize )
+		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned )const)&CurvesPrimitive::numSegments )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( CurvesPrimitive )
 	;
 	INTRUSIVE_PTR_PATCH( CurvesPrimitive, CurvesPrimitivePyClass );
