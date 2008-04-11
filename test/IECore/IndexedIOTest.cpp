@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,6 @@
 #include <iostream>
 
 #include <IECore/IndexedIOInterface.h>
-#include <IECore/SQLiteIndexedIO.h>
 #include <IECore/FileIndexedIO.h>
 
 #include "IndexedIOTest.h"
@@ -45,38 +44,9 @@ namespace IECore
 {
 
 template<>
-std::string IndexedIOTestSuite<SQLiteIndexedIO>::extension() const
-{
-	return "sql";
-}
-
-template<>
 std::string IndexedIOTestSuite<FileIndexedIO>::extension() const
 {
 	return "fio";
-}
-
-template<>
-void IndexedIOTestSuite<SQLiteIndexedIO>::getFilenames( FilenameList &filenames )
-{
-	filenames.clear();
-	
-	filenames.push_back("./test/IECore/data/sqlFiles/0.0.3/rhel4.i686/types.sql");
-	filenames.push_back("./test/IECore/data/sqlFiles/0.0.3/osx104.ppc/types.sql");
-	filenames.push_back("./test/IECore/data/sqlFiles/0.0.3/osx104.i686/types.sql");
-	
-	filenames.push_back("./test/IECore/data/sqlFiles/0.1.0/rhel4.i686/types.sql");
-	filenames.push_back("./test/IECore/data/sqlFiles/0.1.0/osx104.ppc/types.sql");
-	filenames.push_back("./test/IECore/data/sqlFiles/0.1.0/osx104.i686/types.sql");
-	
-	filenames.push_back("./test/IECore/data/sqlFiles/1.0.0/rhel4.i686/types.sql");	
-	filenames.push_back("./test/IECore/data/sqlFiles/1.0.0/osx104.i686/types.sql");
-	
-	filenames.push_back("./test/IECore/data/sqlFiles/2.0.0/rhel4.i686/types.sql");	
-	filenames.push_back("./test/IECore/data/sqlFiles/2.0.0/osx104.i686/types.sql");
-	
-	filenames.push_back("./test/IECore/data/sqlFiles/2.13.0/rhel4.i686/types.sql");	
-	filenames.push_back("./test/IECore/data/sqlFiles/2.13.0/osx104.i686/types.sql");		
 }
 
 template<>
@@ -335,9 +305,6 @@ unsigned char* IndexedIOTestDataTraits<unsigned char*>::value()
 
 void addIndexedIOTest(boost::unit_test::test_suite* test)
 {
-#ifdef IECORE_WITH_SQLITE
-	test->add( new IndexedIOTestSuite<SQLiteIndexedIO>() );
-#endif
 	test->add( new IndexedIOTestSuite<FileIndexedIO>() );
 }
 

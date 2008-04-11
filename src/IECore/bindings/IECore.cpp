@@ -326,5 +326,4 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
 	def( "withTIFF", &IECore::withTIFF );
 	def( "withJPEG", &IECore::withJPEG );
-	def( "withSQLite", &IECore::withSQLite );
 }

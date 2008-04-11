@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,6 @@
 
 #include "IECore/IndexedIOInterface.h"
 #include "IECore/FileSystemIndexedIO.h"
-#include "IECore/SQLiteIndexedIO.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
@@ -58,7 +57,6 @@ void bindIndexedIORegexFilter(const char *bindName);
 
 void bindIndexedIOInterface(const char *bindName);
 void bindFileSystemIndexedIO(const char *bindName);
-void bindSQLiteIndexedIO(const char *bindName);
 void bindFileIndexedIO(const char *bindName);
 
 void bindIndexedIO()
@@ -73,9 +71,6 @@ void bindIndexedIO()
 	
 	bindIndexedIOInterface("IndexedIOInterface");	
 	bindFileSystemIndexedIO("FileSystemIndexedIO");	
-#ifdef IECORE_WITH_SQLITE
-	bindSQLiteIndexedIO("SQLiteIndexedIO");
-#endif // IECORE_WITH_SQLITE
 	bindFileIndexedIO("FileIndexedIO");	
 }
 
@@ -297,18 +292,6 @@ void bindFileSystemIndexedIO(const char *bindName)
 	
 	implicitly_convertible< FileSystemIndexedIOPtr, IndexedIOInterfacePtr >();
 }
-
-
-#ifdef IECORE_WITH_SQLITE
-void bindSQLiteIndexedIO(const char *bindName)
-{	
-	class_< SQLiteIndexedIO, SQLiteIndexedIOPtr, boost::noncopyable, bases<IndexedIOInterface> >(bindName, no_init)
-		.def(init<const std::string &, const std::string &, IndexedIO::OpenMode >())
-	;
-	
-	implicitly_convertible< SQLiteIndexedIOPtr, IndexedIOInterfacePtr >();
-}
-#endif // IECORE_WITH_SQLITE
 
 void bindFileIndexedIO(const char *bindName)
 {	

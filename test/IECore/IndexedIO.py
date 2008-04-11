@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -53,20 +53,11 @@ class TestIndexedIOInterface(unittest.TestCase):
 		io2 = IndexedIOInterface.create( "test/myFile.fio", "/", IndexedIOOpenMode.Write )		
 		self.assertRaises(RuntimeError, IndexedIOInterface.create, "myFileWith.invalidExtension", "/", IndexedIOOpenMode.Write )
 
-		if withSQLite() :
-		
-			io = IndexedIOInterface.create( "test/myFile.sql", "/", IndexedIOOpenMode.Write )
-
 	def testSupportedExtensions( self ) :
 	
 		e = IndexedIOInterface.supportedExtensions()
 		self.assert_( "fio" in e )
 		self.assert_( "fs" in e )
-				
-		if withSQLite() :
-			self.assert_( "sql" in e )
-		else :
-			self.assert_( not "sql" in e )
 	
 	def testOpenMode( self ) :
 	
@@ -81,9 +72,6 @@ class TestIndexedIOInterface(unittest.TestCase):
 		
 	def tearDown(self):
 		
-		if os.path.isfile("test/myFile.sql"):
-			os.remove("test/myFile.sql")
-			
 		for root, dirs, files in os.walk("test/myFile.fs", topdown=Read):
 			
 				for name in files:				

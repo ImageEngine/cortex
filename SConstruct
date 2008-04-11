@@ -129,25 +129,6 @@ o.Add(
 	"/usr/local/lib",
 )
 
-# SQLite options
-
-o.Add(
-	BoolOption( "WITH_SQLITE", "Set this to build support for SQLiteIndexedIO.", False ),
-)
-
-o.Add(
-	"SQLITE_INCLUDE_PATH",
-	"The path to the SQLITE include directory.",
-	"/usr/local/include/",
-)
-
-o.Add(
-	"SQLITE_LIB_PATH",
-	"The path to the SQLITE lib directory.",
-	"/usr/local/lib",
-)
-
-
 # General path options
 
 o.Add(
@@ -452,15 +433,13 @@ env.Prepend(
 		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
 		"$BOOST_INCLUDE_PATH",
 		"$JPEG_INCLUDE_PATH",
-		"$TIFF_INCLUDE_PATH",
-		"$SQLITE_INCLUDE_PATH",
+		"$TIFF_INCLUDE_PATH"
 	],
 	LIBPATH = [
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
 		"$JPEG_LIB_PATH",
-		"$TIFF_LIB_PATH",
-		"$SQLITE_LIB_PATH",
+		"$TIFF_LIB_PATH"
 	],
 	LIBS = [
 		"pthread",
@@ -719,16 +698,7 @@ if doConfigure :
 		coreSources.remove( "src/IECore/JPEGImageReader.cpp" )
 		corePythonSources.remove( "src/IECore/bindings/JPEGImageReaderBinding.cpp" )
 		corePythonSources.remove( "src/IECore/bindings/JPEGImageWriterBinding.cpp" )
-			
-	if coreEnv["WITH_SQLITE"] and c.CheckLibWithHeader( "sqlite3", "sqlite/sqlite3.h", "CXX" ) :
-		c.env.Append( CPPFLAGS = "-DIECORE_WITH_SQLITE" )
-		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_SQLITE' )
-		coreTestEnv.Append( CPPFLAGS = '-DIECORE_WITH_SQLITE' )
-	else :
-		coreSources.remove( "src/IECore/SQLiteIndexedIO.cpp" )
-		if coreEnv["WITH_SQLITE"] :
-			sys.stderr.write( "WARNING: no SQLITE library found, no SQLITE support, check SQLITE_INCLUDE_PATH and SQLITE_LIB_PATH\n" )
-		
+					
 	c.Finish()
 
 # This is a simple mechanism to ensure that all of the installs get performed only after all of the builds

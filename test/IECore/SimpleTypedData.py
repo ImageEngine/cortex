@@ -310,8 +310,8 @@ class BoolDataTest( unittest.TestCase ) :
 		
 	def tearDown( self ) :
 	
-		if os.path.isfile("test/o.sql"):
-			os.remove("test/o.sql")		
+		if os.path.isfile("test/o.fio"):
+			os.remove("test/o.fio")		
 			
 if __name__ == "__main__":
     unittest.main()   

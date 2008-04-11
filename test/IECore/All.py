@@ -83,7 +83,6 @@ from FormattedParameterHelp import *
 from MotionPrimitive import *
 from Transform import *
 from Group import *
-from VisibleRenderable import *
 from NamespacePollution import *
 from OptionalCompoundParameter import *
 from ObjectInterpolation import *
@@ -148,10 +147,6 @@ if IECore.withTIFF() :
 if IECore.withJPEG() :
 	from JPEGImageReader import *
 	from JPEGImageWriter import *
-
-if IECore.withSQLite() :
-	from SQLiteIndexedIO import *
-	from FileFormatSwitch import *
 
 class SplitStream :
 
