@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( Renderer );
 /// more useful to have an incomplete image for diagnosis of the problem than to
 /// have an Exception thrown.
 /// 
-/// \todo More primitives.
+/// \todo More primitives - especially one for the SpherePrimitive to use.
 /// \todo Document some standard options and attributes expected to be implemented
 /// by all subclasses. Also document the prefix: naming convention for passing
 /// renderer specific options and attributes to subclasses without causing errors
@@ -128,17 +128,14 @@ class Renderer : public RunTimeTyped
 		/// \li <b>"shutter" V2fData</b><br>
 		/// The time interval for which the shutter is open - this is used in conjunction with the
 		/// times passed to motionBegin() to specify motion blur. Defaults to 0,0 if unspecified.
-		///
-		/// \todo The parameters argument should be a const reference.
-		virtual void camera( const std::string &name, CompoundDataMap &parameters ) = 0;
+		virtual void camera( const std::string &name, const CompoundDataMap &parameters ) = 0;
 		
 		/// Specifies an image to be output from the renderer. In the case of file outputs name
 		/// specified the filename. type specifies the type of output to create and data specifies
 		/// the data to be output, for instance "rgba". parameters provides an implementation specific
 		/// set of parameters to control other aspects of the image created. It is only valid to call this
 		/// before worldBegin.
-		/// \todo The parameters argument should be a const reference.
-		virtual void display( const std::string &name, const std::string &type, const std::string &data, CompoundDataMap &parameters ) = 0;
+		virtual void display( const std::string &name, const std::string &type, const std::string &data, const CompoundDataMap &parameters ) = 0;
 
 		//! @name World block
 		/// Once all options, cameras and displays are specified, a world block
@@ -323,8 +320,7 @@ class Renderer : public RunTimeTyped
 		/// Generic call for executing arbitrary renderer commands. This is intended to allow
 		/// derived classes to support calls such as RiMakeTexture via calls of the form
 		/// renderer->command( "ri:makeTexture", ... ).
-		/// \todo It would be nice if this had a return value of DataPtr.
-		virtual void command( const std::string &name, const CompoundDataMap &parameters ) = 0;
+		virtual DataPtr command( const std::string &name, const CompoundDataMap &parameters ) = 0;
 
 };
 

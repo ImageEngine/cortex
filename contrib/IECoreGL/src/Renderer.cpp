@@ -394,7 +394,7 @@ IECore::ConstDataPtr IECoreGL::Renderer::getOption( const std::string &name ) co
 }
 
 
-void IECoreGL::Renderer::camera( const std::string &name, IECore::CompoundDataMap &parameters )
+void IECoreGL::Renderer::camera( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	if( m_data->inWorld )
 	{
@@ -421,7 +421,7 @@ void IECoreGL::Renderer::camera( const std::string &name, IECore::CompoundDataMa
 }
 
 
-void IECoreGL::Renderer::display( const std::string &name, const std::string &type, const std::string &data, IECore::CompoundDataMap &parameters )
+void IECoreGL::Renderer::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
 {
 	// we store displays till worldbegin, as until that point we don't have a renderer implementation to pass
 	// them to
@@ -1523,8 +1523,9 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 // commands
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreGL::Renderer::command( const std::string &name, const IECore::CompoundDataMap &parameters )
+IECore::DataPtr IECoreGL::Renderer::command( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "Renderer::setOption", "Not implemented" );
+	msg( Msg::Warning, "Renderer::command", "Not implemented" );
+	return 0;
 }
 

@@ -305,7 +305,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getResolutionOption( cons
 	return 0;
 }
 
-void IECoreRI::RendererImplementation::camera( const std::string &name, IECore::CompoundDataMap &parameters )
+void IECoreRI::RendererImplementation::camera( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
 	// just store the camera so we can emit it just before RiWorldBegin.
@@ -333,7 +333,7 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, IECore::
 
 /// \todo This should be outputting several calls to display as a series of secondary displays, and also trying to find the best display
 /// to be used as the primary display.
-void IECoreRI::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, IECore::CompoundDataMap &parameters )
+void IECoreRI::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
 	ParameterList pl( parameters );
@@ -1040,7 +1040,7 @@ void IECoreRI::RendererImplementation::procFree( void *data )
 // commands
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreRI::RendererImplementation::command( const std::string &name, const CompoundDataMap &parameters )
+IECore::DataPtr IECoreRI::RendererImplementation::command( const std::string &name, const CompoundDataMap &parameters )
 {
    ScopedContext scopedContext( m_context );
 
@@ -1048,12 +1048,12 @@ void IECoreRI::RendererImplementation::command( const std::string &name, const C
 	if( it==m_commandHandlers.end() )
 	{
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::command", boost::format( "Unknown command \"%s\"" ) % name );
-		return;
+		return 0;
 	}
-	(this->*(it->second))( name, parameters );
+	return (this->*(it->second))( name, parameters );
 }
 
-void IECoreRI::RendererImplementation::readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
+IECore::DataPtr IECoreRI::RendererImplementation::readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
 	
@@ -1066,12 +1066,13 @@ void IECoreRI::RendererImplementation::readArchiveCommand( const std::string &na
 	if( !nameData )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:readArchive command expects a StringData value called \"name\"." );
-		return;
+		return 0;
 	}
 	RiReadArchiveV( (char *)nameData->readable().c_str(), 0, 0, 0, 0 );
+	return 0;
 }
 
-void IECoreRI::RendererImplementation::objectBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
+IECore::DataPtr IECoreRI::RendererImplementation::objectBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
 
@@ -1084,7 +1085,7 @@ void IECoreRI::RendererImplementation::objectBeginCommand( const std::string &na
 	if( !nameData )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:objectBegin command expects a StringData value called \"name\"." );
-		return;
+		return 0;
 	}
 	
 #ifdef IECORERI_WITH_OBJECTBEGINV
@@ -1095,15 +1096,17 @@ void IECoreRI::RendererImplementation::objectBeginCommand( const std::string &na
 	// we have to put up with a rubbish name
 	m_objectHandles[nameData->readable()] = RiObjectBegin();	
 #endif
+	return 0;
 }
 
-void IECoreRI::RendererImplementation::objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
+IECore::DataPtr IECoreRI::RendererImplementation::objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
 	RiObjectEnd();
+	return 0;
 }
 
-void IECoreRI::RendererImplementation::objectInstanceCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
+IECore::DataPtr IECoreRI::RendererImplementation::objectInstanceCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
 
@@ -1116,18 +1119,19 @@ void IECoreRI::RendererImplementation::objectInstanceCommand( const std::string 
 	if( !nameData )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:objectInstance command expects a StringData value called \"name\"." );
-		return;
+		return 0;
 	}
 	ObjectHandleMap::const_iterator hIt = m_objectHandles.find( nameData->readable() );
 	if( hIt==m_objectHandles.end() )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", boost::format( "No object named \"%s\" available for instancing." ) % nameData->readable() );
-		return;
+		return 0;
 	}
 	RiObjectInstance( const_cast<void *>( hIt->second ) );
+	return 0;
 }
 
-void IECoreRI::RendererImplementation::archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
+IECore::DataPtr IECoreRI::RendererImplementation::archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
 
@@ -1147,7 +1151,7 @@ void IECoreRI::RendererImplementation::archiveRecordCommand( const std::string &
 	if( !(typeData && recordData) )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:archiveRecord command expects StringData values called \"type\" and \"record\"." );
-		return;
+		return 0;
 	}
 	
 	// if there are printf style format specifiers in the record then we're in trouble - we're about to pass them through a c interface which
@@ -1161,4 +1165,5 @@ void IECoreRI::RendererImplementation::archiveRecordCommand( const std::string &
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:archiveRecord \"record\" parameter appears to contain printf format specifiers." );
 	}
+	return 0;
 }

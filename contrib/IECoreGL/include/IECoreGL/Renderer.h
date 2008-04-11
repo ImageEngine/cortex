@@ -90,8 +90,8 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"resolution"</b>
 		/// \li <b>"screenWindow"</b>
 		/// \li <b>"clippingPlanes"</b>
-		virtual void camera( const std::string &name, IECore::CompoundDataMap &parameters );
-		virtual void display( const std::string &name, const std::string &type, const std::string &data, IECore::CompoundDataMap &parameters );
+		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters );
 
 		virtual void worldBegin();
 		virtual void worldEnd();
@@ -349,7 +349,7 @@ class Renderer : public IECore::Renderer
 		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
 		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
 
-		virtual void command( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		struct MemberData;
 		

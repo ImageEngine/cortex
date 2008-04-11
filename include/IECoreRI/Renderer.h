@@ -107,8 +107,8 @@ class Renderer : public IECore::Renderer
 		/// All parameters matching this naming convention are passed to an RiHider call.
 		///
 		/// \todo Support moving cameras.
-		virtual void camera( const std::string &name, IECore::CompoundDataMap &parameters );
-		virtual void display( const std::string &name, const std::string &type, const std::string &data, IECore::CompoundDataMap &parameters );
+		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters );
 
 		virtual void worldBegin();
 		virtual void worldEnd();
@@ -229,7 +229,7 @@ class Renderer : public IECore::Renderer
 		///
 		/// \todo Implement instancing support through specific calls we add to the IECore::Renderer
 		/// interface definition.
-		virtual void command( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 		
 	private :
 	

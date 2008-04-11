@@ -61,8 +61,8 @@ class RendererImplementation : public IECore::Renderer
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
 
-		virtual void camera( const std::string &name, IECore::CompoundDataMap &parameters );
-		virtual void display( const std::string &name, const std::string &type, const std::string &data, IECore::CompoundDataMap &parameters );
+		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters );
 
 		virtual void worldBegin();
 		virtual void worldEnd();
@@ -102,7 +102,7 @@ class RendererImplementation : public IECore::Renderer
 
 		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
 		
-		virtual void command( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 	private :
 	
@@ -166,18 +166,18 @@ class RendererImplementation : public IECore::Renderer
 		static void procSubdivide( void *data, float detail );
 		static void procFree( void *data );
 		
-		typedef void( RendererImplementation::*CommandHandler)( const std::string &name, const IECore::CompoundDataMap &parameters );
+		typedef IECore::DataPtr ( RendererImplementation::*CommandHandler)( const std::string &name, const IECore::CompoundDataMap &parameters );
 		typedef std::map<std::string, CommandHandler> CommandHandlerMap;
 		CommandHandlerMap m_commandHandlers;
 		
-		void readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
+		IECore::DataPtr  readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		
 		typedef std::map<std::string, const void *> ObjectHandleMap;
 		ObjectHandleMap m_objectHandles;
-		void objectBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
-		void objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
-		void objectInstanceCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
-		void archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
+		IECore::DataPtr objectBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
+		IECore::DataPtr objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
+		IECore::DataPtr objectInstanceCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
+		IECore::DataPtr archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		static std::vector<int> g_nLoops;
 };
