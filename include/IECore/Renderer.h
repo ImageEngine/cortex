@@ -40,6 +40,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/CompoundData.h"
 #include "IECore/Parameterised.h"
+#include "IECore/CubicBasis.h"
 
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathBox.h"
@@ -260,8 +261,7 @@ class Renderer : public RunTimeTyped
 		/// Renders a set of points.
 		virtual void points( size_t numPoints, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders a set of curves.
-		/// \todo This should take a CubicBasis object instead of a string.
-		virtual void curves( const std::string &interpolation, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) = 0;
+		virtual void curves( const CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) = 0;
 		/// Returns the extents of the given string (under the current font, text-layout characteristics).
 		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max()) = 0;
 		/// Renders some text.

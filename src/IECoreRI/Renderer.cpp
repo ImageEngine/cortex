@@ -166,9 +166,9 @@ void Renderer::points( size_t numPoints, const IECore::PrimitiveVariableMap &pri
 	m_implementation->points( numPoints, primVars );
 }
 
-void Renderer::curves( const std::string &interpolation, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
-	m_implementation->curves( interpolation, periodic, numVertices, primVars );
+	m_implementation->curves( basis, periodic, numVertices, primVars );
 }
 
 Imath::Box3f Renderer::textExtents( const std::string &t, float width )

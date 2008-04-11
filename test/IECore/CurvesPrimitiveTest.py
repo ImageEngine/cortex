@@ -103,6 +103,41 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		cc = Reader.create( "test/IECore/data/curves.cob" ).read()
 		
 		self.assertEqual( cc, c )
+	
+	def testVariableSize( self ) :
+	
+		c = CurvesPrimitive( IntVectorData( [ 4 ] ), CubicBasisf.bSpline(), True )
+
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Vertex ), 4 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Varying ), 4 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 4 )
+		
+		# asking for the constant size of a single curve makes no sense
+		self.assertRaises( Exception, c.variableSize, PrimitiveVariable.Interpolation.Constant, 0 )
+		# as does asking for the size of a nonexistent curve
+		self.assertRaises( Exception, c.variableSize, PrimitiveVariable.Interpolation.Vertex, 1 )
+		
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Uniform, 0 ), 1 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Vertex, 0 ), 4 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Varying, 0 ), 4 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.FaceVarying, 0 ), 4 )
+		self.assertEqual( c.numSegments( 0 ), 4 )
+	
+		c = CurvesPrimitive( IntVectorData( [ 4 ] ), CubicBasisf.bSpline(), False )
+
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Vertex ), 4 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Varying ), 2 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 2 )
+		
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Uniform, 0 ), 1 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Vertex, 0 ), 4 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Varying, 0 ), 2 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.FaceVarying, 0 ), 2 )
+		self.assertEqual( c.numSegments( 0 ), 1 )
 		
 	def tearDown( self ) :
 	

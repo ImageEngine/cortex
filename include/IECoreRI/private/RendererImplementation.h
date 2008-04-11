@@ -88,7 +88,7 @@ class RendererImplementation : public IECore::Renderer
 
 		virtual void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars );
 		
-		virtual void curves( const std::string &interpolation, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
+		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max() );
 		virtual void text(const std::string &t, const float width = Imath::limits<float>::max() );

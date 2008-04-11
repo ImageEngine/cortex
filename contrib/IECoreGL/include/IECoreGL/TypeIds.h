@@ -89,6 +89,10 @@ enum TypeId
 	ToGLCameraConverterTypeId = 105046,
 	DoubleSidedStateComponentTypeId = 105047,
 	RightHandedOrientationStateComponentTypeId = 105048,
+	CurvesPrimitiveTypeId = 105049,
+	CurvesPrimitiveGLLineWidthTypeId = 105050,
+	CurvesPrimitiveUseGLLinesTypeId = 105051,
+	CurvesPrimitiveIgnoreBasisTypeId = 105052,
 	/// If we ever get here we should start over again
 	LastCoreGLTypeId = 105999,	
 };	

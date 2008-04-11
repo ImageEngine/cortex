@@ -54,6 +54,7 @@
 #include "IECoreGL/OrthographicCamera.h"
 #include "IECoreGL/NameStateComponent.h"
 #include "IECoreGL/ToGLCameraConverter.h"
+#include "IECoreGL/CurvesPrimitive.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -946,6 +947,9 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["name"] = nameSetter;
 		(*a)["doubleSided"] = typedAttributeSetter<DoubleSidedStateComponent>;
 		(*a)["rightHandedOrientation"] = typedAttributeSetter<RightHandedOrientationStateComponent>;
+		(*a)["gl:curvesPrimitive:useGLLines"] = typedAttributeSetter<CurvesPrimitive::UseGLLines>;
+		(*a)["gl:curvesPrimitive:glLineWidth"] = typedAttributeSetter<CurvesPrimitive::GLLineWidth>;
+		(*a)["gl:curvesPrimitive:ignoreBasis"] = typedAttributeSetter<CurvesPrimitive::IgnoreBasis>;
 	}
 	return a;
 }
@@ -981,6 +985,9 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["name"] = nameGetter;
 		(*a)["doubleSided"] = typedAttributeGetter<DoubleSidedStateComponent>;
 		(*a)["rightHandedOrientation"] = typedAttributeGetter<RightHandedOrientationStateComponent>;
+		(*a)["gl:curvesPrimitive:useGLLines"] = typedAttributeGetter<CurvesPrimitive::UseGLLines>;
+		(*a)["gl:curvesPrimitive:glLineWidth"] = typedAttributeGetter<CurvesPrimitive::GLLineWidth>;
+		(*a)["gl:curvesPrimitive:ignoreBasis"] = typedAttributeGetter<CurvesPrimitive::IgnoreBasis>;
 	}
 	return a;
 }
@@ -1350,9 +1357,29 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 	addPrimitive( prim, primVars, m_data );
 }
 
-void IECoreGL::Renderer::curves( const std::string &interpolation, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "Renderer::curves", "Not implemented" );
+	ConstV3fVectorDataPtr points = findPrimVar<V3fVectorData>( "P", PrimitiveVariable::Vertex, primVars );
+	if( !points )
+	{
+		msg( Msg::Warning, "Renderer::mesh", "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
+		return;
+	}
+
+	ConstFloatDataPtr widthData = findPrimVar<FloatData>( "width", PrimitiveVariable::Constant, primVars );
+	if( !widthData  )
+	{
+		widthData = findPrimVar<FloatData>( "constantwidth", PrimitiveVariable::Constant, primVars );
+	}
+	
+	float width = 1;
+	if( widthData )
+	{
+		width = widthData->readable();
+	}
+	
+	CurvesPrimitivePtr prim = new CurvesPrimitive( basis, periodic, numVertices, points, width );
+	addPrimitive( prim, primVars, m_data );
 }
 
 Imath::Box3f IECoreGL::Renderer::textExtents(const std::string & t, const float width )

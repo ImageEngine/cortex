@@ -200,11 +200,11 @@ static void points( Renderer &r, size_t numPoints, const dict &primVars )
 	r.points( numPoints, p );
 }
 
-static void curves( Renderer &r, const std::string &interpolation, bool periodic, ConstIntVectorDataPtr numVertices, const dict &primVars )
+static void curves( Renderer &r, const CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const dict &primVars )
 {
 	PrimitiveVariableMap p;
 	fillPrimitiveVariableMap( p, primVars );
-	r.curves( interpolation, periodic, numVertices, p );
+	r.curves( basis, periodic, numVertices, p );
 }
 
 static void image( Renderer &r, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const dict &primVars )

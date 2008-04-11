@@ -32,62 +32,71 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CURVESPRIMITIVE_H
-#define IECORE_CURVESPRIMITIVE_H
+#ifndef IECOREGL_CURVESPRIMITIVE_H
+#define IECOREGL_CURVESPRIMITIVE_H
 
-#include "IECore/Primitive.h"
+#include "IECoreGL/Primitive.h"
+#include "IECoreGL/TypedStateComponent.h"
+
 #include "IECore/VectorTypedData.h"
 #include "IECore/CubicBasis.h"
 
-namespace IECore
+namespace IECoreGL
 {
 
 class CurvesPrimitive : public Primitive
 {
 	public :
-	
-		CurvesPrimitive();
-		/// Copies of vertsPerCurve and p are taken.
-		CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const CubicBasisf &basis=CubicBasisf::linear(), bool periodic = false, ConstV3fVectorDataPtr p = 0 );
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurvesPrimitive, CurvesPrimitiveTypeId, Primitive );
+
+		CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve,
+			IECore::ConstV3fVectorDataPtr points, float width=1.0f );
 		virtual ~CurvesPrimitive();
-				
-		IE_CORE_DECLAREOBJECT( CurvesPrimitive, Primitive );
+
+		virtual Imath::Box3f bound() const;
+		virtual size_t vertexAttributeSize() const;
 		
-		ConstIntVectorDataPtr verticesPerCurve() const;
-		const CubicBasisf &basis() const;
-		bool periodic() const;
-		
-		virtual void render( RendererPtr renderer );
-		/// Follows the RenderMan specification for variable sizes.
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
-		/// Returns the variable size for a single curve.
-		size_t variableSize( PrimitiveVariable::Interpolation interpolation, unsigned curveIndex );
-		
-		/// Returns the number of segments in a given curve.
-		unsigned numSegments( unsigned curveIndex );
-		/// Returns the number of segments of a curve with the given topology.
-		static unsigned numSegments( const CubicBasisf &basis, bool periodic, unsigned numVerts );
+		//! @name StateComponents
+		/// The following StateComponent classes have an effect only on
+		/// CurvesPrimitive objects.
+		//////////////////////////////////////////////////////////////////////////////
+		//@{
+		///
+		/// Specifies that all curves should be rendered as linear regardless of their
+		/// basis matrix.
+		typedef TypedStateComponent<bool, CurvesPrimitiveIgnoreBasisTypeId> IgnoreBasis;
+		IE_CORE_DECLAREPTR( IgnoreBasis );
+		/// Specifies whether or not GL_LINE primitives should be used instead of
+		/// polygons to represent curves.
+		typedef TypedStateComponent<bool, CurvesPrimitiveUseGLLinesTypeId> UseGLLines;
+		IE_CORE_DECLAREPTR( UseGLLines );
+		/// Specifies the line width (in pixels) used whenever CurvesPrimitive objects
+		/// are rendered using the GL_LINE primitives.
+		typedef TypedStateComponent<float, CurvesPrimitiveGLLineWidthTypeId> GLLineWidth;
+		IE_CORE_DECLAREPTR( GLLineWidth );
+		//@}
 		
 	protected :
 		
-		/// Throws an exception if numVerts is an inappropriate number for the current basis.
-		static unsigned int numSegments( bool linear, int step, bool periodic, int numVerts );
-		
-		CubicBasisf m_basis;
-		bool m_linear;
-		bool m_periodic;
-		IntVectorDataPtr m_vertsPerCurve;
-		unsigned m_numVerts;
-		unsigned m_numFaceVarying;
+		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
 		
 	private :
 	
-		static const unsigned int m_ioVersion;
-		
+		void renderLines( ConstStatePtr state, IECore::TypeId style ) const;
+		void renderRibbons( ConstStatePtr state, IECore::TypeId style ) const;
+
+		Imath::Box3f m_bound;
+		IECore::CubicBasisf m_basis;
+		bool m_periodic;
+		IECore::IntVectorDataPtr m_vertsPerCurve;
+		IECore::V3fVectorDataPtr m_points;
+		float m_width;
+
 };
 
 IE_CORE_DECLAREPTR( CurvesPrimitive );
 
-} // namespace IECore
+} // namespace IECoreGL
 
-#endif // IECORE_CURVESPRIMITIVE_H
+#endif // IECOREGL_CURVESPRIMITIVE_H

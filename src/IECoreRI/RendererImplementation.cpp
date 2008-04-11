@@ -909,19 +909,15 @@ void IECoreRI::RendererImplementation::points( size_t numPoints, const IECore::P
 	RiPointsV( numPoints, pv.n(), pv.tokens(), pv.values() );
 }
 
-void IECoreRI::RendererImplementation::curves( const std::string &interpolation, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+/// \todo Do something with basis!!!!!!!!!!!!!!!!!
+void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
-	if( interpolation!="linear" && interpolation!="cubic" )
-	{
-		msg( Msg::Warning, "IECoreRI::RendererImplementation::curves", "Unknown interpolation type \"%s\" - should be either \"cubic\" or \"linear\"." );	
-		return;
-	}
 	
 	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
 	vector<int> &numVerticesV = const_cast<vector<int> &>( numVertices->readable() );
 	
-	RiCurvesV(	(char *)interpolation.c_str(),
+	RiCurvesV(	(char *)( basis==CubicBasisf::linear() ? "linear" : "cubic" ),
 				numVerticesV.size(), &*( numVerticesV.begin() ),
 				(char *)( periodic ? "periodic" : "nonperiodic" ),
 				pv.n(), pv.tokens(), pv.values() );

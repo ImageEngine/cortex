@@ -210,6 +210,20 @@ class Renderer : public IECore::Renderer
 		/// The size of the points (in pixels) used when rendering lightweight
 		/// points.
 		///
+		/// \par Implementation specific curves primitive attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"gl:curvesPrimitive:useGLLines" BoolData false</b><br>
+		/// When this is true then lightweight OpenGL line primitives are used
+		/// for representing curves.
+		///
+		/// \li <b>"gl:curvesPrimitive:glLineWidth" FloatData 1.0f</b><br>
+		/// Specifies the line width (in pixels) which is used when
+		/// rendering lightweight line primitives.
+		///
+		/// \li <b>"gl:pointsPrimitive:ignoreBasis" BoolData false</b><br>
+		/// When this is true, all curves are rendered as if they were linear.
+		///
 		/// \par Implementation specific blending attributes :
 		////////////////////////////////////////////////////////////
 		///
@@ -295,7 +309,11 @@ class Renderer : public IECore::Renderer
 		/// Constant|Vertex|Varying FloatData|FloatVectorData "patchrotation"
 		/// These two are used only by the "patch" type.
 		virtual void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars );
-		virtual void curves( const std::string &interpolation, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
+		/// Supports the following primitive variables :
+		///
+		/// Vertex V3fVectorData "P"
+		/// Constant FloatData "width"
+		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
 		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max() );
 		virtual void text(const std::string &t, const float width = Imath::limits<float>::max() );
 		/// Supports the following image formats specified as primitive variables :

@@ -57,18 +57,18 @@ CurvesPrimitive::CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const Cub
 	m_linear = m_basis==CubicBasisf::linear();
 
 	const std::vector<int> &v = m_vertsPerCurve->readable();
-	for( std::vector<int>::const_iterator it=v.begin(); it!=v.end(); it++ )
+	for( size_t i=0; i<v.size(); i++ )
 	{
 		if( m_periodic )
 		{
-			m_numFaceVarying += numSegments( *it );
+			m_numFaceVarying += numSegments( i );
 		}
 		else
 		{
-			m_numFaceVarying += numSegments( *it ) + 1;
+			m_numFaceVarying += numSegments( i ) + 1;
 		}
 		
-		m_numVerts += *it;
+		m_numVerts += v[i];
 	}
 	
 	if( p )
@@ -174,27 +174,7 @@ bool CurvesPrimitive::periodic() const
 		
 void CurvesPrimitive::render( RendererPtr renderer )
 {
-	std::string interpolation = "unknown";
-	if( m_linear )
-	{
-		interpolation = "linear";
-	}
-	else
-	{
-		if( m_basis==CubicBasisf::bezier() )
-		{
-			interpolation = "bezier";
-		}
-		else if( m_basis==CubicBasisf::bSpline() )
-		{
-			interpolation = "bSpline";
-		}
-		else if( m_basis==CubicBasisf::catmullRom() )
-		{
-			interpolation = "catmullRom";
-		}
-	}
-	renderer->curves( interpolation, m_periodic, m_vertsPerCurve, variables );
+	renderer->curves( m_basis, m_periodic, m_vertsPerCurve, variables );
 }
 
 size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
@@ -215,11 +195,55 @@ size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 	}
 }
 
-unsigned int CurvesPrimitive::numSegments( int numVerts )
+size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation, unsigned curveIndex )
 {
-	if( m_linear )
+	if( curveIndex < 0 || curveIndex >= m_vertsPerCurve->readable().size() )
 	{
-		if( m_periodic )
+		throw Exception( "Curve index out of range." );
+	}
+	
+	switch( interpolation )
+	{
+		case PrimitiveVariable::Constant :
+			throw Exception( "Constant variables are not specified on a per curve basis." );
+		case PrimitiveVariable::Uniform :
+			return 1;
+		case PrimitiveVariable::Varying :
+		case PrimitiveVariable::FaceVarying :
+			if( m_periodic ) 
+			{
+				return numSegments( curveIndex );
+			}
+			else
+			{
+				return 1 + numSegments( curveIndex );
+			}
+		case PrimitiveVariable::Vertex :
+			return m_vertsPerCurve->readable()[curveIndex];
+		default :
+			throw Exception( "Invalid interpolation type." );
+	}
+}
+
+unsigned CurvesPrimitive::numSegments( unsigned curveIndex )
+{
+	if( curveIndex < 0 || curveIndex >= m_vertsPerCurve->readable().size() )
+	{
+		throw Exception( "Curve index out of range." );
+	}
+	return numSegments( m_linear, m_basis.step, m_periodic, m_vertsPerCurve->readable()[curveIndex] );
+}
+
+unsigned CurvesPrimitive::numSegments( const CubicBasisf &basis, bool periodic, unsigned numVerts )
+{
+	return numSegments( basis==CubicBasisf::linear(), basis.step, periodic, numVerts );
+}
+
+unsigned int CurvesPrimitive::numSegments( bool linear, int step, bool periodic, int numVerts )
+{
+	if( linear )
+	{
+		if( periodic )
 		{
 			if( numVerts < 3 )
 			{
@@ -238,17 +262,17 @@ unsigned int CurvesPrimitive::numSegments( int numVerts )
 	}
 	else
 	{
-		if( m_periodic )
+		if( periodic )
 		{
 			if( numVerts < 3 )
 			{
 				throw Exception( "Cubic periodic curve with less than 3 vertices." );
 			}
-			if( (numVerts - 1) % m_basis.step )
+			if( (numVerts - 1) % step )
 			{
 				throw Exception( "Cubic curve with extra vertices." );
 			}
-			return numVerts / m_basis.step;
+			return numVerts / step;
 		}
 		else
 		{
@@ -256,11 +280,11 @@ unsigned int CurvesPrimitive::numSegments( int numVerts )
 			{
 				throw Exception( "Cubic nonperiodic curve with less than 4 vertices." );
 			}
-			if( (numVerts - 4) % m_basis.step )
+			if( (numVerts - 4) % step )
 			{
 				throw Exception( "Cubic curve with extra vertices." );
 			}
-			return (numVerts - 4 )/ m_basis.step + 1;	
+			return (numVerts - 4 )/ step + 1;	
 		}
 	}
 }
