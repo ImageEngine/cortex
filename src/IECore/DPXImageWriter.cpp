@@ -138,7 +138,7 @@ struct DPXImageWriter::ChannelConverter
 	};
 };
 
-void DPXImageWriter::writeImage( vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow )
+void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
 {
 	// write the dpx in the standard 10bit log format
 	ofstream out;

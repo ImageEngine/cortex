@@ -62,8 +62,9 @@ class DPXImageWriter : public ImageWriter
 		static const WriterDescription<DPXImageWriter> m_writerDescription;
 		
 		/// write the associated image
-		virtual void writeImage( std::vector<std::string> &names, ConstImagePrimitivePtr image,
-		                        const Imath::Box2i &dataWindow );
+		virtual void writeImage( const std::vector<std::string> &names, 
+		                         ConstImagePrimitivePtr image,
+		                         const Imath::Box2i &dataWindow ) const;
 					
 		struct ChannelConverter;			
 		

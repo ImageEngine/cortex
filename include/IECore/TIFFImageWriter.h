@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,7 @@ namespace IECore
 {
 
 /// The TIFFImageWriter class serializes images to the Tagged Image File Format (TIFF) format
+/// \todo Document which tags we write
 class TIFFImageWriter : public ImageWriter
 {
 
@@ -66,15 +67,16 @@ class TIFFImageWriter : public ImageWriter
 
 		static const WriterDescription<TIFFImageWriter> m_writerDescription;
 
-		virtual void writeImage( std::vector<std::string> &names, ConstImagePrimitivePtr image,
-		                         const Imath::Box2i &dataWindow);
+		virtual void writeImage( const std::vector<std::string> &names,
+		                         ConstImagePrimitivePtr image,
+		                         const Imath::Box2i &dataWindow	) const;
 					 
 		template<typename ChannelData>
 		struct ChannelConverter;			 
 
 		template<typename T>
 		void encodeChannels( ConstImagePrimitivePtr image, const std::vector<std::string> &names,
-		                     const Imath::Box2i &dw, tiff *tiffImage, size_t bufSize, unsigned int numStrips );
+		                     const Imath::Box2i &dw, tiff *tiffImage, size_t bufSize, unsigned int numStrips ) const;
 
 		IntParameterPtr m_compressionParameter;
 		IntParameterPtr m_bitDepthParameter;
@@ -82,7 +84,7 @@ class TIFFImageWriter : public ImageWriter
 		void constructParameters();
 };
 
-IE_CORE_DECLAREPTR(TIFFImageWriter);
+IE_CORE_DECLAREPTR( TIFFImageWriter );
 
 } // namespace IECore
 

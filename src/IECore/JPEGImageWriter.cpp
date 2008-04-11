@@ -179,7 +179,7 @@ struct JPEGImageWriter::ChannelConverter
 	};
 };
 
-void JPEGImageWriter::writeImage( vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow )
+void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
 {
 	vector<string>::const_iterator rIt = std::find( names.begin(), names.end(), "R" );
 	vector<string>::const_iterator gIt = std::find( names.begin(), names.end(), "G" );	

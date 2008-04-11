@@ -61,20 +61,21 @@ class EXRImageWriter : public ImageWriter
 		EXRImageWriter();
 
 		/// construct an EXRImageWriter for the given image and output filename
-		EXRImageWriter(ObjectPtr object, const std::string & fileName);
+		EXRImageWriter( ObjectPtr object, const std::string & fileName );
 
 	private:
 
 		static const WriterDescription<EXRImageWriter> m_writerDescription;
 
-		virtual void writeImage(std::vector<std::string> &names, ConstImagePrimitivePtr image,
-		                        const Imath::Box2i &dw);
+		virtual void writeImage(const std::vector<std::string> &names, 
+		                        ConstImagePrimitivePtr image,
+		                        const Imath::Box2i &dw) const;
 
 		template<typename T>
 		void writeTypedChannel(const char *name, ConstImagePrimitivePtr image,
 		                       const Imath::Box2i &dw, const std::vector<T> &channel,
 		                       const Imf::PixelType TYPE, Imf::Header &header,
-		                       Imf::FrameBuffer &fb);
+		                       Imf::FrameBuffer &fb) const;
 
 };
 

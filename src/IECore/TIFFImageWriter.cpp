@@ -167,7 +167,7 @@ struct TIFFImageWriter::ChannelConverter
 };
 
 template<typename T>
-void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector<string> &names, const Imath::Box2i &dataWindow, tiff *tiffImage, size_t bufSize, unsigned int numStrips )
+void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector<string> &names, const Imath::Box2i &dataWindow, tiff *tiffImage, size_t bufSize, unsigned int numStrips ) const
 {
 	assert( tiffImage );
 
@@ -231,7 +231,7 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 	}
 }
 
-void TIFFImageWriter::writeImage( vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow )
+void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
 {
 	ScopedTIFFExceptionTranslator errorHandler;
 

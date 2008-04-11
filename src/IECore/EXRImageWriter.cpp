@@ -69,8 +69,7 @@ EXRImageWriter::EXRImageWriter(ObjectPtr image, const string &fileName)
 	m_fileNameParameter->setTypedValue( fileName );
 }
 
-// \todo "names" should be const
-void EXRImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow)
+void EXRImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow) const
 {
 	assert( image );
 
@@ -154,7 +153,7 @@ void EXRImageWriter::writeImage(vector<string> &names, ConstImagePrimitivePtr im
 
 template<typename T>
 void EXRImageWriter::writeTypedChannel(const char *name, ConstImagePrimitivePtr image, const Box2i &dataWindow,
-                                       const vector<T> &channel, const Imf::PixelType pixelType, Header &header, FrameBuffer &fb)
+                                       const vector<T> &channel, const Imf::PixelType pixelType, Header &header, FrameBuffer &fb) const
 {
 	assert( name );
 
