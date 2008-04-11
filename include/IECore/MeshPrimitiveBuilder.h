@@ -47,6 +47,8 @@ namespace IECore
 /// using this as a model. One possible client of this class is IECore::MarchingCubes.
 /// \todo This is too specific to MarchingCubes. Some algorithms want to make faces other than triangles, and
 /// some algorithms don't want to supply normals.
+/// \todo Why is this templated if the member data is all V3fVectorData? And we don't support meshes with V3dVectorData
+/// in the Renderer classes?
 template<typename T>
 class MeshPrimitiveBuilder : public RefCounted
 {
