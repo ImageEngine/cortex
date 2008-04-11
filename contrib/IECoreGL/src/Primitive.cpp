@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/UniformFunctions.h"
 
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/DespatchTypedData.h"
 #include "IECore/VectorTypedData.h"
 
 #include "boost/format.hpp"
@@ -193,7 +193,7 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	size_t s = 0;
 	try
 	{
-		s = IECore::despatchVectorTypedDataFn<size_t, IECore::VectorTypedDataSize, IECore::VectorTypedDataSizeArgs>( const_pointer_cast<IECore::Data>( data ), IECore::VectorTypedDataSizeArgs() );
+		s = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsVectorTypedData >( boost::const_pointer_cast<IECore::Data>( data ) );
 	}
 	catch( const std::exception &e )
 	{
@@ -209,20 +209,23 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	m_vertexAttributes[name] = data->copy();
 }
 
-struct SetVertexAttributeArgs
-{
-	GLint vertexArrayIndex;
-};
-
-template<typename T>
 struct SetVertexAttribute
 {
-	const void operator() ( typename T::Ptr data, const SetVertexAttributeArgs &args )
+	typedef const void ReturnType;
+	
+	GLint m_vertexArrayIndex;
+	
+	SetVertexAttribute( GLint vertexArrayIndex ) : m_vertexArrayIndex( vertexArrayIndex )
+	{
+	}
+
+	template<typename T>
+	ReturnType operator() ( typename T::Ptr data )
 	{
 		GLenum type = NumericTraits<typename T::BaseType>::glType();
 		int elementSize = data->baseSize() / data->readable().size();
-		glEnableVertexAttribArray( args.vertexArrayIndex );
-		glVertexAttribPointer( args.vertexArrayIndex, elementSize, type, false, 0, data->baseReadable() );
+		glEnableVertexAttribArray( m_vertexArrayIndex );
+		glVertexAttribPointer( m_vertexArrayIndex, elementSize, type, false, 0, data->baseReadable() );
 	};
 };
 
@@ -254,9 +257,9 @@ void Primitive::setVertexAttributes( ConstStatePtr state ) const
 			VertexAttributeMap::const_iterator it = m_vertexAttributes.find( &name[0] );
 			if( it!=m_vertexAttributes.end() )
 			{
-				SetVertexAttributeArgs a;
-				a.vertexArrayIndex = glGetAttribLocation( shader->m_program, &name[0] );
-				IECore::despatchVectorTypedDataFn<void, SetVertexAttribute>( const_pointer_cast<IECore::Data>( it->second ), a );
+				SetVertexAttribute a( glGetAttribLocation( shader->m_program, &name[0] ) ) ;
+								
+				IECore::despatchTypedData< SetVertexAttribute, IECore::TypeTraits::IsVectorTypedData >( boost::const_pointer_cast<IECore::Data>( it->second ), a );
 			}
 		}
 	}

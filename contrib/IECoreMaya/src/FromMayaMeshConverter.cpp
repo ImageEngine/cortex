@@ -43,7 +43,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/MessageHandler.h"
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/DespatchTypedData.h"
 #include "IECore/ClassData.h"
 
 #include "maya/MFn.h"
@@ -355,7 +355,7 @@ void FromMayaMeshConverter::addPrimVars( IECore::PrimitivePtr primitive, const M
 				size_t s = 1;
 				try
 				{
-					s = despatchVectorTypedDataFn<size_t, VectorTypedDataSize, VectorTypedDataSizeArgs>( data, VectorTypedDataSizeArgs() );
+					s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData>( data );
 				}
 				catch( ... )
 				{

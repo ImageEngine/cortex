@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 #include "IECoreRI/ParameterList.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/TypedDataDespatch.h"
+#include "IECore/DespatchTypedData.h"
 
 #include "boost/format.hpp"
 
@@ -145,21 +145,24 @@ const void *ParameterList::value( IECore::ConstDataPtr d )
 		return &*(m_ints.rbegin());
 	}
 	
+	/// \todo There are cleaner ways of doing this with despatchTypedData
 	try
 	{
-		return despatchSimpleTypedDataFn<const void *, SimpleTypedDataAddress, SimpleTypedDataAddressArgs>( const_pointer_cast<Data>( d ), SimpleTypedDataAddressArgs() );
+		return despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( boost::const_pointer_cast<Data>( d ) );
 	}
 	catch( ... )
 	{
 	}
 	
+
 	try
 	{
-		return despatchVectorTypedDataFn<const void *, VectorTypedDataAddress, VectorTypedDataAddressArgs>( const_pointer_cast<Data>( d ), VectorTypedDataAddressArgs() );
+		return despatchTypedData< TypedDataAddress, TypeTraits::IsVectorTypedData >( boost::const_pointer_cast<Data>( d ) );
 	}
 	catch( ... )
 	{
 	}
+	
 	return 0;
 }
 
