@@ -60,12 +60,6 @@ void bindImagePrimitive()
 	ImagePrimitivePyClass("ImagePrimitive")
 		.def( init<Imath::Box2i, Imath::Box2i>() )
 
-		.add_property( "x", &ImagePrimitive::x )
-		.add_property( "y", &ImagePrimitive::y )
-		.add_property( "width", &ImagePrimitive::width )
-		.add_property( "height", &ImagePrimitive::height )
-		.add_property( "area", &ImagePrimitive::area )
-
 		.add_property("dataWindow", make_function( &ImagePrimitive::getDataWindow,
 	                	return_value_policy<copy_const_reference>() ), &ImagePrimitive::setDataWindow )
 

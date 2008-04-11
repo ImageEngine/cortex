@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "boost/static_assert.hpp"
 
 #include "IECore/ImagePrimitive.h"
@@ -52,7 +54,7 @@ ImagePrimitive::ImagePrimitive()
 {
 }
 
-ImagePrimitive::ImagePrimitive( Box2i dataWindow, Box2i displayWindow )
+ImagePrimitive::ImagePrimitive( const Box2i &dataWindow, const Box2i &displayWindow )
 {
 	setDataWindow( dataWindow );
 	setDisplayWindow( displayWindow );
@@ -101,31 +103,6 @@ void ImagePrimitive::setDisplayWindow( const Box2i &displayWindow )
 	m_displayWindow = displayWindow;
 }
 
-const int ImagePrimitive::width() const
-{
-	return 1 + m_dataWindow.max.x - m_dataWindow.min.x;
-}
-
-const int ImagePrimitive::height() const
-{
-	return 1 + m_dataWindow.max.y - m_dataWindow.min.y;
-}
-
-const int ImagePrimitive::area() const
-{
-	return width() * height();
-}
-
-const int ImagePrimitive::x() const
-{
-	return m_dataWindow.min.x;
-}
-
-const int ImagePrimitive::y() const
-{
-	return m_dataWindow.min.y;
-}
-
 void ImagePrimitive::channelNames( vector<string> &names ) const
 {
 	// copy in the names of channels from the map
@@ -138,7 +115,7 @@ void ImagePrimitive::channelNames( vector<string> &names ) const
 		TypedDataSize func;
 		size_t size = despatchTypedData< TypedDataSize >( primVar.data, func );
 		
-		if ( size == ( const_cast<ImagePrimitive *>(this) )->variableSize( primVar.interpolation ) )
+		if ( size == variableSize( primVar.interpolation ) )
 		{		
 			names.push_back( i->first );
 		}
@@ -154,7 +131,7 @@ size_t ImagePrimitive::variableSize( PrimitiveVariable::Interpolation interpolat
 	case PrimitiveVariable::Vertex:
 	case PrimitiveVariable::Varying:
 	case PrimitiveVariable::FaceVarying:
-		return area();
+		return ( 1 + m_dataWindow.max.x - m_dataWindow.min.x ) * ( 1 + m_dataWindow.max.y - m_dataWindow.min.y );
 
 	default:
 		return 1;
@@ -164,6 +141,8 @@ size_t ImagePrimitive::variableSize( PrimitiveVariable::Interpolation interpolat
 
 void ImagePrimitive::render(RendererPtr renderer)
 {
+	assert( renderer );
+	
 	renderer->image(m_dataWindow, m_displayWindow, variables);
 }
 
@@ -172,6 +151,9 @@ void ImagePrimitive::render(RendererPtr renderer)
 //
 void ImagePrimitive::copyFrom(ConstObjectPtr rhs, IECore::Object::CopyContext *context )
 {
+	assert( rhs );
+	assert( context );
+
 	Primitive::copyFrom(rhs, context);
 	const ImagePrimitive *p_rhs = static_cast<const ImagePrimitive *>(rhs.get());
 
@@ -181,6 +163,8 @@ void ImagePrimitive::copyFrom(ConstObjectPtr rhs, IECore::Object::CopyContext *c
 
 void ImagePrimitive::save(IECore::Object::SaveContext *context) const
 {
+	assert( context );
+
 	Primitive::save(context);
 	IndexedIOInterfacePtr container = context->container(staticTypeName(), m_ioVersion);
 
@@ -197,6 +181,8 @@ void ImagePrimitive::save(IECore::Object::SaveContext *context) const
 
 void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
 {
+	assert( context );
+
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
 
@@ -222,6 +208,8 @@ void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
 
 bool ImagePrimitive::isEqualTo(ConstObjectPtr rhs) const
 {
+	assert( rhs );
+
 	if (!Primitive::isEqualTo(rhs))
 	{
 		return false;

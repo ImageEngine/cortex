@@ -41,13 +41,15 @@ namespace IECore
 {
 	
 template<class T>
-boost::intrusive_ptr<TypedData<std::vector<T> > > ImagePrimitive::createChannel( std::string name )
+typename TypedData<std::vector<T> >::Ptr ImagePrimitive::createChannel( const std::string &name )
 {	
 	// create a new Variable
 	PrimitiveVariable::Interpolation i = PrimitiveVariable::Vertex;
-	boost::intrusive_ptr<TypedData<std::vector<T> > > channel = new TypedData<std::vector<T> >;
+	typename TypedData<std::vector<T> >::Ptr channel = new TypedData<std::vector<T> >;
+	
+	int area = ( 1 + m_dataWindow.max.x - m_dataWindow.min.x ) * ( 1 + m_dataWindow.max.y - m_dataWindow.min.y );
 
-	channel->writable().resize(area());
+	channel->writable().resize( area );
 	
 	variables.insert(PrimitiveVariableMap::value_type(name, PrimitiveVariable(i, channel)));
 	

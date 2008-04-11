@@ -86,17 +86,15 @@ class ImagePrimitive : public Primitive
 
 		IE_CORE_DECLAREOBJECT( ImagePrimitive, Primitive );
 
-
 		/// construct an ImagePrimitive with no area consumed		
 		/// \deprecated There is no default display window which makes sense for an image primitive. We only need this so that we can
-		/// created an object during file reading
+		/// created an object during file reading, or for the default values of ImagePrimitiveParameters
 		/// \todo Try and make this constructor protected so that only the Object loading can call it.
-
 		ImagePrimitive();
 
-		/// construct an ImagePrimitive with the given data and display window dimensions
-		/// \todo Change parameters to const references
-		ImagePrimitive( Imath::Box2i dataWindow, Imath::Box2i displayWindow );
+		/// Construct an ImagePrimitive with the given data and display window dimensions. The constructed image will have
+		/// no primitive variables.
+		ImagePrimitive( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow );
 
 		/// Returns the display window of the image on the XY-plane.
 		virtual Imath::Box3f bound() const;
@@ -106,7 +104,6 @@ class ImagePrimitive : public Primitive
 
 		/// Sets the data window - note that this doesn't modify the contents of primitive variables (channels)
 		/// at all - it is the callers responsibilty to keep any data valid.
-
 		void setDataWindow( const Imath::Box2i &dataWindow );
 
 		/// Returns the display window.
@@ -115,37 +112,10 @@ class ImagePrimitive : public Primitive
 		/// Sets the display window. Throws if an empty window is passed.
 		void setDisplayWindow( const Imath::Box2i &displayWindow );
 
-		/// give the data window x origin
-		/// \deprecated It's unclear whether this should reference the data window or display window.
-		/// Just use those windows directly instead.
-		const int x() const;
-
-		/// compute the data window y origin
-		/// \deprecated It's unclear whether this should reference the data window or display window.
-		/// Just use those windows directly instead.
-		const int y() const;
-
-		/// compute the data window width
-		/// \deprecated It's unclear whether this should reference the data window or display window.
-		/// Just use those windows directly instead.
-		const int width() const;
-
-		/// compute the data window height
-		/// \deprecated It's unclear whether this should reference the data window or display window.
-		/// Just use those windows directly instead.
-		const int height() const;
-
-		/// return the data window area
-		/// \deprecated It's unclear whether this should reference the data window or display window.
-		/// Just use those windows directly instead.
-		const int area() const;
-
 		/// Returns 2-d image size for Vertex, Varying, and FaceVarying Interpolation, otherwise 1.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
-
 		virtual void render( RendererPtr renderer );
-
 
 		/// Places the channel names for this image into the given vector
 		/// \bug this just copies the primitive variable names - it should also check that
@@ -155,10 +125,8 @@ class ImagePrimitive : public Primitive
 
 		/// Convenience function to create a channel - this simply creates and adds a PrimitiveVariable of the appropriate
 		/// size and returns a pointer to the data within it. The data is not initialized.
-		/// \todo Use typename TypedData<std::vector<T> >::Ptr as return type
-		/// \todo Make channel name a const reference
 		template<typename T>
-		boost::intrusive_ptr<TypedData<std::vector<T> > > createChannel( std::string name );
+		typename TypedData<std::vector<T> >::Ptr createChannel( const std::string &name );
 
 	private:
 
