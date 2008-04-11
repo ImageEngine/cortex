@@ -66,6 +66,24 @@ void bezierSubdivideWalk( const Vec &v0, const Vec &v1, const Vec &v2, const Vec
 	}
 }
 
+template<typename Vec, typename F>
+void bezierSubdivideWalk( const Vec &v0, const Vec &v1, const Vec &v2, typename Vec::BaseType tolerance2, F &f )
+{
+	LineSegment<Vec> line( v0, v2 );
+	if( line.distance2To( v1 ) < tolerance2 )
+	{
+		f( v0 );
+	}
+	else
+	{
+		Vec p01 = Imath::lerp( v0, v1, 0.5 );
+		Vec p12 = Imath::lerp( v1, v2, 0.5 );
+		Vec p0112 = Imath::lerp( p01, p12, 0.5 );
+		bezierSubdivideWalk( v0, p01, p0112, tolerance2, f );
+		bezierSubdivideWalk( p0112, p12, v2, tolerance2, f );	
+	}
+}
+
 } // namespace Detail
 
 template<typename Vec, typename F>
@@ -74,6 +92,14 @@ void bezierSubdivide( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &v3
 	typename Vec::BaseType t2 = tolerance * tolerance;
 	Detail::bezierSubdivideWalk( v0, v1, v2, v3, t2, f );
 	f( v3 );
+}
+
+template<typename Vec, typename F>
+void bezierSubdivide( const Vec &v0, const Vec &v1, const Vec &v2, typename Vec::BaseType tolerance, F &f )
+{
+	typename Vec::BaseType t2 = tolerance * tolerance;
+	Detail::bezierSubdivideWalk( v0, v1, v2, t2, f );
+	f( v2 );
 }
 
 } // namespace IECore

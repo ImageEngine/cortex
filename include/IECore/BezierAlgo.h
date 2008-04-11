@@ -44,6 +44,10 @@ namespace IECore
 template<typename Vec, typename F>
 void bezierSubdivide( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &v3, typename Vec::BaseType tolerance, F &f );
 
+/// As above but for quadratic curves.
+template<typename Vec, typename F>
+void bezierSubdivide( const Vec &v0, const Vec &v1, const Vec &v2, typename Vec::BaseType tolerance, F &f );
+
 } // namespace IECore
 
 #include "IECore/BezierAlgo.inl"

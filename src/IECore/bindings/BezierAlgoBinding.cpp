@@ -60,12 +60,24 @@ void bezierSubdivideBinding( const Vec &v0, const Vec &v1, const Vec &v2, const 
 	bezierSubdivide( v0, v1, v2, v3, tolerance, c );
 }
 
+template<typename Vec>
+void bezierSubdivideBindingQuadratic( const Vec &v0, const Vec &v1, const Vec &v2, typename Vec::BaseType tolerance, object f )
+{
+	BezierCallback<Vec> c; c.c = f;
+	bezierSubdivide( v0, v1, v2, tolerance, c );
+}
+
 void bindBezierAlgo()
 {
 	def( "bezierSubdivide", &bezierSubdivideBinding<Imath::V2f> );
 	def( "bezierSubdivide", &bezierSubdivideBinding<Imath::V2d> );
 	def( "bezierSubdivide", &bezierSubdivideBinding<Imath::V3f> );
 	def( "bezierSubdivide", &bezierSubdivideBinding<Imath::V3d> );
+	
+	def( "bezierSubdivide", &bezierSubdivideBindingQuadratic<Imath::V2f> );
+	def( "bezierSubdivide", &bezierSubdivideBindingQuadratic<Imath::V2d> );
+	def( "bezierSubdivide", &bezierSubdivideBindingQuadratic<Imath::V3f> );
+	def( "bezierSubdivide", &bezierSubdivideBindingQuadratic<Imath::V3d> );
 }
 
 } // namespace IECore
