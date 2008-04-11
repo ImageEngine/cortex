@@ -48,6 +48,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/ScopedTIFFExceptionTranslator.h"
 #include "IECore/BoxOps.h"
+#include "IECore/ScaledDataConversion.h"
 
 #include "boost/static_assert.hpp"
 #include "boost/format.hpp"
@@ -230,26 +231,6 @@ T TIFFImageReader::tiffFieldDefaulted( unsigned int t )
 }
 
 template<typename T>
-float toFloat( T t )
-{
-	static const double normalizer = 1.0 / Imath::limits<T>::max();
-
-	return normalizer * t;
-}
-
-template<>
-float toFloat( float t )
-{
-	return t;
-}
-
-template<>
-float toFloat( double t )
-{
-	return static_cast<float>( t );
-}
-
-template<typename T>
 DataPtr TIFFImageReader::readTypedChannel( const std::string &name, const Box2i &dataWindow )
 {
 	FloatVectorDataPtr dataContainer = new FloatVectorData();
@@ -280,6 +261,8 @@ DataPtr TIFFImageReader::readTypedChannel( const std::string &name, const Box2i 
 
 	int dataWidth = 1 + dataWindow.size().x;
 	int bufferDataWidth = 1 + m_dataWindow.size().x;
+	
+	ScaledDataConversion<T, float> converter;
 
 	int dataY = 0;
 	for ( int y = dataWindow.min.y - m_dataWindow.min.y ; y <= dataWindow.max.y - m_dataWindow.min.y ; ++y, ++dataY )
@@ -292,12 +275,11 @@ DataPtr TIFFImageReader::readTypedChannel( const std::string &name, const Box2i 
 			assert( buf );
 
 			// \todo Currently, we only support PLANARCONFIG_CONTIG for TIFFTAG_PLANARCONFIG.
-			/// \todo Use a DataConversion object instead of toFloat<> ?
 
 			FloatVectorData::ValueType::size_type dataOffset = dataY * dataWidth + dataX;
 			assert( dataOffset < data.size() );
 
-			data[dataOffset] = toFloat<T>( buf[ m_samplesPerPixel * ( y * bufferDataWidth + x ) + channelOffset ] );
+			data[dataOffset] = converter( buf[ m_samplesPerPixel * ( y * bufferDataWidth + x ) + channelOffset ] );
 		}
 	}
 
