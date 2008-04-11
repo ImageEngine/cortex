@@ -87,11 +87,41 @@ class TypedStateComponent : public StateComponent
 		
 };
 
+/// Use this macro to specialise the necessary parts of a TypedStateComponent instantiation.
+#define IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )				\
+	template<>																				\
+	std::string TYPE::typeName() const														\
+	{																						\
+		return # TYPE;																		\
+	}																						\
+																							\
+	template<>																				\
+	std::string TYPE::staticTypeName()														\
+	{																						\
+		return # TYPE;																		\
+	}																						\
+																							\
+	template<>																				\
+	BASETYPE TYPE::defaultValue()															\
+	{																						\
+		return DEFAULTVALUE;																\
+	}						
+
+#define IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( TYPE, TYPEID, BASETYPE, DEFAULTVALUE )	\
+	IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )								\
+	template class TypedStateComponent<BASETYPE, TYPEID>;										\
+	
 /// \todo Now there are loads of these typedefs I think they should really be defined in the places
 /// they're used - so PrimitiveBound would be a typedef member in Primitive etc. This would help people
 /// see where StateComponents have effect, and also provide a better location for documenting them. Otherwise
 /// this file has a massive influence over all sorts of disparate bits of the library.
+/// The CurvesPrimitive specific StateComponents have already been implemented this way so use that for reference.
 typedef TypedStateComponent<Imath::Color4f, ColorTypeId> Color;
+template<>
+void Color::bind() const;
+template<>
+GLbitfield Color::mask() const;
+
 typedef TypedStateComponent<bool, PrimitiveBoundTypeId> PrimitiveBound;
 typedef TypedStateComponent<bool, PrimitiveWireframeTypeId> PrimitiveWireframe;
 typedef TypedStateComponent<float, PrimitiveWireframeWidthTypeId> PrimitiveWireframeWidth;
@@ -100,8 +130,6 @@ typedef TypedStateComponent<bool, PrimitiveOutlineTypeId> PrimitiveOutline;
 typedef TypedStateComponent<float, PrimitiveOutlineWidthTypeId> PrimitiveOutlineWidth;
 typedef TypedStateComponent<bool, PrimitivePointsTypeId> PrimitivePoints;
 typedef TypedStateComponent<float, PrimitivePointWidthTypeId> PrimitivePointWidth;
-typedef TypedStateComponent<Imath::Color4f, BlendColorStateComponentTypeId> BlendColorStateComponent;
-typedef TypedStateComponent<GLenum, BlendEquationStateComponentTypeId> BlendEquationStateComponent;
 /// Used to signify that the shading for a primitive may produce transparent values. The Renderer
 /// maps the "gl:shade:transparent" attribute directly to this state. Note that this information
 /// is provided as a separate state item rather than as a query on the Shader class as the values
@@ -139,12 +167,39 @@ struct BlendFactors
 };
 
 typedef TypedStateComponent<BlendFactors, BlendFuncStateComponentTypeId> BlendFuncStateComponent;
+template<>
+void BlendFuncStateComponent::bind() const;
+template<>
+GLbitfield BlendFuncStateComponent::mask() const;
+
+typedef TypedStateComponent<Imath::Color4f, BlendColorStateComponentTypeId> BlendColorStateComponent;
+template<>
+void BlendColorStateComponent::bind() const;
+template<>
+GLbitfield BlendColorStateComponent::mask() const;
+
+typedef TypedStateComponent<GLenum, BlendEquationStateComponentTypeId> BlendEquationStateComponent;
+template<>
+void BlendEquationStateComponent::bind() const;
+template<>
+GLbitfield BlendEquationStateComponent::mask() const;
 
 /// Used to specify enable state of GL_CULL_FACE
 typedef TypedStateComponent<bool, DoubleSidedStateComponentTypeId> DoubleSidedStateComponent;
+template<>
+void DoubleSidedStateComponent::bind() const;
+template<>
+GLbitfield DoubleSidedStateComponent::mask() const;
+
+
 /// Used to implement the "rightHandedOrientation" Renderer attribute. Implemented by calling
 /// glFrontFace( GL_CCW ) when true and glFrontFace( GL_CW ) when false. 
 typedef TypedStateComponent<bool, RightHandedOrientationStateComponentTypeId> RightHandedOrientationStateComponent;
+template<>
+void RightHandedOrientationStateComponent::bind() const;
+template<>
+GLbitfield RightHandedOrientationStateComponent::mask() const;
+
 
 IE_CORE_DECLAREPTR( Color );
 IE_CORE_DECLAREPTR( PrimitiveBound );
@@ -167,5 +222,7 @@ IE_CORE_DECLAREPTR( PointsPrimitiveGLPointWidth );
 IE_CORE_DECLAREPTR( DoubleSidedStateComponent );
 
 } // namespace IECoreGL
+
+#include "IECoreGL/TypedStateComponent.inl"
 
 #endif // IECOREGL_TYPEDSTATECOMPONENT_H

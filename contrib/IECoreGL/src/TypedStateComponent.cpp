@@ -38,110 +38,11 @@ using namespace Imath;
 
 namespace IECoreGL
 {
-
-template<typename T, unsigned int TId>
-StateComponent::Description<TypedStateComponent<T, TId> > TypedStateComponent<T,TId>::g_description;
-
-template<typename T, unsigned int TId>
-TypedStateComponent<T,TId>::TypedStateComponent()
-	:	m_value( defaultValue() )
-{
-}
-
-template<typename T, unsigned int TId>
-TypedStateComponent<T,TId>::TypedStateComponent( const T &value )
-	:	m_value( value )
-{
-}
-
-template<typename T, unsigned int TId>
-IECore::TypeId TypedStateComponent<T,TId>::typeId() const
-{
-	return (IECore::TypeId)TId;
-}
-		
-template<typename T, unsigned int TId>
-bool TypedStateComponent<T,TId>::isInstanceOf( IECore::TypeId typeId ) const
-{
-	if( typeId==staticTypeId() )
-	{
-		return true;
-	}
-	return StateComponent::isInstanceOf( typeId );
-}
-
-template<typename T, unsigned int TId>
-bool TypedStateComponent<T,TId>::isInstanceOf( const std::string &typeName ) const
-{
-	if( typeName==staticTypeName() )
-	{
-		return true;
-	}
-	return StateComponent::isInstanceOf( typeName );
-}
-
-template<typename T, unsigned int TId>
-IECore::TypeId TypedStateComponent<T,TId>::staticTypeId()
-{
-	return (IECore::TypeId)TId;
-}
-
-template<typename T, unsigned int TId>
-bool TypedStateComponent<T,TId>::inheritsFrom( IECore::TypeId typeId )
-{
-	return StateComponent::staticTypeId()==typeId ? true : State::inheritsFrom( typeId );
-}
-
-template<typename T, unsigned int TId>
-bool TypedStateComponent<T,TId>::inheritsFrom( const std::string &typeName )
-{
-	return StateComponent::staticTypeName()==typeName ? true : StateComponent::inheritsFrom( typeName );
-}
-
-template<typename T, unsigned int TId>
-const T &TypedStateComponent<T,TId>::value() const
-{
-	return m_value;
-}
-
-template<typename T, unsigned int TId>
-void TypedStateComponent<T,TId>::bind() const
-{
-}
-
-template<typename T, unsigned int TId>
-GLbitfield TypedStateComponent<T,TId>::mask() const
-{
-	return 0;
-}
-
-#define SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )											\
-	template<>																				\
-	std::string TYPE::typeName() const														\
-	{																						\
-		return # TYPE;																		\
-	}																						\
-																							\
-	template<>																				\
-	std::string TYPE::staticTypeName()														\
-	{																						\
-		return # TYPE;																		\
-	}																						\
-																							\
-	template<>																				\
-	BASETYPE TYPE::defaultValue()															\
-	{																						\
-		return DEFAULTVALUE;																\
-	}																						\
-
-#define SPECIALISE_AND_INSTANTIATE( TYPE, BASETYPE, DEFAULTVALUE )							\
-	SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )												\
-	template class TypedStateComponent<BASETYPE, TYPE ## TypeId>;							\
 	
 // color specialisation and instantiation
 /////////////////////////////////////////////////////////////////////
 
-SPECIALISE( Color, Color4f, Color4f( 1, 1, 1, 1 ) );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( Color, Color4f, Color4f( 1, 1, 1, 1 ) );
 
 template<>
 void Color::bind() const
@@ -160,7 +61,7 @@ template class TypedStateComponent<Color4f, ColorTypeId>;
 // blending specialisations and instantiations
 //////////////////////////////////////////////////////////////////////
 
-SPECIALISE( BlendColorStateComponent, Color4f, Color4f( 1, 1, 1, 1 ) );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( BlendColorStateComponent, Color4f, Color4f( 1, 1, 1, 1 ) );
 
 template<>
 void BlendColorStateComponent::bind() const
@@ -176,7 +77,7 @@ GLbitfield BlendColorStateComponent::mask() const
 
 template class TypedStateComponent<Color4f, BlendColorStateComponentTypeId>;
 
-SPECIALISE( BlendFuncStateComponent, BlendFactors, BlendFactors( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ) );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( BlendFuncStateComponent, BlendFactors, BlendFactors( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ) );
 
 BlendFactors::BlendFactors( GLenum s, GLenum d )
 	:	src( s ), dst( d )
@@ -202,7 +103,7 @@ GLbitfield BlendFuncStateComponent::mask() const
 
 template class TypedStateComponent<BlendFactors, BlendFuncStateComponentTypeId>;
 
-SPECIALISE( BlendEquationStateComponent, GLenum, GL_FUNC_ADD );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( BlendEquationStateComponent, GLenum, GL_FUNC_ADD );
 
 template<>
 void BlendEquationStateComponent::bind() const
@@ -221,7 +122,7 @@ template class TypedStateComponent<GLenum, BlendEquationStateComponentTypeId>;
 // doubleSided specialisations and instantiations
 //////////////////////////////////////////////////////////////////////
 
-SPECIALISE( DoubleSidedStateComponent, bool, true );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( DoubleSidedStateComponent, bool, true );
 
 template<>
 void DoubleSidedStateComponent::bind() const
@@ -247,7 +148,7 @@ template class TypedStateComponent<bool, DoubleSidedStateComponentTypeId>;
 // RightHandedOrientation specialisations and instantiations
 //////////////////////////////////////////////////////////////////////
 
-SPECIALISE( RightHandedOrientationStateComponent, bool, true );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( RightHandedOrientationStateComponent, bool, true );
 
 template<>
 void RightHandedOrientationStateComponent::bind() const
@@ -266,21 +167,21 @@ template class TypedStateComponent<bool, RightHandedOrientationStateComponentTyp
 // instantiation of simple mask()==0 types
 //////////////////////////////////////////////////////////////////////
 
-SPECIALISE_AND_INSTANTIATE( PrimitiveBound, bool, false );
-SPECIALISE_AND_INSTANTIATE( PrimitiveWireframe, bool, false );
-SPECIALISE_AND_INSTANTIATE( PrimitiveWireframeWidth, float, 1.0f );
-SPECIALISE_AND_INSTANTIATE( PrimitiveSolid, bool, true );
-SPECIALISE_AND_INSTANTIATE( PrimitiveOutline, bool, false );
-SPECIALISE_AND_INSTANTIATE( PrimitiveOutlineWidth, float, 1.0f );
-SPECIALISE_AND_INSTANTIATE( PrimitivePoints, bool, false );
-SPECIALISE_AND_INSTANTIATE( PrimitivePointWidth, float, 1.0f );
-SPECIALISE_AND_INSTANTIATE( PrimitiveTransparencySortStateComponent, bool, true );
-SPECIALISE_AND_INSTANTIATE( TransparentShadingStateComponent, bool, false );
-SPECIALISE_AND_INSTANTIATE( BoundColorStateComponent, Color4f, Color4f( 0.36, 0.8, 0.85, 1 ) );
-SPECIALISE_AND_INSTANTIATE( WireframeColorStateComponent, Color4f, Color4f( 0.25, 0.6, 0.85, 1 ) );
-SPECIALISE_AND_INSTANTIATE( OutlineColorStateComponent, Color4f, Color4f( 0.85, 0.75, 0.45, 1 ) );
-SPECIALISE_AND_INSTANTIATE( PointColorStateComponent, Color4f, Color4f( 0.85, 0.45, 0, 1 ) );
-SPECIALISE_AND_INSTANTIATE( PointsPrimitiveUseGLPoints, UseGLPoints, ForPointsOnly );
-SPECIALISE_AND_INSTANTIATE( PointsPrimitiveGLPointWidth, float, 1.0f );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveBound, PrimitiveBoundTypeId, bool, false );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveWireframe, PrimitiveWireframeTypeId, bool, false );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveWireframeWidth, PrimitiveWireframeWidthTypeId, float, 1.0f );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveSolid, PrimitiveSolidTypeId, bool, true );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveOutline, PrimitiveOutlineTypeId, bool, false );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveOutlineWidth, PrimitiveOutlineWidthTypeId, float, 1.0f );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitivePoints, PrimitivePointsTypeId, bool, false );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitivePointWidth, PrimitivePointWidthTypeId, float, 1.0f );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveTransparencySortStateComponent, PrimitiveTransparencySortStateComponentTypeId, bool, true );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( TransparentShadingStateComponent, TransparentShadingStateComponentTypeId, bool, false );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( BoundColorStateComponent, BoundColorStateComponentTypeId, Color4f, Color4f( 0.36, 0.8, 0.85, 1 ) );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( WireframeColorStateComponent, WireframeColorStateComponentTypeId, Color4f, Color4f( 0.25, 0.6, 0.85, 1 ) );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( OutlineColorStateComponent, OutlineColorStateComponentTypeId, Color4f, Color4f( 0.85, 0.75, 0.45, 1 ) );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointColorStateComponent, PointColorStateComponentTypeId, Color4f, Color4f( 0.85, 0.45, 0, 1 ) );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitiveUseGLPoints, PointsPrimitiveUseGLPointsTypeId, UseGLPoints, ForPointsOnly );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitiveGLPointWidth, PointsPrimitiveGLPointWidthTypeId, float, 1.0f );
 
 } // namespace IECoreGL
