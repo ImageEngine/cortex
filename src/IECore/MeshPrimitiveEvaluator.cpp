@@ -491,6 +491,14 @@ PrimitiveEvaluator::ResultPtr MeshPrimitiveEvaluator::createResult() const
       return new Result();
 }
 
+void MeshPrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
+{
+	if (! boost::dynamic_pointer_cast< MeshPrimitiveEvaluator::Result >( result ) )
+	{
+		throw InvalidArgumentException("MeshPrimitiveEvaluator: Invalid PrimitiveEvaulator result type");
+	}
+}
+
 bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
 {
 	assert( boost::dynamic_pointer_cast< Result >( result ) );

@@ -247,6 +247,14 @@ PrimitiveEvaluatorPtr ImagePrimitiveEvaluator::create( ConstPrimitivePtr primiti
 	return new ImagePrimitiveEvaluator( image );
 }
 
+void ImagePrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
+{
+	if (! boost::dynamic_pointer_cast< ImagePrimitiveEvaluator::Result >( result ) )
+	{
+		throw InvalidArgumentException("ImagePrimitiveEvaluator: Invalid PrimitiveEvaulator result type");
+	}
+}
+
 ImagePrimitiveEvaluator::ImagePrimitiveEvaluator( ConstImagePrimitivePtr image )
 {
 	if (! image )

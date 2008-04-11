@@ -81,28 +81,3 @@ PrimitiveEvaluator::~PrimitiveEvaluator()
 PrimitiveEvaluator::Result::~Result()
 {
 }
-
-void PrimitiveEvaluator::validateResult( const ResultPtr &result ) const
-{
-	if (dynamic_cast< const MeshPrimitiveEvaluator * >( this ) )
-	{
-		if (! boost::dynamic_pointer_cast< MeshPrimitiveEvaluator::Result >( result ) )
-		{
-			throw InvalidArgumentException("Invalid PrimitiveEvaulator result type");
-		}
-	}
-	else if (dynamic_cast< const SpherePrimitiveEvaluator * >( this ) )
-	{
-		if (! boost::dynamic_pointer_cast< SpherePrimitiveEvaluator::Result >( result ) )
-		{
-			throw InvalidArgumentException("Invalid PrimitiveEvaulator result type");
-		}
-	}
-	else if (dynamic_cast< const ImagePrimitiveEvaluator * >( this ) )
-	{
-		if (! boost::dynamic_pointer_cast< ImagePrimitiveEvaluator::Result >( result ) )
-		{
-			throw InvalidArgumentException("Invalid PrimitiveEvaulator result type");
-		}
-	}
-}

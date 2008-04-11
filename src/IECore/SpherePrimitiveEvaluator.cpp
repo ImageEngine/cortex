@@ -228,6 +228,19 @@ PrimitiveEvaluator::ResultPtr SpherePrimitiveEvaluator::createResult() const
       return new Result();
 }
 
+void SpherePrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
+{
+	if (! boost::dynamic_pointer_cast< SpherePrimitiveEvaluator::Result >( result ) )
+	{
+		throw InvalidArgumentException("SpherePrimitiveEvaluator: Invalid PrimitiveEvaulator result type");
+	}
+}
+
+ConstPrimitivePtr SpherePrimitiveEvaluator::primitive() const
+{
+	return m_sphere;
+}
+
 bool SpherePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
 {		
 	assert( boost::dynamic_pointer_cast< Result >( result ) );
@@ -415,3 +428,21 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 	return results.size();	
 }
 
+float SpherePrimitiveEvaluator::volume() const
+{
+	float r = m_sphere->radius();
+	
+	return 4.0/3.0 * M_PI * r*r*r ;
+}
+
+V3f SpherePrimitiveEvaluator::centerOfGravity() const
+{
+	return V3f( 0.0f, 0.0f, 0.0f );
+}
+
+float SpherePrimitiveEvaluator::surfaceArea() const
+{
+	float r = m_sphere->radius();
+	
+	return 4.0 * M_PI * r*r ;
+}

@@ -91,7 +91,11 @@ class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 		
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
 		
+		ConstPrimitivePtr primitive() const;
+		
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
+		
+		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;
 		
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
 		
@@ -102,7 +106,13 @@ class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 			
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
+			
+		virtual float volume() const;	
+
+		virtual Imath::V3f centerOfGravity() const;
 		
+		virtual float surfaceArea() const;
+							
 	protected:
 	
 		ConstSpherePrimitivePtr m_sphere;

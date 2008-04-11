@@ -141,12 +141,6 @@ void bindImagePrimitiveEvaluator()
 		.def( "A", &ImagePrimitiveEvaluatorHelper::A )
 		.def( "Y", &ImagePrimitiveEvaluatorHelper::Y )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImagePrimitiveEvaluator)
-		
-		/// \todo Move these into the base class
-		.def( "primitive", &ImagePrimitiveEvaluator::primitive )
-		.def( "volume", &ImagePrimitiveEvaluator::volume )
-		.def( "centerOfGravity", &ImagePrimitiveEvaluator::centerOfGravity )
-		.def( "surfaceArea", &ImagePrimitiveEvaluator::surfaceArea )
 	;
 	INTRUSIVE_PTR_PATCH( ImagePrimitiveEvaluator, ImagePrimitiveEvaluatorPyClass );
 	implicitly_convertible<ImagePrimitiveEvaluatorPtr, PrimitiveEvaluatorPtr>();

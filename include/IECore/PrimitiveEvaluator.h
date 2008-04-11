@@ -105,9 +105,9 @@ class PrimitiveEvaluator : public RunTimeTyped
 				
 		/// Create a result instance which is suitable for passing to one of the query methods
 		virtual ResultPtr createResult() const = 0;
-		
-		/// \todo Add method:
-		/// virtual ConstPrimitivePtr primitive() const;
+				
+		/// Returns the primitive which we're currently evaluating		
+		virtual ConstPrimitivePtr primitive() const = 0;
 		
 		//! @name Query Functions
 		//@{
@@ -116,10 +116,9 @@ class PrimitiveEvaluator : public RunTimeTyped
 		/// virtual bool signedDistance( const Imath::V3f &p, float &distance, const ResultPtr &closestPoint ) const;
 		/// With a default implementation which just checks distance from the plane defined by the closest point and normal.
 		
-		/// \todo Add methods:
-		/// virtual float surfaceArea() const=0;
-		/// virtual float volume() const=0;
-		/// virtual Imath::V3f centerOfGravity() const=0;
+		virtual float surfaceArea() const=0;
+		virtual float volume() const=0;
+		virtual Imath::V3f centerOfGravity() const=0;
 
 		/// Find the closest point on the primitive to the given query point. Returns true on success.
 		virtual bool closestPoint( const Imath::V3f &p, const ResultPtr &result ) const =0;
@@ -140,8 +139,7 @@ class PrimitiveEvaluator : public RunTimeTyped
 		//@}
 		
 		/// Throws an exception if the passed result type is not compatible with the current evaluator
-		/// \todo Make (pure?) virtual. In the meantime do explicit type checking for all derived classes.
-		void validateResult( const ResultPtr &result ) const;
+		virtual void validateResult( const ResultPtr &result ) const =0;
 		
 		/// A class to allow registration of primitive evaluators with the system. Simply declare an instance
 		/// of Description< YourEvaluatorType, YourPrimitiveType >

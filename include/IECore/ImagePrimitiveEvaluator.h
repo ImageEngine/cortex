@@ -99,10 +99,11 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 		
 		virtual ~ImagePrimitiveEvaluator();
 		
-		/// \todo Move to base class
 		virtual ConstPrimitivePtr primitive() const;
 		
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
+		
+		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;	
 						
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
 		
@@ -116,14 +117,11 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
 			
-		/// \todo Add to PrimitiveEvaluator, and make virtual
-		float volume() const;	
+		virtual float volume() const;	
 
-		/// \todo Add to PrimitiveEvaluator, and make virtual
-		Imath::V3f centerOfGravity() const;
+		virtual Imath::V3f centerOfGravity() const;
 		
-		/// \todo Add to PrimitiveEvaluator, and make virtual
-		float surfaceArea() const;
+		virtual float surfaceArea() const;
 		
 		/// Returns the "R" (red) channel of the image, if available. Otherwise returns the variables' "end" iterator.
 		PrimitiveVariableMap::const_iterator R() const;
@@ -139,6 +137,8 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 		
 		/// Returns the "Y" (luminance) channel of the image, if available. Otherwise returns the variables' "end" iterator.		
 		PrimitiveVariableMap::const_iterator Y() const;
+		
+		
 					
 	protected:
 	

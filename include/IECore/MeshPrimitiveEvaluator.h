@@ -102,10 +102,11 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		
 		virtual ~MeshPrimitiveEvaluator();
 		
-		/// \todo Add to PrimitiveEvaluator, and make virtual
-		ConstPrimitivePtr primitive() const;
+		virtual ConstPrimitivePtr primitive() const;
 		
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
+		
+		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;
 						
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
 		
@@ -117,14 +118,11 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
 			
-		/// \todo Add to PrimitiveEvaluator, and make virtual
-		float volume() const;	
+		virtual float volume() const;	
 
-		/// \todo Add to PrimitiveEvaluator, and make virtual
-		Imath::V3f centerOfGravity() const;
+		virtual Imath::V3f centerOfGravity() const;
 		
-		/// \todo Add to PrimitiveEvaluator, and make virtual
-		float surfaceArea() const;
+		virtual float surfaceArea() const;
 					
 	protected:
 	
