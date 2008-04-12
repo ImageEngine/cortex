@@ -171,6 +171,7 @@
 #include "IECore/bindings/TriangulatorBinding.h"
 #include "IECore/bindings/BezierAlgoBinding.h"
 #include "IECore/bindings/ToCoreConverterBinding.h"
+#include "IECore/bindings/MeshNormalsOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -321,6 +322,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTriangulator();
 	bindBezierAlgo();
 	bindToCoreConverter();
+	bindMeshNormalsOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
