@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,8 @@
 #ifndef IE_CORE_DATAPROMOTEOP_H
 #define IE_CORE_DATAPROMOTEOP_H
 
+#include "boost/static_assert.hpp"
+
 #include "IECore/Op.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/NumericParameter.h"
@@ -62,6 +64,14 @@ class DataPromoteOp : public Op
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
 	
 	private :
+	
+		struct Promote1Fn;
+		
+		template<typename T, typename E=void >
+		struct Promote2Fn
+		{
+			BOOST_STATIC_ASSERT( sizeof(T) == 0 );	
+		};
 		
 		ObjectParameterPtr m_objectParameter;
 		IntParameterPtr m_targetTypeParameter;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
 #include "IECore/NullObject.h"
+#include "IECore/DespatchTypedData.h"
 
 #include <cassert>
 
@@ -51,29 +52,29 @@ using namespace std;
 using namespace boost;
 
 DataPromoteOp::DataPromoteOp()
-	:	Op(
-		staticTypeName(),
-		"Promotes scalar data types to compound data types.",
-		new ObjectParameter(
-			"result",
-			"Promoted Data object.",
-			new NullObject(),
-			DataTypeId
+		:	Op(
+		        staticTypeName(),
+		        "Promotes scalar data types to compound data types.",
+		        new ObjectParameter(
+		                "result",
+		                "Promoted Data object.",
+		                new NullObject(),
+		                DataTypeId
+		        )
 		)
-	)
 {
 	m_objectParameter = new ObjectParameter(
-		"object",
-		"The Data object that will be promoted.",
-		new NullObject(),
-		DataTypeId
+	        "object",
+	        "The Data object that will be promoted.",
+	        new NullObject(),
+	        DataTypeId
 	);
 	m_targetTypeParameter = new IntParameter(
-		"targetType",
-		"The target Data typeId.",
-		InvalidTypeId,
-		0,
-		Imath::limits<int>::max()		
+	        "targetType",
+	        "The target Data typeId.",
+	        InvalidTypeId,
+	        0,
+	        Imath::limits<int>::max()
 	);
 	parameters()->addParameter( m_objectParameter );
 	parameters()->addParameter( m_targetTypeParameter );
@@ -83,64 +84,178 @@ DataPromoteOp::~DataPromoteOp()
 {
 }
 
-template<typename T, typename F>
-DataPtr promote2( typename F::ConstPtr d )
+namespace IECore
 {
-	typename T::Ptr result = new T;
-	typename T::ValueType &vt = result->writable();
-	const typename F::ValueType &vf = d->readable();
-	vt.resize( vf.size() );
-	typename T::ValueType::iterator tIt = vt.begin();
-	for( typename F::ValueType::const_iterator it = vf.begin(); it!=vf.end(); it++ )
-	{
-		*tIt++ = typename T::ValueType::value_type( *it );
-	}
-	return result;
-}
 
-template<typename F>
-DataPtr promote1( typename F::ConstPtr d, TypeId targetType )
+template<typename T>
+struct DataPromoteOp::Promote2Fn<T, typename boost::enable_if< TypeTraits::IsVectorTypedData<T> >::type >
 {
-	switch( targetType )
+	typedef DataPtr ReturnType;
+
+	template<typename F>
+	ReturnType operator()( typename F::ConstPtr d ) const
 	{
+		assert( d );
+		typename T::Ptr result = new T;
+		typename T::ValueType &vt = result->writable();
+		const typename F::ValueType &vf = d->readable();
+		vt.resize( vf.size() );
+		typename T::ValueType::iterator tIt = vt.begin();
+		for ( typename F::ValueType::const_iterator it = vf.begin(); it!=vf.end(); it++ )
+		{
+			*tIt++ = typename T::ValueType::value_type( *it );
+		}
+		return result;
+	}
+};
+
+template<typename T>
+struct DataPromoteOp::Promote2Fn<T, typename boost::enable_if< TypeTraits::IsSimpleTypedData<T> >::type >
+{
+	typedef DataPtr ReturnType;
+
+	template<typename F>
+	ReturnType operator()( typename F::ConstPtr d ) const
+	{
+		assert( d );	
+		typename T::Ptr result = new T;
+
+		result->writable() = typename T::ValueType( d->readable() );
+
+		return result;
+	}
+};
+
+struct DataPromoteOp::Promote1Fn
+{
+	typedef DataPtr ReturnType;
+
+	TypeId m_targetType;
+
+	Promote1Fn( TypeId targetType ) : m_targetType( targetType )
+	{
+	}
+
+	template<typename T, typename Enable = void >
+	struct Func
+	{
+		ReturnType operator()( typename T::ConstPtr d, TypeId ) const
+		{
+			assert( d );
+			throw Exception( "DataPromoteOp: Unsupported source data type \"" + d->typeName() + "\"." );
+		}
+	};
+
+	template<typename F>
+	ReturnType operator()( typename F::ConstPtr d ) const
+	{
+		assert( d );
+		Func<F> f;
+		return f(d, m_targetType);
+	}
+
+};
+
+template<typename F >
+struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits::IsNumericVectorTypedData<F> >::type >
+{
+	ReturnType operator()( typename F::ConstPtr d, TypeId targetType ) const
+	{
+		assert( d );	
+		switch ( targetType )
+		{
 		case V2fVectorDataTypeId :
-			return promote2<V3dVectorData, F>( d );	
+		{
+			Promote2Fn<V2fVectorData> fn;
+			return fn.template operator()<F>( d );
+		}
 		case V2dVectorDataTypeId :
-			return promote2<V3dVectorData, F>( d );
+		{
+			Promote2Fn<V2dVectorData> fn;
+			return fn.template operator()<F>( d );
+		}
 		case V3fVectorDataTypeId :
-			return promote2<V3fVectorData, F>( d );
+		{
+			Promote2Fn<V3fVectorData> fn;
+			return fn.template operator()<F>( d );
+		}
 		case V3dVectorDataTypeId :
-			return promote2<V3dVectorData, F>( d );
+		{
+			Promote2Fn<V3dVectorData> fn;
+			return fn.template operator()<F>( d );
+		}
 		case Color3fVectorDataTypeId :
-			return promote2<Color3fVectorData, F>( d );
+		{
+			Promote2Fn<Color3fVectorData> fn;
+			return fn.template operator()<F>( d );
+		}
 		default :
-			throw Exception( "Unsupported target data type \"" + Object::typeNameFromTypeId( targetType ) + "\"." );
+			throw Exception( "DataPromoteOp: Unsupported target data type \"" + Object::typeNameFromTypeId( targetType ) + "\"." );
+		}
 	}
-}
+};
 
-/// \todo Promotions for the SimpleTypedData classes too.
-/// \todo I'm sure there's something we can do in TypedDataDespatch that would
-/// allow us to despatch to specific subgroups of data (in this case scalar data)
-/// based on some compile-time predicate thingummy. That would be really useful
-/// in a whole bunch of places.
+template<typename F >
+struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits::IsNumericSimpleTypedData<F> >::type >
+{
+	ReturnType operator()( typename F::ConstPtr d, TypeId targetType ) const
+	{
+		assert( d );	
+		switch ( targetType )
+		{
+		case V2fDataTypeId :
+		{
+			Promote2Fn<V2fData> fn;
+			return fn.template operator()<F>( d );
+		}
+		case V2dDataTypeId :
+		{
+			Promote2Fn<V2dData> fn;
+			return fn.template operator()<F>( d );
+		}
+		case V3fDataTypeId :
+		{
+			Promote2Fn<V3fData> fn;
+			return fn.template operator()<F>( d );
+		}
+		case V3dDataTypeId :
+		{
+			Promote2Fn<V3dData> fn;
+			return fn.template operator()<F>( d );
+		}
+		case Color3fDataTypeId :
+		{
+			Promote2Fn<Color3fData> fn;
+			return fn.template operator()<F>( d );
+		}
+		default :
+			throw Exception( "DataPromoteOp: Unsupported target data type \"" + Object::typeNameFromTypeId( targetType ) + "\"." );
+		}
+	}
+};
+
+} // namespace IECore
+
 ObjectPtr DataPromoteOp::doOperation( ConstCompoundObjectPtr operands )
 {
+	assert( operands );
+
 	const TypeId targetType = (TypeId)m_targetTypeParameter->getNumericValue();
-	ConstDataPtr srcData = static_pointer_cast<const Data>( m_objectParameter->getValue() );
-	
-	switch( srcData->typeId() )
-	{
-		case UIntVectorDataTypeId :
-			return promote1<UIntVectorData>( static_pointer_cast<const UIntVectorData>( srcData ), targetType );
-		case IntVectorDataTypeId :
-			return promote1<IntVectorData>( static_pointer_cast<const IntVectorData>( srcData ), targetType );
-		case FloatVectorDataTypeId :
-			return promote1<FloatVectorData>( static_pointer_cast<const FloatVectorData>( srcData ), targetType );
-		case DoubleVectorDataTypeId :
-			return promote1<DoubleVectorData>( static_pointer_cast<const DoubleVectorData>( srcData ), targetType );
-		case HalfVectorDataTypeId :
-			return promote1<HalfVectorData>( static_pointer_cast<const HalfVectorData>( srcData ), targetType );		
-		default :
-			throw Exception( "Unsupported source data type \"" + srcData->typeName() + "\"." );
-	}
+	DataPtr srcData = static_pointer_cast<Data>( m_objectParameter->getValue() );
+	assert( srcData );
+
+	Promote1Fn fn( targetType );
+
+	DataPtr targetData = despatchTypedData< Promote1Fn, TypeTraits::IsNumericTypedData >( srcData, fn );
+	assert( targetData );
+
+#ifndef NDEBUG
+	size_t srcSize = despatchTypedData< TypedDataSize >( srcData ) ;
+	size_t targetSize = despatchTypedData< TypedDataSize >( targetData ) ;
+
+	/// This post-condition is stated in the class documentation
+	assert( srcSize == targetSize );
+#endif
+
+	return targetData;
 }

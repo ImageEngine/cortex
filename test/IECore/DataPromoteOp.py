@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -39,10 +39,35 @@ from IECore import *
 
 class TestDataPromoteOp( unittest.TestCase ) :
 
-	def test( self ) :
+	def __makeVectorSourceData( self, dataType ):
+	
+		d = dataType()
+		
+		for i in range( 0, 100 ) :
+		
+			d.append( i )
+	
+		return d
+
+	def testVector( self ) :
 	
 		v = range( 0, 100 )
-		self.assertEqual( DataPromoteOp()( object = IntVectorData( v ), targetType=int(TypeId.V3fVectorData) ), V3fVectorData( [ V3f( x ) for x in v ] ) )
+		
+		op = DataPromoteOp()
+		
+		self.assertEqual( op( object = self.__makeVectorSourceData( IntVectorData ), targetType=int(TypeId.V3fVectorData) ), V3fVectorData( [ V3f( x ) for x in v ] ) )
+		self.assertEqual( op( object = self.__makeVectorSourceData( ShortVectorData ), targetType=int(TypeId.V3dVectorData) ), V3dVectorData( [ V3d( x ) for x in v ] ) )
+		self.assertEqual( op( object = self.__makeVectorSourceData( HalfVectorData ), targetType=int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f( x ) for x in v ] ) )
+		self.assertEqual( op( object = self.__makeVectorSourceData( HalfVectorData ), targetType=int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f( x ) for x in v ] ) )
+		self.assertEqual( op( object = self.__makeVectorSourceData( HalfVectorData ), targetType=int(TypeId.V2fVectorData) ), V2fVectorData( [ V2f( x ) for x in v ] ) )
+		
+	def testSimple( self ) :	
+	
+		op = DataPromoteOp()
+		
+		self.assertEqual( op( object = IntData(2), targetType=int(TypeId.V3fData) ), V3fData( V3f(2.0) ) )
+		self.assertEqual( op( object = IntData(2), targetType=int(TypeId.V3dData) ), V3dData( V3d(2.0) ) )
+		self.assertEqual( op( object = IntData(2), targetType=int(TypeId.Color3fData) ), Color3fData( Color3f(2.0) ) )		
 
 if __name__ == "__main__":
         unittest.main()
