@@ -570,9 +570,9 @@ pythonEnv.Append( CPPFLAGS="$PYTHON_INCLUDE_FLAGS" )
 
 # get the python link flags
 if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
-	pythonEnv.Append( SHLINKFLAGS = getPythonConfig( pythonEnv, "--ldflags" ).split() )
-else :
-	pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
+	pythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( pythonEnv, "--ldflags" )
+
+pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 
 pythonEnv.Append( CPPFLAGS = "-DBOOST_PYTHON_MAX_ARITY=20" )
 pythonEnv.Append( LIBS = [
@@ -1058,6 +1058,13 @@ mayaEnvAppends = {
 		"$GLEW_INCLUDE_PATH",
 	],
 	"LIBPATH" : [ "$MAYA_ROOT/lib" ],
+	"LIBS" : [
+		"OpenMaya",
+		"OpenMayaUI",
+		"OpenMayaAnim",
+		"OpenMayaFX",
+		"boost_python",
+	],
     "CPPFLAGS" : [
 		"-D_BOOL",
 		"-DREQUIRE_IOSTREAM",
@@ -1070,6 +1077,8 @@ if env["PLATFORM"]=="posix" :
 
 mayaEnv = env.Copy( **mayaEnvSets )
 mayaEnv.Append( **mayaEnvAppends )
+
+mayaEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 
 mayaPythonEnv = pythonEnv.Copy( **mayaEnvSets )
 mayaPythonEnv.Append( **mayaEnvAppends )
@@ -1100,6 +1109,7 @@ if doConfigure :
 		# part of the configure process
 		mayaEnv.Prepend( LIBPATH = [ "./lib" ] )
 		mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		mayaEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
 		# maya library
 		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), mayaSources )
@@ -1119,9 +1129,9 @@ if doConfigure :
 		mayaEnv.Alias( "installMaya", mayaHeaderInstall )
 
 		# maya mel
-		mayaMelInstall = mayaEnv.Install( "$INSTALL_MEL_DIR/IECoreMaya", mayaMel )
+		mayaMelInstall = mayaEnv.Install( "$INSTALL_MEL_DIR", mayaMel )
 		mayaEnv.Depends( mayaMelInstall, coreInstallSync )
-		mayaEnv.AddPostAction( "$INSTALL_MEL_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_MEL_DIR"] ) )
+		mayaEnv.AddPostAction( "$INSTALL_MEL_DIR", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_MEL_DIR"] ) )
 		mayaEnv.Alias( "install", mayaMelInstall )
 		mayaEnv.Alias( "installMaya", mayaMelInstall )
 		
@@ -1147,7 +1157,7 @@ if doConfigure :
 				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
-		mayaPythonModule = mayaPythonEnv.SharedLibrary( "contrib/IECoreMaya/python/IECoreMaya/_IECoreMaya", mayaPythonSources )
+		mayaPythonModule = mayaPythonEnv.SharedLibrary( "python/IECoreMaya/_IECoreMaya", mayaPythonSources )
 		mayaPythonEnv.Depends( mayaPythonModule, mayaLibrary )
 
 		mayaPythonModuleInstall = mayaPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )

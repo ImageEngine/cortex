@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,13 +37,13 @@
 /// The core maya library comes with associated MEL files providing useful utility
 /// functions and additional API related to the C++ nodes.
 
-source "IECoreMaya/!VERSION!/ieParameterisedHolder.mel";
-source "IECoreMaya/!VERSION!/ieProceduralHolder.mel";
-source "IECoreMaya/!VERSION!/ieNode.mel";
-source "IECoreMaya/!VERSION!/ieAttr.mel";
-source "IECoreMaya/!VERSION!/ieUnitTest.mel";
+source "IECoreMaya/ieParameterisedHolder.mel";
+source "IECoreMaya/ieProceduralHolder.mel";
+source "IECoreMaya/ieNode.mel";
+source "IECoreMaya/ieAttr.mel";
+source "IECoreMaya/ieUnitTest.mel";
 
-source "IECoreMaya/!VERSION!/ieParameterisedHolderUI.mel";
-source "IECoreMaya/!VERSION!/ieProceduralHolderUI.mel";
-source "IECoreMaya/!VERSION!/ieOpHolderUI.mel";
-source "IECoreMaya/!VERSION!/ieConverterHolderUI.mel";
+source "IECoreMaya/ieParameterisedHolderUI.mel";
+source "IECoreMaya/ieProceduralHolderUI.mel";
+source "IECoreMaya/ieOpHolderUI.mel";
+source "IECoreMaya/ieConverterHolderUI.mel";

@@ -134,7 +134,7 @@ INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/
 INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"
-INSTALL_MEL_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/mel/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
+INSTALL_MEL_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/mel/cortex/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
 INSTALL_MAYAPLUGIN_NAME = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/plugins/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
 
 # set up a post install script to make op wrappers for IECore

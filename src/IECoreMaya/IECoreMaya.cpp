@@ -139,13 +139,7 @@ MStatus initialize(MFnPlugin &plugin)
 		
 		/// \todo This may well need to change, depending on how we allow people to install
 		/// the mel files.
-		MString cmd = "source \"IECoreMaya/";
-		cmd += (int)IE_CORE_MAJORVERSION;
-		cmd += ".";
-		cmd += (int)IE_CORE_MINORVERSION;
-		cmd += ".";		
-		cmd += (int)IE_CORE_PATCHVERSION;				
-		cmd += "/IECoreMaya.mel\";";
+		MString cmd = "source \"IECoreMaya/IECoreMaya.mel\";";
 		s = MGlobal::executeCommand(cmd);
 		
 		if( !getenv( "IECOREMAYA_DISABLEOUTPUTREDIRECTION" ) )
