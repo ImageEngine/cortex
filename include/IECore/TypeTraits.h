@@ -185,6 +185,9 @@ BOOST_STATIC_ASSERT( (IsNumericSimpleTypedData<ShortData>::value) );
 BOOST_STATIC_ASSERT( (IsNumericSimpleTypedData<HalfData>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsNumericSimpleTypedData<char> >::value) );
 
+/// IsNumericTypedData
+template< typename T > struct IsNumericTypedData : boost::mpl::or_< IsNumericSimpleTypedData<T>, IsNumericVectorTypedData<T> > {};
+
 } // namespace TypeTraits
 
 } // namespace IECore
