@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_COREMAYA_H
-#define IE_COREMAYA_COREMAYA_H
 
-#include "maya/MFnPlugin.h"
+#define MNoVersionString
+
+#include "IECore/HeaderGenerator.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/CompoundData.h"
+
+#include "maya/MGlobal.h"
+#include "maya/MFileIO.h"
+#include "maya/MAnimControl.h"
+#include "maya/MTime.h"
+
+using namespace IECore;
 
 namespace IECoreMaya
 {
 
-int majorVersion();
-int minorVersion();
-int patchVersion();
-const std::string &versionString();
+static void mayaHeaderGenerator( CompoundObjectPtr header )
+{
+	CompoundDataPtr compound = new CompoundData();
+	compound->writable()["mayaVersion"] = new StringData( MGlobal::mayaVersion().asChar() );
+	compound->writable()["sceneFile"] = new StringData( MFileIO::currentFile().asChar() );
+	compound->writable()["currentTime"] = new FloatData( MAnimControl::currentTime().value() );
+	compound->writable()["minTime"] = new FloatData( MAnimControl::minTime().value() );
+	compound->writable()["maxTime"] = new FloatData( MAnimControl::maxTime().value() );
+	compound->writable()["frameRate"] = new FloatData( 1. / MTime( 1., MTime::uiUnit() ).as( MTime::kSeconds ) );
 
-MStatus initialize(MFnPlugin &plugin);
-MStatus uninitialize(MFnPlugin &plugin);
-
+	header->members()["maya"] = compound;
 }
 
-//! \mainpage
-///
-/// The IECoreMaya library provides the core C++ framework for all Maya development
-/// at Image Engine. Wherever possible, Maya-specific routines should be implemented
-/// within this library rather than within their respective tools. Code which is 
-/// truly generic and unrelated to Maya should be placed in the main IECore library.
-///
-/// \section mainPageDependencies Dependencies
-///
-/// \subsection IECore
-///
-/// \subsection Maya
-///
-/// <br>
+static bool resIeCoreMaya = HeaderGenerator::registerDataHeaderGenerator( &mayaHeaderGenerator );
 
-/// \defgroup environmentgroup Environment variables
-///
-/// Various aspects of the IECoreMaya library are configured using environment variables.
-/// These are listed below.
-///
-/// <b>IECOREMAYA_DISABLEOUTPUTREDIRECTION</b><br>
-/// By default all python output and IECore::MessageHandler output are redirected through
-/// the appropriate MGlobal::display*() functions, so that they appear in the script editor.
-/// Setting this environment variables disables this redirection, causing the messages to appear
-/// in the shell.
-
-#endif // IE_COREMAYA_COREMAYA_H
+}

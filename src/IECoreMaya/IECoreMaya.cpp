@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -66,32 +66,6 @@ namespace IECoreMaya
 {
 
 static unsigned long g_refCount = 0;
-
-int majorVersion()
-{
-	return IE_MAJOR_VERSION;
-}
-
-int minorVersion()
-{
-	return IE_MINOR_VERSION;
-}
-
-int patchVersion()
-{
-	return IE_PATCH_VERSION;
-}
-
-const std::string &versionString()
-{
-	static std::string v;
-	if( !v.size() )
-	{
-		v = boost::str( boost::format( "%d.%d.%d" ) % majorVersion() % minorVersion() % patchVersion() );
-	}
-	return v;
-}
-
 
 MStatus initialize(MFnPlugin &plugin)
 {
@@ -163,12 +137,14 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerImageFile( "ieImageFile", ImageFile::creator, imageFileExtensions);
 		assert( s );
 		
+		/// \todo This may well need to change, depending on how we allow people to install
+		/// the mel files.
 		MString cmd = "source \"IECoreMaya/";
-		cmd += (int)IE_MAJOR_VERSION;
+		cmd += (int)IE_CORE_MAJORVERSION;
 		cmd += ".";
-		cmd += (int)IE_MINOR_VERSION;
+		cmd += (int)IE_CORE_MINORVERSION;
 		cmd += ".";		
-		cmd += (int)IE_PATCH_VERSION;				
+		cmd += (int)IE_CORE_PATCHVERSION;				
 		cmd += "/IECoreMaya.mel\";";
 		s = MGlobal::executeCommand(cmd);
 		

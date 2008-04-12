@@ -218,10 +218,6 @@ o.Add(
 # Maya options
 
 o.Add(
-	BoolOption( "WITH_MAYA", "Set this to build the coreMaya library in the contrib directory.", False ),
-)
-
-o.Add(
 	"MAYA_ROOT",
 	"The path to the root of the maya installation.",
 	"/usr/aw/maya",
@@ -284,6 +280,18 @@ o.Add(
 	"INSTALL_GLSL_HEADER_DIR",
 	"The directory in which to install GLSL headers.",
 	"$INSTALL_PREFIX/glsl",
+)
+
+o.Add(
+	"INSTALL_MEL_DIR",
+	"The directory in which to install mel scripts.",
+	"$INSTALL_PREFIX/maya/mel/$IECORE_NAME",
+)
+
+o.Add(
+	"INSTALL_MAYAPLUGIN_NAME",
+	"The name under which to install maya plugins.",
+	"$INSTALL_PREFIX/maya/plugins/$IECORE_NAME",
 )
 
 o.Add(
@@ -620,10 +628,18 @@ def makeSymLinks( env, target ) :
 		done = True
 		for key in links.keys() :
 		
-			if target.find( key ) != -1 :
+			keyIndex = target.find( key )
+			if keyIndex != -1 :
 			
+				nextSlashIndex = target.find( "/", keyIndex + len(key) )
+				if nextSlashIndex!=-1 :
+					# the place where we need to make the links is
+					# in the middle of the path somewhere, not in the last
+					# component. truncate the path.
+					target = target[:nextSlashIndex]
+
 				linkName = target.replace( key, links[key] )
-				
+								
 				makeSymLink( env.subst( linkName ), env.subst( target ) )
 				
 				target = linkName
@@ -639,6 +655,7 @@ def makeLibSymLinks( env ) :
 	n = os.path.basename( p )
 	n = "$SHLIBPREFIX" + n + "$SHLIBSUFFIX"
 	p = os.path.join( d, n )
+		
 	makeSymLinks( env, p )
 
 # Make a symlink pointing from target to source
@@ -1027,114 +1044,123 @@ if env["WITH_GL"] and doConfigure :
 		glTestEnv.Alias( "testGL", glTest )
 		
 ###########################################################################################
-# Build, install and test the optional coreMaya library and bindings
+# Build, install and test the coreMaya library and bindings
 ###########################################################################################
 
-# because coreMaya isn't really stable in terms of api yet it has its own version
-# number. when it moves out of /contrib it'll use the same version number as the
-# main libraries.
-ieCoreMayaMajorVersion = 3
-ieCoreMayaMinorVersion = 0
-ieCoreMayaPatchVersion = 0
+mayaEnvSets = {
+	"IECORE_NAME" : "IECoreMaya",
+}
 
-if env["WITH_MAYA"] :
+mayaEnvAppends = {
+	"CPPPATH" : [
+		"$MAYA_ROOT/include",
+		"contrib/IECoreGL/include",
+		"$GLEW_INCLUDE_PATH",
+	],
+	"LIBPATH" : [ "$MAYA_ROOT/lib" ],
+    "CPPFLAGS" : [
+		"-D_BOOL",
+		"-DREQUIRE_IOSTREAM",
+		pythonEnv["PYTHON_INCLUDE_FLAGS"],
+	],
+}
 
+if env["PLATFORM"]=="posix" :
+	mayaEnvAppends["CPPFLAGS"].append( "-DLINUX" )
 
-	mayaEnvSets = {
-		"IECORE_NAME" : "IECoreMaya",
-		"IECORE_MAJOR_VERSION" : ieCoreMayaMajorVersion,
-		"IECORE_MINOR_VERSION" : ieCoreMayaMinorVersion,
-		"IECORE_PATCH_VERSION" : ieCoreMayaPatchVersion,
-	}
+mayaEnv = env.Copy( **mayaEnvSets )
+mayaEnv.Append( **mayaEnvAppends )
 
-	mayaEnvAppends = {
-		"CPPPATH" : [
-			"$MAYA_ROOT/include",
-			"contrib/IECoreMaya/include",
-			"contrib/IECoreGL/include",
-			"$GLEW_INCLUDE_PATH",
-		],
-		"LIBPATH" : [ "$MAYA_ROOT/lib" ],
-    	"CPPFLAGS" : [
-			## \todo The following will make no sense as soon as CoreMaya is out of contrib
-			# and synced in terms of version number
-			"-DIECORE_MAJOR_VERSION=%d" % ieCoreMajorVersion,
-			"-DIE_MAJOR_VERSION=%d" % ieCoreMayaMajorVersion,
-			"-DIE_MINOR_VERSION=%d" % ieCoreMayaMinorVersion,
-			"-DIE_PATCH_VERSION=%d" % ieCoreMayaPatchVersion,
-			## End of defines we need to remove in future
-			"-D_BOOL",
-			"-DREQUIRE_IOSTREAM",
-			pythonEnv["PYTHON_INCLUDE_FLAGS"],
-		],
-	}
+mayaPythonEnv = pythonEnv.Copy( **mayaEnvSets )
+mayaPythonEnv.Append( **mayaEnvAppends )
 
-	if env["PLATFORM"]=="posix" :
-		mayaEnvAppends["CPPFLAGS"].append( "-DLINUX" )
+mayaPluginEnv = mayaEnv.Copy( IECORE_NAME="ieCore" )
 
-	mayaEnv = env.Copy( **mayaEnvSets )
-	mayaEnv.Append( **mayaEnvAppends )
-	
-	mayaPythonEnv = pythonEnv.Copy( **mayaEnvSets )
-	riPythonEnv.Append( **mayaEnvAppends )
+if doConfigure :
 
-	if doConfigure :
+	c = Configure( mayaEnv )
 
-		c = Configure( mayaEnv )
+	if not c.CheckHeader( "maya/MVectorArray.h" ) :
 
-		if not c.CheckHeader( "maya/MVectorArray.h" ) :
+		sys.stderr.write( "WARNING : no maya devkit found, not building IECoreMaya - check MAYA_ROOT.\n" )
+		c.Finish()
+
+	else :
+
+		c.Finish()
+
+		mayaSources = glob.glob( "src/IECoreMaya/*.cpp" )
+		mayaHeaders = glob.glob( "include/IECoreMaya/*.h" ) + glob.glob( "include/IECoreMaya/*.inl" )
+		mayaPythonSources = glob.glob( "src/IECoreMaya/bindings/*.cpp" )
+		mayaPythonScripts = glob.glob( "python/IECoreMaya/*.py" )
+		mayaMel = glob.glob( "mel/IECoreMaya/*.mel" )
+		mayaPluginSources = glob.glob( "src/IECoreMaya/plugin/*.cpp" )
+
+		# we can't append this before configuring, as then it gets built as
+		# part of the configure process
+		mayaEnv.Prepend( LIBPATH = [ "./lib" ] )
+		mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
+		# maya library
+		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), mayaSources )
+		mayaEnv.Depends( coreInstallSync, mayaLibrary )
+		mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), mayaLibrary )
+		mayaEnv.Depends( mayaLibraryInstall, coreInstallSync )
+		mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv ) )
+		mayaEnv.Alias( "install", mayaLibraryInstall )
+		mayaEnv.Alias( "installMaya", mayaLibraryInstall )
+		mayaEnv.Alias( "installLib", [ mayaLibraryInstall ] )
+
+ 		# maya headers
+		mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
+		mayaEnv.Depends( mayaHeaderInstall, coreInstallSync )			
+		mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
+		mayaEnv.Alias( "install", mayaHeaderInstall )
+		mayaEnv.Alias( "installMaya", mayaHeaderInstall )
+
+		# maya mel
+		mayaMelInstall = mayaEnv.Install( "$INSTALL_MEL_DIR/IECoreMaya", mayaMel )
+		mayaEnv.Depends( mayaMelInstall, coreInstallSync )
+		mayaEnv.AddPostAction( "$INSTALL_MEL_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_MEL_DIR"] ) )
+		mayaEnv.Alias( "install", mayaMelInstall )
+		mayaEnv.Alias( "installMaya", mayaMelInstall )
 		
-			sys.stderr.write( "WARNING : no maya devkit found, not building IECoreMaya - check MAYA_ROOT.\n" )
-			c.Finish()
+		# maya plugin
+		mayaPluginEnv.Append(
+			LIBPATH = [ "./lib" ],
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+		mayaPlugin = mayaPluginEnv.SharedLibrary( "plugins/maya/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPluginSources, SHLIBPREFIX="" )
+		mayaPluginInstall = mayaPluginEnv.Install( os.path.dirname( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPlugin )
+		mayaPluginEnv.Depends( mayaPluginInstall, coreInstallSync )
+		mayaPluginEnv.AddPostAction( mayaPluginInstall, lambda target, source, env : makeSymLinks( mayaPluginEnv, mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
+		mayaPluginEnv.Alias( "install", mayaPluginInstall )
+		mayaPluginEnv.Alias( "installMaya", mayaPluginInstall )
+		
+		# maya python
+		mayaPythonEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+		mayaPythonModule = mayaPythonEnv.SharedLibrary( "contrib/IECoreMaya/python/IECoreMaya/_IECoreMaya", mayaPythonSources )
+		mayaPythonEnv.Depends( mayaPythonModule, mayaLibrary )
 
-		else :
+		mayaPythonModuleInstall = mayaPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
+		mayaPythonEnv.Depends( mayaPythonModuleInstall, coreInstallSync )
+		mayaPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonEnv, mayaPythonEnv["INSTALL_PYTHON_DIR"] ) )
+		mayaPythonEnv.Alias( "install", mayaPythonModuleInstall )
+		mayaPythonEnv.Alias( "installMaya", mayaPythonModuleInstall )
 
-			c.Finish()
-			
-			mayaSources = glob.glob( "contrib/IECoreMaya/src/*.cpp" )
-			mayaHeaders = glob.glob( "contrib/IECoreMaya/include/IECoreMaya/*.h" ) + glob.glob( "contrib/IECoreMaya/include/IECoreMaya/*.inl" )
-			mayaPythonSources = glob.glob( "contrib/IECoreMaya/src/IECoreMaya/bindings/*.cpp" )
-			mayaPythonScripts = glob.glob( "contrib/IECoreMaya/python/IECoreMaya/*.py" )
+		if coreEnv["INSTALL_COREMAYA_POST_COMMAND"]!="" :
+			# this is the only way we could find to get a post action to run for an alias
+			corePythonEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
 
-			# we can't append this before configuring, as then it gets built as
-			# part of the configure process
-			mayaEnv.Prepend( LIBPATH = [ "./lib" ] )
-			mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-
-			mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), mayaSources )
-			mayaEnv.Depends( coreInstallSync, mayaLibrary )
-			mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), mayaLibrary )
-			mayaEnv.Depends( mayaLibraryInstall, coreInstallSync )
-			mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv ) )
-			mayaEnv.Alias( "install", mayaLibraryInstall )
-			mayaEnv.Alias( "installMaya", mayaLibraryInstall )
-			mayaEnv.Alias( "installLib", [ mayaLibraryInstall ] )
-
-			mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
-			mayaEnv.Depends( mayaHeaderInstall, coreInstallSync )			
-			mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
-			mayaEnv.Alias( "install", mayaHeaderInstall )
-			mayaEnv.Alias( "installMaya", mayaHeaderInstall )
-
-			mayaPythonEnv.Append(
-				LIBS = [
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				]
-			)
-			mayaPythonModule = mayaPythonEnv.SharedLibrary( "contrib/IECoreMaya/python/IECoreMaya/_IECoreMaya", mayaPythonSources )
-			mayaPythonEnv.Depends( mayaPythonModule, mayaLibrary )
-
-			mayaPythonModuleInstall = mayaPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
-			mayaPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonEnv, mayaPythonEnv["INSTALL_PYTHON_DIR"] ) )
-			mayaPythonEnv.Alias( "install", mayaPythonModuleInstall )
-			mayaPythonEnv.Alias( "installMaya", mayaPythonModuleInstall )
-
-			if coreEnv["INSTALL_COREMAYA_POST_COMMAND"]!="" :
-				# this is the only way we could find to get a post action to run for an alias
-				corePythonEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
-
-			Default( [ mayaLibrary, mayaPythonModule ] )
+		Default( [ mayaLibrary, mayaPlugin, mayaPythonModule ] )
 
 ###########################################################################################
 # Build and install the coreNuke library and headers
@@ -1280,10 +1306,11 @@ if doConfigure :
 # Configure checks to be sure it's there
 docEnv = env.Copy()
 docEnv["ENV"]["PATH"] = os.environ["PATH"]
-docs = docEnv.Command( "doc/html/index.html", "", "doxygen doc/config/Doxyfile" )
+docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "doxygen $SOURCE" )
 docEnv.Depends( docs, glob.glob( "include/IECore*/*.h" ) )
 docEnv.Depends( docs, glob.glob( "src/IECore*/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "python/IECore*/*.py" ) )
+docEnv.Depends( docs, glob.glob( "mel/IECore*/*.mel" ) )
 docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) )
 docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/src/*.cpp" ) )
 docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" ) )

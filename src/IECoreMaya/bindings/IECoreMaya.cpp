@@ -80,9 +80,4 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaObjectConverter();
 	bindFromMayaCameraConverter();
 	bindMayaMeshBuilder();	
-	
-	def( "majorVersion", &IECoreMaya::majorVersion );
-	def( "minorVersion", &IECoreMaya::minorVersion );
-	def( "patchVersion", &IECoreMaya::patchVersion );
-	def( "versionString", &IECoreMaya::versionString, return_value_policy<copy_const_reference>() );	
 }

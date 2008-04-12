@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,18 +75,14 @@ namespace
 	PyMethodDef initial_methods[] = { { 0, 0, 0, 0 } };
 }
 
-/// \todo The VersionControl stuff in here is utterly Image Engine specific and
-/// needs fixing for the outside world.
-void PythonCmd::import( const std::string &moduleName, int moduleVersion )
+void PythonCmd::import( const std::string &moduleName )
 {
 	
 	try
 	{
 		string toExecute = boost::str( format( 
-				"import VersionControl\n"
-				"VersionControl.setVersion( '%1%', '%2%' )\n"
 				"import %1%\n"
-			) % moduleName % moduleVersion
+			) % moduleName
 		);
 		
 		handle<> ignored( PyRun_String( 
@@ -165,6 +161,7 @@ void PythonCmd::initialize()
 		// Testing suggests that there are no ill effects of the mismatch. To be on the safe side
 		// we only suppress for IE prefixed modules and only for the specific API versions with
 		// which we've tested.
+		// \todo It would be a jolly good idea to stop doing this.
 		try
 		{
 			handle<> ignored( PyRun_String(
@@ -179,8 +176,8 @@ void PythonCmd::initialize()
 			PyErr_Print();
 		}
 		
-		import( "IECore", IECORE_MAJOR_VERSION );
-		import( "IECoreMaya", IE_MAJOR_VERSION );
+		import( "IECore" );
+		import( "IECoreMaya" );
 	
 		g_initialized = true;
 		

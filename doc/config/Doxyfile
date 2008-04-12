@@ -462,7 +462,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = include/IECore src/IECore python/IECore include/IECoreRI src/IECoreRI python/IECoreRI include/IECoreNuke src/IECoreNuke contrib/IECoreGL/include/IECoreGL contrib/IECoreGL/src contrib/IECoreGL/python/IECoreGL include/IECoreTruelight src/IECoreTruelight python/IECoreTruelight
+INPUT                  = include/IECore src/IECore python/IECore include/IECoreRI src/IECoreRI python/IECoreRI include/IECoreNuke src/IECoreNuke contrib/IECoreGL/include/IECoreGL contrib/IECoreGL/src contrib/IECoreGL/python/IECoreGL include/IECoreTruelight src/IECoreTruelight python/IECoreTruelight include/IECoreMaya src/IECoreMaya python/IECoreMaya mel/IECoreMaya
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -471,7 +471,7 @@ INPUT                  = include/IECore src/IECore python/IECore include/IECoreR
 # *.c *.cc *.cxx *.cpp *.c++ *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx 
 # *.hpp *.h++ *.idl *.odl *.cs *.php *.php3 *.inc *.m *.mm *.py
 
-FILE_PATTERNS          = *.h *.py *.cpp
+FILE_PATTERNS          = *.h *.py *.cpp *.mel
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories 
 # should be searched for input files as well. Possible values are YES and NO. 

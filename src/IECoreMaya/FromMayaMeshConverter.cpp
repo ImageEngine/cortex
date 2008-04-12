@@ -430,6 +430,7 @@ IECore::ObjectPtr FromMayaMeshConverter::doConversion( const MObject &object, IE
 	}
 	if( m_normals->getTypedValue() )
 	{
+		/// \todo THIS IS A STUPID THING TO BE DOING IF WE'RE USING SUBDIV INTERPOLATION. STOP IT.
 		result->variables["N"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, normals() );
 	}
 	

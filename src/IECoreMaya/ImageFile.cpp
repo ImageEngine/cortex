@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -145,8 +145,8 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 		return MS::kFailure;
 	}
 				
-	m_width = image->width();
-	m_height = image->height();
+	m_width = image->getDataWindow().size().x + 1;
+	m_height = image->getDataWindow().size().y + 1;
 	
 	std::vector<std::string> channelNames;
 	image->channelNames( channelNames );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,38 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-
-#define MNoVersionString
-
-#include "IECore/HeaderGenerator.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/CompoundData.h"
 #include "IECoreMaya/IECoreMaya.h"
 
-#include "maya/MGlobal.h"
-#include "maya/MFileIO.h"
-#include "maya/MAnimControl.h"
-#include "maya/MTime.h"
-
-using namespace IECore;
-
-namespace IECoreMaya
+MStatus initializePlugin( MObject obj )
 {
-
-static void mayaHeaderGenerator( CompoundObjectPtr header )
-{
-	CompoundDataPtr compound = new CompoundData();
-	compound->writable()["mayaVersion"] = new StringData( MGlobal::mayaVersion().asChar() );
-	compound->writable()["sceneFile"] = new StringData( MFileIO::currentFile().asChar() );
-	compound->writable()["currentTime"] = new FloatData( MAnimControl::currentTime().value() );
-	compound->writable()["minTime"] = new FloatData( MAnimControl::minTime().value() );
-	compound->writable()["maxTime"] = new FloatData( MAnimControl::maxTime().value() );
-	compound->writable()["frameRate"] = new FloatData( 1. / MTime( 1., MTime::uiUnit() ).as( MTime::kSeconds ) );
-
-	header->members()["maya"] = compound;
-	header->members()["ieCoreMayaVersion"] = new StringData( versionString() );
+	MStatus s;
+	MFnPlugin plugin(obj, "Image Engine", "1.0");
+	return IECoreMaya::initialize( plugin );
 }
 
-static bool resIeCoreMaya = HeaderGenerator::registerDataHeaderGenerator( &mayaHeaderGenerator );
-
+MStatus uninitializePlugin( MObject obj )
+{ 
+	MStatus s;
+	MFnPlugin plugin(obj);
+	IECoreMaya::uninitialize( plugin );
+	return MS::kSuccess;
 }

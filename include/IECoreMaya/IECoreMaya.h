@@ -32,70 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IE_COREMAYA_COREMAYA_H
+#define IE_COREMAYA_COREMAYA_H
+
 #include "maya/MFnPlugin.h"
 
-#include "IECoreMaya/IECoreMaya.h"
-
-#ifdef IE_INTERNAL_BUILD
-#include "IEMayaVersionControl/MayaPlugin.h"
-
-using namespace IEMayaVersionControl;
-
-class IECorePlugin : public MayaPlugin
+namespace IECoreMaya
 {
-	public:
-	
-		virtual ~IECorePlugin()
-		{
-		}
-	
-		virtual MStatus initialize(MObject obj)
-		{
-			MStatus s;
-			MFnPlugin plugin(obj, "Image Engine", "1.0");
-			return IECoreMaya::initialize( plugin );
-		}
 
-		MStatus uninitialize(MObject obj)
-		{
-			MStatus s;
-			MFnPlugin plugin(obj);
-			IECoreMaya::uninitialize( plugin );
-			return MS::kSuccess;
-		}
-};
+MStatus initialize( MFnPlugin &plugin );
+MStatus uninitialize( MFnPlugin &plugin );
 
-extern "C" MayaPlugin *getPlugin()
-{
-	return new IECorePlugin();
 }
 
-extern "C" MStatus initializePlugin( MObject &obj )
-{
-	return getPlugin()->initialize(obj);
-}
+//! \mainpage
+///
+/// The IECoreMaya library provides the core C++ framework for all Maya development
+/// at Image Engine. Wherever possible, Maya-specific routines should be implemented
+/// within this library rather than within their respective tools. Code which is 
+/// truly generic and unrelated to Maya should be placed in the main IECore library.
+///
+/// \section mainPageDependencies Dependencies
+///
+/// \subsection IECore
+///
+/// \subsection Maya
+///
+/// <br>
 
-extern "C" MStatus uninitializePlugin( MObject &obj )
-{
-	return getPlugin()->uninitialize(obj);
-}
+/// \defgroup environmentgroup Environment variables
+///
+/// Various aspects of the IECoreMaya library are configured using environment variables.
+/// These are listed below.
+///
+/// <b>IECOREMAYA_DISABLEOUTPUTREDIRECTION</b><br>
+/// By default all python output and IECore::MessageHandler output are redirected through
+/// the appropriate MGlobal::display*() functions, so that they appear in the script editor.
+/// Setting this environment variables disables this redirection, causing the messages to appear
+/// in the shell.
 
-#else
-
-
-MStatus initializePlugin( MObject obj )
-{
-	MStatus s;
-	MFnPlugin plugin(obj, "Image Engine", "1.0");
-	return IECoreMaya::initialize( plugin );
-}
-
-MStatus uninitializePlugin( MObject obj )
-{ 
-	MStatus s;
-	MFnPlugin plugin(obj);
-	IECoreMaya::uninitialize( plugin );
-	return MS::kSuccess;
-}
-
-#endif
+#endif // IE_COREMAYA_COREMAYA_H
