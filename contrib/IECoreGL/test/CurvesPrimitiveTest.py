@@ -108,8 +108,6 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 					self.assertEqual( a[i], 1 )
 				elif r2[i] < 0.5 :
 					self.assertEqual( a[i], 0 )
-					
-			
 				
 	def testAttributes( self ) :
 	
@@ -470,12 +468,71 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			[
 			],
 			os.path.dirname( __file__ ) + "/images/twoBSplineCirclesAsLines.tif"
-		)	
-						
-#	def tearDown( self ) :
-#
-#		if os.path.exists( self.outputFileName ) :
-#			os.remove( self.outputFileName )
-#				
+		)
+		
+	def testRibbonWindingOrder( self ) :
+		
+		c = IECore.CurvesPrimitive(
+
+			IECore.IntVectorData( [ 4 ] ),
+			IECore.CubicBasisf.bSpline(),
+			True,
+			IECore.V3fVectorData(
+				[
+					IECore.V3f( 1, 0, 0 ),
+					IECore.V3f( 0, 0, 0 ),
+					IECore.V3f( 0, 1, 0 ),
+					IECore.V3f( 1, 1, 0 ),
+				]
+			)
+
+		)
+		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		
+			
+		self.performTest(
+			c,
+			[
+				( "doubleSided", IECore.BoolData( False ) ),
+			],
+			[
+			],
+			os.path.dirname( __file__ ) + "/images/bSplineCircle.tif"
+		)		
+	
+	def testLinearRibbonWindingOrder( self ) :
+	
+		c = IECore.CurvesPrimitive(
+			
+			IECore.IntVectorData( [ 4 ] ),
+			IECore.CubicBasisf.linear(),
+			True,
+			IECore.V3fVectorData(
+				[
+					IECore.V3f( 0.8, 0.2, 0 ),
+					IECore.V3f( 0.2, 0.2, 0 ),
+					IECore.V3f( 0.2, 0.8, 0 ),
+					IECore.V3f( 0.8, 0.8, 0 ),
+				]
+			)
+
+		)
+		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		
+		self.performTest(
+			c,
+			[
+				( "doubleSided", IECore.BoolData( False ) ),
+			],
+			[
+			],
+			os.path.dirname( __file__ ) + "/images/linearPeriodicRibbon.tif"
+		)
+					
+	def tearDown( self ) :
+
+		if os.path.exists( self.outputFileName ) :
+			os.remove( self.outputFileName )
+				
 if __name__ == "__main__":
     unittest.main()   

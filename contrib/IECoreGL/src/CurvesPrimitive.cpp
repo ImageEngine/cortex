@@ -207,8 +207,8 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 					float cosTheta = sqrt( 1.0f - sinTheta * sinTheta );					
 					o *= halfWidth / cosTheta;
 					
-					glVertex( p1 + o );
 					glVertex( p1 - o );
+					glVertex( p1 + o );
 				}
 
 			glEnd();
@@ -274,8 +274,8 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 								{
 									M44f aim = Imath::alignZAxisWithTargetDir( toCamera( lastP, cameraCentre, cameraView, perspective ), v );
 									V3f o( halfWidth, 0, 0 ); aim.multDirMatrix( o, o );
-									glVertex( lastP + o );
 									glVertex( lastP - o );
+									glVertex( lastP + o );
 								}
 								else
 								{
@@ -292,8 +292,8 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 
 							V3f o( halfWidth, 0, 0 ); aim.multDirMatrix( o, o );
 
-							glVertex( lastP + o );
 							glVertex( lastP - o );
+							glVertex( lastP + o );
 							
 							if( i==0 && ti==2 )
 							{
@@ -309,18 +309,18 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 								{
 									M44f aim = Imath::alignZAxisWithTargetDir( toCamera( p, cameraCentre, cameraView, perspective ), v );
 									V3f o( halfWidth, 0, 0 ); aim.multDirMatrix( o, o );
-									glVertex( p + o );
 									glVertex( p - o );
+									glVertex( p + o );
 								}
 								else
 								{
 									V3f vAvg = (v + firstV) / 2.0f;
 									M44f aim = Imath::alignZAxisWithTargetDir( toCamera( p, cameraCentre, cameraView, perspective ), vAvg );
 									V3f o( halfWidth, 0, 0 ); aim.multDirMatrix( o, o );
-									glVertex( p + o );
 									glVertex( p - o );
-									glVertex( firstP + firstO );
+									glVertex( p + o );
 									glVertex( firstP - firstO );
+									glVertex( firstP + firstO );
 								}
 							}
 							
