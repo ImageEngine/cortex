@@ -55,17 +55,17 @@ class TypedPrimitiveOp : public ModifyOp
 		virtual ~TypedPrimitiveOp();
 		
 		//! @name RunTimeTyped functions
-                ////////////////////////////////////
-                //@{
-                virtual TypeId typeId() const;
-                virtual std::string typeName() const;
-                virtual bool isInstanceOf( TypeId typeId ) const;
-                virtual bool isInstanceOf( const std::string &typeName ) const;
-                static TypeId staticTypeId();
-                static std::string staticTypeName();
-                static bool inheritsFrom( TypeId typeId );
-                static bool inheritsFrom( const std::string &typeName );
-                //@}
+		////////////////////////////////////
+		//@{
+		virtual TypeId typeId() const;
+		virtual std::string typeName() const;
+		virtual bool isInstanceOf( TypeId typeId ) const;
+		virtual bool isInstanceOf( const std::string &typeName ) const;
+		static TypeId staticTypeId();
+		static std::string staticTypeName();
+		static bool inheritsFrom( TypeId typeId );
+		static bool inheritsFrom( const std::string &typeName );
+		//@}
 		
 	protected :
 		
