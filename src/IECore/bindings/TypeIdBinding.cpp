@@ -252,6 +252,7 @@ void bindTypeId()
 		.value("TransformOp", TransformOpTypeId )
 		.value("CurvesPrimitive", CurvesPrimitiveTypeId )
 		.value("ImageDiffOp", ImageDiffOpTypeId )
+		.value("MeshNormalsOp", MeshNormalsOpTypeId )
 	;
 }
 

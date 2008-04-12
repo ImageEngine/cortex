@@ -252,6 +252,7 @@ enum TypeId
 	ImageDiffOpTypeId = 209,
 	CurvesPrimitiveTypeId = 210,
 	CoordinateSystemTypeId = 211,
+	MeshNormalsOpTypeId = 212,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
