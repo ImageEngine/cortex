@@ -306,10 +306,7 @@ void Camera::render( RendererPtr renderer )
 		m_transform->render( renderer );
 	}
 	
-			/// \todo We should be calling readable() but we can't
-			/// because the parameters parameter in the camera() call
-			/// should be const and isn't
-			renderer->camera( m_name, m_parameters->writable() );
+		renderer->camera( m_name, m_parameters->readable() );
 	
 	if( m_transform )
 	{
