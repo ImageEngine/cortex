@@ -307,6 +307,30 @@ class TestHierarchicalCache(unittest.TestCase):
 		self.assertEqual( cache.bound( "/t" ), Box3f( V3f( 0,0,1 ), V3f( 0,1,2 ) ) )
 		cache.remove( "/t" )
 		self.assertEqual( cache.bound( "/" ), Box3f( V3f( 0,0,1 ), V3f( 0,0,1 ) ) )
+	
+	def testOverwriteFailure( self ) :
+	
+		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Append)
+		
+		# write an object
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		cache.write( "/o1", m )
+		self.assertEqual( cache.shape( "/o1" ), m )
+
+		# make a new and different object
+		mm = m.copy()
+		self.assertEqual( mm, m )
+		del mm["P"]
+		self.assertNotEqual( mm, m )
+		
+		# write that over the old one
+		cache.write( "/o1", mm )
+		
+		# and check that the contents of the cache
+		# is the new object and not the old one
+		
+		self.assertEqual( cache.shape( "/o1" ), mm )
+		self.assertNotEqual( cache.shape( "/o1" ), m )
 		
 	def setUp(self):
 		
