@@ -64,7 +64,7 @@ IECore::ObjectPtr FromMayaTransformationMatrixConverter<T>::doConversion( const 
 	}
 
 	MTransformationMatrix t = fnMatrixData.transformation();
-	typename T::ValueType tt = IECoreMaya::convert<typename T::ValueType>( t );
+	typename T::ValueType tt = IECore::convert<typename T::ValueType>( t );
 	return new T( tt );
 }
 

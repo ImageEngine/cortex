@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,12 +35,14 @@
 #ifndef IE_COREMAYA_CONVERT_H
 #define IE_COREMAYA_CONVERT_H
 
+#include "IECore/Convert.h"
+#include "IECore/TransformationMatrix.h"
+
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathQuat.h"
 #include "OpenEXR/ImathMatrix.h"
-#include "IECore/TransformationMatrix.h"
 
 #include "maya/MString.h"
 #include "maya/MBoundingBox.h"
@@ -55,21 +57,10 @@
 
 #include <string>
 
-namespace IECoreMaya
+/// Specialising in the IECore namespace. This is OK because the Maya types
+/// will never be referenced in IECore
+namespace IECore
 {
-
-/// The convert function is used to provide easy conversion
-/// of simple types (like vectors and strings) between maya
-/// and basic IECore types - the Converter classes exist for conversions
-/// of more complex objects. This function must be specialised for
-/// any types it will be used with.
-/// \todo Should the convert function go in IECore?
-/// \todo Add more conversions.
-template<typename T, typename F>
-T convert( const F &from )
-{
-	return static_cast<T>( from );
-}
 
 template<>
 std::string convert( const MString &from );
@@ -170,6 +161,6 @@ IECore::TransformationMatrixd convert( const MTransformationMatrix &from );
 template<>
 MTransformationMatrix convert( const IECore::TransformationMatrixd &from );
 
-} // namespace IECoreMaya
+} // namespace IECore
 
 #endif // IE_COREMAYA_CONVERT_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -214,13 +214,13 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 			switch( request.displayStyle() )
 			{
 				case M3dView::kWireFrame :
-					baseState( M3dView::kWireFrame )->add( new IECoreGL::WireframeColorStateComponent( convert<Imath::Color4f>( wc ) ) );
+					baseState( M3dView::kWireFrame )->add( new IECoreGL::WireframeColorStateComponent( IECore::convert<Imath::Color4f>( wc ) ) );
 					break;
 				case M3dView::kPoints :
-					baseState( M3dView::kPoints )->add( new IECoreGL::PointColorStateComponent( convert<Imath::Color4f>( wc ) ) );
+					baseState( M3dView::kPoints )->add( new IECoreGL::PointColorStateComponent( IECore::convert<Imath::Color4f>( wc ) ) );
 					break;
 				case M3dView::kBoundingBox :
-					baseState( M3dView::kBoundingBox )->add( new IECoreGL::BoundColorStateComponent( convert<Imath::Color4f>( wc ) ) );
+					baseState( M3dView::kBoundingBox )->add( new IECoreGL::BoundColorStateComponent( IECore::convert<Imath::Color4f>( wc ) ) );
 					break;	
 				default :
 					break;
@@ -230,7 +230,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 			if( request.token()==BoundDrawMode )
 			{
 				IECoreGL::StatePtr wireframeState = baseState( M3dView::kWireFrame );
-				m_boxPrimitive->setBox( convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
+				m_boxPrimitive->setBox( IECore::convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
 				glPushAttrib( wireframeState->mask() );
 					(boost::static_pointer_cast<IECoreGL::Renderable>( m_boxPrimitive ))->render( wireframeState );
 				glPopAttrib();

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -66,7 +66,7 @@ IECore::ObjectPtr FromMayaArrayDataConverter<F,T>::doConversion( const MObject &
 	resultArray.resize( array.length() );
 	for( unsigned int i=0; i<resultArray.size(); i++ )
 	{
-		resultArray[i] = IECoreMaya::convert<typename T::ValueType::value_type, typename MArrayTraits<F>::ValueType>( array[i] );
+		resultArray[i] = IECore::convert<typename T::ValueType::value_type, typename MArrayTraits<F>::ValueType>( array[i] );
 	}
 	
 	return resultData;

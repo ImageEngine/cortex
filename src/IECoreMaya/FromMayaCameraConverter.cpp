@@ -100,11 +100,11 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MObject &object, 
 	// convert things that are required by the IECore::Renderer specification
 
 	CameraPtr result = new Camera;
-	result->setName( IECoreMaya::convert<std::string>( fnCamera.name() ) );
+	result->setName( IECore::convert<std::string>( fnCamera.name() ) );
 	
 	MDagPath path;
 	fnCamera.getPath( path );
-	result->setTransform( new MatrixTransform( IECoreMaya::convert<Imath::M44f>( path.inclusiveMatrix() ) ) );
+	result->setTransform( new MatrixTransform( IECore::convert<Imath::M44f>( path.inclusiveMatrix() ) ) );
 
 	V2i resolution;
 	if( operands->member<IntData>( "resolutionMode" )->readable()==RenderGlobals )

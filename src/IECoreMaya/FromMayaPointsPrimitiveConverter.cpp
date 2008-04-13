@@ -162,7 +162,7 @@ IECore::ObjectPtr FromMayaPointsPrimitiveConverter::doConversion( const MObject 
 				{
 					return 0;
 				}
-				positions[p] = IECoreMaya::convert< V3f >( centerPos );
+				positions[p] = IECore::convert< V3f >( centerPos );
 				fnFluid.index( p, xRes, yRes, zRes, xVel, yVel, zVel );
 				velocities[p] = (V3f( velX[xVel], velY[yVel], velZ[zVel] ) + V3f( velX[xVel+1], velY[yVel+1], velZ[zVel+1] )) / 2;
 			}

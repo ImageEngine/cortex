@@ -80,7 +80,7 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 			vertexArray.setLength( numVertices );
 			for (int i = 0; i < numVertices; i++)
 			{
-				vertexArray[i] = IECoreMaya::convert<MFloatPoint, Imath::V3f>( p->readable()[i] );
+				vertexArray[i] = IECore::convert<MFloatPoint, Imath::V3f>( p->readable()[i] );
 			}	
 		}
 		else
@@ -93,7 +93,7 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 				vertexArray.setLength( numVertices );
 				for (int i = 0; i < numVertices; i++)
 				{
-					vertexArray[i] = IECoreMaya::convert<MFloatPoint, Imath::V3d>( p->readable()[i] );
+					vertexArray[i] = IECore::convert<MFloatPoint, Imath::V3d>( p->readable()[i] );
 				}	
 			}
 			else
@@ -145,7 +145,7 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 				vertexNormalsArray.setLength( numVertexNormals );
 				for (int i = 0; i < numVertexNormals; i++)
 				{
-					vertexNormalsArray[i] = IECoreMaya::convert<MFloatVector, Imath::V3f>( n->readable()[i] );
+					vertexNormalsArray[i] = IECore::convert<MFloatVector, Imath::V3f>( n->readable()[i] );
 				}	
 
 				fnMesh.setNormals( vertexNormalsArray );			
@@ -160,7 +160,7 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 					vertexNormalsArray.setLength( numVertexNormals );
 					for (int i = 0; i < numVertexNormals; i++)
 					{
-						vertexNormalsArray[i] = IECoreMaya::convert<MFloatVector, Imath::V3d>( n->readable()[i] );
+						vertexNormalsArray[i] = IECore::convert<MFloatVector, Imath::V3d>( n->readable()[i] );
 					}
 
 					fnMesh.setNormals( vertexNormalsArray );
