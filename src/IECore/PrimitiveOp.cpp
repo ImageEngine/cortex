@@ -42,7 +42,7 @@
 using namespace IECore;
 using namespace boost;
 
-PrimitiveOp::PrimitiveOp( const std::string name, const std::string description )
+PrimitiveOp::PrimitiveOp( const std::string &name, const std::string &description )
 	:	ModifyOp( name, description, new ObjectParameter( "result", "The result", new NullObject, PrimitiveTypeId ), new ObjectParameter( "input", "The Primitive to modify", new NullObject, PrimitiveTypeId ) )
 {
 }
