@@ -72,7 +72,7 @@ class EXRImageWriter : public ImageWriter
 		                        const Imath::Box2i &dw) const;
 
 		template<typename T>
-		void writeTypedChannel(const char *name, ConstImagePrimitivePtr image,
+		void writeTypedChannel(const char *name,
 		                       const Imath::Box2i &dw, const std::vector<T> &channel,
 		                       const Imf::PixelType TYPE, Imf::Header &header,
 		                       Imf::FrameBuffer &fb) const;

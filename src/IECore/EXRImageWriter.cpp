@@ -108,19 +108,19 @@ void EXRImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 			switch (channelData->typeId())
 			{
 			case FloatVectorDataTypeId:
-				writeTypedChannel<float>(name, image, dataWindow,
+				writeTypedChannel<float>(name, dataWindow,
 				                         boost::static_pointer_cast<const FloatVectorData>(channelData)->readable(),
 				                         FLOAT, header, fb);
 				break;
 
 			case UIntVectorDataTypeId:
-				writeTypedChannel<unsigned int>(name, image, dataWindow,
+				writeTypedChannel<unsigned int>(name, dataWindow,
 				                                boost::static_pointer_cast<const UIntVectorData>(channelData)->readable(),
 				                                UINT, header, fb);
 				break;
 
 			case HalfVectorDataTypeId:
-				writeTypedChannel<half>(name, image, dataWindow,
+				writeTypedChannel<half>(name, dataWindow,
 				                        boost::static_pointer_cast<const HalfVectorData>(channelData)->readable(),
 				                        HALF, header, fb);
 				break;
@@ -152,13 +152,10 @@ void EXRImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 }
 
 template<typename T>
-void EXRImageWriter::writeTypedChannel(const char *name, ConstImagePrimitivePtr image, const Box2i &dataWindow,
+void EXRImageWriter::writeTypedChannel(const char *name, const Box2i &dataWindow,
                                        const vector<T> &channel, const Imf::PixelType pixelType, Header &header, FrameBuffer &fb) const
 {
 	assert( name );
-
-	/// \todo Remove this unused parameter
-	(void) image;
 
 	int width = 1 + dataWindow.max.x - dataWindow.min.x;
 
