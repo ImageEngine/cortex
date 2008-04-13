@@ -77,30 +77,6 @@ struct SmootherStepFalloff
 /// providing a falloff function - see SmoothStepFalloff for an example
 /// of one of these.
 /// \todo 4d ones
-/// \bug The 1d version apparently returns 0 if compiled with -O3
-/// \bug Even the 3d version is apparently failing with -O3 - Lucio has
-/// tracked it down to this :
-///
-/// template<typename P, typename V, typename F>
-/// inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::noise( const Point &p ) const
-/// {
-///    int pi[m_maxPointDimensions];
-///     for( unsigned int i=0; i<PointTraits::dimensions(); i++ )
-///     {
-///         pi[i] = fastFloatFloor( vecGet( p, i ) );
-///     }
-///     std::cout << "PointTraits::dimensions(): " << PointTraits::dimensions() << " m_maxPointDimensions: " << m_maxPointDimensions << std::endl;
-///     std::cout << "p " << p[0] << ", " << p[1] << ", " << p[2] << std::endl;
-///     std::cout << "pi " << pi[0] << ", " << pi[1] << ", " << pi[2] << std::endl;
-/// 
-///     return noiseWalk( pi, p, PointTraits::dimensions()-1 );
-/// }
-/// 
-/// I got the following odd output:
-/// 
-/// PointTraits::dimensions(): 4 m_maxPointDimensions: 4
-/// p 0.991601, -0.905699, -1.22626
-/// pi 134758504, 0, -1
 template<typename P, typename V, typename F>
 class PerlinNoise
 {
