@@ -248,6 +248,7 @@ ObjectPtr DataPromoteOp::doOperation( ConstCompoundObjectPtr operands )
 
 	DataPtr targetData = despatchTypedData< Promote1Fn, TypeTraits::IsNumericTypedData >( srcData, fn );
 	assert( targetData );
+	assert( targetData->typeId() == targetType );
 
 #ifndef NDEBUG
 	size_t srcSize = despatchTypedData< TypedDataSize >( srcData ) ;
