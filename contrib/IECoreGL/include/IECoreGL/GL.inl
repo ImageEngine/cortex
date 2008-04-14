@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,22 +36,17 @@
 /// Include this file to include the system OpenGL headers. It's better this way as the
 /// right way of including OpenGL varies from system to system.
 
-#ifndef IECOREGL_GL_H
-#define IECOREGL_GL_H
-
-// now we're using glew we can just include that instead
-// and it'll do all the cross platform worrying for us
-#include "glew.h"
-
-#include "OpenEXR/ImathVec.h"
+#ifndef IECOREGL_GL_INL
+#define IECOREGL_GL_INL
 
 namespace IECoreGL
 {
 
-inline void glVertex( const Imath::V3f &v );
+inline void glVertex( const Imath::V3f &v )
+{
+	glVertex3f( v.x, v.y, v.z );
+}
 
 } // namespace IECoreGL
 
-#include "IECoreGL/GL.inl"
-
-#endif // IECOREGL_GL_H
+#endif // IECOREGL_GL_INL

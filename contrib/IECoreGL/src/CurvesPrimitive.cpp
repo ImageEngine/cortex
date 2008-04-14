@@ -38,7 +38,6 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/CurvesPrimitive.h"
 
-#include "OpenEXR/ImathGL.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
 #include "OpenEXR/ImathFun.h"
 
