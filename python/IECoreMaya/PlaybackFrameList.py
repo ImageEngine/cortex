@@ -34,7 +34,7 @@
 
 from IECore import FrameList
 from IECore import Enum
-from  maya.cmds import playbackOptions
+import maya.cmds
 
 ## The PlaybackFrameList implements an IECore.FrameList which
 # represents the playback ranges queryable using the maya
@@ -66,11 +66,11 @@ class PlaybackFrameList( FrameList ) :
 	def asList( self ) :
 	
 		if self.range==self.Range.Animation :
-			first = playbackOptions( query=True, animationStartTime=True )
-			last = playbackOptions( query=True, animationEndTime=True )
+			first = maya.cmds.playbackOptions( query=True, animationStartTime=True )
+			last = maya.cmds.playbackOptions( query=True, animationEndTime=True )
 		elif self.range==self.Range.Playback :
-			first = playbackOptions( query=True, minTime=True )
-			last = playbackOptions( query=True, maxTime=True )
+			first = maya.cmds.playbackOptions( query=True, minTime=True )
+			last = maya.cmds.playbackOptions( query=True, maxTime=True )
 			
 		return range( int( first ), int( last+1 ) )
 			
