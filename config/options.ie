@@ -72,7 +72,7 @@ LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVer
 # ignore python-config stuff and specify it all explicitly ourselves
 pythonVersion = getOption( "PYTHON_VERSION", "2.5" )
 pythonReg = IEEnv.registry['apps']['python'][pythonVersion][IEEnv.platform()]
-PYTHON = "/software/tools/wrappers/python" + pythonVersion
+PYTHON = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/bin/python" + pythonVersion
 PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/" + pythonReg["include"] + "/python" + pythonVersion
 PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 if PYTHON_LINK_FLAGS=="" :
@@ -119,8 +119,7 @@ WITH_GL=1
 ENV_VARS_TO_IMPORT="PATH COMPILER COMPILER_VERSION PYTHONPATH IEENV_ROOT IEENV_WORKING_PATH IEENV_LIBRARY_PREFIX_PATH DOXYGEN_VERSION IEENV_DEBUG IEENV_DEBUG_PYTHON IEENV_DEBUGGER IEENV_DEBUGGER_ARGS DELIGHT_CONF SCONS_VERSION"
 
 # make sure the tests can run
-TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
-TEST_LIBPATH = compilerReg["location"] + "/lib"
+TEST_LIBPATH = ":".join( [ pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib", compilerReg["location"] + "/lib" ] )
 
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )

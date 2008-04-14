@@ -383,6 +383,14 @@ o.Add(
 )
 
 o.Add(
+	"TEST_MAYA_SCRIPT",
+	"The python script to run for the renderman tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"test/IECoreMaya/All.py"
+)
+
+o.Add(
 	"TEST_LIBPATH",
 	"Additional colon separated paths to be prepended to the library path"
 	"used when running tests.",
@@ -889,11 +897,13 @@ if doConfigure :
 		Default( [ riLibrary, riPythonModule ] )
 		
 		riTestEnv = testEnv.Copy()
-		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
+
+		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
 		riTestEnv["ENV"]["DELIGHT"] = riEnv.subst( "$RMAN_ROOT" )
 		riTestEnv["ENV"]["DL_SHADERS_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
 		riTestEnv["ENV"]["DL_DISPLAYS_PATH"] = riEnv.subst( "$RMAN_ROOT/displays" )
+		
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " $TEST_RI_SCRIPT" )
 		NoCache( riTest )
 		riTestEnv.Depends( riTest, corePythonModule )
@@ -1171,6 +1181,19 @@ if doConfigure :
 			corePythonEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
 
 		Default( [ mayaLibrary, mayaPlugin, mayaPythonModule ] )
+		
+		mayaTestEnv = testEnv.Copy()
+		mayaTestEnv["ENV"]["LD_LIBRARY_PATH"] += ":" + mayaEnv.subst( ":".join( [ "./lib" ] + mayaPythonEnv["LIBPATH"] ) )
+		mayaTestEnv["ENV"]["PATH"] = mayaEnv.subst( "$MAYA_ROOT/bin:" ) + mayaEnv["ENV"]["PATH"]
+		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya"
+		mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./mel"
+		mayaPythonExecutable = "mayapy"
+		
+		mayaTest = mayaTestEnv.Command( "test/IECoreMaya/results.txt", mayaPythonModule, mayaPythonExecutable + " $TEST_MAYA_SCRIPT" )
+		NoCache( mayaTest )
+		mayaTestEnv.Depends( mayaTest, [ mayaPlugin, mayaPythonModule ] )
+		mayaTestEnv.Depends( mayaTest, glob.glob( "test/IECoreMaya/*.py" ) )
+		mayaTestEnv.Alias( "testMaya", mayaTest )			
 
 ###########################################################################################
 # Build and install the coreNuke library and headers
