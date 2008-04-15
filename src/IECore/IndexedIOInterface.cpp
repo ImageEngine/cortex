@@ -83,58 +83,51 @@ IndexedIOInterface::~IndexedIOInterface()
 {
 }
 
-IndexedIO::OpenMode IndexedIOInterface::openMode() const
-{
-	return m_mode;
-}
-
 void IndexedIOInterface::readable(const IndexedIO::EntryID &name) const
 {
 }
 
 void IndexedIOInterface::writable(const IndexedIO::EntryID &name) const
 {
-	if (m_mode & (IndexedIO::Write | IndexedIO::Append) == 0)
+	if ( openMode() & (IndexedIO::Write | IndexedIO::Append) == 0)
 	{
 		throw PermissionDeniedIOException(name);
 	}
 }
 
-void IndexedIOInterface::validateOpenMode(IndexedIO::OpenMode mode)
+void IndexedIOInterface::validateOpenMode(IndexedIO::OpenMode &mode)
 {
-	m_mode = mode;
-	
 	// Clear 'other' bits
-	m_mode &= IndexedIO::Read | IndexedIO::Write | IndexedIO::Append 
+	mode &= IndexedIO::Read | IndexedIO::Write | IndexedIO::Append 
 			| IndexedIO::Shared | IndexedIO::Exclusive;
 	
 	// Check for mutual exclusivity
-	if ((m_mode & IndexedIO::Shared)
-		&& (m_mode & IndexedIO::Exclusive))
+	if ((mode & IndexedIO::Shared)
+		&& (mode & IndexedIO::Exclusive))
 	{		
 		throw InvalidArgumentException("Incorrect IndexedIO open mode specified");
 	}
 	
-	if ((m_mode & IndexedIO::Write)
-		&& (m_mode & IndexedIO::Append))
+	if ((mode & IndexedIO::Write)
+		&& (mode & IndexedIO::Append))
 	{	
 		throw InvalidArgumentException("Incorrect IndexedIO open mode specified");
 	}
 		
 	// Set up default as 'read'
-	if (!(m_mode & IndexedIO::Read
-		|| m_mode & IndexedIO::Write
-		|| m_mode & IndexedIO::Append)
+	if (!(mode & IndexedIO::Read
+		|| mode & IndexedIO::Write
+		|| mode & IndexedIO::Append)
 	)
 	{
-		m_mode |= IndexedIO::Read;
+		mode |= IndexedIO::Read;
 	}
 	
 	// Set up default as 'shared'
-	if (!(m_mode & IndexedIO::Shared
-		|| m_mode & IndexedIO::Exclusive))
+	if (!(mode & IndexedIO::Shared
+		|| mode & IndexedIO::Exclusive))
 	{
-		m_mode |= IndexedIO::Shared;
+		mode |= IndexedIO::Shared;
 	}
 	
 }

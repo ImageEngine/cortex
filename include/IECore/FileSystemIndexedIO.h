@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,6 +51,8 @@ class FileSystemIndexedIO : public IndexedIOInterface
 		FileSystemIndexedIO(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
 		
 		virtual ~FileSystemIndexedIO();
+		
+		virtual IndexedIO::OpenMode openMode() const;
 	
 		IndexedIOInterfacePtr resetRoot() const;
 		
@@ -74,6 +76,8 @@ class FileSystemIndexedIO : public IndexedIOInterface
 		void write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const char *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength);
+		void write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength);
+		void write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength);		
 		void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength);
 		
 		void write(const IndexedIO::EntryID &name, const float &x);		
@@ -84,7 +88,9 @@ class FileSystemIndexedIO : public IndexedIOInterface
 		void write(const IndexedIO::EntryID &name, const std::string &x);		
 		void write(const IndexedIO::EntryID &name, const unsigned int &x);		
 		void write(const IndexedIO::EntryID &name, const char &x);		
-		void write(const IndexedIO::EntryID &name, const unsigned char &x);		
+		void write(const IndexedIO::EntryID &name, const unsigned char &x);
+		void write(const IndexedIO::EntryID &name, const short &x);		
+		void write(const IndexedIO::EntryID &name, const unsigned short &x);					
 				
 		void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength);
 		void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength);
@@ -95,6 +101,8 @@ class FileSystemIndexedIO : public IndexedIOInterface
 		void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength);
 		void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength);
 		void read(const IndexedIO::EntryID &name, std::string*&x, unsigned long arrayLength);
+		void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength);
+		void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength);		
 		void read(const IndexedIO::EntryID &name, float &x);
 		void read(const IndexedIO::EntryID &name, double &x);
 		void read(const IndexedIO::EntryID &name, half &x);		
@@ -104,8 +112,15 @@ class FileSystemIndexedIO : public IndexedIOInterface
 		void read(const IndexedIO::EntryID &name, unsigned int &x);
 		void read(const IndexedIO::EntryID &name, char &x);
 		void read(const IndexedIO::EntryID &name, unsigned char &x);
+		void read(const IndexedIO::EntryID &name, short &x);
+		void read(const IndexedIO::EntryID &name, unsigned short &x);		
 		
 	protected:
+	
+		IndexedIOPath m_currentDirectory;
+	
+		/// The mode this device was opened with
+		IndexedIO::OpenMode m_mode;
 		
 		// Write an array of POD types
 		template<typename T>

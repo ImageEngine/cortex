@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,6 +55,7 @@ IndexedIOInterfacePtr FileSystemIndexedIO::create(const std::string &path, const
 FileSystemIndexedIO::FileSystemIndexedIO(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode)
 {
 	validateOpenMode(mode);
+	m_mode = mode;
 	
 	IndexedIOPath tmp( path );
 	tmp.append(root);
@@ -96,6 +97,11 @@ FileSystemIndexedIO::FileSystemIndexedIO(const std::string &path, const IndexedI
 		
 FileSystemIndexedIO::~FileSystemIndexedIO()
 {
+}
+
+IndexedIO::OpenMode FileSystemIndexedIO::openMode() const
+{
+	return m_mode;
 }
 
 IndexedIOInterfacePtr FileSystemIndexedIO::resetRoot() const
@@ -580,6 +586,16 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const unsigned c
 	write<unsigned char>(name, x);
 }
 
+void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const short &x)
+{
+	write<short>(name, x);
+}
+
+void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const unsigned short &x)
+{
+	write<unsigned short>(name, x);
+}
+
 void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength)
 {
 	write<unsigned int>(name, x, arrayLength);
@@ -598,6 +614,16 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const unsigned c
 void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength)
 {
 	write<std::string>(name, x, arrayLength);
+}
+
+void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength)
+{
+	write<short>(name, x, arrayLength);
+}
+
+void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength)
+{
+	write<unsigned short>(name, x, arrayLength);
 }
 
 void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength)
@@ -638,6 +664,16 @@ void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, char *&x, unsigne
 void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength)
 {
 	read<unsigned char>(name, x, arrayLength);
+}
+
+void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength)
+{
+	read<short>(name, x, arrayLength);
+}
+
+void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength)
+{
+	read<unsigned short>(name, x, arrayLength);
 }
 
 void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength)
@@ -688,4 +724,14 @@ void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, char &x)
 void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, unsigned char &x)
 {
 	read<unsigned char>(name, x);
+}
+
+void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, short &x)
+{
+	read<short>(name, x);
+}
+
+void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, unsigned short &x)
+{
+	read<unsigned short>(name, x);
 }

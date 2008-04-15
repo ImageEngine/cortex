@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,7 +70,6 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// \param path A file or directory on disk. The appropriate reader for reading/writing is determined by the path's extension.
 		/// \param root The root point to 'mount' the structure. Paths above the root in the hierarchy are inaccessible.
 		/// \param mode A bitwise-ORed combination of constants which determine how the file system should be accessed.
-		/// Test
 		static IndexedIOInterfacePtr create( const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
 		
 		/// Fills the passed vector with all the extensions for which an IndexedIOInterface implementation is
@@ -89,15 +88,12 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		virtual ~IndexedIOInterface();
 		
 		/// Returns the mode with which the interface was created.
-		/// \todo This should be made virtual with the next major version, to provide subclasses with the possibility
-		/// of defining it differently. Having m_mode and m_currentDirectory as data members
-		/// in an interface class seems a little dubious anyway.
-		IndexedIO::OpenMode openMode() const;
+		virtual IndexedIO::OpenMode openMode() const = 0;
 		
 		/// Returns a new interface with the root set to the current directory.
 		virtual IndexedIOInterfacePtr resetRoot() const = 0;
 		
-		/// Relocate to a different directory within the current device.  7Attempting to navigate above the current root directory will throw an exception.
+		/// Relocate to a different directory within the current device.  Attempting to navigate above the current root directory will throw an exception.
 		/// \param name The directory to relocate to. Can be an absolute or relative path. Special directory names such as ".", "..", and "/" are supported.
 		virtual void chdir(const IndexedIO::EntryID &name) = 0;
 		
@@ -137,19 +133,19 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// \param arrayLength The number of elements in the array
 		virtual void write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength) = 0;
 		
-		/// Create a new file containing the specified unsigned int  array contents
+		/// Create a new file containing the specified unsigned int array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
 		virtual void write(const IndexedIO::EntryID &name, const int *x, unsigned long arrayLength) = 0;
 		
-		/// Create a new file containing the specified unsigned long  array contents
+		/// Create a new file containing the specified unsigned long array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
 		virtual void write(const IndexedIO::EntryID &name, const long *x, unsigned long arrayLength) = 0;			
 		
-		/// Create a new file containing the specified unsigned int  array contents
+		/// Create a new file containing the specified unsigned int array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
@@ -167,7 +163,19 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// \param arrayLength The number of elements in the array
 		virtual void write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength) = 0;
 		
-		/// Create a new file containing the specified string contents
+		/// Create a new file containing the specified short array contents
+		/// \param name The name of the file to be written
+		/// \param x The data to write
+		/// \param arrayLength The number of elements in the array
+		virtual void write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength) = 0;
+		
+		/// Create a new file containing the specified unsigned short array contents
+		/// \param name The name of the file to be written
+		/// \param x The data to write
+		/// \param arrayLength The number of elements in the array
+		virtual void write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength) = 0;
+		
+		/// Create a new file containing the specified string array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
@@ -217,6 +225,16 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		virtual void write(const IndexedIO::EntryID &name, const unsigned char &x) = 0;
+				
+		/// Create a new file containing the specified short
+		/// \param name The name of the file to be written
+		/// \param x The data to write
+		virtual void write(const IndexedIO::EntryID &name, const short &x) = 0;
+		
+		/// Create a new file containing the specified unsigned short
+		/// \param name The name of the file to be written
+		/// \param x The data to write
+		virtual void write(const IndexedIO::EntryID &name, const unsigned short &x) = 0;
 		
 		/// Read a float array from an existing file.
 		/// \param name The name of the file to be read
@@ -260,13 +278,25 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// \param arrayLength The number of elements in the array
 		virtual void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength) = 0;
 		
-		/// Read an unsigned array from an existing file.
+		/// Read an unsigned char array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
 		virtual void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength) = 0;
 		
-		/// Read an unsigned array from an existing file.
+		/// Read a short array from an existing file.
+		/// \param name The name of the file to be read
+		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
+		/// \param arrayLength The number of elements in the array
+		virtual void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) = 0;
+		
+		/// Read an unsigned short array from an existing file.
+		/// \param name The name of the file to be read
+		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
+		/// \param arrayLength The number of elements in the array
+		virtual void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) = 0;		
+		
+		/// Read a string array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
@@ -317,20 +347,25 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// \param x Returns the data read.
 		virtual void read(const IndexedIO::EntryID &name, unsigned char &x) = 0;
 		
+		/// Read a short from an existing file
+		/// \param name The name of the file to be read
+		/// \param x Returns the data read.
+		virtual void read(const IndexedIO::EntryID &name, short &x) = 0;
+		
+		/// Read an unsigned char from an existing file
+		/// \param name The name of the file to be read
+		/// \param x Returns the data read.
+		virtual void read(const IndexedIO::EntryID &name, unsigned short &x) = 0;
+		
 	protected:
-						
-		IndexedIOPath m_currentDirectory;
-	
-		/// The mode this device was opened with
-		IndexedIO::OpenMode m_mode;
-
+								
 		// Throw an exception if the entry is not readable
 		virtual void readable(const IndexedIO::EntryID &name) const;
 		
 		// Throw an exception if the entry is not writable
 		virtual void writable(const IndexedIO::EntryID &name) const;
 		
-		virtual void validateOpenMode(IndexedIO::OpenMode mode);
+		virtual void validateOpenMode(IndexedIO::OpenMode &mode);
 		
 	private:
 		/// Register a new subclass that can handle the given extension

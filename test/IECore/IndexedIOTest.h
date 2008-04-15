@@ -161,6 +161,8 @@ struct IndexedIOTest
 		write<unsigned int>(io);
 		write<char>(io);
 		write<unsigned char>(io);
+		write<short>(io);
+		write<unsigned short>(io);		
 		
 		
 		writeArray<float>(io);
@@ -172,6 +174,8 @@ struct IndexedIOTest
 		writeArray<unsigned int>(io);
 		writeArray<char>(io);
 		writeArray<unsigned char>(io);
+		writeArray<short>(io);
+		writeArray<unsigned short>(io);		
 		
 	}
 	
