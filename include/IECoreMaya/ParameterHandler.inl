@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,13 +31,6 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
-
-template<class T>
-ParameterHandler::Description<T>::Description( IECore::TypeId parameterType )
-{
-	ParameterHandler::registerHandler( parameterType, IECore::InvalidTypeId, new T() );
-}
 
 template<class T>
 ParameterHandler::Description<T>::Description( IECore::TypeId parameterType, IECore::TypeId dataType )

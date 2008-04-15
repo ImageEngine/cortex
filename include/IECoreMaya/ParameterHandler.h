@@ -79,10 +79,7 @@ class ParameterHandler : public IECore::RefCounted
 			/// Declare a static instance to register a parameter handler. Pass the type of parameter handled and,
 			/// optionally, the type of the data contained within the parameter. This allows, for example, ObjectParameter
 			/// to find handlers based on the typeIds of objects it can contain.
-			/// \todo Use only one constructor here, with the dataType parameter having a default value of InvalidTypeId, 
-			/// but only after the next major version change
-                        Description( IECore::TypeId parameterType );
-			Description( IECore::TypeId parameterType, IECore::TypeId dataType );
+			Description( IECore::TypeId parameterType, IECore::TypeId dataType = IECore::InvalidTypeId);
                 };
 		
 	protected:
