@@ -365,6 +365,35 @@ MStatus ParameterisedHolder<B>::setNodeValues()
 	}
 	return MStatus::kSuccess;
 }
+
+template<typename B>
+MStatus ParameterisedHolder<B>::setNodeValue( ParameterPtr pa )
+{
+	MPlug p = parameterPlug( pa );
+	if( p.isNull() )
+	{
+		return MStatus::kFailure;
+	}
+	
+	MStatus s = MS::kSuccess;
+		
+	try
+	{	
+		s = IECoreMaya::Parameter::setValue( pa, p );
+	} 
+	catch ( std::exception &e )
+	{
+		msg( Msg::Error, "ParameterisedHolder::setNodeValues", boost::format( "Caught exception while setting parameter value to attribute %s : %s" ) % p.name().asChar() % e.what());
+		s = MS::kFailure;
+	}
+	catch (...)
+	{
+		msg( Msg::Error, "ParameterisedHolder::setNodeValues", boost::format( "Caught exception while setting parameter value to attribute %s" ) % p.name().asChar());
+		s = MS::kFailure;
+	}
+	
+	return s;
+}
 		
 template<typename B>
 MStatus ParameterisedHolder<B>::setParameterisedValues()
@@ -402,6 +431,35 @@ MStatus ParameterisedHolder<B>::setParameterisedValues()
 		}
 	}
 	return MStatus::kSuccess;
+}
+
+template<typename B>
+MStatus ParameterisedHolder<B>::setParameterisedValue( ParameterPtr pa )
+{
+	MPlug p = parameterPlug( pa );
+	if( p.isNull() )
+	{
+		return MStatus::kFailure;
+	}
+	
+	MStatus s = MS::kSuccess;
+		
+	try
+	{	
+		s = IECoreMaya::Parameter::setValue( p, pa );
+	}
+	catch ( std::exception &e )
+	{
+		msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s : %s" ) % p.name().asChar() % e.what());
+		s = MS::kFailure;
+	} 
+	catch (...)
+	{
+		msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s" ) % p.name().asChar());
+		s = MS::kFailure;
+	}
+	
+	return s;
 }
 
 template<typename B>

@@ -98,7 +98,9 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		virtual MStatus setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar );
 		virtual IECore::ParameterisedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
 		virtual MStatus setNodeValues();
+		virtual MStatus setNodeValue( IECore::ParameterPtr pa );
 		virtual MStatus setParameterisedValues();
+		virtual MStatus setParameterisedValue( IECore::ParameterPtr pa );
 		virtual MPlug parameterPlug( IECore::ConstParameterPtr parameter );
 		virtual IECore::ParameterPtr plugParameter( const MPlug &plug );
 		//@}

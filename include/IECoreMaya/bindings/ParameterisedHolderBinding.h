@@ -53,15 +53,12 @@ class ParameterisedHolderWrapper : public Node
 		/// Throws if named node is not a ParameterisedHolder instance.
 		ParameterisedHolderWrapper( const char *name );
 	
-		void setParameterised( const std::string &className, int classVersion, const std::string envVarName );
+		void setParameterised( IECore::ParameterisedPtr parameterised );
+		void setParameterised( const std::string &className, int classVersion, const std::string &envVarName );
 		boost::python::tuple getParameterised();
 		void setNodeValues();
-		
-		/// \todo Move this into the ParameterisedHolder itself on the next major version change
 		void setNodeValue( IECore::ParameterPtr pa );
 		void setParameterisedValues();
-		
-		/// \todo Move this into the ParameterisedHolder itself on the next major version change
 		void setParameterisedValue( IECore::ParameterPtr pa );
 		Plug parameterPlug( IECore::ParameterPtr pa );
 		IECore::ParameterPtr plugParameter( const char *plugName );

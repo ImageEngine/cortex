@@ -69,13 +69,19 @@ class ParameterisedHolderInterface
 		/// Sets the attributes of the node to reflect the current values
 		/// of the parameters in the held Parameterised object. Performs validation
 		/// of the parameter values and will return kFailure if any one is not valid.
-		/// \todo We need a version of this that operates on just one Parameter.
 		virtual MStatus setNodeValues() = 0;
+		/// Sets the attribute of the node to reflect the current value
+		/// of the specified parameter in the held Parameterised object. Performs validation
+		/// of the parameter values and will return kFailure if any one is not valid.
+		virtual MStatus setNodeValue( IECore::ParameterPtr pa ) = 0;		
 		/// Sets the values of the parameters of the held Parameterised object
 		/// to reflect the values of the attributes of the node. Performs validation
 		/// of the parameter values and will return kFailure if any one in not valid.
-		/// We need a version of this that operates on just one Parameter.
 		virtual MStatus setParameterisedValues() = 0;
+		/// Sets the value of the specified parameter of the held Parameterised object
+		/// to reflect the value of the corresponding attribute on the node. Performs validation
+		/// of the parameter values and will return kFailure if any one in not valid.		
+		virtual MStatus setParameterisedValue( IECore::ParameterPtr pa ) = 0;		
 		/// Returns the plug used to represent the specified parameter, which should
 		/// be a child of getParameterised()->parameters(). On failure returns a plug
 		/// for which plug.isNull() returns true.

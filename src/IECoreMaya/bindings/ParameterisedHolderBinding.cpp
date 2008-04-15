@@ -83,7 +83,14 @@ void ParameterisedHolderWrapper::initInterface()
 	throw Exception( "Object is not a ParameterisedHolder" );
 }
 
-void ParameterisedHolderWrapper::setParameterised( const std::string &className, int classVersion, const std::string envVarName )
+void ParameterisedHolderWrapper::setParameterised( IECore::ParameterisedPtr parameterised )
+{
+	object(); // to check it's alive
+	StatusException::throwIfError( m_interface->setParameterised( parameterised ) );
+	return;
+}
+
+void ParameterisedHolderWrapper::setParameterised( const std::string &className, int classVersion, const std::string &envVarName )
 {
 	object(); // to check it's alive
 	StatusException::throwIfError( m_interface->setParameterised( className, classVersion, envVarName ) );
@@ -131,26 +138,7 @@ void ParameterisedHolderWrapper::setNodeValue( ParameterPtr pa )
 {
 	object(); // to check it's alive
 	
-	MPlug pl = m_interface->parameterPlug( pa );
-	
-	MStatus s = MS::kSuccess;
-		
-	try
-	{	
-		s = IECoreMaya::Parameter::setValue( pa, pl );
-	} 
-	catch ( std::exception &e )
-	{
-		msg( Msg::Error, "ParameterisedHolder::setNodeValue", e.what() );
-		s = MS::kFailure;
-	}
-	catch (...)
-	{
-		msg( Msg::Error, "ParameterisedHolder::setNodeValue", "Caught exception while setting value." );
-		s = MS::kFailure;
-	}
-	
-	StatusException::throwIfError( s );
+	StatusException::throwIfError( m_interface->setNodeValue( pa ) );	
 }
 
 /// \todo Move the implementation of this into the ParameterisedHolder itself on the next major version change
@@ -158,33 +146,18 @@ void ParameterisedHolderWrapper::setParameterisedValue( ParameterPtr pa )
 {
 	object(); // to check it's alive
 	
-	MPlug pl = m_interface->parameterPlug( pa );
-	
-	MStatus s = MS::kSuccess;
-		
-	try
-	{	
-		s = IECoreMaya::Parameter::setValue( pl, pa );
-	}
-	catch ( std::exception &e )
-	{
-		msg( Msg::Error, "ParameterisedHolder::setParameterisedValue", e.what() );
-		s = MS::kFailure;
-	} 
-	catch (...)
-	{
-		msg( Msg::Error, "ParameterisedHolder::setParameterisedValue", "Caught exception while setting value." );
-		s = MS::kFailure;
-	}
-	
-	StatusException::throwIfError( s );
+	StatusException::throwIfError( m_interface->setParameterisedValue( pa ) );	
 }
 
 void IECoreMaya::bindParameterisedHolder()
 {
+	void (ParameterisedHolderWrapper::*setParameterised1)( IECore::ParameterisedPtr ) = &ParameterisedHolderWrapper::setParameterised;
+	void (ParameterisedHolderWrapper::*setParameterised2)( const std::string &, int , const std::string & ) = &ParameterisedHolderWrapper::setParameterised;	
+	
 	class_<ParameterisedHolderWrapper, boost::noncopyable, bases<Node> >( "ParameterisedHolder", init<const char *>() )
 		.def( "getParameterised", &ParameterisedHolderWrapper::getParameterised )
-		.def( "setParameterised", &ParameterisedHolderWrapper::setParameterised )
+		.def( "setParameterised", setParameterised1 )
+		.def( "setParameterised", setParameterised2 )
 		.def( "setNodeValues", &ParameterisedHolderWrapper::setNodeValues )
 		.def( "setParameterisedValues", &ParameterisedHolderWrapper::setParameterisedValues )
 		.def( "parameterPlug", &ParameterisedHolderWrapper::parameterPlug )

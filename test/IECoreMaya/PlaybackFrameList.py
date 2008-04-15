@@ -41,7 +41,8 @@ from IECoreMaya import *
 
 class TestPlaybackFrameList( unittest.TestCase ) :
 		
-	def test( self ):
+	def test( self ):	
+		""" Test PlaybackFrameList """
 
 		r = PlaybackFrameList( PlaybackFrameList.Range.Animation )	
 		

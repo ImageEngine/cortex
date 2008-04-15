@@ -39,13 +39,27 @@ import os.path
 from IECore import *
 from IECoreMaya import *
 
-class TestConverterHolder( unittest.TestCase ) :
+class TestParameterisedHolder( unittest.TestCase ) :
 		
-	def test( self ):
-		""" Test ConverterHolder """
-		n = cmds.createNode( "ieConverterHolder" )	
-		c = ConverterHolder( str(n) )
-		self.assert_( c )
+	def testNode( self ):
+		""" Test ParameterisedHolderNode """
+		n = cmds.createNode( "ieParameterisedHolderNode" )	
+		h = ParameterisedHolder( str(n) )
+		self.assert_( h )
+		
+		p = ParticleMeshOp()
+		
+		h.setParameterised( p )
+		
+		p.parameters().filename = "testValue"		
+		h.setNodeValue( p.parameters().filename )
+		pl = h.parameterPlug( p.parameters().filename )
+		v = pl.convert( TypeId.StringData )		
+		self.assertEqual( v.value, "testValue" )
+				
+		cmds.setAttr( pl.name(), "testValue2", typ="string" )
+		h.setParameterisedValue( p.parameters().filename )
+		self.assertEqual( p.parameters().filename.getValue().value, "testValue2" )		
 
 
 if __name__ == "__main__":

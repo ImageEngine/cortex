@@ -36,6 +36,7 @@ import unittest
 
 from ConverterHolder import *
 from PlaybackFrameList import *
+from ParameterisedHolder import *
 
 from MayaTextTestRunner import *
 from SplitStream import *	
