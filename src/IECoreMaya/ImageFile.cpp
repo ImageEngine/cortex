@@ -46,6 +46,9 @@
 #include "IECore/ImageReader.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/ScaledDataConversion.h"
+#include "IECore/DataConvert.h"
 
 #include "IECoreMaya/ImageFile.h"
 
@@ -65,56 +68,32 @@ void *ImageFile::creator()
 	return new ImageFile;
 }
 
-
-/// \todo Rework using despatchTypedData and ScaledDataConversion
-template<typename T>
-static float getFloatData( ConstDataPtr d, int idx )
+struct ImageFile::ChannelConverter
 {
-	assert( d );
-	assert( idx >= 0 );
-	
-	if ( idx >= (int)(runTimeCast< const T >(d)->readable().size()) )
+	typedef FloatVectorDataPtr ReturnType;
+
+	std::string m_pathName;
+	std::string m_channelName;	
+
+	template<typename T>
+	ReturnType operator()( typename T::ConstPtr data )
 	{
-		return 0.0f;
-	}
+		assert( data );
+			
+		return DataConvert < T,  FloatVectorData, ScaledDataConversion< typename T::ValueType::value_type, float> >()( data );
+	};
 	
-	return runTimeCast< const T >(d)->readable()[ idx ];	
-}
-
-template<typename T>
-static float getNormalizedFloatData( ConstDataPtr d, int idx )
-{
-	assert( d );
-
-	return getFloatData<T>( d, idx ) / Imath::limits<typename T::ValueType::value_type>::max();	
-}
-
-static float getFloatDataDespatch( ConstDataPtr d, int idx )
-{
-	assert( d );
-	
-	switch ( d->typeId() )
+	struct ErrorHandler
 	{
-		case FloatVectorDataTypeId:
-			return getFloatData<FloatVectorData>( d, idx );
-		case DoubleVectorDataTypeId:
-			return getFloatData<DoubleVectorData>( d, idx );
-		case HalfVectorDataTypeId:
-			return getFloatData<HalfVectorData>( d, idx );
-		case IntVectorDataTypeId:
-			return getNormalizedFloatData<IntVectorData>( d, idx );
-		case UIntVectorDataTypeId:
-			return getNormalizedFloatData<UIntVectorData>( d, idx );
-		case CharVectorDataTypeId:
-			return getNormalizedFloatData<CharVectorData>( d, idx );
-		case UCharVectorDataTypeId:
-			return getNormalizedFloatData<UCharVectorData>( d, idx );
-		case LongVectorDataTypeId:
-			return getNormalizedFloatData<LongVectorData>( d, idx );
-		default:
-			throw Exception("Invalid channel data type");
-	}
-}
+		template<typename T, typename F>
+		void operator()( typename T::ConstPtr data, const F& functor )
+		{
+			assert( data );
+		
+			throw InvalidArgumentException( ( boost::format( "ImageFile: Invalid data type \"%s\" for channel %s while reading %s" ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName % functor.m_pathName ).str() );		
+		}
+	};
+};
 
 MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 {
@@ -164,33 +143,74 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 		m_numChannels = 4;
 	}		
 	
-	assert( m_numChannels == 3 || m_numChannels == 4 );	
+	assert( m_numChannels == 3 || m_numChannels == 4 );
 	
-	m_rData = image->variables["R"].data;
-	if (! m_rData )
-	{
-		return MS::kFailure;
-	}
-		
-	m_gData = image->variables["G"].data;
-	if (! m_gData )
-	{
-		return MS::kFailure;
-	}
-		
-	m_bData = image->variables["B"].data;		
-	if (! m_bData )
-	{
-		return MS::kFailure;
-	}
+	try
+	{	
 	
-	if ( m_numChannels == 4 )
-	{
-		m_aData = image->variables["A"].data;			
-		if (! m_aData )
+		ChannelConverter converter;
+		converter.m_pathName = pathName.asChar();
+
+		DataPtr rData = image->variables["R"].data;
+		if (! rData )
 		{
 			return MS::kFailure;
-		}	
+		}
+
+		converter.m_channelName = "R";
+		m_rData = despatchTypedData<			
+				ChannelConverter, 
+				TypeTraits::IsNumericVectorTypedData,
+				ChannelConverter::ErrorHandler
+			>( rData, converter );	
+
+		DataPtr gData = image->variables["G"].data;
+		if (! gData )
+		{
+			return MS::kFailure;
+		}
+
+		converter.m_channelName = "G";	
+		m_gData = despatchTypedData<			
+				ChannelConverter, 
+				TypeTraits::IsNumericVectorTypedData,
+				ChannelConverter::ErrorHandler
+			>( gData, converter );		
+
+		DataPtr bData = image->variables["B"].data;
+		if (! bData )
+		{
+			return MS::kFailure;
+		}
+
+		converter.m_channelName = "B";	
+		m_bData = despatchTypedData<			
+				ChannelConverter, 
+				TypeTraits::IsNumericVectorTypedData,
+				ChannelConverter::ErrorHandler
+			>( bData, converter );	
+
+		if ( m_numChannels == 4 )
+		{
+			DataPtr aData = image->variables["A"].data;
+			if (! aData )
+			{
+				return MS::kFailure;
+			}
+
+			converter.m_channelName = "A";	
+			m_aData = despatchTypedData<			
+				ChannelConverter, 
+				TypeTraits::IsNumericVectorTypedData,
+				ChannelConverter::ErrorHandler
+			>( aData, converter );	
+		}
+	
+	} 
+	catch ( std::exception &e )
+	{
+		MGlobal::displayError( e.what() );	
+		return MS::kFailure;
 	}
 	
 	if (info)
@@ -212,7 +232,7 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 void ImageFile::populateImage( float* pixels ) const
 {
 	assert( pixels );
-		
+			
 	for (unsigned y = 0; y < m_height; y++)
 	{		
 		for (unsigned x = 0; x < m_width; x++)
@@ -221,20 +241,18 @@ void ImageFile::populateImage( float* pixels ) const
 				
 			assert( pixelIndex < m_width * m_height );
 		
-			*pixels++ = getFloatDataDespatch( m_rData, pixelIndex );
-			*pixels++ = getFloatDataDespatch( m_gData, pixelIndex );			
-			*pixels++ = getFloatDataDespatch( m_bData, pixelIndex );			
+			*pixels++ = m_rData->readable()[ pixelIndex ];
+			*pixels++ = m_gData->readable()[ pixelIndex ];
+			*pixels++ = m_bData->readable()[ pixelIndex ];
 
 			if ( m_aData )
 			{
-				*pixels++ = getFloatDataDespatch( m_aData, pixelIndex );					
+				*pixels++ = m_aData->readable()[ pixelIndex ];
 			}
 		}
 	}	
 }
 
-/// \todo Establish why this works perfectly for the viewport, software renderer, and hardware renderer
-/// but NOT the swatch in the attribute editor!
 MStatus ImageFile::load( MImage& image, unsigned int idx )
 {
 	MStatus s;
@@ -261,21 +279,20 @@ MStatus ImageFile::glLoad( const MImageFileInfo& info, unsigned int idx )
 	assert( m_gData	);
 	assert( m_bData	);
 	
-	float *pixels = new float[ m_width * m_height * m_numChannels ];
+	std::vector<float> pixels;
+	pixels.resize( m_width * m_height * m_numChannels );
 	
-	populateImage( pixels );
+	populateImage( &pixels[0] );
 	
 	switch (m_numChannels)
 	{
 		case 3:
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_FLOAT, pixels );
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_FLOAT, &pixels[0] );
 		case 4:
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_FLOAT, pixels );
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_FLOAT, &pixels[0] );
 		default:
 			assert(false);
 	}
-	
-	delete [] pixels;	
 		
 	return MS::kSuccess;
 }
