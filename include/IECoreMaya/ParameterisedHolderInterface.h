@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,6 +58,8 @@ class ParameterisedHolderInterface
 		/// the Parameterised object. This mechanism is used rather than passing a ParameterisedPtr
 		/// as it allows the Parameterised object to be loaded again when a maya scene is opened.
 		virtual MStatus setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar ) = 0;
+		/// Sets the Parameterised object this node is holding, directly.
+		virtual MStatus setParameterised( IECore::ParameterisedPtr p ) = 0;
 		/// Returns the held Parameterised object, loading it if necessary. May return 0 if loading
 		/// fails. Note that this doesn't update the values of the parameters - you can use the
 		/// separate setParameterisedValues() call for that. If provided, the optional className,

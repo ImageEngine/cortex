@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -94,8 +94,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		/// Set the node to hold a particular Parameterised object. When using this version
 		/// of setParameterised the node will not be able to preserve the object across scene
 		/// save/load - this becomes your responsibility if it's necessary.
-		/// \todo This should be a virtual function defined in the ParameterisedHolderInterface.
-		MStatus setParameterised( IECore::ParameterisedPtr p );
+		virtual MStatus setParameterised( IECore::ParameterisedPtr p );
 		virtual MStatus setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar );
 		virtual IECore::ParameterisedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
 		virtual MStatus setNodeValues();
