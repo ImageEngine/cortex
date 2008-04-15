@@ -107,55 +107,6 @@ struct BoxTraits
 		
 		assert( isEmpty(box) );
 	}
-
-	/// Return the dimensions of the box
-	/// \deprecated Use boxSize method from BoxOps instead
-	static BaseType size( const T &box )
-	{
-		return box.size();
-	}
-	
-	/// Return the center point of the box
-	/// \deprecated	Use boxCenter method from BoxOps instead
-	static BaseType center( const T &box )
-	{
-		return box.center();
-	}			
-
-	/// Enlarge the box to include the given point
-	/// \deprecated	Use boxExtend method from BoxOps instead
-	static void extendBy( T &box, const BaseType &p )
-	{
-		box.extendBy( p );
-		
-		assert( intersects( box, p ) );
-	}
-
-	/// Enlarge the box to include the given box
-	/// \deprecated	Use boxExtend method from BoxOps instead	
-	static void extendBy( T &box, const T &box2 )
-	{
-		box.extendBy( box2 );
-		
-		assert( intersects( box, box2 ) );
-	}
-		
-	/// Return true if the box contains the given box
-	/// \deprecated	Use boxIntersects method from BoxOps instead	
-	static bool intersects( const T &box, const BaseType &p )
-	{
-		return box.intersects( p );
-	}
-	
-	/// Return true if the two boxes intersect
-	/// \deprecated	Use boxIntersects method from BoxOps instead	
-	static bool intersects( const T &box, const T &box2 )
-	{
-		assert( box.intersects( box2 ) == box2.intersects( box ) );
-		
-		return box.intersects( box2 );
-	}
-
 };
 
 template<>
