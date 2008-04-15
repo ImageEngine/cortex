@@ -37,7 +37,7 @@
 
 #include "maya/MPxImageFile.h"
 
-#include "IECore/Data.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreMaya
 {
@@ -58,9 +58,11 @@ class ImageFile : public MPxImageFile
 	
 		void populateImage( float* pixels ) const;
 	
-		IECore::DataPtr m_rData, m_gData, m_bData, m_aData;
+		IECore::FloatVectorDataPtr m_rData, m_gData, m_bData, m_aData;
 		unsigned int m_numChannels;
 		unsigned int m_width, m_height;
+		
+		struct ChannelConverter;
 };
 
 }
