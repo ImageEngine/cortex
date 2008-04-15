@@ -449,13 +449,13 @@ env.Prepend(
 		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
 		"$BOOST_INCLUDE_PATH",
 		"$JPEG_INCLUDE_PATH",
-		"$TIFF_INCLUDE_PATH"
+		"$TIFF_INCLUDE_PATH",
 	],
 	LIBPATH = [
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
 		"$JPEG_LIB_PATH",
-		"$TIFF_LIB_PATH"
+		"$TIFF_LIB_PATH",
 	],
 	LIBS = [
 		"pthread",
@@ -505,18 +505,30 @@ if doConfigure :
 		if m  :
 			boostVersion = m.group( 1 )
 		if boostVersion :
-			m = re.compile( "^([0-9]+)_([0-9]+)_([0-9]+)$" ).match( boostVersion )
+			m = re.compile( "^([0-9]+)_([0-9]+)(?:_([0-9]+)|)$" ).match( boostVersion )
 			boostMajorVersion, boostMinorVersion, boostPatchVersion = m.group( 1, 2, 3 )
 			env["BOOST_MAJOR_VERSION"] = boostMajorVersion
 			env["BOOST_MINOR_VERSION"] = boostMinorVersion
-			env["BOOST_PATCH_VERSION"] = boostPatchVersion
+			env["BOOST_PATCH_VERSION"] = boostPatchVersion or ""
 			break
 			
 	if not boostVersion :
 		sys.stderr.write( "ERROR : unable to determine boost version from \"%s\".\n" % boostVersionHeader )
 		Exit( 1 )
 
-	if not c.CheckLibWithHeader( env.subst( "boost_filesystem" + env["BOOST_LIB_SUFFIX"] ), "boost/filesystem/path.hpp", "CXX" ) :
+	env.Append( LIBS = [
+			"boost_filesystem" + env["BOOST_LIB_SUFFIX"],
+			"boost_regex" + env["BOOST_LIB_SUFFIX"],
+			"boost_iostreams" + env["BOOST_LIB_SUFFIX"],
+			"boost_date_time" + env["BOOST_LIB_SUFFIX"],
+			"boost_thread" + env["BOOST_LIB_SUFFIX"],
+			"boost_wave" + env["BOOST_LIB_SUFFIX"],
+		]
+	)
+	if int( env["BOOST_MINOR_VERSION"] ) >=35 :
+		env.Append( LIBS = [ "boost_system" + env["BOOST_LIB_SUFFIX"] ] )
+		
+	if not c.CheckLibWithHeader( env.subst( "boost_iostreams" + env["BOOST_LIB_SUFFIX"] ), "boost/filesystem/path.hpp", "CXX" ) :
 		sys.stderr.write( "ERROR : unable to find the boost libraries - check BOOST_LIB_PATH.\n" )
 		Exit( 1 )
 
@@ -527,10 +539,6 @@ if doConfigure :
 	c.Finish()
 		
 env.Append( LIBS = [
-		"boost_filesystem" + env["BOOST_LIB_SUFFIX"],
-		"boost_regex" + env["BOOST_LIB_SUFFIX"],
-		"boost_iostreams" + env["BOOST_LIB_SUFFIX"],
-		"boost_date_time" + env["BOOST_LIB_SUFFIX"],
 		"Half",
 		"Iex",
 		"Imath",
@@ -950,9 +958,6 @@ if env["WITH_GL"] and doConfigure :
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
 		],
-		"LIBS" : [
-			"boost_wave",
-		],
 	}
 	
 	glEnv = env.Copy( **glEnvSets )
@@ -1073,7 +1078,7 @@ mayaEnvAppends = {
 		"OpenMayaUI",
 		"OpenMayaAnim",
 		"OpenMayaFX",
-		"boost_python",
+		"boost_python" + pythonEnv["BOOST_LIB_SUFFIX"],
 	],
     "CPPFLAGS" : [
 		"-D_BOOL",
