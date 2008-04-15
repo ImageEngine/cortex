@@ -301,6 +301,24 @@ DataPtr TIFFImageReader::readChannel( const std::string &name, const Imath::Box2
 	{
 		return readTypedChannel<float>( name, dataWindow );
 	}
+	else if ( m_sampleFormat == SAMPLEFORMAT_INT )
+	{
+		switch ( m_bitsPerSample )
+		{
+		case 8:
+			return readTypedChannel<char>( name, dataWindow );
+
+		case 16:
+			return readTypedChannel<int16>( name, dataWindow );
+
+		case 32:
+			return readTypedChannel<int32>( name, dataWindow );
+
+		default:
+			assert( false );
+			return 0;
+		}
+	}
 	else
 	{
 		assert( m_sampleFormat == SAMPLEFORMAT_UINT ) ;
@@ -435,7 +453,8 @@ bool TIFFImageReader::open( bool throwOnFailure )
 
 		m_sampleFormat = tiffFieldDefaulted<uint16>( TIFFTAG_SAMPLEFORMAT );
 		if (! ( m_sampleFormat == SAMPLEFORMAT_UINT ||
-		                m_sampleFormat == SAMPLEFORMAT_IEEEFP
+		                m_sampleFormat == SAMPLEFORMAT_IEEEFP ||
+		                m_sampleFormat == SAMPLEFORMAT_INT
 		      ))
 		{
 			throw IOException( ( boost::format("TIFFImageReader: Unsupported value (%d) for TIFFTAG_SAMPLEFORMAT") % m_sampleFormat ).str() );
