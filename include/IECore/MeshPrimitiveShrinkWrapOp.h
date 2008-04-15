@@ -107,11 +107,6 @@ class MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimitive>
 		IntParameterPtr m_methodParameter;
 		MeshPrimitiveParameterPtr m_directionMeshParameter;
 		FloatParameterPtr m_triangulationToleranceParameter;
-		
-	public:	
-		
-		/// \todo Move all ExtraData members to here on next major version change
-		struct ExtraData;			
 
 };
 
