@@ -43,8 +43,27 @@ struct tiff;
 namespace IECore
 {
 
-/// The TIFFImageReader reads Tagged Image File Format (TIFF) files
-/// \todo Document supported tags and their interpretation
+/// The TIFFImageReader reads Tagged Image File Format (TIFF) files.
+///
+/// Currently handled tags ( and their supported values ):
+///
+/// TIFFTAG_IMAGEWIDTH ( any != 0 )
+/// TIFFTAG_IMAGELENGTH ( any != 0 )
+/// TIFFTAG_SAMPLESPERPIXEL ( any != 0 )
+/// TIFFTAG_BITSPERSAMPLE ( 8, 16, 32 )
+/// TIFFTAG_PHOTOMETRIC ( PHOTOMETRIC_RGB, PHOTOMETRIC_MIN_IS_BLACK )
+/// TIFFTAG_FILLORDER ( any )
+/// TIFFTAG_SAMPLEFORMAT ( SAMPLEFORMAT_UINT, SAMPLEFORMAT_IEEEFP)
+/// TIFFTAG_ORIENTATION ( ORIENTATION_TOPLEFT )
+/// TIFFTAG_PLANARCONFIG ( PLANARCONFIG_CONTIG )
+/// TIFFTAG_EXTRASAMPLES
+/// TIFFTAG_XPOSITION
+/// TIFFTAG_YPOSITION
+/// TIFFTAG_PIXAR_IMAGEFULLWIDTH
+/// TIFFTAG_PIXAR_IMAGEFULLLENGTH
+/// TIFFTAG_XPOSITION
+/// TIFFTAG_YPOSITION
+///
 class TIFFImageReader : public ImageReader
 {
 

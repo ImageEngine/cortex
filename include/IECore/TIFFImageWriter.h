@@ -48,7 +48,28 @@ namespace IECore
 {
 
 /// The TIFFImageWriter class serializes images to the Tagged Image File Format (TIFF) format
-/// \todo Document which tags we write
+/// 
+/// The tags which may be written into the files are:
+///
+/// TIFFTAG_PHOTOMETRIC
+/// TIFFTAG_SAMPLESPERPIXEL
+/// TIFFTAG_EXTRASAMPLES
+/// TIFFTAG_COMPRESSION
+/// TIFFTAG_SAMPLEFORMAT
+/// TIFFTAG_IMAGEWIDTH
+/// TIFFTAG_IMAGELENGTH
+/// TIFFTAG_XPOSITION
+/// TIFFTAG_YPOSITION
+/// TIFFTAG_PIXAR_IMAGEFULLWIDTH
+/// TIFFTAG_PIXAR_IMAGEFULLLENGTH
+/// TIFFTAG_BITSPERSAMPLE
+/// TIFFTAG_ROWSPERSTRIP
+/// TIFFTAG_FILLORDER
+/// TIFFTAG_PLANARCONFIG
+/// TIFFTAG_XRESOLUTION
+/// TIFFTAG_YRESOLUTION
+/// TIFFTAG_RESOLUTIONUNIT
+///
 class TIFFImageWriter : public ImageWriter
 {
 
