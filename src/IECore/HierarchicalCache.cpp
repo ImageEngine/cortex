@@ -433,6 +433,13 @@ void HierarchicalCache::write( const ObjectHandle &obj, ConstVisibleRenderablePt
 	catch( ... )
 	{
 	}
+	try
+	{
+		m_io->rm( "shape" );
+	}
+	catch (IECore::Exception &e)
+	{
+	}
 	
 	boost::static_pointer_cast<const Object>(shape)->save(m_io, "shape" );
 	m_io->chdir( ".." );
