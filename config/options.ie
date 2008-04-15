@@ -59,12 +59,15 @@ os.environ["COMPILER_VERSION"] = compilerVersion
 CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
 
 # set the include paths
-BOOST_INCLUDE_PATH = "/software/tools/include/boost/1.33.1"
-BOOST_LIB_SUFFIX = ""
+BOOST_INCLUDE_PATH = "/software/tools/include/boost/1.35.0"
 OPENEXR_INCLUDE_PATH = "/software/tools/include/OpenEXR/1.4.0"
 TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
 JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
 GLEW_INCLUDE_PATH = '/software/tools/include/glew/1.4.0'
+
+# figure out the boost lib suffix
+compilerVersionSplit = compilerVersion.split( "." )
+BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-1_35"
 
 # find the right libraries based on compiler and platform
 LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
@@ -128,9 +131,9 @@ if INSTALL_PREFIX != os.path.expanduser( "~" ) :
 
 	raise RuntimeError( "Cannot install to anywhere but " + os.path.expanduser( "~" ) + "!" )
 
-INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
+INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
+INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_MEL_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/mel/cortex/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
