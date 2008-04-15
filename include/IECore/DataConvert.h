@@ -40,7 +40,22 @@
 namespace IECore
 {
 
-/// \todo C++ tests
+/// DataConvert is a function object able to convert Simple- and VectorTypedData from
+/// one type to another, using a specified Conversion. The ImageReader subclasses,
+/// for example use this extensively in order to convert various signed and
+/// unsigned data arrays into float arrays in a consistent manner. An example
+/// usage might be:
+///
+/// \code
+/// DataConvert< UIntVectorData, FloatVectorData, ScaledDataConversion< unsigned int, float > > converter;
+/// FloatVectorPataPtr result = convert( myUIntVectorDataPtr );
+/// \endcode
+///
+/// The "Enable" template parameter is for internal use only. 
+/// 
+/// There are two variants of the function, one which constructs the conversion using its default
+/// constructor, the other takes an instance of the Conversion class (to allow for external
+/// initialization)
 template<typename From, typename To, typename Conversion, typename Enable = void>
 struct DataConvert
 {
