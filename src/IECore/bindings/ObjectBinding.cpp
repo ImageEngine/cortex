@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,13 +65,9 @@ void bindObject()
 		.staticmethod( "typeIdFromTypeName" )
 		.def( "typeNameFromTypeId", &Object::typeNameFromTypeId )
 		.staticmethod( "typeNameFromTypeId" )
-		.def( "load", (ObjectPtr (*)( const std::string & ) )&Object::load )
-		.def( "load", (ObjectPtr (*)( IndexedIOInterfacePtr ) )&Object::load )
 		.def( "load", (ObjectPtr (*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & ) )&Object::load )
 		.staticmethod( "load" )
-		.def( "save", (void (Object::*)( IndexedIOInterfacePtr )const )&Object::save )
 		.def( "save", (void (Object::*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & )const )&Object::save )
-		.def( "save", (void (Object::*)( const std::string & )const )&Object::save )
 		.def("memoryUsage", (size_t (Object::*)()const )&Object::memoryUsage, "Returns the number of bytes this instance occupies in memory" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Object)
 	;

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -208,6 +208,8 @@ class CompoundDataTest(unittest.TestCase):
 	def testLoadSave(self):
 		"""Test load/save"""	
 		
+		iface = IndexedIOInterface.create( "test/CompoundData.fio", "/", IndexedIOOpenMode.Write )
+		
 		v1 = CompoundData()
 		v1["0"] = FloatData(1.2)
 		v1["1"] = FloatData(2.3)
@@ -215,9 +217,9 @@ class CompoundDataTest(unittest.TestCase):
 		v1["some:data"] = FloatData(3)		
 		self.assert_(v1["0"] == FloatData(1.2))
 
-		v1.save("test/CompoundData.fio")
+		v1.save( iface, "test" )
 
-		v2 = Object.load("test/CompoundData.fio")	
+		v2 = Object.load( iface, "test" )	
 		self.assertEqual( v1, v2 )	
 
 	def tearDown(self):

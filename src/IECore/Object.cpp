@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -286,23 +286,6 @@ ObjectPtr Object::copy() const
 	return result;
 }
 
-void Object::save( const std::string &path ) const
-{
-	IndexedIOInterfacePtr i = IndexedIOInterface::create( path, "/", IndexedIO::Write | IndexedIO::Exclusive );
-	save( i, "object" );
-}
-		
-void Object::save( IndexedIOInterfacePtr ioInterface ) const
-{
-	// we get a copy of the ioInterface here so the SaveContext can be freed
-	// from always having to balance chdirs() to return to the original
-	// directory after an operation. this results in fewer chdir calls and faster
-	// saving.
-	IndexedIOInterfacePtr i = ioInterface->resetRoot();
-	boost::shared_ptr<SaveContext> context( new SaveContext( i ) );
-	context->save( this, i, "object" );
-}
-
 void Object::save( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name ) const
 {
 	// we get a copy of the ioInterface here so the SaveContext can be freed
@@ -464,48 +447,15 @@ std::string Object::typeNameFromTypeId( TypeId typeId )
 	return it->second;
 }
 
-ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface )
-{
-	// we get a copy of the ioInterface here so the LoadContext can be freed
-	// from always having to balance chdirs() to return to the original
-	// directory after an operation. this results in fewer chdir calls and faster
-	// loading.
-	IndexedIOInterfacePtr i = ioInterface->resetRoot();
-	LoadContextPtr context( new LoadContext( i ) );
-	ObjectPtr result = context->load<Object>( i, "object" );
-	return result;
-}
-
 ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name )
 {
 	// we get a copy of the ioInterface here so the LoadContext can be freed
 	// from always having to balance chdirs() to return to the original
 	// directory after an operation. this results in fewer chdir calls and faster
 	// loading.
-	try
-	{
-		// first try to load it normally
-		IndexedIOInterfacePtr i = ioInterface->resetRoot();
-		LoadContextPtr context( new LoadContext( i ) );
-		ObjectPtr result = context->load<Object>( i, name );
-		return result;
-	}
-	catch( const IOException &e )
-	{
-		// if that fails then we try to load it using the deprecated function. this
-		// helps with transitioning code from the old interface to the new one.
-		IndexedIOInterfacePtr i = ioInterface->resetRoot();
-		i->chdir( name );
-		return load( i );
-	}
-}
-
-ObjectPtr Object::load( const std::string &path )
-{
-	IndexedIOInterfacePtr i = IndexedIOInterface::create( path, "/", IndexedIO::Read | IndexedIO::Exclusive );
-	if( !i )
-	{
-		return 0;
-	}
-	return load( i, "object" );
+	
+	IndexedIOInterfacePtr i = ioInterface->resetRoot();
+	LoadContextPtr context( new LoadContext( i ) );
+	ObjectPtr result = context->load<Object>( i, name );
+	return result;
 }

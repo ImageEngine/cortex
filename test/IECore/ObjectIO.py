@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,28 +41,32 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleIO( self ) :
 	
+		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+	
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
-		o.save( "test/o.fio" )		
-		oo = Object.load( "test/o.fio" )
+		o.save( iface, "test" )		
+		oo = Object.load( iface, "test" )
 		self.assertEqual( o.value, oo.value );
 		
 		o = StringData( "hello" )
 		self.assertEqual( o.value, "hello" )
-		o.save( "test/o.fio" )		
-		oo = Object.load( "test/o.fio" )
+		o.save( iface, "test" )		
+		oo = Object.load( iface, "test" )
 		self.assertEqual( o.value, oo.value );
 		self.assertEqual( o, oo );
 		
 	def testSimpleArrayIO( self ) :
+	
+		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
 	
 		o = IntVectorData()
 		for i in range( 0, 1000 ) :
 			o.append( random.randint( -1000, 1000 ) )
 		self.assertEqual( o.size(), 1000 )
 			
-		o.save( "test/o.fio" )
-		oo = Object.load( "test/o.fio" )
+		o.save( iface, "test" )
+		oo = Object.load( iface, "test" )
 		self.assertEqual( oo.size(), 1000 )
 		
 		for i in range( 0, 1000 ) :
@@ -72,14 +76,16 @@ class TestObjectIO( unittest.TestCase ) :
 			
 	def testStringArrayIO( self ) :
 	
+		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+	
 		words = [ "hello", "there", "young", "fellah" ]
 		s = StringVectorData( words )
 		self.assertEqual( s.size(), len( words ) )
 		for i in range( 0, s.size() ) :
 			self.assertEqual( s[i], words[i] )
 		
-		s.save( "test/o.fio" )
-		ss = Object.load( "test/o.fio" )
+		s.save( iface, "test" )
+		ss = Object.load( iface, "test" )
 		self.assertEqual( ss.size(), s.size() )
 		
 		for i in range( 0, s.size() ) :
@@ -89,13 +95,15 @@ class TestObjectIO( unittest.TestCase ) :
 			
 	def testImathArrayIO( self ) :
 	
+		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+	
 		o = V3fVectorData()
 		for i in range( 0, 1000 ) :
 			o.append( V3f( i*3, i*3 + 1, i*3 + 2 ) )
 		self.assertEqual( o.size(), 1000 )
 		
-		o.save( "test/o.fio" )
-		oo = Object.load( "test/o.fio" )
+		o.save( iface, "test" )
+		oo = Object.load( iface, "test" )
 		self.assertEqual( oo.size(), 1000 )
 		
 		for i in range( 0, 1000 ) :
@@ -105,34 +113,41 @@ class TestObjectIO( unittest.TestCase ) :
 			
 	def testOverwrite( self ) :
 	
+		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+	
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
-		o.save( "test/o.fio" )		
-		oo = Object.load( "test/o.fio" )
+		
+		o.save( iface, "test" )		
+		oo = Object.load( iface, "test" )
 		self.assertEqual( o.value, oo.value );
 
 		# saving over an existing file should
 		# obliterate it but currently doesn't
 		o = StringData( "hello" )
 		self.assertEqual( o.value, "hello" )
-		o.save( "test/o.fio" )		
-		oo = Object.load( "test/o.fio" )
+		o.save( iface, "test" )		
+		oo = Object.load( iface, "test" )
 		self.assertEqual( o.value, oo.value );
 
 		self.assertEqual( o, oo );
 		
 	def testCompoundData( self ) :
 	
+		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+	
 		d = CompoundData()
 		d["A"] = IntData( 10 )
 		d["B"] = StringData( "hithere" )
 		self.assertEqual( d["B"].value, "hithere" )
 		
-		d.save( "test/o.fio" )
-		dd = Object.load( "test/o.fio" )
+		d.save( iface, "test" )
+		dd = Object.load( iface, "test" )
 		self.assertEqual( d, dd )
 		
 	def testMultipleRef( self ) :
+	
+		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
 	
 		d = CompoundData()
 		i = IntData( 100 )
@@ -141,9 +156,9 @@ class TestObjectIO( unittest.TestCase ) :
 		
 		self.assert_( d["ONE"].isSame( d["TWO"] ) )
 		
-		d.save( "test/o.fio" )
+		d.save( iface, "test" )
 		
-		dd = Object.load( "test/o.fio" )
+		dd = Object.load( iface, "test" )
 		self.assertEqual( d, dd )
 		self.assert_( dd["ONE"].isSame( dd["TWO"] ) )
 		
@@ -159,14 +174,14 @@ class TestObjectIO( unittest.TestCase ) :
 		fio.mkdir( "a" )
 		fio.chdir( "a" )
 		d = fio.pwd()
-		o.save( fio )
+		o.save( fio, "test" )
 		self.assertEqual( fio.pwd(), d )
 		del fio
 		
 		fio = FileIndexedIO( "test/o.fio", "/", IndexedIOOpenMode.Read )
 		fio.chdir( "a" )
 		d = fio.pwd()
-		oo = o.load( fio )
+		oo = o.load( fio, "test" )
 		self.assertEqual( fio.pwd(), d )
 		
 		self.assertEqual( o, oo )

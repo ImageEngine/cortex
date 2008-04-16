@@ -297,15 +297,17 @@ class BoolDataTest( unittest.TestCase ) :
 		o = BoolData( True )
 		self.assertEqual( o.value, True )
 		
-		o.save( "test/o.fio" )
-		oo = Object.load( "test/o.fio" )
+		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		
+		o.save( iface, "test" )
+		oo = Object.load( iface, "test" )
 		self.assertEqual( o, oo )
 		
 		o = BoolData( False )
 		self.assertEqual( o.value, False )
 		
-		o.save( "test/o.fio" )
-		oo = Object.load( "test/o.fio" )
+		o.save( iface, "test" )
+		oo = Object.load( iface, "test" )
 		self.assertEqual( o, oo )
 		
 	def tearDown( self ) :
