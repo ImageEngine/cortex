@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 #include "IECore/ObjectReader.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/CompoundData.h"
 
 #include <cassert>
 
@@ -91,10 +92,19 @@ ObjectPtr ObjectReader::doOperation( ConstCompoundObjectPtr operands )
 	return Object::load( io, "object" );
 }
 
-CompoundDataPtr ObjectReader::readHeader() const
+CompoundObjectPtr ObjectReader::readHeader()
 {
+	CompoundObjectPtr header = Reader::readHeader();
+	
 	IndexedIOInterfacePtr io = open(fileName());
-	return runTimeCast<CompoundData>( Object::load( io, "header" ) );
+	CompoundDataPtr objectHeader = runTimeCast<CompoundData>( Object::load( io, "header" ) );
+	
+	for ( CompoundData::ValueType::const_iterator it = objectHeader->readable().begin(); it != objectHeader->readable().end(); ++it )
+	{
+		header->members()[ it->first ] = it->second ;
+	}
+	
+	return header;
 }
 
 IndexedIOInterfacePtr ObjectReader::open( const std::string &fileName )

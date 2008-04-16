@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #define IE_CORE_READER_H
 
 #include "IECore/Op.h"
+#include "IECore/CompoundObject.h"
 
 #include <map>
 #include <vector>
@@ -59,12 +60,19 @@ class Reader : public Op
 		/// which is a simple Parameter instance. If a derived class provides
 		/// more concrete constraints on the type of the result it should
 		/// pass an appropriate resultParameter in its initialiser.
-		Reader( const std::string name, const std::string description, ParameterPtr resultParameter = 0 );
+		Reader( const std::string &name, const std::string &description, ParameterPtr resultParameter = 0 );
 		
 		/// Returns the name of the file this Reader
 		/// is set to read. Actually calls parameters()->parameter<FileNameParameter>( "fileName" )->getTypedValue();
 		/// and therefore can potentially throw an Exception if the fileName is invalid.
 		const std::string &fileName() const;
+		
+		/// Returns the file header in the file specified by fileName(). This is intended to 
+		/// give fast access to some information about the contents of the file, without
+		/// having to load the entire thing. Classes implementing this method should
+		/// call the base class method first, and append any additional data to the CompoundObject
+		/// it returns.
+		virtual CompoundObjectPtr readHeader();
 		
 		/// Reads the file specified by fileName() and
 		/// returns it in the form of an Object. This function

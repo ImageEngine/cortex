@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,11 +58,10 @@ class ObjectReader : public Reader
 		/// Returns true if the given file is potentially readable as an Object
 		static bool canRead( const std::string &fileName );
 		
-		/// Returns the file header. This is intended to give fast access
-		/// to some information about the contents of the file, without
+		/// Returns the file header in the file specified by fileName(). This is intended to 
+		/// give fast access to some information about the contents of the file, without
 		/// having to load the entire thing.
-		/// \todo This should be a virtual method defined on Reader.
-		CompoundDataPtr readHeader() const;
+		CompoundObjectPtr readHeader();
 		
 	protected:
 	
