@@ -51,7 +51,7 @@ using namespace std;
 using namespace IECore;
 using namespace boost;
 
-ParticleReader::ParticleReader( const std::string name, const std::string description ) 
+ParticleReader::ParticleReader( const std::string &name, const std::string &description ) 
 		:	Reader( name, description, new ObjectParameter( "result", "The loaded object.", new NullObject, PointsPrimitive::staticTypeId() ) )
 {
 	m_percentageParameter = new FloatParameter(

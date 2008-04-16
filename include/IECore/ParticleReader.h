@@ -53,7 +53,7 @@ class ParticleReader : public Reader
 
 		IE_CORE_DECLARERUNTIMETYPED( ParticleReader, Reader );
 
-		ParticleReader( const std::string name, const std::string description );
+		ParticleReader( const std::string &name, const std::string &description );
 		
 		/// An enum for the values accepted by realTypeParameter().
 		enum RealType

@@ -52,10 +52,10 @@ class CINImageReader : public ImageReader
 		IE_CORE_DECLARERUNTIMETYPED( CINImageReader, ImageReader );
 
 		CINImageReader();
-		CINImageReader(const std::string & filename);
+		CINImageReader( const std::string &filename );
 		virtual ~CINImageReader();
 
-		static bool canRead(const std::string &filename);
+		static bool canRead( const std::string &filename );
 
 		virtual void channelNames( std::vector<std::string> &names );
 		virtual bool isComplete();

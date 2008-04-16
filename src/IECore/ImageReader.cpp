@@ -47,7 +47,7 @@ using namespace IECore;
 using namespace boost;
 using namespace Imath;
 
-ImageReader::ImageReader( const std::string name, const std::string description ) :
+ImageReader::ImageReader( const std::string &name, const std::string &description ) :
 		Reader( name, description, new ObjectParameter( "result", "The loaded object", new NullObject, ImagePrimitive::staticTypeId() ) )
 {
 	m_dataWindowParameter = new Box2iParameter(

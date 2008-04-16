@@ -49,7 +49,7 @@ class JPEGImageReader : public ImageReader
 		IE_CORE_DECLARERUNTIMETYPED( JPEGImageReader, ImageReader );
 
 		JPEGImageReader();
-		JPEGImageReader( const std::string & filename );
+		JPEGImageReader( const std::string &filename );
 		virtual ~JPEGImageReader();
 
 		static bool canRead( const std::string &filename );

@@ -57,7 +57,7 @@ class ImageReader : public Reader
 
 		IE_CORE_DECLARERUNTIMETYPED( ImageReader, Reader );
 
-		ImageReader( const std::string name, const std::string description );
+		ImageReader( const std::string &name, const std::string &description );
 
 		//! @name Parameter accessors
 		/// These provide convenient access to the parameters controlling
