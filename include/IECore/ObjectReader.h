@@ -61,7 +61,7 @@ class ObjectReader : public Reader
 		/// Returns the file header in the file specified by fileName(). This is intended to 
 		/// give fast access to some information about the contents of the file, without
 		/// having to load the entire thing.
-		CompoundObjectPtr readHeader();
+		virtual CompoundObjectPtr readHeader();
 		
 	protected:
 	
