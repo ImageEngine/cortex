@@ -118,6 +118,8 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
 			
+		virtual bool signedDistance( const Imath::V3f &p, float &distance ) const;
+			
 		virtual float volume() const;	
 
 		virtual Imath::V3f centerOfGravity() const;
@@ -162,6 +164,7 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		void intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;		
 		
 		void calculateMassProperties() const;
+		void calculateAverageNormals() const;
 		
 		BoundedTriangleVector m_uvTriangles;
 		BoundedTriangleTree *m_uvTree;
@@ -176,6 +179,16 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 		mutable bool m_haveSurfaceArea;
 		mutable float m_surfaceArea;
+		
+		mutable bool m_haveAverageNormals;
+		typedef int VertexIndex;
+		typedef int TriangleIndex;
+		typedef std::pair<VertexIndex, VertexIndex> Edge;		
+		
+		typedef std::map< Edge, Imath::V3f > EdgeAverageNormals;		
+		mutable EdgeAverageNormals m_edgeAverageNormals;
+	
+		mutable V3fVectorDataPtr m_vertexAngleWeightedNormals;
 				
 };
 

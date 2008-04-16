@@ -81,3 +81,22 @@ PrimitiveEvaluator::~PrimitiveEvaluator()
 PrimitiveEvaluator::Result::~Result()
 {
 }
+
+bool PrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distance ) const
+{	
+	distance = 0.0f;
+	ResultPtr result = createResult();
+
+	bool success = closestPoint( p, result );
+	if ( !success )
+	{
+		return false;
+	}
+	
+	float planeConstant = result->normal().dot( result->point() );
+	float sign = result->normal().dot( p ) - planeConstant;             
+                                                                
+	distance = (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
+	
+	return true;
+}

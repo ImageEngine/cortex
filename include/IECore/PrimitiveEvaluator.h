@@ -112,12 +112,18 @@ class PrimitiveEvaluator : public RunTimeTyped
 		//! @name Query Functions
 		//@{
 		
-		/// \todo Add something like:
-		/// virtual bool signedDistance( const Imath::V3f &p, float &distance, const ResultPtr &closestPoint ) const;
-		/// With a default implementation which just checks distance from the plane defined by the closest point and normal.
+		/// Computes the signed distance between the given point and the primitive. By default this is
+		/// just the signed distance between the point, and the plane specified by the closest point and normal,
+		/// but derived class are free to override it as they see fit. Returns true on success.
+		virtual bool signedDistance( const Imath::V3f &p, float &distance ) const;
 		
+		/// Computes the surface area of the primitive 
 		virtual float surfaceArea() const=0;
+		
+		/// Computes the volume of the primitive. The result is undefined if the primitive is not closed, or self intersects.
 		virtual float volume() const=0;
+		
+		/// Computes the primitive's center of gravity. The result is undefined if the primitive is not closed, or self intersects.
 		virtual Imath::V3f centerOfGravity() const=0;
 
 		/// Find the closest point on the primitive to the given query point. Returns true on success.
