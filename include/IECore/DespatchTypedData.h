@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-//! \file TypedDataDespatch.h
+//! \file DespatchTypedData.h
 /// Defines useful functions for calling template functions to manipulate
 /// TypedData instances when given only a DataPtr.
 
