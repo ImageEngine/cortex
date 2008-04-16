@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,6 +31,8 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+
+#include <cassert>
 
 #include "IECore/ObjectWriter.h"
 #include "IECore/FileIndexedIO.h"
@@ -71,6 +73,9 @@ void ObjectWriter::doWrite()
 {	
 	IndexedIOInterfacePtr io = new FileIndexedIO( fileName(), "/", IndexedIO::Exclusive | IndexedIO::Write);
 	
+	/// \todo Establish why we only accept CompoundData / Data here when HeaderGenerator::header(), for example,
+	/// returns a CompoundObject
+	
 	// write the header
 	CompoundDataPtr header = static_pointer_cast<CompoundData>( m_headerParameter->getValue()->copy() );
 	
@@ -79,6 +84,7 @@ void ObjectWriter::doWrite()
 	CompoundObjectPtr genericHeader = HeaderGenerator::header();
 	for ( CompoundObject::ObjectMap::const_iterator it = genericHeader->members().begin(); it != genericHeader->members().end(); it++ )
 	{
+		assert( it->second );
 		if ( it->second->isInstanceOf( Data::staticTypeId() ) )
 		{
 			header->writable()[ it->first ] = static_pointer_cast< Data >( it->second );
