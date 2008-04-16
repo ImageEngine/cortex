@@ -40,7 +40,7 @@ PrimitiveImplicitSurfaceFunction::PrimitiveImplicitSurfaceFunction()
 {
 }
 
-PrimitiveImplicitSurfaceFunction::PrimitiveImplicitSurfaceFunction(  PrimitivePtr primitive ) : m_primitive( primitive )
+PrimitiveImplicitSurfaceFunction::PrimitiveImplicitSurfaceFunction(  PrimitivePtr primitive ) 
 {
 	m_evaluator = PrimitiveEvaluator::create( primitive );
 	
@@ -48,8 +48,6 @@ PrimitiveImplicitSurfaceFunction::PrimitiveImplicitSurfaceFunction(  PrimitivePt
 	{
 		throw InvalidArgumentException( "Cannot create evaluator in PrimitiveImplicitSurfaceFunction" );
 	}
-	
-	nIt = m_primitive->variables.find("N");
 }
 
 PrimitiveImplicitSurfaceFunction::~PrimitiveImplicitSurfaceFunction()		
@@ -58,24 +56,11 @@ PrimitiveImplicitSurfaceFunction::~PrimitiveImplicitSurfaceFunction()
 
 PrimitiveImplicitSurfaceFunction::Value PrimitiveImplicitSurfaceFunction::operator()( const PrimitiveImplicitSurfaceFunction::Point &p )
 {	
-	PrimitiveEvaluator::ResultPtr result = m_evaluator->createResult();
+	float distance = 0.0f;
+	bool success = m_evaluator->signedDistance( p, distance );
 	
-	bool found = m_evaluator->closestPoint( p, result );
-	
-	if (found)
-	{		
-		Point n = result->normal();
-						
-		// Use shading normal if available
-		if ( nIt != m_primitive->variables.end() )
-		{
-			n = result->vectorPrimVar( nIt->second );			
-		}
-		
-		/// Compute signed distance from plane, which is defined by closestPoint and closestNormal
-		PrimitiveImplicitSurfaceFunction::Value planeConstant = n.dot( result->point() );		
-		PrimitiveImplicitSurfaceFunction::Value distance = n.dot( p ) - planeConstant;
-		
+	if (success)
+	{				
 		return distance;
 	}
 	else

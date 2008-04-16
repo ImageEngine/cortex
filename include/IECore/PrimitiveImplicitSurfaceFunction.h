@@ -70,9 +70,7 @@ class PrimitiveImplicitSurfaceFunction : public ImplicitSurfaceFunction< Imath::
 	
 		PrimitiveImplicitSurfaceFunction();	
 	
-		PrimitivePtr m_primitive;
 		PrimitiveEvaluatorPtr m_evaluator;
-		PrimitiveVariableMap::const_iterator nIt;
 };
 
 IE_CORE_DECLAREPTR( PrimitiveImplicitSurfaceFunction );

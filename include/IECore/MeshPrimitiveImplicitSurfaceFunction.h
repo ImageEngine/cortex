@@ -62,20 +62,6 @@ class MeshPrimitiveImplicitSurfaceFunction : public PrimitiveImplicitSurfaceFunc
 		
 		// Retrieve the signed distance from the mesh at the given point		
 		virtual Value getValue( const Point &p );
-
-		
-	protected:	
-	
-		typedef int VertexIndex;
-		typedef int TriangleIndex;
-		typedef std::pair<VertexIndex, VertexIndex> Edge;		
-		
-		typedef std::map< Edge, Imath::V3f > EdgeAverageNormals;		
-		EdgeAverageNormals m_edgeAverageNormals;
-	
-		V3fVectorDataPtr m_vertexAngleWeightedNormals;
-		
-		ConstV3fVectorDataPtr m_P;				
 };
 
 IE_CORE_DECLAREPTR( MeshPrimitiveImplicitSurfaceFunction );
