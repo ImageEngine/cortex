@@ -59,8 +59,11 @@ using namespace std;
 
 ImageDiffOp::ImageDiffOp()
 		:	Op(
-		        staticTypeName(),
-		        "todo",
+		        staticTypeName(),			
+			"Evaluates the root-mean-squared error between two images and returns true if it "
+			"exceeds a specified threshold. Unless the \"skip missing channels\" parameter is "
+			"enabled, it will also return true if either image contains a channel which  "
+			"the other doesn't.",
 		        new BoolParameter(
 		                "result",
 		                "True if the image differ, false if they're considered the same",
