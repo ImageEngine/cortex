@@ -56,8 +56,7 @@ class MeshPrimitiveBuilder : public RefCounted
 	
 		typedef T BaseType;
 	
-		typedef boost::intrusive_ptr<const MeshPrimitiveBuilder<T> > ConstPtr;
-		typedef boost::intrusive_ptr<MeshPrimitiveBuilder<T> > Ptr;
+		IE_CORE_DECLAREMEMBERPTR( MeshPrimitiveBuilder<T> );
 	
 		MeshPrimitiveBuilder();
 

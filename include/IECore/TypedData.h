@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -74,8 +74,7 @@ class TypedData : public Data
 {
 	public:
 	
-		typedef boost::intrusive_ptr<TypedData> Ptr;
-		typedef boost::intrusive_ptr<const TypedData> ConstPtr;
+		IE_CORE_DECLAREMEMBERPTR( TypedData );
 		
 		typedef T ValueType;
 	
@@ -100,7 +99,7 @@ class TypedData : public Data
 		//! @name Object interface
 		////////////////////////////////////////////////////////////
 		//@{
-		boost::intrusive_ptr<TypedData<T> > copy() const;
+		typename TypedData<T>::Ptr copy() const;
 		bool isEqualTo( ConstObjectPtr other ) const;
 		//@}
 		
@@ -134,7 +133,6 @@ class TypedData : public Data
 		
 	protected:
 	
-		/// protected destructor. Use intrusive_ptrs for this object.
 		virtual ~TypedData();
 		
 		static TypeDescription<TypedData<T> > m_typeDescription;
@@ -155,7 +153,7 @@ class TypedData : public Data
 			public:
 				T data;
 		};
-		typedef boost::intrusive_ptr<DataHolder> DataHolderPtr;
+		IE_CORE_DECLAREPTR( DataHolder );
 		DataHolderPtr m_data;
 };
 

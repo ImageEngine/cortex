@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,7 +49,13 @@ namespace IECore
 
 class CompoundParameterWrap : public CompoundParameter, public Wrapper< CompoundParameter >
 {
+	public:
+	
+		IE_CORE_DECLAREMEMBERPTR( CompoundParameterWrap );
+
 	protected:
+	
+		
 
 		static std::vector<ParameterPtr> getMembers( const object &members )
 		{
@@ -225,7 +231,7 @@ static void compoundParameterAddParameters( CompoundParameter &o, const boost::p
 void bindCompoundParameter()
 {
 
-	typedef class_< CompoundParameter, intrusive_ptr< CompoundParameterWrap >, boost::noncopyable, bases<Parameter> > CompoundParameterPyClass;
+	typedef class_< CompoundParameter, CompoundParameterWrap::Ptr, boost::noncopyable, bases<Parameter> > CompoundParameterPyClass;
 	CompoundParameterPyClass( "CompoundParameter", no_init )
 		.def( init< const std::string &, const std::string &, optional<const list &,  const object & > >( args( "name", "description", "members", "userData") ) )
 		.def( init< const std::string &, const list &, optional<  const object & > >( args( "name", "members", "userData") ) )

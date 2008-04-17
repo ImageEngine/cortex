@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,13 +40,25 @@
 namespace IECore
 {
 
-#define IE_CORE_DECLAREPTR( TYPENAME )										\
-typedef boost::intrusive_ptr<TYPENAME> TYPENAME ## Ptr;						\
-typedef boost::intrusive_ptr<const TYPENAME> Const ## TYPENAME ## Ptr;		\
+#define IE_CORE_DECLAREPTR( TYPENAME ) \
+typedef boost::intrusive_ptr< TYPENAME > TYPENAME ## Ptr; \
+typedef boost::intrusive_ptr< const TYPENAME > Const ## TYPENAME ## Ptr; \
 
 #define IE_CORE_DECLAREMEMBERPTR( TYPENAME ) \
-		typedef boost::intrusive_ptr<TYPENAME> Ptr; \
-		typedef boost::intrusive_ptr<const TYPENAME> ConstPtr;
+		typedef boost::intrusive_ptr< TYPENAME > Ptr; \
+		typedef boost::intrusive_ptr< const TYPENAME > ConstPtr;
+
+/// This macro can be used when declaring member pointers in template classes with 2 template parameters, 
+/// where the comma in the template arguments would otherwise confuse the pre-processor
+#define IE_CORE_DECLAREMEMBERPTR2( PART1, PART2 ) \
+		typedef boost::intrusive_ptr< PART1, PART2 > Ptr; \
+		typedef boost::intrusive_ptr< const PART1, PART2 > ConstPtr;
+
+/// This macro can be used when declaring member pointers in template classes with 3 template parameters, 
+/// where the commas in the template arguments would otherwise confuse the pre-processor
+#define IE_CORE_DECLAREMEMBERPTR3( PART1, PART2, PART3 ) \
+		typedef boost::intrusive_ptr< PART1, PART2, PART3 > Ptr; \
+		typedef boost::intrusive_ptr< const PART1, PART2, PART3 > ConstPtr;				
 		
 #define IE_CORE_FORWARDDECLARE( TYPENAME )									\
 	class TYPENAME;															\

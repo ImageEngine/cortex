@@ -47,9 +47,7 @@
 namespace IECore
 {
 
-class Object;
-typedef boost::intrusive_ptr<Object> ObjectPtr;
-typedef boost::intrusive_ptr<const Object> ConstObjectPtr;
+IE_CORE_FORWARDDECLARE( Object );
 
 #define IE_CORE_DECLAREOBJECTTYPEDESCRIPTION( TYPENAME )																\
 	private :																											\
@@ -63,7 +61,7 @@ typedef boost::intrusive_ptr<const Object> ConstObjectPtr;
 		
 #define IE_CORE_DECLAREOBJECTMEMBERFNS( TYPENAME )																		\
 	public :																											\
-		boost::intrusive_ptr<TYPENAME> copy() const { return boost::static_pointer_cast<TYPENAME>( Object::copy() ); }	\
+		TYPENAME::Ptr copy() const { return boost::static_pointer_cast<TYPENAME>( Object::copy() ); }	\
 		bool isEqualTo( IECore::ConstObjectPtr other ) const;															\
 	protected :																											\
 		virtual void copyFrom( IECore::ConstObjectPtr other, IECore::Object::CopyContext *context );					\
@@ -286,7 +284,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 				IndexedIOInterfacePtr container( const std::string &typeName, unsigned int &ioVersion );
 				template<class T>
 				/// Load an Object instance previously saved by SaveContext::save().
-				boost::intrusive_ptr<T> load( IndexedIOInterfacePtr container, const IndexedIO::EntryID &name );
+				typename T::Ptr load( IndexedIOInterfacePtr container, const IndexedIO::EntryID &name );
 				/// Returns an interface to a raw container created by SaveContext::rawContainer() - please see
 				/// documentation and cautionary notes for that function.
 				IndexedIOInterfacePtr rawContainer();
@@ -306,7 +304,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 				boost::shared_ptr<LoadedObjectMap> m_loadedObjects;
 				boost::shared_ptr<ContainerRootsMap> m_containerRoots;
 		};
-		typedef boost::intrusive_ptr<LoadContext> LoadContextPtr;
+		IE_CORE_DECLAREPTR( LoadContext );
 		
 		/// Must be implemented in all derived classes. Implementations should first call the parent class
 		/// save() method, then call context->container() before filling the returned container with

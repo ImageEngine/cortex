@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -123,9 +123,9 @@ class CompoundParameter : public Parameter
 		/// the parameter doesn't exist, or does not match the type specified
 		/// as the template argument.
 		template<typename T>
-		boost::intrusive_ptr<T> parameter( const std::string &name );
+		typename T::Ptr parameter( const std::string &name );
 		template<typename T>
-		boost::intrusive_ptr<const T> parameter( const std::string &name ) const;
+		typename T::ConstPtr parameter( const std::string &name ) const;
 		/// Convenience function to find a parameter in parameters() and call setValue()
 		/// on it. Throws an Exception if the named parameter doesn't exist.
 		void setParameterValue( const std::string &name, ObjectPtr value );

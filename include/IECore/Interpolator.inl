@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,10 +71,10 @@ struct LinearInterpolator< std::vector<T> >
 template<typename T>
 struct LinearInterpolator< TypedData< T > >
 {
-	void operator()(const boost::intrusive_ptr< TypedData< T > > &y0, 
-			const boost::intrusive_ptr< TypedData< T > > &y1,
+	void operator()(const typename TypedData< T >::Ptr &y0, 
+			const typename TypedData< T >::Ptr &y1,
 			double x, 
-			boost::intrusive_ptr< TypedData< T > > &result) const
+			typename TypedData< T >::Ptr &result) const
 	{		
 		LinearInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
 	}
@@ -118,10 +118,10 @@ struct CosineInterpolator< std::vector<T> >
 template<typename T>
 struct CosineInterpolator< TypedData< T > >
 {
-	void operator()(const boost::intrusive_ptr< TypedData< T > > &y0, 
-			const boost::intrusive_ptr< TypedData< T > > &y1,
+	void operator()(const typename TypedData< T >::Ptr &y0, 
+			const typename TypedData< T >::Ptr &y1,
 			double x, 
-			boost::intrusive_ptr< TypedData< T > > &result) const
+			typename TypedData< T >::Ptr &result) const
 	{		
 		CosineInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
 	}
@@ -174,13 +174,13 @@ struct CubicInterpolator< std::vector<T> >
 template<typename T>
 struct CubicInterpolator< TypedData<T > >
 {
-	void operator()(const boost::intrusive_ptr< TypedData< T > > &y0, 
-			const boost::intrusive_ptr< TypedData< T > > &y1,
-			const boost::intrusive_ptr< TypedData< T > > &y2,
-			const boost::intrusive_ptr< TypedData< T > > &y3,
+	void operator()(const typename TypedData< T >::Ptr &y0, 
+			const typename TypedData< T >::Ptr &y1,
+			const typename TypedData< T >::Ptr &y2,
+			const typename TypedData< T >::Ptr &y3,
 			
 			double x, 
-			boost::intrusive_ptr< TypedData< T > > &result) const
+			typename TypedData< T >::Ptr &result) const
 	{		
 		CubicInterpolator<T>()( y0->readable(), y1->readable(), y2->readable(), y3->readable(), x, result->writable());
 	}

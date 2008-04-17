@@ -50,8 +50,7 @@ namespace IECore
 class MeshPrimitiveImplicitSurfaceFunction : public PrimitiveImplicitSurfaceFunction
 {
         public:
-                typedef boost::intrusive_ptr<MeshPrimitiveImplicitSurfaceFunction> Ptr;
-                typedef boost::intrusive_ptr<const MeshPrimitiveImplicitSurfaceFunction> ConstPtr;
+		IE_CORE_DECLAREMEMBERPTR( MeshPrimitiveImplicitSurfaceFunction );
 		
 		MeshPrimitiveImplicitSurfaceFunction( MeshPrimitivePtr mesh );
 		

@@ -59,8 +59,7 @@ class Triangulator : public RefCounted
 		/// to last point.
 		typedef std::pair<PointIterator, PointIterator> Loop;
 		
-		typedef boost::intrusive_ptr<Triangulator> Ptr;
-		typedef boost::intrusive_ptr<const Triangulator> ConstPtr;
+		IE_CORE_DECLAREMEMBERPTR( Triangulator );
 		
 		Triangulator( typename MeshBuilder::Ptr builder );
 		virtual ~Triangulator();

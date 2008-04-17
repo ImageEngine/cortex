@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,6 +67,10 @@ namespace IECore
 template<typename T>
 class TypedObjectParameterWrap : public TypedObjectParameter<T>, public Wrapper< TypedObjectParameter<T> >
 {
+	public:
+		
+		IE_CORE_DECLAREMEMBERPTR( TypedObjectParameterWrap<T> );
+	
 	protected:
 
 		static typename TypedObjectParameter<T>::ObjectPresetsMap makePresets( const dict &d )
@@ -96,7 +100,7 @@ class TypedObjectParameterWrap : public TypedObjectParameter<T>, public Wrapper<
 template<typename T>
 static void bindTypedObjectParameter( const char *name )
 {
-	typedef class_< TypedObjectParameter<T>, intrusive_ptr< TypedObjectParameterWrap< T > >, boost::noncopyable, bases<ObjectParameter> > TypedObjectParameterPyClass;
+	typedef class_< TypedObjectParameter<T>, typename TypedObjectParameterWrap< T >::Ptr , boost::noncopyable, bases<ObjectParameter> > TypedObjectParameterPyClass;
 	TypedObjectParameterPyClass( name, no_init )
 		.def( init< const std::string &, const std::string &, typename T::Ptr, optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
 		.def( init< const std::string &, const std::string &, typename T::Ptr, CompoundObjectPtr >( args( "name", "description", "defaultValue", "userData") ) )
@@ -104,10 +108,10 @@ static void bindTypedObjectParameter( const char *name )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedObjectParameter<T> )
 	;
 
-	WrapperToPython< intrusive_ptr<TypedObjectParameter<T> > >();
+	WrapperToPython< typename TypedObjectParameter<T>::Ptr >();
 
 	INTRUSIVE_PTR_PATCH( TypedObjectParameter<T>, typename TypedObjectParameterPyClass );
-	implicitly_convertible<intrusive_ptr<TypedObjectParameter<T> >, ObjectParameterPtr>();
+	implicitly_convertible< typename TypedObjectParameter<T>::Ptr, ObjectParameterPtr>();
 
 }
 

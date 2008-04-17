@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,7 +44,7 @@ using namespace std;
 namespace IECore {
 
 template<typename T>
-static intrusive_ptr<TypedData<vector<typename T::Value> > > noiseVector( const T &n, intrusive_ptr<TypedData<vector<typename T::Point> > > p, intrusive_ptr<TypedData<vector<typename T::Value> > > v = 0 )
+static typename TypedData<vector<typename T::Value> >::Ptr noiseVector( const T &n, typename TypedData<vector<typename T::Point> >::Ptr p, typename TypedData<vector<typename T::Value> >::Ptr v = 0 )
 {
 	if( !v )
 	{
@@ -61,7 +61,7 @@ static intrusive_ptr<TypedData<vector<typename T::Value> > > noiseVector( const 
 }
 
 template<typename T>
-static intrusive_ptr<TypedData<vector<typename T::Value> > > noiseVector2( const T &n, intrusive_ptr<TypedData<vector<typename T::Point> > > p )
+static typename TypedData<vector<typename T::Value> >::Ptr noiseVector2( const T &n, typename TypedData<vector<typename T::Point> >::Ptr p )
 {
 	return noiseVector<T>( n, p );
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,9 +63,9 @@ class CompoundObject : public Object
 		/// the parameter doesn't exist, or does not match the type specified
 		/// as the template argument.
 		template<typename T>
-		boost::intrusive_ptr<T> member( const std::string &name );
+		typename T::Ptr member( const std::string &name );
 		template<typename T>
-		boost::intrusive_ptr<const T> member( const std::string &name ) const;
+		typename T::ConstPtr member( const std::string &name ) const;
 		
 	protected:
 	

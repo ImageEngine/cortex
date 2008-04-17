@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -84,7 +84,7 @@ static ParameterPtr numericConstructor( const std::string &name, const std::stri
 template<typename T>
 static void bindNumericParameter( const char *name )
 {
-	typedef class_< NumericParameter<T>, intrusive_ptr<NumericParameter<T> >, boost::noncopyable, bases<Parameter> > NumericParameterPyClass;
+	typedef class_< NumericParameter<T>, typename NumericParameter<T>::Ptr, boost::noncopyable, bases<Parameter> > NumericParameterPyClass;
 	NumericParameterPyClass( name, no_init )
 		.def( "__init__", make_constructor( &numericConstructor<T>, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ) = T(), boost::python::arg_( "minValue" ) = Imath::limits<T>::min(), boost::python::arg_( "maxValue" ) = Imath::limits<T>::max(), boost::python::arg_( "presets" ) = dict(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
 		.add_property( "numericDefaultValue", &NumericParameter<T>::numericDefaultValue  )
@@ -100,7 +100,7 @@ static void bindNumericParameter( const char *name )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( NumericParameter<T> )
 	;
 	INTRUSIVE_PTR_PATCH( NumericParameter<T>, typename NumericParameterPyClass );
-	implicitly_convertible<intrusive_ptr<NumericParameter<T> >, ParameterPtr>();
+	implicitly_convertible<typename NumericParameter<T>::Ptr, ParameterPtr>();
 }
 
 void bindNumericParameter()

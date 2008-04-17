@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,8 +59,7 @@ template<typename Container>
 class CompoundTypedDataFunctions
 {
 public:
-	typedef TypedData< Container > ThisClass;
-	typedef typename boost::intrusive_ptr< ThisClass > ThisClassPtr;
+	IE_CORE_DECLAREMEMBERPTR( TypedData< Container >  );
 	typedef const char * key_type;
 	typedef typename Container::value_type::second_type data_type;
 	typedef typename Container::size_type size_type;
@@ -68,17 +67,15 @@ public:
 	typedef typename Container::const_iterator const_iterator;
 
 	/// default constructor
-	static ThisClassPtr 
-	dataConstructor() 
+	static typename TypedData< Container >::Ptr dataConstructor() 
 	{
-		return ThisClassPtr(new ThisClass());
+		return new TypedData< Container >();
 	}
 
 	/// constructor that receives a python map object
-	static ThisClassPtr 
-	dataMapConstructor(dict v) 
+	static typename TypedData< Container >::Ptr dataMapConstructor(dict v) 
 	{
-		ThisClassPtr mapPtr = ThisClassPtr(new ThisClass());
+		typename TypedData< Container >::Ptr mapPtr = new TypedData< Container >();
 		
 		list values = v.values();
 		list keys = v.keys();
@@ -114,7 +111,7 @@ public:
 	}
 
 	/// binding for __getitem__ function
-	static data_type getItem(ThisClass &x, PyObject *i)
+	static data_type getItem(TypedData< Container > &x, PyObject *i)
 	{	
 		key_type key = convertKey(x, i);
 		const Container &xData = x.readable();
@@ -132,7 +129,7 @@ public:
 	}
 	
 	/// binding for __setitem__ function
-	static void setItem(ThisClass &x, PyObject *i, data_type v)
+	static void setItem(TypedData< Container > &x, PyObject *i, data_type v)
 	{
 		key_type key = convertKey(x, i);
 		Container &xData = x.writable();
@@ -140,7 +137,7 @@ public:
 	}
 	
 	/// binding for __delitem__ function
-	static void delItem(ThisClass &x, PyObject *i)
+	static void delItem(TypedData< Container > &x, PyObject *i)
 	{	
 		key_type key = convertKey(x, i);
 		Container &xData = x.writable();
@@ -157,24 +154,23 @@ public:
 	}
 
 	/// binding for __len__ function
-	static size_type len(ThisClass &x)
+	static size_type len(TypedData< Container > &x)
 	{
 		return x.readable().size();
 	}
 
 	/// binding for any unsupported binary operator
-	static ThisClassPtr 
-	invalidOperator(ThisClass &x, PyObject* y)
+	static typename TypedData< Container >::Ptr invalidOperator(TypedData< Container > &x, PyObject* y)
 	{
 	   	PyErr_SetString(PyExc_SyntaxError, "Binary operator not supported for this class.");
 	  	throw_error_already_set();
-		ThisClassPtr res;
-		return res;
+		assert( false );
+		return 0;
 	}
 	
 	/// binding for map clear method
 	static void
-	clear(ThisClass &x)
+	clear(TypedData< Container > &x)
 	{
 		Container &xData = x.writable();
 		xData.clear();
@@ -182,7 +178,7 @@ public:
 	
 	/// binding for has_key method
 	static bool
-	has_key(ThisClass &x, PyObject *i)
+	has_key(TypedData< Container > &x, PyObject *i)
 	{
 		key_type key = convertKey(x, i);
 		const Container &xData = x.readable();
@@ -192,7 +188,7 @@ public:
 	
 	/// binding for items method
 	static list
-	items(ThisClass &x)
+	items(TypedData< Container > &x)
 	{
 		list newList;
 		const Container &xData = x.readable();
@@ -207,7 +203,7 @@ public:
 	
 	/// binding for keys methos
 	static list
-	keys(ThisClass &x)
+	keys(TypedData< Container > &x)
 	{
 		list newList;
 		const Container &xData = x.readable();
@@ -222,7 +218,7 @@ public:
 	
 	/// binding for update method
 	static void
-	update1(ThisClass &x, ThisClass &y)
+	update1(TypedData< Container > &x, TypedData< Container > &y)
 	{
 		Container &xData = x.writable();
 		const Container &yData = y.readable();
@@ -236,7 +232,7 @@ public:
 	
 	/// binding for update method
 	static void
-	update2(ThisClass &x, dict v)
+	update2(TypedData< Container > &x, dict v)
 	{
 		list values = v.values();
 		list keys = v.keys();
@@ -272,7 +268,7 @@ public:
 
 	/// binding for values method
 	static list
-	values(ThisClass &x)
+	values(TypedData< Container > &x)
 	{
 		list newList;
 		const Container &xData = x.readable();
@@ -287,14 +283,14 @@ public:
 	
 	/// binding for get method
 	static data_type
-	get2(ThisClass &x, PyObject *i)
+	get2(TypedData< Container > &x, PyObject *i)
 	{
 		return get(x, i, Py_None);
 	}
 
 	/// binding for get method
 	static data_type
-	get(ThisClass &x, PyObject *i, PyObject *v)
+	get(TypedData< Container > &x, PyObject *i, PyObject *v)
 	{
 		key_type key = convertKey(x, i);
 		const Container &xData = x.readable();
@@ -324,14 +320,14 @@ public:
 
 	/// binding for setdefault method
 	static data_type
-	setdefault2(ThisClass &x, PyObject *i)
+	setdefault2(TypedData< Container > &x, PyObject *i)
 	{
 		return setdefault(x, i, Py_None);
 	}
 
 	/// binding for setdefault method
 	static data_type
-	setdefault(ThisClass &x, PyObject *i, PyObject *v)
+	setdefault(TypedData< Container > &x, PyObject *i, PyObject *v)
 	{
 		key_type key = convertKey(x, i);
 		const Container &xData = x.readable();
@@ -365,14 +361,14 @@ public:
 
 	/// binding for pop method
 	static data_type
-	pop2(ThisClass &x, PyObject *i)
+	pop2(TypedData< Container > &x, PyObject *i)
 	{
 		return pop(x, i, Py_None);
 	}
 
 	/// binding for pop method
 	static data_type
-	pop(ThisClass &x, PyObject *i, PyObject *v)
+	pop(TypedData< Container > &x, PyObject *i, PyObject *v)
 	{
 		key_type key = convertKey(x, i);
 		const Container &xData = x.readable();
@@ -406,7 +402,7 @@ public:
 
 	/// binding for popitem method
 	static boost::python::tuple
-	popitem(ThisClass &x)
+	popitem(TypedData< Container > &x)
 	{
 		boost::python::tuple newTuple;
 		Container &xData = x.writable();
@@ -430,7 +426,7 @@ protected:
 	 */
 
 	static key_type
-	convertKey(ThisClass & container, PyObject *key_)
+	convertKey(TypedData< Container > & container, PyObject *key_)
 	{ 
 		extract<key_type> key(key_);
 		if (key.check())

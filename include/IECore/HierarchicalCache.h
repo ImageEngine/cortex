@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -212,7 +212,8 @@ class HierarchicalCache : public RefCounted
 				HierarchicalCache *m_cache;
 			
 		};
-		boost::intrusive_ptr< CacheDependency > m_dependency;
+		IE_CORE_DECLAREPTR( CacheDependency );
+		CacheDependencyPtr m_dependency;
 
 		friend class CacheDependency;
 

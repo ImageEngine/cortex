@@ -51,9 +51,7 @@
 namespace IECore
 {
 
-class IndexedIOInterface;
-	
-typedef boost::intrusive_ptr<IndexedIOInterface> IndexedIOInterfacePtr;
+IE_CORE_FORWARDDECLARE( IndexedIOInterface );
 	
 /// Abstract interface to define operations on a random-access indexed input/output device. All methods throw an instance of IOException,
 /// or one of its subclasses, if an error is encountered. 

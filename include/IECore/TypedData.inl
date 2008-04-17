@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -133,7 +133,7 @@ bool TypedData<T>::inheritsFrom( const std::string &typeName )
 //////////////////////////////////////////////////////////////////////////////////////
 
 template <class T> 
-boost::intrusive_ptr<TypedData<T> > TypedData<T>::copy() const
+typename TypedData<T>::Ptr TypedData<T>::copy() const
 {
 	return boost::static_pointer_cast<TypedData<T> >( Data::copy() );
 }
@@ -180,7 +180,7 @@ bool TypedData<T>::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	boost::intrusive_ptr<const TypedData<T> > tOther = boost::static_pointer_cast<const TypedData<T> >( other );
+	typename TypedData<T>::ConstPtr tOther = boost::static_pointer_cast<const TypedData<T> >( other );
 	if( m_data==tOther->m_data )
 	{
 		// comparing the pointers is quick and that's good

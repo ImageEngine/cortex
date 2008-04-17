@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,13 +56,13 @@ namespace IECore
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<class T>
-static intrusive_ptr<T> construct()
+static typename T::Ptr construct()
 {
 	return new T;
 }
 
 template<class T>
-static intrusive_ptr<T> constructWithValue( const typename T::ValueType &v )
+static typename T::Ptr constructWithValue( const typename T::ValueType &v )
 {
 	return new T( v );
 }
@@ -88,7 +88,7 @@ static int cmp( T &x, T &y )
 template< typename T >
 void bindTypedTransformationMatrixData( const char *bindName )
 {
-	typedef class_< TypedData< TransformationMatrix< T > >, intrusive_ptr< TypedData< TransformationMatrix< T > > >, boost::noncopyable, bases<Data> > ThisPyClass;
+	typedef class_< TypedData< TransformationMatrix< T > >, typename TypedData< TransformationMatrix< T > >::Ptr, boost::noncopyable, bases<Data> > ThisPyClass;
 	ThisPyClass result( bindName, no_init );
 	result.def( "__init__", make_constructor( &construct< TypedData< TransformationMatrix< T > > > ), "Construct with no specified value." );
 	result.def( "__init__", make_constructor( &constructWithValue< TypedData< TransformationMatrix< T > > > ), "Construct with the specified value." );
@@ -99,8 +99,8 @@ void bindTypedTransformationMatrixData( const char *bindName )
 
 	INTRUSIVE_PTR_PATCH( TypedData< TransformationMatrix<T> >, typename ThisPyClass );
 
-	implicitly_convertible< intrusive_ptr< TypedData< TransformationMatrix<T> > >, DataPtr>();
-	implicitly_convertible< intrusive_ptr< TypedData< TransformationMatrix<T> > >, intrusive_ptr< TypedData< TransformationMatrix<T> > const > >();
+	implicitly_convertible< typename TypedData< TransformationMatrix<T> >::Ptr , DataPtr>();
+	implicitly_convertible< typename TypedData< TransformationMatrix<T> >::Ptr, typename TypedData< TransformationMatrix<T> >::ConstPtr >();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

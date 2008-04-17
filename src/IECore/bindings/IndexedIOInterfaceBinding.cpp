@@ -99,7 +99,7 @@ struct IndexedIOInterfaceHelper
 	
 	template<typename T>
 	static void writeVector(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name, 
-		const boost::intrusive_ptr< TypedData < T > > &x)
+		const typename TypedData < T >::Ptr &x)
 	{
 		assert(p);
 		
@@ -108,7 +108,7 @@ struct IndexedIOInterfaceHelper
 	}
 	
 	template<typename T>
-	static boost::intrusive_ptr<TypedData<T> > readSingle(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name, const IndexedIO::Entry &entry)
+	static typename TypedData<T>::Ptr readSingle(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name, const IndexedIO::Entry &entry)
 	{	
 		T data;
 		p->read(name, data);		
@@ -116,10 +116,10 @@ struct IndexedIOInterfaceHelper
 	}
 	
 	template<typename T>
-	static boost::intrusive_ptr<TypedData< std::vector<T> > > readArray(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name, const IndexedIO::Entry &entry)
+	static typename TypedData< std::vector<T> >::Ptr readArray(IndexedIOInterfacePtr p, const IndexedIO::EntryID &name, const IndexedIO::Entry &entry)
 	{	
 		unsigned long count = entry.arrayLength();		
-		boost::intrusive_ptr< TypedData<std::vector<T> > > x = new TypedData<std::vector<T> > ();	
+		typename TypedData<std::vector<T> >::Ptr x = new TypedData<std::vector<T> > ();	
 		x->writable().resize( entry.arrayLength() );		
 		T *data = &(x->writable()[0]);		
 		p->read(name, data, count);		

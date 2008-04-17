@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,8 +60,7 @@ class MarchingCubes : public RefCounted
 		typedef typename Imath::Vec3<PointBaseType> Vector;
 		typedef Imath::Box<Vector> BoxType;
 		
-		typedef boost::intrusive_ptr< MarchingCubes<ImplicitFn, MeshBuilder> > Ptr;
-		typedef boost::intrusive_ptr< const MarchingCubes<ImplicitFn, MeshBuilder> > ConstPtr;
+		IE_CORE_DECLAREMEMBERPTR2( MarchingCubes<ImplicitFn, MeshBuilder> );
 		
 		MarchingCubes( typename ImplicitFn::Ptr fn, typename MeshBuilder::Ptr builder );
 
@@ -125,7 +124,7 @@ class MarchingCubes : public RefCounted
 		unsigned m_numVerts;
 		
 		typedef TypedData< std::vector< Imath::Vec3<PointBaseType > > > V3xVectorData;
-		typedef boost::intrusive_ptr< TypedData< std::vector< Imath::Vec3<PointBaseType > > > > V3xVectorDataPtr;
+		typedef typename TypedData< std::vector< Imath::Vec3<PointBaseType > > >::Ptr V3xVectorDataPtr;
 		V3xVectorDataPtr m_P;
 		V3xVectorDataPtr m_N;		
 		

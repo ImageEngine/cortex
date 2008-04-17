@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,8 +51,8 @@ class NumericParameter : public Parameter
 	
 		typedef T ValueType;
 		typedef TypedData<T> ObjectType;
-		typedef boost::intrusive_ptr<ObjectType> ObjectTypePtr;
-		typedef boost::intrusive_ptr<const ObjectType> ConstObjectTypePtr;
+		IE_CORE_DECLAREMEMBERPTR( NumericParameter<T> );
+		IE_CORE_DECLAREPTR( ObjectType );
 		typedef std::map<std::string, T> PresetsMap;
 	
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue = T(),

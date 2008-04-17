@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,9 +42,8 @@
 
 namespace IECore
 {
-	
-class IndexedIOFilter;
-typedef boost::intrusive_ptr<IndexedIOFilter> IndexedIOFilterPtr;	
+		
+IE_CORE_FORWARDDECLARE( IndexedIOFilter );
 
 /// An interface to allow arbitrary filtering of IndexedIO::EntryList objects. For example,
 /// to filter out all files that are larger than a certain size, or of a particular data type.
@@ -78,8 +77,7 @@ class IndexedIONullFilter : public IndexedIOFilter
 		virtual bool filter( const IndexedIO::Entry &e) const;
 };
 
-typedef boost::intrusive_ptr<IndexedIONullFilter> IndexedIONullFilterPtr;
-
+IE_CORE_DECLAREPTR( IndexedIONullFilter );
 
 /// A class to filter out Entries which don't have the specified type.
 class IndexedIOEntryTypeFilter : public IndexedIOFilter
@@ -94,7 +92,7 @@ class IndexedIOEntryTypeFilter : public IndexedIOFilter
 			
 };
 
-typedef boost::intrusive_ptr<IndexedIOEntryTypeFilter> IndexedIOEntryTypeFilterPtr;
+IE_CORE_DECLAREPTR( IndexedIOEntryTypeFilter );
 
 /// A class to filter out Entries whose names don't match the specified regular expression
 class IndexedIORegexFilter : public IndexedIOFilter
@@ -109,7 +107,7 @@ class IndexedIORegexFilter : public IndexedIOFilter
 			
 };
 
-typedef boost::intrusive_ptr<IndexedIORegexFilter> IndexedIORegexFilterPtr;
+IE_CORE_DECLAREPTR( IndexedIORegexFilter );
 
 }
 
