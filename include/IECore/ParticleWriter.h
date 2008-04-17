@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,7 +54,7 @@ class ParticleWriter : public Writer
 
 		IE_CORE_DECLARERUNTIMETYPED( ParticleWriter, Writer )
 
-		ParticleWriter( const std::string name, const std::string description );
+		ParticleWriter( const std::string &name, const std::string &description );
 		
 		/// Default implementation just checks that object is a PointsPrimitive instance.
 		static bool canWrite( ConstObjectPtr object, const std::string &fileName );

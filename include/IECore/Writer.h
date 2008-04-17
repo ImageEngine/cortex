@@ -56,8 +56,8 @@ class Writer : public Op
 
 		IE_CORE_DECLARERUNTIMETYPED( Writer, Op )
 
-		Writer( const std::string name, const std::string description, TypeId writableType );
-		Writer( const std::string name, const std::string description, const ObjectParameter::TypeIdSet &writableTypes );
+		Writer( const std::string &name, const std::string &description, TypeId writableType );
+		Writer( const std::string &name, const std::string &description, const ObjectParameter::TypeIdSet &writableTypes );
 		
 		/// Returns the name of the file this Writer
 		/// is set to create. This is just a convenience returning the equivalent of

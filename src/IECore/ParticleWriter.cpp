@@ -45,7 +45,7 @@ using namespace std;
 using namespace IECore;
 using namespace boost;
 
-ParticleWriter::ParticleWriter( const std::string name, const std::string description )
+ParticleWriter::ParticleWriter( const std::string &name, const std::string &description )
 	:	Writer( name, description, PointsPrimitiveTypeId )
 {
 	m_attributesParameter = new StringVectorParameter(
