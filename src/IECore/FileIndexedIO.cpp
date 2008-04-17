@@ -1315,15 +1315,12 @@ bool FileIndexedIO::canRead( const std::string &path )
 	return Index::canRead( path );
 }
 
-FileIndexedIO::FileIndexedIO(const FileIndexedIO &other, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode  )
+FileIndexedIO::FileIndexedIO( const FileIndexedIO &other, IndexedIO::OpenMode mode )
 {
 	m_mode = mode;
 	m_indexedFile = other.m_indexedFile;
-
-	/// \todo No need to pass "root" as a parameter because we can derive it, according to this assert	
-	assert( root == other.m_currentDirectory.fullPath() );
 	
-	m_currentDirectory = IndexedIOPath(root);
+	m_currentDirectory = IndexedIOPath( other.m_currentDirectory.fullPath() );
 	
 	m_rootDirectoryNode = other.m_currentDirectoryNode;
 	m_currentDirectoryNode = other.m_currentDirectoryNode;
@@ -1347,7 +1344,7 @@ IndexedIOInterfacePtr FileIndexedIO::resetRoot() const
 		mode |= IndexedIO::Append;
 	}
 		
-	return new FileIndexedIO(*this, m_currentDirectory.fullPath(), mode);
+	return new FileIndexedIO(*this, mode);
 }
 
 FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode)

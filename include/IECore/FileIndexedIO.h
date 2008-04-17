@@ -127,7 +127,7 @@ class FileIndexedIO : public IndexedIOInterface
 		/// The mode this device was opened with
 		IndexedIO::OpenMode m_mode;
 	
-		FileIndexedIO(const FileIndexedIO &other, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
+		FileIndexedIO(const FileIndexedIO &other, IndexedIO::OpenMode mode);
 		
 		/// Check for existence of the entry with specified type
 		bool exists(const IndexedIOPath &path, IndexedIO::EntryType e) const;
