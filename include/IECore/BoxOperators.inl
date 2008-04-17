@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,8 @@
 #ifndef IE_CORE_BOXOPERATORS_INL
 #define IE_CORE_BOXOPERATORS_INL
 
-namespace IECore {
+namespace IECore
+{
 
 template<class T>
 std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj )
@@ -43,30 +44,6 @@ std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj )
       os << "[ " << obj.min << ", " << obj.max << " ]";
       return os;
 }
-
-/// calculate the intersection of two commensurable boxes
-template <class T>
-Imath::Box<T> intersection(const Imath::Box<T> & a, const Imath::Box<T> & b)
-{
-	Imath::Box<T> r;
-	unsigned int dim = a.min.dimensions();
-
-	for(unsigned int d = 0; d < dim; ++d)
-	{
-		r.min[d] = a.min[d] < b.min[d] ? b.min[d] : a.min[d];
-		r.max[d] = a.max[d] < b.max[d] ? a.max[d] : b.max[d];
-
-		// check for emptiness, explicitly set
-		if(r.max[d] < r.min[d])
-		{
-			r.makeEmpty();
-			break;
-		}
-	}
-		
-	return r;
-}
-
 	
 } // namespace IECore
 

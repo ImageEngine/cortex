@@ -55,8 +55,6 @@
 #include "IECore/TypeTraits.h"
 #include "IECore/DespatchTypedData.h"
 
-#include "IECore/BoxOperators.h"
-
 #include "tiffio.h"
 
 using namespace IECore;

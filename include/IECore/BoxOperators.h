@@ -48,11 +48,6 @@ namespace IECore
 template<class T>
 std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj );
 
-/// calculate the intersection of two commensurable boxes
-/// \deprecated
-template <class T>
-Imath::Box<T> intersection(const Imath::Box<T> & a, const Imath::Box<T> & b);
-
 } // namespace IECore
 
 #include "IECore/BoxOperators.inl"

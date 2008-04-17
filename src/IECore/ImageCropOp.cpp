@@ -41,7 +41,7 @@
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/BoxOperators.h"
+#include "IECore/BoxOps.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/DespatchTypedData.h"
 
@@ -176,9 +176,9 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 	bool matchDataWindow = m_matchDataWindow->getTypedValue();
 	bool resetOrigin = m_resetOrigin->getTypedValue();
 
-	Imath::Box2i croppedDisplayWindow = intersection( cropBox, image->getDisplayWindow() );
+	Imath::Box2i croppedDisplayWindow = boxIntersection( cropBox, image->getDisplayWindow() );
 	Imath::Box2i dataWindow = image->getDataWindow();
-	Imath::Box2i croppedDataWindow = intersection( croppedDisplayWindow, dataWindow );
+	Imath::Box2i croppedDataWindow = boxIntersection( croppedDisplayWindow, dataWindow );
 	Imath::Box2i newDisplayWindow = croppedDisplayWindow;
 	Imath::Box2i newDataWindow;
 
