@@ -34,7 +34,6 @@
 
 import os
 import sys
-import maya.cmds as cmds
 import unittest
 
 class SplitStream :
@@ -49,7 +48,9 @@ class SplitStream :
 		self.__f.write( l )
 
 
-class MayaTestSuite( unittest.TestSuite ) :
+class TestSuite( unittest.TestSuite ) :
+
+	""" A test suite which brings in a fresh Maya scene before each test run """
 
 	def __init__( self, tests=() ):
 	
@@ -71,9 +72,10 @@ class MayaTestSuite( unittest.TestSuite ) :
 		
 
 def createMayaTestLoader() :
+	""" Returns an instance of unittest.TestLoader() which gathers test cases into one of our TestSuites """
 
 	loader = unittest.TestLoader()
-	loader.suiteClass = MayaTestSuite	
+	loader.suiteClass = TestSuite	
 	
 	return loader
 	
@@ -81,6 +83,8 @@ def createMayaTestLoader() :
 defaultMayaTestLoader = createMayaTestLoader()	
 
 class TestProgram( unittest.TestProgram ) :
+
+	""" A test program which initializes Maya standalone before running the test suite """
 
 	def __init__(self, module='__main__', defaultTest=None, argv=None, testRunner=None, testLoader=defaultMayaTestLoader ) :
 	
