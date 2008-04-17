@@ -721,6 +721,7 @@ if doConfigure :
 		sys.stderr.write( "WARNING: no TIFF library found, no TIFF support, check TIFF_INCLUDE_PATH and TIFF_LIB_PATH.\n" )
 		coreSources.remove( "src/IECore/TIFFImageWriter.cpp" )
 		coreSources.remove( "src/IECore/TIFFImageReader.cpp" )
+		coreSources.remove( "src/IECore/ScopedTIFFExceptionTranslator.cpp" )		
 		corePythonSources.remove( "src/IECore/bindings/TIFFImageReaderBinding.cpp" )
 		corePythonSources.remove( "src/IECore/bindings/TIFFImageWriterBinding.cpp" )
 		
