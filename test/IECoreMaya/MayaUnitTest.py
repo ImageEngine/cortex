@@ -32,7 +32,10 @@
 #
 ##########################################################################
 
-import sys 
+import os
+import sys
+import maya.cmds as cmds
+import unittest
 
 class SplitStream :
 
@@ -44,3 +47,54 @@ class SplitStream :
 
 		sys.stderr.write( l )
 		self.__f.write( l )
+
+
+class MayaTestSuite( unittest.TestSuite ) :
+
+	def __init__( self, tests=() ):
+	
+		unittest.TestSuite.__init__( self, tests )
+		
+	def run(self, result):
+	
+		import maya.cmds as cmds
+		
+		for test in self._tests:
+		
+			cmds.file( new = True, force = True )
+			
+			if result.shouldStop:
+				break
+				
+			test(result)
+		return result
+		
+
+def createMayaTestLoader() :
+
+	loader = unittest.TestLoader()
+	loader.suiteClass = MayaTestSuite	
+	
+	return loader
+	
+	
+defaultMayaTestLoader = createMayaTestLoader()	
+
+class TestProgram( unittest.TestProgram ) :
+
+	def __init__(self, module='__main__', defaultTest=None, argv=None, testRunner=None, testLoader=defaultMayaTestLoader ) :
+	
+		unittest.TestProgram.__init__( self, module, defaultTest, argv, testRunner, testLoader )
+		
+	def runTests( self ) :	
+		try: 
+			import maya.standalone 
+			maya.standalone.initialize( name='IECoreMayaTest' ) 
+		except: 
+			sys.stderr.write( "Failed to initialize Maya %s in standalone application" % ( os.environ["MAYA_VERSION"] ) ) 
+			raise
+			
+		import maya.cmds
+		maya.cmds.loadPlugin( "ieCore" )
+		
+		unittest.TestProgram.runTests( self )		

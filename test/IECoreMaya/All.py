@@ -38,7 +38,7 @@ from ConverterHolder import *
 from PlaybackFrameList import *
 from ParameterisedHolder import *
 
-from MayaTextTestRunner import *
-from SplitStream import *	
-unittest.TestProgram( testRunner = MayaTextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+from MayaUnitTest import *
+
+MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
 	 

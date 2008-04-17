@@ -34,7 +34,7 @@
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-import unittest
+import unittest, MayaUnitTest
 import os.path
 from IECore import *
 from IECoreMaya import *
@@ -52,7 +52,5 @@ class TestPlaybackFrameList( unittest.TestCase ) :
 		                            int( cmds.playbackOptions( query=True, animationEndTime=True ) + 1 ) ) )
 
 if __name__ == "__main__":
-	from MayaTextTestRunner import *
-	from SplitStream import *
-	unittest.TestProgram( testRunner = MayaTextTestRunner( stream = SplitStream(), verbosity = 2 ) )
-	 
+	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
+

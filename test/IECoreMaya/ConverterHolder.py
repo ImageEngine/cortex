@@ -34,7 +34,7 @@
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-import unittest
+import unittest, MayaUnitTest
 import os.path
 from IECore import *
 from IECoreMaya import *
@@ -46,10 +46,10 @@ class TestConverterHolder( unittest.TestCase ) :
 		n = cmds.createNode( "ieConverterHolder" )	
 		c = ConverterHolder( str(n) )
 		self.assert_( c )
+		
+		# \todo Add a FromMayaMeshConverter, pass in a mesh shape, and assert that we get a MeshPrimitive out
 
 
 if __name__ == "__main__":
-	from MayaTextTestRunner import *
-	from SplitStream import *
-	unittest.TestProgram( testRunner = MayaTextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
 	 

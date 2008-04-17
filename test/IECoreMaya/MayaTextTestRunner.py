@@ -52,3 +52,12 @@ class MayaTextTestRunner( unittest.TextTestRunner ) :
 			
 		import maya.cmds
 		maya.cmds.loadPlugin( "ieCore" )
+		
+	def run( self, test ) :
+	
+		import maya.cmds as cmds
+		print("RUN")
+		cmds.file( new = True, force = True )	
+		unittest.TextTestRunner.run( self, test )	
+		cmds.file( new = True, force = True )
+		print("STOP")
