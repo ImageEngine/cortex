@@ -48,8 +48,6 @@ namespace IECore
 /// Primitives may hold "primitive variables" which are simply values
 /// which vary over the surface of the Primitive and can be used by
 /// the renderer to define various aspects of its appearance.
-/// \todo Utility method to guess the appropriate interpolation for
-/// a given variableSize.
 /// \todo Validation of variableSizes before rendering.
 class Primitive : public VisibleRenderable
 {
@@ -68,11 +66,30 @@ class Primitive : public VisibleRenderable
 
 		/// Returns true if all primitive variables have the correct size for their interpolation type
 		bool arePrimitiveVariablesValid() const;
+		
+		/// Guesses a suitable interpolation type for a PrimitiveVariable containing
+		/// the specified number of data elements. Returns PrimitiveVariable::Invalid
+		/// if no such interpolation exists. Note that for a given size multiple
+		/// interpolation types may well be valid, so this method may not always give
+		/// the desired results. In the case of multiple suitable types, interpolations
+		/// are given the following priority (highest first) :
+		///
+		/// Constant
+		/// Uniform
+		/// Vertex
+		/// Varying
+		/// FaceVarying
+		PrimitiveVariable::Interpolation inferInterpolation( size_t numElements ) const;
+		/// Convenience function which finds the size of data and calls the above
+		/// method.
+		PrimitiveVariable::Interpolation inferInterpolation( ConstDataPtr data ) const;
 				
 		/// Implemented to return a box containing all the points in the variable
 		/// "P" if it exists.
 		virtual Imath::Box3f bound() const;
 		
+		/// Returns the number of values a piece of data must provide for the given
+		/// interpolation type. Must be implemented in all derived classes.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const = 0;
 			
 	private:

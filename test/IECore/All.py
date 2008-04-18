@@ -140,6 +140,7 @@ from ImageDiffOp import *
 from TriangulatorTest import *
 from BezierAlgoTest import *
 from MeshNormalsOpTest import *
+from PrimitiveTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

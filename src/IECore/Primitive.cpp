@@ -230,3 +230,34 @@ bool Primitive::arePrimitiveVariablesValid() const
 	
 	return true;
 }
+
+PrimitiveVariable::Interpolation Primitive::inferInterpolation( size_t numElements ) const
+{
+	if( variableSize( PrimitiveVariable::Constant )==numElements )
+	{
+		return PrimitiveVariable::Constant;
+	}
+	else if( variableSize( PrimitiveVariable::Uniform )==numElements )
+	{
+		return PrimitiveVariable::Uniform;
+	}
+	else if( variableSize( PrimitiveVariable::Vertex )==numElements )
+	{
+		return PrimitiveVariable::Vertex;
+	}
+	else if( variableSize( PrimitiveVariable::Varying )==numElements )
+	{
+		return PrimitiveVariable::Varying;
+	}
+	else if( variableSize( PrimitiveVariable::FaceVarying )==numElements )
+	{
+		return PrimitiveVariable::FaceVarying;
+	}
+	return PrimitiveVariable::Invalid;
+}
+
+PrimitiveVariable::Interpolation Primitive::inferInterpolation( ConstDataPtr data ) const
+{
+	size_t s = IECore::despatchTypedData<IECore::TypedDataSize>( boost::const_pointer_cast<Data>( data ) );
+	return inferInterpolation( s );
+}

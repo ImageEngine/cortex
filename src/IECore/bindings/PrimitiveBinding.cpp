@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -118,6 +118,8 @@ void bindPrimitive()
 		.def( "values", &values, "Returns a list containing shallow copies of the PrimitiveVariable objects held." )
 		.def( "isPrimitiveVariableValid", &Primitive::isPrimitiveVariableValid)
 		.def( "arePrimitiveVariablesValid", &Primitive::arePrimitiveVariablesValid)
+		.def( "inferInterpolation", (PrimitiveVariable::Interpolation (Primitive::*)( size_t ) const)&Primitive::inferInterpolation )
+		.def( "inferInterpolation", (PrimitiveVariable::Interpolation (Primitive::*)( ConstDataPtr ) const)&Primitive::inferInterpolation )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Primitive)		
 	;
 	INTRUSIVE_PTR_PATCH( Primitive, PrimitivePyClass );
