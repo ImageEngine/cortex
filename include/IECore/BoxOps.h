@@ -78,6 +78,10 @@ bool boxIntersects( const T &box, const typename BoxTraits<T>::BaseType &p );
 template <typename T>
 bool boxIntersects( const T &box, const T &box2 );
 
+/// Returns true if box contains containee.
+template <typename T>
+bool boxContains( const T &box, const T &containee );
+
 /// Intersects the box with the given ray. The direction vector must be normalissed. Returns true if there was an intersection, setting
 /// the "result" argument with the point of intersection accordingly.
 template<typename T>

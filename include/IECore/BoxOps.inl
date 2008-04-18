@@ -167,7 +167,7 @@ bool boxIntersects( const T &box, const T &box2 )
 	typename BoxTraits<T>::BaseType max2 = BoxTraits<T>::max( box2 );		
 	
 	for( unsigned int d = 0; d < BoxTraits<T>::BaseType::dimensions(); ++d )
-        {
+	{
 		if ( vecGet( max2, d ) < vecGet( min, d ) )
 		{
 			return false;
@@ -178,6 +178,29 @@ bool boxIntersects( const T &box, const T &box2 )
 		}
 	}
 	
+	return true;
+}
+
+template <typename T>
+bool boxContains( const T &box, const T &containee )
+{
+	typename BoxTraits<T>::BaseType min = BoxTraits<T>::min( box );
+	typename BoxTraits<T>::BaseType max = BoxTraits<T>::max( box );
+	
+	typename BoxTraits<T>::BaseType cMin = BoxTraits<T>::min( containee );
+	typename BoxTraits<T>::BaseType cMax = BoxTraits<T>::max( containee );
+	
+	for( unsigned int d=0; d<BoxTraits<T>::BaseType::dimensions(); d++ )
+	{
+		if( vecGet( cMin, d ) < vecGet( min, d ) )
+		{
+			return false;
+		}
+		if( vecGet( cMax, d ) > vecGet( max, d ) )
+		{
+			return false;
+		}
+	}
 	return true;
 }
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@
 #include <OpenEXR/ImathBoxAlgo.h>
 
 #include "IECore/VectorTraits.h"
+#include "IECore/BoxOps.h"
 #include "IECore/bindings/ImathBoxBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
@@ -130,6 +131,7 @@ class_< Box<T> > bindBox(const char *bindName)
 		.def("center", &Box<T>::center)
 		.def("intersects", i1)
 		.def("intersects", i2)
+		.def("contains", &boxContains<Box<T> > )
 
 		.def("majorAxis", &Box<T>::majorAxis)
 		

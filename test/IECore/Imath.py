@@ -539,7 +539,23 @@ class ImathBox3f(unittest.TestCase):
 		m[1,1]=2
 		m[2,2]=2
 		self.assertEqual( b.transform( m ), Box3f( V3f(2), V3f(4) ) )
+	
+	def testContains( self ) :
+	
+		b1 = Box3f( V3f( -1 ), V3f( 1 ) )
+		b2 = Box3f( V3f( 0, -0.5, 0.5 ), V3f( 0.1, 0, 0.9 ) )
+		b3 = Box3f( V3f( -1.2, -0.6, 0.4 ), V3f( 0.2, 0.1, 1 ) )
 		
+		self.assert_( b1.contains( b2 ) )
+		self.assert_( not b2.contains( b1 ) )
+		
+		self.assert_( not b2.contains( b3 ) )
+		self.assert_( b3.contains( b2 ) )
+		
+		self.assert_( not b3.contains( b1 ) )
+		self.assert_( not b1.contains( b3 ) )
+		
+	
 class ImathQuatf(unittest.TestCase):
 	def testConstructors(self):
 		"""Test Quatf constructors"""
