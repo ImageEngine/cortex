@@ -36,6 +36,7 @@
 
 #include "IECore/Op.h"
 #include "IECore/Parameter.h"
+#include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
@@ -53,6 +54,8 @@ class OpWrap : public Op, public Wrapper<Op>
 		
 		OpWrap( PyObject *self, const std::string name, const std::string description, ParameterPtr resultParameter ) : Op( name, description, resultParameter ), Wrapper<Op>( self, this ) {};
 		
+		OpWrap( PyObject *self, const std::string name, const std::string description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter ) : Op( name, description, compoundParameter, resultParameter ), Wrapper<Op>( self, this ) {};
+
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands ) 
 		{
 			override o = this->get_override( "doOperation" );
@@ -71,6 +74,7 @@ class OpWrap : public Op, public Wrapper<Op>
 			}
 		};
 
+
 };
 IE_CORE_DECLAREPTR( OpWrap );
 
@@ -84,6 +88,7 @@ void bindOp()
 	typedef class_< Op, OpWrapPtr, boost::noncopyable, bases<Parameterised> > OpPyClass;
 	OpPyClass( "Op", no_init )
 		.def( init< const std::string, const std::string, ParameterPtr >( args( "name", "description", "resultParameter") ) )
+		.def( init< const std::string, const std::string, CompoundParameterPtr, ParameterPtr >( args( "name", "description", "compoundParameter", "resultParameter") ) )
 		.def( "resultParameter", &resultParameter )
 		.def( "operate", &Op::operate )
 		.def( "__call__", &Op::operate )

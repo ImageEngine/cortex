@@ -81,7 +81,46 @@ class TestPythonOp( unittest.TestCase ) :
 		if len(badClasses) > 0:
 			raise Exception, "The following Op classes don't have a default constructor: " + \
 					string.join(map(str, badClasses), ", ")
+
+	def testSpecializedCompoundParameter( self ):
 		
+		# This Ops shows how to make cross-validation on Op parameters.
+		# Op that will only operate if the 'first' parameter is greater then the 'second' parameter.
+		class GreaterThenOp( Op ) :
+
+			class MyCompound( CompoundParameter ):
+				def __init__( self ):
+					CompoundParameter.__init__( self,
+							name = '', 
+							description = '', 
+							members = [
+								IntParameter( 'first', '', 0 ),
+								IntParameter( 'second', '', 0 ),
+							]
+					)
+				def valueValid( self, value ) :
+
+					res = CompoundParameter.valueValid( self, value )
+					if not res[0]:
+						return res
+
+					if value.first > value.second:
+						return ( True, "" )
+
+					return ( False, "First parameter is not greater then the second!" )
+
+			def __init__( self ) :
+				Op.__init__( self, "opName", "opDescription", GreaterThenOp.MyCompound(), StringParameter( "result", "", "" ) )
+
+			def doOperation( self, operands ) :
+				return StringData( "Yes!" )
+
+		op = GreaterThenOp()
+		op.first = 1
+		op.second = 0
+		op()
+		op.second = 2
+		self.assertRaises( Exception, op )
 
 if __name__ == "__main__":
 	unittest.main()
