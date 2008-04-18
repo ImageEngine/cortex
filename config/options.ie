@@ -39,6 +39,7 @@ import IEEnv
 
 def getOption( name, default ) :
 
+	import sys
 	result = default
 	for a in sys.argv :
 		if a[:len(name)+1]==name+"=" :	
