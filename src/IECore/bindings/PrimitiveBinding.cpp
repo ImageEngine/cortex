@@ -105,9 +105,6 @@ void bindPrimitive()
 {	
 	typedef class_< Primitive, PrimitivePtr, bases<VisibleRenderable>, boost::noncopyable > PrimitivePyClass;
 	PrimitivePyClass( "Primitive", no_init )
-		/// \bug This pushes a std::map into python, and we've got no converters for that.
-		.add_property("variables", &Primitive::variables)
-		
 		.def( "variableSize", &Primitive::variableSize )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem, "Returns a shallow copy of the requested PrimitiveVariable object." )
