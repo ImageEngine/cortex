@@ -162,6 +162,8 @@ FromMayaMeshConverter::FromMayaMeshConverter( const MObject &object )
 
 	parameters()->addParameter( m_primVarAttrPrefix );
 	
+	/// \todo We don't want all these spaces. We want object and world only.
+	/// Also this parameter should be on a base class somewhere.
 	IntParameter::PresetsMap spacePresets;
 	spacePresets["Transform"] = Transform;
 	spacePresets["PreTransform"] = PreTransform;
