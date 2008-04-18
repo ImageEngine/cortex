@@ -70,15 +70,15 @@ inline void boxExtend( T &box, const T &box2 );
 template <typename T>
 T boxIntersection( const T &box, const T &box2 );
 
-/// Returns true iff the box intersects (contains) the given point
+/// Returns true if the box intersects (contains) the given point
 template <typename T>
 bool boxIntersects( const T &box, const typename BoxTraits<T>::BaseType &p );
 
-/// Returns true iff the box intersects the given box
+/// Returns true if the box intersects the given box
 template <typename T>
 bool boxIntersects( const T &box, const T &box2 );
 
-/// Intersects the box with the given ray. The direction vector must be normalissed. Returns true iff there was an intersection, setting
+/// Intersects the box with the given ray. The direction vector must be normalissed. Returns true if there was an intersection, setting
 /// the "result" argument with the point of intersection accordingly.
 template<typename T>
 bool boxIntersects(
