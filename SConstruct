@@ -470,6 +470,10 @@ env.Prepend(
 
 if env["PLATFORM"]=="darwin" :
 	env.Append( CXXFLAGS = "-Wno-long-double" )
+else:
+	# This is here to specifically address a problem in binutils-2.17 and later, when harmless warnings of the
+	# form "X: referenced in section '.rodata' of Y: defined in discarded section" were changed to errors
+	env.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )
 
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = "-g" )
