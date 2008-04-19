@@ -37,8 +37,6 @@
 #include "IECoreMaya/TypeIds.h"
 #include "IECoreMaya/bindings/TypeIdBinding.h"
 
-#include "IECore/TypeIds.h"
-
 using namespace boost::python;
 
 namespace IECoreMaya
