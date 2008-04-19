@@ -100,9 +100,6 @@ Winding polygonWinding( Iterator first, Iterator last )
 	return z < Real( 0 ) ? ClockwiseWinding : CounterClockwiseWinding; 
 }
 
-/// Returns the winding order for the polygon specified by the 3D vertices in the
-/// given iterator range, when viewed with the specified view vector.
-/// Copes correctly with concave polygons.
 template<typename Iterator>
 Winding polygonWinding( Iterator first, Iterator last, const typename std::iterator_traits<Iterator>::value_type &viewVector )
 {
@@ -110,6 +107,17 @@ Winding polygonWinding( Iterator first, Iterator last, const typename std::itera
 	typedef typename Vec::BaseType Real;
 	Real f = polygonNormal( first, last ).dot( viewVector );
 	return f < Real( 0 ) ? CounterClockwiseWinding : ClockwiseWinding;
+}
+
+template<typename Iterator>
+Imath::Box<typename std::iterator_traits<Iterator>::value_type> polygonBound( Iterator first, Iterator last )
+{
+	Imath::Box<typename std::iterator_traits<Iterator>::value_type> result;
+	for( Iterator it=first; it!=last; it++ )
+	{
+		result.extendBy( *it );
+	}
+	return result;
 }
 
 } // namespace IECore

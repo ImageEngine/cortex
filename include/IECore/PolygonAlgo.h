@@ -35,6 +35,8 @@
 #ifndef IECORE_POLYGONALGO_H
 #define IECORE_POLYGONALGO_H
 
+#include "OpenEXR/ImathBox.h"
+
 namespace IECore
 {
 
@@ -64,6 +66,10 @@ Winding polygonWinding( Iterator first, Iterator last );
 /// Copes correctly with concave polygons.
 template<typename Iterator>
 Winding polygonWinding( Iterator first, Iterator last, const typename std::iterator_traits<Iterator>::value_type &viewVector );
+
+/// Returns the bounding box of the polygon specified by the vertices in the given iterator range.
+template<typename Iterator>
+Imath::Box<typename std::iterator_traits<Iterator>::value_type> polygonBound( Iterator first, Iterator last );
 
 } // namespace IECore
 

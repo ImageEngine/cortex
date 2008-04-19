@@ -125,6 +125,17 @@ class PolygonAlgoTest( unittest.TestCase ) :
 		self.assertEqual( polygonWinding( p, V3f( 0, 0, -1 ) ), Winding.Clockwise )
 		self.assertEqual( polygonWinding( p, V3f( 0, 0, 1 ) ), Winding.CounterClockwise )
 		self.assertNotEqual( polygonWinding( p, V3f( 0, 0, 1 ) ), Winding.Clockwise )
+	
+	def testBound( self ) :
 			
+		p = V3fVectorData( [
+			V3f( 0, 0, 0 ),
+			V3f( 1, 0, 0 ),
+			V3f( 1, 1, 0 ),
+			V3f( 0, 1, 0 ),
+		] )
+		
+		self.assertEqual( polygonBound( p ), Box3f( V3f( 0 ), V3f( 1, 1, 0 ) ) )
+		
 if __name__ == "__main__":
     unittest.main()   

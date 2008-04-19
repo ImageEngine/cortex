@@ -39,6 +39,7 @@
 #include "IECore/VectorTypedData.h"
 
 using namespace boost::python;
+using namespace Imath;
 
 namespace IECore
 {
@@ -61,6 +62,12 @@ static Winding polygonWindingBinding3D( typename VecData::Ptr p, const typename 
 	return polygonWinding( p->readable().begin(), p->readable().end(), v );
 }
 
+template<typename VecData>
+static Box<typename VecData::ValueType::value_type> polygonBoundBinding( typename VecData::Ptr p )
+{
+	return polygonBound( p->readable().begin(), p->readable().end() );
+}
+
 void bindPolygonAlgo()
 {
 	enum_<Winding>( "Winding" )
@@ -76,7 +83,11 @@ void bindPolygonAlgo()
 
 	def( "polygonWinding", &polygonWindingBinding3D<V3fVectorData> );
 	def( "polygonWinding", &polygonWindingBinding3D<V3dVectorData> );
-
+	
+	def( "polygonBound", &polygonBoundBinding<V2fVectorData> );
+	def( "polygonBound", &polygonBoundBinding<V3fVectorData> );
+	def( "polygonBound", &polygonBoundBinding<V2dVectorData> );
+	def( "polygonBound", &polygonBoundBinding<V3dVectorData> );
 }
 
 } // namespace IECore
