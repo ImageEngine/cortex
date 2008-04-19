@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,8 +37,8 @@ import os.path
 
 import maya.cmds as cmds
 
-from IECore import *
 from IECoreMaya import *
+from IECore import *
 
 """ Base class for objects which are able to create a Attribute Editor widget for a single Parameter """
 class ParameterUI :

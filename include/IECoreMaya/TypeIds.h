@@ -51,6 +51,8 @@ enum TypeId
 	FromMayaNumericPlugConverterTypeId = 109007,
 	FromMayaPointsPrimitiveConverterTypeId = 109008,
 	FromMayaStringPlugConverterTypeId = 109009,
+	FromMayaShapeConverterTypeId = 109010,
+	FromMayaCurveConverterTypeId = 109011,
 	LastTypeId = 109999
 
 };
