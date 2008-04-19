@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,56 +34,23 @@
 
 #include "boost/python.hpp"
 
-#include "maya/MPxNode.h"
-#include "maya/MSelectionList.h"
-#include "maya/MFnDependencyNode.h"
-
-#include "IECore/Parameterised.h"
-
-#include "IECoreMaya/IECoreMaya.h"
-#include "IECoreMaya/bindings/ParameterisedHolderBinding.h"
-#include "IECoreMaya/bindings/MayaPythonUtilBinding.h"
-#include "IECoreMaya/bindings/MObjectBinding.h"
-#include "IECoreMaya/bindings/NodeBinding.h"
-#include "IECoreMaya/bindings/DagNodeBinding.h"
-#include "IECoreMaya/bindings/FromMayaConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaPlugConverterBinding.h"
-#include "IECoreMaya/bindings/PlugBinding.h"
-#include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaCameraConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaCameraConverterBinding.h"
-#include "IECoreMaya/bindings/MayaMeshBuilderBinding.h"
-#include "IECoreMaya/bindings/FromMayaShapeConverterBinding.h"
+#include "IECoreMaya/FromMayaCurveConverter.h"
 #include "IECoreMaya/bindings/FromMayaCurveConverterBinding.h"
-#include "IECoreMaya/bindings/TypeIdBinding.h"
 
-using namespace IECore;
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
 using namespace IECoreMaya;
-
 using namespace boost::python;
 
-/// Maya is built with 4-byte Unicode characters, so we need to ensure that we're doing 
-/// the same so that all external symbols resolve correctly at runtime.
-#if ( MAYA_API_VERSION >= 2008 )
-/// \todo Assert for earlier versions too, once installations of Python 2.5 for gcc4.0.2
-/// are built correctly
-BOOST_STATIC_ASSERT(sizeof(Py_UNICODE) == 4);
-#endif
-
-BOOST_PYTHON_MODULE(_IECoreMaya)
+void IECoreMaya::bindFromMayaCurveConverter()
 {
-	bindMayaPythonUtil();		
-	bindMObject();
-	bindNode();
-	bindDagNode();
-	bindParameterisedHolder();
-	bindFromMayaConverter();
-	bindFromMayaPlugConverter();
-	bindPlug();
-	bindFromMayaObjectConverter();
-	bindFromMayaCameraConverter();
-	bindMayaMeshBuilder();
-	bindTypeId();
-	bindFromMayaShapeConverter();
-	bindFromMayaCurveConverter();
+	typedef class_<FromMayaCurveConverter, FromMayaCurveConverterPtr, boost::noncopyable, bases<FromMayaShapeConverter> > FromMayaCurveConverterPyClass;
+
+	FromMayaCurveConverterPyClass( "FromMayaCurveConverter", no_init )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaCurveConverter )
+	;
+	
+	INTRUSIVE_PTR_PATCH( FromMayaCurveConverter, FromMayaCurveConverterPyClass );
+	implicitly_convertible<FromMayaCurveConverterPtr, FromMayaShapeConverterPtr>();
 }

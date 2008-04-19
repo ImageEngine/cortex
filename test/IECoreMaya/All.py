@@ -37,6 +37,7 @@ import unittest
 from ConverterHolder import *
 from PlaybackFrameList import *
 from ParameterisedHolder import *
+from FromMayaCurveConverterTest import *
 
 from MayaUnitTest import *
 
