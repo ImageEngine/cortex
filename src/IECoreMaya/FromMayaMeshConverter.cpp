@@ -36,7 +36,6 @@
 #include "IECoreMaya/FromMayaPlugConverter.h"
 #include "IECoreMaya/MArrayIter.h"
 #include "IECoreMaya/VectorTraits.h"
-#include "IECoreMaya/FromMayaRenderableConverterUtil.h"
 
 #include "IECore/MeshPrimitive.h"
 #include "IECore/VectorOps.h"
@@ -182,8 +181,6 @@ FromMayaMeshConverter::FromMayaMeshConverter( const MObject &object )
 		
 	parameters()->addParameter( extraData->m_space );
 
-	FromMayaRenderableConverterUtilPtr m = new FromMayaRenderableConverterUtil();
-	parameters()->addParameters( m->parameters()->orderedParameters().begin(), m->parameters()->orderedParameters().end() );
 }
 
 FromMayaMeshConverter::~FromMayaMeshConverter()
@@ -469,8 +466,6 @@ IECore::ObjectPtr FromMayaMeshConverter::doConversion( const MObject &object, IE
 		addPrimVars( result, m_primVarAttrPrefix->getTypedValue().c_str() );
 	}
 	
-	FromMayaRenderableConverterUtil::addBlindDataAttributes( operands, object, result );
-
 	return result;
 }
 

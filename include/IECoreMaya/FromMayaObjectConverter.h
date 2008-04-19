@@ -38,6 +38,7 @@
 #include "IECoreMaya/FromMayaConverter.h"
 
 #include "IECore/Object.h"
+#include "IECore/TypedParameter.h"
 
 #include "maya/MObjectHandle.h"
 
@@ -65,12 +66,28 @@ class FromMayaObjectConverter : public FromMayaConverter
 		/// alive or not, and therefore what return value you can expect.
 		bool objectIsAlive() const;
 		
+		//! @name Parameters
+		/// Parameters which affect the conversion process.
+		/////////////////////////////////////////////////////////////////////////////////
+		//@{
+		IECore::StringParameterPtr blindDataAttrPrefixParameter();
+		IECore::ConstStringParameterPtr blindDataAttrPrefixParameter() const;
+		IECore::BoolParameterPtr blindDataRemoveNamespaceParameter();
+		IECore::ConstBoolParameterPtr blindDataRemoveNamespaceParameter() const;
+		//@}
+		
+		//! @name Factory
+		/// The functions allow the creation of a specific converter subclass appropriate
+		/// to a particular object.
+		/////////////////////////////////////////////////////////////////////////////////
+		//@{
 		/// Creates a converter which will convert the given object to an IECore::Object
 		/// of any relevant type. Returns 0 if no such converter can be found.
 		static FromMayaObjectConverterPtr create( const MObject &object );
 		/// Creates a converter which will convert the given object to an IECore::Object
 		/// of the specified type. Returns 0 if no such converter can be found.
 		static FromMayaObjectConverterPtr create( const MObject &object, IECore::TypeId resultType );
+		//@}
 		
 	protected :
 	
@@ -105,9 +122,12 @@ class FromMayaObjectConverter : public FromMayaConverter
 
 	private :
 
-		MObjectHandle m_objectHandle;
+		void addBlindData( const MObject &object, IECore::ObjectPtr convertedObject ) const;
 
-		/// \todo This could simply be replaced by std::pair<MFn::Type, IECore::TypeId>
+		MObjectHandle m_objectHandle;
+		IECore::StringParameterPtr m_blindDataAttrPrefixParameter;
+		IECore::BoolParameterPtr m_blindDataRemoveNamespaceParameter;
+
 		struct Types
 		{
 			Types( MFn::Type from, IECore::TypeId result );

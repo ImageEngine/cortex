@@ -33,8 +33,15 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECoreMaya/FromMayaPlugConverter.h"
 
-#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/BlindDataHolder.h"
+#include "IECore/MessageHandler.h"
+
+#include "maya/MFnDependencyNode.h"
+#include "maya/MStringArray.h"
+#include "maya/MFnAttribute.h"
 
 using namespace IECoreMaya;
 using namespace IECore;
@@ -42,7 +49,36 @@ using namespace IECore;
 FromMayaObjectConverter::FromMayaObjectConverter( const std::string &name, const std::string &description, const MObject &object )
 	:	FromMayaConverter( name, description ), m_objectHandle( object )
 {
+
+	StringParameter::PresetsMap blindDataAttrPrefixPresets;
+	blindDataAttrPrefixPresets["ie"] = "ie";
+	blindDataAttrPrefixPresets["None"] = "";
+	m_blindDataAttrPrefixParameter = new StringParameter(
+		"blindDataAttrPrefix",
+		"Any attribute names beginning with this prefix will be added to the blindData dictionary on the converted object. "
+		"Note that this parameter is only valid if the object being converted is a node, and the converted object is capable "
+		"of holding the blind data.",
+		"ie", // image engine prefix by default. maybe change this if cortex gets adopted elsewhere.
+		blindDataAttrPrefixPresets
+	);
+
+	m_blindDataRemoveNamespaceParameter = new BoolParameter(
+		"blindDataRemoveNamespace",
+		"In addition to converting attributes to blind data on the converted object, the node name is "
+		"saved as an additional piece of blind data. If this parameter is set, then the maya namespace "
+		"will be removed from the name before saving.",
+		true
+	);
+	
+	parameters()->addParameter( m_blindDataAttrPrefixParameter );
+	parameters()->addParameter( m_blindDataRemoveNamespaceParameter );
+	
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+// Object to convert
+/////////////////////////////////////////////////////////////////////////////////
+
 
 const MObject &FromMayaObjectConverter::object() const
 {
@@ -52,19 +88,123 @@ const MObject &FromMayaObjectConverter::object() const
 	}
 	return MObject::kNullObj;
 }
-		
+
 bool FromMayaObjectConverter::objectIsAlive() const
 {
 	return m_objectHandle.isAlive();
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+// Conversion
+/////////////////////////////////////////////////////////////////////////////////
+		
 IECore::ObjectPtr FromMayaObjectConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
 {
 	if( !objectIsAlive() )
 	{
 		return 0;
 	}
-	return doConversion( object(), operands );
+	IECore::ObjectPtr converted = doConversion( object(), operands );
+	addBlindData( object(), converted );
+	return converted;
+}
+
+void FromMayaObjectConverter::addBlindData( const MObject &object, IECore::ObjectPtr convertedObject ) const
+{
+	IECore::BlindDataHolderPtr blindDataHolder = IECore::runTimeCast<BlindDataHolder>( convertedObject );
+	if( !blindDataHolder )
+	{
+		return;
+	}
+
+	MFnDependencyNode fnNode( object );
+	if( !fnNode.hasObj( object ) )
+	{
+		return;
+	}
+	
+	CompoundDataMap &blindData = blindDataHolder->blindData()->writable();
+	
+	MString blindPrefix = m_blindDataAttrPrefixParameter->getTypedValue().c_str();
+	bool ignoreNamespace = m_blindDataRemoveNamespaceParameter->getTypedValue();
+
+	unsigned int n = fnNode.attributeCount();
+	std::string objectName;
+	objectName = fnNode.name().asChar();
+
+	// eliminate namespace from name...
+	if ( ignoreNamespace )
+	{
+		MStringArray parts;
+		if ( fnNode.name().split( ':', parts ) )
+		{
+			objectName = parts[ parts.length() - 1 ].asChar();
+		}
+	}
+	blindData[ "name" ] = new StringData( objectName );
+	
+	if (blindPrefix == "")
+	{
+		// empty string matches no attributes.
+		return;
+	}
+
+	for( unsigned int i=0; i<n; i++ )
+	{
+		MObject attr = fnNode.attribute( i );
+		MFnAttribute fnAttr( attr );
+		MString attrName = fnAttr.name();
+		if( attrName.length() > blindPrefix.length() && attrName.substring( 0, blindPrefix.length()-1 )==blindPrefix )
+		{
+			MPlug plug = fnNode.findPlug( attr );
+			if( !plug.parent().isNull() )
+			{
+				continue; // we don't want to pick up the children of compound numeric attributes
+			}
+			MString plugName = plug.name();
+			
+			// find a converter for the plug		
+			FromMayaConverterPtr converter = FromMayaPlugConverter::create( plug );
+			
+			// run the conversion and check we've got data as a result
+			DataPtr data = 0;
+			if( converter )
+			{
+				 data = runTimeCast<Data>( converter->convert() );
+			}
+			if( !data )
+			{
+				msg( Msg::Warning, "FromMayaRenderableConverterUtil::addBlindDataAttributes", boost::format( "Attribute \"%s\" could not be converted to Data." ) % plugName.asChar() );
+				continue;
+			}
+			blindData[ attrName.asChar() ] = data;
+		}
+	}
+	
+
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Parameters
+/////////////////////////////////////////////////////////////////////////////////
+
+IECore::StringParameterPtr FromMayaObjectConverter::blindDataAttrPrefixParameter()
+{
+	return m_blindDataAttrPrefixParameter;
+}
+
+IECore::ConstStringParameterPtr FromMayaObjectConverter::blindDataAttrPrefixParameter() const
+{
+	return m_blindDataAttrPrefixParameter;
+}
+
+IECore::BoolParameterPtr FromMayaObjectConverter::blindDataRemoveNamespaceParameter()
+{
+	return m_blindDataRemoveNamespaceParameter;
+}
+IECore::ConstBoolParameterPtr FromMayaObjectConverter::blindDataRemoveNamespaceParameter() const
+{
+	return m_blindDataRemoveNamespaceParameter;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

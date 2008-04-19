@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,7 +34,6 @@
 
 #include "IECoreMaya/FromMayaGroupConverter.h"
 #include "IECoreMaya/FromMayaMeshConverter.h"
-#include "IECoreMaya/FromMayaRenderableConverterUtil.h"
 #include "IECoreMaya/MatrixTraits.h"
 
 #include "IECore/Group.h"
@@ -56,9 +55,7 @@ FromMayaGroupConverter::FromMayaGroupConverter( const MObject &object )
 	:	FromMayaObjectConverter( "FromMayaGroupConverter", "Converts transforms to Group objects.", object )
 {
 	
-	FromMayaRenderableConverterUtilPtr mu = new FromMayaRenderableConverterUtil();
-	parameters()->addParameters( mu->parameters()->orderedParameters().begin(), mu->parameters()->orderedParameters().end() );
-
+	/// \todo I see no need for this to be a parameter. Surely it should be a given that we ignore intermediates?
 	BoolParameterPtr ignoreIntermediateObjects = new BoolParameter(
 		"ignoreIntermediateObjects",
 		"If true, all the intermediate objects will be excluded from the conversion.",
@@ -109,7 +106,6 @@ IECore::ObjectPtr FromMayaGroupConverter::doConversion( const MObject &object, I
 				result->addChild( v );
 			}
 		}
-		FromMayaRenderableConverterUtil::addBlindDataAttributes( operands, object, result );
 		return result;
 	}
 	else
