@@ -42,7 +42,7 @@ namespace IECore
 
 template<typename PointIterator, typename MeshBuilder>
 Triangulator<PointIterator, MeshBuilder>::Triangulator( typename MeshBuilder::Ptr builder )
-	:	m_builder( builder )
+	:	m_builder( builder ), m_baseVertexIndex( 0 )
 {
 }
 
@@ -62,8 +62,10 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( PointIterator first,
 	for( PointIterator it=first; it!=last; it++ )
 	{
 		m_builder->addVertex( *it, Point( 0 ) );
-		vertices.push_back( Vertex( size++, it ) );
+		vertices.push_back( Vertex( m_baseVertexIndex + size++, it ) );
 	}
+	m_baseVertexIndex += size;
+	
 	// and triangulate 'em
 	triangulate( vertices, size );
 	
@@ -73,6 +75,8 @@ template<typename PointIterator, typename MeshBuilder>
 template<typename LoopIterator>
 void Triangulator<PointIterator, MeshBuilder>::triangulate( LoopIterator first, LoopIterator last )
 {
+	unsigned nextBaseVertexIndex = m_baseVertexIndex;
+	
 	// put all the vertices of the outer loop into the builder,
 	// and into the vertex list used for ear clipping
 	const Loop &outer = *first;
@@ -81,8 +85,9 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( LoopIterator first, 
 	for( PointIterator it=outer.first; it!=outer.second; it++ )
 	{
 		m_builder->addVertex( *it, Point( 0 ) );
-		vertices.push_back( Vertex( size++, it ) );
+		vertices.push_back( Vertex( m_baseVertexIndex + size++, it ) );
 	}
+	nextBaseVertexIndex += size;
 	
 	// sort the holes by their maximum x coordinate
 	/// \todo Need to sort by a different coordinate for polygons in yz plane
@@ -154,16 +159,19 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( LoopIterator first, 
 		// now integrate the hole into the outer loop
 		VertexIterator insertPos = joinIt; insertPos++;
 		CircularPointIterator holeIt = it->second;
-		unsigned firstHoleVertIndex = size;
+		unsigned firstHoleVertIndex = m_baseVertexIndex + size;
 		do {
 			m_builder->addVertex( *holeIt, Point( 0 ) );
-			vertices.insert( insertPos, Vertex( size++, holeIt ) );
+			vertices.insert( insertPos, Vertex( m_baseVertexIndex + size++, holeIt ) );
+			nextBaseVertexIndex++;
 			holeIt++;
 		} while( holeIt!=it->second );
 		vertices.insert( insertPos, Vertex( firstHoleVertIndex, it->second ) );
 		vertices.insert( insertPos, *joinIt );
 		
 	}
+	
+	m_baseVertexIndex = nextBaseVertexIndex;
 	
 	// do the ear clipping
 	triangulate( vertices, vertices.size() );

@@ -175,7 +175,107 @@ class TriangulatorTest( unittest.TestCase ) :
 		builder = MeshPrimitiveBuilderf()	
 		triangulator = V3fTriangulator( builder )
 		
-		triangulator.triangulate( loop )	
+		triangulator.triangulate( loop )
+		
+	def testMultipleCalls( self ) :
 	
+		#  __   __
+		# |_|  |_|
+		#
+		
+		outline1 = V3fVectorData(
+			[
+				V3f( 0, 0, 0 ),
+				V3f( 1, 0, 0 ),
+				V3f( 1, 1, 0 ),
+				V3f( 0, 1, 0 ),
+			]
+		)
+		
+		outline2 = V3fVectorData(
+			[
+				V3f( 3, 0, 0 ),
+				V3f( 4, 0, 0 ),
+				V3f( 4, 1, 0 ),
+				V3f( 3, 1, 0 ),
+			]
+		)
+		
+		builder = MeshPrimitiveBuilderf()	
+		triangulator = V3fTriangulator( builder )
+		
+		triangulator.triangulate( outline1 )
+		triangulator.triangulate( outline2 )
+
+		outMesh = builder.mesh()
+				
+		self.assertEqual( outMesh["P"].data.size(), 8 )
+		self.assertEqual( outMesh.verticesPerFace, IntVectorData( [ 3, 3, 3, 3 ] ) )
+		self.assertEqual( outMesh.variableSize( PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( outMesh.bound(), Box3f( V3f( 0 ), V3f( 4, 1, 0 ) ) )
+		
+		e = PrimitiveEvaluator.create( outMesh )
+		self.assertEqual( e.surfaceArea(), 2 )
+		
+	def testMultipleCallsWithHoles( self ) :
+	
+		#  ______   ______
+		# |  __ |  |  __ |
+		# | |_| |  | |_| |
+		# |_____|  |_____|
+		#
+		
+		outer1 = V3fVectorData(
+			[
+				V3f( 0, 0, 0 ),
+				V3f( 3, 0, 0 ),
+				V3f( 3, 3, 0 ),
+				V3f( 0, 3, 0 ),
+			]
+		)
+
+		inner1 = V3fVectorData(
+			[
+				V3f( 1, 1, 0 ),
+				V3f( 1, 2, 0 ),
+				V3f( 2, 2, 0 ),
+				V3f( 2, 1, 0 ),
+			]
+		)		
+
+		outer2 = V3fVectorData(
+			[
+				V3f( 4, 0, 0 ),
+				V3f( 7, 0, 0 ),
+				V3f( 7, 3, 0 ),
+				V3f( 4, 3, 0 ),
+			]
+		)
+
+		inner2 = V3fVectorData(
+			[
+				V3f( 5, 1, 0 ),
+				V3f( 5, 2, 0 ),
+				V3f( 6, 2, 0 ),
+				V3f( 6, 1, 0 ),
+			]
+		)		
+
+		builder = MeshPrimitiveBuilderf()	
+		triangulator = V3fTriangulator( builder )
+		
+		triangulator.triangulate( [ outer1, inner1 ] )
+		triangulator.triangulate( [ outer2, inner2 ] )
+
+		outMesh = builder.mesh()
+		
+		self.assertEqual( outMesh["P"].data.size(), 16 )
+		self.assertEqual( outMesh.variableSize( PrimitiveVariable.Interpolation.Vertex ), 16 )
+		self.assertEqual( outMesh.bound(), Box3f( V3f( 0 ), V3f( 7, 3, 0 ) ) )
+		
+		e = PrimitiveEvaluator.create( outMesh )
+		self.assertEqual( e.surfaceArea(), 16 )	
+		
+		
 if __name__ == "__main__":
     unittest.main()   

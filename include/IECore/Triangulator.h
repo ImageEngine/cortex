@@ -95,9 +95,11 @@ class Triangulator : public RefCounted
 		typedef LineSegment<Point> Edge;
 
 		void triangulate( VertexList &vertices, unsigned size );
-
+		
 		typename MeshBuilder::Ptr m_builder;
-
+		// the number of vertices already in the mesh at the start of each triangulate() call
+		unsigned m_baseVertexIndex;
+		
 };
 
 typedef Triangulator<std::vector<Imath::V2f>::const_iterator> V2fTriangulator;
