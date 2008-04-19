@@ -196,6 +196,7 @@ DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i
 
 			// assume we have 10bit log, two wasted bits aligning to 32 longword
 			unsigned short cv = (unsigned short) ( ( mask & cell ) >> ( 2 + ( 2 - channelOffset ) * bpp ) );
+			assert( cv < 1024 );
 			data[dataOffset] = converter( cv );
 		}
 	}
