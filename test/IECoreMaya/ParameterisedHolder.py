@@ -36,25 +36,25 @@ import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import unittest, MayaUnitTest
 import os.path
-from IECore import *
-from IECoreMaya import *
+import IECore
+import IECoreMaya
 
 class TestParameterisedHolder( unittest.TestCase ) :
 		
 	def testNode( self ):
 		""" Test ParameterisedHolderNode """
 		n = cmds.createNode( "ieParameterisedHolderNode" )	
-		h = ParameterisedHolder( str(n) )
+		h = IECoreMaya.ParameterisedHolder( str(n) )
 		self.assert_( h )
 		
-		p = ParticleMeshOp()
+		p = IECore.ParticleMeshOp()
 		
 		h.setParameterised( p )
 		
 		p.parameters().filename = "testValue"		
 		h.setNodeValue( p.parameters().filename )
 		pl = h.parameterPlug( p.parameters().filename )
-		v = pl.convert( TypeId.StringData )		
+		v = pl.convert( IECore.TypeId.StringData )		
 		self.assertEqual( v.value, "testValue" )
 				
 		cmds.setAttr( pl.name(), "testValue2", typ="string" )

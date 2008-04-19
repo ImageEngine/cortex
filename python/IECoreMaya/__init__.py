@@ -34,7 +34,7 @@
 
 from _IECoreMaya import *
 
-from ParameterUI import *
+from ParameterUI import ParameterUI
 from NodeParameter import NodeParameter
 from DAGPathParameter import DAGPathParameter
 from DAGPathVectorParameter import DAGPathVectorParameter
