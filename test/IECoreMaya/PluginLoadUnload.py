@@ -32,15 +32,41 @@
 #
 ##########################################################################
 
-import unittest
+import maya.cmds as cmds
+import maya.OpenMaya as OpenMaya
+import unittest, MayaUnitTest
+import os.path
+from IECore import *
+from IECoreMaya import *
 
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
+class TestPluginLoadUnload( unittest.TestCase ) :
+		
+	def test( self ):
+		""" Test loading/unloading of plugin """
+		
+		# Plugin should be loaded when we get here
+		
+		self.assert_( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+		
+		for i in range( 0, 20 ) :
+		
+			cmds.unloadPlugin( "ieCore" )
+			self.failIf( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )			
+		
+			cmds.loadPlugin( "ieCore" )
+			self.assert_( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+		
 
-from MayaUnitTest import *
+		self.assert_( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+		
+	def tearDown( self ):	
+	
+		if not cmds.pluginInfo( "ieCore", query = True, loaded = True ) :		
+			cmds.loadPlugin( "ieCore" )
+			
+		# Make sure plugin is definitely loaded when we exit tests	
+		assert( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
-MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+if __name__ == "__main__":
+	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
 	 
