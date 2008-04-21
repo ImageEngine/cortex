@@ -40,7 +40,6 @@ from ParameterisedHolder import *
 from FromMayaCurveConverterTest import *
 from PluginLoadUnload import *
 
-from MayaUnitTest import *
-
-MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+import MayaUnitTest
+MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
 	 
