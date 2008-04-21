@@ -470,10 +470,6 @@ env.Prepend(
 
 if env["PLATFORM"]=="darwin" :
 	env.Append( CXXFLAGS = "-Wno-long-double" )
-else:
-	# This is here to specifically address a problem in binutils-2.17 and later, when harmless warnings of the
-	# form "X: referenced in section '.rodata' of Y: defined in discarded section" were changed to errors
-	env.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )
 
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = "-g" )
@@ -740,6 +736,16 @@ if doConfigure :
 		corePythonSources.remove( "src/IECore/bindings/JPEGImageWriterBinding.cpp" )
 					
 	c.Finish()
+
+if not env["PLATFORM"]=="darwin" :
+	# This is here to specifically address a problem in binutils-2.17 and later, when harmless warnings of the
+	# form "X: referenced in section '.rodata' of Y: defined in discarded section" were changed to errors
+	# We do it down here so it doesn't cause Configure tests to pass when they should
+	# really be failing
+	env.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )
+	corePythonEnv.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )
+	coreEnv.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )	
+
 
 # This is a simple mechanism to ensure that all of the installs get performed only after all of the builds
 # have been done. We make this coreInstallSync object depend on every build action, and every install action
