@@ -41,7 +41,6 @@ source "IECoreMaya/ieParameterisedHolder.mel";
 source "IECoreMaya/ieProceduralHolder.mel";
 source "IECoreMaya/ieNode.mel";
 source "IECoreMaya/ieAttr.mel";
-source "IECoreMaya/ieUnitTest.mel";
 
 source "IECoreMaya/ieParameterisedHolderUI.mel";
 source "IECoreMaya/ieProceduralHolderUI.mel";
