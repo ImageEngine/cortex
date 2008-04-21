@@ -117,7 +117,7 @@ except :
 	pass
 	
 # find doxygen
-DOXYGEN_ROOT = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform )
+DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
 
 # ask for opengl support
 WITH_GL=1
@@ -131,8 +131,8 @@ TEST_LIBPATH = ":".join( [ pythonReg["location"] + "/" + compiler + "/" + compil
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
 
+# \todo Remove this before release
 if INSTALL_PREFIX != os.path.expanduser( "~" ) :
-
 	raise RuntimeError( "Cannot install to anywhere but " + os.path.expanduser( "~" ) + "!" )
 
 INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/cortex/$IECORE_MAJORMINORPATCH_VERSION"

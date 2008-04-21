@@ -409,9 +409,9 @@ o.Add(
 # Documentation options
 
 o.Add(
-	"DOXYGEN_ROOT",
-	"The directory in which Doxygen is installed.",
-	"/usr/local/doxygen"
+	"DOXYGEN",
+	"The path to the doxygen binary.",
+	"/usr/local/bin/doxygen"
 )
 
 ###########################################################################################
@@ -1369,18 +1369,36 @@ if doConfigure :
 
 	sys.stdout.write( "Checking for doxygen... " )
 
-	if os.path.exists( docEnv.subst("$DOXYGEN_ROOT/bin/doxygen") ) :
+	if os.path.exists( docEnv["DOXYGEN"] ) :
 	
 		sys.stdout.write( "yes\n" )
 		
-		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "$DOXYGEN_ROOT/bin/doxygen $SOURCE" )
-		docEnv.Depends( docs, glob.glob( "include/IECore*/*.h" ) )
-		docEnv.Depends( docs, glob.glob( "src/IECore*/*.cpp" ) )
-		docEnv.Depends( docs, glob.glob( "python/IECore*/*.py" ) )
-		docEnv.Depends( docs, glob.glob( "mel/IECore*/*.mel" ) )
-		docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) )
-		docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/src/*.cpp" ) )
-		docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" ) )
+		f = open( "doc/config/Doxyfile", "r" )
+		
+		doxyfile = {}
+		
+		for line in f.readlines() :
+		
+			m = re.compile( "^([ \t])*([A-Z_]+)([ \t])*=([ \t])*(.*)" ).match( line )
+			if m  :
+			
+				pair = m.group( 2,5 )
+				doxyfile[ pair[0] ] = pair[1]
+				
+		f.close()
+		
+		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "$DOXYGEN $SOURCE" )
+		
+		for inputDirectory in doxyfile["INPUT"].split( ' ' ) :
+		
+			for filePattern in doxyfile["FILE_PATTERNS"].split( ' ' ) :
+			
+				docEnv.Depends( docs, glob.glob( inputDirectory + "/" + filePattern ) )
+				
+		docEnv.Depends( docs, doxyfile["HTML_HEADER"] )
+		docEnv.Depends( docs, doxyfile["HTML_FOOTER"] )
+		docEnv.Depends( docs, doxyfile["HTML_STYLESHEET"] )						
+				
 		docEnv.Alias( "doc", "doc/html/index.html" )
 
 		# \todo This won't reinstall the documentation if the directory already exists
@@ -1390,6 +1408,6 @@ if doConfigure :
 	else: 
 	
 		sys.stdout.write( "no\n" )
-		sys.stderr.write( "WARNING : no doxygen binary found, not building documentation - check DOXYGEN_ROOT\n" )
+		sys.stderr.write( "WARNING : no doxygen binary found, not building documentation - check DOXYGEN\n" )
 
 	
