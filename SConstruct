@@ -406,6 +406,14 @@ o.Add(
 	"DYLD_LIBRARY_PATH" if Environment()["PLATFORM"]=="darwin" else "LD_LIBRARY_PATH"
 )
 
+# Documentation options
+
+o.Add(
+	"DOXYGEN_ROOT",
+	"The directory in which Doxygen is installed.",
+	"/usr/local/doxygen"
+)
+
 ###########################################################################################
 # An environment for building libraries
 ###########################################################################################
@@ -1093,7 +1101,7 @@ mayaEnvAppends = {
 		"OpenMayaFX",
 		"boost_python" + pythonEnv["BOOST_LIB_SUFFIX"],
 	],
-    "CPPFLAGS" : [
+	"CPPFLAGS" : [
 		"-D_BOOL",
 		"-DREQUIRE_IOSTREAM",
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
@@ -1358,15 +1366,32 @@ if doConfigure :
 # Configure checks to be sure it's there
 docEnv = env.Copy()
 docEnv["ENV"]["PATH"] = os.environ["PATH"]
-docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "doxygen $SOURCE" )
-docEnv.Depends( docs, glob.glob( "include/IECore*/*.h" ) )
-docEnv.Depends( docs, glob.glob( "src/IECore*/*.cpp" ) )
-docEnv.Depends( docs, glob.glob( "python/IECore*/*.py" ) )
-docEnv.Depends( docs, glob.glob( "mel/IECore*/*.mel" ) )
-docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) )
-docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/src/*.cpp" ) )
-docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" ) )
 
-# \todo This won't reinstall the documentation if the directory already exists
-installDoc = docEnv.Install( "$INSTALL_DOC_DIR", "doc/html" )
-docEnv.Alias( "install", installDoc )
+if doConfigure :
+
+	sys.stdout.write( "Checking for doxygen... " )
+
+	if os.path.exists( docEnv.subst("$DOXYGEN_ROOT/bin/doxygen") ) :
+	
+		sys.stdout.write( "yes\n" )
+		
+		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "$DOXYGEN_ROOT/bin/doxygen $SOURCE" )
+		docEnv.Depends( docs, glob.glob( "include/IECore*/*.h" ) )
+		docEnv.Depends( docs, glob.glob( "src/IECore*/*.cpp" ) )
+		docEnv.Depends( docs, glob.glob( "python/IECore*/*.py" ) )
+		docEnv.Depends( docs, glob.glob( "mel/IECore*/*.mel" ) )
+		docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) )
+		docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/src/*.cpp" ) )
+		docEnv.Depends( docs, glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" ) )
+		docEnv.Alias( "doc", "doc/html/index.html" )
+
+		# \todo This won't reinstall the documentation if the directory already exists
+		installDoc = docEnv.Install( "$INSTALL_DOC_DIR", "doc/html" )
+		docEnv.Alias( "install", installDoc )
+		
+	else: 
+	
+		sys.stdout.write( "no\n" )
+		sys.stderr.write( "WARNING : no doxygen binary found, not building documentation - check DOXYGEN_ROOT\n" )
+
+	
