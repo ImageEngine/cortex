@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,15 +32,22 @@
 #
 ##########################################################################
 
+import math
 import unittest
+import IECore
+import IECoreMaya
 
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
+class NamespacePollutionTest( unittest.TestCase ) :
 
-import MayaUnitTest
-MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
-	 
+	def test( self) :
+	
+		for m in IECore, IECoreMaya :
+	
+			d = dir( m )
+			for n in [ "os", "glob", "re", "shutil", "IECore", "IECoreMaya", "shlex", "sys",
+				"traceback", "inspect", "string" ] :
+				self.assert_( not n in d )
+				
+
+if __name__ == "__main__":
+    unittest.main()   	
