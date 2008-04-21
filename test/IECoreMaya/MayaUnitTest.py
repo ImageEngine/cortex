@@ -63,6 +63,7 @@ class TestSuite( unittest.TestSuite ) :
 		for test in self._tests:
 		
 			cmds.file( new = True, force = True )
+			cmds.flushUndo()
 			
 			if result.shouldStop:
 				break
