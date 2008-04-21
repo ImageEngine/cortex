@@ -44,8 +44,7 @@ class TestPluginLoadUnload( unittest.TestCase ) :
 	def test( self ):
 		""" Test loading/unloading of plugin """
 		
-		# Plugin should be loaded when we get here
-		
+		# Plugin should be loaded by MayaUnitTest.TestProgram when we get here		
 		self.assert_( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 		
 		for i in range( 0, 20 ) :
