@@ -82,7 +82,7 @@ bool FileNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) 
 	// extensions check
 	if( extensions().size() )
 	{
-		string ext = boost::filesystem::extension(boost::filesystem::path( s->readable(), boost::filesystem::native));
+		string ext = boost::filesystem::extension(boost::filesystem::path( s->readable()));
 
 		const vector<string> &exts = extensions();
 		bool found = false;
@@ -106,8 +106,8 @@ bool FileNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) 
 	}
 	
 	// file type check
-	if( boost::filesystem::exists(boost::filesystem::path( s->readable(), boost::filesystem::native)) &&
-		 boost::filesystem::is_directory(boost::filesystem::path( s->readable(), boost::filesystem::native)) )
+	if( boost::filesystem::exists(boost::filesystem::path( s->readable())) &&
+		 boost::filesystem::is_directory(boost::filesystem::path( s->readable())) )
 	{
 		if( reason )
 		{

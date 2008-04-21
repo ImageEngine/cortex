@@ -108,7 +108,7 @@ void Writer::registerWriter( const std::string &extensions, CanWriteFn canWrite,
 
 WriterPtr Writer::create( ObjectPtr object, const std::string &fileName )
 {
-	string ext = extension(boost::filesystem::path(fileName, boost::filesystem::native));
+	string ext = extension(boost::filesystem::path(fileName));
 	
 	ExtensionsToFnsMap *m = extensionsToFns();
 	assert( m );

@@ -103,7 +103,7 @@ bool PathVectorParameter::valueValid( ConstObjectPtr value, std::string *reason 
 	{
 		for ( StringVectorData::ValueType::const_iterator it = s->readable().begin(); it != s->readable().end(); ++it )
 		{		
-			boost::filesystem::path( *it, boost::filesystem::native);
+			boost::filesystem::path p( *it );
 		}
 	}
 	catch ( ... )
@@ -118,7 +118,7 @@ bool PathVectorParameter::valueValid( ConstObjectPtr value, std::string *reason 
 	// existence check
 	for ( StringVectorData::ValueType::const_iterator it = s->readable().begin(); it != s->readable().end(); ++it )
 	{
-		if ( boost::filesystem::exists(boost::filesystem::path( *it, boost::filesystem::native)))
+		if ( boost::filesystem::exists(boost::filesystem::path( *it )))
 		{
 			if ( mustNotExist() )
 			{
