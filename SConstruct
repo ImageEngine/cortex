@@ -1173,6 +1173,7 @@ if doConfigure :
 		)
 		mayaPlugin = mayaPluginEnv.SharedLibrary( "plugins/maya/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPluginSources, SHLIBPREFIX="" )
 		mayaPluginInstall = mayaPluginEnv.Install( os.path.dirname( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPlugin )
+		mayaPluginEnv.Depends( mayaPlugin, corePythonModule )
 		mayaPluginEnv.Depends( mayaPluginInstall, coreInstallSync )
 		mayaPluginEnv.AddPostAction( mayaPluginInstall, lambda target, source, env : makeSymLinks( mayaPluginEnv, mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
 		mayaPluginEnv.Alias( "install", mayaPluginInstall )
