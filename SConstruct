@@ -1362,8 +1362,6 @@ if doConfigure :
 # Documentation
 ###########################################################################################
 
-## \todo Have an option for people to point us to their doxygen install, and do
-# Configure checks to be sure it's there
 docEnv = env.Copy()
 docEnv["ENV"]["PATH"] = os.environ["PATH"]
 
