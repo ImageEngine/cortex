@@ -115,6 +115,9 @@ try :
 	TRUELIGHT_ROOT = truelightReg["location"]
 except :
 	pass
+	
+# find doxygen
+DOXYGEN_ROOT = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform )
 
 # ask for opengl support
 WITH_GL=1
@@ -149,7 +152,7 @@ INSTALL_CORETRUELIGHT_POST_COMMAND="scons -f config/ie/installTruelightOps INSTA
 # speed up the build a bit hopefully. we're not doing this on the mac for two reasons. firstly, the macs don't mount /hosts.
 # secondly, scons doesn't recognise that the intel macs are different to the ppc and will try to cache them both the same.
 # we could probably fix both these things if it becomes important.
-if platform=="rhel4.i686" :
+if platform=="rhel4.i686" or platform == "ubu8.x86_64":
 	BUILD_CACHEDIR = "/hosts/wrkpogo01/sconsBuildCache"
 else :	
 	BUILD_CACHEDIR = "/tmp/sconsBuildCache/" + platform
