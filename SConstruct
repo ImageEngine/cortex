@@ -623,7 +623,7 @@ if env["PLATFORM"]=="darwin" :
 		testEnv.Append( CXXFLAGS = "-O0" )
 
 testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )
-if env["BOOST_MINOR_VERSION"] >= 35 :
+if env.has_key("BOOST_MINOR_VERSION") and env["BOOST_MINOR_VERSION"] >= 35 :
 	testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
 
 testEnv["ENV"]["PYTHONPATH"] = "./python"
