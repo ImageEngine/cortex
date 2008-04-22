@@ -145,8 +145,6 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		c = converter.convert()
 		self.assert_( IECore.Box3f( IECore.V3f( -1.1, -1.01, -0.01 ), IECore.V3f( 0.01, 1.01, 0.01 ) ).contains( c.bound() ) ) 		
 		
-		## \todo this fails because we're not initialising the function set in the converter with an MDagPath.
-		# we have some rejigging to do to make that possible.
 		converter.space.setNumericValue( IECoreMaya.FromMayaCurveConverter.Space.World )
 		c = converter.convert()
 		self.assert_( IECore.Box3f( IECore.V3f( -0.1, 0.99, 2.99 ), IECore.V3f( 1.01, 3.01, 3.01 ) ).contains( c.bound() ) ) 		
