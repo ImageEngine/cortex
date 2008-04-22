@@ -45,7 +45,7 @@ namespace IECoreMaya
 {
 
 /// The ToMayaPlugConverter class allows conversion from an IECore Object to MPlug values.
-/// \todo Have this derive from a new ToMayaConverter class.
+/// \todo Have this derive from a new ToMayaConverter class, which derived from FromCoreConverter.
 /// \todo Replace the convert() function with one that calls a pure virtual doConversion
 /// function taking the contents of parameters(), like the other converters.
 /// \todo Add factory style create() functions and a registration mechanism so you can
