@@ -39,13 +39,13 @@ from IECore import *
 
 class TestDPXReader(unittest.TestCase):
 
-        def testConstruction(self):
+	def testConstruction(self):
                 
 		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
 		self.assertEqual( type(r), DPXImageReader )
 
 
-        def testRead(self):
+	def testRead(self):
 
 		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
 		self.assertEqual( type(r), DPXImageReader )
@@ -53,7 +53,21 @@ class TestDPXReader(unittest.TestCase):
 		img = r.read()		
 		self.assertEqual( type(img), ImagePrimitive )
 
-		
+	def testReadHeader( self ):
+
+		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
+		self.assertEqual( type(r), DPXImageReader )
+		h = r.readHeader()
+
+		channelNames = h['channelNames']		
+		self.assertEqual( len( channelNames ), 3 )
+		self.assert_( "R" in channelNames )
+		self.assert_( "G" in channelNames )
+		self.assert_( "B" in channelNames )
+
+		self.assertEqual( h['displayWindow'], Box2iData( Box2i( V2i(0,0), V2i(511,255) ) ) )
+		self.assertEqual( h['dataWindow'], Box2iData( Box2i( V2i(0,0), V2i(511,255) ) ) )
+
 	def testOrientation( self ) :
 		""" Test orientation of Cineon files """
 	

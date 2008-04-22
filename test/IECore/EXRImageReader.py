@@ -82,6 +82,25 @@ class TestEXRReader(unittest.TestCase):
 		
 		r = EXRImageReader( "thisFileDoesntExist.exr" )
 		self.assertRaises( Exception, r.channelNames )
+
+	def testReadHeader( self ):
+
+		r = EXRImageReader( "test/IECore/data/exrFiles/manyChannels.exr" )
+		h = r.readHeader()
+
+		c = h['channelNames']		
+		self.assert_( c.staticTypeId()==StringVectorData.staticTypeId() )
+		self.assert_( len( c ), 7 )
+		self.assert_( "R" in c )
+		self.assert_( "G" in c )
+		self.assert_( "B" in c )
+		self.assert_( "A" in c )
+		self.assert_( "diffuse.red" in c )
+		self.assert_( "diffuse.green" in c )
+		self.assert_( "diffuse.blue" in c )
+
+		self.assertEqual( h['displayWindow'], Box2iData( Box2i( V2i(0,0), V2i(255,255) ) ) )
+		self.assertEqual( h['dataWindow'], Box2iData( Box2i( V2i(0,0), V2i(255,255) ) ) )
 	
 	def testDataAndDisplayWindows( self ) :
 	

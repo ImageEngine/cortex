@@ -59,6 +59,8 @@ class ImageReader : public Reader
 
 		ImageReader( const std::string &name, const std::string &description );
 
+		virtual CompoundObjectPtr readHeader();
+
 		//! @name Parameter accessors
 		/// These provide convenient access to the parameters controlling
 		/// image loading.

@@ -46,6 +46,21 @@ class TestCINReader(unittest.TestCase):
 		r = Reader.create( "test/IECore/data/cinFiles/uvMap.512x256.cin" )
 		self.assertEqual(type(r), CINImageReader)
 
+	def testReadHeader( self ):
+
+		r = Reader.create( "test/IECore/data/cinFiles/uvMap.512x256.cin" )
+		self.assertEqual( type(r), CINImageReader )
+		h = r.readHeader()
+
+		channelNames = h['channelNames']		
+		self.assertEqual( len( channelNames ), 3 )
+		self.assert_( "R" in channelNames )
+		self.assert_( "G" in channelNames )
+		self.assert_( "B" in channelNames )
+
+		self.assertEqual( h['displayWindow'], Box2iData( Box2i( V2i(0,0), V2i(511,255) ) ) )
+		self.assertEqual( h['dataWindow'], Box2iData( Box2i( V2i(0,0), V2i(511,255) ) ) )
+
 	def testRead(self):
 
 		r = Reader.create( "test/IECore/data/cinFiles/uvMap.512x256.cin" )

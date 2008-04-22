@@ -205,3 +205,14 @@ ConstStringVectorParameterPtr ImageReader::channelNamesParameter() const
 {
 	return m_channelNamesParameter;
 }
+
+CompoundObjectPtr ImageReader::readHeader()
+{
+	std::vector<std::string> cn;
+	channelNames( cn );
+	CompoundObjectPtr header = Reader::readHeader();
+	header->members()["displayWindow"] = new Box2iData( displayWindow() );
+	header->members()["dataWindow"] = new Box2iData( dataWindow() );
+	header->members()["channelNames"] = new StringVectorData( cn );
+	return header;
+}

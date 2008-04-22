@@ -73,6 +73,21 @@ class TestTIFFReader(unittest.TestCase):
 		self.assert_( "R" in channelNames )
 		self.assert_( "G" in channelNames )
 		self.assert_( "B" in channelNames )
+
+	def testReadHeader( self ):
+
+		r = Reader.create( "test/IECore/data/tiff/uvMap.512x256.8bit.tif" )
+		self.assertEqual( type(r), TIFFImageReader )
+		h = r.readHeader()
+
+		channelNames = h['channelNames']		
+		self.assertEqual( len( channelNames ), 3 )
+		self.assert_( "R" in channelNames )
+		self.assert_( "G" in channelNames )
+		self.assert_( "B" in channelNames )
+
+		self.assertEqual( h['displayWindow'], Box2iData( Box2i( V2i(0,0), V2i(511,255) ) ) )
+		self.assertEqual( h['dataWindow'], Box2iData( Box2i( V2i(0,0), V2i(511,255) ) ) )
 		
 	def testManyChannels( self ):
 	
