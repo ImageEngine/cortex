@@ -52,10 +52,21 @@ using namespace Imath;
 static const MFn::Type fromTypes[] = { MFn::kNurbsCurve, MFn::kNurbsCurveData, MFn::kInvalid };
 static const IECore::TypeId toTypes[] = { IECore::BlindDataHolderTypeId, IECore::RenderableTypeId, IECore::VisibleRenderableTypeId, IECore::PrimitiveTypeId, IECore::CurvesPrimitiveTypeId, IECore::InvalidTypeId };
 
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaCurveConverter> FromMayaCurveConverter::m_description( fromTypes, toTypes );
+IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_description( fromTypes, toTypes );
 
 FromMayaCurveConverter::FromMayaCurveConverter( const MObject &object )
 	:	FromMayaShapeConverter( staticTypeName(), "Converts maya curve shapes into IECore::CurvesPrimitive objects.", object )
+{
+	constructCommon();
+}
+
+FromMayaCurveConverter::FromMayaCurveConverter( const MDagPath &dagPath )
+	:	FromMayaShapeConverter( staticTypeName(), "Converts maya curve shapes into IECore::CurvesPrimitive objects.", dagPath )
+{
+	constructCommon();
+}
+
+void FromMayaCurveConverter::constructCommon()
 {
 	m_linearParameter = new IECore::BoolParameter(
 		"linearBasis",
@@ -74,7 +85,21 @@ IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( const MObjec
 	{
 		throw IECore::InvalidArgumentException( "FromMayaCurveConverter::doPrimitiveConversion : not a nurbs curve." );
 	}
-		
+	return doPrimitiveConversion( fnCurve );
+}
+
+IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
+{
+	MFnNurbsCurve fnCurve( dagPath );
+	if( !fnCurve.hasObj( dagPath.node() ) )
+	{
+		throw IECore::InvalidArgumentException( "FromMayaCurveConverter::doPrimitiveConversion : not a nurbs curve." );
+	}
+	return doPrimitiveConversion( fnCurve );
+}
+
+IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( MFnNurbsCurve &fnCurve ) const
+{
 	// decide on the basis and periodicity
 	int mDegree = fnCurve.degree();
 	IECore::CubicBasisf basis = IECore::CubicBasisf::linear();

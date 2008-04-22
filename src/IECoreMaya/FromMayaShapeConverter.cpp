@@ -48,6 +48,17 @@ using namespace IECoreMaya;
 FromMayaShapeConverter::FromMayaShapeConverter( const std::string &name, const std::string &description, const MObject &object )
 	:	FromMayaObjectConverter( name, description, object )
 {
+	constructCommon();
+}
+
+FromMayaShapeConverter::FromMayaShapeConverter( const std::string &name, const std::string &description, const MDagPath &dagPath )
+	:	FromMayaObjectConverter( name, description, dagPath.node() ), m_dagPath( dagPath )
+{
+	constructCommon();
+}
+	
+void FromMayaShapeConverter::constructCommon()
+{
 
 	IECore::IntParameter::PresetsMap spacePresets;
 	spacePresets["Object"] = Object;	
@@ -102,8 +113,23 @@ IECore::ConstStringParameterPtr FromMayaShapeConverter::primVarAttrPrefixParamet
 		
 IECore::ObjectPtr FromMayaShapeConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::PrimitivePtr p = doPrimitiveConversion( object, operands );
-	addPrimVars( object, p );
+	IECore::PrimitivePtr p = 0;
+	if( m_dagPath.isValid() )
+	{
+		p = doPrimitiveConversion( m_dagPath, operands );
+	}
+	else
+	{
+		if( space()==MSpace::kWorld )
+		{
+			IECore::msg( IECore::Msg::Warning, "FromMayaShapeConverter::doConversion", "World space requested but no dag path provided." );
+		}
+		p = doPrimitiveConversion( object, operands );
+	}
+	if( p )
+	{
+		addPrimVars( object, p );
+	}
 	return p;
 }
 
@@ -240,3 +266,33 @@ MSpace::Space FromMayaShapeConverter::space() const
 	assert( 0 ); // should never get here
 	return MSpace::kObject;
 }
+
+FromMayaShapeConverterPtr FromMayaShapeConverter::create( const MDagPath &dagPath )
+{
+	return create( dagPath, IECore::InvalidTypeId );
+}
+
+FromMayaShapeConverterPtr FromMayaShapeConverter::create( const MDagPath &dagPath, IECore::TypeId resultType )
+{
+	const ShapeTypesToFnsMap *m = shapeTypesToFns();
+	ShapeTypesToFnsMap::const_iterator it = m->find( ShapeTypes( dagPath.apiType(), resultType ) );
+	if( it!=m->end() )
+	{
+		return it->second( dagPath );
+	}
+	return 0;
+}
+	
+void FromMayaShapeConverter::registerShapeConverter( const MFn::Type fromType, IECore::TypeId resultType, ShapeCreatorFn creator )
+{
+	ShapeTypesToFnsMap *m = shapeTypesToFns();
+	m->insert( ShapeTypesToFnsMap::value_type( ShapeTypes( fromType, resultType ), creator ) );
+	m->insert( ShapeTypesToFnsMap::value_type( ShapeTypes( fromType, IECore::InvalidTypeId ), creator ) ); // for the create function which doesn't care about resultType
+}
+
+FromMayaShapeConverter::ShapeTypesToFnsMap *FromMayaShapeConverter::shapeTypesToFns()
+{
+	static ShapeTypesToFnsMap *m = new ShapeTypesToFnsMap;
+	return m;
+}
+

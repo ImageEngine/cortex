@@ -45,8 +45,7 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		circle = maya.cmds.circle( ch = False )[0]
 		circle = maya.cmds.listRelatives( circle, shapes=True )[0]
 		
-		circle = IECoreMaya.DagNode( str( circle ) )
-		converter = circle.converter( IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
 		
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 		
@@ -75,8 +74,7 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		circle = maya.cmds.circle( ch = False, degree=1 )[0]
 		circle = maya.cmds.listRelatives( circle, shapes=True )[0]
 		
-		circle = IECoreMaya.DagNode( str( circle ) )
-		converter = circle.converter( IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
 		
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 		
@@ -106,8 +104,7 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		arc = maya.cmds.circle( ch = False, sweep=180 )[0]
 		arc = maya.cmds.listRelatives( arc, shapes=True )[0]
 		
-		arc = IECoreMaya.DagNode( str( arc ) )
-		converter = arc.converter( IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( arc ), IECore.CurvesPrimitive.staticTypeId() )
 		
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaCurveConverter.staticTypeId() ) )
 		
@@ -142,8 +139,7 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		maya.cmds.move( 1, 2, 3, arc )
 		arc = maya.cmds.listRelatives( arc, shapes=True )[0]
 		
-		arc = IECoreMaya.DagNode( str( arc ) )
-		converter = arc.converter( IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( arc ), IECore.CurvesPrimitive.staticTypeId() )
 		
 		self.assertEqual( converter.space.getNumericValue(), IECoreMaya.FromMayaCurveConverter.Space.Object )
 		c = converter.convert()
@@ -160,8 +156,7 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		circle = maya.cmds.circle( ch = False )[0]
 		circle = maya.cmds.listRelatives( circle, shapes=True )[0]
 		
-		circle = IECoreMaya.DagNode( str( circle ) )
-		converter = circle.converter( IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
 		converter.linearBasis.setTypedValue( True )
 		
 		curve = converter.convert()
@@ -191,8 +186,7 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		maya.cmds.addAttr( circle, dataType="string", longName="ieString" )
 		maya.cmds.setAttr( circle + ".ieString", "banana", type="string" )
 		
-		circle = IECoreMaya.DagNode( str( circle ) )
-		converter = circle.converter( IECore.CurvesPrimitive.staticTypeId() )		
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
 		curve = converter.convert()
 		
 		self.assertEqual( len( curve.blindData().keys() ), 2 )
@@ -206,13 +200,16 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		
 		maya.cmds.addAttr( circle, attributeType="float", longName="delightDouble", defaultValue=1 )
 		
-		circle = IECoreMaya.DagNode( str( circle ) )
-		converter = circle.converter( IECore.CurvesPrimitive.staticTypeId() )		
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
 		curve = converter.convert()
 		
 		self.assertEqual( len( curve.keys() ), 2 )
 		self.assertEqual( curve["Double"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( curve["Double"].data, IECore.FloatData( 1 ) )
+		
+	def testConvertFromPlug( self ) :
+		
+		raise NotImplementedError
 							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )

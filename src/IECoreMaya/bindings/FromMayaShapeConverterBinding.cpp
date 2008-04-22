@@ -35,13 +35,37 @@
 #include "boost/python.hpp"
 
 #include "IECoreMaya/FromMayaShapeConverter.h"
+#include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/bindings/FromMayaShapeConverterBinding.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
+#include "maya/MSelectionList.h"
+#include "maya/MString.h"
+
 using namespace IECoreMaya;
 using namespace boost::python;
+
+static IECoreMaya::FromMayaShapeConverterPtr create1( const char *n )
+{
+	MSelectionList l;
+	l.add( MString( n ) );
+	MDagPath p;
+	MStatus s = l.getDagPath( 0, p );
+	StatusException::throwIfError( s );
+	return FromMayaShapeConverter::create( p );
+}
+
+static IECoreMaya::FromMayaShapeConverterPtr create2( const char *n, IECore::TypeId t )
+{
+	MSelectionList l;
+	l.add( MString( n ) );
+	MDagPath p;
+	MStatus s = l.getDagPath( 0, p );
+	StatusException::throwIfError( s );
+	return FromMayaShapeConverter::create( p, t );
+}
 
 void IECoreMaya::bindFromMayaShapeConverter()
 {
@@ -49,6 +73,8 @@ void IECoreMaya::bindFromMayaShapeConverter()
 
 	scope s = FromMayaShapeConverterPyClass( "FromMayaShapeConverter", no_init )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaShapeConverter )
+		.def( "create", &create1 )
+		.def( "create", &create2 ).staticmethod( "create" )
 	;
 	
 	enum_<FromMayaShapeConverter::Space>( "Space" )

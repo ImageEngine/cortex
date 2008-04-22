@@ -32,51 +32,45 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_FROMMAYACURVECONVERTER_H
-#define IECOREMAYA_FROMMAYACURVECONVERTER_H
+#ifndef IECOREMAYA_FROMMAYASHAPECONVERTER_INL
+#define IECOREMAYA_FROMMAYASHAPECONVERTER_INL
 
-#include "IECoreMaya/FromMayaShapeConverter.h"
-
-#include "IECore/TypedParameter.h"
-
-class MFnNurbsCurve;
+#include "IECoreMaya/FromMayaObjectConverter.h"
 
 namespace IECoreMaya
 {
 
-/// Converts maya curveShape objects into IECore::CurvesPrimitive objects.
-class FromMayaCurveConverter : public FromMayaShapeConverter
+template<class T>
+FromMayaShapeConverter::Description<T>::Description( MFn::Type fromType, IECore::TypeId resultType )
 {
-	
-	public :
+	// first register with the object converter
+	FromMayaObjectConverter::FromMayaObjectConverterDescription<T> c( fromType, resultType );
+	// then register with the shape converter
+	FromMayaShapeConverter::registerConverter( fromType, resultType, creator );
+}
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaCurveConverter, FromMayaCurveConverterTypeId, FromMayaShapeConverter );
-		
-		FromMayaCurveConverter( const MObject &object );
-		FromMayaCurveConverter( const MDagPath &dagPath );
-		
-		IECore::BoolParameterPtr linearParameter();
-		IECore::ConstBoolParameterPtr linearParameter() const;
-				
-	protected :
-	
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
+template<class T>
+FromMayaShapeConverter::Description<T>::Description( const MFn::Type *fromTypes, const IECore::TypeId *resultTypes )
+{
+	// first register with the object converter
+	FromMayaObjectConverter::FromMayaObjectConverterDescription<T> c( fromTypes, resultTypes );
+	// then register with the shape converter
+	while( *fromTypes!=MFn::kInvalid )
+	{
+		for( const IECore::TypeId *t = resultTypes; *t!=IECore::InvalidTypeId; t++ )
+		{
+			FromMayaShapeConverter::registerShapeConverter( *fromTypes, *t, creator );
+		}
+		fromTypes++;
+	}
+}
 
-	private :
-	
-		void constructCommon();
-	
-		IECore::PrimitivePtr doPrimitiveConversion( MFnNurbsCurve &fnCurve ) const;
-	
-		static Description<FromMayaCurveConverter> m_description;
-
-		IECore::BoolParameterPtr m_linearParameter;
-
-};
-
-IE_CORE_DECLAREPTR( FromMayaCurveConverter );
+template<class T>
+FromMayaShapeConverterPtr FromMayaShapeConverter::Description<T>::creator( const MDagPath &dagPath )
+{
+	return new T( dagPath );
+}
 
 } // namespace IECoreMaya
 
-#endif // IECOREMAYA_FROMMAYACURVECONVERTER_H
+#endif // IECOREMAYA_FROMMAYASHAPECONVERTER_INL
