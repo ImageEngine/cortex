@@ -263,7 +263,7 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::normals() const
 	for( int i=0; i<numPolygons; i++ )
 	{
 		fnMesh.getFaceVertexNormals( i, faceNormals, space() );
-		for( int j=faceNormals.length()-1; j>=0; j-- )
+		for( unsigned j=0; j<faceNormals.length(); j++ )
 		{
 			normals[normalIndex++] = vecConvert<MVector, V3f>( faceNormals[j] );
 		}
@@ -282,7 +282,7 @@ IECore::FloatVectorDataPtr FromMayaMeshConverter::sOrT( const MString &uvSet, un
 	unsigned int resultIndex = 0;
 	for( int i=0; i<numPolygons; i++ )
 	{
-		for( int j=fnMesh.polygonVertexCount( i )-1; j>=0; j-- )
+		for( int j=0; j<fnMesh.polygonVertexCount( i ); j++ )
 		{
 			float uv[2];
 			fnMesh.getPolygonUV( i, j, uv[0], uv[1], &uvSet );
@@ -332,16 +332,14 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	{
 		fnMesh.getPolygonVertices( i, polygonVertices );
 		*verticesPerFaceIt++ = polygonVertices.length();
-		/// \todo There's no need to reverse the winding order here - cortex winding order matches maya's.
-		/// When fixing this we need to change the order we iterate in the s,t conversion code too.
-		copy( MArrayIter<MIntArray>::reverseBegin( polygonVertices ), MArrayIter<MIntArray>::reverseEnd( polygonVertices ), vertexIdsIt );
+		copy( MArrayIter<MIntArray>::begin( polygonVertices ), MArrayIter<MIntArray>::end( polygonVertices ), vertexIdsIt );
 		vertexIdsIt += polygonVertices.length();
 	}
 
 	/// \todo Allow construction of empty meshes. Currently this MeshPrimitive constructor throws if there are no polygons. So we either need to change
 	/// that behaviour, or call the MeshPrimitive() constructor if there are no polygons.
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIds, m_interpolation->getTypedValue() );
-			
+	
 	if( m_points->getTypedValue() )
 	{
 		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, points() );

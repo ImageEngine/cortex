@@ -137,10 +137,25 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		converter.interpolation.setTypedValue( "catmullClark" )
 		m = converter.convert()
 		self.assert_( not "N" in m )
+	
+	def testWindingOrder( self ) :
+	
+		plane = maya.cmds.polyPlane( ch=False, subdivisionsX=1, subdivisionsY=1 )
+		plane = maya.cmds.listRelatives( plane, shapes=True )[0]
+		
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( plane ) )
+
+		m = converter.convert()
+		
+		p = m["P"].data
+		vertexIds = m.vertexIds
+		self.assertEqual( vertexIds.size(), 4 )
+		loop = IECore.V3fVectorData( [ p[vertexIds[0]], p[vertexIds[1]], p[vertexIds[2]], p[vertexIds[3]] ] )
+		
+		self.assert_( IECore.polygonNormal( loop ).equalWithAbsError( IECore.V3f( 0, 1, 0 ), 0.0001 ) )
 		
 	def testSomeMore( self ) :
 		
-		# winding order
 		# from plug
 		# blind data
 		# primvars
