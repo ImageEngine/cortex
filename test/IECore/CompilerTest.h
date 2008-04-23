@@ -39,6 +39,9 @@
 
 #include "OpenEXR/ImathLineAlgo.h"
 #include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathBox.h"
+
+#include "IECore/BoxOps.h"
 
 namespace IECore
 {
@@ -47,23 +50,33 @@ void addCompilerTest(boost::unit_test::test_suite* test);
 
 struct CompilerTest
 {		
-		void runTest()
-		{
-			Imath::V3f p0 = Imath::V3f( 0.587785,         0, 0.809017 );
-			Imath::V3f p1 = Imath::V3f( 0.799057, -0.156434, 0.580549 );
-			Imath::V3f p2 = Imath::V3f( 0.580549, -0.156434, 0.799057 );
-			
-			Imath::Line3f ln;
-			ln.pos = Imath::V3f( -0.289445, -0.0803292, 0.295812 );
-			ln.dir = Imath::V3f(  0.898071, -0.0705415, 0.434157 );
-			
-			
-			Imath::V3f hitPoint, bary;			
-			bool front;
-			
-			/// This seems to be failing on gcc4.2.3 with optimisations -O2, and -O3. -O1 seems fine.
-			BOOST_CHECK( intersect( ln, p0, p1, p2, hitPoint, bary, front ) );
-		}
+
+	void runTest1()
+	{
+		Imath::Box3f b1( Imath::V3f( -1 ), Imath::V3f( 1 ) );
+		Imath::Box3f b2( Imath::V3f( 0, -0.5, 0.5 ), Imath::V3f( 0.1, 0, 0.9 ) );
+
+		/// This seems to be failing on gcc4.2.3 with optimisations -O2, and -O3. -O1 seems fine.
+		BOOST_CHECK( boxContains( b1, b2 ) );
+	}
+
+	void runTest2()
+	{
+		Imath::V3f p0 = Imath::V3f( 0.587785,         0, 0.809017 );
+		Imath::V3f p1 = Imath::V3f( 0.799057, -0.156434, 0.580549 );
+		Imath::V3f p2 = Imath::V3f( 0.580549, -0.156434, 0.799057 );
+
+		Imath::Line3f ln;
+		ln.pos = Imath::V3f( -0.289445, -0.0803292, 0.295812 );
+		ln.dir = Imath::V3f(  0.898071, -0.0705415, 0.434157 );
+
+
+		Imath::V3f hitPoint, bary;			
+		bool front;
+
+		/// This seems to be failing on gcc4.2.3 with optimisations -O2, and -O3. -O1 seems fine.
+		BOOST_CHECK( intersect( ln, p0, p1, p2, hitPoint, bary, front ) );
+	}
 };
 
 
@@ -74,7 +87,8 @@ struct CompilerTestSuite : public boost::unit_test::test_suite
 	{
 		boost::shared_ptr<CompilerTest> instance(new CompilerTest());
 		
-		add( BOOST_CLASS_TEST_CASE( &CompilerTest::runTest, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &CompilerTest::runTest1, instance ) );		
+		add( BOOST_CLASS_TEST_CASE( &CompilerTest::runTest2, instance ) );
 	}
 };
 
