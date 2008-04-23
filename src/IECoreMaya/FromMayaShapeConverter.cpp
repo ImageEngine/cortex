@@ -114,16 +114,13 @@ IECore::ConstStringParameterPtr FromMayaShapeConverter::primVarAttrPrefixParamet
 IECore::ObjectPtr FromMayaShapeConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	IECore::PrimitivePtr p = 0;
-	if( m_dagPath.isValid() )
+	const MDagPath *d = dagPath( true );
+	if( d )
 	{
-		p = doPrimitiveConversion( m_dagPath, operands );
+		p = doPrimitiveConversion( *d, operands );
 	}
 	else
 	{
-		if( space()==MSpace::kWorld )
-		{
-			IECore::msg( IECore::Msg::Warning, "FromMayaShapeConverter::doConversion", "World space requested but no dag path provided." );
-		}
 		p = doPrimitiveConversion( object, operands );
 	}
 	if( p )
@@ -265,6 +262,21 @@ MSpace::Space FromMayaShapeConverter::space() const
 	}
 	assert( 0 ); // should never get here
 	return MSpace::kObject;
+}
+
+const MDagPath *FromMayaShapeConverter::dagPath( bool emitSpaceWarnings ) const
+{
+	if( m_dagPath.isValid() )
+	{
+		return &m_dagPath;
+	}
+	
+	if( emitSpaceWarnings && space()==MSpace::kWorld )
+	{
+		IECore::msg( IECore::Msg::Warning, "FromMayaShapeConverter", "World space requested but no dag path provided." );
+	}
+	
+	return 0;
 }
 
 FromMayaShapeConverterPtr FromMayaShapeConverter::create( const MDagPath &dagPath )

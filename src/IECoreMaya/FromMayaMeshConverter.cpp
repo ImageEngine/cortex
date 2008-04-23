@@ -48,6 +48,7 @@
 #include "maya/MFn.h"
 #include "maya/MFnMesh.h"
 #include "maya/MFnAttribute.h"
+#include "maya/MString.h"
 
 #include <algorithm>
 
@@ -59,21 +60,26 @@ using namespace Imath;
 static const MFn::Type fromTypes[] = { MFn::kMesh, MFn::kMeshData, MFn::kInvalid };
 static const IECore::TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, VisibleRenderableTypeId, PrimitiveTypeId, MeshPrimitiveTypeId, InvalidTypeId };
 
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaMeshConverter> FromMayaMeshConverter::m_description( fromTypes, toTypes );
+FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter::m_description( fromTypes, toTypes );
 
-struct FromMayaMeshConverter::ExtraData
-{
-	IntParameterPtr m_space;
-};
-
-typedef ClassData< FromMayaMeshConverter, FromMayaMeshConverter::ExtraData*, Deleter<FromMayaMeshConverter::ExtraData*> > FromMayaMeshConverterClassData;
-static FromMayaMeshConverterClassData g_classData;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// structors
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 FromMayaMeshConverter::FromMayaMeshConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaMeshConverter", "Converts poly meshes to IECore::MeshPrimitive objects.", object )
+	:	FromMayaShapeConverter( "FromMayaShapeConverter", "Converts poly meshes to IECore::MeshPrimitive objects.", object )
 {
-	ExtraData *extraData = g_classData.create( this, new ExtraData() );
-	assert( extraData );
+	constructCommon();
+}
+
+FromMayaMeshConverter::FromMayaMeshConverter( const MDagPath &dagPath )
+	:	FromMayaShapeConverter( "FromMayaShapeConverter", "Converts poly meshes to IECore::MeshPrimitive objects.", dagPath )
+{
+	constructCommon();
+}
+
+void FromMayaMeshConverter::constructCommon()
+{
 
 	// interpolation
 	StringParameter::PresetsMap interpolationPresets;
@@ -145,52 +151,82 @@ FromMayaMeshConverter::FromMayaMeshConverter( const MObject &object )
 	
 	parameters()->addParameter( m_extraST );
 	
-	// additional primvars
-	StringParameter::PresetsMap primVarAttrPrefixPresets;
-	primVarAttrPrefixPresets["MTOR"] = "rman";
-	primVarAttrPrefixPresets["3Delight"] = "delight";
-	primVarAttrPrefixPresets["None"] = "";
-	m_primVarAttrPrefix = new StringParameter(
-		"primVarAttrPrefix",
-		"Any attribute names beginning with this prefix are considered to represent primitive variables and are converted as such."
-		"The interpolation type of the variable is guessed, unless the attribute name begins with prefix_?_, in which case the ? is"
-		"used to specify type - C for constant, U for uniform, V for Vertex, Y for varying and F for facevarying",
-		"delight", // compatibility with 3delight by default
-		primVarAttrPrefixPresets
-	);
-
-	parameters()->addParameter( m_primVarAttrPrefix );
-	
-	/// \todo We don't want all these spaces. We want object and world only.
-	/// Also this parameter should be on a base class somewhere.
-	IntParameter::PresetsMap spacePresets;
-	spacePresets["Transform"] = Transform;
-	spacePresets["PreTransform"] = PreTransform;
-	spacePresets["PostTransform"] = PostTransform;
-	spacePresets["Object"] = Object;	
-	spacePresets["World"] = World;		
-	extraData->m_space = new IntParameter(
-		"space",
-		"The space obtain the mesh in",
-		Transform,
-		Transform,
-		Object,
-		spacePresets,
-		true
-	);
-		
-	parameters()->addParameter( extraData->m_space );
-
 }
 
 FromMayaMeshConverter::~FromMayaMeshConverter()
 {
-	g_classData.erase( this );
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// parameter access
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+IECore::StringParameterPtr FromMayaMeshConverter::interpolationParameter()
+{
+	return m_interpolation;
+}
+
+IECore::StringParameterPtr FromMayaMeshConverter::interpolationParameter() const
+{
+	return m_interpolation;
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::pointsParameter()
+{
+	return m_points;
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::pointsParameter() const
+{
+	return m_points;
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::normalsParameter()
+{
+	return m_normals;
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::normalsParameter() const
+{
+	return m_normals;
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::stParameter()
+{
+	return m_st;
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::stParameter() const
+{
+	return m_st;
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::extraSTParameter()
+{
+	return m_extraST;
+}
+
+IECore::BoolParameterPtr FromMayaMeshConverter::extraSTParameter() const
+{
+	return m_extraST;
+}
+		
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// conversion
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 IECore::V3fVectorDataPtr FromMayaMeshConverter::points() const
 {
-	MFnMesh fnMesh( object() );
+	MFnMesh fnMesh;
+	const MDagPath *d = dagPath( true );
+	if( d )
+	{
+		fnMesh.setObject( *d );	
+	}
+	else
+	{
+		fnMesh.setObject( object() );
+	}
 	
 	MFloatPointArray mPoints;
 	fnMesh.getPoints( mPoints, space() );
@@ -203,7 +239,16 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::points() const
 
 IECore::V3fVectorDataPtr FromMayaMeshConverter::normals() const
 {
-	MFnMesh fnMesh( object() );
+	MFnMesh fnMesh;
+	const MDagPath *d = dagPath( true );
+	if( d )
+	{
+		fnMesh.setObject( *d );	
+	}
+	else
+	{
+		fnMesh.setObject( object() );
+	}
 
 	V3fVectorDataPtr normalsData = new V3fVectorData;
 	vector<V3f> &normals = normalsData->writable();
@@ -254,150 +299,21 @@ IECore::FloatVectorDataPtr FromMayaMeshConverter::t( const MString &uvSet ) cons
 {
 	return sOrT( uvSet, 1 );
 }
-
-void FromMayaMeshConverter::addPrimVars( IECore::PrimitivePtr primitive, const MString &prefix ) const
-{
-	MFnDependencyNode fnNode( object() );
-	unsigned int n = fnNode.attributeCount();
-	for( unsigned int i=0; i<n; i++ )
-	{
-		MObject attr = fnNode.attribute( i );
-		MFnAttribute fnAttr( attr );
-		MString attrName = fnAttr.name();
-		if( attrName.substring( 0, prefix.length()-1 )==prefix && attrName.length() > prefix.length() )
-		{
-			MPlug plug = fnNode.findPlug( attr );
-			if( !plug.parent().isNull() )
-			{
-				continue; // we don't want to pick up the children of compound numeric attributes
-			}
-			MString plugName = plug.name();
-			
-			// find a converter for the plug, asking for conversion to float types by preference			
-			FromMayaConverterPtr converter = FromMayaPlugConverter::create( plug, IECore::FloatDataTypeId );
-			if( !converter )
-			{
-				converter = FromMayaPlugConverter::create( plug, IECore::V3fDataTypeId );
-			}
-			if( !converter )
-			{
-				converter = FromMayaPlugConverter::create( plug, IECore::V3fVectorDataTypeId );
-			}
-			if( !converter )
-			{
-				converter = FromMayaPlugConverter::create( plug, IECore::FloatVectorDataTypeId );
-			}
-			if( !converter )
-			{
-				converter = FromMayaPlugConverter::create( plug );
-			}
-			
-			// run the conversion and check we've got data as a result
-			DataPtr data = 0;
-			if( converter )
-			{
-				 data = runTimeCast<Data>( converter->convert() );
-			}
-			if( !data )
-			{
-				msg( Msg::Warning, "FromMayaMeshConverter::addPrimVars", boost::format( "Attribute \"%s\" could not be converted to Data." ) % plugName.asChar() );
-				continue;
-			}
-			
-			// convert V3fData to Color3fData if attribute has usedAsColor() set.
-			if( V3fDataPtr vData = runTimeCast<V3fData>( data ) )
-			{
-				if( fnAttr.isUsedAsColor() )
-				{
-					V3f v = vData->readable();
-					data = new Color3fData( Color3f( v.x, v.y, v.z ) ); 
-				}
-			}
-
-			// see if interpolation has been specified, and find primitive variable name
-			string primVarName = attrName.asChar() + prefix.length();
-			PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Invalid;
-			if( attrName.length()>prefix.length()+3 )
-			{
-				const char *c = attrName.asChar();
-				if( c[prefix.length()]=='_' && c[prefix.length()+2]=='_' )
-				{
-					char t = c[prefix.length()+1];
-					primVarName = attrName.asChar() + prefix.length() + 3;
-					switch( t )
-					{
-						case 'C' :
-							interpolation = PrimitiveVariable::Constant;
-							break;
-						case 'U' :
-							interpolation = PrimitiveVariable::Uniform;
-							break;
-						case 'V' :
-							interpolation = PrimitiveVariable::Vertex;
-							break;
-						case 'Y' :
-							interpolation = PrimitiveVariable::Varying;
-							break;
-						case 'F' :
-							interpolation = PrimitiveVariable::FaceVarying;
-							break;
-						default :
-							msg( Msg::Warning, "FromMayaMeshConverter::addPrimVars", boost::format( "Attribute \"%s\" has unknown interpolation - guessing interpolation." ) % plugName.asChar() );
-							break;
-					}
-				}
-			}
-
-			// guess interpolation if not specified
-			if( interpolation==PrimitiveVariable::Invalid )
-			{
-				size_t s = 1;
-				try
-				{
-					s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData>( data );
-				}
-				catch( ... )
-				{
-				}
-				/// \todo Maybe this would make a useful utility function in IECore::Primitive()
-				if( s==primitive->variableSize( PrimitiveVariable::Constant ) )
-				{
-					interpolation = PrimitiveVariable::Constant;
-				}
-				else if( s==primitive->variableSize( PrimitiveVariable::Uniform ) )
-				{
-					interpolation = PrimitiveVariable::Uniform;
-				}
-				else if( s==primitive->variableSize( PrimitiveVariable::Vertex ) )
-				{
-					interpolation = PrimitiveVariable::Vertex;
-				}
-				else if( s==primitive->variableSize( PrimitiveVariable::Varying ) )
-				{
-					interpolation = PrimitiveVariable::Varying;
-				}
-				else if( s==primitive->variableSize( PrimitiveVariable::FaceVarying ) )
-				{
-					interpolation = PrimitiveVariable::FaceVarying;
-				}
-				else
-				{
-					msg( Msg::Warning, "FromMayaMeshConverter::addPrimVars", boost::format( "Attribute \"%s\" has unsuitable size to guess interpolation." ) % plugName.asChar() );
-					continue;
-				}
-			}
-
-			// finally add the primvar
-			primitive->variables[primVarName] = PrimitiveVariable( interpolation, data );
-
-		}
-	}
-}
 		
-IECore::ObjectPtr FromMayaMeshConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
+IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnMesh fnMesh( object );
-	
+	return doPrimitiveConversion( fnMesh );
+}
+
+IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
+{
+	MFnMesh fnMesh( dagPath );
+	return doPrimitiveConversion( fnMesh );
+}
+
+IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMesh ) const
+{
 	// get basic topology and create a mesh
 	int numPolygons = fnMesh.numPolygons();
 	IntVectorDataPtr verticesPerFaceData = new IntVectorData;
@@ -461,46 +377,5 @@ IECore::ObjectPtr FromMayaMeshConverter::doConversion( const MObject &object, IE
 		}
 	}
 	
-	if( m_primVarAttrPrefix->getTypedValue()!="" )
-	{
-		addPrimVars( result, m_primVarAttrPrefix->getTypedValue().c_str() );
-	}
-	
 	return result;
-}
-
-IECore::IntParameterPtr FromMayaMeshConverter::spaceParameter()
-{
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );	
-	
-	return extraData->m_space;
-}
-
-IECore::ConstIntParameterPtr FromMayaMeshConverter::spaceParameter() const
-{
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );	
-	
-	return extraData->m_space;
-}
-
-MSpace::Space FromMayaMeshConverter::space() const
-{
-	ExtraData *extraData = g_classData[this];
-	assert( extraData );	
-	
-	Space s = static_cast< Space > ( extraData->m_space->getNumericValue() );
-	
-	switch ( s )
-	{
-		case Transform:     return MSpace::kTransform;
-		case PreTransform:  return MSpace::kPreTransform;
-		case PostTransform: return MSpace::kPostTransform;
-		case Object:        return MSpace::kObject;
-		case World:         return MSpace::kWorld;
-		default:
-			assert( false );
-			return MSpace::kTransform;
-	}
 }

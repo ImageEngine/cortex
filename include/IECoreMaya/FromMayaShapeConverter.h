@@ -108,7 +108,11 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 
 		/// The space in which derived classes should convert the object.
 		MSpace::Space space() const;
-		
+		/// Returns the dag path for the shape to be converted. This may return false, in which case object() should
+		/// be converted instead. Generally derived classes shouldn't need this method as they can just implement
+		/// the two doPrimitiveConversion() methods above, and this class will call the appropriate one. If emitSpaceWarnings
+		/// is true, then a warning is emitted if there is no valid dag path available and the space parameter is set to world.
+		const MDagPath *dagPath( bool emitSpaceWarnings=false ) const;
 
 		/// Creating a static instance of one of these (templated on your Converter type)
 		/// within your class will register your converter with the factory mechanism.

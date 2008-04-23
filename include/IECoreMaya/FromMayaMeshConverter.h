@@ -35,7 +35,7 @@
 #ifndef IE_COREMAYA_FROMMAYAMESHCONVERTER_H
 #define IE_COREMAYA_FROMMAYAMESHCONVERTER_H
 
-#include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECoreMaya/FromMayaShapeConverter.h"
 
 #include "IECore/VectorTypedData.h"
 #include "IECore/NumericParameter.h"
@@ -43,7 +43,8 @@
 #include "IECore/Primitive.h"
 
 #include "maya/MString.h"
-#include "maya/MGlobal.h"
+
+class MFnMesh;
 
 namespace IECoreMaya
 {
@@ -51,31 +52,20 @@ namespace IECoreMaya
 /// The FromMayaMeshConverter converts types compatible with
 /// MFnMesh into IECore::MeshPrimitive objects.
 /// \todo Vertex color support. Blind data support?
-/// \todo The "space" parameter should probably go in a base class from which all geometry 
-/// converters inherit
 /// \bug This reverses the winding order unecessarily.
 /// \todo Fix the reversing of winding order for the next major release - not we may be relying on
 /// the reversed order in external code at the moment.
-class FromMayaMeshConverter : public FromMayaObjectConverter
+class FromMayaMeshConverter : public FromMayaShapeConverter
 {
 
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaMeshConverter, FromMayaMeshConverterTypeId, FromMayaObjectConverter );
-
-		typedef enum
-		{
-			Transform = 0,
-			PreTransform = 1,
-			PostTransform = 2,
-			World = 3,
-			Object = 4
-		} Space;
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaMeshConverter, FromMayaMeshConverterTypeId, FromMayaShapeConverter );
 
 		FromMayaMeshConverter( const MObject &object );
+		FromMayaMeshConverter( const MDagPath &dagPath );
 		
 		virtual ~FromMayaMeshConverter();
-		
 		
 		/// Returns just the points for the mesh.
 		IECore::V3fVectorDataPtr points() const;
@@ -85,22 +75,38 @@ class FromMayaMeshConverter : public FromMayaObjectConverter
 		IECore::FloatVectorDataPtr s( const MString &uvSet="" ) const;
 		/// Returns just the t for the mesh.
 		IECore::FloatVectorDataPtr t( const MString &uvSet="" ) const;
-		/// Creates primitive variables for the specified primitive using
-		/// attributes whose names begin with prefix.
-		/// \todo We should probably have a FromMayaPrimitiveConverter base
-		/// class to put this functionality in - it can then be shared by
-		/// a future FromMayaNurbsConverter etc.
-		void addPrimVars( IECore::PrimitivePtr primitive, const MString &prefix ) const;
+
+		//! @name Parameter accessors
+		//////////////////////////////////////////////////////////
+		//@{
+		IECore::StringParameterPtr interpolationParameter();
+		IECore::StringParameterPtr interpolationParameter() const;
+
+		IECore::BoolParameterPtr pointsParameter();
+		IECore::BoolParameterPtr pointsParameter() const;
 		
-		IECore::IntParameterPtr spaceParameter();
-		IECore::ConstIntParameterPtr spaceParameter() const;		
-		
-		/// Retrieves the space that the converter's parameters specify
-		MSpace::Space space() const;
+		IECore::BoolParameterPtr normalsParameter();
+		IECore::BoolParameterPtr normalsParameter() const;
+
+		IECore::BoolParameterPtr stParameter();
+		IECore::BoolParameterPtr stParameter() const;
+
+		IECore::BoolParameterPtr extraSTParameter();
+		IECore::BoolParameterPtr extraSTParameter() const;
+		//@}
 		
 	protected :
 	
-		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
+		
+	private :
+
+		void constructCommon();
+		
+		IECore::FloatVectorDataPtr sOrT( const MString &uvSet, unsigned int index ) const;
+
+		IECore::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;
 
 		IECore::StringParameterPtr m_interpolation;
 		IECore::BoolParameterPtr m_points;
@@ -108,16 +114,9 @@ class FromMayaMeshConverter : public FromMayaObjectConverter
 		IECore::BoolParameterPtr m_st;
 		IECore::BoolParameterPtr m_extraST;
 		IECore::StringParameterPtr m_primVarAttrPrefix;
-		
-	private :
 
-		IECore::FloatVectorDataPtr sOrT( const MString &uvSet, unsigned int index ) const;
 
-		static FromMayaObjectConverterDescription<FromMayaMeshConverter> m_description;
-		
-	public :
-	
-		struct ExtraData;
+		static Description<FromMayaMeshConverter> m_description;
 
 };
 
