@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import shutil
 from IECore import *
 
 # \todo use setUp and tearDown to remove directories, also use shutil.rmtree instead of os.system("rm -rf")
@@ -383,6 +384,29 @@ class testBigNumbers( unittest.TestCase ) :
 	def test( self ) :
 	
 		s = FileSequence( "s.####.tif", FrameRange( 10000000000, 10000000001 ) )
+		
+	def testRenumber( self ) :
+	
+		startFrame = 300010321
+		s = FileSequence( "test/IECore/sequences/renumberTest/s.#.tif", FrameRange( startFrame, startFrame + 4 ) )
+		os.system( "mkdir -p test/IECore/sequences/renumberTest" )
+		
+		for f in s.fileNames() :
+			os.system( "touch " + f )
+		
+		offset = -300010000
+		SequenceRenumberOp()( src="test/IECore/sequences/renumberTest/s.#.tif", offset=offset )
+		
+		s2 = ls( "test/IECore/sequences/renumberTest" )
+		self.assertEqual( len( s2 ), 1 )
+		s2 = s2[0]
+		
+		self.assertEqual( s2.frameList.asList(), range( startFrame + offset, startFrame + offset + 5 ) )
+				
+	def tearDown( self ) :
+	
+		if os.path.exists( "test/IECore/sequences/renumberTest" ) :
+			shutil.rmtree( "test/IECore/sequences/renumberTest" )
 
 class testMissingFrames( unittest.TestCase ) :
 
