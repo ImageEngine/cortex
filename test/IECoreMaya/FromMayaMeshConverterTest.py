@@ -153,12 +153,42 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		loop = IECore.V3fVectorData( [ p[vertexIds[0]], p[vertexIds[1]], p[vertexIds[2]], p[vertexIds[3]] ] )
 		
 		self.assert_( IECore.polygonNormal( loop ).equalWithAbsError( IECore.V3f( 0, 1, 0 ), 0.0001 ) )
+	
+	def testBlindData( self ) :
+	
+		plane = maya.cmds.polyPlane( ch=False, subdivisionsX=1, subdivisionsY=1 )
+		plane = maya.cmds.listRelatives( plane, shapes=True )[0]
 		
-	def testSomeMore( self ) :
+		maya.cmds.addAttr( plane, dataType="string", longName="ieString" )
+		maya.cmds.setAttr( plane + ".ieString", "banana", type="string" )
 		
-		# from plug
-		# blind data
-		# primvars
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( plane ) )
+		m = converter.convert()
+		
+		self.assertEqual( len( m.blindData().keys() ), 2 )
+		self.assertEqual( m.blindData()["name"], IECore.StringData( "pPlaneShape1" ) )
+		self.assertEqual( m.blindData()["ieString"], IECore.StringData( "banana" ) )
+	
+	def testPrimVars( self ) :
+			
+		plane = maya.cmds.polyPlane( ch=False, subdivisionsX=1, subdivisionsY=1 )
+		plane = maya.cmds.listRelatives( plane, shapes=True )[0]
+		
+		maya.cmds.addAttr( plane, attributeType="float", longName="delightDouble", defaultValue=1 )
+		maya.cmds.addAttr( plane, dataType="doubleArray", longName="delightDoubleArray" )
+		maya.cmds.setAttr( plane + ".delightDoubleArray", ( 10, 11, 12, 13 ), type="doubleArray" )
+		
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( plane ), IECore.MeshPrimitive.staticTypeId() )
+		m = converter.convert()
+		
+		self.assertEqual( len( m.keys() ), 6 )
+		self.assertEqual( m["Double"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( m["Double"].data, IECore.FloatData( 1 ) )
+		self.assertEqual( m["DoubleArray"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( m["DoubleArray"].data, IECore.FloatVectorData( [ 10, 11, 12, 13 ] ) )
+			
+	def testConvertFromPlug( self ) :
+		
 		raise NotImplementedError
 							
 if __name__ == "__main__":
