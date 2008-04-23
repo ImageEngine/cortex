@@ -471,8 +471,6 @@ env.Prepend(
 	CXXFLAGS = [
 		"-pipe",
 		"-Wall",
-# removing the flag below till we can fix the warnings coming from boost
-#		"-Werror",
 	],
 )
 
@@ -609,6 +607,17 @@ pythonEnv["SHLIBSUFFIX"] = ".so"
 
 if pythonEnv["PLATFORM"]=="darwin" :
 	pythonEnv.Append( SHLINKFLAGS = "-single_module" )
+
+###########################################################################################
+# Warning flags. We'd like to set these for all environments but boost::python generates
+# loads of warnings so we can't set it for the python bindings.
+###########################################################################################
+
+env.Append(
+	CXXFLAGS = [
+		"-Werror",
+	],
+)
 	
 ###########################################################################################
 # An environment for running tests
@@ -645,7 +654,7 @@ else:
 		testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
 
 testEnv["ENV"]["PYTHONPATH"] = "./python"
-
+	
 ###########################################################################################
 # Helper functions
 ###########################################################################################

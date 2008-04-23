@@ -42,9 +42,9 @@
 using namespace IECoreGL;
 
 HitRecord::HitRecord( const GLuint *hitRecord )
-	:	name( NameStateComponent::nameFromGLName( hitRecord[3] ) ),
-		depthMin( (float)hitRecord[1]/(float)Imath::limits<GLuint>::max() ),
-		depthMax( (float)hitRecord[2]/(float)Imath::limits<GLuint>::max() )
+	:	depthMin( (float)hitRecord[1]/(float)Imath::limits<GLuint>::max() ),
+		depthMax( (float)hitRecord[2]/(float)Imath::limits<GLuint>::max() ),
+		name( NameStateComponent::nameFromGLName( hitRecord[3] ) )
 
 {
 	if( hitRecord[0] != 1 )
