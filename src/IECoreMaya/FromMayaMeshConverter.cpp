@@ -116,7 +116,10 @@ void FromMayaMeshConverter::constructCommon()
 
 	m_normals = new BoolParameter(
 		"normals",
-		"When this is on the mesh normals are added to the result as a primitive variable named \"N\".",
+		"When this is on the mesh normals are added to the result as a primitive variable named \"N\". "
+		"Note that normals will only ever be added to meshes created with linear interpolation as "
+		"vertex normals are unsuitable for meshes which will be rendered with some form of "
+		"subdivision.",
 		true,
 		normalsPresets
 	);
@@ -343,9 +346,8 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	{
 		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, points() );
 	}
-	if( m_normals->getTypedValue() )
+	if( m_normals->getTypedValue() && m_interpolation->getTypedValue()=="linear" )
 	{
-		/// \todo THIS IS A STUPID THING TO BE DOING IF WE'RE USING SUBDIV INTERPOLATION. STOP IT.
 		result->variables["N"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, normals() );
 	}
 	

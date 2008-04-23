@@ -120,11 +120,27 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		converter.space.setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
 		m = converter.convert()
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( m.bound() ) )
+	
+	def testNormalsOnlyWhenLinear( self ) :
+	
+		# adding normals to a mesh which will be rendered subdivided is a very bad thing to do.
+		# make sure we aren't doing it.
+		
+		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
+		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
+	
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ) )
+		
+		m = converter.convert()
+		self.assert_( "N" in m )
+		
+		converter.interpolation.setTypedValue( "catmullClark" )
+		m = converter.convert()
+		self.assert_( not "N" in m )
 		
 	def testSomeMore( self ) :
 		
 		# winding order
-		# no normals when not linear
 		# from plug
 		# blind data
 		# primvars
