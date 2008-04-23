@@ -61,7 +61,7 @@ struct CompilerTest
 			Imath::V3f hitPoint, bary;			
 			bool front;
 			
-			/// This seems to be failing on gcc4.2.3/x86_64/amd64 with optimisations -O2, and -O3. -O1 seems fine.
+			/// This seems to be failing on gcc4.2.3 with optimisations -O2, and -O3. -O1 seems fine.
 			BOOST_CHECK( intersect( ln, p0, p1, p2, hitPoint, bary, front ) );
 		}
 };
