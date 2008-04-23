@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,54 +32,53 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#ifndef IE_CORE_COMPILERTEST_H
+#define IE_CORE_COMPILERTEST_H
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+#include "boost/test/unit_test.hpp"
 
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
-#include "DataConvertTest.h"
-#include "DespatchTypedDataTest.h"
-#include "CompilerTest.h"
+#include "OpenEXR/ImathLineAlgo.h"
+#include "OpenEXR/ImathVec.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+namespace IECore
+{
 
-using namespace IECore;
+void addCompilerTest(boost::unit_test::test_suite* test);
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+struct CompilerTest
+{		
+		void runTest()
+		{
+			Imath::V3f p0 = Imath::V3f( 0.587785,         0, 0.809017 );
+			Imath::V3f p1 = Imath::V3f( 0.799057, -0.156434, 0.580549 );
+			Imath::V3f p2 = Imath::V3f( 0.580549, -0.156434, 0.799057 );
+			
+			Imath::Line3f ln;
+			ln.pos = Imath::V3f( -0.289445, -0.0803292, 0.295812 );
+			ln.dir = Imath::V3f(  0.898071, -0.0705415, 0.434157 );
+			
+			
+			Imath::V3f hitPoint, bary;			
+			bool front;
+			
+			/// This seems to be failing on gcc4.2.3/x86_64/amd64 with optimisations -O2, and -O3. -O1 seems fine.
+			BOOST_CHECK( intersect( ln, p0, p1, p2, hitPoint, bary, front ) );
+		}
+};
+
+
+struct CompilerTestSuite : public boost::unit_test::test_suite
 {	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
 	
-	try
+	CompilerTestSuite() : boost::unit_test::test_suite("CompilerTestSuite")
 	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-		addDataConvertTest(test);
-		addDespatchTypedDataTest(test);
-		addCompilerTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
+		boost::shared_ptr<CompilerTest> instance(new CompilerTest());
+		
+		add( BOOST_CLASS_TEST_CASE( &CompilerTest::runTest, instance ) );
 	}
-	
-	return test;
+};
+
 }
+
+#endif
+
