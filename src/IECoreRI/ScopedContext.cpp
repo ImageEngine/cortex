@@ -36,12 +36,12 @@
 
 using namespace IECoreRI;
 
-/// \todo This is the source of "Invalid context for RIGetContext errors" in 3delight.
 ScopedContext::ScopedContext( RtContextHandle context )
-	:	m_contextWasNull( context==RI_NULL ), m_previousContext( RiGetContext() )
+	:	m_contextWasNull( context==RI_NULL )
 {
 	if( !m_contextWasNull )
 	{
+		m_previousContext = RiGetContext();
 		RiContext( context );
 	}
 }
