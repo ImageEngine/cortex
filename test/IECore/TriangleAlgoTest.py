@@ -68,5 +68,14 @@ class TriangleAlgoTest( unittest.TestCase ) :
 					p = u * v0 + v * v1 + w * v2
 					self.failUnless( triangleContainsPoint( v0, v1, v2, p ) )
 					
+	def testNormal( self ) :
+
+		v0 = V3f( 0, 0, 0 )
+		v1 = V3f( 1, 0, 0 )
+		v2 = V3f( 0, 1, 0 )
+		
+		n = triangleNormal( v0, v1, v2 )
+		self.assertEqual( n, V3f( 0, 0, 1 ) )
+					
 if __name__ == "__main__":
     unittest.main()   
