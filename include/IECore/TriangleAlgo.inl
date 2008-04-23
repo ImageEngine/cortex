@@ -53,7 +53,7 @@ typename VectorTraits<Vec>::BaseType triangleArea( const Vec &v0, const Vec &v1,
 template<class Vec>
 Vec triangleNormal( const Vec &v0, const Vec &v1, const Vec &v2 )
 {
-	Vec n = (v2-v0).cross(v1-v0);	
+	Vec n = (v1-v0).cross(v2-v0);	
 	vecNormalize( n );
 	return n;
 }
