@@ -47,6 +47,11 @@ inline void glVertex( const Imath::V3f &v )
 	glVertex3f( v.x, v.y, v.z );
 }
 
+inline void glNormal( const Imath::V3f &n )
+{
+	glNormal3f( n.x, n.y, n.z );
+}
+
 } // namespace IECoreGL
 
 #endif // IECOREGL_GL_INL

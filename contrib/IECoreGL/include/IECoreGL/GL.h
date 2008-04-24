@@ -49,6 +49,7 @@ namespace IECoreGL
 {
 
 inline void glVertex( const Imath::V3f &v );
+inline void glNormal( const Imath::V3f &n );
 
 } // namespace IECoreGL
 
