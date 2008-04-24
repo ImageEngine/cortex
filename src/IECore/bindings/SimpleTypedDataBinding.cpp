@@ -66,7 +66,7 @@ static intrusive_ptr<T> construct()
 
 /// Half needs explicit initialisation
 template<>
-static intrusive_ptr<HalfData> construct()
+intrusive_ptr<HalfData> construct()
 {
 	return new HalfData(0);
 }
@@ -107,7 +107,7 @@ static int cmp( T &x, T &y )
 }
 
 template<>
-static int cmp( StringData &x, StringData &y )
+int cmp( StringData &x, StringData &y )
 {
 	return x.readable().compare( y.readable() );
 }
