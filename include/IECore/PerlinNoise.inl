@@ -134,7 +134,7 @@ inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::noiseWalk( int
 		unsigned int perm = 0;
 		for( unsigned int i=0; i<PointTraits::dimensions(); i++ )
 		{
-			perm = m_perm[perm+(pi[i]&m_permSize-1)];
+			perm = m_perm[ perm+( pi[i] & ( m_permSize-1 ) ) ];
 		}
 		const Value *grad = &m_grad[perm*PointTraits::dimensions()];
 		V g( 0 );
