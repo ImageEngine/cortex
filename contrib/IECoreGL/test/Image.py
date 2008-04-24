@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import os.path
 
 from IECore import *
 
@@ -56,7 +57,7 @@ class TestImage( unittest.TestCase ) :
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		r.concatTransform( M44f.createScaled( V3f( 0.01 ) ) )
 		
-		i = Reader.create( "test/images/colorBarsH512x512.exr" ).read()
+		i = Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsH512x512.exr" ).read()
 		i.render( r )
 		
 		r.worldEnd()
