@@ -422,6 +422,14 @@ env = Environment(
 	options = o
 )
 
+compilerVersionString = os.popen( env.subst("$CXX --version | head -1 | cut -d ' ' -f 3") ).readline()
+m = re.compile( "^([0-9]+)\.([0-9]+)\.([0-9]+)$" ).match( compilerVersionString )
+if not m:
+	raise RuntimeError( "Cannot determine compiler version" )
+	
+compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2, 3 )
+compilerVersion = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
+
 env["LIBPATH"] = env["LIBPATH"].split( ":" )
 
 for e in env["ENV_VARS_TO_IMPORT"].split() :
@@ -647,14 +655,16 @@ testEnv["ENV"]["PYTHONPATH"] = "./python"
 ###########################################################################################
 # Warning flags. We'd like to set these for all environments but boost::python and
 # boost::unit_test generate loads of warnings so we can't set it for the python bindings
-# or C++ tests.
+# or C++ tests. GCC 4.3.0 gives out a lot of boost warnings in general, too.
 ###########################################################################################
 
-env.Append(
-	CXXFLAGS = [
-		"-Werror",
-	],
-)
+if compilerVersion < 430 :
+
+	env.Append(
+		CXXFLAGS = [
+			"-Werror",
+		],
+	)
 	
 ###########################################################################################
 # Helper functions
@@ -765,11 +775,12 @@ if doConfigure :
 					
 	c.Finish()
 
-if not env["PLATFORM"]=="darwin" :
+if compilerVersion < 350 :
 	# This is here to specifically address a problem in binutils-2.17 and later, when harmless warnings of the
 	# form "X: referenced in section '.rodata' of Y: defined in discarded section" were changed to errors
-	# We do it down here so it doesn't cause Configure tests to pass when they should
-	# really be failing
+	# We do it down here so it doesn't cause Configure tests to pass when they should really be failing.
+	# Only gcc-3.4 and earlier omits these warnings, so we don't need to do anything for later compiler
+	# versions.
 	env.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )
 	corePythonEnv.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )
 	coreEnv.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )	
