@@ -39,6 +39,7 @@
 #include "IECore/CurvesPrimitive.h"
 
 #include "OpenEXR/ImathMatrixAlgo.h"
+#include "OpenEXR/ImathVecAlgo.h"
 #include "OpenEXR/ImathFun.h"
 
 using namespace IECoreGL;
@@ -155,6 +156,15 @@ static inline V3f toCamera( const V3f &p, const V3f &cameraCentre, const V3f &ca
 	return perspective ? cameraCentre - p : cameraView;
 }
 
+static inline V3f uTangentAndNormal( const V3f &p, const V3d &cameraCentre, const V3f &cameraView, bool perspective, const V3f &vTangent, V3f &normal )
+{
+	V3f aimDirection = toCamera( p, cameraCentre, cameraView, perspective );
+	M44f aim = Imath::alignZAxisWithTargetDir( aimDirection, vTangent );
+	V3f uTangent( 1.0f, 0, 0 ); aim.multDirMatrix( uTangent, uTangent ); /// \todo x axis can be extracted much faster
+	normal = normal = uTangent.cross( vTangent ).normalized();
+	return uTangent;
+}
+
 void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style ) const
 {
 	float halfWidth = m_width/2.0f;
@@ -204,15 +214,15 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 					V3f vBefore = (p1-p0).normalized();
 					V3f vAfter = (p2-p1).normalized();
 					
-					M44f aim = Imath::alignZAxisWithTargetDir( toCamera( p1, cameraCentre, cameraView, perspective ), vBefore + vAfter );
-					V3f o( 1.0f, 0, 0 ); aim.multDirMatrix( o, o );
+					V3f normal;
+					V3f uTangent = uTangentAndNormal( p1, cameraCentre, cameraView, perspective, vBefore + vAfter, normal ); 
 					
-					float sinTheta = o.dot( vBefore );
+					float sinTheta = uTangent.dot( vBefore );
 					float cosTheta = sqrt( 1.0f - sinTheta * sinTheta );					
-					o *= halfWidth / cosTheta;
-					
-					glVertex( p1 - o );
-					glVertex( p1 + o );
+					uTangent *= halfWidth / cosTheta;
+					glNormal( normal );
+					glVertex( p1 - uTangent );
+					glVertex( p1 + uTangent );
 				}
 
 			glEnd();
@@ -238,7 +248,8 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 				V3f lastV( 0 );
 				V3f firstP( 0 );
 				V3f firstV( 0 );
-				V3f firstO( 0 );
+				V3f firstUTangent( 0 );
+				V3f firstNormal( 0 );
 				for( unsigned i=0; i<numSegments; i++ )
 				{
 					const V3f &p0 = points[basePointIndex+(pi%numPoints)];
@@ -276,10 +287,11 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 								// but only if we're not periodic.
 								if( !m_periodic )
 								{
-									M44f aim = Imath::alignZAxisWithTargetDir( toCamera( lastP, cameraCentre, cameraView, perspective ), v );
-									V3f o( halfWidth, 0, 0 ); aim.multDirMatrix( o, o );
-									glVertex( lastP - o );
-									glVertex( lastP + o );
+									V3f normal;
+									V3f uTangent = uTangentAndNormal( lastP, cameraCentre, cameraView, perspective, v, normal );
+									uTangent *= halfWidth;
+									glVertex( lastP - uTangent );
+									glVertex( lastP + uTangent );
 								}
 								else
 								{
@@ -292,18 +304,20 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 						{
 						
 							V3f vAvg = (v + lastV) / 2.0f;
-							M44f aim = Imath::alignZAxisWithTargetDir( toCamera( lastP, cameraCentre, cameraView, perspective ), vAvg );
-
-							V3f o( halfWidth, 0, 0 ); aim.multDirMatrix( o, o );
-
-							glVertex( lastP - o );
-							glVertex( lastP + o );
+							V3f normal;
+							V3f uTangent = uTangentAndNormal( lastP, cameraCentre, cameraView, perspective, vAvg, normal );
+							uTangent *= halfWidth;					
+		
+							glNormal( normal );
+							glVertex( lastP - uTangent );
+							glVertex( lastP + uTangent );
 							
 							if( i==0 && ti==2 )
 							{
 								// save for joining up periodic curves at the end
 								firstP = lastP;
-								firstO = o;
+								firstUTangent = uTangent;
+								firstNormal = normal;
 							}
 							
 							if( lastSegment && ti==tiLimit )
@@ -311,20 +325,25 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 								// the last point of all.
 								if( !m_periodic )
 								{
-									M44f aim = Imath::alignZAxisWithTargetDir( toCamera( p, cameraCentre, cameraView, perspective ), v );
-									V3f o( halfWidth, 0, 0 ); aim.multDirMatrix( o, o );
-									glVertex( p - o );
-									glVertex( p + o );
+									V3f normal;
+									V3f uTangent = uTangentAndNormal( p, cameraCentre, cameraView, perspective, v, normal );
+									uTangent *= halfWidth;
+									glNormal( normal );
+									glVertex( p - uTangent );
+									glVertex( p + uTangent );
 								}
 								else
 								{
 									V3f vAvg = (v + firstV) / 2.0f;
-									M44f aim = Imath::alignZAxisWithTargetDir( toCamera( p, cameraCentre, cameraView, perspective ), vAvg );
-									V3f o( halfWidth, 0, 0 ); aim.multDirMatrix( o, o );
-									glVertex( p - o );
-									glVertex( p + o );
-									glVertex( firstP - firstO );
-									glVertex( firstP + firstO );
+									V3f normal;
+									V3f uTangent = uTangentAndNormal( p, cameraCentre, cameraView, perspective, vAvg, normal );
+									uTangent *= halfWidth;
+									glNormal( normal );
+									glVertex( p - uTangent );
+									glVertex( p + uTangent );
+									glNormal( firstNormal );
+									glVertex( firstP - firstUTangent );
+									glVertex( firstP + firstUTangent );
 								}
 							}
 							
