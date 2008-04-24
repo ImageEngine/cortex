@@ -68,7 +68,10 @@ GLEW_INCLUDE_PATH = '/software/tools/include/glew/1.4.0'
 
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
-BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-1_35"
+if IEEnv.platformOS() == "osx104" :
+	BOOST_LIB_SUFFIX = "-mt-1_35"
+else:
+	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-1_35"
 
 # find the right libraries based on compiler and platform
 LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
@@ -76,7 +79,13 @@ LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVer
 # ignore python-config stuff and specify it all explicitly ourselves
 pythonVersion = getOption( "PYTHON_VERSION", "2.5" )
 pythonReg = IEEnv.registry['apps']['python'][pythonVersion][IEEnv.platform()]
-PYTHON = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/bin/python" + pythonVersion
+
+pythonRoot = os.path.join( pythonReg["location"], compiler, compilerVersion )
+
+if IEEnv.platformOS() == "osx104" :
+	pythonRoot = os.path.join( pythonRoot, "Python.framework", "Versions", pythonVersion )
+
+PYTHON = os.path.join( pythonRoot, "bin", "python" + pythonVersion )
 PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/" + pythonReg["include"] + "/python" + pythonVersion
 PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 if PYTHON_LINK_FLAGS=="" :
@@ -152,7 +161,7 @@ INSTALL_CORETRUELIGHT_POST_COMMAND="scons -f config/ie/installTruelightOps INSTA
 # speed up the build a bit hopefully. we're not doing this on the mac for two reasons. firstly, the macs don't mount /hosts.
 # secondly, scons doesn't recognise that the intel macs are different to the ppc and will try to cache them both the same.
 # we could probably fix both these things if it becomes important.
-if platform=="rhel4.i686" or platform == "ubu8.x86_64":
-	BUILD_CACHEDIR = "/hosts/wrkpogo01/sconsBuildCache"
-else :	
+if IEEnv.platformOS() == "osx104" :
 	BUILD_CACHEDIR = "/tmp/sconsBuildCache/" + platform
+else:
+	BUILD_CACHEDIR = "/hosts/wrkpogo01/sconsBuildCache"
