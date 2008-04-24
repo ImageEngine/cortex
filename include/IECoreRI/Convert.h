@@ -41,6 +41,7 @@
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathMatrix.h"
 
 #include "ri.h"
 #include "rx.h"
@@ -58,6 +59,9 @@ Imath::Color3f convert( const RtColor &from );
 
 template<>
 Imath::Box3f convert( const RtBound &from );
+
+/// Conversions to RI types can't return the type, as typically they're typedefs for arrays.
+void convert( const Imath::M44f &from, RtMatrix to );
 
 /// This function is intended for converting the results of RxAttribute and RxOption
 /// into useful IECore types.

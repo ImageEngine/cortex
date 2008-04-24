@@ -57,9 +57,20 @@ Imath::Box3f convert( const RtBound &from )
 	return Imath::Box3f( Imath::V3f( from[0], from[2], from[4] ), Imath::V3f( from[1], from[3], from[5] ) );
 }
 
+
+void convert( const Imath::M44f &m, RtMatrix mm )
+{
+	for( unsigned int i=0; i<4; i++ )
+	{
+		for( unsigned int j=0; j<4; j++ )
+		{
+			mm[i][j] = m[i][j];
+		}
+	}
+}
+
 DataPtr convert( const char *data, RxInfoType_t type, RtInt count )
 {
-	/// \todo Deal with the array cases (but how do we distinguish between a single item and a 1 element array?)
 	switch( type )
 	{
 		case RxInfoFloat :

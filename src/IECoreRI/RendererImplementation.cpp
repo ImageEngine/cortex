@@ -71,21 +71,6 @@ IECoreRI::RendererImplementation::AttributeState::AttributeState( const Attribut
 {
 	primVarTypeHints = other.primVarTypeHints;
 }
-
-////////////////////////////////////////////////////////////////////////
-// Matrix conversion utility
-////////////////////////////////////////////////////////////////////////
-
-static void convertMatrix( const Imath::M44f &m, RtMatrix mm )
-{
-	for( unsigned int i=0; i<4; i++ )
-	{
-		for( unsigned int j=0; j<4; j++ )
-		{
-			mm[i][j] = m[i][j];
-		}
-	}
-}
 		
 ////////////////////////////////////////////////////////////////////////
 // IECoreRI::RendererImplementation implementation
@@ -435,7 +420,7 @@ void IECoreRI::RendererImplementation::setTransform( const Imath::M44f &m )
 {
 	ScopedContext scopedContext( m_context );
 	RtMatrix mm;
-	convertMatrix( m, mm );
+	convert( m, mm );
 	RiTransform( mm );
 }
 
@@ -477,7 +462,7 @@ void IECoreRI::RendererImplementation::concatTransform( const Imath::M44f &m )
 {
 	ScopedContext scopedContext( m_context );
 	RtMatrix mm;
-	convertMatrix( m, mm );
+	convert( m, mm );
 	RiConcatTransform( mm );
 }
 
