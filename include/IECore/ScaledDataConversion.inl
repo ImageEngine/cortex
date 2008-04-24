@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <math.h>
 #include <algorithm>
 
 #include "boost/utility/enable_if.hpp"
@@ -59,7 +60,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 	{
 		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );	
 		float result = static_cast<float>(f) / Imath::limits<F>::max() * Imath::limits<T>::max();
-		return static_cast<T>( result + 0.5f );
+		return static_cast<T>( round( result ) );
 	}
 	
 	InverseType inverse() const
@@ -76,7 +77,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
 		f = std::max<F>( f, (F)(Imath::limits<T>::min() ) );
 		float result = static_cast<float>(f) / Imath::limits<F>::max() * Imath::limits<T>::max();
-		return static_cast<T>( result + 0.5f );
+		return static_cast<T>( round( result ) );
 	}
 };
 
@@ -89,7 +90,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 		f = std::max<F>( f, (F)( -1.0 ) );		
 		f = std::min<F>( f, (F)( 1.0 ) );				
 		float result = static_cast<float>(f) * Imath::limits<T>::max();
-		return static_cast<T>( result + 0.5f );
+		return static_cast<T>( round( result ) );
 	}
 };
 
@@ -102,7 +103,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 		f = std::max<F>( f, (F)(Imath::limits<T>::min() ) );
 		f = std::min<F>( f, (F)( 1.0 ) );	
 		float result = static_cast<float>(f) * Imath::limits<T>::max();
-		return static_cast<T>( result + 0.5f );
+		return static_cast<T>( round( result ) );
 	}
 };
 

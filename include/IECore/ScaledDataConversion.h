@@ -42,7 +42,15 @@
 namespace IECore
 {
 
-/// \todo Verify that we can round trip data where possible
+/// A DataConversion which converts one numeric type to another, maximising the use of the range of the target type.
+/// For example, converting a char value of 127 (half way through the range of the char type) to a short would yield
+/// a short value of 32767 (half way through the range of the short type). Care is taken when dealing with floating
+/// point types, which are assumed to have no practical "range". So, in the example above, a char value of 127 when
+/// converter to float, double, or half, would have a value of approximately 0.498 (127/255).
+///
+/// When conversion is attempted between a signed type and an unsigned type, appropriate clamping is performed.
+///
+/// This conversion is employed primarily in the ImageWriter-derived classes.
 template<typename F, typename T, typename Enable = void>
 struct ScaledDataConversion : public DataConversion< F, T >
 {
