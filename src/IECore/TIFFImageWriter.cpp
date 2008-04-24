@@ -331,11 +331,13 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 		TIFFSetField( tiffImage, TIFFTAG_COMPRESSION, compression );
 
 		int bitDepth = m_bitDepthParameter->getNumericValue();
-		if ( compression == COMPRESSION_JPEG )
+		if ( compression == COMPRESSION_JPEG && bitDepth != 8 )
 		{
-			/// \todo Warn
-			/// \todo Decide whether to change the compression method or the bitdepth
-			bitDepth = 8;
+			/// Change the compression method rather than the bitDepth, so at least we get the output we expected at the
+			/// expense of a possibly larger file size. This is arguably better than switching the bitDepth to 8, which would
+			/// change the format of the output to something unexpected.
+			msg( Msg::Warning, "TIFFImageWriter", "JPEG compression only compatible with 8-bit images. Switching to Deflate compression." );
+			compression = COMPRESSION_DEFLATE;
 		}
 
 		switch ( bitDepth )
