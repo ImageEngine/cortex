@@ -894,10 +894,13 @@ void IECoreRI::RendererImplementation::points( size_t numPoints, const IECore::P
 	RiPointsV( numPoints, pv.n(), pv.tokens(), pv.values() );
 }
 
-/// \todo Do something with basis!!!!!!!!!!!!!!!!!
 void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
+	
+	RtMatrix b;
+	convert( basis.matrix, b );
+	RiBasis( b, basis.step, b, basis.step );
 	
 	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
 	vector<int> &numVerticesV = const_cast<vector<int> &>( numVertices->readable() );
