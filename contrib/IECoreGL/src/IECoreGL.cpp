@@ -52,8 +52,8 @@ void IECoreGL::init( bool glAlreadyInitialised )
 			int argc = 2;
 			// on the mac, glut changes working directory during initialisation
 			// unless you pass the -useWorkingDir option
-			char *argv[] = { "IECoreGL", "-useWorkingDir" };
-			glutInit( &argc, argv );
+			const char *argv[] = { "IECoreGL", "-useWorkingDir" };
+			glutInit( &argc, const_cast<char**>( argv ) );
 			/// \todo We're making a window here to make glut initialise a gl context,
 			/// so that glewInit() works. But we should figure out how to initialise
 			/// GL ourselves and avoid the annoying window popping up at the beginning.
