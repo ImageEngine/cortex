@@ -49,7 +49,7 @@ enum TypeId
 	FromMayaGroupConverterTypeId = 109005,
 	FromMayaNumericDataConverterTypeId = 109006,
 	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaPointsPrimitiveConverterTypeId = 109008,
+	FromMayaFluidConverterTypeId = 109008,
 	FromMayaStringPlugConverterTypeId = 109009,
 	FromMayaShapeConverterTypeId = 109010,
 	FromMayaCurveConverterTypeId = 109011,

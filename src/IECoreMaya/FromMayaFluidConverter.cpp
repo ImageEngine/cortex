@@ -32,7 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreMaya/FromMayaPointsPrimitiveConverter.h"
+#include <cassert>
+
+#include "IECoreMaya/FromMayaFluidConverter.h"
 #include "IECoreMaya/Convert.h"
 
 #include "IECore/CompoundParameter.h"
@@ -46,81 +48,85 @@ using namespace IECore;
 using namespace std;
 using namespace Imath;
 
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaPointsPrimitiveConverter > FromMayaPointsPrimitiveConverter::m_description( MFn::kFluid, PointsPrimitive::staticTypeId() );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaFluidConverter > FromMayaFluidConverter::m_description( MFn::kFluid, PointsPrimitive::staticTypeId() );
 
-FromMayaPointsPrimitiveConverter::FromMayaPointsPrimitiveConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaPointsPrimitiveConverter", "Converts maya fluid data to IECore::PointsPrimitive Object", object )
+FromMayaFluidConverter::FromMayaFluidConverter( const MObject &object )
+	:	FromMayaObjectConverter( "FromMayaFluidConverter", "Converts maya fluid data to IECore::PointsPrimitive Object", object )
 {
-	m_velocity = new BoolParameter(
+	m_velocityParameter = new BoolParameter(
 		"velocity",
 		"When this is on the fluid's velocities are added to the result as a primitive variable named \"velocity\".",
 		true
 	);
-	parameters()->addParameter( m_velocity );
+	parameters()->addParameter( m_velocityParameter );
 
-	m_density = new BoolParameter(
+	m_densityParameter = new BoolParameter(
 		"density",
 		"When this is on the fluid's densities are added to the result as a primitive variable named \"density\".",
 		true
 	);
-	parameters()->addParameter( m_density );
+	parameters()->addParameter( m_densityParameter );
 
-	m_pressure = new BoolParameter(
+	m_pressureParameter = new BoolParameter(
 		"pressure",
 		"When this is on the fluid's pressures are added to the result as a primitive variable named \"pressure\".",
 		true
 	);
-	parameters()->addParameter( m_pressure );
+	parameters()->addParameter( m_pressureParameter );
 
-	m_temperature = new BoolParameter(
+	m_temperatureParameter = new BoolParameter(
 		"temperature",
 		"When this is on the fluid's temperatures are added to the result as a primitive variable named \"temperature\".",
 		true
 	);
-	parameters()->addParameter( m_temperature );
+	parameters()->addParameter( m_temperatureParameter );
 
-	m_fuel = new BoolParameter(
+	m_fuelParameter = new BoolParameter(
 		"fuel",
 		"When this is on the fluid's fuel is added to the result as a primitive variable named \"fuel\".",
 		true
 	);
-	parameters()->addParameter( m_fuel );
+	parameters()->addParameter( m_fuelParameter );
 
-	m_falloff = new BoolParameter(
+	m_falloffParameter = new BoolParameter(
 		"falloff",
 		"When this is on the fluid's falloff is added to the result as a primitive variable named \"falloff\".",
 		true
 	);
-	parameters()->addParameter( m_falloff );
+	parameters()->addParameter( m_falloffParameter );
 
-	m_color = new BoolParameter(
+	m_colorParameter = new BoolParameter(
 		"color",
 		"When this is on the fluid's colors are added to the result as a primitive variable named \"color\".",
 		true
 	);
-	parameters()->addParameter( m_color );
+	parameters()->addParameter( m_colorParameter );
 
-	m_textureCoordinates = new BoolParameter(
+	m_textureCoordinatesParameter = new BoolParameter(
 		"textureCoordinates",
 		"When this is on the fluid's texture coordinates are added to the result as a primitive variable named \"uvw\" or \"uv\".",
 		true
 	);
-	parameters()->addParameter( m_textureCoordinates );
+	parameters()->addParameter( m_textureCoordinatesParameter );
 
 }
 
-#define ADD_PRIMVAR( NAME, MAYA_FUNC )												\
-		float *mayaPtr = MAYA_FUNC( &s );											\
-		if ( s )																	\
-		{																			\
-			FloatVectorDataPtr floatData = new FloatVectorData();					\
-			floatData->writable().resize( nPoints );								\
-			std::copy( mayaPtr, mayaPtr + nPoints, &(floatData->writable()[0]) );	\
-			PrimitiveVariable newVar( PrimitiveVariable::Vertex, floatData );		\
-			pp->variables[ NAME ] = newVar;											\
-		}
+void FromMayaFluidConverter::addPrimVar( IECore::PrimitivePtr primitive, const std::string &name, size_t numPoints, MFnFluid &fnFluid, float *(MFnFluid::*fn)( MStatus * ) ) const
+{
+	MStatus s;
+	float *mayaPtr = ((fnFluid).*(fn))( &s );
+	if ( s )																	
+	{					
+		assert( mayaPtr );														
+		FloatVectorDataPtr floatData = new FloatVectorData();					
+		floatData->writable().resize( numPoints );								
+		std::copy( mayaPtr, mayaPtr + numPoints, &(floatData->writable()[0]) );	
+		PrimitiveVariable newVar( PrimitiveVariable::Vertex, floatData );		
+		primitive->variables[ name ] = newVar;											
+	}
+}
 
-IECore::ObjectPtr FromMayaPointsPrimitiveConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
+IECore::ObjectPtr FromMayaFluidConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
 	MFnFluid fnFluid( object );
@@ -149,7 +155,8 @@ IECore::ObjectPtr FromMayaPointsPrimitiveConverter::doConversion( const MObject 
 	{
 		return 0;
 	}
-
+	
+	
 	MPoint centerPos;
 	for ( unsigned int x = 0; x < xRes; x++ )
 	{
@@ -164,6 +171,11 @@ IECore::ObjectPtr FromMayaPointsPrimitiveConverter::doConversion( const MObject 
 				}
 				positions[p] = IECore::convert< V3f >( centerPos );
 				fnFluid.index( p, xRes, yRes, zRes, xVel, yVel, zVel );
+				
+				/// \todo Does this work for 2D fluids?
+				assert( velX );
+				assert( velY );
+				assert( velZ );
 				velocities[p] = (V3f( velX[xVel], velY[yVel], velZ[zVel] ) + V3f( velX[xVel+1], velY[yVel+1], velZ[zVel+1] )) / 2;
 			}
 		}
@@ -173,44 +185,47 @@ IECore::ObjectPtr FromMayaPointsPrimitiveConverter::doConversion( const MObject 
 	PrimitiveVariable varP( PrimitiveVariable::Vertex, new V3fVectorData( positions ) );
 	pp->variables["P"] = varP;
 
-	if( m_velocity->getTypedValue() )
+	if( m_velocityParameter->getTypedValue() )
 	{
 		PrimitiveVariable varVelocity( PrimitiveVariable::Vertex, new V3fVectorData( velocities ) );
 		pp->variables["velocity"] = varVelocity;
 	}
 
-	if( m_density->getTypedValue() )
+	if( m_densityParameter->getTypedValue() )
 	{
-		ADD_PRIMVAR( "density", fnFluid.density )
+		addPrimVar( pp, "density", nPoints, fnFluid, &MFnFluid::density );
 	}
 	
-	if(	m_pressure->getTypedValue() )
+	if( m_pressureParameter->getTypedValue() )
 	{
-		ADD_PRIMVAR( "pressure", fnFluid.pressure )
+		addPrimVar( pp, "pressure", nPoints, fnFluid, &MFnFluid::pressure );
 	}
 
-	if( m_temperature->getTypedValue() )
+	if( m_temperatureParameter->getTypedValue() )
 	{
-		ADD_PRIMVAR( "temperature", fnFluid.temperature )
+		addPrimVar( pp, "temperature", nPoints, fnFluid, &MFnFluid::temperature );
 	}
 
-	if( m_fuel->getTypedValue() )
+	if( m_fuelParameter->getTypedValue() )
 	{
-		ADD_PRIMVAR( "fuel", fnFluid.fuel )
+		addPrimVar( pp, "fuel", nPoints, fnFluid, &MFnFluid::fuel );
 	}
 
-	if(m_falloff->getTypedValue() )
+	if( m_falloffParameter->getTypedValue() )
 	{
-		ADD_PRIMVAR( "falloff", fnFluid.falloff )
+		addPrimVar( pp, "falloff", nPoints, fnFluid, &MFnFluid::falloff );
 	}
 
-	if(m_color->getTypedValue() )
+	if( m_colorParameter->getTypedValue() )
 	{
 		float *redPtr;
 		float *greenPtr;
 		float *bluePtr;
 		if ( fnFluid.getColors( redPtr, greenPtr, bluePtr ) )
 		{
+			assert( redPtr );
+			assert( greenPtr );
+			assert( bluePtr );
 			V3fVectorDataPtr colorData = new V3fVectorData();
 			V3fVectorData::ValueType &colorVector = colorData->writable();
 			colorVector.resize( nPoints );
@@ -219,11 +234,13 @@ IECore::ObjectPtr FromMayaPointsPrimitiveConverter::doConversion( const MObject 
 				colorVector[i] = V3f( redPtr[i], greenPtr[i], bluePtr[i] );
 			}
 			PrimitiveVariable varColor( PrimitiveVariable::Vertex, colorData );
+			
+			/// \todo Why not "Cs"? 
 			pp->variables["color"] = varColor;
 		}
 	}
 
-	if(m_textureCoordinates->getTypedValue() )
+	if(m_textureCoordinatesParameter->getTypedValue() )
 	{
 		float *uPtr;
 		float *vPtr;
@@ -232,6 +249,8 @@ IECore::ObjectPtr FromMayaPointsPrimitiveConverter::doConversion( const MObject 
 		{
 			if ( wPtr == NULL )
 			{
+				assert( uPtr );
+				assert( vPtr );
 				V2fVectorDataPtr uvData = new V2fVectorData();
 				V2fVectorData::ValueType &uvVector = uvData->writable();
 				uvVector.resize( nPoints );
@@ -244,6 +263,8 @@ IECore::ObjectPtr FromMayaPointsPrimitiveConverter::doConversion( const MObject 
 			}
 			else
 			{
+				assert( uPtr );
+				assert( vPtr );
 				V3fVectorDataPtr uvwData = new V3fVectorData();
 				V3fVectorData::ValueType &uvwVector = uvwData->writable();
 				uvwVector.resize( nPoints );

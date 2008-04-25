@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,52 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_FROMMAYAPOINTSPRIMITIVECONVERTER_H
-#define IE_COREMAYA_FROMMAYAPOINTSPRIMITIVECONVERTER_H
+#ifndef IE_COREMAYA_FROMMAYAFLUIDCONVERTER_H
+#define IE_COREMAYA_FROMMAYAFLUIDCONVERTER_H
+
+#include "IECore/TypedParameter.h"
+#include "IECore/Primitive.h"
 
 #include "IECoreMaya/FromMayaObjectConverter.h"
 
-#include "IECore/TypedParameter.h"
+class MFnFluid;
 
 namespace IECoreMaya
 {
 
-/// \todo This should be named FromMayaFluidsConverter or something.
-class FromMayaPointsPrimitiveConverter : public FromMayaObjectConverter
+/// Converts a Maya Fluid to an IECore::PointsPrimitive with appropriate primitive variables
+class FromMayaFluidConverter : public FromMayaObjectConverter
 {
 	
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaPointsPrimitiveConverter, FromMayaPointsPrimitiveConverterTypeId, FromMayaObjectConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaFluidConverter, FromMayaFluidConverterTypeId, FromMayaObjectConverter );
 
-		FromMayaPointsPrimitiveConverter( const MObject &object );
+		FromMayaFluidConverter( const MObject &object );
 		
 	protected :
 	
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
+	
+		void addPrimVar( IECore::PrimitivePtr primitive, const std::string &name, size_t numPoints, MFnFluid &fnFluid, float *(MFnFluid::*fn)( MStatus * ) ) const;
 
-		IECore::BoolParameterPtr m_velocity;
-		IECore::BoolParameterPtr m_density;
-		IECore::BoolParameterPtr m_pressure;
-		IECore::BoolParameterPtr m_temperature;
-		IECore::BoolParameterPtr m_fuel;
-		IECore::BoolParameterPtr m_falloff;
-		IECore::BoolParameterPtr m_color;
-		IECore::BoolParameterPtr m_textureCoordinates;
+		IECore::BoolParameterPtr m_velocityParameter;
+		IECore::BoolParameterPtr m_densityParameter;
+		IECore::BoolParameterPtr m_pressureParameter;
+		IECore::BoolParameterPtr m_temperatureParameter;
+		IECore::BoolParameterPtr m_fuelParameter;
+		IECore::BoolParameterPtr m_falloffParameter;
+		IECore::BoolParameterPtr m_colorParameter;
+		IECore::BoolParameterPtr m_textureCoordinatesParameter;
 
-		static FromMayaObjectConverterDescription<FromMayaPointsPrimitiveConverter> m_description;
+		static FromMayaObjectConverterDescription<FromMayaFluidConverter> m_description;
 		
 };
 
-IE_CORE_DECLAREPTR( FromMayaPointsPrimitiveConverter )
+IE_CORE_DECLAREPTR( FromMayaFluidConverter )
 
 } // namespace IECoreMaya
 
-#endif // IE_COREMAYA_FROMMAYAPOINTSPRIMITIVECONVERTER_H
+#endif // IE_COREMAYA_FROMMAYAFLUIDCONVERTER_H
