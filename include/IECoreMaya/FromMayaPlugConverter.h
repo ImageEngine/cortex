@@ -51,8 +51,6 @@ IE_CORE_FORWARDDECLARE( FromMayaPlugConverter );
 
 /// The FromMayaPlugConverter class allows conversion from MPlug values to
 /// an IECore Object.
-/// \todo Remove the doConversion() implementation and protect the constructor - for
-/// the next major version of the library.
 class FromMayaPlugConverter : public FromMayaConverter
 {
 
@@ -76,11 +74,6 @@ class FromMayaPlugConverter : public FromMayaConverter
 
 		FromMayaPlugConverter( const MPlug &plug );
 		
-		/// Should be implemented by all derived classes to convert the value in plug().
-		/// \todo Implement this in a manner similar to FromMayaObjectConverter (forward on
-		/// to a pure virtual function).
-		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const = 0;
-
 		/// Creating a static instance of one of these (templated on your converter type)
 		/// within your class will register your converter with the factory mechanism.
 		template<class T>
