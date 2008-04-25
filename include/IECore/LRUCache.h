@@ -64,6 +64,7 @@ class LRUCache
 		typedef typename GetterFn::Cost Cost;
 		
 		LRUCache();
+		virtual ~LRUCache();
 	
 		void clear();
 		

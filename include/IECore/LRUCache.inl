@@ -45,6 +45,11 @@ LRUCache<Key, Data, GetterFn>::LRUCache()
 }
 
 template<typename Key, typename Data, typename GetterFn>
+LRUCache<Key, Data, GetterFn>::~LRUCache()
+{
+}
+
+template<typename Key, typename Data, typename GetterFn>
 void LRUCache<Key, Data, GetterFn>::clear()
 {
 	m_currentCost = Cost(0);
