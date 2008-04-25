@@ -59,8 +59,8 @@ class MeshPrimitiveBuilder : public RefCounted
 		template<typename T>						
 		void addVertex( const Imath::Vec3<T> &p, const Imath::Vec3<T> &n );
 
-		/// Construct a triangle from the 3 specified vertex indices
-		/// \todo Define and check winding order
+		/// Construct a triangle from the 3 specified vertex indices. The winding order 
+		/// here matches that of IECore::MeshPrimitive
 		void addTriangle( int v0, int v1, int v2 );
 				
 		/// Retrieve the resultant mesh		
