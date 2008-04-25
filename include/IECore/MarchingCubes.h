@@ -46,7 +46,7 @@ namespace IECore
 {
 
 /// Templated implementation of "Efficient implementation of Marching Cubes cases with topological guarantees", Thomas Lewiner et al 2003, http://cuca.mat.puc-rio.br/~tomlew
-template< typename ImplicitFn = ImplicitSurfaceFunction<Imath::V3f, float>, typename MeshBuilder = MeshPrimitiveBuilder<float> >
+template< typename ImplicitFn = ImplicitSurfaceFunction<Imath::V3f, float>, typename MeshBuilder = MeshPrimitiveBuilder >
 class MarchingCubes : public RefCounted
 {
 	public :

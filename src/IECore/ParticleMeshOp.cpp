@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -383,7 +383,7 @@ FloatParameterPtr ParticleMeshOp::boundExtendParameter() const
 
 ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 {	
-	MeshPrimitiveBuilder<float>::Ptr builder = new MeshPrimitiveBuilder<float>();
+	MeshPrimitiveBuilderPtr builder = new MeshPrimitiveBuilder();
 	
 	ConstObjectPtr fileNameData = fileNameParameter()->getValue();
 	const std::string &fileName = boost::static_pointer_cast<const StringData>(fileNameData)->readable();

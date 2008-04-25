@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,25 +43,19 @@ using namespace boost::python;
 namespace IECore
 {
 
-template<typename T>
-void bindMeshPrimitiveBuilder( const char *name )
-{
-	typedef class_< T, typename T::Ptr, bases<RefCounted>, boost::noncopyable > MeshPrimitiveBuilderPyClass;
-
-	MeshPrimitiveBuilderPyClass( name, no_init )
-		.def( init<> () )
-		.def( "addVertex", &T::addVertex )
-		.def( "addTriangle", &T::addTriangle )
-		.def( "mesh", &T::mesh )								
-	;
-	INTRUSIVE_PTR_PATCH_TEMPLATE( T, MeshPrimitiveBuilderPyClass );
-	implicitly_convertible< typename T::Ptr, RefCountedPtr>();	
-}
-
 void bindMeshPrimitiveBuilder()
 {
-	bindMeshPrimitiveBuilder< MeshPrimitiveBuilder<float> >( "MeshPrimitiveBuilderf" );
-	bindMeshPrimitiveBuilder< MeshPrimitiveBuilder<double> >( "MeshPrimitiveBuilderd" );
+	typedef class_< MeshPrimitiveBuilder, MeshPrimitiveBuilderPtr, bases<RefCounted>, boost::noncopyable > MeshPrimitiveBuilderPyClass;
+
+	MeshPrimitiveBuilderPyClass( "MeshPrimitiveBuilder", no_init )
+		.def( init<> () )
+		.def( "addVertex", &MeshPrimitiveBuilder::addVertex<float> )
+		.def( "addVertex", &MeshPrimitiveBuilder::addVertex<double> )		
+		.def( "addTriangle", &MeshPrimitiveBuilder::addTriangle )
+		.def( "mesh", &MeshPrimitiveBuilder::mesh )								
+	;
+	INTRUSIVE_PTR_PATCH( MeshPrimitiveBuilder, MeshPrimitiveBuilderPyClass );
+	implicitly_convertible< MeshPrimitiveBuilderPtr, RefCountedPtr>();	
 }
 
 } // namespace IECore

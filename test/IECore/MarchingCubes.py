@@ -55,7 +55,7 @@ class TestMarchingCubesf( unittest.TestCase ) :
 				return self.n.noise( p )
 		
 		noiseFn = NoiseFunction()	
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		marcher = MarchingCubesf( noiseFn, builder )
 				
 		marchMin = V3f(-1, -1, -1)
@@ -92,7 +92,7 @@ class TestMarchingCubesd( unittest.TestCase ) :
 				return self.n.noise( V3f(p.x, p.y, p.z) )
 		
 		noiseFn = NoiseFunction()	
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		marcher = MarchingCubesd( noiseFn, builder )
 				
 		marchMin = V3d(-1, -1, -1)

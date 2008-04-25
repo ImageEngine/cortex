@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -204,7 +204,7 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	cacheTolerance = std::min(cacheTolerance, ((bound.max.y - bound.min.y) / (double)resolution.y) / 2.0 );
 	cacheTolerance = std::min(cacheTolerance, ((bound.max.z - bound.min.z) / (double)resolution.z) / 2.0 );	
 
-	MeshPrimitiveBuilder<float>::Ptr builder = new MeshPrimitiveBuilder<float>();
+	MeshPrimitiveBuilderPtr builder = new MeshPrimitiveBuilder();
 
 	switch( points->typeId() )
 	{

@@ -43,7 +43,7 @@ class TestCSGImplicitSurfaceFunction( unittest.TestCase ) :
 		sphere2 = SphereImplicitSurfaceFunctionV3ff( V3f(0,1,0), 1 )
 		
 		csgFn = CSGImplicitSurfaceFunctionV3ff( sphere1, sphere2, CSGImplicitSurfaceFunctionV3ff.Mode.Union )
-		builder = MeshPrimitiveBuilderf()       
+		builder = MeshPrimitiveBuilder()       
 		marcher = MarchingCubesf( csgFn, builder )
                                 
 		marchMin = V3f(-2.5, -2.5, -2.5)
@@ -67,7 +67,7 @@ class TestCSGImplicitSurfaceFunction( unittest.TestCase ) :
 				
 		csgFn1 = CSGImplicitSurfaceFunctionV3ff( sphere1, sphere2, CSGImplicitSurfaceFunctionV3ff.Mode.Intersection )
 		csgFn2 = CSGImplicitSurfaceFunctionV3ff( csgFn1, plane, CSGImplicitSurfaceFunctionV3ff.Mode.Intersection )				
-		builder = MeshPrimitiveBuilderf()       				
+		builder = MeshPrimitiveBuilder()       				
 		marcher = MarchingCubesf( csgFn2, builder )
 				            
 		marchMin = V3f(-2.5, -2.5, -2.5)
@@ -89,7 +89,7 @@ class TestCSGImplicitSurfaceFunction( unittest.TestCase ) :
 		sphere2 = SphereImplicitSurfaceFunctionV3ff( V3f(0,1,0), 1 )
 				
 		csgFn = CSGImplicitSurfaceFunctionV3ff( sphere1, sphere2, CSGImplicitSurfaceFunctionV3ff.Mode.Difference )				
-		builder = MeshPrimitiveBuilderf()       				
+		builder = MeshPrimitiveBuilder()       				
 		marcher = MarchingCubesf( csgFn, builder )
 		
 		            

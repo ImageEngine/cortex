@@ -46,7 +46,7 @@ namespace IECore
 
 /// The Triangulator template class performs triangulation of simple planar polygons. It
 /// uses a MeshBuilder class to build the triangulated mesh.
-template<typename PointIterator, typename MeshBuilder = MeshPrimitiveBuilder<float> >
+template<typename PointIterator, typename MeshBuilder = MeshPrimitiveBuilder >
 class Triangulator : public RefCounted
 {
 	public :
@@ -104,8 +104,8 @@ class Triangulator : public RefCounted
 
 typedef Triangulator<std::vector<Imath::V2f>::const_iterator> V2fTriangulator;
 typedef Triangulator<std::vector<Imath::V3f>::const_iterator> V3fTriangulator;
-typedef Triangulator<std::vector<Imath::V2d>::const_iterator, MeshPrimitiveBuilder<double> > V2dTriangulator;
-typedef Triangulator<std::vector<Imath::V3d>::const_iterator, MeshPrimitiveBuilder<double> > V3dTriangulator;
+typedef Triangulator<std::vector<Imath::V2d>::const_iterator> V2dTriangulator;
+typedef Triangulator<std::vector<Imath::V3d>::const_iterator> V3dTriangulator;
 
 } // namespace IECore
 

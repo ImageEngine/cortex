@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -86,7 +86,7 @@ struct MarchingCubesTest
 {	
 	void testSphere()
 	{
-		typedef MarchingCubes<SphereIsoSurfaceFn, MeshPrimitiveBuilder<float> > Cubes;
+		typedef MarchingCubes<SphereIsoSurfaceFn, MeshPrimitiveBuilder > Cubes;
 		typedef boost::intrusive_ptr<Cubes> CubesPtr;
 	
 		int x = 100;
@@ -96,7 +96,7 @@ struct MarchingCubesTest
 		float radius = 0.5;
 		
 		SphereIsoSurfaceFn::Ptr fn = new SphereIsoSurfaceFn( radius );	
-		MeshPrimitiveBuilder<float>::Ptr builder = new MeshPrimitiveBuilder<float>();
+		MeshPrimitiveBuilder::Ptr builder = new MeshPrimitiveBuilder();
 					
 		CubesPtr c = new Cubes( fn, builder );
 	
@@ -122,7 +122,7 @@ struct MarchingCubesTest
 	
 	void testPerlinNoise()
 	{
-		typedef MarchingCubes<PerlinNoiseV3ff, MeshPrimitiveBuilder<float> > Cubes;
+		typedef MarchingCubes<PerlinNoiseV3ff, MeshPrimitiveBuilder > Cubes;
 		typedef boost::intrusive_ptr<Cubes> CubesPtr;
 	
 		int x = 20;
@@ -130,7 +130,7 @@ struct MarchingCubesTest
 		int z = 20;
 		
 		PerlinNoiseV3ff::Ptr fn = new PerlinNoiseV3ff();	
-		MeshPrimitiveBuilder<float>::Ptr builder = new MeshPrimitiveBuilder<float>();
+		MeshPrimitiveBuilder::Ptr builder = new MeshPrimitiveBuilder();
 					
 		CubesPtr c = new Cubes( fn, builder );
 	

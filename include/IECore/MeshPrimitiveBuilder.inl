@@ -32,55 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IE_CORE_MESHPRIMITIVEBUILDER_INL
+#define IE_CORE_MESHPRIMITIVEBUILDER_INL
+
 #include <cassert>
 
 namespace IECore
 {
 
 template<typename T>
-MeshPrimitiveBuilder<T>::MeshPrimitiveBuilder()
-{
-	m_P = new V3fVectorData();
-	m_N = new V3fVectorData();			
-	m_verticesPerFace = new IntVectorData();
-	m_vertexIds = new IntVectorData();			
-}
-
-template<typename T>				
-void MeshPrimitiveBuilder<T>::addVertex( const Imath::Vec3<T> &p, const Imath::Vec3<T> &n )
+void MeshPrimitiveBuilder::addVertex( const Imath::Vec3<T> &p, const Imath::Vec3<T> &n )
 {
 	assert( m_P );
 	assert( m_N );	
 	
-	m_P->writable().push_back( p );
-	m_N->writable().push_back( n.normalized() );
+	m_P->writable().push_back( Imath::V3f( p.x, p.y, p.z ) );
+	m_N->writable().push_back( Imath::V3f( n.x, n.y, n.z ).normalized() );
 }
 
-template<typename T>
-void MeshPrimitiveBuilder<T>::addTriangle( int v0, int v1, int v2 )
-{
-	assert( m_verticesPerFace );
-	assert( m_vertexIds );
-
-	m_verticesPerFace->writable().push_back( 3 );
-
-	m_vertexIds->writable().push_back ( v0 );
-	m_vertexIds->writable().push_back ( v1 );
-	m_vertexIds->writable().push_back ( v2 );
 }
-		
-template<typename T>		
-MeshPrimitivePtr MeshPrimitiveBuilder<T>::mesh() const
-{
-	if ( m_vertexIds->readable().size() == 0)
-	{
-		return new MeshPrimitive();
-	}
-	
-	MeshPrimitivePtr m = new MeshPrimitive( m_verticesPerFace, m_vertexIds, "linear", m_P );						
-	m->variables["N"] =  IECore::PrimitiveVariable( IECore::PrimitiveVariable::Varying, m_N->copy() );	
-			
-	return m;
-}				
 
-}
+#endif // IE_CORE_MESHPRIMITIVEBUILDER_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,49 +32,57 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include <cassert>
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/MarchingCubes.h"
+#include "IECore/MeshPrimitiveBuilder.h"
 
-using namespace boost::python;
+using namespace IECore;
+using namespace Imath;
+
+MeshPrimitiveBuilder::MeshPrimitiveBuilder()
+{
+	m_P = new V3fVectorData();
+	m_N = new V3fVectorData();			
+	m_verticesPerFace = new IntVectorData();
+	m_vertexIds = new IntVectorData();			
+}
 
 namespace IECore
 {
 
-template<typename T>
-struct MarchingCubesHelper
+template<>
+void MeshPrimitiveBuilder::addVertex<float>( const Imath::Vec3<float> &p, const Imath::Vec3<float> &n )
 {
-	static void march1( T& marchingCubes, const typename T::BoxType &bound, const Imath::V3i &res, typename T::ValueBaseType iso )
-	{
-		marchingCubes.march( bound, res, iso );
-	}
+	assert( m_P );
+	assert( m_N );	
 	
-	static void march2( T& marchingCubes, const typename T::BoxType &bound, const Imath::V3i &res )
-	{
-		marchingCubes.march( bound, res );
-	}
-};
-
-template<typename T>
-void bindMarchingCubes( const char *name )
-{
-	typedef class_< T, typename T::Ptr, bases<RefCounted>, boost::noncopyable > MarchingCubesPyClass;
-	
-	MarchingCubesPyClass( name, no_init )
-		.def( init< typename T::ImplicitFnType::Ptr, typename T::MeshBuilderType::Ptr > () )
-		.def( "march", &MarchingCubesHelper<T>::march1 )
-		.def( "march", &MarchingCubesHelper<T>::march2 )				
-	;
-	
-	INTRUSIVE_PTR_PATCH_TEMPLATE( T, MarchingCubesPyClass );
-	implicitly_convertible< typename T::Ptr, RefCountedPtr>();	
+	m_P->writable().push_back( p );
+	m_N->writable().push_back( n.normalized() );
 }
 
-void bindMarchingCubes()
-{
-	bindMarchingCubes<MarchingCubes< ImplicitSurfaceFunctionV3ff, MeshPrimitiveBuilder > >( "MarchingCubesf" );
-	bindMarchingCubes<MarchingCubes< ImplicitSurfaceFunctionV3dd, MeshPrimitiveBuilder > >( "MarchingCubesd" );
 }
 
-} // namespace IECore
+void MeshPrimitiveBuilder::addTriangle( int v0, int v1, int v2 )
+{
+	assert( m_verticesPerFace );
+	assert( m_vertexIds );
+
+	m_verticesPerFace->writable().push_back( 3 );
+
+	m_vertexIds->writable().push_back ( v0 );
+	m_vertexIds->writable().push_back ( v1 );
+	m_vertexIds->writable().push_back ( v2 );
+}
+		
+MeshPrimitivePtr MeshPrimitiveBuilder::mesh() const
+{
+	if ( m_vertexIds->readable().size() == 0)
+	{
+		return new MeshPrimitive();
+	}
+	
+	MeshPrimitivePtr m = new MeshPrimitive( m_verticesPerFace, m_vertexIds, "linear", m_P );						
+	m->variables["N"] =  IECore::PrimitiveVariable( IECore::PrimitiveVariable::Varying, m_N->copy() );	
+			
+	return m;
+}				

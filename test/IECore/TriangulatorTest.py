@@ -65,7 +65,7 @@ class TriangulatorTest( unittest.TestCase ) :
 		
 		inMesh = MeshPrimitive( IntVectorData( [ 12 ] ), IntVectorData( range( 0, 12 ) ), "linear", p )
 		
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		triangulator = V3fTriangulator( builder )
 		
 		triangulator.triangulate( p )
@@ -107,7 +107,7 @@ class TriangulatorTest( unittest.TestCase ) :
 			]
 		)		
 
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		triangulator = V3fTriangulator( builder )
 		
 		triangulator.triangulate( [ outer, inner ] )
@@ -152,7 +152,7 @@ class TriangulatorTest( unittest.TestCase ) :
 			]
 		)
 		
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		triangulator = V3fTriangulator( builder )
 		
 		triangulator.triangulate( [ outer, inner1, inner2 ] )
@@ -172,7 +172,7 @@ class TriangulatorTest( unittest.TestCase ) :
 			t = i * math.pi * 2 / numPoints
 			loop[i] = V3f( math.cos( t ), math.sin( t ), 0 )
 			
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		triangulator = V3fTriangulator( builder )
 		
 		triangulator.triangulate( loop )
@@ -201,7 +201,7 @@ class TriangulatorTest( unittest.TestCase ) :
 			]
 		)
 		
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		triangulator = V3fTriangulator( builder )
 		
 		triangulator.triangulate( outline1 )
@@ -261,7 +261,7 @@ class TriangulatorTest( unittest.TestCase ) :
 			]
 		)		
 
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		triangulator = V3fTriangulator( builder )
 		
 		triangulator.triangulate( [ outer1, inner1 ] )
@@ -312,7 +312,7 @@ class TriangulatorTest( unittest.TestCase ) :
 			]
 		)
 		
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		triangulator = V3fTriangulator( builder )
 		
 		triangulator.triangulate( [ outer, inner1, inner2 ] )
@@ -348,7 +348,7 @@ class TriangulatorTest( unittest.TestCase ) :
 		)
 
 		
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		triangulator = V3fTriangulator( builder )
 		
 		triangulator.triangulate( outer )
@@ -406,7 +406,7 @@ class TriangulatorTest( unittest.TestCase ) :
 		)
 
 		
-		builder = MeshPrimitiveBuilderf()	
+		builder = MeshPrimitiveBuilder()	
 		triangulator = V3fTriangulator( builder )
 		
 		triangulator.triangulate( [ outer, inner ] )

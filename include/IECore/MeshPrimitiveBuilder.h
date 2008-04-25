@@ -47,20 +47,16 @@ namespace IECore
 /// using this as a model. One possible client of this class is IECore::MarchingCubes.
 /// \todo This is too specific to MarchingCubes. Some algorithms want to make faces other than triangles, and
 /// some algorithms don't want to supply normals.
-/// \todo Why is this templated if the member data is all V3fVectorData? And we don't support meshes with V3dVectorData
-/// in the Renderer classes?
-template<typename T>
 class MeshPrimitiveBuilder : public RefCounted
 {
 	public:
 	
-		typedef T BaseType;
-	
-		IE_CORE_DECLAREMEMBERPTR( MeshPrimitiveBuilder<T> );
+		IE_CORE_DECLAREMEMBERPTR( MeshPrimitiveBuilder );
 	
 		MeshPrimitiveBuilder();
 
-		/// Add a vertex position and normal						
+		/// Add a vertex position and normal
+		template<typename T>						
 		void addVertex( const Imath::Vec3<T> &p, const Imath::Vec3<T> &n );
 
 		/// Construct a triangle from the 3 specified vertex indices
@@ -76,7 +72,9 @@ class MeshPrimitiveBuilder : public RefCounted
 		V3fVectorDataPtr m_N;		
 		IntVectorDataPtr m_verticesPerFace;
 		IntVectorDataPtr m_vertexIds;
-};       
+};
+
+IE_CORE_DECLAREPTR( MeshPrimitiveBuilder );     
 
 }
 
