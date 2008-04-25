@@ -53,6 +53,7 @@ enum TypeId
 	FromMayaStringPlugConverterTypeId = 109009,
 	FromMayaShapeConverterTypeId = 109010,
 	FromMayaCurveConverterTypeId = 109011,
+	FromMayaParticleConverterTypeId = 109012,
 	LastTypeId = 109999
 
 };

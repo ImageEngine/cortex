@@ -57,6 +57,7 @@ void bindTypeId()
 		.value( "FromMayaStringPlugConverter", FromMayaStringPlugConverterTypeId )
 		.value( "FromMayaShapeConverter", FromMayaShapeConverterTypeId )
 		.value( "FromMayaCurveConverter", FromMayaCurveConverterTypeId )
+		.value( "FromMayaParticleConverter", FromMayaParticleConverterTypeId )
 	;
 }
 
