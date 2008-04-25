@@ -43,6 +43,7 @@
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/VectorOps.h"
 #include "IECore/TriangulateOp.h"
+#include "IECore/DespatchTypedData.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -162,145 +163,181 @@ ConstFloatParameterPtr MeshPrimitiveShrinkWrapOp::triangulationToleranceParamete
 	return m_triangulationToleranceParameter;
 }
 
-template<typename T>
-void MeshPrimitiveShrinkWrapOp::doShrinkWrap( std::vector<T> &vertices, PrimitivePtr sourceMesh, ConstPrimitivePtr targetMesh, typename TypedData< std::vector<T> >::ConstPtr directionVerticesData, Direction direction, Method method )
+struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 {
-	assert( sourceMesh );
-
-	if ( ! targetMesh )
-	{
-		return;
-	}
+	typedef void ReturnType;
 	
-	if ( method == DirectionMesh  )
-	{
-		if ( !directionVerticesData )
-		{
-			throw InvalidArgumentException( (boost::format("Direction mesh has no primitive variable \"P\" of type %s in MeshPrimitiveShrinkWrapOp") % TypedData< std::vector<T> >::staticTypeName() ).str() );
-		}
-		else if ( directionVerticesData->readable().size() != vertices.size() )
-		{
-			throw InvalidArgumentException("Direction mesh has incorrect number of vertices in MeshPrimitiveShrinkWrapOp" );
-		}
-	}
-
-	TriangulateOpPtr op = new TriangulateOp();
-	op->inputParameter()->setValue( sourceMesh );
-	op->toleranceParameter()->setNumericValue( this->triangulationToleranceParameter()->getNumericValue() );
-	MeshPrimitivePtr triangulatedSourcePrimitive = runTimeCast< MeshPrimitive > ( op->operate() );
-
-	PrimitiveEvaluatorPtr sourceEvaluator = 0;
-	PrimitiveEvaluator::ResultPtr sourceResult = 0;
+	PrimitivePtr m_sourceMesh;
+	ConstPrimitivePtr m_targetMesh;
+	ConstDataPtr m_directionData;
+	Direction m_direction;
+	Method m_method;
+	float m_tolerance;
 	
-	if ( method == Normal )
+	ShrinkWrapFn( PrimitivePtr sourceMesh, ConstPrimitivePtr targetMesh, ConstDataPtr directionData, Direction direction, Method method, float tolerance )
+	: m_sourceMesh( sourceMesh ), m_targetMesh( targetMesh ), m_directionData( directionData ), m_direction( direction ), m_method( method ), m_tolerance( tolerance )
 	{
-		sourceEvaluator = PrimitiveEvaluator::create( triangulatedSourcePrimitive );
-		assert( sourceEvaluator );
-		sourceResult = sourceEvaluator->createResult();
-		assert( sourceResult );
 	}
 
-	PrimitiveEvaluatorPtr targetEvaluator = PrimitiveEvaluator::create( targetMesh );
-	assert( targetEvaluator );
-	PrimitiveEvaluator::ResultPtr insideResult = targetEvaluator->createResult();
-	PrimitiveEvaluator::ResultPtr outsideResult = targetEvaluator->createResult();
-	assert( insideResult );
-	assert( outsideResult );
-
-	PrimitiveVariableMap::const_iterator it = triangulatedSourcePrimitive->variables.find( "N" );
-	if (it == sourceMesh->variables.end())
+	template<typename T>
+	void operator()( typename T::Ptr vertexData ) const
 	{
-		throw InvalidArgumentException("MeshPrimitive has no primitive variable \"N\" in MeshPrimitiveShrinkWrapOp" );
-	}
-
-	const PrimitiveVariable &nPrimVar = it->second;
-
-	typename std::vector<T>::size_type vertexId = 0;
-	for ( typename std::vector<T>::iterator pit = vertices.begin(); pit != vertices.end(); ++pit, ++vertexId )
-	{
-		T &vertexPosition = *pit;
-
-		T rayDirection;
+		assert( vertexData );
 		
-		if ( method == Normal )
+		typedef typename T::ValueType::value_type Vec;
+
+		assert( m_sourceMesh );
+
+		if ( ! m_targetMesh )
 		{
+			return;
+		}
+
+		typename T::ValueType &vertices = vertexData->writable();
+		
+		typename T::ConstPtr directionVerticesData = runTimeCast<const T>( m_directionData );
+
+		if ( m_method == DirectionMesh  )
+		{
+			if ( !directionVerticesData )
+			{
+				throw InvalidArgumentException( (boost::format("MeshPrimitiveShrinkWrapOp: Direction mesh has no primitive variable \"P\" of type \"%s\" ") % T::staticTypeName() ).str() );
+			}
+			else if ( directionVerticesData->readable().size() != vertices.size() )
+			{
+				throw InvalidArgumentException("MeshPrimitiveShrinkWrapOp: Direction mesh has incorrect number of vertices" );
+			}
+		}
+
+		TriangulateOpPtr op = new TriangulateOp();
+		op->inputParameter()->setValue( m_sourceMesh );
+		op->toleranceParameter()->setNumericValue( m_tolerance );
+		MeshPrimitivePtr triangulatedSourcePrimitive = runTimeCast< MeshPrimitive > ( op->operate() );
+
+		PrimitiveEvaluatorPtr sourceEvaluator = 0;
+		PrimitiveEvaluator::ResultPtr sourceResult = 0;
+
+		if ( m_method == Normal )
+		{
+			sourceEvaluator = PrimitiveEvaluator::create( triangulatedSourcePrimitive );
 			assert( sourceEvaluator );
+			sourceResult = sourceEvaluator->createResult();
 			assert( sourceResult );
-			sourceEvaluator->closestPoint( vertexPosition, sourceResult );
-			rayDirection = sourceResult->vectorPrimVar( nPrimVar ).normalized();
-		} 
-		else if ( method == XAxis )
-		{
-			rayDirection = T( 1.0, 0.0, 0.0 );
-		}
-		else if ( method == YAxis )
-		{
-			rayDirection = T( 0.0, 1.0, 0.0 );
-		}
-		else if ( method == ZAxis )
-		{
-			rayDirection = T( 0.0, 0.0, 1.0 );
-		}
-		else 
-		{
-			assert( method == DirectionMesh );
-			assert( directionVerticesData );
-			assert( vertexId < directionVerticesData->readable().size() );
-			
-			rayDirection = ( directionVerticesData->readable()[ vertexId ] - vertexPosition ).normalized();	
 		}
 
-		bool hit = false;
+		PrimitiveEvaluatorPtr targetEvaluator = PrimitiveEvaluator::create( m_targetMesh );
+		assert( targetEvaluator );
+		PrimitiveEvaluator::ResultPtr insideResult = targetEvaluator->createResult();
+		PrimitiveEvaluator::ResultPtr outsideResult = targetEvaluator->createResult();
+		assert( insideResult );
+		assert( outsideResult );
 
-		if ( direction == Inside )
+		PrimitiveVariableMap::const_iterator it = triangulatedSourcePrimitive->variables.find( "N" );
+		if (it == m_sourceMesh->variables.end())
 		{
-			hit = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult );
-			if ( hit )
+			throw InvalidArgumentException("MeshPrimitiveShrinkWrapOp: MeshPrimitive has no primitive variable \"N\"" );
+		}
+
+		const PrimitiveVariable &nPrimVar = it->second;	
+
+		typename T::ValueType::size_type vertexId = 0;
+		for ( typename T::ValueType::iterator pit = vertices.begin(); pit != vertices.end(); ++pit, ++vertexId )
+		{
+			Vec &vertexPosition = *pit;
+
+			Vec rayDirection;
+
+			if ( m_method == Normal )
 			{
-				vertexPosition = insideResult->point();
+				assert( sourceEvaluator );
+				assert( sourceResult );
+				sourceEvaluator->closestPoint( vertexPosition, sourceResult );
+				rayDirection = sourceResult->vectorPrimVar( nPrimVar ).normalized();
+			} 
+			else if ( m_method == XAxis )
+			{
+				rayDirection = Vec( 1.0, 0.0, 0.0 );
 			}
-		}
-		else if ( direction == Outside )
-		{
-			hit = targetEvaluator->intersectionPoint( vertexPosition, rayDirection, outsideResult );
-			if ( hit )
+			else if ( m_method == YAxis )
 			{
-				vertexPosition = outsideResult->point();
+				rayDirection = Vec( 0.0, 1.0, 0.0 );
 			}
-		}
-		else
-		{
-			assert( direction == Both );
-
-			bool insideHit  = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult  );
-			bool outsideHit = targetEvaluator->intersectionPoint( vertexPosition,  rayDirection, outsideResult );
-
-			/// Choose the closest, or the only, intersection
-			if ( insideHit && outsideHit )
+			else if ( m_method == ZAxis )
 			{
-				typename T::BaseType insideDist  = vecDistance2( vertexPosition, T( insideResult->point()  ) );
-				typename T::BaseType outsideDist = vecDistance2( vertexPosition, T( outsideResult->point() ) );
+				rayDirection = Vec( 0.0, 0.0, 1.0 );
+			}
+			else 
+			{
+				assert( m_method == DirectionMesh );
+				assert( directionVerticesData );
+				assert( vertexId < directionVerticesData->readable().size() );
 
-				if ( insideDist < outsideDist )
+				rayDirection = ( directionVerticesData->readable()[ vertexId ] - vertexPosition ).normalized();	
+			}
+
+			bool hit = false;
+
+			if ( m_direction == Inside )
+			{
+				hit = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult );
+				if ( hit )
 				{
 					vertexPosition = insideResult->point();
 				}
-				else
+			}
+			else if ( m_direction == Outside )
+			{
+				hit = targetEvaluator->intersectionPoint( vertexPosition, rayDirection, outsideResult );
+				if ( hit )
 				{
 					vertexPosition = outsideResult->point();
 				}
 			}
-			else if ( insideHit )
+			else
 			{
-				vertexPosition = insideResult->point();
-			}
-			else if ( outsideHit )
-			{
-				vertexPosition = outsideResult->point();
+				assert( m_direction == Both );
+
+				bool insideHit  = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult  );
+				bool outsideHit = targetEvaluator->intersectionPoint( vertexPosition,  rayDirection, outsideResult );
+
+				/// Choose the closest, or the only, intersection
+				if ( insideHit && outsideHit )
+				{
+					typename Vec::BaseType insideDist  = vecDistance2( vertexPosition, Vec( insideResult->point()  ) );
+					typename Vec::BaseType outsideDist = vecDistance2( vertexPosition, Vec( outsideResult->point() ) );
+
+					if ( insideDist < outsideDist )
+					{
+						vertexPosition = insideResult->point();
+					}
+					else
+					{
+						vertexPosition = outsideResult->point();
+					}
+				}
+				else if ( insideHit )
+				{
+					vertexPosition = insideResult->point();
+				}
+				else if ( outsideHit )
+				{
+					vertexPosition = outsideResult->point();
+				}
 			}
 		}
 	}
-}
+	
+	struct ErrorHandler
+	{
+		template<typename T, typename F>
+		void operator()( typename T::ConstPtr data, const F& functor )
+		{
+			assert( data );
+		
+			throw InvalidArgumentException( ( boost::format( "MeshPrimitiveShrinkWrapOp: Invalid data type \"%s\" for primitive variable \"P\"." ) % Object::typeNameFromTypeId( data->typeId() ) ).str() );		
+		}
+	};
+};
 
 void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
 {
@@ -364,20 +401,6 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, Con
 		directionVerticesData = it->second.data;	
 	}
 	
-	
-	/// \todo Start using depatchTypedData
-	if (runTimeCast<V3fVectorData>(verticesData))
-	{
-		V3fVectorDataPtr p = runTimeCast<V3fVectorData>(verticesData);
-		doShrinkWrap<V3f>( p->writable(), mesh, target, runTimeCast<const V3fVectorData>(directionVerticesData), direction, method );
-	}
-	else if (runTimeCast<V3dVectorData>(verticesData))
-	{
-		V3dVectorDataPtr p = runTimeCast<V3dVectorData>(verticesData);
-		doShrinkWrap<V3d>( p->writable(), mesh, target, runTimeCast<const V3dVectorData>(directionVerticesData), direction, method );
-	}
-	else
-	{
-		throw InvalidArgumentException("MeshPrimitive has no primitive variable \"P\" of type V3fVectorData/V3dVectorData in MeshPrimitiveShrinkWrapOp" );
-	}
+	ShrinkWrapFn fn( mesh, target, directionVerticesData, direction, method, this->triangulationToleranceParameter()->getNumericValue() );
+	despatchTypedData< ShrinkWrapFn, TypeTraits::IsVec3VectorTypedData, ShrinkWrapFn::ErrorHandler >( verticesData, fn );	
 }
