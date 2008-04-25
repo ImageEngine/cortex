@@ -278,6 +278,9 @@ class RendererTest( unittest.TestCase ) :
 	
 		"""Check that missing shaders don't throw an exception but print a message instead."""
 	
+		m = CapturingMessageHandler()
+		s = ScopedMessageHandler( m )
+		
 		r = IECoreRI.Renderer( "test/IECoreRI/output/missingShaders.rib" )
 		
 		r.worldBegin()
@@ -285,6 +288,9 @@ class RendererTest( unittest.TestCase ) :
 		r.shader( "surface", "aShaderWhichDoesntExist", {} )
 		
 		r.worldEnd()
+
+		self.assertEqual( len( m.messages ), 1 )
+		self.assert_( "aShaderWhichDoesntExist" in m.messages[0].message )
 		
 	def testGetUserOption( self ) :
 	
