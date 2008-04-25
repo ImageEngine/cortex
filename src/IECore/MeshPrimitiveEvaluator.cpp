@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// \todo Check winding orders
-
 #include <cassert>
 
 #include "OpenEXR/ImathBoxAlgo.h"
@@ -430,7 +428,7 @@ void MeshPrimitiveEvaluator::calculateMassProperties() const
 		const Imath::V3f &p2 = m_verts->readable()[ triangleVertexIds[2] ];		
 		
 		/// Winding order has to be correct here
-		V3f n = ( p2 - p0 ).cross( p1 - p0 );
+		V3f n = ( p1 - p0 ).cross( p2 - p0 );
 		
 		V3f f1, f2, f3, g0, g1, g2;
 		for (int dim = 0; dim < 3; dim++)
@@ -499,8 +497,6 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 		assert( *it == 3 );
 	}
 #endif
-
-	/// \todo From here on, make sure we're using the correct winding order
 
 	/// Build vertex connectivity. We want to be able to quickly find the list of triangles connected to each vertex.
 	typedef std::map< VertexIndex, std::set<TriangleIndex> > VertexConnectivity;
