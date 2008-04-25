@@ -50,7 +50,8 @@ class CurvesTest( unittest.TestCase ) :
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
 				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) ),
+				"shutter" : IECore.V2fData( IECore.V2f( 0, 1 ) ),
 			}
 		)
 		r.display( self.outputFileName, "tiff", "rgba", {} )
@@ -172,6 +173,33 @@ class CurvesTest( unittest.TestCase ) :
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 		
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bezier.tif" )
+	
+	def testMotionBlur( self ) :
+	
+		c = IECore.CurvesPrimitive(
+			
+			IECore.IntVectorData( [ 4 ] ),
+			IECore.CubicBasisf.bSpline(),
+			False,
+			IECore.V3fVectorData(
+				[
+					IECore.V3f( 0.8, 0.2, 0 ),
+					IECore.V3f( 0.2, 0.2, 0 ),
+					IECore.V3f( 0.2, 0.8, 0 ),
+					IECore.V3f( 0.8, 0.8, 0 ),
+				]
+			)
+
+		)
+		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		
+		c2 = IECore.TransformOp()( input=c, matrix=IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( -0.1, 0, 0 ) ) ) )
+		
+		m = IECore.MotionPrimitive()
+		m[0] = c
+		m[1] = c2
+
+		self.performTest( m, os.path.dirname( __file__ ) + "/data/curveImages/motionBlur.tif" )
 																
 def tearDown( self ) :
 

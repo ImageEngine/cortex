@@ -145,6 +145,8 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_commandHandlers["objectInstance"] = &IECoreRI::RendererImplementation::objectInstanceCommand;
 	m_commandHandlers["ri:objectInstance"] = &IECoreRI::RendererImplementation::objectInstanceCommand;
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
+	
+	m_inMotion = false;
 }
 		
 IECoreRI::RendererImplementation::~RendererImplementation()
@@ -419,6 +421,7 @@ void IECoreRI::RendererImplementation::transformEnd()
 void IECoreRI::RendererImplementation::setTransform( const Imath::M44f &m )
 {
 	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
 	RtMatrix mm;
 	convert( m, mm );
 	RiTransform( mm );
@@ -427,6 +430,7 @@ void IECoreRI::RendererImplementation::setTransform( const Imath::M44f &m )
 void IECoreRI::RendererImplementation::setTransform( const std::string &coordinateSystem )
 {
 	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
 	RiCoordSysTransform( (char *)coordinateSystem.c_str() );
 }
 
@@ -461,6 +465,7 @@ Imath::M44f IECoreRI::RendererImplementation::getTransform( const std::string &c
 void IECoreRI::RendererImplementation::concatTransform( const Imath::M44f &m )
 {
 	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
 	RtMatrix mm;
 	convert( m, mm );
 	RiConcatTransform( mm );
@@ -861,21 +866,29 @@ void IECoreRI::RendererImplementation::light( const std::string &name, const IEC
 
 void IECoreRI::RendererImplementation::motionBegin( const std::set<float> times )
 {
-	ScopedContext scopedContext( m_context );
-	static vector<float> t;
-	t.resize( max( t.size(), times.size() ) );
+	m_delayedMotionTimes.resize( times.size() );
 	unsigned int i = 0;
 	for( set<float>::const_iterator it = times.begin(); it!=times.end(); it++ )
 	{
-		t[i++] = *it;
+		m_delayedMotionTimes[i++] = *it;
 	}
-	RiMotionBeginV( times.size(), &*(t.begin() ) );
+}
+
+void IECoreRI::RendererImplementation::delayedMotionBegin()
+{
+	if( m_delayedMotionTimes.size() )
+	{
+		RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
+		m_delayedMotionTimes.clear();
+		m_inMotion = true;
+	}
 }
 
 void IECoreRI::RendererImplementation::motionEnd()
 {
 	ScopedContext scopedContext( m_context );
 	RiMotionEnd();
+	m_inMotion = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -890,6 +903,7 @@ Imath::Box3f IECoreRI::RendererImplementation::textExtents(const std::string & t
 void IECoreRI::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
 	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
 	RiPointsV( numPoints, pv.n(), pv.tokens(), pv.values() );
 }
@@ -898,9 +912,18 @@ void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis,
 {
 	ScopedContext scopedContext( m_context );
 	
-	RtMatrix b;
-	convert( basis.matrix, b );
-	RiBasis( b, basis.step, b, basis.step );
+	// emit basis if we're not in a motion block right now
+	if( !m_inMotion )
+	{
+		RtMatrix b;
+		convert( basis.matrix, b );
+		RiBasis( b, basis.step, b, basis.step );
+	}
+	
+	// then emit any overdue motionbegin calls.
+	delayedMotionBegin();
+	
+	// finally emit the curves
 	
 	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
 	vector<int> &numVerticesV = const_cast<vector<int> &>( numVertices->readable() );
@@ -913,17 +936,25 @@ void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis,
 
 void IECoreRI::RendererImplementation::text(const std::string &t, const float width )
 {
+	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
+
 	msg( Msg::Warning, "IECoreRI::RendererImplementation::text", "Not implemented" );	
 }
 
 void IECoreRI::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
 {
+	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
+
 	msg( Msg::Warning, "IECoreRI::RendererImplementation::image", "Not implemented" );	
 }
 
 void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
+
 	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
 
 	if( interpolation=="catmullClark" )
@@ -959,6 +990,7 @@ void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr verts
 void IECoreRI::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
 
 	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
 	RiNuPatchV(
@@ -979,6 +1011,7 @@ void IECoreRI::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVect
 void IECoreRI::RendererImplementation::geometry( const std::string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
 
 	if( type=="teapot" || type=="ri:teapot" )
 	{

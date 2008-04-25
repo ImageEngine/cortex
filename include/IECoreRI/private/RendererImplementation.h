@@ -180,6 +180,23 @@ class RendererImplementation : public IECore::Renderer
 		IECore::DataPtr archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		static std::vector<int> g_nLoops;
+		
+		/// Renderman treats curve basis as an attribute, whereas we want to treat it as
+		/// part of the topology of primitives. It makes no sense as an attribute, as it changes the
+		/// size of primitive variables - an attribute which makes a primitive invalid is dumb. This
+		/// difference is fine, except it means we have to implement curves() as a call to RiBasis followed
+		/// by RiCurves. Which is fine too, until we do that inside a motion block - at this point the context
+		/// is invalid for the basis call - we should just be emitting the RiCurves call. We work around
+		/// this by delaying all calls to motionBegin until the primitive or transform calls have had a chance
+		/// to emit something first. This is what this function is all about - all interface functions which
+		/// may be called from within a motion block must call delayedMotionBegin(). This makes for an ugly
+		/// implementation but a better interface for the client. delayedMotionBegin() assumes that the correct
+		/// RiContext will have been made current already.
+		void delayedMotionBegin();
+		/// True when an RiMotionBegin call has been emitted but we have not yet emitted the matching RiMotionEnd.
+		bool m_inMotion;
+		std::vector<float> m_delayedMotionTimes;
+		
 };
 
 } // namespace IECoreRI
