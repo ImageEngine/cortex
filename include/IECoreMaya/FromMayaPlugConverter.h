@@ -72,7 +72,9 @@ class FromMayaPlugConverter : public FromMayaConverter
 		const MPlug &plug() const;
 		
 		/// Creates a converter to convert the plug value to the "most appropriate" IECore
-		/// type. May return 0 if no converter can be found.
+		/// type. May return 0 if no converter can be found. Note that this returns a generic
+		/// FromMayaConverterPtr rather than a FromMayaPlugConverterPtr so that a
+		/// FromMayaObjectConverterPtr may be returned for the case of a plug holding an MObject.
 		static FromMayaConverterPtr create( const MPlug &plug );
 		/// Creates a converter to convert the plug value to a specific IECore type. Maya return
 		/// 0 if no such converter can be found.
