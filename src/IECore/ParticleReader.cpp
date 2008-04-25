@@ -44,6 +44,7 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/NullObject.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/TestTypedData.h"
 
 #include <algorithm>
 
@@ -147,10 +148,8 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 	{
 		DataPtr d = readAttribute( *it );
 		
-		/// \todo Remove use of exception handling as means of flow control
-		try
+		if ( testTypedData<TypeTraits::IsVectorTypedData>( d ) )
 		{
-			// throws if it's not vector data
 			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( d );
 			if( !haveNumPoints )
 			{
@@ -166,19 +165,9 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % *it % result->getNumPoints() % s );
 			}
 		}
-		catch( ... )
+		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( d ) )
 		{
-			// not vector data, maybe it's some sort of constant data
-			try
-			{
-				// throws if not simple data
-				despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( d );
-				result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Constant, d ) ) );
-			}
-			catch( ... )
-			{
-				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to unsupported type \"%s\"." ) % *it % d->typeName() );
-			}
+			result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Constant, d ) ) );
 		}
 	}
 	return result;

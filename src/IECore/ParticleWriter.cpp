@@ -40,6 +40,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/PointsPrimitive.h"
+#include "IECore/TestTypedData.h"
 
 using namespace std;
 using namespace IECore;
@@ -79,10 +80,8 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 	vector<string> allNames;
 	ConstPointsPrimitivePtr cd = particleObject();
 	for( PrimitiveVariableMap::const_iterator it=cd->variables.begin(); it!=cd->variables.end(); it++ )
-	{
-	
-		/// \todo Remove use of exception handling as means of flow control
-		try
+	{					
+		if ( testTypedData<TypeTraits::IsVectorTypedData>( it->second.data ) )
 		{
 			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( it->second.data );
 			if( s==numParticles )
@@ -94,18 +93,13 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 				msg( Msg::Warning, "ParticleWriter::particleAttributes", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % it->first % numParticles % s );
 			}
 		}
-		catch( const std::exception &e )
+		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( it->second.data ) )
 		{
 			// it's not data of a vector type but it could be of a simple type
 			// in which case it's suitable for saving as a constant particle attribute
-			try
-			{
-				despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( it->second.data );
-				allNames.push_back( it->first );
-			}
-			catch( ... )
-			{
-			}
+
+			despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( it->second.data );
+			allNames.push_back( it->first );			
 		}
 	}
 	
@@ -115,8 +109,7 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 		names = allNames;
 		return;
 	}
-	
-	
+		
 	names.clear();
 	for( vector<string>::const_iterator it = d->readable().begin(); it!=d->readable().end(); it++ )
 	{
