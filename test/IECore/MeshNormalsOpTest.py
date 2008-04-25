@@ -86,9 +86,6 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 		
 			self.assert_( math.fabs( normals[i].length() - 1 ) < 0.001 )
 		
-			## \todo This fails only because the winding order of the exported sphere
-			# is incorrect. Fix the maya converter winding order, reexport the sphere
-			# and check the test is good.
 			p = points[i].normalize()
 			self.assert_( normals[i].dot( p ) > 0.99 )
 			self.assert_( normals[i].dot( p ) < 1.01 )
