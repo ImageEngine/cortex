@@ -59,15 +59,7 @@ class FromMayaPlugConverter : public FromMayaConverter
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaPlugConverter, FromMayaPlugConverterTypeId, FromMayaConverter );
-
-		/// Constructs a new converter which will do a slightly arbitrary
-		/// conversion of the data in plug, with no control over the sort
-		/// of object being returned.
-		/// \deprecated You should use the create() method to create an
-		/// appropriate subclass. This gives the capability of requesting the
-		/// result type following conversion.
-		FromMayaPlugConverter( const MPlug &plug );
-		
+	
 		/// The MPlug which will be converted by the convert() function.
 		const MPlug &plug() const;
 		
@@ -82,10 +74,12 @@ class FromMayaPlugConverter : public FromMayaConverter
 		
 	protected :
 
+		FromMayaPlugConverter( const MPlug &plug );
+		
 		/// Should be implemented by all derived classes to convert the value in plug().
 		/// \todo Implement this in a manner similar to FromMayaObjectConverter (forward on
 		/// to a pure virtual function).
-		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const = 0;
 
 		/// Creating a static instance of one of these (templated on your converter type)
 		/// within your class will register your converter with the factory mechanism.
