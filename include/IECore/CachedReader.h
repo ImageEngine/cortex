@@ -54,6 +54,8 @@ IE_CORE_FORWARDDECLARE( CachedReader );
 /// \todo Stats on cache misses etc.
 /// \todo Can we do something to make sure that two paths to the same
 /// file (symlinks) result in only a single cache entry?
+/// \todo Can we use LRUCache in the implementation? There seems to be duplicated
+/// functionality here
 class CachedReader : public RefCounted
 {
 

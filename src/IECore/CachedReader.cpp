@@ -91,6 +91,8 @@ ConstObjectPtr CachedReader::read( const std::string &file )
 	}
 	
 	ObjectPtr object = r->read();
+	/// \todo Why would this ever be NULL? Wouldn't we have thrown an exception already if
+	/// we were unable to read the file?
 	if( !object )
 	{
 		m_unreadables.insert( file );
