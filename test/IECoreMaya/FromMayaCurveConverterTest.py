@@ -97,7 +97,7 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		self.assertEqual( len( p ), 9 )
 		for pp in p :
 			self.assertEqual( pp.z, 0 )
-			self.assertAlmostEqual( pp.length(), 1 )
+			self.assertAlmostEqual( pp.length(), 1, 5 )
 
 	def testCubicArc( self ) :
 	
