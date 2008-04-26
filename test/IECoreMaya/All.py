@@ -41,6 +41,7 @@ from FromMayaCurveConverterTest import *
 from PluginLoadUnload import *
 from NamespacePollution import *
 from FromMayaMeshConverterTest import *
+from FromMayaParticleConverterTest import *
 
 import MayaUnitTest
 MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
