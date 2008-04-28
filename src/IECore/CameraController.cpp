@@ -316,12 +316,12 @@ void CameraController::dolly( const Imath::V2i &p )
 		);
 		
 		float scale = 1.0f - d;
-		
-		screenWindow.min = (screenWindow.min - centre) * scale + centre;
-		screenWindow.max = (screenWindow.max - centre) * scale + centre;
-		
-		m_screenWindow->writable() = screenWindow;
+		if( scale > 0.001 )
+		{
+			screenWindow.min = (screenWindow.min - centre) * scale + centre;
+			screenWindow.max = (screenWindow.max - centre) * scale + centre;
+			m_screenWindow->writable() = screenWindow;
+		}
 	}
-
 }
 
