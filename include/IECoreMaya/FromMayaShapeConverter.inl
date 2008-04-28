@@ -46,7 +46,7 @@ FromMayaShapeConverter::Description<T>::Description( MFn::Type fromType, IECore:
 	// first register with the object converter
 	FromMayaObjectConverter::FromMayaObjectConverterDescription<T> c( fromType, resultType );
 	// then register with the shape converter
-	FromMayaShapeConverter::registerConverter( fromType, resultType, creator );
+	FromMayaShapeConverter::registerShapeConverter( fromType, resultType, creator );
 }
 
 template<class T>
