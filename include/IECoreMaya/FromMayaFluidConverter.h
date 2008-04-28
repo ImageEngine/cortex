@@ -38,7 +38,7 @@
 #include "IECore/TypedParameter.h"
 #include "IECore/Primitive.h"
 
-#include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECoreMaya/FromMayaShapeConverter.h"
 
 class MFnFluid;
 
@@ -46,21 +46,28 @@ namespace IECoreMaya
 {
 
 /// Converts a Maya Fluid to an IECore::PointsPrimitive with appropriate primitive variables
-class FromMayaFluidConverter : public FromMayaObjectConverter
+class FromMayaFluidConverter : public FromMayaShapeConverter
 {
 	
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaFluidConverter, FromMayaFluidConverterTypeId, FromMayaObjectConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaFluidConverter, FromMayaFluidConverterTypeId, FromMayaShapeConverter );
 
 		FromMayaFluidConverter( const MObject &object );
+		FromMayaFluidConverter( const MDagPath &dagPath );
+
+		virtual ~FromMayaFluidConverter();
 		
 	protected :
 	
-		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
 	
+		void constructCommon();
+	
+		IECore::PrimitivePtr doPrimitiveConversion( MFnFluid &fnFluid ) const;
 		void addPrimVar( IECore::PrimitivePtr primitive, const std::string &name, size_t numPoints, MFnFluid &fnFluid, float *(MFnFluid::*fn)( MStatus * ) ) const;
 
 		IECore::BoolParameterPtr m_velocityParameter;
@@ -72,7 +79,7 @@ class FromMayaFluidConverter : public FromMayaObjectConverter
 		IECore::BoolParameterPtr m_colorParameter;
 		IECore::BoolParameterPtr m_textureCoordinatesParameter;
 
-		static FromMayaObjectConverterDescription<FromMayaFluidConverter> m_description;
+		static Description<FromMayaFluidConverter> m_description;
 		
 };
 

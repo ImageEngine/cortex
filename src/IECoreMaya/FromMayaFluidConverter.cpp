@@ -39,6 +39,8 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/PointsPrimitive.h"
+#include "IECore/MatrixMultiplyOp.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "maya/MFn.h"
 #include "maya/MFnFluid.h"
@@ -48,10 +50,25 @@ using namespace IECore;
 using namespace std;
 using namespace Imath;
 
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaFluidConverter > FromMayaFluidConverter::m_description( MFn::kFluid, PointsPrimitive::staticTypeId() );
+FromMayaShapeConverter::Description<FromMayaFluidConverter> FromMayaFluidConverter::m_description( MFn::kFluid, PointsPrimitive::staticTypeId() );
 
 FromMayaFluidConverter::FromMayaFluidConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaFluidConverter", "Converts maya fluid data to IECore::PointsPrimitive Object", object )
+	:	FromMayaShapeConverter( staticTypeName(), "Converts maya fluid data to IECore::PointsPrimitive Object", object )
+{
+	constructCommon();
+}
+
+FromMayaFluidConverter::FromMayaFluidConverter( const MDagPath &dagPath )
+	:	FromMayaShapeConverter( staticTypeName(), "Converts maya fluid data to IECore::PointsPrimitive Object", dagPath )
+{
+	constructCommon();
+}
+
+FromMayaFluidConverter::~FromMayaFluidConverter()
+{
+}
+
+void FromMayaFluidConverter::constructCommon()
 {
 	m_velocityParameter = new BoolParameter(
 		"velocity",
@@ -108,7 +125,6 @@ FromMayaFluidConverter::FromMayaFluidConverter( const MObject &object )
 		true
 	);
 	parameters()->addParameter( m_textureCoordinatesParameter );
-
 }
 
 void FromMayaFluidConverter::addPrimVar( IECore::PrimitivePtr primitive, const std::string &name, size_t numPoints, MFnFluid &fnFluid, float *(MFnFluid::*fn)( MStatus * ) ) const
@@ -126,14 +142,29 @@ void FromMayaFluidConverter::addPrimVar( IECore::PrimitivePtr primitive, const s
 	}
 }
 
-IECore::ObjectPtr FromMayaFluidConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
+IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
-	MStatus s;
 	MFnFluid fnFluid( object );
 	if( !fnFluid.hasObj( object ) )
 	{
 		return 0;
 	}
+	return doPrimitiveConversion( fnFluid );
+}
+
+IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
+{
+	MFnFluid fnFluid( dagPath );
+	if( !fnFluid.hasObj( dagPath.node() ) )
+	{
+		return 0;
+	}
+	return doPrimitiveConversion( fnFluid );
+}
+
+IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fnFluid ) const
+{	
+	MStatus s;
 	unsigned int nPoints = fnFluid.gridSize( &s );
 	if ( !s )
 	{
@@ -146,16 +177,18 @@ IECore::ObjectPtr FromMayaFluidConverter::doConversion( const MObject &object, I
 		return 0;
 	}
 
-	V3fVectorData::ValueType velocities, positions;
-	velocities.resize( nPoints );
+	V3fVectorDataPtr positionsData = new V3fVectorData;
+	V3fVectorDataPtr velocitiesData = new V3fVectorData;
+	V3fVectorData::ValueType positions = positionsData->writable();
+	V3fVectorData::ValueType velocities = velocitiesData->writable();
 	positions.resize( nPoints );
+	velocities.resize( nPoints );
 
 	float *velX, *velY, *velZ;
 	if ( !fnFluid.getVelocity( velX, velY, velZ ) )
 	{
 		return 0;
 	}
-	
 	
 	MPoint centerPos;
 	for ( unsigned int x = 0; x < xRes; x++ )
@@ -172,7 +205,7 @@ IECore::ObjectPtr FromMayaFluidConverter::doConversion( const MObject &object, I
 				positions[p] = IECore::convert< V3f >( centerPos );
 				fnFluid.index( p, xRes, yRes, zRes, xVel, yVel, zVel );
 				
-				/// \todo Does this work for 2D fluids?
+				/// \todo Does this work for 2D fluids? And wouldn't we like the option to convert those to ImagePrimitives instead?
 				assert( velX );
 				assert( velY );
 				assert( velZ );
@@ -181,14 +214,38 @@ IECore::ObjectPtr FromMayaFluidConverter::doConversion( const MObject &object, I
 		}
 	}
 
+	// make a matrix multiply op if we need it
+	// and if we have the right information available
+	MatrixMultiplyOpPtr matrixMultiplier = 0;
+	if( space()==MSpace::kWorld )
+	{
+		const MDagPath *d = dagPath( true );
+		if( d )
+		{
+			matrixMultiplier = new MatrixMultiplyOp;
+			matrixMultiplier->copyParameter()->setTypedValue( false ); // modify input in place
+			matrixMultiplier->matrixParameter()->setValue( new M44fData( IECore::convert<M44f>( d->inclusiveMatrix() ) ) );
+		}
+	}
+
 	PointsPrimitivePtr pp = new PointsPrimitive( nPoints );
-	PrimitiveVariable varP( PrimitiveVariable::Vertex, new V3fVectorData( positions ) );
-	pp->variables["P"] = varP;
+	
+	if( matrixMultiplier )
+	{
+		matrixMultiplier->inputParameter()->setValue( positionsData );
+		matrixMultiplier->operate();
+	}
+	pp->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, positionsData );
 
 	if( m_velocityParameter->getTypedValue() )
 	{
-		PrimitiveVariable varVelocity( PrimitiveVariable::Vertex, new V3fVectorData( velocities ) );
-		pp->variables["velocity"] = varVelocity;
+		if( matrixMultiplier )
+		{
+			matrixMultiplier->inputParameter()->setValue( velocitiesData );
+			matrixMultiplier->modeParameter()->setNumericValue( MatrixMultiplyOp::Vector );
+			matrixMultiplier->operate();
+		}
+		pp->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocitiesData );
 	}
 
 	if( m_densityParameter->getTypedValue() )
@@ -259,7 +316,7 @@ IECore::ObjectPtr FromMayaFluidConverter::doConversion( const MObject &object, I
 					uvVector[i] = V2f( uPtr[i], vPtr[i] );
 				}
 				PrimitiveVariable varUV( PrimitiveVariable::Vertex, uvData );
-				pp->variables["uv"] = varUV;
+				pp->variables["uv"] = varUV; /// \todo Why not s,t?
 			}
 			else
 			{
@@ -273,7 +330,7 @@ IECore::ObjectPtr FromMayaFluidConverter::doConversion( const MObject &object, I
 					uvwVector[i] = V3f( uPtr[i], vPtr[i], wPtr[i] );
 				}
 				PrimitiveVariable varUVW( PrimitiveVariable::Vertex, uvwData );
-				pp->variables["uvw"] = varUVW;
+				pp->variables["uvw"] = varUVW; /// \todo Why not s,t,u or perhaps __Pref?
 			}
 		}
 	}
