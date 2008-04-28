@@ -381,7 +381,6 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 		TIFFSetField( tiffImage, TIFFTAG_BITSPERSAMPLE, (uint16)bitDepth );
 		TIFFSetField( tiffImage, TIFFTAG_ROWSPERSTRIP, (uint32)rowsPerStrip );
 
-		/// \todo What about files written on big endian platforms?
 		TIFFSetField( tiffImage, TIFFTAG_FILLORDER, (uint16)FILLORDER_MSB2LSB );
 		TIFFSetField( tiffImage, TIFFTAG_PLANARCONFIG, (uint16)PLANARCONFIG_CONTIG );
 
