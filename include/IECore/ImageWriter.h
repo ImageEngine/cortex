@@ -54,8 +54,6 @@ class ImageWriter : public Writer
 
 		IE_CORE_DECLARERUNTIMETYPED( ImageWriter, Writer )
 
-		ImageWriter( const std::string &name, const std::string &description );
-
 		/// checks that object is an ImagePrimitive instance
 		static bool canWrite( ConstObjectPtr object, const std::string &fileName );
 
@@ -63,6 +61,8 @@ class ImageWriter : public Writer
 		void imageChannels( std::vector<std::string> &names ) const;
 
 	protected:
+	
+		ImageWriter( const std::string &name, const std::string &description );	
 
 		/// Writes the associated ImagePrimitive. There's no need to reimplement
 		/// this in subclasses - implement writeImage() instead.

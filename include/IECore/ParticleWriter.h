@@ -53,13 +53,13 @@ class ParticleWriter : public Writer
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPED( ParticleWriter, Writer )
-
-		ParticleWriter( const std::string &name, const std::string &description );
-		
+				
 		/// Default implementation just checks that object is a PointsPrimitive instance.
 		static bool canWrite( ConstObjectPtr object, const std::string &fileName );
 		
 	protected :
+	
+		ParticleWriter( const std::string &name, const std::string &description );
 	
 		/// ParticleWriters only write objects of the PointsPrimitive type,
 		/// so this function returns object() already cast and ready.
