@@ -32,19 +32,35 @@
 #
 ##########################################################################
 
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-
 import MayaUnitTest
-MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
-	 
+import maya.cmds
+
+class FromMayaPlugConverterTest( unittest.TestCase ) :
+
+	def testDistance( self ) :
+		
+		locator = maya.cmds.spaceLocator()[0]
+		maya.cmds.move( 1, 2, 3, locator )
+		
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
+		v = converter.convert()		
+		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
+		self.assertEqual( v.value, 1 )
+		
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateY", IECore.FloatData.staticTypeId() )
+		v = converter.convert()		
+		self.assert_( v.isInstanceOf( IECore.FloatData.staticTypeId() ) )
+		self.assertEqual( v.value, 2 )
+		
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateZ" )
+		self.assertEqual( converter.distanceUnit.getCurrentPresetName(), "Centimeters" )
+		converter.distanceUnit.setValue( "Meters" )
+		v = converter.convert()		
+		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
+		self.assertEqual( v.value, 0.03 )
+							
+if __name__ == "__main__":
+	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )

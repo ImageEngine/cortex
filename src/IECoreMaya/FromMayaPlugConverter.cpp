@@ -85,6 +85,18 @@ void FromMayaPlugConverter::registerConverter( const MFnData::Type fromType, IEC
 	TypedTypesToFnsMap *m = typedTypesToFns();
 	(*m)[TypedTypePair( fromType, resultType )] = creator;
 }
+
+FromMayaPlugConverter::UnitTypesToFnsMap *FromMayaPlugConverter::unitTypesToFns()
+{
+	static UnitTypesToFnsMap *m = new UnitTypesToFnsMap;
+	return m;
+}
+
+void FromMayaPlugConverter::registerConverter( const MFnUnitAttribute::Type fromType, IECore::TypeId resultType, CreatorFn creator )
+{
+	UnitTypesToFnsMap *m = unitTypesToFns();
+	(*m)[UnitTypePair( fromType, resultType )] = creator;
+}
 		
 FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug )
 {
@@ -94,6 +106,18 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug )
 FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::TypeId resultType )
 {
 	MObject attribute = plug.attribute();
+	
+	if( attribute.hasFn( MFn::kUnitAttribute ) )
+	{
+		MFnUnitAttribute fnUAttr( attribute );
+		const UnitTypesToFnsMap *m = unitTypesToFns();
+		UnitTypesToFnsMap::const_iterator it = m->find( UnitTypePair( fnUAttr.unitType(), resultType ) );
+		if( it!=m->end() )
+		{
+			return it->second( plug );
+		}
+	}
+	
 	if( attribute.hasFn( MFn::kNumericAttribute ) )
 	{
 		MFnNumericAttribute fnNAttr( attribute );

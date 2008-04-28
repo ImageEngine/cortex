@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,51 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_FROMMAYAPLUGCONVERTER_INL
-#define IE_COREMAYA_FROMMAYAPLUGCONVERTER_INL
+#ifndef IECOREMAYA_FROMMAYAUNITPLUGCONVERTER_H
+#define IECOREMAYA_FROMMAYAUNITPLUGCONVERTER_H
+
 
 #include "IECoreMaya/FromMayaPlugConverter.h"
+
+#include "IECore/NumericParameter.h"
 
 namespace IECoreMaya
 {
 
-template<class T>
-FromMayaPlugConverter::Description<T>::Description( MFnNumericData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter )
+/// \todo Implement RunTimeTyped interface.
+template<typename T> 
+class FromMayaUnitPlugConverter : public FromMayaPlugConverter
 {
-	FromMayaPlugConverter::registerConverter( fromType, resultType, creator );
-	if( isDefaultConverter )
-	{
-		FromMayaPlugConverter::registerConverter( fromType, IECore::InvalidTypeId, creator );
-	}
-}
 
-template<class T>
-FromMayaPlugConverter::Description<T>::Description( MFnData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter )
-{
-	FromMayaPlugConverter::registerConverter( fromType, resultType, creator );
-	if( isDefaultConverter )
-	{
-		FromMayaPlugConverter::registerConverter( fromType, IECore::InvalidTypeId, creator );
-	}
-}
+	public :
+	
+		FromMayaUnitPlugConverter( const MPlug &plug );
+		
+		IECore::IntParameterPtr angleUnitParameter();
+		IECore::ConstIntParameterPtr angleUnitParameter() const;
+		
+		IECore::IntParameterPtr distanceUnitParameter();
+		IECore::ConstIntParameterPtr distanceUnitParameter() const;
+		
+		IECore::IntParameterPtr timeUnitParameter();
+		IECore::ConstIntParameterPtr timeUnitParameter() const;
+		
+	protected :
+		
+		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 
-template<class T>
-FromMayaPlugConverter::Description<T>::Description( MFnUnitAttribute::Type fromType, IECore::TypeId resultType, bool isDefaultConverter )
-{
-	FromMayaPlugConverter::registerConverter( fromType, resultType, creator );
-	if( isDefaultConverter )
-	{
-		FromMayaPlugConverter::registerConverter( fromType, IECore::InvalidTypeId, creator );
-	}
-}
-
-template<class T>
-FromMayaPlugConverterPtr FromMayaPlugConverter::Description<T>::Description::creator( const MPlug &plug )
-{
-	return new T( plug );
-}
+	private :
+	
+		IECore::IntParameterPtr m_angleUnitParameter;
+		IECore::IntParameterPtr m_distanceUnitParameter;
+		IECore::IntParameterPtr m_timeUnitParameter;
+	
+		static Description<FromMayaUnitPlugConverter> m_angleDescription;
+		static Description<FromMayaUnitPlugConverter> m_distanceDescription;
+		static Description<FromMayaUnitPlugConverter> m_timeDescription;
+		
+};
 
 } // namespace IECoreMaya
 
-#endif // IE_COREMAYA_FROMMAYAPLUGCONVERTER_INL
+#endif // IECOREMAYA_FROMMAYAUNITPLUGCONVERTER_H

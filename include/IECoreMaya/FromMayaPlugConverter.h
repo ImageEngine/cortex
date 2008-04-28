@@ -41,6 +41,7 @@
 
 #include "maya/MPlug.h"
 #include "maya/MFnNumericData.h"
+#include "maya/MFnUnitAttribute.h"
 
 #include <map>
 
@@ -82,6 +83,7 @@ class FromMayaPlugConverter : public FromMayaConverter
 			public :
 				Description( MFnData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter );
 				Description( MFnNumericData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter );
+				Description( MFnUnitAttribute::Type fromType, IECore::TypeId resultType, bool isDefaultConverter );
 			private :
 				static FromMayaPlugConverterPtr creator( const MPlug &object );
 		};
@@ -91,6 +93,7 @@ class FromMayaPlugConverter : public FromMayaConverter
 		typedef FromMayaPlugConverterPtr (*CreatorFn)( const MPlug &plug );
 		static void registerConverter( MFnNumericData::Type fromType, IECore::TypeId resultType, CreatorFn creator );
 		static void registerConverter( MFnData::Type fromType, IECore::TypeId resultType, CreatorFn creator );
+		static void registerConverter( MFnUnitAttribute::Type fromType, IECore::TypeId resultType, CreatorFn creator );
 		
 		typedef std::pair<MFnNumericData::Type, IECore::TypeId> NumericTypePair;
 		typedef std::map<NumericTypePair, CreatorFn> NumericTypesToFnsMap;
@@ -100,6 +103,10 @@ class FromMayaPlugConverter : public FromMayaConverter
 		typedef std::map<TypedTypePair, CreatorFn> TypedTypesToFnsMap;
 		static TypedTypesToFnsMap *typedTypesToFns();
 
+		typedef std::pair<MFnUnitAttribute::Type, IECore::TypeId> UnitTypePair;
+		typedef std::map<UnitTypePair, CreatorFn> UnitTypesToFnsMap;
+		static UnitTypesToFnsMap *unitTypesToFns();
+		
 		MPlug m_plug;
 
 };

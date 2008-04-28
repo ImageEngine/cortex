@@ -32,19 +32,21 @@
 #
 ##########################################################################
 
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-
 import MayaUnitTest
-MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
-	 
+import maya.cmds
+
+class FromMayaPlugConverterTest( unittest.TestCase ) :
+
+	def testFactory( self ) :
+		
+		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
+		
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
+		self.assert_( converter )
+		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+							
+if __name__ == "__main__":
+	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
