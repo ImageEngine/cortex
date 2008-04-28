@@ -62,7 +62,7 @@ using namespace boost;
 using namespace Imath;
 using namespace std;
 
-const Reader::ReaderDescription<TIFFImageReader> TIFFImageReader::m_readerDescription("tiff tif");
+const Reader::ReaderDescription<TIFFImageReader> TIFFImageReader::m_readerDescription("tiff tif tdl");
 
 TIFFImageReader::TIFFImageReader()
 		:	ImageReader("TIFFImageReader", "Reads Tagged Image File Format (TIFF) files" ),
