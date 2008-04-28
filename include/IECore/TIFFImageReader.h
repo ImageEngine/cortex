@@ -47,22 +47,24 @@ namespace IECore
 ///
 /// Currently handled tags ( and their supported values ):
 ///
-/// TIFFTAG_IMAGEWIDTH ( any != 0 )
-/// TIFFTAG_IMAGELENGTH ( any != 0 )
-/// TIFFTAG_SAMPLESPERPIXEL ( any != 0 )
-/// TIFFTAG_BITSPERSAMPLE ( 8, 16, 32 )
-/// TIFFTAG_PHOTOMETRIC ( PHOTOMETRIC_RGB, PHOTOMETRIC_MIN_IS_BLACK )
-/// TIFFTAG_FILLORDER ( any )
-/// TIFFTAG_SAMPLEFORMAT ( SAMPLEFORMAT_INT, SAMPLEFORMAT_UINT, SAMPLEFORMAT_IEEEFP)
-/// TIFFTAG_ORIENTATION ( ORIENTATION_TOPLEFT )
-/// TIFFTAG_PLANARCONFIG ( PLANARCONFIG_CONTIG )
-/// TIFFTAG_EXTRASAMPLES
-/// TIFFTAG_XPOSITION
-/// TIFFTAG_YPOSITION
-/// TIFFTAG_PIXAR_IMAGEFULLWIDTH
-/// TIFFTAG_PIXAR_IMAGEFULLLENGTH
-/// TIFFTAG_XPOSITION
-/// TIFFTAG_YPOSITION
+/// TIFFTAG_IMAGEWIDTH ( any != 0 )<br>
+/// TIFFTAG_IMAGELENGTH ( any != 0 )<br>
+/// TIFFTAG_TILEWIDTH ( any != 0 )<br>
+/// TIFFTAG_TILELENGTH ( any != 0 )<br>
+/// TIFFTAG_SAMPLESPERPIXEL ( any != 0 )<br>
+/// TIFFTAG_BITSPERSAMPLE ( 8, 16, 32 )<br>
+/// TIFFTAG_PHOTOMETRIC ( PHOTOMETRIC_RGB, PHOTOMETRIC_MIN_IS_BLACK )<br>
+/// TIFFTAG_FILLORDER ( any )<br>
+/// TIFFTAG_SAMPLEFORMAT ( SAMPLEFORMAT_INT, SAMPLEFORMAT_UINT, SAMPLEFORMAT_IEEEFP)<br>
+/// TIFFTAG_ORIENTATION ( ORIENTATION_TOPLEFT )<br>
+/// TIFFTAG_PLANARCONFIG ( PLANARCONFIG_CONTIG )<br>
+/// TIFFTAG_EXTRASAMPLES<br>
+/// TIFFTAG_XPOSITION<br>
+/// TIFFTAG_YPOSITION<br>
+/// TIFFTAG_PIXAR_IMAGEFULLWIDTH<br>
+/// TIFFTAG_PIXAR_IMAGEFULLLENGTH<br>
+/// TIFFTAG_XPOSITION<br>
+/// TIFFTAG_YPOSITION<br>
 ///
 class TIFFImageReader : public ImageReader
 {
@@ -76,12 +78,25 @@ class TIFFImageReader : public ImageReader
 		virtual ~TIFFImageReader();
 
 		static bool canRead( const std::string &filename );
-
+		
+		/// A TIFF image can contain multiple directories (images), each capable of having its own resolution.
+		/// This method returns the number of directories present in the file so that we can then call setDirectory()
+		/// in order to read a specific image from the file.
+		unsigned int numDirectories();
+		
+		/// Sets the index of the directory we want to read from the TIFF file. By default we read out the first directory
+		/// present.		
+		void setDirectory( unsigned int directoryIndex );
+		
+		//! @name ImageReader interface
+		/// Please note that these methods operate on the current TIFF directory.
+                //@{
 		virtual void channelNames( std::vector<std::string> &names );
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
-
+		//@}
+		
 	private:
 
 		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow );
@@ -89,19 +104,28 @@ class TIFFImageReader : public ImageReader
 		// filename associator
 		static const ReaderDescription<TIFFImageReader> m_readerDescription;
 
-		/// Opens the file, if necessary, and fills the buffer. Throws an IOException if an error occurs.
-		/// Tries to open the file, returning true on success and false on failure. On success,
-		/// the member data derived from the TIFF's "header" will be valid.
+		/// Opens the file, if necessary, and determines the number of directories present, returning true on success
+		/// and false on failure. On success, the m_tiffImage and m_numDirectories data members will be valid.
 		/// If throwOnFailure is true then a descriptive Exception is thrown rather than false being returned.
 		bool open( bool throwOnFailure = false );
 
+		/// Opens the file, if necessary, and reads the image information from the current directory, returning true on
+		/// success and false on failure. On success, the member data derived from the TIFF's "header" will be valid (e.g.
+		/// the channel names. bits per sample, data window, etc).If throwOnFailure is true then a descriptive Exception is 
+		/// thrown rather than false being returned.
+		bool readCurrentDirectory( bool throwOnFailure = false );
+		
 		// tiff image pointer
 		tiff *m_tiffImage;
 		std::string m_tiffImageFileName;
+		
+		unsigned int m_currentDirectoryIndex;
+		unsigned int m_numDirectories;
+		bool m_haveDirectory;
 
 		std::vector<unsigned char> m_buffer;
 
-		// reads the interlaced data into the buffer
+		// Reads the interlaced data from the current directory into the buffer
 		void readBuffer();
 
 		Imath::Box2i m_displayWindow;

@@ -66,13 +66,13 @@ const Reader::ReaderDescription<TIFFImageReader> TIFFImageReader::m_readerDescri
 
 TIFFImageReader::TIFFImageReader()
 		:	ImageReader("TIFFImageReader", "Reads Tagged Image File Format (TIFF) files" ),
-		m_tiffImage(0)
+		m_tiffImage( 0 ), m_currentDirectoryIndex( 0 ), m_numDirectories( 1 ), m_haveDirectory( false )
 {
 }
 
 TIFFImageReader::TIFFImageReader( const string &fileName )
 		:	ImageReader("TIFFImageReader", "Reads Tagged Image File Format (TIFF) files" ),
-		m_tiffImage(0)
+		m_tiffImage( 0 ), m_currentDirectoryIndex( 0 ), m_numDirectories( 1 ), m_haveDirectory( false )
 {
 	m_fileNameParameter->setTypedValue(fileName);
 }
@@ -122,7 +122,7 @@ void TIFFImageReader::channelNames( vector<string> &names )
 {
 	names.clear();
 
-	open( true );
+	readCurrentDirectory( true );
 
 	if ( m_photometricInterpretation == PHOTOMETRIC_RGB )
 	{
@@ -167,7 +167,7 @@ void TIFFImageReader::channelNames( vector<string> &names )
 
 bool TIFFImageReader::isComplete()
 {
-	if ( !open( false ) )
+	if ( !readCurrentDirectory( false ) )
 	{
 		return false;
 	}
@@ -190,16 +190,34 @@ bool TIFFImageReader::isComplete()
 
 Imath::Box2i TIFFImageReader::dataWindow()
 {
-	open( true );
+	readCurrentDirectory( true );
 
 	return m_dataWindow;
 }
 
 Imath::Box2i TIFFImageReader::displayWindow()
 {
-	open( true );
+	readCurrentDirectory( true );
 
 	return m_displayWindow;
+}
+
+unsigned int TIFFImageReader::numDirectories()
+{
+	open( true );
+	
+	return m_numDirectories;
+}
+
+void TIFFImageReader::setDirectory( unsigned int directoryIndex )
+{
+	unsigned int numDirs = numDirectories();
+	if ( directoryIndex >= numDirs )
+	{
+		throw InvalidArgumentException( ( boost::format( "TIFFImageReader: Cannot read directory %s of %s in \"%s\"" ) % (directoryIndex+1) % numDirs % fileName() ).str() );
+	}
+	
+	m_currentDirectoryIndex = directoryIndex;
 }
 
 template<typename T>
@@ -275,7 +293,7 @@ DataPtr TIFFImageReader::readTypedChannel( const std::string &name, const Box2i 
 			assert( buf );
 
 			// \todo Currently, we only support PLANARCONFIG_CONTIG for TIFFTAG_PLANARCONFIG.
-
+			assert( m_planarConfig ==  PLANARCONFIG_CONTIG );	
 			FloatVectorData::ValueType::size_type dataOffset = dataY * dataWidth + dataX;
 			assert( dataOffset < data.size() );
 
@@ -290,7 +308,7 @@ DataPtr TIFFImageReader::readChannel( const std::string &name, const Imath::Box2
 {
 	ScopedTIFFExceptionTranslator errorHandler;
 
-	open( true );
+	readCurrentDirectory( true );
 
 	if ( m_buffer.size() == 0 )
 	{
@@ -343,38 +361,90 @@ DataPtr TIFFImageReader::readChannel( const std::string &name, const Imath::Box2
 
 void TIFFImageReader::readBuffer()
 {
-	/// readChannel should already have opened the image by now
 	assert( m_tiffImage );
-
-	/// \todo Support tiled images!
-	if ( TIFFIsTiled( m_tiffImage ) )
-	{
-		throw IOException( "TIFFImageReader: Tiled images unsupported" );
-	}
+	assert( m_haveDirectory );
 
 	int width = boxSize( m_dataWindow ).x + 1;
 	int height = boxSize( m_dataWindow ).y + 1;
-
-	tsize_t stripSize = TIFFStripSize(m_tiffImage);
-
+	
 	// \todo Currently, we only support PLANARCONFIG_CONTIG for TIFFTAG_PLANARCONFIG.
-	std::vector<unsigned char>::size_type bufSize = (size_t)( (float)m_bitsPerSample / 8 * m_samplesPerPixel * width * height );
+	assert( m_planarConfig ==  PLANARCONFIG_CONTIG );	
+	std::vector<unsigned char>::size_type bufLineSize = (size_t)( (float)m_bitsPerSample / 8 * m_samplesPerPixel * width );	
+	std::vector<unsigned char>::size_type bufSize = bufLineSize * height;
 	assert( bufSize );
 	m_buffer.resize( bufSize, 0 );
-
-	// read the image
-	tsize_t imageOffset = 0;
-	tstrip_t numStrips = TIFFNumberOfStrips( m_tiffImage );
-	for ( tstrip_t strip = 0; strip < numStrips; strip++ )
+	
+	if ( TIFFIsTiled( m_tiffImage ) )
 	{
-		tsize_t result = TIFFReadEncodedStrip( m_tiffImage, strip, &m_buffer[0] + imageOffset, stripSize);
+		tsize_t tileSize = TIFFTileSize( m_tiffImage );
+		ttile_t numTiles = TIFFNumberOfTiles( m_tiffImage );
 
-		if ( result == -1 )
+		/// Create a buffer to hold an individual tile
+		int tileWidth = tiffField<uint32>( TIFFTAG_TILEWIDTH );
+		if ( tileWidth == 0 )
 		{
-			throw IOException( (boost::format( "TIFFImageReader: Read error on strip number %d") % strip).str() );
+			throw IOException( ( boost::format("TIFFImageReader: Unsupported value (%d) for TIFFTAG_TILEWIDTH while reading %s") % tileWidth % fileName() ).str() );
 		}
+		
+		int tileLength = tiffField<uint32>( TIFFTAG_TILELENGTH );
+		if ( tileLength == 0 )
+		{
+			throw IOException( ( boost::format("TIFFImageReader: Unsupported value (%d) for TIFFTAG_TILELENGTH while reading %s") % tileLength % fileName() ).str() );
+		}
+				
+		std::vector<unsigned char>::size_type tileLineSize = (size_t)( (float)m_bitsPerSample / 8 * m_samplesPerPixel * tileWidth );
+		std::vector<unsigned char>::size_type tileBufSize = tileLineSize * tileLength;		
+		std::vector<unsigned char> tileBuffer;
+		tileBuffer.resize( tileBufSize, 0 );
+		
+		int x = 0;
+		int y = 0;
+		
+		/// Read each tile
+		for ( ttile_t tile = 0; tile < numTiles; tile++ )
+		{
+			tsize_t imageOffset = y * bufLineSize + x * ( bufLineSize / width );
+			int result = TIFFReadEncodedTile( m_tiffImage, tile, &tileBuffer[0], tileSize );
+			
+			if ( result == -1 )
+			{
+				throw IOException( (boost::format( "TIFFImageReader: Error on tile number %d while reading %s") % tile % fileName() ).str() );
+			}
+			
+			/// Copy the tile into its rightful place in the image buffer
+			tsize_t tileOffset = 0;
+			for ( int l = 0; l < tileLength; l ++)
+			{
+				memcpy( &m_buffer[0] + imageOffset, &tileBuffer[0] + tileOffset, tileLineSize );
+				imageOffset += bufLineSize;
+				tileOffset += tileLineSize;
+			}
+			
+			x = x + tileWidth;
+			
+			if ( x >= width )
+			{
+				x = 0;
+				y += tileLength;
+			}
+		}
+	}
+	else
+	{
+		tsize_t stripSize = TIFFStripSize( m_tiffImage );
+		tsize_t imageOffset = 0;
+		tstrip_t numStrips = TIFFNumberOfStrips( m_tiffImage );
+		for ( tstrip_t strip = 0; strip < numStrips; strip++ )
+		{
+			tsize_t result = TIFFReadEncodedStrip( m_tiffImage, strip, &m_buffer[0] + imageOffset, stripSize );
 
-		imageOffset += result;
+			if ( result == -1 )
+			{
+				throw IOException( (boost::format( "TIFFImageReader: Error on strip number %d while reading %s") % strip % fileName() ).str() );
+			}
+
+			imageOffset += result;
+		}
 	}
 }
 
@@ -383,11 +453,10 @@ bool TIFFImageReader::open( bool throwOnFailure )
 	ScopedTIFFExceptionTranslator errorHandler;
 
 	if ( m_tiffImage )
-
 	{
 		if ( m_tiffImageFileName == fileName() )
 		{
-			return true;
+			return true;			
 		}
 		else
 		{
@@ -396,19 +465,76 @@ bool TIFFImageReader::open( bool throwOnFailure )
 			m_buffer.clear();
 		}
 	}
-
-	assert( m_tiffImage == 0 );
-	assert( m_buffer.size() == 0 );
-
+	
 	try
 	{
-		m_tiffImage = TIFFOpen( fileName().c_str(), "r" );
-
-		if (! m_tiffImage )
+		if ( ! m_tiffImage )
 		{
-			throw IOException( ( boost::format("TIFFImageReader: Could not open %s ") % fileName() ).str() );
-		}
+			m_tiffImage = TIFFOpen( fileName().c_str(), "r" );
 
+			if (! m_tiffImage )
+			{
+				throw IOException( ( boost::format("TIFFImageReader: Could not open %s ") % fileName() ).str() );
+			}
+		}
+		
+		m_numDirectories = 1;	
+		TIFFSetDirectory( m_tiffImage, 0 );
+		while ( !TIFFLastDirectory( m_tiffImage ) )
+		{
+			m_numDirectories ++;
+			
+			TIFFReadDirectory( m_tiffImage );
+		}
+	
+		TIFFSetDirectory( m_tiffImage, 0 );
+		
+		m_tiffImageFileName = fileName();
+	}
+	catch ( ... )
+	{
+		if ( throwOnFailure )
+		{
+			throw;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return m_tiffImage != 0;
+}
+	
+bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
+{		
+	if ( !open( throwOnFailure ) )
+	{
+		return false;
+	}
+	
+	assert ( m_tiffImage );
+	
+	ScopedTIFFExceptionTranslator errorHandler;
+	
+	try
+	{
+				
+		if ( m_haveDirectory && m_currentDirectoryIndex == TIFFCurrentDirectory( m_tiffImage ) )
+		{
+			return true;
+		}
+		else
+		{
+			int res = TIFFSetDirectory( m_tiffImage, m_currentDirectoryIndex );
+			if ( res != 1 )
+			{						
+				return false;			
+			}
+		}		
+
+		m_buffer.clear();	
+				
 		int width = tiffField<uint32>( TIFFTAG_IMAGEWIDTH );
 		if ( width == 0 )
 		{
@@ -492,7 +618,7 @@ bool TIFFImageReader::open( bool throwOnFailure )
 
 		m_displayWindow = Box2i( V2i( 0, 0 ), V2i( fullWidth - 1, fullLength - 1 ) );
 
-		m_tiffImageFileName = fileName();
+		m_haveDirectory = true;
 	}
 	catch ( ... )
 	{
@@ -506,6 +632,6 @@ bool TIFFImageReader::open( bool throwOnFailure )
 		}
 	}
 
-	return m_tiffImage != 0;
+	return m_haveDirectory;
 }
 
