@@ -32,22 +32,21 @@
 #
 ##########################################################################
 
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-
 import MayaUnitTest
+import maya.cmds
 
+class FromMayaCameraConverterTest( unittest.TestCase ) :
+
+	def test( self ) :
+				
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape" )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCameraConverter ) ) )
+		
+		camera = converter.convert()
+		self.assert_( camera.isInstanceOf( IECore.Camera.staticTypeId() ) )
+								
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )

@@ -54,12 +54,12 @@ using namespace IECore;
 using namespace Imath;
 
 static const MFn::Type fromTypes[] = { MFn::kCamera, MFn::kInvalid };
-static const IECore::TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, PreWorldRenderableTypeId, CameraTypeId };
+static const IECore::TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, PreWorldRenderableTypeId, CameraTypeId, InvalidTypeId };
 
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaCameraConverter> FromMayaCameraConverter::m_description( fromTypes, toTypes );
+FromMayaDagNodeConverter::Description<FromMayaCameraConverter> FromMayaCameraConverter::m_description( fromTypes, toTypes );
 
-FromMayaCameraConverter::FromMayaCameraConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaCameraConverter", "Converts maya camera shape nodes into IECore::Camera objects.", object )
+FromMayaCameraConverter::FromMayaCameraConverter( const MDagPath &dagPath )
+	:	FromMayaDagNodeConverter( staticTypeName(), "Converts maya camera shape nodes into IECore::Camera objects.", dagPath )
 {
 
 	IntParameter::PresetsMap resolutionModePresets;
@@ -93,18 +93,16 @@ FromMayaCameraConverter::FromMayaCameraConverter( const MObject &object )
 	
 }
 
-IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
+IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
 {
-	MFnCamera fnCamera( object );
+	MFnCamera fnCamera( dagPath );
 
 	// convert things that are required by the IECore::Renderer specification
 
 	CameraPtr result = new Camera;
 	result->setName( IECore::convert<std::string>( fnCamera.name() ) );
 	
-	MDagPath path;
-	fnCamera.getPath( path );
-	result->setTransform( new MatrixTransform( IECore::convert<Imath::M44f>( path.inclusiveMatrix() ) ) );
+	result->setTransform( new MatrixTransform( IECore::convert<Imath::M44f>( dagPath.inclusiveMatrix() ) ) );
 
 	V2i resolution;
 	if( operands->member<IntData>( "resolutionMode" )->readable()==RenderGlobals )

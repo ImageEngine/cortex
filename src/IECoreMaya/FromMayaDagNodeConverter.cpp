@@ -32,33 +32,50 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#include "IECoreMaya/FromMayaDagNodeConverter.h"
 
-namespace IECoreMaya
+#include "IECore/CompoundObject.h"
+
+using namespace IECoreMaya;
+
+FromMayaDagNodeConverter::FromMayaDagNodeConverter( const std::string &name, const std::string &description, const MDagPath &dagPath )
+	:	FromMayaObjectConverter( name, description, dagPath.node() ), m_dagPath( dagPath )
 {
+}
 
-enum TypeId
+IECore::ObjectPtr FromMayaDagNodeConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
-	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	LastTypeId = 109999
+	if( !m_dagPath.isValid() )
+	{
+		return 0;
+	}
+	return doConversion( m_dagPath, operands );
+}
 
-};
+FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::create( const MDagPath &dagPath )
+{
+	return create( dagPath, IECore::InvalidTypeId );
+}
 
-} // namespace IECoreMaya
+FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::create( const MDagPath &dagPath, IECore::TypeId resultType )
+{
+	const TypesToFnsMap *m = typesToFns();
+	TypesToFnsMap::const_iterator it = m->find( Types( dagPath.apiType(), resultType ) );
+	if( it!=m->end() )
+	{
+		return it->second( dagPath );
+	}
+	return 0;
+}
 
-#endif // IECOREMAYA_TYPEIDS_H
+FromMayaDagNodeConverter::TypesToFnsMap *FromMayaDagNodeConverter::typesToFns()
+{
+	static TypesToFnsMap *t = new TypesToFnsMap;
+	return t;
+}
+
+void FromMayaDagNodeConverter::registerConverter( const MFn::Type fromType, IECore::TypeId resultType, CreatorFn creator )
+{
+	typesToFns()->insert( TypesToFnsMap::value_type( Types( fromType, resultType), creator ) );
+	typesToFns()->insert( TypesToFnsMap::value_type( Types( fromType, IECore::InvalidTypeId), creator ) );
+}

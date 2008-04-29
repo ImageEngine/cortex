@@ -49,10 +49,13 @@ using namespace IECore;
 using namespace std;
 using namespace Imath;
 
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaGroupConverter> FromMayaGroupConverter::m_description( MFn::kTransform, GroupTypeId );
+static const MFn::Type fromTypes[] = { MFn::kTransform, MFn::kInvalid };
+static const IECore::TypeId toTypes[] = { GroupTypeId, InvalidTypeId };
 
-FromMayaGroupConverter::FromMayaGroupConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaGroupConverter", "Converts transforms to Group objects.", object )
+FromMayaDagNodeConverter::Description<FromMayaGroupConverter> FromMayaGroupConverter::m_description( fromTypes, toTypes );
+
+FromMayaGroupConverter::FromMayaGroupConverter( const MDagPath &dagPath )
+	:	FromMayaDagNodeConverter( staticTypeName(), "Converts transforms to Group objects.", dagPath )
 {
 	
 	/// \todo I see no need for this to be a parameter. Surely it should be a given that we ignore intermediates?
@@ -69,7 +72,7 @@ FromMayaGroupConverter::FromMayaGroupConverter( const MObject &object )
 
 }
 		
-IECore::ObjectPtr FromMayaGroupConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
+IECore::ObjectPtr FromMayaGroupConverter::doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
 {
 	bool ignoreIntermediate = false;
 	CompoundObject::ObjectMap::const_iterator it = operands->members().find( "ignoreIntermediateObjects" );
@@ -78,17 +81,18 @@ IECore::ObjectPtr FromMayaGroupConverter::doConversion( const MObject &object, I
 		ignoreIntermediate = boost::static_pointer_cast< BoolData >( it->second )->readable();
 	}
 
-	if( object.apiType()==MFn::kTransform )
+	if( dagPath.apiType()==MFn::kTransform )
 	{
-		MFnDagNode fnDagNode( object );
+		MFnDagNode fnDagNode( dagPath );
 		
 	 	GroupPtr result = new Group();		
 		result->setTransform( new MatrixTransform( matConvert<MMatrix, M44f>( fnDagNode.transformationMatrix() ) ) );
 		
-		unsigned int n = fnDagNode.childCount();
+		unsigned int n = dagPath.childCount();
 		for( unsigned int i=0; i<n; i++ )
 		{
-			MObject child = fnDagNode.child( i );
+			MDagPath child( dagPath );
+			child.push( dagPath.child( i ) );
 
 			if ( ignoreIntermediate )
 			{
@@ -110,15 +114,15 @@ IECore::ObjectPtr FromMayaGroupConverter::doConversion( const MObject &object, I
 	}
 	else
 	{
-		FromMayaObjectConverterPtr c = 0;
-		if( object.apiType()==MFn::kMesh )
+		FromMayaShapeConverterPtr c = 0;
+		if( dagPath.apiType()==MFn::kMesh )
 		{
-			c = new FromMayaMeshConverter( object );
+			c = new FromMayaMeshConverter( dagPath );
 			c->parameters()->setValue( m_meshParameters->getValue() );
 		}
 		else
 		{
-			c = FromMayaObjectConverter::create( object, VisibleRenderable::staticTypeId() );
+			c = FromMayaShapeConverter::create( dagPath, VisibleRenderable::staticTypeId() );
 		}
 		
 		if( c )

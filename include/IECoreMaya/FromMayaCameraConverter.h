@@ -35,7 +35,7 @@
 #ifndef IE_COREMAYA_FROMMAYACAMERACONVERTER_H
 #define IE_COREMAYA_FROMMAYACAMERACONVERTER_H
 
-#include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECoreMaya/FromMayaDagNodeConverter.h"
 
 #include "IECore/TypedParameter.h"
 #include "IECore/NumericParameter.h"
@@ -43,18 +43,18 @@
 namespace IECoreMaya
 {
 
-class FromMayaCameraConverter : public FromMayaObjectConverter
+class FromMayaCameraConverter : public FromMayaDagNodeConverter
 {
 	
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaCameraConverter, FromMayaCameraConverterTypeId, FromMayaObjectConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaCameraConverter, FromMayaCameraConverterTypeId, FromMayaDagNodeConverter );
 		
-		FromMayaCameraConverter( const MObject &object );
+		FromMayaCameraConverter( const MDagPath &dagPath );
 		
 	protected :
 	
-		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::ObjectPtr doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
 
@@ -68,7 +68,7 @@ class FromMayaCameraConverter : public FromMayaObjectConverter
 		IECore::IntParameterPtr m_resolutionMode;
 		IECore::V2iParameterPtr m_resolution;
 
-		static FromMayaObjectConverterDescription<FromMayaCameraConverter> m_description;
+		static FromMayaDagNodeConverter::Description<FromMayaCameraConverter> m_description;
 
 		
 };

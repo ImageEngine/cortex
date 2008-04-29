@@ -32,33 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#ifndef IECOREMAYA_FROMMAYADAGNODECONVERTERBINDING_H
+#define IECOREMAYA_FROMMAYADAGNODECONVERTERBINDING_H
 
 namespace IECoreMaya
 {
 
-enum TypeId
-{
-	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	LastTypeId = 109999
+void bindFromMayaDagNodeConverter();
 
-};
+}
 
-} // namespace IECoreMaya
-
-#endif // IECOREMAYA_TYPEIDS_H
+#endif // IECOREMAYA_FROMMAYADAGNODECONVERTERBINDING_H

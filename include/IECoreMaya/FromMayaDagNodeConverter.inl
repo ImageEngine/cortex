@@ -32,33 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#ifndef IECOREMAYA_FROMMAYADAGNODECONVERTER_INL
+#define IECOREMAYA_FROMMAYADAGNODECONVERTER_INL
 
 namespace IECoreMaya
 {
 
-enum TypeId
+template<class T>
+FromMayaDagNodeConverter::Description<T>::Description( const MFn::Type *fromTypes, const IECore::TypeId *resultTypes )
 {
-	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	LastTypeId = 109999
+	while( *fromTypes!=MFn::kInvalid )
+	{
+		for( const IECore::TypeId *t = resultTypes; *t!=IECore::InvalidTypeId; t++ )
+		{
+			FromMayaDagNodeConverter::registerConverter( *fromTypes, *t, creator );
+		}
+		fromTypes++;
+	}
+}
 
-};
+template<class T>
+FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::Description<T>::creator( const MDagPath &dagPath )
+{
+	return new T( dagPath );
+}
 
 } // namespace IECoreMaya
 
-#endif // IECOREMAYA_TYPEIDS_H
+#endif // IECOREMAYA_FROMMAYADAGNODECONVERTER_INL

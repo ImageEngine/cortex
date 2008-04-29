@@ -45,7 +45,7 @@ using namespace boost::python;
 
 void IECoreMaya::bindFromMayaCameraConverter()
 {
-	typedef class_<FromMayaCameraConverter, FromMayaCameraConverterPtr, boost::noncopyable, bases<FromMayaObjectConverter> > FromMayaCameraConverterPyClass;
+	typedef class_<FromMayaCameraConverter, FromMayaCameraConverterPtr, boost::noncopyable, bases<FromMayaDagNodeConverter> > FromMayaCameraConverterPyClass;
 
 	FromMayaCameraConverterPyClass( "FromMayaCameraConverter", no_init )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaCameraConverter )

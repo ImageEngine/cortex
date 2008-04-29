@@ -35,7 +35,7 @@
 #ifndef IE_COREMAYA_FROMMAYAGROUPCONVERTER_H
 #define IE_COREMAYA_FROMMAYAGROUPCONVERTER_H
 
-#include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECoreMaya/FromMayaDagNodeConverter.h"
 
 #include "IECore/CompoundParameter.h"
 
@@ -44,24 +44,24 @@ namespace IECoreMaya
 
 /// The FromMayaGroupConverter converts types compatible with
 /// MFnDagNode into IECore::Group objects.
-class FromMayaGroupConverter : public FromMayaObjectConverter
+class FromMayaGroupConverter : public FromMayaDagNodeConverter
 {
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaGroupConverter, FromMayaGroupConverterTypeId, FromMayaObjectConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaGroupConverter, FromMayaGroupConverterTypeId, FromMayaDagNodeConverter );
 
-		FromMayaGroupConverter( const MObject &object );
+		FromMayaGroupConverter( const MDagPath &object );
 		
 	protected :
 	
-		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::ObjectPtr doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 		
 		IECore::CompoundParameterPtr m_meshParameters;
 		
 	private :
 
-		static FromMayaObjectConverterDescription<FromMayaGroupConverter> m_description;
+		static FromMayaDagNodeConverter::Description<FromMayaGroupConverter> m_description;
 
 };
 

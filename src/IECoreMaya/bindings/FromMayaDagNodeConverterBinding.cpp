@@ -32,33 +32,51 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#include "boost/python.hpp"
 
-namespace IECoreMaya
-{
+#include "IECoreMaya/FromMayaDagNodeConverter.h"
+#include "IECoreMaya/StatusException.h"
+#include "IECoreMaya/bindings/FromMayaDagNodeConverterBinding.h"
 
-enum TypeId
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+#include "maya/MSelectionList.h"
+#include "maya/MString.h"
+
+using namespace IECoreMaya;
+using namespace boost::python;
+
+static IECoreMaya::FromMayaDagNodeConverterPtr create1( const char *n )
 {
+	MSelectionList l;
+	l.add( MString( n ) );
+	MDagPath p;
+	MStatus s = l.getDagPath( 0, p );
+	StatusException::throwIfError( s );
+	return FromMayaDagNodeConverter::create( p );
+}
+
+static IECoreMaya::FromMayaDagNodeConverterPtr create2( const char *n, IECore::TypeId t )
+{
+	MSelectionList l;
+	l.add( MString( n ) );
+	MDagPath p;
+	MStatus s = l.getDagPath( 0, p );
+	StatusException::throwIfError( s );
+	return FromMayaDagNodeConverter::create( p, t );
+}
+
+void IECoreMaya::bindFromMayaDagNodeConverter()
+{
+	typedef class_<FromMayaDagNodeConverter, FromMayaDagNodeConverterPtr, boost::noncopyable, bases<FromMayaObjectConverter> > FromMayaDagNodeConverterPyClass;
+
+	scope s = FromMayaDagNodeConverterPyClass( "FromMayaDagNodeConverter", no_init )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaDagNodeConverter )
+		.def( "create", &create1 )
+		.def( "create", &create2 ).staticmethod( "create" )
+	;
 	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	LastTypeId = 109999
-
-};
-
-} // namespace IECoreMaya
-
-#endif // IECOREMAYA_TYPEIDS_H
+	INTRUSIVE_PTR_PATCH( FromMayaDagNodeConverter, FromMayaDagNodeConverterPyClass );
+	implicitly_convertible<FromMayaDagNodeConverterPtr, FromMayaObjectConverterPtr>();
+}
