@@ -120,4 +120,4 @@ class TestProgram( unittest.TestProgram ) :
 		finally:
 		
 			# If cleanup fails for any reason, just exit.
-			system.exit( exitStatus )
+			sys.exit( exitStatus )
