@@ -1247,7 +1247,7 @@ if doConfigure :
 		mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./mel"
 		mayaPythonExecutable = "mayapy"
 		
-		mayaTest = mayaTestEnv.Command( "test/IECoreMaya/results.txt", mayaPythonModule, mayaPythonExecutable + " $TEST_MAYA_SCRIPT" )
+		mayaTest = mayaTestEnv.Command( "test/IECoreMaya/resultsPython.txt", mayaPythonModule, mayaPythonExecutable + " $TEST_MAYA_SCRIPT" )
 		NoCache( mayaTest )
 		mayaTestEnv.Depends( mayaTest, [ mayaPlugin, mayaPythonModule ] )
 		mayaTestEnv.Depends( mayaTest, glob.glob( "test/IECoreMaya/*.py" ) )
