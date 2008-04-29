@@ -1167,7 +1167,8 @@ if doConfigure :
 		c.Finish()
 
 		mayaSources = glob.glob( "src/IECoreMaya/*.cpp" )
-		mayaHeaders = glob.glob( "include/IECoreMaya/*.h" ) + glob.glob( "include/IECoreMaya/*.inl" )
+		mayaHeaders = glob.glob( "include/IECoreMaya/bindings/*.h" ) + glob.glob( "include/IECoreMaya/*.h" ) + glob.glob( "include/IECoreMaya/*.inl" )
+		mayaBindingHeaders = glob.glob( "include/IECoreMaya/bindings/*.h" ) + glob.glob( "include/IECoreMaya/bindings/*.inl" )
 		mayaPythonSources = glob.glob( "src/IECoreMaya/bindings/*.cpp" )
 		mayaPythonScripts = glob.glob( "python/IECoreMaya/*.py" )
 		mayaMel = glob.glob( "mel/IECoreMaya/*.mel" )
@@ -1191,6 +1192,7 @@ if doConfigure :
 
  		# maya headers
 		mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
+		mayaHeaderInstall += mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya/bindings", mayaBindingHeaders )		
 		mayaEnv.Depends( mayaHeaderInstall, coreInstallSync )			
 		mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
 		mayaEnv.Alias( "install", mayaHeaderInstall )
