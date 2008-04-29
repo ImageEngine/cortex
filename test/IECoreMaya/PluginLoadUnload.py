@@ -67,5 +67,4 @@ class TestPluginLoadUnload( unittest.TestCase ) :
 		assert( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
-	 
+	MayaUnitTest.TestProgram()	 

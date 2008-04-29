@@ -101,4 +101,4 @@ class FromMayaParticleConverterTest( unittest.TestCase ) :
 		self.failIf( IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECore.MeshPrimitive.staticTypeId() ) )		
 									
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
+	MayaUnitTest.TestProgram()

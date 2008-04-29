@@ -49,4 +49,4 @@ class FromMayaPlugConverterTest( unittest.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 							
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
+	MayaUnitTest.TestProgram()

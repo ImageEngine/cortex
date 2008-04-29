@@ -192,4 +192,4 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		raise NotImplementedError
 							
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
+	MayaUnitTest.TestProgram()

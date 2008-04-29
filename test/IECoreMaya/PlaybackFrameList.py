@@ -52,5 +52,4 @@ class TestPlaybackFrameList( unittest.TestCase ) :
 		                            int( cmds.playbackOptions( query=True, animationEndTime=True ) + 1 ) ) )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
-
+	MayaUnitTest.TestProgram()

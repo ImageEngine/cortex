@@ -50,4 +50,4 @@ class NamespacePollutionTest( unittest.TestCase ) :
 				
 
 if __name__ == "__main__":
-    unittest.main()   	
+	MayaUnitTest.TestProgram()

@@ -63,4 +63,4 @@ class FromMayaPlugConverterTest( unittest.TestCase ) :
 		self.assertEqual( v.value, 0.03 )
 							
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
+	MayaUnitTest.TestProgram()

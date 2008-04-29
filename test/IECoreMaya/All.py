@@ -46,5 +46,6 @@ from FromMayaPlugConverterTest import *
 from FromMayaUnitPlugConverterTest import *
 
 import MayaUnitTest
-MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )
-	 
+
+if __name__ == "__main__":
+	MayaUnitTest.TestProgram()
