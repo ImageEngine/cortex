@@ -1126,6 +1126,7 @@ mayaEnvAppends = {
 	],
 	"LIBPATH" : [ "$MAYA_ROOT/lib" ],
 	"LIBS" : [
+		"OpenMayalib",
 		"OpenMaya",
 		"OpenMayaUI",
 		"OpenMayaAnim",
