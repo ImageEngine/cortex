@@ -452,7 +452,7 @@ Imath::M44f IECoreRI::RendererImplementation::getTransform( const std::string &c
 		V3f y = convert<Imath::V3f>( p[1] ) - o;
 		V3f z = convert<Imath::V3f>( p[2] ) - o;
 
-		result = IECore::matrixFromBasis( x, y, z, o );
+		result = IECore::matrixFromBasis<float>( x, y, z, o );
 	}
 	else
 	{

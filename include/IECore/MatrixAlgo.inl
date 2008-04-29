@@ -38,9 +38,10 @@
 namespace IECore
 {
 
-Imath::M44f matrixFromBasis( const Imath::V3f &x, const Imath::V3f &y, const Imath::V3f &z, const Imath::V3f &o )
+template<typename T>
+Imath::Matrix44<T> matrixFromBasis( const Imath::Vec3<T> &x, const Imath::Vec3<T> &y, const Imath::Vec3<T> &z, const Imath::Vec3<T> &o )
 {
-	Imath::M44f result;
+	Imath::Matrix44<T> result;
 	result[0][0] = x[0];
 	result[0][1] = x[1];
 	result[0][2] = x[2];

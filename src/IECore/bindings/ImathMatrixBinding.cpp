@@ -546,7 +546,7 @@ void bindMatrix44(const char *bindName)
 		.def("createRotated", &createRotated<Matrix44<T>, Vec3<T> > ).staticmethod( "createRotated" )
 		.def("createAimed", &Imath::rotationMatrix<T> )
 		.def("createAimed", &Imath::rotationMatrixWithUpDir<T> ).staticmethod( "createAimed" )
-		.def("createFromBasis", &matrixFromBasis ).staticmethod( "createFromBasis" )
+		.def("createFromBasis", &matrixFromBasis<T> ).staticmethod( "createFromBasis" )
 		
 		.def("extractScaling", &extractScaling<Matrix44<T>, Vec3<T> > )
 		.def("sansScaling", &sansScaling2<Matrix44<T> > )
