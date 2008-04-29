@@ -102,4 +102,22 @@ class TestProgram( unittest.TestProgram ) :
 		import maya.cmds
 		maya.cmds.loadPlugin( "ieCore" )
 		
-		unittest.TestProgram.runTests( self )		
+		if not self.testRunner:
+			self.testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 )
+			
+		result = self.testRunner.run( self.test )
+		
+		exitStatus = int( not result.wasSuccessful() )
+		
+		try:
+			if hasattr( maya.standalone, "cleanup" ):
+
+				maya.standalone.cleanup( exitStatus )
+			else:
+
+				import IECoreMaya				
+				IECoreMaya.Standalone.cleanup( exitStatus )
+		finally:
+		
+			# If cleanup fails for any reason, just exit.
+			system.exit( exitStatus )
