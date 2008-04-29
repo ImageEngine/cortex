@@ -189,7 +189,15 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 			
 	def testConvertFromPlug( self ) :
 		
-		raise NotImplementedError
+		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
+		maya.cmds.move( 1, 2, 3, sphere )
+		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
+	
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( sphere ) + ".worldMesh" )
+		
+		converter.space.setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
+		m = converter.convert()
+		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( m.bound() ) )
 							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
