@@ -44,7 +44,7 @@ namespace IECoreMaya
 
 IE_CORE_FORWARDDECLARE( FromMayaDagNodeConverter );
 
-/// The FromMayaShapeConverter class forms an abstract base class for converting
+/// The FromMayaDagNodeConverter class forms an abstract base class for converting
 /// maya dag node objects into IECore objects.
 class FromMayaDagNodeConverter : public FromMayaObjectConverter
 {
