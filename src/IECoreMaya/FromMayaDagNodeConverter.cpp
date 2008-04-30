@@ -52,11 +52,6 @@ IECore::ObjectPtr FromMayaDagNodeConverter::doConversion( const MObject &object,
 	return doConversion( m_dagPath, operands );
 }
 
-FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::create( const MDagPath &dagPath )
-{
-	return create( dagPath, IECore::InvalidTypeId );
-}
-
 FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::create( const MDagPath &dagPath, IECore::TypeId resultType )
 {
 	const TypesToFnsMap *m = typesToFns();

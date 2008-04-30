@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,14 +34,29 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
+#include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECoreMaya/StatusException.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
+#include "maya/MSelectionList.h"
+#include "maya/MString.h"
+
 using namespace IECoreMaya;
 using namespace boost::python;
+
+static IECoreMaya::FromMayaObjectConverterPtr create( const char *n, IECore::TypeId resultType )
+{
+	MSelectionList l;
+	StatusException::throwIfError( l.add( MString( n ) ) );
+
+	MObject o;
+	StatusException::throwIfError( l.getDependNode( 0, o ) );
+	
+	return FromMayaObjectConverter::create( o, resultType );
+}
 
 void IECoreMaya::bindFromMayaObjectConverter()
 {
@@ -49,6 +64,7 @@ void IECoreMaya::bindFromMayaObjectConverter()
 
 	FromMayaObjectConverterPyClass( "FromMayaObjectConverter", no_init )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaObjectConverter )
+		.def( "create", &create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 	
 	INTRUSIVE_PTR_PATCH( FromMayaObjectConverter, FromMayaObjectConverterPyClass );

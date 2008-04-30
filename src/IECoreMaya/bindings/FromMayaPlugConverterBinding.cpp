@@ -47,17 +47,7 @@
 using namespace IECoreMaya;
 using namespace boost::python;
 
-static IECoreMaya::FromMayaConverterPtr create1( const char *n )
-{
-	MSelectionList l;
-	l.add( MString( n ) );
-	MPlug p;
-	MStatus s = l.getPlug( 0, p );
-	StatusException::throwIfError( s );
-	return FromMayaPlugConverter::create( p );
-}
-
-static IECoreMaya::FromMayaConverterPtr create2( const char *n, IECore::TypeId t )
+static IECoreMaya::FromMayaConverterPtr create( const char *n, IECore::TypeId t )
 {
 	MSelectionList l;
 	l.add( MString( n ) );
@@ -74,8 +64,7 @@ void IECoreMaya::bindFromMayaPlugConverter()
 	FromMayaPlugConverterPyClass( "FromMayaPlugConverter", no_init )
 		.def( "convert", &FromMayaPlugConverter::convert )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaPlugConverter )
-		.def( "create", &create1 )
-		.def( "create", &create2 ).staticmethod( "create" )
+		.def( "create", &create, ( arg_( "plug" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 	
 	INTRUSIVE_PTR_PATCH( FromMayaPlugConverter, FromMayaPlugConverterPyClass );

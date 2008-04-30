@@ -32,24 +32,24 @@
 #
 ##########################################################################
 
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-
 import MayaUnitTest
+import maya.cmds
 
+class FromMayaObjectConverterTest( unittest.TestCase ) :
+
+	def testFactory( self ) :
+		
+		sphereTransform = maya.cmds.polySphere()[0]
+		sphereShape = maya.cmds.listRelatives( sphereTransform, shapes=True )[0]
+		
+		converter = IECoreMaya.FromMayaObjectConverter.create( str( sphereShape ) )
+		self.assert_( converter.isInstanceOf( IECore.TypeId(IECoreMaya.TypeId.FromMayaMeshConverter) ) )
+		
+		converter = IECoreMaya.FromMayaObjectConverter.create( str( sphereShape ), IECore.TypeId.MeshPrimitive )
+		self.assert_( converter.isInstanceOf( IECore.TypeId(IECoreMaya.TypeId.FromMayaMeshConverter) ) )
+							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

@@ -35,6 +35,11 @@
 #include "boost/python.hpp"
 
 #include "IECoreMaya/FromMayaConverter.h"
+#include "IECoreMaya/FromMayaShapeConverter.h"
+#include "IECoreMaya/FromMayaDagNodeConverter.h"
+#include "IECoreMaya/FromMayaPlugConverter.h"
+#include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/bindings/FromMayaConverterBinding.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
@@ -42,8 +47,57 @@
 
 #include "IECore/Object.h"
 
+#include "maya/MSelectionList.h"
+#include "maya/MString.h"
+
 using namespace IECoreMaya;
 using namespace boost::python;
+
+static IECoreMaya::FromMayaConverterPtr create( const char *n, IECore::TypeId resultType )
+{
+	MSelectionList l;
+	StatusException::throwIfError( l.add( MString( n ) ) );
+	
+	MDagPath p;
+	MStatus s = l.getDagPath( 0, p );
+	if( s )
+	{
+		FromMayaConverterPtr c = FromMayaShapeConverter::create( p, resultType );
+		if( c )
+		{
+			return c;
+		}
+		c = FromMayaDagNodeConverter::create( p );
+		if( c )
+		{
+			return c;
+		}
+	}
+	
+	MObject o;
+	s = l.getDependNode( 0, o );
+	if( s )
+	{
+		FromMayaConverterPtr c = FromMayaObjectConverter::create( o, resultType );
+		if( c )
+		{
+			return c;
+		}
+	}
+	
+	MPlug pl;
+	s = l.getPlug( 0, pl );
+	if( s )
+	{
+		FromMayaConverterPtr c = FromMayaPlugConverter::create( pl, resultType );
+		if( c )
+		{
+			return c;
+		}
+	}
+		
+	return 0;
+}
 
 void IECoreMaya::bindFromMayaConverter()
 {
@@ -51,6 +105,7 @@ void IECoreMaya::bindFromMayaConverter()
 
 	FromMayaConverterPyClass( "FromMayaConverter", no_init )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaConverter )
+		.def( "create", &create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 	
 	INTRUSIVE_PTR_PATCH( FromMayaConverter, FromMayaConverterPyClass );

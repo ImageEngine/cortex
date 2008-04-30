@@ -32,24 +32,39 @@
 #
 ##########################################################################
 
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-
 import MayaUnitTest
+import maya.cmds
 
+class FromMayaConverterTest( unittest.TestCase ) :
+
+	def testFactory( self ) :
+		
+		sphereTransform = maya.cmds.polySphere()[0]
+		sphereShape = maya.cmds.listRelatives( sphereTransform, shapes=True )[0]
+		
+		# get a converter for a plug
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) + ".translateX" )
+		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) + ".translateX", IECore.TypeId.FloatData )
+		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+		
+		# get a converter for a dag node
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) )
+		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ), IECore.TypeId.Group )
+		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
+		
+		# get a converter for a shape node
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ) )
+		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
+		
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ), IECore.TypeId.MeshPrimitive )
+		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
+							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,16 +77,13 @@ class FromMayaObjectConverter : public FromMayaConverter
 		//@}
 		
 		//! @name Factory
-		/// The functions allow the creation of a specific converter subclass appropriate
-		/// to a particular object.
 		/////////////////////////////////////////////////////////////////////////////////
 		//@{
-		/// Creates a converter which will convert the given object to an IECore::Object
-		/// of any relevant type. Returns 0 if no such converter can be found.
-		static FromMayaObjectConverterPtr create( const MObject &object );
-		/// Creates a converter which will convert the given object to an IECore::Object
-		/// of the specified type. Returns 0 if no such converter can be found.
-		static FromMayaObjectConverterPtr create( const MObject &object, IECore::TypeId resultType );
+		/// Creates a converter which will convert the given object to an IECore::Object.
+		/// If resultType is specified then only converters which create objects of that
+		/// type will be returned - the default value allows any suitable converter to be
+		/// created. If no matching converters exist then returns 0.
+		static FromMayaObjectConverterPtr create( const MObject &object, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
 		
 	protected :

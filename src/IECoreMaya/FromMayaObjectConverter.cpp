@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -210,17 +210,6 @@ IECore::ConstBoolParameterPtr FromMayaObjectConverter::blindDataRemoveNamespaceP
 /////////////////////////////////////////////////////////////////////////////////
 // Factory
 /////////////////////////////////////////////////////////////////////////////////
-
-FromMayaObjectConverterPtr FromMayaObjectConverter::create( const MObject &object )
-{
-	const TypesToFnsMap *m = typesToFns();
-	TypesToFnsMap::const_iterator it = m->find( Types( object.apiType(), IECore::InvalidTypeId ) );
-	if( it!=m->end() )
-	{
-		return it->second( object );
-	}
-	return 0;
-}
 
 FromMayaObjectConverterPtr FromMayaObjectConverter::create( const MObject &object, IECore::TypeId resultType )
 {

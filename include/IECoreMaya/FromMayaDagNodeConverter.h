@@ -53,18 +53,13 @@ class FromMayaDagNodeConverter : public FromMayaObjectConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaDagNodeConverter, FromMayaDagNodeConverterTypeId, FromMayaObjectConverter );
 		
-		
 		//! @name Factory
-		/// The functions allow the creation of a specific converter subclass appropriate
-		/// to a particular MDagPath instance.
 		/////////////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Creates a converter which will convert the given object to an IECore::Object
-		/// of any relevant type. Returns 0 if no such converter can be found.
-		static FromMayaDagNodeConverterPtr create( const MDagPath &dagPath );
-		/// Creates a converter which will convert the given object to an IECore::Object
-		/// of the specified type. Returns 0 if no such converter can be found.
-		static FromMayaDagNodeConverterPtr create( const MDagPath &dagPath, IECore::TypeId resultType );
+		/// of the type requested in resultType - the default value specifies that any result type
+		/// will do. Returns 0 if no suitable converter can be found.
+		static FromMayaDagNodeConverterPtr create( const MDagPath &dagPath, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
 		
 	protected :

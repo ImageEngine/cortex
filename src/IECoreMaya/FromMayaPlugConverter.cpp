@@ -97,12 +97,7 @@ void FromMayaPlugConverter::registerConverter( const MFnUnitAttribute::Type from
 	UnitTypesToFnsMap *m = unitTypesToFns();
 	(*m)[UnitTypePair( fromType, resultType )] = creator;
 }
-		
-FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug )
-{
-	return create( plug, IECore::InvalidTypeId );
-}
-		
+
 FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::TypeId resultType )
 {
 	MObject attribute = plug.attribute();

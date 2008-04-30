@@ -279,11 +279,6 @@ const MDagPath *FromMayaShapeConverter::dagPath( bool emitSpaceWarnings ) const
 	return 0;
 }
 
-FromMayaShapeConverterPtr FromMayaShapeConverter::create( const MDagPath &dagPath )
-{
-	return create( dagPath, IECore::InvalidTypeId );
-}
-
 FromMayaShapeConverterPtr FromMayaShapeConverter::create( const MDagPath &dagPath, IECore::TypeId resultType )
 {
 	const ShapeTypesToFnsMap *m = shapeTypesToFns();

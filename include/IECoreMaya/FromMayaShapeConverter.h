@@ -75,19 +75,17 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 		IECore::ConstStringParameterPtr primVarAttrPrefixParameter() const;
 		
 		//! @name Factory
-		/// The functions allow the creation of a specific converter subclass appropriate
-		/// to a particular MDagPath instance. Where possible these should be used in
-		/// preference to the FromMayaObjectConverter factory functions, as constructing
-		/// a converter from an MDagPath provides additional functionality (for instance
-		/// correct world space queries).
+		/// A unctions allow the creation of a specific converter subclass appropriate
+		/// to a particular MDagPath instance. 
 		/////////////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Creates a converter which will convert the given object to an IECore::Object
-		/// of any relevant type. Returns 0 if no such converter can be found.
-		static FromMayaShapeConverterPtr create( const MDagPath &dagPath );
-		/// Creates a converter which will convert the given object to an IECore::Object
-		/// of the specified type. Returns 0 if no such converter can be found.
-		static FromMayaShapeConverterPtr create( const MDagPath &dagPath, IECore::TypeId resultType );
+		/// of the type specified by resultType - the default value specifies that any result
+		/// will do. Returns 0 if no suitable converter can be found. Where possible this should be used in
+		/// preference to the FromMayaObjectConverter factory function, as constructing
+		/// a converter from an MDagPath provides additional functionality (for instance
+		/// correct world space queries).
+		static FromMayaShapeConverterPtr create( const MDagPath &dagPath, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
 		
 	protected :

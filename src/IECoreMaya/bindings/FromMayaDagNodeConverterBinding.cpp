@@ -47,24 +47,14 @@
 using namespace IECoreMaya;
 using namespace boost::python;
 
-static IECoreMaya::FromMayaDagNodeConverterPtr create1( const char *n )
+static IECoreMaya::FromMayaDagNodeConverterPtr create( const char *n, IECore::TypeId resultType )
 {
 	MSelectionList l;
 	l.add( MString( n ) );
 	MDagPath p;
 	MStatus s = l.getDagPath( 0, p );
 	StatusException::throwIfError( s );
-	return FromMayaDagNodeConverter::create( p );
-}
-
-static IECoreMaya::FromMayaDagNodeConverterPtr create2( const char *n, IECore::TypeId t )
-{
-	MSelectionList l;
-	l.add( MString( n ) );
-	MDagPath p;
-	MStatus s = l.getDagPath( 0, p );
-	StatusException::throwIfError( s );
-	return FromMayaDagNodeConverter::create( p, t );
+	return FromMayaDagNodeConverter::create( p, resultType );
 }
 
 void IECoreMaya::bindFromMayaDagNodeConverter()
@@ -73,8 +63,7 @@ void IECoreMaya::bindFromMayaDagNodeConverter()
 
 	scope s = FromMayaDagNodeConverterPyClass( "FromMayaDagNodeConverter", no_init )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaDagNodeConverter )
-		.def( "create", &create1 )
-		.def( "create", &create2 ).staticmethod( "create" )
+		.def( "create", &create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 	
 	INTRUSIVE_PTR_PATCH( FromMayaDagNodeConverter, FromMayaDagNodeConverterPyClass );
