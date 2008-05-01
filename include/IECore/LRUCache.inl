@@ -68,6 +68,18 @@ void LRUCache<Key, Data, GetterFn>::setMaxCost( Cost maxCost )
 }
 
 template<typename Key, typename Data, typename GetterFn>
+typename LRUCache<Key, Data, GetterFn>::Cost LRUCache<Key, Data, GetterFn>::getMaxCost( ) const
+{
+	return m_maxCost;
+}
+
+template<typename Key, typename Data, typename GetterFn>
+typename LRUCache<Key, Data, GetterFn>::Cost LRUCache<Key, Data, GetterFn>::currentCost() const
+{
+	return m_currentCost;
+}
+
+template<typename Key, typename Data, typename GetterFn>
 bool LRUCache<Key, Data, GetterFn>::get( const Key& key, GetterFn fn, Data &data ) const
 {
 	typename Cache::iterator it = m_cache.find( key );
