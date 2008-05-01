@@ -349,6 +349,10 @@ class Renderer : public IECore::Renderer
 		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
 		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
 
+		virtual void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual void instanceEnd();
+		virtual void instance( const std::string &name );
+
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		struct MemberData;

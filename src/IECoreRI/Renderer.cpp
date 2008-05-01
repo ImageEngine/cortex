@@ -216,6 +216,21 @@ void Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 	m_implementation->procedural( proc );
 }
 
+void Renderer::instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters )
+{
+	m_implementation->instanceBegin( name, parameters );
+}
+
+void Renderer::instanceEnd()
+{
+	m_implementation->instanceEnd();
+}
+
+void Renderer::instance( const std::string &name )
+{
+	m_implementation->instance( name );
+}
+
 IECore::DataPtr Renderer::command( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	return m_implementation->command( name, parameters );

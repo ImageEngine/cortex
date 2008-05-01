@@ -252,6 +252,13 @@ static void geometry( Renderer &r, const std::string &type, const dict &topology
 	r.geometry( type, t, p );
 }
 
+static void instanceBegin( Renderer &r, const std::string &name, const dict &parameters )
+{
+	CompoundDataMap p;
+	fillCompoundDataMap( p, parameters );
+	r.instanceBegin( name, p );
+}
+
 static void command( Renderer &r, const std::string &name, const dict &parameters )
 {
 	CompoundDataMap p;
@@ -304,6 +311,10 @@ void bindRenderer()
 		.def("geometry", &geometry)
 		
 		.def("procedural", &Renderer::procedural)
+
+		.def("instanceBegin", &instanceBegin)
+		.def("instanceEnd", &Renderer::instanceEnd)
+		.def("instance", &Renderer::instance)
 
 		.def("command", &command)
 		

@@ -88,8 +88,6 @@ IE_CORE_FORWARDDECLARE( Renderer );
 /// Used to specify data for the purposes of users. The renderer should store the value
 /// and make it available for query, but otherwise it should have no effect. This applies
 /// mostly to the attribute and option calls.
-///
-/// \todo Methods for creating and using instances.
 class Renderer : public RunTimeTyped
 {
 	
@@ -349,6 +347,20 @@ class Renderer : public RunTimeTyped
 		
 		/// Renders a piece of procedural geometry.
 		virtual void procedural( ProceduralPtr proc ) = 0;
+		
+		//! @name Instancing
+		/// These methods provide a means of describing a portion of a scene once and reusing
+		/// it many times.
+		///////////////////////////////////////////////////////////////////////////////////////
+		//@{
+		/// Starts the description of a portion of a scene to be instanced.
+		virtual void instanceBegin( const std::string &name, const CompoundDataMap &parameters ) = 0;
+		/// Ends the description of an instance.
+		virtual void instanceEnd() = 0;
+		/// Instantiates a previously described instance at the current transform position, and
+		/// using the current attribute state.
+		virtual void instance( const std::string &name ) = 0;
+		//@}
 		
 		/// Generic call for executing arbitrary renderer commands. This is intended to allow
 		/// derived classes to support calls such as RiMakeTexture via calls of the form

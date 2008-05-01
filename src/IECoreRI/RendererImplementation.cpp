@@ -1074,6 +1074,45 @@ void IECoreRI::RendererImplementation::procFree( void *data )
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
+// instancing
+/////////////////////////////////////////////////////////////////////////////////////////
+
+void IECoreRI::RendererImplementation::instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters )
+{
+	ScopedContext scopedContext( m_context );
+	
+#ifdef IECORERI_WITH_OBJECTBEGINV
+	// we get to choose the name for the object
+	const char *tokens = "__handleid";
+	const char *namePtr = name.c_str();
+	const void *values = &namePtr;
+	m_objectHandles[name] = RiObjectBeginV( 1, (char **)&tokens, (void **)&values );
+#else
+	// we have to put up with a rubbish name
+	m_objectHandles[name] = RiObjectBegin();	
+#endif
+}
+
+void IECoreRI::RendererImplementation::instanceEnd()
+{
+	ScopedContext scopedContext( m_context );
+	RiObjectEnd();
+}
+
+void IECoreRI::RendererImplementation::instance( const std::string &name )
+{
+	ScopedContext scopedContext( m_context );
+
+	ObjectHandleMap::const_iterator hIt = m_objectHandles.find( name );
+	if( hIt==m_objectHandles.end() )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::instance", boost::format( "No object named \"%s\" available for instancing." ) % name );
+		return;
+	}
+	RiObjectInstance( const_cast<void *>( hIt->second ) );
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 // commands
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1111,8 +1150,6 @@ IECore::DataPtr IECoreRI::RendererImplementation::readArchiveCommand( const std:
 
 IECore::DataPtr IECoreRI::RendererImplementation::objectBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	ScopedContext scopedContext( m_context );
-
 	ConstStringDataPtr nameData;
 	CompoundDataMap::const_iterator it = parameters.find( "name" );
 	if( it!=parameters.end() )
@@ -1125,21 +1162,13 @@ IECore::DataPtr IECoreRI::RendererImplementation::objectBeginCommand( const std:
 		return 0;
 	}
 	
-#ifdef IECORERI_WITH_OBJECTBEGINV
-	// we get to choose the name for the object
-	ParameterList p( "__handleid", nameData );
-	m_objectHandles[nameData->readable()] = RiObjectBeginV( p.n(), p.tokens(), p.values() );
-#else
-	// we have to put up with a rubbish name
-	m_objectHandles[nameData->readable()] = RiObjectBegin();	
-#endif
+	instanceBegin( nameData->readable(), parameters );
 	return 0;
 }
 
 IECore::DataPtr IECoreRI::RendererImplementation::objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	ScopedContext scopedContext( m_context );
-	RiObjectEnd();
+	instanceEnd();
 	return 0;
 }
 
@@ -1158,13 +1187,7 @@ IECore::DataPtr IECoreRI::RendererImplementation::objectInstanceCommand( const s
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:objectInstance command expects a StringData value called \"name\"." );
 		return 0;
 	}
-	ObjectHandleMap::const_iterator hIt = m_objectHandles.find( nameData->readable() );
-	if( hIt==m_objectHandles.end() )
-	{
-		msg( Msg::Error, "IECoreRI::RendererImplementation::command", boost::format( "No object named \"%s\" available for instancing." ) % nameData->readable() );
-		return 0;
-	}
-	RiObjectInstance( const_cast<void *>( hIt->second ) );
+	instance( nameData->readable() );
 	return 0;
 }
 

@@ -204,6 +204,11 @@ class Renderer : public IECore::Renderer
 		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
+		
+		virtual void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual void instanceEnd();
+		virtual void instance( const std::string &name );
+
 		///
 		/// Supports the following commands :
 		///
@@ -225,12 +230,11 @@ class Renderer : public IECore::Renderer
 		/// Calls RiObjectInstance. Expects a single StringData parameter called "name", which
 		/// refers to a name previously passed to command( "ri:objectBegin" ).
 		///
+		/// \deprecated Use the dedicated instancing methods instead of the objectInstance commands
+		///
 		/// "ri:archiveRecord"
 		/// Makes a call to RiArchiveRecord(). Expects StringData parameters called "type" and
 		/// "record".
-		///
-		/// \todo Implement instancing support through specific calls we add to the IECore::Renderer
-		/// interface definition.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 		
 	private :
