@@ -59,10 +59,36 @@ IE_CORE_FORWARDDECLARE( Renderer );
 /// more useful to have an incomplete image for diagnosis of the problem than to
 /// have an Exception thrown.
 /// 
-/// \todo Document some standard options and attributes expected to be implemented
-/// by all subclasses. Also document the prefix: naming convention for passing
-/// renderer specific options and attributes to subclasses without causing errors
-/// in other implementations.
+/// \par Naming conventions
+///
+/// Many of the calls in the Renderer interface associate a name with a piece of
+/// data. Both the setOption() and setAttribute() calls take a name to specify what
+/// is being modified and a DataPtr to specify the new value. Many other calls
+/// accept either a CompoundDataMap or a PrimitiveVariableMap, both of which may
+/// contain many named pieces of Data.
+///
+/// A naming convention exists to specify that particular data is intended only
+/// for a particular Renderer implementation. This allows rendering to be
+/// customised for a particular implementation without causing other implementations
+/// to error due to unsupported features. The convention for each name is as
+/// follows :
+///
+///	\li <b>"name"</b><br>
+/// Should be supported by all Renderer implementations. For instance, the "doubleSided"
+/// attribute should be supported by all Renderers. A warning message should be
+/// output if the name is not recognised and supported.
+///
+/// \li <b>"prefix:name"</b><br>
+/// Used to specify data intended only for a particular implementation. Implementations
+/// silently ignore all data destined for other implementations. For instance, the 
+/// "gl:primitive:wireframe" attribute is used by the GL renderer implementation but
+/// silently ignored by other implementations.  
+///
+/// \li <b>"user:name"</b><br>
+/// Used to specify data for the purposes of users. The renderer should store the value
+/// and make it available for query, but otherwise it should have no effect. This applies
+/// mostly to the attribute and option calls.
+///
 /// \todo Methods for creating and using instances.
 class Renderer : public RunTimeTyped
 {
