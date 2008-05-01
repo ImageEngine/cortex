@@ -253,6 +253,8 @@ enum TypeId
 	CurvesPrimitiveTypeId = 210,
 	CoordinateSystemTypeId = 211,
 	MeshNormalsOpTypeId = 212,
+	MeshMergeOpTypeId = 213,
+	FontTypeId = 214,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
