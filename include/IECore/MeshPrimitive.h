@@ -49,7 +49,6 @@ IE_CORE_FORWARDDECLARE( MeshPrimitive )
 /// point of view of the camera - this can be changed at the point of rendering by
 /// setting attributes in the Renderer. This definition of winding order is the same as
 /// the OpenGL and Maya conventions but the opposite of RenderMan's.
-/// \todo Verify that we're interpreting winding order correctly thoughout Cortex.
 class MeshPrimitive : public Primitive
 {	  
 	
