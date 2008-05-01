@@ -238,7 +238,7 @@ class TestJPEGReader(unittest.TestCase):
 					self.assertRaises( RuntimeError, r.read )
 					
 				else:
-				
+					self.assert_( JPEGImageReader.canRead( f ) )
 					img = r.read()
 					self.assertEqual( type(img), ImagePrimitive )
 					self.assert_( img.arePrimitiveVariablesValid() )	

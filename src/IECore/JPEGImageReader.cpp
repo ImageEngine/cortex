@@ -60,8 +60,7 @@ using namespace boost;
 using namespace Imath;
 using namespace std;
 
-const Reader::ReaderDescription <JPEGImageReader>
-JPEGImageReader::m_readerDescription ("jpeg jpg");
+const Reader::ReaderDescription <JPEGImageReader> JPEGImageReader::m_readerDescription ("jpeg jpg");
 
 JPEGImageReader::JPEGImageReader() :
 		ImageReader( "JPEGImageReader", "Reads Joint Photographic Experts Group (JPEG) files" )
@@ -78,10 +77,8 @@ JPEGImageReader::~JPEGImageReader()
 {
 }
 
-bool JPEGImageReader::canRead(const string & fileName)
+bool JPEGImageReader::canRead( const string &fileName )
 {
-	/// \todo Check for EXIF compatibility?
-	
 	// attempt to open the file
 	ifstream in(fileName.c_str());
 	if (!in.is_open())
@@ -95,7 +92,7 @@ bool JPEGImageReader::canRead(const string & fileName)
 	in.seekg(0, ios_base::beg);
 	in.read((char *) &magic, sizeof(unsigned int));
 
-	return magic == 0xe0ffd8ff || magic == 0xffd8ffe0;
+	return magic == 0xe0ffd8ff || magic == 0xffd8ffe0 || magic == 0xe1ffd8ff || magic == 0xffd8ffe1 ;
 }
 
 void JPEGImageReader::channelNames( vector<string> &names )
