@@ -1357,6 +1357,11 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 	addPrimitive( prim, primVars, m_data );
 }
 
+void IECoreGL::Renderer::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+{
+	msg( Msg::Warning, "Renderer::disk", "Not implemented" );
+}
+
 void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
 	ConstV3fVectorDataPtr points = findPrimVar<V3fVectorData>( "P", PrimitiveVariable::Vertex, primVars );
@@ -1391,6 +1396,12 @@ Imath::Box3f IECoreGL::Renderer::textExtents(const std::string & t, const float 
 void IECoreGL::Renderer::text(const std::string &t, const float width )
 {
 	msg( Msg::Warning, "Renderer::text", "Not implemented" );
+}
+
+void IECoreGL::Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+{
+	SpherePrimitivePtr prim = new SpherePrimitive( radius, zMin, zMax, thetaMax );
+	addPrimitive( prim, primVars, m_data );
 }
 
 static IECoreGL::ShaderPtr imageShader()
@@ -1503,8 +1514,7 @@ void IECoreGL::Renderer::geometry( const std::string &type, const IECore::Compou
 		float zMin = parameterValue<float>( "zMin", topology, -1 );
 		float zMax = parameterValue<float>( "zMax", topology, 1 );
 		float thetaMax = parameterValue<float>( "thetaMax", topology, 360 );
-		SpherePrimitivePtr prim = new SpherePrimitive( radius, zMin, zMax, thetaMax );
-		addPrimitive( prim, primVars, m_data );
+		sphere( radius, zMin, zMax, thetaMax, primVars );
 	}
 	else
 	{

@@ -59,7 +59,6 @@ IE_CORE_FORWARDDECLARE( Renderer );
 /// more useful to have an incomplete image for diagnosis of the problem than to
 /// have an Exception thrown.
 /// 
-/// \todo More primitives - especially one for the SpherePrimitive to use.
 /// \todo Document some standard options and attributes expected to be implemented
 /// by all subclasses. Also document the prefix: naming convention for passing
 /// renderer specific options and attributes to subclasses without causing errors
@@ -257,12 +256,20 @@ class Renderer : public RunTimeTyped
 		//@{
 		/// Renders a set of points.
 		virtual void points( size_t numPoints, const PrimitiveVariableMap &primVars ) = 0;
+		/// Renders a disk of the specified radius on the xy plane, at the specified z value.
+		/// If the "rightHandedOrientation" attribute is true then the normal faces down
+		/// positive z, otherwise it faces down negative z.
+		virtual void disk( float radius, float z, float thetaMax, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders a set of curves.
 		virtual void curves( const CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) = 0;
 		/// Returns the extents of the given string (under the current font, text-layout characteristics).
 		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max()) = 0;
 		/// Renders some text.
 		virtual void text(const std::string &t, const float width = Imath::limits<float>::max()) = 0;
+		/// Renders a sphere of the specified radius. zMin and zMax are measured as a proportion of the radius - so no matter
+		/// what the radius, the default values will always give a full sphere. If the "rightHandedOrientation"
+		/// attribute is true then the normals point outwards, otherwise they point inwards.
+		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders an image.
 		/// \todo Clarify the intended use of dataWindow and displayWindow.
 		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const PrimitiveVariableMap &primVars ) = 0;

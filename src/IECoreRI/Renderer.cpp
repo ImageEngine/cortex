@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -166,6 +166,11 @@ void Renderer::points( size_t numPoints, const IECore::PrimitiveVariableMap &pri
 	m_implementation->points( numPoints, primVars );
 }
 
+void Renderer::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+{
+	m_implementation->disk( radius, z, thetaMax, primVars );
+}
+
 void Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
 	m_implementation->curves( basis, periodic, numVertices, primVars );
@@ -179,6 +184,11 @@ Imath::Box3f Renderer::textExtents( const std::string &t, float width )
 void Renderer::text( const std::string &t, float width )
 {
 	m_implementation->text( t, width );
+}
+
+void Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+{
+	m_implementation->sphere( radius, zMin, zMax, thetaMax, primVars );
 }
 
 void Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )

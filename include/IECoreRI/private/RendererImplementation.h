@@ -87,11 +87,13 @@ class RendererImplementation : public IECore::Renderer
 		virtual void motionEnd();
 
 		virtual void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars );
+		virtual void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
 		
 		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max() );
 		virtual void text(const std::string &t, const float width = Imath::limits<float>::max() );
+		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars );
 		virtual void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars );

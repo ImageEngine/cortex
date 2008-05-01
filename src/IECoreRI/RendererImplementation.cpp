@@ -908,6 +908,14 @@ void IECoreRI::RendererImplementation::points( size_t numPoints, const IECore::P
 	RiPointsV( numPoints, pv.n(), pv.tokens(), pv.values() );
 }
 
+void IECoreRI::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+{
+	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
+	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
+	RiDiskV( z, radius, thetaMax, pv.n(), pv.tokens(), pv.values() );
+}
+
 void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
@@ -940,6 +948,14 @@ void IECoreRI::RendererImplementation::text(const std::string &t, const float wi
 	delayedMotionBegin();
 
 	msg( Msg::Warning, "IECoreRI::RendererImplementation::text", "Not implemented" );	
+}
+
+void IECoreRI::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+{
+	ScopedContext scopedContext( m_context );
+	delayedMotionBegin();
+	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
+	RiSphereV( radius, zMin * radius, zMax * radius, thetaMax, pv.n(), pv.tokens(), pv.values() );
 }
 
 void IECoreRI::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )

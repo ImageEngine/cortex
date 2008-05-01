@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -200,11 +200,25 @@ static void points( Renderer &r, size_t numPoints, const dict &primVars )
 	r.points( numPoints, p );
 }
 
+static void disk( Renderer &r, float radius, float z, float thetaMax, const dict &primVars )
+{
+	PrimitiveVariableMap p;
+	fillPrimitiveVariableMap( p, primVars );
+	r.disk( radius, z, thetaMax, p );
+}
+
 static void curves( Renderer &r, const CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const dict &primVars )
 {
 	PrimitiveVariableMap p;
 	fillPrimitiveVariableMap( p, primVars );
 	r.curves( basis, periodic, numVertices, p );
+}
+
+static void sphere( Renderer &r, float radius, float zMin, float zMax, float thetaMax, const dict &primVars )
+{
+	PrimitiveVariableMap p;
+	fillPrimitiveVariableMap( p, primVars );
+	r.sphere( radius, zMin, zMax, thetaMax, p );
 }
 
 static void image( Renderer &r, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const dict &primVars )
@@ -279,8 +293,10 @@ void bindRenderer()
 		.def("motionEnd", &Renderer::motionEnd)
 
 		.def("points", &points)
+		.def("disk", &disk)
 		.def("curves", &curves)
 		.def("text", &Renderer::text)
+		.def("sphere", &Renderer::text)
 		.def("textExtents", &Renderer::textExtents)
 		.def("image", &image)
 		.def("mesh", &mesh)

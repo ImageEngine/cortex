@@ -309,6 +309,7 @@ class Renderer : public IECore::Renderer
 		/// Constant|Vertex|Varying FloatData|FloatVectorData "patchrotation"
 		/// These two are used only by the "patch" type.
 		virtual void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars );
+		virtual void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
 		/// Supports the following primitive variables :
 		///
 		/// Vertex V3fVectorData "P"
@@ -316,6 +317,7 @@ class Renderer : public IECore::Renderer
 		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
 		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max() );
 		virtual void text(const std::string &t, const float width = Imath::limits<float>::max() );
+		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
 		/// Supports the following image formats specified as primitive variables :
 		///
 		/// 	"R", "G", "B", "A"	:	UCharVectorData
@@ -343,9 +345,7 @@ class Renderer : public IECore::Renderer
 		/// "zMax"		FloatData	1
 		///	"thetaMax"	FloatData	360
 		///
-		/// See the documentation for the SpherePrimitive for the meaning of these values.
-		/// \todo Add specific calls to IECore::Renderer for simple geometric types and we won't have to be
-		/// using the geometry call.
+		/// \deprecated Use the sphere() method instead.
 		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
 		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
 
