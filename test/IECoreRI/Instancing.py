@@ -103,8 +103,8 @@ class InstancingTest( unittest.TestCase ) :
 	
 		files = [
 			"test/IECoreRI/output/instancing.rib",
-			"test/IECoreRI/output/instancing2.rib"
-			"test/IECoreRI/output/instancing3.rib"
+			"test/IECoreRI/output/instancing2.rib",
+			"test/IECoreRI/output/instancing3.rib",
 		]
 		
 		for f in files :
