@@ -104,6 +104,7 @@ class TestDPXReader(unittest.TestCase):
 	def testAll( self ):
 		
 		fileNames = glob.glob( "test/IECore/data/dpx/*.dpx" )
+		expectedFailures = []
 		
 		# Silence any warnings while the tests run
 		MessageHandler.pushHandler( NullMessageHandler() )
@@ -111,11 +112,23 @@ class TestDPXReader(unittest.TestCase):
 		try:
 		
 			for f in fileNames:
-
+			
 				r = DPXImageReader( f ) 
-				img = r.read()
-				self.assertEqual( type(img), ImagePrimitive )
-				self.assert_( img.arePrimitiveVariablesValid() )	
+				
+				if f in expectedFailures :
+				
+					self.assertRaises( RuntimeError, r.read )
+					
+				else :
+			
+					self.assert_( DPXImageReader.canRead( f ) )
+					self.failIf( JPEGImageReader.canRead( f ) )
+					self.failIf( EXRImageReader.canRead( f ) )
+					self.failIf( TIFFImageReader.canRead( f ) )									
+
+					img = r.read()
+					self.assertEqual( type(img), ImagePrimitive )
+					self.assert_( img.arePrimitiveVariablesValid() )	
 				
 		except:
 		

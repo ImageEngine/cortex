@@ -182,9 +182,19 @@ class TestCINReader(unittest.TestCase):
 		
 			for f in fileNames:
 			
-				if not f in expectedFailures :
+				r = CINImageReader( f ) 
+				
+				if f in expectedFailures :
+					
+					self.assertRaises( RuntimeError, r.read )
+				
+				else :
+				
+					self.assert_( CINImageReader.canRead( f ) )
+					self.failIf( JPEGImageReader.canRead( f ) )
+					self.failIf( EXRImageReader.canRead( f ) )
+					self.failIf( TIFFImageReader.canRead( f ) )					
 
-					r = CINImageReader( f ) 
 					img = r.read()
 					self.assertEqual( type(img), ImagePrimitive )
 					self.assert_( img.arePrimitiveVariablesValid() )	

@@ -342,25 +342,29 @@ class TestTIFFReader(unittest.TestCase):
 			"test/IECore/data/tiff/rgb_black_circle.256x256.4bit.tiff",
 			"test/IECore/data/tiff/rgb_black_circle.256x256.2bit.tiff",
 			"test/IECore/data/tiff/rgb_black_circle.256x256.1bit.tiff", 
-			"test/IECore/data/tiff/rgb_black_circle.256x256.tiff",
 			"test/IECore/data/tiff/uvMap.512x256.16bit.truncated.tif",
 		]
 		
 		try:
 		
 			for f in fileNames:
-			
-				try:
-					r = TIFFImageReader( f ) 
+
+				r = TIFFImageReader( f ) 
+
+				if f in expectedFailures :
+				
+					self.assertRaises( RuntimeError, r.read )
+					
+				else :
+					self.assert_( TIFFImageReader.canRead( f ) )
+					self.failIf( JPEGImageReader.canRead( f ) )
+					self.failIf( EXRImageReader.canRead( f ) )
+					self.failIf( CINImageReader.canRead( f ) )					
+					
 					img = r.read()
 					self.assertEqual( type(img), ImagePrimitive )
 					self.assert_( img.arePrimitiveVariablesValid() )	
-				except:
-					
-					if not f in expectedFailures:
-						print f
-						raise
-				
+								
 		except:
 		
 			raise	

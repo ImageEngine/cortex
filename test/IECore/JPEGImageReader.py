@@ -239,6 +239,10 @@ class TestJPEGReader(unittest.TestCase):
 					
 				else:
 					self.assert_( JPEGImageReader.canRead( f ) )
+					self.failIf( CINImageReader.canRead( f ) )
+					self.failIf( EXRImageReader.canRead( f ) )
+					self.failIf( TIFFImageReader.canRead( f ) )					
+										
 					img = r.read()
 					self.assertEqual( type(img), ImagePrimitive )
 					self.assert_( img.arePrimitiveVariablesValid() )	
