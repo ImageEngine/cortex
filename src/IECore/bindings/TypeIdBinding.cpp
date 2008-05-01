@@ -253,6 +253,8 @@ void bindTypeId()
 		.value("CurvesPrimitive", CurvesPrimitiveTypeId )
 		.value("ImageDiffOp", ImageDiffOpTypeId )
 		.value("MeshNormalsOp", MeshNormalsOpTypeId )
+		.value("Font", FontTypeId )
+		.value("MeshMergeOp", MeshMergeOpTypeId )
 	;
 }
 
