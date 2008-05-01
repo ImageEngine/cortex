@@ -52,7 +52,7 @@ class SpherePrimitive : public Primitive
 		/// Construct a full sphere of radius 1.
 		SpherePrimitive();
 		
-		/// Construct a sphere with specified parameterisation. zMin and zMax different from the Renderman specification
+		/// Construct a sphere with specified parameterisation. zMin and zMax differ from the Renderman specification
 		/// slightly in that they're given as a proportion of that radius, so they should fall within the range [-1, 1 ]
 		SpherePrimitive( float radius, float zMin = -1.0f, float zMax = 1.0f, float thetaMax = 360.0f );
 
