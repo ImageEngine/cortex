@@ -71,7 +71,27 @@ class TestMarchingCubesf( unittest.TestCase ) :
 		
 		# \todo Verify that vertex positions are close to original implicit surface function
 		
+	def testWindingOrder( self ) :
+	
+		sphereFn = SphereImplicitSurfaceFunctionV3ff( V3f( 0 ), 1 )
+		builder = MeshPrimitiveBuilder()
+		marcher = MarchingCubesf( sphereFn, builder )
 		
+		marcher.march( Box3f( V3f( -2 ), V3f( 2 ) ), V3i( 100 ) )
+		
+		m = builder.mesh()
+		
+		Nimplicit = m["N"].data
+		MeshNormalsOp()( input=m, copyInput=False )
+		N = m["N"].data
+		P = m["P"].data
+		
+		for ni, n, p in zip( Nimplicit, N, P ) :
+					
+			self.assert_( ni.dot( n ) > 0 )
+			self.assert_( ni.dot( p ) > 0 )
+			self.assert_( n.dot( p ) > 0 )
+				
 class TestMarchingCubesd( unittest.TestCase ) :
 
 	def test( self ) :
