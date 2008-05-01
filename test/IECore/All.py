@@ -141,6 +141,7 @@ from TriangulatorTest import *
 from BezierAlgoTest import *
 from MeshNormalsOpTest import *
 from PrimitiveTest import *
+from MeshMergeOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

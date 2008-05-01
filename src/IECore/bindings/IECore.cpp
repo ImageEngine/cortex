@@ -173,6 +173,7 @@
 #include "IECore/bindings/ToCoreConverterBinding.h"
 #include "IECore/bindings/MeshNormalsOpBinding.h"
 #include "IECore/bindings/PolygonAlgoBinding.h"
+#include "IECore/bindings/MeshMergeOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -325,6 +326,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindToCoreConverter();
 	bindMeshNormalsOp();
 	bindPolygonAlgo();
+	bindMeshMergeOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
@@ -332,5 +334,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
 	def( "withTIFF", &IECore::withTIFF );
 	def( "withJPEG", &IECore::withJPEG );
+	def( "withFreeType", &IECore::withFreeType );
 
 }
