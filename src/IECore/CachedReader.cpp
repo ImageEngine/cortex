@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,30 +39,17 @@ using namespace IECore;
 using namespace boost::filesystem;
 using namespace std;
 
-CachedReader::CachedReader( const SearchPath &paths, size_t maxMemory )
-	:	m_paths( paths ), m_maxMemory( maxMemory ), m_currentMemory( 0 )
+bool CachedReader::CacheFn::get( const std::string &file, ConstObjectPtr &object, Cost &cost )
 {
-}
-		
-ConstObjectPtr CachedReader::read( const std::string &file )
-{
+	object = 0;
+	cost = 0;
+	
 	// if we've failed to read it before then don't try again
 	if( m_unreadables.count( file ) )
 	{
 		throw Exception( "Unreadable file '" + file + "'" );
 	}
 
-	// try to find it in the cache
-	map<string, ConstObjectPtr>::iterator it = m_cache.find( file );
-	if( it!=m_cache.end() )
-	{
-		/// \todo The remove is a linear time operation on the size
-		/// of the cache. Do we need a faster way of doing this?
-		m_accessOrder.remove( file );
-		m_accessOrder.push_back( file );
-		return it->second;
-	}
-	
 	// then try to load it normally
 	path resolvedPath = m_paths.find( file );
 	if( resolvedPath.empty() )
@@ -87,78 +74,70 @@ ConstObjectPtr CachedReader::read( const std::string &file )
 	if( !r )
 	{
 		m_unreadables.insert( file );
-		throw Exception( "No reader for file '" + file + "'" );
+		throw Exception( "Could not create reader for '" + resolvedPath.string() + "'" );
 	}
 	
-	ObjectPtr object = r->read();
+	object = r->read();
 	/// \todo Why would this ever be NULL? Wouldn't we have thrown an exception already if
 	/// we were unable to read the file?
 	if( !object )
 	{
 		m_unreadables.insert( file );
-		throw Exception( "Could not read from file '" + file + "'" );
+		throw Exception( "Reader for '" + resolvedPath.string() + "' returned no data" );
 	}
 	
-	// cache it if we can
-	size_t objectMemory = object->memoryUsage();
-	if( objectMemory<=m_maxMemory )
-	{
-		// it's small enough to cache
-		m_accessOrder.push_back( file );
-		m_cache[file] = object;
-		m_currentMemory += objectMemory;
-		reduce( m_maxMemory );
-	}
+	cost = object->memoryUsage();
 	
-	return object;
+	return true;
+}
+
+CachedReader::CachedReader( const SearchPath &paths, size_t maxMemory )
+{
+	m_fn.m_paths = paths;
+	
+	m_cache.setMaxCost( maxMemory );
+}
+		
+ConstObjectPtr CachedReader::read( const std::string &file )
+{
+	ConstObjectPtr data;
+	
+	bool result = m_cache.get( file, m_fn, data );
+	assert( result );
+	(void) result;
+
+	return data;
 }
 
 size_t CachedReader::memoryUsage() const
 {
-	return m_currentMemory;
+	return m_cache.currentCost();
 }
 
 void CachedReader::clear()
 {
-	reduce( 0 );
-}
-
-void CachedReader::reduce( size_t size )
-{
-	while( m_currentMemory > size )
-	{
-		string f = *m_accessOrder.begin();
-		map<string, ConstObjectPtr>::iterator it = m_cache.find( f );
-		assert( it!=m_cache.end() );
-		size_t objectMemory = it->second->memoryUsage();
-		assert( objectMemory>=m_currentMemory );
-		m_currentMemory -= objectMemory;
-		m_cache.erase( it );
-		m_accessOrder.erase( m_accessOrder.begin() );
-	}
-	assert( m_accessOrder.size()==m_cache.size() );
+	m_cache.clear();
 }
 
 const SearchPath &CachedReader::getSearchPath() const
 {
-	return m_paths;
+	return m_fn.m_paths;
 }
 
 void CachedReader::setSearchPath( const SearchPath &paths )
 {
-	m_paths = paths;
+	m_fn.m_paths = paths;
 	clear();
 }
 
 size_t CachedReader::getMaxMemory() const
 {
-	return m_maxMemory;
+	return m_cache.getMaxCost();
 }
 
 void CachedReader::setMaxMemory( size_t maxMemory )
 {
-	m_maxMemory = maxMemory;
-	reduce( m_maxMemory );
+	m_cache.setMaxCost( maxMemory );
 }
 
 CachedReaderPtr CachedReader::defaultCachedReader()
