@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -49,6 +49,26 @@ class CachedReaderTest( unittest.TestCase ) :
 		
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( r.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
+		
+		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		self.assertEqual( r.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
+		
+		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
+		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
+		
+		# Here, the cache should throw away "o" (because there isn't enough room for it, and it was the least 
+		# recently used) leaving us with just "oo"
+		r.maxMemory = oo.memoryUsage() + ( o.memoryUsage() / 2 )
+		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )	
+		
+		# Here, the cache should throw away "oo" (because there isn't enough room for it, and it was the least 
+		# recently used) leaving us empty
+		r.maxMemory = oo.memoryUsage() / 2
+		self.assertEqual( r.memoryUsage(), 0 )
+		
+		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r.clear()
+		self.assertEqual( r.memoryUsage(), 0 )				
 	
 	def testDefault( self ) :
 	
