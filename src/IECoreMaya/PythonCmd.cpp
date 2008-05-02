@@ -139,23 +139,6 @@ void PythonCmd::initialize()
 		g_globalContext = mainModule.attr("__dict__");
 		assert( g_globalContext );
 		
-		/// When running tests, add ./test/python to PYTHONPATH
-		if( getenv( "IECOREMAYA_TEST" ) )
-		{
-			try 
-			{
-				handle<> ignored( PyRun_String( 
-					"import sys\nsys.path = ['./test/python'] + sys.path\n",
-					Py_file_input, g_globalContext.ptr(),
-					g_globalContext.ptr() )
-				);
-			}
-			catch ( error_already_set & )
-			{
-				PyErr_Print();
-			}
-		}
-		
 		// Suppress warnings about mismatched API versions. We build IE modules
 		// against python2.5 for use elsewhere, but then use them in maya with python 2.4.
 		// Testing suggests that there are no ill effects of the mismatch. To be on the safe side
