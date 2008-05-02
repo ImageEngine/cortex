@@ -32,32 +32,51 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SCOPEDTIFFEXCEPTIONTRANSLATOR_H
-#define IE_CORE_SCOPEDTIFFEXCEPTIONTRANSLATOR_H
 
-#include <stdarg.h>
 
-#include "tiffio.h"
+#include "boost/format.hpp"
 
-namespace IECore
+#include "IECore/ScopedTIFFErrorHandler.h"
+#include "IECore/Exception.h"
+
+using namespace IECore;
+
+std::vector< ScopedTIFFErrorHandler * > &ScopedTIFFErrorHandler::handlers()
 {
+	static std::vector< ScopedTIFFErrorHandler * > g_handlers;
+	return g_handlers;
+}
 
-/// A class which can temporarily translate errors from libtiff into IECore::IOExceptions whilst it remains in scope -
-/// it registers a new TIFFErrorHandler in its constructor, restoring the previous state in its destructor.
-class ScopedTIFFExceptionTranslator 
+ScopedTIFFErrorHandler::ScopedTIFFErrorHandler()
 {
-	public:
-		ScopedTIFFExceptionTranslator( );
-		virtual ~ScopedTIFFExceptionTranslator();
-		
-	protected:
-				
-		static void output(const char* module, const char* fmt, va_list ap);
-		
-		TIFFErrorHandler m_previousHandler;
-			 
-};
+	m_previousHandler = TIFFSetErrorHandler( &output );
+	handlers().push_back( this );
+}
 
-} // namespace IECore
+ScopedTIFFErrorHandler::~ScopedTIFFErrorHandler()
+{
+	assert( handlers().back() == this );
+	TIFFSetErrorHandler( m_previousHandler );
+	handlers().pop_back();
+}
 
-#endif // IE_CORE_SCOPEDTIFFEXCEPTIONTRANSLATOR_H
+void ScopedTIFFErrorHandler::output(const char* module, const char* fmt, va_list ap)
+{		
+	/// Reconstruct the actual error in a buffer of (arbitrary) maximum length.
+	const unsigned int bufSize = 1024;
+	char buf[bufSize];
+	vsnprintf( &buf[0], bufSize-1, fmt, ap );
+	
+	/// Make sure string is null-terminated
+	buf[bufSize-1] = '\0';
+
+	std::string context = "libtiff";
+	if (module)
+	{
+		context = std::string( module );
+	} 
+	
+	ScopedTIFFErrorHandler *handler = handlers().back();
+	handler->m_errorMessage = ( boost::format( "%s : %s" ) % context % buf ).str() ;
+	longjmp( handler->m_jmpBuffer, 1 );
+}

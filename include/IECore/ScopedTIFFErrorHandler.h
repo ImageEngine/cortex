@@ -32,38 +32,39 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
+#ifndef IE_CORE_SCOPEDTIFFERRORHANDLER_H
+#define IE_CORE_SCOPEDTIFFERRORHANDLER_H
 
-#include "IECore/ScopedTIFFExceptionTranslator.h"
-#include "IECore/Exception.h"
+#include <stdarg.h>
+#include <setjmp.h>
+#include <vector>
 
-using namespace IECore;
+#include "tiffio.h"
 
-ScopedTIFFExceptionTranslator::ScopedTIFFExceptionTranslator()
+namespace IECore
 {
-	m_previousHandler = TIFFSetErrorHandler( &output );
-}
 
-ScopedTIFFExceptionTranslator::~ScopedTIFFExceptionTranslator()
+/// A class which can temporarily translate errors from libtiff into longjumps to the given buffer -
+/// it registers a new TIFFErrorHandler in its constructor, restoring the previous state in its destructor.
+/// This works a bit like the error handling present in libjpeg.
+class ScopedTIFFErrorHandler 
 {
-	TIFFSetErrorHandler( m_previousHandler );
-}
+	public:
+		ScopedTIFFErrorHandler( );
+		virtual ~ScopedTIFFErrorHandler();
+		
+		jmp_buf m_jmpBuffer;
+		std::string m_errorMessage;
+		
+	protected:
+		
+		static std::vector< ScopedTIFFErrorHandler * > &handlers();
+				
+		static void output(const char* module, const char* fmt, va_list ap);
+		
+		TIFFErrorHandler m_previousHandler;
+};
 
-void ScopedTIFFExceptionTranslator::output(const char* module, const char* fmt, va_list ap)
-{		
-	/// Reconstruct the actual error in a buffer of (arbitrary) maximum length.
-	const unsigned int bufSize = 1024;
-	char buf[bufSize];
-	vsnprintf( &buf[0], bufSize-1, fmt, ap );
-	
-	/// Make sure string is null-terminated
-	buf[bufSize-1] = '\0';
+} // namespace IECore
 
-	std::string context = "libtiff";
-	if (module)
-	{
-		context = std::string( module );
-	} 
-	
-	throw IOException( ( boost::format( "%s : %s" ) % context % buf ).str() );
-}
+#endif // IE_CORE_SCOPEDTIFFERRORHANDLER_H

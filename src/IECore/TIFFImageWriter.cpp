@@ -49,7 +49,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/Parameter.h"
 #include "IECore/NumericParameter.h"
-#include "IECore/ScopedTIFFExceptionTranslator.h"
+#include "IECore/ScopedTIFFErrorHandler.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
 #include "IECore/TypeTraits.h"
@@ -230,8 +230,12 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 }
 
 void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
-{
-	ScopedTIFFExceptionTranslator errorHandler;
+{	
+	ScopedTIFFErrorHandler errorHandler;
+	if ( setjmp( errorHandler.m_jmpBuffer ) )
+	{
+		throw IOException( errorHandler.m_errorMessage );
+	}
 
 	// create the tiff file
 	TIFF *tiffImage;
@@ -243,7 +247,7 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 	assert( tiffImage );
 
 	try
-	{
+	{	
 		/// Get the channels RGBA at the front, in that order, if they exist
 		vector<string> desiredChannelOrder;
 		desiredChannelOrder.push_back( "R" );

@@ -46,7 +46,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/ScopedTIFFExceptionTranslator.h"
+#include "IECore/ScopedTIFFErrorHandler.h"
 #include "IECore/BoxOps.h"
 #include "IECore/ScaledDataConversion.h"
 
@@ -176,7 +176,7 @@ bool TIFFImageReader::isComplete()
 	{
 		/// Ideally we'd read the last scanline here, but we're unable to do that in all cases because not all
 		/// compression methods support random access to the image data.
-		ScopedTIFFExceptionTranslator errorHandler;
+		ScopedTIFFErrorHandler errorHandler;
 
 		readBuffer();
 
@@ -306,7 +306,11 @@ DataPtr TIFFImageReader::readTypedChannel( const std::string &name, const Box2i 
 
 DataPtr TIFFImageReader::readChannel( const std::string &name, const Imath::Box2i &dataWindow )
 {
-	ScopedTIFFExceptionTranslator errorHandler;
+	ScopedTIFFErrorHandler errorHandler;
+	if ( setjmp( errorHandler.m_jmpBuffer ) )
+	{
+		throw IOException( errorHandler.m_errorMessage );
+	}
 
 	readCurrentDirectory( true );
 
@@ -449,9 +453,7 @@ void TIFFImageReader::readBuffer()
 }
 
 bool TIFFImageReader::open( bool throwOnFailure )
-{
-	ScopedTIFFExceptionTranslator errorHandler;
-
+{			
 	if ( m_tiffImage )
 	{
 		if ( m_tiffImageFileName == fileName() )
@@ -468,6 +470,12 @@ bool TIFFImageReader::open( bool throwOnFailure )
 	
 	try
 	{
+		ScopedTIFFErrorHandler errorHandler;
+		if ( setjmp( errorHandler.m_jmpBuffer ) )
+		{
+			throw IOException( errorHandler.m_errorMessage );
+		}
+		
 		if ( ! m_tiffImage )
 		{
 			m_tiffImage = TIFFOpen( fileName().c_str(), "r" );
@@ -515,10 +523,14 @@ bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
 	
 	assert ( m_tiffImage );
 	
-	ScopedTIFFExceptionTranslator errorHandler;
 	
 	try
-	{
+	{	
+		ScopedTIFFErrorHandler errorHandler;
+		if ( setjmp( errorHandler.m_jmpBuffer ) )
+		{
+			throw IOException( errorHandler.m_errorMessage );
+		}
 				
 		if ( m_haveDirectory && m_currentDirectoryIndex == TIFFCurrentDirectory( m_tiffImage ) )
 		{
