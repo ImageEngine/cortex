@@ -61,3 +61,25 @@ const char* Exception::type() const throw()
 {
 	return "Exception";
 }
+
+Exception &Exception::append( const std::string &s )
+{
+	m_what = new RefCountedString( *m_what + s);
+	return *this;
+}
+
+Exception &Exception::append( const char *s )
+{
+	return append( std::string(s) );
+}	
+
+Exception &Exception::prepend( const std::string &s )
+{
+	m_what = new RefCountedString( s + *m_what );
+	return *this;
+}
+
+Exception &Exception::prepend( const char *s )
+{
+	return prepend( std::string( s ) );
+}			

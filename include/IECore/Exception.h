@@ -57,6 +57,18 @@ namespace IECore
 		
 			/// Return cause of exception
 			virtual const char* what() const throw();
+			
+			/// Appends the given string to the cause of the current exception
+			Exception &append( const std::string &s );
+			
+			/// Appends the given string to the cause of the current exception			
+			Exception &append( const char *s );	
+			
+			/// Prepends the given string to the cause of the current exception
+			Exception &prepend( const std::string &s );
+			
+			/// Prepends the given string to the cause of the current exception			
+			Exception &prepend( const char *s );			
 		
 		protected:
 		
