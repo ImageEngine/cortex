@@ -36,6 +36,7 @@
 #define IE_COREMAYA_CONVERT_H
 
 #include "IECore/Convert.h"
+#include "IECore/Data.h"
 #include "IECore/TransformationMatrix.h"
 
 #include "OpenEXR/ImathVec.h"
@@ -54,6 +55,7 @@
 #include "maya/MColor.h"
 #include "maya/MQuaternion.h"
 #include "maya/MTransformationMatrix.h"
+#include "maya/MCommandResult.h"
 
 #include <string>
 
@@ -160,6 +162,9 @@ IECore::TransformationMatrixd convert( const MTransformationMatrix &from );
 
 template<>
 MTransformationMatrix convert( const IECore::TransformationMatrixd &from );
+
+template<>
+IECore::DataPtr convert( const MCommandResult &from );
 
 } // namespace IECore
 

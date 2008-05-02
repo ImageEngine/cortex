@@ -44,9 +44,10 @@
 #include "maya/MMatrix.h"
 #include "maya/MString.h"
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
+#include "IECore/Data.h"
+#include "IECore/Convert.h"
 
+#include "IECoreMaya/Convert.h"
 #include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/MayaPythonUtil.h"
 
@@ -54,8 +55,6 @@ namespace IECoreMaya
 {
 
 /// \todo Add a parameter to echo the command?
-/// \todo Expose the MCommandResult->IECore::Object conversion
-/// somewhere useful.
 /// \todo Put the M*Array->IECore::*VectorData conversion
 /// somewhere useful.
 IECore::DataPtr executeMel( const std::string &cmd )
@@ -65,149 +64,7 @@ IECore::DataPtr executeMel( const std::string &cmd )
 	
 	if (s)
 	{
-		switch (result.resultType())
-		{
-			case MCommandResult::kInvalid:
-			{
-				// No result
-				return 0;
-			}
-			case MCommandResult::kInt:
-			{
-				int i;
-				s = result.getResult(i);
-				assert(s);
-				
-				IECore::IntDataPtr data = new IECore::IntData();
-				data->writable() = i;
-				
-				return data;
-			}
-			case MCommandResult::kIntArray:
-			{
-				MIntArray v;
-				s = result.getResult(v);
-				assert(s);
-				unsigned sz = v.length();
-				IECore::IntVectorDataPtr data = new IECore::IntVectorData();
-				data->writable().resize(sz);
-				for (unsigned i = 0; i < sz; i++)
-				{
-					(data->writable())[i] = v[i];
-				}
-				
-				return data;
-			}
-			case MCommandResult::kDouble:
-			{
-				double d;
-				s = result.getResult(d);
-				assert(s);
-				
-				IECore::FloatDataPtr data = new IECore::FloatData();
-				data->writable() = static_cast<float>(d);
-				
-				return data;
-			}
-			case MCommandResult::kDoubleArray:
-			{
-				MDoubleArray v;
-				s = result.getResult(v);
-				assert(s);
-				unsigned sz = v.length();
-				IECore::DoubleVectorDataPtr data = new IECore::DoubleVectorData();
-				data->writable().resize(sz);
-				for (unsigned i = 0; i < sz; i++)
-				{
-					data->writable()[i] = v[i];
-				}
-				
-				return data;
-			}
-			case MCommandResult::kString:
-			{
-				MString str;
-				s = result.getResult(str);
-				assert(s);
-				
-				IECore::StringDataPtr data = new IECore::StringData();
-				data->writable() = std::string(str.asChar());
-				
-				return data;
-			}
-			case MCommandResult::kStringArray:
-			{
-				MStringArray v;
-				s = result.getResult(v);
-				assert(s);
-				unsigned sz = v.length();
-				IECore::StringVectorDataPtr data = new IECore::StringVectorData();
-				data->writable().resize(sz);
-				for (unsigned i = 0; i < sz; i++)
-				{
-					data->writable()[i] = std::string(v[i].asChar());
-				}
-				
-				return data;
-			}
-			case MCommandResult::kVector:
-			{
-				MVector v;
-				s = result.getResult(v);
-				assert(s);
-				
-				IECore::V3fDataPtr data = new IECore::V3fData();
-				data->writable() = Imath::V3f(v.x, v.y, v.z);
-				
-				return data;
-			}
-			case MCommandResult::kVectorArray:
-			{
-				MVectorArray v;
-				s = result.getResult(v);
-				assert(s);
-				unsigned sz = v.length();
-				IECore::V3fVectorDataPtr data = new IECore::V3fVectorData();
-				data->writable().resize(sz);					
-				for (unsigned i = 0; i < sz; i++)
-				{
-					data->writable()[i] = Imath::V3f(v[i].x, v[i].y, v[i].z);
-				}
-				
-				return data;
-			}
-			case MCommandResult::kMatrix:
-			{
-				MDoubleArray v;
-				int numRows, numColumns;
-				
-				s = result.getResult(v, numRows, numColumns);
-				assert(s);
-				
-				if (numRows > 4 || numColumns > 4)
-				{
-					throw StatusException( MS::kFailure );
-				}
-				
-				IECore::M44fDataPtr data = new IECore::M44fData();
-				
-				for (int i = 0; i < numColumns; i++)
-				{
-					for (int j = 0; j < numRows; j++)
-					{
-						(data->writable())[i][j] = v[i*numRows+j];
-					}
-				}		
-				
-				return data;
-			}
-			case MCommandResult::kMatrixArray:
-			{
-				return 0;
-			}
-			
-		}
-		
+		return IECore::convert<IECore::DataPtr>( result );
 	}
 	else
 	{
