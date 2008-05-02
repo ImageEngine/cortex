@@ -223,6 +223,14 @@ o.Add(
 	"/usr/aw/maya",
 )
 
+o.Add(
+	BoolOption( 
+		"WITH_MAYA_PLUGIN_LOADER", 
+		"Set this to install the Maya plugin with a stub loader.",
+		 False
+	),
+)
+
 # Debug options
 
 o.Add(
@@ -1172,7 +1180,7 @@ if doConfigure :
 		mayaPythonSources = glob.glob( "src/IECoreMaya/bindings/*.cpp" )
 		mayaPythonScripts = glob.glob( "python/IECoreMaya/*.py" )
 		mayaMel = glob.glob( "mel/IECoreMaya/*.mel" )
-		mayaPluginSources = glob.glob( "src/IECoreMaya/plugin/*.cpp" )
+		mayaPluginSources = [ "src/IECoreMaya/plugin/Plugin.cpp" ]
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
@@ -1213,14 +1221,41 @@ if doConfigure :
 				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
-		mayaPlugin = mayaPluginEnv.SharedLibrary( "plugins/maya/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPluginSources, SHLIBPREFIX="" )
+		
+		mayaPluginTarget = "plugins/maya/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) )
+		
+		if env["WITH_MAYA_PLUGIN_LOADER"] :
+		
+			mayaPluginLoaderSources = [ 'src/IECoreMaya/plugin/Loader.cpp' ]
+		
+			mayaPluginLoaderEnv = mayaPluginEnv.Copy()
+			mayaPluginLoaderEnv.Append(			
+				LIBS = [
+					"dl"
+				]
+			)
+			
+			mayaPluginLoader = mayaPluginLoaderEnv.SharedLibrary( mayaPluginTarget, mayaPluginLoaderSources, SHLIBPREFIX="" )
+			mayaPluginLoaderInstall = mayaPluginLoaderEnv.InstallAs( mayaPluginLoaderEnv.subst( "$INSTALL_MAYAPLUGIN_NAME$SHLIBSUFFIX" ), mayaPluginLoader )
+			mayaPluginLoaderEnv.Depends( mayaPluginLoaderInstall, coreInstallSync )
+			mayaPluginLoaderEnv.AddPostAction( mayaPluginLoaderInstall, lambda target, source, env : makeSymLinks( mayaPluginLoaderEnv, mayaPluginLoaderEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
+			mayaPluginLoaderEnv.Alias( "install", mayaPluginLoaderInstall )
+			mayaPluginLoaderEnv.Alias( "installMaya", mayaPluginLoaderInstall )
+			
+			Default( mayaPluginLoader )
+			
+			mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] = os.path.join( os.path.dirname( mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ), 'impl', os.path.basename( mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
+			mayaPluginTarget = "plugins/maya/impl/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) )
+		
+		mayaPlugin = mayaPluginEnv.SharedLibrary( mayaPluginTarget, mayaPluginSources, SHLIBPREFIX="" )
 		mayaPluginInstall = mayaPluginEnv.Install( os.path.dirname( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPlugin )
 		mayaPluginEnv.Depends( mayaPlugin, corePythonModule )
 		mayaPluginEnv.Depends( mayaPluginInstall, coreInstallSync )
+		
 		mayaPluginEnv.AddPostAction( mayaPluginInstall, lambda target, source, env : makeSymLinks( mayaPluginEnv, mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
 		mayaPluginEnv.Alias( "install", mayaPluginInstall )
 		mayaPluginEnv.Alias( "installMaya", mayaPluginInstall )
-		
+				
 		# maya python
 		mayaPythonEnv.Append(
 			LIBS = [
@@ -1254,6 +1289,8 @@ if doConfigure :
 		NoCache( mayaTest )
 		mayaTestEnv.Depends( mayaTest, [ mayaPlugin, mayaPythonModule ] )
 		mayaTestEnv.Depends( mayaTest, glob.glob( "test/IECoreMaya/*.py" ) )
+		if env["WITH_MAYA_PLUGIN_LOADER"] :
+			mayaTestEnv.Depends( mayaTest, mayaPluginLoader )
 		mayaTestEnv.Alias( "testMaya", mayaTest )			
 
 ###########################################################################################
