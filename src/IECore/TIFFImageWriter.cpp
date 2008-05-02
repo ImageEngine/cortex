@@ -329,8 +329,7 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 		int height = 1 + dataWindow.max.y - dataWindow.min.y;
 
 		/// \todo different compression methods have a bearing on other attributes, eg. the strip size
-		/// handle these issues a bit better and perhaps more explicitly here.  also, we should probably
-		/// warn the user in cases where parameter settings are not permitted (eg 16 bit jpeg)
+		/// handle these issues a bit better and perhaps more explicitly here.
 		int compression = parameters()->parameter<IntParameter>("compression")->getNumericValue();
 		TIFFSetField( tiffImage, TIFFTAG_COMPRESSION, compression );
 
@@ -344,6 +343,7 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 			compression = COMPRESSION_DEFLATE;
 		}
 
+		/// \todo Add a parameter to let us write signed images		
 		switch ( bitDepth )
 		{
 		case 8:
