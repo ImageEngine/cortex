@@ -76,6 +76,7 @@ void bindSearchPath()
 		.def( init<string, string>() )
 		.def( "find", &find )
 		.def( "setPaths", &SearchPath::setPaths )
+		.def( "getPaths", &SearchPath::getPaths )
 		.def( self == self  )
 		.add_property( "paths", &getPaths, &setPaths )	
 	;
