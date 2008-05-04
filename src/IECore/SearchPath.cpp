@@ -65,6 +65,25 @@ void SearchPath::setPaths( const std::string &paths, const std::string &separato
 	copy( t.begin(), t.end(), back_insert_iterator<list<path> >( this->paths ) );
 }
 
+std::string SearchPath::getPaths( const std::string &separator ) const
+{
+	bool first = true;
+	string result;
+	for( list<path>::const_iterator it=paths.begin(); it!=paths.end(); it++ )
+	{
+		if( first )
+		{
+			first = false;
+		}
+		else
+		{
+			result += separator;
+		}
+		result += it->string();
+	}
+	return result;
+}
+
 boost::filesystem::path SearchPath::find( const boost::filesystem::path &file ) const
 {
 	// if it's a full path then there's no need to do any searching

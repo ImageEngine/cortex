@@ -49,6 +49,7 @@ class SearchPathTest( unittest.TestCase ) :
 		
 		s = SearchPath( "a:b:c", ":" )
 		self.assertEqual( s.paths, [ "a", "b", "c" ] )
+		self.assertEqual( s.getPaths( ":" ), "a:b:c" )
 	
 	def testFind( self ) :
 	

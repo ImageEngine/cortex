@@ -58,6 +58,8 @@ class SearchPath
 		
 		/// Sets paths by tokenizing the paths string according to the separators specified.
 		void setPaths( const std::string &paths, const std::string &separators );
+		/// Returns the paths concatenated together by separator.
+		std::string getPaths( const std::string &separator ) const;
 		
 		/// Tries to find the specified file on the paths defined in the paths public member.
 		/// Use result.empty() to determine failure.
