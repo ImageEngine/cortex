@@ -32,10 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// \file GL.h
-/// Include this file to include the system OpenGL headers. It's better this way as the
-/// right way of including OpenGL varies from system to system.
-
 #ifndef IECOREGL_GL_INL
 #define IECOREGL_GL_INL
 
@@ -50,6 +46,16 @@ inline void glVertex( const Imath::V3f &v )
 inline void glNormal( const Imath::V3f &n )
 {
 	glNormal3f( n.x, n.y, n.z );
+}
+
+inline void glTranslate( const Imath::V2f &t )
+{
+	glTranslatef( t.x, t.y, 0 );
+}
+
+inline void glTranslate( const Imath::V3f &t )
+{
+	glTranslatef( t.x, t.y, t.z );
 }
 
 } // namespace IECoreGL

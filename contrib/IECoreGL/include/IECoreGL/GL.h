@@ -50,6 +50,8 @@ namespace IECoreGL
 
 inline void glVertex( const Imath::V3f &v );
 inline void glNormal( const Imath::V3f &n );
+inline void glTranslate( const Imath::V2f &t );
+inline void glTranslate( const Imath::V3f &t );
 
 } // namespace IECoreGL
 
