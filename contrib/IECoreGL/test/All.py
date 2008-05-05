@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+import IECore
+
 from Shader import *
 from State import *
 from ShaderLoader import *
@@ -47,7 +49,10 @@ from Image import *
 from PointsPrimitive import *
 from Orientation import *
 from CurvesPrimitiveTest import *
-from TextTest import *
+
+if IECore.withFreeType() :
+
+	from TextTest import *
 
 if __name__ == "__main__":
     unittest.main()   

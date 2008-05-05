@@ -186,8 +186,11 @@ struct IECoreGL::Renderer::MemberData
 	ShaderLoaderPtr shaderLoader;
 	TextureLoaderPtr textureLoader;
 	
+#ifdef IECORE_WITH_FREETYPE
 	typedef std::map<std::string, FontPtr> FontMap;
 	FontMap fonts;
+#endif // IECORE_WITH_FREETYPE
+
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1414,6 +1417,8 @@ void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic
 
 void IECoreGL::Renderer::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
 {
+
+#ifdef IECORE_WITH_FREETYPE
 	FontPtr f = 0;
 	MemberData::FontMap::const_iterator it = m_data->fonts.find( font );
 	if( it!=m_data->fonts.end() )
@@ -1449,6 +1454,9 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 	
 	TextPrimitivePtr prim = new TextPrimitive( text, f );
 	addPrimitive( prim, primVars, m_data );
+#else
+		IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." ); 	
+#endif // IECORE_WITH_FREETYPE
 }
 
 void IECoreGL::Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
