@@ -969,6 +969,7 @@ void IECoreRI::RendererImplementation::text( const std::string &font, const std:
 	ScopedContext scopedContext( m_context );
 	delayedMotionBegin();
 
+#ifdef IECORE_WITH_FREETYPE
 	IECore::FontPtr f = 0;
 	FontMap::const_iterator it = m_fonts.find( font );
 	if( it!=m_fonts.end() )
@@ -1000,6 +1001,9 @@ void IECoreRI::RendererImplementation::text( const std::string &font, const std:
 	
 	f->setKerning( kerning );
 	f->meshGroup( text )->render( this );
+#else
+		IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." ); 	
+#endif // IECORE_WITH_FREETYPE
 }
 
 void IECoreRI::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )

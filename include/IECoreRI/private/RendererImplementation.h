@@ -188,8 +188,10 @@ class RendererImplementation : public IECore::Renderer
 		IECore::DataPtr archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		IECore::SearchPath m_fontSearchPath;
+#ifdef IECORE_WITH_FREETYPE
 		typedef std::map<std::string, IECore::FontPtr> FontMap;
 		FontMap m_fonts;
+#endif
 
 		static std::vector<int> g_nLoops;
 		
