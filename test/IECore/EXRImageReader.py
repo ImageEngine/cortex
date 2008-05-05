@@ -271,9 +271,9 @@ class TestEXRReader(unittest.TestCase):
 				wholeEvaluator.pointAtPixel( V2i( x, y ), wholeResult )
 				slicedEvaluator.pointAtPixel( V2i( x, y ), slicedResult )
 				
-				self.assertEqual( wholeResult.floatPrimVar( wholeR ), slicedResult.floatPrimVar( slicedR ) )
-				self.assertEqual( wholeResult.floatPrimVar( wholeG ), slicedResult.floatPrimVar( slicedG ) )
-				self.assertEqual( wholeResult.floatPrimVar( wholeB ), slicedResult.floatPrimVar( slicedB ) )
+				self.assertAlmostEqual( wholeResult.floatPrimVar( wholeR ), slicedResult.floatPrimVar( slicedR ), 4 )
+				self.assertAlmostEqual( wholeResult.floatPrimVar( wholeG ), slicedResult.floatPrimVar( slicedG ), 4 )
+				self.assertAlmostEqual( wholeResult.floatPrimVar( wholeB ), slicedResult.floatPrimVar( slicedB ), 4 )
 				
 	def testOrientation( self ) :
 	
