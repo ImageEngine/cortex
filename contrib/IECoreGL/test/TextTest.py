@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,32 +32,19 @@
 #
 ##########################################################################
 
-import sys
+import unittest
+import os.path
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
-from Orientation import *
-from MultipleContextsTest import *
-from Camera import *
-from CurvesTest import *
-from TextTest import *
+import IECore
 
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
+import IECoreGL
+IECoreGL.init( False )
 
-	def __init__( self ) :
+class TextTest( unittest.TestCase ) :
+
+	def test( self ) :
 	
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )		
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
+		raise NotImplementedError
+				
+if __name__ == "__main__":
+    unittest.main()   

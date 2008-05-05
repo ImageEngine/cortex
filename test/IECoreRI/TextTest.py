@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,32 +32,53 @@
 #
 ##########################################################################
 
-import sys
+import unittest
+import os.path
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
-from Orientation import *
-from MultipleContextsTest import *
-from Camera import *
-from CurvesTest import *
-from TextTest import *
+import IECore
+import IECoreRI
 
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
+class TextTest( unittest.TestCase ) :
 
-	def __init__( self ) :
+	outputFileName = os.path.dirname( __file__ ) + "/output/testText.tif"
 	
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )		
+	def test( self ) :
+	
+		os.environ["IECORE_FONT_PATHS"] = "test"
+		
+		r = IECoreRI.Renderer( "" )
+		
+		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test" ) )
+		r.setOption( "searchPath:font", IECore.StringData( "test/IECore/data/fonts" ) )
+		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test/IECore/data/fonts" ) )
+		
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) ),
+			}
+		)
+		r.display( self.outputFileName, "tiff", "rgba", {} )
+		
+		r.worldBegin()
+		
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0.1, -3 ) ) )
+		r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.15 ) ) )
+		
+		r.text( "Vera.ttf", "hello world", 1, {} )
+	
+		r.worldEnd()
 
-	def write( self, l ) :
+		imageCreated = IECore.Reader.create( self.outputFileName ).read()
+		expectedImage = IECore.Reader.create( "test/IECoreRI/data/textImages/helloWorld.tif" ).read()
+		
+		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
+																
+	def tearDown( self ) :
 
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
+		if os.path.exists( self.outputFileName ) :
+			os.remove( self.outputFileName )
+				
+if __name__ == "__main__":
+    unittest.main()   

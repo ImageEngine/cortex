@@ -61,15 +61,19 @@ class Renderer : public IECore::Renderer
 		
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreRI::Renderer, RendererTypeId, IECore::Renderer );
 
-		/// Implementation specific options :
+		/// \par Standard options supported :
 		///
-		/// "ri:searchpath:shader" StringData()
+		/// \li <b>"searchPath:font"</b>
+		///
+		/// \par Implementation specific options :
+		///
+		/// \li <b>"ri:searchpath:shader" StringData()</b><br>
 		/// A colon separated list of paths to search for shaders on.
 		///
-		/// "ri:pixelSamples" V2iData()
+		/// \li <b>"ri:pixelSamples" V2iData()</b><br>
 		/// Passed to an RiPixelSamples call.
 		///
-		/// "ri:*:*"
+		/// \li <b>"ri:*:*"</b><br>
 		/// Passed to an RiOption call.
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		/// Currently supported options :
@@ -191,8 +195,7 @@ class Renderer : public IECore::Renderer
 		
 		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
 
-		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max() );
-		virtual void text(const std::string &t, const float width = Imath::limits<float>::max() );
+		virtual void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() );
 		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars );

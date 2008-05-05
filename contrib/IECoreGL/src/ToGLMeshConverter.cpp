@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,40 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
+#include "IECoreGL/ToGLMeshConverter.h"
+#include "IECoreGL/MeshPrimitive.h"
 
-#include "IECoreGL/Primitive.h"
+#include "IECore/MeshPrimitive.h"
 
-#include "IECore/VectorTypedData.h"
+using namespace IECoreGL;
 
-namespace IECoreGL
+ToGLMeshConverter::ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert )
+	:	ToGLConverter( staticTypeName(), "Converts IECore::MeshPrimitive objects to IECoreGL::MeshPrimitive objects.", IECore::MeshPrimitiveTypeId )
 {
+	srcParameter()->setValue( boost::const_pointer_cast<IECore::MeshPrimitive>( toConvert ) );
+}
 
-/// \todo Triangulation, fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
+ToGLMeshConverter::~ToGLMeshConverter()
 {
-
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
-
-		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
-		virtual ~MeshPrimitive();
+}
 		
-
-		virtual Imath::Box3f bound() const;
-		
-	protected :
-		
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
+IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
+{
+	IECore::ConstMeshPrimitivePtr mesh = boost::static_pointer_cast<const IECore::MeshPrimitive>( src ); // safe because the parameter validated it for us
 	
-	private :
-	
-		IECore::ConstIntVectorDataPtr m_vertsPerFace;
-		IECore::ConstIntVectorDataPtr m_vertIds;
-		IECore::ConstV3fVectorDataPtr m_points;
-		
-		Imath::Box3f m_bound;
-		
-		/// So TextPrimitive can use the render( state, style ) method.
-		friend class TextPrimitive;
-	
-};
+	IECore::ConstV3fVectorDataPtr p = 0;
+	IECore::PrimitiveVariableMap::const_iterator pIt = mesh->variables.find( "P" );
+	if( pIt!=mesh->variables.end() )
+	{
+		if( pIt->second.interpolation==IECore::PrimitiveVariable::Vertex )
+		{
+			p = IECore::runTimeCast<const IECore::V3fVectorData>( pIt->second.data );
+		}	
+	}
+	if( !p )
+	{
+		throw IECore::Exception( "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
+	}
 
-IE_CORE_DECLAREPTR( MeshPrimitive );
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_MESHPRIMITIVE_H
+	return new MeshPrimitive( mesh->verticesPerFace(), mesh->vertexIds(), p );
+}

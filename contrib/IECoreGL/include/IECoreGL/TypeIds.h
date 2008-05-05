@@ -93,7 +93,9 @@ enum TypeId
 	CurvesPrimitiveGLLineWidthTypeId = 105050,
 	CurvesPrimitiveUseGLLinesTypeId = 105051,
 	CurvesPrimitiveIgnoreBasisTypeId = 105052,
-	/// If we ever get here we should start over again
+	ToGLMeshConverterTypeId = 105053,
+	FontTypeId = 105054,
+	TextPrimitiveTypeId = 105055,
 	LastCoreGLTypeId = 105999,	
 };	
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
 
-#include "IECoreGL/Primitive.h"
+#include "IECoreGL/Font.h"
+#include "IECoreGL/ToGLMeshConverter.h"
+#include "IECoreGL/MeshPrimitive.h"
 
-#include "IECore/VectorTypedData.h"
+#include "IECore/MeshPrimitive.h"
 
-namespace IECoreGL
+using namespace IECoreGL;
+using namespace std;
+using namespace boost;
+
+Font::Font( IECore::FontPtr font )
+	:	m_font( font )
 {
+}
 
-/// \todo Triangulation, fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
+Font::~Font()
 {
+}
 
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
-
-		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
-		virtual ~MeshPrimitive();
+IECore::FontPtr Font::coreFont()
+{
+	return m_font;
+}
 		
-
-		virtual Imath::Box3f bound() const;
-		
-	protected :
-		
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
+ConstMeshPrimitivePtr Font::mesh( char c )
+{
+	MeshMap::const_iterator it = m_meshes.find( c );
+	if( it!=m_meshes.end() )
+	{
+		return it->second;
+	}
 	
-	private :
+	ToGLMeshConverter converter( m_font->mesh( c ) );
+	ConstMeshPrimitivePtr mesh = boost::static_pointer_cast<const MeshPrimitive>( converter.convert() );
+	m_meshes[c] = mesh;
 	
-		IECore::ConstIntVectorDataPtr m_vertsPerFace;
-		IECore::ConstIntVectorDataPtr m_vertIds;
-		IECore::ConstV3fVectorDataPtr m_points;
+	return mesh;
+}
 		
-		Imath::Box3f m_bound;
-		
-		/// So TextPrimitive can use the render( state, style ) method.
-		friend class TextPrimitive;
-	
-};
-
-IE_CORE_DECLAREPTR( MeshPrimitive );
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_MESHPRIMITIVE_H

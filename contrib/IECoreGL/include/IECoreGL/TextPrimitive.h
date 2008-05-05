@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,29 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
+#ifndef IECOREGL_TEXTPRIMITIVE_H
+#define IECOREGL_TEXTPRIMITIVE_H
 
 #include "IECoreGL/Primitive.h"
-
-#include "IECore/VectorTypedData.h"
 
 namespace IECoreGL
 {
 
-/// \todo Triangulation, fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
+IE_CORE_FORWARDDECLARE( Font )
+IE_CORE_FORWARDDECLARE( MeshPrimitive )
+
+class TextPrimitive : public Primitive
 {
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TextPrimitive, TextPrimitiveTypeId, Primitive );
 
-		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
-		virtual ~MeshPrimitive();
+		TextPrimitive( const std::string &text, FontPtr font );
+		virtual ~TextPrimitive();
 		
-
 		virtual Imath::Box3f bound() const;
 		
 	protected :
@@ -63,19 +61,17 @@ class MeshPrimitive : public Primitive
 	
 	private :
 	
-		IECore::ConstIntVectorDataPtr m_vertsPerFace;
-		IECore::ConstIntVectorDataPtr m_vertIds;
-		IECore::ConstV3fVectorDataPtr m_points;
+		typedef std::vector<ConstMeshPrimitivePtr> MeshVector;
+		typedef std::vector<Imath::V2f> AdvanceVector;
+		MeshVector m_meshes;
+		AdvanceVector m_advances;
 		
 		Imath::Box3f m_bound;
-		
-		/// So TextPrimitive can use the render( state, style ) method.
-		friend class TextPrimitive;
 	
 };
 
-IE_CORE_DECLAREPTR( MeshPrimitive );
+IE_CORE_DECLAREPTR( TextPrimitive );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_MESHPRIMITIVE_H
+#endif // IECOREGL_TEXTPRIMITIVE_H

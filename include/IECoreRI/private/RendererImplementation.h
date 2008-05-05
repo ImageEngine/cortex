@@ -38,6 +38,7 @@
 #include "IECore/Renderer.h"
 #include "IECore/CachedReader.h"
 #include "IECore/Camera.h"
+#include "IECore/Font.h"
 
 #include "ri.h"
 
@@ -91,8 +92,7 @@ class RendererImplementation : public IECore::Renderer
 		
 		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
 
-		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max() );
-		virtual void text(const std::string &t, const float width = Imath::limits<float>::max() );
+		virtual void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() );
 		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars );
@@ -124,8 +124,10 @@ class RendererImplementation : public IECore::Renderer
 		SetOptionHandlerMap m_setOptionHandlers;
 		GetOptionHandlerMap m_getOptionHandlers;
 		
+		void setFontSearchPathOption( const std::string &name, IECore::ConstDataPtr d );
 		void setShaderSearchPathOption( const std::string &name, IECore::ConstDataPtr d );
 		void setPixelSamplesOption( const std::string &name, IECore::ConstDataPtr d );
+		IECore::ConstDataPtr getFontSearchPathOption( const std::string &name ) const;
 		IECore::ConstDataPtr getShutterOption( const std::string &name ) const;
 		IECore::ConstDataPtr getResolutionOption( const std::string &name ) const;
 		
@@ -184,6 +186,10 @@ class RendererImplementation : public IECore::Renderer
 		IECore::DataPtr objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr objectInstanceCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
+
+		IECore::SearchPath m_fontSearchPath;
+		typedef std::map<std::string, IECore::FontPtr> FontMap;
+		FontMap m_fonts;
 
 		static std::vector<int> g_nLoops;
 		

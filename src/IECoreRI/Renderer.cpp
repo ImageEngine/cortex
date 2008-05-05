@@ -176,14 +176,9 @@ void Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::
 	m_implementation->curves( basis, periodic, numVertices, primVars );
 }
 
-Imath::Box3f Renderer::textExtents( const std::string &t, float width )
+void Renderer::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
 {
-	return m_implementation->textExtents( t, width );
-}
-
-void Renderer::text( const std::string &t, float width )
-{
-	m_implementation->text( t, width );
+	m_implementation->text( font, text, kerning, primVars );
 }
 
 void Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )

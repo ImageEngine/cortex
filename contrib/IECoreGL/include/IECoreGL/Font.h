@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
+#ifndef IECOREGL_FONT_H
+#define IECOREGL_FONT_H
 
-#include "IECoreGL/Primitive.h"
+#include "IECoreGL/TypeIds.h"
 
-#include "IECore/VectorTypedData.h"
+#include "IECore/Font.h"
 
 namespace IECoreGL
 {
 
-/// \todo Triangulation, fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
-{
+IE_CORE_FORWARDDECLARE( MeshPrimitive );
 
+class Font : public IECore::RunTimeTyped
+{
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Font, FontTypeId, IECore::RunTimeTyped );
 
-		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
-		virtual ~MeshPrimitive();
+		Font( IECore::FontPtr font );
+		virtual ~Font();
 		
-
-		virtual Imath::Box3f bound() const;
+		IECore::FontPtr coreFont();
 		
-	protected :
+		ConstMeshPrimitivePtr mesh( char c );
 		
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
-	
 	private :
 	
-		IECore::ConstIntVectorDataPtr m_vertsPerFace;
-		IECore::ConstIntVectorDataPtr m_vertIds;
-		IECore::ConstV3fVectorDataPtr m_points;
-		
-		Imath::Box3f m_bound;
-		
-		/// So TextPrimitive can use the render( state, style ) method.
-		friend class TextPrimitive;
+		IECore::FontPtr m_font;
 	
+		typedef std::map<char, ConstMeshPrimitivePtr> MeshMap;
+		MeshMap m_meshes;
 };
 
-IE_CORE_DECLAREPTR( MeshPrimitive );
+IE_CORE_DECLAREPTR( Font );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_MESHPRIMITIVE_H
+#endif // IECOREGL_FONT_H

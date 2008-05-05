@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,38 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
+#ifndef IECOREGL_TOGLMESHCONVERTER_H
+#define IECOREGL_TOGLMESHCONVERTER_H
 
-#include "IECoreGL/Primitive.h"
+#include "IECoreGL/ToGLConverter.h"
 
-#include "IECore/VectorTypedData.h"
+namespace IECore
+{
+	IE_CORE_FORWARDDECLARE( MeshPrimitive );
+}
 
 namespace IECoreGL
 {
 
-/// \todo Triangulation, fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
+/// Converts IECore::MeshPrimitive objects into IECoreGL::MeshPrimitive objects.
+class ToGLMeshConverter : public ToGLConverter
 {
 
 	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
-
-		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
-		virtual ~MeshPrimitive();
+	
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToGLMeshConverter, ToGLMeshConverterTypeId, ToGLConverter );
 		
-
-		virtual Imath::Box3f bound() const;
+		ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert = 0 );
+		virtual ~ToGLMeshConverter();
 		
 	protected :
-		
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
 	
-	private :
-	
-		IECore::ConstIntVectorDataPtr m_vertsPerFace;
-		IECore::ConstIntVectorDataPtr m_vertIds;
-		IECore::ConstV3fVectorDataPtr m_points;
-		
-		Imath::Box3f m_bound;
-		
-		/// So TextPrimitive can use the render( state, style ) method.
-		friend class TextPrimitive;
-	
+		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+			
 };
 
-IE_CORE_DECLAREPTR( MeshPrimitive );
+IE_CORE_DECLAREPTR( ToGLMeshConverter );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_MESHPRIMITIVE_H
+#endif // IECOREGL_TOGLMESHCONVERTER_H

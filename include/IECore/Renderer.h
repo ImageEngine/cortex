@@ -103,6 +103,13 @@ class Renderer : public RunTimeTyped
 		/// render. These functions allow their setting and getting. All options must
 		/// be set before a call to worldBegin() - it is invalid to change an option
 		/// after worldBegin().
+		///
+		/// \par Standard SearchPath Options
+		/// <br>
+		/// \li <b>"searchPath:font" StringData</b><br>
+		/// A colon separated list of paths to search for fonts on - these are used
+		/// by the text() primitive. The default value should come from the
+		/// IECORE_FONT_PATHS environment variable if set.
 		///////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Set an option. Must not be called after worldBegin().
@@ -286,10 +293,8 @@ class Renderer : public RunTimeTyped
 		virtual void disk( float radius, float z, float thetaMax, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders a set of curves.
 		virtual void curves( const CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) = 0;
-		/// Returns the extents of the given string (under the current font, text-layout characteristics).
-		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max()) = 0;
 		/// Renders some text.
-		virtual void text(const std::string &t, const float width = Imath::limits<float>::max()) = 0;
+		virtual void text( const std::string &font, const std::string &text, float kerning = 1.0f, const PrimitiveVariableMap &primVars=PrimitiveVariableMap() ) = 0;
 		/// Renders a sphere of the specified radius. zMin and zMax are measured as a proportion of the radius - so no matter
 		/// what the radius, the default values will always give a full sphere. If the "rightHandedOrientation"
 		/// attribute is true then the normals point outwards, otherwise they point inwards.

@@ -53,7 +53,11 @@ class Renderer : public IECore::Renderer
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Renderer, RendererTypeId, IECore::Renderer );
 
-		/// Supports the following options :
+		/// \par Standard options supported :
+		///
+		/// \li <b>"searchPath:font"</b>
+		///
+		/// \par Implementation specific options supported :
 		///
 		/// "gl:mode" StringData 
 		/// Valid values are "immediate" or "deferred". In immediate mode rendering is
@@ -315,8 +319,7 @@ class Renderer : public IECore::Renderer
 		/// Vertex V3fVectorData "P"
 		/// Constant FloatData "width"
 		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
-		virtual Imath::Box3f textExtents(const std::string & t, const float width = Imath::limits<float>::max() );
-		virtual void text(const std::string &t, const float width = Imath::limits<float>::max() );
+		virtual void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() );
 		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
 		/// Supports the following image formats specified as primitive variables :
 		///

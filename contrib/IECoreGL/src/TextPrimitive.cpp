@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,61 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
+#include "IECoreGL/TextPrimitive.h"
+#include "IECoreGL/MeshPrimitive.h"
+#include "IECoreGL/State.h"
+#include "IECoreGL/Font.h"
+#include "IECoreGL/GL.h"
 
-#include "IECoreGL/Primitive.h"
+using namespace IECoreGL;
+using namespace Imath;
 
-#include "IECore/VectorTypedData.h"
-
-namespace IECoreGL
+TextPrimitive::TextPrimitive( const std::string &text, FontPtr font )
 {
+	if( text.size() )
+	{
+		V3f advanceSum( 0 );
+		for( unsigned i=0; i<text.size(); i++ )
+		{
+			ConstMeshPrimitivePtr mesh = font->mesh( text[i] );
+			m_meshes.push_back( mesh );
+			Box3f b = mesh->bound();
+			b.min += advanceSum;
+			b.max += advanceSum;
+			m_bound.extendBy( b );
+			if( i<text.size() - 1 )
+			{
+				V2f a = font->coreFont()->advance( text[i], text[i+1] );
+				m_advances.push_back( a );
+				advanceSum += V3f( a.x, a.y, 0 );
+			}
+		}
+	}
+}
 
-/// \todo Triangulation, fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
+TextPrimitive::~TextPrimitive()
 {
+}
 
-	public :
+Imath::Box3f TextPrimitive::bound() const
+{
+	return m_bound;
+}
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
-
-		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
-		virtual ~MeshPrimitive();
-		
-
-		virtual Imath::Box3f bound() const;
-		
-	protected :
-		
-		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
+void TextPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
+{
+	glPushMatrix();
 	
-	private :
+	for( unsigned i=0; i<m_meshes.size(); i++ )
+	{
+		m_meshes[i]->render( state, style );
+		if( i<m_advances.size() )
+		{
+			glTranslate( m_advances[i] );
+		}
+	}
 	
-		IECore::ConstIntVectorDataPtr m_vertsPerFace;
-		IECore::ConstIntVectorDataPtr m_vertIds;
-		IECore::ConstV3fVectorDataPtr m_points;
-		
-		Imath::Box3f m_bound;
-		
-		/// So TextPrimitive can use the render( state, style ) method.
-		friend class TextPrimitive;
-	
-};
+	glPopMatrix();
+}
 
-IE_CORE_DECLAREPTR( MeshPrimitive );
 
-} // namespace IECoreGL
-
-#endif // IECOREGL_MESHPRIMITIVE_H

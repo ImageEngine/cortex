@@ -214,6 +214,13 @@ static void curves( Renderer &r, const CubicBasisf &basis, bool periodic, ConstI
 	r.curves( basis, periodic, numVertices, p );
 }
 
+static void text( Renderer &r, const std::string &font, const std::string &text, float kerning, const dict &primVars )
+{
+	PrimitiveVariableMap p;
+	fillPrimitiveVariableMap( p, primVars );
+	r.text( font, text, kerning, p );
+}
+
 static void sphere( Renderer &r, float radius, float zMin, float zMax, float thetaMax, const dict &primVars )
 {
 	PrimitiveVariableMap p;
@@ -302,9 +309,8 @@ void bindRenderer()
 		.def("points", &points)
 		.def("disk", &disk)
 		.def("curves", &curves)
-		.def("text", &Renderer::text)
-		.def("sphere", &Renderer::text)
-		.def("textExtents", &Renderer::textExtents)
+		.def("text", &text)
+		.def("sphere", &Renderer::sphere)
 		.def("image", &image)
 		.def("mesh", &mesh)
 		.def("nurbs", &nurbs)

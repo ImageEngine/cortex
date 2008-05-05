@@ -44,9 +44,11 @@
 #include "IECore/MatrixAlgo.h"
 #include "IECore/Transform.h"
 #include "IECore/MatrixTransform.h"
+#include "IECore/Group.h"
 
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/format.hpp>
+#include "boost/algorithm/string/case_conv.hpp"
+#include "boost/algorithm/string/join.hpp"
+#include "boost/format.hpp"
 
 #include <iostream>
 
@@ -107,16 +109,24 @@ void IECoreRI::RendererImplementation::constructCommon()
 
 	m_attributeStack.push( AttributeState() );
 	
+	const char *fontPath = getenv( "IECORE_FONT_PATHS" );
+	if( fontPath )
+	{
+		m_fontSearchPath.setPaths( fontPath, ":" );
+	}
+	
 	const char *shaderPathE = getenv( "DL_SHADERS_PATH" );
 	m_shaderCache = new CachedReader( SearchPath( shaderPathE ? shaderPathE : "", ":" ), g_shaderCacheSize );
 	
 	m_setOptionHandlers["ri:searchpath:shader"] = &IECoreRI::RendererImplementation::setShaderSearchPathOption;
 	m_setOptionHandlers["ri:pixelsamples"] = &IECoreRI::RendererImplementation::setPixelSamplesOption;
 	m_setOptionHandlers["ri:pixelSamples"] = &IECoreRI::RendererImplementation::setPixelSamplesOption;
+	m_setOptionHandlers["searchPath:font"] = &IECoreRI::RendererImplementation::setFontSearchPathOption;
 
 	m_getOptionHandlers["shutter"] = &IECoreRI::RendererImplementation::getShutterOption;
 	m_getOptionHandlers["camera:shutter"] = &IECoreRI::RendererImplementation::getShutterOption;
 	m_getOptionHandlers["camera:resolution"] = &IECoreRI::RendererImplementation::getResolutionOption;
+	m_getOptionHandlers["searchPath:font"] = &IECoreRI::RendererImplementation::getFontSearchPathOption;
 	
 	m_setAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::setShadingRateAttribute;
 	m_setAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::setMatteAttribute;
@@ -258,6 +268,23 @@ void IECoreRI::RendererImplementation::setPixelSamplesOption( const std::string 
 	{
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", "Expected V2iData for \"ri:pixelSamples\"." );	
 	}
+}
+
+void IECoreRI::RendererImplementation::setFontSearchPathOption( const std::string &name, IECore::ConstDataPtr d )
+{
+	if( ConstStringDataPtr s = runTimeCast<const StringData>( d ) )
+	{
+		m_fontSearchPath.setPaths( s->readable(), ":" );
+	}
+	else
+	{
+		msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", "Expected StringData for \"searchPath:font\"." );	
+	}
+}
+
+IECore::ConstDataPtr IECoreRI::RendererImplementation::getFontSearchPathOption( const std::string &name ) const
+{
+	return new StringData( m_fontSearchPath.getPaths( ":" ) );
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getShutterOption( const std::string &name ) const
@@ -895,11 +922,6 @@ void IECoreRI::RendererImplementation::motionEnd()
 // primitives
 /////////////////////////////////////////////////////////////////////////////////////////
 
-Imath::Box3f IECoreRI::RendererImplementation::textExtents(const std::string & t, const float width )
-{
-	return Box3f();
-}
-
 void IECoreRI::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
@@ -942,12 +964,42 @@ void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis,
 				pv.n(), pv.tokens(), pv.values() );
 }
 
-void IECoreRI::RendererImplementation::text(const std::string &t, const float width )
+void IECoreRI::RendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
 	delayedMotionBegin();
 
-	msg( Msg::Warning, "IECoreRI::RendererImplementation::text", "Not implemented" );	
+	IECore::FontPtr f = 0;
+	FontMap::const_iterator it = m_fonts.find( font );
+	if( it!=m_fonts.end() )
+	{
+		f = it->second;
+	}
+	else
+	{
+		string file = m_fontSearchPath.find( font ).string();
+		if( file!="" )
+		{
+			try
+			{
+				f = new IECore::Font( file );
+			}
+			catch( const std::exception &e )
+			{
+				IECore::msg( IECore::Msg::Warning, "Renderer::text", e.what() ); 
+			}
+		}
+		m_fonts[font] = f;
+	}
+	
+	if( !f )
+	{
+		IECore::msg( IECore::Msg::Warning, "Renderer::text", boost::format( "Font \"%s\" not found." ) % font ); 	
+		return;
+	}
+	
+	f->setKerning( kerning );
+	f->meshGroup( text )->render( this );
 }
 
 void IECoreRI::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
