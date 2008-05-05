@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,63 +32,77 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/IECore.h"
+#ifndef IECORE_FONT_H
+#define IECORE_FONT_H
 
-#include "boost/format.hpp"
+#include "IECore/RunTimeTyped.h"
+
+#include "OpenEXR/ImathVec.h"
+
+#include "boost/shared_ptr.hpp"
+
+#include <map>
+
+/// Forward declarations for freetype types
+typedef struct FT_LibraryRec_ *FT_Library;
+typedef struct FT_FaceRec_ *FT_Face;
 
 namespace IECore
 {
 
-int majorVersion()
+IE_CORE_FORWARDDECLARE( MeshPrimitive );
+IE_CORE_FORWARDDECLARE( ImagePrimitive );
+IE_CORE_FORWARDDECLARE( Group );
+
+/// The Font class allows the loading of fonts and their
+/// conversion to MeshPrimitives.
+class Font : public RunTimeTyped
 {
-	return IE_CORE_MAJORVERSION;
+	
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPED( Font, RunTimeTyped );
+
+		Font( const std::string &fontFile );
+		virtual ~Font();
+
+		void setKerning( float kerning );
+		float getKerning() const;
+
+		void setCurveTolerance( float tolerance );
+		float getCurveTolerance() const;
+		
+		void setResolution( float pixelsPerEm );
+		float getResolution() const;
+
+		ConstMeshPrimitivePtr mesh( char c );
+		MeshPrimitivePtr mesh( const std::string &text );
+		GroupPtr meshGroup( const std::string &text );
+		Imath::V2f advance( char first, char second );
+		
+	private :
+
+		class Mesher;
+		
+		static FT_Library library();
+
+		FT_Face m_face;
+		float m_kerning;
+		float m_curveTolerance;
+		float m_pixelsPerEm;
+		
+		struct Mesh;
+		typedef boost::shared_ptr<Mesh> MeshPtr;
+		typedef boost::shared_ptr<const Mesh> ConstMeshPtr;
+		typedef std::map<char, ConstMeshPtr> MeshMap;
+		MeshMap m_meshes;
+		
+		ConstMeshPtr cachedMesh( char c );
+		
+};
+
+IE_CORE_DECLAREPTR( Font );
+
 }
 
-int minorVersion()
-{
-	return IE_CORE_MINORVERSION;
-}
-
-int patchVersion()
-{
-	return IE_CORE_PATCHVERSION;
-}
-
-const std::string &versionString()
-{
-	static std::string v;
-	if( !v.size() )
-	{
-		v = boost::str( boost::format( "%d.%d.%d" ) % majorVersion() % minorVersion() % patchVersion() );
-	}
-	return v;
-}
-
-bool withTIFF()
-{
-#ifdef IECORE_WITH_TIFF
-	return true;
-#else
-	return false;
-#endif	
-}
-
-bool withJPEG()
-{
-#ifdef IECORE_WITH_JPEG
-	return true;
-#else
-	return false;
-#endif	
-}
-
-bool withFreeType()
-{
-#ifdef IECORE_WITH_FREETYPE
-	return true;
-#else
-	return false;
-#endif	
-}
-
-}
+#endif // IECORE_FONT_H

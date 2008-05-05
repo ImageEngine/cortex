@@ -150,6 +150,9 @@ if IECore.withTIFF() :
 if IECore.withJPEG() :
 	from JPEGImageReader import *
 	from JPEGImageWriter import *
+	
+if IECore.withFreeType() :
+	from FontTest import *
 
 class SplitStream :
 

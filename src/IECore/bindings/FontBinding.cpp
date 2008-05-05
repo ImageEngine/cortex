@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,63 +32,54 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/IECore.h"
+// This include needs to be the very first to prevent problems with warnings 
+// regarding redefinition of _POSIX_C_SOURCE
+#include <boost/python.hpp>
 
-#include "boost/format.hpp"
+#include "IECore/bindings/FontBinding.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/Font.h"
+#include "IECore/MeshPrimitive.h"
+#include "IECore/ImagePrimitive.h"
+#include "IECore/Group.h"
+
+using namespace boost::python;
+using namespace boost;
+using namespace std;
 
 namespace IECore
 {
 
-int majorVersion()
+static MeshPrimitivePtr mesh( Font &f, char c )
 {
-	return IE_CORE_MAJORVERSION;
-}
-
-int minorVersion()
-{
-	return IE_CORE_MINORVERSION;
-}
-
-int patchVersion()
-{
-	return IE_CORE_PATCHVERSION;
-}
-
-const std::string &versionString()
-{
-	static std::string v;
-	if( !v.size() )
+	ConstMeshPrimitivePtr m = f.mesh( c );
+	if( m )
 	{
-		v = boost::str( boost::format( "%d.%d.%d" ) % majorVersion() % minorVersion() % patchVersion() );
+		return m->copy();
 	}
-	return v;
+	return 0;
 }
 
-bool withTIFF()
+void bindFont()
 {
-#ifdef IECORE_WITH_TIFF
-	return true;
-#else
-	return false;
-#endif	
-}
+	typedef class_< Font, boost::noncopyable, FontPtr, bases< RunTimeTyped > > FontPyClass;
+	FontPyClass( "Font", init<const std::string &>() )
+		.def( "setCurveTolerance", &Font::setCurveTolerance )
+		.def( "getCurveTolerance", &Font::getCurveTolerance )
+		.def( "setResolution", &Font::setResolution )
+		.def( "getResolution", &Font::getResolution )
+		.def( "setKerning", &Font::setKerning )
+		.def( "getKerning", &Font::getKerning )
+		.def( "mesh", &mesh )
+		.def( "mesh", (MeshPrimitivePtr (Font::*)( const std::string &))&Font::mesh )
+		.def( "meshGroup", &Font::meshGroup )
+		.def( "advance", &Font::advance )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Font )		
+	;
 
-bool withJPEG()
-{
-#ifdef IECORE_WITH_JPEG
-	return true;
-#else
-	return false;
-#endif	
+	INTRUSIVE_PTR_PATCH( Font, FontPyClass );
+	implicitly_convertible<FontPtr, RunTimeTypedPtr>();
 }
-
-bool withFreeType()
-{
-#ifdef IECORE_WITH_FREETYPE
-	return true;
-#else
-	return false;
-#endif	
-}
-
-}
+	
+} // namespace IECore

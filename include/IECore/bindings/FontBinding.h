@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,63 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/IECore.h"
-
-#include "boost/format.hpp"
+#ifndef IECOREPYTHON_FONTBINDING_H
+#define IECOREPYTHON_FONTBINDING_H
 
 namespace IECore
 {
-
-int majorVersion()
-{
-	return IE_CORE_MAJORVERSION;
+void bindFont();
 }
 
-int minorVersion()
-{
-	return IE_CORE_MINORVERSION;
-}
-
-int patchVersion()
-{
-	return IE_CORE_PATCHVERSION;
-}
-
-const std::string &versionString()
-{
-	static std::string v;
-	if( !v.size() )
-	{
-		v = boost::str( boost::format( "%d.%d.%d" ) % majorVersion() % minorVersion() % patchVersion() );
-	}
-	return v;
-}
-
-bool withTIFF()
-{
-#ifdef IECORE_WITH_TIFF
-	return true;
-#else
-	return false;
-#endif	
-}
-
-bool withJPEG()
-{
-#ifdef IECORE_WITH_JPEG
-	return true;
-#else
-	return false;
-#endif	
-}
-
-bool withFreeType()
-{
-#ifdef IECORE_WITH_FREETYPE
-	return true;
-#else
-	return false;
-#endif	
-}
-
-}
+#endif // IECOREPYTHON_FONTBINDING_H

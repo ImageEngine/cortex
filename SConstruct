@@ -129,6 +129,20 @@ o.Add(
 	"/usr/local/lib",
 )
 
+# Freetype options
+
+o.Add(
+	"FREETYPE_INCLUDE_PATH",
+	"The path to the FreeType include directory.",
+	"/usr/local/include/freetype2",
+)
+
+o.Add(
+	"FREETYPE_LIB_PATH",
+	"The path to the FreeType lib directory.",
+	"/usr/local/lib",
+)
+
 # General path options
 
 o.Add(
@@ -474,12 +488,14 @@ env.Prepend(
 		"$BOOST_INCLUDE_PATH",
 		"$JPEG_INCLUDE_PATH",
 		"$TIFF_INCLUDE_PATH",
+		"$FREETYPE_INCLUDE_PATH",
 	],
 	LIBPATH = [
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
 		"$JPEG_LIB_PATH",
 		"$TIFF_LIB_PATH",
+		"$FREETYPE_LIB_PATH",
 	],
 	LIBS = [
 		"pthread",
@@ -780,7 +796,15 @@ if doConfigure :
 		coreSources.remove( "src/IECore/JPEGImageReader.cpp" )
 		corePythonSources.remove( "src/IECore/bindings/JPEGImageReaderBinding.cpp" )
 		corePythonSources.remove( "src/IECore/bindings/JPEGImageWriterBinding.cpp" )
-					
+	
+	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
+		c.env.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
+		corePythonEnv.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
+	else :
+		sys.stderr.write( "WARNING: no FreeType library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
+		coreSources.remove( "src/IECore/Font.cpp" )
+		corePythonSources.remove( "src/IECore/bindings/FontBinding.cpp" )
+				
 	c.Finish()
 
 if compilerVersion < 350 :

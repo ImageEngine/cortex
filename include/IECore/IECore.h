@@ -54,6 +54,8 @@ const std::string &versionString();
 bool withTIFF();
 /// Returns true if IECore was built with JPEG support
 bool withJPEG();
+/// Returns true if IECore was built with FreeType suppport
+bool withFreeType();
 
 }
 
