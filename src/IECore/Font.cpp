@@ -344,7 +344,7 @@ Font::ConstMeshPtr Font::cachedMesh( char c )
 	FT_Load_Char( m_face, c, FT_LOAD_NO_BITMAP | FT_LOAD_NO_SCALE );
 	
 	// get the mesh
-	Mesher m( m_curveTolerance * m_face->units_per_EM );
+	Mesher m( (FT_Pos)(m_curveTolerance * m_face->units_per_EM) );
 	MeshPrimitivePtr primitive = m.mesh( &(m_face->glyph->outline) );
 	
 	// transform it so an EM is 1 unit
