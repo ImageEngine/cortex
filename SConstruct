@@ -890,7 +890,7 @@ coreTestEnv.Alias( "testCorePython", corePythonTest )
 # Build, install and test the coreRI library and bindings
 ###########################################################################################
 
-riEnv = env.Copy( IECORE_NAME = "IECoreRI" )
+riEnv = coreEnv.Copy( IECORE_NAME = "IECoreRI" )
 riEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 riEnv.Append(
@@ -1044,7 +1044,7 @@ if env["WITH_GL"] and doConfigure :
 		],
 	}
 	
-	glEnv = env.Copy( **glEnvSets )
+	glEnv = coreEnv.Copy( **glEnvSets )
 
 	glEnv.Append( **glEnvAppends )
 	glEnv.Prepend( **glEnvPrepends )
