@@ -175,6 +175,7 @@
 #include "IECore/bindings/PolygonAlgoBinding.h"
 #include "IECore/bindings/MeshMergeOpBinding.h"
 #include "IECore/bindings/FontBinding.h"
+#include "IECore/bindings/UniformRandomPointDistributionOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -334,6 +335,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindFont();
 
 #endif	
+
+	bindUniformRandomPointDistributionOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

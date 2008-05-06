@@ -255,6 +255,7 @@ void bindTypeId()
 		.value("MeshNormalsOp", MeshNormalsOpTypeId )
 		.value("Font", FontTypeId )
 		.value("MeshMergeOp", MeshMergeOpTypeId )
+		.value("UniformRandomPointDistributionOp", UniformRandomPointDistributionOpTypeId )
 	;
 }
 

@@ -255,6 +255,7 @@ enum TypeId
 	MeshNormalsOpTypeId = 212,
 	MeshMergeOpTypeId = 213,
 	FontTypeId = 214,
+	UniformRandomPointDistributionOpTypeId = 215,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

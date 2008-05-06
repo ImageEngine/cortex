@@ -142,6 +142,7 @@ from BezierAlgoTest import *
 from MeshNormalsOpTest import *
 from PrimitiveTest import *
 from MeshMergeOpTest import *
+from UniformRandomPointDistributionOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
