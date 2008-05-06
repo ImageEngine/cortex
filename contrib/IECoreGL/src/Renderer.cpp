@@ -1455,7 +1455,7 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 	TextPrimitivePtr prim = new TextPrimitive( text, f );
 	addPrimitive( prim, primVars, m_data );
 #else
-		IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." ); 	
+	IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." ); 	
 #endif // IECORE_WITH_FREETYPE
 }
 
