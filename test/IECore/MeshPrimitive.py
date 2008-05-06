@@ -83,6 +83,10 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		
 		self.assert_( mm.arePrimitiveVariablesValid() );
 		
+	def testEmptyMeshConstructor( self ) :
+	
+		m = MeshPrimitive( IntVectorData(), IntVectorData(), "linear", V3fVectorData() )
+		self.assert_( m.arePrimitiveVariablesValid() )
 		
 	def tearDown( self ) :
 	

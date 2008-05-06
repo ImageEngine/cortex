@@ -89,15 +89,10 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 			throw Exception( "Bad topology - number of vertices per face less than 3." );
 		}
 	}
-
-	if (vertexIds->readable().size() < 3)
-	{
-		throw Exception( "Bad topology - insufficient vertexIds." );
-	}
-	
+		
 	minIt = min_element( vertexIds->readable().begin(), vertexIds->readable().end() );
 	{
-		if( *minIt<0 )
+		if( minIt!=vertexIds->readable().end() && *minIt<0 )
 		{
 			throw Exception( "Bad topology - vertexId less than 0." );
 		}
