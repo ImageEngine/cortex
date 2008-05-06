@@ -1002,7 +1002,7 @@ void IECoreRI::RendererImplementation::text( const std::string &font, const std:
 	f->setKerning( kerning );
 	f->meshGroup( text )->render( this );
 #else
-		IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." ); 	
+	IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." ); 	
 #endif // IECORE_WITH_FREETYPE
 }
 
