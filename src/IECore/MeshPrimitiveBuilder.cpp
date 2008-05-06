@@ -75,12 +75,7 @@ void MeshPrimitiveBuilder::addTriangle( int v0, int v1, int v2 )
 }
 		
 MeshPrimitivePtr MeshPrimitiveBuilder::mesh() const
-{
-	if ( m_vertexIds->readable().size() == 0)
-	{
-		return new MeshPrimitive();
-	}
-	
+{	
 	MeshPrimitivePtr m = new MeshPrimitive( m_verticesPerFace, m_vertexIds, "linear", m_P );						
 	m->variables["N"] =  IECore::PrimitiveVariable( IECore::PrimitiveVariable::Varying, m_N->copy() );	
 			
