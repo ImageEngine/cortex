@@ -45,6 +45,7 @@
 #include "IECore/Exception.h"
 #include "IECore/ImagePrimitiveEvaluator.h"
 #include "IECore/Deleter.h"
+#include "IECore/Interpolator.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -169,6 +170,26 @@ unsigned char ImagePrimitiveEvaluator::Result::ucharPrimVar( const PrimitiveVari
 }
 
 template<typename T>
+T ImagePrimitiveEvaluator::Result::indexData( const std::vector<T> &data, const V2i &p ) const
+{
+	int dataWidth = m_dataWindow.size().x + 1;
+	int dataHeight = m_dataWindow.size().y + 1;						
+	
+	if ( p.x >= 0 && p.y >= 0 && p.x < dataWidth && p.y < dataHeight )			
+	{
+		int idx = ( p.y * dataWidth ) + p.x;								
+		assert( idx >= 0 );
+		assert( idx < (int)data.size() );
+
+		return data[idx];				
+	}
+	else
+	{
+		return T(0);
+	}				
+}
+
+template<typename T>
 T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) const
 {
 	if ( pv.interpolation == PrimitiveVariable::Constant )
@@ -210,24 +231,85 @@ T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) con
 				return T(0);
 			}
 			
-			// \todo Use UV coord instead, and perform bilinear interpolation
-			V2i p = pixel() ;	
+			V2f pf(
+				( m_p.x - m_bound.min.x ),
+				( m_p.y - m_bound.min.y )
+			);
 			
-			p = p - m_dataWindow.min;
+			/// Don't interpolate at the half-pixel border on the image's interior
+			if ( 
+				   pf.x <= ( m_dataWindow.min.x + 0.5f )  
+				|| pf.y <= ( m_dataWindow.min.y + 0.5f )
+				|| pf.x >= ( m_dataWindow.max.x + 0.5f )
+				|| pf.y >= ( m_dataWindow.max.y + 0.5f )
+			)
+			{							
+				/// Fix boundary cases on bottom and right edges
+				const float tol = 1.e-3;	
+				if ( pf.x >= m_dataWindow.max.x + 1.0f - tol && pf.x <= m_dataWindow.max.x + 1.0f + tol)
+				{
+					pf.x = m_dataWindow.max.x + 1.0f - tol;
+				}
+				
+				if ( pf.y >= m_dataWindow.max.y + 1.0f - tol && pf.y <= m_dataWindow.max.y + 1.0f + tol)
+				{
+					pf.y = m_dataWindow.max.y + 1.0f - tol;
+				}
 			
-			int dataWidth = static_cast<int>( m_dataWindow.size().x + 1 );
-			int dataHeight = static_cast<int>( m_dataWindow.size().y + 1 );
-			
-			if ( p.x < 0 || p.y < 0 || p.x >= dataWidth || p.y >= dataHeight )
-			{
-				return T(0);
+				V2i p0(
+					static_cast<int>( pf.x ),
+					static_cast<int>( pf.y )
+				);
+				
+				p0 = p0 - m_dataWindow.min;
+				
+				return indexData<T>( data->readable(), p0 );
 			}
+			
+			/// Translate pixel samples (taken at centre of pixels) back to align with pixel grid
+			pf = pf - V2f( 0.5 );
 						
-			int idx = ( p.y * dataWidth ) + p.x;								
-			assert( idx >= 0 );
-			assert( idx < (int)data->readable().size() );
-
-			return data->readable()[idx];							
+			V2i p0(
+				static_cast<int>( pf.x ),
+				static_cast<int>( pf.y )
+			);
+						
+			V2i p1 = p0 + V2i( 1 );
+			
+			V2f pfrac( pf.x - (float)(p0.x), pf.y - (float)(p0.y) );
+			
+			p0 = p0 - m_dataWindow.min;
+			p1 = p1 - m_dataWindow.min;
+			
+			// Layout of samples taken for interpolation:
+			//
+			// ---------------> X
+			//			
+			// a --- e -------- b      |
+			// |     |          |      |
+			// |  result        |      |
+			// |     |          |      |
+			// |     |          |      |
+			// |     |          |      |
+			// |     |          |      |
+			// |     |          |      v
+			// c --- f -------- d      Y
+			
+			T a = indexData<T>( data->readable(), V2i( p0.x, p0.y ) );
+			T b = indexData<T>( data->readable(), V2i( p1.x, p0.y ) );
+			T c = indexData<T>( data->readable(), V2i( p0.x, p1.y ) );
+			T d = indexData<T>( data->readable(), V2i( p1.x, p1.y ) );
+			
+			LinearInterpolator<T> interpolator;
+			
+			T e, f;								
+			interpolator( a, b, pfrac.x, e );
+			interpolator( c, d, pfrac.x, f );
+			
+			T result;
+			interpolator( e, f, pfrac.y, result );
+			
+			return result;
 		}
 			
 		default :
@@ -287,7 +369,7 @@ bool ImagePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluat
 	ResultPtr r = boost::dynamic_pointer_cast< Result >( result );
 	assert( r );
 	
-	r->m_p = closestPointOnBox( p, m_image->bound() );
+	r->m_p = closestPointInBox( p, m_image->bound() );
 	
 	return true;
 }
@@ -305,7 +387,7 @@ bool ImagePrimitiveEvaluator::pointAtUV( const V2f &uv, const PrimitiveEvaluator
 	r->m_p = V3f(
 		m_image->bound().min.x + uv.x * ( m_image->bound().max.x - m_image->bound().min.x ),
 		m_image->bound().min.y + uv.y * ( m_image->bound().max.y - m_image->bound().min.y ),
-		0.0
+		0.0f
 	);
 	
 	return true;	
@@ -324,8 +406,8 @@ bool ImagePrimitiveEvaluator::pointAtPixel( const Imath::V2i &pixel, const Primi
 	}
 	
 	V2f uv(
-		( 1 + pixel.x ) / imageSize.x,
-		( 1 + pixel.y ) / imageSize.y		
+		( 0.5f + pixel.x ) / imageSize.x,
+		( 0.5f + pixel.y ) / imageSize.y		
 	);
 	
 	return pointAtUV( uv, r );

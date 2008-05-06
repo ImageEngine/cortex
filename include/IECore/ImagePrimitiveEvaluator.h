@@ -89,6 +89,9 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 			
 				template<typename T>
 				T getPrimVar( const PrimitiveVariable &pv ) const;
+				
+				template<typename T>
+				T indexData( const std::vector<T> &data, const Imath::V2i &p ) const;
 			
 		};
 		IE_CORE_DECLAREPTR( Result );		
@@ -109,6 +112,7 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 		
 		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
 		
+		/// Returns the object-space point at the center of the specified pixel
 		virtual bool pointAtPixel( const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result ) const;
 		
 		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
