@@ -42,9 +42,51 @@ IECoreGL.init( False )
 
 class TextTest( unittest.TestCase ) :
 
+	outputFileName = os.path.dirname( __file__ ) + "/output/testText.tif"
+	
 	def test( self ) :
 	
-		raise NotImplementedError
+		os.environ["IECORE_FONT_PATHS"] = "test"
+		
+		r = IECoreGL.Renderer()
+		
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+
+		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test" ) )
+		r.setOption( "searchPath:font", IECore.StringData( "test/IECore/data/fonts" ) )
+		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test/IECore/data/fonts" ) )
+
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) ),
+			}
+		)
+		r.display( self.outputFileName, "tiff", "rgba", {} )
+		
+		r.worldBegin()
+
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+		
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0.1, -3 ) ) )
+		r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.15 ) ) )
+		
+		r.text( "Vera.ttf", "hello world", 1, {} )
+	
+		r.worldEnd()
+
+		imageCreated = IECore.Reader.create( self.outputFileName ).read()
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorld.tif" ).read()
+		
+		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.001 ), IECore.BoolData( False ) )
+																
+	def tearDown( self ) :
+
+		if os.path.exists( self.outputFileName ) :
+			os.remove( self.outputFileName )
 				
 if __name__ == "__main__":
     unittest.main()   
