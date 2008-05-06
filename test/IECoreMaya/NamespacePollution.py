@@ -45,9 +45,11 @@ class NamespacePollutionTest( unittest.TestCase ) :
 	
 			d = dir( m )
 			for n in [ "os", "glob", "re", "shutil", "IECore", "IECoreMaya", "shlex", "sys",
-				"traceback", "inspect", "string" ] :
+				"traceback", "inspect", "string", "maya", "cmds", "OpenMaya", "OpenMayaAnim", "OpenMayaUI", "OpenMayaFX" ] :
 				self.assert_( not n in d )
 				
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
+
+	import MayaUnitTest
 	MayaUnitTest.TestProgram()
