@@ -32,24 +32,36 @@
 #
 ##########################################################################
 
-import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
-import unittest, MayaUnitTest
-import os.path
-from IECore import *
-from IECoreMaya import *
+import maya.OpenMaya
 
-class TestConverterHolder( unittest.TestCase ) :
-		
-	def test( self ) :
+__all__ = [ "dependencyNodeFromString", "dagPathFromString", "plugFromString" ]
+
+## Utility function to return a dependency node as an MObject when
+# given it's name as a string.
+def dependencyNodeFromString( s ) :
+
+	sl = maya.OpenMaya.MSelectionList()
+	sl.add( s )
+	result = maya.OpenMaya.MObject()
+	sl.getDependNode( 0, result )
+	return result
 	
-		""" Test ConverterHolder """
-		n = cmds.createNode( "ieConverterHolder" )	
-		c = FnConverterHolder( str(n) )
-		self.assert_( c )
-		
-		# \todo Add a FromMayaMeshConverter, pass in a mesh shape, and assert that we get a MeshPrimitive out
+## Utility function to return an MDagPath when
+# given it's name as a string.
+def dagPathFromString( s ) :
 
+	sl = maya.OpenMaya.MSelectionList()
+	sl.add( s )
+	result = maya.OpenMaya.MDagPath()
+	sl.getDependNode( 0, result )
+	return result
+	
+## Utility function to return an MPlug when
+# given it's name as a string.
+def plugFromString( s ) :
 
-if __name__ == "__main__":
-	MayaUnitTest.TestProgram()	 
+	sl = maya.OpenMaya.MSelectionList()
+	sl.add( s )
+	result = maya.OpenMaya.MPlug()
+	sl.getPlug( 0, result )
+	return result

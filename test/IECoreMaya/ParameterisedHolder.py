@@ -44,7 +44,7 @@ class TestParameterisedHolder( unittest.TestCase ) :
 	def testNode( self ):
 		""" Test ParameterisedHolderNode """
 		n = cmds.createNode( "ieParameterisedHolderNode" )	
-		h = IECoreMaya.ParameterisedHolder( str(n) )
+		h = IECoreMaya.FnParameterisedHolder( str(n) )
 		self.assert_( h )
 		
 		p = IECore.ParticleMeshOp()
@@ -54,7 +54,7 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		p.parameters().filename = "testValue"		
 		h.setNodeValue( p.parameters().filename )
 		pl = h.parameterPlug( p.parameters().filename )
-		v = pl.convert( IECore.TypeId.StringData )		
+		v = IECoreMaya.FromMayaPlugConverter.create( pl, IECore.TypeId.StringData ).convert()
 		self.assertEqual( v.value, "testValue" )
 				
 		cmds.setAttr( pl.name(), "testValue2", typ="string" )

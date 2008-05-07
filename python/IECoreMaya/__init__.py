@@ -40,9 +40,11 @@ from DAGPathParameter import DAGPathParameter
 from DAGPathVectorParameter import DAGPathVectorParameter
 from PlaybackFrameList import PlaybackFrameList
 from mayaDo import mayaDo
-from ConverterHolder import ConverterHolder
 from createMenu import createMenu
 from BakeTransform import BakeTransform
 from MeshOpHolderUtil import create
 from MeshOpHolderUtil import createUI
 from ScopedSelection import ScopedSelection
+from FnParameterisedHolder import FnParameterisedHolder
+from FnConverterHolder import FnConverterHolder
+from StringUtil import *

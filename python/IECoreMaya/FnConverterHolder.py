@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,13 +37,13 @@ import IECore
 import IECoreMaya
 import os.path
 
-class ConverterHolder( IECoreMaya.ParameterisedHolder ) :
+class FnConverterHolder( IECoreMaya.FnParameterisedHolder ) :
 
-	def __init__( self, nodeName ) :
+	def __init__( self, node ) :
 	
-		IECoreMaya.ParameterisedHolder.__init__( self, nodeName )
+		IECoreMaya.FnParameterisedHolder.__init__( self, node )
 		
-		if maya.cmds.nodeType( nodeName )!="ieConverterHolder" :
+		if self.typeName()!="ieConverterHolder" :
 		
 			raise TypeError( "\"%s\" is not a ConverterHolder." )
 	

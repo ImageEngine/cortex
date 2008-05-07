@@ -48,6 +48,7 @@ from FromMayaGroupConverterTest import *
 from FromMayaCameraConverterTest import *
 from FromMayaConverterTest import *
 from FromMayaObjectConverterTest import *
+from FnParameterisedHolderTest import *
 
 import MayaUnitTest
 

@@ -41,14 +41,10 @@
 #include "IECore/Parameterised.h"
 
 #include "IECoreMaya/IECoreMaya.h"
-#include "IECoreMaya/bindings/ParameterisedHolderBinding.h"
+#include "IECoreMaya/bindings/FnParameterisedHolderBinding.h"
 #include "IECoreMaya/bindings/MayaPythonUtilBinding.h"
-#include "IECoreMaya/bindings/MObjectBinding.h"
-#include "IECoreMaya/bindings/NodeBinding.h"
-#include "IECoreMaya/bindings/DagNodeBinding.h"
 #include "IECoreMaya/bindings/FromMayaConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaPlugConverterBinding.h"
-#include "IECoreMaya/bindings/PlugBinding.h"
 #include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaCameraConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaCameraConverterBinding.h"
@@ -76,13 +72,9 @@ BOOST_STATIC_ASSERT(sizeof(Py_UNICODE) == 4);
 BOOST_PYTHON_MODULE(_IECoreMaya)
 {
 	bindMayaPythonUtil();		
-	bindMObject();
-	bindNode();
-	bindDagNode();
-	bindParameterisedHolder();
+	bindFnParameterisedHolder();
 	bindFromMayaConverter();
 	bindFromMayaPlugConverter();
-	bindPlug();
 	bindFromMayaObjectConverter();
 	bindFromMayaDagNodeConverter();	
 	bindFromMayaCameraConverter();

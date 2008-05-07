@@ -47,6 +47,10 @@ class FromMayaPlugConverterTest( unittest.TestCase ) :
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
 		self.assert_( converter )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+	
+		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString( str( locator ) + ".translateX" ) )
+		self.assert_( converter )
+		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

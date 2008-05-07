@@ -64,7 +64,8 @@ void IECoreMaya::bindFromMayaPlugConverter()
 	FromMayaPlugConverterPyClass( "FromMayaPlugConverter", no_init )
 		.def( "convert", &FromMayaPlugConverter::convert )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaPlugConverter )
-		.def( "create", &create, ( arg_( "plug" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
+		.def( "create", &create, ( arg_( "plug" ), arg_( "resultType" ) = IECore::InvalidTypeId ) )
+		.def( "create", &FromMayaPlugConverter::create, ( arg_( "plug" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 	
 	INTRUSIVE_PTR_PATCH( FromMayaPlugConverter, FromMayaPlugConverterPyClass );

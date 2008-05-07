@@ -32,24 +32,68 @@
 #
 ##########################################################################
 
-import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
-import unittest, MayaUnitTest
-import os.path
-from IECore import *
-from IECoreMaya import *
+import IECore
+import IECoreMaya
+import MayaUnitTest
+import unittest
+import maya.cmds
+import maya.OpenMaya
 
-class TestConverterHolder( unittest.TestCase ) :
+class TestOp( IECore.Op ) :
+
+	def __init__( self ) :
+	
+		IECore.Op.__init__( self, "TestOp", "Tests stuff",
+			IECore.IntParameter(
+				name = "result",
+				description = "",
+				defaultValue = 0
+			)
+		)
 		
+		self.parameters().addParameters(
+			[
+				IECore.IntParameter(
+					name = "i",
+					description = "i",
+					defaultValue = 1
+				),
+			]
+		)
+
+class FnParameterisedHolderTest( unittest.TestCase ) :
+
 	def test( self ) :
 	
-		""" Test ConverterHolder """
-		n = cmds.createNode( "ieConverterHolder" )	
-		c = FnConverterHolder( str(n) )
-		self.assert_( c )
-		
-		# \todo Add a FromMayaMeshConverter, pass in a mesh shape, and assert that we get a MeshPrimitive out
+		node = maya.cmds.createNode( "ieOpHolderNode" )
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		self.assertEqual( fnPH.getParameterised(), ( None, "", 0, "" ) )
 
+		op = TestOp()
+		fnPH.setParameterised( op )
+		self.assertEqual( fnPH.getParameterised(), ( op, "", 0, "" ) )
+		
+		iPlug = fnPH.parameterPlug( op.i )
+		self.assert_( isinstance( iPlug, maya.OpenMaya.MPlug ) )
+		self.assert_( iPlug.asInt(), 1 )
+		
+		self.assert_( fnPH.plugParameter( iPlug ).isSame( op.i ) )
+		
+		iPlug.setInt( 2 )
+		fnPH.setParameterisedValue( op.i )
+		self.assert_( op.i.getNumericValue(), 2 )
+		
+		op.i.setNumericValue( 3 )
+		fnPH.setNodeValue( op.i )
+		self.assert_( iPlug.asInt(), 3 )
+		
+		iPlug.setInt( 10 )
+		fnPH.setParameterisedValues()
+		self.assert_( op.i.getNumericValue(), 10 )
+		
+		op.i.setNumericValue( 11 )
+		fnPH.setNodeValues()
+		self.assert_( iPlug.asInt(), 11 )
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()	 
+	MayaUnitTest.TestProgram()

@@ -34,13 +34,17 @@
 
 import math
 import os.path
+import traceback
 
 import maya.cmds as cmds
+import maya.OpenMaya
 
-from IECoreMaya import *
-from IECore import *
+import IECore
+import IECoreMaya
 
-""" Base class for objects which are able to create a Attribute Editor widget for a single Parameter """
+## Base class for objects which are able to create an Attribute Editor widget for a single IECore.Parameter
+# held on an IECoreMaya.ParameterisedHolder node.
+# \todo Make member functions protected or private as necessary - do this for the derived classes too.
 class ParameterUI :
 
 	textColumnWidthIndex = 145
@@ -49,14 +53,18 @@ class ParameterUI :
 	
 	handlers = {}
 
-	"""Derived classes should create relevant widgets in the current layout, and leave the parent layout unchanged on exit"""
-	def __init__( self, node, parameter ) :
-	
-		self.__node = node #IECoreMaya.Node
+	## The parameterisedHolderNode is an MObject specifying the node holding the specified IECore.Parameter.
+	# Derived class __init__ implementations should create relevant widgets in the current ui layout,
+	# and leave the parent layout unchanged on exit.
+	def __init__( self, parameterisedHolderNode, parameter ) :
+
+		self.__node = parameterisedHolderNode
 		self.parameter = parameter #IECore.Parameter
 		self.__popupControl = None		
 	
-	""" Derived classes should override (and call) this method, and reconnect all created widgets to the new node/parameter """		
+	## Derived classes should override this method. The override should first call the base class method and
+	# then reconnect all created widgets to the new node/parameter. The node and parameter arguments are as
+	# for the __init__ function.
 	def replace( self, node, parameter ) :
 	
 		self.__node = node		
@@ -67,31 +75,43 @@ class ParameterUI :
 			cmds.iconTextStaticLabel(			
 				self.__popupControl,
 				edit = True,
-
 				label = self.parameter.getCurrentPresetName(),			
 			)
 	
-	""" Returns the Maya node associated with this piece of UI """	
-	def node( self ):
+	## Returns the Maya node associated with this UI in the form of an OpenMaya.MObject	
+	def node( self ) :
 	
 		return self.__node
+		
+	## Returns the name of the Maya node associated with this UI.
+	def nodeName( self ) :
 	
-	""" Returns the full "node.attribute" plug name for the current parameter """
+		fnDN = maya.OpenMaya.MFnDependencyNode( self.__node )
+		return fnDN.name()
+	
+	## Returns the Maya plug associated with this UI in the form an OpenMaya.MPlug
+	def plug( self ) :
+	
+		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+		return fnPH.parameterPlug( self.parameter )
+	
+	## Returns the full "node.attribute" name for the plug this ui represents.
 	def plugName( self ) :	
 		
-		return self.node().parameterPlug( self.parameter ).fullPathName()
+		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+		return str( fnPH.parameterPlug( self.parameter ).name() )
 	
-	""" Computes a nice label for the parameter """	
+	## Computes a nice label for the ui.
 	def label( self ):
 
-		return mel("interToUI(\"" + self.parameter.name + "\")").value
+		return IECoreMaya.mel( "interToUI(\"" + self.parameter.name + "\")" ).value
 	
-	""" Computes a wrapped annotation/tooltip for the parameter """		
+	## Computes a wrapped annotation/tooltip for the ui	
 	def description( self ):
 	
-		return StringUtil.wrap( self.parameter.description, 48 )
+		return IECore.StringUtil.wrap( self.parameter.description, 48 )
 		
-	""" Creates a drop-down selection list and returns True if the parameter is set to "presets only". Otherwise returns False"""
+	## Creates a drop-down selection list and returns True if the parameter is set to "presets only". Otherwise returns False.
 	def presetsOnly( self ):
 	
 		self.__popupControl = None
@@ -130,7 +150,7 @@ class ParameterUI :
 	def addPopupMenu( self, **kw ):
 	
 		self.__popupMenu = cmds.popupMenu(
-			postMenuCommand =  curry( self.buildPopupMenu, **kw )
+			postMenuCommand = IECore.curry( self.buildPopupMenu, **kw )
 		)
 		
 	def __buildConnectionsPopupMenu( self, popupMenu, ownerControl, **kw ):
@@ -150,14 +170,14 @@ class ParameterUI :
 				parent = popupMenu,
 				label = connections[1],
 				
-				command = curry( self.showEditor, attributeName = connections[1] )
+				command = IECore.curry( self.showEditor, attributeName = connections[1] )
 			)
 
 			cmds.menuItem(
 				parent = popupMenu,
 				label = "Break Connection",
 				
-				command = curry( self.disconnect, source = connections[1], destination = connections[0] )
+				command = IECore.curry( self.disconnect, source = connections[1], destination = connections[0] )
 			)
 			
 			return True
@@ -182,7 +202,7 @@ class ParameterUI :
 				cmds.menuItem(
 					parent = popupMenu,
 					label = k,
-					command = curry( self.selectValue, selection = k )
+					command = IECore.curry( self.selectValue, selection = k )
 				)
 
 			if len( self.parameter.presets().keys() ) > 0:
@@ -195,7 +215,7 @@ class ParameterUI :
 			cmds.menuItem(
 					parent = popupMenu,
 					label = "Default",
-					command = curry( self.selectValue, selection = self.parameter.defaultValue )
+					command = IECore.curry( self.selectValue, selection = self.parameter.defaultValue )
 			)
 
 			cmds.menuItem(
@@ -212,7 +232,7 @@ class ParameterUI :
 					cmds.menuItem(
 						parent = popupMenu,
 						label = "Set Key",
-						command = curry(self.setKey, **kw)
+						command = IECore.curry(self.setKey, **kw)
 					)
 
 				expressions = cmds.listConnections( 
@@ -232,7 +252,7 @@ class ParameterUI :
 							parent = popupMenu,
 							label = "Create New Expression...",
 							
-							command = curry( self.expressionEditor, **kw )
+							command = IECore.curry( self.expressionEditor, **kw )
 						)
 
 				else:
@@ -241,7 +261,7 @@ class ParameterUI :
 						parent = popupMenu,
 						label = "Edit Expression...",
 						
-						command = curry( self.expressionEditor, **kw )
+						command = IECore.curry( self.expressionEditor, **kw )
 					)
 
 	
@@ -249,7 +269,7 @@ class ParameterUI :
 						parent = popupMenu,
 						label = "Delete Expression",
 						
-						command = curry( self.deleteNode, nodeName = expressions[0] )
+						command = IECore.curry( self.deleteNode, nodeName = expressions[0] )
 					)
 					
 			else:
@@ -260,7 +280,7 @@ class ParameterUI :
 			cmds.menuItem(
 					parent = popupMenu,
 					label = "Lock attribute",
-					command = curry(self.lock, **kw)					
+					command = IECore.curry(self.lock, **kw)					
 			)
 			
 		else:
@@ -268,7 +288,7 @@ class ParameterUI :
 			cmds.menuItem(
 					parent = popupMenu,
 					label = "Unlock attribute",
-					command = curry(self.unlock, **kw)
+					command = IECore.curry(self.unlock, **kw)
 			)
 			
 			
@@ -291,7 +311,7 @@ class ParameterUI :
 		
 		melCmd = 'showEditor "' + node + '"'
 		
-		mel( melCmd.encode('ascii') )
+		IECoreMaya.mel( melCmd.encode('ascii') )
 			
 	def deleteNode( self, args, nodeName = None ):	
 	
@@ -305,7 +325,7 @@ class ParameterUI :
 		
 		melCmd = 'expressionEditor EE "' + node + '" "' + attr + '"'
 		
-		mel( melCmd.encode('ascii') )
+		IECoreMaya.mel( melCmd.encode('ascii') )
 		
 	def disconnect( self, args, source = None, destination = None):	
 	
@@ -334,7 +354,7 @@ class ParameterUI :
 	def selectValue( self, args, selection = None):
 
 		self.parameter.setValue( selection )
-		self.__node.setNodeValue( self.parameter )
+		IECoreMaya.FnParameterisedHolder( self.__node ).setNodeValue( self.parameter )
 		
 		if self.__popupControl:
 			cmds.iconTextStaticLabel(
@@ -347,15 +367,24 @@ class ParameterUI :
 	@staticmethod
 	def registerUI( parameterTypeId, handlerType, uiTypeHint = None ):
 	
-		# \todo Make sure that handler supports new and replace methods
-		# \todo Warn if handler for type already exists
-		# \todo Warn if handler is not default-constructible	
+		key = (parameterTypeId, uiTypeHint) 
+		if key in ParameterUI.handlers :
+			IECore.msg( IECore.Msg.Warning, "ParameterUI.registerUI", "Handler for %s already registered." % key )
 		
-		ParameterUI.handlers[ (parameterTypeId, uiTypeHint) ] = handlerType
-				
+		ParameterUI.handlers[key] = handlerType
+	
+	## Returns a new ParameterUI instance suitable for representing
+	# the specified parameter on the specified parameterisedHolderNode.
+	# The node may either be specified as an OpenMaya.MObject or as
+	# a string or unicode object representing the node name.	
 	@staticmethod		
-	def create( node, parameter ) :
-		# \todo Make sure parameter is RTT instanceOf("Parameter")
+	def create( parameterisedHolderNode, parameter ) :
+
+		if not isinstance( parameterisedHolderNode, maya.OpenMaya.MObject ) :
+			parameterisedHolderNode = IECoreMaya.StringUtil.dependencyNodeFromString( parameterisedHolderNode )
+	
+		if not parameter.isInstanceOf( IECore.Parameter.staticTypeId() ) :
+			raise TypeError( "Parameter argument must derive from IECore.Parameter." )
 
 		uiTypeHint = None
 		try:
@@ -367,11 +396,8 @@ class ParameterUI :
 			# \todo Issue a warning
 			return None
 		
-		
-
 		handlerType = ParameterUI.handlers[ (parameter.typeId(), uiTypeHint) ]
-		
-		parameterUI = handlerType( node, parameter)
+		parameterUI = handlerType( parameterisedHolderNode, parameter)
 		
 		return parameterUI
 
@@ -381,6 +407,7 @@ class ParameterUI :
 class CompoundParameterUI( ParameterUI ) :
 
 	def __init__( self, node, parameter ) :
+	
 		ParameterUI.__init__( self, node, parameter )
 		
 		self.__childUIsLayout = None		
@@ -388,7 +415,9 @@ class CompoundParameterUI( ParameterUI ) :
 		
 		self.__layoutName = None
 		
-		if parameter.isSame(node.getParameterised()[0].parameters()):
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		
+		if parameter.isSame( fnPH.getParameterised()[0].parameters() ) :
 			self.__layoutName = cmds.columnLayout()
 			self.__createChildUIs()
 			cmds.setParent("..")
@@ -428,34 +457,45 @@ class CompoundParameterUI( ParameterUI ) :
 
 	def __createChildUIs(self):
 	
-		if self.__childUIsLayout:
-			return
+		# this is the most common entry point into the ui
+		# creation code, and unfortunately it's called from
+		# a maya ui callback. maya appears to suppress all
+		# exceptions which occur in such callbacks, so we
+		# have to wrap with our own exception handling to
+		# make sure any errors become visible.
+		try :
 		
-		# \todo Store collapsed state of self.__layoutName
-			
-		cmds.setUITemplate(
-			"attributeEditorTemplate",
-			pushTemplate = True
-		)
+			if self.__childUIsLayout:
+				return
 
-		self.__childUIsLayout = cmds.columnLayout( parent = self.__layoutName )
-		
-		for pName in self.parameter.keys():
-			p = self.parameter[pName]
-			
-			ui = ParameterUI.create( self.node(), p )
-			
-			if ui:			
-				self.__childUIs[pName] = ui
-		
-		cmds.setParent("..")
-		
-		cmds.setUITemplate(
-			"attributeEditorTemplate",
-			popTemplate = True
-		)		
+			# \todo Store collapsed state of self.__layoutName
 
+			cmds.setUITemplate(
+				"attributeEditorTemplate",
+				pushTemplate = True
+			)
 
+			self.__childUIsLayout = cmds.columnLayout( parent = self.__layoutName )
+
+			for pName in self.parameter.keys():
+				
+				p = self.parameter[pName]
+
+				ui = ParameterUI.create( self.node(), p )
+
+				if ui:			
+					self.__childUIs[pName] = ui
+
+			cmds.setParent("..")
+
+			cmds.setUITemplate(
+				"attributeEditorTemplate",
+				popTemplate = True
+			)		
+
+		except :
+		
+			IECore.msg( IECore.Msg.Level.Error, "ParameterUI", traceback.format_exc() )
 
 class BoolParameterUI( ParameterUI ) :
 
@@ -588,7 +628,7 @@ class FileNameParameterUI( PathParameterUI ) :
 			
 		if len(selection):
 		
-			self.parameter.setValue( StringData( selection ) )
+			self.parameter.setValue( IECore.StringData( selection ) )
 			self.node().setNodeValue( self.parameter )		
 
 
@@ -604,7 +644,7 @@ class DirNameParameterUI( PathParameterUI ) :
 			
 		if len(selection):
 			d = os.path.dirname(selection)
-			self.parameter.setValue( StringData( d ) )
+			self.parameter.setValue( IECore.StringData( d ) )
 			self.node().setNodeValue( self.parameter )	
 
 
@@ -628,7 +668,7 @@ class FileSequenceParameterUI( PathParameterUI ) :
 				
 					if os.path.basename(selection) in seq.fileNames():
 					
-						self.parameter.setValue( StringData( os.path.join( d, str( seq ) ) ) )
+						self.parameter.setValue( IECore.StringData( os.path.join( d, str( seq ) ) ) )
 						self.node().setNodeValue( self.parameter )	
 						
 						return	
@@ -656,7 +696,7 @@ class CachePathPrefixParameterUI( PathParameterUI ) :
 					if os.path.basename(selection) in seq.fileNames():
 						newValue = seq.getPrefix()
 						if newValue.endswith('.'):
-							self.parameter.setValue( StringData( os.path.join( d, newValue[:len(newValue)-1] ) ) )
+							self.parameter.setValue( IECore.StringData( os.path.join( d, newValue[:len(newValue)-1] ) ) )
 							self.node().setNodeValue( self.parameter )
 							return	
 
@@ -729,18 +769,18 @@ class NumericParameterUI( ParameterUI ) :
 		
 	def sliderType( self ):	
 	
-		if self.parameter.isInstanceOf( TypeId.FloatParameter ):
+		if self.parameter.isInstanceOf( IECore.TypeId.FloatParameter ):
 			return cmds.floatSlider
-		elif self.parameter.isInstanceOf( TypeId.IntParameter ):
+		elif self.parameter.isInstanceOf( IECore.TypeId.IntParameter ):
 			return cmds.intSlider
 		else:
 			raise RuntimeError("Invalid parameter type for NumericParameterUI")	
 		
 	def fieldType( self ):
 	
-		if self.parameter.isInstanceOf( TypeId.FloatParameter ):
+		if self.parameter.isInstanceOf( IECore.TypeId.FloatParameter ):
 			return cmds.floatField
-		elif self.parameter.isInstanceOf( TypeId.IntParameter ):
+		elif self.parameter.isInstanceOf( IECore.TypeId.IntParameter ):
 			return cmds.intField
 		else:
 			raise RuntimeError("Invalid parameter type for NumericParameterUI")
@@ -791,26 +831,23 @@ class VectorParameterUI( ParameterUI ) :
 			annotation = self.description()
 		)
 		
-		plug = Plug( self.plugName() )
-		
-		plugChildren = plug.childNames()
-			
-		for i in range(0, self.__dim):	
+		plug = self.plug()			
+		for i in range(0, self.__dim) :
 			self.__fields.append(
 				self.fieldType()(	
 					value = parameter.getTypedValue()[i]
 				)
 			)
 			
-			self.addPopupMenu( attributeName = plug.child(plugChildren[i]).fullPathName() )
+			self.addPopupMenu( attributeName = plug.child(i).name() )
 
-			cmds.connectControl( self.__fields[i], plug.child(plugChildren[i]).fullPathName() )
+			cmds.connectControl( self.__fields[i], plug.child(i).name() )
 			
 		cmds.setParent("..")
 		
 	def fieldType( self ):
 	
-		if self.parameter.isInstanceOf( TypeId.V2iParameter ) or self.parameter.isInstanceOf( TypeId.V3iParameter ):
+		if self.parameter.isInstanceOf( IECore.TypeId.V2iParameter ) or self.parameter.isInstanceOf( IECore.TypeId.V3iParameter ):
 			return cmds.intField		
 		else:
 			return cmds.floatField		
@@ -821,12 +858,10 @@ class VectorParameterUI( ParameterUI ) :
 		
 		if len(self.__fields) == self.__dim:
 		
-			plug = Plug( self.plugName() )
-			plugChildren = plug.childNames()
-		
+			plug = self.plug()		
 			for i in range(0, self.__dim):	
 			
-				cmds.connectControl( self.__fields[i], plug.child(plugChildren[i]).fullPathName() )
+				cmds.connectControl( self.__fields[i], plug.child( i ).name() )
 				
 class ColorParameterUI( ParameterUI ) :
 
@@ -837,9 +872,7 @@ class ColorParameterUI( ParameterUI ) :
 		
 		if self.presetsOnly():
 			return	
-			
-		# \todo Add a "colorIndexSlider" instead, if we have a uiHint telling us to?		
-			
+						
 		self.__dim = parameter.getTypedValue().dimensions()
 		
 		self.__colorSlider = cmds.attrColorSliderGrp(
@@ -863,7 +896,8 @@ class ColorParameterUI( ParameterUI ) :
 
 class BoxParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter ):
+	def __init__( self, node, parameter ) :
+	
 		ParameterUI.__init__( self, node, parameter )
 		
 		self.__fields = []		
@@ -874,14 +908,10 @@ class BoxParameterUI( ParameterUI ) :
 		self.__dim = parameter.getTypedValue().dimensions()		
 		
 		cmds.columnLayout()
-		
-		numFields = 0
-		
-		plug = Plug( self.plugName() )
-		plugChildren = plug.childNames()
-		
-		for plugChild in plugChildren:
-						
+				
+		plug = self.plug()				
+		for childIndex in range( 0, 2 ) :
+									
 			if self.__dim == 2:
 				cmds.rowLayout(
 					numberOfColumns = 3,
@@ -896,7 +926,7 @@ class BoxParameterUI( ParameterUI ) :
 				raise RuntimeError("Unsupported vector dimension in BoxParameterUI")
 			
 			parameterLabel = self.label()
-			if plugChild == plugChildren[0]:
+			if childIndex==0 :
 				parameterLabel = parameterLabel + "Min"
 			else:
 				parameterLabel = parameterLabel + "Max"
@@ -908,19 +938,15 @@ class BoxParameterUI( ParameterUI ) :
 				annotation = self.description()
 			)	
 				
-			vectorPlug = plug.child( plugChild )		
-			vectorPlugChildren = vectorPlug.childNames()
+			vectorPlug = plug.child( childIndex )	 
 
-			for i in range(0, self.__dim):
-				self.__fields.append(
-					self.fieldType()(	
-					)
-				)
-				numFields = numFields + 1
+			for i in range( 0, self.__dim ) :
+			
+				self.__fields.append( self.fieldType()() )
 				
-				vectorPlugChild = vectorPlug.child(vectorPlugChildren[i])				
-				self.addPopupMenu( attributeName = vectorPlugChild.fullPathName() )
-				cmds.connectControl( self.__fields[ numFields - 1 ], vectorPlugChild.fullPathName() )
+				vectorPlugChild = vectorPlug.child( i )				
+				self.addPopupMenu( attributeName = vectorPlugChild.name() )
+				cmds.connectControl( self.__fields[-1], vectorPlugChild.name() )
 			
 			cmds.setParent("..")
 		
@@ -928,7 +954,7 @@ class BoxParameterUI( ParameterUI ) :
 		
 	def fieldType( self ):
 	
-		if self.parameter.isInstanceOf( TypeId.Box2iParameter ) or self.parameter.isInstanceOf( TypeId.Box3iParameter ):
+		if self.parameter.isInstanceOf( IECore.TypeId.Box2iParameter ) or self.parameter.isInstanceOf( IECore.TypeId.Box3iParameter ):
 			return cmds.intField		
 		else:
 			return cmds.floatField		
@@ -939,54 +965,48 @@ class BoxParameterUI( ParameterUI ) :
 		
 		if len(self.__fields) == self.__dim * 2:
 		
-			plug = Plug( self.plugName() )
-			plugChildren = plug.childNames()
-			
 			fieldNum = 0
-		
-			for plugChild in plugChildren:
+			plug = self.plug()		
+			for childIndex in range( 0, 2 ) :
 			
-				vectorPlug = plug.child( plugChild )		
-				vectorPlugChildren = vectorPlug.childNames()
-							
-				for i in range(0, self.__dim):	
+				vectorPlug = plug.child( childIndex )									
+				for i in range( 0, self.__dim ) :	
 				
-					vectorPlugChild = vectorPlug.child(vectorPlugChildren[i])	
-				
-					cmds.connectControl( self.__fields[ fieldNum ], vectorPlugChild.fullPathName() )
+					vectorPlugChild = vectorPlug.child( i )	
+					cmds.connectControl( self.__fields[ fieldNum ], vectorPlugChild.name() )
 					fieldNum += 1
 
 
 
-ParameterUI.registerUI( TypeId.FloatParameter, NumericParameterUI )	
-ParameterUI.registerUI( TypeId.IntParameter, NumericParameterUI )
-ParameterUI.registerUI( TypeId.BoolParameter, BoolParameterUI )
-ParameterUI.registerUI( TypeId.CompoundParameter, CompoundParameterUI )
+ParameterUI.registerUI( IECore.TypeId.FloatParameter, NumericParameterUI )	
+ParameterUI.registerUI( IECore.TypeId.IntParameter, NumericParameterUI )
+ParameterUI.registerUI( IECore.TypeId.BoolParameter, BoolParameterUI )
+ParameterUI.registerUI( IECore.TypeId.CompoundParameter, CompoundParameterUI )
 
-ParameterUI.registerUI( TypeId.StringParameter, StringParameterUI )
-ParameterUI.registerUI( TypeId.FrameListParameter, StringParameterUI )
-ParameterUI.registerUI( TypeId.PathParameter, StringParameterUI )
+ParameterUI.registerUI( IECore.TypeId.StringParameter, StringParameterUI )
+ParameterUI.registerUI( IECore.TypeId.FrameListParameter, StringParameterUI )
+ParameterUI.registerUI( IECore.TypeId.PathParameter, StringParameterUI )
 
-ParameterUI.registerUI( TypeId.V2iParameter, VectorParameterUI )
-ParameterUI.registerUI( TypeId.V3iParameter, VectorParameterUI )
-ParameterUI.registerUI( TypeId.V2fParameter, VectorParameterUI )
-ParameterUI.registerUI( TypeId.V2dParameter, VectorParameterUI )
-ParameterUI.registerUI( TypeId.V3fParameter, VectorParameterUI )
-ParameterUI.registerUI( TypeId.V3dParameter, VectorParameterUI )
+ParameterUI.registerUI( IECore.TypeId.V2iParameter, VectorParameterUI )
+ParameterUI.registerUI( IECore.TypeId.V3iParameter, VectorParameterUI )
+ParameterUI.registerUI( IECore.TypeId.V2fParameter, VectorParameterUI )
+ParameterUI.registerUI( IECore.TypeId.V2dParameter, VectorParameterUI )
+ParameterUI.registerUI( IECore.TypeId.V3fParameter, VectorParameterUI )
+ParameterUI.registerUI( IECore.TypeId.V3dParameter, VectorParameterUI )
 
-ParameterUI.registerUI( TypeId.Box2iParameter, BoxParameterUI )
-ParameterUI.registerUI( TypeId.Box2fParameter, BoxParameterUI )
-ParameterUI.registerUI( TypeId.Box2dParameter, BoxParameterUI )
-ParameterUI.registerUI( TypeId.Box3iParameter, BoxParameterUI )
-ParameterUI.registerUI( TypeId.Box3fParameter, BoxParameterUI )
-ParameterUI.registerUI( TypeId.Box3dParameter, BoxParameterUI )
+ParameterUI.registerUI( IECore.TypeId.Box2iParameter, BoxParameterUI )
+ParameterUI.registerUI( IECore.TypeId.Box2fParameter, BoxParameterUI )
+ParameterUI.registerUI( IECore.TypeId.Box2dParameter, BoxParameterUI )
+ParameterUI.registerUI( IECore.TypeId.Box3iParameter, BoxParameterUI )
+ParameterUI.registerUI( IECore.TypeId.Box3fParameter, BoxParameterUI )
+ParameterUI.registerUI( IECore.TypeId.Box3dParameter, BoxParameterUI )
 
-ParameterUI.registerUI( TypeId.Color3fParameter, ColorParameterUI )
+ParameterUI.registerUI( IECore.TypeId.Color3fParameter, ColorParameterUI )
 
-ParameterUI.registerUI( TypeId.FileSequenceParameter, FileSequenceParameterUI )
-ParameterUI.registerUI( TypeId.DirNameParameter, DirNameParameterUI )
-ParameterUI.registerUI( TypeId.FileNameParameter, FileNameParameterUI )
+ParameterUI.registerUI( IECore.TypeId.FileSequenceParameter, FileSequenceParameterUI )
+ParameterUI.registerUI( IECore.TypeId.DirNameParameter, DirNameParameterUI )
+ParameterUI.registerUI( IECore.TypeId.FileNameParameter, FileNameParameterUI )
 
-ParameterUI.registerUI( TypeId.StringParameter, CachePathPrefixParameterUI, 'cachePathPrefix' )
+ParameterUI.registerUI( IECore.TypeId.StringParameter, CachePathPrefixParameterUI, 'cachePathPrefix' )
 
 #\todo Store "collapsed" state of frameLayouts

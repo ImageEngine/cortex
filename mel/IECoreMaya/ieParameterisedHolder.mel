@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,14 +43,14 @@
 /// \todo Handle case where getParameterised() returns None
 global proc string ieParameterisedHolderClassName( string $nodeName )
 {
-	return `iePython -eval ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).getParameterised()[1]")`;
+	return `iePython -eval ("IECoreMaya.FnParameterisedHolder( '" + $nodeName + "' ).getParameterised()[1]")`;
 }
 
 /// Returns the version of the class being held.
 /// \todo Handle case where getParameterised() returns None
 global proc int ieParameterisedHolderClassVersion( string $nodeName )
 {
-	return (int) `iePython -eval ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).getParameterised()[2]")`;
+	return (int) `iePython -eval ("IECoreMaya.FnParameterisedHolder( '" + $nodeName + "' ).getParameterised()[2]")`;
 }
 
 /// Returns the name of the environment variable which specifies the
@@ -58,13 +58,13 @@ global proc int ieParameterisedHolderClassVersion( string $nodeName )
 /// \todo Handle case where getParameterised() returns None
 global proc string ieParameterisedHolderClassSearchPathEnvVar( string $nodeName )
 {
-	return `iePython -eval ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).getParameterised()[3]")`;
+	return `iePython -eval ("IECoreMaya.FnParameterisedHolder( '" + $nodeName + "' ).getParameterised()[3]")`;
 }
 
 /// Returns the description for the class being held.
 global proc string ieParameterisedHolderClassDescription( string $nodeName )
 {
-	return `iePython -eval ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).getParameterised()[0].description")`;
+	return `iePython -eval ("IECoreMaya.FnParameterisedHolder( '" + $nodeName + "' ).getParameterised()[0].description")`;
 }
 
 /// Returns an int array containing all the valid versions of the class
@@ -96,5 +96,5 @@ global proc ieParameterisedHolderSetParameterised( string $nodeName, string $cla
 		iePython -command "import os.path";
 		$classVersion = (int) `iePython -eval ( "IECore.ClassLoader( IECore.SearchPath(  os.path.expandvars('" + $sp + "'), ':' ) ).getDefaultVersion( '" + $className + "' )" )`;
 	}
-	iePython -cmd ("IECoreMaya.ParameterisedHolder( '" + $nodeName + "' ).setParameterised( '" + $className + "' , " + $classVersion + ", '" + $searchPathEnvVar + "' )");
+	iePython -cmd ("IECoreMaya.FnParameterisedHolder( '" + $nodeName + "' ).setParameterised( '" + $className + "' , " + $classVersion + ", '" + $searchPathEnvVar + "' )");
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,7 +75,7 @@ global proc ieParameterisedHolderUIParametersNew( string $attrName )
 
 	string $node = ieAttrNode( $attrName );
 		
-	string $py = "parameterisedHolder = IECoreMaya.ParameterisedHolder( '"+$node+"' )\nparameterised = parameterisedHolder.getParameterised()[0]\nif parameterised: ieAEParameterUIs['" + `setParent -q` + "'] = IECoreMaya.ParameterUI.create( parameterisedHolder, parameterised.parameters() )";
+	string $py = "parameterisedHolder = IECoreMaya.FnParameterisedHolder( '"+$node+"' )\nparameterised = parameterisedHolder.getParameterised()[0]\nif parameterised: ieAEParameterUIs['" + `setParent -q` + "'] = IECoreMaya.ParameterUI.create( parameterisedHolder.object(), parameterised.parameters() )";
 	iePython -command $py;
 	
 	$ieCurrentAEParameterisedHolderClass = ieParameterisedHolderClassName( $node );
@@ -96,7 +96,7 @@ global proc ieParameterisedHolderUIParametersReplace( string $attrName )
 	
 	if ( $class!="" && $ieCurrentAEParameterisedHolderClass == $class && $ieCurrentAEParameterisedHolderVersion == $currentVersion)
 	{
-		string $py = "parameterisedHolder = IECoreMaya.ParameterisedHolder( '"+$node+"' )\nparameterised = parameterisedHolder.getParameterised()[0]\nif parameterised: ieAEParameterUIs['" + `setParent -q` + "'].replace( parameterisedHolder, parameterised.parameters() )";
+		string $py = "parameterisedHolder = IECoreMaya.FnParameterisedHolder( '"+$node+"' )\nparameterised = parameterisedHolder.getParameterised()[0]\nif parameterised: ieAEParameterUIs['" + `setParent -q` + "'].replace( parameterisedHolder.object(), parameterised.parameters() )";
 		iePython -command $py;
 	}
 	else

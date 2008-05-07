@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,36 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_DAGNODE_H
-#define IE_COREMAYA_DAGNODE_H
-
-#include "IECoreMaya/bindings/NodeBinding.h"
-#include "IECore/SimpleTypedData.h"
+#ifndef IE_COREMAYAPYTHON_FNPARAMETERISEDHOLDERBINDING_H
+#define IE_COREMAYAPYTHON_FNPARAMETERISEDHOLDERBINDING_H
 
 namespace IECoreMaya
 {
 
-/// \todo Make the capitalisation of DagNode match that of DAGPathParameter
-class DagNode : public Node
-{
-	public :
-	
-		/// Throws an exception if the object is not a
-		/// Dag node.
-		DagNode( const MObject &object );
-		/// Throws an exception if no maya object of that name
-		/// exists.
-		DagNode( const char *name );
-		
-		std::string fullPathName();
-		
-		unsigned numParents();
-		DagNode *parent( unsigned int index=0 );
-		
-};
+void bindFnParameterisedHolder();
 
-void bindDagNode();
+} // namespace IECoreMaya
 
-}
-
-#endif //  IE_COREMAYA_DAGNODE_H
+#endif // IE_COREMAYAPYTHON_FNPARAMETERISEDHOLDERBINDING_H
