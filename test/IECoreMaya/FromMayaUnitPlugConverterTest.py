@@ -38,7 +38,7 @@ import unittest
 import MayaUnitTest
 import maya.cmds
 
-class FromMayaPlugConverterTest( unittest.TestCase ) :
+class FromMayaUnitPlugConverterTest( unittest.TestCase ) :
 
 	def testDistance( self ) :
 		
