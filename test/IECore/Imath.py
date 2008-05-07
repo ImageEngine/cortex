@@ -935,6 +935,8 @@ class ImathM44f(unittest.TestCase):
 		self.assertAlmostEqual( m.determinant(), -3, 10 )
 		m.scale( V3f( 3, 3, 1 ) )
 		self.assertAlmostEqual( m.determinant(), -27, 10 )
+		
+		random.seed( 42 )
 
 		r = curry( random.uniform, -2, 2 )	
 		for i in range( 0, 1000 ) :
@@ -947,10 +949,10 @@ class ImathM44f(unittest.TestCase):
 				mi = m.inverse()
 				di = mi.determinant()
 			
-				self.assertAlmostEqual( d, 1/di, 3 )
+				self.assertAlmostEqual( d, 1/di, 4 )
 				
 			mt = m.transposed()
-			self.assertAlmostEqual( d, mt.determinant(), 3 )
+			self.assertAlmostEqual( d, mt.determinant(), 4 )
 			
 		for i in range( 0, 1000 ) :
 		
