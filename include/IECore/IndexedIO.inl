@@ -151,6 +151,30 @@ struct DataTypeTraits<unsigned char*>
 	static IndexedIO::DataType type() { return IndexedIO::UCharArray; }
 };
 
+template<>
+struct DataTypeTraits<short>
+{
+	static IndexedIO::DataType type() { return IndexedIO::Short; }
+};
+
+template<>
+struct DataTypeTraits<short*>
+{
+	static IndexedIO::DataType type() { return IndexedIO::ShortArray; }
+};
+
+template<>
+struct DataTypeTraits<unsigned short>
+{
+	static IndexedIO::DataType type() { return IndexedIO::UShort; }
+};
+
+template<>
+struct DataTypeTraits<unsigned short*>
+{
+	static IndexedIO::DataType type() { return IndexedIO::UShortArray; }
+};
+
 /// Size
 
 template<typename T>

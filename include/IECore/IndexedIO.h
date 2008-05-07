@@ -81,7 +81,11 @@ namespace IndexedIO
 		UChar,
 		UCharArray,
 		Half,
-		HalfArray
+		HalfArray,
+		Short,
+		ShortArray,
+		UShort,
+		UShortArray
 	} DataType;
 	
 	typedef std::string EntryID;
