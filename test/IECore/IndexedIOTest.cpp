@@ -55,7 +55,8 @@ void IndexedIOTestSuite<FileIndexedIO>::getFilenames( FilenameList &filenames )
 	filenames.clear();
 	
 	filenames.push_back("./test/IECore/data/fioFiles/2.13.0/rhel4.i686/types.fio");
-	filenames.push_back("./test/IECore/data/fioFiles/2.13.0/osx104.i686/types.fio");			
+	filenames.push_back("./test/IECore/data/fioFiles/2.13.0/osx104.i686/types.fio");
+	filenames.push_back("./test/IECore/data/fioFiles/3.0.0/cent5.x86_64/types.fio");			
 }
 
 /// float 
@@ -299,6 +300,61 @@ template<>
 unsigned char* IndexedIOTestDataTraits<unsigned char*>::value()
 {
 	static unsigned char v[10] = {'a','b','c','d','e','f','g','h','i','j'};
+	
+	return v;
+} 
+
+/// short 
+template<>
+std::string IndexedIOTestDataTraits<short>::name() 
+{
+	return "short";
+}
+
+template<>
+short IndexedIOTestDataTraits<short>::value()
+{
+	return 12;
+} 
+
+template<>
+std::string IndexedIOTestDataTraits<short*>::name() 
+{
+	return "shortArray";
+}
+
+template<>
+short* IndexedIOTestDataTraits<short*>::value()
+{
+	static short v[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	
+	return v;
+} 
+
+
+/// unsigned short 
+template<>
+std::string IndexedIOTestDataTraits<unsigned short>::name() 
+{
+	return "unsignedshort";
+}
+
+template<>
+unsigned short IndexedIOTestDataTraits<unsigned short>::value()
+{
+	return 5;
+} 
+
+template<>
+std::string IndexedIOTestDataTraits<unsigned short*>::name() 
+{
+	return "unsignedshortArray";
+}
+
+template<>
+unsigned short* IndexedIOTestDataTraits<unsigned short*>::value()
+{
+	static unsigned short v[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	
 	return v;
 } 
