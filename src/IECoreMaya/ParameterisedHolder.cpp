@@ -157,35 +157,6 @@ void *ParameterisedHolder<B>::creator()
 	return new ParameterisedHolder<B>();
 }
 
-// this is a bit of a fiasco. when we came to make ParameterisedHolders
-// derived from MPxSurfaceShape we discovered that those already have an
-// attribute named "clsn", but we were using that for the short name
-// for the class name plug on all parameterised holders. these template
-// functions allow us to continue to use "clsn" with non-SurfaceShape
-// base classes and use a unique name with SurfaceShape derived classes.
-// that way we maintain backwards compatibility with old scenes (but not
-// those containing ProceduralHolders, as that's about to switch to
-// derive from SurfaceShape dammit).
-/// \todo With the next major version sort this fiasco out and use just
-/// one unique name for all nodes. 
-template<typename B>
-static MString classNamePlugShortName()
-{
-	return "clsn";
-}
-
-template<>
-static MString classNamePlugShortName<MPxSurfaceShape>()
-{
-	return "className";
-}
-
-template<>
-static MString classNamePlugShortName<MPxComponentShape>()
-{
-	return "className";
-}
-
 template<typename B>
 MStatus ParameterisedHolder<B>::initialize()
 {
@@ -193,7 +164,7 @@ MStatus ParameterisedHolder<B>::initialize()
 	MFnTypedAttribute tAttr;
 	MFnNumericAttribute nAttr;
 	
-	aParameterisedClassName = tAttr.create( "className", classNamePlugShortName<B>(), MFnData::kString );
+	aParameterisedClassName = tAttr.create( "className", "clas", MFnData::kString );
 	tAttr.setReadable(true);
 	tAttr.setWritable(true);
 	tAttr.setStorable(true);	
