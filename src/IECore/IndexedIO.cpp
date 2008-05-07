@@ -76,6 +76,8 @@ unsigned long Entry::arrayLength() const
 		case UIntArray:
 		case CharArray:
 		case UCharArray:
+		case ShortArray:
+		case UShortArray:
 			return m_arrayLength;	
 		default:
 			throw IOException(m_ID);			
