@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -55,6 +55,15 @@ class TestHeaderGenerator(unittest.TestCase):
 		self.assertEqual( header["host"]["machineName"].value, machine )
 		self.assertEqual( header["userName"].value, pwd.getpwuid( os.getuid() ).pw_name )
 		self.assert_( header.has_key( "timeStamp" ) )
+		
+	def testBackwardsCompatibility(self ):
+		
+		# Make sure we read the "userID" member (previously type LongData, now type IntData) correctly.
+		header = Reader.create( "test/IECore/data/cobFiles/header.cob" ).read()
+		
+		self.assertEqual( header["userID"].value, 523 )
+		
+		
 		
 if __name__ == "__main__":
 	unittest.main()   
