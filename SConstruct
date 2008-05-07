@@ -667,6 +667,8 @@ if env["PLATFORM"]=="darwin" :
 		testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )	
 	
 else:
+	testEnv.Append( CXXFLAGS = "-O0" )
+
 	# Link to the boost unit test library
 	testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )	
 	
@@ -893,12 +895,6 @@ coreTestEnv.Alias( "testCorePython", corePythonTest )
 riEnv = coreEnv.Copy( IECORE_NAME = "IECoreRI" )
 riEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
-riEnv.Append(
-	CPPFLAGS = [
-		## \todo This makes no sense now the versions for the two libraries are locked together
-    	"-DIE_CORE_MAJOR_VERSION=%d" % ieCoreMajorVersion,
-	]
-)
 riEnv.Append(
 	LIBS = [
 		"3delight",
