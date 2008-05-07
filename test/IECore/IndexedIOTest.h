@@ -194,7 +194,7 @@ struct IndexedIOTestSuite : public boost::unit_test::test_suite
 		static boost::shared_ptr<IndexedIOTest<T> > instance(new IndexedIOTest<T>(filenames));
 		
 		/// Uncomment this line to write out new test data - change architecture first
-		//instance->write("./test/data/" + extension() + "Files/" + IECore::versionString() + "/osx104.ppc/types." + extension());		
+		//instance->write("./test/IECore/data/" + extension() + "Files/" + IECore::versionString() + "/osx104.ppc/types." + extension());		
 		
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<float>, instance ) );				
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<double>, instance ) );		
