@@ -176,6 +176,7 @@
 #include "IECore/bindings/MeshMergeOpBinding.h"
 #include "IECore/bindings/FontBinding.h"
 #include "IECore/bindings/UniformRandomPointDistributionOpBinding.h"
+#include "IECore/bindings/UnicodeToStringBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -337,6 +338,7 @@ BOOST_PYTHON_MODULE(_IECore)
 #endif	
 
 	bindUniformRandomPointDistributionOp();
+	bindUnicodeToString();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
