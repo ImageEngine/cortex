@@ -32,27 +32,30 @@
 #
 ##########################################################################
 
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-from FnParameterisedHolderTest import *
-from ToMayaPlugConverterTest import *
-from ToMayaMeshConverterTest import *
-
 import MayaUnitTest
+import maya.cmds
 
+class ToMayaMeshConverterTest( unittest.TestCase ) :
+
+	def testConversion( self ) :
+	
+		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		
+		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
+		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
+		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
+		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
+
+		transform = maya.cmds.createNode( "transform" )				
+		self.assert_( converter.convert( transform ) )
+		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
+	
+		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 8 )
+		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, face=True ), 6 )
+		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, boundingBox=True ), ( (-10, 10), (-10, 10), (-10, 10) ) )
+				
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 #ifndef IE_COREMAYA_TOMAYAOBJECTCONVERTER_H
 #define IE_COREMAYA_TOMAYAOBJECTCONVERTER_H
 
-#include "IECore/Converter.h"
+#include "IECoreMaya/ToMayaConverter.h"
 
 #include "IECore/Object.h"
 
@@ -49,17 +49,18 @@ IE_CORE_DECLAREPTR( ToMayaObjectConverter );
 
 /// The ToMayaObjectConverter class forms a base class for
 /// convertions to MObject datatype.
-/// \todo Have this derive from a new ToMayaConverter class, which in turn derives from IECore::FromCoreConverter.
-class ToMayaObjectConverter : public IECore::Converter
+class ToMayaObjectConverter : public ToMayaConverter
 {
 	
 	public :
-		
-		/// The IECore::Object which will be converted by the convert() function.
-		IECore::ConstObjectPtr object() const;
-		
-		/// Converts the IECore::Object into the given MObject and returns True if succesfull and false otherwise.
-		/// \todo Should this not create and return a new MObject
+			
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaObjectConverter, ToMayaObjectConverterTypeId, ToMayaConverter );
+
+		/// Converts the IECore::Object into the given MObject and returns True if successful and false otherwise.
+		/// \todo Define the meaning of object. Some derived classes seem to modify it, others seem to create a
+		/// new one and assign it. I think if a valid object is passed then it should be edited, and if a null object
+		/// is passed then a new one should be created. We also probably need a ToMayaShapeConverter base class with
+		/// some parentOrOwner type semantics.
 		bool convert( MObject &object ) const;
 		
 		/// Creates a converter which will convert the given IECore::Object to a maya object
@@ -75,7 +76,8 @@ class ToMayaObjectConverter : public IECore::Converter
 
 		/// Must be implemented by subclasses. Is guaranteed only to be called when object()
 		/// returns a valid IECore::Object of a type specified when the converter was registered.
-		virtual bool doConvert( MObject &object ) const = 0;
+		/// \todo I don't think that guarantee is accurate at all.
+		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const = 0;
 	
 		typedef ToMayaObjectConverterPtr (*CreatorFn)( IECore::ConstObjectPtr object );
 
@@ -95,8 +97,6 @@ class ToMayaObjectConverter : public IECore::Converter
 		};
 
 	private :
-
-		IECore::ConstObjectPtr m_object;
 
 		struct Types
 		{

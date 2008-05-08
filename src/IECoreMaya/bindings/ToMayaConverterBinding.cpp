@@ -32,39 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#include "boost/python.hpp"
 
-namespace IECoreMaya
-{
+#include "IECoreMaya/ToMayaConverter.h"
+#include "IECoreMaya/bindings/ToMayaConverterBinding.h"
 
-enum TypeId
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+#include "IECore/Object.h"
+
+using namespace IECoreMaya;
+using namespace boost::python;
+
+void IECoreMaya::bindToMayaConverter()
 {
+	typedef class_<ToMayaConverter, ToMayaConverterPtr, boost::noncopyable, bases<IECore::FromCoreConverter> > ToMayaConverterPyClass;
+
+	ToMayaConverterPyClass( "ToMayaConverter", no_init )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToMayaConverter )
+	;
 	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	ToMayaConverterTypeId = 109014,
-	ToMayaObjectConverterTypeId = 109015,
-	ToMayaNumericDataConverterTypeId = 109016,
-	ToMayaMeshConverterTypeId = 109017,
-	ToMayaArrayDataConverterTypeId = 109018,
-	ToMayaPlugConverterTypeId = 109019,
-	LastTypeId = 109999
-
-};
-
-} // namespace IECoreMaya
-
-#endif // IECOREMAYA_TYPEIDS_H
+	INTRUSIVE_PTR_PATCH( ToMayaConverter, ToMayaConverterPyClass );
+	implicitly_convertible<ToMayaConverterPtr, IECore::FromCoreConverterPtr>();
+}

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,16 +65,16 @@ ToMayaNumericDataConverter::ToMayaNumericDataConverter( ConstObjectPtr object )
 {
 }
 		
-bool ToMayaNumericDataConverter::doConvert( MObject &object ) const
+bool ToMayaNumericDataConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
-	MFnNumericData fnData( object, &s );
+	MFnNumericData fnData( to, &s );
 	
 	switch ( fnData.numericType() )
 	{
 		case MFnNumericData::k2Short:
 		{
-			ConstV2iDataPtr data = runTimeCast<const V2iData>( this->object() );
+			ConstV2iDataPtr data = runTimeCast<const V2iData>( from );
 			if (data == 0)
 			{
 				return false;
@@ -85,7 +85,7 @@ bool ToMayaNumericDataConverter::doConvert( MObject &object ) const
 		}	
 		case MFnNumericData::k3Short:
 		{
-			ConstV3iDataPtr data = runTimeCast<const V3iData>( this->object() );
+			ConstV3iDataPtr data = runTimeCast<const V3iData>( from );
 			if (data == 0)
 			{
 				return false;
@@ -96,7 +96,7 @@ bool ToMayaNumericDataConverter::doConvert( MObject &object ) const
 		}	
 		case MFnNumericData::k2Int:
 		{
-			ConstV2iDataPtr data = runTimeCast<const V2iData>( this->object() );
+			ConstV2iDataPtr data = runTimeCast<const V2iData>( from );
 			if (data == 0)
 			{
 				return false;
@@ -107,7 +107,7 @@ bool ToMayaNumericDataConverter::doConvert( MObject &object ) const
 		}	
 		case MFnNumericData::k3Int:
 		{
-			ConstV3iDataPtr data = runTimeCast<const V3iData>( this->object() );
+			ConstV3iDataPtr data = runTimeCast<const V3iData>( from );
 			if (data == 0)
 			{
 				return false;
@@ -118,7 +118,7 @@ bool ToMayaNumericDataConverter::doConvert( MObject &object ) const
 		}	
 		case MFnNumericData::k2Float:
 		{
-			ConstV2fDataPtr data = runTimeCast<const V2fData>( this->object() );
+			ConstV2fDataPtr data = runTimeCast<const V2fData>( from );
 			if (data == 0)
 			{
 				return false;
@@ -129,7 +129,7 @@ bool ToMayaNumericDataConverter::doConvert( MObject &object ) const
 		}
 		case MFnNumericData::k3Float:
 		{
-			ConstV3fDataPtr data = runTimeCast<const V3fData>( this->object() );
+			ConstV3fDataPtr data = runTimeCast<const V3fData>( from );
 			if (data == 0)
 			{
 				return false;
@@ -140,7 +140,7 @@ bool ToMayaNumericDataConverter::doConvert( MObject &object ) const
 		}
 		case MFnNumericData::k2Double:
 		{
-			ConstV2dDataPtr data = runTimeCast<const V2dData>( this->object() );
+			ConstV2dDataPtr data = runTimeCast<const V2dData>( from );
 			if (data == 0)
 			{
 				return false;
@@ -151,7 +151,7 @@ bool ToMayaNumericDataConverter::doConvert( MObject &object ) const
 		}		
 		case MFnNumericData::k3Double:
 		{
-			ConstV3dDataPtr data = runTimeCast<const V3dData>( this->object() );
+			ConstV3dDataPtr data = runTimeCast<const V3dData>( from );
 			if (data == 0)
 			{
 				return false;

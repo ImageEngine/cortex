@@ -55,11 +55,11 @@ ToMayaMeshConverter::ToMayaMeshConverter( IECore::ConstObjectPtr object )
 {
 }
 
-bool ToMayaMeshConverter::doConvert( MObject &obj ) const
+bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
 	
-	IECore::ConstMeshPrimitivePtr mesh = IECore::runTimeCast<const IECore::MeshPrimitive>(object());
+	IECore::ConstMeshPrimitivePtr mesh = IECore::runTimeCast<const IECore::MeshPrimitive>( from );
 	assert( mesh );
 		
 	MFloatPointArray vertexArray;
@@ -124,7 +124,7 @@ bool ToMayaMeshConverter::doConvert( MObject &obj ) const
 		polygonConnects[i] = vertexIds->readable()[i];
 	}
 			
-	fnMesh.create( numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, obj, &s );
+	fnMesh.create( numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, to, &s );
 	
 	if (!s)
 	{			

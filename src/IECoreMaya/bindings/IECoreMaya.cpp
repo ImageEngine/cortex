@@ -58,6 +58,9 @@
 #include "IECoreMaya/bindings/MPlugFromPython.h"
 #include "IECoreMaya/bindings/MObjectFromPython.h"
 #include "IECoreMaya/bindings/MDagPathFromPython.h"
+#include "IECoreMaya/bindings/ToMayaConverterBinding.h"
+#include "IECoreMaya/bindings/ToMayaPlugConverterBinding.h"
+#include "IECoreMaya/bindings/ToMayaObjectConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -90,4 +93,7 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindMPlugFromPython();
 	bindMObjectFromPython();
 	bindMDagPathFromPython();
+	bindToMayaConverter();
+	bindToMayaPlugConverter();
+	bindToMayaObjectConverter();
 }

@@ -32,39 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#include "boost/python.hpp"
 
-namespace IECoreMaya
-{
+#include "IECoreMaya/ToMayaObjectConverter.h"
+#include "IECoreMaya/bindings/ToMayaObjectConverterBinding.h"
 
-enum TypeId
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+#include "IECore/Object.h"
+
+using namespace IECoreMaya;
+using namespace boost::python;
+
+// weird but harmless hack - we can only get an rvalue (const reference) out
+// of python but we need an lvalue (reference). the object in python is non
+// const anyway though so this is harmless
+static bool convert( ToMayaObjectConverter &c, const MObject &o )
 {
+	return c.convert( (MObject &)o );
+}
+
+void IECoreMaya::bindToMayaObjectConverter()
+{
+	typedef class_<ToMayaObjectConverter, ToMayaObjectConverterPtr, boost::noncopyable, bases<ToMayaConverter> > ToMayaObjectConverterPyClass;
+
+	ToMayaObjectConverterPyClass( "ToMayaObjectConverter", no_init )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToMayaObjectConverter )
+		.def( "convert", &convert )
+		.def( "create", (ToMayaObjectConverterPtr (*)( IECore::ConstObjectPtr))&ToMayaObjectConverter::create ).staticmethod( "create" )
+	;
 	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	ToMayaConverterTypeId = 109014,
-	ToMayaObjectConverterTypeId = 109015,
-	ToMayaNumericDataConverterTypeId = 109016,
-	ToMayaMeshConverterTypeId = 109017,
-	ToMayaArrayDataConverterTypeId = 109018,
-	ToMayaPlugConverterTypeId = 109019,
-	LastTypeId = 109999
-
-};
-
-} // namespace IECoreMaya
-
-#endif // IECOREMAYA_TYPEIDS_H
+	INTRUSIVE_PTR_PATCH( ToMayaObjectConverter, ToMayaObjectConverterPyClass );
+	implicitly_convertible<ToMayaObjectConverterPtr, ToMayaConverterPtr>();
+}

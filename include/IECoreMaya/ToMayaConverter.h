@@ -32,39 +32,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#ifndef IECOREMAYA_TOMAYACONVERTER_H
+#define IECOREMAYA_TOMAYACONVERTER_H
+
+#include "IECoreMaya/TypeIds.h"
+
+#include "IECore/FromCoreConverter.h"
 
 namespace IECoreMaya
 {
 
-enum TypeId
+/// A base class for all classes which convert from an IECore datatype
+/// to a Maya datatype.
+class ToMayaConverter : public IECore::FromCoreConverter
 {
-	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	ToMayaConverterTypeId = 109014,
-	ToMayaObjectConverterTypeId = 109015,
-	ToMayaNumericDataConverterTypeId = 109016,
-	ToMayaMeshConverterTypeId = 109017,
-	ToMayaArrayDataConverterTypeId = 109018,
-	ToMayaPlugConverterTypeId = 109019,
-	LastTypeId = 109999
 
+	public :
+	
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaConverter, ToMayaConverterTypeId, IECore::FromCoreConverter );
+		
+	protected:
+	
+		ToMayaConverter( const std::string &name, const std::string &description, IECore::TypeId supportedType );
+		
+		virtual ~ToMayaConverter();
+	
 };
+
+IE_CORE_DECLAREPTR( ToMayaConverter );
 
 } // namespace IECoreMaya
 
-#endif // IECOREMAYA_TYPEIDS_H
+#endif // IECOREMAYA_TOMAYACONVERTER_H

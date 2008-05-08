@@ -54,11 +54,11 @@ ToMayaArrayDataConverter<F, T>::ToMayaArrayDataConverter( IECore::ConstObjectPtr
 }
 
 template<typename F, typename T>
-bool ToMayaArrayDataConverter<F, T>::doConvert( MObject &obj ) const
+bool ToMayaArrayDataConverter<F, T>::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
 	
-	boost::intrusive_ptr< const F > dataPtr = IECore::runTimeCast<const F>(ToMayaObjectConverter::object());
+	boost::intrusive_ptr< const F > dataPtr = IECore::runTimeCast<const F>(from);
 	assert( dataPtr );
 	
 	typename MArrayTraits<T>::DataFn fnData;
@@ -73,7 +73,7 @@ bool ToMayaArrayDataConverter<F, T>::doConvert( MObject &obj ) const
 		array[i] = IECore::convert< typename MArrayTraits<T>::ValueType, typename F::ValueType::value_type >( v[i] );
 	}
 		
-	obj = fnData.create( array, &s );
+	to = fnData.create( array, &s );
 	
 	return s;
 }

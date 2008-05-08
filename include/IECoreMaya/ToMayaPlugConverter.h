@@ -35,7 +35,7 @@
 #ifndef IE_COREMAYA_TOMAYAPLUGCONVERTER_H
 #define IE_COREMAYA_TOMAYAPLUGCONVERTER_H
 
-#include "IECore/Converter.h"
+#include "IECoreMaya/ToMayaConverter.h"
 
 #include "IECore/Object.h"
 
@@ -44,30 +44,29 @@
 namespace IECoreMaya
 {
 
+IE_CORE_FORWARDDECLARE( ToMayaPlugConverter );
+
 /// The ToMayaPlugConverter class allows conversion from an IECore Object to MPlug values.
-/// \todo Have this derive from a new ToMayaConverter class, which derived from FromCoreConverter.
-/// \todo Replace the convert() function with one that calls a pure virtual doConversion
-/// function taking the contents of parameters(), like the other converters.
-/// \todo Add factory style create() functions and a registration mechanism so you can
-/// ask for converters from different sorts of data, and then implement subclasses to make
-/// a proper job of doing the conversion.
-class ToMayaPlugConverter : public IECore::Converter
+class ToMayaPlugConverter : public ToMayaConverter
 {
 
 	public :
 
-		ToMayaPlugConverter( IECore::ConstObjectPtr obj );
-		
-		/// The IECore::Object which will be converted by the convert() function.
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaPlugConverter, ToMayaPlugConverterTypeId, ToMayaConverter );
 
-		IECore::ConstObjectPtr object() const;
-
-		/// Converts IECore::Object to a MPlug value.
+		/// Converts the srcParameter() value to an MPlug value.
+		/// \todo Replace this function with one that calls a pure virtual doConversion
+		/// function taking the contents of parameters(), like the other converters. Also
+		/// consider that MStatus might be a better return type, and that we might also
+		/// want a converter to create a new plug rather than just fill an existing one.
 		virtual bool convert( MPlug &plug ) const;
 		
+		/// \todo Implement this as a genuine factory which creates subclasses.
+		static ToMayaPlugConverterPtr create( const IECore::ObjectPtr src );
+		
 	private :
-
-		IECore::ConstObjectPtr m_object;
+	
+		ToMayaPlugConverter( IECore::ConstObjectPtr obj );
 
 };
 

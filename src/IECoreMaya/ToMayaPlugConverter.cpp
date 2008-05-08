@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,17 +54,20 @@ using namespace IECore;
 using namespace boost;
 
 ToMayaPlugConverter::ToMayaPlugConverter( ConstObjectPtr object )
-	:	Converter( "ToMayaPlugConverter", "Places values in plugs." ), m_object( object )
+	:	ToMayaConverter( "ToMayaPlugConverter", "Places values in plugs.", IECore::ObjectTypeId )
 {
+	srcParameter()->setValue( const_pointer_cast<Object>( object ) );
 }
 
-ConstObjectPtr ToMayaPlugConverter::object() const
+ToMayaPlugConverterPtr ToMayaPlugConverter::create( const IECore::ObjectPtr src )
 {
-	return m_object;
+	return new ToMayaPlugConverter( src );
 }
 
 bool ToMayaPlugConverter::convert( MPlug &plug ) const
 {
+	ConstObjectPtr toConvert = srcParameter()->getValidatedValue();
+	
 	MStatus s;
 	
 	MObject attr = plug.attribute();
@@ -79,7 +82,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 			case MFnUnitAttribute::kTime:
 			{
 
-				ConstFloatDataPtr data = runTimeCast<const FloatData>( m_object );
+				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
 				if (data == 0) 
 				{
 					return false;
@@ -94,7 +97,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 			}
 			case MFnUnitAttribute::kAngle:
 			{
-				ConstFloatDataPtr data = runTimeCast<const FloatData>( m_object );
+				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
 				if (data == 0) 
 				{
 					return false;
@@ -109,7 +112,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 			}
 			case MFnUnitAttribute::kDistance:
 			{
-				ConstFloatDataPtr data = runTimeCast<const FloatData>( m_object );
+				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
 				if (data == 0) 
 				{
 					return false;
@@ -135,7 +138,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 		{
 			case MFnNumericData::kDouble:
 			{
-				ConstDoubleDataPtr data = runTimeCast<const DoubleData>( m_object );
+				ConstDoubleDataPtr data = runTimeCast<const DoubleData>( toConvert );
 				if (data == 0)
 				{
 					return false;
@@ -146,7 +149,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 			}		
 			case MFnNumericData::kFloat:
 			{
-				ConstFloatDataPtr data = runTimeCast<const FloatData>( m_object );
+				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
 				if (data == 0) 
 				{
 					return false;
@@ -157,7 +160,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 			}		
 			case MFnNumericData::kInt:
 			{
-				ConstIntDataPtr data = runTimeCast<const IntData>( m_object );
+				ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
 				if (data == 0)
 				{
 					return false;
@@ -168,7 +171,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 			}
 			case MFnNumericData::kBoolean:
 			{
-				ConstIntDataPtr data = runTimeCast<const IntData>( m_object );
+				ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
 				if (data == 0)
 				{
 					return false;
@@ -179,7 +182,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 			}
 			case MFnNumericData::kChar:
 			{
-				ConstIntDataPtr data = runTimeCast<const IntData>( m_object );
+				ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
 				if (data == 0)
 				{
 					return false;
@@ -191,7 +194,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 			case MFnNumericData::kShort:
 			case MFnNumericData::kByte:
 			{
-				ConstIntDataPtr data = runTimeCast<const IntData>( m_object );
+				ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
 				if (data == 0)
 				{
 					return false;
@@ -208,7 +211,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 	}
 	else if (attr.hasFn(MFn::kEnumAttribute))
 	{
-		ConstIntDataPtr data = runTimeCast<const IntData>( m_object );
+		ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
 		if (data == 0)
 		{
 			return false;
@@ -224,7 +227,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 		s = plug.getValue( value );
 		assert(s);
 		
-		ToMayaObjectConverterPtr objectConverter = ToMayaObjectConverter::create( m_object );
+		ToMayaObjectConverterPtr objectConverter = ToMayaObjectConverter::create( toConvert );
 
 		if (objectConverter)
 		{

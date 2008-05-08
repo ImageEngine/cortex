@@ -51,7 +51,7 @@ class ToMayaMeshConverter : public ToMayaObjectConverter
 		
 	protected:
 	
-		bool doConvert( MObject &object ) const;
+		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const;
 		
 		typedef ToMayaObjectConverterDescription<ToMayaMeshConverter> Description;
 		static Description g_meshDataDescription;

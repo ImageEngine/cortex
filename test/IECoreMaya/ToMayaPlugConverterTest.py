@@ -32,27 +32,26 @@
 #
 ##########################################################################
 
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-from FnParameterisedHolderTest import *
-from ToMayaPlugConverterTest import *
-from ToMayaMeshConverterTest import *
-
 import MayaUnitTest
+import maya.cmds
 
+class ToMayaPlugConverterTest( unittest.TestCase ) :
+
+	def testConversion( self ) :
+	
+		locator = maya.cmds.spaceLocator()[0]
+		
+		converter = IECoreMaya.ToMayaPlugConverter.create( IECore.FloatData( 10 ) )
+		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaPlugConverter.staticTypeId() ) )
+		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
+		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
+		
+		converter.convert( locator + ".translateX" )
+		
+		self.assertEqual( maya.cmds.getAttr( locator + ".translateX" ), 10 )
+							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
