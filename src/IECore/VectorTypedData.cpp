@@ -41,6 +41,8 @@ using namespace Imath;
 using namespace std;
 using namespace IECore;
 
+LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeDescription( LongVectorDataTypeId, "LongVectorData" );
+
 #define IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )										\
 	template<>																								\
 	void TNAME::memoryUsage( Object::MemoryAccumulator &accumulator ) const			\

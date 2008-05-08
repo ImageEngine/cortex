@@ -40,6 +40,8 @@
 namespace IECore 
 {
 
+LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDataTypeId, "LongData" );
+
 #define IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( TNAME, TID )			\
 	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )			\
 

@@ -121,6 +121,16 @@ IE_CORE_DECLAREPTR( QuatdData );
 
 #include "IECore/SimpleTypedDataTraits.inl"
 
+/// \deprecated This class allows data of the obsolete typeId LongDataTypeId or typename "LongData" to register
+/// itself with an IntData constructor to the Object factory. This allows temporary backwards compatibility (since
+/// long and int were both 32-bits wide on 32-bit platforms)
+class LongDataAlias : private IntData
+{
+	private:	
+		static TypeDescription<IntData> m_typeDescription;	
+		~LongDataAlias() {};	
+};
+
 } // namespace IECore
 
 #endif // IE_CORE_SIMPLETYPEDDATA_H

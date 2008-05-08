@@ -118,6 +118,16 @@ IE_CORE_DECLAREPTR( Color4dVectorData );
 
 #include "IECore/VectorTypedDataTraits.inl"
 
+/// \deprecated This class allows data of the obsolete typeId LongVectorDataTypeId or typename "LongVectorData" to register
+/// itself with an IntVectorData constructor to the Object factory. This allows temporary backwards compatibility (since
+/// long and int were both 32-bits wide on 32-bit platforms)
+class LongVectorDataAlias : private IntVectorData
+{
+	private:
+		static TypeDescription<IntVectorData> m_typeDescription;
+		~LongVectorDataAlias() {};
+};
+
 } // namespace IECore
 
 #endif // IE_CORE_VECTORTYPEDDATA_H
