@@ -126,7 +126,7 @@ IE_CORE_DECLAREPTR( QuatdData );
 /// long and int were both 32-bits wide on 32-bit platforms)
 class LongDataAlias : private IntData
 {
-	private:	
+	protected:	
 		static TypeDescription<IntData> m_typeDescription;	
 		~LongDataAlias() {};	
 };

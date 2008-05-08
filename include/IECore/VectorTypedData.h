@@ -123,7 +123,7 @@ IE_CORE_DECLAREPTR( Color4dVectorData );
 /// long and int were both 32-bits wide on 32-bit platforms)
 class LongVectorDataAlias : private IntVectorData
 {
-	private:
+	protected:
 		static TypeDescription<IntVectorData> m_typeDescription;
 		~LongVectorDataAlias() {};
 };
