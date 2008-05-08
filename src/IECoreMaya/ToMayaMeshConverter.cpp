@@ -41,6 +41,7 @@
 
 #include "IECore/MeshPrimitive.h"
 #include "IECore/PrimitiveVariable.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaMeshConverter.h"
@@ -168,17 +169,17 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				}
 				else
 				{
-					/// \todo Warn that N is not of correct type
+					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"N\" has unsupported type \"%s\"." ) % it->second.data->typeName() );
 				}				
 			}			
 		}
 		else
 		{
-			/// \todo Warn that N is not of correct type		
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "PrimitiveVariable \"N\" has unsupported interpolation (expected FaceVarying)." );
 		}	
 	}
 	
-	/// \todo UV coordinates, another other primvars
+	/// \todo UV coordinates, and other primvars
 		
 	return true;
 }
