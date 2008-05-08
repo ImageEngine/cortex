@@ -113,7 +113,7 @@ IndexedIOEntryTypeFilter::IndexedIOEntryTypeFilter(IndexedIO::EntryType typ)
 	
 bool IndexedIOEntryTypeFilter::filter( const IndexedIO::Entry &e) const
 {
-	return IndexedIOFilter::filter(e) || (e.m_entryType != m_entryType);
+	return IndexedIOFilter::filter(e) || (e.entryType() != m_entryType);
 }
 
 //
