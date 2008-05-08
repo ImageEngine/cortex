@@ -199,6 +199,9 @@ struct DataTypeTraits
 	}
 };
 
+namespace Detail
+{
+
 // Classes which crudely mimic a regular iostream, but read/write from/to a memory buffer.
 
 class InputMemoryStream
@@ -273,9 +276,6 @@ struct MemoryStreamIO
 		i.read(c, n);
 	}
 };
-
-namespace Detail
-{
 
 template<typename T>
 inline int size()
@@ -452,8 +452,8 @@ struct DataFlattenTraits
 		char *data = new char[size];
 		assert(data);
 						
-		OutputMemoryStream mstream(data);
-		Detail::Writer<MemoryStreamIO, OutputMemoryStream, T>::write(mstream, x);		
+		Detail::OutputMemoryStream mstream(data);
+		Detail::Writer<Detail::MemoryStreamIO, Detail::OutputMemoryStream, T>::write(mstream, x);		
 			
 		return mstream.head();
 	}
@@ -461,8 +461,8 @@ struct DataFlattenTraits
 	static void unflatten(const char *src, T &dst)
 	{		
 		assert(src);
-		InputMemoryStream mstream(src);
-		Detail::Reader<MemoryStreamIO, InputMemoryStream, T>::read( mstream, dst );
+		Detail::InputMemoryStream mstream(src);
+		Detail::Reader<Detail::MemoryStreamIO, Detail::InputMemoryStream, T>::read( mstream, dst );
 	}
 		
 	static void free(const char *x)
@@ -480,11 +480,11 @@ struct DataFlattenTraits<T*>
 	{ 	
 		unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
 		
-		OutputMemoryStream mstream(new char[size]);
+		Detail::OutputMemoryStream mstream(new char[size]);
 		
 		for (unsigned long i = 0; i < arrayLength; i++)
 		{
-			Detail::Writer<MemoryStreamIO, OutputMemoryStream, T>::write (mstream, x[i]);		
+			Detail::Writer<Detail::MemoryStreamIO, Detail::OutputMemoryStream, T>::write (mstream, x[i]);		
 		}
 			
 		return mstream.head();
@@ -497,11 +497,11 @@ struct DataFlattenTraits<T*>
 			dst = new T[arrayLength];
 		}
 		
-		InputMemoryStream mstream(src);
+		Detail::InputMemoryStream mstream(src);
 		
 		for (unsigned long i = 0; i < arrayLength; i++)
 		{
-			Detail::Reader<MemoryStreamIO, InputMemoryStream, T>::read( mstream, dst[i] );
+			Detail::Reader<Detail::MemoryStreamIO, Detail::InputMemoryStream, T>::read( mstream, dst[i] );
 		}
 	}
 
@@ -541,13 +541,13 @@ struct DataFlattenTraits<std::string*>
 	{ 
 		unsigned long size = IndexedIO::DataSizeTraits<std::string*>::size(x, arrayLength);	
 	
-		OutputMemoryStream mstream(new char[size]);
+		Detail::OutputMemoryStream mstream(new char[size]);
 		
 		for (unsigned i = 0; i < arrayLength; i++)
 		{
 			unsigned long stringLength = x[i].size();
 			
-			Detail::Writer<MemoryStreamIO, OutputMemoryStream, unsigned long>::write (mstream, stringLength);
+			Detail::Writer<Detail::MemoryStreamIO, Detail::OutputMemoryStream, unsigned long>::write (mstream, stringLength);
 		
 			memcpy( mstream.next(), x[i].c_str(), stringLength );
 			
@@ -564,12 +564,12 @@ struct DataFlattenTraits<std::string*>
 			dst = new std::string[arrayLength];			
 		}
 		
-		InputMemoryStream mstream(src);
+		Detail::InputMemoryStream mstream(src);
 		
 		for (unsigned long i = 0; i < arrayLength; i++)
 		{
 			unsigned long stringLength = 0;
-			Detail::Reader<MemoryStreamIO, InputMemoryStream, unsigned long>::read (mstream, stringLength);
+			Detail::Reader<Detail::MemoryStreamIO, Detail::InputMemoryStream, unsigned long>::read (mstream, stringLength);
 				
 			dst[i] = std::string(mstream.next(), stringLength);
 			assert(dst[i].size() == stringLength);
