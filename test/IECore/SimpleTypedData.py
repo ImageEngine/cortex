@@ -201,7 +201,43 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( UShortData() ), "0" )
-		self.assertEqual( repr( UShortData() ), "UShortData( 0 )" )	
+		self.assertEqual( repr( UShortData() ), "UShortData( 0 )" )
+		
+	def testInt64Data(self):
+		"""Test Int64Data"""
+		a = Int64Data()
+		self.assert_(type(a) is Int64Data)
+		b = Int64Data(1)
+		c = b.copy()
+		self.assertEqual(b.value, 1)
+		self.assertEqual(long(b), 1)
+		b.value = 2
+		self.assertEqual(b.value, 2)
+		a = Int64Data(2)
+		self.assert_(c < b)
+		self.assert_(not c > b)
+		self.assert_(a == b)
+		self.assert_(not a == c)
+		self.assertEqual( str( Int64Data() ), "0" )
+		self.assertEqual( repr( Int64Data() ), "Int64Data( 0 )" )
+		
+	def testUInt64Data(self):
+		"""Test UInt64Data"""
+		a = UInt64Data()
+		self.assert_(type(a) is UInt64Data)
+		b = UInt64Data(1)
+		c = b.copy()
+		self.assertEqual(b.value, 1)
+		self.assertEqual(long(b), 1)
+		b.value = 2
+		self.assertEqual(b.value, 2)
+		a = UInt64Data(2)
+		self.assert_(c < b)
+		self.assert_(not c > b)
+		self.assert_(a == b)
+		self.assert_(not a == c)
+		self.assertEqual( str( UInt64Data() ), "0" )
+		self.assertEqual( repr( UInt64Data() ), "UInt64Data( 0 )" )		
 		
 			
 		
@@ -279,7 +315,7 @@ class BoolDataTest( unittest.TestCase ) :
 		o = BoolData( True )
 		self.assertEqual( o.value, True )
 		
-		iface = IndexedIOInterface.create( "test/o.fio", "/", IndexedIOOpenMode.Write )
+		iface = IndexedIOInterface.create( "test/IECore/o.fio", "/", IndexedIOOpenMode.Write )
 		
 		o.save( iface, "test" )
 		oo = Object.load( iface, "test" )
@@ -294,8 +330,8 @@ class BoolDataTest( unittest.TestCase ) :
 		
 	def tearDown( self ) :
 	
-		if os.path.isfile("test/o.fio"):
-			os.remove("test/o.fio")		
+		if os.path.isfile("test/IECore/o.fio"):
+			os.remove("test/IECore/o.fio")		
 			
 if __name__ == "__main__":
     unittest.main()   

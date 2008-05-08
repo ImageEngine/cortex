@@ -256,6 +256,10 @@ enum TypeId
 	MeshMergeOpTypeId = 213,
 	FontTypeId = 214,
 	UniformRandomPointDistributionOpTypeId = 215,
+	Int64DataTypeId = 216,
+	UInt64DataTypeId = 217,
+	Int64VectorDataTypeId = 218,
+	UInt64VectorDataTypeId = 219,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

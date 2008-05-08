@@ -193,6 +193,8 @@ DEFINENUMERICSTRSPECIALISATION( double );
 DEFINENUMERICSTRSPECIALISATION( half );
 DEFINENUMERICSTRSPECIALISATION( short );
 DEFINENUMERICSTRSPECIALISATION( unsigned short );
+DEFINENUMERICSTRSPECIALISATION( int64_t );
+DEFINENUMERICSTRSPECIALISATION( uint64_t );
 
 #define DEFINETYPEDDATASTRSPECIALISATION( TYPE )														\
 template<>																								\
@@ -220,6 +222,8 @@ DEFINETYPEDDATASTRSPECIALISATION( float );
 DEFINETYPEDDATASTRSPECIALISATION( double );
 DEFINETYPEDDATASTRSPECIALISATION( short );
 DEFINETYPEDDATASTRSPECIALISATION( unsigned short );
+DEFINETYPEDDATASTRSPECIALISATION( int64_t );
+DEFINETYPEDDATASTRSPECIALISATION( uint64_t );
 DEFINETYPEDDATASTRSPECIALISATION( string );
 DEFINETYPEDDATASTRSPECIALISATION( half );
 DEFINETYPEDDATASTRSPECIALISATION( V2i );
@@ -335,7 +339,17 @@ void bindAllSimpleTypedData()
 	class_< UShortData, UShortDataPtr, boost::noncopyable, bases<Data> > ushdc = bindSimpleData<UShortData>();
 	bindNumericMethods( ushdc );
 	ushdc.def( "__int__", &getValue<UShortData> );
-	implicitly_convertible<UShortDataPtr, DataPtr>();	
+	implicitly_convertible<UShortDataPtr, DataPtr>();
+	
+	class_< Int64Data, Int64DataPtr, boost::noncopyable, bases<Data> > i64dc = bindSimpleData<Int64Data>();
+	bindNumericMethods( i64dc );
+	i64dc.def( "__long__", &getValue<Int64Data> );
+	implicitly_convertible<Int64DataPtr, DataPtr>();
+	
+	class_< UInt64Data, UInt64DataPtr, boost::noncopyable, bases<Data> > ui64dc = bindSimpleData<UInt64Data>();
+	bindNumericMethods( ui64dc );
+	ui64dc.def( "__long__", &getValue<UInt64Data> );
+	implicitly_convertible<UInt64DataPtr, DataPtr>();	
 
 	bindSimpleData<V2iData>();
 	implicitly_convertible<V2iDataPtr, DataPtr>();

@@ -139,6 +139,14 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 			return
 			typename Detail::DespatchTypedData< Functor, UShortData, ErrorHandler >
 			::template Func<Enabler>()( boost::static_pointer_cast<UShortData>( data ), functor, errorHandler );
+		case Int64DataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, Int64Data, ErrorHandler >
+			::template Func<Enabler>()( boost::static_pointer_cast<Int64Data>( data ), functor, errorHandler );
+		case UInt64DataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, UInt64Data, ErrorHandler >
+			::template Func<Enabler>()( boost::static_pointer_cast<UInt64Data>( data ), functor, errorHandler );	
 		case StringDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, StringData, ErrorHandler >
@@ -275,6 +283,14 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 			return
 			typename Detail::DespatchTypedData< Functor, UShortVectorData, ErrorHandler >
 			::template Func<Enabler>()( boost::static_pointer_cast<UShortVectorData>( data ), functor, errorHandler );
+		case Int64VectorDataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, Int64VectorData, ErrorHandler >
+			::template Func<Enabler>()( boost::static_pointer_cast<Int64VectorData>( data ), functor, errorHandler );
+		case UInt64VectorDataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, UInt64VectorData, ErrorHandler >
+			::template Func<Enabler>()( boost::static_pointer_cast<UInt64VectorData>( data ), functor, errorHandler );	
 		case StringVectorDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, StringVectorData, ErrorHandler >

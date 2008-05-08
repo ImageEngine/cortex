@@ -58,6 +58,8 @@ typedef TypedData< std::vector< char > > CharVectorData;
 typedef TypedData< std::vector< unsigned char > > UCharVectorData;
 typedef TypedData< std::vector< short > > ShortVectorData;
 typedef TypedData< std::vector< unsigned short > > UShortVectorData;
+typedef TypedData< std::vector< int64_t > > Int64VectorData;
+typedef TypedData< std::vector< uint64_t > > UInt64VectorData;
 typedef TypedData< std::vector< std::string > > StringVectorData;
 
 // vectors for Imath types
@@ -94,6 +96,8 @@ IE_CORE_DECLAREPTR( UCharVectorData );
 IE_CORE_DECLAREPTR( ShortVectorData );
 IE_CORE_DECLAREPTR( UShortVectorData );
 IE_CORE_DECLAREPTR( StringVectorData );
+IE_CORE_DECLAREPTR( Int64VectorData );
+IE_CORE_DECLAREPTR( UInt64VectorData );
 // pointers to vectors of Imath types
 IE_CORE_DECLAREPTR( V2fVectorData );
 IE_CORE_DECLAREPTR( V2dVectorData );

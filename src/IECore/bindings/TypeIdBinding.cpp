@@ -254,6 +254,10 @@ void bindTypeId()
 		.value("Font", FontTypeId )
 		.value("MeshMergeOp", MeshMergeOpTypeId )
 		.value("UniformRandomPointDistributionOp", UniformRandomPointDistributionOpTypeId )
+		.value("Int64Data", Int64DataTypeId )
+		.value("UInt64Data", UInt64DataTypeId )
+		.value("Int64VectorData", Int64VectorDataTypeId )
+		.value("UInt64VectorData", UInt64VectorDataTypeId )
 	;
 }
 

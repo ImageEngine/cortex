@@ -967,6 +967,138 @@ class UShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 		"""Test UShortVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
 		
+class Int64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
+
+	def __init__(self, param1):
+		BaseVectorDataTest.__init__(self, Int64VectorData, int)
+		unittest.TestCase.__init__(self, param1)
+
+	def testConstructors(self):
+		"""Test Int64VectorData constructors"""
+		BaseVectorDataTest.testConstructors(self)
+		
+	def testResize(self):
+		"""Test Int64VectorData resizing"""
+		BaseVectorDataTest.testResize(self)
+				
+	def testAssignment(self):
+		"""Test Int64VectorData assignment"""
+		BaseVectorDataTest.testAssignment(self)
+				
+	def testNegativeIndexing(self):
+		"""Test Int64VectorData negative indexing"""
+		BaseVectorDataTest.testNegativeIndexing(self)
+				
+	def testCopyOnWrite(self):
+		"""Test Int64VectorData copy-on-write behavior"""
+		BaseVectorDataTest.testCopyOnWrite(self)
+				
+	def testContains(self):
+		"""Test Int64VectorData contains function"""
+		BaseVectorDataTest.testContains(self)
+				
+	def testExtend(self):
+		"""Test Int64VectorData extend function"""
+		BaseVectorDataTest.testExtend(self)
+			
+	def testSlices(self):
+		"""Test Int64VectorData slicing behavior"""
+		BaseVectorDataTest.testSlices(self)
+			
+	def testEquality(self):
+		"""Test Int64VectorData equality function"""
+		BaseVectorDataTest.testEquality(self)
+
+	def testComparison(self):
+		"""Test Int64VectorData comparison function"""
+		BaseVectorDataTest.testComparison(self)
+				
+	def testSumOperations(self):
+		"""Test Int64VectorData sum operations"""
+		BaseVectorDataTest.testSumOperations(self)
+		
+	def testSubOperations(self):
+		"""Test Int64VectorData subtraction operations"""
+		BaseVectorDataTest.testSubOperations(self)
+		
+	def testMultOperations(self):
+		"""Test Int64VectorData multiplication operations"""
+		BaseVectorDataTest.testMultOperations(self)
+				
+	def testDivOperations(self):
+		"""Test Int64VectorData division operations"""
+		BaseVectorDataTest.testDivOperations(self)
+				
+	def testByValueItem(self):
+		"""Test Int64VectorData by value return type"""
+		BaseVectorDataTest.testByValueItem(self)
+
+class UInt64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
+
+	def __init__(self, param1):
+		BaseVectorDataTest.__init__(self, UInt64VectorData, int)
+		unittest.TestCase.__init__(self, param1)
+
+	def testConstructors(self):
+		"""Test UInt64VectorData constructors"""
+		BaseVectorDataTest.testConstructors(self)
+		
+	def testResize(self):
+		"""Test UInt64VectorData resizing"""
+		BaseVectorDataTest.testResize(self)
+				
+	def testAssignment(self):
+		"""Test UInt64VectorData assignment"""
+		BaseVectorDataTest.testAssignment(self)
+				
+	def testNegativeIndexing(self):
+		"""Test UInt64VectorData negative indexing"""
+		BaseVectorDataTest.testNegativeIndexing(self)
+				
+	def testCopyOnWrite(self):
+		"""Test UInt64VectorData copy-on-write behavior"""
+		BaseVectorDataTest.testCopyOnWrite(self)
+				
+	def testContains(self):
+		"""Test UInt64VectorData contains function"""
+		BaseVectorDataTest.testContains(self)
+				
+	def testExtend(self):
+		"""Test UInt64VectorData extend function"""
+		BaseVectorDataTest.testExtend(self)
+			
+	def testSlices(self):
+		"""Test UInt64VectorData slicing behavior"""
+		BaseVectorDataTest.testSlices(self)
+			
+	def testEquality(self):
+		"""Test UInt64VectorData equality function"""
+		BaseVectorDataTest.testEquality(self)
+
+	def testComparison(self):
+		"""Test UInt64VectorData comparison function"""
+		BaseVectorDataTest.testComparison(self)
+				
+	def testSumOperations(self):
+		"""Test UInt64VectorData sum operations"""
+		BaseVectorDataTest.testSumOperations(self)
+		
+	def testSubOperations(self):
+		"""Test UInt64VectorData subtraction operations"""
+		BaseVectorDataTest.testSubOperations(self)
+		
+	def testMultOperations(self):
+		"""Test UInt64VectorData multiplication operations"""
+		BaseVectorDataTest.testMultOperations(self)
+				
+	def testDivOperations(self):
+		"""Test UInt64VectorData division operations"""
+		BaseVectorDataTest.testDivOperations(self)
+				
+	def testByValueItem(self):
+		"""Test UInt64VectorData by value return type"""
+		BaseVectorDataTest.testByValueItem(self)		
+		
 class StringVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
