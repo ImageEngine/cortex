@@ -256,24 +256,8 @@ template<>
 void ShortVectorData::save( Object::SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
-	// we can't write out the raw data from inside the vector 'cos it's specialised
-	// to optimise for space, and that means the only access to the data is through
-	// a funny proxy class. so we repack the data into something we can deal with
-	// and write that out instead. essentially i think we're making exactly the same
-	// raw data. rubbish.
-	const std::vector<short> &b = readable();
-	std::vector<int> p;
-	unsigned int s = b.size();
-	p.resize(s);
-
-	for( unsigned int i=0; i<s; i++ )
-	{
-		p[i] = b[i];
-	}
-	
-	container->write( "size", s );
-	container->write( "value", &(p[0]), p.size() );
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), 1 );
+	container->write( "value", baseReadable(), baseSize() );
 }
 
 template<>
@@ -283,17 +267,30 @@ void ShortVectorData::load( LoadContextPtr context )
 	unsigned int v = 0;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	
-	unsigned int s = 0;
-	container->read( "size", s );
-	std::vector<int> p;
-	p.resize( s );
-	int *value = &(p[0]);
-	container->read( "value", value, p.size() );
 	std::vector<short> &b = writable();
-	b.resize( s, false );
-	for( unsigned int i=0; i<s; i++ )
+	
+	if ( v == 0 )
 	{
-		b[i] = static_cast< short > ( p[i] );
+		/// Version 0 stored the array of shorts as ints
+		unsigned int s = 0;
+		container->read( "size", s );
+		std::vector<int> p;
+		p.resize( s );
+		int *value = &(p[0]);
+		container->read( "value", value, p.size() );
+		b.resize( s, false );
+		for( unsigned int i=0; i<s; i++ )
+		{
+			b[i] = static_cast< short > ( p[i] );
+		}
+	}
+	else
+	{
+		/// Version 1 stores the shorts natively
+		IndexedIO::Entry e = container->ls( "value" );												\
+		writable().resize( e.arrayLength() );													\
+		short *p = baseWritable();														\
+		container->read( "value", p, e.arrayLength() );		
 	}
 }
 
@@ -301,24 +298,8 @@ template<>
 void UShortVectorData::save( Object::SaveContext *context ) const
 {
 	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
-	// we can't write out the raw data from inside the vector 'cos it's specialised
-	// to optimise for space, and that means the only access to the data is through
-	// a funny proxy class. so we repack the data into something we can deal with
-	// and write that out instead. essentially i think we're making exactly the same
-	// raw data. rubbish.
-	const std::vector<unsigned short> &b = readable();
-	std::vector<unsigned int> p;
-	unsigned int s = b.size();
-	p.resize(s);
-
-	for( unsigned int i=0; i<s; i++ )
-	{
-		p[i] = b[i];
-	}
-	
-	container->write( "size", s );
-	container->write( "value", &(p[0]), p.size() );
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), 1 );
+	container->write( "value", baseReadable(), baseSize() );
 }
 
 template<>
@@ -328,17 +309,30 @@ void UShortVectorData::load( LoadContextPtr context )
 	unsigned int v = 0;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	
-	unsigned int s = 0;
-	container->read( "size", s );
-	std::vector<unsigned int> p;
-	p.resize( s );
-	unsigned int *value = &(p[0]);
-	container->read( "value", value, p.size() );
 	std::vector<unsigned short> &b = writable();
-	b.resize( s, false );
-	for( unsigned int i=0; i<s; i++ )
+	
+	if ( v == 0 )
 	{
-		b[i] = static_cast< unsigned short > ( p[i] );
+		/// Version 0 stored the array unsigned shorts as unsigned ints
+		unsigned int s = 0;
+		container->read( "size", s );
+		std::vector<unsigned int> p;
+		p.resize( s );
+		unsigned int *value = &(p[0]);
+		container->read( "value", value, p.size() );		
+		b.resize( s, false );
+		for( unsigned int i=0; i<s; i++ )
+		{
+			b[i] = static_cast< unsigned short > ( p[i] );
+		}
+	}
+	else
+	{
+		/// Version 1 stores the unsigned shorts natively
+		IndexedIO::Entry e = container->ls( "value" );												\
+		writable().resize( e.arrayLength() );													\
+		unsigned short *p = baseWritable();														\
+		container->read( "value", p, e.arrayLength() );		
 	}
 }
 	
