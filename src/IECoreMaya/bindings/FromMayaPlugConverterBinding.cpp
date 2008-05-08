@@ -47,16 +47,6 @@
 using namespace IECoreMaya;
 using namespace boost::python;
 
-static IECoreMaya::FromMayaConverterPtr create( const char *n, IECore::TypeId t )
-{
-	MSelectionList l;
-	l.add( MString( n ) );
-	MPlug p;
-	MStatus s = l.getPlug( 0, p );
-	StatusException::throwIfError( s );
-	return FromMayaPlugConverter::create( p, t );
-}
-
 void IECoreMaya::bindFromMayaPlugConverter()
 {
 	typedef class_<FromMayaPlugConverter, FromMayaPlugConverterPtr, boost::noncopyable, bases<FromMayaConverter> > FromMayaPlugConverterPyClass;
@@ -64,7 +54,6 @@ void IECoreMaya::bindFromMayaPlugConverter()
 	FromMayaPlugConverterPyClass( "FromMayaPlugConverter", no_init )
 		.def( "convert", &FromMayaPlugConverter::convert )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaPlugConverter )
-		.def( "create", &create, ( arg_( "plug" ), arg_( "resultType" ) = IECore::InvalidTypeId ) )
 		.def( "create", &FromMayaPlugConverter::create, ( arg_( "plug" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 	

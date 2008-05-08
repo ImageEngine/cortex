@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,30 +32,68 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include <boost/python.hpp>
 
-#include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
-#include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/StatusException.h"
-
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include "maya/MSelectionList.h"
 #include "maya/MString.h"
+#include "maya/MDagPath.h"
 
-using namespace IECoreMaya;
 using namespace boost::python;
 
-void IECoreMaya::bindFromMayaObjectConverter()
+namespace IECoreMaya
 {
-	typedef class_<FromMayaObjectConverter, FromMayaObjectConverterPtr, boost::noncopyable, bases<FromMayaConverter> > FromMayaObjectConverterPyClass;
 
-	FromMayaObjectConverterPyClass( "FromMayaObjectConverter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaObjectConverter )
-		.def( "create", &FromMayaObjectConverter::create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
-	;
+struct MDagPathFromPython
+{
+	static void *convertible( PyObject *obj )
+	{
+		if( PyUnicode_Check( obj ) || PyString_Check( obj ) )
+		{
+			return obj;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 	
-	INTRUSIVE_PTR_PATCH( FromMayaObjectConverter, FromMayaObjectConverterPyClass );
-	implicitly_convertible<FromMayaObjectConverterPtr, FromMayaConverterPtr>();
+	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
+	{
+		void *storage = ((converter::rvalue_from_python_storage<MDagPath>*)data)->storage.bytes;
+
+		MString name;
+
+		if( PyUnicode_Check( obj ) )
+		{
+			PyObject *ascii = PyUnicode_AsASCIIString( obj );
+			name = PyString_AsString( ascii );
+			Py_DECREF( ascii );
+		}
+		else
+		{
+			name = PyString_AsString( obj );
+		}
+
+		MSelectionList s;
+		StatusException::throwIfError( s.add( name ) );
+		
+		MDagPath path;
+		StatusException::throwIfError( s.getDagPath( 0, path ) );
+		
+		new (storage) MDagPath( path );
+		data->convertible = storage;
+	}
+};
+   
+void bindMDagPathFromPython()
+{
+	converter::registry::push_back(
+		&MDagPathFromPython::convertible,
+		&MDagPathFromPython::construct,
+		type_id<MDagPath>()
+	);
 }
+
+} // namespace IECore

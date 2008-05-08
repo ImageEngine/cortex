@@ -47,23 +47,13 @@
 using namespace IECoreMaya;
 using namespace boost::python;
 
-static IECoreMaya::FromMayaShapeConverterPtr create( const char *n, IECore::TypeId t )
-{
-	MSelectionList l;
-	l.add( MString( n ) );
-	MDagPath p;
-	MStatus s = l.getDagPath( 0, p );
-	StatusException::throwIfError( s );
-	return FromMayaShapeConverter::create( p, t );
-}
-
 void IECoreMaya::bindFromMayaShapeConverter()
 {
 	typedef class_<FromMayaShapeConverter, FromMayaShapeConverterPtr, boost::noncopyable, bases<FromMayaObjectConverter> > FromMayaShapeConverterPyClass;
 
 	scope s = FromMayaShapeConverterPyClass( "FromMayaShapeConverter", no_init )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaShapeConverter )
-		.def( "create", &create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
+		.def( "create", &FromMayaShapeConverter::create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 	
 	enum_<FromMayaShapeConverter::Space>( "Space" )

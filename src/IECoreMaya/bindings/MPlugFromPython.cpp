@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,30 +32,69 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include <boost/python.hpp>
 
-#include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
-#include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/StatusException.h"
-
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include "maya/MSelectionList.h"
 #include "maya/MString.h"
+#include "maya/MPlug.h"
 
-using namespace IECoreMaya;
 using namespace boost::python;
 
-void IECoreMaya::bindFromMayaObjectConverter()
+namespace IECoreMaya
 {
-	typedef class_<FromMayaObjectConverter, FromMayaObjectConverterPtr, boost::noncopyable, bases<FromMayaConverter> > FromMayaObjectConverterPyClass;
 
-	FromMayaObjectConverterPyClass( "FromMayaObjectConverter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaObjectConverter )
-		.def( "create", &FromMayaObjectConverter::create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
-	;
+struct MPlugFromPython
+{
+	static void *convertible( PyObject *obj )
+	{
+		if( PyUnicode_Check( obj ) || PyString_Check( obj ) )
+		{
+			return obj;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 	
-	INTRUSIVE_PTR_PATCH( FromMayaObjectConverter, FromMayaObjectConverterPyClass );
-	implicitly_convertible<FromMayaObjectConverterPtr, FromMayaConverterPtr>();
+	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
+	{
+		void *storage = ((converter::rvalue_from_python_storage<MPlug>*)data)->storage.bytes;
+
+		MString plugName;
+
+		if( PyUnicode_Check( obj ) )
+		{
+			PyObject *ascii = PyUnicode_AsASCIIString( obj );
+			plugName = PyString_AsString( ascii );
+			Py_DECREF( ascii );
+		}
+		else
+		{
+			plugName = PyString_AsString( obj );
+		}
+
+		MSelectionList s;
+		StatusException::throwIfError( s.add( plugName ) );
+		
+		MPlug plug;
+		StatusException::throwIfError( s.getPlug( 0, plug ) );
+		
+		new (storage) MPlug( plug );
+		data->convertible = storage;
+	}
+};
+   
+void bindMPlugFromPython()
+{
+	converter::registry::push_back(
+		&MPlugFromPython::convertible,
+		&MPlugFromPython::construct,
+		type_id<MPlug>()
+	);
+
 }
+
+} // namespace IECore

@@ -45,10 +45,10 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 	
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 		
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ), IECore.TypeId.MeshPrimitive )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECore.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 	
 	def testParameters( self ) :
@@ -56,7 +56,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 	
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		self.assertEqual( converter.interpolation.getTypedValue(), "linear" )
 		p = converter.convert()
 		self.assertEqual( p.interpolation, "linear" )		
@@ -64,19 +64,19 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		p = converter.convert()
 		self.assertEqual( p.interpolation, "catmullClark" )
 		
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		self.assertEqual( converter.points.getTypedValue(), True )
 		self.assert_( "P" in converter.convert() )		
 		converter.points.setTypedValue( False )
 		self.assert_( not "P" in converter.convert() )
 		
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		self.assertEqual( converter.normals.getTypedValue(), True )
 		self.assert_( "N" in converter.convert() )		
 		converter.normals.setTypedValue( False )
 		self.assert_( not "N" in converter.convert() )
 		
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		self.assertEqual( converter.st.getTypedValue(), True )
 		self.assert_( "s" in converter.convert() )		
 		self.assert_( "t" in converter.convert() )		
@@ -89,7 +89,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 	
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		
 		m = converter.convert()
 		
@@ -111,7 +111,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		maya.cmds.move( 1, 2, 3, sphere )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 	
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		
 		self.assertEqual( converter.space.getNumericValue(), IECoreMaya.FromMayaCurveConverter.Space.Object )
 		m = converter.convert()
@@ -129,7 +129,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 	
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( sphere ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		
 		m = converter.convert()
 		self.assert_( "N" in m )
@@ -143,7 +143,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		plane = maya.cmds.polyPlane( ch=False, subdivisionsX=1, subdivisionsY=1 )
 		plane = maya.cmds.listRelatives( plane, shapes=True )[0]
 		
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( plane ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( plane )
 
 		m = converter.convert()
 		
@@ -162,7 +162,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		maya.cmds.addAttr( plane, dataType="string", longName="ieString" )
 		maya.cmds.setAttr( plane + ".ieString", "banana", type="string" )
 		
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( plane ) )
+		converter = IECoreMaya.FromMayaShapeConverter.create( plane )
 		m = converter.convert()
 		
 		self.assertEqual( len( m.blindData().keys() ), 2 )
@@ -178,7 +178,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		maya.cmds.addAttr( plane, dataType="doubleArray", longName="delightDoubleArray" )
 		maya.cmds.setAttr( plane + ".delightDoubleArray", ( 10, 11, 12, 13 ), type="doubleArray" )
 		
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( plane ), IECore.MeshPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECore.MeshPrimitive.staticTypeId() )
 		m = converter.convert()
 		
 		self.assertEqual( len( m.keys() ), 6 )
@@ -193,7 +193,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		maya.cmds.move( 1, 2, 3, sphere )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 	
-		converter = IECoreMaya.FromMayaPlugConverter.create( str( sphere ) + ".worldMesh" )
+		converter = IECoreMaya.FromMayaPlugConverter.create( sphere + ".worldMesh" )
 		
 		converter.space.setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
 		m = converter.convert()

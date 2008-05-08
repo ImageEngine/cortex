@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,30 +32,69 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include <boost/python.hpp>
 
-#include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
-#include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/StatusException.h"
-
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include "maya/MSelectionList.h"
 #include "maya/MString.h"
+#include "maya/MObject.h"
 
-using namespace IECoreMaya;
 using namespace boost::python;
 
-void IECoreMaya::bindFromMayaObjectConverter()
+namespace IECoreMaya
 {
-	typedef class_<FromMayaObjectConverter, FromMayaObjectConverterPtr, boost::noncopyable, bases<FromMayaConverter> > FromMayaObjectConverterPyClass;
 
-	FromMayaObjectConverterPyClass( "FromMayaObjectConverter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaObjectConverter )
-		.def( "create", &FromMayaObjectConverter::create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
-	;
+struct MObjectFromPython
+{
+	static void *convertible( PyObject *obj )
+	{
+		if( PyUnicode_Check( obj ) || PyString_Check( obj ) )
+		{
+			return obj;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 	
-	INTRUSIVE_PTR_PATCH( FromMayaObjectConverter, FromMayaObjectConverterPyClass );
-	implicitly_convertible<FromMayaObjectConverterPtr, FromMayaConverterPtr>();
+	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
+	{
+		void *storage = ((converter::rvalue_from_python_storage<MObject>*)data)->storage.bytes;
+
+		MString objectName;
+
+		if( PyUnicode_Check( obj ) )
+		{
+			PyObject *ascii = PyUnicode_AsASCIIString( obj );
+			objectName = PyString_AsString( ascii );
+			Py_DECREF( ascii );
+		}
+		else
+		{
+			objectName = PyString_AsString( obj );
+		}
+
+		MSelectionList s;
+		StatusException::throwIfError( s.add( objectName ) );
+		
+		MObject object;
+		StatusException::throwIfError( s.getDependNode( 0, object ) );
+		
+		new (storage) MObject( object );
+		data->convertible = storage;
+	}
+};
+   
+void bindMObjectFromPython()
+{
+	converter::registry::push_back(
+		&MObjectFromPython::convertible,
+		&MObjectFromPython::construct,
+		type_id<MObject>()
+	);
+
 }
+
+} // namespace IECore

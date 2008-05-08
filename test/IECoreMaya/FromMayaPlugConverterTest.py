@@ -44,11 +44,11 @@ class FromMayaPlugConverterTest( unittest.TestCase ) :
 		
 		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
 		
-		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
+		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".translateX" )
 		self.assert_( converter )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 	
-		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString( str( locator ) + ".translateX" ) )
+		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString( locator + ".translateX" ) )
 		self.assert_( converter )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 							
