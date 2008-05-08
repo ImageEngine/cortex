@@ -1723,9 +1723,14 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const int *x, unsigned
 	write<int>(name, x, arrayLength);
 }
 
-void FileIndexedIO::write(const IndexedIO::EntryID &name, const long *x, unsigned long arrayLength)
+void FileIndexedIO::write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength)
 {
-	write<long>(name, x, arrayLength);
+	write<int64_t>(name, x, arrayLength);
+}
+
+void FileIndexedIO::write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength)
+{
+	write<uint64_t>(name, x, arrayLength);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength)
@@ -1778,9 +1783,14 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const int &x)
 	write<int>(name, x);
 }
 
-void FileIndexedIO::write(const IndexedIO::EntryID &name, const long &x)
+void FileIndexedIO::write(const IndexedIO::EntryID &name, const int64_t &x)
 {
-	write<long>(name, x);
+	write<int64_t>(name, x);
+}
+
+void FileIndexedIO::write(const IndexedIO::EntryID &name, const uint64_t &x)
+{
+	write<uint64_t>(name, x);
 }
 
 void FileIndexedIO::write(const IndexedIO::EntryID &name, const std::string &x)
@@ -1834,9 +1844,14 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, int *&x, unsigned long 
 	read<int>(name, x, arrayLength);
 }
 
-void FileIndexedIO::read(const IndexedIO::EntryID &name, long *&x, unsigned long arrayLength)
+void FileIndexedIO::read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength)
 {
-	read<long>(name, x, arrayLength);
+	read<int64_t>(name, x, arrayLength);
+}
+
+void FileIndexedIO::read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength)
+{
+	read<uint64_t>(name, x, arrayLength);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength)
@@ -1889,9 +1904,14 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, int &x)
 	read<int>(name, x);
 }
 
-void FileIndexedIO::read(const IndexedIO::EntryID &name, long &x)
+void FileIndexedIO::read(const IndexedIO::EntryID &name, int64_t &x)
 {
-	read<long>(name, x);
+	read<int64_t>(name, x);
+}
+
+void FileIndexedIO::read(const IndexedIO::EntryID &name, uint64_t &x)
+{
+	read<uint64_t>(name, x);
 }
 
 void FileIndexedIO::read(const IndexedIO::EntryID &name, std::string &x)

@@ -56,6 +56,7 @@ void IndexedIOTestSuite<FileIndexedIO>::getFilenames( FilenameList &filenames )
 	
 	filenames.push_back("./test/IECore/data/fioFiles/2.13.0/rhel4.i686/types.fio");
 	filenames.push_back("./test/IECore/data/fioFiles/2.13.0/osx104.i686/types.fio");
+	filenames.push_back("./test/IECore/data/fioFiles/3.0.0/rhel4.i686/types.fio");
 	filenames.push_back("./test/IECore/data/fioFiles/3.0.0/cent5.x86_64/types.fio");			
 }
 
@@ -168,29 +169,56 @@ int* IndexedIOTestDataTraits<int*>::value()
 	return v;
 } 
 
-/// long 
+/// int64_t 
 template<>
-std::string IndexedIOTestDataTraits<long>::name() 
+std::string IndexedIOTestDataTraits<int64_t>::name() 
 {
-	return "long";
+	return "int64";
 }
 
 template<>
-long IndexedIOTestDataTraits<long>::value()
+int64_t IndexedIOTestDataTraits<int64_t>::value()
 {
-	return -222;
+	return -888;
 } 
 
 template<>
-std::string IndexedIOTestDataTraits<long*>::name() 
+std::string IndexedIOTestDataTraits<int64_t*>::name() 
 {
-	return "longArray";
+	return "int64Array";
 }
 
 template<>
-long* IndexedIOTestDataTraits<long*>::value()
+int64_t* IndexedIOTestDataTraits<int64_t*>::value()
 {
-	static long v[10] = {1,2,3,4,5,6,7,8,9,10};
+	static int64_t v[10] = {1,2,3,4,5,6,7,8,9,10};
+	
+	return v;
+} 
+
+/// uint64_t 
+template<>
+std::string IndexedIOTestDataTraits<uint64_t>::name() 
+{
+	return "uint64";
+}
+
+template<>
+uint64_t IndexedIOTestDataTraits<uint64_t>::value()
+{
+	return 999;
+} 
+
+template<>
+std::string IndexedIOTestDataTraits<uint64_t*>::name() 
+{
+	return "uint64Array";
+}
+
+template<>
+uint64_t* IndexedIOTestDataTraits<uint64_t*>::value()
+{
+	static uint64_t v[10] = {1,2,3,4,5,6,7,8,9,10};
 	
 	return v;
 } 

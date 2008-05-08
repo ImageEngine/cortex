@@ -65,12 +65,12 @@ enum TypeId
 	FloatDataTypeId = 22,
 	DoubleDataTypeId = 23,
 	IntDataTypeId = 24,
-	LongDataTypeId = 25,
+	LongDataTypeId = 25, /// Obsolete: LongData has been removed. The typeId remains for compatibility with old files, which now load as IntData
 	UIntDataTypeId = 26,
 	CharDataTypeId = 27,
 	UCharDataTypeId = 28,
 	StringDataTypeId = 29,
-	LongVectorDataTypeId = 30,
+	LongVectorDataTypeId = 30, /// Obsolete: LongVectorData has been removed. The typeId remains for compatibility with old files, which now load as IntVectorData
 	CompoundDataTypeId = 31,
 	V2fDataTypeId = 32,
 	V3fDataTypeId = 33,

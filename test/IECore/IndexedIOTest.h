@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -110,9 +110,22 @@ struct IndexedIOTest
 		{
 			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
 		
-			D v;
-			io->read(IndexedIOTestDataTraits<D>::name(), v );
-			IndexedIOTestDataTraits<D>::check(v);
+			bool exists = true;
+			try
+			{
+				io->ls( IndexedIOTestDataTraits<D>::name() );
+			}
+			catch (...)
+			{
+				exists = false;
+			}
+		
+			if ( exists )
+			{
+				D v;
+				io->read(IndexedIOTestDataTraits<D>::name(), v );
+				IndexedIOTestDataTraits<D>::check(v);
+			}
 		}
 	}
 	
@@ -122,13 +135,25 @@ struct IndexedIOTest
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
 			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
-		
-			D *v = new D[10] ;
-			io->read(IndexedIOTestDataTraits<D*>::name(), v, 10 );
 			
-			IndexedIOTestDataTraits<D*>::check(v);
+			bool exists = true;
+			try
+			{
+				io->ls( IndexedIOTestDataTraits<D>::name() );
+			}
+			catch (...)
+			{
+				exists = false;
+			}
 			
-			delete[] v;
+			if ( exists )
+			{		
+				D *v = new D[10] ;
+				io->read(IndexedIOTestDataTraits<D*>::name(), v, 10 );
+			
+				IndexedIOTestDataTraits<D*>::check(v);
+				delete[] v;				
+			}			
 		}
 	}
 	
@@ -137,7 +162,8 @@ struct IndexedIOTest
 	{
 		assert(io);
 		
-		io->write( IndexedIOTestDataTraits<D>::name(), IndexedIOTestDataTraits<D>::value() ); 
+		io->write( IndexedIOTestDataTraits<D>::name(), IndexedIOTestDataTraits<D>::value() );
+		io->ls( IndexedIOTestDataTraits<D>::name() );
 	}
 	
 	template<typename D>
@@ -146,6 +172,7 @@ struct IndexedIOTest
 		assert(io);
 		
 		io->write( IndexedIOTestDataTraits<D*>::name(), IndexedIOTestDataTraits<D*>::value(), 10 ); 
+		io->ls( IndexedIOTestDataTraits<D*>::name() );
 	}
 	
 	void write(const std::string &filename)
@@ -156,7 +183,8 @@ struct IndexedIOTest
 		write<double>(io);
 		write<half>(io);
 		write<int>(io);
-		write<long>(io);
+		write<int64_t>(io);
+		write<uint64_t>(io);		
 		write<std::string>(io);
 		write<unsigned int>(io);
 		write<char>(io);
@@ -169,7 +197,8 @@ struct IndexedIOTest
 		writeArray<double>(io);
 		writeArray<half>(io);
 		writeArray<int>(io);
-		writeArray<long>(io);
+		writeArray<int64_t>(io);
+		writeArray<uint64_t>(io);		
 		writeArray<std::string>(io);
 		writeArray<unsigned int>(io);
 		writeArray<char>(io);
@@ -194,13 +223,14 @@ struct IndexedIOTestSuite : public boost::unit_test::test_suite
 		static boost::shared_ptr<IndexedIOTest<T> > instance(new IndexedIOTest<T>(filenames));
 		
 		/// Uncomment this line to write out new test data - change architecture first
-		//instance->write("./test/IECore/data/" + extension() + "Files/" + IECore::versionString() + "/osx104.ppc/types." + extension());		
+		instance->write("./test/IECore/data/" + extension() + "Files/" + IECore::versionString() + "/cent5.x86_64/types." + extension());		
 		
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<float>, instance ) );				
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<double>, instance ) );		
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<half>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<int>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<long>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<int64_t>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<uint64_t>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<std::string>, instance ) );								
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<unsigned int>, instance ) );				
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<char>, instance ) );				
@@ -210,7 +240,8 @@ struct IndexedIOTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<double>, instance ) );		
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<half>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<int>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<long>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<int64_t>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<uint64_t>, instance ) );		
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<std::string>, instance ) );								
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<unsigned int>, instance ) );				
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<char>, instance ) );				

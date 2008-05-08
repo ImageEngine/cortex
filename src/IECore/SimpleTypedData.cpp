@@ -52,7 +52,6 @@ IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( BoolData, BoolDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( FloatData, FloatDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( DoubleData, DoubleDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( IntData, IntDataTypeId )
-IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( LongData, LongDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( UIntData, UIntDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( CharData, CharDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( UCharData, UCharDataTypeId )
@@ -191,7 +190,6 @@ template class TypedData<bool>;
 template class TypedData<float>;
 template class TypedData<double>;
 template class TypedData<int>;
-template class TypedData<long>;
 template class TypedData<unsigned int>;
 template class TypedData<char>;
 template class TypedData<unsigned char>;

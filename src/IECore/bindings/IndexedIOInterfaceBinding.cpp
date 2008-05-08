@@ -142,7 +142,7 @@ struct IndexedIOInterfaceHelper
 			case IndexedIO::Int:
 				return readSingle<int>(p, name, entry);
 			case IndexedIO::Long:
-				return readSingle<long>(p, name, entry);
+				return readSingle<int>(p, name, entry);
 			case IndexedIO::String:
 				return readSingle<std::string>(p, name, entry);
 			case IndexedIO::StringArray:
@@ -154,7 +154,7 @@ struct IndexedIOInterfaceHelper
 			case IndexedIO::IntArray:
 				return readArray<int>(p, name, entry);
 			case IndexedIO::LongArray:
-				return readArray<long>(p, name, entry);			
+				return readArray<int>(p, name, entry);			
 			case IndexedIO::UInt:
 				return readSingle<unsigned int>(p, name, entry);
 			case IndexedIO::UIntArray:
@@ -204,7 +204,6 @@ void bindIndexedIOInterface(const char *bindName)
 	void (IndexedIOInterface::*writeFloat)(const IndexedIO::EntryID &, const float &) = &IndexedIOInterface::write;
 	void (IndexedIOInterface::*writeDouble)(const IndexedIO::EntryID &, const double &) = &IndexedIOInterface::write;
 	void (IndexedIOInterface::*writeInt)(const IndexedIO::EntryID &, const int &) = &IndexedIOInterface::write;
-	void (IndexedIOInterface::*writeLong)(const IndexedIO::EntryID &, const long &) = &IndexedIOInterface::write;
 	void (IndexedIOInterface::*writeString)(const IndexedIO::EntryID &, const std::string &) = &IndexedIOInterface::write;
 #if 0	
 	void (IndexedIOInterface::*writeUInt)(const IndexedIO::EntryID &, const unsigned int &) = &IndexedIOInterface::write;
@@ -261,12 +260,10 @@ void bindIndexedIOInterface(const char *bindName)
 		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<float> >)
 		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<double> >)
 		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<int> >)
-		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<long> >)
 		.def("write", &IndexedIOInterfaceHelper::writeVector<std::vector<std::string> >)
 		.def("write", writeFloat)
 		.def("write", writeDouble)
 		.def("write", writeInt)
-		.def("write", writeLong)
 		.def("write", writeString)
 #if 0
 		// We dont really want to bind these because they don't represent natural Python datatypes

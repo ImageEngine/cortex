@@ -139,7 +139,6 @@ IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( HalfVectorData, HalfVectorDat
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( DoubleVectorData, DoubleVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( IntVectorData, IntVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UIntVectorData, UIntVectorDataTypeId )
-IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( LongVectorData, LongVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( CharVectorData, CharVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UCharVectorData, UCharVectorDataTypeId )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( V2fVectorData, V2fVectorDataTypeId, 2 )
@@ -346,7 +345,6 @@ template class TypedData<vector<half> >;
 template class TypedData<vector<double> >;
 template class TypedData<vector<int> >;
 template class TypedData<vector<unsigned int> >;
-template class TypedData<vector<long> >;
 template class TypedData<vector<char> >;
 template class TypedData<vector<unsigned char> >;
 template class TypedData<vector<short> >;

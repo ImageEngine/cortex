@@ -119,10 +119,6 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 			return
 			typename Detail::DespatchTypedData< Functor, IntData, ErrorHandler >
 			::template Func<Enabler>()( boost::static_pointer_cast<IntData>( data ), functor, errorHandler );
-		case LongDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, LongData, ErrorHandler >
-			::template Func<Enabler>()( boost::static_pointer_cast<LongData>( data ), functor, errorHandler );
 		case UIntDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, UIntData, ErrorHandler >
@@ -263,10 +259,6 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 			return
 			typename Detail::DespatchTypedData< Functor, UIntVectorData, ErrorHandler >
 			::template Func<Enabler>()( boost::static_pointer_cast<UIntVectorData>( data ), functor, errorHandler );
-		case LongVectorDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, LongVectorData, ErrorHandler >
-			::template Func<Enabler>()( boost::static_pointer_cast<LongVectorData>( data ), functor, errorHandler );
 		case CharVectorDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, CharVectorData, ErrorHandler >

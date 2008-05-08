@@ -101,12 +101,10 @@ struct TypedDataTestSuite : public boost::unit_test::test_suite
 		addVectorTypedDataTest<std::vector<float> >();		
 		addVectorTypedDataTest<std::vector<int> >();
 		addVectorTypedDataTest<std::vector<double> >();
-		addVectorTypedDataTest<std::vector<long> >();
 		
 		addSimpleTypedDataTest<float>();
 		addSimpleTypedDataTest<double>();
 		addSimpleTypedDataTest<int>();
-		addSimpleTypedDataTest<long>();
 		addSimpleTypedDataTest<unsigned int>();
 		addSimpleTypedDataTest<char>();
 		addSimpleTypedDataTest<unsigned char>();

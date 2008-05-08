@@ -78,24 +78,6 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assertEqual( str( UIntData() ), "0" )
 		self.assertEqual( repr( UIntData() ), "UIntData( 0 )" )
 
-	def testLongData(self):
-		"""Test LongData"""
-		a = LongData()
-		self.assert_(type(a) is LongData)
-		b = LongData(1)
-		c = b.copy()
-		self.assertEqual(b.value, 1)
-		self.assertEqual(long(b), 1)
-		b.value = 2
-		self.assertEqual(b.value, 2)
-		a = LongData(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
-		self.assertEqual( str( LongData() ), "0" )
-		self.assertEqual( repr( LongData() ), "LongData( 0 )" )
-
 	def testFloatData(self):
 		"""Test FloatData"""
 		a = FloatData()
@@ -285,7 +267,7 @@ class BoolDataTest( unittest.TestCase ) :
 	
 		a = BoolData()
 		self.assert_(type(a) is BoolData)
-		b = LongData(True)
+		b = IntData(True)
 		c = b.copy()
 		self.assertEqual(b.value, True)
 		b.value = False

@@ -186,7 +186,6 @@ string str<TYPE>( TYPE &x )																				\
 }				
 
 DEFINENUMERICSTRSPECIALISATION( bool );
-DEFINENUMERICSTRSPECIALISATION( long );
 DEFINENUMERICSTRSPECIALISATION( int );
 DEFINENUMERICSTRSPECIALISATION( unsigned int );
 DEFINENUMERICSTRSPECIALISATION( float );
@@ -215,7 +214,6 @@ string str<TypedData<TYPE> >( TypedData<TYPE> &x )														\
 DEFINETYPEDDATASTRSPECIALISATION( bool );
 DEFINETYPEDDATASTRSPECIALISATION( char );
 DEFINETYPEDDATASTRSPECIALISATION( unsigned char );
-DEFINETYPEDDATASTRSPECIALISATION( long );
 DEFINETYPEDDATASTRSPECIALISATION( int );
 DEFINETYPEDDATASTRSPECIALISATION( unsigned int );
 DEFINETYPEDDATASTRSPECIALISATION( float );
@@ -298,11 +296,6 @@ void bindAllSimpleTypedData()
 	bindNumericMethods( idc );
 	idc.def( "__int__", &getValue<IntData> );
 	implicitly_convertible<IntDataPtr, DataPtr>();
-
-	class_< LongData, LongDataPtr, boost::noncopyable, bases<Data> > ldc = bindSimpleData<LongData>();
-	bindNumericMethods( ldc );
-	ldc.def( "__long__", &getValue<LongData> );
-	implicitly_convertible<LongDataPtr, DataPtr>();
 	
 	class_< UIntData, UIntDataPtr, boost::noncopyable, bases<Data> > uidc = bindSimpleData<UIntData>();
 	bindNumericMethods( uidc );

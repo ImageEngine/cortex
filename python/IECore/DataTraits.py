@@ -60,7 +60,7 @@ def isSimpleDataType(obj):
 	return False
 
 ##	Utility function that recognizes objects that are numeric simple types. That means, 
-#	have one single value on it, and it is numeric. For example, IntData, LongData. But not
+#	have one single value on it, and it is numeric. For example, IntData. But not
 #	IntVectorData, nor CharData which just accepts characters (up to now).
 def isSimpleNumericDataType(obj):
 	if not isinstance(obj, IECore.Data):
@@ -114,7 +114,6 @@ __dataTypesConversionDict = {
 	IECore.BoolData: (bool, True),
 	IECore.IntData: (int, True),
 	IECore.UIntData: (int, False),
-	IECore.LongData: (long, False),
 	IECore.CharData: (str, False),
 	IECore.UCharData: (int, False),
 	IECore.StringData: (str, True),

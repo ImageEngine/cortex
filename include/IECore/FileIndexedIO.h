@@ -78,7 +78,8 @@ class FileIndexedIO : public IndexedIOInterface
 		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength);		
 		void write(const IndexedIO::EntryID &name, const int *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const long *x, unsigned long arrayLength);
+		void write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength);
+		void write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength);		
 		void write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const char *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength);
@@ -89,7 +90,8 @@ class FileIndexedIO : public IndexedIOInterface
 		void write(const IndexedIO::EntryID &name, const double &x);
 		void write(const IndexedIO::EntryID &name, const half &x);		
 		void write(const IndexedIO::EntryID &name, const int &x);
-		void write(const IndexedIO::EntryID &name, const long &x);
+		void write(const IndexedIO::EntryID &name, const int64_t &x);
+		void write(const IndexedIO::EntryID &name, const uint64_t &x);		
 		void write(const IndexedIO::EntryID &name, const std::string &x);
 		void write(const IndexedIO::EntryID &name, const unsigned int &x);
 		void write(const IndexedIO::EntryID &name, const char &x);
@@ -101,7 +103,8 @@ class FileIndexedIO : public IndexedIOInterface
 		void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength);
 		void read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength);		
 		void read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength);
-		void read(const IndexedIO::EntryID &name, long *&x, unsigned long arrayLength);
+		void read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength);
+		void read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength);		
 		void read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength);
 		void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength);
 		void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength);
@@ -112,7 +115,8 @@ class FileIndexedIO : public IndexedIOInterface
 		void read(const IndexedIO::EntryID &name, double &x);
 		void read(const IndexedIO::EntryID &name, half &x);		
 		void read(const IndexedIO::EntryID &name, int &x);
-		void read(const IndexedIO::EntryID &name, long &x);
+		void read(const IndexedIO::EntryID &name, int64_t &x);
+		void read(const IndexedIO::EntryID &name, uint64_t &x);		
 		void read(const IndexedIO::EntryID &name, std::string &x);
 		void read(const IndexedIO::EntryID &name, unsigned int &x);
 		void read(const IndexedIO::EntryID &name, char &x);

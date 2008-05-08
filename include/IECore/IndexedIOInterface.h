@@ -37,6 +37,7 @@
 
 #include <string>
 #include <map>
+#include <stdint.h>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
@@ -141,7 +142,13 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const long *x, unsigned long arrayLength) = 0;			
+		virtual void write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength) = 0;			
+		
+		/// Create a new file containing the specified unsigned long array contents
+		/// \param name The name of the file to be written
+		/// \param x The data to write
+		/// \param arrayLength The number of elements in the array
+		virtual void write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength) = 0;					
 		
 		/// Create a new file containing the specified unsigned int array contents
 		/// \param name The name of the file to be written
@@ -202,7 +209,12 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// Create a new file containing the specified long
 		/// \param name The name of the file to be written
 		/// \param x The data to write
-		virtual void write(const IndexedIO::EntryID &name, const long &x) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const int64_t &x) = 0;
+		
+		/// Create a new file containing the specified long
+		/// \param name The name of the file to be written
+		/// \param x The data to write
+		virtual void write(const IndexedIO::EntryID &name, const uint64_t &x) = 0;
 		
 		/// Create a new file containing the specified string
 		/// \param name The name of the file to be written
@@ -262,7 +274,13 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, long *&x, unsigned long arrayLength) = 0;
+		virtual void read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength) = 0;
+		
+		/// Read a long array from an existing file.
+		/// \param name The name of the file to be read
+		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
+		/// \param arrayLength The number of elements in the array
+		virtual void read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength) = 0;
 		
 		/// Read an unsigned int array from an existing file.
 		/// \param name The name of the file to be read
@@ -323,7 +341,12 @@ class IndexedIOInterface : public RefCounted, private boost::noncopyable
 		/// Read a long from an existing file
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, long &x) = 0;
+		virtual void read(const IndexedIO::EntryID &name, int64_t &x) = 0;
+		
+		/// Read a long from an existing file
+		/// \param name The name of the file to be read
+		/// \param x Returns the data read.
+		virtual void read(const IndexedIO::EntryID &name, uint64_t &x) = 0;
 		
 		/// Read a string from an existing file
 		/// \param name The name of the file to be read

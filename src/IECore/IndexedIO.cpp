@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -78,6 +78,8 @@ unsigned long Entry::arrayLength() const
 		case UCharArray:
 		case ShortArray:
 		case UShortArray:
+		case Int64Array:
+		case UInt64Array:		
 			return m_arrayLength;	
 		default:
 			throw IOException(m_ID);			
