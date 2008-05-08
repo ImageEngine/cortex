@@ -189,7 +189,11 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		class TypeDescription
 		{
 			public :
+				/// Registers the object using its static typeId and static typename
 				TypeDescription();
+				
+				/// Registers the object using a specified typeId and typename
+				TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName );
 			private :
 				static ObjectPtr creator();
 		};

@@ -61,6 +61,13 @@ Object::TypeDescription<T>::TypeDescription()
 }
 
 template<class T>
+Object::TypeDescription<T>::TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName )
+{
+	Object::registerType( alternateTypeId, alternateTypeName, creator );
+}
+
+
+template<class T>
 ObjectPtr Object::TypeDescription<T>::creator()
 {
 	return new T;
