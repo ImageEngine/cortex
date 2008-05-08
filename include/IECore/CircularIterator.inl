@@ -157,7 +157,7 @@ bool CircularIterator<Iterator, Container>::operator!=( const BaseIterator &rhs 
 }
 
 template<typename Iterator, typename Container>
-CircularIterator<Iterator, Container>::operator BaseIterator() const
+CircularIterator<Iterator, Container>::operator typename CircularIterator<Iterator, Container>::BaseIterator() const
 {
 	return m_it;
 }
