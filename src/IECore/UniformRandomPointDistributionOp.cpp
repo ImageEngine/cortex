@@ -68,6 +68,25 @@ UniformRandomPointDistributionOp::UniformRandomPointDistributionOp()
 		)
 	)
 {
+	constructCommon();
+}
+
+UniformRandomPointDistributionOp::UniformRandomPointDistributionOp( const std::string &name, const std::string &description )
+	: Op(
+		name,
+		description,
+		new PointsPrimitiveParameter(
+			"result",
+			"Resulting points distributed over mesh.",
+			new PointsPrimitive()
+		)
+	)
+{
+	constructCommon();
+}
+
+void UniformRandomPointDistributionOp::constructCommon()
+{
 	m_meshParameter = new MeshPrimitiveParameter(
 		"mesh",
 		"The mesh to distribute points over.",
@@ -99,6 +118,8 @@ UniformRandomPointDistributionOp::UniformRandomPointDistributionOp()
 	parameters()->addParameter( m_seedParameter );	
 	parameters()->addParameter( m_addSTParameter );	
 }
+
+
 
 UniformRandomPointDistributionOp::~UniformRandomPointDistributionOp()
 {
@@ -144,17 +165,24 @@ ConstBoolParameterPtr UniformRandomPointDistributionOp::addSTParameter() const
 	return m_addSTParameter;
 }
 
+float UniformRandomPointDistributionOp::density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
+{
+	return 1.0f;
+}
+
 struct UniformRandomPointDistributionOp::DistributeFn
 {
 	typedef PointsPrimitivePtr ReturnType;
 	
+	ConstUniformRandomPointDistributionOpPtr m_op;
 	ConstMeshPrimitivePtr m_mesh;
 	const int m_numPoints;	
 	const int m_seed;
 	FloatVectorDataPtr m_sData, m_tData;
+	bool m_addST;
 	
-	DistributeFn( ConstMeshPrimitivePtr mesh, int numPoints, int seed, FloatVectorDataPtr sData, FloatVectorDataPtr tData ) 
-	: m_mesh( mesh ), m_numPoints( numPoints ), m_seed( seed ), m_sData( sData ), m_tData( tData )
+	DistributeFn( UniformRandomPointDistributionOpPtr op, ConstMeshPrimitivePtr mesh, int numPoints, int seed, FloatVectorDataPtr sData, FloatVectorDataPtr tData, bool addST ) 
+	: m_op( op ), m_mesh( mesh ), m_numPoints( numPoints ), m_seed( seed ), m_sData( sData ), m_tData( tData ), m_addST( addST )
 	{
 		assert( m_mesh );
 	}
@@ -206,27 +234,41 @@ struct UniformRandomPointDistributionOp::DistributeFn
 		points->variables.insert( PrimitiveVariableMap::value_type( "P", PrimitiveVariable( PrimitiveVariable::Vertex, positions ) ) );
 		
 		FloatVectorDataPtr sData = 0, tData = 0;
-		if ( m_sData )
+		if ( m_addST )
 		{
 			sData = new FloatVectorData();
-			points->variables.insert( PrimitiveVariableMap::value_type( "s", PrimitiveVariable( PrimitiveVariable::Vertex, sData ) ) );
+			points->variables.insert( PrimitiveVariableMap::value_type( "s", PrimitiveVariable( PrimitiveVariable::Vertex, sData ) ) );			
+				
+			tData = new FloatVectorData();
+			points->variables.insert( PrimitiveVariableMap::value_type( "t", PrimitiveVariable( PrimitiveVariable::Vertex, tData ) ) );			
 			
 			assert( sData );
-		}	
-		
-		if ( m_tData )
-		{
-			tData = new FloatVectorData();
-			points->variables.insert( PrimitiveVariableMap::value_type( "t", PrimitiveVariable( PrimitiveVariable::Vertex, tData ) ) );
-			
 			assert( tData );
 		}	
 		
 		Rand48 generator( m_seed );
 
-		points->setNumPoints( m_numPoints );	
-		for ( int i = 0; i < m_numPoints; i++ )
-		{
+		points->setNumPoints( m_numPoints );
+		
+		int i = 0;
+		int numTrialsSinceLastPoint = 0;
+		while ( i < m_numPoints )
+		{	
+			numTrialsSinceLastPoint ++;
+			
+			/// Check every million trials if we actually emitted anything, to ensure we don't go into
+			/// an infinite loop (e.g. if density returns 0.0)
+			if ( numTrialsSinceLastPoint % 1000000 == 0 )
+			{
+				if ( (float)i / (float)numTrialsSinceLastPoint  < 1.e-10 )
+				{
+					/// \todo Warn
+					
+					points->setNumPoints( positions->readable().size() );					
+					return points;
+				}
+			}
+			
 			/// Pick a triangle, weighted by its area
 			ProbabilityVector::iterator probabilityIt = lower_bound( cummulativeProbabilities.begin(), cummulativeProbabilities.end(), generator.nextf() );		
 			ProbabilityVector::size_type triangleIndex = std::distance( cummulativeProbabilities.begin(), probabilityIt );
@@ -243,29 +285,49 @@ struct UniformRandomPointDistributionOp::DistributeFn
 			V3f bary = barycentricRand<V3f, Rand48>( generator );
 			
 			/// Add the point to the primitive
-			positions->writable().push_back( p0*bary.x + p1*bary.y + p2*bary.z );
+			V3f p = p0*bary.x + p1*bary.y + p2*bary.z;
 			
+			
+			float s = 0.0f;
 			if ( m_sData )
 			{
-				assert( sData );
-				
 				const float &s0 = m_sData->readable()[ v0 ];
 				const float &s1 = m_sData->readable()[ v1 ];
 				const float &s2 = m_sData->readable()[ v2 ];
 				
-				sData->writable().push_back( s0*bary.x + s1*bary.y + s2*bary.z );	
+				s = s0*bary.x + s1*bary.y + s2*bary.z;	
 			}
 			
+			float t = 0.0f;
 			if ( m_tData )
 			{
-				assert( tData );
-				
 				const float &t0 = m_tData->readable()[ v0 ];
 				const float &t1 = m_tData->readable()[ v1 ];
 				const float &t2 = m_tData->readable()[ v2 ];
 				
-				tData->writable().push_back( t0*bary.x + t1*bary.y + t2*bary.z );	
-			}											
+				t = t0*bary.x + t1*bary.y + t2*bary.z;	
+			}
+			
+			float d = m_op->density( m_mesh, p, Imath::V2f( s, t ) );
+			assert( d >= 0.0f );
+			assert( d <= 1.0f );			
+			
+			if ( generator.nextf() <= d )
+			{
+				positions->writable().push_back( p );
+				
+				if ( m_addST )
+				{
+					assert( sData );
+					assert( tData );
+					
+					sData->writable().push_back( s );
+					tData->writable().push_back( t );					
+				}
+				
+				i ++;
+				numTrialsSinceLastPoint = 0;
+			}						
 		}
 
 		return points;
@@ -298,35 +360,23 @@ ObjectPtr UniformRandomPointDistributionOp::doOperation( ConstCompoundObjectPtr 
 	
 	FloatVectorDataPtr sData = 0, tData = 0;
 	
-	if ( addST )
+	PrimitiveVariableMap::const_iterator sIt = mesh->variables.find("s");
+	if ( sIt != mesh->variables.end() )
 	{
-		PrimitiveVariableMap::const_iterator sIt = mesh->variables.find("s");
-		if ( sIt == mesh->variables.end() )
-		{
-			throw InvalidArgumentException( "blah" );
-		}
-		PrimitiveVariableMap::const_iterator tIt = mesh->variables.find("t");
-		if ( tIt == mesh->variables.end() )
-		{
-			throw InvalidArgumentException( "blah" );
-		}
-		
-		sData = runTimeCast<FloatVectorData>( sIt->second.data );
-		if ( !sData )
-		{
-			throw InvalidArgumentException( "blah" );
-		}
-		
-		tData = runTimeCast<FloatVectorData>( tIt->second.data );		
-		if ( !tData )
-		{
-			throw InvalidArgumentException( "blah" );
-		}
-		
-		assert( sData );
-		assert( tData );		
+		sData = runTimeCast<FloatVectorData>( sIt->second.data );	
+	}
+
+	PrimitiveVariableMap::const_iterator tIt = mesh->variables.find("t");
+	if ( tIt != mesh->variables.end() )
+	{
+		tData = runTimeCast<FloatVectorData>( tIt->second.data );	
+	}	
+	
+	if ( addST && ( !sData || !tData ) )
+	{
+		throw InvalidArgumentException( "blah" );
 	}
 	
-	DistributeFn fn( mesh, m_numPointsParameter->getNumericValue(), m_seedParameter->getNumericValue(), sData, tData );
+	DistributeFn fn( this, mesh, m_numPointsParameter->getNumericValue(), m_seedParameter->getNumericValue(), sData, tData, addST );
 	return despatchTypedData< DistributeFn, TypeTraits::IsVec3VectorTypedData, DistributeFn::ErrorHandler >( mesh->variables["P"].data, fn );		
 }

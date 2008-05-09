@@ -40,6 +40,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -47,10 +48,48 @@ using namespace boost::python;
 namespace IECore
 {
 
+
+class UniformRandomPointDistributionOpWrap : 
+	public UniformRandomPointDistributionOp, public Wrapper<UniformRandomPointDistributionOp>
+{
+	public :
+
+		IE_CORE_DECLAREMEMBERPTR( UniformRandomPointDistributionOpWrap );
+				
+		UniformRandomPointDistributionOpWrap( PyObject *self ) : UniformRandomPointDistributionOp(), Wrapper<UniformRandomPointDistributionOp>( self, this )
+		{
+		}
+		
+		UniformRandomPointDistributionOpWrap( PyObject *self, const std::string &name, const std::string &description ) : UniformRandomPointDistributionOp( name, description ), Wrapper<UniformRandomPointDistributionOp>( self, this )
+		{
+		}
+		
+		virtual ~UniformRandomPointDistributionOpWrap()
+		{
+		}
+		
+		virtual float density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
+		{
+			override o = this->get_override( "density" );
+			if( o )
+			{
+				return o( mesh, point, uv );
+			}
+			else
+			{
+				return UniformRandomPointDistributionOp::density( mesh, point, uv );
+			}
+		};
+
+};
+
 void bindUniformRandomPointDistributionOp()
 {
-	typedef class_< UniformRandomPointDistributionOp, UniformRandomPointDistributionOpPtr, boost::noncopyable, bases<Op> > UniformRandomPointDistributionOpPyClass;
-	UniformRandomPointDistributionOpPyClass( "UniformRandomPointDistributionOp" )
+	typedef class_< UniformRandomPointDistributionOp, UniformRandomPointDistributionOpWrap::Ptr, boost::noncopyable, bases<Op> > UniformRandomPointDistributionOpPyClass;
+	UniformRandomPointDistributionOpPyClass( "UniformRandomPointDistributionOp", no_init )
+		.def( init<>() )
+		.def( init< const std::string &, const std::string &>() )
+		.def( "density", &UniformRandomPointDistributionOpWrap::density )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(UniformRandomPointDistributionOp)
 	;
 	

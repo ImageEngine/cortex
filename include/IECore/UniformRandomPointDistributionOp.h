@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_UUNIFORMRANDOMPOINTDISTRIBUTIONOP_H
-#define IE_CORE_UUNIFORMRANDOMPOINTDISTRIBUTIONOP_H
+#ifndef IE_CORE_UNIFORMRANDOMPOINTDISTRIBUTIONOP_H
+#define IE_CORE_UNIFORMRANDOMPOINTDISTRIBUTIONOP_H
 
 #include "IECore/Op.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/MeshPrimitive.h"
 #include "IECore/TypedParameter.h"
 #include "IECore/TypedObjectParameter.h"
 
@@ -71,6 +72,14 @@ class UniformRandomPointDistributionOp : public Op
 		
 	protected :
 	
+		void constructCommon();
+	
+		UniformRandomPointDistributionOp( const std::string &name, const std::string &description );
+	
+		/// Derived classes can override this method and return a number in the range [0,1] defining the
+		/// required density at the given point.
+		virtual float density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const;
+	
 		struct DistributeFn;
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
@@ -88,4 +97,4 @@ IE_CORE_DECLAREPTR( UniformRandomPointDistributionOp );
 
 } // namespace IECore
 
-#endif // IE_CORE_UUNIFORMRANDOMPOINTDISTRIBUTIONOP_H
+#endif // IE_CORE_UNIFORMRANDOMPOINTDISTRIBUTIONOP_H
