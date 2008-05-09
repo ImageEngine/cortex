@@ -955,7 +955,6 @@ void FileIndexedIO::Node::write( std::ostream &f )
 	
 	Imf::Int64 id = m_idx->m_stringCache.find( m_entry.id() );
 	writeLittleEndian<Imf::Int64>( f, id );
-
 	if ( m_entry.entryType() == IndexedIO::File )
 	{
 		t = m_entry.dataType();			
@@ -1170,7 +1169,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		
 		if (! m_device->is_open() )
 		{
-			throw IOException(filename);
+			throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for writing" );
 		}
 		
 		m_stream = new FilteredStream();
@@ -1188,7 +1187,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		
 			if (! m_device->is_open() )
 			{
-				throw IOException(filename);
+				throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for append" );
 			}
 			
 			m_stream = new FilteredStream();
@@ -1204,7 +1203,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		
 			if (! m_device->is_open() )
 			{
-				throw IOException(filename);
+				throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for read " );
 			}
 			
 			m_stream = new FilteredStream();
@@ -1222,7 +1221,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 			}
 			catch (...)
 			{
-				throw IOException(filename);
+				throw IOException( "FileIndexedIO: Caught error reading index in file '" + filename + "'" );
 			}
 		}
 	}
@@ -1233,7 +1232,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		
 		if (! m_device->is_open() )
 		{
-			throw IOException(filename);
+			throw IOException( "FileIndexedIO: Cannot open file '" + filename + "' for read" );
 		}
 		
 		m_stream = new FilteredStream();
@@ -1251,7 +1250,7 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		} 
 		catch (...)
 		{
-			throw IOException(filename);
+			throw IOException( "FileIndexedIO: Caught error while reading index in '" + filename + "'");
 		}
 	}
 
@@ -1376,7 +1375,7 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryID &
 	{
 		if(!exists(m_currentDirectory.fullPath(), IndexedIO::Directory))
 		{
-			throw IOException(filename);
+			throw IOException( "FileIndexedIO: Cannot find directory '" + m_currentDirectory.fullPath() + "' in '" + filename + "'" );
 		}
 	}
 	else
@@ -1488,7 +1487,7 @@ void FileIndexedIO::chdir(const IndexedIO::EntryID &name)
 	
 	if (!found || node->m_entry.entryType() != IndexedIO::Directory)
 	{
-		throw IOException(name);
+		throw IOException( "FileIndexedIO: Entry not found '" + m_currentDirectory.fullPath() + "/" +name + "'" );
 	}
 
 	m_currentDirectory.append(name);
@@ -1535,7 +1534,7 @@ unsigned long FileIndexedIO::rm(const IndexedIO::EntryID &name, bool throwIfNonE
 	{
 		if (throwIfNonExistent)
 		{
-			throw IOException(name);
+			throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
 		}
 		else
 		{
@@ -1590,7 +1589,7 @@ IndexedIO::Entry FileIndexedIO::ls(const IndexedIO::EntryID &name)
 	
 	if (!found)
 	{
-		throw IOException(name);
+		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
 	}
 	
 	return node->m_entry;
@@ -1624,7 +1623,7 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned l
 	}
 	else
 	{
-		throw IOException( name );
+		throw IOException( "FileIndexedIO: Could not insert node '" + name + "' into index" );
 	}
 }
 
@@ -1655,7 +1654,7 @@ void FileIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 	}
 	else
 	{
-		throw IOException( name );
+		throw IOException( "FileIndexedIO: Could not insert node '" + name + "' into index" );
 	}
 }
 
@@ -1670,7 +1669,7 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long ar
 	
 	if (!found || node->m_entry.entryType() != IndexedIO::File)
 	{
-		throw IOException(name);
+		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
 	}
 	
 	m_indexedFile->seekg( node );
@@ -1694,7 +1693,7 @@ void FileIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 	
 	if (!found || node->m_entry.entryType() != IndexedIO::File)
 	{
-		throw IOException(name);
+		throw IOException( "FileIndexedIO: Entry not found '" + name + "'" );
 	}
 
 	m_indexedFile->seekg( node );

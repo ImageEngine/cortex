@@ -62,7 +62,7 @@ DataType Entry::dataType() const
 {
 	if (m_entryType == Directory)
 	{
-		throw IOException(m_ID);
+		throw IOException( "IndexedIO Entry '" + m_ID + "' has no data type - it is a directory" );
 	}
 	
 	return m_dataType;
@@ -100,7 +100,7 @@ unsigned long Entry::arrayLength() const
 {
 	if ( !isArray() )
 	{
-		throw IOException(m_ID);
+		throw IOException( "IndexedIO Entry '" + m_ID + "' is not an array" );
 	}
 	
 	return m_arrayLength;	
