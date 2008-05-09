@@ -260,6 +260,7 @@ enum TypeId
 	UInt64DataTypeId = 217,
 	Int64VectorDataTypeId = 218,
 	UInt64VectorDataTypeId = 219,
+	MappedRandomPointDistributionOpTypeId = 220,	
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

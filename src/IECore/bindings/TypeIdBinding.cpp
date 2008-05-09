@@ -258,6 +258,7 @@ void bindTypeId()
 		.value("UInt64Data", UInt64DataTypeId )
 		.value("Int64VectorData", Int64VectorDataTypeId )
 		.value("UInt64VectorData", UInt64VectorDataTypeId )
+		.value("MappedRandomPointDistributionOp", MappedRandomPointDistributionOpTypeId )
 	;
 }
 
