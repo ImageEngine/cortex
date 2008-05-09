@@ -290,7 +290,7 @@ class FileIndexedIO::Index : public RefCounted
 		static const Imf::Int64 g_unversionedMagicNumber = 0x0B00B1E5;
 		static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
 		
-		static const Imf::Int64 g_currentVersion = 2;
+		static const Imf::Int64 g_currentVersion = 3;
 		
 		Imf::Int64 m_version;		
 	
@@ -935,7 +935,7 @@ void FileIndexedIO::Node::addChild( NodePtr c )
 {
 	if (c->m_parent)
 	{
-		throw IOException("Node already has parent!");
+		throw IOException("FileIndexedIO: Node already has parent!");
 	}
 		
 #ifndef NDEBUG			
@@ -958,9 +958,13 @@ void FileIndexedIO::Node::write( std::ostream &f )
 
 	if ( m_entry.entryType() == IndexedIO::File )
 	{
-		t = m_entry.m_dataType;			
+		t = m_entry.dataType();			
 		f.write( &t, sizeof(char) );
-		writeLittleEndian<Imf::Int64>(f, m_entry.m_arrayLength );
+		
+		if ( m_entry.isArray() )
+		{
+			writeLittleEndian<Imf::Int64>( f, m_entry.arrayLength() );
+		}		
 	}
 								
 	writeLittleEndian<Imf::Int64>(f, m_id);
@@ -987,14 +991,18 @@ void FileIndexedIO::Node::read( std::istream &f )
 	assert( m_idx );
 	
 	char t;	
-	f.read( &t, sizeof(char) );		
-	m_entry.m_entryType = (IndexedIO::EntryType)t;
+	f.read( &t, sizeof(char) );	
+	
+	std::string id;	
+	IndexedIO::EntryType entryType = (IndexedIO::EntryType)t;
+	IndexedIO::DataType dataType = IndexedIO::Invalid;
+	Imf::Int64 arrayLength = 0;
 
 	if (m_idx->m_version >= 1)
 	{
 		Imf::Int64 stringId;
 		readLittleEndian<Imf::Int64>(f, stringId);		
-		m_entry.m_ID = m_idx->m_stringCache.find( stringId );	
+		id = m_idx->m_stringCache.find( stringId );	
 	}
 	else
 	{
@@ -1004,25 +1012,23 @@ void FileIndexedIO::Node::read( std::istream &f )
 		f.read( s, entrySize );
 		s[entrySize] = '\0';
 
-		m_entry.m_ID = s;
+		id = s;
 		delete[] s;
 	}
 
-	if ( m_entry.m_entryType == IndexedIO::File || m_idx->m_version < 2 )
+	if ( entryType == IndexedIO::File || m_idx->m_version < 2 )
 	{
 		f.read( &t, sizeof(char) );		
-		m_entry.m_dataType = (IndexedIO::DataType)t;
-	
-		Imf::Int64 arrayLength;
-		readLittleEndian<Imf::Int64>( f, arrayLength );
-		m_entry.m_arrayLength = arrayLength;			
-	}
-	else
-	{
-		m_entry.m_dataType = IndexedIO::Invalid;
-		m_entry.m_arrayLength = 0;
-	}
+		dataType = (IndexedIO::DataType)t;
 		
+		if ( IndexedIO::Entry::isArray( dataType ) || m_idx->m_version < 3 )
+		{
+			readLittleEndian<Imf::Int64>( f, arrayLength );
+		}
+	}
+	
+	m_entry = IndexedIO::Entry( id, entryType, dataType, static_cast<unsigned long>( arrayLength ) );
+			
 	readLittleEndian<Imf::Int64>(f, m_id );
 
 	m_idx->m_indexToNodeMap[m_id] = this;
@@ -1037,7 +1043,7 @@ void FileIndexedIO::Node::read( std::istream &f )
 	Index::IndexToNodeMap::iterator it = m_idx->m_indexToNodeMap.find( parentId );
 	if (it == m_idx->m_indexToNodeMap.end())
 	{		
-		throw IOException("parentId not found");
+		throw IOException("FileIndexedIO: parentId not found");
 	}
 
 	NodePtr parent = it->second ;
@@ -1047,10 +1053,10 @@ void FileIndexedIO::Node::read( std::istream &f )
 	} 
 	else if (m_id != 0)
 	{
-		throw IOException("Non-root node has no parent");
+		throw IOException("FileIndexedIO: Non-root node has no parent");
 	}
 	
-	if ( m_entry.m_entryType == IndexedIO::File || m_idx->m_version < 2 )
+	if ( m_entry.entryType() == IndexedIO::File || m_idx->m_version < 2 )
 	{
 		readLittleEndian<Imf::Int64>(f, m_offset );
 		readLittleEndian<Imf::Int64>(f, m_size );

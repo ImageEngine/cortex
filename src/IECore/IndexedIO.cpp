@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECore/Exception.h"
 #include "IECore/IndexedIO.h"
 
@@ -46,7 +48,7 @@ Entry::Entry( const EntryID &id, EntryType eType, DataType dType, unsigned long 
 {
 }
 
-EntryID Entry::id() const
+const EntryID &Entry::id() const
 {
 	return m_ID;
 }
@@ -59,17 +61,25 @@ EntryType Entry::entryType() const
 DataType Entry::dataType() const
 {
 	if (m_entryType == Directory)
+	{
 		throw IOException(m_ID);
+	}
 	
 	return m_dataType;
 }
 
-unsigned long Entry::arrayLength() const
+bool Entry::isArray() const
 {
-	switch( dataType() )
+	return isArray( m_dataType );
+}
+
+bool Entry::isArray( DataType dType )
+{
+	switch( dType )
 	{
 		case FloatArray:
 		case DoubleArray:
+		case HalfArray:
 		case IntArray:
 		case LongArray:
 		case StringArray:
@@ -79,9 +89,19 @@ unsigned long Entry::arrayLength() const
 		case ShortArray:
 		case UShortArray:
 		case Int64Array:
-		case UInt64Array:		
-			return m_arrayLength;	
+		case UInt64Array:
+			return true;
 		default:
-			throw IOException(m_ID);			
+			return false;
 	}
+}
+
+unsigned long Entry::arrayLength() const
+{
+	if ( !isArray() )
+	{
+		throw IOException(m_ID);
+	}
+	
+	return m_arrayLength;	
 }

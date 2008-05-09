@@ -302,7 +302,7 @@ void bindFileIndexedIO(const char *bindName)
 void bindIndexedIOEntry(const char *bindName)
 {
 	class_< IndexedIO::Entry>(bindName, no_init)		
-		.def("id", &IndexedIO::Entry::id)
+		.def("id", &IndexedIO::Entry::id, return_value_policy<copy_const_reference>())
 		.def("entryType", &IndexedIO::Entry::entryType)		
 		.def("dataType", &IndexedIO::Entry::dataType)
 		.def("arrayLength", &IndexedIO::Entry::arrayLength)
