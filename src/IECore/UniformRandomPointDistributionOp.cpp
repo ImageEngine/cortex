@@ -291,9 +291,9 @@ struct UniformRandomPointDistributionOp::DistributeFn
 			float s = 0.0f;
 			if ( m_sData )
 			{
-				const float &s0 = m_sData->readable()[ v0 ];
-				const float &s1 = m_sData->readable()[ v1 ];
-				const float &s2 = m_sData->readable()[ v2 ];
+				const float &s0 = m_sData->readable()[ triangleIndex*3 + 0 ];
+				const float &s1 = m_sData->readable()[ triangleIndex*3 + 1 ];
+				const float &s2 = m_sData->readable()[ triangleIndex*3 + 2 ];
 				
 				s = s0*bary.x + s1*bary.y + s2*bary.z;	
 			}
@@ -301,9 +301,9 @@ struct UniformRandomPointDistributionOp::DistributeFn
 			float t = 0.0f;
 			if ( m_tData )
 			{
-				const float &t0 = m_tData->readable()[ v0 ];
-				const float &t1 = m_tData->readable()[ v1 ];
-				const float &t2 = m_tData->readable()[ v2 ];
+				const float &t0 = m_tData->readable()[ triangleIndex*3 + 0 ];
+				const float &t1 = m_tData->readable()[ triangleIndex*3 + 1 ];
+				const float &t2 = m_tData->readable()[ triangleIndex*3 + 2 ];
 				
 				t = t0*bary.x + t1*bary.y + t2*bary.z;	
 			}
@@ -363,12 +363,20 @@ ObjectPtr UniformRandomPointDistributionOp::doOperation( ConstCompoundObjectPtr 
 	PrimitiveVariableMap::const_iterator sIt = mesh->variables.find("s");
 	if ( sIt != mesh->variables.end() )
 	{
+		if ( sIt->second.interpolation != PrimitiveVariable::FaceVarying )
+		{
+			throw InvalidArgumentException( "UniformRandomPointDistributionOp: Primitive variable 's' must have facevarying interpolation" );
+		}
 		sData = runTimeCast<FloatVectorData>( sIt->second.data );	
 	}
 
 	PrimitiveVariableMap::const_iterator tIt = mesh->variables.find("t");
 	if ( tIt != mesh->variables.end() )
 	{
+		if ( tIt->second.interpolation != PrimitiveVariable::FaceVarying )
+		{
+			throw InvalidArgumentException( "UniformRandomPointDistributionOp: Primitive variable 't' must have facevarying interpolation" );
+		}
 		tData = runTimeCast<FloatVectorData>( tIt->second.data );	
 	}	
 	
