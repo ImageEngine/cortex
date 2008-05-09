@@ -36,6 +36,7 @@
 #define IE_CORE_DATACONVERSIONTEST_H
 
 #include <cassert>
+#include <limits.h>
 
 #include "boost/test/unit_test.hpp"
 #include "boost/test/floating_point_comparison.hpp"
@@ -101,7 +102,7 @@ struct DataConversionTest
 		boost::mt19937 generator( seed );
 						
 		/// Create a random number generator within this range
-		boost::uniform_real<> uni_dist( Imath::limits<F>::min(), Imath::limits<F>::max() );		
+		boost::uniform_real<> uni_dist( std::numeric_limits<F>::min(), std::numeric_limits<F>::max() );		
 		boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni(generator, uni_dist);
 	
 		const int numTests = 100;

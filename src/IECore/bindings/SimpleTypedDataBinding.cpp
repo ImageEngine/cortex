@@ -33,6 +33,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <boost/python.hpp>
+
+#include <limits.h>
+
 #include <boost/python/make_constructor.hpp>
 
 #include "OpenEXR/ImathLimits.h"
@@ -115,13 +118,13 @@ int cmp( StringData &x, StringData &y )
 template<class T>
 static typename T::ValueType minValue( T &x )
 {
-	return Imath::limits<typename T::ValueType>::min();
+	return std::numeric_limits<typename T::ValueType>::min();
 }
 
 template<class T>
 static typename T::ValueType maxValue( T & x)
 {
-	return Imath::limits<typename T::ValueType>::max();
+	return std::numeric_limits<typename T::ValueType>::max();
 }
 
 template<>
