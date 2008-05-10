@@ -144,6 +144,7 @@ from PrimitiveTest import *
 from MeshMergeOpTest import *
 from UniformRandomPointDistributionOpTest import *
 from UnicodeToStringTest import *
+from MappedRandomPointDistributionOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
