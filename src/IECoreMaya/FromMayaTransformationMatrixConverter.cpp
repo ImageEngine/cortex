@@ -39,14 +39,23 @@
 
 #include "maya/MFn.h"
 #include "maya/MFnMatrixData.h"
+#include "maya/MFnTransform.h"
 
 using namespace IECoreMaya;
 using namespace IECore;
 using namespace std;
 using namespace Imath;
 
-template<typename T>
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter<T> > FromMayaTransformationMatrixConverter<T>::m_description( MFn::kMatrixData, T::staticTypeId() );
+static const MFn::Type fromTypes[] = { MFn::kMatrixData, MFn::kTransform, MFn::kInvalid };
+
+static const IECore::TypeId toTypesf[] = { TransformationMatrixfData::staticTypeId(), InvalidTypeId };
+static const IECore::TypeId toTypesd[] = { TransformationMatrixdData::staticTypeId(), InvalidTypeId };
+
+template<>
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter<TransformationMatrixdData> > FromMayaTransformationMatrixConverter<TransformationMatrixdData>::m_description( fromTypes, toTypesd );
+
+template<>
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter<TransformationMatrixfData> > FromMayaTransformationMatrixConverter<TransformationMatrixfData>::m_description( fromTypes, toTypesf );
 
 template<typename T>
 FromMayaTransformationMatrixConverter<T>::FromMayaTransformationMatrixConverter( const MObject &object )
@@ -57,15 +66,22 @@ FromMayaTransformationMatrixConverter<T>::FromMayaTransformationMatrixConverter(
 template<typename T>
 IECore::ObjectPtr FromMayaTransformationMatrixConverter<T>::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
+	MStatus s;
 	MFnMatrixData fnMatrixData( object );
-	if( !fnMatrixData.hasObj( object ) )
+	if( fnMatrixData.hasObj( object ) )
 	{
-		return 0;
+		MTransformationMatrix t = fnMatrixData.transformation();
+		typename T::ValueType tt = IECore::convert<typename T::ValueType>( t );
+		return new T( tt );
 	}
-
-	MTransformationMatrix t = fnMatrixData.transformation();
-	typename T::ValueType tt = IECore::convert<typename T::ValueType>( t );
-	return new T( tt );
+	MFnTransform fnTranf( object, &s );
+	if (s)
+	{
+		MTransformationMatrix t = fnTranf.transformation();
+		typename T::ValueType tt = IECore::convert<typename T::ValueType>( t );
+		return new T( tt );
+	}
+	return 0;
 }
 
 template class FromMayaTransformationMatrixConverter<TransformationMatrixfData>;

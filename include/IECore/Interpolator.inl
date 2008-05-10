@@ -51,7 +51,7 @@ struct LinearInterpolator< std::vector<T> >
 			const std::vector<T> &y1,
 			double x, 
 			std::vector<T> &result) const
-	{		
+	{
 		unsigned size =  y0.size();
 		assert(y1.size() == size);
 		
@@ -75,7 +75,7 @@ struct LinearInterpolator< TypedData< T > >
 			const typename TypedData< T >::Ptr &y1,
 			double x, 
 			typename TypedData< T >::Ptr &result) const
-	{		
+	{
 		LinearInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
 	}
 };
@@ -98,7 +98,7 @@ struct CosineInterpolator< std::vector<T> >
 			const std::vector<T> &y1,
 			double x, 
 			std::vector<T> &result) const
-	{		
+	{
 		unsigned size =  y0.size();
 		assert(y1.size() == size);
 		

@@ -46,7 +46,7 @@ class TransformationMatrixfTest(unittest.TestCase):
 		"""Test TransformationMatrixf constructors"""
 		a = TransformationMatrixf()
 		self.assertEqual( a.transform, M44f() )
-		a = TransformationMatrixf( V3f( 2, 2, 2 ), Quatf(), V3f( 1, 0, 0 ) )
+		a = TransformationMatrixf( V3f( 2, 2, 2 ), Eulerf(), V3f( 1, 0, 0 ) )
 		self.assert_( a.transform.equalWithAbsError( M44f().scale( V3f(2,2,2) ) * M44f().translate( V3f(1,0,0) ), 0.01) )
 		b = TransformationMatrixf( a )
 		self.assertEqual( a.transform, b.transform )
@@ -60,7 +60,7 @@ class TransformationMatrixfTest(unittest.TestCase):
 		self.assertEqual( a.scalePivotTranslation, V3f( 0, 0, 0 ) )
 		self.assertEqual( a.rotatePivot, V3f( 0, 0, 0 ) )
 		self.assertEqual( a.rotationOrientation, Quatf() )
-		self.assertEqual( a.rotate, Quatf() )
+		self.assertEqual( a.rotate, Eulerf() )
 		self.assertEqual( a.rotatePivotTranslation, V3f( 0, 0, 0 ) )
 		self.assertEqual( a.translate, V3f( 0, 0, 0 ) )
 		try:
@@ -75,8 +75,8 @@ class TransformationMatrixfTest(unittest.TestCase):
 		a = TransformationMatrixf()
 		a.scale = V3f( 2, 2, 2 )
 		self.assertEqual( a.transform, M44f().scale( V3f( 2, 2, 2 ) ) )
-		a.rotate = Quatf( 0.2, 0.2, 0.2, 0.2 )
-		self.assert_( a.transform.equalWithAbsError( M44f().scale( V3f( 2, 2, 2 ) ) * Quatf( 0.2, 0.2, 0.2, 0.2 ).normalized().toMatrix44(), 0.01 ) )
+		a.rotate = Eulerf( 0.2, 0.2, 0.2 )
+		self.assert_( a.transform.equalWithAbsError( M44f().scale( V3f( 2, 2, 2 ) ) * Eulerf( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixf comparison"""
@@ -94,7 +94,7 @@ class TransformationMatrixdTest(unittest.TestCase):
 		"""Test TransformationMatrixd constructors"""
 		a = TransformationMatrixd()
 		self.assertEqual( a.transform, M44d() )
-		a = TransformationMatrixd( V3d( 2, 2, 2 ), Quatd(), V3d( 1, 0, 0 ) )
+		a = TransformationMatrixd( V3d( 2, 2, 2 ), Eulerd(), V3d( 1, 0, 0 ) )
 		self.assert_( a.transform.equalWithAbsError( M44d().scale( V3d(2,2,2) ) * M44d().translate( V3d(1,0,0) ), 0.01 ) )
 		b = TransformationMatrixd( a )
 		self.assertEqual( a.transform, b.transform )
@@ -108,7 +108,7 @@ class TransformationMatrixdTest(unittest.TestCase):
 		self.assertEqual( a.scalePivotTranslation, V3d( 0, 0, 0 ) )
 		self.assertEqual( a.rotatePivot, V3d( 0, 0, 0 ) )
 		self.assertEqual( a.rotationOrientation, Quatd() )
-		self.assertEqual( a.rotate, Quatd() )
+		self.assertEqual( a.rotate, Eulerd() )
 		self.assertEqual( a.rotatePivotTranslation, V3d( 0, 0, 0 ) )
 		self.assertEqual( a.translate, V3d( 0, 0, 0 ) )
 		try:
@@ -123,8 +123,8 @@ class TransformationMatrixdTest(unittest.TestCase):
 		a = TransformationMatrixd()
 		a.scale = V3d( 2, 2, 2 )
 		self.assertEqual( a.transform, M44d().scale( V3d( 2, 2, 2 ) ) )
-		a.rotate = Quatd( 0.2, 0.2, 0.2, 0.2 ).normalized()
-		self.assert_( a.transform.equalWithAbsError( M44d().scale( V3d( 2, 2, 2 ) ) * Quatd( 0.2, 0.2, 0.2, 0.2 ).normalized().toMatrix44(), 0.01 ) )
+		a.rotate = Eulerd( 0.2, 0.2, 0.2 )
+		self.assert_( a.transform.equalWithAbsError( M44d().scale( V3d( 2, 2, 2 ) ) * Eulerd( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixd comparison"""
@@ -144,12 +144,12 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 		"""Test TransformationMatrixfData constructors"""
 		a = TransformationMatrixfData()
 		self.assertEqual( a.value, TransformationMatrixf() )
-		a = TransformationMatrixfData( TransformationMatrixf( V3f( 2, 2, 2 ), Quatf(), V3f( 1, 0, 0 ) ) )
+		a = TransformationMatrixfData( TransformationMatrixf( V3f( 2, 2, 2 ), Eulerf(), V3f( 1, 0, 0 ) ) )
 		self.assertEqual( a.value.scale, V3f( 2, 2, 2 ) )
 
 	def testCopy(self):
 		"""Test TransformationMatrixfData copy"""
-		a = TransformationMatrixfData( TransformationMatrixf( V3f( 2, 2, 2 ), Quatf(), V3f( 1, 0, 0 ) ) )
+		a = TransformationMatrixfData( TransformationMatrixf( V3f( 2, 2, 2 ), Eulerf(), V3f( 1, 0, 0 ) ) )
 		self.assertEqual( a.value.scale, V3f( 2, 2, 2 ) )
 		b = a.copy()
 		a.value = TransformationMatrixf()
@@ -158,7 +158,7 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 
 	def testIO(self):
 		"""Test TransformationMatrixfData IO"""
-		a = TransformationMatrixfData( TransformationMatrixf( V3f(2,3,4), Quatf(), V3f(1,2,3) ) )
+		a = TransformationMatrixfData( TransformationMatrixf( V3f(2,3,4), Eulerf(), V3f(1,2,3) ) )
 		w = ObjectWriter( a, self.testFile )
 		w.write()
 
@@ -169,7 +169,7 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 	def testInterpolation(self):
 		"""Test TranformationMatrixfData interpolation"""
 		a = TransformationMatrixfData()
-		b = TransformationMatrixfData( TransformationMatrixf( V3f(2,3,4), Quatf(), V3f(1,2,3) ) )
+		b = TransformationMatrixfData( TransformationMatrixf( V3f(2,3,4), Eulerf(), V3f(1,2,3) ) )
 
 		c = linearObjectInterpolation( a, b, 0.5 )
 		self.assertEqual( type(c), TransformationMatrixfData )
@@ -191,9 +191,9 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 		a = TransformationMatrixfData()
 		b = TransformationMatrixfData()
 		self.assertEqual( a, b )
-		b.value = TransformationMatrixf( V3f( 0.00001, 0, 0 ), Quatf(), V3f(0,0,0) )
+		b.value = TransformationMatrixf( V3f( 0.00001, 0, 0 ), Eulerf(), V3f(0,0,0) )
 		self.assertNotEqual( a, b )
-		a.value = TransformationMatrixf( V3f( 0.00001, 0, 0 ), Quatf(), V3f(0,0,0) )
+		a.value = TransformationMatrixf( V3f( 0.00001, 0, 0 ), Eulerf(), V3f(0,0,0) )
 		self.assertEqual( a, b )
 
 	def tearDown(self):
@@ -208,12 +208,12 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 		"""Test TransformationMatrixdData constructors"""
 		a = TransformationMatrixdData()
 		self.assertEqual( a.value, TransformationMatrixd() )
-		a = TransformationMatrixdData( TransformationMatrixd( V3d( 2, 2, 2 ), Quatd(), V3d( 1, 0, 0 ) ) )
+		a = TransformationMatrixdData( TransformationMatrixd( V3d( 2, 2, 2 ), Eulerd(), V3d( 1, 0, 0 ) ) )
 		self.assertEqual( a.value.scale, V3d( 2, 2, 2 ) )
 
 	def testCopy(self):
 		"""Test TransformationMatrixdData copy"""
-		a = TransformationMatrixdData( TransformationMatrixd( V3d( 2, 2, 2 ), Quatd(), V3d( 1, 0, 0 ) ) )
+		a = TransformationMatrixdData( TransformationMatrixd( V3d( 2, 2, 2 ), Eulerd(), V3d( 1, 0, 0 ) ) )
 		self.assertEqual( a.value.scale, V3d( 2, 2, 2 ) )
 		b = a.copy()
 		a.value = TransformationMatrixd()
@@ -222,7 +222,7 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 
 	def testIO(self):
 		"""Test TransformationMatrixdData IO"""
-		a = TransformationMatrixdData( TransformationMatrixd( V3d(2,3,4), Quatd(), V3d(1,2,3) ) )
+		a = TransformationMatrixdData( TransformationMatrixd( V3d(2,3,4), Eulerd(), V3d(1,2,3) ) )
 		w = ObjectWriter( a, self.testFile )
 		w.write()
 
@@ -233,7 +233,7 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 	def testInterpolation(self):
 		"""Test TranformationMatrixdData interpolation"""
 		a = TransformationMatrixdData()
-		b = TransformationMatrixdData( TransformationMatrixd( V3d(2,3,4), Quatd(), V3d(1,2,3) ) )
+		b = TransformationMatrixdData( TransformationMatrixd( V3d(2,3,4), Eulerd(), V3d(1,2,3) ) )
 
 		c = linearObjectInterpolation( a, b, 0.5 )
 		self.assertEqual( type(c), TransformationMatrixdData )
@@ -250,20 +250,21 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 		self.assert_( c.value.scale.equalWithAbsError( V3d( 2, 3, 4 ), 0.01 ) )
 		self.assert_( c.value.translate.equalWithAbsError( V3d( 1, 2, 3 ), 0.01 ) )
 
-		# try quaternion interpolation... ( there's a bug in gcc 4.0.2 with -O3 that we catch here ).
-		d = TransformationMatrixdData( TransformationMatrixd( V3d(2,3,4), Quatd( 1, 2, 3, 4 ), V3d(1,2,3) ) )
+		# try rotation interpolation...
+		d = TransformationMatrixdData( TransformationMatrixd( V3d(2,3,4), Eulerd( 1., 2., 3. ), V3d(1,2,3) ) )
 		e = linearObjectInterpolation( b, d, 0.2 )
+		self.assertAlmostEqual( (e.value.rotate - Eulerd( 0.2, 0.4, 0.6 )).length(), 0, 2 )
 		c = linearObjectInterpolation( d, d, 0.8 )
-		self.assertAlmostEqual( c.value.rotate ^ d.value.rotate.normalized(), 1, 2 )
+		self.assertAlmostEqual( (c.value.rotate - d.value.rotate).length(), 0, 2 )
 
 	def testComparison(self):
 		"""Test TransformationMatrixdData comparison"""
 		a = TransformationMatrixdData()
 		b = TransformationMatrixdData()
 		self.assertEqual( a, b )
-		b.value = TransformationMatrixd( V3d( 0.00001, 0, 0 ), Quatd(), V3d(0,0,0) )
+		b.value = TransformationMatrixd( V3d( 0.00001, 0, 0 ), Eulerd(), V3d(0,0,0) )
 		self.assertNotEqual( a, b )
-		a.value = TransformationMatrixd( V3d( 0.00001, 0, 0 ), Quatd(), V3d(0,0,0) )
+		a.value = TransformationMatrixd( V3d( 0.00001, 0, 0 ), Eulerd(), V3d(0,0,0) )
 		self.assertEqual( a, b )
 
 	def tearDown(self):

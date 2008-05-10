@@ -42,7 +42,7 @@ TransformationMatrix<T>::TransformationMatrix() : scalePivot( 0, 0, 0), scale( 1
 }
 
 template <class T>
-TransformationMatrix<T>::TransformationMatrix( const Imath::Vec3< T > s, const Imath::Quat< T > r, const Imath::Vec3< T > t ) :
+TransformationMatrix<T>::TransformationMatrix( const Imath::Vec3< T > s, const Imath::Euler< T > r, const Imath::Vec3< T > t ) :
 		scalePivot( 0, 0, 0), scale( s ), shear( 0, 0, 0 ), scalePivotTranslation( 0, 0, 0 ), 
 						rotatePivot( 0, 0, 0 ), rotationOrientation(), rotate( r ), rotatePivotTranslation( 0, 0, 0 ), translate( t )
 {
@@ -59,7 +59,7 @@ TransformationMatrix<T>::TransformationMatrix( const TransformationMatrix &cp ) 
 template <class T>
 Imath::Matrix44<T> TransformationMatrix<T>::transform( ) const
 {
-	return Imath::Matrix44<T>().setTranslation( -scalePivot ) * Imath::Matrix44<T>().setScale( scale ) * Imath::Matrix44<T>().setShear( shear ) * Imath::Matrix44<T>().setTranslation( scalePivot + scalePivotTranslation - rotatePivot ) * rotationOrientation.normalized().toMatrix44() * rotate.normalized().toMatrix44() * Imath::Matrix44<T>().setTranslation( rotatePivot + rotatePivotTranslation + translate );
+	return Imath::Matrix44<T>().setTranslation( -scalePivot ) * Imath::Matrix44<T>().setScale( scale ) * Imath::Matrix44<T>().setShear( shear ) * Imath::Matrix44<T>().setTranslation( scalePivot + scalePivotTranslation - rotatePivot ) * rotationOrientation.normalized().toMatrix44() * rotate.toMatrix44() * Imath::Matrix44<T>().setTranslation( rotatePivot + rotatePivotTranslation + translate );
 }
 
 template <class T>
@@ -67,7 +67,7 @@ bool TransformationMatrix<T>::operator == (const TransformationMatrix &t) const
 {
 	return ( scalePivot == t.scalePivot && scale == t.scale && shear == t.shear && scalePivotTranslation == t.scalePivotTranslation &&
 			rotatePivot == t.rotatePivot && rotationOrientation.normalized() == t.rotationOrientation.normalized() && 
-			rotate.normalized() == t.rotate.normalized() &&	rotatePivotTranslation == t.rotatePivotTranslation && translate == t.translate );
+			rotate == t.rotate && rotate.order() == t.rotate.order() &&	rotatePivotTranslation == t.rotatePivotTranslation && translate == t.translate );
 }
 
 #endif // IE_CORE_TRANSFORMATIONMATRIX_INL

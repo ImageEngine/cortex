@@ -158,6 +158,35 @@ class TestInterpolatedCache(unittest.TestCase):
 		cache.setInterpolation( InterpolatedCache.Interpolation.None )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
 
+	def testOldTransformationMatrixData( self ):
+		cache = InterpolatedCache( "test/IECore/data/attributeCaches/transform.old.%04d.fio", frame = 4, interpolation = InterpolatedCache.Interpolation.Linear )
+		self.assertEqual( cache.read( ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
+		self.assertAlmostEqual( (cache.read( ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd( 0.244525, 0, 0 )).length(), 0, 2 )
+		cache.setFrame( 4.5 )
+		self.assertEqual( cache.read( ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
+		self.assertAlmostEqual( (cache.read( ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd(0.283422, 0, 0)).length(), 0, 2 )
+
+	def testNewTransformationMatrixData( self ):
+
+		# Code that created the cache files for this test:
+		#cache1 = AttributeCache( "test/IECore/data/attributeCaches/transform.new.0250.fio", IndexedIOOpenMode.Write )
+		#cache2 = AttributeCache( "test/IECore/data/attributeCaches/transform.new.0500.fio", IndexedIOOpenMode.Write )
+		#for order in [ Eulerd.Order.XYZ, Eulerd.Order.XZY, Eulerd.Order.YZX, Eulerd.Order.YXZ, Eulerd.Order.ZXY, Eulerd.Order.ZYX ]:
+		#	t = TransformationMatrixd()
+		#	t.rotate = Eulerd( 1000, -10, 100, order )
+		#	transform = TransformationMatrixdData( t )
+		#	cache1.write( "test%d" % order, "transform", transform )
+		#	t = TransformationMatrixd()
+		#	t.rotate = Eulerd( 1002, -12, 102, order )
+		#	transform = TransformationMatrixdData( t )
+		#	cache2.write( "test%d" % order, "transform", transform )
+		#cache1 = None
+		#cache2 = None
+		
+		cache = InterpolatedCache( "test/IECore/data/attributeCaches/transform.new.%04d.fio", frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
+		for order in [ Eulerd.Order.XYZ, Eulerd.Order.XZY, Eulerd.Order.YZX, Eulerd.Order.YXZ, Eulerd.Order.ZXY, Eulerd.Order.ZYX ]:
+			self.assertEqual( cache.read( "test%d" % order, "transform" ).value.rotate, Eulerd( 1001, -11, 101, order ) )
+		cache = None
 
 	def tearDown(self):
 

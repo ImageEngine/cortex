@@ -59,32 +59,8 @@ static IECoreMaya::FromMayaConverterPtr create( const char *n, IECore::TypeId re
 	StatusException::throwIfError( l.add( MString( n ) ) );
 	
 	MDagPath p;
-	MStatus s = l.getDagPath( 0, p );
-	if( s )
-	{
-		FromMayaConverterPtr c = FromMayaShapeConverter::create( p, resultType );
-		if( c )
-		{
-			return c;
-		}
-		c = FromMayaDagNodeConverter::create( p );
-		if( c )
-		{
-			return c;
-		}
-	}
-	
-	MObject o;
-	s = l.getDependNode( 0, o );
-	if( s )
-	{
-		FromMayaConverterPtr c = FromMayaObjectConverter::create( o, resultType );
-		if( c )
-		{
-			return c;
-		}
-	}
-	
+	MStatus s;
+
 	MPlug pl;
 	s = l.getPlug( 0, pl );
 	if( s )
@@ -94,8 +70,37 @@ static IECoreMaya::FromMayaConverterPtr create( const char *n, IECore::TypeId re
 		{
 			return c;
 		}
+
 	}
-		
+	else
+	{
+		s = l.getDagPath( 0, p );
+		if( s )
+		{
+			FromMayaConverterPtr c = FromMayaShapeConverter::create( p, resultType );
+			if( c )
+			{
+				return c;
+			}
+			c = FromMayaDagNodeConverter::create( p, resultType );
+			if( c )
+			{
+				return c;
+			}
+		}
+	
+		MObject o;
+		s = l.getDependNode( 0, o );
+		if( s )
+		{
+			FromMayaConverterPtr c = FromMayaObjectConverter::create( o, resultType );
+			if( c )
+			{
+				return c;
+			}
+		}
+	}
+	
 	return 0;
 }
 

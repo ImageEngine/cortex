@@ -341,6 +341,12 @@ bool InterpolatedCache::contains( const ObjectHandle &obj, const AttributeHandle
 	return m_caches[ m_curFrameIndex ]->contains( obj, attr );
 }
 
+InterpolatedCache::CacheVector InterpolatedCache::currentCaches()
+{
+	updateCacheFiles();
+	return m_caches;
+}
+
 void InterpolatedCache::updateCacheFiles()
 {
 	if ( !m_parametersChanged )

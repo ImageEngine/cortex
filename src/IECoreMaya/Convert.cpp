@@ -231,6 +231,78 @@ MMatrix convert( const Imath::M44f &from )
 }
 
 template< typename T >
+typename Imath::Euler<T>::Order mayaToImathRotationOrder( MEulerRotation::RotationOrder order )
+{
+	switch( order )
+	{
+	case MEulerRotation::kXYZ:
+		return Imath::Euler<T>::XYZ;
+	case MEulerRotation::kYZX:
+		return Imath::Euler<T>::YZX;
+	case MEulerRotation::kZXY:
+		return Imath::Euler<T>::ZXY;
+	case MEulerRotation::kXZY:
+		return Imath::Euler<T>::XZY;
+	case MEulerRotation::kYXZ:
+		return Imath::Euler<T>::YXZ;
+	case MEulerRotation::kZYX:
+		return Imath::Euler<T>::ZYX;
+	default:
+		// default rotation.
+		return Imath::Euler<T>::XYZ;
+	}
+}
+
+template< typename T >
+MEulerRotation::RotationOrder iMathToMayaRotationOrder( typename Imath::Euler<T>::Order order )
+{
+	switch( order )
+	{
+	case Imath::Euler<T>::XYZ:
+		return MEulerRotation::kXYZ;
+	case Imath::Euler<T>::YZX:
+		return MEulerRotation::kYZX;
+	case Imath::Euler<T>::ZXY:
+		return MEulerRotation::kZXY;
+	case Imath::Euler<T>::XZY:
+		return MEulerRotation::kXZY;
+	case Imath::Euler<T>::YXZ:
+		return MEulerRotation::kYXZ;
+	case Imath::Euler<T>::ZYX:
+		return MEulerRotation::kZYX;
+	default:
+		// default rotation.
+		return MEulerRotation::kXYZ;
+	}
+}
+
+template<>
+Imath::Eulerf convert( const MEulerRotation &from )
+{
+	return Imath::Eulerf( from.x, from.y, from.z, mayaToImathRotationOrder<float>( from.order ), Imath::Eulerf::XYZLayout );
+}
+
+template<>
+MEulerRotation convert( const Imath::Eulerf &from )
+{
+	Imath::V3f xyz = from.toXYZVector();
+	return MEulerRotation( xyz.x, xyz.y, xyz.z, iMathToMayaRotationOrder<float>( from.order() ) );
+}
+
+template<>
+Imath::Eulerd convert( const MEulerRotation &from )
+{
+	return Imath::Eulerd( from.x, from.y, from.z, mayaToImathRotationOrder<double>( from.order ), Imath::Eulerd::XYZLayout );
+}
+
+template<>
+MEulerRotation convert( const Imath::Eulerd &from )
+{
+	Imath::V3d xyz = from.toXYZVector();
+	return MEulerRotation( xyz.x, xyz.y, xyz.z, iMathToMayaRotationOrder<double>( from.order() ) );
+}
+
+template< typename T >
 IECore::TransformationMatrix<T> convertTransf( const MTransformationMatrix &from )
 {
 	IECore::TransformationMatrix<T> to;
@@ -243,7 +315,7 @@ IECore::TransformationMatrix<T> convertTransf( const MTransformationMatrix &from
 	to.scalePivotTranslation = convert< Imath::Vec3<T>, MVector>( from.scalePivotTranslation( MSpace::kTransform ) );
 	to.rotatePivot = convert< Imath::Vec3<T>, MPoint>( from.rotatePivot( MSpace::kTransform ) );
 	to.rotationOrientation = convert< Imath::Quat<T>, MQuaternion>( from.rotationOrientation() );
-	to.rotate = convert< Imath::Quat<T>, MQuaternion>( from.rotation() );
+	to.rotate = convert< Imath::Euler<T>, MEulerRotation>( from.eulerRotation() );
 	to.rotatePivotTranslation = convert< Imath::Vec3<T>, MVector >( from.rotatePivotTranslation( MSpace::kTransform ) );
 	to.translate = convert< Imath::Vec3<T>, MVector >( from.getTranslation( MSpace::kTransform ) );
 	return to;
@@ -266,7 +338,7 @@ MTransformationMatrix convertTransf( const IECore::TransformationMatrix<T> &from
 	to.setScalePivotTranslation( convert< MVector, Imath::Vec3<T> >( from.scalePivotTranslation ), MSpace::kTransform );
 	to.setRotatePivot( convert< MPoint, Imath::Vec3<T> >( from.rotatePivot ), MSpace::kTransform, false );
 	to.setRotationOrientation( convert< MQuaternion, Imath::Quat<T> >( from.rotationOrientation ) );
-	to.rotateTo( convert< MQuaternion, Imath::Quat<T> >( from.rotate ) );
+	to.rotateTo( convert< MEulerRotation, Imath::Euler<T> >( from.rotate ) );
 	to.setRotatePivotTranslation( convert< MVector, Imath::Vec3<T> >( from.rotatePivotTranslation ), MSpace::kTransform );
 	to.setTranslation( convert< MVector, Imath::Vec3<T> >( from.translate ), MSpace::kTransform );
 	return to;

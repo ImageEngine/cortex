@@ -51,7 +51,7 @@ class FromMayaConverterTest( unittest.TestCase ) :
 		
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) + ".translateX", IECore.TypeId.FloatData )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
-		
+
 		# get a converter for a dag node
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
@@ -65,6 +65,24 @@ class FromMayaConverterTest( unittest.TestCase ) :
 		
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ), IECore.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
-							
+
+	def testTransformationMatrixConverter( self ):
+
+		sphereTransform = maya.cmds.polySphere()[0]
+		radToAng = 180./3.14159265
+		maya.cmds.setAttr( str( sphereTransform ) + ".rotate", -1000*radToAng, 30*radToAng, 100*radToAng, type="double3" )
+
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) )
+		res = converter.convert()
+		self.assert_( not res.isInstanceOf( IECore.TransformationMatrixfData.staticTypeId() ) )
+		self.assert_( not res.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+
+		# test TransformationMatrixData converter
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ), IECore.TypeId.TransformationMatrixfData )
+		self.assert_( converter )
+		transform = converter.convert()
+		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixfData.staticTypeId() ) )
+		self.assertAlmostEqual( (transform.value.rotate - IECore.Eulerf( -1000, 30, 100 )).length(), 0, 2 )
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

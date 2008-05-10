@@ -44,6 +44,7 @@
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathQuat.h"
 #include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathEuler.h"
 
 #include "maya/MString.h"
 #include "maya/MBoundingBox.h"
@@ -56,6 +57,7 @@
 #include "maya/MQuaternion.h"
 #include "maya/MTransformationMatrix.h"
 #include "maya/MCommandResult.h"
+#include "maya/MEulerRotation.h"
 
 #include <string>
 
@@ -152,6 +154,18 @@ template<>
 MMatrix convert( const Imath::M44f &from );
 
 template<>
+Imath::Eulerf convert( const MEulerRotation &from );
+
+template<>
+MEulerRotation convert( const Imath::Eulerf &from );
+
+template<>
+Imath::Eulerd convert( const MEulerRotation &from );
+
+template<>
+MEulerRotation convert( const Imath::Eulerd &from );
+
+template<>
 IECore::TransformationMatrixf convert( const MTransformationMatrix &from );
 
 template<>
@@ -165,6 +179,7 @@ MTransformationMatrix convert( const IECore::TransformationMatrixd &from );
 
 template<>
 IECore::DataPtr convert( const MCommandResult &from );
+
 
 } // namespace IECore
 

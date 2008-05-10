@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,8 @@
 
 
 // Partially specialize for TransformationMatrix
+// Assumes the two rotate members have the same rotation order and that they are sufficiently close 
+// to each other so that the euler interpolation will look good.
 template<typename T>
 struct LinearInterpolator< TransformationMatrix<T> >
 {
@@ -48,13 +50,15 @@ struct LinearInterpolator< TransformationMatrix<T> >
 		LinearInterpolator< Imath::Vec3< T > >()( y0.scalePivotTranslation, y1.scalePivotTranslation, x, result.scalePivotTranslation );
 		LinearInterpolator< Imath::Vec3< T > >()( y0.rotatePivot, y1.rotatePivot, x, result.rotatePivot );
 		LinearInterpolator< Imath::Quat< T > >()( y0.rotationOrientation, y1.rotationOrientation, x, result.rotationOrientation );
-		LinearInterpolator< Imath::Quat< T > >()( y0.rotate, y1.rotate, x, result.rotate );
+		LinearInterpolator< Imath::Vec3< T > >()( y0.rotate, y1.rotate, x, result.rotate );
 		LinearInterpolator< Imath::Vec3< T > >()( y0.rotatePivotTranslation, y1.rotatePivotTranslation, x, result.rotatePivotTranslation );
 		LinearInterpolator< Imath::Vec3< T > >()( y0.translate, y1.translate, x, result.translate );
 	}
 };
 
-// Partially specialize for Imath::Quat
+// Partially specialize for TransformationMatrix
+// Assumes the two rotate members have the same rotation order and that they are sufficiently close 
+// to each other so that the euler interpolation will look good.
 template<typename T>
 struct CosineInterpolator< TransformationMatrix<T> >
 {
@@ -69,13 +73,15 @@ struct CosineInterpolator< TransformationMatrix<T> >
 		CosineInterpolator< Imath::Vec3< T > >()( y0.scalePivotTranslation, y1.scalePivotTranslation, x, result.scalePivotTranslation );
 		CosineInterpolator< Imath::Vec3< T > >()( y0.rotatePivot, y1.rotatePivot, x, result.rotatePivot );
 		CosineInterpolator< Imath::Quat< T > >()( y0.rotationOrientation, y1.rotationOrientation, x, result.rotationOrientation );
-		CosineInterpolator< Imath::Quat< T > >()( y0.rotate, y1.rotate, x, result.rotate );
+		CosineInterpolator< Imath::Vec3< T > >()( y0.rotate, y1.rotate, x, result.rotate );
 		CosineInterpolator< Imath::Vec3< T > >()( y0.rotatePivotTranslation, y1.rotatePivotTranslation, x, result.rotatePivotTranslation );
 		CosineInterpolator< Imath::Vec3< T > >()( y0.translate, y1.translate, x, result.translate );
 	}
 };
 
-// Partially specialize for Imath::Quat
+// Partially specialize for TransformationMatrix
+// Assumes the two rotate members have the same rotation order and that they are sufficiently close 
+// to each other so that the euler interpolation will look good.
 template<typename T>
 struct CubicInterpolator< TransformationMatrix<T> >
 {
@@ -85,14 +91,14 @@ struct CubicInterpolator< TransformationMatrix<T> >
 			const TransformationMatrix<T> &y3,
 			double x, 
 			TransformationMatrix<T> &result) const
-	{		
+	{
 		CubicInterpolator< Imath::Vec3< T > >()( y0.scalePivot, y1.scalePivot, y2.scalePivot, y3.scalePivot, x, result.scalePivot );
 		CubicInterpolator< Imath::Vec3< T > >()( y0.scale, y1.scale, y2.scale, y3.scale, x, result.scale );
 		CubicInterpolator< Imath::Vec3< T > >()( y0.shear, y1.shear, y2.shear, y3.shear, x, result.shear );
 		CubicInterpolator< Imath::Vec3< T > >()( y0.scalePivotTranslation, y1.scalePivotTranslation, y2.scalePivotTranslation, y3.scalePivotTranslation, x, result.scalePivotTranslation );
 		CubicInterpolator< Imath::Vec3< T > >()( y0.rotatePivot, y1.rotatePivot, y2.rotatePivot, y3.rotatePivot, x, result.rotatePivot );
 		CubicInterpolator< Imath::Quat< T > >()( y0.rotationOrientation, y1.rotationOrientation, y2.rotationOrientation, y3.rotationOrientation, x, result.rotationOrientation );
-		CubicInterpolator< Imath::Quat< T > >()( y0.rotate, y1.rotate, y2.rotate, y3.rotate, x, result.rotate );
+		CubicInterpolator< Imath::Vec3< T > >()( y0.rotate, y1.rotate, y2.rotate, y3.rotate, x, result.rotate );
 		CubicInterpolator< Imath::Vec3< T > >()( y0.rotatePivotTranslation, y1.rotatePivotTranslation, y2.rotatePivotTranslation, y3.rotatePivotTranslation, x, result.rotatePivotTranslation );
 		CubicInterpolator< Imath::Vec3< T > >()( y0.translate, y1.translate, y2.translate, y3.translate, x, result.translate );
 	}

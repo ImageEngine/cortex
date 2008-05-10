@@ -49,8 +49,8 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 			M33dData( M33d() * 3 ),
 			M44fData( M44f().createScaled( V3f(3) ) ),
 			M44dData( M44d().createScaled( V3d(3) ) ),
-			TransformationMatrixfData( TransformationMatrixf( V3f( 3 ), Quatf(), V3f( 0 ) ) ),
-			TransformationMatrixdData( TransformationMatrixd( V3d( 3 ), Quatd(), V3d( 0 ) ) ),
+			TransformationMatrixfData( TransformationMatrixf( V3f( 3 ), Eulerf(), V3f( 0 ) ) ),
+			TransformationMatrixdData( TransformationMatrixd( V3d( 3 ), Eulerd(), V3d( 0 ) ) ),
 		]
 		for vector in vectorTypes:
 

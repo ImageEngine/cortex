@@ -37,11 +37,92 @@
 
 namespace IECore {
 
-#define TRANSFORMATIONMATRIX_SIZE	(7 * 3) + (2 * 4)		// 7 3D vectors and 2 quaternions.
+#define TRANSFORMATIONMATRIX_SIZE	(8 * 3) + 4 + 1		// 8 3D vectors, 1 quaternion and one rotation order.
+
+// define save/load methods backward compatible with the old structure that represented rotate as Quat<T> instead of Euler<T>
+#define IE_CORE_DEFINETRANSFORMATIONMATRIXIOSPECIALIZATION( TNAME )									\
+	template<>																						\
+	void TNAME::save( SaveContext *context ) const													\
+	{																								\
+		const TNAME::ValueType &base = TNAME::readable();											\
+		TNAME::BaseType values[ TRANSFORMATIONMATRIX_SIZE ] = {										\
+			base.scalePivot.x, base.scalePivot.y, base.scalePivot.z,								\
+			base.scale.x, base.scale.y, base.scale.z,												\
+			base.shear.x, base.shear.y, base.shear.z,																				\
+			base.scalePivotTranslation.x, base.scalePivotTranslation.y, base.scalePivotTranslation.z,								\
+			base.rotatePivot.x, base.rotatePivot.y, base.rotatePivot.z,																\
+			base.rotationOrientation.r, base.rotationOrientation.v.x, base.rotationOrientation.v.y, base.rotationOrientation.v.z, 	\
+			static_cast< TNAME::BaseType >(base.rotate.order())+0.2, base.rotate.x, base.rotate.y, base.rotate.z, 								\
+			base.rotatePivotTranslation.x, base.rotatePivotTranslation.y, base.rotatePivotTranslation.z, 							\
+			base.translate.x, base.translate.y, base.translate.z 																	\
+		};																							\
+		Data::save( context );																		\
+		IndexedIOInterfacePtr container = context->rawContainer();									\
+		container->write( "value", values, TRANSFORMATIONMATRIX_SIZE );								\
+	}																								\
+																									\
+	template<>																						\
+	void TNAME::load( LoadContextPtr context )														\
+	{																								\
+		Data::load( context );																		\
+		IndexedIOInterfacePtr container;															\
+		TNAME::BaseType values[ TRANSFORMATIONMATRIX_SIZE ];										\
+		TNAME::BaseType *p = &values[0];															\
+		try																							\
+		{																							\
+			container = context->rawContainer();													\
+			container->read( "value", p, TRANSFORMATIONMATRIX_SIZE );								\
+		}																							\
+		catch( ... )																				\
+		{																							\
+			unsigned int v = 0;																		\
+			container = context->container( staticTypeName(), v );									\
+			container->read( "value", p, TRANSFORMATIONMATRIX_SIZE );								\
+		}																							\
+		TNAME::ValueType &base = TNAME::writable();													\
+		base.scalePivot.x = *p++;																	\
+		base.scalePivot.y = *p++;																	\
+		base.scalePivot.z = *p++;																	\
+		base.scale.x = *p++;																		\
+		base.scale.y = *p++;																		\
+		base.scale.z = *p++;																		\
+		base.shear.x = *p++;																		\
+		base.shear.y = *p++;																		\
+		base.shear.z = *p++;																		\
+		base.scalePivotTranslation.x = *p++;														\
+		base.scalePivotTranslation.y = *p++;														\
+		base.scalePivotTranslation.z = *p++;														\
+		base.rotatePivot.x = *p++;																	\
+		base.rotatePivot.y = *p++;																	\
+		base.rotatePivot.z = *p++;																	\
+		base.rotationOrientation.r = *p++;															\
+		base.rotationOrientation.v.x = *p++;														\
+		base.rotationOrientation.v.y = *p++;														\
+		base.rotationOrientation.v.z = *p++;														\
+		TNAME::BaseType order = *p++;																\
+		base.rotate.x = *p++;																		\
+		base.rotate.y = *p++;																		\
+		base.rotate.z = *p++;																		\
+		if ( order <= 1.0 )																			\
+		{																							\
+			/* backward compatibility: rotate used to be a quaternion... */							\
+			base.rotate.setOrder( Imath::Euler<TNAME::BaseType>::XYZ );								\
+			base.rotate.extract( Imath::Quat<TNAME::BaseType>( order, base.rotate.x, base.rotate.y, base.rotate.z ));	\
+		} else																						\
+		{																							\
+			base.rotate.setOrder( static_cast< Imath::Euler<TNAME::BaseType>::Order >(order) );		\
+		}																							\
+		base.rotatePivotTranslation.x = *p++;														\
+		base.rotatePivotTranslation.y = *p++;														\
+		base.rotatePivotTranslation.z = *p++;														\
+		base.translate.x = *p++;																	\
+		base.translate.y = *p++;																	\
+		base.translate.z = *p++;																	\
+	}
 
 #define IE_CORE_DEFINEDATASPECIALISATION( TNAME, TID )							\
-	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )							\
-	IE_CORE_DEFINEBASETYPEDDATAIOSPECIALISATION( TNAME, TRANSFORMATIONMATRIX_SIZE )		\
+	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\
+	IE_CORE_DEFINETRANSFORMATIONMATRIXIOSPECIALIZATION( TNAME )
 
 IE_CORE_DEFINEDATASPECIALISATION( TransformationMatrixfData, TransformationMatrixfDataTypeId )
 IE_CORE_DEFINEDATASPECIALISATION( TransformationMatrixdData, TransformationMatrixdDataTypeId )
