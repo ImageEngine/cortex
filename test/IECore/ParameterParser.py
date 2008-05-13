@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -154,7 +154,86 @@ class testParameterParser( unittest.TestCase ) :
 		IECore.ParameterParser().parse( "-emptyString '' -normalString 'hello' -stringWithSpace 'hello there' -stringWithManySpaces 'hello there old chap'", a.parameters() )
 		
 		a()
+		
+	def testFlaglessParsing( self ) :
+	
+		parameters = IECore.CompoundParameter(
+		
+			members = [
+		
+				IECore.IntParameter(
+					name = "a",
+					description = "",
+					defaultValue = 1
+				),
+				IECore.StringParameter(
+					name = "b",
+					description = "",
+					defaultValue = "2"
+				),
+				IECore.IntParameter(
+					name = "c",
+					description = "",
+					defaultValue = 3
+				),
+			],
+			
+			userData = {
+		
+				"parser" : {
 
+					"flagless" : IECore.StringVectorData( [ "b", "c" ] )
+
+				}
+
+			}
+			
+		)
+		
+		# check that normal parsing still works
+		
+		IECore.ParameterParser().parse( [
+				"-a", "10",
+				"-b", "hello",
+				"-c", "4"
+			],
+			parameters
+		)
+		
+		self.assertEqual( parameters.a.getNumericValue(), 10 )
+		self.assertEqual( parameters.b.getTypedValue(), "hello" )
+		self.assertEqual( parameters.c.getNumericValue(), 4 )
+		
+		# check that flagless parsing works
+		
+		IECore.ParameterParser().parse( [
+				"-a", "15",
+				"goodbye", "20"
+			],
+			parameters
+		)
+		
+		self.assertEqual( parameters.a.getNumericValue(), 15 )
+		self.assertEqual( parameters.b.getTypedValue(), "goodbye" )
+		self.assertEqual( parameters.c.getNumericValue(), 20 )
+		
+		# check that invalid stuff is still detected
+		
+		self.assertRaises( SyntaxError, IECore.ParameterParser().parse,
+			[ "-iDontExist", "10" ],
+			parameters,
+		)
+		
+		self.assertRaises( SyntaxError, IECore.ParameterParser().parse,
+			[ "-a" ],
+			parameters,
+		)
+		
+		self.assertRaises( SyntaxError, IECore.ParameterParser().parse,
+			[ "too", "2", "many", "flaglessValues" ],
+			parameters,
+		)
+		
 	#def testQuotingOnStringParameters( self ):
 
 	#	a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()

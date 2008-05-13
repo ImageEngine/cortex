@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -48,25 +48,49 @@ class ParameterParser :
 	__typesToSerialisers = {}
 
 	## Parses the args to set the values of the parameters
-	# held by a CompoundParameters object. If any invalid values are discovered will
-	# raise a descriptive exception. args may either be a list of strings or a string
-	# itself.
+	# held by a CompoundParameter object. args may either be a list of strings or a string
+	# itself, in which case it will be tokenised using shlex.split().
+	# 
+	# Parsing expects a series of entries of the form -parameterName value(s). It
+	# is also possible to specify a series of child parameters which can be parsed without
+	# their name being specified - this provides much less verbose command lines for commonly
+	# used parameters, and the possibility of supporting the very common "command [options] filenames"
+	# form of command. Flagless parameters are specified as userData in the parameters object passed -
+	# this should be a StringVectorData named "flagless" in a CompoundData called "parser" - 
+	# these flagless parameters are parsed in the order they are specified in the data element.
+	# If parsing fails at any time then a descriptive exception is raised.
 	def parse(self, args, parameters):
 			
 		if type( args ) is str :
 			args = shlex.split( args )
 
+		flagless = None
+		flaglessIndex = 0
+		if "parser" in parameters.userData() :
+			if "flagless" in parameters.userData()["parser"] :
+				flagless = parameters.userData()["parser"]["flagless"]
+				if not flagless.isInstanceOf( IECore.StringVectorData.staticTypeId() ) :
+					raise TypeError( "\"flagless\" parameters must be specified by a StringVectorData instance." )
+				
 		parmsFound = {}
 		result = parameters.defaultValue
 		args = args[:] # a copy we can mess around with
 		while len(args):
 		
-			if not len( args[0] ) or args[0][0] != "-" :
+			# get the name of the parameter being specified
+			if len( args[0] ) and args[0][0]=="-" :
+				name = args[0][1:]
+				del args[0]
+				if not len( args ) :
+					raise SyntaxError( "Expected at least one argument following flag \"-%s\"." % name )
+			elif flagless and flaglessIndex < flagless.size() :
+				name = flagless[flaglessIndex]
+				flaglessIndex += 1
+			else :
 				raise SyntaxError( "Expected a flag argument (beginning with \"-\")" )
 
 			# find the parameter being specified. this might be the child of a compound
 			# denoted by "." separated names.
-			name = args[0][1:]
 			nameSplit = name.split( "." )
 
 			# recurses down the parameters tree
@@ -77,12 +101,7 @@ class ParameterParser :
 					if not nameSplit[i] in p:
 						raise SyntaxError( "\"%s\" is not a parameter name." % name )
 					p = p[nameSplit[i]]
-				
-			del args[0]
-			
-			if not len( args ) :
-				raise SyntaxError( "Expected at least one argument following flag \"-%s\"." % name )
-				
+								
 			# see if the argument being specified is a preset name, in which case we
 			# don't need a special parser.	
 			if args[0] in p.presets() :
