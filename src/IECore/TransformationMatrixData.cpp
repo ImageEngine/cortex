@@ -52,7 +52,7 @@ namespace IECore {
 			base.scalePivotTranslation.x, base.scalePivotTranslation.y, base.scalePivotTranslation.z,								\
 			base.rotatePivot.x, base.rotatePivot.y, base.rotatePivot.z,																\
 			base.rotationOrientation.r, base.rotationOrientation.v.x, base.rotationOrientation.v.y, base.rotationOrientation.v.z, 	\
-			static_cast< TNAME::BaseType >(base.rotate.order())+0.2, base.rotate.x, base.rotate.y, base.rotate.z, 								\
+			(TNAME::BaseType)(base.rotate.order())+0.2, base.rotate.x, base.rotate.y, base.rotate.z, 								\
 			base.rotatePivotTranslation.x, base.rotatePivotTranslation.y, base.rotatePivotTranslation.z, 							\
 			base.translate.x, base.translate.y, base.translate.z 																	\
 		};																							\
@@ -110,7 +110,7 @@ namespace IECore {
 			base.rotate.extract( Imath::Quat<TNAME::BaseType>( order, base.rotate.x, base.rotate.y, base.rotate.z ));	\
 		} else																						\
 		{																							\
-			base.rotate.setOrder( static_cast< Imath::Euler<TNAME::BaseType>::Order >(order) );		\
+			base.rotate.setOrder( (Imath::Euler<TNAME::BaseType>::Order)(order) );		\
 		}																							\
 		base.rotatePivotTranslation.x = *p++;														\
 		base.rotatePivotTranslation.y = *p++;														\
