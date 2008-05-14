@@ -1324,7 +1324,6 @@ if doConfigure :
 nukeEnv = env.Copy( IECORE_NAME = "IECoreNuke" )
 nukeEnv.Append( CPPPATH = [ "$NUKE_ROOT/include" ] )
 nukeEnv.Prepend( LIBPATH = [ "$NUKE_ROOT", "./lib" ] )
-nukeEnv.Append( LIBS = [ "DDImage4.8" ] ) # \todo Obtain correct version somehow
 
 if doConfigure :
 
@@ -1339,33 +1338,59 @@ if doConfigure :
 	
 		c.Finish()
 
-		# we can't add this earlier as then it's built during the configure stage, and that's no good
-		nukeEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		# figure out the nuke version from the headers
+		nukeMajorVersion = None
+		nukeMinorVersion = None
+		nukeVersionHeader = env.FindFile( "DDImage/ddImageVersionNumbers.h", nukeEnv["CPPPATH"] )
+		if nukeVersionHeader :
 
-		nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
-		nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
-
-		nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeSources )
-		nukeEnv.Depends( coreInstallSync, nukeLibrary )
-		nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeLibrary )
-		nukeEnv.Depends( nukeLibraryInstall, coreInstallSync )
-		nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv ) )
-		nukeEnv.Alias( "install", nukeLibraryInstall )
-		nukeEnv.Alias( "installNuke", nukeLibraryInstall )
-		nukeEnv.Alias( "installLib", [ nukeLibraryInstall ] )
-
-		nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
-		nukeEnv.Depends( nukeHeaderInstall, coreInstallSync )
-		nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
-
-		nukeEnv.Alias( "installNuke", nukeHeaderInstall )
-		nukeEnv.Alias( "install", nukeHeaderInstall )
+			for line in open( str( nukeVersionHeader ) ) :
+				w = line.split()
+				if w[0]=="#define" and w[1]=="kDDImageVersionMajorNum" :
+					nukeMajorVersion = int( w[2] )
+				elif w[0]=="#define" and w[1]=="kDDImageVersionMinorNum" :
+					nukeMinorVersion = int( w[2] )
+					
+		else :
 		
-		if coreEnv["INSTALL_CORENUKE_POST_COMMAND"]!="" :
-			# this is the only way we could find to get a post action to run for an alias
-			corePythonEnv.Alias( "installNuke", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" ) 
+			nukeMajorVersion = 4
+			nukeMinorVersion = 8
+					
+		if nukeMajorVersion is None or nukeMinorVersion is None :
+		
+			sys.stderr.write( "ERROR : unable to determine nuke version - not building IECoreNuke.\n" )
+		
+		else :
+		
+			# we can't add this earlier as then it's built during the configure stage, and that's no good
+			nukeEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
-		Default( [ nukeLibrary ] )
+			nukeEnv.Append( LIBS = [ "DDImage%d.%d" % ( nukeMajorVersion, nukeMinorVersion ) ] )
+
+			nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
+			nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
+
+			nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeSources )
+			nukeEnv.Depends( coreInstallSync, nukeLibrary )
+			nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeLibrary )
+			nukeEnv.Depends( nukeLibraryInstall, coreInstallSync )
+			nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv ) )
+			nukeEnv.Alias( "install", nukeLibraryInstall )
+			nukeEnv.Alias( "installNuke", nukeLibraryInstall )
+			nukeEnv.Alias( "installLib", [ nukeLibraryInstall ] )
+
+			nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
+			nukeEnv.Depends( nukeHeaderInstall, coreInstallSync )
+			nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
+
+			nukeEnv.Alias( "installNuke", nukeHeaderInstall )
+			nukeEnv.Alias( "install", nukeHeaderInstall )
+
+			if coreEnv["INSTALL_CORENUKE_POST_COMMAND"]!="" :
+				# this is the only way we could find to get a post action to run for an alias
+				corePythonEnv.Alias( "installNuke", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" ) 
+
+			Default( [ nukeLibrary ] )
 
 ###########################################################################################
 # Build and install the coreTruelight library and headers
