@@ -94,6 +94,5 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindToGLConverter();
 	bindToGLCameraConverter();
 	
-	def( "coreMajorVersion", &coreMajorVersion );
 	def( "init", &IECoreGL::init );
 }

@@ -1002,20 +1002,10 @@ if doConfigure :
 # Build, install and test the optional CoreGL library and bindings
 ###########################################################################################
 
-# because coreGL isn't really stable in terms of api yet it has its own version
-# number. when it moves out of /contrib it'll use the same version number as the
-# main libraries.
-ieCoreGLMajorVersion = 1
-ieCoreGLMinorVersion = 0
-ieCoreGLPatchVersion = 0
-
 if env["WITH_GL"] and doConfigure :
 
 	glEnvSets = {
 		"IECORE_NAME" : "IECoreGL",
-		"IECORE_MAJOR_VERSION" : ieCoreGLMajorVersion,
-		"IECORE_MINOR_VERSION" : ieCoreGLMinorVersion,
-		"IECORE_PATCH_VERSION" : ieCoreGLPatchVersion,
 	}
 
 	glEnvPrepends = {
@@ -1031,9 +1021,6 @@ if env["WITH_GL"] and doConfigure :
 		"CPPPATH" : [
 			"contrib/IECoreGL/include",
 			"$GLEW_INCLUDE_PATH",
-		],
-		"CPPFLAGS" : [
-			"-DIE_CORE_MAJOR_VERSION=%d" % ieCoreMajorVersion,
 		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",

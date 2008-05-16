@@ -69,8 +69,3 @@ void IECoreGL::init( bool glAlreadyInitialised )
 		init = true;
 	}
 }
-
-unsigned int IECoreGL::coreMajorVersion()
-{
-	return IE_CORE_MAJOR_VERSION;
-}
