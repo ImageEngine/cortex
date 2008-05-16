@@ -70,6 +70,7 @@ coreOps = [
 	[ "SearchReplaceOp", "searchReplace", "common/fileSystem" ],
 	[ "CheckImagesOp", "checkImages", "common/fileSystem" ],
 	[ "FileSequenceGraphOp", "fileSequenceGraph", "common/fileSystem" ],
+	[ "MeshPrimitiveImplicitSurfaceOp", "implicitSurface", "common/primitive/mesh" ], 	
 ]
 
 for op in coreOps : 
