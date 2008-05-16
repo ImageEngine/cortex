@@ -118,7 +118,7 @@ try :
 	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
 	if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
 		NUKE_ROOT = nukeReg["location"]
-		INSTALL_NUKELIB_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/" + platform + "/lib/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+		INSTALL_NUKELIB_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 except :
 	pass
 	
