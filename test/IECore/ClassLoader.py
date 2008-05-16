@@ -50,6 +50,11 @@ class TestClassLoader( unittest.TestCase ) :
 		
 		o = l.load( "maths/multiply" )()
 		self.assertEqual( len( o.parameters() ), 2 )
+
+	def testFinalSlash( self ) :
+	
+		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops/", ":" ) )
+		self.assertEqual( l.classNames(), ["bad", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", 'stringParsing'] )
 		
 	def testStaticLoaders( self ) :
 	
