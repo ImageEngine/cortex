@@ -293,6 +293,22 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_MAYALIB_NAME",
+	"The name under which to install the maya libraries. This "
+	"can be used to build and install the library for multiple "
+	"Maya versions.",
+	"$INSTALL_LIB_NAME"
+)
+
+o.Add(
+	"INSTALL_NUKELIB_NAME",
+	"The name under which to install the nuke libraries. This "
+	"can be used to build and install the library for multiple "
+	"Nuke versions.",
+	"$INSTALL_LIB_NAME"
+)
+
+o.Add(
 	"INSTALL_PYTHON_DIR",
 	"The directory in which to install python modules.",
 	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
@@ -730,9 +746,9 @@ def makeSymLinks( env, target ) :
 # Makes versioned symlinks for the library an environment makes.
 # This function is necessary as there's some name munging to get
 # the right prefix and suffix on the library names.
-def makeLibSymLinks( env ) :
+def makeLibSymLinks( env, libNameVar="INSTALL_LIB_NAME" ) :
 
-	p = coreEnv["INSTALL_LIB_NAME"]
+	p = env[libNameVar]
 	d = os.path.dirname( p )
 	n = os.path.basename( p )
 	n = "$SHLIBPREFIX" + n + "$SHLIBSUFFIX"
@@ -1200,11 +1216,11 @@ if doConfigure :
 		mayaEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
 		# maya library
-		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), mayaSources )
+		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaSources )
 		mayaEnv.Depends( coreInstallSync, mayaLibrary )
-		mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), mayaLibrary )
+		mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaLibrary )
 		mayaEnv.Depends( mayaLibraryInstall, coreInstallSync )
-		mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv ) )
+		mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv, "INSTALL_MAYALIB_NAME" ) )
 		mayaEnv.Alias( "install", mayaLibraryInstall )
 		mayaEnv.Alias( "installMaya", mayaLibraryInstall )
 		mayaEnv.Alias( "installLib", [ mayaLibraryInstall ] )
@@ -1228,8 +1244,8 @@ if doConfigure :
 		mayaPluginEnv.Append(
 			LIBPATH = [ "./lib" ],
 			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( coreEnv.subst( "$INSTALL_MAYALIB_NAME" ) ),
+				os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ),
 			]
 		)
 		
@@ -1349,6 +1365,9 @@ if doConfigure :
 		
 		else :
 		
+			nukeEnv["NUKE_MAJOR_VERSION"] = nukeMajorVersion
+			nukeEnv["NUKE_MINOR_VERSION"] = nukeMinorVersion	
+		
 			# we can't add this earlier as then it's built during the configure stage, and that's no good
 			nukeEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
@@ -1357,11 +1376,11 @@ if doConfigure :
 			nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
 			nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
 
-			nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeSources )
+			nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
 			nukeEnv.Depends( coreInstallSync, nukeLibrary )
-			nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ), nukeLibrary )
+			nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeLibrary )
 			nukeEnv.Depends( nukeLibraryInstall, coreInstallSync )
-			nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv ) )
+			nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv, "INSTALL_NUKELIB_NAME" ) )
 			nukeEnv.Alias( "install", nukeLibraryInstall )
 			nukeEnv.Alias( "installNuke", nukeLibraryInstall )
 			nukeEnv.Alias( "installLib", [ nukeLibraryInstall ] )
