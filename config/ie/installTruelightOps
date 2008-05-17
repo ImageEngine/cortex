@@ -42,7 +42,7 @@
 import sys
 
 import VersionControl 
-VersionControl.setVersion('IEBuild', '1.9.1') 
+VersionControl.setVersion('IEBuild', '1.15.1') 
 import IEBuild  
 
 ieCoreMajorVersion=ARGUMENTS['MAJOR']
@@ -59,4 +59,4 @@ truelightOps = [
 
 for op in truelightOps : 
 
-	IEBuild.OpWrapper( ARGUMENTS, op[0], "IECoreTruelight", ieCoreVersion, op[2], op[1], ieCoreMajorVersion ).finalize()
+	IEBuild.OpWrapper( ARGUMENTS, op[0], "IECoreTruelight", ieCoreVersion, op[2], op[1], ieCoreMajorVersion, useVersionControl = False ).finalize()
