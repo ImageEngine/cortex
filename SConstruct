@@ -749,6 +749,10 @@ def makeSymLinks( env, target ) :
 def makeLibSymLinks( env, libNameVar="INSTALL_LIB_NAME" ) :
 
 	p = env[libNameVar]
+	
+	# \todo In most cases "p" seems to contain the name of a second environment variable which has not
+	# yet been expanded - so the code below will produce incorrect paths (e.g. lib/home/user/path/name.so
+	# instead of /home/user/path/libname.so )
 	d = os.path.dirname( p )
 	n = os.path.basename( p )
 	n = "$SHLIBPREFIX" + n + "$SHLIBSUFFIX"
