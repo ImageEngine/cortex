@@ -164,4 +164,4 @@ INSTALL_CORE_POST_COMMAND="scons -f config/ie/installOps INSTALLPREFIX=$INSTALL_
 INSTALL_CORETRUELIGHT_POST_COMMAND="scons -f config/ie/installTruelightOps INSTALLPREFIX=$INSTALL_PREFIX MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install"
 
 # speed up the build a bit hopefully.
-BUILD_CACHEDIR = "/home/software/sconsBuildCache"
+BUILD_CACHEDIR = "/home/software/sconsBuildCache/" + platform
