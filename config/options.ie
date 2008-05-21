@@ -112,23 +112,27 @@ try :
 except :
 	pass
 
-# find nuke
-try :
-	nukeVersion = getOption( "NUKE_VERSION", os.environ["NUKE_VERSION"] )
-	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
-	if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
-		NUKE_ROOT = nukeReg["location"]
-		INSTALL_NUKELIB_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-except :
-	pass
+# find nuke, unless we're on intel macs where the library doesn't link right now
+if IEEnv.platform() != "osx104.i686" :
+	try :
+		nukeVersion = getOption( "NUKE_VERSION", os.environ["NUKE_VERSION"] )
+		nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
+		if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
+			NUKE_ROOT = nukeReg["location"]
+			INSTALL_NUKELIB_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	except :
+		pass
 	
-# find truelight
-try :
-	truelightReg = IEEnv.registry["apps"]["truelight"][getOption( "TRUELIGHT_VERSION", os.environ["TRUELIGHT_VERSION"] )][platform]
-	TRUELIGHT_ROOT = truelightReg["location"]
-except :
-	pass
-	
+# find truelight, unless we're on osx, where we haven't got it to link yet
+if IEEnv.platformOS() != "osx104" :
+	try :
+		truelightReg = IEEnv.registry["apps"]["truelight"][getOption( "TRUELIGHT_VERSION", os.environ["TRUELIGHT_VERSION"] )][platform]
+		TRUELIGHT_ROOT = truelightReg["location"]
+	except :
+		pass
+else :
+	TRUELIGHT_ROOT=""
+
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
 
