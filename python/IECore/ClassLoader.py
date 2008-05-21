@@ -195,8 +195,12 @@ class ClassLoader :
 						
 						head, tail = os.path.split( f )
 						head, version = os.path.split( head )
-						name = head[len(path)+1:]
-												
+						
+						if path.endswith( '/' ) :						
+							name = head[len(path):]
+						else :						
+							name = head[len(path) + 1:]
+													
 						try :
 							version = int( version )
 						except :
