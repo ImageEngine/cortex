@@ -59,8 +59,8 @@ class FromMayaPlugConverterTest( unittest.TestCase ) :
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".worldMatrix" )
 		self.assert_( converter )
 
-		transform = converter()
-		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixf.staticTypeId() ) )
+		transform = converter.convert()
+		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
