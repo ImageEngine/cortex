@@ -207,7 +207,15 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		
 	def testConvertFromPlug( self ) :
 		
-		raise NotImplementedError
+		circle = maya.cmds.circle( ch = False )[0]
+		maya.cmds.move( 1, 2, 3, circle )
+		circle = maya.cmds.listRelatives( circle, shapes=True )[0]
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( circle + ".worldSpace" )
+
+		converter.space.setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
+		curve = converter.convert()
+		self.assert_( IECore.Box3f( IECore.V3f( -1.11 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.11 ) + IECore.V3f( 1, 2, 3 ) ).contains( curve.bound() ) )
 							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
