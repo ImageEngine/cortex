@@ -297,7 +297,7 @@ o.Add(
 	"The name under which to install the maya libraries. This "
 	"can be used to build and install the library for multiple "
 	"Maya versions.",
-	"$INSTALL_LIB_NAME"
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
 )
 
 o.Add(
@@ -305,7 +305,7 @@ o.Add(
 	"The name under which to install the nuke libraries. This "
 	"can be used to build and install the library for multiple "
 	"Nuke versions.",
-	"$INSTALL_LIB_NAME"
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
 )
 
 o.Add(
@@ -750,11 +750,9 @@ def makeLibSymLinks( env, libNameVar="INSTALL_LIB_NAME" ) :
 
 	p = env[libNameVar]
 	
-	# \todo In most cases "p" seems to contain the name of a second environment variable which has not
-	# yet been expanded - so the code below will produce incorrect paths (e.g. lib/home/user/path/name.so
-	# instead of /home/user/path/libname.so )
 	d = os.path.dirname( p )
 	n = os.path.basename( p )
+		
 	n = "$SHLIBPREFIX" + n + "$SHLIBSUFFIX"
 	p = os.path.join( d, n )
 		
@@ -855,6 +853,7 @@ NoCache( coreInstallSync )
 coreLibrary = coreEnv.SharedLibrary( "lib/" + os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreSources )
 coreEnv.Depends( coreInstallSync, coreLibrary )
 coreLibraryInstall = coreEnv.Install( os.path.dirname( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreLibrary )
+coreEnv.NoCache( coreLibraryInstall )
 coreEnv.Depends( coreLibraryInstall, coreInstallSync )
 coreEnv.AddPostAction( coreLibraryInstall, lambda target, source, env : makeLibSymLinks( coreEnv ) )
 coreEnv.Alias( "install", [ coreLibraryInstall ] )
@@ -970,6 +969,7 @@ if doConfigure :
 		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riSources )
 		riEnv.Depends( coreInstallSync, riLibrary )
 		riLibraryInstall = riEnv.Install( os.path.dirname( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riLibrary )
+		riEnv.NoCache( riLibraryInstall )
 		riEnv.Depends( riLibraryInstall, coreInstallSync )		
 		riEnv.AddPostAction( riLibraryInstall, lambda target, source, env : makeLibSymLinks( riEnv ) )
 		riEnv.Alias( "install", riLibraryInstall )
@@ -1091,6 +1091,7 @@ if env["WITH_GL"] and doConfigure :
 		glLibrary = glEnv.SharedLibrary( "lib/" + os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glSources )
 		glEnv.Depends( coreInstallSync, glLibrary )
 		glLibraryInstall = glEnv.Install( os.path.dirname( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glLibrary )
+		glEnv.NoCache( glLibraryInstall )
 		glEnv.Depends( glLibraryInstall, coreInstallSync )
 		glEnv.AddPostAction( glLibraryInstall, lambda target, source, env : makeLibSymLinks( glEnv ) )
 		glEnv.Alias( "install", glLibraryInstall )
@@ -1223,6 +1224,7 @@ if doConfigure :
 		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaSources )
 		mayaEnv.Depends( coreInstallSync, mayaLibrary )
 		mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaLibrary )
+		mayaEnv.NoCache( mayaLibraryInstall )
 		mayaEnv.Depends( mayaLibraryInstall, coreInstallSync )
 		mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv, "INSTALL_MAYALIB_NAME" ) )
 		mayaEnv.Alias( "install", mayaLibraryInstall )
@@ -1442,6 +1444,7 @@ if doConfigure :
 		truelightLibrary = truelightEnv.SharedLibrary( "lib/" + os.path.basename( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightSources )
 		truelightEnv.Depends( coreInstallSync, truelightLibrary )
 		truelightLibraryInstall = truelightEnv.Install( os.path.dirname( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightLibrary )
+		truelightEnv.NoCache( truelightLibraryInstall )
 		truelightEnv.Depends( truelightLibraryInstall, coreInstallSync )
 		truelightEnv.AddPostAction( truelightLibraryInstall, lambda target, source, env : makeLibSymLinks( truelightEnv ) )
 		truelightEnv.Alias( "install", truelightLibraryInstall )
