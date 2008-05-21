@@ -80,7 +80,7 @@ class LineSegmentTest( unittest.TestCase ) :
 	
 		l = LineSegment3f( V3f( 1 ), V3f( 2 ) )
 		
-		r = Rand32()
+		r = Rand32( 100 )
 		
 		for i in range( 0, 1000 ) :
 		
@@ -118,7 +118,7 @@ class LineSegmentTest( unittest.TestCase ) :
 	
 	def testClosestPoints( self ) :
 	
-		r = Rand32()
+		r = Rand32( 100 )
 		for i in range( 0, 1000 ) :
 		
 			x = r.nextf( -10, 10 )
