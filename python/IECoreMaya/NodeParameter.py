@@ -33,7 +33,7 @@
 ##########################################################################
 
 import IECore
-from _IECoreMaya import *
+from maya.OpenMaya import *
 import re
 
 """
@@ -72,7 +72,7 @@ class NodeParameter( IECore.StringParameter ):
 				self.typeRegexDesc = "Invalid type."
 			else:
 				self.typeRegexDesc = typeRegexDescription
-				
+
 	"""
 	Defines two attributes: mustExist and mustNotExist and allowEmptyString exactly like PathParameter class.
 	"""
@@ -110,17 +110,24 @@ class NodeParameter( IECore.StringParameter ):
 		if not self.pathValidator().match( value.value ) :
 			return False, "Not a valid Maya dependency node."
 
+		list = MSelectionList ()
 		try:
-			node = Node( value.value )
-			node.name()
+			list.add( value.value )
 		except:
-			IECore.debugException("failed to instantiate Node from", value.value )
 			exist = False
 		else:
 			exist = True
 
+			try:
+				obj = MObject()
+				list.getDependNode( 0, obj )
+				depNode = MFnDependencyNode( obj )
+			except:
+				IECore.debugException("failed to instantiate MObject from", value.value )
+				return False, "'%s' is not a dependency node" % value.value
+
 			if not self.typeRegex is None:
-				nodeType = node.typeName()
+				nodeType = str(depNode.typeName())
 				if self.typeRegex.match( nodeType ) is None:
 					return False, ("Type '%s' not accepted: " % nodeType) + self.typeRegexDesc
 
@@ -137,19 +144,20 @@ class NodeParameter( IECore.StringParameter ):
 		return True, ""	
 
 	"""
-	Sets the internal StringData value to node.name
+	Sets the internal StringData value from the given dependency node MObject
 	"""	
 	def setNodeValue( self, node ) :
-		self.setValue( IECore.StringData( node.name() ) )
+		self.setValue( IECore.StringData( MFnDependencyNode( node ).name() ) )
 	
 	"""
-	Gets the internal StringData value and creates a IECoreMaya.Node
-	from it. Note that this can return None	if check is DontCare and 
-	no matching node exists in Maya.
+	Returns an MObject that corresponds to the dependency node of the current value.
 	"""
 	def getNodeValue( self ) :
 		nodeName = self.getValidatedValue().value
-		node = Node( nodeName )
-		return node
+		list = MSelectionList ()
+		list.add( nodeName )
+		obj = MObject()
+		list.getDependNode( 0, obj )
+		return obj
 
 IECore.makeRunTimeTyped( NodeParameter, 350002, IECore.StringParameter )

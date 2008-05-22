@@ -33,7 +33,7 @@
 ##########################################################################
 
 import IECore
-from _IECoreMaya import *
+from maya.OpenMaya import *
 import re
 
 """
@@ -66,13 +66,13 @@ class DAGPathParameter( IECore.StringParameter ):
 		self.__mustExist = bool( check == DAGPathParameter.CheckType.MustExist )
 		self.__mustNotExist = bool( check == DAGPathParameter.CheckType.MustNotExist )
 		if typeRegex is None:
-			self.__typeRegex = None
+			self.typeRegex = None
 		else:
-			self.__typeRegex = re.compile( typeRegex )
+			self.typeRegex = re.compile( typeRegex )
 			if typeRegexDescription == "":
-				self.__typeRegexDesc = "Invalid type."
+				self.typeRegexDesc = "Invalid type."
 			else:
-				self.__typeRegexDesc = typeRegexDescription
+				self.typeRegexDesc = typeRegexDescription
 
 	"""
 	Defines two attributes: mustExist and mustNotExist and allowEmptyString exactly like PathParameter class.
@@ -111,19 +111,26 @@ class DAGPathParameter( IECore.StringParameter ):
 		if not self.pathValidator().match( value.value ) :
 			return False, "Not a valid Maya DAG path."
 
+		list = MSelectionList ()
 		try:
-			node = DagNode( value.value )
-			node.fullPathName()
+			list.add( value.value )
 		except:
-			IECore.debugException("failed to instantiate DagNode from", value.value )
 			exist = False
 		else:
 			exist = True
 
-			if not self.__typeRegex is None:
-				nodeType = node.typeName()
-				if self.__typeRegex.match( nodeType ) is None:
-					return False, ("Type '%s' not accepted: " % nodeType) + self.__typeRegexDesc
+			try:
+				dp = MDagPath()
+				list.getDagPath(0, dp)
+				depNode = MFnDagNode( dp )
+			except:
+				IECore.debugException("failed to instantiate MDagPath from", value.value )
+				return False, "'%s' is not a DAG node" % value.value
+
+			if not self.typeRegex is None:
+				nodeType = str(depNode.typeName())
+				if self.typeRegex.match( nodeType ) is None:
+					return False, ("Type '%s' not accepted: " % nodeType) + self.typeRegexDesc
 
 		if self.mustExist :
 
@@ -138,19 +145,26 @@ class DAGPathParameter( IECore.StringParameter ):
 		return True, ""	
 
 	"""
-	Sets the internal StringData value to node.name
+	Sets the internal StringData value from the given MDagPath object
 	"""	
 	def setDAGPathValue( self, dagNode ) :
 		self.setValue( IECore.StringData( dagNode.fullPathName() ) )
 	
 	"""
-	Gets the internal StringData value and creates a IECoreMaya.DagNode
-	from it. Note that this can return None	if check is DontCare and 
-	no matching node exists in Maya.
+	Returns a MDagPath for the current node.
+	Note that this can return None if check is DontCare and no matching node exists in Maya.
 	"""
 	def getDAGPathValue( self ) :
-		dagNodePath = self.getValidatedValue().value
-		dagNode = DagNode( dagNodePath )
-		return dagNode
+		dagNodePath = self.getValue().value
+		try:
+			list = MSelectionList()
+			list.add( dagNodePath )
+			dp = MDagPath()
+			list.getDagPath(0, dp)
+			return dp
+		except:
+			if self.mustExist :
+				raise Exception, "Node '%s' does not exist!" % dagNodePath
+			return None
 
 IECore.makeRunTimeTyped( DAGPathParameter, 350001, IECore.StringParameter )

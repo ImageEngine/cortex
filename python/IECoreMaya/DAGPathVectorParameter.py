@@ -33,7 +33,7 @@
 ##########################################################################
 
 import IECore
-from _IECoreMaya import *
+from maya.OpenMaya import *
 import re
 
 from DAGPathParameter import DAGPathParameter
@@ -57,7 +57,7 @@ class DAGPathVectorParameter( IECore.StringVectorParameter ):
 	typeRegex - regular expression used on parameter validation that validates based on the maya node type. Disable filtering using None.
 	typeRegexDescription - human readable description for the regular expression used to filter node types. It's used when the validation fails.
 	"""
-	def __init__( self, name, description, defaultValue = [], allowEmptyList = True, 
+	def __init__( self, name, description, defaultValue = IECore.StringVectorData(), allowEmptyList = True, 
 		check = CheckType.DontCare, typeRegex = None, typeRegexDescription = "", 
 		presets = {}, presetsOnly = False, userData = IECore.CompoundObject() ) :
 		
@@ -67,13 +67,13 @@ class DAGPathVectorParameter( IECore.StringVectorParameter ):
 		self.__mustExist = bool( check == DAGPathVectorParameter.CheckType.MustExist )
 		self.__mustNotExist = bool( check == DAGPathVectorParameter.CheckType.MustNotExist )
 		if typeRegex is None:
-			self.__typeRegex = None
+			self.typeRegex = None
 		else:
-			self.__typeRegex = re.compile( typeRegex )
+			self.typeRegex = re.compile( typeRegex )
 			if typeRegexDescription == "":
-				self.__typeRegexDesc = "Invalid type."
+				self.typeRegexDesc = "Invalid type."
 			else:
-				self.__typeRegexDesc = typeRegexDescription
+				self.typeRegexDesc = typeRegexDescription
 
 	"""
 	Defines two attributes: mustExist and mustNotExist and allowEmptyString exactly like PathParameter class.
@@ -114,19 +114,26 @@ class DAGPathVectorParameter( IECore.StringVectorParameter ):
 			if not self.pathValidator().match( item ) :
 				return False, "%s is not a valid Maya DAG path." % item
 
+			list = MSelectionList ()
 			try:
-				node = DagNode( item )
-				node.fullPathName()
+				list.add( item )
 			except:
-				IECore.debugException("failed to instantiate DagNode from", item )
 				exist = False
 			else:
 				exist = True
 
-				if not self.__typeRegex is None:
-					nodeType = node.typeName()
-					if self.__typeRegex.match( nodeType ) is None:
-						return False, ("Type '%s' not accepted: " % nodeType) + self.__typeRegexDesc
+				try:
+					dp = MDagPath()
+					list.getDagPath(0, dp)
+					depNode = MFnDagNode( dp )
+				except:
+					IECore.debugException("failed to instantiate MDagPath from", item )
+					return False, "'%s' is not a DAG node" % item
+
+				if not self.typeRegex is None:
+					nodeType = str(depNode.typeName())
+					if self.typeRegex.match( nodeType ) is None:
+						return False, ("Type '%s' not accepted: " % nodeType) + self.typeRegexDesc
 
 			if self.mustExist :
 
@@ -141,7 +148,7 @@ class DAGPathVectorParameter( IECore.StringVectorParameter ):
 		return True, ""	
 
 	"""
-	Sets the internal VectorStringData value from the given node list
+	Sets the internal VectorStringData value from the given MDagPath list
 	"""	
 	def setDAGPathVectorValue( self, dagNodeList ) :
 		l = []
@@ -150,13 +157,23 @@ class DAGPathVectorParameter( IECore.StringVectorParameter ):
 		self.setValue( IECore.StringVectorData( l ) )
 	
 	"""
-	Uses the internal VectorStringData value to create a list of IECoreMaya.DagNode from it.
+	Returns a list of MDagPath objects from the current selection.
 	"""
 	def getDAGPathVectorValue( self ) :
-		dagNodePathList = self.getValidatedValue()
+		dagNodePathList = self.getValue().value
 		result = []
 		for dagNodePath in dagNodePathList:
-			result.append( DagNode( dagNodePath ) )
+		
+			try:
+				list = MSelectionList()
+				list.add( dagNodePath )
+				dp = MDagPath()
+				list.getDagPath(0, dp)
+				result.append( dp )
+			except:
+				if self.mustExist :
+					raise Exception, "Node '%s' does not exist!" % dagNodePath
+
 		return result
 
 IECore.makeRunTimeTyped( DAGPathVectorParameter, 350002, IECore.StringVectorParameter )
