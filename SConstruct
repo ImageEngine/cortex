@@ -887,6 +887,7 @@ Default( coreLibrary, corePythonModule )
 
 if coreEnv["INSTALL_CORE_POST_COMMAND"]!="" :
 	# this is the only way we could find to get a post action to run for an alias
+	corePythonEnv.Alias( "install", corePythonModuleInstall, "$INSTALL_CORE_POST_COMMAND" ) 
 	corePythonEnv.Alias( "installCore", corePythonModuleInstall, "$INSTALL_CORE_POST_COMMAND" ) 
 
 # testing
@@ -1000,7 +1001,8 @@ if doConfigure :
 
 		if coreEnv["INSTALL_CORERI_POST_COMMAND"]!="" :
 			# this is the only way we could find to get a post action to run for an alias
-			corePythonEnv.Alias( "installRI", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
+			riPythonEnv.Alias( "install", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
+			riPythonEnv.Alias( "installRI", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
 
 		Default( [ riLibrary, riPythonModule ] )
 		
@@ -1134,7 +1136,8 @@ if env["WITH_GL"] and doConfigure :
 
 		if coreEnv["INSTALL_COREGL_POST_COMMAND"]!="" :
 			# this is the only way we could find to get a post action to run for an alias
-			corePythonEnv.Alias( "installGL", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
+			glPythonEnv.Alias( "install", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
+			glPythonEnv.Alias( "installGL", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
 
 		Default( [ glLibrary, glPythonModule ] )
 
@@ -1307,7 +1310,8 @@ if doConfigure :
 
 		if coreEnv["INSTALL_COREMAYA_POST_COMMAND"]!="" :
 			# this is the only way we could find to get a post action to run for an alias
-			corePythonEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
+			mayaPythonEnv.Alias( "install", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
+			mayaPythonEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
 
 		Default( [ mayaLibrary, mayaPlugin, mayaPythonModule ] )
 		
@@ -1400,7 +1404,8 @@ if doConfigure :
 
 			if coreEnv["INSTALL_CORENUKE_POST_COMMAND"]!="" :
 				# this is the only way we could find to get a post action to run for an alias
-				corePythonEnv.Alias( "installNuke", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" ) 
+				nukeEnv.Alias( "install", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" ) 
+				nukeEnv.Alias( "installNuke", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" ) 
 
 			Default( [ nukeLibrary ] )
 
@@ -1477,7 +1482,8 @@ if doConfigure :
 		
 		if coreEnv["INSTALL_CORETRUELIGHT_POST_COMMAND"]!="" :
 			# this is the only way we could find to get a post action to run for an alias
-			corePythonEnv.Alias( "installTruelight", truelightLibraryInstall, "$INSTALL_CORETRUELIGHT_POST_COMMAND" ) 
+			truelightEnv.Alias( "install", truelightLibraryInstall, "$INSTALL_CORETRUELIGHT_POST_COMMAND" ) 
+			truelightEnv.Alias( "installTruelight", truelightLibraryInstall, "$INSTALL_CORETRUELIGHT_POST_COMMAND" ) 
 
 		Default( [ truelightLibrary, truelightPythonModule ] )
 		
