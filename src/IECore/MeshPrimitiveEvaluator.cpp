@@ -794,12 +794,8 @@ bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEva
 	{
 		throw Exception("No uvs available for pointAtUV");
 	}
-
-#ifndef NDEBUG	
-	BoundedTriangleTree* &m_uvTree = m_uvTree;		
-	assert( m_uvTree );
-#endif	
 	
+	assert( m_uvTree );	
 	ResultPtr mr = boost::static_pointer_cast< Result >( result );
 	
 	float maxDistSqrd = 2.0f;
@@ -810,7 +806,7 @@ bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEva
 	
 	bool hit = false;
 			
-	pointAtUVWalk( m_tree->rootIndex(), ray, maxDistSqrd, mr, hit );
+	pointAtUVWalk( m_uvTree->rootIndex(), ray, maxDistSqrd, mr, hit );
 	return hit;
 }
 
