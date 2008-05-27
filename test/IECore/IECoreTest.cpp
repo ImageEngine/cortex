@@ -52,6 +52,7 @@
 #include "DataConvertTest.h"
 #include "DespatchTypedDataTest.h"
 #include "CompilerTest.h"
+#include "RadixSortTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -74,6 +75,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addDataConvertTest(test);
 		addDespatchTypedDataTest(test);
 		addCompilerTest(test);
+		addRadixSortTest(test);
 	} 
 	catch (std::exception &ex)
 	{
