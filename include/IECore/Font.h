@@ -38,6 +38,7 @@
 #include "IECore/RunTimeTyped.h"
 
 #include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathBox.h"
 
 #include "boost/shared_ptr.hpp"
 
@@ -66,6 +67,8 @@ class Font : public RunTimeTyped
 		Font( const std::string &fontFile );
 		virtual ~Font();
 
+		const std::string &fileName() const;
+
 		void setKerning( float kerning );
 		float getKerning() const;
 
@@ -75,10 +78,15 @@ class Font : public RunTimeTyped
 		void setResolution( float pixelsPerEm );
 		float getResolution() const;
 
+		/// \todo All these methods should be const. The internal cache
+		/// is an implementation detail which is irrelevant to clients
+		/// of the class.
 		ConstMeshPrimitivePtr mesh( char c );
 		MeshPrimitivePtr mesh( const std::string &text );
 		GroupPtr meshGroup( const std::string &text );
 		Imath::V2f advance( char first, char second );
+		Imath::Box2f bound( char c );
+		Imath::Box2f bound( const std::string &text );
 		
 	private :
 

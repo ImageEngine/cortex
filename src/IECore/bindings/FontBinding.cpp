@@ -65,6 +65,7 @@ void bindFont()
 {
 	typedef class_< Font, boost::noncopyable, FontPtr, bases< RunTimeTyped > > FontPyClass;
 	FontPyClass( "Font", init<const std::string &>() )
+		.def( "fileName", &Font::fileName, return_value_policy<copy_const_reference>() )
 		.def( "setCurveTolerance", &Font::setCurveTolerance )
 		.def( "getCurveTolerance", &Font::getCurveTolerance )
 		.def( "setResolution", &Font::setResolution )
@@ -75,6 +76,8 @@ void bindFont()
 		.def( "mesh", (MeshPrimitivePtr (Font::*)( const std::string &))&Font::mesh )
 		.def( "meshGroup", &Font::meshGroup )
 		.def( "advance", &Font::advance )
+		.def( "bound", (Imath::Box2f (Font::*)( char ))&Font::bound )
+		.def( "bound", (Imath::Box2f (Font::*)( const std::string &))&Font::bound )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Font )		
 	;
 

@@ -44,6 +44,7 @@
 #include "IECore/MeshMergeOp.h"
 #include "IECore/Group.h"
 #include "IECore/MatrixTransform.h"
+#include "IECore/ClassData.h"
 
 #include "ft2build.h"
 #include FT_FREETYPE_H
@@ -54,6 +55,9 @@
 using namespace IECore;
 using namespace Imath;
 using namespace std;
+
+/// \todo Use standard member data on the next major version.
+static ClassData<Font, string> g_fileNames;
 
 ////////////////////////////////////////////////////////////////////////////////
 // struct definitions for the font caches
@@ -288,6 +292,7 @@ int Font::Mesher::cubicTo( const FT_Vector *control1, const FT_Vector *control2,
 Font::Font( const std::string &fontFile )
 	:	m_kerning( 1.0f ), m_curveTolerance( 0.01 ), m_pixelsPerEm( 100 )
 {
+	g_fileNames.create( this, fontFile );
 	FT_Error e = FT_New_Face( library(), fontFile.c_str(), 0, &m_face );
 	if( e )
 	{
@@ -297,7 +302,13 @@ Font::Font( const std::string &fontFile )
 
 Font::~Font()
 {
+	g_fileNames.erase( this );
 	FT_Done_Face( m_face );
+}
+
+const std::string &Font::fileName() const
+{
+	return g_fileNames[this];
 }
 
 void Font::setKerning( float kerning )
@@ -460,6 +471,36 @@ Imath::V2f Font::advance( char first, char second )
 	return a;
 }
 
+Imath::Box2f Font::bound( char c )
+{
+	Imath::Box3f b = cachedMesh( c )->bound;
+	return Imath::Box2f( Imath::V2f( b.min.x, b.min.y ), Imath::V2f( b.max.x, b.max.y ) );
+}
+
+Imath::Box2f Font::bound( const std::string &text )
+{
+	Imath::Box2f result;
+	if( !text.size() )
+	{
+		return result;
+	}
+	
+	V2f translate( 0 );
+	for( unsigned i=0; i<text.size(); i++ )
+	{
+		Box2f b = bound( text[i] );
+		b.min += translate;
+		b.max += translate;
+		result.extendBy( b );
+		if( i<text.size()-1 )
+		{
+			translate += advance( text[i], text[i+1] );
+		}
+	}
+	
+	return result;
+}
+		
 FT_Library Font::library()
 {
 	static FT_Library l;
