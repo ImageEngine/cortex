@@ -164,6 +164,78 @@ GLbitfield RightHandedOrientationStateComponent::mask() const
 
 template class TypedStateComponent<bool, RightHandedOrientationStateComponentTypeId>;
 
+// smoothing specialisations and instantiations
+//////////////////////////////////////////////////////////////////////
+
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( LineSmoothingStateComponent, bool, false );
+
+template<>
+void LineSmoothingStateComponent::bind() const
+{
+	if( m_value )
+	{
+		glEnable( GL_LINE_SMOOTH );
+	}
+	else
+	{
+		glDisable( GL_LINE_SMOOTH );
+	}
+}
+
+template<>
+GLbitfield LineSmoothingStateComponent::mask() const
+{
+	return GL_ENABLE_BIT;
+}
+
+template class TypedStateComponent<bool, LineSmoothingStateComponentTypeId>;
+
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( PointSmoothingStateComponent, bool, false );
+
+template<>
+void PointSmoothingStateComponent::bind() const
+{
+	if( m_value )
+	{
+		glEnable( GL_POINT_SMOOTH );
+	}
+	else
+	{
+		glDisable( GL_POINT_SMOOTH );
+	}
+}
+
+template<>
+GLbitfield PointSmoothingStateComponent::mask() const
+{
+	return GL_ENABLE_BIT;
+}
+
+template class TypedStateComponent<bool, PointSmoothingStateComponentTypeId>;
+
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( PolygonSmoothingStateComponent, bool, false );
+
+template<>
+void PolygonSmoothingStateComponent::bind() const
+{
+	if( m_value )
+	{
+		glEnable( GL_POLYGON_SMOOTH );
+	}
+	else
+	{
+		glDisable( GL_POLYGON_SMOOTH );
+	}
+}
+
+template<>
+GLbitfield PolygonSmoothingStateComponent::mask() const
+{
+	return GL_ENABLE_BIT;
+}
+
+template class TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId>;
+
 // instantiation of simple mask()==0 types
 //////////////////////////////////////////////////////////////////////
 

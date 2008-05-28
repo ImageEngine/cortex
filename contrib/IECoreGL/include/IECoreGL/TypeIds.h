@@ -96,6 +96,9 @@ enum TypeId
 	ToGLMeshConverterTypeId = 105053,
 	FontTypeId = 105054,
 	TextPrimitiveTypeId = 105055,
+	PointSmoothingStateComponentTypeId = 105056,
+	LineSmoothingStateComponentTypeId = 105057,
+	PolygonSmoothingStateComponentTypeId = 105058,
 	LastCoreGLTypeId = 105999,	
 };	
 

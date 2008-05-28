@@ -978,6 +978,9 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:curvesPrimitive:useGLLines"] = typedAttributeSetter<CurvesPrimitive::UseGLLines>;
 		(*a)["gl:curvesPrimitive:glLineWidth"] = typedAttributeSetter<CurvesPrimitive::GLLineWidth>;
 		(*a)["gl:curvesPrimitive:ignoreBasis"] = typedAttributeSetter<CurvesPrimitive::IgnoreBasis>;
+		(*a)["gl:smoothing:points"] = typedAttributeSetter<PointSmoothingStateComponent>;
+		(*a)["gl:smoothing:lines"] = typedAttributeSetter<LineSmoothingStateComponent>;
+		(*a)["gl:smoothing:polygons"] = typedAttributeSetter<PolygonSmoothingStateComponent>;
 	}
 	return a;
 }
@@ -1016,6 +1019,9 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:curvesPrimitive:useGLLines"] = typedAttributeGetter<CurvesPrimitive::UseGLLines>;
 		(*a)["gl:curvesPrimitive:glLineWidth"] = typedAttributeGetter<CurvesPrimitive::GLLineWidth>;
 		(*a)["gl:curvesPrimitive:ignoreBasis"] = typedAttributeGetter<CurvesPrimitive::IgnoreBasis>;
+		(*a)["gl:smoothing:points"] = typedAttributeGetter<PointSmoothingStateComponent>;
+		(*a)["gl:smoothing:lines"] = typedAttributeGetter<LineSmoothingStateComponent>;
+		(*a)["gl:smoothing:polygons"] = typedAttributeGetter<PolygonSmoothingStateComponent>;
 	}
 	return a;
 }

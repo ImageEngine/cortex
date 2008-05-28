@@ -267,6 +267,15 @@ class Renderer : public IECore::Renderer
 		/// "reverseSubtract"<br>
 		/// "min"<br>
 		/// "max"<br>
+		///
+		/// \par Implementation specific antialiasing attributes :
+		///////////////////////////////////////////////////////////
+		///
+		/// \li <b>"gl:smoothing:points" BoolData false</b><br>
+		/// \li <b>"gl:smoothing:lines" BoolData false</b><br>
+		/// \li <b>"gl:smoothing:polygons" BoolData false</b><br>
+		/// These attributes enable GL_POINT_SMOOTH, GL_LINE_SMOOTH and
+		/// GL_POLYGON_SMOOTH respectively.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 		/// Supports only shader type "surface" or "gl:surface", looking for "name.vert" and  "name.frag" GLSL source files

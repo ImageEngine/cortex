@@ -102,6 +102,9 @@ class TestRenderer( unittest.TestCase ) :
 			self.assertEqual( r.getAttribute( "gl:primitive:sortForTransparency" ), BoolData( True ) )
 			self.assertEqual( r.getAttribute( "name" ), StringData( "unnamed" ) )
 			self.assertEqual( r.getAttribute( "doubleSided" ), BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:points" ), BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:lines" ), BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), BoolData( False ) )
 		
 			r.setAttribute( "color", Color3fData( Color3f( 0, 1, 2 ) ) )
 			self.assertEqual( r.getAttribute( "color" ), Color3fData( Color3f( 0, 1, 2 ) ) )
@@ -146,6 +149,13 @@ class TestRenderer( unittest.TestCase ) :
 			
 			r.setAttribute( "doubleSided", BoolData( False ) )
 			self.assertEqual( r.getAttribute( "doubleSided" ), BoolData( False ) )
+			
+			r.setAttribute( "gl:smoothing:points", BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:points" ), BoolData( True ) )
+			r.setAttribute( "gl:smoothing:lines", BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:lines" ), BoolData( True ) )
+			r.setAttribute( "gl:smoothing:polygons", BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), BoolData( True ) )
 				
 			r.worldEnd()
 	

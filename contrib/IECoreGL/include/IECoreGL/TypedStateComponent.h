@@ -191,7 +191,6 @@ void DoubleSidedStateComponent::bind() const;
 template<>
 GLbitfield DoubleSidedStateComponent::mask() const;
 
-
 /// Used to implement the "rightHandedOrientation" Renderer attribute. Implemented by calling
 /// glFrontFace( GL_CCW ) when true and glFrontFace( GL_CW ) when false. 
 typedef TypedStateComponent<bool, RightHandedOrientationStateComponentTypeId> RightHandedOrientationStateComponent;
@@ -200,6 +199,26 @@ void RightHandedOrientationStateComponent::bind() const;
 template<>
 GLbitfield RightHandedOrientationStateComponent::mask() const;
 
+/// Used to specify enable state of GL_LINE_SMOOTH
+typedef TypedStateComponent<bool, LineSmoothingStateComponentTypeId> LineSmoothingStateComponent;
+template<>
+void LineSmoothingStateComponent::bind() const;
+template<>
+GLbitfield LineSmoothingStateComponent::mask() const;
+
+/// Used to specify enable state of GL_POINT_SMOOTH
+typedef TypedStateComponent<bool, PointSmoothingStateComponentTypeId> PointSmoothingStateComponent;
+template<>
+void PointSmoothingStateComponent::bind() const;
+template<>
+GLbitfield PointSmoothingStateComponent::mask() const;
+
+/// Used to specify enable state of GL_POLYGON_SMOOTH
+typedef TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId> PolygonSmoothingStateComponent;
+template<>
+void PolygonSmoothingStateComponent::bind() const;
+template<>
+GLbitfield PolygonSmoothingStateComponent::mask() const;
 
 IE_CORE_DECLAREPTR( Color );
 IE_CORE_DECLAREPTR( PrimitiveBound );
@@ -220,6 +239,8 @@ IE_CORE_DECLAREPTR( PointColorStateComponent );
 IE_CORE_DECLAREPTR( PointsPrimitiveUseGLPoints );
 IE_CORE_DECLAREPTR( PointsPrimitiveGLPointWidth );
 IE_CORE_DECLAREPTR( DoubleSidedStateComponent );
+IE_CORE_DECLAREPTR( LineSmoothingStateComponent );
+IE_CORE_DECLAREPTR( PointSmoothingStateComponent );
 
 } // namespace IECoreGL
 
