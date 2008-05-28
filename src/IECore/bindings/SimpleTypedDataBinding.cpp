@@ -276,6 +276,7 @@ static class_<T, intrusive_ptr<T>, boost::noncopyable, bases<Data> > bindSimpleD
 template<class T>
 static void bindNumericMethods( class_<T, intrusive_ptr<T>, boost::noncopyable, bases<Data> > &c )
 {
+	/// \todo minValue/maxValue should be static
 	c.add_property( "minValue", &minValue<T>, "Minimum representable value." );
 	c.add_property( "maxValue", &maxValue<T>, "Maximum representable value." );
 	c.def( "__cmp__", &cmp<T>, "Comparison operators ( <, >, >=, <= )" );
