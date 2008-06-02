@@ -276,5 +276,20 @@ MeshPrimitivePtr MeshPrimitive::createPlane( Box2f b )
 	p->writable().push_back( V3f( b.max.x, b.max.y, 0 ) );
 	p->writable().push_back( V3f( b.min.x, b.max.y, 0 ) );
 	
-	return new MeshPrimitive( verticesPerFace, vertexIds, "linear", p );
+	FloatVectorDataPtr s = new FloatVectorData;
+	FloatVectorDataPtr t = new FloatVectorData;
+	s->writable().push_back( 0 );
+	t->writable().push_back( 1 );
+	s->writable().push_back( 1 );
+	t->writable().push_back( 1 );
+	s->writable().push_back( 1 );
+	t->writable().push_back( 0 );
+	s->writable().push_back( 0 );
+	t->writable().push_back( 0 );
+	
+	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", p );
+	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, s );
+	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, t );
+	
+	return result;
 }
