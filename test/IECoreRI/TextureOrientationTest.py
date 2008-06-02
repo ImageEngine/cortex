@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,37 +32,52 @@
 #
 ##########################################################################
 
-import sys
+import unittest
 import IECore
+import IECoreRI
+import os.path
+import os
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
-from Orientation import *
-from MultipleContextsTest import *
-from Camera import *
-from CurvesTest import *
-from TextureOrientationTest import *
+class TextureOrientationTest( unittest.TestCase ) :
 
-if IECore.withFreeType() :
-
-	from TextTest import *
-
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
-
-	def __init__( self ) :
+	def test( self ) :
 	
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )		
+		r = IECoreRI.Renderer( "" )
+		r.display( "test/IECoreRI/output/testTextureOrientation1.tif", "tiff", "rgba", {} )
+		r.worldBegin()
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+		r.shader( "surface", "st", {} )
+		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
+		r.worldEnd()
 
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
+		del r
+		
+		r = IECoreRI.Renderer( "" )
+		r.display( "test/IECoreRI/output/testTextureOrientation2.tif", "tiff", "rgba", {} )
+		r.worldBegin()
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+		r.shader( "surface", "test/IECoreRI/shaders/tex", {} )
+		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
+		r.worldEnd()
+		
+		ie = IECore.ImageReader.create( "test/IECoreRI/data/textureOrientationImages/expected.tif" ).read()
+		i1 = IECore.ImageReader.create( "test/IECoreRI/output/testTextureOrientation1.tif" ).read()
+		i2 = IECore.ImageReader.create( "test/IECoreRI/output/testTextureOrientation2.tif" ).read()
+		
+		testOp = IECore.ImageDiffOp()
+		
+		self.assert_( not testOp( imageA=ie, imageB=i1, maxError=0.002 ).value ) 
+		self.assert_( not testOp( imageA=ie, imageB=i2, maxError=0.002 ).value ) 
+			
+	def tearDown( self ) :
+	
+		files = [
+			"test/IECoreRI/output/testTextureOrientation1.tif",
+			"test/IECoreRI/output/testTextureOrientation2.tif"
+		]
+		for f in files :
+			if os.path.exists( f ) :
+				os.remove( f )
+				
+if __name__ == "__main__":
+    unittest.main()   
