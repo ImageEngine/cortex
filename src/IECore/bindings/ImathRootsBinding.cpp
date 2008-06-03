@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,31 +32,82 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+// This include needs to be the very first to prevent problems with warnings 
+// regarding redefinition of _POSIX_C_SOURCE
+#include <boost/python.hpp>
 
-#include "IECore/bindings/ImathBinding.h"
-#include "IECore/bindings/ImathVecBinding.h"
-#include "IECore/bindings/ImathBoxBinding.h"
-#include "IECore/bindings/ImathQuatBinding.h"
-#include "IECore/bindings/ImathMatrixBinding.h"
-#include "IECore/bindings/ImathColorBinding.h"
-#include "IECore/bindings/ImathEulerBinding.h"
+#include "OpenEXR/ImathRoots.h"
+
 #include "IECore/bindings/ImathRootsBinding.h"
 
-using namespace IECore;
+using namespace boost::python;
+using namespace Imath;
 
-// Binding implementations
 namespace IECore 
 {
-	
-void bindImath()
+
+tuple solveLinearWrapper( double a, double b )
 {
-	bindImathVec();	
-	bindImathBox();
-	bindImathQuat();
-	bindImathMatrix();
-	bindImathColor();
-	bindImathEuler();
-	bindImathRoots();
+	double x;
+	int s = solveLinear( a, b, x );
+	switch( s )
+	{
+		case 0 :
+			return tuple();
+		case 1 :
+			return make_tuple( x );
+		default :
+			PyErr_SetString( PyExc_ArithmeticError, "Infinite solutions." );
+			throw_error_already_set();
+			return tuple(); // should never get here
+	}
+}
+
+tuple solveQuadraticWrapper( double a, double b, double c )
+{
+	double x[2];
+	int s = solveQuadratic( a, b, c, x );
+	switch( s )
+	{
+		case 0 :
+			return tuple();
+		case 1 :
+			return make_tuple( x[0] );
+		case 2 :
+			return make_tuple( x[0], x[1] );	
+		default :
+			PyErr_SetString( PyExc_ArithmeticError, "Infinite solutions." );
+			throw_error_already_set();
+			return tuple(); // should never get here
+	}
+}
+
+tuple solveCubicWrapper( double a, double b, double c, double d )
+{
+	double x[3];
+	int s = solveCubic( a, b, c, d, x );
+	switch( s )
+	{
+		case 0 :
+			return tuple();
+		case 1 :
+			return make_tuple( x[0] );
+		case 2 :
+			return make_tuple( x[0], x[1] );
+		case 3 :
+			return make_tuple( x[0], x[1], x[2] );		
+		default :
+			PyErr_SetString( PyExc_ArithmeticError, "Infinite solutions." );
+			throw_error_already_set();
+			return tuple(); // should never get here
+	}
+}
+
+void bindImathRoots()
+{
+	def( "solveLinear", &solveLinearWrapper );
+	def( "solveQuadratic", &solveQuadraticWrapper );
+	def( "solveCubic", &solveCubicWrapper );
 }
 
 }
