@@ -137,8 +137,7 @@ unsigned char BoundedKDTree<BoundIterator>::majorAxis( PermutationConstIterator 
 	BaseType min, max;
 	vecSetAll( min, Imath::limits<typename BaseType::BaseType>::max() );
 	vecSetAll( max, Imath::limits<typename BaseType::BaseType>::min() );	
-	
-	/// \todo Find a better cutting axis
+		
 	for( PermutationConstIterator it=permFirst; it!=permLast; it++ )
 	{
 		BaseType center = boxCenter(**it);
