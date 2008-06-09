@@ -42,7 +42,7 @@
 import sys
 
 import VersionControl 
-VersionControl.setVersion('IEBuild', '1.15.1') 
+VersionControl.setVersion('IEBuild', '1.19.0') 
 import IEBuild  
 
 ieCoreMajorVersion=ARGUMENTS['MAJOR']
@@ -76,3 +76,12 @@ coreOps = [
 for op in coreOps : 
 
 	IEBuild.OpWrapper( ARGUMENTS, op[0], "IECore", ieCoreVersion, op[2], op[1], ieCoreMajorVersion, useVersionControl = False ).finalize()
+
+
+coreProcedurals = [ 
+	[ "ReadProcedural", "read", "" ], 
+]
+
+for procedural in coreProcedurals : 
+
+	IEBuild.ProceduralWrapper( ARGUMENTS, procedural[0], "IECore", ieCoreVersion, procedural[2], procedural[1], ieCoreMajorVersion, useVersionControl = False ).finalize()
