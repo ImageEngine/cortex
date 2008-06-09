@@ -40,6 +40,9 @@ using namespace IECore;
 
 RadixSort::RadixSort() : m_currentSize( 0 ), m_ranks( 0 ), m_ranks2( 0 )
 {
+	m_ranks = new UIntVectorData();
+	m_ranks2 = new UIntVectorData();
+
 	m_currentSize |= 0x80000000;
 }
 
@@ -49,10 +52,7 @@ RadixSort::~RadixSort()
 
 void RadixSort::resize( unsigned int s )
 {
-	m_ranks = new UIntVectorData();
-	m_ranks->writable().resize( s );
-
-	m_ranks2 = new UIntVectorData();
+	m_ranks->writable().resize( s );	
 	m_ranks2->writable().resize( s );
 }
 
@@ -88,9 +88,10 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<float>
 {
 	const unsigned int nb = input2.size();
 	checkResize( nb );
-	
+
 	if ( !nb )
 	{
+		assert( m_ranks );
 		return m_ranks->readable();
 	}
 
@@ -116,6 +117,7 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<float>
 		{
 			unsigned char uniqueVal = 0;
 			unsigned int *curCount = 0;
+
 			bool performPass = checkPassValidity( input2, j, curCount, uniqueVal );
 
 			if ( performPass )
