@@ -54,33 +54,33 @@ IE_CORE_FORWARDDECLARE( MeshPrimitiveEvaluator )
 class PointRepulsionOp : public ModifyOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( PointRepulsionOp, ModifyOp );
-		
+
 		PointRepulsionOp();
 		virtual ~PointRepulsionOp();
-						
-		MeshPrimitiveParameterPtr meshParameter();											
+
+		MeshPrimitiveParameterPtr meshParameter();
 		ConstMeshPrimitiveParameterPtr meshParameter() const;
-		
+
 		ImagePrimitiveParameterPtr imageParameter();
-		ConstImagePrimitiveParameterPtr imageParameter() const;			
-		
+		ConstImagePrimitiveParameterPtr imageParameter() const;
+
 		StringParameterPtr channelNameParameter();
-		ConstStringParameterPtr channelNameParameter() const;	
-		
+		ConstStringParameterPtr channelNameParameter() const;
+
 		IntParameterPtr numIterationsParameter();
 		ConstIntParameterPtr numIterationsParameter() const;
-		
+
 		FloatParameterPtr magnitudeParameter();
 		ConstFloatParameterPtr magnitudeParameter() const;
-		
+
 		StringParameterPtr weightsNameParameter();
 		ConstStringParameterPtr weightsNameParameter() const;
-		
-		
+
+
 	protected :
-	
+
 		void getNearestPointsAndDensities( ImagePrimitiveEvaluatorPtr, const PrimitiveVariable &density, MeshPrimitiveEvaluatorPtr, const PrimitiveVariable &s, const PrimitiveVariable &t, std::vector<Imath::V3f> &points, std::vector<float> &densities );
 		void calculateForces( std::vector<Imath::V3f> &points, std::vector<float> &radii, std::vector<Imath::Box3f> &bounds, std::vector<Imath::V3f> &forces, Imath::Rand48 &generator, std::vector<float> &densities, float densityInv );
 
@@ -91,7 +91,7 @@ class PointRepulsionOp : public ModifyOp
 		StringParameterPtr m_channelNameParameter;
 		IntParameterPtr m_numIterationsParameter;
 		FloatParameterPtr m_magnitudeParameter;
-		StringParameterPtr m_weightsNameParameter;		
+		StringParameterPtr m_weightsNameParameter;
 
 };
 

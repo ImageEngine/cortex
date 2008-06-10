@@ -89,7 +89,7 @@ PointRepulsionOp::PointRepulsionOp()
 	        "The mesh over which the points have been distributed",
 	        new MeshPrimitive()
 	);
-	
+
 	m_imageParameter = new ImagePrimitiveParameter(
 	        "image",
 	        "The image specifying the density map.",
@@ -110,21 +110,21 @@ PointRepulsionOp::PointRepulsionOp()
 	        channelNamePresets,
 	        false
 	);
-	
+
 	m_numIterationsParameter = new IntParameter(
 	        "numIterations",
 	        "The number of repulsion iterations to apply.",
 	        5000,
-		1
+	        1
 	);
-	
+
 	m_magnitudeParameter = new FloatParameter(
 	        "magnitude",
 	        "The magnitude of the force applied by each individual repulsion.",
 	        0.01f,
-		1.e-10f
+	        1.e-10f
 	);
-	
+
 	m_weightsNameParameter = new StringParameter(
 	        "weightsName",
 	        "The name of the primvar in the PointsPrimitive to use as the per-point weights",
@@ -135,8 +135,8 @@ PointRepulsionOp::PointRepulsionOp()
 	parameters()->addParameter( m_channelNameParameter );
 	parameters()->addParameter( m_meshParameter );
 	parameters()->addParameter( m_numIterationsParameter );
-	parameters()->addParameter( m_magnitudeParameter );		
-	parameters()->addParameter( m_weightsNameParameter );			
+	parameters()->addParameter( m_magnitudeParameter );
+	parameters()->addParameter( m_weightsNameParameter );
 }
 
 PointRepulsionOp::~PointRepulsionOp()
@@ -218,7 +218,7 @@ void PointRepulsionOp::getNearestPointsAndDensities( ImagePrimitiveEvaluatorPtr 
 		{
 			throw InvalidArgumentException( "PointRepulsionOp: Invaid mesh - closest point is undefined" );
 		}
-		
+
 		points[p] = meshResult->point();
 
 		Imath::V2f uv(
@@ -258,24 +258,24 @@ void PointRepulsionOp::getNearestPointsAndDensities( ImagePrimitiveEvaluatorPtr 
 void PointRepulsionOp::calculateForces( std::vector<V3f> &points, std::vector<float> &radii, std::vector<Imath::Box3f> &bounds, std::vector<Imath::V3f> &forces, Imath::Rand48 &generator, std::vector<float> &densities, float densityInv )
 {
 	unsigned numPoints = points.size();
-	
+
 	Box3fTree tree( bounds.begin(), bounds.end(), 16 );
 
-	typedef std::vector< Box3fTree::Iterator> Bounds;		
+	typedef std::vector< Box3fTree::Iterator> Bounds;
 
 	for ( std::vector<V3f>::size_type p = 0; p < numPoints; p++ )
-	{									
-		Bounds approximateBounds;					
+	{
+		Bounds approximateBounds;
 		tree.intersectingBounds( bounds[p], approximateBounds );
 
 		for ( Bounds::const_iterator it = approximateBounds.begin(); it != approximateBounds.end(); ++it )
-                {
+		{
 			const std::vector<V3f>::size_type other = *it - bounds.begin();
-                        assert( other < numPoints );				
+			assert( other < numPoints );
 			assert( other < radii.size() );
 
 			if ( p != other )
-	                {			
+			{
 				Imath::V3f separation = points[p] - points[other];
 
 				float dist = separation.length();
@@ -283,8 +283,8 @@ void PointRepulsionOp::calculateForces( std::vector<V3f> &points, std::vector<fl
 				float densityDiff = 1.0f - fabsf( densities[p] * densityInv - densities[other] * densityInv );
 
 				if ( dist < radii[p] + radii[other] )
-				{	
-					float overlap = radii[p] + radii[other] - dist;							
+				{
+					float overlap = radii[p] + radii[other] - dist;
 					assert( overlap >= 0.0f );
 					float overlapNorm = overlap / ( radii[p] + radii[other] );
 
@@ -295,9 +295,9 @@ void PointRepulsionOp::calculateForces( std::vector<V3f> &points, std::vector<fl
 					}
 					else
 					{
-						/// Force acts to move current point away from neighbour along their line of separation															
+						/// Force acts to move current point away from neighbour along their line of separation
 						forces[ p ] += densityDiff * overlapNorm * separation.normalized() ;
-					}					
+					}
 				}
 			}
 		}
@@ -318,17 +318,17 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 
 	PointsPrimitivePtr pointsPrimitive = runTimeCast< PointsPrimitive >( object );
 	assert( pointsPrimitive );
-	
+
 	ImagePrimitivePtr image = runTimeCast< ImagePrimitive >( m_imageParameter->getValue()->copy() );
 	assert( image );
 
 	const std::string &channelName = m_channelNameParameter->getTypedValue();
-	
+
 	const int numIterations = m_numIterationsParameter->getNumericValue();
-	
+
 	const float magnitude = m_magnitudeParameter->getNumericValue();
-	
-	const std::string &weightsName = m_weightsNameParameter->getTypedValue();	
+
+	const std::string &weightsName = m_weightsNameParameter->getTypedValue();
 
 	PrimitiveVariableMap::const_iterator sIt = mesh->variables.find( "s" );
 	if ( sIt != mesh->variables.end() )
@@ -350,13 +350,13 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 		{
 			throw InvalidArgumentException( "PointRepulsionOp: MeshPrimitive variable 't' must have facevarying interpolation" );
 		}
-		
+
 		if ( !runTimeCast< FloatVectorData >( tIt->second.data ) )
 		{
 			throw InvalidArgumentException( "PointRepulsionOp: MeshPrimitive variable 't' must be of type FloatVectorData" );
 		}
 	}
-	
+
 	V3fVectorDataPtr pData = 0;
 	PrimitiveVariableMap::const_iterator pIt = pointsPrimitive->variables.find( "P" );
 	if ( pIt != pointsPrimitive->variables.end() )
@@ -365,7 +365,7 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 		{
 			throw InvalidArgumentException( "PointRepulsionOp: PointsPrimitive variable 'P' must have vertex interpolation" );
 		}
-		
+
 		pData = runTimeCast< V3fVectorData >( pIt->second.data );
 		if ( !pData )
 		{
@@ -376,11 +376,11 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 	{
 		throw InvalidArgumentException( "PointRepulsionOp: PointsPrimitive variable 'P' must be present" );
 	}
-	
-	typedef V3fVectorData::ValueType PointArray;	
+
+	typedef V3fVectorData::ValueType PointArray;
 	PointArray &points = pData->writable();
 	PointArray::size_type numPoints = points.size();
-	
+
 	FloatVectorDataPtr weights = 0;
 	if ( weightsName.size() )
 	{
@@ -389,39 +389,39 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 		{
 			if ( wIt->second.interpolation != PrimitiveVariable::Vertex )
 			{
-				throw InvalidArgumentException( ( boost::format( "PointRepulsionOp: PointsPrimitive variable '%s' must have vertex interpolation" ) % weightsName ).str() );
+				throw InvalidArgumentException(( boost::format( "PointRepulsionOp: PointsPrimitive variable '%s' must have vertex interpolation" ) % weightsName ).str() );
 			}
 
 			weights = runTimeCast< FloatVectorData >( wIt->second.data );
 			if ( !weights )
 			{
-				throw InvalidArgumentException( ( boost::format( "PointRepulsionOp: PointsPrimitive variable '%s' must be of type FloatVectorData" ) % weightsName ).str() );
+				throw InvalidArgumentException(( boost::format( "PointRepulsionOp: PointsPrimitive variable '%s' must be of type FloatVectorData" ) % weightsName ).str() );
 			}
-			
+
 			assert( weights );
 			if ( weights->readable().size() != numPoints )
 			{
-				throw InvalidArgumentException( ( boost::format( "PointRepulsionOp: PointsPrimitive variable '%s' of incorrect size" ) % weightsName ).str() );
+				throw InvalidArgumentException(( boost::format( "PointRepulsionOp: PointsPrimitive variable '%s' of incorrect size" ) % weightsName ).str() );
 			}
 		}
 		else
 		{
-			throw InvalidArgumentException( ( boost::format( "PointRepulsionOp: PointsPrimitive weights variable '%s' must be present" ) % weightsName ).str() );
+			throw InvalidArgumentException(( boost::format( "PointRepulsionOp: PointsPrimitive weights variable '%s' must be present" ) % weightsName ).str() );
 		}
-	}		
+	}
 
 	PrimitiveVariableMap::iterator cIt = image->variables.find( channelName );
 	if ( cIt != image->variables.end() )
-	{				
+	{
 		if ( !runTimeCast< FloatVectorData >( cIt->second.data ) )
 		{
-			throw InvalidArgumentException( ( boost::format( "PointRepulsionOp: ImagePrimitive channel '%s' must be of type FloatVectorData"  ) % channelName ).str() );
+			throw InvalidArgumentException(( boost::format( "PointRepulsionOp: ImagePrimitive channel '%s' must be of type FloatVectorData" ) % channelName ).str() );
 		}
 	}
 	else
 	{
-		throw InvalidArgumentException( ( boost::format( "PointRepulsionOp: ImagePrimitive channel '%s' not found"  ) % channelName ).str() );
-	}			
+		throw InvalidArgumentException(( boost::format( "PointRepulsionOp: ImagePrimitive channel '%s' not found" ) % channelName ).str() );
+	}
 	const PrimitiveVariable &densityPrimVar = cIt->second;
 
 	ImagePrimitiveEvaluatorPtr imageEvaluator = new ImagePrimitiveEvaluator( image );
@@ -429,22 +429,22 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 
 	MeshPrimitiveEvaluatorPtr meshEvaluator = new MeshPrimitiveEvaluator( mesh );
 	PrimitiveEvaluator::ResultPtr meshResult = meshEvaluator->createResult();
-		
+
 
 	/// Convert density image texture, so that values of pixels with the original density channel
-	/// represent "number of points per unit area".			
+	/// represent "number of points per unit area".
 	int height = image->getDisplayWindow().max.y - image->getDisplayWindow().min.y + 1;
 	int width = image->getDisplayWindow().max.x - image->getDisplayWindow().min.x + 1;
-	
+
 	if ( width == 0 || height == 0 )
 	{
 		throw InvalidArgumentException( "PointRepulsionOp: ImagePrimitive has zero area" );
 	}
-	
+
 	float du = 1.0f / width;
 	float dv = 1.0f / height;
-	
-	float textureArea = 0.0f;	
+
+	float textureArea = 0.0f;
 	for ( int y = 0; y < height; y++ )
 	{
 		for ( int x = 0; x < width; x++ )
@@ -452,36 +452,36 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 			//// Get point at center of pixel
 			bool found = imageEvaluator->pointAtPixel( V2i( x, y ), imageResult );
 			if ( found )
-			{			
+			{
 				V2f topLeft =     imageResult->uv() + V2f( -du / 2.0f, -dv / 2.0f );
-				V2f topRight =    imageResult->uv() + V2f(  du / 2.0f, -dv / 2.0f );			
-				V2f bottomRight = imageResult->uv() + V2f(  du / 2.0f,  dv / 2.0f );						
-				V2f bottomLeft =  imageResult->uv() + V2f( -du / 2.0f,  dv / 2.0f );									
-				
+				V2f topRight =    imageResult->uv() + V2f( du / 2.0f, -dv / 2.0f );
+				V2f bottomRight = imageResult->uv() + V2f( du / 2.0f,  dv / 2.0f );
+				V2f bottomLeft =  imageResult->uv() + V2f( -du / 2.0f,  dv / 2.0f );
+
 				std::vector<V2f> pixelCornersUV;
 				pixelCornersUV.push_back( topLeft );
 				pixelCornersUV.push_back( topRight );
 				pixelCornersUV.push_back( bottomRight );
-				pixelCornersUV.push_back( bottomLeft );												
-				
+				pixelCornersUV.push_back( bottomLeft );
+
 				std::vector<V3f> pixelCornersWorld;
-				
+
 				for ( unsigned c = 0; c < 4; c++ )
 				{
 					found = meshEvaluator->pointAtUV( pixelCornersUV[c], meshResult );
-					
+
 					if ( found )
 					{
 						pixelCornersWorld.push_back( meshResult->point() );
 					}
-				}				
-				
+				}
+
 				if ( pixelCornersWorld.size() == 4 )
 				{
 					/// \todo optimise
 					imageEvaluator->pointAtPixel( V2i( x, y ), imageResult );
 					float density = imageResult->floatPrimVar( densityPrimVar );
-					
+
 					textureArea += density * triangleArea( pixelCornersWorld[0], pixelCornersWorld[1], pixelCornersWorld[2] ) ;
 					textureArea += density * triangleArea( pixelCornersWorld[0], pixelCornersWorld[2], pixelCornersWorld[3] );
 				}
@@ -490,12 +490,12 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 					/// \todo optimise
 					imageEvaluator->pointAtPixel( V2i( x, y ), imageResult );
 					float density = imageResult->floatPrimVar( densityPrimVar );
-					
+
 					textureArea += density * triangleArea( pixelCornersWorld[0], pixelCornersWorld[1], pixelCornersWorld[2] );
 				}
-			}					
+			}
 		}
-	}	
+	}
 	FloatVectorDataPtr densityData = runTimeCast< FloatVectorData >( densityPrimVar.data );
 	assert( densityData );
 	int dataOffset = 0;
@@ -503,7 +503,7 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 	{
 		for ( int x = 0; x < width; x++ )
 		{
-			densityData->writable()[ dataOffset ++ ] *= (float)numPoints / textureArea;
+			densityData->writable()[ dataOffset ++ ] *= ( float )numPoints / textureArea;
 		}
 	}
 
@@ -513,115 +513,115 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 	std::vector<float> radii( numPoints );
 	std::vector<Imath::V3f> oldPoints( numPoints );
 	std::vector<Imath::Box3f> bounds( numPoints );
-	
+
 	float lastEnergy = std::numeric_limits<float>::max();
-	
+
 	Rand48 generator( 1 );
-	
+
 	for ( int i = 0; i < numIterations; ++i )
 	{
 		assert( points.size() == originalDensities.size() );
-		assert( points.size() == currentDensities.size() );		
-		assert( points.size() == forces.size() );				
-		assert( points.size() == radii.size() );						
-		assert( points.size() == oldPoints.size() );								
-		assert( points.size() == bounds.size() );										
-	
-		// Snap points to mesh, and calculate new densities		
+		assert( points.size() == currentDensities.size() );
+		assert( points.size() == forces.size() );
+		assert( points.size() == radii.size() );
+		assert( points.size() == oldPoints.size() );
+		assert( points.size() == bounds.size() );
+
+		// Snap points to mesh, and calculate new densities
 		getNearestPointsAndDensities( imageEvaluator, densityPrimVar, meshEvaluator, sIt->second, tIt->second, points, currentDensities );
-		
+
 		if ( i == 0 )
 		{
 			std::copy( currentDensities.begin(), currentDensities.end(), originalDensities.begin() );
 		}
-	
+
 		/// Update radii, bounds, and force accumulator
 		for ( PointArray::size_type p = 0; p < numPoints; p++ )
 		{
 			float pointsPerUnitArea = originalDensities[ p ];
-			
+
 			/// \todo More accurately determine the minimum permissible value for "pointsPerUnitArea"
 			float areaPerPoint = 1.0f / std::max( 0.01f, pointsPerUnitArea );
-			
+
 			assert( p < radii.size() );
-									
+
 			/// pi * r * r = area
 			/// Compensate for the fact that even at the densest possible packing (hexagonal), we only get pi/sqrt(12) ( ~ 0.9 ) efficiency,
 			/// by making each "circle" slightly larger by sqrt(12)/pi
-			radii[p] = sqrt( areaPerPoint / M_PI ) * sqrt(12.0f) / M_PI;
+			radii[p] = sqrt( areaPerPoint / M_PI ) * sqrt( 12.0f ) / M_PI;
 
-			assert( p < radii.size() );			
+			assert( p < radii.size() );
 			bounds[p] = Imath::Box3f(
-				Imath::V3f( points[p] - Imath::V3f( radii[p], radii[p], radii[p] ) ),
-				Imath::V3f( points[p] + Imath::V3f( radii[p], radii[p], radii[p] ) )
-			);
-			
+			                    Imath::V3f( points[p] - Imath::V3f( radii[p], radii[p], radii[p] ) ),
+			                    Imath::V3f( points[p] + Imath::V3f( radii[p], radii[p], radii[p] ) )
+			            );
+
 			/// Zero force accumulator
-			forces[p] = V3f( 0.0 );						
+			forces[p] = V3f( 0.0 );
 		}
 
-		calculateForces( points, radii, bounds, forces, generator, originalDensities, textureArea / (float)numPoints );
+		calculateForces( points, radii, bounds, forces, generator, originalDensities, textureArea / ( float )numPoints );
 
 		std::copy( points.begin(), points.end(), oldPoints.begin() );
-		
+
 		float totalEnergy = 0.0f;
 		for ( PointArray::size_type p = 0; p < numPoints; p++ )
-		{			
+		{
 			totalEnergy += forces[p].length();
-			
+
 			/// Advect point by force applied to it
-			points[p] += forces[p] * magnitude;				
+			points[p] += forces[p] * magnitude;
 		}
-		
+
 		// Snap points back to mesh, and calculate new densities
 		getNearestPointsAndDensities( imageEvaluator, densityPrimVar, meshEvaluator, sIt->second, tIt->second, points, currentDensities );
-		
+
 		totalEnergy = 0.0f;
 		for ( PointArray::size_type p = 0; p < numPoints; p++ )
-		{				
+		{
 			float denom = std::max( originalDensities[p], currentDensities[p] );
 			float scale = 1.0f;
-			if ( denom > 1.0e-6f)
+			if ( denom > 1.0e-6f )
 			{
-				scale = fabsf(originalDensities[p] - currentDensities[p]) / denom;
+				scale = fabsf( originalDensities[p] - currentDensities[p] ) / denom;
 			}
 			forces[p] *= 1.0f - scale;
-			
+
 			if ( weights )
 			{
 				forces[p] *= weights->readable()[ p ];
 			}
-				
+
 			totalEnergy += forces[p].length();
-			
+
 			/// Advect point by force applied to it
-			points[p] = oldPoints[p] + forces[p] * magnitude;			
+			points[p] = oldPoints[p] + forces[p] * magnitude;
 		}
-		
+
 		assert( totalEnergy >= 0.0f );
-				
+
 		msg( Msg::Info, "PointRepulsionOp", boost::format( "Residual error after iteration %s : %s " ) % i % totalEnergy );
-		
+
 		if ( totalEnergy > lastEnergy )
 		{
-			float percentageIncrease = (totalEnergy / lastEnergy - 1.0f) * 100.0f;
-			
-			if ( percentageIncrease > 1.0)
+			float percentageIncrease = ( totalEnergy / lastEnergy - 1.0f ) * 100.0f;
+
+			if ( percentageIncrease > 1.0 )
 			{
 				msg( Msg::Warning, "PointRepulsionOp", boost::format( "Residual error increased by %f%% during iteration %s, consider decreasing magnitude parameter " ) % ( percentageIncrease ) % i );
 			}
 		}
-		
+
 		if ( totalEnergy < 1.e-6f )
 		{
 			break;
 		}
-		
+
 		lastEnergy = totalEnergy;
 	}
-	
+
 	getNearestPointsAndDensities( imageEvaluator, densityPrimVar, meshEvaluator, sIt->second, tIt->second, points, currentDensities );
-	
+
 	if ( pointsPrimitive->variables.find( "width" ) == pointsPrimitive->variables.end() )
 	{
 		for ( PointArray::size_type p = 0; p < numPoints; p++ )
@@ -630,11 +630,11 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 		}
 		pointsPrimitive->variables["width"] = PrimitiveVariable( PrimitiveVariable::Vertex, new FloatVectorData( radii ) );
 	}
-	
+
 	/// Update s and t, if necessary
-	bool pointsPrimitiveHasS = pointsPrimitive->variables.find( "s" ) != pointsPrimitive->variables.end();	
-	bool pointsPrimitiveHasT = pointsPrimitive->variables.find( "t" ) != pointsPrimitive->variables.end();	
-	
+	bool pointsPrimitiveHasS = pointsPrimitive->variables.find( "s" ) != pointsPrimitive->variables.end();
+	bool pointsPrimitiveHasT = pointsPrimitive->variables.find( "t" ) != pointsPrimitive->variables.end();
+
 	if ( pointsPrimitiveHasS || pointsPrimitiveHasT )
 	{
 		FloatVectorDataPtr sData = 0;
@@ -649,15 +649,15 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 			tData = new FloatVectorData();
 			tData->writable().resize( numPoints );
 		}
-		
+
 		assert( sData || tData );
-	
+
 		for ( PointArray::size_type p = 0; p < numPoints; p++ )
 		{
 			bool found = meshEvaluator->closestPoint( points[p], meshResult );
 			assert( found );
-			(void) found;
-			
+			( void ) found;
+
 			if ( sData )
 			{
 				assert( p < sData->readable().size() );
@@ -669,14 +669,14 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 				tData->writable()[p] = meshResult->uv().y;
 			}
 		}
-		
+
 		if ( sData )
 		{
-			pointsPrimitive->variables["s"] = PrimitiveVariable( PrimitiveVariable::Varying, sData );	
+			pointsPrimitive->variables["s"] = PrimitiveVariable( PrimitiveVariable::Varying, sData );
 		}
 		if ( tData )
 		{
-			pointsPrimitive->variables["t"] = PrimitiveVariable( PrimitiveVariable::Varying, tData );	
+			pointsPrimitive->variables["t"] = PrimitiveVariable( PrimitiveVariable::Varying, tData );
 		}
 	}
 }
