@@ -179,6 +179,7 @@
 #include "IECore/bindings/UnicodeToStringBinding.h"
 #include "IECore/bindings/MappedRandomPointDistributionOpBinding.h"
 #include "IECore/bindings/RadixSortBinding.h"
+#include "IECore/bindings/PointRepulsionOpBinding.h"
 #include "IECore/bindings/AngleConversionBinding.h"
 #include "IECore/bindings/LuminanceOpBinding.h"
 #include "IECore/IECore.h"
@@ -345,6 +346,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindUnicodeToString();
 	bindMappedRandomPointDistributionOp();
 	bindRadixSort();	
+	bindPointRepulsionOp();		
 	bindAngleConversion();	
 	bindLuminanceOp();	
 
