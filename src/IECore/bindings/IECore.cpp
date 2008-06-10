@@ -180,6 +180,7 @@
 #include "IECore/bindings/MappedRandomPointDistributionOpBinding.h"
 #include "IECore/bindings/RadixSortBinding.h"
 #include "IECore/bindings/AngleConversionBinding.h"
+#include "IECore/bindings/LuminanceOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -345,6 +346,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMappedRandomPointDistributionOp();
 	bindRadixSort();	
 	bindAngleConversion();	
+	bindLuminanceOp();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

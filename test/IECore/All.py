@@ -148,6 +148,7 @@ from MappedRandomPointDistributionOpTest import *
 from RadixSortTest import *
 from ImathRootsTest import *
 from AngleConversionTest import *
+from LuminanceOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
