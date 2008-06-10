@@ -147,6 +147,7 @@ from UnicodeToStringTest import *
 from MappedRandomPointDistributionOpTest import *
 from RadixSortTest import *
 from ImathRootsTest import *
+from AngleConversionTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
