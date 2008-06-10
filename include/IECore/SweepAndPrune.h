@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,58 +32,51 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#ifndef IE_CORE_SWEEPANDPRUNE_H
+#define IE_CORE_SWEEPANDPRUNE_H
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+#include <vector>
 
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
-#include "DataConvertTest.h"
-#include "DespatchTypedDataTest.h"
-#include "CompilerTest.h"
-#include "RadixSortTest.h"
-#include "SweepAndPruneTest.h"
+#include "boost/static_assert.hpp"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+#include "IECore/RadixSort.h"
 
-using namespace IECore;
+namespace IECore
+{
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
-{	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
+template<typename BoundIterator, template<typename> class CB>
+class SweepAndPrune
+{
+	public:
+		typedef BoundIterator Iterator;
+		typedef typename std::iterator_traits<BoundIterator>::value_type Bound;
+		
+		typedef CB<BoundIterator> Callback;
+		
+		typedef enum
+		{	
+			XYZ,
+			XZY,
+			YXZ,
+			YZX,
+			ZXY,
+			ZYX
+		} AxisOrder;
 	
-	try
-	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-		addDataConvertTest(test);
-		addDespatchTypedDataTest(test);
-		addCompilerTest(test);
-		addRadixSortTest(test);
-		addSweepAndPruneTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+		SweepAndPrune();
+		virtual ~SweepAndPrune();
+		
+		void intersectingBounds( BoundIterator first, BoundIterator last, Callback &cb, AxisOrder axisOrder = XZY );
+		
+	protected:
 	
-	return test;
-}
+		inline bool axisIntersects( const Bound &b1, const Bound &b2, char axis );
+	
+		RadixSort m_radixSort;
+};
+
+} // namespace IECore
+
+#include "IECore/SweepAndPrune.inl"
+
+#endif // IE_CORE_SWEEPANDPRUNE_H
