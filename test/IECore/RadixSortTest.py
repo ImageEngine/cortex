@@ -47,7 +47,7 @@ class RadixSortTest( unittest.TestCase ) :
 		d = FloatVectorData()
 		
 		for i in range( 0, 10000 ):
-			d.append( random.uniform( -10000, 10000 ) )
+			d.append( random.uniform( FloatData().minValue, FloatData().maxValue ) )
 			
 		idx = s.sort( d )	
 		
@@ -66,7 +66,7 @@ class RadixSortTest( unittest.TestCase ) :
 		d = IntVectorData()
 		
 		for i in range( 0, 10000 ):
-			d.append( int( random.uniform( -2**31 + 1, 2**31 - 1 ) ) )
+			d.append( int( random.uniform( IntData().minValue, IntData().maxValue ) ) )
 			
 		idx = s.sort( d )	
 		
@@ -85,7 +85,7 @@ class RadixSortTest( unittest.TestCase ) :
 		d = UIntVectorData()
 		
 		for i in range( 0, 10000 ):
-			d.append( int( random.uniform( 0, 2**32 - 1 ) ) )
+			d.append( int( random.uniform( UIntData().minValue, UIntData().maxValue ) ) )
 			
 		idx = s.sort( d )	
 		
