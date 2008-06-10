@@ -58,4 +58,4 @@ void bindTruelightColorTransformOp()
 
 }
 
-} // namespace IECore
+} // namespace IECoreTruelight
