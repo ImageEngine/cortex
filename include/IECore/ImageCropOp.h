@@ -42,8 +42,9 @@ namespace IECore
 {
 
 /// The ImageCropOp performs cropping over ImagePrimitive objects.
-// The operation results on an ImagePrimitive with displayWindow equal to the given crop box.
-// If matchDataWindow if On then the dataWindow will match displayWindow. Otherwise it will be intersected against the given crop box.
+/// The operation results on an ImagePrimitive with displayWindow equal to the given crop box.
+/// If matchDataWindow if On then the dataWindow will match displayWindow. Otherwise it will be intersected against the given crop box.
+/// \todo This should derive from ImagePrimitiveOp
 class ImageCropOp : public ModifyOp
 {
 	public :
