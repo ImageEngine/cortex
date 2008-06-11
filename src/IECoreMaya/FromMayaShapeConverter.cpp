@@ -114,6 +114,8 @@ IECore::ConstStringParameterPtr FromMayaShapeConverter::primVarAttrPrefixParamet
 IECore::ObjectPtr FromMayaShapeConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	IECore::PrimitivePtr p = 0;
+	
+	/// \todo Surely here we should only be specifying "true" for argument "emitSpaceWarnings" if we're not converting from some DG data?
 	const MDagPath *d = dagPath( true );
 	if( d )
 	{
