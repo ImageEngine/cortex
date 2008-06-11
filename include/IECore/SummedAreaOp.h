@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,60 +32,38 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECORE_SUMMEDAREAOP_H
+#define IECORE_SUMMEDAREAOP_H
 
-#include "IECore/TypedPrimitiveOp.h"
-#include "IECore/Parameter.h"
-#include "IECore/Object.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
-
-using namespace boost;
-using namespace boost::python;
+#include "IECore/ChannelOp.h"
 
 namespace IECore
 {
 
-template<typename T>
-class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPrimitiveOpWrap<T> >
+/// Turns image channels into summed area table of their contents.
+class SummedAreaOp : public ChannelOp
 {
-	public :
-	
-		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOpWrap<T> )
-		
-		TypedPrimitiveOpWrap( PyObject *self, const std::string name, const std::string description ) : TypedPrimitiveOp<T>( name, description ), Wrapper<TypedPrimitiveOpWrap<T> >( self, this )
-		{
-		}
-		
-		virtual void modifyTypedPrimitive( typename T::Ptr object, ConstCompoundObjectPtr operands )
-		{
-			this->get_override( "modifyTypedPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) );
-		}
+	public:
 
+		SummedAreaOp();
+		virtual ~SummedAreaOp();
+
+		IE_CORE_DECLARERUNTIMETYPED( SummedAreaOp, ChannelOp );
+	
+	protected :
+	
+		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );	
+	
+	private :
+	
+		struct SumArea;
+					
 };
 
-template<typename T>
-static void bindTypedPrimitiveOp( const char *name )
-{
-	typedef class_< TypedPrimitiveOp<T>, typename TypedPrimitiveOpWrap<T>::Ptr, boost::noncopyable, bases<ModifyOp> > TypedPrimitiveOpPyClass;
-	TypedPrimitiveOpPyClass( name, no_init )
-		.def( init< const std::string, const std::string>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedPrimitiveOp<T> )
-	;
-	
-	WrapperToPython< typename TypedPrimitiveOp<T>::Ptr >();
+IE_CORE_DECLAREPTR( SummedAreaOp );
 
-	INTRUSIVE_PTR_PATCH_TEMPLATE( TypedPrimitiveOp<T>, TypedPrimitiveOpPyClass );
-	implicitly_convertible< typename TypedPrimitiveOp<T>::Ptr , ModifyOpPtr>();	
-
-}
-
-void bindTypedPrimitiveOp()
-{
-	bindTypedPrimitiveOp< MeshPrimitive >( "MeshPrimitiveOp" );
-	bindTypedPrimitiveOp< ImagePrimitive >( "ImagePrimitiveOp" );
-}
 
 } // namespace IECore
+
+#endif // IECORE_SUMMEDAREAOP_H
+

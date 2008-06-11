@@ -263,6 +263,9 @@ enum TypeId
 	MappedRandomPointDistributionOpTypeId = 220,	
 	PointRepulsionOpTypeId = 221,
 	LuminanceOpTypeId = 222,
+	ImagePrimitiveOpTypeId = 223,
+	ChannelOpTypeId = 224,
+	SummedAreaOpTypeId = 225,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

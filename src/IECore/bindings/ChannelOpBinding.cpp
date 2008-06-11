@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,60 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
 
-#include "IECore/TypedPrimitiveOp.h"
-#include "IECore/Parameter.h"
-#include "IECore/Object.h"
-#include "IECore/CompoundObject.h"
+#include "boost/python.hpp"
+
+#include "IECore/ChannelOp.h"
+#include "IECore/bindings/ChannelOpBinding.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
-using namespace boost;
 using namespace boost::python;
 
 namespace IECore
 {
 
-template<typename T>
-class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPrimitiveOpWrap<T> >
+void bindChannelOp()
 {
-	public :
 	
-		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOpWrap<T> )
-		
-		TypedPrimitiveOpWrap( PyObject *self, const std::string name, const std::string description ) : TypedPrimitiveOp<T>( name, description ), Wrapper<TypedPrimitiveOpWrap<T> >( self, this )
-		{
-		}
-		
-		virtual void modifyTypedPrimitive( typename T::Ptr object, ConstCompoundObjectPtr operands )
-		{
-			this->get_override( "modifyTypedPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) );
-		}
-
-};
-
-template<typename T>
-static void bindTypedPrimitiveOp( const char *name )
-{
-	typedef class_< TypedPrimitiveOp<T>, typename TypedPrimitiveOpWrap<T>::Ptr, boost::noncopyable, bases<ModifyOp> > TypedPrimitiveOpPyClass;
-	TypedPrimitiveOpPyClass( name, no_init )
-		.def( init< const std::string, const std::string>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedPrimitiveOp<T> )
+	typedef class_<ChannelOp, ChannelOpPtr, boost::noncopyable, bases<ImagePrimitiveOp> > ChannelOpPyClass;
+	ChannelOpPyClass( "ChannelOp", no_init )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ChannelOp )
 	;
 	
-	WrapperToPython< typename TypedPrimitiveOp<T>::Ptr >();
+	INTRUSIVE_PTR_PATCH( ChannelOp, ChannelOpPyClass );
+	implicitly_convertible<ChannelOpPtr, ImagePrimitiveOpPtr>();	
 
-	INTRUSIVE_PTR_PATCH_TEMPLATE( TypedPrimitiveOp<T>, TypedPrimitiveOpPyClass );
-	implicitly_convertible< typename TypedPrimitiveOp<T>::Ptr , ModifyOpPtr>();	
-
-}
-
-void bindTypedPrimitiveOp()
-{
-	bindTypedPrimitiveOp< MeshPrimitive >( "MeshPrimitiveOp" );
-	bindTypedPrimitiveOp< ImagePrimitive >( "ImagePrimitiveOp" );
 }
 
 } // namespace IECore
+

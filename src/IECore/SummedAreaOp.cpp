@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,62 +32,75 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDPRIMITIVEOP_H
-#define IE_CORE_TYPEDPRIMITIVEOP_H
+#include "IECore/SummedAreaOp.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/TypeTraits.h"
 
-#include "IECore/PrimitiveOp.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/ImagePrimitive.h"
+using namespace IECore;
+using namespace std;
+using namespace Imath;
 
-namespace IECore
+SummedAreaOp::SummedAreaOp()
+	:	ChannelOp( staticTypeName(), "Calculates summed area table for image channels." )
 {
+}
 
-/// The MeshPrimitiveOp class defines a base class for Ops which modify Meshes.
-template<typename T>
-class TypedPrimitiveOp : public ModifyOp
+SummedAreaOp::~SummedAreaOp()
 {
-	public :
+}
+
+struct SummedAreaOp::SumArea
+{
+	typedef void ReturnType;
+
+	SumArea( const Imath::Box2i &dataWindow )
+		:	m_dataWindow( dataWindow )
+	{
+	}
+
+	template<typename T>
+	ReturnType operator()( typename T::Ptr data )
+	{
+		typedef typename T::ValueType Container;
+		typedef typename Container::value_type V;
+		typedef typename Container::iterator It;
+		
+		Container &buffer = data->writable();
+		
+		// deal with first row alone, as it doesn't have values above it
+		unsigned pixelIndex=0;
+		V rowSum = 0;
+		for( int x=m_dataWindow.min.x; x<=m_dataWindow.max.x; x++, pixelIndex++ )
+		{
+			rowSum += buffer[pixelIndex];
+			buffer[pixelIndex] = rowSum;
+		}
+		// now do the other rows
+		unsigned upperPixelIndex = 0;
+		pixelIndex = m_dataWindow.size().x + 1;
+		for( int y=m_dataWindow.min.y + 1; y<=m_dataWindow.max.y; y++ )
+		{
+			rowSum = 0;
+			for( int x=m_dataWindow.min.x; x<=m_dataWindow.max.x; x++ )
+			{
+				rowSum += buffer[pixelIndex];
+				buffer[pixelIndex++] = rowSum + buffer[upperPixelIndex++];
+			}
+		}
+	}
 	
-		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOp<T> )
-		
-		typedef T PrimitiveType;		
-		
-		TypedPrimitiveOp( const std::string name, const std::string description );
-		virtual ~TypedPrimitiveOp();
-		
-		//! @name RunTimeTyped functions
-		////////////////////////////////////
-		//@{
-		virtual TypeId typeId() const;
-		virtual std::string typeName() const;
-		virtual bool isInstanceOf( TypeId typeId ) const;
-		virtual bool isInstanceOf( const std::string &typeName ) const;
-		static TypeId staticTypeId();
-		static std::string staticTypeName();
-		static bool inheritsFrom( TypeId typeId );
-		static bool inheritsFrom( const std::string &typeName );
-		//@}
-		
-	protected :
-		
-		/// Must be implemented by all subclasses.
-		virtual void modifyTypedPrimitive( typename T::Ptr typedPrimitive, ConstCompoundObjectPtr operands ) = 0;
-		
 	private :
 	
-		/// Implemented to call modifyTypedPrimitive
-		void modify( ObjectPtr primitive, ConstCompoundObjectPtr operands );
-	
+		Box2i m_dataWindow;
+
 };
-
-#define IE_CORE_DEFINETYPEDPRIMITIVEOP( TNAME ) \
-	typedef TypedPrimitiveOp<TNAME> (TNAME ## Op); \
-	typedef TypedPrimitiveOp<TNAME>::Ptr (TNAME ## OpPtr); \
-	typedef TypedPrimitiveOp<TNAME>::ConstPtr (Const ## TNAME ## OpPtr);
 	
-IE_CORE_DEFINETYPEDPRIMITIVEOP( MeshPrimitive )	
-IE_CORE_DEFINETYPEDPRIMITIVEOP( ImagePrimitive )	
-
-} // namespace IECore
-
-#endif // IE_CORE_TYPEDPRIMITIVEOP_H
+void SummedAreaOp::modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels )
+{	
+	SumArea summer( dataWindow );
+	for( unsigned i=0; i<channels.size(); i++ )
+	{
+		despatchTypedData<SumArea, TypeTraits::IsNumericVectorTypedData>( channels[i], summer );
+	}
+}
+		

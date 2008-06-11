@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,62 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDPRIMITIVEOP_H
-#define IE_CORE_TYPEDPRIMITIVEOP_H
-
-#include "IECore/PrimitiveOp.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/ImagePrimitive.h"
+#ifndef IECOREPYTHON_SUMMEDAREAOPBINDING_H
+#define IECOREPYTHON_SUMMEDAREAOPBINDING_H
 
 namespace IECore
 {
 
-/// The MeshPrimitiveOp class defines a base class for Ops which modify Meshes.
-template<typename T>
-class TypedPrimitiveOp : public ModifyOp
-{
-	public :
-	
-		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOp<T> )
-		
-		typedef T PrimitiveType;		
-		
-		TypedPrimitiveOp( const std::string name, const std::string description );
-		virtual ~TypedPrimitiveOp();
-		
-		//! @name RunTimeTyped functions
-		////////////////////////////////////
-		//@{
-		virtual TypeId typeId() const;
-		virtual std::string typeName() const;
-		virtual bool isInstanceOf( TypeId typeId ) const;
-		virtual bool isInstanceOf( const std::string &typeName ) const;
-		static TypeId staticTypeId();
-		static std::string staticTypeName();
-		static bool inheritsFrom( TypeId typeId );
-		static bool inheritsFrom( const std::string &typeName );
-		//@}
-		
-	protected :
-		
-		/// Must be implemented by all subclasses.
-		virtual void modifyTypedPrimitive( typename T::Ptr typedPrimitive, ConstCompoundObjectPtr operands ) = 0;
-		
-	private :
-	
-		/// Implemented to call modifyTypedPrimitive
-		void modify( ObjectPtr primitive, ConstCompoundObjectPtr operands );
-	
-};
-
-#define IE_CORE_DEFINETYPEDPRIMITIVEOP( TNAME ) \
-	typedef TypedPrimitiveOp<TNAME> (TNAME ## Op); \
-	typedef TypedPrimitiveOp<TNAME>::Ptr (TNAME ## OpPtr); \
-	typedef TypedPrimitiveOp<TNAME>::ConstPtr (Const ## TNAME ## OpPtr);
-	
-IE_CORE_DEFINETYPEDPRIMITIVEOP( MeshPrimitive )	
-IE_CORE_DEFINETYPEDPRIMITIVEOP( ImagePrimitive )	
+void bindSummedAreaOp();
 
 } // namespace IECore
 
-#endif // IE_CORE_TYPEDPRIMITIVEOP_H
+#endif // IECOREPYTHON_SUMMEDAREAOPBINDING_H

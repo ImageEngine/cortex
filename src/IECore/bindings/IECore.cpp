@@ -182,6 +182,8 @@
 #include "IECore/bindings/PointRepulsionOpBinding.h"
 #include "IECore/bindings/AngleConversionBinding.h"
 #include "IECore/bindings/LuminanceOpBinding.h"
+#include "IECore/bindings/ChannelOpBinding.h"
+#include "IECore/bindings/SummedAreaOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -349,6 +351,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointRepulsionOp();		
 	bindAngleConversion();	
 	bindLuminanceOp();	
+	bindChannelOp();	
+	bindSummedAreaOp();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
