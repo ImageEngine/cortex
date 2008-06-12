@@ -71,6 +71,7 @@ coreOps = [
 	[ "CheckImagesOp", "checkImages", "common/fileSystem" ],
 	[ "FileSequenceGraphOp", "fileSequenceGraph", "common/fileSystem" ],
 	[ "MeshPrimitiveImplicitSurfaceOp", "implicitSurface", "common/primitive/mesh" ], 	
+	[ "Grade", "grade", "common/colorSpace" ],
 ]
 
 for op in coreOps : 
