@@ -52,6 +52,7 @@ PointsPrimitive::PointsPrimitive( V3fVectorDataPtr points, FloatVectorDataPtr ra
 	variables.insert( PrimitiveVariableMap::value_type( "P", PrimitiveVariable( PrimitiveVariable::Vertex, points ) ) );
 	if( radii )
 	{
+		/// \todo This isn't the name the renderers are looking for - why are we using it?
 		variables.insert( PrimitiveVariableMap::value_type( "r", PrimitiveVariable( PrimitiveVariable::Vertex, radii ) ) );
 	}
 }
