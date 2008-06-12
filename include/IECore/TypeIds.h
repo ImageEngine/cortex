@@ -266,6 +266,7 @@ enum TypeId
 	ImagePrimitiveOpTypeId = 223,
 	ChannelOpTypeId = 224,
 	SummedAreaOpTypeId = 225,
+	GradeColorTransformOpTypeId = 226,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

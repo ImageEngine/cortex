@@ -184,6 +184,7 @@
 #include "IECore/bindings/LuminanceOpBinding.h"
 #include "IECore/bindings/ChannelOpBinding.h"
 #include "IECore/bindings/SummedAreaOpBinding.h"
+#include "IECore/bindings/GradeColorTransformOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -353,6 +354,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLuminanceOp();	
 	bindChannelOp();	
 	bindSummedAreaOp();	
+	bindGradeColorTransformOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

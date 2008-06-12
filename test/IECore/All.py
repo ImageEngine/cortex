@@ -150,6 +150,7 @@ from ImathRootsTest import *
 from AngleConversionTest import *
 from LuminanceOpTest import *
 from SummedAreaOpTest import *
+from GradeColorTransformOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
