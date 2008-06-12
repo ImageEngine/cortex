@@ -32,12 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_GRADECOLORTRANSFORMOPBINDING_H
-#define IECOREPYTHON_GRADECOLORTRANSFORMOPBINDING_H
+#include <boost/python.hpp>
 
-namespace IECore
+#include "IECore/Grade.h"
+#include "IECore/CompoundObject.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+using namespace boost;
+using namespace boost::python;
+
+namespace IECore {
+
+void bindGrade()
 {
-void bindGradeColorTransformOp();
+	typedef class_< Grade, boost::noncopyable, bases<ColorTransformOp> > GradePyClass;
+	GradePyClass( "Grade" )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Grade)
+	;
+	
+	WrapperToPython<GradePtr>();
+
+	INTRUSIVE_PTR_PATCH( Grade, GradePyClass );
+	implicitly_convertible<GradePtr, ColorTransformOpPtr>();
+
 }
 
-#endif // IECOREPYTHON_GRADECOLORTRANSFORMOPBINDING_H
+} // namespace IECore

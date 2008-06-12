@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_GRADECOLORTRANSFORMOP_H
-#define IECORE_GRADECOLORTRANSFORMOP_H
+#ifndef IECORE_GRADE_H
+#define IECORE_GRADE_H
 
 #include "OpenEXR/ImathColor.h"
 #include "IECore/ColorTransformOp.h"
@@ -42,19 +42,19 @@
 namespace IECore
 {
 
-/// The GradeColorTransformOp implements the same operation as Nuke's grade node over the colors of a Primitive object.
+/// The Grade implements the same operation as Nuke's grade node over the colors of a Primitive object.
 /// The computation performed is:
 /// A = multiply * (gain - lift) / (whitePoint - blackPoint)
 /// B = offset + lift - A * blackPoint
 /// output = pow( A * input + B, 1/gamma )
-class GradeColorTransformOp : public ColorTransformOp
+class Grade : public ColorTransformOp
 {
 	public :
 		
-		IE_CORE_DECLARERUNTIMETYPED( GradeColorTransformOp, ColorTransformOp );
+		IE_CORE_DECLARERUNTIMETYPED( Grade, ColorTransformOp );
 		
-		GradeColorTransformOp();
-		virtual ~GradeColorTransformOp();
+		Grade();
+		virtual ~Grade();
 		
 		Color3fParameterPtr blackPointParameter();
 		ConstColor3fParameterPtr blackPointParameter() const;
@@ -107,8 +107,8 @@ class GradeColorTransformOp : public ColorTransformOp
 		Imath::V3d m_invGamma;
 };
 
-IE_CORE_DECLAREPTR( GradeColorTransformOp );
+IE_CORE_DECLAREPTR( Grade );
 
 } // namespace IECore
 
-#endif // IECORE_GRADECOLORTRANSFORMOP_H
+#endif // IECORE_GRADE_H

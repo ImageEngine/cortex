@@ -260,7 +260,7 @@ void bindTypeId()
 		.value("UInt64VectorData", UInt64VectorDataTypeId )
 		.value("MappedRandomPointDistributionOp", MappedRandomPointDistributionOpTypeId )
 		.value("PointRepulsionOp", PointRepulsionOpTypeId )
-		.value("GradeColorTransformOp", GradeColorTransformOpTypeId )
+		.value("Grade", GradeTypeId )
 	;
 }
 

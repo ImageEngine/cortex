@@ -32,16 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/GradeColorTransformOp.h"
+#include "IECore/Grade.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/MessageHandler.h"
 
 using namespace IECore;
 using namespace Imath;
 
-GradeColorTransformOp::GradeColorTransformOp()
-	:	ColorTransformOp( "GradeColorTransformOp", 
-				"The GradeColorTransformOp implements the same operation as Nuke's grade node over the colors of a Primitive object.\n"
+Grade::Grade()
+	:	ColorTransformOp( "Grade", 
+				"The grade implements the same operation as Nuke's grade node over the colors of a Primitive object.\n"
 				"The computation performed is:\n"
 				"A = multiply * (gain - lift) / (whitePoint - blackPoint)\n"
 				"B = offset + lift - A * blackPoint\n"
@@ -115,101 +115,101 @@ GradeColorTransformOp::GradeColorTransformOp()
 	
 }
 
-GradeColorTransformOp::~GradeColorTransformOp()
+Grade::~Grade()
 {
 }
 
-Color3fParameterPtr GradeColorTransformOp::blackPointParameter()
-{
-	return m_blackPointParameter;
-}
-
-ConstColor3fParameterPtr GradeColorTransformOp::blackPointParameter() const
+Color3fParameterPtr Grade::blackPointParameter()
 {
 	return m_blackPointParameter;
 }
 
-Color3fParameterPtr GradeColorTransformOp::whitePointParameter()
+ConstColor3fParameterPtr Grade::blackPointParameter() const
+{
+	return m_blackPointParameter;
+}
+
+Color3fParameterPtr Grade::whitePointParameter()
 {
 	return m_whitePointParameter;
 }
 
-ConstColor3fParameterPtr GradeColorTransformOp::whitePointParameter() const
+ConstColor3fParameterPtr Grade::whitePointParameter() const
 {
 	return m_whitePointParameter;
 }
 
-Color3fParameterPtr GradeColorTransformOp::liftParameter()
+Color3fParameterPtr Grade::liftParameter()
 {
 	return m_liftParameter;
 }
 
-ConstColor3fParameterPtr GradeColorTransformOp::liftParameter() const
+ConstColor3fParameterPtr Grade::liftParameter() const
 {
 	return m_liftParameter;
 }
 
-Color3fParameterPtr GradeColorTransformOp::gainParameter()
+Color3fParameterPtr Grade::gainParameter()
 {
 	return m_gainParameter;
 }
 
-ConstColor3fParameterPtr GradeColorTransformOp::gainParameter() const
+ConstColor3fParameterPtr Grade::gainParameter() const
 {
 	return m_gainParameter;
 }
 
-Color3fParameterPtr GradeColorTransformOp::multiplyParameter()
+Color3fParameterPtr Grade::multiplyParameter()
 {
 	return m_multiplyParameter;
 }
 
-ConstColor3fParameterPtr GradeColorTransformOp::multiplyParameter() const
+ConstColor3fParameterPtr Grade::multiplyParameter() const
 {
 	return m_gainParameter;
 }
 
-Color3fParameterPtr GradeColorTransformOp::offsetParameter()
+Color3fParameterPtr Grade::offsetParameter()
 {
 	return m_offsetParameter;
 }
 
-ConstColor3fParameterPtr GradeColorTransformOp::offsetParameter() const
+ConstColor3fParameterPtr Grade::offsetParameter() const
 {
 	return m_offsetParameter;
 }
 
-Color3fParameterPtr GradeColorTransformOp::gammaParameter()
+Color3fParameterPtr Grade::gammaParameter()
 {
 	return m_gammaParameter;
 }
 
-ConstColor3fParameterPtr GradeColorTransformOp::gammaParameter() const
+ConstColor3fParameterPtr Grade::gammaParameter() const
 {
 	return m_gammaParameter;
 }
 
-BoolParameterPtr GradeColorTransformOp::blackClampParameter()
+BoolParameterPtr Grade::blackClampParameter()
 {
 	return m_blackClampParameter;
 }
 
-ConstBoolParameterPtr GradeColorTransformOp::blackClampParameter() const
+ConstBoolParameterPtr Grade::blackClampParameter() const
 {
 	return m_blackClampParameter;
 }
 
-BoolParameterPtr GradeColorTransformOp::whiteClampParameter()
+BoolParameterPtr Grade::whiteClampParameter()
 {
 	return m_whiteClampParameter;
 }
 
-ConstBoolParameterPtr GradeColorTransformOp::whiteClampParameter() const
+ConstBoolParameterPtr Grade::whiteClampParameter() const
 {
 	return m_whiteClampParameter;
 }
 
-void GradeColorTransformOp::begin( ConstCompoundObjectPtr operands )
+void Grade::begin( ConstCompoundObjectPtr operands )
 {
 	m_invGamma = m_gammaParameter->getTypedValue();
 	if ( m_invGamma.x == 0.0 || m_invGamma.y == 0.0 || m_invGamma.z == 0 )
@@ -228,7 +228,7 @@ void GradeColorTransformOp::begin( ConstCompoundObjectPtr operands )
 	m_B = offset + lift - m_A * blackPoint;
 }
 
-void GradeColorTransformOp::transform( Imath::Color3f &color ) const
+void Grade::transform( Imath::Color3f &color ) const
 {
 	Imath::V3d c = m_A * Imath::V3d(color) + m_B;
 	color.x = ( c.x >= 0.0 ? (float)pow( c.x, m_invGamma.x ) : c.x );
