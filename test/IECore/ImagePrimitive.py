@@ -136,7 +136,7 @@ class TestImagePrimitive( unittest.TestCase ) :
 		
 		i["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, b )
 		
-		self.assert_( "B" in i.channelNames() )
+		self.failIf( "B" in i.channelNames() )
 		
 		self.assert_( i.arePrimitiveVariablesValid() )
 		
@@ -147,7 +147,6 @@ class TestImagePrimitive( unittest.TestCase ) :
 		i["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, g )
 		
 		self.failIf( "G" in i.channelNames() )
-		
 		self.failIf( i.arePrimitiveVariablesValid() )
 		
 	def testCreateChannel( self ):
@@ -177,7 +176,51 @@ class TestImagePrimitive( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, setattr, i, "displayWindow", empty )
 		
 		self.assertRaises( RuntimeError, ImagePrimitive, empty, empty )	
+	
+	def testChannelValid( self ) :
+	
+		b = Box2i( V2i( 0 ), V2i( 9 ) )
+		i = ImagePrimitive( b, b )
 		
+		d = FloatVectorData( [ 1 ] )
+		
+		p = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, d )
+		i["Y"] = p
+		
+		self.assertEqual( i.channelValid( p ), False )
+		self.assertEqual( i.channelValid( "Y" ), False )
+		self.assertEqual( i.getChannel( "Y" ), None )
+		
+		t = i.channelValid( p, True )
+		self.assert_( isinstance( t, tuple ) )
+		self.assertEqual( t[0], False )
+		self.assert_( isinstance( t[1], str ) )
+		
+		p = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, d )
+		i["Y"] = p
+		
+		self.assertEqual( i.channelValid( p ), False )
+		self.assertEqual( i.channelValid( "Y" ), False )
+		self.assertEqual( i.getChannel( "Y" ), None )
+		
+		p = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, d )
+		i["Y"] = p
+		
+		self.assertEqual( i.channelValid( p ), False )
+		self.assertEqual( i.channelValid( "Y" ), False )
+		self.assertEqual( i.getChannel( "Y" ), None )
+		
+		d.resize( 100 )
+		
+		self.assertEqual( i.channelValid( p ), True )
+		self.assertEqual( i.channelValid( "Y" ), True )
+		self.assert_( d.isSame( i.getChannel( "Y" ) ) )
+		
+		pp = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatData( 1 ) )
+		self.assertEqual( i.channelValid( pp ), False )
+		i["PP"] = pp
+		self.assertEqual( i.channelValid( "PP" ), False )
+		self.assertEqual( i.getChannel( "PP" ), None )
 		
 	def tearDown( self ) :
 	
