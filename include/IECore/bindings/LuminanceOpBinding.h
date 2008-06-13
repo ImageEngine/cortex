@@ -40,6 +40,6 @@ namespace IECore
 
 void bindLuminanceOp();
 
-} // namespace IECoreTruelight
+} // namespace IECore
 
 #endif // IECORE_LUMINANCEOPBINDING_H
