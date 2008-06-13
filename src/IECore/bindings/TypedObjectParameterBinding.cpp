@@ -102,7 +102,7 @@ static void bindTypedObjectParameter( const char *name )
 {
 	typedef class_< TypedObjectParameter<T>, typename TypedObjectParameterWrap< T >::Ptr , boost::noncopyable, bases<ObjectParameter> > TypedObjectParameterPyClass;
 	TypedObjectParameterPyClass( name, no_init )
-		.def( init< const std::string &, const std::string &, typename T::Ptr, optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
+		.def( init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
 		.def( init< const std::string &, const std::string &, typename T::Ptr, CompoundObjectPtr >( args( "name", "description", "defaultValue", "userData") ) )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( TypedObjectParameter<T> )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedObjectParameter<T> )
