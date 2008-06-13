@@ -87,6 +87,7 @@ class TypedParameter : public Parameter
 		/// Convenience function for value getting, which avoids all the hoop jumping
 		/// needed to extract the value from the Object returned by Parameter::getValue().
 		/// Throws an Exception if the value is not valid.
+		ValueType &getTypedValue();
 		const ValueType &getTypedValue() const;
 		/// Convenience function for value setting, constructs a TypedData<T> from value
 		/// and calls Parameter::setValue().
