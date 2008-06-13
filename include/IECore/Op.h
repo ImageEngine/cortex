@@ -80,6 +80,7 @@ class Op : public Parameterised
 		/// contains the result of parameters()->getValidatedValue - this
 		/// function will never be called when the contents of the parameters
 		/// are in a bad state.
+		/// \todo This should be const.
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands ) = 0;
 		
 	private :
