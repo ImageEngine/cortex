@@ -132,8 +132,8 @@ class LineSegmentTest( unittest.TestCase ) :
 			p1, p2 = l1.closestPoints( l2 )
 			p3, p4 = l2.closestPoints( l1 )
 	
-			self.assertEqual( p1, p4 )
-			self.assertEqual( p2, p3 )
+			self.assert_( p1.equalWithAbsError( p4, 0.00001 ) )
+			self.assert_( p2.equalWithAbsError( p3, 0.00001 ) )
 			
 		# |
 		# |
