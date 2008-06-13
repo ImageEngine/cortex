@@ -84,6 +84,9 @@ void ChannelOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObje
 
 	ChannelVector channels;
 	
+	/// \todo Just use ImagePrimitive::channelValid. We don't want to do that right now
+	/// as it imposes loose restrictions on the channel datatype - in the future it should perhaps
+	/// impose the restrictions we have here (float, uint or half vector data).
 	size_t numPixels = image->variableSize( PrimitiveVariable::Vertex );
 	const vector<string> channelNames = channelNamesParameter()->getTypedValue();
 	for( unsigned i=0; i<channelNames.size(); i++ )
@@ -99,6 +102,11 @@ void ChannelOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObje
 			it->second.interpolation!=PrimitiveVariable::FaceVarying )
 		{
 			throw Exception( str( format( "Primitive variable \"%s\" has inappropriate interpolation." ) % channelNames[i] ) );
+		}
+		
+		if( !it->second.data )
+		{
+			throw Exception( str( format( "Primitive variable \"%s\" has no data." ) % channelNames[i] ) );
 		}
 		
 		if( !it->second.data->isInstanceOf( FloatVectorData::staticTypeId() ) &&
