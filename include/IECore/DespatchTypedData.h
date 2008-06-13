@@ -119,6 +119,11 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 template< class Functor >
 typename Functor::ReturnType despatchTypedData( const DataPtr &data );
 
+/// Simply returns the result of Trait - this can be used to check TypeTraits at runtime.
+/// e.g. bool isSimple = despatchTraitsTest<TypeTraits::IsSimpleTypedData>( data ).
+template<template<typename> class Trait>
+bool despatchTraitsTest( const DataPtr &data );
+
 /// An error handler which simply ignores any errors encountered
 struct DespatchTypedDataIgnoreError;
 
@@ -133,7 +138,13 @@ struct TypedDataAddress;
 /// and PrimitiveVariable::Invalid otherwise (or if using the DespatchTypedDataIgnoreError error handler)
 struct TypedDataInterpolation;
 
-
+/// A functor which always returns true. This can be used to test data traits at runtime.
+///
+/// e.g. :
+/// bool isSimple = despatchTypedData<TraitsTest, TypeTraits::IsSimpleTypedData, DespatchTypedDataIgnoreError>( data )
+///
+/// This is used by the despatchTraitsTest() convenience function (see above).
+struct TraitsTest;
 
 } // namespace IECore
 

@@ -528,6 +528,23 @@ struct TypedDataInterpolation::TypedDataInterpolationHelper<T, typename boost::e
 	}
 };
 
+template<template<typename> class Trait>
+bool despatchTraitsTest( const DataPtr &data )
+{
+	return despatchTypedData<TraitsTest, Trait, DespatchTypedDataIgnoreError>( data );
+}
+
+struct TraitsTest
+{
+	typedef bool ReturnType;
+	
+	template< typename T >
+	ReturnType operator()( typename T::ConstPtr d ) const
+	{
+		return true;
+	}
+};
+
 }
 
 #endif // IE_CORE_DESPATCHTYPEDDATA_INL
