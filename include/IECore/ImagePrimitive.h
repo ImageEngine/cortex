@@ -117,17 +117,42 @@ class ImagePrimitive : public Primitive
 
 		virtual void render( RendererPtr renderer );
 
-		/// Places the channel names for this image into the given vector
-		/// \bug this just copies the primitive variable names - it should also check that
-		/// the number of elements and interpolation makes the primvars suitable for
-		/// use as channels.
+		//! @name Channels
+		/// Channels of the image are just primitive variables with the following
+		/// constraints :
+		///
+		///		* Data type must satisfy TypeTraits::IsNumericVectorTypedData - this
+		///		  may well be restricted even further in the future, to accept only
+		///		  FloatVectorData, UIntVectorData and possibly HalfVectorData. The
+		///		  restrictions are currently somewhat relaxed as some ImageReaders
+		///		  load the data from file without converting to float - this too may
+		///		  change at some point.
+		///		* Interpolation type must be Vertex, Varying or FaceVarying - these
+		///		  all mean the same thing (that there are the same number of elements
+		///		  as there are pixels). 
+		///		* Data must contain the same number of elements as there are pixels.
+		//////////////////////////////////////////////////////////////////////////////
+		//@{
+		/// Returns true if the PrimitiveVariable is a valid channel for this
+		/// image - returns false otherwise. If false is returned and reason is
+		/// passed, then a reason for invalidity is places in reason.
+		bool channelValid( const PrimitiveVariable &pv, std::string *reason=0 ) const;
+		/// As above but passes the name of a PrimitiveVariable.
+		bool channelValid( const std::string &name, std::string *reason=0 ) const;
+		/// Places the names of all valid channel into the given vector.
 		void channelNames( std::vector<std::string> &names ) const;
-
+		/// Returns the data for the named channel, or 0 if it
+		/// doesn't exist or is invalid.
+		template<typename T>
+		typename TypedData<std::vector<T> >::Ptr getChannel( const std::string &name );
+		template<typename T>
+		typename TypedData<std::vector<T> >::ConstPtr getChannel( const std::string &name ) const;
 		/// Convenience function to create a channel - this simply creates and adds a PrimitiveVariable of the appropriate
 		/// size and returns a pointer to the data within it. The data is not initialized.
 		template<typename T>
 		typename TypedData<std::vector<T> >::Ptr createChannel( const std::string &name );
-
+		//@}
+		
 	private:
 
 		/// the full parameters for image position and dimension

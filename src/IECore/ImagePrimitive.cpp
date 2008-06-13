@@ -103,25 +103,6 @@ void ImagePrimitive::setDisplayWindow( const Box2i &displayWindow )
 	m_displayWindow = displayWindow;
 }
 
-void ImagePrimitive::channelNames( vector<string> &names ) const
-{
-	// copy in the names of channels from the map
-	names.clear();
-	
-	for ( PrimitiveVariableMap::const_iterator i = variables.begin(); i != variables.end(); ++i )
-	{			
-		const PrimitiveVariable &primVar = i->second;
-		
-		TypedDataSize func;
-		size_t size = despatchTypedData< TypedDataSize >( primVar.data, func );
-		
-		if ( size == variableSize( primVar.interpolation ) )
-		{		
-			names.push_back( i->first );
-		}
-	}
-}
-
 // give the size of the image
 size_t ImagePrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
@@ -228,3 +209,80 @@ void ImagePrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( sizeof(m_displayWindow) );
 	a.accumulate( sizeof(m_dataWindow) );
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// Channel methods
+///////////////////////////////////////////////////////////////////////////////////////////
+
+bool ImagePrimitive::channelValid( const PrimitiveVariable &pv, std::string *reason ) const
+{
+	if( pv.interpolation!=PrimitiveVariable::Vertex &&
+		pv.interpolation!=PrimitiveVariable::Varying &&
+		pv.interpolation!=PrimitiveVariable::FaceVarying )
+	{
+		if( reason )
+		{
+			*reason = "Primitive variable has inappropriate interpolation.";
+		}
+		return false;
+	}
+	if( !pv.data )
+	{
+		if( reason )
+		{
+			*reason = "Primitive variable has no data.";
+		}
+		return false;
+	}
+	
+	if( !despatchTraitsTest<TypeTraits::IsNumericVectorTypedData>( pv.data ) )
+	{
+		if( reason )
+		{
+			*reason = "Primitive variable has inappropriate type.";
+		}
+		return false;
+	}
+	
+	size_t size = despatchTypedData<TypedDataSize>( pv.data );
+	size_t numPixels = variableSize( PrimitiveVariable::Vertex );
+	if( size!=numPixels )
+	{
+		if( reason )
+		{
+			*reason = str( format( "Primitive variable has wrong size (%d but should be %d)." ) % size % numPixels );
+		}
+		return false;
+	}
+	
+	return true;
+}
+
+bool ImagePrimitive::channelValid( const std::string &name, std::string *reason ) const
+{
+	PrimitiveVariableMap::const_iterator it = variables.find( name );
+	if( it==variables.end() )
+	{
+		if( reason )
+		{
+			*reason = str( format( "Primitive variable \"%s\" does not exist." ) % name );
+		}
+		return false;
+	}
+	return channelValid( it->second, reason );
+}
+		
+void ImagePrimitive::channelNames( vector<string> &names ) const
+{
+	// copy in the names of channels from the map
+	names.clear();
+	
+	for ( PrimitiveVariableMap::const_iterator i = variables.begin(); i != variables.end(); ++i )
+	{	
+		if( channelValid( i->second ) )
+		{
+			names.push_back( i->first );
+		}
+	}
+}
+

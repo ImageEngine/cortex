@@ -36,10 +36,34 @@
 #define IECORE_IMAGEPRIMITIVE_INL
 
 #include "IECore/Primitive.h"
+#include "IECore/Exception.h"
+#include "boost/format.hpp"
 
 namespace IECore 
 {
-	
+
+template<typename T>
+typename TypedData<std::vector<T> >::Ptr ImagePrimitive::getChannel( const std::string &name )
+{
+	std::string reason = "";
+	if( channelValid( name, &reason ) )
+	{
+		return runTimeCast<TypedData<std::vector<T> > >( variables.find( name )->second.data );
+	}
+	return 0;
+}
+		
+template<typename T>
+typename TypedData<std::vector<T> >::ConstPtr ImagePrimitive::getChannel( const std::string &name ) const
+{
+	std::string reason = "";
+	if( channelValid( name, &reason ) )
+	{
+		return runTimeCast<TypedData<std::vector<T> > >( variables.find( name )->second.data );
+	}
+	return 0;
+}
+			
 template<class T>
 typename TypedData<std::vector<T> >::Ptr ImagePrimitive::createChannel( const std::string &name )
 {	
