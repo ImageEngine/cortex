@@ -267,6 +267,9 @@ enum TypeId
 	ChannelOpTypeId = 224,
 	SummedAreaOpTypeId = 225,
 	GradeTypeId = 226,
+	Box2iVectorDataTypeId = 227,
+	Box3iVectorDataTypeId = 228,
+	MedianCutSamplerTypeId = 229,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

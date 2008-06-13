@@ -261,6 +261,13 @@ void bindTypeId()
 		.value("MappedRandomPointDistributionOp", MappedRandomPointDistributionOpTypeId )
 		.value("PointRepulsionOp", PointRepulsionOpTypeId )
 		.value("Grade", GradeTypeId )
+		.value("LuminanceOp", LuminanceOpTypeId )
+		.value("ImagePrimitiveOp", ImagePrimitiveOpTypeId )
+		.value("ChannelOp", ChannelOpTypeId )
+		.value("SummedAreaOp", SummedAreaOpTypeId )
+		.value("Box2iVectorData", Box2iVectorDataTypeId )
+		.value("Box3iVectorData", Box3iVectorDataTypeId )
+		.value("MedianCutSampler", MedianCutSamplerTypeId )
 	;
 }
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,15 +55,19 @@ using namespace Imath;
 
 namespace IECore {
 
+IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Box2i )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Box2f )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Box2d )
+IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Box3i )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Box3f )
 IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Box3d )
 
 void bindImathBoxVectorTypedData()
 {
+	BIND_VECTOR_TYPEDDATA ( Box< V2i >, "Box2iVectorData", "Box2i")
 	BIND_VECTOR_TYPEDDATA ( Box< V2f >, "Box2fVectorData", "Box2f")
 	BIND_VECTOR_TYPEDDATA ( Box< V2d >, "Box2dVectorData", "Box2d")
+	BIND_VECTOR_TYPEDDATA ( Box< V3i >, "Box3iVectorData", "Box3i")
 	BIND_VECTOR_TYPEDDATA ( Box< V3f >, "Box3fVectorData", "Box3f")
 	BIND_VECTOR_TYPEDDATA ( Box< V3d >, "Box3dVectorData", "Box3d")
 }
