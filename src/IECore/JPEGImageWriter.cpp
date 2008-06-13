@@ -186,7 +186,7 @@ void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 	vector<string>::const_iterator bIt = std::find( names.begin(), names.end(), "B" );
 	vector<string>::const_iterator yIt = std::find( names.begin(), names.end(), "Y" );		
 	
-	int numChannels = 3;
+	int numChannels = 0;
 	J_COLOR_SPACE colorSpace = JCS_RGB;
 	if ( rIt != names.end() && gIt != names.end() && bIt != names.end() )
 	{
@@ -194,6 +194,7 @@ void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 		{
 			throw IOException("JPEGImageWriter: Unsupported channel names specified");
 		}
+		numChannels = 3;
 	} 
 	else if ( yIt != names.end() ) 
 	{
@@ -204,6 +205,11 @@ void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 		
 		colorSpace = JCS_GRAYSCALE;
 		numChannels = 1;
+	}
+	
+	if( !numChannels )
+	{
+		throw IOException( "JPEGImageWriter: Unsupported channel names specified." );
 	}
 	
 	assert( numChannels == 1 || numChannels == 3 );
