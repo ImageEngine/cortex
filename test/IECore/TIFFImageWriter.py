@@ -404,10 +404,6 @@ class TestTIFFImageWriter(unittest.TestCase):
 		w = Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
 		self.assertEqual( type(w), TIFFImageWriter )		
 		w.write()
-	
-		
-		w = Writer.create( imgOrig, "test/IECore/data/tiff/cak2.tif" )		
-		w.write()
 		
 		self.assert_( os.path.exists( "test/IECore/data/tiff/output.tif" ) )
 				
