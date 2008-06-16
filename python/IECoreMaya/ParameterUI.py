@@ -199,7 +199,7 @@ class ParameterUI :
 		
 		if cmds.getAttr( kw['attributeName'], lock = True) == 0:
 		
-			for k in self.parameter.presets().keys():
+			for k in sorted( self.parameter.presets().keys() ):
 				cmds.menuItem(
 					parent = popupMenu,
 					label = k,
@@ -411,6 +411,16 @@ class CompoundParameterUI( ParameterUI ) :
 	
 		ParameterUI.__init__( self, node, parameter )
 		
+		visible = True
+		try:
+			visible = parameter.userData()['UI']['visible'].value
+		except:
+			pass
+			
+		if not visible :
+		
+			return
+		
 		self.__childUIsLayout = None		
 		self.__childUIs = {}
 		
@@ -481,11 +491,18 @@ class CompoundParameterUI( ParameterUI ) :
 			for pName in self.parameter.keys():
 				
 				p = self.parameter[pName]
+				
+				visible = True
+				try:
+					visible = p.userData()['UI']['visible'].value
+				except:
+					pass
 
-				ui = ParameterUI.create( self.node(), p )
+				if visible:
+					ui = ParameterUI.create( self.node(), p )
 
-				if ui:			
-					self.__childUIs[pName] = ui
+					if ui:			
+						self.__childUIs[pName] = ui
 
 			cmds.setParent("..")
 
