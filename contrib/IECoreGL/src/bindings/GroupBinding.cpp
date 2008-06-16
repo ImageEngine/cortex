@@ -48,7 +48,7 @@ namespace IECoreGL
 list children( const Group &g )
 {
 	list result;
-	Group::ChildSet::const_iterator it;
+	Group::ChildContainer::const_iterator it;
 	for( it=g.children().begin(); it!=g.children().end(); it++ )
 	{
 		result.append( *it );

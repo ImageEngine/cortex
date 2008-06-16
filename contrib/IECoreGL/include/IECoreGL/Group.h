@@ -39,7 +39,7 @@
 
 #include "OpenEXR/ImathMatrix.h"
 
-#include <set>
+#include <list>
 
 namespace IECoreGL
 {
@@ -51,7 +51,7 @@ class Group : public Renderable
 
 	public :
 
-		typedef std::set<RenderablePtr> ChildSet;
+		typedef std::list<RenderablePtr> ChildContainer;
 
 		/// Newly created Groups have empty state and
 		/// identity transforms.
@@ -72,13 +72,13 @@ class Group : public Renderable
 		virtual Imath::Box3f bound() const;
 
 		void addChild( RenderablePtr child );
-		const ChildSet &children() const;
+		const ChildContainer &children() const;
 		
 	private :
 	
 		StatePtr m_state;
 		Imath::M44f m_transform;
-		ChildSet m_children;
+		ChildContainer m_children;
 
 };
 

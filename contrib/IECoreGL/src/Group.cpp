@@ -101,7 +101,7 @@ void Group::render( ConstStatePtr state ) const
 			m_state->bind();
 			StatePtr s = new State( *state );
 			s->add( m_state );
-			for( ChildSet::const_iterator it=m_children.begin(); it!=m_children.end(); it++ )
+			for( ChildContainer::const_iterator it=m_children.begin(); it!=m_children.end(); it++ )
 			{
 				(*it)->render( s );
 			}
@@ -119,7 +119,7 @@ void Group::render( ConstStatePtr state ) const
 Imath::Box3f Group::bound() const
 {
 	Box3f result;
-	for( ChildSet::const_iterator it=children().begin(); it!=children().end(); it++ )
+	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
 	{
 		result.extendBy( (*it)->bound() );
 	}
@@ -128,10 +128,10 @@ Imath::Box3f Group::bound() const
 
 void Group::addChild( RenderablePtr child )
 {
-	m_children.insert( child );
+	m_children.push_back( child );
 }
 
-const Group::ChildSet &Group::children() const
+const Group::ChildContainer &Group::children() const
 {
 	return m_children;
 }
