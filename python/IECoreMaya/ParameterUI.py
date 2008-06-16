@@ -1,3 +1,4 @@
+
 ##########################################################################
 #
 #  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
@@ -984,6 +985,7 @@ ParameterUI.registerUI( IECore.TypeId.BoolParameter, BoolParameterUI )
 ParameterUI.registerUI( IECore.TypeId.CompoundParameter, CompoundParameterUI )
 
 ParameterUI.registerUI( IECore.TypeId.StringParameter, StringParameterUI )
+ParameterUI.registerUI( IECore.TypeId.ValidatedStringParameter, StringParameterUI )
 ParameterUI.registerUI( IECore.TypeId.FrameListParameter, StringParameterUI )
 ParameterUI.registerUI( IECore.TypeId.PathParameter, StringParameterUI )
 
