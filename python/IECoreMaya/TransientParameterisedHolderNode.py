@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,20 +32,45 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+import maya.OpenMaya
+import maya.cmds
+import IECoreMaya
+import _IECoreMaya
+import StringUtil
 
-from ParameterUI import ParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
-from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
+class TransientParameterisedHolderNode( maya.OpenMaya.MFnDependencyNode ) :
+
+	def __init__( self, layoutName, classNameOrParameterised, classVersion=None, envVarName=None ) :
+		""" Creates a temporary TransientParameterisedHolderNode in order to present the UI for the specified
+		    parameterised object in the given layout. The node is automatically deleted when the holding
+		    layout is destroyed """
+		
+		nodeName = maya.cmds.createNode( "ieTransientParameterisedHolderNode", skipSelect = True )
+		
+		# Script jobs aren't available from maya.cmds
+		IECoreMaya.mel( 'scriptJob -uiDeleted "%s" "delete %s" -protected' % ( layoutName, nodeName ) )
+		
+		object = StringUtil.dependencyNodeFromString( nodeName )
+				
+		maya.OpenMaya.MFnDependencyNode.__init__( self, object )
+	
+		if isinstance( classNameOrParameterised, str ) :
+			res = _IECoreMaya._parameterisedHolderSetParameterised( self, classNameOrParameterised, classVersion, envVarName )
+		else :
+			assert( not classVersion )
+			assert( not envVarName )
+		
+			res = _IECoreMaya._parameterisedHolderSetParameterised( self, classNameOrParameterised )
+			
+		parameterised = self.getParameterised()[0]
+		
+		if parameterised: 
+			maya.cmds.setParent( layoutName )
+			IECoreMaya.ParameterUI.create( object, parameterised.parameters() )
+			maya.cmds.setParent( layoutName )			
+			
+		return res		
+				
+	def getParameterised( self ) :
+		
+		return _IECoreMaya._parameterisedHolderGetParameterised( self )

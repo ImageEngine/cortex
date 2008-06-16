@@ -52,6 +52,7 @@
 #include "IECoreMaya/IECoreMaya.h"
 #include "IECoreMaya/CacheSet.h"
 #include "IECoreMaya/ParameterisedHolder.h"
+#include "IECoreMaya/TransientParameterisedHolderNode.h"
 #include "IECoreMaya/OpHolder.h"
 #include "IECoreMaya/PythonCmd.h"
 #include "IECoreMaya/ProceduralHolder.h"
@@ -124,6 +125,10 @@ MStatus initialize(MFnPlugin &plugin)
 			ConverterHolder::creator, ConverterHolder::initialize );			
 		assert( s );
 		
+		s = plugin.registerNode( TransientParameterisedHolderNode::typeName, TransientParameterisedHolderNode::id, 
+			TransientParameterisedHolderNode::creator, TransientParameterisedHolderNode::initialize );
+		assert( s );	
+		
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
 		
@@ -172,6 +177,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( ProceduralHolder::id );
 		s = plugin.deregisterNode( OpHolderNode::id );
 		s = plugin.deregisterNode( ConverterHolder::id );
+		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );
 		
 		s = plugin.deregisterCommand( "iePython" );
 		s = plugin.deregisterCommand( "ieSystemExit" );
