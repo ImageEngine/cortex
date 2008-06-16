@@ -42,6 +42,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/DirNameParameter.h"
+#include "IECore/ValidatedStringParameter.h"
 
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnMessageAttribute.h"
@@ -63,6 +64,7 @@ static ParameterHandler::Description< StringParameterHandler > stringRegistrar( 
 static ParameterHandler::Description< StringParameterHandler > pathRegistrar( IECore::PathParameter::staticTypeId() );
 static ParameterHandler::Description< StringParameterHandler > fileNameRegistrar( IECore::FileNameParameter::staticTypeId() );
 static ParameterHandler::Description< StringParameterHandler > dirNameRegistrar( IECore::DirNameParameter::staticTypeId() );
+static ParameterHandler::Description< StringParameterHandler > validatedStringRegistrar( IECore::ValidatedStringParameter::staticTypeId() );
 
 MStatus StringParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
