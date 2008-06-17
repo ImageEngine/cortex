@@ -47,7 +47,8 @@ class TransientParameterisedHolderNode( maya.OpenMaya.MFnDependencyNode ) :
 		
 		nodeName = maya.cmds.createNode( "ieTransientParameterisedHolderNode", skipSelect = True )
 		
-		# Script jobs aren't available from maya.cmds
+		# Script jobs aren't available from maya.cmds. Maya Python bindings generate swig warnings
+		# such as "swig/python detected a memory leak of type 'MCallbackId *', no destructor found"
 		IECoreMaya.mel( 'scriptJob -uiDeleted "%s" "delete %s" -protected' % ( layoutName, nodeName ) )
 		
 		object = StringUtil.dependencyNodeFromString( nodeName )
