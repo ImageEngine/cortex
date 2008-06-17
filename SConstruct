@@ -1428,7 +1428,7 @@ if doConfigure :
 
 	c = Configure( truelightEnv )
 
-	if not c.CheckHeader( "truelight.h", "\"\"", "CXX" ) :
+	if not c.CheckLibWithHeader( "truelight", "truelight.h", "CXX" ) :
 		
 		sys.stderr.write( "WARNING : no truelight devkit found, not building IECoreTruelight - check TRUELIGHT_ROOT.\n" )
 		c.Finish()
