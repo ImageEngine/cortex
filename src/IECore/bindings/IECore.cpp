@@ -185,6 +185,8 @@
 #include "IECore/bindings/ChannelOpBinding.h"
 #include "IECore/bindings/SummedAreaOpBinding.h"
 #include "IECore/bindings/GradeBinding.h"
+#include "IECore/bindings/MedianCutSamplerBinding.h"
+#include "IECore/bindings/EnvMapSamplerBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -355,6 +357,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindChannelOp();	
 	bindSummedAreaOp();	
 	bindGrade();
+	bindMedianCutSampler();	
+	bindEnvMapSampler();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -268,6 +268,7 @@ void bindTypeId()
 		.value("Box2iVectorData", Box2iVectorDataTypeId )
 		.value("Box3iVectorData", Box3iVectorDataTypeId )
 		.value("MedianCutSampler", MedianCutSamplerTypeId )
+		.value("EnvMapSampler", EnvMapSamplerTypeId )
 	;
 }
 

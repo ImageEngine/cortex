@@ -270,6 +270,7 @@ enum TypeId
 	Box2iVectorDataTypeId = 227,
 	Box3iVectorDataTypeId = 228,
 	MedianCutSamplerTypeId = 229,
+	EnvMapSamplerTypeId = 230,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

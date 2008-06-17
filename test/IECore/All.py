@@ -151,6 +151,8 @@ from AngleConversionTest import *
 from LuminanceOpTest import *
 from SummedAreaOpTest import *
 from GradeTest import *
+from MedianCutSamplerTest import *
+from EnvMapSamplerTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
