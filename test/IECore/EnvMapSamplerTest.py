@@ -60,7 +60,7 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 
 		for d in directions :
 		
-			self.assertAlmostEqual( d.length(), 1 )
+			self.assertAlmostEqual( d.length(), 1, 6 )
 
 if __name__ == "__main__":
 	unittest.main()
