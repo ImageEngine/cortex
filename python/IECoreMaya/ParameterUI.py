@@ -687,7 +687,8 @@ class FileSequenceParameterUI( PathParameterUI ) :
 					if os.path.basename(selection) in seq.fileNames():
 					
 						self.parameter.setValue( IECore.StringData( os.path.join( d, str( seq ) ) ) )
-						self.node().setNodeValue( self.parameter )	
+						fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+						fnPH.setNodeValue( self.parameter )	
 						
 						return	
 		
