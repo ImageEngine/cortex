@@ -678,7 +678,7 @@ class FileSequenceParameterUI( PathParameterUI ) :
 			
 		if len(selection):
 			d = os.path.dirname(selection)
-			sequences = ls(d)
+			sequences = IECore.ls(d)
 			
 			if sequences:
 			
