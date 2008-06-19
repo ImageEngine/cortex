@@ -42,7 +42,7 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=3
-ieCoreMinorVersion=2
+ieCoreMinorVersion=3
 ieCorePatchVersion=0
 
 ###########################################################################################
