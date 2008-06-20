@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,7 @@
 
 #include "IECore/bindings/ImathRandomBinding.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/Random.h"
 
 #include "OpenEXR/ImathRandom.h"
 #include "OpenEXR/ImathVec.h"
@@ -192,6 +193,12 @@ void bindRand( const char *className )
 		.def( "gaussSpherefVector", &Vectoriser<T, V2f, &gaussSphereRand<V2f, T> >::vectoriseSeeded )
 		.def( "gaussSpheredVector", &Vectoriser<T, V2d, &gaussSphereRand<V2d, T> >::vectorise )
 		.def( "gaussSpheredVector", &Vectoriser<T, V2d, &gaussSphereRand<V2d, T> >::vectoriseSeeded )
+		.def( "cosineHemispheref", &cosineHemisphereRand<V3f,T> )
+		.def( "cosineHemisphered", &cosineHemisphereRand<V3d,T> )
+		.def( "cosineHemispherefVector", &Vectoriser<T, V3f, &cosineHemisphereRand<V3f, T> >::vectorise )
+		.def( "cosineHemispherefVector", &Vectoriser<T, V3f, &cosineHemisphereRand<V3f, T> >::vectoriseSeeded )
+		.def( "cosineHemispheredfVector", &Vectoriser<T, V3d, &cosineHemisphereRand<V3d, T> >::vectorise )
+		.def( "cosineHemispheredVector", &Vectoriser<T, V3d, &cosineHemisphereRand<V3d, T> >::vectoriseSeeded )
 	;
 	
 }

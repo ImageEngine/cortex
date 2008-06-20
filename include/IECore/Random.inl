@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,9 @@
 #ifndef IECORE_RANDOM_INL
 #define IECORE_RANDOM_INL
 
+#include "OpenEXR/ImathMath.h"
+#include "OpenEXR/ImathVec.h"
+
 namespace IECore
 {
 
@@ -58,6 +61,19 @@ Vec triangleRand( const Vec &v0, const Vec &v1, const Vec &v2, Rand &rand )
 {
 	Vec b = barycentricRand( rand );
 	return v0 * b[0] + v1 * b[1] + v2 * b[2];
+}
+
+template<class Vec, class Rand>
+Vec cosineHemisphereRand( Rand &rand )
+{
+	typedef typename Vec::BaseType BaseType;
+	typedef Imath::Vec2<BaseType> V2;
+	V2 d = Imath::solidSphereRand<V2>( rand );
+	Vec result;
+	result[0] = d[0];
+	result[1] = d[1];
+	result[2] = Imath::Math<BaseType>::sqrt( std::max( BaseType( 0 ), BaseType( 1 ) - d.x*d.x - d.y*d.y ) );
+	return result;
 }
 
 } // namespace IECore

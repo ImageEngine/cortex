@@ -153,6 +153,7 @@ from SummedAreaOpTest import *
 from GradeTest import *
 from MedianCutSamplerTest import *
 from EnvMapSamplerTest import *
+from RandomTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
