@@ -52,6 +52,7 @@ IE_CORE_FORWARDDECLARE( Texture );
 /// object and a set of associated parameter values. It derives
 /// from StateComponent and therefore can be used to apply Shaders
 /// to Primitives within a Group or Scene.
+/// \todo Allow this to specify texture filtering and wrap modes.
 class ShaderStateComponent : public StateComponent
 {
 
