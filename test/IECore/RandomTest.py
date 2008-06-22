@@ -46,7 +46,7 @@ class RandomTest( unittest.TestCase ) :
 		for i in range( 0, v.size() ) :
 		
 			self.assert_( v[i].z >= 0 )
-			self.assertAlmostEqual( v[i].length(), 1 )
+			self.assertAlmostEqual( v[i].length(), 1, 6 )
 		
 if __name__ == "__main__":
 	unittest.main()
