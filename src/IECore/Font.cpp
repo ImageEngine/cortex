@@ -58,6 +58,8 @@ using namespace std;
 
 /// \todo Use standard member data on the next major version.
 static ClassData<Font, string> g_fileNames;
+typedef std::map<char, ConstImagePrimitivePtr> ImageMap;
+static ClassData<Font, ImageMap> g_images;
 
 ////////////////////////////////////////////////////////////////////////////////
 // struct definitions for the font caches
@@ -290,19 +292,22 @@ int Font::Mesher::cubicTo( const FT_Vector *control1, const FT_Vector *control2,
 //////////////////////////////////////////////////////////////////////////////////////////
 
 Font::Font( const std::string &fontFile )
-	:	m_kerning( 1.0f ), m_curveTolerance( 0.01 ), m_pixelsPerEm( 100 )
+	:	m_kerning( 1.0f ), m_curveTolerance( 0.01 ), m_pixelsPerEm( 0 )
 {
 	g_fileNames.create( this, fontFile );
+	g_images.create( this );
 	FT_Error e = FT_New_Face( library(), fontFile.c_str(), 0, &m_face );
 	if( e )
 	{
 		throw Exception( "Error creating new FreeType face." );
 	}
+	setResolution( 100 );
 }
 
 Font::~Font()
 {
 	g_fileNames.erase( this );
+	g_images.erase( this );
 	FT_Done_Face( m_face );
 }
 
@@ -334,7 +339,12 @@ float Font::getCurveTolerance() const
 
 void Font::setResolution( float pixelsPerEm )
 {
-	m_pixelsPerEm = pixelsPerEm;
+	if( pixelsPerEm!=m_pixelsPerEm )
+	{
+		m_pixelsPerEm = pixelsPerEm;
+		g_images[this].clear();
+		FT_Set_Pixel_Sizes( m_face, pixelsPerEm, pixelsPerEm );
+	}
 }
 
 float Font::getResolution() const
@@ -471,6 +481,15 @@ Imath::V2f Font::advance( char first, char second )
 	return a;
 }
 
+Imath::Box2f Font::bound()
+{
+	float scale = 1.0f / (float)(m_face->units_per_EM);
+	return Box2f(
+		V2f( (float)m_face->bbox.xMin * scale, (float)m_face->bbox.yMin * scale ),
+		V2f( (float)m_face->bbox.xMax * scale, (float)m_face->bbox.yMax * scale )
+	);
+}
+
 Imath::Box2f Font::bound( char c )
 {
 	Imath::Box3f b = cachedMesh( c )->bound;
@@ -499,6 +518,114 @@ Imath::Box2f Font::bound( const std::string &text )
 	}
 	
 	return result;
+}
+
+ConstImagePrimitivePtr Font::image( char c )
+{
+	return cachedImage( c );
+}
+
+ImagePrimitivePtr Font::image()
+{
+	Box2i charDisplayWindow = boundingWindow();
+	int charWidth = charDisplayWindow.size().x + 1;
+	int charHeight = charDisplayWindow.size().y + 1;
+	
+	int width = charWidth * 16;
+	int height = charHeight * 8;
+	Box2i window( V2i( 0 ), V2i( width-1, height-1 ) );
+
+	ImagePrimitivePtr result = new ImagePrimitive( window, window );
+	FloatVectorDataPtr luminanceData = result->createChannel<float>( "Y" );
+	float *luminance = &*(luminanceData->writable().begin());
+	
+	for( unsigned c=0; c<128; c++ )
+	{
+		ConstImagePrimitivePtr charImage = image( (char)c );
+		ConstFloatVectorDataPtr charLuminanceData = charImage->getChannel<float>( "Y" );
+		assert( charLuminanceData );
+		const float *charLuminance = &*(charLuminanceData->readable().begin());
+		const Box2i &charDataWindow = charImage->getDataWindow();
+		assert( charDisplayWindow == charImage->getDisplayWindow() );
+		
+		V2i dataOffset = charDataWindow.min - charDisplayWindow.min;
+		
+		int cx = c % 16;
+		int cy = c / 16;
+		float *outBase= luminance + (cy * charHeight + dataOffset.y ) * width + cx * charWidth + dataOffset.x;
+		for( int y=charDataWindow.min.y; y<=charDataWindow.max.y; y++ )
+		{
+			float *rowOut = outBase + (y-charDataWindow.min.y) * width;
+			for( int x=charDataWindow.min.x; x<=charDataWindow.max.x; x++ )
+			{
+				*rowOut++ = *charLuminance++;
+			}
+		}
+	}
+	return result;
+}
+
+ConstImagePrimitivePtr Font::cachedImage( char c )
+{
+	ImageMap &m_images = g_images[this];
+
+	// see if we have it cached
+	ImageMap::const_iterator it = m_images.find( c );
+	if( it!=m_images.end() )
+	{
+		return it->second;
+	}
+	
+	// not in cache, so load it
+	FT_Load_Char( m_face, c, FT_LOAD_RENDER );
+	
+	// convert to ImagePrimitive
+	FT_Bitmap &bitmap = m_face->glyph->bitmap;
+	assert( bitmap.num_grays==256 );
+	assert( bitmap.pixel_mode==FT_PIXEL_MODE_GRAY );
+	
+	Box2i displayWindow = boundingWindow();
+	
+	// datawindow is the bitmap bound, but adjusted to account for the y transformation described
+	// in boundingWindow.
+	Box2i dataWindow(
+		V2i( m_face->glyph->bitmap_left, -m_face->glyph->bitmap_top ),
+		V2i( m_face->glyph->bitmap_left + bitmap.width - 1, -m_face->glyph->bitmap_top + bitmap.rows - 1 )
+	);
+	
+	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );
+	
+	FloatVectorDataPtr luminanceData = image->createChannel<float>( "Y" );
+	float *luminance = &*(luminanceData->writable().begin());
+	for( int y=0; y<bitmap.rows; y++ )
+	{
+		unsigned char *row = bitmap.buffer + y * bitmap.pitch;
+		/// \todo Do we have to reverse gamma correction to get a linear image?
+		for( int x=0; x<bitmap.width; x++ )
+		{
+			*luminance++ = *row++ / 255.0f;
+		}
+	}	
+
+	// put it in the cache
+	m_images[c] = image;
+	
+	// return it
+	return image;
+}
+
+Imath::Box2i Font::boundingWindow() const
+{
+	// display window is the maximum possible character bound. unfortunately the ImagePrimitive
+	// defines it's windows with y increasing from top to bottom, whereas the freetype coordinate
+	// systems have y increasing in the bottom to top direction. there's not an ideal way of mapping
+	// between these two - what we choose to do here is map the 0 of our displayWindow to the baseline of the
+	// freetype coordinate system.
+	float scale = (float)m_face->size->metrics.x_ppem / (float)m_face->units_per_EM;
+	return Box2i(
+		V2i( roundf( m_face->bbox.xMin * scale ), roundf( -m_face->bbox.yMax * scale ) ),
+		V2i( roundf( m_face->bbox.xMax * scale ) - 1, roundf( -m_face->bbox.yMin * scale ) - 1)
+	);	
 }
 		
 FT_Library Font::library()

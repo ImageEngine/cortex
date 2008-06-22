@@ -61,6 +61,16 @@ static MeshPrimitivePtr mesh( Font &f, char c )
 	return 0;
 }
 
+static ImagePrimitivePtr image( Font &f, char c )
+{
+	ConstImagePrimitivePtr i = f.image( c );
+	if( i )
+	{
+		return i->copy();
+	}
+	return 0;
+}
+
 void bindFont()
 {
 	typedef class_< Font, boost::noncopyable, FontPtr, bases< RunTimeTyped > > FontPyClass;
@@ -76,8 +86,11 @@ void bindFont()
 		.def( "mesh", (MeshPrimitivePtr (Font::*)( const std::string &))&Font::mesh )
 		.def( "meshGroup", &Font::meshGroup )
 		.def( "advance", &Font::advance )
+		.def( "bound", (Imath::Box2f (Font::*)( ))&Font::bound )
 		.def( "bound", (Imath::Box2f (Font::*)( char ))&Font::bound )
 		.def( "bound", (Imath::Box2f (Font::*)( const std::string &))&Font::bound )
+		.def( "image", &image )
+		.def( "image", (ImagePrimitivePtr (Font::*)())&Font::image )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Font )		
 	;
 

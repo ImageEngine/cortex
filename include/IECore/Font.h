@@ -56,7 +56,7 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 IE_CORE_FORWARDDECLARE( Group );
 
 /// The Font class allows the loading of fonts and their
-/// conversion to MeshPrimitives.
+/// conversion to MeshPrimitives and ImagePrimitives.
 class Font : public RunTimeTyped
 {
 	
@@ -72,23 +72,67 @@ class Font : public RunTimeTyped
 		void setKerning( float kerning );
 		float getKerning() const;
 
+		/// Sets the tolerance used when converting
+		/// curved segments of glyphs into triangle
+		/// meshes. Smaller values produce denser
+		/// meshes. Tolerance is specified in the
+		/// same coordinate system as the resulting
+		/// mesh - that is one unit in the mesh is
+		/// equal to one em.
 		void setCurveTolerance( float tolerance );
 		float getCurveTolerance() const;
 		
+		/// Sets the resolution used in converting
+		/// glyphs into images.
 		void setResolution( float pixelsPerEm );
 		float getResolution() const;
 
 		/// \todo All these methods should be const. The internal cache
 		/// is an implementation detail which is irrelevant to clients
 		/// of the class.
+		/// Returns a mesh for the specified character, using
+		/// the current curve tolerance. This returns a reference
+		/// into an internal cache and hence the resulting mesh
+		/// is const.
 		ConstMeshPrimitivePtr mesh( char c );
+		/// Returns a mesh representing the specified string,
+		/// using the current curve tolerance and kerning.
 		MeshPrimitivePtr mesh( const std::string &text );
+		/// Returns a group representing the specified string,
+		/// using the current curve tolerance and kerning.
 		GroupPtr meshGroup( const std::string &text );
+		/// Returns the necessary appropriate offset between the
+		/// origins of the first and second characters, taking
+		/// into account the current kerning.
 		Imath::V2f advance( char first, char second );
+		/// Returns a bounding box guaranteed to be large enough
+		/// to contain all characters from the font. 1 unit in this
+		/// bound is equal to 1 em.
+		Imath::Box2f bound();
+		/// Returns the bounding box for the specified character -
+		/// units are as above.
 		Imath::Box2f bound( char c );
+		/// Returns the bounding box for the specified string taking
+		/// into account the current kerning settings - units are as
+		/// above.
 		Imath::Box2f bound( const std::string &text );
+		/// Returns an ImagePrimitive to represent the specified
+		/// character, using the current resolution. The image will have
+		/// a single channel named "Y". The display window is the same for all
+		/// characters, and will bound any character in the font. The data window
+		/// will differ for each character and covers the bounding box of the
+		/// individual character. 0,0 in pixel coordinates corresponds to the
+		/// origin of the character on the baseline - bear in mind that image coordinates
+		/// increase from top to bottom, so the top of the character will typically
+		/// have a negative y coordinate in pixel space.
+		ConstImagePrimitivePtr image( char c );
+		/// Returns an image containing a grid of 16x8 characters containing
+		/// all the chars from 0-127 inclusive. This too has a single "Y" channel.
+		ImagePrimitivePtr image();
 		
 	private :
+
+		Imath::Box2i boundingWindow() const;
 
 		class Mesher;
 		
@@ -104,8 +148,9 @@ class Font : public RunTimeTyped
 		typedef boost::shared_ptr<const Mesh> ConstMeshPtr;
 		typedef std::map<char, ConstMeshPtr> MeshMap;
 		MeshMap m_meshes;
-		
+				
 		ConstMeshPtr cachedMesh( char c );
+		ConstImagePrimitivePtr cachedImage( char c );
 		
 };
 
