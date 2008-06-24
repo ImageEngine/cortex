@@ -343,7 +343,7 @@ void Font::setResolution( float pixelsPerEm )
 	{
 		m_pixelsPerEm = pixelsPerEm;
 		g_images[this].clear();
-		FT_Set_Pixel_Sizes( m_face, pixelsPerEm, pixelsPerEm );
+		FT_Set_Pixel_Sizes( m_face, (FT_UInt)pixelsPerEm, (FT_UInt)pixelsPerEm );
 	}
 }
 
@@ -623,8 +623,8 @@ Imath::Box2i Font::boundingWindow() const
 	// freetype coordinate system.
 	float scale = (float)m_face->size->metrics.x_ppem / (float)m_face->units_per_EM;
 	return Box2i(
-		V2i( roundf( m_face->bbox.xMin * scale ), roundf( -m_face->bbox.yMax * scale ) ),
-		V2i( roundf( m_face->bbox.xMax * scale ) - 1, roundf( -m_face->bbox.yMin * scale ) - 1)
+		V2i( (int)roundf( m_face->bbox.xMin * scale ), (int)roundf( -m_face->bbox.yMax * scale ) ),
+		V2i( (int)roundf( m_face->bbox.xMax * scale ) - 1, (int)roundf( -m_face->bbox.yMin * scale ) - 1)
 	);	
 }
 		
