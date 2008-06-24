@@ -204,7 +204,7 @@ void PointsPrimitive::renderPoints( ConstStatePtr state, IECore::TypeId style ) 
 		glColorPointer( 3, GL_FLOAT, 0, c );
 	}	
 	
-		glDrawArrays( GL_POINTS, 0, p.size() );
+	glDrawArrays( GL_POINTS, 0, p.size() );
 	
 	glDisableClientState( GL_COLOR_ARRAY );
 	glDisableClientState( GL_VERTEX_ARRAY );
