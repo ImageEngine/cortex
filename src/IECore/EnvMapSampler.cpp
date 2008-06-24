@@ -40,6 +40,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/LuminanceOp.h"
 #include "IECore/AngleConversion.h"
+#include "IECore/BoxOperators.h"
 
 using namespace IECore;
 using namespace boost;
@@ -152,7 +153,7 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 			
 			float angle = angleAtTop - yRel * radiansPerPixel;
 			float weight = cosf( angle );
-			int index = ( dataWindow.size().x + 1 ) * yRel;
+			int index = (area.min.x - dataWindow.min.x) + (dataWindow.size().x + 1 ) * yRel;
 			for( int x=area.min.x; x<=area.max.x; x++ )
 			{
 				color[0] += weight * red[index];
@@ -161,7 +162,7 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 				index++;
 			}
 		}
-		color /= (area.size().x + 1) * (area.size().y + 1);
+		color /= red.size();
 		colors.push_back( color );
 		
 		float phi = angleAtTop - (centroids[i].y - dataWindow.min.y) * radiansPerPixel;

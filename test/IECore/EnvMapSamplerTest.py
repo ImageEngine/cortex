@@ -61,7 +61,30 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 		for d in directions :
 		
 			self.assertAlmostEqual( d.length(), 1, 6 )
-
+	
+	def testColorSums( self ) :
+	
+		"""Check that subdivision depth doesn't change the total amount of light."""
+	
+		image = IECore.Reader.create( "test/IECore/data/exrFiles/carPark.exr" ).read()
+		for n in ["R", "G", "B"] :
+			p = image[n]
+			p.data = IECore.DataCastOp()( object=image[n].data, targetType=IECore.FloatVectorData.staticTypeId() )
+			image[n] = p
+		
+		lastColorSum = None
+		for i in range( 0, 10 ) :
+		
+			lights = IECore.EnvMapSampler()( image=image, subdivisionDepth=i )
+			colorSum = sum( lights.colors, IECore.Color3f( 0 ) )
+		
+			if lastColorSum :
+				self.assertAlmostEqual( colorSum[0], lastColorSum[0], 6 )
+				self.assertAlmostEqual( colorSum[1], lastColorSum[1], 6 )
+				self.assertAlmostEqual( colorSum[2], lastColorSum[2], 6 )
+			
+			lastColorSum = colorSum
+				
 if __name__ == "__main__":
 	unittest.main()
 	
