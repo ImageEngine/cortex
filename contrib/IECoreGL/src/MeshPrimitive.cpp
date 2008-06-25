@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECoreGL/MeshPrimitive.h"
 #include "IECoreGL/GL.h"
+#include "IECoreGL/State.h"
 
 #include "OpenEXR/ImathMath.h"
 
@@ -41,9 +44,14 @@ using namespace IECoreGL;
 using namespace Imath;
 using namespace std;
 
-MeshPrimitive::MeshPrimitive( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points )
-	:	m_vertsPerFace( vertsPerFace->copy() ), m_vertIds( vertIds->copy() ), m_points( points->copy() )
+MeshPrimitive::MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points )
+	:	m_vertIds( vertIds->copy() )
 {
+	assert( points );
+	
+	m_points = points->copy();
+	assert( m_points );
+	
 	const vector<V3f> &p = m_points->readable();
 	for( unsigned int i=0; i<p.size(); i++ )
 	{
@@ -55,34 +63,64 @@ MeshPrimitive::~MeshPrimitive()
 {
 
 }
+
+IECore::ConstIntVectorDataPtr MeshPrimitive::vertexIds() const
+{
+	return m_vertIds;
+}
+	
+size_t MeshPrimitive::vertexAttributeSize() const
+{
+	return m_vertIds->readable().size();
+}
 				
 void MeshPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 {
-	const vector<int> &vertsPerFace = m_vertsPerFace->readable();
-	const vector<int> &vertIds = m_vertIds->readable();
-	const vector<V3f> &points = m_points->readable();
+	assert( m_points );
+		
+	setVertexAttributes( state );
 	
-	unsigned int vi = 0;
-	for( unsigned int i=0; i<vertsPerFace.size(); i++ )
+	const vector<V3f> &points = m_points->readable();	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer( 3, GL_FLOAT, 0, &points[0] );	
+	
+	if ( m_normals )
 	{
-		glBegin( GL_POLYGON );
-
-			/// \todo Accept per vertex and facevarying normals
-			/// as input. Write an IECore::CalculateNormalsOp to
-			/// be used in IECoreGL::Renderer to calculate normals
-			/// for subdiv meshes.
-			const V3f &p0 = points[vertIds[vi]];
-			const V3f &p1 = points[vertIds[vi+1]];
-			const V3f &p2 = points[vertIds[vi+2]];
-			V3f n = (p2-p1).cross(p0-p1);
-			glNormal3f( n.x, n.y, n.z );
-			
-			for( int j=0; j<vertsPerFace[i]; j++ )
-			{
-				const V3f &p = points[vertIds[vi++]];
-				glVertex3f( p.x, p.y, p.z );
-			}
-		glEnd();
+		const vector<V3f> &normals = m_normals->readable();	
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glNormalPointer( GL_FLOAT, 0, &normals[0] );	
+	}
+	
+	if ( m_texCoords )
+	{
+		const vector<V2f> &texCoords = m_texCoords->readable();	
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, &texCoords[0] );	
+	}
+	
+	if ( m_colors )
+	{
+		const vector<Color3f> &colors = m_colors->readable();	
+		glEnableClientState(GL_COLOR_ARRAY);
+		glColorPointer(3, GL_FLOAT, 0, &colors[0] );		
+	}
+	
+	glDrawArrays( GL_TRIANGLES, 0, vertexAttributeSize() );
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+	if ( m_normals )
+	{
+		glDisableClientState(GL_NORMAL_ARRAY);
+	}
+	
+	if ( m_texCoords )
+	{
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+	
+	if ( m_colors )
+	{
+		glDisableClientState(GL_COLOR_ARRAY);
 	}
 }
 

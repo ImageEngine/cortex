@@ -1220,10 +1220,14 @@ void IECoreGL::Renderer::motionEnd()
 // ShaderStateComponent to expose it's shader and parameters in non-const form, and i'm not sure RendererImplementation::getState()
 // should return non-const data either. When we do varying primvars look into storing the uniform ones on the primitive too,
 // and see if that might solve our problem somewhat.
-static void addPrimitive( IECoreGL::PrimitivePtr primitive, const IECore::PrimitiveVariableMap &primVars, IECoreGL::Renderer::MemberData *memberData )
+/// \todo the addVertexAttributes is bit of a hack - MeshPrimitives have their own mechanisms for adding vertex attributes to take into
+/// account changes of detail from varying->facevarying. 
+/// \todo Ditch this entire function. Vertex attributes should be added by the relevant converter classes (like MeshPrimitive does), and the
+/// uniform primvar shader overrides should be stored on the primitive and dealt with at draw time.
+static void addPrimitive( IECoreGL::PrimitivePtr primitive, const IECore::PrimitiveVariableMap &primVars, IECoreGL::Renderer::MemberData *memberData, bool addVertexAttributes = true )
 {
 	// add vertex attributes to the primitive if it supports them
-	if( primitive->vertexAttributeSize() )
+	if( addVertexAttributes && primitive->vertexAttributeSize() )
 	{
 		for( IECore::PrimitiveVariableMap::const_iterator it=primVars.begin(); it!=primVars.end(); it++ )
 		{
@@ -1562,7 +1566,7 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
 		m->variables = primVars;
 		MeshPrimitivePtr prim = boost::static_pointer_cast<MeshPrimitive>( ToGLMeshConverter( m ).convert() );
-		addPrimitive( prim, primVars, m_data );
+		addPrimitive( prim, primVars, m_data, false );
 	}
 	catch( const std::exception &e )
 	{

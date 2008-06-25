@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,28 +32,70 @@
 #
 ##########################################################################
 
-import IECore
+import unittest
+import random
 
-from Shader import *
-from State import *
-from ShaderLoader import *
-from Renderer import *
-from Group import *
-from Texture import *
-from ImmediateRenderer import *
-from NameStateComponent import *
-from HitRecord import *
-from Selection import *
-from Camera import *
-from Image import *
-from PointsPrimitive import *
-from Orientation import *
-from CurvesPrimitiveTest import *
-from MeshPrimitiveTest import *
+from IECore import *
 
-if IECore.withFreeType() :
+from IECoreGL import *
+init( False )
 
-	from TextTest import *
+class MeshPrimitiveTest( unittest.TestCase ) :
 
+	## \todo Make this actually assert something
+	def testVertexAttributes( self ) :
+	
+		vertexSource = """
+		attribute vec2 st;
+		varying vec4 stColor;
+		
+		void main()
+		{
+			gl_Position = ftransform();
+			
+			stColor = vec4(st.x, st.y, 0.0, 1.0);			
+		}
+		"""
+	
+		fragmentSource = """
+		varying vec4 stColor;
+		
+		void main()
+		{
+			gl_FragColor = stColor;
+		}
+		"""
+		
+		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
+		
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		
+		r.worldBegin()
+		# we have to make this here so that the shaders that get made are made in the
+		# correct GL context. My understanding is that all shaders should work in all
+		# GL contexts in the address space, but that doesn't seem to be the case.
+		#w = SceneViewer( "scene", r.scene() )
+		
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -15 ) ) )
+		r.shader( "surface", "showS", 
+			{ "gl:fragmentSource" : StringData( fragmentSource ),
+			  "gl:vertexSource" :   StringData( vertexSource   ) 
+			}
+		)
+		
+		primVars = {}
+		
+		primVars["P"] = m["P"]		
+		primVars["s"] = m["s"]
+		primVars["t"] = m["t"]
+		primVars["N"] = m["N"]		
+		
+		r.mesh( m.verticesPerFace, m.vertexIds, m.interpolation, primVars )
+		
+		r.worldEnd()
+	
+		#w.start()
+		
 if __name__ == "__main__":
     unittest.main()   

@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECoreGL/TextPrimitive.h"
 #include "IECoreGL/MeshPrimitive.h"
 #include "IECoreGL/State.h"
@@ -49,6 +51,8 @@ TextPrimitive::TextPrimitive( const std::string &text, FontPtr font )
 		for( unsigned i=0; i<text.size(); i++ )
 		{
 			ConstMeshPrimitivePtr mesh = font->mesh( text[i] );
+			assert( mesh );
+			assert( mesh->vertexIds()->readable().size() );
 			m_meshes.push_back( mesh );
 			Box3f b = mesh->bound();
 			b.min += advanceSum;

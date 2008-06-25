@@ -39,6 +39,7 @@
 #include "IECoreGL/GL.h"
 
 #include "IECore/Primitive.h"
+#include "IECore/VectorTypedData.h"
 
 #include "OpenEXR/ImathBox.h"
 
@@ -110,6 +111,12 @@ class Primitive : public Renderable
 		/// PrimitiveTransparencySortStateComponent is true.
 		bool depthSortRequested( ConstStatePtr state ) const;
 		
+		/// Standard OpenGL vertex arrays
+		IECore::ConstV3fVectorDataPtr m_points;
+		IECore::ConstV3fVectorDataPtr m_normals;		
+		IECore::ConstColor3fVectorDataPtr m_colors;				
+		IECore::ConstV2fVectorDataPtr m_texCoords;		
+		
 	private :
 	
 		struct SetVertexAttribute;
@@ -136,8 +143,7 @@ class Primitive : public Renderable
 		} m_vertexToUniform;
 	
 		typedef std::map<std::string, IECore::ConstDataPtr> VertexAttributeMap;
-		VertexAttributeMap m_vertexAttributes;
-		
+		VertexAttributeMap m_vertexAttributes;				
 };
 
 IE_CORE_DECLAREPTR( Primitive );

@@ -58,6 +58,8 @@ class ToGLMeshConverter : public ToGLConverter
 		
 	protected :
 	
+		class ToFaceVaryingConverter;
+	
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
 			
 };

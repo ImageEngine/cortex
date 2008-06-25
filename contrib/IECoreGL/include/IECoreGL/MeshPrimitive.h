@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@
 namespace IECoreGL
 {
 
-/// \todo Triangulation, fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
+/// \todo Fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
 class MeshPrimitive : public Primitive
 {
 
@@ -51,11 +51,14 @@ class MeshPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
 
 		/// Copies of all data are taken.
-		MeshPrimitive( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
+		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
 		virtual ~MeshPrimitive();
-		
+
+		IECore::ConstIntVectorDataPtr vertexIds() const;		
 
 		virtual Imath::Box3f bound() const;
+		
+		virtual size_t vertexAttributeSize() const;
 		
 	protected :
 		
@@ -63,9 +66,7 @@ class MeshPrimitive : public Primitive
 	
 	private :
 	
-		IECore::ConstIntVectorDataPtr m_vertsPerFace;
 		IECore::ConstIntVectorDataPtr m_vertIds;
-		IECore::ConstV3fVectorDataPtr m_points;
 		
 		Imath::Box3f m_bound;
 		

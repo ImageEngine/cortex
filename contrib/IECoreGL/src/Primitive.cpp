@@ -52,7 +52,7 @@ using namespace std;
 using namespace boost;
 using namespace Imath;
 
-Primitive::Primitive()
+Primitive::Primitive() : m_points( 0 ), m_normals( 0 ), m_colors( 0 ), m_texCoords( 0 )
 {
 	m_vertexToUniform.shader = 0;
 }
@@ -196,6 +196,23 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	if( s!=rightSize )
 	{
 		throw Exception( boost::str( format( "Vertex attribute \"%s\" has wrong number of elements (%d but expected %d)." ) % name % s % rightSize ) );
+	}
+	
+	if ( name == "P" )
+	{
+		m_points = IECore::runTimeCast< const IECore::V3fVectorData >( data );
+	}
+	else if ( name == "Cs" )
+	{
+		m_colors = IECore::runTimeCast< const IECore::Color3fVectorData >( data );
+	} 
+	else if ( name == "N" )
+	{
+		m_normals = IECore::runTimeCast< const IECore::V3fVectorData >( data );
+	}
+	else if ( name == "st" )
+	{
+		m_texCoords = IECore::runTimeCast< const IECore::V2fVectorData >( data );
 	}
 	
 	m_vertexAttributes[name] = data->copy();
