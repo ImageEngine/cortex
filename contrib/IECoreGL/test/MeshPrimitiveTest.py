@@ -78,7 +78,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		#w = SceneViewer( "scene", r.scene() )
 		
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -15 ) ) )
-		r.shader( "surface", "showS", 
+		r.shader( "surface", "showST", 
 			{ "gl:fragmentSource" : StringData( fragmentSource ),
 			  "gl:vertexSource" :   StringData( vertexSource   ) 
 			}
