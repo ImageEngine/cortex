@@ -1401,7 +1401,7 @@ void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic
 	ConstV3fVectorDataPtr points = findPrimVar<V3fVectorData>( "P", PrimitiveVariable::Vertex, primVars );
 	if( !points )
 	{
-		msg( Msg::Warning, "Renderer::mesh", "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
+		msg( Msg::Warning, "Renderer::curves", "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
 		return;
 	}
 
