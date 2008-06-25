@@ -120,6 +120,7 @@ if IEEnv.platform() != "osx104.i686" :
 		if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
 			NUKE_ROOT = nukeReg["location"]
 			INSTALL_NUKELIB_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+			INSTALL_NUKEPYTHON_DIR = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/python/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 	except :
 		pass
 	
