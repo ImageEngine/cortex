@@ -241,12 +241,12 @@ void PointRepulsionOp::getNearestPointsAndDensities( ImagePrimitiveEvaluatorPtr 
 
 		if ( wrapU )
 		{
-			placedUv.x = fmod( placedUv.x, 1.0 );
+			placedUv.x = fmodf( placedUv.x, 1.0f );
 		}
 
 		if ( wrapV )
 		{
-			placedUv.y = fmod( placedUv.y, 1.0 );
+			placedUv.y = fmodf( placedUv.y, 1.0f );
 		}
 
 		imageEvaluator->pointAtUV( placedUv, imageResult );
