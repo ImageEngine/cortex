@@ -61,7 +61,8 @@
 #include "IECoreGL/bindings/HitRecordBinding.h"
 #include "IECoreGL/bindings/ToGLConverterBinding.h"
 #include "IECoreGL/bindings/ToGLCameraConverterBinding.h"
-
+#include "IECoreGL/bindings/AlphaTextureBinding.h"
+#include "IECoreGL/bindings/LuminanceTextureBinding.h"
 
 using namespace IECoreGL;
 using namespace boost::python;
@@ -93,6 +94,8 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindHitRecord();
 	bindToGLConverter();
 	bindToGLCameraConverter();
+	bindAlphaTexture();
+	bindLuminanceTexture();
 	
 	def( "init", &IECoreGL::init );
 }

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,30 +32,33 @@
 #
 ##########################################################################
 
+import unittest
+import os.path
+
 import IECore
 
-from Shader import *
-from State import *
-from ShaderLoader import *
-from Renderer import *
-from Group import *
-from Texture import *
-from ImmediateRenderer import *
-from NameStateComponent import *
-from HitRecord import *
-from Selection import *
-from Camera import *
-from Image import *
-from PointsPrimitive import *
-from Orientation import *
-from CurvesPrimitiveTest import *
-from MeshPrimitiveTest import *
-from AlphaTextureTest import *
-from LuminanceTextureTest import *
+import IECoreGL
+IECoreGL.init( False )
 
-if IECore.withFreeType() :
+class LuminanceTextureTest( unittest.TestCase ) :
 
-	from TextTest import *
-
+	def test( self ) :
+	
+		i = IECore.TIFFImageReader( os.path.dirname( __file__ ) + "/images/a.tif" ).read()
+		i["A"] = i["Y"]
+		
+		t = IECoreGL.LuminanceTexture( i, False )
+		
+		ii = t.imagePrimitive()
+	
+		res = IECore.ImageDiffOp()(
+			imageA = i,
+			imageB = ii,
+			maxError = 0.1,
+			skipMissingChannels = False
+		)
+		
+		self.failIf( res.value )
+		
 if __name__ == "__main__":
     unittest.main()   

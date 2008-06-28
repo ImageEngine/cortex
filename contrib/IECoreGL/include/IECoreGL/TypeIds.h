@@ -99,6 +99,8 @@ enum TypeId
 	PointSmoothingStateComponentTypeId = 105056,
 	LineSmoothingStateComponentTypeId = 105057,
 	PolygonSmoothingStateComponentTypeId = 105058,
+	LuminanceTextureTypeId = 105059,
+	AlphaTextureTypeId = 105060,
 	LastCoreGLTypeId = 105999,	
 };	
 
