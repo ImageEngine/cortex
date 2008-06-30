@@ -52,6 +52,38 @@ LineSegment<T>::LineSegment( const T &P0, const T &P1 )
 }
 
 template<class T>
+template<class S>
+bool LineSegment<T>::operator==( const S &other ) const
+{
+	return p0==other.p0 && p1==other.p1;
+}
+
+template<class T>
+template<class S>
+bool LineSegment<T>::operator!=( const S &other ) const
+{
+	return p0!=other.p0 || p1!=other.p1;
+}
+
+template<class T>
+template<class S>
+const LineSegment<T> &LineSegment<T>::operator *=( const S &m )
+{
+	p0 *= m;
+	p1 *= m;
+	return *this;
+}
+		
+template<class T>
+template<class S>
+LineSegment<T> LineSegment<T>::operator *( const S &m ) const
+{
+	LineSegment r( *this );
+	r *= m;
+	return r;
+}
+		
+template<class T>
 T LineSegment<T>::operator() ( BaseType t ) const
 {
 	return Imath::lerp( p0, p1, t );
@@ -153,6 +185,48 @@ typename LineSegment<T>::BaseType LineSegment<T>::distance2To( const LineSegment
 	T a, b;
 	a = closestPoints( line, b );
 	return (a-b).length2();
+}
+
+template<class T>
+template<class S>
+bool LineSegment<T>::intersect( const Imath::Plane3<S> &plane, T &intersection ) const
+{
+	BaseType t;
+	if( intersectT( plane, t ) )
+	{
+		intersection = (*this)( t );
+		return true;
+	}
+	return false;
+}
+
+template<class T>
+template<class S>
+bool LineSegment<T>::intersectT( const Imath::Plane3<S> &plane, BaseType &t ) const
+{
+	T dir = direction();
+	BaseType d = plane.normal.dot( dir );
+	if( d==0.0 )
+	{
+		return false;
+	}
+	
+	t = (plane.distance - plane.normal.dot( p0 )) / d;
+	
+	if( t >= 0 && t<=1 )
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template<class T>
+std::ostream &operator << ( std::ostream &o, const LineSegment<T> &lineSegment )
+{
+    return o << "(" << lineSegment.p0 << ", " << lineSegment.p1 << ")";
 }
 
 } // namespace IECore

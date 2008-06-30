@@ -38,6 +38,7 @@
 #include "IECore/VectorTraits.h"
 
 #include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathPlane.h"
 
 namespace IECore
 {
@@ -61,6 +62,19 @@ class LineSegment
 		/// Uninitialised.
 		LineSegment();
 		LineSegment( const T &P0, const T &P1 );
+
+		/// Equality
+		template<class S>
+		bool operator==( const S &other ) const;
+		template<class S>
+		bool operator!=( const S &other ) const;
+		
+		/// Matrix multiplication. These functions
+		/// transform both endpoints.
+		template<class S>
+		const LineSegment &operator *=( const S &m );
+		template<class S>
+		LineSegment operator *( const S &m ) const;
 
 		/// Returns the point on the line at parameter t.
 		/// t ranges from 0 at p0 to 1 at p1. 
@@ -89,10 +103,18 @@ class LineSegment
 		/// Returns the shortest squared distance to the line.
 		BaseType distance2To( const LineSegment &line ) const;
 		
+		template<class S>
+		bool intersect( const Imath::Plane3<S> &plane, T &intersection ) const;
+		template<class S>
+		bool intersectT( const Imath::Plane3<S> &plane, BaseType &t ) const;
+		
 };
 
 typedef LineSegment<Imath::V3f> LineSegment3f;
 typedef LineSegment<Imath::V3d> LineSegment3d;
+
+template<class T>
+std::ostream &operator << ( std::ostream &o, const LineSegment<T> &lineSegment );
 
 } // namespace IECore
 

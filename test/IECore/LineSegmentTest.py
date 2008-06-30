@@ -168,5 +168,24 @@ class LineSegmentTest( unittest.TestCase ) :
 		self.assertEqual( p1, V3f( 2, 2, 0 ) )
 		self.assertEqual( p2, V3f( 2, 3, 0 ) )
 		
+	def testTransform( self ) :
+	
+		l1 = LineSegment3f( V3f( 0, 0, 0 ), V3f( 0, 2, 0 ) )
+		l2 = LineSegment3f( l1 )
+		self.assertEqual( l1, l2 )
+		
+		t = M44f.createTranslated( V3f( 1 ) )
+		
+		l3 = l2 * t
+		self.assertEqual( l1, l2 )
+		self.assertEqual( l3.p0, l2.p0 + V3f( 1 ) )
+		self.assertEqual( l3.p1, l2.p1 + V3f( 1 ) )
+		
+		l1 *= t
+		self.assertEqual( l1.p0, l2.p0 + V3f( 1 ) )
+		self.assertEqual( l1.p1, l2.p1 + V3f( 1 ) )
+		
+		
+		
 if __name__ == "__main__":
     unittest.main()   

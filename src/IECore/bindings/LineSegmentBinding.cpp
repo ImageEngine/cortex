@@ -53,9 +53,12 @@ static tuple closestPoints( const L &l, const L &l2 )
 template<typename Vec>
 static void bind( const char *name )
 {
+	typedef typename Vec::BaseType BaseType;
 	typedef LineSegment<Vec> L;
+	typedef Imath::Matrix44<BaseType> M;
 
 	class_<L>( name )
+		.def( init<L>() )
 		.def( init<Vec, Vec>() )
 		.def_readwrite( "p0", &L::p0 )
 		.def_readwrite( "p1", &L::p1 )
@@ -70,6 +73,11 @@ static void bind( const char *name )
 		.def( "distanceTo", (typename L::BaseType (L::*)( const L & ) const)&L::distanceTo )
 		.def( "distance2To", (typename L::BaseType (L::*)( const Vec & ) const)&L::distance2To )
 		.def( "distance2To", (typename L::BaseType (L::*)( const L & ) const)&L::distance2To )
+		.def( self *= M() )
+		.def( self * M() )
+		.def( self == self )
+		.def( self != self )
+		/// \todo Bind the intersect methods when we have a binding for ImathPlane
 	;
 
 }
