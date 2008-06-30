@@ -36,6 +36,7 @@
 #define IECOREGL_FONT_H
 
 #include "IECoreGL/TypeIds.h"
+#include "IECoreGL/AlphaTexture.h"
 
 #include "IECore/Font.h"
 
@@ -56,6 +57,7 @@ class Font : public IECore::RunTimeTyped
 		IECore::FontPtr coreFont();
 		
 		ConstMeshPrimitivePtr mesh( char c );
+		ConstAlphaTexturePtr texture();
 		
 	private :
 	
@@ -63,6 +65,9 @@ class Font : public IECore::RunTimeTyped
 	
 		typedef std::map<char, ConstMeshPrimitivePtr> MeshMap;
 		MeshMap m_meshes;
+		
+		ConstAlphaTexturePtr m_texture;
+		
 };
 
 IE_CORE_DECLAREPTR( Font );

@@ -44,7 +44,7 @@ using namespace std;
 using namespace boost;
 
 Font::Font( IECore::FontPtr font )
-	:	m_font( font )
+	:	m_font( font ), m_texture( 0 )
 {
 }
 
@@ -72,3 +72,17 @@ ConstMeshPrimitivePtr Font::mesh( char c )
 	return mesh;
 }
 		
+ConstAlphaTexturePtr Font::texture()
+{
+	if( m_texture )
+	{
+		return m_texture;
+	}
+	
+	IECore::ConstImagePrimitivePtr image = m_font->image();
+	
+	IECore::ConstFloatVectorDataPtr y = image->getChannel<float>( "Y" );
+	Imath::V2i s = image->getDataWindow().size() + Imath::V2i( 1 );
+	m_texture = new AlphaTexture( s.x, s.y, y );
+	return m_texture;
+}
