@@ -647,7 +647,8 @@ class FileNameParameterUI( PathParameterUI ) :
 		if len(selection):
 		
 			self.parameter.setValue( IECore.StringData( selection ) )
-			self.node().setNodeValue( self.parameter )		
+			fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+			fnPH.setNodeValue( self.parameter )	
 
 
 class DirNameParameterUI( PathParameterUI ) :	
@@ -663,7 +664,8 @@ class DirNameParameterUI( PathParameterUI ) :
 		if len(selection):
 			d = os.path.dirname(selection)
 			self.parameter.setValue( IECore.StringData( d ) )
-			self.node().setNodeValue( self.parameter )	
+			fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+			fnPH.setNodeValue( self.parameter )	
 
 
 class FileSequenceParameterUI( PathParameterUI ) :					
@@ -716,7 +718,8 @@ class CachePathPrefixParameterUI( PathParameterUI ) :
 						newValue = seq.getPrefix()
 						if newValue.endswith('.'):
 							self.parameter.setValue( IECore.StringData( os.path.join( d, newValue[:len(newValue)-1] ) ) )
-							self.node().setNodeValue( self.parameter )
+							fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+							fnPH.setNodeValue( self.parameter )	
 							return	
 
 
