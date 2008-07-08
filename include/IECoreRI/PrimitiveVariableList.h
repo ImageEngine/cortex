@@ -74,7 +74,7 @@ class PrimitiveVariableList
 	
 	private :
 	
-		const char *type( const std::string &name, IECore::ConstDataPtr d, const std::map<std::string, std::string> *typeHints );
+		const char *type( const std::string &name, IECore::ConstDataPtr d, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
 		const char *interpolation( IECore::PrimitiveVariable::Interpolation i );
 		const void *value( IECore::DataPtr d );
 		

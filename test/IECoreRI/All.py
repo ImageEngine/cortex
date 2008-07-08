@@ -47,6 +47,7 @@ from MultipleContextsTest import *
 from Camera import *
 from CurvesTest import *
 from TextureOrientationTest import *
+from ArrayPrimVarTest import *
 
 if IECore.withFreeType() :
 

@@ -37,6 +37,8 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/DespatchTypedData.h"
 
+#include "boost/format.hpp"
+
 using namespace IECore;
 using namespace IECoreRI;
 using namespace std;
@@ -44,18 +46,57 @@ using namespace boost;
 
 PrimitiveVariableList::PrimitiveVariableList( const IECore::PrimitiveVariableMap &primVars, const std::map<std::string, std::string> *typeHints )
 {
-	m_strings.reserve( primVars.size() );
-	m_charPtrs.reserve( primVars.size() );
+	// figure out how many strings we need to deal with so we can reserve
+	// enough space for them
+	int numStrings = 0;
 	PrimitiveVariableMap::const_iterator it;
 	for( it=primVars.begin(); it!=primVars.end(); it++ )
 	{
-		const char *t = type( it->first, it->second.data, typeHints );
+		TypeId type = it->second.data->typeId();
+		switch( type )
+		{
+			case StringVectorDataTypeId :
+				numStrings += static_pointer_cast<StringVectorData>( it->second.data )->readable().size();
+				break;
+				
+			case StringDataTypeId :
+				numStrings++;
+				break;
+				
+			default :
+			
+				break;
+		
+		}
+	}
+	
+	// reserve the space
+	m_strings.reserve( numStrings );
+	m_charPtrs.reserve( numStrings );
+	
+	// build the tokens and values arrays
+	for( it=primVars.begin(); it!=primVars.end(); it++ )
+	{
+		size_t arraySize = 0;
+		const char *t = type( it->first, it->second.data, arraySize, typeHints );
 		const char *i = interpolation( it->second.interpolation );
 		if( t && i )
 		{
-			m_strings.push_back( string( i ) + " " + t + " " + it->first );
-			m_values.push_back( value( it->second.data ) );
+			// push the interpolation/type/name string
+			if( it->second.interpolation==PrimitiveVariable::Constant && arraySize )
+			{
+				// when interpolation is constant, we should treat anything with
+				// multiple elements to be an array. ideally we'd have a mechanism
+				// for specifying arrays with other interpolations, but this requires
+				// much more information than we have - we'd need the Primitive::variableSize().
+				m_strings.push_back( boost::str( boost::format( "%s %s %s[%d]" ) % i % t % it->first % arraySize ) );
+			}
+			else
+			{
+				m_strings.push_back( string( i ) + " " + t + " " + it->first );
+			}
 			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_values.push_back( value( it->second.data ) );
 		}
 	}
 }
@@ -75,12 +116,14 @@ void **PrimitiveVariableList::values()
 	return (void **)&*(m_values.begin());
 }
 
-const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d, const std::map<std::string, std::string> *typeHints )
+const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d, size_t &arraySize, const std::map<std::string, std::string> *typeHints )
 {
+	arraySize = 0;
 	IECore::TypeId t = d->typeId();
 	switch( t )
 	{
 		case V3fVectorDataTypeId :
+			arraySize = static_pointer_cast<const V3fVectorData>( d )->readable().size();
 			if( name=="P" || name=="Pref"  )
 			{
 				return "point";
@@ -112,14 +155,19 @@ const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d
 			}
 			return "vector";
 		case Color3fVectorDataTypeId :
+			arraySize = static_pointer_cast<const Color3fVectorData>( d )->readable().size();
 		case Color3fDataTypeId :
 			return "color";
 		case FloatVectorDataTypeId :
+			arraySize = static_pointer_cast<const FloatVectorData>( d )->readable().size();
 		case FloatDataTypeId :
 			return "float";
 		case IntVectorDataTypeId :
+			arraySize = static_pointer_cast<const IntVectorData>( d )->readable().size();
 		case IntDataTypeId :
 			return "int";
+		case StringVectorDataTypeId :
+			arraySize = static_pointer_cast<const StringVectorData>( d )->readable().size();
 		case StringDataTypeId :
 			return "string";
 		default :
@@ -149,12 +197,20 @@ const char *PrimitiveVariableList::interpolation( IECore::PrimitiveVariable::Int
 
 const void *PrimitiveVariableList::value( IECore::DataPtr d )
 {
-	/// \todo Support StringVectorData too
 	if( d->typeId()==StringData::staticTypeId() )
 	{
 		const char *v = static_pointer_cast<StringData>( d )->readable().c_str();
 		m_charPtrs.push_back( v );
 		return &*(m_charPtrs.rbegin());
+	}
+	else if( d->typeId()==StringVectorData::staticTypeId() )
+	{
+		const StringVectorData &sd = static_cast<StringVectorData &>( *d );
+		for( unsigned i=0; i<sd.readable().size(); i++ )
+		{
+			m_charPtrs.push_back( sd.readable()[i].c_str() );
+		}
+		return (&*(m_charPtrs.rbegin())) - ( sd.readable().size() - 1 );
 	}
 	
 	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );	
