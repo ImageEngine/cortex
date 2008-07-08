@@ -271,6 +271,7 @@ enum TypeId
 	Box3iVectorDataTypeId = 228,
 	MedianCutSamplerTypeId = 229,
 	EnvMapSamplerTypeId = 230,
+	MeshVertexReorderOpTypeId = 231,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

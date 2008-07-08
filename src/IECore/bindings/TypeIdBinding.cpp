@@ -269,6 +269,7 @@ void bindTypeId()
 		.value("Box3iVectorData", Box3iVectorDataTypeId )
 		.value("MedianCutSampler", MedianCutSamplerTypeId )
 		.value("EnvMapSampler", EnvMapSamplerTypeId )
+		.value("MeshVertexReorderOp", MeshVertexReorderOpTypeId )
 	;
 }
 
