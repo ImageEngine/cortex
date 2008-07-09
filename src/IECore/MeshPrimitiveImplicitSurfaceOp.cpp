@@ -57,7 +57,7 @@ MeshPrimitiveImplicitSurfaceOp::MeshPrimitiveImplicitSurfaceOp() : MeshPrimitive
 	m_resolutionParameter = new V3iParameter(
 		"resolution",
 		"The resolution",
-		V3i( 1, 1, 1 )
+		V3i( 10, 10, 10 )
 	);
         
 	m_boundExtendParameter = new FloatParameter(
