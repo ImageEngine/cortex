@@ -154,6 +154,7 @@ from GradeTest import *
 from MedianCutSamplerTest import *
 from EnvMapSamplerTest import *
 from RandomTest import *
+from MeshVertexReorderOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

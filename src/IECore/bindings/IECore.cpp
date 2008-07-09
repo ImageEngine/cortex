@@ -187,6 +187,7 @@
 #include "IECore/bindings/GradeBinding.h"
 #include "IECore/bindings/MedianCutSamplerBinding.h"
 #include "IECore/bindings/EnvMapSamplerBinding.h"
+#include "IECore/bindings/MeshVertexReorderOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -358,7 +359,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSummedAreaOp();	
 	bindGrade();
 	bindMedianCutSampler();	
-	bindEnvMapSampler();	
+	bindEnvMapSampler();
+	bindMeshVertexReorderOp();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
