@@ -65,6 +65,14 @@ def __callbackWrapper( cb, a ) :
 
 	return cb()
 
+def __wrapCallback( cb ) :
+
+	if( callable( cb ) ) :
+		return IECore.curry( __callbackWrapper, cb )
+	else :
+		# presumably a command in string form
+		return cb
+
 def __postMenu( parent, definition ) :
 
 	if callable( definition ) :
@@ -104,6 +112,6 @@ def __postMenu( parent, definition ) :
 
 				menuItem = maya.cmds.menuItem( label=label, parent=parent, enable=active, annotation=item.description )
 				if item.command :
-					maya.cmds.menuItem( menuItem, edit=True, command=IECore.curry( __callbackWrapper, item.command ) )
+					maya.cmds.menuItem( menuItem, edit=True, command=__wrapCallback( item.command ) )
 				if item.secondaryCommand :
-					optionBox = maya.cmds.menuItem( optionBox=True, command=IECore.curry( __callbackWrapper, item.secondaryCommand ), parent=parent )	
+					optionBox = maya.cmds.menuItem( optionBox=True, command=__wrapCallback( item.secondaryCommand ), parent=parent )
