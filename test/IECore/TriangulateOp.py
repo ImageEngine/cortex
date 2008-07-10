@@ -234,9 +234,14 @@ class TestTriangulateOp( unittest.TestCase ) :
 		# FloatVectorData not valid for "P"
 		self.assertRaises( RuntimeError, op )	
 		
-		
-			
+	def testConstantPrimVars( self ) :
 	
+		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()		
+		
+		m["constantScalar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) )
+		m["constantArray"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, StringVectorData( [ "one", "two" ] ) )
+		
+		TriangulateOp()( input = m )	
 
 if __name__ == "__main__":
     unittest.main()   

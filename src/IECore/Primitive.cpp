@@ -182,14 +182,14 @@ struct ValidateArraySize
 	size_t m_variableSize;	
 };
 
-struct ReturnTrue
+struct ReturnFalseErrorHandler
 {
 	typedef bool ReturnType;
 	
-	template<typename T>
-	bool operator() ( typename T::ConstPtr data )
+	template<typename T, typename F>
+	bool operator() ( typename T::ConstPtr data, const F &f )
 	{
-		return true;
+		return false;
 	}
 };
 
@@ -200,22 +200,19 @@ bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv ) const
 		return false;
 	}
 
-	size_t sz = variableSize( pv.interpolation );
-	
-	try
+	if( pv.interpolation==PrimitiveVariable::Constant )
 	{
-		if ( sz == 1 )
-		{
-			ReturnTrue func;
-			return despatchTypedData<ReturnTrue, TypeTraits::IsSimpleTypedData>( pv.data, func );	
-		}	
+		// any data is reasonable for constant interpolation
+		return true;
 	}
-	catch ( InvalidArgumentException &e )
-	{	
-	}
-	
+
+	// all other interpolations require an array of data of the correct length. it could be argued tha
+	// SimpleTypedData should be accepted in the rare case that variableSize==1, but we're rejecting that
+	// argument on the grounds that it makes for a whole bunch of special cases with no gain - the general
+	// cases all require arrays so that's what we require.
+	size_t sz = variableSize( pv.interpolation );
 	ValidateArraySize func( sz );
-	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData>( pv.data, func );	
+	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData, ReturnFalseErrorHandler>( pv.data, func );	
 }
 
 bool Primitive::arePrimitiveVariablesValid() const

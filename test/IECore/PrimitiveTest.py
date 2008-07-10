@@ -57,5 +57,15 @@ class PrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( m.inferInterpolation( IntVectorData( [ 1, 2, 3, 4, 5, 6 ] ) ), PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( m.inferInterpolation( IntVectorData( [ 1, 2, 3, 4, 5, 6, 7 ] ) ), PrimitiveVariable.Interpolation.Invalid )
 		
+	def testPrimitiveVariableValidity( self ) :
+	
+		m = MeshPrimitive( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 1, 2 ] ) )
+		
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( [ 1 ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatData( 1 ) ) ) )
+		
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3 ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3, 4 ] ) ) ) )
+		
 if __name__ == "__main__":
     unittest.main()   
