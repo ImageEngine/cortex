@@ -79,9 +79,9 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 			colorSum = sum( lights.colors, IECore.Color3f( 0 ) )
 		
 			if lastColorSum :
-				self.assertAlmostEqual( colorSum[0], lastColorSum[0], 6 )
-				self.assertAlmostEqual( colorSum[1], lastColorSum[1], 6 )
-				self.assertAlmostEqual( colorSum[2], lastColorSum[2], 6 )
+				self.assertAlmostEqual( colorSum[0], lastColorSum[0], 5 )
+				self.assertAlmostEqual( colorSum[1], lastColorSum[1], 5 )
+				self.assertAlmostEqual( colorSum[2], lastColorSum[2], 5 )
 			
 			lastColorSum = colorSum
 				
