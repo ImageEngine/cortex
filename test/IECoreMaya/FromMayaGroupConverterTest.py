@@ -38,7 +38,7 @@ import unittest
 import MayaUnitTest
 import maya.cmds
 
-class FromMayaMeshConverterTest( unittest.TestCase ) :
+class FromMayaGroupConverterTest( unittest.TestCase ) :
 
 	def testFactory( self ) :
 		
