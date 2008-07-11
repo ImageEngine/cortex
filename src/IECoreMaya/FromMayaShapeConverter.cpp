@@ -115,7 +115,6 @@ IECore::ObjectPtr FromMayaShapeConverter::doConversion( const MObject &object, I
 {
 	IECore::PrimitivePtr p = 0;
 	
-	/// \todo Surely here we should only be specifying "true" for argument "emitSpaceWarnings" if we're not converting from some DG data?
 	const MDagPath *d = dagPath( true );
 	if( d )
 	{
@@ -273,7 +272,7 @@ const MDagPath *FromMayaShapeConverter::dagPath( bool emitSpaceWarnings ) const
 		return &m_dagPath;
 	}
 	
-	if( emitSpaceWarnings && space()==MSpace::kWorld )
+	if( emitSpaceWarnings && !object().hasFn( MFn::kData ) && space()==MSpace::kWorld )
 	{
 		IECore::msg( IECore::Msg::Warning, "FromMayaShapeConverter", "World space requested but no dag path provided." );
 	}
