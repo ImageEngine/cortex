@@ -388,8 +388,8 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 		TIFFSetField( tiffImage, TIFFTAG_FILLORDER, (uint16)FILLORDER_MSB2LSB );
 		TIFFSetField( tiffImage, TIFFTAG_PLANARCONFIG, (uint16)PLANARCONFIG_CONTIG );
 
-		TIFFSetField( tiffImage, TIFFTAG_XRESOLUTION, 1 );
-		TIFFSetField( tiffImage, TIFFTAG_YRESOLUTION, 1 );
+		TIFFSetField( tiffImage, TIFFTAG_XRESOLUTION, 1.0f );
+		TIFFSetField( tiffImage, TIFFTAG_YRESOLUTION, 1.0f );
 		TIFFSetField( tiffImage, TIFFTAG_RESOLUTIONUNIT, (uint16)RESUNIT_NONE );
 
 		size_t bufSize = (size_t)( (float)bitDepth / 8 * samplesPerPixel * width * height );
