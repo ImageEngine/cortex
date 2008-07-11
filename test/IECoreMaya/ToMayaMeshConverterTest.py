@@ -37,6 +37,7 @@ import IECoreMaya
 import unittest
 import MayaUnitTest
 import maya.cmds
+import maya.OpenMaya as OpenMaya
 
 class ToMayaMeshConverterTest( unittest.TestCase ) :
 
@@ -56,6 +57,57 @@ class ToMayaMeshConverterTest( unittest.TestCase ) :
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 8 )
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, face=True ), 6 )
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, boundingBox=True ), ( (-10, 10), (-10, 10), (-10, 10) ) )
+		
+	def testUVConversion( self ) :
+	
+		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		
+		self.assert_( "s" in coreMesh )
+		self.assert_( "t" in coreMesh )
+		
+		coreMesh[ "testUVSet_s" ] = coreMesh[ "s" ]		
+		coreMesh[ "testUVSet_t" ] = coreMesh[ "t" ]		
+		
+		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
+		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
+		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
+		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
+
+		transform = maya.cmds.createNode( "transform" )				
+		self.assert_( converter.convert( transform ) )
+		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
+	
+		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 382 )
+		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, face=True ), 760 )
+		
+		bb = maya.cmds.polyEvaluate( mayaMesh, boundingBox=True )
+		
+		self.assertAlmostEqual( bb[0][0], -1, 4 )
+		self.assertAlmostEqual( bb[0][1],  1, 4 )		
+		self.assertAlmostEqual( bb[1][0], -1, 4 )
+		self.assertAlmostEqual( bb[1][1],  1, 4 )		
+		self.assertAlmostEqual( bb[2][0], -1, 4 )
+		self.assertAlmostEqual( bb[2][1],  1, 4 )												
+		
+		l = OpenMaya.MSelectionList()
+		l.add( mayaMesh )
+		p = OpenMaya.MDagPath()
+		l.getDagPath( 0, p )
+		
+		fnMesh = OpenMaya.MFnMesh( p )
+		u = OpenMaya.MFloatArray()
+		v = OpenMaya.MFloatArray()
+		
+		fnMesh.getUVs( u, v )
+		
+		self.assertEqual( u.length(), 2280 )
+		self.assertEqual( v.length(), 2280 )		
+		
+		fnMesh.getUVs( u, v, "testUVSet" )
+		
+		self.assertEqual( u.length(), 2280 )
+		self.assertEqual( v.length(), 2280 )				
+		
 				
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
