@@ -95,6 +95,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 	
 	IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
 	op->inputParameter()->setValue( mesh );
+	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
 	
 	mesh = IECore::runTimeCast< IECore::MeshPrimitive > ( op->operate() );
 	assert( mesh );
