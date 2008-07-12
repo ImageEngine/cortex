@@ -73,55 +73,78 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 		if ( sIt->second.interpolation != IECore::PrimitiveVariable::FaceVarying )
 		{
 			IECore::msg( IECore::Msg::Warning,"ToMayaMeshConverter::doConversion",  boost::format(  "PrimitiveVariable \"%s\" has unsupported interpolation (expected FaceVarying).") % sPrimVarName );
+			return;
 		}
-		else
+
+		if ( tIt->second.interpolation != IECore::PrimitiveVariable::FaceVarying )
 		{
-			if ( tIt->second.interpolation != IECore::PrimitiveVariable::FaceVarying )
-			{
-				IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported interpolation (expected FaceVarying).") % tPrimVarName);
-			}
-			else
-			{
-				if ( uvSetName )
-				{
-					fnMesh.createUVSetWithName( *uvSetName );
-				}
-			
-				/// \todo Employ some M*Array converters to simplify this
-				int numUVs = mesh->variableSize( IECore::PrimitiveVariable::FaceVarying );											
-			
-				MFloatArray uArray;
-				IECore::ConstFloatVectorDataPtr u = IECore::runTimeCast<const IECore::FloatVectorData>(sIt->second.data);
-				assert( u->readable().size() == numUVs );
-				uArray.setLength( numUVs );
-								
-				MFloatArray vArray;
-				IECore::ConstFloatVectorDataPtr v = IECore::runTimeCast<const IECore::FloatVectorData>(tIt->second.data);
-				assert( v->readable().size() == numUVs );
-				vArray.setLength( numUVs );
-				
-				MIntArray uvIds;
-				uvIds.setLength( numUVs );
-				for ( int i = 0; i < numUVs; i++)
-				{
-					uArray[i] = u->readable()[i];
-					vArray[i] = v->readable()[i];					
-					uvIds[i] = i;
-				}
-							
-				MStatus s = fnMesh.setUVs( uArray, vArray, uvSetName );
-				if ( !s )
-				{
-					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to set UVs." );
-				}
-				
-				fnMesh.assignUVs( polygonCounts, uvIds, uvSetName );
-				if ( !s )
-				{
-					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to assign UVs." );
-				}
-			}
-		}					
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported interpolation (expected FaceVarying).") % tPrimVarName);
+			return;
+		}
+
+		if ( !sIt->second.data )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has no data." ) % sPrimVarName );
+		}
+
+		if ( !tIt->second.data )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has no data." ) % tPrimVarName );
+		}
+
+		/// \todo Employ some M*Array converters to simplify this
+		int numUVs = mesh->variableSize( IECore::PrimitiveVariable::FaceVarying );											
+
+		MFloatArray uArray;												
+		IECore::ConstFloatVectorDataPtr u = IECore::runTimeCast<const IECore::FloatVectorData>(sIt->second.data);
+
+		if ( !u )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported type \"%s\"." ) % sPrimVarName % sIt->second.data->typeName() );
+			return;
+		}
+
+		assert( u->readable().size() == numUVs );
+		uArray.setLength( numUVs );
+
+		MFloatArray vArray;
+		IECore::ConstFloatVectorDataPtr v = IECore::runTimeCast<const IECore::FloatVectorData>(tIt->second.data);
+		if ( !v )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported type \"%s\"." ) % tPrimVarName % tIt->second.data->typeName() );
+			return;
+		}
+
+		assert( v->readable().size() == numUVs );
+		vArray.setLength( numUVs );
+
+		MIntArray uvIds;
+		uvIds.setLength( numUVs );
+		for ( int i = 0; i < numUVs; i++)
+		{
+			uArray[i] = u->readable()[i];
+			vArray[i] = v->readable()[i];					
+			uvIds[i] = i;
+		}
+
+		if ( uvSetName )
+		{
+			fnMesh.createUVSetWithName( *uvSetName );
+		}
+
+		MStatus s = fnMesh.setUVs( uArray, vArray, uvSetName );
+		if ( !s )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to set UVs." );
+			return;
+		}
+
+		fnMesh.assignUVs( polygonCounts, uvIds, uvSetName );
+		if ( !s )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to assign UVs." );
+			return;			
+		}		
 	}
 	else if ( haveS )		
 	{
@@ -135,7 +158,6 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 	{
 		assert( !uvSetName );
 	}
-
 }
 
 bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
@@ -283,12 +305,15 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 		{
 			std::string uvSetNameStr = sName.substr( 0, suffixOffset );
 			
-			MString uvSetName = uvSetNameStr.c_str();
-			std::string tName = uvSetNameStr + "_t";
-			
-			addUVSet( fnMesh, polygonCounts, mesh, sName, tName, &uvSetName );
-			
-			uvSets.insert( uvSetNameStr );						
+			if ( uvSetNameStr.size() )
+			{
+				MString uvSetName = uvSetNameStr.c_str();
+				std::string tName = uvSetNameStr + "_t";
+
+				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, &uvSetName );
+
+				uvSets.insert( uvSetNameStr );						
+			}
 		}
 	}
 	
@@ -304,7 +329,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 		{
 			std::string uvSetNameStr = tName.substr( 0, suffixOffset );
 			
-			if ( uvSets.find( uvSetNameStr ) == uvSets.end() )
+			if ( uvSetNameStr.size() && uvSets.find( uvSetNameStr ) == uvSets.end() )
 			{			
 				MString uvSetName = uvSetNameStr.c_str();
 				std::string sName = uvSetNameStr + "_s";
