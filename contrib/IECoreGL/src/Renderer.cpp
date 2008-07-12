@@ -66,6 +66,7 @@
 #include "IECore/Transform.h"
 #include "IECore/MatrixAlgo.h"
 #include "IECore/MeshPrimitive.h"
+#include "IECore/MeshNormalsOp.h"
 
 #include <stack>
 
@@ -1565,6 +1566,21 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 	{
 		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
 		m->variables = primVars;
+		
+		if( interpolation!="linear" )
+		{
+			// it's a subdivision mesh. in the absence of a nice subdivision algorithm to display things with,
+			// we can at least make things look a bit nicer by calculating some smooth shading normals. 
+			// if interpolation is linear and no normals are provided then we assume the faceted look is intentional.
+			if( primVars.find( "N" )==primVars.end() )
+			{
+				MeshNormalsOpPtr normalOp = new MeshNormalsOp();
+				normalOp->inputParameter()->setValue( m );
+				normalOp->copyParameter()->setTypedValue( false );
+				normalOp->operate();
+			}
+		}
+		
 		MeshPrimitivePtr prim = boost::static_pointer_cast<MeshPrimitive>( ToGLMeshConverter( m ).convert() );
 		addPrimitive( prim, primVars, m_data, false );
 	}
