@@ -104,7 +104,7 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 			return;
 		}
 
-		assert( u->readable().size() == numUVs );
+		assert( (int)u->readable().size() == numUVs );
 		uArray.setLength( numUVs );
 
 		MFloatArray vArray;
@@ -115,7 +115,7 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 			return;
 		}
 
-		assert( v->readable().size() == numUVs );
+		assert( (int)v->readable().size() == numUVs );
 		vArray.setLength( numUVs );
 
 		MIntArray uvIds;
