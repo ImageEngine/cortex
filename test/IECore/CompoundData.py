@@ -220,8 +220,36 @@ class CompoundDataTest(unittest.TestCase):
 		v1.save( iface, "test" )
 
 		v2 = Object.load( iface, "test" )	
-		self.assertEqual( v1, v2 )	
-
+		self.assertEqual( v1, v2 )
+		
+	def testRepr(self):
+		"""Test repr"""			
+		
+		v1 = CompoundData()
+		
+		r1 = repr(v1)
+		
+		self.assertEqual( eval(repr(v1)), v1 )
+		
+		v1 = CompoundData()
+		v1["0"] = FloatData(1.2)
+		v1["1"] = FloatData(2.3)
+		v1["2"] = FloatData(3)
+		
+		self.assertEqual( eval(repr(v1)), v1 )
+		
+		v1 = CompoundData()
+		v1["0"] = StringData( "test" )
+		v1["1"] = CompoundData(
+			{ "0" : StringData( "test" ),
+			  "1" : M33fData() 
+			}
+		)
+		v1["someMoreData"] = V3fVectorData()
+		v1["A"] = Color4fVectorData()		
+		
+		self.assertEqual( eval(repr(v1)), v1 )
+		
 	def tearDown(self):
         
 		if os.path.isfile("./test/CompoundData.fio") :

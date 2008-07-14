@@ -32,14 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// System includes
-
-// External includes
-#include <boost/python.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/tuple.hpp>
-#include <boost/python/dict.hpp>
-#include <boost/python/make_constructor.hpp>
+#include "boost/python.hpp"
+#include "boost/python/list.hpp"
+#include "boost/python/tuple.hpp"
+#include "boost/python/dict.hpp"
+#include "boost/python/make_constructor.hpp"
+#include "boost/python/call_method.hpp"
 
 #include "IECore/CompoundData.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
@@ -423,6 +421,51 @@ class CompoundTypedDataFunctions
 			}
 			return newTuple;
 		}
+		
+		static std::string repr( TypedData< Container > &x )
+		{		
+			std::string r = x.typeName() + "(";		
+		
+			bool added = false;
+			for (
+				typename Container::const_iterator it = x.readable().begin();
+				it != x.readable().end();
+				++it )
+			{
+				const std::string &key = it->first;
+
+				object item( it->second );
+
+				if ( item.attr( "__repr__" ) != object() )
+				{
+					std::string v = call_method< std::string >( item.ptr(), "__repr__" );
+						
+					if ( !added )
+					{
+						added = true;
+						r += "{";	
+					}
+					else
+					{
+						r += ",";
+					}
+					
+					r += "'";
+					r += key;
+					r += "':";
+					r += v;					
+				}
+			}
+		
+			if ( added )
+			{
+				r += "}";
+			}
+		
+			r += ")";
+			
+			return r;
+		}
 
 	protected:
 		/*
@@ -461,9 +504,10 @@ void bindCompoundData()
 		.def( "__setitem__", &ThisBinder::setItem, "index assignment operator.\nWorks exactly like on python dicts but only accepts Data objects as the new value." )
 		.def( "__delitem__", &ThisBinder::delItem, "index deletion operator.\nWorks exactly like on python dicts." )
 		.def( "__len__", &ThisBinder::len, "Length operator." )
-		.def( "__contains__", &ThisBinder::has_key, "In operator.\nWorks exactly like on python dicts." )
+		.def( "__contains__", &ThisBinder::has_key, "In operator.\nWorks exactly like on python dicts." )		
 		.def( "size", &ThisBinder::len, "m.size()\nReturns the number of elements on m. Same result as the len operator." )
 		.def( "__cmp__", &ThisBinder::invalidOperator, "Raises an exception. CompoundData does not support comparison operators." )
+		.def( "__repr__", &ThisBinder::repr )
 		// python map methods.
 		.def( "clear", &ThisBinder::clear, "m.clear()\nRemoves all items from m." )
 		.def( "has_key", &ThisBinder::has_key, "m.has_key(k)\nReturns True if m has key k; otherwise, returns False." )
