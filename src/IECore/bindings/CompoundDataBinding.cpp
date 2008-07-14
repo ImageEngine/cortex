@@ -51,393 +51,397 @@ using namespace boost::python;
 
 // Module declaration
 
-namespace IECore {
+namespace IECore
+{
 
 // Binding implementations
 
 template<typename Container>
 class CompoundTypedDataFunctions
 {
-public:
-	IE_CORE_DECLAREMEMBERPTR( TypedData< Container >  );
-	typedef const char * key_type;
-	typedef typename Container::value_type::second_type data_type;
-	typedef typename Container::size_type size_type;
-	typedef typename Container::iterator iterator;
-	typedef typename Container::const_iterator const_iterator;
+	public:
+		IE_CORE_DECLAREMEMBERPTR( TypedData< Container > );
+		typedef const char * key_type;
+		typedef typename Container::value_type::second_type data_type;
+		typedef typename Container::size_type size_type;
+		typedef typename Container::iterator iterator;
+		typedef typename Container::const_iterator const_iterator;
 
-	/// default constructor
-	static typename TypedData< Container >::Ptr dataConstructor() 
-	{
-		return new TypedData< Container >();
-	}
-
-	/// constructor that receives a python map object
-	static typename TypedData< Container >::Ptr dataMapConstructor(dict v) 
-	{
-		typename TypedData< Container >::Ptr mapPtr = new TypedData< Container >();
-		
-		list values = v.values();
-		list keys = v.keys();
-		
-		Container &newMap = mapPtr->writable();
-		
-		for (int i = 0; i < keys.attr("__len__")(); i++)
+		/// default constructor
+		static typename TypedData< Container >::Ptr dataConstructor()
 		{
-			object key(keys[i]);
-			object value(values[i]);
-			extract<key_type> keyElem(key);
-			extract<data_type> valueElem(value);
-			if (keyElem.check()) 
+			return new TypedData< Container >();
+		}
+
+		/// constructor that receives a python map object
+		static typename TypedData< Container >::Ptr dataMapConstructor( dict v )
+		{
+			typename TypedData< Container >::Ptr mapPtr = new TypedData< Container >();
+
+			list values = v.values();
+			list keys = v.keys();
+
+			Container &newMap = mapPtr->writable();
+
+			for ( int i = 0; i < keys.attr( "__len__" )(); i++ )
 			{
-				//  try if elem is an exact data_type type
-				if (valueElem.check())
+				object key( keys[i] );
+				object value( values[i] );
+				extract<key_type> keyElem( key );
+				extract<data_type> valueElem( value );
+				if ( keyElem.check() )
 				{
-					newMap[keyElem()] = valueElem();
+					//  try if elem is an exact data_type type
+					if ( valueElem.check() )
+					{
+						newMap[keyElem()] = valueElem();
+					}
+					else
+					{
+						PyErr_SetString( PyExc_TypeError, "Incompatible data type." );
+						throw_error_already_set();
+					}
 				}
 				else
 				{
-					PyErr_SetString(PyExc_TypeError, "Incompatible data type.");
+					PyErr_SetString( PyExc_TypeError, "Incompatible key type. Only strings accepted." );
 					throw_error_already_set();
 				}
 			}
-			else 
+			return mapPtr;
+		}
+
+		/// binding for __getitem__ function
+		static data_type getItem( TypedData< Container > &x, PyObject *i )
+		{
+			key_type key = convertKey( x, i );
+			const Container &xData = x.readable();
+			typename Container::const_iterator value = xData.find( key );
+			if ( value != xData.end() )
 			{
-				PyErr_SetString(PyExc_TypeError, "Incompatible key type. Only strings accepted.");
+				return value->second;
+			}
+			else
+			{
+				PyErr_SetString( PyExc_KeyError, key );
+				throw_error_already_set();
+			}
+			return data_type();
+		}
+
+		/// binding for __setitem__ function
+		static void setItem( TypedData< Container > &x, PyObject *i, data_type v )
+		{
+			key_type key = convertKey( x, i );
+			Container &xData = x.writable();
+			xData[key] = v;
+		}
+
+		/// binding for __delitem__ function
+		static void delItem( TypedData< Container > &x, PyObject *i )
+		{
+			key_type key = convertKey( x, i );
+			Container &xData = x.writable();
+			typename Container::iterator value = xData.find( key );
+			if ( value != xData.end() )
+			{
+				xData.erase( value );
+			}
+			else
+			{
+				PyErr_SetString( PyExc_KeyError, key );
 				throw_error_already_set();
 			}
 		}
-		return mapPtr;
-	}
 
-	/// binding for __getitem__ function
-	static data_type getItem(TypedData< Container > &x, PyObject *i)
-	{	
-		key_type key = convertKey(x, i);
-		const Container &xData = x.readable();
-		typename Container::const_iterator value = xData.find(key);
-		if (value != xData.end())
+		/// binding for __len__ function
+		static size_type len( TypedData< Container > &x )
 		{
+			return x.readable().size();
+		}
+
+		/// binding for any unsupported binary operator
+		static typename TypedData< Container >::Ptr invalidOperator( TypedData< Container > &x, PyObject* y )
+		{
+			PyErr_SetString( PyExc_SyntaxError, "Binary operator not supported for this class." );
+			throw_error_already_set();
+			assert( false );
+			return 0;
+		}
+
+		/// binding for map clear method
+		static void
+		clear( TypedData< Container > &x )
+		{
+			Container &xData = x.writable();
+			xData.clear();
+		}
+
+		/// binding for has_key method
+		static bool
+		has_key( TypedData< Container > &x, PyObject *i )
+		{
+			key_type key = convertKey( x, i );
+			const Container &xData = x.readable();
+			typename Container::const_iterator value = xData.find( key );
+			return ( value != xData.end() );
+		}
+
+		/// binding for items method
+		static list
+		items( TypedData< Container > &x )
+		{
+			list newList;
+			const Container &xData = x.readable();
+			typename Container::const_iterator iterX = xData.begin();
+			while ( iterX != xData.end() )
+			{
+				newList.append( boost::python::make_tuple( iterX->first.c_str(), iterX->second ) );
+				iterX++;
+			}
+			return newList;
+		}
+
+		/// binding for keys methos
+		static list
+		keys( TypedData< Container > &x )
+		{
+			list newList;
+			const Container &xData = x.readable();
+			typename Container::const_iterator iterX = xData.begin();
+			while ( iterX != xData.end() )
+			{
+				newList.append( iterX->first );
+				iterX++;
+			}
+			return newList;
+		}
+
+		/// binding for update method
+		static void
+		update1( TypedData< Container > &x, TypedData< Container > &y )
+		{
+			Container &xData = x.writable();
+			const Container &yData = y.readable();
+			typename Container::const_iterator iterY = yData.begin();
+
+			for ( ; iterY != yData.end(); iterY++ )
+			{
+				xData[iterY->first] = iterY->second;
+			}
+		}
+
+		/// binding for update method
+		static void
+		update2( TypedData< Container > &x, dict v )
+		{
+			list values = v.values();
+			list keys = v.keys();
+
+			Container &xData = x.writable();
+
+			for ( int i = 0; i < keys.attr( "__len__" )(); i++ )
+			{
+				object key( keys[i] );
+				object value( values[i] );
+				extract<key_type> keyElem( key );
+				extract<data_type> valueElem( value );
+				if ( keyElem.check() )
+				{
+					//  try if elem is an exact data_type type
+					if ( valueElem.check() )
+					{
+						xData[keyElem()] = valueElem();
+					}
+					else
+					{
+						PyErr_SetString( PyExc_TypeError, "Incompatible data type." );
+						throw_error_already_set();
+					}
+				}
+				else
+				{
+					PyErr_SetString( PyExc_TypeError, "Incompatible key type. Only strings accepted." );
+					throw_error_already_set();
+				}
+			}
+		}
+
+		/// binding for values method
+		static list
+		values( TypedData< Container > &x )
+		{
+			list newList;
+			const Container &xData = x.readable();
+			typename Container::const_iterator iterX = xData.begin();
+			while ( iterX != xData.end() )
+			{
+				newList.append( iterX->second );
+				iterX++;
+			}
+			return newList;
+		}
+
+		/// binding for get method
+		static data_type
+		get2( TypedData< Container > &x, PyObject *i )
+		{
+			return get( x, i, Py_None );
+		}
+
+		/// binding for get method
+		static data_type
+		get( TypedData< Container > &x, PyObject *i, PyObject *v )
+		{
+			key_type key = convertKey( x, i );
+			const Container &xData = x.readable();
+			typename Container::const_iterator value = xData.find( key );
+			if ( value == xData.end() )
+			{
+				if ( v == Py_None )
+				{
+					PyErr_SetString( PyExc_KeyError, key );
+					throw_error_already_set();
+				}
+				extract<data_type> elem( v );
+				if ( elem.check() )
+				{
+					return elem();
+				}
+				else
+				{
+					PyErr_SetString( PyExc_TypeError, "Invalid parameter" );
+					throw_error_already_set();
+				}
+				return data_type();
+			}
+			// return the value from the map
 			return value->second;
 		}
-		else
-		{
-			PyErr_SetString(PyExc_KeyError, key);
-			throw_error_already_set();
-		}
-		return data_type();
-	}
-	
-	/// binding for __setitem__ function
-	static void setItem(TypedData< Container > &x, PyObject *i, data_type v)
-	{
-		key_type key = convertKey(x, i);
-		Container &xData = x.writable();
-		xData[key] = v;
-	}
-	
-	/// binding for __delitem__ function
-	static void delItem(TypedData< Container > &x, PyObject *i)
-	{	
-		key_type key = convertKey(x, i);
-		Container &xData = x.writable();
-		typename Container::iterator value = xData.find(key);
-		if (value != xData.end())
-		{
-			xData.erase(value);
-		}
-		else
-		{
-			PyErr_SetString(PyExc_KeyError, key);
-			throw_error_already_set();
-		}
-	}
 
-	/// binding for __len__ function
-	static size_type len(TypedData< Container > &x)
-	{
-		return x.readable().size();
-	}
 
-	/// binding for any unsupported binary operator
-	static typename TypedData< Container >::Ptr invalidOperator(TypedData< Container > &x, PyObject* y)
-	{
-	   	PyErr_SetString(PyExc_SyntaxError, "Binary operator not supported for this class.");
-	  	throw_error_already_set();
-		assert( false );
-		return 0;
-	}
-	
-	/// binding for map clear method
-	static void
-	clear(TypedData< Container > &x)
-	{
-		Container &xData = x.writable();
-		xData.clear();
-	}
-	
-	/// binding for has_key method
-	static bool
-	has_key(TypedData< Container > &x, PyObject *i)
-	{
-		key_type key = convertKey(x, i);
-		const Container &xData = x.readable();
-		typename Container::const_iterator value = xData.find(key);
-		return (value != xData.end());
-	}
-	
-	/// binding for items method
-	static list
-	items(TypedData< Container > &x)
-	{
-		list newList;
-		const Container &xData = x.readable();
-		typename Container::const_iterator iterX = xData.begin();
-		while (iterX != xData.end())
+		/// binding for setdefault method
+		static data_type
+		setdefault2( TypedData< Container > &x, PyObject *i )
 		{
-			newList.append(boost::python::make_tuple(iterX->first.c_str(), iterX->second));
-			iterX++;
+			return setdefault( x, i, Py_None );
 		}
-		return newList;
-	}
-	
-	/// binding for keys methos
-	static list
-	keys(TypedData< Container > &x)
-	{
-		list newList;
-		const Container &xData = x.readable();
-		typename Container::const_iterator iterX = xData.begin();
-		while (iterX != xData.end())
+
+		/// binding for setdefault method
+		static data_type
+		setdefault( TypedData< Container > &x, PyObject *i, PyObject *v )
 		{
-			newList.append(iterX->first);
-			iterX++;
-		}
-		return newList;
-	}
-	
-	/// binding for update method
-	static void
-	update1(TypedData< Container > &x, TypedData< Container > &y)
-	{
-		Container &xData = x.writable();
-		const Container &yData = y.readable();
-		typename Container::const_iterator iterY = yData.begin();
- 
-		for (; iterY != yData.end(); iterY++) 
-		{
-			xData[iterY->first] = iterY->second;
-		}
-	}
-	
-	/// binding for update method
-	static void
-	update2(TypedData< Container > &x, dict v)
-	{
-		list values = v.values();
-		list keys = v.keys();
-		
-		Container &xData = x.writable();
-		
-		for (int i = 0; i < keys.attr("__len__")(); i++)
-		{
-			object key(keys[i]);
-			object value(values[i]);
-			extract<key_type> keyElem(key);
-			extract<data_type> valueElem(value);
-			if (keyElem.check()) 
+			key_type key = convertKey( x, i );
+			const Container &xData = x.readable();
+			typename Container::const_iterator value = xData.find( key );
+			if ( value == xData.end() )
 			{
-				//  try if elem is an exact data_type type
-				if (valueElem.check())
+				// the key is not there...
+				if ( v == Py_None )
 				{
-					xData[keyElem()] = valueElem();
+					PyErr_SetString( PyExc_KeyError, key );
+					throw_error_already_set();
+				}
+				// get the default value from the parameter
+				extract<data_type> elem( v );
+				if ( elem.check() )
+				{
+					// include the value on the map
+					Container &writableX = x.writable();
+					writableX[key] = elem();
+					return elem();
 				}
 				else
 				{
-					PyErr_SetString(PyExc_TypeError, "Incompatible data type.");
+					PyErr_SetString( PyExc_TypeError, "Invalid parameter" );
 					throw_error_already_set();
 				}
+				return data_type();
 			}
-			else 
-			{
-				PyErr_SetString(PyExc_TypeError, "Incompatible key type. Only strings accepted.");
-				throw_error_already_set();
-			}
+			// return the value from the map.
+			return value->second;
 		}
-	}
 
-	/// binding for values method
-	static list
-	values(TypedData< Container > &x)
-	{
-		list newList;
-		const Container &xData = x.readable();
-		typename Container::const_iterator iterX = xData.begin();
-		while (iterX != xData.end())
+		/// binding for pop method
+		static data_type
+		pop2( TypedData< Container > &x, PyObject *i )
 		{
-			newList.append(iterX->second);
-			iterX++;
+			return pop( x, i, Py_None );
 		}
-		return newList;
-	}
-	
-	/// binding for get method
-	static data_type
-	get2(TypedData< Container > &x, PyObject *i)
-	{
-		return get(x, i, Py_None);
-	}
 
-	/// binding for get method
-	static data_type
-	get(TypedData< Container > &x, PyObject *i, PyObject *v)
-	{
-		key_type key = convertKey(x, i);
-		const Container &xData = x.readable();
-		typename Container::const_iterator value = xData.find(key);
-		if (value == xData.end())
+		/// binding for pop method
+		static data_type
+		pop( TypedData< Container > &x, PyObject *i, PyObject *v )
 		{
-			if (v == Py_None) {
-				PyErr_SetString(PyExc_KeyError, key);
-				throw_error_already_set();
-			}
-			extract<data_type> elem(v);
-			if (elem.check()) 
+			key_type key = convertKey( x, i );
+			const Container &xData = x.readable();
+			typename Container::const_iterator value = xData.find( key );
+			if ( value == xData.end() )
 			{
-				return elem();
-			} 
+				if ( v == Py_None )
+				{
+					PyErr_SetString( PyExc_KeyError, key );
+					throw_error_already_set();
+				}
+				extract<data_type> elem( v );
+				if ( elem.check() )
+				{
+					return elem();
+				}
+				else
+				{
+					PyErr_SetString( PyExc_TypeError, "Invalid parameter" );
+					throw_error_already_set();
+				}
+				return data_type();
+			}
+			// save the returning value.
+			data_type ret( value->second );
+			// delete it from the map
+			Container &writableX = x.writable();
+			typename Container::iterator writableValue = writableX.find( key );
+			writableX.erase( writableValue );
+			return ret;
+		}
+
+		/// binding for popitem method
+		static boost::python::tuple
+		popitem( TypedData< Container > &x )
+		{
+			boost::python::tuple newTuple;
+			Container &xData = x.writable();
+			typename Container::iterator iterX = xData.begin();
+			if ( iterX != xData.end() )
+			{
+				newTuple = boost::python::make_tuple( iterX->first.c_str(), iterX->second );
+				xData.erase( iterX );
+			}
 			else
 			{
-				PyErr_SetString(PyExc_TypeError, "Invalid parameter");
+				PyErr_SetString( PyExc_KeyError, "CompoundData is empty" );
 				throw_error_already_set();
 			}
-			return data_type();
+			return newTuple;
 		}
-		// return the value from the map
-		return value->second;
-	}
 
+	protected:
+		/*
+		 * Utility functions
+		 */
 
-	/// binding for setdefault method
-	static data_type
-	setdefault2(TypedData< Container > &x, PyObject *i)
-	{
-		return setdefault(x, i, Py_None);
-	}
-
-	/// binding for setdefault method
-	static data_type
-	setdefault(TypedData< Container > &x, PyObject *i, PyObject *v)
-	{
-		key_type key = convertKey(x, i);
-		const Container &xData = x.readable();
-		typename Container::const_iterator value = xData.find(key);
-		if (value == xData.end())
+		static key_type
+		convertKey( TypedData< Container > & container, PyObject *key_ )
 		{
-			// the key is not there...
-			if (v == Py_None) {
-				PyErr_SetString(PyExc_KeyError, key);
-				throw_error_already_set();
-			}
-			// get the default value from the parameter
-			extract<data_type> elem(v);
-			if (elem.check()) 
+			extract<key_type> key( key_ );
+			if ( key.check() )
 			{
-				// include the value on the map	
-				Container &writableX = x.writable();
-				writableX[key] = elem();
-				return elem();
-			} 
-			else
-			{
-				PyErr_SetString(PyExc_TypeError, "Invalid parameter");
-				throw_error_already_set();
+				return key();
 			}
-			return data_type();
-		}
-		// return the value from the map.
-		return value->second;
-	}
-
-	/// binding for pop method
-	static data_type
-	pop2(TypedData< Container > &x, PyObject *i)
-	{
-		return pop(x, i, Py_None);
-	}
-
-	/// binding for pop method
-	static data_type
-	pop(TypedData< Container > &x, PyObject *i, PyObject *v)
-	{
-		key_type key = convertKey(x, i);
-		const Container &xData = x.readable();
-		typename Container::const_iterator value = xData.find(key);
-		if (value == xData.end())
-		{
-			if (v == Py_None) {
-				PyErr_SetString(PyExc_KeyError, key);
-				throw_error_already_set();
-			}
-			extract<data_type> elem(v);
-			if (elem.check()) 
-			{
-				return elem();
-			} 
-			else
-			{
-				PyErr_SetString(PyExc_TypeError, "Invalid parameter");
-				throw_error_already_set();
-			}
-			return data_type();
-		}
-		// save the returning value.
-		data_type ret(value->second);
-		// delete it from the map	
-		Container &writableX = x.writable();
-		typename Container::iterator writableValue = writableX.find(key);
-		writableX.erase(writableValue);
-		return ret;
-	}
-
-	/// binding for popitem method
-	static boost::python::tuple
-	popitem(TypedData< Container > &x)
-	{
-		boost::python::tuple newTuple;
-		Container &xData = x.writable();
-		typename Container::iterator iterX = xData.begin();
-		if (iterX != xData.end()) 
-		{
-			newTuple = boost::python::make_tuple(iterX->first.c_str(), iterX->second);
-			xData.erase(iterX);
-		}
-		else
-		{
-			PyErr_SetString(PyExc_KeyError, "CompoundData is empty");
+			PyErr_SetString( PyExc_TypeError, "Invalid key type" );
 			throw_error_already_set();
+			return key_type();
 		}
-		return newTuple;
-	}
-	
-protected:
-	/* 
-	 * Utility functions
-	 */
 
-	static key_type
-	convertKey(TypedData< Container > & container, PyObject *key_)
-	{ 
-		extract<key_type> key(key_);
-		if (key.check())
-		{
-			return key();
-		}
-		PyErr_SetString(PyExc_TypeError, "Invalid key type");
-		throw_error_already_set();
-		return key_type();
-	}
-	
 };
 
 void bindCompoundData()
@@ -445,35 +449,36 @@ void bindCompoundData()
 	typedef CompoundTypedDataFunctions< CompoundDataMap > ThisBinder;
 
 	typedef class_< CompoundData , CompoundDataPtr, boost::noncopyable, bases<Data> > CompoundDataPyClass;
-	CompoundDataPyClass ("CompoundData",
+	CompoundDataPyClass( 
+		"CompoundData",
 		"This class behaves like the native python dict, except that it only accepts objects derived from Data class.\n"
 		"The copy constructor accepts another instance of this class or a python dict containing Data objects\n"
-		"it has the most important dict methods: has_key, items, keys, values, get, pop, etc.\n"
-		, no_init)
-		.def("__init__", make_constructor(&ThisBinder::dataConstructor), "Default constructor")
-		.def("__init__", make_constructor(&ThisBinder::dataMapConstructor), "Copy constructor: accepts a python dict containing Data objects.")
-		.def("__getitem__", &ThisBinder::getItem, "indexing operator.\nAccepts only string keys.")
-		.def("__setitem__", &ThisBinder::setItem, "index assignment operator.\nWorks exactly like on python dicts but only accepts Data objects as the new value.")
-		.def("__delitem__", &ThisBinder::delItem, "index deletion operator.\nWorks exactly like on python dicts.")
-		.def("__len__", &ThisBinder::len, "Length operator.")
-		.def("__contains__", &ThisBinder::has_key, "In operator.\nWorks exactly like on python dicts.")
-		.def("size", &ThisBinder::len, "m.size()\nReturns the number of elements on m. Same result as the len operator.")
-		.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. CompoundData does not support comparison operators.")
-		 // python map methods.
-		.def("clear", &ThisBinder::clear, "m.clear()\nRemoves all items from m.")
-		.def("has_key", &ThisBinder::has_key, "m.has_key(k)\nReturns True if m has key k; otherwise, returns False.")
-		.def("items", &ThisBinder::items, "m.items()\nReturns a list of (key, value) pairs.")
-		.def("keys", &ThisBinder::keys, "m.keys()\nReturns a list of key values.")
-		.def("update", &ThisBinder::update1, "m.update(b)\nAdds all objects from b to m. b can be a CompoundData or a python dict.")
-		.def("update", &ThisBinder::update2)
-		.def("values", &ThisBinder::values, "m.values()\nReturns a list of all values in m.")
-		.def("get", &ThisBinder::get, "m.get(k [, v])\nReturns m[k] if found; otherwise, returns v.")
-		.def("get", &ThisBinder::get2)
-		.def("setdefault", &ThisBinder::setdefault, "m.setdefault(k [, v])\nReturns m[k] if found; otherwise, returns v and sets m[k] = v.")
-		.def("setdefault", &ThisBinder::setdefault2)
-		.def("pop", &ThisBinder::pop, "m.pop(k [,default])\nReturns m[k] if found and removes it from m; otherwise, returns default if supplied or raises KeyError if not.")
-		.def("pop", &ThisBinder::pop2)
-		.def("popitem", &ThisBinder::popitem, "m.popitem()\nRemvoes a random (key,value) pair from m and returns it as a tuple.")
+		"it has the most important dict methods: has_key, items, keys, values, get, pop, etc.\n",
+		no_init )
+		.def( "__init__", make_constructor( &ThisBinder::dataConstructor ), "Default constructor" )
+		.def( "__init__", make_constructor( &ThisBinder::dataMapConstructor ), "Copy constructor: accepts a python dict containing Data objects." )
+		.def( "__getitem__", &ThisBinder::getItem, "indexing operator.\nAccepts only string keys." )
+		.def( "__setitem__", &ThisBinder::setItem, "index assignment operator.\nWorks exactly like on python dicts but only accepts Data objects as the new value." )
+		.def( "__delitem__", &ThisBinder::delItem, "index deletion operator.\nWorks exactly like on python dicts." )
+		.def( "__len__", &ThisBinder::len, "Length operator." )
+		.def( "__contains__", &ThisBinder::has_key, "In operator.\nWorks exactly like on python dicts." )
+		.def( "size", &ThisBinder::len, "m.size()\nReturns the number of elements on m. Same result as the len operator." )
+		.def( "__cmp__", &ThisBinder::invalidOperator, "Raises an exception. CompoundData does not support comparison operators." )
+		// python map methods.
+		.def( "clear", &ThisBinder::clear, "m.clear()\nRemoves all items from m." )
+		.def( "has_key", &ThisBinder::has_key, "m.has_key(k)\nReturns True if m has key k; otherwise, returns False." )
+		.def( "items", &ThisBinder::items, "m.items()\nReturns a list of (key, value) pairs." )
+		.def( "keys", &ThisBinder::keys, "m.keys()\nReturns a list of key values." )
+		.def( "update", &ThisBinder::update1, "m.update(b)\nAdds all objects from b to m. b can be a CompoundData or a python dict." )
+		.def( "update", &ThisBinder::update2 )
+		.def( "values", &ThisBinder::values, "m.values()\nReturns a list of all values in m." )
+		.def( "get", &ThisBinder::get, "m.get(k [, v])\nReturns m[k] if found; otherwise, returns v." )
+		.def( "get", &ThisBinder::get2 )
+		.def( "setdefault", &ThisBinder::setdefault, "m.setdefault(k [, v])\nReturns m[k] if found; otherwise, returns v and sets m[k] = v." )
+		.def( "setdefault", &ThisBinder::setdefault2 )
+		.def( "pop", &ThisBinder::pop, "m.pop(k [,default])\nReturns m[k] if found and removes it from m; otherwise, returns default if supplied or raises KeyError if not." )
+		.def( "pop", &ThisBinder::pop2 )
+		.def( "popitem", &ThisBinder::popitem, "m.popitem()\nRemvoes a random (key,value) pair from m and returns it as a tuple." )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( CompoundData )
 	;
 
