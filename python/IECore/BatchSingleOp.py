@@ -137,6 +137,9 @@ class BatchSingleOp( Op ) :
 				jobs.append( newOperands )
 			return jobs
 
+	def jobName( self, args ):
+		return "BatchSingleOp - " + args.opName.value
+
 	def doOperation( self, operands ) :
 
 		operands = self.preCheck( operands )
