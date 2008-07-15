@@ -900,7 +900,8 @@ class ColorParameterUI( ParameterUI ) :
 		self.__colorSlider = cmds.attrColorSliderGrp(
 			label = self.label(),
 			annotation = self.description(),
-			attribute = self.plugName() 
+			attribute = self.plugName(),
+			showButton = False 
 		)
 		
 		self.addPopupMenu( attributeName = self.plugName() )		
