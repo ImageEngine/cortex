@@ -176,7 +176,11 @@ ObjectPtr SLOReader::doOperation( ConstCompoundObjectPtr operands )
 						for( int j=0; j<arg->svd_arraylen; j++ )
 						{
 							SLO_VISSYMDEF *a = Slo_GetArrayArgElement( arg, j );
-							vData->writable().push_back( a->svd_default.stringval );
+							// sometimes the default value for an element of a string array can be a null pointer.
+							// i'm not sure what the meaning of this is. the 3delight shaderinfo utility reports such values
+							// as "(null)", so that's what we do too.
+							const char *defaultValue = a->svd_default.stringval;
+							vData->writable().push_back( defaultValue ? defaultValue : "(null)" );
 						}
 					}
 				}
