@@ -818,67 +818,75 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 	ScopedContext scopedContext( m_context );
 	
 	ConstShaderPtr s = 0;
-	try 
+	try
 	{
 		s = runTimeCast<const Shader>( m_shaderCache->read( name + ".sdl" ) );
+		if( !s )
+		{
+			msg( Msg::Warning, "IECoreRI::RendererImplementation::shader", format( "Couldn't load shader \"%s\"." ) % name );
+			return;
+		}
+	}
+	catch( const std::exception &e )
+	{
+		msg( Msg::Warning, "IECoreRI::RendererImplementation::shader", format( "Couldn't load shader \"%s\" - %s" ) % name % e.what() );
+		return;
+		// we don't want exceptions to halt rendering - we'd rather just report the error below
 	}
 	catch( ... )
 	{
-		// we don't want exceptions to halt rendering - we'd rather just report the error below
+		msg( Msg::Warning, "IECoreRI::RendererImplementation::shader", format( "Couldn't load shader \"%s\" - an unknown exception was thrown" ) % name );
+		return;
 	}
 	
-	if( s )
+	// if we are here then we loaded a shader ok. now process the parameters for it and make the ri call.
+	
+	AttributeState &state = m_attributeStack.top();
+	state.primVarTypeHints.clear();
+	CompoundDataMap::const_iterator it = s->blindData()->readable().find( "ri:parameterTypeHints" );
+	if( it!=s->blindData()->readable().end() )
 	{
-		AttributeState &state = m_attributeStack.top();
-		state.primVarTypeHints.clear();
-		CompoundDataMap::const_iterator it = s->blindData()->readable().find( "ri:parameterTypeHints" );
-		if( it!=s->blindData()->readable().end() )
+		if( ConstCompoundDataPtr h = runTimeCast<const CompoundData>( it->second ) )
 		{
-			if( ConstCompoundDataPtr h = runTimeCast<const CompoundData>( it->second ) )
+			for( it=h->readable().begin(); it!=h->readable().end(); it++ )
 			{
-				for( it=h->readable().begin(); it!=h->readable().end(); it++ )
+				if( it->second->typeId()==StringData::staticTypeId() )
 				{
-					if( it->second->typeId()==StringData::staticTypeId() )
-					{
-						state.primVarTypeHints.insert( std::pair<string, string>( it->first, static_pointer_cast<const StringData>( it->second )->readable() ) );
-					}
+					state.primVarTypeHints.insert( std::pair<string, string>( it->first, static_pointer_cast<const StringData>( it->second )->readable() ) );
 				}
 			}
 		}
-		ParameterList pl( parameters, &state.primVarTypeHints );
-		if( type=="surface" || type=="ri:surface" )
-		{
-			RiSurfaceV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
-		}
-		else if( type=="displacement" || type=="ri:displacement" )
-		{
-			RiDisplacementV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
-		}
-		else if( type=="light" || type=="ri:light" )
-		{
-			RiLightSourceV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
-		}
-		else if( type=="atmosphere" || type=="ri:atmosphere" )
-		{
-			RiAtmosphereV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
-		}
-		else if( type=="interior" || type=="ri:interior" )
-		{
-			RiInteriorV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
-		}
-		else if( type=="exterior" || type=="ri:exterior" )
-		{
-			RiExteriorV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
-		}
-		else if( type=="deformation" || type=="ri:deformation" )
-		{
-			RiDeformationV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
-		}
 	}
-	else
+	ParameterList pl( parameters, &state.primVarTypeHints );
+	if( type=="surface" || type=="ri:surface" )
 	{
-		msg( Msg::Warning, "IECoreRI::RendererImplementation::shader", format( "Couldn't load shader \"%s\"." ) % name );
+		RiSurfaceV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
+	else if( type=="displacement" || type=="ri:displacement" )
+	{
+		RiDisplacementV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
+	}
+	else if( type=="light" || type=="ri:light" )
+	{
+		RiLightSourceV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
+	}
+	else if( type=="atmosphere" || type=="ri:atmosphere" )
+	{
+		RiAtmosphereV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
+	}
+	else if( type=="interior" || type=="ri:interior" )
+	{
+		RiInteriorV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
+	}
+	else if( type=="exterior" || type=="ri:exterior" )
+	{
+		RiExteriorV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
+	}
+	else if( type=="deformation" || type=="ri:deformation" )
+	{
+		RiDeformationV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
+	}
+
 }
 
 void IECoreRI::RendererImplementation::light( const std::string &name, const IECore::CompoundDataMap &parameters )
