@@ -645,19 +645,14 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 					}
 				}
 			}
-
-			if( children[i]->isInstanceOf( IECore::StringParameter::staticTypeId() ) )
+			
+			/// Set the value of the attribute, in case it differs from the default
+			MPlug plug( B::thisMObject(), attribute );
+			s = IECoreMaya::Parameter::setValue( children[i], plug );
+			if( !s )
 			{
-				// because default value setting for string attributes doesn't work,
-				// the Parameter::create method won't have set any value. do that ourselves
-				// here.
-				MPlug plug( B::thisMObject(), attribute );
-				MStatus s = IECoreMaya::Parameter::setValue( children[i], plug );
-				if( !s )
-				{
-					return s;
-				}
-			}
+				return s;
+			}			
 		}
 	}
 	
