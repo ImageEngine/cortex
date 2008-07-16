@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,8 @@
 
 #include "IECore/Object.h"
 
+
+#include "maya/MArgList.h"
 #include "maya/MPxData.h"
 #include "maya/MString.h"
 #include "maya/MTypeId.h"
@@ -56,11 +58,10 @@ class ObjectData : public MPxData
 		
 		static void* creator();
 		
-		/// \todo Currently reading and writing is not supported
-		virtual MStatus readASCII( const MArgList&, unsigned& lastElement );
-		virtual MStatus readBinary( istream& in, unsigned length );
-		virtual MStatus writeASCII( ostream& out );
-		virtual MStatus writeBinary( ostream& out );
+		virtual MStatus readASCII( const MArgList &argList, unsigned int &endOfTheLastParsedElement );
+		virtual MStatus readBinary( istream &in, unsigned length );
+		virtual MStatus writeASCII( ostream &out );
+		virtual MStatus writeBinary( ostream &out );
 
 		virtual void copy( const MPxData &other );
 		virtual MTypeId typeId() const; 

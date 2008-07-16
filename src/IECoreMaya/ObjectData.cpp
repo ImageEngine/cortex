@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,16 +34,24 @@
 
 #include <cassert>
 
+#include "boost/type_traits/is_integral.hpp"
+
+#include "maya/MGlobal.h"
+
+#include "IECore/VectorTypedData.h"
+#include "IECore/MemoryIndexedIO.h"
+#include "IECore/HexConversion.h"
+
 #include "IECoreMaya/ObjectData.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
 
-const MString ObjectData::typeName("ieObjectData");
+const MString ObjectData::typeName( "ieObjectData" );
 const MTypeId ObjectData::id( ObjectDataId );
 
-ObjectData::ObjectData() : m_object(0)
+ObjectData::ObjectData() : m_object( 0 )
 {
 }
 
@@ -56,35 +64,131 @@ void *ObjectData::creator()
 	return new ObjectData;
 }
 
-MStatus ObjectData::readASCII( const MArgList&, unsigned& lastElement )
+MStatus ObjectData::readASCII( const MArgList &argList, unsigned int &endOfTheLastParsedElement )
 {
-	/// \todo
 	m_object = 0;
-	return MS::kSuccess;
+
+	if ( argList.length() ==  1 )
+	{
+		MStatus s;
+		std::string str = argList.asString( endOfTheLastParsedElement++, &s ).asChar();
+
+		if ( !s )
+		{
+			return s;
+		}
+		CharVectorDataPtr buf = new CharVectorData();
+
+		for ( unsigned i = 0; i < str.size(); i +=2 )
+		{
+			buf->writable().push_back( hexToDec<char>( std::string( str, i, 2 ) ) );
+		}
+		assert( 2 * buf->readable().size() == str.length() );
+
+		try
+		{
+			MemoryIndexedIOPtr io = new MemoryIndexedIO( buf, "/", IndexedIO::Exclusive | IndexedIO::Read );
+			setObject( Object::load( io, "object" ) );
+			return MS::kSuccess;
+		}
+		catch ( std::exception &e )
+		{
+			MGlobal::displayError( e.what() );
+			return MS::kFailure;
+		}
+	}
+	else if ( argList.length() == 0 )
+	{
+
+		return MS::kSuccess;
+	}
+	else
+	{
+		return MS::kFailure;
+	}
 }
+
 MStatus ObjectData::readBinary( istream& in, unsigned length )
-{
-	/// \todo
-	m_object = 0;	
-	return MS::kSuccess;
+{	
+	CharVectorDataPtr buf = new CharVectorData( );
+	buf->writable().resize( length );
+	CharVectorData::ValueType &data = buf->writable();
+
+	in.read( &data[0], length );
+	
+	try
+	{
+		MemoryIndexedIOPtr io = new MemoryIndexedIO( buf, "/", IndexedIO::Exclusive | IndexedIO::Read );
+		setObject( Object::load( io, "object" ) );
+		return MS::kSuccess;
+	}
+	catch ( std::exception &e )
+	{
+		MGlobal::displayError( e.what() );
+		return MS::kFailure;
+	}
 }
 
 MStatus ObjectData::writeASCII( ostream& out )
 {
-	/// \todo
+	if ( m_object )
+	{
+		try
+		{
+			MemoryIndexedIOPtr io = new MemoryIndexedIO( ConstCharVectorDataPtr(), "/", IndexedIO::Exclusive | IndexedIO::Write );
+
+			getObject()->save( io, "object" );
+
+			ConstCharVectorDataPtr buf = io->buffer();
+			const CharVectorData::ValueType &data = buf->readable();
+
+			out << "\"";
+			for ( CharVectorData::ValueType::const_iterator it = data.begin(); it != data.end(); ++it )
+			{
+				out << decToHex( *it );
+			}
+			out << "\"";
+		}
+		catch ( std::exception &e )
+		{
+			MGlobal::displayError( e.what() );
+			return MS::kFailure;
+		}
+	}
+
 	return MS::kSuccess;
 }
 
 MStatus ObjectData::writeBinary( ostream& out )
 {
-	/// \todo
+	if ( m_object )
+	{
+		try
+		{
+			MemoryIndexedIOPtr io = new MemoryIndexedIO( ConstCharVectorDataPtr(), "/", IndexedIO::Exclusive | IndexedIO::Write );
+
+			getObject()->save( io, "object" );
+
+			ConstCharVectorDataPtr buf = io->buffer();
+			const CharVectorData::ValueType &data = buf->readable();
+
+			int sz = data.size();
+			out.write( &data[0], sz );			
+		}
+		catch ( std::exception &e )
+		{
+			MGlobal::displayError( e.what() );
+			return MS::kFailure;
+		}
+	}
+
 	return MS::kSuccess;
 }
 
 void ObjectData::copy( const MPxData &other )
 {
-	const ObjectData *otherData = dynamic_cast<const ObjectData *>(&other);
-	assert (otherData);
+	const ObjectData *otherData = dynamic_cast<const ObjectData *>( &other );
+	assert( otherData );
 
 	setObject( otherData->getObject() );
 }
@@ -111,7 +215,7 @@ ConstObjectPtr ObjectData::getObject() const
 
 void ObjectData::setObject( ConstObjectPtr otherObject )
 {
-	if (otherObject)
+	if ( otherObject )
 	{
 		m_object = otherObject->copy();
 	}
