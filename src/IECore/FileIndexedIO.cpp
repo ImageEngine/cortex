@@ -48,10 +48,9 @@
 #include <boost/iostreams/filter/gzip.hpp>
 
 #include "IECore/ByteOrder.h"
-
 #include "IECore/MemoryStream.h"
-
 #include "IECore/FileIndexedIO.h"
+#include "IECore/VectorTypedData.h"
 
 
 
@@ -548,7 +547,7 @@ FileIndexedIO::Index::Index( FilteredStream &f ) : m_prevId(0)
 	
 	Imf::Int64 magicNumber;
 	readLittleEndian<Imf::Int64>( f, magicNumber );
-	
+		
 	if ( magicNumber == g_versionedMagicNumber )
 	{
 		end -= 3*sizeof(Imf::Int64);
@@ -640,7 +639,7 @@ void FileIndexedIO::Index::write( std::ostream & f )
 
 	// Write out number of free "pages"		
 	writeLittleEndian<Imf::Int64>( compressingStream, numFreePages);
-			
+
 	/// Write out each free page
 	for ( FreePagesSizeMap::const_iterator it = m_freePagesSize.begin(); it != m_freePagesSize.end(); ++it)
 	{
@@ -659,10 +658,12 @@ void FileIndexedIO::Index::write( std::ostream & f )
 	assert( sz > 0 );
 	
 	f.write( data, sz );
-		
+			
 	writeLittleEndian<Imf::Int64>( f, m_offset );
 	writeLittleEndian<Imf::Int64>( f, g_currentVersion );		
 	writeLittleEndian<Imf::Int64>( f, g_versionedMagicNumber );
+	
+	(void)f.tellp();
 	
 	m_hasChanged = false;
 }
@@ -1103,7 +1104,7 @@ bool FileIndexedIO::Node::find( Tokenizer::iterator &parts, Tokenizer::iterator 
 		}
 	}
 }
-
+ 
 bool FileIndexedIO::Node::findInChildren( Tokenizer::iterator &parts, Tokenizer::iterator end, NodePtr &nearest, NodePtr topNode ) const
 {	
 	assert( nearest );
@@ -1141,9 +1142,11 @@ class FileIndexedIO::IndexedFile : public RefCounted
 {
 	public:
 		FilteredStream *m_stream;
-		std::fstream *m_device;
+		std::iostream *m_device;
 			
 		IndexedFile( const std::string &filename, IndexedIO::OpenMode mode );
+		IndexedFile( std::iostream *device, bool newStream = false );
+		
 		virtual ~IndexedFile();
 			
 		/// Obtain the index for this file		
@@ -1156,6 +1159,10 @@ class FileIndexedIO::IndexedFile : public RefCounted
 		/// is updated to record this offset along with its size.
 		void write(NodePtr node, const char *data, Imf::Int64 size);
 		
+		void flush();
+		
+		std::iostream *device();
+		
 	protected:
 	
 		IndexPtr m_index;
@@ -1165,13 +1172,14 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 {
 	if (mode & IndexedIO::Write)
 	{
-		m_device = new std::fstream(filename.c_str(), std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
+		std::fstream *f = new std::fstream(filename.c_str(), std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
+		m_device = f;
 		
-		if (! m_device->is_open() )
+		if (! f->is_open() )
 		{
 			throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for writing" );
 		}
-		
+				
 		m_stream = new FilteredStream();
 		m_stream->push<>( *m_device );
 		assert( m_stream->is_complete() );
@@ -1183,13 +1191,14 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		if (!fs::exists( filename.c_str() ) )
 		{
 			/// Create new file
-			m_device = new std::fstream(filename.c_str(), std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
-		
-			if (! m_device->is_open() )
+			std::fstream *f = new std::fstream(filename.c_str(), std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
+			m_device = f;
+			
+			if (! f->is_open() )
 			{
 				throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for append" );
 			}
-			
+						
 			m_stream = new FilteredStream();
 			m_stream->push<>( *m_device );
 			assert( m_stream->is_complete() );
@@ -1199,9 +1208,10 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		else
 		{		
 			/// Read existing file
-			m_device = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in | std::ios::out);
-		
-			if (! m_device->is_open() )
+			std::fstream *f = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in | std::ios::out);
+			m_device = f;
+			
+			if (! f->is_open() )
 			{
 				throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for read " );
 			}
@@ -1228,9 +1238,10 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 	else
 	{
 		assert( mode & IndexedIO::Read );
-		m_device = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in);
+		std::fstream *f = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in);
+		m_device = f;
 		
-		if (! m_device->is_open() )
+		if (! f->is_open() )
 		{
 			throw IOException( "FileIndexedIO: Cannot open file '" + filename + "' for read" );
 		}
@@ -1260,6 +1271,44 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 	assert( m_index );
 }
 
+			
+FileIndexedIO::IndexedFile::IndexedFile( std::iostream *device, bool newStream )
+{
+	assert( device );
+	m_device = device;
+				
+	m_stream = new FilteredStream();
+	m_stream->push<>( *m_device );
+	assert( m_stream->is_complete() );
+	
+	if ( newStream )
+	{
+		m_index = new Index();
+	}
+	else
+	{
+		/// Read index		
+		try 
+		{
+			m_index = new Index( *m_stream );
+		} 
+		catch ( Exception &e )
+		{
+			throw;
+		}
+		catch (...)
+		{
+			throw IOException( "FileIndexedIO: Caught error reading index in device" );
+		}
+	}
+	
+	assert( m_device );	
+	assert( m_stream );
+	assert( m_stream->is_complete() );	
+	assert( m_index );
+}
+
+
 void FileIndexedIO::IndexedFile::seekg( NodePtr node )	
 {
 	assert( node->m_entry.entryType() == IndexedIO::File );
@@ -1276,14 +1325,10 @@ FileIndexedIO::IndexPtr FileIndexedIO::IndexedFile::index() const
 }
 
 FileIndexedIO::IndexedFile::~IndexedFile()
-{
+{		
+	flush();
+	
 	assert(m_stream);
-	
-	if (index()->hasChanged())
-	{			
-		index()->write( *m_stream );
-	}
-	
 	assert( m_stream->auto_close() );
 	
 	delete m_stream;
@@ -1304,6 +1349,24 @@ void FileIndexedIO::IndexedFile::write(NodePtr node, const char *data, Imf::Int6
 	
 	/// Write data		
 	m_stream->write( data, size );
+}
+
+		
+void FileIndexedIO::IndexedFile::flush()
+{
+	if (m_index->hasChanged())
+	{			
+		m_index->write( *m_stream );
+		assert( m_index->hasChanged() == false );
+	}
+	
+	assert( m_device );
+	m_device->flush();
+}
+
+std::iostream *FileIndexedIO::IndexedFile::device()
+{
+	return m_device;
 }
 
 static IndexedIOInterface::Description<FileIndexedIO> registrar(".fio");
@@ -1396,8 +1459,60 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryID &
 	assert( m_rootDirectoryNode );
 }
 
+FileIndexedIO::FileIndexedIO()
+{	
+}
+
+void FileIndexedIO::open( std::iostream *device, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode, bool newStream)
+{
+	validateOpenMode(mode);
+	m_mode = mode;
+
+	m_currentDirectory = IndexedIOPath(root);
+	
+	m_indexedFile = new IndexedFile( device, newStream );
+	
+	m_rootDirectoryNode = m_indexedFile->index()->m_root;
+	m_indexedFile->index()->find( m_currentDirectory.fullPath(), m_rootDirectoryNode, m_rootDirectoryNode );
+	m_currentDirectoryNode = m_rootDirectoryNode;	
+	
+	if (mode & IndexedIO::Read)
+	{
+		if(!exists(m_currentDirectory.fullPath(), IndexedIO::Directory))
+		{
+			throw IOException( "FileIndexedIO: Cannot find directory '" + m_currentDirectory.fullPath() + "' in buffer" );
+		}
+	}
+	else
+	{	
+		if (mode & IndexedIO::Write)
+		{
+			if (exists(m_currentDirectory.fullPath(), IndexedIO::Directory))
+			{		
+				rm("/");
+			} 
+		}
+		
+	} 	
+	
+	chdir("/");		
+	
+	assert( m_currentDirectoryNode );	
+	assert( m_rootDirectoryNode );
+}
+
 FileIndexedIO::~FileIndexedIO()
 {	
+}
+
+void FileIndexedIO::flush()
+{
+	m_indexedFile->flush();
+}
+
+std::iostream *FileIndexedIO::device()
+{
+	return m_indexedFile->device();
 }
 
 IndexedIO::OpenMode FileIndexedIO::openMode() const

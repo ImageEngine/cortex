@@ -36,14 +36,15 @@
 #define IE_CORE_FILEINDEXEDIO_H
 
 #include <map>
+#include <iostream>
 #include <fstream>
 
 #include "IndexedIOInterface.h"
 #include "Exception.h"
+#include "VectorTypedData.h"
 
 namespace IECore
 {
-
 /// An implementation of IndexedIOInterface which operates within a single file on disk.
 class FileIndexedIO : public IndexedIOInterface
 {
@@ -122,7 +123,9 @@ class FileIndexedIO : public IndexedIOInterface
 		void read(const IndexedIO::EntryID &name, char &x);
 		void read(const IndexedIO::EntryID &name, unsigned char &x);
 		void read(const IndexedIO::EntryID &name, short &x);
-		void read(const IndexedIO::EntryID &name, unsigned short &x);		
+		void read(const IndexedIO::EntryID &name, unsigned short &x);
+		
+		ConstCharVectorDataPtr buf();		
 	
 	protected:
 	
@@ -174,6 +177,16 @@ class FileIndexedIO : public IndexedIOInterface
 		
 		bool find( const IndexedIO::EntryID &name, NodePtr &node ) const;
 		NodePtr insert( const IndexedIO::EntryID &name );
+		
+		void flush();
+		
+		/// \todo Add virtual method to obtain device name ( e.g filename, "memory", etc )
+		
+		std::iostream *device();		
+		
+		void open( std::iostream *device, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode, bool newStream = false );		
+		
+		FileIndexedIO();
 };	
 
 IE_CORE_DECLAREPTR( FileIndexedIO )
