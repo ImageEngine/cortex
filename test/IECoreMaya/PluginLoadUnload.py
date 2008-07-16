@@ -49,6 +49,8 @@ class TestPluginLoadUnload( unittest.TestCase ) :
 		
 		for i in range( 0, 20 ) :
 		
+			self.failIf( cmds.pluginInfo( "ieCore", query = True, serviceDescriptions = True ) )
+		
 			cmds.unloadPlugin( "ieCore" )
 			self.failIf( cmds.pluginInfo( "ieCore", query = True, loaded = True ) )			
 		
