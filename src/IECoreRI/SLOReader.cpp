@@ -167,7 +167,12 @@ ObjectPtr SLOReader::doOperation( ConstCompoundObjectPtr operands )
 				{
 					if( arg->svd_arraylen==0 )
 					{
-						data = new StringData( arg->svd_default.stringval );
+						/// \todo arraylen==0 && defaultValue==0 apparently means a variable
+						/// length array (gleaned from correspondence with 3delight guys).
+						/// this applies to all the types, so when we get the next release from
+						/// them we should update all this code to apply that rule.
+						const char *defaultValue = arg->svd_default.stringval;
+						data = new StringData( defaultValue ? defaultValue : "(null)" );
 					}
 					else
 					{
