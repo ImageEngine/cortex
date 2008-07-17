@@ -109,6 +109,7 @@ try :
 	mayaMajorVersion = mayaReg["majorVersion"]
 	if compiler==mayaReg["compiler"] and compilerVersion==mayaReg["compilerVersion"] :
 		MAYA_ROOT = mayaReg["location"]
+		MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
 except :
 	pass
 

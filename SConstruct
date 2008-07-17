@@ -238,6 +238,13 @@ o.Add(
 )
 
 o.Add(
+	"MAYA_LICENSE_FILE",
+	"The path to FlexLM license file to use for Maya.",
+	"/usr/flexlm/license.dat",
+)
+
+
+o.Add(
 	BoolOption( 
 		"WITH_MAYA_PLUGIN_LOADER", 
 		"Set this to install the Maya plugin with a stub loader.",
@@ -1334,15 +1341,36 @@ if doConfigure :
 		mayaTestEnv["ENV"]["PATH"] = mayaEnv.subst( "$MAYA_ROOT/bin:" ) + mayaEnv["ENV"]["PATH"]
 		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya"
 		mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./mel"
-		mayaPythonExecutable = "mayapy"
 		
-		mayaTest = mayaTestEnv.Command( "test/IECoreMaya/resultsPython.txt", mayaPythonModule, mayaPythonExecutable + " $TEST_MAYA_SCRIPT" )
+		mayaPythonTestEnv = mayaTestEnv.Copy()
+		
+		mayaTestEnv.Append( **mayaEnvAppends )
+		mayaTestEnv.Append( 
+			LIBS = [ 
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), 
+				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ), 				
+				"OpenMayalib" 
+			] 
+		)
+		mayaTestEnv["ENV"]["PYTHONHOME"] = mayaTestEnv.subst( "$MAYA_ROOT" )
+		mayaTestEnv["ENV"]["MAYA_LOCATION"] = mayaTestEnv.subst( "$MAYA_ROOT" )
+		mayaTestEnv["ENV"]["LM_LICENSE_FILE"] = env["MAYA_LICENSE_FILE"]
+				
+		mayaTestProgram = mayaTestEnv.Program( "test/IECoreMaya/IECoreMayaTest", glob.glob( "test/IECoreMaya/*.cpp" ) )
+		mayaTest = mayaTestEnv.Command( "test/IECoreMaya/results.txt", mayaTestProgram, "test/IECoreMaya/IECoreMayaTest >& test/IECoreMaya/results.txt" )
 		NoCache( mayaTest )
 		mayaTestEnv.Depends( mayaTest, [ mayaPlugin, mayaPythonModule ] )
-		mayaTestEnv.Depends( mayaTest, glob.glob( "test/IECoreMaya/*.py" ) )
+		coreTestEnv.Alias( "testMaya", mayaTest )
+		
+		mayaPythonExecutable = "mayapy"
+		
+		mayaPythonTest = mayaPythonTestEnv.Command( "test/IECoreMaya/resultsPython.txt", mayaPythonModule, mayaPythonExecutable + " $TEST_MAYA_SCRIPT" )
+		NoCache( mayaPythonTest )
+		mayaPythonTestEnv.Depends( mayaPythonTest, [ mayaPlugin, mayaPythonModule ] )
+		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "test/IECoreMaya/*.py" ) )
 		if env["WITH_MAYA_PLUGIN_LOADER"] :
-			mayaTestEnv.Depends( mayaTest, mayaPluginLoader )
-		mayaTestEnv.Alias( "testMaya", mayaTest )			
+			mayaPythonTestEnv.Depends( mayaPythonTest, mayaPluginLoader )
+		mayaPythonTestEnv.Alias( "testMaya", mayaPythonTest )			
 
 ###########################################################################################
 # Build and install the coreNuke library and headers
