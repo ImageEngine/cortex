@@ -55,6 +55,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 {			
 	test_suite* test = BOOST_TEST_SUITE( "IECoreMaya unit test" );
 	
+	/// \todo Try and find a way of calling MLibrary::cleanup when Boost.Test exits
 	MStatus s = MLibrary::initialize( "test", false );
 	if ( !s ) 
 	{
@@ -64,6 +65,8 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 	
 	try
 	{
+		/// Boost.Test complaints if we don't add any tests, so add a dummy one.
+		/// \todo Remove EmptyTest and all associated files when the first concrete test has been added
 		addEmptyTest(test);
 	} 
 	catch ( std::exception &ex )
