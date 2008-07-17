@@ -34,9 +34,16 @@
 
 #include <string.h>
 
+#include "boost/static_assert.hpp"
+
+#include "IECore/ByteOrder.h"
 #include "IECore/RadixSort.h"
 
 using namespace IECore;
+
+BOOST_STATIC_ASSERT( sizeof(int) == 4 );
+BOOST_STATIC_ASSERT( sizeof(unsigned int) == 4 );
+BOOST_STATIC_ASSERT( sizeof(float) == 4 );
 
 RadixSort::RadixSort() : m_currentSize( 0 ), m_ranks( 0 ), m_ranks2( 0 )
 {
@@ -60,8 +67,12 @@ template<typename T>
 bool RadixSort::checkPassValidity( const std::vector<T> &input, unsigned int pass, unsigned int* &curCount, unsigned char &uniqueVal )
 {
 	curCount = &m_histogram[ pass << 8 ];
-
+	
+#ifdef IE_CORE_BIG_ENDIAN	
+	uniqueVal = *((( unsigned char* )( &input[0] ) ) + sizeof(T) - 1 - pass );
+#else
 	uniqueVal = *((( unsigned char* )( &input[0] ) ) + pass );
+#endif	
 
 	if ( curCount[ uniqueVal ] == input.size() )
 	{
@@ -130,7 +141,11 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<float>
 				}
 
 				const unsigned char *inputBytes = ( const unsigned char * ) input;
+#ifdef IE_CORE_BIG_ENDIAN			
+				inputBytes += sizeof(float) - 1 - j;
+#else
 				inputBytes += j;
+#endif		
 
 				if ( m_currentSize & 0x80000000 )
 				{
@@ -266,7 +281,7 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<unsign
 		bool performPass = checkPassValidity( input2, j, curCount, uniqueVal );
 
 		if ( performPass )
-		{
+		{		
 			m_link[0] = &m_ranks2->writable()[0];
 				
 			for( unsigned int i = 1; i < 256; i++ )
@@ -275,13 +290,17 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<unsign
 			} 
 			
 			const unsigned char *inputBytes = ( const unsigned char * )( input );
+#ifdef IE_CORE_BIG_ENDIAN			
+			inputBytes += sizeof(unsigned int) - 1 - j;
+#else
 			inputBytes += j;
+#endif			
 			
 			if (m_currentSize & 0x80000000)
 			{
 				for ( unsigned int i = 0; i < nb; i++ )
-				{
-					*m_link[ inputBytes[ i<<2 ] ]++ = i;
+				{					
+					*m_link[ inputBytes[ (i<<2) ] ]++ = i;
 				}
 				m_currentSize &= 0x7fffffff;
 			}
@@ -290,7 +309,8 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<unsign
 				for ( UIntVectorData::ValueType::const_iterator it = m_ranks->readable().begin(); it != m_ranks->readable().end(); ++it )
 				{
 					unsigned int id = *it;
-					*m_link[ inputBytes[ id << 2 ] ]++ = id;
+					
+					*m_link[ inputBytes[ (id << 2) ] ]++ = id;
 				}	
 			}
 			
@@ -357,7 +377,11 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<int> &
 			}
 			
 			const unsigned char *inputBytes = ( const unsigned char * )( input );
+#ifdef IE_CORE_BIG_ENDIAN			
+			inputBytes += sizeof(int) - 1 - j;
+#else
 			inputBytes += j;
+#endif		
 			
 			if (m_currentSize & 0x80000000)
 			{
@@ -394,10 +418,17 @@ bool RadixSort::createHistograms( const std::vector<T> &input )
 	const unsigned char *p = reinterpret_cast< const unsigned char * > ( &input[0] );
 	const unsigned char *pEnd = &p[ input.size() * 4 ] ;
 
+#ifdef IE_CORE_BIG_ENDIAN
+	unsigned int *h3 = &m_histogram[0];
+	unsigned int *h2 = &m_histogram[256];
+	unsigned int *h1 = &m_histogram[512];
+	unsigned int *h0 = &m_histogram[768];
+#else	
 	unsigned int *h0 = &m_histogram[0];
 	unsigned int *h1 = &m_histogram[256];
 	unsigned int *h2 = &m_histogram[512];
 	unsigned int *h3 = &m_histogram[768];
+#endif	
 
 	bool alreadySorted = true;
 
@@ -421,7 +452,7 @@ bool RadixSort::createHistograms( const std::vector<T> &input )
 			h0[ *p++ ] ++;
 			h1[ *p++ ] ++;
 			h2[ *p++ ] ++;
-			h3[ *p++ ] ++;
+			h3[ *p++ ] ++;	
 		}
 
 		if ( alreadySorted )
