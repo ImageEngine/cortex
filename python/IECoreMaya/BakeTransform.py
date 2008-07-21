@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+from maya.OpenMaya import *
 import maya.cmds
 import math
 import IECore
@@ -73,7 +74,7 @@ class BakeTransform( IECore.Op ) :
 						"Keyframes will be made at every frame in this range.",
 					defaultValue = IECoreMaya.PlaybackFrameList( IECoreMaya.PlaybackFrameList.Range.Playback ),
 				),
-				IECoreMaya.BoolParameter(
+				IECore.BoolParameter(
 					name = "lock",
 					description = "If this is specified then the transform attributes which are"
 						"keyframed on the destination object are also locked.",
@@ -85,22 +86,20 @@ class BakeTransform( IECore.Op ) :
 	@staticmethod
 	def transferTransform( src, dst, setKey=True ) :
 				
-		worldMatrixPlug = src.plug( "worldMatrix" )[0]
-		worldMatrix = worldMatrixPlug.convert().value
-			
-		e = IECore.Eulerf()
-		e.extract( worldMatrix.rotate )
-
-		maya.cmds.xform( dst, translation=tuple( worldMatrix.translate ), rotation=[math.degrees(x) for x in e], scale=tuple( worldMatrix.scale ) )
-		maya.cmds.setKeyframe( dst, attribute=["translate", "rotate", "scale"] )
+		worldMatrixConverter = IECoreMaya.FromMayaPlugConverter.create( str(src.fullPathName()) + ".worldMatrix" )
+		worldMatrix = worldMatrixConverter.convert().value
+		e = worldMatrix.rotate
+		maya.cmds.xform( dst.fullPathName(), translation=tuple( worldMatrix.translate ), rotation=[math.degrees(x) for x in e], scale=tuple( worldMatrix.scale ) )
+		maya.cmds.setKeyframe( dst.fullPathName(), attribute=["translate", "rotate", "scale"] )
 		
 	@staticmethod
 	def lockTransform( transform ) :
 		
-		maya.cmds.setAttr( str( transform.plug( "translate" ) ), lock=True )
-		maya.cmds.setAttr( str( transform.plug( "rotate" ) ), lock=True )
-		maya.cmds.setAttr( str( transform.plug( "scale" ) ), lock=True )
-		maya.cmds.setAttr( str( transform.plug( "shear" ) ), lock=True )
+		transformName = transform.fullPathName()
+		maya.cmds.setAttr( str( transformName ) + ".translate", lock=True )
+		maya.cmds.setAttr( str( transformName ) + ".rotate", lock=True )
+		maya.cmds.setAttr( str( transformName ) + ".scale", lock=True )
+		maya.cmds.setAttr( str( transformName ) + ".shear", lock=True )
 			
 	def doOperation( self, operands ) :
 
@@ -108,7 +107,12 @@ class BakeTransform( IECore.Op ) :
 			dst = self.dst.getDAGPathValue()
 		else :
 			dst = maya.cmds.createNode( "transform", name=operands.dst.value, skipSelect=True )
-			dst = IECoreMaya.DagNode( str(dst) )
+			list = MSelectionList()
+			list.add( dst )
+			dst = MDagPath()
+			list.getDagPath(0, dst)
+
+		dstPath = str( dst.fullPathName() )
 
 		src = self.src.getDAGPathValue()
 
@@ -118,9 +122,9 @@ class BakeTransform( IECore.Op ) :
 			self.transferTransform( src, dst, True )
 			
 		# fix discontinuous rotations
-		maya.cmds.filterCurve( str( dst.plug( "rotateX" ) ), str( dst.plug( "rotateY" ) ), str( dst.plug( "rotateZ" ) ) )	
+		maya.cmds.filterCurve( dstPath + ".rotateX", dstPath + ".rotateY", dstPath + ".rotateZ" )
 
 		if operands.lock.value :
 			self.lockTransform( dst )
 
-		return IECore.StringData( str( dst ) )
+		return IECore.StringData( dstPath )
