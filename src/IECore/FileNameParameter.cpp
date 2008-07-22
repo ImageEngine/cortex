@@ -35,6 +35,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundObject.h"
 
+#include "boost/format.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/convenience.hpp"
 #include "boost/algorithm/string/split.hpp"
@@ -99,7 +100,7 @@ bool FileNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) 
 		{
 			if( reason )
 			{
-				*reason = "Filename extension not valid";
+				*reason = ( boost::format( "Filename extension '%s' not valid" ) % ext ).str();
 			}
 			return false;
 		}
