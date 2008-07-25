@@ -60,6 +60,8 @@ enum MayaTypeId
 	ProceduralHolderId = 0x00110DCB,
 	TransientParameterisedHolderNodeId = 0x00110DCC,
 	
+	/// Don't forget to update MayaTypeIdsBinding.cpp
+	
 	LastId = 0x00110E3F,
 
 };
