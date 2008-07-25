@@ -49,3 +49,4 @@ from FnParameterisedHolder import FnParameterisedHolder
 from TransientParameterisedHolderNode import TransientParameterisedHolderNode
 from FnConverterHolder import FnConverterHolder
 from StringUtil import *
+from MayaTypeId import MayaTypeId

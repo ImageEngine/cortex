@@ -32,28 +32,20 @@
 #
 ##########################################################################
 
-import unittest
+import maya.OpenMaya
+import _IECoreMaya
 
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-from FnParameterisedHolderTest import *
-from ToMayaPlugConverterTest import *
-from ToMayaMeshConverterTest import *
-from MayaTypeIdTest import *
+class _MayaTypeIdMeta(type):
 
-import MayaUnitTest
+	def __getattr__( self, n ) :
+	
+		if not hasattr( _IECoreMaya._MayaTypeId, n ) :
+		
+			raise RuntimeError( "MayaTypeId '" + str(n) + "' has not been bound" )
+	
+		return maya.OpenMaya.MTypeId( getattr( _IECoreMaya._MayaTypeId, n ) )
 
-if __name__ == "__main__":
-	MayaUnitTest.TestProgram()
+class MayaTypeId :
+
+	__metaclass__ = _MayaTypeIdMeta
+

@@ -32,28 +32,29 @@
 #
 ##########################################################################
 
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-from FnParameterisedHolderTest import *
-from ToMayaPlugConverterTest import *
-from ToMayaMeshConverterTest import *
-from MayaTypeIdTest import *
-
 import MayaUnitTest
+import maya.cmds
+import os
+import maya.OpenMaya as OpenMaya
 
+class MayaTypeIdTest( unittest.TestCase ) :
+	
+	def test( self ) :
+	
+		a = IECoreMaya.MayaTypeId.ProceduralHolder
+		self.assertEqual( a.id(), 0x00110DCB )
+		
+		b = maya.OpenMaya.MTypeId( a )		
+		self.assertEqual( b.id(), 0x00110DCB )
+	
+	def testErrors( self ) :	
+	
+		self.assertRaises( RuntimeError, getattr, IECoreMaya.MayaTypeId, "NonExistentTypeId" )
+	
+	
+							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
