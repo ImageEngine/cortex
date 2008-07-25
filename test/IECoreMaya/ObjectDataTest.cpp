@@ -34,14 +34,14 @@
 
 #include <iostream>
 
-#include "EmptyTest.h"
+#include "ObjectDataTest.h"
 
 namespace IECoreMaya
 {
 
-void addEmptyTest(boost::unit_test::test_suite* test)
+void addObjectDataTest(boost::unit_test::test_suite* test)
 {
-	test->add( new EmptyTestSuite() );
+	test->add( new ObjectDataTestSuite() );
 }
 
 }

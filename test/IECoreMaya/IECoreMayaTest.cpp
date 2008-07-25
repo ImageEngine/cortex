@@ -35,6 +35,7 @@
 #include <iostream>
 
 #include "maya/MLibrary.h"
+#include "maya/MGlobal.h"
 
 #include <boost/test/test_tools.hpp>
 #include <boost/test/results_reporter.hpp>
@@ -44,7 +45,7 @@
 #include <boost/test/framework.hpp>
 #include <boost/test/detail/unit_test_parameters.hpp>
 
-#include "EmptyTest.h"
+#include "ObjectDataTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -56,18 +57,18 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 	test_suite* test = BOOST_TEST_SUITE( "IECoreMaya unit test" );
 	
 	/// \todo Try and find a way of calling MLibrary::cleanup when Boost.Test exits
-	MStatus s = MLibrary::initialize( "test", false );
+	MStatus s = MLibrary::initialize( argv[0], false );
 	if ( !s ) 
 	{
 		std::cerr << "Could not initialize Maya standalone application: " << s << std::endl;
 		exit( 1 );
         }
 	
+	MGlobal::executeCommand( "loadPlugin \"ieCore\"" );
+	
 	try
 	{
-		/// Boost.Test complaints if we don't add any tests, so add a dummy one.
-		/// \todo Remove EmptyTest and all associated files when the first concrete test has been added
-		addEmptyTest(test);
+		addObjectDataTest(test);
 	} 
 	catch ( std::exception &ex )
 	{
