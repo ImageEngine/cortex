@@ -1339,7 +1339,7 @@ if doConfigure :
 		mayaTestEnv = testEnv.Copy()
 		mayaTestEnv["ENV"]["LD_LIBRARY_PATH"] += ":" + mayaEnv.subst( ":".join( [ "./lib" ] + mayaPythonEnv["LIBPATH"] ) )
 		mayaTestEnv["ENV"]["PATH"] = mayaEnv.subst( "$MAYA_ROOT/bin:" ) + mayaEnv["ENV"]["PATH"]
-		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya"
+		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya:./test/IECoreMaya/plugins"
 		mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./mel"
 		
 		mayaPythonTestEnv = mayaTestEnv.Copy()
@@ -1360,7 +1360,7 @@ if doConfigure :
 		mayaTest = mayaTestEnv.Command( "test/IECoreMaya/results.txt", mayaTestProgram, "test/IECoreMaya/IECoreMayaTest >& test/IECoreMaya/results.txt" )
 		NoCache( mayaTest )
 		mayaTestEnv.Depends( mayaTest, [ mayaPlugin, mayaPythonModule ] )
-		coreTestEnv.Alias( "testMaya", mayaTest )
+		mayaTestEnv.Alias( "testMaya", mayaTest )
 		
 		mayaPythonExecutable = "mayapy"
 		
