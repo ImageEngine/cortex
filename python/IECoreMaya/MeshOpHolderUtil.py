@@ -349,6 +349,8 @@ def create( meshDagPath, className, classVersion, **kw):
 
 def createUI( className, classVersion, **kw ):
 
+	# \todo This below selection determination code fails with an unclear error if
+	# a mesh component is currently selected
 	selectedTransforms = cmds.ls( selection = True, type = "transform" ) or []
 	selectedTransformMeshShapes = cmds.listRelatives( selectedTransforms, type = "mesh" ) or []
 	
