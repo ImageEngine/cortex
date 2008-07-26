@@ -158,6 +158,8 @@ struct ObjectDataTest
 		BOOST_CHECK( s );
 		objectData = dynamic_cast< ObjectData * >( fnData.data() );		
 		BOOST_CHECK( objectData );		
+		BOOST_CHECK( objectData->getObject() );		
+		BOOST_CHECK( testCompoundData.get() != objectData->getObject().get() );		
 		BOOST_CHECK( testCompoundData->isEqualTo( objectData->getObject() ) );
 		
 		fs::remove( fs::path( sceneName.asChar() ) );		
@@ -182,6 +184,8 @@ struct ObjectDataTest
 		BOOST_CHECK( s );
 		objectData = dynamic_cast< ObjectData * >( fnData.data() );		
 		BOOST_CHECK( objectData );		
+		BOOST_CHECK( objectData->getObject() );
+		BOOST_CHECK( testCompoundData.get() != objectData->getObject().get() );
 		BOOST_CHECK( testCompoundData->isEqualTo( objectData->getObject() ) );
 		
 		fs::remove( fs::path( sceneName.asChar() ) );		
