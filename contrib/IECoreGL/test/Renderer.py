@@ -159,6 +159,31 @@ class TestRenderer( unittest.TestCase ) :
 				
 			r.worldEnd()
 	
+	def testOtherRendererAttributes( self ) :
+	
+		"""Attributes destined for other renderers should be silently ignored."""
+		
+		deferred = Renderer()
+		deferred.setOption( "gl:mode", StringData( "deferred" ) )
+		
+		immediate = Renderer()
+		immediate.setOption( "gl:mode", StringData( "immediate" ) )
+		
+		handler = CapturingMessageHandler()
+		Msg.pushHandler( handler )
+		
+		for r in [ deferred, immediate ] :
+		
+			r.worldBegin()
+			
+			r.setAttribute( "ri:visibility:diffuse", IntData( 0 ) )
+			
+			r.worldEnd()
+
+		Msg.popHandler()
+		
+		self.assertEqual( len( handler.messages ), 0 )
+		
 	## \todo Make this test assert something
 	def testStacks( self ) :
 	

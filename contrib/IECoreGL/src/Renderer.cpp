@@ -1046,6 +1046,10 @@ void IECoreGL::Renderer::setAttribute( const std::string &name, IECore::ConstDat
 	{
 		it->second( name, value, m_data );
 	}
+	else if( name.find_first_of( ":" )!=string::npos )
+	{
+		// prefixed for some other renderer, so we can ignore it
+	}
 	else
 	{
 		msg( Msg::Warning, "Renderer::setAttribute", boost::format( "Unsupported attribute \"%s\"." ) % name );
@@ -1059,6 +1063,11 @@ IECore::ConstDataPtr IECoreGL::Renderer::getAttribute( const std::string &name )
 	if( it!=g->end() )
 	{
 		return it->second( name, m_data );
+	}
+	else if( name.find_first_of( ":" )!=string::npos )
+	{
+		// prefixed for some other renderer, so we can ignore it
+		return 0;
 	}
 	else
 	{
