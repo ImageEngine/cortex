@@ -32,40 +32,54 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#include <cassert>
 
-namespace IECoreMaya
-{
+#include "maya/MFnPluginData.h"
 
-enum TypeId
+#include "IECoreMaya/FromMayaPluginDataPlugConverter.h"
+#include "IECoreMaya/ObjectData.h"
+
+using namespace IECoreMaya;
+using namespace IECore;
+
+FromMayaPlugConverter::Description<FromMayaPluginDataPlugConverter> FromMayaPluginDataPlugConverter::m_description( MFnData::kPlugin, Object::staticTypeId(), true );
+
+FromMayaPluginDataPlugConverter::FromMayaPluginDataPlugConverter( const MPlug &plug )
+	:	FromMayaPlugConverter( plug )
 {
+}
+
+IECore::ObjectPtr FromMayaPluginDataPlugConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+{
+	assert( operands );
+
+	MStatus s;
+	MObject data;
+	s = plug().getValue( data );
+	if ( !s )
+	{
+		return 0;
+	}
 	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	ToMayaConverterTypeId = 109014,
-	ToMayaObjectConverterTypeId = 109015,
-	ToMayaNumericDataConverterTypeId = 109016,
-	ToMayaMeshConverterTypeId = 109017,
-	ToMayaArrayDataConverterTypeId = 109018,
-	ToMayaPlugConverterTypeId = 109019,
-	FromMayaPluginDataPlugConverterTypeId = 109020,	
-	LastTypeId = 109999
-
-};
-
-} // namespace IECoreMaya
-
-#endif // IECOREMAYA_TYPEIDS_H
+	MFnPluginData fnPluginData( data, &s );
+	if ( !s )
+	{
+		return 0;
+	}
+	
+	/// If we ever support more than one type of data, we can handle them here.
+	const ObjectData *objectData = dynamic_cast< const ObjectData * >( fnPluginData.data( &s ) );
+	if ( !objectData || !s )
+	{
+		return 0;
+	}
+	
+	IECore::ConstObjectPtr object = objectData->getObject();
+	if ( !object )
+	{
+		return 0;
+	}
+	
+	assert( object );
+	return object->copy();
+}

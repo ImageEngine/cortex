@@ -32,40 +32,33 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#ifndef IE_COREMAYA_FROMMAYAPLUGINDATAPLUGCONVERTER_H
+#define IE_COREMAYA_FROMMAYAPLUGINDATAPLUGCONVERTER_H
+
+#include "IECoreMaya/FromMayaPlugConverter.h"
 
 namespace IECoreMaya
 {
 
-enum TypeId
+class FromMayaPluginDataPlugConverter : public FromMayaPlugConverter
 {
-	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	ToMayaConverterTypeId = 109014,
-	ToMayaObjectConverterTypeId = 109015,
-	ToMayaNumericDataConverterTypeId = 109016,
-	ToMayaMeshConverterTypeId = 109017,
-	ToMayaArrayDataConverterTypeId = 109018,
-	ToMayaPlugConverterTypeId = 109019,
-	FromMayaPluginDataPlugConverterTypeId = 109020,	
-	LastTypeId = 109999
 
+	public :
+	
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaPluginDataPlugConverter, FromMayaPluginDataPlugConverterTypeId, FromMayaPlugConverter );
+
+		FromMayaPluginDataPlugConverter( const MPlug &plug );
+		
+	protected :
+		
+		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
+
+	private :
+	
+		static Description<FromMayaPluginDataPlugConverter> m_description;
+		
 };
 
 } // namespace IECoreMaya
 
-#endif // IECOREMAYA_TYPEIDS_H
+#endif // IE_COREMAYA_FROMMAYAPLUGINDATAPLUGCONVERTER_H
