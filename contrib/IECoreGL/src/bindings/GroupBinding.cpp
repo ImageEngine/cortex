@@ -39,6 +39,7 @@
 #include "IECoreGL/bindings/SceneBinding.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 
@@ -66,6 +67,7 @@ void bindGroup()
 		.def( "getState", (StatePtr(Group::*)())&Group::getState )
 		.def( "addChild", &Group::addChild )
 		.def( "children", &children, "Returns a list referencing the children of the group - modifying the list has no effect on the Group." )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Group )
 	;
 
 	INTRUSIVE_PTR_PATCH( Group, GroupPyClass );
