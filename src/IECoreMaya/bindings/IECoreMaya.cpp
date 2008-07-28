@@ -61,7 +61,7 @@
 #include "IECoreMaya/bindings/ToMayaConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaPlugConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaObjectConverterBinding.h"
-#include "IECoreMaya/bindings/MayaTypeIdsBinding.h"
+#include "IECoreMaya/bindings/MayaTypeIdBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
