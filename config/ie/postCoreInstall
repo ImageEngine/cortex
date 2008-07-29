@@ -71,7 +71,8 @@ coreOps = [
 	[ "CheckImagesOp", "checkImages", "common/fileSystem" ],
 	[ "FileSequenceGraphOp", "fileSequenceGraph", "common/fileSystem" ],
 	[ "MeshPrimitiveImplicitSurfaceOp", "implicitSurface", "common/primitive/mesh" ], 	
-	[ "MeshVertexReorderOp", "vertexReorder", "common/primitive/mesh" ], 		
+	[ "MeshVertexReorderOp", "vertexReorder", "common/primitive/mesh" ],
+	[ "MeshPrimitiveShrinkWrapOp", "shrinkWrap", "common/primitive/mesh" ],	 		
 	[ "Grade", "grade", "common/colorSpace" ],
 ]
 
