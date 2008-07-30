@@ -61,6 +61,7 @@ class NameStateComponent : public StateComponent
 		virtual ~NameStateComponent();
 		
 		const std::string &name() const;
+		GLuint glName() const;
 		
 		/// Calls glLoadName().
 		virtual void bind() const;

@@ -54,6 +54,11 @@ const std::string &NameStateComponent::name() const
 {
 	return (*m_it).first.value();
 }
+
+GLuint NameStateComponent::glName() const
+{
+	return m_it->second;
+}
 			
 void NameStateComponent::bind() const
 {

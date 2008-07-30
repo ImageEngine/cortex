@@ -50,6 +50,7 @@ void bindNameStateComponent()
 	typedef class_<NameStateComponent, NameStateComponentPtr, boost::noncopyable, bases<StateComponent> > NameStateComponentPyClass;
 	NameStateComponentPyClass( "NameStateComponent", init<optional<const std::string &> >() )
 		.def( "name", &NameStateComponent::name, return_value_policy<copy_const_reference>() )
+		.def( "glName", &NameStateComponent::glName )
 		.def( "nameFromGLName", &NameStateComponent::nameFromGLName, return_value_policy<copy_const_reference>() )
 		.staticmethod( "nameFromGLName" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( NameStateComponent )
