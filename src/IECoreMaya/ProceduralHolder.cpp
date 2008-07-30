@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,12 +34,17 @@
 
 #include <boost/python.hpp>
 
+
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/BoxPrimitive.h"
 #include "IECoreGL/TypedStateComponent.h"
+#include "IECoreGL/NameStateComponent.h"
 #include "IECoreGL/State.h"
 #include "IECoreGL/Camera.h"
+#include "IECoreGL/Renderable.h"
+#include "IECoreGL/Group.h"
+#include "IECoreGL/Primitive.h"
 
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/Convert.h"
@@ -48,8 +53,17 @@
 #include "IECore/VectorOps.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/ClassData.h"
 
 #include "maya/MFnNumericAttribute.h"
+#include "maya/MFnTypedAttribute.h"
+#include "maya/MFnSingleIndexedComponent.h"
+#include "maya/MSelectionList.h"
+#include "maya/MAttributeSpec.h"
+#include "maya/MAttributeIndex.h"
+#include "maya/MAttributeSpecArray.h"
+#include "maya/MDagPath.h"
+#include "maya/MFnStringData.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -60,10 +74,31 @@ MTypeId ProceduralHolder::id = ProceduralHolderId;
 MObject ProceduralHolder::aGLPreview;
 MObject ProceduralHolder::aTransparent;
 MObject ProceduralHolder::aDrawBound;
+MObject ProceduralHolder::aProceduralComponents;
+
+struct ProceduralHolder::MemberData
+{
+	ComponentsMap m_componentsMap;		
+	ComponentToGroupMap m_componentToGroupMap;
+};
+
+static IECore::ClassData< ProceduralHolder, ProceduralHolder::MemberData > g_classData;
+
+ProceduralHolder::ComponentsMap &ProceduralHolder::componentsMap()
+{
+	return g_classData[this].m_componentsMap;
+	
+}
+		
+ProceduralHolder::ComponentToGroupMap &ProceduralHolder::componentToGroupMap()
+{
+	return g_classData[this].m_componentToGroupMap;
+}
 
 ProceduralHolder::ProceduralHolder()
 	:	m_boundDirty( true ), m_sceneDirty( true )
 {
+	g_classData.create( this );
 }
 
 ProceduralHolder::~ProceduralHolder()
@@ -87,6 +122,7 @@ MStatus ProceduralHolder::initialize()
 	assert( s );
 	
 	MFnNumericAttribute nAttr;
+	MFnTypedAttribute tAttr;
 	
 	aGLPreview = nAttr.create( "glPreview", "glpr", MFnNumericData::kBoolean, 1, &s );
 	assert( s );
@@ -121,6 +157,26 @@ MStatus ProceduralHolder::initialize()
 	s = addAttribute( aDrawBound );
 	assert( s );
 	
+	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
+	assert( defaultState );
+	assert( defaultState->isComplete() );
+	MFnStringData fnData;
+	MObject defaultValue = fnData.create( defaultState->get<const IECoreGL::NameStateComponent>()->name().c_str(), &s );
+	assert( s );
+	
+	aProceduralComponents = tAttr.create( "proceduralComponents", "prcm", MFnData::kString, defaultValue, &s );
+	assert( s );
+	tAttr.setReadable( true );
+	tAttr.setWritable( false );
+	tAttr.setStorable( false );
+	tAttr.setConnectable( true );
+	tAttr.setHidden( true );
+	tAttr.setArray( true );
+	tAttr.setUsesArrayDataBuilder( true );	
+	
+	s = addAttribute( aProceduralComponents );
+	assert( s );	
+	
 	return MS::kSuccess;
 }
 
@@ -138,10 +194,10 @@ MBoundingBox ProceduralHolder::boundingBox() const
 		
 	m_bound = MBoundingBox( MPoint( -1, -1, -1 ), MPoint( 1, 1, 1 ) );
 
-	Renderer::ProceduralPtr p = ((ProceduralHolder*)this)->getProcedural();
+	Renderer::ProceduralPtr p = const_cast<ProceduralHolder*>(this)->getProcedural();
 	if( p )
 	{
-		((ProceduralHolder*)this)->setParameterisedValues();
+		const_cast<ProceduralHolder*>(this)->setParameterisedValues();
 		try
 		{
 			Box3f b = p->bound();
@@ -154,7 +210,7 @@ MBoundingBox ProceduralHolder::boundingBox() const
 		{
 			PyErr_Print();
 		}
-		catch( IECore::Exception &e )
+		catch( std::exception &e )
 		{
 			msg( Msg::Error, "ProceduralHolder::boundingBox", e.what() );
 		}
@@ -214,6 +270,8 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 			
 			m_scene = renderer->scene();
 			m_scene->setCamera( 0 );
+			
+			buildComponents();
 		}
 		catch( boost::python::error_already_set )
 		{
@@ -232,3 +290,180 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 	m_sceneDirty = false;
 	return m_scene;
 }
+
+void ProceduralHolder::componentToPlugs( MObject &component, MSelectionList &selectionList ) const
+{
+	MStatus s;
+	
+	if ( component.hasFn( MFn::kSingleIndexedComponent ) ) 
+	{ 
+		MFnSingleIndexedComponent fnComp( component, &s ); 
+		assert( s );
+		MObject thisNode = thisMObject(); 
+		MPlug plug( thisNode, aProceduralComponents ); 
+		assert( !plug.isNull() );
+		
+		int len = fnComp.elementCount( &s ); 
+		assert( s );
+		for ( int i = 0; i < len; i++ ) 
+		{ 
+			MPlug compPlug = plug.elementByLogicalIndex( fnComp.element(i), &s ); 
+			assert( s );
+			assert( !compPlug.isNull() );
+			
+			selectionList.add( compPlug ); 
+		} 
+	} 	
+}
+
+MPxSurfaceShape::MatchResult ProceduralHolder::matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list )
+{
+	if( spec.length() == 1 )
+	{
+		MAttributeSpec attrSpec = spec[0];
+		MStatus s;
+
+		int dim = attrSpec.dimensions();
+
+		if ( (dim > 0) && (attrSpec.name() == "proceduralComponents" || attrSpec.name() == "prcm" || attrSpec.name() == "f" ) )
+		{	
+			int numComponents = componentToGroupMap().size();
+
+			MAttributeIndex attrIndex = attrSpec[0];
+			
+			if ( attrIndex.type() != MAttributeIndex::kInteger )
+			{
+				return MPxSurfaceShape::kMatchInvalidAttributeRange;
+			}
+			
+			int upper = numComponents - 1;
+			int lower = 0;
+			if ( attrIndex.hasLowerBound() )
+			{
+				attrIndex.getLower( lower );
+			}
+			if ( attrIndex.hasUpperBound() )
+			{
+				attrIndex.getUpper( upper );
+			}
+
+			// Check the attribute index range is valid
+			if ( (attrIndex.hasRange() && !attrIndex.hasValidRange() ) || (upper >= numComponents) || (lower < 0 ) )
+			{
+				return MPxSurfaceShape::kMatchInvalidAttributeRange;		
+			}
+
+			MDagPath path;
+			item.getDagPath( 0, path );
+			MFnSingleIndexedComponent fnComp;
+			MObject comp = fnComp.create( MFn::kMeshPolygonComponent, &s );
+			assert( s );
+
+			for ( int i=lower; i<=upper; i++ )
+			{
+				fnComp.addElement( i );
+			}
+			
+			list.add( path, comp );
+
+			return MPxSurfaceShape::kMatchOk;
+		}	
+	}
+
+	return MPxSurfaceShape::matchComponent( item, spec, list );	
+}
+
+void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group, MArrayDataBuilder &builder )
+{	
+	assert( nameState );
+	assert( group );
+	assert( group->getState() );				
+	
+	MStatus s;	
+	
+	IECoreGL::ConstNameStateComponentPtr ns = nameState;
+	if (  group->getState()->get< IECoreGL::NameStateComponent >() )
+	{
+		ns = group->getState()->get< IECoreGL::NameStateComponent >();
+	}
+
+	const std::string &name = ns->name();		
+	int compId = ns->glName();
+	
+	ComponentsMap::const_iterator it = componentsMap().find( name );
+	if( it == componentsMap().end() )
+	{		
+		compId = componentsMap().size();
+		componentsMap()[name] = compId;
+		
+		MFnStringData fnData;
+		MObject data = fnData.create( MString( name.c_str() ) );
+		
+		MDataHandle h = builder.addElement( compId, &s );
+		assert( s );
+
+		s = h.set( data );
+		assert( s );
+	}
+	
+	componentToGroupMap()[compId].insert( ComponentToGroupMap::mapped_type::value_type( name, group ) );
+		
+	const IECoreGL::Group::ChildContainer &children = group->children();
+	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
+	{
+		assert( *it );
+		
+		IECoreGL::GroupPtr childGroup = runTimeCast< IECoreGL::Group >( *it );		
+		if ( childGroup )
+		{		
+			buildComponents( ns, childGroup, builder );			
+		}
+	}
+}
+
+void ProceduralHolder::buildComponents()
+{
+	MStatus s;
+	MDataBlock block = forceCache();
+	
+	MArrayDataHandle cH = block.outputArrayValue( aProceduralComponents, &s );
+	assert( s );
+	
+	MArrayDataBuilder builder = cH.builder( &s );
+	assert( s );
+
+	componentsMap().clear();
+
+	componentToGroupMap().clear();
+	
+	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
+	assert( defaultState );
+	assert( defaultState->isComplete() );
+		
+	assert( m_scene );
+	assert( m_scene->root() );	
+	
+	buildComponents( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root(), builder );
+	
+	s = cH.set( builder );
+	assert( s );
+	
+#ifndef NDEBUG
+	MPlug plug( thisMObject(), aProceduralComponents );
+	for ( ComponentsMap::const_iterator it = componentsMap().begin(); it != componentsMap().end(); ++it )
+	{
+		MPlug child = plug.elementByLogicalIndex( it->second, &s );
+		assert( s );
+		MObject obj;
+		s = child.getValue( obj );
+		assert( s );
+		MFnStringData fnData( obj, &s );
+		assert( s );
+		
+		assert( fnData.string() == MString( it->first.value().c_str() ) );
+	}
+	
+#endif	
+}
+				
+

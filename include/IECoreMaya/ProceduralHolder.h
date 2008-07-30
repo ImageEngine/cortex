@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,17 +35,26 @@
 #ifndef IECOREMAYA_PROCEDURALHOLDER_H
 #define IECOREMAYA_PROCEDURALHOLDER_H
 
+#include <map>
+
+#include "IECoreGL/IECoreGL.h"
+
 #include "IECoreMaya/ParameterisedHolder.h"
 
 #include "IECore/Renderer.h"
+#include "IECore/Interned.h"
 
 #include "maya/MPxComponentShape.h"
+#include "maya/MArrayDataBuilder.h"
 
 namespace IECoreGL
 {
 IE_CORE_FORWARDDECLARE( Scene );
 IE_CORE_FORWARDDECLARE( State );
 IE_CORE_FORWARDDECLARE( BoxPrimitive );
+IE_CORE_FORWARDDECLARE( Primitive );
+IE_CORE_FORWARDDECLARE( Group );
+IE_CORE_FORWARDDECLARE( NameStateComponent );
 }
 
 namespace IECoreMaya
@@ -60,9 +69,9 @@ namespace IECoreMaya
 /// The ProceduralHolder class represents implementation of the IECore::Renderer::Procedural
 /// class, presenting the procedural parameters as maya attributes. It also draws a bounding
 /// box for the procedural in the scene.
-/// \todo Implement component selection in some useful way - this will require support from IECoreGL.
 class ProceduralHolder : public ParameterisedHolderComponentShape
 {
+	friend class ProceduralHolderUI;
 
 	public :
 	
@@ -78,7 +87,10 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		virtual bool isBounded() const;
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
-
+		
+		virtual void componentToPlugs( MObject &component, MSelectionList &selectionList ) const;
+		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
+		
 		/// Calls setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" ).
 		MStatus setProcedural( const std::string &className, int classVersion );
 		/// Returns runTimeCast<ParameterisedProcedural>( getProcedural( className, classVersion ) ). 
@@ -90,6 +102,7 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		static MObject aGLPreview;
 		static MObject aTransparent;
 		static MObject aDrawBound;
+		static MObject aProceduralComponents;
 	
 	private :
 	
@@ -100,6 +113,20 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		IECoreGL::ScenePtr m_scene;
 		/// \todo This can probably be merged with scene()
 		void updateScene();
+										
+		typedef std::map<IECore::InternedString, unsigned int> ComponentsMap;
+		typedef std::map< int, std::set< std::pair< std::string, IECoreGL::GroupPtr > > > ComponentToGroupMap;		
+		
+		ComponentsMap &componentsMap();		
+		ComponentToGroupMap &componentToGroupMap();
+		
+		void buildComponents();		
+		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group, MArrayDataBuilder &builder);
+		
+	public:
+	
+		/// \todo Move members into class on next major version change
+		struct MemberData;	
 				
 };
 

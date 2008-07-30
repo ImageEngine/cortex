@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,11 @@
 #ifndef IECOREMAYA_PROCEDURALHOLDERUI_H
 #define IECOREMAYA_PROCEDURALHOLDERUI_H
 
+#include <map>
+
 #include "IECore/Object.h"
+
+#include "IECoreMaya/ProceduralHolder.h"
 
 #include "maya/MPxSurfaceShapeUI.h"
 
@@ -43,6 +47,8 @@ namespace IECoreGL
 {
 IE_CORE_FORWARDDECLARE( State );
 IE_CORE_FORWARDDECLARE( BoxPrimitive );
+IE_CORE_FORWARDDECLARE( Group );
+IE_CORE_FORWARDDECLARE( StateComponent );
 }
 
 namespace IECoreMaya
@@ -67,7 +73,7 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 		enum DrawMode
 		{
 			SceneDrawMode,
-			BoundDrawMode
+			BoundDrawMode,
 		};
 	
 		static void setWireFrameColors( MDrawRequest &request, M3dView::DisplayStatus status );
@@ -75,6 +81,17 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 		IECoreGL::StatePtr baseState( M3dView::DisplayStyle style ) const;
 
 		IECoreGL::BoxPrimitivePtr m_boxPrimitive;
+		
+		typedef std::map< IECoreGL::Group*, IECoreGL::StatePtr > StateMap;
+				
+		void hiliteGroups( const ProceduralHolder::ComponentToGroupMap::mapped_type &groups, IECoreGL::StateComponentPtr hilite, IECoreGL::StateComponentPtr base ) const;
+		void unhiliteGroupChildren( const std::string &name, IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr base ) const;
+		void resetHilites() const;
+		
+	public :
+	
+		/// \todo Move members into class on next major version change
+		struct MemberData;
 
 };
 
