@@ -291,11 +291,11 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 			// draw the scene if asked
 			if( request.token()==SceneDrawMode )
 			{
+				resetHilites();
+			
 				IECoreGL::ConstScenePtr scene = proceduralHolder->scene();
 				if( scene )
-				{
-					resetHilites();
-				
+				{									
 					bool popTexture = false;
 					if( request.displayStyle()==M3dView::kGouraudShaded || request.displayStyle()==M3dView::kFlatShaded )
 					{
