@@ -577,8 +577,6 @@ void ProceduralHolderUI::hiliteGroups( const ProceduralHolder::ComponentToGroupM
 		}
 	
 		group->getState()->add( hilite );
-		
-		unhiliteGroupChildren( it->first, group, base );
 	}
 }
 
