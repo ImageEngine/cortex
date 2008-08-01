@@ -56,7 +56,7 @@ class State : public Bindable
 		
 		virtual ~State();
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( State, StateTypeId, IECore::RunTimeTyped );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( State, StateTypeId, Bindable );
 	
 		virtual void bind() const;
 		virtual GLbitfield mask() const;

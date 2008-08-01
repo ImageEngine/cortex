@@ -69,6 +69,7 @@ void bindScene()
 		.def( "select", &select )
 		.def( "setCamera", &Scene::setCamera )
 		.def( "getCamera", (CameraPtr (Scene::*)())&Scene::getCamera )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Scene )
 	;
 
 	INTRUSIVE_PTR_PATCH( Scene, ScenePyClass );

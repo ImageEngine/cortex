@@ -49,6 +49,8 @@ IE_CORE_FORWARDDECLARE( Camera );
 class Scene : public Renderable
 {
 	public :
+	
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Scene, SceneTypeId, Renderable );
 
 		Scene();
 		virtual ~Scene();
