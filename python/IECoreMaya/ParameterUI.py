@@ -57,11 +57,23 @@ class ParameterUI :
 	## The parameterisedHolderNode is an MObject specifying the node holding the specified IECore.Parameter.
 	# Derived class __init__ implementations should create relevant widgets in the current ui layout,
 	# and leave the parent layout unchanged on exit.
-	def __init__( self, parameterisedHolderNode, parameter ) :
+	def __init__( self, parameterisedHolderNode, parameter, **kw ) :
 
 		self.__node = parameterisedHolderNode
 		self.parameter = parameter #IECore.Parameter
-		self.__popupControl = None		
+		self.__popupControl = None
+		self._layout = None
+		
+		self.labelWithNodeName = False
+		
+		if "labelWithNodeName" in kw :
+		
+			self.labelWithNodeName = kw['labelWithNodeName']		
+			
+		self.longParameterName = parameter.name
+		if "longParameterName" in kw :
+		
+			self.longParameterName = kw['longParameterName']
 	
 	## Derived classes should override this method. The override should first call the base class method and
 	# then reconnect all created widgets to the new node/parameter. The node and parameter arguments are as
@@ -101,11 +113,26 @@ class ParameterUI :
 		
 		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
 		return str( fnPH.parameterPlug( self.parameter ).name() )
+		
+	def layout( self ) :
+	
+		return self._layout	
 	
 	## Computes a nice label for the ui.
 	def label( self ):
+	
+		if self.labelWithNodeName :
+		
+			n = self.nodeName() + "." + self.longParameterName
+			if not self.longParameterName :
+				# Top-level parameter comes through into here without a name
+				n = self.nodeName() + ".parameters"
+		
+			return IECoreMaya.mel( "interToUI(\"" + n + "\")" ).value
+		
+		else :
 
-		return IECoreMaya.mel( "interToUI(\"" + self.parameter.name + "\")" ).value
+			return IECoreMaya.mel( "interToUI(\"" + self.parameter.name + "\")" ).value
 	
 	## Computes a wrapped annotation/tooltip for the ui	
 	def description( self ):
@@ -118,7 +145,7 @@ class ParameterUI :
 		self.__popupControl = None
 	
 		if self.parameter.presetsOnly:
-			cmds.rowLayout(
+			self._layout = cmds.rowLayout(
 				numberOfColumns = 2,
 			)
 		
@@ -134,8 +161,7 @@ class ParameterUI :
 				font = "smallBoldLabelFont",
 				label = self.parameter.getCurrentPresetName(),
 				style = "iconAndTextHorizontal",
-				height = 23 #\ todo
-			
+				height = 23 #\ todo			
 			)
 			
 			self.addPopupMenu( attributeName = self.plugName() )
@@ -147,6 +173,20 @@ class ParameterUI :
 		else:
 		
 			return False
+	
+	@staticmethod		
+	def _defaultDragCallback( dragControl, x, y, modifiers, **kw ):
+
+		# Pass the dictionary of arguments as a string so that it can be captured and eval'ed in the drop callback
+		return [ 'ParameterUI', repr( kw ) ]	
+		
+	def addDragCallback( self, ctrl, **kw ) :
+		
+		maya.cmds.control(
+			ctrl,
+			edit = True,
+			dragCallback = IECore.curry( ParameterUI._defaultDragCallback, nodeName = self.nodeName(), layoutName = self.layout(), **kw )
+		)
 			
 	def addPopupMenu( self, **kw ):
 	
@@ -379,8 +419,8 @@ class ParameterUI :
 	# The node may either be specified as an OpenMaya.MObject or as
 	# a string or unicode object representing the node name.	
 	@staticmethod		
-	def create( parameterisedHolderNode, parameter ) :
-
+	def create( parameterisedHolderNode, parameter, **kw ) :
+	
 		if not isinstance( parameterisedHolderNode, maya.OpenMaya.MObject ) :
 			parameterisedHolderNode = IECoreMaya.StringUtil.dependencyNodeFromString( parameterisedHolderNode )
 	
@@ -397,8 +437,13 @@ class ParameterUI :
 			# \todo Issue a warning
 			return None
 		
+		if 'longParameterName' in kw and len( kw['longParameterName'] ) :
+			kw['longParameterName'] += "." + parameter.name
+		else :
+			kw['longParameterName'] = parameter.name	
+		
 		handlerType = ParameterUI.handlers[ (parameter.typeId(), uiTypeHint) ]
-		parameterUI = handlerType( parameterisedHolderNode, parameter)
+		parameterUI = handlerType( parameterisedHolderNode, parameter, **kw )
 		
 		return parameterUI
 
@@ -407,9 +452,9 @@ class ParameterUI :
 		
 class CompoundParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter ) :
+	def __init__( self, node, parameter, **kw  ) :
 	
-		ParameterUI.__init__( self, node, parameter )
+		ParameterUI.__init__( self, node, parameter, **kw )
 		
 		visible = True
 		try:
@@ -424,29 +469,33 @@ class CompoundParameterUI( ParameterUI ) :
 		self.__childUIsLayout = None		
 		self.__childUIs = {}
 		
-		self.__layoutName = None
+		self._layout = None
 		
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 		
-		if parameter.isSame( fnPH.getParameterised()[0].parameters() ) :
-			self.__layoutName = cmds.columnLayout()
-			self.__createChildUIs()
+		withCompoundFrame = False
+		if 'withCompoundFrame' in kw :
+			withCompoundFrame = kw['withCompoundFrame']
+				
+		if not withCompoundFrame and parameter.isSame( fnPH.getParameterised()[0].parameters() ) :
+			self._layout = cmds.columnLayout()
+			self.__createChildUIs( **kw )
 			cmds.setParent("..")
 		else:
 			# \todo Retrieve the "collapsed" state
 			collapsed = True
 		
-			self.__layoutName = cmds.frameLayout( 
+			self._layout = cmds.frameLayout( 
 				label = self.label(),
 				borderVisible = False,
-				preExpandCommand = self.__createChildUIs,
+				preExpandCommand = IECore.curry( self.__createChildUIs, **kw),
 				collapseCommand = self.__collapse,
 				collapsable = True,
-				collapse = collapsed
+				collapse = collapsed,				
 			)
 				
 			if not collapsed:
-				self.__createChildUIs()
+				self.__createChildUIs( **kw )
 			
 			cmds.setParent("..")
 		
@@ -463,10 +512,10 @@ class CompoundParameterUI( ParameterUI ) :
 			ui.replace( node, p )
 	
 	def __collapse(self):
-		# \todo Store collapsed state of self.__layoutName
+		# \todo Store collapsed state of self._layout
 		pass
 
-	def __createChildUIs(self):
+	def __createChildUIs(self, **kw):
 	
 		# this is the most common entry point into the ui
 		# creation code, and unfortunately it's called from
@@ -478,17 +527,44 @@ class CompoundParameterUI( ParameterUI ) :
 		
 			if self.__childUIsLayout:
 				return
+				
+			kw['labelWithNodeName'] = False	
 
-			# \todo Store collapsed state of self.__layoutName
+			# \todo Store collapsed state of self._layout
 
 			cmds.setUITemplate(
 				"attributeEditorTemplate",
 				pushTemplate = True
 			)
 
-			self.__childUIsLayout = cmds.columnLayout( parent = self.__layoutName )
+			self.__childUIsLayout = cmds.columnLayout( 
+				parent = self._layout,
+				width = 381
+			)
+			
+			draggable = False
+			try:
+				draggable = self.parameter.userData()['UI']['draggable'].value
+			except :
+				pass
+			
+			if draggable :
+			
+				cmds.rowLayout(
+					numberOfColumns = 2,
+					columnWidth2 = ( 361, 20 )
 
-			for pName in self.parameter.keys():
+				)
+
+				cmds.text( label = "" )
+
+				dragIcon = cmds.iconTextStaticLabel(					
+					image = "pick.xpm",
+					height = 20
+				)
+				self.addDragCallback( dragIcon, **kw )			
+						
+			for pName in self.parameter.keys():							
 				
 				p = self.parameter[pName]
 				
@@ -499,7 +575,9 @@ class CompoundParameterUI( ParameterUI ) :
 					pass
 
 				if visible:
-					ui = ParameterUI.create( self.node(), p )
+					cmds.setParent( self.__childUIsLayout )
+				
+					ui = ParameterUI.create( self.node(), p, **kw )
 
 					if ui:			
 						self.__childUIs[pName] = ui
@@ -515,12 +593,13 @@ class CompoundParameterUI( ParameterUI ) :
 		
 			IECore.msg( IECore.Msg.Level.Error, "ParameterUI", traceback.format_exc() )
 
+
 class BoolParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter ):
-		ParameterUI.__init__( self, node, parameter )
+	def __init__( self, node, parameter, **kw ):
+		ParameterUI.__init__( self, node, parameter, **kw )
 		
-		cmds.rowLayout(
+		self._layout = cmds.rowLayout(
 			numberOfColumns = 2,
 			columnWidth2 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex * 3 ]
 		)
@@ -528,11 +607,11 @@ class BoolParameterUI( ParameterUI ) :
 		cmds.text(
 			label = "",
 		)
-		
+				
 		self.__checkBox = cmds.checkBox(
 			annotation = self.description(),			
 			label = self.label(),
-			align = "left"
+			align = "left",
 		)
 		
 		cmds.connectControl( self.__checkBox, self.plugName() )
@@ -549,14 +628,14 @@ class BoolParameterUI( ParameterUI ) :
 
 class StringParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter ):
-		ParameterUI.__init__( self, node, parameter )
+	def __init__( self, node, parameter, **kw ):
+		ParameterUI.__init__( self, node, parameter, **kw )
 		
 		self.__textField = None
 		if self.presetsOnly():
 			return	
 		
-		cmds.rowLayout(
+		self._layout = cmds.rowLayout(
 			numberOfColumns = 2,			
 		)
 		
@@ -586,14 +665,14 @@ class StringParameterUI( ParameterUI ) :
 
 class PathParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter ):
-		ParameterUI.__init__( self, node, parameter )
+	def __init__( self, node, parameter, **kw ):
+		ParameterUI.__init__( self, node, parameter, **kw )
 		
 		self.__textField = None
 		if self.presetsOnly():
 			return	
 		
-		cmds.rowLayout(
+		self._layout = cmds.rowLayout(
 			numberOfColumns = 3,
 			columnWidth3 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex * 3, 26 ]			
 		)
@@ -636,9 +715,9 @@ class PathParameterUI( ParameterUI ) :
 
 class FileNameParameterUI( PathParameterUI ) :	
 
-	def __init__( self, node, parameter ):
+	def __init__( self, node, parameter, **kw ):
 	
-		PathParameterUI.__init__( self, node, parameter )				
+		PathParameterUI.__init__( self, node, parameter, **kw )				
 			
 	def openDialog( self ) :
 	
@@ -653,9 +732,9 @@ class FileNameParameterUI( PathParameterUI ) :
 
 class DirNameParameterUI( PathParameterUI ) :	
 
-	def __init__( self, node, parameter ):
+	def __init__( self, node, parameter, **kw ):
 	
-		PathParameterUI.__init__( self, node, parameter )				
+		PathParameterUI.__init__( self, node, parameter, **kw )				
 			
 	def openDialog( self ) :
 	
@@ -670,9 +749,9 @@ class DirNameParameterUI( PathParameterUI ) :
 
 class FileSequenceParameterUI( PathParameterUI ) :					
 
-	def __init__( self, node, parameter ):
+	def __init__( self, node, parameter, **kw ):
 	
-		PathParameterUI.__init__( self, node, parameter )
+		PathParameterUI.__init__( self, node, parameter, **kw )
 			
 	def openDialog( self ) :
 	
@@ -698,9 +777,9 @@ class FileSequenceParameterUI( PathParameterUI ) :
 # \todo Get rid of this once kiwiRenderer and the cache nodes uses FileSequenceParameter instead.
 class CachePathPrefixParameterUI( PathParameterUI ) :
 
-	def __init__( self, node, parameter ):
+	def __init__( self, node, parameter, **kw ):
 	
-		PathParameterUI.__init__( self, node, parameter )
+		PathParameterUI.__init__( self, node, parameter, **kw )
 
 	def openDialog( self ):
 
@@ -725,8 +804,8 @@ class CachePathPrefixParameterUI( PathParameterUI ) :
 
 class NumericParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter ):
-		ParameterUI.__init__( self, node, parameter )
+	def __init__( self, node, parameter, **kw ):
+		ParameterUI.__init__( self, node, parameter, **kw )
 		
 		self.__field = None
 		self.__slider = None
@@ -737,14 +816,14 @@ class NumericParameterUI( ParameterUI ) :
 
 		if parameter.hasMinValue() and parameter.hasMaxValue():
 		
-			cmds.rowLayout(
+			self._layout = cmds.rowLayout(
 				numberOfColumns = 3,
 				columnWidth3 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex, ParameterUI.sliderWidgetWidthIndex ]
 			)
 			
 		else:
 		
-			cmds.rowLayout(
+			self._layout = cmds.rowLayout(
 				numberOfColumns = 2,
 				columnWidth2 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex ]
 			)
@@ -823,8 +902,8 @@ class NumericParameterUI( ParameterUI ) :
 
 class VectorParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter ):
-		ParameterUI.__init__( self, node, parameter )
+	def __init__( self, node, parameter, **kw ):
+		ParameterUI.__init__( self, node, parameter, **kw )
 		
 		self.__fields = []		
 		
@@ -834,12 +913,12 @@ class VectorParameterUI( ParameterUI ) :
 		self.__dim = parameter.getTypedValue().dimensions()
 
 		if self.__dim == 2:
-			cmds.rowLayout(
+			self._layout = cmds.rowLayout(
 				numberOfColumns = 3,
 				columnWidth3 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex, ParameterUI.singleWidgetWidthIndex ]
 			)
 		elif self.__dim == 3:
-			cmds.rowLayout(
+			self._layout = cmds.rowLayout(
 				numberOfColumns = 4,
 				columnWidth4 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex, ParameterUI.singleWidgetWidthIndex, ParameterUI.singleWidgetWidthIndex ]
 			)
@@ -887,8 +966,8 @@ class VectorParameterUI( ParameterUI ) :
 				
 class ColorParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter ):
-		ParameterUI.__init__( self, node, parameter )
+	def __init__( self, node, parameter, **kw ):
+		ParameterUI.__init__( self, node, parameter, **kw )
 		
 		self.__canvas = None
 		
@@ -903,6 +982,8 @@ class ColorParameterUI( ParameterUI ) :
 			attribute = self.plugName(),
 			showButton = False 
 		)
+		
+		self._layout = self.__colorSlider
 		
 		self.addPopupMenu( attributeName = self.plugName() )		
 					
@@ -919,9 +1000,9 @@ class ColorParameterUI( ParameterUI ) :
 
 class BoxParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter ) :
+	def __init__( self, node, parameter, **kw ) :
 	
-		ParameterUI.__init__( self, node, parameter )
+		ParameterUI.__init__( self, node, parameter, **kw )
 		
 		self.__fields = []		
 		
@@ -930,7 +1011,7 @@ class BoxParameterUI( ParameterUI ) :
 									
 		self.__dim = parameter.getTypedValue().dimensions()		
 		
-		cmds.columnLayout()
+		self._layout = cmds.columnLayout()
 				
 		plug = self.plug()				
 		for childIndex in range( 0, 2 ) :
