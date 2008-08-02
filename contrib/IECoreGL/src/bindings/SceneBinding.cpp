@@ -41,6 +41,7 @@
 #include "IECoreGL/bindings/SceneBinding.h"
 
 #include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 
