@@ -189,6 +189,12 @@ __dataTypesConversionDict = {
 
 	IECore.TransformationMatrixfData: ( IECore.TransformationMatrixf, True ),
 	IECore.TransformationMatrixdData: ( IECore.TransformationMatrixd, True ),
+	
+	IECore.SplineffData: ( IECore.Splineff, True ),
+	IECore.SplineddData: ( IECore.Splinedd, True ),
+	IECore.SplinefColor3fData: ( IECore.SplinefColor3f, True ),
+	IECore.SplinefColor4fData: ( IECore.SplinefColor4f, True ),
+
 }
 
 ## Function that returns a list of Data derived classes.
