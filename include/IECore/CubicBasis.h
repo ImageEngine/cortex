@@ -56,9 +56,13 @@ class CubicBasis
 		
 		template<class S>
 		inline void coefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const;
+		template<class S>
+		inline void coefficients( S t, S c[4] ) const;
 		
 		template<class S>
 		inline S operator() ( typename S::BaseType t, const S &p0, const S &p1, const S &p2, const S &p3 ) const;
+		template<class S>
+		inline S operator() ( typename S::BaseType t, const S p[4] ) const;
 		
 		bool operator==( const CubicBasis &rhs ) const;
 		bool operator!=( const CubicBasis &rhs ) const;

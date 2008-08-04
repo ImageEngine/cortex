@@ -60,6 +60,13 @@ inline void CubicBasis<T>::coefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const
 
 template<typename T>
 template<class S>
+inline void CubicBasis<T>::coefficients( S t, S c[4] ) const
+{
+	coefficients( t, c[0], c[1], c[2], c[3] );
+}
+		
+template<typename T>
+template<class S>
 inline S CubicBasis<T>::operator() ( typename S::BaseType t, const S &p0, const S &p1, const S &p2, const S &p3 ) const
 {
 	typename S::BaseType c0, c1, c2, c3;
@@ -67,7 +74,13 @@ inline S CubicBasis<T>::operator() ( typename S::BaseType t, const S &p0, const 
 	return c0 * p0 + c1 * p1 + c2 * p2 + c3 * p3;
 }
 
-
+template<typename T>
+template<class S>
+inline S CubicBasis<T>::operator() ( typename S::BaseType t, const S p[4] ) const
+{
+	return operator()<S>( t, p[0], p[1], p[2], p[3] );
+}
+		
 template<typename T>
 bool CubicBasis<T>::operator==( const CubicBasis &rhs ) const
 {
