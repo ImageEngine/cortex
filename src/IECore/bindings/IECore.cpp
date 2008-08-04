@@ -188,6 +188,8 @@
 #include "IECore/bindings/MedianCutSamplerBinding.h"
 #include "IECore/bindings/EnvMapSamplerBinding.h"
 #include "IECore/bindings/MeshVertexReorderOpBinding.h"
+#include "IECore/bindings/SplineBinding.h"
+#include "IECore/bindings/SplineDataBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -360,7 +362,9 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindGrade();
 	bindMedianCutSampler();	
 	bindEnvMapSampler();
-	bindMeshVertexReorderOp();	
+	bindMeshVertexReorderOp();
+	bindSpline();
+	bindSplineData();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

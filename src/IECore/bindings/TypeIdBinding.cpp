@@ -270,6 +270,14 @@ void bindTypeId()
 		.value("MedianCutSampler", MedianCutSamplerTypeId )
 		.value("EnvMapSampler", EnvMapSamplerTypeId )
 		.value("MeshVertexReorderOp", MeshVertexReorderOpTypeId )
+		.value("SplineffData", SplineffDataTypeId )
+		.value("SplineddData", SplineddDataTypeId )
+		.value("SplinefColor3fData", SplinefColor3fDataTypeId )
+		.value("SplinefColor4fData", SplinefColor4fDataTypeId )
+		.value("SplineffParameter", SplineffParameterTypeId )
+		.value("SplineddParameter", SplineddParameterTypeId )
+		.value("SplinefColor3fParameter", SplinefColor3fParameterTypeId )
+		.value("SplinefColor4fParameter", SplinefColor4fParameterTypeId )
 	;
 }
 

@@ -155,6 +155,8 @@ from MedianCutSamplerTest import *
 from EnvMapSamplerTest import *
 from RandomTest import *
 from MeshVertexReorderOpTest import *
+from SplineTest import *
+from SplineDataTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

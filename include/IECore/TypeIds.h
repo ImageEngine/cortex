@@ -272,6 +272,14 @@ enum TypeId
 	MedianCutSamplerTypeId = 229,
 	EnvMapSamplerTypeId = 230,
 	MeshVertexReorderOpTypeId = 231,
+	SplineffDataTypeId = 232,
+	SplineddDataTypeId = 233,
+	SplinefColor3fDataTypeId = 234,
+	SplinefColor4fDataTypeId = 235,
+	SplineffParameterTypeId = 236,
+	SplineddParameterTypeId = 237,
+	SplinefColor3fParameterTypeId = 238,
+	SplinefColor4fParameterTypeId = 239,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
