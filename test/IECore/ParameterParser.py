@@ -234,6 +234,16 @@ class testParameterParser( unittest.TestCase ) :
 			parameters,
 		)
 		
+	def testEvalParsing( self ) :
+		
+		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
+		a = l.load( "maths/multiply" )()
+
+		p = a.parameters()
+		IECore.ParameterParser().parse( ["-a", "python:IECore.IntData( 20 )", "-b", "30" ], p )
+		self.assertEqual( p.a.getValue(), IECore.IntData( 20 ) )		
+		self.assertEqual( a(), IECore.IntData( 600 ) )
+		
 	#def testQuotingOnStringParameters( self ):
 
 	#	a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()

@@ -110,7 +110,7 @@ class ParameterParser :
 				del args[0]
 			
 			# or if it's asking us to read a value from a file, in which case we
-			# also don't need a special parser	
+			# also don't need a special parser
 			elif args[0].startswith( "read:" ) :
 			
 				fileName = args[0][5:]
@@ -119,6 +119,15 @@ class ParameterParser :
 					raise RuntimeError( "Unable to create reader for file \"%s\"." % fileName )
 					
 				p.setValidatedValue( r.read() )
+				del args[0]
+			
+			# or if it's asking us to evaluate a python string to create a value,
+			# in which case we also don't need a special parser
+			elif args[0].startswith( "python:" ) :
+			
+				toEval = args[0][7:]
+				r = eval( toEval )
+				p.setValidatedValue( r )
 				del args[0]
 			
 			# otherwise we're gonna need a specialised parser	
