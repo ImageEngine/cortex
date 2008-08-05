@@ -67,6 +67,10 @@ class TestTriangulateOp( unittest.TestCase ) :
 		fv.append( 7 )
 		fv.append( 8 )		
 		m["fv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, fv )
+		
+		u = FloatVectorData()
+		u.append( 1.0 )
+		m["u"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, u )
 								
 		op = TriangulateOp()
 		
@@ -75,6 +79,8 @@ class TestTriangulateOp( unittest.TestCase ) :
 		)
 		
 		self.assert_( "P" in result )
+		
+		self.assert_( result.arePrimitiveVariablesValid() )
 
 		resultP = result["P"].data
 		
@@ -96,6 +102,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 		
 		for i in fv.data:
 			self.assert_( i >= 5 and i <= 8 )
+			
 		
 	def testQuadrangulatedSphere( self ) :
 		""" Test TriangulateOp with a quadrangulated poly sphere"""	
@@ -110,6 +117,8 @@ class TestTriangulateOp( unittest.TestCase ) :
 		result = op(			
 			input = m
 		)
+		
+		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		self.assert_( "P" in result )
 
@@ -138,6 +147,8 @@ class TestTriangulateOp( unittest.TestCase ) :
 		result = op(			
 			input = m
 		)
+				
+		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		# As input was already triangulated, the result should be exactly the same
 		self.assertEqual( m, result )
@@ -241,7 +252,9 @@ class TestTriangulateOp( unittest.TestCase ) :
 		m["constantScalar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) )
 		m["constantArray"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, StringVectorData( [ "one", "two" ] ) )
 		
-		TriangulateOp()( input = m )	
+		result = TriangulateOp()( input = m )	
+		self.assert_( result.arePrimitiveVariablesValid() )
+
 
 if __name__ == "__main__":
     unittest.main()   

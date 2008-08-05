@@ -39,6 +39,7 @@
 #include "IECore/TriangleAlgo.h"
 #include "IECore/Exception.h"
 #include "IECore/CompoundParameter.h"
+#include "IECore/Writer.h"
 
 using namespace IECore;
 
@@ -138,6 +139,8 @@ struct TriangulateOp::TriangulateFn
 	ReturnType operator()( typename T::Ptr p )
 	{
 		typedef typename T::ValueType::value_type Vec;
+		
+		MeshPrimitivePtr meshCopy = m_mesh->copy();
 	
 		ConstIntVectorDataPtr verticesPerFace = m_mesh->verticesPerFace();
 		ConstIntVectorDataPtr vertexIds = m_mesh->vertexIds();
@@ -149,8 +152,10 @@ struct TriangulateOp::TriangulateFn
 		newVerticesPerFace->writable().reserve( verticesPerFace->readable().size() );
 
 		std::vector<int> faceVaryingIndices;
+		std::vector<int> uniformIndices;
 		int faceVertexIdStart = 0;
-		for ( IntVectorData::ValueType::const_iterator it = verticesPerFace->readable().begin(); it != verticesPerFace->readable().end(); ++it )
+		int faceIdx = 0;
+		for ( IntVectorData::ValueType::const_iterator it = verticesPerFace->readable().begin(); it != verticesPerFace->readable().end(); ++it, ++faceIdx )
 		{
 			int numFaceVerts = *it;
 
@@ -249,6 +254,8 @@ struct TriangulateOp::TriangulateFn
 					faceVaryingIndices.push_back( i0 );
 					faceVaryingIndices.push_back( i1 );
 					faceVaryingIndices.push_back( i2 );
+					
+					uniformIndices.push_back( faceIdx );
 				}
 			}
 			else
@@ -270,6 +277,8 @@ struct TriangulateOp::TriangulateFn
 				faceVaryingIndices.push_back( i0 );
 				faceVaryingIndices.push_back( i1 );
 				faceVaryingIndices.push_back( i2 );
+				
+				uniformIndices.push_back( faceIdx );				
 			}
 
 			faceVertexIdStart += numFaceVerts;
@@ -279,17 +288,30 @@ struct TriangulateOp::TriangulateFn
 
 		/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.
 		assert( faceVaryingIndices.size() == newVertexIds->readable().size() );
-		TriangleDataRemap func( faceVaryingIndices );
+		TriangleDataRemap varyingRemap( faceVaryingIndices );
+		TriangleDataRemap uniformRemap( uniformIndices );
 		for ( PrimitiveVariableMap::iterator it = m_mesh->variables.begin(); it != m_mesh->variables.end(); ++it )
 		{
 			if ( it->second.interpolation == PrimitiveVariable::FaceVarying )
 			{
  				assert( it->second.data );
-				func.m_other = it->second.data;
+				varyingRemap.m_other = it->second.data;
 				DataPtr data = it->second.data->copy();
 
-				size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data, func );
+				size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data, varyingRemap );
 				assert( primVarSize == faceVaryingIndices.size() );
+				(void)primVarSize;
+
+				it->second.data = data;
+			}
+			else if ( it->second.interpolation == PrimitiveVariable::Uniform )
+			{
+ 				assert( it->second.data );
+				uniformRemap.m_other = it->second.data;
+				DataPtr data = it->second.data->copy();
+
+				size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data, uniformRemap );
+				assert( primVarSize == uniformIndices.size() );
 				(void)primVarSize;
 
 				it->second.data = data;
