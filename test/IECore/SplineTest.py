@@ -156,6 +156,26 @@ class SplineTest( unittest.TestCase ) :
 				
 				self.assertAlmostEqual( yy, y, 3 )
 
+	def testRepr( self ) :
+	
+		s = IECore.Splineff()
+		s[0] = 10
+		s[1] = 20
+		s[2] = 40
+		s[10] = 50
+
+		ss = eval( repr( s ) )
+		self.assertEqual( s, ss )
+		
+		s = IECore.SplinefColor3f()
+		s[0] = IECore.Color3f( 1, 0, 0 )
+		s[1] = IECore.Color3f( 0, 1, 0 )
+		s[2] = IECore.Color3f( 1, 1, 0 )
+		s[10] = IECore.Color3f( 0, 0, 1 )
+
+		ss = eval( repr( s ) )
+		self.assertEqual( s, ss )
+		
 if __name__ == "__main__":
     unittest.main()   
 

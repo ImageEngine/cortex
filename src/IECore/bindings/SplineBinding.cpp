@@ -37,6 +37,7 @@
 #include <boost/python.hpp>
 
 #include "IECore/bindings/SplineBinding.h"
+#include "IECore/bindings/IECoreBinding.h"
 #include "IECore/Spline.h"
 
 using namespace boost::python;
@@ -45,6 +46,34 @@ using namespace std;
 
 namespace IECore 
 {
+
+#define REPR_SPECIALISATION( TYPE )																		\
+template<>																								\
+string repr<TYPE>( TYPE &x )																			\
+{																										\
+	stringstream s;																						\
+	s << "IECore." << #TYPE << "( ";																	\
+	s << repr( x.basis ) << ", ";																		\
+	s << "(";																							\
+	int i = 0;																							\
+	int l = x.points.size();																			\
+	TYPE::PointContainer::iterator it;																	\
+	for( it=x.points.begin(); it!=x.points.end(); it++, i++ )											\
+	{																									\
+		s << " ( " << it->first << ", " << repr( it->second ) << " )";									\
+		if( i!=l-1 )																					\
+		{																								\
+			s << ",";																					\
+		}																								\
+	}																									\
+	s << " ) )";																						\
+	return s.str();																						\
+}																										\
+
+REPR_SPECIALISATION( Splineff )
+REPR_SPECIALISATION( Splinedd )
+REPR_SPECIALISATION( SplinefColor3f )
+REPR_SPECIALISATION( SplinefColor4f )
 
 template<typename T>
 static T *construct( const typename T::Basis &basis, object o )
@@ -174,6 +203,7 @@ void bindSpline( const char *name )
 		.def( "__call__", &T::operator() )
 		.def( self==self )
 		.def( self!=self )
+		.def( "__repr__", &repr<T> )
 	;
 }
 
