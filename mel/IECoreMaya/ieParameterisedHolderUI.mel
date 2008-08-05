@@ -156,6 +156,10 @@ global proc ieParameterisedHolderUIClassControlVersionCallback( string $node, st
 	string $class = ieParameterisedHolderClassName( $node );
 	string $sp = ieParameterisedHolderClassSearchPathEnvVar( $node );
 	ieParameterisedHolderSetParameterised( $node, $class, $versionInt, $sp );
+	
+	/// Now update the Attribute Editor. This needs to be deferred as it seems Maya doesn't
+	/// appreciate us doing this right in the middle of a menu callback.
+	evalDeferred( "AEbuildControls()" );
 }
 
 global proc ieParameterisedHolderUIExtraAttributesControl()
