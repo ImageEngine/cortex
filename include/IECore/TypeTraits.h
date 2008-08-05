@@ -195,7 +195,7 @@ BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsNumericSimpleTypedData<char> >::value
 template< typename T > struct IsNumericTypedData : boost::mpl::or_< IsNumericSimpleTypedData<T>, IsNumericVectorTypedData<T> > {};
 
 /// IsSpline
-template<typename T, typename E = void > struct IsSpline : public boost::false_type {};
+template<typename T, typename U = void > struct IsSpline : public boost::false_type {};
 template<typename T, typename U> struct IsSpline< Spline<T, U> > : public boost::true_type {};
 BOOST_STATIC_ASSERT( (IsSpline< Spline<float, float> >::value) );
 BOOST_STATIC_ASSERT( (boost::mpl::not_< IsSpline< Imath::V2f > >::value) );
