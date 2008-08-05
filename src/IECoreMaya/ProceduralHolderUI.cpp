@@ -568,11 +568,13 @@ void ProceduralHolderUI::hiliteGroups( const ProceduralHolder::ComponentToGroupM
 		
 	for( ProceduralHolder::ComponentToGroupMap::mapped_type::const_iterator it = groups.begin(); it != groups.end(); ++it )
 	{
-		IECoreGL::GroupPtr group = it->second;		
+		IECoreGL::GroupPtr group = it->second;
+		assert( group );		
 
 		if ( m_stateMap.find( group.get() ) == m_stateMap.end() )
 		{
-			IECoreGL::StatePtr oldState = new IECoreGL::State( *(group->getState()) );		
+			IECoreGL::StatePtr oldState = new IECoreGL::State( *(group->getState()) );
+			assert( oldState );		
 			m_stateMap[ group.get() ] = oldState;
 		}
 	
@@ -593,7 +595,8 @@ void ProceduralHolderUI::unhiliteGroupChildren( const std::string &name, IECoreG
 	{
 		if ( m_stateMap.find( group.get() ) == m_stateMap.end() )
 		{
-			IECoreGL::StatePtr oldState = new IECoreGL::State( *(group->getState()) );		
+			IECoreGL::StatePtr oldState = new IECoreGL::State( *(group->getState()) );
+			assert( oldState );		
 			m_stateMap[ group.get() ] = oldState;
 		}
 
