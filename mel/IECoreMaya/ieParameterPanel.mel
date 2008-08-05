@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,19 +31,54 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+	   	   	   
+if (!`scriptedPanelType -exists ieParameterPanel`) 
+{
+	scriptedPanelType
+		-createCallback		"ieParameterPanelCreate" 
+		-initCallback		"ieParameterPanelInit"
+		-addCallback		"ieParameterPanelAdd"
+		-removeCallback		"ieParameterPanelRemove"
+		-deleteCallback		"ieParameterPanelDelete"
+		-saveStateCallback	"ieParameterPanelSave"
+		-retainOnFileOpen 0
+		-unique 0
+		ieParameterPanel;
+}
 
-/// \defgroup melgroup MEL
-///
-/// The core maya library comes with associated MEL files providing useful utility
-/// functions and additional API related to the C++ nodes.
+global proc ieParameterPanelCreate(string $whichPanel)
+{	
+	iePython -command ("import IECoreMaya; IECoreMaya.ParameterPanel.create('" + $whichPanel + "')");	
+}
 
-source "IECoreMaya/ieParameterisedHolder.mel";
-source "IECoreMaya/ieProceduralHolder.mel";
-source "IECoreMaya/ieNode.mel";
-source "IECoreMaya/ieAttr.mel";
+global proc ieParameterPanelInit(string $whichPanel)
+{	
+	iePython -command ("import IECoreMaya; IECoreMaya.ParameterPanel.init('" + $whichPanel + "')");		
+}
 
-source "IECoreMaya/ieParameterisedHolderUI.mel";
-source "IECoreMaya/ieProceduralHolderUI.mel";
-source "IECoreMaya/ieOpHolderUI.mel";
-source "IECoreMaya/ieConverterHolderUI.mel";
-source "IECoreMaya/ieParameterPanel.mel";
+global proc ieParameterPanelAdd(string $whichPanel)
+{	
+	iePython -command ("import IECoreMaya; IECoreMaya.ParameterPanel.add('" + $whichPanel + "')");			
+}
+
+global proc ieParameterPanelRemove(string $whichPanel)
+{	
+	iePython -command ("import IECoreMaya; IECoreMaya.ParameterPanel.remove('" + $whichPanel + "')");			
+}
+
+global proc ieParameterPanelDelete(string $whichPanel)
+{	
+	iePython -command ("import IECoreMaya; IECoreMaya.ParameterPanel.delete('" + $whichPanel + "')");			
+}
+
+global proc string ieParameterPanelSave(string $whichPanel)
+{	
+	iePython -command ("import IECoreMaya");
+	string $s = `iePython -eval ("IECoreMaya.ParameterPanel.save('" + $whichPanel + "')")`;
+	return $s;
+}
+
+global proc ieParameterPanelRestore(string $whichPanel, string $restoreData)
+{
+	iePython -command ("import IECoreMaya; IECoreMaya.ParameterPanel.restore('" + $whichPanel + "', \"" + $restoreData + "\")");
+}	

@@ -50,3 +50,4 @@ from TransientParameterisedHolderNode import TransientParameterisedHolderNode
 from FnConverterHolder import FnConverterHolder
 from StringUtil import *
 from MayaTypeId import MayaTypeId
+from ParameterPanel import ParameterPanel
