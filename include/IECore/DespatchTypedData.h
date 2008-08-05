@@ -45,9 +45,7 @@
 #include "boost/format.hpp"
 
 #include "IECore/Exception.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/TransformationMatrixData.h"
+#include "IECore/Data.h"
 
 namespace IECore
 {

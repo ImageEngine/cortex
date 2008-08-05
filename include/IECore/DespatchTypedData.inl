@@ -37,6 +37,10 @@
 
 #include "IECore/TypeTraits.h"
 #include "IECore/PrimitiveVariable.h"
+#include "IECore/VectorTypedData.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TransformationMatrixData.h"
+#include "IECore/SplineData.h"
 
 namespace IECore
 {
@@ -247,6 +251,22 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 			return
 			typename Detail::DespatchTypedData< Functor, QuatdData, ErrorHandler >
 			::template Func<Enabler>()( boost::static_pointer_cast<QuatdData>( data ), functor, errorHandler );
+		case SplineffDataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, SplineffData, ErrorHandler >
+			::template Func<Enabler>()( boost::static_pointer_cast<SplineffData>( data ), functor, errorHandler );
+		case SplineddDataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, SplineddData, ErrorHandler >
+			::template Func<Enabler>()( boost::static_pointer_cast<SplineddData>( data ), functor, errorHandler );
+		case SplinefColor3fDataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, SplinefColor3fData, ErrorHandler >
+			::template Func<Enabler>()( boost::static_pointer_cast<SplinefColor3fData>( data ), functor, errorHandler );
+		case SplinefColor4fDataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, SplinefColor4fData, ErrorHandler >
+			::template Func<Enabler>()( boost::static_pointer_cast<SplinefColor4fData>( data ), functor, errorHandler );	
 		case FloatVectorDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, FloatVectorData, ErrorHandler >
