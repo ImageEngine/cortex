@@ -58,7 +58,11 @@ std::string str( T &x );
 /// implementations should be in a richer form than
 /// the str() implementations - the motivation here is
 /// to return as much useful information as possible to
-/// a python programmer.
+/// a python programmer. Ideally repr() should return a
+/// string which, when passed to eval() in python, will
+/// recreate the object. Names in this string should be
+/// fully qualified with the module prefix - e.g. "IECore.V2f( 1, 2 )".
+/// \todo Ensure all implementations follow this convention.
 template<typename T>
 std::string repr( T &x );
 

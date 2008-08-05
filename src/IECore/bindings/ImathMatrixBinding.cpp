@@ -288,7 +288,7 @@ template<>																								\
 string repr<TYPE>( TYPE &x )																			\
 {																										\
 	stringstream s;																						\
-	s << #TYPE << "( ";																					\
+	s << "IECore." << #TYPE << "( ";																	\
 	for( int i=0; i<D; i++ )																			\
 	{																									\
 		for( int j=0; j<D; j++ )																		\
