@@ -47,6 +47,8 @@
 #include "IECore/HalfTypeTraits.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/Spline.h"
+#include "IECore/SplineData.h"
 
 #include "OpenEXR/ImathMatrix.h"
 
@@ -191,6 +193,20 @@ BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsNumericSimpleTypedData<char> >::value
 
 /// IsNumericTypedData
 template< typename T > struct IsNumericTypedData : boost::mpl::or_< IsNumericSimpleTypedData<T>, IsNumericVectorTypedData<T> > {};
+
+/// IsSpline
+template<typename T, typename E = void > struct IsSpline : public boost::false_type {};
+template<typename T, typename U> struct IsSpline< Spline<T, U> > : public boost::true_type {};
+BOOST_STATIC_ASSERT( (IsSpline< Spline<float, float> >::value) );
+BOOST_STATIC_ASSERT( (boost::mpl::not_< IsSpline< Imath::V2f > >::value) );
+
+/// IsSplineTypedData
+template< typename T > struct IsSplineTypedData : boost::mpl::and_< IsTypedData<T>, IsSpline< typename ValueType<T>::type > > {};
+BOOST_STATIC_ASSERT( (IsSplineTypedData<SplineffData>::value) );
+BOOST_STATIC_ASSERT( (IsSplineTypedData<SplineddData>::value) );
+BOOST_STATIC_ASSERT( (IsSplineTypedData<SplinefColor3fData>::value) );
+BOOST_STATIC_ASSERT( (boost::mpl::not_< IsSplineTypedData< Imath::V2f > >::value) );
+BOOST_STATIC_ASSERT( (boost::mpl::not_< IsSplineTypedData< FloatData > >::value) );
 
 } // namespace TypeTraits
 
