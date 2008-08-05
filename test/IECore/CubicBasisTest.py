@@ -116,6 +116,14 @@ class CubicTest( unittest.TestCase ) :
 		self.assertEqual( CubicBasisf.bezier(), CubicBasisf.bezier() )
 		self.assertNotEqual( CubicBasisf.linear(), CubicBasisf.bezier() )
 	
+	def testRepr( self ) :
+	
+		import IECore
+	
+		b = IECore.CubicBasisf.bezier()
+		bb = eval( repr( b ) )
+		self.assertEqual( b, bb )
+	
 if __name__ == "__main__":
     unittest.main()   
 

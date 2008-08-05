@@ -37,6 +37,7 @@
 #include <boost/python.hpp>
 
 #include "IECore/bindings/CubicBasisBinding.h"
+#include "IECore/bindings/IECoreBinding.h"
 #include "IECore/CubicBasis.h"
 
 using namespace boost::python;
@@ -45,6 +46,20 @@ using namespace std;
 
 namespace IECore 
 {
+
+#define REPR_SPECIALISATION( TYPE )																		\
+template<>																								\
+string repr<TYPE>( TYPE &x )																			\
+{																										\
+	stringstream s;																						\
+	s << "IECore." << #TYPE << "( ";																	\
+	s << repr( x.matrix ) << ", " << x.step ;															\
+	s << " )";																							\
+	return s.str();																						\
+}																										\
+
+REPR_SPECIALISATION( CubicBasisf )
+REPR_SPECIALISATION( CubicBasisd )
 
 template<typename T>
 static tuple coefficients( const T &b, typename T::BaseType t )
@@ -71,6 +86,7 @@ void bindCubicBasis( const char *name )
 		.def( "bezier", &T::bezier, return_value_policy<copy_const_reference>() ).staticmethod( "bezier" )
 		.def( "bSpline", &T::bSpline, return_value_policy<copy_const_reference>() ).staticmethod( "bSpline" )
 		.def( "catmullRom", &T::catmullRom, return_value_policy<copy_const_reference>() ).staticmethod( "catmullRom" )
+		.def( "__repr__", &repr<T> )
 	;
 }
 
