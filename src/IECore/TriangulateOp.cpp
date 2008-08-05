@@ -39,7 +39,6 @@
 #include "IECore/TriangleAlgo.h"
 #include "IECore/Exception.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/Writer.h"
 
 using namespace IECore;
 
