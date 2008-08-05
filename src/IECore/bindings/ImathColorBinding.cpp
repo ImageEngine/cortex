@@ -84,7 +84,7 @@ template<>												\
 std::string repr<COL>( COL &x )							\
 {														\
 	std::stringstream s;								\
-	s << #COL << "( ";									\
+	s << "IECore." << #COL << "( ";						\
 	for( unsigned i=0; i<COL::dimensions(); i++ )		\
 	{													\
 		s << x[i];										\
