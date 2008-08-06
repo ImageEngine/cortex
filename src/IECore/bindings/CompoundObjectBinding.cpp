@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,8 @@
 
 #include <boost/python.hpp>
 
+#include <sstream>
+
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
@@ -44,7 +46,53 @@ using std::string;
 using namespace boost;
 using namespace boost::python;
 
-namespace IECore {
+namespace IECore
+{
+
+static std::string repr( CompoundObject &o )
+{	
+	std::stringstream s;
+
+	s << "IECore." << o.typeName() << "(";		
+
+	bool added = false;
+	for (
+		CompoundObject::ObjectMap::const_iterator it = o.members().begin(); it != o.members().end(); ++it )
+	{
+		const std::string &key = it->first;
+
+		object item( it->second );
+
+		if ( item.attr( "__repr__" ) != object() )
+		{
+			std::string v = call_method< std::string >( item.ptr(), "__repr__" );
+
+			if ( !added )
+			{
+				added = true;
+				s << "{";	
+			}
+			else
+			{
+				s << ",";
+			}
+
+			s << "'";
+			s << key;
+			s << "':";
+			s << v;					
+		}
+	}
+
+	if ( added )
+	{
+		s << "}";
+	}
+
+	s << ")";
+
+	return s.str();
+}
 
 static unsigned int len( const CompoundObject &o )
 {
@@ -186,6 +234,7 @@ void bindCompoundObject()
 
 	CompoundObjectPyClass ( "CompoundObject" )
 		.def("__init__", make_constructor(&compoundObjectConstructor), "Copy constructor that accepts a python dict containing Object instances.")
+		.def( "__repr__", &repr )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
 		.def( "__setitem__", &setItem )

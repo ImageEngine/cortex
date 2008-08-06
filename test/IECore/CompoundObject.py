@@ -92,6 +92,22 @@ class testCompoundObject( unittest.TestCase ) :
 		self.assertEqual( o["c"], IECore.CompoundObject( { "d" : IECore.IntData( 3 ) } ) )
 		self.assertEqual( o["c"]["d"], IECore.IntData( 3 ) )
 		
+	def testRepr(self):
+		"""Test repr"""			
+		
+		v1 = IECore.CompoundObject( {
+				"a" : IECore.IntData( 1 ),
+				"b" : IECore.IntData( 2 ),
+				"c" : {
+					"d" : IECore.IntData( 3 )
+				}
+			}
+		)
+		
+		r1 = repr(v1)
+		
+		self.assertEqual( eval(repr(v1)), v1 )		
+		
 if __name__ == "__main__":
         unittest.main()
 
