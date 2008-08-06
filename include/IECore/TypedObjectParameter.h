@@ -111,6 +111,7 @@ typedef TypedObjectParameter<Primitive> PrimitiveParameter;
 typedef TypedObjectParameter<ImagePrimitive> ImagePrimitiveParameter;
 typedef TypedObjectParameter<MeshPrimitive> MeshPrimitiveParameter;
 typedef TypedObjectParameter<PointsPrimitive> PointsPrimitiveParameter;
+typedef TypedObjectParameter<CompoundObject> CompoundObjectParameter;
 
 
 IE_CORE_DECLAREPTR( MeshPrimitiveParameter );
@@ -128,6 +129,7 @@ IE_CORE_DECLAREPTR( PrimitiveParameter );
 IE_CORE_DECLAREPTR( ImagePrimitiveParameter );
 IE_CORE_DECLAREPTR( MeshPrimitiveParameter );
 IE_CORE_DECLAREPTR( PointsPrimitiveParameter );
+IE_CORE_DECLAREPTR( CompoundObjectParameter );
 
 } // namespace IECore
 

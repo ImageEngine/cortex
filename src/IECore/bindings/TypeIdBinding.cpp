@@ -278,6 +278,7 @@ void bindTypeId()
 		.value("SplineddParameter", SplineddParameterTypeId )
 		.value("SplinefColor3fParameter", SplinefColor3fParameterTypeId )
 		.value("SplinefColor4fParameter", SplinefColor4fParameterTypeId )
+		.value("CompoundObjectParameter", CompoundObjectParameterTypeId )		
 	;
 }
 

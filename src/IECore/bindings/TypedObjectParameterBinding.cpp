@@ -131,6 +131,7 @@ void bindTypedObjectParameter()
 	bindTypedObjectParameter<ImagePrimitive>( "ImagePrimitiveParameter" );
 	bindTypedObjectParameter<MeshPrimitive>( "MeshPrimitiveParameter" );
 	bindTypedObjectParameter<PointsPrimitive>( "PointsPrimitiveParameter" );	
+	bindTypedObjectParameter<CompoundObject>( "CompoundObjectParameter" );		
 }
 
 } // namespace IECore
