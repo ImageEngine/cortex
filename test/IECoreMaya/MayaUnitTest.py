@@ -36,6 +36,9 @@ import os
 import sys
 import unittest
 
+# \todo Move the MayaUnitTest functionality into IECoreMaya proper, that way
+# it can be accessed from other modules
+
 class SplitStream :
 
 	def __init__( self ) :
