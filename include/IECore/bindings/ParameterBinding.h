@@ -81,7 +81,7 @@ Parameter::PresetsMap parameterPresetsFromDict( const boost::python::dict &prese
 	{																				\
 		if( override f = this->get_override( "valueValid" ) )								\
 		{																			\
-			boost::python::tuple r = f( const_pointer_cast<Object>( value ) );		\
+			boost::python::tuple r = f( boost::const_pointer_cast<Object>( value ) );		\
 			if( reason )															\
 			{																		\
 				*reason = extract<std::string>( r[1] );								\
