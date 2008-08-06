@@ -37,28 +37,28 @@
 import os
 import math
 import unittest
-from IECore import *
+import IECore
 
 class CompoundDataTest(unittest.TestCase):
 
 	def testConstructors(self):
 		"""Test constructors"""
-		v1 = CompoundData()
+		v1 = IECore.CompoundData()
 		a = dict()
-		a["1"] = IntData(1)
-		v3 = CompoundData(a)
+		a["1"] = IECore.IntData(1)
+		v3 = IECore.CompoundData(a)
 		self.assertEqual(v3.size(), 1)
 		
 	def testResize(self):
 		"""Test resizing"""
-		v = CompoundData()
-		v["0"] = FloatData(2)
-		self.assertEqual(v["0"], FloatData(2))
-		v["1"] = FloatData(0)
-		v["2"] = FloatData(3)
-		v["3"] = FloatData(2)
-		v["4"] = FloatData(5)
-		self.assertEqual(v["4"], FloatData(5))
+		v = IECore.CompoundData()
+		v["0"] = IECore.FloatData(2)
+		self.assertEqual(v["0"], IECore.FloatData(2))
+		v["1"] = IECore.FloatData(0)
+		v["2"] = IECore.FloatData(3)
+		v["3"] = IECore.FloatData(2)
+		v["4"] = IECore.FloatData(5)
+		self.assertEqual(v["4"], IECore.FloatData(5))
 		self.assertEqual(len(v), 5)
 		del(v["0"])
 		self.assertEqual(len(v), 4)
@@ -68,9 +68,9 @@ class CompoundDataTest(unittest.TestCase):
 		
 	def testAssignment(self):
 		"""Test assignment"""
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
 		v2 = v1.copy()
 		v3 = v1
 		v4 = v1.copy()
@@ -83,111 +83,111 @@ class CompoundDataTest(unittest.TestCase):
 		
 	def testCopyOnWrite(self):
 		"""Test copy-on-write behavior"""
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
 		v2 = v1.copy()
 		v3 = v1.copy()
-		v3["0"] = UIntData(5)
-		self.assert_(v3["0"] == UIntData(5))
-		self.assert_(v2["0"] == FloatData(1.2))
-		v1["2"] = FloatData(5);
+		v3["0"] = IECore.UIntData(5)
+		self.assert_(v3["0"] == IECore.UIntData(5))
+		self.assert_(v2["0"] == IECore.FloatData(1.2))
+		v1["2"] = IECore.FloatData(5);
 		self.assertEqual(len(v1), 3)
 		self.assertEqual(len(v2), 2)
 		
 	def testSearch(self):
 		"""Test search functions"""
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
-		v1["2"] = FloatData(3)
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
+		v1["2"] = IECore.FloatData(3)
 		self.assert_("0" in v1)
 		self.assert_("3" not in v1)
 		self.assert_(v1.has_key("1"))
 		self.assert_(not v1.has_key("3"))
-		self.assert_(v1.get("0") == FloatData(1.2))
-		self.assert_(v1.get("0", IntData(10)) == FloatData(1.2))
-		self.assert_(v1.get("xx", IntData(10)) == IntData(10))
+		self.assert_(v1.get("0") == IECore.FloatData(1.2))
+		self.assert_(v1.get("0", IECore.IntData(10)) == IECore.FloatData(1.2))
+		self.assert_(v1.get("xx", IECore.IntData(10)) == IECore.IntData(10))
 		self.assertEqual(len(v1), 3)
 		
 	def testUpdate(self):
 		"""Test update function"""
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
-		v1["2"] = FloatData(3)
-		v2 = CompoundData()
-		v2["0"] = UIntData(5)
-		v2["3"] = UIntData(6)
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
+		v1["2"] = IECore.FloatData(3)
+		v2 = IECore.CompoundData()
+		v2["0"] = IECore.UIntData(5)
+		v2["3"] = IECore.UIntData(6)
 		v2.update(v1)
 		self.assertEqual(len(v2), 4)
-		self.assert_(v2["0"] == FloatData(1.2))
-		self.assert_(v2["3"] == UIntData(6))
+		self.assert_(v2["0"] == IECore.FloatData(1.2))
+		self.assert_(v2["3"] == IECore.UIntData(6))
 		v3 = dict()
-		v3["1"] = CharData("a")
-		v3["4"] = UCharData(9)
+		v3["1"] = IECore.CharData("a")
+		v3["4"] = IECore.UCharData(9)
 		v2.update(v3)
 		self.assertEqual(len(v2), 5)
-		self.assert_(v2["1"] == CharData("a"))
-		self.assert_(v2["4"] == UCharData(9))
+		self.assert_(v2["1"] == IECore.CharData("a"))
+		self.assert_(v2["4"] == IECore.UCharData(9))
 	
 	def testSetDefault(self):
 		"""Test setdefault function"""
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
-		v1["2"] = FloatData(3)
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
+		v1["2"] = IECore.FloatData(3)
 		v2 = v1.copy()
 		self.assertEqual(len(v1), 3)
-		self.assert_(v1.setdefault("2", UIntData(10)) == FloatData(3))
+		self.assert_(v1.setdefault("2", IECore.UIntData(10)) == IECore.FloatData(3))
 		self.assertEqual(len(v1), 3)
-		self.assert_(v1.setdefault("x", UIntData(10)) == UIntData(10))
+		self.assert_(v1.setdefault("x", IECore.UIntData(10)) == IECore.UIntData(10))
 		self.assertEqual(len(v1), 4)
 	
 	def testPop(self):
 		"""Test pop functions"""
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
-		v1["2"] = FloatData(3)
-		v1["3"] = FloatData(4)
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
+		v1["2"] = IECore.FloatData(3)
+		v1["3"] = IECore.FloatData(4)
 		self.assertEqual(len(v1), 4)
 		prev = v1.popitem()
 		self.assertEqual(len(v1), 3)
-		self.assert_(prev == ('0', FloatData(1.2)))
-		self.assert_(v1.pop("x", UIntData(10)) == UIntData(10))
-		self.assert_(v1.pop("3", UIntData(10)) == FloatData(4))
+		self.assert_(prev == ('0', IECore.FloatData(1.2)))
+		self.assert_(v1.pop("x", IECore.UIntData(10)) == IECore.UIntData(10))
+		self.assert_(v1.pop("3", IECore.UIntData(10)) == IECore.FloatData(4))
 		self.assertEqual(len(v1), 2)
 		
 	def testKeyValues(self):
 		"""Test keys/values listing"""
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
-		v1["2"] = FloatData(3)
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
+		v1["2"] = IECore.FloatData(3)
 		self.assert_(v1.keys() == ['0', '1', '2'])
 		vals = v1.values()
-		self.assert_(vals == [FloatData(1.2), FloatData(2.3), FloatData(3)])
+		self.assert_(vals == [IECore.FloatData(1.2), IECore.FloatData(2.3), IECore.FloatData(3)])
 		items = v1.items()
-		self.assert_(items == [('0', FloatData(1.2)), ('1', FloatData(2.3)), ('2', FloatData(3))])
+		self.assert_(items == [('0', IECore.FloatData(1.2)), ('1', IECore.FloatData(2.3)), ('2', IECore.FloatData(3))])
 
 	def testEquality(self):
 		"""Test equality function"""
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
-		v1["2"] = FloatData(3)
-		v2 = CompoundData()
-		v2["0"] = FloatData(1.2)
-		v2["1"] = FloatData(2.3)
-		v2["2"] = FloatData(3)
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
+		v1["2"] = IECore.FloatData(3)
+		v2 = IECore.CompoundData()
+		v2["0"] = IECore.FloatData(1.2)
+		v2["1"] = IECore.FloatData(2.3)
+		v2["2"] = IECore.FloatData(3)
 		v3 = v2.copy()
 		del v3["2"]
 		self.assert_(v1 == v2)
 		self.assert_(not v1 != v2)
 		self.assert_(not v1 == v3)
 		self.assert_(not v2 == v3)
-		v2["-1"] = FloatData(6)
+		v2["-1"] = IECore.FloatData(6)
 		self.assert_(v1 != v2)
 		self.assert_(not v1 == v2)
 		del(v1["2"])
@@ -195,58 +195,58 @@ class CompoundDataTest(unittest.TestCase):
 	
 	def testByValueItem(self):
 		"""Test by value return type"""
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
-		v1["2"] = FloatData(3)
-		self.assert_(v1["0"] == FloatData(1.2))
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
+		v1["2"] = IECore.FloatData(3)
+		self.assert_(v1["0"] == IECore.FloatData(1.2))
 		a = v1["0"]
-		a = UIntData(255)
-		self.assert_(v1["0"] == FloatData(1.2))
-		self.assert_(a == UIntData(255))
+		a = IECore.UIntData(255)
+		self.assert_(v1["0"] == IECore.FloatData(1.2))
+		self.assert_(a == IECore.UIntData(255))
 		
 	def testLoadSave(self):
 		"""Test load/save"""	
 		
-		iface = IndexedIOInterface.create( "test/CompoundData.fio", "/", IndexedIOOpenMode.Write )
+		iface = IECore.IndexedIOInterface.create( "test/CompoundData.fio", "/", IECore.IndexedIOOpenMode.Write )
 		
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
-		v1["2"] = FloatData(3)
-		v1["some:data"] = FloatData(3)		
-		self.assert_(v1["0"] == FloatData(1.2))
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
+		v1["2"] = IECore.FloatData(3)
+		v1["some:data"] = IECore.FloatData(3)		
+		self.assert_(v1["0"] == IECore.FloatData(1.2))
 
 		v1.save( iface, "test" )
 
-		v2 = Object.load( iface, "test" )	
+		v2 = IECore.Object.load( iface, "test" )	
 		self.assertEqual( v1, v2 )
 		
 	def testRepr(self):
 		"""Test repr"""			
 		
-		v1 = CompoundData()
+		v1 = IECore.CompoundData()
 		
 		r1 = repr(v1)
 		
 		self.assertEqual( eval(repr(v1)), v1 )
 		
-		v1 = CompoundData()
-		v1["0"] = FloatData(1.2)
-		v1["1"] = FloatData(2.3)
-		v1["2"] = FloatData(3)
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.FloatData(1.2)
+		v1["1"] = IECore.FloatData(2.3)
+		v1["2"] = IECore.FloatData(3)
 		
 		self.assertEqual( eval(repr(v1)), v1 )
 		
-		v1 = CompoundData()
-		v1["0"] = StringData( "test" )
-		v1["1"] = CompoundData(
-			{ "0" : StringData( "test" ),
-			  "1" : M33fData() 
+		v1 = IECore.CompoundData()
+		v1["0"] = IECore.StringData( "test" )
+		v1["1"] = IECore.CompoundData(
+			{ "0" : IECore.StringData( "test" ),
+			  "1" : IECore.M33fData() 
 			}
 		)
-		v1["someMoreData"] = V3fVectorData()
-		v1["A"] = Color4fVectorData()		
+		v1["someMoreData"] = IECore.V3fVectorData()
+		v1["A"] = IECore.Color4fVectorData()
 		
 		self.assertEqual( eval(repr(v1)), v1 )
 		

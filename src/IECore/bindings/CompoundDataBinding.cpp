@@ -33,6 +33,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+
+#include <sstream>
+
 #include "boost/python/list.hpp"
 #include "boost/python/tuple.hpp"
 #include "boost/python/dict.hpp"
@@ -423,8 +426,10 @@ class CompoundTypedDataFunctions
 		}
 		
 		static std::string repr( TypedData< Container > &x )
-		{		
-			std::string r = x.typeName() + "(";		
+		{	
+			std::stringstream s;
+			
+			s << "IECore." << x.typeName() << "(";
 		
 			bool added = false;
 			for (
@@ -443,28 +448,28 @@ class CompoundTypedDataFunctions
 					if ( !added )
 					{
 						added = true;
-						r += "{";	
+						s << "{";	
 					}
 					else
 					{
-						r += ",";
+						s << ",";
 					}
 					
-					r += "'";
-					r += key;
-					r += "':";
-					r += v;					
+					s << "'";
+					s << key;
+					s << "':";
+					s << v;							
 				}
 			}
 		
 			if ( added )
 			{
-				r += "}";
+				s << "}";
 			}
 		
-			r += ")";
+			s << ")";
 			
-			return r;
+			return s.str();
 		}
 
 	protected:

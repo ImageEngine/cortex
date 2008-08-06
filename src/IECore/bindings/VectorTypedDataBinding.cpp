@@ -82,7 +82,7 @@ template<>
 std::string repr<BoolVectorData>( BoolVectorData &x )					
 {																		
 	std::stringstream s;												
-	s << x.typeName() << "( [ ";										
+	s << "IECore." << x.typeName() << "( [ ";										
 	const std::vector<bool> &xd = x.readable();	
 	for( size_t i=0; i<xd.size(); i++ )									
 	{	

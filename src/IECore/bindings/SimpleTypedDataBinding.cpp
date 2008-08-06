@@ -204,7 +204,7 @@ template<>																								\
 string repr<TypedData<TYPE> >( TypedData<TYPE> &x )														\
 {																										\
 	stringstream s;																						\
-	s << x.typeName() << "( " << repr( const_cast<TYPE &>( x.readable() ) ) << " )";					\
+	s << "IECore." << x.typeName() << "( " << repr( const_cast<TYPE &>( x.readable() ) ) << " )";					\
 	return s.str();																						\
 }																										\
 																										\

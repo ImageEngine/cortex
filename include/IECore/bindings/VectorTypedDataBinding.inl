@@ -617,7 +617,7 @@ template<>																								\
 std::string repr<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &x )					\
 {																										\
 	std::stringstream s;																				\
-	s << x.typeName() << "( [ ";																		\
+	s << "IECore." << x.typeName() << "( [ ";																		\
 	const TypedData<std::vector<TYPE> >::ValueType &xd = x.readable();									\
 	for( size_t i=0; i<xd.size(); i++ )																	\
 	{																									\

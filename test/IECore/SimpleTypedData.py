@@ -58,7 +58,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( IntData() ), "0" )
-		self.assertEqual( repr( IntData() ), "IntData( 0 )" )
+		self.assertEqual( repr( IntData() ), "IECore.IntData( 0 )" )
 
 	def testUIntData(self):
 		"""Test UIntData"""
@@ -76,7 +76,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( UIntData() ), "0" )
-		self.assertEqual( repr( UIntData() ), "UIntData( 0 )" )
+		self.assertEqual( repr( UIntData() ), "IECore.UIntData( 0 )" )
 
 	def testFloatData(self):
 		"""Test FloatData"""
@@ -94,7 +94,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( FloatData() ), "0" )
-		self.assertEqual( repr( FloatData() ), "FloatData( 0 )" )
+		self.assertEqual( repr( FloatData() ), "IECore.FloatData( 0 )" )
 
 	def testDoubleData(self):
 		"""Test DoubleData"""
@@ -112,7 +112,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( DoubleData() ), "0" )
-		self.assertEqual( repr( DoubleData() ), "DoubleData( 0 )" )
+		self.assertEqual( repr( DoubleData() ), "IECore.DoubleData( 0 )" )
 		
 	def testCharData(self):
 		"""Test CharData"""
@@ -129,7 +129,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( CharData() ), "0" )
-		self.assertEqual( repr( CharData() ), "CharData( 0 )" )
+		self.assertEqual( repr( CharData() ), "IECore.CharData( 0 )" )
 
 	def testUCharData(self):
 		"""Test UCharData"""
@@ -147,7 +147,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( UCharData() ), "0" )
-		self.assertEqual( repr( UCharData() ), "UCharData( 0 )" )
+		self.assertEqual( repr( UCharData() ), "IECore.UCharData( 0 )" )
 		
 	def testHalfData(self):
 		"""Test HalfData"""
@@ -165,7 +165,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( HalfData() ), "0" )
-		self.assertEqual( repr( HalfData() ), "HalfData( 0 )" )
+		self.assertEqual( repr( HalfData() ), "IECore.HalfData( 0 )" )
 		
 	def testShortData(self):
 		"""Test ShortData"""
@@ -183,7 +183,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( ShortData() ), "0" )
-		self.assertEqual( repr( ShortData() ), "ShortData( 0 )" )
+		self.assertEqual( repr( ShortData() ), "IECore.ShortData( 0 )" )
 		
 	def testUShortData(self):
 		"""Test UShortData"""
@@ -201,7 +201,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( UShortData() ), "0" )
-		self.assertEqual( repr( UShortData() ), "UShortData( 0 )" )
+		self.assertEqual( repr( UShortData() ), "IECore.UShortData( 0 )" )
 		
 	def testInt64Data(self):
 		"""Test Int64Data"""
@@ -219,7 +219,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( Int64Data() ), "0" )
-		self.assertEqual( repr( Int64Data() ), "Int64Data( 0 )" )
+		self.assertEqual( repr( Int64Data() ), "IECore.Int64Data( 0 )" )
 		
 	def testUInt64Data(self):
 		"""Test UInt64Data"""
@@ -237,7 +237,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( UInt64Data() ), "0" )
-		self.assertEqual( repr( UInt64Data() ), "UInt64Data( 0 )" )		
+		self.assertEqual( repr( UInt64Data() ), "IECore.UInt64Data( 0 )" )		
 		
 			
 		
@@ -257,7 +257,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		
 			v = vt( 10 )
 			self.assertEqual( " ".join( ["10"] * vt.dimensions() ), str( t( v ) ) )
-			self.assertEqual( t.__name__ + "( " + vt.__name__ + "( " + ", ".join( ["10"] * vt.dimensions() ) + " ) )", repr( t( v ) ) )
+			self.assertEqual( "IECore." + t.__name__ + "( " + "IECore." + vt.__name__ + "( " + ", ".join( ["10"] * vt.dimensions() ) + " ) )", repr( t( v ) ) )
 			
 			for i in range( 0, 1000 ) :
 				v = vt( random.uniform( -100, 100 ) )
@@ -280,9 +280,9 @@ class SimpleTypedDataTest(unittest.TestCase):
 			v = vt( 1 )
 			b = bt( v, v )
 			self.assertEqual( " ".join( ["1"]*vt.dimensions()*2 ), str( t( b ) ) )
-			vr = vt.__name__ + "( " + ", ".join( ["1"]*vt.dimensions() ) + " )"
-			br = bt.__name__ + "( " + vr + ", " + vr + " )"
-			self.assertEqual( t.__name__ + "( " + br + " )", repr( t( b ) ) )
+			vr = "IECore." + vt.__name__ + "( " + ", ".join( ["1"]*vt.dimensions() ) + " )"
+			br = "IECore." + bt.__name__ + "( " + vr + ", " + vr + " )"
+			self.assertEqual( "IECore." + t.__name__ + "( " + br + " )", repr( t( b ) ) )
 			
 			for i in range( 0, 1000 ) :
 			

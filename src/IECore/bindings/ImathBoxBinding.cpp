@@ -81,7 +81,7 @@ template<>												\
 std::string repr<BOX>( BOX &x )							\
 {														\
 	std::stringstream s;								\
-	s << #BOX << "( ";									\
+	s << "IECore." << #BOX << "( ";									\
 	s << repr( x.min ) << ", ";							\
 	s << repr( x.max );									\
 	s << " )";											\

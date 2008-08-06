@@ -1172,22 +1172,22 @@ class TestVectorDataStrRepr( unittest.TestCase ) :
 		l = [ V3f( 2 ), V3f( 4 ), V3f( 5 ) ]
 		d = V3fVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
-		self.assertEqual( "V3fVectorData( [ " + ", ".join( [repr( x ) for x in l] ) + " ] )", repr( d ) )
+		self.assertEqual( "IECore.V3fVectorData( [ " + ", ".join( [repr( x ) for x in l] ) + " ] )", repr( d ) )
 		
 		l = [ "one", "two", "three" ]
 		d = StringVectorData( l )
 		self.assertEqual( " ".join( l ), str( d ) )
-		self.assertEqual( "StringVectorData( [ " + ", ".join( ["\""+x+"\"" for x in l] ) + " ] )", repr( d ) )
+		self.assertEqual( "IECore.StringVectorData( [ " + ", ".join( ["\""+x+"\"" for x in l] ) + " ] )", repr( d ) )
 		
 		l = [ 1, 2, 3 ]
 		d = IntVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
-		self.assertEqual( "IntVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
+		self.assertEqual( "IECore.IntVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
 		
 		l = [ 1, 2, 3 ]
 		d = ShortVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
-		self.assertEqual( "ShortVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
+		self.assertEqual( "IECore.ShortVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
 	
 if __name__ == "__main__":
     unittest.main()   

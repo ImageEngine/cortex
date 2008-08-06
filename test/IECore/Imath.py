@@ -1129,7 +1129,7 @@ class ImathEulerfTest( unittest.TestCase ) :
 		"""Test Eulerf repr"""	
 		
 		e = Eulerf()
-		self.assertEqual( repr(e), "Eulerf( 0, 0, 0 )" )
+		self.assertEqual( repr(e), "IECore.Eulerf( 0, 0, 0 )" )
 		
 	def testSimpleXYZRotation(self):
 	
