@@ -280,7 +280,7 @@ enum TypeId
 	SplineddParameterTypeId = 237,
 	SplinefColor3fParameterTypeId = 238,
 	SplinefColor4fParameterTypeId = 239,
-	CompoundObjectParameterTypeId = 239,	
+	CompoundObjectParameterTypeId = 240,	
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
