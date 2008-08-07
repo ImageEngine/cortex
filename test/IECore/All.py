@@ -157,6 +157,7 @@ from RandomTest import *
 from MeshVertexReorderOpTest import *
 from SplineTest import *
 from SplineDataTest import *
+from TypeIdTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
