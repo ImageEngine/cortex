@@ -52,6 +52,7 @@ def registerTypeId( className, typeId ) :
 		
 	# register the new type id
 	setattr( IECore.TypeId, className, IECore.TypeId( typeId ) )
+	IECore.TypeId.values[ typeId ] = className
 
 ## This function adds the necessary function definitions to a python
 # class for it to properly implement the RunTimeTyped interface. It should
