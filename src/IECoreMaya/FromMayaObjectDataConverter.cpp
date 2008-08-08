@@ -32,40 +32,44 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreMaya/FromMayaObjectDataConverter.h"
+#include "IECoreMaya/Convert.h"
+#include "IECoreMaya/ObjectData.h"
 
 #include "maya/MFnPluginData.h"
-
-#include "IECoreMaya/FromMayaPluginDataPlugConverter.h"
-#include "IECoreMaya/FromMayaObjectDataConverter.h"
 
 using namespace IECoreMaya;
 using namespace IECore;
 
-FromMayaPlugConverter::Description<FromMayaPluginDataPlugConverter> FromMayaPluginDataPlugConverter::m_description( MFnData::kPlugin, Object::staticTypeId(), true );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaObjectDataConverter> FromMayaObjectDataConverter::g_description( MFn::kPluginData, Object::staticTypeId() );
 
-FromMayaPluginDataPlugConverter::FromMayaPluginDataPlugConverter( const MPlug &plug )
-	:	FromMayaPlugConverter( plug )
+FromMayaObjectDataConverter::FromMayaObjectDataConverter( const MObject &object )
+	:	FromMayaObjectConverter( "FromMayaObjectDataConverter", "Converts IECoreMaya::ObjectData to an IECore::Object.", object )
 {
 }
-
-IECore::ObjectPtr FromMayaPluginDataPlugConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+		
+ObjectPtr FromMayaObjectDataConverter::doConversion( const MObject &obj, ConstCompoundObjectPtr operands ) const
 {
-	assert( operands );
-
 	MStatus s;
-	MObject data;
-	s = plug().getValue( data );
+	MFnPluginData fnPluginData( obj, &s );
 	if ( !s )
 	{
 		return 0;
 	}
 	
-	FromMayaObjectConverterPtr c = FromMayaObjectConverter::create( data );
-	if ( !c )
+	/// If we ever support more than one type of data, we can handle them here.
+	const ObjectData *objectData = dynamic_cast< const ObjectData * >( fnPluginData.data( &s ) );
+	if ( !objectData || !s )
 	{
 		return 0;
 	}
 	
-	return c->convert();
+	ConstObjectPtr object = objectData->getObject();
+	if ( !object )
+	{
+		return 0;
+	}
+	
+	assert( object );
+	return object->copy();	
 }

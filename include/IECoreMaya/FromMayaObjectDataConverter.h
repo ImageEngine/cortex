@@ -32,40 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#ifndef IECOREMAYA_FROMMAYAOBJECTDATACONVERTER_H
+#define IECOREMAYA_FROMMAYAOBJECTDATACONVERTER_H
 
-#include "maya/MFnPluginData.h"
+#include "IECoreMaya/FromMayaObjectConverter.h"
 
-#include "IECoreMaya/FromMayaPluginDataPlugConverter.h"
-#include "IECoreMaya/FromMayaObjectDataConverter.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/TransformationMatrixData.h"
 
-using namespace IECoreMaya;
-using namespace IECore;
-
-FromMayaPlugConverter::Description<FromMayaPluginDataPlugConverter> FromMayaPluginDataPlugConverter::m_description( MFnData::kPlugin, Object::staticTypeId(), true );
-
-FromMayaPluginDataPlugConverter::FromMayaPluginDataPlugConverter( const MPlug &plug )
-	:	FromMayaPlugConverter( plug )
+namespace IECoreMaya
 {
-}
 
-IECore::ObjectPtr FromMayaPluginDataPlugConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+class FromMayaObjectDataConverter : public FromMayaObjectConverter
 {
-	assert( operands );
 
-	MStatus s;
-	MObject data;
-	s = plug().getValue( data );
-	if ( !s )
-	{
-		return 0;
-	}
+	public :
+
+		FromMayaObjectDataConverter( const MObject &object );
+		
+	protected :
 	
-	FromMayaObjectConverterPtr c = FromMayaObjectConverter::create( data );
-	if ( !c )
-	{
-		return 0;
-	}
-	
-	return c->convert();
-}
+		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+				
+	private :
+
+		static FromMayaObjectConverterDescription<FromMayaObjectDataConverter> g_description;
+
+};
+
+IE_CORE_DECLAREPTR( FromMayaObjectDataConverter );
+
+} // namespace IECoreMaya
+
+#endif // IECOREMAYA_FROMMAYAOBJECTDATACONVERTER_H

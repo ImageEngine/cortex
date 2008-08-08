@@ -214,11 +214,13 @@ IECore::ConstBoolParameterPtr FromMayaObjectConverter::blindDataRemoveNamespaceP
 FromMayaObjectConverterPtr FromMayaObjectConverter::create( const MObject &object, IECore::TypeId resultType )
 {
 	const TypesToFnsMap *m = typesToFns();
+	
 	TypesToFnsMap::const_iterator it = m->find( Types( object.apiType(), resultType ) );
 	if( it!=m->end() )
 	{
 		return it->second( object );
 	}
+
 	return 0;
 }
 
