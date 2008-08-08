@@ -73,7 +73,7 @@ class ParameterUI :
 		self.longParameterName = parameter.name
 		if "longParameterName" in kw :
 		
-			self.longParameterName = kw['longParameterName']
+			self.longParameterName = kw['longParameterName']		
 	
 	## Derived classes should override this method. The override should first call the base class method and
 	# then reconnect all created widgets to the new node/parameter. The node and parameter arguments are as
@@ -440,8 +440,9 @@ class ParameterUI :
 		if 'longParameterName' in kw and len( kw['longParameterName'] ) :
 			kw['longParameterName'] += "." + parameter.name
 		else :
-			kw['longParameterName'] = parameter.name	
-		
+			kw['longParameterName'] = parameter.name
+			
+
 		handlerType = ParameterUI.handlers[ (parameter.typeId(), uiTypeHint) ]
 		parameterUI = handlerType( parameterisedHolderNode, parameter, **kw )
 		
@@ -462,6 +463,17 @@ class CompoundParameterUI( ParameterUI ) :
 		except:
 			pass
 			
+		if 'visibleOnly' in kw :
+		
+			visible = False
+		
+			for i in kw['visibleOnly'] :
+			
+				if kw['longParameterName'] == "" or i.startswith( kw['longParameterName'] + "." ) :
+				
+					visible = True
+				
+							
 		if not visible :
 		
 			return
@@ -573,7 +585,21 @@ class CompoundParameterUI( ParameterUI ) :
 					visible = p.userData()['UI']['visible'].value
 				except:
 					pass
-
+					
+				if 'visibleOnly' in kw and kw['longParameterName'] != "":
+				
+					fullChildName = kw['longParameterName'] + "." + pName 
+				
+					visible = fullChildName in kw['visibleOnly']
+					
+					if not visible and p.isInstanceOf( IECore.TypeId.CompoundParameter ) :
+					
+						for i in kw['visibleOnly'] :
+						
+							if i.startswith( fullChildName + "." ) :
+								
+								visible = True
+		
 				if visible:
 					cmds.setParent( self.__childUIsLayout )
 				
