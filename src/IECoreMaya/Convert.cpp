@@ -178,6 +178,18 @@ Imath::Color4f convert( const MColor &from )
 }
 
 template<>
+MColor convert( const Imath::Color3f &from )
+{
+	return MColor( from[0], from[1], from[2], 1.0 );
+}
+
+template<>
+MColor convert( const Imath::Color4f &from )
+{
+	return MColor( from[0], from[1], from[2], from[3] );
+}
+
+template<>
 MBoundingBox convert( const Imath::Box3f &from )
 {
 	if( from.isEmpty() )

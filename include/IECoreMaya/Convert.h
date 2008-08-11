@@ -130,6 +130,12 @@ template<>
 Imath::Color4f convert( const MColor &from );
 
 template<>
+MColor convert( const Imath::Color3f &from );
+
+template<>
+MColor convert( const Imath::Color4f &from );
+
+template<>
 MBoundingBox convert( const Imath::Box3f &from );
 
 template<>
@@ -179,7 +185,6 @@ MTransformationMatrix convert( const IECore::TransformationMatrixd &from );
 
 template<>
 IECore::DataPtr convert( const MCommandResult &from );
-
 
 } // namespace IECore
 
