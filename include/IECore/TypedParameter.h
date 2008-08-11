@@ -38,6 +38,7 @@
 #include "IECore/Parameter.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/SplineData.h"
 
 namespace IECore
 {
@@ -113,6 +114,10 @@ typedef TypedParameter<Imath::Box2d> Box2dParameter;
 typedef TypedParameter<Imath::Box3d> Box3dParameter;
 typedef TypedParameter<Imath::M44f> M44fParameter;
 typedef TypedParameter<Imath::M44d> M44dParameter;
+typedef TypedParameter<Splineff> SplineffParameter;
+typedef TypedParameter<Splinedd> SplineddParameter;
+typedef TypedParameter<SplinefColor3f> SplinefColor3fParameter;
+typedef TypedParameter<SplinefColor4f> SplinefColor4fParameter;
 
 typedef TypedParameter<std::vector<int> > IntVectorParameter;
 typedef TypedParameter<std::vector<float> > FloatVectorParameter;

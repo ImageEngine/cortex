@@ -159,6 +159,7 @@ from SplineTest import *
 from SplineDataTest import *
 from TypeIdTest import *
 from LayeredDictTest import *
+from SplineParameterTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

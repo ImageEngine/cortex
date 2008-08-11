@@ -144,7 +144,11 @@ void bindTypedParameter()
 	bindTypedParameter<Box3d>( "Box3dParameter" );
 	bindTypedParameter<M44f>( "M44fParameter" );
 	bindTypedParameter<M44d>( "M44dParameter" );
-	bindTypedParameter<string>( "StringParameter" );
+	bindTypedParameter<string>( "StringParameter" );	
+	bindTypedParameter<Splineff>( "SplineffParameter" );
+	bindTypedParameter<Splinedd>( "SplineddParameter" );
+	bindTypedParameter<SplinefColor3f>( "SplinefColor3fParameter" );
+	bindTypedParameter<SplinefColor4f>( "SplinefColor4fParameter" );
 
 	bindTypedParameter<vector<int> >( "IntVectorParameter" );
 	bindTypedParameter<vector<float> >( "FloatVectorParameter" );
