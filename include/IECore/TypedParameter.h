@@ -156,6 +156,10 @@ IE_CORE_DECLAREPTR( Box2dParameter );
 IE_CORE_DECLAREPTR( Box3dParameter );
 IE_CORE_DECLAREPTR( M44fParameter );
 IE_CORE_DECLAREPTR( M44dParameter );
+IE_CORE_DECLAREPTR( SplineffParameter );
+IE_CORE_DECLAREPTR( SplineddParameter );
+IE_CORE_DECLAREPTR( SplinefColor3fParameter );
+IE_CORE_DECLAREPTR( SplinefColor4fParameter );
 
 IE_CORE_DECLAREPTR( IntVectorParameter );
 IE_CORE_DECLAREPTR( FloatVectorParameter );
