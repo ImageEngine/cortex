@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -114,7 +114,7 @@ MStatus ObjectMFnDataParameterHandler<T, D>::setValue( IECore::ConstParameterPtr
 	typedef IECore::TypedData<typename T::ValueType> Data;
 		
 	assert( parameter->getValue() );
-	intrusive_ptr<const Data> v = IECore::runTimeCast<const Data>( parameter->getValue() );
+	typename Data::ConstPtr v = IECore::runTimeCast<const Data>( parameter->getValue() );
 	
 	/// It's OK for this cast to fail, for example if a parameter type has changed from V3fVectorData to V3dVectorData. This can
 	/// happen when scenes are reopened. The ObjectParameterHandler will just try other ways of setting the value instead.

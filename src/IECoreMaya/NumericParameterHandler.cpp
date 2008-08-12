@@ -56,7 +56,7 @@ static ParameterHandler::Description< NumericParameterHandler<double> > doubleRe
 template<typename T>
 MStatus NumericParameterHandler<T>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
-	intrusive_ptr<const IECore::NumericParameter<T> > p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
+	typename IECore::NumericParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -108,7 +108,7 @@ MStatus NumericParameterHandler<T>::update( IECore::ConstParameterPtr parameter,
 template<typename T>
 MObject NumericParameterHandler<T>::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
-	intrusive_ptr<const IECore::NumericParameter<T> > p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
+	typename IECore::NumericParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
 	if( !p )
 	{
 		return MObject::kNullObj;
@@ -123,7 +123,7 @@ MObject NumericParameterHandler<T>::create( IECore::ConstParameterPtr parameter,
 template<typename T>
 MStatus NumericParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
-	intrusive_ptr<const IECore::NumericParameter<T> > p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
+	typename IECore::NumericParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -135,7 +135,7 @@ MStatus NumericParameterHandler<T>::setValue( IECore::ConstParameterPtr paramete
 template<typename T>
 MStatus NumericParameterHandler<T>::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
-	intrusive_ptr<IECore::NumericParameter<T> > p = IECore::runTimeCast<IECore::NumericParameter<T> >( parameter );
+	typename IECore::NumericParameter<T>::Ptr p = IECore::runTimeCast<IECore::NumericParameter<T> >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;

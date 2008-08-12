@@ -59,7 +59,7 @@ static ParameterHandler::Description< StringVectorParameterHandler > registrar( 
 
 MStatus StringVectorParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
-	intrusive_ptr<const IECore::StringVectorParameter> p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
+	IECore::ConstStringVectorParameterPtr p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -86,7 +86,7 @@ MStatus StringVectorParameterHandler::update( IECore::ConstParameterPtr paramete
 
 MObject StringVectorParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
-	intrusive_ptr<const IECore::StringVectorParameter> p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
+	IECore::ConstStringVectorParameterPtr p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
 	if( !p )
 	{
 		return MObject::kNullObj;
@@ -108,7 +108,7 @@ MObject StringVectorParameterHandler::create( IECore::ConstParameterPtr paramete
 		
 MStatus StringVectorParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
-	intrusive_ptr<const IECore::StringVectorParameter> p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
+	IECore::ConstStringVectorParameterPtr p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
@@ -130,7 +130,7 @@ MStatus StringVectorParameterHandler::setValue( IECore::ConstParameterPtr parame
 
 MStatus StringVectorParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
-	intrusive_ptr<IECore::StringVectorParameter> p = IECore::runTimeCast<IECore::StringVectorParameter>( parameter );
+	IECore::StringVectorParameterPtr p = IECore::runTimeCast<IECore::StringVectorParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
