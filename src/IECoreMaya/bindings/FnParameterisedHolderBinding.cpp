@@ -34,6 +34,8 @@
 
 #include "boost/python.hpp"
 
+#include <cassert>
+
 #include "maya/MFnDependencyNode.h"
 
 #include "IECore/Object.h"
@@ -50,6 +52,8 @@ using namespace boost::python;
 
 static ParameterisedHolderInterface *interface( MFnDependencyNode *fnDN )
 {
+	assert( fnDN );
+	
 	MPxNode *userNode = fnDN->userNode();
 	if( userNode )
 	{
@@ -65,16 +69,22 @@ static ParameterisedHolderInterface *interface( MFnDependencyNode *fnDN )
 
 static void setParameterised( MFnDependencyNode *fnDN, ParameterisedPtr p )
 {
+	assert( fnDN );
+	
 	StatusException::throwIfError( interface(fnDN)->setParameterised( p ) );
 }
 
 static void setParameterised2( MFnDependencyNode *fnDN, const std::string &className, int classVersion, const std::string &envVarName )
 {
+	assert( fnDN );
+
 	StatusException::throwIfError( interface(fnDN)->setParameterised( className, classVersion, envVarName ) );
 }
 
 static boost::python::tuple getParameterised( MFnDependencyNode *fnDN )
 {
+	assert( fnDN );
+
 	std::string className; int classVersion = 0; std::string searchPath;
 	ParameterisedPtr p = interface( fnDN )->getParameterised( &className, &classVersion, &searchPath );
 	return boost::python::make_tuple( p, className, classVersion, searchPath );	
@@ -82,26 +92,36 @@ static boost::python::tuple getParameterised( MFnDependencyNode *fnDN )
 
 static void setNodeValues( MFnDependencyNode *fnDN )
 {
+	assert( fnDN );
+
 	StatusException::throwIfError( interface( fnDN )->setNodeValues() );			
 }
 
 static void setNodeValue( MFnDependencyNode *fnDN, ParameterPtr pa )
 {	
+	assert( fnDN );
+	
 	StatusException::throwIfError( interface( fnDN )->setNodeValue( pa ) );	
 }
 
 static void setParameterisedValues( MFnDependencyNode *fnDN )
 {
+	assert( fnDN );
+
 	StatusException::throwIfError( interface( fnDN )->setParameterisedValues() );			
 }
 
 static void setParameterisedValue( MFnDependencyNode *fnDN, ParameterPtr pa )
 {	
+	assert( fnDN );
+
 	StatusException::throwIfError( interface( fnDN )->setParameterisedValue( pa ) );	
 }
 
 static std::string parameterPlug( MFnDependencyNode *fnDN, ParameterPtr pa )
 {
+	assert( fnDN );
+
 	// we don't know how to push a swig wrapped MPlug into python,
 	// so we have to push the name and then let the python half of
 	// MFnParameterisedHolder construct an MPlug from it.
@@ -111,6 +131,8 @@ static std::string parameterPlug( MFnDependencyNode *fnDN, ParameterPtr pa )
 
 static ParameterPtr plugParameter( MFnDependencyNode *fnDN, MPlug *plug )
 {
+	assert( fnDN );
+
 	return interface( fnDN )->plugParameter( *plug );
 }
 
