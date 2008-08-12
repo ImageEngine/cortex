@@ -53,8 +53,6 @@ class FromNukeConverter : public IECore::ToCoreConverter
 
 	protected :
 	
-		/// The caller is responsible for ensuring that geo is alive
-		/// for as long as the converter is.
 		FromNukeConverter( const std::string &name, const std::string &description );
 		virtual ~FromNukeConverter();
 	
