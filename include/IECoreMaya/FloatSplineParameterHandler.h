@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_COLORSPLINEPARAMETERHANDLER_H
-#define IE_COREMAYA_COLORSPLINEPARAMETERHANDLER_H
+#ifndef IE_COREMAYA_FLOATSPLINEPARAMETERHANDLER_H
+#define IE_COREMAYA_FLOATSPLINEPARAMETERHANDLER_H
 
 #include "IECoreMaya/ParameterHandler.h"
 
@@ -44,9 +44,9 @@
 namespace IECoreMaya
 {
 
-/// A ParameterHandler which deals with color splines, templated on the Spline type itself
+/// A ParameterHandler which deals with color splines, templated in the same manner as the Spline itself
 template< typename S >
-class ColorSplineParameterHandler : public ParameterHandler
+class FloatSplineParameterHandler : public ParameterHandler
 {
 	protected :
 		virtual MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const;
@@ -56,9 +56,9 @@ class ColorSplineParameterHandler : public ParameterHandler
 		
 	private :
 	
-		static Description< ColorSplineParameterHandler<S> > g_registrar;
+		static Description< FloatSplineParameterHandler<S> > g_registrar;
 };
 
 } // namespace IECoreMaya
 
-#endif // IE_COREMAYA_COLORSPLINEPARAMETERHANDLER_H
+#endif // IE_COREMAYA_FLOATSPLINEPARAMETERHANDLER_H

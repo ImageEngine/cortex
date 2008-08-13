@@ -37,34 +37,28 @@
 #include "IECoreMaya/Parameter.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
-#include "IECoreMaya/ColorSplineParameterHandler.h"
+#include "IECoreMaya/FloatSplineParameterHandler.h"
 
 #include "IECore/TypedParameter.h"
-
-#include "IECoreMaya/Convert.h"
 
 #include "maya/MFnCompoundAttribute.h"
 #include "maya/MRampAttribute.h"
 #include "maya/MFloatArray.h"
 #include "maya/MIntArray.h"
-#include "maya/MColor.h"
-#include "maya/MColorArray.h"
 #include "maya/MGlobal.h"
 
 using namespace IECoreMaya;
 using namespace Imath;
 using namespace boost;
 
-template<> ParameterHandler::Description< ColorSplineParameterHandler< IECore::SplinefColor3f > > 
-	ColorSplineParameterHandler< IECore::SplinefColor3f >::g_registrar
-		( IECore::SplinefColor3fParameter::staticTypeId() );
-		
-template<> ParameterHandler::Description< ColorSplineParameterHandler< IECore::SplinefColor4f > > 
-	ColorSplineParameterHandler< IECore::SplinefColor4f >::g_registrar
-		( IECore::SplinefColor4fParameter::staticTypeId() );		
+template<> ParameterHandler::Description< FloatSplineParameterHandler<  IECore::Splineff > > 
+	FloatSplineParameterHandler<  IECore::Splineff >::g_registrar( IECore::SplineffParameter::staticTypeId() );
+	
+template<> ParameterHandler::Description< FloatSplineParameterHandler<  IECore::Splinedd > > 
+	FloatSplineParameterHandler<  IECore::Splinedd >::g_registrar( IECore::SplineddParameter::staticTypeId() );	
 
 template<typename S>
-MStatus ColorSplineParameterHandler<S>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const 
+MStatus FloatSplineParameterHandler<S>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const 
 {
 	assert( parameter );
 	
@@ -80,14 +74,14 @@ MStatus ColorSplineParameterHandler<S>::update( IECore::ConstParameterPtr parame
 		return MS::kFailure;
 	}
 	
-	/// \todo See if the attribute is of type ColorRamp - can't do this yet as we can't construct
+	/// \todo See if the attribute is of type CurveRamp - can't do this yet as we can't construct
 	/// an MRampAttribute from just the MObject. We need either the node, too, or an MPlug
 			
 	return MS::kSuccess;
 }
 
 template<typename S>
-MObject ColorSplineParameterHandler<S>::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MObject FloatSplineParameterHandler<S>::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
 	assert( parameter );
 
@@ -98,14 +92,14 @@ MObject ColorSplineParameterHandler<S>::create( IECore::ConstParameterPtr parame
 	}
 	
 	MRampAttribute fnRAttr;
-	MObject result = fnRAttr.createColorRamp( attributeName, attributeName );
+	MObject result = fnRAttr.createCurveRamp( attributeName, attributeName );
 	
 	update( parameter, result );
 	return result;
 }
 
 template<typename S>		
-MStatus ColorSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	assert( parameter );
 	typename IECore::TypedParameter< S >::ConstPtr p = IECore::runTimeCast<const IECore::TypedParameter< S > >( parameter );
@@ -115,7 +109,7 @@ MStatus ColorSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 	}
 	
 	MRampAttribute fnRAttr( plug );
-	if ( !fnRAttr.isColorRamp() )
+	if ( !fnRAttr.isCurveRamp() )
 	{
 		return MS::kFailure;
 	}
@@ -123,14 +117,14 @@ MStatus ColorSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 	const S &spline = p->getTypedValue();
 	
 	MStatus s;	
-	MColorArray colors;
+	MFloatArray values;
 	MFloatArray positions;
 	MIntArray interps;
 	MIntArray indices;	
-	fnRAttr.getEntries( indices, positions, colors, interps, &s );
+	fnRAttr.getEntries( indices, positions, values, interps, &s );
 	assert( s );
 	positions.clear();
-	colors.clear();
+	values.clear();
 	interps.clear();
 	
 	assert( indices.length() == fnRAttr.getNumEntries() );
@@ -138,26 +132,24 @@ MStatus ColorSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 	unsigned idx = 0;
 	for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end(); ++it, ++idx )
 	{
-		MColor c( IECore::convert< MColor >( it->second ) );
-	
 		if ( idx < indices.length() )
 		{
 			fnRAttr.setPositionAtIndex( it->first, indices[ idx ], &s );
 			assert( s );
-			fnRAttr.setColorAtIndex( c, indices[ idx ], &s );	
+			fnRAttr.setValueAtIndex( static_cast<float>( it->second ), indices[ idx ], &s );	
 			assert( s );
 			fnRAttr.setInterpolationAtIndex( MRampAttribute::kSpline, indices[ idx ], &s );		
 			assert( s );
 		}
 		else
 		{	
-			colors.append( c );
+			values.append(  it->second );
 			positions.append( it->first );	
 			interps.append( MRampAttribute::kSpline );	
 		}
 	}
 	
-	fnRAttr.addEntries( positions, colors, interps, &s );
+	fnRAttr.addEntries( positions, values, interps, &s );
 	assert( s );
 	
 	/// Remove all the indices we just reused
@@ -178,7 +170,7 @@ MStatus ColorSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 }
 
 template<typename S>
-MStatus ColorSplineParameterHandler<S>::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
+MStatus FloatSplineParameterHandler<S>::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
 	assert( parameter );
 
@@ -194,7 +186,7 @@ MStatus ColorSplineParameterHandler<S>::setValue( const MPlug &plug, IECore::Par
 	MRampAttribute fnRAttr( plug, &s );	
 	assert( s );
 	
-	if ( !fnRAttr.isColorRamp() )
+	if ( !fnRAttr.isCurveRamp() )
 	{
 		return MS::kFailure;
 	}	
@@ -205,21 +197,21 @@ MStatus ColorSplineParameterHandler<S>::setValue( const MPlug &plug, IECore::Par
 		
 		MIntArray indices;
 		MFloatArray positions;
-		MColorArray colors;
+		MFloatArray values;
 		MIntArray interps;
-		fnRAttr.getEntries( indices, positions, colors, interps, &s );
+		fnRAttr.getEntries( indices, positions, values, interps, &s );
 		assert( s );
 
-		if ( positions.length() != colors.length() || positions.length() != interps.length() )
+		if ( positions.length() != values.length() || positions.length() != interps.length() )
 		{
 			return MS::kFailure;
 		}
-
+		
 		for ( unsigned i = 0; i < positions.length(); i ++)
 		{	
 			spline.points.insert( 
 				typename S::PointContainer::value_type( 
-					static_cast< typename S::XType >( positions[i] ), IECore::convert< typename S::YType >( colors[ i ] ) 
+					static_cast< typename S::XType >( positions[i] ), static_cast< typename S::YType >( values[ i ] )
 				) 
 			);
 		}	
