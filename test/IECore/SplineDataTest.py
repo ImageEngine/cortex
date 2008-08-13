@@ -100,7 +100,21 @@ class SplineDataTest( unittest.TestCase ) :
 		
 		sdd = IECore.ObjectReader( "test/SplineData.cob" ).read()
 		
-		self.assertEqual( sd, sdd )		
+		self.assertEqual( sd, sdd )
+		
+	def testRepr( self ) :	
+	
+		s = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
+		s[0] = IECore.Color3f( 1 )
+		s[1] = IECore.Color3f( 2 )
+		s[2] = IECore.Color3f( 3 )
+		s[3] = IECore.Color3f( 4 )
+		
+		sd = IECore.SplinefColor3fData( s )
+		
+		self.assertEqual( repr(sd), "IECore.SplinefColor3fData( " + repr(s) + " )" ) 
+		
+		self.assertEqual( sd, eval( repr(sd) ) )		
 
 	def tearDown(self):
         

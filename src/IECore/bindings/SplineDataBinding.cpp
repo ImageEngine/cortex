@@ -52,6 +52,24 @@ namespace IECore
 {
 
 template<class T>
+static std::string repr( T &x )
+{	
+	std::stringstream s;
+			
+	s << "IECore." << x.typeName() << "( ";
+	
+	object item( x.readable() );
+	
+	assert( item.attr( "__repr__" ) != object() );
+			
+	s << call_method< std::string >( item.ptr(), "__repr__" );
+	
+	s << " )";
+	
+	return s.str();
+}
+
+template<class T>
 static void setValue( T &that, const typename T::ValueType &v )
 {
 	that.writable() = v;
@@ -70,6 +88,7 @@ void bindSplineData( const char *bindName )
 	PyClass( bindName )
 		.def( init<const typename T::ValueType &>() )
 		.add_property( "value", make_function( &getValue<T>, return_internal_reference<>() ), &setValue<T> )
+		.def( "__repr__", &repr<T> )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( T );
 	;
 
