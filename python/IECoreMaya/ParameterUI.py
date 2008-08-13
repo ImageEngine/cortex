@@ -1163,5 +1163,7 @@ ParameterUI.registerUI( IECore.TypeId.StringParameter, CachePathPrefixParameterU
 
 ParameterUI.registerUI( IECore.TypeId.SplinefColor3fParameter, SplineParameterUI )
 ParameterUI.registerUI( IECore.TypeId.SplinefColor4fParameter, SplineParameterUI )
+ParameterUI.registerUI( IECore.TypeId.SplineffParameter, SplineParameterUI )
+ParameterUI.registerUI( IECore.TypeId.SplineddParameter, SplineParameterUI )
 
 #\todo Store "collapsed" state of frameLayouts
