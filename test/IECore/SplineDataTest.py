@@ -80,9 +80,9 @@ class SplineDataTest( unittest.TestCase ) :
 		
 		sd = IECore.SplineffData( s )
 		
-		IECore.ObjectWriter( sd, "test/SplineData.cob" ).write()
+		IECore.ObjectWriter( sd, "test/IECore/SplineData.cob" ).write()
 		
-		sdd = IECore.ObjectReader( "test/SplineData.cob" ).read()
+		sdd = IECore.ObjectReader( "test/IECore/SplineData.cob" ).read()
 		
 		self.assertEqual( sd, sdd )
 		
@@ -96,9 +96,9 @@ class SplineDataTest( unittest.TestCase ) :
 		
 		sd = IECore.SplinefColor3fData( s )
 		
-		IECore.ObjectWriter( sd, "test/SplineData.cob" ).write()
+		IECore.ObjectWriter( sd, "test/IECore/SplineData.cob" ).write()
 		
-		sdd = IECore.ObjectReader( "test/SplineData.cob" ).read()
+		sdd = IECore.ObjectReader( "test/IECore/SplineData.cob" ).read()
 		
 		self.assertEqual( sd, sdd )
 		
@@ -114,12 +114,17 @@ class SplineDataTest( unittest.TestCase ) :
 		
 		self.assertEqual( repr(sd), "IECore.SplinefColor3fData( " + repr(s) + " )" ) 
 		
-		self.assertEqual( sd, eval( repr(sd) ) )		
+		self.assertEqual( sd, eval( repr(sd) ) )
+		
+	def setUp(self):
+        
+		if os.path.isfile( "test/IECore/SplineData.cob" ) :
+			os.remove( "test/IECore/SplineData.cob" )			
 
 	def tearDown(self):
         
-		if os.path.isfile( "test/SplineData.cob" ) :
-			os.remove( "test/SplineData.cob" )
+		if os.path.isfile( "test/IECore/SplineData.cob" ) :
+			os.remove( "test/IECore/SplineData.cob" )
 
 		
 if __name__ == "__main__":
