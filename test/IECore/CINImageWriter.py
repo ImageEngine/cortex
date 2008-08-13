@@ -257,10 +257,6 @@ class TestCINWriter(unittest.TestCase):
 		self.assertEqual( type(w), CINImageWriter )		
 		w.write()
 		
-		w = Writer.create( imgOrig, "test/IECore/data/cinFiles/output2.cin" )
-		self.assertEqual( type(w), CINImageWriter )		
-		w.write()
-		
 		self.assert_( os.path.exists( "test/IECore/data/cinFiles/output.cin" ) )
 				
 		r = Reader.create( "test/IECore/data/cinFiles/output.cin" )
@@ -317,11 +313,7 @@ class TestCINWriter(unittest.TestCase):
 		w = Writer.create( imgOrig, "test/IECore/data/cinFiles/output.cin" )
 		self.assertEqual( type(w), CINImageWriter )		
 		w.write()
-		
-		w = Writer.create( imgOrig, "test/IECore/data/cinFiles/outputGrey.cin" )
-		self.assertEqual( type(w), CINImageWriter )		
-		w.write()
-		
+				
 		self.assert_( os.path.exists( "test/IECore/data/cinFiles/output.cin" ) )
 		
 		r = Reader.create( "test/IECore/data/cinFiles/output.cin" )

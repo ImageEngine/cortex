@@ -235,10 +235,6 @@ class TestDPXWriter(unittest.TestCase):
 		self.assertEqual( type(w), DPXImageWriter )		
 		w.write()
 		
-		w = Writer.create( imgOrig, "test/IECore/data/dpx/output2.dpx" )
-		self.assertEqual( type(w), DPXImageWriter )		
-		w.write()
-		
 		self.assert_( os.path.exists( "test/IECore/data/dpx/output.dpx" ) )
 				
 		r = Reader.create( "test/IECore/data/dpx/output.dpx" )
