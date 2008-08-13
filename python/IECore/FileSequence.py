@@ -53,7 +53,6 @@ class FileSequence :
 	
 		self.fileName = fileName
 		self.frameList = frameList
-
 		
 	def __setattr__( self, key, value ) :
 	
@@ -225,4 +224,4 @@ class FileSequence :
 		padding = self.getPadding()
 		paddingStr = "".ljust( padding, "#" )
 		
-		return self.fileName.replace( paddingStr, "%." + str(padding) + "d" )
+		return self.fileName.replace( "%", "%%").replace( paddingStr, "%." + str(padding) + "d" )

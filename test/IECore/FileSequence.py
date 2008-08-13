@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -180,6 +180,12 @@ class testFileSequence( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, s.frameForFileName, "aaa.10.tif" )
 		self.assertRaises( RuntimeError, s.frameForFileName, "a.10.exr" )
 		self.assertRaises( RuntimeError, s.frameForFileName, "a..exr" )
+		
+	def testFormatStringInFilename( self ) :
+	
+		s = FileSequence( "a%20ctest.#.tif", FrameRange( 10000, 10001 ) )
+		
+		self.assertEqual( s.fileNames(), [ "a%20ctest.10000.tif", "a%20ctest.10001.tif" ] )
 		
 class testCompoundFrameList( unittest.TestCase ) :
 
