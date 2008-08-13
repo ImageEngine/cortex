@@ -550,6 +550,14 @@ if env["DEBUG"] :
 	env.Append( CXXFLAGS = "-g" )
 else :
 	env.Append( CXXFLAGS = [ "-O2", "-DNDEBUG" ] )
+	
+	if compilerVersion >= 400 :
+
+		env.Append(
+			CXXFLAGS = [
+				"-fvisibility-inlines-hidden",
+			],
+		)
 			
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
