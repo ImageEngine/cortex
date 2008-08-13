@@ -79,6 +79,9 @@ MStatus ColorSplineParameterHandler<C>::update( IECore::ConstParameterPtr parame
 	{
 		return MS::kFailure;
 	}
+	
+	/// \todo See if the attribute is of type ColorRamp - can't do this yet as we can't construct
+	/// an MRampAttribute from just the MObject. We need either the node, too, or an MPlug
 			
 	return MS::kSuccess;
 }
