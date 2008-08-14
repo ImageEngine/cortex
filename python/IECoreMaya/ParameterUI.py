@@ -586,9 +586,14 @@ class CompoundParameterUI( ParameterUI ) :
 				except:
 					pass
 					
-				if 'visibleOnly' in kw and kw['longParameterName'] != "":
+				if 'visibleOnly' in kw :							
 				
-					fullChildName = kw['longParameterName'] + "." + pName 
+					fullChildName = kw['longParameterName'] 
+					
+					if len( fullChildName ) :
+						fullChildName += "."
+						
+					fullChildName += pName 
 				
 					visible = fullChildName in kw['visibleOnly']
 					
@@ -599,7 +604,7 @@ class CompoundParameterUI( ParameterUI ) :
 							if i.startswith( fullChildName + "." ) :
 								
 								visible = True
-		
+												
 				if visible:
 					cmds.setParent( self.__childUIsLayout )
 				
