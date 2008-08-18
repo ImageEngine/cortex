@@ -310,6 +310,9 @@ enum TypeId
 	
 	FirstCoreMayaTypeId = 109000,
 	LastCoreMayaTypeId = 109999,
+	
+	FirstIERenderTypeId = 110000,
+	LastIERenderTypeId = 110499,	
 
 	LastExtensionTypeId = 399999,
 	// Any TypeIds beyond this point can be considered safe for private internal use.
