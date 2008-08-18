@@ -176,7 +176,7 @@ IndexedIO::EntryList FileSystemIndexedIO::ls(IndexedIOFilterPtr f)
 	{
 		if ( fs::is_directory( *dirIt ) )
 		{			
-			result.push_back( IndexedIO::Entry( dirIt->leaf(), IndexedIO::Directory, IndexedIO::Invalid, 0 ) );
+			result.push_back( IndexedIO::Entry( dirIt->path().leaf(), IndexedIO::Directory, IndexedIO::Invalid, 0 ) );
 		}
 		else
 		{			
@@ -202,7 +202,7 @@ IndexedIO::EntryList FileSystemIndexedIO::ls(IndexedIOFilterPtr f)
 			
 			f.close();
 			
-			result.push_back( IndexedIO::Entry( dirIt->leaf(), IndexedIO::File, datatype, arrayLength) );
+			result.push_back( IndexedIO::Entry( dirIt->path().leaf(), IndexedIO::File, datatype, arrayLength) );
 		}
 	}
 	
