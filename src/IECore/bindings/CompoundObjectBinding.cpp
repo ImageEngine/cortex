@@ -238,6 +238,8 @@ void bindCompoundObject()
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
 		.def( "__setitem__", &setItem )
+		/// \todo I don't believe we should be having children represented as attributes like this - we should use the
+		/// item syntax only. See associated todo in CompoundParameterBinding.cpp.
 		.def( "__getattr__", &getItem )
 		.def( "__setattr__", &setItem )
 		.def( "__delitem__", &delItem )

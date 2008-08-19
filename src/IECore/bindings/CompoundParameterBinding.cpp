@@ -238,7 +238,10 @@ void bindCompoundParameter()
 		.def( init< const list &, optional<  const object & > >( args( "members", "userData") ) )
 		.def( "__len__", &compoundParameterLen )
 		.def( "__getitem__", &compoundParameterGetItem )
-		.def( "__getattr__", &compoundParameterGetItem ) // seems a bit unconventional but gives us nicer syntax
+		/// \todo This __getattr__ is causing problems because we can have parameter names and method names fighting over the same namespace.
+		/// It would be better to use only  __getitem__ for children. This would have a massive effect on existing scripts however, as they are all using the parameter.child
+		/// syntax in preference to parameter["child"].
+		.def( "__getattr__", &compoundParameterGetItem )
 		.def( "__contains__", &compoundParameterContains )
 		.def( "keys", &compoundParameterKeys )
 		.def( "values", &compoundParameterValues )
