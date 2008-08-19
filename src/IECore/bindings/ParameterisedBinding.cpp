@@ -73,7 +73,9 @@ void bindParameterised()
 		.add_property( "description", make_function( &Parameterised::description, return_value_policy<copy_const_reference>() ) )
 		.def( "parameters", (CompoundParameterPtr (Parameterised::*)())&Parameterised::parameters )
 		.def( "__getitem__", &parameterisedGetItem )
-		.def( "__getattr__", &parameterisedGetItem ) // seems a bit unconventional but gives us nicer syntax
+		/// \todo Remove this getattr binding. It's bad. You can mask attributes with methods and all sorts of badness. We should
+		/// use only the getitem syntax. See other notes in CompoundObject and CompoundParameter bindings.
+		.def( "__getattr__", &parameterisedGetItem )
 		.def( "userData", (CompoundObjectPtr (Parameterised::*)())&Parameterised::userData )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Parameterised)
 	;
