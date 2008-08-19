@@ -65,6 +65,8 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 		virtual ~FromMayaMeshConverter();
 		
 		/// Returns just the points for the mesh.
+		/// \todo It would be nice if this was virtual somewhere and implemented for other
+		/// converters for which it makes sense. I'm not sure it belongs in the FromMayaShapeConverter though.
 		IECore::V3fVectorDataPtr points() const;
 		/// Returns just the normals for the mesh.
 		IECore::V3fVectorDataPtr normals() const;
