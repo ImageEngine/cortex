@@ -106,7 +106,7 @@ static boost::python::list values( MotionPrimitive &p )
 
 void bindMotionPrimitive()
 {	
-	typedef class_< MotionPrimitive, MotionPrimitivePtr, bases<Renderable>, boost::noncopyable > MotionPrimitivePyClass;
+	typedef class_< MotionPrimitive, MotionPrimitivePtr, bases<VisibleRenderable>, boost::noncopyable > MotionPrimitivePyClass;
 	MotionPrimitivePyClass( "MotionPrimitive" )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
