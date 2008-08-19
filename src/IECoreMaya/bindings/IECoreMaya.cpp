@@ -62,6 +62,7 @@
 #include "IECoreMaya/bindings/ToMayaPlugConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaObjectConverterBinding.h"
 #include "IECoreMaya/bindings/MayaTypeIdBinding.h"
+#include "IECoreMaya/bindings/FromMayaMeshConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -98,4 +99,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindToMayaPlugConverter();
 	bindToMayaObjectConverter();
 	bindMayaTypeId();
+	bindFromMayaMeshConverter();
 }
