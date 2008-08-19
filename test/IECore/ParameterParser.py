@@ -243,7 +243,30 @@ class testParameterParser( unittest.TestCase ) :
 		IECore.ParameterParser().parse( ["-a", "python:IECore.IntData( 20 )", "-b", "30" ], p )
 		self.assertEqual( p.a.getValue(), IECore.IntData( 20 ) )		
 		self.assertEqual( a(), IECore.IntData( 600 ) )
+	
+	def testSplineParsing( self ) :
+	
+		p = IECore.CompoundParameter(
+			members = [
+				IECore.SplineffParameter(
+					name = "a",
+					description = "d",
+					defaultValue = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.catmullRom(), ( ( 0, 0 ), ( 1, 1 ) ) ) ),
+				),
+			]
+		)
 		
+		s = IECore.ParameterParser().serialise( p )
+		v = p["a"].getValue().copy()
+		
+		p["a"].setValue( IECore.SplineffData() )
+		self.assertNotEqual( p["a"].getValue(), v )
+		
+		IECore.ParameterParser().parse( s, p )
+		
+		self.assertEqual( p["a"].getValue(), v )
+		
+			
 	#def testQuotingOnStringParameters( self ):
 
 	#	a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
