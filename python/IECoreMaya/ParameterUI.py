@@ -1,4 +1,3 @@
-
 ##########################################################################
 #
 #  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
@@ -46,6 +45,7 @@ import IECoreMaya
 ## Base class for objects which are able to create an Attribute Editor widget for a single IECore.Parameter
 # held on an IECoreMaya.ParameterisedHolder node.
 # \todo Make member functions protected or private as necessary - do this for the derived classes too.
+# \todo Split derived classes out into their own files.
 class ParameterUI :
 
 	textColumnWidthIndex = 145
@@ -57,6 +57,8 @@ class ParameterUI :
 	## The parameterisedHolderNode is an MObject specifying the node holding the specified IECore.Parameter.
 	# Derived class __init__ implementations should create relevant widgets in the current ui layout,
 	# and leave the parent layout unchanged on exit.
+	# \todo Document the expected behaviour of derived classes with respect to setting up self._layout,
+	# or provide a more explicit mechanism for the same thing.
 	def __init__( self, parameterisedHolderNode, parameter, **kw ) :
 
 		self.__node = parameterisedHolderNode
@@ -410,7 +412,7 @@ class ParameterUI :
 	
 		key = (parameterTypeId, uiTypeHint) 
 		if key in ParameterUI.handlers :
-			IECore.msg( IECore.Msg.Warning, "ParameterUI.registerUI", "Handler for %s already registered." % key )
+			IECore.msg( IECore.Msg.Level.Warning, "ParameterUI.registerUI", "Handler for %s already registered." % str( key ) )
 		
 		ParameterUI.handlers[key] = handlerType
 	
@@ -1111,29 +1113,6 @@ class BoxParameterUI( ParameterUI ) :
 					cmds.connectControl( self.__fields[ fieldNum ], vectorPlugChild.name() )
 					fieldNum += 1
 
-
-class SplineParameterUI( ParameterUI ) :
-
-	def __init__( self, node, parameter, **kw ):
-		ParameterUI.__init__( self, node, parameter, **kw )
-		
-		self.__frameLayout = maya.cmds.frameLayout( label = self.label() )
-		
-		self.__layout = maya.cmds.columnLayout()
-				
-		IECoreMaya.mel( 'source "AETemplates/AEaddRampControl.mel";' )
-		IECoreMaya.mel( 'AEmakeRampControlInteractiveNew_doIt( "' + self.plugName() + '", 1 )' )
-								
-	def replace( self, node, parameter ) :
-	
-		ParameterUI.replace( self, node, parameter )
-	
-		IECoreMaya.mel( 'AEmakeRampControlInteractiveReplace( "' + self.plugName() + '" )' )
-		
-		
-
-
-
 ParameterUI.registerUI( IECore.TypeId.FloatParameter, NumericParameterUI )	
 ParameterUI.registerUI( IECore.TypeId.IntParameter, NumericParameterUI )
 ParameterUI.registerUI( IECore.TypeId.BoolParameter, BoolParameterUI )
@@ -1165,10 +1144,5 @@ ParameterUI.registerUI( IECore.TypeId.DirNameParameter, DirNameParameterUI )
 ParameterUI.registerUI( IECore.TypeId.FileNameParameter, FileNameParameterUI )
 
 ParameterUI.registerUI( IECore.TypeId.StringParameter, CachePathPrefixParameterUI, 'cachePathPrefix' )
-
-ParameterUI.registerUI( IECore.TypeId.SplinefColor3fParameter, SplineParameterUI )
-ParameterUI.registerUI( IECore.TypeId.SplinefColor4fParameter, SplineParameterUI )
-ParameterUI.registerUI( IECore.TypeId.SplineffParameter, SplineParameterUI )
-ParameterUI.registerUI( IECore.TypeId.SplineddParameter, SplineParameterUI )
 
 #\todo Store "collapsed" state of frameLayouts

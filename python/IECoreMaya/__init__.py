@@ -35,6 +35,7 @@
 from _IECoreMaya import *
 
 from ParameterUI import ParameterUI
+from SplineParameterUI import SplineParameterUI
 from NodeParameter import NodeParameter
 from DAGPathParameter import DAGPathParameter
 from DAGPathVectorParameter import DAGPathVectorParameter
