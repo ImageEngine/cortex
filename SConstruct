@@ -42,7 +42,7 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=3
-ieCoreMinorVersion=10
+ieCoreMinorVersion=11
 ieCorePatchVersion=0
 
 ###########################################################################################
@@ -64,6 +64,31 @@ o.Add(
 	"The C++ compiler.",
 	"g++",
 )
+
+o.Add(
+	"CXXFLAGS",
+	"The extra flags to pass to the C++ compiler during compilation.",
+	[ "-pipe", "-Wall", "-O2" ]
+)
+
+o.Add(
+	"TESTCXXFLAGS",
+	"The extra flags to pass to the C++ compiler during compilation of unit tests.",
+	[ "-pipe", "-Wall", "-O0" ]
+)
+
+o.Add(
+	"PYTHONCXXFLAGS",
+	"The extra flags to pass to the C++ compiler during compilation of Python bindings.",
+	[ "-pipe", "-Wall", "-O2" ]
+)
+
+o.Add(
+	"LINKFLAGS",
+	"The extra flags to pass to the linker.",
+	[]
+)
+
 
 # Boost options
 
@@ -481,14 +506,6 @@ env = Environment(
 	options = o
 )
 
-compilerVersionString = os.popen( env.subst("$CXX --version | head -1 | cut -d ' ' -f 3") ).readline()
-m = re.compile( "^([0-9]+)\.([0-9]+)\.([0-9]+)$" ).match( compilerVersionString )
-if not m:
-	raise RuntimeError( "Cannot determine compiler version" )
-	
-compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2, 3 )
-compilerVersion = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
-
 env["LIBPATH"] = env["LIBPATH"].split( ":" )
 
 for e in env["ENV_VARS_TO_IMPORT"].split() :
@@ -536,28 +553,11 @@ env.Prepend(
 	],
 	LIBS = [
 		"pthread",
-	],
-	CXXFLAGS = [
-		"-pipe",
-		"-Wall",
-	],
+	]
 )
 
 if env["PLATFORM"]=="darwin" :
 	env.Append( CXXFLAGS = "-Wno-long-double" )
-
-if env["DEBUG"] :
-	env.Append( CXXFLAGS = "-g" )
-else :
-	env.Append( CXXFLAGS = [ "-O2", "-DNDEBUG" ] )
-	
-	if compilerVersion >= 400 :
-
-		env.Append(
-			CXXFLAGS = [
-				"-fvisibility-inlines-hidden",
-			],
-		)
 			
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
@@ -647,6 +647,7 @@ def getPythonConfig( env, flags ) :
 	return r
 
 pythonEnv = env.Copy()
+pythonEnv.Replace( CXXFLAGS = env.subst("$PYTHONCXXFLAGS") )
 
 # decide where python is
 if pythonEnv["PYTHON"]=="" :
@@ -690,6 +691,7 @@ if pythonEnv["PLATFORM"]=="darwin" :
 ###########################################################################################
 
 testEnv = env.Copy()
+testEnv.Replace( CXXFLAGS = env.subst("$TESTCXXFLAGS") )
 
 testEnv.Prepend( LIBPATH = [ "./lib" ] )
 
@@ -702,8 +704,6 @@ testEnv["ENV"]["DYLD_LIBRARY_PATH" if Environment()["PLATFORM"]=="darwin" else "
 
 if env["PLATFORM"]=="darwin" :	
 	# Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
-	if not testEnv["DEBUG"] :
-		testEnv.Append( CXXFLAGS = "-O0" )
 	
 	# Link to the boost unit test library	
 	if env.has_key("BOOST_MINOR_VERSION") and env["BOOST_MINOR_VERSION"] >= 35 :
@@ -712,8 +712,6 @@ if env["PLATFORM"]=="darwin" :
 		testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )	
 	
 else:
-	testEnv.Append( CXXFLAGS = "-O0" )
-
 	# Link to the boost unit test library
 	testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )	
 	
@@ -722,20 +720,6 @@ else:
 		testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
 
 testEnv["ENV"]["PYTHONPATH"] = "./python"
-
-###########################################################################################
-# Warning flags. We'd like to set these for all environments but boost::python and
-# boost::unit_test generate loads of warnings so we can't set it for the python bindings
-# or C++ tests. GCC 4.3.0 gives out a lot of boost warnings in general, too.
-###########################################################################################
-
-if compilerVersion < 430 :
-
-	env.Append(
-		CXXFLAGS = [
-			"-Werror",
-		],
-	)
 	
 ###########################################################################################
 # Helper functions
@@ -855,16 +839,6 @@ if doConfigure :
 		corePythonSources.remove( "src/IECore/bindings/FontBinding.cpp" )
 				
 	c.Finish()
-
-if compilerVersion < 350 :
-	# This is here to specifically address a problem in binutils-2.17 and later, when harmless warnings of the
-	# form "X: referenced in section '.rodata' of Y: defined in discarded section" were changed to errors
-	# We do it down here so it doesn't cause Configure tests to pass when they should really be failing.
-	# Only gcc-3.4 and earlier omits these warnings, so we don't need to do anything for later compiler
-	# versions.
-	env.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )
-	corePythonEnv.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )
-	coreEnv.Append( LINKFLAGS = "-Wl,--noinhibit-exec" )	
 
 
 # This is a simple mechanism to ensure that all of the installs get performed only after all of the builds

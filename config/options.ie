@@ -36,6 +36,8 @@ import os
 import sys
 import os.path
 import IEEnv
+import re
+import copy
 
 def getOption( name, default ) :
 
@@ -58,6 +60,63 @@ os.environ["COMPILER"] = compiler
 os.environ["COMPILER_VERSION"] = compilerVersion
 
 CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
+
+m = re.compile( "^([0-9]+)\.([0-9]+)\.([0-9]+)$" ).match( compilerVersion )
+if not m:
+	raise RuntimeError( "Cannot determine compiler version" )
+	
+compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2, 3 )
+compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
+
+debug = getOption( "DEBUG", False )
+CXXFLAGS = [ '-pipe', '-Wall' ]
+	
+if debug :
+
+	CXXFLAGS += [ "-g" ]
+
+else :
+
+	CXXFLAGS += [ "-DNDEBUG" ]
+		
+	# "-fvisibility-inlines-hidden" is only available on newer releases of gcc, but shows
+	# some issues with 64-bit builds.	
+	if compilerVersionInt >= 400 and IEEnv.platformHardware() != "x86_64" :
+
+		CXXFLAGS += [ "-fvisibility-inlines-hidden" ]
+
+
+TESTCXXFLAGS = copy.copy( CXXFLAGS )
+	
+# Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
+TESTCXXFLAGS += [ "-O0" ]
+	
+if not debug :
+
+	CXXFLAGS += [ "-O2" ]		
+
+
+PYTHONCXXFLAGS = copy.copy( CXXFLAGS )
+	
+###########################################################################################
+# Warning flags. We'd like to set these for all environments but boost::python and
+# boost::unit_test generate loads of warnings so we can't set it for the python bindings
+# or C++ tests. GCC 4.3.0 gives out a lot of boost warnings in general, too.
+###########################################################################################		
+if compilerVersionInt < 430 :
+
+	CXXFLAGS += [ "-Werror" ]
+	
+LINKFLAGS = []	
+if compilerVersionInt < 350 :
+	##########################################################################################################
+	# This is here to specifically address a problem in binutils-2.17 and later, when harmless warnings of the
+	# form "X: referenced in section '.rodata' of Y: defined in discarded section" were changed to errors
+	# Only gcc-3.4 and earlier omits these warnings, so we don't need to do anything for later compiler
+	# versions.
+	##########################################################################################################
+	LINKFLAGS += [ "-Wl,--noinhibit-exec" ]
+	
 
 # set the include paths
 BOOST_INCLUDE_PATH = "/software/tools/include/boost/1.35.0"
