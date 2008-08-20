@@ -35,7 +35,7 @@
 import IECore
 import IECoreMaya
 import maya.cmds
-from IECoreMaya.ParameterUI import ParameterUI
+from ParameterUI import ParameterUI
 
 class SplineParameterUI( ParameterUI ) :
 
