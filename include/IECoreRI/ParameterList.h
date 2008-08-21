@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -84,13 +84,16 @@ class ParameterList
 		const char *type( const std::string &name, IECore::ConstDataPtr d, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
 		const void *value( IECore::ConstDataPtr d );
 		
-		// call this to say how many parameters you wish to populate the member data with
-		void reserveParameters( size_t n );
-		// then call this n times to populate the member data
+		// Call one of these to reserve enough space in the arrays below to represent all the parameters.
+		void reserve( const IECore::CompoundDataMap &parameters );
+		void reserve( IECore::ConstDataPtr &parameter );
+		void accumulateReservations( const IECore::ConstDataPtr d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats );
+		// Then call this n times to populate the member data
 		void appendParameter( const std::string &name, IECore::ConstDataPtr d, const std::map<std::string, std::string> *typeHints );
 		std::vector<const char *> m_charPtrs;
 		std::vector<std::string> m_strings;
 		std::vector<int> m_ints;
+		std::vector<float> m_floats;
 		std::vector<const char *> m_tokens;
 		std::vector<const void *> m_values;
 	

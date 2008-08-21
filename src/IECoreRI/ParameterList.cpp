@@ -46,7 +46,7 @@ using namespace boost;
 
 ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const std::map<std::string, std::string> *typeHints )
 {
-	reserveParameters( parameters.size() );
+	reserve( parameters );
 	CompoundDataMap::const_iterator it;
 	for( it=parameters.begin(); it!=parameters.end(); it++ )
 	{
@@ -57,7 +57,7 @@ ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const s
 ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const std::string &prefix,
 	const std::map<std::string, std::string> *typeHints )
 {
-	reserveParameters( parameters.size() );
+	reserve( parameters );
 	CompoundDataMap::const_iterator it;
 	for( it=parameters.begin(); it!=parameters.end(); it++ )
 	{
@@ -70,7 +70,7 @@ ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const s
 			
 ParameterList::ParameterList( const std::string &name, IECore::ConstDataPtr parameter, const std::map<std::string, std::string> *typeHints )
 {
-	reserveParameters( 1 );
+	reserve( parameter );
 	appendParameter( name, parameter, typeHints );
 }
 			
@@ -148,28 +148,132 @@ const void *ParameterList::value( IECore::ConstDataPtr d )
 	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );	
 }
 
-void ParameterList::reserveParameters( size_t n )
+void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
 {
-	m_strings.reserve( n );
-	m_charPtrs.reserve( n );
-	m_ints.reserve( n );
+	size_t numStrings = 0;
+	size_t numCharPtrs = 0;
+	size_t numInts = 0;
+	size_t numFloats = 0;
+	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
+	{
+		accumulateReservations( it->second, numStrings, numCharPtrs, numInts, numFloats );
+	}
+	m_strings.reserve( numStrings );
+	m_charPtrs.reserve( numCharPtrs );
+	m_ints.reserve( numInts );
+	m_floats.reserve( numFloats );
+}
+
+void ParameterList::reserve( IECore::ConstDataPtr &parameter )
+{
+	size_t numStrings = 0;
+	size_t numCharPtrs = 0;
+	size_t numInts = 0;
+	size_t numFloats = 0;
+	accumulateReservations( parameter, numStrings, numCharPtrs, numInts, numFloats );
+	m_strings.reserve( numStrings );
+	m_charPtrs.reserve( numCharPtrs );
+	m_ints.reserve( numInts );
+	m_floats.reserve( numFloats );
+}
+
+void ParameterList::accumulateReservations( const IECore::ConstDataPtr d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats )
+{
+	numStrings++; // for the formatted parameter name
+	IECore::TypeId t = d->typeId();
+	switch( t )
+	{
+		case StringDataTypeId :
+			numCharPtrs++;
+			break;
+		case BoolDataTypeId :
+			numInts++;
+			break;
+		case SplineffDataTypeId :
+			{
+				size_t s = static_cast<const SplineffData *>( d.get() )->readable().points.size();
+				numFloats += s * 2; // one for each position and one for each value
+				numStrings++; // for the second formatted parameter name (splines become two array parameters)
+			}
+			break;
+		case SplinefColor3fDataTypeId :
+			{
+				size_t s = static_cast<const SplinefColor3fData *>( d.get() )->readable().points.size();
+				numFloats += s * 4; // one for each position and three for each value
+				numStrings++; // for the second formatted parameter name (splines become two array parameters)
+			}
+			break;
+		default :
+			break;
+			// no special handling required
+	}
 }
 
 void ParameterList::appendParameter( const std::string &name, IECore::ConstDataPtr d, const std::map<std::string, std::string> *typeHints )
 {
-	size_t arraySize = 0;
-	const char *t = type( name, d, arraySize, typeHints );
-	if( t )
+	// we have to deal with the spline types separately, as they map to two shader parameters rather than one.
+	IECore::TypeId typeId = d->typeId();
+	if( typeId==SplineffDataTypeId )
 	{
-		if( arraySize )
-		{
-			m_strings.push_back( boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ) );
-		}
-		else
-		{
-			m_strings.push_back( string( t ) + " " + name );
-		}
+		const IECore::Splineff &spline = static_cast<const SplineffData *>( d.get() )->readable();
+		size_t size = spline.points.size();
+		// put all the positions in one array parameter
+		m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
 		m_tokens.push_back( m_strings.rbegin()->c_str() );
-		m_values.push_back( value( d ) );
+		m_values.push_back( &(m_floats[0]) + m_floats.size() );
+		for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+		{
+			m_floats.push_back( it->first );
+		}
+		// and put all the values in another
+		m_strings.push_back( boost::str( boost::format( "float %sValues[%d]" ) % name % size ) );
+		m_tokens.push_back( m_strings.rbegin()->c_str() );
+		m_values.push_back( &(m_floats[0]) + m_floats.size() );
+		for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+		{
+			m_floats.push_back( it->second );
+		}
+	}
+	else if( typeId==SplinefColor3fDataTypeId )
+	{
+		const IECore::SplinefColor3f &spline = static_cast<const SplinefColor3fData *>( d.get() )->readable();
+		size_t size = spline.points.size();
+		// put all the positions in one array parameter
+		m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
+		m_tokens.push_back( m_strings.rbegin()->c_str() );
+		m_values.push_back( &(m_floats[0]) + m_floats.size() );
+		for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+		{
+			m_floats.push_back( it->first );
+		}
+		// and put all the values in another
+		m_strings.push_back( boost::str( boost::format( "color %sValues[%d]" ) % name % size ) );
+		m_tokens.push_back( m_strings.rbegin()->c_str() );
+		m_values.push_back( &(m_floats[0]) + m_floats.size() );
+		for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+		{
+			m_floats.push_back( it->second[0] );
+			m_floats.push_back( it->second[1] );
+			m_floats.push_back( it->second[2] );
+		}
+	}
+	else
+	{
+		// other types are easier - they map to just a single parameter
+		size_t arraySize = 0;
+		const char *t = type( name, d, arraySize, typeHints );
+		if( t )
+		{
+			if( arraySize )
+			{
+				m_strings.push_back( boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ) );
+			}
+			else
+			{
+				m_strings.push_back( string( t ) + " " + name );
+			}
+			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_values.push_back( value( d ) );
+		}
 	}
 }
