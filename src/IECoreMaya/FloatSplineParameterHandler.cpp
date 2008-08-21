@@ -129,9 +129,29 @@ MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 	
 	assert( indices.length() == fnRAttr.getNumEntries() );
 	
+	size_t pointsSizeMinus2 = spline.points.size() - 1;
 	unsigned idx = 0;
 	for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end(); ++it, ++idx )
 	{
+		// we commonly double up the endpoints on cortex splines to force interpolation to the end.
+		// maya does this implicitly, so we skip duplicated endpoints when passing the splines into maya.
+		// this avoids users having to be responsible for managing the duplicates, and gives them some consistency
+		// with the splines they edit elsewhere in maya.
+		if( idx==1 )
+		{
+			if( *it==*spline.points.begin() )
+			{
+				continue;
+			}
+		}
+		if( idx==pointsSizeMinus2 )
+		{
+			if( *it==*spline.points.rbegin() )
+			{
+				continue;
+			}
+		}
+		
 		if ( idx < indices.length() )
 		{
 			fnRAttr.setPositionAtIndex( it->first, indices[ idx ], &s );
@@ -209,12 +229,20 @@ MStatus FloatSplineParameterHandler<S>::setValue( const MPlug &plug, IECore::Par
 		
 		for ( unsigned i = 0; i < positions.length(); i ++)
 		{	
-			spline.points.insert( 
+			spline.points.insert(
 				typename S::PointContainer::value_type( 
 					static_cast< typename S::XType >( positions[i] ), static_cast< typename S::YType >( values[ i ] )
 				) 
 			);
 		}	
+	}
+	
+	// maya seems to do an implicit doubling up of the end points to cause interpolation to the ends.
+	// our spline has no such implicit behaviour so we explicitly double up.
+	if( spline.points.size() )
+	{
+		spline.points.insert( *spline.points.begin() );
+		spline.points.insert( *spline.points.rbegin() );
 	}
 	
 	p->setTypedValue( spline );
