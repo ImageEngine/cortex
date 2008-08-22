@@ -112,6 +112,8 @@ class LineSegment
 
 typedef LineSegment<Imath::V3f> LineSegment3f;
 typedef LineSegment<Imath::V3d> LineSegment3d;
+typedef LineSegment<Imath::V2f> LineSegment2f;
+typedef LineSegment<Imath::V2d> LineSegment2d;
 
 template<class T>
 std::ostream &operator << ( std::ostream &o, const LineSegment<T> &lineSegment );

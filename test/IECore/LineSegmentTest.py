@@ -185,6 +185,14 @@ class LineSegmentTest( unittest.TestCase ) :
 		self.assertEqual( l1.p0, l2.p0 + V3f( 1 ) )
 		self.assertEqual( l1.p1, l2.p1 + V3f( 1 ) )
 		
+	def testRepr( self ) :
+	
+		p0 = V3f( 0, 0, 0 )
+		p1 = V3f( 0, 0, 0 )		
+	
+		l = LineSegment3f( p0, p1 )
+		self.assertEqual( repr(l), "IECore.LineSegment3f( " + repr(p0) + ", " + repr(p1) + " )" )	
+		
 		
 		
 if __name__ == "__main__":

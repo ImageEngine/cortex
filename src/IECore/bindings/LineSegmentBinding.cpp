@@ -33,6 +33,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <boost/python.hpp>
+#include <cassert>
+
+#include "boost/static_assert.hpp"
 
 #include "IECore/LineSegment.h"
 #include "IECore/bindings/LineSegmentBinding.h"
@@ -43,6 +46,55 @@ namespace IECore
 {
 
 template<class L>
+static char *typeName()
+{
+	BOOST_STATIC_ASSERT( sizeof(L) == 0 );
+	return "";
+}
+
+template<>
+char *typeName<LineSegment2f>()
+{
+	return "LineSegment2f";
+}
+
+template<>
+char *typeName<LineSegment2d>()
+{
+	return "LineSegment2d";
+}
+
+template<>
+char *typeName<LineSegment3f>()
+{
+	return "LineSegment3f";
+}
+
+template<>
+char *typeName<LineSegment3d>()
+{
+	return "LineSegment3d";
+}
+
+template<class L>
+static std::string repr( L &x )
+{	
+	std::stringstream s;
+
+	s << "IECore." << typeName<L>() << "( ";
+	
+	object item0( x.p0 );
+	assert( item.attr0( "__repr__" ) != object() );
+	s << call_method< std::string >( item0.ptr(), "__repr__" ) << ", ";
+	
+	object item1( x.p1 );	
+	assert( item.attr1( "__repr__" ) != object() );	
+	s << call_method< std::string >( item1.ptr(), "__repr__" ) << " )";	
+	
+	return s.str();
+}
+
+template<class L>
 static tuple closestPoints( const L &l, const L &l2 )
 {
 	typename L::Point a, b;
@@ -51,17 +103,18 @@ static tuple closestPoints( const L &l, const L &l2 )
 }
 
 template<typename Vec>
-static void bind( const char *name )
+static void bind3D()
 {
 	typedef typename Vec::BaseType BaseType;
 	typedef LineSegment<Vec> L;
 	typedef Imath::Matrix44<BaseType> M;
 
-	class_<L>( name )
+	class_<L>( typeName< L >() )
 		.def( init<L>() )
 		.def( init<Vec, Vec>() )
 		.def_readwrite( "p0", &L::p0 )
 		.def_readwrite( "p1", &L::p1 )
+		.def( "__repr__", &repr<L> )
 		.def( "__call__", &L::operator() )
 		.def( "direction", &L::direction )
 		.def( "normalizedDirection", &L::normalizedDirection )
@@ -82,10 +135,41 @@ static void bind( const char *name )
 
 }
 
+template<typename Vec>
+static void bind2D()
+{
+	typedef typename Vec::BaseType BaseType;
+	typedef LineSegment<Vec> L;
+	typedef Imath::Matrix33<BaseType> M;
+
+	class_<L>( typeName< L >() )
+		.def( init<L>() )
+		.def( init<Vec, Vec>() )
+		.def_readwrite( "p0", &L::p0 )
+		.def_readwrite( "p1", &L::p1 )
+		.def( "__repr__", &repr<L> )
+		.def( "__call__", &L::operator() )
+		.def( "direction", &L::direction )
+		.def( "normalizedDirection", &L::normalizedDirection )
+		.def( "length", &L::length )
+		.def( "length2", &L::length2 )
+		.def( "closestPointTo", &L::closestPointTo )
+		.def( "distanceTo", (typename L::BaseType (L::*)( const Vec & ) const)&L::distanceTo )	
+		.def( "distance2To", (typename L::BaseType (L::*)( const Vec & ) const)&L::distance2To )		
+		.def( self *= M() )
+		.def( self * M() )
+		.def( self == self )
+		.def( self != self )
+	;
+
+}
+
 void bindLineSegment()
 {
-	bind<Imath::V3f>( "LineSegment3f" );
-	bind<Imath::V3d>( "LineSegment3d" );
+	bind3D<Imath::V3f>();
+	bind3D<Imath::V3d>();
+	bind2D<Imath::V2f>();
+	bind2D<Imath::V2d>();	
 }
 
 } // namespace IECore
