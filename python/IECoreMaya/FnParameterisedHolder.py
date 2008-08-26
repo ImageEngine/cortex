@@ -108,3 +108,13 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	def plugParameter( self, plug ) :
 	
 		return _IECoreMaya._parameterisedHolderPlugParameter( self, plug )
+
+	## Returns the full path name to this node.
+	def fullPathName( self ) :
+	
+		try :
+			f = maya.OpenMaya.MFnDagNode( self.object() )
+			return f.fullPathName()
+		finally :
+			return self.name()
+		
