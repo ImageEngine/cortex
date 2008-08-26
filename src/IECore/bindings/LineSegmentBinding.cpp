@@ -46,32 +46,32 @@ namespace IECore
 {
 
 template<class L>
-static char *typeName()
+static const char *typeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(L) == 0 );
 	return "";
 }
 
 template<>
-char *typeName<LineSegment2f>()
+static const char *typeName<LineSegment2f>()
 {
 	return "LineSegment2f";
 }
 
 template<>
-char *typeName<LineSegment2d>()
+static const char *typeName<LineSegment2d>()
 {
 	return "LineSegment2d";
 }
 
 template<>
-char *typeName<LineSegment3f>()
+static const char *typeName<LineSegment3f>()
 {
 	return "LineSegment3f";
 }
 
 template<>
-char *typeName<LineSegment3d>()
+static const char *typeName<LineSegment3d>()
 {
 	return "LineSegment3d";
 }
@@ -109,7 +109,7 @@ static void bind3D()
 	typedef LineSegment<Vec> L;
 	typedef Imath::Matrix44<BaseType> M;
 
-	class_<L>( typeName< L >() )
+	class_<L>( IECore::typeName< L >() )
 		.def( init<L>() )
 		.def( init<Vec, Vec>() )
 		.def_readwrite( "p0", &L::p0 )
@@ -142,7 +142,7 @@ static void bind2D()
 	typedef LineSegment<Vec> L;
 	typedef Imath::Matrix33<BaseType> M;
 
-	class_<L>( typeName< L >() )
+	class_<L>( IECore::typeName< L >() )
 		.def( init<L>() )
 		.def( init<Vec, Vec>() )
 		.def_readwrite( "p0", &L::p0 )
