@@ -187,6 +187,16 @@ class testFileSequence( unittest.TestCase ) :
 		
 		self.assertEqual( s.fileNames(), [ "a%20ctest.10000.tif", "a%20ctest.10001.tif" ] )
 		
+	def testSpacesInFilename( self ) :
+	
+		s = FileSequence( "space test.#.tif", FrameRange( 10000, 10001 ) )
+		
+		self.assertEqual( s.fileNames(), [ "space test.10000.tif", "space test.10001.tif" ] )	
+		
+		s = FileSequence( "spaces  test .#.tif", FrameRange( 10000, 10001 ) )
+		
+		self.assertEqual( s.fileNames(), [ "spaces  test .10000.tif", "spaces  test .10001.tif" ] )	
+		
 class testCompoundFrameList( unittest.TestCase ) :
 
 	def testConstructor( self ) :
