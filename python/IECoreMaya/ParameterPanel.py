@@ -39,6 +39,9 @@ import maya.OpenMaya
 import IECore
 import IECoreMaya
 
+## \todo Extract out the generic functionality of forwarding the mel calls into instance methods into
+# a standalone Panel class, and use this as a base class for the ParameterPanel class. Then we can reuse the
+# forwarding code when implementing other panel types.
 class ParameterPanel :
 
 	panels = {}
