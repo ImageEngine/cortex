@@ -49,6 +49,33 @@ import maya.mel
 #
 # radialPosition :
 # specifies the radial position of the submenu (if the parent is a marking menu).
+#
+# \bug This leaks the MenuDefinition, because maya leaks the postMenuCommand object. This could
+# be a problem if the menu definition references methods on objects which are significant in terms
+# of memory use - for instance ParameterUI objects (which reference Parameter values). This code
+# demonstrates the problem :
+#
+# import maya.cmds
+# import IECore
+# import IECoreMaya
+# import weakref
+#
+# w = maya.cmds.window( menuBar=True )
+# m = IECore.MenuDefinition()
+# mr = weakref.ref( m )
+# mi = IECoreMaya.createMenu( m, w, "L" )
+# del m
+# maya.cmds.showWindow( w )
+#
+# maya.cmds.deleteUI( w )
+# print mr, mr()
+#
+# You would hope the weakref would no longer be valid, but it is - indicating the leak.
+# 
+# #\todo We might be able to work around this by passing executable strings to the postMenuCommand,
+# with keys to some dictionary which stores the MenuDefinitions. Then we can remove the 
+# definitions from some uiDeleted scriptjob for the menu. Alternatively Alias could fix the damn
+# thing themselves.
 def createMenu( definition, parent, label="", insertAfter=None, radialPosition=None ) :	
 	
 	menu = None
