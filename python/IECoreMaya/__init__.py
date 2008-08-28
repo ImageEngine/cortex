@@ -52,4 +52,5 @@ from FnConverterHolder import FnConverterHolder
 from StringUtil import *
 from MayaTypeId import MayaTypeId
 from ParameterPanel import ParameterPanel
+from AttributeEditorControl import AttributeEditorControl
 from FnProceduralHolder import FnProceduralHolder

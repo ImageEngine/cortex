@@ -67,6 +67,9 @@ global proc ieParameterisedHolderUIParametersControl()
 /// A global dictionary from Attribute Editor parent layouts to ParameterUI objects
 iePython -command "ieAEParameterUIs = {}";
 
+/// \todo This leaks. The global dictionary of ParameterUI objects never gets emptied. The ParameterUI objects hold
+/// references to Parameters. The Parameters potentially refer to big fat meshes and images. Tidy this up (perhaps using
+/// the AttributeEditorControl stuff) so that the ParameterUIs are destroyed when the layout containing them is destroyed.
 global proc ieParameterisedHolderUIParametersNew( string $attrName )
 {
 	setUITemplate -pushTemplate attributeEditorTemplate;
