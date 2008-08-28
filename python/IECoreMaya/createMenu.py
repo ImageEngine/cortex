@@ -39,8 +39,17 @@ import maya.mel
 ## Creates a maya menu from an IECore.MenuDefinition. The menu is built dynamically when it's
 # displayed, so the definition can be edited at any time to change the menu. parent may be a
 # window (in which case the menu is added to the menu bar), a menu (in which case a submenu is created)
-# or a control (in which case a popup menu is created).
-def createMenu( definition, parent, label="", insertAfter=None ) :	
+# or a control (in which case a popup menu is created). The optional keyword arguments operate as follows :
+#
+# label :
+# specifies a label for the submenu (if the parent is a menu) or menubar item (if the parent is a window).
+#
+# insertAfter :
+# specifies the menu item the submenu should be inserted after (if the parent is a menu).
+#
+# radialPosition :
+# specifies the radial position of the submenu (if the parent is a marking menu).
+def createMenu( definition, parent, label="", insertAfter=None, radialPosition=None ) :	
 	
 	menu = None
 	if maya.cmds.window( parent, query=True, exists=True ) :
@@ -48,10 +57,12 @@ def createMenu( definition, parent, label="", insertAfter=None ) :
 		menu = maya.cmds.menu( label=label, parent=parent, tearOff=True )
 	elif maya.cmds.menu( parent, query=True, exists=True ) :
 		# parent is a menu - we're adding a submenu
+		kw = {}
 		if not (insertAfter is None) :
-			menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True, insertAfter=insertAfter )
-		else :
-			menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True )
+			kw["insertAfter"] = insertAfter
+		if radialPosition :
+			kw["radialPosition"] = radialPosition
+		menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True, **kw )
 	else :
 		# assume parent is a control which can accept a popup menu 
 		menu = maya.cmds.popupMenu( parent=parent )
