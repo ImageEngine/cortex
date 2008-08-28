@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,24 +32,49 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
-
-from ParameterUI import ParameterUI
-from SplineParameterUI import SplineParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
+import maya.OpenMaya
+import maya.cmds
 from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
-from MayaTypeId import MayaTypeId
-from ParameterPanel import ParameterPanel
-from FnProceduralHolder import FnProceduralHolder
+
+## A function set for operating on the IECoreMaya::ProceduralHolder type.
+class FnProceduralHolder( FnParameterisedHolder ) :
+
+	## Initialise the function set for the given procedural object, which may
+	# either be an MObject or a node name in string or unicode form.
+	def __init__( self, object ) :
+	
+		FnParameterisedHolder.__init__( self, object )
+
+	## Returns a set of the names of any currently selected components. These names
+	# are specified by the procedural by setting the "name" attribute in the
+	# renderer.
+	def selectedComponentNames( self ) :
+	
+		result = set()
+	
+		s = maya.OpenMaya.MSelectionList()
+		maya.OpenMaya.MGlobal.getActiveSelectionList( s )
+
+		fullPathName = self.fullPathName()
+		for i in range( 0, s.length() ) :
+		
+			try :
+			
+				p = maya.OpenMaya.MDagPath()
+				c = maya.OpenMaya.MObject()
+				s.getDagPath( i, p, c )
+				
+				if p.node()==self.object() :
+					
+					fnC = maya.OpenMaya.MFnSingleIndexedComponent( c )
+					a = maya.OpenMaya.MIntArray()
+					fnC.getElements( a )
+					
+					for j in range( 0, a.length() ) :
+						
+						result.add( maya.cmds.getAttr( fullPathName + ".proceduralComponents[" + str( a[j] ) + "]" ) )
+					
+			except :
+				pass
+
+		return result
