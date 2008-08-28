@@ -72,7 +72,7 @@ import maya.mel
 #
 # You would hope the weakref would no longer be valid, but it is - indicating the leak.
 # 
-# #\todo We might be able to work around this by passing executable strings to the postMenuCommand,
+# \todo We might be able to work around this by passing executable strings to the postMenuCommand,
 # with keys to some dictionary which stores the MenuDefinitions. Then we can remove the 
 # definitions from some uiDeleted scriptjob for the menu. Alternatively Alias could fix the damn
 # thing themselves.
