@@ -226,7 +226,9 @@ MBoundingBox ProceduralHolder::boundingBox() const
 
 MStatus ProceduralHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
-	if( plugParameter( plug ) || (!plug.parent().isNull() && plugParameter( plug.parent() ) ) )
+	/// \todo We should put "parm_" somewhere as a static const char * so everything can
+	/// reference it rather than repeating it.
+	if( std::string( plug.partialName().substring( 0, 4 ).asChar() ) == "parm_" )
 	{
 		// it's an input to the procedural
 		m_boundDirty = m_sceneDirty = true;
