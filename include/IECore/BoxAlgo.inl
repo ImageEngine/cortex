@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_BOXOPERATORS_INL
-#define IE_CORE_BOXOPERATORS_INL
+#ifndef IE_CORE_BOXALGO_INL
+#define IE_CORE_BOXALGO_INL
 
 namespace IECore
 {
@@ -44,7 +44,41 @@ std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj )
       os << "[ " << obj.min << ", " << obj.max << " ]";
       return os;
 }
+
+template <class T>
+Imath::Vec2<T> closestPointInBox(const Imath::Vec2<T>& p, const Imath::Box< Imath::Vec2<T> >& box )
+{
+	Imath::Vec2<T> b;
+
+	if (p.x < box.min.x)
+	{
+		b.x = box.min.x;
+	}
+	else if (p.x > box.max.x)
+	{
+		b.x = box.max.x;
+	}
+	else
+	{
+		b.x = p.x;
+	}
+
+	if (p.y < box.min.y)
+	{
+		b.y = box.min.y;
+	}
+	else if (p.y > box.max.y)
+	{
+		b.y = box.max.y;
+	}
+	else
+	{
+		b.y = p.y;
+	}	
+
+	return b;	
+}	
 	
 } // namespace IECore
 
-#endif // IE_CORE_BOXOPERATORS_INL
+#endif // IE_CORE_BOXALGO_INL

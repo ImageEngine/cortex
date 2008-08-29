@@ -33,11 +33,29 @@
 //////////////////////////////////////////////////////////////////////////
 
 //! \file BoxOperators.h
-/// \deprecated Defines operators which ideally would be already defined in ImathBox.h, now available in BoxAlgo.h
+/// Defines algorithms and operators which ideally would be already defined in ImathBox.h
 
-#ifndef IE_CORE_BOXOPERATORS_H
-#define IE_CORE_BOXOPERATORS_H
 
-#include "IECore/BoxAlgo.h"
+#ifndef IE_CORE_BOXALGO_H
+#define IE_CORE_BOXALGO_H
 
-#endif // IE_CORE_BOXOPERATOR_H
+#include <iostream>
+
+#include "OpenEXR/ImathBox.h"
+
+namespace IECore
+{
+
+/// Streaming for Imath::Box types
+template<class T>
+std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj );
+
+/// Closest point in box for 2D box types
+template <class T>
+Imath::Vec2<T> closestPointInBox(const Imath::Vec2<T>& p, const Imath::Box< Imath::Vec2<T> >& box );
+
+} // namespace IECore
+
+#include "IECore/BoxAlgo.inl"
+
+#endif // IE_CORE_BOXALGO_H
