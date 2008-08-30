@@ -109,7 +109,9 @@ static void bind3D()
 	typedef LineSegment<Vec> L;
 	typedef Imath::Matrix44<BaseType> M;
 
-	class_<L>( IECore::typeName< L >() )
+	const char *name = typeName< L >();
+
+	class_<L>( name )
 		.def( init<L>() )
 		.def( init<Vec, Vec>() )
 		.def_readwrite( "p0", &L::p0 )
@@ -142,7 +144,9 @@ static void bind2D()
 	typedef LineSegment<Vec> L;
 	typedef Imath::Matrix33<BaseType> M;
 
-	class_<L>( IECore::typeName< L >() )
+	const char *name = typeName< L >();
+
+	class_<L>( name )
 		.def( init<L>() )
 		.def( init<Vec, Vec>() )
 		.def_readwrite( "p0", &L::p0 )
@@ -169,7 +173,7 @@ void bindLineSegment()
 	bind3D<Imath::V3f>();
 	bind3D<Imath::V3d>();
 	bind2D<Imath::V2f>();
-	bind2D<Imath::V2d>();	
+	bind2D<Imath::V2d>();
 }
 
 } // namespace IECore
