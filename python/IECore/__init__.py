@@ -82,7 +82,7 @@ from LsHeaderOp import LsHeaderOp
 from curry import curry
 from MenuItemDefinition import MenuItemDefinition
 from MenuDefinition import MenuDefinition
-from ParameterParser import *
+from ParameterParser import ParameterParser
 from SearchReplaceOp import SearchReplaceOp
 from CapturingMessageHandler import CapturingMessageHandler
 from FileSequenceAnalyzerOp import FileSequenceAnalyzerOp
