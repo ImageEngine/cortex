@@ -190,6 +190,14 @@ class ParameterParser :
 	
 		cls.__typesToParsers[typeId] = parser
 		cls.__typesToSerialisers[typeId] = serialiser
+		
+	@classmethod
+	## Registers a default parser and serialiser for a Parameter type
+	# for which repr( parameter.getValue() ) yields a valid python statement.
+	def registerTypeWithRepr( cls, typeId ) :
+	
+		cls.__typesToParsers[typeId] = None
+		cls.__typesToSerialisers[typeId] = _serialiseUsingRepr	
 
 ###################################################################################################################
 # quoting and unquoting methods used in string parameters
@@ -375,7 +383,7 @@ def __serialiseStringArray( parameter ) :
 def __serialiseUsingStr( parameter ) :
 	return str( parameter.getValidatedValue() )
 
-def __serialiseUsingRepr( parameter ) :
+def _serialiseUsingRepr( parameter ) :
 	return "'python:" + repr( parameter.getValidatedValue() ) + "'"
 			
 ParameterParser.registerType( IECore.BoolParameter.staticTypeId(), __parseBool, __serialiseUsingStr )
@@ -410,7 +418,7 @@ ParameterParser.registerType( IECore.Box2dParameter.staticTypeId(), ( lambda arg
 ParameterParser.registerType( IECore.Box3dParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box3dData, IECore.Box3d, IECore.V3d, False, args, parameter ) ), __serialiseUsingStr )
 ParameterParser.registerType( IECore.Box2iParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box2iData, IECore.Box2i, IECore.V2i, True, args, parameter ) ), __serialiseUsingStr )
 ParameterParser.registerType( IECore.Box3iParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box3iData, IECore.Box3i, IECore.V3i, True, args, parameter ) ), __serialiseUsingStr )
-ParameterParser.registerType( IECore.SplineffParameter.staticTypeId(), None, __serialiseUsingRepr )
-ParameterParser.registerType( IECore.SplinefColor3fParameter.staticTypeId(), None, __serialiseUsingRepr )
+ParameterParser.registerType( IECore.SplineffParameter.staticTypeId(), None, _serialiseUsingRepr )
+ParameterParser.registerType( IECore.SplinefColor3fParameter.staticTypeId(), None, _serialiseUsingRepr )
 		
 __all__ = [ "ParameterParser" ]
