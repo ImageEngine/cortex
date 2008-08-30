@@ -65,9 +65,14 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	def setParameterised( self, classNameOrParameterised, classVersion=None, envVarName=None ) :
 	
 		if isinstance( classNameOrParameterised, str ) :
-			return _IECoreMaya._parameterisedHolderSetParameterised( self, classNameOrParameterised, classVersion, envVarName )
+			result = _IECoreMaya._parameterisedHolderSetParameterised( self, classNameOrParameterised, classVersion, envVarName )
 		else :
-			return _IECoreMaya._parameterisedHolderSetParameterised( self, classNameOrParameterised )
+			result = _IECoreMaya._parameterisedHolderSetParameterised( self, classNameOrParameterised )
+	
+		for c in self.__setParameterisedCallbacks :
+			c( self )
+	
+		return result
 	
 	## Returns a tuple of the form (paramterised, className, classVersion, searchPathEnvVar).
 	def getParameterised( self ) :
@@ -117,4 +122,18 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 			return f.fullPathName()
 		finally :
 			return self.name()
+	
+	## Add a callback which will be invoked whenever FnParameterisedHolder.setParameterised
+	# is called. The expected function signature is callback( FnParameterisedHolder ).
+	@classmethod
+	def addSetParameterisedCallback( cls, callback ) :
+	
+		cls.__setParameterisedCallbacks.add( callback )
+	
+	## Remove a previously added callback.	
+	@classmethod
+	def removeSetParameterisedCallback( cls, callback ) :
+	
+		cls.__setParameterisedCallbacks.remove( callback )
 		
+	__setParameterisedCallbacks = set()
