@@ -82,6 +82,15 @@ class LayeredDict() :
 					return LayeredDict( dicts )
 				
 		raise KeyError( key )
+	
+	def __contains__( self, key ) :
+	
+		for i in range( 0, len( self.__dicts ) ) :
+		
+			if key in self.__dicts[i] :
+				return True
+				
+		return False
 		
 	def keys( self ) :
 	
@@ -91,3 +100,11 @@ class LayeredDict() :
 			allKeys.update( d.keys() )
 			
 		return list( allKeys )
+
+	def get( self, key, defaultValue ) :
+	
+		try :
+			return self.__getitem__( key )
+		except KeyError :
+			return defaultValue
+			
