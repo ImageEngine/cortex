@@ -84,11 +84,11 @@ static std::string repr( L &x )
 	s << "IECore." << typeName<L>() << "( ";
 	
 	object item0( x.p0 );
-	assert( item.attr0( "__repr__" ) != object() );
+	assert( item0.attr( "__repr__" ) != object() );
 	s << call_method< std::string >( item0.ptr(), "__repr__" ) << ", ";
 	
 	object item1( x.p1 );	
-	assert( item.attr1( "__repr__" ) != object() );	
+	assert( item1.attr( "__repr__" ) != object() );	
 	s << call_method< std::string >( item1.ptr(), "__repr__" ) << " )";	
 	
 	return s.str();
