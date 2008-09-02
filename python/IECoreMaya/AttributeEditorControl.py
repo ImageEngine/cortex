@@ -34,7 +34,6 @@
 
 import maya.cmds
 import maya.mel
-import maya.OpenMayaUI
 
 ## A base class to help in creating custom attribute editor controls
 # in a nice object oriented manner.
