@@ -78,3 +78,27 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 				pass
 
 		return result
+
+	## Selects the components specified by the passed names. If replace is True
+	# then the current selection is deselected first.
+	def selectComponentNames( self, componentNames ) :
+	
+		if not isinstance( componentNames, set ) :
+			componentNames = set( componentNames )
+	
+		fullPathName = self.fullPathName()
+		validIndices = maya.cmds.getAttr( fullPathName + ".proceduralComponents", multiIndices=True )
+		toSelect = []
+		for i in validIndices :
+			componentName = maya.cmds.getAttr( fullPathName + ".proceduralComponents[" + str( i ) + "]" )
+			if componentName in componentNames :
+				toSelect.append( fullPathName + ".f[" + str( i ) + "]" )
+				
+		maya.cmds.select( clear=True )
+		maya.cmds.selectMode( component=True )
+		maya.cmds.hilite( fullPathName )
+		for s in toSelect :
+			maya.cmds.select( s, add=True )		
+		
+		 
+
