@@ -531,4 +531,41 @@ IECore::DataPtr convert( const MCommandResult &result )
 	}
 }
 
+template<>
+MDistance convert( const double &from )
+{
+	return MDistance( from, MDistance::kCentimeters );
+}
+
+template<>
+double convert( const MDistance &from )
+{
+	return from.asCentimeters();
+}
+
+template<>
+MAngle convert( const double &from )
+{
+	return MAngle( from, MAngle::kRadians );
+}
+
+template<>
+double convert( const MAngle &from )
+{
+	return from.asRadians();
+}
+
+template<>
+MTime convert( const double &from )
+{
+	return MTime( from, MTime::kSeconds );
+}
+
+template<>
+double convert( const MTime &from )
+{
+	return from.as( MTime::kSeconds);
+}
+
+
 }	// namespace IECore

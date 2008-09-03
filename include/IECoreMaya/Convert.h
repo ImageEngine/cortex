@@ -58,6 +58,9 @@
 #include "maya/MTransformationMatrix.h"
 #include "maya/MCommandResult.h"
 #include "maya/MEulerRotation.h"
+#include "maya/MDistance.h"
+#include "maya/MAngle.h"
+#include "maya/MTime.h"
 
 #include <string>
 
@@ -185,6 +188,24 @@ MTransformationMatrix convert( const IECore::TransformationMatrixd &from );
 
 template<>
 IECore::DataPtr convert( const MCommandResult &from );
+
+template<>
+MDistance convert( const double &from );
+
+template<>
+double convert( const MDistance &from );
+
+template<>
+MAngle convert( const double &from );
+
+template<>
+double convert( const MAngle &from );
+
+template<>
+MTime convert( const double &from );
+
+template<>
+double convert( const MTime &from );
 
 } // namespace IECore
 
