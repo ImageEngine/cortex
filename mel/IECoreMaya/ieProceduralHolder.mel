@@ -46,7 +46,8 @@
 /// is less than 0 then the default version for the class is used.
 global proc string ieProceduralHolderCreate( string $name, string $className, int $classVersion )
 {
-	string $node = ieNodeCreateShapeWithParent( $name, "ieProceduralHolder" );
+	string $validName = substituteAllString($name, "/", "_");
+	string $node = ieNodeCreateShapeWithParent( $validName, "ieProceduralHolder" );
 	sets -add initialShadingGroup $node;
 	ieParameterisedHolderSetParameterised( $node, $className, $classVersion, "IECORE_PROCEDURAL_PATHS" );
 	return $node;
