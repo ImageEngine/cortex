@@ -43,7 +43,7 @@ def getOption( name, default ) :
 
 	import sys
 	result = default
-	for a in sys.argv :
+	for a in sys.argv:
 		if a[:len(name)+1]==name+"=" :	
 			result = a[len(name)+1:]
 
