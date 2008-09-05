@@ -37,8 +37,6 @@ import maya.mel
 
 ## A base class to help in creating custom attribute editor controls
 # in a nice object oriented manner.
-## \todo Remove things from the __instances array when their layouts have
-# been destroyed.
 class AttributeEditorControl :
 	
 	## Derived classes should first call the base class __init__, before
