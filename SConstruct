@@ -1412,8 +1412,18 @@ if doConfigure :
 			# we can't add this earlier as then it's built during the configure stage, and that's no good
 			nukeEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
-			nukeEnv.Append( LIBS = [ "DDImage%d.%d" % ( nukeMajorVersion, nukeMinorVersion ) ] )
-
+			if nukeMajorVersion >=5 and nukeMinorVersion >=0 :
+				nukeEnv.Append( LIBS = [ "DDImage" ] )
+			else :
+				nukeEnv.Append( LIBS = [ "DDImage%d.%d" % ( nukeMajorVersion, nukeMinorVersion ) ] )
+				
+			nukeEnv.Append(
+				CPPFLAGS = [
+    				"-DIECORENUKE_NUKE_MAJOR_VERSION=$NUKE_MAJOR_VERSION",
+    				"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
+				]
+			)
+				
 			nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
 			nukeSources = glob.glob( "src/IECoreNuke/*.cpp" )
 			nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )

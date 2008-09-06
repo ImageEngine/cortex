@@ -35,7 +35,16 @@
 #ifndef IECORENUKE_CURVELOOKUP_H
 #define IECORENUKE_CURVELOOKUP_H
 
+#if IECORENUKE_NUKE_MAJOR_VERSION >= 5 && IECORENUKE_NUKE_MINOR_VERSION > 0 
+#define IECORENUKE_NO_ANIMATION
+#endif
+
+#ifdef IECORENUKE_NO_ANIMATION
+#include "DDImage/LookupCurves.h"
+#else
 #include "DDImage/Animation.h"
+#endif
+
 #include "DDImage/Knobs.h"
 
 #include <vector>
@@ -47,7 +56,8 @@ namespace IECoreNuke
 /// which can be used to provide lookup curves to a node. It contains everything necessary to declare
 /// the interface, sample the curve in _evaluate(), and then interpolate those sample values
 /// to perform quick evaluations in engine(). It's templated on the type you want to be returned
-/// from the evaluate() method.
+/// from the evaluate() method. It also deals with the fact that the API for using curve lookups
+/// changed completely between Nuke5 and Nuke5.1.
 template<class T>
 class CurveLookup
 {
@@ -57,6 +67,7 @@ class CurveLookup
 		typedef T BaseType;
 	
 		CurveLookup( const std::string &name, const std::string &label, const std::string &toolTip = "" );
+		~CurveLookup();
 		/// Call this in the constructor for a node, to add as many curves as required. Returns the index
 		/// which should be passed to the validate and evaluate calls below, but this is guaranteed to
 		/// be 0 for the first curve, 1 for the second etc. You cannot add more curves once knobs()
@@ -85,12 +96,21 @@ class CurveLookup
 		CurveLookup( const CurveLookup<T> &other );
 		const CurveLookup<T> &operator=( const CurveLookup &other );
 	
+		unsigned numCurves() const;
+	
 		std::string m_name;
 		std::string m_label;
 		std::string m_toolTip;
+		
+#ifdef IECORENUKE_NO_ANIMATION	
+		std::vector<std::string> *m_namesAndDefaultsStrings;
+		std::vector<DD::Image::CurveDescription> *m_curveDescriptions;
+		DD::Image::LookupCurves *m_curves;
+#else
 		std::vector<std::string> m_namesAndDefaultsStrings;
 		std::vector<const char *> m_namesAndDefaultsPtrs;
 		std::vector<const DD::Image::Animation *> m_curves;
+#endif
 
 		struct Lookup
 		{

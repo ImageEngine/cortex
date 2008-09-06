@@ -47,6 +47,22 @@ template<class T>
 CurveLookup<T>::CurveLookup( const std::string &name, const std::string &label, const std::string &toolTip )
 	:	m_name( name ), m_label( label ), m_toolTip( toolTip )
 {
+#ifdef IECORENUKE_NO_ANIMATION
+	m_namesAndDefaultsStrings = new std::vector<std::string>;
+	m_curveDescriptions = new std::vector<DD::Image::CurveDescription>;
+	m_curves = 0;
+#endif
+}
+
+template<class T>
+CurveLookup<T>::~CurveLookup()
+{
+#ifdef IECORENUKE_NO_ANIMATION
+	delete m_curves;
+	// Note that we're not deliberately not deleting m_namesAndDefaultsStrings
+	// or m_curveDescriptions - the nuke docs say that they have to remain forever, so
+	// we're effectively forced into leaking memory here.
+#endif
 }
 
 template<class T>
@@ -65,14 +81,36 @@ const CurveLookup<T> &CurveLookup<T>::operator=( const CurveLookup<T> &other )
 template<class T>
 int CurveLookup<T>::addCurve( const std::string &name, const std::string &defaultCurve )
 {
+#ifdef IECORENUKE_NO_ANIMATION
+	m_namesAndDefaultsStrings->push_back( name );
+	m_namesAndDefaultsStrings->push_back( defaultCurve );
+	return m_namesAndDefaultsStrings->size()/2 - 1;
+#else
 	m_namesAndDefaultsStrings.push_back( name );
 	m_namesAndDefaultsStrings.push_back( defaultCurve );
 	return m_namesAndDefaultsStrings.size()/2 - 1;
+#endif
 }
 
 template<class T>
 void CurveLookup<T>::knob( DD::Image::Knob_Callback f )
 {
+#ifdef IECORENUKE_NO_ANIMATION
+	if( !m_curves )
+	{
+		for( unsigned i=0; i<m_namesAndDefaultsStrings->size(); i+=2 )
+		{
+			DD::Image::CurveDescription d;
+			d.name = (*m_namesAndDefaultsStrings)[i].c_str();
+			d.defaultValue = (*m_namesAndDefaultsStrings)[i+1].c_str();
+			m_curveDescriptions->push_back( d );
+		}
+		DD::Image::CurveDescription endMarker = { 0 };
+		m_curveDescriptions->push_back( endMarker );
+		m_curves = new DD::Image::LookupCurves( &*(m_curveDescriptions->begin()) );
+	}
+	LookupCurves_knob( f, m_curves, m_name.c_str(), m_label.c_str() ); 	
+#else
 	if( !m_namesAndDefaultsPtrs.size() )
 	{
 		for( std::vector<std::string>::const_iterator it=m_namesAndDefaultsStrings.begin(); it!=m_namesAndDefaultsStrings.end(); it++ )
@@ -84,13 +122,24 @@ void CurveLookup<T>::knob( DD::Image::Knob_Callback f )
 		m_namesAndDefaultsPtrs.push_back( 0 );
 	}
 	Animation_knob( f, &(m_curves[0]), &(m_namesAndDefaultsPtrs[0]), m_name.c_str(), m_label.c_str() );
+#endif
 	Tooltip( f, m_toolTip.c_str() );
+}
+
+template<class T>
+unsigned CurveLookup<T>::numCurves() const
+{
+#ifdef IECORENUKE_NO_ANIMATION
+	return m_curves->size();
+#else
+	return m_curves.size();
+#endif
 }
 
 template<class T>
 void CurveLookup<T>::validate( T xMin, T xMax, unsigned numSamples )
 {
-	for( unsigned i=0; i<m_curves.size(); i++ )
+	for( unsigned i=0; i<numCurves(); i++ )
 	{
 		validate( i, xMin, xMax, numSamples );
 	}
@@ -100,8 +149,8 @@ template<class T>
 void CurveLookup<T>::validate( unsigned curveIndex, T xMin, T xMax, unsigned numSamples )
 {
 	assert( numSamples>=2 );
-	assert( curveIndex<m_curves.size() );
-	m_lookups.resize( m_curves.size() );
+	assert( curveIndex<numCurves() );
+	m_lookups.resize( numCurves() );
 	
 	Lookup &lookup = m_lookups[curveIndex];
 	lookup.values.resize( numSamples );
@@ -109,7 +158,11 @@ void CurveLookup<T>::validate( unsigned curveIndex, T xMin, T xMax, unsigned num
 	T x = xMin;
 	for( unsigned i=0; i<numSamples; i++ )
 	{
+#ifdef IECORENUKE_NO_ANIMATION
+		lookup.values[i] = m_curves->getValue( curveIndex, x );
+#else	
 		lookup.values[i] = m_curves[curveIndex]->evaluate( x );
+#endif
 		x += xStep;
 	}
 	lookup.xMin = xMin;
@@ -120,16 +173,25 @@ void CurveLookup<T>::validate( unsigned curveIndex, T xMin, T xMax, unsigned num
 template<class T>
 void CurveLookup<T>::append( DD::Image::Hash &hash ) const
 {
+#ifdef IECORENUKE_NO_ANIMATION
+	m_curves->append( hash );
+#else
 	for( unsigned i=0; i<m_curves.size(); i++ )
 	{
 		append( i, hash );
 	}
+#endif
 }
 
 template<class T>
 void CurveLookup<T>::append( unsigned curveIndex, DD::Image::Hash &hash ) const
 {
+#ifdef IECORENUKE_NO_ANIMATION
+	// we can't do them one by one with the new nuke version.
+	m_curves->append( hash );
+#else
 	m_curves[curveIndex]->append( hash );
+#endif
 }
 
 template<class T>
