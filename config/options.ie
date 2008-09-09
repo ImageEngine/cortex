@@ -49,10 +49,35 @@ def getOption( name, default ) :
 
 	return result
 
-# get the compiler location using the registry
+# decide what compiler/app we're targeting. we either pass COMPILER_VERSION and COMPILER
+# to do a straight install in /software/tools or we pass an APP and APP_VERSION pair
+# to do an install in /software/tools/app/appVersion - in this case the compiler and settings
+# are dictated by the application.
+
 platform = IEEnv.platform()
-compiler = getOption( "COMPILER", IEEnv.registry["platformDefaults"][platform]["compiler"] )
-compilerVersion = getOption( "COMPILER_VERSION", IEEnv.registry["platformDefaults"][platform]["compilerVersion"]  )
+
+compiler = getOption( "COMPILER", None )
+compilerVersion = getOption( "COMPILER_VERSION", None )
+targetApp = getOption( "APP", None )
+if targetApp and (compiler or compilerVersion) :
+	raise RuntimeError( "Must specify only one of COMPILER or APP" )
+
+if targetApp :
+	if targetApp!="nuke" :
+		raise RuntimeError( "Check config logic applies to the new app and remove this exception." )
+	targetAppVersion = getOption( "APP_VERSION", os.environ.get( targetApp.upper() + "_VERSION" ) )
+	targetAppReg = IEEnv.registry["apps"][targetApp][targetAppVersion][platform]
+	compiler = targetAppReg["compiler"]
+	compilerVersion = targetAppReg["compilerVersion"]
+	openEXRVersion = targetAppReg.get( "openEXRVersion", "1.4.0" )
+else :
+	if not compiler :
+		compiler = IEEnv.registry["platformDefaults"][platform]["compiler"]
+	if not compilerVersion :
+		compilerVersion = IEEnv.registry["platformDefaults"][platform]["compilerVersion"]
+	openEXRVersion = "1.4.0"
+	
+# get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
 
 # We need to set these so that ENV_VARS_TO_IMPORT can supply the correct environment to the scons test environments
@@ -120,7 +145,7 @@ if compilerVersionInt < 350 :
 
 # set the include paths
 BOOST_INCLUDE_PATH = "/software/tools/include/boost/1.35.0"
-OPENEXR_INCLUDE_PATH = "/software/tools/include/OpenEXR/1.4.0"
+OPENEXR_INCLUDE_PATH = "/software/tools/include/OpenEXR/" + openEXRVersion
 TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
 JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
 GLEW_INCLUDE_PATH = '/software/tools/include/glew/1.4.0'
@@ -136,6 +161,10 @@ else:
 
 # find the right libraries based on compiler and platform
 LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
+if targetApp :
+	## \todo This is very nuke specific. Perhaps we should have a registry option to
+	# say what paths are required by what app?
+	LIBPATH = targetAppReg["location"] + ":" + LIBPATH
 
 # ignore python-config stuff and specify it all explicitly ourselves
 pythonVersion = getOption( "PYTHON_VERSION", "2.5" )
@@ -180,7 +209,7 @@ if IEEnv.platform() != "osx104.i686" :
 		if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
 			NUKE_ROOT = nukeReg["location"]
 			INSTALL_NUKELIB_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-			INSTALL_NUKEPYTHON_DIR = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/python/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
+			INSTALL_NUKEPYTHON_DIR = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 	except :
 		pass
 	
@@ -209,10 +238,16 @@ TEST_LIBPATH = ":".join( [ pythonReg["location"] + "/" + compiler + "/" + compil
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
 
-INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/cortex/$IECORE_MAJORMINORPATCH_VERSION"
-INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+if targetApp :
+	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/include/cortex/$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
+else :
+	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/cortex/$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
+
 INSTALL_MAYALIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_MEL_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/mel/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
