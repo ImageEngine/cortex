@@ -877,7 +877,10 @@ class NumericParameterUI( ParameterUI ) :
 			
 		if parameter.hasMaxValue():
 			kw['maxValue'] = parameter.maxValue
-						
+			
+			
+		# \todo Add a way of overriding precision for both float and double parameters, giving
+		# each a sensible (and probably different) default
 		if self.parameter.isInstanceOf( IECore.TypeId.DoubleParameter ) :
 		
 			kw['precision'] = 12
