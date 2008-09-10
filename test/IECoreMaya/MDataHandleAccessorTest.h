@@ -32,50 +32,46 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IE_COREMAYA_MDATAHANDLEACCESSORTEST_H
+#define IE_COREMAYA_MDATAHANDLEACCESSORTEST_H
+
 #include <iostream>
 
-#include "maya/MLibrary.h"
-#include "maya/MGlobal.h"
+#include "boost/test/unit_test.hpp"
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+#include "IECoreMaya/MDataHandleAccessor.h"
 
-#include "ObjectDataTest.h"
-#include "MDataHandleAccessorTest.h"
+namespace IECoreMaya
+{
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+/// Ensure that all specialisations instantiate correctly
+template class MDataHandleAccessor< MObject >;
+template class MDataHandleAccessor< bool >;
+template class MDataHandleAccessor< char >;
+template class MDataHandleAccessor< unsigned char >;
+template class MDataHandleAccessor< short >;
+template class MDataHandleAccessor< int >;
+template class MDataHandleAccessor< void* >;
+template class MDataHandleAccessor< float >;
+template class MDataHandleAccessor< double >;
+template class MDataHandleAccessor< MDistance >;
+template class MDataHandleAccessor< MAngle >;
+template class MDataHandleAccessor< MTime >;
+template class MDataHandleAccessor< short2 >;
+template class MDataHandleAccessor< int2 >;
+template class MDataHandleAccessor< float2 >;
+template class MDataHandleAccessor< double2 >;
+template class MDataHandleAccessor< short3 >;
+template class MDataHandleAccessor< int3 >;
+template class MDataHandleAccessor< float3 >;
+template class MDataHandleAccessor< double3 >;
+template class MDataHandleAccessor< MVector >;
+template class MDataHandleAccessor< MFloatVector >;
+template class MDataHandleAccessor< MMatrix >;
+template class MDataHandleAccessor< MFloatMatrix >;
+template class MDataHandleAccessor< MString >;
+template class MDataHandleAccessor< MPxData * >;
 
-using namespace IECoreMaya;
+} // namespace IECoreMaya
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
-{			
-	test_suite* test = BOOST_TEST_SUITE( "IECoreMaya unit test" );
-	
-	/// \todo Try and find a way of calling MLibrary::cleanup when Boost.Test exits
-	MStatus s = MLibrary::initialize( argv[0], false );
-	if ( !s ) 
-	{
-		std::cerr << "Could not initialize Maya standalone application: " << s << std::endl;
-		exit( 1 );
-        }
-	
-	MGlobal::executeCommand( "loadPlugin \"ieCore\"" );
-	
-	try
-	{
-		addObjectDataTest(test);
-	} 
-	catch ( std::exception &ex )
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-	
-	return test;
-}
+#endif // IE_COREMAYA_MDATAHANDLEACCESSORTEST_H
