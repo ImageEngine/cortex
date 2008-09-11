@@ -41,6 +41,7 @@
 #include "IECore/IndexedIOInterface.h"
 #include "IECore/FileSystemIndexedIO.h"
 #include "IECore/FileIndexedIO.h"
+#include "IECore/MemoryIndexedIO.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
 
@@ -58,6 +59,7 @@ void bindIndexedIORegexFilter(const char *bindName);
 void bindIndexedIOInterface(const char *bindName);
 void bindFileSystemIndexedIO(const char *bindName);
 void bindFileIndexedIO(const char *bindName);
+void bindMemoryIndexedIO(const char *bindName);
 
 void bindIndexedIO()
 {
@@ -72,6 +74,7 @@ void bindIndexedIO()
 	bindIndexedIOInterface("IndexedIOInterface");	
 	bindFileSystemIndexedIO("FileSystemIndexedIO");	
 	bindFileIndexedIO("FileIndexedIO");	
+	bindMemoryIndexedIO("MemoryIndexedIO");	
 }
 
 struct IndexedIOInterfaceHelper
@@ -294,6 +297,21 @@ void bindFileIndexedIO(const char *bindName)
 {	
 	class_< FileIndexedIO, FileIndexedIOPtr, boost::noncopyable, bases<IndexedIOInterface> >(bindName, no_init)
 		.def(init<const std::string &, const std::string &, IndexedIO::OpenMode >())
+	;
+	
+	implicitly_convertible< FileIndexedIOPtr, IndexedIOInterfacePtr >();
+}
+
+CharVectorDataPtr memoryIndexedIOBufferWrapper( MemoryIndexedIOPtr io )
+{
+	return io->buffer()->copy();
+}
+
+void bindMemoryIndexedIO(const char *bindName)
+{
+	class_< MemoryIndexedIO, MemoryIndexedIOPtr, boost::noncopyable, bases<FileIndexedIO> >(bindName, no_init)
+		.def(init<ConstCharVectorDataPtr, const std::string &, IndexedIO::OpenMode >())
+		.def( "buffer", memoryIndexedIOBufferWrapper )
 	;
 	
 	implicitly_convertible< FileIndexedIOPtr, IndexedIOInterfacePtr >();

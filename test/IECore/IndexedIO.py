@@ -422,13 +422,33 @@ class TestFileSystemIndexedIO(unittest.TestCase):
 					os.remove(os.path.join(root, name))
 				for name in dirs:				
 					os.rmdir(os.path.join(root, name))
-				
 			
 			os.rmdir("./test/FileSystemIndexedIO.fs/sub2")
 			
 		if os.path.isdir("./test/FileSystemIndexedIO.fs") :	
 			os.rmdir("./test/FileSystemIndexedIO.fs")
-							
+
+class TestMemoryIndexedIO(unittest.TestCase):
+
+	def test(self):
+		"""Test MemoryIndexedIO read/write operations."""
+		f = MemoryIndexedIO( CharVectorData(), "/", IndexedIOOpenMode.Write)
+		self.assertEqual( f.pwd() , "/" )
+		self.assertRaises( RuntimeError, FileSystemIndexedIO, "./test/FileSystemIndexedIO.fs", "/nonexistantentrypoint", IndexedIOOpenMode.Read)
+		txt = StringData("test1")
+		txt.save( f, "obj1" )
+		size1 = len( f.buffer() )
+		self.assert_( size1 > 0 )
+		txt.save( f, "obj2" )
+		size2 = len( f.buffer() )
+		self.assert_( size2 > size1 )
+
+		buf = f.buffer()
+
+		f2 = MemoryIndexedIO( buf, "/", IndexedIOOpenMode.Read)
+		self.assertEqual( txt, Object.load( f2, "obj1" ) )
+		self.assertEqual( txt, Object.load( f2, "obj2" ) )
+				
 class TestFileIndexedIO(unittest.TestCase):
 	
 	badNames = ['*', '!', '&', '^', '@', '#', '$', '(', ')', '<', '+',
