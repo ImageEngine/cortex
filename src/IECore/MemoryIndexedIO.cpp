@@ -41,16 +41,15 @@ using namespace IECore;
 MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode) 
 : FileIndexedIO()
 {
-
 	if (mode & IndexedIO::Write)
 	{
-		std::stringstream *f = new std::stringstream( std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out);
+		std::stringstream *f = new std::stringstream( std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
 		
 		open( f, root, mode, true );
 	}		
 	else if (mode & IndexedIO::Append)
 	{
-		if ( ! buf->readable().size() )
+		if ( !buf || ! buf->readable().size() )
 		{
 			/// Create new file
 			std::stringstream *f = new std::stringstream(  std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
