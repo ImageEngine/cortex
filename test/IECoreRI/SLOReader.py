@@ -92,6 +92,32 @@ class TestSLOReader( unittest.TestCase ) :
 			]
 		)	
 		
-				
+	def testTypes( self ) :
+	
+		r = SLOReader( "test/IECoreRI/shaders/types.sdl" )
+		s = r.read()
+		
+		expectedParams = [
+			["f", FloatData( 1 )],
+			["s", StringData( "s")],
+			["c", Color3fData( Color3f( 1, 2, 3 ) )],
+			["p", V3fData( V3f( 0, 1, 2 ) )],
+			["m", M44fData( M44f( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ) ) ],
+			["fa", FloatVectorData( [ 1, 2] ) ],
+			["sa", StringVectorData( [ "one", "two" ] ) ],
+			["ca", Color3fVectorData( [ Color3f( 1 ), Color3f( 2 ) ] ) ],
+			["pa", V3fVectorData( [ V3f( 2 ), V3f( 3 ) ] ) ],
+			["ma", M44fVectorData( [ M44f(), M44f() ] ) ],
+			["fav", FloatVectorData() ], 
+			["sav", StringVectorData() ], 
+			["cav", Color3fVectorData() ], 
+			["pav", V3fVectorData() ], 
+			["mav", M44fVectorData() ], 
+		]
+
+		for p in expectedParams :
+		
+			self.assertEqual( s.parameters[p[0]], p[1] )
+		
 if __name__ == "__main__":
     unittest.main()   

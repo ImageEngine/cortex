@@ -106,7 +106,15 @@ ObjectPtr SLOReader::doOperation( ConstCompoundObjectPtr operands )
 					if( arg->svd_arraylen==0 )
 					{
 						const SLO_POINT *p = arg->svd_default.pointval;
-						data = new V3fData( V3f( p->xval, p->yval, p->zval ) );
+						if( p )
+						{
+							data = new V3fData( V3f( p->xval, p->yval, p->zval ) );
+						}
+						else
+						{
+							// 0 length and null value signifies a variable length array
+							data = new V3fVectorData();
+						}
 					}
 					else
 					{
@@ -128,7 +136,15 @@ ObjectPtr SLOReader::doOperation( ConstCompoundObjectPtr operands )
 					if( arg->svd_arraylen==0 )
 					{
 						const SLO_POINT *p = arg->svd_default.pointval;
-						data = new Color3fData( Color3f( p->xval, p->yval, p->zval ) );
+						if( p )
+						{
+							data = new Color3fData( Color3f( p->xval, p->yval, p->zval ) );
+						}
+						else
+						{
+							// 0 length and null value signifies a variable length array
+							data = new Color3fVectorData();
+						}
 					}
 					else
 					{
@@ -148,7 +164,16 @@ ObjectPtr SLOReader::doOperation( ConstCompoundObjectPtr operands )
 				{
 					if( arg->svd_arraylen==0 )
 					{
-						data = new FloatData( *(arg->svd_default.scalarval) );
+						const float *value = arg->svd_default.scalarval;
+						if( value )
+						{
+							data = new FloatData( *value );
+						}
+						else
+						{
+							// 0 length and null value signifies a variable length array
+							data = new FloatVectorData();
+						}
 					}
 					else
 					{
@@ -167,12 +192,16 @@ ObjectPtr SLOReader::doOperation( ConstCompoundObjectPtr operands )
 				{
 					if( arg->svd_arraylen==0 )
 					{
-						/// \todo arraylen==0 && defaultValue==0 apparently means a variable
-						/// length array (gleaned from correspondence with 3delight guys).
-						/// this applies to all the types, so when we get the next release from
-						/// them we should update all this code to apply that rule.
 						const char *defaultValue = arg->svd_default.stringval;
-						data = new StringData( defaultValue ? defaultValue : "(null)" );
+						if( defaultValue )
+						{
+							data = new StringData( defaultValue );
+						}
+						else
+						{
+							// 0 length and null value signifies a variable length array
+							data = new StringVectorData();
+						}
 					}
 					else
 					{
@@ -196,11 +225,19 @@ ObjectPtr SLOReader::doOperation( ConstCompoundObjectPtr operands )
 					if( arg->svd_arraylen==0 )
 					{
 						const float *m = arg->svd_default.matrixval;
-						M44f mm(	m[0], m[1], m[2], m[3],
-									m[4], m[5], m[6], m[7],
-									m[8], m[9], m[10], m[11],
-									m[12], m[13], m[14], m[15] 	);
-						data = new M44fData( mm );
+						if( m )
+						{
+							M44f mm(	m[0], m[1], m[2], m[3],
+										m[4], m[5], m[6], m[7],
+										m[8], m[9], m[10], m[11],
+										m[12], m[13], m[14], m[15] 	);
+							data = new M44fData( mm );
+						}
+						else
+						{
+							// 0 length and null value signifies a variable length array
+							data = new M44fVectorData();
+						}
 					}
 					else
 					{
