@@ -36,6 +36,7 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include <boost/python.hpp>
 
+#include <cassert>
 #include <iostream>
 
 #include "IECore/IndexedIOInterface.h"
@@ -304,6 +305,7 @@ void bindFileIndexedIO(const char *bindName)
 
 CharVectorDataPtr memoryIndexedIOBufferWrapper( MemoryIndexedIOPtr io )
 {
+	assert( io );
 	return io->buffer()->copy();
 }
 
@@ -314,7 +316,7 @@ void bindMemoryIndexedIO(const char *bindName)
 		.def( "buffer", memoryIndexedIOBufferWrapper )
 	;
 	
-	implicitly_convertible< FileIndexedIOPtr, IndexedIOInterfacePtr >();
+	implicitly_convertible< MemoryIndexedIOPtr, FileIndexedIOPtr >();
 }
 
 void bindIndexedIOEntry(const char *bindName)
