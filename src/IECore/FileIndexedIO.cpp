@@ -1339,10 +1339,14 @@ void FileIndexedIO::IndexedFile::write(NodePtr node, const char *data, Imf::Int6
 {
 	/// Find next writable location			
 	Imf::Int64 loc = m_index->allocate( size );
-	
+
 	/// Seek 'write' pointer to writable location
 	m_stream->seekp( loc, std::ios::beg );
-	
+
+	/// Clear error flags because problem on GCC 3.3.4: 
+	/// When the file is a std::stringstream then the first seekp(0) will fail and inhibit following operations on the file.
+	m_stream->clear();
+
 	/// Update node with positional information within file
 	node->m_offset = loc;
 	node->m_size = size;
@@ -1351,7 +1355,6 @@ void FileIndexedIO::IndexedFile::write(NodePtr node, const char *data, Imf::Int6
 	m_stream->write( data, size );
 }
 
-		
 void FileIndexedIO::IndexedFile::flush()
 {
 	if (m_index->hasChanged())
@@ -1495,7 +1498,7 @@ void FileIndexedIO::open( std::iostream *device, const IndexedIO::EntryID &root,
 		
 	} 	
 	
-	chdir("/");		
+	chdir("/");	
 	
 	assert( m_currentDirectoryNode );	
 	assert( m_rootDirectoryNode );
