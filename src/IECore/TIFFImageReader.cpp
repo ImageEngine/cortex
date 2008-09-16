@@ -395,8 +395,9 @@ void TIFFImageReader::readBuffer()
 		{
 			throw IOException( ( boost::format("TIFFImageReader: Unsupported value (%d) for TIFFTAG_TILELENGTH while reading %s") % tileLength % fileName() ).str() );
 		}
-				
-		std::vector<unsigned char>::size_type tileLineSize = (size_t)( (float)m_bitsPerSample / 8 * m_samplesPerPixel * tileWidth );
+
+		std::vector<unsigned char>::size_type pixelSize = (size_t)( (float)m_bitsPerSample / 8 * m_samplesPerPixel );
+		std::vector<unsigned char>::size_type tileLineSize = pixelSize * tileWidth;
 		std::vector<unsigned char>::size_type tileBufSize = tileLineSize * tileLength;		
 		std::vector<unsigned char> tileBuffer;
 		tileBuffer.resize( tileBufSize, 0 );
@@ -414,12 +415,17 @@ void TIFFImageReader::readBuffer()
 			{
 				throw IOException( (boost::format( "TIFFImageReader: Error on tile number %d while reading %s") % tile % fileName() ).str() );
 			}
-			
-			/// Copy the tile into its rightful place in the image buffer
+						
+			/// Copy the tile into its rightful place in the image buffer.
+			/// We have to be careful here as the image might not be an exact 
+			/// multiple of tiles, in which case we can't copy the tiles round the
+			/// edges in their entirety as that would give us buffer overruns.
+			int rowsToCopy = min( tileLength, height - y );
+			int columnsToCopy = min( (int)tileWidth, width - x );
 			tsize_t tileOffset = 0;
-			for ( int l = 0; l < tileLength; l ++)
+			for ( int l = 0; l < rowsToCopy; l ++)
 			{
-				memcpy( &m_buffer[0] + imageOffset, &tileBuffer[0] + tileOffset, tileLineSize );
+				memcpy( &m_buffer[0] + imageOffset, &tileBuffer[0] + tileOffset, pixelSize * columnsToCopy );
 				imageOffset += bufLineSize;
 				tileOffset += tileLineSize;
 			}

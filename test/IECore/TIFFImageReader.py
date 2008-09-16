@@ -373,6 +373,22 @@ class TestTIFFReader(unittest.TestCase):
 			
 			MessageHandler.popHandler()	
 	
+	def testTilesWithLeftovers( self ) :
+	
+		"""Check we cope with tiled images where the width and height aren't multiples of the tile size."""
+
+		i = TIFFImageReader( "test/IECore/data/tiff/tilesWithLeftovers.tif" ).read()
+		i2 = EXRImageReader( "test/IECore/data/exrFiles/tiffTileTestExpectedResults.exr" ).read()
+		
+		op = ImageDiffOp()
+		res = op(
+			imageA = i,
+			imageB = i2,
+			maxError = 0.004,
+			skipMissingChannels = False
+		)
+		
+		self.failIf( res.value )
 		
 if __name__ == "__main__":
 	unittest.main()   
