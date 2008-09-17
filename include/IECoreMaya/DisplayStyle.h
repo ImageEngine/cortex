@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,67 +32,46 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_PROCEDURALHOLDERUI_H
-#define IECOREMAYA_PROCEDURALHOLDERUI_H
+#ifndef IECOREMAYA_DISPLAYSTYLE_H
+#define IECOREMAYA_DISPLAYSTYLE_H
 
-#include <map>
+#include "IECoreGL/State.h"
 
-#include "IECore/Object.h"
-
-#include "IECoreMaya/ProceduralHolder.h"
-
-#include "maya/MPxSurfaceShapeUI.h"
-
-namespace IECoreGL
-{
-IE_CORE_FORWARDDECLARE( State );
-IE_CORE_FORWARDDECLARE( BoxPrimitive );
-IE_CORE_FORWARDDECLARE( Group );
-IE_CORE_FORWARDDECLARE( StateComponent );
-}
+#include "maya/M3dView.h"
 
 namespace IECoreMaya
 {
 
-class ProceduralHolderUI : public MPxSurfaceShapeUI
+/// Maya specifies how things should be drawn using the M3dView::DisplayStyle
+/// enum, whereas IECoreGL uses State objects to specify the equivalent things
+/// (and more). When using IECoreGL to draw within maya nodes it then becomes
+/// necessary to translate from the maya definition into an IECoreGL::State
+/// object. This class performs that translation. Typically one would be held as
+/// member data in a node and baseState() would be called upon in the draw() method.
+class DisplayStyle
 {
 
 	public :
 	
-		ProceduralHolderUI();
-		virtual ~ProceduralHolderUI();
-
-		virtual void getDrawRequests( const MDrawInfo &info, bool objectAndActiveOnly, MDrawRequestQueue &requests );
-		virtual void draw( const MDrawRequest &request, M3dView &view ) const;
-		virtual bool select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const;
-							
-		static void *creator();
-
+		DisplayStyle();
+		DisplayStyle( const DisplayStyle &other );
+		~DisplayStyle();
+	
+		/// Returns a base state suitable for representing objects in the the style specified
+		/// by maya. If setCurrentColor is true then the current gl color is also translated
+		/// appropriately into the State (for bounding box, wireframe and points modes only).
+		IECoreGL::ConstStatePtr baseState( M3dView::DisplayStyle style, bool transferCurrentColor=true );
+	
 	private :
 	
-		enum DrawMode
-		{
-			SceneDrawMode,
-			BoundDrawMode,
-		};
-	
-		static void setWireFrameColors( MDrawRequest &request, M3dView::DisplayStatus status );
-	
-		IECoreGL::BoxPrimitivePtr m_boxPrimitive;
+		void constructCommon();
 		
-		typedef std::map< IECoreGL::Group*, IECoreGL::StatePtr > StateMap;
-				
-		void hiliteGroups( const ProceduralHolder::ComponentToGroupMap::mapped_type &groups, IECoreGL::StateComponentPtr hilite, IECoreGL::StateComponentPtr base ) const;
-		void unhiliteGroupChildren( const std::string &name, IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr base ) const;
-		void resetHilites() const;
+		struct Data;
 		
-	public :
-	
-		/// \todo Move members into class on next major version change
-		struct MemberData;
-
+		Data *m_data;
+		
 };
 
 } // namespace IECoreMaya
 
-#endif // IECOREMAYA_PROCEDURALHOLDERUI_H
+#endif // IECOREMAYA_DISPLAYSTYLE_H

@@ -47,6 +47,7 @@
 #include "IECoreMaya/ProceduralHolderUI.h"
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/Convert.h"
+#include "IECoreMaya/DisplayStyle.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/ClassData.h"
@@ -69,7 +70,8 @@ using namespace std;
 
 struct ProceduralHolderUI::MemberData
 {
-	mutable StateMap m_stateMap;	
+	mutable StateMap m_stateMap;
+	DisplayStyle m_displayStyle;
 };
 
 static IECore::ClassData< ProceduralHolderUI, ProceduralHolderUI::MemberData > g_classData;
@@ -82,6 +84,7 @@ ProceduralHolderUI::ProceduralHolderUI()
 
 ProceduralHolderUI::~ProceduralHolderUI()
 {
+	g_classData.erase( this );
 }
 
 void *ProceduralHolderUI::creator()
@@ -258,30 +261,11 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 	
 		try
 		{
-		
-			// maya has already set the color based on the request created
-			// in getDrawRequests(), but we need to transfer that into the base state
-			// we use to draw the scene and the bounding box.
-			Imath::Color4f wc; glGetFloatv( GL_CURRENT_COLOR, wc.getValue() );
-			switch( request.displayStyle() )
-			{
-				case M3dView::kWireFrame :
-					baseState( M3dView::kWireFrame )->add( new IECoreGL::WireframeColorStateComponent( IECore::convert<Imath::Color4f>( wc ) ) );
-					break;
-				case M3dView::kPoints :
-					baseState( M3dView::kPoints )->add( new IECoreGL::PointColorStateComponent( IECore::convert<Imath::Color4f>( wc ) ) );
-					break;
-				case M3dView::kBoundingBox :
-					baseState( M3dView::kBoundingBox )->add( new IECoreGL::BoundColorStateComponent( IECore::convert<Imath::Color4f>( wc ) ) );
-					break;	
-				default :
-					break;
-			}
 
 			// draw the bound if asked
 			if( request.token()==BoundDrawMode )
 			{
-				IECoreGL::StatePtr wireframeState = baseState( M3dView::kWireFrame );
+				IECoreGL::ConstStatePtr wireframeState = g_classData[this].m_displayStyle.baseState( M3dView::kWireFrame );
 				m_boxPrimitive->setBox( IECore::convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
 				glPushAttrib( wireframeState->mask() );
 					(boost::static_pointer_cast<IECoreGL::Renderable>( m_boxPrimitive ))->render( wireframeState );
@@ -312,7 +296,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 						}
 					}
 
-					IECoreGL::StatePtr displayState = baseState( (M3dView::DisplayStyle)request.displayStyle() );
+					IECoreGL::ConstStatePtr displayState = g_classData[this].m_displayStyle.baseState( (M3dView::DisplayStyle)request.displayStyle() );
 
 					if ( request.component() != MObject::kNullObj )
 					{								
@@ -335,7 +319,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 							hiliteGroups( 
 								proceduralHolder->componentToGroupMap()[compId], 
 								hilite,
-								displayState->get< IECoreGL::WireframeColorStateComponent >()
+								boost::const_pointer_cast<IECoreGL::WireframeColorStateComponent>( displayState->get< IECoreGL::WireframeColorStateComponent >() )
 							);								
 						} 
 					}
@@ -377,7 +361,7 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 		view.beginSelect( &selectBuffer[0], selectBufferSize );
 		glInitNames();
 		glPushName( 0 );
-		scene->render( baseState( selectInfo.displayStyle() ) );
+		scene->render( g_classData[this].m_displayStyle.baseState( selectInfo.displayStyle() ) );
 	}
 	else
 	{
@@ -512,48 +496,6 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 	}
 
 	return true;
-}
-
-IECoreGL::StatePtr ProceduralHolderUI::baseState( M3dView::DisplayStyle style ) const
-{
-	static bool init = false;
-	static IECoreGL::StatePtr wireframe = new IECoreGL::State( true );
-	static IECoreGL::StatePtr shaded = new IECoreGL::State( true );
-	static IECoreGL::StatePtr points = new IECoreGL::State( true );
-	static IECoreGL::StatePtr bounds = new IECoreGL::State( true );
-	if( !init )
-	{
-		wireframe->add( new IECoreGL::PrimitiveSolid( false ) );
-		wireframe->add( new IECoreGL::PrimitiveWireframe( true ) );
-		
-		points->add( new IECoreGL::PrimitiveSolid( false ) );
-		points->add( new IECoreGL::PrimitivePoints( true ) );
-		points->add( new IECoreGL::PrimitivePointWidth( 2.0f ) );
-		
-		bounds->add( new IECoreGL::PrimitiveSolid( false ) );
-		bounds->add( new IECoreGL::PrimitiveBound( true ) );
-		init = true;
-	}
-			
-	switch( style )
-	{
-		case M3dView::kBoundingBox :
-			return bounds;
-			
-		case M3dView::kFlatShaded :
-		case M3dView::kGouraudShaded :
-			return shaded;
-			
-		case M3dView::kWireFrame :
-			return wireframe;
-			
-		case M3dView::kPoints :
-			return points;
-			
-		default :
-			return shaded;
-	}
-	
 }
 
 void ProceduralHolderUI::hiliteGroups( const ProceduralHolder::ComponentToGroupMap::mapped_type &groups, IECoreGL::StateComponentPtr hilite, IECoreGL::StateComponentPtr base ) const
