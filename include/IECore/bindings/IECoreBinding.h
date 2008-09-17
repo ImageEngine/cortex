@@ -63,6 +63,7 @@ std::string str( T &x );
 /// recreate the object. Names in this string should be
 /// fully qualified with the module prefix - e.g. "IECore.V2f( 1, 2 )".
 /// \todo Ensure all implementations follow this convention.
+/// \todo Reference to T should be const.
 template<typename T>
 std::string repr( T &x );
 
