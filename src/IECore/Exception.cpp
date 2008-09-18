@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,7 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <string.h>
+#include <cassert>
+#include <string>
 
 #include "IECore/Exception.h"
 
@@ -44,6 +45,7 @@ Exception::~Exception() throw()
 
 Exception::Exception(const char *what)
 {
+	assert( what );
 	m_what = new RefCountedString(what);
 }
 
@@ -70,6 +72,7 @@ Exception &Exception::append( const std::string &s )
 
 Exception &Exception::append( const char *s )
 {
+	assert( s );
 	return append( std::string(s) );
 }	
 
@@ -81,5 +84,6 @@ Exception &Exception::prepend( const std::string &s )
 
 Exception &Exception::prepend( const char *s )
 {
+	assert( s );
 	return prepend( std::string( s ) );
 }			
