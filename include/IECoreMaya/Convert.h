@@ -207,6 +207,24 @@ MTime convert( const double &from );
 template<>
 double convert( const MTime &from );
 
+template<>
+MDistance convert( const float &from );
+
+template<>
+float convert( const MDistance &from );
+
+template<>
+MAngle convert( const float &from );
+
+template<>
+float convert( const MAngle &from );
+
+template<>
+MTime convert( const float &from );
+
+template<>
+float convert( const MTime &from );
+
 } // namespace IECore
 
 #endif // IE_COREMAYA_CONVERT_H

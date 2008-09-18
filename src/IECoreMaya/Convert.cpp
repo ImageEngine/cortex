@@ -567,5 +567,40 @@ double convert( const MTime &from )
 	return from.as( MTime::kSeconds);
 }
 
+template<>
+MDistance convert( const float &from )
+{
+	return MDistance( from, MDistance::kCentimeters );
+}
+
+template<>
+float convert( const MDistance &from )
+{
+	return from.asCentimeters();
+}
+
+template<>
+MAngle convert( const float &from )
+{
+	return MAngle( from, MAngle::kRadians );
+}
+
+template<>
+float convert( const MAngle &from )
+{
+	return from.asRadians();
+}
+
+template<>
+MTime convert( const float &from )
+{
+	return MTime( from, MTime::kSeconds );
+}
+
+template<>
+float convert( const MTime &from )
+{
+	return from.as( MTime::kSeconds);
+}
 
 }	// namespace IECore
