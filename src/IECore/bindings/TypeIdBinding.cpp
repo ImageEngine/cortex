@@ -278,7 +278,10 @@ void bindTypeId()
 		.value("SplineddParameter", SplineddParameterTypeId )
 		.value("SplinefColor3fParameter", SplinefColor3fParameterTypeId )
 		.value("SplinefColor4fParameter", SplinefColor4fParameterTypeId )
-		.value("CompoundObjectParameter", CompoundObjectParameterTypeId )		
+		.value("CompoundObjectParameter", CompoundObjectParameterTypeId )
+		.value("DisplayDriver", DisplayDriverTypeId )
+		.value("DisplayDriverCreator", DisplayDriverCreatorTypeId )
+		.value("ImageDisplayDriver", ImageDisplayDriverTypeId )
 	;
 }
 

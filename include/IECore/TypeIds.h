@@ -281,6 +281,9 @@ enum TypeId
 	SplinefColor3fParameterTypeId = 238,
 	SplinefColor4fParameterTypeId = 239,
 	CompoundObjectParameterTypeId = 240,	
+	DisplayDriverTypeId = 241,
+	DisplayDriverCreatorTypeId = 242,
+	ImageDisplayDriverTypeId = 243,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

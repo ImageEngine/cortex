@@ -190,6 +190,8 @@
 #include "IECore/bindings/MeshVertexReorderOpBinding.h"
 #include "IECore/bindings/SplineBinding.h"
 #include "IECore/bindings/SplineDataBinding.h"
+#include "IECore/bindings/DisplayDriverBinding.h"
+#include "IECore/bindings/ImageDisplayDriverBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -365,6 +367,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMeshVertexReorderOp();
 	bindSpline();
 	bindSplineData();
+	bindDisplayDriver();
+	bindImageDisplayDriver();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
