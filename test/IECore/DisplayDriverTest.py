@@ -75,12 +75,14 @@ class TestDisplayDriver(unittest.TestCase):
 	def testFactory( self ):
 
 		creator = self.MyDisplayDriverCreator()
-		DisplayDriver.registerFactory( creator )
+		self.assertEqual( DisplayDriver.registerFactory( creator ), True )
 		idd = DisplayDriver.create( Box2i( V2i(0,0), V2i(100,100) ), Box2i( V2i(10,10), V2i(40,40) ), [ 'r', 'g', 'b' ], CompoundData() )
 		self.assertEqual( idd.scanLineOrderOnly(), True )
 		self.assertEqual( idd.displayWindow(), Box2i( V2i(0,0), V2i(100,100) ) )
 		self.assertEqual( idd.dataWindow(), Box2i( V2i(10,10), V2i(40,40) ) )
 		self.assertEqual( idd.channelNames(), [ 'r', 'g', 'b' ] )
+		self.assertEqual( DisplayDriver.unregisterFactory( creator ), True )
+		self.assertEqual( DisplayDriver.unregisterFactory( creator ), False )
 
 class TestImageDisplayDriver(unittest.TestCase):
 
