@@ -35,6 +35,7 @@
 #ifndef IECOREGL_LIGHT_H
 #define IECOREGL_LIGHT_H
 
+/// \todo All the functions in the glsl source need the ie prefix on them.
 vec3 light( vec3 p, int lightIndex, out vec3 L )
 {
 	vec3 Cl = gl_LightSource[lightIndex].diffuse.rgb;
