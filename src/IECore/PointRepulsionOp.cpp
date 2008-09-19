@@ -230,7 +230,7 @@ void PointRepulsionOp::getNearestPointsAndDensities( ImagePrimitiveEvaluatorPtr 
 		float repeatU = 1.0;
 		float repeatV = 1.0;
 
-		/// \toto Wrap modes
+		/// \todo Wrap modes
 		bool wrapU = true;
 		bool wrapV = true;
 
