@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -101,11 +101,6 @@ class DisplayDriverWrap : public DisplayDriver, public Wrapper<DisplayDriver>
 		{
 		}
 
-		void imageData( const Imath::Box2i &box, FloatVectorDataPtr data )
-		{
-			imageData( box, &(data->readable()[0]), data->readable().size() );
-		}
-
 		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize )
 		{
 			boost::python::override c = this->get_override( "imageData" );
@@ -163,6 +158,21 @@ static boost::python::list channelNames( DisplayDriverPtr dd )
 	return newList;
 }
 
+static void displayDriverImageData( DisplayDriverPtr dd, const Imath::Box2i &box, FloatVectorDataPtr data )
+{
+	dd->imageData( box, &(data->readable()[0]), data->readable().size() );
+}
+
+static void displayDriverImageClose( DisplayDriverPtr dd )
+{
+	dd->imageClose();
+}
+
+static bool displayDriverScanLineOrderOnly( DisplayDriverPtr dd )
+{
+	return dd->scanLineOrderOnly();
+}
+
 static DisplayDriverPtr displayDriverCreate( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const boost::python::list &channelNames, CompoundDataPtr parameters )
 {
 	return DisplayDriver::create( displayWindow, dataWindow, listToVector<std::string>(channelNames), parameters ); 
@@ -173,11 +183,11 @@ void bindDisplayDriver()
 	typedef class_< DisplayDriver, DisplayDriverWrapPtr, boost::noncopyable, bases<RunTimeTyped> > DisplayDriverPyClass;
 	scope displayDriverScope = DisplayDriverPyClass( "DisplayDriver", no_init )
 		.def( init< const Imath::Box2i &, const Imath::Box2i &, const list &, CompoundDataPtr >( args( "displayWindow", "dataWindow", "channelNames", "parameters" ) ) )
-		.def( "imageData", (void (DisplayDriverWrap::*)(const Imath::Box2i &, FloatVectorDataPtr))&DisplayDriverWrap::imageData )
-		.def( "imageClose", &DisplayDriverWrap::imageClose )
-		.def( "scanLineOrderOnly", &DisplayDriverWrap::scanLineOrderOnly )
-		.def( "displayWindow", &DisplayDriverWrap::displayWindow )
-		.def( "dataWindow", &DisplayDriverWrap::dataWindow )
+		.def( "imageData", &displayDriverImageData )
+		.def( "imageClose", &displayDriverImageClose )
+		.def( "scanLineOrderOnly", &displayDriverScanLineOrderOnly )
+		.def( "displayWindow", &DisplayDriver::displayWindow )
+		.def( "dataWindow", &DisplayDriver::dataWindow )
 		.def( "channelNames", &channelNames )
 		.def( "create", &displayDriverCreate ).staticmethod("create")
 		.def( "registerFactory", &DisplayDriver::registerFactory ).staticmethod("registerFactory")
@@ -186,17 +196,17 @@ void bindDisplayDriver()
 	;
 	WrapperToPython<DisplayDriverPtr>();
 	INTRUSIVE_PTR_PATCH( DisplayDriver, DisplayDriverPyClass );
-	implicitly_convertible<DisplayDriverWrapPtr, RunTimeTypedPtr>();
+	implicitly_convertible<DisplayDriverPtr, RunTimeTypedPtr>();
 
 	typedef class_< DisplayDriver::DisplayDriverCreator, DisplayDriverCreatorWrapPtr, boost::noncopyable, bases<RunTimeTyped> > DisplayDriverCreatorPyClass;
 	DisplayDriverCreatorPyClass( "DisplayDriverCreator" )
-		.def( "create", &DisplayDriver::DisplayDriverCreator::create )
+		.def( "create", &DisplayDriverCreatorWrap::create )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( DisplayDriver::DisplayDriverCreator )		
 	;
 	
 	WrapperToPython<DisplayDriver::DisplayDriverCreatorPtr>();
 	INTRUSIVE_PTR_PATCH( DisplayDriver::DisplayDriverCreator, DisplayDriverCreatorPyClass );
-	implicitly_convertible<DisplayDriverCreatorWrapPtr, RunTimeTypedPtr>();
+	implicitly_convertible< DisplayDriver::DisplayDriverCreatorPtr, RunTimeTypedPtr>();
 
 }
 

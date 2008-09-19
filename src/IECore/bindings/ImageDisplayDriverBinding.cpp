@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,11 +65,6 @@ class ImageDisplayDriverWrap : public ImageDisplayDriver, public Wrapper<ImageDi
 		{
 		}
 
-		void imageData( const Imath::Box2i &box, FloatVectorDataPtr data )
-		{
-			imageData( box, &(data->readable()[0]), data->readable().size() );
-		}
-
 		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize )
 		{
 			ImageDisplayDriver::imageData( box, data, dataSize );
@@ -111,20 +106,35 @@ class ImageDisplayDriverWrap : public ImageDisplayDriver, public Wrapper<ImageDi
 };
 IE_CORE_DECLAREPTR( ImageDisplayDriverWrap );
 
+static void displayDriverImageData( DisplayDriverPtr dd, const Imath::Box2i &box, FloatVectorDataPtr data )
+{
+	dd->imageData( box, &(data->readable()[0]), data->readable().size() );
+}
+
+static void displayDriverImageClose( DisplayDriverPtr dd )
+{
+	dd->imageClose();
+}
+
+static bool displayDriverScanLineOrderOnly( DisplayDriverPtr dd )
+{
+	return dd->scanLineOrderOnly();
+}
+
 void bindImageDisplayDriver()
 {
 	typedef class_< ImageDisplayDriver, ImageDisplayDriverWrapPtr, boost::noncopyable, bases<DisplayDriver> > ImageDisplayDriverPyClass;
 	ImageDisplayDriverPyClass( "ImageDisplayDriver", no_init )
 		.def( init< const Imath::Box2i &, const Imath::Box2i &, const list &, CompoundDataPtr >( args( "displayWindow", "dataWindow", "channelNames", "parameters" ) ) )
-		.def( "imageData", (void (ImageDisplayDriverWrap::*)(const Imath::Box2i &, FloatVectorDataPtr))&ImageDisplayDriverWrap::imageData )
-		.def( "imageClose", &ImageDisplayDriverWrap::imageClose )
-		.def( "scanLineOrderOnly", &ImageDisplayDriverWrap::scanLineOrderOnly )
+		.def( "imageData", &displayDriverImageData )
+		.def( "imageClose", &displayDriverImageClose )
+		.def( "scanLineOrderOnly", &displayDriverScanLineOrderOnly )
 		.def( "image", &ImageDisplayDriverWrap::image )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(DisplayDriver)
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImageDisplayDriver)
 	;
 	WrapperToPython<ImageDisplayDriverPtr>();
 	INTRUSIVE_PTR_PATCH( ImageDisplayDriver, ImageDisplayDriverPyClass );
-	implicitly_convertible<ImageDisplayDriverWrapPtr, DisplayDriverPtr>();
+	implicitly_convertible<ImageDisplayDriverPtr, DisplayDriverPtr>();
 }
 
 } // namespace IECore

@@ -35,6 +35,7 @@
 import unittest
 import glob
 import sys
+import time
 from IECore import *
 
 class TestDisplayDriver(unittest.TestCase):
@@ -147,7 +148,57 @@ class TestImageDisplayDriver(unittest.TestCase):
 		self.assertEqual( idd.image(), img )
 		self.assertEqual( idd.count, -300 )
 		self.assertEqual( True, ImageDisplayDriver.scanLineOrderOnly( idd ) )
-		
+
+#class TestClientServerDisplayDriver(unittest.TestCase):
+
+#	class MyDisplayDriverCreator( DisplayDriver.DisplayDriverCreator ):
+
+#		def __init__( self, myTest ):
+#			DisplayDriver.DisplayDriverCreator.__init__( self )
+#			self.myTest = myTest
+
+#		def create( self, displayWindow, dataWindow, channelNames, parameters ):
+#			self.myTest.clientDisplayDriver = ImageDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
+#			return self.myTest.clientDisplayDriver
+
+#	def setUp( self ):
+#		self.server = DisplayDriverServer( 1559 )
+#		self.creator = self.MyDisplayDriverCreator( self )
+#		self.assertEqual( DisplayDriver.registerFactory( self.creator ), True )
+#		time.sleep(2)
+
+#	def __prepareBuf( self, buf, width, offset, red, green, blue ):
+#		for i in xrange( 0, width ):
+#			buf[3*i] = blue[i+offset]
+#			buf[3*i+1] = green[i+offset]
+#			buf[3*i+2] = red[i+offset]
+
+#	def testTransfer( self ):
+
+#		img = Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
+#		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
+#		red = img['R'].data
+#		green = img['G'].data
+#		blue = img['B'].data
+#		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
+
+#		params = CompoundData()
+#		params['host'] = StringData('localhost')
+#		params['port'] = StringData( '1559' )
+#		idd = ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
+
+#		buf = FloatVectorData( width * 3 )
+#		for i in xrange( 0, img.dataWindow.max.y - img.dataWindow.min.y + 1 ):
+#			self.__prepareBuf( buf, width, i*width, red, green, blue )
+#			idd.imageData( Box2i( V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
+#		idd.imageClose()
+#		self.assertEqual( self.clientDisplayDriver.image(), img )
+
+#	def tearDown( self ):
+#		self.assertEqual( DisplayDriver.unregisterFactory( self.creator ), True )
+#		self.creator = None
+#		self.server = None
+
 if __name__ == "__main__":
 	unittest.main()   
 	

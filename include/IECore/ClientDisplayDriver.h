@@ -87,6 +87,9 @@ class ClientDisplayDriver : public DisplayDriver
 
 };
 
+IE_CORE_DECLAREPTR( ClientDisplayDriver )
+
+
 }  // namespace IECore
 
 #endif // IE_CORE_CLIENTDISPLAYDRIVER

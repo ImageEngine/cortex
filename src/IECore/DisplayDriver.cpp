@@ -74,7 +74,7 @@ DisplayDriverPtr DisplayDriver::create( const Imath::Box2i &displayWindow, const
 			return res;
 		}
 	}
-	throw( "No display driver is compatible with the given parameters!" );
+	throw Exception( "No display driver is compatible with the given parameters!" );
 }
 
 bool DisplayDriver::registerFactory( DisplayDriver::DisplayDriverCreatorPtr creator )

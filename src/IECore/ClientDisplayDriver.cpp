@@ -53,13 +53,13 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	DataPtr data = parameters->readable().find("host")->second;
 	if ( !data )
 	{
-		throw( std::string( "Could not find 'host' parameter!" ) );
+		throw Exception( "Could not find 'host' parameter!" );
 	}
 	m_host = static_pointer_cast<const StringData>(data)->readable();
 	data = parameters->readable().find("port")->second;
 	if ( !data )
 	{
-		throw( std::string( "Could not find 'port' parameter!" ) );
+		throw Exception( "Could not find 'port' parameter!" );
 	}
 	m_port = static_pointer_cast<const StringData>(data)->readable();
 
@@ -71,10 +71,11 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	{
 		m_socket.connect( *iterator );
 	}
-	catch( std::exception e )
+	catch( std::exception &e )
 	{
-		throw( std::string("Could not connect to remote display driver server: ") + e.what() );
+		throw Exception( std::string("Could not connect to remote display driver server: ") + e.what() );
 	}
+
 
 	MemoryIndexedIOPtr io;
 	ConstCharVectorDataPtr buf;
@@ -93,12 +94,15 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	size_t dataSize = buf->readable().size();
 
 	sendHeader( DisplayDriverServer::imageOpen, dataSize );
+
 	m_socket.send( boost::asio::buffer( &(buf->readable()[0]), dataSize ) );
+
 	if ( receiveHeader( DisplayDriverServer::imageOpen ) != sizeof(m_scanLineOrderOnly) )
 	{
-		throw( "Invalid returned scanLineOrder from display driver server!" );
+		throw Exception( "Invalid returned scanLineOrder from display driver server!" );
 	}
 	m_socket.receive( boost::asio::buffer( &m_scanLineOrderOnly, sizeof(m_scanLineOrderOnly) ) );
+
 }
 
 ClientDisplayDriver::~ClientDisplayDriver()
@@ -133,9 +137,8 @@ size_t ClientDisplayDriver::receiveHeader( DisplayDriverServer::MessageType msg 
 	m_socket.receive( boost::asio::buffer( header.buffer(), header.headerLength ) );
 	if ( !header.valid() )
 	{
-		throw( "Invalid display driver header block on socket package." );
+		throw Exception( "Invalid display driver header block on socket package." );
 	}
-
 	size_t bytesAhead = header.getDataSize();
 	
 	if ( header.messageType() == DisplayDriverServer::exception )
@@ -143,11 +146,11 @@ size_t ClientDisplayDriver::receiveHeader( DisplayDriverServer::MessageType msg 
 		vector<char> txt;
 		txt.resize( bytesAhead );
 		m_socket.receive( boost::asio::buffer( &(txt[0]), bytesAhead ) );
-		throw( std::string("Error on remove display driver: ") + &(txt[0]) );
+		throw Exception( std::string("Error on remote display driver: ") + &(txt[0]) );
 	}
 	if ( header.messageType() != msg )
 	{
-		throw( "Unexpected message type on display driver socket package." );
+		throw Exception( "Unexpected message type on display driver socket package." );
 	}
 	return bytesAhead;
 }

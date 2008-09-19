@@ -70,7 +70,14 @@ void DisplayDriverServer::serverThread()
 	{
 		sleep(1);
 	}
-	m_service.run();
+	try
+	{
+		m_service.run();
+	}
+	catch( std::exception &e )
+	{
+		msg( Msg::Error, "DisplayDriverServer::serverThread", e.what() );
+	}
 }
 
 void DisplayDriverServer::handleAccept( DisplayDriverServer::SessionPtr session, const boost::system::error_code& error)
@@ -99,7 +106,7 @@ enum byteOrder {
 
 DisplayDriverServer::Header::Header()
 {
-	memset( &m_header[0], 0, headerLength );
+	memset( &m_header[0], 0, sizeof(m_header) );
 }
 
 DisplayDriverServer::Header::Header( MessageType msg, size_t dataSize )
@@ -175,14 +182,14 @@ void DisplayDriverServer::Session::handleReadHeader( const boost::system::error_
 {
 	if (error)
 	{
-		msg( Msg::Warning, "DisplayDriverServer::Session::handleReadHeader", error.message().c_str() );
+		msg( Msg::Error, "DisplayDriverServer::Session::handleReadHeader", error.message().c_str() );
 		m_socket.close();
 		return;
 	}
 
 	if ( !m_header.valid() )
 	{
-		msg( Msg::Warning, "DisplayDriverServer::Session::handleReadHeader", "Invalid header!" );
+		msg( Msg::Error, "DisplayDriverServer::Session::handleReadHeader", "Invalid header!" );
 		m_socket.close();
 		return;
 	}
@@ -217,9 +224,9 @@ void DisplayDriverServer::Session::handleReadHeader( const boost::system::error_
 			{
 				m_displayDriver->imageClose();
 			}
-			catch ( std::exception e )
+			catch ( std::exception &e )
 			{
-				msg( Msg::Warning, "DisplayDriverServer::Session::handleReadHeader", e.what() );
+				msg( Msg::Error, "DisplayDriverServer::Session::handleReadHeader", e.what() );
 				sendException( e.what() );
 				m_socket.close();
 				return;
@@ -228,21 +235,21 @@ void DisplayDriverServer::Session::handleReadHeader( const boost::system::error_
 			{
 				sendResult( imageClose, 0 );
 			}
-			catch( std::exception e )
+			catch( std::exception &e )
 			{
-				msg( Msg::Warning, "DisplayDriverServer::Session::handleReadHeader", e.what() );
+				msg( Msg::Error, "DisplayDriverServer::Session::handleReadHeader", e.what() );
 			}
 			m_socket.close();
 		}
 		else
 		{
-			msg( Msg::Warning, "DisplayDriverServer::Session::handleReadHeader", "No DisplayDriver to close." );
+			msg( Msg::Error, "DisplayDriverServer::Session::handleReadHeader", "No DisplayDriver to close." );
 			m_socket.close();
 		}
 		break;
 
 	default:
-		msg( Msg::Warning, "DisplayDriverServer::Session::handleReadHeader", "Unrecognized message type." );
+		msg( Msg::Error, "DisplayDriverServer::Session::handleReadHeader", "Unrecognized message type." );
 		m_socket.close();
 		break;
 	}
@@ -252,7 +259,7 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 {
 	if (error)
 	{
-		msg( Msg::Warning, "DisplayDriverServer::Session::handleReadOpenParameters", error.message().c_str() );
+		msg( Msg::Error, "DisplayDriverServer::Session::handleReadOpenParameters", error.message().c_str() );
 		m_socket.close();
 		return;
 	}
@@ -279,7 +286,7 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 	}
 	catch( std::exception &e )
 	{
-		msg( Msg::Warning, "DisplayDriverServer::Session::handleReadOpenParameters", e.what() );
+		msg( Msg::Error, "DisplayDriverServer::Session::handleReadOpenParameters", e.what() );
 		sendException( e.what() );
 		m_socket.close();
 		return;
@@ -300,18 +307,19 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 			)
 		);
 	}
-	catch( std::exception e )
+	catch( std::exception &e )
 	{
-		msg( Msg::Warning, "DisplayDriverServer::Session::handleReadOpenParameters", e.what() );
+		msg( Msg::Error, "DisplayDriverServer::Session::handleReadOpenParameters", e.what() );
 		m_socket.close();
 	}
+	
 }
 
 void DisplayDriverServer::Session::handleReadDataParameters( const boost::system::error_code& error )
 {
 	if (error)
 	{
-		msg( Msg::Warning, "DisplayDriverServer::Session::handleReadDataParameters", error.message().c_str() );
+		msg( Msg::Error, "DisplayDriverServer::Session::handleReadDataParameters", error.message().c_str() );
 		m_socket.close();
 		return;
 	}
@@ -319,7 +327,7 @@ void DisplayDriverServer::Session::handleReadDataParameters( const boost::system
 	// sanity check: check DisplayDriver object
 	if (! m_displayDriver )
 	{
-		msg( Msg::Warning, "DisplayDriverServer::Session::handleReadDataParameters", "No display drivers!" );
+		msg( Msg::Error, "DisplayDriverServer::Session::handleReadDataParameters", "No display drivers!" );
 		m_socket.close();
 		return;
 	}
@@ -348,9 +356,10 @@ void DisplayDriverServer::Session::handleReadDataParameters( const boost::system
 	}
 	catch( std::exception &e )
 	{
-		msg( Msg::Warning, "DisplayDriverServer::Session::handleReadDataParameters", e.what() );
+		msg( Msg::Error, "DisplayDriverServer::Session::handleReadDataParameters", e.what() );
 		m_socket.close();
 	}
+
 }
 
 void DisplayDriverServer::Session::sendResult( MessageType msg, size_t dataSize )
