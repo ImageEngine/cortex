@@ -282,6 +282,7 @@ void bindTypeId()
 		.value("DisplayDriver", DisplayDriverTypeId )
 		.value("DisplayDriverCreator", DisplayDriverCreatorTypeId )
 		.value("ImageDisplayDriver", ImageDisplayDriverTypeId )
+		.value("ClientDisplayDriver", ClientDisplayDriverTypeId )
 	;
 }
 
