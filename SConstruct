@@ -359,6 +359,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_RSL_HEADER_DIR",
+	"The directory in which to install RSL headers.",
+	"$INSTALL_PREFIX/rsl",
+)
+
+o.Add(
 	"INSTALL_MEL_DIR",
 	"The directory in which to install mel scripts.",
 	"$INSTALL_PREFIX/maya/mel/$IECORE_NAME",
@@ -986,6 +992,12 @@ if doConfigure :
 		riEnv.Alias( "install", riHeaderInstall )
 		riEnv.Alias( "installRI", riHeaderInstall )
 
+		rslHeaders = glob.glob( "rsl/IECoreRI/*.h" )
+		rslHeaderInstall = riEnv.Install( "$INSTALL_RSL_HEADER_DIR/IECoreRI", rslHeaders )
+		riEnv.AddPostAction( "$INSTALL_RSL_HEADER_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riEnv, riEnv["INSTALL_RSL_HEADER_DIR"] ) )
+		riEnv.Alias( "install", rslHeaderInstall )
+		riEnv.Alias( "installRI", rslHeaderInstall )
+		
 		riPythonEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
