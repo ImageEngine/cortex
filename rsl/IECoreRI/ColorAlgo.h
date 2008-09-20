@@ -65,4 +65,20 @@ color ieSRGBToLin( color sRGB )
 	return result;
 }
 
+float ieLuminance( color c; color weights )
+{
+	return vector( c ).vector( weights );
+}
+
+float ieLuminance( color c )
+{
+	return ieLuminance( c, color( 0.212671, 0.715160, 0.072169 ) );
+}
+
+color ieAdjustSaturation( color c; float saturation )
+{
+	float l = ieLuminance( c );
+	return mix( color( l ), c, saturation );
+}
+
 #endif // IECORERI_COLORALGO_H
