@@ -35,6 +35,8 @@
 #ifndef IECOREGL_INTENSITY_H
 #define IECOREGL_INTENSITY_H
 
+/// \todo These should be called ieLuminance to match the method
+/// in IECoreRI/ColorAlgo.h.
 float intensity( vec3 color, vec3 weights )
 {
 	return dot( color, weights );
