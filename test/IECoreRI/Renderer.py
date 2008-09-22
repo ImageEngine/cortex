@@ -53,6 +53,8 @@ class SimpleProcedural( Renderer.Procedural ) :
 		
 	def doRender( self, renderer, args ) :
 	
+		self.rendererTypeName = renderer.typeName()
+		
 		renderer.transformBegin()
 		
 		m = M44f()
@@ -142,9 +144,12 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testProcedural.rib" )
 		r.worldBegin()
 		
-		r.procedural( SimpleProcedural( 10.5 ) )
+		p = SimpleProcedural( 10.5 )
+		r.procedural( p )
 		
 		r.worldEnd()
+		
+		self.assertEqual( p.rendererTypeName, "IECoreRI::Renderer" )
 		
 	def testGetOption( self ) :
 	
