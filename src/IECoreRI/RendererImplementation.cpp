@@ -230,6 +230,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getOption( const std::str
 	{
 		string s( name, 5 );
 		char result[16 * sizeof( RtFloat )]; // enough room for a matrix return type
+		memset( result, 0, 16 * sizeof( RtFloat ) ); // 3delight has a bug where it'll try to free some random part of memory if this is not null (v 7.0.54)
 		RxInfoType_t resultType;
 		int resultCount;
 		if( 0==RxOption( (char *)name.c_str(), result, 16 * sizeof( RtFloat ), &resultType, &resultCount ) )
@@ -700,6 +701,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::
 			return 0;
 		}
 		char result[16 * sizeof( RtFloat )]; // enough room for a matrix return type
+		memset( result, 0, 16 * sizeof( RtFloat ) ); // 3delight has a bug where it'll try to free some random part of memory if this is not null (v 7.0.54)
 		RxInfoType_t resultType;
 		int resultCount;
 		if( 0==RxAttribute( (char *)name.c_str()+3, result, 16 * sizeof( RtFloat ), &resultType, &resultCount ) )
