@@ -284,6 +284,7 @@ void bindTypeId()
 		.value("ImageDisplayDriver", ImageDisplayDriverTypeId )
 		.value("ClientDisplayDriver", ClientDisplayDriverTypeId )
 		.value("DisplayDriverServer", DisplayDriverServerTypeId )
+		.value("CoordinateSystem", CoordinateSystemTypeId )
 	;
 }
 

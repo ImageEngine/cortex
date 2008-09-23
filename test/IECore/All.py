@@ -162,6 +162,7 @@ from LayeredDictTest import *
 from SplineParameterTest import *
 from DisplayDriverTest import *
 from AttributeStateTest import *
+from CoordinateSystemTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

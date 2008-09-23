@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,39 +32,34 @@
 #
 ##########################################################################
 
-import sys
+import os
+import unittest
 import IECore
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
-from Orientation import *
-from MultipleContextsTest import *
-from Camera import *
-from CurvesTest import *
-from TextureOrientationTest import *
-from ArrayPrimVarTest import *
-from CoordinateSystemTest import *
+class CoordinateSystemTest( unittest.TestCase ) :
 
-if IECore.withFreeType() :
-
-	from TextTest import *
-
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
-
-	def __init__( self ) :
+	def test( self ) :
 	
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )		
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
+		a = IECore.CoordinateSystem( "a" )
+		self.assertEqual( a.getName(), "a" )
+		
+		a.setName( "b" )
+		self.assertEqual( a.getName(), "b" )
+		
+		aa = a.copy()
+		self.assertEqual( a, aa )
+		
+		IECore.ObjectWriter( a, "test/IECore/data/coordSys.cob" ).write()
+		aaa = IECore.ObjectReader( "test/IECore/data/coordSys.cob" ).read()
+		
+		self.assertEqual( aaa, aa )
+		self.assertEqual( aaa.getName(), "b" )
+		
+	def tearDown( self ) :
+	
+		if os.path.exists( "test/IECore/data/coordSys.cob" ) :
+		
+			os.remove( "test/IECore/data/coordSys.cob" )
+		
+if __name__ == "__main__":
+	unittest.main()
