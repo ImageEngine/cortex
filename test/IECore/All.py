@@ -161,6 +161,7 @@ from TypeIdTest import *
 from LayeredDictTest import *
 from SplineParameterTest import *
 from DisplayDriverTest import *
+from AttributeStateTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

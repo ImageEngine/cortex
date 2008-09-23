@@ -93,7 +93,7 @@ void AttributeState::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
 	StateRenderable::copyFrom( other, context );
 	ConstAttributeStatePtr s = static_pointer_cast<const AttributeState>( other );
-	m_attributes = context->copy<CompoundData>( m_attributes );
+	m_attributes = context->copy<CompoundData>( s->m_attributes );
 }
 
 void AttributeState::save( SaveContext *context ) const
