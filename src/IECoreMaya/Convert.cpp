@@ -564,7 +564,7 @@ MTime convert( const double &from )
 template<>
 double convert( const MTime &from )
 {
-	return from.as( MTime::kSeconds);
+	return from.as( MTime::kSeconds );
 }
 
 template<>
@@ -600,7 +600,7 @@ MTime convert( const float &from )
 template<>
 float convert( const MTime &from )
 {
-	return from.as( MTime::kSeconds);
+	return from.as( MTime::kSeconds );
 }
 
 }	// namespace IECore
