@@ -94,7 +94,9 @@ compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2
 compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
 
 debug = getOption( "DEBUG", False )
-CXXFLAGS = [ '-pipe', '-Wall', '-pthread' ]
+CXXFLAGS = [ '-pipe', '-Wall' ]
+if IEEnv.platformOS() != "osx104" :
+	CXXFLAGS += [ '-pthread' ]
 	
 if debug :
 
