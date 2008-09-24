@@ -52,6 +52,7 @@ from FnParameterisedHolderTest import *
 from ToMayaPlugConverterTest import *
 from ToMayaMeshConverterTest import *
 from MayaTypeIdTest import *
+from FromMayaTransformConverterTest import *
 
 import MayaUnitTest
 

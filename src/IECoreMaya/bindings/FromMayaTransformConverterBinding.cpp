@@ -32,41 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#include "boost/python.hpp"
 
-namespace IECoreMaya
-{
+#include "IECoreMaya/FromMayaTransformConverter.h"
+#include "IECoreMaya/bindings/FromMayaTransformConverterBinding.h"
 
-enum TypeId
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+using namespace IECoreMaya;
+using namespace boost::python;
+
+void IECoreMaya::bindFromMayaTransformConverter()
 {
+	typedef class_<FromMayaTransformConverter, FromMayaTransformConverterPtr, boost::noncopyable, bases<FromMayaDagNodeConverter> > FromMayaTransformConverterPyClass;
+
+	FromMayaTransformConverterPyClass( "FromMayaTransformConverter", init<const MDagPath &>() )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaTransformConverter )
+	;
 	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	ToMayaConverterTypeId = 109014,
-	ToMayaObjectConverterTypeId = 109015,
-	ToMayaNumericDataConverterTypeId = 109016,
-	ToMayaMeshConverterTypeId = 109017,
-	ToMayaArrayDataConverterTypeId = 109018,
-	ToMayaPlugConverterTypeId = 109019,
-	FromMayaPluginDataPlugConverterTypeId = 109020,	
-	FromMayaTransformConverterTypeId = 109021,	
-	LastTypeId = 109999
-
-};
-
-} // namespace IECoreMaya
-
-#endif // IECOREMAYA_TYPEIDS_H
+	INTRUSIVE_PTR_PATCH( FromMayaTransformConverter, FromMayaTransformConverterPyClass );
+	implicitly_convertible<FromMayaTransformConverterPtr, FromMayaDagNodeConverterPtr>();
+}

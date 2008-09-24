@@ -32,41 +32,49 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_TYPEIDS_H
-#define IECOREMAYA_TYPEIDS_H
+#ifndef IECOREMAYA_FROMMAYATRANSFORMCONVERTER_H
+#define IECOREMAYA_FROMMAYATRANSFORMCONVERTER_H
+
+#include "IECoreMaya/FromMayaDagNodeConverter.h"
+
+#include "IECore/NumericParameter.h"
 
 namespace IECoreMaya
 {
 
-enum TypeId
+/// The FromMayaTransformationMatrixConverter extracts transforms from.
+class FromMayaTransformConverter : public FromMayaDagNodeConverter
 {
+
+	public :
+
+		FromMayaTransformConverter( const MDagPath &dagPath );
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaTransformConverter, FromMayaTransformConverterTypeId, FromMayaDagNodeConverter );
+		
+		enum Space
+		{
+			Local = 0,
+			World = 1
+		};
+
+		IECore::IntParameterPtr spaceParameter();
+		IECore::ConstIntParameterPtr spaceParameter() const;
+		
+	protected :
 	
-	FromMayaConverterTypeId = 109000,
-	FromMayaObjectConverterTypeId = 109001,
-	FromMayaPlugConverterTypeId = 109002,
-	FromMayaMeshConverterTypeId = 109003,
-	FromMayaCameraConverterTypeId = 109004,
-	FromMayaGroupConverterTypeId = 109005,
-	FromMayaNumericDataConverterTypeId = 109006,
-	FromMayaNumericPlugConverterTypeId = 109007,
-	FromMayaFluidConverterTypeId = 109008,
-	FromMayaStringPlugConverterTypeId = 109009,
-	FromMayaShapeConverterTypeId = 109010,
-	FromMayaCurveConverterTypeId = 109011,
-	FromMayaParticleConverterTypeId = 109012,
-	FromMayaDagNodeConverterTypeId = 109013,
-	ToMayaConverterTypeId = 109014,
-	ToMayaObjectConverterTypeId = 109015,
-	ToMayaNumericDataConverterTypeId = 109016,
-	ToMayaMeshConverterTypeId = 109017,
-	ToMayaArrayDataConverterTypeId = 109018,
-	ToMayaPlugConverterTypeId = 109019,
-	FromMayaPluginDataPlugConverterTypeId = 109020,	
-	FromMayaTransformConverterTypeId = 109021,	
-	LastTypeId = 109999
+		virtual IECore::ObjectPtr doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
+			
+	private :
+
+		IECore::IntParameterPtr m_spaceParameter;
+
+		static Description<FromMayaTransformConverter> g_description;
 
 };
 
+IE_CORE_DECLAREPTR( FromMayaTransformConverter );
+
 } // namespace IECoreMaya
 
-#endif // IECOREMAYA_TYPEIDS_H
+#endif // IECOREMAYA_FROMMAYATRANSFORMCONVERTER_H
