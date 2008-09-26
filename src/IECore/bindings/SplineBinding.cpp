@@ -176,6 +176,15 @@ static tuple values( const T &s )
 }
 
 template<typename T>
+static tuple interval( const T &s )
+{
+	/// \todo If we had bindings for boost::interval then we could return one
+	/// of those instead.
+	typename T::XInterval i = s.interval();
+	return make_tuple( i.lower(), i.upper() );
+}
+
+template<typename T>
 static tuple solve( const T &s, typename T::XType x )
 {
 	typename T::YType segment[4];
@@ -199,6 +208,7 @@ void bindSpline( const char *name )
 		.def( "__len__", &len<T> )
 		.def( "keys", &keys<T> )
 		.def( "values", &values<T> )
+		.def( "interval", &interval<T> )
 		.def( "solve", &solve<T> )
 		.def( "__call__", &T::operator() )
 		.def( self==self )

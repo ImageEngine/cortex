@@ -39,6 +39,8 @@
 
 #include "OpenEXR/ImathColor.h"
 
+#include "boost/numeric/interval.hpp"
+
 #include <map>
 
 namespace IECore
@@ -54,6 +56,7 @@ class Spline
 	
 		typedef X XType;
 		typedef Y YType;
+		typedef boost::numeric::interval<XType> XInterval;
 	
 		typedef CubicBasis<XType> Basis;
 		typedef std::multimap<X, Y> PointContainer;
@@ -66,6 +69,9 @@ class Spline
 
 		Spline( const Basis &basis=Basis::catmullRom() );
 		Spline( const Basis &basis, const PointContainer &points );
+		
+		/// Returns the range of the spline in the X direction.
+		XInterval interval() const;
 		
 		/// Find the appropriate segment and parametric position to determine
 		/// the y value for a given x value. The parametric position is returned

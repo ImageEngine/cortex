@@ -55,6 +55,19 @@ Spline<X,Y>::Spline( const Basis &b, const PointContainer &p )
 }
 
 template<typename X, typename Y>
+typename Spline<X,Y>::XInterval Spline<X,Y>::interval() const
+{
+	if( !points.size() )
+	{
+		return XInterval::empty();
+	}
+	else
+	{
+		return XInterval( points.begin()->first, points.rbegin()->first );
+	}
+}
+
+template<typename X, typename Y>
 inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segment ) const
 {
 	size_t numPoints = points.size();
@@ -133,7 +146,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 		{
 			return t[i];
 		}
-		X dist = min( Imath::Math<X>::fabs( t[i] - X( 0 ) ), Imath::Math<X>::fabs( t[i] - X( 1 ) ) );
+		X dist = std::min( Imath::Math<X>::fabs( t[i] - X( 0 ) ), Imath::Math<X>::fabs( t[i] - X( 1 ) ) );
 		if( dist < bestDist )
 		{
 			best = t[i];

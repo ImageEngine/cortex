@@ -175,6 +175,14 @@ class SplineTest( unittest.TestCase ) :
 
 		ss = eval( repr( s ) )
 		self.assertEqual( s, ss )
+	
+	def testInterval( self ) :
+	
+		s = IECore.Splineff()
+		s[10] = 100
+		s[20] = 200
+		
+		self.assertEqual( s.interval(), ( 10, 20 ) )
 		
 if __name__ == "__main__":
     unittest.main()   
