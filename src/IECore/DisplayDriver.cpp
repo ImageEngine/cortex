@@ -38,6 +38,8 @@ using namespace std;
 using namespace IECore;
 using namespace Imath;
 
+boost::mutex DisplayDriver::m_factoryMutex;
+
 DisplayDriver::DisplayDriver( const Box2i &displayWindow, const Box2i &dataWindow, const vector<string> &channelNames, ConstCompoundDataPtr parameters ) :
 	m_displayWindow( displayWindow ), m_dataWindow( dataWindow ), m_channelNames( channelNames )
 {
@@ -64,6 +66,8 @@ const std::vector<std::string> &DisplayDriver::channelNames() const
 
 DisplayDriverPtr DisplayDriver::create( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
 {
+	m_factoryMutex.lock();
+
 	DisplayDriverPtr res;
 	std::vector< DisplayDriverCreatorPtr > &creators = factoryList();
 	for ( std::vector< DisplayDriverCreatorPtr >::iterator it = creators.begin(); it != creators.end(); it++ )
@@ -71,37 +75,48 @@ DisplayDriverPtr DisplayDriver::create( const Imath::Box2i &displayWindow, const
 		res = (*it)->create( displayWindow, dataWindow, channelNames, parameters );
 		if ( res )
 		{
+			m_factoryMutex.unlock();
 			return res;
 		}
 	}
+	m_factoryMutex.unlock();
 	throw Exception( "No display driver is compatible with the given parameters!" );
 }
 
 bool DisplayDriver::registerFactory( DisplayDriver::DisplayDriverCreatorPtr creator )
 {
+	m_factoryMutex.lock();
+
 	std::vector< DisplayDriverCreatorPtr > &creators = factoryList();
 	for ( std::vector< DisplayDriverCreatorPtr >::iterator it = creators.begin(); it != creators.end(); it++ )
 	{
 		if ( *it == creator )
 		{
+			m_factoryMutex.unlock();
 			return false;
 		}
 	}
 	creators.insert( creators.begin(), creator );
+
+	m_factoryMutex.unlock();
 	return true;
 }
 
 bool DisplayDriver::unregisterFactory( DisplayDriver::DisplayDriverCreatorPtr creator )
 {
+	m_factoryMutex.lock();
+
 	std::vector< DisplayDriverCreatorPtr > &creators = factoryList();
 	for ( std::vector< DisplayDriverCreatorPtr >::iterator it = creators.begin(); it != creators.end(); it++ )
 	{
 		if ( *it == creator )
 		{
 			creators.erase( it );
+			m_factoryMutex.unlock();
 			return true;
 		}
 	}
+	m_factoryMutex.unlock();
 	return false;
 }
 

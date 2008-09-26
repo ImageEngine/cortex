@@ -35,9 +35,7 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/container_utils.hpp>
 
-#include "IECore/ImageDisplayDriver.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h" 
+#include "IECore/DisplayDriverServer.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
@@ -45,37 +43,17 @@
 using namespace boost;
 using namespace boost::python;
 
-namespace IECore 
-{
+namespace IECore {
 
-template< typename T >
-std::vector< T > listToVector( const boost::python::list &names )
+void bindDisplayDriverServer()
 {
-	std::vector< T > n;
-	boost::python::container_utils::extend_container( n, names );
-	return n;
-}
-
-static ImageDisplayDriverPtr imageDisplayDriverConstructor( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const list &channelNames, CompoundDataPtr parameters )
-{
-	return new ImageDisplayDriver( displayWindow, dataWindow, listToVector<std::string>( channelNames ), parameters );
-}
-
-static ImagePrimitivePtr image( ImageDisplayDriverPtr dd )
-{
-	return dd->image()->copy();
-}
-
-void bindImageDisplayDriver()
-{
-	typedef class_< ImageDisplayDriver, ImageDisplayDriverPtr, boost::noncopyable, bases<DisplayDriver> > ImageDisplayDriverPyClass;
-	ImageDisplayDriverPyClass( "ImageDisplayDriver", no_init )
-		.def( "__init__", make_constructor( &imageDisplayDriverConstructor, default_call_policies(), ( boost::python::arg_( "displayWindow" ), boost::python::arg_( "dataWindow" ), boost::python::arg_( "channelNames" ), boost::python::arg_( "parameters" ) ) ) )
-		.def( "image", &image )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImageDisplayDriver)
+	typedef class_< DisplayDriverServer, DisplayDriverServerPtr, boost::noncopyable, bases<RunTimeTyped> > DisplayDriverServerPyClass;
+	DisplayDriverServerPyClass( "DisplayDriverServer", no_init )
+		.def( init< int >( args( "portNumber" ) ) )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(DisplayDriverServer)
 	;
-	INTRUSIVE_PTR_PATCH( ImageDisplayDriver, ImageDisplayDriverPyClass );
-	implicitly_convertible<ImageDisplayDriverPtr, DisplayDriverPtr>();
+	INTRUSIVE_PTR_PATCH( DisplayDriverServer, DisplayDriverServerPyClass );
+	implicitly_convertible<DisplayDriverServerPtr, RunTimeTypedPtr>();
 }
 
 } // namespace IECore

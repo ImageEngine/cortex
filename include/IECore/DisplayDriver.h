@@ -40,6 +40,7 @@
 
 #include <vector>
 #include <boost/function.hpp>
+#include <boost/thread/mutex.hpp>
 #include <OpenEXR/ImathBox.h>
 
 #include <IECore/RunTimeTyped.h>
@@ -113,6 +114,7 @@ class DisplayDriver : public RunTimeTyped
 
 	private:
 
+		static boost::mutex m_factoryMutex;
 		static std::vector< DisplayDriverCreatorPtr > &factoryList();
 
 		Imath::Box2i m_displayWindow;

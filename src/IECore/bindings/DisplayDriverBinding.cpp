@@ -83,67 +83,6 @@ class DisplayDriverCreatorWrap : public DisplayDriver::DisplayDriverCreator, pub
 };
 IE_CORE_DECLAREPTR( DisplayDriverCreatorWrap );
 
-template< typename T >
-std::vector< T > listToVector( const boost::python::list &names )
-{
-	std::vector< T > n;
-	boost::python::container_utils::extend_container( n, names );
-	return n;
-}
-
-class DisplayDriverWrap : public DisplayDriver, public Wrapper<DisplayDriver>
-{
-	public :
-		
-		DisplayDriverWrap( PyObject *self, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const boost::python::list &channelNames, CompoundDataPtr parameters ) :
- 				DisplayDriver( displayWindow, dataWindow, listToVector<std::string>(channelNames), parameters ), 
-				Wrapper<DisplayDriver>( self, this )
-		{
-		}
-
-		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize )
-		{
-			boost::python::override c = this->get_override( "imageData" );
-			if( c )
-			{
-				c( const_cast<Imath::Box2i &>(box), FloatVectorDataPtr(new FloatVectorData(std::vector<float>(data, data + dataSize))) );
-			}
-			else
-			{
-				throw Exception( "imageData() python method not defined" );
-			}
-		}
-
-		virtual void imageClose()
-		{
-			boost::python::override c = this->get_override( "imageClose" );
-			if( c )
-			{
-				c();
-			}
-			else
-			{
-				throw Exception( "imageClose() python method not defined" );
-			}
-		}
-
-		virtual bool scanLineOrderOnly() const
-		{
-			boost::python::override c = this->get_override( "scanLineOrderOnly" );
-			if( c )
-			{
-				return c();
-			}
-			else
-			{
-				throw Exception( "scanLineOrderOnly() python method not defined" );
-			}
-		}
-
-};
-IE_CORE_DECLAREPTR( DisplayDriverWrap );
-
-
 static boost::python::list channelNames( DisplayDriverPtr dd )
 {
 	boost::python::list newList;
@@ -173,6 +112,14 @@ static bool displayDriverScanLineOrderOnly( DisplayDriverPtr dd )
 	return dd->scanLineOrderOnly();
 }
 
+template< typename T >
+std::vector< T > listToVector( const boost::python::list &names )
+{
+	std::vector< T > n;
+	boost::python::container_utils::extend_container( n, names );
+	return n;
+}
+
 static DisplayDriverPtr displayDriverCreate( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const boost::python::list &channelNames, CompoundDataPtr parameters )
 {
 	return DisplayDriver::create( displayWindow, dataWindow, listToVector<std::string>(channelNames), parameters ); 
@@ -180,9 +127,8 @@ static DisplayDriverPtr displayDriverCreate( const Imath::Box2i &displayWindow, 
 
 void bindDisplayDriver()
 {
-	typedef class_< DisplayDriver, DisplayDriverWrapPtr, boost::noncopyable, bases<RunTimeTyped> > DisplayDriverPyClass;
+	typedef class_< DisplayDriver, DisplayDriverPtr, boost::noncopyable, bases<RunTimeTyped> > DisplayDriverPyClass;
 	scope displayDriverScope = DisplayDriverPyClass( "DisplayDriver", no_init )
-		.def( init< const Imath::Box2i &, const Imath::Box2i &, const list &, CompoundDataPtr >( args( "displayWindow", "dataWindow", "channelNames", "parameters" ) ) )
 		.def( "imageData", &displayDriverImageData )
 		.def( "imageClose", &displayDriverImageClose )
 		.def( "scanLineOrderOnly", &displayDriverScanLineOrderOnly )
@@ -194,7 +140,6 @@ void bindDisplayDriver()
 		.def( "unregisterFactory", &DisplayDriver::unregisterFactory ).staticmethod("unregisterFactory")
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(DisplayDriver)		
 	;
-	WrapperToPython<DisplayDriverPtr>();
 	INTRUSIVE_PTR_PATCH( DisplayDriver, DisplayDriverPyClass );
 	implicitly_convertible<DisplayDriverPtr, RunTimeTypedPtr>();
 

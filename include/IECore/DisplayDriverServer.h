@@ -78,6 +78,8 @@ class DisplayDriverServer : public RunTimeTyped
 		DisplayDriverServer( int portNumber );
 		~DisplayDriverServer();
 
+		boost::mutex &displayDriverMutex();
+
 	public:
 
 		enum MessageType { imageOpen = 1, imageData = 2, imageClose = 3, exception = 4 };
@@ -127,7 +129,7 @@ class DisplayDriverServer : public RunTimeTyped
 		{
 			public:
 
-				Session( boost::asio::io_service& io_service );
+				Session( boost::asio::io_service& io_service, boost::mutex &mutex );
 				~Session();
 
 				boost::asio::ip::tcp::socket& socket();
@@ -142,6 +144,7 @@ class DisplayDriverServer : public RunTimeTyped
 				void sendException( const char *message );
 
 			private:
+				boost::mutex &m_mutex;
 				boost::asio::ip::tcp::socket m_socket;
 				DisplayDriverPtr m_displayDriver;
 				Header m_header;
@@ -153,6 +156,7 @@ class DisplayDriverServer : public RunTimeTyped
 		void serverThread();
 		void handleAccept( DisplayDriverServer::SessionPtr session, const boost::system::error_code& error);
 
+		boost::mutex m_mutex;
 		boost::asio::ip::tcp::endpoint m_endpoint;
 		boost::asio::io_service m_service;
 		boost::asio::ip::tcp::acceptor m_acceptor;

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,53 +38,6 @@ import sys
 import time
 from IECore import *
 
-class TestDisplayDriver(unittest.TestCase):
-
-	class MyDisplayDriver(DisplayDriver):
-
-		def __init__( self, displayWindow, dataWindow, channelNames, parameters ):
-			DisplayDriver.__init__( self, displayWindow, dataWindow, channelNames, parameters )
-			self.count = 0
-
-		def imageData( self, box, data):
-			self.count = self.count + len(data)
-
-		def imageClose( self ):
-			self.count = -self.count
-
-		def scanLineOrderOnly( self ):
-			return True
-
-	class MyDisplayDriverCreator( DisplayDriver.DisplayDriverCreator ):
-
-		def create( self, displayWindow, dataWindow, channelNames, parameters ):
-			return TestDisplayDriver.MyDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
-
-	def testSubclassing( self ):
-
-		dd = self.MyDisplayDriver( Box2i(), Box2i(), [ 'r', 'g', 'b' ], CompoundData() )
-
-		# call the base class virtual method an expect it to be redirected to the derived one ( as if it were being called by C++ ).
-		v = FloatVectorData( [ 1,2,3] )
-		DisplayDriver.imageData( dd, Box2i(), v )
-		self.assertEqual( dd.count, 3 )
-		DisplayDriver.imageClose( dd )
-		self.assertEqual( dd.count, -3 )
-		self.assertEqual( True, DisplayDriver.scanLineOrderOnly( dd ) )
-		self.assertEqual( dd.channelNames(), ['r', 'g', 'b'] )
-
-	def testFactory( self ):
-
-		creator = self.MyDisplayDriverCreator()
-		self.assertEqual( DisplayDriver.registerFactory( creator ), True )
-		idd = DisplayDriver.create( Box2i( V2i(0,0), V2i(100,100) ), Box2i( V2i(10,10), V2i(40,40) ), [ 'r', 'g', 'b' ], CompoundData() )
-		self.assertEqual( idd.scanLineOrderOnly(), True )
-		self.assertEqual( idd.displayWindow(), Box2i( V2i(0,0), V2i(100,100) ) )
-		self.assertEqual( idd.dataWindow(), Box2i( V2i(10,10), V2i(40,40) ) )
-		self.assertEqual( idd.channelNames(), [ 'r', 'g', 'b' ] )
-		self.assertEqual( DisplayDriver.unregisterFactory( creator ), True )
-		self.assertEqual( DisplayDriver.unregisterFactory( creator ), False )
-
 class TestImageDisplayDriver(unittest.TestCase):
 
 	def testConstruction( self ):
@@ -116,88 +69,72 @@ class TestImageDisplayDriver(unittest.TestCase):
 		idd.imageClose()
 		self.assertEqual( idd.image(), img )
 
-	def testSubclassing( self ):
+	def testFactory( self ):
 
-		class MyImageDisplayDriver(ImageDisplayDriver):
+		class MyDisplayDriverCreator( DisplayDriver.DisplayDriverCreator ):
+	
+			def create( self, displayWindow, dataWindow, channelNames, parameters ):
+				return ImageDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
 
-			def __init__( self, displayWindow, dataWindow, channelNames, parameters ):
-				ImageDisplayDriver.__init__( self, displayWindow, dataWindow, channelNames, parameters )
-				self.count = 0
+		creator = MyDisplayDriverCreator()
+		self.assertEqual( DisplayDriver.registerFactory( creator ), True )
+		idd = DisplayDriver.create( Box2i( V2i(0,0), V2i(100,100) ), Box2i( V2i(10,10), V2i(40,40) ), [ 'r', 'g', 'b' ], CompoundData() )
+		self.assertEqual( idd.scanLineOrderOnly(), False )
+		self.assertEqual( idd.displayWindow(), Box2i( V2i(0,0), V2i(100,100) ) )
+		self.assertEqual( idd.dataWindow(), Box2i( V2i(10,10), V2i(40,40) ) )
+		self.assertEqual( idd.channelNames(), [ 'r', 'g', 'b' ] )
+		self.assertEqual( DisplayDriver.unregisterFactory( creator ), True )
+		self.assertEqual( DisplayDriver.unregisterFactory( creator ), False )
 
-			def imageData( self, box, data):
-				self.count = self.count + 1
+class TestClientServerDisplayDriver(unittest.TestCase):
 
-			def imageClose( self ):
-				self.count = -self.count
+	class MyDisplayDriverCreator( DisplayDriver.DisplayDriverCreator ):
 
-			def scanLineOrderOnly( self ):
-				return True
+		def __init__( self, myTest ):
+			DisplayDriver.DisplayDriverCreator.__init__( self )
+			self.myTest = myTest
+
+		def create( self, displayWindow, dataWindow, channelNames, parameters ):
+			self.myTest.clientDisplayDriver = ImageDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
+			return self.myTest.clientDisplayDriver
+
+	def setUp( self ):
+		self.server = DisplayDriverServer( 1559 )
+		self.creator = self.MyDisplayDriverCreator( self )
+		self.assertEqual( DisplayDriver.registerFactory( self.creator ), True )
+		time.sleep(2)
+
+	def __prepareBuf( self, buf, width, offset, red, green, blue ):
+		for i in xrange( 0, width ):
+			buf[3*i] = blue[i+offset]
+			buf[3*i+1] = green[i+offset]
+			buf[3*i+2] = red[i+offset]
+
+	def testTransfer( self ):
 
 		img = Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
-		idd = MyImageDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), CompoundData() )
 		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
 		red = img['R'].data
 		green = img['G'].data
 		blue = img['B'].data
 		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
+
+		params = CompoundData()
+		params['host'] = StringData('localhost')
+		params['port'] = StringData( '1559' )
+		idd = ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
+
 		buf = FloatVectorData( width * 3 )
 		for i in xrange( 0, img.dataWindow.max.y - img.dataWindow.min.y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
-			ImageDisplayDriver.imageData( idd, Box2i( V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
-		ImageDisplayDriver.imageClose( idd )
-		self.assertEqual( idd.image(), img )
-		self.assertEqual( idd.count, -300 )
-		self.assertEqual( True, ImageDisplayDriver.scanLineOrderOnly( idd ) )
+			idd.imageData( Box2i( V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
+		idd.imageClose()
+		self.assertEqual( self.clientDisplayDriver.image(), img )
 
-#class TestClientServerDisplayDriver(unittest.TestCase):
-
-#	class MyDisplayDriverCreator( DisplayDriver.DisplayDriverCreator ):
-
-#		def __init__( self, myTest ):
-#			DisplayDriver.DisplayDriverCreator.__init__( self )
-#			self.myTest = myTest
-
-#		def create( self, displayWindow, dataWindow, channelNames, parameters ):
-#			self.myTest.clientDisplayDriver = ImageDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
-#			return self.myTest.clientDisplayDriver
-
-#	def setUp( self ):
-#		self.server = DisplayDriverServer( 1559 )
-#		self.creator = self.MyDisplayDriverCreator( self )
-#		self.assertEqual( DisplayDriver.registerFactory( self.creator ), True )
-#		time.sleep(2)
-
-#	def __prepareBuf( self, buf, width, offset, red, green, blue ):
-#		for i in xrange( 0, width ):
-#			buf[3*i] = blue[i+offset]
-#			buf[3*i+1] = green[i+offset]
-#			buf[3*i+2] = red[i+offset]
-
-#	def testTransfer( self ):
-
-#		img = Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
-#		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
-#		red = img['R'].data
-#		green = img['G'].data
-#		blue = img['B'].data
-#		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
-
-#		params = CompoundData()
-#		params['host'] = StringData('localhost')
-#		params['port'] = StringData( '1559' )
-#		idd = ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
-
-#		buf = FloatVectorData( width * 3 )
-#		for i in xrange( 0, img.dataWindow.max.y - img.dataWindow.min.y + 1 ):
-#			self.__prepareBuf( buf, width, i*width, red, green, blue )
-#			idd.imageData( Box2i( V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
-#		idd.imageClose()
-#		self.assertEqual( self.clientDisplayDriver.image(), img )
-
-#	def tearDown( self ):
-#		self.assertEqual( DisplayDriver.unregisterFactory( self.creator ), True )
-#		self.creator = None
-#		self.server = None
+	def tearDown( self ):
+		self.assertEqual( DisplayDriver.unregisterFactory( self.creator ), True )
+		self.creator = None
+		self.server = None
 
 if __name__ == "__main__":
 	unittest.main()   

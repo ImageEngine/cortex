@@ -51,10 +51,10 @@ DisplayDriverServer::DisplayDriverServer( int portNumber ) :
 		m_thread( boost::bind(&DisplayDriverServer::serverThread, this) ),
 		m_startThread(false)
 {
-	DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_service ) );
+	DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_service, m_mutex ) );
 
 	m_acceptor.async_accept( newSession->socket(),
-			boost::bind( &DisplayDriverServer::handleAccept, this, newSession,
+			boost::bind( &DisplayDriverServer::handleAccept, DisplayDriverServerPtr(this), newSession,
 			boost::asio::placeholders::error));
 
 	m_startThread = true;
@@ -80,13 +80,18 @@ void DisplayDriverServer::serverThread()
 	}
 }
 
+boost::mutex &DisplayDriverServer::displayDriverMutex()
+{
+	return m_mutex;
+}
+
 void DisplayDriverServer::handleAccept( DisplayDriverServer::SessionPtr session, const boost::system::error_code& error)
 {
 	if (!error)
 	{
-		DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_service ) );
+		DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_service, m_mutex ) );
 		m_acceptor.async_accept( newSession->socket(),
-				boost::bind( &DisplayDriverServer::handleAccept, this, newSession,
+				boost::bind( &DisplayDriverServer::handleAccept, DisplayDriverServerPtr(this), newSession,
 				boost::asio::placeholders::error));
 		session->start();
 	}
@@ -154,7 +159,8 @@ DisplayDriverServer::MessageType DisplayDriverServer::Header::messageType()
 
 /* DisplayDriverServer::Session functions */
 
-DisplayDriverServer::Session::Session( boost::asio::io_service& io_service ) : m_socket( io_service ), m_displayDriver(0), m_buffer( new CharVectorData( ) )
+DisplayDriverServer::Session::Session( boost::asio::io_service& io_service, boost::mutex &mutex) : 
+	m_mutex( mutex ),m_socket( io_service ), m_displayDriver(0), m_buffer( new CharVectorData( ) )
 {
 }
 
@@ -220,17 +226,20 @@ void DisplayDriverServer::Session::handleReadHeader( const boost::system::error_
 	case imageClose:
 		if ( m_displayDriver )
 		{
+			m_mutex.lock();
 			try 
 			{
 				m_displayDriver->imageClose();
 			}
 			catch ( std::exception &e )
 			{
+				m_mutex.unlock();
 				msg( Msg::Error, "DisplayDriverServer::Session::handleReadHeader", e.what() );
 				sendException( e.what() );
 				m_socket.close();
 				return;
 			}
+			m_mutex.unlock();
 			try
 			{
 				sendResult( imageClose, 0 );
@@ -271,6 +280,7 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 	bool scanLineOrder = false;
 
 	// handle imageOpen parameters.
+	m_mutex.lock();
 	try
 	{
 		MemoryIndexedIOPtr io = new MemoryIndexedIO( m_buffer, "/", IndexedIO::Exclusive | IndexedIO::Read );
@@ -286,11 +296,13 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 	}
 	catch( std::exception &e )
 	{
+		m_mutex.unlock();
 		msg( Msg::Error, "DisplayDriverServer::Session::handleReadOpenParameters", e.what() );
 		sendException( e.what() );
 		m_socket.close();
 		return;
 	}
+	m_mutex.unlock();
 
 	try
 	{
@@ -336,6 +348,7 @@ void DisplayDriverServer::Session::handleReadDataParameters( const boost::system
 	Box2iDataPtr box;
 	FloatVectorDataPtr data;
 		
+	m_mutex.lock();
 	try
 	{
 		MemoryIndexedIOPtr io = new MemoryIndexedIO( m_buffer, "/", IndexedIO::Exclusive | IndexedIO::Read );
@@ -356,10 +369,12 @@ void DisplayDriverServer::Session::handleReadDataParameters( const boost::system
 	}
 	catch( std::exception &e )
 	{
+		m_mutex.unlock();
 		msg( Msg::Error, "DisplayDriverServer::Session::handleReadDataParameters", e.what() );
 		m_socket.close();
+		return;
 	}
-
+	m_mutex.unlock();
 }
 
 void DisplayDriverServer::Session::sendResult( MessageType msg, size_t dataSize )
