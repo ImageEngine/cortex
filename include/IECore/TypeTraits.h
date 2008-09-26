@@ -146,6 +146,25 @@ BOOST_STATIC_ASSERT( (IsVec<Imath::V3i>::value) );
 BOOST_STATIC_ASSERT( (IsVec<Imath::V2d>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVec<int> >::value) );
 
+/// IsColor3
+template<typename T> struct IsColor3 : public boost::false_type {};
+template<typename T> struct IsColor3< Imath::Color3<T> > : public boost::true_type {};
+BOOST_STATIC_ASSERT( ( IsColor3<Imath::Color3f>::value ) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsColor3<Imath::V3f> >::value) );
+
+/// IsColor4
+template<typename T> struct IsColor4 : public boost::false_type {};
+template<typename T> struct IsColor4< Imath::Color4<T> > : public boost::true_type {};
+BOOST_STATIC_ASSERT( ( IsColor4<Imath::Color4f>::value ) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsColor4<Imath::V3f> >::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsColor4<Imath::Color3f> >::value) );
+
+/// IsColor
+template<typename T> struct IsColor : boost::mpl::or_< IsColor3<T>, IsColor4<T> > {};
+BOOST_STATIC_ASSERT( (IsColor<Imath::Color3f>::value) );
+BOOST_STATIC_ASSERT( (IsColor<Imath::Color4f>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsColor<int> >::value) );
+
 /// IsMatrixTypedData
 template< typename T > struct IsMatrixTypedData : boost::mpl::and_< IsTypedData<T>, IsMatrix< typename ValueType<T>::type > > {};
 BOOST_STATIC_ASSERT( (IsMatrixTypedData<M33fData>::value) );
