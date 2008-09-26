@@ -37,7 +37,8 @@
 
 #include "IECore/Exception.h"
 
-#include "OpenEXR/ImathRoots.h"
+#include "OpenEXR/ImathLimits.h"
+#include "OpenEXR/ImathMath.h"
 
 namespace IECore
 {
@@ -89,10 +90,15 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	basis.coefficients( X( 0 ), co );
 	X xp[4];
 	
-	segment = points.begin();
 	It testSegment = points.begin();
 	do
 	{
+		segment = testSegment;
+		for( unsigned i=0; i<basis.step; i++ )
+		{
+			testSegment++;
+		}
+		
 		bool overrun = false;
 		It xIt( testSegment );
 		for( unsigned i=0; i<4; i++ )
@@ -109,11 +115,6 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 		{
 			break;
 		}
-		segment = testSegment;
-		for( unsigned i=0; i<basis.step; i++ )
-		{
-			testSegment++;
-		}
 	
 	} while( xp[0] * co[0] + xp[1] * co[1] + xp[2] * co[2] + xp[3] * co[3] < x );
 	// get the x values of the control values for the segment in question
@@ -122,38 +123,30 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	{
 		xp[i] = (*xIt++).first;
 	}
-	// find the appropriate parametric position within that segment
-	const typename Basis::MatrixType &m = basis.matrix;
-	X a = m[0][0] * xp[0] + m[0][1] * xp[1] + m[0][2] * xp[2] + m[0][3] * xp[3];
-	X b = m[1][0] * xp[0] + m[1][1] * xp[1] + m[1][2] * xp[2] + m[1][3] * xp[3];
-	X c = m[2][0] * xp[0] + m[2][1] * xp[1] + m[2][2] * xp[2] + m[2][3] * xp[3];
-	X d = m[3][0] * xp[0] + m[3][1] * xp[1] + m[3][2] * xp[2] + m[3][3] * xp[3] - x;
-	X t[3];
-	int solutions = Imath::solveCubic( a, b, c, d, t );
-	if( !solutions )
+	// find the appropriate parametric position within that segment. we tried
+	// doing this directly with ImathRoots.h but precision problems prevented this
+	// working well. now we do a sort of bisection thing instead.
+	X tMin = 0;
+	X tMax = 1;
+	X tMid, xMid;
+	X epsilon = Imath::limits<X>::epsilon(); // might be nice to present this as a parameter
+	int i = 0;
+	do
 	{
-		// i don't know if this can ever happen but it needs flagging if it does
-		throw Exception( "Failed to solve cubic." );	
-	}
-	// we want the solution that satisfies 0 <= t <= 1. sometimes precision problems
-	// give us results just outside this range, in these cases we take
-	// the best case solution and clamp it into range.
-	X best = 0;
-	X bestDist = Imath::limits<X>::max();
-	for( int i=0; i<solutions; i++ )
-	{
-		if( t[i]>=0 && t[i]<=1 )
+		tMid = ( tMin + tMax ) / X( 2 );
+		xMid = basis( tMid, xp );
+		if( xMid > x )
 		{
-			return t[i];
+			tMax = tMid;
 		}
-		X dist = std::min( Imath::Math<X>::fabs( t[i] - X( 0 ) ), Imath::Math<X>::fabs( t[i] - X( 1 ) ) );
-		if( dist < bestDist )
+		else
 		{
-			best = t[i];
-			bestDist = dist;
+			tMin = tMid;
 		}
-	}
-	return Imath::clamp( best, X( 0 ), X( 1 ) );
+		i++;
+	} while( Imath::Math<X>::fabs( xMid - x ) > epsilon );
+
+	return tMid;
 }
 
 template<typename X, typename Y>

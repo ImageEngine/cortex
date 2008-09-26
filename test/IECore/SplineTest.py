@@ -134,7 +134,7 @@ class SplineTest( unittest.TestCase ) :
 			s = IECore.Splineff()
 			x = 0
 		
-			for i in range( 0, 4 ) :
+			for i in range( 0, 40 ) :
 			
 				s[x] = random.uniform( 0, 10 )
 				x += 1 + random.uniform( 0, 1 )
