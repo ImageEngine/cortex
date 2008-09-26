@@ -47,6 +47,7 @@
 
 using namespace IECoreGL;
 
+/// \todo This should be in a standalone Op, and should cope with more than just Vertex interpolated input.
 class ToGLMeshConverter::ToFaceVaryingConverter
 {
 	public:
@@ -151,9 +152,12 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		{
 			if ( pIt->second.interpolation==IECore::PrimitiveVariable::Vertex || pIt->second.interpolation==IECore::PrimitiveVariable::Varying )
 			{
+				// convert to facevarying
 				IECore::DataPtr newData = IECore::despatchTypedData< ToFaceVaryingConverter, IECore::TypeTraits::IsVectorTypedData >( pIt->second.data, primVarConverter );
-				pIt->second.interpolation = IECore::PrimitiveVariable::FaceVarying;
 				glMesh->addVertexAttribute( pIt->first, newData );
+				// modify the primvar we converted in case it is "s" or "t", then we don't have to do another conversion below.
+				pIt->second.interpolation = IECore::PrimitiveVariable::FaceVarying;
+				pIt->second.data = newData;
 			} 
 			else if ( pIt->second.interpolation==IECore::PrimitiveVariable::FaceVarying )
 			{
