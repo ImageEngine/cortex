@@ -72,10 +72,13 @@ static tuple coefficients( const T &b, typename T::BaseType t )
 template<typename T>
 void bindCubicBasis( const char *name )
 {
+	typedef typename T::BaseType BaseType;
+
 	class_<T>( name, init<const typename T::MatrixType, unsigned>() )
 		.def_readwrite( "matrix", &T::matrix )
 		.def_readwrite( "step", &T::step )
 		.def( "coefficients", &coefficients<T> )
+		.def( "__call__", (BaseType (T::*) ( BaseType, BaseType, BaseType, BaseType, BaseType )const)&T::template operator()<BaseType> )
 		.def( "__call__", (V2f (T::*) ( float, const V2f &, const V2f &, const V2f &, const V2f &)const)&T::template operator()<V2f> )
 		.def( "__call__", (V3f (T::*) ( float, const V3f &, const V3f &, const V3f &, const V3f &)const)&T::template operator()<V3f> )
 		.def( "__call__", (V2d (T::*) ( double, const V2d &, const V2d &, const V2d &, const V2d &)const)&T::template operator()<V2d> )
