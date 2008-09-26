@@ -286,6 +286,7 @@ enum TypeId
 	ImageDisplayDriverTypeId = 243,
 	DisplayDriverServerTypeId = 244,
 	ClientDisplayDriverTypeId = 245,
+	SplineToImageTypeId = 246,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

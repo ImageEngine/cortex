@@ -163,6 +163,7 @@ from SplineParameterTest import *
 from DisplayDriverTest import *
 from AttributeStateTest import *
 from CoordinateSystemTest import *
+from SplineToImageTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

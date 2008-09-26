@@ -39,6 +39,7 @@
 #include "IECoreGL/QuadPrimitive.h"
 #include "IECoreGL/SpherePrimitive.h"
 #include "IECoreGL/ColorTexture.h"
+#include "IECoreGL/LuminanceTexture.h"
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/Group.h"
 #include "IECoreGL/GL.h"
@@ -67,6 +68,8 @@
 #include "IECore/MatrixAlgo.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/MeshNormalsOp.h"
+#include "IECore/SplineData.h"
+#include "IECore/SplineToImage.h"
 
 #include <stack>
 
@@ -1110,6 +1113,33 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 						return true;
 					}
 				}
+			}
+			else
+			{
+				msg( Msg::Error, context, boost::format( "Shader parameter \"%s\" is not a texture parameter." ) % name );
+				return false;
+			}
+		}
+		else if( value->isInstanceOf( SplinefColor3fDataTypeId ) || value->isInstanceOf( SplineffDataTypeId ) )
+		{
+			// turn splines into textures
+			if( shaderState->shader()->parameterType( name )==Texture::staticTypeId() )
+			{
+				SplineToImagePtr op = new SplineToImage();
+				op->splineParameter()->setValue( value );
+				op->resolutionParameter()->setTypedValue( V2i( 8, 512 ) );
+				ImagePrimitivePtr image = boost::static_pointer_cast<ImagePrimitive>( op->operate() );
+								
+				TexturePtr texture = 0;
+				if( image->variables.find( "R" )!=image->variables.end() )
+				{
+					texture = new ColorTexture( image );
+				}
+				else
+				{
+					texture = new LuminanceTexture( image );
+				}
+				shaderState->textureValues()[name] = texture;	
 			}
 			else
 			{
