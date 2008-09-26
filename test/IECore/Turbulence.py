@@ -91,6 +91,18 @@ class TestTurbulence( unittest.TestCase ) :
 
 		IECore.Writer.create( i, "test/turbulenceV2ff.exr" ).write()
 		
+	def testNaN( self ) :
+	
+		t = IECore.TurbulenceV2ff(
+			octaves = 28,
+			gain = 0.35,
+			lacunarity = IECore.V2f( 2.0 ),
+			turbulent = True
+		)
+		
+		f = t.turbulence( IECore.V2f( 21.3, 51.2 ) )
+		self.assert_( f == f ) # Make sure f is not NaN
+		
 	def tearDown( self ) :
 	
 		if os.path.isfile( "test/turbulenceV2ff.exr" ) :
