@@ -92,6 +92,21 @@ class CubicTest( unittest.TestCase ) :
 		p = b( 1, p0, p1, p2, p3 )
 		self.assertEqual( p, p3 )
 		
+	def testCallWithScalars( self ) :
+	
+		b = CubicBasisf.bezier()
+		
+		p0 = 0
+		p1 = 1
+		p2 = 1
+		p3 = 0
+		
+		p = b( 0, p0, p1, p2, p3 )
+		self.assertEqual( p, p0 )
+		
+		p = b( 1, p0, p1, p2, p3 )
+		self.assertEqual( p, p3 )
+		
 	## This test isn't very useful as it doesn't assert anything,
 	# but it can be handy for making a visual verification.
 	def testPoints( self ) :
