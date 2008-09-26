@@ -101,7 +101,7 @@ class TestTurbulence( unittest.TestCase ) :
 		)
 		
 		f = t.turbulence( IECore.V2f( 21.3, 51.2 ) )
-		self.assert_( f == f ) # Make sure f is not NaN
+		self.assert_( f == f ) # Known bug
 		
 	def tearDown( self ) :
 	
