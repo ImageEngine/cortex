@@ -43,7 +43,7 @@ namespace IECore
 /// A class useful for simple timing of operations.
 /// This simply wraps boost::timer with a more flexible interface
 /// that allows for starting and stopping while accumulating
-/// elapsed time.
+/// elapsed time. Time values returned are in seconds.
 class Timer
 {
 
