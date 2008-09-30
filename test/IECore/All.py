@@ -164,6 +164,7 @@ from DisplayDriverTest import *
 from AttributeStateTest import *
 from CoordinateSystemTest import *
 from SplineToImageTest import *
+from DisplayTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

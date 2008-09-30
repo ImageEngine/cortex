@@ -286,6 +286,7 @@ void bindTypeId()
 		.value("DisplayDriverServer", DisplayDriverServerTypeId )
 		.value("CoordinateSystem", CoordinateSystemTypeId )
 		.value("SplineToImage", SplineToImageTypeId )
+		.value("Display", DisplayTypeId )
 	;
 }
 

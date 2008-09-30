@@ -196,6 +196,7 @@
 #include "IECore/bindings/ClientDisplayDriverBinding.h"
 #include "IECore/bindings/DisplayDriverServerBinding.h"
 #include "IECore/bindings/SplineToImageBinding.h"
+#include "IECore/bindings/DisplayBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -377,6 +378,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindClientDisplayDriver();
 	bindDisplayDriverServer();
 	bindSplineToImage();
+	bindDisplay();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
