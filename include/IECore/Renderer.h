@@ -259,6 +259,8 @@ class Renderer : public RunTimeTyped
 		/// Specifies a shader to be applied to subsequent primitives.
 		virtual void shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters ) = 0;
 		/// Specifies a light to apply to subsequent primitives.
+		/// \todo We need a way to define light handles, and an illuminate() method to turn them on
+		/// and off.
 		virtual void light( const std::string &name, const CompoundDataMap &parameters ) = 0;
 		//@}
 
