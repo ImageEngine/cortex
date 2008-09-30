@@ -55,6 +55,9 @@ class Parameter : public RunTimeTyped
 		IE_CORE_DECLARERUNTIMETYPED( Parameter, RunTimeTyped );
 	
 		/// A typedef used to map from preset names to preset values.
+		/// \todo This mapping also needs to maintain order of insertion - it's maddening
+		/// that drop down menus based on the presets have totally misleading orders. We should
+		/// probably use some sort of boost multi-indexed container.
 		typedef std::map<std::string, ObjectPtr> PresetsMap;
 	
 		/// Creates a new Parameter. If presetsOnly is true then the parameter acts somewhat
