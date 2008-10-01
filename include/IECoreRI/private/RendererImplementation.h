@@ -186,6 +186,7 @@ class RendererImplementation : public IECore::Renderer
 		IECore::DataPtr objectEndCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr objectInstanceCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
+		IECore::DataPtr illuminateCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		IECore::SearchPath m_fontSearchPath;
 #ifdef IECORE_WITH_FREETYPE

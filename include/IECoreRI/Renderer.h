@@ -238,6 +238,11 @@ class Renderer : public IECore::Renderer
 		/// "ri:archiveRecord"
 		/// Makes a call to RiArchiveRecord(). Expects StringData parameters called "type" and
 		/// "record".
+		///
+		/// "ri:illuminate"
+		/// Calls RiIlluminate. Expects a StringData parameter called "handle" and a BoolData parameter
+		/// called "state" with the light state. This is provided as a stopgap until the Renderer base class specifies 
+		/// an specific illuminate method.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 		
 	private :

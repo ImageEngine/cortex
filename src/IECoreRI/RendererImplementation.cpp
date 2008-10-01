@@ -155,6 +155,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_commandHandlers["objectInstance"] = &IECoreRI::RendererImplementation::objectInstanceCommand;
 	m_commandHandlers["ri:objectInstance"] = &IECoreRI::RendererImplementation::objectInstanceCommand;
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
+	m_commandHandlers["ri:illuminate"] = &IECoreRI::RendererImplementation::illuminateCommand;
 	
 	m_inMotion = false;
 }
@@ -1291,5 +1292,32 @@ IECore::DataPtr IECoreRI::RendererImplementation::archiveRecordCommand( const st
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:archiveRecord \"record\" parameter appears to contain printf format specifiers." );
 	}
+	return 0;
+}
+
+IECore::DataPtr IECoreRI::RendererImplementation::illuminateCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
+{
+	ScopedContext scopedContext( m_context );
+
+	ConstStringDataPtr handleData = 0;
+	ConstBoolDataPtr stateData = 0;
+	CompoundDataMap::const_iterator handleIt = parameters.find( "handle" );
+	CompoundDataMap::const_iterator stateIt = parameters.find( "state" );
+	if( handleIt!=parameters.end() )
+	{
+		handleData = runTimeCast<StringData>( handleIt->second );
+	}
+	if( stateIt!=parameters.end() )
+	{
+		stateData = runTimeCast<BoolData>( stateIt->second );
+	}
+	
+	if( !(handleData && stateData) )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:illuminate command expects a StringData value called \"handle\" and a BoolData value called \"state\"." );
+		return 0;
+	}
+	
+	RiIlluminate( (void *)handleData->readable().c_str(), stateData->readable() );
 	return 0;
 }
