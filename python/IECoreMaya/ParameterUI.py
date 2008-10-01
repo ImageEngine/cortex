@@ -998,7 +998,7 @@ class VectorParameterUI( ParameterUI ) :
 		
 		ParameterUI.replace( self, node, parameter )
 		
-		if len(self.__fields) == self.__dim:
+		if len(self.__fields) and len(self.__fields) == self.__dim:
 		
 			plug = self.plug()		
 			for i in range(0, self.__dim):	
