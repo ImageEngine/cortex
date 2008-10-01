@@ -204,9 +204,9 @@ except :
 	pass
 
 # find nuke, unless we're on intel macs where the library doesn't link right now
-if IEEnv.platform() != "osx104.i686" :
+if IEEnv.platform() != "osx104.i686" and targetApp=="nuke" :
 	try :
-		nukeVersion = getOption( "NUKE_VERSION", os.environ["NUKE_VERSION"] )
+		nukeVersion = targetAppVersion
 		nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
 		if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
 			NUKE_ROOT = nukeReg["location"]
