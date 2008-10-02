@@ -54,7 +54,7 @@ DisplayDriverServer::DisplayDriverServer( int portNumber ) :
 	DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_service, m_mutex ) );
 
 	m_acceptor.async_accept( newSession->socket(),
-			boost::bind( &DisplayDriverServer::handleAccept, DisplayDriverServerPtr(this), newSession,
+			boost::bind( &DisplayDriverServer::handleAccept, this, newSession,
 			boost::asio::placeholders::error));
 
 	m_startThread = true;
@@ -62,6 +62,9 @@ DisplayDriverServer::DisplayDriverServer( int portNumber ) :
 
 DisplayDriverServer::~DisplayDriverServer()
 {
+	m_acceptor.cancel();
+	m_acceptor.close();
+	m_thread.join();
 }
 
 void DisplayDriverServer::serverThread()
@@ -91,7 +94,7 @@ void DisplayDriverServer::handleAccept( DisplayDriverServer::SessionPtr session,
 	{
 		DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_service, m_mutex ) );
 		m_acceptor.async_accept( newSession->socket(),
-				boost::bind( &DisplayDriverServer::handleAccept, DisplayDriverServerPtr(this), newSession,
+				boost::bind( &DisplayDriverServer::handleAccept,  this, newSession,
 				boost::asio::placeholders::error));
 		session->start();
 	}

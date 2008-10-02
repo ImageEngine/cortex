@@ -76,7 +76,7 @@ class DisplayDriverServer : public RunTimeTyped
 		IE_CORE_DECLARERUNTIMETYPED( DisplayDriverServer, RunTimeTyped );
 
 		DisplayDriverServer( int portNumber );
-		~DisplayDriverServer();
+		virtual ~DisplayDriverServer();
 
 		boost::mutex &displayDriverMutex();
 
