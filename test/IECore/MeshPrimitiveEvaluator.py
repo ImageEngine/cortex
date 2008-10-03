@@ -71,6 +71,24 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		
 		self.failIf( foundClosest )
 		
+	def testTangents( self ) :	
+	
+		reader = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" )
+		m = reader.read()
+		
+		self.assert_( m.isInstanceOf( "MeshPrimitive" ) )
+		
+		numTriangles = len( m.verticesPerFace )
+		
+		mpe = PrimitiveEvaluator.create( m )
+		
+		r = mpe.createResult()
+		
+		# Currently unimplemented
+		self.assertRaises( RuntimeError, r.uTangent )
+		self.assertRaises( RuntimeError, r.vTangent )
+		
+		
 	def testSimpleMesh( self ) :
 		""" Testing MeshPrimitiveEvaluator with mesh containing single triangle"""	
 		verticesPerFace = IntVectorData()
