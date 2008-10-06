@@ -229,7 +229,7 @@ class testLs( unittest.TestCase ) :
 		
 		for sequence in sequences :	
 			for f in sequence.fileNames() :
-				os.system( "touch test/sequences/lsTest/" + f )
+				os.system( "touch 'test/sequences/lsTest/" + f + "'" )
 		
 		l = ls( "test/sequences/lsTest" )
 				
@@ -299,7 +299,7 @@ class testLs( unittest.TestCase ) :
 		
 		for sequence in [s1, s2, s3] :	
 			for f in sequence.fileNames() :
-				os.system( "touch " + f )
+				os.system( "touch '" + f + "'" )
 		
 		l = ls( "test/sequences/lsTest/a.####.tif" )
 		self.assertEqual( s1, l )
@@ -341,7 +341,7 @@ class testMv( unittest.TestCase ) :
 		os.system( "mkdir -p test/sequences/mvTest" )
 		s = FileSequence( "test/sequences/mvTest/s.####.tif", FrameRange( 0, 100 ) )
 		for f in s.fileNames() :
-			os.system( "touch " + f )
+			os.system( "touch '" + f + "'" )
 			
 		s2 = FileSequence( "test/sequences/mvTest/s2.####.tif", FrameRange( 100, 200 ) )
 		mv( s, s2 )
@@ -357,7 +357,7 @@ class testMv( unittest.TestCase ) :
 		os.system( "mkdir -p test/sequences/mvTest" )
 		s = FileSequence( "test/sequences/mvTest/s.####.tif", FrameRange( 0, 100 ) )
 		for f in s.fileNames() :
-			os.system( "touch " + f )
+			os.system( "touch '" + f + "'" )
 			
 		s2 = FileSequence( "test/sequences/mvTest/s.####.tif", FrameRange( 50, 150 ) )
 		mv( s, s2 )
@@ -382,7 +382,7 @@ class testCp( unittest.TestCase ) :
 		
 		s = FileSequence( "test/sequences/cpTest/s.####.tif", FrameRange( 0, 100 ) )
 		for f in s.fileNames() :
-			os.system( "touch " + f )
+			os.system( "touch '" + f + "'" )
 		
 		s2 = FileSequence( "test/sequences/cpTest/t.####.tif", FrameRange( 50, 150 ) )
 		
@@ -408,7 +408,7 @@ class testBigNumbers( unittest.TestCase ) :
 		os.system( "mkdir -p test/IECore/sequences/renumberTest" )
 		
 		for f in s.fileNames() :
-			os.system( "touch " + f )
+			os.system( "touch '" + f + "'" )
 		
 		offset = -300010000
 		SequenceRenumberOp()( src="test/IECore/sequences/renumberTest/s.#.tif", offset=offset )

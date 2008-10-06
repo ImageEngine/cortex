@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008 Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -79,20 +79,32 @@ class FileSequenceParameter( IECore.PathParameter ) :
 			
 		if not FileSequence.fileNameValidator().match( value.value ) :
 			return False, "Value must contain one sequence of at least one # character to specify frame number."
+				
+		fileSequence = None
+		try :
 		
+			fileSequence = self.__parseFileSequence( value.value )			
+			
+		except RuntimeError, e :
+		
+			return False, "Not a valid file sequence specification"
+					
+		assert( fileSequence )	
+					
 		if len( self.extensions ) :
-			e = os.path.splitext( value.value )[1].lstrip( "." ).split(' ')[0]
+			e = os.path.splitext( fileSequence.fileName )[1].split(".")[1]
+
 			if not e in self.extensions :
 				return False, "File sequence extension not valid."
 		
 		if self.mustExist :
-			parts = value.value.split(' ')
-			if len(parts) == 0 or ls(parts[0]) is None:
+						
+			if ls( fileSequence.fileName ) is None:
 				return False, "File sequence does not exist"
 			
 		elif self.mustNotExist :
-			parts = value.value.split(' ')
-			if ls( parts[0] ) :
+
+			if ls( fileSequence.fileName ) :
 				return False, "File sequence already exists"
 			
 		return True, ""	
@@ -102,18 +114,48 @@ class FileSequenceParameter( IECore.PathParameter ) :
 	
 		self.setValue( IECore.StringData( fileSequence.fileName ) )
 	
+	## Find the longest space-delimited tail substring that is a parseable FrameList and
+	# return a FileSequence instance which contains that FrameList. Everything before that is considered to 
+	# be part of the filename. Previous implementations would just split on the first space character 
+	# encountered, but this wouldn't allow for the filename portion of the value to include spaces itself.
+	def __parseFileSequence( self, fileSequenceStr ) :
+	
+		fileSequenceCopy = str( fileSequenceStr )
+
+		spaceIndex = fileSequenceCopy.find( " " )
+		
+		found = False
+		filename = fileSequenceStr
+		framelist =  FrameList.parse( "" )
+
+		while not found and spaceIndex != -1 :
+
+			head, tail = fileSequenceStr[ 0:spaceIndex ], fileSequenceStr[ spaceIndex+1: ]
+			filename = head
+
+			assert( head + " " + tail == fileSequenceStr )
+
+			try :
+
+				framelist = FrameList.parse( tail )
+				found = True
+			except :
+				fileSequenceCopy =  fileSequenceCopy[ 0:spaceIndex ] + "*" + fileSequenceCopy[ spaceIndex+1: ]				
+				spaceIndex = fileSequenceCopy.find( " " )
+
+		return FileSequence( filename, framelist )
+	
 	## Gets the internal StringData value and creates a FileSequence
 	# from it using the ls() function. Note that this can return None
 	# if check is DontCare and no matching sequence exists on disk.
 	def getFileSequenceValue( self ) :
-		fileSequence = self.getValidatedValue().value
-		parts = fileSequence.split(' ')
-		if len(parts) == 1:
-			return ls(fileSequence)
-		else:
-			filename = parts[0]
-			framelist = FrameList.parse(parts[1])
-			return FileSequence(filename, framelist)
+	
+		fileSequenceStr = self.getValidatedValue().value
+	
+                if fileSequenceStr.find( " " ) == -1:
+                        return ls( fileSequenceStr )
+			
+		return self.__parseFileSequence( fileSequenceStr )
 
 		
 makeRunTimeTyped( FileSequenceParameter, 100000, IECore.PathParameter )

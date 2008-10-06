@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -47,7 +47,7 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		os.system( "mkdir -p " + directory )
 		
 		for f in sequence.fileNames() :
-			os.system( "touch " + directory + "/" + f )
+			os.system( "touch '" + directory + "/" + f + "'" )
 
 	def test( self ) :	
 	
@@ -101,6 +101,30 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "dsds.###" ) )
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "dsds.###.gif" ) )
 		p.setValidatedValue( IECore.StringData( "dsds.##.tif" ) )
+		
+	def testSpacesInFilename( self ) :	
+	
+		s = IECore.FileSequence( "test with spaces .#.tif", IECore.FrameRange( 5, 10 ) )
+		self.mkSequence( s )
+		p = IECore.FileSequenceParameter(
+			name = "n",
+			description = "d",
+			check = IECore.FileSequenceParameter.CheckType.MustExist,
+			extensions="tif exr jpg"
+		)
+		
+		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/test with spaces .#.tif 5-10" ) )
+		
+		s = IECore.FileSequence( "test with   spaces  .#.tif", IECore.FrameRange( 5, 10 ) )
+		self.mkSequence( s )
+		p = IECore.FileSequenceParameter(
+			name = "n",
+			description = "d",
+			check = IECore.FileSequenceParameter.CheckType.MustExist,
+			extensions="tif exr jpg"
+		)
+		
+		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/test with   spaces  .#.tif 5-10" ) )
 
 		
 if __name__ == "__main__":
