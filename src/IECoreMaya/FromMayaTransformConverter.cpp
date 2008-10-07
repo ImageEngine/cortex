@@ -59,7 +59,7 @@ FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath 
 	spacePresets["World"] = World;		
 	m_spaceParameter = new IECore::IntParameter(
 		"space",
-		"The space in which the transfprm is converted.",
+		"The space in which the transform is converted.",
 		World,
 		Local,
 		World,
