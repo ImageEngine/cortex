@@ -33,77 +33,34 @@
 ##########################################################################
 
 import unittest
-import random
-
 from IECore import *
+import math
 
-from IECoreGL import *
-init( False )
-
-class MeshPrimitiveTest( unittest.TestCase ) :
-
-	## \todo Make this actually assert something
-	def testVertexAttributes( self ) :
+class MeshTangentsOpTest( unittest.TestCase ) :
+		
+	def testSphere( self ) :
 	
-		vertexSource = """
+		mesh = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()		
+		self.assert_( not "uTangent" in mesh )
+		self.assert_( not "vTangent" in mesh )		
+		self.assert_( not "sTangent" in mesh )
+		self.assert_( not "tTangent" in mesh )				
 		
-		attribute vec3 uTangent;
-		varying vec4 stColor;
-		
-		void main()
-		{
-			gl_Position = ftransform();
-			
-			stColor = vec4(uTangent.x, uTangent.y, uTangent.z, 1.0);			
-		}
-		"""
-	
-		fragmentSource = """
-		varying vec4 stColor;
-		
-		void main()
-		{
-			gl_FragColor = stColor;
-		}
-		"""
-		
-		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
-		
-		op = MeshTangentsOp()
-		
-		m = op(
-			input = m )
-		
-		
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		
-		r.worldBegin()
-		# we have to make this here so that the shaders that get made are made in the
-		# correct GL context. My understanding is that all shaders should work in all
-		# GL contexts in the address space, but that doesn't seem to be the case.
-		w = SceneViewer( "scene", r.scene() )
-		
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -15 ) ) )
-		r.shader( "surface", "showST", 
-			{ "gl:fragmentSource" : StringData( fragmentSource ),
-			  "gl:vertexSource" :   StringData( vertexSource   ) 
-			}
+		res = MeshTangentsOp()(
+			input = mesh,
+			uPrimVarName = "s",
+			vPrimVarName = "t",
+			uTangentPrimVarName = "sTangent",
+			vTangentPrimVarName = "tTangent",			
 		)
 		
-		primVars = {}
+		self.assert_( not "uTangent" in res )
+		self.assert_( not "vTangent" in res )	
+		self.assert_( "sTangent" in res )
+		self.assert_( "tTangent" in res )		
 		
-		primVars["P"] = m["P"]		
-		primVars["s"] = m["s"]
-		primVars["t"] = m["t"]
-		primVars["N"] = m["N"]	
-		primVars["uTangent"] = m["vTangent"]		
+		self.assert_( res.arePrimitiveVariablesValid() )
 		
-		r.mesh( m.verticesPerFace, m.vertexIds, m.interpolation, primVars )
-		
-		r.worldEnd()
-	
-		w.start()
-		
+			
 if __name__ == "__main__":
     unittest.main()   

@@ -197,6 +197,7 @@
 #include "IECore/bindings/DisplayDriverServerBinding.h"
 #include "IECore/bindings/SplineToImageBinding.h"
 #include "IECore/bindings/DisplayBinding.h"
+#include "IECore/bindings/MeshTangentsOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -379,6 +380,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDisplayDriverServer();
 	bindSplineToImage();
 	bindDisplay();
+	bindMeshTangentsOp();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
@@ -389,3 +391,4 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "withFreeType", &IECore::withFreeType );
 
 }
+

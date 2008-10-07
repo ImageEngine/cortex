@@ -165,6 +165,7 @@ from AttributeStateTest import *
 from CoordinateSystemTest import *
 from SplineToImageTest import *
 from DisplayTest import *
+from MeshTangentsOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
