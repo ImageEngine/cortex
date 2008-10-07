@@ -46,15 +46,14 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 	def testVertexAttributes( self ) :
 	
 		vertexSource = """
-		
-		attribute vec3 uTangent;
+		attribute vec2 st;
 		varying vec4 stColor;
 		
 		void main()
 		{
 			gl_Position = ftransform();
 			
-			stColor = vec4(uTangent.x, uTangent.y, uTangent.z, 1.0);			
+			stColor = vec4(st.x, st.y, 0.0, 1.0);			
 		}
 		"""
 	
@@ -69,12 +68,6 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		
 		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
 		
-		op = MeshTangentsOp()
-		
-		m = op(
-			input = m )
-		
-		
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		
@@ -82,7 +75,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		# we have to make this here so that the shaders that get made are made in the
 		# correct GL context. My understanding is that all shaders should work in all
 		# GL contexts in the address space, but that doesn't seem to be the case.
-		w = SceneViewer( "scene", r.scene() )
+		#w = SceneViewer( "scene", r.scene() )
 		
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -15 ) ) )
 		r.shader( "surface", "showST", 
@@ -96,14 +89,13 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		primVars["P"] = m["P"]		
 		primVars["s"] = m["s"]
 		primVars["t"] = m["t"]
-		primVars["N"] = m["N"]	
-		primVars["uTangent"] = m["vTangent"]		
+		primVars["N"] = m["N"]		
 		
 		r.mesh( m.verticesPerFace, m.vertexIds, m.interpolation, primVars )
 		
 		r.worldEnd()
 	
-		w.start()
+		#w.start()
 		
 if __name__ == "__main__":
     unittest.main()   
