@@ -287,6 +287,7 @@ void bindTypeId()
 		.value("CoordinateSystem", CoordinateSystemTypeId )
 		.value("SplineToImage", SplineToImageTypeId )
 		.value("Display", DisplayTypeId )
+		.value("MeshTangentsOp", MeshTangentsOpTypeId )
 	;
 }
 

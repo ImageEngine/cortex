@@ -288,6 +288,7 @@ enum TypeId
 	ClientDisplayDriverTypeId = 245,
 	SplineToImageTypeId = 246,
 	DisplayTypeId = 247,
+	MeshTangentsOpTypeId = 248,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
