@@ -120,8 +120,10 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		try :
 			f = maya.OpenMaya.MFnDagNode( self.object() )
 			return f.fullPathName()
-		finally :
-			return self.name()
+		except :
+			pass
+			
+		return self.name()
 	
 	## Add a callback which will be invoked whenever FnParameterisedHolder.setParameterised
 	# is called. The expected function signature is callback( FnParameterisedHolder ).

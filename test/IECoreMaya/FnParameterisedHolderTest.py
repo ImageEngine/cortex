@@ -95,5 +95,16 @@ class FnParameterisedHolderTest( unittest.TestCase ) :
 		fnPH.setNodeValues()
 		self.assert_( iPlug.asInt(), 11 )
 
+	def testFullPathName( self ) :
+
+		node = maya.cmds.createNode( "ieOpHolderNode" )
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		self.assertEqual( node, fnPH.fullPathName() )
+		
+		procedural = maya.cmds.createNode( "ieProceduralHolder" )
+		fnPH = IECoreMaya.FnParameterisedHolder( procedural )
+		self.assertEqual( maya.cmds.ls( procedural, long=True )[0], fnPH.fullPathName() )
+		
+		
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
