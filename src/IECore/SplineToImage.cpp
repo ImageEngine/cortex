@@ -121,16 +121,16 @@ struct SplineToImage::CreateImage
 		std::vector<float *> channels;
 		if( YTraits::dimensions()==3 )
 		{
-			FloatVectorDataPtr channel = result->createChannel<float>( "R" );
+			FloatVectorDataPtr channel = result->template createChannel<float>( "R" );
 			channels.push_back( &(channel->writable()[0]) );
-			channel = result->createChannel<float>( "G" );
+			channel = result->template createChannel<float>( "G" );
 			channels.push_back( &(channel->writable()[0]) );
-			channel = result->createChannel<float>( "B" );
+			channel = result->template createChannel<float>( "B" );
 			channels.push_back( &(channel->writable()[0]) );
 		}
 		else if( YTraits::dimensions()==1 )
 		{
-			FloatVectorDataPtr channel = result->createChannel<float>( "Y" );
+			FloatVectorDataPtr channel = result->template createChannel<float>( "Y" );
 			channels.push_back( &(channel->writable()[0]) );		
 		}
 	
