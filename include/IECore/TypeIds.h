@@ -289,6 +289,8 @@ enum TypeId
 	SplineToImageTypeId = 246,
 	DisplayTypeId = 247,
 	MeshTangentsOpTypeId = 248,
+	WarpOpTypeId = 249,
+	UVDistortOpTypeId = 250,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
