@@ -55,7 +55,7 @@ class MotionPrimitive : public VisibleRenderable
 		MotionPrimitive();
 		virtual ~MotionPrimitive();
 				
-		IE_CORE_DECLAREOBJECT( MotionPrimitive, Renderable );
+		IE_CORE_DECLAREOBJECT( MotionPrimitive, VisibleRenderable );
 		
 		//! @name Snapshots
 		////////////////////////////////////////////////////

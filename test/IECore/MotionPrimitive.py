@@ -43,7 +43,7 @@ class TestMotionPrimitive( unittest.TestCase ) :
 	
 		m = MotionPrimitive()
 		self.assert_( m.isInstanceOf( "MotionPrimitive" ) )
-		self.assert_( m.isInstanceOf( "Renderable" ) )
+		self.assert_( m.isInstanceOf( "VisibleRenderable" ) )
 
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )
