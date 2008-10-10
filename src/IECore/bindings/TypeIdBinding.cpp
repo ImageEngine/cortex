@@ -288,6 +288,8 @@ void bindTypeId()
 		.value("SplineToImage", SplineToImageTypeId )
 		.value("Display", DisplayTypeId )
 		.value("MeshTangentsOp", MeshTangentsOpTypeId )
+		.value("WarpOp", WarpOpTypeId )
+		.value("UVDistortOp", UVDistortOpTypeId )
 	;
 }
 
