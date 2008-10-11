@@ -228,6 +228,18 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"gl:pointsPrimitive:ignoreBasis" BoolData false</b><br>
 		/// When this is true, all curves are rendered as if they were linear.
 		///
+		/// \par Implementation specific text primitive attributes :
+		////////////////////////////////////////////////////////////
+		///
+		/// \li <b>"gl:textPrimitive:type" StringData "mesh"
+		/// Controls the basic method used for text rendering. A value
+		/// of "mesh" specifies that text primitives are rendered as
+		/// triangulated meshes, and a value of "sprite" specifies rendering
+		/// as textured planes. The former allows completely customisable shading
+		/// using the current shader, whereas the latter is shaded constantly
+		/// using the current colour, but may offer better anti-aliasing and/or
+		/// speed.
+		///
 		/// \par Implementation specific blending attributes :
 		////////////////////////////////////////////////////////////
 		///
@@ -283,6 +295,8 @@ class Renderer : public IECore::Renderer
 		/// "gl:vertexSource" and/or a "gl:fragmentSource" StringData then a new shader is created using the source provided.
 		/// For shaders with sampler2D parameters, texture files for these parameters may be specified by passing the filename
 		/// to an image as StringData.
+		/// \todo Add support for "textureParameterName:filter" and "textureParameterName:wrap" parameters which set wrapping
+		/// and filtering on a ShaderStateComponent.
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const IECore::CompoundDataMap &parameters );
 

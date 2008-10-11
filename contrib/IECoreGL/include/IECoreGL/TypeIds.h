@@ -103,6 +103,7 @@ enum TypeId
 	AlphaTextureTypeId = 105060,
 	GroupTypeId = 105061,
 	SceneTypeId = 105062,	
+	TextPrimitiveTypeTypeId = 105063,
 	LastCoreGLTypeId = 105999,	
 };	
 

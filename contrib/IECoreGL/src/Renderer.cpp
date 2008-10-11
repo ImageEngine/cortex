@@ -948,6 +948,46 @@ static void nameSetter( const std::string &name, IECore::ConstDataPtr value, IEC
 	memberData->implementation->addState( new NameStateComponent( d->readable() ) );
 }
 
+static IECore::ConstDataPtr textPrimitiveTypeGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
+{
+	TextPrimitive::ConstTypePtr b = memberData->implementation->getState<TextPrimitive::Type>();
+	switch( b->value() )
+	{
+		case TextPrimitive::Mesh :
+			return new StringData( "mesh" );
+		case TextPrimitive::Sprite :
+			return new StringData( "sprite" );
+		default :
+			msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
+			return new StringData( "invalid" );
+	}
+}
+
+static void textPrimitiveTypeSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
+{
+	ConstStringDataPtr d = castWithWarning<const StringData>( value, name, "Renderer::setAttribute" );
+	if( !d )
+	{
+		return;
+	}
+	TextPrimitive::RenderType t;
+	const std::string &v = d->readable();
+	if( v=="mesh" )
+	{
+		t = TextPrimitive::Mesh;
+	}
+	else if( v=="sprite" )
+	{
+		t = TextPrimitive::Sprite;
+	}
+	else
+	{
+		msg( Msg::Error, "Renderer::setAttribute", boost::format( "Unsupported value \"%s\" for attribute \"%s\"." ) % v % name );
+		return;
+	}
+	memberData->implementation->addState( new TextPrimitive::Type( t ) );
+}
+
 static const AttributeSetterMap *attributeSetters()
 {
 	static AttributeSetterMap *a = new AttributeSetterMap;
@@ -985,6 +1025,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:smoothing:points"] = typedAttributeSetter<PointSmoothingStateComponent>;
 		(*a)["gl:smoothing:lines"] = typedAttributeSetter<LineSmoothingStateComponent>;
 		(*a)["gl:smoothing:polygons"] = typedAttributeSetter<PolygonSmoothingStateComponent>;
+		(*a)["gl:textPrimitive:type"] = textPrimitiveTypeSetter;
 	}
 	return a;
 }
@@ -1026,6 +1067,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:smoothing:points"] = typedAttributeGetter<PointSmoothingStateComponent>;
 		(*a)["gl:smoothing:lines"] = typedAttributeGetter<LineSmoothingStateComponent>;
 		(*a)["gl:smoothing:polygons"] = typedAttributeGetter<PolygonSmoothingStateComponent>;
+		(*a)["gl:textPrimitive:type"] = textPrimitiveTypeGetter;
 	}
 	return a;
 }
@@ -1484,6 +1526,7 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 			try
 			{
 				IECore::FontPtr cf = new IECore::Font( file );
+				cf->setResolution( 128 ); // makes for better texture resolutions - maybe it could be an option?
 				f = new Font( cf );
 			}
 			catch( const std::exception &e )
@@ -1541,6 +1584,9 @@ static IECoreGL::ShaderPtr imageShader()
 	return s;	
 }
 
+/// \todo This positions images incorrectly when dataWindow!=displayWindow. This is because the texture
+/// contains only the dataWindow contents, but we've positioned the card as if it will contain the whole
+/// displayWindow.
 void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
 {
 	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );

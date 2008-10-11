@@ -36,6 +36,7 @@
 #define IECOREGL_TEXTPRIMITIVE_H
 
 #include "IECoreGL/Primitive.h"
+#include "IECoreGL/TypedStateComponent.h"
 
 namespace IECoreGL
 {
@@ -55,18 +56,41 @@ class TextPrimitive : public Primitive
 		
 		virtual Imath::Box3f bound() const;
 		
+		//! @name StateComponents
+		/// The following StateComponent classes have an effect only on
+		/// TextPrimitive objects.
+		//////////////////////////////////////////////////////////////////////////////
+		//@{
+		/// An enum to specifiy the type of primitives used to render text.
+		enum RenderType
+		{
+			Invalid,
+			Mesh,
+			Sprite
+		};
+		typedef TypedStateComponent<RenderType, TextPrimitiveTypeTypeId> Type;
+		IE_CORE_DECLAREPTR( Type );
+		//@}
+		
 	protected :
 		
 		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
 	
 	private :
 	
-		typedef std::vector<ConstMeshPrimitivePtr> MeshVector;
-		typedef std::vector<Imath::V2f> AdvanceVector;
-		MeshVector m_meshes;
-		AdvanceVector m_advances;
-		
+		FontPtr m_font;
+		std::string m_text;
 		Imath::Box3f m_bound;
+		typedef std::vector<Imath::V2f> AdvanceVector;
+		AdvanceVector m_advances;
+	
+		/// Mesh rendering bits
+		void renderMeshes( ConstStatePtr state, IECore::TypeId style ) const;
+		typedef std::vector<ConstMeshPrimitivePtr> MeshVector;
+		mutable MeshVector m_meshes;
+		
+		/// Sprite rendering bits
+		void renderSprites( ConstStatePtr state, IECore::TypeId style ) const;
 	
 };
 

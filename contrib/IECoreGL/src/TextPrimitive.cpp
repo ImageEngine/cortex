@@ -39,33 +39,42 @@
 #include "IECoreGL/State.h"
 #include "IECoreGL/Font.h"
 #include "IECoreGL/GL.h"
+#include "IECoreGL/TextureUnits.h"
 
 using namespace IECoreGL;
 using namespace Imath;
+using namespace std;
+
+namespace IECoreGL
+{
+
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( TextPrimitive::Type, TextPrimitiveTypeTypeId, TextPrimitive::RenderType, TextPrimitive::Mesh );
+
+}
 
 TextPrimitive::TextPrimitive( const std::string &text, FontPtr font )
+	:	m_font( font ), m_text( text )
 {
-	if( text.size() )
+	if( m_text.size() )
 	{
-		V3f advanceSum( 0 );
-		for( unsigned i=0; i<text.size(); i++ )
+		Box2f b;
+		V2f advanceSum( 0 );
+		for( unsigned i=0; i<m_text.size(); i++ )
 		{
-			ConstMeshPrimitivePtr mesh = font->mesh( text[i] );
-			assert( mesh );
-			assert( mesh->vertexIds()->readable().size() );
-			m_meshes.push_back( mesh );
-			Box3f b = mesh->bound();
+			Box2f b = m_font->coreFont()->bound( m_text[i] );
 			b.min += advanceSum;
 			b.max += advanceSum;
-			m_bound.extendBy( b );
-			if( i<text.size() - 1 )
+			if( i<m_text.size() - 1 )
 			{
-				V2f a = font->coreFont()->advance( text[i], text[i+1] );
+				V2f a = m_font->coreFont()->advance( m_text[i], m_text[i+1] );
+				advanceSum += a;
 				m_advances.push_back( a );
-				advanceSum += V3f( a.x, a.y, 0 );
 			}
 		}
+		m_bound.min = V3f( b.min.x, b.min.y, 0 );
+		m_bound.max = V3f( b.max.x, b.max.y, 0 );
 	}
+	
 }
 
 TextPrimitive::~TextPrimitive()
@@ -79,18 +88,110 @@ Imath::Box3f TextPrimitive::bound() const
 
 void TextPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 {
-	glPushMatrix();
-	
-	for( unsigned i=0; i<m_meshes.size(); i++ )
+	if( !m_text.size() )
 	{
-		m_meshes[i]->render( state, style );
-		if( i<m_advances.size() )
+		return;
+	}
+
+	ConstTypePtr t = state->get<Type>();
+	switch( t->value() )
+	{
+		case Mesh :
+			renderMeshes( state, style );
+			break;
+		case Sprite :
+			renderSprites( state, style );
+			break;
+		default :
+			break;
+	}
+}
+
+void TextPrimitive::renderMeshes( ConstStatePtr state, IECore::TypeId style ) const
+{
+	if( !m_meshes.size() )
+	{
+		for( unsigned i=0; i<m_text.size(); i++ )
 		{
-			glTranslate( m_advances[i] );
+			ConstMeshPrimitivePtr mesh = m_font->mesh( m_text[i] );
+			m_meshes.push_back( mesh );
 		}
 	}
+	
+	glPushMatrix();
+	
+		for( unsigned i=0; i<m_meshes.size(); i++ )
+		{
+			m_meshes[i]->render( state, style );
+			if( i<m_advances.size() )
+			{
+				glTranslate( m_advances[i] );
+			}
+		}
 	
 	glPopMatrix();
 }
 
+void TextPrimitive::renderSprites( ConstStatePtr state, IECore::TypeId style ) const
+{
+	Box2f charBound = m_font->coreFont()->bound();
+	glPushAttrib( GL_TEXTURE_BIT | GL_ENABLE_BIT );
+	glPushMatrix();
+	
+		/// \todo We need a better way of dealing with shader push/pop
+		/// How about some sort of ScopedProgram class which cleans up
+		/// after itself on destruction? Maybe we should generalise that
+		/// for all the bindables that don't work because there's no suitable
+		/// glPush/Pop for them.
+		GLint oldProgram = 0;
+		if( GLEW_VERSION_2_0 )
+		{
+			glGetIntegerv( GL_CURRENT_PROGRAM, &oldProgram );
+		}
 
+		glUseProgram( 0 );
+		glEnable( GL_TEXTURE_2D );
+		glDisable( GL_LIGHTING ); /// \todo Perhaps we could support lighting even in this mode?
+		glActiveTexture( textureUnits()[0] );
+		m_font->texture()->bind();
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+		float sStep = 1.0f / 16.0f;
+		float tStep = 1.0f / 8.0f;
+		float eps = 0.001; // a small inset seems necessary to avoid getting the border of the adjacent letters
+		for( unsigned i=0; i<m_text.size(); i++ )
+		{
+			char c = m_text[i];
+			int tx = c % 16;
+			int ty = 7 - (c / 16);
+			
+			glBegin( GL_QUADS );
+			
+				glTexCoord2f( tx * sStep + eps, ty * tStep + eps );
+				glVertex2f( charBound.min.x, charBound.min.y );
+				
+				glTexCoord2f( (tx + 1) * sStep - eps, ty * tStep + eps );
+				glVertex2f( charBound.max.x, charBound.min.y );
+				
+				glTexCoord2f( (tx + 1) * sStep - eps, (ty + 1) * tStep - eps );
+				glVertex2f( charBound.max.x, charBound.max.y );
+				
+				glTexCoord2f( tx * sStep + eps, (ty + 1) * tStep - eps);
+				glVertex2f( charBound.min.x, charBound.max.y );
+			
+			glEnd();
+			if( i<m_advances.size() )
+			{
+				glTranslate( m_advances[i] );
+			}
+		}
+		
+		if( GLEW_VERSION_2_0 )
+		{
+			glUseProgram( oldProgram );
+		}
+	
+	glPopMatrix();
+	glPopAttrib();
+}
