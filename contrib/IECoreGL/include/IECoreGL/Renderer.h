@@ -129,6 +129,8 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"rightHandedOrientation"</b>
 		/// \li <b>"name"</b>
 		///
+		/// \li <b>"user:*"</b>
+		///
 		/// \par Implementation specific attributes :
 		////////////////////////////////////////////////////////////
 		///

@@ -185,6 +185,12 @@ struct IECoreGL::Renderer::MemberData
 	/// After worldBegin the transform stack is taken care of by the backend implementations.
 	std::stack<Imath::M44f> transformStack;
 	
+	struct Attributes
+	{
+		IECore::CompoundDataMap userAttributes;
+	};
+	std::stack<Attributes> attributeStack;
+	
 	bool inWorld;
 	RendererImplementationPtr implementation;
 	ShaderLoaderPtr shaderLoader;
@@ -218,6 +224,7 @@ IECoreGL::Renderer::Renderer()
 	m_data->options.textureSearchPath = m_data->options.textureSearchPathDefault = texturePath ? texturePath : "";
 	
 	m_data->transformStack.push( M44f() );
+	m_data->attributeStack.push( MemberData::Attributes() );
 	
 	m_data->inWorld = false;
 	m_data->implementation = 0;
@@ -1075,14 +1082,20 @@ static const AttributeGetterMap *attributeGetters()
 void IECoreGL::Renderer::attributeBegin()
 {
 	m_data->implementation->attributeBegin();
+	m_data->attributeStack.push( m_data->attributeStack.top() );
 }
 
 void IECoreGL::Renderer::attributeEnd()
 {
+	if( !m_data->attributeStack.size() )
+	{
+		IECore::msg( IECore::Msg::Error, "IECoreGL::Renderer::attributeEnd", "No matching attributeBegin." );
+		return;
+	}
+	m_data->attributeStack.pop();
 	m_data->implementation->attributeEnd();
 }
 
-/// \todo Support user attributes and ignore attributes destined for other renderers
 void IECoreGL::Renderer::setAttribute( const std::string &name, IECore::ConstDataPtr value )
 {
 	const AttributeSetterMap *s = attributeSetters();
@@ -1090,6 +1103,10 @@ void IECoreGL::Renderer::setAttribute( const std::string &name, IECore::ConstDat
 	if( it!=s->end() )
 	{
 		it->second( name, value, m_data );
+	}
+	else if( name.compare( 0, 5, "user:" )==0 )
+	{
+		m_data->attributeStack.top().userAttributes[name] = value->copy();
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
 	{
@@ -1108,6 +1125,16 @@ IECore::ConstDataPtr IECoreGL::Renderer::getAttribute( const std::string &name )
 	if( it!=g->end() )
 	{
 		return it->second( name, m_data );
+	}
+	else if( name.compare( 0, 5, "user:" )==0 )
+	{
+		MemberData::Attributes &attributes = m_data->attributeStack.top();
+		IECore::CompoundDataMap::const_iterator it = attributes.userAttributes.find( name );
+		if( it != attributes.userAttributes.end() )
+		{
+			return it->second;
+		}
+		return 0;
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
 	{
