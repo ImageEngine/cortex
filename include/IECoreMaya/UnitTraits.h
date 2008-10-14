@@ -35,6 +35,7 @@
 #ifndef IE_COREMAYA_UNITTRAITS_H
 #define IE_COREMAYA_UNITTRAITS_H
 
+#include "maya/MFnUnitAttribute.h"
 #include "maya/MDistance.h"
 #include "maya/MAngle.h"
 #include "maya/MTime.h"
