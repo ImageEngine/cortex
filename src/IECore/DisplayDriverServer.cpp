@@ -388,7 +388,7 @@ void DisplayDriverServer::Session::sendResult( MessageType msg, size_t dataSize 
 
 void DisplayDriverServer::Session::sendException( const char *message )
 {
-	int msgLen = strlen( message ) + 1;
+	size_t msgLen = strlen( message ) + 1;
 	sendResult( DisplayDriverServer::exception, msgLen );
 	m_socket.send( boost::asio::buffer( message, msgLen ) );
 }
