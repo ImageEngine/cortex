@@ -44,8 +44,9 @@ class FromMayaTransformConverterTest( unittest.TestCase ) :
 		
 		locatorTransform = maya.cmds.spaceLocator()[0]
 		
-		c = IECoreMaya.FromMayaDagNodeConverter.create( str( locatorTransform ) )
+		c = IECoreMaya.FromMayaDagNodeConverter.create( str( locatorTransform ), IECore.TypeId.TransformationMatrixdData )
 		
+		self.assertEqual( IECoreMaya.TypeId.FromMayaTransformConverter, IECoreMaya.FromMayaTransformConverter.staticTypeId() )
 		self.assertEqual( c.typeId(), IECoreMaya.FromMayaTransformConverter.staticTypeId() )
 		
 		t = c.convert()
