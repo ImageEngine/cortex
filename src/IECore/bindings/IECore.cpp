@@ -198,6 +198,8 @@
 #include "IECore/bindings/SplineToImageBinding.h"
 #include "IECore/bindings/DisplayBinding.h"
 #include "IECore/bindings/MeshTangentsOpBinding.h"
+#include "IECore/bindings/WarpOpBinding.h"
+#include "IECore/bindings/UVDistortOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -380,7 +382,9 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDisplayDriverServer();
 	bindSplineToImage();
 	bindDisplay();
-	bindMeshTangentsOp();	
+	bindMeshTangentsOp();
+	bindWarpOp();
+	bindUVDistortOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

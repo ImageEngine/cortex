@@ -44,7 +44,8 @@ using namespace Imath;
 UVDistortOp::UVDistortOp()
 	:	WarpOp( 
 			"UVDistortOp", 
-			"Distorts an ImagePrimitive by using a UV map as reference. The UV map must have the same pixel aspect then the image to be distorted."
+			"Distorts an ImagePrimitive by using a UV map as reference. The UV map must have the same pixel aspect then the image to be distorted. "
+			"The resulting image will have the same data window as the reference UV map."
 		), m_u(0), m_v(0)
 {
 	m_uvMapParameter = new ObjectParameter(
@@ -98,54 +99,26 @@ void UVDistortOp::begin( ConstCompoundObjectPtr operands )
 	m_v = static_pointer_cast<FloatVectorData>(mit->second.data);
 
 	ImagePrimitivePtr inputImage = static_pointer_cast<ImagePrimitive>( inputParameter()->getValue() );
-	m_offset = inputImage->getDataWindow().min;
-	m_ratio = uvImage->getDataWindow().size() / inputImage->getDataWindow().size();
-	m_uvSize = uvImage->getDataWindow().size() + Imath::V2i(1,1);
-	m_bilinear = ( m_ratio != V2f( 1.,1.) );
+	m_uvSize = uvImage->getDataWindow().size();
+	m_uvOrigin = uvImage->getDataWindow().min;
+	m_imageSize = inputImage->getDisplayWindow().size();
+	m_imageOrigin = inputImage->getDisplayWindow().min;
+}
+
+Imath::Box2i UVDistortOp::warpedDataWindow( const Imath::Box2i &dataWindow ) const
+{
+	return Imath::Box2i( m_uvOrigin, m_uvOrigin + m_uvSize );
 }
 
 Imath::V2f UVDistortOp::warp( const Imath::V2f &p ) const
 {
-	Imath::V2f uvCoord = (p - m_offset) * m_ratio;
-
-	if ( m_bilinear )
-	{
-		unsigned pos1, pos2, x1, x2, y1, y2;
-		V2f r1, r2, r;
-
-		x1 = int(uvCoord.x);
-		y1 = int(uvCoord.y);
-		x2 = x1 + 1;
-		y2 = y1 + 1;
-
-		x1 = ( (int)x1 >= m_uvSize.x ? m_uvSize.x - 1 : x1 );
-		x2 = ( (int)x2 >= m_uvSize.x ? m_uvSize.x - 1 : x2 );
-		y1 = ( (int)y1 >= m_uvSize.y ? m_uvSize.y - 1 : y1 );
-		y2 = ( (int)y2 >= m_uvSize.y ? m_uvSize.y - 1 : y2 );
-
-		pos1 = x1 + y1 * m_uvSize.x;
-		pos2 = x2 + y1 * m_uvSize.x;
-		LinearInterpolator<Imath::V2f>()( Imath::V2f( m_u->readable()[ pos1 ], m_v->readable()[ pos1 ] ), 
-										  Imath::V2f( m_u->readable()[ pos2 ], m_v->readable()[ pos2 ] ),
-										  uvCoord.x - x1, r1 );
-		pos1 = x1 + y2 * m_uvSize.x;
-		pos2 = x2 + y2 * m_uvSize.x;
-		LinearInterpolator<Imath::V2f>()( Imath::V2f( m_u->readable()[ pos1 ], m_v->readable()[ pos1 ] ), 
-										  Imath::V2f( m_u->readable()[ pos2 ], m_v->readable()[ pos2 ] ),
-										  uvCoord.x - x1, r2 );
-
-		LinearInterpolator<Imath::V2f>()( r1, r2, uvCoord.y - y1, r );
-		return r;
-	}
-	else
-	{
-		int x = int(uvCoord.x);
-		int y = int(uvCoord.y);
-		x = ( x < 0 ? 0 : x >= m_uvSize.x ? m_uvSize.x - 1 : x );
-		y = ( y < 0 ? 0 : y >= m_uvSize.y ? m_uvSize.y - 1 : y );
-		unsigned pos = x + y * m_uvSize.x;
-		return Imath::V2f( m_u->readable()[ pos ], m_v->readable()[ pos ] );
-	}
+	Imath::V2f uvCoord = (p - m_uvOrigin);
+	int x = int(uvCoord.x);
+	int y = int(uvCoord.y);
+	x = ( x < 0 ? 0 : x > m_uvSize.x ? m_uvSize.x : x );
+	y = ( y < 0 ? 0 : y > m_uvSize.y ? m_uvSize.y : y );
+	unsigned pos = x + y * (m_uvSize.x + 1);
+	return Imath::V2f( m_u->readable()[ pos ], m_v->readable()[ pos ] ) * m_imageSize + m_imageOrigin;
 }
 
 void UVDistortOp::end()

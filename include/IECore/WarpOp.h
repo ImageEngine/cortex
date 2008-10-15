@@ -35,7 +35,7 @@
 #ifndef IECORE_WARPOP_H
 #define IECORE_WARPOP_H
 
-#include "IECore/ChannelOp.h"
+#include "IECore/TypedPrimitiveOp.h"
 #include "IECore/NumericParameter.h"
 
 namespace IECore
@@ -43,9 +43,10 @@ namespace IECore
 
 /// A base class for warp operations on ImagePrimitive objects.
 // This Op modifies an image by remapping pixels values to other locations. 
-// The mapping is determined by the derived classes. The base class is responsible for applying 
-// filtering on the colors based on the floating point positions returned by warp method.
-class WarpOp : public ChannelOp
+// The display window does not change in this process, but the data window may change.
+// The mapping is determined by the derived classes. The base class is responsible for resizing the
+// data window and applying filter on the colors based on the floating point positions returned by warp method.
+class WarpOp : public ImagePrimitiveOp
 {
 	public:
 
@@ -57,18 +58,25 @@ class WarpOp : public ChannelOp
 		IntParameterPtr filterParameter();
 		ConstIntParameterPtr filterParameter() const;
 
-		IE_CORE_DECLARERUNTIMETYPED( WarpOp, ChannelOp );
+		IE_CORE_DECLARERUNTIMETYPED( WarpOp, ImagePrimitiveOp );
 	
 	protected :
 	
-		/// Implemented to call modifyChannels(). Derived classes should implement begin,warp and end rather than this function.
-		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
+		/// Implemented to call begin(), warpedDataWindow(), warp() and end(). Derived classes should implement those functions rather than
+		/// this function.
+		virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
 
-		/// Called once per operation. This is an opportunity to perform any preprocessing
-		/// necessary before many calls to warp() are made.
+		/// Called once per operation before anything else. This is an opportunity to perform any preprocessing
+		/// necessary before warpedDataWindow() and many calls to warp() are made.
 		virtual void begin( ConstCompoundObjectPtr operands );
+		/// Defines the resulting dataWindow.
+		/// This function is called after begin() method. The input Box2i corresponds to the input image data window.
+		/// The default implementation returns the same data window as the original image.
+		virtual Imath::Box2i warpedDataWindow( const Imath::Box2i &dataWindow ) const;
 		/// Called once per element (pixel for ImagePrimitives).
-		/// Must be implemented by subclasses to determine where the color will come from the given pixel location.
+		/// Must be implemented by subclasses to determine where the color will come from.
+		/// The returned coordinate is on pixel space of the input image and the given V2f coordinates are on the 
+		/// output image pixel space.
 		virtual Imath::V2f warp( const Imath::V2f &p ) const = 0;
 		/// Called once per operation, after all calls to transform() have been made. This is
 		/// an opportunity to perform any cleanup necessary.

@@ -43,7 +43,7 @@ using namespace Imath;
 using namespace boost;
 
 WarpOp::WarpOp( const std::string &name, const std::string &description )
-	:	ChannelOp( name, description )
+	:	ImagePrimitiveOp( name, description )
 {
 	IntParameter::PresetsMap filterPresets;
 	filterPresets["None"] = WarpOp::None;
@@ -51,7 +51,7 @@ WarpOp::WarpOp( const std::string &name, const std::string &description )
 	m_filterParameter = new IntParameter(
 		"filter", 
 		"Defines the filter to be used on the warped coordinates.",
-		(int)WarpOp::None,
+		(int)WarpOp::Bilinear,
 		(int)WarpOp::None, 
 		(int)WarpOp::TypeCount - 1,
 		filterPresets, 
@@ -80,8 +80,8 @@ struct WarpOp::Warp
 {
 	typedef void ReturnType;
 
-	Warp( WarpOpPtr warp, WarpOp::FilterType filter, const Imath::Box2i &dataWindow )
-		:	m_warpOp( warp ), m_filter( filter ), m_dataWindow( dataWindow )
+	Warp( WarpOpPtr warp, WarpOp::FilterType filter, const Imath::Box2i &warpedDataWindow, const Imath::Box2i &originalDataWindow )
+		:	m_warpOp( warp ), m_filter( filter ), m_outputDataWindow( warpedDataWindow ), m_inputDataWindow( originalDataWindow )
 	{
 	}
 
@@ -90,10 +90,40 @@ struct WarpOp::Warp
 		Imath::V2f inPos = m_warpOp->warp( Imath::V2f( x, y ) );
 		x1 = int(inPos.x);
 		y1 = int(inPos.y);
-		x2 = ( inPos.x < 0 ? x1 - 1 : x1 + 1 );
-		y2 = ( inPos.y < 0 ? y1 - 1 : y1 + 1 );
-		ratioX = inPos.x - x1;
-		ratioY = inPos.y - y1;
+		if ( x1 > inPos.x )
+		{
+			ratioX = x1 - inPos.x;
+			x2 = x1;
+			x1--;
+		}
+		else
+		{
+			x2 = x1 + 1;
+			ratioX = inPos.x - x1;
+		}
+		if ( y1 > inPos.y )
+		{
+			ratioY = y1 - inPos.y;
+			y2 = y1;
+			y1--;
+		}
+		else
+		{
+			y2 = y1 + 1;
+			ratioY = inPos.y - y1;
+		}
+		x1 -= m_inputDataWindow.min.x;
+		y1 -= m_inputDataWindow.min.y;
+		x2 -= m_inputDataWindow.min.x;
+		y2 -= m_inputDataWindow.min.y;
+	}
+
+	template<typename V>
+	inline V clampXY( const std::vector<V> &buffer, int x, int y, int width, int height ) const
+	{
+		x = ( x < 0 ? 0 : ( x >= width ? width - 1 : x ));
+		y = ( y < 0 ? 0 : ( y >= height ? height - 1 : y ));
+		return buffer[ x + y * width ];
 	}
 
 	template<typename T>
@@ -104,36 +134,41 @@ struct WarpOp::Warp
 		typedef typename Container::iterator It;
 		
 		const Container &inBuffer = data->readable();
+		unsigned int outputWidth = m_outputDataWindow.size().x + 1;
+		unsigned int inputWidth = m_inputDataWindow.size().x + 1;
+		unsigned int inputHeight = m_inputDataWindow.size().y + 1;
 		Container &outBuffer = data->writable();
+		outBuffer.resize( outputWidth * (m_outputDataWindow.size().y + 1) );
 		int x1, x2, y1, y2;
 		float ratioX, ratioY;
-		unsigned int width = m_dataWindow.size().y + 1;
 		unsigned pixelIndex=0;
 		double r1, r2, r;
 
 		switch( m_filter )
 		{
 		case WarpOp::None:
-			for( int y=m_dataWindow.min.y + 1; y<=m_dataWindow.max.y; y++ )
+			for( int y=m_outputDataWindow.min.y; y<=m_outputDataWindow.max.y; y++ )
 			{
-				for( int x=m_dataWindow.min.x; x<=m_dataWindow.max.x; x++, pixelIndex++ )
+				for( int x=m_outputDataWindow.min.x; x<=m_outputDataWindow.max.x; x++, pixelIndex++ )
 				{
 					Imath::V2f inPos = m_warpOp->warp( Imath::V2f( x, y ) );
-					x1 = int(inPos.x);
-					y1 = int(inPos.y);
-					outBuffer[pixelIndex] = inBuffer[ x1 + y1 * width ];
+					x1 = int(inPos.x) - m_inputDataWindow.min.x;
+					y1 = int(inPos.y) - m_inputDataWindow.min.y;
+					outBuffer[pixelIndex] = clampXY<V>( inBuffer, x1, y1, inputWidth, inputHeight);
 				}
 			}
 			break;
 
 		case WarpOp::Bilinear:
-			for( int y=m_dataWindow.min.y + 1; y<=m_dataWindow.max.y; y++ )
+			for( int y=m_outputDataWindow.min.y; y<=m_outputDataWindow.max.y; y++ )
 			{
-				for( int x=m_dataWindow.min.x; x<=m_dataWindow.max.x; x++, pixelIndex++ )
+				for( int x=m_outputDataWindow.min.x; x<=m_outputDataWindow.max.x; x++, pixelIndex++ )
 				{
 					computePixelCoordinates( x, y, x1, y1, x2, y2, ratioX, ratioY );
-					LinearInterpolator<double>()( (double)inBuffer[ x1 + y1 * width ], (double)inBuffer[ x2 + y1 * width ], ratioX, r1 );
-					LinearInterpolator<double>()( (double)inBuffer[ x1 + y2 * width ], (double)inBuffer[ x2 + y2 * width ], ratioX, r2 );
+					LinearInterpolator<double>()( (double)clampXY<V>( inBuffer, x1, y1, inputWidth, inputHeight ), 
+												  (double)clampXY<V>( inBuffer, x2, y1, inputWidth, inputHeight ), ratioX, r1 );
+					LinearInterpolator<double>()( (double)clampXY<V>( inBuffer, x1, y2, inputWidth, inputHeight ), 
+												  (double)clampXY<V>( inBuffer, x2, y2, inputWidth, inputHeight ), ratioX, r2 );
 					LinearInterpolator<double>()( r1, r2, ratioY, r );
 					outBuffer[pixelIndex] = (V)r;
 				}
@@ -148,19 +183,40 @@ struct WarpOp::Warp
 	private :
 		WarpOpPtr m_warpOp;
 		WarpOp::FilterType m_filter;
-		Box2i m_dataWindow;
-
+		Imath::Box2i m_outputDataWindow;
+		Imath::Box2i m_inputDataWindow;
 };
 
-void WarpOp::modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels )
+void WarpOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands )
 {
-	Warp w( this, (FilterType)m_filterParameter->getNumericValue(), dataWindow );
-	begin( static_pointer_cast<const CompoundObject>( parameters()->getValue() ) );
-	for( unsigned i=0; i<channels.size(); i++ )
+	Imath::Box2i originalDataWindow = image->getDataWindow();
+
+	begin( operands );
+	Imath::Box2i newDataWindow = warpedDataWindow( originalDataWindow );
+	std::string error;
+	Warp w( this, (FilterType)m_filterParameter->getNumericValue(), newDataWindow, originalDataWindow );
+	for( PrimitiveVariableMap::iterator it = image->variables.begin(); it != image->variables.end(); it++ )
 	{
-		despatchTypedData<Warp, TypeTraits::IsNumericVectorTypedData>( channels[i], w );
+		if( it->second.interpolation!=PrimitiveVariable::Vertex &&
+			it->second.interpolation!=PrimitiveVariable::Varying &&
+			it->second.interpolation!=PrimitiveVariable::FaceVarying )
+		{
+			continue;
+		}
+
+		if ( !image->channelValid( it->second, &error ) )
+		{
+			throw Exception( error );
+		}
+		despatchTypedData<Warp, TypeTraits::IsNumericVectorTypedData>( it->second.data, w );
 	}
 	end();
+	image->setDataWindow( newDataWindow );
+}
+
+Imath::Box2i WarpOp::warpedDataWindow( const Imath::Box2i &dataWindow ) const
+{
+	return dataWindow;
 }
 
 void WarpOp::begin( ConstCompoundObjectPtr operands )

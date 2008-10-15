@@ -32,53 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_UVDISTORT_H
-#define IECORE_UVDISTORT_H
+
+#include "boost/python.hpp"
 
 #include "IECore/WarpOp.h"
-#include "ObjectParameter.h"
+#include "IECore/bindings/WarpOpBinding.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+using namespace boost::python;
 
 namespace IECore
 {
 
-/// Distorts an ImagePrimitive by using a UV map as reference.
-// This Op expects an UV map with the red and green values being normalized coordinates (x,y) from the undistorted image.
-// The normalized coordinates (0,0)x(1,1) in the uv map will map to the display window of the input image.
-// The resulting image will have the same data window as the reference UV map.
-class UVDistortOp : public WarpOp
+void bindWarpOp()
 {
-	public:
-
-		UVDistortOp();
-		virtual ~UVDistortOp();
-
-		ObjectParameterPtr uvMapParameter();
-		ConstObjectParameterPtr uvMapParameter() const;
-
-		IE_CORE_DECLARERUNTIMETYPED( UVDistortOp, WarpOp );
 	
-	protected :
+	typedef class_<WarpOp, WarpOpPtr, boost::noncopyable, bases<ImagePrimitiveOp> > WarpOpPyClass;
+	WarpOpPyClass( "WarpOp", no_init )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( WarpOp )
+	;
 	
-		virtual void begin( ConstCompoundObjectPtr operands );
-		virtual Imath::Box2i warpedDataWindow( const Imath::Box2i &dataWindow ) const;
-		virtual Imath::V2f warp( const Imath::V2f &p ) const;
-		virtual void end();
-	
-	private :
+	INTRUSIVE_PTR_PATCH( WarpOp, WarpOpPyClass );
+	implicitly_convertible<WarpOpPtr, ImagePrimitiveOpPtr>();	
 
-		ObjectParameterPtr m_uvMapParameter;
-		Imath::V2f m_imageSize;
-		Imath::V2i m_imageOrigin;
-		Imath::V2i m_uvOrigin;
-		Imath::V2i m_uvSize;
-		ConstFloatVectorDataPtr m_u;
-		ConstFloatVectorDataPtr m_v;
-};
-
-IE_CORE_DECLAREPTR( UVDistortOp );
-
+}
 
 } // namespace IECore
-
-#endif // IECORE_UVDISTORT_H
 
