@@ -60,6 +60,7 @@ void bindTypeId()
 		.value( "FromMayaParticleConverter", FromMayaParticleConverterTypeId )
 		.value( "FromMayaDagNodeConverter", FromMayaDagNodeConverterTypeId )
 		.value( "FromMayaPluginDataPlugConverter", FromMayaPluginDataPlugConverterTypeId )		
+		.value( "FromMayaTransformConverter", FromMayaTransformConverterTypeId )				
 	;
 }
 
