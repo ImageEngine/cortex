@@ -201,6 +201,12 @@ BOOST_STATIC_ASSERT( (IsNumericVectorTypedData<Int64VectorData>::value) );
 BOOST_STATIC_ASSERT( (IsNumericVectorTypedData<UInt64VectorData>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsNumericVectorTypedData<StringVectorData> >::value) );
 
+/// IsFloatVectorTypedData
+template< typename T > struct IsFloatVectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, boost::is_floating_point< typename VectorValueType<T>::type > > {};
+BOOST_STATIC_ASSERT( (IsFloatVectorTypedData<FloatVectorData>::value) );
+BOOST_STATIC_ASSERT( (IsFloatVectorTypedData<HalfVectorData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsFloatVectorTypedData<IntVectorData> >::value) );
+
 /// IsNumericSimpleTypedData
 template< typename T > struct IsNumericSimpleTypedData : boost::mpl::and_< IsSimpleTypedData<T>, boost::is_arithmetic< typename ValueType<T>::type > > {};
 BOOST_STATIC_ASSERT( (IsNumericSimpleTypedData<FloatData>::value) );

@@ -291,6 +291,10 @@ enum TypeId
 	MeshTangentsOpTypeId = 248,
 	WarpOpTypeId = 249,
 	UVDistortOpTypeId = 250,
+	LinearToSRGBOpTypeId = 251,
+	SRGBToLinearOpTypeId = 252,
+	LinearToCineonOpTypeId = 253,
+	CineonToLinearOpTypeId = 254,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

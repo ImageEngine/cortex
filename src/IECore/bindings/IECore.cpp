@@ -200,6 +200,10 @@
 #include "IECore/bindings/MeshTangentsOpBinding.h"
 #include "IECore/bindings/WarpOpBinding.h"
 #include "IECore/bindings/UVDistortOpBinding.h"
+#include "IECore/bindings/LinearToSRGBOpBinding.h"
+#include "IECore/bindings/SRGBToLinearOpBinding.h"
+#include "IECore/bindings/LinearToCineonOpBinding.h"
+#include "IECore/bindings/CineonToLinearOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -385,6 +389,10 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMeshTangentsOp();
 	bindWarpOp();
 	bindUVDistortOp();
+	bindSRGBToLinearOp();
+	bindLinearToSRGBOp();
+	bindCineonToLinearOp();
+	bindLinearToCineonOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

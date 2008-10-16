@@ -290,6 +290,10 @@ void bindTypeId()
 		.value("MeshTangentsOp", MeshTangentsOpTypeId )
 		.value("WarpOp", WarpOpTypeId )
 		.value("UVDistortOp", UVDistortOpTypeId )
+		.value("LinearToSRGBOp", LinearToSRGBOpTypeId )
+		.value("SRGBToLinearOp", SRGBToLinearOpTypeId )
+		.value("LinearToCineonOp", LinearToCineonOpTypeId )
+		.value("CineonToLinearOp", CineonToLinearOpTypeId )
 	;
 }
 
