@@ -38,9 +38,7 @@ import IECoreMaya
 import _IECoreMaya
 import StringUtil
 
-## \todo To follow the form of the rest of this module, this should be named FnTransientParameterisedHolderNode,
-# and derived from FnParameterisedHolder. The __init__ method should just wrap around an already existing node,
-# and the existing init functionality should be placed in a static method called create().
+## \deprecated Use the FnTransientParameterisedHolderNode instead.
 class TransientParameterisedHolderNode( maya.OpenMaya.MFnDependencyNode ) :
 
 	def __init__( self, layoutName, classNameOrParameterised, classVersion=None, envVarName=None ) :
@@ -75,7 +73,6 @@ class TransientParameterisedHolderNode( maya.OpenMaya.MFnDependencyNode ) :
 			
 		return res		
 	
-	## \todo This will be unecessary if this class is derived from FnParameterisedHolder.			
 	def getParameterised( self ) :
 		
 		return _IECoreMaya._parameterisedHolderGetParameterised( self )

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,28 +32,45 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+import maya.OpenMaya
+import maya.cmds
+import IECoreMaya
+import _IECoreMaya
+import StringUtil
 
-from ParameterUI import ParameterUI
-from SplineParameterUI import SplineParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
-from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
-from MayaTypeId import MayaTypeId
-from ParameterPanel import ParameterPanel
-from AttributeEditorControl import AttributeEditorControl
-from FnProceduralHolder import FnProceduralHolder
-from UIElement import UIElement
-from OpWindow import OpWindow
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
+class FnTransientParameterisedHolderNode( IECoreMaya.FnParameterisedHolder ) :
+
+	def __init__( self, object ) :
+		
+		IECoreMaya.FnParameterisedHolder.__init__( self, object )
+	
+	## Creates a temporary TransientParameterisedHolderNode in order to present the UI for the specified
+	# parameterised object in the given layout. The node is automatically deleted when the holding
+	# layout is destroyed. Returns a FnTransientParameterisedHolderNode object operating on the new node.
+	@staticmethod
+	def create( layoutName, classNameOrParameterised, classVersion=None, envVarName=None ) :
+			
+		nodeName = maya.cmds.createNode( "ieTransientParameterisedHolderNode", skipSelect = True )
+		
+		# Script jobs aren't available from maya.cmds. Maya Python bindings generate swig warnings
+		# such as "swig/python detected a memory leak of type 'MCallbackId *', no destructor found"
+		IECoreMaya.mel( 'scriptJob -uiDeleted "%s" "delete %s" -protected' % ( layoutName, nodeName ) )
+		
+		fnTPH = FnTransientParameterisedHolderNode( nodeName )
+					
+		if isinstance( classNameOrParameterised, str ) :
+			fnTPH.setParameterised( classNameOrParameterised, classVersion, envVarName )
+		else :
+			assert( not classVersion )
+			assert( not envVarName )
+		
+			fnTPH.setParameterised( classNameOrParameterised )
+			
+		parameterised = fnTPH.getParameterised()[0]
+		
+		if parameterised : 
+			maya.cmds.setParent( layoutName )
+			IECoreMaya.ParameterUI.create( fnTPH.fullPathName(), parameterised.parameters() )
+			maya.cmds.setParent( layoutName )			
+			
+		return fnTPH
