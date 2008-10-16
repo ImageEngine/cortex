@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import maya.OpenMaya
 import maya.cmds
 import IECoreMaya
@@ -49,28 +51,40 @@ class FnTransientParameterisedHolderNode( IECoreMaya.FnParameterisedHolder ) :
 	# layout is destroyed. Returns a FnTransientParameterisedHolderNode object operating on the new node.
 	@staticmethod
 	def create( layoutName, classNameOrParameterised, classVersion=None, envVarName=None ) :
-			
-		nodeName = maya.cmds.createNode( "ieTransientParameterisedHolderNode", skipSelect = True )
 		
-		# Script jobs aren't available from maya.cmds. Maya Python bindings generate swig warnings
-		# such as "swig/python detected a memory leak of type 'MCallbackId *', no destructor found"
-		IECoreMaya.mel( 'scriptJob -uiDeleted "%s" "delete %s" -protected' % ( layoutName, nodeName ) )
-		
-		fnTPH = FnTransientParameterisedHolderNode( nodeName )
-					
-		if isinstance( classNameOrParameterised, str ) :
-			fnTPH.setParameterised( classNameOrParameterised, classVersion, envVarName )
-		else :
-			assert( not classVersion )
-			assert( not envVarName )
-		
-			fnTPH.setParameterised( classNameOrParameterised )
-			
-		parameterised = fnTPH.getParameterised()[0]
-		
-		if parameterised : 
-			maya.cmds.setParent( layoutName )
-			IECoreMaya.ParameterUI.create( fnTPH.fullPathName(), parameterised.parameters() )
-			maya.cmds.setParent( layoutName )			
-			
+		with IECoreMaya.UndoDisabled() :
+
+			nodeName = maya.cmds.createNode( "ieTransientParameterisedHolderNode", skipSelect = True )
+
+			# Script jobs aren't available from maya.cmds. Maya Python bindings generate swig warnings
+			# such as "swig/python detected a memory leak of type 'MCallbackId *', no destructor found"
+			IECoreMaya.mel( 'scriptJob -uiDeleted "%s" "python( \\\"import IECoreMaya; IECoreMaya.FnTransientParameterisedHolderNode._deleteNode( \'%s\' )\\\" )" -protected' % ( layoutName, nodeName ) )
+
+			fnTPH = FnTransientParameterisedHolderNode( nodeName )
+
+			if isinstance( classNameOrParameterised, str ) :
+				fnTPH.setParameterised( classNameOrParameterised, classVersion, envVarName )
+			else :
+				assert( not classVersion )
+				assert( not envVarName )
+
+				fnTPH.setParameterised( classNameOrParameterised )
+
+			parameterised = fnTPH.getParameterised()[0]
+
+			if parameterised : 
+				maya.cmds.setParent( layoutName )
+				IECoreMaya.ParameterUI.create( fnTPH.fullPathName(), parameterised.parameters() )
+				maya.cmds.setParent( layoutName )			
+
 		return fnTPH
+		
+	@staticmethod 
+	def _deleteNode( nodeName ) :
+	
+		with IECoreMaya.UndoDisabled() :
+			
+			maya.cmds.delete( nodeName )
+			
+		
+			
