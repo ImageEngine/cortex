@@ -84,7 +84,8 @@ class FnTransientParameterisedHolderNode( IECoreMaya.FnParameterisedHolder ) :
 	
 		with IECoreMaya.UndoDisabled() :
 			
-			maya.cmds.delete( nodeName )
+			if maya.cmds.objExists( nodeName ) :
+				maya.cmds.delete( nodeName )
 			
 		
 			
