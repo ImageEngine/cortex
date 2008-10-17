@@ -47,31 +47,64 @@ CineonToLinearOp::CineonToLinearOp()
 				   "Applies Cineon to linear conversion on ImagePrimitive channels."
 		)
 {
-	m_filmGamma = new FloatParameter(
-		"filmGamma",
-		"Gamma value",
-		0.6f
-	);
-	m_refWhiteVal = new IntParameter(
-		"refWhiteVal",
-		"White reference value",
-		685
-	);
-	m_refBlackVal = new IntParameter(
-		"refBlackVal",
-		"Black reference value",
-		95
-	);
-	CompoundParameterPtr cineonParameters = new CompoundParameter( "cineonSettings", "Define parameters of the Cineon colorspace" );
-
-	cineonParameters->addParameter( m_filmGamma );
-	cineonParameters->addParameter( m_refWhiteVal );
-	cineonParameters->addParameter( m_refBlackVal );
+	CompoundParameterPtr cineonParameters = createCineonSettings();
+	m_filmGamma = cineonParameters->parameter< FloatParameter >( "filmGamma" );
+	m_refWhiteVal = cineonParameters->parameter< IntParameter >( "refWhiteVal" );
+	m_refBlackVal = cineonParameters->parameter< IntParameter >( "refBlackVal" );
 	parameters()->addParameter( cineonParameters );
 }
 
 CineonToLinearOp::~CineonToLinearOp()
 {
+}
+
+CompoundParameterPtr CineonToLinearOp::createCineonSettings()
+{
+	FloatParameter::PresetsMap gammaPresets;
+	gammaPresets["Cineon"] = 0.6f;
+	gammaPresets["RedLog"] = 1.02f;
+
+	FloatParameterPtr filmGamma = new FloatParameter(
+		"filmGamma",
+		"Gamma value",
+		0.6f,
+		Imath::limits<float>::min(), Imath::limits<float>::max(),
+		gammaPresets,
+		false
+	);
+
+	IntParameter::PresetsMap whiteRefPresets;
+	whiteRefPresets["Cineon"] = 685;
+	whiteRefPresets["RedLog"] = 1023;
+
+	IntParameterPtr refWhiteVal = new IntParameter(
+		"refWhiteVal",
+		"White reference value",
+		685,
+		0, 1023,
+		whiteRefPresets,
+		false
+	);
+
+	IntParameter::PresetsMap blackRefPresets;
+	blackRefPresets["Cineon"] = 95;
+	blackRefPresets["RedLog"] = 0;
+
+	IntParameterPtr refBlackVal = new IntParameter(
+		"refBlackVal",
+		"Black reference value",
+		95,
+		0, 1023,
+		blackRefPresets,
+		false
+	);
+	CompoundParameterPtr cineonParameters = new CompoundParameter( "cineonSettings", "Define parameters of the Cineon colorspace" );
+
+	cineonParameters->addParameter( filmGamma );
+	cineonParameters->addParameter( refWhiteVal );
+	cineonParameters->addParameter( refBlackVal );
+
+	return cineonParameters;
 }
 
 FloatParameterPtr CineonToLinearOp::filmGammaParameter()
@@ -83,6 +116,7 @@ ConstFloatParameterPtr CineonToLinearOp::filmGammaParameter() const
 {
 	return m_filmGamma;
 }
+
 
 IntParameterPtr CineonToLinearOp::refWhiteValParameter()
 {

@@ -37,6 +37,7 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/LinearToCineonDataConversion.h"
+#include "IECore/CineonToLinearOp.h"
 
 using namespace IECore;
 using namespace std;
@@ -47,26 +48,10 @@ LinearToCineonOp::LinearToCineonOp()
 				   "Applies linear to Cineon conversion on ImagePrimitive channels."
 		)
 {
-	m_filmGamma = new FloatParameter(
-		"filmGamma",
-		"Gamma value",
-		0.6f
-	);
-	m_refWhiteVal = new IntParameter(
-		"refWhiteVal",
-		"White reference value",
-		685
-	);
-	m_refBlackVal = new IntParameter(
-		"refBlackVal",
-		"Black reference value",
-		95
-	);
-	CompoundParameterPtr cineonParameters = new CompoundParameter( "cineonSettings", "Define parameters of the Cineon colorspace" );
-
-	cineonParameters->addParameter( m_filmGamma );
-	cineonParameters->addParameter( m_refWhiteVal );
-	cineonParameters->addParameter( m_refBlackVal );
+	CompoundParameterPtr cineonParameters = CineonToLinearOp::createCineonSettings();
+	m_filmGamma = cineonParameters->parameter< FloatParameter >( "filmGamma" );
+	m_refWhiteVal = cineonParameters->parameter< IntParameter >( "refWhiteVal" );
+	m_refBlackVal = cineonParameters->parameter< IntParameter >( "refBlackVal" );
 	parameters()->addParameter( cineonParameters );
 }
 

@@ -59,11 +59,13 @@ class CineonToLinearOp : public ChannelOp
 
 		IntParameterPtr refBlackValParameter();
 		ConstIntParameterPtr refBlackValParameter() const;
+
+		static CompoundParameterPtr createCineonSettings();
 	
 	protected :
-	
+
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
-	
+
 		FloatParameterPtr m_filmGamma;
 		IntParameterPtr m_refWhiteVal;
 		IntParameterPtr m_refBlackVal;
