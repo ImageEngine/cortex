@@ -41,6 +41,8 @@ import weakref
 # created, and restores it when it dies.
 ## \todo Cope with objects changing names, being deleted etc - can probably do this
 # by storing DagNode and Node objects.
+## \todo This should be reimplemented as a context object called SelectionSaved to
+# follow the model set by UndoDisabled.
 class ScopedSelection :
 
 	def __init__( self ) :
