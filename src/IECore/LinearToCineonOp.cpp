@@ -119,11 +119,11 @@ struct LinearToCineonOp::Converter
 			typedef typename T::ValueType Container;
 			typedef typename Container::value_type V;
 			typedef typename Container::iterator It;
-			LinearToCineonDataConversion< V, V > converter( m_filmGamma, m_refWhiteVal, m_refBlackVal );
+			LinearToCineonDataConversion< V, unsigned int > converter( m_filmGamma, m_refWhiteVal, m_refBlackVal );
 			It end = data->writable().end();
 			for ( It it = data->writable().begin(); it != end; it++ )
 			{
-				*it = converter( *it );
+				*it = static_cast<V>(converter( *it ) / 1023.);
 			}
 		}
 

@@ -49,7 +49,7 @@ void bindLinearToSRGBOp()
 {
 	
 	typedef class_<LinearToSRGBOp, LinearToSRGBOpPtr, boost::noncopyable, bases<ChannelOp> > LinearToSRGBOpPyClass;
-	LinearToSRGBOpPyClass( "LinearToSRGBOp", no_init )
+	LinearToSRGBOpPyClass( "LinearToSRGBOp" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( LinearToSRGBOp )
 	;
 	

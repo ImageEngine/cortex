@@ -120,11 +120,12 @@ struct CineonToLinearOp::Converter
 			typedef typename T::ValueType Container;
 			typedef typename Container::value_type V;
 			typedef typename Container::iterator It;
-			CineonToLinearDataConversion< V, V > converter( m_filmGamma, m_refWhiteVal, m_refBlackVal );
+			CineonToLinearDataConversion< unsigned short, V > converter( m_filmGamma, m_refWhiteVal, m_refBlackVal );
 			It end = data->writable().end();
 			for ( It it = data->writable().begin(); it != end; it++ )
 			{
-				*it = converter( *it );
+				unsigned short v = static_cast<unsigned short>( (*it < 0 ? (V)0. : ( *it > 1. ? (V)1. : *it )) * 1023.);
+				*it = converter( v );
 			}
 		}
 

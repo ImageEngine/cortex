@@ -49,7 +49,7 @@ void bindCineonToLinearOp()
 {
 	
 	typedef class_<CineonToLinearOp, CineonToLinearOpPtr, boost::noncopyable, bases<ChannelOp> > CineonToLinearOpPyClass;
-	CineonToLinearOpPyClass( "CineonToLinearOp", no_init )
+	CineonToLinearOpPyClass( "CineonToLinearOp" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( CineonToLinearOp )
 	;
 	
