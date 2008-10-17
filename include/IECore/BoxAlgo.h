@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-//! \file BoxOperators.h
+//! \file BoxAlgo.h
 /// Defines algorithms and operators which ideally would be already defined in ImathBox.h
 
 
