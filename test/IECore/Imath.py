@@ -992,6 +992,9 @@ class ImathColor3Test( unittest.TestCase ) :
 		
 		self.assertEqual( c.dimensions(), 3 )
 		
+		self.assertAlmostEqual( Color3f( 1, 1, 1, ).luminance(), 1 )
+		self.assertAlmostEqual( Color3f( 1, 2, 3, ).luminance( V3f( 10, 1, 3 ) ), 21 )
+		
 class ImathEulerfTest( unittest.TestCase ) :
 
 	def testConstructors(self):

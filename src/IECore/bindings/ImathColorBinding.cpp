@@ -37,6 +37,8 @@
 #include <OpenEXR/ImathColor.h>
 #include <OpenEXR/ImathColorAlgo.h>
 
+#include "IECore/ColorAlgo.h"
+
 #include "IECore/bindings/ImathColorBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
@@ -122,6 +124,7 @@ DEFINECOLSTRSPECIALISATION( Color4d );
 template<typename T>
 void bindColorCommon( class_<T> &c )
 {
+
 	c.def( self==self )
 	.def( self!=self )
 		
@@ -156,14 +159,19 @@ void bindColorCommon( class_<T> &c )
 	.def( "baseTypeSmallest", &T::baseTypeSmallest ).staticmethod( "baseTypeSmallest" )
 	.def( "baseTypeEpsilon", &T::baseTypeEpsilon ).staticmethod( "baseTypeEpsilon" )
 
+	.def( "luminance", &luminance<T, Vec3<typename T::BaseType> > )
+	.def( "luminance", (typename T::BaseType (*)( const T & ))&luminance<T> )
+
 	.def( "__str__", &str<T> )
 	.def( "__repr__", &repr<T> );
+	
 
 }
 
 template<typename T>
 void bindColor3( const char *typeName )
 {
+
 	// we deliberately don't expose the fact that
 	// Color3 derives from Vec3 because we think
 	// that is weird.
