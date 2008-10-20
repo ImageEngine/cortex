@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,62 +32,63 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#ifndef IE_CORE_XYZTORGBCOLORTRANSFORM_H
+#define IE_CORE_XYZTORGBCOLORTRANSFORM_H
 
-#include "OpenEXR/ImathColor.h"
+#include "IECore/ColorTransform.h"
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+namespace IECore
+{
 
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
-#include "DataConvertTest.h"
-#include "DespatchTypedDataTest.h"
-#include "CompilerTest.h"
-#include "RadixSortTest.h"
-#include "SweepAndPruneTest.h"
-#include "ColorTransformTest.h"
+/// Forward declaration
+template< typename, typename > class RGBToXYZColorTransform;
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace IECore;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+/// A templated ColorTransform class to perform XYZ->RGB color transformations
+template<typename F, typename T>
+class XYZToRGBColorTransform : public ColorTransform< F, T >
 {	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
+	public:
+		typedef RGBToXYZColorTransform< T, F > InverseType;
 	
-	try
-	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-		addDataConvertTest(test);
-		addDespatchTypedDataTest(test);
-		addCompilerTest(test);
-		addRadixSortTest(test);
-		addSweepAndPruneTest(test);
-		addColorTransformTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
+		/// Creates a default transform using the following xy chromacities:
+		///      x     y
+		/// r: 0.64, 0.33
+		/// g: 0.3, 0.6 
+		/// b: 0.15, 0.06 
+		/// w: 0.312713, 0.329016	
+		XYZToRGBColorTransform();
 	
-	return test;
-}
+		/// Creates a transform using the specified 3x3 matrix
+		template< typename M >
+		XYZToRGBColorTransform( const M &matrix );
+		
+		/// Creates a transform using the specified xy chromacities. Class "C" should
+		/// be a 2d vector type compatible with IECore::VectorTraits.
+		template< typename C >
+		XYZToRGBColorTransform(		
+			const C &rChromacity,
+			const C &gChromacity,
+			const C &bChromacity,
+			
+			const C &referenceWhite						
+		);
+
+		/// Perform the conversion
+		T operator()( F f );
+		
+		/// Returns an instance of a class able to perform the inverse conversion
+		InverseType inverse() const;
+		
+		/// Retrieves the matrix used to perform the transformation
+		const Imath::M33f &matrix() const;
+	
+	private:
+	
+		Imath::M33f m_matrix;
+};
+
+} // namespace IECore
+
+#include "IECore/XYZToRGBColorTransform.inl"
+
+#endif // IE_CORE_XYZTORGBCOLORTRANSFORM_H

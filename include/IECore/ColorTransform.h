@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,62 +32,48 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#ifndef IE_CORE_COLORTRANSFORM_H
+#define IE_CORE_COLORTRANSFORM_H
 
-#include "OpenEXR/ImathColor.h"
+#include <functional>
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+#include "boost/static_assert.hpp"
 
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
-#include "DataConvertTest.h"
-#include "DespatchTypedDataTest.h"
-#include "CompilerTest.h"
-#include "RadixSortTest.h"
-#include "SweepAndPruneTest.h"
-#include "ColorTransformTest.h"
+#include "IECore/TypeTraits.h"
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+namespace IECore
+{
 
-using namespace IECore;
+/// Base class for data conversions
+template<typename F, typename T>
+struct ColorTransform : public std::unary_function<F, T>
+{
+	BOOST_STATIC_ASSERT( ( TypeTraits::IsColor3<F>::value ) );
+	BOOST_STATIC_ASSERT( ( TypeTraits::IsColor3<T>::value ) );
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
-{	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
+	typedef F FromType;
+	typedef T ToType;
 	
-	try
+	/// The type of the converter that can perform the inverse transformation
+	typedef void InverseType;
+	
+	virtual ~ColorTransform()
 	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-		addDataConvertTest(test);
-		addDespatchTypedDataTest(test);
-		addCompilerTest(test);
-		addRadixSortTest(test);
-		addSweepAndPruneTest(test);
-		addColorTransformTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
 	}
 	
-	return test;
-}
+	T operator()( F f )
+	{
+		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+	}
+	
+	InverseType inverse() const
+	{
+		/// Function is not invertible
+		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+	}
+	
+};
+
+} // namespace IECore
+
+#endif // IE_CORE_COLORTRANSFORM_H
