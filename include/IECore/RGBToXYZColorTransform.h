@@ -59,7 +59,8 @@ class RGBToXYZColorTransform : public ColorTransform< F, T >
 		/// w: 0.312713, 0.329016
 		RGBToXYZColorTransform();
 	
-		/// Creates a transform using the specified 3x3 matrix
+		/// Creates a transform using the specified 3x3 matrix, which should be convertible
+		/// to Imath::M33f using IECore::convert
 		template< typename M >
 		RGBToXYZColorTransform( const M &matrix );
 		
@@ -74,8 +75,8 @@ class RGBToXYZColorTransform : public ColorTransform< F, T >
 			const C &referenceWhite						
 		);
 
-		/// Perform the conversion
-		T operator()( F f );
+		/// Perform the conversion. Each component of the input should be in the range [0,1]
+		virtual T transform( const F &f );
 		
 		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;

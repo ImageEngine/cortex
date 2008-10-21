@@ -63,7 +63,7 @@ class XYYToXYZColorTransform : public ColorTransform< F, T >
 		);
 
 		/// Perform the conversion
-		T operator()( F f );
+		virtual T transform( const F &f );
 		
 		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;

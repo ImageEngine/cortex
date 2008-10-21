@@ -68,7 +68,7 @@ XYYToXYZColorTransform<F, T>::XYYToXYZColorTransform(
 }
 
 template<typename F, typename T>
-T XYYToXYZColorTransform<F, T>::operator()( F f )
+T XYYToXYZColorTransform<F, T>::transform( const F &f )
 {
 	Imath::V3f xyy = IECore::convert< Imath::V3f >( f );
 	if ( Imath::Math<float>::fabs( xyy.y ) <= Imath::limits<float>::epsilon() )

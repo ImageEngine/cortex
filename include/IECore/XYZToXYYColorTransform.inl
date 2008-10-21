@@ -68,7 +68,7 @@ XYZToXYYColorTransform<F, T>::XYZToXYYColorTransform(
 }
 
 template<typename F, typename T>
-T XYZToXYYColorTransform<F, T>::operator()( F f )
+T XYZToXYYColorTransform<F, T>::transform( const F &f )
 {
 	Imath::V3f xyz = IECore::convert< Imath::V3f >( f );
 	

@@ -38,6 +38,8 @@
 #include <cassert>
 
 #include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathLimits.h"
 
 #include "IECore/Convert.h"
 #include "IECore/VectorTraits.h"
@@ -64,7 +66,7 @@ template<typename F, typename T>
 template<typename M>
 RGBToXYZColorTransform<F, T>::RGBToXYZColorTransform( const M &matrix ) 
 {
-	m_matrix = convert<Imath::M33f>( matrix );
+	m_matrix = IECore::convert<Imath::M33f, M>( matrix );
 }
 
 template<typename F, typename T>
@@ -93,6 +95,8 @@ void RGBToXYZColorTransform<F, T>::setMatrix(
 	BOOST_STATIC_ASSERT( ( TypeTraits::IsVec2<C>::value ) );
 
 	typedef VectorTraits<C> VecTraits;
+	
+	assert( VecTraits::dimensions() == 2 );
 	
 	XYYToXYZColorTransform< Imath::Color3f, Imath::Color3f > xyYToXYZ( referenceWhite );
 	
@@ -146,9 +150,16 @@ void RGBToXYZColorTransform<F, T>::setMatrix(
 }		
 
 template<typename F, typename T>
-T RGBToXYZColorTransform<F, T>::operator()( F f )
+T RGBToXYZColorTransform<F, T>::transform( const F &f )
 {
 	Imath::V3f from = IECore::convert< Imath::V3f >( f );
+	assert( from.x >= -Imath::limits<float>::epsilon() );
+	assert( from.y >= -Imath::limits<float>::epsilon() );
+	assert( from.z >= -Imath::limits<float>::epsilon() );		
+	
+	assert( from.x <= 1.0f + Imath::limits<float>::epsilon() );
+	assert( from.y <= 1.0f + Imath::limits<float>::epsilon() );
+	assert( from.z <= 1.0f + Imath::limits<float>::epsilon() );			
 	
 	return IECore::convert<T>( from * m_matrix );		
 }
