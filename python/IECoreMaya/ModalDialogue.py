@@ -32,32 +32,38 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+import IECoreMaya
+import maya.cmds
 
-from ParameterUI import ParameterUI
-from SplineParameterUI import SplineParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
-from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
-from MayaTypeId import MayaTypeId
-from ParameterPanel import ParameterPanel
-from AttributeEditorControl import AttributeEditorControl
-from FnProceduralHolder import FnProceduralHolder
-from UIElement import UIElement
-from OpWindow import OpWindow
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
-from UndoDisabled import UndoDisabled
-from ModalDialogue import ModalDialogue
+## This class provides a useful base for implementing modal dialogues in an
+# object oriented manner.
+class ModalDialogue( IECoreMaya.UIElement ) :
 
-
+	## Derived classes should call the base class __init__ before constructing
+	# their ui. The result of self._topLevelUI() will be a form layout in which
+	# the ui should be constructed. Clients shouldn't construct ModalDialogues
+	# directly but instead use the run() method documented below.
+	def __init__( self ) :
+	
+		IECoreMaya.UIElement.__init__( self, maya.cmds.setParent( query=True ) )
+	
+	## Should be called by derived classes when they wish to close their dialogue.
+	# The result will be returned to the caller of the run() method.
+	def _dismiss( self, result ) :
+	
+		maya.cmds.layoutDialog( dismiss = result )
+	
+	## Call this method to open a dialogue - the return value is the string returned
+	# by the dialogue in its _dismiss method.
+	@classmethod
+	def run( cls ) :
+	
+		ModalDialogue.__toInstantiate = cls
+		title = maya.mel.eval( 'interToUI( "%s" )' % cls.__name__ )
+		result = maya.cmds.layoutDialog( ui = 'python "import IECoreMaya; IECoreMaya.ModalDialogue._ModalDialogue__instantiate()"', title=title )
+		return result
+		
+	@classmethod
+	def __instantiate( cls ) :
+	
+		ModalDialogue.__currentDialogue = cls.__toInstantiate()
