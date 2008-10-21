@@ -52,7 +52,7 @@ class XYYToXYZColorTransform : public ColorTransform< F, T >
 	
 		/// Creates a default transform using the following whitepoint xy chromacity
 		/// w: 0.312713, 0.329016	
-		/// THis white point is only used if you need the inverse transform.
+		/// This white point is only used if you need the inverse transform.
 		XYYToXYZColorTransform();
 	
 		/// Creates a transform using the specified xy whitepoint chromacity (which is only ever used
