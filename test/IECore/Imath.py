@@ -994,7 +994,24 @@ class ImathColor3Test( unittest.TestCase ) :
 		
 		self.assertAlmostEqual( Color3f( 1, 1, 1, ).luminance(), 1 )
 		self.assertAlmostEqual( Color3f( 1, 2, 3, ).luminance( V3f( 10, 1, 3 ) ), 21 )
-		
+	
+	def testSaturation( self ) :
+	
+		c = Color3f( 0.1, 0.5, 0.9 )
+		c.adjustSaturation( 0 )
+		self.assertEqual( c[0], c[1] )
+		self.assertEqual( c[0], c[2] )
+
+class ImathColor4Test( unittest.TestCase ) :
+
+	def testSaturation( self ) :
+	
+		c = Color4f( 0.1, 0.5, 0.9, 0.95 )
+		c.adjustSaturation( 0 )
+		self.assertEqual( c[0], c[1] )
+		self.assertEqual( c[0], c[2] )
+		self.assertAlmostEqual( c[3], 0.95 ) # alpha must remain unchanged
+			
 class ImathEulerfTest( unittest.TestCase ) :
 
 	def testConstructors(self):

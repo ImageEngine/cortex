@@ -35,6 +35,8 @@
 #ifndef IECORE_COLORALGO_INL
 #define IECORE_COLORALGO_INL
 
+#include "OpenEXR/ImathFun.h"
+
 namespace IECore
 {
 
@@ -48,6 +50,17 @@ template<class T, class S>
 typename T::BaseType luminance( const T &color, const S &weights )
 {
 	return color[0] * weights[0] + color[1] * weights[1] + color[2] * weights[2];
+}
+
+template<typename T>
+T adjustSaturation( const T &color, typename T::BaseType saturation )
+{
+	typename T::BaseType l = luminance( color );
+	T desaturated( color );
+	desaturated[0] = l;
+	desaturated[1] = l;
+	desaturated[2] = l;
+	return Imath::lerp( desaturated, color, saturation ); 
 }
 
 } // namespace IECore

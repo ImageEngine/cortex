@@ -122,6 +122,12 @@ DEFINECOLSTRSPECIALISATION( Color3d );
 DEFINECOLSTRSPECIALISATION( Color4d );
 
 template<typename T>
+void adjustSaturationInPlace( T &c, typename T::BaseType s )
+{
+	c = adjustSaturation<T>( c, s );
+}
+
+template<typename T>
 void bindColorCommon( class_<T> &c )
 {
 
@@ -161,6 +167,8 @@ void bindColorCommon( class_<T> &c )
 
 	.def( "luminance", &luminance<T, Vec3<typename T::BaseType> > )
 	.def( "luminance", (typename T::BaseType (*)( const T & ))&luminance<T> )
+
+	.def( "adjustSaturation", &adjustSaturationInPlace<T>, "Adjust the saturation of the color in place,"  )
 
 	.def( "__str__", &str<T> )
 	.def( "__repr__", &repr<T> );

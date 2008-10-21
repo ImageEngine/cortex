@@ -44,6 +44,9 @@ typename T::BaseType luminance( const T &color );
 template<typename T, typename S>
 typename T::BaseType luminance( const T &color, const S &weights );
 
+template<typename T>
+T adjustSaturation( const T &color, typename T::BaseType saturation );
+
 } // namespace IECore
 
 #include "IECore/ColorAlgo.inl"
