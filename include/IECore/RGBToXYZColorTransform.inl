@@ -42,6 +42,9 @@
 #include "IECore/Convert.h"
 #include "IECore/VectorTraits.h"
 
+#include "IECore/XYZToRGBColorTransform.h"
+#include "IECore/XYYToXYZColorTransform.h"
+
 namespace IECore
 {
 
@@ -91,57 +94,55 @@ void RGBToXYZColorTransform<F, T>::setMatrix(
 
 	typedef VectorTraits<C> VecTraits;
 	
-	/// \todo Implement this in terms of an xyY->XYZ converter
-	float xr = VecTraits::get( rChromacity, 0 );
-	float yr = VecTraits::get( rChromacity, 1 );
+	XYYToXYZColorTransform< Imath::Color3f, Imath::Color3f > xyYToXYZ( referenceWhite );
 	
-	float xg = VecTraits::get( gChromacity, 0 );
-	float yg = VecTraits::get( gChromacity, 1 );
+	Imath::Color3f rXYZ = xyYToXYZ(
+		Imath::Color3f(
+			VecTraits::get( rChromacity, 0 ),
+			VecTraits::get( rChromacity, 1 ),
+			1.0
+		)
+	);
 	
-	float xb = VecTraits::get( bChromacity, 0 );
-	float yb = VecTraits::get( bChromacity, 1 );
+	Imath::Color3f gXYZ = xyYToXYZ(
+		Imath::Color3f(
+			VecTraits::get( gChromacity, 0 ),
+			VecTraits::get( gChromacity, 1 ),
+			1.0
+		)
+	);
 	
-	float xw = VecTraits::get( referenceWhite, 0 );
-	float yw = VecTraits::get( referenceWhite, 1 );
-				
-	float Xr = xr / yr;
-	float Yr = 1.0;
-	float Zr = ( 1.0 - xr - yr ) / yr;
+	Imath::Color3f bXYZ = xyYToXYZ(
+		Imath::Color3f(
+			VecTraits::get( bChromacity, 0 ),
+			VecTraits::get( bChromacity, 1 ),
+			1.0
+		)
+	);
 	
-	float Xg = xg / yg;
-	float Yg = 1.0;
-	float Zg = ( 1.0 - xg - yg ) / yg;
-	
-	float Xb = xb / yb;
-	float Yb = 1.0;
-	float Zb = ( 1.0 - xb - yb ) / yb;
-	
-	float Xw = xw / yw;
-	float Yw = 1.0;
-	float Zw = ( 1.0 - xw - yw ) / yw;	
-	
+	Imath::Color3f wXYZ = xyYToXYZ(
+		Imath::Color3f(
+			VecTraits::get( referenceWhite, 0 ),
+			VecTraits::get( referenceWhite, 1 ),
+			1.0
+		)
+	);
+					
 	Imath::M33f m = Imath::M33f
 		(
-			Xr, Yr, Zr,
-			Xg, Yg, Zg,
-			Xb, Yb, Zb
+			rXYZ.x, rXYZ.y, rXYZ.z,
+			gXYZ.x, gXYZ.y, gXYZ.z,
+			bXYZ.x, bXYZ.y, bXYZ.z
 		).inverse();
-		
-	Imath::V3f rw( Xw, Yw, Zw );
-	
-	Imath::V3f s = rw * m;
-	
-	float Sr = s.x;	
-	float Sg = s.y;	
-	float Sb = s.z;			
+			
+	Imath::V3f s = wXYZ * m;
 	
 	m_matrix = Imath::M33f
 	(
-		Sr * Xr, Sr * Yr, Sr * Zr,
-		Sg * Xg, Sg * Yg, Sg * Zg,
-		Sb * Xb, Sb * Yb, Sb * Zb
+		s.x * rXYZ.x, s.x * rXYZ.y, s.x * rXYZ.z,
+		s.y * gXYZ.x, s.y * gXYZ.y, s.y * gXYZ.z,
+		s.z * bXYZ.x, s.z * bXYZ.y, s.z * bXYZ.z
 	);
-
 }		
 
 template<typename F, typename T>
