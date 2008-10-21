@@ -72,6 +72,13 @@ class ReadProcedural( Renderer.Procedural ) :
 						)
 					]
 				),
+				
+				V3fParameter(
+					name = "testV3f",
+					description = "",
+					defaultValue = V3f( 1, 1, 2 ),
+				),
+				
 				CompoundParameter(
 					name = "bounds",
 					description = "Parameters controlling how the bounds are calculated for the particles.",

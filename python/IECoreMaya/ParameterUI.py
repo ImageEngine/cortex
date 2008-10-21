@@ -193,9 +193,7 @@ class ParameterUI :
 			
 	def addPopupMenu( self, **kw ):
 	
-		self.__popupMenu = cmds.popupMenu(
-			postMenuCommand = IECore.curry( self.buildPopupMenu, **kw )
-		)
+		cmds.popupMenu( postMenuCommand = IECore.curry( self.buildPopupMenu, **kw ) )
 		
 	def __buildConnectionsPopupMenu( self, popupMenu, ownerControl, **kw ):
 	
