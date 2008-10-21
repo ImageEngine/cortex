@@ -334,19 +334,6 @@ class ParameterUI :
 					label = "Unlock attribute",
 					command = IECore.curry(self.unlock, **kw)
 			)
-			
-			
-		#if hasConnections:
-		
-		#	if hasattr( cmds, controlType ):
-		#		controlCmd = getattr( cmds, controlType )
-			
-		#		controlCmd(
-		#			ownerControl,
-		#			edit = True,
-		#			editable = False
-		#		)
-			
 	
 	def showEditor( self, args, attributeName = None ):
 	
