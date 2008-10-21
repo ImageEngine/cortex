@@ -45,6 +45,8 @@
 #include "IECore/RGBToXYZColorTransform.h"
 #include "IECore/XYZToRGBColorTransform.h"
 
+#include "IECore/XYZToXYYColorTransform.h"
+
 using namespace Imath;
 
 namespace IECore
@@ -78,6 +80,23 @@ struct ColorTransformTest
 		output = fi( output );
 		BOOST_CHECK( output.equalWithAbsError( input, 0.01 ) );				
 	}
+	
+	template<typename F, typename T>
+	void testXYYXYZ()
+	{
+		/// \todo More rigorous testing
+		typedef XYYToXYZColorTransform< F, T > Func;
+		typedef typename XYYToXYZColorTransform< F, T >::InverseType InvFunc;
+		
+		Func f;
+		InvFunc fi;
+		
+		Imath::Color3f input( 0.5, 0.5, 0.5 ); 
+		Imath::Color3f output = f( input );
+		BOOST_CHECK( !output.equalWithAbsError( input, 0.01 ) );				
+		output = fi( output );
+		BOOST_CHECK( output.equalWithAbsError( input, 0.01 ) );		
+	}
 };
 
 struct ColorTransformTestSuite : public boost::unit_test::test_suite
@@ -87,7 +106,8 @@ struct ColorTransformTestSuite : public boost::unit_test::test_suite
 	{
 		static boost::shared_ptr<ColorTransformTest> instance( new ColorTransformTest() );
 				
-		testRGBXYZ( instance );		
+		testRGBXYZ( instance );	
+		testXYYXYZ( instance );		
 	}		
 	
 	void testRGBXYZ( boost::shared_ptr<ColorTransformTest> instance )
@@ -95,6 +115,14 @@ struct ColorTransformTestSuite : public boost::unit_test::test_suite
 		void (ColorTransformTest::*fn)() = 0;
 		
 		fn = &ColorTransformTest::testRGBXYZ<Imath::Color3f, Imath::Color3f>;
+		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+	}
+	
+	void testXYYXYZ( boost::shared_ptr<ColorTransformTest> instance )
+	{
+		void (ColorTransformTest::*fn)() = 0;
+		
+		fn = &ColorTransformTest::testXYYXYZ<Imath::Color3f, Imath::Color3f>;
 		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
 
 	}
