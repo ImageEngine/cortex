@@ -207,6 +207,8 @@ void ColorTransformOp::transformSeparate( PrimitivePtr primitive, ConstCompoundO
 	
 	begin( operands );
 	
+	try
+	{
 		for( size_t i=0; i<n; i++ )
 		{
 			Color3f c( *rw, *gw, *bw );
@@ -223,7 +225,13 @@ void ColorTransformOp::transformSeparate( PrimitivePtr primitive, ConstCompoundO
 			*gw++ = c[1];
 			*bw++ = c[2];
 		}
-	
+	}
+	catch ( ... )
+	{
+		end();
+		throw;
+	}
+			
 	end();
 }
 				
@@ -236,6 +244,8 @@ void ColorTransformOp::transformInterleaved( PrimitivePtr primitive, ConstCompou
 	const typename T::BaseType *alpha = alphaData<TypedData<std::vector<typename T::BaseType> > >( primitive, numElements );
 		
 	begin( operands );
+	try
+	{
 	
 		size_t i = 0;
 		typename T::BaseType *data = colors->baseWritable();
@@ -255,6 +265,12 @@ void ColorTransformOp::transformInterleaved( PrimitivePtr primitive, ConstCompou
 			*data++ = c[1];
 			*data++ = c[2];
 		}
+	}
+	catch ( ... )
+	{
+		end();
+		throw;
+	}	
 	
 	end();
 }

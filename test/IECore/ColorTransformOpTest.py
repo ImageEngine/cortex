@@ -45,12 +45,13 @@ class AddOp( ColorTransformOp ) :
 		self.numTransforms = 0
 		self.numEnds = 0
 		self.add = Color3f( 1, 2, 3 )
+		self.raiseException = False
 
 	def begin( self, operands ) :
 	
 		self.numBegins += 1
 
-	def transform( self, color ) :
+	def transform( self, color ) :			
 	
 		# we expect the python implementations to
 		# return a new color as below
@@ -63,6 +64,10 @@ class AddOp( ColorTransformOp ) :
 		color[2]=10000
 		
 		self.numTransforms += 1
+		
+		if self.raiseException :
+			
+			raise RuntimeError( "Error in transform!" )
 		
 		return result
 
@@ -174,6 +179,21 @@ class TestPythonOp( unittest.TestCase ) :
 		self.assertEqual( o.numEnds, 3 )
 
 		self.assertEqual( pp["Cs"].data, Color3fVectorData( [ x + Color3f( 1, 2, 3 ) for x in cs ] ) ) 
+		
+	def testExceptions( self ) :
+	
+		p = PointsPrimitive( 2 )
+		
+		cs = Color3fVectorData( [ Color3f( 1, 2, 3 ) ] )
+		p["Cs"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, cs )
+		
+		o = AddOp()
+		o.raiseException = True
+				
+		self.assertRaises( RuntimeError, curry( o, input = p ) )
+		self.assertEqual( o.numBegins, 1 )
+		self.assertEqual( o.numTransforms, 1 )
+		self.assertEqual( o.numEnds, 1 )	
 		
 if __name__ == "__main__":
 	unittest.main()
