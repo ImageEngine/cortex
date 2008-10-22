@@ -113,13 +113,12 @@ class ParameterUI :
 		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
 		return fnPH.parameterPlug( self.parameter )
 	
-	## Returns the full "node.attribute" name for the plug this ui represents.
-	# \bug This doesn't return an unambiguous path, causing things to break if there
-	# are nodes without unique short names.
+	## Returns an unambiguous full path to the plug this ui represents.
 	def plugName( self ) :	
 		
 		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
-		return str( fnPH.parameterPlug( self.parameter ).name() )
+		plug = fnPH.parameterPlug( self.parameter )
+		return str( fnPH.fullPathName() + "." + plug.partialName() )
 		
 	def layout( self ) :
 	
