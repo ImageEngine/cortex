@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import IECore
 import maya.OpenMaya
 
 __all__ = [ "dependencyNodeFromString", "dagPathFromString", "plugFromString" ]
@@ -42,6 +43,10 @@ def dependencyNodeFromString( s ) :
 
 	sl = maya.OpenMaya.MSelectionList()
 	sl.add( s )
+	
+	if sl.length() > 1 :
+		IECore.msg( IECore.Msg.Level.Warning, "IECoreMaya.dependencyNodeFromString", "Name \"%s\" is not unique." % s )
+		
 	result = maya.OpenMaya.MObject()
 	sl.getDependNode( 0, result )
 	return result
@@ -52,6 +57,10 @@ def dagPathFromString( s ) :
 
 	sl = maya.OpenMaya.MSelectionList()
 	sl.add( s )
+	
+	if sl.length() > 1 :
+		IECore.msg( IECore.Msg.Level.Warning, "IECoreMaya.dagPathFromString", "Name \"%s\" is not unique." % s )
+		
 	result = maya.OpenMaya.MDagPath()
 	sl.getDependNode( 0, result )
 	return result
@@ -62,6 +71,10 @@ def plugFromString( s ) :
 
 	sl = maya.OpenMaya.MSelectionList()
 	sl.add( s )
+	
+	if sl.length() > 1 :
+		IECore.msg( IECore.Msg.Level.Warning, "IECoreMaya.plugFromString", "Name \"%s\" is not unique." % s )
+	
 	result = maya.OpenMaya.MPlug()
 	sl.getPlug( 0, result )
 	return result
