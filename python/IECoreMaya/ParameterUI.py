@@ -93,6 +93,8 @@ class ParameterUI :
 				edit = True,
 				label = self.parameter.getCurrentPresetName(),			
 			)
+
+			self._addPopupMenu( parentUI=self.__popupControl, attributeName = self.plugName() )
 	
 	## Returns the Maya node associated with this UI in the form of an OpenMaya.MObject	
 	def node( self ) :
@@ -112,6 +114,8 @@ class ParameterUI :
 		return fnPH.parameterPlug( self.parameter )
 	
 	## Returns the full "node.attribute" name for the plug this ui represents.
+	# \bug This doesn't return an unambiguous path, causing things to break if there
+	# are nodes without unique short names.
 	def plugName( self ) :	
 		
 		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
@@ -167,7 +171,7 @@ class ParameterUI :
 				height = 23 #\ todo			
 			)
 			
-			self.addPopupMenu( attributeName = self.plugName() )
+			self._addPopupMenu( parentUI=self.__popupControl, attributeName = self.plugName() )
 			
 			cmds.setParent("..")
 	
@@ -191,9 +195,26 @@ class ParameterUI :
 			dragCallback = IECore.curry( ParameterUI._defaultDragCallback, nodeName = self.nodeName(), layoutName = self.layout(), **kw )
 		)
 			
-	def addPopupMenu( self, **kw ):
+	## \deprecated Use _addPopupMenu instead.
+	def addPopupMenu( self, parentUI=None, **kw ):
 	
-		cmds.popupMenu( postMenuCommand = IECore.curry( self.buildPopupMenu, **kw ) )
+		IECore.msg( IECore.Msg.Level.Warning, self.__class__.__name__ + ".addPopupMenu", "Deprecated method called." )
+		self._addPopupMenu( parentUI = maya.cmds.setParent( query=True ), **kw )
+	
+	## Can be called by derived classes to add a useful popup menu to the specified ui element. This
+	# will replace any existing popup menus that are already there.
+	## \todo Understand and document the available keyword arguments. I think the only one is "attributeName",
+	# which is used to allow the name of specific elements of compound plugs to be specified to improve the box
+	# and vector uis. That needs rethinking in any case, as we shouldn't be storing attribute names anywhere as it
+	# makes us vulnerable to the names changing behind our backs.
+	def _addPopupMenu( self, parentUI, **kw ) :
+			
+		existingMenus = maya.cmds.control( parentUI, query=True, popupMenuArray=True )
+		if existingMenus :
+			for m in existingMenus :
+				maya.cmds.deleteUI( m, menu=True )
+				
+		cmds.popupMenu( parent = parentUI, postMenuCommand = IECore.curry( self.buildPopupMenu, **kw ) )
 		
 	def __buildConnectionsPopupMenu( self, popupMenu, ownerControl, **kw ):
 	
@@ -237,7 +258,7 @@ class ParameterUI :
 		)
 		
 		hasConnections = False			
-		
+				
 		if cmds.getAttr( kw['attributeName'], lock = True) == 0:
 		
 			for k in sorted( self.parameter.presets().keys() ):
@@ -632,18 +653,17 @@ class BoolParameterUI( ParameterUI ) :
 			label = self.label(),
 			align = "left",
 		)
-		
-		cmds.connectControl( self.__checkBox, self.plugName() )
-		
+				
 		cmds.setParent("..")
+		
+		self.replace( self.node(), self.parameter )
 		
 	def replace( self, node, parameter ) :		
 	
 		ParameterUI.replace( self, node, parameter )
 			
 		cmds.connectControl( self.__checkBox, self.plugName() )
-
-
+		
 
 class StringParameterUI( ParameterUI ) :
 
@@ -665,20 +685,18 @@ class StringParameterUI( ParameterUI ) :
 			annotation = self.description(),				
 		)
 		
-		self.__textField = cmds.textField(
-		)
-		
-		self.addPopupMenu( attributeName = self.plugName() )
-		
-		cmds.connectControl( self.__textField, self.plugName() )
-		
+		self.__textField = cmds.textField()
+				
 		cmds.setParent("..")
+		
+		self.replace( self.node(), self.parameter )
 		
 	def replace( self, node, parameter ) :	
 	
 		ParameterUI.replace( self, node, parameter )	
 		
 		if self.__textField:	
+			self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
 			cmds.connectControl( self.__textField, self.plugName() )
 
 
@@ -703,11 +721,8 @@ class PathParameterUI( ParameterUI ) :
 			annotation = self.description(),				
 		)
 		
-		self.__textField = cmds.textField(
-		)
-		
-		self.addPopupMenu( attributeName = self.plugName() )
-		
+		self.__textField = cmds.textField()
+				
 		cmds.iconTextButton(
 			label = "",
 			image = "fileOpen.xpm",
@@ -715,16 +730,17 @@ class PathParameterUI( ParameterUI ) :
 			height = 23,
 			style = "iconOnly"
 		)
-						
-		cmds.connectControl( self.__textField, self.plugName() )
-		
+								
 		cmds.setParent("..")
+
+		self.replace( self.node(), self.parameter )
 		
 	def replace( self, node, parameter ) :	
 	
 		ParameterUI.replace( self, node, parameter )	
 		
 		if self.__textField:	
+			self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
 			cmds.connectControl( self.__textField, self.plugName() )
 			
 	def openDialog( self ) :
@@ -874,10 +890,6 @@ class NumericParameterUI( ParameterUI ) :
 			value = parameter.getNumericValue(),
 			**kw			
 		)
-		
-		self.addPopupMenu( attributeName = self.plugName() )
-		
-		cmds.connectControl( self.__field, self.plugName() )
 						
 		if parameter.hasMinValue() and parameter.hasMaxValue():
 
@@ -886,13 +898,11 @@ class NumericParameterUI( ParameterUI ) :
 				maxValue = parameter.maxValue,
 				
 				value = parameter.getNumericValue(),								
-			)
-			
-			cmds.connectControl(self.__slider, self.plugName() )
-		
+			)		
 			
 		cmds.setParent("..")
 			
+		self.replace( self.node(), self.parameter )
 		
 	def sliderType( self ):	
 	
@@ -919,8 +929,10 @@ class NumericParameterUI( ParameterUI ) :
 		ParameterUI.replace( self, node, parameter )
 		
 		if self.__field:
-			cmds.connectControl( self.__field, self.plugName() )
 		
+			cmds.connectControl( self.__field, self.plugName() )
+			self._addPopupMenu( parentUI = self.__field, attributeName = self.plugName() )
+					
 			if self.__slider:
 				cmds.connectControl( self.__slider, self.plugName() )
 			
@@ -966,11 +978,9 @@ class VectorParameterUI( ParameterUI ) :
 				)
 			)
 			
-			self.addPopupMenu( attributeName = plug.child(i).name() )
-
-			cmds.connectControl( self.__fields[i], plug.child(i).name() )
-			
 		cmds.setParent("..")
+
+		self.replace( self.node(), self.parameter )
 		
 	def fieldType( self ):
 	
@@ -987,9 +997,10 @@ class VectorParameterUI( ParameterUI ) :
 		
 			plug = self.plug()		
 			for i in range(0, self.__dim):	
-			
+						
 				cmds.connectControl( self.__fields[i], plug.child( i ).name() )
-				
+				self._addPopupMenu( parentUI = self.__fields[i], attributeName = plug.child(i).name() )
+
 class ColorParameterUI( ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ):
@@ -1011,7 +1022,7 @@ class ColorParameterUI( ParameterUI ) :
 		
 		self._layout = self.__colorSlider
 		
-		self.addPopupMenu( attributeName = self.plugName() )		
+		self.replace( self.node(), self.parameter )
 					
 	def replace( self, node, parameter ) :
 		
@@ -1023,6 +1034,7 @@ class ColorParameterUI( ParameterUI ) :
 			attribute = self.plugName() 
 		)
 			
+		self._addPopupMenu( parentUI = self.__colorSlider, attributeName = self.plugName() )		
 
 class BoxParameterUI( ParameterUI ) :
 
@@ -1073,14 +1085,12 @@ class BoxParameterUI( ParameterUI ) :
 			for i in range( 0, self.__dim ) :
 			
 				self.__fields.append( self.fieldType()() )
-				
-				vectorPlugChild = vectorPlug.child( i )				
-				self.addPopupMenu( attributeName = vectorPlugChild.name() )
-				cmds.connectControl( self.__fields[-1], vectorPlugChild.name() )
 			
 			cmds.setParent("..")
 		
 		cmds.setParent("..")
+		
+		self.replace( self.node(), self.parameter )
 		
 	def fieldType( self ):
 	
@@ -1092,7 +1102,7 @@ class BoxParameterUI( ParameterUI ) :
 	def replace( self, node, parameter ) :
 		
 		ParameterUI.replace( self, node, parameter )
-		
+				
 		if len(self.__fields) == self.__dim * 2:
 		
 			fieldNum = 0
@@ -1104,6 +1114,8 @@ class BoxParameterUI( ParameterUI ) :
 				
 					vectorPlugChild = vectorPlug.child( i )	
 					cmds.connectControl( self.__fields[ fieldNum ], vectorPlugChild.name() )
+					self._addPopupMenu( parentUI = self.__fields[fieldNum], attributeName = vectorPlugChild.name() )
+
 					fieldNum += 1
 
 ParameterUI.registerUI( IECore.TypeId.FloatParameter, NumericParameterUI )	
