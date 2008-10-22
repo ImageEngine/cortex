@@ -101,11 +101,11 @@ class ParameterUI :
 	
 		return self.__node
 		
-	## Returns the name of the Maya node associated with this UI.
+	## Returns an umambiguous full path for the Maya node associated with this UI.
 	def nodeName( self ) :
 	
-		fnDN = maya.OpenMaya.MFnDependencyNode( self.__node )
-		return fnDN.name()
+		fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
+		return fnPH.fullPathName()
 	
 	## Returns the Maya plug associated with this UI in the form an OpenMaya.MPlug
 	def plug( self ) :
@@ -996,9 +996,10 @@ class VectorParameterUI( ParameterUI ) :
 		
 			plug = self.plug()		
 			for i in range(0, self.__dim):	
-						
-				cmds.connectControl( self.__fields[i], plug.child( i ).name() )
-				self._addPopupMenu( parentUI = self.__fields[i], attributeName = plug.child(i).name() )
+				
+				childPlugName = self.nodeName() + "." + plug.child(i).partialName()		
+				cmds.connectControl( self.__fields[i], childPlugName )
+				self._addPopupMenu( parentUI = self.__fields[i], attributeName = childPlugName )
 
 class ColorParameterUI( ParameterUI ) :
 
@@ -1111,9 +1112,10 @@ class BoxParameterUI( ParameterUI ) :
 				vectorPlug = plug.child( childIndex )									
 				for i in range( 0, self.__dim ) :	
 				
-					vectorPlugChild = vectorPlug.child( i )	
-					cmds.connectControl( self.__fields[ fieldNum ], vectorPlugChild.name() )
-					self._addPopupMenu( parentUI = self.__fields[fieldNum], attributeName = vectorPlugChild.name() )
+					vectorPlugChild = vectorPlug.child( i )
+					vectorPlugChildName = self.nodeName() + "." + vectorPlugChild.partialName()
+					cmds.connectControl( self.__fields[ fieldNum ], vectorPlugChildName )
+					self._addPopupMenu( parentUI = self.__fields[fieldNum], attributeName = vectorPlugChildName )
 
 					fieldNum += 1
 
