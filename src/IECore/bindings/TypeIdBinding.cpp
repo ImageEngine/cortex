@@ -294,6 +294,11 @@ void bindTypeId()
 		.value("SRGBToLinearOp", SRGBToLinearOpTypeId )
 		.value("LinearToCineonOp", LinearToCineonOpTypeId )
 		.value("CineonToLinearOp", CineonToLinearOpTypeId )
+		.value("CubeColorTransformOp",CubeColorTransformOpTypeId )
+		.value("CubeColorLookupfData", CubeColorLookupfDataTypeId )
+		.value("CubeColorLookupdData", CubeColorLookupdDataTypeId )		
+		.value("CubeColorLookupfParameter", CubeColorLookupfParameterTypeId )
+		.value("CubeColorLookupdParameter", CubeColorLookupdParameterTypeId )				
 	;
 }
 

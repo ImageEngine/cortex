@@ -295,6 +295,11 @@ enum TypeId
 	SRGBToLinearOpTypeId = 252,
 	LinearToCineonOpTypeId = 253,
 	CineonToLinearOpTypeId = 254,
+	CubeColorTransformOpTypeId = 255,
+	CubeColorLookupfDataTypeId = 256,
+	CubeColorLookupdDataTypeId = 257,
+	CubeColorLookupfParameterTypeId = 258,
+	CubeColorLookupdParameterTypeId = 259,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
