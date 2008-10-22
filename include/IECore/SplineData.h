@@ -41,7 +41,7 @@
 namespace IECore
 {
 
-// TransformationMatrix data types.
+// Spline data types.
 typedef TypedData<Splineff> SplineffData;
 typedef TypedData<Splinedd> SplineddData;
 typedef TypedData<SplinefColor3f> SplinefColor3fData;
