@@ -182,4 +182,4 @@ IE_CORE_DECLAREPTR( Color4fVectorParameter );
 
 } // namespace IECore
 
-#endif // IE_CORE_NUMERICPARAMETER_H
+#endif // IE_CORE_TYPEDPARAMETER_H
