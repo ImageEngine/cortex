@@ -125,7 +125,7 @@ static std::string parameterPlug( MFnDependencyNode *fnDN, ParameterPtr pa )
 	// we don't know how to push a swig wrapped MPlug into python,
 	// so we have to push the name and then let the python half of
 	// MFnParameterisedHolder construct an MPlug from it.
-	MString name = interface( fnDN )->parameterPlug( pa ).name();
+	MString name = interface( fnDN )->parameterPlug( pa ).partialName();
 	return name.asChar();
 }
 

@@ -105,6 +105,33 @@ class FnParameterisedHolderTest( unittest.TestCase ) :
 		fnPH = IECoreMaya.FnParameterisedHolder( procedural )
 		self.assertEqual( maya.cmds.ls( procedural, long=True )[0], fnPH.fullPathName() )
 		
+	def testPlugParameterWithNonUniqueNames( self ) :
+	
+		node = maya.cmds.createNode( "ieProceduralHolder" )
+		node2 = maya.cmds.createNode( "ieProceduralHolder" )
 		
+		node = maya.cmds.ls( maya.cmds.rename( node, "iAmNotUnique" ), long=True )[0]
+		node2 = maya.cmds.ls( maya.cmds.rename( node2, "iAmNotUnique" ), long=True )[0]
+				
+		fnPH = IECoreMaya.FnProceduralHolder( node )
+		proc = IECore.ReadProcedural()
+		fnPH.setParameterised( proc )
+		self.assert_( fnPH.getParameterised()[0].isSame( proc ) )
+		
+		fnPH2 = IECoreMaya.FnProceduralHolder( node2 )
+		proc2 = IECore.ReadProcedural()
+		fnPH2.setParameterised( proc2 )
+		self.assert_( fnPH2.getParameterised()[0].isSame( proc2 ) )
+		
+		# check that each function set references a different node.
+		self.assert_( fnPH.object()!=fnPH2.object() )
+		self.assert_( fnPH.fullPathName()!=fnPH2.fullPathName() )
+				
+		plug = fnPH.parameterPlug( proc["motion"]["blur"] )
+		plug2 = fnPH2.parameterPlug( proc2["motion"]["blur"] )
+				
+		self.assertEqual( plug.node(), fnPH.object() )
+		self.assertEqual( plug2.node(), fnPH2.object() )
+				
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
