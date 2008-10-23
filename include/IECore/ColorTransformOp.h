@@ -79,8 +79,8 @@ class ColorTransformOp : public PrimitiveOp
 		/// Called once per color element (pixel for ImagePrimitives).
 		/// Must be implemented by subclasses to transform color in place.
 		virtual void transform( Imath::Color3f &color ) const = 0;
-		/// Called once per operation, after all calls to transform() have been made. This is
-		/// an opportunity to perform any cleanup necessary.
+		/// Called once per operation, after all calls to transform() have been made - even if
+		// /transform() throws an exception. This is an opportunity to perform any cleanup necessary.
 		virtual void end();
 		
 	private :
