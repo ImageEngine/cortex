@@ -194,6 +194,10 @@ __dataTypesConversionDict = {
 	IECore.SplineddData: ( IECore.Splinedd, True ),
 	IECore.SplinefColor3fData: ( IECore.SplinefColor3f, True ),
 	IECore.SplinefColor4fData: ( IECore.SplinefColor4f, True ),
+	
+	IECore.CubeColorLookupfData: ( IECore.CubeColorLookupf, True ),
+	IECore.CubeColorLookupdData: ( IECore.CubeColorLookupd, True ),
+
 
 }
 
