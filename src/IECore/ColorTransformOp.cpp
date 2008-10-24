@@ -48,7 +48,7 @@ ColorTransformOp::ColorTransformOp( const std::string &name, const std::string &
 	m_colorPrimVarParameter = new StringParameter(
 		"colorPrimVar", 
 		"The name of the primitive variable which holds color data. This "
-		"can have data of type Color3fData or Color3fVectorData.",
+		"can have data of type Color3fData, Color3dData, Color3fVectorData, or Color3dVectorData.",
 		"Cs"
 	);
 	
@@ -289,6 +289,12 @@ void ColorTransformOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObj
 			case Color3fVectorDataTypeId :
 				transformInterleaved<Color3fVectorData>( primitive, operands, boost::static_pointer_cast<Color3fVectorData>( colorIt->second.data ) );
 				break;
+			case Color3dDataTypeId :
+				transformInterleaved<Color3dData>( primitive, operands, boost::static_pointer_cast<Color3dData>( colorIt->second.data ) );
+				break;
+			case Color3dVectorDataTypeId :
+				transformInterleaved<Color3dVectorData>( primitive, operands, boost::static_pointer_cast<Color3dVectorData>( colorIt->second.data ) );
+				break;	
 			default :
 				throw Exception( "PrimitiveVariable has unsupported type." );
 				break;

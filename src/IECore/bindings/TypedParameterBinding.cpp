@@ -149,6 +149,8 @@ void bindTypedParameter()
 	bindTypedParameter<Splinedd>( "SplineddParameter" );
 	bindTypedParameter<SplinefColor3f>( "SplinefColor3fParameter" );
 	bindTypedParameter<SplinefColor4f>( "SplinefColor4fParameter" );
+	bindTypedParameter<CubeColorLookupf>( "CubeColorLookupfParameter" );
+	bindTypedParameter<CubeColorLookupd>( "CubeColorLookupdParameter" );	
 
 	bindTypedParameter<vector<int> >( "IntVectorParameter" );
 	bindTypedParameter<vector<float> >( "FloatVectorParameter" );

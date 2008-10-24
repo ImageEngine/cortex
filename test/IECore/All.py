@@ -166,6 +166,9 @@ from CoordinateSystemTest import *
 from SplineToImageTest import *
 from DisplayTest import *
 from MeshTangentsOpTest import *
+from CubeColorLookupTest import *
+from CubeColorLookupDataTest import *
+from CubeColorTransformOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

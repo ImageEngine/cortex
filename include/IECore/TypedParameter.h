@@ -39,6 +39,7 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/SplineData.h"
+#include "IECore/CubeColorLookupData.h"
 
 namespace IECore
 {
@@ -118,6 +119,8 @@ typedef TypedParameter<Splineff> SplineffParameter;
 typedef TypedParameter<Splinedd> SplineddParameter;
 typedef TypedParameter<SplinefColor3f> SplinefColor3fParameter;
 typedef TypedParameter<SplinefColor4f> SplinefColor4fParameter;
+typedef TypedParameter<CubeColorLookupf> CubeColorLookupfParameter;
+typedef TypedParameter<CubeColorLookupd> CubeColorLookupdParameter;
 
 typedef TypedParameter<std::vector<int> > IntVectorParameter;
 typedef TypedParameter<std::vector<float> > FloatVectorParameter;
@@ -160,6 +163,8 @@ IE_CORE_DECLAREPTR( SplineffParameter );
 IE_CORE_DECLAREPTR( SplineddParameter );
 IE_CORE_DECLAREPTR( SplinefColor3fParameter );
 IE_CORE_DECLAREPTR( SplinefColor4fParameter );
+IE_CORE_DECLAREPTR( CubeColorLookupfParameter );
+IE_CORE_DECLAREPTR( CubeColorLookupdParameter );
 
 IE_CORE_DECLAREPTR( IntVectorParameter );
 IE_CORE_DECLAREPTR( FloatVectorParameter );

@@ -204,6 +204,9 @@
 #include "IECore/bindings/SRGBToLinearOpBinding.h"
 #include "IECore/bindings/LinearToCineonOpBinding.h"
 #include "IECore/bindings/CineonToLinearOpBinding.h"
+#include "IECore/bindings/CubeColorLookupBinding.h"
+#include "IECore/bindings/CubeColorLookupDataBinding.h"
+#include "IECore/bindings/CubeColorTransformOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -393,6 +396,9 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLinearToSRGBOp();
 	bindCineonToLinearOp();
 	bindLinearToCineonOp();
+	bindCubeColorLookup();		
+	bindCubeColorLookupData();	
+	bindCubeColorTransformOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
