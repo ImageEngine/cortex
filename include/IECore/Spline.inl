@@ -144,6 +144,15 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 			tMin = tMid;
 		}
 		i++;
+		
+#ifndef NDEBUG
+		/// A million bisections and still no solution? Something must be very wrong!
+		if ( i > 1e6 )
+		{
+			throw Exception( "Spline::solve() entered infinite loop" );
+		}
+#endif				
+		
 	} while( Imath::Math<X>::fabs( xMid - x ) > epsilon );
 
 	return tMid;
