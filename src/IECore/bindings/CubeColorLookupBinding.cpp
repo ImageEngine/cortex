@@ -54,6 +54,11 @@ namespace IECore
 template<typename T>
 static T *construct( const V3i &dimension, object o, const typename T::BoxType &domain, typename T::Interpolation interpolation )
 {
+	if ( dimension.x < 2 || dimension.y < 2 || dimension.z < 2 )
+	{
+		throw InvalidArgumentException( "CubeColorLookup: Dimension must be at least 2 in every axis" );
+	}
+
 	extract<ColorTransformOpPtr> ex( o );
 	
 	if ( ex.check() )
@@ -103,7 +108,7 @@ static T *construct( const V3i &dimension, object o, const typename T::BoxType &
 
 		const typename T::DataType &resultData = runTimeCast< TypedDataType >( result->variables.find( "Cs" )->second.data)->readable();
 
-		return new T( dimension,resultData , domain, interpolation);	
+		return new T( dimension, resultData, domain, interpolation);	
 	}
 	else
 	{
