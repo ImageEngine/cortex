@@ -288,7 +288,15 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 			cube = cubeLookup,			
 		)
 		
-		Writer.create( result, "result.jpg").write()
+		expectedResult = Reader.create( "test/IECore/data/expectedResults/cubeColorTransformOp1.jpg").read()
+		
+		op = ImageDiffOp()
+		res = op(
+                        imageA = result,
+                        imageB = expectedResult
+                )
+                
+                self.failIf( res.value )
 		
 			
 		
