@@ -129,7 +129,7 @@ typename CubeColorLookup<T>::ColorType CubeColorLookup<T>::operator() ( const Co
 	
 	switch ( m_interpolation )
 	{
-		case None :
+		case NoInterpolation :
 			{
 				const VecType idx = normalizedCoordinates( color );
 				

@@ -159,7 +159,7 @@ void bindCubeColorLookup( const char *name )
 		scope s( o );
 
 		enum_< typename T::Interpolation >( "Interpolation" )
-			.value( "None", T::None )
+			.value( "NoInterpolation", T::NoInterpolation )
 			.value( "Linear", T::Linear )	
 		;	
 	}

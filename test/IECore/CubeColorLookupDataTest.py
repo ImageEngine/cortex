@@ -74,7 +74,7 @@ class CubeColorLookupDataTest( unittest.TestCase ) :
 					V3f( 1, 1, 1 )
 				),
 				
-				CubeColorLookupf.Interpolation.None )
+				CubeColorLookupf.Interpolation.NoInterpolation )
 		)
 		ObjectWriter( d3, "test/IECore/CubeColorLookupData.cob" ).write()		
 		self.assertEqual( d3, ObjectReader( "test/IECore/CubeColorLookupData.cob" ).read() )

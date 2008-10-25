@@ -55,7 +55,7 @@ class CubeColorLookup
 	
 		typedef enum
 		{
-			None,
+			NoInterpolation,
 			Linear
 		} Interpolation ;
 	
