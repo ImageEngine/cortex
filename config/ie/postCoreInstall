@@ -74,6 +74,7 @@ coreOps = [
 	[ "MeshVertexReorderOp", "vertexReorder", "common/primitive/mesh" ],
 	[ "MeshPrimitiveShrinkWrapOp", "shrinkWrap", "common/primitive/mesh" ],	 		
 	[ "Grade", "grade", "common/colorSpace" ],
+	[ "CubeColorTransformOp", "cubeColorTransform", "common/colorSpace" ],
 ]
 
 for op in coreOps : 
