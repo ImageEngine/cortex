@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+
+import IEEnv
+import subprocess
+import sys
+
+global args
+args = [ "scons", "install", "INSTALL_PREFIX=/software" ]
+
+def build( extraArgs = [] ) :
+
+	global args
+	
+	buildArgs = list( args )
+	buildArgs.extend( extraArgs )
+	buildArgs.extend( sys.argv[1:] )	
+	
+	if subprocess.call( buildArgs ) != 0 :
+	
+		raise RuntimeError("Error : " + str( " ".join( buildArgs ) ) )
+
+if IEEnv.platform() == "rhel4.i686" :
+
+	build( [ "COMPILER_VERSION=4.0.2" ] )			
+	build( [ "COMPILER_VERSION=4.1.2", "MAYA_VERSION=2008" ] )
+	build( [ "APP=nuke", "APP_VERSION=5.1v1" ] )
+	build( [ "COMPILER_VERSION=3.4.6" ] )		
+	build( [ "COMPILER_VERSION=3.3.4" ] )
+	build( [ "COMPILER_VERSION=4.0.1" ] )					
+	build( [ "APP=nuke", "APP_VERSION=5.1v2" ] )		
+	
+elif IEEnv.platformOS() == "osx" :
+	
+	build()
+
+elif IEEnv.platform() == "cent5.x86_64" :
+
+	build( [ "COMPILER_VERSION=3.4.6" ] )
+	build( [ "COMPILER_VERSION=4.1.2", "MAYA_VERSION=2008" ] )
+
+else :
+
+	raise RuntimeError( "Unknown platform" )
+
