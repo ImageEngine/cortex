@@ -118,6 +118,8 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 		assert( (int)v->readable().size() == numUVs );
 		vArray.setLength( numUVs );
 
+	
+		/// \todo The FromMayaMeshConverter inverts the UVs - shouldn't we do the same here?
 		MIntArray uvIds;
 		uvIds.setLength( numUVs );
 		for ( int i = 0; i < numUVs; i++)
