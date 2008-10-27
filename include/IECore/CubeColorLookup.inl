@@ -43,6 +43,7 @@
 
 #include "OpenEXR/ImathLimits.h"
 #include "OpenEXR/ImathMath.h"
+#include "OpenEXR/ImathBoxAlgo.h"
 
 namespace IECore
 {
@@ -63,13 +64,6 @@ CubeColorLookup<T>::CubeColorLookup() : m_dimension( 2, 2, 2 ), m_domain( VecTyp
 	
 	assert( (int)( m_data.size() ) == m_dimension.x * m_dimension.y * m_dimension.z );
 }
-/*
-template<typename T>
-CubeColorLookup<T>::CubeColorLookup( const Imath::V3i dimension, ConstColorTransformOpPtr op, const BoxType &domain, Interpolation interpolation )
-{
-	assert( false );
-}
-*/
 
 template<typename T>
 CubeColorLookup<T>::CubeColorLookup( const Imath::V3i &dimension, const DataType &data, const BoxType &domain, Interpolation interpolation )
@@ -119,19 +113,16 @@ inline int CubeColorLookup<T>::clamp( int v, int min, int max ) const
 template<typename T>
 typename CubeColorLookup<T>::ColorType CubeColorLookup<T>::operator() ( const ColorType &color ) const
 {
-	if ( !m_domain.intersects( color ) )
-	{
-		throw InvalidArgumentException( "CubeColorLookup: Specified colour is outside of domain" );
-	}
-
 	assert( m_data.size() > 0 );
 	boost::const_multi_array_ref< ColorType, 3 > colorArray( &m_data[0], boost::extents[ m_dimension.x ][ m_dimension.y ][ m_dimension.z ] );
 	
+	const ColorType clampedColor = Imath::closestPointInBox( color, m_domain );
+
 	switch ( m_interpolation )
 	{
 		case NoInterpolation :
 			{
-				const VecType idx = normalizedCoordinates( color );
+				const VecType idx = normalizedCoordinates( clampedColor );
 				
 				return colorArray[ (int)( idx.x + 0.5 ) ][ (int)( idx.y + 0.5 ) ][ (int)( idx.z + 0.5 ) ];
 			}
@@ -141,7 +132,7 @@ typename CubeColorLookup<T>::ColorType CubeColorLookup<T>::operator() ( const Co
 			{
 				LinearInterpolator<ColorType> interp;
 				
-				const VecType idx = normalizedCoordinates( color );
+				const VecType idx = normalizedCoordinates( clampedColor );
 				
 				int ix = (int)floor( idx.x );
 				int iy = (int)floor( idx.y );
