@@ -173,9 +173,11 @@ struct CineonToLinearOp::Converter
 
 void CineonToLinearOp::modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels )
 {
-	CineonToLinearOp::Converter converter( filmGammaParameter()->getNumericValue(), 
-											refWhiteValParameter()->getNumericValue(), 
-											refBlackValParameter()->getNumericValue() );
+	CineonToLinearOp::Converter converter(
+		filmGammaParameter()->getNumericValue(), 
+		refWhiteValParameter()->getNumericValue(), 
+		refBlackValParameter()->getNumericValue()
+	);
 
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )
 	{
