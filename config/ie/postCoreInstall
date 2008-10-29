@@ -75,6 +75,10 @@ coreOps = [
 	[ "MeshPrimitiveShrinkWrapOp", "shrinkWrap", "common/primitive/mesh" ],	 		
 	[ "Grade", "grade", "common/colorSpace" ],
 	[ "CubeColorTransformOp", "cubeColorTransform", "common/colorSpace" ],
+	[ "CineonToLinearOp", "cineonToLinear", "common/colorSpace" ],
+	[ "LinearToCineonOp", "linearToCineon", "common/colorSpace" ],
+	[ "SRGBToLinearOp", "SRGBToLinear", "common/colorSpace" ],
+	[ "LinearToSRGBOp", "linearToSRGB", "common/colorSpace" ],
 ]
 
 for op in coreOps : 
