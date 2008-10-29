@@ -59,5 +59,4 @@ from OpWindow import OpWindow
 from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
 from UndoDisabled import UndoDisabled
 from ModalDialogue import ModalDialogue
-
-
+from Panel import Panel
