@@ -120,6 +120,17 @@ def showCallStack():
 		index += 1
 	Msg.output(Msg.Level.Debug, __getCallContext( withLineNumber = True ), callstack )
 
+## Use this function to get information about the context where the exception happened.
+# Returns a tuple of strings (location, stack trace) for the captured exception.
+def exceptionInfo():
+	(exceptionType, exception, trace) = sys.exc_info()
+	etb = traceback.extract_tb(trace)
+	exceptionType = str(exceptionType.__name__) + ": " + str(exception)
+	exceptInfo = ""
+	for (module, line, function, location) in etb:
+		exceptInfo += " File " + str(module) + ", line " + str(line) + ", in " + str(function) + "\n>    " + str(location) + "\n"
+	return ( __getCallContext(  withLineNumber = True  ), "Exception traceback:\n" + exceptInfo + exceptionType)
+
 ## Sends debug messages to the current message handler and appends a full description of the catched exception.
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
@@ -170,5 +181,5 @@ def error(*args):
 	Msg.output(Msg.Level.Error, __getCallContext(), stdStr )
 
 __all__ = [ "initializeLog", "setLogLevelByName", "setLogLevel", "showCallStack",
-		"debugException", "debug", "warning", "info", "error",
+		"exceptionInfo", "debugException", "debug", "warning", "info", "error",
 ]
