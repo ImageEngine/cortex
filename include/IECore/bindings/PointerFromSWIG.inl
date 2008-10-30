@@ -49,7 +49,7 @@ struct PySwigObject
     void * ptr;
 };
 
-void *extractSWIGPointer( PyObject *o )
+static void *extractSWIGPointer( PyObject *o )
 {
 	if( !PyObject_HasAttrString( o, "this" ) )
 	{
