@@ -122,6 +122,7 @@ typedef TypedParameter<SplinefColor4f> SplinefColor4fParameter;
 typedef TypedParameter<CubeColorLookupf> CubeColorLookupfParameter;
 typedef TypedParameter<CubeColorLookupd> CubeColorLookupdParameter;
 
+typedef TypedParameter<std::vector<bool> > BoolVectorParameter;
 typedef TypedParameter<std::vector<int> > IntVectorParameter;
 typedef TypedParameter<std::vector<float> > FloatVectorParameter;
 typedef TypedParameter<std::vector<double> > DoubleVectorParameter;
@@ -166,6 +167,7 @@ IE_CORE_DECLAREPTR( SplinefColor4fParameter );
 IE_CORE_DECLAREPTR( CubeColorLookupfParameter );
 IE_CORE_DECLAREPTR( CubeColorLookupdParameter );
 
+IE_CORE_DECLAREPTR( BoolVectorParameter );
 IE_CORE_DECLAREPTR( IntVectorParameter );
 IE_CORE_DECLAREPTR( FloatVectorParameter );
 IE_CORE_DECLAREPTR( DoubleVectorParameter );

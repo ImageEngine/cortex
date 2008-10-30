@@ -298,7 +298,8 @@ void bindTypeId()
 		.value("CubeColorLookupfData", CubeColorLookupfDataTypeId )
 		.value("CubeColorLookupdData", CubeColorLookupdDataTypeId )		
 		.value("CubeColorLookupfParameter", CubeColorLookupfParameterTypeId )
-		.value("CubeColorLookupdParameter", CubeColorLookupdParameterTypeId )				
+		.value("CubeColorLookupdParameter", CubeColorLookupdParameterTypeId )
+		.value("BoolVectorParameter", BoolVectorParameterTypeId )				
 	;
 }
 

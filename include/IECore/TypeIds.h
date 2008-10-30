@@ -300,6 +300,7 @@ enum TypeId
 	CubeColorLookupdDataTypeId = 257,
 	CubeColorLookupfParameterTypeId = 258,
 	CubeColorLookupdParameterTypeId = 259,
+	BoolVectorParameterTypeId = 260,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

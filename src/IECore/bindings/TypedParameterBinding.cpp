@@ -152,6 +152,7 @@ void bindTypedParameter()
 	bindTypedParameter<CubeColorLookupf>( "CubeColorLookupfParameter" );
 	bindTypedParameter<CubeColorLookupd>( "CubeColorLookupdParameter" );	
 
+	bindTypedParameter<vector<bool> >( "BoolVectorParameter" );
 	bindTypedParameter<vector<int> >( "IntVectorParameter" );
 	bindTypedParameter<vector<float> >( "FloatVectorParameter" );
 	bindTypedParameter<vector<double> >( "DoubleVectorParameter" );
