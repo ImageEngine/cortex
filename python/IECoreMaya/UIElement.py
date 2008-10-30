@@ -33,9 +33,11 @@
 ##########################################################################
 
 import IECore
+import IECoreMaya
 
 import maya.cmds
 import maya.mel
+import maya.OpenMayaUI
 
 ## The UIElement base class assists in implementing ui elements in an
 # object oriented manner in python.
@@ -55,12 +57,11 @@ class UIElement() :
 		instanceRecord = IECore.Struct()
 		instanceRecord.instance = self
 		instanceRecord.callbacks = []
+		instanceRecord.uiDeletedCallbackId = IECoreMaya.CallbackId( maya.OpenMayaUI.MUiMessage.addUiDeletedCallback( topLevelUI, self.__uiDeleted, topLevelUI ) )
 		UIElement.__instances[topLevelUI] = instanceRecord
 	
 		self.__topLevelUI = topLevelUI
-		
-		maya.mel.eval( 'scriptJob -protected -uiDeleted "%s" "python \\"IECoreMaya.UIElement._UIElement__uiDeleted( \'%s\' )\\""' % ( topLevelUI, topLevelUI ) )
-	
+				
 	## Returns the name of the top level ui element for this instance.
 	def _topLevelUI( self ) :
 	
@@ -80,14 +81,26 @@ class UIElement() :
 		callbacks.append( function )
 		return "import IECoreMaya; IECoreMaya.UIElement._UIElement__invokeCallback( \"%s\", %d )" % ( self._topLevelUI(), len( callbacks ) - 1 )
 	
+	## This is called when the maya ui element corresponding to this
+	# instance is deleted. It may be reimplemented by derived classes
+	# to perform any necessary cleanup. One item of cleanup that might be
+	# very important is to delete any IECoreMaya.CallbackId objects that
+	# may be linking a maya message to a method of the instance - if this
+	# is not done then a circular reference will prevent the instance from
+	# dying, and the callbacks will continue to be despatched despite the
+	# fact that the ui has long gone.
+	def _topLevelUIDeleted( self ) :
+		
+		pass
+	
 	@staticmethod
 	def __uiDeleted( topLevelUI ) :
-	
+				
+		UIElement.__instances[topLevelUI].instance._topLevelUIDeleted()
 		del UIElement.__instances[topLevelUI]
 
 	@staticmethod
 	def __invokeCallback( topLevelUI, callbackIndex, *args ) :
-		
-		instanceRecord = UIElement.__instances[topLevelUI]
-		callback = instanceRecord.callbacks[callbackIndex]
+				
+		callback = UIElement.__instances[topLevelUI].callbacks[callbackIndex]
 		callback( *args )
