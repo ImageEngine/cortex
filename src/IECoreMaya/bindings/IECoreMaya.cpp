@@ -64,6 +64,7 @@
 #include "IECoreMaya/bindings/MayaTypeIdBinding.h"
 #include "IECoreMaya/bindings/FromMayaMeshConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaTransformConverterBinding.h"
+#include "IECoreMaya/bindings/CallbackIdBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -102,4 +103,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindMayaTypeId();
 	bindFromMayaMeshConverter();
 	bindFromMayaTransformConverter();
+	bindCallbackId();
 }
