@@ -71,8 +71,10 @@ class UVDistortOp : public WarpOp
 		Imath::V2i m_imageOrigin;
 		Imath::V2i m_uvOrigin;
 		Imath::V2i m_uvSize;
-		ConstFloatVectorDataPtr m_u;
-		ConstFloatVectorDataPtr m_v;
+		ConstDataPtr m_u;
+		ConstDataPtr m_v;
+
+		struct Lookup;
 };
 
 IE_CORE_DECLAREPTR( UVDistortOp );

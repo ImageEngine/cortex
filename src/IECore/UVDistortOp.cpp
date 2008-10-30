@@ -36,6 +36,8 @@
 #include "IECore/NullObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Interpolator.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/DespatchTypedData.h"
 
 using namespace boost;
 using namespace IECore;
@@ -81,22 +83,28 @@ void UVDistortOp::begin( ConstCompoundObjectPtr operands )
 	{
 		throw Exception("No channel R found in the given uv map object!");
 	}
-	if ( mit->second.data->typeId() != FloatVectorDataTypeId )
+	m_u = mit->second.data;
+
+	if ( m_u->typeId() != FloatVectorDataTypeId &&
+		m_u->typeId() != DoubleVectorDataTypeId &&
+		m_u->typeId() != HalfVectorDataTypeId )
 	{
 		throw Exception("Channel R in the given uv map is not float type!");
 	}
-	m_u = static_pointer_cast<FloatVectorData>(mit->second.data);
 
 	mit = uvImage->variables.find( "G" );
 	if ( mit == uvImage->variables.end() )
 	{
 		throw Exception("No channel G found in the given uv map object!");
 	}
-	if ( mit->second.data->typeId() != FloatVectorDataTypeId )
+	m_v = mit->second.data;
+
+	if ( m_v->typeId() != FloatVectorDataTypeId &&
+		m_v->typeId() != DoubleVectorDataTypeId &&
+		m_v->typeId() != HalfVectorDataTypeId )
 	{
 		throw Exception("Channel G in the given uv map is not float type!");
 	}
-	m_v = static_pointer_cast<FloatVectorData>(mit->second.data);
 
 	ImagePrimitivePtr inputImage = static_pointer_cast<ImagePrimitive>( inputParameter()->getValue() );
 	m_uvSize = uvImage->getDataWindow().size();
@@ -110,6 +118,25 @@ Imath::Box2i UVDistortOp::warpedDataWindow( const Imath::Box2i &dataWindow ) con
 	return Imath::Box2i( m_uvOrigin, m_uvOrigin + m_uvSize );
 }
 
+struct UVDistortOp::Lookup
+{
+		typedef float ReturnType;
+
+		Lookup( unsigned pos ) : m_pos( pos )
+		{
+		}
+	
+		template<typename T>
+		ReturnType operator()( typename T::Ptr data )
+		{
+			return (ReturnType)(data->readable()[ m_pos ]);
+		}
+
+	private:
+
+		unsigned m_pos;
+};
+
 Imath::V2f UVDistortOp::warp( const Imath::V2f &p ) const
 {
 	Imath::V2f uvCoord = (p - m_uvOrigin);
@@ -118,7 +145,14 @@ Imath::V2f UVDistortOp::warp( const Imath::V2f &p ) const
 	x = ( x < 0 ? 0 : x > m_uvSize.x ? m_uvSize.x : x );
 	y = ( y < 0 ? 0 : y > m_uvSize.y ? m_uvSize.y : y );
 	unsigned pos = x + y * (m_uvSize.x + 1);
-	return Imath::V2f( m_u->readable()[ pos ], m_v->readable()[ pos ] ) * m_imageSize + m_imageOrigin;
+
+	UVDistortOp::Lookup lookup( pos );
+	
+	return Imath::V2f( despatchTypedData<UVDistortOp::Lookup, 
+							TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_u), lookup ), 
+						despatchTypedData<UVDistortOp::Lookup, 
+							TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_v), lookup ) ) * 
+			m_imageSize + m_imageOrigin;
 }
 
 void UVDistortOp::end()
