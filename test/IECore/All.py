@@ -169,6 +169,7 @@ from MeshTangentsOpTest import *
 from CubeColorLookupTest import *
 from CubeColorLookupDataTest import *
 from CubeColorTransformOpTest import *
+from CompoundVectorParameterTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

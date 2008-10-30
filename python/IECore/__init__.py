@@ -91,6 +91,7 @@ from FileSequenceVectorParameter import FileSequenceVectorParameter
 from FileSequenceGraphOp import FileSequenceGraphOp
 from BatchSingleOp import BatchSingleOp
 from LayeredDict import LayeredDict
+from CompoundVectorParameter import CompoundVectorParameter
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
