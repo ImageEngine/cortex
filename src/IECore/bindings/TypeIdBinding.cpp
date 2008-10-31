@@ -300,6 +300,8 @@ void bindTypeId()
 		.value("CubeColorLookupfParameter", CubeColorLookupfParameterTypeId )
 		.value("CubeColorLookupdParameter", CubeColorLookupdParameterTypeId )
 		.value("BoolVectorParameter", BoolVectorParameterTypeId )				
+		.value("LinearToRec709Op", LinearToRec709OpTypeId )
+		.value("Rec709ToLinearOp", Rec709ToLinearOpTypeId )
 	;
 }
 

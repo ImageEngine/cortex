@@ -79,6 +79,8 @@ coreOps = [
 	[ "LinearToCineonOp", "linearToCineon", "common/colorSpace" ],
 	[ "SRGBToLinearOp", "SRGBToLinear", "common/colorSpace" ],
 	[ "LinearToSRGBOp", "linearToSRGB", "common/colorSpace" ],
+	[ "Rec709ToLinearOp", "Rec709ToLinear", "common/colorSpace" ],
+	[ "LinearToRec709Op", "linearToRec709", "common/colorSpace" ],
 	[ "UVDistortOp", "uvDistort", "common/2d/image" ],
 ]
 

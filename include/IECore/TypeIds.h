@@ -301,6 +301,8 @@ enum TypeId
 	CubeColorLookupfParameterTypeId = 258,
 	CubeColorLookupdParameterTypeId = 259,
 	BoolVectorParameterTypeId = 260,
+	LinearToRec709OpTypeId = 261,
+	Rec709ToLinearOpTypeId = 262,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
