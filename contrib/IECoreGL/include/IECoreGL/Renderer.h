@@ -233,7 +233,7 @@ class Renderer : public IECore::Renderer
 		/// \par Implementation specific text primitive attributes :
 		////////////////////////////////////////////////////////////
 		///
-		/// \li <b>"gl:textPrimitive:type" StringData "mesh"
+		/// \li <b>"gl:textPrimitive:type" StringData "mesh"</b><br>
 		/// Controls the basic method used for text rendering. A value
 		/// of "mesh" specifies that text primitives are rendered as
 		/// triangulated meshes, and a value of "sprite" specifies rendering

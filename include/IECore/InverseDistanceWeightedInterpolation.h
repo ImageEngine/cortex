@@ -58,7 +58,11 @@ class InverseDistanceWeightedInterpolation
 	
 		/// Creates the interpolator. Note that it does not own the passed points or values -
 		/// it is up to you to ensure that they remain valid and unchanged as long as the 
-		/// interpolator is in use. 
+		/// interpolator is in use.
+		/// \param firstPoint Iterator to first point  
+		/// \param lastPoint Iterator to last point  
+		/// \param firstValue Iterator to first value  
+		/// \param lastValue Iterator to last value  
 		/// \param numNeighbours The amount of nearest-neighbour points to consider when performing interpolation. More usually yields slower, but better results.
 		/// \param maxLeafSize The number of points to store in each KDTree bucket
 		InverseDistanceWeightedInterpolation(

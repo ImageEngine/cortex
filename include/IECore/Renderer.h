@@ -247,7 +247,7 @@ class Renderer : public RunTimeTyped
 		/// the documentation for the various primitives below for how orientation
 		/// affects the way their front face is defined.
 		///
-		/// \li <b>"name" StringData "unnamed"\li <b>
+		/// \li <b>"name" StringData "unnamed"\li </b>
 		/// A descriptive name for the object.
 		///
 		/// \li <b>"user:*"</b><br>

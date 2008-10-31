@@ -56,11 +56,11 @@ IE_CORE_FORWARDDECLARE( IndexedIOInterface );
 
 ///A simple means of storing VisibleRenderable objects in a hierarchical way.
 ///Uses an IndexedIOInterface object to access the file. The file is organized as following:
-///- /headersH/<headerName> (Object)
-///- /children/<objName>/attributes/<attrName>
-///- /children/<objName>/boundingBox (Box3f)
-///- /children/<objName>/transformMatrix (M44f) or /children/<objName>/shape/ ( VisibleRenderable ).
-///- /children/<objName>/children/...
+///- /headersH/&lt;headerName&gt; (Object)
+///- /children/&lt;objName&gt;/attributes/&lt;attrName&gt;
+///- /children/&lt;objName&gt;/boundingBox (Box3f)
+///- /children/&lt;objName&gt;/transformMatrix (M44f) or /children/&lt;objName&gt;/shape/ ( VisibleRenderable ).
+///- /children/&lt;objName&gt;/children/...
 ///Will throw an exception derived from IEException if any errors are encountered.
 ///\todo Create a base class for this one and AttributeCache.
 class HierarchicalCache : public RefCounted
