@@ -47,7 +47,7 @@ namespace IECore
 /// Forward declaration
 template<typename, typename> class LinearToRec709DataConversion;
 
-/// A class to perform data conversion from sRGB values to linear
+/// A class to perform data conversion from Rec709 values to linear
 template<typename F, typename T>
 struct Rec709ToLinearDataConversion : public DataConversion< F, T >
 {
