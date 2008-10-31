@@ -36,6 +36,7 @@ import IECore
 import IECoreMaya
 
 import maya.cmds
+import sys
 
 import pickle
 
@@ -102,9 +103,10 @@ class Panel( IECoreMaya.UIElement ) :
 				saveStateCallback="iePanelSave",
 				deleteCallback="iePanelDelete",
 			)
-#			print 't=' + t
-#			print 'typeName=' + typeName
-			assert( t==typeName )
+			
+			# t=0 is always returned in batch mode, probably because
+			# batch mode can't handle UI callback creation
+			assert( t==typeName or t==0)
 			cls.__panelTypes[t] = subclass
 			
 		else :
