@@ -60,7 +60,7 @@ class CompoundVectorParameter ( CompoundParameter ):
 		self.__testParameterType( parameter )
 		CompoundParameter.insertParameter( self, parameter, other )
 
-	## Returns true only if all the vector parametes are of the same length and they also validate ok.
+	## Returns true only if all the vector parameters are of the same length and they also validate ok.
 	def valueValid( self, value ) :
 
 		res = CompoundParameter.valueValid( self, value )

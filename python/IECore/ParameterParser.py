@@ -344,6 +344,39 @@ def __parseStringArray( args, parameter ) :
 
 	parameter.setValidatedValue( d )
 
+def __parseBoolArray( args, parameter ) :
+
+	d = IECore.BoolVectorData()
+
+	validValues = {
+		"True" : True,
+		"False" : False,
+		"On" : True,
+		"Off" : False,
+		"1" : True,
+		"0" : False,
+		"true" : True,
+		"false" : False,
+		"on" : True,
+		"off" : False,
+	}
+	
+	done = False
+	while len( args ) and not done :
+		a = args[0]
+		if len(a) and a[0] == "-" :
+			done = True
+		elif not args[0] in validValues :
+			raise SyntaxError( "Expected one of %s" % ", ".join( validValues.keys() ) )
+		else :
+			try :
+				d.append( validValues[args[0]] )
+				del args[0]
+			except :
+				done = True
+				
+	parameter.setValidatedValue( d )
+
 def __parseNumericArray( dataType, integer, args, parameter ) :
 
 	d = dataType()
@@ -399,6 +432,7 @@ ParameterParser.registerType( IECore.DirNameParameter.staticTypeId(), __parseStr
 ParameterParser.registerType( IECore.FileSequenceParameter.staticTypeId(), __parseString, __serialiseString )
 ParameterParser.registerType( IECore.FrameListParameter.staticTypeId(), __parseString, __serialiseString )
 ParameterParser.registerType( IECore.StringVectorParameter.staticTypeId(), __parseStringArray, __serialiseStringArray )
+ParameterParser.registerType( IECore.BoolVectorParameter.staticTypeId(), ( lambda args, parameter : __parseBoolArray( args, parameter ) ), __serialiseUsingStr )
 ParameterParser.registerType( IECore.IntVectorParameter.staticTypeId(), ( lambda args, parameter : __parseNumericArray( IECore.IntVectorData, True, args, parameter ) ), __serialiseUsingStr )
 ParameterParser.registerType( IECore.FloatVectorParameter.staticTypeId(), ( lambda args, parameter : __parseNumericArray( IECore.FloatVectorData, False, args, parameter ) ), __serialiseUsingStr )
 ParameterParser.registerType( IECore.DoubleVectorParameter.staticTypeId(), ( lambda args, parameter : __parseNumericArray( IECore.DoubleVectorData, False, args, parameter ) ), __serialiseUsingStr )

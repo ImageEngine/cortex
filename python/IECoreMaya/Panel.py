@@ -73,10 +73,13 @@ class Panel( IECoreMaya.UIElement ) :
 	# as far as maya is concerned may result in multiple IECoreMaya.Panel instantiations -
 	# typically one for each time maya wishes to reparent or copy the panel.
 	@classmethod
-	def create( cls ) :
+	def create( cls, label=None ) :
 		
 		typeName = cls.__name__
-		return maya.cmds.scriptedPanel( unParent=True, type=typeName, label=typeName )
+		panel = maya.cmds.scriptedPanel( unParent=True, type=typeName, label=typeName )
+		if label :
+			maya.cmds.scriptedPanel( panel, edit=True, label=label )
+		return panel
 	
 	## Must be called to register all subclasses. This should
 	# typically be done during plugin initialisation.
@@ -99,6 +102,8 @@ class Panel( IECoreMaya.UIElement ) :
 				saveStateCallback="iePanelSave",
 				deleteCallback="iePanelDelete",
 			)
+#			print 't=' + t
+#			print 'typeName=' + typeName
 			assert( t==typeName )
 			cls.__panelTypes[t] = subclass
 			
