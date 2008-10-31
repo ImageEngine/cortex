@@ -49,6 +49,8 @@
 #include "IECore/LinearToCineonDataConversion.h"
 #include "IECore/SRGBToLinearDataConversion.h"
 #include "IECore/LinearToSRGBDataConversion.h"
+#include "IECore/Rec709ToLinearDataConversion.h"
+#include "IECore/LinearToRec709DataConversion.h"
 #include "IECore/CompoundDataConversion.h"
 
 using namespace Imath;
@@ -79,6 +81,21 @@ struct DataConversionTest
 	void testSRGBLinear()
 	{
 		typedef SRGBToLinearDataConversion< T, T > Func;	
+		CompoundDataConversion< Func, typename Func::InverseType > f;
+		typename CompoundDataConversion< Func, typename Func::InverseType >::InverseType fi = f.inverse();		
+	
+		/// Verify that f(f'(i)) ~ i
+		for ( T i = T(0); i < T(10); i += T(0.2) )
+		{		
+			BOOST_CHECK_CLOSE( double( f(i) ), double( i ), 1.e-4 );
+			BOOST_CHECK_CLOSE( double( fi(i) ), double( i ), 1.e-4 );
+		}
+	}
+
+	template<typename T>
+	void testRec709Linear()
+	{
+		typedef Rec709ToLinearDataConversion< T, T > Func;	
 		CompoundDataConversion< Func, typename Func::InverseType > f;
 		typename CompoundDataConversion< Func, typename Func::InverseType >::InverseType fi = f.inverse();		
 	
@@ -125,6 +142,7 @@ struct DataConversionTestSuite : public boost::unit_test::test_suite
 				
 		testCineonLinear( instance );
 		testSRGBLinear( instance );
+		testRec709Linear( instance );
 		testSignedScaled( instance );
 	}		
 	
@@ -147,6 +165,13 @@ struct DataConversionTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testSRGBLinear<float>, instance ) );		
 		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testSRGBLinear<double>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testSRGBLinear<half>, instance ) );
+	}
+
+	void testRec709Linear( boost::shared_ptr<DataConversionTest> instance )
+	{
+		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testRec709Linear<float>, instance ) );		
+		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testRec709Linear<double>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testRec709Linear<half>, instance ) );
 	}
 	
 	void testSignedScaled( boost::shared_ptr<DataConversionTest> instance )
