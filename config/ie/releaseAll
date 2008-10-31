@@ -3,6 +3,9 @@
 import IEEnv
 import subprocess
 import sys
+import os
+import os.path
+import shutil
 
 global args
 args = [ "scons", "install", "INSTALL_PREFIX=/software" ]
@@ -31,6 +34,13 @@ if IEEnv.platform() == "rhel4.i686" :
 	
 elif IEEnv.platformOS() == "osx104" :
 	
+	if os.path.exists( ".sconsign.dblite" ) :
+		
+		os.remove( ".sconsign.dblite" )
+		
+	if os.path.exists( ".sconf_temp" ) :
+		
+		shutil.rmtree( ".sconf_temp" )	
 	build()
 
 elif IEEnv.platform() == "cent5.x86_64" :
