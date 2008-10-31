@@ -104,7 +104,7 @@ class Panel( IECoreMaya.UIElement ) :
 			
 		else :
 		
-			assert( cls.__panelTypes[typeName]==subclss )
+			assert( cls.__panelTypes[typeName]==subclass )
 			
 	# maps from the maya panel name to a record of the Panel instance and state for
 	# that panel
