@@ -62,6 +62,9 @@ class TruelightColorTransformOp : public IECore::ColorTransformOp
 		
 		IECore::IntParameterPtr inputSpaceParameter();
 		IECore::ConstIntParameterPtr inputSpaceParameter() const;
+		
+		IECore::BoolParameterPtr rawTruelightOutputParameter();
+		IECore::ConstBoolParameterPtr rawTruelightOutputParameter() const;
 
 		/// Returns the actual truelight commands used for the transform.
 		/// This can be of use when debugging.
@@ -73,6 +76,8 @@ class TruelightColorTransformOp : public IECore::ColorTransformOp
 		virtual void transform( Imath::Color3f &color ) const;
 
 	private :
+	
+		void maybeWarn() const;
 
 		void setInstanceFromParameters() const;
 
@@ -81,6 +86,10 @@ class TruelightColorTransformOp : public IECore::ColorTransformOp
 		IECore::IntParameterPtr m_inputSpaceParameter;
 
 		void *m_instance; // truelight instance
+	
+	public :	
+		/// \todo Remove on next major version change
+		struct ExtraData;
 		
 };
 

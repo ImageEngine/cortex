@@ -45,6 +45,7 @@ class TruelightColorTransformOpTest( unittest.TestCase ) :
 		self.assertEqual( o.profile.getTypedValue(), "Kodak" )
 		self.assertEqual( o.display.getTypedValue(), "monitor" )
 		self.assertEqual( o.inputSpace.getCurrentPresetName(), "linear" )
+		self.assertEqual( o.rawTruelightOutput.getTypedValue(), True )
 	
 	def testCommands( self ) :
 	
@@ -53,6 +54,50 @@ class TruelightColorTransformOpTest( unittest.TestCase ) :
 		c = o.commands()
 		
 		self.failUnless( "display{monitor}" in c )
+		
+		
+	def testConversion( self ) :	
+		
+		o = TruelightColorTransformOp()
+		o["display"] = IECore.StringData( "SonyHD" ) # SonyHD is a default monitor profile that ships with Truelight
+		
+		w = IECore.Box2i(
+			IECore.V2i( 0, 0 ),
+			IECore.V2i( 0, 0 )
+		)
+		
+		img = IECore.ImagePrimitive( w, w )
+		rData = IECore.FloatVectorData()
+		gData = IECore.FloatVectorData()		
+		bData = IECore.FloatVectorData()		
+		
+		inCol = IECore.Color3f( 0.5, 0.5, 0.5 )
+		rData.append( inCol.r )
+		gData.append( inCol.g )
+		bData.append( inCol.b )				
+		img["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, rData )	
+		img["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, gData )		
+		img["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, bData )					
+		
+		# These values /should/ be correct, but may not necessarily be. They're here mainly to test
+		# for any unexpected changes in behaviour.
+		# \todo Validate the results here, and remove the above comment when done
+		out = o( input = img )
+		outCol1 = IECore.Color3f( out["R"].data[0], out["G"].data[0], out["B"].data[0] )
+		self.assert_( outCol1.equalWithAbsError( IECore.Color3f( 0.693873, 0.702439, 0.702624 ), 0.01 ) )
+		
+		# Make sure that turning off rawTruelightOutput indeed does an SRGB->Linear conversion
+		out = o( input = img, rawTruelightOutput = False )	
+		outCol2 = IECore.Color3f( out["R"].data[0], out["G"].data[0], out["B"].data[0] )			
+		self.assert_( outCol2.equalWithAbsError( IECore.Color3f( 0.439312, 0.451469, 0.451734 ), 0.01 ) )
+		
+		linearToSRGB = IECore.LinearToSRGBOp()
+		outSRGB = linearToSRGB(
+			input = out,
+			channels = IECore.StringVectorData( [ "R", "G", "B" ] )
+		)
+		outColSRGB = IECore.Color3f( outSRGB["R"].data[0], outSRGB["G"].data[0], outSRGB["B"].data[0] )				
+		self.assert_( outColSRGB.equalWithAbsError( outCol1, 0.01 ) )
 		
 if __name__ == "__main__":
 	unittest.main()
