@@ -180,6 +180,8 @@ def frameListFromList( frames ) :
 	rangeStart = 0
 	rangeEnd = 1
 	rangeStep = frames[rangeEnd] - frames[rangeStart]
+	assert( rangeStep > 0 )
+	
 	while rangeEnd<=len( frames ) :
 		
 		if rangeEnd==len( frames ) or frames[rangeEnd] - frames[rangeEnd-1] != rangeStep :

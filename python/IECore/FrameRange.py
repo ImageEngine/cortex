@@ -45,6 +45,10 @@ class FrameRange( FrameList.FrameList ) :
 	## Constructs a new FrameRange object.
 	def __init__( self, start, end, step = 1 ) :
 	
+		if step == 0 :
+		
+			raise ValueError( "FrameRange step cannot be zero" )
+	
 		self.start = start
 		self.end = end
 		self.step = step
@@ -72,6 +76,12 @@ class FrameRange( FrameList.FrameList ) :
 					raise ValueError( "FrameRange end must be greater than or equal to start." )
 				
 			else :
+			
+				assert( key == "step" )
+				
+				if value == 0 :
+				
+					raise ValueError( "FrameRange step cannot be zero" )
 			
 				if (self.end - self.start) % value != 0 :
 				
