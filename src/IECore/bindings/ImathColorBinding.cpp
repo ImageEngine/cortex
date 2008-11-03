@@ -171,9 +171,21 @@ void bindColorCommon( class_<T> &c )
 	.def( "adjustSaturation", &adjustSaturationInPlace<T>, "Adjust the saturation of the color in place,"  )
 
 	.def( "__str__", &str<T> )
-	.def( "__repr__", &repr<T> );
-	
+	.def( "__repr__", &repr<T> );	
+}
 
+/// We need this and equalWithRelError so that we can call them passing colors instead of vectors.
+/// We deliberately don't expose the fact that Color3 derives from Vec3 because we think that is weird.
+template<typename T>
+static bool equalWithAbsError( const T &c1, const T &c2, typename T::BaseType e )
+{
+	return c1.equalWithAbsError( c2, e );
+}
+
+template<typename T>
+static bool equalWithRelError( const T &c1, const T &c2, typename T::BaseType e )
+{
+	return c1.equalWithRelError( c2, e );
 }
 
 template<typename T>
@@ -194,8 +206,8 @@ void bindColor3( const char *typeName )
 		.def( init<typename T::BaseType, typename T::BaseType, typename T::BaseType>() )
 		.def( init<const T&>() )
 
-		.def( "equalWithAbsError", &T::equalWithAbsError )
-		.def( "equalWithRelError", &T::equalWithRelError )
+		.def( "equalWithAbsError", &equalWithAbsError<T> )
+		.def( "equalWithRelError", &equalWithRelError<T> )
 	;
 	
 	bindColorCommon( c );
