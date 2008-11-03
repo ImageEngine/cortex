@@ -1520,6 +1520,7 @@ if doConfigure :
 
 		# library
 		truelightLibrary = truelightEnv.SharedLibrary( "lib/" + os.path.basename( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightSources )
+		truelightEnv.Depends( truelightLibrary, coreLibrary )
 		truelightEnv.Depends( coreInstallSync, truelightLibrary )
 		truelightLibraryInstall = truelightEnv.Install( os.path.dirname( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightLibrary )
 		truelightEnv.NoCache( truelightLibraryInstall )
@@ -1544,6 +1545,7 @@ if doConfigure :
 		)
 
 		truelightPythonModule = truelightPythonEnv.SharedLibrary( "python/IECoreTruelight/_IECoreTruelight", truelightPythonSources )
+		truelightPythonEnv.Depends( truelightPythonModule, corePythonModule )
 		truelightPythonEnv.Depends( coreInstallSync, truelightPythonModule )		
 		truelightPythonEnv.Depends( truelightPythonModule, truelightLibrary )
 		
