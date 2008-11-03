@@ -1487,13 +1487,19 @@ if doConfigure :
 ###########################################################################################
 
 truelightEnv = env.Copy( IECORE_NAME = "IECoreTruelight" )
+truelightEnv.Append( LIBS = [ "truelight" ] )
+
+# Remove all the boost libs for the configure state- if we don't do this then the configure test can fail for some compilers. 
+# \todo Need to establish exactly what is going on here.
+oldTruelightLibs = list( truelightEnv["LIBS"] )
+truelightEnv["LIBS"] = [ x for x in truelightEnv["LIBS"] if x.find( "boost_" ) == -1 ] 
+
 truelightEnv.Append( CPPPATH = [ "$TRUELIGHT_ROOT/include" ] )
 truelightEnv.Prepend( LIBPATH = [
 		"./lib",
 		"$TRUELIGHT_ROOT/lib"
 	]
 )
-truelightEnv.Append( LIBS = [ "truelight" ] )
 
 truelightPythonEnv = pythonEnv.Copy( IECORE_NAME="IECoreTruelight" )
 
@@ -1509,6 +1515,8 @@ if doConfigure :
 	else :
 	
 		c.Finish()
+		
+		truelightEnv["LIBS"] = oldTruelightLibs
 
 		# we can't add this earlier as then it's built during the configure stage, and that's no good
 		truelightEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
