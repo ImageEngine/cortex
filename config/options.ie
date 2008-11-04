@@ -101,10 +101,12 @@ if IEEnv.platformOS() != "osx104" :
 if debug :
 
 	CXXFLAGS += [ "-g" ]
+	
+	withAsserts = True
 
 else :
 
-	CXXFLAGS += [ "-DNDEBUG" ]
+	withAsserts = False
 		
 	# "-fvisibility-inlines-hidden" is only available on newer releases of gcc, but shows
 	# some issues with 64-bit builds.	
@@ -112,6 +114,9 @@ else :
 
 		CXXFLAGS += [ "-fvisibility-inlines-hidden" ]
 
+withAsserts = getOption( "WITH_ASSERTS", withAsserts )
+if not withAsserts :
+	CXXFLAGS += [ "-DNDEBUG" ]
 
 TESTCXXFLAGS = copy.copy( CXXFLAGS )
 	
