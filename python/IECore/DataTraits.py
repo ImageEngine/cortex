@@ -238,7 +238,7 @@ def dataTypeFromElementType(elementType):
 			continue
 		if value[0] is elementType and value[1]:
 			return dataType
-	raise TypeError, "No Data type is compatible with the given element type."
+	raise TypeError, "No Data type is compatible with the given element type: %s" % ( elementType )
 
 ## Returns the Data class that is instantiable given a element data object.
 # It also instantiate container Data objects, like VectorData and CompoundData, given the proper list and dict.
@@ -260,6 +260,11 @@ def dataTypeFromElement(element):
 # Returns:
 # A Data object that holds the given element data object.
 def dataFromElement(element):
+
+	# An empty list or empty set is ambiguous - we don't know if it should be a StringVectorData, IntVectorData, or anything
+	if element == [] or element == set() : 
+	
+		raise RuntimeError, "Cannot determine Data type for ambiguous element: %s" % ( str( element ) )
 	
 	dataType = dataTypeFromElement(element)
 	return dataType(element)
