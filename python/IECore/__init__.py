@@ -92,6 +92,8 @@ from FileSequenceGraphOp import FileSequenceGraphOp
 from BatchSingleOp import BatchSingleOp
 from LayeredDict import LayeredDict
 from CompoundVectorParameter import CompoundVectorParameter
+from AttributeBlock import AttributeBlock
+from TransformBlock import TransformBlock
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
