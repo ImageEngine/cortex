@@ -105,8 +105,17 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	## Returns the OpenMaya.MPlug object responsible for representing the given parameter.
 	def parameterPlug( self, parameter ) :
 	
-		plugName = _IECoreMaya._parameterisedHolderParameterPlug( self, parameter )		
-		return StringUtil.plugFromString( self.fullPathName() + "." + plugName )		
+		plugName = _IECoreMaya._parameterisedHolderParameterPlug( self, parameter )
+		return StringUtil.plugFromString( self.fullPathName() + "." + plugName )
+		
+	## Returns a string containing a full pathname for the plug representing the given parameter.
+	def parameterPlugPath( self, parameter ) :
+	
+		plugName = _IECoreMaya._parameterisedHolderParameterPlug( self, parameter )
+		if not plugName :
+			return ""
+			
+		return self.fullPathName() + "." + plugName
 
 	## Returns the IECore.Parameter object being represented by the given OpenMaya.MPlug
 	# instance.
