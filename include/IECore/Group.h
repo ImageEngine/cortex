@@ -52,6 +52,8 @@ class Group : public VisibleRenderable
 
 	public:
 	
+		/// \todo Consider making the ChildSet of a container type which preserves order and ensures no duplicates. Otherwise
+		/// we're not going to get consistent ordering of children, even if they're added in the same order.
 		typedef std::set<VisibleRenderablePtr> ChildSet;
 		typedef std::set<StateRenderablePtr> StateSet;
 	
