@@ -80,10 +80,7 @@ TruelightColorTransformOp::TruelightColorTransformOp()
 		"inputSpace",
 		"The colorspace of the input to the transform.",
 		TL_INPUT_LIN,
-		std::min( TL_INPUT_LOG, std::min( TL_INPUT_LIN, TL_INPUT_VID ) ) ,
-		std::max( TL_INPUT_LOG, std::max( TL_INPUT_LIN, TL_INPUT_VID ) ) ,
-		inputSpacePresets,
-		true
+		inputSpacePresets
 	);
 	
 	extraData->m_rawTruelightOutputParameter = new BoolParameter(

@@ -58,6 +58,9 @@ class NumericParameter : public Parameter
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue = T(),
 			T minValue = Imath::limits<T>::min(), T maxValue = Imath::limits<T>::max(),
 			const PresetsMap &presets = PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			
+		NumericParameter( const std::string &name, const std::string &description, T defaultValue,
+			const PresetsMap &presets, ConstCompoundObjectPtr userData = 0 );	
 		
 		//! @name RunTimeTyped functions
 		////////////////////////////////////

@@ -68,6 +68,13 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 	}
 }
 
+template<typename T>
+NumericParameter<T>::NumericParameter( const std::string &name, const std::string &description, T defaultValue,
+	const PresetsMap &presets, ConstCompoundObjectPtr userData )
+	: Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), true, userData ), m_min( Imath::limits<T>::min() ), m_max( Imath::limits<T>::max() )
+{
+}	
+
 /////////////////////////////////////////////////////////////////////////////////////
 // runtimetyped stuff
 /////////////////////////////////////////////////////////////////////////////////////
