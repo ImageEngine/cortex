@@ -56,6 +56,8 @@ Parameter::Parameter( const std::string &name, const std::string &description, O
 	{
 		m_presets.insert( PresetsMap::value_type( it->first, it->second->copy() ) );
 	}
+	
+	/// \todo If presetsOnly is true, doesn't this allow us to set a defaultValue that isn't in the presets list?
 	setValue( defaultValue->copy() );
 }
 
@@ -226,5 +228,8 @@ std::string Parameter::getCurrentPresetName() const
 			return it->first;
 		}
 	}
+	
+	/// \todo Surely we should never get here if m_presetsOnly is true? Assert that, if safe to do so.
+	
 	return "";
 }
