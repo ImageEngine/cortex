@@ -74,13 +74,13 @@ class ParameterHandler : public IECore::RefCounted
 		virtual ~ParameterHandler();
 		
 		template<class T>
-                struct Description
-                {
+		struct Description
+		{
 			/// Declare a static instance to register a parameter handler. Pass the type of parameter handled and,
 			/// optionally, the type of the data contained within the parameter. This allows, for example, ObjectParameter
 			/// to find handlers based on the typeIds of objects it can contain.
 			Description( IECore::TypeId parameterType, IECore::TypeId dataType = IECore::InvalidTypeId);
-                };
+		};
 		
 	protected:
 	
