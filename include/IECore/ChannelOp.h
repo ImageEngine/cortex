@@ -67,7 +67,7 @@ class ChannelOp : public ImagePrimitiveOp
 		/// The base class will already have verified the following :
 		///
 		///		* the channels have an appropriate interpolation value - vertex, varying or facevarying.
-		/// 	* the channels contain the appropriate number of elements for the dataWindow.
+		/// 		* the channels contain the appropriate number of elements for the dataWindow.
 		///		* the channels are all of type FloatVectorData, HalfVectorData or IntVectorData.
 		///		* the dataWindow is not empty.
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels ) = 0;

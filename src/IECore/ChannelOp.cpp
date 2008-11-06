@@ -86,7 +86,7 @@ void ChannelOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObje
 	
 	/// \todo Just use ImagePrimitive::channelValid. We don't want to do that right now
 	/// as it imposes loose restrictions on the channel datatype - in the future it should perhaps
-	/// impose the restrictions we have here (float, uint or half vector data).
+	/// impose the restrictions we have here (float, int or half vector data).
 	size_t numPixels = image->variableSize( PrimitiveVariable::Vertex );
 	const vector<string> channelNames = channelNamesParameter()->getTypedValue();
 	for( unsigned i=0; i<channelNames.size(); i++ )
