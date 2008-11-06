@@ -59,6 +59,7 @@ class ChannelOp : public ImagePrimitiveOp
 	
 		/// Implemented to call modifyChannels(). Derived classes should implement modifyChannels rather than
 		/// this function.
+		/// \todo Consider making this private to enforce the above statement.
 		virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
 
 		typedef std::vector<DataPtr> ChannelVector;
@@ -70,6 +71,9 @@ class ChannelOp : public ImagePrimitiveOp
 		/// 		* the channels contain the appropriate number of elements for the dataWindow.
 		///		* the channels are all of type FloatVectorData, HalfVectorData or IntVectorData.
 		///		* the dataWindow is not empty.
+		/// \todo ChannelVector doesn't contain any indicator as to which channel is which, so why not just pass a single channel at a time? As
+		/// things are right now, every derived class is iterating over the channels vector - there's not much else they can do - so it would
+		/// make sense to move that step to the base class.
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels ) = 0;
 	
 	private :
