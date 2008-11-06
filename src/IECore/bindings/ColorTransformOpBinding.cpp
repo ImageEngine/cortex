@@ -56,6 +56,9 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 			override o = this->get_override( "begin" );
 			if( o )
 			{
+				//// \todo We may want to call operands->copy() here instead of casting away the constness. If the Python code being called
+				/// here actually attempts to change the CompoundObject, then any C++ calling code might get confused when a suposedly const value
+				/// changes unexpectedly. Check any performance overhead of the copy.
 				o( const_pointer_cast<CompoundObject>( operands ) );
 			}
 		}

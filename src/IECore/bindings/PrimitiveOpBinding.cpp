@@ -53,7 +53,14 @@ class PrimitiveOpWrap : public PrimitiveOp, public Wrapper<PrimitiveOp>
 		
 		PrimitiveOpWrap( PyObject *self, const std::string name, const std::string description ) : PrimitiveOp( name, description ), Wrapper<PrimitiveOp>( self, this ) {};
 		
-		virtual void modifyPrimitive( PrimitivePtr object, ConstCompoundObjectPtr operands ) { this->get_override( "modifyPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) ); };
+		virtual void modifyPrimitive( PrimitivePtr object, ConstCompoundObjectPtr operands )
+		{
+			//// \todo We may want to call operands->copy() here instead of casting away the constness. If the Python code being called
+			/// here actually attempts to change the CompoundObject, then any C++ calling code might get confused when a suposedly const value
+			/// changes unexpectedly. Check any performance overhead of the copy. 
+			
+			this->get_override( "modifyPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) );
+		}
 
 };
 IE_CORE_DECLAREPTR( PrimitiveOpWrap );

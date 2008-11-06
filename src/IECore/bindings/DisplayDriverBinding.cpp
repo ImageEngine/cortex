@@ -67,8 +67,12 @@ class DisplayDriverCreatorWrap : public DisplayDriver::DisplayDriverCreator, pub
 					channelList.append( *iterX );
 					iterX++;
 				}
+				
+				//// \todo We may want to call operands->copy() here instead of casting away the constness. If the Python code being called
+				/// here actually attempts to change the CompoundObject, then any C++ calling code might get confused when a suposedly const value
+				/// changes unexpectedly. Check any performance overhead of the copy.
 				DisplayDriverPtr r = c( displayWindow, dataWindow, channelList, 
-										const_pointer_cast<CompoundData>( parameters ) );
+					const_pointer_cast<CompoundData>( parameters ) );
 				if( !r )
 				{
 					throw Exception( "create() python method didn't return a DisplayDriver." );
