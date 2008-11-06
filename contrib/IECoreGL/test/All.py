@@ -53,6 +53,7 @@ from MeshPrimitiveTest import *
 from AlphaTextureTest import *
 from LuminanceTextureTest import *
 from UserAttributesTest import *
+from DeferredRenderer import *
 
 if IECore.withFreeType() :
 
