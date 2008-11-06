@@ -209,6 +209,7 @@
 #include "IECore/bindings/CubeColorTransformOpBinding.h"
 #include "IECore/bindings/LinearToRec709OpBinding.h"
 #include "IECore/bindings/Rec709ToLinearOpBinding.h"
+#include "IECore/bindings/ObjectVectorBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -403,6 +404,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCubeColorTransformOp();
 	bindLinearToRec709Op();
 	bindRec709ToLinearOp();
+	bindObjectVector();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

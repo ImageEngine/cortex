@@ -303,6 +303,7 @@ enum TypeId
 	BoolVectorParameterTypeId = 260,
 	LinearToRec709OpTypeId = 261,
 	Rec709ToLinearOpTypeId = 262,
+	ObjectVectorTypeId = 263,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

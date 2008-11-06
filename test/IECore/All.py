@@ -171,6 +171,7 @@ from CubeColorLookupDataTest import *
 from CubeColorTransformOpTest import *
 from CompoundVectorParameterTest import *
 from UVDistortOpTest import *
+from ObjectVectorTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
