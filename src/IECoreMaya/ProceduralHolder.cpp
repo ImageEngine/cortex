@@ -262,7 +262,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 		setParameterisedValues();
 		try
 		{
-			IECoreGL::RendererPtr renderer = new IECoreGL::Renderer;
+			IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 			renderer->setOption( "gl:mode", new StringData( "deferred" ) );
 			renderer->worldBegin();
 			
@@ -375,7 +375,7 @@ MPxSurfaceShape::MatchResult ProceduralHolder::matchComponent( const MSelectionL
 	return MPxSurfaceShape::matchComponent( item, spec, list );	
 }
 
-void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group, MArrayDataBuilder &builder )
+void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group )
 {	
 	assert( nameState );
 	assert( group );
@@ -383,42 +383,36 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 	
 	MStatus s;	
 	
-	IECoreGL::ConstNameStateComponentPtr ns = nameState;
 	if (  group->getState()->get< IECoreGL::NameStateComponent >() )
 	{
-		ns = group->getState()->get< IECoreGL::NameStateComponent >();
+		nameState = group->getState()->get< IECoreGL::NameStateComponent >();
 	}
 
-	const std::string &name = ns->name();		
-	int compId = ns->glName();
+	const std::string &name = nameState->name();		
+	int compId = nameState->glName();
 	
 	ComponentsMap::const_iterator it = componentsMap().find( name );
 	if( it == componentsMap().end() )
 	{		
 		compId = componentsMap().size();
-		componentsMap()[name] = compId;
-		
-		MFnStringData fnData;
-		MObject data = fnData.create( MString( name.c_str() ) );
-		
-		MDataHandle h = builder.addElement( compId, &s );
-		assert( s );
-
-		s = h.set( data );
-		assert( s );
-	}
-	
-	componentToGroupMap()[compId].insert( ComponentToGroupMap::mapped_type::value_type( name, group ) );
+				
+		/// Reserve slot in the componentsMap. The exact component ID gets generated later, once all components have been
+		/// traversed. IDs are then assigned in ascending order whilst iterating over the component map, which is sorted by name. This
+		/// ensures a consistent ordering of components from frame to frame, which we'd not otherwise get due to IECore::Group using
+		/// a regular set (sorted by pointer) to store its children.
+		componentsMap()[name] = ComponentsMap::mapped_type( 0, group );				
+	}		
 		
 	const IECoreGL::Group::ChildContainer &children = group->children();
+	
 	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
 	{
 		assert( *it );
 		
-		IECoreGL::GroupPtr childGroup = runTimeCast< IECoreGL::Group >( *it );		
-		if ( childGroup )
+		group = runTimeCast< IECoreGL::Group >( *it );		
+		if ( group )
 		{		
-			buildComponents( ns, childGroup, builder );			
+			buildComponents( nameState, group );			
 		}
 	}
 }
@@ -430,9 +424,6 @@ void ProceduralHolder::buildComponents()
 	
 	MArrayDataHandle cH = block.outputArrayValue( aProceduralComponents, &s );
 	assert( s );
-	
-	MArrayDataBuilder builder = cH.builder( &s );
-	assert( s );
 
 	componentsMap().clear();
 
@@ -441,11 +432,34 @@ void ProceduralHolder::buildComponents()
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	assert( defaultState );
 	assert( defaultState->isComplete() );
+	assert( defaultState->get<const IECoreGL::NameStateComponent>() );
 		
 	assert( m_scene );
-	assert( m_scene->root() );	
+	assert( m_scene->root() );
 	
-	buildComponents( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root(), builder );
+	buildComponents( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root() );
+	
+	
+	MArrayDataBuilder builder = cH.builder( &s );
+	assert( s );
+	
+	int compId = 0;
+	ComponentsMap::iterator it = componentsMap().begin();
+	for ( ; it != componentsMap().end(); it ++ )
+	{
+		/// Build the mapping that goes from ID -> ( name, group )
+		componentToGroupMap()[compId].insert( ComponentToGroupMap::mapped_type::value_type( it->first.value(), it->second.second ) );
+	
+		it->second.first = compId ++;
+		
+		MFnStringData fnData;
+		MObject data = fnData.create( MString( it->first.value().c_str() ) );
+		MDataHandle h = builder.addElement( it->second.first, &s );
+		assert( s );
+
+		s = h.set( data );
+		assert( s );
+	}
 	
 	s = cH.set( builder );
 	assert( s );
@@ -454,7 +468,7 @@ void ProceduralHolder::buildComponents()
 	MPlug plug( thisMObject(), aProceduralComponents );
 	for ( ComponentsMap::const_iterator it = componentsMap().begin(); it != componentsMap().end(); ++it )
 	{
-		MPlug child = plug.elementByLogicalIndex( it->second, &s );
+		MPlug child = plug.elementByLogicalIndex( it->second.first, &s );
 		assert( s );
 		MObject obj;
 		s = child.getValue( obj );

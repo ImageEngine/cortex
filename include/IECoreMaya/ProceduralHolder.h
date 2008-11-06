@@ -114,14 +114,14 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		/// \todo This can probably be merged with scene()
 		void updateScene();
 										
-		typedef std::map<IECore::InternedString, unsigned int> ComponentsMap;
+		typedef std::map<IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr > > ComponentsMap;
 		typedef std::map< int, std::set< std::pair< std::string, IECoreGL::GroupPtr > > > ComponentToGroupMap;		
 		
 		ComponentsMap &componentsMap();		
 		ComponentToGroupMap &componentToGroupMap();
 		
 		void buildComponents();		
-		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group, MArrayDataBuilder &builder);
+		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group );
 		
 	public:
 	

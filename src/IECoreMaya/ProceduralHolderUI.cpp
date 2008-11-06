@@ -397,7 +397,7 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 		ProceduralHolder::ComponentsMap::const_iterator compIt = proceduralHolder->componentsMap().find( hitName );
 		assert( compIt != proceduralHolder->componentsMap().end() );
 				
-		int compId = compIt->second;
+		int compId = compIt->second.first;
 
 		if ( selectInfo.singleSelection()  )
 		{
