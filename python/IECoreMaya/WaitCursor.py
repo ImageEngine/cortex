@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,32 +32,18 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+import maya.cmds
 
-from ParameterUI import ParameterUI
-from SplineParameterUI import SplineParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
-from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
-from MayaTypeId import MayaTypeId
-from ParameterPanel import ParameterPanel
-from AttributeEditorControl import AttributeEditorControl
-from FnProceduralHolder import FnProceduralHolder
-from UIElement import UIElement
-from OpWindow import OpWindow
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
-from UndoDisabled import UndoDisabled
-from ModalDialogue import ModalDialogue
-from Panel import Panel
-from WaitCursor import WaitCursor
+## A context object intended for use with python's "with" syntax. It ensures
+# that all operations in the with block are performed with maya's wait cursor enabled,
+# and that the wait cursor is disabled when the block exits.
+class WaitCursor() :
+
+	def __enter__( self ) :
+	
+		maya.cmds.waitCursor( state=True )
+	
+	def __exit__( self, type, value, traceBack ) :
+	
+		maya.cmds.waitCursor( state=False )
+	
