@@ -34,6 +34,7 @@
 
 import unittest
 import gc
+import weakref
 
 from IECore import *
 
@@ -108,6 +109,25 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		del o
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+	
+	def testWeakRef( self ) :
+	
+		RefCounted.collectGarbage()
+		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		
+		self.callbackCalled = False
+		def callback( self, w ) :
+		
+			self.callbackCalled = True
+		
+		o = Renderer.Procedural( "a", "b" )
+		w = weakref.ref( o )
+		self.assert_( w() is o )
+		del o
+		RefCounted.collectGarbage()
+		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		self.assertEqual( self.callbackCalled, True )
+		self.assertEqual( w(), None )
 		
 if __name__ == "__main__":
         unittest.main()
