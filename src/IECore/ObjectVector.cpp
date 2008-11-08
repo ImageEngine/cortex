@@ -84,7 +84,8 @@ void ObjectVector::save( SaveContext *context ) const
 	Object::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
 	
-	container->write( "size", m_members.size() );
+	unsigned int size = m_members.size();
+	container->write( "size", size );
 	
 	container->mkdir( "members" );
 	container->chdir( "members" );
@@ -109,7 +110,7 @@ void ObjectVector::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	
-	MemberContainer::size_type size = m_members.size();
+	unsigned int size = 0;
 	container->read( "size", size );
 	
 	m_members.resize( size );
