@@ -116,12 +116,12 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
 		
 		self.callbackCalled = False
-		def callback( self, w ) :
+		def callback( w ) :
 		
 			self.callbackCalled = True
 		
 		o = Renderer.Procedural( "a", "b" )
-		w = weakref.ref( o )
+		w = weakref.ref( o, callback )
 		self.assert_( w() is o )
 		del o
 		RefCounted.collectGarbage()

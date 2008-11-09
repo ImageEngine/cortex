@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,8 +68,14 @@ class Wrapper : public boost::python::wrapper<T>, public WrapperGarbageCollector
 		virtual ~Wrapper()
 		{
 			assert(m_pyObject);
-		
-			Py_DECREF(m_pyObject);	
+			if( m_pyObject->ob_refcnt > 0 )
+			{
+				// i don't know that there are any circumstances under which we can get here. it's certainly
+				// important that we don't call Py_DECREF if the reference count is already 0 though, as this yields
+				// a negative reference count and screws up the clearing of weak references, resulting in
+				// crashes.
+				Py_DECREF(m_pyObject);
+			}
 		}
 		
 		boost::python::override get_override(const char *name) const
