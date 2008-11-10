@@ -266,6 +266,13 @@ class testParameterParser( unittest.TestCase ) :
 		
 		self.assertEqual( p["a"].getValue(), v )
 		
+	def testEmptyVector( self ) :
+		""" Test that serializing then parsing a vector with no elements in it succeeds """
+	
+		p = IECore.StringVectorParameter( name = "name", description = "description", defaultValue = IECore.StringVectorData() )
+		s = IECore.ParameterParser().serialise( p )	
+		IECore.ParameterParser().parse( s, p )	
+		
 			
 	#def testQuotingOnStringParameters( self ):
 
