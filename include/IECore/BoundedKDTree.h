@@ -45,6 +45,8 @@ namespace IECore
 {
 
 /// Builds a KDTree of bounded volumes to permit fast intersection/overlap tests.
+/// \todo Rearrange this to avoid all the interleaving of public and private sections - see KDTree.h
+/// for a structure which works in that regard.
 template<class BoundIterator>
 class BoundedKDTree
 {
@@ -75,6 +77,7 @@ class BoundedKDTree
 		BoundedKDTree( BoundIterator first, BoundIterator last, int maxLeafSize=4 );
 		
 		/// Populates the passed vector of iterators with the bounds which intersect "b". Returns the number of bounds found.		
+		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
 		template<typename S>
 		unsigned int intersectingBounds( const S &b, std::vector<BoundIterator> &bounds ) const;
 		
