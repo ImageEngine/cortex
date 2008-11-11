@@ -210,6 +210,7 @@
 #include "IECore/bindings/LinearToRec709OpBinding.h"
 #include "IECore/bindings/Rec709ToLinearOpBinding.h"
 #include "IECore/bindings/ObjectVectorBinding.h"
+#include "IECore/bindings/HenyeyGreensteinBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -405,6 +406,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLinearToRec709Op();
 	bindRec709ToLinearOp();
 	bindObjectVector();
+	bindHenyeyGreenstein();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
