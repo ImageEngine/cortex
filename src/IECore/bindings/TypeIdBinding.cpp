@@ -303,6 +303,7 @@ void bindTypeId()
 		.value("LinearToRec709Op", LinearToRec709OpTypeId )
 		.value("Rec709ToLinearOp", Rec709ToLinearOpTypeId )
 		.value("ObjectVector", ObjectVectorTypeId )
+		.value("ObjectVectorParameter", ObjectVectorParameterTypeId )
 	;
 }
 

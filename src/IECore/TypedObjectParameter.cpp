@@ -50,6 +50,7 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/PointsPrimitive.h"
+#include "IECore/ObjectVector.h"
 
 using namespace IECore;
 using namespace std;
@@ -181,4 +182,5 @@ IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ImagePrimitive, ImagePrimitive
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( MeshPrimitive, MeshPrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( PointsPrimitive, PointsPrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( CompoundObject, CompoundObjectParameter );
+IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ObjectVector, ObjectVectorParameter );
 }	

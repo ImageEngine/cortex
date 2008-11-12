@@ -56,6 +56,7 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/PointsPrimitive.h"
+#include "IECore/ObjectVector.h"
 
 using namespace std;
 using namespace boost;
@@ -132,6 +133,7 @@ void bindTypedObjectParameter()
 	bindTypedObjectParameter<MeshPrimitive>( "MeshPrimitiveParameter" );
 	bindTypedObjectParameter<PointsPrimitive>( "PointsPrimitiveParameter" );	
 	bindTypedObjectParameter<CompoundObject>( "CompoundObjectParameter" );		
+	bindTypedObjectParameter<ObjectVector>( "ObjectVectorParameter" );		
 }
 
 } // namespace IECore

@@ -304,6 +304,7 @@ enum TypeId
 	LinearToRec709OpTypeId = 261,
 	Rec709ToLinearOpTypeId = 262,
 	ObjectVectorTypeId = 263,
+	ObjectVectorParameterTypeId = 264,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

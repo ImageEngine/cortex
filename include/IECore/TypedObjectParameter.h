@@ -58,6 +58,7 @@ class Primitive;
 class ImagePrimitive;
 class MeshPrimitive;
 class PointsPrimitive;
+class ObjectVector;
 
 /// The TypedObjectParameter class implements an ObjectParameter which rigidly only
 /// accepts one type of Object
@@ -112,6 +113,7 @@ typedef TypedObjectParameter<ImagePrimitive> ImagePrimitiveParameter;
 typedef TypedObjectParameter<MeshPrimitive> MeshPrimitiveParameter;
 typedef TypedObjectParameter<PointsPrimitive> PointsPrimitiveParameter;
 typedef TypedObjectParameter<CompoundObject> CompoundObjectParameter;
+typedef TypedObjectParameter<ObjectVector> ObjectVectorParameter;
 
 
 IE_CORE_DECLAREPTR( MeshPrimitiveParameter );
@@ -130,6 +132,7 @@ IE_CORE_DECLAREPTR( ImagePrimitiveParameter );
 IE_CORE_DECLAREPTR( MeshPrimitiveParameter );
 IE_CORE_DECLAREPTR( PointsPrimitiveParameter );
 IE_CORE_DECLAREPTR( CompoundObjectParameter );
+IE_CORE_DECLAREPTR( ObjectVectorParameter );
 
 } // namespace IECore
 
