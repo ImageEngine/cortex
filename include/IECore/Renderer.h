@@ -320,6 +320,19 @@ class Renderer : public RunTimeTyped
 		/// \todo I think Procedurals should be simpler than a full blown Parameterised
 		/// class - we might have a ParameterisedProcedural too but at the lower level
 		/// a Procedural class shouldn't dictate how member data is stored.
+		/// \todo The fact that this doesn't derive from VisibleRenderable means we can't
+		/// store them in groups, which is also a major issue. I think we need to fix this 
+		/// by :
+		///
+		/// * having this class be much simpler and not derived from Parameterised - it should
+		///   have no more going on than the bare minimum the Renderer needs.
+		/// * deriving a ParameterisedProcedural class from VisibleRenderable and ParameterisedInterface,
+		///   that implements its render() method by using a Procedural of the new form to call
+		///   back to methods on the ParameterisedProcedural.
+		///
+		/// An additional consequence of this will be that we need to fix up the IECoreMaya::ParameterisedHolder stuff
+		/// so that it can hold T::Ptr provided T derives from ParameterisedInterface, whereas right now it insists
+		/// upon holding Parameterised::Ptr.
 		class Procedural : public Parameterised
 		{
 			public :
