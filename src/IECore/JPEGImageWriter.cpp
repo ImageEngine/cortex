@@ -341,13 +341,13 @@ void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 	}
 	catch ( std::exception &e )
 	{
-		throw IOException( ( boost::format( "JPEGImageReader : %s" ) % e.what() ).str() );
+		throw IOException( ( boost::format( "JPEGImageWriter : %s" ) % e.what() ).str() );
 	}
 	catch ( ... )
 	{
 		jpeg_destroy_compress( &cinfo );
 		fclose( outFile );
 
-		throw IOException( "JPEGImageReader: Unexpected error" );
+		throw IOException( "JPEGImageWriter: Unexpected error" );
 	}
 }
