@@ -34,6 +34,7 @@
 
 import IECore
 import maya.OpenMaya
+import re
 
 __all__ = [ "dependencyNodeFromString", "dagPathFromString", "plugFromString" ]
 
@@ -78,3 +79,8 @@ def plugFromString( s ) :
 	result = maya.OpenMaya.MPlug()
 	sl.getPlug( 0, result )
 	return result
+
+## Extracts the node name from a full path to an attribute.
+def nodeFromAttributePath( a ) :
+
+	return re.match( "^[^.]*", a ).group( 0 )
