@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -47,6 +47,8 @@ def loadConfig( searchPaths, localsDict, raiseExceptions = False ) :
 	paths = searchPaths.paths
 	paths.reverse()
 	for path in paths :
+		# \todo Perhaps filter out filenames that begin with "~", also? This would
+		# exclude certain types of auto-generated backup files.
 		pyExtTest = re.compile( "\.py$" )
 		for dirPath, dirNames, fileNames in os.walk( path ) :
 			for fileName in filter( pyExtTest.search, fileNames ) :
