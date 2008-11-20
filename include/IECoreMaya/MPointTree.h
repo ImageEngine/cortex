@@ -49,6 +49,3 @@ typedef IECore::KDTree<MArrayIter<MPointArray>::ConstIterator> MPointTree;
 } // namespace IECoreMaya
 
 #endif // IE_COREMAYA_MPOINTTREE_H
-
-
-#endif // IE_COREMAYA_MPOINTTREE_H
