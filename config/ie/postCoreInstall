@@ -60,6 +60,7 @@ coreOps = [
 	[ "SequenceRmOp", "seqRm", "common/fileSystem" ], 
 	[ "SequenceRenumberOp", "seqRenumber", "common/fileSystem" ], 
 	[ "SequenceConvertOp", "seqConvert", "common/fileSystem" ],
+	[ "SequenceCatOp", "seqCat", "common/fileSystem" ],
 	[ "RemovePrimitiveVariables", "removeVariables", "common/primitive" ], 
 	[ "RenamePrimitiveVariables", "renameVariables", "common/primitive" ], 
 	[ "PointsExpressionOp", "pointsExpression", "common/primitive" ],

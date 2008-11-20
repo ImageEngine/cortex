@@ -64,6 +64,7 @@ from SequenceCpOp import SequenceCpOp
 from SequenceLsOp import SequenceLsOp
 from SequenceMvOp import SequenceMvOp
 from SequenceRmOp import SequenceRmOp
+from SequenceCatOp import SequenceCatOp
 from SequenceRenumberOp import SequenceRenumberOp
 from SequenceConvertOp import SequenceConvertOp
 from FormattedParameterHelp import formatParameterHelp

@@ -164,6 +164,16 @@ def rm( sequence ) :
 	
 		os.remove( f )
 
+## Concetenates all the files specified by the sequence to stdout
+# \todo Allow destination file to be specified
+def cat( sequence ) :	
+
+	for f in sequence.fileNames() :
+	
+		ret = os.system( 'cat "%s"' % ( f ) )	
+		
+		
+
 ## Returns a FrameList instance that "best" represents the specified list of integer
 # frame numbers. This function attempts to be intelligent and uses a CompoundFrameList
 # of FrameRange objects to represent the specified frames compactly.
@@ -233,4 +243,4 @@ def __tmpPrefix() :
 	h.update( str( time.time() ) )
 	return "ieSequenceTmp" + h.hexdigest() + "."
 
-__all__ = [ "findSequences", "ls", "mv", "cp", "rm", "frameListFromList" ]
+__all__ = [ "findSequences", "ls", "mv", "cp", "rm", "cat", "frameListFromList" ]
