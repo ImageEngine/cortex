@@ -85,7 +85,7 @@ MStatus ObjectVectorParameterHandler::setValue( const MPlug &plug, IECore::Param
 			obj = c->convert();
 		}
 		
-		v->members().resize( max( elementPlug.logicalIndex() + 1, v->members().size() ), 0 );
+		v->members().resize( std::max<ObjectVector::MemberContainer::size_type>( elementPlug.logicalIndex() + 1, v->members().size() ), 0 );
 		v->members()[elementPlug.logicalIndex()] = obj;
 	}
 	
