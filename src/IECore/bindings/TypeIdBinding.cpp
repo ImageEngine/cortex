@@ -304,6 +304,7 @@ void bindTypeId()
 		.value("Rec709ToLinearOp", Rec709ToLinearOpTypeId )
 		.value("ObjectVector", ObjectVectorTypeId )
 		.value("ObjectVectorParameter", ObjectVectorParameterTypeId )
+		.value("YUVImageWriter", YUVImageWriterTypeId )
 	;
 }
 
