@@ -237,7 +237,20 @@ Imath::M44f convert( const MMatrix &from )
 }
 
 template<>
+Imath::M44d convert( const MMatrix &from )
+{
+	return Imath::M44d( from[0][0], from[0][1], from[0][2], from[0][3], from[1][0], from[1][1], from[1][2], from[1][3],
+						from[2][0], from[2][1], from[2][2], from[2][3], from[3][0], from[3][1], from[3][2], from[3][3]  );
+}
+
+template<>
 MMatrix convert( const Imath::M44f &from )
+{
+	return MMatrix( from.x );
+}
+
+template<>
+MMatrix convert( const Imath::M44d &from )
 {
 	return MMatrix( from.x );
 }

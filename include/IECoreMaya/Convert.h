@@ -160,7 +160,13 @@ template<>
 Imath::M44f convert( const MMatrix &from );
 
 template<>
+Imath::M44d convert( const MMatrix &from );
+
+template<>
 MMatrix convert( const Imath::M44f &from );
+
+template<>
+MMatrix convert( const Imath::M44d &from );
 
 template<>
 Imath::Eulerf convert( const MEulerRotation &from );
