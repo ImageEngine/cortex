@@ -37,7 +37,7 @@ import maya.cmds
 ## A context object intended for use with python's "with" syntax. It ensures
 # that all operations in the with block are performed with maya's undo disabled,
 # and that undo is returned to its previous state when the block exits.
-class UndoDisabled() :
+class UndoDisabled :
 
 	def __enter__( self ) :
 	

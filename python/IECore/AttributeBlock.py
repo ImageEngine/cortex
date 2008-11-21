@@ -34,7 +34,7 @@
 
 ## A context object intended for use with python's "with" syntax. It calls
 # renderer.attributeBegin() in enter and renderer.attributeEnd() in exit.
-class AttributeBlock() :
+class AttributeBlock :
 
 	def __init__( self, renderer ) :
 	

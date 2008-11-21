@@ -37,7 +37,7 @@ import maya.cmds
 ## A context object intended for use with python's "with" syntax. It ensures
 # that all operations in the with block are performed with maya's wait cursor enabled,
 # and that the wait cursor is disabled when the block exits.
-class WaitCursor() :
+class WaitCursor :
 
 	def __enter__( self ) :
 	

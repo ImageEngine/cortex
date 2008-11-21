@@ -34,7 +34,7 @@
 
 ## A context object intended for use with python's "with" syntax. It calls
 # renderer.transformBegin() in enter and renderer.transformEnd() in exit.
-class TransformBlock() :
+class TransformBlock :
 
 	def __init__( self, renderer ) :
 	

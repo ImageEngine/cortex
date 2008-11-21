@@ -37,7 +37,7 @@ from IECore import CompoundObject, CompoundParameter
 ## This class takes a stack of dictionary like objects and provides
 # read only access to them as if they were one, falling through to
 # lower dictionaries if the requested item isn't in the ones above.
-class LayeredDict() :
+class LayeredDict :
 
 	## Constructs a new layered dictionary :
 	#

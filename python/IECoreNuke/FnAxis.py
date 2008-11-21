@@ -41,7 +41,7 @@ from KnobAccessors import getKnobValue
 # an axis knob. This includes the Axis, TransformGeo and Camera nodes.
 ## \todo Methods for dealing with TransformationMatrices, absolute transforms
 # and for setting transforms.
-class FnAxis() :
+class FnAxis :
 
 	def __init__( self, node ) :
 	

@@ -43,7 +43,7 @@ import maya.OpenMayaUI
 # object oriented manner in python.
 ## \todo Preexisting ui elements should be rewritten to take
 # advantage of this base class wherever possible.
-class UIElement() :
+class UIElement :
 
 	__instances = {}
 	
