@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,33 +32,35 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
-
-from ParameterUI import ParameterUI
-from SplineParameterUI import SplineParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
 from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
-from MayaTypeId import MayaTypeId
-from ParameterPanel import ParameterPanel
-from AttributeEditorControl import AttributeEditorControl
-from FnProceduralHolder import FnProceduralHolder
-from UIElement import UIElement
-from OpWindow import OpWindow
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
-from UndoDisabled import UndoDisabled
-from ModalDialogue import ModalDialogue
-from Panel import Panel
-from WaitCursor import WaitCursor
-from FnOpHolder import FnOpHolder
+
+import maya.cmds
+
+class FnOpHolder( FnParameterisedHolder ) :
+
+	def __init__( self, objectOrObjectName ) :
+	
+		FnParameterisedHolder.__init__( self, objectOrObjectName )
+
+	## Creates a new node holding a new instance of the op of the specified
+	# type and version. Returns an FnOpHolder instance attached to this node.
+	@staticmethod
+	def create( nodeName, opType, opVersion ) :
+	
+		holder = maya.cmds.createNode( "ieOpHolderNode", name=nodeName, skipSelect=True )
+		
+		fnOH = FnOpHolder( holder )
+		fnOH.setOp( opType, opVersion )
+		
+		return fnOH
+
+	## Convenience function which calls setParameterised( opType, opVersion, "IECORE_OP_PATHS" )
+	def setOp( self, opType, opVersion ) :
+	
+		self.setParameterised( opType, opVersion, "IECORE_OP_PATHS" )
+		
+	## Convenience function which returns getParameterised()[0]
+	def getOp( self ) :
+	
+		return self.getParameterised()[0]
+		
