@@ -83,6 +83,13 @@ class FromMayaObjectConverter : public FromMayaConverter
 		/// If resultType is specified then only converters which create objects of that
 		/// type will be returned - the default value allows any suitable converter to be
 		/// created. If no matching converters exist then returns 0.
+		/// \todo The availability of a default conversion by using the default value for
+		/// resultType is troublesome. As we add new converters the default conversion changes,
+		/// and in addition I think it may change based on the order of static initialisation
+		/// of the registrar classes, which I don't think is guaranteed to be consistent. It is
+		/// therefore a very good idea to avoid the use of the default parameter - perhaps we
+		/// should remove it at some point. This also applies to the factory functions in the
+		/// other converters.
 		static FromMayaObjectConverterPtr create( const MObject &object, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
 		
