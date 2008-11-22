@@ -56,7 +56,7 @@ class FromMayaPlugConverterTest( unittest.TestCase ) :
 
 		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
 		
-		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".worldMatrix" )
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".worldMatrix", IECore.TransformationMatrixdData.staticTypeId() )
 		self.assert_( converter )
 
 		transform = converter.convert()
