@@ -72,6 +72,9 @@ class FromMayaConverterTest( unittest.TestCase ) :
 		radToAng = 180./3.14159265
 		maya.cmds.setAttr( str( sphereTransform ) + ".rotate", -1000*radToAng, 30*radToAng, 100*radToAng, type="double3" )
 
+		## \todo This section sometimes fails due to use of the unpredictable default conversion (see FromMayaObjectConverter.h
+		# for a description). We probably need to remove the default conversion so that people aren't exposed to it, or fix it
+		# so we can define which the default conversion is.
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) )
 		res = converter.convert()
 		self.assert_( not res.isInstanceOf( IECore.TransformationMatrixfData.staticTypeId() ) )
