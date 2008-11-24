@@ -126,5 +126,4 @@ void ChannelOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObje
 	}
 	
 	modifyChannels( image->getDisplayWindow(), image->getDataWindow(), channels );
-	assert( image->arePrimitiveVariablesValid() );
 }
