@@ -42,7 +42,7 @@
 namespace IECore
 {
 
-/// The MeshPrimitiveOp class defines a base class for Ops which modify Meshes.
+/// The TypedPrimitiveOp template defines a base class for Ops which modify primitives of a specific type.
 template<typename T>
 class TypedPrimitiveOp : public ModifyOp
 {
