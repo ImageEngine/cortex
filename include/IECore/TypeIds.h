@@ -305,7 +305,8 @@ enum TypeId
 	Rec709ToLinearOpTypeId = 262,
 	ObjectVectorTypeId = 263,
 	ObjectVectorParameterTypeId = 264,
-	YUVImageWriterTypeId = 265,	
+	YUVImageWriterTypeId = 265,
+	ImageCompositeOpTypeId = 266,
 
 	
 	// Remember to update TypeIdBinding.cpp !!!
