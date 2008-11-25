@@ -100,6 +100,35 @@ ImageCropOp::~ImageCropOp()
 {
 }
 
+Box2iParameterPtr ImageCropOp::cropBoxParameter()
+{
+	return m_cropBox;
+}
+
+ConstBox2iParameterPtr ImageCropOp::cropBoxParameter() const
+{
+	return m_cropBox;
+}
+
+BoolParameterPtr ImageCropOp::matchDataWindowParameter()
+{
+	return m_matchDataWindow;
+}
+
+ConstBoolParameterPtr ImageCropOp::matchDataWindowParameter() const
+{
+	return m_matchDataWindow;
+}
+
+BoolParameterPtr ImageCropOp::resetOriginParameter()
+{
+	return m_resetOrigin;
+}
+
+ConstBoolParameterPtr ImageCropOp::resetOriginParameter() const
+{
+	return m_resetOrigin;
+}
 
 struct ImageCropOp::ImageCropFn
 {

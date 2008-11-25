@@ -54,6 +54,16 @@ class ImageCropOp : public ModifyOp
 		ImageCropOp();
 		virtual ~ImageCropOp();
 		
+		Box2iParameterPtr cropBoxParameter();
+		ConstBox2iParameterPtr cropBoxParameter() const;
+		
+		BoolParameterPtr matchDataWindowParameter();
+		ConstBoolParameterPtr matchDataWindowParameter() const;		
+		
+		BoolParameterPtr resetOriginParameter();
+		ConstBoolParameterPtr resetOriginParameter() const;		
+		
+		/// \todo Should be "protected", not "public"
 		virtual void modify( ObjectPtr toModify, ConstCompoundObjectPtr operands );
 		
 	private :
