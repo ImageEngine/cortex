@@ -40,10 +40,9 @@ from IECore import *
 class TestDPXReader(unittest.TestCase):
 
 	def testConstruction(self):
-                
+	
 		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
 		self.assertEqual( type(r), DPXImageReader )
-
 
 	def testRead(self):
 
@@ -69,7 +68,7 @@ class TestDPXReader(unittest.TestCase):
 		self.assertEqual( h['dataWindow'], Box2iData( Box2i( V2i(0,0), V2i(511,255) ) ) )
 
 	def testOrientation( self ) :
-		""" Test orientation of Cineon files """
+		""" Test orientation of DPX files """
 	
 		img = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" ).read()
 		
@@ -99,12 +98,12 @@ class TestDPXReader(unittest.TestCase):
 				result.halfPrimVar( ipe.B() )
 			)
 						
-			self.assert_( ( color - expectedColor).length() < 1.e-6 )		
-		
+			self.assert_( ( color - expectedColor).length() < 1.e-6 )
+			
 	def testAll( self ):
-		
+	
 		fileNames = glob.glob( "test/IECore/data/dpx/*.dpx" )
-		expectedFailures = []
+		expectedFailures = [ "test/IECore/data/dpx/colorBarsWithAlpha.dpx" ]
 		
 		# Silence any warnings while the tests run
 		MessageHandler.pushHandler( NullMessageHandler() )

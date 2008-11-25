@@ -88,6 +88,8 @@ class DPXImageReader : public ImageReader
 
 		struct Header;
 		Header *m_header;
+		
+		const char* descriptorStr( int descriptor ) const;
 };
 
 IE_CORE_DECLAREPTR(DPXImageReader);

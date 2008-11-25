@@ -259,13 +259,41 @@ bool DPXImageReader::open( bool throwOnFailure )
 			m_header->m_imageInformation.element_number      = reverseBytes(m_header->m_imageInformation.element_number);
 			m_header->m_imageInformation.pixels_per_line     = reverseBytes(m_header->m_imageInformation.pixels_per_line);
 			m_header->m_imageInformation.lines_per_image_ele = reverseBytes(m_header->m_imageInformation.lines_per_image_ele);
+			
+			for ( unsigned i = 0; i < 8; i ++)
+			{
+				m_header->m_imageInformation.image_element[i].packing = reverseBytes(m_header->m_imageInformation.image_element[i].packing);
+				m_header->m_imageInformation.image_element[i].encoding = reverseBytes(m_header->m_imageInformation.image_element[i].encoding);
+			}
+		}
+		
+		if ( m_header->m_imageInformation.element_number != 1 )
+		{
+			throw IOException( "DPXImageReader: Invalid number of elements in image while reading " + fileName() );
+		}
+		
+		if ( m_header->m_imageInformation.image_element[0].bit_size != 10 )
+		{
+			throw IOException( "DPXImageReader: Invalid bitdepth (only 10-bit images are supported) while reading " + fileName() );
+		}
+		
+		if ( m_header->m_imageInformation.image_element[0].descriptor != 50 )
+		{
+			throw IOException( boost::str( boost::format( "DPXImageReader: Cannot read image '%s' of type '%s' ( only RGB are supported)" ) % fileName() % descriptorStr( m_header->m_imageInformation.image_element[0].descriptor ) ) );
+		}
+		
+		if ( m_header->m_imageInformation.image_element[0].packing != 1 )
+		{
+			throw IOException( "DPXImageReader: Found invalid image packing while reading " + fileName() );
+		}
+		
+		if ( m_header->m_imageInformation.image_element[0].encoding != 0 )
+		{
+			throw IOException( "DPXImageReader: Found invalid image encoding while reading " + fileName() );
 		}
 
 		m_bufferWidth = m_header->m_imageInformation.pixels_per_line;
 		m_bufferHeight = m_header->m_imageInformation.lines_per_image_ele;
-
-		/// \todo should verify that it is a code 50 RGB single image dpx.
-
 		in.seekg( m_header->m_fileInformation.image_data_offset, ios_base::beg );
 		if ( in.fail() )
 		{
@@ -295,4 +323,40 @@ bool DPXImageReader::open( bool throwOnFailure )
 	}
 
 	return true;
+}
+
+const char* DPXImageReader::descriptorStr( int descriptor ) const
+{
+	switch ( descriptor ) 
+	{	
+		case 0 :
+		case 150:
+		case 151:
+		case 152:
+		case 153:
+		case 154:
+		case 155:
+		case 156: 
+			  return "User-defined";
+		case 1  : return "Red";
+		case 2  : return "Green";
+		case 3  :  return "Blue";
+		case 4  : return "Alpha";
+		case 6  : return "Luminance";
+		case 7  : return "Chrominance";
+		case 8  : return "Depth";
+		case 9  : return "Composite video";
+		case 50 : return "RGB";
+		case 51 : return "RGBA";
+		case 52 : return "ABGR";
+		case 100: return "CbYCrY";
+		case 101: return "CbYaCrYa";
+		case 102: return "CbYCr";		
+		case 103: return "CbYCra";
+		
+		default : return "Unknown";						
+	}
+	
+	assert( false );
+	return 0;
 }
