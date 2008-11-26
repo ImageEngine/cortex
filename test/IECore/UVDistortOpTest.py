@@ -59,6 +59,7 @@ class testUVDistortOp( unittest.TestCase ) :
 		uvMapName = "test/IECore/data/exrFiles/distorted_21mm_uv.exr"
 		uvImg = Reader.create( uvMapName )()
 		resultImg2 = op( input = resultImg, uvMap = uvImg )
+		resultImg2.displayWindow = resultImg2.dataWindow
 
 		self.assert_( ImageDiffOp()( imageA = resultImg, imageB = resultImg2, maxError = 0.02 ).value )
 		self.assert_( not ImageDiffOp()( imageA = img, imageB = resultImg2, maxError = 0.015 ).value )
