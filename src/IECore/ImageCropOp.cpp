@@ -144,7 +144,7 @@ struct ImageCropOp::ImageCropFn
 	}
 
 	template< typename T>
-	ReturnType operator()( typename T::Ptr source ) const
+	ReturnType operator()( typename T::ConstPtr source ) const
 	{
 		assert( source );
 		
@@ -252,7 +252,8 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 				break;
 			
 			default:
-				// do nothing.
+				/// Nothing to do for these channel types
+				assert( channel.interpolation == PrimitiveVariable::Constant || channel.interpolation == PrimitiveVariable::Uniform );
 				break;
 		}
 	}
