@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "math.h"
+
 #include "IECore/EXRImageReader.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
@@ -123,7 +125,7 @@ Imath::Box2i EXRImageReader::displayWindow()
 template<class T>
 DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow, const Imf::Channel *channel )
 {
-
+	assert( channel );
 	Imath::V2i pixelDimensions = dataWindow.size() + Imath::V2i( 1 );
 	unsigned numPixels = pixelDimensions.x * pixelDimensions.y;
 
@@ -187,6 +189,14 @@ DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::
 			msg( Msg::Warning, "EXRImageReader::readChannel", e.what() );
 		}	
 	}
+	
+#ifndef NDEBUG
+	for ( typename DataType::ValueType::const_iterator it = data->readable().begin(); it != data->readable().end(); ++it )
+	{
+		assert( *it == *it ); // Will fail iff NaN
+	}
+#endif	
+	
 	return data;
 }
 
