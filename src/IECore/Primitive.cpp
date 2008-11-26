@@ -195,7 +195,7 @@ struct ReturnFalseErrorHandler
 
 bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv ) const
 {
-	if (! pv.data )
+	if (! pv.data || pv.interpolation==PrimitiveVariable::Invalid)
 	{
 		return false;
 	}
