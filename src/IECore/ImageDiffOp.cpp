@@ -187,6 +187,11 @@ ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 	{
 		throw InvalidArgumentException( "ImageDiffOp: Image with invalid primitive variables specified as input parameter" );
 	}
+	
+	if ( imageA->getDisplayWindow() != imageB->getDisplayWindow() )
+	{
+		return new BoolData( true );
+	}
 
 	/// \todo Allow differing data windows. Cchange iteration to be over entire displayWindow rather than over channel data,
 	/// considering data outside of the dataWindow to be 0.
@@ -286,5 +291,3 @@ ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 
 	return new BoolData( false );
 }
-
-
