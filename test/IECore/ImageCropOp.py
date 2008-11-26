@@ -63,8 +63,6 @@ class TestImageCropOp(unittest.TestCase):
 		self.__testCrop( inputfile, self.testoutEXRfile, tests )
 
 	def testCropTiff(self):
-	
-		return
 
 		inputfile =    "test/IECore/data/tiff/bluegreen_noise.400x300.tif"
 
