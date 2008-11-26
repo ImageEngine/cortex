@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECore/UVDistortOp.h"
 #include "IECore/NullObject.h"
 #include "IECore/CompoundParameter.h"
@@ -76,6 +78,7 @@ ConstObjectParameterPtr UVDistortOp::uvMapParameter() const
 
 void UVDistortOp::begin( ConstCompoundObjectPtr operands )
 {
+	assert( runTimeCast< ImagePrimitive >(m_uvMapParameter->getValue()) );
 	ImagePrimitivePtr uvImage = static_pointer_cast<ImagePrimitive>(m_uvMapParameter->getValue());
 	PrimitiveVariableMap::iterator mit;
 	mit = uvImage->variables.find( "R" );
@@ -106,6 +109,7 @@ void UVDistortOp::begin( ConstCompoundObjectPtr operands )
 		throw Exception("Channel G in the given uv map is not float type!");
 	}
 
+	assert( runTimeCast< ImagePrimitive >(inputParameter()->getValue()) );
 	ImagePrimitivePtr inputImage = static_pointer_cast<ImagePrimitive>( inputParameter()->getValue() );
 	m_uvSize = uvImage->getDataWindow().size();
 	m_uvOrigin = uvImage->getDataWindow().min;
@@ -127,7 +131,7 @@ struct UVDistortOp::Lookup
 		}
 	
 		template<typename T>
-		ReturnType operator()( typename T::Ptr data )
+		ReturnType operator()( typename T::ConstPtr data )
 		{
 			return (ReturnType)(data->readable()[ m_pos ]);
 		}
@@ -148,11 +152,10 @@ Imath::V2f UVDistortOp::warp( const Imath::V2f &p ) const
 
 	UVDistortOp::Lookup lookup( pos );
 	
-	return Imath::V2f( despatchTypedData<UVDistortOp::Lookup, 
-							TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_u), lookup ), 
-						despatchTypedData<UVDistortOp::Lookup, 
-							TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_v), lookup ) ) * 
-			m_imageSize + m_imageOrigin;
+	return Imath::V2f(
+		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_u), lookup ), 
+		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_v), lookup )
+	) * m_imageSize + m_imageOrigin;
 }
 
 void UVDistortOp::end()
