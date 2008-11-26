@@ -151,16 +151,14 @@ class TestImageCropOp(unittest.TestCase):
 		if len(errors):
 			raise Exception, "\n".join( errors )
 			
-	def testBug1( self ) :	
+	def testEmptyCropBox( self ) :	
 			
 		image = IECore.Reader.create( "test/IECore/data/exrFiles/checker2.exr" ).read()
 		
 		op = IECore.ImageCropOp()
-		result = op(
-			object = image
-		)
-		self.assert_( result.arePrimitiveVariablesValid() )
-			
+		executeOp = IECore.curry( op, object = image )
+		self.assertRaises( RuntimeError, executeOp )
+
 	def setUp( self ) :
 		
 		self.tearDown()

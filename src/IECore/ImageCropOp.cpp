@@ -206,11 +206,17 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 	// first, make sure the input image is correct.
 	if ( !image->arePrimitiveVariablesValid() )
 	{
-		throw InvalidArgumentException( "ImageCropOp: Input image is not valid!" );
+		throw InvalidArgumentException( "ImageCropOp: Input image is not valid" );
 	}
+	
+	bool matchDataWindow = m_matchDataWindow->getTypedValue();
 
 	const Imath::Box2i &cropBox = m_cropBox->getTypedValue();
-	bool matchDataWindow = m_matchDataWindow->getTypedValue();
+	if ( cropBox.isEmpty() )
+	{
+		throw InvalidArgumentException( "ImageCropOp: Specified crop box is empty" );
+	}
+	
 	bool resetOrigin = m_resetOrigin->getTypedValue();
 
 	Imath::Box2i croppedDisplayWindow = boxIntersection( cropBox, image->getDisplayWindow() );
