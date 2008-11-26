@@ -135,30 +135,30 @@ struct ImageCropOp::ImageCropFn
 	typedef DataPtr ReturnType;
 	
 	const Imath::Box2i m_sourceDataWindow;
-	const Imath::Box2i m_copyWindow;
+	const Imath::Box2i m_copyDataWindow;
 	const Imath::Box2i m_targetDataWindow;	
 	
-	ImageCropFn( const Imath::Box2i &sourceDataWindow, const Imath::Box2i &copyWindow, const Imath::Box2i &targetDataWindow )
-	: m_sourceDataWindow( sourceDataWindow ), m_copyWindow( copyWindow ), m_targetDataWindow( targetDataWindow )
+	ImageCropFn( const Imath::Box2i &sourceDataWindow, const Imath::Box2i &copyDataWindow, const Imath::Box2i &targetDataWindow )
+	: m_sourceDataWindow( sourceDataWindow ), m_copyDataWindow( copyDataWindow ), m_targetDataWindow( targetDataWindow )
 	{
 	}
 
 	template< typename T>
-	ReturnType operator()( typename T::Ptr source  ) const
+	ReturnType operator()( typename T::Ptr source ) const
 	{
 		assert( source );
 		
 		typename T::Ptr newChannel = new T;
-		int sourceX, sourceY, targetX, targetY, sourceWidth, targetWidth, targetHeight, cropWidth, cropHeight;
-		sourceWidth = m_sourceDataWindow.max.x - m_sourceDataWindow.min.x + 1;
-		targetWidth = m_targetDataWindow.max.x - m_targetDataWindow.min.x + 1;
-		targetHeight = m_targetDataWindow.max.y - m_targetDataWindow.min.y + 1;
-		cropWidth = m_copyWindow.max.x - m_copyWindow.min.x + 1;
-		cropHeight = m_copyWindow.max.y - m_copyWindow.min.y + 1;
-		sourceX = m_copyWindow.min.x - m_sourceDataWindow.min.x;
-		sourceY = m_copyWindow.min.y - m_sourceDataWindow.min.y;
-		targetX = m_copyWindow.min.x - m_targetDataWindow.min.x;
-		targetY = m_copyWindow.min.y - m_targetDataWindow.min.y;
+		
+		int sourceWidth = m_sourceDataWindow.max.x - m_sourceDataWindow.min.x + 1;
+		int targetWidth = m_targetDataWindow.max.x - m_targetDataWindow.min.x + 1;
+		int targetHeight = m_targetDataWindow.max.y - m_targetDataWindow.min.y + 1;
+		int cropWidth = m_copyDataWindow.max.x - m_copyDataWindow.min.x + 1;
+		int cropHeight = m_copyDataWindow.max.y - m_copyDataWindow.min.y + 1;
+		int sourceX = m_copyDataWindow.min.x - m_sourceDataWindow.min.x;
+		int sourceY = m_copyDataWindow.min.y - m_sourceDataWindow.min.y;
+		int targetX = m_copyDataWindow.min.x - m_targetDataWindow.min.x;
+		int targetY = m_copyDataWindow.min.y - m_targetDataWindow.min.y;
 
 #ifndef NDEBUG
 		size_t numPixelsCopied = 0;
