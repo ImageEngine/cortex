@@ -35,6 +35,8 @@
 #ifndef IE_CORE_RUNTIMETYPED_INL
 #define IE_CORE_RUNTIMETYPED_INL
 
+#include <cassert>
+
 namespace IECore
 {
 
@@ -64,6 +66,20 @@ T *runTimeCast( S *src )
 		return static_cast<T *>( src );
 	}
 	return 0;
+}
+
+template<typename T, typename S>
+boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<S> &src )
+{
+	assert( runTimeCast<T>( src ) );
+	return boost::static_pointer_cast<T>( src );
+}
+
+template<typename T, typename S>
+T* assertedStaticCast( S* src )
+{
+	assert( runTimeCast<T>( src ) );
+	return static_cast<T *>( src );
 }
 
 } // namespace IECore

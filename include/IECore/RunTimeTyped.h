@@ -154,6 +154,19 @@ boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src );
 template<typename T, typename S>
 T *runTimeCast( S *src );
 
+/// Equivalent to boost::static_pointer_cast, but using the type identifaction
+/// system implemented in RunTimeTyped to fire an assert if the equivalent runTimeCast
+/// would not succeed. In a non-asserted build this will compile directly down to
+/// a single boost::static_pointer_cast.
+template<typename T, typename S>
+inline boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<S> &src );
+
+/// Equivalent to static_cast, but using the type identifaction system implemented in 
+/// RunTimeTyped to fire an assert if the equivalent runTimeCast would not succeed. 
+/// In a non-asserted build this will compile directly down to a single static_cast.
+template<typename T, typename S>
+inline T* assertedStaticCast( S* src );
+
 } // namespace IECore
 
 #include "IECore/RunTimeTyped.inl"
