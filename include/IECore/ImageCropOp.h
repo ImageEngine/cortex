@@ -61,7 +61,7 @@ class ImageCropOp : public ModifyOp
 		ConstBoolParameterPtr matchDataWindowParameter() const;		
 		
 		BoolParameterPtr resetOriginParameter();
-		ConstBoolParameterPtr resetOriginParameter() const;		
+		ConstBoolParameterPtr resetOriginParameter() const;	
 		
 		/// \todo Should be "protected", not "public"
 		virtual void modify( ObjectPtr toModify, ConstCompoundObjectPtr operands );

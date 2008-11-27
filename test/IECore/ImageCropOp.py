@@ -38,13 +38,15 @@ import IECore
 
 class TestImageCropOp(unittest.TestCase):
 
-	testoutTifffile = "test/IECore/data/tiff/bluegreen_noise.testoutput.tiff"
-	testoutEXRfile = "test/IECore/data/exrFiles/colorBarsWithDataWindow.testoutput.exr"
+	def __fromNukeCrop( self, x, y, r, t, h = 1556 ) :
 	
-	def testCropEXR(self):
+		# Nuke is flipped in the vertical, and would use a bound of ((0,2),(0,2)) for a 2x2 image.
+		return IECore.Box2i( IECore.V2i( x , h - t ), IECore.V2i( r - 1, h - y - 1 ) )
 	
-		inputfile = "test/IECore/data/exrFiles/colorBarsWithDataWindow.exr"
-		
+	def testCrop(self):
+	
+		inputFile = "test/IECore/data/exrFiles/colorBarsWithDataWindow.exr"
+					
 		tests = [
 			{ 
 				"cropBox": IECore.Box2i( IECore.V2i( 855, 170 ), IECore.V2i( 1460, 1465 ) ),
@@ -57,94 +59,65 @@ class TestImageCropOp(unittest.TestCase):
 				"checkFile": "test/IECore/data/expectedResults/imageCropDataWindowMatched.exr",
 				"matchDataWindow" : True,
 				"resetOrigin" : True				
-			},
-		]
-		
-		self.__testCrop( inputfile, self.testoutEXRfile, tests )
-
-	def testCropTiff(self):
-
-		inputfile =    "test/IECore/data/tiff/bluegreen_noise.400x300.tif"
-
-		tests = [
+			},			
 			{ 
-				"cropBox": IECore.Box2i( IECore.V2i( 0, 75 ), IECore.V2i( 399, 224 ) ),
-				"checkFile": "test/IECore/data/tiff/bluegreen_noise.400x150.tif",
-				"resetOrigin" : False				
-			},
-
-			{ 
-				"cropBox": IECore.Box2i( IECore.V2i( 100, 75 ), IECore.V2i( 299, 224 ) ),
-				"checkFile": "test/IECore/data/tiff/bluegreen_noise.200x150.tif",
-				"resetOrigin" : False
-			},
-
-			{ 
-				"cropBox": IECore.Box2i( IECore.V2i( -100, -75 ), IECore.V2i( 499, 374 ) ),
-				"checkFile": "test/IECore/data/tiff/bluegreen_noise.400x300.tif",
+				"cropBox": self.__fromNukeCrop( 1125, 195, 1551, 681 ),
+				"checkFile": "test/IECore/data/expectedResults/imageCropDataWindow2Matched.exr",
+				"matchDataWindow" : True,
 				"resetOrigin" : False				
 			},
 			{ 
-				"cropBox": IECore.Box2i( IECore.V2i( 0, 75 ), IECore.V2i( 399, 224 ) ),
-				"checkFile": "test/IECore/data/tiff/bluegreen_noise.400x150.tif",
-				"resetOrigin" : True
+				"cropBox": self.__fromNukeCrop( 1125, 195, 1551, 681 ),
+				"checkFile": "test/IECore/data/expectedResults/imageCropDataWindow2.exr",
+				"matchDataWindow" : False,
+				"resetOrigin" : False				
 			},
-
 			{ 
-				"cropBox": IECore.Box2i( IECore.V2i( 100, 75 ), IECore.V2i( 299, 224 ) ),
-				"checkFile": "test/IECore/data/tiff/bluegreen_noise.200x150.tif",
-				"resetOrigin" : True
+				"cropBox": IECore.Box2i( IECore.V2i( -10, -10 ), IECore.V2i( 3000, 3000 ) ),
+				"checkFile": inputFile,
+				"matchDataWindow" : False,
+				"resetOrigin" : False				
 			},
-
-			{ 
-				"cropBox": IECore.Box2i( IECore.V2i( -100, -75 ), IECore.V2i( 499, 374 ) ),
-				"checkFile": "test/IECore/data/tiff/bluegreen_noise.400x300.tif",
-				"resetOrigin" : True
-			},
-		
 		]
-		self.__testCrop( inputfile, self.testoutTifffile, tests )
+		
+		self.__testCrop( inputFile , tests )
 
-	def __testCrop( self, inputfile, outputfile, tests ):
+	def __testCrop( self, inputfile, tests ):
 		r = IECore.Reader.create(inputfile)
 		img = r.read()
-		self.assertEqual(type(img), IECore.ImagePrimitive)
+		self.assertEqual(type(img), IECore.ImagePrimitive)		
 
 		cropOp = IECore.ImageCropOp()
 		errors = []
 
+		testIdx = 0
 		for testCase in tests:
-
+			testIdx = testIdx + 1
 			cropOp['copyInput'] = True
 			cropOp['cropBox'] = testCase['cropBox']
 			cropOp['matchDataWindow'] = testCase.get( 'matchDataWindow', True )
 			resetOrigin = testCase.get( 'resetOrigin', True )
 			cropOp['resetOrigin'] = resetOrigin
-				
+			cropOp['extendDataWindow'] = False
 			cropOp['object'] = img
+	
 			croppedImg = cropOp()
 
 			if not croppedImg.arePrimitiveVariablesValid():
 				raise Exception, "Invalid cropped image in test case: " + str(testCase) + ". Image info (displayWindow, dataWindow,bufferSize): " + str( croppedImg.displayWindow) + ", " + str( croppedImg.dataWindow ) + ", " + str( len(croppedImg["R"].data) )
 
-			IECore.Writer.create(croppedImg, outputfile).write()
+                
+			#Uncomment to generate missing expected result files
+			#if not os.path.exists( testCase['checkFile'] ) :
+			#	IECore.Writer.create( croppedImg, testCase['checkFile'] ).write()
 
-			testImg = IECore.Reader.create(outputfile).read()
-
-			if not resetOrigin:
-				dyw = croppedImg.displayWindow
-				dtw = croppedImg.dataWindow
-				dyw.max -= dyw.min
-				dtw.max -= dyw.min
-				dtw.min -= dyw.min
-				dyw.min = IECore.V2i( 0,0 )
-				croppedImg.displayWindow = dyw
-				croppedImg.dataWindow = dtw
-
-			if croppedImg == testImg:
-				continue		
-
-			errors.append( "Crop test case failed:" + str(testCase) + ". Cropped image: " + str(croppedImg.displayWindow) + " " + str(croppedImg.dataWindow) + " Loaded image: " + str(testImg.displayWindow) + " " + str(testImg.dataWindow) )
+			expectedImg = IECore.Reader.create( testCase['checkFile'] ).read()
+			
+			if croppedImg == expectedImg :
+				
+				continue
+			
+			errors.append( "Crop test case failed:" + str(testCase) + ". Cropped image: " + str(croppedImg.displayWindow) + " " + str(croppedImg.dataWindow) + " Loaded image: " + str(expectedImg.displayWindow) + " " + str(expectedImg.dataWindow) )
 
 		if len(errors):
 			raise Exception, "\n".join( errors )
@@ -166,6 +139,28 @@ class TestImageCropOp(unittest.TestCase):
 		op = IECore.ImageCropOp()
 		executeOp = IECore.curry( op, object = image )
 		self.assertRaises( RuntimeError, executeOp )
+		
+	def testCropEnlarge( self ) :
+	
+		image = IECore.Reader.create( "test/IECore/data/exrFiles/checker2.exr" ).read()
+		
+		op = IECore.ImageCropOp()
+		result = op(
+			object = image,
+			cropBox = IECore.Box2i(
+				IECore.V2i( 28, 92 ),
+				IECore.V2i( 580, 455 )
+			),
+			resetOrigin = False,
+			matchDataWindow = True,
+		)
+		
+		self.assert_( result.arePrimitiveVariablesValid() )
+
+		expectedResult = IECore.Reader.create( "test/IECore/data/expectedResults/imageCropEnlarge.exr" ).read()
+		
+		self.assertEqual( result, expectedResult )
+				
 
 	def setUp( self ) :
 		
@@ -173,11 +168,7 @@ class TestImageCropOp(unittest.TestCase):
 							
 	def tearDown( self ) :
 	
-		if os.path.isfile( self.testoutTifffile ) :
-			os.remove( self.testoutTifffile )
-			
-		if os.path.isfile( self.testoutEXRfile ) :
-			os.remove( self.testoutEXRfile )	
+		pass	
 
 if __name__ == "__main__":
 	unittest.main()   

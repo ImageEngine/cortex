@@ -97,7 +97,11 @@ ImageCropOp::ImageCropOp()
 	);
 
 	parameters()->addParameter( m_resetOrigin );
-
+	
+	
+	/// \todo Add "intersect" and "reformat" parameters, like Nuke
+	/// Current behaviour is to both intersect, and reformat, so take care to set
+	/// the defaults accordingly.
 }
 
 ImageCropOp::~ImageCropOp()
@@ -139,65 +143,69 @@ struct ImageCropOp::ImageCropFn
 	typedef DataPtr ReturnType;
 	
 	const Imath::Box2i m_sourceDataWindow;
-	const Imath::Box2i m_copyDataWindow;
+	const Imath::Box2i m_croppedDataWindow;
 	const Imath::Box2i m_targetDataWindow;	
 	
-	ImageCropFn( const Imath::Box2i &sourceDataWindow, const Imath::Box2i &copyDataWindow, const Imath::Box2i &targetDataWindow )
-	: m_sourceDataWindow( sourceDataWindow ), m_copyDataWindow( copyDataWindow ), m_targetDataWindow( targetDataWindow )
+	ImageCropFn( const Imath::Box2i &sourceDataWindow, const Imath::Box2i &croppedDataWindow, const Imath::Box2i &targetDataWindow )
+	: m_sourceDataWindow( sourceDataWindow ), m_croppedDataWindow( croppedDataWindow ), m_targetDataWindow( targetDataWindow )
 	{
 	}
 
 	template< typename T>
-	ReturnType operator()( typename T::ConstPtr source ) const
+	ReturnType operator()( typename T::ConstPtr sourceData ) const
 	{
-		assert( source );
+		assert( sourceData );
 		
-		typename T::Ptr newChannel = new T;
+		typename T::Ptr newChannel = new T();
 		
 		int sourceWidth = m_sourceDataWindow.max.x - m_sourceDataWindow.min.x + 1;
+
 		int targetWidth = m_targetDataWindow.max.x - m_targetDataWindow.min.x + 1;
 		int targetHeight = m_targetDataWindow.max.y - m_targetDataWindow.min.y + 1;
-		int cropWidth = m_copyDataWindow.max.x - m_copyDataWindow.min.x + 1;
-		int cropHeight = m_copyDataWindow.max.y - m_copyDataWindow.min.y + 1;
-		int sourceX = m_copyDataWindow.min.x - m_sourceDataWindow.min.x;
-		int sourceY = m_copyDataWindow.min.y - m_sourceDataWindow.min.y;
-		int targetX = m_copyDataWindow.min.x - m_targetDataWindow.min.x;
-		int targetY = m_copyDataWindow.min.y - m_targetDataWindow.min.y;
+		int targetArea = targetWidth * targetHeight;
 
 #ifndef NDEBUG
-		size_t numPixelsCopied = 0;
+		int numPixelsCopied = 0;
 #endif		
 
-		if ( targetWidth > 0 && targetHeight > 0 )
-		{
-			typename T::ValueType &target = newChannel->writable();
-			target.resize( targetWidth * targetHeight );
-			typename T::ValueType::iterator targetIt;
+		typename T::ValueType &target = newChannel->writable();
+		target.resize( targetArea, typename T::ValueType::value_type() );
+					
+		const typename T::ValueType &source = sourceData->readable();
 
-			if ( cropWidth < targetWidth || cropHeight < targetHeight )
+		/// \todo Optimize
+		Imath::V2i copyPixel;
+		for ( copyPixel.y = m_croppedDataWindow.min.y; copyPixel.y <= m_croppedDataWindow.max.y; copyPixel.y ++ )
+		{
+			for ( copyPixel.x = m_croppedDataWindow.min.x; copyPixel.x <= m_croppedDataWindow.max.x; copyPixel.x ++ )
 			{
-				for ( targetIt = target.begin(); targetIt != target.end(); targetIt++ )
+				if ( m_sourceDataWindow.intersects( copyPixel ) && m_targetDataWindow.intersects( copyPixel ) )
 				{
-					*targetIt = 0;
+					assert( boxIntersection( m_sourceDataWindow, m_targetDataWindow ).intersects( copyPixel ) );
+				
+					int sourceOffset = sourceWidth * ( copyPixel.y - m_sourceDataWindow.min.y ) + ( copyPixel.x - m_sourceDataWindow.min.x );
+					assert( sourceOffset >= 0 );
+					assert( sourceOffset < (int)source.size() );
+					int targetOffset = targetWidth * ( copyPixel.y - m_targetDataWindow.min.y ) + ( copyPixel.x - m_targetDataWindow.min.x );
+					assert( targetOffset >= 0 );
+					assert( targetOffset < (int)target.size() );
+
+					target[ targetOffset++ ] = source[ sourceOffset++ ];
+#ifndef NDEBUG
+					numPixelsCopied ++;
+#endif					
+				}
+				else
+				{
+					assert( !boxIntersection( m_sourceDataWindow, m_targetDataWindow ).intersects( copyPixel ) );
 				}
 			}
-
-			typename T::ValueType::const_iterator sourceIt = source->readable().begin()+sourceWidth*sourceY+sourceX;
-			targetIt = target.begin()+targetWidth*targetY+targetX;
-
-			for ( int y = 0; y < cropHeight; y++ )
-			{
-				std::copy( sourceIt, sourceIt + cropWidth, targetIt );
-#ifndef NDEBUG
-				numPixelsCopied += cropWidth;
-#endif				
-				sourceIt += sourceWidth;
-				targetIt += targetWidth;
-			}
-		}		
-		assert( numPixelsCopied <= ((size_t)( m_targetDataWindow.size().x + 1 ) * ( m_targetDataWindow.size().y + 1)) );		
+		}
 		
-		assert( newChannel );		
+		assert( (int)target.size() == targetArea );
+		assert( numPixelsCopied <= (int)target.size() );
+		
+		assert( newChannel );			
 		return newChannel;
 	}
 
@@ -205,15 +213,13 @@ struct ImageCropOp::ImageCropFn
 
 void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 {
-	ImagePrimitivePtr image = static_pointer_cast< ImagePrimitive >( toModify );
+	ImagePrimitivePtr image = assertedStaticCast< ImagePrimitive >( toModify );
 
-	// first, make sure the input image is correct.
+	// Validate the input image
 	if ( !image->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "ImageCropOp: Input image is not valid" );
 	}
-	
-	bool matchDataWindow = m_matchDataWindow->getTypedValue();
 
 	const Imath::Box2i &cropBox = m_cropBox->getTypedValue();
 	if ( cropBox.isEmpty() )
@@ -221,14 +227,17 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 		throw InvalidArgumentException( "ImageCropOp: Specified crop box is empty" );
 	}
 	
-	bool resetOrigin = m_resetOrigin->getTypedValue();
+	const bool resetOrigin = m_resetOrigin->getTypedValue();
 
-	Imath::Box2i croppedDisplayWindow = boxIntersection( cropBox, image->getDisplayWindow() );
+	const Imath::Box2i croppedDisplayWindow = boxIntersection( cropBox, image->getDisplayWindow() );
 	const Imath::Box2i &dataWindow = image->getDataWindow();
+	
 	Imath::Box2i croppedDataWindow = boxIntersection( cropBox, dataWindow );
+	
 	Imath::Box2i newDisplayWindow = croppedDisplayWindow;
 	Imath::Box2i newDataWindow;
-
+	
+	const bool matchDataWindow = m_matchDataWindow->getTypedValue();
 	if ( matchDataWindow )
 	{
 		newDataWindow = newDisplayWindow;
@@ -240,8 +249,7 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 
 	for ( PrimitiveVariableMap::iterator varIt = image->variables.begin(); varIt != image->variables.end(); varIt++ )
 	{
-		PrimitiveVariable &channel = varIt->second;
-		DataPtr data = channel.data;
+		PrimitiveVariable &channel = varIt->second;		
 
 		switch ( channel.interpolation )
 		{
@@ -249,9 +257,12 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 			case PrimitiveVariable::Varying:
 			case PrimitiveVariable::FaceVarying:
 				{			
+					DataPtr data = channel.data;
+					assert( data );
 					ImageCropFn fn( dataWindow, croppedDataWindow, newDataWindow );
 
-					channel.data = despatchTypedData< ImageCropFn, TypeTraits::IsNumericVectorTypedData >( data, fn );			
+					channel.data = despatchTypedData< ImageCropFn, TypeTraits::IsVectorTypedData >( data, fn );
+					assert( channel.data );
 				}
 				break;
 			
@@ -273,10 +284,15 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 		newDataWindow.max = newDataWindow.max - newDisplayWindow.min;
 		newDisplayWindow.min = Imath::V2i( 0, 0 );
 		assert( newDisplayWindowSize == newDisplayWindow.size() );
-		assert( newDataWindowSize == newDataWindow.size() );	
+		assert( newDataWindowSize == newDataWindow.size() );
 	}	
 	image->setDataWindow( newDataWindow );
 	image->setDisplayWindow( newDisplayWindow );
+		
+	if ( matchDataWindow )
+	{
+		assert( image->getDisplayWindow() == image->getDataWindow() );
+	}
 	
 	assert( image->arePrimitiveVariablesValid() );
 }
