@@ -307,6 +307,8 @@ enum TypeId
 	ObjectVectorParameterTypeId = 264,
 	YUVImageWriterTypeId = 265,
 	ImageCompositeOpTypeId = 266,
+	ImagePremultiplyOpTypeId = 267,	
+	ImageUnpremultiplyOpTypeId = 268,		
 
 	
 	// Remember to update TypeIdBinding.cpp !!!

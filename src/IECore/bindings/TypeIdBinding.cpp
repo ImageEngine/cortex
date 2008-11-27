@@ -306,6 +306,8 @@ void bindTypeId()
 		.value("ObjectVectorParameter", ObjectVectorParameterTypeId )
 		.value("YUVImageWriter", YUVImageWriterTypeId )
 		.value("ImageCompositeOp", ImageCompositeOpTypeId )
+		.value("ImagePremultiplyOp", ImagePremultiplyOpTypeId )
+		.value("ImageUnpremultiplyOp", ImageUnpremultiplyOpTypeId )		
 	;
 }
 
