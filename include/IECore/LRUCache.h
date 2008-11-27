@@ -82,6 +82,7 @@ class LRUCache
 		
 		/// Retrieve the item from the cache, computing it if necessary. Returns true if successful and "data" has been set, else
 		/// returns false and the value of "data" is undefined.
+		/// \todo Consider use of boost::optional to remove need for bool flag
 		bool get( const Key& key, GetterFn fn, Data &data ) const;
 		
 	protected:
