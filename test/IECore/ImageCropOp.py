@@ -155,7 +155,7 @@ class TestImageCropOp(unittest.TestCase):
 		
 		self.assert_( op['cropBox'].getValue().value.isEmpty() )
 		self.assertEqual( op['resetOrigin'].getValue().value, True )
-		self.assertEqual( op['matchDataWindow'].getValue().value, False )		
+		self.assertEqual( op['matchDataWindow'].getValue().value, True )		
 		
 	
 			

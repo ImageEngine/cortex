@@ -73,7 +73,7 @@ ImageCropOp::ImageCropOp()
 	m_cropBox = new Box2iParameter(
 		"cropBox",
 		"Determines the crop coordinates to apply on the image.",
-		new Box2iData()
+		Box2i()
 	);
 
 	parameters()->addParameter( m_cropBox );
@@ -81,7 +81,11 @@ ImageCropOp::ImageCropOp()
 	m_matchDataWindow = new BoolParameter(
 		"matchDataWindow",
 		"if On then the dataWindow will match displayWindow. Otherwise it will be intersected against the given crop box.",	
-		new BoolData( false )
+		
+		/// \todo The original intent was that this default should be false, but when specifying "new BoolData(false)" as
+		/// the default value it seems the compiler would prefer to convert the BoolData* to a bool over a BoolData::Ptr.
+		/// Consider changing the default if required, but only on the next major version change.
+		true
 	);
 
 	parameters()->addParameter( m_matchDataWindow );
@@ -89,7 +93,7 @@ ImageCropOp::ImageCropOp()
 	m_resetOrigin = new BoolParameter(
 		"resetOrigin",
 		"if On then the resulting image will have it's top-left corner at (0,0).",	
-		new BoolData( true )
+		true
 	);
 
 	parameters()->addParameter( m_resetOrigin );
