@@ -148,6 +148,16 @@ class TestImageCropOp(unittest.TestCase):
 
 		if len(errors):
 			raise Exception, "\n".join( errors )
+	
+	def testDefaults( self ) :
+	
+		op = IECore.ImageCropOp()
+		
+		self.assert_( op['cropBox'].getValue().value.isEmpty() )
+		self.assertEqual( op['resetOrigin'].getValue().value, True )
+		self.assertEqual( op['matchDataWindow'].getValue().value, False )		
+		
+	
 			
 	def testEmptyCropBox( self ) :	
 			
