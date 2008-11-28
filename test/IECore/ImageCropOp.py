@@ -36,6 +36,10 @@ import unittest
 import sys, os
 import IECore
 
+# \todo Add tests for 
+# - invalid input images
+# - unsupported channel types (i.e. non-numeric primvar data)
+
 class TestImageCropOp(unittest.TestCase):
 
 	def __fromNukeCrop( self, x, y, r, t, h = 1556 ) :
