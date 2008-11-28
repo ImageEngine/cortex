@@ -95,6 +95,7 @@ from LayeredDict import LayeredDict
 from CompoundVectorParameter import CompoundVectorParameter
 from AttributeBlock import AttributeBlock
 from TransformBlock import TransformBlock
+from WorldBlock import WorldBlock
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
