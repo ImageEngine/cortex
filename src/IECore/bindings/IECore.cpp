@@ -212,6 +212,9 @@
 #include "IECore/bindings/ObjectVectorBinding.h"
 #include "IECore/bindings/HenyeyGreensteinBinding.h"
 #include "IECore/bindings/YUVImageWriterBinding.h"
+#include "IECore/bindings/ImageCompositeOpBinding.h"
+#include "IECore/bindings/ImagePremultiplyOpBinding.h"
+#include "IECore/bindings/ImageUnpremultiplyOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -409,6 +412,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindObjectVector();
 	bindHenyeyGreenstein();
 	bindYUVImageWriter();
+	bindImagePremultiplyOp();
+	bindImageUnpremultiplyOp();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
