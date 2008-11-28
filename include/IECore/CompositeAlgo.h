@@ -42,6 +42,18 @@ namespace IECore
 template<typename T>
 inline T compositeOver( T aVal, T aAlpha, T bVal, T bAlpha );
 
+/// max(A, B)
+template<typename T>
+inline T compositeMax( T aVal, T aAlpha, T bVal, T bAlpha );
+
+/// min(A, B)
+template<typename T>
+inline T compositeMin( T aVal, T aAlpha, T bVal, T bAlpha );
+
+/// A*B
+template<typename T>
+inline T compositeMultiply( T aVal, T aAlpha, T bVal, T bAlpha );
+
 } // namespace IECore
 
 #include "IECore/CompositeAlgo.inl"

@@ -45,6 +45,25 @@ T compositeOver( T aVal, T aAlpha, T bVal, T bAlpha )
 	return aVal + bVal * ( T(1) - aAlpha );
 }
 
+template<typename T>
+T compositeMax( T aVal, T aAlpha, T bVal, T bAlpha )
+{
+	return std::max<T>( aVal, bVal );
+}
+
+template<typename T>
+T compositeMin( T aVal, T aAlpha, T bVal, T bAlpha )
+{
+	return std::min<T>( aVal, bVal );
+}
+
+template<typename T>
+T compositeMultiply( T aVal, T aAlpha, T bVal, T bAlpha )
+{
+	return aVal * bVal;
+}
+
+
 }
 
 #endif // IE_CORE_COMPOSITEALGO_INL
