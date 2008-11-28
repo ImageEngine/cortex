@@ -138,32 +138,11 @@ class TestImageCropOp(unittest.TestCase):
 			
 	def testEmptyCropBox( self ) :	
 			
-		image = IECore.Reader.create( "test/IECore/data/exrFiles/checker2.exr" ).read()
+		image = IECore.Reader.create( "test/IECore/data/exrFiles/colorBarsWithDataWindow.exr" ).read()
 		
 		op = IECore.ImageCropOp()
 		executeOp = IECore.curry( op, object = image )
-		self.assertRaises( RuntimeError, executeOp )
-		
-	def testCropEnlarge( self ) :
-	
-		image = IECore.Reader.create( "test/IECore/data/exrFiles/checker2.exr" ).read()
-		
-		op = IECore.ImageCropOp()
-		result = op(
-			object = image,
-			cropBox = IECore.Box2i(
-				IECore.V2i( 28, 92 ),
-				IECore.V2i( 580, 455 )
-			),
-			resetOrigin = False,
-			matchDataWindow = True,
-		)
-		
-		self.assert_( result.arePrimitiveVariablesValid() )
-
-		expectedResult = IECore.Reader.create( "test/IECore/data/expectedResults/imageCropEnlarge.exr" ).read()
-		
-		self.assertEqual( result, expectedResult )
+		self.assertRaises( RuntimeError, executeOp )			
 				
 
 	def setUp( self ) :
