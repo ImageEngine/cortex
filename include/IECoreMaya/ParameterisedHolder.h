@@ -52,7 +52,7 @@ class MPxComponentShape;
 namespace IECoreMaya
 {
 
-/// A base class from which nodes to hold IECore::Parametised objects
+/// A base class from which nodes to hold IECore::Parameterised objects
 /// should derive (for example, Maya RI procedurals). It's templated
 /// to allow inheritance from any Maya proxy.
 ///
@@ -82,11 +82,11 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		static MTypeId id;
 		static MString typeName;
 		
-		void postConstructor();
+		virtual void postConstructor();
 		
-		bool isAbstractClass();
-		
-		MStatus shouldSave( const MPlug &plug, bool &isSaving );
+		virtual bool isAbstractClass();
+
+		virtual MStatus shouldSave( const MPlug &plug, bool &isSaving );
 		
 		//! @name ParameterisedHolderInterface implementation
 		/////////////////////////////////////////////////////////////////////////////////////////
