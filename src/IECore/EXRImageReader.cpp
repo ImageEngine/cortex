@@ -177,10 +177,9 @@ DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::
 		{
 			for( int y=yStart; y!=(yEnd+yStep); y+=yStep )
 			{
-
-					m_inputFile->readPixels( y );
-					memcpy( (char *)transferDestination, (const char *)tmpBufferTransferStart, tmpBufferTransferLength );
-					transferDestination += pixelDimensions.x;
+				m_inputFile->readPixels( y );
+				memcpy( (char *)transferDestination, (const char *)tmpBufferTransferStart, tmpBufferTransferLength );
+				transferDestination += pixelDimensions.x;
 			}
 		}
 		catch( Iex::InputExc &e )
