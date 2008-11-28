@@ -32,6 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+//! \file CompositeAlgo.h
+/// Defines fundamental compositing operations of two data values (A and B),
+/// each with associated alpha. The values are expected to be premultiplied
+/// by their corresponding alpha.
+
+
 #ifndef IE_CORE_COMPOSITEALGO_H
 #define IE_CORE_COMPOSITEALGO_H
 
