@@ -127,4 +127,5 @@ void ChannelOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObje
 	}
 	
 	modifyChannels( image->getDisplayWindow(), image->getDataWindow(), channels );
+	/// \todo Consider cases where the derived class invalidates the channel data (by changing its length)
 }
