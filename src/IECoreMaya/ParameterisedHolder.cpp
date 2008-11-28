@@ -116,6 +116,19 @@ bool ParameterisedHolder<B>::isAbstractClass()
 }
 
 template<typename B>
+MStatus ParameterisedHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
+{
+	if( plug==aParameterisedClassName || plug==aParameterisedVersion || plug==aParameterisedSearchPathEnvVar )
+	{
+		// if the held class changes in any way then we ditch it so we're forced to reload
+		// in getParameterised().
+		m_parameterised = 0;
+		m_failedToLoad = false;
+	}
+	return B::setDependentsDirty( plug, plugArray );
+}
+
+template<typename B>
 MStatus ParameterisedHolder<B>::shouldSave( const MPlug &plug, bool &isSaving )
 {
 	/// Maya 8.5 crashes when saving a GenericAttribute (such as that
