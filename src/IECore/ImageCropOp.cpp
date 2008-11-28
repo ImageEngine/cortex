@@ -169,7 +169,7 @@ struct ImageCropOp::ImageCropFn
 #endif		
 
 		typename T::ValueType &target = newChannel->writable();
-		target.resize( targetArea, typename T::ValueType::value_type() );
+		target.resize( targetArea, 0 );
 					
 		const typename T::ValueType &source = sourceData->readable();
 
@@ -261,7 +261,7 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 					assert( data );
 					ImageCropFn fn( dataWindow, croppedDataWindow, newDataWindow );
 
-					channel.data = despatchTypedData< ImageCropFn, TypeTraits::IsVectorTypedData >( data, fn );
+					channel.data = despatchTypedData< ImageCropFn, TypeTraits::IsNumericVectorTypedData >( data, fn );
 					assert( channel.data );
 				}
 				break;
