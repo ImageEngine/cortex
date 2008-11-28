@@ -343,7 +343,10 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	// write the buffer
 	for (int i = 0; i < displayWidth*displayHeight; ++i)
 	{
+		assert( i < (int)imageBuffer.size() );
 		imageBuffer[i] = asBigEndian<>(imageBuffer[i]);
+		/// \todo The following line has been seen to generate a valgrind warning that the system functions
+		/// called from within are attempting to access uninitialized data. Establish why.
 		out.write((const char *) (&imageBuffer[i]), sizeof(unsigned int));
 		if ( out.fail() )
 		{
