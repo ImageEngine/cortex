@@ -106,8 +106,10 @@ struct ImageUnpremultiplyOp::UnpremultFn
 		{
 			float channelValue = toFloat( *it );
 
-			/// \todo Zero check
-			channelValue /= *alphaIt;
+			if ( fabsf(*alphaIt) > 0.0f )
+			{
+				channelValue /= *alphaIt;
+			}
 			
 			*it = fromFloat( channelValue );
 		}
