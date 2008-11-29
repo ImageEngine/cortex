@@ -79,25 +79,25 @@ class parameterTypes( Op ) :
 				IntVectorParameter(
 					name = "e",
 					description = "An array of ints",
-					defaultValue = IntVectorData(),
+					defaultValue = IntVectorData( [ 4, -1, 2 ] ),
 				),
 
 				StringVectorParameter(
 					name = "f",
 					description = "An array of strings",
-					defaultValue = StringVectorData(),
+					defaultValue = StringVectorData( ["one", "two", "three" ]),
 				),
 
 				V2fParameter(
 					name = "g",
 					description = "A v2f",
-					defaultValue = V2fData(),
+					defaultValue = V2fData( V2f( 1,2 ) ),
 				),
 
 				V3fParameter(
 					name = "h",
 					description = "a v3f",
-					defaultValue = V3fData(),
+					defaultValue = V3fData( V3f( 1, 1, 1 ) ),
 					presets = {
 						"x" : V3f( 1, 0, 0 ),
 						"y" : V3f( 0, 1, 0 ),
@@ -108,7 +108,7 @@ class parameterTypes( Op ) :
 				V2dParameter(
 					name = "i",
 					description = "a v2d",
-					defaultValue = V2dData(),
+					defaultValue = V2dData( V2d( 1, 1 ) ),
 				),
 
 				CompoundParameter(
@@ -121,7 +121,7 @@ class parameterTypes( Op ) :
 						V3dParameter(
 							name = "j",
 							description = "a v3d",
-							defaultValue = V3dData(),
+							defaultValue = V3dData( V3d( 8, 16, 32 ) ),
 							presets = {
 								"one" : V3d( 1 ),
 								"two" : V3d( 2 )
@@ -131,7 +131,7 @@ class parameterTypes( Op ) :
 						M44fParameter(
 							name = "k",
 							description = "an m44f",
-							defaultValue = M44fData(),
+							defaultValue = M44fData( ),
 							presets = {
 								"one" : M44f( 1 ),
 								"two" : M44f( 2 )
@@ -145,13 +145,13 @@ class parameterTypes( Op ) :
 				Color3fParameter(
 					name = "l",
 					description = "a color3f",
-					defaultValue = Color3fData(),
+					defaultValue = Color3fData( Color3f( 1, 0, 1 )),
 				),
 
 				Color4fParameter(
 					name = "m",
 					description = "a color4f",
-					defaultValue = Color4fData(),
+					defaultValue = Color4fData( Color4f( 1, 0, 1, 0.5 ) ),
 				),
 
 				FileNameParameter(
@@ -197,14 +197,14 @@ class parameterTypes( Op ) :
 				V2iParameter(
 					name = "u",
 					description = "A v2i",
-					defaultValue = V2iData(),
+					defaultValue = V2iData( V2i( 2, 2 ) ),
 				),
 				
 				
 				V3iParameter(
 					name = "v",
 					description = "A v3i",
-					defaultValue = V3iData(),
+					defaultValue = V3iData( V3i( 5, 5, 5 ) ),
 				),
 				
 				FrameListParameter(
