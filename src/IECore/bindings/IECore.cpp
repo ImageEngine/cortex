@@ -413,7 +413,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindHenyeyGreenstein();
 	bindYUVImageWriter();
 	bindImagePremultiplyOp();
-	bindImageUnpremultiplyOp();	
+	bindImageUnpremultiplyOp();
+	bindImageCompositeOp();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
