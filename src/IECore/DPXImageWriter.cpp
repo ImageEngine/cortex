@@ -251,7 +251,7 @@ void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 
 		/// \todo Dcoument these constants
 		ie.transfer = 1;
-		ie.packing = 256;
+		ie.packing =  asBigEndian<short>( 1 );
 		ie.bit_size = 10;
 		ie.descriptor = 50;
 
