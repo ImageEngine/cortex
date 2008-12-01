@@ -40,7 +40,8 @@
 #include <set>
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp> 
-
+#include <boost/optional.hpp>
+#include <boost/format.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
@@ -273,7 +274,7 @@ class FileIndexedIO::Index : public RefCounted
 		NodePtr insert( NodePtr parentNode, IndexedIO::Entry e );
 
 		/// Write the index to a file stream
-		void write( std::ostream &f );
+		Imf::Int64 write( std::ostream &f );
 	
 		/// Allocate a new chunk of data of the requested size, returning its offset within the file
 		Imf::Int64 allocate( Imf::Int64 sz );
@@ -566,7 +567,7 @@ FileIndexedIO::Index::Index( FilteredStream &f ) : m_prevId(0)
 	{	
 		throw IOException("Not a FileIndexedIO file");
 	}
-					
+	
 	f.seekg( m_offset, std::ios::beg );
 	
 	io::filtering_istream decompressingStream;	
@@ -598,6 +599,8 @@ FileIndexedIO::Index::Index( FilteredStream &f ) : m_prevId(0)
 
 	Imf::Int64 numFreePages;		
 	readLittleEndian<Imf::Int64>( *inputStream, numFreePages );
+	
+	m_next = m_offset;
 
 	for (Imf::Int64 i = 0; i < numFreePages; i++)
 	{
@@ -607,11 +610,9 @@ FileIndexedIO::Index::Index( FilteredStream &f ) : m_prevId(0)
 		
 		addFreePage( offset, sz );
 	}
-
-	m_next = m_offset;
 }
 
-void FileIndexedIO::Index::write( std::ostream & f )
+Imf::Int64 FileIndexedIO::Index::write( std::ostream & f )
 {
 	/// Write index at end	
 	std::streampos indexStart = m_next;
@@ -663,9 +664,10 @@ void FileIndexedIO::Index::write( std::ostream & f )
 	writeLittleEndian<Imf::Int64>( f, g_currentVersion );		
 	writeLittleEndian<Imf::Int64>( f, g_versionedMagicNumber );
 	
-	(void)f.tellp();
 	
 	m_hasChanged = false;
+	
+	return f.tellp();
 }
 
 Imf::Int64 FileIndexedIO::Index::allocate( Imf::Int64 sz )
@@ -1143,6 +1145,8 @@ class FileIndexedIO::IndexedFile : public RefCounted
 	public:
 		FilteredStream *m_stream;
 		std::iostream *m_device;
+		std::string m_filename;
+		std::ios_base::openmode m_openmode;
 			
 		IndexedFile( const std::string &filename, IndexedIO::OpenMode mode );
 		IndexedFile( std::iostream *device, bool newStream = false );
@@ -1159,7 +1163,7 @@ class FileIndexedIO::IndexedFile : public RefCounted
 		/// is updated to record this offset along with its size.
 		void write(NodePtr node, const char *data, Imf::Int64 size);
 		
-		void flush();
+		boost::optional<Imf::Int64> flush();
 		
 		std::iostream *device();
 		
@@ -1168,11 +1172,12 @@ class FileIndexedIO::IndexedFile : public RefCounted
 		IndexPtr m_index;
 };
 			
-FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO::OpenMode mode )
+FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO::OpenMode mode ) : m_filename( filename )
 {
 	if (mode & IndexedIO::Write)
 	{
-		std::fstream *f = new std::fstream(filename.c_str(), std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
+		m_openmode =  std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out;
+		std::fstream *f = new std::fstream(filename.c_str(), m_openmode);
 		m_device = f;
 		
 		if (! f->is_open() )
@@ -1191,7 +1196,8 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		if (!fs::exists( filename.c_str() ) )
 		{
 			/// Create new file
-			std::fstream *f = new std::fstream(filename.c_str(), std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
+			m_openmode = std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out;
+			std::fstream *f = new std::fstream(filename.c_str(), m_openmode );
 			m_device = f;
 			
 			if (! f->is_open() )
@@ -1208,7 +1214,8 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 		else
 		{		
 			/// Read existing file
-			std::fstream *f = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in | std::ios::out);
+			m_openmode = std::ios::binary | std::ios::in | std::ios::out;
+			std::fstream *f = new std::fstream(filename.c_str(), m_openmode );
 			m_device = f;
 			
 			if (! f->is_open() )
@@ -1238,7 +1245,8 @@ FileIndexedIO::IndexedFile::IndexedFile( const std::string &filename, IndexedIO:
 	else
 	{
 		assert( mode & IndexedIO::Read );
-		std::fstream *f = new std::fstream(filename.c_str(), std::ios::binary | std::ios::in);
+		m_openmode = std::ios::binary | std::ios::in;
+		std::fstream *f = new std::fstream(filename.c_str(), m_openmode);
 		m_device = f;
 		
 		if (! f->is_open() )
@@ -1326,13 +1334,32 @@ FileIndexedIO::IndexPtr FileIndexedIO::IndexedFile::index() const
 
 FileIndexedIO::IndexedFile::~IndexedFile()
 {		
-	flush();
-	
-	assert(m_stream);
+	boost::optional<Imf::Int64> end = flush();
+		
+	assert( m_device );
+	assert( m_stream );
 	assert( m_stream->auto_close() );
+
+	/// Truncate files which we're writing, at the end of the index
+	if ( end &&  ( m_openmode & std::ios::out ) )
+	{		
+		std::fstream *f = dynamic_cast< std::fstream * >( m_device );
+		if ( f )
+		{	
+			/// Close the file before truncation
+			delete m_stream;
+			delete m_device;	
+			int err = truncate( m_filename.c_str(), *end );	
+			if ( err != 0 )
+			{
+				throw IOException( boost::str( boost::format ( "Error truncating file '%s' : %s" ) % m_filename % strerror( err ) ) );
+			}
+			return;
+		}		
+	}
 	
 	delete m_stream;
-	delete m_device;	 
+	delete m_device;	
 }
 
 void FileIndexedIO::IndexedFile::write(NodePtr node, const char *data, Imf::Int64 size)
@@ -1355,16 +1382,18 @@ void FileIndexedIO::IndexedFile::write(NodePtr node, const char *data, Imf::Int6
 	m_stream->write( data, size );
 }
 
-void FileIndexedIO::IndexedFile::flush()
+boost::optional<Imf::Int64> FileIndexedIO::IndexedFile::flush()
 {
 	if (m_index->hasChanged())
 	{			
-		m_index->write( *m_stream );
+		Imf::Int64 end = m_index->write( *m_stream );
 		assert( m_index->hasChanged() == false );
+		return boost::optional<Imf::Int64>( end );
 	}
 	
 	assert( m_device );
 	m_device->flush();
+	return boost::optional<Imf::Int64>();
 }
 
 std::iostream *FileIndexedIO::IndexedFile::device()

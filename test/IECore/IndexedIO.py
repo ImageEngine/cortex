@@ -37,6 +37,7 @@
 import os
 import unittest
 import math
+import random
 
 from IECore import *
 
@@ -598,6 +599,68 @@ class TestFileIndexedIO(unittest.TestCase):
 		f.chdir("..")
 		f.rm("sub2")
 		
+		
+	def testRmStress(self) :		
+		"""Test FileIndexedIO rm (stress test)"""	
+		
+		random.seed( 19 )
+		
+		dataPresent = set()
+		
+		f = FileIndexedIO("./test/FileIndexedIO.fio", "/", IndexedIOOpenMode.Write)
+		f.mkdir("data")
+		f.chdir("data")
+		
+		f = None
+		f = FileIndexedIO("./test/FileIndexedIO.fio", "/", IndexedIOOpenMode.Append)
+		f.chdir( "data" )	
+		
+		numLoops = 500
+		maxSize = 1000
+		
+		for i in range( 0, numLoops ) :
+			
+			for i in range( 0, maxSize ) :
+
+				index = int( random.random() * maxSize )
+
+				if not index in dataPresent :
+
+					f.write( "data"+str(index), i )
+					dataPresent.add( index )
+					
+				else :
+				
+					f.rm( "data"+str(index) )
+					dataPresent.remove( index )
+				
+				
+			# Reopen the file every now and then, to exercise the index reading/writing
+			if random.random() > 0.8 :
+			
+				f = None
+				f = FileIndexedIO("./test/FileIndexedIO.fio", "/", IndexedIOOpenMode.Append)
+				f.chdir( "data" )		
+			
+			entries = f.ls( IndexedIONullFilter() )
+
+			entryNames = [ x.id() for x in entries ]
+
+			for i in range( 0, maxSize ) :
+
+				dataName = "data"+str(i)
+				if dataName in entryNames :
+
+					self.assert_( i in dataPresent )
+
+				else :
+
+					self.failIf( i in dataPresent )
+
+			self.assertEqual( len(entries), len(dataPresent) )
+		
+			
+		
 	def testReadWrite(self):
 		"""Test FileIndexedIO read/write(generic)"""
 		
@@ -756,6 +819,11 @@ class TestFileIndexedIO(unittest.TestCase):
 		
 		self.failIf(fv is gv)
 		self.assertEqual(fv, gv)
+		
+	def setUp( self ):
+	
+		if os.path.isfile("./test/FileIndexedIO.fio") :	
+			os.remove("./test/FileIndexedIO.fio")	
 	
 	def tearDown(self):
 		
