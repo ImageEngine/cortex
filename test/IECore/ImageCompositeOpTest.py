@@ -67,6 +67,22 @@ class ImageCompositeOpTest( unittest.TestCase ) :
 		self.assertEqual( op.parameters().operation.getValue().value, ImageCompositeOp.Operation.Over )
 		self.assertEqual( op.parameters().alphaChannelName.getValue().value, "A" )		
 		self.assertEqual( op.parameters().channels.getValue(), StringVectorData( [ "R", "G", "B" ] ) )
+		
+	def testChannelSubset( self ):
+	
+		op = ImageCompositeOp()
+		
+		imageA = Reader.create( "test/IECore/data/exrFiles/checker1Premult.exr" ).read()
+		imageB = Reader.create( "test/IECore/data/exrFiles/checker2Premult.exr" ).read()
+		
+		result = op(
+			input = imageB,
+			imageA = imageA,
+			channels = StringVectorData( [ "R", "G" ] ),
+			operation = ImageCompositeOp.Operation.Over
+		)	
+		
+		self.assert_( result.arePrimitiveVariablesValid() )
 
 	def testOver( self ) :
 	
