@@ -255,6 +255,8 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 		/// Make a new imageA, premultiplied
 		premultOp->copyParameter()->setTypedValue( true );
 		premultOp->inputParameter()->setValue( imageA );
+		premultOp->alphaChannelNameParameter()->setTypedValue( alphaChannel );
+		premultOp->channelNamesParameter()->setTypedValue( channelNames );
 		imageA = assertedStaticCast< ImagePrimitive >( premultOp->operate() );
 		assert( imageA->arePrimitiveVariablesValid() );
 		
@@ -353,6 +355,8 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 		ImageUnpremultiplyOpPtr unpremultOp = new ImageUnpremultiplyOp();
 		/// Unpremultiply imageB in-place		
 		unpremultOp->copyParameter()->setTypedValue( false );
+		unpremultOp->channelNamesParameter()->setTypedValue( channelNames );
+		unpremultOp->alphaChannelNameParameter()->setTypedValue( alphaChannel );
 		unpremultOp->inputParameter()->setValue( imageB );
 		unpremultOp->operate();	
 		assert( imageB->arePrimitiveVariablesValid() );	
