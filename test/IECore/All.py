@@ -175,6 +175,7 @@ from ObjectVectorTest import *
 from ImagePremultiplyOpTest import *
 from ImageUnpremultiplyOpTest import *
 from ImageCompositeOpTest import *
+from ImageSequenceCompositeOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

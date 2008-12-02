@@ -96,6 +96,8 @@ from CompoundVectorParameter import CompoundVectorParameter
 from AttributeBlock import AttributeBlock
 from TransformBlock import TransformBlock
 from WorldBlock import WorldBlock
+from SequenceMergeOp import SequenceMergeOp
+from ImageSequenceCompositeOp import ImageSequenceCompositeOp
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
