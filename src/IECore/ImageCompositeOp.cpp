@@ -251,19 +251,26 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 	if ( inputMode == Unpremultiplied )
 	{
 		ImagePremultiplyOpPtr premultOp = new ImagePremultiplyOp();
-		
-		/// Make a new imageA, premultiplied
-		premultOp->copyParameter()->setTypedValue( true );
-		premultOp->inputParameter()->setValue( imageA );
 		premultOp->alphaChannelNameParameter()->setTypedValue( alphaChannel );
 		premultOp->channelNamesParameter()->setTypedValue( channelNames );
-		imageA = assertedStaticCast< ImagePrimitive >( premultOp->operate() );
-		assert( imageA->arePrimitiveVariablesValid() );
 		
-		/// Premultiply imageB in-place
-		premultOp->copyParameter()->setTypedValue( false );
-		premultOp->inputParameter()->setValue( imageB );
-		premultOp->operate();
+		if ( imageA->variables.find( alphaChannel ) != imageA->variables.end() )
+		{
+			/// Make a new imageA, premultiplied
+			premultOp->copyParameter()->setTypedValue( true );
+			premultOp->inputParameter()->setValue( imageA );
+		
+			imageA = assertedStaticCast< ImagePrimitive >( premultOp->operate() );
+			assert( imageA->arePrimitiveVariablesValid() );
+		}
+		
+		if ( imageB->variables.find( alphaChannel ) != imageB->variables.end() )
+		{		
+			/// Premultiply imageB in-place
+			premultOp->copyParameter()->setTypedValue( false );
+			premultOp->inputParameter()->setValue( imageB );
+			premultOp->operate();
+		}
 	}
 	else
 	{
@@ -335,8 +342,8 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 				float aVal = readChannelData( imageA, aData, V2i( x, y ) );
 				float bVal = readChannelData( imageB, bData, V2i( x, y ) );
 				
-				float aAlpha = aAlphaData ? readChannelData( imageA, aAlphaData, V2i( x, y ) ) : 0.0f;			
-				float bAlpha = bAlphaData ? readChannelData( imageB, bAlphaData, V2i( x, y ) ) : 0.0f;
+				float aAlpha = aAlphaData ? readChannelData( imageA, aAlphaData, V2i( x, y ) ) : 1.0f;			
+				float bAlpha = bAlphaData ? readChannelData( imageB, bAlphaData, V2i( x, y ) ) : 1.0f;
 				
 				assert( offset >= 0 );
 				assert( offset < (int)newBData->readable().size() );
@@ -350,7 +357,7 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 	assert( imageB->arePrimitiveVariablesValid() );
 	
 	/// If input images were unpremultiplied, then ensure that the output is also
-	if ( inputMode == Unpremultiplied )
+	if ( inputMode == Unpremultiplied && imageB->variables.find( alphaChannel ) != imageB->variables.end() )
 	{
 		ImageUnpremultiplyOpPtr unpremultOp = new ImageUnpremultiplyOp();
 		/// Unpremultiply imageB in-place		
