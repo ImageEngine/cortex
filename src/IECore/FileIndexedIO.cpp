@@ -546,7 +546,7 @@ FileIndexedIO::Index::Index( FilteredStream &f ) : m_prevId(0)
 	
 	f.seekg( end-1*sizeof(Imf::Int64), std::ios::beg );
 	
-	Imf::Int64 magicNumber;
+	Imf::Int64 magicNumber = 0;
 	readLittleEndian<Imf::Int64>( f, magicNumber );
 		
 	if ( magicNumber == g_versionedMagicNumber )
