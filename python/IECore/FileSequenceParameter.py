@@ -110,6 +110,7 @@ class FileSequenceParameter( IECore.PathParameter ) :
 		return True, ""	
 	
 	## Sets the internal StringData value to fileSequence.fileName
+	# \todo Don't throw away fileSequence.frameList here!
 	def setFileSequenceValue( self, fileSequence ) :
 	
 		self.setValue( IECore.StringData( fileSequence.fileName ) )
