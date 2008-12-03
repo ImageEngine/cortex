@@ -179,7 +179,7 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	int displayHeight = 1 + displayWindow.size().y;
 
 	// build the header
-	FileInformation fi;
+	FileInformation fi = { 0 };
 	fi.magic = asBigEndian<>( 0x802a5fd7 );
 
 	fi.section_header_length = 0;
@@ -199,7 +199,7 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	snprintf(fi.creation_date, sizeof( fi.creation_date ), "%04d-%02d-%02d", 1900 + gmt.tm_year, gmt.tm_mon, gmt.tm_mday);
 	snprintf(fi.creation_time, sizeof( fi.creation_time ), "%02d:%02d:%02d", gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
 
-	ImageInformation ii;
+	ImageInformation ii = { 0 };
 	ii.orientation = 0;
 	ii.channel_count = 0;
 
@@ -291,7 +291,7 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 		throw IOException( "CINImageWriter: Invalid number of channels" );
 	}
 
-	ImageDataFormatInformation idfi;
+	ImageDataFormatInformation idfi = { 0 };
 	idfi.interleave = 0;               // pixel interleave
 	idfi.packing = 5;                  // 32 bit left-aligned with 2 waste bits
 	idfi.data_signed = 0;              // unsigned data
@@ -300,7 +300,7 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	idfi.eoc_padding = 0;              // no end-of-data padding
 
 	/// \todo Complete filling in this structure
-	ImageOriginationInformation ioi;
+	ImageOriginationInformation ioi = { 0 };
 	ioi.x_offset = 0;                  // could be dataWindow min.x
 	ioi.y_offset = 0;                  // could be dataWindow min.y
 	ioi.gamma = 0x7f800000;
@@ -345,8 +345,6 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	{
 		assert( i < (int)imageBuffer.size() );
 		imageBuffer[i] = asBigEndian<>(imageBuffer[i]);
-		/// \todo The following line has been seen to generate a valgrind warning that the system functions
-		/// called from within are attempting to access uninitialized data. Establish why.
 		out.write((const char *) (&imageBuffer[i]), sizeof(unsigned int));
 		if ( out.fail() )
 		{
