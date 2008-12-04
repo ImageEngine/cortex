@@ -80,6 +80,18 @@ def plugFromString( s ) :
 	sl.getPlug( 0, result )
 	return result
 
+## Returns a full path to an MPlug.
+def pathFromPlug( p ) :
+
+	try :
+		f = maya.OpenMaya.MFnDagNode( p.node() )
+		nodePath = f.fullPathName()
+	except :
+		f = maya.OpenMaya.MFnDependencyNode( p.node() )
+		nodePath = f.name()
+			
+	return nodePath + "." + p.partialName()
+
 ## Extracts the node name from a full path to an attribute.
 def nodeFromAttributePath( a ) :
 
