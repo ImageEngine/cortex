@@ -106,6 +106,8 @@ class ImageCompositeOp : public ImagePrimitiveOp
 		IntParameterPtr m_inputModeParameter;
 		
 	private :
+		struct ChannelConverter;
+	
 		FloatVectorDataPtr getChannelData( ImagePrimitivePtr image, const std::string &channelName, bool mustExist = true );
 		float readChannelData( ConstImagePrimitivePtr image, ConstFloatVectorDataPtr data, const Imath::V2i &pixel );	
 	

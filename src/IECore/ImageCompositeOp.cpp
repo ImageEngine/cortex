@@ -42,6 +42,10 @@
 #include "IECore/CompositeAlgo.h"
 #include "IECore/ImagePremultiplyOp.h"
 #include "IECore/ImageUnpremultiplyOp.h"
+#include "IECore/DataConvert.h"
+#include "IECore/ScaledDataConversion.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/DespatchTypedData.h"
 
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathBox.h"
@@ -163,6 +167,39 @@ ConstIntParameterPtr ImageCompositeOp::inputModeParameter() const
 	return m_inputModeParameter;
 }
 
+struct ImageCompositeOp::ChannelConverter
+{
+	typedef FloatVectorDataPtr ReturnType;
+	
+	const std::string &m_channelName;
+	
+	ChannelConverter( const std::string &channelName ) : m_channelName( channelName )
+	{
+	}
+
+	template<typename T>
+	ReturnType operator()( typename T::Ptr data )
+	{
+		assert( data );
+			
+		return DataConvert < T, FloatVectorData, ScaledDataConversion< typename T::ValueType::value_type, float> >()
+		(
+			boost::static_pointer_cast<const T>( data )
+		);
+	};
+	
+	struct ErrorHandler
+	{
+		template<typename T, typename F>
+		void operator()( typename T::ConstPtr data, const F& functor )
+		{
+			assert( data );
+		
+			throw InvalidArgumentException( ( boost::format( "ImageCompositeOp: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+		}
+	};
+};
+
 FloatVectorDataPtr ImageCompositeOp::getChannelData( ImagePrimitivePtr image, const std::string &channelName, bool mustExist )
 {
 	assert( image );
@@ -191,13 +228,14 @@ FloatVectorDataPtr ImageCompositeOp::getChannelData( ImagePrimitivePtr image, co
 	{
 		throw Exception( str( format( "ImageCompositeOp: Primitive variable \"%s\" has no data." ) % channelName ) );
 	}
-
-	if( !it->second.data->isInstanceOf( FloatVectorData::staticTypeId() ) )
-	{
-		throw Exception( str( format( "ImageCompositeOp: Primitive variable \"%s\" has inappropriate type." ) % channelName ) );
-	}
 	
-	return assertedStaticCast< FloatVectorData >( it->second.data );
+	ChannelConverter converter( channelName );
+	
+	return despatchTypedData<			
+			ChannelConverter, 
+			TypeTraits::IsNumericVectorTypedData,
+			ChannelConverter::ErrorHandler
+		>( it->second.data, converter );
 }
 
 float ImageCompositeOp::readChannelData( ConstImagePrimitivePtr image, ConstFloatVectorDataPtr data, const V2i &pixel )
