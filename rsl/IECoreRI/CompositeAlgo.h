@@ -59,10 +59,11 @@ color ieCompositeMultiply( color aVal; color aAlpha; color bVal; color bAlpha )
 	return aVal * bVal;
 }
 
-#define IECORE_COMPOSITE_OVER 0
-#define IECORE_COMPOSITE_MAX 1
-#define IECORE_COMPOSITE_MIN 2
-#define IECORE_COMPOSITE_MULTIPLY 3
+#define IECORE_COMPOSITE_INVALID 0
+#define IECORE_COMPOSITE_OVER 1
+#define IECORE_COMPOSITE_MAX 2
+#define IECORE_COMPOSITE_MIN 3
+#define IECORE_COMPOSITE_MULTIPLY 4
 
 color ieComposite( float operation; color aVal; color aAlpha; color bVal; color bAlpha )
 {
