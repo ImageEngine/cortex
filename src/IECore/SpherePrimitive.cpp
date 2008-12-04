@@ -140,15 +140,7 @@ size_t SpherePrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 void SpherePrimitive::render( RendererPtr renderer )
 {
 	assert( renderer );
-	
-	CompoundDataMap topology;
-	
-	topology["radius"] = new FloatData( m_radius );
-	topology["zMin"] = new FloatData( m_zMin );
-	topology["zMax"] = new FloatData( m_zMax );
-	topology["thetaMax"] = new FloatData( m_thetaMax );			
-	
-	renderer->geometry( "sphere", topology, variables );
+	renderer->sphere( m_radius, m_zMin, m_zMax, m_thetaMax, variables );
 }
 
 void SpherePrimitive::copyFrom( ConstObjectPtr other, IECore::Object::CopyContext *context )
