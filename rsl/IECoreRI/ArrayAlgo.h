@@ -48,6 +48,11 @@ float ieArrayLength( string a[] )
 	return arraylength( a );
 }
 
+float ieArrayLength( color a[] )
+{
+	return arraylength( a );
+}
+
 /// Returns the sum of all the values in the array.
 float ieArraySum( float a[] )
 {
