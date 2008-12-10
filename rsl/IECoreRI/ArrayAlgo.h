@@ -82,4 +82,39 @@ float ieArrayCount( float a[]; float v )
 	return c;
 }
 
+/// Checks that array is the specified length, returning 1 if it is. If it isn't, returns 0 and
+/// outputs an informative error using context and arrayName.
+float ieArrayLengthCheck( float array[]; float length; string context; string arrayName )
+{
+	uniform float l = ieArrayLength( array );
+	if( l!=length )
+	{
+		printf( "ERROR : %s : Incorrect length for %s (%f but should be %f).\n", context, arrayName, l, length );
+		return 0;
+	}
+	return 1;
+}
+
+float ieArrayLengthCheck( string array[]; float length; string context; string arrayName )
+{
+	uniform float l = ieArrayLength( array );
+	if( l!=length )
+	{
+		printf( "ERROR : %s : Incorrect length for %s (%f but should be %f).\n", context, arrayName, l, length );
+		return 0;
+	}
+	return 1;
+}
+
+float ieArrayLengthCheck( color array[]; float length; string context; string arrayName )
+{
+	uniform float l = ieArrayLength( array );
+	if( l!=length )
+	{
+		printf( "ERROR : %s : Incorrect length for %s (%f but should be %f).\n", context, arrayName, l, length );
+		return 0;
+	}
+	return 1;
+}
+
 #endif // IECORERI_ARRAYALGO_H
