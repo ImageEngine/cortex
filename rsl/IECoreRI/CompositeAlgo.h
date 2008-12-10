@@ -64,12 +64,18 @@ color ieCompositeAdd( color aVal; color aAlpha; color bVal; color bAlpha )
 	return aVal + bVal;
 }
 
+color ieCompositeScreen( color aVal; color aAlpha; color bVal; color bAlpha )
+{
+	return aVal + bVal - ( aVal * bVal );
+}
+
 #define IECORE_COMPOSITE_INVALID 0
 #define IECORE_COMPOSITE_OVER 1
 #define IECORE_COMPOSITE_MAX 2
 #define IECORE_COMPOSITE_MIN 3
 #define IECORE_COMPOSITE_MULTIPLY 4
 #define IECORE_COMPOSITE_ADD 5
+#define IECORE_COMPOSITE_SCREEN 6
 
 color ieComposite( float operation; color aVal; color aAlpha; color bVal; color bAlpha )
 {
@@ -92,6 +98,10 @@ color ieComposite( float operation; color aVal; color aAlpha; color bVal; color 
 	else if( operation==IECORE_COMPOSITE_ADD )
 	{
 		return ieCompositeAdd( aVal, aAlpha, bVal, bAlpha );
+	}
+	else if( operation==IECORE_COMPOSITE_SCREEN )
+	{
+		return ieCompositeScreen( aVal, aAlpha, bVal, bAlpha );
 	}
 	return 0;
 }
