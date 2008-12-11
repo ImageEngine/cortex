@@ -50,6 +50,7 @@
 
 #include "IECore/ByteOrder.h"
 #include "IECore/MemoryStream.h"
+#include "IECore/MessageHandler.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/VectorTypedData.h"
 
@@ -1348,11 +1349,12 @@ FileIndexedIO::IndexedFile::~IndexedFile()
 		{	
 			/// Close the file before truncation
 			delete m_stream;
-			delete m_device;	
+			delete m_device;
+				
 			int err = truncate( m_filename.c_str(), *end );	
 			if ( err != 0 )
 			{
-				throw IOException( boost::str( boost::format ( "Error truncating file '%s' : %s" ) % m_filename % strerror( err ) ) );
+				msg( Msg::Error, "FileIndexedIO", boost::format ( "Error truncating file '%s' to %d bytes: %s" ) % m_filename % (*end) % strerror( errno ) );
 			}
 			return;
 		}		
