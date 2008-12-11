@@ -464,6 +464,13 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertRaises( RuntimeError, FileIndexedIO, "./test/FileIndexedIO.fio", "/nonexistantentrypoint", IndexedIOOpenMode.Read)
 		f = None
 		f = FileIndexedIO("./test/FileIndexedIO.fio", "/", IndexedIOOpenMode.Read)
+		
+	def testEmptyWrite(self):	
+		"""Test FileIndexedIO empty file writing"""
+		f = FileIndexedIO("./test/FileIndexedIO.fio", "/", IndexedIOOpenMode.Write)
+		self.assertEqual( f.pwd() , "/" )
+		f = None
+		self.assert_( os.path.exists( "./test/FileIndexedIO.fio" ) )
 
 	def testResetRoot(self):
 		"""Test FileIndexedIO resetRoot"""
