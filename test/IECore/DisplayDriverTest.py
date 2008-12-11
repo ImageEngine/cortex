@@ -120,8 +120,8 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
 
 		params = CompoundData()
-		params['host'] = StringData('localhost')
-		params['port'] = StringData( '1559' )
+		params['displayHost'] = StringData('localhost')
+		params['displayPort'] = StringData( '1559' )
 		idd = ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
 
 		buf = FloatVectorData( width * 3 )
