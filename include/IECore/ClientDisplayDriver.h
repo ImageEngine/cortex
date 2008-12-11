@@ -57,7 +57,7 @@ class ClientDisplayDriver : public DisplayDriver
 		IE_CORE_DECLARERUNTIMETYPED( ClientDisplayDriver, DisplayDriver );
 
 		// Constructor.
-		// Expects two StringData parameters: host and port.
+		// Expects two StringData parameters: displayHost and displayPort.
 		ClientDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
 
 		virtual ~ClientDisplayDriver();
