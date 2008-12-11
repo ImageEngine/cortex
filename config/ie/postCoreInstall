@@ -83,6 +83,7 @@ coreOps = [
 	[ "Rec709ToLinearOp", "Rec709ToLinear", "common/colorSpace" ],
 	[ "LinearToRec709Op", "linearToRec709", "common/colorSpace" ],
 	[ "UVDistortOp", "uvDistort", "common/2d/image" ],
+	[ "ImageCompositeOp", "imageComposite", "common/2d/image" ],
 ]
 
 for op in coreOps : 
