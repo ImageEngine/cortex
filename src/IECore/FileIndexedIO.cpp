@@ -1335,28 +1335,40 @@ FileIndexedIO::IndexPtr FileIndexedIO::IndexedFile::index() const
 
 FileIndexedIO::IndexedFile::~IndexedFile()
 {		
-	boost::optional<Imf::Int64> end = flush();
+	boost::optional<Imf::Int64> indexEnd = flush();
 		
 	assert( m_device );
 	assert( m_stream );
 	assert( m_stream->auto_close() );
 
 	/// Truncate files which we're writing, at the end of the index
-	if ( end &&  ( m_openmode & std::ios::out ) )
+	/// \todo Derived classes also need to take care of this, e.g. MemoryIndexedIO. Add a general "truncate" virtual method in the
+	/// next major version change.
+	if ( indexEnd && ( m_openmode & std::ios::out ) )
 	{		
 		std::fstream *f = dynamic_cast< std::fstream * >( m_device );
+		
+		/// If we're dealing with a physical file...
 		if ( f )
-		{	
-			/// Close the file before truncation
-			delete m_stream;
-			delete m_device;
+		{			
+			f->seekg( 0, std::ios::end );
+			Imf::Int64 fileEnd = f->tellg();
+			
+			// .. and the length of that file extends beyond the end of the index
+			if ( fileEnd > *indexEnd ) 
+			{			
+				/// Close the file before truncation			
+				delete m_stream;
+				delete m_device;
 				
-			int err = truncate( m_filename.c_str(), *end );	
-			if ( err != 0 )
-			{
-				msg( Msg::Error, "FileIndexedIO", boost::format ( "Error truncating file '%s' to %d bytes: %s" ) % m_filename % (*end) % strerror( errno ) );
+				/// Truncate the file at the end of the index
+				int err = truncate( m_filename.c_str(), *indexEnd );	
+				if ( err != 0 )
+				{
+					msg( Msg::Error, "FileIndexedIO", boost::format ( "Error truncating file '%s' to %d bytes: %s" ) % m_filename % (*indexEnd) % strerror( errno ) );
+				}
+				return;
 			}
-			return;
 		}		
 	}
 	
@@ -1539,9 +1551,9 @@ FileIndexedIO::~FileIndexedIO()
 {	
 }
 
-void FileIndexedIO::flush()
+boost::optional<Imf::Int64> FileIndexedIO::flush()
 {
-	m_indexedFile->flush();
+	return m_indexedFile->flush();
 }
 
 std::iostream *FileIndexedIO::device()

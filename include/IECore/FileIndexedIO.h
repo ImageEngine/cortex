@@ -39,6 +39,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "boost/optional.hpp"
+
 #include "IndexedIOInterface.h"
 #include "Exception.h"
 #include "VectorTypedData.h"
@@ -178,7 +180,7 @@ class FileIndexedIO : public IndexedIOInterface
 		bool find( const IndexedIO::EntryID &name, NodePtr &node ) const;
 		NodePtr insert( const IndexedIO::EntryID &name );
 		
-		void flush();
+		boost::optional<Imf::Int64> flush();
 		
 		/// \todo Add virtual method to obtain device name ( e.g filename, "memory", etc )
 		
