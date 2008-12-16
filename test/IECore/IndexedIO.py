@@ -449,6 +449,66 @@ class TestMemoryIndexedIO(unittest.TestCase):
 		f2 = MemoryIndexedIO( buf, "/", IndexedIOOpenMode.Read)
 		self.assertEqual( txt, Object.load( f2, "obj1" ) )
 		self.assertEqual( txt, Object.load( f2, "obj2" ) )
+		
+	def testRmStress(self) :		
+		"""Test MemoryIndexedIO rm (stress test)"""	
+		
+		random.seed( 19 )
+		
+		dataPresent = set()
+		
+		f = MemoryIndexedIO( CharVectorData(), "/", IndexedIOOpenMode.Write)
+		f.mkdir("data")
+		f.chdir("data")		
+		buf = f.buffer()
+		f = None
+		f = MemoryIndexedIO(buf, "/", IndexedIOOpenMode.Append)
+		f.chdir( "data" )	
+		
+		numLoops = 500
+		maxSize = 1000
+		
+		for i in range( 0, numLoops ) :
+			
+			for i in range( 0, maxSize ) :
+
+				index = int( random.random() * maxSize )
+
+				if not index in dataPresent :
+
+					f.write( "data"+str(index), i )
+					dataPresent.add( index )
+					
+				else :
+				
+					f.rm( "data"+str(index) )
+					dataPresent.remove( index )
+				
+				
+			# Reopen the file every now and then, to exercise the index reading/writing
+			if random.random() > 0.8 :
+			
+				buf = f.buffer()
+				f = None		
+				f = MemoryIndexedIO(buf, "/", IndexedIOOpenMode.Append)
+				f.chdir( "data" )		
+			
+			entries = f.ls( IndexedIONullFilter() )
+
+			entryNames = [ x.id() for x in entries ]
+
+			for i in range( 0, maxSize ) :
+
+				dataName = "data"+str(i)
+				if dataName in entryNames :
+
+					self.assert_( i in dataPresent )
+
+				else :
+
+					self.failIf( i in dataPresent )
+
+			self.assertEqual( len(entries), len(dataPresent) )	
 				
 class TestFileIndexedIO(unittest.TestCase):
 	
