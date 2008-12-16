@@ -324,6 +324,15 @@ class TestCINWriter(unittest.TestCase):
 		
 		self.__verifyImageRGB( imgNew, imgOrig )
 		
+	def testOversizeDataWindow( self ) :
+	
+		r = Reader.create( "test/IECore/data/exrFiles/oversizeDataWindow.exr" )
+		img = r.read()
+		
+		w = Writer.create( img, "test/IECore/data/cinFiles/output.cin" )
+		self.assertEqual( type(w), CINImageWriter )		
+		w.write()	
+		
 	def setUp( self ) :
 	
 		if os.path.isfile( "test/IECore/data/cinFiles/output.cin") :
