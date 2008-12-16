@@ -82,14 +82,24 @@ MemoryIndexedIO::~MemoryIndexedIO()
 
 ConstCharVectorDataPtr MemoryIndexedIO::buffer()
 {
-	flush();
+	boost::optional<Imf::Int64> indexEnd = flush();
 	
 	std::stringstream *s = dynamic_cast< std::stringstream *>( device() ) ;
 	assert( s );
 	
 	CharVectorData::ValueType d;
 	const std::string &str = s->str();
-	d.assign( str.begin(), str.end() );
-	assert( str.size() == d.size() );
+	
+	if ( indexEnd )
+	{
+		d.assign( str.begin(), str.end() );
+		d.resize( *indexEnd );
+		assert( d.size() ==  *indexEnd );
+	}	
+	else
+	{
+		d.assign( str.begin(), str.end() );
+	}
+	
 	return new CharVectorData( d );
 }
