@@ -189,7 +189,7 @@ global proc ieParameterisedHolderUIExtraAttributesNewAndReplace( string $attrNam
 	string $dynAttr;
 	for ($dynAttr in $dynAttrs)
 	{
-		if (match("^parm_", $dynAttr) == "")
+		if (match("^parm_", $dynAttr) == "" && $dynAttr != "result" )
 		{
 			attrControlGrp -attribute ($nodeName + "." + $dynAttr);
 		}
