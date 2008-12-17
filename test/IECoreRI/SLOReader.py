@@ -38,6 +38,8 @@ from IECore import *
 from IECoreRI import *
 import os
 
+## \todo We should compile these shaders during the test so we're using the same version
+# of the 3delight library to compile as we're using to load.
 class TestSLOReader( unittest.TestCase ) :
 
 	def shaderPath( self ) :
