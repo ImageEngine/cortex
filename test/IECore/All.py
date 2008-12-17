@@ -160,11 +160,11 @@ from SplineDataTest import *
 from TypeIdTest import *
 from LayeredDictTest import *
 from SplineParameterTest import *
-#from DisplayDriverTest import *
+from DisplayDriverTest import *
 from AttributeStateTest import *
 from CoordinateSystemTest import *
 from SplineToImageTest import *
-#from DisplayTest import *
+from DisplayTest import *
 from MeshTangentsOpTest import *
 from CubeColorLookupTest import *
 from CubeColorLookupDataTest import *
