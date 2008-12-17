@@ -172,6 +172,12 @@ class Renderer : public IECore::Renderer
 		///
 		/// \li <b>"ri:geometricApproximation:motionFactor" and ri:geometricApproximation:focusFactor" FloatData</b><br>
 		///	Passed to RiGeometricApproximation.
+		///
+		/// \li <b>"ri:subsurface" CompoundData</b><br>
+		/// 3delight gets upset if subsurface attributes aren't all specified as a group and in the right order. This
+		/// is a problem as we can't specify order in the AttributeState or Group objects (see todo items there). We therefore
+		/// support their specification as a single CompoundData, and ensure that they are specified in an appropriate order.
+		/// \todo Do the todo items in IECore::Group and IECore::AttributeState and deprecate the ri:subsurface call.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		/// \par Currently supported attributes :
 		///

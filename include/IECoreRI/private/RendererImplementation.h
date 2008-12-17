@@ -159,6 +159,7 @@ class RendererImplementation : public IECore::Renderer
 		void setRightHandedOrientationAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setGeometricApproximationAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setNameAttribute( const std::string &name, IECore::ConstDataPtr d );
+		void setSubsurfaceAttribute( const std::string &name, IECore::ConstDataPtr d );
 
 		IECore::ConstDataPtr getShadingRateAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getMatteAttribute( const std::string &name ) const;

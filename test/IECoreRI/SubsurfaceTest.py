@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,41 +32,50 @@
 #
 ##########################################################################
 
-import sys
+import unittest
+import os.path
+
 import IECore
+import IECoreRI
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
-from Orientation import *
-from MultipleContextsTest import *
-from Camera import *
-from CurvesTest import *
-from TextureOrientationTest import *
-from ArrayPrimVarTest import *
-from CoordinateSystemTest import *
-from IlluminateTest import *
-from SubsurfaceTest import *
+class SubsurfaceTest( unittest.TestCase ) :
 
-if IECore.withFreeType() :
-
-	from TextTest import *
-
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
-
-	def __init__( self ) :
+	outputFileName = os.path.dirname( __file__ ) + "/output/subsurface.rib"
 	
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )		
+	def test( self ) :
+	
+		r = IECoreRI.Renderer( self.outputFileName )
+		
+		r.worldBegin()
+		
+		a = IECore.AttributeState()
+		a.attributes["ri:subsurface"] = IECore.CompoundData(
+			{
+				"visibility" : IECore.StringData( "test" ),
+				"meanfreepath" : IECore.Color3fData( IECore.Color3f( 1 ) ),
+				"reflectance" : IECore.Color3fData( IECore.Color3f( 0 ) ),
+				"refractionindex" : IECore.FloatData( 1.3 ),
+				"scale" : IECore.FloatData( 0.1 ),
+				"shadingrate" : IECore.FloatData( 10 ),
+			}
+		)
+			
+		a.render( r )
+		
+		r.worldEnd()
+		
+		l = "".join( file( self.outputFileName ).readlines() )
+		
+		p1 = l.find( 'Attribute "visibility" "string subsurface" [ "test" ]' )
+		p2 = l.find( 'Attribute "subsurface" "color meanfreepath" [ 1 1 1 ] "color reflectance" [ 0 0 0 ] "float refractionindex" [ 1.3 ] "float scale" [ 0.1 ] "float shadingrate" [ 10 ]' )
+		self.assertNotEqual( p1, -1 )
+		self.assertNotEqual( p2, -1 )
+		self.assert_( p2 > p1 )
+					
+	def tearDown( self ) :
 
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
+		if os.path.exists( self.outputFileName ) :
+			os.remove( self.outputFileName )
+				
+if __name__ == "__main__":
+    unittest.main()   

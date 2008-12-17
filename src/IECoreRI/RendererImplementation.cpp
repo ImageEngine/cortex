@@ -140,6 +140,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["ri:geometricApproximation:motionFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:focusFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["name"] = &IECoreRI::RendererImplementation::setNameAttribute;
+	m_setAttributeHandlers["ri:subsurface"] = &IECoreRI::RendererImplementation::setSubsurfaceAttribute;
 
 	m_getAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::getShadingRateAttribute;
 	m_getAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::getMatteAttribute;
@@ -683,6 +684,38 @@ void IECoreRI::RendererImplementation::setNameAttribute( const std::string &name
 	}
 	ParameterList pl( "name", f );
 	RiAttributeV( "identifier", pl.n(), pl.tokens(), pl.values() );
+}
+
+void IECoreRI::RendererImplementation::setSubsurfaceAttribute( const std::string &name, IECore::ConstDataPtr d )
+{
+	ConstCompoundDataPtr c = runTimeCast<const CompoundData>( d );
+	if( !c )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", format( "%s attribute expects a CompoundData value." ) % name );
+		return;
+	}
+		
+	CompoundDataMap::const_iterator it = c->readable().find( "visibility" );
+	if( it==c->readable().end() )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", format( "%s attribute expected to contain a \"visibility\" value." ) % name );
+		return;
+	}
+	
+	ConstStringDataPtr v = runTimeCast<const StringData>( it->second );
+	if( !v )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", format( "%s attribute \"visibility\" value must be of type StringData." ) % name );
+		return;
+	}
+	
+	const char *ssv = v->readable().c_str();
+	RiAttribute( "visibility", "string subsurface", &ssv, 0 );
+	
+	CompoundDataPtr ssParms = c->copy();
+	ssParms->writable().erase( "visibility" );
+	ParameterList pl( ssParms->readable() );
+	RiAttributeV( "subsurface", pl.n(), pl.tokens(), pl.values() );
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::string &name ) const
