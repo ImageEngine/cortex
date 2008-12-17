@@ -46,6 +46,7 @@
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/BoxOps.h"
 
 #include "boost/format.hpp"
 
@@ -306,7 +307,7 @@ void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 			DataPtr dataContainer = image->variables.find( name )->second.data;
 			assert( dataContainer );
 			
-			ChannelConverter converter( *it, image->getDisplayWindow(), dataWindow, numChannels, channelOffset, imageBuffer );
+			ChannelConverter converter( *it, image->getDisplayWindow(), boxIntersection( dataWindow, image->getDisplayWindow() ), numChannels, channelOffset, imageBuffer );
 		
 			despatchTypedData<			
 				ChannelConverter, 

@@ -276,6 +276,15 @@ class TestDPXWriter(unittest.TestCase):
 		expectedColor = V3f( 0.911133, 0.911133, 0 )
 		self.assert_( ( color - expectedColor).length() < 1.e-3 )
 		
+	def testOversizeDataWindow( self ) :
+	
+		r = Reader.create( "test/IECore/data/exrFiles/oversizeDataWindow.exr" )
+		img = r.read()
+		
+		w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
+		self.assertEqual( type(w), DPXImageWriter )		
+		w.write()		
+		
 	def setUp( self ) :
 	
 		if os.path.isfile( "test/IECore/data/dpx/output.dpx") :

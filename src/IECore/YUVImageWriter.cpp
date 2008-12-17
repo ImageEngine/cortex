@@ -284,7 +284,7 @@ void YUVImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 			DataPtr dataContainer = image->variables.find( name )->second.data;
 			assert( dataContainer );
 			
-			ChannelConverter converter( *it, image->getDisplayWindow(), dataWindow, channelOffset, rgbData );
+			ChannelConverter converter( *it, image->getDisplayWindow(), boxIntersection( dataWindow, image->getDisplayWindow() ), channelOffset, rgbData );
 		
 			despatchTypedData<			
 				ChannelConverter, 
