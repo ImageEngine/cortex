@@ -55,6 +55,8 @@ class Group : public VisibleRenderable
 		/// \todo Consider making the ChildSet of a container type which preserves order and ensures no duplicates. Otherwise
 		/// we're not going to get consistent ordering of children, even if they're added in the same order.
 		typedef std::set<VisibleRenderablePtr> ChildSet;
+		/// \todo Make StateSet preserve order of insertion - there are cases where 3delight cares very much what order
+		/// attributes are specified in (subsurface attributes in particular).
 		typedef std::set<StateRenderablePtr> StateSet;
 	
 		/// \todo Add a constructor taking a list of children and state

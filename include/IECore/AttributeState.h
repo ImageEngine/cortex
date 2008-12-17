@@ -41,6 +41,8 @@ namespace IECore
 {
 
 /// A class to manipulate the attribute state of a Renderer.
+/// \todo Make order of rendering match order of addition - there are cases where
+/// 3delight cares very much what order attributes are specified in (subsurface attributes in particular).
 class AttributeState : public StateRenderable
 {
 	public:
