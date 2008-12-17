@@ -137,8 +137,6 @@ class RendererTest( unittest.TestCase ) :
 			l = " ".join( l.split() )
 			self.assert_( t[2] in l )
 
-		
-	## \todo Make this test actually test something
 	def testProcedural( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testProcedural.rib" )
