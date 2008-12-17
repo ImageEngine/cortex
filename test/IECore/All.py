@@ -176,6 +176,7 @@ from ImagePremultiplyOpTest import *
 from ImageUnpremultiplyOpTest import *
 from ImageCompositeOpTest import *
 from ImageSequenceCompositeOpTest import *
+from YUVImageWriter import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
