@@ -43,6 +43,7 @@
 #include "IECore/CompoundDataConversion.h"
 #include "IECore/LinearToCineonDataConversion.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/BoxOps.h"
 
 #include "IECore/private/cineon.h"
 
@@ -271,7 +272,7 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 		DataPtr dataContainer = image->variables.find( *i )->second.data;
 		assert( dataContainer );
 		
-		ChannelConverter converter( *i, image->getDisplayWindow(), dataWindow, shift, imageBuffer );
+		ChannelConverter converter( *i, image->getDisplayWindow(), boxIntersection( dataWindow, image->getDisplayWindow() ), shift, imageBuffer );
 		
 		despatchTypedData<			
 			ChannelConverter, 
