@@ -148,6 +148,7 @@ class BatchSingleOp( Op ) :
 			try:
 				op()
 			except Exception, e:
+				# \todo Stop hiding true reason for exception!
 				raise Exception, "Op %02d: %s" % (i,str(e))
 
 		return IntData(1)
