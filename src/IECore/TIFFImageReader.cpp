@@ -475,13 +475,7 @@ bool TIFFImageReader::open( bool throwOnFailure )
 	}
 	
 	try
-	{
-		ScopedTIFFErrorHandler errorHandler;
-		if ( setjmp( errorHandler.m_jmpBuffer ) )
-		{
-			throw IOException( errorHandler.m_errorMessage );
-		}
-		
+	{				
 		if ( ! m_tiffImage )
 		{
 			m_tiffImage = TIFFOpen( fileName().c_str(), "r" );
@@ -490,6 +484,12 @@ bool TIFFImageReader::open( bool throwOnFailure )
 			{
 				throw IOException( ( boost::format("TIFFImageReader: Could not open %s ") % fileName() ).str() );
 			}
+		}
+		
+		ScopedTIFFErrorHandler errorHandler;
+		if ( setjmp( errorHandler.m_jmpBuffer ) )
+		{
+			throw IOException( errorHandler.m_errorMessage );
 		}
 		
 		m_numDirectories = 1;	
