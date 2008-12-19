@@ -61,22 +61,25 @@ ScopedTIFFErrorHandler::~ScopedTIFFErrorHandler()
 }
 
 void ScopedTIFFErrorHandler::output(const char* module, const char* fmt, va_list ap)
-{		
-	/// Reconstruct the actual error in a buffer of (arbitrary) maximum length.
-	const unsigned int bufSize = 1024;
-	char buf[bufSize];
-	vsnprintf( &buf[0], bufSize-1, fmt, ap );
-	
-	/// Make sure string is null-terminated
-	buf[bufSize-1] = '\0';
-
-	std::string context = "libtiff";
-	if (module)
-	{
-		context = std::string( module );
-	} 
-	
+{	
 	ScopedTIFFErrorHandler *handler = handlers().back();
-	handler->m_errorMessage = ( boost::format( "%s : %s" ) % context % buf ).str() ;
+	// Ensure that any variables we allocate here don't get lost due to the longjmp call
+	{	
+		/// Reconstruct the actual error in a buffer of (arbitrary) maximum length.
+		const unsigned int bufSize = 1024;
+		char buf[bufSize];
+		vsnprintf( &buf[0], bufSize-1, fmt, ap );
+
+		/// Make sure string is null-terminated
+		buf[bufSize-1] = '\0';
+
+		std::string context = "libtiff";
+		if (module)
+		{
+			context = std::string( module );
+		} 
+
+		handler->m_errorMessage = ( boost::format( "%s : %s" ) % context % buf ).str() ;
+	}
 	longjmp( handler->m_jmpBuffer, 1 );
 }
