@@ -148,6 +148,7 @@ DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::
 		{
 			// so we can read incomplete files
 			msg( Msg::Warning, "EXRImageReader::readChannel", e.what() );
+			return data;
 		}
 	}
 	else
@@ -182,6 +183,7 @@ DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::
 		{
 			// so we can read incomplete files
 			msg( Msg::Warning, "EXRImageReader::readChannel", e.what() );
+			return data;
 		}	
 	}
 	
