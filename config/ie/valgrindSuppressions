@@ -43,3 +43,10 @@
    fun:deflate
 }
 
+{
+   Syscall param socketcall.sendto(msg) points to uninitialised byte(s)
+   Memcheck:Param
+   socketcall.sendto(msg)
+   obj:/lib/tls/libc-2.3.4.so
+   fun:getaddrinfo	
+}
