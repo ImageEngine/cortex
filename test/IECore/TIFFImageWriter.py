@@ -446,6 +446,15 @@ class TestTIFFImageWriter(unittest.TestCase):
 			)	
 							
 			self.assert_( ( color - pixelColor[1]).length() < 1.e-3 )	
+			
+	def testOversizeDataWindow( self ) :
+	
+		r = Reader.create( "test/IECore/data/exrFiles/oversizeDataWindow.exr" )
+		img = r.read()
+		
+		w = Writer.create( img, "test/IECore/data/tiff/output.tif" )
+		self.assertEqual( type(w), TIFFImageWriter )		
+		w.write()	
 									
 		
 	def setUp( self ) :
