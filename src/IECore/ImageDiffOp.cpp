@@ -52,6 +52,7 @@
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
 #include "IECore/MeanSquaredError.h"
+#include "IECore/ImageCropOp.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -166,8 +167,8 @@ struct ImageDiffOp::FloatConverter
 
 ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 {
-	ConstImagePrimitivePtr imageA = m_imageAParameter->getTypedValue< ImagePrimitive >();
-	ConstImagePrimitivePtr imageB = m_imageBParameter->getTypedValue< ImagePrimitive >();
+	ImagePrimitivePtr imageA = m_imageAParameter->getTypedValue< ImagePrimitive >();
+	ImagePrimitivePtr imageB = m_imageBParameter->getTypedValue< ImagePrimitive >();
 
 	if ( imageA == imageB )
 	{
@@ -192,14 +193,18 @@ ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 	{
 		return new BoolData( true );
 	}
-
-	/// \todo Allow differing data windows. Cchange iteration to be over entire displayWindow rather than over channel data,
-	/// considering data outside of the dataWindow to be 0.
-	if ( imageA->getDataWindow() != imageB->getDataWindow() )
-	{
-		return new BoolData( true );
-	}
-
+	
+	/// Use the CropOp to expand the dataWindows of both images to fill the display window
+	ImageCropOpPtr cropOp = new ImageCropOp();
+	cropOp->matchDataWindowParameter()->setTypedValue( true );
+	cropOp->cropBoxParameter()->setTypedValue( imageA->getDisplayWindow() );
+	
+	cropOp->inputParameter()->setValue( imageA );	
+	imageA = runTimeCast< ImagePrimitive >( cropOp->operate() );
+	
+	cropOp->inputParameter()->setValue( imageB );	
+	imageB = runTimeCast< ImagePrimitive >( cropOp->operate() );
+	
 	const float maxError = m_maxErrorParameter->getNumericValue();
 
 	const bool skipMissingChannels = m_skipMissingChannelsParameter->getTypedValue();
