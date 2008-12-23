@@ -73,6 +73,8 @@ void YUVImageWriter::constructParameters()
 {
 	IntParameter::PresetsMap formatPresets;
 	formatPresets["yuv420p"] = YUV420P;
+	formatPresets["yuv422p"] = YUV422P;
+	formatPresets["yuv444p"] = YUV444P;
 
 	m_formatParameter = new IntParameter(
 	        "format",
@@ -335,15 +337,47 @@ void YUVImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 			
 			yuvData->writable()[i] = yCbCr;
 		}
-
-		/// Only 8-bit YUV 4:2:0 for now. Need to handle other cases here as and when they come up.
-		assert( m_formatParameter->getNumericValue() == YUV420P );
+		
+		/// \todo Chroma-filtering. Ideally we should do a proper sampled downsize of the chroma, rather than skipping data
+		/// elements. This would avoid any aliasing.
+		
+		int lumaStepX = 1;
+		int lumaStepY = 1;
+		
+		int chromaUStepX = 1;
+		int chromaUStepY = 1;		
+		
+		int chromaVStepX = 1;		
+		int chromaVStepY = 1;
+		
+		switch ( m_formatParameter->getNumericValue() )
+		{
+			case YUV420P :
+				/// Half res in U and V
+				chromaUStepX = 2;
+				chromaUStepY = 2;
+				chromaVStepX = 2;
+				chromaVStepY = 2;				
+				break;
+			case YUV422P :
+				/// Half horizonal res in U and V
+				chromaUStepX = 2;
+				chromaUStepY = 1;
+				chromaVStepX = 2;
+				chromaVStepY = 1;				
+				break;	
+			case YUV444P :
+				/// Full res in U and V
+				break;		
+			default :
+				assert( false );
+		}				
 					
 		ScaledDataConversion<float, unsigned char> converter;
 		/// Y-plane				
-		for ( int y = 0; y < displayHeight; y++ )
+		for ( int y = 0; y < displayHeight; y += lumaStepX )
 		{
-			for ( int x = 0; x < displayWidth; x++ )
+			for ( int x = 0; x < displayWidth; x += lumaStepY )
 			{								
 				const V3f yCbCr = yuvData->readable()[y*displayWidth + x];
 				
@@ -354,9 +388,9 @@ void YUVImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 		}
 		
 		/// U-plane			
-		for ( int y = 0; y < displayHeight; y+=2 )
+		for ( int y = 0; y < displayHeight; y+=chromaUStepX )
 		{
-			for ( int x = 0; x < displayWidth; x+=2 )
+			for ( int x = 0; x < displayWidth; x+=chromaUStepY )
 			{								
 				const V3f yCbCr = yuvData->readable()[y*displayWidth + x];
 				
@@ -368,9 +402,9 @@ void YUVImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 		}
 		
 		/// V-plane			
-		for ( int y = 0; y < displayHeight; y+=2 )
+		for ( int y = 0; y < displayHeight; y+=chromaVStepX )
 		{
-			for ( int x = 0; x < displayWidth; x+=2 )
+			for ( int x = 0; x < displayWidth; x+=chromaVStepY )
 			{								
 				const V3f yCbCr = yuvData->readable()[y*displayWidth + x];
 				

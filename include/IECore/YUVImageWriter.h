@@ -52,7 +52,14 @@ class YUVImageWriter : public ImageWriter
 		typedef enum
 		{
 			/// Write a YUV 4:2:0 file as 3 separate image planes, Y followed by U, then V
-			YUV420P
+			YUV420P,
+			
+			/// Write a YUV 4:2:2 file as 3 separate image planes, Y followed by U, then V
+			YUV422P,
+			
+			/// Write a YUV 4:4:4 file as 3 separate image planes, Y followed by U, then V
+			YUV444P,
+			
 		} Format;
 
 		IE_CORE_DECLARERUNTIMETYPED( YUVImageWriter, ImageWriter )
