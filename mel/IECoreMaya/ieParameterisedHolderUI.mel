@@ -145,9 +145,17 @@ global proc ieParameterisedHolderUIClassControlNewAndReplace( string $attrName )
 		text -align right -label $class -ann $description;
 		text -align left -font boldLabelFont -label ("v"+$currentVersion);
 		popupMenu;
-			for( $version in $versions )
+			/// Put most recent (and presumably most relevant) versions first
+			int $latestVersionIdx = size( $versions ) - 1 ;			
+			for( $i = $latestVersionIdx; $i >= 0; $i = $i - 1 )
 			{
- 				menuItem -label ("v"+$version) -command ("ieParameterisedHolderUIClassControlVersionCallback " + $node + " " + $version);
+				/// Break the popupMenu into multiple cascading menus with 30 elements maximum in each, so that 
+				/// we don't exceed the screen height
+				if ( $i != $latestVersionIdx && ( $i - $latestVersionIdx ) % 30 == 0 )
+				{
+					menuItem -label "More..." -subMenu true;
+				}
+ 				menuItem -label ("v"+$versions[$i]) -command ("ieParameterisedHolderUIClassControlVersionCallback " + $node + " " + $versions[$i]);
 			}
 		setParent ..;
 	setParent ..;
