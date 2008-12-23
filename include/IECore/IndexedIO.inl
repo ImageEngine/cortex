@@ -448,11 +448,8 @@ struct DataFlattenTraits
 	static const char* flatten(const T& x)
 	{ 
 		unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
-		
-		char *data = new char[size];
-		assert(data);
 						
-		Detail::OutputMemoryStream mstream(data);
+		Detail::OutputMemoryStream mstream(new char[size]);
 		Detail::Writer<Detail::MemoryStreamIO, Detail::OutputMemoryStream, T>::write(mstream, x);		
 			
 		return mstream.head();
