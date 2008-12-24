@@ -360,25 +360,11 @@ void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned l
 			throw IOException(name);
 		}
 		
-		char *r = 0;
-		try
-		{
-			r = new char[size];
-			f.read(r, size);
-			if (f.fail()) throw IOException(name);
+		std::vector<char> buf( size );
+		f.read(&buf[0], size);
+		if (f.fail()) throw IOException(name);
 		
-			IndexedIO::DataFlattenTraits<T*>::unflatten(r, x, arrayLength);
-		}
-		catch (...)
-		{
-			if (r)
-			{
-				delete [] r;
-			}
-			throw;
-		}
-		
-		delete[] r;
+		IndexedIO::DataFlattenTraits<T*>::unflatten(&buf[0], x, arrayLength);
 	}	
 	catch (std::exception &e)
 	{
@@ -416,7 +402,8 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 	{
 		throw IOException(name);
 	}
-
+	const char *data = 0;
+	
 	try
 	{		
 		unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
@@ -431,19 +418,19 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 		f.write( reinterpret_cast<const char *>(&datatype), sizeof(IndexedIO::DataType) );
 		if (f.fail()) throw IOException(name);
 			
-		const char *data = IndexedIO::DataFlattenTraits<T>::flatten(x);
-		f.write( data, size );
-		
-		//IndexedIO::DataFlattenTraits<T>::free(data);
-		if (f.fail()) throw IOException(name);			
+		data = IndexedIO::DataFlattenTraits<T>::flatten(x);
+		f.write( data, size );		
+		if (f.fail()) throw IOException(name);						
 	} 
 	catch (std::exception &e)
-	{
-		f.close();
+	{		
+		IndexedIO::DataFlattenTraits<T>::free(data);		
+		f.close();		
 		
 		throw;
 	}
 
+	IndexedIO::DataFlattenTraits<T>::free(data);	
 	f.close();		
 }
 		
@@ -486,25 +473,11 @@ void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 			throw IOException(name);
 		}
 
-		char *r = 0;
-		try
-		{
-			r = new char[size];			
-			f.read(r, size);
-			if (f.fail()) throw IOException(name);		 
+		std::vector<char> buf( size );
+		f.read(&buf[0], size);
+		if (f.fail()) throw IOException(name);		 
 			
-			IndexedIO::DataFlattenTraits<T>::unflatten( r, x );
-		} 
-		catch (...)
-		{
-			if (r)
-			{
-				delete[] r;
-			}
-			throw;
-		}
-		
-		delete[] r;
+		IndexedIO::DataFlattenTraits<T>::unflatten( &buf[0], x );
 	}
 	catch (std::exception &e)
 	{
