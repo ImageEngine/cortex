@@ -44,6 +44,14 @@
 }
 
 {
+   zlib error
+   Memcheck:Cond
+   obj:/software/tools/lib/rhel4.i686/gcc/3.3.4/libz.so.1.2.1.2
+   obj:/software/tools/lib/rhel4.i686/gcc/3.3.4/libz.so.1.2.1.2
+   fun:deflate
+}
+
+{
    Syscall param socketcall.sendto(msg) points to uninitialised byte(s)
    Memcheck:Param
    socketcall.sendto(msg)
