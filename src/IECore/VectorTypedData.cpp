@@ -43,6 +43,8 @@ using namespace IECore;
 
 LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeDescription( LongVectorDataTypeId, "LongVectorData" );
 
+/// \todo Rewrite without using macros
+
 #define IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )										\
 	template<>																								\
 	void TNAME::memoryUsage( Object::MemoryAccumulator &accumulator ) const			\
@@ -96,8 +98,12 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );				\
 		IndexedIO::Entry e = container->ls( "value" );												\
 		writable().resize( e.arrayLength() );														\
-		TNAME::ValueType::value_type *p = &(writable()[0]);											\
-		container->read( "value", p, e.arrayLength() );												\
+		if ( e.arrayLength() ) \
+		{ \
+			TNAME::ValueType::value_type *p = &(writable()[0]); \
+			assert( p ); \
+			container->read( "value", p, e.arrayLength() ); \
+		} \
 	}																								\
 	
 #define IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )								\
@@ -117,8 +123,12 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );				\
 		IndexedIO::Entry e = container->ls( "value" );												\
 		writable().resize( e.arrayLength() / N );													\
-		TNAME::BaseType *p = baseWritable();														\
-		container->read( "value", p, e.arrayLength() );												\
+		if ( e.arrayLength() ) \
+		{ \
+			TNAME::BaseType *p = baseWritable(); \
+			assert( p ) ; \
+			container->read( "value", p, e.arrayLength() ); \
+		} \
 	}	
 	
 #define IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( TNAME, TID )			\
