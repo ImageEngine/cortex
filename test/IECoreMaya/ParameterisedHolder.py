@@ -98,7 +98,14 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		self.assert_( fn1.userNode() )
 		self.assert_( fn2.userNode() ) # This failure appears to be due to a Maya bug. Awaiting confirmation of this.
 		
+	def tearDown( self ) :
 		
+		for f in [ "test/IECoreMaya/reference.ma" , "test/IECoreMaya/referenceMaster.ma" ] :
+		
+			if os.path.exists( f ) :
+		
+				os.remove( f )
+			
 		
 		
 
