@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -59,8 +59,50 @@ class TestParameterisedHolder( unittest.TestCase ) :
 				
 		cmds.setAttr( pl.name(), "testValue2", typ="string" )
 		h.setParameterisedValue( p.parameters().filename )
-		self.assertEqual( p.parameters().filename.getValue().value, "testValue2" )		
+		self.assertEqual( p.parameters().filename.getValue().value, "testValue2" )
+					
+	def testParameterisedHolderSetReference( self ):	
+		""" Test multiple references to ieParameterisedHolderSet nodes """
+								
+		nodeType = "ieParameterisedHolderSet" 	
+				
+		nodeName = cmds.createNode( nodeType )
+		
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "reference.ma" ) )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		cmds.file( new = True, force = True )				
+		cmds.file( scene, reference = True, namespace = "ns1" )
+		cmds.file( scene, reference = True, namespace = "ns2" )
+		
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "referenceMaster.ma" ) )
+		masterScene = cmds.file( force = True, type = "mayaAscii", save = True )
+				
+		cmds.file( masterScene, force = True, open = True )
+		
+		nodeName1 = "ns1:" + nodeName	
+		nodeName2 = "ns2:" + nodeName	
+		
+		l = OpenMaya.MSelectionList()
+		l.add( nodeName1 )
+		l.add( nodeName2 )
+				
+		node1 = OpenMaya.MObject()
+		l.getDependNode( 0, node1 )
+		node2 = OpenMaya.MObject()
+		l.getDependNode( 1, node2 )
+		
+		fn1 = OpenMaya.MFnDependencyNode( node1 )
+		fn2 = OpenMaya.MFnDependencyNode( node2 )
+		
+		self.assert_( fn1.userNode() )
+		self.assert_( fn2.userNode() ) # This failure appears to be due to a Maya bug. Awaiting confirmation of this.
+		
+		
+		
+		
 
+		
 
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
