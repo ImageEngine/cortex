@@ -62,7 +62,6 @@
 #include "IECoreMaya/ObjectData.h"
 #include "IECoreMaya/ConverterHolder.h"
 #include "IECoreMaya/ImageFile.h"
-#include "IECoreMaya/ImageTextureNode.h"
 
 namespace IECoreMaya
 {
@@ -132,10 +131,6 @@ MStatus initialize(MFnPlugin &plugin)
 			TransientParameterisedHolderNode::creator, TransientParameterisedHolderNode::initialize );
 		assert( s );	
 		
-		const MString texture2dClassify( "texture/2d" );
-		s = plugin.registerNode( "ieImageTexture", ImageTextureNode::id, ImageTextureNode::creator, ImageTextureNode::initialize,	MPxNode::kDependNode, &texture2dClassify );
-		assert( s );
-		
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
 		
@@ -189,7 +184,6 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( OpHolderNode::id );
 		s = plugin.deregisterNode( ConverterHolder::id );
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );
-		s = plugin.deregisterNode( ImageTextureNode::id );
 		
 		s = plugin.deregisterCommand( "iePython" );
 		s = plugin.deregisterCommand( "ieSystemExit" );
