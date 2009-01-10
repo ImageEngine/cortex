@@ -62,6 +62,7 @@
 #include "IECoreMaya/ObjectData.h"
 #include "IECoreMaya/ConverterHolder.h"
 #include "IECoreMaya/ImageFile.h"
+#include "IECoreMaya/ImageTextureNode.h"
 
 namespace IECoreMaya
 {
@@ -82,6 +83,8 @@ MStatus initialize(MFnPlugin &plugin)
 	
 		// register plugin
 		
+		s = plugin.registerData( ObjectData::typeName, ObjectData::id, ObjectData::creator);
+		
 		s = plugin.registerNode( "ieCacheSet", CacheSet::id, CacheSet::creator, CacheSet::initialize,
 			MPxNode::kObjectSet );
 					
@@ -90,19 +93,19 @@ MStatus initialize(MFnPlugin &plugin)
 		assert( s );	
 			
 		s = plugin.registerNode( ParameterisedHolderLocator::typeName, ParameterisedHolderLocator::id, 
-			ParameterisedHolderLocator::creator, ParameterisedHolderLocator::initialize );
+			ParameterisedHolderLocator::creator, ParameterisedHolderLocator::initialize, MPxNode::kLocatorNode );
 		assert( s );
 		
 		s = plugin.registerNode( ParameterisedHolderDeformer::typeName, ParameterisedHolderDeformer::id, 
-			ParameterisedHolderDeformer::creator, ParameterisedHolderDeformer::initialize );
+			ParameterisedHolderDeformer::creator, ParameterisedHolderDeformer::initialize, MPxNode::kDeformerNode );
 		assert( s );
 		
 		s = plugin.registerNode( ParameterisedHolderField::typeName, ParameterisedHolderField::id, 
-			ParameterisedHolderField::creator, ParameterisedHolderField::initialize );
+			ParameterisedHolderField::creator, ParameterisedHolderField::initialize, MPxNode::kFieldNode );
 		assert( s );
 		
 		s = plugin.registerNode( ParameterisedHolderSet::typeName, ParameterisedHolderSet::id, 
-			ParameterisedHolderSet::creator, ParameterisedHolderSet::initialize );
+			ParameterisedHolderSet::creator, ParameterisedHolderSet::initialize, MPxNode::kObjectSet );
 		assert( s );
 		
 		s = plugin.registerShape( ParameterisedHolderSurfaceShape::typeName, ParameterisedHolderSurfaceShape::id, 
@@ -129,19 +132,21 @@ MStatus initialize(MFnPlugin &plugin)
 			TransientParameterisedHolderNode::creator, TransientParameterisedHolderNode::initialize );
 		assert( s );	
 		
+		const MString texture2dClassify( "texture/2d" );
+		s = plugin.registerNode( "ieImageTexture", ImageTextureNode::id, ImageTextureNode::creator, ImageTextureNode::initialize,	MPxNode::kDependNode, &texture2dClassify );
+		assert( s );
+		
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
 		
-		s = plugin.registerCommand( "ieSystemExit", SystemExitCmd::creator );
-		
-		s = plugin.registerData( ObjectData::typeName, ObjectData::id, ObjectData::creator);
+		s = plugin.registerCommand( "ieSystemExit", SystemExitCmd::creator );				
 		
 		MStringArray imageFileExtensions;
 		imageFileExtensions.append( "exr" );
 		
 		s = plugin.registerImageFile( "ieImageFile", ImageFile::creator, imageFileExtensions);
 		assert( s );
-		
+					
 		/// \todo This may well need to change, depending on how we allow people to install
 		/// the mel files.
 		MString cmd = "source \"IECoreMaya/IECoreMaya.mel\";";
@@ -174,10 +179,17 @@ MStatus uninitialize(MFnPlugin &plugin)
 		
 		s = plugin.deregisterNode( CacheSet::id );
 		s = plugin.deregisterNode( ParameterisedHolderNode::id );
+		s = plugin.deregisterNode( ParameterisedHolderLocator::id );
+		s = plugin.deregisterNode( ParameterisedHolderDeformer::id );
+		s = plugin.deregisterNode( ParameterisedHolderField::id );
+		s = plugin.deregisterNode( ParameterisedHolderSet::id );
+		s = plugin.deregisterNode( ParameterisedHolderSurfaceShape::id );
+		s = plugin.deregisterNode( ParameterisedHolderComponentShape::id );		
 		s = plugin.deregisterNode( ProceduralHolder::id );
 		s = plugin.deregisterNode( OpHolderNode::id );
 		s = plugin.deregisterNode( ConverterHolder::id );
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );
+		s = plugin.deregisterNode( ImageTextureNode::id );
 		
 		s = plugin.deregisterCommand( "iePython" );
 		s = plugin.deregisterCommand( "ieSystemExit" );
