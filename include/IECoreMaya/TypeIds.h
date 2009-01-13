@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,7 +62,9 @@ enum TypeId
 	ToMayaArrayDataConverterTypeId = 109018,
 	ToMayaPlugConverterTypeId = 109019,
 	FromMayaPluginDataPlugConverterTypeId = 109020,	
-	FromMayaTransformConverterTypeId = 109021,	
+	FromMayaTransformConverterTypeId = 109021,
+	FromMayaImageConverterTypeId = 109003,	
+	ToMayaImageConverterTypeId = 109004,	
 	LastTypeId = 109999
 
 };
