@@ -61,7 +61,7 @@ void bindTypeId()
 		.value( "FromMayaDagNodeConverter", FromMayaDagNodeConverterTypeId )
 		.value( "FromMayaPluginDataPlugConverter", FromMayaPluginDataPlugConverterTypeId )		
 		.value( "FromMayaTransformConverter", FromMayaTransformConverterTypeId )				
-		.value( "FromMayaImageConverter", FromMayaImageConverter )						
+		.value( "FromMayaImageConverter", FromMayaImageConverterTypeId )						
 	;
 }
 
