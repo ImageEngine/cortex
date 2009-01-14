@@ -117,4 +117,26 @@ float ieArrayLengthCheck( color array[]; float length; string context; string ar
 	return 1;
 }
 
+/// Multiplies all the elements of an array in place.
+void ieArrayMultiply( output color array[]; color multiplier )
+{
+	uniform float l = ieArrayLength( array );
+	uniform float i = 0;
+	for( i=0; i<l; i+=1 )
+	{
+		array[i] *= multiplier;
+	}
+}
+
+/// Multiplies all the elements of an array in place.
+void ieArrayMultiply( output float array[]; float multiplier )
+{
+	uniform float l = ieArrayLength( array );
+	uniform float i = 0;
+	for( i=0; i<l; i+=1 )
+	{
+		array[i] *= multiplier;
+	}
+}
+
 #endif // IECORERI_ARRAYALGO_H
