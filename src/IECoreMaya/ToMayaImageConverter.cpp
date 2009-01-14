@@ -127,28 +127,76 @@ void ToMayaImageConverter::writeChannel( MImage &image, typename TypedData< std:
 {
 	assert( channelOffset < numChannels );
 	
+	ConstImagePrimitivePtr toConvert = runTimeCast<const ImagePrimitive>( srcParameter()->getValidatedValue() );
+	assert( toConvert );
+	
+	unsigned width, height;
+	image.getSize( width, height );
+	
+	const Imath::Box2i &dataWindow = toConvert->getDataWindow();
+	const Imath::Box2i &displayWindow = toConvert->getDisplayWindow();
+	
+	unsigned int dataWidth = dataWindow.size().x + 1;
+	unsigned int dataHeight = dataWindow.size().y + 1;
+	
+	Imath::V2i dataOffset = dataWindow.min - displayWindow.min ;
+		
+	boost::multi_array_ref< const T, 2 > src( &channelData->readable()[0], boost::extents[dataHeight][dataWidth] );	
+	boost::multi_array_ref< T, 3 > dst( MImageAccessor<T>::getPixels( image ), boost::extents[ height ][ width ][ numChannels ] );
+	
+	for ( unsigned x = 0; x < dataWidth; x++ )
+	{
+		for ( unsigned y = 0; y < dataHeight; y++ )
+		{			
+			/// Vertical flip, to match Maya	
+			dst[ ( height - 1 ) - ( y + dataOffset.y ) ][ x + dataOffset.x ][channelOffset] = src[y][x];
+		}
+	}	
+}
+
+template<typename T>
+void ToMayaImageConverter::writeAlpha( MImage &image, const T &alpha ) const
+{
+	const int numChannels = 4;
+	const int channelOffset = 3;
+
 	unsigned width, height;
 	image.getSize( width, height );
 		
-	boost::multi_array_ref< const T, 2 > src( &channelData->readable()[0], boost::extents[height][width] );	
 	boost::multi_array_ref< T, 3 > dst( MImageAccessor<T>::getPixels( image ), boost::extents[ height ][ width ][ numChannels ] );
 	
 	for ( unsigned x = 0; x < width; x++ )
 	{
 		for ( unsigned y = 0; y < height; y++ )
 		{			
-			/// Vertical flip, to match Maya	
-			dst[height - y  - 1][x][channelOffset] = src[y][x];
+			dst[y][x][channelOffset] = alpha;
 		}
 	}	
 }
 
 MStatus ToMayaImageConverter::convert( MImage &image ) const
 {
+	MStatus s;
 	ConstImagePrimitivePtr toConvert = runTimeCast<const ImagePrimitive>( srcParameter()->getValidatedValue() );
 	assert( toConvert );
 	
+	unsigned int width = toConvert->getDisplayWindow().size().x + 1;
+	unsigned int height = toConvert->getDisplayWindow().size().y + 1;		
 	
+	MImage::MPixelType pixelType = MImage::kUnknown;
+	switch( typeParameter()->getNumericValue() )
+	{
+		case Float :
+			pixelType = MImage::kFloat;
+			break;
+		case Byte:
+			pixelType = MImage::kByte;		
+			break;
+		default :
+		
+			assert( false );
+	}
+		
 	/// Get the channels RGBA at the front, in that order, if they exist
 	vector<string> desiredChannelOrder;
 	desiredChannelOrder.push_back( "R" );
@@ -189,29 +237,12 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 	{
 		return MS::kFailure;
 	}
+	
+	unsigned numChannels = 4; // We always add an alpha if one is not present. 
 			
-	unsigned int width = toConvert->getDataWindow().size().x + 1;
-	unsigned int height = toConvert->getDataWindow().size().y + 1;	
-	
-	unsigned numChannels = rgbChannelsFound + ( haveAlpha ? 1 : 0 );
-	
-	MImage::MPixelType pixelType = MImage::kUnknown;
-	switch( typeParameter()->getNumericValue() )
-	{
-		case Float :
-			pixelType = MImage::kFloat;
-			break;
-		case Byte:
-			pixelType = MImage::kByte;		
-			break;
-		default :
-		
-			assert( false );
-	}
-	
-	MStatus s = image.create( width, height, numChannels, pixelType );
+	s = image.create( width, height, numChannels, pixelType );
 	if ( !s )
-	{		
+	{			
 		return s;
 	}
 	
@@ -254,12 +285,28 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 			default :
 
 				assert( false );
-		}
-		
-	
-			
+		}	
 	}
 	
+	if ( !haveAlpha )
+	{
+		switch( pixelType )
+		{
+			case MImage::kFloat :
+			{
+				writeAlpha<float>( image, 1.0 );
+			}
+			break;
+			case MImage::kByte :
+			{
+				writeAlpha<unsigned char>( image, 255 );
+			}
+			break;
+			default :
+
+				assert( false );
+		}	
+	}
 	
 	return MS::kSuccess;
 }

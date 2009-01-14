@@ -85,6 +85,9 @@ class ToMayaImageConverter : public ToMayaConverter
 	
 		template<typename T>
 		void writeChannel( MImage &image, typename IECore::TypedData< std::vector<T> >::Ptr channelData, unsigned channelOffset, unsigned numChannels ) const;
+		
+		template<typename T>
+		void writeAlpha( MImage &image, const T &alpha ) const;
 	
 		ToMayaImageConverter( IECore::ConstObjectPtr obj );
 
