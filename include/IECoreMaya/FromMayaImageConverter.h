@@ -52,6 +52,7 @@ namespace IECoreMaya
 IE_CORE_FORWARDDECLARE( FromMayaImageConverter );
 
 /// The FromMayaImageConverter class allows conversion from MImages to an IECore::ImagePrimitive
+/// \todo Add C++ unit tests
 class FromMayaImageConverter : public FromMayaConverter
 {
 
