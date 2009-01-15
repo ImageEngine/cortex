@@ -123,6 +123,9 @@ def __postMenu( parent, definition ) :
 
 		pathComponents = path.strip( "/" ).split( "/" )
 		name = pathComponents[0]
+		## \todo We shouldn't use interToUI here, as it reduces the freedom you have to name
+		# menu items the way you want. For instance, you might want a menu item to match a filename
+		# or nodename exactly, and the interToUI call ruins that.
 		label = maya.mel.eval( 'interToUI( "%s" )' % name )
 		if len( pathComponents ) > 1 :
 			# a submenu
