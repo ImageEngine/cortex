@@ -239,7 +239,8 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 	}
 	
 	unsigned numChannels = 4; // We always add an alpha if one is not present. 
-			
+
+	/// \todo We could optimise here by not recreating the image if the existing one matches our exact requirements			
 	s = image.create( width, height, numChannels, pixelType );
 	if ( !s )
 	{			
