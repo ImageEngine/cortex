@@ -50,7 +50,8 @@
 #
 # assert( E.Orange == E( 1 ) )
 # assert( E.Orange != E.Apple )
-
+#
+# \todo Add a classmethod to return a tuple of all values.
 def create( *names ) :
 
 	class Enum :
