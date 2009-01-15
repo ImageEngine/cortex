@@ -116,6 +116,11 @@ else :
 
 withAsserts = getOption( "WITH_ASSERTS", withAsserts )
 if not withAsserts :
+	# \todo This doesnt disable ALL asserts - boost ones are controlled
+	# by their own preprocessor symbol. We may want to specify
+	# "-DBOOST_DISABLE_ASSERTS" in this list too, to disable Boost's
+	# asserts here. It shows a ~5% speedup on the test cases, so could
+	# be worthwhile.
 	CXXFLAGS += [ "-DNDEBUG" ]
 
 TESTCXXFLAGS = copy.copy( CXXFLAGS )
