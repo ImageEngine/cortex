@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@
 #include "maya/MPxDeformerNode.h"
 #include "maya/MPxObjectSet.h"
 #include "maya/MPxFieldNode.h"
+#include "maya/MPxImagePlane.h"
 #include "maya/MGlobal.h"
 
 #include "IECore/Parameterised.h"
@@ -62,6 +63,7 @@
 #include "IECoreMaya/ObjectData.h"
 #include "IECoreMaya/ConverterHolder.h"
 #include "IECoreMaya/ImageFile.h"
+#include "IECoreMaya/ImagePlaneHolder.h"
 
 namespace IECoreMaya
 {
@@ -114,7 +116,7 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerShape( ParameterisedHolderComponentShape::typeName, ParameterisedHolderComponentShape::id, 
 			ParameterisedHolderComponentShape::creator, ParameterisedHolderComponentShape::initialize, ProceduralHolderUI::creator );
 		assert( s );
-		
+
 		s = plugin.registerShape( "ieProceduralHolder", ProceduralHolder::id, 
 			ProceduralHolder::creator, ProceduralHolder::initialize, ProceduralHolderUI::creator );	
 		assert( s );
@@ -129,7 +131,15 @@ MStatus initialize(MFnPlugin &plugin)
 		
 		s = plugin.registerNode( TransientParameterisedHolderNode::typeName, TransientParameterisedHolderNode::id, 
 			TransientParameterisedHolderNode::creator, TransientParameterisedHolderNode::initialize );
-		assert( s );	
+		assert( s );
+		
+		s = plugin.registerNode( ParameterisedHolderImagePlane::typeName, ParameterisedHolderImagePlane::id, 
+			ParameterisedHolderImagePlane::creator, ParameterisedHolderImagePlane::initialize, MPxNode::kImagePlaneNode );
+		assert( s );
+		
+		s = plugin.registerNode( "ieImagePlaneHolder", ImagePlaneHolder::id, 
+			ImagePlaneHolder::creator, ImagePlaneHolder::initialize, MPxNode::kImagePlaneNode );
+		assert( s );			
 		
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
@@ -184,6 +194,8 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( OpHolderNode::id );
 		s = plugin.deregisterNode( ConverterHolder::id );
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );
+		s = plugin.deregisterNode( ParameterisedHolderImagePlane::id );
+		s = plugin.deregisterNode( ImagePlaneHolder::id );
 		
 		s = plugin.deregisterCommand( "iePython" );
 		s = plugin.deregisterCommand( "ieSystemExit" );

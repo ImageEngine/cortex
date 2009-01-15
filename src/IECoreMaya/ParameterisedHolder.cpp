@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@
 #include "maya/MPxFieldNode.h"
 #include "maya/MPxSurfaceShape.h"
 #include "maya/MPxComponentShape.h"
+#include "maya/MPxImagePlane.h"
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnDependencyNode.h"
@@ -753,6 +754,12 @@ MTypeId ParameterisedHolderComponentShape::id( ParameterisedHolderComponentShape
 
 template<>
 MString ParameterisedHolderComponentShape::typeName( "ieParameterisedHolderComponentShape" );
+
+template<>
+MTypeId ParameterisedHolderImagePlane::id( ParameterisedHolderImagePlaneId );
+
+template<>
+MString ParameterisedHolderImagePlane::typeName( "ieParameterisedHolderImagePlane" );
 						
 // explicit instantiation
 template class ParameterisedHolder<MPxNode>;
@@ -762,3 +769,4 @@ template class ParameterisedHolder<MPxFieldNode>;
 template class ParameterisedHolder<MPxObjectSet>;
 template class ParameterisedHolder<MPxSurfaceShape>;
 template class ParameterisedHolder<MPxComponentShape>;
+template class ParameterisedHolder<MPxImagePlane>;

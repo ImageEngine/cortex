@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,21 +32,45 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// \defgroup melgroup MEL
-///
-/// The core maya library comes with associated MEL files providing useful utility
-/// functions and additional API related to the C++ nodes.
+#ifndef IECOREMAYA_IMAGEPLANEHOLDER_H
+#define IECOREMAYA_IMAGEPLANEHOLDER_H
 
-source "IECoreMaya/ieParameterisedHolder.mel";
-source "IECoreMaya/ieProceduralHolder.mel";
-source "IECoreMaya/ieNode.mel";
-source "IECoreMaya/ieAttr.mel";
+#include "IECore/Op.h"
 
-source "IECoreMaya/ieParameterisedHolderUI.mel";
-source "IECoreMaya/ieProceduralHolderUI.mel";
-source "IECoreMaya/ieOpHolderUI.mel";
-source "IECoreMaya/ieConverterHolderUI.mel";
-source "IECoreMaya/ieParameterPanel.mel";
-source "IECoreMaya/ieAttributeEditorControl.mel";
-source "IECoreMaya/iePanel.mel";
-source "IECoreMaya/ieImagePlaneHolderUI.mel";
+#include "IECoreMaya/ParameterisedHolder.h"
+
+#include "maya/MPxImagePlane.h"
+
+namespace IECoreMaya
+{
+
+/// A class which holds an Op, expected to return an ImagePrimitive, which is then placed onto an ImagePlane.
+class ImagePlaneHolder : public ParameterisedHolderImagePlane
+{	
+	public :
+	
+		ImagePlaneHolder();
+		virtual ~ImagePlaneHolder();
+
+		virtual void postConstructor();
+		
+		//// \bug See comments in ParameterisedHolder.h
+		bool isAbstractClass();
+
+		static void *creator();				
+		static MStatus initialize();		
+		static MTypeId id;
+
+		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
+		virtual MStatus loadImageMap ( const MString &fileName, int frame, MImage &image );
+				
+		/// Calls setParameterised( className, classVersion, "IECORE_OP_PATHS" ).
+		MStatus setOp( const std::string &className, int classVersion );
+		/// Returns runTimeCast<Op>( getParameterised( className, classVersion ) ). 
+		IECore::OpPtr getOp( std::string *className = 0, int *classVersion = 0 );
+				
+};
+
+} // namespace IECoreMaya
+
+#endif // IECOREMAYA_IMAGEPLANEHOLDER_H
