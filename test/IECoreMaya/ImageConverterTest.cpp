@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,49 +34,14 @@
 
 #include <iostream>
 
-#include "maya/MLibrary.h"
-#include "maya/MGlobal.h"
-
-#include <boost/test/unit_test.hpp>
-
-#include "ObjectDataTest.h"
-#include "MDataHandleAccessorTest.h"
 #include "ImageConverterTest.h"
 
-using namespace boost::unit_test;
+namespace IECoreMaya
+{
 
-using namespace IECoreMaya;
+void addImageConverterTest(boost::unit_test::test_suite* test)
+{
+	test->add( new ImageConverterTestSuite() );
+}
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
-{			
-	test_suite* test = BOOST_TEST_SUITE( "IECoreMaya unit test" );
-	
-	/// \todo Try and find a way of calling MLibrary::cleanup when Boost.Test exits
-	/// I think we'd have to rebuild the boost test library with BOOST_TEST_NO_MAIN defined,
-	/// then implement our own main() here which simply calls :
-	/// int exitStatus = unit_test_main( &init_unit_test_suite, argc, argv );
-	/// We can then put our MLibrary calls on either side of that.
-	/// While we don't have BOOST_TEST_NO_MAIN a main() gets automatically generated in 
-	/// libboost_test_exec_monitor
-	MStatus s = MLibrary::initialize( argv[0], false );
-	if ( !s ) 
-	{
-		std::cerr << "Could not initialize Maya standalone application: " << s << std::endl;
-		exit( 1 );
-        }
-	
-	MGlobal::executeCommand( "loadPlugin \"ieCore\"" );
-	
-	try
-	{
-		addObjectDataTest(test);
-		addImageConverterTest(test);
-	} 
-	catch ( std::exception &ex )
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-	
-	return test;
 }

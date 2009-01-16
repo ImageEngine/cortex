@@ -51,7 +51,6 @@ namespace IECoreMaya
 IE_CORE_FORWARDDECLARE( ToMayaImageConverter );
 
 /// The ToMayaImageConverter class allows conversion from an IECore::ImagePrimitive to MImage values.
-/// \todo Add C++ unit tests
 class ToMayaImageConverter : public ToMayaConverter
 {
 
