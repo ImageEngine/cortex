@@ -95,13 +95,13 @@ compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion)
 
 debug = getOption( "DEBUG", False )
 CXXFLAGS = [ '-pipe', '-Wall' ]
-if IEEnv.platformOS() != "osx104" :
+if not IEEnv.platformOS().startswith( "osx" ) :
 	CXXFLAGS += [ '-pthread' ]
 	
 if debug :
 
 	CXXFLAGS += [ "-g" ]
-	
+
 	withAsserts = True
 
 else :
@@ -166,7 +166,7 @@ CPPPATH = "/software/tools/include/freetype/2.3.5"
 
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
-if IEEnv.platformOS() == "osx104" :
+if IEEnv.platformOS().startswith( "osx" ) :
 	BOOST_LIB_SUFFIX = "-mt-1_35"
 else:
 	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-1_35"
@@ -184,15 +184,16 @@ pythonReg = IEEnv.registry['apps']['python'][pythonVersion][IEEnv.platform()]
 
 pythonRoot = os.path.join( pythonReg["location"], compiler, compilerVersion )
 
-if IEEnv.platformOS() == "osx104" :
+if IEEnv.platformOS().startswith( "osx" ):
 	pythonRoot = os.path.join( pythonRoot, "Python.framework", "Versions", pythonVersion )
 
 PYTHON = os.path.join( pythonRoot, "bin", "python" + pythonVersion )
 PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/" + pythonReg["include"] + "/python" + pythonVersion
 PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
+
 if PYTHON_LINK_FLAGS=="" :
 	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion 
-	
+
 # find 3delight
 try :
 	dlReg = IEEnv.registry["apps"]["3delight"][getOption( "DL_VERSION", os.environ["DL_VERSION"] )][platform]
@@ -214,7 +215,7 @@ except :
 	pass
 
 # find nuke, unless we're on intel macs where the library doesn't link right now
-if IEEnv.platform() != "osx104.i686" and targetApp=="nuke" :
+if IEEnv.platform() != "osx104.i686" and IEEnv.platform() != "osx105.i686" and targetApp=="nuke" :
 	try :
 		nukeVersion = targetAppVersion
 		nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
@@ -226,7 +227,7 @@ if IEEnv.platform() != "osx104.i686" and targetApp=="nuke" :
 		pass
 	
 # find truelight, unless we're on osx, where we haven't got it to link yet
-if IEEnv.platformOS() != "osx104" :
+if not IEEnv.platformOS().startswith("osx") :
 	try :
 		truelightReg = IEEnv.registry["apps"]["truelight"][getOption( "TRUELIGHT_VERSION", os.environ["TRUELIGHT_VERSION"] )][platform]
 		TRUELIGHT_ROOT = truelightReg["location"]
