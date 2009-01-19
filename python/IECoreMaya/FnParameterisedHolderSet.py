@@ -43,7 +43,7 @@ class FnParameterisedHolderSet( IECoreMaya.FnParameterisedHolder ) :
 	# either be an MObject or a node name in string or unicode form.
 	def __init__( self, object ) :
 	
-		IECoreMaya.FnParameterisedHolder.__init__( object )
+		IECoreMaya.FnParameterisedHolder.__init__( self, object )
 	
 	@staticmethod
 	def create( nodeName, className, classVersion, searchPathEnvVar ) :
@@ -51,6 +51,6 @@ class FnParameterisedHolderSet( IECoreMaya.FnParameterisedHolder ) :
 		node = maya.cmds.createNode( "ieParameterisedHolderSet", name=nodeName )
 		
 		fnSH = IECoreMaya.FnParameterisedHolderSet( node )
-		fnSN.setParameterised( className, classVersion, searchPathEnvVar )
+		fnSH.setParameterised( className, classVersion, searchPathEnvVar )
 
 		return fnSH
