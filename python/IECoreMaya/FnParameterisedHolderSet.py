@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,35 +32,25 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+import maya.cmds
 
-from ParameterUI import ParameterUI
-from SplineParameterUI import SplineParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
-from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
-from MayaTypeId import MayaTypeId
-from ParameterPanel import ParameterPanel
-from AttributeEditorControl import AttributeEditorControl
-from FnProceduralHolder import FnProceduralHolder
-from UIElement import UIElement
-from OpWindow import OpWindow
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
-from UndoDisabled import UndoDisabled
-from ModalDialogue import ModalDialogue
-from Panel import Panel
-from WaitCursor import WaitCursor
-from FnOpHolder import FnOpHolder
-from UITemplate import UITemplate
-from FnParameterisedHolderSet import FnParameterisedHolderSet
+import IECoreMaya
+
+## A function set for operating on ieParameterisedHolderSet node type.
+class FnParameterisedHolderSet( IECoreMaya.FnParameterisedHolder ) :
+
+	## Initialise the function set for the given object, which may
+	# either be an MObject or a node name in string or unicode form.
+	def __init__( self, object ) :
+	
+		IECoreMaya.FnParameterisedHolder.__init__( object )
+	
+	@staticmethod
+	def create( nodeName, className, classVersion, searchPathEnvVar ) :
+	
+		node = maya.cmds.createNode( "ieParameterisedHolderSet", name=nodeName )
+		
+		fnSH = IECoreMaya.FnParameterisedHolderSet( node )
+		fnSN.setParameterised( className, classVersion, searchPathEnvVar )
+
+		return fnSH
