@@ -47,9 +47,15 @@ void IECoreMaya::bindFromMayaTransformConverter()
 {
 	typedef class_<FromMayaTransformConverter, FromMayaTransformConverterPtr, boost::noncopyable, bases<FromMayaDagNodeConverter> > FromMayaTransformConverterPyClass;
 
-	FromMayaTransformConverterPyClass( "FromMayaTransformConverter", init<const MDagPath &>() )
+	scope s = FromMayaTransformConverterPyClass( "FromMayaTransformConverter", init<const MDagPath &>() )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaTransformConverter )
 	;
+	
+	enum_<FromMayaTransformConverter::Space>( "Space" )
+		.value( "Local", FromMayaTransformConverter::Local )
+		.value( "World", FromMayaTransformConverter::World )
+	;
+	
 	
 	INTRUSIVE_PTR_PATCH( FromMayaTransformConverter, FromMayaTransformConverterPyClass );
 	implicitly_convertible<FromMayaTransformConverterPtr, FromMayaDagNodeConverterPtr>();
