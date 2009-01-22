@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -79,6 +79,9 @@ class TransformationMatrix
 		bool operator == (const TransformationMatrix &t) const;
 		
 };
+
+template<class T>
+std::ostream &operator << ( std::ostream &os, const TransformationMatrix<T> &x );
 
 typedef TransformationMatrix<double> TransformationMatrixd;
 typedef TransformationMatrix<float> TransformationMatrixf;

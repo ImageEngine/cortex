@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,6 +68,14 @@ bool TransformationMatrix<T>::operator == (const TransformationMatrix &t) const
 	return ( scalePivot == t.scalePivot && scale == t.scale && shear == t.shear && scalePivotTranslation == t.scalePivotTranslation &&
 			rotatePivot == t.rotatePivot && rotationOrientation.normalized() == t.rotationOrientation.normalized() && 
 			rotate == t.rotate && rotate.order() == t.rotate.order() &&	rotatePivotTranslation == t.rotatePivotTranslation && translate == t.translate );
+}
+
+template<class T>
+std::ostream &operator << ( std::ostream &os, const TransformationMatrix<T> &x )
+{
+	os << "sp : " << x.scalePivot << " s : " << x.scale << " sh " << x.shear << " spt " << x.scalePivotTranslation << " rp " << x.rotatePivot << 
+		" ro : " << x.rotationOrientation << " r : " << x.rotate << " rpt : " << x.rotatePivotTranslation << " t : " << x.translate;
+	return os;
 }
 
 #endif // IE_CORE_TRANSFORMATIONMATRIX_INL
