@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,11 +38,12 @@
 #include "IECoreMaya/FromMayaDagNodeConverter.h"
 
 #include "IECore/NumericParameter.h"
+#include "IECore/TypedParameter.h"
 
 namespace IECoreMaya
 {
 
-/// The FromMayaTransformationMatrixConverter extracts transforms from.
+/// The FromMayaTransformationMatrixConverter extracts transforms from DAG nodes.
 class FromMayaTransformConverter : public FromMayaDagNodeConverter
 {
 
@@ -61,6 +62,9 @@ class FromMayaTransformConverter : public FromMayaDagNodeConverter
 		IECore::IntParameterPtr spaceParameter();
 		IECore::ConstIntParameterPtr spaceParameter() const;
 		
+		IECore::BoolParameterPtr eulerFilterParameter();
+		IECore::ConstBoolParameterPtr eulerFilterParameter() const;
+		
 	protected :
 	
 		virtual IECore::ObjectPtr doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
@@ -68,7 +72,7 @@ class FromMayaTransformConverter : public FromMayaDagNodeConverter
 	private :
 
 		IECore::IntParameterPtr m_spaceParameter;
-
+		
 		static Description<FromMayaTransformConverter> g_description;
 
 };

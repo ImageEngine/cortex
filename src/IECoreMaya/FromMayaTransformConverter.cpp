@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/TransformationMatrixData.h"
+#include "IECore/ClassData.h"
 
 #include "maya/MTransformationMatrix.h"
 #include "maya/MFnMatrixData.h"
@@ -49,6 +50,16 @@ static const MFn::Type fromTypes[] = { MFn::kTransform };
 static const IECore::TypeId toTypes[] = { IECore::TransformationMatrixdData::staticTypeId() };
 
 FromMayaDagNodeConverter::Description<FromMayaTransformConverter> FromMayaTransformConverter::g_description( fromTypes, toTypes );
+
+/// \todo Move this into the main class for the next major version
+struct FromMayaTransformConverterExtraMembers
+{
+	MEulerRotation lastRotation;
+	bool lastRotationValid;
+	IECore::BoolParameterPtr eulerFilterParameter;
+};
+
+static IECore::ClassData<FromMayaTransformConverter, FromMayaTransformConverterExtraMembers> g_extraMembers;
 
 FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( staticTypeName(), "Converts transform nodes.",  dagPath )
@@ -68,7 +79,19 @@ FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath 
 	);
 
 	parameters()->addParameter( m_spaceParameter );
-
+	
+	FromMayaTransformConverterExtraMembers &extraMembers = g_extraMembers.create( this );
+	extraMembers.lastRotationValid = false;
+	extraMembers.eulerFilterParameter = new IECore::BoolParameter(
+		"eulerFilter",
+		"If this parameter is on, then rotations are filtered so as to be as "
+		"close as possible to the previously converted rotation. This allows "
+		"the reuse of the same converter over a series of frames to produce a series "
+		"of transformations which will interpolate smoothly.",
+		false
+	);
+	
+	parameters()->addParameter( extraMembers.eulerFilterParameter );
 }
 
 IECore::IntParameterPtr FromMayaTransformConverter::spaceParameter()
@@ -80,9 +103,19 @@ IECore::ConstIntParameterPtr FromMayaTransformConverter::spaceParameter() const
 {
 	return m_spaceParameter;
 }
+
+IECore::BoolParameterPtr FromMayaTransformConverter::eulerFilterParameter()
+{
+	return g_extraMembers[this].eulerFilterParameter;
+}
+
+IECore::ConstBoolParameterPtr FromMayaTransformConverter::eulerFilterParameter() const
+{
+	return g_extraMembers[this].eulerFilterParameter;
+}
 		
 IECore::ObjectPtr FromMayaTransformConverter::doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
-{
+{	
 	MTransformationMatrix transform;
 	
 	if( m_spaceParameter->getNumericValue()==Local )
@@ -106,6 +139,16 @@ IECore::ObjectPtr FromMayaTransformConverter::doConversion( const MDagPath &dagP
 		MFnMatrixData fnM( matrix );
 		transform = fnM.transformation();
 	}
+	
+	FromMayaTransformConverterExtraMembers &extraMembers = g_extraMembers[this];
+	
+	if( extraMembers.eulerFilterParameter->getTypedValue() && extraMembers.lastRotationValid )
+	{
+		transform.rotateTo( transform.eulerRotation().closestSolution( extraMembers.lastRotation ) );
+	}
+	
+	extraMembers.lastRotation = transform.eulerRotation();
+	extraMembers.lastRotationValid = true;
 	
 	return new IECore::TransformationMatrixdData( IECore::convert<IECore::TransformationMatrixd, MTransformationMatrix>( transform ) );
 }
