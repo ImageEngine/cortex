@@ -65,6 +65,9 @@ class FromMayaTransformConverter : public FromMayaDagNodeConverter
 		IECore::BoolParameterPtr eulerFilterParameter();
 		IECore::ConstBoolParameterPtr eulerFilterParameter() const;
 		
+		IECore::BoolParameterPtr zeroPivotsParameter();
+		IECore::ConstBoolParameterPtr zeroPivotsParameter() const;
+		
 	protected :
 	
 		virtual IECore::ObjectPtr doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;

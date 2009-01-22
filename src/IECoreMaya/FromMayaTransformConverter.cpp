@@ -57,6 +57,7 @@ struct FromMayaTransformConverterExtraMembers
 	MEulerRotation lastRotation;
 	bool lastRotationValid;
 	IECore::BoolParameterPtr eulerFilterParameter;
+	IECore::BoolParameterPtr zeroPivotsParameter;
 };
 
 static IECore::ClassData<FromMayaTransformConverter, FromMayaTransformConverterExtraMembers> g_extraMembers;
@@ -92,6 +93,19 @@ FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath 
 	);
 	
 	parameters()->addParameter( extraMembers.eulerFilterParameter );
+	
+	/// \todo We need this parameter because we're finding that our conversion of the maya
+	/// MTransformationMatrix class to our TransformationMatrix classes isn't yielding the same
+	/// results when the pivot is non-zero. We should figure out the real reason for that rather
+	/// than use this parameter as a crutch.
+	extraMembers.zeroPivotsParameter = new IECore::BoolParameter(
+		"zeroPivots",
+		"If this parameter is on, then the scale and rotate pivots are reset to zero, "
+		"adjusting the transform to maintain the same positioning.",
+		false
+	);
+	
+	parameters()->addParameter( extraMembers.zeroPivotsParameter );
 }
 
 IECore::IntParameterPtr FromMayaTransformConverter::spaceParameter()
@@ -113,7 +127,17 @@ IECore::ConstBoolParameterPtr FromMayaTransformConverter::eulerFilterParameter()
 {
 	return g_extraMembers[this].eulerFilterParameter;
 }
-		
+
+IECore::BoolParameterPtr FromMayaTransformConverter::zeroPivotsParameter()
+{
+	return g_extraMembers[this].zeroPivotsParameter;
+}
+
+IECore::ConstBoolParameterPtr FromMayaTransformConverter::zeroPivotsParameter() const
+{
+	return g_extraMembers[this].zeroPivotsParameter;
+}
+				
 IECore::ObjectPtr FromMayaTransformConverter::doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
 {	
 	MTransformationMatrix transform;
@@ -141,6 +165,12 @@ IECore::ObjectPtr FromMayaTransformConverter::doConversion( const MDagPath &dagP
 	}
 	
 	FromMayaTransformConverterExtraMembers &extraMembers = g_extraMembers[this];
+	
+	if( extraMembers.zeroPivotsParameter->getTypedValue() )
+	{
+		transform.setScalePivot( MPoint( 0, 0, 0 ), MSpace::kTransform, true );
+		transform.setRotatePivot( MPoint( 0, 0, 0 ), MSpace::kTransform, true );
+	}
 	
 	if( extraMembers.eulerFilterParameter->getTypedValue() && extraMembers.lastRotationValid )
 	{
