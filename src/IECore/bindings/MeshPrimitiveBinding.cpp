@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ namespace IECore
 			.def( init<IntVectorDataPtr, IntVectorDataPtr, optional<const std::string &, V3fVectorDataPtr> >() )
 			.add_property( "verticesPerFace", &verticesPerFace, "A copy of the mesh's list of vertices per face." )
 			.add_property( "vertexIds", &vertexIds, "A copy of the mesh's list of vertex ids." )
-			.add_property( "interpolation", make_function( &MeshPrimitive::interpolation, return_value_policy<copy_const_reference>() ) )
+			.add_property( "interpolation", make_function( &MeshPrimitive::interpolation, return_value_policy<copy_const_reference>() ), &MeshPrimitive::setInterpolation )
 			.def( "setTopology", &MeshPrimitive::setTopology )
 			.def( "createBox", &MeshPrimitive::createBox ).staticmethod( "createBox" )
 			.def( "createPlane", &MeshPrimitive::createPlane ).staticmethod( "createPlane" )

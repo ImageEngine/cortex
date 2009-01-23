@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,6 +71,7 @@ class MeshPrimitive : public Primitive
 		ConstIntVectorDataPtr vertexIds() const;
 		const std::string &interpolation() const;
 		virtual void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
+		void setInterpolation( const std::string &interpolation );
 		//@}
 	
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;

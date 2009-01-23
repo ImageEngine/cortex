@@ -82,6 +82,13 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		mm = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		
 		self.assert_( mm.arePrimitiveVariablesValid() );
+	
+	def testSetInterpolation( self ) :
+	
+		m = MeshPrimitive()
+		self.assertEqual( m.interpolation, "linear" )
+		m.interpolation = "catmullClark"
+		self.assertEqual( m.interpolation, "catmullClark" )
 		
 	def testEmptyMeshConstructor( self ) :
 	
