@@ -49,6 +49,10 @@ def getOption( name, default ) :
 
 	return result
 
+if getOption( "INSTALL_PREFIX", "" )=="/software" :
+	sys.stderr.write( "Don't install me.\n" )
+	sys.exit( 1 )
+
 # decide what compiler/app we're targeting. we either pass COMPILER_VERSION and COMPILER
 # to do a straight install in /software/tools or we pass an APP and APP_VERSION pair
 # to do an install in /software/tools/app/appVersion - in this case the compiler and settings
