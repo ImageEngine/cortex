@@ -61,7 +61,10 @@ class ImageCropOp : public ModifyOp
 		ConstBoolParameterPtr matchDataWindowParameter() const;		
 		
 		BoolParameterPtr resetOriginParameter();
-		ConstBoolParameterPtr resetOriginParameter() const;	
+		ConstBoolParameterPtr resetOriginParameter() const;
+		
+		BoolParameterPtr intersectParameter();
+		ConstBoolParameterPtr intersectParameter() const;	
 		
 		/// \todo Should be "protected", not "public"
 		virtual void modify( ObjectPtr toModify, ConstCompoundObjectPtr operands );
@@ -73,6 +76,10 @@ class ImageCropOp : public ModifyOp
 		Box2iParameterPtr m_cropBox;
 		BoolParameterPtr m_matchDataWindow;
 		BoolParameterPtr m_resetOrigin;
+		
+	public:	
+		/// \todo Remove on next major version change
+		struct ExtraMembers;
 };
 
 IE_CORE_DECLAREPTR( ImageCropOp );

@@ -44,6 +44,7 @@
 #include "IECore/BoxOps.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/ClassData.h"
 
 #include <cassert>
 
@@ -51,6 +52,14 @@ using namespace IECore;
 using namespace Imath;
 using namespace std;
 using namespace boost;
+
+/// \todo Move this into the main class for the next major version
+struct ImageCropOp::ExtraMembers
+{	
+	IECore::BoolParameterPtr m_intersectParameter;
+};
+
+static IECore::ClassData<ImageCropOp, ImageCropOp::ExtraMembers> g_extraMembers;
 
 ImageCropOp::ImageCropOp()
 	:	ModifyOp(
@@ -70,6 +79,8 @@ ImageCropOp::ImageCropOp()
 		)
 	)
 {
+	ExtraMembers &extraMembers = g_extraMembers.create( this );
+
 	m_cropBox = new Box2iParameter(
 		"cropBox",
 		"Determines the crop coordinates to apply on the image.",
@@ -98,10 +109,17 @@ ImageCropOp::ImageCropOp()
 
 	parameters()->addParameter( m_resetOrigin );
 	
+	extraMembers.m_intersectParameter = new BoolParameter(
+		"intersect",
+		"If enabled then the display window of the resultant image will be cropped against the crop reigion too",
+		true
+	);
+
+	parameters()->addParameter( extraMembers.m_intersectParameter );
 	
-	/// \todo Add "intersect" and "reformat" parameters, like Nuke
-	/// Current behaviour is to both intersect, and reformat, so take care to set
-	/// the defaults accordingly.
+	
+	/// \todo Add "reformat" parameter, like Nuke
+	/// Current behaviour is to reformat, so take care to set the default accordingly.
 }
 
 ImageCropOp::~ImageCropOp()
@@ -136,6 +154,18 @@ BoolParameterPtr ImageCropOp::resetOriginParameter()
 ConstBoolParameterPtr ImageCropOp::resetOriginParameter() const
 {
 	return m_resetOrigin;
+}
+
+BoolParameterPtr ImageCropOp::intersectParameter()
+{
+	assert( g_extraMembers.find( this ) != g_extraMembers.end() );
+	return g_extraMembers[this].m_intersectParameter;
+}
+
+ConstBoolParameterPtr ImageCropOp::intersectParameter() const
+{
+	assert( g_extraMembers.find( this ) != g_extraMembers.end() );
+	return g_extraMembers[this].m_intersectParameter;
 }
 
 struct ImageCropOp::ImageCropFn
@@ -213,6 +243,8 @@ struct ImageCropOp::ImageCropFn
 
 void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 {
+	assert( g_extraMembers.find( this ) != g_extraMembers.end() );
+	
 	ImagePrimitivePtr image = assertedStaticCast< ImagePrimitive >( toModify );
 
 	// Validate the input image
@@ -228,8 +260,17 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 	}
 	
 	const bool resetOrigin = m_resetOrigin->getTypedValue();
+	const bool intersect = g_extraMembers[this].m_intersectParameter->getTypedValue();
 
-	const Imath::Box2i croppedDisplayWindow = boxIntersection( cropBox, image->getDisplayWindow() );
+	Imath::Box2i croppedDisplayWindow;
+	if ( intersect )
+	{
+		croppedDisplayWindow = boxIntersection( cropBox, image->getDisplayWindow() );
+	}
+	else
+	{
+		croppedDisplayWindow = cropBox;
+	}
 	const Imath::Box2i &dataWindow = image->getDataWindow();
 	
 	Imath::Box2i croppedDataWindow = boxIntersection( cropBox, dataWindow );
