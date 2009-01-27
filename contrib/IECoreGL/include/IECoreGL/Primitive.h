@@ -79,6 +79,10 @@ class Primitive : public Renderable
 		/// vertex attributes. Returns 0 if vertex attributes
 		/// are not supported. The default implementation
 		/// returns 0.
+		/// \todo What if an object does support vertex attributes
+		/// but has no vertices? Like a MeshPrimitive with no faces? If
+		/// it returns 0 then addVertexAttribute() will throw Exceptions,
+		/// meaning other code has to make special case workarounds.
 		virtual size_t vertexAttributeSize() const;
 		/// Takes a copy of data. Throws an Exception if this primitive doesn't support
 		/// vertex attributes, or if the data supplied is not suitable.

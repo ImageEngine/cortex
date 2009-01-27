@@ -143,6 +143,14 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 	assert( n );
 		
 	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->vertexIds(), p );
+	if( !p->readable().size() )
+	{
+		// if there are no points in the mesh then any calls to addVertexAttribute will fail
+		// with an exception being thrown, so we early out before that happens. see associated
+		// todo in Primitive::vertexAttributeSize() - we should be able to add attributes provided
+		// they have 0 length too.
+		return glMesh;
+	}
 	
 	ToFaceVaryingConverter primVarConverter( mesh->vertexIds() );
 	
@@ -209,6 +217,6 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 	{
 		IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", "Primitive variable \"s\" or \"t\" found, but not both." );
 	}
-	
+		
 	return glMesh;
 }
