@@ -1373,7 +1373,8 @@ if doConfigure :
 nukeEnv = env.Copy( IECORE_NAME = "IECoreNuke" )
 nukeEnv.Append( CPPPATH = [ "$NUKE_ROOT/include" ] )
 nukeEnv.Prepend( LIBPATH = [ "$NUKE_ROOT", "./lib" ] )
-
+nukeEnv.Prepend( LIBS = [ "GLEW" ] )
+		
 nukePythonEnv = pythonEnv.Copy( IECORE_NAME = "IECoreNuke" )
 
 nukeTestEnv = testEnv.Copy()
