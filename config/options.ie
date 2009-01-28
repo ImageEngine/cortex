@@ -202,17 +202,22 @@ try :
 except :
 	pass
 	
-# find maya
-mayaVersion = getOption( "MAYA_VERSION", os.environ["MAYA_VERSION"] )
-mayaMajorVersion = mayaVersion
-try :
-	mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
-	mayaMajorVersion = mayaReg["majorVersion"]
-	if compiler==mayaReg["compiler"] and compilerVersion==mayaReg["compilerVersion"] :
-		MAYA_ROOT = mayaReg["location"]
-		MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
-except :
-	pass
+# find maya, provided we're not building for some other app
+if not targetApp :
+
+	mayaVersion = getOption( "MAYA_VERSION", os.environ["MAYA_VERSION"] )
+	mayaMajorVersion = mayaVersion
+	try :
+		mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
+		mayaMajorVersion = mayaReg["majorVersion"]
+		if compiler==mayaReg["compiler"] and compilerVersion==mayaReg["compilerVersion"] :
+			MAYA_ROOT = mayaReg["location"]
+			MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
+	except :
+		pass
+else :
+
+	mayaMajorVersion = "0" # it needs a value just for the install setup below to execute			
 
 # find nuke, unless we're on intel macs where the library doesn't link right now
 if IEEnv.platform() != "osx104.i686" and IEEnv.platform() != "osx105.i686" and targetApp=="nuke" :

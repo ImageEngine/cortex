@@ -31,6 +31,7 @@ if IEEnv.platform() == "rhel4.i686" :
 	build( [ "COMPILER_VERSION=3.3.4" ] )
 	build( [ "COMPILER_VERSION=4.0.1" ] )					
 	build( [ "APP=nuke", "APP_VERSION=5.1v2" ] )		
+	build( [ "APP=nuke", "APP_VERSION=5.1v3" ] )		
 	
 elif IEEnv.platformOS() == "osx104" or IEEnv.platformOS() == "osx105" :
 	
