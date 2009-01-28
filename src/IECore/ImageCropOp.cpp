@@ -124,6 +124,7 @@ ImageCropOp::ImageCropOp()
 
 ImageCropOp::~ImageCropOp()
 {
+	g_extraMembers.erase( this );
 }
 
 Box2iParameterPtr ImageCropOp::cropBoxParameter()
