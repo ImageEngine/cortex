@@ -158,13 +158,11 @@ ConstBoolParameterPtr ImageCropOp::resetOriginParameter() const
 
 BoolParameterPtr ImageCropOp::intersectParameter()
 {
-	assert( g_extraMembers.find( this ) != g_extraMembers.end() );
 	return g_extraMembers[this].m_intersectParameter;
 }
 
 ConstBoolParameterPtr ImageCropOp::intersectParameter() const
 {
-	assert( g_extraMembers.find( this ) != g_extraMembers.end() );
 	return g_extraMembers[this].m_intersectParameter;
 }
 
@@ -242,9 +240,7 @@ struct ImageCropOp::ImageCropFn
 };
 
 void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
-{
-	assert( g_extraMembers.find( this ) != g_extraMembers.end() );
-	
+{	
 	ImagePrimitivePtr image = assertedStaticCast< ImagePrimitive >( toModify );
 
 	// Validate the input image
