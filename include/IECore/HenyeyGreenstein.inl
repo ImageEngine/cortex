@@ -64,4 +64,4 @@ inline T henyeyGreensteinCT( T g, T cosTheta )
 
 } // namespace IECore
 
-#endif IECORE_HENYEYGREENSTEIN_INL
+#endif // IECORE_HENYEYGREENSTEIN_INL

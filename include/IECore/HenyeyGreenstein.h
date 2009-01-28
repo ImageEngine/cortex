@@ -54,4 +54,4 @@ inline T henyeyGreensteinCT( T g, T cosTheta );
 
 #include "IECore/HenyeyGreenstein.inl"
 
-#endif IECORE_HENYEYGREENSTEIN_H
+#endif // IECORE_HENYEYGREENSTEIN_H
