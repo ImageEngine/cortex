@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,6 +59,8 @@ DataType &ClassData<ClassType, DataType, DataDeletePolicy>::create( const ClassT
 {
 	assert( classOwner );
 	assert( m_classDataMap.find( classOwner ) == m_classDataMap.end() );
+
+	m_classDataMap[ classOwner ] = DataType();
 
 	return m_classDataMap[ classOwner ];
 }
