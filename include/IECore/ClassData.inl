@@ -58,10 +58,18 @@ template< typename ClassType, typename DataType, typename DataDeletePolicy >
 DataType &ClassData<ClassType, DataType, DataDeletePolicy>::create( const ClassType* classOwner )
 {
 	assert( classOwner );
-	assert( m_classDataMap.find( classOwner ) == m_classDataMap.end() );
+	typename ClassDataMap::const_iterator it = m_classDataMap.find( classOwner );
+		
+	if( it != m_classDataMap.end() )
+	{
+		/// If this point has been reached it means that two instances of ClassType have been allocated with the same address, but the
+		/// first instance has not erased its class data on destruction. We do the erase here, to allow things to proceed, but it does
+		/// imply a bug in the calling code - hence the assert(false) in asserted builds.		
+		erase( classOwner );
+		assert( false );
+	}
 
-	m_classDataMap[ classOwner ] = DataType();
-
+	/// Will cause default construction of DataType
 	return m_classDataMap[ classOwner ];
 }
 
