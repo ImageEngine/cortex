@@ -48,6 +48,10 @@ namespace IECoreMaya
 /// necessary to translate from the maya definition into an IECoreGL::State
 /// object. This class performs that translation. Typically one would be held as
 /// member data in a node and baseState() would be called upon in the draw() method.
+/// \bug The default assignment operator is no good - it results in two objects pointing
+/// to the same Data in m_data - which leads to double destruction when both referring
+/// objects are destructed.
+/// \todo Implement an assignment operator with sensible semantics.
 class DisplayStyle
 {
 
