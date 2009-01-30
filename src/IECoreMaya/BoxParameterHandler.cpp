@@ -139,11 +139,11 @@ MObject BoxParameterHandler<T>::create( IECore::ConstParameterPtr parameter, con
 			{
 				MObject oMinX = fnNAttr.create( attributeName + "MinX", attributeName + "MinX", NumericTraits<T>::baseDataType() );
 				MObject oMinY = fnNAttr.create( attributeName + "MinY", attributeName + "MinY", NumericTraits<T>::baseDataType() );
-				oMin = fnNAttr.create( attributeName, attributeName, oMinX, oMinY );
+				oMin = fnNAttr.create( attributeName + "Min", attributeName + "Min", oMinX, oMinY );
 				
 				MObject oMaxX = fnNAttr.create( attributeName + "MaxX", attributeName + "MaxX", NumericTraits<T>::baseDataType() );
 				MObject oMaxY = fnNAttr.create( attributeName + "MaxY", attributeName + "MaxY", NumericTraits<T>::baseDataType() );
-				oMax = fnNAttr.create( attributeName, attributeName, oMaxX, oMaxY );
+				oMax = fnNAttr.create( attributeName + "Max", attributeName + "Max", oMaxX, oMaxY );
 			}
 			break;
 		case 3 :
