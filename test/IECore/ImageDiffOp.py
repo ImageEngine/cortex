@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -72,13 +72,22 @@ class TestImageDiffOp(unittest.TestCase):
 		self.assert_( res.value )	
 		
 		imageA = Reader.create( "test/IECore/data/tiff/uvMap.512x256.32bit.tif" ).read()
+				
+		m = CapturingMessageHandler()
+		s = ScopedMessageHandler( m )
 		
 		res = op(
 			imageA = imageA,
 			imageB = imageA
 		)
 		
+		self.assertEqual( len( m.messages ), 1 )
+		self.assertEqual( m.messages[0].level, Msg.Level.Warning )
+		self.assertEqual( m.messages[0].message, "Exact same image specified as both input parameters." )
+		
 		self.failIf( res.value )
+		
+		s = None
 		
 		res = op(
 			imageA = imageA,
