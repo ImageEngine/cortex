@@ -139,8 +139,9 @@ if hasattr( IECoreRI, "PTCParticleWriter" ):
 
 			self.assertEqual( set( [ "P", "N", "width", "another" ] ), set( pointCloud2.keys() ) )
 			for var in pointCloud.keys():
-				if pointCloud[ var ].data != pointCloud2[ var ].data:
-					raise Exception, "Variable %s does not match!" % var
+				self.assertEqual( len( pointCloud[var].data ), len( pointCloud2[var].data ) )
+				for value in pointCloud[ var ].data :
+					self.assert_( value in pointCloud2[var].data )
 			
 			self.assertEqual( worldToEye, pointCloud2.blindData()['PTCParticleIO']['worldToEye'] )
 			self.assertEqual( worldToNdc, pointCloud2.blindData()['PTCParticleIO']['worldToNdc'] )
