@@ -1026,8 +1026,9 @@ if doConfigure :
 		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
 		riTestEnv["ENV"]["DELIGHT"] = riEnv.subst( "$RMAN_ROOT" )
-		riTestEnv["ENV"]["DL_SHADERS_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
+		riTestEnv["ENV"]["DL_SHADERS_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" ) + ":./"
 		riTestEnv["ENV"]["DL_DISPLAYS_PATH"] = riEnv.subst( "$RMAN_ROOT/displays" )
+		riTestEnv["ENV"]["PATH"] = riEnv.subst( "$RMAN_ROOT/bin" ) + ":" + riTestEnv["ENV"]["PATH"] 
 		
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " $TEST_RI_SCRIPT" )
 		NoCache( riTest )

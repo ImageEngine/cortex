@@ -42,6 +42,8 @@ class TextureOrientationTest( unittest.TestCase ) :
 
 	def test( self ) :
 	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/tex.sdl test/IECoreRI/shaders/tex.sl" ), 0 )
+
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testTextureOrientation1.tif", "tiff", "rgba", {} )
 		r.worldBegin()
@@ -70,10 +72,11 @@ class TextureOrientationTest( unittest.TestCase ) :
 		self.assert_( not testOp( imageA=ie, imageB=i2, maxError=0.002 ).value ) 
 			
 	def tearDown( self ) :
-	
+		
 		files = [
 			"test/IECoreRI/output/testTextureOrientation1.tif",
-			"test/IECoreRI/output/testTextureOrientation2.tif"
+			"test/IECoreRI/output/testTextureOrientation2.tif",
+			"test/IECoreRI/shaders/tex.sdl",
 		]
 		for f in files :
 			if os.path.exists( f ) :

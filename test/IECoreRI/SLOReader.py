@@ -32,14 +32,12 @@
 #
 ##########################################################################
 
-import unittest
 import os
+import glob
+import unittest
 from IECore import *
 from IECoreRI import *
-import os
 
-## \todo We should compile these shaders during the test so we're using the same version
-# of the 3delight library to compile as we're using to load.
 class TestSLOReader( unittest.TestCase ) :
 
 	def shaderPath( self ) :
@@ -95,6 +93,8 @@ class TestSLOReader( unittest.TestCase ) :
 		)	
 		
 	def testTypes( self ) :
+						
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
 	
 		r = SLOReader( "test/IECoreRI/shaders/types.sdl" )
 		s = r.read()
@@ -120,6 +120,12 @@ class TestSLOReader( unittest.TestCase ) :
 		for p in expectedParams :
 		
 			self.assertEqual( s.parameters[p[0]], p[1] )
+	
+	def tearDown( self ) :
+	
+		for f in [ "test/IECoreRI/shaders/types.sdl" ] :
+			if os.path.exists( f ) :
+				os.remove( f )
 		
 if __name__ == "__main__":
     unittest.main()   
