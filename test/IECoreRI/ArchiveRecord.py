@@ -54,14 +54,22 @@ class ArchiveRecordTest( unittest.TestCase ) :
 	
 		# passing printf style format strings in the record would blow up the renderer
 		# so check we're catching those
-	
+
+		m = IECore.CapturingMessageHandler() 
+		s = IECore.ScopedMessageHandler( m )
+			
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testArchiveRecord.rib" )
 		r.worldBegin()
+		
 		r.command( "ri:archiveRecord", { "type" : IECore.StringData( "verbatim" ), "record" : IECore.StringData( "NAUGHTY %s %f" ) } )
 		r.worldEnd()
 
 		l = "".join( file( "test/IECoreRI/output/testArchiveRecord.rib" ).readlines() )
 		self.assert_( not "NAUGHTY" in l )
+		
+		self.assertEqual( len( m.messages ), 1 )
+		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Error )
+		self.assert_( "printf" in m.messages[0].message )
 	
 	def tearDown( self ) :
 	
