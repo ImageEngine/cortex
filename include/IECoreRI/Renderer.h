@@ -110,6 +110,16 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ri:hider:*"</b><br>
 		/// All parameters matching this naming convention are passed to an RiHider call.
 		///
+		/// \li <b>"ri:outputNow" BoolData false</b><br>
+		/// The renderman interface and the IECore::Renderer interface differ in their interpretation
+		/// of transforms before worldBegin, and the IECore::Renderer spec says that the last camera specified
+		/// is the one to render through whereas the renderman specification has only a single camera (ignoring
+		/// all that nasty frame camera stuff).
+		/// For these reasons it's necessary for the IECoreRI::Renderer to store the camera
+		/// and output it in the worldBegin() call. This is no good if the Renderer instance is being used to
+		/// specify just part of a scene (without a world block). This hacky parameter is therefore provided
+		/// to cause the immediate output of the camera to support this situation.
+		///
 		/// \todo Support moving cameras.
 		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters );

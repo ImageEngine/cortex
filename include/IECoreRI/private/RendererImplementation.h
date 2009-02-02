@@ -132,6 +132,7 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getResolutionOption( const std::string &name ) const;
 		
 		IECore::CameraPtr m_camera;
+		void outputCamera( IECore::CameraPtr camera );
 		
 		struct AttributeState
 		{

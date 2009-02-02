@@ -325,29 +325,111 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getResolutionOption( cons
 void IECoreRI::RendererImplementation::camera( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
-	// just store the camera so we can emit it just before RiWorldBegin.
 	CompoundDataPtr parameterData = (new CompoundData( parameters ))->copy();
-	m_camera = new Camera( name, 0, parameterData );
-	m_camera->addStandardParameters(); // it simplifies worldBegin() to know that the camera is complete
 	
-	CompoundDataMap::const_iterator transformIt=parameters.find( "transform" );
-	if( transformIt!=parameters.end() )
+	CameraPtr camera = new Camera( name, 0, parameterData );
+	camera->addStandardParameters(); // it simplifies outputCamera() to know that the camera is complete
+	
+	bool outputNow = false;
+	CompoundDataMap::const_iterator outputNowIt=parameters.find( "ri:outputNow" );
+	if( outputNowIt!=parameters.end() )
 	{
-		if( M44fDataPtr m = runTimeCast<M44fData>( transformIt->second ) )
+		if( ConstBoolDataPtr b = runTimeCast<BoolData>( outputNowIt->second ) )
 		{
-			m_camera->setTransform( new MatrixTransform( m->readable() ) );
+			outputNow = b->readable();
 		}
 		else
 		{
-			msg( Msg::Error, "IECoreRI::RendererImplementation::camera", "\"transform\" parameter should be of type M44fData." );
+			msg( Msg::Error, "IECoreRI::RendererImplementation::camera", "\"ri:outputNow\" parameter should be of type BoolData." );
 		}
+	}
+
+	if( outputNow )
+	{
+		outputCamera( camera );
 	}
 	else
 	{
-		m_camera->setTransform( new MatrixTransform( getTransform() ) );
+		// add transform and store for output at worldBegin().
+		CompoundDataMap::const_iterator transformIt=parameters.find( "transform" );
+		if( transformIt!=parameters.end() )
+		{
+			if( M44fDataPtr m = runTimeCast<M44fData>( transformIt->second ) )
+			{
+				camera->setTransform( new MatrixTransform( m->readable() ) );
+			}
+			else
+			{
+				msg( Msg::Error, "IECoreRI::RendererImplementation::camera", "\"transform\" parameter should be of type M44fData." );
+			}
+		}
+		else
+		{
+			camera->setTransform( new MatrixTransform( getTransform() ) );
+		}
+		m_camera = camera;
 	}
 }
 
+void IECoreRI::RendererImplementation::outputCamera( IECore::CameraPtr camera )
+{
+	// then shutter
+	CompoundDataMap::const_iterator it = camera->parameters().find( "shutter" );
+	ConstV2fDataPtr shutterD = runTimeCast<const V2fData>( it->second );
+	RiShutter( shutterD->readable()[0], shutterD->readable()[1] );
+	
+	// then hider
+	it = camera->parameters().find( "ri:hider" );
+	if( it!=camera->parameters().end() )
+	{
+		ConstStringDataPtr d = runTimeCast<const StringData>( it->second );
+		if( d )
+		{
+			ParameterList p( camera->parameters(), "ri:hider:" );
+			RiHiderV( (char *)d->readable().c_str(), p.n(), p.tokens(), p.values() );
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreRI::RendererImplementation::worldBegin", "Camera \"ri:hider\" parameter should be of type StringData." );
+		}
+	}
+	
+	// then resolution
+	it = camera->parameters().find( "resolution" );
+	ConstV2iDataPtr d = runTimeCast<const V2iData>( it->second );
+	RiFormat( d->readable().x, d->readable().y, 1 );
+	
+	// then screen window
+	it = camera->parameters().find( "screenWindow" );
+	ConstBox2fDataPtr screenWindowD = runTimeCast<const Box2fData>( it->second );
+	RiScreenWindow( screenWindowD->readable().min.x, screenWindowD->readable().max.x, screenWindowD->readable().min.y, screenWindowD->readable().max.y );
+	
+	// then crop window
+	it = camera->parameters().find( "cropWindow" );
+	ConstBox2fDataPtr cropWindowD = runTimeCast<const Box2fData>( it->second );
+	RiCropWindow( cropWindowD->readable().min.x, cropWindowD->readable().max.x, cropWindowD->readable().min.y, cropWindowD->readable().max.y );
+	
+	// then clipping
+	it = camera->parameters().find( "clippingPlanes" );
+	ConstV2fDataPtr clippingD = runTimeCast<const V2fData>( it->second );
+	RiClipping( clippingD->readable()[0], clippingD->readable()[1] );
+	
+	// then projection
+	it = camera->parameters().find( "projection" );
+	ConstStringDataPtr projectionD = runTimeCast<const StringData>( it->second );
+	ParameterList p( camera->parameters(), "projection:" );
+	RiProjectionV( (char *)projectionD->readable().c_str(), p.n(), p.tokens(), p.values() );
+
+	// transform last
+	if( camera->getTransform() )
+	{
+		M44f m = camera->getTransform()->transform();
+		m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
+		m.invert();
+		setTransform( m );
+	}
+}
+	
 /// \todo This should be outputting several calls to display as a series of secondary displays, and also trying to find the best display
 /// to be used as the primary display.
 void IECoreRI::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
@@ -364,68 +446,10 @@ void IECoreRI::RendererImplementation::display( const std::string &name, const s
 void IECoreRI::RendererImplementation::worldBegin()
 {
 	ScopedContext scopedContext( m_context );
-	// push out the camera we saved earlier
-	// we can assume that all the standard parameters of the camera
-	// have valid values of the right type as we called
-	// addStandardParameters() in camera().
-	/////////////////////////////////////////////////////////
-	
-	// then shutter
-	CompoundDataMap::const_iterator it = m_camera->parameters().find( "shutter" );
-	ConstV2fDataPtr shutterD = runTimeCast<const V2fData>( it->second );
-	RiShutter( shutterD->readable()[0], shutterD->readable()[1] );
-	
-	// then hider
-	it = m_camera->parameters().find( "ri:hider" );
-	if( it!=m_camera->parameters().end() )
-	{
-		ConstStringDataPtr d = runTimeCast<const StringData>( it->second );
-		if( d )
-		{
-			ParameterList p( m_camera->parameters(), "ri:hider:" );
-			RiHiderV( (char *)d->readable().c_str(), p.n(), p.tokens(), p.values() );
-		}
-		else
-		{
-			msg( Msg::Error, "IECoreRI::RendererImplementation::worldBegin", "Camera \"ri:hider\" parameter should be of type StringData." );
-		}
-	}
-	
-	// then resolution
-	it = m_camera->parameters().find( "resolution" );
-	ConstV2iDataPtr d = runTimeCast<const V2iData>( it->second );
-	RiFormat( d->readable().x, d->readable().y, 1 );
-	
-	// then screen window
-	it = m_camera->parameters().find( "screenWindow" );
-	ConstBox2fDataPtr screenWindowD = runTimeCast<const Box2fData>( it->second );
-	RiScreenWindow( screenWindowD->readable().min.x, screenWindowD->readable().max.x, screenWindowD->readable().min.y, screenWindowD->readable().max.y );
-	
-	// then crop window
-	it = m_camera->parameters().find( "cropWindow" );
-	ConstBox2fDataPtr cropWindowD = runTimeCast<const Box2fData>( it->second );
-	RiCropWindow( cropWindowD->readable().min.x, cropWindowD->readable().max.x, cropWindowD->readable().min.y, cropWindowD->readable().max.y );
-	
-	// then clipping
-	it = m_camera->parameters().find( "clippingPlanes" );
-	ConstV2fDataPtr clippingD = runTimeCast<const V2fData>( it->second );
-	RiClipping( clippingD->readable()[0], clippingD->readable()[1] );
-	
-	// then projection
-	it = m_camera->parameters().find( "projection" );
-	ConstStringDataPtr projectionD = runTimeCast<const StringData>( it->second );
-	ParameterList p( m_camera->parameters(), "projection:" );
-	RiProjectionV( (char *)projectionD->readable().c_str(), p.n(), p.tokens(), p.values() );
-
-	// transform last
-	M44f m = m_camera->getTransform()->transform();
-	m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
-	m.invert();
-	setTransform( m );
-	
+	outputCamera( m_camera );	
 	RiWorldBegin();
 }
-
+	
 void IECoreRI::RendererImplementation::worldEnd()
 {
 	ScopedContext scopedContext( m_context );
