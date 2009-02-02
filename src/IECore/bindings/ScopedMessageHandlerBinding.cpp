@@ -41,6 +41,7 @@ using namespace boost::python;
 namespace IECore
 {
 
+/// \todo This would be better bound as a MessageHandlerContext context handler for use in "with" blocks.
 void bindScopedMessageHandler()
 {
 		
