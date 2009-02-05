@@ -84,3 +84,4 @@ template class ToMayaArrayDataConverter< IECore::V3fVectorData, MPointArray >;
 template class ToMayaArrayDataConverter< IECore::V3dVectorData, MPointArray >;
 template class ToMayaArrayDataConverter< IECore::StringVectorData, MStringArray >;
 template class ToMayaArrayDataConverter< IECore::DoubleVectorData, MDoubleArray >;
+template class ToMayaArrayDataConverter< IECore::IntVectorData, MIntArray >;
