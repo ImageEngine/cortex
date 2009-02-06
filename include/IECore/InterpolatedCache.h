@@ -44,6 +44,9 @@ namespace IECore
 ///Or returns the data from the nearest frame if the data cannot be interpolated.
 ///The interface looks like AttributeCache reader functions. It assumes the time is encoded in 6000FPS units.
 ///The frame numbers are computed by using OversamplesCalculator6kFPS.
+/// \todo Reconsider the use of the OversamplesCalculator. It was intended to match old maya behaviour which has
+/// apparently now changed. The OversamplesCalculator changes the oversampling rate silently to make sure the values in the 6000 tick world
+/// are all integers - we don't need this at all. We could get by just fine by rounding to the nearest integer and using that.
 class InterpolatedCache : public RefCounted
 {
 	public:
