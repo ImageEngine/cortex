@@ -64,3 +64,4 @@ from WaitCursor import WaitCursor
 from FnOpHolder import FnOpHolder
 from UITemplate import UITemplate
 from FnParameterisedHolderSet import FnParameterisedHolderSet
+from TemporaryAttributeValues import TemporaryAttributeValues
