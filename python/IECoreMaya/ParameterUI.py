@@ -255,9 +255,7 @@ class ParameterUI :
 			edit = True,
 			deleteAllItems = True
 		)
-		
-		hasConnections = False			
-				
+						
 		if cmds.getAttr( kw['attributeName'], lock = True) == 0:
 		
 			for k in sorted( self.parameter.presets().keys() ):
@@ -334,7 +332,7 @@ class ParameterUI :
 					
 			else:
 			
-				hasConnections = self.__buildConnectionsPopupMenu( popupMenu, ownerControl, **kw )
+				self.__buildConnectionsPopupMenu( popupMenu, ownerControl, **kw )
 		
 			cmds.menuItem(
 					parent = popupMenu,
