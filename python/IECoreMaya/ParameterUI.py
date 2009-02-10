@@ -258,35 +258,39 @@ class ParameterUI :
 						
 		if cmds.getAttr( kw['attributeName'], lock = True) == 0:
 		
-			for k in sorted( self.parameter.presets().keys() ):
+			settable = maya.cmds.getAttr( kw["attributeName"], settable=True )
+			if settable :
+
+				# make menu items for all presets and for the default value
+				
+				for k in sorted( self.parameter.presets().keys() ):
+					cmds.menuItem(
+						parent = popupMenu,
+						label = k,
+						command = IECore.curry( self.selectValue, selection = k )
+					)
+
+				if len( self.parameter.presets().keys() ) > 0:
+					cmds.menuItem(
+						parent = popupMenu,
+						divider = True
+					)	
+
 				cmds.menuItem(
-					parent = popupMenu,
-					label = k,
-					command = IECore.curry( self.selectValue, selection = k )
+						parent = popupMenu,
+						label = "Default",
+						command = IECore.curry( self.selectValue, selection = self.parameter.defaultValue )
 				)
 
-			if len( self.parameter.presets().keys() ) > 0:
 				cmds.menuItem(
 					parent = popupMenu,
 					divider = True
 				)	
 		
-			cmds.menuItem(
-					parent = popupMenu,
-					label = "Default",
-					command = IECore.curry( self.selectValue, selection = self.parameter.defaultValue )
-			)
-
-			cmds.menuItem(
-				parent = popupMenu,
-				divider = True
-			)		
-		
 			controlType = cmds.objectTypeUI( ownerControl)
-			
 			if controlType == "floatField" or controlType == "intField":
 
-				if cmds.getAttr( kw['attributeName'], keyable=True) == 1:
+				if cmds.getAttr( kw['attributeName'], keyable=True) and settable :
 					cmds.menuItem(
 						parent = popupMenu,
 						label = "Set Key",
@@ -303,8 +307,7 @@ class ParameterUI :
 				if not expressions:
 
 					hasConnections = self.__buildConnectionsPopupMenu( popupMenu, ownerControl, **kw )
-					
-					if not hasConnections:
+					if not hasConnections and settable :
 
 						cmds.menuItem(
 							parent = popupMenu,
