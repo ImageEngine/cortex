@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -176,7 +176,16 @@ global proc ieParameterisedHolderUIClassControlVersionCallback( string $node, st
 global proc ieParameterisedHolderUIExtraAttributesControl()
 {
 	editorTemplate -callCustom "ieParameterisedHolderUIExtraAttributesNewAndReplace" "ieParameterisedHolderUIExtraAttributesNewAndReplace" "iDontExist";
-	editorTemplate -extraControlsLabel "Do not open" -addExtraControls;
+	// maya hangs when trying to update the extra attributes when there are large numbers of them - which
+	// there often are with real world procedurals. we can't find a way to stop maya from wanting to draw them
+	// so the only thing we can do is hide them deep enough that only the determined user can get into trouble. as
+	// soon as the Open With Caution section has been opened, maya may hang at any future time when updating the
+	// attribute editor, even if you subsequently close that section.
+	editorTemplate -beginLayout "All Dynamic Attributes";
+		editorTemplate -beginLayout "Open With Caution - Maya May Hang";
+			editorTemplate -extraControlsLabel "Too Late Now!" -addExtraControls;
+		editorTemplate -endLayout;
+	editorTemplate -endLayout;
 }
 		
 global proc ieParameterisedHolderUIExtraAttributesNewAndReplace( string $attrName )
@@ -202,52 +211,5 @@ global proc ieParameterisedHolderUIExtraAttributesNewAndReplace( string $attrNam
 			attrControlGrp -attribute ($nodeName + "." + $dynAttr);
 		}
 	}
-	
-	/// Set up a little script job that lets us hide Maya's built-in Extra Attributes layout after
-	/// construction of the AE window is complete
-	scriptJob -runOnce true -event "idle" ieParameterisedHolderUIHideExtraAttributes;
-}
 
-global proc ieParameterisedHolderUIHideExtraAttributes()
-{
-	if (`control -exists ieParameterisedAEExtraAttributes`)
-	{
-		/// As "control -q -p" doesn't seem to work we have to look through all of the layouts hunting
-		/// for ieParameterisedAEExtraAttributes to obtain its long name.
-		string $c;
-		for ($c in `lsUI -l -controlLayouts`)
-		{
-			if (match("ieParameterisedAEExtraAttributes$", $c) != "")
-			{
-				string $buf[];
-				tokenize($c, "|", $buf);
-				
-				/// Strip off the last two child layouts, which should leave us at the scrollLayout which
-				/// represents our "Extra Attributes".
-				string $extraAttributesLayout = "";
-				int $i;
-				for ($i = 0; $i < size($buf) - 2; $i++)
-				{
-					if ($i != 0)
-					{
-						$extraAttributesLayout += "|";						
-					}
-					$extraAttributesLayout += $buf[$i];
-				}
-				
-				/// For safety....
-				if (size($extraAttributesLayout))
-				{
-					/// Again for safety....
-					if (`layout -exists $extraAttributesLayout`)
-					{
-						string $children[] = `layout -q -ca $extraAttributesLayout`;
-					
-						/// Hide the last child, which should be the Maya built-in Extra Attributes scrollLayout
-						control -e -manage false $children[size($children)-1];
-					}
-				}				
-			}
-		}
-	}
 }
