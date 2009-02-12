@@ -81,8 +81,6 @@ class ParameterParser :
 			if len( args[0] ) and args[0][0]=="-" :
 				name = args[0][1:]
 				del args[0]
-				if not len( args ) :
-					raise SyntaxError( "Expected at least one argument following flag \"-%s\"." % name )
 			elif flagless and flaglessIndex < flagless.size() :
 				name = flagless[flaglessIndex]
 				flaglessIndex += 1
@@ -101,46 +99,50 @@ class ParameterParser :
 					if not nameSplit[i] in p:
 						raise SyntaxError( "\"%s\" is not a parameter name." % name )
 					p = p[nameSplit[i]]
+			
+			if len( args ) :
 								
-			# see if the argument being specified is a preset name, in which case we
-			# don't need a special parser.	
-			if args[0] in p.presets() :
-				
-				p.setValue( args[0] )
-				del args[0]
-			
-			# or if it's asking us to read a value from a file, in which case we
-			# also don't need a special parser
-			elif args[0].startswith( "read:" ) :
-			
-				fileName = args[0][5:]
-				r = IECore.Reader.create( fileName )
-				if not r :
-					raise RuntimeError( "Unable to create reader for file \"%s\"." % fileName )
-					
-				p.setValidatedValue( r.read() )
-				del args[0]
-			
-			# or if it's asking us to evaluate a python string to create a value,
-			# in which case we also don't need a special parser
-			elif args[0].startswith( "python:" ) :
-			
-				toEval = args[0][7:]
-				r = eval( toEval )
-				p.setValidatedValue( r )
-				del args[0]
-			
-			# otherwise we're gonna need a specialised parser	
-			else :	
-				parmType = p.typeId()			
-				if not parmType in self.__typesToParsers :
-					raise SyntaxError( "No parser available for parameter \"%s\"." % name )
+				# see if the argument being specified is a preset name, in which case we
+				# don't need a special parser.	
+				if args[0] in p.presets() :
 
-				f = self.__typesToParsers[parmType]
-				try :
-					f( args, p )
-				except Exception, e :
-					raise SyntaxError( "Problem parsing parameter \"%s\" : %s " % ( name, e ) )
+					p.setValue( args[0] )
+					del args[0]
+					continue
+
+				# or if it's asking us to read a value from a file, in which case we
+				# also don't need a special parser
+				if args[0].startswith( "read:" ) :
+
+					fileName = args[0][5:]
+					r = IECore.Reader.create( fileName )
+					if not r :
+						raise RuntimeError( "Unable to create reader for file \"%s\"." % fileName )
+
+					p.setValidatedValue( r.read() )
+					del args[0]
+					continue
+
+				# or if it's asking us to evaluate a python string to create a value,
+				# in which case we also don't need a special parser
+				if args[0].startswith( "python:" ) :
+
+					toEval = args[0][7:]
+					r = eval( toEval )
+					p.setValidatedValue( r )
+					del args[0]
+					continue
+			
+			# we're gonna need a specialised parser	
+			parmType = p.typeId()			
+			if not parmType in self.__typesToParsers :
+				raise SyntaxError( "No parser available for parameter \"%s\"." % name )
+
+			f = self.__typesToParsers[parmType]
+			try :
+				f( args, p )
+			except Exception, e :
+				raise SyntaxError( "Problem parsing parameter \"%s\" : %s " % ( name, e ) )
 
 	## Returns a string representing the values contained within parameters.
 	# This string can later be passed to parse() to retrieve the values. May

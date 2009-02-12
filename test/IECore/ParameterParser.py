@@ -176,6 +176,7 @@ class testParameterParser( unittest.TestCase ) :
 					description = "",
 					defaultValue = 3
 				),
+				
 			],
 			
 			userData = {
@@ -273,7 +274,59 @@ class testParameterParser( unittest.TestCase ) :
 		s = IECore.ParameterParser().serialise( p )	
 		IECore.ParameterParser().parse( s, p )	
 		
-			
+	def testNoValueProvidedSyntaxError( self ) :
+	
+		p = IECore.CompoundParameter(
+			members = [
+				IECore.StringParameter(
+					name = "string",
+					description = "d",
+					defaultValue = '',
+				),
+				IECore.IntParameter(
+					name = "int",
+					description = "d",
+					defaultValue = 0,
+				),
+				IECore.FloatParameter(
+					name = "float",
+					description = "d",
+					defaultValue = 0.0,
+				),
+				IECore.BoolParameter(
+					name = "bool",
+					description = "d",
+					defaultValue = False,
+				),
+				IECore.V2iParameter(
+					name = "v2i",
+					description = "d",
+					defaultValue = IECore.V2i( 0 ),
+				),
+				IECore.Box3fParameter(
+					name = "box3f",
+					description = "d",
+					defaultValue = IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ),
+				),
+				IECore.SplineffParameter(
+					name = "spline",
+					description = "d",
+					defaultValue = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.catmullRom(), ( ( 0, 0 ), ( 1, 1 ) ) ) ),
+				),
+			]
+		)
+		
+		parser = IECore.ParameterParser()
+
+		self.assertRaises( SyntaxError, parser.parse, "-string", p )	
+		self.assertRaises( SyntaxError, parser.parse, "-int", p )	
+		self.assertRaises( SyntaxError, parser.parse, "-float", p )	
+		self.assertRaises( SyntaxError, parser.parse, "-bool", p )	
+		self.assertRaises( SyntaxError, parser.parse, "-v21", p )
+		self.assertRaises( SyntaxError, parser.parse, "-box3f", p )
+		self.assertRaises( SyntaxError, parser.parse, "-spline", p )
+		
+	
 	#def testQuotingOnStringParameters( self ):
 
 	#	a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
