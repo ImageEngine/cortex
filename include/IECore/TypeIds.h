@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -308,7 +308,9 @@ enum TypeId
 	YUVImageWriterTypeId = 265,
 	ImageCompositeOpTypeId = 266,
 	ImagePremultiplyOpTypeId = 267,	
-	ImageUnpremultiplyOpTypeId = 268,		
+	ImageUnpremultiplyOpTypeId = 268,
+	DateTimeDataTypeId = 269,
+	DateTimeParameterTypeId = 270,
 
 	
 	// Remember to update TypeIdBinding.cpp !!!

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -307,7 +307,9 @@ void bindTypeId()
 		.value("YUVImageWriter", YUVImageWriterTypeId )
 		.value("ImageCompositeOp", ImageCompositeOpTypeId )
 		.value("ImagePremultiplyOp", ImagePremultiplyOpTypeId )
-		.value("ImageUnpremultiplyOp", ImageUnpremultiplyOpTypeId )		
+		.value("ImageUnpremultiplyOp", ImageUnpremultiplyOpTypeId )
+		.value("DateTimeData", DateTimeDataTypeId )		
+		.value("DateTimeParameter", DateTimeParameterTypeId )				
 	;
 }
 
