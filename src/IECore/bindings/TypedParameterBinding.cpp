@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -151,6 +151,7 @@ void bindTypedParameter()
 	bindTypedParameter<SplinefColor4f>( "SplinefColor4fParameter" );
 	bindTypedParameter<CubeColorLookupf>( "CubeColorLookupfParameter" );
 	bindTypedParameter<CubeColorLookupd>( "CubeColorLookupdParameter" );	
+	bindTypedParameter<boost::posix_time::ptime>( "DateTimeParameter" );	
 
 	bindTypedParameter<vector<bool> >( "BoolVectorParameter" );
 	bindTypedParameter<vector<int> >( "IntVectorParameter" );

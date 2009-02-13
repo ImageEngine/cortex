@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,6 +40,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/SplineData.h"
 #include "IECore/CubeColorLookupData.h"
+#include "IECore/DateTimeData.h"
 
 namespace IECore
 {
@@ -97,6 +98,7 @@ class TypedParameter : public Parameter
 		
 };
 
+/// \todo Split some of these off into separate files to speed up compilation times
 typedef TypedParameter<bool> BoolParameter;
 typedef TypedParameter<std::string> StringParameter;
 typedef TypedParameter<Imath::V2i> V2iParameter;
@@ -121,6 +123,7 @@ typedef TypedParameter<SplinefColor3f> SplinefColor3fParameter;
 typedef TypedParameter<SplinefColor4f> SplinefColor4fParameter;
 typedef TypedParameter<CubeColorLookupf> CubeColorLookupfParameter;
 typedef TypedParameter<CubeColorLookupd> CubeColorLookupdParameter;
+typedef TypedParameter<boost::posix_time::ptime> DateTimeParameter;
 
 typedef TypedParameter<std::vector<bool> > BoolVectorParameter;
 typedef TypedParameter<std::vector<int> > IntVectorParameter;
@@ -166,6 +169,7 @@ IE_CORE_DECLAREPTR( SplinefColor3fParameter );
 IE_CORE_DECLAREPTR( SplinefColor4fParameter );
 IE_CORE_DECLAREPTR( CubeColorLookupfParameter );
 IE_CORE_DECLAREPTR( CubeColorLookupdParameter );
+IE_CORE_DECLAREPTR( DateTimeParameter );
 
 IE_CORE_DECLAREPTR( BoolVectorParameter );
 IE_CORE_DECLAREPTR( IntVectorParameter );

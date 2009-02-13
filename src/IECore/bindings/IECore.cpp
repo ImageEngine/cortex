@@ -216,6 +216,7 @@
 #include "IECore/bindings/ImagePremultiplyOpBinding.h"
 #include "IECore/bindings/ImageUnpremultiplyOpBinding.h"
 #include "IECore/bindings/OversamplesCalculatorBinding.h"
+#include "IECore/bindings/DateTimeDataBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -417,6 +418,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageUnpremultiplyOp();
 	bindImageCompositeOp();	
 	bindOversamplesCalculator();	
+	bindDateTimeData();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

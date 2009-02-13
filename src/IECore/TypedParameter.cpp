@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -224,6 +224,7 @@ void TypedParameter<T>::setTypedValue( const T &value )
 
 namespace IECore
 {
+/// \todo Split some of these off into separate files to speed up compilation times
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( bool, BoolParameter )
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( string, StringParameter )
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V2i, V2iParameter )
@@ -248,6 +249,7 @@ IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( SplinefColor3f, SplinefColor3fParame
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( SplinefColor4f, SplinefColor4fParameter )
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( CubeColorLookupf, CubeColorLookupfParameter )
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( CubeColorLookupd, CubeColorLookupdParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( boost::posix_time::ptime, DateTimeParameter )
 
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<bool>, BoolVectorParameter )
 IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<int>, IntVectorParameter )

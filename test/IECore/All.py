@@ -178,6 +178,8 @@ from ImageCompositeOpTest import *
 from ImageSequenceCompositeOpTest import *
 from YUVImageWriter import *
 from OversamplesCalculatorTest import *
+from DateTimeDataTest import *
+from DateTimeParameterTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
