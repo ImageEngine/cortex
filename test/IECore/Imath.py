@@ -670,6 +670,16 @@ class ImathQuatf(unittest.TestCase):
 		q2 = Quatf( 5, 6, 7, 8 )
 		self.assertAlmostEqual( q1 ^ q2, q1.r * q2.r + (q1.v ^ q2.v ), 3 )
 
+	def testSlerpStability( self ) :
+	
+		q1 = Quatd( 0.60477471085951961527, 0.19082800913200048676, -0.73048263950686898038, 0.25343112163777203882, )
+		q2 = Quatd( 0.6047747108595192822, 0.190828009132000459, -0.73048263950686909141,    0.25343112163777264945, )
+	
+		q3 = slerp( q1, q2, 0.5 )
+		
+		self.assert_( q1.v.equalWithAbsError( q3.v, 0.000000000000001 ) )	
+		self.assertAlmostEqual( q1.r, q3.r, 14 )	
+
 class ImathM33f(unittest.TestCase):
 	def testConstructors(self):
 		"""Test M33f constructors"""

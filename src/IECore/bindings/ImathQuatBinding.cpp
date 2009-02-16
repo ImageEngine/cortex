@@ -42,6 +42,8 @@
 
 #include <OpenEXR/ImathQuat.h>
 
+#include "IECore/QuatAlgo.h"
+
 #include "IECore/bindings/ImathQuatBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
@@ -185,7 +187,8 @@ void bindQuat(const char *bindName)
 		.def("__repr__", IECore::repr<Quat<T> >)
 	;
 			
-	def("slerp", slerp<T>);
+	def("slerp", IECore::slerp<T>);
+	def("slerpShortestArc", IECore::slerpShortestArc<T>);
 	def("squad", squad<T>);
 	def("spline", spline<T>);
 }

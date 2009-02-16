@@ -43,6 +43,7 @@
 #include <IECore/TransformationMatrix.h>
 
 #include <IECore/TypedData.h>
+#include "IECore/QuatAlgo.h"
 
 namespace IECore
 {

@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-
 // Partially specialize for Imath::Quat. Interpolates through the shortest path.
 template<typename T>
 struct LinearInterpolator< Imath::Quat<T> >
@@ -51,14 +50,7 @@ struct LinearInterpolator< Imath::Quat<T> >
 			return;
 		}		
 
-		if ( (y0Tmp ^ y1Tmp) < 0.0 )
-		{
-			result = Imath::slerp< T >( y0Tmp, -y1Tmp, static_cast< T >(x) );
-		}
-		else
-		{
-			result = Imath::slerp< T >( y0Tmp, y1Tmp, static_cast< T >(x) );
-		}
+		result = IECore::slerpShortestArc( y0Tmp, y1Tmp, static_cast< T >(x) );
 	}
 };
 
