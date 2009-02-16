@@ -56,8 +56,22 @@ def __parseDateTime( args, parameter ) :
 			return
 		except :
 			pass
+	
+	# If no day specified, use today		
+	for format in [ "%H:%M:%S", "%H:%M" ] :
+	
+		try :
+			date = datetime.datetime.strptime( dateStr, format )
+			today = datetime.datetime.now()
+			date = date.replace( day = today.day, month = today.month, year = today.year )
+			d = IECore.DateTimeData( date )
+			parameter.setValidatedValue( d )
+			del args[0]
+			return
+		except :
+			pass
 			
-	raise SyntaxError( "Not a valid date: '%s'" % ( dateStr ) )		
+	raise SyntaxError( "Not a valid date/time: '%s'" % ( dateStr ) )		
 
 	
 def __serialiseDateTime( parameter ) :
