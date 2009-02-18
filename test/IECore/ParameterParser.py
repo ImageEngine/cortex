@@ -267,6 +267,40 @@ class testParameterParser( unittest.TestCase ) :
 		
 		self.assertEqual( p["a"].getValue(), v )
 		
+	def testDatetimeParsing( self ) :
+	
+		import datetime
+	
+		now = datetime.datetime.now()
+		now = now.replace( microsecond = 0 )
+	
+		p = IECore.CompoundParameter(
+			members = [
+					IECore.DateTimeParameter(
+						name = "testName",
+						description = "testName description",
+						defaultValue = now
+					),
+				]
+		)
+		
+		s = IECore.ParameterParser().serialise( p )
+		v = p["testName"].getValue().copy()
+		
+		p["testName"].setValue( IECore.DateTimeData() )
+		self.assertNotEqual( p["testName"].getValue(), v )
+		
+		IECore.ParameterParser().parse( s, p )
+		
+		self.assertEqual( p["testName"].getValue(), v )	
+		
+		IECore.ParameterParser().parse( ["-testName", "2009-02-13" ], p )
+		IECore.ParameterParser().parse( ["-testName", "2009-02-13 10:42:13" ], p )				
+		IECore.ParameterParser().parse( ["-testName", "2009-02-13 10:42" ], p )
+		
+		IECore.ParameterParser().parse( ["-testName", "10:42" ], p )
+		IECore.ParameterParser().parse( ["-testName", "18:12:32" ], p )
+		
 	def testEmptyVector( self ) :
 		""" Test that serializing then parsing a vector with no elements in it succeeds """
 	
