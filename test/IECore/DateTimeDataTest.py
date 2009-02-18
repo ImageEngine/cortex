@@ -42,7 +42,10 @@ class DateTimeDataTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 	
-		d = IECore.DateTimeData()
+		dd = IECore.DateTimeData()
+		
+		d = datetime.datetime( 2009, 2, 12 )
+		dd = IECore.DateTimeData( d )
 		
 		
 	def testValueAccess( self ) :
