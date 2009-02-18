@@ -75,6 +75,8 @@ void bindImathBox()
 	bindBox<V3i>("Box3i");
 }
 
+/// \todo The only reason this is a macro is so that it can turn the class type to a string. We should probably do this 
+/// with a small traits class instead, and get rid of the macro.
 #define DEFINEBOXSTRSPECIALISATION( BOX )				\
 														\
 template<>												\

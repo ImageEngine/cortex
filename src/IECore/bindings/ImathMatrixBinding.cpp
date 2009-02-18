@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -120,6 +120,7 @@ struct MatrixWrapper
 		if (x < 0 || x >= extract<int>(dims[0]) ||
 			y < 0 || y >= extract<int>(dims[1]))
 		{
+			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
 			throw std::out_of_range("");	
 		}		
 		
@@ -136,6 +137,7 @@ struct MatrixWrapper
 		if (x < 0 || x >= extract<int>(dims[0]) ||
 			y < 0 || y >= extract<int>(dims[1]))
 		{
+			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
 			throw std::out_of_range("");	
 		}		
 		
@@ -283,6 +285,8 @@ tuple extractSHRT33( const Matrix33<T> &m )
 	return make_tuple( s, h, r, t );
 }
 
+/// \todo The only reason this is a macro is so that it can turn the class type to a string. We should probably do this 
+/// with a small traits class instead, and get rid of the macro.
 #define DEFINEMATRIXSTRSPECIALISATION( TYPE, D )														\
 template<>																								\
 string repr<TYPE>( TYPE &x )																			\

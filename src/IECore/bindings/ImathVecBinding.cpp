@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,6 +83,7 @@ struct VectorIndexer
 		}
 		else
 		{
+			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
 			throw std::out_of_range("");	
 		}
 		
@@ -96,12 +97,15 @@ struct VectorIndexer
 		}
 		else
 		{
+			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
 			throw std::out_of_range("");	
 		}
 	}
 	
 };
 
+/// \todo The only reason this is a macro is so that it can turn the class type to a string. We should probably do this 
+/// with a small traits class instead, and get rid of the macro.
 #define DEFINEVECSTRSPECIALISATION( VEC )				\
 														\
 template<>												\
