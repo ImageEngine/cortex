@@ -221,9 +221,6 @@ void bindColor3( const char *typeName )
 template<typename T>
 void bindColor4( const char *typeName )
 {
-	// we deliberately don't expose the fact that
-	// Color3 derives from Vec3 because we think
-	// that is weird.
 	class_<T> c = class_<T>( typeName )
 		
 		.def_readwrite( "r", &T::r )
