@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 from IECore import *
 import os
 import os.path
+import datetime
 
 class SequenceLsOp( Op ) :
 
@@ -75,6 +76,17 @@ class SequenceLsOp( Op ) :
 					minValue = 1,
 				),
 				StringParameter( 
+					name = "type",
+					description = "The file types of the sequences to classify.",
+					defaultValue = "any",
+					presets = {
+						"files" : "files",
+						"directories" : "directories",
+						"any" : "any"
+					},
+					presetsOnly = True,
+				),
+				StringParameter( 
 					name = "resultType",
 					description = "The type of the result returned.",
 					defaultValue = "string",
@@ -83,6 +95,11 @@ class SequenceLsOp( Op ) :
 						"stringVector" : "stringVector",
 					},
 					presetsOnly = True,
+				),
+				BoolParameter(
+					name = "contiguousSequencesOnly",
+					description = "When on, only sequences without missing frames are returned.",
+					defaultValue = False,
 				),
 				StringParameter(
 					name = "format",
@@ -103,6 +120,48 @@ class SequenceLsOp( Op ) :
 					presets = {
 						"images" : StringVectorData( [ "tif", "tiff", "jpg", "jpeg", "exr", "cin", "dpx", "ppm", "png", "gif", "iff" ] )
 					}
+				),								
+				CompoundParameter(
+					name = "advanced",
+					description = "Advanced paramaters for filtering results based on various criteria",
+					members = [
+						
+						CompoundParameter(
+							name = "modificationTime",
+							description = "Controls for filtering results based on modification time",
+							
+							members = [
+								BoolParameter(
+									name = "enabled",
+									description = "Enable filtering based on modification time",
+									defaultValue = False
+								),
+								StringParameter(
+									name = "mode",
+									description = "Changes the mode of modified time operation, e.g. before or after",
+									defaultValue = "before",
+									presets = {
+										"Before Start" : "before",
+										"After End" : "after",
+										"Between Start/End" : "between",
+										"Outside Start/End" : "outside"										
+									},
+									presetsOnly = True
+								),
+								DateTimeParameter(
+									name = "startTime",
+									description = "The start time at which to make modification time comparisons against",
+									defaultValue = datetime.datetime.now()
+								),
+								DateTimeParameter(
+									name = "endTime",
+									description = "The end time at which to make modification time comparisons against",
+									defaultValue = datetime.datetime.now()
+								),
+									
+							]
+						)
+					]
 				)
 			]
 		)
@@ -115,6 +174,14 @@ class SequenceLsOp( Op ) :
 			baseDirectory = baseDirectory[:-1]
 	
 		sequences = ls( baseDirectory )
+		
+		# If we've passed in a directory which isn't the current one it is convenient to get that included in the returned sequence names
+		relDir = os.path.normpath( baseDirectory ) != "."
+				
+		if relDir :
+			for s in sequences :
+				s.fileName = os.path.join( baseDirectory, s.fileName )
+					
 		if operands.recurse.value :
 			for root, dirs, files in os.walk( baseDirectory, True ) :
 				
@@ -131,24 +198,114 @@ class SequenceLsOp( Op ) :
 					ss = ls( os.path.join( root, d ) )
 					if ss :
 						for s in ss :
-							s.fileName = os.path.join( relRoot, d, s.fileName )
+						
+							if relDir :
+								s.fileName = os.path.join( baseDirectory, relRoot, d, s.fileName )
+							else :	
+								s.fileName = os.path.join( relRoot, d, s.fileName )
 							sequences.append( s )
-							
+		
+		
+		# \todo This Op would benefit considerably from dynamic parameters
+		# NB. Ordering of filters could have considerable impact on execution time. The most expensive filters should be specified last.
+		filters = []
+		
+		# filter sequences based on type
+		if operands.type.value != "any" :
+		
+			if operands.type.value == "files" :
+				fileTypeTest = os.path.isfile
+			else :	
+				assert( operands.type.value == "directories" )
+				fileTypeTest = os.path.isdir
+					
+			def matchType( sequence ) :						
+				for sequenceFile in sequence.fileNames() :				
+					if not fileTypeTest( sequenceFile ) :						
+						return False
+						
+				return True			
+				
+			filters.append( matchType )
+									
 		# filter sequences based on extension
 		if operands.extensions.size() :
-		
-			filteredSequences = []
+							
 			extensions = set( ["." + e for e in operands.extensions] )
-			for sequence in sequences :
-				root, ext = os.path.splitext( sequence.fileName )
-				if ext in extensions :
-					filteredSequences.append( sequence )
+			
+			def matchExt( sequence ) :			
+				return os.path.splitext( sequence.fileName )[1] in extensions
+				
+			filters.append( matchExt )
+
+		# filter sequences which aren't contiguous			
+		if operands.contiguousSequencesOnly.value :
 		
-			sequences = filteredSequences
-		
+			def isContiguous( sequence ):
+			
+				return len( sequence.frameList.asList() ) == max( sequence.frameList.asList() ) - min( sequence.frameList.asList() ) + 1
+				
+			filters.append( isContiguous )		
+			
+		# advanced filters
+		if operands.advanced.modificationTime.enabled.value :
+			
+			filteredSequences = []
+			
+			mode = operands.advanced.modificationTime.mode.value
+			startTime = operands.advanced.modificationTime.startTime.value
+			endTime = operands.advanced.modificationTime.endTime.value
+
+			matchFn = None
+			if mode == "before" :												
+				matchFn = lambda x : x < startTime	
+					
+			elif mode == "after" :				
+				matchFn = lambda x : x > startTime
+				
+			elif mode == "between" :			
+				matchFn = lambda x : x > startTime and x < endTime				
+				
+			else :
+				assert( mode == "outside" )				
+				matchFn = lambda x : x < startTime or x > endTime
+				
+			assert( matchFn )	
+				
+			def matchModifcationTime( sequence ) :	
+			
+				# If any file in the sequence matches, we have a match.
+				for sequenceFile in sequence.fileNames() :
+
+					st = os.stat( sequenceFile )
+					modifiedTime = datetime.datetime.utcfromtimestamp( st.st_mtime )
+					if matchFn( modifiedTime ) :
+						return True
+						
+				return False	
+				
+			filters.append( matchModifcationTime )		
+			
+		def matchAllFilters( sequence ) :
+				
+			for f in filters :
+				if not f( sequence ) : return False
+				
+			return True
+			
+		def matchAnyFilter( sequence ) :
+				
+			for f in filters :
+				if f( sequence ) : return True
+				
+			return False	
+			
+		# \todo Allow matching of any filter, optionally	
+		sequences = filter( matchAllFilters, sequences )
+
 		# reformat the sequences into strings as requested
 		
-		for i in range( 0, len( sequences ) ) :
+		for i in xrange( 0, len( sequences ) ) :
 			
 			s = operands.format.value
 			s = s.replace( "<PREFIX>", sequences[i].getPrefix() )
@@ -167,7 +324,7 @@ class SequenceLsOp( Op ) :
 			s = s.replace( "<LAST>", str( frames[-1] ) )
 			if s.find( "<STEP>" )!=-1 :
 				stepCounts = {}
-				for j in range( 1, len( frames ) ) :
+				for j in xrange( 1, len( frames ) ) :
 					step = frames[j] - frames[j-1]
 					stepCounts[step] = stepCounts.setdefault( step, 0 ) + 1
 				m = 0

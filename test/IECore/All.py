@@ -180,6 +180,7 @@ from YUVImageWriter import *
 from OversamplesCalculatorTest import *
 from DateTimeDataTest import *
 from DateTimeParameterTest import *
+from SequenceLsOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
