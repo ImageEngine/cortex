@@ -74,7 +74,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	
 		return result
 	
-	## Returns a tuple of the form (paramterised, className, classVersion, searchPathEnvVar).
+	## Returns a tuple of the form (parameterised, className, classVersion, searchPathEnvVar).
 	def getParameterised( self ) :
 		
 		return _IECoreMaya._parameterisedHolderGetParameterised( self )
