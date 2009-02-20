@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -65,6 +65,11 @@ class testFrameRange( unittest.TestCase ) :
 		self.assertEqual( r.start, 3 )
 		self.assertEqual( str(r), "3" )
 		
+	def testRepr( self ) :
+		import IECore
+		r = FrameRange( 2, 200, 2 )
+		self.assertEqual( r, eval( repr( r ) ) )	
+		
 	def testParser( self ) :
 	
 		r = FrameList.parse( "1" )
@@ -117,6 +122,11 @@ class testFileSequence( unittest.TestCase ) :
 		self.assertEqual( s.fileName, "seq.####.tif" )
 		
 		self.assertEqual( s.fileNames(), ["seq.0000.tif", "seq.0001.tif", "seq.0002.tif"] )
+		
+	def testRepr( self ) :
+		import IECore
+		s = FileSequence( "seq.#.tif", FrameRange( 0, 2 ) )
+		self.assertEqual( s, eval( repr( s ) ) )	
 	
 	def testPrefix( self ) :
 	
@@ -218,6 +228,12 @@ class testCompoundFrameList( unittest.TestCase ) :
 		c = FrameList.parse( "1-2, 5, 6, 9-11, 100" )
 		self.assert_( isinstance( c, CompoundFrameList ) )
 		self.assertEqual( c.asList(), [1,2,5,6,9,10,11,100] )
+		
+	def testRepr( self ) :
+	
+		import IECore
+		c = CompoundFrameList( [ FrameRange( 2, 4 ), FrameRange( 3, 6 ) ] )
+		self.assertEqual( c, eval( repr( c ) ) )		
 			
 		
 class testLs( unittest.TestCase ) :

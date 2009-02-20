@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -48,6 +48,11 @@ class ExclusionFrameListTest( unittest.TestCase ) :
 		f = ExclusionFrameList( FrameRange( 1, 10 ), FrameRange( 1, 11, 2 ) )
 		self.assert_( isinstance( f, ExclusionFrameList ) )
 		self.assertEqual( str( f ), "1-10!1-11x2" )
+		
+	def testRepr( self ) :
+	
+		f = ExclusionFrameList( FrameRange( 1, 10 ), FrameRange( 1, 11, 2 ) )
+		self.assertEqual( f, eval( repr( f ) ) )
 
 	def testParsing( self ) :
 
