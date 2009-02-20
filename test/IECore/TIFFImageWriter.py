@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -230,7 +230,7 @@ class TestTIFFImageWriter(unittest.TestCase):
 			
 			self.tearDown()
 
-	def testWrite( self ) :
+	def testWrite( self ) :	
 		
 		displayWindow = Box2i(
 			V2i( 0, 0 ),
@@ -410,11 +410,6 @@ class TestTIFFImageWriter(unittest.TestCase):
 		r = Reader.create( "test/IECore/data/tiff/output.tif" )
 		imgNew = r.read()
 		
-		r = Reader.create( "test/IECore/data/expectedResults/windowWrite.tif" )
-		imgExpected = r.read()
-		
-		self.__verifyImageRGB( imgNew, imgExpected )	
-		
 		
 		expectedDisplayWindow = Box2i(
 			V2i( 0, 0 ),
@@ -427,7 +422,30 @@ class TestTIFFImageWriter(unittest.TestCase):
 		)
 		
 		self.assertEqual( imgNew.displayWindow, expectedDisplayWindow )			
-		self.assertEqual( imgNew.dataWindow, expectedDataWindow )
+		self.assertEqual( imgNew.dataWindow, expectedDataWindow )	
+		
+		pixelColorMap = {
+			V2i( 20, 20 ) : V3f( 0, 0, 0 ),
+			V2i( 60, 60 ) : V3f( 0.404044, 0.404044, 0 ),
+			V2i( 119, 119 ): V3f( 1, 1, 0 ),			
+		}
+	
+		ipe = PrimitiveEvaluator.create( imgNew )
+		
+		
+		result = ipe.createResult()	
+		
+		for pixelColor in pixelColorMap.items() :
+		
+			found = ipe.pointAtPixel( pixelColor[0], result )
+			self.assert_( found )		
+			color = V3f(
+				result.floatPrimVar( ipe.R() ),
+				result.floatPrimVar( ipe.G() ), 
+				result.floatPrimVar( ipe.B() )
+			)	
+							
+			self.assert_( ( color - pixelColor[1]).length() < 1.e-3 )	
 			
 	def testOversizeDataWindow( self ) :
 	
@@ -436,15 +454,7 @@ class TestTIFFImageWriter(unittest.TestCase):
 		
 		w = Writer.create( img, "test/IECore/data/tiff/output.tif" )
 		self.assertEqual( type(w), TIFFImageWriter )		
-		w.write()
-		
-		r = Reader.create( "test/IECore/data/tiff/output.tif" )
-		imgNew = r.read()
-				
-		r = Reader.create( "test/IECore/data/expectedResults/oversizeDataWindow.tiff" )
-		imgExpected = r.read()
-		
-		self.__verifyImageRGB( imgNew, imgExpected )		
+		w.write()	
 									
 		
 	def setUp( self ) :
