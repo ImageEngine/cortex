@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -43,6 +43,22 @@ class FrameList :
 	def __str__( self ) :
 	
 		raise NotImplementedError
+	
+	## Returns the frame list in a string form suitable for evaluation. Must be implemented in all
+	# subclasses.	
+	def __repr__( self ) :
+	
+		raise NotImplementedError
+	
+	## Default equality operator, which can be overriden in derived classes for efficiency	
+	def __eq__( self, other ) :
+	
+		return self.asList() == other.asList()
+
+	## Default comparison operator, which can be overriden in derived classes for efficiency		
+	def __cmp__( self, other ) :
+	
+		return cmp( self.asList(), other.asList() )			
 
 	## This method returns a simple list of frames. They are not guaranteed to
 	# be in ascending order, but they are guaranteed to be non repeating - make

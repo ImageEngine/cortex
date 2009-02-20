@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -47,7 +47,11 @@ class BinaryFrameList( ReorderedFrameList ) :
 	def __init__( self, frameList = EmptyFrameList() ) :
 	
 		ReorderedFrameList.__init__( self, frameList )
-
+		
+	def __repr__( self ) :
+	
+		return "IECore.BinaryFrameList( %s )" % ( repr( self.frameList ) )
+			
 	## Returns self.frameList.asList() in a sort of binary refined way.
 	def asList( self ) :
 	

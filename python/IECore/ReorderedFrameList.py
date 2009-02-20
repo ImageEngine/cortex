@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -68,6 +68,11 @@ class ReorderedFrameList( FrameList ) :
 			return "(%s)%s" % ( s, self.suffix() )
 		else :
 			return s + self.suffix()
+		
+	## Each derived class should override this method		
+	def __repr__( self ) :
+	
+		raise NotImplementedError			
 	
 	## Each derived class should override this method to define a suffix used in the
 	# string representation of the frame list.

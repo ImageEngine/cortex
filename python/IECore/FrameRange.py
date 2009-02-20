@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -97,6 +97,15 @@ class FrameRange( FrameList.FrameList ) :
 			return "%d-%d" % (self.start, self.end)
 		else :
 			return "%d" % self.start
+			
+	def __repr__( self ) :
+	
+		return "IECore.FrameRange( %d, %d, %d )" % ( self.start, self.end, self.step )
+		
+	def __eq__( self, other ) :
+	
+		# Optimized version of base class's equality comparison
+		return isinstance( other, FrameRange ) and self.start == other.start and self.end == other.end and self.step == other.step		
 
 	## Returns a list containing all the frames from start to end inclusive,
 	# ascending by step each time.

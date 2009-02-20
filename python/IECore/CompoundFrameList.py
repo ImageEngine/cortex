@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -75,6 +75,14 @@ class CompoundFrameList( FrameList.FrameList ) :
 	
 		self.__checkList( self.frameLists )
 		return ",".join( [ str( l ) for l in self.frameLists ] )
+		
+	def __repr__( self ) :
+	
+		return "IECore.CompoundFrameList( %s )" % ( repr( self.frameLists ) )	
+		
+	def __eq__( self, other ) :
+	
+		return self.frameLists == other.frameLists	
 
 	## Returns all the frames represented by the FrameLists in self.frameLists.
 	# Frames are returned in the order specified by self.frameLists, but duplicate

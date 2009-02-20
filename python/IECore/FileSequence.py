@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -81,7 +81,7 @@ class FileSequence :
 		
 	def __repr__( self ) :
 		
-		return self.__str__()
+		return "IECore.FileSequence( %s, %s )" % ( repr( self.fileName ), repr( self.frameList ) )
 		
 	## Returns true if other is a FileSequence with the same fileName and FrameList
 	def __eq__( self, other ) :
@@ -89,7 +89,15 @@ class FileSequence :
 		if not isinstance( other, FileSequence ) :
 			return False
 			
-		return self.fileName==other.fileName and self.frameList.asList()==other.frameList.asList()
+		return self.fileName==other.fileName and self.frameList==other.frameList
+	
+	## Returns -1, 0, or 1 depending on whether this file sequence is less than, equal to, or greater than the other. The fileName is considered
+	# more important than the frameList when determining ordering.
+	def __cmp__( self, other ) :
+
+		c = cmp( self.fileName, other.fileName )		
+		if c != 0 : return c
+		else :return cmp( self.frameList, other.frameList )	
 	
 	## Returns the frame number padding - this is calculated by looking at the
 	# number of # characters in self.fileName."""	
