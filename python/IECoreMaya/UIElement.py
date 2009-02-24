@@ -75,11 +75,21 @@ class UIElement :
 	# that maya will not leak it.
 	#
 	# Example usage : maya.cmds.button( command=self._createCallback( self.__buttonPressed ) )
-	def _createCallback( self, function ) :
+	#
+	# If the mel parameter is True then it causes the creation of a mel command to call back and
+	# invoke the python callback. This is useful for the cases where maya insists on treating callbacks as
+	# mel commands even when they're added from python - for instance the outlinerEditor selectCommand
+	# in maya 2008.
+	def _createCallback( self, function, mel=False ) :
 	
 		callbacks = self.__instances[self._topLevelUI()].callbacks
 		callbacks.append( function )
-		return "import IECoreMaya; IECoreMaya.UIElement._UIElement__invokeCallback( \"%s\", %d )" % ( self._topLevelUI(), len( callbacks ) - 1 )
+		
+		pythonCmd = "import IECoreMaya; IECoreMaya.UIElement._UIElement__invokeCallback( '%s', %d )" % ( self._topLevelUI(), len( callbacks ) - 1 )
+		if not mel :
+			return pythonCmd
+		else :
+			return "python( \"%s\" )" % pythonCmd
 	
 	## This is called when the maya ui element corresponding to this
 	# instance is deleted. It may be reimplemented by derived classes
