@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -234,47 +234,16 @@ class TestDPXWriter(unittest.TestCase):
 		w = Writer.create( imgOrig, "test/IECore/data/dpx/output.dpx" )
 		self.assertEqual( type(w), DPXImageWriter )		
 		w.write()
-		
+
 		self.assert_( os.path.exists( "test/IECore/data/dpx/output.dpx" ) )
 				
 		r = Reader.create( "test/IECore/data/dpx/output.dpx" )
 		imgNew = r.read()
 		
-		self.assertEqual( imgNew.displayWindow.min, V2i( 0, 0 ) )			
-		self.assertEqual( imgNew.displayWindow.max, V2i( 219, 219 ) )
+		r = Reader.create( "test/IECore/data/expectedResults/windowWrite.dpx" )
+		imgExpected = r.read()
 		
-		ipe = PrimitiveEvaluator.create( imgNew )
-		self.assert_( ipe.R() )
-		self.assert_( ipe.G() )
-		self.assert_( ipe.B() )
-		self.failIf ( ipe.A() )
-		
-		result = ipe.createResult()
-				
-		# Check that image has been written correctly, accounting for the change in display window
-		found = ipe.pointAtPixel( V2i( 19, 19 ), result )
-		self.assert_( found )		
-		color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
-				result.halfPrimVar( ipe.B() )
-			)
-					
-		# \todo Check	
-		expectedColor = V3f( -0.0056, -0.0056, -0.0056 )
-		self.assert_( ( color - expectedColor).length() < 1.e-3 )
-		
-		found = ipe.pointAtPixel( V2i( 110, 110 ), result )
-		self.assert_( found )		
-		color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
-				result.halfPrimVar( ipe.B() )
-			)	
-				
-		# \todo Check		
-		expectedColor = V3f( 0.911133, 0.911133, 0 )
-		self.assert_( ( color - expectedColor).length() < 1.e-3 )
+		self.__verifyImageRGB( imgNew, imgExpected )
 		
 	def testOversizeDataWindow( self ) :
 	
@@ -283,7 +252,15 @@ class TestDPXWriter(unittest.TestCase):
 		
 		w = Writer.create( img, "test/IECore/data/dpx/output.dpx" )
 		self.assertEqual( type(w), DPXImageWriter )		
-		w.write()		
+		w.write()
+		
+		r = Reader.create( "test/IECore/data/dpx/output.dpx" )
+		imgNew = r.read()
+		
+		r = Reader.create( "test/IECore/data/expectedResults/oversizeDataWindow.dpx" )
+		imgExpected = r.read()
+		
+		self.__verifyImageRGB( imgNew, imgExpected )
 		
 	def setUp( self ) :
 	

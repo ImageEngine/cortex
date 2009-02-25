@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -332,41 +332,14 @@ class TestJPEGImageWriter(unittest.TestCase):
 		w.write()
 		
 		self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
-				
+						
 		r = Reader.create( "test/IECore/data/jpg/output.jpg" )
-		img2 = r.read()
+		imgNew = r.read()
 		
-		self.assertEqual( img2.displayWindow.min, V2i( 0, 0 ) )			
-		self.assertEqual( img2.displayWindow.max, V2i( 219, 219 ) )
+		r = Reader.create( "test/IECore/data/expectedResults/windowWrite.jpg" )
+		imgExpected = r.read()
 		
-		ipe = PrimitiveEvaluator.create( img2 )
-		self.assert_( ipe.R() )
-		self.assert_( ipe.G() )
-		self.assert_( ipe.B() )
-		self.failIf ( ipe.A() )
-		
-		result = ipe.createResult()
-				
-		# Check that image has been written correctly, accounting for the change in display window
-		found = ipe.pointAtPixel( V2i( 19, 19 ), result )
-		self.assert_( found )		
-		color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
-				result.halfPrimVar( ipe.B() )
-			)		
-		expectedColor = V3f( 0, 0, 0 )
-		self.assert_( ( color - expectedColor).length() < 1.e-3 )
-		
-		found = ipe.pointAtPixel( V2i( 110, 110 ), result )
-		self.assert_( found )		
-		color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
-				result.halfPrimVar( ipe.B() )
-			)		
-		expectedColor = V3f( 0.913574, 0.909668, 0 )
-		self.assert_( ( color - expectedColor).length() < 1.e-3 )	
+		self.__verifyImageRGB( imgNew, imgExpected )	
 		
 	def testOversizeDataWindow( self ) :
 	
@@ -375,7 +348,15 @@ class TestJPEGImageWriter(unittest.TestCase):
 		
 		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
 		self.assertEqual( type(w), JPEGImageWriter )		
-		w.write()		
+		w.write()	
+		
+		r = Reader.create( "test/IECore/data/jpg/output.jpg" )
+		imgNew = r.read()
+		
+		r = Reader.create( "test/IECore/data/expectedResults/oversizeDataWindow.jpg" )
+		imgExpected = r.read()
+		
+		self.__verifyImageRGB( imgNew, imgExpected )			
 		
 	def setUp( self ) :
 
