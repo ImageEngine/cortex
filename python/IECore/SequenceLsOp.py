@@ -69,6 +69,11 @@ class SequenceLsOp( Op ) :
 					description = "When on, recursively searches all subdirectories for sequences.",
 					defaultValue = False,
 				),
+				BoolParameter(
+					name = "followLinks",
+					description = "When on, follow symbolic links during directory traversal.",
+					defaultValue = False,
+				),
 				IntParameter(
 					name = "maxDepth",
 					description = "The maximum depth to recursion - this can be used to prevent accidental traversing of huge hierarchies.",
@@ -166,6 +171,37 @@ class SequenceLsOp( Op ) :
 			]
 		)
 
+	@staticmethod		
+	def __walk(top, topdown=True, followlinks=False):
+
+		from os.path import join, isdir, islink
+		from os import listdir, error
+
+		try:
+			names = listdir(top)
+		except error :
+		        return
+
+		dirs, nondirs = [], []
+		for name in names:
+			if isdir(join(top, name)):
+				dirs.append(name)
+			else:
+				nondirs.append(name)
+	
+		if topdown:
+			yield top, dirs, nondirs
+			
+		for name in dirs:
+			path = join(top, name)
+			if followlinks or not islink(path):
+				for x in SequenceLsOp.__walk(path, topdown, followlinks):
+					yield x
+					
+		if not topdown:
+			yield top, dirs, nondirs
+	
+
 	def doOperation( self, operands ) :
 	
 		# recursively find sequences
@@ -183,8 +219,8 @@ class SequenceLsOp( Op ) :
 				s.fileName = os.path.join( baseDirectory, s.fileName )
 					
 		if operands.recurse.value :
-			for root, dirs, files in os.walk( baseDirectory, True ) :
-				
+			# \todo Can safely use os.walk here after Python 2.6, which introduced the followlinks parameter
+			for root, dirs, files in SequenceLsOp.__walk( baseDirectory, topdown = True, followlinks = operands.followLinks.value ) :
 				relRoot = root[len(baseDirectory)+1:]
 				if relRoot!="" :
 					depth = len( relRoot.split( "/" ) )
