@@ -79,6 +79,18 @@ inline T reverseBytes( const T &x )
 }
 
 template<>
+inline char reverseBytes<char>( const char &x )
+{
+	return x;
+}
+
+template<>
+inline unsigned char reverseBytes<unsigned char>( const unsigned char &x )
+{
+	return x;
+}
+
+template<>
 inline short reverseBytes<short>( const short &x )
 {
 	return 	((x & 255) << 8) |
@@ -113,6 +125,7 @@ inline unsigned int reverseBytes<unsigned int>( const unsigned int &x )
 template<>
 inline float reverseBytes<float>( const float &x )
 {
+	BOOST_STATIC_ASSERT( sizeof(int) == sizeof(float) );
 	union {
 		int i;
 		float f;
@@ -138,6 +151,7 @@ inline Imf::Int64 reverseBytes<Imf::Int64>( const Imf::Int64 &x )
 template<>
 inline double reverseBytes<double>( const double &x )
 {
+	BOOST_STATIC_ASSERT( sizeof(Imf::Int64) == sizeof(double) );
 	union {
 		Imf::Int64 i;
 		double d;
