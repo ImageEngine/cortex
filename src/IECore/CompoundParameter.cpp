@@ -214,6 +214,7 @@ bool CompoundParameter::valueValid( ConstObjectPtr value, std::string *reason ) 
 		}
 		else
 		{
+			/// \todo Prepend the child parameter name to the message to make it more useful.
 			if( !pIt->second->valueValid( it->second, reason ) )
 			{
 				return false;
