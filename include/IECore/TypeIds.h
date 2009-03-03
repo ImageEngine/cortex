@@ -311,6 +311,7 @@ enum TypeId
 	ImageUnpremultiplyOpTypeId = 268,
 	DateTimeDataTypeId = 269,
 	DateTimeParameterTypeId = 270,
+	SGIImageReaderTypeId = 271,
 
 	
 	// Remember to update TypeIdBinding.cpp !!!

@@ -181,6 +181,7 @@ from OversamplesCalculatorTest import *
 from DateTimeDataTest import *
 from DateTimeParameterTest import *
 from SequenceLsOpTest import *
+from SGIImageReaderTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
