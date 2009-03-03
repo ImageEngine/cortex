@@ -41,9 +41,7 @@
 namespace IECore
 {
 
-/// The SGIImageReader reads Kodak Cineon (CIN) files.
-/// Currently, only the overwhelmingly popular 10-bit log-encoded pixel-interlaced
-/// 32-bit word boundary format is loaded.
+/// The SGIImageReader reads SGI RGB files.
 class SGIImageReader : public ImageReader
 {
 
@@ -75,7 +73,7 @@ class SGIImageReader : public ImageReader
 
 		/// Opens the file, if necessary, and fills the buffer. Throws an IOException if an error occurs.
 		/// Tries to open the file, returning true on success and false on failure. On success,
-		/// the member data derived from the Cineons's header will be valid.
+		/// the member data derived from the image's header will be valid.
 		/// If throwOnFailure is true then a descriptive Exception is thrown rather than false being returned.
 		bool open( bool throwOnFailure = false );
 
