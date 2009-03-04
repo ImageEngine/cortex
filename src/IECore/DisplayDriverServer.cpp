@@ -34,6 +34,8 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "IECore/DisplayDriverServer.h"
 #include "IECore/SimpleTypedData.h"
@@ -44,35 +46,49 @@ using namespace IECore;
 using boost::asio::ip::tcp;
 using namespace boost;
 
+/* Set the FD_CLOEXEC flag for the given socket descriptor, so that it will not exist on child processes.*/
+static void fixSocketFlags( int socketDesc )
+{
+	int oldflags = fcntl (socketDesc, F_GETFD, 0);
+	if ( oldflags >= 0 )
+	{
+		fcntl( socketDesc, F_SETFD, oldflags | FD_CLOEXEC );
+	}
+}
+
 DisplayDriverServer::DisplayDriverServer( int portNumber ) : 
 		m_endpoint(tcp::v4(), portNumber), 
 		m_service(), 
-		m_acceptor( m_service, m_endpoint),
-		m_thread( boost::bind(&DisplayDriverServer::serverThread, this) ),
+		m_acceptor( m_service ),
+		m_thread(),
 		m_startThread(false)
 {
+	m_acceptor.open(  m_endpoint.protocol() );
+	m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true));
+	m_acceptor.bind( m_endpoint );
+	m_acceptor.listen();
 	DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_service, m_mutex ) );
-
 	m_acceptor.async_accept( newSession->socket(),
 			boost::bind( &DisplayDriverServer::handleAccept, this, newSession,
 			boost::asio::placeholders::error));
-
+	fixSocketFlags( m_acceptor.native() );
+	boost::thread newThread( boost::bind(&DisplayDriverServer::serverThread, this) );
+	m_thread.swap( newThread );
 	m_startThread = true;
 }
 
 DisplayDriverServer::~DisplayDriverServer()
 {
-	m_acceptor.cancel();
-	m_acceptor.close();
-	m_thread.join();
+	if (m_startThread)
+	{
+		m_acceptor.cancel();
+		m_acceptor.close();
+		m_thread.join();
+	}
 }
 
 void DisplayDriverServer::serverThread()
 {
-	while ( !m_startThread )
-	{
-		sleep(1);
-	}
 	try
 	{
 		m_service.run();
@@ -169,6 +185,7 @@ DisplayDriverServer::Session::Session( boost::asio::io_service& io_service, boos
 
 DisplayDriverServer::Session::~Session()
 {
+	m_socket.close();
 }
 
 boost::asio::ip::tcp::socket& DisplayDriverServer::Session::socket()
@@ -185,6 +202,7 @@ void DisplayDriverServer::Session::start()
 				boost::asio::placeholders::error
 			)
 	);
+	fixSocketFlags( m_socket.native() );
 }
 
 void DisplayDriverServer::Session::handleReadHeader( const boost::system::error_code& error )
