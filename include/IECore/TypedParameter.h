@@ -41,6 +41,8 @@
 #include "IECore/SplineData.h"
 #include "IECore/CubeColorLookupData.h"
 #include "IECore/DateTimeData.h"
+#include "IECore/TimeDurationData.h"
+#include "IECore/TimePeriodData.h"
 
 namespace IECore
 {
@@ -124,6 +126,8 @@ typedef TypedParameter<SplinefColor4f> SplinefColor4fParameter;
 typedef TypedParameter<CubeColorLookupf> CubeColorLookupfParameter;
 typedef TypedParameter<CubeColorLookupd> CubeColorLookupdParameter;
 typedef TypedParameter<boost::posix_time::ptime> DateTimeParameter;
+typedef TypedParameter<boost::posix_time::time_duration> TimeDurationParameter;
+typedef TypedParameter<TimePeriod> TimePeriodParameter;
 
 typedef TypedParameter<std::vector<bool> > BoolVectorParameter;
 typedef TypedParameter<std::vector<int> > IntVectorParameter;
@@ -170,6 +174,8 @@ IE_CORE_DECLAREPTR( SplinefColor4fParameter );
 IE_CORE_DECLAREPTR( CubeColorLookupfParameter );
 IE_CORE_DECLAREPTR( CubeColorLookupdParameter );
 IE_CORE_DECLAREPTR( DateTimeParameter );
+IE_CORE_DECLAREPTR( TimeDurationParameter );
+IE_CORE_DECLAREPTR( TimePeriodParameter );
 
 IE_CORE_DECLAREPTR( BoolVectorParameter );
 IE_CORE_DECLAREPTR( IntVectorParameter );

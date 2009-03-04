@@ -312,6 +312,10 @@ enum TypeId
 	DateTimeDataTypeId = 269,
 	DateTimeParameterTypeId = 270,
 	SGIImageReaderTypeId = 271,
+	TimeDurationDataTypeId = 272,
+	TimeDurationParameterTypeId = 273,
+	TimePeriodDataTypeId = 274,
+	TimePeriodParameterTypeId = 275,
 
 	
 	// Remember to update TypeIdBinding.cpp !!!

@@ -310,7 +310,11 @@ void bindTypeId()
 		.value("ImageUnpremultiplyOp", ImageUnpremultiplyOpTypeId )
 		.value("DateTimeData", DateTimeDataTypeId )		
 		.value("DateTimeParameter", DateTimeParameterTypeId )				
-		.value("SGIImageReader", SGIImageReaderTypeId )						
+		.value("SGIImageReader", SGIImageReaderTypeId )
+		.value("TimeDurationData", TimeDurationDataTypeId )
+		.value("TimeDurationParameter", TimeDurationParameterTypeId )
+		.value("TimePeriodData", TimePeriodDataTypeId )
+		.value("TimePeriodParameter", TimePeriodParameterTypeId )
 	;
 }
 

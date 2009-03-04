@@ -182,6 +182,8 @@ from DateTimeDataTest import *
 from DateTimeParameterTest import *
 from SequenceLsOpTest import *
 from SGIImageReaderTest import *
+from TimeDurationDataTest import *
+from TimePeriodDataTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

@@ -200,6 +200,8 @@ __dataTypesConversionDict = {
 	IECore.CubeColorLookupdData: ( IECore.CubeColorLookupd, True ),
 	
 	IECore.DateTimeData: ( datetime.datetime, True ),
+	IECore.TimeDurationData: ( datetime.timedelta, True ),
+	IECore.TimePeriodData: ( IECore.TimePeriod, True ),
 
 
 }

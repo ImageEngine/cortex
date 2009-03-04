@@ -152,6 +152,7 @@ void bindTypedParameter()
 	bindTypedParameter<CubeColorLookupf>( "CubeColorLookupfParameter" );
 	bindTypedParameter<CubeColorLookupd>( "CubeColorLookupdParameter" );	
 	bindTypedParameter<boost::posix_time::ptime>( "DateTimeParameter" );	
+	bindTypedParameter<boost::posix_time::time_duration>( "TimeDurationParameter" );	
 
 	bindTypedParameter<vector<bool> >( "BoolVectorParameter" );
 	bindTypedParameter<vector<int> >( "IntVectorParameter" );

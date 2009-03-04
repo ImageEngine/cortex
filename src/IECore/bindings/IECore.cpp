@@ -218,6 +218,9 @@
 #include "IECore/bindings/OversamplesCalculatorBinding.h"
 #include "IECore/bindings/DateTimeDataBinding.h"
 #include "IECore/bindings/SGIImageReaderBinding.h"
+#include "IECore/bindings/TimeDurationDataBinding.h"
+#include "IECore/bindings/TimePeriodBinding.h"
+#include "IECore/bindings/TimePeriodDataBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -421,6 +424,9 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindOversamplesCalculator();
 	bindDateTimeData();
 	bindSGIImageReader();
+	bindTimeDurationData();
+	bindTimePeriod();	
+	bindTimePeriodData();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
