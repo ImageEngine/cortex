@@ -139,4 +139,26 @@ void ieArrayMultiply( output float array[]; float multiplier )
 	}
 }
 
+/// Adds the elements from array2 onto the corresponding elements of array, in place.
+void ieArrayAdd( output color array[]; color array2[] )
+{
+	uniform float l = min( ieArrayLength( array ), ieArrayLength( array2 ) );
+	uniform float i = 0;
+	for( i=0; i<l; i+=1 )
+	{
+		array[i] += array2[i];
+	}
+}
+
+/// Adds the elements from array2 onto the corresponding elements of array, in place.
+void ieArrayAdd( output float array[]; float array2[] )
+{
+	uniform float l = min( ieArrayLength( array ), ieArrayLength( array2 ) );
+	uniform float i = 0;
+	for( i=0; i<l; i+=1 )
+	{
+		array[i] += array2[i];
+	}
+}
+
 #endif // IECORERI_ARRAYALGO_H
