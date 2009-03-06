@@ -97,7 +97,6 @@ class TypedObjectParameter : public ObjectParameter
 
 };
 
-typedef TypedObjectParameter<MeshPrimitive> MeshPrimitiveParameter;
 typedef TypedObjectParameter<Renderable> RenderableParameter;
 typedef TypedObjectParameter<StateRenderable> StateRenderableParameter;
 typedef TypedObjectParameter<AttributeState> AttributeStateParameter;
@@ -115,8 +114,6 @@ typedef TypedObjectParameter<PointsPrimitive> PointsPrimitiveParameter;
 typedef TypedObjectParameter<CompoundObject> CompoundObjectParameter;
 typedef TypedObjectParameter<ObjectVector> ObjectVectorParameter;
 
-
-IE_CORE_DECLAREPTR( MeshPrimitiveParameter );
 IE_CORE_DECLAREPTR( RenderableParameter );
 IE_CORE_DECLAREPTR( StateRenderableParameter );
 IE_CORE_DECLAREPTR( AttributeStateParameter );
