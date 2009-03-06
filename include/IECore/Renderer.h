@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -287,6 +287,7 @@ class Renderer : public RunTimeTyped
 		/// to the rightHandedOrientation attribute.
 		////////////////////////////////////////////////////////////////////////////
 		//@{
+		/// \todo Add a patchMesh call
 		/// Renders a set of points.
 		virtual void points( size_t numPoints, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders a disk of the specified radius on the xy plane, at the specified z value.
