@@ -51,6 +51,7 @@ from ArrayPrimVarTest import *
 from CoordinateSystemTest import *
 from IlluminateTest import *
 from SubsurfaceTest import *
+from PatchMeshTest import *
 
 if IECore.withFreeType() :
 

@@ -184,6 +184,7 @@ from SequenceLsOpTest import *
 from SGIImageReaderTest import *
 from TimeDurationDataTest import *
 from TimePeriodDataTest import *
+from PatchMeshPrimitiveTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

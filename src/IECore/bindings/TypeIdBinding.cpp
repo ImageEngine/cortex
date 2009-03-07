@@ -315,6 +315,7 @@ void bindTypeId()
 		.value("TimeDurationParameter", TimeDurationParameterTypeId )
 		.value("TimePeriodData", TimePeriodDataTypeId )
 		.value("TimePeriodParameter", TimePeriodParameterTypeId )
+		.value("PatchMeshPrimitive", PatchMeshPrimitiveTypeId )
 	;
 }
 

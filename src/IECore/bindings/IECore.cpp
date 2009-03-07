@@ -221,6 +221,7 @@
 #include "IECore/bindings/TimeDurationDataBinding.h"
 #include "IECore/bindings/TimePeriodBinding.h"
 #include "IECore/bindings/TimePeriodDataBinding.h"
+#include "IECore/bindings/PatchMeshPrimitiveBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -427,6 +428,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTimeDurationData();
 	bindTimePeriod();	
 	bindTimePeriodData();
+	bindPatchMeshPrimitive();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

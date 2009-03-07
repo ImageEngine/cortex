@@ -1151,14 +1151,77 @@ void IECoreRI::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVect
 void IECoreRI::RendererImplementation::geometry( const std::string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-
+	
 	if( type=="teapot" || type=="ri:teapot" )
 	{
+		delayedMotionBegin();
 		RiGeometry( "teapot", 0 );
+	}
+	else if ( type == "patchMesh" )
+	{
+		CompoundDataMap::const_iterator it;
+				
+		// emit basis if we're not in a motion block right now
+		if( !m_inMotion )
+		{
+
+			RtMatrix uBasis, vBasis;
+			
+			it = topology.find( "uBasisMatrix" );
+			assert( it != topology.end() );			
+			convert( ( assertedStaticCast<M44fData>( it->second ) )->readable(), uBasis );
+			
+			it = topology.find( "vBasisMatrix" );
+			assert( it != topology.end() );			
+			convert( ( assertedStaticCast<M44fData>( it->second ) )->readable(), vBasis );
+			
+			it = topology.find( "uBasisStep" );
+			assert( it != topology.end() );		
+			int uStep = ( assertedStaticCast<IntData>( it->second ) )->readable();		
+			
+			it = topology.find( "vBasisStep" );
+			assert( it != topology.end() );		
+			int vStep = ( assertedStaticCast<IntData>( it->second ) )->readable();
+			
+			RiBasis( uBasis, uStep, vBasis, vStep );
+		}
+		
+		delayedMotionBegin();
+		
+		it = topology.find( "type" );
+		assert( it != topology.end() );	
+		const std::string &type = ( assertedStaticCast<StringData>( it->second ) )->readable();
+		
+		it = topology.find( "nu" );
+		assert( it != topology.end() );	
+		int nu = ( assertedStaticCast<IntData>( it->second ) )->readable();
+		
+		it = topology.find( "uwrap" );
+		assert( it != topology.end() );	
+		const std::string &uwrap = ( assertedStaticCast<StringData>( it->second ) )->readable();
+		
+		it = topology.find( "nv" );
+		assert( it != topology.end() );	
+		int nv = ( assertedStaticCast<IntData>( it->second ) )->readable();
+		
+		it = topology.find( "vwrap" );
+		assert( it != topology.end() );	
+		const std::string &vwrap = ( assertedStaticCast<StringData>( it->second ) )->readable();
+				
+	
+		PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
+		RiPatchMeshV(
+			const_cast<char*>( type.c_str() ),
+			nu,
+			const_cast<char*>( uwrap.c_str() ),
+			nv,
+			const_cast<char*>( vwrap.c_str() ),
+			pv.n(), pv.tokens(), pv.values()			
+		);		
 	}
 	else
 	{
+		delayedMotionBegin();
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::geometry", format( "Unsupported geometry type \"%s\"." ) % type );
 	}	
 }
