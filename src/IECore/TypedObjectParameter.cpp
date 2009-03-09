@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,6 +49,7 @@
 #include "IECore/Primitive.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/MeshPrimitive.h"
+#include "IECore/CurvesPrimitive.h"
 #include "IECore/PointsPrimitive.h"
 #include "IECore/ObjectVector.h"
 
@@ -180,6 +181,7 @@ IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( MotionPrimitive, MotionPrimiti
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( Primitive, PrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ImagePrimitive, ImagePrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( MeshPrimitive, MeshPrimitiveParameter );
+IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( CurvesPrimitive, CurvesPrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( PointsPrimitive, PointsPrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( CompoundObject, CompoundObjectParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ObjectVector, ObjectVectorParameter );

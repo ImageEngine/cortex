@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,6 +55,7 @@
 #include "IECore/Primitive.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/MeshPrimitive.h"
+#include "IECore/CurvesPrimitive.h"
 #include "IECore/PointsPrimitive.h"
 #include "IECore/ObjectVector.h"
 
@@ -131,6 +132,7 @@ void bindTypedObjectParameter()
 	bindTypedObjectParameter<Primitive>( "PrimitiveParameter" );
 	bindTypedObjectParameter<ImagePrimitive>( "ImagePrimitiveParameter" );
 	bindTypedObjectParameter<MeshPrimitive>( "MeshPrimitiveParameter" );
+	bindTypedObjectParameter<CurvesPrimitive>( "CurvesPrimitiveParameter" );
 	bindTypedObjectParameter<PointsPrimitive>( "PointsPrimitiveParameter" );	
 	bindTypedObjectParameter<CompoundObject>( "CompoundObjectParameter" );		
 	bindTypedObjectParameter<ObjectVector>( "ObjectVectorParameter" );		

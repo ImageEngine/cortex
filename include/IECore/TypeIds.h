@@ -317,7 +317,7 @@ enum TypeId
 	TimePeriodDataTypeId = 274,
 	TimePeriodParameterTypeId = 275,
 	PatchMeshPrimitiveTypeId = 276,
-
+	CurvesPrimitiveParameterTypeId = 277,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

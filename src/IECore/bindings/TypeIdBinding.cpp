@@ -316,6 +316,7 @@ void bindTypeId()
 		.value("TimePeriodData", TimePeriodDataTypeId )
 		.value("TimePeriodParameter", TimePeriodParameterTypeId )
 		.value("PatchMeshPrimitive", PatchMeshPrimitiveTypeId )
+		.value("CurvesPrimitiveParameter", CurvesPrimitiveParameterTypeId )
 	;
 }
 
