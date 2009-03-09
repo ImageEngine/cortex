@@ -201,10 +201,10 @@ class CurvesTest( unittest.TestCase ) :
 
 		self.performTest( m, os.path.dirname( __file__ ) + "/data/curveImages/motionBlur.tif" )
 																
-def tearDown( self ) :
-
-	if os.path.exists( self.outputFileName ) :
-		os.remove( self.outputFileName )
+	def tearDown( self ) :
+	
+		if os.path.exists( self.outputFileName ) :
+			os.remove( self.outputFileName )
 				
 if __name__ == "__main__":
     unittest.main()   
