@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,6 +51,9 @@ namespace IECore
 /// type information) is that they are used to display
 /// the results of the "do" script, and as such need to
 /// be as simple as possible to parse.
+/// \todo Reference to T should be const.
+/// \todo If we used a class instead, then partial specialisations would allow us to more
+///       easily bind templates without the need for macros to instantiate all the str variations.
 template<typename T>
 std::string str( T &x );
 
@@ -64,6 +67,8 @@ std::string str( T &x );
 /// fully qualified with the module prefix - e.g. "IECore.V2f( 1, 2 )".
 /// \todo Ensure all implementations follow this convention.
 /// \todo Reference to T should be const.
+/// \todo If we used a class instead, then partial specialisations would allow us to more
+///       easily bind templates without the need for macros to instantiate all the repr variations.
 template<typename T>
 std::string repr( T &x );
 
