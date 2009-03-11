@@ -32,8 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+namespace IECoreMaya
+{
+
 template<class T>
 ParameterHandler::Description<T>::Description( IECore::TypeId parameterType, IECore::TypeId dataType )
 {
 	ParameterHandler::registerHandler( parameterType, dataType, new T() );
 }
+
+} // namespace IECoreMaya

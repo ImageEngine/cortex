@@ -34,6 +34,9 @@
 
 #include <cassert>
 
+namespace IECore
+{
+
 template<typename P, typename V>	
 CSGImplicitSurfaceFunction<P,V>::CSGImplicitSurfaceFunction( typename Fn::Ptr fn1, typename Fn::Ptr fn2, Mode mode ) : m_fn1(fn1), m_fn2(fn2), m_mode(mode)
 {
@@ -76,3 +79,4 @@ typename CSGImplicitSurfaceFunction<P,V>::Value CSGImplicitSurfaceFunction<P,V>:
 	return this->operator()(p);
 }
 
+} // namespace IECore

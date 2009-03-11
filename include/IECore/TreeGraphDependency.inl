@@ -32,6 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+namespace IECore
+{
+
 template< typename T >
 void TreeGraphDependency<T>::update( )
 {
@@ -176,3 +179,4 @@ void TreeGraphDependency<T>::clear()
 	m_dirtyNodes.clear();
 }
 
+} // namespace IECore

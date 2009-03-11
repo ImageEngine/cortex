@@ -93,8 +93,9 @@ typedef BlobbyImplicitSurfaceFunction<Imath::V3f, double> BlobbyImplicitSurfaceF
 typedef BlobbyImplicitSurfaceFunction<Imath::V3d, float>  BlobbyImplicitSurfaceFunctionV3df;
 typedef BlobbyImplicitSurfaceFunction<Imath::V3d, double> BlobbyImplicitSurfaceFunctionV3dd;
 
-#include "IECore/BlobbyImplicitSurfaceFunction.inl"
 
 } // namespace IECore
+
+#include "IECore/BlobbyImplicitSurfaceFunction.inl"
 
 #endif // IE_CORE_BLOBBYIMPLICITSURFACEFUNCTION_H

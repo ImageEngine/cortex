@@ -99,8 +99,8 @@ class ParameterHandler : public IECore::RefCounted
                 static HandlerMap &handlers();
 };
 
-#include "IECoreMaya/ParameterHandler.inl"
-
 } // namespace IECoreMaya
+
+#include "IECoreMaya/ParameterHandler.inl"
 
 #endif // IE_COREMAYA_PARAMETERHANDLER_H

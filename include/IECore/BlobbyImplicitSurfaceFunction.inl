@@ -36,6 +36,9 @@
 
 #include "IECore/BoxTraits.h"
 
+namespace IECore
+{
+
 template<typename P, typename V>	
 BlobbyImplicitSurfaceFunction<P,V>::BlobbyImplicitSurfaceFunction( typename PointVectorData::ConstPtr p, ConstDoubleVectorDataPtr r, ConstDoubleVectorDataPtr s ) : m_p( p ), m_radius( r ), m_strength( s )
 {		
@@ -129,3 +132,5 @@ typename BlobbyImplicitSurfaceFunction<P,V>::Value BlobbyImplicitSurfaceFunction
 {
 	return this->operator()(p);
 }
+
+} // namespace IECore

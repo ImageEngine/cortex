@@ -95,8 +95,8 @@ class TreeGraphDependency : public GraphDependency<T>
 
 };
 
-#include <IECore/TreeGraphDependency.inl>
-
 } // namespace IECore
+
+#include <IECore/TreeGraphDependency.inl>
 
 #endif //IE_CORE_TREEGRAPHDEPENDENCY_H

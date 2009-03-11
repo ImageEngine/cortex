@@ -79,13 +79,13 @@ class CSGImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 		
 };
 
-#include "IECore/CSGImplicitSurfaceFunction.inl"
-
 typedef CSGImplicitSurfaceFunction<Imath::V3f, float>  CSGImplicitSurfaceFunctionV3ff;
 typedef CSGImplicitSurfaceFunction<Imath::V3f, double> CSGImplicitSurfaceFunctionV3fd;
 typedef CSGImplicitSurfaceFunction<Imath::V3d, float>  CSGImplicitSurfaceFunctionV3df;
 typedef CSGImplicitSurfaceFunction<Imath::V3d, double> CSGImplicitSurfaceFunctionV3dd;
 
 } // namespace IECore
+
+#include "IECore/CSGImplicitSurfaceFunction.inl"
 
 #endif // IE_CORE_CSGIMPLICITSURFACEFUNCTION_H
