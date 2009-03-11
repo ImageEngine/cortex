@@ -32,7 +32,7 @@
 #
 ##########################################################################
 
-## \file StringUtil.py
+## \file IECore/StringUtil.py
 #
 # This file defines useful string related functions.
 #
