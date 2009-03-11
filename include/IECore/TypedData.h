@@ -157,8 +157,8 @@ class TypedData : public Data
 		DataHolderPtr m_data;
 };
 
-#include "IECore/TypedDataTraits.inl"
-
 } // namespace IECore
+
+#include "IECore/TypedDataTraits.inl"
 
 #endif // IE_CORE_TYPEDDATA_H

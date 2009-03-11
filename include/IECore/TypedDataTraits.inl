@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+namespace IECore
+{
 
 /// This macro specializes the TypedDAtaTraits template class for a particular Data type T.
 // The parameter BT must be the base data type for the internal structure on the Data type T.
@@ -43,3 +45,5 @@
 			typedef BT BaseType;											\
 	};
 
+
+} // namespace IECore
