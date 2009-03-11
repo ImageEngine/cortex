@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -97,6 +97,58 @@ template<class S>
 inline S CubicBasis<T>::operator() ( typename S::BaseType t, const S p[4] ) const
 {
 	return operator()<S>( t, p[0], p[1], p[2], p[3] );
+}
+
+template<typename T>
+template<class S>
+inline void CubicBasis<T>::derivativeCoefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const
+{
+	S t2 = t * t;
+	c0 = matrix[0][0] * 3.0 * t2 + matrix[1][0] * 2.0 * t + matrix[2][0];
+	c1 = matrix[0][1] * 3.0 * t2 + matrix[1][1] * 2.0 * t + matrix[2][1];
+	c2 = matrix[0][2] * 3.0 * t2 + matrix[1][2] * 2.0 * t + matrix[2][2];
+	c3 = matrix[0][3] * 3.0 * t2 + matrix[1][3] * 2.0 * t + matrix[2][3];
+}
+
+template<typename T>
+template<class S>
+inline void CubicBasis<T>::derivativeCoefficients( S t, S c[4] ) const
+{
+	derivativeCoefficients( t, c[0], c[1], c[2], c[3] );
+}
+
+template<typename T>
+template<class S>
+inline S CubicBasis<T>::derivative( S t, S p0, S p1, S p2, S p3 ) const
+{
+	S c0, c1, c2, c3;
+	derivativeCoefficients( t, c0, c1, c2, c3 );
+	return c0 * p0 + c1 * p1 + c2 * p2 + c3 * p3;
+}
+
+template<typename T>
+template<class S>
+inline S CubicBasis<T>::derivative( S t, const S p[4] ) const
+{
+	S c0, c1, c2, c3;
+	derivativeCoefficients( t, c0, c1, c2, c3 );
+	return c0 * p[0] + c1 * p[1] + c2 * p[2] + c3 * p[3];
+}
+
+template<typename T>
+template<class S>
+inline S CubicBasis<T>::derivative( typename S::BaseType t, const S &p0, const S &p1, const S &p2, const S &p3 ) const
+{
+	typename S::BaseType c0, c1, c2, c3;
+	derivativeCoefficients( t, c0, c1, c2, c3 );
+	return c0 * p0 + c1 * p1 + c2 * p2 + c3 * p3;
+}
+
+template<typename T>
+template<class S>
+inline S CubicBasis<T>::derivative( typename S::BaseType t, const S p[4] ) const
+{
+	return derivative( t, p[0], p[1], p[2], p[3] );
 }
 		
 template<typename T>

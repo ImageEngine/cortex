@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,6 +70,14 @@ static tuple coefficients( const T &b, typename T::BaseType t )
 }
 
 template<typename T>
+static tuple derivativeCoefficients( const T &b, typename T::BaseType t )
+{
+	typename T::BaseType c0, c1, c2, c3;
+	b.derivativeCoefficients( t, c0, c1, c2, c3 );
+	return make_tuple( c0, c1, c2, c3 );
+}
+
+template<typename T>
 void bindCubicBasis( const char *name )
 {
 	typedef typename T::BaseType BaseType;
@@ -78,11 +86,17 @@ void bindCubicBasis( const char *name )
 		.def_readwrite( "matrix", &T::matrix )
 		.def_readwrite( "step", &T::step )
 		.def( "coefficients", &coefficients<T> )
+		.def( "derivativeCoefficients", &derivativeCoefficients<T> )
 		.def( "__call__", (BaseType (T::*) ( BaseType, BaseType, BaseType, BaseType, BaseType )const)&T::template operator()<BaseType> )
 		.def( "__call__", (V2f (T::*) ( float, const V2f &, const V2f &, const V2f &, const V2f &)const)&T::template operator()<V2f> )
 		.def( "__call__", (V3f (T::*) ( float, const V3f &, const V3f &, const V3f &, const V3f &)const)&T::template operator()<V3f> )
 		.def( "__call__", (V2d (T::*) ( double, const V2d &, const V2d &, const V2d &, const V2d &)const)&T::template operator()<V2d> )
 		.def( "__call__", (V3d (T::*) ( double, const V3d &, const V3d &, const V3d &, const V3d &)const)&T::template operator()<V3d> )
+		.def( "derivative", (BaseType (T::*) ( BaseType, BaseType, BaseType, BaseType, BaseType )const)&T::template derivative<BaseType> )
+		.def( "derivative", (V2f (T::*) ( float, const V2f &, const V2f &, const V2f &, const V2f &)const)&T::template derivative<V2f> )
+		.def( "derivative", (V3f (T::*) ( float, const V3f &, const V3f &, const V3f &, const V3f &)const)&T::template derivative<V3f> )
+		.def( "derivative", (V2d (T::*) ( double, const V2d &, const V2d &, const V2d &, const V2d &)const)&T::template derivative<V2d> )
+		.def( "derivative", (V3d (T::*) ( double, const V3d &, const V3d &, const V3d &, const V3d &)const)&T::template derivative<V3d> )				
 		.def( self==self )
 		.def( self!=self )
 		.def( "linear", &T::linear, return_value_policy<copy_const_reference>() ).staticmethod( "linear" )
