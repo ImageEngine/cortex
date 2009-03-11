@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_RENDERERABLE_H
-#define IE_CORE_RENDERERABLE_H
+#ifndef IE_CORE_RENDERABLE_H
+#define IE_CORE_RENDERABLE_H
 
 #include "IECore/BlindDataHolder.h"
 
@@ -64,4 +64,4 @@ IE_CORE_DECLAREPTR( Renderable );
 
 }
 
-#endif // IE_CORE_RENDERERABLE_H
+#endif // IE_CORE_RENDERABLE_H
