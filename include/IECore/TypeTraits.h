@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,6 +49,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/Spline.h"
 #include "IECore/SplineData.h"
+#include "IECore/DateTimeData.h"
 
 #include "OpenEXR/ImathMatrix.h"
 
@@ -176,6 +177,11 @@ template< typename T > struct IsVec2TypedData : boost::mpl::and_< IsTypedData<T>
 BOOST_STATIC_ASSERT( (IsVec2TypedData<V2fData>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVec2TypedData<V3iData> >::value) );
 
+/// IsVec2VectorTypedData
+template< typename T > struct IsVec2VectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, IsVec2< typename VectorValueType<T>::type > > {};
+BOOST_STATIC_ASSERT( (IsVec2VectorTypedData<V2iVectorData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVec2VectorTypedData<V2fData> >::value) );
+
 /// IsVec3TypedData
 template< typename T > struct IsVec3TypedData : boost::mpl::and_< IsTypedData<T>, IsVec3< typename ValueType<T>::type > > {};
 BOOST_STATIC_ASSERT( (IsVec3TypedData<V3fData>::value) );
@@ -188,6 +194,12 @@ BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVec3VectorTypedData<V3fData> >::value
 
 /// IsVecTypedData
 template< typename T > struct IsVecTypedData : boost::mpl::or_< IsVec2TypedData<T>, IsVec3TypedData<T> > {};
+BOOST_STATIC_ASSERT( (IsVecTypedData<V2iData>::value) );
+BOOST_STATIC_ASSERT( (IsVecTypedData<V3fData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVecTypedData<M33fData> >::value) );
+
+/// IsVecVectorTypedData
+template< typename T > struct IsVecVectorTypedData : boost::mpl::or_< IsVec2VectorTypedData<T>, IsVec3VectorTypedData<T> > {};
 BOOST_STATIC_ASSERT( (IsVecTypedData<V2iData>::value) );
 BOOST_STATIC_ASSERT( (IsVecTypedData<V3fData>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsVecTypedData<M33fData> >::value) );
@@ -218,6 +230,37 @@ BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsNumericSimpleTypedData<char> >::value
 
 /// IsNumericTypedData
 template< typename T > struct IsNumericTypedData : boost::mpl::or_< IsNumericSimpleTypedData<T>, IsNumericVectorTypedData<T> > {};
+
+/// IsInterpolable
+template< typename T > struct IsInterpolable 
+	: boost::mpl::or_< 
+		boost::is_arithmetic<T>,
+		boost::mpl::or_<
+			IsColor<T>,
+			IsVec<T>
+		>
+	> {} ;
+BOOST_STATIC_ASSERT( (IsInterpolable<int>::value) );	
+BOOST_STATIC_ASSERT( (IsInterpolable<Imath::Color3f>::value) );	
+BOOST_STATIC_ASSERT( (IsInterpolable<Imath::V2d>::value) );	
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolable<std::string> >::value) );
+
+/// IsInterpolableTypedData
+template< typename T > struct IsInterpolableTypedData : boost::mpl::and_< IsTypedData<T>, IsInterpolable< typename ValueType<T>::type > > {};
+
+/// IsInterpolableVectorTypedData
+template< typename T > struct IsInterpolableVectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, IsInterpolable< typename VectorValueType<T>::type > > {};
+BOOST_STATIC_ASSERT( (IsInterpolableVectorTypedData<HalfVectorData>::value) );	
+BOOST_STATIC_ASSERT( (IsInterpolableVectorTypedData<Color4fVectorData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableVectorTypedData<FloatData> >::value) );	
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableVectorTypedData<StringData> >::value) );
+
+/// IsInterpolableSimpleTypedData
+template< typename T > struct IsInterpolableSimpleTypedData : boost::mpl::and_< IsSimpleTypedData<T>, IsInterpolable< typename ValueType<T>::type > > {};
+BOOST_STATIC_ASSERT( (IsInterpolableSimpleTypedData<IntData>::value) );	
+BOOST_STATIC_ASSERT( (IsInterpolableSimpleTypedData<V2iData>::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableSimpleTypedData<DateTimeData> >::value) );	
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableSimpleTypedData<IntVectorData> >::value) );	
 
 /// IsSpline
 template<typename T, typename U = void > struct IsSpline : public boost::false_type {};
