@@ -86,8 +86,8 @@ std::ostream &operator << ( std::ostream &os, const TransformationMatrix<T> &x )
 typedef TransformationMatrix<double> TransformationMatrixd;
 typedef TransformationMatrix<float> TransformationMatrixf;
 
-#include "IECore/TransformationMatrix.inl"
-
 }
+
+#include "IECore/TransformationMatrix.inl"
 
 #endif // IE_CORE_TRANSFORMATIONMATRIX_H

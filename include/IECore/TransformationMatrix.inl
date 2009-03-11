@@ -35,6 +35,9 @@
 #ifndef IE_CORE_TRANSFORMATIONMATRIX_INL
 #define IE_CORE_TRANSFORMATIONMATRIX_INL
 
+namespace IECore
+{
+
 template <class T>
 TransformationMatrix<T>::TransformationMatrix() : scalePivot( 0, 0, 0), scale( 1, 1, 1 ), shear( 0, 0, 0 ), scalePivotTranslation( 0, 0, 0 ), 
 						rotatePivot( 0, 0, 0 ), rotationOrientation(), rotate(), rotatePivotTranslation( 0, 0, 0 ), translate( 0, 0, 0 )
@@ -77,5 +80,7 @@ std::ostream &operator << ( std::ostream &os, const TransformationMatrix<T> &x )
 		" ro : " << x.rotationOrientation << " r : " << x.rotate << " rpt : " << x.rotatePivotTranslation << " t : " << x.translate;
 	return os;
 }
+
+} // namespace IECore
 
 #endif // IE_CORE_TRANSFORMATIONMATRIX_INL

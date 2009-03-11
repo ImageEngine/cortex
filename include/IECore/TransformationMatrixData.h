@@ -49,8 +49,8 @@ typedef TypedData < TransformationMatrixd > TransformationMatrixdData;
 IE_CORE_DECLAREPTR( TransformationMatrixfData );
 IE_CORE_DECLAREPTR( TransformationMatrixdData );
 
-#include "IECore/TransformationMatrixDataTraits.inl"
-
 }
+
+#include "IECore/TransformationMatrixDataTraits.inl"
 
 #endif // IE_CORE_TRANSFORMATIONMATRIXDATA_H

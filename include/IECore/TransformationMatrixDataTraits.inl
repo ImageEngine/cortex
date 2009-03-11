@@ -32,6 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+namespace IECore
+{
+
 IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( TransformationMatrixfData, float );
 IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( TransformationMatrixdData, double );
 
+} // namespace IECore
