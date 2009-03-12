@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -130,7 +130,6 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	X tMax = 1;
 	X tMid, xMid;
 	X epsilon = Imath::limits<X>::epsilon(); // might be nice to present this as a parameter
-	int i = 0;
 	do
 	{
 		tMid = ( tMin + tMax ) / X( 2 );
@@ -143,15 +142,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 		{
 			tMin = tMid;
 		}
-		i++;
-		
-		/// A million bisections and still no solution? Something must be very wrong!
-		if ( i > 1e6 )
-		{
-			throw Exception( "Spline::solve() entered infinite loop" );
-		}			
-		
-	} while( Imath::Math<X>::fabs( xMid - x ) > epsilon );
+	} while( Imath::Math<X>::fabs( tMin - tMax ) > epsilon );
 
 	return tMid;
 }
