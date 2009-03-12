@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,55 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECORE_RIBWRITER_H
+#define IECORE_RIBWRITER_H
 
-#include "IECoreRI/bindings/RendererBinding.h"
-#include "IECoreRI/bindings/SLOReaderBinding.h"
+#include "IECore/Writer.h"
+#include "IECore/TypedParameter.h"
 
-#include "IECoreRI/bindings/PTCParticleReaderBinding.h"
-#include "IECoreRI/bindings/PTCParticleWriterBinding.h"
-#include "IECoreRI/bindings/RIBWriterBinding.h"
+#include "IECoreRI/TypeIds.h"
 
-using namespace IECoreRI;
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( _IECoreRI )
+namespace IECore
 {
-	bindRenderer();
-	bindSLOReader();
-#ifdef IECORERI_WITH_PTC
-	bindPTCParticleReader();
-	bindPTCParticleWriter();
-#endif // IECORERI_WITH_PTC
-	bindRIBWriter();
+
+IE_CORE_FORWARDDECLARE( ObjectParameter )
+
 }
+
+namespace IECoreRI
+{
+
+class RIBWriter : public IECore::Writer
+{
+
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( RIBWriter, RIBWriterTypeId, Writer )
+
+		RIBWriter();
+		RIBWriter( IECore::ObjectPtr object, const std::string &fileName );
+		
+		static bool canWrite( IECore::ConstObjectPtr object, const std::string &fileName );
+		
+		IECore::BoolParameterPtr worldBlockParameter();
+		IECore::ConstBoolParameterPtr worldBlockParameter() const;
+		
+	protected :
+
+		virtual void doWrite();
+	
+	private :
+	
+		void constructParameters();
+		
+		IECore::BoolParameterPtr m_worldBlockParameter;
+			
+		static const WriterDescription<RIBWriter> g_writerDescription;
+		
+};
+
+IE_CORE_DECLAREPTR( RIBWriter );
+
+} // namespace IECoreRI
+
+#endif // IECORE_RIBWRITER_H

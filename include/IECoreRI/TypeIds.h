@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,7 +42,8 @@ enum TypeId
 	PTCParticleReaderTypeId = 106000,
 	PTCParticleWriterTypeId = 106001,
 	RendererTypeId = 106002,
-
+	RIBWriterTypeId = 106003,
+	
 	/// If we ever get here we should start over again
 	LastCoreRITypeId = 106999,	
 };	

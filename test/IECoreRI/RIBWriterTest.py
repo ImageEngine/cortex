@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,43 +32,45 @@
 #
 ##########################################################################
 
-import sys
+import unittest
+import os.path
+
 import IECore
+import IECoreRI
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
-from Orientation import *
-from MultipleContextsTest import *
-from Camera import *
-from CurvesTest import *
-from TextureOrientationTest import *
-from ArrayPrimVarTest import *
-from CoordinateSystemTest import *
-from IlluminateTest import *
-from SubsurfaceTest import *
-from PatchMeshTest import *
-from RIBWriterTest import *
+class RIBWriterTest( unittest.TestCase ) :
 
-if IECore.withFreeType() :
-
-	from TextTest import *
-
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
-
-	def __init__( self ) :
+	outputFileName = os.path.dirname( __file__ ) + "/output/ribWriter.rib"
 	
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )		
+	def test( self ) :
+	
+		cube = IECore.ObjectReader( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+	
+		writer = IECoreRI.RIBWriter( cube, self.outputFileName )
+		writer.write()
+		
+		l = "".join( file( self.outputFileName ).readlines() )
+		self.assert_( "PointsGeneralPolygons" in l )
+		self.assert_( "WorldBegin" not in l )
+		self.assert_( "WorldEnd" not in l )
 
-	def write( self, l ) :
+	def testWithWorld( self ) :
+	
+		cube = IECore.ObjectReader( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+	
+		writer = IECoreRI.RIBWriter( cube, self.outputFileName )
+		writer["worldBlock"].setTypedValue( True )
+		writer.write()
+		
+		l = "".join( file( self.outputFileName ).readlines() )
+		self.assert_( "PointsGeneralPolygons" in l )
+		self.assert_( "WorldBegin" in l )
+		self.assert_( "WorldEnd" in l )
+					
+	def tearDown( self ) :
 
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )		
+		if os.path.exists( self.outputFileName ) :
+			os.remove( self.outputFileName )
+				
+if __name__ == "__main__":
+    unittest.main()   
