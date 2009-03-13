@@ -185,6 +185,7 @@ from SGIImageReaderTest import *
 from TimeDurationDataTest import *
 from TimePeriodDataTest import *
 from PatchMeshPrimitiveTest import *
+from CurvesToPatchMeshGroupOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
