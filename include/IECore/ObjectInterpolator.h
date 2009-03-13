@@ -84,6 +84,7 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, double x, Ob
 		throw( Exception( "Interpolation objects type don't match!" ) );
 	}
 
+	/// \todo Use TypeTraits::IsInterpolable, or similar (need to account for integral types not being interpolated here)
 	switch( y0->typeId() )
 	{
 		INTERPOLATE2_TYPE( FloatData )
@@ -183,6 +184,8 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, double x, Ob
 		case UIntDataTypeId :
 		case CharDataTypeId :
 		case UCharDataTypeId :
+		case ShortDataTypeId :
+		case UShortDataTypeId :
 		case V2iDataTypeId :
 		case V3iDataTypeId :
 		case Box2iDataTypeId :
@@ -234,7 +237,7 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, const Object
 		throw( Exception( "Interpolation objects type don't match!" ) );
 	}
 
-
+	/// \todo Use TypeTraits::IsInterpolable, or similar (need to account for integral types not being interpolated here)
 	switch( y0->typeId() )
 	{
 		INTERPOLATE4_TYPE( FloatData )
@@ -378,6 +381,8 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, const Object
 		case UIntDataTypeId :
 		case CharDataTypeId :
 		case UCharDataTypeId :
+		case ShortDataTypeId :
+		case UShortDataTypeId :
 		case V2iDataTypeId :
 		case V3iDataTypeId :
 		case Box2iDataTypeId :
