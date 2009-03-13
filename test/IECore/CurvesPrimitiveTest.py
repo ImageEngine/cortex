@@ -103,6 +103,8 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		cc = Reader.create( "test/IECore/data/curves.cob" ).read()
 		
 		self.assertEqual( cc, c )
+		
+		c = Reader.create( "test/IECore/data/cobFiles/torusCurves.cob" ).read()
 	
 	def testVariableSize( self ) :
 	
