@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,31 +32,60 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IE_CORE_CURVEEXTRUDEOP_H
+#define IE_CORE_CURVEEXTRUDEOP_H
 
-#include "IECore/CurvesToPatchMeshGroupOp.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include <vector>
 
-using namespace boost;
-using namespace boost::python;
+#include "IECore/Op.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/TypedParameter.h"
+#include "IECore/TypedObjectParameter.h"
+#include "IECore/CurvesPrimitive.h"
+#include "IECore/PatchMeshPrimitive.h"
 
 namespace IECore
 {
 
-void bindCurvesToPatchMeshGroupOp()
-{
-	typedef class_< CurvesToPatchMeshGroupOp, CurvesToPatchMeshGroupOpPtr, boost::noncopyable, bases<Op> > CurvesToPatchMeshGroupOpPyClass;
-	CurvesToPatchMeshGroupOpPyClass( "CurvesToPatchMeshGroupOp", no_init )
-		.def( init<>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CurvesToPatchMeshGroupOp)
-	;
-	
-	INTRUSIVE_PTR_PATCH( CurvesToPatchMeshGroupOp, CurvesToPatchMeshGroupOpPyClass );
-	implicitly_convertible<CurvesToPatchMeshGroupOpPtr, OpPtr>();	
+IE_CORE_FORWARDDECLARE( ObjectParameter )
 
-}
+/// The CurveExtrudeOp lofts RiCurves into RiPatchMesh cylinders, obeying any width primvars present.
+class CurveExtrudeOp : public Op
+{
+	public :
+		
+		IE_CORE_DECLARERUNTIMETYPED( CurveExtrudeOp, Op );
+		
+		CurveExtrudeOp();
+		virtual ~CurveExtrudeOp();
+		
+		CurvesPrimitiveParameterPtr curvesParameter();
+		ConstCurvesPrimitiveParameterPtr curvesParameter() const;
+		
+		V2iParameterPtr resolutionParameter();				
+		ConstV2iParameterPtr resolutionParameter() const;		
+		
+	protected :
+
+		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		
+		void buildReferenceFrames( const std::vector< Imath::V3f > &points, std::vector< Imath::V3f > &tangents, std::vector< Imath::M44f > &frames ) const;
+		
+		PatchMeshPrimitivePtr buildPatchMesh( ConstCurvesPrimitivePtr curves, unsigned curveIndex, unsigned vertexOffset, unsigned varyingOffset ) const;
+	
+	private :
+		
+		CurvesPrimitiveParameterPtr m_curvesParameter;
+		V2iParameterPtr m_resolutionParameter;
+		
+		struct VaryingFn;
+		struct VertexFn;
+		struct UniformFn;
+
+};
+
+IE_CORE_DECLAREPTR( CurveExtrudeOp );
 
 } // namespace IECore
+
+#endif // IE_CORE_CURVEEXTRUDEOP_H

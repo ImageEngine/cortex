@@ -222,7 +222,7 @@
 #include "IECore/bindings/TimePeriodBinding.h"
 #include "IECore/bindings/TimePeriodDataBinding.h"
 #include "IECore/bindings/PatchMeshPrimitiveBinding.h"
-#include "IECore/bindings/CurvesToPatchMeshGroupOpBinding.h"
+#include "IECore/bindings/CurveExtrudeOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -430,7 +430,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTimePeriod();	
 	bindTimePeriodData();
 	bindPatchMeshPrimitive();
-	bindCurvesToPatchMeshGroupOp();
+	bindCurveExtrudeOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

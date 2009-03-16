@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,12 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_CURVESTOPATCHMESHGROUPOPBINDING_H
-#define IECOREPYTHON_CURVESTOPATCHMESHGROUPOPBINDING_H
+#include <boost/python.hpp>
+
+#include "IECore/CurveExtrudeOp.h"
+#include "IECore/CompoundObject.h"
+#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+using namespace boost;
+using namespace boost::python;
 
 namespace IECore
 {
-void bindCurvesToPatchMeshGroupOp();
+
+void bindCurveExtrudeOp()
+{
+	typedef class_< CurveExtrudeOp, CurveExtrudeOpPtr, boost::noncopyable, bases<Op> > CurveExtrudeOpPyClass;
+	CurveExtrudeOpPyClass( "CurveExtrudeOp", no_init )
+		.def( init<>() )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CurveExtrudeOp)
+	;
+	
+	INTRUSIVE_PTR_PATCH( CurveExtrudeOp, CurveExtrudeOpPyClass );
+	implicitly_convertible<CurveExtrudeOpPtr, OpPtr>();	
+
 }
 
-#endif // IECOREPYTHON_CURVESTOPATCHMESHGROUPOPBINDING_H
+} // namespace IECore

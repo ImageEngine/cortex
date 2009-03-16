@@ -317,7 +317,7 @@ void bindTypeId()
 		.value("TimePeriodParameter", TimePeriodParameterTypeId )
 		.value("PatchMeshPrimitive", PatchMeshPrimitiveTypeId )
 		.value("CurvesPrimitiveParameter", CurvesPrimitiveParameterTypeId )
-		.value("CurvesToPatchMeshGroupOp", CurvesToPatchMeshGroupOpTypeId )
+		.value("CurveExtrudeOp", CurveExtrudeOpTypeId )
 	;
 }
 

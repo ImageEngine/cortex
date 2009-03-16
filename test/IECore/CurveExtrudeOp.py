@@ -38,14 +38,14 @@ import math
 import unittest
 import IECore
 
-class CurvesToPatchMeshGroupOpTest( unittest.TestCase ) :
+class CurveExtrudeOpTest( unittest.TestCase ) :
 	
 	def testIt( self ) :
 	
 		c = IECore.Reader.create( "test/IECore/data/cobFiles/torusCurves.cob" ).read()
 		assert( c.arePrimitiveVariablesValid() )
 		
-		op = IECore.CurvesToPatchMeshGroupOp()
+		op = IECore.CurveExtrudeOp()
 		
 		patchGroup = op(
 			curves = c,

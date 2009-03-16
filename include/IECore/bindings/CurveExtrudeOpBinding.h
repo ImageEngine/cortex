@@ -32,61 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_CURVESTOPATCHMESHGROUPOP_H
-#define IE_CORE_CURVESTOPATCHMESHGROUPOP_H
-
-#include <vector>
-
-#include "IECore/Op.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/TypedParameter.h"
-#include "IECore/TypedObjectParameter.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/PatchMeshPrimitive.h"
+#ifndef IECOREPYTHON_CURVEEXTRUDEOPBINDING_H
+#define IECOREPYTHON_CURVEEXTRUDEOPBINDING_H
 
 namespace IECore
 {
+void bindCurveExtrudeOp();
+}
 
-IE_CORE_FORWARDDECLARE( ObjectParameter )
-
-/// The CurvesToPatchMeshGroupOp distributes points over a mesh using a random distribution. Evenness is
-/// approximated by weighting the amount of expected particles per mesh face to be proportional to that face's area.
-class CurvesToPatchMeshGroupOp : public Op
-{
-	public :
-		
-		IE_CORE_DECLARERUNTIMETYPED( CurvesToPatchMeshGroupOp, Op );
-		
-		CurvesToPatchMeshGroupOp();
-		virtual ~CurvesToPatchMeshGroupOp();
-		
-		CurvesPrimitiveParameterPtr curvesParameter();
-		ConstCurvesPrimitiveParameterPtr curvesParameter() const;
-		
-		V2iParameterPtr resolutionParameter();				
-		ConstV2iParameterPtr resolutionParameter() const;		
-		
-	protected :
-
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-		
-		void buildReferenceFrames( const std::vector< Imath::V3f > &points, std::vector< Imath::V3f > &tangents, std::vector< Imath::M44f > &frames ) const;
-		
-		PatchMeshPrimitivePtr buildPatchMesh( ConstCurvesPrimitivePtr curves, unsigned curveIndex, unsigned vertexOffset, unsigned varyingOffset ) const;
-	
-	private :
-		
-		CurvesPrimitiveParameterPtr m_curvesParameter;
-		V2iParameterPtr m_resolutionParameter;
-		
-		struct VaryingFn;
-		struct VertexFn;
-		struct UniformFn;
-
-};
-
-IE_CORE_DECLAREPTR( CurvesToPatchMeshGroupOp );
-
-} // namespace IECore
-
-#endif // IE_CORE_CURVESTOPATCHMESHGROUPOP_H
+#endif // IECOREPYTHON_CURVEEXTRUDEOPBINDING_H

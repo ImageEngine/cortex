@@ -50,16 +50,16 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
 
-#include "IECore/CurvesToPatchMeshGroupOp.h"
+#include "IECore/CurveExtrudeOp.h"
 
 using namespace IECore;
 using namespace Imath;
 using namespace std;
 
-CurvesToPatchMeshGroupOp::CurvesToPatchMeshGroupOp()
+CurveExtrudeOp::CurveExtrudeOp()
 	:	Op(
 		staticTypeName(),
-		"The CurvesToPatchMeshGroupOp creates a group of PatchMesh geometries by lofting a circle along each given CurvesPrimitive.",
+		"The CurveExtrudeOp creates a group of PatchMesh geometries by lofting a circle along each given CurvesPrimitive.",
 		new GroupParameter(
 			"result",
 			"Resulting group of patch meshes.",
@@ -83,21 +83,21 @@ CurvesToPatchMeshGroupOp::CurvesToPatchMeshGroupOp()
 	parameters()->addParameter( m_resolutionParameter );
 }
 
-CurvesToPatchMeshGroupOp::~CurvesToPatchMeshGroupOp()
+CurveExtrudeOp::~CurveExtrudeOp()
 {
 }
 
-CurvesPrimitiveParameterPtr CurvesToPatchMeshGroupOp::curvesParameter()
-{
-	return m_curvesParameter;
-}
-
-ConstCurvesPrimitiveParameterPtr CurvesToPatchMeshGroupOp::curvesParameter() const
+CurvesPrimitiveParameterPtr CurveExtrudeOp::curvesParameter()
 {
 	return m_curvesParameter;
 }
 
-void CurvesToPatchMeshGroupOp::buildReferenceFrames( const std::vector< Imath::V3f > &points, std::vector< Imath::V3f > &tangents, std::vector< M44f > &frames ) const
+ConstCurvesPrimitiveParameterPtr CurveExtrudeOp::curvesParameter() const
+{
+	return m_curvesParameter;
+}
+
+void CurveExtrudeOp::buildReferenceFrames( const std::vector< Imath::V3f > &points, std::vector< Imath::V3f > &tangents, std::vector< M44f > &frames ) const
 {	
 	/// \todo This disregads the "N" primvar which is possibly specified on the CurvesPrimitive
 	std::vector< Imath::V3f >::size_type numPoints = points.size();
@@ -129,7 +129,7 @@ void CurvesToPatchMeshGroupOp::buildReferenceFrames( const std::vector< Imath::V
 	);	
 }
 
-struct CurvesToPatchMeshGroupOp::VaryingFn
+struct CurveExtrudeOp::VaryingFn
 {
 	typedef DataPtr ReturnType;
 	
@@ -195,12 +195,12 @@ struct CurvesToPatchMeshGroupOp::VaryingFn
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );
-			throw InvalidArgumentException( ( boost::format( "CurvesToPatchMeshGroupOp: Invalid data type \"%s\" for primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );            
+			throw InvalidArgumentException( ( boost::format( "CurveExtrudeOp: Invalid data type \"%s\" for primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );            
                 }
         };
 };
 
-struct CurvesToPatchMeshGroupOp::VertexFn
+struct CurveExtrudeOp::VertexFn
 {
 	typedef DataPtr ReturnType;
 	
@@ -274,13 +274,13 @@ struct CurvesToPatchMeshGroupOp::VertexFn
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );
-			throw InvalidArgumentException( ( boost::format( "CurvesToPatchMeshGroupOp: Invalid data type \"%s\" for vertex primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );            
+			throw InvalidArgumentException( ( boost::format( "CurveExtrudeOp: Invalid data type \"%s\" for vertex primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );            
                 }
         };
 };
 
 
-struct CurvesToPatchMeshGroupOp::UniformFn
+struct CurveExtrudeOp::UniformFn
 {
 	typedef DataPtr ReturnType;
 	
@@ -305,28 +305,28 @@ struct CurvesToPatchMeshGroupOp::UniformFn
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );                	
-			throw InvalidArgumentException( ( boost::format( "CurvesToPatchMeshGroupOp: Invalid data type \"%s\" for uniform primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );            
+			throw InvalidArgumentException( ( boost::format( "CurveExtrudeOp: Invalid data type \"%s\" for uniform primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );            
                 }
         };
 };
 
 
-PatchMeshPrimitivePtr CurvesToPatchMeshGroupOp::buildPatchMesh( ConstCurvesPrimitivePtr curves, unsigned curveIndex, unsigned vertexOffset, unsigned varyingOffset ) const
+PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( ConstCurvesPrimitivePtr curves, unsigned curveIndex, unsigned vertexOffset, unsigned varyingOffset ) const
 {		
 	if ( curves->periodic() )
 	{
-		throw InvalidArgumentException( "CurvesToPatchMeshGroupOp: Cannot convert periodic curves" );
+		throw InvalidArgumentException( "CurveExtrudeOp: Cannot convert periodic curves" );
 	}
 	
 	PrimitiveVariableMap::const_iterator it = curves->variables.find( "P" );
 	if ( it == curves->variables.end() )
 	{
-		throw InvalidArgumentException( "CurvesToPatchMeshGroupOp: Input curve has no 'P' primvar" );
+		throw InvalidArgumentException( "CurveExtrudeOp: Input curve has no 'P' primvar" );
 	}
 	ConstV3fVectorDataPtr pData = runTimeCast< const V3fVectorData >( it->second.data );
 	if ( !pData )
 	{
-		throw InvalidArgumentException( "CurvesToPatchMeshGroupOp: Input curve has no 'P' primvar of type V3fVectorData" );
+		throw InvalidArgumentException( "CurveExtrudeOp: Input curve has no 'P' primvar of type V3fVectorData" );
 	}
 	
 	float width = 1.0f;
@@ -345,7 +345,7 @@ PatchMeshPrimitivePtr CurvesToPatchMeshGroupOp::buildPatchMesh( ConstCurvesPrimi
 		}
 		else
 		{
-			msg( Msg::Warning, "CurvesToPatchMeshGroupOp", "Ignoring malformed primvar 'constantwidth'" );
+			msg( Msg::Warning, "CurveExtrudeOp", "Ignoring malformed primvar 'constantwidth'" );
 		}
 	}
 	
@@ -365,7 +365,7 @@ PatchMeshPrimitivePtr CurvesToPatchMeshGroupOp::buildPatchMesh( ConstCurvesPrimi
 		
 		if ( !varyingWidthData && !vertexWidthData)
 		{
-			msg( Msg::Warning, "CurvesToPatchMeshGroupOp", "Ignoring malformed primvar 'width'" );
+			msg( Msg::Warning, "CurveExtrudeOp", "Ignoring malformed primvar 'width'" );
 		}
 	}
 	
@@ -553,7 +553,7 @@ PatchMeshPrimitivePtr CurvesToPatchMeshGroupOp::buildPatchMesh( ConstCurvesPrimi
 	return patchMesh;
 }
 
-ObjectPtr CurvesToPatchMeshGroupOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr CurveExtrudeOp::doOperation( ConstCompoundObjectPtr operands )
 {	
 	CurvesPrimitivePtr curves = m_curvesParameter->getTypedValue<CurvesPrimitive>();	
 	assert( curves );
