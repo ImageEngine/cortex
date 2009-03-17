@@ -353,6 +353,7 @@ void bindMatrix33(const char *bindName)
 		.def(init<>())
 		.def(init<T>())
 		.def(init<T, T, T, T, T, T, T, T, T>())
+		/// \todo Could add constructor which takes a Python list
 		
 		.def(init<const Matrix33<T> &>())
 	
@@ -465,6 +466,8 @@ void bindMatrix44(const char *bindName)
 	
 	class_< Matrix44<T> >(bindName)
 		//.def_readwrite("x", &Matrix44<T>::x)
+		
+		/// \todo Could add constructor which takes a Python list, which would certainly make integration with Maya nicer
 		.def(init<>())
 		.def(init<T>())
 		.def(init<T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T>())

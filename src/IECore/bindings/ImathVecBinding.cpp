@@ -169,6 +169,7 @@ void bindVec2(const char *bindName)
 		.def(init<const Vec2<float> &>())
 		.def(init<const Vec2<double> &>())
 		.def(init<const Vec2<int> &>())
+		/// \todo Could add constructor which takes a Python list
 	
 		.def("setValue", sv1)
 		.def("setValue", sv2)
@@ -250,6 +251,7 @@ void bindVec3(const char *bindName)
 		.def("__getitem__", &VectorIndexer<Vec3<T> >::get)
 		.def("__setitem__", &VectorIndexer<Vec3<T> >::set)
 	
+		/// \todo Could add constructor which takes a Python list, which would certainly make integration with Maya nicer
 		.def(init<>())
 		.def(init<T>())
 		.def(init<T, T, T>())
