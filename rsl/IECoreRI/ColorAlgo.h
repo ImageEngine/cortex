@@ -81,4 +81,15 @@ color ieAdjustSaturation( color c; float saturation )
 	return mix( color( l ), c, saturation );
 }
 
+/// Arguments of 0 leave color unchanged.
+color ieAdjustHSV( color c; float hue; float saturation; float value )
+{
+	color cc = ctransform( "rgb", "hsv", c );
+	cc[0] += hue;
+	cc[1] *= max( 0, 1 + saturation);
+	cc[2] *= max( 0, 1 + value);
+	cc = ctransform( "hsv", "rgb", cc );
+	return clamp( cc, 0, 1 );
+}
+
 #endif // IECORERI_COLORALGO_H
