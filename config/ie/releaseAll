@@ -49,7 +49,7 @@ elif IEEnv.platform() == "cent5.x86_64" :
 
 	build( [ "COMPILER_VERSION=3.4.6" ] )
 	build( [ "COMPILER_VERSION=4.1.2", "MAYA_VERSION=2008" ] )
-	build( [ "COMPILER_VERSION=4.0.4", "DL_VERSION=8.0.33" ] )
+	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=8.0.42" ] )
 
 else :
 
