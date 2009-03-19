@@ -74,11 +74,7 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 
 		splineData = IECore.SplineffData( 
 			IECore.Splineff( 
-			IECore.CubicBasisf( 
-				IECore.M44f( -0.5, 1.5, -1.5, 0.5, 1, -2.5, 2, -0.5, -0.5, 0, 0.5, 0, 0, 1, 0, 0 ), 
-				1 
-			), 
-			
+			IECore.CubicBasisf.catmullRom(), 			
 			( ( 0, 0 ), ( 0, 0 ), ( 1, 0 ),( 1, 0 ) ) )
 		)
 		
