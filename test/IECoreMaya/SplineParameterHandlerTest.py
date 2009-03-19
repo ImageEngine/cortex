@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,32 +32,67 @@
 #
 ##########################################################################
 
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-from FnParameterisedHolderTest import *
-from ToMayaPlugConverterTest import *
-from ToMayaMeshConverterTest import *
-from MayaTypeIdTest import *
-from FromMayaTransformConverterTest import *
-from CallbackIdTest import *
-from TemporaryAttributeValuesTest import *
-from SplineParameterHandlerTest import *
-
 import MayaUnitTest
+import maya.cmds
 
+class SplineParameterHandlerTest( unittest.TestCase ) :
+
+	class TestClass( IECore.Parameterised ) :
+
+		def __init__( self ) :
+
+			IECore.Parameterised.__init__( self, "name", "description" )
+
+			self.parameters().addParameter(
+				IECore.SplineffParameter(
+					name = "spline",
+					description = "description",
+					defaultValue = IECore.SplineffData(
+						IECore.Splineff(
+							IECore.CubicBasisf.catmullRom(),
+							(
+								( 0, 1 ),
+								( 0, 1 ),
+								( 1, 0 ),
+								( 1, 0 ),
+							),
+						),
+					),
+				)
+			)
+
+	def testRoundTrip( self ) :
+				
+		node = maya.cmds.createNode( "ieParameterisedHolderNode" )
+	
+		parameterised = SplineParameterHandlerTest.TestClass()
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		fnPH.setParameterised( parameterised )
+
+		splineData = IECore.SplineffData( 
+			IECore.Splineff( 
+			IECore.CubicBasisf( 
+				IECore.M44f( -0.5, 1.5, -1.5, 0.5, 1, -2.5, 2, -0.5, -0.5, 0, 0.5, 0, 0, 1, 0, 0 ), 
+				1 
+			), 
+			
+			( ( 0, 0 ), ( 0, 0 ), ( 1, 0 ),( 1, 0 ) ) )
+		)
+		
+		parameterised.parameters()["spline"].setValue( splineData )
+		
+		# Put the value to the node's attributes						
+		fnPH.setNodeValue( parameterised.parameters()["spline"] )
+		
+		# Retrieve the value from the node's attributes		
+		fnPH.setParameterisedValue( parameterised.parameters()["spline"] )		
+		
+		# The parameter value should not have changed
+		self.assertEqual( parameterised.parameters()["spline"].getValue(), splineData )
+
+	
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
