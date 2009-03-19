@@ -91,7 +91,7 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 		fnPH.setParameterisedValue( parameterised.parameters()["spline"] )		
 		
 		# The parameter value should not have changed
-		self.assertEqual( parameterised.parameters()["spline"].getValue(), splineData )
+		self.assertEqual( parameterised.parameters()["spline"].getValue(), splineData ) # Known bug
 
 	
 if __name__ == "__main__":
