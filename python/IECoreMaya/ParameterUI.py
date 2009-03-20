@@ -88,6 +88,8 @@ class ParameterUI :
 		
 		if self.__popupControl:
 		
+			IECoreMaya.FnParameterisedHolder( self.node() ).setParameterisedValue( self.parameter )
+
 			cmds.iconTextStaticLabel(			
 				self.__popupControl,
 				edit = True,
@@ -151,6 +153,9 @@ class ParameterUI :
 		self.__popupControl = None
 	
 		if self.parameter.presetsOnly:
+		
+			IECoreMaya.FnParameterisedHolder( self.node() ).setParameterisedValue( self.parameter )
+			
 			self._layout = cmds.rowLayout(
 				numberOfColumns = 2,
 			)
