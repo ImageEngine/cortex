@@ -78,7 +78,7 @@ class WrapperGarbageCollector : public WrapperGarbageCollectorBase
 				toCollect.clear();
 				for( InstanceMap::const_iterator it = g_refCountedToPyObject.begin(); it!=g_refCountedToPyObject.end(); it++ )
 				{
-					if( it->first->refCounter()==1 )
+					if( it->first->refCount()==1 )
 					{
 						if( it->second->ob_refcnt==1 )
 						{

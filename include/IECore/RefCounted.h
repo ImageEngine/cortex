@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -76,18 +76,23 @@ class RefCounted
 		RefCounted();		
 	
 		/// Add a reference to the current object
+		/// \todo Inline me!
 		void addRef() const;
 	
 		/// Remove a reference from the current object
+		/// \todo Inline me!
 		void removeRef() const;
 		
-		/// Return current counter
+		/// \deprecated Use refCount() instead.
 		RefCount refCounter() const;
+		/// Returns the current reference count.
+		inline RefCount refCount() const { return m_numRefs; };
 	
 	protected:
 		
 		virtual ~RefCounted();	
-			
+		
+		/// \todo Make me private
 		mutable RefCount m_numRefs;
 };
 
