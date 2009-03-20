@@ -72,10 +72,9 @@ global proc string ieParameterisedHolderClassDescription( string $nodeName )
 global proc int[] ieParameterisedHolderClassVersions( string $nodeName )
 {
 	string $class = ieParameterisedHolderClassName( $nodeName );
-	string $sp = ieParameterisedHolderClassSearchPathEnvVar( $nodeName );
-	$sp = getenv( $sp );
+	string $searchPathEnvVar = ieParameterisedHolderClassSearchPathEnvVar( $nodeName );
 	iePython -command "import os.path";
-	string $versions = `iePython -eval ("IECore.ClassLoader( IECore.SearchPath( os.path.expandvars('" + $sp + "'), ':' ) ).versions( '" + $class + "' )" )`;
+	string $versions = `iePython -eval ("IECore.ClassLoader.defaultLoader( '" + $searchPathEnvVar + "' ).versions( '" + $class + "' )" )`;
 	string $tokens[];
 	tokenize $versions "[], " $tokens;
 	int $result[];
@@ -92,9 +91,8 @@ global proc ieParameterisedHolderSetParameterised( string $nodeName, string $cla
 {
 	if( $classVersion < 0 )
 	{
-		string $sp = getenv( $searchPathEnvVar );
 		iePython -command "import os.path";
-		$classVersion = (int) `iePython -eval ( "IECore.ClassLoader( IECore.SearchPath(  os.path.expandvars('" + $sp + "'), ':' ) ).getDefaultVersion( '" + $className + "' )" )`;
+		$classVersion = (int) `iePython -eval ( "IECore.ClassLoader.defaultLoader( '" + $searchPathEnvVar + "' ).getDefaultVersion( '" + $className + "' )" )`;
 	}
 	iePython -cmd ("IECoreMaya.FnParameterisedHolder( '" + $nodeName + "' ).setParameterised( '" + $className + "' , " + $classVersion + ", '" + $searchPathEnvVar + "' )");
 }

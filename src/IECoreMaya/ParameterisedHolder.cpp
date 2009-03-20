@@ -481,25 +481,13 @@ IECore::ParameterPtr ParameterisedHolder<B>::plugParameter( const MPlug &plug )
 template<typename B>
 IECore::ParameterisedPtr ParameterisedHolder<B>::loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar )
 {
-	const char *searchPath = getenv( searchPathEnvVar.asChar() );
-	if( !searchPath )
-	{
-		searchPath = "";
-	}	
-
 	string toExecute = boost::str( format( 
-			"IECore.ClassLoader( IECore.SearchPath( os.path.expandvars(\"%s\"), \":\" ) ).load( \"%s\", %d )()\n"
-		) % searchPath % className.asChar() % classVersion
+			"IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n"
+		) % searchPathEnvVar.asChar() % className.asChar() % classVersion
 	);
 
 	try
 	{
-		PyRun_String( 
-			"import os.path",
-			Py_file_input, PythonCmd::globalContext().ptr(),
-			PythonCmd::globalContext().ptr()
-		);
-
 		handle<> resultHandle( PyRun_String( 
 			toExecute.c_str(),
 			Py_eval_input, PythonCmd::globalContext().ptr(),

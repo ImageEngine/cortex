@@ -224,6 +224,28 @@ class ClassLoader :
 		for k, v in defaultVersions.items() :
 			if k in self.__classes and not v is None :
 				self.setDefaultVersion( k, v )
+		
+	__defaultLoaders = {}
+	## Returns a ClassLoader configured to load from the paths defined by the
+	# specified environment variable. The same object is returned each time,
+	# allowing one loader to be shared by many callers.
+	@classmethod
+	def defaultLoader( cls, envVar ) :
+	
+		loader = cls.__defaultLoaders.get( envVar, None )
+		if loader :
+			return loader
+		
+		sp = ""
+		if envVar in os.environ :
+			sp = os.environ[envVar]
+		else :
+			msg( Msg.Level.Warning, "ClassLoader.defaultLoader", "Environment variable %s not set." % envVar )
+			
+		loader = cls( SearchPath( os.path.expandvars( sp ), ":" ) )
+		cls.__defaultLoaders[envVar] = loader
+		
+		return loader
 	
 	## Returns a ClassLoader configured to load from the
 	# paths defined by the IECORE_OP_PATHS environment variable. The
@@ -232,18 +254,7 @@ class ClassLoader :
 	@classmethod
 	def defaultOpLoader( cls ) :
 		
-		try :
-			return cls.__defaultOpLoader
-		except :
-			sp = ""
-			if "IECORE_OP_PATHS" in os.environ :
-				sp = os.environ["IECORE_OP_PATHS"]
-			else :
-				msg( Msg.Level.Warning, "ClassLoader.defaultOpLoader", "Environment variable IECORE_OP_PATHS not set." )
-
-			cls.__defaultOpLoader = cls( SearchPath( os.path.expandvars( sp ), ":" ) )
-			
-		return cls.__defaultOpLoader
+		return cls.defaultLoader( "IECORE_OP_PATHS" )
 		
 	## Returns a ClassLoader configured to load from the
 	# paths defined by the IECORE_PROCEDURAL_PATHS environment variable. The
@@ -252,18 +263,7 @@ class ClassLoader :
 	@classmethod
 	def defaultProceduralLoader( cls ) :
 		
-		try :
-			return cls.__defaultProceduralLoader
-		except :
-			sp = ""
-			if "IECORE_PROCEDURAL_PATHS" in os.environ :
-				sp = os.environ["IECORE_PROCEDURAL_PATHS"]
-			else :
-				msg( Msg.Level.Warning, "ClassLoader.defaultProceduralLoader", "Environment variable IECORE_PROCEDURAL_PATHS not set." )
-
-			cls.__defaultProceduralLoader = cls( SearchPath( os.path.expandvars( sp ), ":" ) )
-			
-		return cls.__defaultProceduralLoader	
+		return cls.defaultLoader( "IECORE_PROCEDURAL_PATHS" )
 	
 	# throws an exception if the version is no good
 	@staticmethod
