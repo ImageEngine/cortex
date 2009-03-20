@@ -60,12 +60,16 @@ class TestClassLoader( unittest.TestCase ) :
 	
 		l = IECore.ClassLoader.defaultOpLoader()
 		ll = IECore.ClassLoader.defaultOpLoader()
+		lll = IECore.ClassLoader.defaultLoader( "IECORE_OP_PATHS" )
 		self.assert_( l is ll )
+		self.assert_( l is lll )
 		self.assert_( isinstance( l, IECore.ClassLoader ) )
 		
 		l = IECore.ClassLoader.defaultProceduralLoader()
 		ll = IECore.ClassLoader.defaultProceduralLoader()
+		lll = IECore.ClassLoader.defaultLoader( "IECORE_PROCEDURAL_PATHS" )
 		self.assert_( l is ll )
+		self.assert_( l is lll )
 		self.assert_( isinstance( l, IECore.ClassLoader ) )
 		
 	def testRefresh( self ) :
