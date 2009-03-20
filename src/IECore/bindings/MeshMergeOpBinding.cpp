@@ -38,7 +38,6 @@
 #include "IECore/MeshMergeOp.h"
 #include "IECore/bindings/MeshMergeOpBinding.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;

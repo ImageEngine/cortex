@@ -38,7 +38,6 @@
 #include "IECore/bindings/MeshPrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 
 using namespace IECore;
 using namespace boost::python;

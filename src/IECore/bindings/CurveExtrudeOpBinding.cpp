@@ -37,7 +37,6 @@
 #include "IECore/CurveExtrudeOp.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
