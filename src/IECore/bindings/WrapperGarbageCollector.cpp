@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,36 +32,59 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_WRAPPERGARBAGECOLLECTOR_H
-#define IECORE_WRAPPERGARBAGECOLLECTOR_H
+#include "IECore/bindings/WrapperGarbageCollector.h"
 
-#include <boost/python.hpp>
+#include <iostream>
+#include <cassert>
+#include <vector>
 
-#include "IECore/RefCounted.h"
-#include "IECore/WrapperGarbageCollectorBase.h"
+using namespace IECore;
 
-namespace IECore
+WrapperGarbageCollector::WrapperGarbageCollector( PyObject *pyObject, RefCounted *object )
+	:	m_pyObject( pyObject ), m_object( object )
 {
+	g_allocCount++;
 
-//\todo Optimize the collect() function. The function is taking too much tests on reference counting when many objects are allocated.
-class WrapperGarbageCollector : public WrapperGarbageCollectorBase
-{
-				
-	public :
-	
-		WrapperGarbageCollector( PyObject *pyObject, RefCounted *object );
-		
-		virtual ~WrapperGarbageCollector();
-		
-		static void collect();
-		
-	protected :
-	
-		PyObject *m_pyObject;
-		RefCounted *m_object;
-			
-};
+	if (g_allocCount >= g_allocThreshold)
+	{
+		collect();
+	}
 
+	g_refCountedToPyObject[object] = pyObject;
 }
 
-#endif // IECORE_WRAPPERGARBAGECOLLECTOR_H
+WrapperGarbageCollector::~WrapperGarbageCollector()
+{
+	g_refCountedToPyObject.erase( m_object );
+}		
+		
+void WrapperGarbageCollector::collect()
+{
+	std::vector<PyObject*> toCollect;
+
+	do
+	{
+		toCollect.clear();
+		for( InstanceMap::const_iterator it = g_refCountedToPyObject.begin(); it!=g_refCountedToPyObject.end(); it++ )
+		{
+			if( it->first->refCount()==1 )
+			{
+				if( it->second->ob_refcnt==1 )
+				{
+					toCollect.push_back( it->second );
+				}
+			}
+		}
+
+		for (std::vector<PyObject*>::const_iterator jt = toCollect.begin(); jt != toCollect.end(); ++jt)
+		{
+			Py_DECREF( *jt );
+		}
+	} while( toCollect.size() );
+
+	g_allocCount = 0;
+	/// Scale the collection threshold with the number of objects to be collected, otherwise we get
+	/// awful (quadratic?) behaviour when creating large numbers of objects.
+	/// \todo Revisit this with a better thought out strategy, perhaps like python's own garbage collector.
+	g_allocThreshold = std::max( size_t( 50 ), g_refCountedToPyObject.size() );
+}
