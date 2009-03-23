@@ -37,6 +37,8 @@
 
 #include <boost/python.hpp>
 
+#include <vector>
+
 #include "IECore/RefCounted.h"
 #include "IECore/WrapperGarbageCollectorBase.h"
 
@@ -49,11 +51,54 @@ class WrapperGarbageCollector : public WrapperGarbageCollectorBase
 				
 	public :
 	
-		WrapperGarbageCollector( PyObject *pyObject, RefCounted *object );
+		WrapperGarbageCollector( PyObject *pyObject, RefCounted *object )
+			:	m_pyObject( pyObject ), m_object( object )
+		{
+			g_allocCount++;
+
+			if (g_allocCount >= g_allocThreshold)
+			{
+				collect();
+			}
+
+			g_refCountedToPyObject[object] = pyObject;
+		}
 		
-		virtual ~WrapperGarbageCollector();
-		
-		static void collect();
+		virtual ~WrapperGarbageCollector()
+		{
+			g_refCountedToPyObject.erase( m_object );
+		}		
+
+		static void collect()
+		{
+			std::vector<PyObject*> toCollect;
+
+			do
+			{
+				toCollect.clear();
+				for( InstanceMap::const_iterator it = g_refCountedToPyObject.begin(); it!=g_refCountedToPyObject.end(); it++ )
+				{
+					if( it->first->refCount()==1 )
+					{
+						if( it->second->ob_refcnt==1 )
+						{
+							toCollect.push_back( it->second );
+						}
+					}
+				}
+
+				for (std::vector<PyObject*>::const_iterator jt = toCollect.begin(); jt != toCollect.end(); ++jt)
+				{
+					Py_DECREF( *jt );
+				}
+			} while( toCollect.size() );
+
+			g_allocCount = 0;
+			/// Scale the collection threshold with the number of objects to be collected, otherwise we get
+			/// awful (quadratic?) behaviour when creating large numbers of objects.
+			/// \todo Revisit this with a better thought out strategy, perhaps like python's own garbage collector.
+			g_allocThreshold = std::max( size_t( 50 ), g_refCountedToPyObject.size() );
+		}
 		
 	protected :
 	
