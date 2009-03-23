@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@
 
 #include "IECore/private/cineon.h"
 
+#include "boost/multi_array.hpp"
 #include "boost/format.hpp"
 
 #include <fstream>
@@ -80,13 +81,13 @@ struct CINImageWriter::ChannelConverter
 	typedef void ReturnType;
 
 	std::string m_channelName;
-	Box2i m_displayWindow;
+	ConstImagePrimitivePtr m_image;	
 	Box2i m_dataWindow;
 	unsigned int m_bitShift;
 	std::vector<unsigned int> &m_imageBuffer;
 
-	ChannelConverter( const std::string &channelName, const Box2i &displayWindow, const Box2i &dataWindow, unsigned int bitShift, std::vector<unsigned int> &imageBuffer  ) 
-	: m_channelName( channelName ), m_displayWindow( displayWindow ), m_dataWindow( dataWindow ), m_bitShift( bitShift ), m_imageBuffer( imageBuffer )
+	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, unsigned int bitShift, std::vector<unsigned int> &imageBuffer  ) 
+	: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_bitShift( bitShift ), m_imageBuffer( imageBuffer )
 	{
 	}
 
@@ -101,27 +102,21 @@ struct CINImageWriter::ChannelConverter
 			ScaledDataConversion<typename T::ValueType::value_type, float>, 
 			LinearToCineonDataConversion<float, unsigned int> 
 		> converter;
-
-		int displayWidth = m_displayWindow.size().x + 1;
-		int dataWidth = m_dataWindow.size().x + 1;
-
-		int dataY = 0;
-
-		for ( int y = m_dataWindow.min.y; y <= m_dataWindow.max.y; y++, dataY++ )
+		
+		typedef boost::multi_array_ref< const typename T::ValueType::value_type, 2 > SourceArray2D;
+		typedef boost::multi_array_ref< unsigned int, 2 > TargetArray2D;
+		
+		const SourceArray2D sourceData( &data[0], extents[ m_image->getDataWindow().size().y + 1 ][ m_image->getDataWindow().size().x + 1 ] );
+		TargetArray2D targetData( &m_imageBuffer[0], extents[ m_image->getDisplayWindow().size().y + 1 ][ m_image->getDisplayWindow().size().x + 1 ] );
+		
+		const Box2i copyRegion = boxIntersection( m_dataWindow, boxIntersection( m_image->getDisplayWindow(), m_image->getDataWindow() ) );
+		
+		for ( int y = copyRegion.min.y; y <= copyRegion.max.y ; y++ )
 		{
-			int dataOffset = dataY * dataWidth ;
-			assert( dataOffset >= 0 );
-
-			for ( int x = m_dataWindow.min.x; x <= m_dataWindow.max.x; x++, dataOffset++ )
-			{
-				int pixelIdx = ( y - m_displayWindow.min.y ) * displayWidth + ( x - m_displayWindow.min.x );
-
-				assert( pixelIdx >= 0 );
-				assert( pixelIdx < (int)m_imageBuffer.size() );
-				assert( dataOffset < (int)data.size() );
-
-				/// Perform the conversion, and set the appropriate bits in the "cell"
-				m_imageBuffer[ pixelIdx ] |= converter( data[dataOffset] ) << m_bitShift;
+			for ( int x = copyRegion.min.x; x <= copyRegion.max.x ; x++ )
+			{				
+				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ] 
+					|= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) << m_bitShift;			
 			}
 		}
 	};
@@ -272,7 +267,7 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 		DataPtr dataContainer = image->variables.find( *i )->second.data;
 		assert( dataContainer );
 		
-		ChannelConverter converter( *i, image->getDisplayWindow(), boxIntersection( dataWindow, image->getDisplayWindow() ), shift, imageBuffer );
+		ChannelConverter converter( *i, image, dataWindow, shift, imageBuffer );
 		
 		despatchTypedData<			
 			ChannelConverter, 

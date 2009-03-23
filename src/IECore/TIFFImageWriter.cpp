@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -180,8 +180,6 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 
 	vector<T> imageBuffer( samplesPerPixel * area, 0 );
 	
-	int dataWidth = dataWindow.size().x + 1;
-
 	// Encode each individual channel into the buffer
 	int channelOffset = 0;
 	for ( vector<string>::const_iterator i = names.begin(); i != names.end(); ++i, ++channelOffset )
@@ -196,23 +194,19 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 			TypeTraits::IsNumericVectorTypedData,
 			typename ChannelConverter<ChannelData>::ErrorHandler
 		>( dataContainer, converter );
-
-		int dataY = 0;
 		
-		for ( int y = dataWindow.min.y; y <= dataWindow.max.y; y++, dataY++ )
+		typedef boost::multi_array_ref< const T, 2 > SourceArray2D;
+		typedef boost::multi_array_ref< T, 3 > TargetArray3D;
+		
+		const SourceArray2D sourceData( &channelData->readable()[0], extents[ image->getDataWindow().size().y + 1 ][ image->getDataWindow().size().x + 1 ] );
+		TargetArray3D targetData( &imageBuffer[0], extents[ height ][ width ][ samplesPerPixel ] );
+		
+		for ( int y = dataWindow.min.y; y <= dataWindow.max.y ; y++ )
 		{
-			int dataOffset = dataY * dataWidth;
-			assert( dataOffset >= 0 );
-
-			for ( int x = dataWindow.min.x; x <= dataWindow.max.x; x++, dataOffset++ )
-			{		
-				int pixelIdx = ( y - image->getDataWindow().min.y ) * dataWidth + ( x - image->getDataWindow().min.x );
-
-				assert( pixelIdx >= 0 );
-				assert( samplesPerPixel*dataOffset + channelOffset < (int)imageBuffer.size() );
-				assert( pixelIdx < (int)channelData->readable().size() );
-				
-				imageBuffer[ samplesPerPixel*dataOffset + channelOffset ] = channelData->readable()[pixelIdx];
+			for ( int x = dataWindow.min.x; x <= dataWindow.max.x ; x++ )
+			{				
+				targetData[ y - dataWindow.min.y ][ x - dataWindow.min.x ][ channelOffset ]
+					= sourceData[ y - image->getDataWindow().min.y ][ x - image->getDataWindow().min.x ];			
 			}
 		}
 	}
@@ -332,7 +326,7 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 			TIFFSetField( tiffImage, TIFFTAG_EXTRASAMPLES, extraSamples.size(), (uint16*)&extraSamples[0] );
 		}
 		
-		Box2i dataWindow = boxIntersection( fullDataWindow, image->getDisplayWindow() );
+		Box2i dataWindow = boxIntersection( fullDataWindow, boxIntersection( image->getDisplayWindow(), image->getDataWindow() ) );
 
 		// compute the writebox
 		int width  = 1 + dataWindow.max.x - dataWindow.min.x;
