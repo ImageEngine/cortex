@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -135,35 +135,29 @@ MStatus ColorSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 	
 	assert( indices.length() == fnRAttr.getNumEntries() );
 	
-	size_t pointsSizeMinus2 = spline.points.size() - 1;
+	size_t pointsSizeMinus2 = spline.points.size() - 2;
 	unsigned idx = 0;
+	unsigned expectedPoints = 0;
+	unsigned reusedIndices = 0;	
 	for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end(); ++it, ++idx )
 	{
 		// we commonly double up the endpoints on cortex splines to force interpolation to the end.
 		// maya does this implicitly, so we skip duplicated endpoints when passing the splines into maya.
 		// this avoids users having to be responsible for managing the duplicates, and gives them some consistency
 		// with the splines they edit elsewhere in maya.
-		if( idx==1 )
+		if( idx==1 && *it == *spline.points.begin() || idx==pointsSizeMinus2 && *it == *spline.points.rbegin()  )
 		{
-			if( *it==*spline.points.begin() )
-			{
-				continue;
-			}
-		}
-		if( idx==pointsSizeMinus2 )
-		{
-			if( *it==*spline.points.rbegin() )
-			{
-				continue;
-			}
+			continue;
 		}
 		
-		MColor c( IECore::convert< MColor >( it->second ) );
-	
-		if ( idx < indices.length() )
+		expectedPoints ++;
+		
+		if ( idx < std::min( 2u, indices.length() ) )
 		{
+			reusedIndices ++;
 			fnRAttr.setPositionAtIndex( it->first, indices[ idx ], &s );
 			assert( s );
+			MColor c = IECore::convert< MColor >( it->second );
 			fnRAttr.setColorAtIndex( c, indices[ idx ], &s );	
 			assert( s );
 			fnRAttr.setInterpolationAtIndex( MRampAttribute::kSpline, indices[ idx ], &s );		
@@ -171,30 +165,75 @@ MStatus ColorSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 		}
 		else
 		{	
-			colors.append( c );
+			colors.append( IECore::convert< MColor >( it->second ) );
 			positions.append( it->first );	
 			interps.append( MRampAttribute::kSpline );	
 		}
 	}
 	
+	assert( positions.length() == colors.length() );
+	assert( positions.length() == interps.length() );
+	assert( expectedPoints == reusedIndices + positions.length() );	
+		
+#ifndef NDEBUG
+	unsigned int oldNumEntries = fnRAttr.getNumEntries();
+#endif		
+	
 	fnRAttr.addEntries( positions, colors, interps, &s );
 	assert( s );
 	
+	assert( fnRAttr.getNumEntries() == oldNumEntries + positions.length() );
+	
 	/// Remove all the indices we just reused
-	for ( unsigned i = 0; i < idx; i ++ )
+	for ( unsigned i = 0; i < reusedIndices ; i ++ )
 	{
+		assert( indices.length() > 0 );
 		indices.remove( 0 );
 	}
-
-	/// \todo Find out why MRampAttribute::deleteEntries doesn't work	
-	for ( unsigned i = 0; i < indices.length(); i ++ )
-	{
-		MPlug child = plug.elementByLogicalIndex( indices[i], &s );
-		assert( s );
-		MGlobal::executeCommand( "removeMultiInstance -break true \"" + child.name() + "\"" );				
-	}
 	
-	return s;
+	/// Delete any ununsed indices
+	if ( indices.length() )
+	{
+		fnRAttr.deleteEntries( indices, &s );
+		assert( s );
+	}		
+	
+#ifndef NDEBUG	
+	{
+		assert( fnRAttr.getNumEntries() == expectedPoints );
+		
+		MIntArray indices;
+		MFloatArray positions;
+		MColorArray colors;
+		MIntArray interps;
+		fnRAttr.getEntries( indices, positions, colors, interps, &s );				
+		assert( s );
+		assert( expectedPoints == positions.length() );		
+		assert( expectedPoints == colors.length() );
+		assert( expectedPoints == interps.length() );
+		assert( expectedPoints == indices.length() );
+		
+		for ( unsigned i = 0; i < positions.length(); i++ )
+		{			
+			float position = positions[ i ];
+			const MVector color( colors[ i ][ 0 ], colors[ i ][ 1 ], colors[ i ][ 2 ] );
+			
+			bool found = false;
+			
+			for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end() && !found; ++it )
+			{
+				MVector color2( it->second[0], it->second[1], it->second[2] );
+				if ( fabs( it->first - position ) < 1.e-3f && ( color2 - color ).length() < 1.e-3f )
+				{
+					found = true;
+				}
+			}
+			assert( found );			
+		}			
+	}
+#endif	
+	
+	return MS::kSuccess;
 }
 
 template<typename S>
@@ -249,11 +288,23 @@ MStatus ColorSplineParameterHandler<S>::setValue( const MPlug &plug, IECore::Par
 	// our spline has no such implicit behaviour so we explicitly double up.
 	if( spline.points.size() )
 	{
+#ifndef NDEBUG	
+		size_t oldSplineSize = spline.points.size();
+#endif		
+		
+		assert( spline.points.begin()->first <= spline.points.rbegin()->first );
 		spline.points.insert( *spline.points.begin() );
 		spline.points.insert( *spline.points.rbegin() );
+		assert( spline.points.size() == oldSplineSize + 2 );
 	}
 	
 	p->setTypedValue( spline );
+	
+	if( spline.points.size() )
+	{
+		assert( spline.points.size() >= 2 );
+		assert( spline.points.size() == fnRAttr.getNumEntries() + 2 );
+	}
 	
 	return MS::kSuccess;
 }
