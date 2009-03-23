@@ -41,8 +41,8 @@ import re
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
-ieCoreMajorVersion=3
-ieCoreMinorVersion=43
+ieCoreMajorVersion=4
+ieCoreMinorVersion=0
 ieCorePatchVersion=0
 
 ###########################################################################################
