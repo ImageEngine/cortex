@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+import warnings
+
 import IECore
 
 """
@@ -56,9 +58,27 @@ def __parameterisedSetItemOp( self, attrName, attrValue ):
 			# allow assignment of other attributes to the object.
 			self.__dict__[ attrName ] = attrValue
 
+## \todo Remove this in major version 5.
+def __parameterisedSetAttrOp( self, attrName, attrValue ):
+	"""
+	Smart version of __setitem__ and __setattr__ operator. Uses Parameter.smartSetValue() function for
+	dynamic type convertion.
+	"""
+	try:
+		parameters = IECore.Parameterised.parameters( self )
+	except:
+		# it's probably a derived class and the constructor did not initialized Parameterised.
+		# So the attribute must be a class attribute and not a Parameter attribute.
+		self.__dict__[ attrName ] = attrValue
+	else:
+		if parameters.has_key( attrName ):
+			parameters[ attrName ].smartSetValue( attrValue )
+			warnings.warn( "Access to Parameters as attributes is deprecated - please use item style access instead.", DeprecationWarning, 2 )
+		else:
+			# allow assignment of other attributes to the object.
+			self.__dict__[ attrName ] = attrValue	
 
-# redefine Op
 IECore.Parameterised.__setitem__ = __parameterisedSetItemOp
-IECore.Parameterised.__setattr__ = __parameterisedSetItemOp
+IECore.Parameterised.__setattr__ = __parameterisedSetAttrOp
 
 __all__ = []

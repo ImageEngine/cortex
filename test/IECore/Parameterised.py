@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import warnings
 
 from IECore import *
 
@@ -60,13 +61,17 @@ class TestParameterised( unittest.TestCase ) :
 		
 		b = derived()
 		b.anotherAttribute = [ 1, "lala", 1.2 ]
-		b.number = 20
 		b.objectAttribute1 = 2
 		self.assert_( isinstance( b.anotherAttribute, list ) )
-		self.assertEqual( b.number.getTypedValue(), 20 )
 		self.assertEqual( b.objectAttribute1, 2 )
 		b["number"] = 30
-		self.assertEqual( b.number.getTypedValue(), 30 )
+		self.assertEqual( b["number"].getTypedValue(), 30 )
+
+	def testAttributeDeprecation( self ) :
+			
+		b = derived()
+		self.assertRaises( DeprecationWarning, getattr, b, "number" )
+		self.assertRaises( DeprecationWarning, setattr, b, "number", 10 )
 
 if __name__ == "__main__":
         unittest.main()

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -75,7 +75,7 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 			self.assertEqual( vt[i], v[i] + V3f( 1, 2, 3 ) )
 			
 		# as vectors
-		o.mode.setValue( "vector" )
+		o["mode"].setValue( "vector" )
 		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
@@ -85,7 +85,7 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 			self.assertEqual( vt[i], v[i] * V3f( 1, 2, 3 ) )
 		
 		# as normals
-		o.mode.setValue( "normal" )
+		o["mode"].setValue( "normal" )
 		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )

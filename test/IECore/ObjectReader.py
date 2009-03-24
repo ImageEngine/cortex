@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@ class TestObjectReader( unittest.TestCase ) :
 	
 		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
 		self.assertEqual( type( r ), IECore.ObjectReader )
-		self.assertEqual( r.fileName.getValue().value, "test/IECore/data/cobFiles/compoundData.cob" )
+		self.assertEqual( r["fileName"].getValue().value, "test/IECore/data/cobFiles/compoundData.cob" )
 		
 	def testRead( self ) :
 	

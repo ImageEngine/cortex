@@ -32,6 +32,9 @@
 #
 ##########################################################################
 
+import warnings
+warnings.filterwarnings( "error", "Access to Parameters as attributes is deprecated - please use item style access instead.", DeprecationWarning )
+
 import unittest
 import IECore
 import sys
