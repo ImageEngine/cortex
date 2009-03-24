@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -58,7 +58,7 @@ class TestPDCWriter( unittest.TestCase ) :
 		p = r.read()
 		
 		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
-		w.parameters().attributes.setValue( IECore.StringVectorData( ["position"] ) )
+		w.parameters()["attributes"].setValue( IECore.StringVectorData( ["position"] ) )
 		w.write()
 		
 		for k in p.keys() :

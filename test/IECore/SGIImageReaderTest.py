@@ -82,7 +82,7 @@ class SGIImageReaderTest(unittest.TestCase):
 				V2i(399, 199)
 			)
 
-			r.parameters().dataWindow.setValue( Box2iData( dataWindow ) )
+			r.parameters()["dataWindow"].setValue( Box2iData( dataWindow ) )
 
 			img = r.read()
 
@@ -136,8 +136,8 @@ class SGIImageReaderTest(unittest.TestCase):
 		r = Reader.create( "test/IECore/data/sgiFiles/uvMap.512x256.8bit.sgi" )
 		self.assertEqual( type(r), SGIImageReader )
 		
-		r.parameters().dataWindow.setValue( Box2iData( Box2i( V2i(100, 100), V2i(199, 199) ) ) )
-		r.parameters().channels.setValue( StringVectorData( ["R", "G"] ) )
+		r.parameters()["dataWindow"].setValue( Box2iData( Box2i( V2i(100, 100), V2i(199, 199) ) ) )
+		r.parameters()["channels"].setValue( StringVectorData( ["R", "G"] ) )
 
 		img = r.read()
 		self.assertEqual( type(img), ImagePrimitive )

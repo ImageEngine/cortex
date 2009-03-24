@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -64,9 +64,9 @@ class ImageCompositeOpTest( unittest.TestCase ) :
 	def testConstruction( self ) :
 	
 		op = ImageCompositeOp()
-		self.assertEqual( op.parameters().operation.getValue().value, ImageCompositeOp.Operation.Over )
-		self.assertEqual( op.parameters().alphaChannelName.getValue().value, "A" )		
-		self.assertEqual( op.parameters().channels.getValue(), StringVectorData( [ "R", "G", "B" ] ) )
+		self.assertEqual( op.parameters()["operation"].getValue().value, ImageCompositeOp.Operation.Over )
+		self.assertEqual( op.parameters()["alphaChannelName"].getValue().value, "A" )		
+		self.assertEqual( op.parameters()["channels"].getValue(), StringVectorData( [ "R", "G", "B" ] ) )
 		
 	def testChannelSubset( self ):
 	

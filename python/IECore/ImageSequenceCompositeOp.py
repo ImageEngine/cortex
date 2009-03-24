@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -80,7 +80,7 @@ class ImageSequenceCompositeOp( SequenceMergeOp ) :
 		resultImage = op(
 			input = image2,
 			imageA = image1,
-			operation = self.parameters().operation.getValue().value,
+			operation = self.parameters()["operation"].getValue().value,
 			inputMode = ImageCompositeOp.InputMode.Unpremultiplied,
 		)
 		Writer.create( resultImage, outputFileName ).write()

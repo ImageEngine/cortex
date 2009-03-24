@@ -486,7 +486,6 @@ class TestCompoundParameter( unittest.TestCase ) :
 		)
 		
 		self.assertEqual( p["i"].name, "i" )
-		self.assertEqual( p.i.name, "i" )
 		self.assertEqual( p.parameter( "i" ).name, "i" )
 			
 	def testPresets( self ) :
@@ -566,13 +565,13 @@ class TestCompoundParameter( unittest.TestCase ) :
 		p.validate()
 		p.setValue( CompoundObject( { "i" : IntData( 10 ), "f" : FloatData( 20 ) } ) )
 		p.validate()
-		self.assertEqual( p.i.getValue(),  IntData( 10 ) )
-		self.assertEqual( p.f.getValue(),  FloatData( 20 ) )
+		self.assertEqual( p["i"].getValue(),  IntData( 10 ) )
+		self.assertEqual( p["f"].getValue(),  FloatData( 20 ) )
 		
 		p.setValue( CompoundObject( { "i" : IntData( 10 ) } ) )
 		self.assertRaises( RuntimeError, p.validate )
 		self.assertRaises( RuntimeError, p.getValidatedValue )
-		p.f.setValue( FloatData( 20 ) )
+		p["f"].setValue( FloatData( 20 ) )
 		p.validate()
 
 		p.setValue( CompoundObject( { "idontbelong" : IntData( 10 ), "i" : IntData( 10 ), "f" : FloatData( 20 ) } ) )
@@ -727,6 +726,18 @@ class TestCompoundParameter( unittest.TestCase ) :
 		self.assert_( p["i"].getTypedValue() == 20 )
 		p["i"] = IntData(30)
 		self.assert_( p["i"].getTypedValue() == 30 )
+		
+	def testAttributeAccessDeprecation( self ) :
+	
+		p = CompoundParameter(
+			name = "c",
+			description = "d",
+			members = [
+				IntParameter( "i", "d", 1 ),
+			],
+		)
+		
+		self.assertRaises( DeprecationWarning, getattr, p, "i" )
 				
 class TestValidatedStringParameter( unittest.TestCase ) :
 

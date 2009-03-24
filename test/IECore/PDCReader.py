@@ -95,8 +95,8 @@ class TestPDCReader( unittest.TestCase ) :
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		
 		attributesToLoad = [ "position", "age" ]
-		r.parameters().percentage.setValue( IECore.FloatData( 50 ) )
-		r.parameters().attributes.setValue( IECore.StringVectorData( attributesToLoad ) )
+		r.parameters()["percentage"].setValue( IECore.FloatData( 50 ) )
+		r.parameters()["attributes"].setValue( IECore.StringVectorData( attributesToLoad ) )
 		
 		a = r.readAttribute( "position" )
 		# what the acceptable thresholds should be are somewhat debatable,
@@ -115,7 +115,7 @@ class TestPDCReader( unittest.TestCase ) :
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
 		
-		r.parameters().realType.setValue( "float" )
+		r.parameters()["realType"].setValue( "float" )
 
 		attrNames = r.attributeNames()
 		expectedAttrNamesAndTypes = {
@@ -159,7 +159,7 @@ class TestPDCReader( unittest.TestCase ) :
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
 		
-		r.parameters().realType.setValue( "float" )
+		r.parameters()["realType"].setValue( "float" )
 
 		attrNames = r.attributeNames()
 		expectedAttrNamesAndTypes = {

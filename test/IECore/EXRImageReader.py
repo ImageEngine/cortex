@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -156,7 +156,7 @@ class TestEXRReader(unittest.TestCase):
 		r = EXRImageReader( "test/IECore/data/exrFiles/uvMap.256x256.exr" )
 		i1 = r.read()
 		
-		r.parameters().displayWindow.setTypedValue( Box2i( V2i( -1000, -10 ), V2i( 1000, 10 ) ) ) 
+		r.parameters()["displayWindow"].setTypedValue( Box2i( V2i( -1000, -10 ), V2i( 1000, 10 ) ) ) 
 		i2 = r.read()
 		
 		self.assertEqual( i2.displayWindow, Box2i( V2i( -1000, -10 ), V2i( 1000, 10 ) ) )
@@ -168,7 +168,7 @@ class TestEXRReader(unittest.TestCase):
 	def testReadInvalidDataWindow( self ) :
 	
 		r = EXRImageReader( "test/IECore/data/exrFiles/uvMap.512x256.exr" )
-		r.parameters().dataWindow.setTypedValue( Box2i( V2i( -1 ), V2i( 511, 255 ) ) )
+		r.parameters()["dataWindow"].setTypedValue( Box2i( V2i( -1 ), V2i( 511, 255 ) ) )
 
 		self.assertRaises( Exception, r.read )
 		
@@ -178,7 +178,7 @@ class TestEXRReader(unittest.TestCase):
 		iWhole = r.read()
 		
 		# read and test a horizontal slice starting at y==0
-		r.parameters().dataWindow.setTypedValue( Box2i( V2i( 0, 0 ), V2i( 511, 100 ) ) )
+		r.parameters()["dataWindow"].setTypedValue( Box2i( V2i( 0, 0 ), V2i( 511, 100 ) ) )
 		
 		iSliced = r.read()
 		self.assertEqual( iSliced.dataWindow, Box2i( V2i( 0, 0 ), V2i( 511, 100 ) ) )
@@ -193,7 +193,7 @@ class TestEXRReader(unittest.TestCase):
 			self.assertEqual( iSliced["B"].data[i], iWhole["B"].data[i] )
 		
 		# read and test a horizontal slice ending at the end of the image
-		r.parameters().dataWindow.setTypedValue( Box2i( V2i( 0, 200 ), V2i( 511, 255 ) ) )
+		r.parameters()["dataWindow"].setTypedValue( Box2i( V2i( 0, 200 ), V2i( 511, 255 ) ) )
 		
 		iSliced = r.read()
 		self.assertEqual( iSliced.dataWindow, Box2i( V2i( 0, 200 ), V2i( 511, 255 ) ) )
@@ -209,7 +209,7 @@ class TestEXRReader(unittest.TestCase):
 		r = EXRImageReader( "test/IECore/data/exrFiles/uvMap.512x256.exr" )
 		iWhole = r.read()
 		
-		r.parameters().dataWindow.setTypedValue( Box2i( V2i( 10, 10 ), V2i( 100, 150 ) ) )
+		r.parameters()["dataWindow"].setTypedValue( Box2i( V2i( 10, 10 ), V2i( 100, 150 ) ) )
 		
 		iSliced = r.read()
 		self.assertEqual( iSliced.displayWindow, Box2i( V2i( 0, 0 ), V2i( 511, 255 ) ) )
@@ -248,7 +248,7 @@ class TestEXRReader(unittest.TestCase):
 
 		self.assert_( i.arePrimitiveVariablesValid() )
 		
-		r.parameters().dataWindow.setTypedValue( Box2i( V2i( 30 ), V2i( 40 ) ) )
+		r.parameters()["dataWindow"].setTypedValue( Box2i( V2i( 30 ), V2i( 40 ) ) )
 		iSliced = r.read()
 		
 		self.assertEqual( iSliced.dataWindow, Box2i( V2i( 30 ), V2i( 40 ) ) )

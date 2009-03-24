@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -194,6 +194,16 @@ static ParameterPtr compoundParameterGetItem( CompoundParameter &o, const std::s
 	return result;
 }
 
+static ParameterPtr compoundParameterGetAttr( CompoundParameter &o, const std::string &n )
+{
+	if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to CompoundParameter children as attributes is deprecated - please use item style access instead.", 1 ) )
+	{
+		// warning converted to exception;
+		throw error_already_set();
+	}
+	return compoundParameterGetItem( o, n );
+}
+
 static bool compoundParameterContains( const CompoundParameter &o, const std::string &n )
 {
 	return o.parameter<const Parameter>( n );
@@ -238,10 +248,8 @@ void bindCompoundParameter()
 		.def( init< const list &, optional<  const object & > >( args( "members", "userData") ) )
 		.def( "__len__", &compoundParameterLen )
 		.def( "__getitem__", &compoundParameterGetItem )
-		/// \todo This __getattr__ is causing problems because we can have parameter names and method names fighting over the same namespace.
-		/// It would be better to use only  __getitem__ for children. This would have a massive effect on existing scripts however, as they are all using the parameter.child
-		/// syntax in preference to parameter["child"].
-		.def( "__getattr__", &compoundParameterGetItem )
+		/// \todo Remove attribute style access in major version 5.
+		.def( "__getattr__", &compoundParameterGetAttr )
 		.def( "__contains__", &compoundParameterContains )
 		.def( "keys", &compoundParameterKeys )
 		.def( "values", &compoundParameterValues )

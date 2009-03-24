@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -42,10 +42,10 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 	def testAttributeAccess( self ):
 
 		p = OptionalCompoundParameter( "n", "d", members = [ StringParameter( "a", "a", "", presets = { "b": StringData( "b" ) }, presetsOnly = True ) ] )
-		p.a = "My compound attribute"
+		p["a"].setTypedValue( "My compound attribute" )
 		p.c = "My python attribute"
 		self.assertEqual( p.c, "My python attribute" )
-		self.assertEqual( p.a.getTypedValue(), "My compound attribute" )
+		self.assertEqual( p["a"].getTypedValue(), "My compound attribute" )
 		self.assertEqual( p.userData(), CompoundObject() )
 
 	def testConstructor( self ) :
@@ -72,13 +72,13 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 		p.validate()
 		p.setValue( CompoundObject( { "i" : IntData( 10 ), "f" : FloatData( 20 ) } ) )
 		p.validate()
-		self.assertEqual( p.i.getValue(),  IntData( 10 ) )
-		self.assertEqual( p.f.getValue(),  FloatData( 20 ) )
+		self.assertEqual( p["i"].getValue(),  IntData( 10 ) )
+		self.assertEqual( p["f"].getValue(),  FloatData( 20 ) )
 		
 		p.setValue( CompoundObject( { "i" : IntData( 10 ) } ) )
 		self.assertRaises( RuntimeError, p.validate )
 		self.assertRaises( RuntimeError, p.getValidatedValue )
-		p.f.setValue( FloatData( 20 ) )
+		p["f"].setValue( FloatData( 20 ) )
 		p.validate()
 
 		p.setValue( CompoundObject( { "idontbelong" : IntData( 10 ), "i" : IntData( 10 ), "f" : FloatData( 20 ) } ) )
