@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,9 +63,6 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 				override o = this->get_override( "doBound" );
 				if( o )
 				{
-					//// \todo We may want to call operands->copy() here instead of casting away the constness. If the Python code being called
-					/// here actually attempts to change the CompoundObject, then any C++ calling code might get confused when a suposedly const value
-					/// changes unexpectedly. Check any performance overhead of the copy.
 					return o( const_pointer_cast<CompoundObject>( args ) );
 				}
 				else
