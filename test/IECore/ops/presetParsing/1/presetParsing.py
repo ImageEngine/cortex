@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -105,14 +105,14 @@ class presetParsing( Op ) :
 	
 	def doOperation( self, operands ) :
 		
-		assert operands.h == V3fData( V3f( 1, 0, 0 ) )
+		assert operands["h"] == V3fData( V3f( 1, 0, 0 ) )
 		
-		assert operands.i == V2dData( V2d( 0 ) )
+		assert operands["i"] == V2dData( V2d( 0 ) )
 	
 		compoundPreset = CompoundObject()
-		compoundPreset.j = V3dData( V3d( 1 ) )
-		compoundPreset.k = M44fData( M44f( 1 ) )
-		assert operands.compound == compoundPreset
+		compoundPreset["j"] = V3dData( V3d( 1 ) )
+		compoundPreset["k"] = M44fData( M44f( 1 ) )
+		assert operands["compound"] == compoundPreset
 	
 		return IntData( 1 )
 

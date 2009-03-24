@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -65,11 +65,11 @@ class RemovePrimitiveVariables( PrimitiveOp ) :
 		
 	def modifyPrimitive( self, primitive, args ) :
 	
-		keep = args.mode.value == "keep"
+		keep = args["mode"].value == "keep"
 	
 		for key in primitive.keys() :
 
-			for n in args.names :
+			for n in args["names"] :
 			
 				m = fnmatchcase( key, n )
 				if (m and not keep) or (not m and keep) :

@@ -207,7 +207,7 @@ class SequenceLsOp( Op ) :
 	def doOperation( self, operands ) :
 	
 		# recursively find sequences
-		baseDirectory = operands.dir.value
+		baseDirectory = operands["dir"].value
 		if baseDirectory[-1] == '/' :
 			baseDirectory = baseDirectory[:-1]
 	
@@ -220,16 +220,16 @@ class SequenceLsOp( Op ) :
 			for s in sequences :
 				s.fileName = os.path.join( baseDirectory, s.fileName )
 					
-		if operands.recurse.value :
+		if operands["recurse"].value :
 			# \todo Can safely use os.walk here after Python 2.6, which introduced the followlinks parameter
-			for root, dirs, files in SequenceLsOp.__walk( baseDirectory, topdown = True, followlinks = operands.followLinks.value ) :
+			for root, dirs, files in SequenceLsOp.__walk( baseDirectory, topdown = True, followlinks = operands["followLinks"].value ) :
 				relRoot = root[len(baseDirectory)+1:]
 				if relRoot!="" :
 					depth = len( relRoot.split( "/" ) )
 				else :
 					depth = 0
 				
-				if depth>=operands.maxDepth.value :
+				if depth>=operands["maxDepth"].value :
 					dirs[:] = []
 				
 				for d in dirs :
@@ -249,12 +249,12 @@ class SequenceLsOp( Op ) :
 		filters = []
 		
 		# filter sequences based on type
-		if operands.type.value != "any" :
+		if operands["type"].value != "any" :
 		
-			if operands.type.value == "files" :
+			if operands["type"].value == "files" :
 				fileTypeTest = os.path.isfile
 			else :	
-				assert( operands.type.value == "directories" )
+				assert( operands["type"].value == "directories" )
 				fileTypeTest = os.path.isdir
 					
 			def matchType( sequence ) :						
@@ -267,9 +267,9 @@ class SequenceLsOp( Op ) :
 			filters.append( matchType )
 									
 		# filter sequences based on extension
-		if operands.extensions.size() :
+		if operands["extensions"].size() :
 							
-			extensions = set( ["." + e for e in operands.extensions] )
+			extensions = set( ["." + e for e in operands["extensions"]] )
 			
 			def matchExt( sequence ) :			
 				return os.path.splitext( sequence.fileName )[1] in extensions
@@ -277,7 +277,7 @@ class SequenceLsOp( Op ) :
 			filters.append( matchExt )
 
 		# filter sequences which aren't contiguous			
-		if operands.contiguousSequencesOnly.value :
+		if operands["contiguousSequencesOnly"].value :
 		
 			def isContiguous( sequence ):
 			
@@ -286,13 +286,13 @@ class SequenceLsOp( Op ) :
 			filters.append( isContiguous )		
 			
 		# advanced filters
-		if operands.advanced.modificationTime.enabled.value :
+		if operands["advanced"]["modificationTime"]["enabled"].value :
 			
 			filteredSequences = []
 			
-			mode = operands.advanced.modificationTime.mode.value
-			startTime = operands.advanced.modificationTime.startTime.value
-			endTime = operands.advanced.modificationTime.endTime.value
+			mode = operands["advanced"]["modificationTime"]["mode"].value
+			startTime = operands["advanced"]["modificationTime"]["startTime"].value
+			endTime = operands["advanced"]["modificationTime"]["endTime"].value
 
 			matchFn = None
 			if mode == "before" :												
@@ -345,7 +345,7 @@ class SequenceLsOp( Op ) :
 		
 		for i in xrange( 0, len( sequences ) ) :
 			
-			s = operands.format.value
+			s = operands["format"].value
 			s = s.replace( "<PREFIX>", sequences[i].getPrefix() )
 			
 			pi = s.find( "PADDING>" )
@@ -376,7 +376,7 @@ class SequenceLsOp( Op ) :
 			sequences[i] = s
 			
 		# return the result as the requested type					
-		if operands.resultType.value == "string" :
+		if operands["resultType"].value == "string" :
 			return StringData( "\n".join( sequences ) )
 		else :
 			return StringVectorData( sequences )

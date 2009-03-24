@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -459,8 +459,8 @@ class TestCompoundParameter( unittest.TestCase ) :
 			]
 		)
 		c = a.getValue()
-		c.b.value = 'error!'
-		self.assertEqual( a.b.defaultValue.value, "ok")
+		c["b"].value = 'error!'
+		self.assertEqual( a["b"].defaultValue.value, "ok")
 
 	def testUserData( self ):
 		compound = CompoundObject()

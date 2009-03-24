@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -47,7 +47,6 @@ class testCompoundObject( unittest.TestCase ) :
 		o["a"] = IECore.IntData( 1 )
 		self.assertEqual( len( o ), 1 )
 		self.assertEqual( o["a"], IECore.IntData( 1 ) )
-		self.assertEqual( o.a, IECore.IntData( 1 ) )
 		self.assertEqual( len( o.keys() ), 1 )
 		self.assertEqual( len( o.values() ), 1 )
 		self.assert_( "a" in o.keys() )
@@ -55,7 +54,6 @@ class testCompoundObject( unittest.TestCase ) :
 		o["b"] = IECore.IntData( 2 )
 		self.assertEqual( len( o ), 2 )
 		self.assertEqual( o["b"], IECore.IntData( 2 ) )
-		self.assertEqual( o.b, IECore.IntData( 2 ) )
 		self.assertEqual( len( o.keys() ), 2 )
 		self.assertEqual( len( o.values() ), 2 )
 		self.assert_( "a" in o.keys() )
@@ -65,9 +63,7 @@ class testCompoundObject( unittest.TestCase ) :
 		o = IECore.CompoundObject( { "a": IECore.IntData( 1 ), "b": IECore.FloatData( 1.0 ) } )
 		self.assertEqual( len( o ), 2 )
 		self.assertEqual( o["a"], IECore.IntData( 1 ) )
-		self.assertEqual( o.a, IECore.IntData( 1 ) )
 		self.assertEqual( o["b"], IECore.FloatData( 1.0 ) )
-		self.assertEqual( o.b, IECore.FloatData( 1.0 ) )
 		self.assertEqual( len( o.keys() ), 2 )
 		self.assertEqual( len( o.values() ), 2 )
 		self.assert_( "a" in o.keys() )
@@ -107,6 +103,12 @@ class testCompoundObject( unittest.TestCase ) :
 		r1 = repr(v1)
 		
 		self.assertEqual( eval(repr(v1)), v1 )		
+	
+	def testDeprecatedAttributeAccess( self ) :
+	
+		v = IECore.CompoundObject( { "a" : IECore.IntData( 1 ) } )
+		
+		self.assertRaises( DeprecationWarning, getattr, v, "a" )
 		
 if __name__ == "__main__":
         unittest.main()

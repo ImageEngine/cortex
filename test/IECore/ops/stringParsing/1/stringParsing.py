@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -77,9 +77,9 @@ class stringParsing( Op ) :
 		
 	def doOperation( self, args ) :
 
-		assert args.emptyString.value == ""
-		assert args.normalString.value == "hello"
-		assert args.stringWithSpace.value == "hello there"
-		assert args.stringWithManySpaces.value == "hello there old chap"
+		assert args["emptyString"].value == ""
+		assert args["normalString"].value == "hello"
+		assert args["stringWithSpace"].value == "hello there"
+		assert args["stringWithManySpaces"].value == "hello there old chap"
 		
 		return IntData( 1 )

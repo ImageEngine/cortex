@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -49,8 +49,8 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 		
 		self.assertEqual( len( lights ), 2 )
 		
-		directions = lights.directions
-		colors = lights.colors
+		directions = lights["directions"]
+		colors = lights["colors"]
 		
 		self.assert_( directions.isInstanceOf( IECore.V3fVectorData.staticTypeId() ) )
 		self.assert_( colors.isInstanceOf( IECore.Color3fVectorData.staticTypeId() ) )
@@ -76,7 +76,7 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 		for i in range( 0, 10 ) :
 		
 			lights = IECore.EnvMapSampler()( image=image, subdivisionDepth=i )
-			colorSum = sum( lights.colors, IECore.Color3f( 0 ) )
+			colorSum = sum( lights["colors"], IECore.Color3f( 0 ) )
 		
 			if lastColorSum :
 				self.assertAlmostEqual( colorSum[0], lastColorSum[0], 5 )

@@ -81,10 +81,10 @@ class SequenceRenumberOp( Op ) :
 	
 		src = self.parameters()["src"].getFileSequenceValue()
 		dst = src.copy()
-		if operands.dst.value!="" :
-			dst.fileName = operands.dst.value
+		if operands["dst"].value!="" :
+			dst.fileName = operands["dst"].value
 
-		frames = [ x * operands.multiply.value + operands.offset.value for x in src.frameList.asList() ]
+		frames = [ x * operands["multiply"].value + operands["offset"].value for x in src.frameList.asList() ]
 		
 		dst.frameList = frameListFromList( frames )
 		

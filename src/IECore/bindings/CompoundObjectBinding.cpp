@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -112,6 +112,26 @@ static ObjectPtr getItem( const CompoundObject &o, const std::string &n )
 static void setItem( CompoundObject &o, const std::string &n, Object &v )
 {
 	o.members()[n] = &v;
+}
+
+static ObjectPtr getAttr( const CompoundObject &o, const std::string &n )
+{
+	if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to CompoundObject children as attributes is deprecated - please use item style access instead.", 1 ) )
+	{
+		// warning converted to exception;
+		throw error_already_set();
+	}
+	return getItem( o, n );
+}
+
+static void setAttr( CompoundObject &o, const std::string &n, Object &v )
+{
+	if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to CompoundObject children as attributes is deprecated - please use item style access instead.", 1 ) )
+	{
+		// warning converted to exception;
+		throw error_already_set();
+	}
+	setItem( o, n, v );
 }
 
 static void delItem( CompoundObject &o, const std::string &n )
@@ -238,10 +258,9 @@ void bindCompoundObject()
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
 		.def( "__setitem__", &setItem )
-		/// \todo I don't believe we should be having children represented as attributes like this - we should use the
-		/// item syntax only. See associated todo in CompoundParameterBinding.cpp.
-		.def( "__getattr__", &getItem )
-		.def( "__setattr__", &setItem )
+		/// \todo Remove attribute access in major version 5.
+		.def( "__getattr__", &getAttr )
+		.def( "__setattr__", &setAttr )
 		.def( "__delitem__", &delItem )
 		.def( "__contains__", &contains )
 		.def( "has_key", &has_key )

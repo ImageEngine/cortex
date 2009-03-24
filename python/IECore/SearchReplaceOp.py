@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -87,14 +87,14 @@ class SearchReplaceOp( Op ) :
 
 	def doOperation( self, operands ) :
 	
-		source = operands.source.value
-		destination = operands.destination.value		
+		source = operands["source"].value
+		destination = operands["destination"].value		
 		
-		searchFor = operands.searchFor.value		
-		if not operands.regexpSearch :
+		searchFor = operands["searchFor"].value		
+		if not operands["regexpSearch"] :
 			searchFor = re.escape( searchFor )
 			
-		replaceWith = operands.replaceWith.value	
+		replaceWith = operands["replaceWith"].value	
 		
 		inFileStat = os.stat( source ).st_mode
 		
