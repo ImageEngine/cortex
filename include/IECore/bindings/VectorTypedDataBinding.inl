@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,7 +48,7 @@ class VectorTypedDataFunctions
 {
 public:
 	typedef TypedData< Container > ThisClass;
-	typedef typename boost::intrusive_ptr< ThisClass > ThisClassPtr;
+	typedef typename ThisClass::Ptr ThisClassPtr;
 	typedef typename Container::value_type data_type;
 	typedef typename Container::size_type index_type;
 	typedef typename Container::size_type size_type;
@@ -80,6 +80,17 @@ public:
 			boost::python::container_utils::extend_container(r->writable(), v);
 			return r;
 		}
+	}
+	
+	// 
+	static iterator begin(ThisClass &x)
+	{
+		return x.writable().begin();
+	}
+	
+	static iterator end(ThisClass &x)
+	{
+		return x.writable().end();
 	}
 
 	/// binding for __getitem__ function
@@ -348,26 +359,7 @@ public:
 		}
 		return 0;
 	}
-
-	/*	
-	static object getList(ThisClass &x)
-	{
-		const Container &xData = x.readable();
-		PyObject myList = PyList_New(xData.size());
-		const_iterator iterX = xData.begin() + from;
-		for (size_t index = 0; iterX <= xData.end(); ++iterX, index++)
-		{
-			myList.SetItem(index, object(*iterX));
-		}
-		return object(myList);
-	}
-	*/
-/*	
-	static index_type iter()
-	{
-	}
-*/	
-
+	
 	/*
 	 * Math Operators
 	 */
@@ -680,6 +672,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 		.def("index", &ThisBinder::index1)																			\
 		.def("index", &ThisBinder::index2)																			\
 		.def("insert", &ThisBinder::insert, "s.insert(i, x)\nInserts x at index i.")								\
+		.def("__iter__", boost::python::range( &ThisBinder::begin, &ThisBinder::end ) ) \
 		/*  pop, remove, reverse, sort.*/																			\
 		.def("size", &ThisBinder::len, "s.size()\nReturns the number of elements on s. Same result as the len operator.")	\
 		.def("resize", &ThisBinder::resize, "s.resize( size )\nAdjusts the size of s.")	\
