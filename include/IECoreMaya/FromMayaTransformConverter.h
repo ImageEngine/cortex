@@ -35,6 +35,8 @@
 #ifndef IECOREMAYA_FROMMAYATRANSFORMCONVERTER_H
 #define IECOREMAYA_FROMMAYATRANSFORMCONVERTER_H
 
+#include "maya/MEulerRotation.h"
+
 #include "IECoreMaya/FromMayaDagNodeConverter.h"
 
 #include "IECore/NumericParameter.h"
@@ -75,6 +77,10 @@ class FromMayaTransformConverter : public FromMayaDagNodeConverter
 	private :
 
 		IECore::IntParameterPtr m_spaceParameter;
+		mutable MEulerRotation m_lastRotation;
+		mutable bool m_lastRotationValid;
+		IECore::BoolParameterPtr m_eulerFilterParameter;
+		IECore::BoolParameterPtr m_zeroPivotsParameter;
 		
 		static Description<FromMayaTransformConverter> g_description;
 
