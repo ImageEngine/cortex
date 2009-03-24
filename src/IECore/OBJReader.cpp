@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,6 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+
+#include <iostream>
+#include <iterator>
+#include <fstream>
+
+#include "boost/bind.hpp"
+#include "boost/version.hpp"
+#if BOOST_VERSION >= 103600
+#define BOOST_SPIRIT_USE_OLD_NAMESPACE
+#include "boost/spirit/include/classic.hpp"
+#else
+#include "boost/spirit.hpp"
+#endif
+
 #include "IECore/OBJReader.h"
 #include "IECore/CompoundData.h"
 #include "IECore/SimpleTypedData.h"
@@ -44,13 +58,6 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/NullObject.h"
-
-#include <iostream>
-#include <iterator>
-#include <fstream>
-
-#include <boost/spirit.hpp>
-#include <boost/bind.hpp>
 
 using namespace std;
 using namespace IECore;
