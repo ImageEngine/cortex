@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,6 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/LuminanceOp.h"
 #include "IECore/AngleConversion.h"
-#include "IECore/BoxOperators.h"
 
 using namespace IECore;
 using namespace boost;

@@ -39,7 +39,6 @@
 #include "IECore/BezierAlgo.h"
 #include "IECore/PolygonAlgo.h"
 #include "IECore/BoxOps.h"
-#include "IECore/BoxOperators.h"
 #include "IECore/TransformOp.h"
 #include "IECore/MeshMergeOp.h"
 #include "IECore/Group.h"
