@@ -33,7 +33,6 @@
 ##########################################################################
 
 import unittest
-import warnings
 
 from IECore import *
 
