@@ -289,18 +289,17 @@ bool PatchMeshPrimitive::vPeriodic() const
 
 void PatchMeshPrimitive::render( RendererPtr renderer )
 {
-	CompoundDataMap topology;
-	topology["type"] = new StringData( m_linear ? "bilinear" : "bicubic" );
-	topology["nu"] = new IntData( m_uPoints );
-	topology["nv"] = new IntData( m_vPoints );
-	topology["uwrap"] = new StringData( m_uPeriodic ? "periodic" : "nonperiodic" );
-	topology["vwrap"] = new StringData( m_vPeriodic ? "periodic" : "nonperiodic" );	
-	topology["uBasisMatrix"] = new M44fData( m_uBasis.matrix );
-	topology["uBasisStep"] = new IntData( m_uBasis.step );
-	topology["vBasisMatrix"] = new M44fData( m_vBasis.matrix );	
-	topology["vBasisStep"] = new IntData( m_vBasis.step );	
-	
-	renderer->geometry( "patchMesh", topology, Primitive::variables );
+
+	renderer->patchMesh(
+		m_uBasis,
+		m_vBasis,
+		m_linear ? "bilinear" : "bicubic",
+		m_uPoints,
+		m_uPeriodic,
+		m_vPoints,
+		m_vPeriodic,
+		Primitive::variables
+	);
 }
 
 size_t PatchMeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const

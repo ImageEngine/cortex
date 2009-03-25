@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -199,6 +199,11 @@ void Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIn
 void Renderer::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
 {
 	m_implementation->nurbs( uOrder, uKnot, uMin, uMax, vOrder, vKnot, vMin, vMax, primVars );
+}
+
+void Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, const std::string &type, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars )
+{
+	m_implementation->patchMesh( uBasis, vBasis, type, nu, uPeriodic, nv, vPeriodic, primVars );
 }
 
 void Renderer::geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars )

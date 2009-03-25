@@ -287,7 +287,6 @@ class Renderer : public RunTimeTyped
 		/// to the rightHandedOrientation attribute.
 		////////////////////////////////////////////////////////////////////////////
 		//@{
-		/// \todo Add a patchMesh call
 		/// Renders a set of points.
 		virtual void points( size_t numPoints, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders a disk of the specified radius on the xy plane, at the specified z value.
@@ -311,6 +310,8 @@ class Renderer : public RunTimeTyped
 		virtual void mesh( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds, const std::string &interpolation, const PrimitiveVariableMap &primVars ) = 0;
 		/// Renders a nurbs surface.
 		virtual void nurbs( int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const PrimitiveVariableMap &primVars ) = 0;
+		/// Render a patch mesh
+		virtual void patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, const std::string &type, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars ) = 0;		
 		/// Generic call for specifying renderer specify geometry types.
 		virtual void geometry( const std::string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars ) = 0;
 		//@}
