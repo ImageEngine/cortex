@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -106,7 +106,7 @@ void bindParameter()
 {
 	typedef class_< Parameter, ParameterWrapPtr, boost::noncopyable, bases<RunTimeTyped> > ParameterPyClass;
 	ParameterPyClass( "Parameter", no_init )
-		.def( init< const std::string &, const std::string &, ObjectPtr, optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
+		.def( init< const std::string &, const std::string &, ObjectPtr, boost::python::optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
 		.def( init< const std::string &, const std::string &, ObjectPtr, CompoundObjectPtr >( args( "name", "description", "defaultValue", "userData") ) )
 		.add_property( "name", make_function( &Parameter::name, return_value_policy<copy_const_reference>() ) )
 		.add_property( "description", make_function( &Parameter::description, return_value_policy<copy_const_reference>() ) )

@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-#include <boost/python/suite/indexing/container_utils.hpp>
+#include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
@@ -243,9 +244,9 @@ void bindCompoundParameter()
 
 	typedef class_< CompoundParameter, CompoundParameterWrap::Ptr, boost::noncopyable, bases<Parameter> > CompoundParameterPyClass;
 	CompoundParameterPyClass( "CompoundParameter", no_init )
-		.def( init< const std::string &, const std::string &, optional<const list &,  const object & > >( args( "name", "description", "members", "userData") ) )
-		.def( init< const std::string &, const list &, optional<  const object & > >( args( "name", "members", "userData") ) )
-		.def( init< const list &, optional<  const object & > >( args( "members", "userData") ) )
+		.def( init< const std::string &, const std::string &, boost::python::optional<const list &,  const object & > >( args( "name", "description", "members", "userData") ) )
+		.def( init< const std::string &, const list &, boost::python::optional<  const object & > >( args( "name", "members", "userData") ) )
+		.def( init< const list &, boost::python::optional<  const object & > >( args( "members", "userData") ) )
 		.def( "__len__", &compoundParameterLen )
 		.def( "__getitem__", &compoundParameterGetItem )
 		/// \todo Remove attribute style access in major version 5.

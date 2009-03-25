@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -104,7 +104,7 @@ void bindPathVectorParameter()
 		;
 	}
 	pathVectorParamClass
-		.def( init< const std::string &, const std::string &, ConstStringVectorDataPtr, optional<bool, PathVectorParameter::CheckType, const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "allowEmptyList", "check", "presets", "presetsOnly", "userData") ) )
+		.def( init< const std::string &, const std::string &, ConstStringVectorDataPtr, boost::python::optional<bool, PathVectorParameter::CheckType, const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "allowEmptyList", "check", "presets", "presetsOnly", "userData") ) )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( PathVectorParameter )
 		.add_property( "mustExist", &PathVectorParameter::mustExist )
 		.add_property( "mustNotExist", &PathVectorParameter::mustNotExist )

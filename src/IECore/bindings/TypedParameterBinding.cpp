@@ -110,7 +110,7 @@ static void bindTypedParameter( const char *name )
 {
 	typedef class_< TypedParameter<T>, typename TypedParameterWrap< T >::Ptr, boost::noncopyable, bases<Parameter> > TypedParameterPyClass;
 	TypedParameterPyClass( name, no_init )
-		.def( init< const std::string &, const std::string &, object, optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
+		.def( init< const std::string &, const std::string &, object, boost::python::optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
 		.def( init< const std::string &, const std::string &, object, CompoundObjectPtr >( args( "name", "description", "defaultValue", "userData") ) )
 		.def( "setTypedValue", &TypedParameter<T>::setTypedValue )
 		.def( "getTypedValue", (const T &(TypedParameter<T>::* )() const)&TypedParameter<T>::getTypedValue, return_value_policy<copy_const_reference>() )
