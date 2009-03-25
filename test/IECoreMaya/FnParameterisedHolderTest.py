@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -73,25 +73,25 @@ class FnParameterisedHolderTest( unittest.TestCase ) :
 		fnPH.setParameterised( op )
 		self.assertEqual( fnPH.getParameterised(), ( op, "", 0, "" ) )
 		
-		iPlug = fnPH.parameterPlug( op.i )
+		iPlug = fnPH.parameterPlug( op["i"] )
 		self.assert_( isinstance( iPlug, maya.OpenMaya.MPlug ) )
 		self.assert_( iPlug.asInt(), 1 )
 		
-		self.assert_( fnPH.plugParameter( iPlug ).isSame( op.i ) )
+		self.assert_( fnPH.plugParameter( iPlug ).isSame( op["i"] ) )
 		
 		iPlug.setInt( 2 )
-		fnPH.setParameterisedValue( op.i )
-		self.assert_( op.i.getNumericValue(), 2 )
+		fnPH.setParameterisedValue( op["i"] )
+		self.assert_( op["i"].getNumericValue(), 2 )
 		
-		op.i.setNumericValue( 3 )
-		fnPH.setNodeValue( op.i )
+		op["i"].setNumericValue( 3 )
+		fnPH.setNodeValue( op["i"] )
 		self.assert_( iPlug.asInt(), 3 )
 		
 		iPlug.setInt( 10 )
 		fnPH.setParameterisedValues()
-		self.assert_( op.i.getNumericValue(), 10 )
+		self.assert_( op["i"].getNumericValue(), 10 )
 		
-		op.i.setNumericValue( 11 )
+		op["i"].setNumericValue( 11 )
 		fnPH.setNodeValues()
 		self.assert_( iPlug.asInt(), 11 )
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -56,8 +56,8 @@ class FromMayaUnitPlugConverterTest( unittest.TestCase ) :
 		self.assertEqual( v.value, 2 )
 		
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateZ" )
-		self.assertEqual( converter.distanceUnit.getCurrentPresetName(), "Centimeters" )
-		converter.distanceUnit.setValue( "Meters" )
+		self.assertEqual( converter["distanceUnit"].getCurrentPresetName(), "Centimeters" )
+		converter["distanceUnit"].setValue( "Meters" )
 		v = converter.convert()		
 		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
 		self.assertEqual( v.value, 0.03 )

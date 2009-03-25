@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -141,11 +141,11 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		
 		converter = IECoreMaya.FromMayaShapeConverter.create( str( arc ), IECore.CurvesPrimitive.staticTypeId() )
 		
-		self.assertEqual( converter.space.getNumericValue(), IECoreMaya.FromMayaCurveConverter.Space.Object )
+		self.assertEqual( converter["space"].getNumericValue(), IECoreMaya.FromMayaCurveConverter.Space.Object )
 		c = converter.convert()
 		self.assert_( IECore.Box3f( IECore.V3f( -1.1, -1.01, -0.01 ), IECore.V3f( 0.01, 1.01, 0.01 ) ).contains( c.bound() ) ) 		
 		
-		converter.space.setNumericValue( IECoreMaya.FromMayaCurveConverter.Space.World )
+		converter["space"].setNumericValue( IECoreMaya.FromMayaCurveConverter.Space.World )
 		c = converter.convert()
 		self.assert_( IECore.Box3f( IECore.V3f( -0.1, 0.99, 2.99 ), IECore.V3f( 1.01, 3.01, 3.01 ) ).contains( c.bound() ) ) 		
 
@@ -155,7 +155,7 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 		circle = maya.cmds.listRelatives( circle, shapes=True )[0]
 		
 		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
-		converter.linearBasis.setTypedValue( True )
+		converter["linearBasis"].setTypedValue( True )
 		
 		curve = converter.convert()
 		self.assert_( curve.isInstanceOf( IECore.CurvesPrimitive.staticTypeId() ) )
@@ -213,7 +213,7 @@ class FromMayaCurveConverterTest( unittest.TestCase ) :
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( circle + ".worldSpace" )
 
-		converter.space.setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
+		converter["space"].setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
 		curve = converter.convert()
 		self.assert_( IECore.Box3f( IECore.V3f( -1.11 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.11 ) + IECore.V3f( 1, 2, 3 ) ).contains( curve.bound() ) )
 							
