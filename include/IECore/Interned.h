@@ -46,8 +46,12 @@ namespace IECore
 /// multiple different objects with the same value. It does this
 /// by keeping a static table with the actual values in it, with
 /// the object instances just referencing the values in the table.
-/// \todo We could consider replacing this with the boost flyweight
-/// stuff when it makes it into an actual boost release.
+/// \todo Consider replacing this with the boost flyweight
+/// stuff now it's available (boost 1.38.0). Initial investigation
+/// suggests the boost implementation to be equivalent in speed but
+/// much more flexible. However, without using intermodule_holder
+/// we get crashes at program termination, and using it we get gcc
+/// crashes during compilation (with gcc 4.0.2).
 template<typename T, typename Hash=Hash<T> >
 class Interned
 {
