@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,7 +44,6 @@
 #include "IECore/BoxOps.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/DespatchTypedData.h"
-#include "IECore/ClassData.h"
 
 #include <cassert>
 
@@ -53,43 +52,23 @@ using namespace Imath;
 using namespace std;
 using namespace boost;
 
-/// \todo Move this into the main class for the next major version
-struct ImageCropOp::ExtraMembers
-{	
-	IECore::BoolParameterPtr m_intersectParameter;
-};
-
-static IECore::ClassData<ImageCropOp, ImageCropOp::ExtraMembers> g_extraMembers;
-
 ImageCropOp::ImageCropOp()
-	:	ModifyOp(
-		staticTypeName(),
-		"Performs cropping over ImagePrimitive objects.\n"
-		"The operation results on an ImagePrimitive with displayWindow equal to the intersection of the given crop box and the original image displayWindow.\n"
-		"If matchDataWindow if On then the dataWindow will match the new displayWindow (new pixels will be filled with zero). Otherwise it will only be intersected against the given crop box.",
-		new ImagePrimitiveParameter(
-			"result",
-			"Cropped image.",
-			new ImagePrimitive()
-		),
-		new ImagePrimitiveParameter(
-			"object",
-			"The vector object that will be transformed by the matrix.",
-			new ImagePrimitive()
+	:	ImagePrimitiveOp(
+			staticTypeName(),
+			"Performs cropping over ImagePrimitive objects.\n"
+			"The operation results on an ImagePrimitive with displayWindow equal to the intersection of the given crop box and the original image displayWindow.\n"
+			"If matchDataWindow if On then the dataWindow will match the new displayWindow (new pixels will be filled with zero). Otherwise it will only be intersected against the given crop box."
 		)
-	)
 {
-	ExtraMembers &extraMembers = g_extraMembers.create( this );
-
-	m_cropBox = new Box2iParameter(
+	m_cropBoxParameter = new Box2iParameter(
 		"cropBox",
 		"Determines the crop coordinates to apply on the image.",
 		Box2i()
 	);
 
-	parameters()->addParameter( m_cropBox );
+	parameters()->addParameter( m_cropBoxParameter );
 
-	m_matchDataWindow = new BoolParameter(
+	m_matchDataWindowParameter = new BoolParameter(
 		"matchDataWindow",
 		"if On then the dataWindow will match displayWindow. Otherwise it will be intersected against the given crop box.",	
 		
@@ -99,23 +78,23 @@ ImageCropOp::ImageCropOp()
 		true
 	);
 
-	parameters()->addParameter( m_matchDataWindow );
+	parameters()->addParameter( m_matchDataWindowParameter );
 
-	m_resetOrigin = new BoolParameter(
+	m_resetOriginParameter = new BoolParameter(
 		"resetOrigin",
 		"if On then the resulting image will have it's top-left corner at (0,0).",	
 		true
 	);
 
-	parameters()->addParameter( m_resetOrigin );
+	parameters()->addParameter( m_resetOriginParameter );
 	
-	extraMembers.m_intersectParameter = new BoolParameter(
+	m_intersectParameter = new BoolParameter(
 		"intersect",
 		"If enabled then the display window of the resultant image will be cropped against the crop reigion too",
 		true
 	);
 
-	parameters()->addParameter( extraMembers.m_intersectParameter );
+	parameters()->addParameter( m_intersectParameter );
 	
 	
 	/// \todo Add "reformat" parameter, like Nuke
@@ -124,47 +103,46 @@ ImageCropOp::ImageCropOp()
 
 ImageCropOp::~ImageCropOp()
 {
-	g_extraMembers.erase( this );
 }
 
 Box2iParameterPtr ImageCropOp::cropBoxParameter()
 {
-	return m_cropBox;
+	return m_cropBoxParameter;
 }
 
 ConstBox2iParameterPtr ImageCropOp::cropBoxParameter() const
 {
-	return m_cropBox;
+	return m_cropBoxParameter;
 }
 
 BoolParameterPtr ImageCropOp::matchDataWindowParameter()
 {
-	return m_matchDataWindow;
+	return m_matchDataWindowParameter;
 }
 
 ConstBoolParameterPtr ImageCropOp::matchDataWindowParameter() const
 {
-	return m_matchDataWindow;
+	return m_matchDataWindowParameter;
 }
 
 BoolParameterPtr ImageCropOp::resetOriginParameter()
 {
-	return m_resetOrigin;
+	return m_resetOriginParameter;
 }
 
 ConstBoolParameterPtr ImageCropOp::resetOriginParameter() const
 {
-	return m_resetOrigin;
+	return m_resetOriginParameter;
 }
 
 BoolParameterPtr ImageCropOp::intersectParameter()
 {
-	return g_extraMembers[this].m_intersectParameter;
+	return m_intersectParameter;
 }
 
 ConstBoolParameterPtr ImageCropOp::intersectParameter() const
 {
-	return g_extraMembers[this].m_intersectParameter;
+	return m_intersectParameter;
 }
 
 struct ImageCropOp::ImageCropFn
@@ -240,24 +218,22 @@ struct ImageCropOp::ImageCropFn
 
 };
 
-void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
+void ImageCropOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands )
 {	
-	ImagePrimitivePtr image = assertedStaticCast< ImagePrimitive >( toModify );
-
 	// Validate the input image
 	if ( !image->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "ImageCropOp: Input image is not valid" );
 	}
 
-	const Imath::Box2i &cropBox = m_cropBox->getTypedValue();
+	const Imath::Box2i &cropBox = m_cropBoxParameter->getTypedValue();
 	if ( cropBox.isEmpty() )
 	{
 		throw InvalidArgumentException( "ImageCropOp: Specified crop box is empty" );
 	}
 	
-	const bool resetOrigin = m_resetOrigin->getTypedValue();
-	const bool intersect = g_extraMembers[this].m_intersectParameter->getTypedValue();
+	const bool resetOrigin = m_resetOriginParameter->getTypedValue();
+	const bool intersect = m_intersectParameter->getTypedValue();
 
 	Imath::Box2i croppedDisplayWindow;
 	if ( intersect )
@@ -275,7 +251,7 @@ void ImageCropOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
 	Imath::Box2i newDisplayWindow = croppedDisplayWindow;
 	Imath::Box2i newDataWindow;
 	
-	const bool matchDataWindow = m_matchDataWindow->getTypedValue();
+	const bool matchDataWindow = m_matchDataWindowParameter->getTypedValue();
 	if ( matchDataWindow )
 	{
 		newDataWindow = newDisplayWindow;

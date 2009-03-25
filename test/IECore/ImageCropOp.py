@@ -103,7 +103,7 @@ class TestImageCropOp(unittest.TestCase):
 			resetOrigin = testCase.get( 'resetOrigin', True )
 			cropOp['resetOrigin'] = resetOrigin
 			cropOp['extendDataWindow'] = False
-			cropOp['object'] = img
+			cropOp['input'] = img
 	
 			croppedImg = cropOp()
 

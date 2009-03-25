@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,17 +41,18 @@
 using namespace boost;
 using namespace boost::python;
 
-namespace IECore {
+namespace IECore
+{
 
 void bindImageCropOp()
 {
-	typedef class_< ImageCropOp, ImageCropOpPtr, boost::noncopyable, bases<ModifyOp> > ImageCropOpPyClass;
+	typedef class_< ImageCropOp, ImageCropOpPtr, boost::noncopyable, bases<ImagePrimitiveOp> > ImageCropOpPyClass;
 	ImageCropOpPyClass( "ImageCropOp" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ImageCropOp )
 	;
 	
 	INTRUSIVE_PTR_PATCH( ImageCropOp, ImageCropOpPyClass );
-	implicitly_convertible<ImageCropOpPtr, ModifyOpPtr>();	
+	implicitly_convertible<ImageCropOpPtr, ImagePrimitiveOpPtr>();	
 
 }
 
