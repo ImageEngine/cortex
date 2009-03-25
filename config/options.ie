@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -138,11 +138,12 @@ PYTHONCXXFLAGS = copy.copy( CXXFLAGS )
 ###########################################################################################
 # Warning flags. We'd like to set these for all environments but boost::python and
 # boost::unit_test generate loads of warnings so we can't set it for the python bindings
-# or C++ tests. GCC 4.3.0 gives out a lot of boost warnings in general, too.
+# or C++ tests. GCC 4.3.0 gives out a lot of boost warnings in general, too. 
+# boost 1.38.0 generates construction initialization order warnings which we don't want, either.
 ###########################################################################################		
 if compilerVersionInt < 430 :
 
-	CXXFLAGS += [ "-Werror" ]
+	CXXFLAGS += [ "-Werror", "-Wno-reorder" ]
 	
 LINKFLAGS = []	
 if compilerVersionInt < 350 :
@@ -156,7 +157,7 @@ if compilerVersionInt < 350 :
 	
 
 # set the include paths
-BOOST_INCLUDE_PATH = "/software/tools/include/boost/1.35.0"
+BOOST_INCLUDE_PATH = "/software/tools/include/boost/1.38.0"
 OPENEXR_INCLUDE_PATH = "/software/tools/include/OpenEXR/" + openEXRVersion
 TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
 JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
@@ -167,12 +168,13 @@ CPPPATH = "/software/tools/include/freetype/2.3.5"
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
 if IEEnv.platformOS().startswith( "osx" ) :
-	BOOST_LIB_SUFFIX = "-mt-1_35"
+	BOOST_LIB_SUFFIX = "-xgcc" + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-1_38"
 else:
-	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-1_35"
+	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-1_38"
 
 # find the right libraries based on compiler and platform
 LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
+LIBPATH += ":/home/mark/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
 if targetApp :
 	## \todo This is very nuke specific. Perhaps we should have a registry option to
 	# say what paths are required by what app?
