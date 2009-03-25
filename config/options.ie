@@ -174,7 +174,6 @@ else:
 
 # find the right libraries based on compiler and platform
 LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
-LIBPATH += ":/home/mark/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
 if targetApp :
 	## \todo This is very nuke specific. Perhaps we should have a registry option to
 	# say what paths are required by what app?
