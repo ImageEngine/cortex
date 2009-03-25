@@ -70,7 +70,7 @@ inline bool Interned<T, Hash>::operator < ( const Interned<T, Hash> &other ) con
 }
 
 template<typename T, typename Hash>
-inline Interned<T, Hash>::operator T () const
+inline Interned<T, Hash>::operator const T & () const
 {
 	return *m_value;
 }

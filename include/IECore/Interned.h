@@ -60,7 +60,7 @@ class Interned
 		inline bool operator == ( const Interned<T, Hash> &other ) const;
 		inline bool operator < ( const Interned<T, Hash> &other ) const;
 		
-		inline operator T () const;
+		inline operator const T & () const;
 
 		const T &value() const;
 		
