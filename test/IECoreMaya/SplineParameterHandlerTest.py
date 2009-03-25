@@ -134,11 +134,7 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 			# The parameter value should not have changed
 			
 			data = parameterised.parameters()["spline"].getValue()
-			self.assertEqual( len( data.value ), len( splineData.value ) )
-			
-			if data.value != splineData.value :
-			
-				print data.value, "!=", splineData.value	
+			self.assertEqual( len( data.value ), len( splineData.value ) )	
 			
 			for i in range( 0, len( data.value ) ) :
 			
