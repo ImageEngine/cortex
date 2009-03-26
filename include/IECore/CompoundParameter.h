@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,7 +50,7 @@ class CompoundParameter : public Parameter
 		IE_CORE_DECLARERUNTIMETYPED( CompoundParameter, Parameter )
 	
 		/// A type to map from names to Parameters.
-		typedef std::map<std::string, ParameterPtr> ParameterMap;
+		typedef std::map<InternedString, ParameterPtr> ParameterMap;
 		/// A type to hold a vector of Parameters.
 		typedef std::vector<ParameterPtr> ParameterVector;
 		

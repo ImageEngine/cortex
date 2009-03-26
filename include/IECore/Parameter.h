@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #define IE_CORE_PARAMETER_H
 
 #include "IECore/RunTimeTyped.h"
+#include "IECore/Interned.h"
 
 #include <map>
 #include <string>
@@ -72,6 +73,7 @@ class Parameter : public RunTimeTyped
 		//@{
 		/// Returns the name of this parameter.
 		const std::string &name() const;
+		inline const InternedString &internedName() const;
 		/// Returns the description for this parameter.
 		const std::string &description() const;
 		/// Returns the default value for this parameter.
@@ -171,11 +173,11 @@ class Parameter : public RunTimeTyped
 		/// name, otherwise returns the empty string.
 		std::string getCurrentPresetName() const;
 		//@}
-
+	
 	private :	
 
-		std::string m_name;
-		std::string m_description;
+		InternedString m_name;
+		InternedString m_description;
 
 		ObjectPtr m_value;
 		ConstObjectPtr m_defaultValue;

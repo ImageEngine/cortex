@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -226,17 +226,17 @@ bool CompoundParameter::valueValid( ConstObjectPtr value, std::string *reason ) 
 
 void CompoundParameter::addParameter( ParameterPtr parameter )
 {
-	if( m_namesToParameters.find( parameter->name() )!=m_namesToParameters.end() )
+	if( m_namesToParameters.find( parameter->internedName() )!=m_namesToParameters.end() )
 	{
 		throw Exception( "Identically named child parameter already exists." );
 	}
-	m_namesToParameters.insert( ParameterMap::value_type( parameter->name(), parameter ) );
+	m_namesToParameters.insert( ParameterMap::value_type( parameter->internedName(), parameter ) );
 	m_parameters.push_back( parameter );	
 }
 
 void CompoundParameter::insertParameter( ParameterPtr parameter, ConstParameterPtr other )
 {
-	if( m_namesToParameters.find( parameter->name() )!=m_namesToParameters.end() )
+	if( m_namesToParameters.find( parameter->internedName() )!=m_namesToParameters.end() )
 	{
 		throw Exception( "Identically named child parameter already exists." );
 	}
@@ -245,7 +245,7 @@ void CompoundParameter::insertParameter( ParameterPtr parameter, ConstParameterP
 	{
 		throw Exception( "Parameter to insert before is not a child." );
 	}
-	m_namesToParameters.insert( ParameterMap::value_type( parameter->name(), parameter ) );
+	m_namesToParameters.insert( ParameterMap::value_type( parameter->internedName(), parameter ) );
 	m_parameters.insert( it, parameter );
 }
 
@@ -257,7 +257,7 @@ void CompoundParameter::removeParameter( ParameterPtr parameter )
 		throw Exception( "Parameter to remove doesn't exist" );
 	}
 	m_parameters.erase( it );
-	m_namesToParameters.erase( parameter->name() );
+	m_namesToParameters.erase( parameter->internedName() );
 
 	ObjectPtr value = Parameter::getValue();
 	CompoundObjectPtr tValue = runTimeCast<CompoundObject>( value );
