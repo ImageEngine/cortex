@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,8 +62,6 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 				Result();
 	
 				Imath::V3f point() const;
-				/// \bug This is returning the normal the wrong way round, but we kindof need it that way
-				/// until we fix the winding order reversal bug in the maya mesh converter.				
 				Imath::V3f normal() const;
 				Imath::V2f uv() const;
 				Imath::V3f uTangent() const;
