@@ -47,11 +47,11 @@
 
 #include "IECore/private/cineon.h"
 
+#include "boost/date_time/posix_time/ptime.hpp"
 #include "boost/multi_array.hpp"
 #include "boost/format.hpp"
 
 #include <fstream>
-#include <time.h>
 
 using namespace IECore;
 using namespace std;
@@ -186,15 +186,23 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 
 	strncpy( (char *) fi.file_name, fileName().c_str(), sizeof( fi.file_name ) );
 
-	// compute the current date and time
-	time_t t;
-	time(&t);
-	struct tm gmt;
-	localtime_r(&t, &gmt);
+	// compute the current date and time	
+	boost::posix_time::ptime localTime = boost::posix_time::second_clock::local_time();
+	boost::gregorian::date date = localTime.date();
+	boost::posix_time::time_duration time = localTime.time_of_day();
 
-	snprintf(fi.creation_date, sizeof( fi.creation_date ), "%04d-%02d-%02d", 1900 + gmt.tm_year, gmt.tm_mon, gmt.tm_mday);
-	snprintf(fi.creation_time, sizeof( fi.creation_time ), "%02d:%02d:%02d", gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
-
+	snprintf(fi.creation_date, sizeof( fi.creation_date ), "%04d-%02d-%02d",
+		static_cast<int>( date.year() ), 
+		static_cast<int>( date.month() ), 
+		static_cast<int>( date.day() )
+	);
+	
+	snprintf(fi.creation_time, sizeof( fi.creation_time ), "%02d:%02d:%02d",  
+		time.hours(), 
+		time.minutes(), 
+		time.seconds()
+	);
+		
 	ImageInformation ii = { 0 };
 	ii.orientation = 0;
 	ii.channel_count = 0;

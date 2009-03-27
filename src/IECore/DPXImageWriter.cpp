@@ -47,11 +47,11 @@
 
 #include "IECore/private/dpx.h"
 
+#include "boost/date_time/posix_time/ptime.hpp"
 #include "boost/multi_array.hpp"
 #include "boost/format.hpp"
 
 #include <fstream>
-#include <time.h>
 
 using namespace IECore;
 using namespace std;
@@ -208,13 +208,19 @@ void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	strncpy( (char *) fi.file_name, fileName().c_str(), sizeof( fi.file_name ) );
 
 	// compute the current date and time
-	time_t t;
-	time(&t);
-	struct tm gmt;
-	localtime_r(&t, &gmt);
+	boost::posix_time::ptime utc = boost::posix_time::second_clock::universal_time();
+	boost::gregorian::date date = utc.date();
+	boost::posix_time::time_duration time = utc.time_of_day();
+
 	snprintf((char *) fi.create_time,  sizeof( fi.create_time ), "%04d:%02d:%02d:%02d:%02d:%02d:%s",
-	        1900 + gmt.tm_year, gmt.tm_mon, gmt.tm_mday,
-	        gmt.tm_hour, gmt.tm_min, gmt.tm_sec, gmt.tm_zone );
+	        static_cast<int>( date.year() ), 
+		static_cast<int>( date.month() ), 
+		static_cast<int>( date.day() ),
+	        time.hours(), 
+		time.minutes(), 
+		time.seconds(), 
+		"UTC"
+	);
 	
 	snprintf((char *) fi.creator, sizeof( fi.creator ), "cortex");
 	snprintf((char *) fi.project, sizeof( fi.project ), "cortex");
