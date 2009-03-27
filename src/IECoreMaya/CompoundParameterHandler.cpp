@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,7 +75,7 @@ MStatus CompoundParameterHandler::update( IECore::ConstParameterPtr parameter, M
 		{
 			MObject childAttr = fnCAttr.child( i );
 			MFnAttribute fnAttr( childAttr );
-			if( !childParameters.count( fnAttr.name().asChar() ) )
+			if( !childParameters.count( IECore::InternedString( fnAttr.name().asChar() ) ) )
 			{
 				fnCAttr.removeChild( childAttr );
 				removedOne = true;
@@ -92,7 +92,7 @@ MStatus CompoundParameterHandler::update( IECore::ConstParameterPtr parameter, M
 		{
 			MObject childAttr = fnCAttr.child( i );
 			MFnAttribute fnChildAttr( childAttr );
-			if( fnChildAttr.name()==it->first.c_str() )
+			if( fnChildAttr.name()==it->first.value().c_str() )
 			{
 				if( Parameter::update( it->second, childAttr ) ) {
 					updatedOk = true;
@@ -104,7 +104,7 @@ MStatus CompoundParameterHandler::update( IECore::ConstParameterPtr parameter, M
 		}
 		if( !updatedOk )
 		{
-			MObject c = Parameter::create( it->second, it->first.c_str() );
+			MObject c = Parameter::create( it->second, it->first.value().c_str() );
 			if( c.isNull() )
 			{
 				return MS::kFailure;
@@ -153,7 +153,7 @@ MStatus CompoundParameterHandler::setValue( IECore::ConstParameterPtr parameter,
 	for( unsigned i=0; i<plug.numChildren(); i++ )
 	{
 		MPlug childPlug = plug.child( i );
-		IECore::CompoundParameter::ParameterMap::const_iterator it = childParameters.find( childPlug.partialName().asChar() );
+		IECore::CompoundParameter::ParameterMap::const_iterator it = childParameters.find( IECore::InternedString( childPlug.partialName().asChar() ) );
 		if( it==childParameters.end() )
 		{
 			return MS::kFailure;
@@ -185,7 +185,7 @@ MStatus CompoundParameterHandler::setValue( const MPlug &plug, IECore::Parameter
 	for( unsigned i=0; i<plug.numChildren(); i++ )
 	{
 		MPlug childPlug = plug.child( i );
-		IECore::CompoundParameter::ParameterMap::const_iterator it = childParameters.find( childPlug.partialName().asChar() );
+		IECore::CompoundParameter::ParameterMap::const_iterator it = childParameters.find( IECore::InternedString( childPlug.partialName().asChar() ) );
 		if( it==childParameters.end() )
 		{
 			return MS::kFailure;
