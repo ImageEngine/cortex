@@ -65,6 +65,7 @@ enum TypeId
 	FromMayaTransformConverterTypeId = 109021,
 	FromMayaImageConverterTypeId = 109003,	
 	ToMayaImageConverterTypeId = 109004,	
+	PlaybackFrameListTypeId = 109005,	
 	LastTypeId = 109999
 
 };

@@ -319,6 +319,14 @@ enum TypeId
 	PatchMeshPrimitiveTypeId = 276,
 	CurvesPrimitiveParameterTypeId = 277,
 	CurveExtrudeOpTypeId = 278,
+	FrameListTypeId = 279,
+	EmptyFrameListTypeId = 280,
+	FrameRangeTypeId = 281,
+	CompoundFrameListTypeId = 282,
+	ReorderedFrameListTypeId = 283,
+	BinaryFrameListTypeId = 284,
+	ReversedFrameListTypeId = 285,
+	ExclusionFrameListTypeId = 286,	    
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
