@@ -38,7 +38,7 @@
 
 #include <string>
 
-#include <IECore/InterpolatedCache.h>
+#include "IECore/InterpolatedCache.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
 

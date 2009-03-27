@@ -38,8 +38,8 @@
 
 #include <string>
 
-#include <IECore/IndexedIO.h>
-#include <IECore/AttributeCache.h>
+#include "IECore/IndexedIO.h"
+#include "IECore/AttributeCache.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
 
