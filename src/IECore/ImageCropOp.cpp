@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/format.hpp>
+#include "boost/format.hpp"
 
 #include "IECore/ImageCropOp.h"
 #include "IECore/SimpleTypedData.h"

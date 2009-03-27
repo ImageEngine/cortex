@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 #include "IECore/Parameterised.h"
 #include "IECore/CompoundParameter.h"

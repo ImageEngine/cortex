@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 #include "IECore/ColorTransformOp.h"
 #include "IECore/CompoundObject.h"

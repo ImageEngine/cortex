@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 #include "IECore/YUVImageWriter.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"

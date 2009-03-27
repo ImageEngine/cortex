@@ -32,10 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include <OpenEXR/ImathColor.h>
-#include <OpenEXR/ImathColorAlgo.h>
+#include "OpenEXR/ImathColor.h"
+#include "OpenEXR/ImathColorAlgo.h"
 
 #include "IECore/ColorAlgo.h"
 

@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 #include "IECore/TypeIds.h"
 #include "IECore/bindings/TypeIdBinding.h"

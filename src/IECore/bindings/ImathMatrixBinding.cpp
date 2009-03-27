@@ -34,14 +34,14 @@
 
 // This include needs to be the very first to prevent problems with warnings 
 // regarding redefinition of _POSIX_C_SOURCE
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 // System includes
 #include <string>
 #include <stdexcept>
 
-#include <OpenEXR/ImathMatrix.h>
-#include <OpenEXR/ImathMatrixAlgo.h>
+#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathMatrixAlgo.h"
 
 #include "IECore/MatrixAlgo.h"
 #include "IECore/bindings/ImathMatrixBinding.h"

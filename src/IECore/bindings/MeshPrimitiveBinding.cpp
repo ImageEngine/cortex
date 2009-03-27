@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 #include "IECore/MeshPrimitive.h"
 #include "IECore/bindings/MeshPrimitiveBinding.h"

@@ -34,7 +34,7 @@
 
 // This include needs to be the very first to prevent problems with warnings 
 // regarding redefinition of _POSIX_C_SOURCE
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 #include "IECore/AngleConversion.h"
 

@@ -34,13 +34,13 @@
 
 // This include needs to be the very first to prevent problems with warnings 
 // regarding redefinition of _POSIX_C_SOURCE
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 // System includes
 #include <string>
 #include <stdexcept>
 
-#include <OpenEXR/ImathQuat.h>
+#include "OpenEXR/ImathQuat.h"
 
 #include "IECore/QuatAlgo.h"
 

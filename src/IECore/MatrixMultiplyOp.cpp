@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,10 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/mpl/eval_if.hpp>
-#include <boost/mpl/or.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <cassert>
+
+#include "boost/mpl/eval_if.hpp"
+#include "boost/mpl/or.hpp"
+#include "boost/type_traits/is_same.hpp"
+#include "boost/utility/enable_if.hpp"
 
 #include "IECore/MatrixMultiplyOp.h"
 #include "IECore/SimpleTypedData.h"
@@ -45,8 +47,6 @@
 #include "IECore/Object.h"
 #include "IECore/NullObject.h"
 #include "IECore/DespatchTypedData.h"
-
-#include <cassert>
 
 using namespace IECore;
 using namespace Imath;

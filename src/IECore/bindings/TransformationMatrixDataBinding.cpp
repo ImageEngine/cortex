@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
+#include "boost/python.hpp"
+#include "boost/python/make_constructor.hpp"
 
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"

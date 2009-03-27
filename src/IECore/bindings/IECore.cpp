@@ -32,12 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// System includes
+#include "boost/python.hpp"
 
-// External includes
-#include <boost/python.hpp>
-
-// Local includes
 #include "IECore/bindings/RefCountedBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/ExceptionBinding.h"

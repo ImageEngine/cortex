@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 #include "IECore/bindings/ParameterBinding.h"
 #include "IECore/PathVectorParameter.h"

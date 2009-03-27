@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 #include <limits.h>
 
-#include <boost/python/make_constructor.hpp>
+#include "boost/python/make_constructor.hpp"
 
 #include "OpenEXR/ImathLimits.h"
 
