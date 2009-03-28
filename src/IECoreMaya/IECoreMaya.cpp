@@ -38,6 +38,7 @@
 #include "boost/format.hpp"
 
 #include "IECoreGL/IECoreGL.h"
+#include "IECoreGL/GL.h"
 
 #include "maya/MPxNode.h"
 #include "maya/MPxLocatorNode.h"
