@@ -71,7 +71,7 @@ class FrameList : public RunTimeTyped
 		void asClumpedList( std::vector< std::vector<Frame> > &clumpedFrames, unsigned int clumpSize ) const;
 		
 		/// Parses a string and returns the FrameList object that it represents.
-		/// Strings may be in any of the forms returned by str( SomeFrameListSubclass ).
+		/// Strings may be in any of the forms returned by SomeFrameListSubclass::asString().
 		/// Subclasses must register a suitable parser for the form that they return
 		/// by instantiating a static FrameList::Parser instance. Throws an Exception if the string 
 		/// is in an unrecognised form.	
