@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -116,17 +116,12 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 										
 		typedef std::map<IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr > > ComponentsMap;
 		typedef std::map< int, std::set< std::pair< std::string, IECoreGL::GroupPtr > > > ComponentToGroupMap;		
-		
-		ComponentsMap &componentsMap();		
-		ComponentToGroupMap &componentToGroupMap();
-		
+				
 		void buildComponents();		
 		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group );
 		
-	public:
-	
-		/// \todo Move members into class on next major version change
-		struct MemberData;	
+		ComponentsMap m_componentsMap;		
+		ComponentToGroupMap m_componentToGroupMap;
 				
 };
 

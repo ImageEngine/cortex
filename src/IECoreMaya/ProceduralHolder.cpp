@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -53,7 +53,6 @@
 #include "IECore/VectorOps.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/ClassData.h"
 
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnTypedAttribute.h"
@@ -76,29 +75,9 @@ MObject ProceduralHolder::aTransparent;
 MObject ProceduralHolder::aDrawBound;
 MObject ProceduralHolder::aProceduralComponents;
 
-struct ProceduralHolder::MemberData
-{
-	ComponentsMap m_componentsMap;		
-	ComponentToGroupMap m_componentToGroupMap;
-};
-
-static IECore::ClassData< ProceduralHolder, ProceduralHolder::MemberData > g_classData;
-
-ProceduralHolder::ComponentsMap &ProceduralHolder::componentsMap()
-{
-	return g_classData[this].m_componentsMap;
-	
-}
-		
-ProceduralHolder::ComponentToGroupMap &ProceduralHolder::componentToGroupMap()
-{
-	return g_classData[this].m_componentToGroupMap;
-}
-
 ProceduralHolder::ProceduralHolder()
 	:	m_boundDirty( true ), m_sceneDirty( true )
 {
-	g_classData.create( this );
 }
 
 ProceduralHolder::~ProceduralHolder()
@@ -329,7 +308,7 @@ MPxSurfaceShape::MatchResult ProceduralHolder::matchComponent( const MSelectionL
 
 		if ( (dim > 0) && (attrSpec.name() == "proceduralComponents" || attrSpec.name() == "prcm" || attrSpec.name() == "f" ) )
 		{	
-			int numComponents = componentToGroupMap().size();
+			int numComponents = m_componentToGroupMap.size();
 
 			MAttributeIndex attrIndex = attrSpec[0];
 			
@@ -391,16 +370,16 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 	const std::string &name = nameState->name();		
 	int compId = nameState->glName();
 	
-	ComponentsMap::const_iterator it = componentsMap().find( name );
-	if( it == componentsMap().end() )
+	ComponentsMap::const_iterator it = m_componentsMap.find( name );
+	if( it == m_componentsMap.end() )
 	{		
-		compId = componentsMap().size();
+		compId = m_componentsMap.size();
 				
 		/// Reserve slot in the componentsMap. The exact component ID gets generated later, once all components have been
 		/// traversed. IDs are then assigned in ascending order whilst iterating over the component map, which is sorted by name. This
 		/// ensures a consistent ordering of components from frame to frame, which we'd not otherwise get due to IECore::Group using
 		/// a regular set (sorted by pointer) to store its children.
-		componentsMap()[name] = ComponentsMap::mapped_type( 0, group );				
+		m_componentsMap[name] = ComponentsMap::mapped_type( 0, group );				
 	}		
 		
 	const IECoreGL::Group::ChildContainer &children = group->children();
@@ -425,9 +404,9 @@ void ProceduralHolder::buildComponents()
 	MArrayDataHandle cH = block.outputArrayValue( aProceduralComponents, &s );
 	assert( s );
 
-	componentsMap().clear();
+	m_componentsMap.clear();
 
-	componentToGroupMap().clear();
+	m_componentToGroupMap.clear();
 	
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	assert( defaultState );
@@ -444,11 +423,11 @@ void ProceduralHolder::buildComponents()
 	assert( s );
 	
 	int compId = 0;
-	ComponentsMap::iterator it = componentsMap().begin();
-	for ( ; it != componentsMap().end(); it ++ )
+	ComponentsMap::iterator it = m_componentsMap.begin();
+	for ( ; it != m_componentsMap.end(); it ++ )
 	{
 		/// Build the mapping that goes from ID -> ( name, group )
-		componentToGroupMap()[compId].insert( ComponentToGroupMap::mapped_type::value_type( it->first.value(), it->second.second ) );
+		m_componentToGroupMap[compId].insert( ComponentToGroupMap::mapped_type::value_type( it->first.value(), it->second.second ) );
 	
 		it->second.first = compId ++;
 		
@@ -466,7 +445,7 @@ void ProceduralHolder::buildComponents()
 	
 #ifndef NDEBUG
 	MPlug plug( thisMObject(), aProceduralComponents );
-	for ( ComponentsMap::const_iterator it = componentsMap().begin(); it != componentsMap().end(); ++it )
+	for ( ComponentsMap::const_iterator it = m_componentsMap.begin(); it != m_componentsMap.end(); ++it )
 	{
 		MPlug child = plug.elementByLogicalIndex( it->second.first, &s );
 		assert( s );

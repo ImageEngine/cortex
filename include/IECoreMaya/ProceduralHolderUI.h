@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,8 +40,11 @@
 #include "IECore/Object.h"
 
 #include "IECoreMaya/ProceduralHolder.h"
+#include "IECoreMaya/DisplayStyle.h"
 
 #include "maya/MPxSurfaceShapeUI.h"
+
+
 
 namespace IECoreGL
 {
@@ -86,10 +89,8 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 		void unhiliteGroupChildren( const std::string &name, IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr base ) const;
 		void resetHilites() const;
 		
-	public :
-	
-		/// \todo Move members into class on next major version change
-		struct MemberData;
+		mutable StateMap m_stateMap;
+		mutable DisplayStyle m_displayStyle;
 
 };
 
