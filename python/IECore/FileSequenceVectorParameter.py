@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,6 @@ import _IECore as IECore
 from FileSequence import FileSequence
 from FileSequenceFunctions import ls
 from RunTimeTypedUtil import makeRunTimeTyped
-from FrameList import FrameList
 
 ## The FileSequenceVectorParameter class implements a Parameter
 # to define a vector (list) of FileSequences. It's cunningly named in that
@@ -127,7 +126,7 @@ class FileSequenceVectorParameter( IECore.PathVectorParameter ) :
 				value = ls(fileSequence)
 			else:
 				filename = parts[0]
-				framelist = FrameList.parse(parts[1])
+				framelist = IECore.FrameList.parse(parts[1])
 				value = FileSequence(filename, framelist)
 				
 			if value :

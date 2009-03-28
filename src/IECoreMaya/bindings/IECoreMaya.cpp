@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,6 +65,7 @@
 #include "IECoreMaya/bindings/FromMayaMeshConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaTransformConverterBinding.h"
 #include "IECoreMaya/bindings/CallbackIdBinding.h"
+#include "IECoreMaya/bindings/PlaybackFrameListBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -104,4 +105,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaMeshConverter();
 	bindFromMayaTransformConverter();
 	bindCallbackId();
+	bindPlaybackFrameList();
 }

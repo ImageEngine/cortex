@@ -50,7 +50,7 @@ class ExclusionFrameListTest( unittest.TestCase ) :
 		self.assertEqual( str( f ), "1-10!1-11x2" )
 		
 	def testRepr( self ) :
-	
+		import IECore
 		f = ExclusionFrameList( FrameRange( 1, 10 ), FrameRange( 1, 11, 2 ) )
 		self.assertEqual( f, eval( repr( f ) ) )
 

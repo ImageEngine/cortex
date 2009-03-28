@@ -39,7 +39,6 @@ from SplineParameterUI import SplineParameterUI
 from NodeParameter import NodeParameter
 from DAGPathParameter import DAGPathParameter
 from DAGPathVectorParameter import DAGPathVectorParameter
-from PlaybackFrameList import PlaybackFrameList
 from mayaDo import mayaDo
 from createMenu import createMenu
 from BakeTransform import BakeTransform

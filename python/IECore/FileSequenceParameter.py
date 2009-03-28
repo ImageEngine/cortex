@@ -38,7 +38,6 @@ import _IECore as IECore
 from FileSequence import FileSequence
 from FileSequenceFunctions import ls
 from RunTimeTypedUtil import makeRunTimeTyped
-from FrameList import FrameList
 
 ## The FileSequenceParameter class implements a Parameter
 # to define FileSequences. It's cunningly named in that
@@ -127,7 +126,7 @@ class FileSequenceParameter( IECore.PathParameter ) :
 		
 		found = False
 		filename = fileSequenceStr
-		framelist =  FrameList.parse( "" )
+		framelist = IECore.FrameList.parse( "" )
 
 		while not found and spaceIndex != -1 :
 
@@ -138,7 +137,7 @@ class FileSequenceParameter( IECore.PathParameter ) :
 
 			try :
 
-				framelist = FrameList.parse( tail )
+				framelist = IECore.FrameList.parse( tail )
 				found = True
 			except :
 				fileSequenceCopy =  fileSequenceCopy[ 0:spaceIndex ] + "*" + fileSequenceCopy[ spaceIndex+1: ]				

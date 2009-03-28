@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,9 +33,7 @@
 ##########################################################################
 
 import _IECore as IECore
-from FrameList import FrameList
 from RunTimeTypedUtil import makeRunTimeTyped
-from EmptyFrameList import EmptyFrameList
 
 ## The FrameListParameter stores a string as its value but uses the
 # FrameList.parse() function to validate that it represents a FrameList.
@@ -47,7 +45,7 @@ class FrameListParameter( IECore.StringParameter ) :
 	def __init__( self, name, description, defaultValue = "", allowEmptyList = True,
 		presets = {}, presetsOnly = False, userData = IECore.CompoundObject() ) :
 		
-		if isinstance( defaultValue, FrameList ) :
+		if isinstance( defaultValue, IECore.FrameList ) :
 			defaultValue = str( defaultValue )
 		
 		IECore.StringParameter.__init__( self, name, description, defaultValue, presets, presetsOnly, userData )
@@ -62,8 +60,8 @@ class FrameListParameter( IECore.StringParameter ) :
 			return False, "Value must be of type StringData"
 				
 		try :
-			f = FrameList.parse( value.value )
-			if not self.__allowEmptyList and isinstance( f, EmptyFrameList ) :
+			f = IECore.FrameList.parse( value.value )
+			if not self.__allowEmptyList and isinstance( f, IECore.EmptyFrameList ) :
 				return False, "Value must not be empty."
 		except Exception, e :
 			return False, str( e )
@@ -79,6 +77,6 @@ class FrameListParameter( IECore.StringParameter ) :
 	# creating using it.
 	def getFrameListValue( self ) :
 		s = self.getValidatedValue().value
-		return FrameList.parse( s )
+		return IECore.FrameList.parse( s )
 		
 makeRunTimeTyped( FrameListParameter, 100012, IECore.StringParameter )

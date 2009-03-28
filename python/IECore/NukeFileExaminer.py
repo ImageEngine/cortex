@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,8 +32,8 @@
 #
 ##########################################################################
 
+import _IECore as IECore
 from FileExaminer import FileExaminer
-from FrameRange import FrameRange
 import re
 
 ## The NukeFileExaminer class implements the FileExaminer interface for
@@ -171,7 +171,7 @@ class NukeFileExaminer( FileExaminer ) :
 					# spaces in a filename
 					raise Exception( "Filename \"%s\" is padded with spaces." % fileName )
 				
-			return m.group( 1 ) + "".ljust( padding, '#' ) + m.group( 3 ) + " " + str( FrameRange( firstFrame, lastFrame ) )
+			return m.group( 1 ) + "".ljust( padding, '#' ) + m.group( 3 ) + " " + str( IECore.FrameRange( firstFrame, lastFrame ) )
 		
 		else :
 		

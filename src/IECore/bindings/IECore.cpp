@@ -219,6 +219,14 @@
 #include "IECore/bindings/TimePeriodDataBinding.h"
 #include "IECore/bindings/PatchMeshPrimitiveBinding.h"
 #include "IECore/bindings/CurveExtrudeOpBinding.h"
+#include "IECore/bindings/FrameListBinding.h"
+#include "IECore/bindings/EmptyFrameListBinding.h"
+#include "IECore/bindings/FrameRangeBinding.h"
+#include "IECore/bindings/CompoundFrameListBinding.h"
+#include "IECore/bindings/ReorderedFrameListBinding.h"
+#include "IECore/bindings/BinaryFrameListBinding.h"
+#include "IECore/bindings/ReversedFrameListBinding.h"
+#include "IECore/bindings/ExclusionFrameListBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -427,6 +435,14 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTimePeriodData();
 	bindPatchMeshPrimitive();
 	bindCurveExtrudeOp();
+	bindFrameList();
+	bindEmptyFrameList();	
+	bindFrameRange();	
+	bindCompoundFrameList();
+	bindReorderedFrameList();
+	bindBinaryFrameList();
+	bindReversedFrameList();
+	bindExclusionFrameList();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

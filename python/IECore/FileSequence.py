@@ -33,8 +33,7 @@
 ##########################################################################
 
 import re
-import copy
-import FrameList
+import _IECore as IECore
 
 ## The FileSequence class represents a sequence of files on disk. It provides
 # methods for manipulating the names of such files so that renumbering and renaming
@@ -68,7 +67,7 @@ class FileSequence :
 				
 		elif key=="frameList" :
 		
-			if not isinstance( value, FrameList.FrameList ) :
+			if not isinstance( value, IECore.FrameList ) :
 			
 				raise ValueError( "FileSequence frameList must be an instance of FrameList." )
 		
@@ -189,7 +188,7 @@ class FileSequence :
 	# Returns a deep copy of this object.
 	def copy( self ) :
 	
-		return copy.deepcopy( self )
+		return FileSequence( str( self.fileName ), self.frameList.copy() )
 	
 	## Returns a mapping from the filenames represented by this object to
 	# the filenames represented by another FileSequence object. Throws an exception if

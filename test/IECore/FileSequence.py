@@ -45,8 +45,8 @@ class testFrameRange( unittest.TestCase ) :
 	
 		self.assertRaises( TypeError, FrameRange, 1, 100.1 )
 		self.assertRaises( TypeError, FrameRange, "1", "100" )
-		self.assertRaises( ValueError, FrameRange, 10, 1 )
-		self.assertRaises( ValueError, FrameRange, 1, 9, 3 )
+		self.assertRaises( RuntimeError, FrameRange, 10, 1 )
+		self.assertRaises( RuntimeError, FrameRange, 1, 9, 3 )
 		
 		r = FrameRange( 1, 100 )
 		self.assertEqual( r.start, 1 )
@@ -212,7 +212,7 @@ class testCompoundFrameList( unittest.TestCase ) :
 	def testConstructor( self ) :
 	
 		self.assertRaises( TypeError, CompoundFrameList, "" )
-		self.assertRaises( TypeError, CompoundFrameList, [ "" ] )
+		self.assertRaises( RuntimeError, CompoundFrameList, [ "" ] )
 		
 		c = CompoundFrameList()
 		c = CompoundFrameList([])

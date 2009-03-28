@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -42,10 +42,8 @@ import re
 import glob
 import shutil
 import os.path
-from EmptyFrameList import EmptyFrameList
-from FrameRange import FrameRange
-from CompoundFrameList import CompoundFrameList
 from FileSequence import FileSequence
+import _IECore as IECore
 
 ## Returns a list of FileSequence objects representing all the sequences in names.
 # names is just a list of arbitrary strings, which may or may not represent files
@@ -180,10 +178,10 @@ def cat( sequence ) :
 def frameListFromList( frames ) :
 
 	if len( frames )==0 :
-		return EmptyFrameList()
+		return IECore.EmptyFrameList()
 		
 	if len( frames )==1 :
-		return FrameRange( frames[0], frames[0] )
+		return IECore.FrameRange( frames[0], frames[0] )
 		
 	frameLists = []
 	
@@ -197,9 +195,9 @@ def frameListFromList( frames ) :
 		if rangeEnd==len( frames ) or frames[rangeEnd] - frames[rangeEnd-1] != rangeStep :
 			# we've come to the end of a run
 			if rangeEnd-1==rangeStart :
-				frameLists.append( FrameRange( frames[rangeStart], frames[rangeStart] ) )
+				frameLists.append( IECore.FrameRange( frames[rangeStart], frames[rangeStart] ) )
 			else :
-				frameLists.append( FrameRange( frames[rangeStart], frames[rangeEnd-1], rangeStep ) )
+				frameLists.append( IECore.FrameRange( frames[rangeStart], frames[rangeEnd-1], rangeStep ) )
 			rangeStart = rangeEnd
 			rangeEnd = rangeStart + 1
 				
@@ -212,7 +210,7 @@ def frameListFromList( frames ) :
 	if len( frameLists )==1 :
 		return frameLists[0]
 	else :
-		return CompoundFrameList( frameLists )
+		return IECore.CompoundFrameList( frameLists )
 
 # private utility functions
 
