@@ -59,7 +59,7 @@ void FrameList::asClumpedList( std::vector< std::vector<Frame> > &clumpedFrames,
 	size_t idx = 0;
 	while ( idx < frames.size() )
 	{
-		size_t thisClumpSize = std::min( frames.size() - idx, clumpSize );
+		size_t thisClumpSize = std::min( frames.size() - idx, (size_t)clumpSize );
 
 		size_t j = 0;				
 		std::vector<Frame> clump;
