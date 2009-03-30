@@ -227,6 +227,7 @@
 #include "IECore/bindings/BinaryFrameListBinding.h"
 #include "IECore/bindings/ReversedFrameListBinding.h"
 #include "IECore/bindings/ExclusionFrameListBinding.h"
+#include "IECore/bindings/FrameListParameterBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -443,6 +444,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBinaryFrameList();
 	bindReversedFrameList();
 	bindExclusionFrameList();	
+	bindFrameListParameter();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -326,7 +326,8 @@ enum TypeId
 	ReorderedFrameListTypeId = 283,
 	BinaryFrameListTypeId = 284,
 	ReversedFrameListTypeId = 285,
-	ExclusionFrameListTypeId = 286,	    
+	ExclusionFrameListTypeId = 286,	   
+	FrameListParameterTypeId = 287, 
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

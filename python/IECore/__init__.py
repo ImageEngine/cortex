@@ -49,7 +49,6 @@ from DataTraits import *
 from FileSequence import FileSequence
 from FileSequenceFunctions import *
 from FileSequenceParameter import FileSequenceParameter
-from FrameListParameter import FrameListParameter
 from ClassLoader import ClassLoader
 from RemovePrimitiveVariables import RemovePrimitiveVariables
 from RenamePrimitiveVariables import RenamePrimitiveVariables
