@@ -103,6 +103,7 @@ void bindFrameList()
 	;
 	
 	INTRUSIVE_PTR_PATCH( FrameList, FrameListPyClass );
+	implicitly_convertible<FrameListPtr, ConstFrameListPtr>();		
 	implicitly_convertible<FrameListPtr, RunTimeTypedPtr>();	
 }
 
