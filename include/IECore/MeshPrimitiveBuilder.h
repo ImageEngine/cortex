@@ -78,6 +78,4 @@ IE_CORE_DECLAREPTR( MeshPrimitiveBuilder );
 
 }
 
-#include "IECore/MeshPrimitiveBuilder.inl"
-
 #endif
