@@ -97,6 +97,7 @@ from ReversedFrameList import *
 from BinaryFrameList import *
 from PointsExpressionOp import *
 from FrameList import *
+from FrameListParameter import *
 from Struct import *
 from Enum import *
 from HeaderGenerator import *
