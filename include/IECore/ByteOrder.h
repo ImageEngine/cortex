@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,9 @@
 #ifndef IE_CORE_BYTEORDER_H
 #define IE_CORE_BYTEORDER_H
 
-#include <boost/static_assert.hpp>
+#include <stdint.h>
+
+#include "boost/static_assert.hpp"
 
 #include "OpenEXR/ImfInt64.h"
 
@@ -91,21 +93,21 @@ inline unsigned char reverseBytes<unsigned char>( const unsigned char &x )
 }
 
 template<>
-inline short reverseBytes<short>( const short &x )
+inline int16_t reverseBytes<int16_t>( const int16_t &x )
 {
 	return 	((x & 255) << 8) |
 			((x >> 8) & 255 );
 }
 
 template<>
-inline unsigned short reverseBytes<unsigned short>( const unsigned short &x )
+inline uint16_t reverseBytes<uint16_t>( const uint16_t &x )
 {
 	return 	((x & 255) << 8) |
 			((x >> 8) & 255 );
 }
 
 template<>
-inline int reverseBytes<int>( const int &x )
+inline int32_t reverseBytes<int32_t>( const int32_t &x )
 {
 	return 	((x & 255) << 24) |
 			(((x >> 8) & 255 ) << 16 ) |
@@ -114,7 +116,7 @@ inline int reverseBytes<int>( const int &x )
 }
 
 template<>
-inline unsigned int reverseBytes<unsigned int>( const unsigned int &x )
+inline uint32_t reverseBytes<uint32_t>( const uint32_t &x )
 {
 	return 	((x & 255) << 24) |
 			(((x >> 8) & 255 ) << 16 ) |
@@ -125,9 +127,9 @@ inline unsigned int reverseBytes<unsigned int>( const unsigned int &x )
 template<>
 inline float reverseBytes<float>( const float &x )
 {
-	BOOST_STATIC_ASSERT( sizeof(int) == sizeof(float) );
+	BOOST_STATIC_ASSERT( sizeof(uint32_t) == sizeof(float) );
 	union {
-		int i;
+		uint32_t i;
 		float f;
 	} xx;
 	xx.f = x;
