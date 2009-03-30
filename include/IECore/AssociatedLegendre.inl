@@ -33,7 +33,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <cassert>
-#include <OpenEXR/ImathMath.h>
+
+#include "OpenEXR/ImathMath.h"
 
 namespace IECore
 {

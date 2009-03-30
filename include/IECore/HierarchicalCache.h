@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,13 +38,13 @@
 #include <string>
 #include <vector>
 
-#include <IECore/RefCounted.h>
-#include <IECore/IndexedIO.h>
-#include <OpenEXR/ImathMatrix.h>
-#include <OpenEXR/ImathBox.h>
-#include <IECore/VisibleRenderable.h>
-#include <IECore/TreeGraphDependency.h>
+#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathBox.h"
 
+#include "IECore/RefCounted.h"
+#include "IECore/IndexedIO.h"
+#include "IECore/VisibleRenderable.h"
+#include "IECore/TreeGraphDependency.h"
 
 namespace IECore
 {
