@@ -218,7 +218,7 @@ template<class T>
 T & TypedData<T>::writable()
 {
 	assert( m_data );
-	if (m_data->refCounter() > 1) 
+	if (m_data->refCount() > 1) 
 	{
 		// duplicate the data
 

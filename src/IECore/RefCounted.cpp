@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,44 +44,6 @@ RefCounted::RefCounted() : m_numRefs(0)
 
 RefCounted::~RefCounted()
 {
-}
-
-void RefCounted::addRef() const
-{
-	// Prevent unused variable warning in release builds
-#ifndef NDEBUG	
-	RefCount oldRefCount = m_numRefs;
-#endif
-	
-	m_numRefs ++;
-	
-	// Trap wrap-around
-	assert( m_numRefs > oldRefCount );
-}
-
-void RefCounted::removeRef() const
-{
-	assert( m_numRefs > 0 );
-
-	// Prevent unused variable warning in release builds
-#ifndef NDEBUG
-	RefCount oldRefCount = m_numRefs;
-#endif	
-	
-	m_numRefs --;
-	
-	// Trap wrap-around
-	assert( m_numRefs < oldRefCount );
-	
-	if ( m_numRefs == 0 ) 
-	{
-		delete this;
-	}
-}
-
-RefCounted::RefCount RefCounted::refCounter() const
-{
-	return m_numRefs;
 }
 
 } // namespace IECore
