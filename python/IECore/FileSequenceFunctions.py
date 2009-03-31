@@ -48,59 +48,6 @@ import _IECore as IECore
 # This is here because we can't yet create a to_python converter for boost::regex
 IECore.FileSequence.fileNameValidator = staticmethod( lambda : re.compile( "^([^#]*)(#+)([^#]*)$" ) )
 
-## Returns a list of FileSequence objects representing all the sequences in names.
-# names is just a list of arbitrary strings, which may or may not represent files
-# on disk.
-def findSequences( names ) :
-
-	# this matches names of the form $prefix$frameNumber$suffix
-	# placing each of those in a group of the resulting match.
-	# both $prefix and $suffix may be the empty string and $frameNumber
-	# may be preceded by a minus sign.
-	matchExpression = re.compile( "^([^#]*?)(-{,1}[0-9]+)([^0-9#]*)$" )
-	# build a mapping from ($prefix, $suffix) to a list of $frameNumbers
-	sequenceMap = {}
-	for f in names :
-	
-		match = matchExpression.match( f )
-		if match :
-		
-			fixes = match.group( 1 ), match.group( 3 )
-			frames = sequenceMap.setdefault( fixes, [] )
-			frames.append( match.group( 2 ) )
-	
-	# build a list of FileSequence objects to return
-	result = []	
-	for fixes, frames in sequenceMap.items() :
-	
-		# in diabolical cases the elements of frames may not all have the same padding
-		# so we'll sort them out into padded and unpadded frame sequences here, by creating
-		# a map of padding->list of frames. unpadded things will be considered to have a padding
-		# of 1.
-		frames.sort()
-		paddingToFrames = {}
-		for frame in frames :
-			sign = 1
-			if frame[0]=="-" :
-				frame = frame[1:]
-				sign = -1
-			if frame[0]=="0" or len(frame) in paddingToFrames :
-				numericFrames = paddingToFrames.setdefault( len(frame), [] )
-			else :
-				numericFrames = paddingToFrames.setdefault( 1, [] )
-			numericFrames.append( sign * int(frame) )
-		
-		for padding, numericFrames in paddingToFrames.items() :
-			
-			numericFrames.sort()	
-			frameList = frameListFromList( numericFrames )
-			result.append( IECore.FileSequence( fixes[0] + "".ljust( padding, "#" ) + fixes[1], frameList ) )
-	
-	# remove any sequences with less than two files
-	result = [ x for x in result if len( x.frameList.asList() ) > 1 ]
-		
-	return result
-
 ## If path is a directory then returns all sequences
 # residing in that directory in the form of a list of FileSequences, returning
 # the empty list if none are found. If path is a sequence style filename with a
@@ -116,7 +63,7 @@ def ls( path ) :
 				
 		files = glob.glob( globPath )
 				
-		sequences = findSequences( files )
+		sequences = IECore.findSequences( files )
 		for sequence in sequences :
 			if sequence.getPadding()==padding :
 				return sequence
@@ -126,7 +73,7 @@ def ls( path ) :
 	elif os.path.isdir( path ) :
 		
 		allFiles = os.listdir( path )
-		return findSequences( allFiles )			
+		return IECore.findSequences( allFiles )			
 
 ## Moves the set of files specified by sequence1 to the set of files
 # specified by sequence2, where sequence1 and sequence2 are
@@ -172,48 +119,6 @@ def cat( sequence ) :
 	
 		ret = os.system( 'cat "%s"' % ( f ) )	
 		
-		
-
-## Returns a FrameList instance that "best" represents the specified list of integer
-# frame numbers. This function attempts to be intelligent and uses a CompoundFrameList
-# of FrameRange objects to represent the specified frames compactly.
-def frameListFromList( frames ) :
-
-	if len( frames )==0 :
-		return IECore.EmptyFrameList()
-		
-	if len( frames )==1 :
-		return IECore.FrameRange( frames[0], frames[0] )
-		
-	frameLists = []
-	
-	rangeStart = 0
-	rangeEnd = 1
-	rangeStep = frames[rangeEnd] - frames[rangeStart]
-	assert( rangeStep > 0 )
-	
-	while rangeEnd<=len( frames ) :
-		
-		if rangeEnd==len( frames ) or frames[rangeEnd] - frames[rangeEnd-1] != rangeStep :
-			# we've come to the end of a run
-			if rangeEnd-1==rangeStart :
-				frameLists.append( IECore.FrameRange( frames[rangeStart], frames[rangeStart] ) )
-			else :
-				frameLists.append( IECore.FrameRange( frames[rangeStart], frames[rangeEnd-1], rangeStep ) )
-			rangeStart = rangeEnd
-			rangeEnd = rangeStart + 1
-				
-			if rangeEnd<len( frames ) :
-				rangeStep = frames[rangeEnd] - frames[rangeStart]
-		else :
-			# continue the current run
-			rangeEnd += 1
-
-	if len( frameLists )==1 :
-		return frameLists[0]
-	else :
-		return IECore.CompoundFrameList( frameLists )
-
 # private utility functions
 
 def __sequencesClash( sequence1, sequence2 ) :
@@ -243,4 +148,4 @@ def __tmpPrefix() :
 	h.update( str( time.time() ) )
 	return "ieSequenceTmp" + h.hexdigest() + "."
 
-__all__ = [ "findSequences", "ls", "mv", "cp", "rm", "cat", "frameListFromList" ]
+__all__ = [ "ls", "mv", "cp", "rm", "cat" ]

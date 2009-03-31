@@ -229,6 +229,7 @@
 #include "IECore/bindings/ExclusionFrameListBinding.h"
 #include "IECore/bindings/FrameListParameterBinding.h"
 #include "IECore/bindings/FileSequenceBinding.h"
+#include "IECore/bindings/FileSequenceFunctionsBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -447,6 +448,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindExclusionFrameList();	
 	bindFrameListParameter();
 	bindFileSequence();
+	bindFileSequenceFunctions();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

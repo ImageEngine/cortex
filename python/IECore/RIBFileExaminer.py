@@ -33,7 +33,7 @@
 ##########################################################################
 
 from FileExaminer import FileExaminer
-from FileSequenceFunctions import findSequences
+from IECore import findSequences
 import os
 
 ## The RIBFileExaminer class implements the FileExaminer interface for
