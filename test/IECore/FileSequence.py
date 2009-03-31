@@ -108,7 +108,7 @@ class testFileSequence( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 		
-		self.assertRaises( ValueError, FileSequence, "", FrameRange( 0, 1 ) )
+		self.assertRaises( RuntimeError, FileSequence, "", FrameRange( 0, 1 ) )
 		
 		s = FileSequence( "seq.#.tif", FrameRange( 0, 2 ) )
 		self.assertEqual( s.fileNames(), ["seq.0.tif", "seq.1.tif", "seq.2.tif"] )
