@@ -35,7 +35,6 @@
 import re
 import os.path
 import _IECore as IECore
-from FileSequence import FileSequence
 from FileSequenceFunctions import ls
 from RunTimeTypedUtil import makeRunTimeTyped
 
@@ -78,7 +77,7 @@ class FileSequenceVectorParameter( IECore.PathVectorParameter ) :
 		
 		for v in value :
 			
-			if not FileSequence.fileNameValidator().match( v ) :
+			if not IECore.FileSequence.fileNameValidator().match( v ) :
 				return False, "Value must contain one sequence of at least one # character to specify frame number."
 
 			if len( self.extensions ) :
@@ -127,7 +126,7 @@ class FileSequenceVectorParameter( IECore.PathVectorParameter ) :
 			else:
 				filename = parts[0]
 				framelist = IECore.FrameList.parse(parts[1])
-				value = FileSequence(filename, framelist)
+				value = IECore.FileSequence(filename, framelist)
 				
 			if value :
 			

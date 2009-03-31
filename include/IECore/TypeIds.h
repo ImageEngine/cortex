@@ -328,6 +328,7 @@ enum TypeId
 	ReversedFrameListTypeId = 285,
 	ExclusionFrameListTypeId = 286,	   
 	FrameListParameterTypeId = 287, 
+	FileSequenceTypeId = 288,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

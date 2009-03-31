@@ -327,6 +327,7 @@ void bindTypeId()
 		.value("ReversedFrameList", ReversedFrameListTypeId )
 		.value("ExclusionFrameList", ExclusionFrameListTypeId )
 		.value("FrameListParameter", FrameListParameterTypeId )
+		.value("FileSequence", FileSequenceTypeId )
 	;
 }
 

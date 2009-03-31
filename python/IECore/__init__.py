@@ -46,7 +46,6 @@ from Formatter import Formatter
 from WrappedTextFormatter import WrappedTextFormatter
 import StringUtil
 from DataTraits import *
-from FileSequence import FileSequence
 from FileSequenceFunctions import *
 from FileSequenceParameter import FileSequenceParameter
 from ClassLoader import ClassLoader

@@ -37,13 +37,16 @@
 #
 # \ingroup python
 
+import re
 import os
 import re
 import glob
 import shutil
 import os.path
-from FileSequence import FileSequence
 import _IECore as IECore
+
+# This is here because we can't yet create a to_python converter for boost::regex
+IECore.FileSequence.fileNameValidator = staticmethod( lambda : re.compile( "^([^#]*)(#+)([^#]*)$" ) )
 
 ## Returns a list of FileSequence objects representing all the sequences in names.
 # names is just a list of arbitrary strings, which may or may not represent files
@@ -91,7 +94,7 @@ def findSequences( names ) :
 			
 			numericFrames.sort()	
 			frameList = frameListFromList( numericFrames )
-			result.append( FileSequence( fixes[0] + "".ljust( padding, "#" ) + fixes[1], frameList ) )
+			result.append( IECore.FileSequence( fixes[0] + "".ljust( padding, "#" ) + fixes[1], frameList ) )
 	
 	# remove any sequences with less than two files
 	result = [ x for x in result if len( x.frameList.asList() ) > 1 ]
@@ -105,7 +108,7 @@ def findSequences( names ) :
 # matching that specification, returning None if one isn't found.
 def ls( path ) :
 	
-	r = FileSequence.fileNameValidator()
+	r = IECore.FileSequence.fileNameValidator()
 	if r.match( path ) :
 	
 		padding = len( r.match( path ).group( 2 ) )

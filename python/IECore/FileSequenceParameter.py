@@ -35,7 +35,6 @@
 import re
 import os.path
 import _IECore as IECore
-from FileSequence import FileSequence
 from FileSequenceFunctions import ls
 from RunTimeTypedUtil import makeRunTimeTyped
 
@@ -76,7 +75,7 @@ class FileSequenceParameter( IECore.PathParameter ) :
 		if self.allowEmptyString and value.value=="" :
 			return True, ""
 			
-		if not FileSequence.fileNameValidator().match( value.value ) :
+		if not IECore.FileSequence.fileNameValidator().match( value.value ) :
 			return False, "Value must contain one sequence of at least one # character to specify frame number."
 				
 		fileSequence = None
@@ -143,7 +142,7 @@ class FileSequenceParameter( IECore.PathParameter ) :
 				fileSequenceCopy =  fileSequenceCopy[ 0:spaceIndex ] + "*" + fileSequenceCopy[ spaceIndex+1: ]				
 				spaceIndex = fileSequenceCopy.find( " " )
 
-		return FileSequence( filename, framelist )
+		return IECore.FileSequence( filename, framelist )
 	
 	## Gets the internal StringData value and creates a FileSequence
 	# from it using the ls() function. Note that this can return None

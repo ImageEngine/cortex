@@ -33,7 +33,6 @@
 ##########################################################################
 
 import os.path
-from FileSequence import FileSequence
 from FileSequenceFunctions import ls
 
 ## The FileExaminer class is an abstract base class for classes which
@@ -79,7 +78,7 @@ class FileExaminer :
 			dependencies = examiner.dependencies()
 			result = dependencies
 			for dependency in dependencies :
-				if FileSequence.fileNameValidator().match( dependency ) :
+				if IECore.FileSequence.fileNameValidator().match( dependency ) :
 					ext = os.path.splitext( dependency )
 					if ext!="" :
 						ext = ext[1:]
