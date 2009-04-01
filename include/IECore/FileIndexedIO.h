@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,6 +48,9 @@
 namespace IECore
 {
 /// An implementation of IndexedIOInterface which operates within a single file on disk.
+/// \todo Most of the implementation of this class would be better of in a "StreamIndexedIO" class which
+/// FileIndexedIO and MemoryIndexedIO derive from. MemoryIndexedIO wasn't implemented that cleanly in the first
+/// place due to the necessity to maintain binary compatibility.
 class FileIndexedIO : public IndexedIOInterface
 {
 	public:
@@ -180,6 +183,7 @@ class FileIndexedIO : public IndexedIOInterface
 		bool find( const IndexedIO::EntryID &name, NodePtr &node ) const;
 		NodePtr insert( const IndexedIO::EntryID &name );
 		
+		/// \todo Should be virtual
 		boost::optional<Imf::Int64> flush();
 		
 		/// \todo Add virtual method to obtain device name ( e.g filename, "memory", etc )
