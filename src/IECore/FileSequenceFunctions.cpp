@@ -38,6 +38,10 @@
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/convenience.hpp"
+#include "boost/algorithm/string.hpp"
 
 #include "IECore/Exception.h"
 #include "IECore/FileSequence.h"
@@ -140,6 +144,80 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 			}			
 		}
 	}
+}
+
+void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequences )
+{
+	sequences.clear();
+	
+	 if ( boost::filesystem::is_directory( path ) )
+	 {
+		boost::filesystem::directory_iterator end;
+	 	std::vector< std::string > files;
+		for ( boost::filesystem::directory_iterator it( path ); it != end; ++it )	
+		{
+			files.push_back( it->leaf() );
+		}
+		
+		findSequences( files, sequences );
+	 }
+}
+
+void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence )
+{
+	sequence = 0;
+	boost::smatch matches;
+	bool m = boost::regex_match( sequencePath, matches, FileSequence::fileNameValidator() );
+	if ( !m )
+	{
+		return;
+	}
+	
+	const std::string paddingStr( matches[2].first, matches[2].second );	
+	const unsigned padding = paddingStr.size();
+		
+ 	std::vector< std::string > files;
+	
+	boost::filesystem::path dir = boost::filesystem::path( sequencePath ).parent_path();
+		
+	std::string baseSequencePath = boost::filesystem::path( sequencePath ).filename();
+	
+	const std::string::size_type first = baseSequencePath.find_first_of( '#' );
+	assert( first != std::string::npos );
+	const std::string prefix = baseSequencePath.substr( 0, first );
+	
+	const std::string::size_type last = baseSequencePath.find_last_of( '#' );
+	assert( last != std::string::npos );
+	const std::string suffix = baseSequencePath.substr( last + 1, baseSequencePath.size() - last - 1 );
+	
+	boost::filesystem::path dirToCheck( dir );
+	if ( dirToCheck.string() == "" )
+	{
+		dirToCheck = ".";
+	}	
+	
+	boost::filesystem::directory_iterator end;
+	for ( boost::filesystem::directory_iterator it( dirToCheck ); it != end; ++it )	
+	{
+		const std::string &fileName = it->leaf();
+				
+		if ( fileName.substr( 0, prefix.size() ) == prefix && fileName.substr( fileName.size() - suffix.size(), suffix.size() ) == suffix )
+		{
+			files.push_back( ( dir / fileName ).string() );
+		}
+	}
+	
+	std::vector< FileSequencePtr > sequences;
+	findSequences( files, sequences );
+	
+	for ( std::vector< FileSequencePtr >::iterator it = sequences.begin(); it != sequences.end() ; ++it )
+	{
+		if ( (*it)->getPadding() == padding )
+		{
+			sequence = *it;
+			return;
+		}
+	}	
 }
 
 FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &frames )

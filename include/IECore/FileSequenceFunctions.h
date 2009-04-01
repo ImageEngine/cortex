@@ -46,6 +46,12 @@ namespace IECore
 /// on disk.
 void findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences );
 
+/// Generates all sequences residing in given directory in the form of a list of FileSequences. 
+void ls( const std::string &path, std::vector< FileSequencePtr > &sequences );
+
+/// Attempts to find a sequnece matching the given sequence template (e.g. with at least one '#' character).
+void ls( const std::string &sequencePath, FileSequencePtr &sequence );
+
 /// Returns a FrameList instance that "best" represents the specified list of integer
 /// frame numbers. This function attempts to be intelligent and uses a CompoundFrameList
 /// of FrameRange objects to represent the specified frames compactly.

@@ -33,7 +33,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+
 #include "boost/format.hpp"
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 #include "IECore/FileSequence.h"
 #include "IECore/Exception.h"
@@ -77,6 +80,34 @@ struct FileSequenceFunctionsHelper
 		return result;
 	}
 	
+	static object ls( const std::string &path )
+	{
+		if ( boost::regex_match( path, FileSequence::fileNameValidator() ) )
+		{		
+			FileSequencePtr sequence = 0;
+			IECore::ls( path, sequence );
+			
+			if ( sequence )
+			{
+				return object( sequence );
+			}
+		}
+		else if ( boost::filesystem::is_directory( path ) )
+		{
+			list result;
+			std::vector< FileSequencePtr > sequences;
+			IECore::ls( path, sequences );
+			for ( std::vector< FileSequencePtr >::const_iterator it = sequences.begin(); it != sequences.end(); ++it )
+			{
+				result.append( *it );
+			}
+
+			return result;
+		}
+		
+		return object();
+	}
+	
 	static FrameListPtr frameListFromList( list l )
 	{
 		std::vector< FrameList::Frame > frameList;
@@ -99,6 +130,7 @@ struct FileSequenceFunctionsHelper
 void bindFileSequenceFunctions()
 {	
 	def( "findSequences", &FileSequenceFunctionsHelper::findSequences );
+	def( "ls", &FileSequenceFunctionsHelper::ls );		
 	def( "frameListFromList", &FileSequenceFunctionsHelper::frameListFromList );	
 }
 

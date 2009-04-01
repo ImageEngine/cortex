@@ -48,33 +48,6 @@ import _IECore as IECore
 # This is here because we can't yet create a to_python converter for boost::regex
 IECore.FileSequence.fileNameValidator = staticmethod( lambda : re.compile( "^([^#]*)(#+)([^#]*)$" ) )
 
-## If path is a directory then returns all sequences
-# residing in that directory in the form of a list of FileSequences, returning
-# the empty list if none are found. If path is a sequence style filename with a
-# single sequence of at least one embedded # then tries to find a sequence
-# matching that specification, returning None if one isn't found.
-def ls( path ) :
-	
-	r = IECore.FileSequence.fileNameValidator()
-	if r.match( path ) :
-	
-		padding = len( r.match( path ).group( 2 ) )
-		globPath = re.sub( "#+", "*", path )
-				
-		files = glob.glob( globPath )
-				
-		sequences = IECore.findSequences( files )
-		for sequence in sequences :
-			if sequence.getPadding()==padding :
-				return sequence
-				
-		return None
-				
-	elif os.path.isdir( path ) :
-		
-		allFiles = os.listdir( path )
-		return IECore.findSequences( allFiles )			
-
 ## Moves the set of files specified by sequence1 to the set of files
 # specified by sequence2, where sequence1 and sequence2 are
 # FileSequence objects of equal length. This function is safe even if the
@@ -148,4 +121,4 @@ def __tmpPrefix() :
 	h.update( str( time.time() ) )
 	return "ieSequenceTmp" + h.hexdigest() + "."
 
-__all__ = [ "ls", "mv", "cp", "rm", "cat" ]
+__all__ = [ "mv", "cp", "rm", "cat" ]

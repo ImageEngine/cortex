@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,7 +33,7 @@
 ##########################################################################
 
 import os.path
-from FileSequenceFunctions import ls
+from IECore import ls
 
 ## The FileExaminer class is an abstract base class for classes which
 # can perform some query on a file.

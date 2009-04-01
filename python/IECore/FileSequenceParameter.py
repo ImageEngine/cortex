@@ -35,7 +35,7 @@
 import re
 import os.path
 import _IECore as IECore
-from FileSequenceFunctions import ls
+from IECore import ls
 from RunTimeTypedUtil import makeRunTimeTyped
 
 ## The FileSequenceParameter class implements a Parameter
