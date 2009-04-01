@@ -185,7 +185,7 @@ class Parameter : public RunTimeTyped
 		PresetsMap m_presets;
 		bool m_presetsOnly;
 
-		CompoundObjectPtr m_userData;
+		mutable CompoundObjectPtr m_userData;
 };
 
 IE_CORE_DECLAREPTR( Parameter );

@@ -48,7 +48,7 @@ using namespace std;
 Parameter::Parameter( const std::string &name, const std::string &description, ObjectPtr defaultValue,
 	const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	m_name( name ), m_description( description ), m_defaultValue( defaultValue ), m_presetsOnly( presetsOnly ),
-		m_userData( userData ? userData->copy() : new CompoundObject() )
+		m_userData( userData ? userData->copy() : 0 )
 {
 	assert( defaultValue );
 	
@@ -96,11 +96,19 @@ bool Parameter::presetsOnly() const
 
 CompoundObjectPtr Parameter::userData()
 {
+	if( !m_userData )
+	{
+		m_userData = new CompoundObject();
+	}
 	return m_userData;
 }
 
 ConstCompoundObjectPtr Parameter::userData() const
 {
+	if( !m_userData )
+	{
+		m_userData = new CompoundObject();
+	}
 	return m_userData;
 }
 
