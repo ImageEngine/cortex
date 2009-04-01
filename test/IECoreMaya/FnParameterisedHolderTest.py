@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import IECore
 import IECoreMaya
 import MayaUnitTest
@@ -135,6 +137,27 @@ class FnParameterisedHolderTest( unittest.TestCase ) :
 		
 		self.assertEqual( fnPH.parameterPlugPath( proc["motion"]["blur"] ), "|transform1|iAmNotUnique.parm_motion_blur" )
 		self.assertEqual( fnPH2.parameterPlugPath( proc2["motion"]["blur"] ), "|transform2|iAmNotUnique.parm_motion_blur" )
+	
+	def testSetNodeValueUndo( self ) :
+	
+		node = maya.cmds.createNode( "ieOpHolderNode" )
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		op = TestOp()
+		fnPH.setParameterised( op )
+		iPlug = fnPH.parameterPlug( op["i"] )
+		
+		self.assertEqual( op["i"].getNumericValue(), 1 )
+		self.assertEqual( iPlug.asInt(), 1 )
+		
+		self.assert_( maya.cmds.undoInfo( query=True, state=True ) )
+		
+		op["i"].setNumericValue( 10 )
+		fnPH.setNodeValues()
+		self.assertEqual( op["i"].getNumericValue(), 10 )
+		
+		maya.cmds.undo()
+		self.assertEqual( op["i"].getNumericValue(), 1 )
+		
 				
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
