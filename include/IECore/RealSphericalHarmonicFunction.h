@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,40 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#ifndef IECORE_REALSPHERICALHARMONICFUNCTION_H
+#define IECORE_REALSPHERICALHARMONICFUNCTION_H
 
-#include "OpenEXR/ImathColor.h"
+#include "boost/static_assert.hpp"
+#include "boost/type_traits.hpp"
+#include <vector>
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+namespace IECore
+{
 
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
-#include "DataConvertTest.h"
-#include "DespatchTypedDataTest.h"
-#include "CompilerTest.h"
-#include "RadixSortTest.h"
-#include "SweepAndPruneTest.h"
-#include "ColorTransformTest.h"
-#include "AssociatedLegendreTest.h"
-#include "SphericalHarmonicsTest.h"
+// Class for computing Real Spherical Harmonics functions
+// Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
+template < typename V >
+class RealSphericalHarmonicFunction
+{
+	public :
 
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
+		BOOST_STATIC_ASSERT( boost::is_floating_point<V>::value );
 
-using namespace IECore;
+		// compute the real harmonic function for the given band l and parameter m at the spherical coordinates theta and phi.
+		// l is in the range [0,MAX_BAND]
+		// m is in the range [-l,l]
+		// theta is in the range [0,pi]
+		// phi is in the range [0,2*pi]
+		static V evaluate( unsigned int l, int m, V theta, V phi );
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
-{	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
-	
-	try
-	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-		addDataConvertTest(test);
-		addDespatchTypedDataTest(test);
-		addCompilerTest(test);
-		addRadixSortTest(test);
-		addSweepAndPruneTest(test);
-		addColorTransformTest(test);
-		addAssociatedLegendreTest(test);
-		addSphericalHarmonicsTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-	
-	return test;
-}
+		// computes all the bands for the given spherical coordinates and stores the results on the given array.
+		// the order in the array follows: index = l*(l+1)+m where l is [0,bands-1] and m[-l,l].
+		static void evaluate( unsigned int bands, V theta, V phi, std::vector<V> &result );
+
+};
+
+} // namespace IECore
+
+#include "RealSphericalHarmonicFunction.inl"
+
+#endif // IECORE_REALSPHERICALHARMONICFUNCTION_H

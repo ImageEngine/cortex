@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,48 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include <cassert>
+#include "IECore/VectorTraits.h"
+#include "IECore/RealSphericalHarmonicFunction.h"
 
-#include "OpenEXR/ImathColor.h"
+namespace IECore
+{
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
-
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
-#include "DataConvertTest.h"
-#include "DespatchTypedDataTest.h"
-#include "CompilerTest.h"
-#include "RadixSortTest.h"
-#include "SweepAndPruneTest.h"
-#include "ColorTransformTest.h"
-#include "AssociatedLegendreTest.h"
-#include "SphericalHarmonicsTest.h"
-
-using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
-
-using namespace IECore;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
-{	
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
-	
-	try
-	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-		addDataConvertTest(test);
-		addDespatchTypedDataTest(test);
-		addCompilerTest(test);
-		addRadixSortTest(test);
-		addSweepAndPruneTest(test);
-		addColorTransformTest(test);
-		addAssociatedLegendreTest(test);
-		addSphericalHarmonicsTest(test);
-	} 
-	catch (std::exception &ex)
-	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
-	}
-	
-	return test;
+template < typename V >
+void SphericalHarmonics<V>::evaluate( V theta, V phi, EvaluationVector &result ) const
+{
+	evaluate( m_bands - 1, theta, phi, result );
 }
+
+template < typename V >
+void SphericalHarmonics<V>::evaluate( unsigned int band, V theta, V phi, EvaluationVector &result ) const
+{
+	assert( band < m_bands );
+	typename CoefficientVector::const_iterator cit = m_coefficients.begin();
+	typename EvaluationVector::iterator it = result.begin();
+	for ( unsigned int l = 0; l <= band; l++ )
+	{
+		for (int m = -l; m <= static_cast<int>(l); m++, it++, cit++ )
+		{
+			*it = (*cit) * V( RealSphericalHarmonicFunction< typename VectorTraits<V>::BaseType >::evaluate( l, m, theta, phi ) );
+		}
+	}
+}
+
+template< typename V >
+template< typename T, typename R >
+R SphericalHarmonics<V>::dot( typename SphericalHarmonics<T>::ConstPtr &s ) const
+{
+	T res(0);
+	typename CoefficientVector::const_iterator ita = m_coefficients.begin();
+	typename SphericalHarmonics<T>::CoefficientVector::const_iterator itb = s->coefficients().start();
+
+	for ( ; ita != m_coefficients.end() && itb != s->coefficients().end(); ita++, itb++ )
+	{
+		res += (*ita) * (*itb);
+	}
+	return res;
+}
+
+
+}	// namespace IECore

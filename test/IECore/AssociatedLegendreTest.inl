@@ -123,4 +123,21 @@ void AssociatedLegendreTest<T>::testEvaluation()
 	}
 }
 
+template< typename T >
+void AssociatedLegendreTest<T>::testDepthEvaluation()
+{
+	T x = 0.3;
+	T res;
+	for ( unsigned int l = 0; l < 50; l++ )
+	{
+		for ( unsigned int m = 0; m <= l; m++ )
+		{
+			res = AssociatedLegendre<T>::evaluate( l, m, x );
+			BOOST_CHECK( !isnan( res ) );
+			res = AssociatedLegendre<T>::normalizationFactor( l, m );
+			BOOST_CHECK( !isnan( res ) );
+		}
+	}
+}
+
 }

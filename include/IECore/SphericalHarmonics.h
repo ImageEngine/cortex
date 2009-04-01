@@ -32,53 +32,77 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_ASSOCIATEDLEGENDRE_H
-#define IECORE_ASSOCIATEDLEGENDRE_H
+#ifndef IECORE_SPHERICALHARMONICS_H
+#define IECORE_SPHERICALHARMONICS_H
 
-#include "boost/static_assert.hpp"
-#include "boost/type_traits.hpp"
+#include "IECore/RefCounted.h"
 #include <vector>
 
 namespace IECore
 {
 
-// Implements associated Legendre polynomial computation.
+// Class for representing a set of real spherical harmonics basis functions scaled by coefficients.
 // Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
-// \todo provide a way to compute all the polynomials from band 0 to N taking advantage of the recurrence rules. Then add the same functionality in RealSphericalHarmonicFunction.
+// \todo test dot() function and add + operator
 template < typename V >
-class AssociatedLegendre
+class SphericalHarmonics : public RefCounted
 {
 	public :
+		typedef V ValueType;
+		typedef std::vector<V> CoefficientVector;
+		typedef std::vector<V> EvaluationVector;
 
-		BOOST_STATIC_ASSERT( boost::is_floating_point<V>::value );
+		IE_CORE_DECLAREMEMBERPTR( SphericalHarmonics );
 
-		// computes the function for a given band m and parameter m.
-		// uses formula: ((-1)^mm) * (2mm-1))!! * (1-x^2)^(mm/2)
-		static V evaluate( unsigned int mm, V x );
+		SphericalHarmonics( unsigned int bands ) : m_bands(bands)
+		{
+			m_coefficients.resize( bands * bands, V(0) );
+		}
 
-		// computes the function for a given band l and parameter m based on  previous computed values for band l and parameters m-1 and m-2.
-		static V evaluateFromRecurrence1( unsigned int l, unsigned int m, V x, V p1, V p2 );
+		virtual ~SphericalHarmonics()
+		{
+		}
 
-		// computes the function for a given band m and parameter m+1 based on  previous computed value for band m and parameters m.
-		static V evaluateFromRecurrence2( unsigned int m, V x, V p1 );
+		// return number of spherical harmonics bands represented by this object
+		unsigned int bands() const
+		{
+			return m_bands;
+		}
 
-		// computes the function for a given band l and parameter m.
-		static V evaluate( unsigned int l, unsigned int m, V x );
+		// returns all the coefficients
+		const std::vector< V > &coefficients() const
+		{
+			return m_coefficients;
+		}
 
-		// computes the normalization factor for the function on a given band l and parameter m.
-		static V normalizationFactor( unsigned int l, unsigned int m );
+		// returns all the coefficients
+		std::vector< V > &coefficients()
+		{
+			return m_coefficients;
+		}
 
-		// precomputes factorials necessary for computation of the given band l.
-		// this function is called from normalizationFactor but if you want to preallocate them, you can call it directly.
-		static void computeFactorials( unsigned int l );
+		// computes the spherical harmonics at polar coordinates theta and phi.
+		void evaluate( V theta, V phi, EvaluationVector &result ) const;
 
-	private :
-		
-		static std::vector< double > &factorials();
+		// computes the spherical harmonics at polar coordinates theta and phi up to the given band.
+		void evaluate( unsigned int band, V theta, V phi, EvaluationVector &result ) const;
+
+		// dot product on the coefficient vectors.
+		// The return value is dependent on the result of the multiplication between the two harmonics coefficients.
+		template <typename T, typename R>
+		R dot( typename SphericalHarmonics<T>::ConstPtr &s ) const;
+
+	protected :
+
+		unsigned int m_bands;
+		std::vector< V > m_coefficients;
 };
+
+typedef SphericalHarmonics<float> FloatSh;
+typedef SphericalHarmonics<double> DoubleSh;
 
 } // namespace IECore
 
-#include "AssociatedLegendre.inl"
+#include "SphericalHarmonics.inl"
 
-#endif // IECORE_ASSOCIATEDLEGENDRE_H
+#endif // IECORE_SPHERICALHARMONICS_H
