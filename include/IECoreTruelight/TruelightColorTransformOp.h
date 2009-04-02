@@ -39,6 +39,7 @@
 
 #include "IECore/ColorTransformOp.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/SRGBToLinearDataConversion.h"
 
 namespace IECoreTruelight
 {
@@ -84,12 +85,10 @@ class TruelightColorTransformOp : public IECore::ColorTransformOp
 		IECore::StringParameterPtr m_profileParameter;
 		IECore::StringParameterPtr m_displayParameter;
 		IECore::IntParameterPtr m_inputSpaceParameter;
+		IECore::BoolParameterPtr m_rawTruelightOutputParameter;
+		IECore::SRGBToLinearDataConversion<float, float> m_srgbToLinearConversion;
 
 		void *m_instance; // truelight instance
-	
-	public :	
-		/// \todo Remove on next major version change
-		struct ExtraData;
 		
 };
 
