@@ -341,7 +341,7 @@ float Font::getResolution() const
 	return m_pixelsPerEm;
 }
 
-Font::ConstMeshPtr Font::cachedMesh( char c )
+Font::ConstMeshPtr Font::cachedMesh( char c ) const
 {
 	// see if we have it cached
 	MeshMap::const_iterator it = m_meshes.find( c );
@@ -376,12 +376,12 @@ Font::ConstMeshPtr Font::cachedMesh( char c )
 	return mesh;
 }
 		
-ConstMeshPrimitivePtr Font::mesh( char c )
+ConstMeshPrimitivePtr Font::mesh( char c ) const
 {
 	return cachedMesh( c )->primitive;
 }
 
-MeshPrimitivePtr Font::mesh( const std::string &text )
+MeshPrimitivePtr Font::mesh( const std::string &text ) const
 {
 	MeshPrimitivePtr result = new MeshPrimitive;
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData );
@@ -422,7 +422,7 @@ MeshPrimitivePtr Font::mesh( const std::string &text )
 	return result;
 }
 
-GroupPtr Font::meshGroup( const std::string &text )
+GroupPtr Font::meshGroup( const std::string &text ) const
 {
 	GroupPtr result = new Group;
 	
@@ -453,7 +453,7 @@ GroupPtr Font::meshGroup( const std::string &text )
 	return result;
 }
 
-Imath::V2f Font::advance( char first, char second )
+Imath::V2f Font::advance( char first, char second ) const
 {
 	V2f a = cachedMesh( first )->advance;
 	if( m_kerning!=0.0f )
@@ -470,7 +470,7 @@ Imath::V2f Font::advance( char first, char second )
 	return a;
 }
 
-Imath::Box2f Font::bound()
+Imath::Box2f Font::bound() const
 {
 	float scale = 1.0f / (float)(m_face->units_per_EM);
 	return Box2f(
@@ -479,13 +479,13 @@ Imath::Box2f Font::bound()
 	);
 }
 
-Imath::Box2f Font::bound( char c )
+Imath::Box2f Font::bound( char c ) const
 {
 	Imath::Box3f b = cachedMesh( c )->bound;
 	return Imath::Box2f( Imath::V2f( b.min.x, b.min.y ), Imath::V2f( b.max.x, b.max.y ) );
 }
 
-Imath::Box2f Font::bound( const std::string &text )
+Imath::Box2f Font::bound( const std::string &text ) const
 {
 	Imath::Box2f result;
 	if( !text.size() )
@@ -509,12 +509,12 @@ Imath::Box2f Font::bound( const std::string &text )
 	return result;
 }
 
-ConstImagePrimitivePtr Font::image( char c )
+ConstImagePrimitivePtr Font::image( char c ) const
 {
 	return cachedImage( c );
 }
 
-ImagePrimitivePtr Font::image()
+ImagePrimitivePtr Font::image() const
 {
 	Box2i charDisplayWindow = boundingWindow();
 	int charWidth = charDisplayWindow.size().x + 1;
@@ -554,7 +554,7 @@ ImagePrimitivePtr Font::image()
 	return result;
 }
 
-ConstImagePrimitivePtr Font::cachedImage( char c )
+ConstImagePrimitivePtr Font::cachedImage( char c ) const
 {
 
 	// see if we have it cached
