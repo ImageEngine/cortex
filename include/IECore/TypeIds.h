@@ -330,6 +330,7 @@ enum TypeId
 	FrameListParameterTypeId = 287, 
 	FileSequenceTypeId = 288,
 	FileSequenceParameterTypeId = 289,
+	FileSequenceVectorParameterTypeId = 290,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

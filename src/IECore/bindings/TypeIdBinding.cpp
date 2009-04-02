@@ -329,6 +329,7 @@ void bindTypeId()
 		.value("FrameListParameter", FrameListParameterTypeId )
 		.value("FileSequence", FileSequenceTypeId )
 		.value("FileSequenceParameter", FileSequenceParameterTypeId )		
+		.value("FileSequenceVectorParameter", FileSequenceVectorParameterTypeId )
 	;
 }
 

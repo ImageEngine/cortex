@@ -78,7 +78,6 @@ from SearchReplaceOp import SearchReplaceOp
 from CapturingMessageHandler import CapturingMessageHandler
 from FileSequenceAnalyzerOp import FileSequenceAnalyzerOp
 from CheckImagesOp import CheckImagesOp
-from FileSequenceVectorParameter import FileSequenceVectorParameter
 from FileSequenceGraphOp import FileSequenceGraphOp
 from BatchSingleOp import BatchSingleOp
 from LayeredDict import LayeredDict
