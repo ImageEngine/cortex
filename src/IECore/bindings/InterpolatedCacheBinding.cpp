@@ -148,7 +148,7 @@ void bindInterpolatedCache()
 	interpolatedCacheClass
 		.def( init< optional<const std::string &, double, InterpolatedCache::Interpolation, int, double > >( args("pathTemplate", "frame", "interpolation", "oversamples", "frameRate") ) )
 		.def("setPathTemplate", &InterpolatedCache::setPathTemplate )
-		.def("getPathTemplate", &InterpolatedCache::getPathTemplate )
+		.def("getPathTemplate", &InterpolatedCache::getPathTemplate, return_value_policy<copy_const_reference>() )
 		.def("setFrame", &InterpolatedCache::setFrame )
 		.def("getFrame", &InterpolatedCache::getFrame )
 		.def("setInterpolation", &InterpolatedCache::setInterpolation )

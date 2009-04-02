@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -76,7 +76,7 @@ class InterpolatedCache : public RefCounted
 		void setPathTemplate( const std::string &pathTemplate );
 
 		///Returns the current path template used to open cache files.
-		std::string	getPathTemplate();
+		const std::string &getPathTemplate() const;
 
 		///Advances in time.
 		// It will not try to load the new files until the read methods are called.
