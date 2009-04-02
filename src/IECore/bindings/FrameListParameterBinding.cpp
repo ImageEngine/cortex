@@ -149,7 +149,8 @@ void bindFrameListParameter()
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FrameListParameter )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FrameListParameter )
 	;
-	
+
+	WrapperToPython< FrameListParameterWrap::Ptr >();	
 	INTRUSIVE_PTR_PATCH( FrameListParameter, FrameListParameterPyClass );
 	implicitly_convertible<FrameListParameterWrap::Ptr, FrameListParameterPtr>();
 	implicitly_convertible<FrameListParameterPtr, StringParameterPtr>();
