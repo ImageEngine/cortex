@@ -47,7 +47,6 @@ from WrappedTextFormatter import WrappedTextFormatter
 import StringUtil
 from DataTraits import *
 from FileSequenceFunctions import *
-from FileSequenceParameter import FileSequenceParameter
 from ClassLoader import ClassLoader
 from RemovePrimitiveVariables import RemovePrimitiveVariables
 from RenamePrimitiveVariables import RenamePrimitiveVariables

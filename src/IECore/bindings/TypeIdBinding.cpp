@@ -328,6 +328,7 @@ void bindTypeId()
 		.value("ExclusionFrameList", ExclusionFrameListTypeId )
 		.value("FrameListParameter", FrameListParameterTypeId )
 		.value("FileSequence", FileSequenceTypeId )
+		.value("FileSequenceParameter", FileSequenceParameterTypeId )		
 	;
 }
 

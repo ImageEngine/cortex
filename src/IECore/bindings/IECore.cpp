@@ -230,6 +230,7 @@
 #include "IECore/bindings/FrameListParameterBinding.h"
 #include "IECore/bindings/FileSequenceBinding.h"
 #include "IECore/bindings/FileSequenceFunctionsBinding.h"
+#include "IECore/bindings/FileSequenceParameterBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -449,6 +450,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindFrameListParameter();
 	bindFileSequence();
 	bindFileSequenceFunctions();
+	bindFileSequenceParameter();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
