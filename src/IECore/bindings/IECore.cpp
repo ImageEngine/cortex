@@ -246,6 +246,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImath();
 	bindKDTree();
 	bindObject();
+	bindCompoundObject();		
 	bindTypeId();
 	bindData();
 	bindAllSimpleTypedData();
@@ -276,8 +277,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindValidatedStringParameter();	
 	bindPathParameter();	
 	bindFileNameParameter();	
-	bindDirNameParameter();	
-	bindCompoundObject();	
+	bindDirNameParameter();		
 	bindPrimitive();	
 	bindPrimitiveVariable();	
 	bindPointsPrimitive();	
