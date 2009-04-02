@@ -131,19 +131,30 @@ class FrameListParameterWrap : public FrameListParameter, public Wrapper< FrameL
 		FrameListParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv, bool allowEmptyList = true, const dict &p = dict(), bool po = false, CompoundObjectPtr ud = 0 )	
 			:	FrameListParameter( n, d, makeDefault( dv ), allowEmptyList, makePresets( p ), po, ud ), Wrapper< FrameListParameter >( self, this ) {};
 		
-		FrameListParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv, CompoundObjectPtr ud )	
-			:	FrameListParameter( n, d, makeDefault( dv ), true, FrameListParameter::ObjectPresetsMap(), false, ud ), Wrapper< FrameListParameter >( self, this ) {};
-
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( FrameListParameter );
 };
 
 
 void bindFrameListParameter()
 {	
+	using boost::python::arg;
+
 	typedef class_< FrameListParameter, FrameListParameterWrap::Ptr, boost::noncopyable, bases< StringParameter > > FrameListParameterPyClass;
 	FrameListParameterPyClass ( "FrameListParameter", no_init )
-		.def( init< const std::string &, const std::string &, object, boost::python::optional< bool, const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "allowEmptyList", "presets", "presetsOnly", "userData") ) )
-		.def( init< const std::string &, const std::string &, object, CompoundObjectPtr >( args( "name", "description", "defaultValue", "userData") ) )	
+		.def( 
+			init< const std::string &, const std::string &, object, boost::python::optional< bool, const dict &, bool, CompoundObjectPtr > >
+			( 
+				( 
+					arg( "name" ), 
+					arg( "description" ), 
+					arg( "defaultValue" ),
+					arg( "allowEmptyList" ) = true,
+					arg( "presets" ) = dict(),
+					arg( "presetsOnly" ) = false , 
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				) 
+			)
+		)
 		.def( "getFrameListValue", &FrameListParameter::getFrameListValue )	
 		.def( "setFrameListValue", &FrameListParameter::setFrameListValue )	
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FrameListParameter )

@@ -104,10 +104,23 @@ IE_CORE_DECLAREPTR( ParameterWrap );
 
 void bindParameter()
 {
+	using boost::python::arg;
+	
 	typedef class_< Parameter, ParameterWrapPtr, boost::noncopyable, bases<RunTimeTyped> > ParameterPyClass;
 	ParameterPyClass( "Parameter", no_init )
-		.def( init< const std::string &, const std::string &, ObjectPtr, boost::python::optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
-		.def( init< const std::string &, const std::string &, ObjectPtr, CompoundObjectPtr >( args( "name", "description", "defaultValue", "userData") ) )
+		.def( 
+			init< const std::string &, const std::string &, ObjectPtr, boost::python::optional<const dict &, bool, CompoundObjectPtr > >
+			( 
+				( 
+					arg( "name" ), 
+					arg( "description" ), 
+					arg( "defaultValue" ),
+					arg( "presets" ) = dict(),
+					arg( "presetsOnly" ) = false , 
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				) 
+			)
+		)
 		.add_property( "name", make_function( &Parameter::name, return_value_policy<copy_const_reference>() ) )
 		.add_property( "description", make_function( &Parameter::description, return_value_policy<copy_const_reference>() ) )
 		.add_property( "defaultValue", &defaultValue )

@@ -46,9 +46,11 @@ namespace IECore
 
 void bindObjectInterpolator()
 {
-	def("linearObjectInterpolation", &linearObjectInterpolation, args( "y0", "y1", "x" ) );
-	def("cosineObjectInterpolation", &cosineObjectInterpolation, args( "y0", "y1", "x" ) );
-	def("cubicObjectInterpolation", &cubicObjectInterpolation, args( "y0", "y1", "y2", "y3", "x" ) );
+	using boost::python::arg;
+	
+	def("linearObjectInterpolation", &linearObjectInterpolation, ( arg( "y0" ), arg( "y1" ), arg( "x" ) ) );
+	def("cosineObjectInterpolation", &cosineObjectInterpolation, ( arg( "y0" ), arg( "y1" ), arg( "x" ) ) );
+	def("cubicObjectInterpolation", &cubicObjectInterpolation, ( arg( "y0" ), arg( "y1" ), arg( "y2" ), arg( "y3" ), arg( "x" ) ) );
 }
 
 } // namespace IECore

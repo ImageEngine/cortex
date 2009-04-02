@@ -85,10 +85,12 @@ static ParameterPtr resultParameter( const Op &o )
 
 void bindOp()
 {
+	using boost::python::arg;
+	
 	typedef class_< Op, OpWrapPtr, boost::noncopyable, bases<Parameterised> > OpPyClass;
 	OpPyClass( "Op", no_init )
-		.def( init< const std::string, const std::string, ParameterPtr >( args( "name", "description", "resultParameter") ) )
-		.def( init< const std::string, const std::string, CompoundParameterPtr, ParameterPtr >( args( "name", "description", "compoundParameter", "resultParameter") ) )
+		.def( init< const std::string, const std::string, ParameterPtr >( ( arg( "name" ), arg( "description" ), arg( "resultParameter") ) ) )
+		.def( init< const std::string, const std::string, CompoundParameterPtr, ParameterPtr >( ( arg( "name" ), arg( "description" ), arg( "compoundParameter" ), arg( "resultParameter") ) ) )
 		.def( "resultParameter", &resultParameter )
 		.def( "operate", &Op::operate )
 		.def( "__call__", &Op::operate )

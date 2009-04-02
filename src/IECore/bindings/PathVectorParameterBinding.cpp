@@ -91,7 +91,8 @@ IE_CORE_DECLAREPTR( PathVectorParameterWrap );
 
 void bindPathVectorParameter()
 {
-
+	using boost::python::arg;
+	
 	typedef class_<PathVectorParameter, PathVectorParameterWrapPtr, boost::noncopyable, bases<StringVectorParameter> > PathVectorParameterPyClass;
 	PathVectorParameterPyClass pathVectorParamClass( "PathVectorParameter", no_init );
 	{
@@ -104,7 +105,21 @@ void bindPathVectorParameter()
 		;
 	}
 	pathVectorParamClass
-		.def( init< const std::string &, const std::string &, ConstStringVectorDataPtr, boost::python::optional<bool, PathVectorParameter::CheckType, const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "allowEmptyList", "check", "presets", "presetsOnly", "userData") ) )
+		.def( 
+			init< const std::string &, const std::string &, ConstStringVectorDataPtr, boost::python::optional<bool, PathVectorParameter::CheckType, const dict &, bool, CompoundObjectPtr > >
+			( 
+				( 
+					arg( "name" ), 
+					arg( "description" ), 
+					arg( "defaultValue" ),
+					arg( "allowEmptyList" ) = true,
+					arg( "check" ) = PathVectorParameter::DontCare,
+					arg( "presets" ) = dict(),
+					arg( "presetsOnly" ) = false , 
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				) 
+			)
+		)
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( PathVectorParameter )
 		.add_property( "mustExist", &PathVectorParameter::mustExist )
 		.add_property( "mustNotExist", &PathVectorParameter::mustNotExist )

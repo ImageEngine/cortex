@@ -48,9 +48,23 @@ namespace IECore
 
 void bindDisplay()
 {
+	using boost::python::arg;
+
 	typedef class_<Display, boost::noncopyable, DisplayPtr, bases<PreWorldRenderable> > DisplayPyClass;
 	DisplayPyClass( "Display", no_init )
-		.def( init< optional< const std::string &, const std::string &, const std::string &, CompoundDataPtr > >( args( "name", "type", "data", "parameters" ) ) )
+		.def(
+		 	init< optional< const std::string &, const std::string &, const std::string &, CompoundDataPtr > >
+			( 
+				( 
+					arg( "name" ) = std::string( "default" ), 
+					arg( "type" ) = std::string( "exr" ),
+					arg( "data" ) = std::string( "rgba" ),
+					
+					/// We need to explicitly make this a CompoundData::Ptr so that boost.python finds the correct to_python converter					
+					arg( "parameters" ) = CompoundData::Ptr( new CompoundData() )
+				) 
+			)
+		)
 		.def( "setName", &Display::setName )
 		.def( "getName", &Display::getName, return_value_policy<copy_const_reference>() )
 		.def( "setType", &Display::setType )

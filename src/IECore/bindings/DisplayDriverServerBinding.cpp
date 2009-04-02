@@ -46,9 +46,11 @@ namespace IECore {
 
 void bindDisplayDriverServer()
 {
+	using boost::python::arg;
+
 	typedef class_< DisplayDriverServer, DisplayDriverServerPtr, boost::noncopyable, bases<RunTimeTyped> > DisplayDriverServerPyClass;
 	DisplayDriverServerPyClass( "DisplayDriverServer", no_init )
-		.def( init< int >( args( "portNumber" ) ) )
+		.def( init< int >( ( arg( "portNumber" ) ) ) )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(DisplayDriverServer)
 	;
 	INTRUSIVE_PTR_PATCH( DisplayDriverServer, DisplayDriverServerPyClass );

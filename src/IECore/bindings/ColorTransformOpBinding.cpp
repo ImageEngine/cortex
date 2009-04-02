@@ -43,6 +43,7 @@
 using namespace boost;
 using namespace boost::python;
 
+
 namespace IECore {
 
 class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransformOp>
@@ -88,9 +89,11 @@ IE_CORE_DECLAREPTR( ColorTransformOpWrap );
 
 void bindColorTransformOp()
 {
+	using boost::python::arg;
+	
 	typedef class_< ColorTransformOp, ColorTransformOpWrapPtr, boost::noncopyable, bases<PrimitiveOp> > ColorTransformOpPyClass;
 	ColorTransformOpPyClass( "ColorTransformOp", no_init )
-		.def( init< const std::string, const std::string>( args( "name", "description" ) ) )
+		.def( init< const std::string, const std::string>( ( arg( "name" ), arg( "description" ) ) ) )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ColorTransformOp)
 	;
 	

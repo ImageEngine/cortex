@@ -43,6 +43,7 @@
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
+using boost::python::arg;
 
 namespace IECore
 {
@@ -51,7 +52,17 @@ void bindCamera()
 {
 	typedef class_<Camera, boost::noncopyable, CameraPtr, bases<PreWorldRenderable> > CameraPyClass;
 	CameraPyClass( "Camera", no_init )
-		.def( init< optional< const std::string &, TransformPtr, CompoundDataPtr > >( args( "name", "transform", "parameters" ) ) )
+		.def( init< optional< const std::string &, TransformPtr, CompoundDataPtr > >
+			( 
+				( 
+					arg( "name" ) = std::string( "default" ), 
+					arg( "transform" ) = TransformPtr(), 
+					
+					/// We need to explicitly make this a CompoundData::Ptr so that boost.python finds the correct to_python converter
+					arg( "parameters" ) = CompoundData::Ptr( new CompoundData() )
+				) 
+			)
+		)
 		.def( "setName", &Camera::setName )
 		.def( "getName", &Camera::getName, return_value_policy<copy_const_reference>() )
 		.def( "setTransform", &Camera::setTransform )

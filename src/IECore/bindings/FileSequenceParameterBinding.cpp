@@ -213,7 +213,7 @@ void bindFileSequenceParameter()
 					arg( "check" ) = FileSequenceParameter::DontCare, 
 					arg( "presets" ) = dict(),
 					arg( "presetsOnly" ) = false , 
-					arg( "userData" ) = CompoundObjectPtr(),
+					arg( "userData" ) = CompoundObject::Ptr( 0 ),
 					arg( "extensions" ) = list()
 				) 
 			) 

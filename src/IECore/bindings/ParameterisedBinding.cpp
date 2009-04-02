@@ -75,10 +75,12 @@ static ParameterPtr parameterisedGetAttr( Parameterised &o, const std::string &n
 
 void bindParameterised()
 {
+	using boost::python::arg;
+	
 	typedef class_< Parameterised, ParameterisedWrapPtr, boost::noncopyable, bases<RunTimeTyped> > ParameterisedPyClass;
 	ParameterisedPyClass( "Parameterised", no_init )
-		.def( init< const std::string, const std::string>( args( "name", "description") ) )
-		.def( init< const std::string, const std::string, CompoundParameterPtr >( args( "name", "description", "compoundParameter") ) )
+		.def( init< const std::string, const std::string>( ( arg( "name" ), arg( "description") ) ) )
+		.def( init< const std::string, const std::string, CompoundParameterPtr >( ( arg( "name" ), arg( "description") , arg( "compoundParameter") ) ) )
 		.add_property( "name", make_function( &Parameterised::name, return_value_policy<copy_const_reference>() ) )
 		.add_property( "description", make_function( &Parameterised::description, return_value_policy<copy_const_reference>() ) )
 		.def( "parameters", (CompoundParameterPtr (Parameterised::*)())&Parameterised::parameters )

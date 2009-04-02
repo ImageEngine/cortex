@@ -98,9 +98,6 @@ class TypedParameterWrap : public TypedParameter<T>, public Wrapper< TypedParame
 
 		TypedParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv, const dict &p = dict(), bool po = false, CompoundObjectPtr ud = 0 )	
 			:	TypedParameter<T>( n, d, makeDefault( dv ), makePresets( p ), po, ud ), Wrapper< TypedParameter<T> >( self, this ) {};
-		
-		TypedParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv, CompoundObjectPtr ud )	
-			:	TypedParameter<T>( n, d, makeDefault( dv ), typename TypedParameter<T>::ObjectPresetsMap(), false, ud ), Wrapper< TypedParameter<T> >( self, this ) {};
 
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( TypedParameter<T> );
 };
@@ -108,10 +105,23 @@ class TypedParameterWrap : public TypedParameter<T>, public Wrapper< TypedParame
 template<typename T>
 static void bindTypedParameter( const char *name )
 {
+	using boost::python::arg;
+	
 	typedef class_< TypedParameter<T>, typename TypedParameterWrap< T >::Ptr, boost::noncopyable, bases<Parameter> > TypedParameterPyClass;
 	TypedParameterPyClass( name, no_init )
-		.def( init< const std::string &, const std::string &, object, boost::python::optional<const dict &, bool, CompoundObjectPtr > >( args( "name", "description", "defaultValue", "presets", "presetsOnly", "userData") ) )
-		.def( init< const std::string &, const std::string &, object, CompoundObjectPtr >( args( "name", "description", "defaultValue", "userData") ) )
+		.def( 
+			init< const std::string &, const std::string &, object, boost::python::optional<const dict &, bool, CompoundObjectPtr > >
+			( 
+				( 
+					arg( "name" ), 
+					arg( "description" ), 
+					arg( "defaultValue" ),
+					arg( "presets" ) = dict(),
+					arg( "presetsOnly" ) = false , 
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				) 
+			)
+		) 
 		.def( "setTypedValue", &TypedParameter<T>::setTypedValue )
 		.def( "getTypedValue", (const T &(TypedParameter<T>::* )() const)&TypedParameter<T>::getTypedValue, return_value_policy<copy_const_reference>() )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( TypedParameter<T> )
