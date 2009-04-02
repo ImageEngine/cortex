@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_SPHERICALHARMONICSSAMPLER_H
-#define IECORE_SPHERICALHARMONICSSAMPLER_H
+#ifndef IECORE_SPHERICALHARMONICSPROJECTOR_H
+#define IECORE_SPHERICALHARMONICSPROJECTOR_H
 
 #include "boost/static_assert.hpp"
 #include "boost/type_traits.hpp"
 
-#include "IECore/VectorTypedData.h"
+#include <vector>
+#include "OpenEXR/ImathVec.h"
 #include "IECore/SphericalHarmonics.h"
 
 namespace IECore
@@ -50,7 +51,7 @@ namespace IECore
 // sampling points.
 // Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
 template < typename V >
-class SphericalHarmonicsSampler : public RefCounted
+class SphericalHarmonicsProjector
 {
 	public:
 		BOOST_STATIC_ASSERT( boost::is_floating_point<V>::value );
@@ -58,38 +59,30 @@ class SphericalHarmonicsSampler : public RefCounted
 		typedef std::vector< V > EvaluationVector;
 		typedef std::vector< EvaluationVector > EvaluationSamples;
 
-		IE_CORE_DECLAREMEMBERPTR( SphericalHarmonicsSampler );
-
 		// uses unbiased uniform distribution
 		// the actual number of samples is rounded to sqrt(samples)*sqrt(samples).
-		SphericalHarmonicsSampler( unsigned int bands, unsigned int samples, unsigned long int seed = 0 );
+		SphericalHarmonicsProjector( unsigned int samples, unsigned long int seed = 0 );
 
 		// uses given uniform point distribution.
 		// V2f defines (theta and phi) angles.
-		SphericalHarmonicsSampler( unsigned int bands, ConstV2fVectorDataPtr &sphericalCoordinates );
+		SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates );
 
 		// uses given non-uniform point distribution and weights.
 		// The weight should be proportional to each sample's spherical area. 
 		// Uniform distribution results in weight constant = 4*PI
-		SphericalHarmonicsSampler( unsigned int bands, ConstV2fVectorDataPtr &sphericalCoordinates, ConstFloatVectorDataPtr &weights );
+		SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates, const std::vector< V > &weights );
 
 		// returns all the samples coordinates used on this projector in polar coordinates (theta and phi).
-		ConstV2fVectorDataPtr sphericalCoordinates() const
+		const std::vector< Imath::Vec2< V > > &sphericalCoordinates() const
 		{
 			return m_sphericalCoordinates;
 		}
 
 		// returns all the sample coordinates in euclidian space ( unit vector in 3D space ).
-		ConstV3fVectorDataPtr euclidianCoordinates() const;
+		const std::vector< Imath::Vec3< V > > &euclidianCoordinates() const;
 
-		// returns all the spherical harmonics used on this projector representing each sample point on the sphere.
-		const EvaluationSamples &sphericalHarmonicsSamples() const
-		{
-			return m_shEvaluations;
-		}
-
-		// returns the weights for each sample. In case it's uniform distribution it returns 0.
-		ConstFloatVectorDataPtr weights() const
+		// returns the weights for each sample. In case it's uniform distribution it returns empty array.
+		const std::vector< V > &weights() const
 		{
 			return m_weights;
 		}
@@ -97,40 +90,36 @@ class SphericalHarmonicsSampler : public RefCounted
 		// Sets the given SphericalHarmonics object with the projection of the given functor for every polar coordinate.
 		// the value stored in the spherical harmonics is the same as the functor return type.
 		template< typename T, typename U > 
-		void polarProjection( T functor, boost::intrusive_ptr< SphericalHarmonics< U > > result ) const;
+		void polarProjection( T functor,  SphericalHarmonics< U > &result ) const;
 
 		// Sets the given SphericalHarmonics object with the projection of the given functor for every euclidean direction.
 		// the value stored in the spherical harmonics is the same as the functor return type.
 		template< typename T, typename U > 
-		void euclideanProjection( T functor, boost::intrusive_ptr< SphericalHarmonics< U > > result ) const;
-
-		// returns a vector of "points" reconstructing a function defined by the given spherical harmonics.
-		// the returned type depends on the given spherical harmonics object.
-		template< typename T > 
-		void reconstruction( const boost::intrusive_ptr< SphericalHarmonics< T > > sh, boost::intrusive_ptr< TypedData< std::vector< T > > > result ) const;
+		void euclideanProjection( T functor, SphericalHarmonics< U > & result ) const;
 
 	protected:
 
-		static Imath::V3f sphericalCoordsToUnitVector( const Imath::V2f &sphericalCoord );
+		static Imath::Vec3<V> sphericalCoordsToUnitVector( const Imath::Vec2<V> &sphericalCoord );
 
 		// computes without temporary storage: harmonics coefficients += evaluationVector * scale
 		template <typename T>
 		static void addProjection( typename SphericalHarmonics<T>::CoefficientVector &c, const EvaluationVector &v, const T &scale );
 
-		void evaluateSphericalHarmonicsSamples();
+		// make sure the evaluations go up to the given number of bands.
+		void evaluateSphericalHarmonicsSamples( unsigned int bands ) const;
 
-		unsigned int m_bands;
-		V2fVectorDataPtr m_sphericalCoordinates;
-		mutable V3fVectorDataPtr m_euclidianCoordinates;
-		EvaluationSamples m_shEvaluations;
-		FloatVectorDataPtr m_weights;
+		mutable unsigned int m_bands;
+		std::vector< Imath::Vec2< V > > m_sphericalCoordinates;
+		mutable std::vector< Imath::Vec3< V > > m_euclidianCoordinates;
+		mutable EvaluationSamples m_shEvaluations;
+		std::vector< V > m_weights;
 };
 
-typedef SphericalHarmonicsSampler<float> FloatShSampler;
-typedef SphericalHarmonicsSampler<double> DoubleShSampler;
+typedef SphericalHarmonicsProjector<float> SHProjectorf;
+typedef SphericalHarmonicsProjector<double> SHProjectord;
 
 } // namespace IECore
 
-#include "SphericalHarmonicsSampler.inl"
+#include "SphericalHarmonicsProjector.inl"
 
-#endif // IECORE_SPHERICALHARMONICSSAMPLER_H
+#endif // IECORE_SPHERICALHARMONICSPROJECTOR_H

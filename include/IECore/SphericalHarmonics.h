@@ -35,7 +35,7 @@
 #ifndef IECORE_SPHERICALHARMONICS_H
 #define IECORE_SPHERICALHARMONICS_H
 
-#include "IECore/RefCounted.h"
+#include "IECore/VectorTraits.h"
 #include <vector>
 
 namespace IECore
@@ -43,16 +43,16 @@ namespace IECore
 
 // Class for representing a set of real spherical harmonics basis functions scaled by coefficients.
 // Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
-// \todo test dot() function and add + operator
+// \todo test call operator.
+// \todo test dot() function and add common operators such as +.
+// \todo see if we can get the result type of multiplying two objects using data traits and apply it to dot() then create ^ operator.
 template < typename V >
-class SphericalHarmonics : public RefCounted
+class SphericalHarmonics 
 {
 	public :
+		typedef typename VectorTraits<V>::BaseType BaseType;
 		typedef V ValueType;
 		typedef std::vector<V> CoefficientVector;
-		typedef std::vector<V> EvaluationVector;
-
-		IE_CORE_DECLAREMEMBERPTR( SphericalHarmonics );
 
 		SphericalHarmonics( unsigned int bands ) : m_bands(bands)
 		{
@@ -81,11 +81,8 @@ class SphericalHarmonics : public RefCounted
 			return m_coefficients;
 		}
 
-		// computes the spherical harmonics at polar coordinates theta and phi.
-		void evaluate( V theta, V phi, EvaluationVector &result ) const;
-
-		// computes the spherical harmonics at polar coordinates theta and phi up to the given band.
-		void evaluate( unsigned int band, V theta, V phi, EvaluationVector &result ) const;
+		// evaluates the spherical harmonics at polar coordinates theta and phi.
+		inline V operator() ( BaseType theta, BaseType phi ) const;
 
 		// dot product on the coefficient vectors.
 		// The return value is dependent on the result of the multiplication between the two harmonics coefficients.
@@ -98,8 +95,8 @@ class SphericalHarmonics : public RefCounted
 		std::vector< V > m_coefficients;
 };
 
-typedef SphericalHarmonics<float> FloatSh;
-typedef SphericalHarmonics<double> DoubleSh;
+typedef SphericalHarmonics<float> SHf;
+typedef SphericalHarmonics<double> SHd;
 
 } // namespace IECore
 

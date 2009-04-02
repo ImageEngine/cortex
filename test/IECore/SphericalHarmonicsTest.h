@@ -39,7 +39,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <IECore/SphericalHarmonics.h>
-#include <IECore/SphericalHarmonicsSampler.h>
+#include <IECore/SphericalHarmonicsProjector.h>
 
 namespace IECore
 {
@@ -54,7 +54,7 @@ class SphericalHarmonicsFunctionTest
 };
 
 template<typename T, int bands, unsigned int samples >
-class SphericalHarmonicsSamplerTest
+class SphericalHarmonicsProjectorTest
 {
 	public:
 
@@ -89,7 +89,7 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 	{
 		addSphericalHarmonicsFunctionTest< float >();
 		addSphericalHarmonicsFunctionTest< double >();
-		addSphericalHarmonicsSamplerTest< double,10,20000 >();
+		addSphericalHarmonicsProjectorTest< double,10,20000 >();
 	}
 
 	template< typename T >
@@ -101,15 +101,15 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 	}
 
 	template< typename T, int bands, int samples >
-	void addSphericalHarmonicsSamplerTest()
+	void addSphericalHarmonicsProjectorTest()
 	{
-		static boost::shared_ptr< SphericalHarmonicsSamplerTest< T,bands,samples > > instance(new SphericalHarmonicsSamplerTest<T,bands,samples>());
+		static boost::shared_ptr< SphericalHarmonicsProjectorTest< T,bands,samples > > instance(new SphericalHarmonicsProjectorTest<T,bands,samples>());
 		
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsSamplerTest< T,bands,samples >::testProjection), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsSamplerTest< T,bands,samples >::testPolarProjection1D), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsSamplerTest< T,bands,samples >::testPolarProjection3D), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsSamplerTest< T,bands,samples >::testEuclidianProjection1D), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsSamplerTest< T,bands,samples >::testEuclidianProjection3D), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testProjection), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testPolarProjection1D), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testPolarProjection3D), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclidianProjection1D), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclidianProjection3D), instance ) );
 	}
 	
 };

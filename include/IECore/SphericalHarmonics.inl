@@ -40,24 +40,18 @@ namespace IECore
 {
 
 template < typename V >
-void SphericalHarmonics<V>::evaluate( V theta, V phi, EvaluationVector &result ) const
+V SphericalHarmonics<V>::operator() ( BaseType theta, BaseType phi ) const
 {
-	evaluate( m_bands - 1, theta, phi, result );
-}
-
-template < typename V >
-void SphericalHarmonics<V>::evaluate( unsigned int band, V theta, V phi, EvaluationVector &result ) const
-{
-	assert( band < m_bands );
+	V res(0);
 	typename CoefficientVector::const_iterator cit = m_coefficients.begin();
-	typename EvaluationVector::iterator it = result.begin();
-	for ( unsigned int l = 0; l <= band; l++ )
+	for ( unsigned int l = 0; l < m_bands; l++ )
 	{
-		for (int m = -l; m <= static_cast<int>(l); m++, it++, cit++ )
+		for (int m = -l; m <= static_cast<int>(l); m++, cit++ )
 		{
-			*it = (*cit) * V( RealSphericalHarmonicFunction< typename VectorTraits<V>::BaseType >::evaluate( l, m, theta, phi ) );
+			res += (*cit) * V( RealSphericalHarmonicFunction< BaseType >::evaluate( l, m, theta, phi ) );
 		}
 	}
+	return res;
 }
 
 template< typename V >

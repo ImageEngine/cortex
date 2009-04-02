@@ -65,13 +65,13 @@ void SphericalHarmonicsFunctionTest< T >::testEvaluation()
 
 
 template<typename T, int bands, unsigned int samples >
-T SphericalHarmonicsSamplerTest< T, bands, samples >::lightFunctor( const Imath::V2f &polar )
+T SphericalHarmonicsProjectorTest< T, bands, samples >::lightFunctor( const Imath::V2f &polar )
 {
 	return max( T(0), T(5) * Imath::Math<T>::cos( polar.x ) - T(4) ) + max( T(0), T(-4) * Imath::Math<T>::sin( polar.x - M_PI ) * Imath::Math<T>::cos( polar.y - T(2.5) ) - T(3) );
 }
 
 template<typename T, int bands, unsigned int samples >
-T SphericalHarmonicsSamplerTest< T, bands, samples >::polar1DFunctor( const V2f &polar )
+T SphericalHarmonicsProjectorTest< T, bands, samples >::polar1DFunctor( const V2f &polar )
 {
 	T sinTheta = Imath::Math<T>::sin( polar.x );
 	Imath::V3f pos( sinTheta*Imath::Math<T>::cos( polar.y), sinTheta*Imath::Math<T>::sin( polar.y ), Imath::Math<T>::cos( polar.x ));
@@ -79,14 +79,14 @@ T SphericalHarmonicsSamplerTest< T, bands, samples >::polar1DFunctor( const V2f 
 }
 
 template<typename T, int bands, unsigned int samples >
-T SphericalHarmonicsSamplerTest< T, bands, samples >::euclidian1DFunctor( const V3f &pos )
+T SphericalHarmonicsProjectorTest< T, bands, samples >::euclidian1DFunctor( const V3f &pos )
 {
 	Vec3<T> res = euclidian3DFunctor( pos );
 	return res.length();
 }
 
 template<typename T, int bands, unsigned int samples >
-Imath::Vec3<T> SphericalHarmonicsSamplerTest< T, bands, samples >::polar3DFunctor( const V2f &polar )
+Imath::Vec3<T> SphericalHarmonicsProjectorTest< T, bands, samples >::polar3DFunctor( const V2f &polar )
 {
 	T sinTheta = Imath::Math<T>::sin( polar.x );
 	Imath::Vec3<T> pos( sinTheta*Imath::Math<T>::cos( polar.y), sinTheta*Imath::Math<T>::sin( polar.y ), Imath::Math<T>::cos( polar.x ));
@@ -94,7 +94,7 @@ Imath::Vec3<T> SphericalHarmonicsSamplerTest< T, bands, samples >::polar3DFuncto
 }
 
 template<typename T, int bands, unsigned int samples >
-Imath::Vec3<T> SphericalHarmonicsSamplerTest< T, bands, samples >::euclidian3DFunctor( const V3f &pos )
+Imath::Vec3<T> SphericalHarmonicsProjectorTest< T, bands, samples >::euclidian3DFunctor( const V3f &pos )
 {
 	Imath::Vec3<T> res( Imath::Math<T>::fabs(pos.x), Imath::Math<T>::fabs(pos.y), Imath::Math<T>::fabs(pos.z) );
 	// project to a cube of side 2.
@@ -102,7 +102,7 @@ Imath::Vec3<T> SphericalHarmonicsSamplerTest< T, bands, samples >::euclidian3DFu
 }
 
 template<typename T, int bands, unsigned int samples >
-void SphericalHarmonicsSamplerTest< T, bands, samples >::testProjection()
+void SphericalHarmonicsProjectorTest< T, bands, samples >::testProjection()
 {
 	T target[] = {
 		0.39925,
@@ -112,18 +112,18 @@ void SphericalHarmonicsSamplerTest< T, bands, samples >::testProjection()
 	};
 
 	// create normal distribution
-	typename SphericalHarmonicsSampler<T>::Ptr m_sampler = new SphericalHarmonicsSampler<T>( 4, samples );
-	typename std::vector< Imath::V2f >::const_iterator pIt;
+	SphericalHarmonicsProjector<T> sampler( samples );
+	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
 
 	// test 1D polar projection
-	typename SphericalHarmonics<T>::Ptr sh1D = new SphericalHarmonics<T>( 4 );
+	SphericalHarmonics<T> sh1D( 4 );
 	typename SphericalHarmonics<T>::CoefficientVector::iterator it;
 
-	m_sampler->template polarProjection( lightFunctor, sh1D );
+	sampler.template polarProjection( lightFunctor, sh1D );
 	
 	T e = 0.01;
 	int i = 0;
-	for ( it = sh1D->coefficients().begin(); it != sh1D->coefficients().end(); it++, i++ )
+	for ( it = sh1D.coefficients().begin(); it != sh1D.coefficients().end(); it++, i++ )
 	{
 		if (!Imath::equalWithAbsError ( *it, target[i], e))
 		{
@@ -134,37 +134,71 @@ void SphericalHarmonicsSamplerTest< T, bands, samples >::testProjection()
 
 }
 
+// extension class for SphericalHarmonicsProjector. Adds reconstruction for testing purposes.
+template< typename V >
+class SphericalHarmonicsProjectorExt : public SphericalHarmonicsProjector<V>
+{
+	public:
+
+		SphericalHarmonicsProjectorExt( unsigned int samples ) :
+			SphericalHarmonicsProjector<V>( samples )
+		{
+		}
+
+		template< typename T >
+		void reconstruction( const SphericalHarmonics< T > &sh, std::vector< T > &result )
+		{
+			result.resize( this->m_shEvaluations.size() );
+		
+			typename std::vector< T >::iterator rit = result.begin();
+			typename SphericalHarmonics<T>::CoefficientVector::const_iterator shIt;
+			typename SphericalHarmonicsProjector<V>::EvaluationVector::const_iterator eIt;
+			typename SphericalHarmonicsProjector<V>::EvaluationSamples::const_iterator it;
+		
+			for ( it = this->m_shEvaluations.begin(); it != this->m_shEvaluations.end(); it++, rit++ )
+			{
+				T acc(0);
+				// multiplies the spherical harmonics coefficients by their evaluations at each sampling point.
+				for ( shIt = sh.coefficients().begin(), eIt = it->begin(); shIt != sh.coefficients().end() && eIt != it->end(); shIt++, eIt++ )
+				{
+					acc += (*shIt) * (*eIt);
+				}
+				*rit = acc;
+			}
+		}
+
+};
+
+
 template<typename T, int bands, unsigned int samples >
-void SphericalHarmonicsSamplerTest< T, bands, samples >::testPolarProjection1D()
+void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection1D()
 {
 	// create normal distribution of samples
-	typename SphericalHarmonicsSampler<T>::Ptr m_sampler = new SphericalHarmonicsSampler<T>( bands, samples );
-	typename std::vector< Imath::V2f >::const_iterator pIt;
+	SphericalHarmonicsProjectorExt<T> sampler( samples );
+	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
 
 	// test 1D polar projection
-	typename boost::intrusive_ptr< TypedData< std::vector< T > > > func1DValues = new TypedData< std::vector< T > >();
-	typename SphericalHarmonics<T>::Ptr sh1D = new SphericalHarmonics<T>( bands );
+	std::vector< T > func1DValues;
+	SphericalHarmonics<T> sh1D( bands );
 	typename std::vector< T >::const_iterator it;
 
-	assert( sh1D );
-
-	m_sampler->template polarProjection( polar1DFunctor, sh1D );
-	m_sampler->template reconstruction( sh1D, func1DValues );
+	sampler.template polarProjection( polar1DFunctor, sh1D );
+	sampler.reconstruction( sh1D, func1DValues );
 
 #ifdef SAVE_RECONSTRUCTION
 	typename std::vector< Imath::V3f >::const_iterator eIt;
-	PointsPrimitivePtr points = new PointsPrimitive( m_sampler->euclidianCoordinates()->readable().size() );
+	PointsPrimitivePtr points = new PointsPrimitive( sampler.euclidianCoordinates().size() );
 	V3fVectorDataPtr POINTS = new V3fVectorData();
 	FloatVectorDataPtr RADIUS = new FloatVectorData();
-	POINTS->writable().resize( m_sampler->euclidianCoordinates()->readable().size() );
-	RADIUS->writable().resize( m_sampler->euclidianCoordinates()->readable().size(), 0.04 );
+	POINTS->writable().resize( sampler.euclidianCoordinates().size() );
+	RADIUS->writable().resize( sampler.euclidianCoordinates().size(), 0.04 );
 	points->variables["P"].data = POINTS;
 	points->variables["P"].interpolation = PrimitiveVariable::Vertex;
 	points->variables["constantwidth"].data = new FloatData(0.04);
 	points->variables["constantwidth"].interpolation = PrimitiveVariable::Constant;
 	typename std::vector<Imath::V3f>::iterator PIT = POINTS->writable().begin();
-	for ( it = func1DValues->readable().begin(), eIt = m_sampler->euclidianCoordinates()->readable().begin(); 
-			it != func1DValues->readable().end() && eIt != m_sampler->euclidianCoordinates()->readable().end(); it++, eIt++, PIT++ )
+	for ( it = func1DValues.begin(), eIt = sampler.euclidianCoordinates().begin(); 
+			it != func1DValues.end() && eIt != sampler.euclidianCoordinates().end(); it++, eIt++, PIT++ )
 	{
 		*PIT = *eIt * ( *it );
 	}	
@@ -173,12 +207,12 @@ void SphericalHarmonicsSamplerTest< T, bands, samples >::testPolarProjection1D()
 	
 	int errors = 0;
 	T e = 0.15;
-	for ( it = func1DValues->readable().begin(), pIt = m_sampler->sphericalCoordinates()->readable().begin(); 
-			it != func1DValues->readable().end() && pIt != m_sampler->sphericalCoordinates()->readable().end(); it++, pIt++ )
+	for ( it = func1DValues.begin(), pIt = sampler.sphericalCoordinates().begin(); 
+			it != func1DValues.end() && pIt != sampler.sphericalCoordinates().end(); it++, pIt++ )
 	{
 		if (!Imath::equalWithRelError ( polar1DFunctor(*pIt), *it, e))
 		{
-			cout << "Failed on sample " << ( pIt - m_sampler->sphericalCoordinates()->readable().begin() ) << endl;
+			cout << "Failed on sample " << ( pIt - sampler.sphericalCoordinates().begin() ) << endl;
 			BOOST_CHECK_EQUAL( *it, polar1DFunctor( *pIt ) );
 			if ( ++errors > 10 )
 			{
@@ -191,32 +225,32 @@ void SphericalHarmonicsSamplerTest< T, bands, samples >::testPolarProjection1D()
 }
 
 template<typename T, int bands, unsigned int samples >
-void SphericalHarmonicsSamplerTest< T, bands, samples >::testPolarProjection3D()
+void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection3D()
 {
 	// create normal distribution of samples
-	typename SphericalHarmonicsSampler<T>::Ptr m_sampler = new SphericalHarmonicsSampler<T>( bands, samples );
-	typename std::vector< Imath::V2f >::const_iterator pIt;
+	SphericalHarmonicsProjectorExt<T> sampler( samples );
+	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
 
 	// test 3D polar projection
-	typename SphericalHarmonics< Imath::Vec3<T> >::Ptr sh3D = new SphericalHarmonics< Imath::Vec3<T> >( bands );
-	typename boost::intrusive_ptr< TypedData< std::vector< Imath::Vec3<T> > > > func3DValues = new TypedData< std::vector< Imath::Vec3<T> > >();
+	SphericalHarmonics< Imath::Vec3<T> > sh3D( bands );
+	std::vector< Imath::Vec3<T> > func3DValues;
 	typename std::vector< Imath::Vec3<T> >::const_iterator it3d;
 
-	m_sampler->template polarProjection( polar3DFunctor, sh3D );
-	m_sampler->template reconstruction( sh3D, func3DValues );
+	sampler.template polarProjection( polar3DFunctor, sh3D );
+	sampler.reconstruction( sh3D, func3DValues );
 
 #ifdef SAVE_RECONSTRUCTION
-	PointsPrimitivePtr points = new PointsPrimitive( m_sampler->euclidianCoordinates()->readable().size() );
+	PointsPrimitivePtr points = new PointsPrimitive( sampler.euclidianCoordinates().size() );
 	V3fVectorDataPtr POINTS = new V3fVectorData();
 	FloatVectorDataPtr RADIUS = new FloatVectorData();
-	POINTS->writable().resize( m_sampler->euclidianCoordinates()->readable().size() );
-	RADIUS->writable().resize( m_sampler->euclidianCoordinates()->readable().size(), 0.04 );
+	POINTS->writable().resize( sampler.euclidianCoordinates().size() );
+	RADIUS->writable().resize( sampler.euclidianCoordinates().size(), 0.04 );
 	points->variables["P"].data = POINTS;
 	points->variables["P"].interpolation = PrimitiveVariable::Vertex;
 	points->variables["constantwidth"].data = new FloatData(0.04);
 	points->variables["constantwidth"].interpolation = PrimitiveVariable::Constant;
 	typename std::vector<Imath::V3f>::iterator PIT = POINTS->writable().begin();
-	for ( it3d = func3DValues->readable().begin(); it3d != func3DValues->readable().end(); it3d++, PIT++ )
+	for ( it3d = func3DValues.begin(); it3d != func3DValues.end(); it3d++, PIT++ )
 	{
 		*PIT = *it3d;
 	}	
@@ -225,8 +259,8 @@ void SphericalHarmonicsSamplerTest< T, bands, samples >::testPolarProjection3D()
 
 	int errors = 0;
 	T e = 0.3;
-	for ( it3d = func3DValues->readable().begin(), pIt = m_sampler->sphericalCoordinates()->readable().begin(); 
-			it3d != func3DValues->readable().end() && pIt != m_sampler->sphericalCoordinates()->readable().end(); it3d++, pIt++ )
+	for ( it3d = func3DValues.begin(), pIt = sampler.sphericalCoordinates().begin(); 
+			it3d != func3DValues.end() && pIt != sampler.sphericalCoordinates().end(); it3d++, pIt++ )
 	{
 		if ( !(*it3d).equalWithAbsError( polar3DFunctor( *pIt ), e) ) 
 		{
@@ -242,24 +276,24 @@ void SphericalHarmonicsSamplerTest< T, bands, samples >::testPolarProjection3D()
 }
 
 template<typename T, int bands, unsigned int samples >
-void SphericalHarmonicsSamplerTest<T, bands, samples>::testEuclidianProjection1D()
+void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection1D()
 {
 	// create normal distribution of samples
-	typename SphericalHarmonicsSampler<T>::Ptr m_sampler = new SphericalHarmonicsSampler<T>( bands, samples );
-	typename std::vector< Imath::V3f >::const_iterator eIt;
+	SphericalHarmonicsProjectorExt<T> sampler( samples );
+	typename std::vector< Imath::Vec3<T> >::const_iterator eIt;
 
-	typename boost::intrusive_ptr< TypedData< std::vector< T > > > func1DValues = new TypedData< std::vector< T > >();
-	typename SphericalHarmonics<T>::Ptr sh1D = new SphericalHarmonics<T>( bands );
+	std::vector< T > func1DValues;
+	SphericalHarmonics<T> sh1D( bands );
 	typename std::vector< T >::const_iterator it;
 
 	// test 1D euclidian projection
-	m_sampler->template euclideanProjection( euclidian1DFunctor, sh1D );
-	m_sampler->template reconstruction( sh1D, func1DValues );
+	sampler.template euclideanProjection( euclidian1DFunctor, sh1D );
+	sampler.reconstruction( sh1D, func1DValues );
 	
 	int errors = 0;
 	T e = 0.15;
-	for ( it = func1DValues->readable().begin(), eIt = m_sampler->euclidianCoordinates()->readable().begin(); 
-			it != func1DValues->readable().end() && eIt != m_sampler->euclidianCoordinates()->readable().end(); it++, eIt++ )
+	for ( it = func1DValues.begin(), eIt = sampler.euclidianCoordinates().begin(); 
+			it != func1DValues.end() && eIt != sampler.euclidianCoordinates().end(); it++, eIt++ )
 	{
 		if (!Imath::equalWithRelError ( *it, euclidian1DFunctor(*eIt), e))
 		{
@@ -274,24 +308,24 @@ void SphericalHarmonicsSamplerTest<T, bands, samples>::testEuclidianProjection1D
 }
 
 template<typename T, int bands, unsigned int samples >
-void SphericalHarmonicsSamplerTest<T, bands, samples>::testEuclidianProjection3D()
+void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection3D()
 {
 	// create normal distribution of samples
-	typename SphericalHarmonicsSampler<T>::Ptr m_sampler = new SphericalHarmonicsSampler<T>( bands, samples );
-	typename std::vector< Imath::V3f >::const_iterator eIt;
+	SphericalHarmonicsProjectorExt<T> sampler( samples );
+	typename std::vector< Imath::Vec3<T> >::const_iterator eIt;
 
 	// test 3D euclidian projection
-	typename SphericalHarmonics< Imath::Vec3<T> >::Ptr sh3D = new SphericalHarmonics< Imath::Vec3<T> >( bands );
-	typename boost::intrusive_ptr< TypedData< std::vector< Imath::Vec3<T> > > > func3DValues = new TypedData< std::vector< Imath::Vec3<T> > >();
+	SphericalHarmonics< Imath::Vec3<T> > sh3D( bands );
+	std::vector< Imath::Vec3<T> > func3DValues;
 	typename std::vector< Imath::Vec3<T> >::const_iterator it3d;
 
-	m_sampler->template euclideanProjection( euclidian3DFunctor, sh3D );
-	m_sampler->template reconstruction( sh3D, func3DValues );
+	sampler.template euclideanProjection( euclidian3DFunctor, sh3D );
+	sampler.reconstruction( sh3D, func3DValues );
 
 	int errors = 0;
 	T e = 0.3;
-	for ( it3d = func3DValues->readable().begin(), eIt = m_sampler->euclidianCoordinates()->readable().begin(); 
-			it3d != func3DValues->readable().end() && eIt != m_sampler->euclidianCoordinates()->readable().end(); it3d++, eIt++ )
+	for ( it3d = func3DValues.begin(), eIt = sampler.euclidianCoordinates().begin(); 
+			it3d != func3DValues.end() && eIt != sampler.euclidianCoordinates().end(); it3d++, eIt++ )
 	{
 		if ( !(*it3d).equalWithAbsError( euclidian3DFunctor( *eIt ), e) ) 
 		{
