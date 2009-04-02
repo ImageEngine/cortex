@@ -46,8 +46,8 @@ namespace IECore
 template<typename F, typename T>
 T LinearToSRGBDataConversion<F, T>::operator()( F f ) const
 {
-	float phi = 12.92f;
-	float cutoff = 0.003130805f;
+	const float phi = 12.92f;
+	const float cutoff = 0.003130805f;
 
 	if ( f <= cutoff )
 	{
@@ -55,8 +55,8 @@ T LinearToSRGBDataConversion<F, T>::operator()( F f ) const
 	}
 	else
 	{
-		float alpha = 0.055f;
-		float exponent = 2.4f;
+		const float alpha = 0.055f;
+		const float exponent = 2.4f;
 
 		float v = ( 1.0f + alpha ) * Imath::Math<float>::pow(f, 1.0f / exponent ) - alpha;
 

@@ -44,8 +44,8 @@ namespace IECore
 template<typename F, typename T>
 T SRGBToLinearDataConversion<F, T>::operator()( F f ) const
 {
-	float k0 = 0.04045f;
-	float phi = 12.92f;
+	const float k0 = 0.04045f;
+	const float phi = 12.92f;
 
 	if ( f <= k0 )
 	{
@@ -53,8 +53,8 @@ T SRGBToLinearDataConversion<F, T>::operator()( F f ) const
 	}
 	else
 	{
-		float alpha = 0.055;
-		float exponent = 2.4;
+		const float alpha = 0.055;
+		const float exponent = 2.4;
 
 		float v = Imath::Math<float>::pow( ( f + alpha ) / ( 1.0f + alpha ), exponent );
 

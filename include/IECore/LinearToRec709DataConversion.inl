@@ -45,8 +45,8 @@ namespace IECore
 template<typename F, typename T>
 T LinearToRec709DataConversion<F, T>::operator()( F f ) const
 {
-	float phi = 4.5f;
-	float cutoff = (float)(0.081f / 4.5f);
+	const float phi = 4.5f;
+	const float cutoff = (float)(0.081f / 4.5f);
 
 	if ( f <= cutoff )
 	{
@@ -54,8 +54,8 @@ T LinearToRec709DataConversion<F, T>::operator()( F f ) const
 	}
 	else
 	{
-		float alpha = 0.099f;
-		float exponent = 1/.45;
+		const float alpha = 0.099f;
+		const float exponent = 1/.45;
 
 		float v = ( 1.0f + alpha ) * Imath::Math<float>::pow(f, 1.0f / exponent ) - alpha;
 
