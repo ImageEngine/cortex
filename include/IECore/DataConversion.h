@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,7 +56,7 @@ struct DataConversion : public std::unary_function<F, T>
 	{
 	}
 	
-	T operator()( F f )
+	T operator()( F f ) const
 	{
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 	}

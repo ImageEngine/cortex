@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,7 +62,7 @@ class CompoundDataConversion : public DataConversion< typename C1::FromType, typ
 		CompoundDataConversion( const C1 &c1, const C2 &c2 );
 
 		/// Perform the conversion
-		typename CompoundDataConversion<C1, C2>::ToType operator()( typename CompoundDataConversion<C1, C2>::FromType f );
+		typename CompoundDataConversion<C1, C2>::ToType operator()( typename CompoundDataConversion<C1, C2>::FromType f ) const;
 		
 		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;

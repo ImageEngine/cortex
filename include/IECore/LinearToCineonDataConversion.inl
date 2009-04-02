@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,7 +67,7 @@ LinearToCineonDataConversion<F, T>::LinearToCineonDataConversion( float filmGamm
 }
 
 template<typename F, typename T>
-T LinearToCineonDataConversion<F, T>::operator()( F f )
+T LinearToCineonDataConversion<F, T>::operator()( F f ) const
 {
 	std::vector<float>::const_iterator it = std::lower_bound( lookupTable().begin(), lookupTable().end(), (float) f );
 	std::iterator_traits<std::vector<float>::const_iterator>::difference_type v = std::distance( lookupTable().begin(), it );

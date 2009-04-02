@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,7 +55,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 {
 	typedef ScaledDataConversion< T, F > InverseType;
 	
-	T operator()( F f )
+	T operator()( F f ) const
 	{
 		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );	
 		float result = static_cast<float>(f) / std::numeric_limits<F>::max() * std::numeric_limits<T>::max();
@@ -71,7 +71,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type > : public DataConversion< F, T >
 {
-	T operator()( F f )
+	T operator()( F f ) const
 	{
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
 		f = std::max<F>( f, (F)(std::numeric_limits<T>::min() ) );
@@ -83,7 +83,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type > : public DataConversion< F, T >
 {
-	T operator()( F f )
+	T operator()( F f ) const
 	{
 		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );
 		f = std::max<F>( f, (F)( -1.0 ) );		
@@ -96,7 +96,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type > : public DataConversion< F, T >
 {
-	T operator()( F f )
+	T operator()( F f ) const
 	{		
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
 		f = std::max<F>( f, (F)(std::numeric_limits<T>::min() ) );
@@ -111,7 +111,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 {
 	typedef ScaledDataConversion< T, F > InverseType;
 
-	T operator()( F f )
+	T operator()( F f ) const
 	{
 		float result = static_cast<float>(f) / std::numeric_limits<F>::max();
 		return static_cast<T>( result );
@@ -128,7 +128,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 {
 	typedef ScaledDataConversion< T, F > InverseType;
 
-	T operator()( F f )
+	T operator()( F f ) const
 	{
 		return static_cast<T>( f );
 	}

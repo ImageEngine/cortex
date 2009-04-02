@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,7 +54,7 @@ namespace IECore
 template<typename F, typename T, typename Enable = void>
 struct ScaledDataConversion : public DataConversion< F, T >
 {
-	T operator()( F f )
+	T operator()( F f ) const
 	{
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 	}

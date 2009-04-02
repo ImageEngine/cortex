@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,7 +49,7 @@ CompoundDataConversion<C1, C2>::CompoundDataConversion( const C1 &c1, const C2 &
 }
 
 template<typename C1, typename C2>
-typename CompoundDataConversion<C1, C2>::ToType CompoundDataConversion<C1, C2>::operator()( typename CompoundDataConversion<C1, C2>::FromType f )
+typename CompoundDataConversion<C1, C2>::ToType CompoundDataConversion<C1, C2>::operator()( typename CompoundDataConversion<C1, C2>::FromType f ) const
 {
 	return m_c2( m_c1( f ) );	
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,7 +57,7 @@ struct Rec709ToLinearDataConversion : public DataConversion< F, T >
 	typedef LinearToRec709DataConversion<T, F> InverseType;
 
 	/// Perform the conversion
-	T operator()( F f );
+	T operator()( F f ) const;
 	
 	/// Returns an instance of a class able to perform the inverse conversion	
 	InverseType inverse() const;
