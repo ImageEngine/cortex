@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -138,6 +138,8 @@ class Font : public RunTimeTyped
 		
 		static FT_Library library();
 
+		std::string m_fileName;
+		
 		FT_Face m_face;
 		float m_kerning;
 		float m_curveTolerance;
@@ -148,6 +150,9 @@ class Font : public RunTimeTyped
 		typedef boost::shared_ptr<const Mesh> ConstMeshPtr;
 		typedef std::map<char, ConstMeshPtr> MeshMap;
 		MeshMap m_meshes;
+		
+		typedef std::map<char, ConstImagePrimitivePtr> ImageMap;
+		ImageMap m_images;
 				
 		ConstMeshPtr cachedMesh( char c );
 		ConstImagePrimitivePtr cachedImage( char c );

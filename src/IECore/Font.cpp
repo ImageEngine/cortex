@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,7 +43,6 @@
 #include "IECore/MeshMergeOp.h"
 #include "IECore/Group.h"
 #include "IECore/MatrixTransform.h"
-#include "IECore/ClassData.h"
 
 #include "ft2build.h"
 #include FT_FREETYPE_H
@@ -54,11 +53,6 @@
 using namespace IECore;
 using namespace Imath;
 using namespace std;
-
-/// \todo Use standard member data on the next major version.
-static ClassData<Font, string> g_fileNames;
-typedef std::map<char, ConstImagePrimitivePtr> ImageMap;
-static ClassData<Font, ImageMap> g_images;
 
 ////////////////////////////////////////////////////////////////////////////////
 // struct definitions for the font caches
@@ -291,10 +285,8 @@ int Font::Mesher::cubicTo( const FT_Vector *control1, const FT_Vector *control2,
 //////////////////////////////////////////////////////////////////////////////////////////
 
 Font::Font( const std::string &fontFile )
-	:	m_kerning( 1.0f ), m_curveTolerance( 0.01 ), m_pixelsPerEm( 0 )
+	:	m_fileName( fontFile ), m_kerning( 1.0f ), m_curveTolerance( 0.01 ), m_pixelsPerEm( 0 )
 {
-	g_fileNames.create( this, fontFile );
-	g_images.create( this );
 	FT_Error e = FT_New_Face( library(), fontFile.c_str(), 0, &m_face );
 	if( e )
 	{
@@ -305,14 +297,12 @@ Font::Font( const std::string &fontFile )
 
 Font::~Font()
 {
-	g_fileNames.erase( this );
-	g_images.erase( this );
 	FT_Done_Face( m_face );
 }
 
 const std::string &Font::fileName() const
 {
-	return g_fileNames[this];
+	return m_fileName;
 }
 
 void Font::setKerning( float kerning )
@@ -341,7 +331,7 @@ void Font::setResolution( float pixelsPerEm )
 	if( pixelsPerEm!=m_pixelsPerEm )
 	{
 		m_pixelsPerEm = pixelsPerEm;
-		g_images[this].clear();
+		m_images.clear();
 		FT_Set_Pixel_Sizes( m_face, (FT_UInt)pixelsPerEm, (FT_UInt)pixelsPerEm );
 	}
 }
@@ -566,7 +556,6 @@ ImagePrimitivePtr Font::image()
 
 ConstImagePrimitivePtr Font::cachedImage( char c )
 {
-	ImageMap &m_images = g_images[this];
 
 	// see if we have it cached
 	ImageMap::const_iterator it = m_images.find( c );
