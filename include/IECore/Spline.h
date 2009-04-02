@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -78,8 +78,6 @@ class Spline
 		/// and segment is set to point to the first point in the segment. This
 		/// information can then be used along with the basis matrix to calculate
 		/// the y value.
-		/// \todo I'm not convinced this is terribly stable when x values get close
-		/// together.
 		inline X solve( X x, typename PointContainer::const_iterator &segment ) const;
 		/// As above but fills the points array with the points for the segment.
 		inline X solve( X x, Y segment[4] ) const;
