@@ -224,7 +224,7 @@ FileSequencePtr FileSequenceVectorParameter::parseFileSequence( const std::strin
 		
 		std::string head = fileSequenceStr.substr( 0, spaceIndex );
 		std::string tail = fileSequenceStr.substr( spaceIndex+1, fileSequenceStr.size() - spaceIndex - 1 );		
-		assert( head + " " + tail = fileSequenceStr );
+		assert( head + " " + tail == fileSequenceStr );
 		
 		filename = head;
 		
