@@ -56,13 +56,13 @@ class InterpolatedCache : public RefCounted
 		typedef IECore::AttributeCache::HeaderHandle HeaderHandle;
 		typedef IECore::AttributeCache::AttributeHandle AttributeHandle;
 	
-		typedef enum
+		enum Interpolation
 		{ 
 			None = 0,
 			Linear,
 			Cosine,
 			Cubic
-		} Interpolation;
+		};
 
 		///Constructor
 		///pathTemplate must contain "%d" indicating the frame number position in the file name. You can use padding too: %03d for example.
