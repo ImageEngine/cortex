@@ -54,12 +54,9 @@ namespace IECore
 
 IE_CORE_FORWARDDECLARE( DisplayDriver );
 
-/*
-* Abstract base class for generic image display drivers.
-* Derived classes should implement the virtual methods that are used as callbacks for opening a new pass, updating an image block and closing the image.
-* \todo derive from RunTimeTyped
-* \todo factory function
-*/
+
+/// Abstract base class for generic image display drivers.
+/// Derived classes should implement the virtual methods that are used as callbacks for opening a new pass, updating an image block and closing the image.
 class DisplayDriver : public RunTimeTyped
 {
 	public:
