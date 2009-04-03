@@ -231,9 +231,6 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 			setFileSequenceValues( seqs );		
 		}
 		
-		/// Gets the internal StringData value and creates a FileSequence
-		/// from it using the ls() function. Note that this can return 0
-		/// if check is DontCare and no matching sequence exists on disk.	
 		list getFileSequenceValuesWrap() const
 		{
 			list r;
