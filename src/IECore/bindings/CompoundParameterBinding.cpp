@@ -159,20 +159,8 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 
 	public :
 
-		CompoundParameterWrap( PyObject *self, const std::string &name, const std::string &description, const list &members = list(), const object &userData = object() )
+		CompoundParameterWrap( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), const object &userData = object() )
 			:	CompoundParameter( name, description, getUserData( userData ) ), Wrapper< CompoundParameter >( self, this ) 
-		{
-			addParametersFromMembers( members );
-		}
-
-		CompoundParameterWrap( PyObject *self, const std::string &name, const list &members, const object & userData = object() )
-			:	CompoundParameter( name, "", getUserData( userData ) ), Wrapper< CompoundParameter >( self, this )
-		{
-			addParametersFromMembers( members );
-		}
-		
-		CompoundParameterWrap( PyObject *self, const list &members, const object & userData = object() )
-			:	CompoundParameter( "", "", getUserData( userData ) ), Wrapper< CompoundParameter >( self, this )
 		{
 			addParametersFromMembers( members );
 		}
@@ -241,12 +229,21 @@ static void compoundParameterAddParameters( CompoundParameter &o, const boost::p
 
 void bindCompoundParameter()
 {
-
+	using boost::python::arg ;
+	
 	typedef class_< CompoundParameter, CompoundParameterWrap::Ptr, boost::noncopyable, bases<Parameter> > CompoundParameterPyClass;
 	CompoundParameterPyClass( "CompoundParameter", no_init )
-		.def( init< const std::string &, const std::string &, boost::python::optional<const list &,  const object & > >( args( "name", "description", "members", "userData") ) )
-		.def( init< const std::string &, const list &, boost::python::optional<  const object & > >( args( "name", "members", "userData") ) )
-		.def( init< const list &, boost::python::optional<  const object & > >( args( "members", "userData") ) )
+		.def(
+			init< const std::string &, const std::string &, boost::python::optional<const list &,  const object & > >
+			( 
+				(
+					arg( "name" ) = std::string(""),
+					arg( "description" ) = std::string(""),
+					arg( "members" ) = list(),
+					arg( "userData") = object()
+				)
+			) 
+		)
 		.def( "__len__", &compoundParameterLen )
 		.def( "__getitem__", &compoundParameterGetItem )
 		/// \todo Remove attribute style access in major version 5.
