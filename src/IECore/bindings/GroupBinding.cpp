@@ -49,7 +49,7 @@ namespace IECore
 static list children( Group &g )
 {
 	list result;
-	for( Group::ChildSet::const_iterator it=g.children().begin(); it!=g.children().end(); it++ )
+	for( Group::ChildContainer::const_iterator it=g.children().begin(); it!=g.children().end(); it++ )
 	{
 		result.append( *it );
 	}
@@ -59,7 +59,7 @@ static list children( Group &g )
 static list state( Group &g )
 {
 	list result;
-	for( Group::StateSet::const_iterator it=g.state().begin(); it!=g.state().end(); it++ )
+	for( Group::StateContainer::const_iterator it=g.state().begin(); it!=g.state().end(); it++ )
 	{
 		result.append( *it );
 	}

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,12 +52,8 @@ class Group : public VisibleRenderable
 
 	public:
 	
-		/// \todo Consider making the ChildSet of a container type which preserves order and ensures no duplicates. Otherwise
-		/// we're not going to get consistent ordering of children, even if they're added in the same order.
-		typedef std::set<VisibleRenderablePtr> ChildSet;
-		/// \todo Make StateSet preserve order of insertion - there are cases where 3delight cares very much what order
-		/// attributes are specified in (subsurface attributes in particular).
-		typedef std::set<StateRenderablePtr> StateSet;
+		typedef std::vector<VisibleRenderablePtr> ChildContainer;
+		typedef std::vector<StateRenderablePtr> StateContainer;
 	
 		/// \todo Add a constructor taking a list of children and state
 		/// and an optional transform, and bind it.
@@ -94,8 +90,8 @@ class Group : public VisibleRenderable
 		/// Removes all state from the Group.
 		void clearState();
 		/// Const access to the internal data structure used
-		/// to hold the children.
-		const StateSet &state() const;
+		/// to hold the state.
+		const StateContainer &state() const;
 		
 		/// Adds a child to this Group. If the child is a Group itself
 		/// and already has a parent then it will be removed from that
@@ -110,7 +106,7 @@ class Group : public VisibleRenderable
 		void clearChildren();
 		/// Const access to the internal data structure used to hold
 		/// the children.
-		const ChildSet &children() const;
+		const ChildContainer &children() const;
 
 		/// Returns the parent for this Group, returning 0 if no
 		/// parent exists.
@@ -128,8 +124,8 @@ class Group : public VisibleRenderable
 	
 		TransformPtr m_transform;
 		Group *m_parent; // not a smart pointer to avoid cylic references
-		StateSet m_state;
-		ChildSet m_children;
+		StateContainer m_state;
+		ChildContainer m_children;
 		
 };
 

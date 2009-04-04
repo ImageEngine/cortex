@@ -119,7 +119,41 @@ class TestGroup( unittest.TestCase ) :
 	
 		g = Group()
 		self.assertRaises( Exception, g.addState, MatrixTransform( M44f() ) )
+	
+	def testChildOrdering( self ) :
+	
+		g = Group()
+		c1 = PointsPrimitive( 1 )
+		c2 = PointsPrimitive( 2 )
+		c3 = PointsPrimitive( 3 )
 		
+		g.addChild( c1 )
+		g.addChild( c2 )
+		g.addChild( c3 )
+		
+		c = g.children()
+		self.assertEqual( len( c ), 3 )
+		self.assert_( c[0].isSame( c1 ) )
+		self.assert_( c[1].isSame( c2 ) )
+		self.assert_( c[2].isSame( c3 ) )
+
+	def testStateOrdering( self ) :
+	
+		g = Group()
+		a1 = AttributeState()
+		a2 = AttributeState()
+		a3 = AttributeState()
+		
+		g.addState( a1 )
+		g.addState( a2 )
+		g.addState( a3 )
+		
+		s = g.state()
+		self.assertEqual( len( s ), 3 )
+		self.assert_( s[0].isSame( a1 ) )
+		self.assert_( s[1].isSame( a2 ) )
+		self.assert_( s[2].isSame( a3 ) )
+				
 	def tearDown( self ) :
 	
 		if os.path.isfile("test/group.cob"):
