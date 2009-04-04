@@ -94,9 +94,9 @@ class ParameterHandler : public IECore::RefCounted
 	
 		static void registerHandler( IECore::TypeId parameterType, IECore::TypeId dataType, ConstParameterHandlerPtr handler );
         
-                typedef std::map<IECore::TypeId, ConstParameterHandlerPtr> HandlerMap;
+		typedef std::map<IECore::TypeId, ConstParameterHandlerPtr> HandlerMap;
 		
-                static HandlerMap &handlers();
+		static HandlerMap &handlers();
 };
 
 } // namespace IECoreMaya
