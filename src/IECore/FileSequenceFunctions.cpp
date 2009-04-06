@@ -238,9 +238,9 @@ FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &f
 	FrameList::Frame rangeStep = frames[ rangeEnd ] - frames[ rangeStart ];	
 	assert( rangeStep > 0 );
 	
-	while ( rangeEnd <= frames.size() )
+	while ( rangeEnd <= (FrameList::Frame)frames.size() )
 	{
-		if ( rangeEnd == frames.size() || frames[ rangeEnd ] - frames[ rangeEnd -1 ] != rangeStep )
+		if ( rangeEnd == (FrameList::Frame)frames.size() || frames[ rangeEnd ] - frames[ rangeEnd -1 ] != rangeStep )
 		{
 			/// we've come to the end of a run
 			if ( rangeEnd - 1 == rangeStart )
@@ -255,7 +255,7 @@ FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &f
 			rangeStart = rangeEnd;
 			rangeEnd = rangeStart + 1;
 			
-			if ( rangeEnd < frames.size() )
+			if ( rangeEnd < (FrameList::Frame)frames.size() )
 			{
 				rangeStep = frames[ rangeEnd ] - frames[ rangeStart ];
 			}
