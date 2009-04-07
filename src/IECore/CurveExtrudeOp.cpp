@@ -573,11 +573,6 @@ ObjectPtr CurveExtrudeOp::doOperation( ConstCompoundObjectPtr operands )
 		
 		PatchMeshPrimitivePtr patchMesh = buildPatchMesh( curves, curveIndex, vertexOffset, varyingOffset );
 		assert( patchMesh );
-		
-		/// \todo This is a temporary workaround for the fact that Groups dont maintain the order of insertion, so 
-		/// if we're going to motion blur a group of patches in the same way we'd simply motion blur two RiCurves primitives
-		/// we need a way of working out which patch represents which curve
-		patchMesh->variables["curveIndex"] = PrimitiveVariable( PrimitiveVariable::Constant, new IntData( curveIndex ) );
 						
 		group->addChild( patchMesh );
 				
