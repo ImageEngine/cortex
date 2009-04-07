@@ -64,7 +64,8 @@ CompoundObjectPtr Reader::readHeader()
 
 ObjectPtr Reader::read()
 {
-	/// \todo Perhaps we should append the fileName() to any exceptions thrown by operate() before re-raising them?
+	/// \todo Perhaps we should append the fileName() to any exceptions thrown by operate() before re-raising them? 
+	/// Use of boost.exception might make this easier.
 	return operate();
 }
 
