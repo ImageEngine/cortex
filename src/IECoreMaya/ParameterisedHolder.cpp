@@ -52,6 +52,7 @@
 #include "maya/MDGModifier.h"
 #include "maya/MNodeMessage.h"
 #include "maya/MFnExpression.h"
+#include "maya/MFnDagNode.h"
 
 #include "IECoreMaya/ParameterisedHolder.h"
 #include "IECoreMaya/Parameter.h"
@@ -541,6 +542,14 @@ template<typename B>
 MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName )
 {
 	MFnDependencyNode fnDN( B::thisMObject() );
+	
+	MString thisNodeName = B::name();
+	MFnDagNode fnDAGN( B::thisMObject() );
+	if( fnDAGN.hasObj( B::thisMObject() ) )
+	{
+		thisNodeName = fnDAGN.fullPathName();
+	}
+	
 	const CompoundParameter::ParameterVector &children = parameter->orderedParameters();
 	for( size_t i=0; i<children.size(); i++ )
 	{
@@ -626,7 +635,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 						if ( it != mayaUserData.end() && it->second->typeId() == StringDataTypeId )
 						{
 							std::string defaultConnection = static_pointer_cast<StringData>(it->second)->readable();
-							std::string cmd = string( "connectAttr " ) + defaultConnection + " " + plug.partialName( true ).asChar();
+							std::string cmd = string( "connectAttr " ) + defaultConnection + " " + thisNodeName.asChar() + "." + plug.partialName().asChar();
 							MDGModifier dgMod;
 							dgMod.commandToExecute( cmd.c_str() );
 							dgMod.doIt();												
@@ -635,7 +644,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 						if ( it != mayaUserData.end() && it->second->typeId() == StringDataTypeId )
 						{
 							std::string defaultExpression = static_pointer_cast<StringData>(it->second)->readable();
-							MString cmd = plug.partialName( true ) + defaultExpression.c_str();
+							MString cmd = thisNodeName + "." + plug.partialName() + defaultExpression.c_str();
 							MFnExpression expFn;
 							expFn.create( cmd );
 						}
