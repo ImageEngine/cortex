@@ -53,9 +53,6 @@ class ImagePlaneHolder : public ParameterisedHolderImagePlane
 		virtual ~ImagePlaneHolder();
 
 		virtual void postConstructor();
-		
-		//// \bug See comments in ParameterisedHolder.h
-		bool isAbstractClass();
 
 		static void *creator();				
 		static MStatus initialize();		

@@ -111,12 +111,6 @@ void ParameterisedHolder<B>::postConstructor()
 }
 
 template<typename B>
-bool ParameterisedHolder<B>::isAbstractClass()
-{
-	return true;
-}
-
-template<typename B>
 MStatus ParameterisedHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
 	if( plug==aParameterisedClassName || plug==aParameterisedVersion || plug==aParameterisedSearchPathEnvVar )

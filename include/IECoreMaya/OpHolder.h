@@ -62,10 +62,7 @@ class OpHolder : public ParameterisedHolder<BaseType>
 		static void *creator();				
 		static MStatus initialize();		
 		static MTypeId id;
-		
-		//// \bug See comments in ParameterisedHolder.h
-		bool isAbstractClass();
-		
+				
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		
 		virtual MStatus compute( const MPlug &plug, MDataBlock &block );

@@ -73,11 +73,6 @@ void ImagePlaneHolder::postConstructor()
 	setExistWithoutOutConnections(true);	
 }
 
-bool ImagePlaneHolder::isAbstractClass()
-{
-	return false;
-}
-
 void *ImagePlaneHolder::creator()
 {
 	return new ImagePlaneHolder();

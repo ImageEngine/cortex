@@ -85,13 +85,6 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		
 		virtual void postConstructor();
 		
-		/// \bug This isn't actually overriding the virtual method defined on MPxNode as it's
-		/// missing the const from the signature. It's debatable as to what the right course of
-		/// action is - right now I suspect that we need it to be broken as the derived classes
-		/// aren't overriding it to make themselves non-abstract again.
-		/// \todo Fix this for the next major version.		
-		bool isAbstractClass();
-		
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		
 		virtual MStatus shouldSave( const MPlug &plug, bool &isSaving );
