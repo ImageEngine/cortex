@@ -77,6 +77,8 @@ bool withFreeType();
 /// \ref mainPageRenderingSection <br>
 /// \ref mainPageAlgorithmsSection <br>
 /// \ref mainPagePythonSection <br>
+/// \ref mainPageApplicationSupportSection <br>
+///
 /// \section mainPageMathSection Math
 ///
 /// Basic math types are provided by the Imath library which comes as part
@@ -226,9 +228,10 @@ bool withFreeType();
 ///
 /// \section mainPageRenderingSection Rendering
 ///
-/// IECore defines the \link IECore::Renderer Renderer \endlink class for the description of scenes to a renderer. Currently
-/// no concrete implementations exist in the core library itself, but implementations for
-/// RenderMan and OpenGL exist in separate libraries.
+/// IECore defines the \link IECore::Renderer Renderer \endlink class for the description of scenes to a renderer. The IECoreRI::Renderer
+/// subclass implements this class for RIB generation and use in DynamicLoad procedurals, and the IECoreGL::Renderer subclass implements
+/// the same interface in terms of OpenGL, providing fast preview rendering which can be used to visualise procedural results within
+/// an IECoreMaya::ProceduralHolder node.
 ///
 /// The Renderable class and subclasses such as \link IECore::MeshPrimitive MeshPrimitive \endlink
 /// provide objects which can be manipulated with Ops and which can describe themselves to Renderers.
@@ -254,8 +257,11 @@ bool withFreeType();
 ///
 /// All of the IECore C++ classes are bound into Python using the <a href="http://www.boost.org/libs/python/doc/">boost::python</a> framework.
 /// Many can actually be subclassed in python, making it very quick to implement a new Op
-/// or Procedural. Some IECore functionality is implemented directly in Python - for instance
-/// the \link IECore::FileSequence FileSequence \endlink and \link IECore::FrameList
-/// FrameList \endlink classes.
+/// or Procedural.
+///
+/// \section mainPageApplicationSupportSection Application support
+///
+/// The generic functionality contained within IECore is interfaced with specific 3rd party applications and frameworks using additional
+/// libraries. These libraries include \ref IECoreMaya, IECoreNuke, IECoreGL and IECoreTruelight.
 
 #endif // IE_CORE_CORE_H
