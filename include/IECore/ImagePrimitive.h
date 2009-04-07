@@ -117,7 +117,7 @@ class ImagePrimitive : public Primitive
 		/// Returns 2-d image size for Vertex, Varying, and FaceVarying Interpolation, otherwise 1.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
-		virtual void render( RendererPtr renderer );
+		virtual void render( RendererPtr renderer ) const;
 
 		//! @name Channels
 		/// Channels of the image are just primitive variables with the following

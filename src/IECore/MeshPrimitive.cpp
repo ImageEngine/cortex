@@ -145,7 +145,7 @@ size_t MeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolati
 	}
 }
 
-void MeshPrimitive::render( RendererPtr renderer )
+void MeshPrimitive::render( RendererPtr renderer ) const
 {
 	renderer->mesh( m_verticesPerFace, m_vertexIds, m_interpolation, variables );
 }

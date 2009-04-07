@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,7 +60,7 @@ class AttributeState : public StateRenderable
 		CompoundDataPtr attributesData();
 		
 		/// Calls renderer->setAttribute() for each name, data pair in attributes()
-		virtual void render( RendererPtr renderer );
+		virtual void render( RendererPtr renderer ) const;
 	
 	private:
 

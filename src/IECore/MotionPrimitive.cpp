@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -88,7 +88,7 @@ MotionPrimitive::SnapshotMap &MotionPrimitive::snapshots()
 	return m_snapshots;
 }
 
-void MotionPrimitive::render( RendererPtr renderer )
+void MotionPrimitive::render( RendererPtr renderer ) const
 {
 	if( !m_snapshots.size() )
 	{
@@ -108,7 +108,7 @@ void MotionPrimitive::render( RendererPtr renderer )
 	size_t fs = m_snapshots.begin()->second->variableSize( PrimitiveVariable::FaceVarying );
 	
 	set<float> times;
-	for( SnapshotMap::iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
+	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 	{
 		if( it->second->typeId()!=t )
 		{
@@ -126,7 +126,7 @@ void MotionPrimitive::render( RendererPtr renderer )
 		times.insert( it->first );
 	}
 	renderer->motionBegin( times );
-		for( SnapshotMap::iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
+		for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 		{
 			it->second->render( renderer );
 		}

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -80,7 +80,7 @@ class SpherePrimitive : public Primitive
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
 		/// Render the sphere
-		virtual void render( RendererPtr renderer );
+		virtual void render( RendererPtr renderer ) const;
 
 	private:
 

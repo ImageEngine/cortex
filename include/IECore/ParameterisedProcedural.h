@@ -60,7 +60,7 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 		/// Calls Renderer::procedural using doBound() and doRender() to
 		/// implement the bound() and render() methods required by the
 		/// Renderer.
-		virtual void render( RendererPtr renderer );
+		virtual void render( RendererPtr renderer ) const;
 		/// Forwards to doBound().
 		virtual Imath::Box3f bound() const;
 

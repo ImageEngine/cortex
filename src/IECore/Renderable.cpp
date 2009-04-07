@@ -78,7 +78,7 @@ void Renderable::memoryUsage( Object::MemoryAccumulator &a ) const
 }
 
 
-void Renderable::render( RendererPtr renderer )
+void Renderable::render( RendererPtr renderer ) const
 {
 #ifndef NDEBUG
 	bool unimplemented = false;

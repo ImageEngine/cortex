@@ -94,7 +94,7 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 {
 	public :
 		
-		Forwarder( ParameterisedProceduralPtr p )
+		Forwarder( ConstParameterisedProceduralPtr p )
 			:	parameterisedProcedural( p )
 		{
 		}
@@ -110,10 +110,10 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 			parameterisedProcedural->doRender( renderer, args );
 		}
 		
-		ParameterisedProceduralPtr parameterisedProcedural;
+		ConstParameterisedProceduralPtr parameterisedProcedural;
 };
 				
-void ParameterisedProcedural::render( RendererPtr renderer )
+void ParameterisedProcedural::render( RendererPtr renderer ) const
 {
 	renderer->procedural( new Forwarder( this ) );
 }

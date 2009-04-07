@@ -287,7 +287,7 @@ bool PatchMeshPrimitive::vPeriodic() const
 	return m_vPeriodic;
 }
 
-void PatchMeshPrimitive::render( RendererPtr renderer )
+void PatchMeshPrimitive::render( RendererPtr renderer ) const
 {
 
 	renderer->patchMesh(
