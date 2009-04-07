@@ -97,6 +97,12 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		
 		self.assert_( fn1.userNode() )
 		self.assert_( fn2.userNode() ) # This failure is due to a Maya bug. When referencing the same scene twice, as an optimisation Maya will duplicate existing nodes instead of creating new ones. There is a bug in MPxObjectSet::copy() which gets exercised here. There is a Maya environment variable which can disable this optimisation, however.
+	
+	def testSetParameterisedFromClassLoader( self ) :
+	
+		fnPH = IECoreMaya.FnProceduralHolder.create( "test", "read", 1 )
+		proc = fnPH.getProcedural()
+		self.assert_( isinstance( proc, IECore.ParameterisedProcedural ) )
 		
 	def tearDown( self ) :
 		

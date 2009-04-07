@@ -474,7 +474,7 @@ IECore::ParameterPtr ParameterisedHolder<B>::plugParameter( const MPlug &plug )
 }
 
 template<typename B>
-IECore::ParameterisedPtr ParameterisedHolder<B>::loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar )
+IECore::RunTimeTypedPtr ParameterisedHolder<B>::loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar )
 {
 	string toExecute = boost::str( format( 
 			"IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n"
@@ -489,7 +489,7 @@ IECore::ParameterisedPtr ParameterisedHolder<B>::loadClass( const MString &class
 			PythonCmd::globalContext().ptr() )
 		);
 		object result( resultHandle );
-		return extract<ParameterisedPtr>( result )();
+		return extract<RunTimeTypedPtr>( result )();
 	}
 	catch( error_already_set & )
 	{

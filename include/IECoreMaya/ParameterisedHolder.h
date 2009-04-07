@@ -112,7 +112,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 				
 	private:
 		
-		IECore::ParameterisedPtr loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar );
+		IECore::RunTimeTypedPtr loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar );
 		
 		/// Creates (or updates existing) attributes for each parameter. Removes any old attributes no longer
 		/// needed.

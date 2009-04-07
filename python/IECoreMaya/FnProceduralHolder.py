@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -44,6 +44,26 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 	def __init__( self, object ) :
 	
 		FnParameterisedHolder.__init__( self, object )
+
+	## Creates a new node with the specified name and holding the specified procedural
+	# class type. Returns a function set instance operating on this new node.
+	@staticmethod
+	def create( nodeName, className, classVersion=-1 ) :
+	
+		holder = maya.mel.eval( "ieProceduralHolderCreate( \"%s\", \"%s\", %d )" % ( nodeName, className, classVersion ) )
+		return FnProceduralHolder( holder )
+
+	## Convenience method to call setParameterised with the environment variable
+	# for the searchpaths set to "IECORE_PROCEDURAL_PATHS".
+	def setProcedural( self, className, classVersion ) :
+	
+		self.setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" )
+
+	## Convenience method to return the ParameterisedProcedural class held inside this
+	# node.
+	def getProcedural( self ) :
+	
+		return self.getParameterised()[0]
 
 	## Returns a set of the names of any currently selected components. These names
 	# are specified by the procedural by setting the "name" attribute in the
