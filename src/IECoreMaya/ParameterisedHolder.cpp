@@ -214,7 +214,7 @@ MStatus ParameterisedHolder<B>::initialize()
 }
 
 template<typename B>
-MStatus ParameterisedHolder<B>::setParameterised( IECore::ParameterisedPtr p )
+MStatus ParameterisedHolder<B>::setParameterised( IECore::RunTimeTypedPtr p )
 {
 	MPlug pClassName( B::thisMObject(), aParameterisedClassName );
 	MPlug pVersion( B::thisMObject(), aParameterisedVersion );
@@ -258,7 +258,7 @@ MStatus ParameterisedHolder<B>::setParameterised( const std::string &className, 
 }
 
 template<typename B>
-IECore::ParameterisedPtr ParameterisedHolder<B>::getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut )
+IECore::RunTimeTypedPtr ParameterisedHolder<B>::getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut )
 {
 	MPlug pClassName( B::thisMObject(), aParameterisedClassName );
 	MPlug pVersion( B::thisMObject(), aParameterisedVersion );
@@ -524,7 +524,8 @@ MStatus ParameterisedHolder<B>::createAndRemoveAttributes()
 	MStatus s;
 	if( m_parameterised )
 	{
-		s = createAttributesWalk( m_parameterised->parameters(), "parm" );
+		ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
+		s = createAttributesWalk( parameterisedInterface->parameters(), "parm" );
 		if( !s )
 		{
 			msg( Msg::Error, "ParameterisedHolder::createAndRemoveAttributes", boost::format( "Unable to create attributes to represent class." ) );

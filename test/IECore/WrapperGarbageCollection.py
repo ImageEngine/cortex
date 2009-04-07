@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -120,7 +120,7 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		
 			self.callbackCalled = True
 		
-		o = Renderer.Procedural( "a", "b" )
+		o = Renderer.Procedural()
 		w = weakref.ref( o, callback )
 		self.assert_( w() is o )
 		del o

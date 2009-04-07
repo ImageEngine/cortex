@@ -62,6 +62,10 @@ class TestOp( IECore.Op ) :
 				),
 			]
 		)
+		
+	def doOperation( self, args ) :
+	
+		return IECore.IntData( 10 )
 
 class FnParameterisedHolderTest( unittest.TestCase ) :
 
@@ -73,7 +77,10 @@ class FnParameterisedHolderTest( unittest.TestCase ) :
 
 		op = TestOp()
 		fnPH.setParameterised( op )
-		self.assertEqual( fnPH.getParameterised(), ( op, "", 0, "" ) )
+		parameterisedTuple = fnPH.getParameterised()
+		self.assert_( parameterisedTuple[0].isSame( op ) )
+		self.assertEqual( parameterisedTuple[1:], ( "", 0, "" ) )
+		self.assertEqual( parameterisedTuple[0](), IECore.IntData( 10 ) )
 		
 		iPlug = fnPH.parameterPlug( op["i"] )
 		self.assert_( isinstance( iPlug, maya.OpenMaya.MPlug ) )

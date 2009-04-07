@@ -41,18 +41,18 @@ class SimpleProcedural( Renderer.Procedural ) :
 
 	def __init__( self, scale ) :
 	
-		Renderer.Procedural.__init__( self, "name", "description" )
+		Renderer.Procedural.__init__( self )
 		self.__scale = scale
 		self.__t = StringData( "hello" )
 		self.__c = CompoundData()
 		self.__c["a"] = IntData( 4 )
 
-	def doBound( self, args ) :
+	def bound( self ) :
 	
 		return Box3f( V3f( -self.__scale ), V3f( self.__scale ) )
 		
-	def doRender( self, renderer, args ) :
-	
+	def render( self, renderer ) :
+		
 		self.rendererTypeName = renderer.typeName()
 		
 		renderer.transformBegin()

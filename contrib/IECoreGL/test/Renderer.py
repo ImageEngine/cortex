@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -377,27 +377,31 @@ class TestRenderer( unittest.TestCase ) :
 	
 		#w.start()
 	
-	## \todo Make this assert something
 	def testProcedural( self ) :
 	
 		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.setOption( "gl:mode", StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.display( os.path.dirname( __file__ ) + "/output/proceduralTest.tif", "tiff", "rgba", {} )
 		
 		r.worldBegin()
-		#w = SceneViewer( "scene", r.scene() )		
 		
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
 
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( M44f.createScaled( V3f( 0.1 ) ) )
 		
 		p = ReadProcedural()
-		p.files["name"].setValue( StringData( os.path.dirname( __file__ ) + "/models/sphere.cob" ) )
-		#r.procedural( p )
+		p["files"]["name"].setValue( StringData( "test/IECore/data/cobFiles/pSphereShape1.cob" ) )
 		
+		p.render( r )
+
 		r.worldEnd()
 	
-		#w.start()
+		expectedImage = Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/proceduralTest.tif" )()
+		actualImage = Reader.create( os.path.dirname( __file__ ) + "/output/proceduralTest.tif" )()
+
+		self.assertEqual( ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 		
 	## \todo Make this assert something
 	def testShader( self ) :
@@ -418,6 +422,7 @@ class TestRenderer( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/output/testPrimVars.tif",
 			os.path.dirname( __file__ ) + "/output/testImage.tif",
 			os.path.dirname( __file__ ) + "/output/testStackBug.tif",
+#			os.path.dirname( __file__ ) + "/output/proceduralTest.tif",
 		]
 		
 		for f in files :

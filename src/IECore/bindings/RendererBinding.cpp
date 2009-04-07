@@ -55,19 +55,19 @@ namespace IECore
 class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Procedural>
 {
 	public :
-		ProceduralWrap( PyObject *self, const std::string &name, const std::string &description ) : Renderer::Procedural( name, description ), Wrapper<Renderer::Procedural>( self, this ) {};
-		virtual Imath::Box3f doBound( ConstCompoundObjectPtr args ) const
+		ProceduralWrap( PyObject *self ) : Wrapper<Renderer::Procedural>( self, this ) {};
+		virtual Imath::Box3f bound() const
 		{
 			try
 			{
-				override o = this->get_override( "doBound" );
+				override o = this->get_override( "bound" );
 				if( o )
 				{
-					return o( const_pointer_cast<CompoundObject>( args ) );
+					return o();
 				}
 				else
 				{
-					msg( Msg::Error, "ProceduralWrap::doBound", "doBound() python method not defined" );
+					msg( Msg::Error, "ProceduralWrap::bound", "bound() python method not defined" );
 				}
 			}
 			catch( error_already_set )
@@ -76,31 +76,28 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 			}
 			catch( const std::exception &e )
 			{
-				msg( Msg::Error, "ProceduralWrap::doRender", e.what() );
+				msg( Msg::Error, "ProceduralWrap::bound", e.what() );
 			}
 			catch( ... )
 			{
-				msg( Msg::Error, "ProceduralWrap::doRender", "Caught unknown exception" );
+				msg( Msg::Error, "ProceduralWrap::bound", "Caught unknown exception" );
 			}
 			return Imath::Box3f(); // empty
 		}
-		virtual void doRender( RendererPtr r, ConstCompoundObjectPtr args ) const
+		virtual void render( RendererPtr r ) const
 		{
 			// ideally we might not do any exception handling here, and always leave it to the host.
 			// but in our case the host is mainly 3delight and that does no exception handling at all.
 			try
 			{
-				override o = this->get_override( "doRender" );
+				override o = this->get_override( "render" );
 				if( o )
 				{
-					//// \todo We may want to call operands->copy() here instead of casting away the constness. If the Python code being called
-					/// here actually attempts to change the CompoundObject, then any C++ calling code might get confused when a suposedly const value
-					/// changes unexpectedly. Check any performance overhead of the copy.
-					o( r, const_pointer_cast<CompoundObject>( args ) );
+					o( r );
 				}
 				else
 				{
-					msg( Msg::Error, "ProceduralWrap::doRender", "doRender() python method not defined" );
+					msg( Msg::Error, "ProceduralWrap::render", "render() python method not defined" );
 				}
 			}
 			catch( error_already_set )
@@ -109,11 +106,11 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 			}
 			catch( const std::exception &e )
 			{
-				msg( Msg::Error, "ProceduralWrap::doRender", e.what() );
+				msg( Msg::Error, "ProceduralWrap::render", e.what() );
 			}
 			catch( ... )
 			{
-				msg( Msg::Error, "ProceduralWrap::doRender", "Caught unknown exception" );
+				msg( Msg::Error, "ProceduralWrap::render", "Caught unknown exception" );
 			}
 		}
 
@@ -341,19 +338,17 @@ void bindRenderer()
 	INTRUSIVE_PTR_PATCH( Renderer, RendererPyClass );
 	implicitly_convertible<RendererPtr, RunTimeTypedPtr>();
 	
-	typedef class_< Renderer::Procedural, ProceduralWrapPtr, boost::noncopyable, bases<Parameterised> > ProceduralPyClass;
-	ProceduralPyClass( "Procedural", no_init )
-		.def( init<const std::string &, const std::string &>() )
+	typedef class_< Renderer::Procedural, ProceduralWrapPtr, boost::noncopyable, bases<RefCounted> > ProceduralPyClass;
+	ProceduralPyClass( "Procedural" )
 		.def( "bound", &Renderer::Procedural::bound )
 		.def( "render", &Renderer::Procedural::render )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Renderer::Procedural )		
 	;
 	
 	WrapperToPython<Renderer::ProceduralPtr>();
 
 	INTRUSIVE_PTR_PATCH( Renderer::Procedural, ProceduralPyClass );
 	
-	implicitly_convertible<Renderer::ProceduralPtr, ParameterisedPtr>();
+	implicitly_convertible<Renderer::ProceduralPtr, RefCountedPtr>();
 	implicitly_convertible<Renderer::ProceduralPtr, Renderer::ConstProceduralPtr>();
 	implicitly_convertible<ProceduralWrapPtr, Renderer::ProceduralPtr>();
 	

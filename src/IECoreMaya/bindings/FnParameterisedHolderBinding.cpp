@@ -67,7 +67,7 @@ static ParameterisedHolderInterface *interface( MFnDependencyNode *fnDN )
 	throw Exception( ( MString("Node \"") + fnDN->name() + "\" is not a ParameterisedHolder" ).asChar() );
 }
 
-static void setParameterised( MFnDependencyNode *fnDN, ParameterisedPtr p )
+static void setParameterised( MFnDependencyNode *fnDN, RunTimeTypedPtr p )
 {
 	assert( fnDN );
 	
@@ -86,7 +86,7 @@ static boost::python::tuple getParameterised( MFnDependencyNode *fnDN )
 	assert( fnDN );
 
 	std::string className; int classVersion = 0; std::string searchPath;
-	ParameterisedPtr p = interface( fnDN )->getParameterised( &className, &classVersion, &searchPath );
+	RunTimeTypedPtr p = interface( fnDN )->getParameterised( &className, &classVersion, &searchPath );
 	return boost::python::make_tuple( p, className, classVersion, searchPath );	
 }
 

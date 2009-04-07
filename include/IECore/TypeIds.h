@@ -178,7 +178,7 @@ enum TypeId
 	ModifyOpTypeId = 135,
 	ImageOpTypeId = 136,
 	PrimitiveOpTypeId = 137,
-	ProceduralTypeId = 138,
+	ProceduralTypeId = 138, // Obsolete
 	Box3iParameterTypeId = 139,
 	V2iParameterTypeId = 140,
 	V3iParameterTypeId = 141,
@@ -331,6 +331,7 @@ enum TypeId
 	FileSequenceTypeId = 288,
 	FileSequenceParameterTypeId = 289,
 	FileSequenceVectorParameterTypeId = 290,
+	ParameterisedProceduralTypeId = 291,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	

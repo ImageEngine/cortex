@@ -173,7 +173,7 @@ MBoundingBox ProceduralHolder::boundingBox() const
 		
 	m_bound = MBoundingBox( MPoint( -1, -1, -1 ), MPoint( 1, 1, 1 ) );
 
-	Renderer::ProceduralPtr p = const_cast<ProceduralHolder*>(this)->getProcedural();
+	ParameterisedProceduralPtr p = const_cast<ProceduralHolder*>(this)->getProcedural();
 	if( p )
 	{
 		const_cast<ProceduralHolder*>(this)->setParameterisedValues();
@@ -222,9 +222,9 @@ MStatus ProceduralHolder::setProcedural( const std::string &className, int class
 	return setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" );
 }
 
-IECore::Renderer::ProceduralPtr ProceduralHolder::getProcedural( std::string *className, int *classVersion )
+IECore::ParameterisedProceduralPtr ProceduralHolder::getProcedural( std::string *className, int *classVersion )
 {
-	return runTimeCast<Renderer::Procedural>( getParameterised( className, classVersion ) );
+	return runTimeCast<IECore::ParameterisedProcedural>( getParameterised( className, classVersion ) );
 }
 
 IECoreGL::ConstScenePtr ProceduralHolder::scene()
@@ -235,7 +235,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 	}
 	
 	m_scene = 0;
-	Renderer::ProceduralPtr p = ((ProceduralHolder*)this)->getProcedural();
+	ParameterisedProceduralPtr p = ((ProceduralHolder*)this)->getProcedural();
 	if( p )
 	{
 		setParameterisedValues();

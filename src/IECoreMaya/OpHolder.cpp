@@ -160,7 +160,7 @@ MStatus OpHolder<B>::compute( const MPlug &plug, MDataBlock &block )
 }
 
 template<typename B>
-IECore::ParameterisedPtr OpHolder<B>::getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut )
+IECore::RunTimeTypedPtr OpHolder<B>::getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut )
 {
 	if (!ParameterisedHolder<B>::m_parameterised && !ParameterisedHolder<B>::m_failedToLoad)
 	{

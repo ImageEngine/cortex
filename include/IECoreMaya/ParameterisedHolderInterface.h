@@ -43,7 +43,7 @@
 namespace IECoreMaya
 {
 
-/// A base class from which nodes to hold IECore::Parametised objects
+/// A base class from which nodes to hold IECore::ParameterisedInterface objects
 /// should multiply inherit (for example, Maya RI procedurals).
 class ParameterisedHolderInterface 
 {
@@ -59,13 +59,13 @@ class ParameterisedHolderInterface
 		/// as it allows the Parameterised object to be loaded again when a maya scene is opened.
 		virtual MStatus setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar ) = 0;
 		/// Sets the Parameterised object this node is holding, directly.
-		virtual MStatus setParameterised( IECore::ParameterisedPtr p ) = 0;
+		virtual MStatus setParameterised( IECore::RunTimeTypedPtr p ) = 0;
 		/// Returns the held Parameterised object, loading it if necessary. May return 0 if loading
 		/// fails. Note that this doesn't update the values of the parameters - you can use the
 		/// separate setParameterisedValues() call for that. If provided, the optional className,
 		/// classVersion and searchPathEnvVar are updated to reflect the last values passed to
 		/// setParameterised - in the case of a 0 return value these values are left unchanged.
-		virtual IECore::ParameterisedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 ) = 0;
+		virtual IECore::RunTimeTypedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 ) = 0;
 		/// Sets the attributes of the node to reflect the current values
 		/// of the parameters in the held Parameterised object. Performs validation
 		/// of the parameter values and will return kFailure if any one is not valid.

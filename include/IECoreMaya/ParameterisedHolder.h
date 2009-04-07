@@ -102,9 +102,9 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		/// Set the node to hold a particular Parameterised object. When using this version
 		/// of setParameterised the node will not be able to preserve the object across scene
 		/// save/load - this becomes your responsibility if it's necessary.
-		virtual MStatus setParameterised( IECore::ParameterisedPtr p );
+		virtual MStatus setParameterised( IECore::RunTimeTypedPtr p );
 		virtual MStatus setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar );
-		virtual IECore::ParameterisedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
+		virtual IECore::RunTimeTypedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
 		virtual MStatus setNodeValues();
 		virtual MStatus setNodeValue( IECore::ParameterPtr pa );
 		virtual MStatus setParameterisedValues();
@@ -151,7 +151,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		
 	protected :
 	
-		IECore::ParameterisedPtr m_parameterised;
+		IECore::RunTimeTypedPtr m_parameterised;
 		bool m_failedToLoad; // to avoid constantly trying to reload things that aren't there						
 		
 };

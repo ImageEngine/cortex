@@ -232,6 +232,7 @@
 #include "IECore/bindings/FileSequenceFunctionsBinding.h"
 #include "IECore/bindings/FileSequenceParameterBinding.h"
 #include "IECore/bindings/FileSequenceVectorParameterBinding.h"
+#include "IECore/bindings/ParameterisedProceduralBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -453,6 +454,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindFileSequenceFunctions();
 	bindFileSequenceParameter();
 	bindFileSequenceVectorParameter();
+	bindParameterisedProcedural();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,11 +35,11 @@
 from IECore import *
 import math
 
-class ReadProcedural( Renderer.Procedural ) :
+class ReadProcedural( ParameterisedProcedural ) :
 
 	def __init__( self ) :
 	
-		Renderer.Procedural.__init__( self, "ReadProcedural", "A procedural to render simple objects which can be loaded with a Reader." )
+		ParameterisedProcedural.__init__( self )
 		
 		self.parameters().addParameters(
 		
@@ -111,9 +111,9 @@ class ReadProcedural( Renderer.Procedural ) :
 	
 	def doBound( self, args ) :
 			
-		if args.bounds.mode.value=="specified" :
+		if args["bounds"]["mode"].value=="specified" :
 		
-			return args.bounds.specified.value
+			return args["bounds"]["specified"].value
 		
 		else :
 		
@@ -174,24 +174,24 @@ class ReadProcedural( Renderer.Procedural ) :
 	# returns either a list of filenames (no motion blur) or a list of tuples of filenames (for motion blur)
 	def __allFileNames( self, args ) :
 	
-		if args.files.name.value=="" :
+		if args["files"]["name"].value=="" :
 			return []
 	
-		frame = args.files.frame.value
+		frame = args["files"]["frame"].value
 
 		result = []
-		if FileSequence.fileNameValidator().match( args.files.name.value ) :
-			sequence = FileSequence( args.files.name.value, FrameRange( frame, frame ) )
-			if args.motion.blur.value :
+		if FileSequence.fileNameValidator().match( args["files"]["name"].value ) :
+			sequence = FileSequence( args["files"]["name"].value, FrameRange( frame, frame ) )
+			if args["motion"]["blur"].value :
 				result.append( ( sequence.fileNameForFrame( frame ), sequence.fileNameForFrame( frame + 1 ) ) )
 			else :
 				result.append( sequence.fileNameForFrame( frame ) )
 		else :
-			result.append( args.files.name.value )
+			result.append( args["files"]["name"].value )
 				
-		if "@" in args.files.name.value :
+		if "@" in args["files"]["name"].value :
 		
-			numbers = FrameList.parse( args.files.numbers.value ).asList()
+			numbers = FrameList.parse( args["files"]["numbers"].value ).asList()
 			
 			newResult = []
 			for f in result :
@@ -224,4 +224,4 @@ class ReadProcedural( Renderer.Procedural ) :
 			
 		return o
 
-# \todo Add RunTimeTyped id
+makeRunTimeTyped( ReadProcedural, 100026, ParameterisedProcedural )

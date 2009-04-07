@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,7 +70,7 @@ class OpHolder : public ParameterisedHolder<BaseType>
 		
 		virtual MStatus compute( const MPlug &plug, MDataBlock &block );
 		
-		virtual IECore::ParameterisedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
+		virtual IECore::RunTimeTypedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
 		
 		virtual MStatus setOp( const std::string &className, int classVersion  );
 		virtual IECore::OpPtr getOp( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );	

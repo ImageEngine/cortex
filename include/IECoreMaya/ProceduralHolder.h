@@ -41,7 +41,7 @@
 
 #include "IECoreMaya/ParameterisedHolder.h"
 
-#include "IECore/Renderer.h"
+#include "IECore/ParameterisedProcedural.h"
 #include "IECore/Interned.h"
 
 #include "maya/MPxComponentShape.h"
@@ -94,7 +94,7 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		/// Calls setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" ).
 		MStatus setProcedural( const std::string &className, int classVersion );
 		/// Returns runTimeCast<ParameterisedProcedural>( getProcedural( className, classVersion ) ). 
-		IECore::Renderer::ProceduralPtr getProcedural( std::string *className = 0, int *classVersion = 0 );
+		IECore::ParameterisedProceduralPtr getProcedural( std::string *className = 0, int *classVersion = 0 );
 	
 		/// Returns an up to date scene from the procedural
 		IECoreGL::ConstScenePtr scene();
