@@ -52,7 +52,8 @@ class Renderable : public BlindDataHolder
 				
 		IE_CORE_DECLAREABSTRACTOBJECT( Renderable, BlindDataHolder );
 		
-		/// Render the object held by this instance via the given renderer
+		/// Render the object held by this instance via the given renderer.
+		/// \todo Should this be const?
 		virtual void render( RendererPtr renderer ) = 0;
 	
 	private:
