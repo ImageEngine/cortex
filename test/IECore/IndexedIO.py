@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -460,7 +460,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 		f = MemoryIndexedIO( CharVectorData(), "/", IndexedIOOpenMode.Write)
 		f.mkdir("data")
 		f.chdir("data")		
-		buf = f.buffer()
+		buf = f.buffer() # Fails under gcc 3.3.4 when no data has been written, as a result of the way in which std::ostringstream::seekp(0) works when the stream is currently empty. Fixed in gcc 3.4.x and later.
 		f = None
 		f = MemoryIndexedIO(buf, "/", IndexedIOOpenMode.Append)
 		f.chdir( "data" )	
