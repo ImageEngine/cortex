@@ -66,6 +66,7 @@
 #include "IECoreMaya/bindings/FromMayaTransformConverterBinding.h"
 #include "IECoreMaya/bindings/CallbackIdBinding.h"
 #include "IECoreMaya/bindings/PlaybackFrameListBinding.h"
+#include "IECoreMaya/bindings/MStringFromPython.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -106,4 +107,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaTransformConverter();
 	bindCallbackId();
 	bindPlaybackFrameList();
+	bindMStringFromPython();
 }
