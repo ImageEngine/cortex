@@ -101,6 +101,10 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		self.assertEqual( m["N"].data.size(), 180 )
 		self.assertEqual( m["s"].data.size(), 180 )
 		self.assertEqual( m["t"].data.size(), 180 )
+		self.assert_( m["P"].data == converter.points() )
+		self.assert_( m["N"].data == converter.normals() )		
+		self.assert_( m["s"].data == converter.s( "map1" ) )		
+		self.assert_( m["t"].data == converter.t( "map1" ) )				
 				
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ), IECore.V3f( 1.0001 ) ).contains( m.bound() ) )
 		self.assert_( m.bound().contains( IECore.Box3f( IECore.V3f( -0.90 ), IECore.V3f( 0.90 ) ) ) )
