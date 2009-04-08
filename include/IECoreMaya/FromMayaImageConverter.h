@@ -62,11 +62,16 @@ class FromMayaImageConverter : public FromMayaConverter
 		FromMayaImageConverter( MImage &image );
 	
 		/// The MImage which will be converted by the convert() function.
-		const MImage &image() const;				
+		const MImage &image() const;	
+		
+		IECore::BoolParameterPtr depthParameter();
+		IECore::BoolParameterPtr depthParameter() const;			
 		
 	protected :
 				
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
+		
+		IECore::BoolParameterPtr m_depthParameter;
 		
 	private :
 

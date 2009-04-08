@@ -53,11 +53,28 @@ using namespace IECore;
 
 FromMayaImageConverter::FromMayaImageConverter( MImage &image ) : FromMayaConverter( "name", "description" ), m_image( image )
 {
+	m_depthParameter = new BoolParameter(
+		"depth",
+		"When this is on the depth channel (if present), is added as primitive variable 'Z'",
+		true
+	);
+	
+	parameters()->addParameter( m_depthParameter );
 }
 
 const MImage &FromMayaImageConverter::image() const
 {
 	return m_image;
+}
+
+BoolParameterPtr FromMayaImageConverter::depthParameter()
+{
+	return m_depthParameter;
+}
+
+BoolParameterPtr FromMayaImageConverter::depthParameter() const
+{
+	return m_depthParameter;
 }
 
 template<typename T> 
@@ -190,20 +207,23 @@ ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands 
 			throw InvalidArgumentException( "FromMayaImageConverter: MImage has unknown pixel type" );
 	}
 	
-	float *depth = m_image.depthMap();
-	if ( depth )
+	if ( m_depthParameter()->getTypedValue() )
 	{	
-		unsigned depthWidth = 0, depthHeight = 0;
-		
-		s = m_image.getDepthMapSize( depthWidth, depthHeight );
-		assert( s );
+		float *depth = m_image.depthMap();
+		if ( depth )
+		{	
+			unsigned depthWidth = 0, depthHeight = 0;
 
-		if ( depthWidth != width || depthHeight != height )
-		{
-			throw InvalidArgumentException( "FromMayaImageConverter: Different color/depth resolutions" );
+			s = m_image.getDepthMapSize( depthWidth, depthHeight );
+			assert( s );
+
+			if ( depthWidth != width || depthHeight != height )
+			{
+				throw InvalidArgumentException( "FromMayaImageConverter: Different color/depth resolutions" );
+			}
+
+			writeDepth( img, depth );		
 		}
-		
-		writeDepth( img, depth );		
 	}
 	
 	assert( img->arePrimitiveVariablesValid() );
