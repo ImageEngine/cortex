@@ -42,6 +42,7 @@
 
 #include "IECore/Object.h"
 #include "IECore/ImagePrimitive.h"
+#include "IECore/TypedParameter.h"
 
 #include "maya/MImage.h"
 

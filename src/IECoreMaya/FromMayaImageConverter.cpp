@@ -39,6 +39,7 @@
 #include "boost/format.hpp"
 #include "boost/multi_array.hpp"
 
+#include "IECore/CompoundParameter.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/ScaledDataConversion.h"
@@ -207,7 +208,7 @@ ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands 
 			throw InvalidArgumentException( "FromMayaImageConverter: MImage has unknown pixel type" );
 	}
 	
-	if ( m_depthParameter()->getTypedValue() )
+	if ( m_depthParameter->getTypedValue() )
 	{	
 		float *depth = m_image.depthMap();
 		if ( depth )
