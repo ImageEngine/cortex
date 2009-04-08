@@ -87,6 +87,8 @@ class ToMayaImageConverter : public ToMayaConverter
 		
 		template<typename T>
 		void writeAlpha( MImage &image, const T &alpha ) const;
+		
+		void writeDepth( MImage &image, IECore::FloatVectorDataPtr channelData ) const;
 	
 		ToMayaImageConverter( IECore::ConstObjectPtr obj );
 

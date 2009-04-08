@@ -77,6 +77,8 @@ class FromMayaImageConverter : public FromMayaConverter
 		
 		template<typename T> 
 		void writeChannels( IECore::ImagePrimitivePtr target, const std::vector< std::string > &channelNames ) const;
+		
+		void writeDepth( IECore::ImagePrimitivePtr target, const float *depth ) const;
 
 };
 

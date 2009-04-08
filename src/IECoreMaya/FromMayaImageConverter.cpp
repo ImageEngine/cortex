@@ -95,6 +95,33 @@ void FromMayaImageConverter::writeChannels( ImagePrimitivePtr target, const std:
 	}	
 }
 
+void FromMayaImageConverter::writeDepth( ImagePrimitivePtr target, const float *depth ) const
+{
+	assert( target );
+	unsigned width, height;
+	MStatus s = m_image.getSize( width, height );	
+	assert( width );
+	assert( height );
+	
+	boost::multi_array_ref< const float, 2 > depthArray( depth, boost::extents[height][width] );
+	
+	FloatVectorDataPtr targetDepth = new FloatVectorData();
+	targetDepth->writable().resize( width * height );
+	
+	boost::multi_array_ref< float, 2 > targetDepthArray( &(targetDepth->writable()[0]), boost::extents[height][width] );
+
+	for ( unsigned x = 0; x < width; x++ )
+	{
+		for ( unsigned y = 0; y < height; y++ )
+		{				
+			/// Vertical flip, to match Maya					
+			targetDepthArray[height - 1 - y][x] = depthArray[y][x];													
+		}
+	}
+	
+	target->variables["Z"] = PrimitiveVariable( PrimitiveVariable::Vertex, targetDepth );	
+}
+
 ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands ) const
 {
 	assert( operands );
@@ -161,6 +188,22 @@ ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands 
 			break;
 		default :		
 			throw InvalidArgumentException( "FromMayaImageConverter: MImage has unknown pixel type" );
+	}
+	
+	float *depth = m_image.depthMap();
+	if ( depth )
+	{	
+		unsigned depthWidth = 0, depthHeight = 0;
+		
+		s = m_image.getDepthMapSize( depthWidth, depthHeight );
+		assert( s );
+
+		if ( depthWidth != width || depthHeight != height )
+		{
+			throw InvalidArgumentException( "FromMayaImageConverter: Different color/depth resolutions" );
+		}
+		
+		writeDepth( img, depth );		
 	}
 	
 	assert( img->arePrimitiveVariablesValid() );
