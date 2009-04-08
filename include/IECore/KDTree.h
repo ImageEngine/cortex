@@ -152,12 +152,6 @@ class KDTree<PointIterator>::Node
 
 		inline void makeLeaf( PermutationIterator permFirst, PermutationIterator permLast );
 		inline void makeBranch( unsigned char cutAxis, BaseType cutValue );
-		/// \todo Ditch me in preference to the KDTree::rootIndex method.
-		inline static NodeIndex rootIndex();
-		/// \todo Ditch me in preference to the KDTree::lowChildIndex method.
-		inline static NodeIndex lowChildIndex( NodeIndex index );
-		/// \todo Ditch me in preference to the KDTree::highChildIndex method.
-		inline static NodeIndex highChildIndex( NodeIndex index );
 						
 		unsigned char m_cutAxisAndLeaf;
 		union {
