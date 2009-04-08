@@ -37,9 +37,9 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-
 #include <IECore/SphericalHarmonics.h>
 #include <IECore/SphericalHarmonicsProjector.h>
+#include <IECore/SphericalHarmonicsRotationMatrix.h>
 
 namespace IECore
 {
@@ -73,13 +73,34 @@ class SphericalHarmonicsProjectorTest
 		// tests 3D functor with euclidian coordinates
 		void testEuclidianProjection3D();
 
+
+		static T euclidian1DFunctor( const Imath::Vec3<T> &pos );
+		static Imath::Vec3<T> euclidian3DFunctor( const Imath::Vec3<T> &pos );
+
 	private:
 
-		static T lightFunctor( const Imath::V2f &polar );
-		static T polar1DFunctor( const Imath::V2f &polar );
-		static T euclidian1DFunctor( const Imath::V3f &pos );
-		static Imath::Vec3<T> polar3DFunctor( const Imath::V2f &polar );
-		static Imath::Vec3<T> euclidian3DFunctor( const Imath::V3f &pos );
+		static T lightFunctor( const Imath::Vec2<T> &polar );
+		static T polar1DFunctor( const Imath::Vec2<T> &polar );
+		static Imath::Vec3<T> polar3DFunctor( const Imath::Vec2<T> &polar );
+};
+
+template< typename T >
+class SphericalHarmonicsRotationMatrixTest
+{
+	public:
+
+		void testRotation();
+		void testRotation3D();
+
+	private:
+
+		static Imath::Euler<T> rotation();
+		static T normalFunctor( const Imath::Vec3<T> &pos );
+		static T rotatedFunctor( const Imath::Vec3<T> &pos );
+
+		static Imath::Vec3<T> normal3dFunctor( const Imath::Vec3<T> &pos );
+		static Imath::Vec3<T> rotated3dFunctor( const Imath::Vec3<T> &pos );
+
 };
 
 struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
@@ -90,6 +111,8 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 		addSphericalHarmonicsFunctionTest< float >();
 		addSphericalHarmonicsFunctionTest< double >();
 		addSphericalHarmonicsProjectorTest< double,10,20000 >();
+		addSphericalHarmonicsRotationMatrixTest< double >();
+		
 	}
 
 	template< typename T >
@@ -110,6 +133,15 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testPolarProjection3D), instance ) );
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclidianProjection1D), instance ) );
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclidianProjection3D), instance ) );
+	}
+
+	template< typename T >
+	void addSphericalHarmonicsRotationMatrixTest()
+	{
+		static boost::shared_ptr< SphericalHarmonicsRotationMatrixTest< T > > instance(new SphericalHarmonicsRotationMatrixTest<T>());
+		
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsRotationMatrixTest< T >::testRotation), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsRotationMatrixTest< T >::testRotation3D), instance ) );
 	}
 	
 };

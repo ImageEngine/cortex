@@ -65,13 +65,13 @@ void SphericalHarmonicsFunctionTest< T >::testEvaluation()
 
 
 template<typename T, int bands, unsigned int samples >
-T SphericalHarmonicsProjectorTest< T, bands, samples >::lightFunctor( const Imath::V2f &polar )
+T SphericalHarmonicsProjectorTest< T, bands, samples >::lightFunctor( const Imath::Vec2<T> &polar )
 {
 	return max( T(0), T(5) * Imath::Math<T>::cos( polar.x ) - T(4) ) + max( T(0), T(-4) * Imath::Math<T>::sin( polar.x - M_PI ) * Imath::Math<T>::cos( polar.y - T(2.5) ) - T(3) );
 }
 
 template<typename T, int bands, unsigned int samples >
-T SphericalHarmonicsProjectorTest< T, bands, samples >::polar1DFunctor( const V2f &polar )
+T SphericalHarmonicsProjectorTest< T, bands, samples >::polar1DFunctor( const Imath::Vec2<T> &polar )
 {
 	T sinTheta = Imath::Math<T>::sin( polar.x );
 	Imath::V3f pos( sinTheta*Imath::Math<T>::cos( polar.y), sinTheta*Imath::Math<T>::sin( polar.y ), Imath::Math<T>::cos( polar.x ));
@@ -79,14 +79,14 @@ T SphericalHarmonicsProjectorTest< T, bands, samples >::polar1DFunctor( const V2
 }
 
 template<typename T, int bands, unsigned int samples >
-T SphericalHarmonicsProjectorTest< T, bands, samples >::euclidian1DFunctor( const V3f &pos )
+T SphericalHarmonicsProjectorTest< T, bands, samples >::euclidian1DFunctor( const Imath::Vec3<T> &pos )
 {
 	Vec3<T> res = euclidian3DFunctor( pos );
 	return res.length();
 }
 
 template<typename T, int bands, unsigned int samples >
-Imath::Vec3<T> SphericalHarmonicsProjectorTest< T, bands, samples >::polar3DFunctor( const V2f &polar )
+Imath::Vec3<T> SphericalHarmonicsProjectorTest< T, bands, samples >::polar3DFunctor( const Imath::Vec2<T> &polar )
 {
 	T sinTheta = Imath::Math<T>::sin( polar.x );
 	Imath::Vec3<T> pos( sinTheta*Imath::Math<T>::cos( polar.y), sinTheta*Imath::Math<T>::sin( polar.y ), Imath::Math<T>::cos( polar.x ));
@@ -94,7 +94,7 @@ Imath::Vec3<T> SphericalHarmonicsProjectorTest< T, bands, samples >::polar3DFunc
 }
 
 template<typename T, int bands, unsigned int samples >
-Imath::Vec3<T> SphericalHarmonicsProjectorTest< T, bands, samples >::euclidian3DFunctor( const V3f &pos )
+Imath::Vec3<T> SphericalHarmonicsProjectorTest< T, bands, samples >::euclidian3DFunctor( const Imath::Vec3<T> &pos )
 {
 	Imath::Vec3<T> res( Imath::Math<T>::fabs(pos.x), Imath::Math<T>::fabs(pos.y), Imath::Math<T>::fabs(pos.z) );
 	// project to a cube of side 2.
@@ -339,6 +339,161 @@ void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection
 	}
 }
 
+template< typename T >
+Euler<T> SphericalHarmonicsRotationMatrixTest<T>::rotation()
+{
+	return Euler<T>( M_PI / 3, M_PI / 5, M_PI / 10 );
+}
 
+template< typename T >
+T SphericalHarmonicsRotationMatrixTest<T>::normalFunctor( const Imath::Vec3<T> &pos )
+{
+	return SphericalHarmonicsProjectorTest< T,10,20000 >::euclidian1DFunctor( pos );
+}
+
+template< typename T >
+T SphericalHarmonicsRotationMatrixTest<T>::rotatedFunctor( const Imath::Vec3<T> &pos )
+{
+	return SphericalHarmonicsProjectorTest< T,10,20000 >::euclidian1DFunctor( pos * rotation().toMatrix44() );
+}
+
+template< typename T >
+Imath::Vec3<T> SphericalHarmonicsRotationMatrixTest<T>::normal3dFunctor( const Imath::Vec3<T> &pos )
+{
+	return SphericalHarmonicsProjectorTest< T,10,20000 >::euclidian3DFunctor( pos );
+}
+
+template< typename T >
+Imath::Vec3<T> SphericalHarmonicsRotationMatrixTest<T>::rotated3dFunctor( const Imath::Vec3<T> &pos )
+{
+	return SphericalHarmonicsProjectorTest< T,10,20000 >::euclidian3DFunctor( pos * rotation().toMatrix44() );
+}
+
+template< typename T >
+void SphericalHarmonicsRotationMatrixTest<T>::testRotation()
+{
+	unsigned int bands = 5;
+
+	SphericalHarmonicsRotationMatrix<T> shRotation;
+	shRotation.setRotation( rotation().toMatrix44() );
+
+	// create normal distribution of samples
+	SphericalHarmonicsProjectorExt<T> sampler( 5000 );
+	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
+
+	// apply euclidian projection
+	SphericalHarmonics< T > sh( bands );
+
+	std::vector< T > normalValues;
+	std::vector< T > rotatedValues;
+	typename std::vector< T >::const_iterator itN;
+	typename std::vector< T >::const_iterator itR;
+
+	sampler.template euclideanProjection( rotatedFunctor, sh );
+	sampler.reconstruction( sh, rotatedValues );
+
+	sampler.template euclideanProjection( normalFunctor, sh );
+	sh *= shRotation;
+	sampler.reconstruction( sh, normalValues );
+
+#ifdef SAVE_ROTATION
+	typename std::vector< Imath::Vec3<T> >::const_iterator eIt;
+	PointsPrimitivePtr points = new PointsPrimitive( sampler.euclidianCoordinates().size() );
+	V3fVectorDataPtr POINTS = new V3fVectorData();
+	FloatVectorDataPtr RADIUS = new FloatVectorData();
+	POINTS->writable().resize( sampler.euclidianCoordinates().size() );
+	RADIUS->writable().resize( sampler.euclidianCoordinates().size(), 0.04 );
+	points->variables["P"].data = POINTS;
+	points->variables["P"].interpolation = PrimitiveVariable::Vertex;
+	points->variables["constantwidth"].data = new FloatData(0.04);
+	points->variables["constantwidth"].interpolation = PrimitiveVariable::Constant;
+	typename std::vector<Imath::V3f>::iterator PIT = POINTS->writable().begin();
+	for ( itN = normalValues.begin(), eIt = sampler.euclidianCoordinates().begin(); 
+			itN != normalValues.end() && eIt != sampler.euclidianCoordinates().end(); itN++, eIt++, PIT++ )
+	{
+		*PIT = *eIt * ( *itN );
+	}
+	Writer::create( points, "/tmp/rotation.cob" )->write();
+#endif
+
+	int errors = 0;
+	T e = 0.1;
+	Imath::Matrix44<T> m = rotation().toMatrix44();
+	for ( itN = normalValues.begin(), itR = rotatedValues.begin(); itN != normalValues.end(); itN++, itR++ )
+	{
+		if ( !Imath::equalWithRelError(*itR, *itN, e ) )
+		{
+			BOOST_CHECK_EQUAL( *itR, *itN );
+			if ( ++errors > 10 )
+			{
+				cout << "Could have more errors..." << endl;
+				break;
+			}
+		}
+	}
+}
+
+template< typename T >
+void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
+{
+	unsigned int bands = 5;
+
+	SphericalHarmonicsRotationMatrix<T> shRotation;
+	shRotation.setRotation( rotation().toMatrix44() );
+
+	// create normal distribution of samples
+	SphericalHarmonicsProjectorExt<T> sampler( 5000 );
+	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
+
+	// apply euclidian projection
+	SphericalHarmonics< Imath::Vec3<T> > sh( bands );
+
+	std::vector< Imath::Vec3<T> > normalValues;
+	std::vector< Imath::Vec3<T> > rotatedValues;
+	typename std::vector< Imath::Vec3<T> >::const_iterator itN;
+	typename std::vector< Imath::Vec3<T> >::const_iterator itR;
+
+	sampler.template euclideanProjection( rotated3dFunctor, sh );
+	sampler.reconstruction( sh, rotatedValues );
+
+	sampler.template euclideanProjection( normal3dFunctor, sh );
+	sh *= shRotation;
+
+	sampler.reconstruction( sh, normalValues );
+
+#ifdef SAVE_ROTATION
+	PointsPrimitivePtr points = new PointsPrimitive( sampler.euclidianCoordinates().size() );
+	V3fVectorDataPtr POINTS = new V3fVectorData();
+	FloatVectorDataPtr RADIUS = new FloatVectorData();
+	POINTS->writable().resize( sampler.euclidianCoordinates().size() );
+	RADIUS->writable().resize( sampler.euclidianCoordinates().size(), 0.04 );
+	points->variables["P"].data = POINTS;
+	points->variables["P"].interpolation = PrimitiveVariable::Vertex;
+	points->variables["constantwidth"].data = new FloatData(0.04);
+	points->variables["constantwidth"].interpolation = PrimitiveVariable::Constant;
+	typename std::vector<Imath::V3f>::iterator PIT = POINTS->writable().begin();
+	for ( itN = normalValues.begin(); itN != normalValues.end(); itN++, PIT++ )
+	{
+		*PIT = *itN;
+	}	
+	Writer::create( points, "/tmp/rotation3d.cob" )->write();
+#endif
+
+	int errors = 0;
+	T e = 0.3;
+	Imath::Matrix44<T> m = rotation().toMatrix44();
+	for ( itN = normalValues.begin(), itR = rotatedValues.begin(); itN != normalValues.end(); itN++, itR++ )
+	{
+		if ( !(*itR).equalWithAbsError(*itN, e ) )
+		{
+			BOOST_CHECK_EQUAL( *itR, *itN );
+			if ( ++errors > 10 )
+			{
+				cout << "Could have more errors..." << endl;
+				break;
+			}
+		}
+	}
+}
 
 }
