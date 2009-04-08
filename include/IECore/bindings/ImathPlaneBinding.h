@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,33 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IE_COREPYTHON_IMATHPLANEBINDING_H
+#define IE_COREPYTHON_IMATHPLANEBINDING_H
 
-#include "IECore/bindings/ImathBinding.h"
-#include "IECore/bindings/ImathVecBinding.h"
-#include "IECore/bindings/ImathBoxBinding.h"
-#include "IECore/bindings/ImathQuatBinding.h"
-#include "IECore/bindings/ImathMatrixBinding.h"
-#include "IECore/bindings/ImathColorBinding.h"
-#include "IECore/bindings/ImathEulerBinding.h"
-#include "IECore/bindings/ImathRootsBinding.h"
-#include "IECore/bindings/ImathPlaneBinding.h"
-
-using namespace IECore;
-
-// Binding implementations
-namespace IECore 
+namespace IECore
 {
-	
-void bindImath()
-{
-	bindImathVec();	
-	bindImathBox();
-	bindImathQuat();
-	bindImathMatrix();
-	bindImathColor();
-	bindImathEuler();
-	bindImathRoots();
-	bindImathPlane();
+
+void bindImathPlane();
+
 }
 
-}
+#endif // IE_COREPYTHON_IMATHPLANEBINDING_H

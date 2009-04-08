@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1186,6 +1186,23 @@ class ImathEulerfTest( unittest.TestCase ) :
 		
 		# check that the original vector isn't modified in place
 		self.assertEqual( ee, e )	
+
+class ImathPlane3fTest( unittest.TestCase ) :
+
+	def testConstructors( self ) :
+	
+		p = Plane3f( V3f( 0, 0, 0 ), V3f( 1, 0, 0 ) )
+		self.assertEqual( p.normal, V3f( 1, 0, 0 ) )
+		self.assertEqual( p.distance, 0 )
+	
+		p = Plane3f( V3f( 0, 0, 0 ), V3f( 0, 1, 0 ), V3f( 0, 0, 1 ) )
+		self.assertEqual( p.normal, V3f( 1, 0, 0 ) )	
+		self.assertEqual( p.distance, 0 )
+		
+		p = Plane3f( V3f( 2, 2, 2 ), V3f( 2, 3, 2 ), V3f( 2, 2, 3 ) )
+		self.assertEqual( p.normal, V3f( 1, 0, 0 ) )	
+		self.assertEqual( p.distance, 2 )
+		
 		
 if __name__ == "__main__":
     unittest.main()   
