@@ -125,7 +125,12 @@ TESTCXXFLAGS += [ "-O0" ]
 	
 if not debug :
 
-	CXXFLAGS += [ "-O2" ]		
+	CXXFLAGS += [ "-O2" ]
+			
+
+if IEEnv.platformHardware() == "i686" :
+
+	CXXFLAGS += [ "-march=pentium4", "-mfpmath=sse" ]
 
 
 PYTHONCXXFLAGS = copy.copy( CXXFLAGS )
