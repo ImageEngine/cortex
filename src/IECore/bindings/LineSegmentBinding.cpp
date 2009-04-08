@@ -102,6 +102,22 @@ static tuple closestPoints( const L &l, const L &l2 )
 	return make_tuple( a, b );
 }
 
+template<class L>
+static tuple intersect(  const L &l, const Imath::Plane3< typename L::BaseType > &plane )
+{
+	typename L::Point pt;
+	bool hit = l.intersect( plane, pt );
+	return make_tuple( hit, pt );	
+}
+
+template<class L>
+static tuple intersectT(  const L &l, const Imath::Plane3< typename L::BaseType > &plane )
+{
+	typename L::BaseType d;
+	bool hit = l.intersectT( plane, d );
+	return make_tuple( hit, d );	
+}
+
 template<typename Vec>
 static void bind3D()
 {
@@ -128,11 +144,12 @@ static void bind3D()
 		.def( "distanceTo", (typename L::BaseType (L::*)( const L & ) const)&L::distanceTo )
 		.def( "distance2To", (typename L::BaseType (L::*)( const Vec & ) const)&L::distance2To )
 		.def( "distance2To", (typename L::BaseType (L::*)( const L & ) const)&L::distance2To )
+		.def( "intersect", &intersect< L > )
+		.def( "intersectT", &intersectT< L > )
 		.def( self *= M() )
 		.def( self * M() )
 		.def( self == self )
 		.def( self != self )
-		/// \todo Bind the intersect methods when we have a binding for ImathPlane
 	;
 
 }
