@@ -103,6 +103,16 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		fnPH = IECoreMaya.FnProceduralHolder.create( "test", "read", 1 )
 		proc = fnPH.getProcedural()
 		self.assert_( isinstance( proc, IECore.ParameterisedProcedural ) )
+	
+	def testAllParameters( self ) :
+	
+		node = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnOpHolder( node )
+		
+		op = IECore.ClassLoader.defaultOpLoader().load( "parameterTypes", 1 )()
+		op.parameters().removeParameter( "m" ) # we're not even attempting to represent Color4fParameters at present
+		
+		fnOH.setParameterised( op )
 		
 	def tearDown( self ) :
 		
