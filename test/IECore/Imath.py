@@ -73,7 +73,14 @@ class ImathV2f(unittest.TestCase):
 
 		self.assertEqual( V3i( V3i( 1, 2, 3 ) ), V3i( 1, 2, 3 ) )
 		self.assertEqual( V3i( V3f( 1, 2, 3 ) ), V3i( 1, 2, 3 ) )
-		self.assertEqual( V3i( V3d( 1, 2, 3 ) ), V3i( 1, 2, 3 ) )		
+		self.assertEqual( V3i( V3d( 1, 2, 3 ) ), V3i( 1, 2, 3 ) )
+		
+		v = V2f( [ 1, 1 ] )
+		self.assertEqual(v.x, 1)
+		self.assertEqual(v.y, 1)
+		
+		self.assertRaises( RuntimeError, V2f, [ 1 ] )		
+		self.assertRaises( RuntimeError, V2f, [ 1, 2, 3 ] )		
 						
 	def testDimensions(self):
 		"""Test V2f dimensions"""
@@ -282,6 +289,15 @@ class ImathV3f(unittest.TestCase):
 		self.assertEqual(v.x, 2)
 		self.assertEqual(v.y, 3)
 		self.assertEqual(v.z, 4)
+		
+		v = V3f( [ 1, 1, 1 ] )
+		self.assertEqual(v.x, 1)
+		self.assertEqual(v.y, 1)
+		self.assertEqual(v.z, 1)
+		
+		self.assertRaises( RuntimeError, V3f, [ 1 ] )		
+		self.assertRaises( RuntimeError, V3f, [ 1, 2 ] )		
+		self.assertRaises( RuntimeError, V3f, [ 1, 2, 3, 4 ] )				
 		
 	def testDimensions(self):
 		"""Test V3f dimensions"""
@@ -690,6 +706,12 @@ class ImathM33f(unittest.TestCase):
 		m = M33f(1, 0, 0,
 		              0, 1, 0,
                               0, 0, 1);
+			      
+		m = M33f( [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ] )
+			      
+		self.assertRaises( RuntimeError, M33f, [ 1 ] )		
+		self.assertRaises( RuntimeError, M33f, [ 1, 2 ] )		
+		self.assertRaises( RuntimeError, M33f, [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] )				      
 
 	def testDimensions(self):
 		"""Test M33f dimensions"""
@@ -822,6 +844,12 @@ class ImathM44f(unittest.TestCase):
 		t = V3f(5., 5., 5.)
 		
 		m = M44f(m3, t)
+		
+		m = M44f( [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ] )
+			      
+		self.assertRaises( RuntimeError, M44f, [ 1 ] )		
+		self.assertRaises( RuntimeError, M44f, [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ] )		
+		self.assertRaises( RuntimeError, M44f, [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 ] )
 		
 	def testDimensions(self):
 		"""Test M44f dimensions"""
