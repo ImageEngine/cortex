@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,8 +39,10 @@
 
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathPlane.h"
 
 #include "IECore/TypeTraits.h"
+#include "IECore/LineSegment.h"
 
 namespace IECore
 {
@@ -53,6 +55,8 @@ struct DimensionTraits<1, T>
 	typedef T ValueType;
 	typedef T VectorType;
 	typedef void BoxType;
+	typedef void PlaneType;
+	typedef void LineSegmentType;	
 };
 
 /// 2-D partial specialization
@@ -63,6 +67,8 @@ struct DimensionTraits<2, T>
 	typedef T ValueType;
 	typedef Imath::Vec2<T> VectorType;
 	typedef Imath::Box< VectorType > BoxType;
+	typedef void PlaneType;
+	typedef LineSegment< VectorType > LineSegmentType;
 };
 
 /// 3-D partial specialization
@@ -73,6 +79,8 @@ struct DimensionTraits<3, T>
 	typedef T ValueType;	
 	typedef Imath::Vec3<T> VectorType;
 	typedef Imath::Box< VectorType > BoxType;
+	typedef Imath::Plane3<T> PlaneType;
+	typedef LineSegment< VectorType > LineSegmentType;	
 };
 
 }

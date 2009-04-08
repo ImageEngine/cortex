@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,7 +45,6 @@ namespace IECore
 /// For example, DimensionTraits< 3, float >::VectorType is defined to be Imath::V3f
 ///
 /// Any combinations which are meaningless (e.g. a 1-d box) are defined as void.
-/// \todo Add LineSegment, Plane, and any other meaningful types
 template< int N, typename T = void >
 struct DimensionTraits
 {
@@ -53,6 +52,8 @@ struct DimensionTraits
 	
 	typedef void VectorType;
 	typedef void BoxType;	
+	typedef void PlaneType;
+	typedef void LineSegmentType;
 };
 
 } // namespace IECore
