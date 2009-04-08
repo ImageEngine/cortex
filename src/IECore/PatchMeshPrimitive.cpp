@@ -38,12 +38,12 @@
 
 using namespace IECore;
 
-const unsigned int PatchMeshPrimitive::m_ioVersion = 0;
+const unsigned int PatchMeshPrimitive::m_ioVersion = 1;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( PatchMeshPrimitive );
 
 PatchMeshPrimitive::PatchMeshPrimitive()
 		:
-		m_linear( true ),
+		m_uLinear( true ), m_vLinear( true ),
 		m_uPoints( 0 ), m_vPoints( 0 ),
 		m_uBasis( CubicBasisf::linear() ), m_vBasis( CubicBasisf::linear() ),
 		m_uPeriodic( false ), m_vPeriodic( false )
@@ -61,12 +61,8 @@ PatchMeshPrimitive::PatchMeshPrimitive(
 ) : m_uPoints( uPoints ), m_vPoints( vPoints ), m_uBasis( uBasis ), m_vBasis( vBasis ), m_uPeriodic( uPeriodic ),
 		m_vPeriodic( vPeriodic )
 {
-	m_linear = m_uBasis==CubicBasisf::linear();
-	
-	if ( ( m_vBasis==CubicBasisf::linear() ) != m_linear )
-	{
-		throw InvalidArgumentException( "PatchMeshPrimitive: Mismatched u/v basis" );
-	}	
+	m_uLinear = m_uBasis==CubicBasisf::linear();
+	m_vLinear = m_vBasis==CubicBasisf::linear();	
 	
 	if ( !uPoints )
 	{
@@ -77,16 +73,12 @@ PatchMeshPrimitive::PatchMeshPrimitive(
 		throw InvalidArgumentException( "PatchMeshPrimitive: Insufficient control points in v" );
 	}
 	
-	if ( m_linear )
+	if ( m_uLinear )
 	{
 		if ( !m_uPeriodic && !m_uPoints )
 		{		
 			throw InvalidArgumentException( "PatchMeshPrimitive: Insufficient control points in u" );
-		}
-		if ( !m_vPeriodic && !m_vPoints )
-		{
-			throw InvalidArgumentException( "PatchMeshPrimitive: Insufficient control points in v" );
-		}
+		}		
 	}
 	else 
 	{
@@ -94,6 +86,17 @@ PatchMeshPrimitive::PatchMeshPrimitive(
 		{
 			throw InvalidArgumentException( "PatchMeshPrimitive: Insufficient control points in u" );
 		}
+	}
+	
+	if ( m_vLinear )
+	{
+		if ( !m_vPeriodic && !m_vPoints )
+		{
+			throw InvalidArgumentException( "PatchMeshPrimitive: Insufficient control points in v" );
+		}
+	}
+	else 
+	{
 		if ( !m_vPeriodic && m_vPoints < 4 )
 		{
 			throw InvalidArgumentException( "PatchMeshPrimitive: Insufficient control points in v" );
@@ -126,7 +129,11 @@ bool PatchMeshPrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	if ( m_linear!=tOther->m_linear )
+	if ( m_uLinear!=tOther->m_uLinear )
+	{
+		return false;
+	}
+	if ( m_vLinear!=tOther->m_vLinear )
 	{
 		return false;
 	}
@@ -152,7 +159,8 @@ void PatchMeshPrimitive::copyFrom( ConstObjectPtr other, CopyContext *context )
 	m_vBasis = tOther->m_vBasis;
 	m_uPeriodic = tOther->m_uPeriodic;
 	m_vPeriodic = tOther->m_vPeriodic;
-	m_linear = tOther->m_linear;	
+	m_uLinear = tOther->m_uLinear;	
+	m_vLinear = tOther->m_vLinear;		
 }
 
 void PatchMeshPrimitive::save( IECore::Object::SaveContext *context ) const
@@ -195,14 +203,14 @@ void PatchMeshPrimitive::load( IECore::Object::LoadContextPtr context )
 	container->read( "vPeriodic", p );
 	m_vPeriodic = p;
 
-	m_linear = m_uBasis==CubicBasisf::linear();
-	assert ( (m_vBasis==CubicBasisf::linear()) == m_linear );
+	m_uLinear = m_uBasis==CubicBasisf::linear();
+	m_vLinear = m_vBasis==CubicBasisf::linear();	
 }
 
 void PatchMeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Primitive::memoryUsage( a );
-	a.accumulate( sizeof( CubicBasisf ) * 2 + sizeof( bool ) * 3 + sizeof( unsigned ) * 2 );
+	a.accumulate( sizeof( CubicBasisf ) * 2 + sizeof( bool ) * 4 + sizeof( unsigned ) * 2 );
 }
 
 unsigned int PatchMeshPrimitive::uPoints() const
@@ -217,7 +225,7 @@ unsigned int PatchMeshPrimitive::vPoints() const
 
 unsigned int PatchMeshPrimitive::uPatches() const
 {
-	if ( m_linear )
+	if ( m_uLinear )
 	{
 		if ( m_uPeriodic )
 		{
@@ -243,7 +251,7 @@ unsigned int PatchMeshPrimitive::uPatches() const
 
 unsigned int PatchMeshPrimitive::vPatches() const
 {
-	if ( m_linear )
+	if ( m_vLinear )
 	{
 		if ( m_vPeriodic )
 		{
@@ -289,11 +297,9 @@ bool PatchMeshPrimitive::vPeriodic() const
 
 void PatchMeshPrimitive::render( RendererPtr renderer ) const
 {
-
 	renderer->patchMesh(
 		m_uBasis,
 		m_vBasis,
-		m_linear ? "bilinear" : "bicubic",
 		m_uPoints,
 		m_uPeriodic,
 		m_vPoints,

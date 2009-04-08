@@ -1148,9 +1148,18 @@ void IECoreRI::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVect
 	);
 }
 
-void IECoreRI::RendererImplementation::patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, const std::string &type, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars )
 {
 	ScopedContext scopedContext( m_context );
+	
+	bool uLinear = uBasis == CubicBasisf::linear();
+	bool vLinear = vBasis == CubicBasisf::linear();	
+	
+	if ( uLinear != vLinear )
+	{
+		msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Mismatched u/v basis.");	
+		return;
+	}		
 
 	if( !m_inMotion )
 	{
@@ -1163,8 +1172,9 @@ void IECoreRI::RendererImplementation::patchMesh( const CubicBasisf &uBasis, con
 	delayedMotionBegin();
 
 	PrimitiveVariableList pv( primVars, &( m_attributeStack.top().primVarTypeHints ) );
+	const char *type = uLinear ? "bilinear" : "bicubic";
 	RiPatchMeshV(
-		const_cast<char*>( type.c_str() ),
+		const_cast< char * >( type ),
 		nu,
 		(char *)( uPeriodic ? "periodic" : "nonperiodic" ),
 		nv,

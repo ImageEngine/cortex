@@ -1708,7 +1708,7 @@ void IECoreGL::Renderer::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKno
 	msg( Msg::Warning, "Renderer::nurbs", "Not implemented" );
 }
 
-void IECoreGL::Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, const std::string &type, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "Renderer::patchMesh", "Not implemented" );
 }

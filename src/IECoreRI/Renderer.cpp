@@ -201,9 +201,9 @@ void Renderer::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float u
 	m_implementation->nurbs( uOrder, uKnot, uMin, uMax, vOrder, vKnot, vMin, vMax, primVars );
 }
 
-void Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, const std::string &type, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars )
 {
-	m_implementation->patchMesh( uBasis, vBasis, type, nu, uPeriodic, nv, vPeriodic, primVars );
+	m_implementation->patchMesh( uBasis, vBasis, nu, uPeriodic, nv, vPeriodic, primVars );
 }
 
 void Renderer::geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars )

@@ -86,7 +86,7 @@ class PatchMeshPrimitive : public Primitive
 
 	protected :
 
-		bool m_linear;
+		bool m_uLinear, m_vLinear;
 		unsigned int m_uPoints, m_vPoints;
 		CubicBasisf m_uBasis, m_vBasis;
 		bool m_uPeriodic, m_vPeriodic;

@@ -249,11 +249,11 @@ static void nurbs( Renderer &r, int uOrder, ConstFloatVectorDataPtr uKnot, float
 	r.nurbs( uOrder, uKnot, uMin, uMax, vOrder, vKnot, vMin, vMax, p );
 }
 
-static void patchMesh( Renderer &r, const CubicBasisf &uBasis, const CubicBasisf &vBasis, const std::string &type, int nu, bool uPeriodic, int nv, bool vPeriodic, const dict &primVars )
+static void patchMesh( Renderer &r, const CubicBasisf &uBasis, const CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const dict &primVars )
 {
 	PrimitiveVariableMap p;
 	fillPrimitiveVariableMap( p, primVars );
-	r.patchMesh( uBasis, vBasis, type, nu, uPeriodic, nv, vPeriodic, p );
+	r.patchMesh( uBasis, vBasis, nu, uPeriodic, nv, vPeriodic, p );
 }
 
 static void geometry( Renderer &r, const std::string &type, const dict &topology, const dict &primVars )

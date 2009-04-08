@@ -311,8 +311,7 @@ class Renderer : public RunTimeTyped
 		/// Renders a nurbs surface.
 		virtual void nurbs( int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const PrimitiveVariableMap &primVars ) = 0;
 		/// Render a patch mesh.
-		/// \todo What is type for? I don't think it adds anything that isn't specified by the two basis objects.
-		virtual void patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, const std::string &type, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars ) = 0;		
+		virtual void patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars ) = 0;
 		/// Generic call for specifying renderer specify geometry types.
 		virtual void geometry( const std::string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars ) = 0;
 		//@}
