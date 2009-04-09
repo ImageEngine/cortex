@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,29 +45,16 @@ namespace IECore
 {
 
 /// Builds a KDTree of bounded volumes to permit fast intersection/overlap tests.
-/// \todo Rearrange this to avoid all the interleaving of public and private sections - see KDTree.h
-/// for a structure which works in that regard.
 template<class BoundIterator>
 class BoundedKDTree
 {
 	public:
-		class Node;
+
 		typedef BoundIterator Iterator;
 		typedef typename std::iterator_traits<BoundIterator>::value_type Bound;
-		typedef typename BoxTraits<Bound>::BaseType BaseType;		
-	
-	private :
-		
-		typedef std::vector<BoundIterator> Permutation;
-		typedef typename Permutation::iterator PermutationIterator;
-		typedef typename Permutation::const_iterator PermutationConstIterator;
-				
-		
-		typedef std::vector<Node> NodeVector;		
-
-
-	public:
-	
+		typedef typename BoxTraits<Bound>::BaseType BaseType;			
+		class Node;
+		typedef std::vector<Node> NodeVector;
 		typedef typename NodeVector::size_type NodeIndex;
 				
 		/// Creates a tree for the fast searching of bounds.
@@ -79,51 +66,8 @@ class BoundedKDTree
 		/// Populates the passed vector of iterators with the bounds which intersect "b". Returns the number of bounds found.		
 		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
 		template<typename S>
-		unsigned int intersectingBounds( const S &b, std::vector<BoundIterator> &bounds ) const;
+		unsigned int intersectingBounds( const S &b, std::vector<BoundIterator> &bounds ) const;		
 		
-		class Node
-		{
-
-			friend class BoundedKDTree<BoundIterator>;
-
-			private:
-
-				inline void makeLeaf( PermutationIterator permFirst, PermutationIterator permLast );
-				inline void makeBranch( unsigned char cutAxis );
-				
-				inline Bound &bound();
-				
-			public :
-
-				/// Must be default constructible for use as element within std::vector			
-				Node();			
-
-				inline bool isLeaf() const;
-
-				inline BoundIterator *permFirst() const;
-
-				inline BoundIterator *permLast() const;
-
-				inline bool isBranch() const;
-
-				inline unsigned char cutAxis() const;				
-
-				inline const Bound &bound() const;				
-
-			private :
-
-				unsigned char m_cutAxisAndLeaf;
-
-				Bound m_bound;
-
-				struct
-				{
-					BoundIterator *first;
-					BoundIterator *last;
-				} m_perm;
-
-		};
-	
 		/// Direct access to the index of the root node		
 		NodeIndex rootIndex() const;
 		
@@ -137,7 +81,11 @@ class BoundedKDTree
 		static NodeIndex highChildIndex( NodeIndex index );
 
 	private:
-			
+	
+		typedef std::vector<BoundIterator> Permutation;
+		typedef typename Permutation::iterator PermutationIterator;
+		typedef typename Permutation::const_iterator PermutationConstIterator;
+						
 		class AxisSort;
 		
 		unsigned char majorAxis( PermutationConstIterator permFirst, PermutationConstIterator permLast );
@@ -153,6 +101,46 @@ class BoundedKDTree
 		const BoundIterator m_lastBound;
 };
 
+template<class BoundIterator>
+class BoundedKDTree<BoundIterator>::Node
+{
+	public :
+
+		/// Must be default constructible for use as element within std::vector			
+		Node();			
+
+		inline bool isLeaf() const;
+
+		inline BoundIterator *permFirst() const;
+
+		inline BoundIterator *permLast() const;
+
+		inline bool isBranch() const;
+
+		inline unsigned char cutAxis() const;				
+
+		inline const Bound &bound() const;				
+
+	private :
+	
+		friend class BoundedKDTree<BoundIterator>;
+
+		inline void makeLeaf( PermutationIterator permFirst, PermutationIterator permLast );
+		inline void makeBranch( unsigned char cutAxis );
+
+		inline Bound &bound();	
+
+		unsigned char m_cutAxisAndLeaf;
+
+		Bound m_bound;
+
+		struct
+		{
+			BoundIterator *first;
+			BoundIterator *last;
+		} m_perm;
+};
+	
 typedef BoundedKDTree<std::vector<Imath::Box2f>::const_iterator> Box2fTree;
 typedef BoundedKDTree<std::vector<Imath::Box2d>::const_iterator> Box2dTree;
 typedef BoundedKDTree<std::vector<Imath::Box3f>::const_iterator> Box3fTree;
