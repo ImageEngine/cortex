@@ -67,6 +67,9 @@
 #include "IECoreMaya/bindings/CallbackIdBinding.h"
 #include "IECoreMaya/bindings/PlaybackFrameListBinding.h"
 #include "IECoreMaya/bindings/MStringFromPython.h"
+#include "IECoreMaya/bindings/ViewportPostProcessBinding.h"
+#include "IECoreMaya/bindings/ImageViewportPostProcessBinding.h"
+#include "IECoreMaya/bindings/ViewportPostProcessCallbackBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -108,4 +111,7 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindCallbackId();
 	bindPlaybackFrameList();
 	bindMStringFromPython();
+	bindViewportPostProcess();
+	bindImageViewportPostProcess();
+	bindViewportPostProcessCallback();	
 }
