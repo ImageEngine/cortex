@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -66,6 +66,8 @@ class ParameterisedHolderInterface
 		/// classVersion and searchPathEnvVar are updated to reflect the last values passed to
 		/// setParameterised - in the case of a 0 return value these values are left unchanged.
 		virtual IECore::RunTimeTypedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 ) = 0;
+		/// Convenience method to return dynamic_cast<IECore::ParameterisedInterface *>( getParameterised().get() )
+		IECore::ParameterisedInterface *getParameterisedInterface();
 		/// Sets the attributes of the node to reflect the current values
 		/// of the parameters in the held Parameterised object. Performs validation
 		/// of the parameter values and will return kFailure if any one is not valid.
