@@ -113,6 +113,28 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		op.parameters().removeParameter( "m" ) # we're not even attempting to represent Color4fParameters at present
 		
 		fnOH.setParameterised( op )
+	
+	def testStringVectorParameter( self ) :
+	
+		p = IECore.Parameterised( "", "" )
+		p.parameters().addParameter( 
+			IECore.StringVectorParameter(
+				"sv",
+				"",
+				IECore.StringVectorData( [ "hello", "goodbye" ] )
+			)
+		)
+		self.assertEqual( p["sv"].getValue(), IECore.StringVectorData( [ "hello", "goodbye" ] ) )
+		
+		node = cmds.createNode( "ieParameterisedHolderLocator" )
+		fnOH = IECoreMaya.FnParameterisedHolder( node )
+		fnOH.setParameterised( p )
+		
+		self.assertEqual( cmds.getAttr( node + ".parm_sv" ), [ "hello", "goodbye" ] )
+		
+		fnOH.setParameterisedValues()
+
+		self.assertEqual( p["sv"].getValue(), IECore.StringVectorData( [ "hello", "goodbye" ] ) )
 		
 	def tearDown( self ) :
 		

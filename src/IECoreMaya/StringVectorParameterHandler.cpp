@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -193,6 +193,10 @@ MStatus StringVectorParameterHandler::setValue( const MPlug &plug, IECore::Param
 		}	
 	}	
 	
+	// it's essential that the fnData object is declared at the same scope as the arr object we copy
+	// the array into. this is because arr appears to become a reference into the same data as fnData
+	// holds, and when fnData goes out of scope the data appears to become unavailable and arr becomes of length 0
+	MFnStringArrayData fnData;
 	if (!hasValueProvider)
 	{
 		MObject data;
@@ -200,8 +204,7 @@ MStatus StringVectorParameterHandler::setValue( const MPlug &plug, IECore::Param
 		
 		if( result )
 		{	
-			MStatus s;
-			MFnStringArrayData fnData( data, &s );
+			MStatus s = fnData.setObject( data );
 			if (!s)
 			{
 				return s;
@@ -211,14 +214,16 @@ MStatus StringVectorParameterHandler::setValue( const MPlug &plug, IECore::Param
 		}
 	}
 		
-	IECore::StringVectorParameter::ValueType value;
+	IECore::StringVectorParameter::ObjectType::Ptr valuePtr = new IECore::StringVectorParameter::ObjectType;
+	IECore::StringVectorParameter::ValueType &value = valuePtr->writable();
+	value.reserve( arr.length() );
 	
 	for (unsigned i = 0; i < arr.length(); i++)
 	{
 		value.push_back( arr[i].asChar() );
 	}	
 		
-	p->setTypedValue( value );
+	p->setValue( valuePtr );
 	
 	return result;
 }
