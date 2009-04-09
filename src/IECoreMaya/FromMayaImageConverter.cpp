@@ -209,10 +209,11 @@ ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands 
 	}
 	
 	if ( m_depthParameter->getTypedValue() )
-	{	
-		float *depth = m_image.depthMap();
-		if ( depth )
+	{			
+		if ( m_image.haveDepth() )
 		{	
+			float *depth = m_image.depthMap();
+			assert( depth );
 			unsigned depthWidth = 0, depthHeight = 0;
 
 			s = m_image.getDepthMapSize( depthWidth, depthHeight );
