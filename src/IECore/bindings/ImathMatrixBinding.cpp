@@ -407,7 +407,9 @@ void bindMatrix33()
 	const Matrix33<T> &(Matrix33<T>::*shear1)(const T &) = &Matrix33<T>::template shear<T>;
 	const Matrix33<T> &(Matrix33<T>::*shear2)(const Vec2<T> &) = &Matrix33<T>::template shear<T>;
 	
-	class_< Matrix33<T> >( typeName< Matrix33<T > >() )
+	const char *bindName = typeName<Matrix33<T> >();
+	
+	class_< Matrix33<T> >( bindName )
 		//.def_readwrite("x", &Matrix33<T>::x)
 		.def(init<>())
 		.def(init<T>())
@@ -524,7 +526,9 @@ void bindMatrix44()
 	//const Matrix44<T> &(Matrix44<T>::*shear1)(const Shear6<T> &) = &Matrix44<T>::template shear<T>;
 	const Matrix44<T> &(Matrix44<T>::*shear2)(const Vec3<T> &) = &Matrix44<T>::template shear<T>;
 	
-	class_< Matrix44<T> >( typeName< Matrix44<T > >() )
+	const char *bindName = typeName<Matrix44<T> >();
+	
+	class_< Matrix44<T> >( bindName )
 		
 		.def(init<>())
 		.def(init<T>())

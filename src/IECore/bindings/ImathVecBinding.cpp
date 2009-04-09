@@ -221,7 +221,9 @@ void bindVec2()
 	void (Vec2<T>::*sv1)(T, T) = &Vec2<T>::template setValue<T>;
 	void (Vec2<T>::*sv2)(const Vec2<T>&) = &Vec2<T>::template setValue<T>;
 	
-	class_< Vec2<T> >( typeName<Vec2<T> >() )
+	const char *bindName = typeName<Vec2<T> >();
+	
+	class_< Vec2<T> >( bindName )
 		.def_readwrite("x", &Vec2<T>::x)
 		.def_readwrite("y", &Vec2<T>::y)
 	
@@ -310,7 +312,9 @@ void bindVec3()
 	void (Vec3<T>::*sv1)(T, T, T) = &Vec3<T>::template setValue<T>;
 	void (Vec3<T>::*sv2)(const Vec3<T>&) = &Vec3<T>::template setValue<T>;
 	
-	class_< Vec3<T> >( typeName<Vec3<T> >() )
+	const char *bindName = typeName<Vec3<T> >();
+	
+	class_< Vec3<T> >( bindName )
 		.def_readwrite("x", &Vec3<T>::x)
 		.def_readwrite("y", &Vec3<T>::y)
 		.def_readwrite("z", &Vec3<T>::z)
