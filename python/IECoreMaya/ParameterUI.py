@@ -148,6 +148,7 @@ class ParameterUI :
 		return IECore.StringUtil.wrap( self.parameter.description, 48 )
 		
 	## Creates a drop-down selection list and returns True if the parameter is set to "presets only". Otherwise returns False.
+	## \todo This needs some sort of attribute changed callback so the menu updates when the attribute changes for some other reason.
 	def presetsOnly( self ):
 	
 		self.__popupControl = None
