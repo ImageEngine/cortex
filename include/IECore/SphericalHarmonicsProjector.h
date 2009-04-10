@@ -60,7 +60,6 @@ class SphericalHarmonicsProjector
 		typedef std::vector< EvaluationVector > EvaluationSamples;
 
 		// uses unbiased uniform distribution
-		// the actual number of samples is rounded to sqrt(samples)*sqrt(samples).
 		SphericalHarmonicsProjector( unsigned int samples, unsigned long int seed = 0 );
 
 		// uses given uniform point distribution.
@@ -87,6 +86,11 @@ class SphericalHarmonicsProjector
 			return m_weights;
 		}
 
+		// Projects just one sample point at the given coordinate index.
+		// The function does the appropriate initialization and finalization of the spherical harmonics object on the first and last samples.
+		template< typename U > 
+		void operator()( unsigned int coordinateIndex, const U &value, SphericalHarmonics< U > &result ) const;
+
 		// Sets the given SphericalHarmonics object with the projection of the given functor for every polar coordinate.
 		// the value stored in the spherical harmonics is the same as the functor return type.
 		template< typename T, typename U > 
@@ -97,6 +101,10 @@ class SphericalHarmonicsProjector
 		template< typename T, typename U > 
 		void euclideanProjection( T functor, SphericalHarmonics< U > & result ) const;
 
+		// make sure the evaluations go up to the given number of bands.
+		// this function is called by the projection functions, but you may want to use it if the projector is used by several threads.
+		void computeSamples( unsigned int bands ) const;
+
 	protected:
 
 		static Imath::Vec3<V> sphericalCoordsToUnitVector( const Imath::Vec2<V> &sphericalCoord );
@@ -105,8 +113,6 @@ class SphericalHarmonicsProjector
 		template <typename T>
 		static void addProjection( typename SphericalHarmonics<T>::CoefficientVector &c, const EvaluationVector &v, const T &scale );
 
-		// make sure the evaluations go up to the given number of bands.
-		void evaluateSphericalHarmonicsSamples( unsigned int bands ) const;
 
 		mutable unsigned int m_bands;
 		std::vector< Imath::Vec2< V > > m_sphericalCoordinates;

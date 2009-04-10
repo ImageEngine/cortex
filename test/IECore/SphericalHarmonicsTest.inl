@@ -112,14 +112,17 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testProjection()
 	};
 
 	// create normal distribution
-	SphericalHarmonicsProjector<T> sampler( samples );
+	SphericalHarmonicsProjector<T> projector( samples );
 	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
 
 	// test 1D polar projection
 	SphericalHarmonics<T> sh1D( 4 );
 	typename SphericalHarmonics<T>::CoefficientVector::iterator it;
 
-	sampler.template polarProjection( lightFunctor, sh1D );
+	for ( unsigned int i = 0; i < samples; i++ )
+	{
+		projector.template operator()( i, lightFunctor( projector.sphericalCoordinates()[i] ), sh1D );
+	}
 	
 	T e = 0.01;
 	int i = 0;
@@ -174,7 +177,7 @@ template<typename T, int bands, unsigned int samples >
 void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection1D()
 {
 	// create normal distribution of samples
-	SphericalHarmonicsProjectorExt<T> sampler( samples );
+	SphericalHarmonicsProjectorExt<T> projector( samples );
 	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
 
 	// test 1D polar projection
@@ -182,23 +185,23 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection1D
 	SphericalHarmonics<T> sh1D( bands );
 	typename std::vector< T >::const_iterator it;
 
-	sampler.template polarProjection( polar1DFunctor, sh1D );
-	sampler.reconstruction( sh1D, func1DValues );
+	projector.template polarProjection( polar1DFunctor, sh1D );
+	projector.reconstruction( sh1D, func1DValues );
 
 #ifdef SAVE_RECONSTRUCTION
 	typename std::vector< Imath::V3f >::const_iterator eIt;
-	PointsPrimitivePtr points = new PointsPrimitive( sampler.euclidianCoordinates().size() );
+	PointsPrimitivePtr points = new PointsPrimitive( projector.euclidianCoordinates().size() );
 	V3fVectorDataPtr POINTS = new V3fVectorData();
 	FloatVectorDataPtr RADIUS = new FloatVectorData();
-	POINTS->writable().resize( sampler.euclidianCoordinates().size() );
-	RADIUS->writable().resize( sampler.euclidianCoordinates().size(), 0.04 );
+	POINTS->writable().resize( projector.euclidianCoordinates().size() );
+	RADIUS->writable().resize( projector.euclidianCoordinates().size(), 0.04 );
 	points->variables["P"].data = POINTS;
 	points->variables["P"].interpolation = PrimitiveVariable::Vertex;
 	points->variables["constantwidth"].data = new FloatData(0.04);
 	points->variables["constantwidth"].interpolation = PrimitiveVariable::Constant;
 	typename std::vector<Imath::V3f>::iterator PIT = POINTS->writable().begin();
-	for ( it = func1DValues.begin(), eIt = sampler.euclidianCoordinates().begin(); 
-			it != func1DValues.end() && eIt != sampler.euclidianCoordinates().end(); it++, eIt++, PIT++ )
+	for ( it = func1DValues.begin(), eIt = projector.euclidianCoordinates().begin(); 
+			it != func1DValues.end() && eIt != projector.euclidianCoordinates().end(); it++, eIt++, PIT++ )
 	{
 		*PIT = *eIt * ( *it );
 	}	
@@ -207,12 +210,12 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection1D
 	
 	int errors = 0;
 	T e = 0.15;
-	for ( it = func1DValues.begin(), pIt = sampler.sphericalCoordinates().begin(); 
-			it != func1DValues.end() && pIt != sampler.sphericalCoordinates().end(); it++, pIt++ )
+	for ( it = func1DValues.begin(), pIt = projector.sphericalCoordinates().begin(); 
+			it != func1DValues.end() && pIt != projector.sphericalCoordinates().end(); it++, pIt++ )
 	{
 		if (!Imath::equalWithRelError ( polar1DFunctor(*pIt), *it, e))
 		{
-			cout << "Failed on sample " << ( pIt - sampler.sphericalCoordinates().begin() ) << endl;
+			cout << "Failed on sample " << ( pIt - projector.sphericalCoordinates().begin() ) << endl;
 			BOOST_CHECK_EQUAL( *it, polar1DFunctor( *pIt ) );
 			if ( ++errors > 10 )
 			{
@@ -228,7 +231,7 @@ template<typename T, int bands, unsigned int samples >
 void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection3D()
 {
 	// create normal distribution of samples
-	SphericalHarmonicsProjectorExt<T> sampler( samples );
+	SphericalHarmonicsProjectorExt<T> projector( samples );
 	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
 
 	// test 3D polar projection
@@ -236,15 +239,15 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection3D
 	std::vector< Imath::Vec3<T> > func3DValues;
 	typename std::vector< Imath::Vec3<T> >::const_iterator it3d;
 
-	sampler.template polarProjection( polar3DFunctor, sh3D );
-	sampler.reconstruction( sh3D, func3DValues );
+	projector.template polarProjection( polar3DFunctor, sh3D );
+	projector.reconstruction( sh3D, func3DValues );
 
 #ifdef SAVE_RECONSTRUCTION
-	PointsPrimitivePtr points = new PointsPrimitive( sampler.euclidianCoordinates().size() );
+	PointsPrimitivePtr points = new PointsPrimitive( projector.euclidianCoordinates().size() );
 	V3fVectorDataPtr POINTS = new V3fVectorData();
 	FloatVectorDataPtr RADIUS = new FloatVectorData();
-	POINTS->writable().resize( sampler.euclidianCoordinates().size() );
-	RADIUS->writable().resize( sampler.euclidianCoordinates().size(), 0.04 );
+	POINTS->writable().resize( projector.euclidianCoordinates().size() );
+	RADIUS->writable().resize( projector.euclidianCoordinates().size(), 0.04 );
 	points->variables["P"].data = POINTS;
 	points->variables["P"].interpolation = PrimitiveVariable::Vertex;
 	points->variables["constantwidth"].data = new FloatData(0.04);
@@ -259,8 +262,8 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection3D
 
 	int errors = 0;
 	T e = 0.3;
-	for ( it3d = func3DValues.begin(), pIt = sampler.sphericalCoordinates().begin(); 
-			it3d != func3DValues.end() && pIt != sampler.sphericalCoordinates().end(); it3d++, pIt++ )
+	for ( it3d = func3DValues.begin(), pIt = projector.sphericalCoordinates().begin(); 
+			it3d != func3DValues.end() && pIt != projector.sphericalCoordinates().end(); it3d++, pIt++ )
 	{
 		if ( !(*it3d).equalWithAbsError( polar3DFunctor( *pIt ), e) ) 
 		{
@@ -279,7 +282,7 @@ template<typename T, int bands, unsigned int samples >
 void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection1D()
 {
 	// create normal distribution of samples
-	SphericalHarmonicsProjectorExt<T> sampler( samples );
+	SphericalHarmonicsProjectorExt<T> projector( samples );
 	typename std::vector< Imath::Vec3<T> >::const_iterator eIt;
 
 	std::vector< T > func1DValues;
@@ -287,13 +290,13 @@ void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection
 	typename std::vector< T >::const_iterator it;
 
 	// test 1D euclidian projection
-	sampler.template euclideanProjection( euclidian1DFunctor, sh1D );
-	sampler.reconstruction( sh1D, func1DValues );
+	projector.template euclideanProjection( euclidian1DFunctor, sh1D );
+	projector.reconstruction( sh1D, func1DValues );
 	
 	int errors = 0;
 	T e = 0.15;
-	for ( it = func1DValues.begin(), eIt = sampler.euclidianCoordinates().begin(); 
-			it != func1DValues.end() && eIt != sampler.euclidianCoordinates().end(); it++, eIt++ )
+	for ( it = func1DValues.begin(), eIt = projector.euclidianCoordinates().begin(); 
+			it != func1DValues.end() && eIt != projector.euclidianCoordinates().end(); it++, eIt++ )
 	{
 		if (!Imath::equalWithRelError ( *it, euclidian1DFunctor(*eIt), e))
 		{
@@ -311,7 +314,7 @@ template<typename T, int bands, unsigned int samples >
 void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection3D()
 {
 	// create normal distribution of samples
-	SphericalHarmonicsProjectorExt<T> sampler( samples );
+	SphericalHarmonicsProjectorExt<T> projector( samples );
 	typename std::vector< Imath::Vec3<T> >::const_iterator eIt;
 
 	// test 3D euclidian projection
@@ -319,13 +322,13 @@ void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection
 	std::vector< Imath::Vec3<T> > func3DValues;
 	typename std::vector< Imath::Vec3<T> >::const_iterator it3d;
 
-	sampler.template euclideanProjection( euclidian3DFunctor, sh3D );
-	sampler.reconstruction( sh3D, func3DValues );
+	projector.template euclideanProjection( euclidian3DFunctor, sh3D );
+	projector.reconstruction( sh3D, func3DValues );
 
 	int errors = 0;
 	T e = 0.3;
-	for ( it3d = func3DValues.begin(), eIt = sampler.euclidianCoordinates().begin(); 
-			it3d != func3DValues.end() && eIt != sampler.euclidianCoordinates().end(); it3d++, eIt++ )
+	for ( it3d = func3DValues.begin(), eIt = projector.euclidianCoordinates().begin(); 
+			it3d != func3DValues.end() && eIt != projector.euclidianCoordinates().end(); it3d++, eIt++ )
 	{
 		if ( !(*it3d).equalWithAbsError( euclidian3DFunctor( *eIt ), e) ) 
 		{
@@ -378,7 +381,7 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation()
 	shRotation.setRotation( rotation().toMatrix44() );
 
 	// create normal distribution of samples
-	SphericalHarmonicsProjectorExt<T> sampler( 5000 );
+	SphericalHarmonicsProjectorExt<T> projector( 10000 );
 	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
 
 	// apply euclidian projection
@@ -389,27 +392,27 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation()
 	typename std::vector< T >::const_iterator itN;
 	typename std::vector< T >::const_iterator itR;
 
-	sampler.template euclideanProjection( rotatedFunctor, sh );
-	sampler.reconstruction( sh, rotatedValues );
+	projector.template euclideanProjection( rotatedFunctor, sh );
+	projector.reconstruction( sh, rotatedValues );
 
-	sampler.template euclideanProjection( normalFunctor, sh );
+	projector.template euclideanProjection( normalFunctor, sh );
 	sh *= shRotation;
-	sampler.reconstruction( sh, normalValues );
+	projector.reconstruction( sh, normalValues );
 
 #ifdef SAVE_ROTATION
 	typename std::vector< Imath::Vec3<T> >::const_iterator eIt;
-	PointsPrimitivePtr points = new PointsPrimitive( sampler.euclidianCoordinates().size() );
+	PointsPrimitivePtr points = new PointsPrimitive( projector.euclidianCoordinates().size() );
 	V3fVectorDataPtr POINTS = new V3fVectorData();
 	FloatVectorDataPtr RADIUS = new FloatVectorData();
-	POINTS->writable().resize( sampler.euclidianCoordinates().size() );
-	RADIUS->writable().resize( sampler.euclidianCoordinates().size(), 0.04 );
+	POINTS->writable().resize( projector.euclidianCoordinates().size() );
+	RADIUS->writable().resize( projector.euclidianCoordinates().size(), 0.04 );
 	points->variables["P"].data = POINTS;
 	points->variables["P"].interpolation = PrimitiveVariable::Vertex;
 	points->variables["constantwidth"].data = new FloatData(0.04);
 	points->variables["constantwidth"].interpolation = PrimitiveVariable::Constant;
 	typename std::vector<Imath::V3f>::iterator PIT = POINTS->writable().begin();
-	for ( itN = normalValues.begin(), eIt = sampler.euclidianCoordinates().begin(); 
-			itN != normalValues.end() && eIt != sampler.euclidianCoordinates().end(); itN++, eIt++, PIT++ )
+	for ( itN = normalValues.begin(), eIt = projector.euclidianCoordinates().begin(); 
+			itN != normalValues.end() && eIt != projector.euclidianCoordinates().end(); itN++, eIt++, PIT++ )
 	{
 		*PIT = *eIt * ( *itN );
 	}
@@ -442,7 +445,7 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
 	shRotation.setRotation( rotation().toMatrix44() );
 
 	// create normal distribution of samples
-	SphericalHarmonicsProjectorExt<T> sampler( 5000 );
+	SphericalHarmonicsProjectorExt<T> projector( 5000 );
 	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
 
 	// apply euclidian projection
@@ -453,20 +456,20 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
 	typename std::vector< Imath::Vec3<T> >::const_iterator itN;
 	typename std::vector< Imath::Vec3<T> >::const_iterator itR;
 
-	sampler.template euclideanProjection( rotated3dFunctor, sh );
-	sampler.reconstruction( sh, rotatedValues );
+	projector.template euclideanProjection( rotated3dFunctor, sh );
+	projector.reconstruction( sh, rotatedValues );
 
-	sampler.template euclideanProjection( normal3dFunctor, sh );
+	projector.template euclideanProjection( normal3dFunctor, sh );
 	sh *= shRotation;
 
-	sampler.reconstruction( sh, normalValues );
+	projector.reconstruction( sh, normalValues );
 
 #ifdef SAVE_ROTATION
-	PointsPrimitivePtr points = new PointsPrimitive( sampler.euclidianCoordinates().size() );
+	PointsPrimitivePtr points = new PointsPrimitive( projector.euclidianCoordinates().size() );
 	V3fVectorDataPtr POINTS = new V3fVectorData();
 	FloatVectorDataPtr RADIUS = new FloatVectorData();
-	POINTS->writable().resize( sampler.euclidianCoordinates().size() );
-	RADIUS->writable().resize( sampler.euclidianCoordinates().size(), 0.04 );
+	POINTS->writable().resize( projector.euclidianCoordinates().size() );
+	RADIUS->writable().resize( projector.euclidianCoordinates().size(), 0.04 );
 	points->variables["P"].data = POINTS;
 	points->variables["P"].interpolation = PrimitiveVariable::Vertex;
 	points->variables["constantwidth"].data = new FloatData(0.04);

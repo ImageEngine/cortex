@@ -47,13 +47,13 @@ SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int sample
 	m_shEvaluations(),
 	m_weights( 0 )
 {
-	int sqrtSamples = int(round(sqrt((double)samples)));
+	int sqrtSamples = int(floor(sqrt((double)samples)));
 
 	Imath::Rand32 random( seed );
 	V invN = 1.0 / V(sqrtSamples);
 	Imath::V2f sc;
 
-	m_sphericalCoordinates.resize( sqrtSamples * sqrtSamples );
+	m_sphericalCoordinates.resize( samples );
 
 	typename std::vector< Imath::Vec2<V> >::iterator it = m_sphericalCoordinates.begin();
 
@@ -68,6 +68,17 @@ SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int sample
 			*it = sc;
 		}
 	}
+
+	// complete samples using random distribution
+	for ( unsigned int n = sqrtSamples*sqrtSamples; n < samples; n++, it++ )
+	{
+		V x = random.nextf();
+		V y = random.nextf();
+		sc[0] = 2.0 * Imath::Math<float>::acos( sqrt( 1.0 - x ) );
+		sc[1] = 2.0 * M_PI * y;
+		*it = sc;
+	}
+
 }
 
 template < typename V >
@@ -108,12 +119,58 @@ const std::vector< Imath::Vec3< V > > &SphericalHarmonicsProjector<V>::euclidian
 }
 
 template< typename V >
+template< typename U > 
+void SphericalHarmonicsProjector<V>::operator()( unsigned int coordinateIndex, const U &value, SphericalHarmonics< U > &result ) const
+{
+	if ( coordinateIndex == 0 )
+	{
+		computeSamples( result.bands() );
+
+		// zero coefficients to start accumulation.
+		for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
+		{
+			*rit = U(0);
+		}
+	}
+
+	assert( coordinateIndex < m_shEvaluations.size() );
+
+	if ( m_weights.size() )
+	{
+		addProjection( result.coefficients(), m_shEvaluations[ coordinateIndex ], value * m_weights[ coordinateIndex ] );
+	}
+	else
+	{
+		// uniform distribution weights
+		addProjection( result.coefficients(), m_shEvaluations[ coordinateIndex ], value );
+	}
+
+	if ( coordinateIndex == m_shEvaluations.size() - 1 )
+	{
+		double factor;
+		if ( m_weights.size() )
+		{
+			factor = 1. / (double)m_shEvaluations.size();
+		}
+		else
+		{
+			const double weight = 4 * M_PI;
+			factor = weight / (double)m_shEvaluations.size();
+		}
+		for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
+		{
+			*rit *= factor;
+		}
+	}
+}
+
+template< typename V >
 template< typename T, typename U > 
 void SphericalHarmonicsProjector<V>::polarProjection( T functor, SphericalHarmonics< U > &result ) const
 {
 	double factor;
 
-	evaluateSphericalHarmonicsSamples( result.bands() );
+	computeSamples( result.bands() );
 
 	// zero coefficients to start accumulation.
 	for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
@@ -153,7 +210,7 @@ void SphericalHarmonicsProjector<V>::euclideanProjection( T functor, SphericalHa
 {
 	double factor;
 
-	evaluateSphericalHarmonicsSamples( result.bands() );
+	computeSamples( result.bands() );
 
 	// make sure our internal object is created.
 	euclidianCoordinates();
@@ -197,7 +254,7 @@ Imath::Vec3<V> SphericalHarmonicsProjector<V>::sphericalCoordsToUnitVector( cons
 }
 
 template< typename V >
-void SphericalHarmonicsProjector<V>::evaluateSphericalHarmonicsSamples( unsigned int bands ) const
+void SphericalHarmonicsProjector<V>::computeSamples( unsigned int bands ) const
 {
 	if ( m_bands >= bands )
 		return;
