@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -80,16 +80,24 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		return _IECoreMaya._parameterisedHolderGetParameterised( self )
 
 	## Sets the values of the plugs representing the parameterised object,
-	# using the current values of the parameters.
-	def setNodeValues( self ) :
-	
-		return _IECoreMaya._parameterisedHolderSetNodeValues( self )
-	
+	# using the current values of the parameters. If the undoable parameter is True
+	# then this method is undoable using the standard maya undo mechanism.
+	def setNodeValues( self, undoable=True ) :
+		
+		if undoable :	
+			maya.cmds.ieParameterisedHolderSetValue( self.fullPathName() )
+		else :
+			_IECoreMaya._parameterisedHolderSetNodeValues( self )
+				
 	## Set the value for the plug representing parameter, using the current
-	# value of the parameter.
-	def setNodeValue( self, parameter ) :
-	
-		return _IECoreMaya._parameterisedHolderSetNodeValue( self, parameter )
+	# value of the parameter. If the undoable parameter is True
+	# then this method is undoable using the standard maya undo mechanism.
+	def setNodeValue( self, parameter, undoable=True ) :
+			
+		if undoable :
+			maya.cmds.ieParameterisedHolderSetValue( self.fullPathName(), plug=self.parameterPlug( parameter ).partialName() )
+		else :
+			_IECoreMaya._parameterisedHolderSetNodeValue( self, parameter )
 
 	## Transfers the values from the plugs of the node onto the 
 	# parameters of the held Parameterised object.

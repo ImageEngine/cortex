@@ -86,7 +86,6 @@ class ParameterHandler : public IECore::RefCounted
 	
 		virtual MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const = 0;
 		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const = 0;
-		/// \todo We really need an undoable version of this.
 		virtual MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const = 0;
 		virtual MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const = 0;		
 		

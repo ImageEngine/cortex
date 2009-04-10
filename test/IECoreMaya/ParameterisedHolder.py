@@ -52,7 +52,7 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		h.setParameterised( p )
 		
 		p.parameters().filename = "testValue"		
-		h.setNodeValue( p.parameters()["filename"] )
+		h.setNodeValue( p.parameters()["filename"], False )
 		pl = h.parameterPlug( p.parameters()["filename"] )
 		v = IECoreMaya.FromMayaPlugConverter.create( pl, IECore.TypeId.StringData ).convert()
 		self.assertEqual( v.value, "testValue" )

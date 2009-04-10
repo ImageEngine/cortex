@@ -126,7 +126,7 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 			parameterised.parameters()["spline"].setValue( splineData )
 
 			# Put the value to the node's attributes
-			fnPH.setNodeValue( parameterised.parameters()["spline"] )
+			fnPH.setNodeValue( parameterised.parameters()["spline"], False )
 
 			# Retrieve the value from the node's attributes		
 			fnPH.setParameterisedValue( parameterised.parameters()["spline"] )
@@ -178,7 +178,7 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 			parameterised.parameters()["spline"].setValue( splineData )
 
 			# Put the value to the node's attributes
-			fnPH.setNodeValue( parameterised.parameters()["spline"] )
+			fnPH.setNodeValue( parameterised.parameters()["spline"], False )
 
 			# Retrieve the value from the node's attributes		
 			fnPH.setParameterisedValue( parameterised.parameters()["spline"] )
