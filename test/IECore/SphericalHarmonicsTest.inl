@@ -121,7 +121,7 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testProjection()
 
 	for ( unsigned int i = 0; i < samples; i++ )
 	{
-		projector.template operator()( i, lightFunctor( projector.sphericalCoordinates()[i] ), sh1D );
+		projector.template operator()<>( i, lightFunctor( projector.sphericalCoordinates()[i] ), sh1D );
 	}
 	
 	T e = 0.01;
@@ -185,7 +185,7 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection1D
 	SphericalHarmonics<T> sh1D( bands );
 	typename std::vector< T >::const_iterator it;
 
-	projector.template polarProjection( polar1DFunctor, sh1D );
+	projector.template polarProjection<>( polar1DFunctor, sh1D );
 	projector.reconstruction( sh1D, func1DValues );
 
 #ifdef SAVE_RECONSTRUCTION
@@ -239,7 +239,7 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection3D
 	std::vector< Imath::Vec3<T> > func3DValues;
 	typename std::vector< Imath::Vec3<T> >::const_iterator it3d;
 
-	projector.template polarProjection( polar3DFunctor, sh3D );
+	projector.template polarProjection<>( polar3DFunctor, sh3D );
 	projector.reconstruction( sh3D, func3DValues );
 
 #ifdef SAVE_RECONSTRUCTION
@@ -290,7 +290,7 @@ void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection
 	typename std::vector< T >::const_iterator it;
 
 	// test 1D euclidian projection
-	projector.template euclideanProjection( euclidian1DFunctor, sh1D );
+	projector.template euclideanProjection<>( euclidian1DFunctor, sh1D );
 	projector.reconstruction( sh1D, func1DValues );
 	
 	int errors = 0;
@@ -322,7 +322,7 @@ void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection
 	std::vector< Imath::Vec3<T> > func3DValues;
 	typename std::vector< Imath::Vec3<T> >::const_iterator it3d;
 
-	projector.template euclideanProjection( euclidian3DFunctor, sh3D );
+	projector.template euclideanProjection<>( euclidian3DFunctor, sh3D );
 	projector.reconstruction( sh3D, func3DValues );
 
 	int errors = 0;
@@ -392,10 +392,10 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation()
 	typename std::vector< T >::const_iterator itN;
 	typename std::vector< T >::const_iterator itR;
 
-	projector.template euclideanProjection( rotatedFunctor, sh );
+	projector.template euclideanProjection<>( rotatedFunctor, sh );
 	projector.reconstruction( sh, rotatedValues );
 
-	projector.template euclideanProjection( normalFunctor, sh );
+	projector.template euclideanProjection<>( normalFunctor, sh );
 	sh *= shRotation;
 	projector.reconstruction( sh, normalValues );
 
@@ -456,10 +456,10 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
 	typename std::vector< Imath::Vec3<T> >::const_iterator itN;
 	typename std::vector< Imath::Vec3<T> >::const_iterator itR;
 
-	projector.template euclideanProjection( rotated3dFunctor, sh );
+	projector.template euclideanProjection<>( rotated3dFunctor, sh );
 	projector.reconstruction( sh, rotatedValues );
 
-	projector.template euclideanProjection( normal3dFunctor, sh );
+	projector.template euclideanProjection<>( normal3dFunctor, sh );
 	sh *= shRotation;
 
 	projector.reconstruction( sh, normalValues );
