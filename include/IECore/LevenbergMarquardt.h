@@ -122,7 +122,7 @@ class LevenbergMarquardt : public boost::noncopyable
 		unsigned getMaxCalls() const;
 
 		/// Updates parameters in place. Returns true on success.
-		bool solve( typename TypedData< std::vector<T> >::Ptr parameters, ErrorFn &fn, Status *status = 0 );
+		Status solve( typename TypedData< std::vector<T> >::Ptr parameters, ErrorFn &fn );
 
 	protected :
 

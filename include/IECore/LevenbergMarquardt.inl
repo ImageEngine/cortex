@@ -136,7 +136,7 @@ unsigned LevenbergMarquardt<T, ErrorFn, Traits>::getMaxCalls() const
 }
 
 template<typename T, typename ErrorFn, template<typename> class Traits>
-bool LevenbergMarquardt<T, ErrorFn, Traits>::solve( typename TypedData< std::vector<T> >::Ptr parameters, ErrorFn &fn, Status *status )
+typename LevenbergMarquardt<T, ErrorFn, Traits>::Status LevenbergMarquardt<T, ErrorFn, Traits>::solve( typename TypedData< std::vector<T> >::Ptr parameters, ErrorFn &fn )
 {
 	assert( parameters );
 	m_n = parameters->readable().size();
@@ -276,11 +276,7 @@ bool LevenbergMarquardt<T, ErrorFn, Traits>::solve( typename TypedData< std::vec
 
 		if ( gnorm <= m_gtol )
 		{
-			if ( status )
-			{
-				*status = Degenerate;
-			}
-			return false;
+			return Degenerate;
 		}
 
 		for ( unsigned j = 0; j < m_n; j++ )
@@ -390,55 +386,31 @@ bool LevenbergMarquardt<T, ErrorFn, Traits>::solve( typename TypedData< std::vec
 			/// tests for convergence
 			if ( Imath::Math<T>::fabs( actred ) <= m_ftol && prered <= m_ftol && 0.5 * ratio <= 1 )
 			{
-				if ( status )
-				{
-					*status = Success;
-				}
-				return true;
+				return Success;
 			}
 
 			if ( delta <= m_xtol * xnorm )
 			{
-				if ( status )
-				{
-					*status = Success;
-				}
-				return true;
+				return Success;
 			}
 
 			/// tests for termination and stringent tolerances.
 			if ( m_numCalls >= m_maxCalls )
 			{
-				if ( status )
-				{
-					*status = CallLimit;
-				}
-				return false;
+				return  CallLimit;
 			}
 			if ( Imath::Math<T>::fabs( actred ) <= Traits<T>::machinePrecision() &&
 			                prered <= Traits<T>::machinePrecision() && 0.5 * ratio <= 1 )
 			{
-				if ( status )
-				{
-					*status = FailedFTol;
-				}
-				return false;
+				return FailedFTol;
 			}
 			if ( delta <= Traits<T>::machinePrecision() * xnorm )
 			{
-				if ( status )
-				{
-					*status = FailedXTol;
-				}
-				return false;
+				return FailedXTol;
 			}
 			if ( gnorm <= Traits<T>::machinePrecision() )
 			{
-				if ( status )
-				{
-					*status = FailedGTol;
-				}
-				return false;
+				return FailedGTol;
 			}
 		}
 		while ( ratio < 1.0e-4 );
