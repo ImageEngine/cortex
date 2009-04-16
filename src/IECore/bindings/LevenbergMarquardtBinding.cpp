@@ -140,15 +140,7 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
 template< typename T>
 class LevenbergMarquardtWrapper : public LevenbergMarquardt< T, LevenbergMarquardtErrorFnWrapper<T> >
 {
-	public:
-	
-		tuple solve( typename TypedData< std::vector<T> >::Ptr parameters, LevenbergMarquardtErrorFnWrapper<T> &fn )
-		{
-			typename LevenbergMarquardt< T, LevenbergMarquardtErrorFnWrapper<T> >::Status s;
-			bool result = LevenbergMarquardt< T, LevenbergMarquardtErrorFnWrapper<T> >::solve( parameters, fn, &s );
-			
-			return make_tuple( result, s );
-		};
+	public:			
 		
 		tuple getParameters()
 		{
