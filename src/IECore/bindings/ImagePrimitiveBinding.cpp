@@ -107,17 +107,9 @@ void bindImagePrimitive()
 		.def( "getChannel", &getChannel )
 		.def( "channelNames", &channelNames)
 
-		/// \todo Why are we allowing people to create channels of types that are invalid according to our own spec?
-		/// Are we relying on this somewhere?
 		.def( "createFloatChannel", &ImagePrimitive::createChannel<float> )
 		.def( "createHalfChannel", &ImagePrimitive::createChannel<half> )
-		.def( "createDoubleChannel", &ImagePrimitive::createChannel<double> )
-		.def( "createIntChannel", &ImagePrimitive::createChannel<int> )
 		.def( "createUIntChannel", &ImagePrimitive::createChannel<unsigned int> )
-		.def( "createShortChannel", &ImagePrimitive::createChannel<short> )
-		.def( "createUShortChannel", &ImagePrimitive::createChannel<unsigned short> )
-		.def( "createCharChannel", &ImagePrimitive::createChannel<char> )
-		.def( "createUCharChannel", &ImagePrimitive::createChannel<unsigned char> )
 
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ImagePrimitive )
 	;
