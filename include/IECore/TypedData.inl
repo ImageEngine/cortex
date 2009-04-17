@@ -245,7 +245,7 @@ bool TypedData<T>::hasBase()
 }
 
 template <class T>
-unsigned long TypedData<T>::baseSize() const
+size_t TypedData<T>::baseSize() const
 {
 	if ( !TypedData<T>::hasBase() )
 	{
@@ -308,7 +308,7 @@ typename TypedData<T>::BaseType *TypedData<T>::baseWritable()
 		return false;														\
 	}																		\
 	template <>																\
-	unsigned long TNAME::baseSize()	const									\
+	size_t TNAME::baseSize() const									\
 	{																		\
 		throw Exception( TNAME::staticTypeName() + " has no base type." );	\
 	}																		\

@@ -129,7 +129,7 @@ class TypedData : public Data
 
 		/// return the size of the internal data structure in terms of base type elements.
 		/// Throws an Exception if this type has no single base type.
-		unsigned long baseSize() const;
+		size_t baseSize() const;
 		
 	protected:
 	

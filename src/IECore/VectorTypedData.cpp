@@ -55,7 +55,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 
 #define IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )											\
 	template <>																									\
-	unsigned long TNAME::baseSize()	 const																		\
+	size_t TNAME::baseSize() const																		\
 	{																											\
 		if ( !TNAME::hasBase() )																				\
 		{																										\
