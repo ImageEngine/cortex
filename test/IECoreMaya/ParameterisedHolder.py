@@ -96,7 +96,7 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		fn2 = OpenMaya.MFnDependencyNode( node2 )
 		
 		self.assert_( fn1.userNode() )
-		self.assert_( fn2.userNode() ) # This failure is due to a Maya bug. When referencing the same scene twice, as an optimisation Maya will duplicate existing nodes instead of creating new ones. There is a bug in MPxObjectSet::copy() which gets exercised here. There is a Maya environment variable which can disable this optimisation, however.
+		self.assert_( fn2.userNode() ) # This failure is due to a Maya bug. When referencing the same scene twice, as an optimisation Maya will duplicate existing nodes instead of creating new ones. There is a bug in MPxObjectSet::copy() which gets exercised here. Setting the environment variable MAYA_FORCE_REF_READ to 1 will disable this optimisation, however.
 	
 	def testSetParameterisedFromClassLoader( self ) :
 	
