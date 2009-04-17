@@ -38,6 +38,7 @@ import unittest, MayaUnitTest
 import os.path
 import IECore
 import IECoreMaya
+			
 
 class TestParameterisedHolder( unittest.TestCase ) :
 		
@@ -52,14 +53,15 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		h.setParameterised( p )
 		
 		p.parameters().filename = "testValue"		
-		h.setNodeValue( p.parameters()["filename"], False )
-		pl = h.parameterPlug( p.parameters()["filename"] )
+		h.setNodeValue( p.parameters().filename )
+		pl = h.parameterPlug( p.parameters().filename )
 		v = IECoreMaya.FromMayaPlugConverter.create( pl, IECore.TypeId.StringData ).convert()
 		self.assertEqual( v.value, "testValue" )
 				
 		cmds.setAttr( pl.name(), "testValue2", typ="string" )
-		h.setParameterisedValue( p.parameters()["filename"] )
-		self.assertEqual( p.parameters()["filename"].getValue().value, "testValue2" )
+		h.setParameterisedValue( p.parameters().filename )
+		self.assertEqual( p.parameters().filename.getValue().value, "testValue2" )
+		
 					
 	def testParameterisedHolderSetReference( self ):	
 		""" Test multiple references to ieParameterisedHolderSet nodes """
@@ -97,44 +99,51 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		
 		self.assert_( fn1.userNode() )
 		self.assert_( fn2.userNode() ) # This failure is due to a Maya bug. When referencing the same scene twice, as an optimisation Maya will duplicate existing nodes instead of creating new ones. There is a bug in MPxObjectSet::copy() which gets exercised here. Setting the environment variable MAYA_FORCE_REF_READ to 1 will disable this optimisation, however.
-	
-	def testSetParameterisedFromClassLoader( self ) :
-	
-		fnPH = IECoreMaya.FnProceduralHolder.create( "test", "read", 1 )
-		proc = fnPH.getProcedural()
-		self.assert_( isinstance( proc, IECore.ParameterisedProcedural ) )
-	
-	def testAllParameters( self ) :
-	
-		node = cmds.createNode( "ieOpHolderNode" )
-		fnOH = IECoreMaya.FnOpHolder( node )
 		
-		op = IECore.ClassLoader.defaultOpLoader().load( "parameterTypes", 1 )()
-		op.parameters().removeParameter( "m" ) # we're not even attempting to represent Color4fParameters at present
-		
-		fnOH.setParameterised( op )
+	def testChangeDefault( self ) :
+		""" Test that changing parameter defaults is correctly reflected in Maya attributes """
 	
-	def testStringVectorParameter( self ) :
-	
-		p = IECore.Parameterised( "", "" )
-		p.parameters().addParameter( 
-			IECore.StringVectorParameter(
-				"sv",
-				"",
-				IECore.StringVectorData( [ "hello", "goodbye" ] )
-			)
-		)
-		self.assertEqual( p["sv"].getValue(), IECore.StringVectorData( [ "hello", "goodbye" ] ) )
-		
-		node = cmds.createNode( "ieParameterisedHolderLocator" )
-		fnOH = IECoreMaya.FnParameterisedHolder( node )
-		fnOH.setParameterised( p )
-		
-		self.assertEqual( cmds.getAttr( node + ".parm_sv" ), [ "hello", "goodbye" ] )
-		
-		fnOH.setParameterisedValues()
+		def makeOp( defaultValue ) :
 
-		self.assertEqual( p["sv"].getValue(), IECore.StringVectorData( [ "hello", "goodbye" ] ) )
+			class TestOp( IECore.Op ) :
+
+				def __init__( self ) :
+
+					IECore.Op.__init__( self, "TestOp", "Tests stuff",
+						IECore.IntParameter(
+							name = "result",
+							description = "",
+							defaultValue = 0
+						)
+					)
+
+					self.parameters().addParameters(
+						[
+							IECore.Color3fParameter(
+								name = "c",
+								description = "",
+								defaultValue = defaultValue
+							),
+						]
+					)
+					
+			return TestOp()	
+	
+	
+		n = cmds.createNode( "ieParameterisedHolderNode" )	
+		h = IECoreMaya.FnParameterisedHolder( str(n) )
+		self.assert_( h )
+		
+		p = makeOp( IECore.Color3f( 0, 0, 0 ) )		
+		h.setParameterised( p )
+		dv = cmds.attributeQuery ( "parm_c", node = n, listDefault = True )
+		self.assertEqual( dv, [ 0, 0, 0 ] )
+		
+		p = makeOp( IECore.Color3f( 1, 1, 1 ) )			
+		h.setParameterised( p )		
+		dv = cmds.attributeQuery ( "parm_c", node = n, listDefault = True )
+		self.assertEqual( dv, [ 1, 1, 1 ] )
+		
 		
 	def tearDown( self ) :
 		

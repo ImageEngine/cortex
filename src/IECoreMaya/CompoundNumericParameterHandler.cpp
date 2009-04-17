@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -82,20 +82,57 @@ MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr pa
 		return MS::kFailure;
 	}
 	
+	/// Set the default value one child attribute at a time. It would appear that using the variants of setDefault
+	/// whicn take 2 or 3 arguments can exercise a Maya bug.
 	T defValue = p->typedDefaultValue();
+	for( unsigned i=0; i<T::dimensions(); i++ )
+	{
+		MStatus s;
+		MObject childAttr = fnNAttr.child( i, &s );
+		if ( !s )
+		{
+			return s;
+		}
+		MFnNumericAttribute fnChildNAttr( childAttr, &s );
+		if ( !s )
+		{
+			return s;
+		}
+		s = fnChildNAttr.setDefault( defValue[i] );
+		if ( !s )
+		{
+			return s;
+		}
+	}
+	
+#ifndef NDEBUG
+	/// Verify that the defaults have been set correctly. Only do this in asserted builds.
 	switch( T::dimensions() )
 	{
 		case 2 :
-			fnNAttr.setDefault( defValue[0], defValue[1] );
+			{
+				typename T::BaseType c0, c1 ;
+				MStatus s = fnNAttr.getDefault( c0, c1 );
+				assert( s );
+				assert( c0 == defValue[0] );
+				assert( c1 == defValue[1] );
+			}
 			break;
 		case 3 :
-			fnNAttr.setDefault( defValue[0], defValue[1], defValue[2] );
+			{
+				typename T::BaseType c0, c1, c2;
+				MStatus s = fnNAttr.getDefault( c0, c1, c2 );
+				assert( s );
+				assert( c0 == defValue[0] );
+				assert( c1 == defValue[1] );
+				assert( c2 == defValue[2] );								
+			}
 			break;
 		default :
 			assert( false );
-			return MS::kFailure;
 	}
-	
+#endif	
+			
 	fnNAttr.setUsedAsColor( NumericTraits<T>::isColor() );
 	
 	bool keyable = true;
@@ -146,6 +183,7 @@ MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr pa
 	{
 		case 2 :
 			{
+				assert( !NumericTraits<T>::isColor() );
 				MObject e0 = fnNAttr.create( attributeName + "X", attributeName + "X", NumericTraits<T>::baseDataType() );
 				MObject e1 = fnNAttr.create( attributeName + "Y", attributeName + "Y", NumericTraits<T>::baseDataType() );
 				result = fnNAttr.create( attributeName, attributeName, e0, e1 );
@@ -153,7 +191,7 @@ MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr pa
 			break;
 		case 3 :
 			if( NumericTraits<T>::isColor() )
-			{
+			{			
 				result = fnNAttr.createColor( attributeName, attributeName );
 			}
 			else
