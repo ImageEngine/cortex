@@ -115,8 +115,8 @@ void bindPrimitive()
 		.def( "values", &values, "Returns a list containing shallow copies of the PrimitiveVariable objects held." )
 		.def( "isPrimitiveVariableValid", &Primitive::isPrimitiveVariableValid)
 		.def( "arePrimitiveVariablesValid", &Primitive::arePrimitiveVariablesValid)
-		.def( "inferInterpolation", (PrimitiveVariable::Interpolation (Primitive::*)( size_t ) const)&Primitive::inferInterpolation )
 		.def( "inferInterpolation", (PrimitiveVariable::Interpolation (Primitive::*)( ConstDataPtr ) const)&Primitive::inferInterpolation )
+		.def( "inferInterpolation", (PrimitiveVariable::Interpolation (Primitive::*)( size_t ) const)&Primitive::inferInterpolation )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Primitive)		
 	;
 	INTRUSIVE_PTR_PATCH( Primitive, PrimitivePyClass );
