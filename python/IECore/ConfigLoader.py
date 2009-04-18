@@ -61,8 +61,8 @@ def loadConfig( searchPaths, localsDict, raiseExceptions = False ) :
 					try :
 						execfile( fullFileName, globals(), localsDict )
 					except Exception, m :
-						traceback.print_exc( sys.stderr )
-						IECore.debugException("loading config file")
-						IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\"." % ( fullFileName, m ) )
+						stacktrace = traceback.format_exc()
+#						IECore.debugException("loading config file")
+						IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\".\n %s" % ( fullFileName, m, stacktrace ) )
 
 loadConfig( IECore.SearchPath( os.environ.get( "IECORE_CONFIG_PATHS", "" ), ":" ), { "IECore" : IECore } )
