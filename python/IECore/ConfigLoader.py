@@ -35,6 +35,8 @@
 import re
 import os
 import os.path
+import sys
+import traceback
 import IECore
 
 ## This function provides an easy means of providing a flexible configuration
@@ -59,6 +61,7 @@ def loadConfig( searchPaths, localsDict, raiseExceptions = False ) :
 					try :
 						execfile( fullFileName, globals(), localsDict )
 					except Exception, m :
+						traceback.print_exc( sys.stderr )
 						IECore.debugException("loading config file")
 						IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\"." % ( fullFileName, m ) )
 
