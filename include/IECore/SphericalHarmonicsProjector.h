@@ -45,10 +45,9 @@
 namespace IECore
 {
 
-// Class that discretizes the spherical harmonics functions on a set of points on the sphere.
-// The object defines a distribution of points over the sphere surface and uses that distribution to project a given function
-// onto a spherical harmonics object or from a given spherical harmonics reconstruct the function by returning the values at the
-// sampling points.
+// Class that projects functions on spherical harmonics objects.
+// The object defines a distribution of points over the sphere surface and uses that distribution to 
+// project a given function onto a spherical harmonics object.
 // Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
 template < typename V >
 class SphericalHarmonicsProjector

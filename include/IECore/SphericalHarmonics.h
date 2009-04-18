@@ -87,7 +87,7 @@ class SphericalHarmonics
 		// dot product on the coefficient vectors.
 		// The return value is dependent on the result of the multiplication between the two harmonics coefficients.
 		template <typename T, typename R>
-		R dot( typename SphericalHarmonics<T>::ConstPtr &s ) const;
+		R dot( const SphericalHarmonics<T> &s ) const;
 
 	protected :
 

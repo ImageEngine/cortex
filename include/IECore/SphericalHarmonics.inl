@@ -56,13 +56,13 @@ V SphericalHarmonics<V>::operator() ( BaseType theta, BaseType phi ) const
 
 template< typename V >
 template< typename T, typename R >
-R SphericalHarmonics<V>::dot( typename SphericalHarmonics<T>::ConstPtr &s ) const
+R SphericalHarmonics<V>::dot( const SphericalHarmonics<T> &s ) const
 {
 	T res(0);
 	typename CoefficientVector::const_iterator ita = m_coefficients.begin();
-	typename SphericalHarmonics<T>::CoefficientVector::const_iterator itb = s->coefficients().start();
+	typename SphericalHarmonics<T>::CoefficientVector::const_iterator itb = s.coefficients().begin();
 
-	for ( ; ita != m_coefficients.end() && itb != s->coefficients().end(); ita++, itb++ )
+	for ( ; ita != m_coefficients.end() && itb != s.coefficients().end(); ita++, itb++ )
 	{
 		res += (*ita) * (*itb);
 	}
