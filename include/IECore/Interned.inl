@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,10 +51,23 @@ Interned<T, Hash>::Interned( const Interned<T, Hash> &other )
 {
 }
 
-
+template<typename T, typename Hash>
+template<typename S>
+Interned<T, Hash>::Interned( const S &value )
+{
+	HashSet *h = hashSet();
+	m_value = &(*(h->insert( T( value ) ).first ) );
+}
+		
 template<typename T, typename Hash>
 Interned<T, Hash>::~Interned()
 {
+}
+
+template<typename T, typename Hash>
+inline bool Interned<T, Hash>::operator != ( const Interned<T, Hash> &other ) const
+{
+	return m_value!=other.m_value;
 }
 
 template<typename T, typename Hash>

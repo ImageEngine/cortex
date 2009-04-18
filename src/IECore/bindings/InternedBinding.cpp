@@ -52,6 +52,7 @@ void bindInterned()
 		.def( "__str__", &InternedString::value, return_value_policy<copy_const_reference>() )
 		.def( "value", &InternedString::value, return_value_policy<copy_const_reference>() )
 		.def( self == self )
+		.def( self != self )
 		.def( "size", &InternedString::size ).staticmethod( "size" )
 	;
 	implicitly_convertible<InternedString, string>();
