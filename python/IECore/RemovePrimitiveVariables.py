@@ -49,10 +49,10 @@ class RemovePrimitiveVariables( PrimitiveOp ) :
 					description = """This chooses whether or not the names parameter specifies the names of
 						variables to keep or the names of variables to remove.""",				
 					defaultValue = "remove",
-					presets = {
-						"keep" : "keep",
-						"remove" : "remove"
-					},
+					presets = (
+						( "keep", "keep" ),
+						( "remove", "remove" )
+					),
 					presetsOnly = True
 				),
 				StringVectorParameter( 

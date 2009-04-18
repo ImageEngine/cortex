@@ -41,7 +41,7 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 
 	def testAttributeAccess( self ):
 
-		p = OptionalCompoundParameter( "n", "d", members = [ StringParameter( "a", "a", "", presets = { "b": StringData( "b" ) }, presetsOnly = True ) ] )
+		p = OptionalCompoundParameter( "n", "d", members = [ StringParameter( "a", "a", "", presets = ( ( "b", StringData( "b" ) ), ), presetsOnly = True ) ] )
 		p["a"].setTypedValue( "My compound attribute" )
 		p.c = "My python attribute"
 		self.assertEqual( p.c, "My python attribute" )
@@ -50,7 +50,7 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 	
-		p = OptionalCompoundParameter( "n", "d", members = [ StringParameter( "a", "a", "", presets = { "b": StringData( "b" ) }, presetsOnly = True ) ] )
+		p = OptionalCompoundParameter( "n", "d", members = [ StringParameter( "a", "a", "", presets = ( ( "b", StringData( "b" ) ), ), presetsOnly = True ) ] )
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( len( p.keys() ), 1 )
@@ -93,7 +93,7 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1, presets = { "10": 10, "11": 11 }, presetsOnly = True ),
+				IntParameter( "i", "d", 1, presets = ( ( "10", 10 ), ( "11", 11 ) ), presetsOnly = True ),
 				FloatParameter( "f", "d", 2 )
 			]
 		)

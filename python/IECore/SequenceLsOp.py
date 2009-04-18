@@ -84,21 +84,21 @@ class SequenceLsOp( Op ) :
 					name = "type",
 					description = "The file types of the sequences to classify.",
 					defaultValue = "any",
-					presets = {
-						"files" : "files",
-						"directories" : "directories",
-						"any" : "any"
-					},
+					presets = (
+						( "files", "files" ),
+						( "directories", "directories" ),
+						( "any", "any" )
+					),
 					presetsOnly = True,
 				),
 				StringParameter( 
 					name = "resultType",
 					description = "The type of the result returned.",
 					defaultValue = "string",
-					presets = {
-						"string" : "string",
-						"stringVector" : "stringVector",
-					},
+					presets = (
+						( "string", "string" ),
+						( "stringVector", "stringVector" ),
+					),
 					presetsOnly = True,
 				),
 				BoolParameter(
@@ -110,21 +110,21 @@ class SequenceLsOp( Op ) :
 					name = "format",
 					description = "The format of the result. This can be used to return strings suitable for viewing a sequence in a particular package.",
 					defaultValue = "<PREFIX><#PADDING><SUFFIX> <FRAMES>",
-					presets = {
-						"shake" : "shake -t <FRAMES> <PREFIX>#<SUFFIX>",
-						"nuke" : "nuke -v <PREFIX>%0<PADDINGSIZE>d<SUFFIX> <FIRST>,<LAST>",
-						"fcheck" : "fcheck -n <FIRST> <LAST> <STEP> <PREFIX><@PADDING><SUFFIX>",
-						"frameCycler" : "framecycler <PREFIX><#PADDING><SUFFIX>",
-					}
+					presets = (
+						( "shake", "shake -t <FRAMES> <PREFIX>#<SUFFIX>" ),
+						( "nuke", "nuke -v <PREFIX>%0<PADDINGSIZE>d<SUFFIX> <FIRST>,<LAST>" ),
+						( "fcheck", "fcheck -n <FIRST> <LAST> <STEP> <PREFIX><@PADDING><SUFFIX>" ),
+						( "frameCycler", "framecycler <PREFIX><#PADDING><SUFFIX>" ),
+					)
 				),
 				StringVectorParameter(
 					name = "extensions",
 					description = "A list of file extensions which the sequences must have if they are to be listed. An empty list"
 						"means that any sequence will be listed. The . character should be omitted from the extension.",
 					defaultValue = StringVectorData(),
-					presets = {
-						"images" : StringVectorData( [ "tif", "tiff", "jpg", "jpeg", "exr", "cin", "dpx", "ppm", "png", "gif", "iff" ] )
-					}
+					presets = (
+						( "images", StringVectorData( [ "tif", "tiff", "jpg", "jpeg", "exr", "cin", "dpx", "ppm", "png", "gif", "iff" ] ) ),
+					)
 				),								
 				CompoundParameter(
 					name = "advanced",
@@ -145,12 +145,12 @@ class SequenceLsOp( Op ) :
 									name = "mode",
 									description = "Changes the mode of modified time operation, e.g. before or after",
 									defaultValue = "before",
-									presets = {
-										"Before Start" : "before",
-										"After End" : "after",
-										"Between Start/End" : "between",
-										"Outside Start/End" : "outside"										
-									},
+									presets = (
+										( "Before Start", "before" ),
+										( "After End", "after" ),
+										( "Between Start/End", "between" ),
+										( "Outside Start/End", "outside" )										
+									),
 									presetsOnly = True
 								),
 								

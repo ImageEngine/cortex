@@ -56,11 +56,11 @@ class presetParsing( Op ) :
 					name = "h",
 					description = "a v3f",
 					defaultValue = V3fData(),
-					presets = {
-						"x" : V3f( 1, 0, 0 ),
-						"y" : V3f( 0, 1, 0 ),
-						"z" : V3f( 0, 0, 1 )
-					}
+					presets = (
+						( "x", V3f( 1, 0, 0 ) ),
+						( "y", V3f( 0, 1, 0 ) ),
+						( "z", V3f( 0, 0, 1 ) )
+					)
 				),
 
 				V2dParameter(
@@ -80,20 +80,20 @@ class presetParsing( Op ) :
 							name = "j",
 							description = "a v3d",
 							defaultValue = V3dData(),
-							presets = {
-								"one" : V3d( 1 ),
-								"two" : V3d( 2 )
-							}
+							presets = (
+								( "one", V3d( 1 ) ),
+								( "two", V3d( 2 ) )
+							)
 						),
 
 						M44fParameter(
 							name = "k",
 							description = "an m44f",
 							defaultValue = M44fData(),
-							presets = {
-								"one" : M44f( 1 ),
-								"two" : M44f( 2 )
-							}
+							presets = (
+								( "one", M44f( 1 ) ),
+								( "two", M44f( 2 ) )
+							)
 						),
 
 					]

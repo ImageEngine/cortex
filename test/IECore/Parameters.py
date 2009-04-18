@@ -83,12 +83,12 @@ class TestParameter( unittest.TestCase ) :
 			name = "n",
 			description = "d",
 			defaultValue = FloatData( 20 ),
-			presets = {
-				"p1" : FloatData( 40 ),
-				"p2" : IntData( 60 ),
-				"p3" : CompoundData(),
-				"p4" : FloatData( 20 ),
-			},
+			presets = (
+				( "p1", FloatData( 40 ) ),
+				( "p2", IntData( 60 ) ),
+				( "p3", CompoundData() ),
+				( "p4", FloatData( 20 ) ),
+			),
 			presetsOnly = True,
 		)
 		
@@ -256,11 +256,11 @@ class TestNumericParameter( unittest.TestCase ) :
 		p = IntParameter(
 			name = "n",
 			description = "d",
-			presets = {
-				"one" : 1,
-				"two" : 2,
-				"three" : 3,
-			} 
+			presets = (
+				( "one", 1 ),
+				( "two", 2 ),
+				( "three", 3 ),
+			)
 		)
 		
 		pr = p.presets()
@@ -338,11 +338,11 @@ class TestTypedParameter( unittest.TestCase ) :
 			name = "n",
 			description = "d",
 			defaultValue = V3f( 2 ),
-			presets = {
-				"one" : V3f( 1 ),
-				"two" : V3f( 2 ),
-				"three" : V3f( 3 ),
-			},
+			presets = (
+				( "one", V3f( 1 ) ),
+				( "two", V3f( 2 ) ),
+				( "three", V3f( 3 ) ),
+			),
 			presetsOnly = True, 
 		)
 		
@@ -361,11 +361,11 @@ class TestTypedParameter( unittest.TestCase ) :
 			name = "n",
 			description = "d",
 			defaultValue = V3f( 2 ),
-			presets = {
-				"one" : V3f( 1 ),
-				"two" : V3f( 2 ),
-				"three" : V3f( 3 ),
-			},
+			presets = (
+				( "one", V3f( 1 ) ),
+				( "two", V3f( 2 ) ),
+				( "three", V3f( 3 ) ),
+			),
 			presetsOnly = True, 
 		)
 		
@@ -375,11 +375,11 @@ class TestTypedParameter( unittest.TestCase ) :
 			name = "n",
 			description = "d",
 			defaultValue = V3f( 2 ),
-			presets = {
-				"one" : V3f( 1 ),
-				"two" : V3f( 2 ),
-				"three" : V3f( 3 ),
-			},
+			presets = (
+				( "one", V3f( 1 ) ),
+				( "two", V3f( 2 ) ),
+				( "three", V3f( 3 ) ),
+			),
 			presetsOnly = False, 
 		)
 		
@@ -461,7 +461,7 @@ class TestCompoundParameter( unittest.TestCase ) :
 			def valueValid( self, value ) :
 				return ( True, "" )
 
-		p = DerivedCompoundParameter( "n", "d", members = [ StringParameter( "a", "a", "", presets = { "b": StringData( "b" ) }, presetsOnly = True ) ] )
+		p = DerivedCompoundParameter( "n", "d", members = [ StringParameter( "a", "a", "", presets = ( ( "b", StringData( "b" ) ), ), presetsOnly = True ) ] )
 		p.validate()
 
 	def testConstructor( self ) :
@@ -548,21 +548,21 @@ class TestCompoundParameter( unittest.TestCase ) :
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1, presets = {
-						"one" : 1,
-						"two" : 2,
-						"ambiguous" : 4,
-						"four" : 4,
-						"otherAmbiguous" : 4,
-					},
+				IntParameter( "i", "d", 1, presets = (
+						( "one", 1 ),
+						( "two", 2 ),
+						( "ambiguous", 4 ),
+						( "four", 4 ),
+						( "otherAmbiguous", 4 ),
+					),
 					presetsOnly = True,
 				),
-				FloatParameter( "f", "d", 2, presets = {
-						"one" : 1,
-						"two" : 2,
-						"three" : 3,
-						"four": 4,
-					},
+				FloatParameter( "f", "d", 2, presets = (
+						( "one", 1 ),
+						( "two", 2 ),
+						( "three", 3 ),
+						( "four", 4 ),
+					),
 					presetsOnly = True,
 				)
 			]
@@ -587,17 +587,17 @@ class TestCompoundParameter( unittest.TestCase ) :
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1, presets = {
-						"one" : 1,
-						"two" : 2,
-					},
+				IntParameter( "i", "d", 1, presets = (
+						( "one", 1 ),
+						( "two", 2 ),
+					),
 					presetsOnly = True,
 				),
-				FloatParameter( "f", "d", 1, presets = {
-						"one" : 1,
-						"two" : 2,
-						"three" : 3,
-					},
+				FloatParameter( "f", "d", 1, presets = (
+						( "one", 1 ),
+						( "two", 2 ),
+						( "three", 3 ),
+					),
 					presetsOnly = True,
 				)
 			]
@@ -709,12 +709,12 @@ class TestCompoundParameter( unittest.TestCase ) :
 		
 		self.assertEqual( p.presets(), {} )
 		
-		p.addParameter( IntParameter( name = "i", description = "d", defaultValue = 10, presets = { "one" : 1, "two" : 2  } ) )
+		p.addParameter( IntParameter( name = "i", description = "d", defaultValue = 10, presets = ( ( "one", 1 ), ( "two", 2 ) ) ) )
 		
 		self.assertEqual( len( p.presets() ), 2 )
 		self.assertEqual( p.presets(), { "one" : CompoundObject( { "i" : IntData( 1 ) } ), "two" : CompoundObject( { "i" : IntData( 2 ) } ) } )
 		
-		fParam = FloatParameter( name = "f", description = "d", defaultValue = 20, presets = { "one" : 1 } )
+		fParam = FloatParameter( name = "f", description = "d", defaultValue = 20, presets = ( ( "one", 1 ), ) )
 		p.addParameter( fParam )
 
 		self.assertEqual( len( p.presets() ), 1 )
@@ -802,10 +802,10 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 			description = "d",
 			regex = "[0-9]*",
 			regexDescription = "Value must be an integer",
-			presets = {
-				"100" : "100",
-				"200" : "200",
-			}
+			presets = (
+				( "100", "100" ),
+				( "200", "200" ),
+			)
 		)
 		
 		self.assertEqual( p.name, "n" )
@@ -1091,11 +1091,11 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 			name = "n",
 			description = "d",
 			defaultValue = mesh2,
-			presets = {
-				"one" : mesh1,
-				"two" : mesh2,
-				"three" : mesh3,
-			},
+			presets = (
+				( "one", mesh1 ),
+				( "two", mesh2 ),
+				( "three", mesh3 ),
+			),
 			presetsOnly = True, 
 		)
 		
@@ -1120,11 +1120,11 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 			name = "n",
 			description = "d",
 			defaultValue = mesh2,
-			presets = {
-				"one" : mesh1,
-				"two" : mesh2,
-				"three" : mesh3,
-			},
+			presets = (
+				( "one", mesh1 ),
+				( "two", mesh2 ),
+				( "three", mesh3 ),
+			),
 			presetsOnly = True, 
 		)
 		
@@ -1134,11 +1134,11 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 			name = "n",
 			description = "d",
 			defaultValue = mesh2,
-			presets = {
-				"one" : mesh1,
-				"two" : mesh2,
-				"three" : mesh3,
-			},
+			presets = (
+				( "one", mesh1 ),
+				( "two", mesh2 ),
+				( "three", mesh3 ),
+			),
 			presetsOnly = False, 
 		)
 		

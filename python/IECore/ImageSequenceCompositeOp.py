@@ -55,11 +55,11 @@ class ImageSequenceCompositeOp( SequenceMergeOp ) :
 					name = "operation",
 					description = "The compositing operation to apply",
 					defaultValue = ImageCompositeOp.Operation.Over,
-					presets = {
-						"Over" : ImageCompositeOp.Operation.Over,
-						"Min" : ImageCompositeOp.Operation.Min,
-						"Max" : ImageCompositeOp.Operation.Max,
-					},
+					presets = (
+						( "Over", ImageCompositeOp.Operation.Over ),
+						( "Min", ImageCompositeOp.Operation.Min ),
+						( "Max", ImageCompositeOp.Operation.Max ),
+					),
 					presetsOnly = True
 				),
 			]

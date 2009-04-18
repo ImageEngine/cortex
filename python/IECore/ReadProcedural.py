@@ -81,10 +81,10 @@ class ReadProcedural( ParameterisedProcedural ) :
 							name = "mode",
 							description = "How the bounds are calculated.",
 							defaultValue = "calculated",
-							presets = {
-								"Calculated" : "calculated",
-								"Specified" : "specified",
-							},
+							presets = (
+								( "Calculated", "calculated" ),
+								( "Specified", "specified" ),
+							),
 							presetsOnly = True,
 						),
 						Box3fParameter(
