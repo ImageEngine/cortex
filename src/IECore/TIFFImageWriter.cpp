@@ -81,10 +81,10 @@ TIFFImageWriter::TIFFImageWriter( ObjectPtr image, const string &fileName )
 
 void TIFFImageWriter::constructParameters()
 {
-	IntParameter::PresetsMap bitDepthPresets;
-	bitDepthPresets["8"] = 8;
-	bitDepthPresets["16"] = 16;
-	bitDepthPresets["32"] = 32;
+	IntParameter::PresetsContainer bitDepthPresets;
+	bitDepthPresets.push_back( IntParameter::Preset( "8", 8 ) );
+	bitDepthPresets.push_back( IntParameter::Preset( "16", 16 ) );
+	bitDepthPresets.push_back( IntParameter::Preset( "32", 32 ) );
 
 	m_bitDepthParameter = new IntParameter(
 	        "bitdepth",
@@ -98,11 +98,11 @@ void TIFFImageWriter::constructParameters()
 	parameters()->addParameter( m_bitDepthParameter );
 
 	// compression parameter
-	IntParameter::PresetsMap compressionPresets;
-	compressionPresets["none"]    = COMPRESSION_NONE;
-	compressionPresets["lzw"]     = COMPRESSION_LZW;
-	compressionPresets["jpeg"]    = COMPRESSION_JPEG;
-	compressionPresets["deflate"] = COMPRESSION_DEFLATE;
+	IntParameter::PresetsContainer compressionPresets;
+	compressionPresets.push_back( IntParameter::Preset( "none", COMPRESSION_NONE ) );
+	compressionPresets.push_back( IntParameter::Preset( "lzw", COMPRESSION_LZW ) );
+	compressionPresets.push_back( IntParameter::Preset( "jpeg", COMPRESSION_JPEG ) );
+	compressionPresets.push_back( IntParameter::Preset( "deflate", COMPRESSION_DEFLATE ) );
 
 	/// Verify min
 	BOOST_STATIC_ASSERT( COMPRESSION_NONE < COMPRESSION_LZW );
@@ -117,7 +117,7 @@ void TIFFImageWriter::constructParameters()
 	m_compressionParameter = new IntParameter(
 	        "compression",
 	        "TIFF compression method",
-	        compressionPresets["lzw"],
+	        COMPRESSION_LZW,
 	        COMPRESSION_NONE,
 	        COMPRESSION_DEFLATE,
 	        compressionPresets,

@@ -73,25 +73,8 @@ class TypedObjectParameterWrap : public TypedObjectParameter<T>, public Wrapper<
 		
 		IE_CORE_DECLAREMEMBERPTR( TypedObjectParameterWrap<T> );
 	
-	protected:
-
-		static typename TypedObjectParameter<T>::ObjectPresetsMap makePresets( const dict &d )
-		{
-			typename TypedObjectParameter<T>::ObjectPresetsMap p;
-			boost::python::list keys = d.keys();
-			boost::python::list values = d.values();
-			for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-			{
-				extract<typename T::Ptr> e( values[i] );
-				p.insert( typename TypedObjectParameter<T>::ObjectPresetsMap::value_type( extract<string>( keys[i] )(), e() ) );			
-			}
-			return p;
-		}
-
-	public :
-
-		TypedObjectParameterWrap( PyObject *self, const std::string &n, const std::string &d, typename T::Ptr dv, const dict &p = dict(), bool po = false, CompoundObjectPtr ud = 0 )	
-			:	TypedObjectParameter<T>( n, d, dv, makePresets( p ), po, ud ), Wrapper< TypedObjectParameter<T> >( self, this ) {};
+		TypedObjectParameterWrap( PyObject *self, const std::string &n, const std::string &d, typename T::Ptr dv, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+			:	TypedObjectParameter<T>( n, d, dv, parameterPresets<typename TypedObjectParameter<T>::ObjectPresetsContainer>( p ), po, ud ), Wrapper< TypedObjectParameter<T> >( self, this ) {};
 		
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( TypedObjectParameter<T> );
 };
@@ -104,13 +87,13 @@ static void bindTypedObjectParameter( const char *name )
 	typedef class_< TypedObjectParameter<T>, typename TypedObjectParameterWrap< T >::Ptr , boost::noncopyable, bases<ObjectParameter> > TypedObjectParameterPyClass;
 	TypedObjectParameterPyClass( name, no_init )
 		.def( 
-			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const dict &, bool, CompoundObjectPtr > >
+			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
 			( 
 				( 
 					arg( "name" ), 
 					arg( "description" ), 
 					arg( "defaultValue" ),
-					arg( "presets" ) = dict(),
+					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false , 
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
 				) 

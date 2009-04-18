@@ -54,9 +54,9 @@ FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath 
 	:	FromMayaDagNodeConverter( staticTypeName(), "Converts transform nodes.",  dagPath )
 {
 	
-	IECore::IntParameter::PresetsMap spacePresets;
-	spacePresets["Local"] = Local;	
-	spacePresets["World"] = World;		
+	IECore::IntParameter::PresetsContainer spacePresets;
+	spacePresets.push_back( IECore::IntParameter::Preset( "Local", Local ) );
+	spacePresets.push_back( IECore::IntParameter::Preset( "World", World ) );
 	m_spaceParameter = new IECore::IntParameter(
 		"space",
 		"The space in which the transform is converted.",

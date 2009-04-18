@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,9 +60,9 @@ CineonToLinearOp::~CineonToLinearOp()
 
 CompoundParameterPtr CineonToLinearOp::createCineonSettings()
 {
-	FloatParameter::PresetsMap gammaPresets;
-	gammaPresets["Cineon"] = 0.6f;
-	gammaPresets["RedLog"] = 1.02f;
+	FloatParameter::PresetsContainer gammaPresets;
+	gammaPresets.push_back( FloatParameter::Preset( "Cineon", 0.6f ) );
+	gammaPresets.push_back( FloatParameter::Preset( "RedLog", 1.02f ) );
 
 	FloatParameterPtr filmGamma = new FloatParameter(
 		"filmGamma",
@@ -73,9 +73,9 @@ CompoundParameterPtr CineonToLinearOp::createCineonSettings()
 		false
 	);
 
-	IntParameter::PresetsMap whiteRefPresets;
-	whiteRefPresets["Cineon"] = 685;
-	whiteRefPresets["RedLog"] = 1023;
+	IntParameter::PresetsContainer whiteRefPresets;
+	whiteRefPresets.push_back( IntParameter::Preset( "Cineon", 685 ) );
+	whiteRefPresets.push_back( IntParameter::Preset( "RedLog", 1023 ) );
 
 	IntParameterPtr refWhiteVal = new IntParameter(
 		"refWhiteVal",
@@ -86,9 +86,9 @@ CompoundParameterPtr CineonToLinearOp::createCineonSettings()
 		false
 	);
 
-	IntParameter::PresetsMap blackRefPresets;
-	blackRefPresets["Cineon"] = 95;
-	blackRefPresets["RedLog"] = 0;
+	IntParameter::PresetsContainer blackRefPresets;
+	blackRefPresets.push_back( IntParameter::Preset( "Cineon", 95 ) );
+	blackRefPresets.push_back( IntParameter::Preset( "RedLog", 0 ) );
 
 	IntParameterPtr refBlackVal = new IntParameter(
 		"refBlackVal",

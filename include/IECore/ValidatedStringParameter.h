@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,7 +50,7 @@ class ValidatedStringParameter : public StringParameter
 	
 		ValidatedStringParameter( const std::string &name, const std::string &description,
 			const std::string &regex, const std::string &regexDescription = "", const std::string &defaultValue = "", bool allowEmptyString = true,
-			const StringParameter::PresetsMap &presets = StringParameter::PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
 
 		const std::string &regex() const;
 		const std::string &regexDescription() const;

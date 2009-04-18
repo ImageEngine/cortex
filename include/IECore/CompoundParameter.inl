@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@ namespace IECore
 
 template<typename I>	
 CompoundParameter::CompoundParameter( const std::string &name, const std::string &description, I membersBegin, I membersEnd, ConstCompoundObjectPtr userData )
-	:	Parameter( name, description, new CompoundObject, PresetsMap(), false, userData )
+	:	Parameter( name, description, new CompoundObject, PresetsContainer(), false, userData )
 {
 	addParameters( membersBegin, membersEnd );
 }

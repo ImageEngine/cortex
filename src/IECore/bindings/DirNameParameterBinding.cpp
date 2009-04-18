@@ -47,15 +47,10 @@ namespace IECore
 {
 
 static DirNameParameterPtr dirNameParameterConstructor( const std::string &name, const std::string &description,
-	const std::string &defaultValue, bool allowEmptyString, PathParameter::CheckType check, const dict &presets, bool presetsOnly, object userData )
+	const std::string &defaultValue, bool allowEmptyString, PathParameter::CheckType check, const object &presets, bool presetsOnly, object userData )
 {
- 	DirNameParameter::PresetsMap p;
-	boost::python::list keys = presets.keys();
-	boost::python::list values = presets.values();
-	for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-	{
-		p.insert( DirNameParameter::PresetsMap::value_type( extract<string>( keys[i] )(), extract<string>( values[i] )() ) );
-	}
+ 	DirNameParameter::PresetsContainer p = parameterPresets<DirNameParameter::PresetsContainer>( presets );
+
 	// get the optional userData parameter.
 	ConstCompoundObjectPtr ptrUserData = 0;
 	if (userData != object()) {
@@ -84,7 +79,7 @@ void bindDirNameParameter()
 
 	typedef class_<DirNameParameter, DirNameParameterPtr, boost::noncopyable, bases<PathParameter> > DirNameParameterPyClass;
 	DirNameParameterPyClass( "DirNameParameter", no_init )
-		.def( "__init__", make_constructor( &dirNameParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ) = string( "" ), boost::python::arg_( "allowEmptyString" ) = true, boost::python::arg_( "check" ) = PathParameter::DontCare, boost::python::arg_( "presets" ) = dict(), boost::python::arg_( "presetsOnly") = false, boost::python::arg_( "userData" ) = object() ) ) )
+		.def( "__init__", make_constructor( &dirNameParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ) = string( "" ), boost::python::arg_( "allowEmptyString" ) = true, boost::python::arg_( "check" ) = PathParameter::DontCare, boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly") = false, boost::python::arg_( "userData" ) = object() ) ) )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( DirNameParameter )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( DirNameParameter )
 	;

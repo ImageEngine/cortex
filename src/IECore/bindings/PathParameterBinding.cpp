@@ -49,26 +49,14 @@ using namespace boost::python;
 namespace IECore
 {
 
-static PathParameter::PresetsMap makePresets( const dict &d )
-{
-	PathParameter::PresetsMap p;
-	boost::python::list keys = d.keys();
-	boost::python::list values = d.values();
-	for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-	{
-		p.insert( PathParameter::PresetsMap::value_type( extract<string>( keys[i] )(), extract<string>( values[i] )() ) );
-	}
-	return p;
-}
-
 class PathParameterWrap : public PathParameter, public Wrapper<PathParameter>
 {
 
 	public :
 
 		PathParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
-			PathParameter::CheckType c, dict p, bool po, CompoundObjectPtr ud )	
-			:	PathParameter( n, d, dv, ae, c, makePresets( p ), po, ud ), Wrapper<PathParameter>( self, this ) {};
+			PathParameter::CheckType c, object &p, bool po, CompoundObjectPtr ud )	
+			:	PathParameter( n, d, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud ), Wrapper<PathParameter>( self, this ) {};
 		
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( PathParameter );
 		
@@ -90,7 +78,7 @@ void bindPathParameter()
 		;
 	}
 	pathParamClass
-		.def( init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, dict, bool, CompoundObjectPtr>() )
+		.def( init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, object &, bool, CompoundObjectPtr>() )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( PathParameter )
 		.add_property( "mustExist", &PathParameter::mustExist )
 		.add_property( "mustNotExist", &PathParameter::mustNotExist )

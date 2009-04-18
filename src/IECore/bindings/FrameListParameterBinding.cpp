@@ -89,47 +89,10 @@ class FrameListParameterWrap : public FrameListParameter, public Wrapper< FrameL
 			}
 		}
 
-		static FrameListParameter::ObjectPresetsMap makePresets( const dict &d )
-		{
-			FrameListParameter::ObjectPresetsMap p;
-			boost::python::list keys = d.keys();
-			boost::python::list values = d.values();
-			for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-			{			
-				const std::string key = extract<std::string>( keys[i] )();
-				extract<std::string> de( values[i] );
-				if( de.check() )
-				{
-					p.insert( FrameListParameter::ObjectPresetsMap::value_type( key, new StringData( de() ) ) );
-				}
-				else
-				{				
-					extract<StringData *> de( values[i] );
-					if( de.check() )
-					{
-						p.insert( FrameListParameter::ObjectPresetsMap::value_type( key, de() ) );
-					}				
-					else	
-					{
-						extract<FrameList *> de( values[i] );
-						if( de.check() )
-						{
-							p.insert( FrameListParameter::ObjectPresetsMap::value_type( key, new StringData( de()->asString() ) ) );
-						}
-						else
-						{
-							throw InvalidArgumentException( "FrameListParameter: Invalid preset value" );
-						}
-					}
-				}
-			}
-			return p;
-		}
-
 	public :
 
-		FrameListParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv, bool allowEmptyList = true, const dict &p = dict(), bool po = false, CompoundObjectPtr ud = 0 )	
-			:	FrameListParameter( n, d, makeDefault( dv ), allowEmptyList, makePresets( p ), po, ud ), Wrapper< FrameListParameter >( self, this ) {};
+		FrameListParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv, bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+			:	FrameListParameter( n, d, makeDefault( dv ), allowEmptyList, parameterPresets<FrameListParameter::ObjectPresetsContainer>( p ), po, ud ), Wrapper< FrameListParameter >( self, this ) {};
 		
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( FrameListParameter );
 };
@@ -149,7 +112,7 @@ void bindFrameListParameter()
 					arg( "description" ), 
 					arg( "defaultValue" ),
 					arg( "allowEmptyList" ) = true,
-					arg( "presets" ) = dict(),
+					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false , 
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
 				) 

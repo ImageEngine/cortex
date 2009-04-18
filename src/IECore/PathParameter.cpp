@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,7 +48,7 @@ using namespace IECore;
 
 PathParameter::PathParameter( const std::string &name, const std::string &description,
 			const std::string &defaultValue, bool allowEmptyString,	CheckType check,
-			const StringParameter::PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+			const StringParameter::PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	StringParameter( name, description, defaultValue, presets, presetsOnly, userData ), m_allowEmptyString( allowEmptyString ), m_check( check )
 {
 }

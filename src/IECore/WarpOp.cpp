@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,9 +45,9 @@ using namespace boost;
 WarpOp::WarpOp( const std::string &name, const std::string &description )
 	:	ImagePrimitiveOp( name, description )
 {
-	IntParameter::PresetsMap filterPresets;
-	filterPresets["None"] = WarpOp::None;
-	filterPresets["Bilinear"] = WarpOp::Bilinear;
+	IntParameter::PresetsContainer filterPresets;
+	filterPresets.push_back( IntParameter::Preset( "None", WarpOp::None ) );
+	filterPresets.push_back( IntParameter::Preset( "Bilinear", WarpOp::Bilinear ) );
 	m_filterParameter = new IntParameter(
 		"filter", 
 		"Defines the filter to be used on the warped coordinates.",

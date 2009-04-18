@@ -59,15 +59,17 @@ class TypedParameter : public Parameter
 		IE_CORE_DECLAREMEMBERPTR( TypedParameter<T> );		
 		IE_CORE_DECLAREPTR( ObjectType );
 		
-		typedef std::map<std::string, T> PresetsMap;
-		typedef std::map<std::string, ObjectTypePtr> ObjectPresetsMap;
+		typedef std::pair<std::string, T> Preset;
+		typedef std::pair<std::string, ObjectTypePtr> ObjectPreset;
+		typedef std::vector<Preset> PresetsContainer;
+		typedef std::vector<ObjectPreset> ObjectPresetsContainer;
 	
 		/// Constructs a new ObjectType object to hold the default value.
 		TypedParameter( const std::string &name, const std::string &description, const T &defaultValue = T(),
-			const PresetsMap &presets = PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
 		/// Takes a copy of defaultValue for use as the default value.
 		TypedParameter( const std::string &name, const std::string &description, ObjectTypePtr defaultValue,
-			const ObjectPresetsMap &presets = ObjectPresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
 		
 		//! @name RunTimeTyped functions
 		////////////////////////////////////

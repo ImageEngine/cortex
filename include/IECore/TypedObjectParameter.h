@@ -72,9 +72,10 @@ class TypedObjectParameter : public ObjectParameter
 		typedef T ObjectType;
 		typedef typename T::Ptr ObjectTypePtr;
 		typedef typename T::ConstPtr ConstObjectTypePtr;
-		typedef std::map<std::string, ObjectTypePtr> ObjectPresetsMap;
+		typedef std::pair<std::string, ObjectTypePtr> ObjectPreset;
+		typedef std::vector<ObjectPreset> ObjectPresetsContainer;
 		
-		TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsMap &presets = ObjectPresetsMap(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );		
+		TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );		
 		
 		//! @name RunTimeTyped functions
 		////////////////////////////////////
@@ -94,7 +95,7 @@ class TypedObjectParameter : public ObjectParameter
 		
 	protected:
 	
-		static PresetsMap makePresets( const ObjectPresetsMap &presets );
+		static PresetsContainer makePresets( const ObjectPresetsContainer &presets );
 
 };
 

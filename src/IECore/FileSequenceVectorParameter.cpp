@@ -47,7 +47,7 @@ using namespace IECore;
 
 FileSequenceVectorParameter::FileSequenceVectorParameter( const std::string &name, const std::string &description, 
 	const std::vector< std::string > &defaultValue, bool allowEmptyList, CheckType check,
-	const StringVectorParameter::PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData,
+	const StringVectorParameter::PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData,
 	const ExtensionList &extensions )
  : PathVectorParameter( name, description, defaultValue, allowEmptyList, check, presets, presetsOnly, userData ),
     m_extensions( extensions )

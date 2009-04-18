@@ -48,15 +48,10 @@ namespace IECore
 {
 
 static FileNameParameterPtr fileNameParameterConstructor( const std::string &name, const std::string &description,
-	const std::string &extensions, const std::string &defaultValue, bool allowEmptyString, PathParameter::CheckType check, const dict &presets, bool presetsOnly,  object userData )
+	const std::string &extensions, const std::string &defaultValue, bool allowEmptyString, PathParameter::CheckType check, const object &presets, bool presetsOnly, object userData )
 {
- 	FileNameParameter::PresetsMap p;
-	boost::python::list keys = presets.keys();
-	boost::python::list values = presets.values();
-	for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-	{
-		p.insert( FileNameParameter::PresetsMap::value_type( extract<string>( keys[i] )(), extract<string>( values[i] )() ) );
-	}
+ 	FileNameParameter::PresetsContainer p = parameterPresets<FileNameParameter::PresetsContainer>( presets );
+	
 	// get the optional userData parameter.
 	ConstCompoundObjectPtr ptrUserData = 0;
 	if (userData != object()) {
@@ -96,7 +91,7 @@ void bindFileNameParameter()
 
 	typedef class_<FileNameParameter, FileNameParameterPtr, boost::noncopyable, bases<PathParameter> > FileNameParameterPyClass;
 	FileNameParameterPyClass( "FileNameParameter", no_init )
-		.def( "__init__", make_constructor( &fileNameParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "extensions" ) = string( "" ), boost::python::arg_( "defaultValue" ) = string( "" ), boost::python::arg_( "allowEmptyString" ) = true, boost::python::arg_( "check" ) = PathParameter::DontCare, boost::python::arg_( "presets" ) = dict(), boost::python::arg_( "presetsOnly") = false, boost::python::arg_( "userData" ) = object() ) ) )
+		.def( "__init__", make_constructor( &fileNameParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "extensions" ) = string( "" ), boost::python::arg_( "defaultValue" ) = string( "" ), boost::python::arg_( "allowEmptyString" ) = true, boost::python::arg_( "check" ) = PathParameter::DontCare, boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly") = false, boost::python::arg_( "userData" ) = object() ) ) )
 		.add_property( "extensions", &fileNameParameterExtensions )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FileNameParameter )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FileNameParameter )

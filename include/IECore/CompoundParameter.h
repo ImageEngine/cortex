@@ -71,7 +71,7 @@ class CompoundParameter : public Parameter
 		/// Implemented to update the presets with the intersection of the presets
 		/// of all the child parameters. Please note that the map returned may differ between
 		/// one call to presets() and the next.
-		virtual const PresetsMap &presets() const;
+		virtual const PresetsContainer &presets() const;
 		/// Implemented to return true only if all children have presetsOnly() true.
 		virtual bool presetsOnly() const;
 		/// Values are only valid if they are a CompoundObject with a valid member

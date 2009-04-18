@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,10 +52,10 @@ class ObjectParameter : public Parameter
 	
 		typedef std::set<TypeId> TypeIdSet;
 		
-		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const PresetsMap &presets = PresetsMap(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );
-		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeIdSet &types, const PresetsMap &presets = PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );
+		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeIdSet &types, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
 		/// types must be an array of TypeIds terminated with InvalidTypeId.
-		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsMap &presets = PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
 		
 		/// Returns false if isn't an instance of any type in validTypes(), or any type derived from those types
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;

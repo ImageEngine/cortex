@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,19 +47,19 @@ using namespace boost;
 /////////////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-static Parameter::PresetsMap convertPresets( const typename NumericParameter<T>::PresetsMap p )
+static Parameter::PresetsContainer convertPresets( const typename NumericParameter<T>::PresetsContainer p )
 {
-	Parameter::PresetsMap result;
-	for( typename NumericParameter<T>::PresetsMap::const_iterator it=p.begin(); it!=p.end(); it++ )
+	Parameter::PresetsContainer result; result.reserve( p.size() );
+	for( typename NumericParameter<T>::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
-		result.insert( typename Parameter::PresetsMap::value_type( it->first, new TypedData<T>( it->second ) ) );
+		result.push_back( typename Parameter::PresetsContainer::value_type( it->first, new TypedData<T>( it->second ) ) );
 	}
 	return result;
 }
 
 template<typename T>
 NumericParameter<T>::NumericParameter( const std::string &name, const std::string &description, T defaultValue,
-	T minValue, T maxValue, const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+	T minValue, T maxValue, const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), presetsOnly, userData ), m_min( minValue ), m_max( maxValue )	
 {
 	if ( defaultValue < minValue || defaultValue > maxValue )
@@ -70,7 +70,7 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 
 template<typename T>
 NumericParameter<T>::NumericParameter( const std::string &name, const std::string &description, T defaultValue,
-	const PresetsMap &presets, ConstCompoundObjectPtr userData )
+	const PresetsContainer &presets, ConstCompoundObjectPtr userData )
 	: Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), true, userData ), m_min( Imath::limits<T>::min() ), m_max( Imath::limits<T>::max() )
 {
 }	

@@ -60,7 +60,7 @@ class FileSequenceVectorParameter : public PathVectorParameter
 		IE_CORE_DECLARERUNTIMETYPED( FileSequenceVectorParameter, PathVectorParameter );
 		
 		FileSequenceVectorParameter( const std::string &name, const std::string &description, const std::vector< std::string > &defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
-			const StringVectorParameter::PresetsMap &presets = StringVectorParameter::PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
+			const StringVectorParameter::PresetsContainer &presets = StringVectorParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
 			const ExtensionList &extensions = ExtensionList() );
 				
 		virtual ~FileSequenceVectorParameter();

@@ -81,10 +81,10 @@ void FromMayaMeshConverter::constructCommon()
 {
 
 	// interpolation
-	StringParameter::PresetsMap interpolationPresets;
-	interpolationPresets["poly"] = "linear";
-	interpolationPresets["subdiv"] = "catmullClark";
-
+	StringParameter::PresetsContainer interpolationPresets;
+	interpolationPresets.push_back( StringParameter::Preset( "poly", "linear" ) );
+	interpolationPresets.push_back( StringParameter::Preset( "subdiv", "catmullClark" ) );
+	
 	m_interpolation = new StringParameter(
 		"interpolation",
 		"Sets the interpolation type of the new mesh",
@@ -95,9 +95,9 @@ void FromMayaMeshConverter::constructCommon()
 	parameters()->addParameter( m_interpolation );
 	
 	// points
-	BoolParameter::PresetsMap pointsPresets;
-	pointsPresets["poly"] = true;
-	pointsPresets["subdiv"] = true;
+	BoolParameter::PresetsContainer pointsPresets;
+	pointsPresets.push_back( BoolParameter::Preset( "poly", true ) );
+	pointsPresets.push_back( BoolParameter::Preset( "subdiv", true ) );
 
 	m_points = new BoolParameter(
 		"points",
@@ -109,9 +109,9 @@ void FromMayaMeshConverter::constructCommon()
 	parameters()->addParameter( m_points );
 	
 	// normals
-	BoolParameter::PresetsMap normalsPresets;
-	normalsPresets["poly"] = true;
-	normalsPresets["subdiv"] = false;
+	BoolParameter::PresetsContainer normalsPresets;
+	normalsPresets.push_back( BoolParameter::Preset( "poly", true ) );
+	normalsPresets.push_back( BoolParameter::Preset( "subdiv", true ) );
 
 	m_normals = new BoolParameter(
 		"normals",
@@ -126,9 +126,9 @@ void FromMayaMeshConverter::constructCommon()
 	parameters()->addParameter( m_normals );
 	
 	// st
-	BoolParameter::PresetsMap stPresets;
-	stPresets["poly"] = true;
-	stPresets["subdiv"] = true;
+	BoolParameter::PresetsContainer stPresets;
+	stPresets.push_back( BoolParameter::Preset( "poly", true ) );
+	stPresets.push_back( BoolParameter::Preset( "subdiv", true ) );
 
 	m_st = new BoolParameter(
 		"st",
@@ -140,9 +140,9 @@ void FromMayaMeshConverter::constructCommon()
 	parameters()->addParameter( m_st );
 	
 	// extra st
-	BoolParameter::PresetsMap extraSTPresets;
-	extraSTPresets["poly"] = true;
-	extraSTPresets["subdiv"] = true;
+	BoolParameter::PresetsContainer extraSTPresets;
+	extraSTPresets.push_back( BoolParameter::Preset( "poly", true ) );
+	extraSTPresets.push_back( BoolParameter::Preset( "subdiv", true ) );
 
 	m_extraST = new BoolParameter(
 		"extraST",

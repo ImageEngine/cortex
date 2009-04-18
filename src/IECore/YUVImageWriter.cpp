@@ -71,10 +71,10 @@ YUVImageWriter::YUVImageWriter(ObjectPtr image, const string &fileName) :
 
 void YUVImageWriter::constructParameters()
 {
-	IntParameter::PresetsMap formatPresets;
-	formatPresets["yuv420p"] = YUV420P;
-	formatPresets["yuv422p"] = YUV422P;
-	formatPresets["yuv444p"] = YUV444P;
+	IntParameter::PresetsContainer formatPresets;
+	formatPresets.push_back( IntParameter::Preset( "yuv420p", YUV420P ) );
+	formatPresets.push_back( IntParameter::Preset( "yuv422p", YUV422P ) );
+	formatPresets.push_back( IntParameter::Preset( "yuv444p", YUV444P ) );
 
 	m_formatParameter = new IntParameter(
 	        "format",
@@ -83,9 +83,9 @@ void YUVImageWriter::constructParameters()
 	        formatPresets
 	);
 	
-	V2fParameter::PresetsMap kBkRPresets;
-	kBkRPresets["rec601"] = V2f( 0.114,  0.299  );
-	kBkRPresets["rec709"] = V2f( 0.0722, 0.2126 );	
+	V2fParameter::PresetsContainer kBkRPresets;
+	kBkRPresets.push_back( V2fParameter::Preset( "rec601", V2f( 0.114,  0.299  ) ) );
+	kBkRPresets.push_back( V2fParameter::Preset( "rec709", V2f( 0.0722, 0.2126 ) ) );
 	m_kBkRParameter = new V2fParameter(
 		"kBkR",
 		"Defines the constants kB/kR for calculating YUV (Y'CbCr) components",
@@ -96,9 +96,9 @@ void YUVImageWriter::constructParameters()
 	
 	Box3f defaultRange = Box3f( V3f( 0.0f, 0.0f, 0.0f ), V3f( 1.0f, 1.0f, 1.0f ) );
 	
-	Box3fParameter::PresetsMap rangePresets;
-	rangePresets["zeroToOne"] = defaultRange;
-	rangePresets["standardScaling"] = Box3f( 
+	Box3fParameter::PresetsContainer rangePresets;
+	rangePresets.push_back( Box3fParameter::Preset( "zeroToOne", defaultRange ) );
+	rangePresets.push_back( Box3fParameter::Preset( "standardScaling", Box3f( 
 		V3f( 
 			16.0f / 255.0f, 
 			16.0f / 255.0f,
@@ -109,7 +109,8 @@ void YUVImageWriter::constructParameters()
 			240.0f / 255.0f, 
 			240.0f / 255.0f		
 		)
-	);
+	) ) );
+	
 	m_rangeParameter = new Box3fParameter(
 		"range",
 		"Specifies the floating-point min/max of the YUV components, to allow rescaling due to addition of head-room and/or toe-room. The standardScaling preset "

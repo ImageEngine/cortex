@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -53,14 +53,15 @@ class NumericParameter : public Parameter
 		typedef TypedData<T> ObjectType;
 		IE_CORE_DECLAREMEMBERPTR( NumericParameter<T> );
 		IE_CORE_DECLAREPTR( ObjectType );
-		typedef std::map<std::string, T> PresetsMap;
+		typedef std::pair<std::string, T> Preset;
+		typedef std::vector<Preset> PresetsContainer;
 	
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue = T(),
 			T minValue = Imath::limits<T>::min(), T maxValue = Imath::limits<T>::max(),
-			const PresetsMap &presets = PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
 			
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue,
-			const PresetsMap &presets, ConstCompoundObjectPtr userData = 0 );	
+			const PresetsContainer &presets, ConstCompoundObjectPtr userData = 0 );	
 		
 		//! @name RunTimeTyped functions
 		////////////////////////////////////

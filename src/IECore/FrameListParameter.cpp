@@ -41,19 +41,19 @@
 
 using namespace IECore;
 
-static StringParameter::ObjectPresetsMap convertPresets( const FrameListParameter::PresetsMap p )
+static StringParameter::ObjectPresetsContainer convertPresets( const FrameListParameter::PresetsContainer p )
 {
-	StringParameter::ObjectPresetsMap result;
-	for( FrameListParameter::PresetsMap::const_iterator it=p.begin(); it!=p.end(); it++ )
+	StringParameter::ObjectPresetsContainer result;
+	for( FrameListParameter::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
-		result.insert( StringParameter::ObjectPresetsMap::value_type( it->first, new StringData( it->second ) ) );
+		result.push_back( StringParameter::ObjectPresetsContainer::value_type( it->first, new StringData( it->second ) ) );
 	}
 	return result;
 }
 
 
 FrameListParameter::FrameListParameter( const std::string &name, const std::string &description, const std::string &defaultValue, bool allowEmptyList,
-			const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+			const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 			: StringParameter( name, description, new StringData( defaultValue ), convertPresets( presets ), presetsOnly, userData ), 
 			m_allowEmptyList( allowEmptyList )
 {
@@ -61,7 +61,7 @@ FrameListParameter::FrameListParameter( const std::string &name, const std::stri
 }
 
 FrameListParameter::FrameListParameter( const std::string &name, const std::string &description, StringDataPtr defaultValue, bool allowEmptyList,
-			const ObjectPresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData  )
+			const ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData  )
 			: StringParameter( name, description, defaultValue, presets, presetsOnly, userData ), 
 			m_allowEmptyList( allowEmptyList )
 {

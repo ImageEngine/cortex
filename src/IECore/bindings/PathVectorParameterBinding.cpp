@@ -54,38 +54,13 @@ class PathVectorParameterWrap : public PathVectorParameter, public Wrapper<PathV
 	public:
 	
 		PathVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, ConstStringVectorDataPtr dv, bool ae = true,
-			PathVectorParameter::CheckType c = PathVectorParameter::DontCare, dict p = dict(), bool po = false, CompoundObjectPtr ud = 0 )	
-			:	PathVectorParameter( n, d, dv->readable(), ae, c, makePresets( p ), po, ud ), Wrapper<PathVectorParameter>( self, this )
+			PathVectorParameter::CheckType c = PathVectorParameter::DontCare, object p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+			:	PathVectorParameter( n, d, dv->readable(), ae, c, parameterPresets<PathVectorParameter::PresetsContainer>( p ), po, ud ), Wrapper<PathVectorParameter>( self, this )
 		{
 		}
 		
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( PathVectorParameter );
 
-	protected :
-	
-		static PathVectorParameter::PresetsMap makePresets( const dict &d )
-		{
-			PathVectorParameter::PresetsMap p;
-			boost::python::list keys = d.keys();
-			boost::python::list values = d.values();
-			for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-			{
-				extract<StringVectorDataPtr> e( values[i] );				
-				if( e.check() )
-				{
-					p.insert( PathVectorParameter::PresetsMap::value_type( extract<string>( keys[i] )(), e()->readable() ) );
-				}
-				else
-				{
-					p.insert( PathVectorParameter::PresetsMap::value_type( extract<string>( keys[i] )(), extract<StringVectorDataPtr>( values[i] )()->readable() ) );
-				}
-				
-				StringVectorDataPtr value = e();
-				assert( value );
-				p.insert( PathVectorParameter::PresetsMap::value_type( extract<string>( keys[i] )(), value->readable() ) );
-			}
-			return p;
-		}		
 };
 IE_CORE_DECLAREPTR( PathVectorParameterWrap );
 
@@ -114,7 +89,7 @@ void bindPathVectorParameter()
 					arg( "defaultValue" ),
 					arg( "allowEmptyList" ) = true,
 					arg( "check" ) = PathVectorParameter::DontCare,
-					arg( "presets" ) = dict(),
+					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false , 
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
 				) 

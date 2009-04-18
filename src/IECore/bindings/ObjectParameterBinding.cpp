@@ -52,18 +52,18 @@ using namespace boost::python;
 namespace IECore
 {
 
-static ObjectParameterPtr objectParameterConstructor( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const dict &presets, bool presetsOnly, CompoundObjectPtr userData )
+static ObjectParameterPtr objectParameterConstructor( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const object &presets, bool presetsOnly, CompoundObjectPtr userData )
 {
-	return new ObjectParameter( name, description, defaultValue, type, parameterPresetsFromDict( presets ), presetsOnly, userData );
+	return new ObjectParameter( name, description, defaultValue, type, parameterPresets<Parameter::PresetsContainer>( presets ), presetsOnly, userData );
 }
 
-static ObjectParameterPtr objectParameterConstructor2( const std::string &name, const std::string &description, ObjectPtr defaultValue, const boost::python::list &types, const dict &presets, bool presetsOnly, CompoundObjectPtr userData )
+static ObjectParameterPtr objectParameterConstructor2( const std::string &name, const std::string &description, ObjectPtr defaultValue, const boost::python::list &types, const object &presets, bool presetsOnly, CompoundObjectPtr userData )
 {
 	vector<TypeId> tv;
 	boost::python::container_utils::extend_container( tv, types );
 	ObjectParameter::TypeIdSet t;
 	copy( tv.begin(), tv.end(), insert_iterator<ObjectParameter::TypeIdSet>( t, t.begin() ) );
-	return new ObjectParameter( name, description, defaultValue, t, parameterPresetsFromDict( presets ), presetsOnly, userData );
+	return new ObjectParameter( name, description, defaultValue, t, parameterPresets<Parameter::PresetsContainer>( presets ), presetsOnly, userData );
 }
 
 static boost::python::list validTypes( ObjectParameter &o )
@@ -81,8 +81,8 @@ void bindObjectParameter()
 
 	typedef class_< ObjectParameter, ObjectParameterPtr, boost::noncopyable, bases<Parameter> > ObjectParameterPyClass;
 	ObjectParameterPyClass( "ObjectParameter", no_init )
-		.def( "__init__", make_constructor( &objectParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ), boost::python::arg_( "type" ), boost::python::arg_( "presets" ) = dict(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
-		.def( "__init__", make_constructor( &objectParameterConstructor2, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ), boost::python::arg_( "types" ), boost::python::arg_( "presets" ) = dict(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
+		.def( "__init__", make_constructor( &objectParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ), boost::python::arg_( "type" ), boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
+		.def( "__init__", make_constructor( &objectParameterConstructor2, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ), boost::python::arg_( "types" ), boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
 		.def( "validTypes", &validTypes )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( ObjectParameter )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ObjectParameter)

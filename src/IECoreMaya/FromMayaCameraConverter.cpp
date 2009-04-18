@@ -61,10 +61,10 @@ FromMayaCameraConverter::FromMayaCameraConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( staticTypeName(), "Converts maya camera shape nodes into IECore::Camera objects.", dagPath )
 {
 
-	IntParameter::PresetsMap resolutionModePresets;
-	resolutionModePresets["renderGlobals"] = RenderGlobals;
-	resolutionModePresets["specified"] = Specified;
-	
+	IntParameter::PresetsContainer resolutionModePresets;
+	resolutionModePresets.push_back( IntParameter::Preset( "renderGlobals", RenderGlobals ) );
+	resolutionModePresets.push_back( IntParameter::Preset( "specified", Specified ) );
+		
 	m_resolutionMode = new IntParameter(
 		"resolutionMode",
 		"Determines how the resolution of the camera is decided.",
@@ -77,9 +77,9 @@ FromMayaCameraConverter::FromMayaCameraConverter( const MDagPath &dagPath )
 	
 	parameters()->addParameter( m_resolutionMode );
 	
-	V2iParameter::PresetsMap resolutionPresets;
-	resolutionPresets["2K"] = Imath::V2i( 2048, 1556 );
-	resolutionPresets["1K"] = Imath::V2i( 1024, 778 );
+	V2iParameter::PresetsContainer resolutionPresets;
+	resolutionPresets.push_back( V2iParameter::Preset( "2K", Imath::V2i( 2048, 1556 ) ) );
+	resolutionPresets.push_back( V2iParameter::Preset( "1K", Imath::V2i( 1024, 778 ) ) );
 	
 	m_resolution = new V2iParameter(
 		"resolution",

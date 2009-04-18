@@ -130,48 +130,11 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 				}
 			}
 		}
-
-		static StringParameter::PresetsMap makePresets( const dict &d )
-		{
-			StringParameter::PresetsMap p;
-			boost::python::list keys = d.keys();
-			boost::python::list values = d.values();
-			for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-			{			
-				const std::string key = extract<std::string>( keys[i] )();
-				extract<std::string> de( values[i] );
-				if( de.check() )
-				{
-					p.insert( StringParameter::PresetsMap::value_type( key, de() ) );
-				}
-				else
-				{				
-					extract<StringData *> de( values[i] );
-					if( de.check() )
-					{
-						p.insert( StringParameter::PresetsMap::value_type( key, de()->readable() ) );
-					}				
-					else	
-					{
-						extract<FileSequence *> de( values[i] );
-						if( de.check() )
-						{
-							p.insert( StringParameter::PresetsMap::value_type( key, de()->asString() ) );
-						}
-						else
-						{
-							throw InvalidArgumentException( "FileSequenceParameter: Invalid preset value" );
-						}
-					}
-				}
-			}
-			return p;
-		}
 				
 	public :
 
-		FileSequenceParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const dict &p = dict(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )	
-			:	FileSequenceParameter( n, d, makeDefault( dv ), allowEmptyString, check, makePresets( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceParameter >( self, this ) {};
+		FileSequenceParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )	
+			:	FileSequenceParameter( n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceParameter >( self, this ) {};
 					
 		list getExtensionsWrap()
 		{
@@ -203,7 +166,7 @@ void bindFileSequenceParameter()
 	typedef class_< FileSequenceParameter, FileSequenceParameterWrap::Ptr, boost::noncopyable, bases< PathParameter > > FileSequenceParameterPyClass;
 	FileSequenceParameterPyClass ( "FileSequenceParameter", no_init )
 		.def(
-			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceParameter::CheckType, const dict &, bool, CompoundObjectPtr, object > >
+			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceParameter::CheckType, const object &, bool, CompoundObjectPtr, object > >
 			( 
 				( 
 					arg( "name" ), 
@@ -211,7 +174,7 @@ void bindFileSequenceParameter()
 					arg( "defaultValue" ) = object( std::string("") ),
 					arg( "allowEmptyString" ) = true,
 					arg( "check" ) = FileSequenceParameter::DontCare, 
-					arg( "presets" ) = dict(),
+					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false , 
 					arg( "userData" ) = CompoundObject::Ptr( 0 ),
 					arg( "extensions" ) = list()

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,7 +48,7 @@ using namespace IECore;
 
 PathVectorParameter::PathVectorParameter( const std::string &name, const std::string &description,
                               const std::vector<std::string> &defaultValue, bool allowEmptyList, CheckType check,
-                              const StringVectorParameter::PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+                              const StringVectorParameter::PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 		:	StringVectorParameter( name, description, defaultValue, presets, presetsOnly, userData ), m_allowEmptyList( allowEmptyList ), m_check( check )
 {
 }

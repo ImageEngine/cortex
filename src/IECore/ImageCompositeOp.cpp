@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,11 +60,12 @@ using namespace Imath;
 
 ImageCompositeOp::ImageCompositeOp() : ImagePrimitiveOp( "ImageCompositeOp", "ImageCompositeOp" )
 {
-	IntParameter::PresetsMap operationPresets;
-	operationPresets["Over"] = Over;
-	operationPresets["Max"] = Max;
-	operationPresets["Min"] = Min;
-	operationPresets["Multiply"] = Multiply;
+	IntParameter::PresetsContainer operationPresets;
+	operationPresets.push_back( IntParameter::Preset( "Over", Over ) );
+	operationPresets.push_back( IntParameter::Preset( "Max", Max ) );
+	operationPresets.push_back( IntParameter::Preset( "Min", Min ) );
+	operationPresets.push_back( IntParameter::Preset( "Multiply", Multiply ) );
+
 	m_operationParameter = new IntParameter(
 		"operation",
 		"operation description",
@@ -96,9 +97,10 @@ ImageCompositeOp::ImageCompositeOp() : ImagePrimitiveOp( "ImageCompositeOp", "Im
 		new ImagePrimitive()
 	);
 	
-	IntParameter::PresetsMap inputModePresets;
-	inputModePresets["Premultiplied"] = Premultiplied;
-	inputModePresets["Unpremultiplied"] = Unpremultiplied;
+	IntParameter::PresetsContainer inputModePresets;
+	inputModePresets.push_back( IntParameter::Preset( "Premultiplied", Premultiplied ) );
+	inputModePresets.push_back( IntParameter::Preset( "Unpremultiplied", Unpremultiplied ) );
+	
 	m_inputModeParameter = new IntParameter(
 		"inputMode",
 		"States whether the input images are premultiplied by their alpha.",

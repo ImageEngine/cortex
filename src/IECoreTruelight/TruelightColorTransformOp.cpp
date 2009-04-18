@@ -58,10 +58,10 @@ TruelightColorTransformOp::TruelightColorTransformOp()
 		"monitor"
 	);
 	
-	IntParameter::PresetsMap inputSpacePresets;
-	inputSpacePresets["log"] = TL_INPUT_LOG;
-	inputSpacePresets["linear"] = TL_INPUT_LIN;
-	inputSpacePresets["video"] = TL_INPUT_VID;
+	IntParameter::PresetsContainer inputSpacePresets;
+	inputSpacePresets.push_back( IntParameter::Preset( "log", TL_INPUT_LOG ) );
+	inputSpacePresets.push_back( IntParameter::Preset( "linear", TL_INPUT_LIN ) );
+	inputSpacePresets.push_back( IntParameter::Preset( "video", TL_INPUT_VID ) );
 	m_inputSpaceParameter = new IntParameter(
 		"inputSpace",
 		"The colorspace of the input to the transform.",

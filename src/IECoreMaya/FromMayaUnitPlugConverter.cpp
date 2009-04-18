@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,9 +56,9 @@ template<typename T>
 FromMayaUnitPlugConverter<T>::FromMayaUnitPlugConverter( const MPlug &plug )
 	:	FromMayaPlugConverter( plug )
 {
-	IECore::IntParameter::PresetsMap anglePresets;
-	anglePresets["Radians"] = MAngle::kRadians;	
-	anglePresets["Degrees"] = MAngle::kDegrees;			
+	IECore::IntParameter::PresetsContainer anglePresets;
+	anglePresets.push_back( IECore::IntParameter::Preset( "Radians", MAngle::kRadians ) );
+	anglePresets.push_back( IECore::IntParameter::Preset( "Degrees", MAngle::kDegrees ) );			
 	m_angleUnitParameter = new IECore::IntParameter(
 		"angleUnit",
 		"The unit in which angular values are returned.",
@@ -69,15 +69,15 @@ FromMayaUnitPlugConverter<T>::FromMayaUnitPlugConverter( const MPlug &plug )
 		true
 	);
 	
-	IECore::IntParameter::PresetsMap distancePresets;
-	distancePresets["Inches"] = MDistance::kInches;
-	distancePresets["Feet"] = MDistance::kFeet;
-	distancePresets["Yards"] = MDistance::kYards;
-	distancePresets["Miles"] = MDistance::kMiles;
-	distancePresets["Millimeters"] = MDistance::kMillimeters;
-	distancePresets["Centimeters"] = MDistance::kCentimeters;
-	distancePresets["Meters"] = MDistance::kMeters;
-	distancePresets["Kilometers"] = MDistance::kKilometers;
+	IECore::IntParameter::PresetsContainer distancePresets;
+	distancePresets.push_back( IECore::IntParameter::Preset( "Inches", MDistance::kInches ) );
+	distancePresets.push_back( IECore::IntParameter::Preset( "Feet", MDistance::kFeet ) );
+	distancePresets.push_back( IECore::IntParameter::Preset( "Yards", MDistance::kYards ) );
+	distancePresets.push_back( IECore::IntParameter::Preset( "Miles", MDistance::kMiles ) );
+	distancePresets.push_back( IECore::IntParameter::Preset( "Millimeters", MDistance::kMillimeters ) );
+	distancePresets.push_back( IECore::IntParameter::Preset( "Centimeters", MDistance::kCentimeters ) );
+	distancePresets.push_back( IECore::IntParameter::Preset( "Meters", MDistance::kMeters ) );
+	distancePresets.push_back( IECore::IntParameter::Preset( "Kilometers", MDistance::kKilometers ) );
 	m_distanceUnitParameter = new IECore::IntParameter(
 		"distanceUnit",
 		"The unit in which distance values are returned.",
@@ -88,12 +88,11 @@ FromMayaUnitPlugConverter<T>::FromMayaUnitPlugConverter( const MPlug &plug )
 		true
 	);
 	
-	IECore::IntParameter::PresetsMap timePresets;
-	timePresets["Hours"] = MTime::kHours;
-	timePresets["Minutes"] = MTime::kMinutes;
-	timePresets["Seconds"] = MTime::kSeconds;
-	timePresets["Milliseconds"] = MTime::kMilliseconds;
-	
+	IECore::IntParameter::PresetsContainer timePresets;
+	timePresets.push_back( IECore::IntParameter::Preset( "Hours", MTime::kHours ) );
+	timePresets.push_back( IECore::IntParameter::Preset( "Minutes", MTime::kMinutes ) );
+	timePresets.push_back( IECore::IntParameter::Preset( "Seconds", MTime::kSeconds ) );
+	timePresets.push_back( IECore::IntParameter::Preset( "Milliseconds", MTime::kMilliseconds ) );
 	m_timeUnitParameter = new IECore::IntParameter(
 		"timeUnit",
 		"The unit in which time values are returned.",

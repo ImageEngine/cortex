@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,6 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
+#include "boost/bind.hpp"
+
 #include "IECore/Parameter.h"
 #include "IECore/Exception.h"
 #include "IECore/NullObject.h"
@@ -46,17 +50,17 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Parameter::Parameter( const std::string &name, const std::string &description, ObjectPtr defaultValue,
-	const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+	const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	m_name( name ), m_description( description ), m_defaultValue( defaultValue ), m_presetsOnly( presetsOnly ),
 		m_userData( userData ? userData->copy() : 0 )
 {
 	assert( defaultValue );
 	
-	for( PresetsMap::const_iterator it=presets.begin(); it!=presets.end(); it++ )
+	for( PresetsContainer::const_iterator it=presets.begin(); it!=presets.end(); it++ )
 	{
-		m_presets.insert( PresetsMap::value_type( it->first, it->second->copy() ) );
+		m_presets.push_back( PresetsContainer::value_type( it->first, it->second->copy() ) );
 	}
-	
+		
 	/// \todo If presetsOnly is true, doesn't this allow us to set a defaultValue that isn't in the presets list?
 	setValue( defaultValue->copy() );
 }
@@ -84,7 +88,7 @@ ConstObjectPtr Parameter::defaultValue() const
 	return m_defaultValue;
 }
 
-const Parameter::PresetsMap &Parameter::presets() const
+const Parameter::PresetsContainer &Parameter::presets() const
 {
 	return m_presets;
 }
@@ -130,8 +134,8 @@ bool Parameter::valueValid( ConstObjectPtr value, std::string *reason ) const
 	{
 		return true;
 	}
-	const PresetsMap &pr = presets();
-	for( PresetsMap::const_iterator it = pr.begin(); it!=pr.end(); it++ )
+	const PresetsContainer &pr = presets();
+	for( PresetsContainer::const_iterator it = pr.begin(); it!=pr.end(); it++ )
 	{
 		if( it->second->isEqualTo( value ) )
 		{
@@ -186,8 +190,8 @@ void Parameter::setValidatedValue( ObjectPtr value )
 
 void Parameter::setValue( const std::string &presetName )
 {
-	const PresetsMap &pr = presets();
-	PresetsMap::const_iterator it = pr.find( presetName );
+	const PresetsContainer &pr = presets();
+	PresetsContainer::const_iterator it = find_if( pr.begin(), pr.end(), bind( &Preset::first, _1 )==presetName ); 
 	if( it==pr.end() )
 	{
 		throw Exception( string( "Preset \"" ) + presetName + "\" does not exist." );
@@ -227,8 +231,8 @@ std::string Parameter::getCurrentPresetName() const
 	// didn't have to do a copy of the value. but that breaks with CompoundParameter
 	// as it builds the value dynamically in getValue().
 	ConstObjectPtr currentValue = getValue();
-	const PresetsMap &pr = presets();
-	PresetsMap::const_iterator it;
+	const PresetsContainer &pr = presets();
+	PresetsContainer::const_iterator it;
 	for( it=pr.begin(); it!=pr.end(); it++ )
 	{
 		if( it->second->isEqualTo( currentValue ) )

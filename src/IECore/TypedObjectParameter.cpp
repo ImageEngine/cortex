@@ -57,17 +57,17 @@ using namespace IECore;
 using namespace std;
 
 template<typename T>
-TypedObjectParameter<T>::TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+TypedObjectParameter<T>::TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	: ObjectParameter(  name, description, defaultValue, T::staticTypeId(), makePresets( presets) , presetsOnly, userData )
 {
 }
 
 template<typename T>
-Parameter::PresetsMap TypedObjectParameter<T>::makePresets( const ObjectPresetsMap &presets )
+Parameter::PresetsContainer TypedObjectParameter<T>::makePresets( const ObjectPresetsContainer &presets )
 {
-	Parameter::PresetsMap result;
+	Parameter::PresetsContainer result; result.reserve( presets.size() );
 	
-	result.insert( presets.begin(), presets.end() );
+	result.insert( result.end(), presets.begin(), presets.end() );
 	
 	return result;
 }

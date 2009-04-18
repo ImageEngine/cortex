@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,9 +60,9 @@ FromMayaShapeConverter::FromMayaShapeConverter( const std::string &name, const s
 void FromMayaShapeConverter::constructCommon()
 {
 
-	IECore::IntParameter::PresetsMap spacePresets;
-	spacePresets["Object"] = Object;	
-	spacePresets["World"] = World;		
+	IECore::IntParameter::PresetsContainer spacePresets;
+	spacePresets.push_back( IECore::IntParameter::Preset( "Object", Object ) );
+	spacePresets.push_back( IECore::IntParameter::Preset( "World", World ) );
 	m_spaceParameter = new IECore::IntParameter(
 		"space",
 		"The space in which the object is exported.",
@@ -73,10 +73,10 @@ void FromMayaShapeConverter::constructCommon()
 		true
 	);
 
-	IECore::StringParameter::PresetsMap primVarAttrPrefixPresets;
-	primVarAttrPrefixPresets["MTOR"] = "rman";
-	primVarAttrPrefixPresets["3Delight"] = "delight";
-	primVarAttrPrefixPresets["None"] = "";
+	IECore::StringParameter::PresetsContainer primVarAttrPrefixPresets;
+	primVarAttrPrefixPresets.push_back( IECore::StringParameter::Preset( "MTOR", "rman" ) );
+	primVarAttrPrefixPresets.push_back( IECore::StringParameter::Preset( "3Delight", "delight" ) );
+	primVarAttrPrefixPresets.push_back( IECore::StringParameter::Preset( "None", "" ) );
 	m_primVarAttrPrefixParameter = new IECore::StringParameter(
 		"primVarAttrPrefix",
 		"Any attribute names beginning with this prefix are considered to represent primitive variables and are converted as such."

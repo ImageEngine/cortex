@@ -32,6 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
+#include "boost/bind.hpp"
+
 #include "IECore/CompoundParameter.h"
 #include "IECore/NullObject.h"
 #include "IECore/Exception.h"
@@ -41,7 +45,7 @@ using namespace IECore;
 using namespace boost;
 
 CompoundParameter::CompoundParameter( const std::string &name, const std::string &description, ConstCompoundObjectPtr userData )
-	:	Parameter( name, description, new CompoundObject, Parameter::PresetsMap(), false, userData )
+	:	Parameter( name, description, new CompoundObject, PresetsContainer(), false, userData )
 {
 }
 
@@ -64,10 +68,10 @@ ConstObjectPtr CompoundParameter::defaultValue() const
 	return value;
 }
 
-const Parameter::PresetsMap &CompoundParameter::presets() const
+const Parameter::PresetsContainer &CompoundParameter::presets() const
 {
 	// naughty? nah! it gives the right semantics to an outside observer
-	PresetsMap &pr = const_cast<PresetsMap &>( Parameter::presets() );
+	PresetsContainer &pr = const_cast<PresetsContainer &>( Parameter::presets() );
 	pr.clear();
 	if( !m_namesToParameters.size() )
 	{
@@ -77,7 +81,7 @@ const Parameter::PresetsMap &CompoundParameter::presets() const
 	// get a references for each child preset map.
 	// we only want to call presets() once for
 	// each child as the map returned may change between calls.
-	vector<const PresetsMap *> childPresets;
+	vector<const PresetsContainer *> childPresets;
 	for( size_t i=0; i<m_parameters.size(); i++ )
 	{
 		childPresets.push_back( &(m_parameters[i]->presets()) );
@@ -85,12 +89,12 @@ const Parameter::PresetsMap &CompoundParameter::presets() const
 	
 	// find the intersection of all the child preset names
 	set<string> names;
-	for( PresetsMap::const_iterator it=childPresets[0]->begin(); it!=childPresets[0]->end(); it++ )
+	for( PresetsContainer::const_iterator it=childPresets[0]->begin(); it!=childPresets[0]->end(); it++ )
 	{
 		bool ok = true;
 		for( size_t i=1; i<m_parameters.size(); i++ )
 		{
-			if( childPresets[i]->find( it->first )==childPresets[i]->end() )
+			if( find_if( childPresets[i]->begin(), childPresets[i]->end(), bind( &Preset::first, _1 )==it->first )==childPresets[i]->end() )
 			{
 				ok = false;
 				break;
@@ -107,9 +111,9 @@ const Parameter::PresetsMap &CompoundParameter::presets() const
 		CompoundObjectPtr o = new CompoundObject;
 		for( size_t i=0; i<m_parameters.size(); i++ )
 		{
-			o->members()[m_parameters[i]->name()] = childPresets[i]->find(*nIt)->second;
+			o->members()[m_parameters[i]->name()] = find_if( childPresets[i]->begin(), childPresets[i]->end(), bind( &Preset::first, _1 )==*nIt )->second;
 		}
-		pr[*nIt] = o;
+		pr.push_back( Preset( *nIt, o ) );
 	}
 	
 	return pr;

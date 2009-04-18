@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,12 +64,12 @@ MappedRandomPointDistributionOp::MappedRandomPointDistributionOp()
 	        new ImagePrimitive()
 	);
 
-	StringParameter::PresetsMap channelNamePresets;
-	channelNamePresets["R"] = "R";
-	channelNamePresets["G"] = "G";
-	channelNamePresets["B"] = "B";
-	channelNamePresets["A"] = "A";
-	channelNamePresets["Y"] = "Y";
+	StringParameter::PresetsContainer channelNamePresets;
+	channelNamePresets.push_back( StringParameter::Preset( "R", "R" ) );
+	channelNamePresets.push_back( StringParameter::Preset( "G", "G" ) );
+	channelNamePresets.push_back( StringParameter::Preset( "B", "B" ) );
+	channelNamePresets.push_back( StringParameter::Preset( "A", "A" ) );
+	channelNamePresets.push_back( StringParameter::Preset( "Y", "Y" ) );
 
 	m_channelNameParameter = new StringParameter(
 	        "channelName",

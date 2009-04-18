@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -79,9 +79,9 @@ MedianCutSampler::MedianCutSampler()
 		4
 	);
 	
-	IntParameter::PresetsMap projectionPresets;
-	projectionPresets["rectilinear"] = Rectilinear;
-	projectionPresets["latLong"] = LatLong;
+	IntParameter::PresetsContainer projectionPresets;
+	projectionPresets.push_back( IntParameter::Preset( "rectilinear", Rectilinear ) );
+	projectionPresets.push_back( IntParameter::Preset( "latLong", LatLong ) );
 	m_projectionParameter = new IntParameter(
 		"projection",
 		"The projection the image represents. When in latLong mode the "

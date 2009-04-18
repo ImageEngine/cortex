@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,10 +57,10 @@ MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( static
 	        new MeshPrimitive()
 	);
 
-	IntParameter::PresetsMap directionPresets;
-	directionPresets["Inside"] = Inside;
-	directionPresets["Outside"] = Outside;
-	directionPresets["Both"] = Both;
+	IntParameter::PresetsContainer directionPresets;
+	directionPresets.push_back( IntParameter::Preset( "Inside", Inside ) );
+	directionPresets.push_back( IntParameter::Preset( "Outside", Outside ) );
+	directionPresets.push_back( IntParameter::Preset( "Both", Both ) );
 
 	m_directionParameter = new IntParameter(
 	        "direction",
@@ -72,12 +72,12 @@ MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( static
 	        true
 	);
 	
-	IntParameter::PresetsMap methodPresets;
-	methodPresets["Normal"] = Normal;
-	methodPresets["X-axis"] = XAxis;
-	methodPresets["Y-axis"] = YAxis;
-	methodPresets["Z-axis"] = ZAxis;		
-	methodPresets["DirectionMesh"] = DirectionMesh;	
+	IntParameter::PresetsContainer methodPresets;
+	methodPresets.push_back( IntParameter::Preset( "Normal", Normal ) );
+	methodPresets.push_back( IntParameter::Preset( "X-axis", XAxis ) );
+	methodPresets.push_back( IntParameter::Preset( "Y-axis", YAxis ) );
+	methodPresets.push_back( IntParameter::Preset( "Z-axis", ZAxis ) );
+	methodPresets.push_back( IntParameter::Preset( "DirectionMesh", DirectionMesh ) );
 
 	m_methodParameter = new IntParameter(
 	        "method",

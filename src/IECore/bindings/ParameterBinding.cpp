@@ -65,24 +65,34 @@ static ObjectPtr defaultValue( Parameter &that )
 static dict presets( Parameter &that )
 {
 	dict result;
-	const Parameter::PresetsMap &p = that.presets();
-	for( Parameter::PresetsMap::const_iterator it=p.begin(); it!=p.end(); it++ )
+	const Parameter::PresetsContainer &p = that.presets();
+	for( Parameter::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
 		result[it->first] = it->second->copy();
 	}
 	return result;
 }
 
-Parameter::PresetsMap parameterPresetsFromDict( const dict &presets )
+static boost::python::tuple presetNames( const Parameter &that )
 {
-	Parameter::PresetsMap p;
-	boost::python::list keys = presets.keys();
-	boost::python::list values = presets.values();
-	for( int i = 0; i<keys.attr( "__len__" )(); i++ )
+	boost::python::list result;
+	const Parameter::PresetsContainer &p = that.presets();
+	for( Parameter::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
-		p.insert( Parameter::PresetsMap::value_type( extract<string>( keys[i] )(), extract<ObjectPtr>( values[i] )() ) );
+		result.append( it->first );
 	}
-	return p;
+	return boost::python::tuple( result );
+}
+
+static boost::python::tuple presetValues( const Parameter &that )
+{
+	boost::python::list result;
+	const Parameter::PresetsContainer &p = that.presets();
+	for( Parameter::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
+	{
+		result.append( it->second->copy() );
+	}
+	return boost::python::tuple( result );
 }
 
 class ParameterWrap : public Parameter, public Wrapper<Parameter>
@@ -90,11 +100,11 @@ class ParameterWrap : public Parameter, public Wrapper<Parameter>
 	public:
 
 		ParameterWrap( PyObject *self, const std::string &name, const std::string &description, ObjectPtr defaultValue,
-						const dict & presets = dict(), bool presetsOnly = false, CompoundObjectPtr userData = 0 ) :
-				Parameter( name, description, defaultValue, parameterPresetsFromDict( presets ), presetsOnly, userData ), Wrapper< Parameter >( self, this ) {};
+						const object &presets = boost::python::tuple(), bool presetsOnly = false, CompoundObjectPtr userData = 0 ) :
+				Parameter( name, description, defaultValue, parameterPresets<Parameter::PresetsContainer>( presets ), presetsOnly, userData ), Wrapper< Parameter >( self, this ) {};
 
 		ParameterWrap( PyObject *self, const std::string &name, const std::string &description, ObjectPtr defaultValue, CompoundObjectPtr userData ) :
-				Parameter( name, description, defaultValue, Parameter::PresetsMap(), false, userData ), Wrapper< Parameter >( self, this ) {};
+				Parameter( name, description, defaultValue, Parameter::PresetsContainer(), false, userData ), Wrapper< Parameter >( self, this ) {};
 
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( Parameter );
 
@@ -109,13 +119,13 @@ void bindParameter()
 	typedef class_< Parameter, ParameterWrapPtr, boost::noncopyable, bases<RunTimeTyped> > ParameterPyClass;
 	ParameterPyClass( "Parameter", no_init )
 		.def( 
-			init< const std::string &, const std::string &, ObjectPtr, boost::python::optional<const dict &, bool, CompoundObjectPtr > >
+			init< const std::string &, const std::string &, ObjectPtr, boost::python::optional<const boost::python::object &, bool, CompoundObjectPtr > >
 			( 
 				( 
 					arg( "name" ), 
 					arg( "description" ), 
 					arg( "defaultValue" ),
-					arg( "presets" ) = dict(),
+					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false , 
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
 				) 
@@ -135,6 +145,8 @@ void bindParameter()
 		.def( "validate", (void (Parameter::*)( ConstObjectPtr ) const)&Parameter::validate )
 		.add_property( "presetsOnly", &Parameter::presetsOnly )
 		.def( "presets", &presets, "Returns a dictionary containing presets for the parameter." )
+		.def( "presetNames", &presetNames, "Returns a tuple containing the names of all presets for the parameter." )
+		.def( "presetValues", &presetValues, "Returns a tuple containing the values of all presets for the parameter." )
 		.def( "userData", (CompoundObjectPtr (Parameter::*)())&Parameter::userData )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Parameter)
 	;

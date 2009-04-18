@@ -47,37 +47,37 @@ using namespace Imath;
 /////////////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-static Parameter::PresetsMap convertPresets( const typename TypedParameter<T>::PresetsMap p )
+static Parameter::PresetsContainer convertPresets( const typename TypedParameter<T>::PresetsContainer &p )
 {
-	Parameter::PresetsMap result;
-	for( typename TypedParameter<T>::PresetsMap::const_iterator it=p.begin(); it!=p.end(); it++ )
+	Parameter::PresetsContainer result;
+	for( typename TypedParameter<T>::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
-		result.insert( typename Parameter::PresetsMap::value_type( it->first, new TypedData<T>( it->second ) ) );
+		result.push_back( typename Parameter::PresetsContainer::value_type( it->first, new TypedData<T>( it->second ) ) );
 	}
 	return result;
 }
 
 template<typename T>
-static Parameter::PresetsMap convertPresets( const typename TypedParameter<T>::ObjectPresetsMap p )
+static Parameter::PresetsContainer convertPresets( const typename TypedParameter<T>::ObjectPresetsContainer &p )
 {
-	Parameter::PresetsMap result;
-	for( typename TypedParameter<T>::ObjectPresetsMap::const_iterator it=p.begin(); it!=p.end(); it++ )
+	Parameter::PresetsContainer result;
+	for( typename TypedParameter<T>::ObjectPresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
-		result.insert( typename Parameter::PresetsMap::value_type( it->first, it->second ) );
+		result.push_back( typename Parameter::PresetsContainer::value_type( it->first, it->second ) );
 	}
 	return result;
 }
 
 template<typename T>
 TypedParameter<T>::TypedParameter( const std::string &name, const std::string &description, const T &defaultValue,
-	const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+	const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), presetsOnly, userData )	
 {
 }
 
 template<typename T>
 TypedParameter<T>::TypedParameter( const std::string &name, const std::string &description, ObjectTypePtr defaultValue,
-	const ObjectPresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+	const ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, defaultValue, convertPresets<T>( presets ), presetsOnly, userData )
 {
 }

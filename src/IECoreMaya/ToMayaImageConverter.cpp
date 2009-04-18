@@ -60,10 +60,9 @@ ToMayaImageConverter::ToMayaImageConverter( ConstObjectPtr object )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<Object>( object ) );
 	
-	IntParameter::PresetsMap typePresets;
-	typePresets["Float"] = Float;
-	typePresets["Byte"] = Byte;	
-	
+	IntParameter::PresetsContainer typePresets;
+	typePresets.push_back( IntParameter::Preset( "Float", Float ) );
+	typePresets.push_back( IntParameter::Preset( "Byte", Byte ) );	
 	m_typeParameter = new IntParameter(
 		"type",		
 		"Type of image to convert to",

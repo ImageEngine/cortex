@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,7 +48,8 @@ namespace IECore
 void bindParameter();
 
 // Exposed so it can be used in the bindings for the other Parameter types.
-Parameter::PresetsMap parameterPresetsFromDict( const boost::python::dict &presets );
+template<class T>
+T parameterPresets( const boost::python::object &o );
 
 /// The following macros and functions provide a good example to follow in trying to
 /// wrap non trivial C++ objects so they can be derived from in Python, as they solve

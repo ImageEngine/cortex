@@ -164,32 +164,11 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 			
 			return result;
 		}
-
-		static StringVectorParameter::PresetsMap makePresets( const dict &d )
-		{
-			StringVectorParameter::PresetsMap p;
-			boost::python::list keys = d.keys();
-			boost::python::list values = d.values();
-			for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-			{			
-				const std::string key = extract<std::string>( keys[i] )();
-				
-				try
-				{
-					p.insert( StringVectorParameter::PresetsMap::value_type( key, makeFromObject( values[i] ) ) );
-				}
-				catch ( InvalidArgumentException &e )
-				{
-					throw InvalidArgumentException( "FileSequenceVectorParameter: Invalid preset value" );
-				}				
-			}
-			return p;
-		}
 				
 	public :
 
-		FileSequenceVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = list(), bool allowEmptyList = true, FileSequenceVectorParameter::CheckType check = FileSequenceVectorParameter::DontCare, const dict &p = dict(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )	
-			:	FileSequenceVectorParameter( n, d, makeDefault( dv ), allowEmptyList, check, makePresets( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceVectorParameter >( self, this ) {};
+		FileSequenceVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = list(), bool allowEmptyList = true, FileSequenceVectorParameter::CheckType check = FileSequenceVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )	
+			:	FileSequenceVectorParameter( n, d, makeDefault( dv ), allowEmptyList, check, parameterPresets<FileSequenceVectorParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceVectorParameter >( self, this ) {};
 					
 		list getExtensionsWrap() const
 		{
@@ -255,7 +234,7 @@ void bindFileSequenceVectorParameter()
 	typedef class_< FileSequenceVectorParameter, FileSequenceVectorParameterWrap::Ptr, boost::noncopyable, bases< PathVectorParameter > > FileSequenceVectorParameterPyClass;
 	FileSequenceVectorParameterPyClass ( "FileSequenceVectorParameter", no_init )
 		.def(
-			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceVectorParameter::CheckType, const dict &, bool, CompoundObjectPtr, object > >
+			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceVectorParameter::CheckType, const object &, bool, CompoundObjectPtr, object > >
 			( 
 				( 
 					arg( "name" ), 
@@ -263,7 +242,7 @@ void bindFileSequenceVectorParameter()
 					arg( "defaultValue" ) = list(),
 					arg( "allowEmptyList" ) = true,
 					arg( "check" ) = FileSequenceVectorParameter::DontCare, 
-					arg( "presets" ) = dict(),
+					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false , 
 					arg( "userData" ) = CompoundObject::Ptr( 0 ),
 					arg( "extensions" ) = list()

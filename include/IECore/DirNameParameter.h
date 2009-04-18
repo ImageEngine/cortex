@@ -51,7 +51,7 @@ class DirNameParameter : public PathParameter
 		DirNameParameter( const std::string &name, const std::string &description,
 			const std::string &defaultValue = "", bool allowEmptyString = true,
 			PathParameter::CheckType check = PathParameter::DontCare,
-			const StringParameter::PresetsMap &presets = StringParameter::PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
 
 		/// Returns false if :
 		///

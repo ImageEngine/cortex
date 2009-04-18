@@ -97,10 +97,11 @@ MatrixMultiplyOp::MatrixMultiplyOp()
 		&matrixTypes[0]
 	);
 	
-	IntParameter::PresetsMap modePresets;
-	modePresets["point"] = Point;
-	modePresets["vector"] = Vector;
-	modePresets["normal"] = Normal;
+	IntParameter::PresetsContainer modePresets;
+	modePresets.push_back( IntParameter::Preset( "point", Point ) );
+	modePresets.push_back( IntParameter::Preset( "vector", Vector ) );
+	modePresets.push_back( IntParameter::Preset( "normal", Normal ) );
+	
 	m_modeParameter = new IntParameter(
 		"mode",
 		"The interpretation of the vectors, which modifies the way "

@@ -47,7 +47,7 @@ using namespace IECore;
 
 FileSequenceParameter::FileSequenceParameter( 
 	const std::string &name, const std::string &description, const std::string &defaultValue, 
-	bool allowEmptyString, CheckType check, const StringParameter::PresetsMap &presets, bool presetsOnly, 
+	bool allowEmptyString, CheckType check, const StringParameter::PresetsContainer &presets, bool presetsOnly, 
 	ConstCompoundObjectPtr userData, const ExtensionList &extensions
 ) : PathParameter( name, description, defaultValue, allowEmptyString, check, presets, presetsOnly, userData ),
     m_extensions( extensions )

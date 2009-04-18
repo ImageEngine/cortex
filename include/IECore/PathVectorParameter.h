@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,7 +57,7 @@ class PathVectorParameter : public StringVectorParameter
 
 		PathVectorParameter( const std::string &name, const std::string &description,
 		                     const std::vector<std::string> &defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
-		                     const StringVectorParameter::PresetsMap &presets = StringVectorParameter::PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+		                     const StringVectorParameter::PresetsContainer &presets = StringVectorParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
 
 		bool allowEmptyList() const;
 		bool mustExist() const;

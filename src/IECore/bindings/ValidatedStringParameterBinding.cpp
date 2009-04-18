@@ -48,15 +48,9 @@ namespace IECore
 
 static ValidatedStringParameterPtr validatedStringParameterConstructor( const std::string &name, const std::string &description,
 	const std::string &regex, const std::string &regexDescription,
-	const std::string &defaultValue, bool allowEmptyString, const dict &presets, bool presetsOnly, object userData )
+	const std::string &defaultValue, bool allowEmptyString, const object &presets, bool presetsOnly, object userData )
 {
- 	ValidatedStringParameter::PresetsMap p;
-	boost::python::list keys = presets.keys();
-	boost::python::list values = presets.values();
-	for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-	{
-		p.insert( ValidatedStringParameter::PresetsMap::value_type( extract<string>( keys[i] )(), extract<string>( values[i] )() ) );
-	}
+ 	ValidatedStringParameter::PresetsContainer p = parameterPresets<ValidatedStringParameter::PresetsContainer>( presets );
 	// get the optional userData parameter.
 	ConstCompoundObjectPtr ptrUserData = 0;
 	if (userData != object()) {
@@ -85,7 +79,7 @@ void bindValidatedStringParameter()
 
 	typedef class_< ValidatedStringParameter, ValidatedStringParameterPtr, boost::noncopyable, bases<StringParameter> > ValidatedStringParameterPyClass;
 	ValidatedStringParameterPyClass( "ValidatedStringParameter", no_init )
-		.def( "__init__", make_constructor( &validatedStringParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "regex" ), boost::python::arg_( "regexDescription" ), boost::python::arg_( "defaultValue" ) = string( "" ), boost::python::arg_( "allowEmptyString" ) = true, boost::python::arg_( "presets" ) = dict(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
+		.def( "__init__", make_constructor( &validatedStringParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "regex" ), boost::python::arg_( "regexDescription" ), boost::python::arg_( "defaultValue" ) = string( "" ), boost::python::arg_( "allowEmptyString" ) = true, boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
 		.add_property( "regex", make_function( &ValidatedStringParameter::regex, return_value_policy<copy_const_reference>() ) )
 		.add_property( "regexDescription", make_function( &ValidatedStringParameter::regexDescription, return_value_policy<copy_const_reference>() ) )
 		.add_property( "allowEmptyString", &ValidatedStringParameter::allowEmptyString )

@@ -49,15 +49,10 @@ namespace IECore
 
 template<class T>
 static ParameterPtr numericConstructor( const std::string &name, const std::string &description, T defaultValue, T minValue, T maxValue,
-	const dict & presets, bool presetsOnly, object userData )
+	const object &presets, bool presetsOnly, object userData )
 {
-	typename NumericParameter<T>::PresetsMap p;
-	boost::python::list keys = presets.keys();
-	boost::python::list values = presets.values();
-	for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-	{
-		p.insert( typename NumericParameter<T>::PresetsMap::value_type( extract<string>( keys[i] )(), extract<T>( values[i] )() ) );
-	}
+	typename NumericParameter<T>::PresetsContainer p = parameterPresets<typename NumericParameter<T>::PresetsContainer>( presets );
+	
 	// get the optional userData parameter.
 	ConstCompoundObjectPtr ptrUserData = 0;
 	if (userData != object()) {
@@ -86,7 +81,7 @@ static void bindNumericParameter( const char *name )
 {
 	typedef class_< NumericParameter<T>, typename NumericParameter<T>::Ptr, boost::noncopyable, bases<Parameter> > NumericParameterPyClass;
 	NumericParameterPyClass( name, no_init )
-		.def( "__init__", make_constructor( &numericConstructor<T>, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ) = T(), boost::python::arg_( "minValue" ) = Imath::limits<T>::min(), boost::python::arg_( "maxValue" ) = Imath::limits<T>::max(), boost::python::arg_( "presets" ) = dict(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
+		.def( "__init__", make_constructor( &numericConstructor<T>, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ) = T(), boost::python::arg_( "minValue" ) = Imath::limits<T>::min(), boost::python::arg_( "maxValue" ) = Imath::limits<T>::max(), boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
 		.add_property( "numericDefaultValue", &NumericParameter<T>::numericDefaultValue  )
 		.def( "getNumericValue", &NumericParameter<T>::getNumericValue  )
 		.def( "setNumericValue", &NumericParameter<T>::setNumericValue  )

@@ -107,6 +107,24 @@ class TestParameter( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, p.setValue, "thisIsNotAPreset" )
 		self.assertRaises( RuntimeError, p.setValidatedValue, FloatData( 1000 ) )
 		
+	def testOrderedPresets( self ) :
+	
+		p = Parameter(
+			name = "n",
+			description = "d",
+			defaultValue = FloatData( 20 ),
+			presets = (
+				( "p1", FloatData( 40 ) ),
+				( "p2", IntData( 60 ) ),
+				( "p3", CompoundData() ),
+				( "p4", FloatData( 20 ) ),
+			),
+			presetsOnly = True,
+		)
+		
+		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
+		self.assertEqual( p.presetValues(), ( FloatData( 40 ), IntData( 60 ), CompoundData(), FloatData( 20 ) ) )
+		
 	def testRunTimeTyping( self ) :
 	
 		c = IntParameter(
@@ -250,7 +268,25 @@ class TestNumericParameter( unittest.TestCase ) :
 		self.assertEqual( pr["one"], IntData( 1 ) )
 		self.assertEqual( pr["two"], IntData( 2 ) )
 		self.assertEqual( pr["three"], IntData( 3 ) )
+	
+	def testOrderedPresets( self ) :
+	
+		p = IntParameter(
+			name = "n",
+			description = "d",
+			defaultValue = 1,
+			presets = (
+				( "p1", 10 ),
+				( "p2", 1 ),
+				( "p3", 20 ),
+				( "p4", 30 ),
+			),
+			presetsOnly = True,
+		)
 		
+		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
+		self.assertEqual( p.presetValues(), ( IntData( 10 ), IntData( 1 ), IntData( 20 ), IntData( 30 ) ) )
+			
 	def testSetGet( self ) :
 	
 		p = IntParameter( "name", "description", 1 )
@@ -372,6 +408,24 @@ class TestTypedParameter( unittest.TestCase ) :
 		self.assert_( p.getValue() == V2fData( V2f( 3 ) ) )
 		p.smartSetValue( V2fData( V2f( 4 ) ) )
 		self.assert_( p.getValue() == V2fData( V2f( 4 ) ) )
+
+	def testOrderedPresets( self ) :
+	
+		p = StringParameter(
+			name = "n",
+			description = "d",
+			defaultValue = "huh?",
+			presets = (
+				( "p1", "a" ),
+				( "p2", StringData( "b" ) ),
+				( "p3", "c" ),
+				( "p4", "d" ),
+			),
+			presetsOnly = True,
+		)
+		
+		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
+		self.assertEqual( p.presetValues(), ( StringData( "a" ), StringData( "b" ), StringData( "c" ), StringData( "d" ) ) )
 		
 class TestCompoundParameter( unittest.TestCase ) :
 
@@ -786,6 +840,26 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 		data["fourth"] = CharData('1')
 		data["first"] = data["fourth"]
 
+	def testOrderedPresets( self ) :
+	
+		p = ValidatedStringParameter(
+			name = "n",
+			description = "d",
+			regex = "*",
+			regexDescription = "",
+			defaultValue = "huh?",
+			presets = (
+				( "p1", "a" ),
+				( "p2", "b" ),
+				( "p3", "c" ),
+				( "p4", "d" ),
+			),
+			presetsOnly = True,
+		)
+		
+		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
+		self.assertEqual( p.presetValues(), ( StringData( "a" ), StringData( "b" ), StringData( "c" ), StringData( "d" ) ) )
+
 class TestDirNameParameter( unittest.TestCase ) :
 
 	def test( self ) :
@@ -962,6 +1036,26 @@ class TestObjectParameter( unittest.TestCase ) :
 		
 		p = ObjectParameter( name = "name", description = "description", defaultValue = FloatData( 1 ), types = [TypeId.FloatData, TypeId.DoubleData, TypeId.IntData] )
 		self.assertEqual( p.valueValid( V3fData( V3f( 1 ) ) )[1], "Object is not of type FloatData, DoubleData or IntData" )
+
+	def testOrderedPresets( self ) :
+	
+		p = ObjectParameter(
+			name = "n",
+			description = "d",
+			defaultValue = FloatData( 20 ),
+			types = [ Object.staticTypeId() ], 
+			presets = (
+				( "p1", FloatData( 40 ) ),
+				( "p2", IntData( 60 ) ),
+				( "p3", CompoundData() ),
+				( "p4", FloatData( 20 ) ),
+			),
+			presetsOnly = True,
+		)
+		
+		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
+		self.assertEqual( p.presetValues(), ( FloatData( 40 ), IntData( 60 ), CompoundData(), FloatData( 20 ) ) )
+		
 		
 class TestTypedObjectParameter( unittest.TestCase ) :
 
@@ -1049,6 +1143,24 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 		)
 		
 		p.setValue( mesh4 )	
+
+	def testOrderedPresets( self ) :
+	
+		p = PointsPrimitiveParameter(
+			name = "n",
+			description = "d",
+			defaultValue = PointsPrimitive( 1 ),
+			presets = (
+				( "p1", PointsPrimitive( 1 ) ),
+				( "p2", PointsPrimitive( 2 ) ),
+				( "p3", PointsPrimitive( 3 ) ),
+				( "p4", PointsPrimitive( 4 ) ),
+			),
+			presetsOnly = True,
+		)
+		
+		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
+		self.assertEqual( p.presetValues(), ( PointsPrimitive( 1 ), PointsPrimitive( 2 ), PointsPrimitive( 3 ), PointsPrimitive( 4 ) ) )
 
 class TestPathVectorParameter( unittest.TestCase ) :
 

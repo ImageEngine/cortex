@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,19 +39,19 @@
 using namespace IECore;
 using namespace std;
 
-ObjectParameter::ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+ObjectParameter::ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, defaultValue, presets, presetsOnly, userData )
 {
 	m_validTypes.insert( type );
 }
 
-ObjectParameter::ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeIdSet &types, const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+ObjectParameter::ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeIdSet &types, const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, defaultValue, presets, presetsOnly, userData ), m_validTypes( types )
 {
 
 }
 
-ObjectParameter::ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsMap &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+ObjectParameter::ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, defaultValue, presets, presetsOnly, userData )
 {
 	while( *types!=InvalidTypeId )

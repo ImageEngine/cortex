@@ -39,6 +39,7 @@
 #include "IECore/Interned.h"
 
 #include <map>
+#include <vector>
 #include <string>
 
 namespace IECore
@@ -55,16 +56,16 @@ class Parameter : public RunTimeTyped
 	
 		IE_CORE_DECLARERUNTIMETYPED( Parameter, RunTimeTyped );
 	
-		/// A typedef used to map from preset names to preset values.
-		/// \todo This mapping also needs to maintain order of insertion - it's maddening
-		/// that drop down menus based on the presets have totally misleading orders. We should
-		/// probably use some sort of boost multi-indexed container.
-		typedef std::map<std::string, ObjectPtr> PresetsMap;
+		/// A type which associates a value for the Parameter with
+		/// a name.
+		typedef std::pair<std::string, ObjectPtr> Preset;
+		/// A type to store a bunch of preset values for the Parameter.
+		typedef std::vector<Preset> PresetsContainer;
 	
 		/// Creates a new Parameter. If presetsOnly is true then the parameter acts somewhat
 		/// like an enum and only accepts values if they are present in the presets map.
 		Parameter( const std::string &name, const std::string &description, ObjectPtr defaultValue,
-			const PresetsMap &presets = PresetsMap(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
 
 		virtual ~Parameter();
 
@@ -79,7 +80,7 @@ class Parameter : public RunTimeTyped
 		/// Returns the default value for this parameter.
 		virtual ConstObjectPtr defaultValue() const;
 		/// Returns the presets for this parameter.
-		virtual const PresetsMap &presets() const;
+		virtual const PresetsContainer &presets() const;
 		/// Returns true if this parameter only accepts
 		/// parameters present as presets.
 		virtual bool presetsOnly() const;
@@ -182,7 +183,7 @@ class Parameter : public RunTimeTyped
 		ObjectPtr m_value;
 		ConstObjectPtr m_defaultValue;
 		
-		PresetsMap m_presets;
+		PresetsContainer m_presets;
 		bool m_presetsOnly;
 
 		mutable CompoundObjectPtr m_userData;
