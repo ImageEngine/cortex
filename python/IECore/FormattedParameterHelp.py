@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -160,11 +160,10 @@ def __formatParameter( parm, formatter ) :
 	elif isinstance( d, IECore.Data ) and hasattr( d, "value" ) :
 		formatter.paragraph( "Default : " + str( d.value ) )
 	
-	p = parm.presets()
-	if len( p ) :
+	if len( parm.presetNames() ) :
 		formatter.paragraph( "Presets : " )
 		formatter.indent()
-		formatter.paragraph( "\n".join( p.keys() ) )
+		formatter.paragraph( "\n".join( parm.presetNames() ) )
 		formatter.unindent()
 		
 	formatter.unindent()
