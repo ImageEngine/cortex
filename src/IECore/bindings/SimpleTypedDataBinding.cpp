@@ -241,6 +241,75 @@ DEFINETYPEDDATASTRSPECIALISATION( Quatf );
 DEFINETYPEDDATASTRSPECIALISATION( Quatd );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// an rvalue converter to get TypedData<T> from a python object convertible to T
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct TypedDataFromType
+{
+	TypedDataFromType()
+	{
+		converter::registry::push_back(
+			&convertible,
+			&construct,
+			type_id<typename T::Ptr>()
+		);
+	
+	}
+
+	static void *convertible( PyObject *obj )
+	{
+		extract<typename T::ValueType> e( obj );
+		if( e.check() )
+		{
+			return obj;
+		}
+		return 0;
+	}
+	
+	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
+	{
+		void *storage = ((converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
+		new (storage) typename T::Ptr( new T( extract<typename T::ValueType>( obj ) ) );
+		data->convertible = storage;
+	}
+};
+
+// specialise the bool version so it doesn't go gobbling up ints and things and turning them
+// into BoolData
+template<>
+struct TypedDataFromType<BoolData>
+{
+
+	TypedDataFromType()
+	{
+		converter::registry::push_back(
+			&convertible,
+			&construct,
+			type_id<BoolDataPtr>()
+		);
+	
+	}
+
+	static void *convertible( PyObject *obj )
+	{
+		if( PyBool_Check( obj ) )
+		{
+			return obj;
+		}
+		return 0;
+	}
+	
+	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
+	{
+		void *storage = ((converter::rvalue_from_python_storage<BoolDataPtr>*)data)->storage.bytes;
+		new (storage) BoolDataPtr( new BoolData( extract<bool>( obj ) ) );
+		data->convertible = storage;
+	}
+
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // functions to do the binding
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -258,6 +327,9 @@ static class_<T, intrusive_ptr<T>, boost::noncopyable, bases<Data> > bindSimpleD
 									&setValue<T>, "The value contained by the object.");
 	result.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(T);									
 	INTRUSIVE_PTR_PATCH( T, typename ThisPyClass );
+	
+	TypedDataFromType<T>();
+
 	return result;
 }
 

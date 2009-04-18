@@ -194,6 +194,7 @@ from PatchMeshPrimitiveTest import *
 from CurveExtrudeOp import *
 from ParameterisedProceduralTest import *
 from LevenbergMarquardtTest import *
+from TypedDataTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
