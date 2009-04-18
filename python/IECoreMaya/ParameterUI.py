@@ -269,14 +269,14 @@ class ParameterUI :
 
 				# make menu items for all presets and for the default value
 				
-				for k in sorted( self.parameter.presets().keys() ):
+				for k in self.parameter.presetNames() :
 					cmds.menuItem(
 						parent = popupMenu,
 						label = k,
 						command = IECore.curry( self.selectValue, selection = k )
 					)
 
-				if len( self.parameter.presets().keys() ) > 0:
+				if len( self.parameter.presetNames() ) > 0:
 					cmds.menuItem(
 						parent = popupMenu,
 						divider = True
