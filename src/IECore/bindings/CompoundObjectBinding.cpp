@@ -166,7 +166,7 @@ static boost::python::list keys( CompoundObject &o )
 	CompoundObject::ObjectMap::const_iterator it;
 	for( it = o.members().begin(); it!=o.members().end(); it++ )
 	{
-		result.append( it->first );
+		result.append( it->first.value() );
 	}
 	return result;
 }
