@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #define IE_CORE_COMPOUNDOBJECT_H
 
 #include "IECore/Object.h"
+#include "IECore/Interned.h"
 
 namespace IECore
 {
@@ -51,7 +52,7 @@ class CompoundObject : public Object
 		
 		IE_CORE_DECLAREOBJECT( CompoundObject, Object );
 		
-		typedef std::map<std::string, ObjectPtr> ObjectMap;
+		typedef std::map<InternedString, ObjectPtr> ObjectMap;
 		
 		/// Gives const access to the member object map.
 		const ObjectMap &members() const;
