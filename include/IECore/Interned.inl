@@ -35,6 +35,8 @@
 #ifndef IECORE_INTERNED_INL
 #define IECORE_INTERNED_INL
 
+#include "boost/static_assert.hpp"
+
 namespace IECore
 {
 
@@ -58,6 +60,19 @@ Interned<T, Hash>::Interned( const S &value )
 	HashSet *h = hashSet();
 	m_value = &(*(h->insert( T( value ) ).first ) );
 }
+
+template<typename T, typename Hash>
+Interned<T, Hash>::Interned( const char *value )
+{
+	// this constructor is only intended for specialisation by InternedString
+	BOOST_STATIC_ASSERT( sizeof( T )==0  );
+}
+
+// specialisation of construction from const char * for InternedString. This avoids the
+// creation of a temporary std::string in the case that the string is already in the HashSet.
+// this is implemented in Interned.cpp.
+template<>
+InternedString::Interned( const char *value );
 		
 template<typename T, typename Hash>
 Interned<T, Hash>::~Interned()

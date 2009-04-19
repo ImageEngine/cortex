@@ -59,6 +59,7 @@ class Interned
 	
 		Interned( const T &value );
 		Interned( const Interned<T, Hash> &other );
+		Interned( const char *value );
 		template<typename S>
 		Interned( const S &value );
 		

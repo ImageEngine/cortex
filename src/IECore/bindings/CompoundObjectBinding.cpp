@@ -99,7 +99,7 @@ static unsigned int len( const CompoundObject &o )
 	return o.members().size();
 }
 
-static ObjectPtr getItem( const CompoundObject &o, const std::string &n )
+static ObjectPtr getItem( const CompoundObject &o, const char *n )
 {
 	CompoundObject::ObjectMap::const_iterator it = o.members().find( n );
 	if( it==o.members().end() )
@@ -114,7 +114,7 @@ static void setItem( CompoundObject &o, const std::string &n, Object &v )
 	o.members()[n] = &v;
 }
 
-static ObjectPtr getAttr( const CompoundObject &o, const std::string &n )
+static ObjectPtr getAttr( const CompoundObject &o, const char *n )
 {
 	if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to CompoundObject children as attributes is deprecated - please use item style access instead.", 1 ) )
 	{

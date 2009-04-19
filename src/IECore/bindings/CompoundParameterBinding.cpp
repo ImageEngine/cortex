@@ -173,17 +173,19 @@ static unsigned int compoundParameterLen( const CompoundParameter &o )
 	return o.parameters().size();
 }
 
-static ParameterPtr compoundParameterGetItem( CompoundParameter &o, const std::string &n )
+static ParameterPtr compoundParameterGetItem( CompoundParameter &o, const char *n )
 {
-	ParameterPtr result = o.parameter<Parameter>( n );
-	if( !result )
+	const CompoundParameter::ParameterMap &p = o.parameters();
+	CompoundParameter::ParameterMap::const_iterator it = p.find( n );
+	if( it!=p.end() )
 	{
-		throw Exception( std::string("Bad index: ") + n );
+		return it->second;
 	}
-	return result;
+	
+	throw Exception( std::string("Bad index: ") + n );
 }
 
-static ParameterPtr compoundParameterGetAttr( CompoundParameter &o, const std::string &n )
+static ParameterPtr compoundParameterGetAttr( CompoundParameter &o, const char *n )
 {
 	if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to CompoundParameter children as attributes is deprecated - please use item style access instead.", 1 ) )
 	{
