@@ -47,8 +47,6 @@
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
-using namespace boost;
-using namespace std;
 
 namespace IECore
 {
@@ -63,6 +61,35 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 		{
 		}
 		
+		virtual void doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const
+		{
+			try
+			{
+				override o = this->get_override( "doRenderState" );
+				if( o )
+				{
+					o( renderer, boost::const_pointer_cast<CompoundObject>( args ) );
+				}
+				else
+				{
+					ParameterisedProcedural::doRenderState( renderer, args );
+				}
+			}
+			catch( error_already_set )
+			{
+				PyErr_Print();
+			}
+			catch( const std::exception &e )
+			{
+				msg( Msg::Error, "ParameterisedProceduralWrap::doRenderState", e.what() );
+			}
+			catch( ... )
+			{
+				msg( Msg::Error, "ParameterisedProceduralWrap::doRenderState", "Caught unknown exception" );
+			}
+		
+		}
+
 		virtual Imath::Box3f doBound( ConstCompoundObjectPtr args ) const
 		{
 			try
@@ -70,7 +97,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 				override o = this->get_override( "doBound" );
 				if( o )
 				{
-					return o( const_pointer_cast<CompoundObject>( args ) );
+					return o( boost::const_pointer_cast<CompoundObject>( args ) );
 				}
 				else
 				{
@@ -101,7 +128,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 				override o = this->get_override( "doRender" );
 				if( o )
 				{
-					o( r, const_pointer_cast<CompoundObject>( args ) );
+					o( r, boost::const_pointer_cast<CompoundObject>( args ) );
 				}
 				else
 				{
@@ -142,6 +169,8 @@ void bindParameterisedProcedural()
 	typedef class_< ParameterisedProcedural, ParameterisedProceduralWrapPtr, boost::noncopyable, bases<VisibleRenderable> > ParameterisedProceduralPyClass;
 	ParameterisedProceduralPyClass( "ParameterisedProcedural" )
 		.def( "parameters", (CompoundParameterPtr (ParameterisedProcedural::*)())&ParameterisedProcedural::parameters )
+		.def( "render", (void (ParameterisedProcedural::*)( RendererPtr ) const )&ParameterisedProcedural::render )
+		.def( "render", (void (ParameterisedProcedural::*)( RendererPtr, bool, bool, bool, bool ) const )&ParameterisedProcedural::render, ( arg( "renderer" ), arg( "inAttributeBlock" ) = true, arg( "withState" ) = true, arg( "withGeometry" ) = true, arg( "immediateGeometry" ) = false ) )
 		.def( "__getitem__", &parameterisedProceduralGetItem )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ParameterisedProcedural)		
 	;

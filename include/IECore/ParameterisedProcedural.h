@@ -48,6 +48,12 @@ IE_CORE_FORWARDDECLARE( CompoundObject )
 /// VisibleRenderable it allows procedurals to be embedded in groups with
 /// other geometry and state and by deriving from ParameterisedInterface
 /// it provides a consistent way of providing parameter values to subclasses.
+/// It also deals with the common problem that in order for a procedural to
+/// be invoked by the renderer, it has to have appropriate visibility attributes,
+/// which must be set before the procedural is declared. This case is addressed
+/// by the doRenderState() virtual method, which gives ParameterisedProcedurals the
+/// opportunity to specify any attribute state they need to exist before the procedural
+/// itself is declared.
 class ParameterisedProcedural : public VisibleRenderable, public ParameterisedInterface
 {
 	public:
@@ -57,10 +63,16 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 				
 		IE_CORE_DECLAREABSTRACTOBJECT( ParameterisedProcedural, VisibleRenderable );
 				
-		/// Calls Renderer::procedural using doBound() and doRender() to
-		/// implement the bound() and render() methods required by the
-		/// Renderer.
+		/// Calls render( renderer, true, true, true, false );
 		virtual void render( RendererPtr renderer ) const;
+		/// An additional render method to provide finer grained control. When inAttributeBlock is true,
+		/// the rendering is all contained within an attributeBegin()/attributeEnd() pair. When withState
+		/// is specified, the doRenderState() method is called to declare the appropriate
+		/// render state. When withGeometry is true then doRender() is called to
+		/// output the procedural geometry. When immediateGeometry is true, the doRender method is called immediately
+		/// rather than being deferred within a renderer-procedural() call.
+		void render( RendererPtr renderer, bool inAttributeBlock, bool withState, bool withGeometry, bool immediateGeometry ) const;
+		
 		/// Forwards to doBound().
 		virtual Imath::Box3f bound() const;
 
@@ -69,6 +81,12 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 
 	protected :
 	
+		/// May be implemented by derived classes to output attributes which must
+		/// be set outside of the procedural - for instance to ensure the procedural
+		/// has the necessary visibility attributes for it to be expanded in the first
+		/// place. The contents of args is guaranteed to have been validated prior
+		/// to entry to this method. The default implementation does nothing.
+		virtual void doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const;
 		/// Must be implemented by derived classes - the contents of args is
 		/// guaranteed to have been validated.
 		virtual Imath::Box3f doBound( ConstCompoundObjectPtr args ) const = 0;
@@ -90,6 +108,6 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 
 IE_CORE_DECLAREPTR( ParameterisedProcedural );
 
-}
+} // namespace IECore
 
 #endif // IECORE_PARAMETERISEDPROCEDURAL_H

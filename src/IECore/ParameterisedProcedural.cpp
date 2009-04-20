@@ -35,6 +35,7 @@
 #include "IECore/ParameterisedProcedural.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Renderer.h"
+#include "IECore/AttributeBlock.h"
 
 using namespace IECore;
 
@@ -94,28 +95,55 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 {
 	public :
 		
-		Forwarder( ConstParameterisedProceduralPtr p )
-			:	parameterisedProcedural( p )
+		Forwarder( ConstParameterisedProceduralPtr p, ConstCompoundObjectPtr a )
+			:	parameterisedProcedural( p ), validatedArgs( a )
 		{
 		}
 		
 		virtual Imath::Box3f bound() const
 		{
-			return parameterisedProcedural->bound();
+			return parameterisedProcedural->doBound( validatedArgs );
 		}
 		
 		virtual void render( RendererPtr renderer ) const
 		{
-			ConstCompoundObjectPtr args = parameterisedProcedural->parameters()->getTypedValidatedValue<CompoundObject>();
-			parameterisedProcedural->doRender( renderer, args );
+			parameterisedProcedural->doRender( renderer, validatedArgs );
 		}
 		
 		ConstParameterisedProceduralPtr parameterisedProcedural;
+		ConstCompoundObjectPtr validatedArgs;
 };
 				
 void ParameterisedProcedural::render( RendererPtr renderer ) const
 {
-	renderer->procedural( new Forwarder( this ) );
+	render( renderer, true, true, true, false );
+}
+
+void ParameterisedProcedural::render( RendererPtr renderer, bool inAttributeBlock, bool withState, bool withGeometry, bool immediateGeometry ) const
+{
+	ConstCompoundObjectPtr validatedArgs = parameters()->getTypedValidatedValue<CompoundObject>();
+
+	AttributeBlock attributeBlock( renderer, inAttributeBlock );
+	
+		if( withState )
+		{
+			doRenderState( renderer, validatedArgs );
+		}
+		
+		if( withGeometry )
+		{
+
+			if( immediateGeometry )
+			{
+				doRender( renderer, validatedArgs  );
+			}
+			else
+			{
+				renderer->procedural( new Forwarder( this, validatedArgs ) );
+			}
+
+		}
+		
 }
 
 Imath::Box3f ParameterisedProcedural::bound() const
@@ -132,4 +160,8 @@ CompoundParameterPtr ParameterisedProcedural::parameters()
 ConstCompoundParameterPtr ParameterisedProcedural::parameters() const
 {
 	return m_parameters;
+}
+
+void ParameterisedProcedural::doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const
+{
 }
