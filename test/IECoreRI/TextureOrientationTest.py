@@ -56,6 +56,7 @@ class TextureOrientationTest( unittest.TestCase ) :
 		
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testTextureOrientation2.tif", "tiff", "rgba", {} )
+ 		r.setOption( "ri:searchpath:texture", IECore.StringData( "@:." ) )
 		r.worldBegin()
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		r.shader( "surface", "test/IECoreRI/shaders/tex", {} )
