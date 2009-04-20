@@ -59,7 +59,15 @@ void bindFrameRange()
 {	
 	typedef class_< FrameRange, FrameRange::Ptr, bases< FrameList >, boost::noncopyable > FrameRangePyClass;
 	FrameRangePyClass ( "FrameRange", no_init )
-		.def( init< FrameList::Frame, FrameList::Frame, optional< FrameList::Frame > >() )		
+		.def( init< FrameList::Frame, FrameList::Frame, optional< FrameList::Frame > >
+			(
+				(
+					arg( "start" ),
+					arg( "end" ),
+					arg( "step" ) = 1
+				)
+			)
+		)
 		.add_property( "start", &FrameRange::getStart, &FrameRange::setStart )
 		.add_property( "end", &FrameRange::getEnd, &FrameRange::setEnd )
 		.add_property( "step", &FrameRange::getStep, &FrameRange::setStep )				
