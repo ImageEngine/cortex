@@ -50,7 +50,7 @@ def isSimpleDataType(obj):
 	
 	if not isinstance(obj, IECore.Data):
 		return False
-	if hasattr(obj, "value"):
+	if hasattr(obj.__class__, "value"):
 		objClass = type(obj)
 		info = __dataTypesConversionDict[objClass]
 		if info is None:
@@ -66,7 +66,7 @@ def isSimpleDataType(obj):
 def isSimpleNumericDataType(obj):
 	if not isinstance(obj, IECore.Data):
 		return False
-	if hasattr(obj, "value"):
+	if hasattr(obj.__class__, "value"):
 		objClass = type(obj)
 		info = __dataTypesConversionDict[objClass]
 		if info is None:
@@ -80,9 +80,10 @@ def isSimpleNumericDataType(obj):
 # For example the IMath types: V2f, M33f, Color3f. But not vectors of those types.
 def isMatrixDataType(obj):
 	
-	if not hasattr(obj, "value"):
+	if not hasattr(obj.__class__, "value"):
 		return False
-	if hasattr(obj.value, "dimensions"):
+	##\ todo: this attr doesn't guarantee a matrix or not. Quats and transformation matrices don't have dimension attrs
+	if hasattr(obj.value.__class__, "dimensions"):
 		# vectors, colors and matrices
 		return True
 	return False

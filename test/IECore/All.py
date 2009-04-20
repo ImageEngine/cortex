@@ -196,6 +196,7 @@ from CurveExtrudeOp import *
 from ParameterisedProceduralTest import *
 from LevenbergMarquardtTest import *
 from TypedDataTest import *
+from DataTraitsTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
