@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//	     other contributors to this software may be used to endorse or
+//       other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,24 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDDATATRAITS_INL
-#define IE_CORE_TYPEDDATATRAITS_INL
+#ifndef IE_CORE_TYPEDDATATRAITS_H
+#define IE_CORE_TYPEDDATATRAITS_H
+
+#include "boost/type_traits/integral_constant.hpp"
 
 namespace IECore
 {
 
-/// This macro specializes the TypedDataTraits template class for a particular Data type T.
-/// The parameter BT must be the base data type for the internal structure on the Data type T.
-#define IE_CORE_DEFINETYPEDDATATRAITSSPECIALIZATION( T, BT )				\
-	template <>																\
-	class TypedDataTraits<T>												\
-	{																		\
-		public:																\
-			typedef BT BaseType; \
-			typedef boost::true_type HasBase; \
-	};
-
+/// Traits class for TypedData internal data structure
+/// This templated class was created so that it could define the base data type used
+/// in TypedData classes. That happens when the internal structure stored in 
+/// the TypedData is made of only one data type, so that it could be addressed as an
+/// array of base data type values.
+/// Check TypedDataTraits.inl for utility macros that specializes TypedDataTraits.
+template <class T>
+class TypedDataTraits
+{
+	public:
+		typedef void BaseType;
+		typedef boost::false_type HasBase;
+};
 
 } // namespace IECore
 
-#endif // IE_CORE_TYPEDDATATRAITS_INL
+#include "IECore/TypedDataTraits.inl"
+
+#endif // IE_CORE_TYPEDDATATRAITS_H

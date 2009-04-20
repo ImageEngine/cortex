@@ -241,7 +241,7 @@ void TypedData<T>::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 template <class T>
 bool TypedData<T>::hasBase()
 {
-	return true;
+	return TypedDataTraits< TypedData<T> >::HasBase::value;
 }
 
 template <class T>
@@ -302,11 +302,6 @@ typename TypedData<T>::BaseType *TypedData<T>::baseWritable()
 	}																		\
 
 #define IE_CORE_DEFINETYPEDDATANOBASESIZE( TNAME )							\
-	template <>																\
-	bool TNAME::hasBase()													\
-	{																		\
-		return false;														\
-	}																		\
 	template <>																\
 	size_t TNAME::baseSize() const									\
 	{																		\

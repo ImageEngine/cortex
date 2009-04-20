@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,22 +37,10 @@
 
 #include "IECore/Data.h"
 #include "IECore/Exception.h"
+#include "IECore/TypedDataTraits.h"
 
 namespace IECore
 {
-
-/// Traits class for TypedData internal data structure
-// This templated class was created so that it could define the base data type used
-// in TypedData classes. That happens when the internal structure stored in 
-// the TypedData is made of only one data type, so that it could be addressed as an
-// array of base data type values.
-// Check TypedDataTraits.inl for utility macros that specializes TypedDataTraits.
-template <class T>
-class TypedDataTraits
-{
-	public:
-		typedef void BaseType;
-};
 
 /// A templated class which can be used to wrap useful data
 /// types and containers. The copyFrom() function is implemented
@@ -158,7 +146,5 @@ class TypedData : public Data
 };
 
 } // namespace IECore
-
-#include "IECore/TypedDataTraits.inl"
 
 #endif // IE_CORE_TYPEDDATA_H
