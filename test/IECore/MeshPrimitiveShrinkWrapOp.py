@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -43,12 +43,14 @@ class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
 
 	def testSimple( self ) :
 		""" Test MeshPrimitiveShrinkWrapOp """
+		
+		random.seed( 1011 )
 	
 		# Load poly sphere of radius 1
 		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		radius = 1.0
 				
-		# Duplicate and scale to radius 3				
+		# Duplicate and scale to radius 3, jitter slightly
 		targetRadius = 3.0
 		target = m.copy()
 		
@@ -56,7 +58,7 @@ class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
 		
 		target["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData() )
 		for p in pData:
-			target["P"].data.append( p * targetRadius ) 
+			target["P"].data.append( p * targetRadius + 0.01 * V3f( random.random(), random.random(), random.random() ) ) 
 			
 		self.assertEqual( len( target["P"].data ), len( m["P"].data ) )
 	
@@ -66,13 +68,13 @@ class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
 			target = target,			
 			input = m,
 			
-			method =  MeshPrimitiveShrinkWrapOp.Method.XAxis,
+			method =  MeshPrimitiveShrinkWrapOp.Method.Normal,
 			direction = MeshPrimitiveShrinkWrapOp.Direction.Both
 		)
 
 		pData = res["P"].data
 		for p in pData:
-			self.assert_( math.fabs( p.length() - targetRadius ) < 0.5 )
+			self.assert_( math.fabs( p.length() - targetRadius ) < 0.1 )
 			
 			
 	
