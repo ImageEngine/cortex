@@ -37,7 +37,7 @@
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/StringVectorParameterHandler.h"
 
-#include "IECore/TypedParameter.h"
+#include "IECore/VectorTypedParameter.h"
 #include "IECore/CompoundObject.h"
 
 #include "maya/MFnTypedAttribute.h"

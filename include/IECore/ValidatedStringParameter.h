@@ -35,7 +35,7 @@
 #ifndef IE_CORE_VALIDATEDSTRINGPARAMETER_H
 #define IE_CORE_VALIDATEDSTRINGPARAMETER_H
 
-#include "IECore/TypedParameter.h"
+#include "IECore/SimpleTypedParameter.h"
 
 namespace IECore
 {

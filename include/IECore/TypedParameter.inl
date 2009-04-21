@@ -32,15 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IE_CORE_TYPEDPARAMETER_INL
+#define IE_CORE_TYPEDPARAMETER_INL
+
 #include "boost/static_assert.hpp"
 
 #include "IECore/TypedParameter.h"
 #include "IECore/CompoundObject.h"
 
-using namespace std;
-using namespace IECore;
-using namespace boost;
-using namespace Imath;
+namespace IECore
+{
 
 /////////////////////////////////////////////////////////////////////////////////////
 // constructor stuff
@@ -91,26 +92,26 @@ TypeId TypedParameter<T>::typeId() const
 {
 	return staticTypeId();
 }
-
+/*
 template <class T> 
 TypeId TypedParameter<T>::staticTypeId()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return InvalidTypeId;
-}
+}*/
 
 template <class T> 
 std::string TypedParameter<T>::typeName() const
 {
 	return staticTypeName();
 }
-
+/*
 template <class T> 
 std::string TypedParameter<T>::staticTypeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
-}
+}*/
 
 template<class T>
 bool TypedParameter<T>::isInstanceOf( TypeId typeId ) const
@@ -160,7 +161,7 @@ bool TypedParameter<T>::valueValid( ConstObjectPtr value, std::string *reason ) 
 	{
 		if( reason )
 		{
-			*reason = string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"";
+			*reason = std::string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"";
 		}
 		return false;
 	}
@@ -170,7 +171,7 @@ bool TypedParameter<T>::valueValid( ConstObjectPtr value, std::string *reason ) 
 template<typename T>
 const typename TypedParameter<T>::ValueType &TypedParameter<T>::typedDefaultValue() const
 {
-	return static_pointer_cast<const TypedData<T> >( defaultValue() )->readable();
+	return boost::static_pointer_cast<const TypedData<T> >( defaultValue() )->readable();
 }
 
 template<typename T>
@@ -179,9 +180,9 @@ typename TypedParameter<T>::ValueType &TypedParameter<T>::getTypedValue()
 	ConstObjectTypePtr tValue = runTimeCast<const ObjectType>( getValue() );
 	if( !tValue )
 	{
-		throw Exception( string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"");
+		throw Exception( std::string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"");
 	}
-	return static_pointer_cast<TypedData<T> >( getValue() )->writable();
+	return boost::static_pointer_cast<TypedData<T> >( getValue() )->writable();
 }
 
 template<typename T>
@@ -190,9 +191,9 @@ const typename TypedParameter<T>::ValueType &TypedParameter<T>::getTypedValue() 
 	ConstObjectTypePtr tValue = runTimeCast<const ObjectType>( getValue() );
 	if( !tValue )
 	{
-		throw Exception( string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"");
+		throw Exception( std::string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"");
 	}
-	return static_pointer_cast<const TypedData<T> >( getValue() )->readable();
+	return boost::static_pointer_cast<const TypedData<T> >( getValue() )->readable();
 }
 		
 template<typename T>
@@ -222,54 +223,6 @@ void TypedParameter<T>::setTypedValue( const T &value )
 																					\
 	template class TypedParameter<T>;
 
-namespace IECore
-{
-/// \todo Split some of these off into separate files to speed up compilation times
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( bool, BoolParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( string, StringParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V2i, V2iParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V3i, V3iParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V2f, V2fParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V3f, V3fParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V2d, V2dParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V3d, V3dParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Color3f, Color3fParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Color4f, Color4fParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box2i, Box2iParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box3i, Box3iParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box2f, Box2fParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box3f, Box3fParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box2d, Box2dParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box3d, Box3dParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( M44f, M44fParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( M44d, M44dParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Splineff, SplineffParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Splinedd, SplineddParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( SplinefColor3f, SplinefColor3fParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( SplinefColor4f, SplinefColor4fParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( CubeColorLookupf, CubeColorLookupfParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( CubeColorLookupd, CubeColorLookupdParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( boost::posix_time::ptime, DateTimeParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( boost::posix_time::time_duration, TimeDurationParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( TimePeriod, TimePeriodParameter )
-
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<bool>, BoolVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<int>, IntVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<float>, FloatVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<double>, DoubleVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<string>, StringVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<V2f>, V2fVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<V3f>, V3fVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<V2d>, V2dVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<V3d>, V3dVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Box3f>, Box3fVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Box3d>, Box3dVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<M33f>, M33fVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<M44f>, M44fVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<M33d>, M33dVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<M44d>, M44dVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Quatf>, QuatfVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Quatd>, QuatdVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Color3f>, Color3fVectorParameter )
-IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Color4f>, Color4fVectorParameter )
 }
+	
+#endif // IE_CORE_TYPEDPARAMETER_INL

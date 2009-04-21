@@ -36,7 +36,7 @@
 #define IECORE_CHANNELOP_H
 
 #include "IECore/TypedPrimitiveOp.h"
-#include "IECore/TypedParameter.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECore
 {

@@ -36,7 +36,7 @@
 #define IE_CORE_FRAMELISTPARAMETER_H
 
 #include "IECore/FrameList.h"
-#include "IECore/TypedParameter.h"
+#include "IECore/SimpleTypedParameter.h"
 
 namespace IECore
 {

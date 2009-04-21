@@ -39,7 +39,7 @@
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/ColorSplineParameterHandler.h"
 
-#include "IECore/TypedParameter.h"
+#include "IECore/SplineParameter.h"
 
 #include "IECoreMaya/Convert.h"
 

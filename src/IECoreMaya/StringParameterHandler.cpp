@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/StringParameterHandler.h"
 
-#include "IECore/TypedParameter.h"
+#include "IECore/SimpleTypedParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/FileNameParameter.h"

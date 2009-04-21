@@ -35,11 +35,11 @@
 #ifndef IE_CORE_IMAGEWRITER_H
 #define IE_CORE_IMAGEWRITER_H
 
-#include "IECore/Writer.h"
-#include "IECore/TypedParameter.h"
-
 #include <vector>
 #include <string>
+
+#include "IECore/Writer.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECore
 {

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,59 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MESHTANGENTSOP_H
-#define IECORE_MESHTANGENTSOP_H
-
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedPrimitiveOp.h"
+#include "IECore/TimeDurationParameter.h"
 
 namespace IECore
 {
 
-/// A MeshPrimitiveOp to calculate vertex tangents.
-class MeshTangentsOp : public MeshPrimitiveOp
-{
-	public:
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( boost::posix_time::time_duration, TimeDurationParameter )
 
-		MeshTangentsOp();
-		virtual ~MeshTangentsOp();
-		
-		StringParameterPtr uPrimVarNameParameter();
-		ConstStringParameterPtr uPrimVarNameParameter() const;		
-		
-		StringParameterPtr vPrimVarNameParameter();		
-		ConstStringParameterPtr vPrimVarNameParameter() const;	
-		
-		StringParameterPtr uTangentPrimVarNameParameter();
-		ConstStringParameterPtr uTangentPrimVarNameParameter() const;		
-		
-		StringParameterPtr vTangentPrimVarNameParameter();		
-		ConstStringParameterPtr vTangentPrimVarNameParameter() const;			
-
-		IE_CORE_DECLARERUNTIMETYPED( MeshTangentsOp, MeshPrimitiveOp );
-
-	protected:
-	
-		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
-	
-	private :
-		
-		StringParameterPtr m_uPrimVarNameParameter;
-		StringParameterPtr m_vPrimVarNameParameter;	
-		StringParameterPtr m_uTangentPrimVarNameParameter;
-		StringParameterPtr m_vTangentPrimVarNameParameter;		
-	
-		struct CalculateTangents;	
-		struct HandleErrors;
-		
-};
-
-IE_CORE_DECLAREPTR( MeshTangentsOp );
-
-
-} // namespace IECore
-
-#endif // IECORE_MESHTANGENTSOP_H
-
-
-
+}

@@ -34,6 +34,7 @@
 
 #include "boost/python.hpp"
 
+#include "IECore/PathParameter.h"
 #include "IECore/DirNameParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"

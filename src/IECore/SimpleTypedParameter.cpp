@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,59 +32,38 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MESHTANGENTSOP_H
-#define IECORE_MESHTANGENTSOP_H
+#include <string>
+
+#include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathColor.h"
+#include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathMatrix.h"
 
 #include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedPrimitiveOp.h"
+
+using std::string;
+using namespace Imath;
 
 namespace IECore
 {
 
-/// A MeshPrimitiveOp to calculate vertex tangents.
-class MeshTangentsOp : public MeshPrimitiveOp
-{
-	public:
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( bool, BoolParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( string, StringParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V2i, V2iParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V3i, V3iParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V2f, V2fParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V3f, V3fParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V2d, V2dParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( V3d, V3dParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Color3f, Color3fParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Color4f, Color4fParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box2i, Box2iParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box3i, Box3iParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box2f, Box2fParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box3f, Box3fParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box2d, Box2dParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( Box3d, Box3dParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( M44f, M44fParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( M44d, M44dParameter )
 
-		MeshTangentsOp();
-		virtual ~MeshTangentsOp();
-		
-		StringParameterPtr uPrimVarNameParameter();
-		ConstStringParameterPtr uPrimVarNameParameter() const;		
-		
-		StringParameterPtr vPrimVarNameParameter();		
-		ConstStringParameterPtr vPrimVarNameParameter() const;	
-		
-		StringParameterPtr uTangentPrimVarNameParameter();
-		ConstStringParameterPtr uTangentPrimVarNameParameter() const;		
-		
-		StringParameterPtr vTangentPrimVarNameParameter();		
-		ConstStringParameterPtr vTangentPrimVarNameParameter() const;			
-
-		IE_CORE_DECLARERUNTIMETYPED( MeshTangentsOp, MeshPrimitiveOp );
-
-	protected:
-	
-		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
-	
-	private :
-		
-		StringParameterPtr m_uPrimVarNameParameter;
-		StringParameterPtr m_vPrimVarNameParameter;	
-		StringParameterPtr m_uTangentPrimVarNameParameter;
-		StringParameterPtr m_vTangentPrimVarNameParameter;		
-	
-		struct CalculateTangents;	
-		struct HandleErrors;
-		
-};
-
-IE_CORE_DECLAREPTR( MeshTangentsOp );
-
-
-} // namespace IECore
-
-#endif // IECORE_MESHTANGENTSOP_H
-
-
-
+}

@@ -36,7 +36,8 @@
 #define IE_CORE_IMAGEREADER_H
 
 #include "IECore/Reader.h"
-#include "IECore/TypedParameter.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECore
 {

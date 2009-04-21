@@ -32,53 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_PATHPARAMETER_H
-#define IE_CORE_PATHPARAMETER_H
+#include <vector>
+#include <string>
 
-#include "IECore/SimpleTypedParameter.h"
+#include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathColor.h"
+#include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathMatrix.h"
+
+#include "IECore/VectorTypedParameter.h"
+
+using std::vector;
+using std::string;
+using namespace Imath;
 
 namespace IECore
 {
 
-/// This base class implements a StringParameter object with validation
-/// of the value based on it representing a file/directory path.
-class PathParameter : public StringParameter
-{
-	public :
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<bool>, BoolVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<int>, IntVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<float>, FloatVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<double>, DoubleVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<string>, StringVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<V2f>, V2fVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<V3f>, V3fVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<V2d>, V2dVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<V3d>, V3dVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Box3f>, Box3fVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Box3d>, Box3dVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<M33f>, M33fVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<M44f>, M44fVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<M33d>, M33dVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<M44d>, M44dVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Quatf>, QuatfVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Quatd>, QuatdVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Color3f>, Color3fVectorParameter )
+IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( vector<Color4f>, Color4fVectorParameter )
 
-		IE_CORE_DECLARERUNTIMETYPED( PathParameter, StringParameter )
-
-		typedef enum {
-			DontCare,
-			MustExist,
-			MustNotExist,
-		} CheckType;
-	
-		PathParameter( const std::string &name, const std::string &description,
-			const std::string &defaultValue = "", bool allowEmptyString = true, CheckType check = PathParameter::DontCare,
-			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
-
-		bool allowEmptyString() const;
-		bool mustExist() const;
-		bool mustNotExist() const;
-		
-		/// Returns false if :
-		///
-		/// * allowEmptyString() is false and the string is empty.
-		/// * The value does not form a valid path name.
-		/// * mustExist() is true and the file/dir doesn't exist.
-		/// * mustNotExist() is true and the file/dir exists.
-		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
-
-	private :
-	
-		bool m_allowEmptyString;
-		CheckType m_check;
-
-};
-
-IE_CORE_DECLAREPTR( PathParameter )
-
-} // namespace IECore
-
-#endif // IE_CORE_PATHPARAMETER_H
+}

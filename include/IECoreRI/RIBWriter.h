@@ -36,7 +36,7 @@
 #define IECORE_RIBWRITER_H
 
 #include "IECore/Writer.h"
-#include "IECore/TypedParameter.h"
+#include "IECore/SimpleTypedParameter.h"
 
 #include "IECoreRI/TypeIds.h"
 

@@ -32,55 +32,55 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_IMAGECROPOP_H
-#define IE_CORE_IMAGECROPOP_H
+#ifndef IE_CORE_SIMPLETYPEDPARAMETER_H
+#define IE_CORE_SIMPLETYPEDPARAMETER_H
 
-#include "IECore/TypedPrimitiveOp.h"
-#include "IECore/SimpleTypedParameter.h"
+#include <vector>
+
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TypedParameter.h"
 
 namespace IECore
 {
 
-/// The ImageCropOp performs cropping over ImagePrimitive objects.
-/// The operation results on an ImagePrimitive with displayWindow equal to the given crop box.
-/// If matchDataWindow if On then the dataWindow will match displayWindow. Otherwise it will be intersected against the given crop box.
-class ImageCropOp : public ImagePrimitiveOp
-{
-	public :
-		
-		IE_CORE_DECLARERUNTIMETYPED( ImageCropOp, ImagePrimitiveOp );
-		
-		ImageCropOp();
-		virtual ~ImageCropOp();
-		
-		Box2iParameterPtr cropBoxParameter();
-		ConstBox2iParameterPtr cropBoxParameter() const;
-		
-		BoolParameterPtr matchDataWindowParameter();
-		ConstBoolParameterPtr matchDataWindowParameter() const;		
-		
-		BoolParameterPtr resetOriginParameter();
-		ConstBoolParameterPtr resetOriginParameter() const;
-		
-		BoolParameterPtr intersectParameter();
-		ConstBoolParameterPtr intersectParameter() const;	
-			
-	protected :
-	
-		virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
-		
-	private :
-	
-		struct ImageCropFn;
-		
-		Box2iParameterPtr m_cropBoxParameter;
-		BoolParameterPtr m_matchDataWindowParameter;
-		BoolParameterPtr m_resetOriginParameter;
-		BoolParameterPtr m_intersectParameter;
-};
+typedef TypedParameter<bool> BoolParameter;
+typedef TypedParameter<std::string> StringParameter;
+typedef TypedParameter<Imath::V2i> V2iParameter;
+typedef TypedParameter<Imath::V3i> V3iParameter;
+typedef TypedParameter<Imath::V2f> V2fParameter;
+typedef TypedParameter<Imath::V3f> V3fParameter;
+typedef TypedParameter<Imath::V2d> V2dParameter;
+typedef TypedParameter<Imath::V3d> V3dParameter;
+typedef TypedParameter<Imath::Color3f> Color3fParameter;
+typedef TypedParameter<Imath::Color4f> Color4fParameter;
+typedef TypedParameter<Imath::Box2i> Box2iParameter;
+typedef TypedParameter<Imath::Box3i> Box3iParameter;
+typedef TypedParameter<Imath::Box2f> Box2fParameter;
+typedef TypedParameter<Imath::Box3f> Box3fParameter;
+typedef TypedParameter<Imath::Box2d> Box2dParameter;
+typedef TypedParameter<Imath::Box3d> Box3dParameter;
+typedef TypedParameter<Imath::M44f> M44fParameter;
+typedef TypedParameter<Imath::M44d> M44dParameter;
 
-IE_CORE_DECLAREPTR( ImageCropOp );
+IE_CORE_DECLAREPTR( BoolParameter );
+IE_CORE_DECLAREPTR( StringParameter );
+IE_CORE_DECLAREPTR( V2iParameter );
+IE_CORE_DECLAREPTR( V3iParameter );
+IE_CORE_DECLAREPTR( V2fParameter );
+IE_CORE_DECLAREPTR( V3fParameter );
+IE_CORE_DECLAREPTR( V2dParameter );
+IE_CORE_DECLAREPTR( V3dParameter );
+IE_CORE_DECLAREPTR( Color3fParameter );
+IE_CORE_DECLAREPTR( Color4fParameter );
+IE_CORE_DECLAREPTR( Box2iParameter );
+IE_CORE_DECLAREPTR( Box3iParameter );
+IE_CORE_DECLAREPTR( Box2fParameter );
+IE_CORE_DECLAREPTR( Box3fParameter );
+IE_CORE_DECLAREPTR( Box2dParameter );
+IE_CORE_DECLAREPTR( Box3dParameter );
+IE_CORE_DECLAREPTR( M44fParameter );
+IE_CORE_DECLAREPTR( M44dParameter );
 
-} // namespace IECore
+}
 
-#endif // IE_CORE_IMAGECROPOP_H
+#endif // IE_CORE_SIMPLETYPEDPARAMETER_H

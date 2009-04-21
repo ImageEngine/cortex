@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,59 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MESHTANGENTSOP_H
-#define IECORE_MESHTANGENTSOP_H
+#ifndef IE_CORE_DATETIMEPARAMETER_H
+#define IE_CORE_DATETIMEPARAMETER_H
 
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedPrimitiveOp.h"
+#include "IECore/DateTimeData.h"
+#include "IECore/TypedParameter.h"
 
 namespace IECore
 {
 
-/// A MeshPrimitiveOp to calculate vertex tangents.
-class MeshTangentsOp : public MeshPrimitiveOp
-{
-	public:
+typedef TypedParameter<boost::posix_time::ptime> DateTimeParameter;
 
-		MeshTangentsOp();
-		virtual ~MeshTangentsOp();
-		
-		StringParameterPtr uPrimVarNameParameter();
-		ConstStringParameterPtr uPrimVarNameParameter() const;		
-		
-		StringParameterPtr vPrimVarNameParameter();		
-		ConstStringParameterPtr vPrimVarNameParameter() const;	
-		
-		StringParameterPtr uTangentPrimVarNameParameter();
-		ConstStringParameterPtr uTangentPrimVarNameParameter() const;		
-		
-		StringParameterPtr vTangentPrimVarNameParameter();		
-		ConstStringParameterPtr vTangentPrimVarNameParameter() const;			
+IE_CORE_DECLAREPTR( DateTimeParameter );
 
-		IE_CORE_DECLARERUNTIMETYPED( MeshTangentsOp, MeshPrimitiveOp );
+}
 
-	protected:
-	
-		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
-	
-	private :
-		
-		StringParameterPtr m_uPrimVarNameParameter;
-		StringParameterPtr m_vPrimVarNameParameter;	
-		StringParameterPtr m_uTangentPrimVarNameParameter;
-		StringParameterPtr m_vTangentPrimVarNameParameter;		
-	
-		struct CalculateTangents;	
-		struct HandleErrors;
-		
-};
-
-IE_CORE_DECLAREPTR( MeshTangentsOp );
-
-
-} // namespace IECore
-
-#endif // IECORE_MESHTANGENTSOP_H
-
-
-
+#endif // IE_CORE_DATETIMEPARAMETER_H

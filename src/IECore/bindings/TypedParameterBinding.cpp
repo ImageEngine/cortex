@@ -37,6 +37,13 @@
 #include "IECore/bindings/ParameterBinding.h"
 #include "IECore/bindings/Wrapper.h"
 #include "IECore/TypedParameter.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/VectorTypedParameter.h"
+#include "IECore/SplineParameter.h"
+#include "IECore/CubeColorLookupParameter.h"
+#include "IECore/DateTimeParameter.h"
+#include "IECore/TimeDurationParameter.h"
+#include "IECore/TimePeriodParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
@@ -117,6 +124,7 @@ static void bindTypedParameter( const char *name )
 
 void bindTypedParameter()
 {
+	/// \todo Split some of these off into separate files to speed up compilation
 	bindTypedParameter<bool>( "BoolParameter" );
 	bindTypedParameter<V2i>( "V2iParameter" );
 	bindTypedParameter<V3i>( "V3iParameter" );

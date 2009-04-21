@@ -62,8 +62,8 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
-#include "IECore/TypedParameter.h"
 #include "IECore/MeshPrimitive.h"
+#include "IECore/SimpleTypedData.h"
 
 #include <stdlib.h>
 

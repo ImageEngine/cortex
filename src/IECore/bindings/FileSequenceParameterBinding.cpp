@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/tokenizer.hpp"
 
 #include "IECore/FileSequenceParameter.h"
 #include "IECore/CompoundObject.h"

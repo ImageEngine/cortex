@@ -40,7 +40,7 @@
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/FloatSplineParameterHandler.h"
 
-#include "IECore/TypedParameter.h"
+#include "IECore/SplineParameter.h"
 
 #include "maya/MFnCompoundAttribute.h"
 #include "maya/MRampAttribute.h"

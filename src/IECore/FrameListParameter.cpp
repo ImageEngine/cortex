@@ -41,7 +41,7 @@
 
 using namespace IECore;
 
-static StringParameter::ObjectPresetsContainer convertPresets( const FrameListParameter::PresetsContainer p )
+static StringParameter::ObjectPresetsContainer convertPresets( const FrameListParameter::PresetsContainer &p )
 {
 	StringParameter::ObjectPresetsContainer result;
 	for( FrameListParameter::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
@@ -54,7 +54,7 @@ static StringParameter::ObjectPresetsContainer convertPresets( const FrameListPa
 
 FrameListParameter::FrameListParameter( const std::string &name, const std::string &description, const std::string &defaultValue, bool allowEmptyList,
 			const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
-			: StringParameter( name, description, new StringData( defaultValue ), convertPresets( presets ), presetsOnly, userData ), 
+			: StringParameter( name, description, new StringData( defaultValue ), ::convertPresets( presets ), presetsOnly, userData ), 
 			m_allowEmptyList( allowEmptyList )
 {
 
