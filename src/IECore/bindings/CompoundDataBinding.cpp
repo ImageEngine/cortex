@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,7 +56,7 @@ namespace IECore
 {
 
 // Binding implementations
-
+/// \todo Why is this a template? We only ever instantiate it for one type
 template<typename Container>
 class CompoundTypedDataFunctions
 {
@@ -75,6 +75,7 @@ class CompoundTypedDataFunctions
 		}
 
 		/// constructor that receives a python map object
+		/// \todo Create a rvalue-from-python converter to replace this
 		static typename TypedData< Container >::Ptr dataMapConstructor( dict v )
 		{
 			typename TypedData< Container >::Ptr mapPtr = new TypedData< Container >();
@@ -233,6 +234,7 @@ class CompoundTypedDataFunctions
 		}
 
 		/// binding for update method
+		/// \todo This can be removed once we have a dict->CompoundData from-python converter
 		static void
 		update2( TypedData< Container > &x, dict v )
 		{
@@ -425,6 +427,7 @@ class CompoundTypedDataFunctions
 			return newTuple;
 		}
 		
+		/// \todo Move outside template so that it specialises the repr() in IECoreBinding.h
 		static std::string repr( TypedData< Container > &x )
 		{	
 			std::stringstream s;
