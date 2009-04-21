@@ -151,8 +151,7 @@ class DisplayDriverServer : public RunTimeTyped
 				Header m_header;
 				CharVectorDataPtr m_buffer;
 		};
-
-		typedef boost::intrusive_ptr<Session> SessionPtr;
+		IE_CORE_DECLAREPTR( Session );
 
 		void serverThread();
 		void handleAccept( DisplayDriverServer::SessionPtr session, const boost::system::error_code& error);
