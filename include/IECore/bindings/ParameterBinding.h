@@ -80,14 +80,14 @@ T parameterPresets( const boost::python::object &o );
 #define IE_COREPYTHON_PARAMETERWRAPPERFNS( CLASSNAME )								\
 	virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const	\
 	{																				\
-		if( override f = this->get_override( "valueValid" ) )								\
+		if( boost::python::override f = this->get_override( "valueValid" ) )								\
 		{																			\
 			boost::python::tuple r = f( boost::const_pointer_cast<Object>( value ) );		\
 			if( reason )															\
 			{																		\
-				*reason = extract<std::string>( r[1] );								\
+				*reason = boost::python::extract<std::string>( r[1] );								\
 			}																		\
-			return extract<bool>( r[0] );											\
+			return boost::python::extract<bool>( r[0] );											\
 		}																			\
 		return CLASSNAME::valueValid( value, reason );								\
 	}
