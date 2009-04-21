@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,39 +32,17 @@
 #
 ##########################################################################
 
-import warnings
-warnings.filterwarnings( "error", "Access to Parameters as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Access to CompoundObject children as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Access to CompoundParameter children as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Specifying presets as a dictionary is deprecated - pass a tuple of tuples instead.", DeprecationWarning )
-
+import IECore
+import IECoreMaya
 import unittest
-
-from ConverterHolder import *
-from PlaybackFrameList import *
-from ParameterisedHolder import *
-from FromMayaCurveConverterTest import *
-from PluginLoadUnload import *
-from NamespacePollution import *
-from FromMayaMeshConverterTest import *
-from FromMayaParticleConverterTest import *
-from FromMayaPlugConverterTest import *
-from FromMayaUnitPlugConverterTest import *
-from FromMayaGroupConverterTest import *
-from FromMayaCameraConverterTest import *
-from FromMayaConverterTest import *
-from FromMayaObjectConverterTest import *
-from FnParameterisedHolderTest import *
-from ToMayaPlugConverterTest import *
-from ToMayaMeshConverterTest import *
-from MayaTypeIdTest import *
-from FromMayaTransformConverterTest import *
-from CallbackIdTest import *
-from TemporaryAttributeValuesTest import *
-from SplineParameterHandlerTest import *
-from DAGPathParametersTest import *
-
 import MayaUnitTest
 
+class DAGPathParametersTest( unittest.TestCase ) :
+
+	def test( self ) :
+	
+		p1 = IECoreMaya.DAGPathVectorParameter( "n", "d" )
+		p2 = IECoreMaya.DAGPathParameter( "n", "d" )
+		
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

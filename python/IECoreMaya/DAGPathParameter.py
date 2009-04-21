@@ -58,7 +58,7 @@ class DAGPathParameter( IECore.StringParameter ):
 	typeRegexDescription - human readable description for the regular expression used to filter node types. It's used when the validation fails.
 	"""
 	def __init__( self, name, description, defaultValue = "", allowEmptyString = True, 
-		check = CheckType.DontCare, typeRegex = None, typeRegexDescription = "", presets = {}, presetsOnly = False, userData = IECore.CompoundObject() ) :
+		check = CheckType.DontCare, typeRegex = None, typeRegexDescription = "", presets = (), presetsOnly = False, userData = IECore.CompoundObject() ) :
 		
 		IECore.StringParameter.__init__( self, name, description, defaultValue, presets, presetsOnly, userData )
 

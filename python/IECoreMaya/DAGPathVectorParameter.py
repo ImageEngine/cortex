@@ -59,7 +59,7 @@ class DAGPathVectorParameter( IECore.StringVectorParameter ):
 	"""
 	def __init__( self, name, description, defaultValue = IECore.StringVectorData(), allowEmptyList = True, 
 		check = CheckType.DontCare, typeRegex = None, typeRegexDescription = "", 
-		presets = {}, presetsOnly = False, userData = IECore.CompoundObject() ) :
+		presets = (), presetsOnly = False, userData = IECore.CompoundObject() ) :
 		
 		IECore.StringVectorParameter.__init__( self, name, description, defaultValue, presets, presetsOnly, userData )
 
