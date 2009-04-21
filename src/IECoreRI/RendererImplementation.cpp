@@ -842,17 +842,31 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getRightHandedOrientation
 	char *result = 0;
 	RxInfoType_t resultType;
 	int resultCount;
-	if( 0==RxAttribute( "Orientation", &result, sizeof( char * ), &resultType, &resultCount ) )
+	if( 0==RxAttribute( "Ri:Orientation", &result, sizeof( char * ), &resultType, &resultCount ) )
 	{
 		if( resultType==RxInfoStringV && resultCount==1 )
 		{
+			// it'd be nice if we were just told "rh" or "lh"
 			if( 0==strcmp( result, "rh" ) )
 			{
 				return new BoolData( true );
 			}
-			else
+			else if( 0==strcmp( result, "lh" ) )
 			{
 				return new BoolData( false );
+			}
+			// but in practice we seem to be told "outside" or "inside"
+			else
+			{
+				bool determinantNegative = determinant( getTransform() ) < 0.0f;
+				if( 0==strcmp( result, "outside" ) )
+				{
+					return new BoolData( !determinantNegative );
+				}
+				else if( 0==strcmp( result, "inside" ) )
+				{
+					return new BoolData( determinantNegative );
+				}
 			}
 		}
 	}
