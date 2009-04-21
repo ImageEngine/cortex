@@ -60,7 +60,6 @@ class TestPerlinNoise( unittest.TestCase ) :
 		i["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		
-		IECore.Writer.create( i, "test/IECore/data/expectedResults/perlinff.exr" ).write()
 		e = IECore.Reader.create( "test/IECore/data/expectedResults/perlinff.exr" ).read()
 		
 		op = IECore.ImageDiffOp()
