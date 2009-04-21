@@ -54,7 +54,7 @@ class PathVectorParameterWrap : public PathVectorParameter, public Wrapper<PathV
 	public:
 	
 		PathVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, ConstStringVectorDataPtr dv, bool ae = true,
-			PathVectorParameter::CheckType c = PathVectorParameter::DontCare, object p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+			PathVectorParameter::CheckType c = PathVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
 			:	PathVectorParameter( n, d, dv->readable(), ae, c, parameterPresets<PathVectorParameter::PresetsContainer>( p ), po, ud ), Wrapper<PathVectorParameter>( self, this )
 		{
 		}
@@ -81,7 +81,7 @@ void bindPathVectorParameter()
 	}
 	pathVectorParamClass
 		.def( 
-			init< const std::string &, const std::string &, ConstStringVectorDataPtr, boost::python::optional<bool, PathVectorParameter::CheckType, const dict &, bool, CompoundObjectPtr > >
+			init< const std::string &, const std::string &, ConstStringVectorDataPtr, boost::python::optional<bool, PathVectorParameter::CheckType, const object &, bool, CompoundObjectPtr > >
 			( 
 				( 
 					arg( "name" ), 
