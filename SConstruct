@@ -126,6 +126,14 @@ o.Add(
 	"/usr/local/lib",
 )
 
+o.Add(
+	"OPENEXR_LIB_SUFFIX",
+	"The suffix appended to the names of the OpenEXR libraries. You can modify this "
+	"to link against libraries installed with non-default names",
+	"",
+)
+
+
 # JPEG options
 
 o.Add(
@@ -621,18 +629,18 @@ if doConfigure :
 		sys.stderr.write( "ERROR : unable to find the boost libraries - check BOOST_LIB_PATH.\n" )
 		Exit( 1 )
 
-	if not c.CheckLibWithHeader( "Iex", "OpenEXR/ImfInputFile.h", "C++" ) :
+	if not c.CheckLibWithHeader( "Iex" + env["OPENEXR_LIB_SUFFIX"], "OpenEXR/ImfInputFile.h", "C++" ) :
 		sys.stderr.write( "ERROR : unable to find the OpenEXR libraries - check OPENEXR_INCLUDE_PATH and OPENEXR_LIB_PATH.\n" )
 		Exit( 1 )
 		
 	c.Finish()
 		
 env.Append( LIBS = [
-		"Half",
-		"Iex",
-		"Imath",
-		"IlmImf",
-		"IlmThread",
+		"Half" + env["OPENEXR_LIB_SUFFIX"],
+		"Iex" + env["OPENEXR_LIB_SUFFIX"],
+		"Imath" + env["OPENEXR_LIB_SUFFIX"],
+		"IlmImf" + env["OPENEXR_LIB_SUFFIX"],
+		"IlmThread" + env["OPENEXR_LIB_SUFFIX"],
 		"z",
 	]
 )

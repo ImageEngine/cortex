@@ -66,8 +66,8 @@ class TestMarchingCubesf( unittest.TestCase ) :
 				
 		m = builder.mesh()
 
-		self.assertEqual( len( m.verticesPerFace ), 7491 )
-		self.assertEqual( len( m.vertexIds ), 22473 )
+		self.assertEqual( len( m.verticesPerFace ), 6967 ) # Tested against OpenEXR 1.6.1
+		self.assertEqual( len( m.vertexIds ), 20901 ) # Tested against OpenEXR 1.6.1
 		
 		# \todo Verify that vertex positions are close to original implicit surface function
 		
@@ -123,8 +123,8 @@ class TestMarchingCubesd( unittest.TestCase ) :
 				
 		m = builder.mesh()
 
-		self.assertEqual( len( m.verticesPerFace ), 7491 )
-		self.assertEqual( len( m.vertexIds ), 22473 )
+		self.assertEqual( len( m.verticesPerFace ), 6967 ) # Tested against OpenEXR 1.6.1
+		self.assertEqual( len( m.vertexIds ), 20901 ) # Tested against OpenEXR 1.6.1
 		
 		# \todo Verify that vertex positions are close to original implicit surface function		
 

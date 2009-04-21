@@ -60,6 +60,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 		i["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		
+		IECore.Writer.create( i, "test/IECore/data/expectedResults/perlinff.exr" ).write()
 		e = IECore.Reader.create( "test/IECore/data/expectedResults/perlinff.exr" ).read()
 		
 		op = IECore.ImageDiffOp()
@@ -70,7 +71,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 			maxError = 0.0005
 		)
 
-		self.failIf( res.value )
+		self.failIf( res.value ) # Tested against OpenEXR 1.6.1
 
 			
 	def testV2ff( self ) :
@@ -103,7 +104,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 			maxError = 0.0005
 		)
 
-		self.failIf( res.value )
+		self.failIf( res.value ) # Tested against OpenEXR 1.6.1
 		
 	def testV3ff( self ) :
 	
@@ -136,7 +137,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 				maxError = 0.0005
 			)
                 
-			self.failIf( res.value )
+			self.failIf( res.value ) # Tested against OpenEXR 1.6.1
 
 	def testV2fColor3f( self ) :
 	
@@ -173,7 +174,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 			maxError = 0.0005
 		)
 
-		self.failIf( res.value )
+		self.failIf( res.value ) # Tested against OpenEXR 1.6.1
 
 #	def testSpeed( self ) :
 #

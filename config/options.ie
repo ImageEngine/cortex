@@ -1,4 +1,4 @@
-##########################################################################
+55##########################################################################
 #
 #  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
@@ -69,13 +69,13 @@ if targetApp :
 	targetAppReg = IEEnv.registry["apps"][targetApp][targetAppVersion][platform]
 	compiler = targetAppReg["compiler"]
 	compilerVersion = targetAppReg["compilerVersion"]
-	openEXRVersion = targetAppReg.get( "openEXRVersion", "1.4.0" )
+	openEXRVersion = targetAppReg.get( "openEXRVersion", "1.6.1" )
 else :
 	if not compiler :
 		compiler = IEEnv.registry["platformDefaults"][platform]["compiler"]
 	if not compilerVersion :
 		compilerVersion = IEEnv.registry["platformDefaults"][platform]["compilerVersion"]
-	openEXRVersion = "1.4.0"
+	openEXRVersion = "1.6.1"
 	
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
@@ -171,9 +171,13 @@ if IEEnv.platformOS().startswith( "osx" ) :
 	BOOST_LIB_SUFFIX = "-xgcc" + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-1_38"
 else:
 	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-1_38"
+	
+	
+OPENEXR_LIB_SUFFIX = "-" + openEXRVersion
 
 # find the right libraries based on compiler and platform
 LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
+LIBPATH += ":/home/mark/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
 if targetApp :
 	## \todo This is very nuke specific. Perhaps we should have a registry option to
 	# say what paths are required by what app?
