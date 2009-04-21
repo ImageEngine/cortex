@@ -53,7 +53,7 @@ static Parameter::PresetsContainer convertPresets( const typename TypedParameter
 	Parameter::PresetsContainer result;
 	for( typename TypedParameter<T>::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
-		result.push_back( typename Parameter::PresetsContainer::value_type( it->first, new ObjectType( it->second ) ) );
+		result.push_back( typename Parameter::PresetsContainer::value_type( it->first, new (typename TypedParameter<T>::ObjectType)( it->second ) ) );
 	}
 	return result;
 }
