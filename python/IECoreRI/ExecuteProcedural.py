@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,9 +40,6 @@ import IECoreRI
 # to set the procedural parameters and then renders the procedural. It's
 # useful to use this in the command string for a dynamicload procedural
 # that executes python.
-## \todo We can do better than this - I think we're ending up calling bound()
-# on the procedural when we've already put the bound in the rib as
-# part of the DynamicLoad statement.
 def executeProcedural( name, version, args ) :
 	
 	procedural = IECore.ClassLoader.defaultProceduralLoader().load( name, version )()
@@ -52,4 +49,4 @@ def executeProcedural( name, version, args ) :
 		IECore.ParameterParser().parse( args, procedural.parameters() )
 		
 		renderer = IECoreRI.Renderer()
-		renderer.procedural( procedural )			
+		procedural.render( renderer, inAttributeBlock=False, withState=False, withGeometry=True, immediateGeometry=True )
