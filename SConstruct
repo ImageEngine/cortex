@@ -952,7 +952,7 @@ if doConfigure :
 
 	c = Configure( riEnv )
 
-	if not c.CheckLibWithHeader( "3delight", "ri.h", "C" ) :
+	if not c.CheckLibWithHeader( "3delight", "ri.h", "CXX" ) :
 		sys.stderr.write( "WARNING : no 3delight library found, not building IECoreRI - check RMAN_ROOT.\n" )
 		c.Finish()
 
