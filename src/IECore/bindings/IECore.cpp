@@ -61,7 +61,13 @@
 #include "IECore/bindings/PDCParticleWriterBinding.h"
 #include "IECore/bindings/ParameterBinding.h"
 #include "IECore/bindings/NumericParameterBinding.h"
-#include "IECore/bindings/TypedParameterBinding.h"
+#include "IECore/bindings/SimpleTypedParameterBinding.h"
+#include "IECore/bindings/VectorTypedParameterBinding.h"
+#include "IECore/bindings/SplineParameterBinding.h"
+#include "IECore/bindings/DateTimeParameterBinding.h"
+#include "IECore/bindings/CubeColorLookupParameterBinding.h"
+#include "IECore/bindings/TimePeriodParameterBinding.h"
+#include "IECore/bindings/TimeDurationParameterBinding.h"
 #include "IECore/bindings/CompoundParameterBinding.h"
 #include "IECore/bindings/ValidatedStringParameterBinding.h"
 #include "IECore/bindings/PathParameterBinding.h"
@@ -274,8 +280,14 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindObjectReader();
 	bindObjectWriter();	
 	bindParameter();	
-	bindNumericParameter();	
-	bindTypedParameter();	
+	bindNumericParameter();		
+	bindSimpleTypedParameter();	
+	bindVectorTypedParameter();	
+	bindSplineParameter();		
+	bindCubeColorLookupParameter();		
+	bindDateTimeParameter();			
+	bindTimePeriodParameter();		
+	bindTimeDurationParameter();				
 	bindCompoundParameter();	
 	bindValidatedStringParameter();	
 	bindPathParameter();	

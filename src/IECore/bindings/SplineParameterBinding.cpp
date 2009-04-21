@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREPYTHON_TYPEDPARAMETERBINDING_H
-#define IE_COREPYTHON_TYPEDPARAMETERBINDING_H
+#include "boost/python.hpp"
+
+#include "IECore/bindings/TypedParameterBinding.h"
+#include "IECore/SplineParameter.h"
 
 namespace IECore
 {
-void bindTypedParameter();
+
+void bindSplineParameter()
+{
+	bindTypedParameter<Splineff>( "SplineffParameter" );
+	bindTypedParameter<Splinedd>( "SplineddParameter" );
+	bindTypedParameter<SplinefColor3f>( "SplinefColor3fParameter" );
+	bindTypedParameter<SplinefColor4f>( "SplinefColor4fParameter" );	
 }
 
-#include "IECore/bindings/TypedParameterBinding.inl"
-
-#endif // IE_COREPYTHON_TYPEDPARAMETERBINDING_H
+} // namespace IECore

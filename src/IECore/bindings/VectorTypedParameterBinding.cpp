@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,38 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREPYTHON_TYPEDPARAMETERBINDING_H
-#define IE_COREPYTHON_TYPEDPARAMETERBINDING_H
+#include "boost/python.hpp"
+
+#include "IECore/bindings/TypedParameterBinding.h"
+#include "IECore/VectorTypedParameter.h"
+
+using namespace std;
+using namespace Imath;
 
 namespace IECore
 {
-void bindTypedParameter();
+
+void bindVectorTypedParameter()
+{
+	bindTypedParameter<vector<bool> >( "BoolVectorParameter" );
+	bindTypedParameter<vector<int> >( "IntVectorParameter" );
+	bindTypedParameter<vector<float> >( "FloatVectorParameter" );
+	bindTypedParameter<vector<double> >( "DoubleVectorParameter" );
+	bindTypedParameter<vector<string> >( "StringVectorParameter" );
+	bindTypedParameter<vector<V2f> >( "V2fVectorParameter" );
+	bindTypedParameter<vector<V3f> >( "V3fVectorParameter" );
+	bindTypedParameter<vector<V2d> >( "V2dVectorParameter" );
+	bindTypedParameter<vector<V3d> >( "V3dVectorParameter" );
+	bindTypedParameter<vector<Box3f> >( "Box3fVectorParameter" );
+	bindTypedParameter<vector<Box3d> >( "Box3dVectorParameter" );
+	bindTypedParameter<vector<M33f> >( "M33fVectorParameter" );
+	bindTypedParameter<vector<M44f> >( "M44fVectorParameter" );
+	bindTypedParameter<vector<M33d> >( "M33dVectorParameter" );
+	bindTypedParameter<vector<M44d> >( "M44dVectorParameter" );
+	bindTypedParameter<vector<Quatf> >( "QuatfVectorParameter" );
+	bindTypedParameter<vector<Quatd> >( "QuatdVectorParameter" );
+	bindTypedParameter<vector<Color3f> >( "Color3fVectorParameter" );
+	bindTypedParameter<vector<Color4f> >( "Color4fVectorParameter" );
 }
 
-#include "IECore/bindings/TypedParameterBinding.inl"
-
-#endif // IE_COREPYTHON_TYPEDPARAMETERBINDING_H
+} // namespace IECore

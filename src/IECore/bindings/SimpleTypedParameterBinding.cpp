@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREPYTHON_TYPEDPARAMETERBINDING_H
-#define IE_COREPYTHON_TYPEDPARAMETERBINDING_H
+#include "boost/python.hpp"
+
+#include "IECore/bindings/TypedParameterBinding.h"
+#include "IECore/SimpleTypedParameter.h"
+
+using namespace std;
+using namespace Imath;
 
 namespace IECore
 {
-void bindTypedParameter();
+
+void bindSimpleTypedParameter()
+{
+	bindTypedParameter<bool>( "BoolParameter" );
+	bindTypedParameter<V2i>( "V2iParameter" );
+	bindTypedParameter<V3i>( "V3iParameter" );
+	bindTypedParameter<V2f>( "V2fParameter" );
+	bindTypedParameter<V3f>( "V3fParameter" );
+	bindTypedParameter<V2d>( "V2dParameter" );
+	bindTypedParameter<V3d>( "V3dParameter" );
+	bindTypedParameter<Color3f>( "Color3fParameter" );
+	bindTypedParameter<Color4f>( "Color4fParameter" );
+	bindTypedParameter<Box2i>( "Box2iParameter" );
+	bindTypedParameter<Box3i>( "Box3iParameter" );
+	bindTypedParameter<Box2f>( "Box2fParameter" );
+	bindTypedParameter<Box3f>( "Box3fParameter" );
+	bindTypedParameter<Box2d>( "Box2dParameter" );
+	bindTypedParameter<Box3d>( "Box3dParameter" );
+	bindTypedParameter<M44f>( "M44fParameter" );
+	bindTypedParameter<M44d>( "M44dParameter" );
+	bindTypedParameter<string>( "StringParameter" );
 }
 
-#include "IECore/bindings/TypedParameterBinding.inl"
-
-#endif // IE_COREPYTHON_TYPEDPARAMETERBINDING_H
+} // namespace IECore
