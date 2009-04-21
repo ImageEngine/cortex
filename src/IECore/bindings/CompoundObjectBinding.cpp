@@ -160,7 +160,7 @@ static bool has_key( const CompoundObject &o, const std::string n)
 	return ( it != o.members().end() );
 }
 
-static boost::python::list keys( CompoundObject &o )
+static boost::python::list keys( const CompoundObject &o )
 {
 	boost::python::list result;
 	CompoundObject::ObjectMap::const_iterator it;
@@ -171,7 +171,7 @@ static boost::python::list keys( CompoundObject &o )
 	return result;
 }
 
-static boost::python::list values( CompoundObject &o )
+static boost::python::list values( const CompoundObject &o )
 {
 	boost::python::list result;
 	CompoundObject::ObjectMap::const_iterator it;
@@ -182,70 +182,105 @@ static boost::python::list values( CompoundObject &o )
 	return result;
 }
 
-static CompoundObjectPtr compoundObjectFromDict( dict v )
+class CompoundObjectFromPythonDict
 {
-	CompoundObjectPtr x = new CompoundObject;
-	list values = v.values();
-	list keys = v.keys();
-		
-	for (int i = 0; i < keys.attr("__len__")(); i++)
-	{
-		object key(keys[i]);
-		object value(values[i]);
-		extract< const std::string > keyElem(key);
-		if (!keyElem.check()) 
+	public :
+	
+		CompoundObjectFromPythonDict()
 		{
-			PyErr_SetString(PyExc_TypeError, "Incompatible key type. Only strings accepted.");
-			throw_error_already_set();
+			converter::registry::push_back(
+				&convertible,
+				&construct,
+				type_id<CompoundObjectPtr> ()
+			);
 		}
 		
-		extract< Object& > valueElem(value);
-		if (valueElem.check())
+	private :	
+
+		static void *convertible( PyObject *obj_ptr )
 		{
-			setItem( *x, keyElem(), valueElem() );
-			continue;
+			if ( !PyDict_Check( obj_ptr ) )
+			{
+				return 0;
+			}
+			return obj_ptr;
 		}
-		extract<dict> dictValueE( value );
-		if( dictValueE.check() )
+
+		static void construct(
+	        	PyObject *obj_ptr,
+	        	converter::rvalue_from_python_stage1_data *data )
 		{
-			ObjectPtr co = compoundObjectFromDict( dictValueE() );
-			setItem( *x, keyElem(), *co );
-			continue;
+			assert( obj_ptr );
+			assert( PyDict_Check( obj_ptr ) );
+
+			handle<> h( obj_ptr );
+			dict d( h );
+
+			void* storage = (( converter::rvalue_from_python_storage<CompoundObject>* ) data )->storage.bytes;
+			new( storage ) CompoundObjectPtr( compoundObjectFromDict( d ) );
+			data->convertible = storage;
 		}
-		else 
+	
+		static CompoundObjectPtr compoundObjectFromDict( const dict &v )
 		{
-			PyErr_SetString(PyExc_TypeError, "Incompatible value type - must be Object or dict.");
-			throw_error_already_set();
+			CompoundObjectPtr x = new CompoundObject();
+			list values = v.values();
+			list keys = v.keys();
+
+			for (int i = 0; i < keys.attr("__len__")(); i++)
+			{
+				object key(keys[i]);
+				object value(values[i]);
+				extract< const std::string > keyElem(key);
+				if (!keyElem.check()) 
+				{
+					PyErr_SetString(PyExc_TypeError, "Incompatible key type. Only strings accepted.");
+					throw_error_already_set();
+				}
+
+				extract< Object& > valueElem(value);
+				if (valueElem.check())
+				{
+					setItem( *x, keyElem(), valueElem() );
+					continue;
+				}
+				extract<dict> dictValueE( value );
+				if( dictValueE.check() )
+				{
+					CompoundObjectPtr sub = compoundObjectFromDict( dictValueE() );
+					setItem( *x, keyElem(), *sub );
+					continue;
+				}
+				else 
+				{
+					PyErr_SetString(PyExc_TypeError, "Incompatible value type - must be Object or dict.");
+					throw_error_already_set();
+				}
+			}
+			
+			return x;
 		}
-	}
-	return x;
-}
+};
 
 /// binding for update method
-static void
-update1(CompoundObject &x, CompoundObject &y)
+static void update( CompoundObject &x, ConstCompoundObjectPtr y )
 {
-	CompoundObject::ObjectMap::const_iterator it = y.members().begin();
+	assert( y );
+	CompoundObject::ObjectMap::const_iterator it = y->members().begin();
 
-	for (; it != y.members().end(); it++) 
+	for (; it != y->members().end(); it++) 
 	{
 		setItem( x, it->first, *it->second );
 	}
 }
-	
-/// binding for update method
-static void
-update2(CompoundObject &x, dict v)
-{
-	CompoundObjectPtr vv = compoundObjectFromDict( v );
-	update1( x, *vv );
-}
 
-/// constructor that receives a python map object
-static CompoundObjectPtr 
-compoundObjectConstructor(dict v) 
+/// copy constructor
+static CompoundObjectPtr copyConstructor( ConstCompoundObjectPtr other ) 
 {
-	return compoundObjectFromDict( v );
+	assert( other );
+	CompoundObjectPtr r = new CompoundObject();
+	update( *r, other );
+	return r;
 }
 
 void bindCompoundObject()
@@ -253,7 +288,7 @@ void bindCompoundObject()
 	typedef class_< CompoundObject , CompoundObjectPtr, boost::noncopyable, bases<Object> > CompoundObjectPyClass;
 
 	CompoundObjectPyClass ( "CompoundObject" )
-		.def("__init__", make_constructor(&compoundObjectConstructor), "Copy constructor that accepts a python dict containing Object instances.")
+		.def("__init__", make_constructor(&copyConstructor), "Copy constructor.")
 		.def( "__repr__", &repr )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
@@ -266,14 +301,15 @@ void bindCompoundObject()
 		.def( "has_key", &has_key )
 		.def( "keys", &keys )
 		.def( "values", &values )
-		.def( "update", &update1 )
-		.def( "update", &update2 )
+		.def( "update", &update )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( CompoundObject )
 	;
 
 	INTRUSIVE_PTR_PATCH( CompoundObject, CompoundObjectPyClass );
-
 	implicitly_convertible<CompoundObjectPtr, ObjectPtr>();
+	implicitly_convertible<CompoundObjectPtr, ConstCompoundObjectPtr>();
+	
+	CompoundObjectFromPythonDict();
 }
 
 } // namespace IECore

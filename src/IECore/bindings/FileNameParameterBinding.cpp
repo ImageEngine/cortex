@@ -34,11 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/FileNameParameter.h"
 #include "IECore/bindings/ParameterBinding.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/bindings/Wrapper.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace std;
 using namespace boost;
@@ -47,33 +49,18 @@ using namespace boost::python;
 namespace IECore
 {
 
-static FileNameParameterPtr fileNameParameterConstructor( const std::string &name, const std::string &description,
-	const std::string &extensions, const std::string &defaultValue, bool allowEmptyString, PathParameter::CheckType check, const object &presets, bool presetsOnly, object userData )
+class FileNameParameterWrap : public FileNameParameter, public Wrapper<FileNameParameter>
 {
- 	FileNameParameter::PresetsContainer p = parameterPresets<FileNameParameter::PresetsContainer>( presets );
-	
-	// get the optional userData parameter.
-	ConstCompoundObjectPtr ptrUserData = 0;
-	if (userData != object()) {
-		extract<CompoundObjectPtr> elem(userData);
-		// try if elem is an exact CompoundObjectPtr
-		if (elem.check()) {
-			ptrUserData = elem();
-		} else {
-			// now try for ConstCompoundObjectPtr
-			extract<ConstCompoundObjectPtr> elem(userData);
-			if (elem.check()) {
-				ptrUserData = elem();
-			} else {
-			   	PyErr_SetString(PyExc_TypeError, "Parameter userData is not an instance of CompoundObject!");
-			  	throw_error_already_set();
-				FileNameParameterPtr res;
-				return res;
-			}
-		}
-	}
-	return new FileNameParameter( name, description, extensions, defaultValue, allowEmptyString, check, p, presetsOnly, ptrUserData );
-}
+	public :
+
+		FileNameParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &e, const std::string &dv, bool ae,
+			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud )	
+			:	FileNameParameter( n, d, e, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud ), Wrapper<FileNameParameter>( self, this ) {};
+		
+		IE_COREPYTHON_PARAMETERWRAPPERFNS( FileNameParameter );
+		
+};
+IE_CORE_DECLAREPTR( FileNameParameterWrap );
 
 static boost::python::list fileNameParameterExtensions( const FileNameParameter &that )
 {
@@ -88,10 +75,26 @@ static boost::python::list fileNameParameterExtensions( const FileNameParameter 
 
 void bindFileNameParameter()
 {
+	using boost::python::arg;
 
-	typedef class_<FileNameParameter, FileNameParameterPtr, boost::noncopyable, bases<PathParameter> > FileNameParameterPyClass;
+	typedef class_<FileNameParameter, FileNameParameterWrapPtr, boost::noncopyable, bases<PathParameter> > FileNameParameterPyClass;
 	FileNameParameterPyClass( "FileNameParameter", no_init )
-		.def( "__init__", make_constructor( &fileNameParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "extensions" ) = string( "" ), boost::python::arg_( "defaultValue" ) = string( "" ), boost::python::arg_( "allowEmptyString" ) = true, boost::python::arg_( "check" ) = PathParameter::DontCare, boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly") = false, boost::python::arg_( "userData" ) = object() ) ) )
+		.def(
+			init<const std::string &, const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
+					arg( "extensions" ) = std::string( "" ),
+					arg( "defaultValue" ) = std::string( "" ),						
+					arg( "allowEmptyString" ) = true,
+					arg( "check" ) = PathParameter::DontCare,
+					arg( "presets" ) = boost::python::tuple(),
+					arg( "presetsOnly" ) = false,
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				)
+			)
+		)
 		.add_property( "extensions", &fileNameParameterExtensions )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FileNameParameter )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FileNameParameter )

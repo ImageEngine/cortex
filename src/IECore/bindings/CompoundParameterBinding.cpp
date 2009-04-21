@@ -34,9 +34,9 @@
 
 #include "boost/python.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECore/CompoundParameter.h"
+#include "IECore/CompoundObject.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/ParameterBinding.h"
 #include "IECore/bindings/Wrapper.h"
@@ -55,8 +55,6 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 		IE_CORE_DECLAREMEMBERPTR( CompoundParameterWrap );
 
 	protected:
-	
-		
 
 		static std::vector<ParameterPtr> getMembers( const object &members )
 		{
@@ -68,83 +66,6 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 				m.push_back( &p );
 			}
 			return m;
-		}
-
-		static CompoundObjectPtr compoundObjectFromDict( const dict &v )
-		{
-			CompoundObjectPtr x = new CompoundObject;
-			list values = v.values();
-			list keys = v.keys();
-		
-			for (int i = 0; i < keys.attr("__len__")(); i++)
-			{
-				object key(keys[i]);
-				object value(values[i]);
-				extract< const std::string > keyElem(key);
-				if (!keyElem.check()) 
-				{
-					PyErr_SetString(PyExc_TypeError, "Incompatible key type. Only strings accepted.");
-					throw_error_already_set();
-				}
-		
-				extract< Object& > valueElem(value);
-				if (valueElem.check())
-				{
-					x->members()[ keyElem() ] = &valueElem();
-					continue;
-				}
-				extract<dict> dictValueE( value );
-				if( dictValueE.check() )
-				{
-					ObjectPtr co = compoundObjectFromDict( dictValueE() );
-					x->members()[ keyElem() ] =  co;
-					continue;
-				}
-				else 
-				{
-					PyErr_SetString(PyExc_TypeError, "Incompatible value type - must be Object or dict.");
-					throw_error_already_set();
-				}
-			}
-			return x;
-		}
-
-		static ConstCompoundObjectPtr getUserData( const object & userData )
-		{
-			// get the optional userData parameter.
-			ConstCompoundObjectPtr ptrUserData = 0;
-			if (userData != object())
-			{
-
-				// get userData from python dict.
-				extract<dict> listElem(userData);
-				if (listElem.check())
-				{
-					return compoundObjectFromDict( listElem() );
-				}
-
-				extract<CompoundObjectPtr> elem(userData);
-				// try if elem is an exact CompoundObjectPtr
-				if (elem.check())
-				{
-					ptrUserData = elem();
-				}
-				else
-				{
-					// now try for ConstCompoundObjectPtr
-					extract<ConstCompoundObjectPtr> elem(userData);
-					if (elem.check())
-					{
-						ptrUserData = elem();
-					} 
-					else
-					{
-					   	PyErr_SetString(PyExc_TypeError, "Parameter userData is not an instance of CompoundObject nor a dictionary!");
-					  	throw_error_already_set();
-					}
-				}
-			}
-			return ptrUserData;
 		}
 
 		void addParametersFromMembers( const object &members )
@@ -159,8 +80,8 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 
 	public :
 
-		CompoundParameterWrap( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), const object &userData = object() )
-			:	CompoundParameter( name, description, getUserData( userData ) ), Wrapper< CompoundParameter >( self, this ) 
+		CompoundParameterWrap( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = 0 )
+			:	CompoundParameter( name, description, userData ), Wrapper< CompoundParameter >( self, this ) 
 		{
 			addParametersFromMembers( members );
 		}
@@ -236,13 +157,13 @@ void bindCompoundParameter()
 	typedef class_< CompoundParameter, CompoundParameterWrap::Ptr, boost::noncopyable, bases<Parameter> > CompoundParameterPyClass;
 	CompoundParameterPyClass( "CompoundParameter", no_init )
 		.def(
-			init< const std::string &, const std::string &, boost::python::optional<const list &,  const object & > >
+			init< const std::string &, const std::string &, boost::python::optional<const list &, CompoundObjectPtr > >
 			( 
 				(
 					arg( "name" ) = std::string(""),
 					arg( "description" ) = std::string(""),
 					arg( "members" ) = list(),
-					arg( "userData") = object()
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
 				)
 			) 
 		)
@@ -268,6 +189,7 @@ void bindCompoundParameter()
 
 	INTRUSIVE_PTR_PATCH( CompoundParameter, CompoundParameterPyClass );
 	implicitly_convertible<CompoundParameterPtr, ParameterPtr>();
+	implicitly_convertible<CompoundParameterPtr, ConstCompoundParameterPtr>();
 
 }
 

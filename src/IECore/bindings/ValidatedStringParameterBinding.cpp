@@ -36,8 +36,12 @@
 
 #include "IECore/ValidatedStringParameter.h"
 #include "IECore/CompoundObject.h"
+
 #include "IECore/bindings/ParameterBinding.h"
+#include "IECore/bindings/Wrapper.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace std;
 using namespace boost;
@@ -46,48 +50,54 @@ using namespace boost::python;
 namespace IECore
 {
 
-static ValidatedStringParameterPtr validatedStringParameterConstructor( const std::string &name, const std::string &description,
-	const std::string &regex, const std::string &regexDescription,
-	const std::string &defaultValue, bool allowEmptyString, const object &presets, bool presetsOnly, object userData )
+class ValidatedStringParameterWrap : public ValidatedStringParameter, public Wrapper<ValidatedStringParameter>
 {
- 	ValidatedStringParameter::PresetsContainer p = parameterPresets<ValidatedStringParameter::PresetsContainer>( presets );
-	// get the optional userData parameter.
-	ConstCompoundObjectPtr ptrUserData = 0;
-	if (userData != object()) {
-		extract<CompoundObjectPtr> elem(userData);
-		// try if elem is an exact CompoundObjectPtr
-		if (elem.check()) {
-			ptrUserData = elem();
-		} else {
-			// now try for ConstCompoundObjectPtr
-			extract<ConstCompoundObjectPtr> elem(userData);
-			if (elem.check()) {
-				ptrUserData = elem();
-			} else {
-			   	PyErr_SetString(PyExc_TypeError, "Parameter userData is not an instance of CompoundObject!");
-			  	throw_error_already_set();
-				ValidatedStringParameterPtr res;
-				return res;
-			}
-		}
-	}
-	return new ValidatedStringParameter( name, description, regex, regexDescription, defaultValue, allowEmptyString, p, presetsOnly, ptrUserData );
-}
+
+	public :
+
+		ValidatedStringParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &r, const std::string &rd,
+			const std::string &dv, bool ae, object &p, bool po, CompoundObjectPtr ud )	
+			:	ValidatedStringParameter( n, d, r, rd, dv, ae, parameterPresets<ValidatedStringParameter::PresetsContainer>( p ), po, ud ), Wrapper<ValidatedStringParameter>( self, this ) {};
+		
+		IE_COREPYTHON_PARAMETERWRAPPERFNS( ValidatedStringParameter );
+		
+};
+IE_CORE_DECLAREPTR( ValidatedStringParameterWrap );
 
 void bindValidatedStringParameter()
 {
-
-	typedef class_< ValidatedStringParameter, ValidatedStringParameterPtr, boost::noncopyable, bases<StringParameter> > ValidatedStringParameterPyClass;
+	using boost::python::arg ;
+	
+	typedef class_< ValidatedStringParameter, ValidatedStringParameterWrapPtr, boost::noncopyable, bases<StringParameter> > ValidatedStringParameterPyClass;
 	ValidatedStringParameterPyClass( "ValidatedStringParameter", no_init )
-		.def( "__init__", make_constructor( &validatedStringParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "regex" ), boost::python::arg_( "regexDescription" ), boost::python::arg_( "defaultValue" ) = string( "" ), boost::python::arg_( "allowEmptyString" ) = true, boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
+		.def(
+			init< const std::string &, const std::string &, const std::string &, const std::string &, const std::string &, bool, object &, bool, CompoundObjectPtr >
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
+					arg( "regex" ),					
+					arg( "regexDescription" ) = std::string( "" ),					
+					arg( "defaultValue" ) = std::string( "" ),						
+					arg( "allowEmptyString" ) = true,
+					arg( "presets" ) = boost::python::tuple(),
+					arg( "presetsOnly" ) = false,
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				)
+			)
+		)
 		.add_property( "regex", make_function( &ValidatedStringParameter::regex, return_value_policy<copy_const_reference>() ) )
 		.add_property( "regexDescription", make_function( &ValidatedStringParameter::regexDescription, return_value_policy<copy_const_reference>() ) )
 		.add_property( "allowEmptyString", &ValidatedStringParameter::allowEmptyString )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( ValidatedStringParameter )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ValidatedStringParameter )
 	;
+	
+	WrapperToPython<ValidatedStringParameterPtr>();
+	
 	INTRUSIVE_PTR_PATCH( ValidatedStringParameter, ValidatedStringParameterPyClass );
 	implicitly_convertible<ValidatedStringParameterPtr, StringParameterPtr>();
+	implicitly_convertible<ValidatedStringParameterPtr, ConstValidatedStringParameterPtr>();
 
 }
 

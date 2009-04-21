@@ -51,7 +51,6 @@ namespace IECore
 
 class PathParameterWrap : public PathParameter, public Wrapper<PathParameter>
 {
-
 	public :
 
 		PathParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
@@ -65,6 +64,7 @@ IE_CORE_DECLAREPTR( PathParameterWrap );
 
 void bindPathParameter()
 {
+	using boost::python::arg;
 
 	typedef class_<PathParameter, PathParameterWrapPtr, boost::noncopyable, bases<StringParameter> > PathParameterPyClass;
 	PathParameterPyClass pathParamClass( "PathParameter", no_init );
@@ -78,7 +78,21 @@ void bindPathParameter()
 		;
 	}
 	pathParamClass
-		.def( init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, object &, bool, CompoundObjectPtr>() )
+		.def( 
+			init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, object &, bool, CompoundObjectPtr>
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
+					arg( "defaultValue" ) = std::string( "" ),						
+					arg( "allowEmptyString" ) = true,
+					arg( "check" ) = PathParameter::DontCare,
+					arg( "presets" ) = boost::python::tuple(),
+					arg( "presetsOnly" ) = false,
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				)
+			)
+		)
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( PathParameter )
 		.add_property( "mustExist", &PathParameter::mustExist )
 		.add_property( "mustNotExist", &PathParameter::mustNotExist )
@@ -90,6 +104,7 @@ void bindPathParameter()
 	
 	INTRUSIVE_PTR_PATCH( PathParameter, PathParameterPyClass );
 	implicitly_convertible<PathParameterPtr, StringParameterPtr>();
+	implicitly_convertible<PathParameterPtr, ConstPathParameterPtr>();	
 
 }
 
