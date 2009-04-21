@@ -34,6 +34,8 @@
 
 #include "IECore/DateTimeParameter.h"
 
+#include "IECore/TypedParameter.inl"
+
 namespace IECore
 {
 

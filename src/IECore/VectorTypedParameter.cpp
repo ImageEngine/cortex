@@ -42,6 +42,8 @@
 
 #include "IECore/VectorTypedParameter.h"
 
+#include "IECore/TypedParameter.inl"
+
 using std::vector;
 using std::string;
 using namespace Imath;

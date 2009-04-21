@@ -98,6 +98,4 @@ class TypedParameter : public Parameter
 
 } // namespace IECore
 
-#include "IECore/TypedParameter.inl"
-
 #endif // IE_CORE_TYPEDPARAMETER_H

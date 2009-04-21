@@ -34,6 +34,8 @@
 
 #include "IECore/TimePeriodParameter.h"
 
+#include "IECore/TypedParameter.inl"
+
 namespace IECore
 {
 

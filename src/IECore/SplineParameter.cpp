@@ -34,6 +34,8 @@
 
 #include "IECore/SplineParameter.h"
 
+#include "IECore/TypedParameter.inl"
+
 namespace IECore
 {
 

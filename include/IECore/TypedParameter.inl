@@ -53,7 +53,7 @@ static Parameter::PresetsContainer convertPresets( const typename TypedParameter
 	Parameter::PresetsContainer result;
 	for( typename TypedParameter<T>::PresetsContainer::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
-		result.push_back( typename Parameter::PresetsContainer::value_type( it->first, new TypedData<T>( it->second ) ) );
+		result.push_back( typename Parameter::PresetsContainer::value_type( it->first, new ObjectType( it->second ) ) );
 	}
 	return result;
 }
@@ -92,26 +92,26 @@ TypeId TypedParameter<T>::typeId() const
 {
 	return staticTypeId();
 }
-/*
+
 template <class T> 
 TypeId TypedParameter<T>::staticTypeId()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return InvalidTypeId;
-}*/
+}
 
 template <class T> 
 std::string TypedParameter<T>::typeName() const
 {
 	return staticTypeName();
 }
-/*
+
 template <class T> 
 std::string TypedParameter<T>::staticTypeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
-}*/
+}
 
 template<class T>
 bool TypedParameter<T>::isInstanceOf( TypeId typeId ) const
@@ -171,7 +171,7 @@ bool TypedParameter<T>::valueValid( ConstObjectPtr value, std::string *reason ) 
 template<typename T>
 const typename TypedParameter<T>::ValueType &TypedParameter<T>::typedDefaultValue() const
 {
-	return boost::static_pointer_cast<const TypedData<T> >( defaultValue() )->readable();
+	return boost::static_pointer_cast<const ObjectType>( defaultValue() )->readable();
 }
 
 template<typename T>
@@ -182,7 +182,7 @@ typename TypedParameter<T>::ValueType &TypedParameter<T>::getTypedValue()
 	{
 		throw Exception( std::string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"");
 	}
-	return boost::static_pointer_cast<TypedData<T> >( getValue() )->writable();
+	return boost::static_pointer_cast<ObjectType>( getValue() )->writable();
 }
 
 template<typename T>
@@ -193,13 +193,13 @@ const typename TypedParameter<T>::ValueType &TypedParameter<T>::getTypedValue() 
 	{
 		throw Exception( std::string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"");
 	}
-	return boost::static_pointer_cast<const TypedData<T> >( getValue() )->readable();
+	return boost::static_pointer_cast<const ObjectType>( getValue() )->readable();
 }
 		
 template<typename T>
 void TypedParameter<T>::setTypedValue( const T &value )
 {
-	setValue( new TypedData<T>( value ) );
+	setValue( new ObjectType( value ) );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

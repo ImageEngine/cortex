@@ -34,6 +34,8 @@
 
 #include "IECore/CubeColorLookupParameter.h"
 
+#include "IECore/TypedParameter.inl"
+
 namespace IECore
 {
 

@@ -41,6 +41,8 @@
 
 #include "IECore/SimpleTypedParameter.h"
 
+#include "IECore/TypedParameter.inl"
+
 using std::string;
 using namespace Imath;
 
