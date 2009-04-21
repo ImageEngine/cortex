@@ -62,21 +62,26 @@ namespace IECore
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<class T>
-static intrusive_ptr<T> construct()
+struct ConstructHelper
 {
-	return new T;
-}
+	static typename T::Ptr construct()
+	{
+		return new T;
+	}
+};
 
 /// Half needs explicit initialisation
 template<>
-intrusive_ptr<HalfData> construct()
+struct ConstructHelper<HalfData>
 {
-	return new HalfData(0);
-}
-
+	static HalfDataPtr construct()
+	{
+		return new HalfData( 0 );
+	}
+};
 
 template<class T>
-static intrusive_ptr<T> constructWithValue( const typename T::ValueType &v )
+static typename T::Ptr constructWithValue( const typename T::ValueType &v )
 {
 	return new T( v );
 }
@@ -314,12 +319,12 @@ struct TypedDataFromType<BoolData>
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<class T>
-static class_<T, intrusive_ptr<T>, boost::noncopyable, bases<Data> > bindSimpleData()
+static class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > bindSimpleData()
 {
 	string typeName = T::staticTypeName();
-	typedef class_<T, intrusive_ptr<T>, boost::noncopyable, bases<Data> > ThisPyClass;
+	typedef class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > ThisPyClass;
 	ThisPyClass result( typeName.c_str(), no_init );
-	result.def( "__init__", make_constructor( &construct<T> ), "Construct with no specified value." );
+	result.def( "__init__", make_constructor( &ConstructHelper<T>::construct ), "Construct with no specified value." );
 	result.def( "__init__", make_constructor( &constructWithValue<T> ), "Construct with the specified value." );
 	result.def( "__str__", &str<T> );
 	result.def( "__repr__", &repr<T> );
@@ -334,7 +339,7 @@ static class_<T, intrusive_ptr<T>, boost::noncopyable, bases<Data> > bindSimpleD
 }
 
 template<class T>
-static void bindNumericMethods( class_<T, intrusive_ptr<T>, boost::noncopyable, bases<Data> > &c )
+static void bindNumericMethods( class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > &c )
 {
 	c.add_static_property( "minValue", &std::numeric_limits<typename T::ValueType>::min, "Minimum representable value." );
 	c.add_static_property( "maxValue", &std::numeric_limits<typename T::ValueType>::max, "Maximum representable value." );
