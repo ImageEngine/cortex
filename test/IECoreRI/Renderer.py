@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -54,6 +54,7 @@ class SimpleProcedural( Renderer.Procedural ) :
 	def render( self, renderer ) :
 		
 		self.rendererTypeName = renderer.typeName()
+		self.rendererTypeId = renderer.typeId()
 		
 		renderer.transformBegin()
 		
@@ -69,6 +70,11 @@ class RendererTest( unittest.TestCase ) :
 	def loadShader( self, shader ) :
 	
 		return IECoreRI.SLOReader( os.path.join( os.environ["SHADER_PATH"], shader + ".sdl" ) ).read()
+
+	def testTypeId( self ) :
+	
+		self.assertEqual( IECoreRI.Renderer().typeId(), IECoreRI.Renderer.staticTypeId() )
+		self.assertNotEqual( IECoreRI.Renderer.staticTypeId(), Renderer.staticTypeId() )
 
 	def testTypeName( self ) :
 	
@@ -147,7 +153,9 @@ class RendererTest( unittest.TestCase ) :
 		
 		r.worldEnd()
 		
+		self.assertEqual( p.rendererTypeId, IECoreRI.Renderer.staticTypeId() )
 		self.assertEqual( p.rendererTypeName, "IECoreRI::Renderer" )
+		self.assertEqual( p.rendererTypeName, IECoreRI.Renderer.staticTypeName() )
 		
 	def testGetOption( self ) :
 	

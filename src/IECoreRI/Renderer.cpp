@@ -38,12 +38,12 @@
 using namespace IECoreRI;
 
 Renderer::Renderer()
-	:	m_implementation( new RendererImplementation() )
+	:	m_implementation( new RendererImplementation( this ) )
 {
 }
 
 Renderer::Renderer( const std::string &name )
-	:	m_implementation( new RendererImplementation( name ) )
+	:	m_implementation( new RendererImplementation( this, name ) )
 {
 }
 

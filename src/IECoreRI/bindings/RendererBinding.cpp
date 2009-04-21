@@ -37,6 +37,7 @@
 #include "IECoreRI/Renderer.h"
 #include "IECoreRI/bindings/RendererBinding.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -49,6 +50,7 @@ void bindRenderer()
 	typedef class_< IECoreRI::Renderer, boost::noncopyable, IECoreRI::RendererPtr, bases< IECore::Renderer > > RendererPyClass;
 	RendererPyClass( "Renderer" )
 		.def( init<const std::string &>() )
+		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Renderer)		
 	;
 
 	INTRUSIVE_PTR_PATCH( IECoreRI::Renderer, RendererPyClass );

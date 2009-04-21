@@ -35,10 +35,11 @@
 #ifndef IECORERI_RENDERERIMPLEMENTATION_H
 #define IECORERI_RENDERERIMPLEMENTATION_H
 
-#include "IECore/Renderer.h"
 #include "IECore/CachedReader.h"
 #include "IECore/Camera.h"
 #include "IECore/Font.h"
+
+#include "IECoreRI/Renderer.h"
 
 #include "ri.h"
 
@@ -54,8 +55,8 @@ class RendererImplementation : public IECore::Renderer
 
 	public :
 
-		RendererImplementation();
-		RendererImplementation( const std::string &name );
+		RendererImplementation( IECoreRI::Renderer *parent );
+		RendererImplementation( IECoreRI::Renderer *parent, const std::string &name );
 		
 		virtual ~RendererImplementation();
 
@@ -117,6 +118,7 @@ class RendererImplementation : public IECore::Renderer
 		// Does things common to both constructors
 		void constructCommon();
 	
+		IECoreRI::Renderer *m_parent;
 		RtContextHandle m_context;
 	
 		typedef void (RendererImplementation::*SetOptionHandler)( const std::string &name, IECore::ConstDataPtr d );
@@ -173,7 +175,7 @@ class RendererImplementation : public IECore::Renderer
 		struct ProcData
 		{
 			IECore::Renderer::ConstProceduralPtr proc;
-			RendererImplementationPtr that;
+			IECoreRI::RendererPtr renderer;
 		};
 		static void procSubdivide( void *data, float detail );
 		static void procFree( void *data );

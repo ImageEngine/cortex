@@ -81,13 +81,14 @@ IECoreRI::RendererImplementation::AttributeState::AttributeState( const Attribut
 const unsigned int IECoreRI::RendererImplementation::g_shaderCacheSize = 10 * 1024 * 1024;	
 std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
-IECoreRI::RendererImplementation::RendererImplementation()
-	:	m_context( 0 )
+IECoreRI::RendererImplementation::RendererImplementation( IECoreRI::Renderer *parent )
+	:	m_parent( parent ), m_context( 0 )
 {
 	constructCommon();
 }
 
-IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
+IECoreRI::RendererImplementation::RendererImplementation( IECoreRI::Renderer *parent, const std::string &name )
+	:	m_parent( parent )
 {
 	constructCommon();
 	if( name!="" )
@@ -1217,14 +1218,14 @@ void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralP
 	riBound[5] = bound.max.z;
 	ProcData *data = new ProcData;
 	data->proc = proc;
-	data->that = this;
+	data->renderer = m_parent;
 	RiProcedural( data, riBound, procSubdivide, procFree );
 }
 
 void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )
 {
 	ProcData *procData = (ProcData *)data;
-	procData->proc->render( procData->that );
+	procData->proc->render( procData->renderer );
 }
 
 void IECoreRI::RendererImplementation::procFree( void *data )
