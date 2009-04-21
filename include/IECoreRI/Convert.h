@@ -62,6 +62,7 @@ Imath::Box3f convert( const RtBound &from );
 
 /// Conversions to RI types can't return the type, as typically they're typedefs for arrays.
 void convert( const Imath::M44f &from, RtMatrix to );
+void convert( const Imath::Box3f &from, RtBound to );
 
 /// This function is intended for converting the results of RxAttribute and RxOption
 /// into useful IECore types.

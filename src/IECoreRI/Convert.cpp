@@ -69,6 +69,16 @@ void convert( const Imath::M44f &m, RtMatrix mm )
 	}
 }
 
+void convert( const Imath::Box3f &from, RtBound to )
+{
+	to[0] = from.min.x;
+	to[1] = from.max.x;
+	to[2] = from.min.y;
+	to[3] = from.max.y;
+	to[4] = from.min.z;
+	to[5] = from.max.z;
+}
+
 DataPtr convert( const char *data, RxInfoType_t type, RtInt count )
 {
 	switch( type )
