@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,14 +34,14 @@
 
 import unittest
 
-from IECore import *
+import IECore
 
 class TestWrapperToPython( unittest.TestCase ) :
 
 	def test( self ) :
 	
-		f = FileSequenceParameter( "f", "d" )
-		c = CompoundParameter(
+		f = IECore.FileSequenceParameter( "f", "d" )
+		c = IECore.CompoundParameter(
 			members = [
 				f
 			]
@@ -50,6 +50,14 @@ class TestWrapperToPython( unittest.TestCase ) :
 		self.assert_( c["f"].isSame( f ) )
 		self.assert_( c["f"] is f )
 		self.assertEqual( c["f"], f )
+
+	def testReturningNonWrappedPtr( self ) :
+	
+		r = IECore.ReadProcedural()
+		o = IECore.CompoundObject( { "c" : r } )
+
+		self.assert_( o["c"].isSame( r ) )
+		self.assert_( o["c"] is r )
 
 if __name__ == "__main__":
         unittest.main()
