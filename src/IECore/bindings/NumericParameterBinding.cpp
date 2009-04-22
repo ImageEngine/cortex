@@ -34,10 +34,12 @@
 
 #include "boost/python.hpp"
 
+#include "IECore/bindings/ParameterBinding.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/bindings/Wrapper.h"
 #include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/ParameterBinding.h"
+#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace std;
@@ -47,41 +49,41 @@ using namespace boost::python;
 namespace IECore
 {
 
-template<class T>
-static ParameterPtr numericConstructor( const std::string &name, const std::string &description, T defaultValue, T minValue, T maxValue,
-	const object &presets, bool presetsOnly, object userData )
+template<typename T>
+class NumericParameterWrap : public NumericParameter<T>, public Wrapper<NumericParameter<T> >
 {
-	typename NumericParameter<T>::PresetsContainer p = parameterPresets<typename NumericParameter<T>::PresetsContainer>( presets );
-	
-	// get the optional userData parameter.
-	ConstCompoundObjectPtr ptrUserData = 0;
-	if (userData != object()) {
-		extract<CompoundObjectPtr> elem(userData);
-		// try if elem is an exact CompoundObjectPtr
-		if (elem.check()) {
-			ptrUserData = elem();
-		} else {
-			// now try for ConstCompoundObjectPtr
-			extract<ConstCompoundObjectPtr> elem(userData);
-			if (elem.check()) {
-				ptrUserData = elem();
-			} else {
-			   	PyErr_SetString(PyExc_TypeError, "Parameter userData is not an instance of CompoundObject!");
-			  	throw_error_already_set();
-				ParameterPtr res;
-				return res;
-			}
-		}
-	}
-	return new NumericParameter<T>( name, description, defaultValue, minValue, maxValue, p, presetsOnly, ptrUserData );
-}
+	public :
+
+		NumericParameterWrap( PyObject *self, const std::string &n, const std::string &d, T v = T(), T minValue = Imath::limits<T>::min(),
+			T maxValue = Imath::limits<T>::max(), const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+			:	NumericParameter<T>( n, d, v, minValue, maxValue, parameterPresets<typename NumericParameter<T>::PresetsContainer>( p ), po, ud ), Wrapper<NumericParameter<T> >( self, this ) {};
+		
+		IE_COREPYTHON_PARAMETERWRAPPERFNS( NumericParameter<T> );
+		IE_CORE_DECLAREMEMBERPTR( NumericParameterWrap<T> );		
+};
 
 template<typename T>
 static void bindNumericParameter( const char *name )
 {
-	typedef class_< NumericParameter<T>, typename NumericParameter<T>::Ptr, boost::noncopyable, bases<Parameter> > NumericParameterPyClass;
+	using boost::python::arg;
+
+	typedef class_< NumericParameter<T>, typename NumericParameterWrap<T>::Ptr, boost::noncopyable, bases<Parameter> > NumericParameterPyClass;
 	NumericParameterPyClass( name, no_init )
-		.def( "__init__", make_constructor( &numericConstructor<T>, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ) = T(), boost::python::arg_( "minValue" ) = Imath::limits<T>::min(), boost::python::arg_( "maxValue" ) = Imath::limits<T>::max(), boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
+		.def(
+			init<const std::string &, const std::string &, boost::python::optional< T, T, T, const object &, bool, CompoundObjectPtr> >
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
+					arg( "defaultValue" ) = T(),
+					arg( "minValue" ) = Imath::limits<T>::min(),						
+					arg( "maxValue" ) = Imath::limits<T>::max(),	
+					arg( "presets" ) = boost::python::tuple(),
+					arg( "presetsOnly" ) = false,
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				)
+			)
+		)
 		.add_property( "numericDefaultValue", &NumericParameter<T>::numericDefaultValue  )
 		.def( "getNumericValue", &NumericParameter<T>::getNumericValue  )
 		.def( "setNumericValue", &NumericParameter<T>::setNumericValue  )
@@ -96,6 +98,7 @@ static void bindNumericParameter( const char *name )
 	;
 	INTRUSIVE_PTR_PATCH( NumericParameter<T>, typename NumericParameterPyClass );
 	implicitly_convertible<typename NumericParameter<T>::Ptr, ParameterPtr>();
+	implicitly_convertible<typename NumericParameter<T>::Ptr, typename NumericParameter<T>::ConstPtr>();
 }
 
 void bindNumericParameter()
