@@ -46,6 +46,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( FileSequence );
+
 FileSequence::FileSequence( const std::string &fileName, FrameListPtr frameList )
 {
 	setFileName( fileName );

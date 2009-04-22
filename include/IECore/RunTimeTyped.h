@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,21 +39,28 @@
 #include "IECore/TypeIds.h"
 
 #include <string>
+#include <map>
+#include <vector>
+#include <set>
 
 namespace IECore
 {
 
-#define IE_CORE_DECLARETYPEFNS( TYPENAME )										\
-	virtual IECore::TypeId typeId() const { return TYPENAME ## TypeId; };		\
-	virtual std::string typeName() const { return #TYPENAME; };					\
-	static IECore::TypeId staticTypeId() { return TYPENAME ## TypeId; };		\
-	static std::string staticTypeName() { return #TYPENAME; };
+#define IE_CORE_DECLARETYPEFNS( TYPENAME, BASETYPENAME )\
+	virtual IECore::TypeId typeId() const { return TYPENAME ## TypeId; };\
+	virtual std::string typeName() const { return #TYPENAME; };\
+	static IECore::TypeId staticTypeId() { return TYPENAME ## TypeId; };\
+	static std::string staticTypeName() { return #TYPENAME; };\
+	static IECore::TypeId baseTypeId() { return BASETYPENAME ## TypeId; };\
+	static std::string baseTypeName() { return #BASETYPENAME; };	
 
-#define IE_CORE_DECLAREEXTENSIONTYPEFNS( TYPENAME, TYPEID )							\
-	virtual IECore::TypeId typeId() const { return IECore::TypeId(TYPEID); };		\
-	virtual std::string typeName() const { return #TYPENAME; };						\
-	static IECore::TypeId staticTypeId() { return IECore::TypeId(TYPEID); };		\
-	static std::string staticTypeName() { return #TYPENAME; };
+#define IE_CORE_DECLAREEXTENSIONTYPEFNS( TYPENAME, TYPEID, BASETYPENAME )\
+	virtual IECore::TypeId typeId() const { return IECore::TypeId(TYPEID); };\
+	virtual std::string typeName() const { return #TYPENAME; };\
+	static IECore::TypeId staticTypeId() { return IECore::TypeId(TYPEID); };\
+	static std::string staticTypeName() { return #TYPENAME; };\
+	static IECore::TypeId baseTypeId() { return BASETYPENAME ## TypeId; };\
+	static std::string baseTypeName() { return #BASETYPENAME; };	
 		
 #define IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS( BASETYPE )																										\
 	virtual bool isInstanceOf( IECore::TypeId typeId ) const { return typeId==staticTypeId() ? true : BASETYPE::isInstanceOf( typeId ); };						\
@@ -62,26 +69,42 @@ namespace IECore
 #define IE_CORE_DECLAREINHERITSFROMFUNCTIONS( BASETYPE )																										\
 	static bool inheritsFrom( IECore::TypeId typeId ) { return BASETYPE::staticTypeId()==typeId ? true : BASETYPE::inheritsFrom( typeId ); };					\
 	static bool inheritsFrom( const std::string &typeName ) { return BASETYPE::staticTypeName()==typeName ? true : BASETYPE::inheritsFrom( typeName ); }		\
+
+#define IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TYPE )		\
+	private: \
+	static const IECore::RunTimeTyped::TypeDescription<TYPE> g_typeDescription;\
+	public:
 	
+#define IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( TYPE )																	\
+	const IECore::RunTimeTyped::TypeDescription<TYPE> TYPE::g_typeDescription;		
+	
+#define IE_CORE_DEFINERUNTIMETYPED( TYPE )																	\
+	IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( TYPE )
+		
 /// Use this macro within the public section of an IECore class declaration to
 /// implement all necessary RunTimeTyped functions. TYPE is the name of
 /// the class and BASETYPE is the name of the base class. The TypeId
 /// enum must contain an entry TYPETypeId.
-#define IE_CORE_DECLARERUNTIMETYPED( TYPE, BASETYPE )		\
-	IE_CORE_DECLAREMEMBERPTR( TYPE )  						\
-	IE_CORE_DECLARETYPEFNS( TYPE )							\
-	IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS( BASETYPE )		\
-	IE_CORE_DECLAREINHERITSFROMFUNCTIONS( BASETYPE )		\
+#define IE_CORE_DECLARERUNTIMETYPED( TYPE, BASETYPE )\
+	IE_CORE_DECLAREMEMBERPTR( TYPE )  \
+	IE_CORE_DECLARETYPEFNS( TYPE, BASETYPE )\
+	IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS( BASETYPE )\
+	IE_CORE_DECLAREINHERITSFROMFUNCTIONS( BASETYPE )\
+	IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TYPE ) \
+	typedef BASETYPE BaseType;
+	
 	
 /// Use this macro within the public section of an extension library class declaration to
 /// implement all necessary RunTimeTyped functions. TYPE is the name of
 /// the class and BASETYPE is the name of the base class. TYPEID is a unique numeric type
 /// identifier that must not clash with any other.
-#define IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE )		\
-	IE_CORE_DECLAREMEMBERPTR( TYPE )  										\
-	IE_CORE_DECLAREEXTENSIONTYPEFNS( TYPE, TYPEID )							\
-	IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS( BASETYPE )						\
-	IE_CORE_DECLAREINHERITSFROMFUNCTIONS( BASETYPE )						\
+#define IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE )\
+	IE_CORE_DECLAREMEMBERPTR( TYPE )  \
+	IE_CORE_DECLAREEXTENSIONTYPEFNS( TYPE, TYPEID, BASETYPE )\
+	IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS( BASETYPE )\
+	IE_CORE_DECLAREINHERITSFROMFUNCTIONS( BASETYPE )\
+	IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TYPE ) \
+	typedef BASETYPE BaseType;
 
 /// An abstract base class for objects whose type we wish to determine at runtime.
 /// The rationale for using such a type system rather than the std c++
@@ -118,12 +141,23 @@ class RunTimeTyped : public RefCounted
 		virtual TypeId typeId() const;
 		/// Returns a unique name for the type of this instance. This should be
 		/// implemented to return the class name.
+		/// \todo Is this the most efficient return type?
 		virtual std::string typeName() const;
 		
 		/// Returns the TypeId for this class, without needing an instance.
 		static TypeId staticTypeId();
 		/// Returns the type name for this class, without needing an instance.
+		/// \todo Is this the most efficient return type?		
 		static std::string staticTypeName();
+		
+		/// Returns the TypeId of the base of this class, without needing an instance. 
+		/// The base type of RunTimeTyped itself is defined to be InvalidTypeId;
+		static TypeId baseTypeId();
+		
+		/// Returns the type name of the base of this class, without needing an instance. 
+		/// The base type name of RunTimeTyped itself is defined to be "InvalidType";
+		/// \todo Is this the most efficient return type?		
+		static std::string baseTypeName();		
 		
 		/// Returns true if this object is an instance of the specified type,
 		/// or of a class inherited from the specified type.
@@ -137,8 +171,37 @@ class RunTimeTyped : public RefCounted
 		/// Returns true if this class inherits from the specified type.
 		static bool inheritsFrom( const std::string &typeName );
 		
+		/// Returns the base type of the given type, or InvalidTypeId if no such base exists.
+		static TypeId baseTypeId( TypeId typeId );
+		
+		/// Returns all bases of the given type, or an empty set if no such bases exist.
+		/// The elemenents are ordered by "distance" from the given TypeId. That is to say, the first
+		/// element will be the immediate base class, and the last elemenet will be RunTimeTyped.
+		static const std::vector<TypeId> &baseTypeIds( TypeId typeId );		
+		
+		/// Returns all derived types of the given type, or an empty set if no such derived types exist.
+		static const std::set<TypeId> &derivedTypeIds( TypeId typeId );	
+		
 		//@}
-
+		
+	protected :
+	
+		template<class T>
+		struct TypeDescription
+		{
+			TypeDescription();
+		};
+		
+		typedef std::map< TypeId, TypeId > BaseTypeRegistryMap;
+		typedef std::map< TypeId, std::set< TypeId > > DerivedTypesRegistryMap;		
+		
+		static BaseTypeRegistryMap &baseTypeRegistry();
+		static DerivedTypesRegistryMap &derivedTypesRegistry();
+		
+		static void derivedTypeIds( TypeId typeId, std::set<TypeId> & );	
+		
+		static void registerType( TypeId derivedTypeId, TypeId baseTypeId );	
+			
 };
 
 IE_CORE_DECLAREPTR( RunTimeTyped );

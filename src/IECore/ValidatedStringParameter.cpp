@@ -41,6 +41,8 @@ using namespace boost;
 using namespace std;
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( ValidatedStringParameter );
+
 ValidatedStringParameter::ValidatedStringParameter( const std::string &name, const std::string &description,
 	const std::string &regex, const std::string &regexDescription, const std::string &defaultValue, bool allowEmptyString, const StringParameter::PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	StringParameter( name, description, defaultValue, presets, presetsOnly, userData ), m_regex( regex ), m_regexDescription( regexDescription ), m_allowEmptyString( allowEmptyString )

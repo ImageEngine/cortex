@@ -38,6 +38,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( Parameterised );
+
 Parameterised::Parameterised(  const std::string &name, const std::string &description )
 	:	m_name( name ), m_description( description ), m_parameters( new CompoundParameter ), m_userData( new CompoundObject )
 {

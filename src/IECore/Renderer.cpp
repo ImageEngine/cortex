@@ -38,6 +38,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( Renderer );
+
 Renderer::Renderer()
 {
 }

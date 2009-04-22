@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -66,9 +66,11 @@ def makeRunTimeTyped( typ, typId, baseClass ) :
 	typ.typeId = lambda x : typId
 	typ.typeName = lambda x: typ.__name__
 
-	# add the staticTypeId and staticTypeName overrides
+	# add the staticTypeId, staticTypeName, baseTypeId, and baseTypeName overrides
 	typ.staticTypeId = staticmethod( lambda : typId )
 	typ.staticTypeName = staticmethod( lambda : typ.__name__ )
+	typ.baseTypeId = staticmethod( lambda : baseClass.staticTypeId() )
+	typ.baseTypeName = staticmethod( lambda : baseClass.staticTypeName() )	
 	
 	# add the inheritsFrom method override
 	def inheritsFrom( t, baseClass ) :

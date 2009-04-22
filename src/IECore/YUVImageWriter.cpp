@@ -53,6 +53,8 @@ using namespace std;
 using namespace boost;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( YUVImageWriter )
+
 const Writer::WriterDescription<YUVImageWriter> YUVImageWriter::m_writerDescription("yuv");
 
 YUVImageWriter::YUVImageWriter() :

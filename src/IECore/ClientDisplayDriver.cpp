@@ -45,6 +45,8 @@ using namespace Imath;
 using namespace IECore;
 using boost::asio::ip::tcp;
 
+IE_CORE_DEFINERUNTIMETYPED( ClientDisplayDriver );
+
 ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters ) : 
 		DisplayDriver( displayWindow, dataWindow, channelNames, parameters ),
 		m_service(), m_host(""), m_port(""), m_scanLineOrderOnly(false), m_socket( m_service )

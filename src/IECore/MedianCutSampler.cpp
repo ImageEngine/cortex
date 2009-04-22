@@ -47,6 +47,8 @@ using namespace boost;
 using namespace Imath;
 using namespace std;
 
+IE_CORE_DEFINERUNTIMETYPED( MedianCutSampler );
+
 MedianCutSampler::MedianCutSampler()
 	:
 	Op(

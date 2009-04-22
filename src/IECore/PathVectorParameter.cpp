@@ -46,6 +46,8 @@ using namespace boost;
 using namespace std;
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( PathVectorParameter )
+
 PathVectorParameter::PathVectorParameter( const std::string &name, const std::string &description,
                               const std::vector<std::string> &defaultValue, bool allowEmptyList, CheckType check,
                               const StringVectorParameter::PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )

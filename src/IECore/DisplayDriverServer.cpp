@@ -47,6 +47,8 @@ using namespace IECore;
 using boost::asio::ip::tcp;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( DisplayDriverServer );
+
 /* Set the FD_CLOEXEC flag for the given socket descriptor, so that it will not exist on child processes.*/
 static void fixSocketFlags( int socketDesc )
 {

@@ -58,6 +58,8 @@ using namespace std;
 using namespace boost;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( DPXImageWriter )
+
 const Writer::WriterDescription<DPXImageWriter> DPXImageWriter::m_writerDescription("dpx");
 
 DPXImageWriter::DPXImageWriter() :

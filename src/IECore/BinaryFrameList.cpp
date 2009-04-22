@@ -41,6 +41,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( BinaryFrameList );
+
 FrameList::Parser< BinaryFrameList > BinaryFrameList::g_parserRegistrar;
 
 BinaryFrameList::BinaryFrameList( FrameListPtr frameList ) : ReorderedFrameList( frameList ? frameList : new EmptyFrameList() )

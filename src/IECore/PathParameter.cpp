@@ -46,6 +46,8 @@ using namespace boost;
 using namespace std;
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( PathParameter )
+
 PathParameter::PathParameter( const std::string &name, const std::string &description,
 			const std::string &defaultValue, bool allowEmptyString,	CheckType check,
 			const StringParameter::PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )

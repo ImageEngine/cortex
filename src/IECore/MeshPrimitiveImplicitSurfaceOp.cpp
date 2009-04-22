@@ -46,6 +46,8 @@
 using namespace IECore;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( MeshPrimitiveImplicitSurfaceOp );
+
 MeshPrimitiveImplicitSurfaceOp::MeshPrimitiveImplicitSurfaceOp() : MeshPrimitiveOp( staticTypeName(), "A MeshPrimitiveOp to make an offset mesh using an implicit surface" )
 {
 	m_thresholdParameter = new FloatParameter(

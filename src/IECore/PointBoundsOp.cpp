@@ -47,6 +47,8 @@ using namespace Imath;
 using namespace std;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( PointBoundsOp );
+
 static TypeId pointAndVelocityTypes[] = { V3fVectorDataTypeId, V3dVectorDataTypeId, InvalidTypeId };
 static TypeId radiusTypes[] = { FloatVectorDataTypeId, DoubleVectorDataTypeId, InvalidTypeId };
 

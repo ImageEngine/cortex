@@ -42,6 +42,8 @@
 using namespace IECore;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( ColorTransformOp );
+
 ColorTransformOp::ColorTransformOp( const std::string &name, const std::string &description )
 	:	PrimitiveOp( name, description )
 {

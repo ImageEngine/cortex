@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,6 +64,16 @@ std::string RunTimeTyped::staticTypeName()
 	return "RunTimeTyped";
 }
 
+TypeId RunTimeTyped::baseTypeId()
+{
+	return InvalidTypeId;
+}
+		
+std::string RunTimeTyped::baseTypeName()
+{
+	return "InvalidType";
+}	
+
 bool RunTimeTyped::isInstanceOf( TypeId typeId ) const
 {
 	return typeId==staticTypeId();
@@ -82,4 +92,117 @@ bool RunTimeTyped::inheritsFrom( TypeId typeId )
 bool RunTimeTyped::inheritsFrom( const std::string &typeName )
 {
 	return false;
+}
+
+void RunTimeTyped::registerType( TypeId derivedTypeId, TypeId baseTypeId )
+{
+	BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();
+#ifndef NDEBUG
+	BaseTypeRegistryMap::const_iterator it = baseRegistry.find( derivedTypeId );
+	if ( it != baseRegistry.end() )
+	{
+		assert( it->second == baseTypeId );
+	}	
+#endif	
+	
+	baseRegistry[ derivedTypeId ] = baseTypeId;
+	
+	DerivedTypesRegistryMap &derivedRegistry = derivedTypesRegistry();
+	derivedRegistry[ baseTypeId ].insert( derivedTypeId );
+}
+
+RunTimeTyped::BaseTypeRegistryMap &RunTimeTyped::baseTypeRegistry()
+{
+	static BaseTypeRegistryMap *registry = new BaseTypeRegistryMap();
+	
+	assert( registry );
+	return *registry;
+}
+
+RunTimeTyped::DerivedTypesRegistryMap &RunTimeTyped::derivedTypesRegistry()
+{
+	static DerivedTypesRegistryMap *registry = new DerivedTypesRegistryMap();
+	
+	assert( registry );	
+	return *registry;
+}
+
+TypeId RunTimeTyped::baseTypeId( TypeId typeId )
+{
+	BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();
+	BaseTypeRegistryMap::const_iterator it = baseRegistry.find( typeId );
+	
+	if ( it == baseRegistry.end() )
+	{
+		return InvalidTypeId;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+				
+const std::vector<TypeId> &RunTimeTyped::baseTypeIds( TypeId typeId )
+{
+	typedef std::map< TypeId, std::vector<TypeId> > BaseTypeIdsMap;
+	static BaseTypeIdsMap *baseTypes = new BaseTypeIdsMap();
+	
+	BaseTypeIdsMap::iterator it = baseTypes->find( typeId );
+	if ( it != baseTypes->end() )
+	{
+		return it->second;
+	}
+	
+	baseTypes->insert( BaseTypeIdsMap::value_type( typeId, std::vector<TypeId>() ) );
+	it = baseTypes->find( typeId );
+	assert( it != baseTypes->end() );
+	
+	TypeId baseType = baseTypeId( typeId );
+	while ( baseType != InvalidTypeId )
+	{
+		it->second.push_back( baseType );
+		baseType = baseTypeId( baseType );
+	}
+	
+	return it->second;
+}
+		
+const std::set<TypeId> &RunTimeTyped::derivedTypeIds( TypeId typeId )
+{
+	static DerivedTypesRegistryMap *derivedTypes = new DerivedTypesRegistryMap();
+	static std::set<TypeId> emptySet;
+
+	assert( derivedTypes );
+	DerivedTypesRegistryMap::iterator it = derivedTypes->find( typeId );
+	
+	if ( it == derivedTypes->end() )
+	{
+		derivedTypes->insert( DerivedTypesRegistryMap::value_type( typeId, std::set<TypeId>() ) );
+		it = derivedTypes->find( typeId );
+		assert( it != derivedTypes->end() );
+		
+		// Walk over the hierarchy of derived types
+		derivedTypeIds( typeId, it->second );
+	}
+	
+	return it->second;	
+}
+
+void RunTimeTyped::derivedTypeIds( TypeId typeId, std::set<TypeId> &typeIds )
+{
+	DerivedTypesRegistryMap &derivedRegistry = derivedTypesRegistry();	
+	DerivedTypesRegistryMap::const_iterator it = derivedRegistry.find( typeId );
+	if ( it == derivedRegistry.end() )
+	{
+		/// Termination condition: No derived types
+		return;
+	}
+	
+	for ( std::set<TypeId>::const_iterator typesIt = it->second.begin(); typesIt != it->second.end(); ++ typesIt )
+	{
+		typeIds.insert( *typesIt );
+		
+		// Recurse down into derived types	
+		derivedTypeIds( *typesIt, typeIds );
+	}
 }

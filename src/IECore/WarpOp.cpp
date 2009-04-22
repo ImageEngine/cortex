@@ -42,6 +42,8 @@ using namespace IECore;
 using namespace Imath;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( WarpOp );
+
 WarpOp::WarpOp( const std::string &name, const std::string &description )
 	:	ImagePrimitiveOp( name, description )
 {

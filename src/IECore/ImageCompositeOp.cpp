@@ -58,6 +58,8 @@ using boost::format;
 using namespace IECore;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( ImageCompositeOp );
+
 ImageCompositeOp::ImageCompositeOp() : ImagePrimitiveOp( "ImageCompositeOp", "ImageCompositeOp" )
 {
 	IntParameter::PresetsContainer operationPresets;

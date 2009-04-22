@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -50,6 +50,8 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.assert_( i.isInstanceOf( IECore.TypeId.Object ) )
 		self.assert_( i.isInstanceOf( IECore.TypeId.RunTimeTyped ) )
 		
+		self.assertEqual( i.baseTypeId(), IECore.TypeId.Data )
+		
 		self.assert_( IECore.IntData.inheritsFrom( "Data" ) )
 		self.assert_( IECore.IntData.inheritsFrom( "Object" ) )
 		self.assert_( IECore.IntData.inheritsFrom( "RunTimeTyped" ) )
@@ -77,8 +79,6 @@ class TestRunTimeTyped( unittest.TestCase ) :
 			# Iteratively expand base classes all the way to the top
 			if hasattr(t, "__bases__"):
 			
-				baseClasses = [ t ]
-				
 				i=0
 				while i < len(baseClasses):
 					for x in baseClasses[i].__bases__:
@@ -89,14 +89,25 @@ class TestRunTimeTyped( unittest.TestCase ) :
 			if IECore.RunTimeTyped in baseClasses:
 				self.assert_( getattr(t, "staticTypeName") )
 				self.assert_( getattr(t, "staticTypeId") )
+				self.assert_( getattr(t, "baseTypeId") )
+				self.assert_( getattr(t, "baseTypeName") )
 				
 				# Make sure that no 2 IECore classes provide the same typeId or typeName
 				if t.staticTypeName() in typeNames:
-					print(typeNames[t.staticTypeName()])
 					raise Exception( "'%s' does not have a unique RunTimeTyped static type name (conflicts with '%s')." % ( t.__name__ , typeNames[t.staticTypeName()] ))
 					
 				if t.staticTypeId() in typeIds:
 					raise Exception( "'%s' does not have a unique RunTimeTyped static type id (conflicts with '%s')." % (t.__name__ , typeIds[t.staticTypeId()] ))
+					
+				for base in baseClasses :
+				
+					if hasattr( base, "staticTypeId" ) :
+					
+						self.assertNotEqual( base.staticTypeId(), t.staticTypeId() )
+						
+						if not base.staticTypeId() in IECore.RunTimeTyped.baseTypeIds( t.staticTypeId() ) :
+							raise Exception( "'%s' does not have '%s' in its RunTimeTyped base classes, even though Python says it derives from it." % (t.staticTypeName(), base.staticTypeName() ))
+						
 				
 				typeNames[t.staticTypeName()] = t.__name__
 				typeIds[t.staticTypeId()] = t.__name__			

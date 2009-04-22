@@ -38,6 +38,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( EmptyFrameList );
+
 FrameList::Parser< EmptyFrameList > EmptyFrameList::g_parserRegistrar;
 
 EmptyFrameList::EmptyFrameList()

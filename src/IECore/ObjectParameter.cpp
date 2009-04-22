@@ -39,6 +39,8 @@
 using namespace IECore;
 using namespace std;
 
+IE_CORE_DEFINERUNTIMETYPED( ObjectParameter )
+
 ObjectParameter::ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, defaultValue, presets, presetsOnly, userData )
 {

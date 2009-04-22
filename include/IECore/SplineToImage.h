@@ -50,7 +50,7 @@ class SplineToImage : public Op
 {
 	public :
 				
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SplineToImage, SplineToImageTypeId, Op );
+		IE_CORE_DECLARERUNTIMETYPED( SplineToImage, Op );
 		
 		SplineToImage();
 		virtual ~SplineToImage();

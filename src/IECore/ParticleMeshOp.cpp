@@ -62,6 +62,8 @@ using namespace std;
 
 static TypeId resultTypes[] = { MeshPrimitiveTypeId, InvalidTypeId };
 
+IE_CORE_DEFINERUNTIMETYPED( ParticleMeshOp );
+
 ParticleMeshOp::ParticleMeshOp()
 	:	Op(
 		staticTypeName(),

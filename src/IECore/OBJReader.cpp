@@ -65,6 +65,8 @@ using namespace Imath;
 using namespace boost;
 using namespace boost::spirit;
 
+IE_CORE_DEFINERUNTIMETYPED(OBJReader);
+
 // syntactic sugar for specifying our grammar
 typedef boost::spirit::rule<boost::spirit::phrase_scanner_t> srule;
 

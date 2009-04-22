@@ -44,6 +44,7 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( FileSequenceVectorParameter );
 
 FileSequenceVectorParameter::FileSequenceVectorParameter( const std::string &name, const std::string &description, 
 	const std::vector< std::string > &defaultValue, bool allowEmptyList, CheckType check,

@@ -42,6 +42,8 @@ using namespace IECore;
 using namespace std;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( CineonToLinearOp );
+
 CineonToLinearOp::CineonToLinearOp()
 	:	ChannelOp( "CineonToLinearOp", 
 				   "Applies Cineon to linear conversion on ImagePrimitive channels."

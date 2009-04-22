@@ -41,6 +41,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( FrameList );
+
 FrameList::FrameList()
 {
 }

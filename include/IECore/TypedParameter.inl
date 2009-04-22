@@ -88,6 +88,9 @@ TypedParameter<T>::TypedParameter( const std::string &name, const std::string &d
 /////////////////////////////////////////////////////////////////////////////////////
 
 template <class T> 
+const RunTimeTyped::TypeDescription<TypedParameter<T> > TypedParameter<T>::g_typeDescription;
+
+template <class T> 
 TypeId TypedParameter<T>::typeId() const
 {
 	return staticTypeId();
@@ -111,6 +114,18 @@ std::string TypedParameter<T>::staticTypeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
+}
+
+template <class T> 
+TypeId TypedParameter<T>::baseTypeId()
+{
+	return Parameter::staticTypeId();
+}
+
+template <class T> 
+std::string TypedParameter<T>::baseTypeName()
+{
+	return Parameter::staticTypeName();
 }
 
 template<class T>

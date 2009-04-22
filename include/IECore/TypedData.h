@@ -82,6 +82,8 @@ class TypedData : public Data
 		static std::string staticTypeName();
 		static bool inheritsFrom( TypeId typeId );
 		static bool inheritsFrom( const std::string &typeName );
+		static TypeId baseTypeId();
+		static std::string baseTypeName();
 		//@}
 		
 		//! @name Object interface
@@ -123,7 +125,7 @@ class TypedData : public Data
 	
 		virtual ~TypedData();
 		
-		static TypeDescription<TypedData<T> > m_typeDescription;
+		static Object::TypeDescription<TypedData<T> > m_typeDescription;
 		
 		virtual void copyFrom( ConstObjectPtr other, CopyContext *context );
 		virtual void save( SaveContext *context ) const;

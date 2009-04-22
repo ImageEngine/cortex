@@ -47,6 +47,8 @@ using namespace boost;
 using namespace std;
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( FileNameParameter )
+
 FileNameParameter::FileNameParameter( const std::string &name, const std::string &description,
 			const std::string &extensions, const std::string &defaultValue, bool allowEmptyString, PathParameter::CheckType check,
 			const StringParameter::PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )

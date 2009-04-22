@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,6 +41,8 @@
 #include "IECore/ScaledDataConversion.h"
 
 using namespace IECore;
+
+IE_CORE_DEFINERUNTIMETYPED( ImageUnpremultiplyOp );
 
 ImageUnpremultiplyOp::ImageUnpremultiplyOp(): ChannelOp( "ImageUnpremultiplyOp", "Unpremultiplies image channels by the alpha channel." )
 {

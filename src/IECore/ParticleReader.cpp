@@ -52,6 +52,8 @@ using namespace std;
 using namespace IECore;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( ParticleReader );
+
 ParticleReader::ParticleReader( const std::string &name, const std::string &description ) 
 		:	Reader( name, description, new ObjectParameter( "result", "The loaded object.", new NullObject, PointsPrimitive::staticTypeId() ) )
 {

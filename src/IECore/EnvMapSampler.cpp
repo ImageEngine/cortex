@@ -46,6 +46,8 @@ using namespace boost;
 using namespace Imath;
 using namespace std;
 
+IE_CORE_DEFINERUNTIMETYPED( EnvMapSampler );
+
 EnvMapSampler::EnvMapSampler()
 	:
 	Op(

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -186,7 +186,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// Object are registered this way. The best way of doing this
 		/// is as a private static member of the class being registered.
 		template<class T>
-		class TypeDescription
+		class TypeDescription : protected RunTimeTyped::TypeDescription<T>
 		{
 			public :
 				/// Registers the object using its static typeId and static typename
@@ -202,7 +202,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// class for this, but use a specialisation of TypeDescription
 		/// or summink.
 		template<class T>
-		class AbstractTypeDescription
+		class AbstractTypeDescription : protected RunTimeTyped::TypeDescription<T>
 		{
 			public :
 				AbstractTypeDescription();

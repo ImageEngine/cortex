@@ -43,6 +43,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( FrameRange );
+
 FrameList::Parser< FrameRange > FrameRange::g_parserRegistrar;
 
 FrameRange::FrameRange( Frame start, Frame end, Frame step ) : m_start( start ), m_end( end ), m_step( step )

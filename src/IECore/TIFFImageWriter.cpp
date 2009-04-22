@@ -63,6 +63,8 @@ using namespace std;
 using namespace Imath;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( TIFFImageWriter )
+
 const Writer::WriterDescription<TIFFImageWriter> TIFFImageWriter::m_writerDescription("tiff tif");
 
 TIFFImageWriter::TIFFImageWriter()

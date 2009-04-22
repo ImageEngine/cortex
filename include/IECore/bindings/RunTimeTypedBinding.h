@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,11 +40,15 @@ namespace IECore
 void bindRunTimeTyped();
 }
 
-#define IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CLASSNAME)							\
-	def("staticTypeName", &CLASSNAME::staticTypeName).staticmethod("staticTypeName") 	\
-	.def("staticTypeId", &CLASSNAME::staticTypeId).staticmethod("staticTypeId")			\
-	.def("inheritsFrom", (bool (*)( const std::string &))&CLASSNAME::inheritsFrom)		\
-	.def("inheritsFrom", (bool (*)( IECore::TypeId ) )&CLASSNAME::inheritsFrom).staticmethod("inheritsFrom")
+#define IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CLASSNAME)\
+	def("staticTypeName", &CLASSNAME::staticTypeName).staticmethod("staticTypeName") \
+	.def("staticTypeId", &CLASSNAME::staticTypeId).staticmethod("staticTypeId")\
+	.def( "baseTypeId", ( IECore::TypeId (*)() )&CLASSNAME::baseTypeId )  \
+	.staticmethod("baseTypeId")\
+	.def("baseTypeName", &CLASSNAME::baseTypeName).staticmethod("baseTypeName")\
+	.def("inheritsFrom", (bool (*)( const std::string &))&CLASSNAME::inheritsFrom)\
+	.def("inheritsFrom", (bool (*)( IECore::TypeId ) )&CLASSNAME::inheritsFrom).staticmethod("inheritsFrom")\
+	
 
 
 #endif // IE_COREPYTHON_RUNTIMETYPEDBINDING_H

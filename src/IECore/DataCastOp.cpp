@@ -51,6 +51,8 @@ using namespace Imath;
 using namespace std;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( DataCastOp );
+
 DataCastOp::DataCastOp()
 	:	Op(
 		staticTypeName(),

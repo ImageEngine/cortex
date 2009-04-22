@@ -40,6 +40,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( ReversedFrameList );
+
 FrameList::Parser< ReversedFrameList > ReversedFrameList::g_parserRegistrar;
 
 ReversedFrameList::ReversedFrameList( FrameListPtr frameList ) : ReorderedFrameList( frameList ? frameList : new EmptyFrameList() )

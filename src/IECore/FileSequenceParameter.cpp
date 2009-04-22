@@ -44,6 +44,7 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( FileSequenceParameter );
 
 FileSequenceParameter::FileSequenceParameter( 
 	const std::string &name, const std::string &description, const std::string &defaultValue, 

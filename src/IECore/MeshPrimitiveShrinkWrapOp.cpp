@@ -48,6 +48,7 @@
 using namespace IECore;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( MeshPrimitiveShrinkWrapOp );
 
 MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( staticTypeName(), "A MeshPrimitiveOp to shrink-wrap one mesh onto another" )
 {

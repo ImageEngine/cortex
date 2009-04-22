@@ -54,6 +54,8 @@ using namespace std;
 using namespace boost;
 using namespace boost::mpl;
 
+IE_CORE_DEFINERUNTIMETYPED( MatrixMultiplyOp );
+
 static TypeId inputTypes[] = 
 {
 	V3fVectorDataTypeId,

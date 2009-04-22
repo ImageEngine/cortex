@@ -42,6 +42,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( ExclusionFrameList );
+
 FrameList::Parser< ExclusionFrameList > ExclusionFrameList::g_parserRegistrar;
 
 ExclusionFrameList::ExclusionFrameList( FrameListPtr frameList, FrameListPtr exclusionFrameList ) : m_frameList( frameList ), m_exclusionFrameList( exclusionFrameList )

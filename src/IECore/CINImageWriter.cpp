@@ -58,6 +58,7 @@ using namespace std;
 using namespace boost;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( CINImageWriter )
 const Writer::WriterDescription<CINImageWriter> CINImageWriter::m_writerDescription("cin");
 
 CINImageWriter::CINImageWriter() :

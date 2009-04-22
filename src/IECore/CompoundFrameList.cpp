@@ -42,6 +42,7 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( CompoundFrameList );
 FrameList::Parser< CompoundFrameList > CompoundFrameList::g_parserRegistrar;
 
 CompoundFrameList::CompoundFrameList()

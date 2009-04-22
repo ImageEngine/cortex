@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,8 @@
 #include "IECore/Converter.h"
 
 using namespace IECore;
+
+IE_CORE_DEFINERUNTIMETYPED( Converter );
 
 Converter::Converter( const std::string &name, const std::string &description )
 	:	Parameterised( name, description )

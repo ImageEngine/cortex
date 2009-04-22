@@ -44,6 +44,8 @@ using namespace std;
 using namespace IECore;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( CompoundParameter );
+
 CompoundParameter::CompoundParameter( const std::string &name, const std::string &description, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, new CompoundObject, PresetsContainer(), false, userData )
 {

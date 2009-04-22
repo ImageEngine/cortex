@@ -56,6 +56,8 @@ using namespace IECore;
 using namespace Imath;
 using namespace std;
 
+IE_CORE_DEFINERUNTIMETYPED( CurveExtrudeOp );
+
 CurveExtrudeOp::CurveExtrudeOp()
 	:	Op(
 		staticTypeName(),

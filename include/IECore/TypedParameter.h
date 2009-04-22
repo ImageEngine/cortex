@@ -76,6 +76,9 @@ class TypedParameter : public Parameter
 		static std::string staticTypeName();
 		static bool inheritsFrom( TypeId typeId );
 		static bool inheritsFrom( const std::string &typeName );
+		static TypeId baseTypeId();
+		static std::string baseTypeName();
+		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedParameter<T> );
 		//@}
 			
 		/// Implemented to return true only if value is of type TypedData<T>.

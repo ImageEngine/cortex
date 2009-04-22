@@ -43,6 +43,31 @@ using namespace boost::python;
 namespace IECore
 {
 
+static list baseTypeIds( TypeId typeId )
+{
+	list result;
+	
+	const std::vector<TypeId> &ids = RunTimeTyped::baseTypeIds( typeId );
+	for( std::vector<TypeId>::const_iterator it = ids.begin(); it != ids.end(); ++it )
+	{
+		result.append( *it );
+	}
+	
+	return result;
+}
+
+static list derivedTypeIds( TypeId typeId )
+{
+	list result;
+	const std::set<TypeId> &ids = RunTimeTyped::derivedTypeIds( typeId );
+	for( std::set<TypeId>::const_iterator it = ids.begin(); it != ids.end(); ++it )
+	{
+		result.append( *it );
+	}
+	
+	return result;
+}
+
 void bindRunTimeTyped()
 {
 	typedef class_<RunTimeTyped, boost::noncopyable, RunTimeTypedPtr, bases<RefCounted> > RunTimeTypedPyClass;
@@ -51,6 +76,13 @@ void bindRunTimeTyped()
 		.def( "typeId", &RunTimeTyped::typeId )
 		.def( "isInstanceOf", (bool (RunTimeTyped::*)( const std::string &) const)&RunTimeTyped::isInstanceOf )
 		.def( "isInstanceOf", (bool (RunTimeTyped::*)( TypeId ) const)&RunTimeTyped::isInstanceOf )
+		
+		// Not defined as staticmethod as IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS does this after
+		// definition of overloaded baseTypeId(TypeId) function (staticmethod must be called after
+		// all the other definitions of that function)
+		.def("baseTypeId", ( TypeId (*)( TypeId ) )( &RunTimeTyped::baseTypeId ) )
+		.def( "baseTypeIds", &baseTypeIds ).staticmethod( "baseTypeIds" )
+		.def( "derivedTypeIds", &derivedTypeIds ).staticmethod( "derivedTypeIds" )		
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( RunTimeTyped )
 	;
 	

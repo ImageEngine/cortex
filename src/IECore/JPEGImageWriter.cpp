@@ -63,6 +63,8 @@ using namespace std;
 using namespace boost;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( JPEGImageWriter )
+
 const Writer::WriterDescription<JPEGImageWriter> JPEGImageWriter::m_writerDescription("jpeg jpg");
 
 JPEGImageWriter::JPEGImageWriter() :

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,13 +55,13 @@ boost::intrusive_ptr<T> Object::CopyContext::copy( boost::intrusive_ptr<const T>
 }
 
 template<class T>
-Object::TypeDescription<T>::TypeDescription()
+Object::TypeDescription<T>::TypeDescription() : RunTimeTyped::TypeDescription<T>()
 {
 	Object::registerType( T::staticTypeId(), T::staticTypeName(), creator );
 }
 
 template<class T>
-Object::TypeDescription<T>::TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName )
+Object::TypeDescription<T>::TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName ) : RunTimeTyped::TypeDescription<T>()
 {
 	Object::registerType( alternateTypeId, alternateTypeName, creator );
 }
@@ -74,7 +74,7 @@ ObjectPtr Object::TypeDescription<T>::creator()
 }
 
 template<class T>
-Object::AbstractTypeDescription<T>::AbstractTypeDescription()
+Object::AbstractTypeDescription<T>::AbstractTypeDescription() : RunTimeTyped::TypeDescription<T>()
 {
 	Object::registerType( T::staticTypeId(), T::staticTypeName(), 0 );
 }

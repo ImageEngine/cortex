@@ -40,6 +40,7 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( ReorderedFrameList );
 
 ReorderedFrameList::ReorderedFrameList( FrameListPtr frameList ) : m_frameList( frameList )
 {

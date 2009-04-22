@@ -52,6 +52,8 @@ using namespace IECore;
 using namespace Imath;
 using namespace std;
 
+IE_CORE_DEFINERUNTIMETYPED( MappedRandomPointDistributionOp );
+
 MappedRandomPointDistributionOp::MappedRandomPointDistributionOp()
 		:	UniformRandomPointDistributionOp(
 		        staticTypeName(),

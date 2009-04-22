@@ -98,6 +98,18 @@ std::string TypedObjectParameter<T>::staticTypeName()
 	return "";
 }
 
+template <class T> 
+TypeId TypedObjectParameter<T>::baseTypeId()
+{
+	return ObjectParameter::staticTypeId();
+}
+
+template <class T> 
+std::string TypedObjectParameter<T>::baseTypeName()
+{
+	return ObjectParameter::staticTypeName();
+}
+
 template<typename T>
 bool TypedObjectParameter<T>::isInstanceOf( TypeId typeId ) const
 {
@@ -150,20 +162,23 @@ bool TypedObjectParameter<T>::valueValid( ConstObjectPtr value, std::string *rea
 	return true;
 }
 
-#define IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( T, TNAME )						\
-																					\
-	template<>																		\
-	TypeId TypedObjectParameter<T>::staticTypeId()										\
-	{																				\
-		return TNAME ## TypeId;														\
-	}																				\
-																					\
-	template<>																		\
-	std::string TypedObjectParameter<T>::staticTypeName()									\
-	{																				\
-		return # TNAME;																\
-	}																				\
-																					\
+#define IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( T, TNAME )\
+	\
+	template<>\
+	TypeId TypedObjectParameter<T>::staticTypeId()\
+	{\
+		return TNAME ## TypeId;\
+	}\
+	\
+	template<>\
+	std::string TypedObjectParameter<T>::staticTypeName()\
+	{\
+		return # TNAME;\
+	}\
+	\
+	template<> \
+	const RunTimeTyped::TypeDescription< TypedObjectParameter<T> >  TypedObjectParameter<T>::g_typeDescription; \
+	\
 	template class TypedObjectParameter<T>;
 	
 namespace IECore

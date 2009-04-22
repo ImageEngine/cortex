@@ -41,6 +41,8 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( FrameListParameter );
+
 static StringParameter::ObjectPresetsContainer convertPresets( const FrameListParameter::PresetsContainer &p )
 {
 	StringParameter::ObjectPresetsContainer result;
