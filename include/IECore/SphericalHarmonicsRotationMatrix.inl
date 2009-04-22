@@ -44,7 +44,9 @@ SphericalHarmonicsRotationMatrix<V>::SphericalHarmonicsRotationMatrix() :
 
 template < typename V >
 template <class S>
-SphericalHarmonicsRotationMatrix<V>::SphericalHarmonicsRotationMatrix( const Imath::Vec3<S>& r )
+SphericalHarmonicsRotationMatrix<V>::SphericalHarmonicsRotationMatrix( const Imath::Vec3<S>& r ) :
+		m_bands(0),
+		m_newRotation(true)
 {
 	m_3dRotation.setEulerAngles( r );
 }
@@ -54,6 +56,7 @@ template <class S>
 void SphericalHarmonicsRotationMatrix<V>::setEulerAngles( const Imath::Vec3<S>& r )
 {
 	m_3dRotation.setEulerAngles( r );
+	m_newRotation = true;
 }
 
 template < typename V >
@@ -61,6 +64,7 @@ template <class S>
 void SphericalHarmonicsRotationMatrix<V>::setAxisAngle ( const Imath::Vec3<S>& ax, S ang)
 {
 	m_3dRotation.setAxisAngle( ax, ang );
+	m_newRotation = true;
 }
 
 template < typename V >
@@ -68,6 +72,7 @@ template <class S>
 void SphericalHarmonicsRotationMatrix<V>::setQuaternion( const Imath::Quat<S>& q )
 {
 	m_3dRotation = q.toMatrix44();
+	m_newRotation = true;
 }
 
 template < typename V >
@@ -75,6 +80,7 @@ template <class S>
 void SphericalHarmonicsRotationMatrix<V>::setRotation( const Imath::Matrix44<S>& m )
 {
 	m_3dRotation = m;
+	m_newRotation = true;
 }
 
 template < typename V >
