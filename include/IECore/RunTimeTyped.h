@@ -91,7 +91,7 @@ namespace IECore
 	IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS( BASETYPE )\
 	IE_CORE_DECLAREINHERITSFROMFUNCTIONS( BASETYPE )\
 	IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TYPE ) \
-	typedef BASETYPE BaseType;
+	typedef BASETYPE BaseClass;
 	
 	
 /// Use this macro within the public section of an extension library class declaration to
@@ -104,7 +104,7 @@ namespace IECore
 	IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS( BASETYPE )\
 	IE_CORE_DECLAREINHERITSFROMFUNCTIONS( BASETYPE )\
 	IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TYPE ) \
-	typedef BASETYPE BaseType;
+	typedef BASETYPE BaseClass;
 
 /// An abstract base class for objects whose type we wish to determine at runtime.
 /// The rationale for using such a type system rather than the std c++
