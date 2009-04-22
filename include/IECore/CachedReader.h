@@ -60,6 +60,8 @@ class CachedReader : public RefCounted
 
 	public :
 
+		IE_CORE_DECLAREMEMBERPTR( CachedReader );
+
 		/// Creates a reader that will search for files on the
 		/// given paths and load them. Up to maxMemory bytes of
 		/// memory will be used to cache loading.
@@ -121,6 +123,8 @@ class CachedReader : public RefCounted
 		Cache m_cache;
 		
 };
+
+IE_CORE_DECLAREPTR( CachedReader )
 
 } // namespace IECore
 
