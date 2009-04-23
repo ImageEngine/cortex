@@ -59,7 +59,7 @@ namespace IECore
 	virtual std::string typeName() const { return #TYPENAME; };\
 	static IECore::TypeId staticTypeId() { return IECore::TypeId(TYPEID); };\
 	static std::string staticTypeName() { return #TYPENAME; };\
-	static IECore::TypeId baseTypeId() { return BASETYPENAME ## TypeId; };\
+	static IECore::TypeId baseTypeId() { return IECore::TypeId( BASETYPENAME ## TypeId ); };\
 	static std::string baseTypeName() { return #BASETYPENAME; };	
 		
 #define IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS( BASETYPE )																										\
