@@ -78,7 +78,7 @@ class TypedParameter : public Parameter
 		static bool inheritsFrom( const std::string &typeName );
 		static TypeId baseTypeId();
 		static std::string baseTypeName();
-		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedParameter<T> );
+		typedef Parameter BaseClass;		
 		//@}
 			
 		/// Implemented to return true only if value is of type TypedData<T>.
@@ -96,6 +96,10 @@ class TypedParameter : public Parameter
 		/// Convenience function for value setting, constructs a TypedData<T> from value
 		/// and calls Parameter::setValue().
 		void setTypedValue( const T &value );
+	
+	private :
+	
+		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedParameter<T> );
 		
 };
 

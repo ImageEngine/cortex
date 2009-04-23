@@ -90,7 +90,7 @@ class TypedObjectParameter : public ObjectParameter
 		static bool inheritsFrom( const std::string &typeName );
 		static TypeId baseTypeId();
 		static std::string baseTypeName();
-		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedObjectParameter<T> );
+		typedef ObjectParameter BaseClass;
 		//@}
 		
 		/// Implemented to return true only if value is of type T.
@@ -99,6 +99,10 @@ class TypedObjectParameter : public ObjectParameter
 	protected:
 	
 		static PresetsContainer makePresets( const ObjectPresetsContainer &presets );
+		
+	private :
+		
+		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedObjectParameter<T> );
 
 };
 

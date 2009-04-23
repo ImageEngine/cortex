@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -92,6 +92,18 @@ std::string TypedPrimitiveOp<T>::staticTypeName()
 	return "";
 }
 
+template <class T> 
+TypeId TypedPrimitiveOp<T>::baseTypeId()
+{
+	return ModifyOp::staticTypeId();
+}
+
+template <class T> 
+std::string TypedPrimitiveOp<T>::baseTypeName()
+{
+	return ModifyOp::staticTypeName();
+}
+
 template<typename T>
 bool TypedPrimitiveOp<T>::isInstanceOf( TypeId typeId ) const
 {
@@ -125,19 +137,21 @@ bool TypedPrimitiveOp<T>::inheritsFrom( const std::string &typeName )
 }
 
 #define IE_CORE_DEFINETYPEDPRIMITIVEOPSPECIALISATION( T, TNAME ) \
- \
+	\
 	template<> \
 	TypeId TypedPrimitiveOp<T>::staticTypeId() \
 	{ \
 		return TNAME ## TypeId; \
 	} \
- \
+	\
 	template<> \
 	std::string TypedPrimitiveOp<T>::staticTypeName() \
 	{ \
 		return # TNAME; \
 	} \
- \
+	template<> \
+	const RunTimeTyped::TypeDescription< TypedPrimitiveOp<T> >  TypedPrimitiveOp<T>::g_typeDescription; \
+	\
 	template class TypedPrimitiveOp<T>;
 	
 namespace IECore

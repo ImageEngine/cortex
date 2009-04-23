@@ -84,6 +84,7 @@ class TypedData : public Data
 		static bool inheritsFrom( const std::string &typeName );
 		static TypeId baseTypeId();
 		static std::string baseTypeName();
+		typedef Data BaseClass;
 		//@}
 		
 		//! @name Object interface

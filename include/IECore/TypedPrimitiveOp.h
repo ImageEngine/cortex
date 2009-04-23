@@ -66,6 +66,9 @@ class TypedPrimitiveOp : public ModifyOp
 		static std::string staticTypeName();
 		static bool inheritsFrom( TypeId typeId );
 		static bool inheritsFrom( const std::string &typeName );
+		static TypeId baseTypeId();
+		static std::string baseTypeName();
+		typedef ModifyOp BaseClass;
 		//@}
 		
 	protected :
@@ -77,6 +80,8 @@ class TypedPrimitiveOp : public ModifyOp
 	
 		/// Implemented to call modifyTypedPrimitive
 		void modify( ObjectPtr primitive, ConstCompoundObjectPtr operands );
+		
+		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedPrimitiveOp<T> );
 	
 };
 
