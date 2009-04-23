@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,6 +52,8 @@ using namespace IECoreGL;
 using namespace IECore;
 using namespace Imath;
 using namespace std;
+
+IE_CORE_DEFINERUNTIMETYPED( PointsPrimitive );
 
 float PointsPrimitive::g_defaultWidth = 1;
 float PointsPrimitive::g_defaultHeight = 1;

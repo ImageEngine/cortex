@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -66,6 +66,9 @@ class TypedStateComponent : public StateComponent
 		static std::string staticTypeName();
 		static bool inheritsFrom( IECore::TypeId typeId );
 		static bool inheritsFrom( const std::string &typeName );
+		static IECore::TypeId baseTypeId();
+		static std::string baseTypeName();
+		typedef StateComponent BaseClass;		
 		//@}
 		
 		//! @name Bindable interface
