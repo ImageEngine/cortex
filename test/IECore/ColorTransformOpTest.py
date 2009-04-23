@@ -75,7 +75,7 @@ class AddOp( ColorTransformOp ) :
 	
 		self.numEnds += 1
 
-class TestPythonOp( unittest.TestCase ) :
+class TestPythonColorTransformOp( unittest.TestCase ) :
 
 	def testParameterDefaults( self ) :
 	
