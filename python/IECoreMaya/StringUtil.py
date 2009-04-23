@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-9, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -51,7 +51,18 @@ def dependencyNodeFromString( s ) :
 	result = maya.OpenMaya.MObject()
 	sl.getDependNode( 0, result )
 	return result
+
+## Utility function to return the parent string when
+# given a UI or DAG node's full path name as a string.
+def parentFromString( s ) :
+	tokens = s.split('|')
+	if len(tokens) > 1 :
+		parent = tokens[-2]
+	else :
+		parent = None
 	
+	return parent
+
 ## Utility function to return an MDagPath when
 # given it's name as a string.
 def dagPathFromString( s ) :
