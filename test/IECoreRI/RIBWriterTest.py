@@ -44,6 +44,8 @@ class RIBWriterTest( unittest.TestCase ) :
 	
 	def test( self ) :
 	
+		self.assertEqual( IECoreRI.RIBWriter.baseTypeName(), "Writer" )
+	
 		cube = IECore.ObjectReader( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 	
 		writer = IECoreRI.RIBWriter( cube, self.outputFileName )
@@ -59,6 +61,7 @@ class RIBWriterTest( unittest.TestCase ) :
 		cube = IECore.ObjectReader( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 	
 		writer = IECoreRI.RIBWriter( cube, self.outputFileName )
+		
 		writer["worldBlock"].setTypedValue( True )
 		writer.write()
 		
