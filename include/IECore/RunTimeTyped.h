@@ -174,8 +174,8 @@ class RunTimeTyped : public RefCounted
 		/// Returns the base type of the given type, or InvalidTypeId if no such base exists.
 		static TypeId baseTypeId( TypeId typeId );
 		
-		/// Returns all bases of the given type, or an empty set if no such bases exist.
-		/// The elemenents are ordered by "distance" from the given TypeId. That is to say, the first
+		/// Returns all bases of the given type, or an empty vector if no such bases exist.
+		/// The elements are ordered by "distance" from the given TypeId. That is to say, the first
 		/// element will be the immediate base class, and the last elemenet will be RunTimeTyped.
 		/// Should not be called during static initialization as it's likely that not all types will
 		/// have been registered at that point, so to do so would yield an incomplete list.
