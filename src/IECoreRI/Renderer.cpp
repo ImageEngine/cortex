@@ -37,6 +37,8 @@
 
 using namespace IECoreRI;
 
+IE_CORE_DEFINERUNTIMETYPED( Renderer );
+
 Renderer::Renderer()
 	:	m_implementation( new RendererImplementation( this ) )
 {

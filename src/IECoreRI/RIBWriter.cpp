@@ -45,6 +45,8 @@ using namespace IECoreRI;
 using namespace std;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( RIBWriter );
+
 const IECore::Writer::WriterDescription<RIBWriter> RIBWriter::g_writerDescription( "rib" );
 
 RIBWriter::RIBWriter()

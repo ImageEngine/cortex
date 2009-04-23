@@ -55,7 +55,7 @@ class RIBWriter : public IECore::Writer
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( RIBWriter, RIBWriterTypeId, Writer )
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( RIBWriter, RIBWriterTypeId, IECore::Writer )
 
 		RIBWriter();
 		RIBWriter( IECore::ObjectPtr object, const std::string &fileName );

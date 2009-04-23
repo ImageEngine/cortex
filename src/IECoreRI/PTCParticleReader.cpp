@@ -60,6 +60,8 @@ using namespace boost;
 using namespace Imath;
 using namespace std;
 
+IE_CORE_DEFINERUNTIMETYPED( PTCParticleReader );
+
 const Reader::ReaderDescription<PTCParticleReader> PTCParticleReader::m_readerDescription( "3Dbake 3DWbake ptc" );
 
 PTCParticleReader::PTCParticleReader( )

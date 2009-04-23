@@ -51,6 +51,8 @@ using namespace IECore;
 using namespace std;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( PTCParticleWriter );
+
 const Writer::WriterDescription<PTCParticleWriter> PTCParticleWriter::m_writerDescription( "3Dbake 3DWbake ptc" );
 
 PTCParticleWriter::PTCParticleWriter( )
