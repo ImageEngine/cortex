@@ -55,11 +55,10 @@ def dependencyNodeFromString( s ) :
 ## Utility function to return the parent string when
 # given a UI or DAG node's full path name as a string.
 def parentFromString( s ) :
+	
 	tokens = s.split('|')
-	if len(tokens) > 1 :
-		parent = tokens[-2]
-	else :
-		parent = None
+	tokens.pop()
+	parent = '|'.join( tokens )
 	
 	return parent
 
