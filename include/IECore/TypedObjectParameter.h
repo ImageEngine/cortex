@@ -106,6 +106,7 @@ class TypedObjectParameter : public ObjectParameter
 
 };
 
+/// \todo Split some of these off into separate files to speed up compilation
 typedef TypedObjectParameter<Renderable> RenderableParameter;
 typedef TypedObjectParameter<StateRenderable> StateRenderableParameter;
 typedef TypedObjectParameter<AttributeState> AttributeStateParameter;
