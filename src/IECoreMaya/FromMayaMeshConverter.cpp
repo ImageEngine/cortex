@@ -56,6 +56,8 @@ using namespace IECore;
 using namespace std;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaMeshConverter );
+
 static const MFn::Type fromTypes[] = { MFn::kMesh, MFn::kMeshData, MFn::kInvalid };
 static const IECore::TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, VisibleRenderableTypeId, PrimitiveTypeId, MeshPrimitiveTypeId, InvalidTypeId };
 

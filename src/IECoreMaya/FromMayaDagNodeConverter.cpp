@@ -38,6 +38,8 @@
 
 using namespace IECoreMaya;
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaDagNodeConverter );
+
 FromMayaDagNodeConverter::FromMayaDagNodeConverter( const std::string &name, const std::string &description, const MDagPath &dagPath )
 	:	FromMayaObjectConverter( name, description, dagPath.node() ), m_dagPath( dagPath )
 {

@@ -52,6 +52,8 @@
 using namespace IECoreMaya;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaParticleConverter );
+
 static const MFn::Type fromTypes[] = { MFn::kParticle, MFn::kInvalid };
 static const IECore::TypeId toTypes[] = { IECore::BlindDataHolderTypeId, IECore::RenderableTypeId, IECore::VisibleRenderableTypeId, IECore::PrimitiveTypeId, IECore::PointsPrimitiveTypeId, IECore::InvalidTypeId };
 

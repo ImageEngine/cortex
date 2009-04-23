@@ -50,6 +50,8 @@ using namespace IECore;
 using namespace std;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaFluidConverter );
+
 FromMayaShapeConverter::Description<FromMayaFluidConverter> FromMayaFluidConverter::m_description( MFn::kFluid, PointsPrimitive::staticTypeId() );
 
 FromMayaFluidConverter::FromMayaFluidConverter( const MObject &object )

@@ -42,6 +42,8 @@
 using namespace IECore;
 using namespace IECoreMaya;
 
+IE_CORE_DEFINERUNTIMETYPED( PlaybackFrameList );
+
 FrameList::Parser< PlaybackFrameList > PlaybackFrameList::g_parserRegistrar;
 
 PlaybackFrameList::PlaybackFrameList( PlaybackFrameList::Range r ) : m_range( r )

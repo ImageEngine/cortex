@@ -52,6 +52,8 @@ using namespace IECoreMaya;
 using namespace IECore;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaCameraConverter );
+
 static const MFn::Type fromTypes[] = { MFn::kCamera, MFn::kInvalid };
 static const IECore::TypeId toTypes[] = { BlindDataHolderTypeId, RenderableTypeId, PreWorldRenderableTypeId, CameraTypeId, InvalidTypeId };
 

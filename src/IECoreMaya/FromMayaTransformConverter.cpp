@@ -45,6 +45,8 @@
 
 using namespace IECoreMaya;
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaTransformConverter );
+
 static const MFn::Type fromTypes[] = { MFn::kTransform };
 static const IECore::TypeId toTypes[] = { IECore::TransformationMatrixdData::staticTypeId() };
 

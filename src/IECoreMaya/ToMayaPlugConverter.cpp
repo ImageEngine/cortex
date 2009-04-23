@@ -53,6 +53,8 @@ using namespace IECoreMaya;
 using namespace IECore;
 using namespace boost;
 
+IE_CORE_DEFINERUNTIMETYPED( ToMayaPlugConverter );
+
 ToMayaPlugConverter::ToMayaPlugConverter( ConstObjectPtr object )
 	:	ToMayaConverter( "ToMayaPlugConverter", "Places values in plugs.", IECore::ObjectTypeId )
 {

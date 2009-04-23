@@ -45,6 +45,8 @@
 
 using namespace IECoreMaya;
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaShapeConverter );
+
 FromMayaShapeConverter::FromMayaShapeConverter( const std::string &name, const std::string &description, const MObject &object )
 	:	FromMayaObjectConverter( name, description, object )
 {

@@ -52,6 +52,8 @@
 using namespace IECoreMaya;
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaImageConverter );
+
 FromMayaImageConverter::FromMayaImageConverter( MImage &image ) : FromMayaConverter( "name", "description" ), m_image( image )
 {
 	m_depthParameter = new BoolParameter(

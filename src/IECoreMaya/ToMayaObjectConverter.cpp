@@ -42,6 +42,8 @@
 using namespace IECoreMaya;
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( ToMayaObjectConverter );
+
 ToMayaObjectConverter::ToMayaObjectConverter(  const std::string &name, const std::string &description, ConstObjectPtr object )
 	:	ToMayaConverter( name, description, IECore::ObjectTypeId )
 {

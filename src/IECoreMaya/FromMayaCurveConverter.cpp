@@ -49,6 +49,8 @@
 using namespace IECoreMaya;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaCurveConverter );
+
 static const MFn::Type fromTypes[] = { MFn::kNurbsCurve, MFn::kNurbsCurveData, MFn::kInvalid };
 static const IECore::TypeId toTypes[] = { IECore::BlindDataHolderTypeId, IECore::RenderableTypeId, IECore::VisibleRenderableTypeId, IECore::PrimitiveTypeId, IECore::CurvesPrimitiveTypeId, IECore::InvalidTypeId };
 

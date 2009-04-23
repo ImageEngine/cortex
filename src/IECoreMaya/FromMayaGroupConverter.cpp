@@ -52,6 +52,8 @@ using namespace Imath;
 static const MFn::Type fromTypes[] = { MFn::kTransform, MFn::kInvalid };
 static const IECore::TypeId toTypes[] = { GroupTypeId, InvalidTypeId };
 
+IE_CORE_DEFINERUNTIMETYPED( FromMayaGroupConverter );
+
 FromMayaDagNodeConverter::Description<FromMayaGroupConverter> FromMayaGroupConverter::m_description( fromTypes, toTypes );
 
 FromMayaGroupConverter::FromMayaGroupConverter( const MDagPath &dagPath )

@@ -55,6 +55,8 @@ using namespace IECore;
 using std::string;
 using std::vector;
 
+IE_CORE_DEFINERUNTIMETYPED( ToMayaImageConverter );
+
 ToMayaImageConverter::ToMayaImageConverter( ConstObjectPtr object )
 	:	ToMayaConverter( "ToMayaImageConverter", "Converts image types.", IECore::ImagePrimitiveTypeId )
 {
