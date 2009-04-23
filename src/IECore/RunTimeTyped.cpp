@@ -144,18 +144,17 @@ TypeId RunTimeTyped::baseTypeId( TypeId typeId )
 				
 const std::vector<TypeId> &RunTimeTyped::baseTypeIds( TypeId typeId )
 {
-	typedef std::map< TypeId, std::vector<TypeId> > BaseTypeIdsMap;
-	static BaseTypeIdsMap *baseTypes = new BaseTypeIdsMap();
+	BaseTypesRegistryMap &baseTypes = completeBaseTypesRegistry();
 	
-	BaseTypeIdsMap::iterator it = baseTypes->find( typeId );
-	if ( it != baseTypes->end() )
+	BaseTypesRegistryMap::iterator it = baseTypes.find( typeId );
+	if ( it != baseTypes.end() )
 	{
 		return it->second;
 	}
 	
-	baseTypes->insert( BaseTypeIdsMap::value_type( typeId, std::vector<TypeId>() ) );
-	it = baseTypes->find( typeId );
-	assert( it != baseTypes->end() );
+	baseTypes.insert( BaseTypesRegistryMap::value_type( typeId, std::vector<TypeId>() ) );
+	it = baseTypes.find( typeId );
+	assert( it != baseTypes.end() );
 	
 	TypeId baseType = baseTypeId( typeId );
 	while ( baseType != InvalidTypeId )
@@ -168,27 +167,26 @@ const std::vector<TypeId> &RunTimeTyped::baseTypeIds( TypeId typeId )
 }
 		
 const std::set<TypeId> &RunTimeTyped::derivedTypeIds( TypeId typeId )
-{
-	static DerivedTypesRegistryMap *derivedTypes = new DerivedTypesRegistryMap();
-	static std::set<TypeId> emptySet;
-
-	assert( derivedTypes );
-	DerivedTypesRegistryMap::iterator it = derivedTypes->find( typeId );
+{	
+	DerivedTypesRegistryMap &derivedTypes = completeDerivedTypesRegistry();
 	
-	if ( it == derivedTypes->end() )
+	assert( derivedTypes );
+	DerivedTypesRegistryMap::iterator it = derivedTypes.find( typeId );
+	
+	if ( it == derivedTypes.end() )
 	{
-		derivedTypes->insert( DerivedTypesRegistryMap::value_type( typeId, std::set<TypeId>() ) );
-		it = derivedTypes->find( typeId );
-		assert( it != derivedTypes->end() );
+		derivedTypes.insert( DerivedTypesRegistryMap::value_type( typeId, std::set<TypeId>() ) );
+		it = derivedTypes.find( typeId );
+		assert( it != derivedTypes.end() );
 		
 		// Walk over the hierarchy of derived types
-		derivedTypeIds( typeId, it->second );
+		derivedTypeIdsWalk( typeId, it->second );
 	}
 	
 	return it->second;	
 }
 
-void RunTimeTyped::derivedTypeIds( TypeId typeId, std::set<TypeId> &typeIds )
+void RunTimeTyped::derivedTypeIdsWalk( TypeId typeId, std::set<TypeId> &typeIds )
 {
 	DerivedTypesRegistryMap &derivedRegistry = derivedTypesRegistry();	
 	DerivedTypesRegistryMap::const_iterator it = derivedRegistry.find( typeId );
@@ -203,6 +201,20 @@ void RunTimeTyped::derivedTypeIds( TypeId typeId, std::set<TypeId> &typeIds )
 		typeIds.insert( *typesIt );
 		
 		// Recurse down into derived types	
-		derivedTypeIds( *typesIt, typeIds );
+		derivedTypeIdsWalk( *typesIt, typeIds );
 	}
+}
+
+RunTimeTyped::BaseTypesRegistryMap &RunTimeTyped::completeBaseTypesRegistry()
+{
+	static BaseTypesRegistryMap *baseTypes = new BaseTypesRegistryMap();
+	assert( baseTypes );
+	return *baseTypes;
+}
+
+RunTimeTyped::DerivedTypesRegistryMap &RunTimeTyped::completeDerivedTypesRegistry()
+{
+	static DerivedTypesRegistryMap *derivedTypes = new DerivedTypesRegistryMap();
+	assert( derivedTypes );
+	return *derivedTypes;
 }

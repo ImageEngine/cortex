@@ -177,9 +177,13 @@ class RunTimeTyped : public RefCounted
 		/// Returns all bases of the given type, or an empty set if no such bases exist.
 		/// The elemenents are ordered by "distance" from the given TypeId. That is to say, the first
 		/// element will be the immediate base class, and the last elemenet will be RunTimeTyped.
+		/// Should not be called during static initialization as it's likely that not all types will
+		/// have been registered at that point, so to do so would yield an incomplete list.
 		static const std::vector<TypeId> &baseTypeIds( TypeId typeId );		
 		
 		/// Returns all derived types of the given type, or an empty set if no such derived types exist.
+		/// Should not be called during static initialization as it's likely that not all types will
+		/// have been registered at that point, so to do so would yield an incomplete list.
 		static const std::set<TypeId> &derivedTypeIds( TypeId typeId );	
 		
 		//@}
@@ -193,12 +197,16 @@ class RunTimeTyped : public RefCounted
 		};
 		
 		typedef std::map< TypeId, TypeId > BaseTypeRegistryMap;
+		typedef std::map< TypeId, std::vector<TypeId> > BaseTypesRegistryMap;
 		typedef std::map< TypeId, std::set< TypeId > > DerivedTypesRegistryMap;		
 		
 		static BaseTypeRegistryMap &baseTypeRegistry();
 		static DerivedTypesRegistryMap &derivedTypesRegistry();
 		
-		static void derivedTypeIds( TypeId typeId, std::set<TypeId> & );	
+		static BaseTypesRegistryMap &completeBaseTypesRegistry();
+		static DerivedTypesRegistryMap &completeDerivedTypesRegistry();
+		
+		static void derivedTypeIdsWalk( TypeId typeId, std::set<TypeId> & );	
 		
 		static void registerType( TypeId derivedTypeId, TypeId baseTypeId );	
 			
