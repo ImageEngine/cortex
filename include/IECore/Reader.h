@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -88,6 +88,10 @@ class Reader : public Op
 		/// available. Extensions are of the form "tif" - ie without a preceding '.'.
 		static void supportedExtensions( std::vector<std::string> &extensions );
 		
+		/// Fills the passed vector with all the extensions for which a Reader of, or inherited from, the given type is
+		/// available. Extensions are of the form "tif" - ie without a preceding '.'.
+		static void supportedExtensions( TypeId typeId, std::vector<std::string> &extensions );
+		
 	protected :
 	
 		/// Definition of a function which can create a Reader when
@@ -104,7 +108,7 @@ class Reader : public Op
 		/// canRead functions are called in a last ditch attempt to find a suitable reader. Typically
 		/// you will not call this function directly to register a reader type - you will instead use
 		/// the registration utility class below.
-		static void registerReader( const std::string &extensions, CanReadFn canRead, CreatorFn creator );
+		static void registerReader( const std::string &extensions, CanReadFn canRead, CreatorFn creator, TypeId typeId );
 	
 		/// This utility class is provided to help with Reader registration. By having a private static
 		/// const instance of one of these in your class, it will call registerReader() for you when
@@ -127,6 +131,7 @@ class Reader : public Op
 		{
 			CreatorFn creator;
 			CanReadFn canRead;
+			TypeId typeId;
 		};
 		typedef std::map<std::string, ReaderFns> ExtensionsToFnsMap;
 		static ExtensionsToFnsMap *extensionsToFns();

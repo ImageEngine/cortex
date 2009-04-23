@@ -57,13 +57,27 @@ static list supportedExtensions()
 	return result;
 }
 
+static list supportedExtensions( TypeId typeId )
+{
+	list result;
+	std::vector<std::string> e;
+	Writer::supportedExtensions( typeId, e );
+	for( unsigned int i=0; i<e.size(); i++ )
+	{
+		result.append( e[i] );
+	}
+	return result;
+}
+
 void bindWriter()
 {
 	typedef class_< Writer , WriterPtr, boost::noncopyable, bases<Op> > WriterPyClass;
 	WriterPyClass ( "Writer", no_init )
 		.def( "write", &Writer::write )
 		.def( "create", &Writer::create ).staticmethod( "create" )
-		.def( "supportedExtensions", &supportedExtensions ).staticmethod( "supportedExtensions" )
+		.def( "supportedExtensions", ( list(*)( ) )&supportedExtensions )
+		.def( "supportedExtensions", ( list(*)( TypeId ) )&supportedExtensions )
+		.staticmethod( "supportedExtensions" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Writer)
 	;
 	INTRUSIVE_PTR_PATCH( Writer, WriterPyClass );

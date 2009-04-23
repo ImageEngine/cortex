@@ -41,8 +41,6 @@
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/filesystem/convenience.hpp"
 
-#include <iostream>
-
 using namespace std;
 using namespace IECore;
 using namespace boost;
@@ -124,8 +122,29 @@ void Reader::supportedExtensions( std::vector<std::string> &extensions )
 	}
 }
 
-void Reader::registerReader( const std::string &extensions, CanReadFn canRead, CreatorFn creator )
+void Reader::supportedExtensions( TypeId typeId, std::vector<std::string> &extensions )
 {
+	extensions.clear();
+	ExtensionsToFnsMap *m = extensionsToFns();
+	assert( m );	
+	
+	const std::set< TypeId > &derivedTypes = RunTimeTyped::derivedTypeIds( typeId );
+	
+	for( ExtensionsToFnsMap::const_iterator it=m->begin(); it!=m->end(); it++ )
+	{
+		if ( it->second.typeId == typeId || std::find( derivedTypes.begin(), derivedTypes.end(), it->second.typeId ) != derivedTypes.end() )
+		{
+			extensions.push_back( it->first.substr( 1 ) );
+		}
+	}
+}
+
+void Reader::registerReader( const std::string &extensions, CanReadFn canRead, CreatorFn creator, TypeId typeId )
+{
+	assert( canRead );
+	assert( creator );
+	assert( typeId != InvalidTypeId );
+	
 	ExtensionsToFnsMap *m = extensionsToFns();
 	assert( m );	
 	vector<string> splitExt;
@@ -133,6 +152,7 @@ void Reader::registerReader( const std::string &extensions, CanReadFn canRead, C
 	ReaderFns r;
 	r.creator = creator;
 	r.canRead = canRead;
+	r.typeId = typeId;
 	for( vector<string>::const_iterator it=splitExt.begin(); it!=splitExt.end(); it++ )
 	{
 		m->insert( ExtensionsToFnsMap::value_type( "." + *it, r ) );

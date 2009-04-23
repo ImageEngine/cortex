@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -43,7 +43,7 @@ class TestReader(unittest.TestCase):
 		for ee in e :
 			self.assert_( type( ee ) is str )
 		
-		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "obj" ]
+		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "obj", "sgi", "bw", "rgba", "rgb", "tdl" ]
 		if withTIFF() :
 			expectedExtensions += [ "tif", "tiff" ]
 		if withJPEG() :
@@ -51,6 +51,21 @@ class TestReader(unittest.TestCase):
 						
 		for ee in expectedExtensions :
 			self.assert_( ee in e )
+		
+		e = Reader.supportedExtensions( TypeId.ImageReader )
+		for ee in e :
+			self.assert_( type( ee ) is str )	
+		expectedImageReaderExtensions = [ "exr", "cin", "dpx", "sgi", "bw", "rgba", "rgb", "tdl" ]
+		if withTIFF() :
+			expectedImageReaderExtensions += [ "tif", "tiff" ]
+		if withJPEG() :
+			expectedImageReaderExtensions += [ "jpg", "jpeg" ]
+						
+		self.assertEqual( set( expectedImageReaderExtensions ), set( e ) )
+			
+		self.assert_( not "pdc" in expectedImageReaderExtensions )
+		self.assert_( not "cob" in expectedImageReaderExtensions )
+		self.assert_( not "obj" in expectedImageReaderExtensions )			
 
 	def test( self ) :
 	

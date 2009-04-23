@@ -43,13 +43,26 @@ using std::string;
 using namespace boost;
 using namespace boost::python;
 
-namespace IECore {
+namespace IECore
+{
 
 static list supportedExtensions()
 {
 	list result;
 	std::vector<std::string> e;
 	Reader::supportedExtensions( e );
+	for( unsigned int i=0; i<e.size(); i++ )
+	{
+		result.append( e[i] );
+	}
+	return result;
+}
+
+static list supportedExtensions( TypeId typeId )
+{
+	list result;
+	std::vector<std::string> e;
+	Reader::supportedExtensions( typeId, e );
 	for( unsigned int i=0; i<e.size(); i++ )
 	{
 		result.append( e[i] );
@@ -64,7 +77,9 @@ void bindReader()
 		.def( "readHeader", &Reader::readHeader )
 		.def( "read", &Reader::read )		
 		.def( "create", &Reader::create ).staticmethod( "create" )
-		.def( "supportedExtensions", &supportedExtensions ).staticmethod( "supportedExtensions" )
+		.def( "supportedExtensions", ( list(*)( ) ) &supportedExtensions ) 
+		.def( "supportedExtensions", ( list(*)( IECore::TypeId ) ) &supportedExtensions )
+		.staticmethod( "supportedExtensions" )
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Reader )
 	;
 	INTRUSIVE_PTR_PATCH( Reader, ReaderPyClass );

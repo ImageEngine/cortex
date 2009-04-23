@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -79,6 +79,10 @@ class Writer : public Op
 		/// available. Extensions are of the form "tif" - ie without a preceding '.'.
 		static void supportedExtensions( std::vector<std::string> &extensions );
 		
+		/// Fills the passed vector with all the extensions for which a Writer of, or inherited from, the given type is
+		/// available. Extensions are of the form "tif" - ie without a preceding '.'.
+		static void supportedExtensions( TypeId typeId, std::vector<std::string> &extensions );
+		
 	protected :
 	
 		Writer( const std::string &name, const std::string &description, TypeId writableType );
@@ -105,7 +109,7 @@ class Writer : public Op
 		/// then the creator function will then be called. Typically
 		/// you will not call this function directly to register a writer type - you will instead use
 		/// the registration utility class below.
-		static void registerWriter( const std::string &extensions, CanWriteFn canWrite, CreatorFn creator );
+		static void registerWriter( const std::string &extensions, CanWriteFn canWrite, CreatorFn creator, TypeId typeId );
 	
 		/// This utility class is provided to help with Writer registration. By having a private static
 		/// const instance of one of these in your class, it will call registerWriter() for you when
@@ -129,6 +133,7 @@ class Writer : public Op
 		{
 			CreatorFn creator;
 			CanWriteFn canWrite;
+			TypeId typeId;
 		};
 		typedef std::multimap<std::string, WriterFns> ExtensionsToFnsMap;
 		static ExtensionsToFnsMap *extensionsToFns();
