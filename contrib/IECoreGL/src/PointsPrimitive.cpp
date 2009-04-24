@@ -367,7 +367,7 @@ struct SortFn
 	const vector<float> &depths;
 };
 
-/// \todo Stick a radix sort in IECore and use that.
+/// \todo Use IECore::RadixSort (might still want to use std::sort for small numbers of points - profile to check this)
 void PointsPrimitive::depthSort() const
 {
 	V3f cameraDirection = Camera::viewDirectionInObjectSpace();
