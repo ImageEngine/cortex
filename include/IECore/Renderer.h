@@ -323,6 +323,8 @@ class Renderer : public RunTimeTyped
 		class Procedural : public RefCounted
 		{
 			public :
+				
+				IE_CORE_DECLAREMEMBERPTR( Procedural );
 							
 				Procedural();
 				virtual ~Procedural();
