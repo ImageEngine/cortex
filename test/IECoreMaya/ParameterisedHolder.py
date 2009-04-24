@@ -52,15 +52,15 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		
 		h.setParameterised( p )
 		
-		p.parameters().filename = "testValue"		
-		h.setNodeValue( p.parameters().filename )
-		pl = h.parameterPlug( p.parameters().filename )
+		p.parameters()["filename"] = "testValue"		
+		h.setNodeValue( p.parameters()["filename"] )
+		pl = h.parameterPlug( p.parameters()["filename"] )
 		v = IECoreMaya.FromMayaPlugConverter.create( pl, IECore.TypeId.StringData ).convert()
 		self.assertEqual( v.value, "testValue" )
 				
 		cmds.setAttr( pl.name(), "testValue2", typ="string" )
-		h.setParameterisedValue( p.parameters().filename )
-		self.assertEqual( p.parameters().filename.getValue().value, "testValue2" )
+		h.setParameterisedValue( p.parameters()["filename"] )
+		self.assertEqual( p.parameters()["filename"].getValue().value, "testValue2" )
 		
 					
 	def testParameterisedHolderSetReference( self ):	
