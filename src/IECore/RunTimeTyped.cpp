@@ -98,11 +98,13 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const std::string &derive
 {
 	BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();
 #ifndef NDEBUG
-	BaseTypeRegistryMap::const_iterator it = baseRegistry.find( derivedTypeId );
-	if ( it != baseRegistry.end() )
 	{
-		assert( it->second == baseTypeId );
-	}	
+		BaseTypeRegistryMap::const_iterator it = baseRegistry.find( derivedTypeId );
+		if ( it != baseRegistry.end() )
+		{
+			assert( it->second == baseTypeId );
+		}	
+	}
 #endif	
 	
 	baseRegistry[ derivedTypeId ] = baseTypeId;
@@ -113,10 +115,12 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const std::string &derive
 	/// Put in id->name map
 	TypeIdsToTypeNamesMap &idsToNames = typeIdsToTypeNames();
 #ifndef NDEBUG
-	TypeIdsToTypeNamesMap::const_iterator it = idsToNames.find( derivedTypeId );
-	if ( it != baseRegistry.end() )
 	{
-		assert( it->second == derivedTypeName );
+		TypeIdsToTypeNamesMap::const_iterator it = idsToNames.find( derivedTypeId );
+		if ( it != idsToNames.end() )
+		{
+			assert( it->second == derivedTypeName );
+		}
 	}	
 #endif
 	idsToNames[ derivedTypeId ] = derivedTypeName;
@@ -124,11 +128,13 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const std::string &derive
 	/// Put in name->id map
 	TypeNamesToTypeIdsMap &namesToIds = typeNamesToTypeIds();
 #ifndef NDEBUG
-	TypeNamesToTypeIdsMap::const_iterator it = namesToIds.find( derivedTypeName );
-	if ( it != baseRegistry.end() )
 	{
-		assert( it->second == derivedTypeId );
-	}	
+		TypeNamesToTypeIdsMap::const_iterator it = namesToIds.find( derivedTypeName );
+		if ( it != namesToIds.end() )
+		{
+			assert( it->second == derivedTypeId );
+		}	
+	}
 #endif
 	namesToIds[ derivedTypeName ] = derivedTypeId;
 	
@@ -191,9 +197,7 @@ const std::vector<TypeId> &RunTimeTyped::baseTypeIds( TypeId typeId )
 		
 const std::set<TypeId> &RunTimeTyped::derivedTypeIds( TypeId typeId )
 {	
-	DerivedTypesRegistryMap &derivedTypes = completeDerivedTypesRegistry();
-	
-	assert( derivedTypes );
+	DerivedTypesRegistryMap &derivedTypes = completeDerivedTypesRegistry();	
 	DerivedTypesRegistryMap::iterator it = derivedTypes.find( typeId );
 	
 	if ( it == derivedTypes.end() )
