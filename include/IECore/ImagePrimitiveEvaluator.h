@@ -58,6 +58,8 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 			
 			public:
 				
+				IE_CORE_DECLAREMEMBERPTR( Result );
+				
 				Result( const Imath::Box3f &bound, const Imath::Box2i &dataWindow );
 				virtual ~Result();
 	

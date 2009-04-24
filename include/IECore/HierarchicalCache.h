@@ -71,6 +71,8 @@ class HierarchicalCache : public RefCounted
 		typedef IndexedIO::EntryID HeaderHandle;
 		typedef IndexedIO::EntryID AttributeHandle;
 		
+		IE_CORE_DECLAREMEMBERPTR( HierarchicalCache );
+
 		///Open the cache, using the specified open mode
 		HierarchicalCache( const std::string &filename, IndexedIO::OpenMode mode );
 

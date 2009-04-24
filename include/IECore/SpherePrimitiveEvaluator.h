@@ -59,6 +59,8 @@ class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 			
 			public:
 			
+				IE_CORE_DECLAREMEMBERPTR( Result );
+			
 				Result();
 	
 				Imath::V3f point() const;								

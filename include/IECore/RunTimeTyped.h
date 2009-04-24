@@ -185,7 +185,8 @@ class RunTimeTyped : public RefCounted
 		/// Should not be called during static initialization as it's likely that not all types will
 		/// have been registered at that point, so to do so would yield an incomplete list.
 		static const std::set<TypeId> &derivedTypeIds( TypeId typeId );	
-		
+		/// A typedef for the class this class derives from. All RunTimeTyped classes define this typedef.
+		typedef RefCounted BaseClass;
 		//@}
 		
 	protected :

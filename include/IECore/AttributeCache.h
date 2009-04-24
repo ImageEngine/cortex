@@ -57,6 +57,8 @@ class AttributeCache : public RefCounted
 		typedef std::string HeaderHandle;
 		typedef std::string AttributeHandle;
 		
+		IE_CORE_DECLAREMEMBERPTR( AttributeCache )
+		
 		///Open the cache, using the specified open mode
 		AttributeCache( const std::string &filename, IndexedIO::OpenMode mode );
 		

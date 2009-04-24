@@ -58,6 +58,8 @@ class MessageHandler : public RefCounted
 
 	public :
 	
+		IE_CORE_DECLAREMEMBERPTR( MessageHandler );
+	
 		enum Level
 		{
 			Error = 0,

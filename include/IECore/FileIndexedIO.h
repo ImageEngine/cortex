@@ -55,6 +55,8 @@ class FileIndexedIO : public IndexedIOInterface
 {
 	public:
 		
+		IE_CORE_DECLAREMEMBERPTR( FileIndexedIO );
+		
 		static IndexedIOInterfacePtr create(const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
 		
 		static bool canRead( const std::string &path );

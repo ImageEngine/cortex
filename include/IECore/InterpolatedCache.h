@@ -55,6 +55,8 @@ class InterpolatedCache : public RefCounted
 		typedef IECore::AttributeCache::ObjectHandle ObjectHandle;
 		typedef IECore::AttributeCache::HeaderHandle HeaderHandle;
 		typedef IECore::AttributeCache::AttributeHandle AttributeHandle;
+
+		IE_CORE_DECLAREMEMBERPTR( InterpolatedCache );
 	
 		enum Interpolation
 		{ 

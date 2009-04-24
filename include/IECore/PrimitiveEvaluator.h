@@ -65,6 +65,9 @@ class PrimitiveEvaluator : public RunTimeTyped
 		class Result : public RefCounted
 		{
 			public:
+			
+				IE_CORE_DECLAREMEMBERPTR( Result );
+			
 				virtual ~Result();
 				
 				/// Returns the point computed by the query.

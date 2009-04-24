@@ -59,6 +59,9 @@ IE_CORE_FORWARDDECLARE( IndexedIOInterface );
 class IndexedIOInterface : public RefCounted, private boost::noncopyable
 {
 	public:	
+	
+		IE_CORE_DECLAREMEMBERPTR( IndexedIOInterface );
+	
 		typedef IndexedIOInterfacePtr (*CreatorFn)(const std::string &, const IndexedIO::EntryID &, IndexedIO::OpenMode );
 	
 		/// Create an instance of a subclass which is able to open the IndexedIO structure found at "path".

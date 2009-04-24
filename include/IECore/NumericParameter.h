@@ -55,6 +55,7 @@ class NumericParameter : public Parameter
 		IE_CORE_DECLAREPTR( ObjectType );
 		typedef std::pair<std::string, T> Preset;
 		typedef std::vector<Preset> PresetsContainer;
+		typedef Parameter BaseClass;
 	
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue = T(),
 			T minValue = Imath::limits<T>::min(), T maxValue = Imath::limits<T>::max(),
