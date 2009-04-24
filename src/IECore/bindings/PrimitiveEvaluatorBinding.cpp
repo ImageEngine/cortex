@@ -37,7 +37,6 @@
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/bindings/PrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 
 using namespace IECore;
 using namespace boost::python;
@@ -125,16 +124,14 @@ struct PrimitiveEvaluatorHelper
 };
 
 void bindPrimitiveEvaluator()
-{
-	typedef class_< PrimitiveEvaluator, PrimitiveEvaluatorPtr, bases< RunTimeTyped >, boost::noncopyable > PrimitiveEvaluatorPyClass;
-	
+{	
 	list (*intersectionPoints)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &) = &PrimitiveEvaluatorHelper::intersectionPoints;
 	list (*intersectionPointsMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, float) = &PrimitiveEvaluatorHelper::intersectionPoints;	
 	
 	bool (*intersectionPoint)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, const PrimitiveEvaluator::ResultPtr &) = &PrimitiveEvaluatorHelper::intersectionPoint;
 	bool (*intersectionPointMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, const PrimitiveEvaluator::ResultPtr &, float ) = &PrimitiveEvaluatorHelper::intersectionPointMaxDist;	
 	
-	object p = PrimitiveEvaluatorPyClass ( "PrimitiveEvaluator", no_init )
+	object p = RunTimeTypedClass<PrimitiveEvaluator>()
 		.def( "create", &PrimitiveEvaluatorHelper::create ).staticmethod("create")
 		.def( "createResult", &PrimitiveEvaluator::createResult )
 		.def( "validateResult", &PrimitiveEvaluator::validateResult )	
@@ -149,16 +146,11 @@ void bindPrimitiveEvaluator()
 		.def( "volume", &PrimitiveEvaluator::volume )
 		.def( "centerOfGravity", &PrimitiveEvaluator::centerOfGravity )
 		.def( "surfaceArea", &PrimitiveEvaluator::surfaceArea )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(PrimitiveEvaluator)
 	;
-	INTRUSIVE_PTR_PATCH( PrimitiveEvaluator, PrimitiveEvaluatorPyClass );
-	implicitly_convertible<PrimitiveEvaluatorPtr, RunTimeTypedPtr>();
 	
 	{
 		scope ps( p );
-		typedef class_< PrimitiveEvaluator::Result, PrimitiveEvaluator::ResultPtr, bases< RefCounted >, boost::noncopyable > ResultPyClass;
-		
-		ResultPyClass( "Result", no_init )
+		RefCountedClass<PrimitiveEvaluator::Result, RefCounted>( "Result" )
 			.def( "point", &PrimitiveEvaluator::Result::point )
 			.def( "normal", &PrimitiveEvaluator::Result::normal )			
 			.def( "uv", &PrimitiveEvaluator::Result::uv )			
@@ -172,8 +164,6 @@ void bindPrimitiveEvaluator()
 			.def( "halfPrimVar", &PrimitiveEvaluator::Result::halfPrimVar )								
 		;
 	
-		INTRUSIVE_PTR_PATCH( PrimitiveEvaluator::Result, ResultPyClass );
-		implicitly_convertible<PrimitiveEvaluator::ResultPtr, RefCountedPtr>();	
 	}
 }
 

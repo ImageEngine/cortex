@@ -41,9 +41,8 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/bindings/RendererBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost::python;
 using namespace boost;
@@ -282,8 +281,7 @@ static void command( Renderer &r, const std::string &name, const dict &parameter
 
 void bindRenderer()
 {
-	typedef class_< Renderer, boost::noncopyable, RendererPtr, bases< RunTimeTyped > > RendererPyClass;
-	scope rendererScope = RendererPyClass("Renderer", "An abstract class to define a renderer", no_init)
+	scope rendererScope =  RunTimeTypedClass<Renderer>( "An abstract class to define a renderer" )
 		.def("setOption", &Renderer::setOption)
 		.def("getOption", &getOption, "Returns a copy of the internal option data." )
 
@@ -332,25 +330,13 @@ void bindRenderer()
 
 		.def("command", &command)
 		
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Renderer)		
 	;
-
-	INTRUSIVE_PTR_PATCH( Renderer, RendererPyClass );
-	implicitly_convertible<RendererPtr, RunTimeTypedPtr>();
 	
-	typedef class_< Renderer::Procedural, ProceduralWrapPtr, boost::noncopyable, bases<RefCounted> > ProceduralPyClass;
-	ProceduralPyClass( "Procedural" )
+	RefCountedClass<Renderer::Procedural, RefCounted, ProceduralWrapPtr>( "Procedural" )
+		.def( init<>() )
 		.def( "bound", &Renderer::Procedural::bound )
 		.def( "render", &Renderer::Procedural::render )
 	;
-	
-	WrapperToPython<Renderer::ProceduralPtr>();
-
-	INTRUSIVE_PTR_PATCH( Renderer::Procedural, ProceduralPyClass );
-	
-	implicitly_convertible<Renderer::ProceduralPtr, RefCountedPtr>();
-	implicitly_convertible<Renderer::ProceduralPtr, Renderer::ConstProceduralPtr>();
-	implicitly_convertible<ProceduralWrapPtr, Renderer::ProceduralPtr>();
 	
 }
 	

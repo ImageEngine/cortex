@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECoreGL/ColorTexture.h"
 #include "IECoreGL/bindings/ColorTextureBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,15 +47,11 @@ namespace IECoreGL
 
 void bindColorTexture()
 {
-	typedef class_< ColorTexture, ColorTexturePtr, boost::noncopyable, bases<Texture> > ColorTexturePyClass;
-	ColorTexturePyClass( "ColorTexture", init<unsigned int, unsigned int>() )
+	IECore::RunTimeTypedClass<ColorTexture>()
+		.def( init<unsigned int, unsigned int>() )
 		.def( init<unsigned int, unsigned int, IECore::ConstDataPtr, IECore::ConstDataPtr, IECore::ConstDataPtr, IECore::ConstDataPtr>() )
 		.def( init<IECore::ImagePrimitivePtr>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ColorTexture )
 	;
-
-	INTRUSIVE_PTR_PATCH( ColorTexture, ColorTexturePyClass );
-	implicitly_convertible<ColorTexturePtr, TexturePtr>();
 }
 	
 }

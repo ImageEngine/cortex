@@ -40,7 +40,6 @@
 #include "datetime.h"
 
 #include "IECore/DateTimeData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
@@ -184,20 +183,13 @@ void bindDateTimeData()
 	ptime_from_python_datetime();
 	to_python_converter<posix_time::ptime, ptime_to_python > ();
 
-	typedef class_< DateTimeData, DateTimeDataPtr, noncopyable, bases<Data> > DateTimeDataPyClass;
-	DateTimeDataPyClass( "DateTimeData", no_init )
+	RunTimeTypedClass<DateTimeData>()
 		.def( init<>() )
 		.def( init<const DateTimeData::ValueType &>() )
 		.add_property( "value", make_function( &getValue, return_value_policy<copy_const_reference>() ), &setValue )
 		.def( "__repr__", &repr<DateTimeData> )
 		.def( "__str__", &str<DateTimeData> )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( DateTimeData );
 	;
-
-	INTRUSIVE_PTR_PATCH( DateTimeData, DateTimeDataPyClass );
-
-	implicitly_convertible<DateTimeDataPtr, DataPtr>();
-	implicitly_convertible<DateTimeDataPtr, ConstDateTimeDataPtr >();
 }
 
 } // namespace IECore

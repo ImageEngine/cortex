@@ -36,7 +36,6 @@
 
 #include "IECore/Writer.h"
 #include "IECore/Object.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -71,16 +70,13 @@ static list supportedExtensions( TypeId typeId )
 
 void bindWriter()
 {
-	typedef class_< Writer , WriterPtr, boost::noncopyable, bases<Op> > WriterPyClass;
-	WriterPyClass ( "Writer", no_init )
+	RunTimeTypedClass<Writer>()
 		.def( "write", &Writer::write )
 		.def( "create", &Writer::create ).staticmethod( "create" )
 		.def( "supportedExtensions", ( list(*)( ) )&supportedExtensions )
 		.def( "supportedExtensions", ( list(*)( TypeId ) )&supportedExtensions )
 		.staticmethod( "supportedExtensions" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Writer)
 	;
-	INTRUSIVE_PTR_PATCH( Writer, WriterPyClass );
 }
 
 } // namespace IECore

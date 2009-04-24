@@ -36,10 +36,9 @@
 
 #include "IECore/Exception.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
-
 #include "IECore/ImplicitSurfaceFunction.h"
+#include "IECore/bindings/Wrapper.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 
 using namespace boost;
@@ -84,16 +83,10 @@ class ImplicitWrap :
 template<typename T>
 void bindImplicit( const char *name )
 {
-	typedef class_< T, typename ImplicitWrap<T>::Ptr, bases<RefCounted>, boost::noncopyable > ImplicitPyClass;
-
-	ImplicitPyClass( name, no_init )
+	RefCountedClass<T, RefCounted, typename ImplicitWrap<T>::Ptr >( name )
 		.def( init<> () )
 		.def( "getValue", pure_virtual( &T::getValue ) )		
 	;
-	WrapperToPython< typename ImplicitWrap<T>::Ptr >();
-	INTRUSIVE_PTR_PATCH_TEMPLATE( T, ImplicitPyClass );
-	implicitly_convertible< typename ImplicitWrap<T>::Ptr, typename T::Ptr >();
-	implicitly_convertible< typename T::Ptr, RefCountedPtr>();
 }
 
 void bindImplicitSurfaceFunction()

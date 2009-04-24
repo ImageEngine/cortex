@@ -37,7 +37,6 @@
 
 #include "IECore/UVDistortOp.h"
 #include "IECore/bindings/UVDistortOpBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,14 +47,10 @@ namespace IECore
 void bindUVDistortOp()
 {
 	
-	typedef class_<UVDistortOp, UVDistortOpPtr, boost::noncopyable, bases<WarpOp> > UVDistortOpPyClass;
-	UVDistortOpPyClass( "UVDistortOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( UVDistortOp )
+	RunTimeTypedClass<UVDistortOp>()
+		.def( init<>() )
 	;
 	
-	INTRUSIVE_PTR_PATCH( UVDistortOp, UVDistortOpPyClass );
-	implicitly_convertible<UVDistortOpPtr, WarpOpPtr>();	
-
 }
 
 } // namespace IECore

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/bindings/ShaderLoaderBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 
@@ -46,16 +46,13 @@ namespace IECoreGL
 
 void bindShaderLoader()
 {
-	typedef class_< ShaderLoader, ShaderLoaderPtr, boost::noncopyable, bases< IECore::RefCounted > > ShaderLoaderPyClass;
-	ShaderLoaderPyClass( "ShaderLoader", init<const IECore::SearchPath &>() )
+	IECore::RefCountedClass<ShaderLoader, IECore::RefCounted>( "ShaderLoader" )
+		.def( init<const IECore::SearchPath &>() )
 		.def( init<const IECore::SearchPath &, const IECore::SearchPath *>() )
 		.def( "load", &ShaderLoader::load )
 		.def( "clear", &ShaderLoader::clear )
 		.def( "defaultShaderLoader", &ShaderLoader::defaultShaderLoader ).staticmethod( "defaultShaderLoader" )
 	;
-
-	INTRUSIVE_PTR_PATCH( ShaderLoader, ShaderLoaderPyClass );
-	implicitly_convertible<ShaderLoaderPtr, IECore::RefCountedPtr>();
 }
 	
 }

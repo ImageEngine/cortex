@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,6 @@
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/bindings/ShaderBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -61,8 +60,8 @@ boost::python::list parameterNames( const Shader &s )
 
 void bindShader()
 {
-	typedef class_< Shader, ShaderPtr, boost::noncopyable, bases<Bindable> > ShaderPyClass;
-	ShaderPyClass( "Shader", init<const std::string &, const std::string &>() )
+	IECore::RunTimeTypedClass<Shader>()
+		.def( init<const std::string &, const std::string &>() )
 		.def( "parameterNames", &parameterNames )
 		.def( "parameterIndex", &Shader::parameterIndex )
 		.def( "hasParameter", &Shader::hasParameter )
@@ -81,11 +80,7 @@ void bindShader()
 		.def( "constant", &Shader::constant ).staticmethod( "constant" )
 		.def( "facingRatio", &Shader::facingRatio ).staticmethod( "facingRatio" )
 		.def( self==self )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Shader )
 	;
-
-	INTRUSIVE_PTR_PATCH( Shader, ShaderPyClass );
-	implicitly_convertible<ShaderPtr, BindablePtr>();
 }
 	
 }

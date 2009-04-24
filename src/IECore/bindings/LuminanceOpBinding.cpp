@@ -36,7 +36,6 @@
 
 #include "IECore/LuminanceOp.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -47,14 +46,9 @@ namespace IECore
 
 void bindLuminanceOp()
 {
-	typedef class_< LuminanceOp, LuminanceOpPtr, boost::noncopyable, bases<IECore::PrimitiveOp> > LuminanceOpPyClass;
-	LuminanceOpPyClass( "LuminanceOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(LuminanceOp)
-	;
-	
-	INTRUSIVE_PTR_PATCH( LuminanceOp, LuminanceOpPyClass );
-	implicitly_convertible<LuminanceOpPtr, PrimitiveOpPtr>();	
-
+	RunTimeTypedClass<LuminanceOp>()
+		.def( init<>() )
+	;	
 }
 
 } // namespace IECore

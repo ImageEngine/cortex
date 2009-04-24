@@ -41,10 +41,9 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FrameListBinding.h"
 #include "IECore/bindings/ParameterBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost::python;
 
@@ -102,8 +101,7 @@ void bindFrameListParameter()
 {	
 	using boost::python::arg;
 
-	typedef class_< FrameListParameter, FrameListParameterWrap::Ptr, boost::noncopyable, bases< StringParameter > > FrameListParameterPyClass;
-	FrameListParameterPyClass ( "FrameListParameter", no_init )
+	RunTimeTypedClass<FrameListParameter, FrameListParameterWrap::Ptr>()
 		.def( 
 			init< const std::string &, const std::string &, object, boost::python::optional< bool, const dict &, bool, CompoundObjectPtr > >
 			( 
@@ -121,13 +119,8 @@ void bindFrameListParameter()
 		.def( "getFrameListValue", &FrameListParameter::getFrameListValue )	
 		.def( "setFrameListValue", &FrameListParameter::setFrameListValue )	
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FrameListParameter )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FrameListParameter )
 	;
 
-	WrapperToPython< FrameListParameterWrap::Ptr >();	
-	INTRUSIVE_PTR_PATCH( FrameListParameter, FrameListParameterPyClass );
-	implicitly_convertible<FrameListParameterWrap::Ptr, FrameListParameterPtr>();
-	implicitly_convertible<FrameListParameterPtr, StringParameterPtr>();
 }
 
 }

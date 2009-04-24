@@ -36,7 +36,6 @@
 #include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECore/DisplayDriverServer.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -48,13 +47,10 @@ void bindDisplayDriverServer()
 {
 	using boost::python::arg;
 
-	typedef class_< DisplayDriverServer, DisplayDriverServerPtr, boost::noncopyable, bases<RunTimeTyped> > DisplayDriverServerPyClass;
-	DisplayDriverServerPyClass( "DisplayDriverServer", no_init )
+	RunTimeTypedClass<DisplayDriverServer>()
 		.def( init< int >( ( arg( "portNumber" ) ) ) )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(DisplayDriverServer)
 	;
-	INTRUSIVE_PTR_PATCH( DisplayDriverServer, DisplayDriverServerPyClass );
-	implicitly_convertible<DisplayDriverServerPtr, RunTimeTypedPtr>();
+
 }
 
 } // namespace IECore

@@ -34,8 +34,8 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/MarchingCubes.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 
@@ -59,16 +59,11 @@ struct MarchingCubesHelper
 template<typename T>
 void bindMarchingCubes( const char *name )
 {
-	typedef class_< T, typename T::Ptr, bases<RefCounted>, boost::noncopyable > MarchingCubesPyClass;
-	
-	MarchingCubesPyClass( name, no_init )
+	RefCountedClass<T, RefCounted>( name )
 		.def( init< typename T::ImplicitFnType::Ptr, typename T::MeshBuilderType::Ptr > () )
 		.def( "march", &MarchingCubesHelper<T>::march1 )
 		.def( "march", &MarchingCubesHelper<T>::march2 )				
 	;
-	
-	INTRUSIVE_PTR_PATCH_TEMPLATE( T, MarchingCubesPyClass );
-	implicitly_convertible< typename T::Ptr, RefCountedPtr>();	
 }
 
 void bindMarchingCubes()

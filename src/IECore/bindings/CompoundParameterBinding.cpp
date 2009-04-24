@@ -37,10 +37,8 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/ParameterBinding.h"
 #include "IECore/bindings/Wrapper.h"
-#include "IECore/bindings/WrapperToPython.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -154,8 +152,7 @@ void bindCompoundParameter()
 {
 	using boost::python::arg ;
 	
-	typedef class_< CompoundParameter, CompoundParameterWrap::Ptr, boost::noncopyable, bases<Parameter> > CompoundParameterPyClass;
-	CompoundParameterPyClass( "CompoundParameter", no_init )
+	RunTimeTypedClass<CompoundParameter, CompoundParameterWrap::Ptr>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional<const list &, CompoundObjectPtr > >
 			( 
@@ -182,14 +179,7 @@ void bindCompoundParameter()
 		.def( "removeParameter", (void (CompoundParameter::*)(ParameterPtr)) &CompoundParameter::removeParameter )
 		.def( "removeParameter", (void (CompoundParameter::*)(const std::string&)) &CompoundParameter::removeParameter )				
 		.def( "parameter", (ParameterPtr (CompoundParameter::*)(const std::string&)) &CompoundParameter::parameter<Parameter> )				
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( CompoundParameter )
 	;
-
-	WrapperToPython< CompoundParameterPtr >();
-
-	INTRUSIVE_PTR_PATCH( CompoundParameter, CompoundParameterPyClass );
-	implicitly_convertible<CompoundParameterPtr, ParameterPtr>();
-	implicitly_convertible<CompoundParameterPtr, ConstCompoundParameterPtr>();
 
 }
 

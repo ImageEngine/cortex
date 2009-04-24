@@ -42,7 +42,6 @@
 #include "OpenEXR/halfLimits.h"
 
 #include "IECore/SimpleTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
@@ -319,21 +318,18 @@ struct TypedDataFromType<BoolData>
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<class T>
-static class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > bindSimpleData()
+static RunTimeTypedClass<T> bindSimpleData()
 {
-	string typeName = T::staticTypeName();
-	typedef class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > ThisPyClass;
-	ThisPyClass result( typeName.c_str(), no_init );
+	TypedDataFromType<T>();
+	
+	RunTimeTypedClass<T> result;
 	result.def( "__init__", make_constructor( &ConstructHelper<T>::construct ), "Construct with no specified value." );
 	result.def( "__init__", make_constructor( &constructWithValue<T> ), "Construct with the specified value." );
 	result.def( "__str__", &str<T> );
 	result.def( "__repr__", &repr<T> );
 	result.add_property( "value",	&getValue<T>,
 									&setValue<T>, "The value contained by the object.");
-	result.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(T);									
-	INTRUSIVE_PTR_PATCH( T, typename ThisPyClass );
-	
-	TypedDataFromType<T>();
+
 
 	return result;
 }
@@ -352,133 +348,98 @@ static void bindNumericMethods( class_<T, typename T::Ptr, boost::noncopyable, b
 
 void bindAllSimpleTypedData()
 {
-	class_< StringData, StringDataPtr, boost::noncopyable, bases<Data> > sdc = bindSimpleData<StringData>();
+	RunTimeTypedClass<StringData> sdc = bindSimpleData<StringData>();
 	sdc.def("__cmp__", &cmp<StringData> );
-	implicitly_convertible<StringDataPtr, DataPtr>();
 
 	bindSimpleData<BoolData>();
-	implicitly_convertible<BoolDataPtr, DataPtr>();
 	
-	class_< IntData, IntDataPtr, boost::noncopyable, bases<Data> > idc = bindSimpleData<IntData>();
+	RunTimeTypedClass<IntData> idc = bindSimpleData<IntData>();
 	bindNumericMethods( idc );
 	idc.def( "__int__", &getValue<IntData> );
-	implicitly_convertible<IntDataPtr, DataPtr>();
 	
-	class_< UIntData, UIntDataPtr, boost::noncopyable, bases<Data> > uidc = bindSimpleData<UIntData>();
+	RunTimeTypedClass<UIntData> uidc = bindSimpleData<UIntData>();
 	bindNumericMethods( uidc );
 	uidc.def( "__long__", &getValue<UIntData> );
-	implicitly_convertible<UIntDataPtr, DataPtr>();
 	
-	class_< FloatData, FloatDataPtr, boost::noncopyable, bases<Data> > fdc = bindSimpleData<FloatData>();
+	RunTimeTypedClass<FloatData > fdc = bindSimpleData<FloatData>();
 	bindNumericMethods( fdc );
 	fdc.def( "__float__", &getValue<FloatData> );
-	implicitly_convertible<FloatDataPtr, DataPtr>();
 	
-	class_< DoubleData, DoubleDataPtr, boost::noncopyable, bases<Data> > ddc = bindSimpleData<DoubleData>();
+	RunTimeTypedClass<DoubleData> ddc = bindSimpleData<DoubleData>();
 	bindNumericMethods( ddc );
 	ddc.def( "__float__", &getValue<DoubleData> );
-	implicitly_convertible<DoubleDataPtr, DataPtr>();
 	
-	class_< CharData, CharDataPtr, boost::noncopyable, bases<Data> > cdc = bindSimpleData<CharData>();
+	RunTimeTypedClass<CharData> cdc = bindSimpleData<CharData>();
 	bindNumericMethods( cdc );
-	implicitly_convertible<CharDataPtr, DataPtr>();
 	
-	class_< UCharData, UCharDataPtr, boost::noncopyable, bases<Data> > ucdc = bindSimpleData<UCharData>();
+	RunTimeTypedClass<UCharData> ucdc = bindSimpleData<UCharData>();
 	bindNumericMethods( ucdc );
 	ucdc.def( "__int__", &getValue<UCharData> );
 	ucdc.def( "__chr__", &getValue<UCharData> );
-	implicitly_convertible<UCharDataPtr, DataPtr>();
 	
-	class_< HalfData, HalfDataPtr, boost::noncopyable, bases<Data> > hdc = bindSimpleData<HalfData>();
+	RunTimeTypedClass<HalfData> hdc = bindSimpleData<HalfData>();
 	bindNumericMethods( hdc );
 	hdc.def( "__float__", &getValue<HalfData> );
-	implicitly_convertible<HalfDataPtr, DataPtr>();
 	
-	class_< ShortData, ShortDataPtr, boost::noncopyable, bases<Data> > shdc = bindSimpleData<ShortData>();
+	RunTimeTypedClass<ShortData> shdc = bindSimpleData<ShortData>();
 	bindNumericMethods( shdc );
 	shdc.def( "__int__", &getValue<ShortData> );
-	implicitly_convertible<ShortDataPtr, DataPtr>();
 	
-	class_< UShortData, UShortDataPtr, boost::noncopyable, bases<Data> > ushdc = bindSimpleData<UShortData>();
+	RunTimeTypedClass<UShortData> ushdc = bindSimpleData<UShortData>();
 	bindNumericMethods( ushdc );
 	ushdc.def( "__int__", &getValue<UShortData> );
-	implicitly_convertible<UShortDataPtr, DataPtr>();
 	
-	class_< Int64Data, Int64DataPtr, boost::noncopyable, bases<Data> > i64dc = bindSimpleData<Int64Data>();
+	RunTimeTypedClass<Int64Data> i64dc = bindSimpleData<Int64Data>();
 	bindNumericMethods( i64dc );
 	i64dc.def( "__long__", &getValue<Int64Data> );
-	implicitly_convertible<Int64DataPtr, DataPtr>();
 	
-	class_< UInt64Data, UInt64DataPtr, boost::noncopyable, bases<Data> > ui64dc = bindSimpleData<UInt64Data>();
+	RunTimeTypedClass<UInt64Data> ui64dc = bindSimpleData<UInt64Data>();
 	bindNumericMethods( ui64dc );
 	ui64dc.def( "__long__", &getValue<UInt64Data> );
-	implicitly_convertible<UInt64DataPtr, DataPtr>();	
 
 	bindSimpleData<V2iData>();
-	implicitly_convertible<V2iDataPtr, DataPtr>();
 
 	bindSimpleData<V3iData>();
-	implicitly_convertible<V3iDataPtr, DataPtr>();
 
 	bindSimpleData<V2fData>();
-	implicitly_convertible<V2fDataPtr, DataPtr>();
 	
 	bindSimpleData<V3fData>();
-	implicitly_convertible<V3fDataPtr, DataPtr>();
 	
 	bindSimpleData<V2dData>();
-	implicitly_convertible<V2dDataPtr, DataPtr>();
 	
 	bindSimpleData<V3dData>();
-	implicitly_convertible<V3dDataPtr, DataPtr>();
 
 	bindSimpleData<Box2iData>();
-	implicitly_convertible<Box2iDataPtr, DataPtr>();
 	
 	bindSimpleData<Box3iData>();
-	implicitly_convertible<Box3iDataPtr, DataPtr>();
 	
 	bindSimpleData<Box2fData>();
-	implicitly_convertible<Box2fDataPtr, DataPtr>();
 	
 	bindSimpleData<Box3fData>();
-	implicitly_convertible<Box3fDataPtr, DataPtr>();
 	
 	bindSimpleData<Box2dData>();
-	implicitly_convertible<Box2dDataPtr, DataPtr>();
 	
 	bindSimpleData<Box3dData>();
-	implicitly_convertible<Box3dDataPtr, DataPtr>();
 
 	bindSimpleData<M33fData>();
-	implicitly_convertible<M33fDataPtr, DataPtr>();
 	
 	bindSimpleData<M33dData>();
-	implicitly_convertible<M33dDataPtr, DataPtr>();
 	
 	bindSimpleData<M44fData>();
-	implicitly_convertible<M44fDataPtr, DataPtr>();
 	
 	bindSimpleData<M44dData>();
-	implicitly_convertible<M44dDataPtr, DataPtr>();
 	
 	bindSimpleData<QuatfData>();
-	implicitly_convertible<QuatfDataPtr, DataPtr>();
 	
 	bindSimpleData<QuatdData>();
-	implicitly_convertible<QuatdDataPtr, DataPtr>();
 	
 	bindSimpleData<Color3fData>();
-	implicitly_convertible<Color3fDataPtr, DataPtr>();
 	
 	bindSimpleData<Color3dData>();
-	implicitly_convertible<Color3dDataPtr, DataPtr>();
 	
 	bindSimpleData<Color4fData>();
-	implicitly_convertible<Color4fDataPtr, DataPtr>();
 	
 	bindSimpleData<Color4dData>();
-	implicitly_convertible<Color4dDataPtr, DataPtr>();
 
 }
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreGL/TextureLoader.h"
 #include "IECoreGL/Texture.h"
 #include "IECoreGL/bindings/TextureLoaderBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 
@@ -46,15 +46,12 @@ namespace IECoreGL
 
 void bindTextureLoader()
 {
-	typedef class_< TextureLoader, TextureLoaderPtr, boost::noncopyable, bases< IECore::RefCounted > > TextureLoaderPyClass;
-	TextureLoaderPyClass( "TextureLoader", init<const IECore::SearchPath &>() )
+	IECore::RefCountedClass<TextureLoader, IECore::RefCounted>( "TextureLoader" )
+		.def( init<const IECore::SearchPath &>() )
 		.def( "load", &TextureLoader::load )
 		.def( "clear", &TextureLoader::clear )
 		.def( "defaultTextureLoader", &TextureLoader::defaultTextureLoader ).staticmethod( "defaultTextureLoader" )
 	;
-
-	INTRUSIVE_PTR_PATCH( TextureLoader, TextureLoaderPyClass );
-	implicitly_convertible<TextureLoaderPtr, IECore::RefCountedPtr>();
 }
 	
 }

@@ -36,7 +36,6 @@
 
 #include "IECore/Reader.h"
 #include "IECore/Object.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -72,17 +71,14 @@ static list supportedExtensions( TypeId typeId )
 
 void bindReader()
 {
-	typedef class_< Reader , ReaderPtr, boost::noncopyable, bases<Op> > ReaderPyClass;
-	ReaderPyClass( "Reader", no_init )
+	RunTimeTypedClass<Reader>()
 		.def( "readHeader", &Reader::readHeader )
 		.def( "read", &Reader::read )		
 		.def( "create", &Reader::create ).staticmethod( "create" )
 		.def( "supportedExtensions", ( list(*)( ) ) &supportedExtensions ) 
 		.def( "supportedExtensions", ( list(*)( IECore::TypeId ) ) &supportedExtensions )
 		.staticmethod( "supportedExtensions" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Reader )
 	;
-	INTRUSIVE_PTR_PATCH( Reader, ReaderPyClass );
 }
 
 } // namespace IECore

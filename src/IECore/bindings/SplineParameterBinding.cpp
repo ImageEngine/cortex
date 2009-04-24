@@ -42,10 +42,10 @@ namespace IECore
 
 void bindSplineParameter()
 {
-	bindTypedParameter<Splineff>( "SplineffParameter" );
-	bindTypedParameter<Splinedd>( "SplineddParameter" );
-	bindTypedParameter<SplinefColor3f>( "SplinefColor3fParameter" );
-	bindTypedParameter<SplinefColor4f>( "SplinefColor4fParameter" );	
+	bindTypedParameter<Splineff>();
+	bindTypedParameter<Splinedd>();
+	bindTypedParameter<SplinefColor3f>();
+	bindTypedParameter<SplinefColor4f>();	
 }
 
 } // namespace IECore

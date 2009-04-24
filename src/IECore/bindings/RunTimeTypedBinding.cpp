@@ -36,7 +36,6 @@
 
 #include "IECore/RunTimeTyped.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 
 using namespace boost::python;
 
@@ -70,31 +69,19 @@ static list derivedTypeIds( TypeId typeId )
 
 void bindRunTimeTyped()
 {
-	typedef class_<RunTimeTyped, boost::noncopyable, RunTimeTypedPtr, bases<RefCounted> > RunTimeTypedPyClass;
-	RunTimeTypedPyClass( "RunTimeTyped", no_init )
+	RunTimeTypedClass<RunTimeTyped>()
 		.def( "typeName", &RunTimeTyped::typeName )
 		.def( "typeId", &RunTimeTyped::typeId )
 		.def( "isInstanceOf", (bool (RunTimeTyped::*)( const char * ) const)&RunTimeTyped::isInstanceOf )
 		.def( "isInstanceOf", (bool (RunTimeTyped::*)( TypeId ) const)&RunTimeTyped::isInstanceOf )
-		
-		// Not defined as staticmethod as IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS does this after
-		// definition of overloaded baseTypeId(TypeId) function (staticmethod must be called after
-		// all the other definitions of that function)
-		.def("baseTypeId", ( TypeId (*)( TypeId ) )( &RunTimeTyped::baseTypeId ) )
 		.def( "baseTypeIds", &baseTypeIds ).staticmethod( "baseTypeIds" )
 		.def( "derivedTypeIds", &derivedTypeIds ).staticmethod( "derivedTypeIds" )
 		.def( "typeIdFromTypeName", &RunTimeTyped::typeIdFromTypeName )
 		.staticmethod( "typeIdFromTypeName" )
 		.def( "typeNameFromTypeId", &RunTimeTyped::typeNameFromTypeId )
 		.staticmethod( "typeNameFromTypeId" )		
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( RunTimeTyped )
 	;
 	
-	INTRUSIVE_PTR_PATCH( RunTimeTyped, RunTimeTypedPyClass );
-
-	implicitly_convertible<RunTimeTypedPtr, RefCountedPtr>();
-	implicitly_convertible<RunTimeTypedPtr, ConstRunTimeTypedPtr>();
-
 }
 
 }

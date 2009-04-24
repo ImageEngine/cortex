@@ -39,7 +39,7 @@
 #include "IECore/CachedReader.h"
 #include "IECore/Object.h"
 #include "IECore/bindings/CachedReaderBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 
@@ -61,8 +61,7 @@ static ObjectPtr read( CachedReader &r, const std::string &f )
 
 void bindCachedReader()
 {
-	typedef class_< CachedReader, boost::noncopyable, CachedReaderPtr, bases< RefCounted > > CachedReaderPyClass;
-	CachedReaderPyClass( "CachedReader", no_init )
+	RefCountedClass<CachedReader, RefCounted>( "CachedReader" )
 		.def( init<const SearchPath &, size_t>() )
 		.def( "read", &read )
 		.def( "memoryUsage", &CachedReader::memoryUsage )
@@ -70,11 +69,7 @@ void bindCachedReader()
 		.add_property( "searchPath", make_function( &CachedReader::getSearchPath, return_value_policy<copy_const_reference>() ), &CachedReader::setSearchPath )
 		.add_property( "maxMemory", &CachedReader::getMaxMemory, &CachedReader::setMaxMemory )		
 		.def( "defaultCachedReader", &CachedReader::defaultCachedReader ).staticmethod( "defaultCachedReader" )
-	;
-
-	INTRUSIVE_PTR_PATCH( CachedReader, CachedReaderPyClass );
-	implicitly_convertible<CachedReaderPtr, RefCountedPtr>();
-	
+	;	
 }
 	
 }

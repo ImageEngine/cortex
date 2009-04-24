@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECoreGL/DepthTexture.h"
 #include "IECoreGL/bindings/DepthTextureBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,14 +47,10 @@ namespace IECoreGL
 
 void bindDepthTexture()
 {
-	typedef class_< DepthTexture, DepthTexturePtr, boost::noncopyable, bases<Texture> > DepthTexturePyClass;
-	DepthTexturePyClass( "DepthTexture", init<unsigned int, unsigned int>() )
+	IECore::RunTimeTypedClass<DepthTexture>()
+		.def( init<unsigned int, unsigned int>() )
 		.def( init<unsigned int, unsigned int, IECore::ConstDataPtr>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( DepthTexture )
 	;
-
-	INTRUSIVE_PTR_PATCH( DepthTexture, DepthTexturePyClass );
-	implicitly_convertible<DepthTexturePtr, TexturePtr>();
 }
 	
 }

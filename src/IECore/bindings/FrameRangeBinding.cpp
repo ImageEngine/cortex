@@ -37,8 +37,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FrameListBinding.h"
 
 #include "IECore/FrameRange.h"
@@ -57,8 +55,7 @@ std::string repr( FrameRange &x )
 
 void bindFrameRange()
 {	
-	typedef class_< FrameRange, FrameRange::Ptr, bases< FrameList >, boost::noncopyable > FrameRangePyClass;
-	FrameRangePyClass ( "FrameRange", no_init )
+	RunTimeTypedClass<FrameRange>()
 		.def( init< FrameList::Frame, FrameList::Frame, optional< FrameList::Frame > >
 			(
 				(
@@ -73,11 +70,7 @@ void bindFrameRange()
 		.add_property( "step", &FrameRange::getStep, &FrameRange::setStep )				
 		.def( "__repr__", repr< FrameRange > )
 		.def( self == self )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(FrameRange)	
 	;
-		
-	INTRUSIVE_PTR_PATCH( FrameRange, FrameRangePyClass );
-	implicitly_convertible<FrameRangePtr, FrameListPtr>();	
 }
 
 }

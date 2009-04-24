@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/DPXImageReader.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -48,16 +47,12 @@ namespace IECore
 void bindDPXImageReader()
 {
 
-	typedef class_<DPXImageReader, DPXImageReaderPtr, boost::noncopyable, bases<ImageReader> > DPXImageReaderPyClass;
-
-	DPXImageReaderPyClass("DPXImageReader", init<>())
-		.def(  init<const std::string &>() )
+	RunTimeTypedClass<DPXImageReader>()
+		.def( init<>() )
+		.def( init<const std::string &>() )
 		.def( "canRead", &DPXImageReader::canRead).staticmethod( "canRead" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(DPXImageReader)
 	;
 
-	INTRUSIVE_PTR_PATCH( DPXImageReader, DPXImageReaderPyClass );
-	implicitly_convertible<DPXImageReaderPtr, ImageReaderPtr>();
 }
 
 } // namespace IECore

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,6 @@
 #include "IECoreGL/OrthographicCamera.h"
 #include "IECoreGL/bindings/OrthographicCameraBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,8 +47,7 @@ namespace IECoreGL
 
 void bindOrthographicCamera()
 {
-	typedef class_< OrthographicCamera, OrthographicCameraPtr, boost::noncopyable, bases<Camera> > OrthographicCameraPyClass;
-	OrthographicCameraPyClass( "OrthographicCamera", no_init )
+	IECore::RunTimeTypedClass<OrthographicCamera>()
 		.def( init<const Imath::M44f &, const Imath::V2i &, const Imath::Box2f &, const Imath::V2f &>( (
 				arg( "transform" ) = Imath::M44f(),
 				arg( "resolution" ) = Imath::V2i( 640, 480 ),
@@ -58,11 +56,7 @@ void bindOrthographicCamera()
 			)
 		) )
 		.def( "render", &OrthographicCamera::render )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( OrthographicCamera )
 	;
-
-	INTRUSIVE_PTR_PATCH( OrthographicCamera, OrthographicCameraPyClass );
-	implicitly_convertible<OrthographicCameraPtr, CameraPtr>();
 }
 	
 }

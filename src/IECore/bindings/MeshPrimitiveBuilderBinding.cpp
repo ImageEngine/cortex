@@ -34,7 +34,7 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 #include "IECore/MeshPrimitiveBuilder.h"
 
@@ -45,17 +45,13 @@ namespace IECore
 
 void bindMeshPrimitiveBuilder()
 {
-	typedef class_< MeshPrimitiveBuilder, MeshPrimitiveBuilderPtr, bases<RefCounted>, boost::noncopyable > MeshPrimitiveBuilderPyClass;
-
-	MeshPrimitiveBuilderPyClass( "MeshPrimitiveBuilder", no_init )
+	RefCountedClass<MeshPrimitiveBuilder, RefCounted>( "MeshPrimitiveBuilder" )
 		.def( init<> () )
 		.def( "addVertex", &MeshPrimitiveBuilder::addVertex<float> )
 		.def( "addVertex", &MeshPrimitiveBuilder::addVertex<double> )		
 		.def( "addTriangle", &MeshPrimitiveBuilder::addTriangle )
 		.def( "mesh", &MeshPrimitiveBuilder::mesh )								
 	;
-	INTRUSIVE_PTR_PATCH( MeshPrimitiveBuilder, MeshPrimitiveBuilderPyClass );
-	implicitly_convertible< MeshPrimitiveBuilderPtr, RefCountedPtr>();	
 }
 
 } // namespace IECore

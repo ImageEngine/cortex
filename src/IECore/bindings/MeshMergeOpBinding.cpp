@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 
 #include "IECore/MeshMergeOp.h"
 #include "IECore/bindings/MeshMergeOpBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,14 +47,10 @@ namespace IECore
 void bindMeshMergeOp()
 {
 	
-	typedef class_<MeshMergeOp, MeshMergeOpPtr, boost::noncopyable, bases<MeshPrimitiveOp> > MeshMergeOpPyClass;
-	MeshMergeOpPyClass( "MeshMergeOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( MeshMergeOp )
+	RunTimeTypedClass<MeshMergeOp>()
+		.def( init<>() )
 	;
 	
-	INTRUSIVE_PTR_PATCH( MeshMergeOp, MeshMergeOpPyClass );
-	implicitly_convertible<MeshMergeOpPtr, MeshMergeOpPtr>();	
-
 }
 
 } // namespace IECore

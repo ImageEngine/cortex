@@ -38,7 +38,6 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -49,14 +48,9 @@ namespace IECore
 
 void bindParticleMeshOp()
 {
-	typedef class_< ParticleMeshOp, ParticleMeshOpPtr, boost::noncopyable, bases<Op> > ParticleMeshOpPyClass;
-	ParticleMeshOpPyClass( "ParticleMeshOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ParticleMeshOp)
+	RunTimeTypedClass<ParticleMeshOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( ParticleMeshOp, ParticleMeshOpPyClass );
-	implicitly_convertible<ParticleMeshOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

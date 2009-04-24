@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/DataCastOp.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -45,14 +44,9 @@ namespace IECore {
 
 void bindDataCastOp()
 {
-	typedef class_< DataCastOp, DataCastOpPtr, boost::noncopyable, bases<Op> > DataCastOpPyClass;
-	DataCastOpPyClass( "DataCastOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( DataCastOp )
+	RunTimeTypedClass<DataCastOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( DataCastOp, DataCastOpPyClass );
-	implicitly_convertible<DataCastOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

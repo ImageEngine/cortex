@@ -36,7 +36,6 @@
 
 #include "IECore/SpherePrimitive.h"
 #include "IECore/bindings/SpherePrimitiveBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -46,10 +45,9 @@ namespace IECore
 	
 void bindSpherePrimitive()
 {
-	typedef class_<SpherePrimitive, SpherePrimitivePtr, bases<Primitive>, boost::noncopyable> SpherePrimitivePyClass;
-	SpherePrimitivePyClass( "SpherePrimitive" )
+	RunTimeTypedClass<SpherePrimitive>()
+		.def( init<>() )
 		.def( init< float, optional< float, float, float > >() )		
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( SpherePrimitive )
 		.def( "radius", &SpherePrimitive::radius )
 		.def( "zMin", &SpherePrimitive::zMin )
 		.def( "zMax", &SpherePrimitive::zMax )
@@ -58,10 +56,7 @@ void bindSpherePrimitive()
 		.def( "setZMin", &SpherePrimitive::setZMin )
 		.def( "setZMax", &SpherePrimitive::setZMax )
 		.def( "setThetaMax", &SpherePrimitive::setThetaMax )
-								
 	;
-	INTRUSIVE_PTR_PATCH( SpherePrimitive, SpherePrimitivePyClass );
-	implicitly_convertible<SpherePrimitivePtr, PrimitivePtr>();
 }
 	
 }

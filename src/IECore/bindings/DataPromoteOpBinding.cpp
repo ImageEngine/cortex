@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/DataPromoteOp.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -45,14 +44,9 @@ namespace IECore {
 
 void bindDataPromoteOp()
 {
-	typedef class_< DataPromoteOp, DataPromoteOpPtr, boost::noncopyable, bases<Op> > DataPromoteOpPyClass;
-	DataPromoteOpPyClass( "DataPromoteOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( DataPromoteOp )
+	RunTimeTypedClass<DataPromoteOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( DataPromoteOp, DataPromoteOpPyClass );
-	implicitly_convertible<DataPromoteOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

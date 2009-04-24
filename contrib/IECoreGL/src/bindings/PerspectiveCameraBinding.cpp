@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,6 @@
 #include "IECoreGL/PerspectiveCamera.h"
 #include "IECoreGL/bindings/PerspectiveCameraBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,8 +47,7 @@ namespace IECoreGL
 
 void bindPerspectiveCamera()
 {
-	typedef class_< PerspectiveCamera, PerspectiveCameraPtr, boost::noncopyable, bases< Camera > > PerspectiveCameraPyClass;
-	PerspectiveCameraPyClass( "PerspectiveCamera", no_init )
+	IECore::RunTimeTypedClass<PerspectiveCamera>()
 		.def( init<const Imath::M44f &, const Imath::V2i &, const Imath::Box2f &, const Imath::V2f &, float>( (
 				arg( "transform" ) = Imath::M44f(),
 				arg( "resolution" ) = Imath::V2i( 640, 480 ),
@@ -61,11 +59,7 @@ void bindPerspectiveCamera()
 		.def( "setFOV", &PerspectiveCamera::setFOV )
 		.def( "getFOV", &PerspectiveCamera::getFOV )
 		.def( "render", &PerspectiveCamera::render )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( PerspectiveCamera )
 	;
-
-	INTRUSIVE_PTR_PATCH( PerspectiveCamera, PerspectiveCameraPyClass );
-	implicitly_convertible<PerspectiveCameraPtr, CameraPtr>();
 }
 	
 }

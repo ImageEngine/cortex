@@ -36,7 +36,6 @@
 
 #include "IECore/ImagePrimitive.h"
 #include "IECore/bindings/ImagePrimitiveBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include "OpenEXR/half.h"
@@ -92,8 +91,8 @@ static StringVectorDataPtr channelNames( ImagePrimitive &that )
 
 void bindImagePrimitive()
 {
-	typedef class_<ImagePrimitive, ImagePrimitivePtr, bases<Primitive>, boost::noncopyable> ImagePrimitivePyClass;
-	ImagePrimitivePyClass("ImagePrimitive")
+	RunTimeTypedClass<ImagePrimitive>()
+		.def( init<>() )
 		.def( init<Imath::Box2i, Imath::Box2i>() )
 
 		.add_property("dataWindow", make_function( &ImagePrimitive::getDataWindow,
@@ -111,11 +110,8 @@ void bindImagePrimitive()
 		.def( "createHalfChannel", &ImagePrimitive::createChannel<half> )
 		.def( "createUIntChannel", &ImagePrimitive::createChannel<unsigned int> )
 
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ImagePrimitive )
 	;
 
-	INTRUSIVE_PTR_PATCH( ImagePrimitive, ImagePrimitivePyClass );
-	implicitly_convertible<ImagePrimitivePtr, PrimitivePtr>();
 }
 
 }

@@ -35,7 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/Exception.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 #include "IECore/CSGImplicitSurfaceFunction.h"
 
 using namespace boost::python;
@@ -48,15 +48,10 @@ void bindCSGImplicitSurfaceFunction( const char *name )
 {
 	typedef ImplicitSurfaceFunction<typename T::Point, typename T::Value> Base;
 	
-	typedef class_< T, typename T::Ptr, bases< Base >, boost::noncopyable > CSGImplicitPyClass;
-
-	object csg = CSGImplicitPyClass( name, no_init )
+	object csg = RefCountedClass<T, Base>( name )
 		.def( init< typename T::Fn::Ptr, typename T::Fn::Ptr, typename T::Mode > () )
 	;
-	
-	implicitly_convertible< typename T::Ptr, typename Base::Ptr>();
-	INTRUSIVE_PTR_PATCH_TEMPLATE( T, CSGImplicitPyClass );
-	
+		
 	scope csgScope( csg );
 	
 	enum_< typename T::Mode> ("Mode")

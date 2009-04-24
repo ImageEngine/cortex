@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,6 @@
 #include "IECore/ObjectVector.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/ObjectVectorBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 
 using namespace boost::python;
 
@@ -91,21 +90,14 @@ static void append( ObjectVector &o, ObjectPtr value )
 
 void bindObjectVector()
 {
-	typedef class_< ObjectVector, ObjectVectorPtr, bases<Object>, boost::noncopyable > ObjectVectorPyClass;
-
-	ObjectVectorPyClass( "ObjectVector" )
+	RunTimeTypedClass<ObjectVector>()
+		.def( init<>() )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
 		.def( "__setitem__", &setItem )
 		.def( "__delitem__", &delItem )
 		.def( "append", &append )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ObjectVector)
-	;
-	
-	INTRUSIVE_PTR_PATCH( ObjectVector, ObjectVectorPyClass );
-	
-	implicitly_convertible<ObjectVectorPtr, ObjectPtr>();
-	
+	;	
 }
 
 } // namespace IECore

@@ -38,7 +38,6 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/Wrapper.h"
 
@@ -85,17 +84,11 @@ class UniformRandomPointDistributionOpWrap :
 
 void bindUniformRandomPointDistributionOp()
 {
-	typedef class_< UniformRandomPointDistributionOp, UniformRandomPointDistributionOpWrap::Ptr, boost::noncopyable, bases<Op> > UniformRandomPointDistributionOpPyClass;
-	UniformRandomPointDistributionOpPyClass( "UniformRandomPointDistributionOp", no_init )
+	RunTimeTypedClass<UniformRandomPointDistributionOp, UniformRandomPointDistributionOpWrap::Ptr>()
 		.def( init<>() )
 		.def( init< const std::string &, const std::string &>() )
 		.def( "density", &UniformRandomPointDistributionOpWrap::density )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(UniformRandomPointDistributionOp)
 	;
-	
-	INTRUSIVE_PTR_PATCH( UniformRandomPointDistributionOp, UniformRandomPointDistributionOpPyClass );
-	implicitly_convertible<UniformRandomPointDistributionOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

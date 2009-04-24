@@ -37,7 +37,6 @@
 #include "IECore/ObjectWriter.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -48,13 +47,10 @@ namespace IECore {
 
 void bindObjectWriter()
 {
-	typedef class_< ObjectWriter , ObjectWriterPtr, bases<Writer> > ObjectWriterPyClass;
-	ObjectWriterPyClass( "ObjectWriter", init<>() )
+	RunTimeTypedClass<ObjectWriter>()
+		.def( init<>() )
 		.def( init<ObjectPtr, const std::string &>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ObjectWriter)
 	;
-	INTRUSIVE_PTR_PATCH( ObjectWriter, ObjectWriterPyClass );
-	implicitly_convertible<ObjectWriterPtr, WriterPtr>();
 }
 
 } // namespace IECore

@@ -35,7 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/Exception.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 #include "IECore/MeshPrimitiveImplicitSurfaceFunction.h"
 
 using namespace boost::python;
@@ -45,14 +45,9 @@ namespace IECore
 
 void bindMeshPrimitiveImplicitSurfaceFunction()
 {
-	typedef class_< MeshPrimitiveImplicitSurfaceFunction, MeshPrimitiveImplicitSurfaceFunction::Ptr, bases< PrimitiveImplicitSurfaceFunction >, boost::noncopyable > MeshPrimitiveImplicitSurfaceFunctionPyClass;
-
-	MeshPrimitiveImplicitSurfaceFunctionPyClass( "MeshPrimitiveImplicitSurfaceFunction", no_init )
+	RefCountedClass<MeshPrimitiveImplicitSurfaceFunction, PrimitiveImplicitSurfaceFunction>( "MeshPrimitiveImplicitSurfaceFunction" )
 		.def( init< MeshPrimitivePtr > () )		
 	;
-	
-	implicitly_convertible< MeshPrimitiveImplicitSurfaceFunction::Ptr, PrimitiveImplicitSurfaceFunction::Ptr>();
-	INTRUSIVE_PTR_PATCH( MeshPrimitiveImplicitSurfaceFunction, MeshPrimitiveImplicitSurfaceFunctionPyClass );	
 }
 
 } // namespace IECore

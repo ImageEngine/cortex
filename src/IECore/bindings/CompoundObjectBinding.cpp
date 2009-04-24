@@ -37,7 +37,6 @@
 #include <sstream>
 
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include <exception>
@@ -216,7 +215,7 @@ class CompoundObjectFromPythonDict
 			handle<> h( obj_ptr );
 			dict d( h );
 
-			void* storage = (( converter::rvalue_from_python_storage<CompoundObject>* ) data )->storage.bytes;
+			void* storage = (( converter::rvalue_from_python_storage<CompoundObjectPtr>* ) data )->storage.bytes;
 			new( storage ) CompoundObjectPtr( compoundObjectFromDict( d ) );
 			data->convertible = storage;
 		}
@@ -285,9 +284,9 @@ static CompoundObjectPtr copyConstructor( ConstCompoundObjectPtr other )
 
 void bindCompoundObject()
 {
-	typedef class_< CompoundObject , CompoundObjectPtr, boost::noncopyable, bases<Object> > CompoundObjectPyClass;
-
-	CompoundObjectPyClass ( "CompoundObject" )
+	
+	RunTimeTypedClass<CompoundObject>()
+		.def( init<>() )
 		.def("__init__", make_constructor(&copyConstructor), "Copy constructor.")
 		.def( "__repr__", &repr )
 		.def( "__len__", &len )
@@ -302,14 +301,10 @@ void bindCompoundObject()
 		.def( "keys", &keys )
 		.def( "values", &values )
 		.def( "update", &update )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( CompoundObject )
 	;
-
-	INTRUSIVE_PTR_PATCH( CompoundObject, CompoundObjectPyClass );
-	implicitly_convertible<CompoundObjectPtr, ObjectPtr>();
-	implicitly_convertible<CompoundObjectPtr, ConstCompoundObjectPtr>();
 	
 	CompoundObjectFromPythonDict();
+	
 }
 
 } // namespace IECore

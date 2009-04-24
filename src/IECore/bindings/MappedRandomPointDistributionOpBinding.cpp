@@ -38,9 +38,7 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -51,15 +49,9 @@ namespace IECore
 
 void bindMappedRandomPointDistributionOp()
 {
-	typedef class_< MappedRandomPointDistributionOp, MappedRandomPointDistributionOpPtr, boost::noncopyable, bases<UniformRandomPointDistributionOp> > MappedRandomPointDistributionOpPyClass;
-	MappedRandomPointDistributionOpPyClass( "MappedRandomPointDistributionOp", no_init )
+	RunTimeTypedClass<MappedRandomPointDistributionOp>()
 		.def( init<>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(MappedRandomPointDistributionOp)
 	;
-	
-	INTRUSIVE_PTR_PATCH( MappedRandomPointDistributionOp, MappedRandomPointDistributionOpPyClass );
-	implicitly_convertible<MappedRandomPointDistributionOpPtr, UniformRandomPointDistributionOpPtr>();	
-
 }
 
 } // namespace IECore

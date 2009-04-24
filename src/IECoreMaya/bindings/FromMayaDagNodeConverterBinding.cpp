@@ -38,7 +38,6 @@
 #include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/bindings/FromMayaDagNodeConverterBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include "maya/MSelectionList.h"
@@ -59,13 +58,9 @@ static IECoreMaya::FromMayaDagNodeConverterPtr create( const char *n, IECore::Ty
 
 void IECoreMaya::bindFromMayaDagNodeConverter()
 {
-	typedef class_<FromMayaDagNodeConverter, FromMayaDagNodeConverterPtr, boost::noncopyable, bases<FromMayaObjectConverter> > FromMayaDagNodeConverterPyClass;
 
-	scope s = FromMayaDagNodeConverterPyClass( "FromMayaDagNodeConverter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaDagNodeConverter )
+	scope s = IECore::RunTimeTypedClass<FromMayaDagNodeConverter>()
 		.def( "create", &create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
-	
-	INTRUSIVE_PTR_PATCH( FromMayaDagNodeConverter, FromMayaDagNodeConverterPyClass );
-	implicitly_convertible<FromMayaDagNodeConverterPtr, FromMayaObjectConverterPtr>();
+
 }

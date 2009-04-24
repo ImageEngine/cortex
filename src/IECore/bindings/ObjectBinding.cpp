@@ -36,7 +36,6 @@
 
 #include "IECore/Object.h"
 #include "IECore/bindings/ObjectBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -46,8 +45,8 @@ namespace IECore
 
 void bindObject()
 {
-	typedef class_<Object, boost::noncopyable, ObjectPtr, bases<RunTimeTyped> > ObjectPyClass;
-	ObjectPyClass( "Object", no_init )
+
+	RunTimeTypedClass<Object>()
 		.def( self == self )
 		.def( self != self )
 		.def( "copy", &Object::copy )
@@ -64,14 +63,8 @@ void bindObject()
 		.staticmethod( "load" )
 		.def( "save", (void (Object::*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & )const )&Object::save )
 		.def("memoryUsage", (size_t (Object::*)()const )&Object::memoryUsage, "Returns the number of bytes this instance occupies in memory" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Object)
 	;
 	
-	INTRUSIVE_PTR_PATCH( Object, ObjectPyClass );
-
-	implicitly_convertible<ObjectPtr, RefCountedPtr>();
-	implicitly_convertible<ObjectPtr, ConstObjectPtr>();
-
 }
 
 }

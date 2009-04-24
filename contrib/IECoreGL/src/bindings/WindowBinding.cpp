@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,9 +38,8 @@
 #include "IECoreGL/bindings/WindowBinding.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/RefCountedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost::python;
 
@@ -120,19 +119,14 @@ IE_CORE_DECLAREPTR( WindowWrap );
 
 void bindWindow()
 {
-	typedef class_< Window, boost::noncopyable, WindowWrapPtr, bases< IECore::RefCounted > > WindowPyClass;
-	WindowPyClass( "Window", init<std::string>() )
+	IECore::RefCountedClass<Window, IECore::RefCounted, WindowWrapPtr>( "Window" )
+		.def( init<std::string>() )
 		.def( "setTitle", &Window::setTitle )
 		.def( "getTitle", &Window::getTitle, return_value_policy<copy_const_reference>() )
 		.def( "setVisibility", &Window::setVisibility )
 		.def( "getVisibility", &Window::getVisibility )
 		.def( "start", &Window::start ).staticmethod( "start" )
 	;
-	IECore::WrapperToPython<WindowPtr>();
-	INTRUSIVE_PTR_PATCH( Window, WindowPyClass );
-	implicitly_convertible<WindowWrapPtr, WindowPtr>();
-	implicitly_convertible<WindowPtr, IECore::RefCountedPtr>();
-
 }
 
 } // namespace IECoreGL

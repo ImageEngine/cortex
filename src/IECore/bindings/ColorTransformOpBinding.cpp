@@ -36,9 +36,8 @@
 
 #include "IECore/ColorTransformOp.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -91,16 +90,9 @@ void bindColorTransformOp()
 {
 	using boost::python::arg;
 	
-	typedef class_< ColorTransformOp, ColorTransformOpWrapPtr, boost::noncopyable, bases<PrimitiveOp> > ColorTransformOpPyClass;
-	ColorTransformOpPyClass( "ColorTransformOp", no_init )
+	RunTimeTypedClass<ColorTransformOp, ColorTransformOpWrapPtr>( "ColorTransformOp" )
 		.def( init< const std::string, const std::string>( ( arg( "name" ), arg( "description" ) ) ) )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ColorTransformOp)
 	;
-	
-	WrapperToPython<ColorTransformOpPtr>();
-
-	INTRUSIVE_PTR_PATCH( ColorTransformOp, ColorTransformOpPyClass );
-	implicitly_convertible<ColorTransformOpPtr, PrimitiveOpPtr>();	
 
 }
 

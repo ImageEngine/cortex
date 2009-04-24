@@ -38,8 +38,6 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/Wrapper.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace std;
@@ -77,8 +75,7 @@ void bindFileNameParameter()
 {
 	using boost::python::arg;
 
-	typedef class_<FileNameParameter, FileNameParameterWrapPtr, boost::noncopyable, bases<PathParameter> > FileNameParameterPyClass;
-	FileNameParameterPyClass( "FileNameParameter", no_init )
+	RunTimeTypedClass<FileNameParameter, FileNameParameterWrapPtr>()
 		.def(
 			init<const std::string &, const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
 			(
@@ -97,10 +94,7 @@ void bindFileNameParameter()
 		)
 		.add_property( "extensions", &fileNameParameterExtensions )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FileNameParameter )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FileNameParameter )
 	;
-	INTRUSIVE_PTR_PATCH( FileNameParameter, FileNameParameterPyClass );
-	implicitly_convertible<FileNameParameterPtr, PathParameterPtr>();
 
 }
 

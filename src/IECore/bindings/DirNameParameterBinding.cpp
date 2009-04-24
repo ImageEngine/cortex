@@ -38,8 +38,6 @@
 #include "IECore/DirNameParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/Wrapper.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace std;
@@ -66,8 +64,7 @@ void bindDirNameParameter()
 {
 	using boost::python::arg;
 	
-	typedef class_<DirNameParameter, DirNameParameterWrapPtr, boost::noncopyable, bases<PathParameter> > DirNameParameterPyClass;
-	DirNameParameterPyClass( "DirNameParameter", no_init )
+	RunTimeTypedClass<DirNameParameter, DirNameParameterWrapPtr>()
 		.def(
 			init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
 			(
@@ -84,11 +81,7 @@ void bindDirNameParameter()
 			)
 		)
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( DirNameParameter )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( DirNameParameter )
 	;
-	INTRUSIVE_PTR_PATCH( DirNameParameter, DirNameParameterPyClass );
-	implicitly_convertible<DirNameParameterPtr, PathParameterPtr>();
-	implicitly_convertible<DirNameParameterPtr, ConstDirNameParameterPtr>();
 
 }
 

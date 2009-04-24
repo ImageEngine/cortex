@@ -36,7 +36,6 @@
 #include "boost/python/make_constructor.hpp"
 
 #include "IECore/CubeColorLookupData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
@@ -82,26 +81,20 @@ static typename T::ValueType &getValue( T &that )
 }
 
 template< typename T >
-void bindCubeColorLookupData( const char *bindName )
+void bindCubeColorLookupData()
 {
-	typedef class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > PyClass;
-	PyClass( bindName )
+	RunTimeTypedClass<T>()
+		.def( init<>() )
 		.def( init<const typename T::ValueType &>() )
 		.add_property( "value", make_function( &getValue<T>, return_internal_reference<>() ), &setValue<T> )
 		.def( "__repr__", &repr<T> )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( T )
 	;
-
-	INTRUSIVE_PTR_PATCH( T, typename PyClass );
-
-	implicitly_convertible<typename T::Ptr , DataPtr>();
-	implicitly_convertible<typename T::Ptr, typename T::ConstPtr >();
 }
 
 void bindCubeColorLookupData()
 {
-	bindCubeColorLookupData<CubeColorLookupfData>( "CubeColorLookupfData" );
-	bindCubeColorLookupData<CubeColorLookupdData>( "CubeColorLookupdData" );
+	bindCubeColorLookupData<CubeColorLookupfData>();
+	bindCubeColorLookupData<CubeColorLookupdData>();
 }
 
 } // namespace IECore

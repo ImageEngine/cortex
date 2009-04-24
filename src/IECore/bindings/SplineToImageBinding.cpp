@@ -38,7 +38,6 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -49,14 +48,9 @@ namespace IECore
 
 void bindSplineToImage()
 {
-	typedef class_< SplineToImage, SplineToImagePtr, boost::noncopyable, bases<Op> > SplineToImagePyClass;
-	SplineToImagePyClass( "SplineToImage" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(SplineToImage)
+	RunTimeTypedClass<SplineToImage>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( SplineToImage,SplineToImagePyClass );
-	implicitly_convertible<SplineToImagePtr, OpPtr>();	
-
 }
 
 } // namespace IECore

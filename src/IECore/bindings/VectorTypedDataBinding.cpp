@@ -51,7 +51,6 @@
 #include "IECore/bindings/ImathColorVectorBinding.h"
 #include "IECore/bindings/ImathBoxVectorBinding.h"
 #include "IECore/bindings/ImathQuatVectorBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/VectorTypedDataBinding.inl"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
@@ -120,67 +119,54 @@ void bindAllVectorTypedData()
 	// basic types
 	BIND_VECTOR_TYPEDDATA( 
 		bool,
-		"BoolVectorData",
 		"bool")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA( 
 		half,
-		"HalfVectorData",
 		"half")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA( 
 		float,
-		"FloatVectorData",
 		"float")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA( 
 		double,
-		"DoubleVectorData",
 		"double")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		int,
-		"IntVectorData",
 		"int")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		unsigned int,
-		"UIntVectorData",
 		"unsigned int")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		char,
-		"CharVectorData",
 		"char")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		unsigned char,
-		"UCharVectorData",
 		"unsigned char")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		short,
-		"ShortVectorData",
 		"short")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		unsigned short,
-		"UShortVectorData",
 		"unsigned short")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		int64_t,
-		"Int64VectorData",
 		"int64_t")
 		
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		uint64_t,
-		"UInt64VectorData",
 		"uint64_t")		
 		
 	BIND_VECTOR_TYPEDDATA (
 		std::string,
-		"StringVectorData",
 		"string")
 	
 	// Imath types

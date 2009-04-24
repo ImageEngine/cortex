@@ -39,8 +39,6 @@
 #include "IECore/BlindDataHolder.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/BlindDataHolderBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-
 
 using namespace boost::python;
 
@@ -49,15 +47,11 @@ namespace IECore
 
 void bindBlindDataHolder()
 {
-	typedef class_< BlindDataHolder, BlindDataHolderPtr, bases<Object> > BlindDataHolderPyClass;
-
-	BlindDataHolderPyClass("BlindDataHolder", "A class which represents an object with some blind data attached.", no_init)
+	RunTimeTypedClass<BlindDataHolder>( "A class which represents an object with some blind data attached." )
 		.def(init<>())
 		.def(init<CompoundDataPtr>())
 		.def("blindData", &BlindDataHolder::blindData)
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(BlindDataHolder)
 	;
-	INTRUSIVE_PTR_PATCH( BlindDataHolder, BlindDataHolderPyClass );
-	implicitly_convertible<BlindDataHolderPtr, ObjectPtr>();
 }
+
 }

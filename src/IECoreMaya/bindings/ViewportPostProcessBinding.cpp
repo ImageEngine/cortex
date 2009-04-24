@@ -36,15 +36,14 @@
 
 #include "maya/MGlobal.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
-
 #include "IECore/Exception.h"
 
 #include "IECoreMaya/StatusException.h"
 
 #include "IECoreMaya/bindings/ViewportPostProcessBinding.h"
 #include "IECoreMaya/ViewportPostProcess.h"
+
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace IECore;
 using namespace boost::python;
@@ -54,13 +53,8 @@ namespace IECoreMaya
 
 void bindViewportPostProcess()
 {
-	typedef class_< ViewportPostProcess, ViewportPostProcessPtr, bases< RefCounted >, boost::noncopyable > ViewportPostProcessPyClass;
-	
-	ViewportPostProcessPyClass( "ViewportPostProcess", no_init )
+	RefCountedClass<ViewportPostProcess, RefCounted> ViewportPostProcessPyClass( "ViewportPostProcess" )
 	;
-	
-	INTRUSIVE_PTR_PATCH( ViewportPostProcess, ViewportPostProcessPyClass );
-	implicitly_convertible< ViewportPostProcessPtr, RefCountedPtr >();
 }
 
 }

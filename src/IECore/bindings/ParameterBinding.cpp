@@ -37,9 +37,7 @@
 #include "IECore/Parameter.h"
 #include "IECore/bindings/ParameterBinding.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/Wrapper.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace std;
@@ -116,8 +114,7 @@ void bindParameter()
 {
 	using boost::python::arg;
 	
-	typedef class_< Parameter, ParameterWrapPtr, boost::noncopyable, bases<RunTimeTyped> > ParameterPyClass;
-	ParameterPyClass( "Parameter", no_init )
+	RunTimeTypedClass<Parameter, ParameterWrapPtr>()
 		.def( 
 			init< const std::string &, const std::string &, ObjectPtr, boost::python::optional<const boost::python::object &, bool, CompoundObjectPtr > >
 			( 
@@ -148,14 +145,8 @@ void bindParameter()
 		.def( "presetNames", &presetNames, "Returns a tuple containing the names of all presets for the parameter." )
 		.def( "presetValues", &presetValues, "Returns a tuple containing the values of all presets for the parameter." )
 		.def( "userData", (CompoundObjectPtr (Parameter::*)())&Parameter::userData )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Parameter)
 	;
 	
-	WrapperToPython<ParameterPtr>();
-	INTRUSIVE_PTR_PATCH( Parameter, ParameterPyClass );
-	implicitly_convertible<ParameterPtr, RunTimeTypedPtr>();
-	implicitly_convertible<ParameterPtr, ConstParameterPtr>();
-
 }
 
 } // namespace IECore

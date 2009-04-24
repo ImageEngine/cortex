@@ -38,7 +38,6 @@
 
 #include "IECore/Data.h"
 #include "IECore/bindings/DataBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 
@@ -49,14 +48,7 @@ namespace IECore
 
 void bindData()
 {
-	typedef class_< Data, boost::noncopyable, DataPtr, bases<Object> > DataPyClass;
-	DataPyClass ("Data", "An abstract base class for data storage.", no_init)
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Data )
+	RunTimeTypedClass<Data>( "An abstract base class for data storage." )
 	;
-
-	INTRUSIVE_PTR_PATCH( Data, DataPyClass );
-
-	implicitly_convertible<DataPtr, ObjectPtr>();
-	implicitly_convertible<DataPtr, ConstDataPtr>();
 }
 }

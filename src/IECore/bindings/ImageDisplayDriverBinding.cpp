@@ -38,7 +38,6 @@
 #include "IECore/ImageDisplayDriver.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h" 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -67,14 +66,10 @@ static ImagePrimitivePtr image( ImageDisplayDriverPtr dd )
 
 void bindImageDisplayDriver()
 {
-	typedef class_< ImageDisplayDriver, ImageDisplayDriverPtr, boost::noncopyable, bases<DisplayDriver> > ImageDisplayDriverPyClass;
-	ImageDisplayDriverPyClass( "ImageDisplayDriver", no_init )
+	RunTimeTypedClass<ImageDisplayDriver>()
 		.def( "__init__", make_constructor( &imageDisplayDriverConstructor, default_call_policies(), ( boost::python::arg_( "displayWindow" ), boost::python::arg_( "dataWindow" ), boost::python::arg_( "channelNames" ), boost::python::arg_( "parameters" ) ) ) )
 		.def( "image", &image )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImageDisplayDriver)
 	;
-	INTRUSIVE_PTR_PATCH( ImageDisplayDriver, ImageDisplayDriverPyClass );
-	implicitly_convertible<ImageDisplayDriverPtr, DisplayDriverPtr>();
 }
 
 } // namespace IECore

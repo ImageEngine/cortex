@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/Wrapper.h"
+#include "IECore/bindings/RefCountedBinding.h"
+
 #include "IECore/LevenbergMarquardt.h"
 
 using namespace boost::python;
@@ -166,17 +167,12 @@ void bindLevenbergMarquardt( const char *name )
 		enum_< typename LevenbergMarquardtWrapper<T>::Status >( "Status" )
 			.value( "Success", LevenbergMarquardtWrapper<T>::Success )
 		;
-		
-		typedef class_< LevenbergMarquardtErrorFn<T>, typename LevenbergMarquardtErrorFnWrapper<T>::Ptr, boost::noncopyable > ErrorFnPyClass;
-		
-		ErrorFnPyClass( "ErrorFn", no_init )
+				
+		RefCountedClass<LevenbergMarquardtErrorFn<T>, RefCounted, typename LevenbergMarquardtErrorFnWrapper<T>::Ptr>( "ErrorFn" )
 			.def( init<>() )
 			.def( "numErrors", pure_virtual( &LevenbergMarquardtErrorFnWrapper<T>::numErrors ) )
 			.def( "computeErrors", pure_virtual( &LevenbergMarquardtErrorFnWrapper<T>::computeErrors ) )		
 		;
-		
-		WrapperToPython< typename LevenbergMarquardtErrorFnWrapper<T>::Ptr >();
-		INTRUSIVE_PTR_PATCH_TEMPLATE( LevenbergMarquardtErrorFn<T>, ErrorFnPyClass );		
 	}
 }
 

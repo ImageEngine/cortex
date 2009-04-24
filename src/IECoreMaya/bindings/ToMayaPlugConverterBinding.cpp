@@ -37,7 +37,6 @@
 #include "IECoreMaya/ToMayaPlugConverter.h"
 #include "IECoreMaya/bindings/ToMayaPlugConverterBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include "IECore/Object.h"
@@ -56,14 +55,8 @@ static bool convert( ToMayaPlugConverter &c, const MPlug &p )
 
 void IECoreMaya::bindToMayaPlugConverter()
 {
-	typedef class_<ToMayaPlugConverter, ToMayaPlugConverterPtr, boost::noncopyable, bases<ToMayaConverter> > ToMayaPlugConverterPyClass;
-
-	ToMayaPlugConverterPyClass( "ToMayaPlugConverter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToMayaPlugConverter )
+	IECore::RunTimeTypedClass<ToMayaPlugConverter>()
 		.def( "convert", &convert )
 		.def( "create", &ToMayaPlugConverter::create ).staticmethod( "create" )
 	;
-	
-	INTRUSIVE_PTR_PATCH( ToMayaPlugConverter, ToMayaPlugConverterPyClass );
-	implicitly_convertible<ToMayaPlugConverterPtr, ToMayaConverterPtr>();
 }

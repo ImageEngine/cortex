@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/ImageCropOp.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -46,14 +45,9 @@ namespace IECore
 
 void bindImageCropOp()
 {
-	typedef class_< ImageCropOp, ImageCropOpPtr, boost::noncopyable, bases<ImagePrimitiveOp> > ImageCropOpPyClass;
-	ImageCropOpPyClass( "ImageCropOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ImageCropOp )
+	RunTimeTypedClass<ImageCropOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( ImageCropOp, ImageCropOpPyClass );
-	implicitly_convertible<ImageCropOpPtr, ImagePrimitiveOpPtr>();	
-
 }
 
 } // namespace IECore

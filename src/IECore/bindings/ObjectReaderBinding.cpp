@@ -38,7 +38,6 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/bindings/ObjectReaderBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -50,14 +49,10 @@ namespace IECore
 
 void bindObjectReader()
 {
-	typedef class_< ObjectReader , ObjectReaderPtr, bases<Reader> > ObjectReaderPyClass;
-	ObjectReaderPyClass( "ObjectReader", init<>() )
+	RunTimeTypedClass<ObjectReader>()
+		.def( init<>() )
 		.def( init<const std::string &>() )		
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ObjectReader)
 	;
-
-	INTRUSIVE_PTR_PATCH( ObjectReader, ObjectReaderPyClass );
-	implicitly_convertible<ObjectReaderPtr, ReaderPtr>();
 }
 
 } // namespace IECore

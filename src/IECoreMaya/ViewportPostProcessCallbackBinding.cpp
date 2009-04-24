@@ -36,8 +36,8 @@
 
 #include "maya/MGlobal.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/Exception.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 #include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/ViewportPostProcessCallback.h"
@@ -79,16 +79,11 @@ struct ViewportPostProcessCallbackHelper
 };
 
 void bindViewportPostProcessCallback()
-{
-	typedef class_< ViewportPostProcessCallback, bases< RefCounted >, boost::noncopyable > ViewportPostProcessCallbackPyClass;
-	
-	ViewportPostProcessCallbackPyClass( "ViewportPostProcessCallback", no_init )				
+{	
+	RefCountedClass<ViewportPostProcessCallback, RefCounted>( "ViewportPostProcessCallback" )				
 		.def( "registerCallback", &ViewportPostProcessCallbackHelper::registerCallback ).staticmethod( "registerCallback" )
 		.def( "deregisterCallback", &ViewportPostProcessCallbackHelper::deregisterCallback ).staticmethod( "deregisterCallback" )
 	;
-	
-	INTRUSIVE_PTR_PATCH( ViewportPostProcessCallback, ViewportPostProcessCallbackPyClass );
-	implicitly_convertible< ViewportPostProcessCallback::Ptr, RefCountedPtr >();
 }
 
 }

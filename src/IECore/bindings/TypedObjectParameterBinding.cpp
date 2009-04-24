@@ -38,9 +38,8 @@
 #include "IECore/bindings/Wrapper.h"
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/WrapperToPython.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 #include "IECore/Renderable.h"
 #include "IECore/StateRenderable.h"
@@ -80,12 +79,11 @@ class TypedObjectParameterWrap : public TypedObjectParameter<T>, public Wrapper<
 };
 
 template<typename T>
-static void bindTypedObjectParameter( const char *name )
+static void bindTypedObjectParameter()
 {
 	using boost::python::arg;
 	
-	typedef class_< TypedObjectParameter<T>, typename TypedObjectParameterWrap< T >::Ptr , boost::noncopyable, bases<ObjectParameter> > TypedObjectParameterPyClass;
-	TypedObjectParameterPyClass( name, no_init )
+	RunTimeTypedClass<TypedObjectParameter<T>, typename TypedObjectParameterWrap<T>::Ptr >()
 		.def( 
 			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
 			( 
@@ -100,35 +98,28 @@ static void bindTypedObjectParameter( const char *name )
 			)
 		) 		
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( TypedObjectParameter<T> )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedObjectParameter<T> )
 	;
-
-	WrapperToPython< typename TypedObjectParameter<T>::Ptr >();
-
-	INTRUSIVE_PTR_PATCH( TypedObjectParameter<T>, typename TypedObjectParameterPyClass );
-	implicitly_convertible< typename TypedObjectParameter<T>::Ptr, ObjectParameterPtr>();
-
 }
 
 void bindTypedObjectParameter()
 {
-	bindTypedObjectParameter<Renderable>( "RenderableParameter" );
-	bindTypedObjectParameter<StateRenderable>( "StateRenderableParameter" );
-	bindTypedObjectParameter<AttributeState>( "AttributeStateParameter" );
-	bindTypedObjectParameter<Shader>( "ShaderParameter" );
-	bindTypedObjectParameter<Transform>( "TransformParameter" );
-	bindTypedObjectParameter<MatrixMotionTransform>( "MatrixMotionTransformParameter" );
-	bindTypedObjectParameter<MatrixTransform>( "MatrixTransformParameter" );
-	bindTypedObjectParameter<VisibleRenderable>( "VisibleRenderableParameter" );
-	bindTypedObjectParameter<Group>( "GroupParameter" );
-	bindTypedObjectParameter<MotionPrimitive>( "MotionPrimitiveParameter" );
-	bindTypedObjectParameter<Primitive>( "PrimitiveParameter" );
-	bindTypedObjectParameter<ImagePrimitive>( "ImagePrimitiveParameter" );
-	bindTypedObjectParameter<MeshPrimitive>( "MeshPrimitiveParameter" );
-	bindTypedObjectParameter<CurvesPrimitive>( "CurvesPrimitiveParameter" );
-	bindTypedObjectParameter<PointsPrimitive>( "PointsPrimitiveParameter" );	
-	bindTypedObjectParameter<CompoundObject>( "CompoundObjectParameter" );		
-	bindTypedObjectParameter<ObjectVector>( "ObjectVectorParameter" );		
+	bindTypedObjectParameter<Renderable>();
+	bindTypedObjectParameter<StateRenderable>();
+	bindTypedObjectParameter<AttributeState>();
+	bindTypedObjectParameter<Shader>();
+	bindTypedObjectParameter<Transform>();
+	bindTypedObjectParameter<MatrixMotionTransform>();
+	bindTypedObjectParameter<MatrixTransform>();
+	bindTypedObjectParameter<VisibleRenderable>();
+	bindTypedObjectParameter<Group>();
+	bindTypedObjectParameter<MotionPrimitive>();
+	bindTypedObjectParameter<Primitive>();
+	bindTypedObjectParameter<ImagePrimitive>();
+	bindTypedObjectParameter<MeshPrimitive>();
+	bindTypedObjectParameter<CurvesPrimitive>();
+	bindTypedObjectParameter<PointsPrimitive>();	
+	bindTypedObjectParameter<CompoundObject>();		
+	bindTypedObjectParameter<ObjectVector>();		
 }
 
 } // namespace IECore

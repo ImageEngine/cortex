@@ -38,9 +38,7 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -50,15 +48,9 @@ namespace IECore
 
 void bindPointRepulsionOp()
 {
-	typedef class_< PointRepulsionOp, PointRepulsionOpPtr, boost::noncopyable, bases<ModifyOp> > PointRepulsionOpPyClass;
-	PointRepulsionOpPyClass( "PointRepulsionOp", no_init )
+	RunTimeTypedClass<PointRepulsionOp>()
 		.def( init<>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(PointRepulsionOp)
 	;
-	
-	INTRUSIVE_PTR_PATCH( PointRepulsionOp, PointRepulsionOpPyClass );
-	implicitly_convertible<PointRepulsionOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

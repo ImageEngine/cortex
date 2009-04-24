@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECore/ImagePrimitiveEvaluator.h"
 #include "IECore/bindings/ImagePrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 
 using namespace IECore;
 using namespace boost::python;
@@ -129,9 +128,8 @@ struct ImagePrimitiveEvaluatorHelper
 
 void bindImagePrimitiveEvaluator()
 {
-	typedef class_< ImagePrimitiveEvaluator, ImagePrimitiveEvaluatorPtr, bases< PrimitiveEvaluator >, boost::noncopyable > ImagePrimitiveEvaluatorPyClass;
 	
-	object m = ImagePrimitiveEvaluatorPyClass ( "ImagePrimitiveEvaluator", no_init )
+	object m = RunTimeTypedClass<ImagePrimitiveEvaluator>()
 		.def( init< ImagePrimitivePtr > () )
 		.def( "pointAtPixel", &ImagePrimitiveEvaluatorHelper::pointAtPixel )
 		.def( "R", &ImagePrimitiveEvaluatorHelper::R )
@@ -139,16 +137,11 @@ void bindImagePrimitiveEvaluator()
 		.def( "B", &ImagePrimitiveEvaluatorHelper::B )
 		.def( "A", &ImagePrimitiveEvaluatorHelper::A )
 		.def( "Y", &ImagePrimitiveEvaluatorHelper::Y )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImagePrimitiveEvaluator)
 	;
-	INTRUSIVE_PTR_PATCH( ImagePrimitiveEvaluator, ImagePrimitiveEvaluatorPyClass );
-	implicitly_convertible<ImagePrimitiveEvaluatorPtr, PrimitiveEvaluatorPtr>();
 	
 	{
 		scope ms( m );
-		typedef class_< ImagePrimitiveEvaluator::Result, ImagePrimitiveEvaluator::ResultPtr, bases< PrimitiveEvaluator::Result >, boost::noncopyable > ResultPyClass;
-		
-		ResultPyClass( "Result", no_init )
+		RefCountedClass<ImagePrimitiveEvaluator::Result, PrimitiveEvaluator::Result >( "Result" )
 			.def( "pixel", &ImagePrimitiveEvaluator::Result::pixel )
 			.def( "uintPrimVar", &ImagePrimitiveEvaluator::Result::uintPrimVar )
 			.def( "shortPrimVar", &ImagePrimitiveEvaluator::Result::shortPrimVar )
@@ -158,8 +151,6 @@ void bindImagePrimitiveEvaluator()
 			
 		;
 	
-		INTRUSIVE_PTR_PATCH( ImagePrimitiveEvaluator::Result, ResultPyClass );
-		implicitly_convertible<ImagePrimitiveEvaluator::ResultPtr, PrimitiveEvaluator::ResultPtr>();	
 	}
 }
 

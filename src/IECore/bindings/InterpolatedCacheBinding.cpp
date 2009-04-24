@@ -40,7 +40,7 @@
 
 #include "IECore/InterpolatedCache.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -134,7 +134,7 @@ void bindInterpolatedCache()
 	
 	typedef class_< InterpolatedCache, InterpolatedCachePtr > InterpolatedCachePyClass;
 
-	InterpolatedCachePyClass interpolatedCacheClass( bindName, no_init );
+	RefCountedClass<InterpolatedCache, RefCounted> interpolatedCacheClass( bindName );
 	{
 		// define enum before functions.
 		scope varScope = interpolatedCacheClass;
@@ -179,6 +179,5 @@ void bindInterpolatedCache()
 		.def("attributes", make_function( &InterpolatedCacheHelper::attributes, default_call_policies(), ( boost::python::arg_( "obj" ), boost::python::arg_( "regex" ) = object() ) ) )
 		.def("currentCaches", make_function( &InterpolatedCacheHelper::currentCaches, default_call_policies() ) )
 	;
-	INTRUSIVE_PTR_PATCH( InterpolatedCache, InterpolatedCachePyClass );
 }
 }

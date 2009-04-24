@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/EXRImageReader.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -48,15 +47,11 @@ namespace IECore
 void bindEXRImageReader()
 {
 
-	typedef class_<EXRImageReader, EXRImageReaderPtr, boost::noncopyable, bases<ImageReader> > EXRImageReaderPyClass;
-	EXRImageReaderPyClass( "EXRImageReader", init<>() )
+	RunTimeTypedClass<EXRImageReader>()
+		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "canRead", &EXRImageReader::canRead ).staticmethod( "canRead" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( EXRImageReader )
 	;
-
-	INTRUSIVE_PTR_PATCH( EXRImageReader, EXRImageReaderPyClass );
-	implicitly_convertible<EXRImageReaderPtr, ImageReaderPtr>();
 	
 }
   

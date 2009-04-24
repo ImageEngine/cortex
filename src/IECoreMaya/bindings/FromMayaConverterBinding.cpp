@@ -42,7 +42,6 @@
 #include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/bindings/FromMayaConverterBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include "IECore/Object.h"
@@ -106,13 +105,7 @@ static IECoreMaya::FromMayaConverterPtr create( const char *n, IECore::TypeId re
 
 void IECoreMaya::bindFromMayaConverter()
 {
-	typedef class_<FromMayaConverter, FromMayaConverterPtr, boost::noncopyable, bases<IECore::ToCoreConverter> > FromMayaConverterPyClass;
-
-	FromMayaConverterPyClass( "FromMayaConverter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaConverter )
+	IECore::RunTimeTypedClass<FromMayaConverter>()
 		.def( "create", &create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
-	
-	INTRUSIVE_PTR_PATCH( FromMayaConverter, FromMayaConverterPyClass );
-	implicitly_convertible<FromMayaConverterPtr, IECore::ToCoreConverterPtr>();
 }

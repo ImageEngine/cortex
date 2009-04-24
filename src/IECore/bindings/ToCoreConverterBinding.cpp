@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/bindings/ToCoreConverterBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include "IECore/ToCoreConverter.h"
@@ -49,15 +48,9 @@ namespace IECore
 
 void bindToCoreConverter()
 {
-	typedef class_< ToCoreConverter, ToCoreConverterPtr, boost::noncopyable, bases< Converter > > ToCoreConverterPyClass;
-	ToCoreConverterPyClass( "ToCoreConverter", no_init )
+	RunTimeTypedClass<ToCoreConverter>()
 		.def( "convert", &ToCoreConverter::convert )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToCoreConverter )
 	;
-
-	INTRUSIVE_PTR_PATCH( ToCoreConverter, ToCoreConverterPyClass );
-	implicitly_convertible<ToCoreConverterPtr, ConverterPtr>();
-	implicitly_convertible<ToCoreConverterPtr, ConstToCoreConverterPtr>();
 }
 
 }

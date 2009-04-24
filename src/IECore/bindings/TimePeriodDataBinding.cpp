@@ -40,7 +40,6 @@
 #include "datetime.h"
 
 #include "IECore/TimePeriodData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
@@ -106,21 +105,14 @@ void bindTimePeriodData()
 {
 	PyDateTime_IMPORT;
 		
-	typedef class_< TimePeriodData, TimePeriodDataPtr, noncopyable, bases<Data> > TimePeriodDataPyClass;
-	TimePeriodDataPyClass( "TimePeriodData", no_init )
+	RunTimeTypedClass<TimePeriodData>()
 		.def( init<>() )
 		.def( init<const TimePeriodData::ValueType &>() )
 		.add_property( "value", make_function( &getValue, return_value_policy<copy_const_reference>() ), &setValue )
 		.def( "__repr__", &repr<TimePeriodData> )
 		.def( "__str__", &str<TimePeriodData> )
 		.def( "__cmp__", &str<TimePeriodData> )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TimePeriodData );
 	;
-
-	INTRUSIVE_PTR_PATCH( TimePeriodData, TimePeriodDataPyClass );
-
-	implicitly_convertible<TimePeriodDataPtr, DataPtr>();
-	implicitly_convertible<TimePeriodDataPtr, ConstTimePeriodDataPtr >();
 }
 
 } // namespace IECore

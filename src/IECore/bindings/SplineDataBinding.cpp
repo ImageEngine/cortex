@@ -36,7 +36,6 @@
 #include "boost/python/make_constructor.hpp"
 
 #include "IECore/SplineData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
@@ -82,28 +81,22 @@ static typename T::ValueType &getValue( T &that )
 }
 
 template< typename T >
-void bindSplineData( const char *bindName )
+void bindSplineData()
 {
-	typedef class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > PyClass;
-	PyClass( bindName )
+	RunTimeTypedClass<T>()
+		.def( init<>() )
 		.def( init<const typename T::ValueType &>() )
 		.add_property( "value", make_function( &getValue<T>, return_internal_reference<>() ), &setValue<T> )
 		.def( "__repr__", &repr<T> )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( T );
 	;
-
-	INTRUSIVE_PTR_PATCH( T, typename PyClass );
-
-	implicitly_convertible<typename T::Ptr , DataPtr>();
-	implicitly_convertible<typename T::Ptr, typename T::ConstPtr >();
 }
 
 void bindSplineData()
 {
-	bindSplineData<SplineffData>( "SplineffData" );
-	bindSplineData<SplineddData>( "SplineddData" );
-	bindSplineData<SplinefColor3fData>( "SplinefColor3fData" );
-	bindSplineData<SplinefColor4fData>( "SplinefColor4fData" );
+	bindSplineData<SplineffData>();
+	bindSplineData<SplineddData>();
+	bindSplineData<SplinefColor3fData>();
+	bindSplineData<SplinefColor4fData>();
 }
 
 } // namespace IECore

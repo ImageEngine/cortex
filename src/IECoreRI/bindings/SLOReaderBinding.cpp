@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,7 +36,7 @@
 
 #include "IECoreRI/SLOReader.h"
 #include "IECoreRI/bindings/SLOReaderBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -46,13 +46,10 @@ namespace IECoreRI
 
 void bindSLOReader()
 {
-	typedef class_< SLOReader, SLOReaderPtr, boost::noncopyable, bases< Reader > > SLOReaderPyClass;
-	SLOReaderPyClass( "SLOReader")
+	RunTimeTypedClass<SLOReader>()
+		.def( init<>() )
 		.def( init<const std::string &>() )
 	;
-
-	INTRUSIVE_PTR_PATCH( SLOReader, SLOReaderPyClass );
-	implicitly_convertible<SLOReaderPtr, ReaderPtr>();
 }
 	
 }

@@ -38,8 +38,6 @@
 #include "IECore/PathParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/Wrapper.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace std;
@@ -66,8 +64,7 @@ void bindPathParameter()
 {
 	using boost::python::arg;
 
-	typedef class_<PathParameter, PathParameterWrapPtr, boost::noncopyable, bases<StringParameter> > PathParameterPyClass;
-	PathParameterPyClass pathParamClass( "PathParameter", no_init );
+	RunTimeTypedClass<PathParameter, PathParameterWrapPtr> pathParamClass;
 	{
 		// define enum before functions.
 		scope varScope = pathParamClass;
@@ -97,15 +94,7 @@ void bindPathParameter()
 		.add_property( "mustExist", &PathParameter::mustExist )
 		.add_property( "mustNotExist", &PathParameter::mustNotExist )
 		.add_property( "allowEmptyString", &PathParameter::allowEmptyString )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(PathParameter)
 	;	
-	
-	WrapperToPython<PathParameterPtr>();
-	
-	INTRUSIVE_PTR_PATCH( PathParameter, PathParameterPyClass );
-	implicitly_convertible<PathParameterPtr, StringParameterPtr>();
-	implicitly_convertible<PathParameterPtr, ConstPathParameterPtr>();	
-
 }
 
 } // namespace IECore

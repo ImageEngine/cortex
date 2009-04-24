@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,6 @@
 #include "IECoreGL/State.h"
 #include "IECoreGL/bindings/SceneBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -59,19 +58,15 @@ list children( const Group &g )
 
 void bindGroup()
 {
-	typedef class_< Group, boost::noncopyable, GroupPtr, bases<Renderable> > GroupPyClass;
-	GroupPyClass( "Group" )
+	IECore::RunTimeTypedClass<Group>()
+		.def( init<>() )
 		.def( "setTransform", &Group::setTransform )
 		.def( "getTransform", &Group::getTransform, return_value_policy<copy_const_reference>() )
 		.def( "setState", &Group::setState )
 		.def( "getState", (StatePtr(Group::*)())&Group::getState )
 		.def( "addChild", &Group::addChild )
 		.def( "children", &children, "Returns a list referencing the children of the group - modifying the list has no effect on the Group." )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Group )
 	;
-
-	INTRUSIVE_PTR_PATCH( Group, GroupPyClass );
-	implicitly_convertible<GroupPtr, RenderablePtr>();
 }
 	
 }

@@ -38,9 +38,8 @@
 #include "IECore/DisplayDriver.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h" 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -128,8 +127,7 @@ static DisplayDriverPtr displayDriverCreate( const Imath::Box2i &displayWindow, 
 
 void bindDisplayDriver()
 {
-	typedef class_< DisplayDriver, DisplayDriverPtr, boost::noncopyable, bases<RunTimeTyped> > DisplayDriverPyClass;
-	scope displayDriverScope = DisplayDriverPyClass( "DisplayDriver", no_init )
+	scope displayDriverScope = RunTimeTypedClass<DisplayDriver>()
 		.def( "imageData", &displayDriverImageData )
 		.def( "imageClose", &displayDriverImageClose )
 		.def( "scanLineOrderOnly", &displayDriverScanLineOrderOnly )
@@ -139,21 +137,12 @@ void bindDisplayDriver()
 		.def( "create", &displayDriverCreate ).staticmethod("create")
 		.def( "registerFactory", &DisplayDriver::registerFactory ).staticmethod("registerFactory")
 		.def( "unregisterFactory", &DisplayDriver::unregisterFactory ).staticmethod("unregisterFactory")
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(DisplayDriver)		
 	;
-	INTRUSIVE_PTR_PATCH( DisplayDriver, DisplayDriverPyClass );
-	implicitly_convertible<DisplayDriverPtr, RunTimeTypedPtr>();
 
-	typedef class_< DisplayDriver::DisplayDriverCreator, DisplayDriverCreatorWrapPtr, boost::noncopyable, bases<RunTimeTyped> > DisplayDriverCreatorPyClass;
-	DisplayDriverCreatorPyClass( "DisplayDriverCreator" )
+	RunTimeTypedClass<DisplayDriver::DisplayDriverCreator, DisplayDriverCreatorWrapPtr>()
+		.def( init<>() )
 		.def( "create", &DisplayDriverCreatorWrap::create )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( DisplayDriver::DisplayDriverCreator )		
 	;
-	
-	WrapperToPython<DisplayDriver::DisplayDriverCreatorPtr>();
-	INTRUSIVE_PTR_PATCH( DisplayDriver::DisplayDriverCreator, DisplayDriverCreatorPyClass );
-	implicitly_convertible< DisplayDriver::DisplayDriverCreatorPtr, RunTimeTypedPtr>();
-
 }
 
 } // namespace IECore

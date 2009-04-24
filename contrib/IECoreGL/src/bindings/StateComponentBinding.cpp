@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECoreGL/StateComponent.h"
 #include "IECoreGL/bindings/StateComponentBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -47,15 +46,8 @@ namespace IECoreGL
 
 void bindStateComponent()
 {
-	typedef class_< StateComponent, StateComponentPtr, boost::noncopyable, bases< Bindable > > StateComponentPyClass;
-	StateComponentPyClass( "StateComponent", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( StateComponent )
+	IECore::RunTimeTypedClass<StateComponent>()
 	;
-
-	INTRUSIVE_PTR_PATCH( StateComponent, StateComponentPyClass );
-	implicitly_convertible<StateComponentPtr, ConstStateComponentPtr>();
-	implicitly_convertible<StateComponentPtr, BindablePtr>();
-
 }
 
 } // namespace IECoreGL

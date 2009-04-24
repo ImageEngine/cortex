@@ -39,9 +39,8 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -87,20 +86,13 @@ void bindOp()
 {
 	using boost::python::arg;
 	
-	typedef class_< Op, OpWrapPtr, boost::noncopyable, bases<Parameterised> > OpPyClass;
-	OpPyClass( "Op", no_init )
+	RunTimeTypedClass<Op, OpWrapPtr>()
 		.def( init< const std::string, const std::string, ParameterPtr >( ( arg( "name" ), arg( "description" ), arg( "resultParameter") ) ) )
 		.def( init< const std::string, const std::string, CompoundParameterPtr, ParameterPtr >( ( arg( "name" ), arg( "description" ), arg( "compoundParameter" ), arg( "resultParameter") ) ) )
 		.def( "resultParameter", &resultParameter )
 		.def( "operate", &Op::operate )
 		.def( "__call__", &Op::operate )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Op)
 	;
-	
-	WrapperToPython<OpPtr>();
-
-	INTRUSIVE_PTR_PATCH( Op, OpPyClass );
-	implicitly_convertible<OpPtr, ParameterisedPtr>();	
 
 }
 

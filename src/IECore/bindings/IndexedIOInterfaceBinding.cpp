@@ -44,7 +44,8 @@
 #include "IECore/FileIndexedIO.h"
 #include "IECore/MemoryIndexedIO.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -250,8 +251,7 @@ void bindIndexedIOInterface(const char *bindName)
 		.export_values()
 	;
 	
-	typedef class_< IndexedIOInterface, boost::noncopyable, IndexedIOInterfacePtr, bases<RefCounted> > IndexedIOInterfacePyClass;
-	IndexedIOInterfacePyClass( bindName, no_init )
+	RefCountedClass<IndexedIOInterface, RefCounted>( bindName )
 		.def("openMode", &IndexedIOInterface::openMode)
 		.def("resetRoot", &IndexedIOInterface::resetRoot)
 		.def("chdir", &IndexedIOInterface::chdir)
@@ -280,27 +280,21 @@ void bindIndexedIOInterface(const char *bindName)
 		.def("supportedExtensions", &IndexedIOInterfaceHelper::supportedExtensions ).staticmethod("supportedExtensions")
 	
 	;
-	INTRUSIVE_PTR_PATCH( IndexedIOInterface, IndexedIOInterfacePyClass );
 
-	implicitly_convertible<IndexedIOInterfacePtr, RefCountedPtr>();
 }
 
 void bindFileSystemIndexedIO(const char *bindName)
 {	
-	class_< FileSystemIndexedIO, FileSystemIndexedIOPtr, boost::noncopyable, bases<IndexedIOInterface> >(bindName, no_init)
+	RefCountedClass<FileSystemIndexedIO, IndexedIOInterface>( bindName )
 		.def(init<const std::string &, const std::string &, IndexedIO::OpenMode >())				
 	;
-	
-	implicitly_convertible< FileSystemIndexedIOPtr, IndexedIOInterfacePtr >();
 }
 
 void bindFileIndexedIO(const char *bindName)
 {	
-	class_< FileIndexedIO, FileIndexedIOPtr, boost::noncopyable, bases<IndexedIOInterface> >(bindName, no_init)
+	RefCountedClass<FileIndexedIO, IndexedIOInterface>( bindName )
 		.def(init<const std::string &, const std::string &, IndexedIO::OpenMode >())
 	;
-	
-	implicitly_convertible< FileIndexedIOPtr, IndexedIOInterfacePtr >();
 }
 
 CharVectorDataPtr memoryIndexedIOBufferWrapper( MemoryIndexedIOPtr io )
@@ -311,12 +305,10 @@ CharVectorDataPtr memoryIndexedIOBufferWrapper( MemoryIndexedIOPtr io )
 
 void bindMemoryIndexedIO(const char *bindName)
 {
-	class_< MemoryIndexedIO, MemoryIndexedIOPtr, boost::noncopyable, bases<FileIndexedIO> >(bindName, no_init)
+	RefCountedClass<MemoryIndexedIO, IndexedIOInterface>( bindName )
 		.def(init<ConstCharVectorDataPtr, const std::string &, IndexedIO::OpenMode >())
 		.def( "buffer", memoryIndexedIOBufferWrapper )
 	;
-	
-	implicitly_convertible< MemoryIndexedIOPtr, FileIndexedIOPtr >();
 }
 
 void bindIndexedIOEntry(const char *bindName)

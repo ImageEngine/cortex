@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,8 +38,7 @@
 #include "IECoreGL/bindings/CameraControllerBinding.h"
 #include "IECoreGL/Camera.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 
@@ -48,8 +47,8 @@ namespace IECoreGL
 
 void bindCameraController()
 {
-	typedef class_< CameraController, CameraControllerPtr, boost::noncopyable, bases<IECore::RefCounted> > CameraControllerPyClass;
-	CameraControllerPyClass( "CameraController", init<CameraPtr, float>( ( arg( "camera" ), arg( "centreOfInterest" ) = 5.0f ) ) )
+	IECore::RefCountedClass<CameraController, IECore::RefCounted>( "CameraController" )
+		.def( init<CameraPtr, float>( ( arg( "camera" ), arg( "centreOfInterest" ) = 5.0f ) ) )
 		.def( "setCamera", &CameraController::setCamera )
 		.def( "getCamera", &CameraController::getCamera )
 		.def( "reshape", &CameraController::reshape )
@@ -59,9 +58,6 @@ void bindCameraController()
 		.def( "tumble", &CameraController::tumble )
 		.def( "dolly", &CameraController::dolly )
 	;
-
-	INTRUSIVE_PTR_PATCH( CameraController, CameraControllerPyClass );
-	implicitly_convertible<CameraControllerPtr, IECore::RefCountedPtr>();
 }
 	
 }

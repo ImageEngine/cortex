@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 
 #include "IECore/MeshTangentsOp.h"
 #include "IECore/bindings/MeshTangentsOpBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,14 +47,9 @@ namespace IECore
 void bindMeshTangentsOp()
 {
 	
-	typedef class_<MeshTangentsOp, MeshTangentsOpPtr, boost::noncopyable, bases<MeshPrimitiveOp> > MeshTangentsOpPyClass;
-	MeshTangentsOpPyClass( "MeshTangentsOp", no_init )
+	RunTimeTypedClass<MeshTangentsOp>()
 		.def( init<>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( MeshTangentsOp )
 	;
-	
-	INTRUSIVE_PTR_PATCH( MeshTangentsOp, MeshTangentsOpPyClass );
-	implicitly_convertible<MeshTangentsOpPtr, MeshPrimitiveOpPtr>();	
 
 }
 

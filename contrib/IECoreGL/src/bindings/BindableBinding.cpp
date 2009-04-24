@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/bindings/BindableBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -47,15 +46,10 @@ namespace IECoreGL
 
 void bindBindable()
 {
-	typedef class_< Bindable, BindablePtr, boost::noncopyable, bases<IECore::RunTimeTyped> > BindablePyClass;
-	BindablePyClass( "Bindable", no_init )
+	IECore::RunTimeTypedClass<Bindable>()
 		.def( "bind", &Bindable::bind )
 		.def( "mask", &Bindable::mask )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Bindable )
 	;
-
-	INTRUSIVE_PTR_PATCH( Bindable, BindablePyClass );
-	implicitly_convertible<BindablePtr, IECore::RunTimeTypedPtr>();
 }
 	
 }

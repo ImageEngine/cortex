@@ -36,8 +36,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FrameListBinding.h"
 
 #include "IECore/EmptyFrameList.h"
@@ -57,15 +55,10 @@ std::string repr( EmptyFrameList &x )
 
 void bindEmptyFrameList()
 {	
-	typedef class_< EmptyFrameList, EmptyFrameList::Ptr, bases< FrameList >, boost::noncopyable > EmptyFrameListPyClass;
-	EmptyFrameListPyClass ( "EmptyFrameList", no_init )
+	RunTimeTypedClass<EmptyFrameList>()
 		.def( init<>() )
 		.def( "__repr__", repr< EmptyFrameList > )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(EmptyFrameList)	
 	;
-		
-	INTRUSIVE_PTR_PATCH( EmptyFrameList, EmptyFrameListPyClass );
-	implicitly_convertible<EmptyFrameListPtr, FrameListPtr>();	
 }
 
 }

@@ -36,8 +36,6 @@
 
 #include "IECore/Grade.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -47,16 +45,9 @@ namespace IECore {
 
 void bindGrade()
 {
-	typedef class_< Grade, boost::noncopyable, bases<ColorTransformOp> > GradePyClass;
-	GradePyClass( "Grade" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Grade)
+	RunTimeTypedClass<Grade>()
+		.def( init<>() )
 	;
-	
-	WrapperToPython<GradePtr>();
-
-	INTRUSIVE_PTR_PATCH( Grade, GradePyClass );
-	implicitly_convertible<GradePtr, ColorTransformOpPtr>();
-
 }
 
 } // namespace IECore

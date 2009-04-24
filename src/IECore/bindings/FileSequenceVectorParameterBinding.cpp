@@ -41,10 +41,9 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FileSequenceVectorParameterBinding.h"
 #include "IECore/bindings/ParameterBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost::python;
 
@@ -232,8 +231,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 void bindFileSequenceVectorParameter()
 {	
 
-	typedef class_< FileSequenceVectorParameter, FileSequenceVectorParameterWrap::Ptr, boost::noncopyable, bases< PathVectorParameter > > FileSequenceVectorParameterPyClass;
-	FileSequenceVectorParameterPyClass ( "FileSequenceVectorParameter", no_init )
+	RunTimeTypedClass<FileSequenceVectorParameter, FileSequenceVectorParameterWrap::Ptr>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceVectorParameter::CheckType, const object &, bool, CompoundObjectPtr, object > >
 			( 
@@ -254,13 +252,8 @@ void bindFileSequenceVectorParameter()
 		.def( "setFileSequenceValues", &FileSequenceVectorParameterWrap::setFileSequenceValuesWrap )
 		.add_property( "extensions",&FileSequenceVectorParameterWrap::getExtensionsWrap, &FileSequenceVectorParameterWrap::setExtensionsWrap )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FileSequenceVectorParameter )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FileSequenceVectorParameter )
 	;
 	
-	WrapperToPython< FileSequenceVectorParameterWrap::Ptr >();
-	INTRUSIVE_PTR_PATCH( FileSequenceVectorParameter, FileSequenceVectorParameterPyClass );
-	implicitly_convertible<FileSequenceVectorParameterWrap::Ptr, FileSequenceVectorParameterPtr>();
-	implicitly_convertible<FileSequenceVectorParameterPtr, PathVectorParameterPtr>();
 }
 
 }

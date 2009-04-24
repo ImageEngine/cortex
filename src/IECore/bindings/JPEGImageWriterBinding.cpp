@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/JPEGImageWriter.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -46,15 +45,10 @@ namespace IECore
 
 void bindJPEGImageWriter()
 {
-	typedef class_<JPEGImageWriter, JPEGImageWriterPtr, boost::noncopyable, bases<ImageWriter> > JPEGImageWriterPyClass;
-
-	JPEGImageWriterPyClass("JPEGImageWriter", init<>())
+	RunTimeTypedClass<JPEGImageWriter>()
+		.def( init<>() )
 		.def( init<ObjectPtr, const std::string &>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( JPEGImageWriter )
 	;
-
-	INTRUSIVE_PTR_PATCH( JPEGImageWriter, JPEGImageWriterPyClass );
-	implicitly_convertible<JPEGImageWriterPtr, JPEGImageWriterPtr>();
 }
 
 } // namespace IECore

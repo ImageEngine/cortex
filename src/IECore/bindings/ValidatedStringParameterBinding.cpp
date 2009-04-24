@@ -39,9 +39,8 @@
 
 #include "IECore/bindings/ParameterBinding.h"
 #include "IECore/bindings/Wrapper.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace std;
 using namespace boost;
@@ -66,10 +65,9 @@ IE_CORE_DECLAREPTR( ValidatedStringParameterWrap );
 
 void bindValidatedStringParameter()
 {
-	using boost::python::arg ;
+	using boost::python::arg;
 	
-	typedef class_< ValidatedStringParameter, ValidatedStringParameterWrapPtr, boost::noncopyable, bases<StringParameter> > ValidatedStringParameterPyClass;
-	ValidatedStringParameterPyClass( "ValidatedStringParameter", no_init )
+	RunTimeTypedClass<ValidatedStringParameter, ValidatedStringParameterWrapPtr>()
 		.def(
 			init< const std::string &, const std::string &, const std::string &, const std::string &, const std::string &, bool, object &, bool, CompoundObjectPtr >
 			(
@@ -90,15 +88,7 @@ void bindValidatedStringParameter()
 		.add_property( "regexDescription", make_function( &ValidatedStringParameter::regexDescription, return_value_policy<copy_const_reference>() ) )
 		.add_property( "allowEmptyString", &ValidatedStringParameter::allowEmptyString )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( ValidatedStringParameter )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ValidatedStringParameter )
 	;
-	
-	WrapperToPython<ValidatedStringParameterPtr>();
-	
-	INTRUSIVE_PTR_PATCH( ValidatedStringParameter, ValidatedStringParameterPyClass );
-	implicitly_convertible<ValidatedStringParameterPtr, StringParameterPtr>();
-	implicitly_convertible<ValidatedStringParameterPtr, ConstValidatedStringParameterPtr>();
-
 }
 
 } // namespace IECore

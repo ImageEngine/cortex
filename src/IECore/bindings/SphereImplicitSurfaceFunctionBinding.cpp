@@ -35,8 +35,8 @@
 #include "boost/python.hpp"
 
 #include "IECore/Exception.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/SphereImplicitSurfaceFunction.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 
@@ -48,14 +48,9 @@ void bindSphereImplicitSurfaceFunction( const char *name )
 {
 	typedef ImplicitSurfaceFunction<typename T::Point, typename T::Value> Base;
 	
-	typedef class_< T, typename T::Ptr, bases< Base >, boost::noncopyable > SphereImplicitPyClass;
-
-	SphereImplicitPyClass( name, no_init )
+	RefCountedClass<T, Base>( name )
 		.def( init< const typename T::Point  &, typename T::PointBaseType> () )
 	;
-	
-	implicitly_convertible< typename T::Ptr, typename Base::Ptr>();
-	INTRUSIVE_PTR_PATCH_TEMPLATE( T, SphereImplicitPyClass );	
 }
 
 void bindSphereImplicitSurfaceFunction()

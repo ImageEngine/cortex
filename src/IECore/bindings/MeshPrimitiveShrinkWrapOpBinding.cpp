@@ -38,7 +38,6 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/MeshPrimitiveShrinkWrapOpBinding.h"
 
@@ -54,7 +53,6 @@ void bindMeshPrimitiveShrinkWrapOp()
 	typedef class_< MeshPrimitiveShrinkWrapOp, MeshPrimitiveShrinkWrapOpPtr, boost::noncopyable, bases<MeshPrimitiveOp> > MeshPrimitiveShrinkWrapOpPyClass;
 	scope opScope = MeshPrimitiveShrinkWrapOpPyClass( "MeshPrimitiveShrinkWrapOp", no_init )
 		.def( init< >() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( MeshPrimitiveShrinkWrapOp )
 	;
 	
 	enum_< MeshPrimitiveShrinkWrapOp::Direction >( "Direction" )
@@ -69,9 +67,6 @@ void bindMeshPrimitiveShrinkWrapOp()
 		.value( "YAxis", MeshPrimitiveShrinkWrapOp::YAxis )
 		.value( "ZAxis", MeshPrimitiveShrinkWrapOp::ZAxis )		
 	;			
-	
-	INTRUSIVE_PTR_PATCH( MeshPrimitiveShrinkWrapOp, MeshPrimitiveShrinkWrapOpPyClass );
-	implicitly_convertible<MeshPrimitiveShrinkWrapOpPtr, MeshPrimitiveOpPtr>();	
 
 }
 

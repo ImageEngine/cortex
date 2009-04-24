@@ -35,8 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/ImageWriter.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -48,14 +46,9 @@ namespace IECore
 
 void bindImageWriter()
 {
-	typedef class_< ImageWriter , ImageWriterPtr, boost::noncopyable, bases<Writer> > ImageWriterPyClass;
-	ImageWriterPyClass("ImageWriter", no_init)
+	RunTimeTypedClass<ImageWriter>()
 		.def( "canWrite", &ImageWriter::canWrite ).staticmethod( "canWrite" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImageWriter)
 	;
-
-	INTRUSIVE_PTR_PATCH( ImageWriter, ImageWriterPyClass );
-	implicitly_convertible<ImageWriterPtr, WriterPtr>();
 }
 
 } // namespace IECore

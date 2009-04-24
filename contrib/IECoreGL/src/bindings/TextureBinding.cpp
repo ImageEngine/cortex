@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECoreGL/Texture.h"
 #include "IECoreGL/bindings/TextureBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,14 +47,10 @@ namespace IECoreGL
 
 void bindTexture()
 {
-	typedef class_< Texture, TexturePtr, boost::noncopyable, bases<Bindable> > TexturePyClass;
-	TexturePyClass( "Texture", init<GLuint>() )
+	IECore::RunTimeTypedClass<Texture>()
+		.def( init<GLuint>() )
 		.def( "imagePrimitive", &Texture::imagePrimitive )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Texture )
 	;
-
-	INTRUSIVE_PTR_PATCH( Texture, TexturePyClass );
-	implicitly_convertible<TexturePtr, BindablePtr>();
 }
 	
 }

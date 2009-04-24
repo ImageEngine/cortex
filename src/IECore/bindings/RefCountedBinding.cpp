@@ -40,7 +40,6 @@
 #include "IECore/WrapperGarbageCollectorBase.h"
 #include "IECore/bindings/WrapperGarbageCollector.h"
 #include "IECore/bindings/RefCountedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 
 using namespace boost::python;
 
@@ -54,15 +53,18 @@ static bool is(RefCountedPtr self,RefCountedPtr other )
 
 void bindRefCounted()
 {
-	typedef class_< RefCounted, boost::noncopyable, RefCountedPtr > RefCountedPyClass;
-	RefCountedPyClass("RefCounted", "A simple class to count references.", no_init)
+	class_<RefCounted, boost::noncopyable, RefCountedPtr>( "RefCounted", "A simple class to count references." )
 		.def( "isSame", &is )
 		.def( "numWrappedInstances", &WrapperGarbageCollectorBase::numWrappedInstances ).staticmethod( "numWrappedInstances" )
 		.add_static_property( "garbageCollectionThreshold", &WrapperGarbageCollectorBase::getCollectThreshold, &WrapperGarbageCollectorBase::setCollectThreshold )
 		.def( "collectGarbage", &WrapperGarbageCollector::collect ).staticmethod( "collectGarbage" )
 	;
-	INTRUSIVE_PTR_PATCH( RefCounted, RefCountedPyClass );
+	
+	IntrusivePtrToPython<RefCounted>();
+	IntrusivePtrFromPython<RefCounted>();
+		
 	implicitly_convertible<RefCountedPtr, ConstRefCountedPtr>();
 }
+
 }
 

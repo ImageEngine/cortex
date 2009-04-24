@@ -36,8 +36,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FrameListBinding.h"
 
 #include "IECore/ReorderedFrameList.h"
@@ -56,14 +54,9 @@ std::string repr( ReorderedFrameList &x )
 
 void bindReorderedFrameList()
 {	
-	typedef class_< ReorderedFrameList, ReorderedFrameList::Ptr, bases< FrameList >, boost::noncopyable > ReorderedFrameListPyClass;
-	ReorderedFrameListPyClass ( "ReorderedFrameList", no_init )
+	RunTimeTypedClass<ReorderedFrameList>()
 		.add_property( "frameList", &ReorderedFrameList::getFrameList, &ReorderedFrameList::setFrameList )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ReorderedFrameList)	
 	;
-		
-	INTRUSIVE_PTR_PATCH( ReorderedFrameList, ReorderedFrameListPyClass );
-	implicitly_convertible<ReorderedFrameListPtr, FrameListPtr>();	
 }
 
 }

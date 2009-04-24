@@ -41,7 +41,6 @@
 #include "OpenEXR/ImathMatrix.h"
 
 #include "IECore/VectorTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/VectorTypedDataBinding.inl"
 
 using namespace std;
@@ -59,10 +58,10 @@ IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( M44d )
 
 void bindImathMatrixVectorTypedData()
 {
-	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Matrix33< float >,  "M33fVectorData", "M33f")
-	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Matrix33< double >, "M33dVectorData", "M33d")
-	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Matrix44< float >,  "M44fVectorData", "M44f")
-	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Matrix44< double >, "M44dVectorData", "M44d")
+	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Matrix33< float >, "M33f")
+	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Matrix33< double >, "M33d")
+	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Matrix44< float >, "M44f")
+	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Matrix44< double >,"M44d")
 }
 
 } // namespace IECore

@@ -42,7 +42,7 @@ namespace IECore
 
 void bindDateTimeParameter()
 {
-	bindTypedParameter<boost::posix_time::ptime>( "DateTimeParameter" );
+	bindTypedParameter<boost::posix_time::ptime>();
 }
 
 } // namespace IECore

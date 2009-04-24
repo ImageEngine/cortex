@@ -36,7 +36,6 @@
 
 #include "IECore/MatrixMotionTransform.h"
 #include "IECore/bindings/MatrixMotionTransformBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -107,8 +106,8 @@ static boost::python::list values( MatrixMotionTransform &p )
 
 void bindMatrixMotionTransform()
 {	
-	typedef class_< MatrixMotionTransform, MatrixMotionTransformPtr, bases<Transform>, boost::noncopyable > MatrixMotionTransformPyClass;
-	MatrixMotionTransformPyClass( "MatrixMotionTransform" )
+	RunTimeTypedClass<MatrixMotionTransform>()
+		.def( init<>() )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
 		.def( "__setitem__", &setItem )
@@ -116,10 +115,7 @@ void bindMatrixMotionTransform()
 		.def( "__contains__", &contains )
 		.def( "keys", &keys )
 		.def( "values", &values )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(MatrixMotionTransform)
 	;
-	INTRUSIVE_PTR_PATCH( MatrixMotionTransform, MatrixMotionTransformPyClass );
-	implicitly_convertible<MatrixMotionTransformPtr, TransformPtr>();
 }
 
 }

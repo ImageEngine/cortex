@@ -42,7 +42,6 @@
 #include "OpenEXR/ImathQuat.h"
 
 #include "IECore/VectorTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/VectorTypedDataBinding.inl"
 
 using namespace std;
@@ -58,8 +57,8 @@ IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Quatd )
 
 void bindImathQuatVectorTypedData()
 {
-	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Quat< float >,  "QuatfVectorData", "Quatf")
-	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Quat< double >, "QuatdVectorData", "Quatd")
+	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Quat< float >, "Quatf")
+	BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA( Quat< double >, "Quatd")
 }
 
 } // namespace IECore

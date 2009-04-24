@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,6 @@
 #include "IECoreGL/DepthTexture.h"
 #include "IECoreGL/bindings/FrameBufferBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -50,19 +49,15 @@ namespace IECoreGL
 
 void bindFrameBuffer()
 {
-	typedef class_< FrameBuffer, FrameBufferPtr, boost::noncopyable, bases<Bindable> > FrameBufferPyClass;
-	FrameBufferPyClass( "FrameBuffer" )
+	IECore::RunTimeTypedClass<FrameBuffer>()
+		.def( init<>() )
 		.def( "maxColors", &FrameBuffer::maxColors ).staticmethod( "maxColors" )
 		.def( "setColor", &FrameBuffer::setColor )
 		.def( "getColor", (ColorTexturePtr (FrameBuffer::*)( unsigned int ))&FrameBuffer::getColor )
 		.def( "setDepth", &FrameBuffer::setDepth )
 		.def( "getDepth", (DepthTexturePtr (FrameBuffer::*)())&FrameBuffer::getDepth )
 		.def( "validate", &FrameBuffer::validate )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FrameBuffer )
 	;
-
-	INTRUSIVE_PTR_PATCH( FrameBuffer, FrameBufferPyClass );
-	implicitly_convertible<FrameBufferPtr, BindablePtr>();
 }
 	
 }

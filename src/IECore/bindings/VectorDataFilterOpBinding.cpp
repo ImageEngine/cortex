@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/VectorDataFilterOp.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -45,14 +44,9 @@ namespace IECore {
 
 void bindVectorDataFilterOp()
 {
-	typedef class_< VectorDataFilterOp, VectorDataFilterOpPtr, boost::noncopyable, bases<ModifyOp> > VectorDataFilterOpPyClass;
-	VectorDataFilterOpPyClass( "VectorDataFilterOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( VectorDataFilterOp )
+	RunTimeTypedClass<VectorDataFilterOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( VectorDataFilterOp, VectorDataFilterOpPyClass );
-	implicitly_convertible<VectorDataFilterOpPtr, ModifyOpPtr>();	
-
 }
 
 } // namespace IECore

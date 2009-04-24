@@ -37,8 +37,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FrameListBinding.h"
 
 #include "IECore/CompoundFrameList.h"
@@ -129,17 +127,12 @@ std::string repr( CompoundFrameList &x )
 
 void bindCompoundFrameList()
 {	
-	typedef class_< CompoundFrameList, CompoundFrameList::Ptr, bases< FrameList >, boost::noncopyable > CompoundFrameListPyClass;
-	CompoundFrameListPyClass ( "CompoundFrameList", no_init )		
+	RunTimeTypedClass<CompoundFrameList>()		
 		.def( init<>() )
 		.def( "__init__", make_constructor( &constructFromList ) )
 		.add_property( "frameLists", getFrameLists, setFrameLists )
 		.def( "__repr__", repr< CompoundFrameList > )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CompoundFrameList)	
-	;
-		
-	INTRUSIVE_PTR_PATCH( CompoundFrameList, CompoundFrameListPyClass );
-	implicitly_convertible<CompoundFrameListPtr, FrameListPtr>();	
+	;		
 }
 
 }

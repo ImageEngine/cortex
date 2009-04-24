@@ -45,24 +45,24 @@ namespace IECore
 
 void bindSimpleTypedParameter()
 {
-	bindTypedParameter<bool>( "BoolParameter" );
-	bindTypedParameter<V2i>( "V2iParameter" );
-	bindTypedParameter<V3i>( "V3iParameter" );
-	bindTypedParameter<V2f>( "V2fParameter" );
-	bindTypedParameter<V3f>( "V3fParameter" );
-	bindTypedParameter<V2d>( "V2dParameter" );
-	bindTypedParameter<V3d>( "V3dParameter" );
-	bindTypedParameter<Color3f>( "Color3fParameter" );
-	bindTypedParameter<Color4f>( "Color4fParameter" );
-	bindTypedParameter<Box2i>( "Box2iParameter" );
-	bindTypedParameter<Box3i>( "Box3iParameter" );
-	bindTypedParameter<Box2f>( "Box2fParameter" );
-	bindTypedParameter<Box3f>( "Box3fParameter" );
-	bindTypedParameter<Box2d>( "Box2dParameter" );
-	bindTypedParameter<Box3d>( "Box3dParameter" );
-	bindTypedParameter<M44f>( "M44fParameter" );
-	bindTypedParameter<M44d>( "M44dParameter" );
-	bindTypedParameter<string>( "StringParameter" );
+	bindTypedParameter<bool>();
+	bindTypedParameter<V2i>();
+	bindTypedParameter<V3i>();
+	bindTypedParameter<V2f>();
+	bindTypedParameter<V3f>();
+	bindTypedParameter<V2d>();
+	bindTypedParameter<V3d>();
+	bindTypedParameter<Color3f>();
+	bindTypedParameter<Color4f>();
+	bindTypedParameter<Box2i>();
+	bindTypedParameter<Box3i>();
+	bindTypedParameter<Box2f>();
+	bindTypedParameter<Box3f>();
+	bindTypedParameter<Box2d>();
+	bindTypedParameter<Box3d>();
+	bindTypedParameter<M44f>();
+	bindTypedParameter<M44d>();
+	bindTypedParameter<string>();
 }
 
 } // namespace IECore

@@ -36,8 +36,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FrameListBinding.h"
 
 #include "IECore/ExclusionFrameList.h"
@@ -72,17 +70,12 @@ std::string repr( ExclusionFrameList &x )
 
 void bindExclusionFrameList()
 {	
-	typedef class_< ExclusionFrameList, ExclusionFrameList::Ptr, bases< FrameList >, boost::noncopyable > ExclusionFrameListPyClass;
-	ExclusionFrameListPyClass ( "ExclusionFrameList", no_init )
+	RunTimeTypedClass<ExclusionFrameList>()
 		.def( init< FrameListPtr, FrameListPtr >() )
 		.add_property( "frameList", &ExclusionFrameList::getFrameList, &ExclusionFrameList::setFrameList )
 		.add_property( "exclusionFrameList", &ExclusionFrameList::getExclusionFrameList, &ExclusionFrameList::setExclusionFrameList )		
 		.def( "__repr__", repr< ExclusionFrameList > )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ExclusionFrameList)
 	;
-		
-	INTRUSIVE_PTR_PATCH( ExclusionFrameList, ExclusionFrameListPyClass );
-	implicitly_convertible<ExclusionFrameListPtr, FrameListPtr>();	
 }
 
 }

@@ -36,7 +36,7 @@
 
 #include "IECore/Exception.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 #include "IECore/CachedImplicitSurfaceFunction.h"
 
@@ -53,21 +53,12 @@ void bindCachedImplicitSurfaceFunction( const char *name )
 {
 	typedef ImplicitSurfaceFunction< typename T::Point, typename T::Value> Base;
 	
-	typedef class_< 
-		T, 
-		typename T::Ptr, 
-		bases< Base >, 
-		boost::noncopyable 
-	> CachedImplicitSurfaceFunctionPyClass;
-
-	CachedImplicitSurfaceFunctionPyClass( name, no_init )
+	RefCountedClass<T, Base>( name )
 		.def( init< typename Base::Ptr, optional< typename T::PointBaseType > > () )
 		.def( "clear", &T::clear )
 		.def( "size", &T::size )		
 
-	;
-	
-	implicitly_convertible< typename T::Ptr, typename Base::Ptr>();
+	;	
 }
 
 void bindCachedImplicitSurfaceFunction()

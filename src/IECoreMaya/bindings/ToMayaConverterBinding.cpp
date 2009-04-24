@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECoreMaya/ToMayaConverter.h"
 #include "IECoreMaya/bindings/ToMayaConverterBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 #include "IECore/Object.h"
@@ -47,12 +46,6 @@ using namespace boost::python;
 
 void IECoreMaya::bindToMayaConverter()
 {
-	typedef class_<ToMayaConverter, ToMayaConverterPtr, boost::noncopyable, bases<IECore::FromCoreConverter> > ToMayaConverterPyClass;
-
-	ToMayaConverterPyClass( "ToMayaConverter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToMayaConverter )
+	IECore::RunTimeTypedClass<ToMayaConverter>()
 	;
-	
-	INTRUSIVE_PTR_PATCH( ToMayaConverter, ToMayaConverterPyClass );
-	implicitly_convertible<ToMayaConverterPtr, IECore::FromCoreConverterPtr>();
 }

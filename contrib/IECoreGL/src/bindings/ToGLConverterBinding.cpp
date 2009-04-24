@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECoreGL/ToGLConverter.h"
 #include "IECoreGL/bindings/ToGLConverterBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,14 +47,9 @@ namespace IECoreGL
 
 void bindToGLConverter()
 {
-	typedef class_< ToGLConverter, ToGLConverterPtr, boost::noncopyable, bases< IECore::FromCoreConverter > > ToGLConverterPyClass;
-	ToGLConverterPyClass( "ToGLConverter", no_init )
+	IECore::RunTimeTypedClass<ToGLConverter>()
 		.def( "convert", &ToGLConverter::convert )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToGLConverter )
 	;
-
-	INTRUSIVE_PTR_PATCH( ToGLConverter, ToGLConverterPyClass );
-	implicitly_convertible<ToGLConverterPtr, IECore::FromCoreConverterPtr>();
 }
 
 }

@@ -38,7 +38,6 @@
 
 #include "IECore/Display.h"
 #include "IECore/bindings/DisplayBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -50,8 +49,7 @@ void bindDisplay()
 {
 	using boost::python::arg;
 
-	typedef class_<Display, boost::noncopyable, DisplayPtr, bases<PreWorldRenderable> > DisplayPyClass;
-	DisplayPyClass( "Display", no_init )
+	RunTimeTypedClass<Display>()
 		.def(
 		 	init< optional< const std::string &, const std::string &, const std::string &, CompoundDataPtr > >
 			( 
@@ -72,11 +70,8 @@ void bindDisplay()
 		.def( "setData", &Display::setData )
 		.def( "getData", &Display::getData, return_value_policy<copy_const_reference>() )
 		.def( "parameters", &Display::parametersData )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Display )
 	;
-	INTRUSIVE_PTR_PATCH( Display, DisplayPyClass );
-	implicitly_convertible<DisplayPtr, ConstDisplayPtr>();
-	implicitly_convertible<DisplayPtr, PreWorldRenderablePtr>();
+
 }
 
 }

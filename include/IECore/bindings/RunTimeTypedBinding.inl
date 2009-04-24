@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,70 +32,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_WRAPPERTOPYTHON_H
-#define IECORE_WRAPPERTOPYTHON_H
+#ifndef IE_COREPYTHON_RUNTIMETYPEDBINDING_INL
+#define IE_COREPYTHON_RUNTIMETYPEDBINDING_INL
 
-#include <boost/python.hpp>
-#include <boost/static_assert.hpp>
-#include <cassert>
+#include "boost/algorithm/string/find.hpp"
 
-#include "IECore/bindings/Wrapper.h"
-#include "IECore/WrapperGarbageCollectorBase.h"
+#include "IECore/bindings/RefCountedBinding.h"
+#include "IECore/RunTimeTyped.h"
 
 namespace IECore
 {
 
-/// This class is used to register a to_python_converter which
-/// ensures that wrapped objects go back into python as the exact
-/// PyObject they originated from.
-/// \todo This could be merged with the intrusive ptr patch code,
-/// but only if we wrap every class.
-template<typename TPtr>
-struct WrapperToPython
-{	
-	typedef typename TPtr::element_type T;
-	 
-	WrapperToPython() 
-	{
-		using namespace boost::python;
-		to_python_converter<TPtr, WrapperToPython<TPtr> >();
-	}
-	
-	virtual ~WrapperToPython()
-	{
-	}
-	
-	static PyObject* convert( TPtr const &x )
-	{		
-		if (!x)
-		{
-			return Py_None;
-		}
-		
-		PyObject* converted = WrapperGarbageCollectorBase::pyObject( x.get() );	
-		if( converted )
-		{
-			Py_INCREF( converted );	
-		}
-		else
-		{
-			using namespace boost::python::objects;
-			
-			converted = class_value_wrapper< 
-				TPtr, make_ptr_instance< 
-					T, 
-					pointer_holder<TPtr, T> 
-					>
-				>::convert(x);
-		}
-		
-		assert(converted);
+namespace Detail
+{
 
-		return converted;
+static const char *nameWithoutNamespace( const char *name )
+{
+	boost::iterator_range<const char *> r = boost::find_last( name, ":" );
+	if( !r )
+	{
+		return name;
 	}
+	return r.end();
+}
 
-};
+} // namespace Detail
+
+template<typename T, typename Ptr>
+RunTimeTypedClass<T, Ptr>::RunTimeTypedClass( const char *docString )
+	:	BaseClass( Detail::nameWithoutNamespace( T::staticTypeName() ), docString )
+{
+	
+	BaseClass::BaseClass::def( "staticTypeName", &T::staticTypeName );
+	BaseClass::BaseClass::staticmethod( "staticTypeName" );
+
+	BaseClass::BaseClass::def( "staticTypeId", &T::staticTypeId );
+	BaseClass::BaseClass::staticmethod( "staticTypeId" );
+
+	BaseClass::BaseClass::def( "baseTypeId", ( TypeId (*)( TypeId ) )( &RunTimeTyped::baseTypeId ) );
+	BaseClass::BaseClass::def( "baseTypeId", ( IECore::TypeId (*)() )&T::baseTypeId );
+	BaseClass::BaseClass::staticmethod( "baseTypeId" );
+
+	BaseClass::BaseClass::def( "baseTypeName", &T::baseTypeName );
+	BaseClass::BaseClass::staticmethod( "baseTypeName" );
+
+	BaseClass::BaseClass::def( "inheritsFrom", (bool (*)( const char * ) )&T::inheritsFrom );
+	BaseClass::BaseClass::def( "inheritsFrom", (bool (*)( IECore::TypeId ) )&T::inheritsFrom );
+	BaseClass::BaseClass::staticmethod( "inheritsFrom" );
 
 }
 
-#endif // IECORE_WRAPPERTOPYTHON_H
+} // namespace IECore
+
+#endif // IE_COREPYTHON_RUNTIMETYPEDBINDING_INL

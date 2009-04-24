@@ -35,20 +35,31 @@
 #ifndef IE_COREPYTHON_RUNTIMETYPEDBINDING_H
 #define IE_COREPYTHON_RUNTIMETYPEDBINDING_H
 
+#include "IECore/bindings/RefCountedBinding.h"
+
 namespace IECore
 {
+
 void bindRunTimeTyped();
-}
 
-#define IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CLASSNAME)\
-	def("staticTypeName", &CLASSNAME::staticTypeName).staticmethod("staticTypeName") \
-	.def("staticTypeId", &CLASSNAME::staticTypeId).staticmethod("staticTypeId")\
-	.def( "baseTypeId", ( IECore::TypeId (*)() )&CLASSNAME::baseTypeId )  \
-	.staticmethod("baseTypeId")\
-	.def("baseTypeName", &CLASSNAME::baseTypeName).staticmethod("baseTypeName")\
-	.def("inheritsFrom", (bool (*)( const char *))&CLASSNAME::inheritsFrom)\
-	.def("inheritsFrom", (bool (*)( IECore::TypeId ) )&CLASSNAME::inheritsFrom).staticmethod("inheritsFrom")\
+/// A class to simplify the binding of RunTimeTyped derived classes. This should be used
+/// in place of the usual boost::python::class_. It automatically makes sure the class is bound
+/// with the correct name and base class, as well as dealing with all the issues that RefCountedClass
+/// fixes.
+template<typename T, typename Ptr=boost::intrusive_ptr<T> >
+class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
+{
+
+	public :
+
+		typedef RefCountedClass<T, typename T::BaseClass, Ptr> BaseClass;
 	
+		RunTimeTypedClass( const char *docString = 0 );
+			
+};
 
+} // namespace IECore
+
+#include "IECore/bindings/RunTimeTypedBinding.inl"
 
 #endif // IE_COREPYTHON_RUNTIMETYPEDBINDING_H

@@ -38,10 +38,9 @@
 #include "IECore/TypedParameter.h"
 #include "IECore/CompoundObject.h"
 
-#include "IECore/bindings/WrapperToPython.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/ParameterBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 namespace IECore
 {
@@ -79,12 +78,11 @@ class TypedParameterWrap : public TypedParameter<T>, public Wrapper< TypedParame
 };
 
 template<typename T>
-void bindTypedParameter( const char *name )
+void bindTypedParameter()
 {
 	using boost::python::arg;
 	
-	typedef boost::python::class_< TypedParameter<T>, typename TypedParameterWrap< T >::Ptr, boost::noncopyable, boost::python::bases<Parameter> > TypedParameterPyClass;
-	TypedParameterPyClass( name, boost::python::no_init )
+	RunTimeTypedClass<TypedParameter<T>, typename TypedParameterWrap<T>::Ptr>()
 		.def( 
 			boost::python::init< const std::string &, const std::string &, boost::python::object, boost::python::optional<const boost::python::object &, bool, CompoundObjectPtr > >
 			( 
@@ -101,13 +99,7 @@ void bindTypedParameter( const char *name )
 		.def( "setTypedValue", &TypedParameter<T>::setTypedValue )
 		.def( "getTypedValue", (const T &(TypedParameter<T>::* )() const)&TypedParameter<T>::getTypedValue, boost::python::return_value_policy<boost::python::copy_const_reference>() )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( TypedParameter<T> )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedParameter<T> )
 	;
-
-	WrapperToPython< typename TypedParameter<T>::Ptr >();
-
-	INTRUSIVE_PTR_PATCH( TypedParameter<T>, typename TypedParameterPyClass );
-	boost::python::implicitly_convertible<typename TypedParameter<T>::Ptr, ParameterPtr>();
 
 }
 

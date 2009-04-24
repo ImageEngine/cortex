@@ -37,7 +37,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/bindings/FontBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/Font.h"
 #include "IECore/MeshPrimitive.h"
@@ -73,8 +72,8 @@ static ImagePrimitivePtr image( Font &f, char c )
 
 void bindFont()
 {
-	typedef class_< Font, boost::noncopyable, FontPtr, bases< RunTimeTyped > > FontPyClass;
-	FontPyClass( "Font", init<const std::string &>() )
+	RunTimeTypedClass<Font>()
+		.def(  init<const std::string &>() )
 		.def( "fileName", &Font::fileName, return_value_policy<copy_const_reference>() )
 		.def( "setCurveTolerance", &Font::setCurveTolerance )
 		.def( "getCurveTolerance", &Font::getCurveTolerance )
@@ -91,11 +90,8 @@ void bindFont()
 		.def( "bound", (Imath::Box2f (Font::*)( const std::string &)const)&Font::bound )
 		.def( "image", &image )
 		.def( "image", (ImagePrimitivePtr (Font::*)()const)&Font::image )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Font )		
 	;
 
-	INTRUSIVE_PTR_PATCH( Font, FontPyClass );
-	implicitly_convertible<FontPtr, RunTimeTypedPtr>();
 }
 	
 } // namespace IECore

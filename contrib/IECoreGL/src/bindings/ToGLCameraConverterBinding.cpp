@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECoreGL/ToGLCameraConverter.h"
 #include "IECoreGL/bindings/ToGLCameraConverterBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,13 +47,9 @@ namespace IECoreGL
 
 void bindToGLCameraConverter()
 {
-	typedef class_< ToGLCameraConverter, ToGLCameraConverterPtr, boost::noncopyable, bases<ToGLConverter> > ToGLCameraConverterPyClass;
-	ToGLCameraConverterPyClass( "ToGLCameraConverter", init< IECore::ConstCameraPtr >() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ToGLCameraConverter )
+	IECore::RunTimeTypedClass<ToGLCameraConverter>()
+		.def( init< IECore::ConstCameraPtr >() )
 	;
-
-	INTRUSIVE_PTR_PATCH( ToGLCameraConverter, ToGLCameraConverterPyClass );
-	implicitly_convertible<ToGLCameraConverterPtr, ToGLConverterPtr>();
 }
 
 }

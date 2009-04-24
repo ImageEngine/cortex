@@ -38,7 +38,6 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/MeshPrimitiveImplicitSurfaceOpBinding.h"
 
@@ -51,15 +50,10 @@ namespace IECore
 void bindMeshPrimitiveImplicitSurfaceOp()
 {
 	
-	typedef class_< MeshPrimitiveImplicitSurfaceOp, MeshPrimitiveImplicitSurfaceOpPtr, boost::noncopyable, bases<MeshPrimitiveOp> > MeshPrimitiveImplicitSurfaceOpPyClass;
-	MeshPrimitiveImplicitSurfaceOpPyClass( "MeshPrimitiveImplicitSurfaceOp", no_init )
+	RunTimeTypedClass<MeshPrimitiveImplicitSurfaceOp>()
 		.def( init< >() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( MeshPrimitiveImplicitSurfaceOp )
 	;
 	
-	INTRUSIVE_PTR_PATCH( MeshPrimitiveImplicitSurfaceOp, MeshPrimitiveImplicitSurfaceOpPyClass );
-	implicitly_convertible<MeshPrimitiveImplicitSurfaceOpPtr, MeshPrimitiveOpPtr>();	
-
 }
 
 } // namespace IECore

@@ -39,7 +39,6 @@
 #include "IECore/Renderable.h"
 #include "IECore/Renderer.h"
 #include "IECore/bindings/RenderableBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -49,13 +48,9 @@ namespace IECore
 
 void bindRenderable()
 {
-	typedef class_< Renderable, boost::noncopyable, RenderablePtr, bases<BlindDataHolder> > RenderablePyClass;
-	RenderablePyClass("Renderable", "An abstract class to define objects which are renderable", no_init)
+	RunTimeTypedClass<Renderable>( "An abstract class to define objects which are renderable" )
 		.def("render", &Renderable::render)
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Renderable)
 	;
-	INTRUSIVE_PTR_PATCH( Renderable, RenderablePyClass );
-	implicitly_convertible<RenderablePtr, BlindDataHolderPtr>();
 }
 
 }

@@ -41,7 +41,7 @@
 #include "IECore/IndexedIO.h"
 #include "IECore/AttributeCache.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -117,14 +117,11 @@ struct AttributeCacheHelper
 };
 
 void bindAttributeCache()
-{
-	const char *bindName = "AttributeCache";
-	
+{	
 	bool (AttributeCache::*containsObj)(const AttributeCache::ObjectHandle &) = &AttributeCache::contains;
 	bool (AttributeCache::*containsObjAttr)(const AttributeCache::ObjectHandle &, const AttributeCache::AttributeHandle &) = &AttributeCache::contains;
 	
-	typedef class_< AttributeCache, AttributeCachePtr > AttributeCachePyClass;
-	AttributeCachePyClass ( bindName, no_init )
+	RefCountedClass<AttributeCache, RefCounted>( "AttributeCache" )
 		.def( init<const std::string &, IndexedIO::OpenMode>() )
 		.def("write", &AttributeCache::write)
 		.def("writeHeader", &AttributeCache::writeHeader)
@@ -141,6 +138,5 @@ void bindAttributeCache()
 		.def("remove", (void (AttributeCache::*)( const AttributeCache::ObjectHandle & ))&AttributeCache::remove)
 		.def("removeHeader", &AttributeCache::removeHeader )
 	;
-	INTRUSIVE_PTR_PATCH( AttributeCache, AttributeCachePyClass );
 }
 }

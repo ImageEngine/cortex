@@ -36,8 +36,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FrameListBinding.h"
 
 #include "IECore/BinaryFrameList.h"
@@ -63,15 +61,10 @@ std::string repr( BinaryFrameList &x )
 
 void bindBinaryFrameList()
 {	
-	typedef class_< BinaryFrameList, BinaryFrameList::Ptr, bases< ReorderedFrameList >, boost::noncopyable > BinaryFrameListPyClass;
-	BinaryFrameListPyClass ( "BinaryFrameList", no_init )
+	RunTimeTypedClass<BinaryFrameList>()
 		.def( init< optional< FrameListPtr > >() )	
 		.def( "__repr__", repr< BinaryFrameList > )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(BinaryFrameList)		
 	;
-		
-	INTRUSIVE_PTR_PATCH( BinaryFrameList, BinaryFrameListPyClass );
-	implicitly_convertible<BinaryFrameListPtr, ReorderedFrameListPtr>();	
 }
 
 }

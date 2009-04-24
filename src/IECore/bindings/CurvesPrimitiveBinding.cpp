@@ -36,7 +36,6 @@
 
 #include "IECore/bindings/CurvesPrimitiveBinding.h"
 #include "IECore/CurvesPrimitive.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -52,8 +51,8 @@ static IntVectorDataPtr verticesPerFace( const CurvesPrimitive &p )
 
 void bindCurvesPrimitive()
 {
-	typedef class_<CurvesPrimitive, CurvesPrimitivePtr, bases<Primitive>, boost::noncopyable> CurvesPrimitivePyClass;
-	CurvesPrimitivePyClass( "CurvesPrimitive" )
+	RunTimeTypedClass<CurvesPrimitive>()
+		.def( init<>() )
 		.def( init<IntVectorDataPtr, optional<const CubicBasisf &, bool, ConstV3fVectorDataPtr> >() )
 		.def( "verticesPerCurve", &verticesPerFace, "A copy of the list of vertices per curve." )
 		.def( "basis", &CurvesPrimitive::basis, return_value_policy<copy_const_reference>() )
@@ -61,11 +60,7 @@ void bindCurvesPrimitive()
 		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation )const)&CurvesPrimitive::variableSize )
 		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation, unsigned )const)&CurvesPrimitive::variableSize )
 		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned )const)&CurvesPrimitive::numSegments )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( CurvesPrimitive )
 	;
-	INTRUSIVE_PTR_PATCH( CurvesPrimitive, CurvesPrimitivePyClass );
-	implicitly_convertible<CurvesPrimitivePtr, PrimitivePtr>();
-	implicitly_convertible<CurvesPrimitivePtr, ConstCurvesPrimitivePtr>();
 }
 	
 } // namespace IECore

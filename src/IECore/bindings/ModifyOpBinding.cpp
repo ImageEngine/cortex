@@ -38,9 +38,8 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -66,17 +65,9 @@ IE_CORE_DECLAREPTR( ModifyOpWrap );
 
 void bindModifyOp()
 {
-	typedef class_< ModifyOp, ModifyOpWrapPtr, boost::noncopyable, bases<Op> > ModifyOpPyClass;
-	ModifyOpPyClass( "ModifyOp", no_init )
+	RunTimeTypedClass<ModifyOp, ModifyOpWrapPtr>()
 		.def( init< const std::string, const std::string, ParameterPtr, ParameterPtr >() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ModifyOp)
 	;
-	
-	WrapperToPython<ModifyOpPtr>();
-
-	INTRUSIVE_PTR_PATCH( ModifyOp, ModifyOpPyClass );
-	implicitly_convertible<ModifyOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

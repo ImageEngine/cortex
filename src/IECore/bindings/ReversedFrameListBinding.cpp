@@ -36,8 +36,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FrameListBinding.h"
 
 #include "IECore/ReversedFrameList.h"
@@ -63,15 +61,10 @@ std::string repr( ReversedFrameList &x )
 
 void bindReversedFrameList()
 {	
-	typedef class_< ReversedFrameList, ReversedFrameList::Ptr, bases< ReorderedFrameList >, boost::noncopyable > ReversedFrameListPyClass;
-	ReversedFrameListPyClass ( "ReversedFrameList", no_init )
+	RunTimeTypedClass<ReversedFrameList>()
 		.def( init< optional< FrameListPtr > >() )	
 		.def( "__repr__", repr< ReversedFrameList > )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ReversedFrameList)	
 	;
-		
-	INTRUSIVE_PTR_PATCH( ReversedFrameList, ReversedFrameListPyClass );
-	implicitly_convertible<ReversedFrameListPtr, ReorderedFrameListPtr>();	
 }
 
 }

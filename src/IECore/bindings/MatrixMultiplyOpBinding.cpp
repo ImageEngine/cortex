@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/MatrixMultiplyOp.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -45,14 +44,9 @@ namespace IECore {
 
 void bindMatrixMultiplyOp()
 {
-	typedef class_< MatrixMultiplyOp, MatrixMultiplyOpPtr, boost::noncopyable, bases<ModifyOp> > MatrixMultiplyOpPyClass;
-	MatrixMultiplyOpPyClass( "MatrixMultiplyOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( MatrixMultiplyOp )
+	RunTimeTypedClass<MatrixMultiplyOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( MatrixMultiplyOp, MatrixMultiplyOpPyClass );
-	implicitly_convertible<MatrixMultiplyOpPtr, ModifyOpPtr>();	
-
 }
 
 } // namespace IECore

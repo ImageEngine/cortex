@@ -41,7 +41,7 @@
 #include "IECore/IndexedIO.h"
 #include "IECore/HierarchicalCache.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -136,8 +136,7 @@ void bindHierarchicalCache()
 	bool (HierarchicalCache::*containsObj)(const HierarchicalCache::ObjectHandle &) = &HierarchicalCache::contains;
 	bool (HierarchicalCache::*containsObjAttr)(const HierarchicalCache::ObjectHandle &, const HierarchicalCache::AttributeHandle &) = &HierarchicalCache::contains;
 	
-	typedef class_< HierarchicalCache, HierarchicalCachePtr > HierarchicalCachePyClass;
-	HierarchicalCachePyClass ( bindName, no_init )
+	RefCountedClass<HierarchicalCache, RefCounted>( bindName )
 		.def( init<const std::string &, IndexedIO::OpenMode>() )
 		.def("write", (void (HierarchicalCache::*)( const HierarchicalCache::ObjectHandle &, const HierarchicalCache::AttributeHandle &, ObjectPtr ))&HierarchicalCache::write)
 		.def("writeHeader", &HierarchicalCache::writeHeader)
@@ -173,6 +172,5 @@ void bindHierarchicalCache()
 		.staticmethod( "rootName" )
 	;
 
-	INTRUSIVE_PTR_PATCH( HierarchicalCache, HierarchicalCachePyClass );
 }
 }

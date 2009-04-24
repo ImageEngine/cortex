@@ -36,7 +36,6 @@
 
 #include "IECore/PointsPrimitive.h"
 #include "IECore/bindings/PointsPrimitiveBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -46,16 +45,12 @@ namespace IECore
 
 void bindPointsPrimitive()
 {	
-	typedef class_< PointsPrimitive, PointsPrimitivePtr, bases<Primitive>, boost::noncopyable > PointsPrimitivePyClass;
-	scope primScope = PointsPrimitivePyClass( "PointsPrimitive", no_init )
+	scope primScope = RunTimeTypedClass<PointsPrimitive>()
 		.def( init<size_t>() )
 		.def( init<V3fVectorDataPtr>() )
 		.def( init<V3fVectorDataPtr, FloatVectorDataPtr>() )
 		.add_property( "numPoints", &PointsPrimitive::getNumPoints, &PointsPrimitive::setNumPoints  )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(PointsPrimitive)
 	;
-	INTRUSIVE_PTR_PATCH( PointsPrimitive, PointsPrimitivePyClass );
-	implicitly_convertible<PointsPrimitivePtr, PrimitivePtr>();
 }
 
 }

@@ -38,9 +38,8 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -67,25 +66,17 @@ class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPri
 };
 
 template<typename T>
-static void bindTypedPrimitiveOp( const char *name )
+static void bindTypedPrimitiveOp()
 {
-	typedef class_< TypedPrimitiveOp<T>, typename TypedPrimitiveOpWrap<T>::Ptr, boost::noncopyable, bases<ModifyOp> > TypedPrimitiveOpPyClass;
-	TypedPrimitiveOpPyClass( name, no_init )
+	RunTimeTypedClass<TypedPrimitiveOp<T>, typename TypedPrimitiveOpWrap<T>::Ptr>()
 		.def( init< const std::string, const std::string>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TypedPrimitiveOp<T> )
 	;
-	
-	WrapperToPython< typename TypedPrimitiveOp<T>::Ptr >();
-
-	INTRUSIVE_PTR_PATCH_TEMPLATE( TypedPrimitiveOp<T>, TypedPrimitiveOpPyClass );
-	implicitly_convertible< typename TypedPrimitiveOp<T>::Ptr , ModifyOpPtr>();	
-
 }
 
 void bindTypedPrimitiveOp()
 {
-	bindTypedPrimitiveOp< MeshPrimitive >( "MeshPrimitiveOp" );
-	bindTypedPrimitiveOp< ImagePrimitive >( "ImagePrimitiveOp" );
+	bindTypedPrimitiveOp< MeshPrimitive >();
+	bindTypedPrimitiveOp< ImagePrimitive >();
 }
 
 } // namespace IECore

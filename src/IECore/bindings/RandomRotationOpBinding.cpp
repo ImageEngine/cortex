@@ -38,7 +38,6 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -48,14 +47,9 @@ namespace IECore {
 
 void bindRandomRotationOp()
 {
-	typedef class_< RandomRotationOp, RandomRotationOpPtr, boost::noncopyable, bases<Op> > RandomRotationOpPyClass;
-	RandomRotationOpPyClass( "RandomRotationOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(RandomRotationOp)
+	RunTimeTypedClass<RandomRotationOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( RandomRotationOp, RandomRotationOpPyClass );
-	implicitly_convertible<RandomRotationOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

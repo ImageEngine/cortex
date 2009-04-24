@@ -36,7 +36,6 @@
 
 #include "IECore/CubeColorTransformOp.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -47,15 +46,9 @@ namespace IECore
 
 void bindCubeColorTransformOp()
 {
-	typedef class_< CubeColorTransformOp, CubeColorTransformOpPtr, boost::noncopyable, bases<ColorTransformOp> > CubeColorTransformOpPyClass;
-	CubeColorTransformOpPyClass( "CubeColorTransformOp", no_init )
+	RunTimeTypedClass<CubeColorTransformOp>()
 		.def( init<>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CubeColorTransformOp)
 	;
-	
-	INTRUSIVE_PTR_PATCH( CubeColorTransformOp, CubeColorTransformOpPyClass );
-	implicitly_convertible<CubeColorTransformOpPtr, ColorTransformOpPtr>();	
-
 }
 
 } // namespace IECore

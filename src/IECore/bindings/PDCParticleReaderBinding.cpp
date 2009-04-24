@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/PDCParticleReader.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -46,14 +45,10 @@ namespace IECore {
 
 void bindPDCParticleReader()
 {
-	typedef class_< PDCParticleReader , PDCParticleReaderPtr, boost::noncopyable, bases<ParticleReader> > PDCParticleReaderPyClass;
-	PDCParticleReaderPyClass( "PDCParticleReader", init<>() )
+	RunTimeTypedClass<PDCParticleReader>()
+		.def( init<>() )
 		.def( init<const std::string &>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( PDCParticleReader )
 	;
-
-	INTRUSIVE_PTR_PATCH( PDCParticleReader, PDCParticleReaderPyClass );
-	implicitly_convertible<PDCParticleReaderPtr, ParticleReaderPtr>();
 }
 
 } // namespace IECore

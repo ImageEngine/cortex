@@ -38,7 +38,6 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -49,14 +48,10 @@ namespace IECore
 
 void bindImageDiffOp()
 {
-	typedef class_< ImageDiffOp, ImageDiffOpPtr, boost::noncopyable, bases<Op> > ImageDiffOpPyClass;
-	ImageDiffOpPyClass( "ImageDiffOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImageDiffOp)
+	RunTimeTypedClass<ImageDiffOp>()
+		.def( init<>() )
 	;
 	
-	INTRUSIVE_PTR_PATCH( ImageDiffOp, ImageDiffOpPyClass );
-	implicitly_convertible<ImageDiffOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

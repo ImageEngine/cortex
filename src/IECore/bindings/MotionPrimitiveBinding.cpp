@@ -36,7 +36,6 @@
 
 #include "IECore/MotionPrimitive.h"
 #include "IECore/bindings/MotionPrimitiveBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -106,8 +105,8 @@ static boost::python::list values( MotionPrimitive &p )
 
 void bindMotionPrimitive()
 {	
-	typedef class_< MotionPrimitive, MotionPrimitivePtr, bases<VisibleRenderable>, boost::noncopyable > MotionPrimitivePyClass;
-	MotionPrimitivePyClass( "MotionPrimitive" )
+	RunTimeTypedClass<MotionPrimitive>()
+		.def( init<>() )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
 		.def( "__setitem__", &setItem )
@@ -115,10 +114,7 @@ void bindMotionPrimitive()
 		.def( "__contains__", &contains )
 		.def( "keys", &keys )
 		.def( "values", &values )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(MotionPrimitive)
 	;
-	INTRUSIVE_PTR_PATCH( MotionPrimitive, MotionPrimitivePyClass );
-	implicitly_convertible<MotionPrimitivePtr, RenderablePtr>();
 }
 
 }

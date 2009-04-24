@@ -38,7 +38,6 @@
 
 #include "IECore/PreWorldRenderable.h"
 #include "IECore/bindings/PreWorldRenderableBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,12 +47,8 @@ namespace IECore
 
 void bindPreWorldRenderable()
 {
-	typedef class_< PreWorldRenderable, boost::noncopyable, PreWorldRenderablePtr, bases<Renderable> > PreWorldRenderablePyClass;
-	PreWorldRenderablePyClass("PreWorldRenderable", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( PreWorldRenderable )
+	RunTimeTypedClass<PreWorldRenderable>()
 	;
-	INTRUSIVE_PTR_PATCH( PreWorldRenderable, PreWorldRenderablePyClass );
-	implicitly_convertible<PreWorldRenderablePtr, RenderablePtr>();
 }
 
 }

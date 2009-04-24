@@ -36,7 +36,6 @@
 
 #include "IECore/CoordinateSystem.h"
 #include "IECore/bindings/CoordinateSystemBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -46,15 +45,12 @@ namespace IECore
 
 void bindCoordinateSystem()
 {
-	typedef class_<CoordinateSystem, CoordinateSystemPtr, bases<StateRenderable>, boost::noncopyable> CoordinateSystemPyClass;
-	CoordinateSystemPyClass( "CoordinateSystem" )
+	RunTimeTypedClass<CoordinateSystem>()
+		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "getName", &CoordinateSystem::getName, return_value_policy<copy_const_reference>() )
 		.def( "setName", &CoordinateSystem::setName )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CoordinateSystem)
 	;
-	INTRUSIVE_PTR_PATCH( CoordinateSystem, CoordinateSystemPyClass );
-	implicitly_convertible<CoordinateSystemPtr, StateRenderablePtr>();
 }
 	
 }

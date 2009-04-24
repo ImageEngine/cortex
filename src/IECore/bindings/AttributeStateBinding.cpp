@@ -36,7 +36,6 @@
 
 #include "IECore/AttributeState.h"
 #include "IECore/bindings/AttributeStateBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -45,13 +44,9 @@ namespace IECore
 {
 	void bindAttributeState()
 	{
-		typedef class_<AttributeState, AttributeStatePtr, bases<StateRenderable>, boost::noncopyable> AttributeStatePyClass;
-		AttributeStatePyClass( "AttributeState" )
+		RunTimeTypedClass<AttributeState>( "AttributeState" )
+			.def( init<>() )
 			.add_property( "attributes", &AttributeState::attributesData )
-			.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(AttributeState)
 		;
-		INTRUSIVE_PTR_PATCH( AttributeState, AttributeStatePyClass );
-		implicitly_convertible<AttributeStatePtr, StateRenderablePtr>();
 	}
-	
 }

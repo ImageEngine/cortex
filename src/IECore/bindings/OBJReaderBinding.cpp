@@ -36,7 +36,6 @@
 
 #include "IECore/OBJReader.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -45,15 +44,11 @@ using namespace boost::python;
 
 namespace IECore {
 	
-	void bindOBJReader() {
-		typedef class_<OBJReader, OBJReaderPtr, boost::noncopyable, bases<Reader> > OBJReaderPyClass;
-		OBJReaderPyClass("OBJReader", no_init)
+	void bindOBJReader()
+	{
+		RunTimeTypedClass<OBJReader>()
 			.def(init<const std::string &>())
-			.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(OBJReader)
-			;
-
-		//INTRUSIVE_PTR_PATCH(OBJReader, ReaderPyClass);
-		implicitly_convertible<OBJReaderPtr, ReaderPtr>();
+		;
   }
   
 } // namespace IECore

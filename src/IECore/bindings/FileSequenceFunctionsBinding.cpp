@@ -43,8 +43,6 @@
 #include "IECore/FileSequenceFunctions.h"
 
 #include "IECore/bindings/IECoreBinding.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/FileSequenceFunctionsBinding.h"
 
 using namespace boost::python;

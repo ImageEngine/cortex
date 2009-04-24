@@ -38,7 +38,6 @@
 
 #include "IECore/VisibleRenderable.h"
 #include "IECore/bindings/VisibleRenderableBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,14 +47,9 @@ namespace IECore
 
 void bindVisibleRenderable()
 {
-	typedef class_< VisibleRenderable, boost::noncopyable, VisibleRenderablePtr, bases<Renderable> > VisibleRenderablePyClass;
-	VisibleRenderablePyClass("VisibleRenderable", "An abstract class to define objects which create visible results but don't leave renderer state unchanged.", no_init)
+	RunTimeTypedClass<VisibleRenderable>( "An abstract class to define objects which create visible results but don't leave renderer state unchanged." )
 		.def( "bound", &VisibleRenderable::bound )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(VisibleRenderable)
 	;
-	INTRUSIVE_PTR_PATCH( VisibleRenderable, VisibleRenderablePyClass );
-	implicitly_convertible<VisibleRenderablePtr, RenderablePtr>();
-	implicitly_convertible<VisibleRenderablePtr, ConstVisibleRenderablePtr>();
 }
 
 }

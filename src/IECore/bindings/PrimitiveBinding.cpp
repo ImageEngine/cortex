@@ -36,7 +36,6 @@
 
 #include "IECore/Primitive.h"
 #include "IECore/bindings/PrimitiveBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -103,8 +102,7 @@ static void delItem( Primitive &p, const std::string &n )
 
 void bindPrimitive()
 {	
-	typedef class_< Primitive, PrimitivePtr, bases<VisibleRenderable>, boost::noncopyable > PrimitivePyClass;
-	PrimitivePyClass( "Primitive", no_init )
+	RunTimeTypedClass<Primitive>()
 		.def( "variableSize", &Primitive::variableSize )
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem, "Returns a shallow copy of the requested PrimitiveVariable object." )
@@ -117,11 +115,7 @@ void bindPrimitive()
 		.def( "arePrimitiveVariablesValid", &Primitive::arePrimitiveVariablesValid)
 		.def( "inferInterpolation", (PrimitiveVariable::Interpolation (Primitive::*)( ConstDataPtr ) const)&Primitive::inferInterpolation )
 		.def( "inferInterpolation", (PrimitiveVariable::Interpolation (Primitive::*)( size_t ) const)&Primitive::inferInterpolation )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Primitive)		
-	;
-	INTRUSIVE_PTR_PATCH( Primitive, PrimitivePyClass );
-	implicitly_convertible<PrimitivePtr, VisibleRenderablePtr>();
-	
+	;	
 }
 
 }

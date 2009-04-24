@@ -39,7 +39,6 @@
 #include "IECore/Camera.h"
 #include "IECore/Transform.h"
 #include "IECore/bindings/CameraBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -50,8 +49,7 @@ namespace IECore
 
 void bindCamera()
 {
-	typedef class_<Camera, boost::noncopyable, CameraPtr, bases<PreWorldRenderable> > CameraPyClass;
-	CameraPyClass( "Camera", no_init )
+	RunTimeTypedClass<Camera>()
 		.def( init< optional< const std::string &, TransformPtr, CompoundDataPtr > >
 			( 
 				( 
@@ -69,11 +67,7 @@ void bindCamera()
 		.def( "getTransform", (TransformPtr (Camera::*)())&Camera::getTransform )
 		.def( "parameters", &Camera::parametersData )
 		.def( "addStandardParameters", &Camera::addStandardParameters )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Camera )
 	;
-	INTRUSIVE_PTR_PATCH( Camera, CameraPyClass );
-	implicitly_convertible<CameraPtr, ConstCameraPtr>();
-	implicitly_convertible<CameraPtr, PreWorldRenderablePtr>();
 }
 
 }

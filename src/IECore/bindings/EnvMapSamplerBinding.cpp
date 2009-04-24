@@ -36,7 +36,6 @@
 
 #include "IECore/EnvMapSampler.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -47,14 +46,9 @@ namespace IECore
 
 void bindEnvMapSampler()
 {
-	typedef class_< EnvMapSampler, EnvMapSamplerPtr, boost::noncopyable, bases<IECore::Op> > EnvMapSamplerPyClass;
-	EnvMapSamplerPyClass( "EnvMapSampler" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(EnvMapSampler)
+	RunTimeTypedClass<EnvMapSampler>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( EnvMapSampler, EnvMapSamplerPyClass );
-	implicitly_convertible<EnvMapSamplerPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/ParticleWriter.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -46,12 +45,8 @@ namespace IECore {
 
 void bindParticleWriter()
 {
-	typedef class_< ParticleWriter , ParticleWriterPtr, boost::noncopyable, bases<Writer> > ParticleWriterPyClass;
-	ParticleWriterPyClass( "ParticleWriter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ParticleWriter)
+	RunTimeTypedClass<ParticleWriter>()
 	;
-	INTRUSIVE_PTR_PATCH( ParticleWriter, ParticleWriterPyClass );
-	implicitly_convertible<ParticleWriterPtr, WriterPtr>();
 }
 
 } // namespace IECore

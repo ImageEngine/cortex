@@ -35,7 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/bindings/TriangulatorBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RefCountedBinding.h"
 
 #include "IECore/Triangulator.h"
 
@@ -68,15 +68,11 @@ static void triangulateLoops( T &t, list loops )
 template<typename T>
 void bindTriangulator( const char *name )
 {
-	typedef class_<T, typename T::Ptr, bases<RefCounted>, boost::noncopyable > TriangulatorPyClass;
-	
-	TriangulatorPyClass( name, init<typename T::MeshBuilderType::Ptr>() )
+	RefCountedClass<T, RefCounted>( name )
+		.def( init<typename T::MeshBuilderType::Ptr>() )
 		.def( "triangulate", &triangulate<T> )
 		.def( "triangulate", &triangulateLoops<T> )
 	;
-	
-	INTRUSIVE_PTR_PATCH_TEMPLATE( T, TriangulatorPyClass );
-	implicitly_convertible< typename T::Ptr, RefCountedPtr>();	
 }
 
 void bindTriangulator()

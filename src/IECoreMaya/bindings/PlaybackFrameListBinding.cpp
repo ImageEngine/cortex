@@ -38,8 +38,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 
 #include "IECoreMaya/bindings/PlaybackFrameListBinding.h"
 #include "IECoreMaya/PlaybackFrameList.h"
@@ -69,11 +67,9 @@ namespace IECoreMaya
 
 void bindPlaybackFrameList()
 {	
-	typedef class_< PlaybackFrameList, PlaybackFrameList::Ptr, bases< FrameList >, boost::noncopyable > PlaybackFrameListPyClass;
-	object o = PlaybackFrameListPyClass ( "PlaybackFrameList", no_init )
+	object o = RunTimeTypedClass<PlaybackFrameList>()
 		.def( init< PlaybackFrameList::Range >() )
 		.add_property( "range", &PlaybackFrameList::getRange, &PlaybackFrameList::setRange )		
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(PlaybackFrameList)	
 	;
 	
 	scope oS( o );
@@ -82,9 +78,6 @@ void bindPlaybackFrameList()
 		.value( "Animation", PlaybackFrameList::Animation )
 		.value( "Playback", PlaybackFrameList::Playback )
 	;		
-		
-	INTRUSIVE_PTR_PATCH( PlaybackFrameList, PlaybackFrameListPyClass );
-	implicitly_convertible<PlaybackFrameListPtr, FrameListPtr>();	
 }
 
 }

@@ -38,7 +38,6 @@
 
 #include "IECore/HeaderGenerator.h"
 #include "IECore/bindings/HeaderGeneratorBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 
 using namespace boost::python;
 using namespace IECore;

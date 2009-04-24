@@ -38,7 +38,6 @@
 
 #include "IECore/MatrixTransform.h"
 #include "IECore/bindings/MatrixTransformBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,13 +47,10 @@ namespace IECore
 
 void bindMatrixTransform()
 {
-	typedef class_< MatrixTransform, boost::noncopyable, MatrixTransformPtr, bases<Transform> > MatrixTransformPyClass;
-	MatrixTransformPyClass("MatrixTransform", init<const Imath::M44f &>() )
+	RunTimeTypedClass<MatrixTransform>()
+		.def( init<const Imath::M44f &>() )
 		.def_readwrite("matrix", &MatrixTransform::matrix)
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(MatrixTransform)
 	;
-	INTRUSIVE_PTR_PATCH( MatrixTransform, MatrixTransformPyClass );
-	implicitly_convertible<MatrixTransformPtr,TransformPtr>();
 }
 
 }

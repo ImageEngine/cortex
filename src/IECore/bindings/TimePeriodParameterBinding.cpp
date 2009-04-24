@@ -42,7 +42,7 @@ namespace IECore
 
 void bindTimePeriodParameter()
 {
-	bindTypedParameter<TimePeriod>( "TimePeriodParameter" );
+	bindTypedParameter<TimePeriod>();
 }
 
 } // namespace IECore

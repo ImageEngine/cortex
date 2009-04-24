@@ -38,7 +38,6 @@
 
 #include "IECore/StateRenderable.h"
 #include "IECore/bindings/StateRenderableBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,12 +47,8 @@ namespace IECore
 
 void bindStateRenderable()
 {
-	typedef class_< StateRenderable, boost::noncopyable, StateRenderablePtr, bases<Renderable> > StateRenderablePyClass;
-	StateRenderablePyClass("StateRenderable", "An abstract class to define objects which are renderable but which only modify renderer state.", no_init)
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(StateRenderable)
+	RunTimeTypedClass<StateRenderable>( "An abstract class to define objects which are renderable but which only modify renderer state." )
 	;
-	INTRUSIVE_PTR_PATCH( StateRenderable, StateRenderablePyClass );
-	implicitly_convertible<StateRenderablePtr, RenderablePtr>();
 }
 
 }

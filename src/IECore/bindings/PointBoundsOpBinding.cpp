@@ -38,7 +38,6 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -48,14 +47,9 @@ namespace IECore {
 
 void bindPointBoundsOp()
 {
-	typedef class_< PointBoundsOp, PointBoundsOpPtr, boost::noncopyable, bases<Op> > PointBoundsOpPyClass;
-	PointBoundsOpPyClass( "PointBoundsOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(PointBoundsOp)
+	RunTimeTypedClass<PointBoundsOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( PointBoundsOp, PointBoundsOpPyClass );
-	implicitly_convertible<PointBoundsOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

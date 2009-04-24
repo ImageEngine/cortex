@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/NullObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -45,17 +44,10 @@ namespace IECore
 
 void bindNullObject()
 {
-	typedef class_<NullObject, boost::noncopyable, NullObjectPtr, bases<Object> > NullObjectPyClass;
-	NullObjectPyClass( "NullObject", no_init )
+	RunTimeTypedClass<NullObject>()
 		.def( init<>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(NullObject)
 		.def( "defaultNullObject", NullObject::defaultNullObject ).staticmethod( "defaultNullObject" )
 	;
-	
-	INTRUSIVE_PTR_PATCH( NullObject, NullObjectPyClass );
-
-	implicitly_convertible<NullObjectPtr, ObjectPtr>();
-
 }
 
 }

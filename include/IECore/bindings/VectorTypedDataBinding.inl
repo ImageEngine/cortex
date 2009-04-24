@@ -636,20 +636,19 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 }																										\
  
 /// \todo Get rid of these macros
-#define BASIC_VECTOR_BINDING(T, bindName, Tname)																	\
+#define BASIC_VECTOR_BINDING(T, Tname)																	\
 		typedef TypedData< std::vector< T > > ThisClass;															\
 		typedef boost::intrusive_ptr< ThisClass > ThisClassPtr;														\
 		typedef boost::intrusive_ptr< const ThisClass > ThisConstClassPtr;											\
 		typedef VectorTypedDataFunctions< std::vector<T> > ThisBinder;												\
 																													\
-		typedef class_< ThisClass , boost::intrusive_ptr< ThisClass >, boost::noncopyable, bases<Data> > PyClass;	\
-		PyClass(bindName, 																							\
+		RunTimeTypedClass<ThisClass>(																							\
 			Tname "-type vector class derived from Data class.\n"													\
 			"This class behaves like the native python lists, except that it only accepts " Tname " values.\n"		\
 			"The copy constructor accepts another instance of this class or a python list containing " Tname		\
 			"\nor any other python built-in type that is convertible into it.\n"									\
  			"It accepts slicing, negative indexing and special functions like extend, insert, etc.\n"				\
-			, no_init)																								\
+			)																								\
 			.def("__init__", make_constructor(&ThisBinder::dataConstructor), "Default constructor: creates an empty vector.")	\
 			.def("__init__", make_constructor(&ThisBinder::dataListOrSizeConstructor),										\
 						 "Accepts another vector of the same class or a python list containing " Tname \
@@ -674,23 +673,19 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 			.def("resize", &ThisBinder::resizeWithValue, "s.resize( size, value )\nAdjusts the size of s, inserting elements of value as necessary.")	\
 			.def("__str__", &str<ThisClass> )	\
 			.def("__repr__", &repr<ThisClass> )	\
-			.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ThisClass )
 
 // bind a VectorTypedData class that does not support Math operators
-#define BIND_VECTOR_TYPEDDATA(T, bindName, Tname)													\
+#define BIND_VECTOR_TYPEDDATA(T, Tname)													\
 		{																							\
-			BASIC_VECTOR_BINDING(T, bindName, Tname)																	\
+			BASIC_VECTOR_BINDING(T, Tname)																	\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
 			;																						\
-			INTRUSIVE_PTR_PATCH( ThisClass, PyClass );												\
-			implicitly_convertible<ThisClassPtr, DataPtr>();										\
-			implicitly_convertible<ThisClassPtr, ThisConstClassPtr>();								\
 		}
 
 // bind a VectorTypedData class that supports simple Math operators (+=, -= and *=)
-#define BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA(T, bindName, Tname)									\
+#define BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA(T, Tname)									\
 		{																							\
-			BASIC_VECTOR_BINDING(T, bindName, Tname)																	\
+			BASIC_VECTOR_BINDING(T, Tname)																	\
 				/* operators */																			\
 				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname)			\
@@ -700,15 +695,12 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 				.def("__imul__", &ThisBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname)		\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
 			;																						\
-			INTRUSIVE_PTR_PATCH( ThisClass, PyClass );												\
-			implicitly_convertible<ThisClassPtr, DataPtr>();										\
-			implicitly_convertible<ThisClassPtr, ThisConstClassPtr>();								\
 		}
 
 // bind a VectorTypedData class that supports all Math operators (+=, -=, *=, /=)
-#define BIND_OPERATED_VECTOR_TYPEDDATA(T, bindName, Tname)											\
+#define BIND_OPERATED_VECTOR_TYPEDDATA(T, Tname)											\
 		{																							\
-			BASIC_VECTOR_BINDING(T, bindName, Tname)																	\
+			BASIC_VECTOR_BINDING(T, Tname)																	\
 				/* operators */																			\
 				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname)			\
@@ -720,15 +712,12 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
 			;																						\
-			INTRUSIVE_PTR_PATCH( ThisClass, PyClass );												\
-			implicitly_convertible<ThisClassPtr, DataPtr>();										\
-			implicitly_convertible<ThisClassPtr, ThisConstClassPtr>();								\
 		}
 
 // bind a VectorTypedData class that supports all Math operators (+=, -=, *=, /=, <, >)
-#define BIND_FULL_OPERATED_VECTOR_TYPEDDATA(T, bindName, Tname)											\
+#define BIND_FULL_OPERATED_VECTOR_TYPEDDATA(T, Tname)											\
 		{																							\
-			BASIC_VECTOR_BINDING(T, bindName, Tname)																	\
+			BASIC_VECTOR_BINDING(T, Tname)																	\
 				/* operators */																			\
 				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname)			\
@@ -740,9 +729,6 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::cmp, "comparison operators (<, >, >=, <=) : The comparison is element-wise, like a string comparison. \n")	\
 			;																						\
-			INTRUSIVE_PTR_PATCH( ThisClass, PyClass );												\
-			implicitly_convertible<ThisClassPtr, DataPtr>();										\
-			implicitly_convertible<ThisClassPtr, ThisConstClassPtr>();								\
 		}
 
 } // namespace IECore

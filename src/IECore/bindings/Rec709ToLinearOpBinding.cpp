@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 
 #include "IECore/Rec709ToLinearOp.h"
 #include "IECore/bindings/Rec709ToLinearOpBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -48,13 +47,9 @@ namespace IECore
 void bindRec709ToLinearOp()
 {
 	
-	typedef class_<Rec709ToLinearOp, Rec709ToLinearOpPtr, boost::noncopyable, bases<ChannelOp> > Rec709ToLinearOpPyClass;
-	Rec709ToLinearOpPyClass( "Rec709ToLinearOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Rec709ToLinearOp )
+	RunTimeTypedClass<Rec709ToLinearOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( Rec709ToLinearOp, Rec709ToLinearOpPyClass );
-	implicitly_convertible<Rec709ToLinearOpPtr, ChannelOpPtr>();	
 
 }
 

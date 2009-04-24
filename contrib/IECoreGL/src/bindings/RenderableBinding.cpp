@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@
 #include "IECoreGL/State.h"
 #include "IECoreGL/bindings/RenderableBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 
@@ -47,14 +47,10 @@ namespace IECoreGL
 
 void bindRenderable()
 {
-	typedef class_< Renderable, boost::noncopyable, RenderablePtr, bases< IECore::RunTimeTyped > > RenderablePyClass;
-	RenderablePyClass( "Renderable", no_init )
+	IECore::RunTimeTypedClass<Renderable>()
 		.def( "render", &Renderable::render )
 		.def( "bound", &Renderable::bound )
 	;
-
-	INTRUSIVE_PTR_PATCH( Renderable, RenderablePyClass );
-	implicitly_convertible<RenderablePtr, IECore::RunTimeTypedPtr>();
 }
 	
 }

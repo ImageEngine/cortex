@@ -36,7 +36,6 @@
 
 #include "IECore/Shader.h"
 #include "IECore/bindings/ShaderBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -45,16 +44,13 @@ namespace IECore
 {
 	void bindShader()
 	{
-		typedef class_<Shader, ShaderPtr, bases<StateRenderable>, boost::noncopyable> ShaderPyClass;
-		ShaderPyClass( "Shader" )
+		RunTimeTypedClass<Shader>()
+			.def( init<>() )
 			.def( init<optional<const std::string &, const std::string &, const CompoundDataMap &> >() )
 			.add_property( "name", make_function( &Shader::getName, return_value_policy<copy_const_reference>() ), &Shader::setName )
 			.add_property( "type", make_function( &Shader::getType, return_value_policy<copy_const_reference>() ), &Shader::setType )
 			.add_property( "parameters", &Shader::parametersData )
-			.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Shader)
 		;
-		INTRUSIVE_PTR_PATCH( Shader, ShaderPyClass );
-		implicitly_convertible<ShaderPtr, StateRenderablePtr>();
 	}
 	
 }

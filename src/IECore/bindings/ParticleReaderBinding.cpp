@@ -36,7 +36,6 @@
 
 #include "IECore/ParticleReader.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -54,16 +53,11 @@ static StringVectorDataPtr attributeNames( ParticleReader &that )
 
 void bindParticleReader()
 {
-	typedef class_< ParticleReader , ParticleReaderPtr, boost::noncopyable, bases<Reader> > ParticleReaderPyClass;
-	ParticleReaderPyClass( "ParticleReader", no_init )
+	RunTimeTypedClass<ParticleReader>()
 		.def( "numParticles", &ParticleReader::numParticles )
 		.def( "attributeNames", &attributeNames )
 		.def( "readAttribute", &ParticleReader::readAttribute )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ParticleReader )
 	;
-
-	INTRUSIVE_PTR_PATCH( ParticleReader, ParticleReaderPyClass );
-	implicitly_convertible<ParticleReaderPtr, ReaderPtr>();
 }
 
 } // namespace IECore

@@ -36,7 +36,6 @@
 
 #include "IECore/CurveExtrudeOp.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -47,15 +46,9 @@ namespace IECore
 
 void bindCurveExtrudeOp()
 {
-	typedef class_< CurveExtrudeOp, CurveExtrudeOpPtr, boost::noncopyable, bases<Op> > CurveExtrudeOpPyClass;
-	CurveExtrudeOpPyClass( "CurveExtrudeOp", no_init )
+	RunTimeTypedClass<CurveExtrudeOp>()
 		.def( init<>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(CurveExtrudeOp)
 	;
-	
-	INTRUSIVE_PTR_PATCH( CurveExtrudeOp, CurveExtrudeOpPyClass );
-	implicitly_convertible<CurveExtrudeOpPtr, OpPtr>();	
-
 }
 
 } // namespace IECore

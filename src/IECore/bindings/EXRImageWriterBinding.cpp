@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/EXRImageWriter.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -47,14 +46,10 @@ namespace IECore
 
 void bindEXRImageWriter()
 {
-	typedef class_<EXRImageWriter, EXRImageWriterPtr, boost::noncopyable, bases<ImageWriter> > EXRImageWriterPyClass;
-	EXRImageWriterPyClass ("EXRImageWriter", init<>())
+	RunTimeTypedClass<EXRImageWriter>()
+		.def( init<>() )
 		.def( init<ObjectPtr, const std::string &>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(EXRImageWriter)
 	;
-
-	INTRUSIVE_PTR_PATCH( EXRImageWriter, EXRImageWriterPyClass );
-	implicitly_convertible<EXRImageWriterPtr, EXRImageWriterPtr>();
 }
 
 } // namespace IECore

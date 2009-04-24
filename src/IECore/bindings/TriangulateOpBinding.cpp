@@ -36,7 +36,6 @@
 
 #include "IECore/TriangulateOp.h"
 #include "IECore/bindings/TriangulateOpBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -47,15 +46,10 @@ namespace IECore
 void bindTriangulateOp()
 {
 	
-	typedef class_< TriangulateOp, TriangulateOpPtr, boost::noncopyable, bases<MeshPrimitiveOp> > TriangulateOpPyClass;
-	TriangulateOpPyClass( "TriangulateOp", no_init )
+	RunTimeTypedClass<TriangulateOp>()
 		.def( init< >() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TriangulateOp )
 	;
 	
-	INTRUSIVE_PTR_PATCH( TriangulateOp, TriangulateOpPyClass );
-	implicitly_convertible<TriangulateOpPtr, MeshPrimitiveOpPtr>();	
-
 }
 
 } // namespace IECore

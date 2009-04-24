@@ -38,8 +38,6 @@
 #include "IECore/PathVectorParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/Wrapper.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace std;
@@ -68,8 +66,7 @@ void bindPathVectorParameter()
 {
 	using boost::python::arg;
 	
-	typedef class_<PathVectorParameter, PathVectorParameterWrapPtr, boost::noncopyable, bases<StringVectorParameter> > PathVectorParameterPyClass;
-	PathVectorParameterPyClass pathVectorParamClass( "PathVectorParameter", no_init );
+	RunTimeTypedClass<PathVectorParameter, PathVectorParameterWrapPtr> pathVectorParamClass;
 	{
 		// define enum before functions.
 		scope varScope = pathVectorParamClass;
@@ -99,14 +96,7 @@ void bindPathVectorParameter()
 		.add_property( "mustExist", &PathVectorParameter::mustExist )
 		.add_property( "mustNotExist", &PathVectorParameter::mustNotExist )
 		.add_property( "allowEmptyList", &PathVectorParameter::allowEmptyList )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( PathVectorParameter )
 	;	
-	
-	WrapperToPython<PathVectorParameterPtr>();
-	
-	INTRUSIVE_PTR_PATCH( PathVectorParameter, PathVectorParameterPyClass );
-	implicitly_convertible<PathVectorParameterPtr, StringVectorParameterPtr>();
-
 }
 
 } // namespace IECore

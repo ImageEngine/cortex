@@ -37,7 +37,6 @@
 #include "IECoreMaya/FromMayaParticleConverter.h"
 #include "IECoreMaya/bindings/FromMayaParticleConverterBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace IECoreMaya;
@@ -45,12 +44,7 @@ using namespace boost::python;
 
 void IECoreMaya::bindFromMayaParticleConverter()
 {
-	typedef class_<FromMayaParticleConverter, FromMayaParticleConverterPtr, boost::noncopyable, bases<FromMayaShapeConverter> > FromMayaParticleConverterPyClass;
 
-	FromMayaParticleConverterPyClass( "FromMayaParticleConverter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaParticleConverter )
+	IECore::RunTimeTypedClass<FromMayaParticleConverter>()
 	;
-	
-	INTRUSIVE_PTR_PATCH( FromMayaParticleConverter, FromMayaParticleConverterPyClass );
-	implicitly_convertible<FromMayaParticleConverterPtr, FromMayaShapeConverterPtr>();
 }

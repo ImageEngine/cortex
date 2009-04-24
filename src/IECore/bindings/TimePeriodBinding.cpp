@@ -38,8 +38,6 @@
 #include "boost/date_time/posix_time/time_parsers.hpp"
 
 #include "IECore/TimePeriodData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
 #include <sstream>

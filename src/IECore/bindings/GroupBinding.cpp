@@ -38,7 +38,6 @@
 
 #include "IECore/Group.h"
 #include "IECore/bindings/GroupBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -71,8 +70,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS( globalTransformMatrixOverloads, globalTr
 
 void bindGroup()
 {
-	typedef class_< Group, boost::noncopyable, GroupPtr, bases<VisibleRenderable> > GroupPyClass;
-	GroupPyClass( "Group" )
+	RunTimeTypedClass<Group>()
+		.def( init<>() )
 		.def( "children", &children, "Returns all the children in a list - note that modifying the list will not add or remove children." )
 		.def( "addChild", &Group::addChild )
 		.def( "removeChild", &Group::removeChild )
@@ -86,11 +85,7 @@ void bindGroup()
 		.def( "transformMatrix", &Group::transformMatrix, transformMatrixOverloads() )
 		.def( "globalTransformMatrix", &Group::globalTransformMatrix, globalTransformMatrixOverloads() )
 		.def( "parent", (GroupPtr (Group::*)())&Group::parent )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Group)
 	;
-	INTRUSIVE_PTR_PATCH( Group, GroupPyClass );
-	implicitly_convertible<GroupPtr, VisibleRenderablePtr>();
-	implicitly_convertible<GroupPtr, ConstGroupPtr>();
 }
 
 }

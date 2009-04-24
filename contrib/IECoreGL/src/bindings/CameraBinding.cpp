@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include "IECoreGL/Camera.h"
 #include "IECoreGL/bindings/CameraBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -47,8 +46,7 @@ namespace IECoreGL
 
 void bindCamera()
 {
-	typedef class_< Camera, CameraPtr, boost::noncopyable, bases< Renderable > > CameraPyClass;
-	CameraPyClass( "Camera", no_init )
+	IECore::RunTimeTypedClass<Camera>()
 		.def( "setTransform", &Camera::setTransform )
 		.def( "getTransform", &Camera::getTransform, return_value_policy<copy_const_reference>() )
 		.def( "setResolution", &Camera::setResolution )
@@ -63,11 +61,7 @@ void bindCamera()
 		.def( "positionInObjectSpace", &Camera::positionInObjectSpace ).staticmethod( "positionInObjectSpace" )
 		.def( "viewDirectionInObjectSpace", &Camera::viewDirectionInObjectSpace ).staticmethod( "viewDirectionInObjectSpace" )
 		.def( "upInObjectSpace", &Camera::upInObjectSpace ).staticmethod( "upInObjectSpace" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( Camera )
 	;
-
-	INTRUSIVE_PTR_PATCH( Camera, CameraPyClass );
-	implicitly_convertible<CameraPtr, RenderablePtr>();
 }
 
 }

@@ -36,8 +36,8 @@
 
 #include "maya/MGlobal.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
+#include "IECore/bindings/RefCountedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 #include "IECore/Exception.h"
 
@@ -132,17 +132,12 @@ void bindImageViewportPostProcess()
 {
 	typedef class_< ImageViewportPostProcess, ImageViewportPostProcessWrapperPtr, bases< ViewportPostProcess >, boost::noncopyable > ImageViewportPostProcessPyClass;
 	
-	ImageViewportPostProcessPyClass( "ImageViewportPostProcess", no_init )
+	RefCountedClass<ImageViewportPostProcess, ViewportPostProcess, ImageViewportPostProcessWrapperPtr>( "ImageViewportPostProcess" )
 		.def( init<>() )
 		.def( "needsDepth", &ImageViewportPostProcessWrapper::needsDepth )
 		.def( "preRender", &ImageViewportPostProcessWrapper::preRender )
 		.def( "postRender", pure_virtual( &ImageViewportPostProcessWrapper::postRender ) )
 	;
-	
-	WrapperToPython< ImageViewportPostProcessWrapperPtr >();
-	INTRUSIVE_PTR_PATCH( ImageViewportPostProcess, ImageViewportPostProcessPyClass );
-	implicitly_convertible< ImageViewportPostProcessWrapperPtr, ImageViewportPostProcessPtr >();
-	implicitly_convertible< ImageViewportPostProcessPtr, ViewportPostProcessPtr >();
 }
 
 }

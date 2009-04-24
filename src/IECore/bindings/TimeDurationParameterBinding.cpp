@@ -42,7 +42,7 @@ namespace IECore
 
 void bindTimeDurationParameter()
 {
-	bindTypedParameter<boost::posix_time::time_duration>( "TimeDurationParameter" );	
+	bindTypedParameter<boost::posix_time::time_duration>();	
 }
 
 } // namespace IECore

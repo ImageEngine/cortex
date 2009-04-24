@@ -36,9 +36,8 @@
 
 #include "IECore/Parameterised.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -77,8 +76,7 @@ void bindParameterised()
 {
 	using boost::python::arg;
 	
-	typedef class_< Parameterised, ParameterisedWrapPtr, boost::noncopyable, bases<RunTimeTyped> > ParameterisedPyClass;
-	ParameterisedPyClass( "Parameterised", no_init )
+	RunTimeTypedClass<Parameterised, ParameterisedWrapPtr>()
 		.def( init< const std::string, const std::string>( ( arg( "name" ), arg( "description") ) ) )
 		.def( init< const std::string, const std::string, CompoundParameterPtr >( ( arg( "name" ), arg( "description") , arg( "compoundParameter") ) ) )
 		.add_property( "name", make_function( &Parameterised::name, return_value_policy<copy_const_reference>() ) )
@@ -88,12 +86,8 @@ void bindParameterised()
 		/// \todo Remove this in major version 5.
 		.def( "__getattr__", &parameterisedGetAttr )
 		.def( "userData", (CompoundObjectPtr (Parameterised::*)())&Parameterised::userData )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(Parameterised)
 	;
 	
-	WrapperToPython<ParameterisedPtr>();
-	INTRUSIVE_PTR_PATCH( Parameterised, ParameterisedPyClass );
-	implicitly_convertible<ParameterisedWrapPtr, ParameterisedPtr>();
 }
 
 } // namespace IECore

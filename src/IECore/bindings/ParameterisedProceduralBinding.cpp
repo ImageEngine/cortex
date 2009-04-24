@@ -42,9 +42,8 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ParameterisedProcedural.h"
 #include "IECore/bindings/ParameterisedProceduralBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using namespace boost::python;
 
@@ -166,23 +165,14 @@ static ParameterPtr parameterisedProceduralGetItem( ParameterisedProcedural &o, 
 void bindParameterisedProcedural()
 {
 	
-	typedef class_< ParameterisedProcedural, ParameterisedProceduralWrapPtr, boost::noncopyable, bases<VisibleRenderable> > ParameterisedProceduralPyClass;
-	ParameterisedProceduralPyClass( "ParameterisedProcedural" )
+	RunTimeTypedClass<ParameterisedProcedural, ParameterisedProceduralWrapPtr>()
+		.def( init<>() )
 		.def( "parameters", (CompoundParameterPtr (ParameterisedProcedural::*)())&ParameterisedProcedural::parameters )
 		.def( "render", (void (ParameterisedProcedural::*)( RendererPtr ) const )&ParameterisedProcedural::render )
 		.def( "render", (void (ParameterisedProcedural::*)( RendererPtr, bool, bool, bool, bool ) const )&ParameterisedProcedural::render, ( arg( "renderer" ), arg( "inAttributeBlock" ) = true, arg( "withState" ) = true, arg( "withGeometry" ) = true, arg( "immediateGeometry" ) = false ) )
 		.def( "__getitem__", &parameterisedProceduralGetItem )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ParameterisedProcedural)		
 	;
-	
-	WrapperToPython<ParameterisedProceduralPtr>();
-
-	INTRUSIVE_PTR_PATCH( ParameterisedProcedural, ParameterisedProceduralPyClass );
-	
-	implicitly_convertible<ParameterisedProceduralPtr, VisibleRenderablePtr>();
-	implicitly_convertible<ParameterisedProceduralPtr, ConstParameterisedProceduralPtr>();
-	implicitly_convertible<ParameterisedProceduralWrapPtr, ParameterisedProceduralPtr>();
-	
+		
 }
 	
 } // namespace IECore

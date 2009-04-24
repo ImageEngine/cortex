@@ -38,8 +38,6 @@
 #include "IECore/NumericParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/bindings/Wrapper.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace std;
@@ -63,12 +61,11 @@ class NumericParameterWrap : public NumericParameter<T>, public Wrapper<NumericP
 };
 
 template<typename T>
-static void bindNumericParameter( const char *name )
+static void bindNumericParameter()
 {
 	using boost::python::arg;
-
-	typedef class_< NumericParameter<T>, typename NumericParameterWrap<T>::Ptr, boost::noncopyable, bases<Parameter> > NumericParameterPyClass;
-	NumericParameterPyClass( name, no_init )
+	
+	RunTimeTypedClass<NumericParameter<T>, typename NumericParameterWrap<T>::Ptr>()
 		.def(
 			init<const std::string &, const std::string &, boost::python::optional< T, T, T, const object &, bool, CompoundObjectPtr> >
 			(
@@ -94,18 +91,14 @@ static void bindNumericParameter( const char *name )
 		.def( "hasMaxValue", &NumericParameter<T>::hasMaxValue )		
 		.add_property( "minValue", &NumericParameter<T>::minValue )
 		.add_property( "maxValue", &NumericParameter<T>::maxValue )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( NumericParameter<T> )
 	;
-	INTRUSIVE_PTR_PATCH( NumericParameter<T>, typename NumericParameterPyClass );
-	implicitly_convertible<typename NumericParameter<T>::Ptr, ParameterPtr>();
-	implicitly_convertible<typename NumericParameter<T>::Ptr, typename NumericParameter<T>::ConstPtr>();
 }
 
 void bindNumericParameter()
 {
-	bindNumericParameter<int>( "IntParameter" );
-	bindNumericParameter<float>( "FloatParameter" );
-	bindNumericParameter<double>( "DoubleParameter" );
+	bindNumericParameter<int>();
+	bindNumericParameter<float>();
+	bindNumericParameter<double>();
 }
 
 };

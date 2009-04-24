@@ -39,8 +39,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FrameListBinding.h"
 
 using namespace boost::python;
@@ -90,8 +88,7 @@ struct FrameListHelper
 
 void bindFrameList()
 {	
-	typedef class_< FrameList, FrameListPtr, boost::noncopyable, bases< RunTimeTyped > > FrameListPyClass;
-	FrameListPyClass ( "FrameList", no_init )
+	RunTimeTypedClass<FrameList>()
 		.def( "asList", FrameListHelper::asList )
 		.def( "isEqualTo", &FrameList::isEqualTo )
 		.def( "copy", &FrameList::copy )
@@ -99,12 +96,7 @@ void bindFrameList()
 		.def( "parse", &FrameList::parse ).staticmethod( "parse" )
 		.def( "__str__", &FrameList::asString )
 		.def( self == self )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(FrameList)
-	;
-	
-	INTRUSIVE_PTR_PATCH( FrameList, FrameListPyClass );
-	implicitly_convertible<FrameListPtr, ConstFrameListPtr>();		
-	implicitly_convertible<FrameListPtr, RunTimeTypedPtr>();	
+	;	
 }
 
 }

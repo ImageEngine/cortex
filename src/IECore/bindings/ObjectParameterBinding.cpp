@@ -38,7 +38,6 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/ObjectParameterBinding.h"
 #include "IECore/bindings/ParameterBinding.h"
 
@@ -79,16 +78,12 @@ static boost::python::list validTypes( ObjectParameter &o )
 void bindObjectParameter()
 {
 
-	typedef class_< ObjectParameter, ObjectParameterPtr, boost::noncopyable, bases<Parameter> > ObjectParameterPyClass;
-	ObjectParameterPyClass( "ObjectParameter", no_init )
+	RunTimeTypedClass<ObjectParameter>()
 		.def( "__init__", make_constructor( &objectParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ), boost::python::arg_( "type" ), boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
 		.def( "__init__", make_constructor( &objectParameterConstructor2, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ), boost::python::arg_( "types" ), boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
 		.def( "validTypes", &validTypes )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( ObjectParameter )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ObjectParameter)
 	;
-	INTRUSIVE_PTR_PATCH( ObjectParameter, ObjectParameterPyClass );
-	implicitly_convertible<ObjectParameterPtr, ParameterPtr>();
 
 }
 

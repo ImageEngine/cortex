@@ -37,7 +37,6 @@
 #include "IECore/SpherePrimitiveEvaluator.h"
 #include "IECore/bindings/SpherePrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 
 using namespace IECore;
 using namespace boost::python;
@@ -47,24 +46,14 @@ namespace IECore
 
 void bindSpherePrimitiveEvaluator()
 {
-	typedef class_< SpherePrimitiveEvaluator, SpherePrimitiveEvaluatorPtr, bases< PrimitiveEvaluator >, boost::noncopyable > SpherePrimitiveEvaluatorPyClass;
-	
-	object s = SpherePrimitiveEvaluatorPyClass ( "SpherePrimitiveEvaluator", no_init )
+	object s = RunTimeTypedClass<SpherePrimitiveEvaluator>()
 		.def( init< SpherePrimitivePtr > () )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(SpherePrimitiveEvaluator)
 	;
-	INTRUSIVE_PTR_PATCH( SpherePrimitiveEvaluator, SpherePrimitiveEvaluatorPyClass );
-	implicitly_convertible<SpherePrimitiveEvaluatorPtr, PrimitiveEvaluatorPtr>();
 	
 	{
 		scope ss( s );
-		typedef class_< SpherePrimitiveEvaluator::Result, SpherePrimitiveEvaluator::ResultPtr, bases< PrimitiveEvaluator::Result >, boost::noncopyable > ResultPyClass;
-		
-		ResultPyClass( "Result", no_init )
+		RefCountedClass<SpherePrimitiveEvaluator::Result, PrimitiveEvaluator::Result>( "Result" )
 		;
-	
-		INTRUSIVE_PTR_PATCH( SpherePrimitiveEvaluator::Result, ResultPyClass );
-		implicitly_convertible<SpherePrimitiveEvaluator::ResultPtr, PrimitiveEvaluator::ResultPtr>();	
 	}
 }
 

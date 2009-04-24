@@ -36,7 +36,6 @@
 
 #include "IECore/ImageReader.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -55,18 +54,13 @@ static StringVectorDataPtr channelNames( ImageReader &that )
 void bindImageReader()
 {
 
-	typedef class_< ImageReader , ImageReaderPtr, boost::noncopyable, bases<Reader> > ImageReaderPyClass;
-	ImageReaderPyClass( "ImageReader", no_init )
+	RunTimeTypedClass<ImageReader>()
 		.def( "isComplete", &ImageReader::isComplete )
 		.def( "channelNames", &channelNames )
 		.def( "dataWindow", &ImageReader::dataWindow )
 		.def( "displayWindow", &ImageReader::displayWindow )
 		.def( "readChannel", (DataPtr (ImageReader::*)( const std::string &))&ImageReader::readChannel )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(ImageReader)
 	;
-
-	INTRUSIVE_PTR_PATCH( ImageReader, ImageReaderPyClass );
-	implicitly_convertible<ImageReaderPtr, ReaderPtr>();
 
 }
   

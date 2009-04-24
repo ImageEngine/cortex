@@ -37,7 +37,6 @@
 #include "IECoreMaya/FromMayaMeshConverter.h"
 #include "IECoreMaya/bindings/FromMayaMeshConverterBinding.h"
 
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace IECoreMaya;
@@ -45,16 +44,10 @@ using namespace boost::python;
 
 void IECoreMaya::bindFromMayaMeshConverter()
 {
-	typedef class_<FromMayaMeshConverter, FromMayaMeshConverterPtr, boost::noncopyable, bases<FromMayaShapeConverter> > FromMayaMeshConverterPyClass;
-
-	FromMayaMeshConverterPyClass( "FromMayaMeshConverter", no_init )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( FromMayaMeshConverter )
+	IECore::RunTimeTypedClass<FromMayaMeshConverter>()
 		.def( "points", &FromMayaMeshConverter::points )
 		.def( "normals", &FromMayaMeshConverter::normals )
 		.def( "s", &FromMayaMeshConverter::s )
 		.def( "t", &FromMayaMeshConverter::t )
 	;
-	
-	INTRUSIVE_PTR_PATCH( FromMayaMeshConverter, FromMayaMeshConverterPyClass );
-	implicitly_convertible<FromMayaMeshConverterPtr, FromMayaShapeConverterPtr>();
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,6 @@
 #include "IECoreGL/bindings/StateBinding.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost::python;
@@ -54,21 +53,15 @@ static StatePtr defaultState()
 
 void bindState()
 {
-	typedef class_< State, StatePtr, boost::noncopyable, bases< Bindable > > StatePyClass;
-	StatePyClass( "State", init<bool>() )
+	IECore::RunTimeTypedClass<State>()
+		.def( init<bool>() )
 		.def( "add", (void (State::*)( StatePtr ) )&State::add )
 		.def( "add", (void (State::*)( StateComponentPtr ) )&State::add )
 		.def( "get", ( StateComponentPtr (State::*)( IECore::TypeId) )&State::get )
 		.def( "remove", (void (State::*)( IECore::TypeId) )&State::remove )
 		.def( "isComplete", &State::isComplete )
 		.def( "defaultState", &defaultState ).staticmethod( "defaultState" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( State )
 	;
-
-	INTRUSIVE_PTR_PATCH( State, StatePyClass );
-	implicitly_convertible<StatePtr, ConstStatePtr>();
-	implicitly_convertible<StatePtr, BindablePtr>();
-
 }
 
 } // namespace IECoreGL

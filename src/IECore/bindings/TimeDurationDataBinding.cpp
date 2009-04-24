@@ -40,7 +40,6 @@
 #include "datetime.h"
 
 #include "IECore/TimeDurationData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/IECoreBinding.h"
 
@@ -183,20 +182,14 @@ void bindTimeDurationData()
 	TimeDurationFromPythonDelta();
 	to_python_converter<posix_time::time_duration, TimeDurationToPythonDelta > ();
 
-	typedef class_< TimeDurationData, TimeDurationDataPtr, noncopyable, bases<Data> > TimeDurationDataPyClass;
-	TimeDurationDataPyClass( "TimeDurationData", no_init )
+	RunTimeTypedClass<TimeDurationData>()
 		.def( init<>() )
 		.def( init<const TimeDurationData::ValueType &>() )
 		.add_property( "value", make_function( &getValue, return_value_policy<copy_const_reference>() ), &setValue )
 		.def( "__repr__", &repr<TimeDurationData> )
 		.def( "__str__", &str<TimeDurationData> )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( TimeDurationData );
 	;
 
-	INTRUSIVE_PTR_PATCH( TimeDurationData, TimeDurationDataPyClass );
-
-	implicitly_convertible<TimeDurationDataPtr, DataPtr>();
-	implicitly_convertible<TimeDurationDataPtr, ConstTimeDurationDataPtr >();
 }
 
 } // namespace IECore

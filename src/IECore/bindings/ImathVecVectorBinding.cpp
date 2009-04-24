@@ -41,7 +41,6 @@
 #include "OpenEXR/ImathVec.h"
 
 #include "IECore/VectorTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/VectorTypedDataBinding.inl"
 
 using namespace std;
@@ -61,12 +60,12 @@ IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( V3i )
 
 void bindImathVecVectorTypedData()
 {
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec2< float >,	 "V2fVectorData", "V2f")
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec2< double >, "V2dVectorData", "V2d")
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec2< int >, "V2iVectorData", "V2i")
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec3< float >,	 "V3fVectorData", "V3f")
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec3< double >, "V3dVectorData", "V3d")
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec3< int >, "V3iVectorData", "V3i")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec2< float >, "V2f")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec2< double >, "V2d")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec2< int >, "V2i")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec3< float >,	"V3f")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec3< double >, "V3d")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Vec3< int >, "V3i")
 }
 
 } // namespace IECore

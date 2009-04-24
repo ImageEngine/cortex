@@ -43,7 +43,6 @@
 #include "boost/python/call_method.hpp"
 
 #include "IECore/CompoundData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using std::string;
@@ -499,13 +498,11 @@ void bindCompoundData()
 {
 	typedef CompoundTypedDataFunctions< CompoundDataMap > ThisBinder;
 
-	typedef class_< CompoundData , CompoundDataPtr, boost::noncopyable, bases<Data> > CompoundDataPyClass;
-	CompoundDataPyClass( 
-		"CompoundData",
+	RunTimeTypedClass<CompoundData>(
 		"This class behaves like the native python dict, except that it only accepts objects derived from Data class.\n"
 		"The copy constructor accepts another instance of this class or a python dict containing Data objects\n"
-		"it has the most important dict methods: has_key, items, keys, values, get, pop, etc.\n",
-		no_init )
+		"it has the most important dict methods: has_key, items, keys, values, get, pop, etc.\n"
+		)
 		.def( "__init__", make_constructor( &ThisBinder::dataConstructor ), "Default constructor" )
 		.def( "__init__", make_constructor( &ThisBinder::dataMapConstructor ), "Copy constructor: accepts a python dict containing Data objects." )
 		.def( "__getitem__", &ThisBinder::getItem, "indexing operator.\nAccepts only string keys." )
@@ -531,11 +528,8 @@ void bindCompoundData()
 		.def( "pop", &ThisBinder::pop, "m.pop(k [,default])\nReturns m[k] if found and removes it from m; otherwise, returns default if supplied or raises KeyError if not." )
 		.def( "pop", &ThisBinder::pop2 )
 		.def( "popitem", &ThisBinder::popitem, "m.popitem()\nRemvoes a random (key,value) pair from m and returns it as a tuple." )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( CompoundData )
 	;
 
-	INTRUSIVE_PTR_PATCH( CompoundData, CompoundDataPyClass );
-	implicitly_convertible<CompoundDataPtr, DataPtr>();
 }
 
 } // namespace IECore

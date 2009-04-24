@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/ImagePremultiplyOp.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
@@ -45,14 +44,9 @@ namespace IECore {
 
 void bindImagePremultiplyOp()
 {
-	typedef class_< ImagePremultiplyOp, ImagePremultiplyOpPtr, boost::noncopyable, bases<ChannelOp> > ImagePremultiplyOpPyClass;
-	ImagePremultiplyOpPyClass( "ImagePremultiplyOp" )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( ImagePremultiplyOp )
+	RunTimeTypedClass<ImagePremultiplyOp>()
+		.def( init<>() )
 	;
-	
-	INTRUSIVE_PTR_PATCH( ImagePremultiplyOp, ImagePremultiplyOpPyClass );
-	implicitly_convertible<ImagePremultiplyOpPtr, ChannelOpPtr>();	
-
 }
 
 } // namespace IECore

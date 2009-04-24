@@ -37,8 +37,6 @@
 
 #include "IECore/bindings/IECoreBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
-#include "IECore/bindings/WrapperToPython.h"
 #include "IECore/bindings/FileSequenceBinding.h"
 
 #include "IECore/FileSequence.h"
@@ -161,8 +159,7 @@ void bindFileSequence()
 	object (*mapTo1)( const FileSequence &, ConstFileSequencePtr, bool ) = &FileSequenceHelper::mapTo;
 	object (*mapTo2)( const FileSequence &, ConstFileSequencePtr ) = &FileSequenceHelper::mapTo;	
 
-	typedef class_< FileSequence, FileSequence::Ptr, bases< RunTimeTyped >, boost::noncopyable > FileSequencePyClass;
-	FileSequencePyClass( "FileSequence", no_init )	
+	RunTimeTypedClass<FileSequence>()	
 		.def( init< const std::string &, FrameListPtr >() )
 		.add_property( "frameList", &FileSequence::getFrameList, &FileSequence::setFrameList )
 		.add_property( "fileName", make_function( &FileSequence::getFileName, return_value_policy<copy_const_reference>() ), &FileSequence::setFileName )							
@@ -182,12 +179,8 @@ void bindFileSequence()
 		.def( "__repr__", repr< FileSequence > )
 		.def( "__str__", str< FileSequence > )	
 		.def( self == self )	
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS(FileSequence)	
 	;
-		
-	INTRUSIVE_PTR_PATCH( FileSequence, FileSequencePyClass );
-	implicitly_convertible<FileSequencePtr, RunTimeTypedPtr>();	
-	implicitly_convertible<FileSequencePtr, ConstFileSequencePtr>();	
+
 }
 
 }

@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECoreRI/RIBWriter.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/Object.h"
 
@@ -49,13 +48,10 @@ namespace IECoreRI
 
 void bindRIBWriter()
 {
-	typedef class_<RIBWriter, RIBWriterPtr, boost::noncopyable, bases<Writer> > RIBWriterPyClass;
-	RIBWriterPyClass( "RIBWriter", init<>() )
+	RunTimeTypedClass<RIBWriter>()
+		.def( init<>() )
 		.def( init<ObjectPtr, const std::string &>() )
-		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( RIBWriter )
 	;
-	INTRUSIVE_PTR_PATCH( RIBWriter, RIBWriterPyClass );
-	implicitly_convertible<RIBWriterPtr, WriterPtr>();
 }
 
 } // namespace IECore

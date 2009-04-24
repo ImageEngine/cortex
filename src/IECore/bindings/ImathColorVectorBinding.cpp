@@ -44,7 +44,6 @@
 #include "OpenEXR/ImathColor.h"
 
 #include "IECore/VectorTypedData.h"
-#include "IECore/bindings/IntrusivePtrPatch.h"
 #include "IECore/bindings/VectorTypedDataBinding.inl"
 
 using namespace std;
@@ -62,10 +61,10 @@ IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Color4<double> )
 
 void bindImathColorVectorTypedData()
 {
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Color3f, "Color3fVectorData", "Color3f")
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Color4f, "Color4fVectorData", "Color4f")
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Color3<double>, "Color3dVectorData", "Color3d")
-	BIND_OPERATED_VECTOR_TYPEDDATA ( Color4<double>, "Color4dVectorData", "Color4d")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Color3f, "Color3f")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Color4f, "Color4f")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Color3<double>, "Color3d")
+	BIND_OPERATED_VECTOR_TYPEDDATA ( Color4<double>, "Color4d")
 }
 
 } // namespace IECore
