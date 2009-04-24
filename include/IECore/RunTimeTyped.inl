@@ -85,7 +85,7 @@ T* assertedStaticCast( S* src )
 template<class T>
 RunTimeTyped::TypeDescription<T>::TypeDescription()
 {
-	RunTimeTyped::registerType( T::staticTypeId(), T::baseTypeId() );
+	RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
 };
 
 } // namespace IECore

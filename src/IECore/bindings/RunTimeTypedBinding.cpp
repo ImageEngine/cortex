@@ -82,7 +82,11 @@ void bindRunTimeTyped()
 		// all the other definitions of that function)
 		.def("baseTypeId", ( TypeId (*)( TypeId ) )( &RunTimeTyped::baseTypeId ) )
 		.def( "baseTypeIds", &baseTypeIds ).staticmethod( "baseTypeIds" )
-		.def( "derivedTypeIds", &derivedTypeIds ).staticmethod( "derivedTypeIds" )		
+		.def( "derivedTypeIds", &derivedTypeIds ).staticmethod( "derivedTypeIds" )
+		.def( "typeIdFromTypeName", &RunTimeTyped::typeIdFromTypeName )
+		.staticmethod( "typeIdFromTypeName" )
+		.def( "typeNameFromTypeId", &RunTimeTyped::typeNameFromTypeId )
+		.staticmethod( "typeNameFromTypeId" )		
 		.IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS( RunTimeTyped )
 	;
 	

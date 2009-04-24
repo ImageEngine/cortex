@@ -64,6 +64,9 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.assert_( IECore.Data.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
 		
 		self.assert_( IECore.Object.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
+				
+		self.assertEqual( IECore.RunTimeTyped.typeNameFromTypeId( IECore.TypeId.IntData ), "IntData" )
+		self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( "IntData" ), IECore.TypeId.IntData )
 
 	def testStaticTypeBindings( self ) :
 	

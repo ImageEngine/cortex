@@ -167,15 +167,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		static ObjectPtr create( const std::string &typeName );		
 		/// Loads an object previously saved with the given name in the current directory
 		/// of ioInterface.
-		static ObjectPtr load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name );
-		/// Returns the corresponding TypeId for the specified
-		/// typeName, or InvalidTypeId if typeName is not a
-		/// registered type.
-		static TypeId typeIdFromTypeName( const std::string &typeName );
-		/// Returns the corresponding typeName for the specified
-		/// TypeId, or InvalidTypeId if typeId is not a
-		/// registered type.
-		static std::string typeNameFromTypeId( TypeId typeId );
+		static ObjectPtr load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name );		
 		//@}
 	
 	protected :

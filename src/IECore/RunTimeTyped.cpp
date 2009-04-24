@@ -94,7 +94,7 @@ bool RunTimeTyped::inheritsFrom( const std::string &typeName )
 	return false;
 }
 
-void RunTimeTyped::registerType( TypeId derivedTypeId, TypeId baseTypeId )
+void RunTimeTyped::registerType( TypeId derivedTypeId, const std::string &derivedTypeName, TypeId baseTypeId )
 {
 	BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();
 #ifndef NDEBUG
@@ -109,6 +109,29 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, TypeId baseTypeId )
 	
 	DerivedTypesRegistryMap &derivedRegistry = derivedTypesRegistry();
 	derivedRegistry[ baseTypeId ].insert( derivedTypeId );
+	
+	/// Put in id->name map
+	TypeIdsToTypeNamesMap &idsToNames = typeIdsToTypeNames();
+#ifndef NDEBUG
+	TypeIdsToTypeNamesMap::const_iterator it = idsToNames.find( derivedTypeId );
+	if ( it != baseRegistry.end() )
+	{
+		assert( it->second == derivedTypeName );
+	}	
+#endif
+	idsToNames[ derivedTypeId ] = derivedTypeName;
+	
+	/// Put in name->id map
+	TypeNamesToTypeIdsMap &namesToIds = typeNamesToTypeIds();
+#ifndef NDEBUG
+	TypeNamesToTypeIdsMap::const_iterator it = namesToIds.find( derivedTypeName );
+	if ( it != baseRegistry.end() )
+	{
+		assert( it->second == derivedTypeId );
+	}	
+#endif
+	namesToIds[ derivedTypeName ] = derivedTypeId;
+	
 }
 
 RunTimeTyped::BaseTypeRegistryMap &RunTimeTyped::baseTypeRegistry()
@@ -217,4 +240,40 @@ RunTimeTyped::DerivedTypesRegistryMap &RunTimeTyped::completeDerivedTypesRegistr
 	static DerivedTypesRegistryMap *derivedTypes = new DerivedTypesRegistryMap();
 	assert( derivedTypes );
 	return *derivedTypes;
+}
+
+TypeId RunTimeTyped::typeIdFromTypeName( const std::string &typeName )
+{
+	TypeNamesToTypeIdsMap &namesToIds = typeNamesToTypeIds();
+	TypeNamesToTypeIdsMap::const_iterator it = namesToIds.find( typeName );
+	if( it == namesToIds.end() )
+	{
+		return InvalidTypeId;
+	}
+	return it->second;
+}
+
+std::string RunTimeTyped::typeNameFromTypeId( TypeId typeId )
+{
+	TypeIdsToTypeNamesMap &idsToNames = typeIdsToTypeNames();
+	TypeIdsToTypeNamesMap::const_iterator it = idsToNames.find( typeId );
+	if( it == idsToNames.end() )
+	{
+		return "";
+	}
+	return it->second;
+}
+
+RunTimeTyped::TypeIdsToTypeNamesMap &RunTimeTyped::typeIdsToTypeNames()
+{
+	static TypeIdsToTypeNamesMap *m = new TypeIdsToTypeNamesMap();
+	assert( m );
+	return *m;
+}
+
+RunTimeTyped::TypeNamesToTypeIdsMap &RunTimeTyped::typeNamesToTypeIds()
+{
+	static TypeNamesToTypeIdsMap *m = new TypeNamesToTypeIdsMap();
+	assert( m );
+	return *m;
 }

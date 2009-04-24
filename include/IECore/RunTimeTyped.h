@@ -187,6 +187,15 @@ class RunTimeTyped : public RefCounted
 		static const std::set<TypeId> &derivedTypeIds( TypeId typeId );	
 		/// A typedef for the class this class derives from. All RunTimeTyped classes define this typedef.
 		typedef RefCounted BaseClass;
+		/// Returns the corresponding TypeId for the specified
+		/// typeName, or InvalidTypeId if typeName is not a
+		/// registered type.
+		static TypeId typeIdFromTypeName( const std::string &typeName );
+		/// Returns the corresponding typeName for the specified
+		/// TypeId, or InvalidTypeId if typeId is not a
+		/// registered type.
+		static std::string typeNameFromTypeId( TypeId typeId );
+		
 		//@}
 		
 	protected :
@@ -209,7 +218,13 @@ class RunTimeTyped : public RefCounted
 		
 		static void derivedTypeIdsWalk( TypeId typeId, std::set<TypeId> & );	
 		
-		static void registerType( TypeId derivedTypeId, TypeId baseTypeId );	
+		static void registerType( TypeId derivedTypeId, const std::string &derivedTypeName, TypeId baseTypeId );	
+		
+		typedef std::map<TypeId, std::string> TypeIdsToTypeNamesMap;
+		typedef std::map<std::string, TypeId> TypeNamesToTypeIdsMap;
+		
+		static TypeIdsToTypeNamesMap &typeIdsToTypeNames();
+		static TypeNamesToTypeIdsMap &typeNamesToTypeIds();
 			
 };
 
