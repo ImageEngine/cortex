@@ -93,16 +93,29 @@ TypeId NumericParameter<T>::staticTypeId()
 }
 
 template <class T> 
-std::string NumericParameter<T>::typeName() const
+const char *NumericParameter<T>::typeName() const
 {
 	return staticTypeName();
 }
 
 template <class T> 
-std::string NumericParameter<T>::staticTypeName()
+const char *NumericParameter<T>::staticTypeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
+}
+
+
+template <class T> 
+TypeId NumericParameter<T>::baseTypeId()
+{	
+	return Parameter::staticTypeId();
+}
+
+template <class T> 
+const char *NumericParameter<T>::baseTypeName()
+{
+	return Parameter::staticTypeName();
 }
 
 template<class T>
@@ -116,9 +129,9 @@ bool NumericParameter<T>::isInstanceOf( TypeId typeId ) const
 }
 
 template<class T>
-bool NumericParameter<T>::isInstanceOf( const std::string &typeName ) const
+bool NumericParameter<T>::isInstanceOf( const char *typeName ) const
 {
-	if( typeName==staticTypeName() )
+	if( !strcmp( typeName, staticTypeName() ) )
 	{
 		return true;
 	}
@@ -132,9 +145,9 @@ bool NumericParameter<T>::inheritsFrom( TypeId typeId )
 }
 
 template<class T>
-bool NumericParameter<T>::inheritsFrom( const std::string &typeName )
+bool NumericParameter<T>::inheritsFrom( const char *typeName )
 {
-	return Parameter::staticTypeName()==typeName ? true : Parameter::inheritsFrom( typeName );
+	return !strcmp( Parameter::staticTypeName(), typeName ) ? true : Parameter::inheritsFrom( typeName );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -230,7 +243,7 @@ bool NumericParameter<T>::valueValid( ConstObjectPtr value, std::string *reason 
 	}																				\
 																					\
 	template<>																		\
-	std::string NumericParameter<T>::staticTypeName()								\
+	const char *NumericParameter<T>::staticTypeName()								\
 	{																				\
 		return # TNAME;																\
 	}																				\

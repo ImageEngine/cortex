@@ -68,13 +68,15 @@ class NumericParameter : public Parameter
 		////////////////////////////////////
 		//@{
 		virtual TypeId typeId() const;
-		virtual std::string typeName() const;
+		virtual const char *typeName() const;
 		virtual bool isInstanceOf( TypeId typeId ) const;
-		virtual bool isInstanceOf( const std::string &typeName ) const;
+		virtual bool isInstanceOf( const char *typeName ) const;
 		static TypeId staticTypeId();
-		static std::string staticTypeName();
+		static const char *staticTypeName();
 		static bool inheritsFrom( TypeId typeId );
-		static bool inheritsFrom( const std::string &typeName );
+		static bool inheritsFrom( const char *typeName );
+		static TypeId baseTypeId();
+		static const char *baseTypeName();
 		//@}
 		
 		bool hasMinValue() const;

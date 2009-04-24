@@ -71,9 +71,9 @@ bool TypedStateComponent<T,TId>::isInstanceOf( IECore::TypeId typeId ) const
 }
 
 template<typename T, unsigned int TId>
-bool TypedStateComponent<T,TId>::isInstanceOf( const std::string &typeName ) const
+bool TypedStateComponent<T,TId>::isInstanceOf( const char *typeName ) const
 {
-	if( typeName==staticTypeName() )
+	if( !strcmp( typeName, staticTypeName() ) )
 	{
 		return true;
 	}
@@ -93,9 +93,9 @@ bool TypedStateComponent<T,TId>::inheritsFrom( IECore::TypeId typeId )
 }
 
 template<typename T, unsigned int TId>
-bool TypedStateComponent<T,TId>::inheritsFrom( const std::string &typeName )
+bool TypedStateComponent<T,TId>::inheritsFrom( const char *typeName )
 {
-	return StateComponent::staticTypeName()==typeName ? true : StateComponent::inheritsFrom( typeName );
+	return !strcmp( StateComponent::staticTypeName(), typeName ) ? true : StateComponent::inheritsFrom( typeName );
 }
 
 template<typename T, unsigned int TId>
@@ -105,7 +105,7 @@ IECore::TypeId TypedStateComponent<T,TId>::baseTypeId()
 }
 
 template<typename T, unsigned int TId>
-std::string TypedStateComponent<T,TId>::baseTypeName()
+const char *TypedStateComponent<T,TId>::baseTypeName()
 {
 	return StateComponent::staticTypeName();
 }

@@ -80,13 +80,13 @@ TypeId TypedPrimitiveOp<T>::staticTypeId()
 }
 
 template <typename T> 
-std::string TypedPrimitiveOp<T>::typeName() const
+const char *TypedPrimitiveOp<T>::typeName() const
 {
 	return staticTypeName();
 }
 
 template <typename T> 
-std::string TypedPrimitiveOp<T>::staticTypeName()
+const char *TypedPrimitiveOp<T>::staticTypeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
@@ -99,7 +99,7 @@ TypeId TypedPrimitiveOp<T>::baseTypeId()
 }
 
 template <class T> 
-std::string TypedPrimitiveOp<T>::baseTypeName()
+const char *TypedPrimitiveOp<T>::baseTypeName()
 {
 	return ModifyOp::staticTypeName();
 }
@@ -115,9 +115,9 @@ bool TypedPrimitiveOp<T>::isInstanceOf( TypeId typeId ) const
 }
 
 template<typename T>
-bool TypedPrimitiveOp<T>::isInstanceOf( const std::string &typeName ) const
+bool TypedPrimitiveOp<T>::isInstanceOf( const char *typeName ) const
 {
-	if( typeName==staticTypeName() )
+	if( !strcmp( typeName, staticTypeName() ) )
 	{
 		return true;
 	}
@@ -131,9 +131,9 @@ bool TypedPrimitiveOp<T>::inheritsFrom( TypeId typeId )
 }
 
 template<typename T>
-bool TypedPrimitiveOp<T>::inheritsFrom( const std::string &typeName )
+bool TypedPrimitiveOp<T>::inheritsFrom( const char *typeName )
 {
-	return ModifyOp::staticTypeName()==typeName ? true : ModifyOp::inheritsFrom( typeName );
+	return !strcmp( ModifyOp::staticTypeName(), typeName ) ? true : ModifyOp::inheritsFrom( typeName );
 }
 
 #define IE_CORE_DEFINETYPEDPRIMITIVEOPSPECIALISATION( T, TNAME ) \
@@ -145,7 +145,7 @@ bool TypedPrimitiveOp<T>::inheritsFrom( const std::string &typeName )
 	} \
 	\
 	template<> \
-	std::string TypedPrimitiveOp<T>::staticTypeName() \
+	const char *TypedPrimitiveOp<T>::staticTypeName() \
 	{ \
 		return # TNAME; \
 	} \

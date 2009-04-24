@@ -81,15 +81,15 @@ class TypedObjectParameter : public ObjectParameter
 		////////////////////////////////////
 		//@{
 		virtual TypeId typeId() const;
-		virtual std::string typeName() const;
+		virtual const char *typeName() const;
 		virtual bool isInstanceOf( TypeId typeId ) const;
-		virtual bool isInstanceOf( const std::string &typeName ) const;
+		virtual bool isInstanceOf( const char *typeName ) const;
 		static TypeId staticTypeId();
-		static std::string staticTypeName();
+		static const char *staticTypeName();
 		static bool inheritsFrom( TypeId typeId );
-		static bool inheritsFrom( const std::string &typeName );
+		static bool inheritsFrom( const char *typeName );
 		static TypeId baseTypeId();
-		static std::string baseTypeName();
+		static const char *baseTypeName();
 		typedef ObjectParameter BaseClass;
 		//@}
 		

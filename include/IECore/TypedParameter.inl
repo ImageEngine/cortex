@@ -104,13 +104,13 @@ TypeId TypedParameter<T>::staticTypeId()
 }
 
 template <class T> 
-std::string TypedParameter<T>::typeName() const
+const char *TypedParameter<T>::typeName() const
 {
 	return staticTypeName();
 }
 
 template <class T> 
-std::string TypedParameter<T>::staticTypeName()
+const char *TypedParameter<T>::staticTypeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
@@ -123,7 +123,7 @@ TypeId TypedParameter<T>::baseTypeId()
 }
 
 template <class T> 
-std::string TypedParameter<T>::baseTypeName()
+const char *TypedParameter<T>::baseTypeName()
 {
 	return Parameter::staticTypeName();
 }
@@ -139,9 +139,9 @@ bool TypedParameter<T>::isInstanceOf( TypeId typeId ) const
 }
 
 template<class T>
-bool TypedParameter<T>::isInstanceOf( const std::string &typeName ) const
+bool TypedParameter<T>::isInstanceOf( const char *typeName ) const
 {
-	if( typeName==staticTypeName() )
+	if( !strcmp( typeName, staticTypeName() ) )
 	{
 		return true;
 	}
@@ -155,9 +155,9 @@ bool TypedParameter<T>::inheritsFrom( TypeId typeId )
 }
 
 template<class T>
-bool TypedParameter<T>::inheritsFrom( const std::string &typeName )
+bool TypedParameter<T>::inheritsFrom( const char *typeName )
 {
-	return Parameter::staticTypeName()==typeName ? true : Parameter::inheritsFrom( typeName );
+	return !strcmp( Parameter::staticTypeName(), typeName ) ? true : Parameter::inheritsFrom( typeName );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -231,7 +231,7 @@ void TypedParameter<T>::setTypedValue( const T &value )
 	}																				\
 																					\
 	template<>																		\
-	std::string TypedParameter<T>::staticTypeName()									\
+	const char *TypedParameter<T>::staticTypeName()									\
 	{																				\
 		return # TNAME;																\
 	}																				\

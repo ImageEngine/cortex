@@ -74,7 +74,7 @@ void bindRunTimeTyped()
 	RunTimeTypedPyClass( "RunTimeTyped", no_init )
 		.def( "typeName", &RunTimeTyped::typeName )
 		.def( "typeId", &RunTimeTyped::typeId )
-		.def( "isInstanceOf", (bool (RunTimeTyped::*)( const std::string &) const)&RunTimeTyped::isInstanceOf )
+		.def( "isInstanceOf", (bool (RunTimeTyped::*)( const char * ) const)&RunTimeTyped::isInstanceOf )
 		.def( "isInstanceOf", (bool (RunTimeTyped::*)( TypeId ) const)&RunTimeTyped::isInstanceOf )
 		
 		// Not defined as staticmethod as IE_COREPYTHON_DEFRUNTIMETYPEDSTATICMETHODS does this after

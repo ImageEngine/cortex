@@ -46,7 +46,7 @@ void bindRunTimeTyped();
 	.def( "baseTypeId", ( IECore::TypeId (*)() )&CLASSNAME::baseTypeId )  \
 	.staticmethod("baseTypeId")\
 	.def("baseTypeName", &CLASSNAME::baseTypeName).staticmethod("baseTypeName")\
-	.def("inheritsFrom", (bool (*)( const std::string &))&CLASSNAME::inheritsFrom)\
+	.def("inheritsFrom", (bool (*)( const char *))&CLASSNAME::inheritsFrom)\
 	.def("inheritsFrom", (bool (*)( IECore::TypeId ) )&CLASSNAME::inheritsFrom).staticmethod("inheritsFrom")\
 	
 

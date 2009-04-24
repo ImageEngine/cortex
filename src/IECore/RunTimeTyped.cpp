@@ -49,7 +49,7 @@ TypeId RunTimeTyped::typeId() const
 	return staticTypeId();
 }
 
-std::string RunTimeTyped::typeName() const
+const char *RunTimeTyped::typeName() const
 {
 	return staticTypeName();
 }
@@ -59,7 +59,7 @@ TypeId RunTimeTyped::staticTypeId()
 	return RunTimeTypedTypeId;
 }
 
-std::string RunTimeTyped::staticTypeName()
+const char *RunTimeTyped::staticTypeName()
 {
 	return "RunTimeTyped";
 }
@@ -69,7 +69,7 @@ TypeId RunTimeTyped::baseTypeId()
 	return InvalidTypeId;
 }
 		
-std::string RunTimeTyped::baseTypeName()
+const char *RunTimeTyped::baseTypeName()
 {
 	return "InvalidType";
 }	
@@ -79,9 +79,9 @@ bool RunTimeTyped::isInstanceOf( TypeId typeId ) const
 	return typeId==staticTypeId();
 }
 
-bool RunTimeTyped::isInstanceOf( const std::string &typeName ) const
+bool RunTimeTyped::isInstanceOf( const char *typeName ) const
 {
-	return typeName==staticTypeName();
+	return !strcmp( typeName, staticTypeName() );
 }
 
 bool RunTimeTyped::inheritsFrom( TypeId typeId )
@@ -89,12 +89,12 @@ bool RunTimeTyped::inheritsFrom( TypeId typeId )
 	return false;
 }
 
-bool RunTimeTyped::inheritsFrom( const std::string &typeName )
+bool RunTimeTyped::inheritsFrom( const char *typeName )
 {
 	return false;
 }
 
-void RunTimeTyped::registerType( TypeId derivedTypeId, const std::string &derivedTypeName, TypeId baseTypeId )
+void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId )
 {
 	BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();
 #ifndef NDEBUG
@@ -246,10 +246,11 @@ RunTimeTyped::DerivedTypesRegistryMap &RunTimeTyped::completeDerivedTypesRegistr
 	return *derivedTypes;
 }
 
-TypeId RunTimeTyped::typeIdFromTypeName( const std::string &typeName )
+TypeId RunTimeTyped::typeIdFromTypeName( const char *typeName )
 {
 	TypeNamesToTypeIdsMap &namesToIds = typeNamesToTypeIds();
-	TypeNamesToTypeIdsMap::const_iterator it = namesToIds.find( typeName );
+	const std::string key( typeName );
+	TypeNamesToTypeIdsMap::const_iterator it = namesToIds.find( key );
 	if( it == namesToIds.end() )
 	{
 		return InvalidTypeId;
@@ -257,7 +258,7 @@ TypeId RunTimeTyped::typeIdFromTypeName( const std::string &typeName )
 	return it->second;
 }
 
-std::string RunTimeTyped::typeNameFromTypeId( TypeId typeId )
+const char *RunTimeTyped::typeNameFromTypeId( TypeId typeId )
 {
 	TypeIdsToTypeNamesMap &idsToNames = typeIdsToTypeNames();
 	TypeIdsToTypeNamesMap::const_iterator it = idsToNames.find( typeId );
@@ -265,7 +266,7 @@ std::string RunTimeTyped::typeNameFromTypeId( TypeId typeId )
 	{
 		return "";
 	}
-	return it->second;
+	return it->second.c_str();
 }
 
 RunTimeTyped::TypeIdsToTypeNamesMap &RunTimeTyped::typeIdsToTypeNames()

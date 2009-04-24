@@ -189,7 +189,7 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 {
 	if( !vertexAttributeSize() )
 	{
-		throw Exception( typeName() + " does not support vertex attributes." );
+		throw Exception( std::string( typeName() ) + " does not support vertex attributes." );
 	}
 	
 	size_t s = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsTypedData >( boost::const_pointer_cast<IECore::Data>( data ) );

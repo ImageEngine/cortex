@@ -59,7 +59,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	{																											\
 		if ( !TNAME::hasBase() )																				\
 		{																										\
-			throw Exception( TNAME::staticTypeName() + " has no base type." );									\
+			throw Exception( std::string( TNAME::staticTypeName() ) + " has no base type." );									\
 		}																										\
 		return ( sizeof( TNAME::ValueType::value_type ) / sizeof( TNAME::BaseType ) ) * this->readable().size();	\
 	}																											\
@@ -68,7 +68,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	{																											\
 		if ( !TNAME::hasBase() )																				\
 		{																										\
-			throw Exception( TNAME::staticTypeName() + " has no base type." );									\
+			throw Exception( std::string( TNAME::staticTypeName() ) + " has no base type." );									\
 		}																										\
 		return reinterpret_cast< const TNAME::BaseType * >( &(this->readable()[0]) );							\
 	}																											\
@@ -77,7 +77,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	{																											\
 		if ( !TNAME::hasBase() )																				\
 		{																										\
-			throw Exception( TNAME::staticTypeName() + " has no base type." );									\
+			throw Exception( std::string( TNAME::staticTypeName() ) + " has no base type." );									\
 		}																										\
 		return reinterpret_cast< TNAME::BaseType * >( &(this->writable()[0]) );									\
 	}																											\

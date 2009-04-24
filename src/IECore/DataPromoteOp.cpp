@@ -192,7 +192,7 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 			return fn.template operator()<F>( d );
 		}
 		default :
-			throw Exception( "DataPromoteOp: Unsupported target data type \"" + Object::typeNameFromTypeId( targetType ) + "\"." );
+			throw Exception( "DataPromoteOp: Unsupported target data type \"" + std::string( Object::typeNameFromTypeId( targetType ) ) + "\"." );
 		}
 	}
 };
@@ -231,7 +231,7 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 			return fn.template operator()<F>( d );
 		}
 		default :
-			throw Exception( "DataPromoteOp: Unsupported target data type \"" + Object::typeNameFromTypeId( targetType ) + "\"." );
+			throw Exception( "DataPromoteOp: Unsupported target data type \"" + std::string( Object::typeNameFromTypeId( targetType ) ) + "\"." );
 		}
 	}
 };

@@ -59,15 +59,15 @@ class TypedStateComponent : public StateComponent
 		////////////////////////////////////////////////////
 		//@{
 		virtual IECore::TypeId typeId() const;
-		virtual std::string typeName() const;
+		virtual const char *typeName() const;
 		virtual bool isInstanceOf( IECore::TypeId typeId ) const;
-		virtual bool isInstanceOf( const std::string &typeName ) const;
+		virtual bool isInstanceOf( const char *typeName ) const;
 		static IECore::TypeId staticTypeId();
-		static std::string staticTypeName();
+		static const char *staticTypeName();
 		static bool inheritsFrom( IECore::TypeId typeId );
-		static bool inheritsFrom( const std::string &typeName );
+		static bool inheritsFrom( const char *typeName );
 		static IECore::TypeId baseTypeId();
-		static std::string baseTypeName();
+		static const char *baseTypeName();
 		typedef StateComponent BaseClass;		
 		//@}
 		
@@ -93,13 +93,13 @@ class TypedStateComponent : public StateComponent
 /// Use this macro to specialise the necessary parts of a TypedStateComponent instantiation.
 #define IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )				\
 	template<>																				\
-	std::string TYPE::typeName() const														\
+	const char *TYPE::typeName() const														\
 	{																						\
 		return # TYPE;																		\
 	}																						\
 																							\
 	template<>																				\
-	std::string TYPE::staticTypeName()														\
+	const char *TYPE::staticTypeName()														\
 	{																						\
 		return # TYPE;																		\
 	}																						\

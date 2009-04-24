@@ -86,13 +86,13 @@ TypeId TypedObjectParameter<T>::staticTypeId()
 }
 
 template <typename T> 
-std::string TypedObjectParameter<T>::typeName() const
+const char *TypedObjectParameter<T>::typeName() const
 {
 	return staticTypeName();
 }
 
 template <typename T> 
-std::string TypedObjectParameter<T>::staticTypeName()
+const char *TypedObjectParameter<T>::staticTypeName()
 {
 	assert( 0 ); // this function must be specialised for each type!
 	return "";
@@ -105,7 +105,7 @@ TypeId TypedObjectParameter<T>::baseTypeId()
 }
 
 template <class T> 
-std::string TypedObjectParameter<T>::baseTypeName()
+const char *TypedObjectParameter<T>::baseTypeName()
 {
 	return ObjectParameter::staticTypeName();
 }
@@ -121,9 +121,9 @@ bool TypedObjectParameter<T>::isInstanceOf( TypeId typeId ) const
 }
 
 template<typename T>
-bool TypedObjectParameter<T>::isInstanceOf( const std::string &typeName ) const
+bool TypedObjectParameter<T>::isInstanceOf( const char *typeName ) const
 {
-	if( typeName==staticTypeName() )
+	if( !strcmp( typeName, staticTypeName() ) )
 	{
 		return true;
 	}
@@ -137,9 +137,9 @@ bool TypedObjectParameter<T>::inheritsFrom( TypeId typeId )
 }
 
 template<typename T>
-bool TypedObjectParameter<T>::inheritsFrom( const std::string &typeName )
+bool TypedObjectParameter<T>::inheritsFrom( const char *typeName )
 {
-	return ObjectParameter::staticTypeName()==typeName ? true : ObjectParameter::inheritsFrom( typeName );
+	return !strcmp( ObjectParameter::staticTypeName(), typeName ) ? true : ObjectParameter::inheritsFrom( typeName );
 }
 
 
@@ -171,7 +171,7 @@ bool TypedObjectParameter<T>::valueValid( ConstObjectPtr value, std::string *rea
 	}\
 	\
 	template<>\
-	std::string TypedObjectParameter<T>::staticTypeName()\
+	const char *TypedObjectParameter<T>::staticTypeName()\
 	{\
 		return # TNAME;\
 	}\
