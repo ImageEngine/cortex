@@ -75,6 +75,11 @@ class TestFrameListParameter( unittest.TestCase ) :
 	
 		p = IECore.FrameListParameter( "n", "d", IECore.FrameRange( 0, 10 ) )
 		self.assertEqual( p.getFrameListValue().asList(), range( 0, 11 ) )
+	
+	def testOps( self ) :
+	
+		o1 = IECore.CheckImagesOp()
+		o2 = IECore.FileSequenceGraphOp()
 			
 if __name__ == "__main__":
         unittest.main()
