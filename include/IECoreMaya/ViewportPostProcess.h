@@ -54,6 +54,8 @@ class ViewportPostProcess : public IECore::RefCounted
 	
 	public:
 	
+		IE_CORE_DECLAREMEMBERPTR( ViewportPostProcess );
+			
 		ViewportPostProcess();
 		virtual ~ViewportPostProcess();
 		

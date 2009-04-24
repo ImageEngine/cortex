@@ -53,6 +53,8 @@ class ImageViewportPostProcess : public ViewportPostProcess
 {
 	public:
 	
+		IE_CORE_DECLAREMEMBERPTR( ImageViewportPostProcess )
+	
 		ImageViewportPostProcess();
 		virtual ~ImageViewportPostProcess();
 				
