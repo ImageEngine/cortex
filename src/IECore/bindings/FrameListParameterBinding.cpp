@@ -90,7 +90,7 @@ class FrameListParameterWrap : public FrameListParameter, public Wrapper< FrameL
 
 	public :
 
-		FrameListParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv, bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+		FrameListParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = std::string(""), bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
 			:	FrameListParameter( n, d, makeDefault( dv ), allowEmptyList, parameterPresets<FrameListParameter::ObjectPresetsContainer>( p ), po, ud ), Wrapper< FrameListParameter >( self, this ) {};
 		
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( FrameListParameter );
@@ -103,12 +103,12 @@ void bindFrameListParameter()
 
 	RunTimeTypedClass<FrameListParameter, FrameListParameterWrap::Ptr>()
 		.def( 
-			init< const std::string &, const std::string &, object, boost::python::optional< bool, const dict &, bool, CompoundObjectPtr > >
+			init< const std::string &, const std::string &, boost::python::optional< object, bool, const dict &, bool, CompoundObjectPtr > >
 			( 
 				( 
 					arg( "name" ), 
 					arg( "description" ), 
-					arg( "defaultValue" ),
+					arg( "defaultValue" ) = std::string( "" ),
 					arg( "allowEmptyList" ) = true,
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false , 
