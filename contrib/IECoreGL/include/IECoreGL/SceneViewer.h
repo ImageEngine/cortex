@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,6 +50,8 @@ class SceneViewer : public Window
 {
 
 	public :
+	
+		IE_CORE_DECLAREMEMBERPTR( SceneViewer );
 	
 		/// Creates a new window with a view onto the
 		/// specified scene.
