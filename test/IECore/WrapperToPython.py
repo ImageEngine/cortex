@@ -60,4 +60,4 @@ class TestWrapperToPython( unittest.TestCase ) :
 		self.assert_( o["c"] is r )
 
 if __name__ == "__main__":
-        unittest.main()
+	unittest.main()
