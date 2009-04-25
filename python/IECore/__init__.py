@@ -36,6 +36,14 @@
 #
 # Some parts of the IECore library are defined purely in Python. These are shown below.
 
+# We register our own IntrusivePtrToPython converter in the bindings based on RefCountedClass. This allows
+# us to deal with object identity issues when pushing wrapped objects back into python. Boost python issues a warning
+# about this as it has already registered a converter, so we ignore the warnings here. The alternative would be to use
+# some other type for the default held type in RefCountedClass, but that means making a new pointer type which tries to
+# act like intrusive_ptr, and that seems to be unecessary bloat compared to just ignoring the warning.
+import warnings
+warnings.filterwarnings( "ignore", "to-Python converter for boost::intrusive_ptr.*already registered.", RuntimeWarning )
+
 from _IECore import *
 
 # access by a shorter name for convenience
