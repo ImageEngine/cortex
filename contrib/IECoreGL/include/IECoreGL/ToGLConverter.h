@@ -51,7 +51,7 @@ class ToGLConverter : public IECore::FromCoreConverter
 
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToGLConverter, ToGLConverterTypeId, IECore::FromCoreConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLConverter, ToGLConverterTypeId, IECore::FromCoreConverter );
 	
 		/// Returns the object in srcParameter() converted to an appropriate IECoreGL
 		/// type.

@@ -47,7 +47,7 @@ class DepthTexture : public Texture
 {
 	public :
 				
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( DepthTexture, DepthTextureTypeId, Texture );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::DepthTexture, DepthTextureTypeId, Texture );
 		
 		DepthTexture( unsigned int width, unsigned height, IECore::ConstDataPtr z = 0 );
 				

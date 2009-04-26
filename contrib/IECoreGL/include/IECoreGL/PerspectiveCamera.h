@@ -52,7 +52,7 @@ class PerspectiveCamera : public Camera
 			float horizontalFOV = 90.0f
 		);
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PerspectiveCamera, PerspectiveCameraTypeId, Camera );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::PerspectiveCamera, PerspectiveCameraTypeId, Camera );
 
 		void setFOV( float fov );
 		float getFOV() const;

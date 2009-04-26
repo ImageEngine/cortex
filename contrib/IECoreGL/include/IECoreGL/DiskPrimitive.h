@@ -45,7 +45,7 @@ class DiskPrimitive : public Primitive
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( DiskPrimitive, DiskPrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::DiskPrimitive, DiskPrimitiveTypeId, Primitive );
 
 		DiskPrimitive( float radius = 1, float thetaMax = 360 );
 		virtual ~DiskPrimitive();

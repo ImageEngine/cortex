@@ -45,7 +45,7 @@ class QuadPrimitive : public Primitive
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( QuadPrimitive, QuadPrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::QuadPrimitive, QuadPrimitiveTypeId, Primitive );
 
 		QuadPrimitive( float width = 1, float height = 1 );
 		virtual ~QuadPrimitive();

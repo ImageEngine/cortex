@@ -59,7 +59,7 @@ class Renderable : public IECore::RunTimeTyped, boost::noncopyable
 		Renderable();
 		virtual ~Renderable();
 		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Renderable, RenderableTypeId, IECore::RunTimeTyped );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Renderable, RenderableTypeId, IECore::RunTimeTyped );
 		
 		/// Renders the object in the current OpenGL context, using
 		/// the state specified. The state should already have been

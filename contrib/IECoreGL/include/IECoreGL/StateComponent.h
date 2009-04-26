@@ -50,7 +50,7 @@ class StateComponent : public Bindable
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( StateComponent, StateComponentTypeId, Bindable );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::StateComponent, StateComponentTypeId, Bindable );
 		
 		virtual ~StateComponent();
 

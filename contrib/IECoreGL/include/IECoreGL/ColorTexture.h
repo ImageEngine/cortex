@@ -48,7 +48,7 @@ class ColorTexture : public Texture
 {
 	public :
 				
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ColorTexture, ColorTextureTypeId, Texture );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ColorTexture, ColorTextureTypeId, Texture );
 		
 		/// Constructs an empty texture of the specified dimensions.
 		ColorTexture( unsigned int width, unsigned int height );

@@ -48,7 +48,7 @@ class MeshPrimitive : public Primitive
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::MeshPrimitive, MeshPrimitiveTypeId, Primitive );
 
 		/// Copies of all data are taken.
 		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );

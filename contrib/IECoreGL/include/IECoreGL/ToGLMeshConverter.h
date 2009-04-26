@@ -51,7 +51,7 @@ class ToGLMeshConverter : public ToGLConverter
 
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToGLMeshConverter, ToGLMeshConverterTypeId, ToGLConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLMeshConverter, ToGLMeshConverterTypeId, ToGLConverter );
 		
 		ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert = 0 );
 		virtual ~ToGLMeshConverter();

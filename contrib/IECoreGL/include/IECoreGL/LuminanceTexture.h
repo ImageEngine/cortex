@@ -46,7 +46,7 @@ class LuminanceTexture : public Texture
 {
 	public :
 				
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LuminanceTexture, LuminanceTextureTypeId, Texture );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::LuminanceTexture, LuminanceTextureTypeId, Texture );
 		
 		/// Constructs a new LuminanceTexture. Both channels must be of the same type, and must
 		/// be some form of numeric VectorData. The alpha channel may be omitted.

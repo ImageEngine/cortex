@@ -45,7 +45,7 @@ class SpherePrimitive : public Primitive
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SpherePrimitive, SpherePrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::SpherePrimitive, SpherePrimitiveTypeId, Primitive );
 
 		/// Z range is always 0 <= zMin < zMax <= 1. ie zMin and zMax are measured as a proportion
 		/// of radius and not absolutely as in the Renderman spec.

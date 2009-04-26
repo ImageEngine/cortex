@@ -49,7 +49,7 @@ class Font : public IECore::RunTimeTyped
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Font, FontTypeId, IECore::RunTimeTyped );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Font, FontTypeId, IECore::RunTimeTyped );
 
 		Font( IECore::FontPtr font );
 		virtual ~Font();

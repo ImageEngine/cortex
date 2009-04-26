@@ -49,14 +49,14 @@ class TestShaderLoader( unittest.TestCase ) :
 		l = ShaderLoader( sp )
 		
 		s = l.load( "3dLabs/Toon" )	
-		self.assert_( s.typeName()=="Shader" )
+		self.assert_( s.typeName()=="IECoreGL::Shader" )
 		
 		ss = l.load( "3dLabs/Toon" )
 		self.assert_( s.isSame( ss ) )
 		
 		# shader is too complicated for my graphics card
 		s = l.load( "3dLabs/Mandel" )	
-		self.assert_( s.typeName()=="Shader" )
+		self.assert_( s.typeName()=="IECoreGL::Shader" )
 		
 		self.assert_( ShaderLoader.defaultShaderLoader().isSame( ShaderLoader.defaultShaderLoader() ) )
 	

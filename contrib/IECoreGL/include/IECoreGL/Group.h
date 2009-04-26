@@ -53,7 +53,7 @@ class Group : public Renderable
 
 		typedef std::list<RenderablePtr> ChildContainer;
 		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Group, GroupTypeId, Renderable );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Group, GroupTypeId, Renderable );
 
 		/// Newly created Groups have empty state and
 		/// identity transforms.

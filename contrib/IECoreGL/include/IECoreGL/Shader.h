@@ -53,7 +53,7 @@ class Shader : public Bindable
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Shader, ShaderTypeId, Bindable );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Shader, ShaderTypeId, Bindable );
 
 		/// Either vertexSource or fragmentSource may be empty to use the fixed
 		/// functionality for that shader component.

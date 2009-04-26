@@ -57,7 +57,7 @@ class Primitive : public Renderable
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Primitive, PrimitiveTypeId, Renderable );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Primitive, PrimitiveTypeId, Renderable );
 
 		Primitive();
 		virtual ~Primitive();

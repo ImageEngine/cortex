@@ -49,7 +49,7 @@ class TextPrimitive : public Primitive
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TextPrimitive, TextPrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::TextPrimitive, TextPrimitiveTypeId, Primitive );
 
 		TextPrimitive( const std::string &text, FontPtr font );
 		virtual ~TextPrimitive();

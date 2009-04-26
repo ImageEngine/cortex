@@ -48,7 +48,7 @@ class CurvesPrimitive : public Primitive
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurvesPrimitive, CurvesPrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::CurvesPrimitive, CurvesPrimitiveTypeId, Primitive );
 
 		CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve,
 			IECore::ConstV3fVectorDataPtr points, float width=1.0f );

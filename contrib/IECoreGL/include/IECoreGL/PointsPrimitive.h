@@ -47,7 +47,7 @@ class PointsPrimitive : public Primitive
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointsPrimitive, PointsPrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::PointsPrimitive, PointsPrimitiveTypeId, Primitive );
 
 		/// \todo We should consider removing the Point enum value and always using the PointsPrimitiveUseGLPoints
 		/// attribute instead.

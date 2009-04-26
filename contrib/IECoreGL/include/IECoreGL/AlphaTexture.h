@@ -44,7 +44,7 @@ class AlphaTexture : public Texture
 {
 	public :
 				
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( AlphaTexture, AlphaTextureTypeId, Texture );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::AlphaTexture, AlphaTextureTypeId, Texture );
 		
 		/// Constructs a texture using the specified data.
 		AlphaTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr a, bool mipMap=true );

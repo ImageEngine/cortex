@@ -50,7 +50,7 @@ class Scene : public Renderable
 {
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Scene, SceneTypeId, Renderable );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Scene, SceneTypeId, Renderable );
 
 		Scene();
 		virtual ~Scene();

@@ -53,7 +53,7 @@ class FrameBuffer : public Bindable
 {
 	public :
 		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FrameBuffer, FrameBufferTypeId, Bindable );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::FrameBuffer, FrameBufferTypeId, Bindable );
 		
 		/// Makes a new framebuffer. At this point the buffer is empty - you must use
 		/// the set*() functions below to provide locations to draw to before using

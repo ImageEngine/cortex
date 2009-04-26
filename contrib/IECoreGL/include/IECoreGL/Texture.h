@@ -57,7 +57,7 @@ class Texture : public Bindable
 		
 		friend class FrameBuffer;
 		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Texture, TextureTypeId, Bindable );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Texture, TextureTypeId, Bindable );
 		
 		/// Creates a texture object to wrap the already created
 		/// GL texture specified.

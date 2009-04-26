@@ -51,7 +51,7 @@ class OrthographicCamera : public Camera
 			const Imath::V2f &clippingPlanes = Imath::V2f( 0.1, 1000 )
 		);
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( OrthographicCamera, OrthographicCameraTypeId, Camera );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::OrthographicCamera, OrthographicCameraTypeId, Camera );
 
 		virtual void render( ConstStatePtr state ) const;
 

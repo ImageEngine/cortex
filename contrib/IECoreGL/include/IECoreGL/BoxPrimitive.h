@@ -45,7 +45,7 @@ class BoxPrimitive : public Primitive
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( BoxPrimitive, BoxPrimitiveTypeId, Primitive );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::BoxPrimitive, BoxPrimitiveTypeId, Primitive );
 
 		BoxPrimitive( const Imath::Box3f &box );
 		virtual ~BoxPrimitive();

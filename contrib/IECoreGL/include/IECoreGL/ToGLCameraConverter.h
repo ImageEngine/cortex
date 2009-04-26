@@ -48,7 +48,7 @@ class ToGLCameraConverter : public ToGLConverter
 
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToGLCameraConverter, ToGLCameraConverterTypeId, ToGLConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLCameraConverter, ToGLCameraConverterTypeId, ToGLConverter );
 		
 		ToGLCameraConverter( IECore::ConstCameraPtr toConvert = 0 );
 		virtual ~ToGLCameraConverter();

@@ -55,7 +55,7 @@ class NameStateComponent : public StateComponent
 {
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( NameStateComponent, NameStateComponentTypeId, StateComponent );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::NameStateComponent, NameStateComponentTypeId, StateComponent );
 
 		NameStateComponent( const std::string &name="unnamed" );
 		virtual ~NameStateComponent();
