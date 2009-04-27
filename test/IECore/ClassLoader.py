@@ -51,6 +51,8 @@ class TestClassLoader( unittest.TestCase ) :
 		o = l.load( "maths/multiply" )()
 		self.assertEqual( len( o.parameters() ), 2 )
 
+		self.assertEqual( l.versions( "maths/multiply" ), [ 1, 2 ] )
+
 	def testFinalSlash( self ) :
 	
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops/", ":" ) )
@@ -90,6 +92,14 @@ class TestClassLoader( unittest.TestCase ) :
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		
 		c = l.load( "path.With.Dot/multiply" )
+		
+	def testExceptions( self ) :
+	
+		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
+		self.assertRaises( RuntimeError, l.getDefaultVersion, "thisOpDoesntExist" )
+		self.assertRaises( RuntimeError, l.setDefaultVersion, "thisOpDoesntExist", 1 )
+		self.assertRaises( TypeError, l.setDefaultVersion, "maths/multiply", "iShouldBeAnInt" )
+		self.assertRaises( RuntimeError, l.setDefaultVersion, "maths/multiply", 10 )
 		
 if __name__ == "__main__":
         unittest.main()
