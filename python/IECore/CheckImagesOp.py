@@ -89,4 +89,4 @@ Otherwise it will return the number of suspicious frames (strange file sizes).""
 
 		return IntData( len(suspicious) )
 
-makeRunTimeTyped( CheckImagesOp, 100017, Op )
+makeRunTimeTyped( CheckImagesOp, 100017, FileSequenceAnalyzerOp )
