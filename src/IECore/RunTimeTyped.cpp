@@ -32,7 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/format.hpp"
+
 #include "IECore/RunTimeTyped.h"
+#include "IECore/MessageHandler.h"
 
 using namespace IECore;
 
@@ -96,47 +99,62 @@ bool RunTimeTyped::inheritsFrom( const char *typeName )
 
 void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId )
 {
-	BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();
-#ifndef NDEBUG
 	{
-		BaseTypeRegistryMap::const_iterator it = baseRegistry.find( derivedTypeId );
-		if ( it != baseRegistry.end() )
+		BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();		
+		BaseTypeRegistryMap::iterator lb = baseRegistry.lower_bound( derivedTypeId );
+		if ( lb != baseRegistry.end() && derivedTypeId == lb->first ) 
 		{
-			assert( it->second == baseTypeId );
-		}	
+			if ( baseTypeId != lb->second )
+			{
+				msg( Msg::Warning, "RunTimeTyped", boost::format( "Duplicate registration of base type id for '%s' - %d and %d") % derivedTypeName % lb->second % baseTypeId  );
+			}
+		}
+		else
+		{
+			/// Use the lower-bound as a hint for the position, yielding constant insert time
+			baseRegistry.insert( lb, BaseTypeRegistryMap::value_type( derivedTypeId, baseTypeId ) );
+		}
 	}
-#endif	
 	
-	baseRegistry[ derivedTypeId ] = baseTypeId;
-	
+	/// Inserted derived type id into set of base classes derived type ids 
 	DerivedTypesRegistryMap &derivedRegistry = derivedTypesRegistry();
 	derivedRegistry[ baseTypeId ].insert( derivedTypeId );
-	
+		
 	/// Put in id->name map
-	TypeIdsToTypeNamesMap &idsToNames = typeIdsToTypeNames();
-#ifndef NDEBUG
 	{
-		TypeIdsToTypeNamesMap::const_iterator it = idsToNames.find( derivedTypeId );
-		if ( it != idsToNames.end() )
+		TypeIdsToTypeNamesMap &idsToNames = typeIdsToTypeNames();
+		TypeIdsToTypeNamesMap::iterator lb = idsToNames.lower_bound( derivedTypeId );
+		if ( lb != idsToNames.end() && derivedTypeId == lb->first ) 
 		{
-			assert( it->second == derivedTypeName );
+			if ( std::string( derivedTypeName ) != lb->second )
+			{
+				msg( Msg::Warning, "RunTimeTyped", boost::format( "Duplicate registration of type name for type id %d - '%s' and '%s'" ) % derivedTypeId % lb->second % derivedTypeName );
+			}
 		}
-	}	
-#endif
-	idsToNames[ derivedTypeId ] = derivedTypeName;
+		else
+		{
+			/// Use the lower-bound as a hint for the position, yielding constant insert time
+			idsToNames.insert( lb, TypeIdsToTypeNamesMap::value_type( derivedTypeId, derivedTypeName ) );
+		}
+	}
 	
 	/// Put in name->id map
-	TypeNamesToTypeIdsMap &namesToIds = typeNamesToTypeIds();
-#ifndef NDEBUG
 	{
-		TypeNamesToTypeIdsMap::const_iterator it = namesToIds.find( derivedTypeName );
-		if ( it != namesToIds.end() )
+		TypeNamesToTypeIdsMap &namesToIds = typeNamesToTypeIds();
+		TypeNamesToTypeIdsMap::iterator lb = namesToIds.lower_bound( derivedTypeName );
+		if ( lb != namesToIds.end() && derivedTypeName == lb->first ) 
 		{
-			assert( it->second == derivedTypeId );
-		}	
+			if ( derivedTypeId != lb->second )
+			{
+				msg( Msg::Warning, "RunTimeTyped", boost::format( "Duplicate registration of type id for type name '%s' - %d and %d") % derivedTypeName % lb->second % derivedTypeId );
+			}
+		}
+		else
+		{
+			/// Use the lower-bound as a hint for the position, yielding constant insert time
+			namesToIds.insert( lb, TypeNamesToTypeIdsMap::value_type( derivedTypeName, derivedTypeId ) );
+		}
 	}
-#endif
-	namesToIds[ derivedTypeName ] = derivedTypeId;
 	
 }
 
