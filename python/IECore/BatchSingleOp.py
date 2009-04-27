@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,10 +35,12 @@
 from IECore import *
 from urllib import unquote
 
-# Op for executing another Op multiple times with different parameters.
+## Op for executing another Op multiple times with different parameters.
+# \todo Move this somewhere IE specific - it's relies on IEFarm too much to be in cortex.
 class BatchSingleOp( Op ) :
 
-	def __init__( self, classLoader = ClassLoader.defaultOpLoader() ) :
+	## If classLoader is None then ClassLoader.defaultOpLoader() will be used.
+	def __init__( self, classLoader = None ) :
 	
 		Op.__init__( self, 
 			"BatchSingleOp", 
@@ -60,7 +62,7 @@ class BatchSingleOp( Op ) :
 		)
 
 		self.__ops = []
-		self.__classLoader = classLoader
+		self.__classLoader = classLoader or ClassLoader.defaultOpLoader()
 		
 		self.parameters().addParameters(
 			[
