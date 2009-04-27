@@ -63,9 +63,9 @@ enum TypeId
 	ToMayaPlugConverterTypeId = 109019,
 	FromMayaPluginDataPlugConverterTypeId = 109020,	
 	FromMayaTransformConverterTypeId = 109021,
-	FromMayaImageConverterTypeId = 109003,	
-	ToMayaImageConverterTypeId = 109004,	
-	PlaybackFrameListTypeId = 109005,	
+	FromMayaImageConverterTypeId = 109022,	
+	ToMayaImageConverterTypeId = 109023,	
+	PlaybackFrameListTypeId = 109024,	
 	LastTypeId = 109999
 
 };
