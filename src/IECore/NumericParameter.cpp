@@ -80,6 +80,9 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 /////////////////////////////////////////////////////////////////////////////////////
 
 template <class T> 
+const RunTimeTyped::TypeDescription<NumericParameter<T> > NumericParameter<T>::g_typeDescription;
+
+template <class T> 
 TypeId NumericParameter<T>::typeId() const
 {
 	return staticTypeId();

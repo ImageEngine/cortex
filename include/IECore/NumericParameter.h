@@ -107,6 +107,8 @@ class NumericParameter : public Parameter
 
 		T m_min;
 		T m_max;
+	
+		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( NumericParameter<T> );
 
 };
 
