@@ -66,6 +66,9 @@ void TypedPrimitiveOp<T>::modify( ObjectPtr primitive, ConstCompoundObjectPtr op
 	modifyTypedPrimitive( typedPrimitive, operands );
 }
 
+template<typename T>
+const RunTimeTyped::TypeDescription< TypedPrimitiveOp<T> > TypedPrimitiveOp<T>::g_typeDescription;
+
 template <typename T> 
 TypeId TypedPrimitiveOp<T>::typeId() const
 {
@@ -149,8 +152,6 @@ bool TypedPrimitiveOp<T>::inheritsFrom( const char *typeName )
 	{ \
 		return # TNAME; \
 	} \
-	template<> \
-	const RunTimeTyped::TypeDescription< TypedPrimitiveOp<T> >  TypedPrimitiveOp<T>::g_typeDescription; \
 	\
 	template class TypedPrimitiveOp<T>;
 	

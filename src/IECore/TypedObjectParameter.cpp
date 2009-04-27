@@ -72,6 +72,9 @@ Parameter::PresetsContainer TypedObjectParameter<T>::makePresets( const ObjectPr
 	return result;
 }
 
+template <class T> 
+const RunTimeTyped::TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
+
 template <typename T> 
 TypeId TypedObjectParameter<T>::typeId() const
 {
@@ -175,10 +178,6 @@ bool TypedObjectParameter<T>::valueValid( ConstObjectPtr value, std::string *rea
 	{\
 		return # TNAME;\
 	}\
-	\
-	template<> \
-	const RunTimeTyped::TypeDescription< TypedObjectParameter<T> >  TypedObjectParameter<T>::g_typeDescription; \
-	\
 	template class TypedObjectParameter<T>;
 	
 namespace IECore
