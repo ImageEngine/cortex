@@ -114,4 +114,4 @@ class FileSequenceGraphOp( FileSequenceAnalyzerOp ):
 		graph.blindData()['hyperlink'] = StringData('FileSystem')
 		return graph
 
-makeRunTimeTyped( FileSequenceGraphOp, 100020, Op )
+makeRunTimeTyped( FileSequenceGraphOp, 100020, FileSequenceAnalyzerOp )
