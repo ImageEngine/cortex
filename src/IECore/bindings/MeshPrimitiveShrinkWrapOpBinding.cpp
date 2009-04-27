@@ -48,11 +48,9 @@ namespace IECore
 {
 
 void bindMeshPrimitiveShrinkWrapOp()
-{
-	
-	typedef class_< MeshPrimitiveShrinkWrapOp, MeshPrimitiveShrinkWrapOpPtr, boost::noncopyable, bases<MeshPrimitiveOp> > MeshPrimitiveShrinkWrapOpPyClass;
-	scope opScope = MeshPrimitiveShrinkWrapOpPyClass( "MeshPrimitiveShrinkWrapOp", no_init )
-		.def( init< >() )
+{	
+	scope opScope = RunTimeTypedClass<MeshPrimitiveShrinkWrapOp>()
+		.def( init<>() )
 	;
 	
 	enum_< MeshPrimitiveShrinkWrapOp::Direction >( "Direction" )
