@@ -116,7 +116,7 @@ struct DataConversionTest
 		CompoundDataConversion< Func, typename Func::InverseType > f_fi( f, f.inverse() );
 		
 		unsigned seed = 42;
-		boost::mt19937 generator( seed );
+		boost::mt19937 generator( static_cast<boost::mt19937::result_type>( seed ) );
 						
 		/// Create a random number generator within this range
 		boost::uniform_real<> uni_dist( std::numeric_limits<F>::min(), std::numeric_limits<F>::max() );		
