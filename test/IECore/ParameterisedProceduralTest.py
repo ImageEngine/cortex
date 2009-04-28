@@ -46,6 +46,16 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 
 		self.assert_( IECore.Object.isType( IECore.TypeId.ReadProcedural ) )		
 		self.failIf( IECore.Object.isAbstractType( IECore.TypeId.ReadProcedural ) )
+		p = IECore.Object.create( IECore.TypeId.ReadProcedural )
+		
+	def testRunTimeTyped( self ) :	
+		
+		self.assertEqual( IECore.ReadProcedural.staticTypeName(), "ReadProcedural" )
+		self.assertEqual( IECore.ReadProcedural.staticTypeId(), IECore.TypeId.ReadProcedural )		
+		
+		p = IECore.ReadProcedural()
+		self.assertEqual( p.typeName(), "ReadProcedural" )
+		self.assertEqual( p.typeId(), IECore.TypeId.ReadProcedural )				
 
 	def testParameterAccess( self ) :
 		
