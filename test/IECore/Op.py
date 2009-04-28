@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -44,7 +44,7 @@ class PythonOp( Op ) :
 
 	def doOperation( self, operands ) :
 	
-		return StringData( operands.name.value )
+		return StringData( operands['name'].value )
 
 class TestPythonOp( unittest.TestCase ) :
 
@@ -108,7 +108,7 @@ class TestPythonOp( unittest.TestCase ) :
 					if not res[0]:
 						return res
 
-					if value.first > value.second:
+					if value['first'] > value['second']:
 						return ( True, "" )
 
 					return ( False, "First parameter is not greater then the second!" )
@@ -120,10 +120,10 @@ class TestPythonOp( unittest.TestCase ) :
 				return StringData( "Yes!" )
 
 		op = GreaterThenOp()
-		op.first = 1
-		op.second = 0
+		op['first'] = 1
+		op['second'] = 0
 		op()
-		op.second = 2
+		op['second'] = 2
 		self.assertRaises( Exception, op )
 
 if __name__ == "__main__":
