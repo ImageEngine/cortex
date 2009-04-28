@@ -46,7 +46,6 @@ class testFrameRange( unittest.TestCase ) :
 		self.assertRaises( TypeError, FrameRange, 1, 100.1 )
 		self.assertRaises( TypeError, FrameRange, "1", "100" )
 		self.assertRaises( RuntimeError, FrameRange, 10, 1 )
-		self.assertRaises( RuntimeError, FrameRange, 1, 9, 3 )
 		
 		r = FrameRange( 1, 100 )
 		self.assertEqual( r.start, 1 )
@@ -96,6 +95,19 @@ class testFrameRange( unittest.TestCase ) :
 		self.assertEqual( r.start, -100 )
 		self.assertEqual( r.end, -10 )
 		self.assertEqual( r.step, 2 )
+	
+	def testImperfectMultiples( self ) :
+	
+		"""It was getting a bit annoying being forced to make the ranges a perfect multiple of the step."""
+		
+		r = FrameRange( 1, 10, 2 )
+		self.assertEqual( r.asList(), [ 1, 3, 5, 7, 9 ] )
+		self.assertEqual( str( r ), "1-10x2" )
+		
+		r = FrameList.parse( "1-100x10" )
+		self.assertEqual( r, FrameRange( 1, 100, 10 ) )
+		self.assertEqual( r.asList(), [ 1, 11, 21, 31, 41, 51, 61, 71, 81, 91 ] )
+		self.assertEqual( str( r ), "1-100x10" )
 		
 	def testClumping( self ) :
 	

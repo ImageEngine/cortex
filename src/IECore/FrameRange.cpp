@@ -57,10 +57,6 @@ FrameRange::FrameRange( Frame start, Frame end, Frame step ) : m_start( start ),
 	{
 		throw Exception( "FrameRange step cannot be zero" );
 	}
-	if ( ( m_end - m_start ) % m_step != 0 )
-	{
-		throw Exception( "FrameRange step must divide perfectly into end-start" );
-	}
 }
 
 FrameRange::~FrameRange()
@@ -104,10 +100,6 @@ void FrameRange::setStep( Frame step )
 	if ( step == 0 )
 	{
 		throw Exception( "FrameRange step cannot be zero" );
-	}
-	if ( ( m_end - m_start ) % m_step != 0 )
-	{
-		throw Exception( "FrameRange step must divide perfectly into end-start" );
 	}
 	m_step = step;
 }
