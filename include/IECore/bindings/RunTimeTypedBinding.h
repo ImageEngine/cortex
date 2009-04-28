@@ -58,6 +58,44 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 			
 };
 
+#define IE_COREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME )\
+	virtual TypeId typeId() const\
+	{\
+		if( boost::python::override f = this->get_override( "typeId" ) )\
+		{\
+			boost::python::object res = f(); \
+			return boost::python::extract<TypeId>( res );\
+		}\
+		return CLASSNAME::typeId();\
+	}\
+	virtual const char *typeName() const\
+	{\
+		if( boost::python::override f = this->get_override( "typeName" ) )\
+		{\
+			boost::python::object res = f(); \
+			return boost::python::extract<const char *>( res );\
+		}\
+		return CLASSNAME::typeName();\
+	}\
+	virtual bool isInstanceOf( TypeId typeId ) const\
+	{\
+		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
+		{\
+			boost::python::object res = f( typeId ); \
+			return boost::python::extract<bool>( res );\
+		}\
+		return CLASSNAME::isInstanceOf( typeId );\
+	}\
+	virtual bool isInstanceOf( const char *typeName ) const\
+	{\
+		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
+		{\
+			boost::python::object res = f( typeName ); \
+			return boost::python::extract<bool>( res );\
+		}\
+		return CLASSNAME::isInstanceOf( typeName );\
+	}
+
 } // namespace IECore
 
 #include "IECore/bindings/RunTimeTypedBinding.inl"
