@@ -68,7 +68,9 @@ Object::~Object()
 struct Object::TypeInformation
 {
 	std::map<TypeId, CreatorFn> typeIdsToCreators;	
-	std::map<std::string, CreatorFn> typeNamesToCreators;	
+	std::map<std::string, CreatorFn> typeNamesToCreators;
+	std::map<TypeId, void *> typeIdsToData;	
+	std::map<std::string, void *> typeNamesToData;
 };
 
 Object::TypeInformation *Object::typeInformation()
@@ -386,11 +388,18 @@ bool Object::isAbstractType( const std::string &typeName )
 	return !it->second;
 }
 
-void Object::registerType( TypeId typeId, const std::string typeName, CreatorFn creator )
+void Object::registerType( TypeId typeId, const std::string &typeName, CreatorFn creator, void *data )
 {
 	TypeInformation *i = typeInformation();
 	i->typeIdsToCreators[typeId] = creator;
 	i->typeNamesToCreators[typeName] = creator;
+	
+	/// Don't bother storing NULL data
+	if ( data )
+	{
+		i->typeIdsToData[typeId] = data;
+		i->typeNamesToData[typeName] = data;
+	}
 }
 
 ObjectPtr Object::create( TypeId typeId )
@@ -405,7 +414,15 @@ ObjectPtr Object::create( TypeId typeId )
 	{
 		throw Exception( ( boost::format( "Type %d is an abstract type." ) % typeId ).str() );
 	}
-	return it->second();
+	
+	void *data = 0;
+	std::map<TypeId, void *>::const_iterator dataIt = i->typeIdsToData.find( typeId );
+	if ( dataIt != i->typeIdsToData.end() )
+	{
+		data = dataIt->second;
+	}
+	
+	return it->second( data );
 }
 
 ObjectPtr Object::create( const std::string &typeName )
@@ -420,7 +437,15 @@ ObjectPtr Object::create( const std::string &typeName )
 	{
 		throw Exception( ( boost::format( "Type \"%d\" is an abstract type." ) % typeName ).str() );
 	}
-	return it->second();
+	
+	void *data = 0;
+	std::map<std::string, void *>::const_iterator dataIt = i->typeNamesToData.find( typeName );
+	if ( dataIt != i->typeNamesToData.end() )
+	{
+		data = dataIt->second;
+	}
+	
+	return it->second( data );
 }
 
 ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name )

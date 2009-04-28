@@ -57,26 +57,27 @@ boost::intrusive_ptr<T> Object::CopyContext::copy( boost::intrusive_ptr<const T>
 template<class T>
 Object::TypeDescription<T>::TypeDescription() : RunTimeTyped::TypeDescription<T>()
 {
-	Object::registerType( T::staticTypeId(), T::staticTypeName(), creator );
+	Object::registerType( T::staticTypeId(), T::staticTypeName(), creator, (void*)0 );
 }
 
 template<class T>
 Object::TypeDescription<T>::TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName ) : RunTimeTyped::TypeDescription<T>()
 {
-	Object::registerType( alternateTypeId, alternateTypeName, creator );
+	Object::registerType( alternateTypeId, alternateTypeName, creator, (void*)0 );
 }
 
 
 template<class T>
-ObjectPtr Object::TypeDescription<T>::creator()
+ObjectPtr Object::TypeDescription<T>::creator( void *data )
 {
+	assert( !data ); // We don't expect to receive any data here. 
 	return new T;
 }
 
 template<class T>
 Object::AbstractTypeDescription<T>::AbstractTypeDescription() : RunTimeTyped::TypeDescription<T>()
 {
-	Object::registerType( T::staticTypeId(), T::staticTypeName(), 0 );
+	Object::registerType( T::staticTypeId(), T::staticTypeName(), 0, (void*)0 );
 }
 
 template<class T>

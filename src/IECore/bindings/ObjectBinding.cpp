@@ -34,6 +34,8 @@
 
 #include "boost/python.hpp"
 
+#include <cassert>
+
 #include "IECore/Object.h"
 #include "IECore/bindings/ObjectBinding.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
@@ -42,6 +44,27 @@ using namespace boost::python;
 
 namespace IECore
 {
+
+static ObjectPtr creator( void *data )
+{
+	assert( data );
+	PyObject *d = (PyObject *)(data );
+	
+	ObjectPtr r = call< ObjectPtr >( d );
+	return r;
+}
+
+static void registerType( TypeId typeId, const std::string &typeName, PyObject *createFn )
+{
+	assert( createFn );
+	Py_INCREF( createFn );
+	Object::registerType( typeId, typeName, creator, (void*)createFn );	
+}
+
+static void registerAbstractType( TypeId typeId, const std::string &typeName )
+{
+	Object::registerType( typeId, typeName, 0, (void*)0 );
+}
 
 void bindObject()
 {
@@ -54,7 +77,7 @@ void bindObject()
 		.def( "isType", (bool (*)( TypeId) )&Object::isType )
 		.staticmethod( "isType" )
 		.def( "isAbstractType", (bool (*)( const std::string &) )&Object::isAbstractType )
-		.def( "isAbstractType", (bool (*)( TypeId) )&Object::isAbstractType )
+		.def( "isAbstractType", (bool (*)( TypeId ) )&Object::isAbstractType )
 		.staticmethod( "isAbstractType" )
 		.def( "create", (ObjectPtr (*)( const std::string &) )&Object::create )
 		.def( "create", (ObjectPtr (*)( TypeId ) )&Object::create )
@@ -62,7 +85,10 @@ void bindObject()
 		.def( "load", (ObjectPtr (*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & ) )&Object::load )
 		.staticmethod( "load" )
 		.def( "save", (void (Object::*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & )const )&Object::save )
-		.def("memoryUsage", (size_t (Object::*)()const )&Object::memoryUsage, "Returns the number of bytes this instance occupies in memory" )
+		.def( "memoryUsage", (size_t (Object::*)()const )&Object::memoryUsage, "Returns the number of bytes this instance occupies in memory" )
+		.def( "registerType", registerType )
+		.def( "registerType", registerAbstractType )
+		.staticmethod( "registerType" )
 	;
 	
 }

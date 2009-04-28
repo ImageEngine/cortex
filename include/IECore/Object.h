@@ -169,6 +169,12 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// of ioInterface.
 		static ObjectPtr load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name );		
 		//@}
+		
+		typedef ObjectPtr (*CreatorFn)( void *data );
+		
+		/// Register a new Object-derived type with the system. The specified void* data is passed into the creator function
+		static void registerType( TypeId typeId, const std::string &typeName, CreatorFn creator, void *data = 0 );
+
 	
 	protected :
 		
@@ -187,7 +193,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 				/// Registers the object using a specified typeId and typename
 				TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName );
 			private :
-				static ObjectPtr creator();
+				static ObjectPtr creator( void *data = 0 );
 		};
 		/// As for TypeDescription, but for registering abstract classes.
 		/// \todo Hopefully find a way of not needing a separate
@@ -342,10 +348,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		virtual void memoryUsage( MemoryAccumulator &accumulator ) const = 0;
 		
 	private :
-		
-		typedef ObjectPtr (*CreatorFn)();
-		static void registerType( TypeId typeId, const std::string typeName, CreatorFn creator );
-		
+				
 		struct TypeInformation;
 		static TypeInformation *typeInformation();
 		
