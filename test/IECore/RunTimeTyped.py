@@ -70,48 +70,59 @@ class TestRunTimeTyped( unittest.TestCase ) :
 
 	def testStaticTypeBindings( self ) :
 	
+		import IECore
+	
 		typeNames={}
 		typeIds = {}
 	
 		# Make that all classes derived from RunTimeTyped correctly bind staticTypeName and staticTypeId
 		for typeName in dir(IECore):
+		
 			t = getattr(IECore, typeName)
 
 			baseClasses = []
 			
 			# Iteratively expand base classes all the way to the top
 			if hasattr(t, "__bases__"):
-			
+				baseClasses = list( t.__bases__ )
+				
 				i=0
 				while i < len(baseClasses):
 					for x in baseClasses[i].__bases__:
 						baseClasses.extend([x])
 					
 					i = i + 1	
-						
+				
 			if IECore.RunTimeTyped in baseClasses:
-				self.assert_( getattr(t, "staticTypeName") )
-				self.assert_( getattr(t, "staticTypeId") )
-				self.assert_( getattr(t, "baseTypeId") )
-				self.assert_( getattr(t, "baseTypeName") )
+			
+				baseIds = IECore.RunTimeTyped.baseTypeIds( t.staticTypeId() )
+				baseIds = set( [ int(x) for x in baseIds ] )
+							
+				self.assert_( hasattr(t, "staticTypeName") )
+				self.assert_( hasattr(t, "staticTypeId") )
+				self.assert_( hasattr(t, "baseTypeId") )
+				self.assert_( hasattr(t, "baseTypeName") )
+								
+				self.assert_( t.staticTypeId() in IECore.TypeId.values.keys() )
 				
 				# Make sure that no 2 IECore classes provide the same typeId or typeName
 				if t.staticTypeName() in typeNames:
-					raise Exception( "'%s' does not have a unique RunTimeTyped static type name (conflicts with '%s')." % ( t.__name__ , typeNames[t.staticTypeName()] ))
+					raise RuntimeError( "'%s' does not have a unique RunTimeTyped static type name (conflicts with '%s')." % ( t.__name__ , typeNames[t.staticTypeName()] ))
 					
 				if t.staticTypeId() in typeIds:
-					raise Exception( "'%s' does not have a unique RunTimeTyped static type id (conflicts with '%s')." % (t.__name__ , typeIds[t.staticTypeId()] ))
+					raise RuntimeError( "'%s' does not have a unique RunTimeTyped static type id (conflicts with '%s')." % (t.__name__ , typeIds[t.staticTypeId()] ))
+									
+				self.assertEqual( IECore.RunTimeTyped.typeNameFromTypeId( t.staticTypeId() ), t.staticTypeName() )	
+				self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( t.staticTypeName() ), t.staticTypeId() )					
 					
 				for base in baseClasses :
 				
-					if hasattr( base, "staticTypeId" ) :
+					if issubclass( base, IECore.RunTimeTyped ) :
 					
 						self.assertNotEqual( base.staticTypeId(), t.staticTypeId() )
-						
-						if not base.staticTypeId() in IECore.RunTimeTyped.baseTypeIds( t.staticTypeId() ) :
+						if not base.staticTypeId() in IECore.RunTimeTyped.baseTypeIds( t.staticTypeId() ):
 							raise Exception( "'%s' does not have '%s' in its RunTimeTyped base classes, even though Python says it derives from it." % (t.staticTypeName(), base.staticTypeName() ))
-						
-				
+										
 				typeNames[t.staticTypeName()] = t.__name__
 				typeIds[t.staticTypeId()] = t.__name__			
 			
@@ -138,6 +149,8 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.assert_( IECore.FileSequenceParameter( "", "" ).isInstanceOf( "PathParameter" ) )
 		self.assert_( IECore.FileSequenceParameter( "", "" ).isInstanceOf( IECore.TypeId.PathParameter ) )
 		self.assertRaises( TypeError, IECore.FileSequenceParameter( "", "" ).isInstanceOf, 10 )
+		
+	
 
 if __name__ == "__main__":
     unittest.main()   

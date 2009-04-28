@@ -62,32 +62,6 @@ class TestObject( unittest.TestCase ) :
 		if len(notDefinedClasses) > 0:
 			raise Exception, "The following classes were not defined on the conversion dictionaire: " + \
 					", ".join( map(str, notDefinedClasses) ) + ".\nPlease, add them on DataTraits.py"
-
-	def testTypeIds( self ):
-		"""
-		Function that checks if all Object derived classes have typeId.name defined.
-		"""
-		import IECore
-		def objectDerived(c):
-			try:
-				return issubclass(c, IECore.Object)
-			except:
-				return False
-	
-		objectClasses = filter(objectDerived, map(lambda x: getattr(IECore, x), dir(IECore)))
-		
-		badClasses = []
-		typeIdsSeen = set()
-		for c in objectClasses :
-			tId = Object.typeIdFromTypeName( c.__name__ )
-			self.assertNotEqual( tId, IECore.TypeId.Invalid )
-			self.assert_( not int( tId ) in typeIdsSeen )
-			typeIdsSeen.add( int( tId ) )
-			if not tId in IECore.TypeId.values.keys() :
-				badClasses.append( c.__name__ )
-		
-		if len( badClasses ) :
-			raise Exception( "The following classes do not have TypeIds defined in IECore.TypeId - " + str( badClasses ) )
 		
 	def testObjectCreateAndCast( self ):
 		"""
