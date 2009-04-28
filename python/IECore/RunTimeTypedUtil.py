@@ -37,22 +37,29 @@ import IECore
 ## Registers a type id for an extension class. This makes TypeId.className
 # available and also checks that no other type is trying to use the same id.
 # It raises a RuntimeError if a conflicting type is already registered.
-def registerTypeId( className, typeId ) :
+def registerTypeId( typeId, typeName, baseTypeId ) :
 
+	assert( type( typeId ) is IECore.TypeId )
+	assert( type( typeName ) is str )	
+	assert( type( baseTypeId ) is IECore.TypeId )	
 
 	# check this type hasn't been registered already
-	if hasattr( IECore.TypeId, className ):
-		if getattr( IECore.TypeId, className ) != typeId:
-			raise RuntimeError( "Type \"%s\" is already registered." % className )
+	if hasattr( IECore.TypeId, typeName ):
+		if getattr( IECore.TypeId, typeName ) != typeId:
+			raise RuntimeError( "Type \"%s\" is already registered." % typeName )
 			
 		return	
 
 	if typeId in IECore.TypeId.values :
 		raise RuntimeError( "TypeId \"%d\" is already registered as \"%s\"." % (typeId, IECore.TypeId.values[typeId] ) )
+
+	# update the TypeId enum
+	setattr( IECore.TypeId, typeName, typeId )
+	IECore.TypeId.values[ int( typeId ) ] = typeId
+	
+	# register the new type id		
+	IECore.RunTimeTyped.registerType( typeId, typeName, baseTypeId )
 		
-	# register the new type id
-	setattr( IECore.TypeId, className, IECore.TypeId( typeId ) )
-	IECore.TypeId.values[ typeId ] = className
 
 ## This function adds the necessary function definitions to a python
 # class for it to properly implement the RunTimeTyped interface. It should
@@ -60,15 +67,20 @@ def registerTypeId( className, typeId ) :
 # calls registerTypeId() for you.
 def makeRunTimeTyped( typ, typId, baseClass ) :
 
-	registerTypeId( typ.__name__, typId )
+	typeName = typ.__name__
+
+	registerTypeId( IECore.TypeId( typId ), typeName, IECore.TypeId( baseClass.staticTypeId() ) )
+	
+	# Retrieve the correct value from the enum
+	tId = getattr( IECore.TypeId, typeName )
 
 	# add the typeId and typeName method overrides
-	typ.typeId = lambda x : typId
-	typ.typeName = lambda x: typ.__name__
+	typ.typeId = lambda x : tId
+	typ.typeName = lambda x: typeName
 
 	# add the staticTypeId, staticTypeName, baseTypeId, and baseTypeName overrides
-	typ.staticTypeId = staticmethod( lambda : typId )
-	typ.staticTypeName = staticmethod( lambda : typ.__name__ )
+	typ.staticTypeId = staticmethod( lambda : tId )
+	typ.staticTypeName = staticmethod( lambda : typeName )
 	typ.baseTypeId = staticmethod( lambda : baseClass.staticTypeId() )
 	typ.baseTypeName = staticmethod( lambda : baseClass.staticTypeName() )	
 	
