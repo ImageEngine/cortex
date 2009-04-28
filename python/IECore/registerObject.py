@@ -32,11 +32,9 @@
 #
 ##########################################################################
 
-# \todo Remove in major version 5
-def makeRunTimeTyped( typ, typId, baseClass ) :
+import IECore
 
-	import warnings
-	from IECore import registerRunTimeTyped
-	
-	warnings.warn( "makeRunTimeTyped is deprecated - please use registerRunTimeTyped instead.", DeprecationWarning, 2 )
-	registerRunTimeTyped( typ, typId, baseClass )
+def registerObject( typ, typId, baseClass ) :
+
+	IECore.registerRunTimeTyped( typ, typId, baseClass )
+	IECore.Object.registerType( typ.staticTypeId(), typ.staticTypeName(), typ )

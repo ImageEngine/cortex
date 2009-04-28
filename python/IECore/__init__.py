@@ -48,6 +48,8 @@ from _IECore import *
 
 # access by a shorter name for convenience
 Msg = MessageHandler
+from registerRunTimeTyped import registerRunTimeTyped
+from registerObject import registerObject
 from RunTimeTypedUtil import *
 from Log import *
 from Formatter import Formatter

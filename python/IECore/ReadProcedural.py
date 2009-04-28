@@ -224,4 +224,4 @@ class ReadProcedural( ParameterisedProcedural ) :
 			
 		return o
 
-makeRunTimeTyped( ReadProcedural, 100026, ParameterisedProcedural )
+registerObject( ReadProcedural, 100026, ParameterisedProcedural )
