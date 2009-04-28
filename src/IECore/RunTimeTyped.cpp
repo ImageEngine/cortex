@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "boost/format.hpp"
 
 #include "IECore/RunTimeTyped.h"
@@ -84,6 +86,7 @@ bool RunTimeTyped::isInstanceOf( TypeId typeId ) const
 
 bool RunTimeTyped::isInstanceOf( const char *typeName ) const
 {
+	assert( typeName );
 	return !strcmp( typeName, staticTypeName() );
 }
 
@@ -94,11 +97,14 @@ bool RunTimeTyped::inheritsFrom( TypeId typeId )
 
 bool RunTimeTyped::inheritsFrom( const char *typeName )
 {
+	assert( typeName );
 	return false;
 }
 
 void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId )
 {
+	assert( derivedTypeName );
+	
 	{
 		BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();		
 		BaseTypeRegistryMap::iterator lb = baseRegistry.lower_bound( derivedTypeId );
@@ -135,6 +141,7 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeNa
 		{
 			/// Use the lower-bound as a hint for the position, yielding constant insert time
 			idsToNames.insert( lb, TypeIdsToTypeNamesMap::value_type( derivedTypeId, derivedTypeName ) );
+			assert( !strcmp( typeNameFromTypeId( derivedTypeId ), derivedTypeName ) );
 		}
 	}
 	
@@ -153,9 +160,9 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeNa
 		{
 			/// Use the lower-bound as a hint for the position, yielding constant insert time
 			namesToIds.insert( lb, TypeNamesToTypeIdsMap::value_type( derivedTypeName, derivedTypeId ) );
+			assert( typeIdFromTypeName( derivedTypeName ) == derivedTypeId );
 		}
-	}
-	
+	}		
 }
 
 RunTimeTyped::BaseTypeRegistryMap &RunTimeTyped::baseTypeRegistry()
@@ -266,6 +273,8 @@ RunTimeTyped::DerivedTypesRegistryMap &RunTimeTyped::completeDerivedTypesRegistr
 
 TypeId RunTimeTyped::typeIdFromTypeName( const char *typeName )
 {
+	assert( typeName );
+	
 	TypeNamesToTypeIdsMap &namesToIds = typeNamesToTypeIds();
 	const std::string key( typeName );
 	TypeNamesToTypeIdsMap::const_iterator it = namesToIds.find( key );
