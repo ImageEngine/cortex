@@ -38,6 +38,15 @@ import IECore
 
 class ParameterisedProceduralTest( unittest.TestCase ) :
 
+	def testObject( self ) :
+	
+		self.assert_( IECore.Object.isType( IECore.TypeId.ParameterisedProcedural ) )
+		self.assert_( IECore.Object.isAbstractType( IECore.TypeId.ParameterisedProcedural ) )
+		self.assertRaises( RuntimeError, IECore.Object.create, IECore.TypeId.ParameterisedProcedural )
+
+		self.assert_( IECore.Object.isType( IECore.TypeId.ReadProcedural ) )		
+		self.failIf( IECore.Object.isAbstractType( IECore.TypeId.ReadProcedural ) )
+
 	def testParameterAccess( self ) :
 		
 		p = IECore.ReadProcedural()
