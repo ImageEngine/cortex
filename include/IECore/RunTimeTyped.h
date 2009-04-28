@@ -122,7 +122,7 @@ namespace IECore
 class RunTimeTyped : public RefCounted
 {
 	public:
-
+	
 		/// A typedef for the class this class derives from. All RunTimeTyped classes define this typedef.
 		typedef RefCounted BaseClass;
 		
@@ -197,6 +197,8 @@ class RunTimeTyped : public RefCounted
 		/// registered type.
 		static const char *typeNameFromTypeId( TypeId typeId );
 		
+		/// Allows external modules to register their own type ids
+		static void registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId );	
 		//@}
 		
 	protected :
@@ -217,9 +219,7 @@ class RunTimeTyped : public RefCounted
 		static BaseTypesRegistryMap &completeBaseTypesRegistry();
 		static DerivedTypesRegistryMap &completeDerivedTypesRegistry();
 		
-		static void derivedTypeIdsWalk( TypeId typeId, std::set<TypeId> & );	
-		
-		static void registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId );	
+		static void derivedTypeIdsWalk( TypeId typeId, std::set<TypeId> & );			
 		
 		typedef std::map<TypeId, std::string> TypeIdsToTypeNamesMap;
 		typedef std::map<std::string, TypeId> TypeNamesToTypeIdsMap;

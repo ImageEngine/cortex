@@ -79,7 +79,8 @@ void bindRunTimeTyped()
 		.def( "typeIdFromTypeName", &RunTimeTyped::typeIdFromTypeName )
 		.staticmethod( "typeIdFromTypeName" )
 		.def( "typeNameFromTypeId", &RunTimeTyped::typeNameFromTypeId )
-		.staticmethod( "typeNameFromTypeId" )		
+		.staticmethod( "typeNameFromTypeId" )
+		.def( "registerType",  &RunTimeTyped::registerType ).staticmethod( "registerType" )		
 	;
 	
 }
