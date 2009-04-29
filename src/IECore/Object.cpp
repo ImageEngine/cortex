@@ -284,9 +284,8 @@ size_t Object::MemoryAccumulator::total() const
 
 ObjectPtr Object::copy() const
 {
-	CopyContext *c = new CopyContext;
+	boost::shared_ptr<CopyContext> c( new CopyContext );
 	ObjectPtr result = c->copy( ConstObjectPtr( this ) );
-	delete c;
 	return result;
 }
 
