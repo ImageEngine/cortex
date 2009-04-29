@@ -34,7 +34,6 @@
 
 from IECore import *
 from fnmatch import fnmatchcase
-from RunTimeTypedUtil import makeRunTimeTyped
 
 class RenamePrimitiveVariables( PrimitiveOp ) :
 
@@ -63,4 +62,4 @@ class RenamePrimitiveVariables( PrimitiveOp ) :
 			primitive[ns[1]] = primitive[ns[0]]
 			del primitive[ns[0]]
 
-makeRunTimeTyped( RenamePrimitiveVariables, 100002, PrimitiveOp )
+registerRunTimeTyped( RenamePrimitiveVariables, 100002, PrimitiveOp )

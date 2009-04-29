@@ -155,4 +155,4 @@ class BatchSingleOp( Op ) :
 
 		return IntData(1)
 
-makeRunTimeTyped( BatchSingleOp, 100021, Op )
+registerRunTimeTyped( BatchSingleOp, 100021, Op )

@@ -34,7 +34,6 @@
 
 from IECore import *
 from fnmatch import fnmatchcase
-from RunTimeTypedUtil import makeRunTimeTyped
 
 class RemovePrimitiveVariables( PrimitiveOp ) :
 
@@ -75,4 +74,4 @@ class RemovePrimitiveVariables( PrimitiveOp ) :
 				if (m and not keep) or (not m and keep) :
 					del primitive[key]
 
-makeRunTimeTyped( RemovePrimitiveVariables, 100001, PrimitiveOp )
+registerRunTimeTyped( RemovePrimitiveVariables, 100001, PrimitiveOp )

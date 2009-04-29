@@ -381,4 +381,4 @@ class SequenceLsOp( Op ) :
 		else :
 			return StringVectorData( sequences )
 
-makeRunTimeTyped( SequenceLsOp, 100006, Op )
+registerRunTimeTyped( SequenceLsOp, 100006, Op )

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,7 +33,7 @@
 ##########################################################################
 
 import _IECore as IECore
-from RunTimeTypedUtil import makeRunTimeTyped
+from IECore import registerRunTimeTyped
 
 ## This class implements a CompoundParameter that do not validate optional parameters if they are undefined.
 # This CompoundParameter derived class allows one to set a group of obligatory parameters that should always
@@ -115,4 +115,4 @@ class OptionalCompoundParameter( IECore.CompoundParameter ):
 		else:
 			parameter.smartSetValue( attrValue )
 
-makeRunTimeTyped( OptionalCompoundParameter, 100009, IECore.CompoundParameter )
+registerRunTimeTyped( OptionalCompoundParameter, 100009, IECore.CompoundParameter )
