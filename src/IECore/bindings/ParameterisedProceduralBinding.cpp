@@ -147,6 +147,8 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 				msg( Msg::Error, "ParameterisedProceduralWrap::doRender", "Caught unknown exception" );
 			}
 		}
+		
+		IE_COREPYTHON_RUNTIMETYPEDWRAPPERFNS( ParameterisedProcedural );
 
 };
 
