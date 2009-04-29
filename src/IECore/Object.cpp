@@ -67,10 +67,12 @@ Object::~Object()
 
 struct Object::TypeInformation
 {
-	std::map<TypeId, CreatorFn> typeIdsToCreators;	
-	std::map<std::string, CreatorFn> typeNamesToCreators;
-	std::map<TypeId, void *> typeIdsToData;	
-	std::map<std::string, void *> typeNamesToData;
+	typedef std::pair< CreatorFn, void *> CreatorAndData;
+	typedef std::map< TypeId, CreatorAndData > TypeIdsToCreatorsMap;
+	typedef std::map< std::string, CreatorAndData > TypeNamesToCreatorsMap;
+	
+	TypeIdsToCreatorsMap typeIdsToCreators;	
+	TypeNamesToCreatorsMap typeNamesToCreators;
 };
 
 Object::TypeInformation *Object::typeInformation()
@@ -369,83 +371,66 @@ bool Object::isType( const std::string &typeName )
 bool Object::isAbstractType( TypeId typeId )
 {
 	TypeInformation *i = typeInformation();
-	std::map<TypeId, Object::CreatorFn>::const_iterator it = i->typeIdsToCreators.find( typeId );
+	TypeInformation::TypeIdsToCreatorsMap::const_iterator it = i->typeIdsToCreators.find( typeId );
 	if( it==i->typeIdsToCreators.end() )
 	{
 		return false;
 	}
-	return !it->second;
+	return !it->second.first;
 }
 
 bool Object::isAbstractType( const std::string &typeName )
 {
 	TypeInformation *i = typeInformation();
-	std::map<std::string, Object::CreatorFn>::const_iterator it = i->typeNamesToCreators.find( typeName );
+	TypeInformation::TypeNamesToCreatorsMap::const_iterator it = i->typeNamesToCreators.find( typeName );
 	if( it==i->typeNamesToCreators.end() )
 	{
 		return false;
 	}
-	return !it->second;
+	return !it->second.first;
 }
 
 void Object::registerType( TypeId typeId, const std::string &typeName, CreatorFn creator, void *data )
 {
 	TypeInformation *i = typeInformation();
-	i->typeIdsToCreators[typeId] = creator;
-	i->typeNamesToCreators[typeName] = creator;
-	
-	/// Don't bother storing NULL data
-	if ( data )
-	{
-		i->typeIdsToData[typeId] = data;
-		i->typeNamesToData[typeName] = data;
-	}
+	i->typeIdsToCreators[typeId] = TypeInformation::CreatorAndData( creator, data );
+	i->typeNamesToCreators[typeName] = TypeInformation::CreatorAndData( creator, data );
 }
 
 ObjectPtr Object::create( TypeId typeId )
 {
 	TypeInformation *i = typeInformation();
-	std::map<TypeId, Object::CreatorFn>::const_iterator it = i->typeIdsToCreators.find( typeId );
+	TypeInformation::TypeIdsToCreatorsMap::const_iterator it = i->typeIdsToCreators.find( typeId );
 	if( it==i->typeIdsToCreators.end() )
 	{
 		throw Exception( ( boost::format( "Type %d is not a registered Object type." ) % typeId ).str() );
 	}
-	if( !it->second )
+	const TypeInformation::CreatorAndData &creatorAndData = it->second;
+	
+	if( !creatorAndData.first )
 	{
 		throw Exception( ( boost::format( "Type %d is an abstract type." ) % typeId ).str() );
 	}
 	
-	void *data = 0;
-	std::map<TypeId, void *>::const_iterator dataIt = i->typeIdsToData.find( typeId );
-	if ( dataIt != i->typeIdsToData.end() )
-	{
-		data = dataIt->second;
-	}
-	
-	return it->second( data );
+	return creatorAndData.first( creatorAndData.second );
 }
 
 ObjectPtr Object::create( const std::string &typeName )
 {
 	TypeInformation *i = typeInformation();
-	std::map<std::string, Object::CreatorFn>::const_iterator it = i->typeNamesToCreators.find( typeName );
+	TypeInformation::TypeNamesToCreatorsMap::const_iterator it = i->typeNamesToCreators.find( typeName );
 	if( it==i->typeNamesToCreators.end() )
 	{
 		throw Exception( ( boost::format( "Type \"%s\" is not a registered Object type." ) % typeName ).str() );
 	}
-	if( !it->second )
+	const TypeInformation::CreatorAndData &creatorAndData = it->second;
+	
+	if( !creatorAndData.first )
 	{
-		throw Exception( ( boost::format( "Type \"%d\" is an abstract type." ) % typeName ).str() );
+		throw Exception( ( boost::format( "Type \"%s\" is an abstract type." ) % typeName ).str() );
 	}
 	
-	void *data = 0;
-	std::map<std::string, void *>::const_iterator dataIt = i->typeNamesToData.find( typeName );
-	if ( dataIt != i->typeNamesToData.end() )
-	{
-		data = dataIt->second;
-	}
-	
-	return it->second( data );
+	return creatorAndData.first( creatorAndData.second );
 }
 
 ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name )
