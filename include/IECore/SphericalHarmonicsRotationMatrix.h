@@ -153,8 +153,6 @@ class SphericalHarmonicsRotationMatrix
 
 		// returns the offset in columns or rows for the center of the submatrix for the given band.
 		static int bandMatrixOffset( int band );
-		// returns the width/height of the submatrix that defines rotation of a given band.
-		static V bandMatrixSize( int band );
 		// function to read submatrices cells for a given band. m1 and m2 can be any value from [-band,band]
 		static V bandMatrixValue( const std::vector< std::vector<V> > &mat, int band, int m1, int m2 );
 		// function to write submatrices cells for a given band. m1 and m2 can be any value from [-band,band]

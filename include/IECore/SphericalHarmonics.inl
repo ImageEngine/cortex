@@ -46,7 +46,26 @@ V SphericalHarmonics<V>::operator() ( BaseType theta, BaseType phi ) const
 	typename CoefficientVector::const_iterator cit = m_coefficients.begin();
 	for ( unsigned int l = 0; l < m_bands; l++ )
 	{
-		for (int m = -l; m <= static_cast<int>(l); m++, cit++ )
+		for (int m = -static_cast<int>(l); m <= static_cast<int>(l); m++, cit++ )
+		{
+			res += (*cit) * V( RealSphericalHarmonicFunction< BaseType >::evaluate( l, m, theta, phi ) );
+		}
+	}
+	return res;
+}
+
+template < typename V >
+V SphericalHarmonics<V>::operator() ( BaseType theta, BaseType phi, unsigned int bands ) const
+{
+	if ( bands > m_bands )
+	{
+		bands = m_bands;
+	}
+	V res(0);
+	typename CoefficientVector::const_iterator cit = m_coefficients.begin();
+	for ( unsigned int l = 0; l < bands; l++ )
+	{
+		for (int m = -static_cast<int>(l); m <= static_cast<int>(l); m++, cit++ )
 		{
 			res += (*cit) * V( RealSphericalHarmonicFunction< BaseType >::evaluate( l, m, theta, phi ) );
 		}

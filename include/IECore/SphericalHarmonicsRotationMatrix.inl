@@ -130,12 +130,6 @@ int SphericalHarmonicsRotationMatrix<V>::bandMatrixOffset( int band )
 }
 
 template < typename V >
-V SphericalHarmonicsRotationMatrix<V>::bandMatrixSize( int band )
-{
-	return band*2+1;
-}
-
-template < typename V >
 V SphericalHarmonicsRotationMatrix<V>::bandMatrixValue( const std::vector< std::vector<V> > &mat, int band, int m1, int m2 )
 {
 	int offset = bandMatrixOffset( band );

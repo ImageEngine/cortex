@@ -84,6 +84,9 @@ class SphericalHarmonics
 		// evaluates the spherical harmonics at polar coordinates theta and phi.
 		inline V operator() ( BaseType theta, BaseType phi ) const;
 
+		// evaluates the spherical harmonics at polar coordinates theta and phi up to the given number of bands.
+		inline V operator() ( BaseType theta, BaseType phi, unsigned int bands ) const;
+
 		// dot product on the coefficient vectors.
 		// The return value is dependent on the result of the multiplication between the two harmonics coefficients.
 		template <typename T, typename R>

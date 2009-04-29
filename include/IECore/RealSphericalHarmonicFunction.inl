@@ -66,7 +66,7 @@ void RealSphericalHarmonicFunction<V>::evaluate( unsigned int bands, V theta, V 
 	typename std::vector<V>::iterator it = result.begin();
 	for ( unsigned int l = 0; l < bands; l++ )
 	{
-		for (int m = -l; m <= static_cast<int>(l); m++, it++ )
+		for (int m = -static_cast<int>(l); m <= static_cast<int>(l); m++, it++ )
 		{
 			*it = evaluate( l, m, theta, phi );
 		}
