@@ -35,6 +35,8 @@
 #ifndef IECOREMAYA_DISPLAYSTYLE_H
 #define IECOREMAYA_DISPLAYSTYLE_H
 
+#include "boost/noncopyable.hpp"
+
 #include "IECoreGL/State.h"
 
 #include "maya/M3dView.h"
@@ -48,17 +50,12 @@ namespace IECoreMaya
 /// necessary to translate from the maya definition into an IECoreGL::State
 /// object. This class performs that translation. Typically one would be held as
 /// member data in a node and baseState() would be called upon in the draw() method.
-/// \bug The default assignment operator is no good - it results in two objects pointing
-/// to the same Data in m_data - which leads to double destruction when both referring
-/// objects are destructed.
-/// \todo Implement an assignment operator with sensible semantics.
-class DisplayStyle
+class DisplayStyle : public boost::noncopyable
 {
 
 	public :
 	
 		DisplayStyle();
-		DisplayStyle( const DisplayStyle &other );
 		~DisplayStyle();
 	
 		/// Returns a base state suitable for representing objects in the the style specified
@@ -67,9 +64,7 @@ class DisplayStyle
 		IECoreGL::ConstStatePtr baseState( M3dView::DisplayStyle style, bool transferCurrentColor=true );
 	
 	private :
-	
-		void constructCommon();
-		
+			
 		struct Data;
 		
 		Data *m_data;

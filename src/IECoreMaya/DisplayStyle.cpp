@@ -46,7 +46,7 @@ struct DisplayStyle::Data
 	IECoreGL::StatePtr boundsState;	
 };
 
-void DisplayStyle::constructCommon()
+DisplayStyle::DisplayStyle()
 {
 	m_data = new Data;
 	m_data->wireframeState = new IECoreGL::State( true );
@@ -63,23 +63,6 @@ void DisplayStyle::constructCommon()
 		
 	m_data->boundsState->add( new IECoreGL::PrimitiveSolid( false ) );
 	m_data->boundsState->add( new IECoreGL::PrimitiveBound( true ) );
-}
-
-DisplayStyle::DisplayStyle()
-{
-	constructCommon();
-}
-
-DisplayStyle::DisplayStyle( const DisplayStyle &other )
-{
-	// we can't copy States or StateComponents. we construct a brand new
-	// state and then copy over any colours which may have been adjusted in it.
-	constructCommon();
-	
-	m_data->boundsState->add( new IECoreGL::BoundColorStateComponent( other.m_data->boundsState->get<IECoreGL::BoundColorStateComponent>()->value() ) );
-	m_data->wireframeState->add( new IECoreGL::WireframeColorStateComponent( other.m_data->boundsState->get<IECoreGL::WireframeColorStateComponent>()->value() ) );
-	m_data->pointsState->add( new IECoreGL::PointColorStateComponent( other.m_data->boundsState->get<IECoreGL::PointColorStateComponent>()->value() ) );
-
 }
 
 DisplayStyle::~DisplayStyle()
