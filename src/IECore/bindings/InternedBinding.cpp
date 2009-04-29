@@ -44,6 +44,39 @@ using namespace boost::python;
 namespace IECore
 {
 
+struct InternedStringFromPython
+{
+	InternedStringFromPython()
+	{
+		converter::registry::push_back(
+			&convertible,
+			&construct,
+			type_id<InternedString> ()
+		);
+	}
+
+	static void *convertible( PyObject *obj_ptr )
+	{
+		if ( !PyString_Check( obj_ptr ) )
+		{
+			return 0;
+		}
+		return obj_ptr;
+	}
+
+	static void construct(
+	        PyObject *obj_ptr,
+	        converter::rvalue_from_python_stage1_data *data )
+	{
+		assert( obj_ptr );
+		assert( PyString_Check( obj_ptr ) );
+		
+		void* storage = (( converter::rvalue_from_python_storage<InternedString>* ) data )->storage.bytes;
+		new( storage ) InternedString( PyString_AsString( obj_ptr ) );
+		data->convertible = storage;
+	}
+};
+
 void bindInterned()
 {
 
@@ -56,6 +89,8 @@ void bindInterned()
 		.def( "size", &InternedString::size ).staticmethod( "size" )
 	;
 	implicitly_convertible<InternedString, string>();
+	
+	InternedStringFromPython();
 
 }
 
