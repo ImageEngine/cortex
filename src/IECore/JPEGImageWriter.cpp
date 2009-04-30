@@ -98,6 +98,11 @@ JPEGImageWriter::~JPEGImageWriter()
 {
 }
 
+std::string JPEGImageWriter::defaultColorSpace() const
+{
+	return "srgb";
+}
+
 IntParameterPtr JPEGImageWriter::qualityParameter()
 {
 	return m_qualityParameter;

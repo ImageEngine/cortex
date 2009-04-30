@@ -131,6 +131,11 @@ YUVImageWriter::~YUVImageWriter()
 {
 }
 
+std::string YUVImageWriter::defaultColorSpace() const
+{
+	return "srgb";
+}
+
 IntParameterPtr YUVImageWriter::formatParameter()
 {
 	return m_formatParameter;

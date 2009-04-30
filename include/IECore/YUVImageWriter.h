@@ -66,11 +66,11 @@ class YUVImageWriter : public ImageWriter
 
 		YUVImageWriter();
 
-		/// construct an YUVImageWriter for the given image and output filename
+		/// Construct an YUVImageWriter for the given image and output filename
 		YUVImageWriter(ObjectPtr object, const std::string & fileName);
-
-		/// free any resources consumed in writing the associated image
 		virtual ~YUVImageWriter();
+		
+		virtual std::string defaultColorSpace() const ;		
 
 		IntParameterPtr formatParameter();
 		ConstIntParameterPtr formatParameter() const;

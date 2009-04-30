@@ -81,8 +81,9 @@ class TIFFImageWriter : public ImageWriter
 
 		/// construct an TIFFImageWriter for the given image and output filename
 		TIFFImageWriter( ObjectPtr object, const std::string &fileName );
-
 		virtual ~TIFFImageWriter();
+		
+		virtual std::string defaultColorSpace() const ;		
 
 	private:
 

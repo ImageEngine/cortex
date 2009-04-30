@@ -77,6 +77,11 @@ CINImageWriter::~CINImageWriter()
 {
 }
 
+std::string CINImageWriter::defaultColorSpace() const
+{
+	return "linear";
+}
+
 struct CINImageWriter::ChannelConverter
 {
 	typedef void ReturnType;

@@ -51,11 +51,11 @@ class JPEGImageWriter : public ImageWriter
 
 		JPEGImageWriter();
 
-		/// construct an JPEGImageWriter for the given image and output filename
+		/// Construct an JPEGImageWriter for the given image and output filename
 		JPEGImageWriter(ObjectPtr object, const std::string & fileName);
-
-		/// free any resources consumed in writing the associated image
 		virtual ~JPEGImageWriter();
+		
+		virtual std::string defaultColorSpace() const ;		
 
 		IntParameterPtr qualityParameter();
 		ConstIntParameterPtr qualityParameter() const;

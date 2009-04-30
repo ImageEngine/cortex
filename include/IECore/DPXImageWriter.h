@@ -51,11 +51,11 @@ class DPXImageWriter : public ImageWriter
 
 		DPXImageWriter();
 
-		/// construct an DPXImageWriter for the given image and output filename
+		/// Construct an DPXImageWriter for the given image and output filename
 		DPXImageWriter( ObjectPtr object, const std::string &fileName );
-
-		/// free the resources consumed in serializing the associated image
 		virtual ~DPXImageWriter();
+		
+		virtual std::string defaultColorSpace() const ;
 
 	private:
 

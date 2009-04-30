@@ -133,6 +133,11 @@ TIFFImageWriter::~TIFFImageWriter()
 {
 }
 
+std::string TIFFImageWriter::defaultColorSpace() const
+{
+	return "srgb";
+}
+
 template<typename ChannelData>
 struct TIFFImageWriter::ChannelConverter
 {

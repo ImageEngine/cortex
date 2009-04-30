@@ -51,12 +51,11 @@ class CINImageWriter : public ImageWriter
 
 		CINImageWriter();
 
-		/// construct an CINImageWriter for the given image and output filename
+		/// Construct an CINImageWriter for the given image and output filename
 		CINImageWriter( ObjectPtr object, const std::string &fileName );
-
-
-		/// free the resources consumed in serializing the associated image
 		virtual ~CINImageWriter();
+		
+		virtual std::string defaultColorSpace() const ;
 
 	private:
 

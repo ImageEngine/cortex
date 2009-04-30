@@ -78,6 +78,11 @@ DPXImageWriter::~DPXImageWriter()
 {
 }
 
+std::string DPXImageWriter::defaultColorSpace() const
+{
+	return "linear";
+}
+
 struct DPXImageWriter::ChannelConverter
 {
 	typedef void ReturnType;

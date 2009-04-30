@@ -62,6 +62,8 @@ class EXRImageWriter : public ImageWriter
 
 		/// construct an EXRImageWriter for the given image and output filename
 		EXRImageWriter( ObjectPtr object, const std::string & fileName );
+		
+		virtual std::string defaultColorSpace() const ;
 
 	private:
 
