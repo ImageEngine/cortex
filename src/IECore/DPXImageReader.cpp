@@ -135,6 +135,11 @@ Box2i DPXImageReader::displayWindow()
 	return dataWindow();
 }
 
+std::string DPXImageReader::defaultColorSpace() const
+{
+	return "linear";
+}
+
 /// \todo
 /// we assume here DPX coding in the 'typical' configuration (output by film dumps, nuke, etc).
 /// this is RGB 10bit log for film, pixel-interlaced data.  we convert this to a linear 16-bit (half)

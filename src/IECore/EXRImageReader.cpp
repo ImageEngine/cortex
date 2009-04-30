@@ -120,6 +120,11 @@ Imath::Box2i EXRImageReader::displayWindow()
 	return m_inputFile->header().displayWindow();
 }
 
+std::string EXRImageReader::defaultColorSpace() const
+{
+	return "linear";
+}
+
 template<class T>
 DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow, const Imf::Channel *channel )
 {

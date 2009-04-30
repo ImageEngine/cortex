@@ -204,6 +204,11 @@ Imath::Box2i TIFFImageReader::displayWindow()
 	return m_displayWindow;
 }
 
+std::string TIFFImageReader::defaultColorSpace() const
+{
+	return "srgb";
+}
+
 unsigned int TIFFImageReader::numDirectories()
 {
 	open( true );

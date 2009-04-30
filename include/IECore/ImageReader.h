@@ -96,6 +96,10 @@ class ImageReader : public Reader
 		/// Reads the specified channel. This function obeys the dataWindowParameter(), so
 		/// that a subsection of the channel will be loaded if requested.
 		DataPtr readChannel( const std::string &name );
+		
+		/// Returns the name of default colorspace in which the Reader returns images.
+		virtual std::string defaultColorSpace() const = 0;
+		
 		//@}
 	
 	protected:

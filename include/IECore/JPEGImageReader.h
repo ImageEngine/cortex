@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,7 +71,12 @@ class JPEGImageReader : public ImageReader
 		/// Returns the displayWindow contained in the file. This is the displayWindow
 		/// that will be loaded if the displayWindowParameter() is left at its default value.
 		virtual Imath::Box2i displayWindow();
+		
+		/// Returns the name of default colorspace in which the Reader returns images.
+		virtual std::string defaultColorSpace() const ;		
 		//@}
+		
+
 
 	private:
 

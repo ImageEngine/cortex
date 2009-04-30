@@ -152,6 +152,11 @@ Box2i CINImageReader::displayWindow()
 	return dataWindow();
 }
 
+std::string CINImageReader::defaultColorSpace() const
+{
+	return "linear";
+}
+
 /// \todo
 /// we assume here CIN coding in the 'typical' configuration (output by film dumps, nuke, etc).
 /// this is RGB 10bit log for film, pixel-interlaced data.  we convert this to a linear 16-bit (half)

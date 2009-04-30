@@ -188,6 +188,11 @@ Box2i SGIImageReader::displayWindow()
 	return dataWindow();
 }
 
+std::string SGIImageReader::defaultColorSpace() const
+{
+	return "srgb";
+}
+
 DataPtr SGIImageReader::readChannel( const string &name, const Imath::Box2i &dataWindow )
 {
 	if ( !open() )

@@ -95,6 +95,7 @@ class TIFFImageReader : public ImageReader
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
+		virtual std::string defaultColorSpace() const ;		
 		//@}
 		
 	private:
