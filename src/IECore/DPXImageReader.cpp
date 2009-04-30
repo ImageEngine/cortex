@@ -135,8 +135,11 @@ Box2i DPXImageReader::displayWindow()
 	return dataWindow();
 }
 
-std::string DPXImageReader::defaultColorSpace() const
+std::string DPXImageReader::sourceColorSpace() const
 {
+	/// This isn't strictly true, but as the reader currently stands it performs the Cineon-Linear
+	/// conversion for us. Eventually, this will start returning "cineon", and the ImageReader base
+	/// class will handle the appropriate color conversions.	
 	return "linear";
 }
 

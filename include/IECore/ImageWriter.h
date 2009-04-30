@@ -61,7 +61,7 @@ class ImageWriter : public Writer
 		void imageChannels( std::vector<std::string> &names ) const;
 		
 		/// Returns the name of default colorspace in which the Writer expects to receive images.
-		virtual std::string defaultColorSpace() const = 0;
+		virtual std::string destinationColorSpace() const = 0;
 
 	protected:
 	

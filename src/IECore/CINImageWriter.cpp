@@ -77,8 +77,11 @@ CINImageWriter::~CINImageWriter()
 {
 }
 
-std::string CINImageWriter::defaultColorSpace() const
+std::string CINImageWriter::destinationColorSpace() const
 {
+	/// This isn't strictly true, but as the writer currently stands it performs the Linear-Cineon
+	/// conversion for us. Eventually, this will start returning "cineon", and the ImageWriter base
+	/// class will handle the appropriate color conversions.	
 	return "linear";
 }
 

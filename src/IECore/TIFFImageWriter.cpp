@@ -133,7 +133,7 @@ TIFFImageWriter::~TIFFImageWriter()
 {
 }
 
-std::string TIFFImageWriter::defaultColorSpace() const
+std::string TIFFImageWriter::destinationColorSpace() const
 {
 	return "srgb";
 }

@@ -98,7 +98,7 @@ JPEGImageWriter::~JPEGImageWriter()
 {
 }
 
-std::string JPEGImageWriter::defaultColorSpace() const
+std::string JPEGImageWriter::destinationColorSpace() const
 {
 	return "srgb";
 }

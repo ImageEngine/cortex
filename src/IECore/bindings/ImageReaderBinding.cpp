@@ -60,7 +60,7 @@ void bindImageReader()
 		.def( "dataWindow", &ImageReader::dataWindow )
 		.def( "displayWindow", &ImageReader::displayWindow )
 		.def( "readChannel", (DataPtr (ImageReader::*)( const std::string &))&ImageReader::readChannel )
-		.def( "defaultColorSpace", &ImageReader::defaultColorSpace )
+		.def( "sourceColorSpace", &ImageReader::sourceColorSpace )
 	;
 
 }

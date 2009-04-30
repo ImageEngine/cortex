@@ -78,8 +78,11 @@ DPXImageWriter::~DPXImageWriter()
 {
 }
 
-std::string DPXImageWriter::defaultColorSpace() const
+std::string DPXImageWriter::destinationColorSpace() const
 {
+	/// This isn't strictly true, but as the writer currently stands it performs the Linear-Cineon
+	/// conversion for us. Eventually, this will start returning "cineon", and the ImageWriter base
+	/// class will handle the appropriate color conversions.
 	return "linear";
 }
 

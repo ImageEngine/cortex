@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -97,8 +97,9 @@ class ImageReader : public Reader
 		/// that a subsection of the channel will be loaded if requested.
 		DataPtr readChannel( const std::string &name );
 		
-		/// Returns the name of default colorspace in which the Reader returns images.
-		virtual std::string defaultColorSpace() const = 0;
+		/// Returns the name of the colorspace in which the image is stored. For example,
+		/// this would usually be "srgb" for a JPEG file or "linear" for an EXR file.
+		virtual std::string sourceColorSpace() const = 0;
 		
 		//@}
 	

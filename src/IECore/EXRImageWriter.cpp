@@ -71,7 +71,7 @@ EXRImageWriter::EXRImageWriter(ObjectPtr image, const string &fileName)
 	m_fileNameParameter->setTypedValue( fileName );
 }
 
-std::string EXRImageWriter::defaultColorSpace() const
+std::string EXRImageWriter::destinationColorSpace() const
 {
 	return "linear";
 }

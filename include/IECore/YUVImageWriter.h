@@ -70,7 +70,7 @@ class YUVImageWriter : public ImageWriter
 		YUVImageWriter(ObjectPtr object, const std::string & fileName);
 		virtual ~YUVImageWriter();
 		
-		virtual std::string defaultColorSpace() const ;		
+		virtual std::string destinationColorSpace() const ;		
 
 		IntParameterPtr formatParameter();
 		ConstIntParameterPtr formatParameter() const;

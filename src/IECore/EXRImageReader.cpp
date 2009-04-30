@@ -120,7 +120,7 @@ Imath::Box2i EXRImageReader::displayWindow()
 	return m_inputFile->header().displayWindow();
 }
 
-std::string EXRImageReader::defaultColorSpace() const
+std::string EXRImageReader::sourceColorSpace() const
 {
 	return "linear";
 }

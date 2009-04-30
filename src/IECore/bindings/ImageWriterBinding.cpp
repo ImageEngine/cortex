@@ -48,7 +48,7 @@ void bindImageWriter()
 {
 	RunTimeTypedClass<ImageWriter>()
 		.def( "canWrite", &ImageWriter::canWrite ).staticmethod( "canWrite" )
-		.def( "defaultColorSpace", &ImageWriter::defaultColorSpace )
+		.def( "destinationColorSpace", &ImageWriter::destinationColorSpace )
 	;
 }
 

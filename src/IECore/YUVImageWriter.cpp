@@ -131,7 +131,7 @@ YUVImageWriter::~YUVImageWriter()
 {
 }
 
-std::string YUVImageWriter::defaultColorSpace() const
+std::string YUVImageWriter::destinationColorSpace() const
 {
 	return "srgb";
 }

@@ -73,7 +73,7 @@ class JPEGImageReader : public ImageReader
 		virtual Imath::Box2i displayWindow();
 		
 		/// Returns the name of default colorspace in which the Reader returns images.
-		virtual std::string defaultColorSpace() const ;		
+		virtual std::string sourceColorSpace() const ;		
 		//@}
 		
 

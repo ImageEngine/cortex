@@ -152,8 +152,11 @@ Box2i CINImageReader::displayWindow()
 	return dataWindow();
 }
 
-std::string CINImageReader::defaultColorSpace() const
+std::string CINImageReader::sourceColorSpace() const
 {
+	/// This isn't strictly true, but as the reader currently stands it performs the Cineon-Linear
+	/// conversion for us. Eventually, this will start returning "cineon", and the ImageReader base
+	/// class will handle the appropriate color conversions.	
 	return "linear";
 }
 

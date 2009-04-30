@@ -132,7 +132,7 @@ Imath::Box2i JPEGImageReader::displayWindow()
 	return dataWindow();
 }
 
-std::string JPEGImageReader::defaultColorSpace() const
+std::string JPEGImageReader::sourceColorSpace() const
 {
 	return "srgb";
 }

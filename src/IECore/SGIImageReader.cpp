@@ -188,7 +188,7 @@ Box2i SGIImageReader::displayWindow()
 	return dataWindow();
 }
 
-std::string SGIImageReader::defaultColorSpace() const
+std::string SGIImageReader::sourceColorSpace() const
 {
 	return "srgb";
 }
