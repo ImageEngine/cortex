@@ -333,7 +333,8 @@ void bindTypeId()
 		.value( "FileSequence", FileSequenceTypeId )
 		.value( "FileSequenceParameter", FileSequenceParameterTypeId )		
 		.value( "FileSequenceVectorParameter", FileSequenceVectorParameterTypeId )
-		.value( "ParameterisedProcedural", ParameterisedProceduralTypeId )		
+		.value( "ParameterisedProcedural", ParameterisedProceduralTypeId )	
+		.value( "ColorSpaceTransformOp", ColorSpaceTransformOpTypeId )	
 	;
 }
 

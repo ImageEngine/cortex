@@ -332,6 +332,7 @@ enum TypeId
 	FileSequenceParameterTypeId = 289,
 	FileSequenceVectorParameterTypeId = 290,
 	ParameterisedProceduralTypeId = 291,
+	ColorSpaceTransformOpTypeId = 292,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 	
