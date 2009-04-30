@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <cassert>
+#include <algorithm>
 
 #include "IECore/EmptyFrameList.h"
 #include "IECore/ReversedFrameList.h"
