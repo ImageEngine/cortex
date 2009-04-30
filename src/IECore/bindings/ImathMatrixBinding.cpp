@@ -65,25 +65,25 @@ static const char *typeName()
 }
 
 template<>
-static const char *typeName<M33f>()
+const char *typeName<M33f>()
 {
 	return "M33f";
 }
 
 template<>
-static const char *typeName<M33d>()
+const char *typeName<M33d>()
 {
 	return "M33d";
 }
 
 template<>
-static const char *typeName<M44f>()
+const char *typeName<M44f>()
 {
 	return "M44f";
 }
 
 template<>
-static const char *typeName<M44d>()
+const char *typeName<M44d>()
 {
 	return "M44d";
 }

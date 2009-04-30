@@ -142,7 +142,7 @@ struct TimeDurationToPythonDelta
 };
 
 template<>
-static std::string repr<TimeDurationData>( TimeDurationData &x )
+std::string repr<TimeDurationData>( TimeDurationData &x )
 {
 	object item( x.readable() );
 
@@ -158,7 +158,7 @@ static std::string repr<TimeDurationData>( TimeDurationData &x )
 }
 
 template<>
-static std::string str<TimeDurationData>( TimeDurationData &x )
+std::string str<TimeDurationData>( TimeDurationData &x )
 {
 	return posix_time::to_simple_string( x.readable() );
 }

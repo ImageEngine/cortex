@@ -143,7 +143,7 @@ struct ptime_to_python
 };
 
 template<>
-static std::string repr<DateTimeData>( DateTimeData &x )
+std::string repr<DateTimeData>( DateTimeData &x )
 {
 	object item( x.readable() );
 
@@ -159,7 +159,7 @@ static std::string repr<DateTimeData>( DateTimeData &x )
 }
 
 template<>
-static std::string str<DateTimeData>( DateTimeData &x )
+std::string str<DateTimeData>( DateTimeData &x )
 {
 	return posix_time::to_simple_string( x.readable() );
 }

@@ -49,7 +49,7 @@ namespace IECore
 {
 
 template<>
-static std::string repr<TimePeriod>( TimePeriod &x )
+std::string repr<TimePeriod>( TimePeriod &x )
 {
 	object beginObject( x.begin() );
 	assert( beginObject.attr( "__repr__" ) != object() );
@@ -69,7 +69,7 @@ static std::string repr<TimePeriod>( TimePeriod &x )
 }
 
 template<>
-static std::string str<TimePeriod>( TimePeriod &x )
+std::string str<TimePeriod>( TimePeriod &x )
 {
 	std::stringstream s;
 

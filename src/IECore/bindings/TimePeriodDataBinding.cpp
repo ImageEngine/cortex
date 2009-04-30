@@ -68,7 +68,7 @@ static int cmp( T &x, T &y )
 }
 
 template<>
-static std::string repr<TimePeriodData>( TimePeriodData &x )
+std::string repr<TimePeriodData>( TimePeriodData &x )
 {
 	object item( x.readable() );
 
@@ -84,7 +84,7 @@ static std::string repr<TimePeriodData>( TimePeriodData &x )
 }
 
 template<>
-static std::string str<TimePeriodData>( TimePeriodData &x )
+std::string str<TimePeriodData>( TimePeriodData &x )
 {
 	return posix_time::to_simple_string( x.readable() );
 }

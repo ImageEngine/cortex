@@ -53,25 +53,25 @@ static const char *typeName()
 }
 
 template<>
-static const char *typeName<LineSegment2f>()
+const char *typeName<LineSegment2f>()
 {
 	return "LineSegment2f";
 }
 
 template<>
-static const char *typeName<LineSegment2d>()
+const char *typeName<LineSegment2d>()
 {
 	return "LineSegment2d";
 }
 
 template<>
-static const char *typeName<LineSegment3f>()
+const char *typeName<LineSegment3f>()
 {
 	return "LineSegment3f";
 }
 
 template<>
-static const char *typeName<LineSegment3d>()
+const char *typeName<LineSegment3d>()
 {
 	return "LineSegment3d";
 }

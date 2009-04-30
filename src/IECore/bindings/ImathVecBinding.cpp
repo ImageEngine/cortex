@@ -63,37 +63,37 @@ static const char *typeName()
 }
 
 template<>
-static const char *typeName<V2f>()
+const char *typeName<V2f>()
 {
 	return "V2f";
 }
 
 template<>
-static const char *typeName<V2d>()
+const char *typeName<V2d>()
 {
 	return "V2d";
 }
 
 template<>
-static const char *typeName<V2i>()
+const char *typeName<V2i>()
 {
 	return "V2i";
 }
 
 template<>
-static const char *typeName<V3f>()
+const char *typeName<V3f>()
 {
 	return "V3f";
 }
 
 template<>
-static const char *typeName<V3d>()
+const char *typeName<V3d>()
 {
 	return "V3d";
 }
 
 template<>
-static const char *typeName<V3i>()
+const char *typeName<V3i>()
 {
 	return "V3i";
 }
