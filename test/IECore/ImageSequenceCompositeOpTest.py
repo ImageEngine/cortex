@@ -78,7 +78,7 @@ class ImageSequenceCompositeOpTest( unittest.TestCase ) :
 	
 		outputSequence = FileSequence( "test/IECore/imageSequenceCompositeOpTest.####.exr", FrameRange( 1,6 ) )	
 		
-		for i in range( 1, 6 ) :
+		for i in range( 1, 7 ) :
 		
 			filename = outputSequence.fileNameForFrame( i )
 			if os.path.exists( filename ):
