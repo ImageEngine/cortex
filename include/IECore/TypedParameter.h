@@ -80,6 +80,13 @@ class TypedParameter : public Parameter
 		static const char *baseTypeName();
 		typedef Parameter BaseClass;		
 		//@}
+
+		//! @name Object functions
+		////////////////////////////////////
+		//@{
+		typename TypedParameter<T>::Ptr copy() const;
+		virtual bool isEqualTo( ConstObjectPtr other ) const;
+		//@}
 			
 		/// Implemented to return true only if value is of type TypedData<T>.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
@@ -97,10 +104,20 @@ class TypedParameter : public Parameter
 		/// and calls Parameter::setValue().
 		void setTypedValue( const T &value );
 	
+	protected :
+	
+		TypedParameter();
+
+		virtual void copyFrom( ConstObjectPtr other, CopyContext *context );
+		virtual void save( SaveContext *context ) const;
+		virtual void load( LoadContextPtr context );
+		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
+	
 	private :
 	
-		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedParameter<T> );
-		
+		static const TypeDescription<TypedParameter<T> > g_typeDescription;
+		friend class TypeDescription<TypedParameter<T> >;
+				
 };
 
 } // namespace IECore

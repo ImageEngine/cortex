@@ -46,7 +46,7 @@ class FileNameParameter : public PathParameter
 {
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPED( FileNameParameter, PathParameter )
+		IE_CORE_DECLAREOBJECT( FileNameParameter, PathParameter )
 	
 		FileNameParameter( const std::string &name, const std::string &description,
 			const std::string &extensions = "", const std::string &defaultValue = "", bool allowEmptyString = true,
@@ -62,9 +62,18 @@ class FileNameParameter : public PathParameter
 		/// * The given path points to a existent directory.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
 
+	protected :
+	
+		// for io and copying
+		FileNameParameter();
+		friend class TypeDescription<FileNameParameter>;
+
 	private :
 	
 		std::vector<std::string> m_extensions;
+		
+		static const unsigned int g_ioVersion;
+		
 };
 
 IE_CORE_DECLAREPTR( FileNameParameter )

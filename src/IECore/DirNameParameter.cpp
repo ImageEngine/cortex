@@ -46,7 +46,11 @@ using namespace boost;
 using namespace std;
 using namespace IECore;
 
-IE_CORE_DEFINERUNTIMETYPED( DirNameParameter )
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( DirNameParameter );
+
+DirNameParameter::DirNameParameter()
+{
+}
 
 DirNameParameter::DirNameParameter( const std::string &name, const std::string &description,
 			const std::string &defaultValue, bool allowEmptyString,  PathParameter::CheckType check,
@@ -83,4 +87,33 @@ bool DirNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) c
 		return false;
 	}
 	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Object implementation
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void DirNameParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+{
+	PathParameter::copyFrom( other, context );
+}
+
+void DirNameParameter::save( SaveContext *context ) const
+{
+	PathParameter::save( context );
+}
+
+void DirNameParameter::load( LoadContextPtr context )
+{
+	PathParameter::load( context );
+}
+
+bool DirNameParameter::isEqualTo( ConstObjectPtr other ) const
+{
+	return PathParameter::isEqualTo( other );
+}
+
+void DirNameParameter::memoryUsage( Object::MemoryAccumulator &a ) const
+{
+	PathParameter::memoryUsage( a );
 }

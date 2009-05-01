@@ -79,6 +79,13 @@ class NumericParameter : public Parameter
 		static const char *baseTypeName();
 		//@}
 		
+		//! @name Object functions
+		////////////////////////////////////
+		//@{
+		typename NumericParameter<T>::Ptr copy() const;
+		virtual bool isEqualTo( ConstObjectPtr other ) const;
+		//@}
+		
 		bool hasMinValue() const;
 		T minValue() const;
 		
@@ -103,13 +110,25 @@ class NumericParameter : public Parameter
 		/// min <= value->readable() <= max.		
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
 
+	protected :
+	
+		// constructor for use during load/copy
+		NumericParameter();
+
+		virtual void copyFrom( ConstObjectPtr other, CopyContext *context );
+		virtual void save( SaveContext *context ) const;
+		virtual void load( LoadContextPtr context );
+		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
+
 	private :	
 
 		T m_min;
 		T m_max;
 	
-		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( NumericParameter<T> );
+		static TypeDescription<NumericParameter<T> > g_typeDescription;
+		friend class TypeDescription<NumericParameter<T> >;
 
+		static const unsigned int g_ioVersion;
 };
 
 typedef NumericParameter<int> IntParameter;

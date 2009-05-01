@@ -36,6 +36,9 @@
 #include <cassert>
 
 #include "boost/filesystem/convenience.hpp"
+#include "boost/algorithm/string/split.hpp"
+#include "boost/algorithm/string/join.hpp"
+#include "boost/algorithm/string/classification.hpp"
 
 #include "IECore/FileSequenceVectorParameter.h"
 #include "IECore/FileSequenceFunctions.h"
@@ -43,8 +46,14 @@
 #include "IECore/CompoundObject.h"
 
 using namespace IECore;
+using namespace boost;
 
-IE_CORE_DEFINERUNTIMETYPED( FileSequenceVectorParameter );
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( FileSequenceVectorParameter );
+const unsigned int FileSequenceVectorParameter::g_ioVersion = 1;
+
+FileSequenceVectorParameter::FileSequenceVectorParameter()
+{
+}
 
 FileSequenceVectorParameter::FileSequenceVectorParameter( const std::string &name, const std::string &description, 
 	const std::vector< std::string > &defaultValue, bool allowEmptyList, CheckType check,
@@ -247,4 +256,58 @@ FileSequencePtr FileSequenceVectorParameter::parseFileSequence( const std::strin
 	
 	return new FileSequence( filename, frameList );
 	
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Object implementation
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void FileSequenceVectorParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+{
+	PathVectorParameter::copyFrom( other, context );
+	const FileSequenceVectorParameter *tOther = static_cast<const FileSequenceVectorParameter *>( other.get() );
+	m_extensions = tOther->m_extensions;
+}
+
+void FileSequenceVectorParameter::save( SaveContext *context ) const
+{
+	PathVectorParameter::save( context );
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
+	
+	std::string extensions = join( m_extensions, " " );
+	container->write( "extensions", extensions );
+}
+
+void FileSequenceVectorParameter::load( LoadContextPtr context )
+{
+	PathVectorParameter::load( context );
+	unsigned int v = g_ioVersion;
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	
+	m_extensions.clear();
+	std::string extensions;
+	container->read( "extensions", extensions );
+	if( extensions!="" )
+	{
+		split( m_extensions, extensions, is_any_of( " " ) );
+	}
+}
+
+bool FileSequenceVectorParameter::isEqualTo( ConstObjectPtr other ) const
+{
+	if( !PathVectorParameter::isEqualTo( other ) )
+	{
+		return false;
+	}
+	const FileSequenceVectorParameter *tOther = static_cast<const FileSequenceVectorParameter *>( other.get() );
+	return m_extensions == tOther->m_extensions;
+}
+
+void FileSequenceVectorParameter::memoryUsage( Object::MemoryAccumulator &a ) const
+{
+	PathVectorParameter::memoryUsage( a );
+	for( std::vector<std::string>::const_iterator it=m_extensions.begin(); it!=m_extensions.end(); it++ )
+	{
+		a.accumulate( it->capacity() );
+	}
 }

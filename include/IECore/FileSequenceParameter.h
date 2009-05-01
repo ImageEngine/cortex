@@ -56,7 +56,7 @@ class FileSequenceParameter : public PathParameter
 	
 		typedef std::vector< std::string > ExtensionList;
 	
-		IE_CORE_DECLARERUNTIMETYPED( FileSequenceParameter, PathParameter );
+		IE_CORE_DECLAREOBJECT( FileSequenceParameter, PathParameter );
 		
 		FileSequenceParameter( const std::string &name, const std::string &description,	const std::string &defaultValue = "", bool allowEmptyString = true, CheckType check = PathParameter::DontCare,
 			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
@@ -81,7 +81,9 @@ class FileSequenceParameter : public PathParameter
 		
 	protected :
 	
-		
+		FileSequenceParameter();
+		friend class TypeDescription<FileSequenceParameter>;
+			
 		/// Find the longest space-delimited tail substring that is a parseable FrameList and
 		/// return a FileSequence instance which contains that FrameList. Everything before that is considered to 
 		/// be part of the filename. Previous implementations would just split on the first space character 
@@ -89,8 +91,11 @@ class FileSequenceParameter : public PathParameter
 		FileSequencePtr parseFileSequence( const std::string &fileSequenceString ) const;
 	
 		ExtensionList m_extensions;
+
+	private :
 	
-			
+		static const unsigned int g_ioVersion;
+					
 };
 
 IE_CORE_DECLAREPTR( FileSequenceParameter );

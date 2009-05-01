@@ -92,18 +92,27 @@ class TypedObjectParameter : public ObjectParameter
 		static const char *baseTypeName();
 		typedef ObjectParameter BaseClass;
 		//@}
+
+		//! @name Object functions
+		////////////////////////////////////
+		//@{
+		typename TypedObjectParameter<T>::Ptr copy() const;
+		//@}
 		
 		/// Implemented to return true only if value is of type T.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
 		
 	protected:
 	
+		TypedObjectParameter();
+		
 		static PresetsContainer makePresets( const ObjectPresetsContainer &presets );
 		
 	private :
 		
-		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedObjectParameter<T> );
-
+		static TypeDescription<TypedObjectParameter<T> > g_typeDescription;
+		friend class TypeDescription<TypedObjectParameter<T> >;
+		
 };
 
 /// \todo Split some of these off into separate files to speed up compilation

@@ -33,7 +33,7 @@
 ##########################################################################
 
 import _IECore as IECore
-from IECore import registerRunTimeTyped
+from IECore import registerObject
 
 ## This class implements a CompoundParameter that do not validate optional parameters if they are undefined.
 # This CompoundParameter derived class allows one to set a group of obligatory parameters that should always
@@ -115,4 +115,4 @@ class OptionalCompoundParameter( IECore.CompoundParameter ):
 		else:
 			parameter.smartSetValue( attrValue )
 
-registerRunTimeTyped( OptionalCompoundParameter, 100009, IECore.CompoundParameter )
+registerObject( OptionalCompoundParameter, 100009, IECore.CompoundParameter )

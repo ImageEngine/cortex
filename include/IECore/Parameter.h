@@ -35,7 +35,7 @@
 #ifndef IE_CORE_PARAMETER_H
 #define IE_CORE_PARAMETER_H
 
-#include "IECore/RunTimeTyped.h"
+#include "IECore/Object.h"
 #include "IECore/Interned.h"
 
 #include <map>
@@ -45,16 +45,15 @@
 namespace IECore
 {
 
-IE_CORE_FORWARDDECLARE( Object );
 IE_CORE_FORWARDDECLARE( CompoundObject );
 
 /// The Parameter base class represents a means of describing data to be passed
 /// to some process.
-class Parameter : public RunTimeTyped
+class Parameter : public Object
 {
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPED( Parameter, RunTimeTyped );
+		IE_CORE_DECLAREOBJECT( Parameter, Object );
 	
 		/// A type which associates a value for the Parameter with
 		/// a name.
@@ -175,8 +174,15 @@ class Parameter : public RunTimeTyped
 		std::string getCurrentPresetName() const;
 		//@}
 	
+	protected :
+	
+		// constructor for use during load/copy
+		Parameter();
+		
 	private :	
 
+		friend class TypeDescription<Parameter>;
+		
 		InternedString m_name;
 		InternedString m_description;
 
@@ -187,6 +193,9 @@ class Parameter : public RunTimeTyped
 		bool m_presetsOnly;
 
 		mutable CompoundObjectPtr m_userData;
+		
+		static const unsigned int g_ioVersion;	
+	
 };
 
 IE_CORE_DECLAREPTR( Parameter );

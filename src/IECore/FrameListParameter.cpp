@@ -41,7 +41,8 @@
 
 using namespace IECore;
 
-IE_CORE_DEFINERUNTIMETYPED( FrameListParameter );
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( FrameListParameter );
+const unsigned int FrameListParameter::g_ioVersion = 1;
 
 static StringParameter::ObjectPresetsContainer convertPresets( const FrameListParameter::PresetsContainer &p )
 {
@@ -53,6 +54,9 @@ static StringParameter::ObjectPresetsContainer convertPresets( const FrameListPa
 	return result;
 }
 
+FrameListParameter::FrameListParameter()
+{
+}
 
 FrameListParameter::FrameListParameter( const std::string &name, const std::string &description, const std::string &defaultValue, bool allowEmptyList,
 			const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
@@ -120,4 +124,51 @@ void FrameListParameter::setFrameListValue( ConstFrameListPtr frameList )
 FrameListPtr FrameListParameter::getFrameListValue() const
 {
 	return FrameList::parse( getTypedValue() );
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Object implementation
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void FrameListParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+{
+	StringParameter::copyFrom( other, context );
+	const FrameListParameter *tOther = static_cast<const FrameListParameter *>( other.get() );
+	m_allowEmptyList = tOther->m_allowEmptyList;
+}
+
+void FrameListParameter::save( SaveContext *context ) const
+{
+	StringParameter::save( context );
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
+	
+	unsigned char tmp = m_allowEmptyList;
+	container->write( "allowEmptyList", tmp );
+}
+
+void FrameListParameter::load( LoadContextPtr context )
+{
+	StringParameter::load( context );
+	unsigned int v = g_ioVersion;
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	
+	unsigned char tmp;
+	container->read( "allowEmptyList", tmp );
+	m_allowEmptyList = tmp;
+}
+
+bool FrameListParameter::isEqualTo( ConstObjectPtr other ) const
+{
+	if( !StringParameter::isEqualTo( other ) )
+	{
+		return false;
+	}
+	const FrameListParameter *tOther = static_cast<const FrameListParameter *>( other.get() );
+	return m_allowEmptyList == tOther->m_allowEmptyList;
+}
+
+void FrameListParameter::memoryUsage( Object::MemoryAccumulator &a ) const
+{
+	StringParameter::memoryUsage( a );
+	a.accumulate( sizeof( m_allowEmptyList ) );
 }

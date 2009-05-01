@@ -39,7 +39,12 @@
 using namespace IECore;
 using namespace std;
 
-IE_CORE_DEFINERUNTIMETYPED( ObjectParameter )
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( ObjectParameter );
+const unsigned int ObjectParameter::g_ioVersion = 1;	
+
+ObjectParameter::ObjectParameter()
+{
+}
 
 ObjectParameter::ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, defaultValue, presets, presetsOnly, userData )
@@ -102,4 +107,62 @@ bool ObjectParameter::valueValid( ConstObjectPtr value, std::string *reason ) co
 const ObjectParameter::TypeIdSet &ObjectParameter::validTypes() const
 {
 	return m_validTypes;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Object implementation
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ObjectParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+{
+	Parameter::copyFrom( other, context );
+	const ObjectParameter *tOther = static_cast<const ObjectParameter *>( other.get() );
+	
+	m_validTypes = tOther->m_validTypes;
+}
+
+void ObjectParameter::save( SaveContext *context ) const
+{
+	Parameter::save( context );
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
+	
+	std::vector<unsigned int> tmp( m_validTypes.size() );
+	std::copy( m_validTypes.begin(), m_validTypes.end(), tmp.begin() );
+	
+	container->write( "validTypes", &(tmp[0]), tmp.size() );
+}
+
+void ObjectParameter::load( LoadContextPtr context )
+{
+	Parameter::load( context );
+	unsigned int v = g_ioVersion;
+	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
+	
+	IndexedIO::Entry e = container->ls( "validTypes" );
+	std::vector<unsigned int> tmp( e.arrayLength() );
+	unsigned int *p = &(tmp[0]);
+	container->read( "validTypes", p, e.arrayLength() );
+	
+	m_validTypes.clear();
+	for( std::vector<unsigned int>::const_iterator it=tmp.begin(); it!=tmp.end(); it++ )
+	{
+		m_validTypes.insert( (TypeId)*it );
+	}
+}
+
+bool ObjectParameter::isEqualTo( ConstObjectPtr other ) const
+{
+	if( !Parameter::isEqualTo( other ) )
+	{
+		return false;
+	}
+	
+	const ObjectParameter *tOther = static_cast<const ObjectParameter *>( other.get() );
+	return m_validTypes==tOther->m_validTypes;
+}
+
+void ObjectParameter::memoryUsage( Object::MemoryAccumulator &a ) const
+{
+	Parameter::memoryUsage( a );
+	a.accumulate( sizeof( m_validTypes ) );
 }

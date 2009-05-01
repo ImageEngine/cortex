@@ -46,7 +46,7 @@ class ValidatedStringParameter : public StringParameter
 {
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPED( ValidatedStringParameter, StringParameter );
+		IE_CORE_DECLAREOBJECT( ValidatedStringParameter, StringParameter );
 	
 		ValidatedStringParameter( const std::string &name, const std::string &description,
 			const std::string &regex, const std::string &regexDescription = "", const std::string &defaultValue = "", bool allowEmptyString = true,
@@ -60,11 +60,19 @@ class ValidatedStringParameter : public StringParameter
 		/// the contained string matches the regular expression specified in the constructor.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
 
+	protected :
+		
+		ValidatedStringParameter();
+
 	private :
+	
+		friend class TypeDescription<ValidatedStringParameter>;
 	
 		std::string m_regex;
 		std::string m_regexDescription;
 		bool m_allowEmptyString;
+
+		static const unsigned int g_ioVersion;	
 		
 };
 

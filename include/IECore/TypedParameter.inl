@@ -70,6 +70,11 @@ static Parameter::PresetsContainer convertPresets( const typename TypedParameter
 }
 
 template<typename T>
+TypedParameter<T>::TypedParameter()
+{
+}
+
+template<typename T>
 TypedParameter<T>::TypedParameter( const std::string &name, const std::string &description, const T &defaultValue,
 	const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), presetsOnly, userData )	
@@ -88,7 +93,7 @@ TypedParameter<T>::TypedParameter( const std::string &name, const std::string &d
 /////////////////////////////////////////////////////////////////////////////////////
 
 template <class T> 
-const RunTimeTyped::TypeDescription<TypedParameter<T> > TypedParameter<T>::g_typeDescription;
+const Object::TypeDescription<TypedParameter<T> > TypedParameter<T>::g_typeDescription;
 
 template <class T> 
 TypeId TypedParameter<T>::typeId() const
@@ -215,6 +220,46 @@ template<typename T>
 void TypedParameter<T>::setTypedValue( const T &value )
 {
 	setValue( new ObjectType( value ) );
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+// object stuff
+/////////////////////////////////////////////////////////////////////////////////////
+
+template <class T> 
+typename TypedParameter<T>::Ptr TypedParameter<T>::copy() const
+{
+	return boost::static_pointer_cast<TypedParameter<T> >( copy() );
+}
+
+template<class T>
+void TypedParameter<T>::copyFrom( ConstObjectPtr other, CopyContext *context )
+{
+	Parameter::copyFrom( other, context );
+}
+
+template<class T>
+void TypedParameter<T>::save( SaveContext *context ) const
+{
+	Parameter::save( context );
+}
+
+template<class T>
+void TypedParameter<T>::load( LoadContextPtr context )
+{
+	Parameter::load( context );
+}
+
+template<class T>
+bool TypedParameter<T>::isEqualTo( ConstObjectPtr other ) const
+{
+	return Parameter::isEqualTo( other );
+}
+
+template<class T>
+void TypedParameter<T>::memoryUsage( Object::MemoryAccumulator &a ) const
+{
+	Parameter::memoryUsage( a );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

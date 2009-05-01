@@ -78,4 +78,4 @@ class CompoundVectorParameter ( CompoundParameter ):
 
 		return ( True, "" )
 
-registerRunTimeTyped( CompoundVectorParameter, 100022, CompoundParameter )
+registerObject( CompoundVectorParameter, 100022, CompoundParameter )

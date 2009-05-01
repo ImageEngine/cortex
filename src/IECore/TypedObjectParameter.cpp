@@ -57,6 +57,14 @@ using namespace IECore;
 using namespace std;
 
 template<typename T>
+TypedObjectParameter<T>::TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
+
+template<typename T>
+TypedObjectParameter<T>::TypedObjectParameter()
+{
+}
+
+template<typename T>
 TypedObjectParameter<T>::TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	: ObjectParameter(  name, description, defaultValue, T::staticTypeId(), makePresets( presets) , presetsOnly, userData )
 {
@@ -71,9 +79,6 @@ Parameter::PresetsContainer TypedObjectParameter<T>::makePresets( const ObjectPr
 	
 	return result;
 }
-
-template <class T> 
-const RunTimeTyped::TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
 
 template <typename T> 
 TypeId TypedObjectParameter<T>::typeId() const
@@ -145,6 +150,11 @@ bool TypedObjectParameter<T>::inheritsFrom( const char *typeName )
 	return !strcmp( ObjectParameter::staticTypeName(), typeName ) ? true : ObjectParameter::inheritsFrom( typeName );
 }
 
+template<typename T>
+typename TypedObjectParameter<T>::Ptr TypedObjectParameter<T>::copy() const
+{
+	return boost::static_pointer_cast<TypedObjectParameter<T> >( copy() );
+}
 
 template<typename T>
 bool TypedObjectParameter<T>::valueValid( ConstObjectPtr value, std::string *reason ) const

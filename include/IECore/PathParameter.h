@@ -46,7 +46,7 @@ class PathParameter : public StringParameter
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPED( PathParameter, StringParameter )
+		IE_CORE_DECLAREOBJECT( PathParameter, StringParameter )
 
 		typedef enum {
 			DontCare,
@@ -70,10 +70,17 @@ class PathParameter : public StringParameter
 		/// * mustNotExist() is true and the file/dir exists.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
 
+	protected :
+	
+		PathParameter();
+		friend class TypeDescription<PathParameter>;
+
 	private :
 	
 		bool m_allowEmptyString;
 		CheckType m_check;
+		
+		static const unsigned int g_ioVersion;
 
 };
 

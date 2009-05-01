@@ -48,7 +48,7 @@ class ObjectParameter : public Parameter
 {
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPED( ObjectParameter, Parameter )
+		IE_CORE_DECLAREOBJECT( ObjectParameter, Parameter )
 	
 		typedef std::set<TypeId> TypeIdSet;
 		
@@ -62,10 +62,17 @@ class ObjectParameter : public Parameter
 		
 		/// Returns a set containing the valid types.
 		const TypeIdSet &validTypes() const;
+	
+	protected :
+	
+		ObjectParameter();
+		friend class TypeDescription<ObjectParameter>;
 		
 	private :	
 
 		TypeIdSet m_validTypes;
+		
+		static const unsigned int g_ioVersion;
 		
 };
 
