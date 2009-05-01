@@ -76,12 +76,12 @@ static list colorSpaces()
 }
 
 
-static ImagePrimitiveOpPtr creator( const std::string &, const std::string &, void *data )
+static ImagePrimitiveOpPtr creator( const std::string &inputColorSpace, const std::string &outputColorSpace, void *data )
 {
         assert( data );
         PyObject *d = (PyObject *)( data );
         
-        ImagePrimitiveOpPtr r = call< ImagePrimitiveOpPtr >( d );
+        ImagePrimitiveOpPtr r = call< ImagePrimitiveOpPtr >( d, inputColorSpace, outputColorSpace );
         return r;
 }
 
