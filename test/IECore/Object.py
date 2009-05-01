@@ -149,8 +149,8 @@ class TestObject( unittest.TestCase ) :
 			if Object.isType( tId ) and not Object.isAbstractType( tId ) :
 				
 				o = Object.create( tId )
-				oo = o.copy()				
-		
+				oo = o.copy()
+				self.assertEqual( o, oo )
 			
 if __name__ == "__main__":
     unittest.main()   
