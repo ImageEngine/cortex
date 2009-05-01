@@ -36,6 +36,7 @@
 #define IECORE_LINEARTOSRGBOP_H
 
 #include "IECore/ChannelOp.h"
+#include "IECore/ColorSpaceTransformOp.h"
 
 namespace IECore
 {
@@ -55,6 +56,10 @@ class LinearToSRGBOp : public ChannelOp
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
 	
 		struct Converter;
+		
+	private :
+	
+		static ColorSpaceTransformOp::ColorSpaceDescription<LinearToSRGBOp> g_colorSpaceDescription;		
 };
 
 IE_CORE_DECLAREPTR( LinearToSRGBOp );

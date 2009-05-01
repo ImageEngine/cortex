@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_REC709TOLINEAROP_H
-#define IECORE_REC709TOLINEAROP_H
-
-#include "IECore/ChannelOp.h"
-#include "IECore/ColorSpaceTransformOp.h"
+#ifndef IECORE_COLORSPACETRANSFORMOP_INL
+#define IECORE_COLORSPACETRANSFORMOP_INL
 
 namespace IECore
 {
 
-/// Applies Rec709 to linear conversion on ImagePrimitive channels.
-class Rec709ToLinearOp : public ChannelOp
+template<typename T>
+ColorSpaceTransformOp::ColorSpaceDescription<T>::ColorSpaceDescription( const InputColorSpace &inputColorSpace, const OutputColorSpace &outputColorSpace )
 {
-	public:
+	registerConversion( inputColorSpace, outputColorSpace, &createOp );
+}
 
-		Rec709ToLinearOp();
-		virtual ~Rec709ToLinearOp();
-
-		IE_CORE_DECLARERUNTIMETYPED( Rec709ToLinearOp, ChannelOp );
-	
-	protected :
-	
-		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
-
-		struct Converter;
-		
-	private :
-	
-		static ColorSpaceTransformOp::ColorSpaceDescription<Rec709ToLinearOp> g_colorSpaceDescription;		
-	
-};
-
-IE_CORE_DECLAREPTR( Rec709ToLinearOp );
-
+template<typename T>
+ImagePrimitiveOpPtr ColorSpaceTransformOp::ColorSpaceDescription<T>::createOp( const InputColorSpace &, const OutputColorSpace &, void * )
+{
+	return new T();
+}
 
 } // namespace IECore
 
-#endif // IECORE_REC709TOLINEAROP_H
+#endif // IECORE_COLORSPACETRANSFORMOP_INL
 

@@ -197,6 +197,7 @@ from ParameterisedProceduralTest import *
 from LevenbergMarquardtTest import *
 from TypedDataTest import *
 from DataTraitsTest import *
+from ColorSpaceTransformOpTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

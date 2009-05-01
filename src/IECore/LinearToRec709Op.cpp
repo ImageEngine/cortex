@@ -44,6 +44,8 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( LinearToRec709Op );
 
+ColorSpaceTransformOp::ColorSpaceDescription<LinearToRec709Op> LinearToRec709Op::g_colorSpaceDescription( "linear", "rec709" );
+
 LinearToRec709Op::LinearToRec709Op()
 	:	ChannelOp( "LinearToRec709", 
 				   "Applies linear to Rec709 conversion on ImagePrimitive channels."

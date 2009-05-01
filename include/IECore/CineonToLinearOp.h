@@ -37,6 +37,7 @@
 
 #include "IECore/ChannelOp.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/ColorSpaceTransformOp.h"
 
 namespace IECore
 {
@@ -71,6 +72,10 @@ class CineonToLinearOp : public ChannelOp
 		IntParameterPtr m_refBlackVal;
 
 		struct Converter;
+		
+	private :
+	
+		static ColorSpaceTransformOp::ColorSpaceDescription<CineonToLinearOp> g_colorSpaceDescription;
 	
 };
 

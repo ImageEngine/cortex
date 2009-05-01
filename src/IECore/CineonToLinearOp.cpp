@@ -44,6 +44,8 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( CineonToLinearOp );
 
+ColorSpaceTransformOp::ColorSpaceDescription<CineonToLinearOp> CineonToLinearOp::g_colorSpaceDescription( "cineon", "linear" );
+
 CineonToLinearOp::CineonToLinearOp()
 	:	ChannelOp( "CineonToLinearOp", 
 				   "Applies Cineon to linear conversion on ImagePrimitive channels."

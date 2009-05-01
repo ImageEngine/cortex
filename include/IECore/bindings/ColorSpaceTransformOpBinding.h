@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_REC709TOLINEAROP_H
-#define IECORE_REC709TOLINEAROP_H
-
-#include "IECore/ChannelOp.h"
-#include "IECore/ColorSpaceTransformOp.h"
+#ifndef IECOREPYTHON_COLORSPACETRANSFORMOPBINDING_H
+#define IECOREPYTHON_COLORSPACETRANSFORMOPBINDING_H
 
 namespace IECore
 {
 
-/// Applies Rec709 to linear conversion on ImagePrimitive channels.
-class Rec709ToLinearOp : public ChannelOp
-{
-	public:
-
-		Rec709ToLinearOp();
-		virtual ~Rec709ToLinearOp();
-
-		IE_CORE_DECLARERUNTIMETYPED( Rec709ToLinearOp, ChannelOp );
-	
-	protected :
-	
-		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
-
-		struct Converter;
-		
-	private :
-	
-		static ColorSpaceTransformOp::ColorSpaceDescription<Rec709ToLinearOp> g_colorSpaceDescription;		
-	
-};
-
-IE_CORE_DECLAREPTR( Rec709ToLinearOp );
-
+void bindColorSpaceTransformOp();
 
 } // namespace IECore
 
-#endif // IECORE_REC709TOLINEAROP_H
-
+#endif // IECOREPYTHON_COLORSPACETRANSFORMOPBINDING_H

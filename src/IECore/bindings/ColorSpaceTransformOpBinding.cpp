@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,41 +32,79 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_REC709TOLINEAROP_H
-#define IECORE_REC709TOLINEAROP_H
+#include "boost/python.hpp"
 
-#include "IECore/ChannelOp.h"
 #include "IECore/ColorSpaceTransformOp.h"
+#include "IECore/bindings/ColorSpaceTransformOpBinding.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
+
+using namespace boost::python;
 
 namespace IECore
 {
 
-/// Applies Rec709 to linear conversion on ImagePrimitive channels.
-class Rec709ToLinearOp : public ChannelOp
+template<typename T>
+static list vectorToList( const std::vector<T> &v )
 {
-	public:
+	list r;
+	for ( typename std::vector<T>::const_iterator it = v.begin(); it != v.end(); ++it )
+	{
+		r.append( *it );
+	}
+	return r;
+}
 
-		Rec709ToLinearOp();
-		virtual ~Rec709ToLinearOp();
+static list inputColorSpaces()
+{
+	std::vector<std::string> x;
+	ColorSpaceTransformOp::inputColorSpaces( x );
+	return vectorToList( x );
+}
 
-		IE_CORE_DECLARERUNTIMETYPED( Rec709ToLinearOp, ChannelOp );
-	
-	protected :
-	
-		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
+static list outputColorSpaces()
+{
+	std::vector<std::string> x;
+	ColorSpaceTransformOp::outputColorSpaces( x );
+	return vectorToList( x );
+}
 
-		struct Converter;
+static list colorSpaces()
+{
+	std::vector<std::string> x;
+	ColorSpaceTransformOp::colorSpaces( x );
+	return vectorToList( x );
+}
+
+
+static ImagePrimitiveOpPtr creator( const std::string &, const std::string &, void *data )
+{
+        assert( data );
+        PyObject *d = (PyObject *)( data );
+        
+        ImagePrimitiveOpPtr r = call< ImagePrimitiveOpPtr >( d );
+        return r;
+}
+
+static void registerConversion( const std::string &inputColorSpace, const std::string &outputColorSpace, PyObject *createFn )
+{
+	Py_INCREF( createFn );
+	ColorSpaceTransformOp::registerConversion( inputColorSpace, outputColorSpace, &creator, (void*)createFn );
+}
+
+void bindColorSpaceTransformOp()
+{
+
+	RunTimeTypedClass<ColorSpaceTransformOp>()
+		.def( init<>() )
 		
-	private :
-	
-		static ColorSpaceTransformOp::ColorSpaceDescription<Rec709ToLinearOp> g_colorSpaceDescription;		
-	
-};
+		.def( "registerConversion", registerConversion ).staticmethod( "registerConversion" )
+		
+		.def( "inputColorSpaces", inputColorSpaces ).staticmethod( "inputColorSpaces" )
+		.def( "outputColorSpaces", outputColorSpaces ).staticmethod( "outputColorSpaces" )
+		.def( "colorSpaces", colorSpaces ).staticmethod( "colorSpaces" )				
+	;
 
-IE_CORE_DECLAREPTR( Rec709ToLinearOp );
-
+}
 
 } // namespace IECore
-
-#endif // IECORE_REC709TOLINEAROP_H
 

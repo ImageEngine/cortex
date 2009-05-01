@@ -44,6 +44,8 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( LinearToSRGBOp );
 
+ColorSpaceTransformOp::ColorSpaceDescription<LinearToSRGBOp> LinearToSRGBOp::g_colorSpaceDescription( "linear", "srgb" );
+
 LinearToSRGBOp::LinearToSRGBOp()
 	:	ChannelOp( "LinearToSRGB", 
 				   "Applies linear to SRGB conversion on ImagePrimitive channels."
