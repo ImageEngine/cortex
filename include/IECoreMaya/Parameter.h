@@ -54,9 +54,6 @@ class Parameter
 	public :
 
 		static MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName );
-		/// \bug It seems like it's impossible to add/remove parameters from maya compound
-		/// attributes after the compound has been added to a node already - so this function
-		/// really doesn't work very well for updating compounds (tested in maya 7.0.1).
 		/// \bug Maya doesn't seem to correctly store default values for dynamic string attributes
 		/// when saving the scene - so this method doesn't set the default value appropriately for
 		/// StringParameter and its derived classes (tested in maya 7.0.1).
