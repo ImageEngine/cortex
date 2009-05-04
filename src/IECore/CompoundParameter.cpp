@@ -237,7 +237,7 @@ void CompoundParameter::addParameter( ParameterPtr parameter )
 {
 	if( m_namesToParameters.find( parameter->internedName() )!=m_namesToParameters.end() )
 	{
-		throw Exception( "Identically named child parameter already exists." );
+		throw Exception( boost::str( boost::format( "Child parameter named \"%s\" already exists." ) % parameter->name() ) );
 	}
 	m_namesToParameters.insert( ParameterMap::value_type( parameter->internedName(), parameter ) );
 	m_parameters.push_back( parameter );	
@@ -247,7 +247,7 @@ void CompoundParameter::insertParameter( ParameterPtr parameter, ConstParameterP
 {
 	if( m_namesToParameters.find( parameter->internedName() )!=m_namesToParameters.end() )
 	{
-		throw Exception( "Identically named child parameter already exists." );
+		throw Exception( boost::str( boost::format( "Child parameter named \"%s\" already exists." ) % parameter->name() ) );
 	}
 	ParameterVector::iterator it = find( m_parameters.begin(), m_parameters.end(), other );
 	if( it==m_parameters.end() )
