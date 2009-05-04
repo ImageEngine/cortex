@@ -43,6 +43,8 @@
 using namespace IECoreTruelight;
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPED( IECoreTruelight::TruelightColorTransformOp );
+
 TruelightColorTransformOp::TruelightColorTransformOp()
 	:	ColorTransformOp( "TruelightColorTransformOp", "Applies truelight transforms." ), m_instance( 0 )
 {
