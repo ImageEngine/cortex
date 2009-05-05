@@ -81,6 +81,13 @@ static void setParameterised2( MFnDependencyNode *fnDN, const std::string &class
 	StatusException::throwIfError( interface(fnDN)->setParameterised( className, classVersion, envVarName ) );
 }
 
+static void updateParameterised( MFnDependencyNode *fnDN )
+{
+	assert( fnDN );
+	
+	StatusException::throwIfError( interface(fnDN)->updateParameterised() );
+}
+
 static boost::python::tuple getParameterised( MFnDependencyNode *fnDN )
 {
 	assert( fnDN );
@@ -141,6 +148,7 @@ void IECoreMaya::bindFnParameterisedHolder()
 
 	def( "_parameterisedHolderSetParameterised", &setParameterised );
 	def( "_parameterisedHolderSetParameterised", &setParameterised2 );
+	def( "_parameterisedHolderUpdateParameterised", &updateParameterised );
 	def( "_parameterisedHolderGetParameterised", &getParameterised );
 	def( "_parameterisedHolderSetNodeValues", &setNodeValues );
 	def( "_parameterisedHolderSetNodeValue", &setNodeValue );

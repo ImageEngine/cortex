@@ -74,6 +74,11 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	
 		return result
 	
+	## Updates the node to reflect any addition or removal of parameters.
+	def updateParameterised( self ) :
+	
+		return _IECoreMaya._parameterisedHolderUpdateParameterised( self )
+	
 	## Returns a tuple of the form (parameterised, className, classVersion, searchPathEnvVar).
 	def getParameterised( self ) :
 		

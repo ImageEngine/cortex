@@ -60,6 +60,9 @@ class ParameterisedHolderInterface
 		virtual MStatus setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar ) = 0;
 		/// Sets the Parameterised object this node is holding, directly.
 		virtual MStatus setParameterised( IECore::RunTimeTypedPtr p ) = 0;
+		/// Updates the node to reflect any changes to the currently held Parameterised object. This should be called if Parameters have
+		/// been added to or removed from the Parameterised object.
+		virtual MStatus updateParameterised() = 0;
 		/// Returns the held Parameterised object, loading it if necessary. May return 0 if loading
 		/// fails. Note that this doesn't update the values of the parameters - you can use the
 		/// separate setParameterisedValues() call for that. If provided, the optional className,

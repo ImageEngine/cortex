@@ -84,11 +84,10 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		static MString typeName;
 		
 		virtual void postConstructor();
-		
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
-		
 		virtual MStatus shouldSave( const MPlug &plug, bool &isSaving );
-		
+		virtual void copyInternalData( MPxNode *node );
+				
 		//! @name ParameterisedHolderInterface implementation
 		/////////////////////////////////////////////////////////////////////////////////////////
 		//@{
@@ -97,6 +96,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		/// save/load - this becomes your responsibility if it's necessary.
 		virtual MStatus setParameterised( IECore::RunTimeTypedPtr p );
 		virtual MStatus setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar );
+		virtual MStatus updateParameterised();
 		virtual IECore::RunTimeTypedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
 		virtual MStatus setNodeValues();
 		virtual MStatus setNodeValue( IECore::ParameterPtr pa );
@@ -106,27 +106,44 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		virtual IECore::ParameterPtr plugParameter( const MPlug &plug );
 		//@}
 		
+		//! @name Attributes
+		/////////////////////////////////////////////////////////////////////////////////////////
 		static MObject aParameterisedClassName;
 		static MObject aParameterisedVersion;
 		static MObject aParameterisedSearchPathEnvVar;
-				
+		static MObject aDynamicParameters;
+		//@}
+		
 	private:
 		
 		IECore::RunTimeTypedPtr loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar );
 		
 		/// Creates (or updates existing) attributes for each parameter. Removes any old attributes no longer
-		/// needed.
-		MStatus createAndRemoveAttributes();	
+		/// needed. If dynamicParameterStorage is specified then any new Parameters for which attributes must be
+		/// created are placed in there - this is used by updateParameterised() to store dynamic parameters.
+		MStatus createAndRemoveAttributes( IECore::CompoundObjectPtr dynamicParameterStorage=0 );
 		// Makes (or updates existing) attributes for each parameter. Also fills in the two maps below.
 		// This method is called by getParameterised(), so you should call that before expecting the maps
 		// to be up to date.
-		MStatus createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName );
+		MStatus createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName, IECore::CompoundObjectPtr dynamicParameterStorage );
 		typedef std::map<IECore::ParameterPtr, MString> ParameterToAttributeNameMap;
 		ParameterToAttributeNameMap m_parametersToAttributeNames;
 		typedef std::map<MString, IECore::ParameterPtr> AttributeNameToParameterMap;
 		AttributeNameToParameterMap	m_attributeNamesToParameters;
 
-		MStatus removeUnecessaryAttributes();
+		MStatus removeUnecessaryAttributes( IECore::CompoundObjectPtr dynamicParameterStorage );
+		
+		// We store the Parameters which were added dynamically inside a CompoundObject within a plug
+		// value on the node. This allows us to recreate those Parameters when the node is copied or
+		// saved and then loaded. The keys in the CompoundObject are the names of the parameters which
+		// are parents of dynamic parameters. The values are ObjectVectors containing all the Parameters
+		// which belong to that parent.
+		IECore::CompoundObjectPtr getDynamicParameters();
+		void setDynamicParameters( IECore::CompoundObjectPtr dynamicParameters );
+		// This function takes the stored dynamic parameters and adds them to the currently held
+		// Parameterised object. This means parameters can be added on the fly and they'll survive
+		// node duplication and file save/load.
+		void addDynamicParameters();
 		
 		class PLCB : public PostLoadCallback
 		{
