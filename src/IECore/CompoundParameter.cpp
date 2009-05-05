@@ -341,6 +341,31 @@ ObjectPtr CompoundParameter::getValidatedParameterValue( const std::string &name
 	return p->getValidatedValue();
 }
 
+bool CompoundParameter::parameterPath( ConstParameterPtr child, std::vector<std::string> &path ) const
+{
+	for( ParameterVector::const_iterator it=m_parameters.begin(); it!=m_parameters.end(); it++ )
+	{
+		if( child==*it )
+		{
+			path.insert( path.begin(), child->name() );
+			return true;
+		}
+		else
+		{
+			ConstCompoundParameterPtr c = runTimeCast<const CompoundParameter>( *it );
+			if( c )
+			{
+				if( c->parameterPath( child, path ) )
+				{
+					path.insert( path.begin(),  name() );
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

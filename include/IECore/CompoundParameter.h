@@ -126,6 +126,10 @@ class CompoundParameter : public Parameter
 		typename T::Ptr parameter( const std::string &name );
 		template<typename T>
 		typename T::ConstPtr parameter( const std::string &name ) const;
+		/// Searches for child recursively underneath this parameter, filling path
+		/// with the names of all its ancestors, plus the name of child
+		/// itself. Returns true if child is found and false otherwise.
+		bool parameterPath( ConstParameterPtr child, std::vector<std::string> &path ) const;
 		/// Convenience function to find a parameter in parameters() and call setValue()
 		/// on it. Throws an Exception if the named parameter doesn't exist.
 		void setParameterValue( const std::string &name, ObjectPtr value );

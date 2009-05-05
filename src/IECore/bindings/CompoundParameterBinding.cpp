@@ -148,6 +148,18 @@ static void compoundParameterAddParameters( CompoundParameter &o, const boost::p
 	o.addParameters( pp.begin(), pp.end() );
 }
 
+static boost::python::list parameterPath( CompoundParameter &o, ConstParameterPtr child )
+{
+	std::vector<std::string> p;
+	o.parameterPath( child, p );
+	boost::python::list result;
+	for( std::vector<std::string>::const_iterator it=p.begin(); it!=p.end(); it++ )
+	{
+		result.append( *it );
+	}
+	return result;
+}
+
 void bindCompoundParameter()
 {
 	using boost::python::arg ;
@@ -179,6 +191,7 @@ void bindCompoundParameter()
 		.def( "removeParameter", (void (CompoundParameter::*)(ParameterPtr)) &CompoundParameter::removeParameter )
 		.def( "removeParameter", (void (CompoundParameter::*)(const std::string&)) &CompoundParameter::removeParameter )				
 		.def( "parameter", (ParameterPtr (CompoundParameter::*)(const std::string&)) &CompoundParameter::parameter<Parameter> )				
+		.def( "parameterPath", &parameterPath )				
 	;
 
 }

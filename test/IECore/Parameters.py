@@ -793,7 +793,28 @@ class TestCompoundParameter( unittest.TestCase ) :
 		)
 		
 		self.assertRaises( DeprecationWarning, getattr, p, "i" )
-				
+	
+	def testParameterPath( self ) :
+	
+		p = CompoundParameter(
+			name = "c",
+			description = "d",
+			members = [
+				IntParameter( "i", "d", 1, ),
+				FloatParameter( "f", "d", 2, ),
+				CompoundParameter( "c", "d", members = [
+						IntParameter( "j", "d", 10 ),
+					]
+				)
+			]
+		)
+		
+		self.assertEqual( p.parameterPath( p["i"] ), [ "i" ] )
+		self.assertEqual( p.parameterPath( p["f"] ), [ "f" ] )
+		self.assertEqual( p.parameterPath( p["c"]["j"] ), [ "c", "j" ] )
+		self.assertEqual( p.parameterPath( IntParameter( "i", "d", 10 ) ), [] )
+		self.assertEqual( p["c"].parameterPath( p["c"]["j"] ), [ "j" ] )
+					
 class TestValidatedStringParameter( unittest.TestCase ) :
 
 	def test( self ) :
