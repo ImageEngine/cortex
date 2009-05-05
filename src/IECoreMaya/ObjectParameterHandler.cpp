@@ -134,7 +134,7 @@ MStatus ObjectParameterHandler::setValue( IECore::ConstParameterPtr parameter, M
 	assert(s);
 	assert(data);
 	
-	data->setObject( p->getValue() );
+	data->setObject( p->getValue()->copy() );
 	return plug.setValue( plugData );
 }
 
@@ -180,7 +180,6 @@ MStatus ObjectParameterHandler::setValue( const MPlug &plug, IECore::ParameterPt
 		
 	}
 
-	/// \todo Should probably be calling setValidatedValue here, and handle any thrown exceptions?	
 	parameter->setValue( data->getObject() );
 		
 	return MS::kSuccess;			

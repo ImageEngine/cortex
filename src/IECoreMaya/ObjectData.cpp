@@ -51,7 +51,7 @@ using namespace IECoreMaya;
 const MString ObjectData::typeName( "ieObjectData" );
 const MTypeId ObjectData::id( ObjectDataId );
 
-ObjectData::ObjectData() : m_object( 0 )
+ObjectData::ObjectData() : m_copyMode( Deep ), m_object( 0 )
 {
 }
 
@@ -185,12 +185,28 @@ MStatus ObjectData::writeBinary( ostream& out )
 	return MS::kSuccess;
 }
 
+void ObjectData::setCopyMode( CopyMode mode )
+{
+	m_copyMode = mode;
+}
+
+ObjectData::CopyMode ObjectData::getCopyMode() const
+{
+	return m_copyMode;
+}
+		
 void ObjectData::copy( const MPxData &other )
 {
 	const ObjectData *otherData = dynamic_cast<const ObjectData *>( &other );
-	assert( otherData );
-
-	setObject( otherData->getObject() );
+	if( otherData->m_copyMode==Deep )
+	{
+		m_object = otherData->m_object ? otherData->m_object->copy() : 0;
+	}
+	else
+	{
+		m_object = otherData->m_object;
+	}
+	m_copyMode = otherData->m_copyMode;
 }
 
 MTypeId ObjectData::typeId() const
@@ -213,14 +229,7 @@ ConstObjectPtr ObjectData::getObject() const
 	return m_object;
 }
 
-void ObjectData::setObject( ConstObjectPtr otherObject )
+void ObjectData::setObject( ObjectPtr otherObject )
 {
-	if ( otherObject )
-	{
-		m_object = otherObject->copy();
-	}
-	else
-	{
-		m_object = 0;
-	}
+	m_object = otherObject;
 }
