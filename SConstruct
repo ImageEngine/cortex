@@ -1501,10 +1501,10 @@ if doConfigure :
 truelightEnv = env.Copy( IECORE_NAME = "IECoreTruelight" )
 truelightEnv.Append( LIBS = [ "truelight" ] )
 
-# Remove all the boost libs for the configure state- if we don't do this then the configure test can fail for some compilers. 
+# Remove all the boost and OpenEXR libs for the configure state- if we don't do this then the configure test can fail for some compilers. 
 # \todo Need to establish exactly what is going on here.
 oldTruelightLibs = list( truelightEnv["LIBS"] )
-truelightEnv["LIBS"] = [ x for x in truelightEnv["LIBS"] if x.find( "boost_" ) == -1 ] 
+truelightEnv["LIBS"] = [ x for x in truelightEnv["LIBS"] if ( x.find( "boost_" ) == -1 and x.find( "Ilm" ) == -1 and x.find( "Iex" ) == -1 and x.find( "Half" )==-1 and x.find( "Imath" )==-1 ) ] 
 
 truelightEnv.Append( CPPPATH = [ "$TRUELIGHT_ROOT/include" ] )
 truelightEnv.Prepend( LIBPATH = [
