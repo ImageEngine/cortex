@@ -45,10 +45,15 @@
 
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/SimpleTypedParameter.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECore
 {
 
+/// The ColorSpaceTransformOp allows complex color space operations to performed on images by chaining together simpler ones. e.g.
+/// An SRGB->Rec709 op can be constructed from a combination of SRGB->Linear followed by Linear->Rec709. If multiple paths are possible
+/// for a requested conversion then the shorted one is used. Static and dynamic registration mechanisms are provided to allow the
+/// addition of new transformations.
 class ColorSpaceTransformOp : public ImagePrimitiveOp
 {
 	public:
@@ -68,7 +73,23 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 		StringParameterPtr outputColorSpaceParameter();
 		ConstStringParameterPtr outputColorSpaceParameter() const;
 		
-		typedef ImagePrimitiveOpPtr (*CreatorFn)( const InputColorSpace &, const OutputColorSpace &, void * );	
+		/// Each string in the vector for this parameter should be a comma-separated list of either 1 or 3 items. If there's only 1 item it's assumed to 
+		/// represent the colorPrimVar name, else it's assumed to represent red/green/blue
+		/// An example value might be ["R,G,B","diffuseR,diffuseG,diffuseB"]
+		/// When a ChannelOp is called, it would be passed R,G,B,diffuseR,diffuseG,diffuseB for the channelNames.
+		/// When a ColorTransformOp is called it would be executed twice, once with R, G, B set for the red/green/blue primVar names, 
+		/// and once with diffuseR, diffuseG, diffuseB set.
+		StringVectorParameterPtr channelSetsParameter();
+		ConstStringVectorParameterPtr channelSetsParameter() const;
+		
+		StringParameterPtr alphaPrimVarParameter();
+		ConstStringParameterPtr alphaPrimVarParameter() const;
+		
+		BoolParameterPtr premultipliedParameter();
+		ConstBoolParameterPtr premultipliedParameter() const;		
+		
+		/// ModifyOp is the most-derived common base class of ChannelOp and ColorTransformOp
+		typedef ModifyOpPtr (*CreatorFn)( const InputColorSpace &, const OutputColorSpace &, void * );	
 		static void registerConversion( const InputColorSpace &, const OutputColorSpace &, CreatorFn fn, void *data = 0 );
 		
 		static void inputColorSpaces( std::vector< InputColorSpace > &colorSpaces );
@@ -81,7 +102,7 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 			public:
 				ColorSpaceDescription( const InputColorSpace &, const OutputColorSpace & );
 			protected :			
-				static ImagePrimitiveOpPtr createOp( const InputColorSpace &, const OutputColorSpace &, void * );			
+				static ModifyOpPtr createOp( const InputColorSpace &, const OutputColorSpace &, void * );			
 		};
 							
 	protected :
@@ -101,6 +122,9 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 		
 		StringParameterPtr m_inputColorSpaceParameter;
 		StringParameterPtr m_outputColorSpaceParameter;
+		StringVectorParameterPtr m_channelSetsParameter;
+		StringParameterPtr m_alphaPrimVarParameter;
+		BoolParameterPtr m_premultipliedParameter;
 		
 		typedef std::multimap< InputColorSpace, ConversionInfo > ConvertersMap;		
 		typedef std::map< CreatorFn, Conversion > ConverterTypesMap;		

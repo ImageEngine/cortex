@@ -45,7 +45,7 @@ ColorSpaceTransformOp::ColorSpaceDescription<T>::ColorSpaceDescription( const In
 }
 
 template<typename T>
-ImagePrimitiveOpPtr ColorSpaceTransformOp::ColorSpaceDescription<T>::createOp( const InputColorSpace &, const OutputColorSpace &, void * )
+ModifyOpPtr ColorSpaceTransformOp::ColorSpaceDescription<T>::createOp( const InputColorSpace &, const OutputColorSpace &, void * )
 {
 	return new T();
 }
