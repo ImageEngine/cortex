@@ -70,7 +70,17 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 		p = IECore.ReadProcedural()
 		g = IECore.Group()
 		g.addChild( p )
+	
+	def testNoTypeIdOverride( self ) :
+	
+		class T( IECore.ParameterisedProcedural ) :
 		
+			def __init__( self ) :
+				
+				IECore.ParameterisedProcedural.__init__( self )
+				
+		t = T()
+		t.typeId()	
 	
 if __name__ == "__main__":
         unittest.main()
