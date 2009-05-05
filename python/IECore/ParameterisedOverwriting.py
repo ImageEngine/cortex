@@ -50,6 +50,7 @@ def __parameterisedSetItemOp( self, attrName, attrValue ):
 	except:
 		# it's probably a derived class and the constructor did not initialized Parameterised.
 		# So the attribute must be a class attribute and not a Parameter attribute.
+		# \todo Might want to rethink this logic	
 		self.__dict__[ attrName ] = attrValue
 	else:
 		if parameters.has_key( attrName ):
