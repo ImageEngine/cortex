@@ -70,12 +70,11 @@ T parameterPresets( const boost::python::object &o )
 		
 		return result;
 	}
-	
-	boost::python::tuple tuple = boost::python::extract<boost::python::tuple>( o )();
-	size_t s = boost::python::len( tuple );
+		
+	size_t s = boost::python::len( o );
 	for( size_t i=0; i<s; i++ )
 	{
-		boost::python::tuple preset = boost::python::extract<boost::python::tuple>( tuple[i] )();
+		boost::python::tuple preset = boost::python::extract<boost::python::tuple>( o[i] )();
 		size_t ts = boost::python::len( preset );
 		if( ts!=2 )
 		{
@@ -84,7 +83,8 @@ T parameterPresets( const boost::python::object &o )
 		}
 		result.push_back( typename T::value_type( boost::python::extract<std::string>( preset[0] )(), boost::python::extract<typename T::value_type::second_type>( preset[1] )() ) );
 	}
-	return result;
+	
+	return result;	
 }
 
 }

@@ -80,6 +80,7 @@ class TestParameter( unittest.TestCase ) :
 		
 	def testPresets( self ) :
 	
+		# Presets as tuple
 		p = Parameter(
 			name = "n",
 			description = "d",
@@ -107,6 +108,27 @@ class TestParameter( unittest.TestCase ) :
 		
 		self.assertRaises( RuntimeError, p.setValue, "thisIsNotAPreset" )
 		self.assertRaises( RuntimeError, p.setValidatedValue, FloatData( 1000 ) )
+		
+		# Presets as list
+		p = Parameter(
+			name = "n",
+			description = "d",
+			defaultValue = FloatData( 20 ),
+			presets = [
+				( "p1", FloatData( 40 ) ),
+				( "p2", IntData( 60 ) ),
+				( "p3", CompoundData() ),
+				( "p4", FloatData( 20 ) ),
+			],
+			presetsOnly = True,
+		)
+		
+		pr = p.presets()
+		self.assertEqual( len( pr ), 4 )
+		self.assertEqual( pr["p1"], FloatData( 40 ) )
+		self.assertEqual( pr["p2"], IntData( 60 ) )
+		self.assertEqual( pr["p3"], CompoundData() )
+		self.assertEqual( pr["p4"], FloatData( 20 ) )
 		
 	def testOrderedPresets( self ) :
 	
