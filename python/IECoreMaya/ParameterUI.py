@@ -446,7 +446,7 @@ class ParameterUI :
 			pass
 	
 		if not ( parameter.typeId(), uiTypeHint ) in ParameterUI.handlers:
-			# \todo Issue a warning
+			IECore.msg( IECore.Msg.Level.Warning, "ParameterUI.create", "No UI registered for parameters of type \"%s\"" % parameter.typeName() )
 			return None
 		
 		if 'longParameterName' in kw and len( kw['longParameterName'] ) :
