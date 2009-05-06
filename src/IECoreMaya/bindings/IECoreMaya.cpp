@@ -70,6 +70,7 @@
 #include "IECoreMaya/bindings/ViewportPostProcessBinding.h"
 #include "IECoreMaya/bindings/ImageViewportPostProcessBinding.h"
 #include "IECoreMaya/bindings/ViewportPostProcessCallbackBinding.h"
+#include "IECoreMaya/bindings/FromMayaGroupConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -114,4 +115,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindViewportPostProcess();
 	bindImageViewportPostProcess();
 	bindViewportPostProcessCallback();	
+	bindFromMayaGroupConverter();	
 }
