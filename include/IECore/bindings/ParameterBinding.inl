@@ -54,7 +54,7 @@ T parameterPresets( const boost::python::object &o )
 	boost::python::extract<boost::python::dict> ed( o );
 	if( ed.check() )
 	{
-		if( PyErr_WarnEx( PyExc_DeprecationWarning, "Specifying presets as a dictionary is deprecated - pass a tuple of tuples instead.", 1 ) )
+		if( PyErr_WarnEx( PyExc_DeprecationWarning, "Specifying presets as a dictionary is deprecated - pass a list or tuple of tuples instead.", 1 ) )
 		{
 			// warning converted to exception
 			throw boost::python::error_already_set();
