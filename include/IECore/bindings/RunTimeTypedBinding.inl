@@ -56,12 +56,41 @@ static const char *nameWithoutNamespace( const char *name )
 	return r.end();
 }
 
+template<class T>
+static TypeId typeId( T &t )
+{
+	return t.T::typeId();
+}
+
+template<class T>
+static const char *typeName( T &t )
+{
+	return t.T::typeName();
+}
+
+template<class T>
+static bool isInstanceOf( T &t, TypeId i )
+{
+	return t.T::isInstanceOf( i );
+}
+
+template<class T>
+static bool isInstanceOf2( T &t, const char *n )
+{
+	return t.T::isInstanceOf( n );
+}
+
 } // namespace Detail
 
 template<typename T, typename Ptr>
 RunTimeTypedClass<T, Ptr>::RunTimeTypedClass( const char *docString )
 	:	BaseClass( Detail::nameWithoutNamespace( T::staticTypeName() ), docString )
 {
+	
+	BaseClass::BaseClass::def( "typeId", &Detail::typeId<T> );
+	BaseClass::BaseClass::def( "typeName", &Detail::typeName<T> );
+	BaseClass::BaseClass::def( "isInstanceOf", &Detail::isInstanceOf<T> );	
+	BaseClass::BaseClass::def( "isInstanceOf", &Detail::isInstanceOf2<T> );
 	
 	BaseClass::BaseClass::def( "staticTypeName", &T::staticTypeName );
 	BaseClass::BaseClass::staticmethod( "staticTypeName" );

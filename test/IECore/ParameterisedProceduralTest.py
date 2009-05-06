@@ -73,6 +73,10 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 	
 	def testNoTypeIdOverride( self ) :
 	
+		## Really all the typeid functions should be overridden in all python
+		# derived classes, but that won't always be the case and we sure don't
+		# want things to blow up if they're absent.
+	
 		class T( IECore.ParameterisedProcedural ) :
 		
 			def __init__( self ) :
@@ -80,7 +84,10 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 				IECore.ParameterisedProcedural.__init__( self )
 				
 		t = T()
-		t.typeId()	
+		self.assertEqual( t.typeId(), IECore.ParameterisedProcedural.staticTypeId() )
+		self.assertEqual( t.typeName(), IECore.ParameterisedProcedural.staticTypeName() )
+		self.failUnless( t.isInstanceOf( IECore.ParameterisedProcedural.staticTypeId() ) )
+		self.failUnless( t.isInstanceOf( IECore.ParameterisedProcedural.staticTypeName() ) )
 	
 if __name__ == "__main__":
         unittest.main()
