@@ -335,16 +335,16 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, Const
 	{
 		boost::tokenizer<boost::char_separator<char> > t( *it, char_separator<char>( ", " ) );
 		 
-		std::vector< std::string > blah;
-		copy( t.begin(), t.end(), back_insert_iterator< std::vector< std::string > >( blah ) );
+		std::vector< std::string > channels;
+		copy( t.begin(), t.end(), back_insert_iterator< std::vector< std::string > >( channels ) );
 		copy( t.begin(), t.end(), back_insert_iterator< std::vector< std::string > >( channelNames ) );
 		 
-		if ( blah.size() != 1 && blah.size() != 3 )
+		if ( channels.size() != 1 && channels.size() != 3 )
 		{
 			throw InvalidArgumentException( ( boost::format( "ColorSpaceTransformOp: Don't know what to do with channel set '%s' - must specify either 1 or 3 elements" ) % *it ).str()  );	
 		}
 		 
-		channelSets.push_back( blah );
+		channelSets.push_back( channels );
 	}
 	
 	bool first = true;
@@ -354,6 +354,8 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, Const
 	for( std::vector< ConversionInfo >::const_iterator it = conversions.begin() ; it != conversions.end(); ++it )
 	{	
 		current = *it;
+		
+		
 		if ( first )
 		{
 			assert( current.get<1>() == inputColorSpace );
@@ -365,6 +367,7 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, Const
 		}
 		ModifyOpPtr currentConversion = (current.get<0>())( current.get<1>(), current.get<2>(), current.get<3>() );
 		assert( currentConversion );
+		
 		if ( !currentConversion->isInstanceOf( ChannelOpTypeId ) && !currentConversion->isInstanceOf( ColorTransformOpTypeId ) )		
 		{
 			throw InvalidArgumentException( ( boost::format( "ColorSpaceTransformOp: '%s' to '%s' conversion registered unsupported Op type '%s'" ) % inputColorSpace % outputColorSpace % currentConversion->typeName()).str() );
@@ -387,8 +390,7 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, Const
 			ColorTransformOpPtr op = boost::dynamic_pointer_cast< ColorTransformOp >( currentConversion );
 								
 			for ( ChannelSets::const_iterator it = channelSets.begin(); it != channelSets.end(); ++it )
-			{
-				op->parameters()->setValue( op->parameters()->defaultValue()->copy() );
+			{																												
 				op->inputParameter()->setValue( image );
 				op->copyParameter()->setTypedValue( false );
 			
@@ -398,6 +400,10 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, Const
 				if ( it->size() == 1 )
 				{
 					op->colorPrimVarParameter()->setTypedValue( (*it)[0] );
+					
+					op->redPrimVarParameter()->setValue( op->redPrimVarParameter()->defaultValue()->copy() );
+					op->greenPrimVarParameter()->setValue( op->greenPrimVarParameter()->defaultValue()->copy() );
+					op->bluePrimVarParameter()->setValue( op->bluePrimVarParameter()->defaultValue()->copy() );
 				}
 				else 
 				{
@@ -405,7 +411,9 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, Const
 					
 					op->redPrimVarParameter()->setTypedValue( (*it)[0] );
 					op->greenPrimVarParameter()->setTypedValue( (*it)[1] );
-					op->bluePrimVarParameter()->setTypedValue( (*it)[2] );										
+					op->bluePrimVarParameter()->setTypedValue( (*it)[2] );
+					
+					op->colorPrimVarParameter()->setValue( op->colorPrimVarParameter()->defaultValue()->copy() );										
 					
 				}
 				result = runTimeCast< ImagePrimitive >( op->operate() );
