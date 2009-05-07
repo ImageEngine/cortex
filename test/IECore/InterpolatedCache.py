@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -144,11 +144,11 @@ class TestInterpolatedCache(unittest.TestCase):
 		cache.setInterpolation( InterpolatedCache.Interpolation.Linear )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 0.5 ) )
 		cache.setFrame( 2.25 )
-		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.496, 3 )
+		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.5, 3 )
 		cache.setInterpolation( InterpolatedCache.Interpolation.Cosine )
-		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.28846, 3 )
+		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.28846, 3 ) # \todo Is this really correct?
 		cache.setInterpolation( InterpolatedCache.Interpolation.Cubic )
-		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.4512, 3 )
+		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.4512, 3 ) # \todo Is this really correct?
 		cache.setFrame( 5 )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
 		cache.setInterpolation( InterpolatedCache.Interpolation.Linear )
