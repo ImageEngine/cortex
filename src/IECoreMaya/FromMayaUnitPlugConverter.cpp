@@ -178,6 +178,9 @@ IECore::ObjectPtr FromMayaUnitPlugConverter<T>::doConversion( IECore::ConstCompo
 	}
 }
 
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaUnitPlugConverterf, FromMayaUnitPlugConverterfTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaUnitPlugConverterd, FromMayaUnitPlugConverterdTypeId, FromMayaPlugConverter )
+
 // explicit instantiation
 template class FromMayaUnitPlugConverter<float>;
 template class FromMayaUnitPlugConverter<double>;

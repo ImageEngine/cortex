@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,45 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_FROMMAYATRANSFORMATIONMATRIXCONVERTER_H
-#define IECOREMAYA_FROMMAYATRANSFORMATIONMATRIXCONVERTER_H
+#include "boost/python.hpp"
 
-#include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECoreMaya/FromMayaCompoundNumericPlugConverter.h"
+#include "IECoreMaya/bindings/FromMayaCompoundNumericPlugConverterBinding.h"
 
-#include "IECore/CompoundParameter.h"
-#include "IECore/TransformationMatrixData.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
-namespace IECoreMaya
+using namespace IECoreMaya;
+using namespace boost::python;
+
+template<class T>
+static void bind()
 {
+	IECore::RunTimeTypedClass<T>()
+	;
+}
 
-/// The FromMayaTransformationMatrixConverter converts types compatible with
-/// MFnMatrixData  into IECore::TransformationMatrixData.
-template<typename T>
-class FromMayaTransformationMatrixConverter : public FromMayaObjectConverter
+void IECoreMaya::bindFromMayaCompoundNumericPlugConverter()
 {
+	bind<FromMayaCompoundNumericPlugConverterV2fV2i>();
+	bind<FromMayaCompoundNumericPlugConverterV2fV2f>();
+	bind<FromMayaCompoundNumericPlugConverterV2fV2d>();
 
-	public :
+	bind<FromMayaCompoundNumericPlugConverterV2dV2i>();
+	bind<FromMayaCompoundNumericPlugConverterV2dV2f>();
+	bind<FromMayaCompoundNumericPlugConverterV2dV2d>();
 
-		FromMayaTransformationMatrixConverter( const MObject &object );
-
-		IECORE_RUNTIMETYPED_DECLARETEMPLATE( FromMayaTransformationMatrixConverter, FromMayaObjectConverter )
-		
-	protected :
+	bind<FromMayaCompoundNumericPlugConverterV3fV3i>();
+	bind<FromMayaCompoundNumericPlugConverterV3fV3f>();
+	bind<FromMayaCompoundNumericPlugConverterV3fV3d>();
+	bind<FromMayaCompoundNumericPlugConverterV3fC3f>();
 	
-		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-				
-	private :
-
-		static FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter> m_description;
-
-};
-
-typedef FromMayaTransformationMatrixConverter<IECore::TransformationMatrixfData> FromMayaTransformationMatrixfConverter;
-typedef FromMayaTransformationMatrixConverter<IECore::TransformationMatrixdData> FromMayaTransformationMatrixdConverter;
-
-IE_CORE_DECLAREPTR( FromMayaTransformationMatrixfConverter );
-IE_CORE_DECLAREPTR( FromMayaTransformationMatrixdConverter );
-
-} // namespace IECoreMaya
-
-#endif // IECOREMAYA_FROMMAYATRANSFORMATIONMATRIXCONVERTER_H
+	bind<FromMayaCompoundNumericPlugConverterV3dV3i>();
+	bind<FromMayaCompoundNumericPlugConverterV3dV3f>();
+	bind<FromMayaCompoundNumericPlugConverterV3dV3d>();
+	bind<FromMayaCompoundNumericPlugConverterV3dC3f>();
+	
+}

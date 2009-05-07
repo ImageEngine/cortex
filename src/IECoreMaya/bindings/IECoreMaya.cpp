@@ -71,6 +71,11 @@
 #include "IECoreMaya/bindings/ImageViewportPostProcessBinding.h"
 #include "IECoreMaya/bindings/ViewportPostProcessCallbackBinding.h"
 #include "IECoreMaya/bindings/FromMayaGroupConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaUnitPlugConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaNumericPlugConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaArrayDataConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaCompoundNumericPlugConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaTransformationMatrixConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -116,4 +121,9 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindImageViewportPostProcess();
 	bindViewportPostProcessCallback();	
 	bindFromMayaGroupConverter();	
+	bindFromMayaUnitPlugConverter();	
+	bindFromMayaNumericPlugConverter();	
+	bindFromMayaArrayDataConverter();	
+	bindFromMayaCompoundNumericPlugConverter();	
+	bindFromMayaTransformationMatrixConverter();	
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,8 +38,10 @@
 
 #include "IECore/VectorTypedData.h"
 
-using namespace IECoreMaya;
 using namespace IECore;
+
+namespace IECoreMaya
+{
 
 template<typename F, typename T>
 FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaArrayDataConverter<F,T> > FromMayaArrayDataConverter<F,T>::m_description( MArrayTraits<F>::dataType(), T::staticTypeId() );
@@ -72,6 +74,14 @@ IECore::ObjectPtr FromMayaArrayDataConverter<F,T>::doConversion( const MObject &
 	return resultData;
 }
 
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterii, FromMayaArrayDataConverteriiTypeId, FromMayaObjectConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterdd, FromMayaArrayDataConverterddTypeId, FromMayaObjectConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterdf, FromMayaArrayDataConverterdfTypeId, FromMayaObjectConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterss, FromMayaArrayDataConverterssTypeId, FromMayaObjectConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVV3f, FromMayaArrayDataConverterVV3fTypeId, FromMayaObjectConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVV3d, FromMayaArrayDataConverterVV3dTypeId, FromMayaObjectConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVC3f, FromMayaArrayDataConverterVC3fTypeId, FromMayaObjectConverter )
+
 /// Explicit instantiations.
 template class FromMayaArrayDataConverter<MIntArray, IntVectorData>;
 template class FromMayaArrayDataConverter<MDoubleArray, DoubleVectorData>;
@@ -80,3 +90,5 @@ template class FromMayaArrayDataConverter<MStringArray, StringVectorData>;
 template class FromMayaArrayDataConverter<MVectorArray, V3fVectorData>;
 template class FromMayaArrayDataConverter<MVectorArray, V3dVectorData>;
 template class FromMayaArrayDataConverter<MVectorArray, Color3fVectorData>;
+
+} // namespace IECoreMaya

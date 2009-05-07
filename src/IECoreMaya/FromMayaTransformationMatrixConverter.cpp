@@ -41,10 +41,12 @@
 #include "maya/MFnMatrixData.h"
 #include "maya/MFnTransform.h"
 
-using namespace IECoreMaya;
 using namespace IECore;
 using namespace std;
 using namespace Imath;
+
+namespace IECoreMaya
+{
 
 static const MFn::Type fromTypes[] = { MFn::kMatrixData, MFn::kTransform, MFn::kInvalid };
 
@@ -84,6 +86,10 @@ IECore::ObjectPtr FromMayaTransformationMatrixConverter<T>::doConversion( const 
 	return 0;
 }
 
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaTransformationMatrixfConverter, FromMayaTransformationMatrixfConverterTypeId, FromMayaObjectConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaTransformationMatrixdConverter, FromMayaTransformationMatrixdConverterTypeId, FromMayaObjectConverter )
+
 template class FromMayaTransformationMatrixConverter<TransformationMatrixfData>;
 template class FromMayaTransformationMatrixConverter<TransformationMatrixdData>;
 
+} // namespace IECoreMaya

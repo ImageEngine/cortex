@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,10 +40,12 @@
 
 #include "boost/type_traits/is_same.hpp"
 
-using namespace IECoreMaya;
 using namespace IECore;
 using namespace Imath;
 using namespace boost;
+
+namespace IECoreMaya
+{
 
 template<typename F, typename T>
 FromMayaPlugConverter::Description<FromMayaCompoundNumericPlugConverter<F,T> > FromMayaCompoundNumericPlugConverter<F,T>::m_description( NumericTraits<F>::dataType(), T::staticTypeId(), is_same<F, typename T::ValueType>::value );
@@ -67,6 +69,24 @@ IECore::ObjectPtr FromMayaCompoundNumericPlugConverter<F,T>::doConversion( IECor
 	return new T( vv );
 }
 
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV2fV2i, FromMayaCompoundNumericPlugConverterV2fV2iTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV2fV2f, FromMayaCompoundNumericPlugConverterV2fV2fTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV2fV2d, FromMayaCompoundNumericPlugConverterV2fV2dTypeId, FromMayaPlugConverter )
+
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV2dV2i, FromMayaCompoundNumericPlugConverterV2dV2iTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV2dV2f, FromMayaCompoundNumericPlugConverterV2dV2fTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV2dV2d, FromMayaCompoundNumericPlugConverterV2dV2dTypeId, FromMayaPlugConverter )
+
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV3fV3i, FromMayaCompoundNumericPlugConverterV3fV3iTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV3fV3f, FromMayaCompoundNumericPlugConverterV3fV3fTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV3fV3d, FromMayaCompoundNumericPlugConverterV3fV3dTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV3fC3f, FromMayaCompoundNumericPlugConverterV3fC3fTypeId, FromMayaPlugConverter )
+
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV3dV3i, FromMayaCompoundNumericPlugConverterV3dV3iTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV3dV3f, FromMayaCompoundNumericPlugConverterV3dV3fTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV3dV3d, FromMayaCompoundNumericPlugConverterV3dV3dTypeId, FromMayaPlugConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaCompoundNumericPlugConverterV3dC3f, FromMayaCompoundNumericPlugConverterV3dC3fTypeId, FromMayaPlugConverter )
+
 /// Explicit instantiations.
 template class FromMayaCompoundNumericPlugConverter<V2f, V2iData>;
 template class FromMayaCompoundNumericPlugConverter<V2f, V2fData>;
@@ -85,3 +105,5 @@ template class FromMayaCompoundNumericPlugConverter<V3d, V3iData>;
 template class FromMayaCompoundNumericPlugConverter<V3d, V3fData>;
 template class FromMayaCompoundNumericPlugConverter<V3d, V3dData>;
 template class FromMayaCompoundNumericPlugConverter<V3d, Color3fData>;
+
+} // namespace IECoreMaya

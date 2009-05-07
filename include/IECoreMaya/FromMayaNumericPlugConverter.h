@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,12 +35,13 @@
 #ifndef IE_COREMAYA_FROMMAYANUMERICPLUGCONVERTER_H
 #define IE_COREMAYA_FROMMAYANUMERICPLUGCONVERTER_H
 
+#include "IECore/SimpleTypedData.h"
+
 #include "IECoreMaya/FromMayaPlugConverter.h"
 
 namespace IECoreMaya
 {
 
-/// \todo Shorten name, implement RunTimeTyped interface.
 template<typename F, typename T> 
 class FromMayaNumericPlugConverter : public FromMayaPlugConverter
 {
@@ -48,6 +49,8 @@ class FromMayaNumericPlugConverter : public FromMayaPlugConverter
 	public :
 	
 		FromMayaNumericPlugConverter( const MPlug &plug );
+
+		IECORE_RUNTIMETYPED_DECLARETEMPLATE( FromMayaNumericPlugConverter, FromMayaPlugConverter )
 		
 	protected :
 		
@@ -58,6 +61,18 @@ class FromMayaNumericPlugConverter : public FromMayaPlugConverter
 		static Description<FromMayaNumericPlugConverter> m_description;
 		
 };
+
+typedef FromMayaNumericPlugConverter<bool, IECore::BoolData> FromMayaNumericPlugConverterbb;
+typedef FromMayaNumericPlugConverter<bool, IECore::IntData> FromMayaNumericPlugConverterbi;
+typedef FromMayaNumericPlugConverter<int, IECore::IntData> FromMayaNumericPlugConverterii;
+typedef FromMayaNumericPlugConverter<int, IECore::FloatData> FromMayaNumericPlugConverterif;
+typedef FromMayaNumericPlugConverter<int, IECore::DoubleData> FromMayaNumericPlugConverterid;
+typedef FromMayaNumericPlugConverter<float, IECore::IntData> FromMayaNumericPlugConverterfi;
+typedef FromMayaNumericPlugConverter<float, IECore::FloatData> FromMayaNumericPlugConverterff;
+typedef FromMayaNumericPlugConverter<float, IECore::DoubleData> FromMayaNumericPlugConverterfd;
+typedef FromMayaNumericPlugConverter<double, IECore::IntData> FromMayaNumericPlugConverterdi;
+typedef FromMayaNumericPlugConverter<double, IECore::FloatData> FromMayaNumericPlugConverterdf;
+typedef FromMayaNumericPlugConverter<double, IECore::DoubleData> FromMayaNumericPlugConverterdd;
 
 } // namespace IECoreMaya
 

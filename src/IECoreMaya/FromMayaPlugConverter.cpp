@@ -111,7 +111,8 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 		UnitTypesToFnsMap::const_iterator it = m->find( UnitTypePair( fnUAttr.unitType(), resultType ) );
 		if( it!=m->end() )
 		{
-			return it->second( plug );
+			FromMayaConverterPtr result = it->second( plug );
+			return result;
 		}
 	}
 	
@@ -122,7 +123,8 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 		NumericTypesToFnsMap::const_iterator it = m->find( NumericTypePair( fnNAttr.unitType(), resultType ) );
 		if( it!=m->end() )
 		{
-			return it->second( plug );
+			FromMayaConverterPtr result = it->second( plug );
+			return result;
 		}
 	}
 	
@@ -133,7 +135,8 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 		TypedTypesToFnsMap::const_iterator it = m->find( TypedTypePair( fnTAttr.attrType(), resultType ) );
 		if( it!=m->end() )
 		{
-			return it->second( plug );
+			FromMayaConverterPtr result = it->second( plug );
+			return result;
 		}
 	}
 	

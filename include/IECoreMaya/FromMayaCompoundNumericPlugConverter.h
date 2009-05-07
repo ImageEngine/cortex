@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,12 +35,13 @@
 #ifndef IE_COREMAYA_FROMMAYACOMPOUNDNUMERICPLUGCONVERTER_H
 #define IE_COREMAYA_FROMMAYACOMPOUNDNUMERICPLUGCONVERTER_H
 
+#include "IECore/SimpleTypedData.h"
+
 #include "IECoreMaya/FromMayaPlugConverter.h"
 
 namespace IECoreMaya
 {
 
-/// \todo Shorten name, implement RunTimeTyped interface.
 template<typename F, typename T> 
 class FromMayaCompoundNumericPlugConverter : public FromMayaPlugConverter
 {
@@ -48,6 +49,8 @@ class FromMayaCompoundNumericPlugConverter : public FromMayaPlugConverter
 	public :
 	
 		FromMayaCompoundNumericPlugConverter( const MPlug &plug );
+
+		IECORE_RUNTIMETYPED_DECLARETEMPLATE( FromMayaCompoundNumericPlugConverter, FromMayaPlugConverter )
 		
 	protected :
 		
@@ -58,6 +61,24 @@ class FromMayaCompoundNumericPlugConverter : public FromMayaPlugConverter
 		static Description<FromMayaCompoundNumericPlugConverter> m_description;
 		
 };
+
+typedef FromMayaCompoundNumericPlugConverter<Imath::V2f, IECore::V2iData> FromMayaCompoundNumericPlugConverterV2fV2i;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V2f, IECore::V2fData> FromMayaCompoundNumericPlugConverterV2fV2f;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V2f, IECore::V2dData> FromMayaCompoundNumericPlugConverterV2fV2d;
+
+typedef FromMayaCompoundNumericPlugConverter<Imath::V2d, IECore::V2iData> FromMayaCompoundNumericPlugConverterV2dV2i;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V2d, IECore::V2fData> FromMayaCompoundNumericPlugConverterV2dV2f;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V2d, IECore::V2dData> FromMayaCompoundNumericPlugConverterV2dV2d;
+
+typedef FromMayaCompoundNumericPlugConverter<Imath::V3f, IECore::V3iData> FromMayaCompoundNumericPlugConverterV3fV3i;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V3f, IECore::V3fData> FromMayaCompoundNumericPlugConverterV3fV3f;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V3f, IECore::V3dData> FromMayaCompoundNumericPlugConverterV3fV3d;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V3f, IECore::Color3fData> FromMayaCompoundNumericPlugConverterV3fC3f;
+
+typedef FromMayaCompoundNumericPlugConverter<Imath::V3d, IECore::V3iData> FromMayaCompoundNumericPlugConverterV3dV3i;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V3d, IECore::V3fData> FromMayaCompoundNumericPlugConverterV3dV3f;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V3d, IECore::V3dData> FromMayaCompoundNumericPlugConverterV3dV3d;
+typedef FromMayaCompoundNumericPlugConverter<Imath::V3d, IECore::Color3fData> FromMayaCompoundNumericPlugConverterV3dC3f;
 
 } // namespace IECoreMaya
 

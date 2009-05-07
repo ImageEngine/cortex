@@ -61,6 +61,13 @@ class FromMayaUnitPlugConverterTest( unittest.TestCase ) :
 		v = converter.convert()		
 		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
 		self.assertEqual( v.value, 0.03 )
+	
+	def testTypeIds( self ) :
+	
+		locator = maya.cmds.spaceLocator()[0]
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
+		self.assertEqual( converter.typeId(), IECoreMaya.TypeId.FromMayaUnitPlugConverterd )
+		self.assertEqual( converter.typeName(), "FromMayaUnitPlugConverterd" )
 							
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

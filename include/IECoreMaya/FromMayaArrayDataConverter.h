@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,13 @@
 #ifndef IE_COREMAYA_FROMMAYAARRAYDATACONVERTER_H
 #define IE_COREMAYA_FROMMAYAARRAYDATACONVERTER_H
 
+#include "maya/MIntArray.h"
+#include "maya/MDoubleArray.h"
+#include "maya/MStringArray.h"
+#include "maya/MVectorArray.h"
+
+#include "IECore/VectorTypedData.h"
+
 #include "IECoreMaya/FromMayaObjectConverter.h"
 
 namespace IECoreMaya
@@ -42,7 +49,6 @@ namespace IECoreMaya
 
 /// This template class can convert from various maya array data types
 /// into various IECore TypedVectorData types.
-/// \todo Shorten name, implement RunTimeTyped interface.
 template<typename F, typename T>
 class FromMayaArrayDataConverter : public FromMayaObjectConverter
 {
@@ -50,6 +56,8 @@ class FromMayaArrayDataConverter : public FromMayaObjectConverter
 	public :
 	
 		FromMayaArrayDataConverter( const MObject &object );
+
+		IECORE_RUNTIMETYPED_DECLARETEMPLATE( FromMayaArrayDataConverter, FromMayaObjectConverter )
 		
 	protected :
 	
@@ -58,6 +66,14 @@ class FromMayaArrayDataConverter : public FromMayaObjectConverter
 		static FromMayaObjectConverterDescription<FromMayaArrayDataConverter> m_description;
 
 };
+
+typedef FromMayaArrayDataConverter<MIntArray, IECore::IntVectorData> FromMayaArrayDataConverterii;
+typedef FromMayaArrayDataConverter<MDoubleArray, IECore::DoubleVectorData> FromMayaArrayDataConverterdd;
+typedef FromMayaArrayDataConverter<MDoubleArray, IECore::FloatVectorData> FromMayaArrayDataConverterdf;
+typedef FromMayaArrayDataConverter<MStringArray, IECore::StringVectorData> FromMayaArrayDataConverterss;
+typedef FromMayaArrayDataConverter<MVectorArray, IECore::V3fVectorData> FromMayaArrayDataConverterVV3f;
+typedef FromMayaArrayDataConverter<MVectorArray, IECore::V3dVectorData> FromMayaArrayDataConverterVV3d;
+typedef FromMayaArrayDataConverter<MVectorArray, IECore::Color3fVectorData> FromMayaArrayDataConverterVC3f;
 
 } // namespace IECoreMaya
 
