@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -82,29 +82,6 @@ struct LinearInterpolator< TransformationMatrix<T> >
 		
 		LinearInterpolator< Imath::Vec3< T > >()( y0.rotatePivotTranslation, y1.rotatePivotTranslation, x, result.rotatePivotTranslation );
 		LinearInterpolator< Imath::Vec3< T > >()( y0.translate, y1.translate, x, result.translate );
-	}
-};
-
-// Partially specialize for TransformationMatrix
-// Assumes the two rotate members have the same rotation order and that they are sufficiently close 
-// to each other so that the euler interpolation will look good.
-template<typename T>
-struct CosineInterpolator< TransformationMatrix<T> >
-{
-	void operator()(const TransformationMatrix<T> &y0, 
-			const TransformationMatrix<T> &y1,
-			double x, 
-			TransformationMatrix<T> &result) const
-	{
-		CosineInterpolator< Imath::Vec3< T > >()( y0.scalePivot, y1.scalePivot, x, result.scalePivot );
-		CosineInterpolator< Imath::Vec3< T > >()( y0.scale, y1.scale, x, result.scale );
-		CosineInterpolator< Imath::Vec3< T > >()( y0.shear, y1.shear, x, result.shear );
-		CosineInterpolator< Imath::Vec3< T > >()( y0.scalePivotTranslation, y1.scalePivotTranslation, x, result.scalePivotTranslation );
-		CosineInterpolator< Imath::Vec3< T > >()( y0.rotatePivot, y1.rotatePivot, x, result.rotatePivot );
-		CosineInterpolator< Imath::Quat< T > >()( y0.rotationOrientation, y1.rotationOrientation, x, result.rotationOrientation );
-		CosineInterpolator< Imath::Vec3< T > >()( y0.rotate, y1.rotate, x, result.rotate );
-		CosineInterpolator< Imath::Vec3< T > >()( y0.rotatePivotTranslation, y1.rotatePivotTranslation, x, result.rotatePivotTranslation );
-		CosineInterpolator< Imath::Vec3< T > >()( y0.translate, y1.translate, x, result.translate );
 	}
 };
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -176,11 +176,6 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 		self.assert_( c.value.scale.equalWithAbsError( V3f( 1.5, 2, 2.5 ), 0.01 ) )
 		self.assert_( c.value.translate.equalWithAbsError( V3f( 0.5, 1, 1.5 ), 0.01 ) )
 
-		c = cosineObjectInterpolation( a, b, 0.5 )
-		self.assertEqual( type(c), TransformationMatrixfData )
-		self.assert_( c.value.scale.equalWithAbsError( V3f( 1.5, 2, 2.5 ), 0.01 ) )
-		self.assert_( c.value.translate.equalWithAbsError( V3f( 0.5, 1, 1.5 ), 0.01 ) )
-
 		c = cubicObjectInterpolation( b, b, b, b, 0.5 )
 		self.assertEqual( type(c), TransformationMatrixfData )
 		self.assert_( c.value.scale.equalWithAbsError( V3f( 2, 3, 4 ), 0.01 ) )
@@ -239,11 +234,6 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 		self.assertEqual( type(c), TransformationMatrixdData )
 		self.assert_( c.value.scale.equalWithAbsError( V3d( 1.5, 2, 2.5 ), 0.01 ) )
 		self.assert_( c.value.translate.equalWithAbsError( V3d( 0.5, 1, 1.5 ), 0.01 ) )
-
-		c = cosineObjectInterpolation( a, b, 0.5 )
-		self.assertEqual( type(c), TransformationMatrixdData )
-		self.assert_( c.value.scale.equalWithAbsError( V3d( 1.5, 2, 2.5 ), 0.01 ) )
-		self.assert_( c.value.translate.equalWithAbsError( V3d( .5, 1, 1.5 ), 0.01 ) )
 
 		c = cubicObjectInterpolation( b, b, b, b, 0.5 )
 		self.assertEqual( type(c), TransformationMatrixdData )

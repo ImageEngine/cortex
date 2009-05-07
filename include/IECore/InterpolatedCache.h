@@ -61,8 +61,7 @@ class InterpolatedCache : public RefCounted
 		enum Interpolation
 		{ 
 			None = 0,
-			Linear,
-			Cosine,
+			Linear,			
 			Cubic
 		};
 

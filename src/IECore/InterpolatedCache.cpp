@@ -151,12 +151,7 @@ ObjectPtr InterpolatedCache::read( const ObjectHandle &obj, const AttributeHandl
 				{
 					data = linearObjectInterpolation( pts[0], pts[1], m_x);
 					break;
-				}
-				case Cosine:
-				{
-					data = cosineObjectInterpolation( pts[0], pts[1], m_x);
-					break;
-				}
+				}				
 				case Cubic:
 				{
 					data = cubicObjectInterpolation( pts[0], pts[1], pts[2], pts[3], m_x );
@@ -245,11 +240,6 @@ ObjectPtr InterpolatedCache::readHeader( const HeaderHandle &hdr )
 				case Linear:
 				{
 					data = linearObjectInterpolation( pts[0], pts[1], m_x);
-					break;
-				}
-				case Cosine:
-				{
-					data = cosineObjectInterpolation( pts[0], pts[1], m_x);
 					break;
 				}
 				case Cubic:
@@ -385,7 +375,6 @@ void InterpolatedCache::updateCacheFiles()
 				m_useInterpolation = false;
 				break;
 			case Linear:
-			case Cosine:
 				// Need one frame ahead
 				start = 0;
 				end = 1;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,53 +77,6 @@ struct LinearInterpolator< TypedData< T > >
 			typename TypedData< T >::Ptr &result) const
 	{
 		LinearInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
-	}
-};
-
-template<typename T>
-void CosineInterpolator<T>::operator()(const T &y0, const T &y1, double x, T &result) const
-{
-	assert(x >= 0.0);
-	assert(x <= 1.0);	
-	
-	double cx = (1.0 - cos(x * M_PI)) / 2.0;
-	result = y0 * (1 - cx) + y1 * cx;
-}
-
-// Partially specialise for std::vector
-template<typename T>
-struct CosineInterpolator< std::vector<T> >
-{
-	void operator()(const std::vector<T> &y0, 
-			const std::vector<T> &y1,
-			double x, 
-			std::vector<T> &result) const
-	{
-		unsigned size =  y0.size();
-		assert(y1.size() == size);
-		
-		result.resize( size );
-		
-		CosineInterpolator<T> interp;
-		for (unsigned i = 0; i < size; i++)
-		{
-			interp( y0[i], y1[i], x, result[i]);
-		}
-		
-		assert(result.size() == size);
-	}
-};
-
-// Partially specialise for TypedData
-template<typename T>
-struct CosineInterpolator< TypedData< T > >
-{
-	void operator()(const typename TypedData< T >::Ptr &y0, 
-			const typename TypedData< T >::Ptr &y1,
-			double x, 
-			typename TypedData< T >::Ptr &result) const
-	{		
-		CosineInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
 	}
 };
 

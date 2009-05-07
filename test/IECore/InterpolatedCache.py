@@ -95,10 +95,6 @@ class TestInterpolatedCache(unittest.TestCase):
 		self.assertEqual( cache.getFrameRate(), 20. )
 		self.assertEqual( cache.getInterpolation(), InterpolatedCache.Interpolation.Linear )
 
-		cache = InterpolatedCache(self.pathTemplate, frame = 10, interpolation = InterpolatedCache.Interpolation.Cosine, oversamples = 3, frameRate = 24.0 ) 
-		self.assertEqual( cache.getOversamples(), 3 )
-		self.assertEqual( cache.getFrame(), 10 )
-
 		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.Cubic, oversamples = 1, frameRate = 24.0 ) 
 
 	def testHeaders( self ):
@@ -145,15 +141,11 @@ class TestInterpolatedCache(unittest.TestCase):
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 0.5 ) )
 		cache.setFrame( 2.25 )
 		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.5, 3 )
-		cache.setInterpolation( InterpolatedCache.Interpolation.Cosine )
-		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.28846, 3 ) # \todo Is this really correct?
 		cache.setInterpolation( InterpolatedCache.Interpolation.Cubic )
 		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.4512, 3 ) # \todo Is this really correct?
 		cache.setFrame( 5 )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
 		cache.setInterpolation( InterpolatedCache.Interpolation.Linear )
-		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
-		cache.setInterpolation( InterpolatedCache.Interpolation.Cosine )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
 		cache.setInterpolation( InterpolatedCache.Interpolation.None )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )

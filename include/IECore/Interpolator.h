@@ -54,23 +54,11 @@ template<typename T>
 struct LinearInterpolator;
 
 template<typename T>
-struct CosineInterpolator;
-
-template<typename T>
 struct CubicInterpolator;
 
 
 template<typename T>
 struct LinearInterpolator
-{
-		/// Interpolate between y0 and y1
-		void operator()(const T &y0, const T &y1, double x, T &result ) const;
-
-};
-
-/// A function object which performs cosine interpolation
-template<typename T>
-struct CosineInterpolator
 {
 		/// Interpolate between y0 and y1
 		void operator()(const T &y0, const T &y1, double x, T &result ) const;

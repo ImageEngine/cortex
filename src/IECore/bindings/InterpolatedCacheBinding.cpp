@@ -141,7 +141,6 @@ void bindInterpolatedCache()
 		enum_<InterpolatedCache::Interpolation>( "Interpolation" )
 			.value( "None", InterpolatedCache::None )
 			.value( "Linear", InterpolatedCache::Linear )
-			.value( "Cosine", InterpolatedCache::Cosine )
 			.value( "Cubic", InterpolatedCache::Cubic )
 		;
 	}
