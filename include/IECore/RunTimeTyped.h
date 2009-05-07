@@ -107,8 +107,93 @@ namespace IECore
 	IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS()\
 	IE_CORE_DECLAREINHERITSFROMFUNCTIONS()\
 	IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TYPE )
-	
 
+/// Use this macro within the public section of a template class deriving from
+/// RunTimeTyped, instead of IE_CORE_DECLARERUNTIMETYPED.
+#define IECORE_RUNTIMETYPED_DECLARETEMPLATE( TYPENAME, BASETYPENAME )		\
+	IE_CORE_DECLAREMEMBERPTR( TYPENAME )									\
+	virtual IECore::TypeId typeId() const;									\
+	virtual const char *typeName() const;									\
+	static IECore::TypeId staticTypeId();									\
+	static const char *staticTypeName();									\
+	static IECore::TypeId baseTypeId();										\
+	static const char *baseTypeName();										\
+	virtual bool isInstanceOf( IECore::TypeId typeId ) const;				\
+	virtual bool isInstanceOf( const char *typeName ) const;				\
+	static bool inheritsFrom( IECore::TypeId typeId );						\
+	static bool inheritsFrom( const char *typeName );						\
+	typedef BASETYPENAME BaseClass;											\
+
+/// Use this macro within a .cpp file to implement the RunTimeTyped methods of
+/// a template class.
+#define IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TYPENAME, TYPEID, BASETYPENAME )		\
+																				\
+																				\
+	template<>																	\
+	IECore::TypeId TYPENAME::typeId() const										\
+	{																			\
+		return IECore::TypeId( TYPEID );										\
+	}																			\
+	template<>																	\
+	IECore::TypeId TYPENAME::staticTypeId()										\
+	{																			\
+		return IECore::TypeId( TYPEID );										\
+	}																			\
+	template<>																	\
+	const char *TYPENAME::typeName() const										\
+	{																			\
+		return #TYPENAME;														\
+	}																			\
+	template<>																	\
+	const char *TYPENAME::staticTypeName()										\
+	{																			\
+		return #TYPENAME;														\
+	}																			\
+																				\
+	template<> 																	\
+	IECore::TypeId TYPENAME::baseTypeId()										\
+	{																			\
+		return BASETYPENAME::staticTypeId();									\
+	}																			\
+																				\
+	template<> 																	\
+	const char *TYPENAME::baseTypeName()										\
+	{																			\
+		return BASETYPENAME::staticTypeName();									\
+	}																			\
+																				\
+	template<>																	\
+	bool TYPENAME::isInstanceOf( IECore::TypeId typeId ) const					\
+	{																			\
+		if( typeId==staticTypeId() )											\
+		{																		\
+			return true;														\
+		}																		\
+		return BASETYPENAME::isInstanceOf( typeId );							\
+	}																			\
+																				\
+	template<>																	\
+	bool TYPENAME::isInstanceOf( const char *typeName ) const					\
+	{																			\
+		if( !strcmp( typeName, staticTypeName() ) )								\
+		{																		\
+			return true;														\
+		}																		\
+		return BASETYPENAME::isInstanceOf( typeName );							\
+	}																			\
+																				\
+	template<>																	\
+	bool TYPENAME::inheritsFrom( IECore::TypeId typeId )						\
+	{																			\
+		return BASETYPENAME::staticTypeId()==typeId ? true : BASETYPENAME::inheritsFrom( typeId );	\
+	}																			\
+																				\
+	template<>																	\
+	bool TYPENAME::inheritsFrom( const char *typeName )							\
+	{																			\
+		return !strcmp( BASETYPENAME::staticTypeName(), typeName ) ? true : BASETYPENAME::inheritsFrom( typeName );	\
+	}																			\
+	
 /// An abstract base class for objects whose type we wish to determine at runtime.
 /// The rationale for using such a type system rather than the std c++
 /// typeid() stuff is as follows :
