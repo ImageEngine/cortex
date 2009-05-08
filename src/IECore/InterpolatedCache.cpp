@@ -99,21 +99,6 @@ void InterpolatedCache::setInterpolation( InterpolatedCache::Interpolation inter
 		m_interpolation = interpolation;
 		m_parametersChanged = true;
 	}
-
-	switch ( interpolation )
-	{
-	case None:
-		m_curFrameIndex = 0;
-		break;
-	case Linear:
-		m_curFrameIndex = 0;
-		break;
-	case Cubic:
-		m_curFrameIndex = 1;
-		break;
-	default:
-		assert( false );
-	}
 }
 
 InterpolatedCache::Interpolation InterpolatedCache::getInterpolation() const
@@ -316,6 +301,7 @@ void InterpolatedCache::updateCacheFiles() const
 		m_useInterpolation = false;
 		start = 0;
 		end = 0;
+		m_curFrameIndex = 0;
 	}
 	else
 	{
@@ -324,11 +310,13 @@ void InterpolatedCache::updateCacheFiles() const
 		{
 		case Linear:
 			// Need one file ahead
+			m_curFrameIndex = 0;
 			start = 0;
 			end = 1;
 			break;
 		case Cubic:
 			// Need one file behind, 2 files ahead
+			m_curFrameIndex = 1;
 			start = -1;
 			end = 2;
 			break;

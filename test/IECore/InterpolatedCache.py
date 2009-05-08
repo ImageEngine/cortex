@@ -177,7 +177,7 @@ class TestInterpolatedCache(unittest.TestCase):
 		cache.setFrame( 2.25 )
 		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.5, 3 )
 		cache.setInterpolation( InterpolatedCache.Interpolation.Cubic )
-		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.4512, 3 ) # \todo Is this really correct?
+		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 2.4531, 3 )
 		cache.setFrame( 5 )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
 		cache.setInterpolation( InterpolatedCache.Interpolation.Linear )

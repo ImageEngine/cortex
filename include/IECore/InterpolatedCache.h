@@ -160,15 +160,12 @@ class InterpolatedCache : public RefCounted
 
 		mutable bool m_parametersChanged;
 
-		unsigned m_curFrameIndex;
+		mutable unsigned m_curFrameIndex;
 		mutable bool m_useInterpolation;
 		mutable float m_x;
 
 		mutable CacheVector m_caches;
 		mutable std::vector< std::string> m_cacheFiles;
-
-
-
 };
 
 IE_CORE_DECLAREPTR( InterpolatedCache );
