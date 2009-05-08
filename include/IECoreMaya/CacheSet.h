@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,14 +54,12 @@ class CacheSet : public MPxObjectSet
 		static MStatus initialize();
 		
 		virtual bool isAbstractClass() const;
-		virtual MStatus compute(const MPlug &plug, MDataBlock &block);		
 		
 		static MTypeId id;
 		
 		static MObject aActive;
 		static MObject aFrameRate;
 		static MObject aOversamples;
-		static MObject aActualOversamples;
 		static MObject aOutFrameMel;
 		
 	protected:

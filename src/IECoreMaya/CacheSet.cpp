@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,6 @@
 #include "maya/MGlobal.h"
 
 #include "IECore/Exception.h"
-#include "IECore/OversamplesCalculator.h"
 #include "IECoreMaya/CacheSet.h"
 #include "IECoreMaya/MayaTime.h"
 #include "IECoreMaya/MayaTypeIds.h"
@@ -51,7 +50,6 @@ using namespace IECoreMaya;
 MObject CacheSet::aActive;
 MObject CacheSet::aFrameRate;
 MObject CacheSet::aOversamples;		
-MObject CacheSet::aActualOversamples;		
 MObject CacheSet::aOutFrameMel;
 
 MTypeId CacheSet::id( CacheSetId );
@@ -97,11 +95,6 @@ MStatus CacheSet::initialize()
 	nAttr.setWritable(true);
 	nAttr.setStorable(true);
 	nAttr.setMin(1);
-
-	aActualOversamples = nAttr.create("actualOversamples", "aos", MFnNumericData::kInt, 1, &s);
-	nAttr.setReadable(true);
-	nAttr.setWritable(false);
-	nAttr.setStorable(true);
 	
 	aOutFrameMel = tAttr.create("outFrameMel", "ofc", MFnData::kString);
 	tAttr.setWritable(false);
@@ -117,73 +110,13 @@ MStatus CacheSet::initialize()
 	s = addAttribute(aOversamples);
 	assert(s);
 
-	s = addAttribute(aActualOversamples);
-	assert(s);
-	
 	s = addAttribute(aOutFrameMel);
 	assert(s);
 	
 	s = attributeAffects(aActive, aOutFrameMel);
 	assert(s);
-
-	s = attributeAffects(aFrameRate, aActualOversamples);
-	assert(s);
-
-	s = attributeAffects(aOversamples, aActualOversamples);
-	assert(s);
 	
 	return MS::kSuccess;
-}
-
-MStatus CacheSet::compute(const MPlug &plug, MDataBlock &block)
-{
-	if (plug != aActualOversamples)
-	{
-		return MS::kUnknownParameter;
-	}
-	
-	MStatus s;
-		
-	MDataHandle frameRateH = block.inputValue( aFrameRate );
-	double frameRate = frameRateH.asDouble();
-	
-	MDataHandle oversamplesH = block.inputValue( aOversamples );
-	int oversamples = oversamplesH.asInt();
-
-	MDataHandle actualOversamplesH = block.outputValue( aActualOversamples, &s );
-
-	// frameRate should match UI time units, 
-	// so we can use the mel command currentTime for caching very easily.
-	if (frameRate != MayaTime::fps( MTime::uiUnit() ) )
-	{
-		MGlobal::displayError( "The frame rate attribute does not match current time unit. Caching will not save the expected frames." );
-		return MS::kFailure;
-	}
-
-	try {
-		OversamplesCalculator6kFPS oversamplesCalc( frameRate, oversamples );
-		oversamples = oversamplesCalc.actualOversamples();
-		actualOversamplesH.set( oversamples );
-		s = MStatus::kSuccess;
-	}
-	catch (IECore::Exception &e)
-	{
-		MString err = e.type();
-		err += ": ";
-		err += e.what();
-			
-		MGlobal::displayError(err);
-		return MS::kFailure;	
-	}	
-	catch (...)
-	{
-		MString err = "Unknown error computing actual oversamples.";
-
-		MGlobal::displayError(err);
-		return MS::kFailure;	
-	}
-	
-	return s;
 }
 
 MString CacheSet::melFromStringArray(const MStringArray &a) const
