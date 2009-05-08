@@ -38,6 +38,10 @@
 namespace IECore
 {
 
+/// Performs conversions between floating-point time and a discretized "tick"-based system, such as
+/// the one Maya uses (there are 6000 Maya ticks per second). Also provides a utility for computing the 
+/// interpolation factor between two successive ticks for a given frame under different oversampling conditions.
+/// \todo Rename to something more descriptive of its function
 class OversamplesCalculator
 {
 	public:
