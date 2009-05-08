@@ -340,6 +340,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindObjectInterpolator();
 	bindPointNormalsOp();
 	bindPointDensitiesOp();
+	bindOversamplesCalculator();
 	bindInterpolatedCache();
 	bindTransformationMatrix();
 	bindTransformationMatrixData();
@@ -447,7 +448,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImagePremultiplyOp();
 	bindImageUnpremultiplyOp();
 	bindImageCompositeOp();	
-	bindOversamplesCalculator();
 	bindDateTimeData();
 	bindSGIImageReader();
 	bindTimeDurationData();
