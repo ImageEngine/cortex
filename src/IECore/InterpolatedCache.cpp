@@ -32,20 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
+#include "boost/format.hpp"
+
 #include "IECore/MessageHandler.h"
 #include "IECore/OversamplesCalculator.h"
 #include "IECore/ObjectInterpolator.h"
 #include "IECore/InterpolatedCache.h"
 #include "IECore/CompoundObject.h"
-
+#include "IECore/FileSequence.h"
+#include "IECore/EmptyFrameList.h"
 
 using namespace IECore;
 using namespace boost;
 
-InterpolatedCache::InterpolatedCache( const std::string &pathTemplate, double frame, Interpolation interpolation, 
-							int oversamples, double frameRate ) :
-					m_pathTemplate( pathTemplate ), m_frameRate( frameRate ), m_oversamples( oversamples ), m_interpolation( interpolation ), m_frame( frame ), m_parametersChanged( true )
+InterpolatedCache::InterpolatedCache( const std::string &pathTemplate, float frame, Interpolation interpolation, const OversamplesCalculator &o )
+		: m_fileSequence( 0 ), m_oversamplesCalculator( o )
 {
+	setPathTemplate( pathTemplate );
+	setFrame( frame );
+	setInterpolation( interpolation );
+
+	m_parametersChanged = true;
 }
 
 InterpolatedCache::~InterpolatedCache()
@@ -55,229 +64,179 @@ InterpolatedCache::~InterpolatedCache()
 
 void InterpolatedCache::setPathTemplate( const std::string &pathTemplate )
 {
-	if ( pathTemplate == m_pathTemplate )
+	if ( !m_fileSequence || getPathTemplate() != pathTemplate )
 	{
-		return;
+		m_fileSequence = new FileSequence( pathTemplate, new EmptyFrameList() );
+		m_parametersChanged = true;
+		closeCacheFiles();
 	}
-	m_pathTemplate = pathTemplate;
-	closeCacheFiles();
 }
 
 const std::string &InterpolatedCache::getPathTemplate() const
 {
-	return m_pathTemplate;
+	assert( m_fileSequence );
+	return m_fileSequence->getFileName();
 }
 
-void InterpolatedCache::setFrame( double frame )
+void InterpolatedCache::setFrame( float frame )
 {
-	m_frame = frame;
-	m_parametersChanged = true;
+	if ( frame != m_frame )
+	{
+		m_frame = frame;
+		m_parametersChanged = true;
+	}
 }
 
-double InterpolatedCache::getFrame()
+float InterpolatedCache::getFrame() const
 {
 	return m_frame;
 }
 
 void InterpolatedCache::setInterpolation( InterpolatedCache::Interpolation interpolation )
 {
-	m_interpolation = interpolation;
-	m_parametersChanged = true;
+	if ( interpolation != m_interpolation )
+	{
+		m_interpolation = interpolation;
+		m_parametersChanged = true;
+	}
+
+	switch ( interpolation )
+	{
+	case None:
+		m_curFrameIndex = 0;
+		break;
+	case Linear:
+		m_curFrameIndex = 0;
+		break;
+	case Cubic:
+		m_curFrameIndex = 1;
+		break;
+	default:
+		assert( false );
+	}
 }
 
-InterpolatedCache::Interpolation InterpolatedCache::getInterpolation()
+InterpolatedCache::Interpolation InterpolatedCache::getInterpolation() const
 {
 	return m_interpolation;
 }
 
-void InterpolatedCache::setOversamples( int oversamples )
-{
-	m_oversamples = oversamples;
-	m_parametersChanged = true;
-}
-
-int InterpolatedCache::getOversamples()
-{
-	return m_oversamples;
-}
-
-void InterpolatedCache::setFrameRate( double frameRate )
-{
-	m_frameRate = frameRate;
-	m_parametersChanged = true;
-}
-
-double InterpolatedCache::getFrameRate()
-{
-	return m_frameRate;
-}
-
-ObjectPtr InterpolatedCache::read( const ObjectHandle &obj, const AttributeHandle &attr )
+ObjectPtr InterpolatedCache::read( const ObjectHandle &obj, const AttributeHandle &attr ) const
 {
 	updateCacheFiles();
-	
+
 	ObjectPtr data;
-	bool interpolationFailed = false;
 
 	if ( m_useInterpolation )
 	{
 		std::vector< ObjectPtr > pts;
-		for (unsigned int c = 0; c < m_caches.size(); c++)
+		for ( unsigned int c = 0; c < m_caches.size(); c++ )
 		{
-			try
-			{
-				data = m_caches[c]->read( obj, attr );
-			}
-			catch (IECore::Exception &e)
-			{
-				break;
-			}
-			if ( !data )
-			{
-				break;
-			}
+			data = m_caches[c]->read( obj, attr );
+			assert( data );
 			pts.push_back( data );
 		}
+		assert( pts.size() == m_caches.size() );
 
-		if ( pts.size() != m_caches.size() )
+		switch ( m_interpolation )
 		{
-			interpolationFailed = true;
-		}
-		else
+		case Linear:
 		{
-			switch (m_interpolation)
-			{
-				case Linear:
-				{
-					data = linearObjectInterpolation( pts[0], pts[1], m_x);
-					break;
-				}				
-				case Cubic:
-				{
-					data = cubicObjectInterpolation( pts[0], pts[1], pts[2], pts[3], m_x );
-					break;
-				}
-				default:
-					data = 0;
-					break;
-			}
-			if (! data )
-			{
-				data = pts[ m_curFrameIndex ];
-			}
+			assert( pts.size() == 2 );
+			data = linearObjectInterpolation( pts[0], pts[1], m_x );
+
+			break;
 		}
-	}
-	if ( !m_useInterpolation || interpolationFailed )
-	{
-		try
+		case Cubic:
 		{
-			data = m_caches[ m_curFrameIndex ]->read( obj, attr );
+			assert( pts.size() == 4 );
+			data = cubicObjectInterpolation( pts[0], pts[1], pts[2], pts[3], m_x );
+			break;
 		}
-		catch (IECore::Exception &e)
-		{
-			std::string err = (format( "Could not load attribute %s from object %s: %s" ) % attr % obj % e.what() ).str();
-			throw IOException( err );
+		default:
+			assert( false );
 		}
+
 		if ( !data )
 		{
-			throw IOException( (format( "Could not load attribute %s from object %s." ) % attr % obj ).str() );
+			data = pts[ m_curFrameIndex ];
 		}
 	}
+	else
+	{
+		data = m_caches[ m_curFrameIndex ]->read( obj, attr );
+	}
+
+	assert( data );
 	return data;
 }
 
-CompoundObjectPtr InterpolatedCache::read( const ObjectHandle &obj )
+CompoundObjectPtr InterpolatedCache::read( const ObjectHandle &obj ) const
 {
 	CompoundObjectPtr dict = new CompoundObject();
 	std::vector<AttributeHandle> attrs;
 	attributes( obj, attrs );
 
-	for (std::vector<AttributeHandle>::const_iterator it = attrs.begin(); it != attrs.end(); ++it)
+	for ( std::vector<AttributeHandle>::const_iterator it = attrs.begin(); it != attrs.end(); ++it )
 	{
 		ObjectPtr data = read( obj, *it );
 
 		dict->members()[ *it ] = data;
-
 	}
+
 	return dict;
 }
 
-ObjectPtr InterpolatedCache::readHeader( const HeaderHandle &hdr )
+ObjectPtr InterpolatedCache::readHeader( const HeaderHandle &hdr ) const
 {
-	updateCacheFiles();	
+	updateCacheFiles();
 
 	ObjectPtr data;
-	bool interpolationFailed = false;
 
 	if ( m_useInterpolation )
 	{
 		std::vector< ObjectPtr > pts;
-		for (unsigned int c = 0; c < m_caches.size(); c++)
+		for ( unsigned int c = 0; c < m_caches.size(); c++ )
 		{
-			try
-			{
-				data = m_caches[c]->readHeader( hdr );
-			}
-			catch (IECore::Exception &e)
-			{
-				break;
-			}
-			if ( !data )
-			{
-				break;
-			}
+			data = m_caches[c]->readHeader( hdr );
+			assert( data );
 			pts.push_back( data );
 		}
+		assert( pts.size() == m_caches.size() );
 
-		if ( pts.size() != m_caches.size() )
+		switch ( m_interpolation )
 		{
-			interpolationFailed = true;
-		}
-		else
+		case Linear:
 		{
-			switch (m_interpolation)
-			{
-				case Linear:
-				{
-					data = linearObjectInterpolation( pts[0], pts[1], m_x);
-					break;
-				}
-				case Cubic:
-				{
-					data = cubicObjectInterpolation( pts[0], pts[1], pts[2], pts[3], m_x );
-					break;
-				}
-				default:
-					data = 0;
-					break;
-			}
-			if (! data )
-			{
-				data = pts[ m_curFrameIndex ];
-			}
+			assert( pts.size() == 2 );
+			data = linearObjectInterpolation( pts[0], pts[1], m_x );
+			break;
 		}
-	}
-	if ( !m_useInterpolation || interpolationFailed )
-	{
-		try
+		case Cubic:
 		{
-			data = m_caches[ m_curFrameIndex ]->readHeader( hdr );
+			assert( pts.size() == 4 );
+			data = cubicObjectInterpolation( pts[0], pts[1], pts[2], pts[3], m_x );
+			break;
 		}
-		catch (IECore::Exception &e)
-		{
-			std::string err = (format( "Could not load header %s: %s" ) % hdr % e.what() ).str();
-			throw IOException( err );
+		default:
+			assert( false );
 		}
+
 		if ( !data )
 		{
-			throw IOException( (format( "Could not load header %s." ) % hdr).str() );
+			data = pts[ m_curFrameIndex ];
 		}
 	}
+	else
+	{
+		data = m_caches[ m_curFrameIndex ]->readHeader( hdr );
+	}
 
+	assert( data );
 	return data;
 }
 
-CompoundObjectPtr InterpolatedCache::readHeader( )
+CompoundObjectPtr InterpolatedCache::readHeader( ) const
 {
 	updateCacheFiles();
 
@@ -285,7 +244,7 @@ CompoundObjectPtr InterpolatedCache::readHeader( )
 	std::vector<HeaderHandle> hds;
 	headers( hds );
 
-	for (std::vector<HeaderHandle>::const_iterator it = hds.begin(); it != hds.end(); ++it)
+	for ( std::vector<HeaderHandle>::const_iterator it = hds.begin(); it != hds.end(); ++it )
 	{
 		ObjectPtr data = readHeader( *it );
 
@@ -295,99 +254,86 @@ CompoundObjectPtr InterpolatedCache::readHeader( )
 	return dict;
 }
 
-void InterpolatedCache::objects(std::vector<ObjectHandle> &objs)
+void InterpolatedCache::objects( std::vector<ObjectHandle> &objs ) const
 {
-	updateCacheFiles();	
+	updateCacheFiles();
+	assert( m_caches.size() > m_curFrameIndex );
 	m_caches[ m_curFrameIndex ]->objects( objs );
 }
 
-void InterpolatedCache::headers(std::vector<HeaderHandle> &hds)
+void InterpolatedCache::headers( std::vector<HeaderHandle> &hds ) const
 {
-	updateCacheFiles();	
+	updateCacheFiles();
+	assert( m_caches.size() > m_curFrameIndex );
 	m_caches[ m_curFrameIndex ]->headers( hds );
 }
 
-void InterpolatedCache::attributes(const ObjectHandle &obj, std::vector<AttributeHandle> &attrs)
+void InterpolatedCache::attributes( const ObjectHandle &obj, std::vector<AttributeHandle> &attrs ) const
 {
-	updateCacheFiles();	
+	updateCacheFiles();
+	assert( m_caches.size() > m_curFrameIndex );
 	m_caches[ m_curFrameIndex ]->attributes( obj, attrs );
 }
-		
-void InterpolatedCache::attributes(const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs)
+
+void InterpolatedCache::attributes( const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs ) const
 {
-	updateCacheFiles();	
+	updateCacheFiles();
+	assert( m_caches.size() > m_curFrameIndex );
 	m_caches[ m_curFrameIndex ]->attributes( obj, regex, attrs );
 }
 
-bool InterpolatedCache::contains( const ObjectHandle &obj )
+bool InterpolatedCache::contains( const ObjectHandle &obj ) const
 {
-	updateCacheFiles();	
+	updateCacheFiles();
+	assert( m_caches.size() > m_curFrameIndex );
 	return m_caches[ m_curFrameIndex ]->contains( obj );
 }
-		
-bool InterpolatedCache::contains( const ObjectHandle &obj, const AttributeHandle &attr )
+
+bool InterpolatedCache::contains( const ObjectHandle &obj, const AttributeHandle &attr ) const
 {
-	updateCacheFiles();	
+	updateCacheFiles();
+	assert( m_caches.size() > m_curFrameIndex );
 	return m_caches[ m_curFrameIndex ]->contains( obj, attr );
 }
 
-InterpolatedCache::CacheVector InterpolatedCache::currentCaches()
-{
-	updateCacheFiles();
-	return m_caches;
-}
-
-void InterpolatedCache::updateCacheFiles()
+void InterpolatedCache::updateCacheFiles() const
 {
 	if ( !m_parametersChanged )
 	{
 		return;
 	}
 
-	OversamplesCalculator6kFPS oversamplesCalc( m_frameRate, m_oversamples );
-	int curTime = oversamplesCalc.frameToTime(m_frame);
-	int step = oversamplesCalc.stepSize();
-	double x = oversamplesCalc.relativeStepOffset( curTime );
-	int f = oversamplesCalc.stepRound( curTime );
+	int lowTick, highTick;
+	float x = m_oversamplesCalculator.tickInterval( m_frame, lowTick, highTick );
 
-	m_useInterpolation = true;
+	float step = ( float )m_oversamplesCalculator.getTicksPerSecond() / m_oversamplesCalculator.getSamplesPerFrame() / m_oversamplesCalculator.getFrameRate() ;
 
 	int start = 0;
 	int end = 0;
-	int curFrameIndex = 0;
 
-	if (x == 0.)
+	if ( x == 0. || m_interpolation == None )
 	{
 		m_useInterpolation = false;
 		start = 0;
 		end = 0;
-		curFrameIndex = 0;
 	}
 	else
-	{	
-		switch (m_interpolation)
+	{
+		m_useInterpolation = true;
+		switch ( m_interpolation )
 		{
-			case None:
-				// No additional frames needed
-				start = 0;
-				end = 0;
-				curFrameIndex = 0;
-				m_useInterpolation = false;
-				break;
-			case Linear:
-				// Need one frame ahead
-				start = 0;
-				end = 1;
-				curFrameIndex = 0;
-				break;
-			case Cubic:
-				// Need one frame behind, 2 frames ahead
-				start = -1;
-				end = 2;
-				curFrameIndex = 1;
-				break;
-			default:
-				throw Exception("Invalid interpolation method!");
+		case Linear:
+			// Need one file ahead
+			start = 0;
+			end = 1;
+			break;
+		case Cubic:
+			// Need one file behind, 2 files ahead
+			start = -1;
+			end = 2;
+			break;
+		default:
+			assert( false );
 		}
 	}
 
@@ -395,14 +341,15 @@ void InterpolatedCache::updateCacheFiles()
 	std::vector< std::string > cacheFiles;
 	AttributeCachePtr cache;
 	// Open all the cache files required to perform interpolation
-	for (int fileNum = start; fileNum <= end; fileNum ++)
+	for ( int fileNum = start; fileNum <= end; fileNum ++ )
 	{
-		std::string fullpath = (format( m_pathTemplate ) % (f + fileNum * step)).str();
+		int tick = m_oversamplesCalculator.nearestTick(( int )( lowTick + fileNum * step ) );
+		std::string fileName = m_fileSequence->fileNameForFrame( tick );
 
 		cache = 0;
-		for ( unsigned i = 0; i < m_caches.size(); i++)
+		for ( unsigned i = 0; i < m_caches.size(); i++ )
 		{
-			if ( fullpath == m_cacheFiles[i] )
+			if ( fileName == m_cacheFiles[i] )
 			{
 				cache = m_caches[i];
 				break;
@@ -410,20 +357,24 @@ void InterpolatedCache::updateCacheFiles()
 		}
 		if ( !cache )
 		{
-			cache = new AttributeCache( fullpath, IndexedIO::Read );
+			cache = new AttributeCache( fileName, IndexedIO::Read );
 		}
-		cacheFiles.push_back( fullpath );
+
+		assert( cache );
+		cacheFiles.push_back( fileName );
 		caches.push_back( cache );
 	}
 
 	// save info in the object.
 	m_x = x;
-	m_curFrameIndex = curFrameIndex;
 	m_caches = caches;
 	m_cacheFiles = cacheFiles;
+	assert( m_caches.size() == m_cacheFiles.size() );
+	assert( m_caches.size() > m_curFrameIndex );
+	m_parametersChanged = false;
 }
 
-void InterpolatedCache::closeCacheFiles()
+void InterpolatedCache::closeCacheFiles() const
 {
 	m_parametersChanged = true;
 	m_caches.clear();

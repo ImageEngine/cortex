@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,37 +38,42 @@
 namespace IECore
 {
 
-/// A templated class that computes oversampling rate based on the time unit U (measured in FPS) and related parameters.
-template<int U>
 class OversamplesCalculator
 {
 	public:
-	OversamplesCalculator( double frameRate, int desiredOversamples );
-	/// converts your continuous frame number ( dependent on the frameRate used ) to a time unit this object understands.
-	int frameToTime( double frame ) const;
-	/// finds the nearest supported oversampling rate based on the given frame rate.
-	int actualOversamples() const;
-	/// returns the time unit used for the oversampling computation.
-	int timeUnit() const;
-	/// returns the time step size that should be used in order to get the oversampling
-	int stepSize() const;
-	/// rounds the given time to the biggest step-aligned frame smaller than the given time.
-	int stepRound( int time ) const;
-	/// returns a number in the interval [0,1) that defines the relative offset of the given time to the
-	// nearest smaller step-aligned frame.
-	double relativeStepOffset( int time ) const;
-	
-	private:
-	
-	double m_frameRate;
-	int m_oversamples;
-	int m_step;
-};
+		OversamplesCalculator(
+			float frameRate=24.0, 
+			unsigned samplesPerFrame=1,
+			unsigned ticksPerSecond=6000
+		);
 
-typedef OversamplesCalculator< 6000 > OversamplesCalculator6kFPS;
+		void setFrameRate( float frameRate );
+		float getFrameRate() const;
+		void setSamplesPerFrame( unsigned samplesPerFrame );
+		unsigned getSamplesPerFrame() const;
+		void setTicksPerSecond( unsigned ticksPerSecond );
+		unsigned getTicksPerSecond() const;
+
+		/// Convert the given fractional frame into ticks
+		int framesToTicks( float f ) const;
+
+		/// Convert the specfied tick to frames
+		float ticksToFrames( int i ) const;
+
+		/// Returns the tick nearest to the argument
+		int nearestTick( int tick ) const ;
+
+		/// Returns lerp factor, and the times of the adjacent ticks
+		float tickInterval( float frame, int &tickLow, int &tickHigh ) const;
+
+	private:
+
+		float m_frameRate ;
+		int m_samplesPerFrame ;
+		int m_ticksPerSecond ;
+};
 
 }; // namespace IECore
 
-#include "OversamplesCalculator.inl"
 
 #endif // IE_CORE_OVERSAMPLESCALCULATOR_H

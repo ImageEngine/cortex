@@ -44,24 +44,40 @@ using namespace boost::python;
 namespace IECore 
 {
 
-template<typename T>
-static void bind( const char *name )
+tuple tickInterval( const OversamplesCalculator &o, float f )
 {
+	int tickLow = 0;
+	int tickHigh = 0;
 
-	class_< T >( name, init<double, int>() )
-		.def( "frameToTime", &T::frameToTime )
-		.def( "actualOversamples", &T::actualOversamples )
-		.def( "timeUnit", &T::timeUnit )
-		.def( "stepSize", &T::stepSize )
-		.def( "stepRound", &T::stepRound )
-		.def( "relativeStepOffset", &T::relativeStepOffset )
-	;
-
-}		
+	float x = o.tickInterval( f, tickLow, tickHigh );
+	return make_tuple( x, tickLow, tickHigh );
+}
 
 void bindOversamplesCalculator()
 {
-	bind<OversamplesCalculator6kFPS>( "OversamplesCalculator6kFPS" );
+	class_< OversamplesCalculator >( "OversamplesCalculator", no_init )
+		.def( 
+			init< optional< float, unsigned, unsigned > >
+			( 
+				(
+					arg( "frameRate" ) = float(24.0), 
+					arg( "samplesPerFrame" ) = unsigned(1), 
+					arg( "ticksPerSecond" ) = unsigned(6000) 
+				)
+			) 
+		)
+				
+		.def( "setFrameRate", &OversamplesCalculator::setFrameRate )
+		.def( "getFrameRate", &OversamplesCalculator::getFrameRate )
+		.def( "setSamplesPerFrame", &OversamplesCalculator::setSamplesPerFrame )
+		.def( "getSamplesPerFrame", &OversamplesCalculator::getSamplesPerFrame )
+		.def( "setTicksPerSecond", &OversamplesCalculator::setTicksPerSecond )
+		.def( "getTicksPerSecond", &OversamplesCalculator::getTicksPerSecond )
+		.def( "framesToTicks", &OversamplesCalculator::framesToTicks )
+		.def( "ticksToFrames", &OversamplesCalculator::ticksToFrames )
+		.def( "nearestTick", &OversamplesCalculator::nearestTick )
+		.def( "tickInterval", &tickInterval )		
+	;
 }	
 
 } // namespace IECore

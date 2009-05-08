@@ -39,11 +39,17 @@ class OversamplesCalculatorTest( unittest.TestCase ) :
 
 	def test( self ) :
 	
-		c = IECore.OversamplesCalculator6kFPS( 24, 10 )
+		c = IECore.OversamplesCalculator( 24, 10 )
+		self.assertEqual( c.framesToTicks( 0.1 ), 25 )
+		self.assertEqual( c.framesToTicks( 1 ), 250 )
+		self.assertEqual( c.framesToTicks( 1.5 ), 375 )
+		self.assertEqual( c.framesToTicks( 2 ), 500 )
 		
-		self.assertEqual( c.frameToTime( 1 ), 250 )
-		self.assertEqual( c.frameToTime( 1.5 ), 375 )
-		self.assertEqual( c.frameToTime( 2 ), 500 )
+		c = IECore.OversamplesCalculator( 24, 3 )
+		self.assertEqual( c.framesToTicks( 1 ), 250 )
+		self.assertEqual( c.framesToTicks( 1 + 1.0/3.0 ), 333 )
+		self.assertEqual( c.framesToTicks( 1 + 2.0/3.0 ), 416 )
+		self.assertEqual( c.nearestTick( 500 ), 499 ) 
 	
 if __name__ == "__main__":
 	unittest.main()

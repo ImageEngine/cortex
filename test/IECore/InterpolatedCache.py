@@ -43,22 +43,34 @@ from IECore import *
 
 class TestInterpolatedCache(unittest.TestCase):
 
-	pathTemplate = "./test/cache_%003d.fio"
+	pathTemplate = "./test/cache_####.fio"
+	
+	def mark( self ) :
+	
+		self.__createCacheFile( 250, 0 )
+		self.__createCacheFile( 333, 1 )
+		self.__createCacheFile( 416, 2 )
+		self.__createCacheFile( 499, 3 )
+		self.__createCacheFile( 583, 4 )
+		self.__createCacheFile( 666, 5 )
+		self.__createCacheFile( 749, 6 )
 
-	def __createV3f( self, seed ):
+	def __createV3f( self, value ):
 		dataWritten = V3fVectorData()
 		for i in range(0, 3):
-			dataWritten.append( V3f( seed, seed, seed ) )
+			dataWritten.append( V3f( value, value, value ) )
 		return dataWritten
 
-	def __createCache( self, frame, seed ):
+	def __createCacheFile( self, frame, value ):
+	
+		fs = FileSequence( self.pathTemplate, EmptyFrameList() )
 
-		cache = AttributeCache( self.pathTemplate % frame, IndexedIOOpenMode.Write)
+		cache = AttributeCache( fs.fileNameForFrame( frame ), IndexedIOOpenMode.Write)
 
-		dataWritten = self.__createV3f( seed )
+		dataWritten = self.__createV3f( value )
 		cache.write( "obj1", "v3fVec", dataWritten)
-		cache.write( "obj2", "i", IntData( seed ) )
-		cache.write( "obj2", "d", DoubleData( seed ) )
+		cache.write( "obj2", "i", IntData( value ) )
+		cache.write( "obj2", "d", DoubleData( value ) )
 		cache.writeHeader( "testCache", self.__headerCompound( frame ) )
 
 	def __headerCompound( self, frame ):
@@ -73,32 +85,34 @@ class TestInterpolatedCache(unittest.TestCase):
 	def __time( self, frame ):
 		return int( frame * 6000. / 24. )
 
-	def setUp( self ):
+	def __createCache( self ):
 		"""Create some cache files do play with..."""
-		self.__createCache( self.__time( 0 ), 0 )
-		self.__createCache( self.__time( 1 ), 1 )
-		self.__createCache( self.__time( 2 ), 2 )
-		self.__createCache( self.__time( 3 ), 4 )
-		self.__createCache( self.__time( 4 ), 8 )
-		self.__createCache( self.__time( 5 ), 16 )
+		
+		self.__createCacheFile( self.__time( 0 ), 0 )
+		self.__createCacheFile( self.__time( 1 ), 1 )
+		self.__createCacheFile( self.__time( 2 ), 2 )
+		self.__createCacheFile( self.__time( 3 ), 4 )
+		self.__createCacheFile( self.__time( 4 ), 8 )
+		self.__createCacheFile( self.__time( 5 ), 16 )
 
 	def testConstructors(self):
 		"""Test InterpolatedCache constructors"""
 		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.None )
-		self.assertEqual( cache.getFrameRate(), 24. )
 		self.assertEqual( cache.getInterpolation(), InterpolatedCache.Interpolation.None )
 		self.assertEqual( cache.getPathTemplate(), self.pathTemplate )
 		self.assertEqual( cache.getFrame(), 0 )
-		self.assertEqual( cache.getOversamples(), 1 )
 
-		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.Linear, oversamples = 1, frameRate = 20.0 ) 
-		self.assertEqual( cache.getFrameRate(), 20. )
+		os = OversamplesCalculator( frameRate = 20, samplesPerFrame = 1 )
+		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.Linear, oversamplesCalculator = os ) 
 		self.assertEqual( cache.getInterpolation(), InterpolatedCache.Interpolation.Linear )
 
-		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.Cubic, oversamples = 1, frameRate = 24.0 ) 
+		os = OversamplesCalculator( frameRate = 24, samplesPerFrame = 1 )
+		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.Cubic, oversamplesCalculator = os ) 
 
 	def testHeaders( self ):
 		"""Test InterpolatedCache headers"""
+		
+		self.__createCache()
 
 		cache = InterpolatedCache(self.pathTemplate, frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
 		self.assert_( "testCache" in cache.headers() )
@@ -107,6 +121,8 @@ class TestInterpolatedCache(unittest.TestCase):
 
 	def testAttributes(self):
 		"""Test InterpolatedCache attributes"""
+		
+		self.__createCache()
 
 		cache = InterpolatedCache(self.pathTemplate, frame = 1.2, interpolation = InterpolatedCache.Interpolation.Linear )
 		self.assertEqual( len( cache.attributes( "obj2" )), 2 )
@@ -115,6 +131,9 @@ class TestInterpolatedCache(unittest.TestCase):
 
 	def testContains(self):
 		"""Test InterpolatedCache contains"""
+		
+		self.__createCache()		
+		
 		cache = InterpolatedCache(self.pathTemplate, frame = 1.2, interpolation = InterpolatedCache.Interpolation.Linear )
 		self.assert_( cache.contains( "obj1" ) )
 		self.assert_( cache.contains( "obj2", "i" ) )
@@ -123,13 +142,29 @@ class TestInterpolatedCache(unittest.TestCase):
 
 	def testReading(self):
 		"""Test InterpolatedCache read"""
+		
+		self.__createCache()
+		
 		cache = InterpolatedCache(self.pathTemplate, frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
 		self.assertEqual( cache.read( "obj2", "i" ), IntData( 1 ) )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 1.5 ) )
 		self.assertEqual( cache.read( "obj1" ), CompoundObject( { "v3fVec": self.__createV3f( 1.5 ) } ) )
+		
+	def testOversampledReading( self ) :
+		
+		self.mark()
+		
+		os = OversamplesCalculator( frameRate = 24, samplesPerFrame = 3 )
+		cache = InterpolatedCache(self.pathTemplate, frame = 1, interpolation = InterpolatedCache.Interpolation.Linear, oversamplesCalculator = os ) 
+		cache.setFrame( 2.0 )
+		self.assertAlmostEqual( cache.read( "obj2", "d" ).value, 3, 4 )
+			
 
 	def testChangingParameters( self ):
 		"""Test InterpolatedCache reading and changing frame, interpolation, ... """
+		
+		self.__createCache()
+		
 		cache = InterpolatedCache(self.pathTemplate, frame = 0, interpolation = InterpolatedCache.Interpolation.None )
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 0 ) )
 		cache.setFrame( 0.8 )
@@ -151,7 +186,7 @@ class TestInterpolatedCache(unittest.TestCase):
 		self.assertEqual( cache.read( "obj2", "d" ), DoubleData( 16 ) )
 
 	def testOldTransformationMatrixData( self ):
-		cache = InterpolatedCache( "test/IECore/data/attributeCaches/transform.old.%04d.fio", frame = 4, interpolation = InterpolatedCache.Interpolation.Linear )
+		cache = InterpolatedCache( "test/IECore/data/attributeCaches/transform.old.####.fio", frame = 4, interpolation = InterpolatedCache.Interpolation.Linear )
 		self.assertEqual( cache.read( ".parent", "transformCache.transform" ).value.rotate, Eulerd() )
 		self.assertAlmostEqual( (cache.read( ".pSphere1", "transformCache.transform" ).value.rotate - Eulerd( 0.244525, 0, 0 )).length(), 0, 2 )
 		cache.setFrame( 4.5 )
@@ -175,7 +210,7 @@ class TestInterpolatedCache(unittest.TestCase):
 		#cache1 = None
 		#cache2 = None
 		
-		cache = InterpolatedCache( "test/IECore/data/attributeCaches/transform.new.%04d.fio", frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
+		cache = InterpolatedCache( "test/IECore/data/attributeCaches/transform.new.####.fio", frame = 1.5, interpolation = InterpolatedCache.Interpolation.Linear )
 		for order in [ Eulerd.Order.XYZ, Eulerd.Order.XZY, Eulerd.Order.YZX, Eulerd.Order.YXZ, Eulerd.Order.ZXY, Eulerd.Order.ZYX ]:
 			self.assertEqual( cache.read( "test%d" % order, "transform" ).value.rotate, Eulerd( 1001, -11, 101, order ) )
 		cache = None
@@ -183,7 +218,7 @@ class TestInterpolatedCache(unittest.TestCase):
 	def tearDown(self):
 
 		# cleanup
-		allFiles = glob.glob( self.pathTemplate.replace( "%003d", "*" ) )
+		allFiles = glob.glob( self.pathTemplate.replace( "####", "*" ) )
 		for f in allFiles:	
 			os.remove( f )
 

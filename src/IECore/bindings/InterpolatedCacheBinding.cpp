@@ -54,7 +54,7 @@ struct InterpolatedCacheHelper
 	typedef std::vector<InterpolatedCache::ObjectHandle> ObjectHandleVector;
 	typedef std::vector<InterpolatedCache::AttributeHandle> AttributeHandleVector;	
 	
-	static list objects(InterpolatedCachePtr cache)
+	static list objects(ConstInterpolatedCachePtr cache)
 	{
 		list objects;
 		
@@ -69,7 +69,7 @@ struct InterpolatedCacheHelper
 		return objects;
 	}
 
-	static list headers(InterpolatedCachePtr cache)
+	static list headers(ConstInterpolatedCachePtr cache)
 	{
 		list headers;
 		
@@ -83,7 +83,7 @@ struct InterpolatedCacheHelper
 		return headers;
 	}
 	
-	static list attributes(InterpolatedCachePtr cache, const InterpolatedCache::ObjectHandle &obj, object regex)
+	static list attributes(ConstInterpolatedCachePtr cache, const InterpolatedCache::ObjectHandle &obj, object regex)
 	{
 		list attributes;
 
@@ -112,29 +112,16 @@ struct InterpolatedCacheHelper
 		
 		return attributes;
 	}
-	
-	static list currentCaches(InterpolatedCachePtr cache)
-	{
-		list caches;
-		InterpolatedCache::CacheVector a = cache->currentCaches();
-		for (InterpolatedCache::CacheVector::const_iterator it = a.begin(); it != a.end(); ++it)
-		{
-			caches.append<AttributeCachePtr>(*it);
-		}
-		return caches;
-	}
 };
 
 void bindInterpolatedCache()
 {
-	const char *bindName = "InterpolatedCache";
-	
-	bool (InterpolatedCache::*containsObj)(const InterpolatedCache::ObjectHandle &) = &InterpolatedCache::contains;
-	bool (InterpolatedCache::*containsObjAttr)(const InterpolatedCache::ObjectHandle &, const InterpolatedCache::AttributeHandle &) = &InterpolatedCache::contains;
+	bool (InterpolatedCache::*containsObj)(const InterpolatedCache::ObjectHandle &) const = &InterpolatedCache::contains;
+	bool (InterpolatedCache::*containsObjAttr)(const InterpolatedCache::ObjectHandle &, const InterpolatedCache::AttributeHandle &) const = &InterpolatedCache::contains;
 	
 	typedef class_< InterpolatedCache, InterpolatedCachePtr > InterpolatedCachePyClass;
 
-	RefCountedClass<InterpolatedCache, RefCounted> interpolatedCacheClass( bindName );
+	RefCountedClass<InterpolatedCache, RefCounted> interpolatedCacheClass( "InterpolatedCache" );
 	{
 		// define enum before functions.
 		scope varScope = interpolatedCacheClass;
@@ -146,14 +133,13 @@ void bindInterpolatedCache()
 	}
 	interpolatedCacheClass
 		.def( 
-			init< optional<const std::string &, double, InterpolatedCache::Interpolation, int, double > >
+			init< optional< const std::string &, double, InterpolatedCache::Interpolation, const OversamplesCalculator & > >
 			( 
 				(
 					arg( "pathTemplate" ) = std::string(""), 
-					arg( "frame" ) = double(0.0), 
-					arg( "interpolation" ) = InterpolatedCache::None, 
-					arg( "oversamples" ) = int(1),
-					arg( "frameRate") = double(24.0)
+					arg( "frame" ) = double(0.0),
+					arg( "interpolation" ) = InterpolatedCache::None,
+					arg( "oversamplesCalculator" ) = OversamplesCalculator()
 				)
 			) 
 		)
@@ -163,20 +149,15 @@ void bindInterpolatedCache()
 		.def("getFrame", &InterpolatedCache::getFrame )
 		.def("setInterpolation", &InterpolatedCache::setInterpolation )
 		.def("getInterpolation", &InterpolatedCache::getInterpolation )
-		.def("setOversamples", &InterpolatedCache::setOversamples )
-		.def("getOversamples", &InterpolatedCache::getOversamples )
-		.def("setFrameRate", &InterpolatedCache::setFrameRate )
-		.def("getFrameRate", &InterpolatedCache::getFrameRate )
-		.def("read", (ObjectPtr (InterpolatedCache::*)( const InterpolatedCache::ObjectHandle &, const InterpolatedCache::AttributeHandle & ) )&InterpolatedCache::read)
-		.def("read", (CompoundObjectPtr (InterpolatedCache::*)( const InterpolatedCache::ObjectHandle & ))&InterpolatedCache::read)
-		.def("readHeader", (ObjectPtr (InterpolatedCache::*) ( const InterpolatedCache::HeaderHandle & ))&InterpolatedCache::readHeader)
-		.def("readHeader", (CompoundObjectPtr (InterpolatedCache::*)())&InterpolatedCache::readHeader)
+		.def("read", (ObjectPtr (InterpolatedCache::*)( const InterpolatedCache::ObjectHandle &, const InterpolatedCache::AttributeHandle & ) const )&InterpolatedCache::read)
+		.def("read", (CompoundObjectPtr (InterpolatedCache::*)( const InterpolatedCache::ObjectHandle & ) const )&InterpolatedCache::read)
+		.def("readHeader", (ObjectPtr (InterpolatedCache::*) ( const InterpolatedCache::HeaderHandle & ) const )&InterpolatedCache::readHeader)
+		.def("readHeader", (CompoundObjectPtr (InterpolatedCache::*)() const )&InterpolatedCache::readHeader)
 		.def("contains", containsObj)
 		.def("contains", containsObjAttr)		
 		.def("objects", &InterpolatedCacheHelper::objects)
 		.def("headers", &InterpolatedCacheHelper::headers)
 		.def("attributes", make_function( &InterpolatedCacheHelper::attributes, default_call_policies(), ( boost::python::arg_( "obj" ), boost::python::arg_( "regex" ) = object() ) ) )
-		.def("currentCaches", make_function( &InterpolatedCacheHelper::currentCaches, default_call_policies() ) )
 	;
 }
 }
