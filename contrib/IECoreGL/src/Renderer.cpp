@@ -59,6 +59,7 @@
 #include "IECoreGL/ToGLMeshConverter.h"
 #include "IECoreGL/Font.h"
 #include "IECoreGL/TextPrimitive.h"
+#include "IECoreGL/DiskPrimitive.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -1508,7 +1509,8 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 
 void IECoreGL::Renderer::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "Renderer::disk", "Not implemented" );
+	DiskPrimitivePtr prim = new DiskPrimitive( radius, z, thetaMax );
+	addPrimitive( prim, primVars, m_data );
 }
 
 void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )

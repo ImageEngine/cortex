@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,39 +32,64 @@
 #
 ##########################################################################
 
-import warnings
-warnings.filterwarnings( "error", "Access to Parameters as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Access to CompoundObject children as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Access to CompoundParameter children as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Specifying presets as a dictionary is deprecated - pass a tuple of tuples instead.", DeprecationWarning )
+from __future__ import with_statement
+
+import unittest
+import os.path
 
 import IECore
 
-from Shader import *
-from State import *
-from ShaderLoader import *
-from Renderer import *
-from Group import *
-from Texture import *
-from ImmediateRenderer import *
-from NameStateComponent import *
-from HitRecord import *
-from Selection import *
-from Camera import *
-from Image import *
-from PointsPrimitive import *
-from Orientation import *
-from CurvesPrimitiveTest import *
-from MeshPrimitiveTest import *
-from AlphaTextureTest import *
-from LuminanceTextureTest import *
-from UserAttributesTest import *
-from DeferredRenderer import *
-from DiskPrimitiveTest import DiskPrimitiveTest
+import IECoreGL
+IECoreGL.init( False )
 
-if IECore.withFreeType() :
+class DiskPrimitiveTest( unittest.TestCase ) :
 
-	from TextTest import *
+	outputFileName = os.path.dirname( __file__ ) + "/output/testDisk.tif"
+	
+	def test( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "tif", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+		
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+			r.disk( 1, 0, 360, {} )
 
+		i = IECore.Reader.create( self.outputFileName ).read()
+		i2 = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/disk.tif" ).read()
+		
+		# blue where there must be an object
+		# red where we don't mind
+		# black where there must be nothing
+
+		a = i["A"].data
+
+		r2 = i2["R"].data
+		b2 = i2["B"].data
+		for i in range( r2.size() ) :
+
+			if b2[i] > 0.5 :
+				self.assertEqual( a[i], 1 )
+			elif r2[i] < 0.5 :
+				self.assertEqual( a[i], 0 )
+
+	def tearDown( self ) :
+
+		if os.path.exists( self.outputFileName ) :
+			os.remove( self.outputFileName )
+				
 if __name__ == "__main__":
     unittest.main()   

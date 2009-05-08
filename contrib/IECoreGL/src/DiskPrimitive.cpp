@@ -42,8 +42,8 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( DiskPrimitive );
 
-DiskPrimitive::DiskPrimitive( float radius, float thetaMax )
-	:	m_radius( radius ), m_thetaMax( thetaMax )
+DiskPrimitive::DiskPrimitive( float radius, float z, float thetaMax )
+	:	m_radius( radius ), m_z( z ), m_thetaMax( thetaMax )
 {
 }
 
@@ -61,7 +61,27 @@ float DiskPrimitive::getRadius() const
 {
 	return m_radius;
 }
-				
+	
+void DiskPrimitive::setZ( float z )
+{
+	m_z = z;
+}
+
+float DiskPrimitive::getZ() const
+{
+	return m_z;
+}
+
+void DiskPrimitive::setThetaMax( float thetaMax )
+{
+	m_thetaMax = thetaMax;
+}
+
+float DiskPrimitive::getThetaMax() const
+{
+	return m_thetaMax;
+}
+
 void DiskPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 {
 	glBegin( GL_TRIANGLE_FAN );
@@ -69,7 +89,7 @@ void DiskPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 		glNormal3f( 0, 0, 1.0f );
 
 		glTexCoord2f( 0.5f, 0.5f );
-		glVertex2f( 0.0f, 0.0f );
+		glVertex3f( 0.0f, 0.0f, m_z );
 		const unsigned int n = 20;
 		float thetaMax = m_thetaMax/180.0f * M_PI;
 		for( unsigned int i=0; i<n; i++ )
@@ -78,7 +98,7 @@ void DiskPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 			float x = Math<float>::cos( t );
 			float y = Math<float>::sin( t );
 			glTexCoord2f( x/2.0f + 0.5f, y/2.0f + 0.5f );
-			glVertex2f( m_radius * x, m_radius * y );
+			glVertex3f( m_radius * x, m_radius * y, m_z );
 		}
 
 	glEnd();
