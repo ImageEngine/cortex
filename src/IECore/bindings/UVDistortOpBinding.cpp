@@ -46,11 +46,11 @@ namespace IECore
 
 void bindUVDistortOp()
 {
-	
+
 	RunTimeTypedClass<UVDistortOp>()
 		.def( init<>() )
 	;
-	
+
 }
 
 } // namespace IECore

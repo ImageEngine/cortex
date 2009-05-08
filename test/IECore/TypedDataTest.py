@@ -36,17 +36,17 @@ import unittest
 import IECore
 
 class TestTypedData( unittest.TestCase ) :
-    
+
 	def testRValueFromT( self ) :
-	
+
 		c = IECore.CompoundData()
-		
+
 		c["a"] = 1
 		c["b"] = True
 		c["c"] = "hello"
 		c["d"] = 10.1
 		c["e"] = IECore.V3f( 1, 2, 3 )
-		
+
 		self.assertEqual( c["a"], IECore.IntData( 1 ) )
 		self.assertEqual( c["b"], IECore.BoolData( True ) )
 		self.assertEqual( c["c"], IECore.StringData( "hello" ) )
@@ -54,5 +54,5 @@ class TestTypedData( unittest.TestCase ) :
 		self.assertEqual( c["e"], IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
 
 if __name__ == "__main__":
-	unittest.main()   
-	        
+	unittest.main()
+

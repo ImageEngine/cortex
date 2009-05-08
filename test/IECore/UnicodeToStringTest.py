@@ -38,10 +38,10 @@ import unittest
 class UnicodeToStringTest( unittest.TestCase ) :
 
 	def test( self ) :
-				
+
 		s = IECore.StringData( u"hello" )
 		self.assertEqual( s.value, "hello" )
-		
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

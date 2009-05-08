@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( Group );
 /// conversion to MeshPrimitives and ImagePrimitives.
 class Font : public RunTimeTyped
 {
-	
+
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPED( Font, RunTimeTyped );
@@ -81,7 +81,7 @@ class Font : public RunTimeTyped
 		/// equal to one em.
 		void setCurveTolerance( float tolerance );
 		float getCurveTolerance() const;
-		
+
 		/// Sets the resolution used in converting
 		/// glyphs into images.
 		void setResolution( float pixelsPerEm );
@@ -126,34 +126,34 @@ class Font : public RunTimeTyped
 		/// Returns an image containing a grid of 16x8 characters containing
 		/// all the chars from 0-127 inclusive. This too has a single "Y" channel.
 		ImagePrimitivePtr image() const;
-		
+
 	private :
 
 		Imath::Box2i boundingWindow() const;
 
 		class Mesher;
-		
+
 		static FT_Library library();
 
 		std::string m_fileName;
-		
+
 		FT_Face m_face;
 		float m_kerning;
 		float m_curveTolerance;
 		float m_pixelsPerEm;
-		
+
 		struct Mesh;
 		typedef boost::shared_ptr<Mesh> MeshPtr;
 		typedef boost::shared_ptr<const Mesh> ConstMeshPtr;
 		typedef std::map<char, ConstMeshPtr> MeshMap;
 		mutable MeshMap m_meshes;
-		
+
 		typedef std::map<char, ConstImagePrimitivePtr> ImageMap;
 		mutable ImageMap m_images;
-				
+
 		ConstMeshPtr cachedMesh( char c ) const;
 		ConstImagePrimitivePtr cachedImage( char c ) const;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Font );

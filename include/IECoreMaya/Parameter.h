@@ -58,10 +58,10 @@ class Parameter
 		/// when saving the scene - so this method doesn't set the default value appropriately for
 		/// StringParameter and its derived classes (tested in maya 7.0.1).
 		static MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute );
-		
+
 		static MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug );
 		static MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter );
-		
+
 };
 
 

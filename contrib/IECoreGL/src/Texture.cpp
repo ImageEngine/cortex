@@ -53,7 +53,7 @@ Texture::Texture( GLuint texture )
 	:	m_texture( texture )
 {
 }
-			
+
 Texture::~Texture()
 {
 	glDeleteTextures( 1, &m_texture );

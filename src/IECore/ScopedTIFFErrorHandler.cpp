@@ -61,10 +61,10 @@ ScopedTIFFErrorHandler::~ScopedTIFFErrorHandler()
 }
 
 void ScopedTIFFErrorHandler::output(const char* module, const char* fmt, va_list ap)
-{	
+{
 	ScopedTIFFErrorHandler *handler = handlers().back();
 	// Ensure that any variables we allocate here don't get lost due to the longjmp call
-	{	
+	{
 		/// Reconstruct the actual error in a buffer of (arbitrary) maximum length.
 		const unsigned int bufSize = 1024;
 		char buf[bufSize];
@@ -77,7 +77,7 @@ void ScopedTIFFErrorHandler::output(const char* module, const char* fmt, va_list
 		if (module)
 		{
 			context = std::string( module );
-		} 
+		}
 
 		handler->m_errorMessage = ( boost::format( "%s : %s" ) % context % buf ).str() ;
 	}

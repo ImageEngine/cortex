@@ -77,98 +77,98 @@ IE_COREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( std::string )
 
 // we have to specialise the repr() and str() separately here, because of
 // the whole vector<bool> is not a container thing.
-template<>																
-std::string repr<BoolVectorData>( BoolVectorData &x )					
-{																		
-	std::stringstream s;												
-	s << "IECore." << x.typeName() << "( [ ";										
-	const std::vector<bool> &xd = x.readable();	
-	for( size_t i=0; i<xd.size(); i++ )									
-	{	
-		bool b = xd[i];																
-		s << repr( b );						
-		if( i!=xd.size()-1 )											
-		{																
-			s << ", ";													
-		}																
-	}																	
-	s<< " ] )";															
-	return s.str();														
-}																		
-																		
-																		
-template<>																			
-std::string str<BoolVectorData>( BoolVectorData &x )	
-{																					
-	std::stringstream s;															
-	const std::vector<bool> &xd = x.readable();				
-	for( size_t i=0; i<xd.size(); i++ )												
-	{																				
-		bool b = xd[i];																
-		s << str( b );									
-		if( i!=xd.size()-1 )														
-		{																			
-			s << " ";																
-		}																			
-	}																				
-	return s.str();																	
-}																					
+template<>
+std::string repr<BoolVectorData>( BoolVectorData &x )
+{
+	std::stringstream s;
+	s << "IECore." << x.typeName() << "( [ ";
+	const std::vector<bool> &xd = x.readable();
+	for( size_t i=0; i<xd.size(); i++ )
+	{
+		bool b = xd[i];
+		s << repr( b );
+		if( i!=xd.size()-1 )
+		{
+			s << ", ";
+		}
+	}
+	s<< " ] )";
+	return s.str();
+}
+
+
+template<>
+std::string str<BoolVectorData>( BoolVectorData &x )
+{
+	std::stringstream s;
+	const std::vector<bool> &xd = x.readable();
+	for( size_t i=0; i<xd.size(); i++ )
+	{
+		bool b = xd[i];
+		s << str( b );
+		if( i!=xd.size()-1 )
+		{
+			s << " ";
+		}
+	}
+	return s.str();
+}
 
 void bindAllVectorTypedData()
 {
 	// basic types
-	BIND_VECTOR_TYPEDDATA( 
+	BIND_VECTOR_TYPEDDATA(
 		bool,
 		"bool")
-		
-	BIND_FULL_OPERATED_VECTOR_TYPEDDATA( 
+
+	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		half,
 		"half")
-		
-	BIND_FULL_OPERATED_VECTOR_TYPEDDATA( 
+
+	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		float,
 		"float")
-		
-	BIND_FULL_OPERATED_VECTOR_TYPEDDATA( 
+
+	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		double,
 		"double")
-		
+
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		int,
 		"int")
-		
+
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		unsigned int,
 		"unsigned int")
-		
+
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		char,
 		"char")
-		
+
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		unsigned char,
 		"unsigned char")
-		
+
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		short,
 		"short")
-		
+
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		unsigned short,
 		"unsigned short")
-		
+
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		int64_t,
 		"int64_t")
-		
+
 	BIND_FULL_OPERATED_VECTOR_TYPEDDATA(
 		uint64_t,
-		"uint64_t")		
-		
+		"uint64_t")
+
 	BIND_VECTOR_TYPEDDATA (
 		std::string,
 		"string")
-	
+
 	// Imath types
 	bindImathMatrixVectorTypedData();
 	bindImathVecVectorTypedData();

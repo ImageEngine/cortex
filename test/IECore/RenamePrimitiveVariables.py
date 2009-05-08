@@ -38,26 +38,26 @@ import IECore
 class TestRenamePrimVar( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		p = r.read()
-		
+
 		self.assert_( "position" in p )
 		self.assert_( "particleId" in p )
-		
+
 		newNames = [ "position P", "particleId id" ]
-		
+
 		o = IECore.RenamePrimitiveVariables()
 		o["input"].setValue( p )
 		o["names"].setValue( IECore.StringVectorData( newNames ) )
-		
+
 		pp = o()
 		self.assertEqual( len( pp ), len( p ) )
 		for n in newNames :
 			ns = n.split()
 			self.assert_( ns[1] in pp )
 			self.assert_( not ns[0] in pp )
-			
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

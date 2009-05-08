@@ -51,7 +51,7 @@ class LinearInterpolatorTest
 {
 	public:
 		void testSimple();
-		void testTyped();	
+		void testTyped();
 		void testVector();
 };
 
@@ -59,46 +59,46 @@ template<typename T>
 class CubicInterpolatorTest
 {
 	public:
-		
+
 		void testSimple();
-		void testTyped();	
+		void testTyped();
 		void testVector();
 };
 
 struct InterpolatorTestSuite : public boost::unit_test::test_suite
-{	
-	
+{
+
 	InterpolatorTestSuite() : boost::unit_test::test_suite("InterpolatorTestSuite")
 	{
 		addLinearTest<float>();
 		addLinearTest<double>();
 		addLinearTest<Imath::V3f>();
 		addLinearTest<Imath::V3d>();
-		
+
 		addCubicTest<float>();
 		addCubicTest<double>();
 		addCubicTest<Imath::V3f>();
 		addCubicTest<Imath::V3d>();
 	}
-	
+
 	template<typename T>
 	void addLinearTest()
 	{
 		static boost::shared_ptr<LinearInterpolatorTest<T> > instance(new LinearInterpolatorTest<T>());
-		
+
 		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testSimple, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testVector, instance ) );				
+		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testVector, instance ) );
 	}
-	
+
 	template<typename T>
 	void addCubicTest()
 	{
 		static boost::shared_ptr<CubicInterpolatorTest<T> > instance(new CubicInterpolatorTest<T>());
-		
+
 		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testSimple, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testVector, instance ) );				
+		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testVector, instance ) );
 	}
 };
 }

@@ -43,7 +43,7 @@
 #include <map>
 #include <string>
 
-namespace IECore 
+namespace IECore
 {
 
 /// The type of Data held by the CompoundData typedef.

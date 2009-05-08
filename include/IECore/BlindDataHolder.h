@@ -45,26 +45,26 @@ namespace IECore
 class BlindDataHolder : public Object
 {
 	public:
-	
+
 		BlindDataHolder();
 		BlindDataHolder(CompoundDataPtr data);
-		
+
 		BlindDataHolder( const BlindDataHolder &other );
-		
+
 		virtual ~BlindDataHolder();
-		
+
 		IE_CORE_DECLAREOBJECT( BlindDataHolder, Object );
-		
+
 		/// Return the blind data for modification.
 		CompoundDataPtr blindData() const;
-		
+
 	protected:
-	
+
 		CompoundDataPtr m_data;
-		
+
 	private :
 
-		static const unsigned int m_ioVersion;	
+		static const unsigned int m_ioVersion;
 
 };
 

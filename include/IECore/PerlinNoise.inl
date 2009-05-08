@@ -47,7 +47,7 @@
 
 #include <cassert>
 
-namespace IECore 
+namespace IECore
 {
 
 template<typename P, typename V, typename F>
@@ -57,7 +57,7 @@ PerlinNoise<P, V, F>::PerlinNoise( unsigned long int seed )
 
 	// fill the permutation table
 	m_perm.resize( m_permSize * 2 );
-	
+
 	// fill first half with the values 0-m_permSize
 	unsigned int value=0;
 	std::vector<unsigned int>::iterator it = m_perm.begin();
@@ -69,8 +69,8 @@ PerlinNoise<P, V, F>::PerlinNoise( unsigned long int seed )
 	std::random_shuffle( m_perm.begin(), m_perm.begin() + m_permSize, random );
 	// fill second half of table with a copy of first half
 	std::copy( m_perm.begin(), m_perm.begin() + m_permSize, m_perm.begin() + m_permSize );
-	
-	// and initialise the gradients	
+
+	// and initialise the gradients
 	initGradients( seed );
 }
 
@@ -150,7 +150,7 @@ inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::noiseWalk( int
 		pi[d] += 1;
 		Value v1 = noiseWalk( pi, p, d-1 );
 		pi[d] -= 1;
-		return Imath::lerp( v0, v1, m_falloff( vecGet( p, d ) - pi[d] ) ); 
+		return Imath::lerp( v0, v1, m_falloff( vecGet( p, d ) - pi[d] ) );
 	}
 }
 
@@ -160,7 +160,7 @@ inline typename PerlinNoise<P, V, F>::ValueBaseType PerlinNoise<P, V, F>::weight
 	float t3 = t * t * t;
 	float t4 = t3 * t;
 	return 6.0f * t4 * t - 15.0f * t4 + 10.0f * t3;
-	
+
 }
 
 template<class T>
@@ -168,7 +168,7 @@ inline T SmoothStepFalloff<T>::operator()( T t ) const
 {
 	return t * t * ( T( 3 ) - T( 2 ) * t );
 };
- 
+
 template<class T>
 inline T SmootherStepFalloff<T>::operator()( T t ) const
 {
@@ -176,7 +176,7 @@ inline T SmootherStepFalloff<T>::operator()( T t ) const
 	T t4 = t3 * t;
 	return T( 6 ) * t4 * t - T( 15 ) * t4 + T( 10 ) * t3;
 }
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_PERLINNOISE_INL

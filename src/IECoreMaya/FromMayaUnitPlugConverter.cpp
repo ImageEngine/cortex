@@ -45,20 +45,20 @@
 namespace IECoreMaya
 {
 
-template<typename T> 
+template<typename T>
 FromMayaPlugConverter::Description<FromMayaUnitPlugConverter<T> > FromMayaUnitPlugConverter<T>::m_angleDescription( MFnUnitAttribute::kAngle, IECore::TypedData<T>::staticTypeId(), boost::is_same<T, double>::value );
-template<typename T> 
+template<typename T>
 FromMayaPlugConverter::Description<FromMayaUnitPlugConverter<T> > FromMayaUnitPlugConverter<T>::m_distanceDescription( MFnUnitAttribute::kDistance, IECore::TypedData<T>::staticTypeId(), boost::is_same<T, double>::value );
-template<typename T> 
+template<typename T>
 FromMayaPlugConverter::Description<FromMayaUnitPlugConverter<T> > FromMayaUnitPlugConverter<T>::m_timeDescription( MFnUnitAttribute::kTime, IECore::TypedData<T>::staticTypeId(), boost::is_same<T, double>::value );
 
-template<typename T> 
+template<typename T>
 FromMayaUnitPlugConverter<T>::FromMayaUnitPlugConverter( const MPlug &plug )
 	:	FromMayaPlugConverter( plug )
 {
 	IECore::IntParameter::PresetsContainer anglePresets;
 	anglePresets.push_back( IECore::IntParameter::Preset( "Radians", MAngle::kRadians ) );
-	anglePresets.push_back( IECore::IntParameter::Preset( "Degrees", MAngle::kDegrees ) );			
+	anglePresets.push_back( IECore::IntParameter::Preset( "Degrees", MAngle::kDegrees ) );
 	m_angleUnitParameter = new IECore::IntParameter(
 		"angleUnit",
 		"The unit in which angular values are returned.",
@@ -68,7 +68,7 @@ FromMayaUnitPlugConverter<T>::FromMayaUnitPlugConverter( const MPlug &plug )
 		anglePresets,
 		true
 	);
-	
+
 	IECore::IntParameter::PresetsContainer distancePresets;
 	distancePresets.push_back( IECore::IntParameter::Preset( "Inches", MDistance::kInches ) );
 	distancePresets.push_back( IECore::IntParameter::Preset( "Feet", MDistance::kFeet ) );
@@ -87,7 +87,7 @@ FromMayaUnitPlugConverter<T>::FromMayaUnitPlugConverter( const MPlug &plug )
 		distancePresets,
 		true
 	);
-	
+
 	IECore::IntParameter::PresetsContainer timePresets;
 	timePresets.push_back( IECore::IntParameter::Preset( "Hours", MTime::kHours ) );
 	timePresets.push_back( IECore::IntParameter::Preset( "Minutes", MTime::kMinutes ) );
@@ -102,55 +102,55 @@ FromMayaUnitPlugConverter<T>::FromMayaUnitPlugConverter( const MPlug &plug )
 		timePresets,
 		true
 	);
-	
+
 	parameters()->addParameter( m_angleUnitParameter );
 	parameters()->addParameter( m_distanceUnitParameter );
 	parameters()->addParameter( m_timeUnitParameter );
-	
+
 }
-		
-template<typename T> 
+
+template<typename T>
 IECore::IntParameterPtr FromMayaUnitPlugConverter<T>::angleUnitParameter()
 {
 	return m_angleUnitParameter;
 }
 
-template<typename T> 
+template<typename T>
 IECore::ConstIntParameterPtr FromMayaUnitPlugConverter<T>::angleUnitParameter() const
 {
 	return m_angleUnitParameter;
 }
 
-template<typename T> 
+template<typename T>
 IECore::IntParameterPtr FromMayaUnitPlugConverter<T>::distanceUnitParameter()
 {
 	return m_distanceUnitParameter;
 }
 
-template<typename T> 
+template<typename T>
 IECore::ConstIntParameterPtr FromMayaUnitPlugConverter<T>::distanceUnitParameter() const
 {
 	return m_distanceUnitParameter;
 }
 
-template<typename T> 
+template<typename T>
 IECore::IntParameterPtr FromMayaUnitPlugConverter<T>::timeUnitParameter()
 {
 	return m_timeUnitParameter;
 }
 
-template<typename T> 
+template<typename T>
 IECore::ConstIntParameterPtr FromMayaUnitPlugConverter<T>::timeUnitParameter() const
 {
 	return m_timeUnitParameter;
 }
 
-template<typename T> 
+template<typename T>
 IECore::ObjectPtr FromMayaUnitPlugConverter<T>::doConversion( IECore::ConstCompoundObjectPtr operands ) const
 {
 	typedef IECore::TypedData<T> ResultType;
 	typedef typename IECore::TypedData<T>::Ptr ResultTypePtr;
-	
+
 	MObject attr = plug().attribute();
 	MFnUnitAttribute fnUAttr( attr );
 	switch( fnUAttr.unitType() )

@@ -48,7 +48,7 @@ def __opSmartOperator( self, **args ):
 			self[ paramName ].setValue( paramValue )
 		else:
 			self[ paramName ].setTypedValue( paramValue )
-		
+
 	return self.operate( )
 
 # redefine Op

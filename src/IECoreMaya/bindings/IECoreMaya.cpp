@@ -82,7 +82,7 @@ using namespace IECoreMaya;
 
 using namespace boost::python;
 
-/// Maya is built with 4-byte Unicode characters, so we need to ensure that we're doing 
+/// Maya is built with 4-byte Unicode characters, so we need to ensure that we're doing
 /// the same so that all external symbols resolve correctly at runtime.
 #if ( MAYA_API_VERSION >= 2008 )
 /// \todo Assert for earlier versions too, once installations of Python 2.5 for gcc4.0.2
@@ -92,22 +92,22 @@ BOOST_STATIC_ASSERT(sizeof(Py_UNICODE) == 4);
 
 BOOST_PYTHON_MODULE(_IECoreMaya)
 {
-	bindMayaPythonUtil();		
+	bindMayaPythonUtil();
 	bindFnParameterisedHolder();
 	bindFromMayaConverter();
 	bindFromMayaPlugConverter();
 	bindFromMayaObjectConverter();
-	bindFromMayaDagNodeConverter();	
+	bindFromMayaDagNodeConverter();
 	bindFromMayaCameraConverter();
 	bindMayaMeshBuilder();
 	bindTypeId();
 	bindFromMayaShapeConverter();
 	bindFromMayaCurveConverter();
 	bindFromMayaParticleConverter();
-	bindStandalone();	
+	bindStandalone();
 	bindMPlugFromPython();
 	bindMObjectFromPython();
-	bindMDagPathFromPython();	
+	bindMDagPathFromPython();
 	bindToMayaConverter();
 	bindToMayaPlugConverter();
 	bindToMayaObjectConverter();
@@ -119,11 +119,11 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindMStringFromPython();
 	bindViewportPostProcess();
 	bindImageViewportPostProcess();
-	bindViewportPostProcessCallback();	
-	bindFromMayaGroupConverter();	
-	bindFromMayaUnitPlugConverter();	
-	bindFromMayaNumericPlugConverter();	
-	bindFromMayaArrayDataConverter();	
-	bindFromMayaCompoundNumericPlugConverter();	
-	bindFromMayaTransformationMatrixConverter();	
+	bindViewportPostProcessCallback();
+	bindFromMayaGroupConverter();
+	bindFromMayaUnitPlugConverter();
+	bindFromMayaNumericPlugConverter();
+	bindFromMayaArrayDataConverter();
+	bindFromMayaCompoundNumericPlugConverter();
+	bindFromMayaTransformationMatrixConverter();
 }

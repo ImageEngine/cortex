@@ -52,11 +52,11 @@ class PathParameterWrap : public PathParameter, public Wrapper<PathParameter>
 	public :
 
 		PathParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
-			PathParameter::CheckType c, object &p, bool po, CompoundObjectPtr ud )	
+			PathParameter::CheckType c, object &p, bool po, CompoundObjectPtr ud )
 			:	PathParameter( n, d, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud ), Wrapper<PathParameter>( self, this ) {};
-		
+
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( PathParameter );
-		
+
 };
 IE_CORE_DECLAREPTR( PathParameterWrap );
 
@@ -75,13 +75,13 @@ void bindPathParameter()
 		;
 	}
 	pathParamClass
-		.def( 
+		.def(
 			init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, object &, bool, CompoundObjectPtr>
 			(
 				(
 					arg( "name" ),
 					arg( "description" ),
-					arg( "defaultValue" ) = std::string( "" ),						
+					arg( "defaultValue" ) = std::string( "" ),
 					arg( "allowEmptyString" ) = true,
 					arg( "check" ) = PathParameter::DontCare,
 					arg( "presets" ) = boost::python::tuple(),
@@ -94,7 +94,7 @@ void bindPathParameter()
 		.add_property( "mustExist", &PathParameter::mustExist )
 		.add_property( "mustNotExist", &PathParameter::mustNotExist )
 		.add_property( "allowEmptyString", &PathParameter::allowEmptyString )
-	;	
+	;
 }
 
 } // namespace IECore

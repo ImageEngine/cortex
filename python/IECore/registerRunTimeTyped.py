@@ -40,15 +40,15 @@ import IECore
 def __registerTypeId( typeId, typeName, baseTypeId ) :
 
 	assert( type( typeId ) is IECore.TypeId )
-	assert( type( typeName ) is str )	
-	assert( type( baseTypeId ) is IECore.TypeId )	
+	assert( type( typeName ) is str )
+	assert( type( baseTypeId ) is IECore.TypeId )
 
 	# check this type hasn't been registered already
 	if hasattr( IECore.TypeId, typeName ):
 		if getattr( IECore.TypeId, typeName ) != typeId:
 			raise RuntimeError( "Type \"%s\" is already registered." % typeName )
-			
-		return	
+
+		return
 
 	if typeId in IECore.TypeId.values :
 		raise RuntimeError( "TypeId \"%d\" is already registered as \"%s\"." % (typeId, IECore.TypeId.values[typeId] ) )
@@ -56,10 +56,10 @@ def __registerTypeId( typeId, typeName, baseTypeId ) :
 	# update the TypeId enum
 	setattr( IECore.TypeId, typeName, typeId )
 	IECore.TypeId.values[ int( typeId ) ] = typeId
-	
-	# register the new type id		
+
+	# register the new type id
 	IECore.RunTimeTyped.registerType( typeId, typeName, baseTypeId )
-		
+
 
 ## This function adds the necessary function definitions to a python
 # class for it to properly implement the RunTimeTyped interface. It should
@@ -70,7 +70,7 @@ def registerRunTimeTyped( typ, typId, baseClass ) :
 	typeName = typ.__name__
 
 	__registerTypeId( IECore.TypeId( typId ), typeName, IECore.TypeId( baseClass.staticTypeId() ) )
-	
+
 	# Retrieve the correct value from the enum
 	tId = getattr( IECore.TypeId, typeName )
 
@@ -82,11 +82,11 @@ def registerRunTimeTyped( typ, typId, baseClass ) :
 	typ.staticTypeId = staticmethod( lambda : tId )
 	typ.staticTypeName = staticmethod( lambda : typeName )
 	typ.baseTypeId = staticmethod( lambda : baseClass.staticTypeId() )
-	typ.baseTypeName = staticmethod( lambda : baseClass.staticTypeName() )	
-	
+	typ.baseTypeName = staticmethod( lambda : baseClass.staticTypeName() )
+
 	# add the inheritsFrom method override
 	def inheritsFrom( t, baseClass ) :
-	
+
 		if type( t ) is str :
 			if type( baseClass ) is list :
 				for base in baseClass :
@@ -105,31 +105,31 @@ def registerRunTimeTyped( typ, typId, baseClass ) :
 					return True
 		else:
 			raise TypeError( "Invalid type specifier ( %s )" % str( t ) )
-			
+
 		if type( baseClass ) is list :
 			for base in baseClass:
 				if base.inheritsFrom( t ):
 					return True
-		else:	
+		else:
 			return baseClass.inheritsFrom( t )
-			
-		return False	
-		
+
+		return False
+
 	typ.inheritsFrom = staticmethod( lambda t : inheritsFrom( t, baseClass ) )
-		
-		
+
+
 	# add the isInstanceOf method override
 	def isInstanceOf( self, t, baseClass ) :
-				
+
 		if type( t ) is str :
 			if self.staticTypeName() == t :
 				return True
 		elif type( t ) is IECore.TypeId :
 			if self.staticTypeId() == t :
-				return True				
+				return True
 		else :
 			raise TypeError( "Invalid type specifier ( %s )" % str( t ) )
-		
+
 		return inheritsFrom( t, baseClass )
-		
+
 	typ.isInstanceOf = lambda self, t : isInstanceOf( self, t, baseClass )

@@ -53,36 +53,36 @@ struct ColorIndexer
 {
 	typedef typename T::BaseType V;
 	static V get(const T &x, int i)
-	{	
+	{
 		// Do we want to handle backward indexing?
-		if ( i >= 0 && i < static_cast<int>(T::dimensions()) ) 
+		if ( i >= 0 && i < static_cast<int>(T::dimensions()) )
 		{
 			return x[i];
 		}
 		else
 		{
 			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
-			throw std::out_of_range("");	
+			throw std::out_of_range("");
 		}
-		
+
 	}
-	
+
 	static void set(T &x, int i, const V &v)
 	{
-		if ( i >= 0 && i < static_cast<int>(T::dimensions()) ) 
+		if ( i >= 0 && i < static_cast<int>(T::dimensions()) )
 		{
 			x[i] = v;
 		}
 		else
 		{
 			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
-			throw std::out_of_range("");	
+			throw std::out_of_range("");
 		}
 	}
-	
+
 };
 
-/// \todo The only reason this is a macro is so that it can turn the class type to a string. We should probably do this 
+/// \todo The only reason this is a macro is so that it can turn the class type to a string. We should probably do this
 /// with a small traits class instead, and get rid of the macro.
 #define DEFINECOLSTRSPECIALISATION( COL )				\
 														\
@@ -137,7 +137,7 @@ void bindColorCommon( class_<T> &c )
 
 	c.def( self==self )
 	.def( self!=self )
-		
+
 	.def( self += self )
 	.def( self + self )
 
@@ -178,7 +178,7 @@ void bindColorCommon( class_<T> &c )
 	.def( "sRGBToLinear", &sRGBToLinear<T> )
 
 	.def( "__str__", &str<T> )
-	.def( "__repr__", &repr<T> );	
+	.def( "__repr__", &repr<T> );
 }
 
 /// We need this and equalWithRelError so that we can call them passing colors instead of vectors.
@@ -203,11 +203,11 @@ void bindColor3( const char *typeName )
 	// Color3 derives from Vec3 because we think
 	// that is weird.
 	class_<T> c = class_<T>( typeName )
-		
+
 		.def_readwrite( "r", &T::x )
 		.def_readwrite( "g", &T::y )
 		.def_readwrite( "b", &T::z )
-		
+
 		.def( init<>() )
 		.def( init<typename T::BaseType>() )
 		.def( init<typename T::BaseType, typename T::BaseType, typename T::BaseType>() )
@@ -216,7 +216,7 @@ void bindColor3( const char *typeName )
 		.def( "equalWithAbsError", &equalWithAbsError<T> )
 		.def( "equalWithRelError", &equalWithRelError<T> )
 	;
-	
+
 	bindColorCommon( c );
 
 }
@@ -225,19 +225,19 @@ template<typename T>
 void bindColor4( const char *typeName )
 {
 	class_<T> c = class_<T>( typeName )
-		
+
 		.def_readwrite( "r", &T::r )
 		.def_readwrite( "g", &T::g )
 		.def_readwrite( "b", &T::b )
 		.def_readwrite( "a", &T::a )
-		
+
 		.def( init<>() )
 		.def( init<typename T::BaseType>() )
 		.def( init<typename T::BaseType, typename T::BaseType, typename T::BaseType, typename T::BaseType>() )
 		.def( init<const T&>() )
-		
+
 	;
-	
+
 	bindColorCommon( c );
 
 }

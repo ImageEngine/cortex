@@ -42,7 +42,7 @@ using namespace Imath;
 IE_CORE_DEFINERUNTIMETYPED( Grade );
 
 Grade::Grade()
-	:	ColorTransformOp( "Grade", 
+	:	ColorTransformOp( "Grade",
 				"The grade implements the same operation as Nuke's grade node over the colors of a Primitive object.\n"
 				"The computation performed is:\n"
 				"A = multiply * (gain - lift) / (whitePoint - blackPoint)\n"
@@ -52,43 +52,43 @@ Grade::Grade()
 {
 
 	m_blackPointParameter = new Color3fParameter(
-		"blackPoint", 
+		"blackPoint",
 		"This color is considered the black.",
 		Imath::Color3f(0,0,0)
 	);
-	
+
 	m_whitePointParameter = new Color3fParameter(
-		"whitePoint", 
+		"whitePoint",
 		"This color is considered the white.",
 		Imath::Color3f(1,1,1)
 	);
 
 	m_liftParameter = new Color3fParameter(
-		"lift", 
+		"lift",
 		"This color is turned into black.",
 		Imath::Color3f(0,0,0)
 	);
 
 	m_gainParameter = new Color3fParameter(
-		"gain", 
+		"gain",
 		"This color is turned into white.",
 		Imath::Color3f(1,1,1)
 	);
 
 	m_multiplyParameter = new Color3fParameter(
-		"multiply", 
+		"multiply",
 		"Constant to multiply result by.",
 		Imath::Color3f(1,1,1)
 	);
 
 	m_offsetParameter = new Color3fParameter(
-		"offset", 
+		"offset",
 		"Constant to add to result.",
 		Imath::Color3f(0,0,0)
 	);
 
 	m_gammaParameter = new Color3fParameter(
-		"gamma", 
+		"gamma",
 		"Gamma correction applied to final result",
 		Imath::Color3f(1,1,1)
 	);
@@ -104,7 +104,7 @@ Grade::Grade()
 		"Output greater then one is clamped to one.",
 		false
 	);
-	
+
 	parameters()->addParameter( m_blackPointParameter );
 	parameters()->addParameter( m_whitePointParameter );
 	parameters()->addParameter( m_liftParameter );
@@ -114,7 +114,7 @@ Grade::Grade()
 	parameters()->addParameter( m_gammaParameter );
 	parameters()->addParameter( m_blackClampParameter );
 	parameters()->addParameter( m_whiteClampParameter );
-	
+
 }
 
 Grade::~Grade()

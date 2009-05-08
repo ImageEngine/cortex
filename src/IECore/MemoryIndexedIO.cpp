@@ -38,31 +38,31 @@
 
 using namespace IECore;
 
-MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode) 
+MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode)
 : FileIndexedIO()
 {
 	if (mode & IndexedIO::Write)
 	{
 		std::stringstream *f = new std::stringstream( std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
-		
+
 		open( f, root, mode, true );
-	}		
+	}
 	else if (mode & IndexedIO::Append)
 	{
 		if ( !buf || ! buf->readable().size() )
 		{
 			/// Create new file
 			std::stringstream *f = new std::stringstream(  std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
-			
+
 			open( f, root, mode, true );
 		}
 		else
-		{		
+		{
 			assert( buf );
-			
+
 			/// Read existing file
 			std::stringstream *f = new std::stringstream( std::string( &buf->readable()[0], buf->readable().size() ), std::ios::binary | std::ios::in | std::ios::out );
-			
+
 			open( f, root, mode );
 		}
 	}
@@ -71,7 +71,7 @@ MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::E
 		assert( buf );
 		assert( mode & IndexedIO::Read );
 		std::stringstream *f = new std::stringstream( std::string( &buf->readable()[0], buf->readable().size() ), std::ios::binary | std::ios::in | std::ios::out );
-		
+
 		open( f, root, mode );
 	}
 }
@@ -83,23 +83,23 @@ MemoryIndexedIO::~MemoryIndexedIO()
 ConstCharVectorDataPtr MemoryIndexedIO::buffer()
 {
 	boost::optional<Imf::Int64> indexEnd = flush();
-	
+
 	std::stringstream *s = dynamic_cast< std::stringstream *>( device() ) ;
 	assert( s );
-	
+
 	CharVectorData::ValueType d;
 	const std::string &str = s->str();
-	
+
 	if ( indexEnd )
 	{
 		d.assign( str.begin(), str.end() );
 		d.resize( *indexEnd );
 		assert( d.size() ==  *indexEnd );
-	}	
+	}
 	else
 	{
 		d.assign( str.begin(), str.end() );
 	}
-	
+
 	return new CharVectorData( d );
 }

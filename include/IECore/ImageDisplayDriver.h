@@ -61,7 +61,7 @@ class ImageDisplayDriver : public DisplayDriver
 
 		// updates the internal image primitive.
 		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize );
-		
+
 		virtual void imageClose();
 
 		ConstImagePrimitivePtr image() const;

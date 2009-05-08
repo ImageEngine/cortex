@@ -45,11 +45,11 @@ class SystemExitCmd : public MPxCommand
 	public:
 		SystemExitCmd();
 		virtual ~SystemExitCmd();
-		
+
 		static void *creator();
-		
+
 		MStatus doIt( const MArgList &args );
-		
+
 };
 
 }

@@ -43,13 +43,13 @@ init( False )
 class TestSelection( unittest.TestCase ) :
 
 	def testSelect( self ) :
-	
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		
+
 		r.worldBegin()
-	
+
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 
 		r.setAttribute( "name", StringData( "one" ) )
@@ -63,27 +63,27 @@ class TestSelection( unittest.TestCase ) :
 		r.concatTransform( M44f.createTranslated( V3f( 2, 0, 0 ) ) )
 		r.setAttribute( "name", StringData( "three" ) )
 		r.geometry( "sphere", {}, {} )
-				
+
 		r.worldEnd()
-		
+
 		s = r.scene()
 		s.setCamera( PerspectiveCamera() )
-		
+
 		ss = s.select( Box2f( V2f( 0 ), V2f( 1 ) ) )
 		names = [ x.name.value() for x in ss ]
 		self.assertEqual( len( names ), 3 )
 		self.assert_( "one" in names )
 		self.assert_( "two" in names )
 		self.assert_( "three" in names )
-		
+
 	def testRegionSelect( self ) :
-	
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		
+
 		r.worldBegin()
-		
+
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
@@ -100,17 +100,17 @@ class TestSelection( unittest.TestCase ) :
 		r.concatTransform( M44f.createTranslated( V3f( 4, 0, 0 ) ) )
 		r.setAttribute( "name", StringData( "blue" ) )
 		r.geometry( "sphere", {}, {} )
-				
+
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 1, 1 ) ) } )
 		r.concatTransform( M44f.createTranslated( V3f( 0, -4, 0 ) ) )
 		r.setAttribute( "name", StringData( "white" ) )
 		r.geometry( "sphere", {}, {} )
 
 		r.worldEnd()
-		
+
 		s = r.scene()
 		s.setCamera( PerspectiveCamera() )
-		
+
 		ss = s.select( Box2f( V2f( 0, 0.5 ), V2f( 0.5, 1 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( ss[0].name.value(), "red" )
@@ -126,6 +126,6 @@ class TestSelection( unittest.TestCase ) :
 		ss = s.select( Box2f( V2f( 0.5 ), V2f( 1 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( ss[0].name.value(), "white" )
-			
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

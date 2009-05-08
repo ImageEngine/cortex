@@ -75,27 +75,27 @@ class PythonCmd : public MPxCommand
 	public:
 		PythonCmd();
 		virtual ~PythonCmd();
-		
+
 		static void* creator();
 		static MSyntax newSyntax();
-		
+
 		MStatus doIt( const MArgList & args );
-		
+
 		static void import( const std::string &moduleName );
-		
+
 		static void initialize();
 		static void uninitialize();
-		
+
 		/// Returns the python context used for commands not specifying a context.
 		/// This may be useful for executing python code from c++ elsewhere.
 		static boost::python::object &globalContext();
-		
+
 	private:
 		static bool g_initialized;
 		static boost::python::object g_globalContext;
-		
+
 		typedef std::map< std::string, boost::python::dict> ContextMap;
-		
+
 		static ContextMap g_contextMap;
 };
 

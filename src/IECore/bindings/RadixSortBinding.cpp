@@ -49,18 +49,18 @@ struct RadixSortWrapper : public RadixSort
 	UIntVectorDataPtr sort( typename TypedData< std::vector<T> >::ConstPtr input )
 	{
 		const std::vector<unsigned int> &indices = this->operator()( input->readable() );
-		
+
 		UIntVectorDataPtr result = new UIntVectorData();
 		result->writable().assign( indices.begin(), indices.end() );
-		
-		return result;	
+
+		return result;
 	}
 };
 
 void bindRadixSort()
 {
 	typedef class_< RadixSortWrapper, boost::noncopyable> MeshPrimitiveEvaluatorPyClass;
-	
+
 	class_< RadixSortWrapper, boost::noncopyable>( "RadixSort", no_init )
 		.def( init<>() )
 		.def( "sort", &RadixSortWrapper::sort<int> )

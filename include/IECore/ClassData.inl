@@ -59,12 +59,12 @@ DataType &ClassData<ClassType, DataType, DataDeletePolicy>::create( const ClassT
 {
 	assert( classOwner );
 	typename ClassDataMap::const_iterator it = m_classDataMap.find( classOwner );
-		
+
 	if( it != m_classDataMap.end() )
 	{
 		/// If this point has been reached it means that two instances of ClassType have been allocated with the same address, but the
 		/// first instance has not erased its class data on destruction. We do the erase here, to allow things to proceed, but it does
-		/// imply a bug in the calling code - hence the assert(false) in asserted builds.		
+		/// imply a bug in the calling code - hence the assert(false) in asserted builds.
 		erase( classOwner );
 		assert( false );
 	}
@@ -90,12 +90,12 @@ const DataType &ClassData<ClassType, DataType, DataDeletePolicy>::operator []( c
 	typename ClassDataMap::const_iterator it = m_classDataMap.find( classOwner );
 	assert( it != m_classDataMap.end() );
 
-	return it->second;			
+	return it->second;
 }
 
 template< typename ClassType, typename DataType, typename DataDeletePolicy >
 DataType &ClassData<ClassType, DataType, DataDeletePolicy>::operator []( const ClassType *classOwner )
-{		
+{
 	assert( classOwner );
 	typename ClassDataMap::iterator it = m_classDataMap.find( classOwner );
 	assert( it != m_classDataMap.end() );

@@ -73,15 +73,15 @@ struct Font::Mesh
 
 class Font::Mesher
 {
-	
+
 	public :
-	
+
 		Mesher( FT_Pos curveTolerance );
-		
+
 		MeshPrimitivePtr mesh( FT_Outline *outline );
-		
+
 	private :
-	
+
 		FT_Pos m_curveTolerance;
 
 		typedef vector<V3f> PointVector;
@@ -94,7 +94,7 @@ class Font::Mesher
 
 		// used in the subdivision of bezier curves
 		class BezierCallback;
-		
+
 		// functions to be used as part of an FT_Outline_Funcs_ struct
 		static int moveTo( const FT_Vector *to, void *that );
 		static int lineTo( const FT_Vector *to, void *that );
@@ -102,7 +102,7 @@ class Font::Mesher
 		static int cubicTo( const FT_Vector *control1, const FT_Vector *control2, const FT_Vector *to, void *that );
 
 		vector<PointVector> m_pointVectors;
-		
+
 };
 
 
@@ -151,7 +151,7 @@ MeshPrimitivePtr Font::Mesher::mesh( FT_Outline *outline )
 	funcs.shift = 0;
 	funcs.delta = 0;
 	FT_Outline_Decompose( outline, &funcs, this );
-	
+
 	// reverse the contours if necessary
 	if( !(outline->flags & FT_OUTLINE_REVERSE_FILL) )
 	{
@@ -160,14 +160,14 @@ MeshPrimitivePtr Font::Mesher::mesh( FT_Outline *outline )
 			std::reverse( m_pointVectors[i].begin(), m_pointVectors[i].end() );
 		}
 	}
-	
+
 	// sort into outlines and holes
 	LoopVector outlines;
 	BoundVector outlineBounds;
 	LoopVector holes;
 	BoundVector holeBounds;
 	vector<bool> holeUsed;
-	
+
 	for( unsigned i=0; i<m_pointVectors.size(); i++ )
 	{
 		if( m_pointVectors[i].size() )
@@ -190,16 +190,16 @@ MeshPrimitivePtr Font::Mesher::mesh( FT_Outline *outline )
 		}
 		else
 		{
-			outlines.push_back( Loop( m_pointVectors[i].begin(), m_pointVectors[i].end() ) );		
+			outlines.push_back( Loop( m_pointVectors[i].begin(), m_pointVectors[i].end() ) );
 			Box3f b = polygonBound( m_pointVectors[i].begin(), m_pointVectors[i].end() );
 			outlineBounds.push_back( Box2f( V2f( b.min.x, b.min.y ), V2f( b.max.x, b.max.y ) ) );
 		}
 	}
-	
+
 	// triangulate each outline, along with any holes which should be associated with it
 	MeshPrimitiveBuilder::Ptr b = new MeshPrimitiveBuilder;
 	V3fTriangulator::Ptr t = new V3fTriangulator( b );
-	
+
 	for( unsigned i=0; i<outlines.size(); i++ )
 	{
 		LoopVector loops;
@@ -217,10 +217,10 @@ MeshPrimitivePtr Font::Mesher::mesh( FT_Outline *outline )
 				}
 			}
 		}
-		
+
 		t->triangulate( loops.begin(), loops.end() );
 	}
-	
+
 	return b->mesh();
 }
 
@@ -351,14 +351,14 @@ Font::ConstMeshPtr Font::cachedMesh( char c ) const
 	{
 		return it->second;
 	}
-	
+
 	// not in cache, so load it
 	FT_Load_Char( m_face, c, FT_LOAD_NO_BITMAP | FT_LOAD_NO_SCALE );
-	
+
 	// get the mesh
 	Mesher m( (FT_Pos)(m_curveTolerance * m_face->units_per_EM) );
 	MeshPrimitivePtr primitive = m.mesh( &(m_face->glyph->outline) );
-	
+
 	// transform it so an EM is 1 unit
 	M44f transform; transform.scale( V3f( 1.0f / m_face->units_per_EM ) );
 	TransformOpPtr transformOp = new TransformOp;
@@ -366,18 +366,18 @@ Font::ConstMeshPtr Font::cachedMesh( char c ) const
 	transformOp->matrixParameter()->setValue( new M44fData( transform ) );
 	transformOp->copyParameter()->setTypedValue( false );
 	transformOp->operate();
-	
+
 	// put it in the cache
 	MeshPtr mesh( new Mesh );
 	mesh->primitive = primitive;
 	mesh->bound = primitive->bound();
 	mesh->advance = V2f( m_face->glyph->advance.x, m_face->glyph->advance.y ) / m_face->units_per_EM;
 	m_meshes[c] = mesh;
-	
+
 	// return it
 	return mesh;
 }
-		
+
 ConstMeshPrimitivePtr Font::mesh( char c ) const
 {
 	return cachedMesh( c )->primitive;
@@ -387,52 +387,52 @@ MeshPrimitivePtr Font::mesh( const std::string &text ) const
 {
 	MeshPrimitivePtr result = new MeshPrimitive;
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData );
-	
+
 	if( !text.size() )
 	{
 		return result;
 	}
-	
+
 	MeshMergeOpPtr merger = new MeshMergeOp;
 	merger->inputParameter()->setValue( result );
 	merger->copyParameter()->setTypedValue( false );
-	
+
 	TransformOpPtr transformOp = new TransformOp;
 	transformOp->copyParameter()->setTypedValue( false );
 	M44fDataPtr matrixData = new M44fData;
 	transformOp->matrixParameter()->setValue( matrixData );
-	
+
 	for( unsigned i=0; i<text.size(); i++ )
 	{
 		ConstMeshPtr character = cachedMesh( text[i] );
-		
+
 		MeshPrimitivePtr primitive = character->primitive->copy();
-		
+
 		transformOp->inputParameter()->setValue( primitive );
 		transformOp->operate();
-		 
+
 		merger->meshParameter()->setValue( primitive );
 		merger->operate();
-		
+
 		if( i<text.size()-1 )
 		{
 			V2f a = advance( text[i], text[i+1] );
 			matrixData->writable().translate( V3f( a.x, a.y, 0 ) );
 		}
 	}
-	
+
 	return result;
 }
 
 GroupPtr Font::meshGroup( const std::string &text ) const
 {
 	GroupPtr result = new Group;
-	
+
 	if( !text.size() )
 	{
 		return result;
 	}
-	
+
 	M44f transform;
 	for( unsigned i=0; i<text.size(); i++ )
 	{
@@ -444,14 +444,14 @@ GroupPtr Font::meshGroup( const std::string &text ) const
 			g->setTransform( new MatrixTransform( transform ) );
 			result->addChild( g );
 		}
-		
+
 		if( i<text.size()-1 )
 		{
 			V2f a = advance( text[i], text[i+1] );
 			transform.translate( V3f( a.x, a.y, 0 ) );
 		}
 	}
-	
+
 	return result;
 }
 
@@ -461,7 +461,7 @@ Imath::V2f Font::advance( char first, char second ) const
 	if( m_kerning!=0.0f )
 	{
 		FT_UInt left = FT_Get_Char_Index( m_face, first );
-		FT_UInt right = FT_Get_Char_Index( m_face, second );	
+		FT_UInt right = FT_Get_Char_Index( m_face, second );
 		FT_Vector kerning;
 		FT_Error e = FT_Get_Kerning( m_face, left, right, FT_KERNING_UNSCALED, &kerning );
 		if( !e )
@@ -494,7 +494,7 @@ Imath::Box2f Font::bound( const std::string &text ) const
 	{
 		return result;
 	}
-	
+
 	V2f translate( 0 );
 	for( unsigned i=0; i<text.size(); i++ )
 	{
@@ -507,7 +507,7 @@ Imath::Box2f Font::bound( const std::string &text ) const
 			translate += advance( text[i], text[i+1] );
 		}
 	}
-	
+
 	return result;
 }
 
@@ -521,7 +521,7 @@ ImagePrimitivePtr Font::image() const
 	Box2i charDisplayWindow = boundingWindow();
 	int charWidth = charDisplayWindow.size().x + 1;
 	int charHeight = charDisplayWindow.size().y + 1;
-	
+
 	int width = charWidth * 16;
 	int height = charHeight * 8;
 	Box2i window( V2i( 0 ), V2i( width-1, height-1 ) );
@@ -529,7 +529,7 @@ ImagePrimitivePtr Font::image() const
 	ImagePrimitivePtr result = new ImagePrimitive( window, window );
 	FloatVectorDataPtr luminanceData = result->createChannel<float>( "Y" );
 	float *luminance = &*(luminanceData->writable().begin());
-	
+
 	for( unsigned c=0; c<128; c++ )
 	{
 		ConstImagePrimitivePtr charImage = image( (char)c );
@@ -538,9 +538,9 @@ ImagePrimitivePtr Font::image() const
 		const float *charLuminance = &*(charLuminanceData->readable().begin());
 		const Box2i &charDataWindow = charImage->getDataWindow();
 		assert( charDisplayWindow == charImage->getDisplayWindow() );
-		
+
 		V2i dataOffset = charDataWindow.min - charDisplayWindow.min;
-		
+
 		int cx = c % 16;
 		int cy = c / 16;
 		float *outBase= luminance + (cy * charHeight + dataOffset.y ) * width + cx * charWidth + dataOffset.x;
@@ -565,26 +565,26 @@ ConstImagePrimitivePtr Font::cachedImage( char c ) const
 	{
 		return it->second;
 	}
-	
+
 	// not in cache, so load it
 	FT_Load_Char( m_face, c, FT_LOAD_RENDER );
-	
+
 	// convert to ImagePrimitive
 	FT_Bitmap &bitmap = m_face->glyph->bitmap;
 	assert( bitmap.num_grays==256 );
 	assert( bitmap.pixel_mode==FT_PIXEL_MODE_GRAY );
-	
+
 	Box2i displayWindow = boundingWindow();
-	
+
 	// datawindow is the bitmap bound, but adjusted to account for the y transformation described
 	// in boundingWindow.
 	Box2i dataWindow(
 		V2i( m_face->glyph->bitmap_left, -m_face->glyph->bitmap_top ),
 		V2i( m_face->glyph->bitmap_left + bitmap.width - 1, -m_face->glyph->bitmap_top + bitmap.rows - 1 )
 	);
-	
+
 	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );
-	
+
 	FloatVectorDataPtr luminanceData = image->createChannel<float>( "Y" );
 	float *luminance = &*(luminanceData->writable().begin());
 	for( int y=0; y<bitmap.rows; y++ )
@@ -595,11 +595,11 @@ ConstImagePrimitivePtr Font::cachedImage( char c ) const
 		{
 			*luminance++ = *row++ / 255.0f;
 		}
-	}	
+	}
 
 	// put it in the cache
 	m_images[c] = image;
-	
+
 	// return it
 	return image;
 }
@@ -615,9 +615,9 @@ Imath::Box2i Font::boundingWindow() const
 	return Box2i(
 		V2i( (int)roundf( m_face->bbox.xMin * scale ), (int)roundf( -m_face->bbox.yMax * scale ) ),
 		V2i( (int)roundf( m_face->bbox.xMax * scale ) - 1, (int)roundf( -m_face->bbox.yMin * scale ) - 1)
-	);	
+	);
 }
-		
+
 FT_Library Font::library()
 {
 	static FT_Library l;

@@ -43,23 +43,23 @@ namespace IECore
 class CoordinateSystem : public StateRenderable
 {
 	public:
-	
+
 		CoordinateSystem();
 		CoordinateSystem( const std::string &name );
 		virtual ~CoordinateSystem();
-				
+
 		IE_CORE_DECLAREOBJECT( CoordinateSystem, StateRenderable );
-		
+
 		const std::string &getName() const;
 		void setName( const std::string &name );
-		
+
 		/// Calls renderer->coordinateSystem( name )
 		virtual void render( RendererPtr renderer ) const;
-	
+
 	private:
 
 		std::string m_name;
-	
+
 		static const unsigned int m_ioVersion;
 };
 

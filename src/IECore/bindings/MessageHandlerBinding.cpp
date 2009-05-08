@@ -55,9 +55,9 @@ class MessageHandlerWrap : public MessageHandler, public Wrapper<MessageHandler>
 
 		MessageHandlerWrap( PyObject *self ) : Wrapper<MessageHandler>( self, this ) {}
 
-		virtual void handle( MessageHandler::Level level, const std::string &context, const std::string &message ) 
+		virtual void handle( MessageHandler::Level level, const std::string &context, const std::string &message )
 		{
-			this->get_override( "handle" )( level, context, message ); 
+			this->get_override( "handle" )( level, context, message );
 		}
 
 };
@@ -81,9 +81,9 @@ static LevelFilteredMessageHandlerPtr levelFilteredMessageHandlerConstructor(Mes
 
 void bindMessageHandler()
 {
-	
+
 	def( "msg", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&msg );
-	
+
 	object mh = RefCountedClass<MessageHandler, RefCounted, MessageHandlerWrapPtr>( "MessageHandler" )
 		.def( init<>() )
 		.def( "handle", pure_virtual( &MessageHandler::handle ) )
@@ -98,24 +98,24 @@ void bindMessageHandler()
 		.def( "stringAsLevel", MessageHandler::stringAsLevel )
 		.staticmethod( "stringAsLevel" )
 	;
-		
+
 	RefCountedClass<NullMessageHandler, MessageHandler>( "NullMessageHandler" )
 	.	def( init<>() )
 	;
-	
+
 	RefCountedClass<OStreamMessageHandler, MessageHandler>( "OStreamMessageHandler" )
 		.def( "cErrHandler", &OStreamMessageHandler::cErrHandler )
 		.staticmethod( "cErrHandler" )
 		.def( "cOutHandler", &OStreamMessageHandler::cOutHandler )
 		.staticmethod( "cOutHandler" )
 	;
-	
+
 	RefCountedClass<CompoundMessageHandler, MessageHandler>( "CompoundMessageHandler" )
 		.def( init<>() )
 		.def( "addHandler", &addHandler )
 		.def( "removeHandler", &removeHandler )
 	;
-	
+
 	RefCountedClass<FilteredMessageHandler, MessageHandler>( "FilteredMessageHandler" )
 	;
 
@@ -133,7 +133,7 @@ void bindMessageHandler()
 		.value( "Debug", MessageHandler::Debug )
 		.value( "Invalid", MessageHandler::Invalid )
 	;
-		
+
 }
 
 }

@@ -41,7 +41,7 @@ vec3 hsvToRGB( vec3 hsv )
 	{
 		return hsv.ggg;
 	}
-	
+
 	float h = hsv.r * 6.0;
 	int i = int( floor( h ) );
 	float f = h - float( i );
@@ -69,7 +69,7 @@ vec3 hsvToRGB( vec3 hsv )
 	{
 		return vec3( t, p, hsv.b );
 	}
-	
+
 	return vec3( hsv.b, p, q );
 }
 

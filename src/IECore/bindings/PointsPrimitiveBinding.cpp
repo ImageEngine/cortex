@@ -44,7 +44,7 @@ namespace IECore
 {
 
 void bindPointsPrimitive()
-{	
+{
 	scope primScope = RunTimeTypedClass<PointsPrimitive>()
 		.def( init<size_t>() )
 		.def( init<V3fVectorDataPtr>() )

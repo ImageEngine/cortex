@@ -40,7 +40,7 @@ namespace IECoreTruelight
 
 enum TypeId
 {
-	
+
 	TruelightColorTransformOpTypeId = 108000,
 	LastTypeId = 108999
 

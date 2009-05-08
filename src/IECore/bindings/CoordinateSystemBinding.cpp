@@ -52,5 +52,5 @@ void bindCoordinateSystem()
 		.def( "setName", &CoordinateSystem::setName )
 	;
 }
-	
+
 }

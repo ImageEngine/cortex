@@ -43,11 +43,11 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 struct FrameListHelper
-{	
+{
 	static list asList( FrameListPtr l )
 	{
 		std::vector<FrameList::Frame> frames;
@@ -83,11 +83,11 @@ struct FrameListHelper
 		}
 
 		return result;
-	}	
+	}
 };
 
 void bindFrameList()
-{	
+{
 	RunTimeTypedClass<FrameList>()
 		.def( "asList", FrameListHelper::asList )
 		.def( "isEqualTo", &FrameList::isEqualTo )
@@ -96,7 +96,7 @@ void bindFrameList()
 		.def( "parse", &FrameList::parse ).staticmethod( "parse" )
 		.def( "__str__", &FrameList::asString )
 		.def( self == self )
-	;	
+	;
 }
 
 }

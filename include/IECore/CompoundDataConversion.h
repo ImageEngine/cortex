@@ -51,24 +51,24 @@ class CompoundDataConversion : public DataConversion< typename C1::FromType, typ
 	public:
 		/// These two types must be the same, so that the function composition works
 		BOOST_STATIC_ASSERT( (boost::is_same< typename C1::ToType, typename C2::FromType >::value) );
-		
-		/// Inverse defined by the equality: (f o g)'(x) = ( g' o f' )(x)		
+
+		/// Inverse defined by the equality: (f o g)'(x) = ( g' o f' )(x)
 		typedef CompoundDataConversion< typename C2::InverseType, typename C1::InverseType > InverseType;
-	
+
 		/// Instantiate a conversion using the default constructors for C1 and C2
 		CompoundDataConversion();
-		
+
 		/// Instantiate a conversion using given instances of C1 and C2
 		CompoundDataConversion( const C1 &c1, const C2 &c2 );
 
 		/// Perform the conversion
 		typename CompoundDataConversion<C1, C2>::ToType operator()( typename CompoundDataConversion<C1, C2>::FromType f ) const;
-		
+
 		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;
-	
+
 	protected:
-	
+
 		C1 m_c1;
 		C2 m_c2;
 };

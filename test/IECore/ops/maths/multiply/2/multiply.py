@@ -37,7 +37,7 @@ from IECore import *
 class multiply( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self,
 			"multiply",
 			"multiplies two numbers together - in a new and improved version 2!!.",
@@ -47,27 +47,27 @@ class multiply( Op ) :
 				defaultValue = 2,
 			)
 		)
-		
-		self.parameters().addParameter( 
-		
+
+		self.parameters().addParameter(
+
 			IntParameter(
 				name = "a",
 				description = "first operand",
 				defaultValue = 1,
 			)
 		)
-		
+
 		self.parameters().addParameter(
-			
+
 			IntParameter(
 				name = "b",
 				description = "second operand",
 				defaultValue = 2,
 			)
-		
+
 		)
-		
+
 	def doOperation( self, operands ) :
-	
+
 		return IntData( operands["a"].value * operands["b"].value )
 

@@ -45,7 +45,7 @@ namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( Primitive );
-	
+
 } // namespace IECore
 
 namespace IECoreMaya
@@ -57,26 +57,26 @@ IE_CORE_FORWARDDECLARE( FromMayaShapeConverter );
 /// maya shape objects into IECore::Primitive objects.
 class FromMayaShapeConverter : public FromMayaObjectConverter
 {
-	
+
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaShapeConverter, FromMayaShapeConverterTypeId, FromMayaObjectConverter );
-		
+
 		enum Space
 		{
 			Object = 0,
 			World = 1
 		};
-		
+
 		IECore::IntParameterPtr spaceParameter();
 		IECore::ConstIntParameterPtr spaceParameter() const;
-		
+
 		IECore::StringParameterPtr primVarAttrPrefixParameter();
 		IECore::ConstStringParameterPtr primVarAttrPrefixParameter() const;
-		
+
 		//! @name Factory
 		/// A unctions allow the creation of a specific converter subclass appropriate
-		/// to a particular MDagPath instance. 
+		/// to a particular MDagPath instance.
 		/////////////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Creates a converter which will convert the given object to an IECore::Object
@@ -87,9 +87,9 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 		/// correct world space queries).
 		static FromMayaShapeConverterPtr create( const MDagPath &dagPath, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
-		
+
 	protected :
-	
+
 		FromMayaShapeConverter( const std::string &name, const std::string &description, const MObject &object );
 		/// This form is necessary if people want to get the shape in world space - world space queries only ever
 		/// work with an MDagPath.
@@ -129,7 +129,7 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 		};
 
 	private :
-	
+
 		void constructCommon(); // does stuff both constructors need.
 		void addPrimVars( const MObject &object, IECore::PrimitivePtr primitive ) const;
 
@@ -137,11 +137,11 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 
 		IECore::IntParameterPtr m_spaceParameter;
 		IECore::StringParameterPtr m_primVarAttrPrefixParameter;
-		
+
 		typedef FromMayaShapeConverterPtr (*ShapeCreatorFn)( const MDagPath &dagPath );
 		typedef std::pair<MFn::Type, IECore::TypeId> ShapeTypes;
 		typedef std::map<ShapeTypes, ShapeCreatorFn> ShapeTypesToFnsMap;
-		
+
 		static ShapeTypesToFnsMap *shapeTypesToFns();
 		static void registerShapeConverter( const MFn::Type fromType, IECore::TypeId resultType, ShapeCreatorFn creator );
 

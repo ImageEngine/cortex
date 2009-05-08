@@ -51,7 +51,7 @@ ParameterisedProcedural::ParameterisedProcedural()
 ParameterisedProcedural::~ParameterisedProcedural()
 {
 }
-				
+
 void ParameterisedProcedural::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
 	VisibleRenderable::copyFrom( other, context );
@@ -94,26 +94,26 @@ void ParameterisedProcedural::memoryUsage( Object::MemoryAccumulator &a ) const
 class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 {
 	public :
-		
+
 		Forwarder( ConstParameterisedProceduralPtr p, ConstCompoundObjectPtr a )
 			:	parameterisedProcedural( p ), validatedArgs( a )
 		{
 		}
-		
+
 		virtual Imath::Box3f bound() const
 		{
 			return parameterisedProcedural->doBound( validatedArgs );
 		}
-		
+
 		virtual void render( RendererPtr renderer ) const
 		{
 			parameterisedProcedural->doRender( renderer, validatedArgs );
 		}
-		
+
 		ConstParameterisedProceduralPtr parameterisedProcedural;
 		ConstCompoundObjectPtr validatedArgs;
 };
-				
+
 void ParameterisedProcedural::render( RendererPtr renderer ) const
 {
 	render( renderer, true, true, true, false );
@@ -124,12 +124,12 @@ void ParameterisedProcedural::render( RendererPtr renderer, bool inAttributeBloc
 	ConstCompoundObjectPtr validatedArgs = parameters()->getTypedValidatedValue<CompoundObject>();
 
 	AttributeBlock attributeBlock( renderer, inAttributeBlock );
-	
+
 		if( withState )
 		{
 			doRenderState( renderer, validatedArgs );
 		}
-		
+
 		if( withGeometry )
 		{
 
@@ -143,7 +143,7 @@ void ParameterisedProcedural::render( RendererPtr renderer, bool inAttributeBloc
 			}
 
 		}
-		
+
 }
 
 Imath::Box3f ParameterisedProcedural::bound() const

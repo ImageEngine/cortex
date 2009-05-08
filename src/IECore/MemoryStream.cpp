@@ -49,7 +49,7 @@ MemoryStream::MemoryStream( char *buf, std::streamsize sz, bool ownsBuf )
 {
 	m_impl = new Impl( buf, sz, ownsBuf );
 }
-		
+
 std::streamsize MemoryStream::read(char* s, std::streamsize n)
 {
 	return m_impl->read( s, n );
@@ -65,7 +65,7 @@ void MemoryStream::get( char *& data, std::streamsize &sz ) const
 	data = m_impl->m_head;
 	sz = m_impl->m_size;
 }
-		
+
 MemoryStream::Impl::Impl()
 {
 	m_bufSize = 16384; // Modest initial size, arbitrarily chosen
@@ -93,17 +93,17 @@ std::streamsize MemoryStream::Impl::read(char* s, std::streamsize n)
 	{
 		// Underflow, so read as many as we can, return num read
 		n = m_size - (m_next - m_head);
-		
+
 		if (n == 0)
-		{		
+		{
 			return EOF;
-		}							
+		}
 	}
-	
+
 	assert( s );
 	assert( m_next );
 	memcpy( s, m_next, n );
-	
+
 	m_next += n;
 
 	return n;
@@ -124,10 +124,10 @@ std::streamsize MemoryStream::Impl::write(const char* s, std::streamsize n)
 		}
 		m_bufSize *= 2;
 
-	
+
 		m_next = newbuf + ( m_next - m_head );
-		m_head = newbuf;				
-		m_ownsBuf = true;									
+		m_head = newbuf;
+		m_ownsBuf = true;
 	}
 	// copy in
 	memcpy( m_next, s, n );

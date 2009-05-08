@@ -51,14 +51,14 @@ class Converter : public Parameterised
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( Converter, Parameterised );
-	
+
 	protected :
-	
+
 		Converter( const std::string &name, const std::string &description );
-		virtual ~Converter();	
-	
+		virtual ~Converter();
+
 };
 
 IE_CORE_DECLAREPTR( Converter );

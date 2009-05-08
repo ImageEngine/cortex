@@ -49,33 +49,33 @@ namespace IECore
 {
 
 template<typename F, typename T>
-XYZToRGBColorTransform<F, T>::XYZToRGBColorTransform() 
-{	
+XYZToRGBColorTransform<F, T>::XYZToRGBColorTransform()
+{
 	InverseType t;
-	
+
 	m_matrix = t.matrix().inverse();
 
 }
 
 template<typename F, typename T>
 template<typename M>
-XYZToRGBColorTransform<F, T>::XYZToRGBColorTransform( const M &matrix ) 
+XYZToRGBColorTransform<F, T>::XYZToRGBColorTransform( const M &matrix )
 {
 	m_matrix = IECore::convert<Imath::M33f>( matrix );
 }
 
 template<typename F, typename T>
 template<typename C>
-XYZToRGBColorTransform<F, T>::XYZToRGBColorTransform(		
+XYZToRGBColorTransform<F, T>::XYZToRGBColorTransform(
 	const C &rChromacity,
 	const C &gChromacity,
 	const C &bChromacity,
 
-	const C &referenceWhite						
+	const C &referenceWhite
 )
 {
 	InverseType t( rChromacity, gChromacity, bChromacity, referenceWhite );
-	
+
 	m_matrix = t.matrix().inverse();
 }
 
@@ -85,13 +85,13 @@ T XYZToRGBColorTransform<F, T>::transform( const F &f )
 	Imath::V3f from = IECore::convert< Imath::V3f >( f );
 	assert( from.x >= -Imath::limits<float>::epsilon() );
 	assert( from.y >= -Imath::limits<float>::epsilon() );
-	assert( from.z >= -Imath::limits<float>::epsilon() );		
-	
+	assert( from.z >= -Imath::limits<float>::epsilon() );
+
 	assert( from.x <= 1.0f + Imath::limits<float>::epsilon() );
 	assert( from.y <= 1.0f + Imath::limits<float>::epsilon() );
-	assert( from.z <= 1.0f + Imath::limits<float>::epsilon() );		
-	
-	return IECore::convert<T>( from * m_matrix );		
+	assert( from.z <= 1.0f + Imath::limits<float>::epsilon() );
+
+	return IECore::convert<T>( from * m_matrix );
 }
 
 template<typename F, typename T>

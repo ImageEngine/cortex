@@ -46,11 +46,11 @@ namespace IECore
 
 void bindMeshNormalsOp()
 {
-	
+
 	RunTimeTypedClass<MeshNormalsOp>()
 		.def( init<>() )
 	;
-	
+
 }
 
 } // namespace IECore

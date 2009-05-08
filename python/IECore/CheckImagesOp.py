@@ -44,9 +44,9 @@ from IECore import *
 class CheckImagesOp( FileSequenceAnalyzerOp ) :
 
 	def __init__( self ) :
-	
+
 		FileSequenceAnalyzerOp.__init__( self, "CheckImagesOp",
-"""This Op checks an image file sequence for corrupted and missing files. It also warns of abrupt file size changes. 
+"""This Op checks an image file sequence for corrupted and missing files. It also warns of abrupt file size changes.
 The Op will raise an error if there's any missing or corrupt file.
 Otherwise it will return the number of suspicious frames (strange file sizes).""",
 			IntParameter(
@@ -56,7 +56,7 @@ Otherwise it will return the number of suspicious frames (strange file sizes).""
 			),
 			extensions = "dpx exr cin tif tiff jpeg jpg"
 		)
-		
+
 		self.userData()["UI"] = CompoundObject(
 			{
 				"infoMessages": BoolData( True ),

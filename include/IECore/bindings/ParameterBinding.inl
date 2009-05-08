@@ -59,7 +59,7 @@ T parameterPresets( const boost::python::object &o )
 			// warning converted to exception
 			throw boost::python::error_already_set();
 		}
-	
+
 		boost::python::dict dict = ed();
 		boost::python::list keys = dict.keys();
 		boost::python::list values = dict.values();
@@ -67,10 +67,10 @@ T parameterPresets( const boost::python::object &o )
 		{
 			result.push_back( typename T::value_type( boost::python::extract<std::string>( keys[i] )(), boost::python::extract<typename T::value_type::second_type>( values[i] )() ) );
 		}
-		
+
 		return result;
 	}
-		
+
 	size_t s = boost::python::len( o );
 	for( size_t i=0; i<s; i++ )
 	{
@@ -83,8 +83,8 @@ T parameterPresets( const boost::python::object &o )
 		}
 		result.push_back( typename T::value_type( boost::python::extract<std::string>( preset[0] )(), boost::python::extract<typename T::value_type::second_type>( preset[1] )() ) );
 	}
-	
-	return result;	
+
+	return result;
 }
 
 }

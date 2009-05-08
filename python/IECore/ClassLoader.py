@@ -54,66 +54,66 @@ class ClassLoader :
 	# classes found on the SearchPath object passed
 	# in.
 	def __init__( self, searchPaths ) :
-	
+
 		self.__searchPaths = searchPaths
 		self.__defaultVersions = {}
 		self.refresh()
-		
+
 	## Returns an alphabetically sorted list
 	# of all the classes found
 	# on the searchpaths. The optional matchString
 	# performs glob style matching to narrow down
 	# the set of names returned.
 	def classNames( self, matchString = "*" ) :
-		
-		self.__findAllClasses()	
+
+		self.__findAllClasses()
 		n = [ x for x in self.__classes.keys() if fnmatch( x, matchString ) ]
 		n.sort()
 		return n
-		
+
 	## Returns the available versions of the specified
 	# class as a list of ints, with the latest version
 	# last. If the class doesn't exist returns an empty
 	# list.
 	def versions( self, name ) :
-	
+
 		try :
 			c = self.__findClass( name )
 			return c["versions"]
 		except :
 			return []
-				
+
 	## Sets the default	version for the named class.
 	# This is the version that is loaded if no version
 	# is specified in the load() method.
 	def setDefaultVersion( self, name, version ) :
-	
+
 		self.__validateVersion( version )
-	
+
 		c = self.__findClass( name )
-			
+
 		if not version in c["versions"] :
 			raise RuntimeError( "Class \"%s\" has no version %d." % (name, version) )
-			
+
 		self.__defaultVersions[name] = version
-	
+
 	## Returns the default version for the named class.
 	# This is the version that is loaded if no version
 	# is specified in the load() method. If it has not
 	# been set explicitly with setDefaultVersion() then
 	# it defaults to the highest available version.
 	def getDefaultVersion( self, name ) :
-	
+
 		c = self.__findClass( name )
-		
+
 		v = self.__defaultVersions.get( name, c["versions"][-1] )
 		if not v in c["versions"] :
 			msg( Msg.Level.Warning, "ClassLoader.getDefaultVersion", "Version %d doesn't exist, reverting to version %d." % ( v, c["versions"][-1] ) )
 			v = c["versions"][-1]
 			self.__defaultVersions[name] = v
-			
+
 		return v
-					
+
 	## Loads the specified version of the named class.
 	# Version defaults to getDefaultVersion( name ) if
 	# not specified. Note that this returns the actual class
@@ -123,46 +123,46 @@ class ClassLoader :
 	def load( self, name, version = None ) :
 
 		c = self.__findClass( name )
-			
+
 		if not version :
 			version = self.getDefaultVersion( name )
-					
+
 		if not version in self.versions( name ) :
 			raise RuntimeError( "Class \"%s\" has no version %d." % (name, version) )
 
 		if version in c["imports"] :
 			return c["imports"][version]
-		
+
 		nameTail = os.path.basename( name )
 		fileName = os.path.join( name, str(version), nameTail + ".py" )
 		fileName = self.__searchPaths.find( fileName )
 		if fileName=="" :
 			raise IOError( "Unable to find implementation file for class \"%s\" version %d." % (name, version) )
-			
+
 		fileForLoad = open( fileName, "r" )
 		try :
 			module = imp.load_module( "IECoreClassLoader" + name.replace( ".", "_" ) + str( version ), fileForLoad, fileName, ( ".py", "r", imp.PY_SOURCE ) )
 		finally :
 			fileForLoad.close()
-			
+
 		if not getattr( module, nameTail, None ) :
 			raise IOError( "File \"%s\" does not define a class named \"%s\"." % ( fileName, nameTail ) )
-	
+
 		result = getattr( module, nameTail )
 
 		result.path = name
 		result.version = version
 
 		c["imports"][version] = result
-		
+
 		return result
-		
+
 	## The ClassLoader uses a caching mechanism to speed
 	# up frequent reloads of the same class. This method
 	# can be used to force an update of the cache to
 	# reflect changes on the filesystem.
 	def refresh( self ) :
-	
+
 		# __classes is a dictionary mapping from a class name
 		# to information for that class in the following form
 		# {
@@ -180,47 +180,47 @@ class ClassLoader :
 	# allowing one loader to be shared by many callers.
 	@classmethod
 	def defaultLoader( cls, envVar ) :
-	
+
 		loader = cls.__defaultLoaders.get( envVar, None )
 		if loader :
 			return loader
-		
+
 		sp = ""
 		if envVar in os.environ :
 			sp = os.environ[envVar]
 		else :
 			msg( Msg.Level.Warning, "ClassLoader.defaultLoader", "Environment variable %s not set." % envVar )
-			
+
 		loader = cls( SearchPath( os.path.expandvars( sp ), ":" ) )
 		cls.__defaultLoaders[envVar] = loader
-		
+
 		return loader
-	
+
 	## Returns a ClassLoader configured to load from the
 	# paths defined by the IECORE_OP_PATHS environment variable. The
 	# same object is returned each time, allowing one loader to be
-	# shared by many callers.			
+	# shared by many callers.
 	@classmethod
 	def defaultOpLoader( cls ) :
-		
+
 		return cls.defaultLoader( "IECORE_OP_PATHS" )
-		
+
 	## Returns a ClassLoader configured to load from the
 	# paths defined by the IECORE_PROCEDURAL_PATHS environment variable. The
 	# same object is returned each time, allowing one loader to be
-	# shared by many callers.			
+	# shared by many callers.
 	@classmethod
 	def defaultProceduralLoader( cls ) :
-		
+
 		return cls.defaultLoader( "IECORE_PROCEDURAL_PATHS" )
-	
+
 	def __updateClassFromSearchPath( self, searchPath, name ) :
-	
+
 		foundAVersion = False
 		nameTail = os.path.split( name )[1]
 		gf = glob.glob( os.path.join( searchPath, name, "*", nameTail + ".py" ) )
 		for f in gf :
-			
+
 			version = f.split( "/" )[-2]
 
 			try :
@@ -231,24 +231,24 @@ class ClassLoader :
 			c = self.__classes.setdefault( name, { "versions" : [], "imports" : {} } )
 
 			if not version in c["versions"]:
-				c["versions"].append( version )						
+				c["versions"].append( version )
 				c["versions"].sort()
 
 			foundAVersion = True
-	
+
 		return foundAVersion
-	
+
 	def __findClass( self, name ) :
-	
-		if not name in self.__classes and not self.__foundAllClasses :	
+
+		if not name in self.__classes and not self.__foundAllClasses :
 			for path in self.__searchPaths.paths :
 				self.__updateClassFromSearchPath( path, name )
-	
+
 		if name in self.__classes :
 			return self.__classes[name]
 		else :
 			raise RuntimeError( "Class \"%s\" doesn't exist." % name )
-	
+
 	def __findAllClasses( self ) :
 
 		if self.__foundAllClasses :
@@ -256,29 +256,29 @@ class ClassLoader :
 
 		self.__classes = {}
 		for path in self.__searchPaths.paths :
-		
+
 			for root, dirs, files in os.walk( path ) :
-			
+
 				if path.endswith( '/' ) :
 					nameBase = root[len(path):]
 				else :
 					nameBase = root[len(path)+1:]
-							
+
 				dirsToPrune = set()
 				for d in dirs :
-				
+
 					if self.__updateClassFromSearchPath( path, os.path.join( nameBase, d ) ) :
 						dirsToPrune.add( d )
-					
+
 				for d in dirsToPrune :
 					dirs.remove( d )
-					
+
 		self.__foundAllClasses = True
-		
+
 	# throws an exception if the version is no good
 	@staticmethod
 	def __validateVersion( version ) :
-	
+
 		if not type( version ) is int :
 			raise TypeError( "Version must be an integer" )
-	
+

@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -64,20 +64,20 @@ void bindCameraController()
 		.def( "setResolution", &CameraController::setResolution )
 		.def( "getResolution", &CameraController::getResolution, return_value_policy<copy_const_reference>() )
 		.def( "frame", (void (CameraController::*)( const Imath::Box3f & ))&CameraController::frame )
-		.def( "frame", (void (CameraController::*)( const Imath::Box3f &, const Imath::V3f &, const Imath::V3f & ))&CameraController::frame )		
+		.def( "frame", (void (CameraController::*)( const Imath::Box3f &, const Imath::V3f &, const Imath::V3f & ))&CameraController::frame )
 		.def( "unproject", &unproject )
 		.def( "motionStart", &CameraController::motionStart )
 		.def( "motionUpdate", &CameraController::motionUpdate )
 		.def( "motionEnd", &CameraController::motionEnd )
 	;
-	
+
 	enum_<CameraController::MotionType>( "MotionType" )
 		.value( "None", CameraController::None )
 		.value( "Track", CameraController::Track )
 		.value( "Tumble", CameraController::Tumble )
 		.value( "Dolly", CameraController::Dolly )
 	;
-	
+
 }
 
 }

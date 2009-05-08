@@ -49,13 +49,13 @@ namespace IECore
 class PointsPrimitive : public Primitive
 {
 	public:
-	
+
 		PointsPrimitive( size_t numPoints = 0 );
 		PointsPrimitive( V3fVectorDataPtr points, FloatVectorDataPtr radii = 0 );
 		virtual ~PointsPrimitive();
-				
+
 		IE_CORE_DECLAREOBJECT( PointsPrimitive, Primitive );
-		
+
 		/// Returns the number of points the primitive is expected
 		/// to have. This defines the expected dimensions of Primitive::Variable
 		/// data.
@@ -64,19 +64,19 @@ class PointsPrimitive : public Primitive
 		/// This defines the expected dimensions of Primitive::Variable
 		/// data.
 		void setNumPoints( size_t n );
-		
+
 		/// Returns numPoints() for Vertex, Varying, and FaceVarying interpolations,
 		/// and 1 for all other types.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
-		
+
 		virtual void render( RendererPtr renderer ) const;
-	
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
-		
+
 		size_t m_numPoints;
-		
+
 };
 
 IE_CORE_DECLAREPTR( PointsPrimitive );

@@ -55,38 +55,38 @@ using namespace IECore;
 void IECore::findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences )
 {
 	sequences.clear();
-	
+
 	/// this matches names of the form $prefix$frameNumber$suffix
 	/// placing each of those in a group of the resulting match.
 	/// both $prefix and $suffix may be the empty string and $frameNumber
 	/// may be preceded by a minus sign.
 	boost::regex matchExpression( std::string( "^([^#]*?)(-?[0-9]+)([^0-9#]*)$" ) );
-	
+
 	/// build a mapping from ($prefix, $suffix) to a list of $frameNumbers
 	typedef std::vector< std::string > Frames;
 	typedef std::map< std::pair< std::string, std::string >, Frames > SequenceMap;
-	
+
 	SequenceMap sequenceMap;
-	
+
 	for ( std::vector< std::string >::const_iterator it = names.begin(); it != names.end(); ++it )
 	{
 		boost::smatch matches;
 		if ( boost::regex_match( *it, matches, matchExpression ) )
 		{
-			sequenceMap[ 
-				SequenceMap::key_type( 
+			sequenceMap[
+				SequenceMap::key_type(
 					std::string( matches[1].first, matches[1].second ),
 					std::string( matches[3].first, matches[3].second )
 				)
-			].push_back( std::string( matches[2].first, matches[2].second ) );				
+			].push_back( std::string( matches[2].first, matches[2].second ) );
 		}
 	}
-	
+
 	for ( SequenceMap::const_iterator it = sequenceMap.begin(); it != sequenceMap.end(); ++it )
 	{
 		const SequenceMap::key_type &fixes = it->first;
 		const Frames &frames = it->second;
-		
+
 		/// in diabolical cases the elements of frames may not all have the same padding
 		/// so we'll sort them out into padded and unpadded frame sequences here, by creating
 		/// a map of padding->list of frames. unpadded things will be considered to have a padding
@@ -98,7 +98,7 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 		{
 			std::string frame = *fIt;
 			int sign = 1;
-						
+
 			assert( frame.size() );
 			if ( *frame.begin() == '-' )
 			{
@@ -114,18 +114,18 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 				paddingToFrames[ 1 ].push_back( sign * boost::lexical_cast<FrameList::Frame>( frame ) );
 			}
 		}
-		
+
 		for ( PaddingToFramesMap::iterator pIt = paddingToFrames.begin(); pIt != paddingToFrames.end(); ++pIt )
 		{
 			const PaddingToFramesMap::key_type &padding = pIt->first;
 			NumericFrames &numericFrames = pIt->second;
 			std::sort( numericFrames.begin(), numericFrames.end() );
-			
+
 			FrameListPtr frameList = frameListFromList( numericFrames );
-			
+
 			std::vector< FrameList::Frame > expandedFrameList;
 			frameList->asList( expandedFrameList );
-			
+
 			/// remove any sequences with less than two files
 			if ( expandedFrameList.size() >= 2 )
 			{
@@ -133,15 +133,15 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 				for ( PaddingToFramesMap::key_type i = 0; i < padding; i++ )
 				{
 					frameTemplate += "#";
-				} 
-							
-				sequences.push_back( 
+				}
+
+				sequences.push_back(
 					new FileSequence(
 						fixes.first + frameTemplate + fixes.second,
 						frameList
 					)
-				);						
-			}			
+				);
+			}
 		}
 	}
 }
@@ -149,16 +149,16 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequences )
 {
 	sequences.clear();
-	
+
 	 if ( boost::filesystem::is_directory( path ) )
 	 {
 		boost::filesystem::directory_iterator end;
 	 	std::vector< std::string > files;
-		for ( boost::filesystem::directory_iterator it( path ); it != end; ++it )	
+		for ( boost::filesystem::directory_iterator it( path ); it != end; ++it )
 		{
 			files.push_back( it->leaf() );
 		}
-		
+
 		findSequences( files, sequences );
 	 }
 }
@@ -172,44 +172,44 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence )
 	{
 		return;
 	}
-	
-	const std::string paddingStr( matches[2].first, matches[2].second );	
+
+	const std::string paddingStr( matches[2].first, matches[2].second );
 	const unsigned padding = paddingStr.size();
-		
+
  	std::vector< std::string > files;
-	
+
 	boost::filesystem::path dir = boost::filesystem::path( sequencePath ).parent_path();
-		
+
 	std::string baseSequencePath = boost::filesystem::path( sequencePath ).filename();
-	
+
 	const std::string::size_type first = baseSequencePath.find_first_of( '#' );
 	assert( first != std::string::npos );
 	const std::string prefix = baseSequencePath.substr( 0, first );
-	
+
 	const std::string::size_type last = baseSequencePath.find_last_of( '#' );
 	assert( last != std::string::npos );
 	const std::string suffix = baseSequencePath.substr( last + 1, baseSequencePath.size() - last - 1 );
-	
+
 	boost::filesystem::path dirToCheck( dir );
 	if ( dirToCheck.string() == "" )
 	{
 		dirToCheck = ".";
-	}	
-	
+	}
+
 	boost::filesystem::directory_iterator end;
-	for ( boost::filesystem::directory_iterator it( dirToCheck ); it != end; ++it )	
+	for ( boost::filesystem::directory_iterator it( dirToCheck ); it != end; ++it )
 	{
 		const std::string &fileName = it->leaf();
-				
+
 		if ( fileName.substr( 0, prefix.size() ) == prefix && fileName.substr( fileName.size() - suffix.size(), suffix.size() ) == suffix )
 		{
 			files.push_back( ( dir / fileName ).string() );
 		}
 	}
-	
+
 	std::vector< FileSequencePtr > sequences;
 	findSequences( files, sequences );
-	
+
 	for ( std::vector< FileSequencePtr >::iterator it = sequences.begin(); it != sequences.end() ; ++it )
 	{
 		if ( (*it)->getPadding() == padding )
@@ -217,7 +217,7 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence )
 			sequence = *it;
 			return;
 		}
-	}	
+	}
 }
 
 FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &frames )
@@ -226,18 +226,18 @@ FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &f
 	{
 		return new EmptyFrameList();
 	}
-	else if ( frames.size() == 1 ) 
+	else if ( frames.size() == 1 )
 	{
 		return new FrameRange( frames[0], frames[0] );
 	}
-	
+
 	std::vector< FrameListPtr > frameLists;
-	
+
 	FrameList::Frame rangeStart = 0;
 	FrameList::Frame rangeEnd = 1;
-	FrameList::Frame rangeStep = frames[ rangeEnd ] - frames[ rangeStart ];	
+	FrameList::Frame rangeStep = frames[ rangeEnd ] - frames[ rangeStart ];
 	assert( rangeStep > 0 );
-	
+
 	while ( rangeEnd <= (FrameList::Frame)frames.size() )
 	{
 		if ( rangeEnd == (FrameList::Frame)frames.size() || frames[ rangeEnd ] - frames[ rangeEnd -1 ] != rangeStep )
@@ -251,10 +251,10 @@ FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &f
 			{
 				frameLists.push_back( new FrameRange( frames[ rangeStart ], frames[ rangeEnd -1 ], rangeStep ) );
 			}
-			
+
 			rangeStart = rangeEnd;
 			rangeEnd = rangeStart + 1;
-			
+
 			if ( rangeEnd < (FrameList::Frame)frames.size() )
 			{
 				rangeStep = frames[ rangeEnd ] - frames[ rangeStart ];
@@ -265,7 +265,7 @@ FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &f
 			rangeEnd ++;
 		}
 	}
-	
+
 	if ( frameLists.size() == 1 )
 	{
 		return frameLists[0];
@@ -274,5 +274,5 @@ FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &f
 	{
 		return new CompoundFrameList( frameLists );
 	}
-	
+
 }

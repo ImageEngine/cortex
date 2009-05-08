@@ -256,48 +256,48 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImath();
 	bindKDTree();
 	bindObject();
-	bindCompoundObject();		
+	bindCompoundObject();
 	bindTypeId();
 	bindData();
 	bindAllSimpleTypedData();
 	bindAllVectorTypedData();
 	bindCompoundData();
 	bindIndexedIO();
-	bindMessageHandler();	
+	bindMessageHandler();
 	bindAttributeCache();
 	bindParameterised();
 	bindOp();
-	bindReader();	
-	bindParticleReader();	
-	bindPDCParticleReader();	
-	bindBlindDataHolder();	
-	bindRenderable();	
-	bindStateRenderable();	
-	bindVisibleRenderable();	
+	bindReader();
+	bindParticleReader();
+	bindPDCParticleReader();
+	bindBlindDataHolder();
+	bindRenderable();
+	bindStateRenderable();
+	bindVisibleRenderable();
 	bindRenderer();
-	bindWriter();	
-	bindParticleWriter();	
+	bindWriter();
+	bindParticleWriter();
 	bindPDCParticleWriter();
 	bindObjectReader();
-	bindObjectWriter();	
-	bindParameter();	
-	bindNumericParameter();		
-	bindSimpleTypedParameter();	
-	bindVectorTypedParameter();	
-	bindSplineParameter();		
-	bindCubeColorLookupParameter();		
-	bindDateTimeParameter();			
-	bindTimePeriodParameter();		
-	bindTimeDurationParameter();				
-	bindCompoundParameter();	
-	bindValidatedStringParameter();	
-	bindPathParameter();	
-	bindFileNameParameter();	
-	bindDirNameParameter();		
-	bindPrimitive();	
-	bindPrimitiveVariable();	
-	bindPointsPrimitive();	
-	bindPerlinNoise();	
+	bindObjectWriter();
+	bindParameter();
+	bindNumericParameter();
+	bindSimpleTypedParameter();
+	bindVectorTypedParameter();
+	bindSplineParameter();
+	bindCubeColorLookupParameter();
+	bindDateTimeParameter();
+	bindTimePeriodParameter();
+	bindTimeDurationParameter();
+	bindCompoundParameter();
+	bindValidatedStringParameter();
+	bindPathParameter();
+	bindFileNameParameter();
+	bindDirNameParameter();
+	bindPrimitive();
+	bindPrimitiveVariable();
+	bindPointsPrimitive();
+	bindPerlinNoise();
 	bindHalf();
 	bindTimer();
 	bindTurbulence();
@@ -312,12 +312,12 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageWriter();
 	bindEXRImageReader();
 	bindEXRImageWriter();
-	
-#ifdef IECORE_WITH_TIFF	
+
+#ifdef IECORE_WITH_TIFF
 	bindTIFFImageReader();
 	bindTIFFImageWriter();
 #endif
-	
+
 	bindCINImageReader();
 	bindCINImageWriter();
 	bindDPXImageReader();
@@ -347,7 +347,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindHierarchicalCache();
 	bindBoundedKDTree();
 	bindVectorDataFilterOp();
-	bindTypedObjectParameter();	
+	bindTypedObjectParameter();
 	bindHeaderGenerator();
 	bindPreWorldRenderable();
 	bindCamera();
@@ -358,22 +358,22 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointBoundsOp();
 	bindImathRandom();
 	bindRandomRotationOp();
-	bindImplicitSurfaceFunction();	
-	bindCachedImplicitSurfaceFunction();	
+	bindImplicitSurfaceFunction();
+	bindCachedImplicitSurfaceFunction();
 	bindMeshPrimitiveBuilder();
 	bindMarchingCubes();
 	bindPointMeshOp();
 	bindCSGImplicitSurfaceFunction();
 	bindSphereImplicitSurfaceFunction();
 	bindPlaneImplicitSurfaceFunction();
-	bindBlobbyImplicitSurfaceFunction();		
+	bindBlobbyImplicitSurfaceFunction();
 	bindParticleMeshOp();
-	bindTypedPrimitiveOp();	
+	bindTypedPrimitiveOp();
 	bindPrimitiveEvaluator();
 	bindMeshPrimitiveEvaluator();
-	bindPrimitiveImplicitSurfaceFunction();	
-	bindMeshPrimitiveImplicitSurfaceFunction();		
-	bindMeshPrimitiveImplicitSurfaceOp();	
+	bindPrimitiveImplicitSurfaceFunction();
+	bindMeshPrimitiveImplicitSurfaceFunction();
+	bindMeshPrimitiveImplicitSurfaceOp();
 	bindTriangulateOp();
 	bindInterned();
 	bindSpherePrimitive();
@@ -394,31 +394,31 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLineSegment();
 	bindCubicBasis();
 	bindCurvesPrimitive();
-	bindImageDiffOp();	
+	bindImageDiffOp();
 	bindTriangulator();
 	bindBezierAlgo();
 	bindToCoreConverter();
 	bindMeshNormalsOp();
 	bindPolygonAlgo();
 	bindMeshMergeOp();
-	
+
 #ifdef IECORE_WITH_FREETYPE
 
 	bindFont();
 
-#endif	
+#endif
 
 	bindUniformRandomPointDistributionOp();
 	bindUnicodeToString();
 	bindMappedRandomPointDistributionOp();
-	bindRadixSort();	
-	bindPointRepulsionOp();		
-	bindAngleConversion();	
-	bindLuminanceOp();	
-	bindChannelOp();	
-	bindSummedAreaOp();	
+	bindRadixSort();
+	bindPointRepulsionOp();
+	bindAngleConversion();
+	bindLuminanceOp();
+	bindChannelOp();
+	bindSummedAreaOp();
 	bindGrade();
-	bindMedianCutSampler();	
+	bindMedianCutSampler();
 	bindEnvMapSampler();
 	bindMeshVertexReorderOp();
 	bindSpline();
@@ -437,8 +437,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLinearToSRGBOp();
 	bindCineonToLinearOp();
 	bindLinearToCineonOp();
-	bindCubeColorLookup();		
-	bindCubeColorLookupData();	
+	bindCubeColorLookup();
+	bindCubeColorLookupData();
 	bindCubeColorTransformOp();
 	bindLinearToRec709Op();
 	bindRec709ToLinearOp();
@@ -447,22 +447,22 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindYUVImageWriter();
 	bindImagePremultiplyOp();
 	bindImageUnpremultiplyOp();
-	bindImageCompositeOp();	
+	bindImageCompositeOp();
 	bindDateTimeData();
 	bindSGIImageReader();
 	bindTimeDurationData();
-	bindTimePeriod();	
+	bindTimePeriod();
 	bindTimePeriodData();
 	bindPatchMeshPrimitive();
 	bindCurveExtrudeOp();
 	bindFrameList();
-	bindEmptyFrameList();	
-	bindFrameRange();	
+	bindEmptyFrameList();
+	bindFrameRange();
 	bindCompoundFrameList();
 	bindReorderedFrameList();
 	bindBinaryFrameList();
 	bindReversedFrameList();
-	bindExclusionFrameList();	
+	bindExclusionFrameList();
 	bindFrameListParameter();
 	bindFileSequence();
 	bindFileSequenceFunctions();
@@ -470,7 +470,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindFileSequenceVectorParameter();
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
-	bindColorSpaceTransformOp();	
+	bindColorSpaceTransformOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

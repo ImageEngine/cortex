@@ -48,26 +48,26 @@ class CacheSet : public MPxObjectSet
 	public:
 		CacheSet();
 		virtual ~CacheSet();
-		
+
 		static void *creator();
-		
+
 		static MStatus initialize();
-		
+
 		virtual bool isAbstractClass() const;
-		
+
 		static MTypeId id;
-		
+
 		static MObject aActive;
 		static MObject aFrameRate;
 		static MObject aOversamples;
 		static MObject aOutFrameMel;
-		
+
 	protected:
-	
+
 		/// A simple helper function to translate an MStringArray into
 		/// the MEL representation of the same data.
 		MString melFromStringArray(const MStringArray &a) const;
-		
+
 };
 }
 

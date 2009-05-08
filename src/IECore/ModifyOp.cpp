@@ -45,19 +45,19 @@ ModifyOp::ModifyOp( const std::string name, const std::string description, Param
 {
 	parameters()->addParameter( inputParameter );
 	m_inputParameter = inputParameter;
-	
+
 	m_copyParameter = new BoolParameter(
 		"copyInput",
 		"When this is on the input is copied before being modified. When off the object is modified in place.",
 		true
 	);
 	parameters()->addParameter( m_copyParameter );
-	
+
 	m_enableParameter = new BoolParameter(
 		"enable",
 		"When this is off the input is passed through unchanged.",
 		true
-	
+
 	);
 	parameters()->addParameter( m_enableParameter );
 }

@@ -52,15 +52,15 @@ IE_CORE_FORWARDDECLARE( CompoundObject );
 class Parameter : public Object
 {
 	public :
-	
+
 		IE_CORE_DECLAREOBJECT( Parameter, Object );
-	
+
 		/// A type which associates a value for the Parameter with
 		/// a name.
 		typedef std::pair<std::string, ObjectPtr> Preset;
 		/// A type to store a bunch of preset values for the Parameter.
 		typedef std::vector<Preset> PresetsContainer;
-	
+
 		/// Creates a new Parameter. If presetsOnly is true then the parameter acts somewhat
 		/// like an enum and only accepts values if they are present in the presets map.
 		Parameter( const std::string &name, const std::string &description, ObjectPtr defaultValue,
@@ -88,7 +88,7 @@ class Parameter : public Object
 		/// Read only version of the above.
 		ConstCompoundObjectPtr userData() const;
 		//@}
-		
+
 		//! @name Validation
 		/// The Parameter class defines the concept of whether or not
 		/// a value is valid. This is used to provide guarantees about
@@ -114,12 +114,12 @@ class Parameter : public Object
 		bool valueValid( std::string *reason = 0 ) const;
 		/// Throws an Exception if valueValid( getValue() ) is false, otherwise
 		/// does nothing.
-		void validate() const;		
+		void validate() const;
 		/// Throws an Exception if valueValid( value ) is false, otherwise
 		/// does nothing.
 		void validate( ConstObjectPtr value ) const;
 		//@}
-		
+
 		//! @name Value setting
 		/// These functions set the Parameter value, with or without
 		/// validation.
@@ -137,7 +137,7 @@ class Parameter : public Object
 		/// preset.
 		void setValue( const std::string &presetName );
 		//@}
-		
+
 		//! @name Value getting
 		/// These functions provide access to the Parameter value, with or without
 		/// validation.
@@ -173,29 +173,29 @@ class Parameter : public Object
 		/// name, otherwise returns the empty string.
 		std::string getCurrentPresetName() const;
 		//@}
-	
+
 	protected :
-	
+
 		// constructor for use during load/copy
 		Parameter();
-		
-	private :	
+
+	private :
 
 		friend class TypeDescription<Parameter>;
-		
+
 		InternedString m_name;
 		InternedString m_description;
 
 		ObjectPtr m_value;
 		ConstObjectPtr m_defaultValue;
-		
+
 		PresetsContainer m_presets;
 		bool m_presetsOnly;
 
 		mutable CompoundObjectPtr m_userData;
-		
-		static const unsigned int g_ioVersion;	
-	
+
+		static const unsigned int g_ioVersion;
+
 };
 
 IE_CORE_DECLAREPTR( Parameter );

@@ -41,13 +41,13 @@ import os
 class BoolVectorDataTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		trueFalse = [ True, False ]
-		
+
 		random.seed( 0 )
-		
+
 		for i in range( 0, 100 ) :
-		
+
 			s = random.randint( 0, 100 )
 			b = BoolVectorData( s )
 			self.assertEqual( s, len( b ) )
@@ -56,26 +56,26 @@ class BoolVectorDataTest( unittest.TestCase ) :
 				v = random.choice( trueFalse )
 				b[j] = v
 				self.assertEqual( b[j], v )
-							
+
 			bb = b.copy()
 			self.assertEqual( b, bb )
-						
+
 			ObjectWriter( b, "test/boolVector.cob" ).write()
-						
+
 			bbb = ObjectReader( "test/boolVector.cob" ).read()
-						
+
 			self.assertEqual( b, bbb )
-	
+
 	def testStrAndRepr( self ) :
-	
+
 		self.assertEqual( str( BoolVectorData( [True, False] ) ), "1 0" )
 		self.assertEqual( repr( BoolVectorData( [False, True] ) ), "BoolVectorData( [ 0, 1 ] )" )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile( "test/boolVector.cob" ):
-			os.remove( "test/boolVector.cob" )		
-	
+			os.remove( "test/boolVector.cob" )
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

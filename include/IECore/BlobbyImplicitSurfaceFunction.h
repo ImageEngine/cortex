@@ -55,33 +55,33 @@ class BlobbyImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 		typedef V Value;
 		typedef VectorTraits<V> ValueTraits;
 		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-		
+
 		typedef std::vector<P> PointVector;
 		typedef TypedData<PointVector> PointVectorData;
-		
+
 		typedef Imath::Box<P> Bound;
-		
+
 		IE_CORE_DECLAREMEMBERPTR2( BlobbyImplicitSurfaceFunction<P, V> );
-		
+
 		/// Construct an implicit surface function from parallel arrays of positions, radii, and strengths
 		BlobbyImplicitSurfaceFunction( typename PointVectorData::ConstPtr p, ConstDoubleVectorDataPtr r, ConstDoubleVectorDataPtr s );
-		
+
 		virtual ~BlobbyImplicitSurfaceFunction();
 
 		/// Evaluate the function at the specified point
 		inline Value operator()( const Point &p );
 
-		/// Evaluate the function at the specified point		
+		/// Evaluate the function at the specified point
 		virtual Value getValue( const Point &p );
-		
+
 	protected:
 
 		typedef std::vector< Bound > BoundVector;
 		typedef typename BoundVector::const_iterator BoundVectorConstIterator;
 		typedef BoundedKDTree< BoundVectorConstIterator > Tree;
-		
-		typename PointVectorData::ConstPtr m_p;		
-		ConstDoubleVectorDataPtr m_radius;		
+
+		typename PointVectorData::ConstPtr m_p;
+		ConstDoubleVectorDataPtr m_radius;
 		ConstDoubleVectorDataPtr m_strength;
 
 		BoundVector m_bounds;

@@ -36,7 +36,7 @@ namespace IECore
 {
 
 template < typename V >
-SphericalHarmonicsRotationMatrix<V>::SphericalHarmonicsRotationMatrix() : 
+SphericalHarmonicsRotationMatrix<V>::SphericalHarmonicsRotationMatrix() :
 		m_bands(0),
 		m_newRotation(true)
 {
@@ -363,7 +363,7 @@ void SphericalHarmonicsRotationMatrix<V>::computeSquareRoots( ) const
 		return;
 	}
 	m_squareRoots.resize( rootCount );
-	for (unsigned int i = 0; i < rootCount; i++ ) 
+	for (unsigned int i = 0; i < rootCount; i++ )
 	{
 		m_squareRoots[i] = sqrt( static_cast<V>(i) );
 	}

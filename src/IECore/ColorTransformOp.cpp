@@ -47,59 +47,59 @@ IE_CORE_DEFINERUNTIMETYPED( ColorTransformOp );
 ColorTransformOp::ColorTransformOp( const std::string &name, const std::string &description )
 	:	PrimitiveOp( name, description )
 {
-	
+
 	m_colorPrimVarParameter = new StringParameter(
-		"colorPrimVar", 
+		"colorPrimVar",
 		"The name of the primitive variable which holds color data. This "
 		"can have data of type Color3fData, Color3dData, Color3fVectorData, or Color3dVectorData.",
 		"Cs"
 	);
-	
+
 	m_redPrimVarParameter = new StringParameter(
-		"redPrimVar", 
+		"redPrimVar",
 		"The name of the primitive variable which holds the red channel of the color data. This "
 		"can have data of type HalfData, HalfVectorData, FloatData or FloatVectorData. "
 		"However, The type of this primvar must match the type of the other color component primvars.",
 		"R"
 	);
-	
+
 	m_greenPrimVarParameter = new StringParameter(
-		"greenPrimVar", 
+		"greenPrimVar",
 		"The name of the primitive variable which holds the green channel of the color data. This "
 		"can have data of type HalfData, HalfVectorData, FloatData or FloatVectorData. "
 		"However, The type of this primvar must match the type of the other color component primvars.",
 		"G"
 	);
-	
+
 	m_bluePrimVarParameter = new StringParameter(
-		"bluePrimVar", 
+		"bluePrimVar",
 		"The name of the primitive variable which holds the blue channel of the color data. This "
 		"can have data of type HalfData, HalfVectorData, FloatData or FloatVectorData. "
 		"However, The type of this primvar must match the type of the other color component primvars.",
 		"B"
 	);
-	
+
 	m_alphaPrimVarParameter = new StringParameter(
-		"alphaPrimVar", 
+		"alphaPrimVar",
 		"The name of the primitive variable which holds the alpha channel. This is only used "
 		"if the premultiplied parameter is on. The type must match the type of the color channels.",
 		"A"
 	);
-	
+
 	m_premultipliedParameter = new BoolParameter(
 		"premultiplied",
 		"If this is on, then the colors are divided by alpha before transformation and "
 		"premultiplied again afterwards.",
 		true
 	);
-	
+
 	parameters()->addParameter( m_colorPrimVarParameter );
 	parameters()->addParameter( m_redPrimVarParameter );
 	parameters()->addParameter( m_greenPrimVarParameter );
 	parameters()->addParameter( m_bluePrimVarParameter );
 	parameters()->addParameter( m_alphaPrimVarParameter );
 	parameters()->addParameter( m_premultipliedParameter );
-	
+
 }
 
 ColorTransformOp::~ColorTransformOp()
@@ -188,14 +188,14 @@ const typename T::BaseType *ColorTransformOp::alphaData( PrimitivePtr primitive,
 	{
 		throw Exception( "Alpha data type does not match color data type." );
 	}
-	
+
 	typename T::Ptr d = boost::static_pointer_cast<T>( it->second.data );
 	if( d->baseSize()!=requiredElements )
 	{
 		throw Exception( "Alpha data has incorrect number of elements." );
 	}
-	
-	return d->baseReadable();	
+
+	return d->baseReadable();
 }
 
 template <typename T>
@@ -207,9 +207,9 @@ void ColorTransformOp::transformSeparate( PrimitivePtr primitive, ConstCompoundO
 	typename T::BaseType *rw = r->baseWritable();
 	typename T::BaseType *gw = g->baseWritable();
 	typename T::BaseType *bw = b->baseWritable();
-	
+
 	begin( operands );
-	
+
 	try
 	{
 		for( size_t i=0; i<n; i++ )
@@ -234,22 +234,22 @@ void ColorTransformOp::transformSeparate( PrimitivePtr primitive, ConstCompoundO
 		end();
 		throw;
 	}
-			
+
 	end();
 }
-				
+
 template<typename T>
 void ColorTransformOp::transformInterleaved( PrimitivePtr primitive, ConstCompoundObjectPtr operands, typename T::Ptr colors )
 {
 	assert( colors->baseSize() %3 == 0 );
 	size_t numElements = colors->baseSize() / 3;
-	
+
 	const typename T::BaseType *alpha = alphaData<TypedData<std::vector<typename T::BaseType> > >( primitive, numElements );
-		
+
 	begin( operands );
 	try
 	{
-	
+
 		size_t i = 0;
 		typename T::BaseType *data = colors->baseWritable();
 		for( i=0; i<numElements; i++ )
@@ -273,8 +273,8 @@ void ColorTransformOp::transformInterleaved( PrimitivePtr primitive, ConstCompou
 	{
 		end();
 		throw;
-	}	
-	
+	}
+
 	end();
 }
 
@@ -297,7 +297,7 @@ void ColorTransformOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObj
 				break;
 			case Color3dVectorDataTypeId :
 				transformInterleaved<Color3dVectorData>( primitive, operands, boost::static_pointer_cast<Color3dVectorData>( colorIt->second.data ) );
-				break;	
+				break;
 			default :
 				throw Exception( "PrimitiveVariable has unsupported type." );
 				break;
@@ -355,7 +355,7 @@ void ColorTransformOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObj
 					boost::static_pointer_cast<FloatVectorData>( gIt->second.data ),
 					boost::static_pointer_cast<FloatVectorData>( bIt->second.data )
 				);
-				break;	
+				break;
 			default :
 				throw Exception( "PrimitiveVariables have unsupported type." );
 				break;

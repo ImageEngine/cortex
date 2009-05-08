@@ -89,7 +89,7 @@ class TreeGraphDependency : public GraphDependency<T>
 		///Starts looking for node from the given dirty list position.
 		void setDirty( const T &node, typename DirtyList::iterator begin );
 
-		///Triggers recursive computation on all dirty nodes dependent and including the given one. 
+		///Triggers recursive computation on all dirty nodes dependent and including the given one.
 		///Starts looking for the node on the given position.
 		void update( const T &node, typename DirtyList::iterator pos );
 

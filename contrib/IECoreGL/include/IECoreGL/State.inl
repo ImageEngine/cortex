@@ -7,7 +7,7 @@ namespace IECoreGL
 template<typename T>
 typename T::Ptr State::get()
 {
-	return boost::static_pointer_cast<T>( get( T::staticTypeId() ) );	
+	return boost::static_pointer_cast<T>( get( T::staticTypeId() ) );
 }
 
 template<typename T>

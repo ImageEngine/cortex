@@ -81,7 +81,7 @@ std::string CINImageWriter::destinationColorSpace() const
 {
 	/// This isn't strictly true, but as the writer currently stands it performs the Linear-Cineon
 	/// conversion for us. Eventually, this will start returning "cineon", and the ImageWriter base
-	/// class will handle the appropriate color conversions.	
+	/// class will handle the appropriate color conversions.
 	return "linear";
 }
 
@@ -90,12 +90,12 @@ struct CINImageWriter::ChannelConverter
 	typedef void ReturnType;
 
 	std::string m_channelName;
-	ConstImagePrimitivePtr m_image;	
+	ConstImagePrimitivePtr m_image;
 	Box2i m_dataWindow;
 	unsigned int m_bitShift;
 	std::vector<unsigned int> &m_imageBuffer;
 
-	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, unsigned int bitShift, std::vector<unsigned int> &imageBuffer  ) 
+	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, unsigned int bitShift, std::vector<unsigned int> &imageBuffer  )
 	: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_bitShift( bitShift ), m_imageBuffer( imageBuffer )
 	{
 	}
@@ -106,38 +106,38 @@ struct CINImageWriter::ChannelConverter
 		assert( dataContainer );
 
 		const typename T::ValueType &data = dataContainer->readable();
-	
+
 		CompoundDataConversion<
-			ScaledDataConversion<typename T::ValueType::value_type, float>, 
-			LinearToCineonDataConversion<float, unsigned int> 
+			ScaledDataConversion<typename T::ValueType::value_type, float>,
+			LinearToCineonDataConversion<float, unsigned int>
 		> converter;
-		
+
 		typedef boost::multi_array_ref< const typename T::ValueType::value_type, 2 > SourceArray2D;
 		typedef boost::multi_array_ref< unsigned int, 2 > TargetArray2D;
-		
+
 		const SourceArray2D sourceData( &data[0], extents[ m_image->getDataWindow().size().y + 1 ][ m_image->getDataWindow().size().x + 1 ] );
 		TargetArray2D targetData( &m_imageBuffer[0], extents[ m_image->getDisplayWindow().size().y + 1 ][ m_image->getDisplayWindow().size().x + 1 ] );
-		
+
 		const Box2i copyRegion = boxIntersection( m_dataWindow, boxIntersection( m_image->getDisplayWindow(), m_image->getDataWindow() ) );
-		
+
 		for ( int y = copyRegion.min.y; y <= copyRegion.max.y ; y++ )
 		{
 			for ( int x = copyRegion.min.x; x <= copyRegion.max.x ; x++ )
-			{				
-				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ] 
-					|= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) << m_bitShift;			
+			{
+				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ]
+					|= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) << m_bitShift;
 			}
 		}
 	};
-	
+
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );
-		
-			throw InvalidArgumentException( ( boost::format( "CINImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+
+			throw InvalidArgumentException( ( boost::format( "CINImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
 		}
 	};
 };
@@ -177,7 +177,7 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	}
 
 	assert( names.size() == filteredNames.size() );
-	
+
 	Box2i displayWindow = image->getDisplayWindow();
 
 	int displayWidth  = 1 + displayWindow.size().x;
@@ -195,23 +195,23 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 
 	strncpy( (char *) fi.file_name, fileName().c_str(), sizeof( fi.file_name ) );
 
-	// compute the current date and time	
+	// compute the current date and time
 	boost::posix_time::ptime localTime = boost::posix_time::second_clock::local_time();
 	boost::gregorian::date date = localTime.date();
 	boost::posix_time::time_duration time = localTime.time_of_day();
 
 	snprintf(fi.creation_date, sizeof( fi.creation_date ), "%04d-%02d-%02d",
-		static_cast<int>( date.year() ), 
-		static_cast<int>( date.month() ), 
+		static_cast<int>( date.year() ),
+		static_cast<int>( date.month() ),
 		static_cast<int>( date.day() )
 	);
-	
-	snprintf(fi.creation_time, sizeof( fi.creation_time ), "%02d:%02d:%02d",  
-		time.hours(), 
-		time.minutes(), 
+
+	snprintf(fi.creation_time, sizeof( fi.creation_time ), "%02d:%02d:%02d",
+		time.hours(),
+		time.minutes(),
 		time.seconds()
 	);
-		
+
 	ImageInformation ii = { 0 };
 	ii.orientation = 0;
 	ii.channel_count = 0;
@@ -229,7 +229,7 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 
 	// write the data
 	std::vector<unsigned int> imageBuffer( displayWidth*displayHeight, 0 );
-	
+
 	vector<string>::const_iterator i = filteredNames.begin();
 	int offset = 0;
 	while (i != filteredNames.end())
@@ -283,15 +283,15 @@ void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 		assert( image->variables.find( *i ) != image->variables.end() );
 		DataPtr dataContainer = image->variables.find( *i )->second.data;
 		assert( dataContainer );
-		
+
 		ChannelConverter converter( *i, image, dataWindow, shift, imageBuffer );
-		
-		despatchTypedData<			
-			ChannelConverter, 
+
+		despatchTypedData<
+			ChannelConverter,
 			TypeTraits::IsNumericVectorTypedData,
 			ChannelConverter::ErrorHandler
-		>( dataContainer, converter );	
-		
+		>( dataContainer, converter );
+
 		ii.channel_count ++;
 
 		++offset;

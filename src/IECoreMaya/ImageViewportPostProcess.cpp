@@ -55,19 +55,19 @@ void ImageViewportPostProcess::postRender( const std::string &panelName, MImage 
 {
 	FromMayaImageConverterPtr fromMaya = new FromMayaImageConverter( viewportImage );
 	fromMaya->depthParameter()->setTypedValue( needsDepth() );
-	ImagePrimitivePtr image = runTimeCast< ImagePrimitive >( fromMaya->convert() );	
-	
+	ImagePrimitivePtr image = runTimeCast< ImagePrimitive >( fromMaya->convert() );
+
 	assert( image->arePrimitiveVariablesValid() );
-	
+
 	postRender( panelName, image );
-	
+
 	if ( !image->arePrimitiveVariablesValid() )
 	{
-		MGlobal::displayError( "ImageViewportPostProcess: Image primvars invalid after postprocess" );		
+		MGlobal::displayError( "ImageViewportPostProcess: Image primvars invalid after postprocess" );
 	}
 	else
 	{
-		ToMayaImageConverterPtr toMaya = ToMayaImageConverter::create( image );				
+		ToMayaImageConverterPtr toMaya = ToMayaImageConverter::create( image );
 		toMaya->convert( viewportImage );
 	}
 }

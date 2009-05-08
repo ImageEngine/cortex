@@ -79,13 +79,13 @@ template<>
 Imath::V3d convert( const MVector &from )
 {
 	return Imath::V3d( from[0], from[1], from[2] );
-} 
+}
 
 template<>
 Imath::V3d convert( const MFloatVector &from )
 {
 	return Imath::V3d( from[0], from[1], from[2] );
-} 
+}
 
 template<>
 Imath::V3f convert( const MPoint &from )
@@ -500,7 +500,7 @@ IECore::DataPtr convert( const MCommandResult &result )
 			assert(s);
 			unsigned sz = v.length();
 			IECore::V3fVectorDataPtr data = new IECore::V3fVectorData();
-			data->writable().resize(sz);					
+			data->writable().resize(sz);
 			for (unsigned i = 0; i < sz; i++)
 			{
 				data->writable()[i] = Imath::V3f(v[i].x, v[i].y, v[i].z);
@@ -529,7 +529,7 @@ IECore::DataPtr convert( const MCommandResult &result )
 				{
 					(data->writable())[i][j] = v[i*numRows+j];
 				}
-			}		
+			}
 
 			return data;
 		}
@@ -538,7 +538,7 @@ IECore::DataPtr convert( const MCommandResult &result )
 			return 0;
 		}
 		default:
-		
+
 			assert( false );
 			return 0;
 	}

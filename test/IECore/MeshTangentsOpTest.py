@@ -37,30 +37,30 @@ from IECore import *
 import math
 
 class MeshTangentsOpTest( unittest.TestCase ) :
-		
+
 	def testSphere( self ) :
-	
-		mesh = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()		
+
+		mesh = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		self.assert_( not "uTangent" in mesh )
-		self.assert_( not "vTangent" in mesh )		
+		self.assert_( not "vTangent" in mesh )
 		self.assert_( not "sTangent" in mesh )
-		self.assert_( not "tTangent" in mesh )				
-		
+		self.assert_( not "tTangent" in mesh )
+
 		res = MeshTangentsOp()(
 			input = mesh,
 			uPrimVarName = "s",
 			vPrimVarName = "t",
 			uTangentPrimVarName = "sTangent",
-			vTangentPrimVarName = "tTangent",			
+			vTangentPrimVarName = "tTangent",
 		)
-		
+
 		self.assert_( not "uTangent" in res )
-		self.assert_( not "vTangent" in res )	
+		self.assert_( not "vTangent" in res )
 		self.assert_( "sTangent" in res )
-		self.assert_( "tTangent" in res )		
-		
+		self.assert_( "tTangent" in res )
+
 		self.assert_( res.arePrimitiveVariablesValid() )
-		
-			
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

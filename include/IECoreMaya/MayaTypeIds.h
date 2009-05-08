@@ -61,9 +61,9 @@ enum MayaTypeId
 	TransientParameterisedHolderNodeId = 0x00110DCC,
 	ParameterisedHolderImagePlaneId = 0x00110DCD,
 	ImagePlaneHolderId = 0x00110DCE,
-	
+
 	/// Don't forget to update MayaTypeIdsBinding.cpp
-	
+
 	LastId = 0x00110E3F,
 
 };

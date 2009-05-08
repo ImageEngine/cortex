@@ -46,20 +46,20 @@ namespace IECore
 class CompoundObject : public Object
 {
 	public:
-	
+
 		CompoundObject();
 		virtual ~CompoundObject();
-		
+
 		IE_CORE_DECLAREOBJECT( CompoundObject, Object );
-		
+
 		typedef std::map<InternedString, ObjectPtr> ObjectMap;
-		
+
 		/// Gives const access to the member object map.
 		const ObjectMap &members() const;
 		/// Gives access to the member Object map for
 		/// direct manipulation.
 		ObjectMap &members();
-		
+
 		/// Convenience function to find an object in members(). Returns 0 if
 		/// the parameter doesn't exist, or does not match the type specified
 		/// as the template argument.
@@ -67,15 +67,15 @@ class CompoundObject : public Object
 		typename T::Ptr member( const std::string &name );
 		template<typename T>
 		typename T::ConstPtr member( const std::string &name ) const;
-		
+
 	protected:
-	
+
 		ObjectMap m_members;
-		
+
 	private :
 
 		static const unsigned int m_ioVersion;
-				
+
 };
 
 IE_CORE_DECLAREPTR( CompoundObject );

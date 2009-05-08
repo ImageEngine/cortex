@@ -46,7 +46,7 @@ namespace IECore
 void bindPrimitiveImplicitSurfaceFunction()
 {
 	RefCountedClass<PrimitiveImplicitSurfaceFunction, ImplicitSurfaceFunctionV3ff>( "PrimitiveImplicitSurfaceFunction" )
-		.def( init< PrimitivePtr > () )		
+		.def( init< PrimitivePtr > () )
 	;
 }
 

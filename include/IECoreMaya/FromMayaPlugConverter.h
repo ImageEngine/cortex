@@ -58,21 +58,21 @@ class FromMayaPlugConverter : public FromMayaConverter
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaPlugConverter, FromMayaPlugConverterTypeId, FromMayaConverter );
-	
+
 		/// The MPlug which will be converted by the convert() function.
 		const MPlug &plug() const;
-		
+
 		/// Creates a converter to convert the plug value to the an IECore
 		/// type. If resultType is specified then only converters which would create that type
 		/// will be considered. May return 0 if no converter can be found. Note that this returns a generic
 		/// FromMayaConverterPtr rather than a FromMayaPlugConverterPtr so that a
 		/// FromMayaObjectConverterPtr may be returned for the case of a plug holding an MObject.
 		static FromMayaConverterPtr create( const MPlug &plug, IECore::TypeId resultType=IECore::InvalidTypeId );
-		
+
 	protected :
 
 		FromMayaPlugConverter( const MPlug &plug );
-		
+
 		/// Creating a static instance of one of these (templated on your converter type)
 		/// within your class will register your converter with the factory mechanism.
 		template<class T>
@@ -85,18 +85,18 @@ class FromMayaPlugConverter : public FromMayaConverter
 			private :
 				static FromMayaPlugConverterPtr creator( const MPlug &object );
 		};
-		
+
 	private :
 
 		typedef FromMayaPlugConverterPtr (*CreatorFn)( const MPlug &plug );
 		static void registerConverter( MFnNumericData::Type fromType, IECore::TypeId resultType, CreatorFn creator );
 		static void registerConverter( MFnData::Type fromType, IECore::TypeId resultType, CreatorFn creator );
 		static void registerConverter( MFnUnitAttribute::Type fromType, IECore::TypeId resultType, CreatorFn creator );
-		
+
 		typedef std::pair<MFnNumericData::Type, IECore::TypeId> NumericTypePair;
 		typedef std::map<NumericTypePair, CreatorFn> NumericTypesToFnsMap;
 		static NumericTypesToFnsMap *numericTypesToFns();
-		
+
 		typedef std::pair<MFnData::Type, IECore::TypeId> TypedTypePair;
 		typedef std::map<TypedTypePair, CreatorFn> TypedTypesToFnsMap;
 		static TypedTypesToFnsMap *typedTypesToFns();
@@ -104,7 +104,7 @@ class FromMayaPlugConverter : public FromMayaConverter
 		typedef std::pair<MFnUnitAttribute::Type, IECore::TypeId> UnitTypePair;
 		typedef std::map<UnitTypePair, CreatorFn> UnitTypesToFnsMap;
 		static UnitTypesToFnsMap *unitTypesToFns();
-		
+
 		MPlug m_plug;
 
 };

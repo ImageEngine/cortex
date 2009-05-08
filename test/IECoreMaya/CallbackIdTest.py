@@ -43,37 +43,37 @@ import weakref
 class CallbackIdTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		# callback function just counts the number of times it has been invoked
 		CallbackIdTest.numCalls = 0
 		def callback( node, name, userData ) :
-			
+
 			CallbackIdTest.numCalls += 1
-		
+
 		# make a sphere and get the MObject from it
 		sphere = maya.cmds.sphere()[0]
 		s = maya.OpenMaya.MSelectionList()
 		s.add( sphere )
 		o = maya.OpenMaya.MObject()
 		s.getDependNode( 0, o )
-		
+
 		# attach a name changed callback
 		c = IECoreMaya.CallbackId( maya.OpenMaya.MNodeMessage.addNameChangedCallback( o, callback ) )
-		
+
 		# check that the callback is invoked
 		self.assertEqual( CallbackIdTest.numCalls, 0 )
 		sphere = maya.cmds.rename( sphere, sphere + "Different" )
 		self.assertEqual( CallbackIdTest.numCalls, 1 )
-		
+
 		# delete the CallbackId object and make sure the callback is removed and therefore not invoked any more
 		del c
 		sphere = maya.cmds.rename( sphere, sphere + "DifferentAgain" )
 		self.assertEqual( CallbackIdTest.numCalls, 1 )
-		
+
 		# also check that maya isn't holding onto any unecessary references to the callback function.
 		w = weakref.ref( callback )
 		del callback
 		self.assertEqual( w(), None )
-		
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

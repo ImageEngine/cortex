@@ -36,39 +36,39 @@ import unittest
 from IECore import *
 
 class TestReader(unittest.TestCase):
-    
+
 	def testSupportedExtensions( self ) :
-	
+
 		e = Reader.supportedExtensions()
 		for ee in e :
 			self.assert_( type( ee ) is str )
-		
+
 		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "obj", "sgi", "bw", "rgba", "rgb", "tdl" ]
 		if withTIFF() :
 			expectedExtensions += [ "tif", "tiff" ]
 		if withJPEG() :
 			expectedExtensions += [ "jpg", "jpeg" ]
-						
+
 		for ee in expectedExtensions :
 			self.assert_( ee in e )
-		
+
 		e = Reader.supportedExtensions( TypeId.ImageReader )
 		for ee in e :
-			self.assert_( type( ee ) is str )	
+			self.assert_( type( ee ) is str )
 		expectedImageReaderExtensions = [ "exr", "cin", "dpx", "sgi", "bw", "rgba", "rgb", "tdl" ]
 		if withTIFF() :
 			expectedImageReaderExtensions += [ "tif", "tiff" ]
 		if withJPEG() :
 			expectedImageReaderExtensions += [ "jpg", "jpeg" ]
-						
+
 		self.assertEqual( set( expectedImageReaderExtensions ), set( e ) )
-			
+
 		self.assert_( not "pdc" in expectedImageReaderExtensions )
 		self.assert_( not "cob" in expectedImageReaderExtensions )
-		self.assert_( not "obj" in expectedImageReaderExtensions )			
+		self.assert_( not "obj" in expectedImageReaderExtensions )
 
 	def test( self ) :
-	
+
 		"""
 		check if we can create a reader from a blank file.
 		this should definitely NOT create a valid reader
@@ -77,7 +77,7 @@ class TestReader(unittest.TestCase):
 		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null' )
 		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null.cin' )
 
-                
+
 if __name__ == "__main__":
-	unittest.main()   
-	        
+	unittest.main()
+

@@ -43,9 +43,9 @@ namespace IECoreMaya
 /// A ParameterHandler for the ObjectVectorParameter.
 class ObjectVectorParameterHandler : public ParameterHandler
 {
-	
+
 	protected:
-	
+
 		virtual MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const;
 		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const;
 		virtual MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;

@@ -38,7 +38,7 @@ from IECore import *
 class TestEnum( unittest.TestCase ) :
 
 	def test( self ) :
-		
+
 		E = Enum.create( "Red", "Green", "Blue" )
 		self.assertNotEqual( E.Red, E.Green )
 		self.assertEqual( E.Red, E( 0 ) )
@@ -50,9 +50,9 @@ class TestEnum( unittest.TestCase ) :
 		self.assertEqual( int( E.Red ), 0 )
 		self.assertEqual( int( E.Green ), 1 )
 		self.assertEqual( int( E.Blue ), 2 )
-		
+
 		self.assertRaises( ValueError, E, 3 )
-		
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

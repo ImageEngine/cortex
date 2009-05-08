@@ -50,12 +50,12 @@ EmptyFrameList::~EmptyFrameList()
 {
 }
 
-void EmptyFrameList::asList( std::vector<Frame> &frames ) const 
+void EmptyFrameList::asList( std::vector<Frame> &frames ) const
 {
-	frames.clear();	
+	frames.clear();
 }
 
-std::string EmptyFrameList::asString() const 
+std::string EmptyFrameList::asString() const
 {
 	return "";
 }
@@ -66,11 +66,11 @@ FrameListPtr EmptyFrameList::copy() const
 }
 
 FrameListPtr EmptyFrameList::parse( const std::string &frameList )
-{	
+{
 	if ( !frameList.size() || boost::regex_match( frameList, boost::regex( "^[ \t\r\n]+$" ) ) )
 	{
 		return new EmptyFrameList();
 	}
-	
+
 	return 0;
 }

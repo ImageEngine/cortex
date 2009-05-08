@@ -77,28 +77,28 @@ MStatus StringParameterHandler::update( IECore::ConstParameterPtr parameter, MOb
 	{
 		return MS::kFailure;
 	}
-	
+
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
 	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
 
 	if (maya)
 	{
 		const IECore::ConstStringDataPtr valueProvider = maya->member<const IECore::StringData>("valueProvider");
-		
+
 		if (valueProvider && valueProvider->readable() == "connectedNodeName")
 		{
 			/// Nothing to do.
 			return MS::kSuccess;
 		}
-	}	
-	
+	}
+
 	// we'd like to be setting the default value here, but as maya doesn't save the default value
 	// for dynamic string attributes in scene files, it'll be lost when the scene is reloaded. it's
 	// best therefore that we don't set the default at all, so that the default is "", which is what
 	// it'll be when we reload the scene - this ensures that any values set in the attribute later
 	// will be saved correctly (if we set the default to "X" and the value was "X", maya won't save the
 	// default or the value at all, and we end up with a value of "" on scene reload).
-	
+
 	return MS::kSuccess;
 }
 
@@ -109,30 +109,30 @@ MObject StringParameterHandler::create( IECore::ConstParameterPtr parameter, con
 	{
 		return MObject::kNullObj;
 	}
-	
+
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
 	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
 
 	if (maya)
 	{
 		const IECore::ConstStringDataPtr valueProvider = maya->member<const IECore::StringData>("valueProvider");
-		
+
 		if (valueProvider && valueProvider->readable() == "connectedNodeName")
 		{
 			MFnMessageAttribute fnMAttr;
 			MObject result = fnMAttr.create( attributeName, attributeName );
-			
+
 			return result;
-			
+
 		}
-	}	
-	
+	}
+
 	MFnTypedAttribute fnTAttr;
 	MObject result = fnTAttr.create( attributeName, attributeName, MFnData::kString /* see comments in stringUpdate for why we don't specify a default here */ );
 	update( parameter, result );
 	return result;
 }
-		
+
 MStatus StringParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstStringParameterPtr p = IECore::runTimeCast<const IECore::StringParameter>( parameter );
@@ -140,20 +140,20 @@ MStatus StringParameterHandler::setValue( IECore::ConstParameterPtr parameter, M
 	{
 		return MS::kFailure;
 	}
-	
+
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
 	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
-	
+
 	if (maya)
 	{
 		const IECore::ConstStringDataPtr valueProvider = maya->member<const IECore::StringData>("valueProvider");
-		
+
 		if (valueProvider && valueProvider->readable() == "connectedNodeName")
 		{
 			return MS::kSuccess;
 		}
-	}		
-		
+	}
+
 	return plug.setValue( p->getTypedValue().c_str() );
 }
 
@@ -164,82 +164,82 @@ MStatus StringParameterHandler::setValue( const MPlug &plug, IECore::ParameterPt
 	{
 		return MS::kFailure;
 	}
-	
+
 	MString v = "";
 	MStatus result;
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
 	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
-		
+
 	bool hasValueProvider = false;
 	if (maya)
 	{
 		const IECore::ConstStringDataPtr valueProvider = maya->member<const IECore::StringData>("valueProvider");
-		
+
 		if (valueProvider && valueProvider->readable() == "nodeName")
 		{
 			MStatus s;
 			MObject node = plug.node();
-			
+
 			if (node.hasFn( MFn::kDagNode) )
-			{				
+			{
 				MDagPath path;
 				s = MDagPath::getAPathTo( node, path );
 				if (!s)
 				{
 					return s;
 				}
-				v = path.fullPathName();					
+				v = path.fullPathName();
 			}
 			else
-			{						
+			{
 				MFnDependencyNode fnDN( node, &s );
 				if (!s)
 				{
 					return s;
 				}
-				v = fnDN.name();				
+				v = fnDN.name();
 			}
-			
+
 			hasValueProvider = true;
 		}
 		else if (valueProvider && valueProvider->readable() == "connectedNodeName")
 		{
 			assert( plug.attribute().hasFn( MFn::kMessageAttribute ) );
-					
+
 			MStatus s;
-			
+
 			MPlugArray connections;
 			bool connected = plug.connectedTo( connections, true, false, &s);
-			
+
 			if (connected)
-			{	
+			{
 				MObject node = connections[0].node();
-				
+
 				if (node.hasFn( MFn::kDagNode) )
-				{				
+				{
 					MDagPath path;
 					s = MDagPath::getAPathTo( node, path );
 					if (!s)
 					{
 						return s;
 					}
-					v = path.fullPathName();					
+					v = path.fullPathName();
 				}
 				else
-				{						
+				{
 					MFnDependencyNode fnDN( node, &s );
 					if (!s)
 					{
 						return s;
 					}
-					v = fnDN.name();				
+					v = fnDN.name();
 				}
 			}
-			
+
 			hasValueProvider = true;
-		}		
-	}	
-	
+		}
+	}
+
 	if (!hasValueProvider)
 	{
 		result = plug.getValue( v );

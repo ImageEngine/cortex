@@ -41,23 +41,23 @@ class TestDataCastOp( unittest.TestCase ) :
 
 	def testTypeConvertion( self ) :
 
-		self.assertEqual( DataCastOp()( object = FloatData( 2 ), targetType = int(TypeId.DoubleData) ), DoubleData( 2 ) ) 
-		self.assertEqual( DataCastOp()( object = DoubleData( 2 ), targetType = int(TypeId.FloatData) ), FloatData( 2 ) ) 
-		self.assertEqual( DataCastOp()( object = IntData( 2 ), targetType = int(TypeId.UIntData) ), UIntData( 2 ) ) 
-		self.assertEqual( DataCastOp()( object = V3fData( V3f( 2 ) ), targetType = int(TypeId.V3dData) ), V3dData( V3d( 2 ) ) ) 
-		self.assertEqual( DataCastOp()( object = QuatfData( Quatf( 1,2,3,4 ) ), targetType = int(TypeId.QuatdData) ), QuatdData( Quatd( 1,2,3,4 ) ) ) 
-	
-	def testStructureConvertion( self ) :
-		self.assertEqual( DataCastOp()( object = V3fData( V3f( 1, 2, 3 ) ), targetType = int(TypeId.FloatVectorData) ), FloatVectorData( [ 1, 2, 3 ] ) ) 
-		self.assertEqual( DataCastOp()( object = V3fData( V3f( 1, 2, 3 ) ), targetType = int(TypeId.Color3fData) ), Color3fData( Color3f( 1, 2, 3 ) ) ) 
-		self.assertEqual( DataCastOp()( object = V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ), targetType = int(TypeId.FloatVectorData) ), FloatVectorData( [ 1, 1, 1, 2, 2, 2, 3, 3, 3 ] ) ) 
+		self.assertEqual( DataCastOp()( object = FloatData( 2 ), targetType = int(TypeId.DoubleData) ), DoubleData( 2 ) )
+		self.assertEqual( DataCastOp()( object = DoubleData( 2 ), targetType = int(TypeId.FloatData) ), FloatData( 2 ) )
+		self.assertEqual( DataCastOp()( object = IntData( 2 ), targetType = int(TypeId.UIntData) ), UIntData( 2 ) )
+		self.assertEqual( DataCastOp()( object = V3fData( V3f( 2 ) ), targetType = int(TypeId.V3dData) ), V3dData( V3d( 2 ) ) )
+		self.assertEqual( DataCastOp()( object = QuatfData( Quatf( 1,2,3,4 ) ), targetType = int(TypeId.QuatdData) ), QuatdData( Quatd( 1,2,3,4 ) ) )
 
-		self.assertEqual( DataCastOp()( object = FloatVectorData( [ 1, 2, 3 ] ), targetType = int(TypeId.V3fData) ), V3fData( V3f( 1, 2, 3 ) ) ) 
-		self.assertEqual( DataCastOp()( object = Color3fData( Color3f( 1, 2, 3 ) ), targetType = int(TypeId.V3fData) ), V3fData( V3f( 1, 2, 3 ) ) ) 
-		self.assertEqual( DataCastOp()( object = FloatVectorData( [ 1, 1, 1, 2, 2, 2, 3, 3, 3 ] ), targetType = int(TypeId.V3fVectorData) ), V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ) ) 
-		self.assertEqual( DataCastOp()( object = V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ), targetType = int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f(1), Color3f(2), Color3f(3) ] ) ) 
-		self.assertEqual( DataCastOp()( object = V3dVectorData( [ V3d(1), V3d(2), V3d(3) ] ), targetType = int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f(1), Color3f(2), Color3f(3) ] ) ) 
-	
+	def testStructureConvertion( self ) :
+		self.assertEqual( DataCastOp()( object = V3fData( V3f( 1, 2, 3 ) ), targetType = int(TypeId.FloatVectorData) ), FloatVectorData( [ 1, 2, 3 ] ) )
+		self.assertEqual( DataCastOp()( object = V3fData( V3f( 1, 2, 3 ) ), targetType = int(TypeId.Color3fData) ), Color3fData( Color3f( 1, 2, 3 ) ) )
+		self.assertEqual( DataCastOp()( object = V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ), targetType = int(TypeId.FloatVectorData) ), FloatVectorData( [ 1, 1, 1, 2, 2, 2, 3, 3, 3 ] ) )
+
+		self.assertEqual( DataCastOp()( object = FloatVectorData( [ 1, 2, 3 ] ), targetType = int(TypeId.V3fData) ), V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( DataCastOp()( object = Color3fData( Color3f( 1, 2, 3 ) ), targetType = int(TypeId.V3fData) ), V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( DataCastOp()( object = FloatVectorData( [ 1, 1, 1, 2, 2, 2, 3, 3, 3 ] ), targetType = int(TypeId.V3fVectorData) ), V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ) )
+		self.assertEqual( DataCastOp()( object = V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ), targetType = int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f(1), Color3f(2), Color3f(3) ] ) )
+		self.assertEqual( DataCastOp()( object = V3dVectorData( [ V3d(1), V3d(2), V3d(3) ] ), targetType = int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f(1), Color3f(2), Color3f(3) ] ) )
+
 	def testInvalidConversions( self ) :
 		tests = [
 			( FloatVectorData( [ 1, 2, 3 ] ), int(TypeId.V2fData) ),

@@ -56,25 +56,25 @@ template<typename T, typename Hash=Hash<T> >
 class Interned
 {
 	public :
-	
+
 		Interned( const T &value );
 		Interned( const Interned<T, Hash> &other );
 		Interned( const char *value );
 		template<typename S>
 		Interned( const S &value );
-		
+
 		~Interned();
 
 		inline bool operator != ( const Interned<T, Hash> &other ) const;
 		inline bool operator == ( const Interned<T, Hash> &other ) const;
 		inline bool operator < ( const Interned<T, Hash> &other ) const;
-		
+
 		inline operator const T & () const;
 
 		const T &value() const;
-		
+
 		static size_t size();
-		
+
 	private :
 
 		typedef boost::multi_index::multi_index_container<
@@ -84,14 +84,14 @@ class Interned
 					boost::multi_index::identity<T>,
 					Hash
 				>
-			> 
+			>
 		> HashSet;
-		
+
 		typedef typename HashSet::template nth_index<0>::type Index;
 		typedef typename HashSet::template nth_index_const_iterator<0>::type ConstIterator;
-		
+
 		const T *m_value;
-				
+
 		static HashSet *hashSet();
 
 };

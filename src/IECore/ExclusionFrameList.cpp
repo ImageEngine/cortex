@@ -74,21 +74,21 @@ FrameListPtr ExclusionFrameList::getExclusionFrameList()
 	return m_exclusionFrameList;
 }
 
-void ExclusionFrameList::asList( std::vector<Frame> &frames ) const 
-{	
+void ExclusionFrameList::asList( std::vector<Frame> &frames ) const
+{
 	frames.clear();
-	
+
 	std::vector<Frame> l;
 	m_frameList->asList( l );
-	
+
 	std::vector<Frame> e;
-	m_exclusionFrameList->asList( e );	
-	
+	m_exclusionFrameList->asList( e );
+
 	std::set<Frame> lSet( l.begin(), l.end() );
 	std::set<Frame> eSet( e.begin(), e.end() );
-	
+
 	set_difference( lSet.begin(), lSet.end(), eSet.begin(), eSet.end(), std::back_inserter( frames ) );
-	
+
 	assert( frames.size() <= l.size() );
 }
 
@@ -96,17 +96,17 @@ std::string ExclusionFrameList::asString() const
 {
 	std::string s1 = m_frameList->asString();
 	std::string s2 = m_exclusionFrameList->asString();
-	
+
 	if ( s1.find_first_of( ',' ) != std::string::npos )
 	{
 		s1 = "(" + s1 + ")";
 	}
-	
+
 	if ( s2.find_first_of( ',' ) != std::string::npos )
 	{
 		s2 = "(" + s2 + ")";
 	}
-	
+
 	return s1 + "!" + s2;
 }
 
@@ -116,9 +116,9 @@ bool ExclusionFrameList::isEqualTo( ConstFrameListPtr other ) const
 	{
 		return false;
 	}
-	
+
 	ConstExclusionFrameListPtr otherF = assertedStaticCast< const ExclusionFrameList >( other );
-	
+
 	return m_frameList->isEqualTo( otherF->m_frameList ) && m_exclusionFrameList->isEqualTo( otherF->m_exclusionFrameList ) ;
 }
 
@@ -132,14 +132,14 @@ FrameListPtr ExclusionFrameList::parse( const std::string &frameList )
 	boost::tokenizer<boost::char_separator<char> > t( frameList, boost::char_separator<char>( "!" ) );
 	std::vector<std::string> tokens;
 	std::copy( t.begin(), t.end(), std::back_inserter( tokens ) );
-	
+
 	if ( tokens.size() == 2 )
 	{
 		try
-		{		
+		{
 			FrameListPtr f1 = FrameList::parse( tokens[0] );
-			FrameListPtr f2 = FrameList::parse( tokens[1] );			
-			
+			FrameListPtr f2 = FrameList::parse( tokens[1] );
+
 			if ( f1 && f2 )
 			{
 				return new ExclusionFrameList( f1, f2 );

@@ -50,34 +50,34 @@ IE_CORE_FORWARDDECLARE( MatrixMultiplyOp )
 class TransformOp : public PrimitiveOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( TransformOp, PrimitiveOp );
-		
+
 		TransformOp();
-		
+
 		ObjectParameterPtr matrixParameter();
 		ConstObjectParameterPtr matrixParameter() const;
-		
+
 		StringVectorParameterPtr pointPrimVarsParameter();
 		ConstStringVectorParameterPtr pointPrimVarsParameter() const;
-		
+
 		StringVectorParameterPtr vectorPrimVarsParameter();
 		ConstStringVectorParameterPtr vectorPrimVarsParameter() const;
-		
+
 		StringVectorParameterPtr normalPrimVarsParameter();
 		ConstStringVectorParameterPtr normalPrimVarsParameter() const;
-		
+
 	protected :
-		
-		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );		
-	
+
+		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );
+
 	private :
-	
+
 		MatrixMultiplyOpPtr m_multiplyOp;
 		StringVectorParameterPtr m_pointPrimVarsParameter;
 		StringVectorParameterPtr m_vectorPrimVarsParameter;
 		StringVectorParameterPtr m_normalPrimVarsParameter;
-	
+
 };
 
 IE_CORE_DECLAREPTR( TransformOp );

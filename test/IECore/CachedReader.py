@@ -40,45 +40,45 @@ import os
 class CachedReaderTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		r = CachedReader( SearchPath( "./", ":" ), 100 * 1024 * 1024 )
-		
+
 		o = r.read( "test/IECore/data/cobFiles/compoundData.cob" )
 		self.assertEqual( o.typeName(), "CompoundData" )
 		self.assertEqual( r.memoryUsage(), o.memoryUsage() )
-		
+
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( r.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
-		
+
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( r.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
-		
+
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
-		
-		# Here, the cache should throw away "o" (because there isn't enough room for it, and it was the least 
+
+		# Here, the cache should throw away "o" (because there isn't enough room for it, and it was the least
 		# recently used) leaving us with just "oo"
 		r.maxMemory = oo.memoryUsage() + ( o.memoryUsage() / 2 )
-		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )	
-		
-		# Here, the cache should throw away "oo" (because there isn't enough room for it, and it was the least 
+		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )
+
+		# Here, the cache should throw away "oo" (because there isn't enough room for it, and it was the least
 		# recently used) leaving us empty
 		r.maxMemory = oo.memoryUsage() / 2
 		self.assertEqual( r.memoryUsage(), 0 )
-		
+
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		r.clear()
-		self.assertEqual( r.memoryUsage(), 0 )				
-	
+		self.assertEqual( r.memoryUsage(), 0 )
+
 	def testDefault( self ) :
-	
+
 		os.environ["IECORE_CACHEDREADER_PATHS"] = "a:test:path"
-	
+
 		r = CachedReader.defaultCachedReader()
 		r2 = CachedReader.defaultCachedReader()
 		self.assert_( r.isSame( r2 ) )
 		self.assertEqual( r.maxMemory, 1024 * 1024 * 100 )
 		self.assertEqual( r.searchPath, SearchPath( "a:test:path", ":" ) )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

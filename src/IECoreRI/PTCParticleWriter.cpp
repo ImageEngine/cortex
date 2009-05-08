@@ -111,7 +111,7 @@ static void writeAttribute( float *target, DataPtr attr, int index )
 				write1DAttr<FloatVectorData>( target, f, index );
 			}
 			break;
-			
+
 		case V3dVectorDataTypeId :
 			{
 				V3dVectorDataPtr d = static_pointer_cast<V3dVectorData>( attr );
@@ -282,7 +282,7 @@ void PTCParticleWriter::doWrite()
 			if ( t == VarTypeCount )
 			{
 				msg( Msg::Warning, "PTCParticleWriter::write", format( "Unrecognized attribute type \"%s\"." ) % typeStr );
-			}		
+			}
 		}
 	}
 	if (m_header.nPoints != (int)particleObject()->getNumPoints() )
@@ -308,7 +308,7 @@ void PTCParticleWriter::doWrite()
 	if ( blindData && (itBlind = blindData->readable().find( "worldToNdc" )) != blindData->readable().end() &&
 			itBlind->second->typeId() == M44fDataTypeId )
 	{
-		
+
 		m = static_pointer_cast< M44fData >( itBlind->second )->readable();
 	}
 	k = 0;
@@ -324,7 +324,7 @@ void PTCParticleWriter::doWrite()
 		CompoundDataMap::const_iterator xResolutionIt = blindData->readable().find( "xResolution" );
 		CompoundDataMap::const_iterator yResolutionIt = blindData->readable().find( "yResolution" );
 		CompoundDataMap::const_iterator aspectRatioIt = blindData->readable().find( "aspectRatio" );
-		if ( xResolutionIt != end && yResolutionIt != end && aspectRatioIt != end && 
+		if ( xResolutionIt != end && yResolutionIt != end && aspectRatioIt != end &&
 			 xResolutionIt->second->typeId() == FloatDataTypeId && yResolutionIt->second->typeId() == FloatDataTypeId &&
 			aspectRatioIt->second->typeId() == FloatDataTypeId)
 		{
@@ -396,7 +396,7 @@ void PTCParticleWriter::doWrite()
 		{
 			writeAttribute( &radius, radiusVector, i );
 		}
-		
+
 		map<string, Record>::const_iterator it;
 		for( it=m_header.attributes.begin(); it!=m_header.attributes.end(); it++ )
 		{

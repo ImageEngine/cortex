@@ -47,7 +47,7 @@ namespace IECore
 // \todo test dot() function and add common operators such as +.
 // \todo see if we can get the result type of multiplying two objects using data traits and apply it to dot() then create ^ operator.
 template < typename V >
-class SphericalHarmonics 
+class SphericalHarmonics
 {
 	public :
 		typedef typename VectorTraits<V>::BaseType BaseType;

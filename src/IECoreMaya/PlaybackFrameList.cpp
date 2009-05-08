@@ -64,16 +64,16 @@ void PlaybackFrameList::setRange( Range r )
 	m_range = r;
 }
 
-void PlaybackFrameList::asList( std::vector<Frame> &frames ) const 
+void PlaybackFrameList::asList( std::vector<Frame> &frames ) const
 {
-	frames.clear();	
-	
+	frames.clear();
+
 	MTime start, end;
-	
+
 	if ( m_range == Animation )
 	{
 		start = MAnimControl::animationStartTime();
-		end = MAnimControl::animationEndTime();		
+		end = MAnimControl::animationEndTime();
 	}
 	else if ( m_range == Playback )
 	{
@@ -84,23 +84,23 @@ void PlaybackFrameList::asList( std::vector<Frame> &frames ) const
 	{
 		assert( false );
 	}
-	
+
 	Frame startFrame = static_cast<Frame>( start.as( MTime::uiUnit() ) );
-	Frame endFrame = static_cast<Frame>( end.as( MTime::uiUnit() ) );	
-	
+	Frame endFrame = static_cast<Frame>( end.as( MTime::uiUnit() ) );
+
 	for ( Frame i = startFrame; i <= endFrame; i++ )
 	{
 		frames.push_back( i );
 	}
 }
 
-std::string PlaybackFrameList::asString() const 
+std::string PlaybackFrameList::asString() const
 {
 	if ( m_range == Animation )
 	{
 		return "animation";
 	}
-	else 
+	else
 	{
 		assert( m_range == Playback );
 		return "playback";
@@ -118,18 +118,18 @@ bool PlaybackFrameList::isEqualTo( ConstFrameListPtr other ) const
 	{
 		return false;
 	}
-	
+
 	ConstPlaybackFrameListPtr otherF = assertedStaticCast< const PlaybackFrameList >( other );
-	
+
 	return m_range == otherF->m_range;
 }
 
 FrameListPtr PlaybackFrameList::parse( const std::string &frameList )
-{	
+{
 	if ( frameList == "animation" )
 	{
 		return new PlaybackFrameList( Animation );
-	}	
+	}
 	else if ( frameList == "playback" )
 	{
 		return new PlaybackFrameList( Playback );

@@ -41,47 +41,47 @@ from IECore import *
 class PatchMeshPrimitiveTest( unittest.TestCase ) :
 
 	def testConstructors( self ) :
-		
+
 		self.assertRaises( Exception, PatchMeshPrimitive )
-		
+
 		p = PatchMeshPrimitive( 10, 7, CubicBasisf.bezier(), CubicBasisf.bezier(), False, False, V3fVectorData( [ V3f() ] * 70 ) )
 
 		self.assertEqual( p.uBasis(), CubicBasisf.bezier() )
-		self.assertEqual( p.vBasis(), CubicBasisf.bezier() )		
+		self.assertEqual( p.vBasis(), CubicBasisf.bezier() )
 		self.assertEqual( p.uPeriodic(), False )
-		self.assertEqual( p.vPeriodic(), False )		
+		self.assertEqual( p.vPeriodic(), False )
 		self.assertEqual( p.keys(), [ "P" ] )
 		self.assertEqual( p.uPoints(), 10 )
-		self.assertEqual( p.vPoints(), 7 )		
+		self.assertEqual( p.vPoints(), 7 )
 		self.assertEqual( p.uPatches(), 3 )
-		self.assertEqual( p.vPatches(), 2 )		
+		self.assertEqual( p.vPatches(), 2 )
 		self.assert_( p.arePrimitiveVariablesValid() )
-		
+
 	def testConstructorValidation( self ) :
-	
+
 		self.assertRaises( Exception, PatchMeshPrimitive, 0, 0 )
 		self.assertRaises( Exception, PatchMeshPrimitive, 0, 1 )
 		self.assertRaises( Exception, PatchMeshPrimitive, 1, 0 )
 
 	def testCopy( self ) :
-	
+
 		p = PatchMeshPrimitive( 10, 7, CubicBasisf.bezier(), CubicBasisf.bezier(), False, False, V3fVectorData( [ V3f() ] * 70 ) )
-		
+
 		pp = p.copy()
 		self.assertEqual( p, pp )
 
 	def testIO( self ) :
-	
+
 		p = PatchMeshPrimitive( 10, 7, CubicBasisf.bezier(), CubicBasisf.bezier(), False, False )
-		
+
 		Writer.create( p, "test/IECore/data/PatchMeshPrimitive.cob" ).write()
-		
+
 		pp = Reader.create( "test/IECore/data/PatchMeshPrimitive.cob" ).read()
-		
+
 		self.assertEqual( pp, p )
-	
+
 	def testVariableSize( self ) :
-	
+
 		p = PatchMeshPrimitive( 10, 7, CubicBasisf.bezier(), CubicBasisf.bezier(), False, False, V3fVectorData( [ V3f() ] * 70 ) )
 
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -89,7 +89,7 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Vertex ), 70 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Varying ), 12 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 12 )
-		
+
 		p = PatchMeshPrimitive( 9, 5, CubicBasisf.catmullRom(), CubicBasisf.catmullRom(), True, False, V3fVectorData( [ V3f() ] * 45 ) )
 
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -97,17 +97,17 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Vertex ), 45 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Varying ), 27 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 27 )
-			
+
 	def setUp( self ) :
-	
+
 		if os.path.isfile( "test/IECore/data/PatchMeshPrimitive.cob" ) :
 			os.remove( "test/IECore/data/PatchMeshPrimitive.cob" )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile( "test/IECore/data/PatchMeshPrimitive.cob" ) :
 			os.remove( "test/IECore/data/PatchMeshPrimitive.cob" )
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

@@ -69,12 +69,12 @@ template<typename T>
 class TypedObjectParameterWrap : public TypedObjectParameter<T>, public Wrapper< TypedObjectParameter<T> >
 {
 	public:
-		
+
 		IE_CORE_DECLAREMEMBERPTR( TypedObjectParameterWrap<T> );
-	
-		TypedObjectParameterWrap( PyObject *self, const std::string &n, const std::string &d, typename T::Ptr dv, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+
+		TypedObjectParameterWrap( PyObject *self, const std::string &n, const std::string &d, typename T::Ptr dv, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )
 			:	TypedObjectParameter<T>( n, d, dv, parameterPresets<typename TypedObjectParameter<T>::ObjectPresetsContainer>( p ), po, ud ), Wrapper< TypedObjectParameter<T> >( self, this ) {};
-		
+
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( TypedObjectParameter<T> );
 };
 
@@ -82,21 +82,21 @@ template<typename T>
 static void bindTypedObjectParameter()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<TypedObjectParameter<T>, typename TypedObjectParameterWrap<T>::Ptr >()
-		.def( 
+		.def(
 			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
-			( 
-				( 
-					arg( "name" ), 
-					arg( "description" ), 
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
 					arg( "defaultValue" ),
 					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false , 
+					arg( "presetsOnly" ) = false ,
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
-				) 
+				)
 			)
-		) 		
+		)
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( TypedObjectParameter<T> )
 	;
 }
@@ -117,9 +117,9 @@ void bindTypedObjectParameter()
 	bindTypedObjectParameter<ImagePrimitive>();
 	bindTypedObjectParameter<MeshPrimitive>();
 	bindTypedObjectParameter<CurvesPrimitive>();
-	bindTypedObjectParameter<PointsPrimitive>();	
-	bindTypedObjectParameter<CompoundObject>();		
-	bindTypedObjectParameter<ObjectVector>();		
+	bindTypedObjectParameter<PointsPrimitive>();
+	bindTypedObjectParameter<CompoundObject>();
+	bindTypedObjectParameter<ObjectVector>();
 }
 
 } // namespace IECore

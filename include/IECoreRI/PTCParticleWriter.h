@@ -52,13 +52,13 @@ class PTCParticleWriter : public IECore::ParticleWriter
 
 		PTCParticleWriter( );
 		PTCParticleWriter( IECore::ObjectPtr object, const std::string &fileName );
-		
+
 	private :
-	
+
 		virtual void doWrite();
-		
+
 		static const WriterDescription<PTCParticleWriter> m_writerDescription;
-		
+
 		struct PTCParticleIO::PTCHeader m_header;
 
 };

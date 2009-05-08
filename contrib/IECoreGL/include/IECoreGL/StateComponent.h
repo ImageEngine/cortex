@@ -51,13 +51,13 @@ class StateComponent : public Bindable
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::StateComponent, StateComponentTypeId, Bindable );
-		
+
 		virtual ~StateComponent();
 
 	protected :
 
 		StateComponent();
-		
+
 		template<typename T>
 		class Description : protected IECore::RunTimeTyped::TypeDescription< T >
 		{

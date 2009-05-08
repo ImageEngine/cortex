@@ -76,7 +76,7 @@ void FromMayaParticleConverter::constructCommon()
 
 	IECore::StringVectorDataPtr attributeNamesDefaultData = new IECore::StringVectorData();
 	IECore::StringVectorData::ValueType &attributeNames = attributeNamesDefaultData->writable();
-	
+
 	attributeNames.push_back( "velocity" );
 
 	m_attributeNamesParameter = new IECore::StringVectorParameter(
@@ -86,8 +86,8 @@ void FromMayaParticleConverter::constructCommon()
 		attributeNamesDefaultData
 		/// \todo Add presets
 	);
-			
-	parameters()->addParameter( m_attributeNamesParameter );	
+
+	parameters()->addParameter( m_attributeNamesParameter );
 }
 
 IECore::StringVectorParameterPtr FromMayaParticleConverter::attributeNamesParameter()
@@ -124,66 +124,66 @@ IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnPartic
 {
 	MStatus s;
 	IECore::PointsPrimitivePtr points = new IECore::PointsPrimitive( fnParticle.count( ) );
-	
+
 	/// We always add "position" as "P"
 	MVectorArray position;
 	fnParticle.position( position );
-	
+
         IECore::V3fVectorDataPtr pos = new IECore::V3fVectorData();
         pos->writable().resize( position.length() );
-        std::transform( MArrayIter<MVectorArray>::begin( position ), MArrayIter<MVectorArray>::end( position ), pos->writable().begin(), IECore::VecConvert<MVector, V3f>() );		
+        std::transform( MArrayIter<MVectorArray>::begin( position ), MArrayIter<MVectorArray>::end( position ), pos->writable().begin(), IECore::VecConvert<MVector, V3f>() );
 	points->variables["P"] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, pos );
-	
+
 	const IECore::StringVectorParameter::ValueType &attributeNames = attributeNamesParameter()->getTypedValue();
-	
+
 	for ( IECore::StringVectorParameter::ValueType::const_iterator it = attributeNames.begin(); it != attributeNames.end(); ++it )
 	{
 		const MString attrName = it->c_str();
 		const std::string &primVarName = *it;
-		
+
 		if ( fnParticle.isPerParticleIntAttribute( attrName, &s ) )
 		{
 			assert( s );
 			MIntArray arr;
 			unsigned int len = fnParticle.getPerParticleAttribute( attrName, arr, &s );
 			assert( len == fnParticle.count() );
-			
+
 			IECore::IntVectorDataPtr data = new IECore::IntVectorData();
-			data->writable().resize( len );			
+			data->writable().resize( len );
 			data->writable().assign( MArrayIter<MIntArray>::begin( arr ), MArrayIter<MIntArray>::end( arr ) );
-			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );			
-		} 
+			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );
+		}
 		else if ( fnParticle.isPerParticleDoubleAttribute( attrName, &s ) )
 		{
 			assert( s );
 			MDoubleArray arr;
 			unsigned int len = fnParticle.getPerParticleAttribute( attrName, arr, &s );
 			assert( len == fnParticle.count() );
-			
+
 			IECore::FloatVectorDataPtr data = new IECore::FloatVectorData();
-			data->writable().resize( len );			
+			data->writable().resize( len );
 			data->writable().assign( MArrayIter<MDoubleArray>::begin( arr ), MArrayIter<MDoubleArray>::end( arr ) );
-			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );			
-		} 
+			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );
+		}
 		else if ( fnParticle.isPerParticleVectorAttribute( attrName, &s ) )
 		{
-			assert( s );		
+			assert( s );
 			MVectorArray arr;
 			unsigned int len = fnParticle.getPerParticleAttribute( attrName, arr, &s );
 			assert( len == fnParticle.count() );
-			
+
 			IECore::V3fVectorDataPtr data = new IECore::V3fVectorData();
 			data->writable().resize( len );
-		        std::transform( MArrayIter<MVectorArray>::begin( arr ), MArrayIter<MVectorArray>::end( arr ), data->writable().begin(), IECore::VecConvert<MVector, V3f>() );		
-			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );			
+		        std::transform( MArrayIter<MVectorArray>::begin( arr ), MArrayIter<MVectorArray>::end( arr ), data->writable().begin(), IECore::VecConvert<MVector, V3f>() );
+			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );
 		}
 		else
 		{
 			IECore::msg( IECore::Msg::Warning, "FromMayaParticleConverter", boost::format( "Ignoring attribute \%s\", which is not a per-particle attribute" ) % primVarName);
 		}
-		
+
 	}
-	
+
 	assert( points->arePrimitiveVariablesValid() );
 	return points;
 }

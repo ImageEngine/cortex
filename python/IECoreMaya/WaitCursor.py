@@ -40,10 +40,10 @@ import maya.cmds
 class WaitCursor :
 
 	def __enter__( self ) :
-	
+
 		maya.cmds.waitCursor( state=True )
-	
+
 	def __exit__( self, type, value, traceBack ) :
-	
+
 		maya.cmds.waitCursor( state=False )
-	
+

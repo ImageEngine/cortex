@@ -67,7 +67,7 @@ bool ReorderedFrameList::isEqualTo( ConstFrameListPtr other ) const
 	{
 		return false;
 	}
-	
+
 	ConstReorderedFrameListPtr otherF = assertedStaticCast< const ReorderedFrameList >( other );
 	return m_frameList->isEqualTo( otherF->m_frameList );
 }

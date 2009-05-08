@@ -40,7 +40,7 @@ from IECore import *
 class TestCamera( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		c = Camera()
 		self.assertEqual( c.getName(), "default" )
 		self.assertEqual( c.getTransform(), None )
@@ -51,38 +51,38 @@ class TestCamera( unittest.TestCase ) :
 		self.assertEqual( cc.getTransform(), None )
 		self.assertEqual( cc.parameters(), CompoundData() )
 		self.assertEqual( cc, c )
-		
+
 		Writer.create( cc, "test/IECore/data/camera.cob" ).write()
 		ccc = Reader.create( "test/IECore/data/camera.cob" ).read()
-		
+
 		self.assertEqual( c, ccc )
-		
+
 		c.setName( "n" )
 		self.assertEqual( c.getName(), "n" )
-		
+
 		c.setTransform( MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
 		self.assertEqual( c.getTransform(), MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
-		
+
 		c.parameters()["fov"] = FloatData( 45 )
 		self.assertEqual( c.parameters()["fov"], FloatData( 45 ) )
-		
+
 		# test copying and saving with some parameters and a transform
 		cc = c.copy()
 		self.assertEqual( cc, c )
-		
+
 		Writer.create( cc, "test/IECore/data/camera.cob" ).write()
 		ccc = Reader.create( "test/IECore/data/camera.cob" ).read()
 		self.assertEqual( ccc, c )
-	
+
 	def testAddStandardParameters( self ) :
-	
+
 		c = Camera()
 		c.addStandardParameters()
-		
+
 		self.assertEqual( c.parameters()["resolution"].value, V2i( 640, 480 ) )
 		aspectRatio = 640.0/480.0
 		self.assertEqual( c.parameters()["screenWindow"].value, Box2f( V2f( -aspectRatio, -1 ), V2f( aspectRatio, 1 ) ) )
-		
+
 		self.assertEqual( c.parameters()["cropWindow"].value, Box2f( V2f( 0, 0 ), V2f( 1, 1 ) ) )
 		self.assertEqual( c.parameters()["projection"].value, "orthographic" )
 		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 0.01, 100000 ) )
@@ -102,12 +102,12 @@ class TestCamera( unittest.TestCase ) :
 		self.assertEqual( c.parameters()["projection:fov"].value, 90 )
 		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 1, 1000 ) )
 		self.assertEqual( c.parameters()["shutter"].value, V2f( 1, 2 ) )
-	
-		
+
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile( "test/IECore/data/camera.cob" ) :
-			os.remove( "test/IECore/data/camera.cob" )	
+			os.remove( "test/IECore/data/camera.cob" )
 
 if __name__ == "__main__":
         unittest.main()

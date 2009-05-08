@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -45,26 +45,26 @@
 using namespace boost::python;
 using namespace Imath;
 
-namespace IECore 
+namespace IECore
 {
 
 void bindAngleConversion()
 {
-	
+
 	def( "degreesToRadians", &degreesToRadians<float> );
 	def( "degreesToRadians", &degreesToRadians<double> );
 	def( "degreesToRadians", &degreesToRadians<Imath::V2f> );
 	def( "degreesToRadians", &degreesToRadians<Imath::V2d> );
 	def( "degreesToRadians", &degreesToRadians<Imath::V3f> );
 	def( "degreesToRadians", &degreesToRadians<Imath::V3d> );
-	
+
 	def( "radiansToDegrees", &radiansToDegrees<float> );
 	def( "radiansToDegrees", &radiansToDegrees<double> );
 	def( "radiansToDegrees", &radiansToDegrees<Imath::V2f> );
 	def( "radiansToDegrees", &radiansToDegrees<Imath::V2d> );
 	def( "radiansToDegrees", &radiansToDegrees<Imath::V3f> );
 	def( "radiansToDegrees", &radiansToDegrees<Imath::V3d> );
-	
+
 }
 
 }

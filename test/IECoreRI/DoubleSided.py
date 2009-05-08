@@ -41,28 +41,28 @@ import os
 class DoubleSidedTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testDoubleSided.rib" )
 		self.assertEqual( r.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
-		
+
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
 		self.assertEqual( r.getAttribute( "doubleSided" ), IECore.BoolData( False ) )
 		del r
-		
+
 		l = "".join( file( "test/IECoreRI/output/testDoubleSided.rib" ).readlines() )
 		self.assert_( "Sides 1" in l )
-		
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testDoubleSided.rib" )
 		r.setAttribute( "doubleSided", IECore.BoolData( True ) )
 		del r
-		
+
 		l = "".join( file( "test/IECoreRI/output/testDoubleSided.rib" ).readlines() )
 		self.assert_( "Sides 2" in l )
-			
+
 	def tearDown( self ) :
-	
+
 		if os.path.exists( "test/IECoreRI/output/testDoubleSided.rib" ) :
 			os.remove( "test/IECoreRI/output/testDoubleSided.rib" )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

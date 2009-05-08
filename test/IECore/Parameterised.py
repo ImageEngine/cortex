@@ -50,14 +50,14 @@ class TestParameterised( unittest.TestCase ) :
 	def testSubclass( self ) :
 		""" Test Parameterised subclassing """
 		b = derived()
-		
+
 	def testUserData( self ) :
-	
+
 		a = Parameterised( "name", "description" )
 		self.assertEqual( a.userData(), CompoundObject() )
 
 	def testSmartAssignment( self ):
-		
+
 		b = derived()
 		b.anotherAttribute = [ 1, "lala", 1.2 ]
 		b.objectAttribute1 = 2
@@ -67,7 +67,7 @@ class TestParameterised( unittest.TestCase ) :
 		self.assertEqual( b["number"].getTypedValue(), 30 )
 
 	def testAttributeDeprecation( self ) :
-			
+
 		b = derived()
 		self.assertRaises( DeprecationWarning, getattr, b, "number" )
 		self.assertRaises( DeprecationWarning, setattr, b, "number", 10 )

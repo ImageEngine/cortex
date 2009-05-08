@@ -41,53 +41,53 @@ from IECore import *
 class GammaOp( ColorTransformOp ) :
 
 	def __init__( self, gamma = 1.0 ) :
-	
+
 		ColorTransformOp.__init__( self, "gamma", "applies gamma" )
 
 		self.gamma = gamma
-		
+
 	def begin( self, operands ) :
-	
-		pass	
-	
-	def transform( self, color ) :			
-	
+
+		pass
+
+	def transform( self, color ) :
+
 		return Color3f(
 			math.pow( color.r, 1.0 / self.gamma ),
 			math.pow( color.g, 1.0 / self.gamma ),
 			math.pow( color.b, 1.0 / self.gamma )
-		)	
-		
+		)
+
 	def end( self ) :
-	
-		pass	
+
+		pass
 
 
 class CubeColorLookupTest( unittest.TestCase ) :
 
 	def testOpConstruction( self ) :
-	
+
 		gammaOp = GammaOp( 2.0 )
-		
+
 		dim = V3i( 48, 66, 101 )
 		cubeLookup = CubeColorLookupf( dim, gammaOp )
-		
+
 		random.seed( 23 )
-		
+
 		# Perform 100 random comparisons with the LUT against the original function
 		for i in range( 0, 100 ) :
-		
+
 			c = Color3f( random.random(), random.random(), random.random() )
-			
+
 			c1 = cubeLookup( c )
 			c2 = gammaOp.transform( c )
-									
+
 			self.assertAlmostEqual( c1.r, c2.r, 1 )
 			self.assertAlmostEqual( c1.g, c2.g, 1 )
 			self.assertAlmostEqual( c1.b, c2.b, 1 )
-			
-	
-		
+
+
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

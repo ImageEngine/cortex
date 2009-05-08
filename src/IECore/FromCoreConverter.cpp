@@ -60,7 +60,7 @@ FromCoreConverter::FromCoreConverter( const std::string &name, const std::string
 	m_srcParameter = new ObjectParameter( "src", "The object to be converted.", new NullObject(), supportedTypes );
 	parameters()->addParameter( m_srcParameter );
 }
-		
+
 FromCoreConverter::~FromCoreConverter()
 {
 }

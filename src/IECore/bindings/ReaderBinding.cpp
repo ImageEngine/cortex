@@ -73,9 +73,9 @@ void bindReader()
 {
 	RunTimeTypedClass<Reader>()
 		.def( "readHeader", &Reader::readHeader )
-		.def( "read", &Reader::read )		
+		.def( "read", &Reader::read )
 		.def( "create", &Reader::create ).staticmethod( "create" )
-		.def( "supportedExtensions", ( list(*)( ) ) &supportedExtensions ) 
+		.def( "supportedExtensions", ( list(*)( ) ) &supportedExtensions )
 		.def( "supportedExtensions", ( list(*)( IECore::TypeId ) ) &supportedExtensions )
 		.staticmethod( "supportedExtensions" )
 	;

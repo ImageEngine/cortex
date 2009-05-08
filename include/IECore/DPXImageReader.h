@@ -61,7 +61,7 @@ class DPXImageReader : public ImageReader
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
-		virtual std::string sourceColorSpace() const ;		
+		virtual std::string sourceColorSpace() const ;
 
 	private:
 
@@ -89,7 +89,7 @@ class DPXImageReader : public ImageReader
 
 		struct Header;
 		Header *m_header;
-		
+
 		const char* descriptorStr( int descriptor ) const;
 };
 

@@ -53,9 +53,9 @@ class TextPrimitive : public Primitive
 
 		TextPrimitive( const std::string &text, FontPtr font );
 		virtual ~TextPrimitive();
-		
+
 		virtual Imath::Box3f bound() const;
-		
+
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
 		/// TextPrimitive objects.
@@ -71,27 +71,27 @@ class TextPrimitive : public Primitive
 		typedef TypedStateComponent<RenderType, TextPrimitiveTypeTypeId> Type;
 		IE_CORE_DECLAREPTR( Type );
 		//@}
-		
+
 	protected :
-		
+
 		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
-	
+
 	private :
-	
+
 		FontPtr m_font;
 		std::string m_text;
 		Imath::Box3f m_bound;
 		typedef std::vector<Imath::V2f> AdvanceVector;
 		AdvanceVector m_advances;
-	
+
 		/// Mesh rendering bits
 		void renderMeshes( ConstStatePtr state, IECore::TypeId style ) const;
 		typedef std::vector<ConstMeshPrimitivePtr> MeshVector;
 		mutable MeshVector m_meshes;
-		
+
 		/// Sprite rendering bits
 		void renderSprites( ConstStatePtr state, IECore::TypeId style ) const;
-	
+
 };
 
 IE_CORE_DECLAREPTR( TextPrimitive );

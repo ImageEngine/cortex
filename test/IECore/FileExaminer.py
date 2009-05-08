@@ -39,16 +39,16 @@ from IECore import *
 class TestFileExaminer( unittest.TestCase ) :
 
 	def testNoExaminer( self ) :
-	
+
 		self.assertEqual( FileExaminer.create( "noExtension" ), None )
 		self.assertEqual( FileExaminer.create( "extensionNot.registered" ), None )
 		self.assertEqual( FileExaminer.allDependencies( "noExtension" ), set() )
 		self.assertEqual( FileExaminer.allDependencies( "extensionNot.registered" ), set() )
 
 	def testNuke( self ) :
-		
+
 		e = FileExaminer.create( "test/IECore/data/nukeScripts/dependencies.nk" )
-		
+
 		expectedDependencies = [
 			"/tmp/test.####.tif 3-10",
 			"/film/grain/scans/AreDependenciesToo.####.tif 2-75",
@@ -59,29 +59,29 @@ class TestFileExaminer( unittest.TestCase ) :
 			"/tmp/animatedGeo.####.obj 1-101",
 			"/tmp/test/geoNoAnimation.obj",
 		]
-		
+
 		d = e.dependencies()
-						
+
 		self.assertEqual( len( expectedDependencies ), len( d ) )
 		for ed in expectedDependencies :
 			self.assert_( ed in d )
-			
+
 	def testRIB( self ) :
-	
+
 		e = FileExaminer.create( "test/IECore/data/ribFiles/dependencies.rib" )
-		
+
 		expectedDependencies = [
 			"aShader.sdl",
 			"/a/texture/file.0001.tdl",
 			"hello.tdl",
 			"aPythonProcedural",
 		]
-		
+
 		d = e.dependencies()
-				
+
 		self.assertEqual( len( expectedDependencies ), len( d ) )
 		for ed in expectedDependencies :
 			self.assert_( ed in d )
-					
+
 if __name__ == "__main__":
 	unittest.main()

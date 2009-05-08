@@ -48,7 +48,7 @@ void bindLuminanceOp()
 {
 	RunTimeTypedClass<LuminanceOp>()
 		.def( init<>() )
-	;	
+	;
 }
 
 } // namespace IECore

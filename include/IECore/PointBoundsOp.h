@@ -47,36 +47,36 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 class PointBoundsOp : public Op
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( PointBoundsOp, Op );
-		
+
 		PointBoundsOp();
 		virtual ~PointBoundsOp();
-		
+
 		/// The Parameter for the input point cloud.
 		ObjectParameterPtr pointParameter();
 		ConstObjectParameterPtr pointParameter() const;
-		
+
 		/// The Parameter for point velocities.
 		ObjectParameterPtr velocityParameter();
 		ConstObjectParameterPtr velocityParameter() const;
-		
+
 		FloatParameterPtr velocityMultiplierParameter();
 		ConstFloatParameterPtr velocityMultiplierParameter() const;
 
 		/// The Parameter for optional point radii.
 		ObjectParameterPtr radiusParameter();
 		ConstObjectParameterPtr radiusParameter() const;
-		
+
 		FloatParameterPtr radiusMultiplierParameter();
 		ConstFloatParameterPtr radiusMultiplierParameter() const;
-						
+
 	protected :
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-	
+
 	private :
-		
+
 		ObjectParameterPtr m_pointParameter;
 		ObjectParameterPtr m_radiusParameter;
 		FloatParameterPtr m_radiusMultiplierParameter;

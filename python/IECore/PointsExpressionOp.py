@@ -37,7 +37,7 @@ from IECore import *
 class PointsExpressionOp( ModifyOp ) :
 
 	def __init__( self ) :
-	
+
 		ModifyOp.__init__( self, "PointsExpressionOp", "Modifies the primitive variables of a PointsPrimitive using a python expression.",
 			ObjectParameter(
 				name = "result",
@@ -52,9 +52,9 @@ class PointsExpressionOp( ModifyOp ) :
 				type = PointsPrimitive.staticTypeId(),
 			)
 		)
-		
+
 		self.parameters().addParameters(
-		
+
 			[
 				StringParameter(
 					name = "expression",
@@ -67,14 +67,14 @@ class PointsExpressionOp( ModifyOp ) :
 		)
 
 	def modify( self, pointsPrim, operands ) :
-	
+
 		# this dictionary derived class provides the locals for
 		# the expressions. it overrides the item accessors to
 		# provide access into the point data
 		class LocalsDict( dict ) :
-		
+
 			def __init__( self, p ) :
-			
+
 				self.__numPoints = p.numPoints
 				self.__vectors = {}
 				for k in p.keys() :
@@ -83,20 +83,20 @@ class PointsExpressionOp( ModifyOp ) :
 							self.__vectors[k] = p[k].data
 					except :
 						pass
-						
+
 				self.__vectors["remove"] = BoolVectorData( p.numPoints )
 				self.__haveRemovals = False
-				
+
 			def __getitem__( self, n ) :
-			
+
 				vector = self.__vectors.get( n, None )
 				if vector is None :
 					return dict.__getitem__( self, n )
 				else :
 					return vector[self["i"]]
-					
+
 			def __setitem__( self, n, v ) :
-			
+
 				vector = self.__vectors.get( n, None )
 				if vector is None :
 					dict.__setitem__( self, n, v )
@@ -104,32 +104,32 @@ class PointsExpressionOp( ModifyOp ) :
 					vector[self["i"]] = v
 					if n=="remove" and v :
 						self.__haveRemovals = True
-					
+
 			def removals( self ) :
-			
+
 				if self.__haveRemovals :
 					return self.__vectors["remove"]
 				else :
 					return None
-		
+
 		# get globals and locals for expressions
 		g = globals()
 		l = LocalsDict( pointsPrim )
-		
-		# run the expression for each point	
+
+		# run the expression for each point
 		e = compile( operands["expression"].value, "expression", "exec" )
 		for i in range( 0, pointsPrim.numPoints ) :
-		
+
 			l["i"] = i
 			exec e in g, l
-					
+
 		# filter out any points if requested
 		removals = l.removals()
 		if removals :
-		
+
 			newNumPoints = pointsPrim.numPoints
 			for k in pointsPrim.keys() :
-				
+
 				try :
 					primVar = pointsPrim[k]
 					if len( primVar.data )==pointsPrim.numPoints :
@@ -139,7 +139,7 @@ class PointsExpressionOp( ModifyOp ) :
 				except :
 					# we'll get exceptions for data types which don't define len()
 					pass
-					
+
 			pointsPrim.numPoints = newNumPoints
-		
+
 registerRunTimeTyped( PointsExpressionOp, 100013, ModifyOp )

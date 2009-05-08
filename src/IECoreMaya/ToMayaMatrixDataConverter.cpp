@@ -46,7 +46,7 @@ template<typename F>
 ToMayaObjectConverter::ToMayaObjectConverterDescription<ToMayaMatrixDataConverter<F> > ToMayaMatrixDataConverter<F>::g_description( F::staticTypeId(), MFn::kMatrixData );
 
 template<typename F>
-ToMayaMatrixDataConverter<F>::ToMayaMatrixDataConverter( IECore::ConstObjectPtr object ) 
+ToMayaMatrixDataConverter<F>::ToMayaMatrixDataConverter( IECore::ConstObjectPtr object )
 : ToMayaObjectConverter( "ToMayaMatrixDataConverter", "Converts IECore::M44*Data objects to a Maya object.", object )
 {
 }
@@ -55,19 +55,19 @@ template<typename F>
 bool ToMayaMatrixDataConverter<F>::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
-	
+
 	typename F::ConstPtr data = IECore::runTimeCast<const F>( from );
 	if( !data )
 	{
 		return false;
 	}
-		
+
 	const typename F::ValueType &coreMatrix = data->readable();
 	MMatrix mayaMatrix = IECore::convert<MMatrix>( coreMatrix );
-	
+
 	MFnMatrixData fnMD;
 	to = fnMD.create( mayaMatrix, &s );
-	
+
 	return s;
 }
 

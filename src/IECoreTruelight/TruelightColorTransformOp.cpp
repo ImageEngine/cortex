@@ -48,7 +48,7 @@ IE_CORE_DEFINERUNTIMETYPED( IECoreTruelight::TruelightColorTransformOp );
 TruelightColorTransformOp::TruelightColorTransformOp()
 	:	ColorTransformOp( "TruelightColorTransformOp", "Applies truelight transforms." ), m_instance( 0 )
 {
-	
+
 	m_profileParameter = new StringParameter(
 		"profile",
 		"The name of a truelight profile to define the transformation.",
@@ -59,7 +59,7 @@ TruelightColorTransformOp::TruelightColorTransformOp()
 		"The name of a display calibration to define the transformation.",
 		"monitor"
 	);
-	
+
 	IntParameter::PresetsContainer inputSpacePresets;
 	inputSpacePresets.push_back( IntParameter::Preset( "log", TL_INPUT_LOG ) );
 	inputSpacePresets.push_back( IntParameter::Preset( "linear", TL_INPUT_LIN ) );
@@ -70,20 +70,20 @@ TruelightColorTransformOp::TruelightColorTransformOp()
 		TL_INPUT_LIN,
 		inputSpacePresets
 	);
-	
+
 	m_rawTruelightOutputParameter = new BoolParameter(
 		"rawTruelightOutput",
 		"If disabled, applies an sRGB->Linear conversion after the Truelight LUT.",
 		true
 	);
-	
+
 	parameters()->addParameter( m_profileParameter );
 	parameters()->addParameter( m_displayParameter );
 	parameters()->addParameter( m_inputSpaceParameter );
 	parameters()->addParameter( m_rawTruelightOutputParameter );
-	
+
 	init( "" );
-	
+
 	m_instance = TruelightCreateInstance();
 	if( !m_instance )
 	{
@@ -134,19 +134,19 @@ IECore::BoolParameterPtr TruelightColorTransformOp::rawTruelightOutputParameter(
 
 IECore::ConstBoolParameterPtr TruelightColorTransformOp::rawTruelightOutputParameter() const
 {
-	return m_rawTruelightOutputParameter;	
+	return m_rawTruelightOutputParameter;
 }
 
 void TruelightColorTransformOp::begin( IECore::ConstCompoundObjectPtr operands )
 {
 	assert( operands );
 	assert( m_instance );
-	
+
 	setInstanceFromParameters();
 	if( !TruelightInstanceSetUp( m_instance ) )
 	{
-		throw Exception( TruelightGetErrorString() );		
-	}	
+		throw Exception( TruelightGetErrorString() );
+	}
 }
 
 void TruelightColorTransformOp::setInstanceFromParameters() const
@@ -180,14 +180,14 @@ void TruelightColorTransformOp::transform( Imath::Color3f &color ) const
 	assert( m_instance );
 	TruelightInstanceTransformF( m_instance, color.getValue() );
 	maybeWarn();
-	
+
 	if ( !m_rawTruelightOutputParameter->getTypedValue() )
 	{
 		/// \todo This would be easier if we had some sort of DataConversionToColorTransformAdapter template
 		color.x = m_srgbToLinearConversion( color.x );
 		color.y = m_srgbToLinearConversion( color.y );
-		color.z = m_srgbToLinearConversion( color.z );  			 
-	}		
+		color.z = m_srgbToLinearConversion( color.z );
+	}
 }
 
 void TruelightColorTransformOp::maybeWarn() const

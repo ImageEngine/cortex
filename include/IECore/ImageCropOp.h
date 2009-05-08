@@ -47,32 +47,32 @@ namespace IECore
 class ImageCropOp : public ImagePrimitiveOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( ImageCropOp, ImagePrimitiveOp );
-		
+
 		ImageCropOp();
 		virtual ~ImageCropOp();
-		
+
 		Box2iParameterPtr cropBoxParameter();
 		ConstBox2iParameterPtr cropBoxParameter() const;
-		
+
 		BoolParameterPtr matchDataWindowParameter();
-		ConstBoolParameterPtr matchDataWindowParameter() const;		
-		
+		ConstBoolParameterPtr matchDataWindowParameter() const;
+
 		BoolParameterPtr resetOriginParameter();
 		ConstBoolParameterPtr resetOriginParameter() const;
-		
+
 		BoolParameterPtr intersectParameter();
-		ConstBoolParameterPtr intersectParameter() const;	
-			
+		ConstBoolParameterPtr intersectParameter() const;
+
 	protected :
-	
+
 		virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
-		
+
 	private :
-	
+
 		struct ImageCropFn;
-		
+
 		Box2iParameterPtr m_cropBoxParameter;
 		BoolParameterPtr m_matchDataWindowParameter;
 		BoolParameterPtr m_resetOriginParameter;

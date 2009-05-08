@@ -48,7 +48,7 @@ struct Standalone
 	static void cleanup( int exitCode )
 	{
 		MLibrary::cleanup( exitCode );
-	}	
+	}
 };
 
 void bindStandalone()

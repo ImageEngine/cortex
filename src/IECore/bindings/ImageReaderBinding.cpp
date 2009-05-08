@@ -64,5 +64,5 @@ void bindImageReader()
 	;
 
 }
-  
+
 } // namespace IECore

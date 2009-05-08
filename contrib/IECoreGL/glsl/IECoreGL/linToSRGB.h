@@ -39,7 +39,7 @@ float ieLinToSRGB( float f )
 {
 	const float phi = 12.92;
 	const float cutoff = 0.003130805;
-	
+
 	if( f <= cutoff )
 	{
 		return f * phi;

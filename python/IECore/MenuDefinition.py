@@ -44,16 +44,16 @@ from MenuItemDefinition import MenuItemDefinition
 class MenuDefinition :
 
 	def __init__( self, items = [] ) :
-	
+
 		self.__items = []
-	
+
 		for path, item in items :
-		
+
 			self.append( path, item )
-	
+
 	## Prepends a menu item to the menu. The item will
 	# appear before all other items in its respective
-	# submenu.		
+	# submenu.
 	def prepend( self, path, item ) :
 
 		if isinstance( item, dict ) :
@@ -62,10 +62,10 @@ class MenuDefinition :
 		self.remove( path, False )
 
 		self.__items.insert( 0, ( path, item ) )
-		
+
 	## Appends a menu item at the end. The item will
 	# appear after all other items in its respective
-	# submenu.		
+	# submenu.
 	def append( self, path, item ) :
 
 		if isinstance( item, dict ) :
@@ -74,39 +74,39 @@ class MenuDefinition :
 		self.remove( path, False )
 
 		self.__items.append( ( path, item ) )
-	
+
 	## Insert a menu item before the specified menu item.
 	def insertBefore( self, path, item, beforePath ) :
-	
+
 		if isinstance( item, dict ) :
 			item = MenuItemDefinition( item )
 
 		self.remove( path, False )
-		
+
 		i = self.__pathIndex( beforePath )
 		self.__items.insert( i, ( path, item ) )
-		
+
 	## Insert a menu item after the specified menu item.
 	def insertAfter( self, path, item, afterPath ) :
-		
+
 		if isinstance( item, dict ) :
 			item = MenuItemDefinition( item )
 
 		self.remove( path, False )
-		
+
 		i = self.__pathIndex( afterPath )
 		self.__items.insert( i+1, ( path, item ) )
-	
+
 	## Removes the named menu item. Raises a KeyError if
-	# no such item exists and raiseIfMissing is True.	
+	# no such item exists and raiseIfMissing is True.
 	def remove( self, path, raiseIfMissing=True ) :
-	
+
 		index = None
 		for i in range( 0, len( self.__items ) ) :
 			if self.__items[i][0]==path :
 				index = i
 				break
-				
+
 		if not index is None :
 			del self.__items[index]
 		else :
@@ -116,62 +116,62 @@ class MenuDefinition :
 	## Removes all items whose paths match the given
 	# regular expression.
 	def removeMatching( self, regEx ) :
-	
+
 		if type( regEx ) is str :
 			regEx = re.compile( regEx )
-				
+
 		toRemove = []
 		for i in range( 0, len( self.__items ) ) :
 			if regEx.search( self.__items[i][0] ) :
-				toRemove.append( i )	
-	
+				toRemove.append( i )
+
 		toRemove.sort()
 		toRemove.reverse()
 		for i in toRemove :
 			del self.__items[i]
-		
+
 	## Removes all menu items from the definition.
 	def clear( self ) :
-	
+
 		del self.__items[:]
-		
+
 	## Returns a list of tuples of the form (path, MenuItemDefinition).
 	# This can be used in realising the menu in a UI toolkit. This list
 	# should be considered read-only - use the other methods to add and
-	# remove items.	
+	# remove items.
 	def items( self ) :
-	
+
 		return self.__items
-	
+
 	## Returns a new MenuDefinition containing only the menu items
 	# that reside below the specified root path. The paths in this
 	# new definition are all adjusted to be relative to the requested
-	# root.	
+	# root.
 	def reRooted( self, root ) :
-	
+
 		if not len( root ) :
 			return MenuDefinition( [] )
-		
+
 		if root[-1]!="/" :
 			root = root + "/"
-			
+
 		newItems = []
 		for item in self.items() :
-		
+
 			if item[0].startswith( root ) :
 				newItems.append( ( item[0][len(root)-1:], item[1] ) )
-				
+
 		return MenuDefinition( newItems )
-		
+
 	def __repr__( self ) :
-	
+
 		return "MenuDefinition( " + repr( self.items() ) + " )"
 
 	def __pathIndex( self, path ) :
-	
+
 		for i in range( 0, len( self.__items ) ) :
-		
+
 			if self.__items[i][0]==path :
 				return i
-				
-		raise KeyError( path )		
+
+		raise KeyError( path )

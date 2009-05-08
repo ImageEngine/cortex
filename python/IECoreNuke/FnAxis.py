@@ -44,23 +44,23 @@ from KnobAccessors import getKnobValue
 class FnAxis :
 
 	def __init__( self, node ) :
-	
+
 		if isinstance( node, str ) :
-			
+
 			axis = nuke.toNode( node )
-			
+
 		self.__node = node
 
 	## Returns the transformation matrix for the local axis knob.
 	# This ignores any parent transforms.
 	def getLocalMatrix( self, resultType=IECore.M44f ) :
-	
+
 		vectorType = IECore.V3f
 		eulerType = IECore.Eulerf
 		if resultType==IECore.M44d :
 			vectorType = IECore.V3d
 			eulerType = IECore.Eulerd
-			
+
 		translate = getKnobValue( self.__node.knob( "translate" ), resultType=vectorType )
 		translate = resultType.createTranslated( translate )
 

@@ -59,7 +59,7 @@ template<typename T>
 void TypedPrimitiveOp<T>::modify( ObjectPtr primitive, ConstCompoundObjectPtr operands )
 {
 	typename T::Ptr typedPrimitive = boost::dynamic_pointer_cast<T>( primitive );
-	
+
 	// Parameter validation should ensure that this is object is of the correct type, hence the assertion
 	assert( typedPrimitive );
 
@@ -69,39 +69,39 @@ void TypedPrimitiveOp<T>::modify( ObjectPtr primitive, ConstCompoundObjectPtr op
 template<typename T>
 const RunTimeTyped::TypeDescription< TypedPrimitiveOp<T> > TypedPrimitiveOp<T>::g_typeDescription;
 
-template <typename T> 
+template <typename T>
 TypeId TypedPrimitiveOp<T>::typeId() const
 {
 	return staticTypeId();
 }
 
-template <typename T> 
+template <typename T>
 TypeId TypedPrimitiveOp<T>::staticTypeId()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return InvalidTypeId;
 }
 
-template <typename T> 
+template <typename T>
 const char *TypedPrimitiveOp<T>::typeName() const
 {
 	return staticTypeName();
 }
 
-template <typename T> 
+template <typename T>
 const char *TypedPrimitiveOp<T>::staticTypeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
 }
 
-template <class T> 
+template <class T>
 TypeId TypedPrimitiveOp<T>::baseTypeId()
 {
 	return ModifyOp::staticTypeId();
 }
 
-template <class T> 
+template <class T>
 const char *TypedPrimitiveOp<T>::baseTypeName()
 {
 	return ModifyOp::staticTypeName();
@@ -154,9 +154,9 @@ bool TypedPrimitiveOp<T>::inheritsFrom( const char *typeName )
 	} \
 	\
 	template class TypedPrimitiveOp<T>;
-	
+
 namespace IECore
 {
 IE_CORE_DEFINETYPEDPRIMITIVEOPSPECIALISATION( MeshPrimitive, MeshPrimitiveOp );
 IE_CORE_DEFINETYPEDPRIMITIVEOPSPECIALISATION( ImagePrimitive, ImagePrimitiveOp );
-}	
+}

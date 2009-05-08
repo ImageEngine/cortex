@@ -44,7 +44,7 @@
 namespace IECore
 {
 
-/// A template to define an implicit surface function, which returns a value of type template parameter V when passed 
+/// A template to define an implicit surface function, which returns a value of type template parameter V when passed
 /// a location of type template parameter P
 template<typename P, typename V>
 class ImplicitSurfaceFunction : public RefCounted
@@ -56,23 +56,23 @@ class ImplicitSurfaceFunction : public RefCounted
 		typedef V Value;
 		typedef VectorTraits<V> ValueTraits;
 		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-		
-		typedef ImplicitSurfaceFunction<P, V> Fn;		
-		IE_CORE_DECLAREMEMBERPTR( Fn );		
-		
+
+		typedef ImplicitSurfaceFunction<P, V> Fn;
+		IE_CORE_DECLAREMEMBERPTR( Fn );
+
 		virtual ~ImplicitSurfaceFunction()
 		{
 		}
-		
+
 		/// The operator simply calls the pure virtual method getValue, to allow easier subclassing from
 		/// within Python
 		inline Value operator()( const Point &p )
 		{
 			return getValue( p );
 		}
-				
+
 		virtual Value getValue( const Point &p ) = 0;
-	
+
 };
 
 typedef ImplicitSurfaceFunction<Imath::V3f, float> ImplicitSurfaceFunctionV3ff;

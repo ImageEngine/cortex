@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -52,7 +52,7 @@ using namespace boost::python;
 using namespace Imath;
 using namespace std;
 
-namespace IECore 
+namespace IECore
 {
 
 template<class L>
@@ -120,33 +120,33 @@ struct VectorIndexer
 {
 	typedef typename T::BaseType V;
 	static V get(const T &x, int i)
-	{	
+	{
 		// Do we want to handle backward indexing?
-		if ( i >= 0 && i < static_cast<int>(T::dimensions()) ) 
+		if ( i >= 0 && i < static_cast<int>(T::dimensions()) )
 		{
 			return x[i];
 		}
 		else
 		{
 			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
-			throw std::out_of_range("");	
+			throw std::out_of_range("");
 		}
-		
+
 	}
-	
+
 	static void set(T &x, int i, const V &v)
 	{
-		if ( i >= 0 && i < static_cast<int>(T::dimensions()) ) 
+		if ( i >= 0 && i < static_cast<int>(T::dimensions()) )
 		{
 			x[i] = v;
 		}
 		else
 		{
 			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
-			throw std::out_of_range("");	
+			throw std::out_of_range("");
 		}
 	}
-	
+
 };
 
 #define DEFINEVECSTRSPECIALISATION( VEC )\
@@ -197,9 +197,9 @@ V *constructFromList( list l )
 	{
 		throw InvalidArgumentException( std::string( "Invalid list length given to IECore." ) + typeName<V>() + " constructor" );
 	}
-	
+
 	V *r = new V();
-	
+
 	for ( unsigned i = 0; i < V::dimensions(); i ++ )
 	{
 		extract< typename V::BaseType > ex( l[i] );
@@ -207,93 +207,93 @@ V *constructFromList( list l )
 		{
 			throw InvalidArgumentException( std::string( "Invalid list element given to IECore." ) + typeName<V>() + " constructor" );
 		}
-		
+
 		(*r)[i] = ex();
 	}
-	
+
 	return r ;
 }
 
 template<typename T>
 void bindVec2()
-{	
+{
 	// To allow correct resolve of overloaded methods
 	void (Vec2<T>::*sv1)(T, T) = &Vec2<T>::template setValue<T>;
 	void (Vec2<T>::*sv2)(const Vec2<T>&) = &Vec2<T>::template setValue<T>;
-	
+
 	const char *bindName = typeName<Vec2<T> >();
-	
+
 	class_< Vec2<T> >( bindName )
 		.def_readwrite("x", &Vec2<T>::x)
 		.def_readwrite("y", &Vec2<T>::y)
-	
+
 		// [] operator support
 		.def("__getitem__", &VectorIndexer<Vec2<T> >::get)
 		.def("__setitem__", &VectorIndexer<Vec2<T> >::set)
-	
+
 		.def(init<>())
 		.def(init<T>())
 		.def(init<T, T>())
-	
+
 		.def(init<const Vec2<float> &>())
 		.def(init<const Vec2<double> &>())
 		.def(init<const Vec2<int> &>())
-		
+
 		.def("__init__", make_constructor( &constructFromList< Vec2<T> > ) )
-	
+
 		.def("setValue", sv1)
 		.def("setValue", sv2)
-	
+
 		.def(self == self)
 		.def(self != self)
-	
+
 		.def("equalWithAbsError", &Vec2<T>::equalWithAbsError)
 		.def("equalWithRelError", &Vec2<T>::equalWithRelError)
 
 		.def("dot", &Vec2<T>::dot)
-	
+
 		.def("cross", &Vec2<T>::cross)
-	
+
 		.def(self ^ self)
-		
+
 		.def(self % self)
-	
+
 		.def(self += self)
 		.def(self + self)
-		
+
 		.def(self -= self)
 		.def(self - self)
-				
+
 		.def(- self)
 		.def("negate", &Vec2<T>::negate, return_self<>())
-		
+
 		.def(self *= self)
 		.def(self *= T())
 		.def(self * self)
 		.def(self * T())
 		.def(T() * self)
-		
+
 		.def(self /= self)
 		.def(self /= T())
 		.def(self / self)
 		.def(self / T())
-		
+
 		.def(self * Matrix33<T>())
 		.def(self *= Matrix33<T>())
-	
+
 		.def("length", &Vec2<T>::length)
 		.def("length2", &Vec2<T>::length2)
-	
+
 		.def("normalize", &Vec2<T>::normalize, return_self<>())
 		.def("normalizeExc", &Vec2<T>::normalizeExc, return_self<>())
 		.def("normalizeNonNull", &Vec2<T>::normalizeNonNull, return_self<>())
-		
+
 		.def("normalized", &Vec2<T>::normalized)
 		.def("normalizedExc", &Vec2<T>::normalizedExc)
 		.def("normalizedNonNull", &Vec2<T>::normalizedNonNull)
-	
+
 		.def("dimensions", &Vec2<T>::dimensions).staticmethod("dimensions")
-	
+
 		.def("baseTypeMin", &Vec2<T>::baseTypeMin).staticmethod("baseTypeMin")
 		.def("baseTypeMax", &Vec2<T>::baseTypeMax).staticmethod("baseTypeMax")
 		.def("baseTypeSmallest", &Vec2<T>::baseTypeSmallest).staticmethod("baseTypeSmallest")
@@ -307,91 +307,91 @@ void bindVec2()
 
 template<typename T>
 void bindVec3()
-{	
+{
 	// To allow correct resolve of overloaded methods
 	void (Vec3<T>::*sv1)(T, T, T) = &Vec3<T>::template setValue<T>;
 	void (Vec3<T>::*sv2)(const Vec3<T>&) = &Vec3<T>::template setValue<T>;
-	
+
 	const char *bindName = typeName<Vec3<T> >();
-	
+
 	class_< Vec3<T> >( bindName )
 		.def_readwrite("x", &Vec3<T>::x)
 		.def_readwrite("y", &Vec3<T>::y)
 		.def_readwrite("z", &Vec3<T>::z)
-	
+
 		// [] operator support
 		.def("__getitem__", &VectorIndexer<Vec3<T> >::get)
 		.def("__setitem__", &VectorIndexer<Vec3<T> >::set)
-	
+
 		.def(init<>())
 		.def(init<T>())
 		.def(init<T, T, T>())
-	
+
 		.def(init<const Vec3<float> &>())
 		.def(init<const Vec3<double> &>())
 		.def(init<const Vec3<int> &>())
-		
+
 		.def("__init__", make_constructor( &constructFromList< Vec3<T> > ) )
-	
+
 		.def("setValue", sv1)
 		.def("setValue", sv2)
-	
+
 		.def(self == self)
 		.def(self != self)
-	
+
 		.def("equalWithAbsError", &Vec3<T>::equalWithAbsError)
 		.def("equalWithRelError", &Vec3<T>::equalWithRelError)
 
 		.def("dot", &Vec3<T>::dot)
-	
+
 		.def("cross", &Vec3<T>::cross)
-	
+
 		.def(self ^ self)
 
 		.def(self %= self)
 		.def(self % self)
-	
+
 		.def(self += self)
 		.def(self + self)
-		
+
 		.def(self -= self)
 		.def(self - self)
-				
+
 		.def(- self)
 		.def("negate", &Vec3<T>::negate, return_self<>())
-		
+
 		.def(self *= self)
 		.def(self *= T())
 		.def(self * self)
 		.def(self * T())
 		.def(T() * self)
-		
+
 		.def(self /= self)
 		.def(self /= T())
 		.def(self / self)
-		.def(self / T())	
-	
+		.def(self / T())
+
 		.def(self * Matrix44<T>())
 		.def(self *= Matrix44<T>())
 
 		.def("length", &Vec3<T>::length)
 		.def("length2", &Vec3<T>::length2)
-	
+
 		.def("normalize", &Vec3<T>::normalize, return_self<>())
 		.def("normalizeExc", &Vec3<T>::normalizeExc, return_self<>())
 		.def("normalizeNonNull", &Vec3<T>::normalizeNonNull, return_self<>())
-		
+
 		.def("normalized", &Vec3<T>::normalized)
 		.def("normalizedExc", &Vec3<T>::normalizedExc)
 		.def("normalizedNonNull", &Vec3<T>::normalizedNonNull)
-	
+
 		.def("dimensions", &Vec3<T>::dimensions).staticmethod("dimensions")
-	
+
 		.def("baseTypeMin", &Vec3<T>::baseTypeMin).staticmethod("baseTypeMin")
 		.def("baseTypeMax", &Vec3<T>::baseTypeMax).staticmethod("baseTypeMax")
 		.def("baseTypeSmallest", &Vec3<T>::baseTypeSmallest).staticmethod("baseTypeSmallest")
 		.def("baseTypeEpsilon", &Vec3<T>::baseTypeEpsilon).staticmethod("baseTypeEpsilon")
-		
+
 		.def( "__str__", &IECore::str<Vec3<T> > )
 		.def( "__repr__", &IECore::repr<Vec3<T> > )
 	;

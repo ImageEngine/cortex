@@ -64,10 +64,10 @@ class ParameterList
 		/// prefix, and strips the prefix off when creating the parameter names.
 		ParameterList( const IECore::CompoundDataMap &parameters, const std::string &prefix,
 			const std::map<std::string, std::string> *typeHints = 0 );
-		/// Convenience function for constructing a ParameterList of length 1.	
+		/// Convenience function for constructing a ParameterList of length 1.
 		ParameterList( const std::string &name, IECore::ConstDataPtr parameter,
 			const std::map<std::string, std::string> *typeHints = 0 );
-		
+
 		/// Returns the number of parameters, to be passed as the
 		/// n argument to the Ri call.
 		int n();
@@ -79,12 +79,12 @@ class ParameterList
 		/// have been cast to a non-const form to fit the Ri interface, but
 		/// you must absolutely not modify the data.
 		void **values();
-	
+
 	private :
-	
+
 		const char *type( const std::string &name, IECore::ConstDataPtr d, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
 		const void *value( IECore::ConstDataPtr d );
-		
+
 		// Call one of these to reserve enough space in the arrays below to represent all the parameters.
 		void reserve( const IECore::CompoundDataMap &parameters );
 		void reserve( IECore::ConstDataPtr &parameter );
@@ -97,7 +97,7 @@ class ParameterList
 		std::vector<float> m_floats;
 		std::vector<const char *> m_tokens;
 		std::vector<const void *> m_values;
-	
+
 };
 
 } // namespace IECoreRI

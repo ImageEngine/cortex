@@ -50,11 +50,11 @@ template<typename PointIterator, typename MeshBuilder>
 Triangulator<PointIterator, MeshBuilder>::~Triangulator()
 {
 }
-			
+
 template<typename PointIterator, typename MeshBuilder>
 void Triangulator<PointIterator, MeshBuilder>::triangulate( PointIterator first, PointIterator last )
 {
-	
+
 	// put all the vertices into the builder, and build a list containing
 	// the vertices for our own traversal
 	VertexList vertices;
@@ -65,10 +65,10 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( PointIterator first,
 		vertices.push_back( Vertex( m_baseVertexIndex + size++, it ) );
 	}
 	m_baseVertexIndex += size;
-	
+
 	// and triangulate 'em
 	triangulate( vertices, size );
-	
+
 }
 
 template<typename PointIterator, typename MeshBuilder>
@@ -76,7 +76,7 @@ template<typename LoopIterator>
 void Triangulator<PointIterator, MeshBuilder>::triangulate( LoopIterator first, LoopIterator last )
 {
 	unsigned nextBaseVertexIndex = m_baseVertexIndex;
-	
+
 	// put all the vertices of the outer loop into the builder,
 	// and into the vertex list used for ear clipping
 	const Loop &outer = *first;
@@ -88,11 +88,11 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( LoopIterator first, 
 		vertices.push_back( Vertex( m_baseVertexIndex + size++, it ) );
 	}
 	nextBaseVertexIndex += size;
-	
+
 	// sort the holes by their maximum x coordinate
 	/// \todo Need to sort by a different coordinate for polygons in yz plane
 	typedef CircularIterator<PointIterator> CircularPointIterator;
-	
+
 	typedef std::multimap<BaseType, CircularPointIterator, std::greater<BaseType> > HoleMap;
 	typedef typename HoleMap::value_type HoleMapValue;
 	HoleMap holes;
@@ -110,7 +110,7 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( LoopIterator first, 
 		}
 		holes.insert( HoleMapValue( m, CircularPointIterator( lIt->first, lIt->second, mIt ) ) );
 	}
-	
+
 	// now integrate the holes into the vertex list for the outer loop
 	for( typename HoleMap::const_iterator it = holes.begin(); it!=holes.end(); it++ )
 	{
@@ -126,7 +126,7 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( LoopIterator first, 
 			{
 				continue;
 			}
-						
+
 			const Edge joinEdge( innerPoint, outerPoint );
 			// if the join edge intersects any of the existing edges then
 			// we have to reject it.
@@ -167,11 +167,11 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( LoopIterator first, 
 		} while( holeIt!=it->second );
 		vertices.insert( insertPos, Vertex( firstHoleVertIndex, it->second ) );
 		vertices.insert( insertPos, *joinIt );
-		
+
 	}
-	
+
 	m_baseVertexIndex = nextBaseVertexIndex;
-	
+
 	// do the ear clipping
 	triangulate( vertices, vertices.size() );
 }
@@ -183,15 +183,15 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( VertexList &vertices
 	// iterate round the vertex list clipping off ears as we go,
 	// until we've clipped all the ears.
 	////////////////////////////////////////////////////////////
-	
+
 	// a candidate for clipping
 	CircularVertexIterator candidate( &vertices, ++vertices.begin() );
 	// the point at which we've tried clipping all the vertices,
 	// but found nothing suitable. at this point we have to just
-	// clip anyway. this should only happen in the case of invalid input - 
+	// clip anyway. this should only happen in the case of invalid input -
 	// either the wrong winding order or intersecting edges.
 	CircularVertexIterator failurePoint( &vertices, vertices.begin() );
-	
+
 	while( size>2 )
 	{
 
@@ -200,7 +200,7 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( VertexList &vertices
 		// in which case we have to accept it anyway.
 		if( candidate!=failurePoint )
 		{
-			
+
 			CircularVertexIterator vIt = candidate;
 			// the points and indices of the candidate triangle.
 			// candidate actually points to the first vertex
@@ -208,7 +208,7 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( VertexList &vertices
 			const Point &v0 = *(vIt->second); unsigned int i0 = vIt->first; vIt++;
 			const Point &v1 = *(vIt->second); unsigned int i1 = vIt->first; vIt++;
 			const Point &v2 = *(vIt->second); unsigned int i2 = vIt->first; vIt++;
-		
+
 			if( (v0-v1).cross( v2-v1 ).z >= 0 )
 			{
 				// it's not a convex vertex so we can't clip.
@@ -235,12 +235,12 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( VertexList &vertices
 						}
 					}
 					vIt++;
-				}	
-			
+				}
+
 			}
-			
+
 		}
-		
+
 		// if we didn't reject it then clip it.
 		if( !reject )
 		{
@@ -252,10 +252,10 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( VertexList &vertices
 			failurePoint = candidate;
 			size--;
 		}
-		
+
 		candidate++;
 	}
-	
+
 }
 
 } // namespace IECore

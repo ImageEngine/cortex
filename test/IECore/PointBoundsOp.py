@@ -38,12 +38,12 @@ from IECore import *
 class TestPointBoundsOp( unittest.TestCase ) :
 
 	def test( self ) :
-		
+
 		o = PointBoundsOp()
 		b = o( points = V3fVectorData( [ V3f( 0 ) ] ) )
 		self.assert_( b.isInstanceOf( Box3fData.staticTypeId() ) )
 		self.assertEqual( b.value, Box3f( V3f( 0 ), V3f( 0 ) ) )
-		
+
 		o = PointBoundsOp()
 		b = o(
 			points = V3fVectorData( [ V3f( 0 ) ] ),
@@ -58,7 +58,7 @@ class TestPointBoundsOp( unittest.TestCase ) :
 			velocityMultiplier = 0.5
 		)
 		self.assertEqual( b.value, Box3f( V3f( 0 ), V3f( 0.5 ) ) )
-		
+
 		o = PointBoundsOp()
 		b = o(
 			points = V3fVectorData( [ V3f( 0 ) ] ),
@@ -67,7 +67,7 @@ class TestPointBoundsOp( unittest.TestCase ) :
 			radii = FloatVectorData( [ 1 ] ),
 		)
 		self.assertEqual( b.value, Box3f( V3f( -1 ), V3f( 1.5 ) ) )
-		
+
 		o = PointBoundsOp()
 		b = o(
 			points = V3fVectorData( [ V3f( 0 ) ] ),
@@ -77,13 +77,13 @@ class TestPointBoundsOp( unittest.TestCase ) :
 			radiusMultiplier = 0.5,
 		)
 		self.assertEqual( b.value, Box3f( V3f( -0.5 ), V3f( 1 ) ) )
-		
+
 		o = PointBoundsOp()
 		b = o(
 			points = V3fVectorData( [ V3f( 0, 1, 2 ), V3f( 4, 5, 6 ) ] ),
 		)
 		self.assertEqual( b.value, Box3f( V3f( 0, 1, 2 ), V3f( 4, 5, 6 ) ) )
-					
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

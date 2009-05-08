@@ -56,9 +56,9 @@ struct IntrusivePtrFromPython
 {
 	/// Constructor registers the conversion with boost::python.
 	IntrusivePtrFromPython();
-	
+
 	static void *convertible( PyObject *p );
-	static void construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data );		
+	static void construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data );
 
 };
 
@@ -69,11 +69,11 @@ class RefCountedClass : public boost::python::class_<T, Ptr, boost::noncopyable,
 {
 
 	public :
-	
+
 		typedef boost::python::class_<T, Ptr, boost::noncopyable, boost::python::bases<Base> > BaseClass;
-	
+
 		RefCountedClass( const char *className, const char *docString = 0 );
-		
+
 };
 
 } // namespace IECore

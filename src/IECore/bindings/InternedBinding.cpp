@@ -70,7 +70,7 @@ struct InternedStringFromPython
 	{
 		assert( obj_ptr );
 		assert( PyString_Check( obj_ptr ) );
-		
+
 		void* storage = (( converter::rvalue_from_python_storage<InternedString>* ) data )->storage.bytes;
 		new( storage ) InternedString( PyString_AsString( obj_ptr ) );
 		data->convertible = storage;
@@ -89,7 +89,7 @@ void bindInterned()
 		.def( "size", &InternedString::size ).staticmethod( "size" )
 	;
 	implicitly_convertible<InternedString, string>();
-	
+
 	InternedStringFromPython();
 
 }

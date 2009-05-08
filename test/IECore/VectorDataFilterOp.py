@@ -36,24 +36,24 @@ import unittest
 from IECore import *
 
 class TestVectorDataFilterOp( unittest.TestCase ) :
-    
+
 	def test( self ) :
-	
+
 		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
 		f = BoolVectorData( [ 0, 1, 0, 1 ] )
-		
+
 		ii = VectorDataFilterOp()( input = i, filter = f, invert = False, clip = True )
 		self.assertEqual( ii, IntVectorData( [ 2, 4 ] ) )
-		
+
 		ii = VectorDataFilterOp()( input = i, filter = f, invert = True, clip = True )
 		self.assertEqual( ii, IntVectorData( [ 1, 3 ] ) )
-		
+
 		ii = VectorDataFilterOp()( input = i, filter = f, invert = False, clip = False )
 		self.assertEqual( ii, IntVectorData( [ 2, 4, 5, 6 ] ) )
-		
+
 		ii = VectorDataFilterOp()( input = i, filter = f, invert = True, clip = False )
 		self.assertEqual( ii, IntVectorData( [ 1, 3, 5, 6 ] ) )
-                
+
 if __name__ == "__main__":
-	unittest.main()   
-	        
+	unittest.main()
+

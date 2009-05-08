@@ -32,30 +32,30 @@ class DeferredRendererImplementation : public RendererImplementation
 		virtual void transformBegin();
 		virtual void transformEnd();
 		virtual void concatTransform( const Imath::M44f &matrix );
-		
+
 		virtual void attributeBegin();
 		virtual void attributeEnd();
-		
+
 		virtual void addState( StateComponentPtr state );
 		virtual StateComponentPtr getState( IECore::TypeId type );
 
 		virtual void addPrimitive( PrimitivePtr primitive );
 
 		ScenePtr scene();
-				
+
 	private :
 
 		ScenePtr m_scene;
-		
+
 		typedef std::stack<Imath::M44f> TransformStack;
 		TransformStack m_transformStack;
-		
+
 		typedef std::vector<StatePtr> StateStack;
 		StateStack m_stateStack;
-		
+
 		typedef std::stack<GroupPtr> GroupStack;
 		GroupStack m_groupStack;
-		
+
 };
 
 IE_CORE_DECLAREPTR( DeferredRendererImplementation );

@@ -51,7 +51,7 @@ void IECoreMaya::bindFromMayaShapeConverter()
 	scope s = IECore::RunTimeTypedClass<FromMayaShapeConverter>()
 		.def( "create", &FromMayaShapeConverter::create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
-	
+
 	enum_<FromMayaShapeConverter::Space>( "Space" )
 		.value( "Object", FromMayaShapeConverter::Object )
 		.value( "World", FromMayaShapeConverter::World )

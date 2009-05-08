@@ -53,5 +53,5 @@ void bindTextureLoader()
 		.def( "defaultTextureLoader", &TextureLoader::defaultTextureLoader ).staticmethod( "defaultTextureLoader" )
 	;
 }
-	
+
 }

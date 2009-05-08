@@ -50,45 +50,45 @@ struct PrimitiveEvaluatorHelper
 	{
 		return PrimitiveEvaluator::create( primitive );
 	}
-	
+
 	static float signedDistance( PrimitiveEvaluator &evaluator, const Imath::V3f &p )
 	{
 
 		float distance = 0.0;
 		bool success = evaluator.signedDistance( p, distance );
-		
+
 		if ( !success )
 		{
 		}
-		
-		return distance;	
+
+		return distance;
 	}
-	
+
 	static bool closestPoint( PrimitiveEvaluator &evaluator, const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result )
 	{
 		evaluator.validateResult( result );
-		
+
 		return evaluator.closestPoint( p, result );
 	}
-			
+
 	static bool pointAtUV( PrimitiveEvaluator &evaluator, const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result )
 	{
 		evaluator.validateResult( result );
-		
+
 		return evaluator.pointAtUV( uv, result );
 	}
-		
+
 	static bool intersectionPoint( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, const PrimitiveEvaluator::ResultPtr &result )
 	{
 		evaluator.validateResult( result );
-	
+
 		return evaluator.intersectionPoint( origin, direction, result );
 	}
-	
+
 	static bool intersectionPointMaxDist( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, const PrimitiveEvaluator::ResultPtr &result, float maxDist )
 	{
 		evaluator.validateResult( result );
-	
+
 		return evaluator.intersectionPoint( origin, direction, result, maxDist );
 	}
 
@@ -96,50 +96,50 @@ struct PrimitiveEvaluatorHelper
 	{
 		std::vector< PrimitiveEvaluator::ResultPtr > results;
 		evaluator.intersectionPoints( origin, direction, results );
-		
+
 		list result;
-		
+
 		for ( std::vector< PrimitiveEvaluator::ResultPtr >::const_iterator it = results.begin(); it != results.end(); ++it)
 		{
 			result.append( *it );
 		}
-		
+
 		return result;
 	}
-	
+
 	static list intersectionPoints( PrimitiveEvaluator& evaluator, const Imath::V3f &origin, const Imath::V3f &direction, float maxDistance )
 	{
 		std::vector< PrimitiveEvaluator::ResultPtr > results;
 		evaluator.intersectionPoints( origin, direction, results, maxDistance );
-		
+
 		list result;
-				
+
 		for ( std::vector< PrimitiveEvaluator::ResultPtr >::const_iterator it = results.begin(); it != results.end(); ++it)
 		{
 			result.append( *it );
 		}
-		
+
 		return result;
 	}
 };
 
 void bindPrimitiveEvaluator()
-{	
+{
 	list (*intersectionPoints)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &) = &PrimitiveEvaluatorHelper::intersectionPoints;
-	list (*intersectionPointsMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, float) = &PrimitiveEvaluatorHelper::intersectionPoints;	
-	
+	list (*intersectionPointsMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, float) = &PrimitiveEvaluatorHelper::intersectionPoints;
+
 	bool (*intersectionPoint)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, const PrimitiveEvaluator::ResultPtr &) = &PrimitiveEvaluatorHelper::intersectionPoint;
-	bool (*intersectionPointMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, const PrimitiveEvaluator::ResultPtr &, float ) = &PrimitiveEvaluatorHelper::intersectionPointMaxDist;	
-	
+	bool (*intersectionPointMaxDist)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &, const PrimitiveEvaluator::ResultPtr &, float ) = &PrimitiveEvaluatorHelper::intersectionPointMaxDist;
+
 	object p = RunTimeTypedClass<PrimitiveEvaluator>()
 		.def( "create", &PrimitiveEvaluatorHelper::create ).staticmethod("create")
 		.def( "createResult", &PrimitiveEvaluator::createResult )
-		.def( "validateResult", &PrimitiveEvaluator::validateResult )	
-		.def( "signedDistance", &PrimitiveEvaluatorHelper::signedDistance )	
+		.def( "validateResult", &PrimitiveEvaluator::validateResult )
+		.def( "signedDistance", &PrimitiveEvaluatorHelper::signedDistance )
 		.def( "closestPoint", &PrimitiveEvaluatorHelper::closestPoint )
 		.def( "pointAtUV", &PrimitiveEvaluatorHelper::pointAtUV )
 		.def( "intersectionPoint", intersectionPoint )
-		.def( "intersectionPoint", intersectionPointMaxDist )		
+		.def( "intersectionPoint", intersectionPointMaxDist )
 		.def( "intersectionPoints", intersectionPoints )
 		.def( "intersectionPoints", intersectionPointsMaxDist )
 		.def( "primitive", &PrimitiveEvaluator::primitive )
@@ -147,23 +147,23 @@ void bindPrimitiveEvaluator()
 		.def( "centerOfGravity", &PrimitiveEvaluator::centerOfGravity )
 		.def( "surfaceArea", &PrimitiveEvaluator::surfaceArea )
 	;
-	
+
 	{
 		scope ps( p );
 		RefCountedClass<PrimitiveEvaluator::Result, RefCounted>( "Result" )
 			.def( "point", &PrimitiveEvaluator::Result::point )
-			.def( "normal", &PrimitiveEvaluator::Result::normal )			
-			.def( "uv", &PrimitiveEvaluator::Result::uv )			
-			.def( "uTangent", &PrimitiveEvaluator::Result::uTangent )			
-			.def( "vTangent", &PrimitiveEvaluator::Result::vTangent )									
-			.def( "vectorPrimVar", &PrimitiveEvaluator::Result::vectorPrimVar )						
+			.def( "normal", &PrimitiveEvaluator::Result::normal )
+			.def( "uv", &PrimitiveEvaluator::Result::uv )
+			.def( "uTangent", &PrimitiveEvaluator::Result::uTangent )
+			.def( "vTangent", &PrimitiveEvaluator::Result::vTangent )
+			.def( "vectorPrimVar", &PrimitiveEvaluator::Result::vectorPrimVar )
 			.def( "floatPrimVar", &PrimitiveEvaluator::Result::floatPrimVar )
-			.def( "intPrimVar", &PrimitiveEvaluator::Result::intPrimVar )			
+			.def( "intPrimVar", &PrimitiveEvaluator::Result::intPrimVar )
 			.def( "stringPrimVar", &PrimitiveEvaluator::Result::stringPrimVar, return_value_policy<copy_const_reference>() )
 			.def( "colorPrimVar", &PrimitiveEvaluator::Result::colorPrimVar )
-			.def( "halfPrimVar", &PrimitiveEvaluator::Result::halfPrimVar )								
+			.def( "halfPrimVar", &PrimitiveEvaluator::Result::halfPrimVar )
 		;
-	
+
 	}
 }
 

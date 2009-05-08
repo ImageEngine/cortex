@@ -51,12 +51,12 @@ from IECore import *
 #
 # \todo This should take an enum type as the argument not a string
 def initializeLog(level = None):
-	
+
 	if level is None:
 		level = LevelFilteredMessageHandler.defaultLevel()
 	else:
 		level = MessageHandler.stringAsLevel( level )
-		
+
 	setLogLevel( level )
 
 ## Set the environment variable and the current LevelFilteredMessageHandler.
@@ -64,11 +64,11 @@ def initializeLog(level = None):
 # level: a string with the name of the log level as defined in MessageHandler.Level.
 #
 # This function sets the $IECORE_LOG_LEVEL environment variable, so child processes will inherit the log level.
-# If the current message handler is also a LevelFilteredMessageHandler, this function pushes 
+# If the current message handler is also a LevelFilteredMessageHandler, this function pushes
 # it from the stack and register the new one.
-# 
+#
 def setLogLevelByName( levelName ):
-	
+
 	setLogLevel( MessageHandler.stringAsLevel( levelName ) )
 
 ## Set the environment variable and the current LevelFilteredMessageHandler.
@@ -76,7 +76,7 @@ def setLogLevelByName( levelName ):
 # level: MessageHandler.Level value.
 #
 # This function sets the $IECORE_LOG_LEVEL environment variable, so child processes will inherit the log level.
-# If the current message handler is also a LevelFilteredMessageHandler, this function pushes 
+# If the current message handler is also a LevelFilteredMessageHandler, this function pushes
 # it from the stack and register the new one.
 #
 # \todo This function completely unbalances the pushing and popping of handlers by popping
@@ -105,7 +105,7 @@ def __getCallContext(frame = None, withLineNumber = False):
 	callStr = f.f_globals["__name__"]
 	if withLineNumber:
 		callStr += " #" + str(f.f_lineno)
-	return callStr  
+	return callStr
 
 ## Help function to track dificult errors.
 # It prints the callstack giving the module name and the line number.
@@ -135,7 +135,7 @@ def exceptionInfo():
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
 def debugException(*args):
-	
+
 	# same as debug
 	stdStr = string.join(map(str, args), " ")
 
@@ -152,15 +152,15 @@ def debugException(*args):
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
 def debug(*args):
-	
+
 	stdStr = string.join(map(str, args), " ")
 	Msg.output(Msg.Level.Debug, __getCallContext( withLineNumber = True ), stdStr )
-	
+
 # Sends warning messages to the current message handler.
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
 def warning(*args):
-	
+
 	stdStr = string.join(map(str, args), " ")
 	Msg.output(Msg.Level.Warning, __getCallContext(), stdStr )
 
@@ -168,7 +168,7 @@ def warning(*args):
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
 def info(*args):
-	
+
 	stdStr = string.join(map(str, args), " ")
 	Msg.output(Msg.Level.Info, __getCallContext(), stdStr )
 
@@ -176,7 +176,7 @@ def info(*args):
 # Parameters:
 # Any string or object. They are converted to string and separated by space.
 def error(*args):
-	
+
 	stdStr = string.join(map(str, args), " ")
 	Msg.output(Msg.Level.Error, __getCallContext(), stdStr )
 

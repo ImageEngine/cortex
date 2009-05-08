@@ -46,25 +46,25 @@ class CallbackId
 {
 
 	public :
-	
+
 		CallbackId();
 		/// Stores the specified CallbackId id, calling MMessage::removeCallback()
 		/// for it on destruction.
 		CallbackId( MCallbackId id );
 		/// Calls MMessage::removeCallback() for the currently held callback.
 		~CallbackId();
-	
-		/// Calls MMessage::removeCallback() for the currently held callback, and 
+
+		/// Calls MMessage::removeCallback() for the currently held callback, and
 		/// stores the new callback for later removal.
 		const CallbackId &operator = ( MCallbackId id );
-	
+
 	private :
-	
+
 		/// No sensible semantics for this.
 		CallbackId( const CallbackId &other );
-	
+
 		MCallbackId m_id;
-	
+
 };
 
 } // namespace IECoreMaya

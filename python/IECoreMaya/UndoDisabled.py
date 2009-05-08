@@ -40,11 +40,11 @@ import maya.cmds
 class UndoDisabled :
 
 	def __enter__( self ) :
-	
+
 		self.__prevState = maya.cmds.undoInfo( query=True, state=True )
 		maya.cmds.undoInfo( stateWithoutFlush=False )
-	
+
 	def __exit__( self, type, value, traceBack ) :
-	
+
 		maya.cmds.undoInfo( stateWithoutFlush=self.__prevState )
-	
+

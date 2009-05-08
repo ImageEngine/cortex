@@ -49,15 +49,15 @@ class SummedAreaOp : public ChannelOp
 		virtual ~SummedAreaOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( SummedAreaOp, ChannelOp );
-	
+
 	protected :
-	
-		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );	
-	
+
+		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
+
 	private :
-	
+
 		struct SumArea;
-					
+
 };
 
 IE_CORE_DECLAREPTR( SummedAreaOp );

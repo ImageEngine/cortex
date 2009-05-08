@@ -39,28 +39,28 @@ import maya.cmds
 class FnOpHolder( FnParameterisedHolder ) :
 
 	def __init__( self, objectOrObjectName ) :
-	
+
 		FnParameterisedHolder.__init__( self, objectOrObjectName )
 
 	## Creates a new node holding a new instance of the op of the specified
 	# type and version. Returns an FnOpHolder instance attached to this node.
 	@staticmethod
 	def create( nodeName, opType, opVersion ) :
-	
+
 		holder = maya.cmds.createNode( "ieOpHolderNode", name=nodeName, skipSelect=True )
-		
+
 		fnOH = FnOpHolder( holder )
 		fnOH.setOp( opType, opVersion )
-		
+
 		return fnOH
 
 	## Convenience function which calls setParameterised( opType, opVersion, "IECORE_OP_PATHS" )
 	def setOp( self, opType, opVersion ) :
-	
+
 		self.setParameterised( opType, opVersion, "IECORE_OP_PATHS" )
-		
+
 	## Convenience function which returns getParameterised()[0]
 	def getOp( self ) :
-	
+
 		return self.getParameterised()[0]
-		
+

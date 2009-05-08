@@ -57,9 +57,9 @@ class MessageHandler : public RefCounted
 {
 
 	public :
-	
+
 		IE_CORE_DECLAREMEMBERPTR( MessageHandler );
-	
+
 		enum Level
 		{
 			Error = 0,
@@ -68,7 +68,7 @@ class MessageHandler : public RefCounted
 			Debug = 3,
 			Invalid = 4
 		};
-		
+
 		//! @name Message output
 		/// These functions all output a message via the current
 		/// MessageHandler object.
@@ -79,7 +79,7 @@ class MessageHandler : public RefCounted
 		/// Output a message to the current handler.
 		static void output( Level level, const std::string &context, const boost::format &message );
 		//@}
-		
+
 		//! @name Handler stack manipulation
 		///
 		/// A stack of message handlers is provided to make it
@@ -98,7 +98,7 @@ class MessageHandler : public RefCounted
 		/// last pushHandler() call.
 		static MessageHandlerPtr popHandler();
 		//@}
-		
+
 		//! @name Conversions between Level and string
 		////////////////////////////////////////////////////////
 		//@{
@@ -107,9 +107,9 @@ class MessageHandler : public RefCounted
 		/// Returns a message level based on the specified string (case is ignored).
 		static Level stringAsLevel( const std::string &level );
 		//@}
-		
-		/// Must be implemented by subclasses to output the message appropriately.	
-		virtual void handle( Level level, const std::string &context, const std::string &message ) = 0;	
+
+		/// Must be implemented by subclasses to output the message appropriately.
+		virtual void handle( Level level, const std::string &context, const std::string &message ) = 0;
 
 	private :
 

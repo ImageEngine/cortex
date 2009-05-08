@@ -53,16 +53,16 @@ template<>
 void IndexedIOTestSuite<FileIndexedIO>::getFilenames( FilenameList &filenames )
 {
 	filenames.clear();
-	
+
 	filenames.push_back("./test/IECore/data/fioFiles/2.13.0/rhel4.i686/types.fio");
 	filenames.push_back("./test/IECore/data/fioFiles/2.13.0/osx104.i686/types.fio");
 	filenames.push_back("./test/IECore/data/fioFiles/3.0.0/rhel4.i686/types.fio");
-	filenames.push_back("./test/IECore/data/fioFiles/3.0.0/cent5.x86_64/types.fio");			
+	filenames.push_back("./test/IECore/data/fioFiles/3.0.0/cent5.x86_64/types.fio");
 }
 
-/// float 
+/// float
 template<>
-std::string IndexedIOTestDataTraits<float>::name() 
+std::string IndexedIOTestDataTraits<float>::name()
 {
 	return "float";
 }
@@ -71,10 +71,10 @@ template<>
 float IndexedIOTestDataTraits<float>::value()
 {
 	return 5.0f;
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<float*>::name() 
+std::string IndexedIOTestDataTraits<float*>::name()
 {
 	return "floatArray";
 }
@@ -83,14 +83,14 @@ template<>
 float* IndexedIOTestDataTraits<float*>::value()
 {
 	static float v[10] = {1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f,8.0f,9.0f,10.0f};
-	
+
 	return v;
-} 
+}
 
 
-/// double 
+/// double
 template<>
-std::string IndexedIOTestDataTraits<double>::name() 
+std::string IndexedIOTestDataTraits<double>::name()
 {
 	return "double";
 }
@@ -99,10 +99,10 @@ template<>
 double IndexedIOTestDataTraits<double>::value()
 {
 	return -14.0;
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<double*>::name() 
+std::string IndexedIOTestDataTraits<double*>::name()
 {
 	return "doubleArray";
 }
@@ -111,13 +111,13 @@ template<>
 double* IndexedIOTestDataTraits<double*>::value()
 {
 	static double v[10] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0};
-	
-	return v;
-} 
 
-/// half 
+	return v;
+}
+
+/// half
 template<>
-std::string IndexedIOTestDataTraits<half>::name() 
+std::string IndexedIOTestDataTraits<half>::name()
 {
 	return "half";
 }
@@ -126,10 +126,10 @@ template<>
 half IndexedIOTestDataTraits<half>::value()
 {
 	return -14.0;
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<half*>::name() 
+std::string IndexedIOTestDataTraits<half*>::name()
 {
 	return "halfArray";
 }
@@ -138,13 +138,13 @@ template<>
 half* IndexedIOTestDataTraits<half*>::value()
 {
 	static half v[10] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0};
-	
-	return v;
-} 
 
-/// int 
+	return v;
+}
+
+/// int
 template<>
-std::string IndexedIOTestDataTraits<int>::name() 
+std::string IndexedIOTestDataTraits<int>::name()
 {
 	return "int";
 }
@@ -153,10 +153,10 @@ template<>
 int IndexedIOTestDataTraits<int>::value()
 {
 	return 3;
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<int*>::name() 
+std::string IndexedIOTestDataTraits<int*>::name()
 {
 	return "intArray";
 }
@@ -165,13 +165,13 @@ template<>
 int* IndexedIOTestDataTraits<int*>::value()
 {
 	static int v[10] = {1,2,3,4,5,6,7,8,9,10};
-	
-	return v;
-} 
 
-/// int64_t 
+	return v;
+}
+
+/// int64_t
 template<>
-std::string IndexedIOTestDataTraits<int64_t>::name() 
+std::string IndexedIOTestDataTraits<int64_t>::name()
 {
 	return "int64";
 }
@@ -180,10 +180,10 @@ template<>
 int64_t IndexedIOTestDataTraits<int64_t>::value()
 {
 	return -888;
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<int64_t*>::name() 
+std::string IndexedIOTestDataTraits<int64_t*>::name()
 {
 	return "int64Array";
 }
@@ -192,13 +192,13 @@ template<>
 int64_t* IndexedIOTestDataTraits<int64_t*>::value()
 {
 	static int64_t v[10] = {1,2,3,4,5,6,7,8,9,10};
-	
-	return v;
-} 
 
-/// uint64_t 
+	return v;
+}
+
+/// uint64_t
 template<>
-std::string IndexedIOTestDataTraits<uint64_t>::name() 
+std::string IndexedIOTestDataTraits<uint64_t>::name()
 {
 	return "uint64";
 }
@@ -207,10 +207,10 @@ template<>
 uint64_t IndexedIOTestDataTraits<uint64_t>::value()
 {
 	return 999;
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<uint64_t*>::name() 
+std::string IndexedIOTestDataTraits<uint64_t*>::name()
 {
 	return "uint64Array";
 }
@@ -219,13 +219,13 @@ template<>
 uint64_t* IndexedIOTestDataTraits<uint64_t*>::value()
 {
 	static uint64_t v[10] = {1,2,3,4,5,6,7,8,9,10};
-	
-	return v;
-} 
 
-/// string 
+	return v;
+}
+
+/// string
 template<>
-std::string IndexedIOTestDataTraits<std::string>::name() 
+std::string IndexedIOTestDataTraits<std::string>::name()
 {
 	return "string";
 }
@@ -234,10 +234,10 @@ template<>
 std::string IndexedIOTestDataTraits<std::string>::value()
 {
 	return "testString";
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<std::string*>::name() 
+std::string IndexedIOTestDataTraits<std::string*>::name()
 {
 	return "stringArray";
 }
@@ -246,13 +246,13 @@ template<>
 std::string* IndexedIOTestDataTraits<std::string*>::value()
 {
 	static std::string v[10] = {"s1","s2","s3","s4","s5","s6","s7","s8","s9","s10"};
-	
-	return v;
-} 
 
-/// unsigned int 
+	return v;
+}
+
+/// unsigned int
 template<>
-std::string IndexedIOTestDataTraits<unsigned int>::name() 
+std::string IndexedIOTestDataTraits<unsigned int>::name()
 {
 	return "unsignedInt";
 }
@@ -261,10 +261,10 @@ template<>
 unsigned int IndexedIOTestDataTraits<unsigned int>::value()
 {
 	return 555;
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<unsigned int*>::name() 
+std::string IndexedIOTestDataTraits<unsigned int*>::name()
 {
 	return "unsignedIntArray";
 }
@@ -273,13 +273,13 @@ template<>
 unsigned int* IndexedIOTestDataTraits<unsigned int*>::value()
 {
 	static unsigned int v[10] = {1,2,3,4,5,6,7,8,9,10};
-	
-	return v;
-} 
 
-/// char 
+	return v;
+}
+
+/// char
 template<>
-std::string IndexedIOTestDataTraits<char>::name() 
+std::string IndexedIOTestDataTraits<char>::name()
 {
 	return "char";
 }
@@ -288,10 +288,10 @@ template<>
 char IndexedIOTestDataTraits<char>::value()
 {
 	return 'f';
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<char*>::name() 
+std::string IndexedIOTestDataTraits<char*>::name()
 {
 	return "charArray";
 }
@@ -300,14 +300,14 @@ template<>
 char* IndexedIOTestDataTraits<char*>::value()
 {
 	static char v[10] = {'a','b','c','d','e','f','g','h','i','j'};
-	
+
 	return v;
-} 
+}
 
 
-/// unsigned char 
+/// unsigned char
 template<>
-std::string IndexedIOTestDataTraits<unsigned char>::name() 
+std::string IndexedIOTestDataTraits<unsigned char>::name()
 {
 	return "unsignedChar";
 }
@@ -316,10 +316,10 @@ template<>
 unsigned char IndexedIOTestDataTraits<unsigned char>::value()
 {
 	return 'f';
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<unsigned char*>::name() 
+std::string IndexedIOTestDataTraits<unsigned char*>::name()
 {
 	return "unsignedCharArray";
 }
@@ -328,13 +328,13 @@ template<>
 unsigned char* IndexedIOTestDataTraits<unsigned char*>::value()
 {
 	static unsigned char v[10] = {'a','b','c','d','e','f','g','h','i','j'};
-	
-	return v;
-} 
 
-/// short 
+	return v;
+}
+
+/// short
 template<>
-std::string IndexedIOTestDataTraits<short>::name() 
+std::string IndexedIOTestDataTraits<short>::name()
 {
 	return "short";
 }
@@ -343,10 +343,10 @@ template<>
 short IndexedIOTestDataTraits<short>::value()
 {
 	return 12;
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<short*>::name() 
+std::string IndexedIOTestDataTraits<short*>::name()
 {
 	return "shortArray";
 }
@@ -355,14 +355,14 @@ template<>
 short* IndexedIOTestDataTraits<short*>::value()
 {
 	static short v[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-	
+
 	return v;
-} 
+}
 
 
-/// unsigned short 
+/// unsigned short
 template<>
-std::string IndexedIOTestDataTraits<unsigned short>::name() 
+std::string IndexedIOTestDataTraits<unsigned short>::name()
 {
 	return "unsignedshort";
 }
@@ -371,10 +371,10 @@ template<>
 unsigned short IndexedIOTestDataTraits<unsigned short>::value()
 {
 	return 5;
-} 
+}
 
 template<>
-std::string IndexedIOTestDataTraits<unsigned short*>::name() 
+std::string IndexedIOTestDataTraits<unsigned short*>::name()
 {
 	return "unsignedshortArray";
 }
@@ -383,9 +383,9 @@ template<>
 unsigned short* IndexedIOTestDataTraits<unsigned short*>::value()
 {
 	static unsigned short v[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-	
+
 	return v;
-} 
+}
 
 void addIndexedIOTest(boost::unit_test::test_suite* test)
 {

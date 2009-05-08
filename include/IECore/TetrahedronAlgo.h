@@ -42,19 +42,19 @@ namespace IECore
 
 /// Returns the volume of the tetrahedron defined by the 4 specified vertices
 template<typename Vec>
-typename VectorTraits<Vec>::BaseType tetrahedronVolume( 
-	const Vec &v0, 
-	const Vec &v1, 	
-	const Vec &v2, 
+typename VectorTraits<Vec>::BaseType tetrahedronVolume(
+	const Vec &v0,
+	const Vec &v1,
+	const Vec &v2,
 	const Vec &v3
 );
 
 /// Returns the point of the tetrahedron which has the given barycentric coordinates
 template<typename Vec>
-Vec tetrahedronPoint( 
-	const Vec &v0, 
-	const Vec &v1, 	
-	const Vec &v2, 
+Vec tetrahedronPoint(
+	const Vec &v0,
+	const Vec &v1,
+	const Vec &v2,
 	const Vec &v3,
 	typename VectorTraits<Vec>::BaseType barycentric[4]
 );
@@ -62,10 +62,10 @@ Vec tetrahedronPoint(
 /// Returns the barycentric coordinates of the given point relative to the tetrahedron. The point is
 /// assumed to be inside the tetrahedron.
 template<typename Vec>
-void tetrahedronBarycentric( 
-	const Vec &v0, 
-	const Vec &v1, 	
-	const Vec &v2, 
+void tetrahedronBarycentric(
+	const Vec &v0,
+	const Vec &v1,
+	const Vec &v2,
 	const Vec &v3,
 	const Vec &p,
 	typename VectorTraits<Vec>::BaseType barycentric[4]
@@ -73,10 +73,10 @@ void tetrahedronBarycentric(
 
 /// Returns the squared-distance to the closest point on the tetrahedron, and computes that point's barycentric coordinates
 template<typename Vec>
-typename VectorTraits<Vec>::BaseType tetrahedronClosestBarycentric( 
-	const Vec &v0, 
-	const Vec &v1, 	
-	const Vec &v2, 
+typename VectorTraits<Vec>::BaseType tetrahedronClosestBarycentric(
+	const Vec &v0,
+	const Vec &v1,
+	const Vec &v2,
 	const Vec &v3,
 	const Vec &p,
 	typename VectorTraits<Vec>::BaseType barycentric[4]

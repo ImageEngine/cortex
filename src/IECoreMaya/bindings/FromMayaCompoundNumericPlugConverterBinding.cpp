@@ -63,10 +63,10 @@ void IECoreMaya::bindFromMayaCompoundNumericPlugConverter()
 	bind<FromMayaCompoundNumericPlugConverterV3fV3f>();
 	bind<FromMayaCompoundNumericPlugConverterV3fV3d>();
 	bind<FromMayaCompoundNumericPlugConverterV3fC3f>();
-	
+
 	bind<FromMayaCompoundNumericPlugConverterV3dV3i>();
 	bind<FromMayaCompoundNumericPlugConverterV3dV3f>();
 	bind<FromMayaCompoundNumericPlugConverterV3dV3d>();
 	bind<FromMayaCompoundNumericPlugConverterV3dC3f>();
-	
+
 }

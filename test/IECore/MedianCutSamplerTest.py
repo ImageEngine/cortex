@@ -38,15 +38,15 @@ import IECore
 class MedianCutSamplerTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		image = IECore.Reader.create( "test/IECore/data/exrFiles/carPark.exr" ).read()
 		for n in ["R", "G", "B"] :
 			p = image[n]
 			p.data = IECore.DataCastOp()( object=image[n].data, targetType=IECore.FloatVectorData.staticTypeId() )
 			image[n] = p
-			
+
 		luminanceImage = IECore.LuminanceOp()( input=image )
-			
+
 		s = IECore.MedianCutSampler()( image=luminanceImage, subdivisionDepth=4, projection=IECore.MedianCutSampler.Projection.LatLong )
 		centroids = s["centroids"]
 		areas = s["areas"]
@@ -54,9 +54,9 @@ class MedianCutSamplerTest( unittest.TestCase ) :
 		self.assertEqual( len( s ), 2 )
 		self.assertEqual( len( centroids ), len( areas ) )
 		self.assertEqual( len( centroids ), 16 )
-		self.assert_( centroids.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) ) 
-		self.assert_( areas.isInstanceOf( IECore.Box2iVectorData.staticTypeId() ) ) 
-		
+		self.assert_( centroids.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
+		self.assert_( areas.isInstanceOf( IECore.Box2iVectorData.staticTypeId() ) )
+
 		dataWindow = luminanceImage.dataWindow
 		areaSum = 0
 		for i in range( 0, len( centroids ) ) :
@@ -66,10 +66,10 @@ class MedianCutSamplerTest( unittest.TestCase ) :
 			self.assert_( areas[i].intersects( c ) )
 			s = areas[i].size() + IECore.V2i( 1 )
 			areaSum += s.x * s.y
-			
+
 		self.assertEqual( areaSum, luminanceImage.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
-			
-		
+
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

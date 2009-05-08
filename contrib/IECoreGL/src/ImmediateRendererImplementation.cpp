@@ -90,16 +90,16 @@ void ImmediateRendererImplementation::worldBegin()
 		/// \todo how about a fallback?
 		IECore::msg( IECore::Msg::Error, "Renderer::worldBegin", boost::format( "Unable to make framebuffer (%s)." ) % e.what() );
 	}
-	
+
 	m_camera->render( m_stateStack.top() );
-	
+
 	glViewport( 0, 0, width, height );
 	glClearColor( 0.0, 0.0, 0.0, 0.0 );
 	glClearDepth( 1.0 );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	
+
 	m_stateStack.push( new State( *(m_stateStack.top()) ) );
-	
+
 	glPushAttrib( GL_ALL_ATTRIB_BITS );
 	State::bindBaseState();
 	m_stateStack.top()->bind();

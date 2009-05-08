@@ -47,7 +47,7 @@ using boost::asio::ip::tcp;
 
 IE_CORE_DEFINERUNTIMETYPED( ClientDisplayDriver );
 
-ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters ) : 
+ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters ) :
 		DisplayDriver( displayWindow, dataWindow, channelNames, parameters ),
 		m_service(), m_host(""), m_port(""), m_scanLineOrderOnly(false), m_socket( m_service )
 {
@@ -73,7 +73,7 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	{
 		// for backward compatibility...
 		it = parameters->readable().find("port");
-	}	
+	}
 	if ( it == parameters->readable().end() )
 	{
 		throw Exception( "Could not find 'port' parameter!" );
@@ -162,7 +162,7 @@ size_t ClientDisplayDriver::receiveHeader( DisplayDriverServer::MessageType msg 
 		throw Exception( "Invalid display driver header block on socket package." );
 	}
 	size_t bytesAhead = header.getDataSize();
-	
+
 	if ( header.messageType() == DisplayDriverServer::exception )
 	{
 		vector<char> txt;

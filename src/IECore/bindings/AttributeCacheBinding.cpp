@@ -53,37 +53,37 @@ struct AttributeCacheHelper
 {
 	typedef std::vector<AttributeCache::HeaderHandle> HeaderHandleVector;
 	typedef std::vector<AttributeCache::ObjectHandle> ObjectHandleVector;
-	typedef std::vector<AttributeCache::AttributeHandle> AttributeHandleVector;	
-	
+	typedef std::vector<AttributeCache::AttributeHandle> AttributeHandleVector;
+
 	static list objects(AttributeCachePtr cache)
 	{
 		list objects;
-		
+
 		ObjectHandleVector o;
 		cache->objects(o);
 		for (ObjectHandleVector::const_iterator it = o.begin(); it != o.end(); ++it)
 		{
 			objects.append<std::string>(*it);
 		}
-		
-		
+
+
 		return objects;
 	}
 
 	static list headers(AttributeCachePtr cache)
 	{
 		list headers;
-		
+
 		HeaderHandleVector o;
 		cache->headers(o);
 		for (HeaderHandleVector::const_iterator it = o.begin(); it != o.end(); ++it)
 		{
 			headers.append<std::string>(*it);
 		}
-		
+
 		return headers;
 	}
-	
+
 	static list attributes(AttributeCachePtr cache, const AttributeCache::ObjectHandle &obj, object regex)
 	{
 		list attributes;
@@ -110,17 +110,17 @@ struct AttributeCacheHelper
 		{
 			attributes.append<std::string>(*it);
 		}
-		
+
 		return attributes;
 	}
-	
+
 };
 
 void bindAttributeCache()
-{	
+{
 	bool (AttributeCache::*containsObj)(const AttributeCache::ObjectHandle &) = &AttributeCache::contains;
 	bool (AttributeCache::*containsObjAttr)(const AttributeCache::ObjectHandle &, const AttributeCache::AttributeHandle &) = &AttributeCache::contains;
-	
+
 	RefCountedClass<AttributeCache, RefCounted>( "AttributeCache" )
 		.def( init<const std::string &, IndexedIO::OpenMode>() )
 		.def("write", &AttributeCache::write)
@@ -130,7 +130,7 @@ void bindAttributeCache()
 		.def("readHeader", (ObjectPtr (AttributeCache::*) ( const AttributeCache::HeaderHandle & ))&AttributeCache::readHeader)
 		.def("readHeader", (CompoundObjectPtr (AttributeCache::*)())&AttributeCache::readHeader)
 		.def("contains", containsObj)
-		.def("contains", containsObjAttr)		
+		.def("contains", containsObjAttr)
 		.def("objects", &AttributeCacheHelper::objects)
 		.def("headers", &AttributeCacheHelper::headers)
 		.def("attributes", make_function( &AttributeCacheHelper::attributes, default_call_policies(), ( boost::python::arg_( "obj" ), boost::python::arg_( "regex" ) = object() ) ) )

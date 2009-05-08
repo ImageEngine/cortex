@@ -45,13 +45,13 @@ IECoreGL.init( False )
 class DiskPrimitiveTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testDisk.tif"
-	
+
 	def test( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		
+
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -60,17 +60,17 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		
+
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
 			r.disk( 1, 0, 360, {} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
 		i2 = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/disk.tif" ).read()
-		
+
 		# blue where there must be an object
 		# red where we don't mind
 		# black where there must be nothing
@@ -90,6 +90,6 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		if os.path.exists( self.outputFileName ) :
 			os.remove( self.outputFileName )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

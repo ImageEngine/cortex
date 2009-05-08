@@ -36,77 +36,77 @@ import unittest
 from IECore import *
 
 class TestCSGImplicitSurfaceFunction( unittest.TestCase ) :
-	
+
 	def testUnion( self ) :
 		""" Test implicit surface CSG union """
 		sphere1 = SphereImplicitSurfaceFunctionV3ff( V3f(0,0,0), 1 )
 		sphere2 = SphereImplicitSurfaceFunctionV3ff( V3f(0,1,0), 1 )
-		
+
 		csgFn = CSGImplicitSurfaceFunctionV3ff( sphere1, sphere2, CSGImplicitSurfaceFunctionV3ff.Mode.Union )
-		builder = MeshPrimitiveBuilder()       
+		builder = MeshPrimitiveBuilder()
 		marcher = MarchingCubesf( csgFn, builder )
-                                
+
 		marchMin = V3f(-2.5, -2.5, -2.5)
 		marchMax = V3f( 2.5,  2.5,  2.5)
 		marchBound = Box3f( marchMin, marchMax )
 		marchResolution = V3i( 30, 30, 30 )
 		marcher.march( marchBound, marchResolution, -0.000001 )
-                                
+
 		m = builder.mesh()
-		
+
 		# Verified visually
 		self.assert_( len( m.vertexIds ) > 5700 )
-		self.assert_( len( m.vertexIds ) < 5900 )		
+		self.assert_( len( m.vertexIds ) < 5900 )
 
 	def testIntersection( self ):
 		""" Test implicit surface CSG intersection """
 		sphere1 = SphereImplicitSurfaceFunctionV3ff( V3f(0,0,0), 1 )
 		sphere2 = SphereImplicitSurfaceFunctionV3ff( V3f(0,1,0), 1 )
-		
+
 		plane = PlaneImplicitSurfaceFunctionV3ff( V3f(1,0,0), 0.2 )
-				
+
 		csgFn1 = CSGImplicitSurfaceFunctionV3ff( sphere1, sphere2, CSGImplicitSurfaceFunctionV3ff.Mode.Intersection )
-		csgFn2 = CSGImplicitSurfaceFunctionV3ff( csgFn1, plane, CSGImplicitSurfaceFunctionV3ff.Mode.Intersection )				
-		builder = MeshPrimitiveBuilder()       				
+		csgFn2 = CSGImplicitSurfaceFunctionV3ff( csgFn1, plane, CSGImplicitSurfaceFunctionV3ff.Mode.Intersection )
+		builder = MeshPrimitiveBuilder()
 		marcher = MarchingCubesf( csgFn2, builder )
-				            
+
 		marchMin = V3f(-2.5, -2.5, -2.5)
 		marchMax = V3f( 2.5,  2.5,  2.5)
 		marchBound = Box3f( marchMin, marchMax )
 		marchResolution = V3i( 30, 30, 30 )
 		marcher.march( marchBound, marchResolution )
-		                 
+
 		m = builder.mesh()
-				
+
 		# Verified visually
 		self.assert_( len( m.vertexIds ) > 850 )
 		self.assert_( len( m.vertexIds ) < 950 )
-	
-	def testDifference( self ):	
-	
+
+	def testDifference( self ):
+
 		""" Test implicit surface CSG difference """
 		sphere1 = SphereImplicitSurfaceFunctionV3ff( V3f(0,0,0), 1 )
 		sphere2 = SphereImplicitSurfaceFunctionV3ff( V3f(0,1,0), 1 )
-				
-		csgFn = CSGImplicitSurfaceFunctionV3ff( sphere1, sphere2, CSGImplicitSurfaceFunctionV3ff.Mode.Difference )				
-		builder = MeshPrimitiveBuilder()       				
+
+		csgFn = CSGImplicitSurfaceFunctionV3ff( sphere1, sphere2, CSGImplicitSurfaceFunctionV3ff.Mode.Difference )
+		builder = MeshPrimitiveBuilder()
 		marcher = MarchingCubesf( csgFn, builder )
-		
-		            
+
+
 		marchMin = V3f(-2.5, -2.5, -2.5)
 		marchMax = V3f( 2.5,  2.5,  2.5)
 		marchBound = Box3f( marchMin, marchMax )
 		marchResolution = V3i( 30, 30, 30 )
 		marcher.march( marchBound, marchResolution )
-		                 
+
 		m = builder.mesh()
-		
+
 		# Verified visually
 		self.assert_( len( m.vertexIds ) > 3600 )
 		self.assert_( len( m.vertexIds ) < 3750 )
-			
-				
-	
+
+
+
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

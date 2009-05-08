@@ -74,7 +74,7 @@ V3f ImagePrimitiveEvaluator::Result::normal() const
 }
 
 V2f ImagePrimitiveEvaluator::Result::uv() const
-{	
+{
 	return V2f(
 		( m_p.x - m_bound.min.x ) / ( m_bound.max.x - m_bound.min.x ),
 		( m_p.y - m_bound.min.y ) / ( m_bound.max.y - m_bound.min.y )
@@ -123,21 +123,21 @@ unsigned int ImagePrimitiveEvaluator::Result::uintPrimVar( const PrimitiveVariab
 const std::string &ImagePrimitiveEvaluator::Result::stringPrimVar( const PrimitiveVariable &pv ) const
 {
 	StringDataPtr data = runTimeCast< StringData >( pv.data );
-		
+
 	if (data)
 	{
 		return data->readable();
-	}	
+	}
 	else
 	{
 		StringVectorDataPtr data = runTimeCast< StringVectorData >( pv.data );
-		
+
 		if (data)
-		{		
+		{
 			return data->readable()[0];
 		}
 	}
-	
+
 	throw InvalidArgumentException( "Could not retrieve primvar data for ImagePrimitiveEvaluator" );
 }
 
@@ -175,20 +175,20 @@ template<typename T>
 T ImagePrimitiveEvaluator::Result::indexData( const std::vector<T> &data, const V2i &p ) const
 {
 	int dataWidth = m_dataWindow.size().x + 1;
-	int dataHeight = m_dataWindow.size().y + 1;						
-	
-	if ( p.x >= 0 && p.y >= 0 && p.x < dataWidth && p.y < dataHeight )			
+	int dataHeight = m_dataWindow.size().y + 1;
+
+	if ( p.x >= 0 && p.y >= 0 && p.x < dataWidth && p.y < dataHeight )
 	{
-		int idx = ( p.y * dataWidth ) + p.x;								
+		int idx = ( p.y * dataWidth ) + p.x;
 		assert( idx >= 0 );
 		assert( idx < (int)data.size() );
 
-		return data[idx];				
+		return data[idx];
 	}
 	else
 	{
 		return T(0);
-	}				
+	}
 }
 
 template<typename T>
@@ -198,15 +198,15 @@ T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) con
 	{
 		typedef TypedData<T> Data;
 		typedef typename Data::Ptr DataPtr;
-		
+
 		DataPtr data = runTimeCast< Data >( pv.data );
-		
+
 		if (data)
 		{
 			return data->readable();
 		}
 	}
-	
+
 	typedef TypedData< std::vector<T> > VectorData;
 	typedef typename VectorData::Ptr VectorDataPtr;
 	VectorDataPtr data = runTimeCast< VectorData >( pv.data );
@@ -215,78 +215,78 @@ T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) con
 	{
 		throw InvalidArgumentException( ( boost::format("ImagePrimitiveEvaluator: Could not retrieve primvar data of type %s or %s " ) % TypedData<T>::staticTypeName() % VectorData::staticTypeName() ).str() );
 	}
-	
+
 	switch ( pv.interpolation )
 	{
 		case PrimitiveVariable::Uniform :
 		case PrimitiveVariable::Constant :
 			assert( data->readable().size() == 1 );
-			
+
 			return data->readable()[0];
 
 		case PrimitiveVariable::Vertex :
 		case PrimitiveVariable::Varying:
 		case PrimitiveVariable::FaceVarying:
-		{	
+		{
 			if ( m_dataWindow.isEmpty() )
 			{
 				return T(0);
 			}
-			
+
 			V2f pf(
 				( m_p.x - m_bound.min.x ),
 				( m_p.y - m_bound.min.y )
 			);
-			
+
 			/// Don't interpolate at the half-pixel border on the image's interior
-			if ( 
-				   pf.x <= ( m_dataWindow.min.x + 0.5f )  
+			if (
+				   pf.x <= ( m_dataWindow.min.x + 0.5f )
 				|| pf.y <= ( m_dataWindow.min.y + 0.5f )
 				|| pf.x >= ( m_dataWindow.max.x + 0.5f )
 				|| pf.y >= ( m_dataWindow.max.y + 0.5f )
 			)
-			{							
+			{
 				/// Fix boundary cases on bottom and right edges
-				const float tol = 1.e-3;	
+				const float tol = 1.e-3;
 				if ( pf.x >= m_dataWindow.max.x + 1.0f - tol && pf.x <= m_dataWindow.max.x + 1.0f + tol)
 				{
 					pf.x = m_dataWindow.max.x + 1.0f - tol;
 				}
-				
+
 				if ( pf.y >= m_dataWindow.max.y + 1.0f - tol && pf.y <= m_dataWindow.max.y + 1.0f + tol)
 				{
 					pf.y = m_dataWindow.max.y + 1.0f - tol;
 				}
-			
+
 				V2i p0(
 					static_cast<int>( pf.x ),
 					static_cast<int>( pf.y )
 				);
-				
+
 				p0 = p0 - m_dataWindow.min;
-				
+
 				return indexData<T>( data->readable(), p0 );
 			}
-			
+
 			/// Translate pixel samples (taken at centre of pixels) back to align with pixel grid
 			pf = pf - V2f( 0.5 );
-						
+
 			V2i p0(
 				static_cast<int>( pf.x ),
 				static_cast<int>( pf.y )
 			);
-						
+
 			V2i p1 = p0 + V2i( 1 );
-			
+
 			V2f pfrac( pf.x - (float)(p0.x), pf.y - (float)(p0.y) );
-			
+
 			p0 = p0 - m_dataWindow.min;
 			p1 = p1 - m_dataWindow.min;
-			
+
 			// Layout of samples taken for interpolation:
 			//
 			// ---------------> X
-			//			
+			//
 			// a --- e -------- b      |
 			// |     |          |      |
 			// |  result        |      |
@@ -296,28 +296,28 @@ T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) con
 			// |     |          |      |
 			// |     |          |      v
 			// c --- f -------- d      Y
-			
+
 			T a = indexData<T>( data->readable(), V2i( p0.x, p0.y ) );
 			T b = indexData<T>( data->readable(), V2i( p1.x, p0.y ) );
 			T c = indexData<T>( data->readable(), V2i( p0.x, p1.y ) );
 			T d = indexData<T>( data->readable(), V2i( p1.x, p1.y ) );
-			
+
 			LinearInterpolator<T> interpolator;
-			
-			T e, f;								
+
+			T e, f;
 			interpolator( a, b, pfrac.x, e );
 			interpolator( c, d, pfrac.x, f );
-			
+
 			T result;
 			interpolator( e, f, pfrac.y, result );
-			
+
 			return result;
 		}
-			
+
 		default :
 			/// Unimplemented primvar interpolation
 			assert( false );
-			return T();			
+			return T();
 	}
 }
 
@@ -343,12 +343,12 @@ ImagePrimitiveEvaluator::ImagePrimitiveEvaluator( ConstImagePrimitivePtr image )
 	{
 		throw InvalidArgumentException( "No image given to ImagePrimitiveEvaluator");
 	}
-	
+
 	if (! image->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "Image with invalid primitive variables given to ImagePrimitiveEvaluator");
 	}
-	
+
 	m_image = image->copy();
 }
 
@@ -367,12 +367,12 @@ PrimitiveEvaluator::ResultPtr ImagePrimitiveEvaluator::createResult() const
 }
 
 bool ImagePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
-{	
+{
 	ResultPtr r = boost::dynamic_pointer_cast< Result >( result );
 	assert( r );
-	
+
 	r->m_p = closestPointInBox( p, m_image->bound() );
-	
+
 	return true;
 }
 
@@ -380,38 +380,38 @@ bool ImagePrimitiveEvaluator::pointAtUV( const V2f &uv, const PrimitiveEvaluator
 {
 	ResultPtr r = boost::dynamic_pointer_cast< Result >( result );
 	assert( r );
-	
+
 	if ( uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 )
 	{
 		return false;
 	}
-	
+
 	r->m_p = V3f(
 		m_image->bound().min.x + uv.x * ( m_image->bound().max.x - m_image->bound().min.x ),
 		m_image->bound().min.y + uv.y * ( m_image->bound().max.y - m_image->bound().min.y ),
 		0.0f
 	);
-	
-	return true;	
+
+	return true;
 }
 
 bool ImagePrimitiveEvaluator::pointAtPixel( const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result ) const
 {
 	ResultPtr r = boost::dynamic_pointer_cast< Result >( result );
 	assert( r );
-	
+
 	V3f imageSize = boxSize( m_image->bound() );
-	
+
 	if ( pixel.x < 0 || pixel.x > (int)imageSize.x || pixel.y < 0 || pixel.y > (int)imageSize.y )
 	{
 		return false;
 	}
-	
+
 	V2f uv(
 		( 0.5f + pixel.x ) / imageSize.x,
-		( 0.5f + pixel.y ) / imageSize.y		
+		( 0.5f + pixel.y ) / imageSize.y
 	);
-	
+
 	return pointAtUV( uv, r );
 }
 
@@ -420,12 +420,12 @@ bool ImagePrimitiveEvaluator::intersectionPoint( const V3f &origin, const V3f &d
 {
 	ResultPtr r = boost::dynamic_pointer_cast< Result >( result );
 	assert( r );
-	
+
 	std::vector<PrimitiveEvaluator::ResultPtr> results;
-	
+
 	int numIntersections = intersectionPoints( origin, direction, results, maxDistance );
 	assert( numIntersections == 0 || numIntersections == 1 );
-	
+
 	if ( ! numIntersections )
 	{
 		return false;
@@ -434,11 +434,11 @@ bool ImagePrimitiveEvaluator::intersectionPoint( const V3f &origin, const V3f &d
 	{
 		assert( numIntersections == 1 );
 		assert( results.size() == 1 );
-		
+
 		ResultPtr intersectionResult = boost::dynamic_pointer_cast< Result >( results[0] );
 		assert( intersectionResult );
 		r->m_p = intersectionResult->m_p;
-		
+
 		return true;
 	}
 }
@@ -447,22 +447,22 @@ int ImagePrimitiveEvaluator::intersectionPoints( const V3f &origin, const V3f &d
                 std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance ) const
 {
 	results.clear();
-	
+
 	V3f hitPoint;
 	Box3f bound = m_image->bound();
 	bool hit = boxIntersects( bound , origin, direction.normalized(), hitPoint );
-	
+
 	if ( hit )
 	{
 		if ( ( origin - hitPoint ).length2() < maxDistance * maxDistance )
-		{	
+		{
 			ResultPtr result = boost::dynamic_pointer_cast< Result >( createResult() );
 			result->m_p = hitPoint;
-		
-			results.push_back( result );			
-		}		
+
+			results.push_back( result );
+		}
 	}
-	
+
 	return results.size();
 }
 
@@ -479,7 +479,7 @@ V3f ImagePrimitiveEvaluator::centerOfGravity() const
 float ImagePrimitiveEvaluator::surfaceArea() const
 {
 	V3f size = boxSize( m_image->bound() );
-	
+
 	return 2.0f * ( size.x*size.y + size.x*size.z + size.y*size.z );
 }
 

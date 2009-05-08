@@ -58,14 +58,14 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 	IntVectorDataPtr vertexIdsData = new IntVectorData;
 	std::vector<int> &verticesPerFace = verticesPerFaceData->writable();
 	std::vector<int> &vertexIds = vertexIdsData->writable();
-		
+
 	unsigned numPrimitives = m_geo->primitives();
 	const DD::Image::Primitive **primitives = m_geo->primitive_array();
 	std::vector<unsigned> tmpFaceVertices;
 	for( unsigned primIndex=0; primIndex<numPrimitives; primIndex++ )
 	{
 		const DD::Image::Primitive *prim = primitives[primIndex];
-	
+
 		unsigned numFaces = prim->faces();
 		for( unsigned faceIndex=0; faceIndex<numFaces; faceIndex++ )
 		{
@@ -79,9 +79,9 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 			}
 		}
 	}
-	
+
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIdsData, "linear" );
-	
+
 	// points
 	if( const DD::Image::PointList *pl = m_geo->point_list() )
 	{
@@ -90,7 +90,7 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 		std::transform( pl->begin(), pl->end(), p->writable().begin(), IECore::convert<Imath::V3f, DD::Image::Vector3> );
 		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, p );
 	}
-	
+
 	// uvs
 	PrimitiveVariable::Interpolation uvInterpolation = PrimitiveVariable::Vertex;
 	const DD::Image::Attribute *uvAttr = m_geo->get_typed_group_attribute( DD::Image::Group_Points, "uv", DD::Image::VECTOR4_ATTRIB );
@@ -99,7 +99,7 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 		uvAttr = m_geo->get_typed_group_attribute( DD::Image::Group_Vertices, "uv", DD::Image::VECTOR4_ATTRIB );
 		uvInterpolation = PrimitiveVariable::FaceVarying;
 	}
-	
+
 	if( uvAttr )
 	{
 		FloatVectorDataPtr ud = new FloatVectorData();
@@ -126,7 +126,7 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 		nAttr = m_geo->get_typed_group_attribute( DD::Image::Group_Vertices, "N", DD::Image::NORMAL_ATTRIB );
 		nInterpolation = PrimitiveVariable::FaceVarying;
 	}
-	
+
 	if( nAttr )
 	{
 		V3fVectorDataPtr nd = new V3fVectorData();

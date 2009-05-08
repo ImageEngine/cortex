@@ -50,13 +50,13 @@ class Turbulence
 {
 
 	public :
-	
+
 		typedef N Noise;
 		typedef typename N::Point Point;
 		typedef typename VectorTraits<Point>::BaseType PointBaseType;
 		typedef typename N::Value Value;
 		typedef typename VectorTraits<Value>::BaseType ValueBaseType;
-		
+
 		/// Constructor. All the arguments are as you would expect. Vector values are
 		/// used for lacunarity and gain so that they can be different in each dimension.
 		/// If turbulent is true you get turbulence if it's false you get fbm.
@@ -72,16 +72,16 @@ class Turbulence
 		//@{
 		void setOctaves( unsigned int octaves );
 		unsigned int getOctaves() const;
-		
+
 		void setGain( const Value &gain );
 		const Value &getGain() const;
-		
+
 		void setLacunarity( const Point &lacunarity );
 		const Point &getLacunarity() const;
-		
+
 		void setTurbulent( bool turbulent );
 		bool getTurbulent() const;
-		
+
 		void setNoise( const Noise &n );
 		const Noise &getNoise() const;
 		//@}
@@ -91,18 +91,18 @@ class Turbulence
 		Value turbulence( const Point &p ) const;
 
 	private :
-	
+
 		// This calculates m_offset and m_scale so as to bring the
 		// result into the appropriate -0.5 to 0.5 range.
 		void calculateScaleAndOffset();
 		Value m_offset;
 		Value m_scale;
-		
+
 		unsigned int m_octaves;
 		Value m_gain;
 		Point m_lacunarity;
 		bool m_turbulent;
-		
+
 		Noise m_noise;
 
 };

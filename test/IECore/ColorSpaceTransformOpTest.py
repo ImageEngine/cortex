@@ -38,29 +38,29 @@ from IECore import *
 class ColorSpaceTransformOpTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		self.assertEqual(  set( ColorSpaceTransformOp.colorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb'] ) )
 		self.assertEqual(  set( ColorSpaceTransformOp.inputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb'] ) )
 		self.assertEqual(  set( ColorSpaceTransformOp.outputColorSpaces() ), set( ['cineon', 'linear', 'rec709', 'srgb'] ) )
 
 	def testConversion( self ) :
-		
+
 		op = ColorSpaceTransformOp()
 		result = op(
 			inputColorSpace = "linear",
 			outputColorSpace = "srgb",
-			
+
 			input = Reader.create( "test/IECore/data/exrFiles/uvMap.256x256.exr" ).read()
-		)		
-		
+		)
+
 		# SRGB To Rec709 isn't directly available, we have to go SRGB->Linear->Rec709
 		result = op(
 			inputColorSpace = "srgb",
 			outputColorSpace = "rec709",
-			
+
 			input = result
-		)	
-		
+		)
+
 		# Result verified by eye
 		diff = ImageDiffOp()
 		diffResult = diff(
@@ -69,7 +69,7 @@ class ColorSpaceTransformOpTest( unittest.TestCase ) :
 			maxError = 0.0001
 		)
 		self.failIf( diffResult.value )
-		
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

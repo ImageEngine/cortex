@@ -41,17 +41,17 @@ import maya.cmds
 class ToMayaPlugConverterTest( unittest.TestCase ) :
 
 	def testConversion( self ) :
-	
+
 		locator = maya.cmds.spaceLocator()[0]
-		
+
 		converter = IECoreMaya.ToMayaPlugConverter.create( IECore.FloatData( 10 ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaPlugConverter.staticTypeId() ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
 		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
-		
+
 		converter.convert( locator + ".translateX" )
-		
+
 		self.assertEqual( maya.cmds.getAttr( locator + ".translateX" ), 10 )
-							
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

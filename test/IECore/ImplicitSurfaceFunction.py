@@ -40,23 +40,23 @@ from IECore import *
 class TestImplicitSurfaceFunction( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		class TestFunction( ImplicitSurfaceFunctionV3ff ):
-		
-			def __init__( self ) :	
-			
+
+			def __init__( self ) :
+
 				ImplicitSurfaceFunctionV3ff.__init__( self )
-				
+
 			def getValue( self, p ):
-			
+
 				return 0.5
-				
+
 		a = TestFunction()
-		
-		self.assertEqual( a.getValue( V3f(1,1,1) ), 0.5 )		
-			
-				
-	
+
+		self.assertEqual( a.getValue( V3f(1,1,1) ), 0.5 )
+
+
+
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

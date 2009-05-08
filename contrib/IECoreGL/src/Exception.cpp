@@ -73,6 +73,6 @@ void Exception::throwIfError( GLenum error )
 {
 	if( error!=GL_NO_ERROR )
 	{
-		throw Exception( error );	
+		throw Exception( error );
 	}
 }

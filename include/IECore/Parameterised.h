@@ -49,9 +49,9 @@ class Parameterised : public RunTimeTyped, public ParameterisedInterface
 {
 
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( Parameterised, RunTimeTyped );
-		
+
 		/// The base class constructor receives the name and a short description about the Parameterised object created.
 		/// They are usually defined within the derived class constructors.
 		/// \todo Remove name - It doesn't add anything over and above typeName().
@@ -67,7 +67,7 @@ class Parameterised : public RunTimeTyped, public ParameterisedInterface
 		const std::string &name() const;
 		/// Returns a description for this parameterised object.
 		const std::string &description() const;
-		
+
 		/// Returns the parameters for editing. Subclasses should
 		/// typically add parameters to this from their constructors.
 		virtual CompoundParameterPtr parameters();
@@ -78,14 +78,14 @@ class Parameterised : public RunTimeTyped, public ParameterisedInterface
 		CompoundObjectPtr userData();
 		/// Read only version of the above.
 		ConstCompoundObjectPtr userData() const;
-		
+
 	private :
 
 		std::string m_name;
 		std::string m_description;
 		CompoundParameterPtr m_parameters;
 		CompoundObjectPtr m_userData;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Parameterised );

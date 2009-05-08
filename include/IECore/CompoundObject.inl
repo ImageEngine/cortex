@@ -61,7 +61,7 @@ typename T::ConstPtr CompoundObject::member( const std::string &name ) const
 	}
 	return 0;
 }
-		
+
 }; // namespace IECore
 
 #endif // IE_CORE_COMPOUNDOBJECT_INL

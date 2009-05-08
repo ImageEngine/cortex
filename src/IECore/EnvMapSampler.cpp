@@ -52,10 +52,10 @@ EnvMapSampler::EnvMapSampler()
 	:
 	Op(
 		staticTypeName(),
-		"Samples an environment map to generate lights.", 
+		"Samples an environment map to generate lights.",
 		new ObjectParameter( "result",
 			"A CompoundObject containing the light directions and colours.",
-			NullObject::defaultNullObject(), 
+			NullObject::defaultNullObject(),
 			CompoundObject::staticTypeId()
 		)
 	)
@@ -66,17 +66,17 @@ EnvMapSampler::EnvMapSampler()
 		"must have 3 float channels named R, G and B.",
 		new ImagePrimitive
 	);
-	
+
 	m_subdivisionDepthParameter = new IntParameter(
 		"subdivisionDepth",
 		"The number of times to subdivide the image. This controls how many "
 		"lights will be created.",
 		4
 	);
-	
+
 	parameters()->addParameter( m_imageParameter );
 	parameters()->addParameter( m_subdivisionDepthParameter );
-	
+
 }
 
 EnvMapSampler::~EnvMapSampler()
@@ -107,7 +107,7 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 {
 	ImagePrimitivePtr image = static_pointer_cast<ImagePrimitive>( imageParameter()->getValue() )->copy();
 	Box2i dataWindow = image->getDataWindow();
-	
+
 	// find the rgb channels
 	ConstFloatVectorDataPtr redData = image->getChannel<float>( "R" );
 	ConstFloatVectorDataPtr greenData = image->getChannel<float>( "G" );
@@ -119,14 +119,14 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 	const vector<float> &red = redData->readable();
 	const vector<float> &green = greenData->readable();
 	const vector<float> &blue = blueData->readable();
-	
+
 	// get a luminance channel
 	LuminanceOpPtr luminanceOp = new LuminanceOp();
 	luminanceOp->inputParameter()->setValue( image );
 	luminanceOp->copyParameter()->getTypedValue() = false;
 	luminanceOp->removeColorPrimVarsParameter()->getTypedValue() = false;
 	luminanceOp->operate();
-	
+
 	// do the median cut thing to get some samples
 	MedianCutSamplerPtr sampler = new MedianCutSampler;
 	sampler->imageParameter()->setValue( image );
@@ -134,16 +134,16 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 	ConstCompoundObjectPtr samples = static_pointer_cast<CompoundObject>( sampler->operate() );
 	const vector<V2f> &centroids = static_pointer_cast<V2fVectorData>( samples->members().find( "centroids" )->second )->readable();
 	const vector<Box2i> &areas = static_pointer_cast<Box2iVectorData>( samples->members().find( "areas" )->second )->readable();
-	
+
 	// get light directions and colors from the samples
 	V3fVectorDataPtr directionsData = new V3fVectorData;
 	Color3fVectorDataPtr colorsData = new Color3fVectorData;
 	vector<V3f> &directions = directionsData->writable();
 	vector<Color3f> &colors = colorsData->writable();
-	
+
 	float radiansPerPixel = M_PI / (dataWindow.size().y + 1);
 	float angleAtTop = ( M_PI - radiansPerPixel ) / 2.0f;
-		
+
 	for( unsigned i=0; i<centroids.size(); i++ )
 	{
 		const Box2i &area = areas[i];
@@ -151,7 +151,7 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 		for( int y=area.min.y; y<=area.max.y; y++ )
 		{
 			int yRel = y - dataWindow.min.y;
-			
+
 			float angle = angleAtTop - yRel * radiansPerPixel;
 			float weight = cosf( angle );
 			int index = (area.min.x - dataWindow.min.x) + (dataWindow.size().x + 1 ) * yRel;
@@ -165,19 +165,19 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 		}
 		color /= red.size();
 		colors.push_back( color );
-		
+
 		float phi = angleAtTop - (centroids[i].y - dataWindow.min.y) * radiansPerPixel;
-		
+
 		V3f direction;
 		direction.y = sinf( phi );
 		float r = cosf( phi );
 		float theta = 2 * M_PI * lerpfactor( (float)centroids[i].x, (float)dataWindow.min.x, (float)dataWindow.max.x );
 		direction.x = r * cosf( theta );
 		direction.z = r * sinf( theta );
-		
+
 		directions.push_back( -direction ); // negated so we output the direction the light shines in
 	}
-	
+
 	// return the result
 	CompoundObjectPtr result = new CompoundObject;
 	result->members()["directions"] = directionsData;

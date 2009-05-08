@@ -48,20 +48,20 @@ class MeshFromNuke : public FromNukeConverter
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshFromNuke, MeshFromNukeTypeId, FromNukeConverter );
 
 		/// The caller is responsible for ensuring that geo is alive
 		/// for as long as the converter is.
 		MeshFromNuke( const DD::Image::GeoInfo *geo );
 		virtual ~MeshFromNuke();
-	
+
 	protected :
-	
+
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
-	
+
 	private :
-	
+
 		const DD::Image::GeoInfo *m_geo;
 
 };

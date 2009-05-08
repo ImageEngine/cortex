@@ -53,9 +53,9 @@ class ColorSplineParameterHandler : public ParameterHandler
 		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const;
 		virtual MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
-		
+
 	private :
-	
+
 		static Description< ColorSplineParameterHandler<S> > g_registrar;
 };
 

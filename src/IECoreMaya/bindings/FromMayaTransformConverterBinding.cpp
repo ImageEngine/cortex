@@ -47,9 +47,9 @@ void IECoreMaya::bindFromMayaTransformConverter()
 	scope s = IECore::RunTimeTypedClass<FromMayaTransformConverter>()
 		.def( init<const MDagPath &>() )
 	;
-	
+
 	enum_<FromMayaTransformConverter::Space>( "Space" )
 		.value( "Local", FromMayaTransformConverter::Local )
 		.value( "World", FromMayaTransformConverter::World )
-	;	
+	;
 }

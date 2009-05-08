@@ -36,19 +36,19 @@ import unittest
 from IECore import *
 
 class MAppedRandomPointDistributionOpTest( unittest.TestCase ) :
-    
+
 	def testSimple( self ) :
-			
+
 		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-		
+
 		img = Reader.create( "test/IECore/data/tiff/rgbCheckerboard.tiff" ).read()
-				
+
 		op = MappedRandomPointDistributionOp()
-		
+
 		for i in range( 0, len(m["P"].data ) ):
-		
+
 			m["P"].data[i] *= 50
-		
+
 		p = op(
 			mesh = m,
 			numPoints = 10000,
@@ -57,13 +57,13 @@ class MAppedRandomPointDistributionOpTest( unittest.TestCase ) :
 			image = img,
 			channelName = "R"
 		)
-		
+
 		self.assert_( "P" in p )
-		self.assert_( "s" in p )		
+		self.assert_( "s" in p )
 		self.assert_( "t" in p )
-		
+
 		self.assertEqual( len( p["P"].data ), 10000 )
-		
+
 if __name__ == "__main__":
-	unittest.main()   
-	        
+	unittest.main()
+

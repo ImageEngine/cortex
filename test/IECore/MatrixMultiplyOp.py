@@ -40,11 +40,11 @@ from IECore import *
 class TestMultiplyMatrixOp( unittest.TestCase ) :
 
 	def testMultiplication( self ) :
-		vectorTypes = [ 
+		vectorTypes = [
 			V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ),
 			V3dVectorData( [ V3d(1), V3d(2), V3d(3) ] ),
 		]
-		matrixTypes = [ 
+		matrixTypes = [
 			M33fData( M33f() * 3 ),
 			M33dData( M33d() * 3 ),
 			M44fData( M44f().createScaled( V3f(3) ) ),
@@ -65,34 +65,34 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 				raise Exception, "Error testing vector " + str(type(vector)) + " against matrix " + str(type(matrix)) + ". Resulted " + str( res )
 
 	def testModes( self ) :
-	
+
 		v = V3fVectorData( [ V3f( 1 ), V3f( 2 ), V3f( 3 ) ] )
 		o = MatrixMultiplyOp()
-		
+
 		# as points
 		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] + V3f( 1, 2, 3 ) )
-			
+
 		# as vectors
 		o["mode"].setValue( "vector" )
 		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
-			
+
 		vt = o( object = v.copy(), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] * V3f( 1, 2, 3 ) )
-		
+
 		# as normals
 		o["mode"].setValue( "normal" )
 		vt = o( object = v.copy(), matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
-			
+
 		vt = o( object = v.copy(), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
-			self.assertNotEqual( vt[i], v[i] * V3f( 1, 2, 3 ) )	
-			
+			self.assertNotEqual( vt[i], v[i] * V3f( 1, 2, 3 ) )
+
 if __name__ == "__main__":
         unittest.main()

@@ -39,7 +39,7 @@
 vec3 light( vec3 p, int lightIndex, out vec3 L )
 {
 	vec3 Cl = gl_LightSource[lightIndex].diffuse.rgb;
-	
+
 	if( gl_LightSource[lightIndex].position.w==0.0 )
 	{
 		// directional light
@@ -48,16 +48,16 @@ vec3 light( vec3 p, int lightIndex, out vec3 L )
 	else
 	{
 		// pointlight or spotlight
-		
+
 		L = gl_LightSource[lightIndex].position.xyz - p;
 		float d = length( L );
 		vec3 Ln = L/d;
-		
+
 		float falloff = 1.0 /
 			(	gl_LightSource[lightIndex].constantAttenuation +
 				gl_LightSource[lightIndex].linearAttenuation * d +
 				gl_LightSource[lightIndex].quadraticAttenuation * d * d );
-		
+
 		if( gl_LightSource[lightIndex].spotCutoff!=180.0 )
 		{
 			// spotlight
@@ -71,7 +71,7 @@ vec3 light( vec3 p, int lightIndex, out vec3 L )
 				falloff *= pow( cosA, gl_LightSource[lightIndex].spotExponent );
 			}
 		}
-		
+
 		Cl *= falloff;
 	}
 	return Cl;

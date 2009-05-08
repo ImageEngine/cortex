@@ -41,16 +41,16 @@ import nuke
 class FnAxisTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		n = nuke.nodes.Axis()
-		
+
 		f = IECoreNuke.FnAxis( n )
 		self.assertEqual( f.getLocalMatrix(), IECore.M44f() )
-		
+
 		IECoreNuke.setKnobValue( n.knob( "translate" ), IECore.V3f( 1, 2, 3 ) )
 		self.assertEqual( f.getLocalMatrix(), IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
-		
-		
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

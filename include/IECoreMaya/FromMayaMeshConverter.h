@@ -56,14 +56,14 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaMeshConverter, FromMayaMeshConverterTypeId, FromMayaShapeConverter );
 
 		FromMayaMeshConverter( const MObject &object );
 		FromMayaMeshConverter( const MDagPath &dagPath );
-		
+
 		virtual ~FromMayaMeshConverter();
-		
+
 		/// Returns just the points for the mesh.
 		/// \todo It would be nice if this was virtual somewhere and implemented for other
 		/// converters for which it makes sense. I'm not sure it belongs in the FromMayaShapeConverter though.
@@ -83,7 +83,7 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 
 		IECore::BoolParameterPtr pointsParameter();
 		IECore::BoolParameterPtr pointsParameter() const;
-		
+
 		IECore::BoolParameterPtr normalsParameter();
 		IECore::BoolParameterPtr normalsParameter() const;
 
@@ -93,16 +93,16 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 		IECore::BoolParameterPtr extraSTParameter();
 		IECore::BoolParameterPtr extraSTParameter() const;
 		//@}
-		
+
 	protected :
-	
+
 		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
 		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
-		
+
 	private :
 
 		void constructCommon();
-		
+
 		IECore::FloatVectorDataPtr sOrT( const MString &uvSet, unsigned int index ) const;
 
 		IECore::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;

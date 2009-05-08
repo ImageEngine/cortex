@@ -39,47 +39,47 @@ import os
 
 class TestFrameListParameter( unittest.TestCase ) :
 
-	def test( self ) :	
-	
+	def test( self ) :
+
 		p = IECore.FrameListParameter( "n", "d", "" )
 		p.validate()
 		self.assert_( isinstance( p.getFrameListValue(), IECore.EmptyFrameList ) )
-		
+
 		p.setTypedValue( "1-100" )
 		p.validate()
 		self.assert_( isinstance( p.getFrameListValue(), IECore.FrameRange ) )
-		
+
 		p.setValue( IECore.StringData( "i'mNotAFrameList" ) )
 		self.assertRaises( RuntimeError, p.validate )
-		
+
 	def testNoEmptyList( self ) :
-	
+
 		p = IECore.FrameListParameter( "n", "d", "1-10", False )
 		p.validate()
-		
+
 		p.setTypedValue( "" )
 		self.assertRaises( RuntimeError, p.validate )
 
 		p.setTypedValue( "1" )
 		p.validate()
-		
+
 	def testSetAndGet( self ) :
-	
+
 		p = IECore.FrameListParameter( "n", "d", "" )
 		p.setFrameListValue( IECore.FrameRange(  0, 100, 2 ) )
 		self.assertEqual( p.getTypedValue(), "0-100x2" )
-		
+
 		self.assertEqual( p.getFrameListValue().asList(), IECore.FrameRange(  0, 100, 2 ).asList() )
-	
+
 	def testDefaultValueAsFrameList( self ) :
-	
+
 		p = IECore.FrameListParameter( "n", "d", IECore.FrameRange( 0, 10 ) )
 		self.assertEqual( p.getFrameListValue().asList(), range( 0, 11 ) )
-	
+
 	def testOps( self ) :
-	
+
 		o1 = IECore.CheckImagesOp()
 		o2 = IECore.FileSequenceGraphOp()
-			
+
 if __name__ == "__main__":
         unittest.main()

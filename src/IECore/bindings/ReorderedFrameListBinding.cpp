@@ -43,7 +43,7 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 template<>
@@ -53,7 +53,7 @@ std::string repr( ReorderedFrameList &x )
 }
 
 void bindReorderedFrameList()
-{	
+{
 	RunTimeTypedClass<ReorderedFrameList>()
 		.add_property( "frameList", &ReorderedFrameList::getFrameList, &ReorderedFrameList::setFrameList )
 	;

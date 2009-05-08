@@ -37,7 +37,7 @@
 
 #include <iostream>
 
-namespace IECore 
+namespace IECore
 {
 
 LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDataTypeId, "LongData" );
@@ -48,7 +48,7 @@ LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDa
 #define IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( TNAME, TID, N )		\
 	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )			\
 	IE_CORE_DEFINEBASETYPEDDATAIOSPECIALISATION( TNAME, N )				\
-			
+
 
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( BoolData, BoolDataTypeId )
 IE_CORE_DEFINEBASETYPEDDATASPECIALISATION( FloatData, FloatDataTypeId )
@@ -97,7 +97,7 @@ void StringData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 	accumulator.accumulate( &readable(), readable().capacity() );
 }
 
-template<> 
+template<>
 void TypedData<bool>::save( SaveContext *context ) const
 {
 	Data::save( context );
@@ -106,7 +106,7 @@ void TypedData<bool>::save( SaveContext *context ) const
 	container->write( "value", c );
 }
 
-template<> 
+template<>
 void TypedData<bool>::load( LoadContextPtr context )
 {
 	Data::load( context );
@@ -124,11 +124,11 @@ void TypedData<bool>::load( LoadContextPtr context )
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 		container->read( "value", c );
 	}
-	
+
 	writable() = c;
 }
 
-template<> 
+template<>
 void TypedData<short>::save( SaveContext *context ) const
 {
 	Data::save( context );
@@ -137,7 +137,7 @@ void TypedData<short>::save( SaveContext *context ) const
 	container->write( "value", c );
 }
 
-template<> 
+template<>
 void TypedData<short>::load( LoadContextPtr context )
 {
 	Data::load( context );
@@ -155,11 +155,11 @@ void TypedData<short>::load( LoadContextPtr context )
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 		container->read( "value", c );
 	}
-	
+
 	writable() = static_cast<short>( c );
 }
 
-template<> 
+template<>
 void TypedData<unsigned short>::save( SaveContext *context ) const
 {
 	Data::save( context );
@@ -168,7 +168,7 @@ void TypedData<unsigned short>::save( SaveContext *context ) const
 	container->write( "value", c );
 }
 
-template<> 
+template<>
 void TypedData<unsigned short>::load( LoadContextPtr context )
 {
 	Data::load( context );
@@ -186,7 +186,7 @@ void TypedData<unsigned short>::load( LoadContextPtr context )
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 		container->read( "value", c );
 	}
-	
+
 	writable() = static_cast<unsigned short>( c );
 }
 

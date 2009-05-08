@@ -72,7 +72,7 @@ MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( static
 	        directionPresets,
 	        true
 	);
-	
+
 	IntParameter::PresetsContainer methodPresets;
 	methodPresets.push_back( IntParameter::Preset( "Normal", Normal ) );
 	methodPresets.push_back( IntParameter::Preset( "X-axis", XAxis ) );
@@ -89,13 +89,13 @@ MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( static
 	        methodPresets,
 	        true
 	);
-		
+
 	m_directionMeshParameter = new MeshPrimitiveParameter(
 	        "directionMesh",
 	        "The direction mesh to use when determining where to cast rays",
 	        new MeshPrimitive()
 	);
-	
+
 	m_triangulationToleranceParameter = new FloatParameter(
 		"triangulationTolerance",
 		"Set the non-planar and non-convex tolerance for the internal triangulation tests",
@@ -155,7 +155,7 @@ ConstMeshPrimitiveParameterPtr MeshPrimitiveShrinkWrapOp::directionMeshParameter
 }
 
 FloatParameterPtr MeshPrimitiveShrinkWrapOp::triangulationToleranceParameter()
-{	
+{
 	return m_triangulationToleranceParameter;
 }
 
@@ -167,14 +167,14 @@ ConstFloatParameterPtr MeshPrimitiveShrinkWrapOp::triangulationToleranceParamete
 struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 {
 	typedef void ReturnType;
-	
+
 	PrimitivePtr m_sourceMesh;
 	ConstPrimitivePtr m_targetMesh;
 	ConstDataPtr m_directionData;
 	Direction m_direction;
 	Method m_method;
 	float m_tolerance;
-	
+
 	ShrinkWrapFn( PrimitivePtr sourceMesh, ConstPrimitivePtr targetMesh, ConstDataPtr directionData, Direction direction, Method method, float tolerance )
 	: m_sourceMesh( sourceMesh ), m_targetMesh( targetMesh ), m_directionData( directionData ), m_direction( direction ), m_method( method ), m_tolerance( tolerance )
 	{
@@ -184,7 +184,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 	void operator()( typename T::Ptr vertexData ) const
 	{
 		assert( vertexData );
-		
+
 		typedef typename T::ValueType::value_type Vec;
 
 		assert( m_sourceMesh );
@@ -195,7 +195,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 		}
 
 		typename T::ValueType &vertices = vertexData->writable();
-		
+
 		typename T::ConstPtr directionVerticesData = runTimeCast<const T>( m_directionData );
 
 		if ( m_method == DirectionMesh  )
@@ -239,7 +239,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 			throw InvalidArgumentException("MeshPrimitiveShrinkWrapOp: MeshPrimitive has no primitive variable \"N\"" );
 		}
 
-		const PrimitiveVariable &nPrimVar = it->second;	
+		const PrimitiveVariable &nPrimVar = it->second;
 
 		typename T::ValueType::size_type vertexId = 0;
 		for ( typename T::ValueType::iterator pit = vertices.begin(); pit != vertices.end(); ++pit, ++vertexId )
@@ -254,7 +254,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 				assert( sourceResult );
 				sourceEvaluator->closestPoint( vertexPosition, sourceResult );
 				rayDirection = sourceResult->vectorPrimVar( nPrimVar ).normalized();
-			} 
+			}
 			else if ( m_method == XAxis )
 			{
 				rayDirection = Vec( 1.0, 0.0, 0.0 );
@@ -267,13 +267,13 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 			{
 				rayDirection = Vec( 0.0, 0.0, 1.0 );
 			}
-			else 
+			else
 			{
 				assert( m_method == DirectionMesh );
 				assert( directionVerticesData );
 				assert( vertexId < directionVerticesData->readable().size() );
 
-				rayDirection = ( directionVerticesData->readable()[ vertexId ] - vertexPosition ).normalized();	
+				rayDirection = ( directionVerticesData->readable()[ vertexId ] - vertexPosition ).normalized();
 			}
 
 			bool hit = false;
@@ -327,15 +327,15 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 			}
 		}
 	}
-	
+
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );
-		
-			throw InvalidArgumentException( ( boost::format( "MeshPrimitiveShrinkWrapOp: Invalid data type \"%s\" for primitive variable \"P\"." ) % Object::typeNameFromTypeId( data->typeId() ) ).str() );		
+
+			throw InvalidArgumentException( ( boost::format( "MeshPrimitiveShrinkWrapOp: Invalid data type \"%s\" for primitive variable \"P\"." ) % Object::typeNameFromTypeId( data->typeId() ) ).str() );
 		}
 	};
 };
@@ -344,7 +344,7 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, Con
 {
 	assert( mesh );
 	assert( operands );
-	
+
 	PrimitiveVariableMap::const_iterator it = mesh->variables.find("P");
 	if (it == mesh->variables.end())
 	{
@@ -375,33 +375,33 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, Con
 
 	Direction direction = static_cast<Direction>( m_directionParameter->getNumericValue() );
 	Method method = static_cast<Method>( m_methodParameter->getNumericValue() );
-	
+
 	MeshPrimitivePtr directionMesh = 0;
-	
+
 	ConstDataPtr directionVerticesData = 0;
 	if ( method == DirectionMesh )
 	{
 		directionMesh = directionMeshParameter()->getTypedValue< MeshPrimitive >( );
-				
+
 		if ( ! directionMesh )
 		{
 			throw InvalidArgumentException( "No direction mesh given to MeshPrimitiveShrinkWrapOp" );
 		}
-		
+
 		if ( ! directionMesh->arePrimitiveVariablesValid() )
 		{
 			throw InvalidArgumentException( "Direction mesh with invalid primitive variables given to MeshPrimitiveShrinkWrapOp" );
 		}
-		
+
 		PrimitiveVariableMap::const_iterator it = directionMesh->variables.find("P");
 		if (it == directionMesh->variables.end())
 		{
 			throw InvalidArgumentException("Direction mesh has no primitive variable \"P\" in MeshPrimitiveShrinkWrapOp" );
 		}
-		
-		directionVerticesData = it->second.data;	
+
+		directionVerticesData = it->second.data;
 	}
-	
+
 	ShrinkWrapFn fn( mesh, target, directionVerticesData, direction, method, this->triangulationToleranceParameter()->getNumericValue() );
-	despatchTypedData< ShrinkWrapFn, TypeTraits::IsVec3VectorTypedData, ShrinkWrapFn::ErrorHandler >( verticesData, fn );	
+	despatchTypedData< ShrinkWrapFn, TypeTraits::IsVec3VectorTypedData, ShrinkWrapFn::ErrorHandler >( verticesData, fn );
 }

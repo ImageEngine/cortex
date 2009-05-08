@@ -55,22 +55,22 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 	{
 		throw InvalidArgumentException( "Invalid radius specified for SpherePrimitive" );
 	}
-	
+
 	if ( zMin < -1.0f )
 	{
 		throw InvalidArgumentException( "Invalid zMin specified for SpherePrimitive" );
 	}
-	
+
 	if ( zMax > 1.0f )
 	{
 		throw InvalidArgumentException( "Invalid zMax specified for SpherePrimitive" );
 	}
-	
+
 	if ( zMax <= zMin )
 	{
 		throw InvalidArgumentException( "Invalid zMin/zMax specified for SpherePrimitive" );
 	}
-	
+
 	if ( fabsf(thetaMax) < 1.e-6 )
 	{
 		throw InvalidArgumentException( "Invalid thetaMax specified for SpherePrimitive" );
@@ -96,7 +96,7 @@ float SpherePrimitive::thetaMax() const
 {
 	return m_thetaMax;
 }
-		
+
 void SpherePrimitive::setRadius( float r )
 {
 	m_radius = r;
@@ -124,16 +124,16 @@ size_t SpherePrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 		case PrimitiveVariable::Constant :
 		case PrimitiveVariable::Uniform :
 			return 1;
-		
+
 		case PrimitiveVariable::Vertex :
 		case PrimitiveVariable::Varying:
 		case PrimitiveVariable::FaceVarying:
 			return 4;
-			
+
 		default :
 			assert( false );
 			return 0;
-		
+
 	}
 }
 
@@ -150,27 +150,27 @@ void SpherePrimitive::copyFrom( ConstObjectPtr other, IECore::Object::CopyContex
 	m_radius = tOther->m_radius;
 	m_zMin = tOther->m_zMin;
 	m_zMax = tOther->m_zMax;
-	m_thetaMax = tOther->m_thetaMax;			
+	m_thetaMax = tOther->m_thetaMax;
 }
 
 void SpherePrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save(context);
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	
+
 	container->write( "radius", m_radius );
 	container->write( "zMin", m_zMin );
 	container->write( "zMax", m_zMax );
-	container->write( "thetaMax", m_thetaMax );		
+	container->write( "thetaMax", m_thetaMax );
 }
 
 void SpherePrimitive::load( IECore::Object::LoadContextPtr context )
 {
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
-	
+
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	container->read( "radius", m_radius );
 	container->read( "zMin", m_zMin );
 	container->read( "zMax", m_zMax );
@@ -183,9 +183,9 @@ bool SpherePrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	const SpherePrimitive *tOther = static_cast<const SpherePrimitive *>( other.get() );
-	
+
 	if( m_radius!=tOther->m_radius )
 	{
 		return false;
@@ -201,8 +201,8 @@ bool SpherePrimitive::isEqualTo( ConstObjectPtr other ) const
 	if( m_thetaMax!=tOther->m_thetaMax )
 	{
 		return false;
-	}		
-		
+	}
+
 	return true;
 }
 
@@ -212,5 +212,5 @@ void SpherePrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( sizeof( m_radius ) );
 	a.accumulate( sizeof( m_zMin ) );
 	a.accumulate( sizeof( m_zMax ) );
-	a.accumulate( sizeof( m_thetaMax ) );			
+	a.accumulate( sizeof( m_thetaMax ) );
 }

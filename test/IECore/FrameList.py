@@ -38,16 +38,16 @@ from IECore import *
 
 class TestFrameList( unittest.TestCase ) :
 
-	def test( self ) :	
-	
+	def test( self ) :
+
 		f = FrameList.parse( "" )
 		self.assert_( isinstance( f, EmptyFrameList ) )
 		self.assertEqual( len( f.asList() ), 0 )
 		self.assertEqual( repr( f ), "IECore.EmptyFrameList()" )
-		
+
 		f = FrameList.parse( " " )
 		self.assert_( isinstance( f, EmptyFrameList ) )
-		self.assertEqual( len( f.asList() ), 0 )		
-		
+		self.assertEqual( len( f.asList() ), 0 )
+
 if __name__ == "__main__":
         unittest.main()

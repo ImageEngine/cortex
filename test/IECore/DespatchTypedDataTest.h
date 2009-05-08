@@ -56,37 +56,37 @@ struct TestFunctor
 {
 	typedef void ReturnType;
 	int m_successes;
-	
+
 	template<typename T>
 	ReturnType operator()( typename T::Ptr data )
 	{
 		BOOST_CHECK( data );
-		
+
 		m_successes ++;
 		BOOST_CHECK( data->typeId() == M33fDataTypeId || data->typeId() == StringDataTypeId );
-	}	 	
+	}
 };
 
 struct TestFunctorErrorHandler
-{	
+{
 	int m_failures;
 
 	template<typename T, typename F >
 	void operator()( typename T::ConstPtr data, F& functor )
 	{
 		BOOST_CHECK( data );
-		
-		m_failures++;	
+
+		m_failures++;
 	}
 };
 
 struct DespatchTypedDataTest
-{	
+{
 	void test()
 	{
 		TestFunctor func;
 		func.m_successes = 0;
-		
+
 		TestFunctorErrorHandler eh;
 		eh.m_failures = 0;
 
@@ -94,20 +94,20 @@ struct DespatchTypedDataTest
 		despatchTypedData< TestFunctor, TypeTraits::IsSimpleTypedData, TestFunctorErrorHandler >( new M33fData(), func, eh );
 		despatchTypedData< TestFunctor, TypeTraits::IsSimpleTypedData, TestFunctorErrorHandler >( new StringData(), func, eh );
 		despatchTypedData< TestFunctor, TypeTraits::IsSimpleTypedData, TestFunctorErrorHandler >( new V3fVectorData(), func, eh ); // should fail
-		
-		BOOST_CHECK_EQUAL( func.m_successes, 3 );				
-		BOOST_CHECK_EQUAL( eh.m_failures, 1 );						
+
+		BOOST_CHECK_EQUAL( func.m_successes, 3 );
+		BOOST_CHECK_EQUAL( eh.m_failures, 1 );
 	}
 };
 
 struct DespatchTypedDataTestSuite : public boost::unit_test::test_suite
-{	
+{
 	DespatchTypedDataTestSuite() : boost::unit_test::test_suite( "DespatchTypedDataTestSuite" )
 	{
 		static boost::shared_ptr<DespatchTypedDataTest> instance( new DespatchTypedDataTest() );
-				
-		add( BOOST_CLASS_TEST_CASE( &DespatchTypedDataTest::test, instance ) );		
-	}			
+
+		add( BOOST_CLASS_TEST_CASE( &DespatchTypedDataTest::test, instance ) );
+	}
 };
 
 }

@@ -52,7 +52,7 @@ IE_CORE_FORWARDDECLARE( FromMayaObjectConverter );
 /// from a Maya datatype to an IECore datatype.
 class FromMayaObjectConverter : public FromMayaConverter
 {
-	
+
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaObjectConverter, FromMayaObjectConverterTypeId, FromMayaConverter );
@@ -65,7 +65,7 @@ class FromMayaObjectConverter : public FromMayaConverter
 		/// 0 from convert(). This function tells you if the object is still
 		/// alive or not, and therefore what return value you can expect.
 		bool objectIsAlive() const;
-		
+
 		//! @name Parameters
 		/// Parameters which affect the conversion process.
 		/////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ class FromMayaObjectConverter : public FromMayaConverter
 		IECore::BoolParameterPtr blindDataRemoveNamespaceParameter();
 		IECore::ConstBoolParameterPtr blindDataRemoveNamespaceParameter() const;
 		//@}
-		
+
 		//! @name Factory
 		/////////////////////////////////////////////////////////////////////////////////
 		//@{
@@ -92,22 +92,22 @@ class FromMayaObjectConverter : public FromMayaConverter
 		/// other converters.
 		static FromMayaObjectConverterPtr create( const MObject &object, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
-		
+
 	protected :
-	
+
 		FromMayaObjectConverter( const std::string &name, const std::string &description, const MObject &object );
-		
+
 		/// Implemented to call doConversion as defined below only if object() has a suitable
 		/// value - otherwise returns 0.
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 		/// Must be implemented by subclasses. Is guaranteed only to be called when object()
 		/// returns a valid MObject of a type specified when the converter was registered.
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const = 0;
-	
+
 		typedef FromMayaObjectConverterPtr (*CreatorFn)( const MObject &object );
 
 		static void registerConverter( const MFn::Type fromType, IECore::TypeId resultType, CreatorFn creator );
-	
+
 		/// Creating a static instance of one of these (templated on your Converter type)
 		/// within your class will register your converter with the factory mechanism.
 		template<class T>
@@ -137,9 +137,9 @@ class FromMayaObjectConverter : public FromMayaConverter
 			Types( MFn::Type from, IECore::TypeId result );
 			MFn::Type fromType;
 			IECore::TypeId resultType;
-			bool operator < ( const Types &other ) const; 
+			bool operator < ( const Types &other ) const;
 		};
-		
+
 		typedef std::map<Types, CreatorFn> TypesToFnsMap;
 		static TypesToFnsMap *typesToFns();
 

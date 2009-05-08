@@ -73,7 +73,7 @@ const LineSegment<T> &LineSegment<T>::operator *=( const S &m )
 	p1 *= m;
 	return *this;
 }
-		
+
 template<class T>
 template<class S>
 LineSegment<T> LineSegment<T>::operator *( const S &m ) const
@@ -82,7 +82,7 @@ LineSegment<T> LineSegment<T>::operator *( const S &m ) const
 	r *= m;
 	return r;
 }
-		
+
 template<class T>
 T LineSegment<T>::operator() ( BaseType t ) const
 {
@@ -122,7 +122,7 @@ T LineSegment<T>::closestPointTo( const T &point ) const
 	{
 		return p0;
 	}
-	
+
 	BaseType t = (point-p0).dot( d ) / l2;
 	return (*this)( Imath::clamp( t, BaseType( 0 ), BaseType( 1 ) ) );
 }
@@ -134,7 +134,7 @@ T LineSegment<T>::closestPoints( const LineSegment &line, T &otherPoint ) const
 	T a = p1 - p0;
 	T b = line.p1 - line.p0;
 	T c = line.p0 - p0;
-	
+
 	T ab = a.cross( b );
 	BaseType abL2 = ab.length2();
 	if( abL2 < 1e-6 )
@@ -143,18 +143,18 @@ T LineSegment<T>::closestPoints( const LineSegment &line, T &otherPoint ) const
 		otherPoint = line.p0;
 		return p0;
 	}
-	
+
 	T cb = c.cross( b );
 	T ca = c.cross( a );
 	T ba = -ab;
-	
+
 	BaseType s = cb.dot( ab ) / abL2;
 	BaseType t = - ca.dot( ba ) / abL2;
-	
+
 	// clamp onto the segments
 	s = Imath::clamp( s, BaseType( 0 ), BaseType( 1 ) );
 	t = Imath::clamp( t, BaseType( 0 ), BaseType( 1 ) );
-		
+
 	otherPoint = line( t );
 	return (*this)( s );
 }
@@ -210,9 +210,9 @@ bool LineSegment<T>::intersectT( const Imath::Plane3<S> &plane, BaseType &t ) co
 	{
 		return false;
 	}
-	
+
 	t = (plane.distance - plane.normal.dot( p0 )) / d;
-	
+
 	if( t >= 0 && t<=1 )
 	{
 		return true;

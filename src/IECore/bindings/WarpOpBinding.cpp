@@ -46,7 +46,7 @@ namespace IECore
 
 void bindWarpOp()
 {
-	
+
 	RunTimeTypedClass<WarpOp>()
 	;
 

@@ -55,9 +55,9 @@ static int getMicroseconds( const posix_time::time_duration &dur )
 {
 	static long ticksPerSecond = posix_time::time_duration::ticks_per_second();
 	long fractionalSeconds = dur.fractional_seconds();
-	
+
 	static const int oneMillion = 1000000;
-	
+
 	/// Prevent over/underflow
 	if ( ticksPerSecond > oneMillion )
 	{
@@ -127,7 +127,7 @@ struct ptime_to_python
 			PyErr_SetString(PyExc_ValueError, "Cannot convert out-of-range ptime to datetime");
 			throw_error_already_set();
 		}
-		
+
 		gregorian::date date = t.date();
 		posix_time::time_duration dur = t.time_of_day();
 		return PyDateTime_FromDateAndTime(

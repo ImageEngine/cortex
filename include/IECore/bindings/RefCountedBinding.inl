@@ -54,19 +54,19 @@ PyObject *IntrusivePtrToPython<T>::convert( typename T::Ptr const &x )
 		return Py_None;
 	}
 
-	PyObject* converted = WrapperGarbageCollectorBase::pyObject( x.get() );	
+	PyObject* converted = WrapperGarbageCollectorBase::pyObject( x.get() );
 	if( converted )
 	{
-		Py_INCREF( converted );	
+		Py_INCREF( converted );
 	}
 	else
 	{
 		using namespace boost::python::objects;
 
-		converted = class_value_wrapper< 
-			typename T::Ptr, make_ptr_instance< 
-				T, 
-				pointer_holder<typename T::Ptr, T> 
+		converted = class_value_wrapper<
+			typename T::Ptr, make_ptr_instance<
+				T,
+				pointer_holder<typename T::Ptr, T>
 				>
 			>::convert(x);
 	}
@@ -89,7 +89,7 @@ void *IntrusivePtrFromPython<T>::convertible( PyObject *p )
 	{
 		return p;
 	}
-	
+
 	return boost::python::converter::get_lvalue_from_python( p, boost::python::converter::registered<T>::converters );
 }
 
@@ -97,7 +97,7 @@ template<typename T>
 void IntrusivePtrFromPython<T>::construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data )
 {
 	void *storage = ((boost::python::converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
-		
+
 	if( data->convertible == source )
 	{
 		// Py_None case
@@ -123,7 +123,7 @@ RefCountedClass<T, Base, Ptr>::RefCountedClass( const char *className, const cha
 	// register casts between T and Base
 	boost::python::objects::register_dynamic_id<T>();
 	boost::mpl::for_each( boost::python::objects::register_base_of<T>(), (typename BaseClass::metadata::bases*)0, (boost::add_pointer<boost::mpl::_>*) 0 );
-	
+
 	// implicit conversions
 	boost::python::implicitly_convertible<boost::intrusive_ptr<T> , boost::intrusive_ptr<Base> >();
 	boost::python::implicitly_convertible<boost::intrusive_ptr<T> , boost::intrusive_ptr<const T> >();

@@ -39,7 +39,7 @@ import os.path
 class FileDependenciesOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "FileDependenciesOp", "Lists the dependencies of a file.",
 			Parameter(
 				name = "result",
@@ -47,7 +47,7 @@ class FileDependenciesOp( Op ) :
 				defaultValue = StringVectorData()
 			)
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				FileNameParameter(
@@ -63,7 +63,7 @@ class FileDependenciesOp( Op ) :
 					description = "When on, recursively searches the file dependency tree and lists all results.",
 					defaultValue = False,
 				),
-				StringParameter( 
+				StringParameter(
 					name = "resultType",
 					description = "The format of the result",
 					defaultValue = "string",
@@ -77,16 +77,16 @@ class FileDependenciesOp( Op ) :
 		)
 
 	def doOperation( self, operands ) :
-	
+
 		files = set()
 		if operands.recurse.value :
-			
+
 			files = FileExaminer.allDependencies( operands.file.value )
-		
+
 		else :
-		
+
 			files = FileExaminer.create( operands.file.value ).dependencies()
-								
+
 		if operands.resultType.value == "string" :
 			return StringData( "\n".join( [str(s) for s in files] ) )
 		else :

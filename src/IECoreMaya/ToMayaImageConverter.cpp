@@ -61,17 +61,17 @@ ToMayaImageConverter::ToMayaImageConverter( ConstObjectPtr object )
 	:	ToMayaConverter( "ToMayaImageConverter", "Converts image types.", IECore::ImagePrimitiveTypeId )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<Object>( object ) );
-	
+
 	IntParameter::PresetsContainer typePresets;
 	typePresets.push_back( IntParameter::Preset( "Float", Float ) );
-	typePresets.push_back( IntParameter::Preset( "Byte", Byte ) );	
+	typePresets.push_back( IntParameter::Preset( "Byte", Byte ) );
 	m_typeParameter = new IntParameter(
-		"type",		
+		"type",
 		"Type of image to convert to",
 		Byte,
-		typePresets );	
-		
-	parameters()->addParameter( m_typeParameter );	
+		typePresets );
+
+	parameters()->addParameter( m_typeParameter );
 }
 
 ToMayaImageConverterPtr ToMayaImageConverter::create( const IECore::ObjectPtr src )
@@ -93,9 +93,9 @@ template<typename C>
 struct ToMayaImageConverter::ChannelConverter
 {
 	typedef typename TypedData< std::vector<C> >::Ptr  ReturnType;
-	
+
 	const std::string &m_channelName;
-	
+
 	ChannelConverter( const std::string &channelName ) : m_channelName( channelName )
 	{
 	}
@@ -104,21 +104,21 @@ struct ToMayaImageConverter::ChannelConverter
 	ReturnType operator()( typename T::Ptr data )
 	{
 		assert( data );
-			
+
 		return DataConvert < T, TypedData< std::vector<C> >, ScaledDataConversion< typename T::ValueType::value_type, C> >()
 		(
 			boost::static_pointer_cast<const T>( data )
 		);
 	};
-	
+
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );
-		
-			throw InvalidArgumentException( ( boost::format( "ToMayaImageConverter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+
+			throw InvalidArgumentException( ( boost::format( "ToMayaImageConverter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
 		}
 	};
 };
@@ -127,32 +127,32 @@ template<typename T>
 void ToMayaImageConverter::writeChannel( MImage &image, typename TypedData< std::vector<T> >::Ptr channelData, unsigned channelOffset, unsigned numChannels ) const
 {
 	assert( channelOffset < numChannels );
-	
+
 	ConstImagePrimitivePtr toConvert = runTimeCast<const ImagePrimitive>( srcParameter()->getValidatedValue() );
 	assert( toConvert );
-	
+
 	unsigned width, height;
 	image.getSize( width, height );
-	
+
 	const Imath::Box2i &dataWindow = toConvert->getDataWindow();
 	const Imath::Box2i &displayWindow = toConvert->getDisplayWindow();
-	
+
 	unsigned int dataWidth = dataWindow.size().x + 1;
 	unsigned int dataHeight = dataWindow.size().y + 1;
-	
+
 	Imath::V2i dataOffset = dataWindow.min - displayWindow.min ;
-		
-	boost::multi_array_ref< const T, 2 > src( &channelData->readable()[0], boost::extents[dataHeight][dataWidth] );	
+
+	boost::multi_array_ref< const T, 2 > src( &channelData->readable()[0], boost::extents[dataHeight][dataWidth] );
 	boost::multi_array_ref< T, 3 > dst( MImageAccessor<T>::getPixels( image ), boost::extents[ height ][ width ][ numChannels ] );
-	
+
 	for ( unsigned x = 0; x < dataWidth; x++ )
 	{
 		for ( unsigned y = 0; y < dataHeight; y++ )
-		{			
-			/// Vertical flip, to match Maya	
+		{
+			/// Vertical flip, to match Maya
 			dst[ ( height - 1 ) - ( y + dataOffset.y ) ][ x + dataOffset.x ][channelOffset] = src[y][x];
 		}
-	}	
+	}
 }
 
 template<typename T>
@@ -163,16 +163,16 @@ void ToMayaImageConverter::writeAlpha( MImage &image, const T &alpha ) const
 
 	unsigned width, height;
 	image.getSize( width, height );
-		
+
 	boost::multi_array_ref< T, 3 > dst( MImageAccessor<T>::getPixels( image ), boost::extents[ height ][ width ][ numChannels ] );
-	
+
 	for ( unsigned x = 0; x < width; x++ )
 	{
 		for ( unsigned y = 0; y < height; y++ )
-		{			
+		{
 			dst[y][x][channelOffset] = alpha;
 		}
-	}	
+	}
 }
 
 void ToMayaImageConverter::writeDepth( MImage &image, FloatVectorDataPtr channelData ) const
@@ -180,44 +180,44 @@ void ToMayaImageConverter::writeDepth( MImage &image, FloatVectorDataPtr channel
 	assert( channelData );
 	ConstImagePrimitivePtr toConvert = runTimeCast<const ImagePrimitive>( srcParameter()->getValidatedValue() );
 	assert( toConvert );
-	
+
 	unsigned width, height;
 	MStatus s = image.getSize( width, height );
 	assert( s );
-	
+
 	const Imath::Box2i &dataWindow = toConvert->getDataWindow();
 	const Imath::Box2i &displayWindow = toConvert->getDisplayWindow();
-	
+
 	unsigned int dataWidth = dataWindow.size().x + 1;
 	unsigned int dataHeight = dataWindow.size().y + 1;
-	
+
 	Imath::V2i dataOffset = dataWindow.min - displayWindow.min ;
-		
-	boost::multi_array_ref< const float, 2 > src( &channelData->readable()[0], boost::extents[dataHeight][dataWidth] );	
-	
+
+	boost::multi_array_ref< const float, 2 > src( &channelData->readable()[0], boost::extents[dataHeight][dataWidth] );
+
 	std::vector<float> depth;
 	depth.resize( height * width, 0 );
 	boost::multi_array_ref< float, 2 > dst( &depth[0], boost::extents[ height ][ width ] );
-	
+
 	for ( unsigned x = 0; x < dataWidth; x++ )
 	{
 		for ( unsigned y = 0; y < dataHeight; y++ )
-		{			
-			/// Vertical flip, to match Maya	
+		{
+			/// Vertical flip, to match Maya
 			dst[ ( height - 1 ) - ( y + dataOffset.y ) ][ x + dataOffset.x ] = src[y][x];
 		}
 	}
-	
-	s = image.setDepthMap( &depth[0], width, height );	
+
+	s = image.setDepthMap( &depth[0], width, height );
 	assert( s );
 	assert( image.depth() );
 #ifndef NDEBUG
 	unsigned depthWidth = 0, depthHeight = 0;
-	s = image.getDepthMapSize( depthWidth, depthHeight );	
+	s = image.getDepthMapSize( depthWidth, depthHeight );
 	assert( s );
 	assert( depthWidth == width );
 	assert( depthHeight == height );
-#endif	
+#endif
 }
 
 MStatus ToMayaImageConverter::convert( MImage &image ) const
@@ -225,10 +225,10 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 	MStatus s;
 	ConstImagePrimitivePtr toConvert = runTimeCast<const ImagePrimitive>( srcParameter()->getValidatedValue() );
 	assert( toConvert );
-	
+
 	unsigned int width = toConvert->getDisplayWindow().size().x + 1;
-	unsigned int height = toConvert->getDisplayWindow().size().y + 1;		
-	
+	unsigned int height = toConvert->getDisplayWindow().size().y + 1;
+
 	MImage::MPixelType pixelType = MImage::kUnknown;
 	switch( typeParameter()->getNumericValue() )
 	{
@@ -236,13 +236,13 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 			pixelType = MImage::kFloat;
 			break;
 		case Byte:
-			pixelType = MImage::kByte;		
+			pixelType = MImage::kByte;
 			break;
 		default :
-		
+
 			assert( false );
 	}
-		
+
 	/// Get the channels RGBA at the front, in that order, if they exist
 	vector<string> desiredChannelOrder;
 	desiredChannelOrder.push_back( "R" );
@@ -255,7 +255,7 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 	{
 		channelNames.push_back( it->first );
 	}
-	
+
 	vector<string> filteredNames;
 
 	int rgbChannelsFound = 0;
@@ -278,29 +278,29 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 		}
 	}
 	channelNames = filteredNames;
-	
+
 	if ( rgbChannelsFound != 3 )
 	{
 		return MS::kFailure;
 	}
-	
-	unsigned numChannels = 4; // We always add an alpha if one is not present. 
 
-	/// \todo We could optimise here by not recreating the image if the existing one matches our exact requirements			
+	unsigned numChannels = 4; // We always add an alpha if one is not present.
+
+	/// \todo We could optimise here by not recreating the image if the existing one matches our exact requirements
 	s = image.create( width, height, numChannels, pixelType );
 	if ( !s )
-	{			
+	{
 		return s;
 	}
-	
+
 	image.setRGBA( true );
-	
+
 	unsigned channelOffset = 0;
 	for ( vector<string>::const_iterator it = channelNames.begin(); it != channelNames.end(); ++it, ++channelOffset )
-	{					
+	{
 		DataPtr dataContainer = toConvert->variables.find( *it )->second.data;
 		assert( dataContainer );
-		
+
 		switch( pixelType )
 		{
 			case MImage::kFloat :
@@ -311,10 +311,10 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 					TypeTraits::IsNumericVectorTypedData,
 					ChannelConverter<float>::ErrorHandler
 				>( dataContainer, converter );
-	
-				writeChannel<float>( image, channelData, channelOffset, numChannels );	
+
+				writeChannel<float>( image, channelData, channelOffset, numChannels );
 			}
-				
+
 				break;
 			case MImage::kByte:
 			{
@@ -324,17 +324,17 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 					TypeTraits::IsNumericVectorTypedData,
 					ChannelConverter<unsigned char>::ErrorHandler
 				>( dataContainer, converter );
-	
-				writeChannel<unsigned char>( image, channelData, channelOffset, numChannels );	
+
+				writeChannel<unsigned char>( image, channelData, channelOffset, numChannels );
 			}
-				
+
 				break;
 			default :
 
 				assert( false );
-		}	
+		}
 	}
-	
+
 	if ( !haveAlpha )
 	{
 		switch( pixelType )
@@ -352,24 +352,24 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 			default :
 
 				assert( false );
-		}	
+		}
 	}
-	
+
 	PrimitiveVariableMap::const_iterator it = toConvert->variables.find( "Z" );
 	if ( it != toConvert->variables.end() )
 	{
 			DataPtr dataContainer = it->second.data;
 			assert( dataContainer );
-	
+
 			ChannelConverter<float> converter( "Z" );
 			FloatVectorDataPtr channelData = despatchTypedData<
 				ChannelConverter<float>,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter<float>::ErrorHandler
 			>( dataContainer, converter );
-			
+
 			writeDepth( image, channelData );
 	}
-	
+
 	return MS::kSuccess;
 }

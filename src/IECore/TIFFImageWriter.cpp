@@ -142,9 +142,9 @@ template<typename ChannelData>
 struct TIFFImageWriter::ChannelConverter
 {
 	typedef typename ChannelData::Ptr ReturnType;
-	
+
 	std::string m_channelName;
-	
+
 	ChannelConverter( const std::string &channelName ) : m_channelName( channelName )
 	{
 	}
@@ -153,21 +153,21 @@ struct TIFFImageWriter::ChannelConverter
 	ReturnType operator()( typename T::Ptr data )
 	{
 		assert( data );
-			
+
 		return DataConvert < T, ChannelData, ScaledDataConversion< typename T::ValueType::value_type, typename ChannelData::ValueType::value_type> >()
 		(
 			boost::static_pointer_cast<const T>( data )
 		);
 	};
-	
+
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );
-		
-			throw InvalidArgumentException( ( boost::format( "TIFFImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+
+			throw InvalidArgumentException( ( boost::format( "TIFFImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
 		}
 	};
 };
@@ -186,34 +186,34 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 	// Build a vector in which we place all the image channels
 
 	vector<T> imageBuffer( samplesPerPixel * area, 0 );
-	
+
 	// Encode each individual channel into the buffer
 	int channelOffset = 0;
 	for ( vector<string>::const_iterator i = names.begin(); i != names.end(); ++i, ++channelOffset )
-	{		
+	{
 		DataPtr dataContainer = image->variables.find(i->c_str())->second.data;
 		assert( dataContainer );
-		
-		typedef TypedData< vector<T> > ChannelData;	
+
+		typedef TypedData< vector<T> > ChannelData;
 		ChannelConverter<ChannelData> converter( *i );
 		typename ChannelData::Ptr channelData = despatchTypedData<
 			ChannelConverter<ChannelData>,
 			TypeTraits::IsNumericVectorTypedData,
 			typename ChannelConverter<ChannelData>::ErrorHandler
 		>( dataContainer, converter );
-		
+
 		typedef boost::multi_array_ref< const T, 2 > SourceArray2D;
 		typedef boost::multi_array_ref< T, 3 > TargetArray3D;
-		
+
 		const SourceArray2D sourceData( &channelData->readable()[0], extents[ image->getDataWindow().size().y + 1 ][ image->getDataWindow().size().x + 1 ] );
 		TargetArray3D targetData( &imageBuffer[0], extents[ height ][ width ][ samplesPerPixel ] );
-		
+
 		for ( int y = dataWindow.min.y; y <= dataWindow.max.y ; y++ )
 		{
 			for ( int x = dataWindow.min.x; x <= dataWindow.max.x ; x++ )
-			{				
+			{
 				targetData[ y - dataWindow.min.y ][ x - dataWindow.min.x ][ channelOffset ]
-					= sourceData[ y - image->getDataWindow().min.y ][ x - image->getDataWindow().min.x ];			
+					= sourceData[ y - image->getDataWindow().min.y ][ x - image->getDataWindow().min.x ];
 			}
 		}
 	}
@@ -239,7 +239,7 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 }
 
 void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &fullDataWindow ) const
-{	
+{
 	ScopedTIFFErrorHandler errorHandler;
 	if ( setjmp( errorHandler.m_jmpBuffer ) )
 	{
@@ -256,7 +256,7 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 	assert( tiffImage );
 
 	try
-	{	
+	{
 		/// Get the channels RGBA at the front, in that order, if they exist
 		vector<string> desiredChannelOrder;
 		desiredChannelOrder.push_back( "R" );
@@ -332,7 +332,7 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 
 			TIFFSetField( tiffImage, TIFFTAG_EXTRASAMPLES, extraSamples.size(), (uint16*)&extraSamples[0] );
 		}
-		
+
 		Box2i dataWindow = boxIntersection( fullDataWindow, boxIntersection( image->getDisplayWindow(), image->getDataWindow() ) );
 
 		// compute the writebox
@@ -354,7 +354,7 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 			compression = COMPRESSION_DEFLATE;
 		}
 
-		/// \todo Add a parameter to let us write signed images		
+		/// \todo Add a parameter to let us write signed images
 		switch ( bitDepth )
 		{
 		case 8:
@@ -379,7 +379,7 @@ void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 		// set the basic values
 		TIFFSetField( tiffImage, TIFFTAG_IMAGEWIDTH, (uint32)width );
 		TIFFSetField( tiffImage, TIFFTAG_IMAGELENGTH, (uint32)height );
-		
+
 		if ( dataWindow != image->getDisplayWindow() )
 		{
 			V2i position = dataWindow.min - image->getDisplayWindow().min;

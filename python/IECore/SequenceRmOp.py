@@ -37,7 +37,7 @@ from IECore import *
 class SequenceRmOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "SequenceRmOp", "Removes file sequences.",
 			FileSequenceParameter(
 				name = "result",
@@ -47,7 +47,7 @@ class SequenceRmOp( Op ) :
 				allowEmptyString = True,
 			)
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				FileSequenceParameter(
@@ -61,7 +61,7 @@ class SequenceRmOp( Op ) :
 		)
 
 	def doOperation( self, operands ) :
-	
+
 		rm(	self.parameters()["seq"].getFileSequenceValue() )
 
 		return StringData( operands.seq.value )

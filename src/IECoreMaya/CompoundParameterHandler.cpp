@@ -50,13 +50,13 @@ MStatus CompoundParameterHandler::update( IECore::ConstParameterPtr parameter, M
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnMessageAttribute fnMAttr( attribute );
 	if( !fnMAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
 	}
-		
+
 	return MS::kSuccess;
 }
 
@@ -67,12 +67,12 @@ MObject CompoundParameterHandler::create( IECore::ConstParameterPtr parameter, c
 	{
 		return MObject::kNullObj;
 	}
-	
+
 	MFnMessageAttribute fnMAttr;
 	MObject result = fnMAttr.create( attributeName, attributeName );
 	return result;
 }
-		
+
 MStatus CompoundParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	return MS::kSuccess;
@@ -80,5 +80,5 @@ MStatus CompoundParameterHandler::setValue( IECore::ConstParameterPtr parameter,
 
 MStatus CompoundParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
-	return MS::kSuccess;	
+	return MS::kSuccess;
 }

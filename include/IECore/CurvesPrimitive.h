@@ -45,45 +45,45 @@ namespace IECore
 class CurvesPrimitive : public Primitive
 {
 	public :
-	
+
 		CurvesPrimitive();
 		/// Copies of vertsPerCurve and p are taken.
 		CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const CubicBasisf &basis=CubicBasisf::linear(), bool periodic = false, ConstV3fVectorDataPtr p = 0 );
 		virtual ~CurvesPrimitive();
-				
+
 		IE_CORE_DECLAREOBJECT( CurvesPrimitive, Primitive );
-		
+
 		ConstIntVectorDataPtr verticesPerCurve() const;
 		const CubicBasisf &basis() const;
 		bool periodic() const;
-		
+
 		virtual void render( RendererPtr renderer ) const;
 		/// Follows the RenderMan specification for variable sizes.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 		/// Returns the variable size for a single curve.
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation, unsigned curveIndex ) const;
-		
+
 		/// Returns the number of segments in a given curve.
 		unsigned numSegments( unsigned curveIndex ) const;
 		/// Returns the number of segments of a curve with the given topology.
 		static unsigned numSegments( const CubicBasisf &basis, bool periodic, unsigned numVerts );
-		
+
 	protected :
-		
+
 		/// Throws an exception if numVerts is an inappropriate number for the current basis.
 		static unsigned int numSegments( bool linear, int step, bool periodic, int numVerts );
-		
+
 		CubicBasisf m_basis;
 		bool m_linear;
 		bool m_periodic;
 		IntVectorDataPtr m_vertsPerCurve;
 		unsigned m_numVerts;
 		unsigned m_numFaceVarying;
-		
+
 	private :
-	
+
 		static const unsigned int m_ioVersion;
-		
+
 };
 
 IE_CORE_DECLAREPTR( CurvesPrimitive );

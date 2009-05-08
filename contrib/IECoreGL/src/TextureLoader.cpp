@@ -52,7 +52,7 @@ TexturePtr TextureLoader::load( const std::string &name )
 	{
 		return it->second;
 	}
-	
+
 	boost::filesystem::path path = m_searchPaths.find( name );
 	if( path.empty() )
 	{
@@ -60,7 +60,7 @@ TexturePtr TextureLoader::load( const std::string &name )
 		m_loadedTextures[name] = 0; // to save us trying over and over again
 		return 0;
 	}
-	
+
 	IECore::ReaderPtr r = IECore::Reader::create( path.string() );
 	if( !r )
 	{
@@ -68,7 +68,7 @@ TexturePtr TextureLoader::load( const std::string &name )
 		m_loadedTextures[name] = 0; // to save us trying over and over again
 		return 0;
 	}
-	
+
 	IECore::ObjectPtr o = r->read();
 	IECore::ImagePrimitivePtr i = IECore::runTimeCast<IECore::ImagePrimitive>( o );
 	if( !i )
@@ -77,7 +77,7 @@ TexturePtr TextureLoader::load( const std::string &name )
 		m_loadedTextures[name] = 0; // to save us trying over and over again
 		return 0;
 	}
-	
+
 	TexturePtr t = 0;
 	try
 	{

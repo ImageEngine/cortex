@@ -46,24 +46,24 @@ class ConverterHolder : public ParameterisedHolderNode
 {
 
 	public :
-	
+
 		ConverterHolder();
 		virtual ~ConverterHolder();
 
-		static void *creator();				
-		static MStatus initialize();		
+		static void *creator();
+		static MStatus initialize();
 		static MTypeId id;
 
 		virtual MStatus connectionMade( const MPlug &plug, const MPlug &otherPlug, bool asSrc );
 		virtual MStatus connectionBroken( const MPlug &plug, const MPlug &otherPlug, bool asSrc );
-			
+
 		static MObject aIn;
 		static MObject aFileName;
-			
+
 	private :
-	
-		
-		
+
+
+
 };
 
 } // namespace IECoreMaya

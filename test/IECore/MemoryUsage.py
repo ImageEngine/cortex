@@ -38,41 +38,41 @@ from IECore import *
 class TestMemoryUsage( unittest.TestCase ) :
 
 	def testMultipleReferences( self ) :
-	
+
 		"""When an object has multiple references to the same child, that child
 		should not be counted multiple times in the memory usage total."""
-		
+
 		c = CompoundObject()
 		d = IntVectorData( 10000 )
-		
+
 		c["a"] = d
-		
+
 		m = c.memoryUsage()
 		dm = d.memoryUsage()
-		
-		c["b"] = d		
+
+		c["b"] = d
 		self.assert_( c.memoryUsage() < m + dm )
-		
+
 	def testCopiedDataReferences( self ) :
-	
+
 		"""Copied data shouldn't use additional memory unless the copies have
 		been modified by writing."""
-		
+
 		c = CompoundObject()
 		d = IntVectorData( 10000 )
-		
+
 		c["a"] = d
 		c["b"] = d.copy()
-		
+
 		c2 = CompoundObject()
 		c2["a"] = d
 		c2["b"] = d
 		self.assert_( abs( c.memoryUsage() - c2.memoryUsage() ) < 10 )
-		
+
 		# writing to the copy should now increase the memory usage
 		m = c.memoryUsage()
 		c["b"][0] = 100
 		self.assert_( c.memoryUsage()!=m )
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

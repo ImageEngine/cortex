@@ -44,95 +44,95 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 static CompoundFrameListPtr constructFromList( list l )
 {
 	std::vector< FrameListPtr > frameLists;
-	
+
 	for ( long i = 0; i < len( l ); i++ )
 	{
 		extract< FrameListPtr > ex( l[i] );
-		
+
 		if ( !ex.check() )
 		{
 			throw Exception( "Not a FrameList" );
 		}
-	
+
 		frameLists.push_back( ex() );
 	}
-	
+
 	return new CompoundFrameList( frameLists );
 }
 
 static list getFrameLists( CompoundFrameList &x )
 {
 	const std::vector<FrameListPtr> &frameLists = x.getFrameLists();
-	
+
 	list result;
-	
+
 	for ( std::vector<FrameListPtr>::const_iterator it = frameLists.begin(); it != frameLists.end(); ++it )
 	{
 		result.append( *it );
 	}
-	
-	return result;	
+
+	return result;
 }
 
 static void setFrameLists( CompoundFrameList &x, list l )
 {
 	std::vector< FrameListPtr > frameLists;
-	
+
 	for ( long i = 0; i < len( l ); i++ )
 	{
 		extract< FrameListPtr > ex( l[i] );
-		
+
 		if ( !ex.check() )
 		{
 			throw Exception( "Not a FrameList" );
 		}
-	
+
 		frameLists.push_back( ex() );
 	}
-	
+
 	x.setFrameLists( frameLists );
 }
 
 template<>
 std::string repr( CompoundFrameList &x )
-{	
+{
 	std::stringstream s;
-	
+
 	s << "IECore.CompoundFrameList( [ ";
-	
+
 	const std::vector< FrameListPtr > &frameLists = x.getFrameLists();
-	
+
 	for ( std::vector< FrameListPtr >::const_iterator it = frameLists.begin(); it != frameLists.end(); ++it )
 	{
 		object item( *it );
-		
+
 		if ( it != frameLists.begin() )
 		{
 			s << ", ";
 		}
-		
+
 		s << call_method< std::string >( item.ptr(), "__repr__" );
 	}
 
 	s << " ] ) ";
-	
+
 	return s.str();
 }
 
 void bindCompoundFrameList()
-{	
-	RunTimeTypedClass<CompoundFrameList>()		
+{
+	RunTimeTypedClass<CompoundFrameList>()
 		.def( init<>() )
 		.def( "__init__", make_constructor( &constructFromList ) )
 		.add_property( "frameLists", getFrameLists, setFrameLists )
 		.def( "__repr__", repr< CompoundFrameList > )
-	;		
+	;
 }
 
 }

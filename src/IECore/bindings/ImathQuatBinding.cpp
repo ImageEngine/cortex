@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -50,39 +50,39 @@
 using namespace boost::python;
 using namespace Imath;
 
-namespace IECore 
+namespace IECore
 {
-	
+
 template<typename T>
 void bindQuat(const char *bindName);
 
 void bindImathQuat()
-{	
+{
 	bindQuat<float>("Quatf");
-	bindQuat<double>("Quatd");	
+	bindQuat<double>("Quatd");
 }
 
 template<typename T>
 struct QuatIndexer
-{	
+{
 	static T get(const Quat<T> &x, int i)
-	{	
+	{
 		// Do we want to handle backward indexing?
-		if ( i >= 0 && i < 4 ) 
+		if ( i >= 0 && i < 4 )
 		{
 			return x[i];
 		}
 		else
 		{
 			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
-			throw std::out_of_range("");	
+			throw std::out_of_range("");
 		}
-		
+
 	}
-	
+
 	static void set(Quat<T>  &x, int i, const T &v)
 	{
-		if ( i >= 0 && i < 4 ) 
+		if ( i >= 0 && i < 4 )
 		{
 			x[i] = v;
 		}
@@ -92,11 +92,11 @@ struct QuatIndexer
 			throw std::out_of_range("");
 		}
 	}
-	
+
 
 };
 
-/// \todo The only reason this is a macro is so that it can turn the class type to a string. We should probably do this 
+/// \todo The only reason this is a macro is so that it can turn the class type to a string. We should probably do this
 /// with a small traits class instead, and get rid of the macro.
 #define DEFINEQUATSTRSPECIALISATION( QUAT )				\
 														\
@@ -138,59 +138,59 @@ DEFINEQUATSTRSPECIALISATION( Quatd );
 template<typename T>
 void bindQuat(const char *bindName)
 {
-	class_< Quat<T> >(bindName)	
+	class_< Quat<T> >(bindName)
 		.def_readwrite("r", &Quat<T>::r)
 		.def_readwrite("v", &Quat<T>::v)
-	
+
 		// [] operator support
 		.def("__getitem__", &QuatIndexer<T>::get)
 		.def("__setitem__", &QuatIndexer<T>::set)
-	
+
 		.def(init<>())
 		.def(init<Quat<T> >())
 		.def(init<T, T, T, T>())
 		.def(init<T, Vec3<T> >())
-	
+
 		.def("identity", &Quat<T>::identity).staticmethod("identity")
-		
+
 		.def(self ^ self)
-	
+
 		.def(self *= self)
 		.def(self *= T())
 		.def(self /= self)
 		.def(self /= T())
 		.def(self += self)
 		.def(self -= self)
-	
+
 		.def(self == self)
 		.def(self != self)
-		
+
 		.def( self * self )
-	
+
 		.def( ~self )
-	
+
 		.def("invert", &Quat<T>::invert, return_self<>())
-		.def("inverse", &Quat<T>::inverse)		
+		.def("inverse", &Quat<T>::inverse)
 		.def("normalize", &Quat<T>::normalize, return_self<>())
 		.def("normalized", &Quat<T>::normalized)
 		.def("length", &Quat<T>::length)
-		
+
 		.def("setAxisAngle", &Quat<T>::setAxisAngle, return_self<>())
 		.def("setRotation", &Quat<T>::setRotation, return_self<>())
-		
+
 		.def("angle", &Quat<T>::angle)
 		.def("axis", &Quat<T>::axis)
-		
+
 		.def("toMatrix33", &Quat<T>::toMatrix33)
 		.def("toMatrix44", &Quat<T>::toMatrix44)
-		
+
 		.def("log", &Quat<T>::log)
 		.def("exp", &Quat<T>::exp)
-		
+
 		.def("__str__", IECore::str<Quat<T> >)
 		.def("__repr__", IECore::repr<Quat<T> >)
 	;
-			
+
 	def("slerp", IECore::slerp<T>);
 	def("slerpShortestArc", IECore::slerpShortestArc<T>);
 	def("squad", squad<T>);

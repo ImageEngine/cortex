@@ -74,55 +74,55 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 	friend class ProceduralHolderUI;
 
 	public :
-	
+
 		ProceduralHolder();
 		virtual ~ProceduralHolder();
 
 		virtual void postConstructor();
 
-		static void *creator();				
-		static MStatus initialize();		
+		static void *creator();
+		static MStatus initialize();
 		static MTypeId id;
-		
+
 		virtual bool isBounded() const;
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
-		
+
 		virtual void componentToPlugs( MObject &component, MSelectionList &selectionList ) const;
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
-		
+
 		/// Calls setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" ).
 		MStatus setProcedural( const std::string &className, int classVersion );
-		/// Returns runTimeCast<ParameterisedProcedural>( getProcedural( className, classVersion ) ). 
+		/// Returns runTimeCast<ParameterisedProcedural>( getProcedural( className, classVersion ) ).
 		IECore::ParameterisedProceduralPtr getProcedural( std::string *className = 0, int *classVersion = 0 );
-	
+
 		/// Returns an up to date scene from the procedural
 		IECoreGL::ConstScenePtr scene();
-		
+
 		static MObject aGLPreview;
 		static MObject aTransparent;
 		static MObject aDrawBound;
 		static MObject aProceduralComponents;
-	
+
 	private :
-	
+
 		mutable bool m_boundDirty;
 		mutable MBoundingBox m_bound;
-		
+
 		bool m_sceneDirty;
 		IECoreGL::ScenePtr m_scene;
 		/// \todo This can probably be merged with scene()
 		void updateScene();
-										
+
 		typedef std::map<IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr > > ComponentsMap;
-		typedef std::map< int, std::set< std::pair< std::string, IECoreGL::GroupPtr > > > ComponentToGroupMap;		
-				
-		void buildComponents();		
+		typedef std::map< int, std::set< std::pair< std::string, IECoreGL::GroupPtr > > > ComponentToGroupMap;
+
+		void buildComponents();
 		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group );
-		
-		ComponentsMap m_componentsMap;		
+
+		ComponentsMap m_componentsMap;
 		ComponentToGroupMap m_componentToGroupMap;
-				
+
 };
 
 } // namespace IECoreMaya

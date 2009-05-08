@@ -51,37 +51,37 @@ template< typename, typename > class CineonToLinearDataConversion;
 /// A class to perform data conversion from linear to Cineon log values
 template<typename F, typename T>
 class LinearToCineonDataConversion : public DataConversion< F, T >
-{	
+{
 	public:
-	
+
 		/// "To" data type should be at least 10-bits!
 		BOOST_STATIC_ASSERT( sizeof(T) >= 2 );
-		
+
 		BOOST_STATIC_ASSERT( boost::is_floating_point< F >::value );
-		
+
 		typedef CineonToLinearDataConversion< T, F >  InverseType;
-	
-		/// Make a default converter with sensible gamma, and black/white points	
+
+		/// Make a default converter with sensible gamma, and black/white points
 		LinearToCineonDataConversion();
-		
-		/// Make a converter with specified gamma, and black/white points			
+
+		/// Make a converter with specified gamma, and black/white points
 		LinearToCineonDataConversion( float filmGamma, int refWhiteVal, int refBlackVal );
 
 		/// Perform the conversion
 		T operator()( F f ) const;
 
-		/// Returns an instance of a class able to perform the inverse conversion		
+		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;
-	
+
 	private:
-	
+
 		const std::vector<float> &lookupTable() const;
-				
+
 		float m_filmGamma;
 		int m_refWhiteVal;
 		int m_refBlackVal;
-		
-		
+
+
 		mutable std::vector<float> m_LUT;
 		mutable bool m_LUTValid;
 };

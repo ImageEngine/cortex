@@ -40,7 +40,7 @@
 namespace IECore
 {
 
-template<typename I>	
+template<typename I>
 CompoundParameter::CompoundParameter( const std::string &name, const std::string &description, I membersBegin, I membersEnd, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, new CompoundObject, PresetsContainer(), false, userData )
 {
@@ -55,7 +55,7 @@ void CompoundParameter::addParameters( I begin, I end )
 		addParameter( *it );
 	}
 }
-	
+
 template<typename T>
 typename T::Ptr CompoundParameter::parameter( const std::string &name )
 {
@@ -77,7 +77,7 @@ typename T::ConstPtr CompoundParameter::parameter( const std::string &name ) con
 	}
 	return 0;
 }
-		
+
 }; // namespace IECore
 
 #endif // IE_CORE_COMPOUNDPARAMETER_INL

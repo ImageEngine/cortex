@@ -43,7 +43,7 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 template<>
@@ -54,7 +54,7 @@ std::string repr( EmptyFrameList &x )
 }
 
 void bindEmptyFrameList()
-{	
+{
 	RunTimeTypedClass<EmptyFrameList>()
 		.def( init<>() )
 		.def( "__repr__", repr< EmptyFrameList > )

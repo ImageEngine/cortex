@@ -41,11 +41,11 @@ import IECoreRI
 class CurvesTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testCurves.tif"
-	
+
 	def performTest( self, curvesPrimitive, testImage ) :
-	
+
 		r = IECoreRI.Renderer( "" )
-		
+
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -57,22 +57,22 @@ class CurvesTest( unittest.TestCase ) :
 		r.display( self.outputFileName, "tiff", "rgba", {} )
 		r.setOption( "ri:pixelSamples", IECore.V2iData( IECore.V2i( 10 ) ) )
 		r.worldBegin()
-			
+
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		
+
 		curvesPrimitive.render( r )
-	
+
 		r.worldEnd()
 
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
 		expectedImage = IECore.Reader.create( testImage ).read()
-		
+
 		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
-		
+
 	def testLinearPeriodic( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
 			True,
@@ -87,13 +87,13 @@ class CurvesTest( unittest.TestCase ) :
 
 		)
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linearPeriodic.tif" )
 
 	def testLinear( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
 			False,
@@ -108,13 +108,13 @@ class CurvesTest( unittest.TestCase ) :
 
 		)
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linear.tif" )
 
 	def testBSplinePeriodic( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bSpline(),
 			True,
@@ -129,13 +129,13 @@ class CurvesTest( unittest.TestCase ) :
 
 		)
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSplinePeriodic.tif" )
 
 	def testBSpline( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bSpline(),
 			False,
@@ -150,13 +150,13 @@ class CurvesTest( unittest.TestCase ) :
 
 		)
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSpline.tif" )
 
 	def testBezier( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bezier(),
 			False,
@@ -171,13 +171,13 @@ class CurvesTest( unittest.TestCase ) :
 
 		)
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bezier.tif" )
-	
+
 	def testMotionBlur( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bSpline(),
 			False,
@@ -192,19 +192,19 @@ class CurvesTest( unittest.TestCase ) :
 
 		)
 		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		c2 = IECore.TransformOp()( input=c, matrix=IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( -0.1, 0, 0 ) ) ) )
-		
+
 		m = IECore.MotionPrimitive()
 		m[0] = c
 		m[1] = c2
 
 		self.performTest( m, os.path.dirname( __file__ ) + "/data/curveImages/motionBlur.tif" )
-																
+
 	def tearDown( self ) :
-	
+
 		if os.path.exists( self.outputFileName ) :
 			os.remove( self.outputFileName )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

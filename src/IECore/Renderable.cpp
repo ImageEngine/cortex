@@ -83,5 +83,5 @@ void Renderable::render( RendererPtr renderer ) const
 #ifndef NDEBUG
 	bool unimplemented = false;
 	assert(unimplemented);
-#endif	
+#endif
 }

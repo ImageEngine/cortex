@@ -68,20 +68,20 @@ MStatus ConverterHolder::initialize()
 	{
 		return s;
 	}
-	
+
 	MFnMessageAttribute fnMAttr;
 	aIn = fnMAttr.create( "input", "in", &s );
 	assert( s );
 	s = addAttribute( aIn );
 	assert( s );
-	
+
 	MFnTypedAttribute fnTAttr;
 	MFnStringData fnSData;
 	aFileName = fnTAttr.create( "fileName", "fn", MFnData::kString, fnSData.create( "" ) , &s );
 	assert( s );
 	s = addAttribute( aFileName );
 	assert( s );
-	
+
 	return MS::kSuccess;
 }
 

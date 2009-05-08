@@ -46,14 +46,14 @@ namespace IECore
 class StateRenderable : public Renderable
 {
 	public:
-	
+
 		StateRenderable();
 		virtual ~StateRenderable();
-				
+
 		IE_CORE_DECLAREABSTRACTOBJECT( StateRenderable, Renderable );
-			
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
 };
 

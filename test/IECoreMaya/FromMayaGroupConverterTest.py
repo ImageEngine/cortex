@@ -41,28 +41,28 @@ import maya.cmds
 class FromMayaGroupConverterTest( unittest.TestCase ) :
 
 	def testFactory( self ) :
-		
+
 		sphereTransform = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )[0]
-			
+
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( str( sphereTransform ), IECore.TypeId.Group )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaGroupConverter ) ) )
-	
+
 	def testConversion( self ) :
-	
+
 		cubeTransform = maya.cmds.polyCube()[0]
 		maya.cmds.move( 1, 2, 3, cubeTransform )
-		
+
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( str( cubeTransform ), IECore.TypeId.Group )
-		
+
 		converted = converter.convert()
-		
+
 		self.assert_( converted.isInstanceOf( IECore.Group.staticTypeId() ) )
 		self.assertEqual( converted.getTransform().transform(), IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
-		
+
 		self.assertEqual( len( converted.children() ), 1 )
 		convertedCube = converted.children()[0]
 		self.assert_( convertedCube.isInstanceOf( IECore.MeshPrimitive.staticTypeId() ) )
-		
-							
+
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

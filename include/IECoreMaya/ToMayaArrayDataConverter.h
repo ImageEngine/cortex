@@ -46,15 +46,15 @@ template<typename From, typename To>
 class ToMayaArrayDataConverter : public ToMayaObjectConverter
 {
 	public:
-	
+
 		ToMayaArrayDataConverter( IECore::ConstObjectPtr object );
-		
+
 	protected:
-	
+
 		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const;
-		
+
 		typedef ToMayaObjectConverterDescription<ToMayaArrayDataConverter> Description;
-		static Description g_description;		
+		static Description g_description;
 };
 
 }

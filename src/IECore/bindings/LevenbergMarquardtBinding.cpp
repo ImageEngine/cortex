@@ -48,17 +48,17 @@ template<typename T>
 class LevenbergMarquardtErrorFn : public RefCounted
 {
 	public :
-		
+
 		IE_CORE_DECLAREMEMBERPTR( LevenbergMarquardtErrorFn<T> );
-		
+
 		LevenbergMarquardtErrorFn()
 		{
 		}
-	
+
 		virtual ~LevenbergMarquardtErrorFn()
 		{
 		}
-		
+
 		void operator()(
 		        typename TypedData< std::vector<T> >::Ptr parameters,
 		        typename TypedData< std::vector<T> >::Ptr errors
@@ -67,32 +67,32 @@ class LevenbergMarquardtErrorFn : public RefCounted
 			computeErrors( parameters, errors );
 			assert( errors->readable().size() == numErrors() );
 		}
-		
+
 		virtual unsigned numErrors() = 0;
-	
+
 		virtual void computeErrors(
 		        typename TypedData< std::vector<T> >::Ptr parameters,
 		        typename TypedData< std::vector<T> >::Ptr errors
 		) = 0;
-		
+
 };
 
 template<typename T>
 class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, public Wrapper< LevenbergMarquardtErrorFn<T> >
 {
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( LevenbergMarquardtErrorFnWrapper<T> );
 
 		LevenbergMarquardtErrorFnWrapper(PyObject *self ) :  LevenbergMarquardtErrorFn<T>(), Wrapper< LevenbergMarquardtErrorFn<T> >( self, this )
 		{
 		}
-		
+
 		virtual ~LevenbergMarquardtErrorFnWrapper()
 		{
-		}		
-		
-		virtual unsigned numErrors() 
+		}
+
+		virtual unsigned numErrors()
 		{
 			override o = this->get_override( "numErrors" );
                 	if( o )
@@ -110,13 +110,13 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
                 	else
                 	{
                         	throw Exception( "LevenbergMarquardt: Error function does not define 'numErrors' instance method" );
-                	}	
+                	}
 		}
 
 		virtual void computeErrors(
 		        typename TypedData< std::vector<T> >::Ptr parameters,
 		        typename TypedData< std::vector<T> >::Ptr errors
-		) 
+		)
 		{
 			override o = this->get_override( "computeErrors" );
                 	if( o )
@@ -134,15 +134,15 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
                 	else
                 	{
                         	throw Exception( "LevenbergMarquardt: Error function does not define 'computeErrors' instance method" );
-                	}	
+                	}
 		}
 };
 
 template< typename T>
 class LevenbergMarquardtWrapper : public LevenbergMarquardt< T, LevenbergMarquardtErrorFnWrapper<T> >
 {
-	public:			
-		
+	public:
+
 		tuple getParameters()
 		{
 			T ftol, xtol, gtol, epsilon, stepBound;
@@ -154,24 +154,24 @@ class LevenbergMarquardtWrapper : public LevenbergMarquardt< T, LevenbergMarquar
 template<typename T>
 void bindLevenbergMarquardt( const char *name )
 {
-	object lm = class_< LevenbergMarquardtWrapper<T>, boost::noncopyable >( name, no_init )		
+	object lm = class_< LevenbergMarquardtWrapper<T>, boost::noncopyable >( name, no_init )
 		.def( init<>() )
 		.def( "setParameters", &LevenbergMarquardtWrapper<T>::setParameters )
 		.def( "getParameters", &LevenbergMarquardtWrapper<T>::getParameters )
 		.def( "solve", &LevenbergMarquardtWrapper<T>::solve )
 	;
-	
+
 	{
 		scope lmS( lm );
 
 		enum_< typename LevenbergMarquardtWrapper<T>::Status >( "Status" )
 			.value( "Success", LevenbergMarquardtWrapper<T>::Success )
 		;
-				
+
 		RefCountedClass<LevenbergMarquardtErrorFn<T>, RefCounted, typename LevenbergMarquardtErrorFnWrapper<T>::Ptr>( "ErrorFn" )
 			.def( init<>() )
 			.def( "numErrors", pure_virtual( &LevenbergMarquardtErrorFnWrapper<T>::numErrors ) )
-			.def( "computeErrors", pure_virtual( &LevenbergMarquardtErrorFnWrapper<T>::computeErrors ) )		
+			.def( "computeErrors", pure_virtual( &LevenbergMarquardtErrorFnWrapper<T>::computeErrors ) )
 		;
 	}
 }

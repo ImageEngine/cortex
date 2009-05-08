@@ -53,9 +53,9 @@ class FloatSplineParameterHandler : public ParameterHandler
 		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const;
 		virtual MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
-		
+
 	private :
-	
+
 		static Description< FloatSplineParameterHandler<S> > g_registrar;
 };
 

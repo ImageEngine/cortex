@@ -38,15 +38,15 @@ from IECore import *
 class TestStruct( unittest.TestCase ) :
 
 	def test( self ) :
-		
+
 		s = Struct()
 		s.a = 10
 		self.assertEqual( s.a, 10 )
-		
+
 		s = Struct( b = 20 )
 		self.assertEqual( s.b, 20 )
-		
+
 
 if __name__ == "__main__":
 	unittest.main()
-	
+

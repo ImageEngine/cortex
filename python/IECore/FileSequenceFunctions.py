@@ -51,7 +51,7 @@ IECore.FileSequence.fileNameValidator = staticmethod( lambda : re.compile( "^([^
 ## Moves the set of files specified by sequence1 to the set of files
 # specified by sequence2, where sequence1 and sequence2 are
 # FileSequence objects of equal length. This function is safe even if the
-# files specified by each sequence overlap.				
+# files specified by each sequence overlap.
 def mv( sequence1, sequence2 ) :
 
 	if __sequencesClash( sequence1, sequence2 ) :
@@ -68,30 +68,30 @@ def mv( sequence1, sequence2 ) :
 ## Copies the set of files specified by sequence1 to the set of files
 # specified by sequence2, where sequence1 and sequence2 are
 # FileSequence objects of equal length. This function is safe even if the
-# files specified by each sequence overlap.	
+# files specified by each sequence overlap.
 def cp( sequence1, sequence2 ) :
-	
+
 	if __sequencesClash( sequence1, sequence2 ) :
 		raise RuntimeError( "Attempt to copy sequences with common filenames." )
-		
+
 	for src, dst in sequence1.mapTo( sequence2, True ) :
 		shutil.copy( src, dst )
 
 ## Removes all the files specified by the sequence.
 def rm( sequence ) :
-	
+
 	for f in sequence.fileNames() :
-	
+
 		os.remove( f )
 
 ## Concetenates all the files specified by the sequence to stdout
 # \todo Allow destination file to be specified
-def cat( sequence ) :	
+def cat( sequence ) :
 
 	for f in sequence.fileNames() :
-	
-		ret = os.system( 'cat "%s"' % ( f ) )	
-		
+
+		ret = os.system( 'cat "%s"' % ( f ) )
+
 # private utility functions
 
 def __sequencesClash( sequence1, sequence2 ) :
@@ -99,22 +99,22 @@ def __sequencesClash( sequence1, sequence2 ) :
 	s = set()
 	for f in sequence1.fileNames() :
 		s.add( f )
-		
+
 	for f in sequence2.fileNames() :
 		if f in s :
 			return True
 
 	return False
-	
+
 def __tmpPrefix() :
 
 	"""Returns a hopefully unique string suitable for use as the temporary
 	sequence prefix when moving a sequence."""
-	
+
 	import hashlib
 	import platform
 	import time
-	
+
 	h = hashlib.md5()
 	h.update( platform.node() ) # computer name
 	h.update( str( os.getpid() ) )

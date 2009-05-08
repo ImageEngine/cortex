@@ -43,31 +43,31 @@ class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
 
 	def testSimple( self ) :
 		""" Test MeshPrimitiveShrinkWrapOp """
-		
+
 		random.seed( 1011 )
-	
+
 		# Load poly sphere of radius 1
 		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		radius = 1.0
-				
+
 		# Duplicate and scale to radius 3, jitter slightly
 		targetRadius = 3.0
 		target = m.copy()
-		
+
 		pData = m["P"].data
-		
+
 		target["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData() )
 		for p in pData:
-			target["P"].data.append( p * targetRadius + 0.01 * V3f( random.random(), random.random(), random.random() ) ) 
-			
+			target["P"].data.append( p * targetRadius + 0.01 * V3f( random.random(), random.random(), random.random() ) )
+
 		self.assertEqual( len( target["P"].data ), len( m["P"].data ) )
-	
+
 		# Shrink wrap smaller mesh to larger mesh
 		op = MeshPrimitiveShrinkWrapOp()
 		res = op(
-			target = target,			
+			target = target,
 			input = m,
-			
+
 			method =  MeshPrimitiveShrinkWrapOp.Method.Normal,
 			direction = MeshPrimitiveShrinkWrapOp.Direction.Both
 		)
@@ -75,9 +75,9 @@ class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
 		pData = res["P"].data
 		for p in pData:
 			self.assert_( math.fabs( p.length() - targetRadius ) < 0.1 )
-			
-			
-	
+
+
+
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

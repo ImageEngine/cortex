@@ -42,43 +42,43 @@ import sys
 class ObjectDataTestNode( OpenMayaMPx.MPxNode ):
 
 	typeId = OpenMaya.MTypeId( 0x00070000 )
-	
+
 	objectDataAttr = OpenMaya.MObject()
-	
+
 	def __init__( self ):
 		OpenMayaMPx.MPxNode.__init__( self )
-	
+
 	@staticmethod
 	def creator():
-	
+
 		return OpenMayaMPx.asMPxPtr( ObjectDataTestNode() )
-		
+
 	@staticmethod
-	def initialize():	
-	
+	def initialize():
+
 		fnData = OpenMaya.MFnPluginData()
-		
+
 		defaultValue = fnData.create( IECoreMaya.MayaTypeId.ObjectData )
-	
+
 		tAttr = OpenMaya.MFnTypedAttribute()
-		ObjectDataTestNode.objectDataAttr = tAttr.create( 
-			"objectData", 
-			"od", 
-			IECoreMaya.MayaTypeId.ObjectData, 
-			defaultValue 
+		ObjectDataTestNode.objectDataAttr = tAttr.create(
+			"objectData",
+			"od",
+			IECoreMaya.MayaTypeId.ObjectData,
+			defaultValue
 		)
 		tAttr.setStorable( True )
 		tAttr.setReadable( True )
-		tAttr.setWritable( True )				
-		
+		tAttr.setWritable( True )
+
 		ObjectDataTestNode.addAttribute( ObjectDataTestNode.objectDataAttr )
-		
-		
+
+
 def initializePlugin( obj ) :
 
 	plugin = OpenMayaMPx.MFnPlugin( obj )
-	s = plugin.registerNode( "ieObjectDataTestNode", ObjectDataTestNode.typeId, ObjectDataTestNode.creator, ObjectDataTestNode.initialize )	
-	
+	s = plugin.registerNode( "ieObjectDataTestNode", ObjectDataTestNode.typeId, ObjectDataTestNode.creator, ObjectDataTestNode.initialize )
+
 def uninitializePlugin( obj ) :
 
 	plugin = OpenMayaMPx.MFnPlugin( obj )

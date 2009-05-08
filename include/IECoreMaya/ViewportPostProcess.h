@@ -51,27 +51,27 @@ namespace IECoreMaya
 class ViewportPostProcess : public IECore::RefCounted
 {
 	friend class ViewportPostProcessCallback;
-	
+
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( ViewportPostProcess );
-			
+
 		ViewportPostProcess();
 		virtual ~ViewportPostProcess();
-		
+
 		virtual bool needsDepth() const;
-				
+
 	protected:
-	
+
 		virtual void preRender( const std::string &panelName );
-		
+
 		/// Derived classes should implement this, and modify the image in-place.
 		virtual void postRender( const std::string &panelName, MImage &image ) = 0;
-		
+
 	private :
-	
-		ViewportPostProcess( const ViewportPostProcess &other );		
-		ViewportPostProcess& operator =( const ViewportPostProcess &other );		
+
+		ViewportPostProcess( const ViewportPostProcess &other );
+		ViewportPostProcess& operator =( const ViewportPostProcess &other );
 };
 
 

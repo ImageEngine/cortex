@@ -41,9 +41,9 @@ import os
 class CameraTest( unittest.TestCase ) :
 
 	def testParameters( self ) :
-		
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
-		
+
 		# we can't use concatTransform to position the camera until
 		# we get support for RxTransformPoints working in rib generation
 		# mode from 3delight - instead we're using the nasty transform
@@ -60,13 +60,13 @@ class CameraTest( unittest.TestCase ) :
 			"ri:hider:jitter" : IECore.IntData( 1 ),
 			"shutter" : IECore.V2fData( IECore.V2f( 0, 0.1 ) ),
 		} )
-		
-		r.worldBegin()		
+
+		r.worldBegin()
 		r.worldEnd()
-		
+
 		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
 		l = " ".join( l.split() )
-		
+
 		self.assert_( "Format 1024 200 1 " in l )
 		self.assert_( "ScreenWindow -1 1 -1 1" in l )
 		self.assert_( "CropWindow 0.1 0.9 0.1 0.9" in l )
@@ -74,16 +74,16 @@ class CameraTest( unittest.TestCase ) :
 		self.assert_( "Projection \"perspective\" \"float fov\" [ 45 ]" in l )
 		self.assert_( "Hider \"hidden\" \"int jitter\" [ 1 ] " in l )
 		self.assert_( "Shutter 0 0.1" in l )
-		
+
 	def testPositioning( self ) :
-	
+
 		# render a plane at z = 0 with the default camera
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
 		r.worldBegin()
 		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
 		r.worldEnd()
-		
+
 		# check that nothing appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
 		e = IECore.PrimitiveEvaluator.create( i )
@@ -92,20 +92,20 @@ class CameraTest( unittest.TestCase ) :
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 0 )
 		del r
-		
+
 		# render a plane at z = 0 with the camera moved back a touch to see it
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
-		
+
 		r.transformBegin()
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 		r.camera( "main", {} )
 		r.transformEnd()
-		
+
 		r.worldBegin()
 		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
 		r.worldEnd()
-		
+
 		# check that something appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
 		e = IECore.PrimitiveEvaluator.create( i )
@@ -113,25 +113,25 @@ class CameraTest( unittest.TestCase ) :
 		a = e.A()
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 1 )
-		
+
 	def testXYOrientation( self ) :
-	
+
 		# render a red square at x==1, and a green one at y==1
-		
+
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
 		r.transformBegin()
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ) } )
 		r.transformEnd()
-		
+
 		r.worldBegin()
 		r.setAttribute( "color", IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
 		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.75, -0.25 ), IECore.V2f( 1.25, 0.25 ) ) ).render( r )
 		r.setAttribute( "color", IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) )
 		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
 		r.worldEnd()
-		
+
 		# check we get the colors we'd expect where we expect them
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
 		e = IECore.PrimitiveEvaluator.create( i )
@@ -150,17 +150,17 @@ class CameraTest( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( r ), 0 )
 		self.assertEqual( result.floatPrimVar( g ), 1 )
 		self.assertEqual( result.floatPrimVar( b ), 0 )
-		
+
 	def tearDown( self ) :
-	
+
 		files = [
 			"test/IECoreRI/output/testCamera.rib",
 			"test/IECoreRI/output/testCamera.tif",
 		]
-		
+
 		for f in files :
 			if os.path.exists( f ) :
 				os.remove( f )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

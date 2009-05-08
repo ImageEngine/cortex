@@ -153,7 +153,7 @@ void NURBSPrimitive::setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, fl
 	{
 		throw Exception( "Not enough knot values in v direction." );
 	}
-	
+
 	// check knots are monotonically increasing
 	const vector<float> &u = uKnot->readable();
 	float previous = u[0];
@@ -175,7 +175,7 @@ void NURBSPrimitive::setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, fl
 		}
 		previous = v[i];
 	}
-	
+
 	// check min and max parametric values are in range
 	if( uMin > uMax )
 	{
@@ -185,7 +185,7 @@ void NURBSPrimitive::setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, fl
 	{
 		throw Exception( "vMin greater than vMax." );
 	}
-	
+
 	if( uMin < u[uOrder-2] )
 	{
 		throw Exception( "uMin too small." );
@@ -194,7 +194,7 @@ void NURBSPrimitive::setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, fl
 	{
 		throw Exception( "uMax too great." );
 	}
-	
+
 	if( vMin < v[vOrder-2] )
 	{
 		throw Exception( "vMin too small." );
@@ -205,7 +205,7 @@ void NURBSPrimitive::setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, fl
 	}
 
 	// set everything (taking copies of the data)
-	
+
 	m_uOrder = uOrder;
 	m_uKnot = uKnot->copy();
 	m_uMin = uMin;
@@ -215,27 +215,27 @@ void NURBSPrimitive::setTopology(  int uOrder, ConstFloatVectorDataPtr uKnot, fl
 	m_vMin = vMin;
 	m_vMax = vMax;
 }
-		
+
 size_t NURBSPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch( interpolation )
 	{
 		case PrimitiveVariable::Constant :
 			return 1;
-			
+
 		case PrimitiveVariable::Uniform :
 			return uSegments() * vSegments();
-			
+
 		case PrimitiveVariable::Vertex :
 			return uVertices() * vVertices();
-			
+
 		case PrimitiveVariable::Varying:
 		case PrimitiveVariable::FaceVarying:
 			return (uSegments()+1) * (vSegments()+1);
-						
+
 		default :
 			return 0;
-		
+
 	}
 }
 
@@ -262,7 +262,7 @@ void NURBSPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save(context);
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	
+
 	container->write( "uOrder", m_uOrder );
 	context->save( m_uKnot, container, "uKnot" );
 	container->write( "uMin", m_uMin );
@@ -271,21 +271,21 @@ void NURBSPrimitive::save( IECore::Object::SaveContext *context ) const
 	container->write( "vOrder", m_vOrder );
 	context->save( m_vKnot, container, "vKnot" );
 	container->write( "vMin", m_vMin );
-	container->write( "vMax", m_vMax );	
+	container->write( "vMax", m_vMax );
 }
 
 void NURBSPrimitive::load( IECore::Object::LoadContextPtr context )
 {
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
-	
+
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	container->read( "uOrder", m_uOrder );
 	m_uKnot = context->load<FloatVectorData>( container, "uKnot" );
 	container->read( "uMin", m_uMin );
 	container->read( "uMax", m_uMax );
-	
+
 	container->read( "vOrder", m_vOrder );
 	m_vKnot = context->load<FloatVectorData>( container, "vKnot" );
 	container->read( "vMin", m_vMin );
@@ -298,9 +298,9 @@ bool NURBSPrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	const NURBSPrimitive *tOther = static_cast<const NURBSPrimitive *>( other.get() );
-	
+
 	if( m_uOrder!=tOther->m_uOrder )
 	{
 		return false;
@@ -309,7 +309,7 @@ bool NURBSPrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	if( m_uMin!=tOther->m_uMin )
 	{
 		return false;
@@ -318,7 +318,7 @@ bool NURBSPrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	if( m_uMax!=tOther->m_uMax )
 	{
 		return false;
@@ -327,7 +327,7 @@ bool NURBSPrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	if( !m_uKnot->isEqualTo( tOther->m_uKnot ) )
 	{
 		return false;
@@ -336,7 +336,7 @@ bool NURBSPrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-		
+
 	return true;
 }
 

@@ -50,12 +50,12 @@ namespace IECore {
 class OpWrap : public Op, public Wrapper<Op>
 {
 	public :
-		
+
 		OpWrap( PyObject *self, const std::string name, const std::string description, ParameterPtr resultParameter ) : Op( name, description, resultParameter ), Wrapper<Op>( self, this ) {};
-		
+
 		OpWrap( PyObject *self, const std::string name, const std::string description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter ) : Op( name, description, compoundParameter, resultParameter ), Wrapper<Op>( self, this ) {};
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands ) 
+		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands )
 		{
 			override o = this->get_override( "doOperation" );
 			if( o )
@@ -85,7 +85,7 @@ static ParameterPtr resultParameter( const Op &o )
 void bindOp()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<Op, OpWrapPtr>()
 		.def( init< const std::string, const std::string, ParameterPtr >( ( arg( "name" ), arg( "description" ), arg( "resultParameter") ) ) )
 		.def( init< const std::string, const std::string, CompoundParameterPtr, ParameterPtr >( ( arg( "name" ), arg( "description" ), arg( "compoundParameter" ), arg( "resultParameter") ) ) )

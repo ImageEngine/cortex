@@ -42,14 +42,14 @@ class FileSequenceGraphOp( FileSequenceAnalyzerOp ):
 
 	def __init__( self ):
 
-		FileSequenceAnalyzerOp.__init__( self, 
+		FileSequenceAnalyzerOp.__init__( self,
 			name = 'FileSequenceGraphOp',
 			description = 'Creates a bar graph object that represents the file sizes as bar height and file status as bar color.',
-			resultParameter = ObjectParameter( 
-								name = 'barGraph', 
-								description = 'Resulting bar graph object that represents the input file sequence.', 
-								defaultValue = NullObject(), 
-								type = TypeId.Group, 
+			resultParameter = ObjectParameter(
+								name = 'barGraph',
+								description = 'Resulting bar graph object that represents the input file sequence.',
+								defaultValue = NullObject(),
+								type = TypeId.Group,
 			)
 		)
 

@@ -42,8 +42,8 @@ import unittest
 class SplitStream :
 
 	def __init__( self ) :
-	
-		self.__f = open( "test/IECoreMaya/resultsPython.txt", 'w' )		
+
+		self.__f = open( "test/IECoreMaya/resultsPython.txt", 'w' )
 
 	def write( self, l ) :
 
@@ -56,71 +56,71 @@ class TestSuite( unittest.TestSuite ) :
 	""" A test suite which brings in a fresh Maya scene before each test run """
 
 	def __init__( self, tests=() ):
-	
+
 		unittest.TestSuite.__init__( self, tests )
-		
+
 	def run(self, result):
-	
+
 		import maya.cmds as cmds
-		
+
 		for test in self._tests:
-		
+
 			cmds.file( new = True, force = True )
 			cmds.flushUndo()
-			
+
 			if result.shouldStop:
 				break
-				
+
 			test(result)
 		return result
-		
+
 
 def createMayaTestLoader() :
 	""" Returns an instance of unittest.TestLoader() which gathers test cases into one of our TestSuites """
 
 	loader = unittest.TestLoader()
-	loader.suiteClass = TestSuite	
-	
+	loader.suiteClass = TestSuite
+
 	return loader
-	
-	
-defaultMayaTestLoader = createMayaTestLoader()	
+
+
+defaultMayaTestLoader = createMayaTestLoader()
 
 class TestProgram( unittest.TestProgram ) :
 
 	""" A test program which initializes Maya standalone before running the test suite """
 
 	def __init__(self, module='__main__', defaultTest=None, argv=None, testRunner=None, testLoader=defaultMayaTestLoader ) :
-	
+
 		unittest.TestProgram.__init__( self, module, defaultTest, argv, testRunner, testLoader )
-		
-	def runTests( self ) :	
-		try: 
-			import maya.standalone 
-			maya.standalone.initialize( name='IECoreMayaTest' ) 
-		except: 
-			sys.stderr.write( "Failed to initialize Maya %s in standalone application" % ( os.environ["MAYA_VERSION"] ) ) 
+
+	def runTests( self ) :
+		try:
+			import maya.standalone
+			maya.standalone.initialize( name='IECoreMayaTest' )
+		except:
+			sys.stderr.write( "Failed to initialize Maya %s in standalone application" % ( os.environ["MAYA_VERSION"] ) )
 			raise
-			
+
 		import maya.cmds
 		maya.cmds.loadPlugin( "ieCore" )
-		
+
 		if not self.testRunner:
 			self.testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 )
-			
+
 		result = self.testRunner.run( self.test )
-		
+
 		exitStatus = int( not result.wasSuccessful() )
-		
+
 		try:
 			if hasattr( maya.standalone, "cleanup" ):
 
 				maya.standalone.cleanup( exitStatus )
 			else:
 
-				import IECoreMaya				
+				import IECoreMaya
 				IECoreMaya.Standalone.cleanup( exitStatus )
 		finally:
-		
+
 			# If cleanup fails for any reason, just exit.
 			sys.exit( exitStatus )

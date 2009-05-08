@@ -38,11 +38,11 @@ namespace IECore
 {
 
 void addTypedDataTest(boost::unit_test::test_suite* test)
-{	
+{
 	test->add( new TypedDataTestSuite<0>() );
 	test->add( new TypedDataTestSuite<1>() );
 	test->add( new TypedDataTestSuite<10>() );
-	test->add( new TypedDataTestSuite<100>() );	
+	test->add( new TypedDataTestSuite<100>() );
 	test->add( new TypedDataTestSuite<1000000>() );
 }
 

@@ -63,11 +63,11 @@ void ieGaussianProduct( float a1; float b1; float c1; float a2; float b2; float 
 	float C2 = -b2;
 	float P1 = 1 / ( 2 * c1 * c1 );
 	float P2 = 1 / ( 2 * c2 * c2 );
-	
+
 	float P = P1 + P2;
 	float C = (P1*C1 + P2*C2) / P;
 	float CC = C1 - C2;
-	
+
 	a = a1 * a2 * exp( -P1 * P2 * CC * CC / P );
 	b = -C;
 	c = sqrt( 1 / ( 2 * P ) );

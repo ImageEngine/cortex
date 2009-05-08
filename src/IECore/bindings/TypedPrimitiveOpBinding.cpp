@@ -51,13 +51,13 @@ template<typename T>
 class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPrimitiveOpWrap<T> >
 {
 	public :
-	
+
 		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOpWrap<T> )
-		
+
 		TypedPrimitiveOpWrap( PyObject *self, const std::string name, const std::string description ) : TypedPrimitiveOp<T>( name, description ), Wrapper<TypedPrimitiveOpWrap<T> >( self, this )
 		{
 		}
-		
+
 		virtual void modifyTypedPrimitive( typename T::Ptr object, ConstCompoundObjectPtr operands )
 		{
 			this->get_override( "modifyTypedPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) );

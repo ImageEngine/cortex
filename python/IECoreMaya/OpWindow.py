@@ -45,31 +45,31 @@ class OpWindow( IECoreMaya.UIElement ) :
 	def __init__( self, op ) :
 
 		window = maya.cmds.window( title="Op Settings" )
-		
+
 		IECoreMaya.UIElement.__init__( self, window )
-		
+
 		form = maya.cmds.formLayout()
-		
+
 		infoRow = maya.cmds.rowLayout()
 		maya.cmds.text( label = op.name, annotation = op.description, font = "boldLabelFont" )
-		
+
 		maya.cmds.setParent( form )
-		
+
 		scrollLayout = maya.cmds.scrollLayout( horizontalScrollBarThickness=0 )
 		column = maya.cmds.columnLayout()
 		maya.cmds.separator( parent=column, style="none" )
 		maya.cmds.separator( parent=column, style="none" )
-		
+
 		maya.cmds.setParent( form )
-		
+
 		cancelButton = maya.cmds.button( label="Cancel", command="import maya.cmds; maya.cmds.deleteUI( \"%s\" )" % window )
 		resetButton = maya.cmds.button( label="Reset", command=self._createCallback( self.__revertPressed ) )
 		goButton = maya.cmds.button( label="Go!", command=self._createCallback( self.__goPressed ) )
-		
+
 		self.__fnTPH = IECoreMaya.FnTransientParameterisedHolderNode.create( column, op )
-		
+
 		maya.cmds.setParent( form )
-		
+
 		maya.cmds.formLayout(
 			form,
 			edit = True,
@@ -101,20 +101,20 @@ class OpWindow( IECoreMaya.UIElement ) :
 				( goButton, "top" ),
 			]
 		)
-		
+
 		maya.cmds.showWindow( window )
 
 	def __revertPressed( self ) :
-			
+
 		op = self.__fnTPH.getParameterised()[0]
 		op.parameters().setValue( op.parameters().defaultValue )
 		self.__fnTPH.setNodeValues()
-		
+
 	def __goPressed( self ) :
-			
+
 		self.__fnTPH.setParameterisedValues()
 		op = self.__fnTPH.getParameterised()[0]
-		
+
 		valid = op.parameters().valueValid()
 		if not valid[0] :
 			maya.cmds.confirmDialog(
@@ -124,7 +124,7 @@ class OpWindow( IECoreMaya.UIElement ) :
 				parent=self._topLevelUI()
 			)
 			return
-		
+
 		result = None
 		try :
 			result = op()
@@ -138,6 +138,6 @@ class OpWindow( IECoreMaya.UIElement ) :
 			)
 			if buttonPressed=="Print Details" :
 				traceback.print_exc()
-			
-		if result is not None :	
+
+		if result is not None :
 			maya.cmds.deleteUI( self._topLevelUI() )

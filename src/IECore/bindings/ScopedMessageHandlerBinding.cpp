@@ -44,7 +44,7 @@ namespace IECore
 /// \todo This would be better bound as a MessageHandlerContext context handler for use in "with" blocks.
 void bindScopedMessageHandler()
 {
-		
+
 	class_<ScopedMessageHandler, boost::noncopyable>( "ScopedMessageHandler", init<MessageHandlerPtr>() )
 	;
 

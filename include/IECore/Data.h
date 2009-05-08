@@ -44,15 +44,15 @@ namespace IECore
 class Data : public Object
 {
 	public :
-		
+
 		IE_CORE_DECLAREABSTRACTOBJECT( Data, Object );
-		
+
 	protected :
-	
+
 		virtual ~Data();
-		
+
 	private :
-	
+
 		static const unsigned int m_ioVersion;
 
 };

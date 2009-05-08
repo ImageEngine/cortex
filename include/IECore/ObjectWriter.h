@@ -54,21 +54,21 @@ class ObjectWriter : public Writer
 
 		/// Construct a new instance which can write the given object to the specified filename
 		ObjectWriter( ObjectPtr object, const std::string &fileName );
-		
+
 		static bool canWrite( ConstObjectPtr object, const std::string &fileName );
-		
+
 	protected :
 
 		virtual void doWrite();
-		
+
 		ObjectParameterPtr m_headerParameter;
 
 	private :
-	
+
 		void constructParameters();
-	
+
 		static const WriterDescription<ObjectWriter> g_writerDescription;
-		
+
 };
 
 IE_CORE_DECLAREPTR( ObjectWriter );

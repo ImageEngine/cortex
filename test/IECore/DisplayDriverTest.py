@@ -72,7 +72,7 @@ class TestImageDisplayDriver(unittest.TestCase):
 	def testFactory( self ):
 
 		class MyDisplayDriverCreator( DisplayDriver.DisplayDriverCreator ):
-	
+
 			def create( self, displayWindow, dataWindow, channelNames, parameters ):
 				return ImageDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
 
@@ -137,5 +137,5 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 		self.server = None
 
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

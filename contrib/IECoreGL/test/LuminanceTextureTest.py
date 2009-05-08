@@ -43,22 +43,22 @@ IECoreGL.init( False )
 class LuminanceTextureTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		i = IECore.TIFFImageReader( os.path.dirname( __file__ ) + "/images/a.tif" ).read()
 		i["A"] = i["Y"]
-		
+
 		t = IECoreGL.LuminanceTexture( i, False )
-		
+
 		ii = t.imagePrimitive()
-	
+
 		res = IECore.ImageDiffOp()(
 			imageA = i,
 			imageB = ii,
 			maxError = 0.1,
 			skipMissingChannels = False
 		)
-		
+
 		self.failIf( res.value )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

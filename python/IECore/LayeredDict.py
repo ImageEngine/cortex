@@ -51,60 +51,60 @@ class LayeredDict :
 	# is returned - this allows the layering to continue in dictionaries held
 	# within the topmost dictionary.
 	def __init__( self, dicts, dictClasses = set( [ dict, CompoundObject, CompoundParameter ] ) ) :
-	
+
 		for d in dicts :
 			assert( d.__class__ in dictClasses )
-		
+
 		self.__dicts = dicts
-		
+
 		assert( isinstance( dictClasses, set ) )
 		self.__dictClasses = dictClasses
-				
+
 	def __getitem__( self, key ) :
-	
+
 		for i in range( 0, len( self.__dicts ) ) :
-		
+
 			if key in self.__dicts[i] :
-				
+
 				value = self.__dicts[i][key]
 				if not value.__class__ in self.__dictClasses :
-				
+
 					return value
-					
+
 				else :
-								
+
 					# need to return a LayeredDict
 					dicts = [ value ]
 					for j in range( i + 1, len( self.__dicts ) ) :
 						if key in self.__dicts[j] :
 							dicts.append( self.__dicts[j][key] )
-					
+
 					return LayeredDict( dicts )
-				
+
 		raise KeyError( key )
-	
+
 	def __contains__( self, key ) :
-	
+
 		for i in range( 0, len( self.__dicts ) ) :
-		
+
 			if key in self.__dicts[i] :
 				return True
-				
+
 		return False
-		
+
 	def keys( self ) :
-	
+
 		allKeys = set()
 		for d in self.__dicts :
-		
+
 			allKeys.update( d.keys() )
-			
+
 		return list( allKeys )
 
 	def get( self, key, defaultValue ) :
-	
+
 		try :
 			return self.__getitem__( key )
 		except KeyError :
 			return defaultValue
-			
+

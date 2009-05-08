@@ -53,14 +53,14 @@ class State : public Bindable
 
 		State( bool complete );
 		State( const State &other );
-		
+
 		virtual ~State();
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::State, StateTypeId, Bindable );
-	
+
 		virtual void bind() const;
 		virtual GLbitfield mask() const;
-		
+
 		void add( StatePtr s );
 		void add( StateComponentPtr s );
 		template<typename T>
@@ -73,14 +73,14 @@ class State : public Bindable
 		void remove( IECore::TypeId componentType );
 
 		bool isComplete() const;
-		
+
 		typedef StateComponentPtr (*CreatorFn)();
 		static void registerComponent( IECore::TypeId, CreatorFn );
-		
+
 		/// Returns a complete State object with default settings. The
 		/// same object is returned each time this is called.
 		static ConstStatePtr defaultState();
-		
+
 		/// Even a complete State object doesn't specify the whole of the
 		/// GL state - and in fact the State object and components assume
 		/// that certain aspects of the GL state will be fixed at certain
@@ -91,17 +91,17 @@ class State : public Bindable
 		/// \todo This is incomplete - add more base state as we find it.
 		/// \todo Also, remove any base state as we add StateComponents which
 		/// specify it.
-		/// \todo Should the StateComponents not get the chance to set the 
+		/// \todo Should the StateComponents not get the chance to set the
 		/// base state themselves? We've got a lot of random disparate stuff
 		/// in this function that might be better placed alongside the
 		/// code that's relying on that state.
 		static void bindBaseState();
-			
+
 	private :
-	
+
 		typedef std::map<IECore::TypeId, CreatorFn> CreatorMap;
 		static CreatorMap *creators();
-	
+
 		typedef std::map<IECore::TypeId, StateComponentPtr> ComponentMap;
 		ComponentMap m_components;
 

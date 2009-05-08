@@ -62,18 +62,18 @@ class RadixSort
 		/// the given input to the sorted result. For example, the position of input[3] in the sorted result can be
 		/// found in indices[3].
 		const std::vector<unsigned int> &operator()( const std::vector<float> &input );
-		
+
 		/// Sort the given vector of unsigned ints, returning a vector of indices representing a mapping from
 		/// the given input to the sorted result. For example, the position of input[3] in the sorted result can be
 		/// found in indices[3].
 		const std::vector<unsigned int> &operator()( const std::vector<unsigned int> &input );
-		
+
 		/// Sort the given vector of signed ints, returning a vector of indices representing a mapping from
 		/// the given input to the sorted result. For example, the position of input[3] in the sorted result can be
 		/// found in indices[3].
-		const std::vector<unsigned int> &operator()( const std::vector<int> &input );		
-		
-	private:					
+		const std::vector<unsigned int> &operator()( const std::vector<int> &input );
+
+	private:
 
 		template<typename T>
 		bool createHistograms( const std::vector<T> &input );

@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -49,7 +49,7 @@ using namespace boost::python;
 using namespace Imath;
 using namespace std;
 
-namespace IECore 
+namespace IECore
 {
 
 template<typename T>
@@ -102,37 +102,37 @@ template<typename T>
 struct EulerHelper
 {
 	typedef typename Euler<T>::Order OrderType;
-	
+
 	static tuple angleOrder( Euler<T> &e )
 	{
 		int i, j, k;
 		e.angleOrder( i, j, k );
-		
+
 		return make_tuple( i, j, k );
 	}
-	
+
 	static tuple angleMapping( Euler<T> &e )
 	{
 		int i, j, k;
 		e.angleMapping( i, j, k );
-		
+
 		return make_tuple( i, j, k );
 	}
-	
+
 	static Vec3<T> simpleXYZRotation( Vec3<T> xyzRot, const Vec3<T> &targetXyzRot )
 	{
 		Euler<T>::simpleXYZRotation( xyzRot, targetXyzRot );
-		
+
 		return xyzRot;
 	}
-	
+
 	static Vec3<T> nearestRotation( Vec3<T> xyzRot, const Vec3<T> &targetXyzRot, OrderType order )
 	{
 		Euler<T>::nearestRotation( xyzRot, targetXyzRot, order );
-		
+
 		return xyzRot;
 	}
-			
+
 	static Vec3<T> nearestRotation( Vec3<T> xyzRot, const Vec3<T> &targetXyzRot )
 	{
 		Euler<T>::nearestRotation( xyzRot, targetXyzRot, (OrderType)(Euler<T>::XYZ) );
@@ -142,73 +142,73 @@ struct EulerHelper
 
 template<typename T>
 void bindEuler(const char *bindName)
-{		
-	/// We need these typedefs so we can instantiate the "optional" and "enum_" templates. 
+{
+	/// We need these typedefs so we can instantiate the "optional" and "enum_" templates.
 	// Without them, the enums defined in Imath::Euler aren't types.
 	typedef typename Euler<T>::Order OrderType;
-	typedef typename Euler<T>::InputLayout InputLayoutType;	
-	typedef typename Euler<T>::Axis AxisType;		
+	typedef typename Euler<T>::InputLayout InputLayoutType;
+	typedef typename Euler<T>::Axis AxisType;
 
 	void (Euler<T>::*extractM33)(const Matrix33<T>&) = &Euler<T>::extract;
 	void (Euler<T>::*extractM44)(const Matrix44<T>&) = &Euler<T>::extract;
 	void (Euler<T>::*extractQuat)(const Quat<T>&) = &Euler<T>::extract;
-	
+
 	Vec3<T> (*nearestRotation1)( Vec3<T>, const Vec3<T> &, OrderType )= &EulerHelper<T>::nearestRotation;
-	Vec3<T> (*nearestRotation2)( Vec3<T>, const Vec3<T> & )= &EulerHelper<T>::nearestRotation;	
+	Vec3<T> (*nearestRotation2)( Vec3<T>, const Vec3<T> & )= &EulerHelper<T>::nearestRotation;
 
 	object euler = class_< Euler<T>, bases< Vec3<T> > >(bindName)
-	
+
 		.def( init<>() )
-		.def( init< const Euler<T> & >() )		
+		.def( init< const Euler<T> & >() )
 		.def( init< OrderType >() )
 		.def( init< const Vec3<T> &, optional< OrderType, InputLayoutType > >() )
 		.def( init< T, T, T, optional< OrderType, InputLayoutType > >() )
 		.def( init< const Euler<T> &, optional< OrderType > >() )
 		.def( init< const Matrix33<T> &, optional< OrderType > > () )
 		.def( init< const Matrix44<T> &, optional< OrderType > > () )
-		
+
 		.def( "__str__", &IECore::str<Euler<T> > )
 		.def( "__repr__", &IECore::repr<Euler<T> > )
-		
+
 
 		.def( "legal", &Euler<T>::legal ).staticmethod("legal")
-		
+
 		.def( "setXYZVector", &Euler<T>::setXYZVector )
-		
+
 		.def( "order", &Euler<T>::order )
 		.def( "setOrder", &Euler<T>::setOrder )
-		
+
 		.def( "set", &Euler<T>::set )
-		
+
 		.def( "extract", extractM33 )
-		.def( "extract", extractM44 )		
-		.def( "extract", extractQuat )	
-		
-		.def( "toMatrix33", &Euler<T>::toMatrix33 )	
+		.def( "extract", extractM44 )
+		.def( "extract", extractQuat )
+
+		.def( "toMatrix33", &Euler<T>::toMatrix33 )
 		.def( "toMatrix44", &Euler<T>::toMatrix44 )
 		.def( "toQuat", &Euler<T>::toQuat )
-		.def( "toXYZVector", &Euler<T>::toXYZVector )		
-		
+		.def( "toXYZVector", &Euler<T>::toXYZVector )
+
 		.def( "angleOrder", &EulerHelper<T>::angleOrder )
 		.def( "angleMapping", &EulerHelper<T>::angleOrder )
-		
+
 		.def( "angleMod", &Euler<T>::angleMod ).staticmethod("angleMod")
 		.def( "simpleXYZRotation", &EulerHelper<T>::simpleXYZRotation ).staticmethod("simpleXYZRotation")
 		.def( "nearestRotation", nearestRotation1 )
-		.def( "nearestRotation", nearestRotation2 ).staticmethod("nearestRotation")				
-		
+		.def( "nearestRotation", nearestRotation2 ).staticmethod("nearestRotation")
+
 		.def( "makeNear", &Euler<T>::makeNear )
-		
+
 		.def( "frameStatic", &Euler<T>::frameStatic )
 		.def( "initialRepeated", &Euler<T>::initialRepeated )
 		.def( "parityEven", &Euler<T>::parityEven )
-		.def( "initialAxis", &Euler<T>::initialAxis )				
+		.def( "initialAxis", &Euler<T>::initialAxis )
 	;
-	
+
 	scope eulerScope (euler );
-	
+
 	enum_< OrderType >( "Order" )
-		.value( "XYZ", Euler<T>::XYZ )		
+		.value( "XYZ", Euler<T>::XYZ )
 		.value( "XZY", Euler<T>::XZY )
 		.value( "YZX", Euler<T>::YZX )
 		.value( "YXZ", Euler<T>::YXZ )
@@ -235,19 +235,19 @@ void bindEuler(const char *bindName)
 		.value( "YZYr", Euler<T>::YZYr )
 		.value( "ZYZr", Euler<T>::ZYZr )
 		.value( "ZXZr", Euler<T>::ZXZr )
-		
-		.value( "Default", Euler<T>::Default )		
+
+		.value( "Default", Euler<T>::Default )
 	;
-	
+
 	enum_< InputLayoutType >( "InputLayout" )
 		.value( "XYZLayout", Euler<T>::XYZLayout )
 		.value( "IJKLayout", Euler<T>::IJKLayout )
-	;		
-		
+	;
+
 	enum_< AxisType >( "Axis" )
 		.value( "X", Euler<T>::X )
-		.value( "Y", Euler<T>::Y )		
-		.value( "Z", Euler<T>::Z )		
+		.value( "Y", Euler<T>::Y )
+		.value( "Z", Euler<T>::Z )
 	;
 }
 

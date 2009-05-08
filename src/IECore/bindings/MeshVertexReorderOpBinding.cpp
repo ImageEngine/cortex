@@ -46,11 +46,11 @@ namespace IECore
 
 void bindMeshVertexReorderOp()
 {
-	
+
 	RunTimeTypedClass<MeshVertexReorderOp>()
 		.def( init<>() )
 	;
-	
+
 }
 
 } // namespace IECore

@@ -60,8 +60,8 @@ class TestBoostFilesystemPaths(unittest.TestCase):
 
         dnp.setValidatedValue(IECore.StringData('/path with space'))
 
-        
-        
-                			
+
+
+
 if __name__ == "__main__":
     unittest.main()

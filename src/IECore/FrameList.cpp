@@ -54,16 +54,16 @@ FrameList::~FrameList()
 void FrameList::asClumpedList( std::vector< std::vector<Frame> > &clumpedFrames, unsigned int clumpSize ) const
 {
 	clumpedFrames.clear();
-	
+
 	std::vector<Frame> frames;
 	asList( frames );
-	
+
 	size_t idx = 0;
 	while ( idx < frames.size() )
 	{
 		size_t thisClumpSize = std::min( frames.size() - idx, (size_t)clumpSize );
 
-		size_t j = 0;				
+		size_t j = 0;
 		std::vector<Frame> clump;
 		while ( j < thisClumpSize )
 		{
@@ -82,12 +82,12 @@ FrameListPtr FrameList::parse( const std::string &frameList )
 
 	/// Strip whitespace
 	for ( std::string::const_iterator it = frameList.begin(); it != frameList.end(); ++it )
-	{		
+	{
 		if ( *it == ' ' || *it == '\n' || *it == '\r' || *it == '\n' )
 		{
 			continue;
 		}
-		
+
 		s += *it;
 	}
 
@@ -106,7 +106,7 @@ FrameListPtr FrameList::parse( const std::string &frameList )
 			return f;
 		}
 	}
-	
+
 	throw Exception( ( boost::format( "\"%s\" does not define a valid frame list." ) % ( frameList ) ).str() );
 }
 
@@ -114,7 +114,7 @@ bool FrameList::isEqualTo( ConstFrameListPtr other ) const
 {
 	return typeId() == other->typeId();
 }
-		
+
 bool FrameList::operator ==( const FrameList &other ) const
 {
 	return this->isEqualTo( ConstFrameListPtr( &other ) );
@@ -129,7 +129,7 @@ FrameList::ParserList *FrameList::parserList()
 void FrameList::registerParser( ParserFn fn )
 {
 	ParserList *l = parserList();
-	assert( std::find( l->begin(), l->end(), fn ) == l->end() );	
+	assert( std::find( l->begin(), l->end(), fn ) == l->end() );
 	l->push_back( fn );
 }
 

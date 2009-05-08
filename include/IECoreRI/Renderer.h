@@ -56,9 +56,9 @@ class Renderer : public IECore::Renderer
 		/// context. If the empty string is passed then RiBegin( 0 ) is called to actually
 		/// render the scene rather than create a rib.
 		Renderer( const std::string &name );
-		
+
 		virtual ~Renderer();
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreRI::Renderer, RendererTypeId, IECore::Renderer );
 
 		/// \par Standard options supported :
@@ -175,7 +175,7 @@ class Renderer : public IECore::Renderer
 		///
 		/// \li <b>"ri:opacity" Color3fData</b><br>
 		/// \deprecated Use "opacity" in preference to "ri:opacity"
-		/// 
+		///
 		/// \li <b>"ri:sides" IntData</b><br>
 		/// Passed to RiSides
 		/// \deprecated Use "doubleSided" in preference to "ri:sides"
@@ -208,7 +208,7 @@ class Renderer : public IECore::Renderer
 
 		virtual void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars );
 		virtual void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
-		
+
 		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() );
@@ -217,15 +217,15 @@ class Renderer : public IECore::Renderer
 		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars );
 		/// Renders interpolation types of "linear" as RiPointsGeneralPolygons and "catmullClark" as RiSubdivisionMesh.
 		virtual void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars );
-		
+
 		virtual void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars );
-		
+
 		virtual void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
-		
+
 		virtual void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void instanceEnd();
 		virtual void instance( const std::string &name );
@@ -259,12 +259,12 @@ class Renderer : public IECore::Renderer
 		///
 		/// "ri:illuminate"
 		/// Calls RiIlluminate. Expects a StringData parameter called "handle" and a BoolData parameter
-		/// called "state" with the light state. This is provided as a stopgap until the Renderer base class specifies 
+		/// called "state" with the light state. This is provided as a stopgap until the Renderer base class specifies
 		/// an specific illuminate method.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
-		
+
 	private :
-	
+
 		IECore::RendererPtr m_implementation;
 
 };

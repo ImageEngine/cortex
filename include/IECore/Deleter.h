@@ -43,32 +43,32 @@ namespace IECore
 template<typename T>
 struct Deleter
 {
-	inline void operator()( T &arg ) 
+	inline void operator()( T &arg )
 	{
 		delete arg;
 		arg = 0;
-	}	
+	}
 };
 
 /// A simple unary functor which calls delete[] on its argument, and resets it to zero.
 template<typename T>
 struct ArrayDeleter
 {
-	inline void operator()( T &arg ) 
+	inline void operator()( T &arg )
 	{
 		delete[] arg;
 		arg = 0;
-	}	
+	}
 };
 
 /// A simple unary functor of the same form as DeletePolicy and ArrayDeletePolicy, which does nothing
-/// with the data given to it. 
+/// with the data given to it.
 template<typename T>
 struct NullDeleter
 {
-	inline void operator()( T & ) 
+	inline void operator()( T & )
 	{
-	}	
+	}
 };
 
 } // namespace IECore

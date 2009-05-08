@@ -43,15 +43,15 @@ import StringUtil
 class FnTransientParameterisedHolderNode( IECoreMaya.FnParameterisedHolder ) :
 
 	def __init__( self, object ) :
-		
+
 		IECoreMaya.FnParameterisedHolder.__init__( self, object )
-	
+
 	## Creates a temporary TransientParameterisedHolderNode in order to present the UI for the specified
 	# parameterised object in the given layout. The node is automatically deleted when the holding
 	# layout is destroyed. Returns a FnTransientParameterisedHolderNode object operating on the new node.
 	@staticmethod
 	def create( layoutName, classNameOrParameterised, classVersion=None, envVarName=None ) :
-		
+
 		with IECoreMaya.UndoDisabled() :
 
 			nodeName = maya.cmds.createNode( "ieTransientParameterisedHolderNode", skipSelect = True )
@@ -72,20 +72,20 @@ class FnTransientParameterisedHolderNode( IECoreMaya.FnParameterisedHolder ) :
 
 			parameterised = fnTPH.getParameterised()[0]
 
-			if parameterised : 
+			if parameterised :
 				maya.cmds.setParent( layoutName )
 				IECoreMaya.ParameterUI.create( fnTPH.fullPathName(), parameterised.parameters() )
-				maya.cmds.setParent( layoutName )			
+				maya.cmds.setParent( layoutName )
 
 		return fnTPH
-		
-	@staticmethod 
+
+	@staticmethod
 	def _deleteNode( nodeName ) :
-	
+
 		with IECoreMaya.UndoDisabled() :
-			
+
 			if maya.cmds.objExists( nodeName ) :
 				maya.cmds.delete( nodeName )
-			
-		
-			
+
+
+

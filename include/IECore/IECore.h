@@ -93,7 +93,7 @@ bool withFreeType();
 /// provide common operations on top of this lower level access, allowing classes
 /// such as \link IECore::KDTree KDTree \endlink and \link IECore::PerlinNoise PerlinNoise \endlink to operate both on native IECore types and
 /// application specific types such as the Maya MPoint and MVector classes.
-/// 
+///
 /// The VectorOps.h and MatrixOps.h code provides a pretty ugly c-style function
 /// based interface - functional enough to provide library components like the KDTree
 /// but not useable enough for everyday coding. It may be better in the future to
@@ -205,17 +205,17 @@ bool withFreeType();
 /// As we saw above, Objects have a built in serialisation mechanism. This makes use of
 /// the \link IECore::IndexedIOInterface IndexedIOInterface \endlink, which defines a mechanism for the creation of random access
 /// files containing a hierarchy of named data items. Currently the main implementation
-/// of this interface is \link IECore::FileIndexedIO FileIndexedIO \endlink, with 
+/// of this interface is \link IECore::FileIndexedIO FileIndexedIO \endlink, with
 /// \link IECore::FileSystemIndexedIO FileSystemIndexedIO \endlink implementing a reference
 /// solution of use for debugging and the like.
 ///
-/// The \link IECore::AttributeCache AttributeCache \endlink and \link IECore::InterpolatedCache 
+/// The \link IECore::AttributeCache AttributeCache \endlink and \link IECore::InterpolatedCache
 /// InterpolatedCache \endlink sit on top of IndexedIOInterface and provide
 /// a simple framework useable for vertex caching, transform caching and more - in fact any
 /// Object subclass can be stored as an element of a cache - this is one of the benefits
 /// of combining the object serialisation and random access caching code.
 ///
-/// For input and output of third party file formats there are the \link IECore::Reader 
+/// For input and output of third party file formats there are the \link IECore::Reader
 /// Reader \endlink and \link IECore::Writer Writer \endlink classes.
 /// These contain factory mechanisms for obtaining Readers and Writers given a filename with
 /// an extension, and use Parameters to control any conversions during the io process.
@@ -244,7 +244,7 @@ bool withFreeType();
 /// \link IECore::PerlinNoise PerlinNoise \endlink implements the classic noise function for arbitrary dimensions.
 ///
 /// Fast closest point and ray intersection queries can be performed on some of the classes derived
-/// from \link IECore::Primitive Primitive \endlink, using an instance of a 
+/// from \link IECore::Primitive Primitive \endlink, using an instance of a
 /// \link IECore::PrimitiveEvaluator PrimitiveEvaluator \endlink.
 ///
 /// A fast, robust implementation of \link IECore::MarchingCubes MarchingCubes \endlink is available for creating meshes from an

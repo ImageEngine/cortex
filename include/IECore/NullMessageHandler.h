@@ -49,13 +49,13 @@ IE_CORE_DECLAREPTR( NullMessageHandler );
 /// suppress all message output.
 class NullMessageHandler : public MessageHandler
 {
-	
+
 	public :
 
 		IE_CORE_DECLAREMEMBERPTR( NullMessageHandler );
-	
+
 		NullMessageHandler();
-		
+
 		virtual void handle( Level level, const std::string &context, const std::string &message );
 
 };

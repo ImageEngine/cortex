@@ -58,33 +58,33 @@ namespace IECoreMaya
 void addImageConverterTest( boost::unit_test::test_suite* test );
 
 struct ImageConverterTest
-{	
+{
 	/// \todo Test more than this
 	void test()
-	{	
+	{
 		ImagePrimitivePtr imageA = runTimeCast<ImagePrimitive>( Reader::create( "test/IECore/data/exrFiles/colorBarsWithAlpha.exr")->read() );
 		BOOST_CHECK( imageA );
-		
+
 		MImage mimage;
-		
+
 		ToMayaImageConverterPtr toMaya = ToMayaImageConverter::create( imageA );
 		BOOST_CHECK( toMaya );
-				
+
 		MStatus s = toMaya->convert( mimage );
 		BOOST_CHECK( s );
-		
+
 		FromMayaImageConverterPtr fromMaya  = new FromMayaImageConverter( mimage );
 		BOOST_CHECK( fromMaya );
-				
+
 		ImagePrimitivePtr imageB = runTimeCast<ImagePrimitive>( fromMaya->convert() );
 		BOOST_CHECK( imageB );
-		
+
 		ImageDiffOpPtr diffOp = new ImageDiffOp();
-		
+
 		diffOp->imageAParameter()->setValue( imageA );
 		diffOp->imageBParameter()->setValue( imageB );
 		diffOp->maxErrorParameter()->setNumericValue( 1.0 / 256.0 );
-		
+
 		bool result = runTimeCast< BoolData >( diffOp->operate() )->readable();
 		BOOST_CHECK( !result );
 	}

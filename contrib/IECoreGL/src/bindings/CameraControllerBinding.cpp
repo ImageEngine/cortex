@@ -59,5 +59,5 @@ void bindCameraController()
 		.def( "dolly", &CameraController::dolly )
 	;
 }
-	
+
 }

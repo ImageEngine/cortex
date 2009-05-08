@@ -54,26 +54,26 @@ namespace IECoreGL
 class NameStateComponent : public StateComponent
 {
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::NameStateComponent, NameStateComponentTypeId, StateComponent );
 
 		NameStateComponent( const std::string &name="unnamed" );
 		virtual ~NameStateComponent();
-		
+
 		const std::string &name() const;
 		GLuint glName() const;
-		
+
 		/// Calls glLoadName().
 		virtual void bind() const;
 		virtual GLbitfield mask() const;
-		
+
 		/// Returns the public (string) name from the internal OpenGL name value, which
 		/// typically will come from the contents of the select buffer. Raises an Exception
 		/// if glName does not map to a NameStateComponent name.
 		static const std::string &nameFromGLName( GLuint glName );
-		
+
 	private :
-		
+
 		typedef std::pair<IECore::InternedString, unsigned int> NamePair;
 		typedef boost::multi_index::multi_index_container<
 			NamePair,
@@ -87,13 +87,13 @@ class NameStateComponent : public StateComponent
 			>
 		> NameMap;
 		typedef NameMap::nth_index_const_iterator<0>::type ConstNameIterator;
-		
+
 		ConstNameIterator m_it;
-		
+
 		static NameMap g_nameMap;
-		
+
 		static Description<NameStateComponent> g_description;
-		
+
 };
 
 IE_CORE_DECLAREPTR( NameStateComponent );

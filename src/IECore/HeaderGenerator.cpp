@@ -114,16 +114,16 @@ static void timeStampHeaderGenerator( CompoundObjectPtr header )
 {
 	time_t tm;
 	time( &tm );
-	
+
 	/// ctime_r manpage suggest that 26 characters should be enough in all cases
 	char buf[27];
 	std::string strTime ( ctime_r( &tm, &buf[0] ) );
-		
+
 	assert( strTime.length() <= 26 );
-	
+
 	/// Remove the newline at the end
 	boost::algorithm::trim_right( strTime );
-			
+
 	header->members()["timeStamp"] = new StringData( strTime );
 }
 

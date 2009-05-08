@@ -39,19 +39,19 @@ from IECore import *
 class TestMessageHandler( unittest.TestCase ) :
 
 	def testAbbreviation( self ) :
-	
+
 		self.assertEqual( Msg, MessageHandler )
 		self.assert_( Msg is MessageHandler )
 
 	def testStack( self ) :
-	
-		for i in range( 1, 10 ) :			
+
+		for i in range( 1, 10 ) :
 			MessageHandler.pushHandler( NullMessageHandler() )
 		for i in range( 1, 10 ) :
 			MessageHandler.popHandler()
-			
+
 	def testLevelStringConversion( self ) :
-	
+
 		ll = [
 			(MessageHandler.Level.Error, "ERROR"),
 			(MessageHandler.Level.Warning, "WARNING"),
@@ -64,27 +64,27 @@ class TestMessageHandler( unittest.TestCase ) :
 			self.assertEqual( MessageHandler.levelAsString( l ), s )
 			self.assertEqual( MessageHandler.stringAsLevel( s ), l )
 			self.assertEqual( MessageHandler.stringAsLevel( s.lower() ), l )
-		
+
 	def testOutput( self ) :
-	
+
 		MessageHandler.pushHandler( NullMessageHandler() )
-		
+
 		MessageHandler.output( Msg.Level.Debug, "message handler test", "ignore me" )
 		MessageHandler.output( Msg.Level.Info, "message handler test", "and me" )
 		MessageHandler.output( Msg.Level.Warning, "message handler test", "and me" )
 		MessageHandler.output( Msg.Level.Error, "message handler test", "and me" )
-			
+
 		msg( Msg.Level.Error, "message handler test", "and me" )
-		
+
 		MessageHandler.popHandler()
-	
+
 	def testOStreamHandler( self ) :
-	
+
 		OStreamMessageHandler.cErrHandler()
 		OStreamMessageHandler.cOutHandler()
-	
+
 	def testCompoundHandler( self ) :
-	
+
 		h = CompoundMessageHandler()
 		h.addHandler( OStreamMessageHandler.cErrHandler() )
 		h.addHandler( OStreamMessageHandler.cOutHandler() )
@@ -125,10 +125,10 @@ class TestMessageHandler( unittest.TestCase ) :
 		self.assertEqual( myHandler.lastLevel.value, Msg.Level.Info )
 		self.assertEqual( myHandler.lastContext.value, "context" )
 		self.assertEqual( myHandler.lastMessage.value, "message" )
-		
+
 	def testIsRefCounted( self ) :
-	
+
 		self.assert_( issubclass( MessageHandler, RefCounted ) )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

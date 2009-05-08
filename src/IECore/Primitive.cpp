@@ -77,7 +77,7 @@ Imath::Box3f Primitive::bound() const
 	}
 	return result;
 }
-		
+
 void Primitive::copyFrom( IECore::ConstObjectPtr other, IECore::Object::CopyContext *context )
 {
 	VisibleRenderable::copyFrom( other, context );
@@ -111,7 +111,7 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 {
 	unsigned int v = m_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	// we changed the inheritance hierarchy at io version 1
 	if( v==0 )
 	{
@@ -121,7 +121,7 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 	{
 		VisibleRenderable::load( context );
 	}
-	
+
 	container->chdir( "variables" );
 		variables.clear();
 		IndexedIO::EntryList names = container->ls();
@@ -162,30 +162,30 @@ void Primitive::memoryUsage( Object::MemoryAccumulator &a ) const
 struct ValidateArraySize
 {
 	typedef bool ReturnType;
-		
+
 	ValidateArraySize( size_t sz ) : m_variableSize( sz )
 	{
-	} 
+	}
 
 	template<typename T>
 	bool operator() ( typename T::ConstPtr data )
 	{
 		assert( data );
-                
+
 		const typename T::ValueType &v = data->readable();
-		
+
 		return v.size() == m_variableSize;
 	}
-	
+
 	private:
-	
-	size_t m_variableSize;	
+
+	size_t m_variableSize;
 };
 
 struct ReturnFalseErrorHandler
 {
 	typedef bool ReturnType;
-	
+
 	template<typename T, typename F>
 	bool operator() ( typename T::ConstPtr data, const F &f )
 	{
@@ -212,7 +212,7 @@ bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv ) const
 	// cases all require arrays so that's what we require.
 	size_t sz = variableSize( pv.interpolation );
 	ValidateArraySize func( sz );
-	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData, ReturnFalseErrorHandler>( pv.data, func );	
+	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData, ReturnFalseErrorHandler>( pv.data, func );
 }
 
 bool Primitive::arePrimitiveVariablesValid() const
@@ -224,7 +224,7 @@ bool Primitive::arePrimitiveVariablesValid() const
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 

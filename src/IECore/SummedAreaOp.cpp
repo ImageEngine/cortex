@@ -66,9 +66,9 @@ struct SummedAreaOp::SumArea
 		typedef typename T::ValueType Container;
 		typedef typename Container::value_type V;
 		typedef typename Container::iterator It;
-		
+
 		Container &buffer = data->writable();
-		
+
 		// deal with first row alone, as it doesn't have values above it
 		unsigned pixelIndex=0;
 		V rowSum = 0;
@@ -90,19 +90,19 @@ struct SummedAreaOp::SumArea
 			}
 		}
 	}
-	
+
 	private :
-	
+
 		Box2i m_dataWindow;
 
 };
-	
+
 void SummedAreaOp::modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels )
-{	
+{
 	SumArea summer( dataWindow );
 	for( unsigned i=0; i<channels.size(); i++ )
 	{
 		despatchTypedData<SumArea, TypeTraits::IsNumericVectorTypedData>( channels[i], summer );
 	}
 }
-		
+

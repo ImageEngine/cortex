@@ -38,8 +38,8 @@ template<typename T>
 void LinearInterpolator<T>::operator()(const T &y0, const T & y1, double x, T &result) const
 {
 	assert(x >= 0.0);
-	assert(x <= 1.0);	
-	
+	assert(x <= 1.0);
+
 	result = static_cast<T>(y0 + (y1 - y0) * x);
 }
 
@@ -47,23 +47,23 @@ void LinearInterpolator<T>::operator()(const T &y0, const T & y1, double x, T &r
 template<typename T>
 struct LinearInterpolator< std::vector<T> >
 {
-	void operator()(const std::vector<T> &y0, 
+	void operator()(const std::vector<T> &y0,
 			const std::vector<T> &y1,
-			double x, 
+			double x,
 			std::vector<T> &result) const
 	{
 		unsigned size =  y0.size();
 		assert(y1.size() == size);
-		
+
 		result.resize( size );
-		
+
 		LinearInterpolator<T> interp;
 		for (unsigned i = 0; i < size; i++)
 		{
 			interp( y0[i], y1[i], x, result[i]);
 		}
-		
-		assert(result.size() == size);		
+
+		assert(result.size() == size);
 	}
 };
 
@@ -71,9 +71,9 @@ struct LinearInterpolator< std::vector<T> >
 template<typename T>
 struct LinearInterpolator< TypedData< T > >
 {
-	void operator()(const typename TypedData< T >::Ptr &y0, 
+	void operator()(const typename TypedData< T >::Ptr &y0,
 			const typename TypedData< T >::Ptr &y1,
-			double x, 
+			double x,
 			typename TypedData< T >::Ptr &result) const
 	{
 		LinearInterpolator<T>()( y0->readable(), y1->readable(), x, result->writable());
@@ -84,7 +84,7 @@ template<typename T>
 void CubicInterpolator<T>::operator()(const T &y0, const T &y1, const T &y2, const T &y3, double x, T &result ) const
 {
 	assert(x >= 0.0);
-	assert(x <= 1.0);	
+	assert(x <= 1.0);
 
 	T a0 = y3 - y2 - y0 + y1;
 	T a1 = y0 - y1 - a0;
@@ -98,27 +98,27 @@ void CubicInterpolator<T>::operator()(const T &y0, const T &y1, const T &y2, con
 template<typename T>
 struct CubicInterpolator< std::vector<T> >
 {
-	void operator()(const std::vector<T> &y0, 
+	void operator()(const std::vector<T> &y0,
 			const std::vector<T> &y1,
 			const std::vector<T> &y2,
 			const std::vector<T> &y3,
-			
-			double x, 
+
+			double x,
 			std::vector<T> &result) const
-	{		
+	{
 		unsigned size =  y0.size();
 		assert(y1.size() == size);
 		assert(y2.size() == size);
-		assert(y3.size() == size);				
-		
+		assert(y3.size() == size);
+
 		result.resize( size );
-		
+
 		CubicInterpolator<T> interp;
 		for (unsigned i = 0; i < size; i++)
 		{
 			interp( y0[i], y1[i], y2[i], y3[i], x, result[i]);
 		}
-		
+
 		assert(result.size() == size);
 	}
 };
@@ -127,14 +127,14 @@ struct CubicInterpolator< std::vector<T> >
 template<typename T>
 struct CubicInterpolator< TypedData<T > >
 {
-	void operator()(const typename TypedData< T >::Ptr &y0, 
+	void operator()(const typename TypedData< T >::Ptr &y0,
 			const typename TypedData< T >::Ptr &y1,
 			const typename TypedData< T >::Ptr &y2,
 			const typename TypedData< T >::Ptr &y3,
-			
-			double x, 
+
+			double x,
 			typename TypedData< T >::Ptr &result) const
-	{		
+	{
 		CubicInterpolator<T>()( y0->readable(), y1->readable(), y2->readable(), y3->readable(), x, result->writable());
 	}
 };

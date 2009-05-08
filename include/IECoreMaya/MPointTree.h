@@ -42,7 +42,7 @@
 
 namespace IECoreMaya
 {
-	
+
 /// A KDTree typedef for use with the MPoint point type.
 typedef IECore::KDTree<MArrayIter<MPointArray>::ConstIterator> MPointTree;
 

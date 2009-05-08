@@ -38,11 +38,11 @@ import _IECoreMaya
 class _MayaTypeIdMeta(type):
 
 	def __getattr__( self, n ) :
-	
+
 		if not hasattr( _IECoreMaya._MayaTypeId, n ) :
-		
+
 			raise RuntimeError( "MayaTypeId '" + str(n) + "' has not been bound" )
-	
+
 		return maya.OpenMaya.MTypeId( getattr( _IECoreMaya._MayaTypeId, n ) )
 
 class MayaTypeId :

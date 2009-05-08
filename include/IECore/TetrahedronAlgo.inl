@@ -46,16 +46,16 @@ namespace IECore
 {
 
 template<typename Vec>
-typename VectorTraits<Vec>::BaseType tetrahedronVolume( 
-	const Vec &v0, 
-	const Vec &v1, 	
-	const Vec &v2, 
+typename VectorTraits<Vec>::BaseType tetrahedronVolume(
+	const Vec &v0,
+	const Vec &v1,
+	const Vec &v2,
 	const Vec &v3
 )
 {
 	/// From http://en.wikipedia.org/wiki/Tetrahedron
-	return fabs( 
-		vecDot( 
+	return fabs(
+		vecDot(
 			vecSub( v0, v3 ),
 
 			vecCross(
@@ -67,40 +67,40 @@ typename VectorTraits<Vec>::BaseType tetrahedronVolume(
 }
 
 template<typename Vec>
-Vec tetrahedronPoint( 
-	const Vec &v0, 
-	const Vec &v1, 	
-	const Vec &v2, 
+Vec tetrahedronPoint(
+	const Vec &v0,
+	const Vec &v1,
+	const Vec &v2,
 	const Vec &v3,
 	typename VectorTraits<Vec>::BaseType barycentric[4]
 )
 {
-	return vecAdd( 
-		vecMul( v0, barycentric[0] ), 
-		
+	return vecAdd(
+		vecMul( v0, barycentric[0] ),
+
 		vecAdd(
 			vecMul( v1, barycentric[1] ),
-			
+
 			vecAdd(
 				vecMul( v2, barycentric[2] ),
-				vecMul( v3, barycentric[3] ) 
+				vecMul( v3, barycentric[3] )
 			)
 		)
 	);
 }
 
 template<typename Vec>
-void tetrahedronBarycentric( 
-	const Vec &v0, 
-	const Vec &v1, 	
-	const Vec &v2, 
+void tetrahedronBarycentric(
+	const Vec &v0,
+	const Vec &v1,
+	const Vec &v2,
 	const Vec &v3,
 	const Vec &p,
 	typename VectorTraits<Vec>::BaseType barycentric[4]
 )
 {
 	typename VectorTraits<Vec>::BaseType totalVolume = tetrahedronVolume( v0, v1, v2, v3 );
-	
+
 	barycentric[0] = tetrahedronVolume( p,  v1, v2, v3 ) / totalVolume ;
 	barycentric[1] = tetrahedronVolume( v0, p,  v2, v3 ) / totalVolume ;
 	barycentric[2] = tetrahedronVolume( v0, v1, p,  v3 ) / totalVolume ;
@@ -108,47 +108,47 @@ void tetrahedronBarycentric(
 }
 
 template<typename Vec>
-typename VectorTraits<Vec>::BaseType tetrahedronClosestBarycentric( 
-	const Vec &v0, 
-	const Vec &v1, 	
-	const Vec &v2, 
+typename VectorTraits<Vec>::BaseType tetrahedronClosestBarycentric(
+	const Vec &v0,
+	const Vec &v1,
+	const Vec &v2,
 	const Vec &v3,
 	const Vec &p,
 	typename VectorTraits<Vec>::BaseType barycentric[4]
 )
 {
 	Vec centroid = vecAdd( v0, vecAdd( v1, vecAdd( v2, v3 ) ) ) / 4.0;
-	
+
 	Vec closestPoint = p;
 	typename VectorTraits<Vec>::BaseType closestDistSqrd = Imath::limits< typename VectorTraits<Vec>::BaseType >::max();
-	
+
 	Vec v[4] = { v0, v1, v2, v3 };
-		
+
 	bool inside = true;
 	for ( unsigned i = 0; i < 4; i++)
 	{
 		/// Only need to consider facse which the point is "outside"
 		Imath::V3i faceIndices = tetrahedronFaceIndices( i );
-		
+
 		/// Compute a face normal which points away from the tetrahedron's centroid
 		Vec faceNormal = triangleNormal( v[faceIndices[0]], v[faceIndices[1]], v[faceIndices[2]] );
-		
+
 		Vec centroidToFace = vecSub( v[faceIndices[0]], centroid );
-				
+
 		if ( vecDot(centroidToFace, faceNormal) < 0.0 )
 		{
 			faceNormal = vecMul( faceNormal, -1.0 );
 		}
-		
+
 		typename VectorTraits<Vec>::BaseType planeConstant = faceNormal.dot( v[i] );
 		typename VectorTraits<Vec>::BaseType planeDistance = faceNormal.dot( p ) - planeConstant;
-		
+
 		if ( planeDistance >= 0.0 )
 		{
 			inside = false;
 			Imath::Vec3<typename VectorTraits<Vec>::BaseType> triBarycentric;
 			typename VectorTraits<Vec>::BaseType triDistSqrd = triangleClosestBarycentric( v[faceIndices[0]], v[faceIndices[1]], v[faceIndices[2]], p, triBarycentric );
-		
+
 			if ( triDistSqrd < closestDistSqrd )
 			{
 				closestDistSqrd = triDistSqrd;
@@ -156,14 +156,14 @@ typename VectorTraits<Vec>::BaseType tetrahedronClosestBarycentric(
 			}
 		}
 	}
-		
+
 	tetrahedronBarycentric( v0, v1, v2, v3, closestPoint, barycentric );
-	
+
 	if ( inside )
 	{
 		return 0.0;
 	}
-	
+
 	return closestDistSqrd;
 }
 
@@ -178,7 +178,7 @@ inline Imath::V3i tetrahedronFaceIndices( int face )
 		case 2:
 			return Imath::V3i( 0, 3, 2 );
 		case 3:
-			return Imath::V3i( 1, 2, 3 );									
+			return Imath::V3i( 1, 2, 3 );
 		default:
 			assert(false);
 			return Imath::V3i( 0, 0, 0 );

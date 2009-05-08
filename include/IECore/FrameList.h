@@ -50,56 +50,56 @@ IE_CORE_FORWARDDECLARE( FrameList );
 class FrameList : public RunTimeTyped
 {
 	public:
-	
+
 		typedef int64_t Frame;
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( FrameList, RunTimeTyped );
-	
+
 		FrameList();
 		virtual ~FrameList();
-		
+
 		/// This method returns a simple list of frames. They are not guaranteed to
 		/// be in ascending order, but they are guaranteed to be non repeating - make
 		/// sure you honour these requirements when creating subclasses.
-		virtual void asList( std::vector<Frame> &frames ) const = 0;		
+		virtual void asList( std::vector<Frame> &frames ) const = 0;
 		virtual std::string asString() const = 0;
-		virtual bool isEqualTo( ConstFrameListPtr other ) const;		
+		virtual bool isEqualTo( ConstFrameListPtr other ) const;
 		virtual FrameListPtr copy() const = 0;
-		
+
 		/// This method takes the list of frames returned by asList() and returns a list
 		/// of lists of frames, where each sublist contains no more than clumpSize frames.
 		void asClumpedList( std::vector< std::vector<Frame> > &clumpedFrames, unsigned int clumpSize ) const;
-		
+
 		/// Parses a string and returns the FrameList object that it represents.
 		/// Strings may be in any of the forms returned by SomeFrameListSubclass::asString().
 		/// Subclasses must register a suitable parser for the form that they return
-		/// by instantiating a static FrameList::Parser instance. Throws an Exception if the string 
-		/// is in an unrecognised form.	
+		/// by instantiating a static FrameList::Parser instance. Throws an Exception if the string
+		/// is in an unrecognised form.
 		static FrameListPtr parse( const std::string &frameList );
-		
+
 		bool operator ==( const FrameList &other ) const;
-		
+
 	protected :
-	
+
 		typedef FrameListPtr (*ParserFn)( const std::string &frameList );
-		
+
 		static void registerParser( ParserFn fn );
-		
+
 		template<class T>
 		class Parser
 		{
 			public :
 				Parser();
-		};	
-		
+		};
+
 	private :
-	
+
 		typedef std::vector< ParserFn > ParserList;
-		
+
 		static ParserList *parserList();
-		
+
 };
-	
+
 } // namespace IECore
 
 #include "IECore/FrameList.inl"

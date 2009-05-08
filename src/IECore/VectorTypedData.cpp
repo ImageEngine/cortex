@@ -105,7 +105,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 			container->read( "value", p, e.arrayLength() ); \
 		} \
 	}																								\
-	
+
 #define IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )								\
 	template<>																						\
 	void TNAME::save( SaveContext *context ) const													\
@@ -129,8 +129,8 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 			assert( p ) ; \
 			container->read( "value", p, e.arrayLength() ); \
 		} \
-	}	
-	
+	}
+
 #define IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( TNAME, TID )			\
 	IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )					\
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
@@ -142,7 +142,7 @@ LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeD
 	IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )					\
 	IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )				\
 	IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N )				\
-	
+
 namespace IECore
 {
 // specialisation definitions for vector types...
@@ -188,7 +188,7 @@ template<>
 void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 {
 	Data::memoryUsage( accumulator );
-	
+
 	size_t count = 0;
 	const std::vector< std::string > &vector = m_data->data;
 	std::vector< std::string >::const_iterator iterV = vector.begin();
@@ -238,7 +238,7 @@ void BoolVectorData::save( Object::SaveContext *context ) const
 			p[i/8] |= 1 << (i % 8);
 		}
 	}
-	
+
 	container->write( "size", s );
 	container->write( "value", &(p[0]), p.size() );
 }
@@ -249,7 +249,7 @@ void BoolVectorData::load( LoadContextPtr context )
 	Data::load( context );
 	unsigned int v = 0;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	unsigned int s = 0;
 	container->read( "size", s );
 	std::vector<unsigned char> p;
@@ -278,9 +278,9 @@ void ShortVectorData::load( LoadContextPtr context )
 	Data::load( context );
 	unsigned int v = 0;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	std::vector<short> &b = writable();
-	
+
 	if ( v == 0 )
 	{
 		/// Version 0 stored the array of shorts as ints
@@ -302,7 +302,7 @@ void ShortVectorData::load( LoadContextPtr context )
 		IndexedIO::Entry e = container->ls( "value" );												\
 		writable().resize( e.arrayLength() );													\
 		short *p = baseWritable();														\
-		container->read( "value", p, e.arrayLength() );		
+		container->read( "value", p, e.arrayLength() );
 	}
 }
 
@@ -320,9 +320,9 @@ void UShortVectorData::load( LoadContextPtr context )
 	Data::load( context );
 	unsigned int v = 0;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	std::vector<unsigned short> &b = writable();
-	
+
 	if ( v == 0 )
 	{
 		/// Version 0 stored the array unsigned shorts as unsigned ints
@@ -331,7 +331,7 @@ void UShortVectorData::load( LoadContextPtr context )
 		std::vector<unsigned int> p;
 		p.resize( s );
 		unsigned int *value = &(p[0]);
-		container->read( "value", value, p.size() );		
+		container->read( "value", value, p.size() );
 		b.resize( s, false );
 		for( unsigned int i=0; i<s; i++ )
 		{
@@ -344,10 +344,10 @@ void UShortVectorData::load( LoadContextPtr context )
 		IndexedIO::Entry e = container->ls( "value" );												\
 		writable().resize( e.arrayLength() );													\
 		unsigned short *p = baseWritable();														\
-		container->read( "value", p, e.arrayLength() );		
+		container->read( "value", p, e.arrayLength() );
 	}
 }
-	
+
 // explicitly instantiate each of the types we defined in the public ui.
 template class TypedData<vector<float> >;
 template class TypedData<vector<bool> >;

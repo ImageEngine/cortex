@@ -43,7 +43,7 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 template<>
@@ -51,18 +51,18 @@ std::string repr( BinaryFrameList &x )
 {
 	object item( x.getFrameList() );
 	std::stringstream s;
-	
+
 	s << "IECore.BinaryFrameList( ";
 	s << call_method< std::string >( item.ptr(), "__repr__" );
 	s << " ) ";
-	
+
 	return s.str();
 }
 
 void bindBinaryFrameList()
-{	
+{
 	RunTimeTypedClass<BinaryFrameList>()
-		.def( init< optional< FrameListPtr > >() )	
+		.def( init< optional< FrameListPtr > >() )
 		.def( "__repr__", repr< BinaryFrameList > )
 	;
 }

@@ -74,11 +74,11 @@ Imath::Vec2<T> closestPointInBox(const Imath::Vec2<T>& p, const Imath::Box< Imat
 	else
 	{
 		b.y = p.y;
-	}	
+	}
 
-	return b;	
-}	
-	
+	return b;
+}
+
 } // namespace IECore
 
 #endif // IE_CORE_BOXALGO_INL

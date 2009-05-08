@@ -42,7 +42,7 @@ using namespace boost::python;
 
 namespace IECore
 {
- 
+
 void bindJPEGImageReader()
 {
 	RunTimeTypedClass<JPEGImageReader>()

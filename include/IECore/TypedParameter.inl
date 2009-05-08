@@ -77,7 +77,7 @@ TypedParameter<T>::TypedParameter()
 template<typename T>
 TypedParameter<T>::TypedParameter( const std::string &name, const std::string &description, const T &defaultValue,
 	const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
-	:	Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), presetsOnly, userData )	
+	:	Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), presetsOnly, userData )
 {
 }
 
@@ -92,42 +92,42 @@ TypedParameter<T>::TypedParameter( const std::string &name, const std::string &d
 // runtimetyped stuff
 /////////////////////////////////////////////////////////////////////////////////////
 
-template <class T> 
+template <class T>
 const Object::TypeDescription<TypedParameter<T> > TypedParameter<T>::g_typeDescription;
 
-template <class T> 
+template <class T>
 TypeId TypedParameter<T>::typeId() const
 {
 	return staticTypeId();
 }
 
-template <class T> 
+template <class T>
 TypeId TypedParameter<T>::staticTypeId()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return InvalidTypeId;
 }
 
-template <class T> 
+template <class T>
 const char *TypedParameter<T>::typeName() const
 {
 	return staticTypeName();
 }
 
-template <class T> 
+template <class T>
 const char *TypedParameter<T>::staticTypeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
 }
 
-template <class T> 
+template <class T>
 TypeId TypedParameter<T>::baseTypeId()
 {
 	return Parameter::staticTypeId();
 }
 
-template <class T> 
+template <class T>
 const char *TypedParameter<T>::baseTypeName()
 {
 	return Parameter::staticTypeName();
@@ -167,7 +167,7 @@ bool TypedParameter<T>::inheritsFrom( const char *typeName )
 
 /////////////////////////////////////////////////////////////////////////////////////
 // other stuff
-/////////////////////////////////////////////////////////////////////////////////////					
+/////////////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
 bool TypedParameter<T>::valueValid( ConstObjectPtr value, std::string *reason ) const
@@ -215,7 +215,7 @@ const typename TypedParameter<T>::ValueType &TypedParameter<T>::getTypedValue() 
 	}
 	return boost::static_pointer_cast<const ObjectType>( getValue() )->readable();
 }
-		
+
 template<typename T>
 void TypedParameter<T>::setTypedValue( const T &value )
 {
@@ -226,7 +226,7 @@ void TypedParameter<T>::setTypedValue( const T &value )
 // object stuff
 /////////////////////////////////////////////////////////////////////////////////////
 
-template <class T> 
+template <class T>
 typename TypedParameter<T>::Ptr TypedParameter<T>::copy() const
 {
 	return boost::static_pointer_cast<TypedParameter<T> >( copy() );
@@ -264,7 +264,7 @@ void TypedParameter<T>::memoryUsage( Object::MemoryAccumulator &a ) const
 
 /////////////////////////////////////////////////////////////////////////////////////
 // specialisation and template instantiation
-/////////////////////////////////////////////////////////////////////////////////////	
+/////////////////////////////////////////////////////////////////////////////////////
 
 
 #define IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( T, TNAME )						\
@@ -284,5 +284,5 @@ void TypedParameter<T>::memoryUsage( Object::MemoryAccumulator &a ) const
 	template class TypedParameter<T>;
 
 }
-	
+
 #endif // IE_CORE_TYPEDPARAMETER_INL

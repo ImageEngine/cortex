@@ -63,6 +63,6 @@ MStatus TransientParameterisedHolderNode::initialize()
 	{
 		return s;
 	}
-	
+
 	return s;
 }

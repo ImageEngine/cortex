@@ -51,27 +51,27 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 class PointNormalsOp : public Op
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( PointNormalsOp, Op );
-		
+
 		PointNormalsOp();
 		virtual ~PointNormalsOp();
-		
+
 		/// The Parameter for the input point cloud.
 		ObjectParameterPtr pointParameter();
 		ConstObjectParameterPtr pointParameter() const;
-		
+
 		/// The Parameter that specifies how many neighbours to use
 		/// in estimating the density.
 		IntParameterPtr numNeighboursParameter();
 		ConstIntParameterPtr numNeighboursParameter() const;
-				
+
 	protected :
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-	
+
 	private :
-		
+
 		ObjectParameterPtr m_pointParameter;
 		IntParameterPtr m_numNeighboursParameter;
 

@@ -52,7 +52,7 @@ template<typename T>
 inline std::string decToHex( T n )
 {
 	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
-	
+
 	std::string r;
 	for ( unsigned i=0; i < sizeof( T ) * 2; i++ )
 	{
@@ -70,7 +70,7 @@ inline T hexToDec( const std::string &s )
 {
 	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
 	assert( s.size() <= sizeof( T ) * 2 );
-	
+
 	T n = 0;
 
 	for ( std::string::const_iterator it = s.begin(); it != s.end(); ++it )
@@ -116,7 +116,7 @@ inline T hexToDec( const std::string &s )
 		case 'B' :
 		case 'b' :
 			n |= 11;
-			break;			
+			break;
 		case 'C' :
 		case 'c' :
 			n |= 12;
@@ -140,7 +140,7 @@ inline T hexToDec( const std::string &s )
 
 	return n;
 }
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_HEXCONVERSION_H

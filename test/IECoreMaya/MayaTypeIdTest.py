@@ -41,20 +41,20 @@ import os
 import maya.OpenMaya as OpenMaya
 
 class MayaTypeIdTest( unittest.TestCase ) :
-	
+
 	def test( self ) :
-	
+
 		a = IECoreMaya.MayaTypeId.ProceduralHolder
 		self.assertEqual( a.id(), 0x00110DCB )
-		
-		b = maya.OpenMaya.MTypeId( a )		
+
+		b = maya.OpenMaya.MTypeId( a )
 		self.assertEqual( b.id(), 0x00110DCB )
-	
-	def testErrors( self ) :	
-	
+
+	def testErrors( self ) :
+
 		self.assertRaises( RuntimeError, getattr, IECoreMaya.MayaTypeId, "NonExistentTypeId" )
-	
-	
-							
+
+
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

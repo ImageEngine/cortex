@@ -45,7 +45,7 @@ namespace Detail
 
 struct PySwigObject
 {
-    PyObject_HEAD 
+    PyObject_HEAD
     void * ptr;
 };
 

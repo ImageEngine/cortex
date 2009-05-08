@@ -46,16 +46,16 @@ namespace IECoreNuke
 /// convert from Nuke datatypes to IECore datatypes.
 class FromNukeConverter : public IECore::ToCoreConverter
 {
-	
+
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromNukeConverter, FromNukeConverterTypeId, IECore::ToCoreConverter );
 
 	protected :
-	
+
 		FromNukeConverter( const std::string &name, const std::string &description );
 		virtual ~FromNukeConverter();
-	
+
 };
 
 } // namespace IECoreNuke

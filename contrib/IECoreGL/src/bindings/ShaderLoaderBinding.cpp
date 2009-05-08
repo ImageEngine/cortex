@@ -54,5 +54,5 @@ void bindShaderLoader()
 		.def( "defaultShaderLoader", &ShaderLoader::defaultShaderLoader ).staticmethod( "defaultShaderLoader" )
 	;
 }
-	
+
 }

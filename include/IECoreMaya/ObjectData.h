@@ -53,18 +53,18 @@ namespace IECoreMaya
 class ObjectData : public MPxData
 {
 	public:
-	
+
 		enum CopyMode
 		{
 			Shallow,
 			Deep
 		};
-	
+
 		ObjectData();
 		virtual ~ObjectData();
-		
+
 		static void* creator();
-		
+
 		virtual MStatus readASCII( const MArgList &argList, unsigned int &endOfTheLastParsedElement );
 		virtual MStatus readBinary( istream &in, unsigned length );
 		virtual MStatus writeASCII( ostream &out );
@@ -72,12 +72,12 @@ class ObjectData : public MPxData
 
 		/// The behaviour of this function is defined by the current copy mode of source.
 		virtual void copy( const MPxData &source );
-		virtual MTypeId typeId() const; 
+		virtual MTypeId typeId() const;
 		virtual MString name() const;
-		
+
 		static const MString typeName;
 		static const MTypeId id;
-		
+
 		/// Controls how the copy() method behaves when this object is the source
 		/// for the copy. When in Shallow mode
 		/// an ObjectData copy will point to the same Object that the original
@@ -88,7 +88,7 @@ class ObjectData : public MPxData
 		void setCopyMode( CopyMode mode );
 		/// Returns the current copy mode.
 		CopyMode getCopyMode() const;
-		
+
 		/// Returns the object held by this instance - note that this is not
 		/// a copy so you should be careful not to cause unwanted side effects
 		/// through modification.
@@ -98,14 +98,14 @@ class ObjectData : public MPxData
 		/// taken, so any subsequent modification of object directly affects this
 		/// ObjectData.
 		void setObject( IECore::ObjectPtr object );
-		
+
 	protected:
-	
+
 		CopyMode m_copyMode;
-		IECore::ObjectPtr m_object;				
-		
+		IECore::ObjectPtr m_object;
+
 };
 
 }
 
-#endif // IE_COREMAYA_OBJECTDATA_H 
+#endif // IE_COREMAYA_OBJECTDATA_H

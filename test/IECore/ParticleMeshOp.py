@@ -39,31 +39,31 @@ class TestParticleMeshOp( unittest.TestCase ) :
 
 	def testParticleMeshOp( self ) :
 		""" Testing ParticleMeshOp """
-		
+
 		o = ParticleMeshOp()
-		
+
 		points = V3fVectorData()
 		radius = DoubleVectorData()
 		strength = DoubleVectorData()
-		
+
 		bound = Box3f( V3f( -5, -7, -2 ), V3f( 3, 3, 3 ) )
-		resolution = V3i( 80, 80, 80 )				
-		
+		resolution = V3i( 80, 80, 80 )
+
 		m = o(
 			filename = "test/IECore/data/pdcFiles/particleMesh.pdc",
-			
+
 			useRadiusAttribute = False,
 			radius = 0.25,
-			
+
 			threshold = 1,
 			bound = bound,
 			resolution = resolution
 		)
-		
+
 		# Verified by eye
 		self.assert_( len(m.vertexIds) > 120000)
-		self.assert_( len(m.vertexIds) < 140000)		
-			
+		self.assert_( len(m.vertexIds) < 140000)
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

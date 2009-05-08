@@ -43,23 +43,23 @@ IECoreGL.init( False )
 class AlphaTextureTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		i = IECore.TIFFImageReader( os.path.dirname( __file__ ) + "/images/a.tif" ).read()
 		i["A"] = i["Y"]
 		del i["Y"]
-		
+
 		t = IECoreGL.AlphaTexture( i, False )
-		
+
 		ii = t.imagePrimitive()
-	
+
 		res = IECore.ImageDiffOp()(
 			imageA = i,
 			imageB = ii,
 			maxError = 0.001,
 			skipMissingChannels = False
 		)
-		
+
 		self.failIf( res.value )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

@@ -37,7 +37,7 @@
 
 #include "IECore/ClientDisplayDriver.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h" 
+#include "IECore/VectorTypedData.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;

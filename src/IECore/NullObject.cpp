@@ -36,7 +36,7 @@
 
 using namespace IECore;
 
-const unsigned int NullObject::m_ioVersion = 1;	
+const unsigned int NullObject::m_ioVersion = 1;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(NullObject);
 

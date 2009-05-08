@@ -48,28 +48,28 @@ namespace IECore
 class BinaryFrameList : public ReorderedFrameList
 {
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( BinaryFrameList, ReorderedFrameList );
-		
-		BinaryFrameList( FrameListPtr frameList = 0 );		
-		
+
+		BinaryFrameList( FrameListPtr frameList = 0 );
+
 		virtual ~BinaryFrameList();
 
-		virtual void asList( std::vector<Frame> &frames ) const ;		
+		virtual void asList( std::vector<Frame> &frames ) const ;
 		virtual std::string asString() const;
 		virtual FrameListPtr copy() const ;
 
 		static std::string suffix();
-		
+
 		static FrameListPtr parse( const std::string &frameList );
-		
+
 	private :
-	
-		static FrameList::Parser< BinaryFrameList > g_parserRegistrar;			
+
+		static FrameList::Parser< BinaryFrameList > g_parserRegistrar;
 };
 
 IE_CORE_DECLAREPTR( BinaryFrameList );
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_BINARYFRAMELIST_H

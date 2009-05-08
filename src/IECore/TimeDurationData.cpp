@@ -37,18 +37,18 @@
 #include "IECore/TimeDurationData.h"
 #include "IECore/TypedData.inl"
 
-namespace IECore 
+namespace IECore
 {
 
 IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TimeDurationData, TimeDurationDataTypeId )
 IE_CORE_DEFINETYPEDDATANOBASESIZE( TimeDurationData )
 
-template<> 
+template<>
 void TimeDurationData::save( SaveContext *context ) const
-{  
+{
 	Data::save( context );
 	IndexedIOInterfacePtr container = context->rawContainer();
-	
+
 	/// This is cross-platform and handles special values cleanly. It's also going to be smaller than
 	/// creating a proper container, and storing the day/month/year/time_of_day components individually.
 	/// Boost doesn't make this any easier for us as many of the time functions deal with "long" integer types,
@@ -57,15 +57,15 @@ void TimeDurationData::save( SaveContext *context ) const
 	container->write( "value", boost::posix_time::to_simple_string( readable() ) );
 }
 
-template<> 
+template<>
 void TimeDurationData::load( LoadContextPtr context )
 {
-	Data::load( context );	
+	Data::load( context );
 	IndexedIOInterfacePtr container = context->rawContainer();
-	
+
 	std::string t;
-	container->read( "value", t );	
-	
+	container->read( "value", t );
+
 	try
 	{
 		writable() = boost::posix_time::duration_from_string( t );
@@ -89,7 +89,7 @@ void TimeDurationData::load( LoadContextPtr context )
 		{
 			throw;
 		}
-	}				
+	}
 }
 
 template class TypedData< boost::posix_time::time_duration >;

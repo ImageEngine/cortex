@@ -45,62 +45,62 @@
 namespace IECore
 {
 
-/// The CubeColorLookup, templated on either float or double, performs interpolated lookups into color tables. 
+/// The CubeColorLookup, templated on either float or double, performs interpolated lookups into color tables.
 template<typename T>
 class CubeColorLookup
 {
 	public:
-	
+
 		friend class TypedData< CubeColorLookup< T > >;
-	
+
 		typedef enum
 		{
 			NoInterpolation,
 			Linear
 		} Interpolation ;
-	
+
 		typedef T BaseType;
 		typedef std::vector< Imath::Color3<T> > DataType;
-		
+
 		typedef Imath::Vec3<T> VecType;
 		typedef Imath::Box< VecType > BoxType;
 		typedef Imath::Color3<T> ColorType;
 
 		/// Constructs an identity lookup in the domain [0,1]x[0,1]x[0,1]
 		CubeColorLookup();
-		
-		/// Constructs a lookup with the given dimensions and data, over the specified domain and interpolation. The data layout should be in C-array format, 
-		/// i.e. lookups of data[x][y][z] work as expected. 
+
+		/// Constructs a lookup with the given dimensions and data, over the specified domain and interpolation. The data layout should be in C-array format,
+		/// i.e. lookups of data[x][y][z] work as expected.
 		CubeColorLookup( const Imath::V3i &dimension, const DataType &data, const BoxType &domain = BoxType( VecType( 0, 0, 0 ), VecType( 1, 1, 1 ) ), Interpolation interpolation = Linear );
-		virtual ~CubeColorLookup();	
-		
+		virtual ~CubeColorLookup();
+
 		// Sets the interpolation type performed by this lookup
 		void setInterpolation( Interpolation i );
-		
+
 		/// Performs a color lookup
 		inline ColorType operator() ( const ColorType &color ) const;
-		
+
 		/// Sets the values held by this lookup
-		void setCube( const Imath::V3i &dimension, const DataType &data, const BoxType &domain = BoxType( VecType( 0, 0, 0 ), VecType( 1, 1, 1 ) ) );	
-						
-		/// Retrieve fundamental properties of the lookup		
+		void setCube( const Imath::V3i &dimension, const DataType &data, const BoxType &domain = BoxType( VecType( 0, 0, 0 ), VecType( 1, 1, 1 ) ) );
+
+		/// Retrieve fundamental properties of the lookup
 		const Imath::V3i &dimension() const;
 		const BoxType &domain() const;
-		const DataType &data() const;				
+		const DataType &data() const;
 		Interpolation getInterpolation() const;
-		
+
 		inline bool operator==( const CubeColorLookup &rhs ) const;
 		inline bool operator!=( const CubeColorLookup &rhs ) const;
-		
+
 	protected:
-	
+
 		inline VecType normalizedCoordinates( const ColorType &color ) const;
 		inline int clamp( int v, int min, int max ) const;
-	
+
 		Imath::V3i m_dimension;
 		BoxType m_domain;
 		DataType m_data;
-		Interpolation m_interpolation;										
+		Interpolation m_interpolation;
 };
 
 typedef CubeColorLookup<float> CubeColorLookupf;

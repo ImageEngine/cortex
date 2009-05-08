@@ -61,47 +61,47 @@ MStatus NumericParameterHandler<T>::update( IECore::ConstParameterPtr parameter,
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnNumericAttribute fnNAttr( attribute );
 	if( !fnNAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
 	}
-	
+
 	fnNAttr.setDefault( p->numericDefaultValue() );
 	fnNAttr.setMin( p->minValue() );
 	fnNAttr.setMax( p->maxValue() );
-	
+
 	bool keyable = true;
 	bool channelBox = true;
-	
+
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
 	assert( userData );
-	
+
 	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
 	if (maya)
 	{
-		const IECore::ConstBoolDataPtr keyableData = maya->member<const IECore::BoolData>("keyable");		
+		const IECore::ConstBoolDataPtr keyableData = maya->member<const IECore::BoolData>("keyable");
 		if (keyableData)
 		{
 			keyable = keyableData->readable();
 		}
-		
-		const IECore::ConstBoolDataPtr channelBoxData = maya->member<const IECore::BoolData>("channelBox");		
+
+		const IECore::ConstBoolDataPtr channelBoxData = maya->member<const IECore::BoolData>("channelBox");
 		if (channelBoxData)
 		{
 			channelBox = channelBoxData->readable();
 		}
-	}	
-	
+	}
+
 	fnNAttr.setKeyable( keyable );
-	
+
 	// Calling setChannelBox(true) disables keying
 	if (!keyable)
 	{
 		fnNAttr.setChannelBox( channelBox );
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -113,13 +113,13 @@ MObject NumericParameterHandler<T>::create( IECore::ConstParameterPtr parameter,
 	{
 		return MObject::kNullObj;
 	}
-	
+
 	MFnNumericAttribute fnNAttr;
 	MObject result = fnNAttr.create( attributeName, attributeName, NumericTraits<T>::dataType(), p->numericDefaultValue() );
 	update( parameter, result );
 	return result;
 }
-		
+
 template<typename T>
 MStatus NumericParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
@@ -128,7 +128,7 @@ MStatus NumericParameterHandler<T>::setValue( IECore::ConstParameterPtr paramete
 	{
 		return MS::kFailure;
 	}
-	
+
 	return plug.setValue( p->getNumericValue() );
 }
 
@@ -140,7 +140,7 @@ MStatus NumericParameterHandler<T>::setValue( const MPlug &plug, IECore::Paramet
 	{
 		return MS::kFailure;
 	}
-	
+
 	T v;
 	MStatus result;
 	result = plug.getValue( v );

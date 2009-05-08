@@ -39,26 +39,26 @@ import IECore
 class TestObjectReader( unittest.TestCase ) :
 
 	def testConstruction( self ) :
-	
+
 		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
 		self.assertEqual( type( r ), IECore.ObjectReader )
 		self.assertEqual( r["fileName"].getValue().value, "test/IECore/data/cobFiles/compoundData.cob" )
-		
+
 	def testRead( self ) :
-	
+
 		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
 		self.assertEqual( type( r ), IECore.ObjectReader )
-		
+
 		c = r.read()
-		
+
 		self.assertEqual( len(c), 4 )
 		self.assertEqual( c["banana"].value, 2)
 		self.assertEqual( c["apple"].value, 12)
 		self.assertEqual( c["lemon"].value, -3)
-		self.assertEqual( c["melon"].value, 2.5)				
-				
-		
-			
+		self.assertEqual( c["melon"].value, 2.5)
+
+
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

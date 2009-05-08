@@ -39,7 +39,7 @@ import IECore
 class TestWrapperToPython( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		f = IECore.FileSequenceParameter( "f", "d" )
 		c = IECore.CompoundParameter(
 			members = [
@@ -52,7 +52,7 @@ class TestWrapperToPython( unittest.TestCase ) :
 		self.assertEqual( c["f"], f )
 
 	def testReturningNonWrappedPtr( self ) :
-	
+
 		r = IECore.ReadProcedural()
 		o = IECore.CompoundObject( { "c" : r } )
 

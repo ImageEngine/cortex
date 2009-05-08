@@ -38,71 +38,71 @@ import unittest, MayaUnitTest
 import os.path
 import IECore
 import IECoreMaya
-			
+
 
 class TestParameterisedHolder( unittest.TestCase ) :
-		
+
 	def testNode( self ):
 		""" Test ParameterisedHolderNode """
-		n = cmds.createNode( "ieParameterisedHolderNode" )	
+		n = cmds.createNode( "ieParameterisedHolderNode" )
 		h = IECoreMaya.FnParameterisedHolder( str(n) )
 		self.assert_( h )
-		
+
 		p = IECore.ParticleMeshOp()
-		
+
 		h.setParameterised( p )
-		
-		p.parameters()["filename"] = "testValue"		
+
+		p.parameters()["filename"] = "testValue"
 		h.setNodeValue( p.parameters()["filename"] )
 		pl = h.parameterPlug( p.parameters()["filename"] )
 		v = IECoreMaya.FromMayaPlugConverter.create( pl, IECore.TypeId.StringData ).convert()
 		self.assertEqual( v.value, "testValue" )
-				
+
 		cmds.setAttr( pl.name(), "testValue2", typ="string" )
 		h.setParameterisedValue( p.parameters()["filename"] )
 		self.assertEqual( p.parameters()["filename"].getValue().value, "testValue2" )
-		
-					
-	def testParameterisedHolderSetReference( self ):	
+
+
+	def testParameterisedHolderSetReference( self ):
 		""" Test multiple references to ieParameterisedHolderSet nodes """
-								
-		nodeType = "ieParameterisedHolderSet" 	
-				
+
+		nodeType = "ieParameterisedHolderSet"
+
 		nodeName = cmds.createNode( nodeType )
-		
+
 		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "reference.ma" ) )
 		scene = cmds.file( force = True, type = "mayaAscii", save = True )
-		
-		cmds.file( new = True, force = True )				
+
+		cmds.file( new = True, force = True )
 		cmds.file( scene, reference = True, namespace = "ns1" )
 		cmds.file( scene, reference = True, namespace = "ns2" )
-		
+
 		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "referenceMaster.ma" ) )
 		masterScene = cmds.file( force = True, type = "mayaAscii", save = True )
-				
+
 		cmds.file( masterScene, force = True, open = True )
-		
-		nodeName1 = "ns1:" + nodeName	
-		nodeName2 = "ns2:" + nodeName	
-		
+
+		nodeName1 = "ns1:" + nodeName
+		nodeName2 = "ns2:" + nodeName
+
 		l = OpenMaya.MSelectionList()
 		l.add( nodeName1 )
 		l.add( nodeName2 )
-				
+
 		node1 = OpenMaya.MObject()
 		l.getDependNode( 0, node1 )
 		node2 = OpenMaya.MObject()
 		l.getDependNode( 1, node2 )
-		
+
 		fn1 = OpenMaya.MFnDependencyNode( node1 )
 		fn2 = OpenMaya.MFnDependencyNode( node2 )
-		
+
 		self.assert_( fn1.userNode() )
 		self.assert_( fn2.userNode() ) # This failure is due to a Maya bug. When referencing the same scene twice, as an optimisation Maya will duplicate existing nodes instead of creating new ones. There is a bug in MPxObjectSet::copy() which gets exercised here. Setting the environment variable MAYA_FORCE_REF_READ to 1 will disable this optimisation, however.
-		
+
 	def testChangeDefault( self ) :
 		""" Test that changing parameter defaults is correctly reflected in Maya attributes """
-	
+
 		def makeOp( defaultValue ) :
 
 			class TestOp( IECore.Op ) :
@@ -126,55 +126,55 @@ class TestParameterisedHolder( unittest.TestCase ) :
 							),
 						]
 					)
-					
-			return TestOp()	
-	
-	
-		n = cmds.createNode( "ieParameterisedHolderNode" )	
+
+			return TestOp()
+
+
+		n = cmds.createNode( "ieParameterisedHolderNode" )
 		h = IECoreMaya.FnParameterisedHolder( str(n) )
 		self.assert_( h )
-		
-		p = makeOp( IECore.Color3f( 0, 0, 0 ) )		
+
+		p = makeOp( IECore.Color3f( 0, 0, 0 ) )
 		h.setParameterised( p )
 		dv = cmds.attributeQuery ( "parm_c", node = n, listDefault = True )
 		self.assertEqual( dv, [ 0, 0, 0 ] )
-		
-		p = makeOp( IECore.Color3f( 1, 1, 1 ) )			
-		h.setParameterised( p )		
+
+		p = makeOp( IECore.Color3f( 1, 1, 1 ) )
+		h.setParameterised( p )
 		dv = cmds.attributeQuery ( "parm_c", node = n, listDefault = True )
 		self.assertEqual( dv, [ 1, 1, 1 ] )
-	
+
 	def testDynamicParameters( self ) :
-	
+
 		fnPH = IECoreMaya.FnOpHolder.create( "holder", "maths/multiply", 2 )
-		
+
 		p = fnPH.getParameterised()[0]
-	
+
 		p.parameters().addParameter(
-		
+
 			IECore.IntParameter(
 				"iAmDynamic",
 				"",
 				2
 			)
-		
+
 		)
-		
+
 		fnPH.updateParameterised()
-		
+
 		self.assert_( cmds.objExists( fnPH.fullPathName() + ".parm_iAmDynamic" ) )
 		plug = fnPH.parameterPlug( p["iAmDynamic"] )
 		self.assertEqual( plug.partialName(), "parm_iAmDynamic" )
 		self.assertEqual( plug.asInt(), 2 )
-		
+
 		plug.setInt( 3 )
 		fnPH.setParameterisedValue( p["iAmDynamic"] )
 		self.assertEqual( p["iAmDynamic"].getNumericValue(), 3 )
-		
+
 		plug.setInt( 4 )
 		fnPH.setParameterisedValues()
 		self.assertEqual( p["iAmDynamic"].getNumericValue(), 4 )
-		
+
 		p["iAmDynamic"].setNumericValue( 5 )
 		fnPH.setNodeValue( p["iAmDynamic"] )
 		self.assertEqual( plug.asInt(), 5 )
@@ -182,39 +182,39 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		p["iAmDynamic"].setNumericValue( 6 )
 		fnPH.setNodeValues()
 		self.assertEqual( plug.asInt(), 6 )
-				
+
 		p.parameters().removeParameter( p["iAmDynamic"] )
 		fnPH.updateParameterised()
 		self.assert_( not cmds.objExists( fnPH.fullPathName() + ".parm_iAmDynamic" ) )
-	
+
 	def testDynamicParametersDuplicate( self ) :
-	
+
 		fnPH = IECoreMaya.FnOpHolder.create( "holder", "maths/multiply", 2 )
-		
+
 		p = fnPH.getParameterised()[0]
-			
+
 		p.parameters().addParameter(
-		
+
 			IECore.IntParameter(
 				"iAmDynamic",
 				"iAmADescription",
 				2
 			)
-		
+
 		)
-		
+
 		fnPH.updateParameterised()
-		
+
 		dd = cmds.duplicate( fnPH.fullPathName() )[0]
-		
+
 		fnPH2 = IECoreMaya.FnParameterisedHolder( dd )
 		p2 = fnPH2.getParameterised()[0]
-		
+
 		self.assert_( p2["iAmDynamic"].isInstanceOf( IECore.IntParameter.staticTypeId() ) )
 		self.assertEqual( p2["iAmDynamic"].description, "iAmADescription" )
 		self.assertEqual( p2["iAmDynamic"].defaultValue, IECore.IntData( 2 ) )
 		self.assert_( not p2["iAmDynamic"].isSame( p["iAmDynamic"] ) )
-		
+
 		plug = fnPH2.parameterPlug( p2["iAmDynamic"] )
 		self.assertEqual( plug.asInt(), 2 )
 
@@ -223,57 +223,57 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		fnPH.setNodeValues()
 		fnPH2.setNodeValues()
 		self.assertEqual( fnPH.parameterPlug( p["iAmDynamic"] ).asInt(), 10 )
-		self.assertEqual( fnPH2.parameterPlug( p2["iAmDynamic"] ).asInt(), 20 )	
+		self.assertEqual( fnPH2.parameterPlug( p2["iAmDynamic"] ).asInt(), 20 )
 
 	def testDynamicParametersAddRemoveAndDuplicate( self ) :
-	
+
 		fnPH = IECoreMaya.FnOpHolder.create( "holder", "maths/multiply", 2 )
-		
+
 		p = fnPH.getParameterised()[0]
-	
+
 		p.parameters().addParameter(
-		
+
 			IECore.IntParameter(
 				"iAmDynamic",
 				"iAmADescription",
 				2
 			)
-		
+
 		)
-		
+
 		fnPH.updateParameterised()
-				
+
 		p.parameters().removeParameter( p["iAmDynamic"] )
-		fnPH.updateParameterised()		
+		fnPH.updateParameterised()
 		self.assert_( not cmds.objExists( fnPH.fullPathName() + ".parm_iAmDynamic" ) )
 		self.assert_( not "iAmDynamic" in p.parameters() )
-		
+
 		dd = cmds.duplicate( fnPH.fullPathName() )[0]
-		
+
 		fnPH2 = IECoreMaya.FnParameterisedHolder( dd )
 		p2 = fnPH2.getParameterised()[0]
-		
+
 		self.assert_( not cmds.objExists( fnPH2.fullPathName() + ".parm_iAmDynamic" ) )
 		self.assert_( not "iAmDynamic" in p2.parameters() )
 
 	def testDynamicParametersSaveAndLoad( self ) :
-			
+
 		fnPH = IECoreMaya.FnOpHolder.create( "holder", "maths/multiply", 2 )
-		
-		p = fnPH.getParameterised()[0]	
-	
+
+		p = fnPH.getParameterised()[0]
+
 		p.parameters().addParameter(
-		
+
 			IECore.IntParameter(
 				"iAmDynamic",
 				"iAmADescription",
 				2
 			)
-		
-		)		
-	
+
+		)
+
 		fnPH.updateParameterised()
-		
+
 		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "dynamicParameters.ma" ) )
 		scene = cmds.file( force = True, type = "mayaAscii", save = True )
 		cmds.file( new = True, force = True )
@@ -281,7 +281,7 @@ class TestParameterisedHolder( unittest.TestCase ) :
 
 		fnPH = IECoreMaya.FnOpHolder( "holder" )
 		p = fnPH.getParameterised()[0]
-		
+
 		self.assert_( cmds.objExists( fnPH.fullPathName() + ".parm_iAmDynamic" ) )
 		plug = fnPH.parameterPlug( p["iAmDynamic"] )
 		self.assertEqual( plug.partialName(), "parm_iAmDynamic" )
@@ -291,21 +291,21 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		self.assertEqual( p["iAmDynamic"].defaultValue, IECore.IntData( 2 ) )
 
 	def testDynamicParametersReload( self ) :
-	
+
 		fnPH = IECoreMaya.FnOpHolder.create( "holder", "maths/multiply", 1 )
-		
+
 		p = fnPH.getParameterised()[0]
-	
+
 		p.parameters().addParameter(
-		
+
 			IECore.IntParameter(
 				"iAmDynamic",
 				"iAmADescription",
 				2
 			)
-		
-		)		
-	
+
+		)
+
 		fnPH.updateParameterised()
 		fnPH.setOp( "maths/multiply", 2 )
 
@@ -314,112 +314,112 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		self.assertEqual( plug.asInt(), 2 )
 		self.assert_( p["iAmDynamic"].isInstanceOf( IECore.IntParameter.staticTypeId() ) )
 		self.assertEqual( p["iAmDynamic"].description, "iAmADescription" )
-		self.assertEqual( p["iAmDynamic"].defaultValue, IECore.IntData( 2 ) )		
+		self.assertEqual( p["iAmDynamic"].defaultValue, IECore.IntData( 2 ) )
 
 	def testEmptyDynamicCompoundParameters( self ) :
-	
+
 		fnPH = IECoreMaya.FnOpHolder.create( "holder", "maths/multiply", 1 )
-		
+
 		p = fnPH.getParameterised()[0]
-	
+
 		p.parameters().addParameter(
-		
+
 			IECore.CompoundParameter(
 				"iAmDynamic",
 				"andIAmACompoundParameter",
 			)
-		
-		)		
-	
+
+		)
+
 		fnPH.updateParameterised()
-		
+
 		dd = cmds.duplicate( fnPH.fullPathName() )[0]
-		
+
 		fnPH2 = IECoreMaya.FnParameterisedHolder( dd )
 		p2 = fnPH2.getParameterised()[0]
-		
+
 		self.assert_( p2["iAmDynamic"].isInstanceOf( IECore.CompoundParameter.staticTypeId() ) )
 		self.assert_( not p["iAmDynamic"].isSame( p2["iAmDynamic"] ) )
 		self.assertEqual( len( p2["iAmDynamic"] ), 0 )
 		self.assert_( not fnPH2.parameterPlug( p2["iAmDynamic"] ).isNull() )
 
 	def testDynamicCompoundParametersWithDynamicChildren( self ) :
-	
+
 		fnPH = IECoreMaya.FnOpHolder.create( "holder", "maths/multiply", 1 )
-		
+
 		p = fnPH.getParameterised()[0]
-	
+
 		p.parameters().addParameter(
-		
+
 			IECore.CompoundParameter(
 				"iAmDynamic",
 				"andIAmACompoundParameter",
 			)
-		
-		)		
+
+		)
 
 		p["iAmDynamic"].addParameter(
-		
+
 			IECore.IntParameter(
 				"iAmDynamicToo",
 				"iAmADescriptionToo",
 				2
 			)
-		
-		)		
-		
+
+		)
+
 		fnPH.updateParameterised()
 		self.assertEqual( fnPH.parameterPlug( p["iAmDynamic"]["iAmDynamicToo"] ).asInt(), 2 )
 
 		dd = cmds.duplicate( fnPH.fullPathName() )[0]
-		
+
 		fnPH2 = IECoreMaya.FnParameterisedHolder( dd )
 		p2 = fnPH2.getParameterised()[0]
 		self.assertEqual( fnPH2.parameterPlug( p2["iAmDynamic"]["iAmDynamicToo"] ).asInt(), 2 )
 
 	def testDynamicCompoundParametersWithDynamicChildrenAddedLater( self ) :
-	
+
 		fnPH = IECoreMaya.FnOpHolder.create( "holder", "maths/multiply", 1 )
-		
+
 		p = fnPH.getParameterised()[0]
-	
+
 		p.parameters().addParameter(
-		
+
 			IECore.CompoundParameter(
 				"iAmDynamic",
 				"andIAmACompoundParameter",
 			)
-		
+
 		)
 
 		fnPH.updateParameterised()
 
 		p["iAmDynamic"].addParameter(
-		
+
 			IECore.IntParameter(
 				"iAmDynamicToo",
 				"iAmADescriptionToo",
 				2
 			)
-		
-		)		
-		
+
+		)
+
 		fnPH.updateParameterised()
 		self.assertEqual( fnPH.parameterPlug( p["iAmDynamic"]["iAmDynamicToo"] ).asInt(), 2 )
 
 		dd = cmds.duplicate( fnPH.fullPathName() )[0]
-		
+
 		fnPH2 = IECoreMaya.FnParameterisedHolder( dd )
 		p2 = fnPH2.getParameterised()[0]
 		self.assertEqual( fnPH2.parameterPlug( p2["iAmDynamic"]["iAmDynamicToo"] ).asInt(), 2 )
 
-				
+
 	def tearDown( self ) :
-		
+
 		for f in [ "test/IECoreMaya/reference.ma" , "test/IECoreMaya/referenceMaster.ma", "test/IECoreMaya/dynamicParameters.ma" ] :
-		
+
 			if os.path.exists( f ) :
-		
+
 				os.remove( f )
 
 if __name__ == "__main__":

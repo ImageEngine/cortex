@@ -53,18 +53,18 @@ class ParameterisedHolderSetValueCmd : public MPxCommand
 
 		ParameterisedHolderSetValueCmd();
 		virtual ~ParameterisedHolderSetValueCmd();
-		
+
 		static void *creator();
 		static MSyntax newSyntax();
-		
+
 		virtual bool isUndoable() const;
-		
+
 		virtual MStatus doIt( const MArgList &argList );
 		virtual MStatus undoIt();
 		virtual MStatus redoIt();
-	
+
 	private :
-	
+
 		ParameterisedHolderInterface *m_parameterisedHolder;
 		IECore::ParameterPtr m_parameter; // only set if we're setting a specific parameter rather than all of them
 		IECore::ObjectPtr m_originalValue;

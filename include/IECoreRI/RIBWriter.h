@@ -59,24 +59,24 @@ class RIBWriter : public IECore::Writer
 
 		RIBWriter();
 		RIBWriter( IECore::ObjectPtr object, const std::string &fileName );
-		
+
 		static bool canWrite( IECore::ConstObjectPtr object, const std::string &fileName );
-		
+
 		IECore::BoolParameterPtr worldBlockParameter();
 		IECore::ConstBoolParameterPtr worldBlockParameter() const;
-		
+
 	protected :
 
 		virtual void doWrite();
-	
+
 	private :
-	
+
 		void constructParameters();
-		
+
 		IECore::BoolParameterPtr m_worldBlockParameter;
-			
+
 		static const WriterDescription<RIBWriter> g_writerDescription;
-		
+
 };
 
 IE_CORE_DECLAREPTR( RIBWriter );

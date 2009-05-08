@@ -75,7 +75,7 @@ static unsigned long g_refCount = 0;
 MStatus initialize(MFnPlugin &plugin)
 {
 	MStatus s = MS::kSuccess;
-	
+
 	if (g_refCount == 0)
 	{
 
@@ -83,84 +83,84 @@ MStatus initialize(MFnPlugin &plugin)
 		{
 			IECoreGL::init( true );
 		}
-	
+
 		// register plugin
-		
+
 		s = plugin.registerData( ObjectData::typeName, ObjectData::id, ObjectData::creator);
-		
+
 		s = plugin.registerNode( "ieCacheSet", CacheSet::id, CacheSet::creator, CacheSet::initialize,
 			MPxNode::kObjectSet );
-					
-		s = plugin.registerNode( ParameterisedHolderNode::typeName, ParameterisedHolderNode::id, 
+
+		s = plugin.registerNode( ParameterisedHolderNode::typeName, ParameterisedHolderNode::id,
 			ParameterisedHolderNode::creator, ParameterisedHolderNode::initialize );
-		assert( s );	
-			
-		s = plugin.registerNode( ParameterisedHolderLocator::typeName, ParameterisedHolderLocator::id, 
+		assert( s );
+
+		s = plugin.registerNode( ParameterisedHolderLocator::typeName, ParameterisedHolderLocator::id,
 			ParameterisedHolderLocator::creator, ParameterisedHolderLocator::initialize, MPxNode::kLocatorNode );
 		assert( s );
-		
-		s = plugin.registerNode( ParameterisedHolderDeformer::typeName, ParameterisedHolderDeformer::id, 
+
+		s = plugin.registerNode( ParameterisedHolderDeformer::typeName, ParameterisedHolderDeformer::id,
 			ParameterisedHolderDeformer::creator, ParameterisedHolderDeformer::initialize, MPxNode::kDeformerNode );
 		assert( s );
-		
-		s = plugin.registerNode( ParameterisedHolderField::typeName, ParameterisedHolderField::id, 
+
+		s = plugin.registerNode( ParameterisedHolderField::typeName, ParameterisedHolderField::id,
 			ParameterisedHolderField::creator, ParameterisedHolderField::initialize, MPxNode::kFieldNode );
 		assert( s );
-		
-		s = plugin.registerNode( ParameterisedHolderSet::typeName, ParameterisedHolderSet::id, 
+
+		s = plugin.registerNode( ParameterisedHolderSet::typeName, ParameterisedHolderSet::id,
 			ParameterisedHolderSet::creator, ParameterisedHolderSet::initialize, MPxNode::kObjectSet );
 		assert( s );
-		
-		s = plugin.registerShape( ParameterisedHolderSurfaceShape::typeName, ParameterisedHolderSurfaceShape::id, 
+
+		s = plugin.registerShape( ParameterisedHolderSurfaceShape::typeName, ParameterisedHolderSurfaceShape::id,
 			ParameterisedHolderSurfaceShape::creator, ParameterisedHolderSurfaceShape::initialize, ProceduralHolderUI::creator );
 		assert( s );
-		
-		s = plugin.registerShape( ParameterisedHolderComponentShape::typeName, ParameterisedHolderComponentShape::id, 
+
+		s = plugin.registerShape( ParameterisedHolderComponentShape::typeName, ParameterisedHolderComponentShape::id,
 			ParameterisedHolderComponentShape::creator, ParameterisedHolderComponentShape::initialize, ProceduralHolderUI::creator );
 		assert( s );
 
-		s = plugin.registerShape( "ieProceduralHolder", ProceduralHolder::id, 
-			ProceduralHolder::creator, ProceduralHolder::initialize, ProceduralHolderUI::creator );	
+		s = plugin.registerShape( "ieProceduralHolder", ProceduralHolder::id,
+			ProceduralHolder::creator, ProceduralHolder::initialize, ProceduralHolderUI::creator );
 		assert( s );
-		
-		s = plugin.registerNode( "ieOpHolderNode", OpHolderNode::id, 
+
+		s = plugin.registerNode( "ieOpHolderNode", OpHolderNode::id,
 			OpHolderNode::creator, OpHolderNode::initialize );
 		assert( s );
-			
-		s = plugin.registerNode( "ieConverterHolder", ConverterHolder::id, 
-			ConverterHolder::creator, ConverterHolder::initialize );			
+
+		s = plugin.registerNode( "ieConverterHolder", ConverterHolder::id,
+			ConverterHolder::creator, ConverterHolder::initialize );
 		assert( s );
-		
-		s = plugin.registerNode( TransientParameterisedHolderNode::typeName, TransientParameterisedHolderNode::id, 
+
+		s = plugin.registerNode( TransientParameterisedHolderNode::typeName, TransientParameterisedHolderNode::id,
 			TransientParameterisedHolderNode::creator, TransientParameterisedHolderNode::initialize );
 		assert( s );
-		
-		s = plugin.registerNode( ParameterisedHolderImagePlane::typeName, ParameterisedHolderImagePlane::id, 
+
+		s = plugin.registerNode( ParameterisedHolderImagePlane::typeName, ParameterisedHolderImagePlane::id,
 			ParameterisedHolderImagePlane::creator, ParameterisedHolderImagePlane::initialize, MPxNode::kImagePlaneNode );
 		assert( s );
-		
-		s = plugin.registerNode( "ieImagePlaneHolder", ImagePlaneHolder::id, 
+
+		s = plugin.registerNode( "ieImagePlaneHolder", ImagePlaneHolder::id,
 			ImagePlaneHolder::creator, ImagePlaneHolder::initialize, MPxNode::kImagePlaneNode );
-		assert( s );			
-		
+		assert( s );
+
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
-		
-		s = plugin.registerCommand( "ieSystemExit", SystemExitCmd::creator );				
-		
-		s = plugin.registerCommand( "ieParameterisedHolderSetValue", ParameterisedHolderSetValueCmd::creator, ParameterisedHolderSetValueCmd::newSyntax );				
+
+		s = plugin.registerCommand( "ieSystemExit", SystemExitCmd::creator );
+
+		s = plugin.registerCommand( "ieParameterisedHolderSetValue", ParameterisedHolderSetValueCmd::creator, ParameterisedHolderSetValueCmd::newSyntax );
 
 		MStringArray imageFileExtensions;
 		imageFileExtensions.append( "exr" );
-		
+
 		s = plugin.registerImageFile( "ieImageFile", ImageFile::creator, imageFileExtensions);
 		assert( s );
-					
+
 		/// \todo This may well need to change, depending on how we allow people to install
 		/// the mel files.
 		MString cmd = "source \"IECoreMaya/IECoreMaya.mel\";";
 		s = MGlobal::executeCommand(cmd);
-		
+
 		if( !getenv( "IECOREMAYA_DISABLEOUTPUTREDIRECTION" ) )
 		{
 			IECore::MessageHandlerPtr h = new IECoreMaya::MessageHandler;
@@ -168,24 +168,24 @@ MStatus initialize(MFnPlugin &plugin)
 			IECore::MessageHandler::pushHandler( h );
 		}
 	}
-	
+
 	g_refCount ++;
-	
+
 	return s;
 }
 
 MStatus uninitialize(MFnPlugin &plugin)
 {
 	MStatus s = MS::kSuccess;
-	
+
 	assert( g_refCount > 0 );
-	
+
 	g_refCount --;
-	
+
 	if (g_refCount == 0)
 	{
 		// unregister plugin
-		
+
 		s = plugin.deregisterNode( CacheSet::id );
 		s = plugin.deregisterNode( ParameterisedHolderNode::id );
 		s = plugin.deregisterNode( ParameterisedHolderLocator::id );
@@ -193,24 +193,24 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( ParameterisedHolderField::id );
 		s = plugin.deregisterNode( ParameterisedHolderSet::id );
 		s = plugin.deregisterNode( ParameterisedHolderSurfaceShape::id );
-		s = plugin.deregisterNode( ParameterisedHolderComponentShape::id );		
+		s = plugin.deregisterNode( ParameterisedHolderComponentShape::id );
 		s = plugin.deregisterNode( ProceduralHolder::id );
 		s = plugin.deregisterNode( OpHolderNode::id );
 		s = plugin.deregisterNode( ConverterHolder::id );
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );
 		s = plugin.deregisterNode( ParameterisedHolderImagePlane::id );
 		s = plugin.deregisterNode( ImagePlaneHolder::id );
-		
+
 		s = plugin.deregisterCommand( "iePython" );
 		s = plugin.deregisterCommand( "ieSystemExit" );
 		PythonCmd::uninitialize();
-		
+
 		s = plugin.deregisterCommand( "ieParameterisedHolderSetValue" );
-		
+
 		s = plugin.deregisterData( ObjectData::id );
-		
+
 		s = plugin.deregisterImageFile( "ieImageFile" );
-		
+
 		// \todo Should we also pop our message handler here if we pushed one in initialize?
 		// We're not doing that for now as IECore.Log.setLogLevel messes with the balancing of the
 		// stack so i'm not sure popping is a good idea. Also even if we fix that then there's no real
@@ -218,7 +218,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 		// handlers since ours, and not popped 'em). Not sure - maybe we need some guidelines as to
 		// the nesting of handlers?
 	}
-	
+
 	return s;
 }
 

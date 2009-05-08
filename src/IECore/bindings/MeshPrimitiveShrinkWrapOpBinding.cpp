@@ -48,23 +48,23 @@ namespace IECore
 {
 
 void bindMeshPrimitiveShrinkWrapOp()
-{	
+{
 	scope opScope = RunTimeTypedClass<MeshPrimitiveShrinkWrapOp>()
 		.def( init<>() )
 	;
-	
+
 	enum_< MeshPrimitiveShrinkWrapOp::Direction >( "Direction" )
 		.value( "Both", MeshPrimitiveShrinkWrapOp::Both )
 		.value( "Inside", MeshPrimitiveShrinkWrapOp::Inside )
-		.value( "Outside", MeshPrimitiveShrinkWrapOp::Outside )	
+		.value( "Outside", MeshPrimitiveShrinkWrapOp::Outside )
 	;
-	
+
 	enum_< MeshPrimitiveShrinkWrapOp::Method >( "Method" )
 		.value( "Normal", MeshPrimitiveShrinkWrapOp::Normal )
 		.value( "XAxis", MeshPrimitiveShrinkWrapOp::XAxis )
 		.value( "YAxis", MeshPrimitiveShrinkWrapOp::YAxis )
-		.value( "ZAxis", MeshPrimitiveShrinkWrapOp::ZAxis )		
-	;			
+		.value( "ZAxis", MeshPrimitiveShrinkWrapOp::ZAxis )
+	;
 
 }
 

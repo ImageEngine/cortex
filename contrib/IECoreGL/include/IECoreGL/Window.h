@@ -55,9 +55,9 @@ class Window : public IECore::RefCounted
 {
 
 	public :
-	
+
 		IE_CORE_DECLAREMEMBERPTR( Window )
-	
+
 		/// Creates a new window with the specified
 		/// title.
 		Window( const std::string &title );
@@ -67,20 +67,20 @@ class Window : public IECore::RefCounted
 		const std::string &getTitle() const;
 		/// Sets the window title.
 		void setTitle( const std::string &title );
-		
+
 		/// Sets whether the window is shown or
 		/// hidden.
 		void setVisibility( bool visible );
 		/// Returns whether the window is shown or
 		/// hidden.
 		bool getVisibility() const;
-		
+
 		/// Enters the main GLUT display loop. Once
 		/// you're in that there's no getting back.
 		static void start();
-		
+
 	protected :
-	
+
 		//! @name Callbacks
 		/// These correspond directly to the glut
 		/// callback functions for the window.
@@ -96,10 +96,10 @@ class Window : public IECore::RefCounted
 		virtual void passiveMotion( int x, int y );
 		virtual void keyboard( unsigned char key, int x, int y );
 		//@}
-		
+
 		/// Calls glutPostRedisplay() for this window.
 		void postRedisplay() const;
-		
+
 		/// Returns true if the specified mouse button is pressed.
 		/// button is in the same format as passed to the mouse()
 		/// callback function - ie one of the GLUT_*_BUTTON
@@ -114,19 +114,19 @@ class Window : public IECore::RefCounted
 		/// only reliable if any overrides to motion() and mouse() also
 		/// call the base class equivalents
 		Imath::V2i lastMouseDragPosition() const;
-		
+
 	private :
-	
+
 		int m_window;
 		std::string m_title;
 		bool m_visible;
-	
+
 		bool m_mouseLeftDown;
 		bool m_mouseMiddleDown;
 		bool m_mouseRightDown;
 		Imath::V2i m_lastMouseClickPosition;
 		Imath::V2i m_lastMouseDragPosition;
-				
+
 		typedef std::map<int, Window *> WindowMap;
 		static WindowMap m_windows;
 		static void displayFunc();

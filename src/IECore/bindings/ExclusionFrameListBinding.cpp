@@ -43,37 +43,37 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 template<>
 std::string repr( ExclusionFrameList &x )
 {
 	std::stringstream s;
-	
+
 	s << "IECore.ExclusionFrameList( ";
-	
+
 	object item( x.getFrameList() );
-	
+
 	s << call_method< std::string >( item.ptr(), "__repr__" );
-	
+
 	s << ", ";
-	
+
 	item = object( x.getExclusionFrameList() );
-	
+
 	s << call_method< std::string >( item.ptr(), "__repr__" );
 
 	s << " ) ";
-	
+
 	return s.str();
 }
 
 void bindExclusionFrameList()
-{	
+{
 	RunTimeTypedClass<ExclusionFrameList>()
 		.def( init< FrameListPtr, FrameListPtr >() )
 		.add_property( "frameList", &ExclusionFrameList::getFrameList, &ExclusionFrameList::setFrameList )
-		.add_property( "exclusionFrameList", &ExclusionFrameList::getExclusionFrameList, &ExclusionFrameList::setExclusionFrameList )		
+		.add_property( "exclusionFrameList", &ExclusionFrameList::getExclusionFrameList, &ExclusionFrameList::setExclusionFrameList )
 		.def( "__repr__", repr< ExclusionFrameList > )
 	;
 }

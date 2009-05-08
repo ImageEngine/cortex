@@ -38,16 +38,16 @@ import unittest
 class CapturingMessageHandler( unittest.TestCase ) :
 
 	def setUp( self ) :
-	
+
 		self.handler = IECore.CapturingMessageHandler()
 		IECore.Msg.pushHandler( self.handler )
 
 	def test( self ) :
-	
+
 		IECore.msg( IECore.Msg.Level.Error, "A", "AAA" )
 		IECore.msg( IECore.Msg.Level.Error, "B", "BBB" )
 		IECore.msg( IECore.Msg.Level.Error, "C", "CCC" )
-		
+
 		self.assertEqual( len( self.handler.messages ), 3 )
 		self.assertEqual( self.handler.messages[0].level, IECore.Msg.Level.Error )
 		self.assertEqual( self.handler.messages[1].level, IECore.Msg.Level.Error )
@@ -58,11 +58,11 @@ class CapturingMessageHandler( unittest.TestCase ) :
 		self.assertEqual( self.handler.messages[0].message, "AAA" )
 		self.assertEqual( self.handler.messages[1].message, "BBB" )
 		self.assertEqual( self.handler.messages[2].message, "CCC" )
-		
-	def tearDown( self ) :			
-		
+
+	def tearDown( self ) :
+
 		IECore.Msg.popHandler()
 
 if __name__ == "__main__":
-	unittest.main()   
+	unittest.main()
 

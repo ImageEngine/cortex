@@ -55,7 +55,7 @@ class ToMayaImageConverter : public ToMayaConverter
 {
 
 	public :
-	
+
 		typedef enum
 		{
 			Float,
@@ -69,27 +69,27 @@ class ToMayaImageConverter : public ToMayaConverter
 		/// function taking the contents of parameters(), like the other converters. We might also
 		/// want a converter to create a new image rather than just fill an existing one.
 		virtual MStatus convert( MImage &image ) const;
-		
+
 		static ToMayaImageConverterPtr create( const IECore::ObjectPtr src );
-		
+
 		IECore::IntParameterPtr typeParameter();
-		IECore::ConstIntParameterPtr typeParameter() const;		
-			
+		IECore::ConstIntParameterPtr typeParameter() const;
+
 	private :
-	
+
 		IECore::IntParameterPtr m_typeParameter;
-	
+
 		template<typename T>
 		struct ChannelConverter;
-	
+
 		template<typename T>
 		void writeChannel( MImage &image, typename IECore::TypedData< std::vector<T> >::Ptr channelData, unsigned channelOffset, unsigned numChannels ) const;
-		
+
 		template<typename T>
 		void writeAlpha( MImage &image, const T &alpha ) const;
-		
+
 		void writeDepth( MImage &image, IECore::FloatVectorDataPtr channelData ) const;
-	
+
 		ToMayaImageConverter( IECore::ConstObjectPtr obj );
 
 };

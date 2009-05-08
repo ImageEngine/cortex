@@ -64,7 +64,7 @@ FromMayaTransformationMatrixConverter<T>::FromMayaTransformationMatrixConverter(
 	:	FromMayaObjectConverter( "FromMayaTransformationMatrixConverter", "Converts maya matrix data to IECore::TransformationMatrixData.", object )
 {
 }
-		
+
 template<typename T>
 IECore::ObjectPtr FromMayaTransformationMatrixConverter<T>::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {

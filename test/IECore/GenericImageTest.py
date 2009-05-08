@@ -66,16 +66,16 @@ class TestImageReadersAndWriters(unittest.TestCase):
         channel["B"] = IECore.FloatVectorData(width * height)
         for i in range(0, width*height):
             channel["B"][i] = ((i + 203)%(width*height-1)) / 255.0
-		
+
         b = IECore.Box2i(IECore.V2i(0, 0), IECore.V2i(width-1, height-1))
         image = IECore.ImagePrimitive(b, b)
         image["R"] = IECore.PrimitiveVariable(IECore.PrimitiveVariable.Interpolation.Vertex, channel["R"])
         image["G"] = IECore.PrimitiveVariable(IECore.PrimitiveVariable.Interpolation.Vertex, channel["G"])
         image["B"] = IECore.PrimitiveVariable(IECore.PrimitiveVariable.Interpolation.Vertex, channel["B"])
-        
+
         # test the handlers
         for image_type in image_handlers:
-            
+
             # write the file
             writer = IECore.Writer.create(image, "test/generic_image.%s" % image_type.lower())
             self.assert_( writer.isInstanceOf( "ImageWriter" ) )
@@ -89,7 +89,7 @@ class TestImageReadersAndWriters(unittest.TestCase):
             reader = IECore.Reader.create("test/generic_image.%s" % image_type.lower())
             self.assert_( reader.isInstanceOf( "ImageReader" ) )
             self.assert_( reader.resultParameter().isInstanceOf( "ObjectParameter" ) )
-            self.assertEqual( reader.resultParameter().validTypes(), [IECore.TypeId.ImagePrimitive] )			
+            self.assertEqual( reader.resultParameter().validTypes(), [IECore.TypeId.ImagePrimitive] )
             read_image = reader.read()
 
             # write back out to verify
@@ -115,7 +115,7 @@ class TestImageReadersAndWriters(unittest.TestCase):
                 if math.fabs(sum_of_diff) > (image_type == 'JPEG' and 0.2 or 0.1):
                     print 'sum of differences:', sum_of_diff
                     raise Exception("bad image write or reader: encoding is %s" % image_type)
-            
+
 
 
     def testWindows(self):
@@ -133,7 +133,7 @@ class TestImageReadersAndWriters(unittest.TestCase):
         channel = IECore.FloatVectorData(width * height)
         for i in range(0, width*height):
             channel[i] = i / 255.0
-		
+
         b = IECore.Box2i(IECore.V2i(0, 0), IECore.V2i(width-1, height-1))
         image = IECore.ImagePrimitive(b, b)
         image["R"] = IECore.PrimitiveVariable(IECore.PrimitiveVariable.Interpolation.Vertex, channel)
@@ -142,10 +142,10 @@ class TestImageReadersAndWriters(unittest.TestCase):
 
         # get smaller sub-window
         sub_box = Box2iData(Box2i(V2i(0, 0), V2i(7, 7)))
-        
+
         # test the handlers
         for image_type in image_handlers:
-            
+
             # write the file
             IECore.Writer.create(image, "test/generic_image.window.%s" % image_type.lower()).write()
 
@@ -173,7 +173,7 @@ class TestImageReadersAndWriters(unittest.TestCase):
 
                         ci = 16*y + x
                         i = 8*y + x
-                        
+
                         diff = read_channel[i] - channel[ci]
 
                         sum_of_diff += diff
@@ -185,7 +185,7 @@ class TestImageReadersAndWriters(unittest.TestCase):
                 if math.fabs(sum_of_diff) > 0.1:
                     print 'sum of differences:', sum_of_diff
                     raise Exception("bad image write or reader: encoding is %s" % image_type)
-            
+
 
 
 
@@ -204,7 +204,7 @@ class TestImageReadersAndWriters(unittest.TestCase):
         channel = IECore.FloatVectorData(width * height)
         for i in range(0, width*height):
             channel[i] = i / 255.0
-		
+
         b = IECore.Box2i(IECore.V2i(0, 0), IECore.V2i(width-1, height-1))
         image = IECore.ImagePrimitive(b, b)
         image["R"] = IECore.PrimitiveVariable(IECore.PrimitiveVariable.Interpolation.Vertex, channel)
@@ -213,10 +213,10 @@ class TestImageReadersAndWriters(unittest.TestCase):
 
         # get smaller sub-window
         sub_box = Box2iData(Box2i(V2i(-4, -4), V2i(21, 21)))
-        
+
         # test the handlers
         for image_type in image_handlers:
-            
+
             # write the file
             IECore.Writer.create(image, "test/generic_image.outside.%s" % image_type.lower()).write()
 
@@ -244,32 +244,32 @@ class TestImageReadersAndWriters(unittest.TestCase):
                     for x in range(0, 26):
 
                         i = 26*y + x
-                        
+
                         if y < 4 or x < 4 or y >= 4 + 16 or x >= 4 + 16:
                             if read_channel[i] > 0.0001:
                                 raise Exception("non-zero channel value (%f) in outside region (x,y %d,%d) of windowed read (%s encoding)" % (read_channel[i], x, y, image_type))
 
                         else:
-                            
+
                             ci = 16*(y-4) + (x-4)
-                        
+
                             diff = read_channel[i] - channel[ci]
 
                             sum_of_diff += diff
                             if math.fabs(diff) > epsilon:
                                 print '%s channel %s: difference between write and read at %d, %d: %f' % (image_type, cn, x, y, diff)
                                 raise Exception("bad image write or read: encoding is %s" % image_type)
-                            
-                            
+
+
                 if math.fabs(sum_of_diff) > 0.1:
                     print 'sum of differences:', sum_of_diff
                     raise Exception("bad image write or reader: encoding is %s" % image_type)
-            
 
-            
-        
-        
-                                        
+
+
+
+
+
 if __name__ == "__main__":
-        unittest.main()   
-        
+        unittest.main()
+

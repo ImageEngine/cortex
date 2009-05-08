@@ -51,9 +51,9 @@ namespace IECore
 {
 
 template<typename F, typename T>
-RGBToXYZColorTransform<F, T>::RGBToXYZColorTransform() 
-{	
-	setMatrix( 
+RGBToXYZColorTransform<F, T>::RGBToXYZColorTransform()
+{
+	setMatrix(
 		Imath::V2f( 0.64, 0.33 ),
 		Imath::V2f( 0.3, 0.6 ),
 		Imath::V2f( 0.15, 0.06 ),
@@ -64,19 +64,19 @@ RGBToXYZColorTransform<F, T>::RGBToXYZColorTransform()
 
 template<typename F, typename T>
 template<typename M>
-RGBToXYZColorTransform<F, T>::RGBToXYZColorTransform( const M &matrix ) 
+RGBToXYZColorTransform<F, T>::RGBToXYZColorTransform( const M &matrix )
 {
 	m_matrix = IECore::convert<Imath::M33f, M>( matrix );
 }
 
 template<typename F, typename T>
 template<typename C>
-RGBToXYZColorTransform<F, T>::RGBToXYZColorTransform(		
+RGBToXYZColorTransform<F, T>::RGBToXYZColorTransform(
 	const C &rChromacity,
 	const C &gChromacity,
 	const C &bChromacity,
 
-	const C &referenceWhite						
+	const C &referenceWhite
 )
 {
 	setMatrix( rChromacity, gChromacity, bChromacity, referenceWhite );
@@ -84,22 +84,22 @@ RGBToXYZColorTransform<F, T>::RGBToXYZColorTransform(
 
 template<typename F, typename T>
 template<typename C>
-void RGBToXYZColorTransform<F, T>::setMatrix(		
+void RGBToXYZColorTransform<F, T>::setMatrix(
 	const C &rChromacity,
 	const C &gChromacity,
 	const C &bChromacity,
 
-	const C &referenceWhite						
+	const C &referenceWhite
 )
 {
 	BOOST_STATIC_ASSERT( ( TypeTraits::IsVec2<C>::value ) );
 
 	typedef VectorTraits<C> VecTraits;
-	
+
 	assert( VecTraits::dimensions() == 2 );
-	
+
 	XYYToXYZColorTransform< Imath::Color3f, Imath::Color3f > xyYToXYZ( referenceWhite );
-	
+
 	Imath::Color3f rXYZ = xyYToXYZ(
 		Imath::Color3f(
 			VecTraits::get( rChromacity, 0 ),
@@ -107,7 +107,7 @@ void RGBToXYZColorTransform<F, T>::setMatrix(
 			1.0
 		)
 	);
-	
+
 	Imath::Color3f gXYZ = xyYToXYZ(
 		Imath::Color3f(
 			VecTraits::get( gChromacity, 0 ),
@@ -115,7 +115,7 @@ void RGBToXYZColorTransform<F, T>::setMatrix(
 			1.0
 		)
 	);
-	
+
 	Imath::Color3f bXYZ = xyYToXYZ(
 		Imath::Color3f(
 			VecTraits::get( bChromacity, 0 ),
@@ -123,7 +123,7 @@ void RGBToXYZColorTransform<F, T>::setMatrix(
 			1.0
 		)
 	);
-	
+
 	Imath::Color3f wXYZ = xyYToXYZ(
 		Imath::Color3f(
 			VecTraits::get( referenceWhite, 0 ),
@@ -131,23 +131,23 @@ void RGBToXYZColorTransform<F, T>::setMatrix(
 			1.0
 		)
 	);
-					
+
 	Imath::M33f m = Imath::M33f
 		(
 			rXYZ.x, rXYZ.y, rXYZ.z,
 			gXYZ.x, gXYZ.y, gXYZ.z,
 			bXYZ.x, bXYZ.y, bXYZ.z
 		).inverse();
-			
+
 	Imath::V3f s = wXYZ * m;
-	
+
 	m_matrix = Imath::M33f
 	(
 		s.x * rXYZ.x, s.x * rXYZ.y, s.x * rXYZ.z,
 		s.y * gXYZ.x, s.y * gXYZ.y, s.y * gXYZ.z,
 		s.z * bXYZ.x, s.z * bXYZ.y, s.z * bXYZ.z
 	);
-}		
+}
 
 template<typename F, typename T>
 T RGBToXYZColorTransform<F, T>::transform( const F &f )
@@ -155,13 +155,13 @@ T RGBToXYZColorTransform<F, T>::transform( const F &f )
 	Imath::V3f from = IECore::convert< Imath::V3f >( f );
 	assert( from.x >= -Imath::limits<float>::epsilon() );
 	assert( from.y >= -Imath::limits<float>::epsilon() );
-	assert( from.z >= -Imath::limits<float>::epsilon() );		
-	
+	assert( from.z >= -Imath::limits<float>::epsilon() );
+
 	assert( from.x <= 1.0f + Imath::limits<float>::epsilon() );
 	assert( from.y <= 1.0f + Imath::limits<float>::epsilon() );
-	assert( from.z <= 1.0f + Imath::limits<float>::epsilon() );			
-	
-	return IECore::convert<T>( from * m_matrix );		
+	assert( from.z <= 1.0f + Imath::limits<float>::epsilon() );
+
+	return IECore::convert<T>( from * m_matrix );
 }
 
 template<typename F, typename T>

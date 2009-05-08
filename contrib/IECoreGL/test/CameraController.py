@@ -42,34 +42,34 @@ init( False )
 class TestCameraControl( unittest.TestCase ) :
 
 	def test( self ) :
-			
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", StringData( "test/shaders" ) )
-		
+
 		r.worldBegin()
 		c = PerspectiveCamera( horizontalFOV = 90 )
 		#c = OrthographicCamera()
 		s = r.scene()
 		s.setCamera( c )
-		w = SceneViewer( "scene", s )		
-		
+		w = SceneViewer( "scene", s )
+
 		r.setAttribute( "gl:blend:srcFactor", StringData( "one" ) )
 		r.setAttribute( "gl:blend:dstFactor", StringData( "one" ) )
 		r.setAttribute( "gl:blend:equation", StringData( "add" ) )
-				
+
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
 		r.concatTransform( M44f.createScaled( V3f( 0.004 ) ) )
-		
+
 		r.concatTransform( M44f.createTranslated( V3f( -150, -200, 0 ) ) )
 		i = Reader.create( "test/images/numberWithAlpha.exr" ).read()
 		i.render( r )
-		
+
 		r.concatTransform( M44f.createTranslated( V3f( 300, 300, 1 ) ) )
 		i.render( r )
-	
+
 		r.worldEnd()
 		w.start()
-			
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

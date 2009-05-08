@@ -61,15 +61,15 @@ class Shader : public Bindable
 		/// version isn't sufficient to support shaders.
 		Shader( const std::string &vertexSource, const std::string &fragmentSource );
 		virtual ~Shader();
-		
+
 		bool operator==( const Shader &other ) const;
-		
+
 		virtual void bind() const;
 		/// \bug This returns 0, as I haven't yet found a way of pushing/popping
 		/// the current shader in GL. This is worked around by pushing and popping
 		/// the current program by hand in Group::render().
 		virtual GLbitfield mask() const;
-		
+
 		/// Fills the passed vector with the names of all shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
 		/// Arrays will be returned as a single name, rather than the list array[0],
@@ -81,7 +81,7 @@ class Shader : public Bindable
 		GLint parameterIndex( const std::string &parameterName ) const;
 		/// Returns true if the Shader has a parameter of the given name.
 		bool hasParameter( const std::string &parameterName ) const;
-		
+
 		/// Returns the type of a named parameter, described in terms of the
 		/// most closely related IECore datatype. The type here is the type of
 		/// data returned by the getParameter() function below, except in the case
@@ -89,7 +89,7 @@ class Shader : public Bindable
 		IECore::TypeId parameterType( GLint parameterIndex ) const;
 		/// As above but by specifying the parameter by name.
 		IECore::TypeId parameterType( const std::string &parameterName ) const;
-		
+
 		//! @name Parameter getting
 		/// These calls return the current values of shader parameters. Unlike
 		/// the calls to set values (see below) the shader does not have to be
@@ -99,7 +99,7 @@ class Shader : public Bindable
 		IECore::DataPtr getParameter( GLint parameterIndex ) const;
 		IECore::DataPtr getParameter( const std::string &parameterName ) const;
 		//@}
-		
+
 		//! @name Parameter setting
 		/// These calls set shader parameters. They can only be called while
 		/// the Shader is bound (using bind()) as the current shader - Exceptions
@@ -131,7 +131,7 @@ class Shader : public Bindable
 		void setParameter( GLint parameterIndex, int value );
 		void setParameter( const std::string &parameterName, int value );
 		//@}
-		
+
 		//! @name Built in shaders
 		/// These functions provide access to static instances of
 		/// various simple but useful shaders.
@@ -143,11 +143,11 @@ class Shader : public Bindable
 		/// Returns a shader which shades as a facing ratio.
 		static ShaderPtr facingRatio();
 		//@}
-		
+
 	private :
 
 		// The Primitive class needs access to the internals of the Shader so it
-		// can set vertex attributes for shader attributes. This functionality 
+		// can set vertex attributes for shader attributes. This functionality
 		// isn't provided as a public method because there's no way that the Shader
 		// can validate that the right amount of data is being passed - whereas
 		// the Primitive is in a position to do this.
@@ -159,7 +159,7 @@ class Shader : public Bindable
 		GLuint m_vertexShader;
 		GLuint m_fragmentShader;
 		GLuint m_program;
-		
+
 		struct ParameterDescription
 		{
 			std::string name;

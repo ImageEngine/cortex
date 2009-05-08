@@ -52,13 +52,13 @@ class FromMayaGroupConverter : public FromMayaDagNodeConverter
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaGroupConverter, FromMayaGroupConverterTypeId, FromMayaDagNodeConverter );
 
 		FromMayaGroupConverter( const MDagPath &object );
-		
+
 	protected :
-	
+
 		virtual IECore::ObjectPtr doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
-		
+
 		IECore::CompoundParameterPtr m_meshParameters;
-		
+
 	private :
 
 		static FromMayaDagNodeConverter::Description<FromMayaGroupConverter> m_description;

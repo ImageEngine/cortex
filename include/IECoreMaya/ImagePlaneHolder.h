@@ -46,26 +46,26 @@ namespace IECoreMaya
 
 /// A class which holds an Op, expected to return an ImagePrimitive, which is then placed onto an ImagePlane.
 class ImagePlaneHolder : public ParameterisedHolderImagePlane
-{	
+{
 	public :
-	
+
 		ImagePlaneHolder();
 		virtual ~ImagePlaneHolder();
 
 		virtual void postConstructor();
 
-		static void *creator();				
-		static MStatus initialize();		
+		static void *creator();
+		static MStatus initialize();
 		static MTypeId id;
 
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus loadImageMap ( const MString &fileName, int frame, MImage &image );
-				
+
 		/// Calls setParameterised( className, classVersion, "IECORE_OP_PATHS" ).
 		MStatus setOp( const std::string &className, int classVersion );
-		/// Returns runTimeCast<Op>( getParameterised( className, classVersion ) ). 
+		/// Returns runTimeCast<Op>( getParameterised( className, classVersion ) ).
 		IECore::OpPtr getOp( std::string *className = 0, int *classVersion = 0 );
-				
+
 };
 
 } // namespace IECoreMaya

@@ -50,21 +50,21 @@ class ToMayaNumericDataConverter : public ToMayaObjectConverter
 	public :
 
 		ToMayaNumericDataConverter( IECore::ConstObjectPtr object );
-		
+
 	protected :
-	
+
 		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
 
 		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_3Double;
-		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_3Float;		
-		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_3Int;		
-		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_3Short;		
+		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_3Float;
+		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_3Int;
+		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_3Short;
 		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_2Double;
-		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_2Float;		
-		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_2Int;		
-		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_2Short;		
+		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_2Float;
+		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_2Int;
+		static ToMayaObjectConverterDescription<ToMayaNumericDataConverter> g_2Short;
 };
 
 IE_CORE_DECLAREPTR( ToMayaNumericDataConverter );

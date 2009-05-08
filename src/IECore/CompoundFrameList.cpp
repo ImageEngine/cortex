@@ -77,22 +77,22 @@ void CompoundFrameList::setFrameLists( const std::vector< FrameListPtr > &frameL
 	m_frameLists = frameLists;
 }
 
-void CompoundFrameList::asList( std::vector<Frame> &frames ) const 
+void CompoundFrameList::asList( std::vector<Frame> &frames ) const
 {
-	frames.clear();	
-	
+	frames.clear();
+
 	std::set<Frame> frameSet;
-	
+
 	for ( std::vector< FrameListPtr >::const_iterator it = m_frameLists.begin(); it != m_frameLists.end(); ++it )
 	{
 		if ( !(*it) )
 		{
 			throw Exception( "CompoundFrameList contains invalid frame list" );
 		}
-		
+
 		std::vector<Frame> subFrames;
 		(*it)->asList( subFrames );
-		
+
 		for ( std::vector<Frame>::const_iterator it = subFrames.begin(); it != subFrames.end(); ++it )
 		{
 			if ( frameSet.find( *it ) == frameSet.end() )
@@ -104,7 +104,7 @@ void CompoundFrameList::asList( std::vector<Frame> &frames ) const
 	}
 }
 
-std::string CompoundFrameList::asString() const 
+std::string CompoundFrameList::asString() const
 {
 	std::string s;
 	for ( std::vector< FrameListPtr >::const_iterator it = m_frameLists.begin(); it != m_frameLists.end(); ++it )
@@ -117,7 +117,7 @@ std::string CompoundFrameList::asString() const
 		{
 			s += ",";
 		}
-		
+
 		s += (*it)->asString();
 	}
 	return s;
@@ -129,14 +129,14 @@ bool CompoundFrameList::isEqualTo( ConstFrameListPtr other ) const
 	{
 		return false;
 	}
-	
+
 	ConstCompoundFrameListPtr otherF = assertedStaticCast< const CompoundFrameList >( other );
-	
+
 	if ( getFrameLists().size() != otherF->getFrameLists().size() )
 	{
 		return false;
 	}
-	
+
 	for ( std::vector< FrameListPtr >::size_type i = 0; i < getFrameLists().size(); i++ )
 	{
 		if ( !getFrameLists()[i]->isEqualTo( otherF->getFrameLists()[i] ) )
@@ -144,7 +144,7 @@ bool CompoundFrameList::isEqualTo( ConstFrameListPtr other ) const
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -154,12 +154,12 @@ FrameListPtr CompoundFrameList::copy() const
 }
 
 FrameListPtr CompoundFrameList::parse( const std::string &frameList )
-{	
+{
 	if ( frameList.find_first_of( ',' ) != std::string::npos )
 	{
 		std::vector< FrameListPtr > frameLists;
 		boost::tokenizer<boost::char_separator<char> > t( frameList, boost::char_separator<char>( "," ) );
-		try 
+		try
 		{
 			for (
 				boost::tokenizer<boost::char_separator<char> >::iterator it = t.begin();
@@ -172,12 +172,12 @@ FrameListPtr CompoundFrameList::parse( const std::string &frameList )
 				{
 					return 0;
 				}
-				
+
 				frameLists.push_back( f );
 			}
-			
+
 			return new CompoundFrameList( frameLists );
-		} 
+		}
 		catch ( Exception & )
 		{
 			return 0;

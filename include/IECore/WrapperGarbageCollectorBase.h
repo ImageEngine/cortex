@@ -67,7 +67,7 @@ class WrapperGarbageCollector;
 class WrapperGarbageCollectorBase
 {
 	public :
-	
+
 		/// Returns the python object holding the specified
 		/// object, or 0 if no python object is associated
 		/// with that object.
@@ -75,22 +75,22 @@ class WrapperGarbageCollectorBase
 		/// Returns the number of wrapped instances currently
 		/// in existence.
 		static size_t numWrappedInstances();
-		
+
 		/// Sets the number of object instance allocations
 		/// after which a garbage collection pass will be
 		/// performed.
 		static void setCollectThreshold( size_t t );
 		/// Returns the collection threshold.
 		static size_t getCollectThreshold();
-	
+
 	protected:
-	
+
 		static size_t g_allocCount;
 		static size_t g_allocThreshold;
-		
+
 		typedef std::map<RefCounted *, PyObject *> InstanceMap;
 		static InstanceMap g_refCountedToPyObject;
-		
+
 };
 
 } // namespace IECore

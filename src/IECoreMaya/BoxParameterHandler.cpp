@@ -62,30 +62,30 @@ MStatus BoxParameterHandler<T>::update( IECore::ConstParameterPtr parameter, MOb
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnCompoundAttribute fnCAttr( attribute );
 	if( !fnCAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
 	}
-	
+
 	if( fnCAttr.numChildren()!=2 )
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnNumericAttribute fnMinAttr( fnCAttr.child( 0 ) );
 	if( fnMinAttr.unitType()!=NumericTraits<T>::dataType() )
 	{
 		return MS::kFailure;
 	}
-	
-	MFnNumericAttribute fnMaxAttr( fnCAttr.child( 1 ) );	
+
+	MFnNumericAttribute fnMaxAttr( fnCAttr.child( 1 ) );
 	if( fnMaxAttr.unitType()!=NumericTraits<T>::dataType() )
 	{
 		return MS::kFailure;
 	}
-	
+
 	Box<T> defValue = p->typedDefaultValue();
 	MStatus s;
 	switch( T::dimensions() )
@@ -117,7 +117,7 @@ MStatus BoxParameterHandler<T>::update( IECore::ConstParameterPtr parameter, MOb
 		default :
 			return MS::kFailure;
 	}
-		
+
 	return MS::kSuccess;
 }
 
@@ -129,7 +129,7 @@ MObject BoxParameterHandler<T>::create( IECore::ConstParameterPtr parameter, con
 	{
 		return MObject::kNullObj;
 	}
-	
+
 	MFnNumericAttribute fnNAttr;
 	MFnCompoundAttribute fnCAttr;
 	MObject oMin, oMax;
@@ -140,7 +140,7 @@ MObject BoxParameterHandler<T>::create( IECore::ConstParameterPtr parameter, con
 				MObject oMinX = fnNAttr.create( attributeName + "MinX", attributeName + "MinX", NumericTraits<T>::baseDataType() );
 				MObject oMinY = fnNAttr.create( attributeName + "MinY", attributeName + "MinY", NumericTraits<T>::baseDataType() );
 				oMin = fnNAttr.create( attributeName + "Min", attributeName + "Min", oMinX, oMinY );
-				
+
 				MObject oMaxX = fnNAttr.create( attributeName + "MaxX", attributeName + "MaxX", NumericTraits<T>::baseDataType() );
 				MObject oMaxY = fnNAttr.create( attributeName + "MaxY", attributeName + "MaxY", NumericTraits<T>::baseDataType() );
 				oMax = fnNAttr.create( attributeName + "Max", attributeName + "Max", oMaxX, oMaxY );
@@ -150,17 +150,17 @@ MObject BoxParameterHandler<T>::create( IECore::ConstParameterPtr parameter, con
 			oMin = fnNAttr.createPoint( attributeName + "Min", attributeName + "Min" );
 			oMax = fnNAttr.createPoint( attributeName + "Max", attributeName + "Max" );
 			break;
-		default :	
+		default :
 			return MObject::kNullObj;
 	}
-	
+
 	MObject result = fnCAttr.create( attributeName, attributeName );
 	fnCAttr.addChild( oMin );
 	fnCAttr.addChild( oMax );
 	update( parameter, result );
 	return result;
 }
-		
+
 template<typename T>
 MStatus BoxParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
@@ -169,20 +169,20 @@ MStatus BoxParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, M
 	{
 		return MS::kFailure;
 	}
-	
+
 	if( plug.numChildren() != 2 )
 	{
 		return MS::kFailure;
 	}
-	
+
 	MPlug minPlug = plug.child( 0 );
 	MPlug maxPlug = plug.child( 1 );
-	
+
 	if( minPlug.numChildren()!=T::dimensions() || maxPlug.numChildren()!=T::dimensions() )
 	{
 		return MS::kFailure;
 	}
-	
+
 	Box<T> v = p->getTypedValue();
 	for( unsigned i=0; i<minPlug.numChildren(); i++ )
 	{
@@ -209,20 +209,20 @@ MStatus BoxParameterHandler<T>::setValue( const MPlug &plug, IECore::ParameterPt
 	{
 		return MS::kFailure;
 	}
-	
+
 	if( plug.numChildren() != 2 )
 	{
 		return MS::kFailure;
 	}
-	
+
 	MPlug minPlug = plug.child( 0 );
 	MPlug maxPlug = plug.child( 1 );
-	
+
 	if( minPlug.numChildren()!=T::dimensions() || maxPlug.numChildren()!=T::dimensions() )
 	{
 		return MS::kFailure;
 	}
-	
+
 	Box<T> v;
 	for( unsigned i=0; i<minPlug.numChildren(); i++ )
 	{
@@ -237,7 +237,7 @@ MStatus BoxParameterHandler<T>::setValue( const MPlug &plug, IECore::ParameterPt
 			return s;
 		}
 	}
-	
+
 	p->setTypedValue( v );
 	return MS::kSuccess;
 }

@@ -57,7 +57,7 @@ namespace IECore
 class ColorSpaceTransformOp : public ImagePrimitiveOp
 {
 	public:
-	
+
 		/// Typedefs make code easier to read
 		typedef std::string InputColorSpace;
 		typedef std::string OutputColorSpace;
@@ -66,72 +66,72 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 		virtual ~ColorSpaceTransformOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( ColorSpaceTransformOp, ImagePrimitiveOp );
-		
+
 		StringParameterPtr inputColorSpaceParameter();
-		ConstStringParameterPtr inputColorSpaceParameter() const;		
-		
+		ConstStringParameterPtr inputColorSpaceParameter() const;
+
 		StringParameterPtr outputColorSpaceParameter();
 		ConstStringParameterPtr outputColorSpaceParameter() const;
-		
-		/// Each string in the vector for this parameter should be a comma-separated list of either 1 or 3 items. If there's only 1 item it's assumed to 
+
+		/// Each string in the vector for this parameter should be a comma-separated list of either 1 or 3 items. If there's only 1 item it's assumed to
 		/// represent the colorPrimVar name, else it's assumed to represent red/green/blue
 		/// An example value might be ["R,G,B","diffuseR,diffuseG,diffuseB"]
 		/// When a ChannelOp is called, it would be passed R,G,B,diffuseR,diffuseG,diffuseB for the channelNames.
-		/// When a ColorTransformOp is called it would be executed twice, once with R, G, B set for the red/green/blue primVar names, 
+		/// When a ColorTransformOp is called it would be executed twice, once with R, G, B set for the red/green/blue primVar names,
 		/// and once with diffuseR, diffuseG, diffuseB set.
 		StringVectorParameterPtr channelSetsParameter();
 		ConstStringVectorParameterPtr channelSetsParameter() const;
-		
+
 		StringParameterPtr alphaPrimVarParameter();
 		ConstStringParameterPtr alphaPrimVarParameter() const;
-		
+
 		BoolParameterPtr premultipliedParameter();
-		ConstBoolParameterPtr premultipliedParameter() const;		
-		
+		ConstBoolParameterPtr premultipliedParameter() const;
+
 		/// ModifyOp is the most-derived common base class of ChannelOp and ColorTransformOp
-		typedef ModifyOpPtr (*CreatorFn)( const InputColorSpace &, const OutputColorSpace &, void * );	
+		typedef ModifyOpPtr (*CreatorFn)( const InputColorSpace &, const OutputColorSpace &, void * );
 		static void registerConversion( const InputColorSpace &, const OutputColorSpace &, CreatorFn fn, void *data = 0 );
-		
+
 		static void inputColorSpaces( std::vector< InputColorSpace > &colorSpaces );
 		static void outputColorSpaces( std::vector< OutputColorSpace > &colorSpaces );
 		static void colorSpaces( std::vector< std::string > &colorSpaces );
-				
+
 		template<typename T>
 		class ColorSpaceDescription
 		{
 			public:
 				ColorSpaceDescription( const InputColorSpace &, const OutputColorSpace & );
-			protected :			
-				static ModifyOpPtr createOp( const InputColorSpace &, const OutputColorSpace &, void * );			
+			protected :
+				static ModifyOpPtr createOp( const InputColorSpace &, const OutputColorSpace &, void * );
 		};
-							
+
 	protected :
-	
+
 		typedef std::pair< InputColorSpace, OutputColorSpace > Conversion;
 		typedef boost::tuple< CreatorFn, InputColorSpace, OutputColorSpace, void* > ConversionInfo;
-			
+
 		void findConversion( const InputColorSpace &, const OutputColorSpace &, std::vector< ConversionInfo > &conversions );
 		void findConversion(
 			const InputColorSpace &,
-			const OutputColorSpace &, 
+			const OutputColorSpace &,
 			std::set< Conversion > &visitedConversions,
 			std::vector< ConversionInfo > &currentConversion,
 			std::vector< ConversionInfo > &bestConversion
-			);		
+			);
 	 	virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
-		
+
 		StringParameterPtr m_inputColorSpaceParameter;
 		StringParameterPtr m_outputColorSpaceParameter;
 		StringVectorParameterPtr m_channelSetsParameter;
 		StringParameterPtr m_alphaPrimVarParameter;
 		BoolParameterPtr m_premultipliedParameter;
-		
-		typedef std::multimap< InputColorSpace, ConversionInfo > ConvertersMap;		
-		typedef std::map< CreatorFn, Conversion > ConverterTypesMap;		
+
+		typedef std::multimap< InputColorSpace, ConversionInfo > ConvertersMap;
+		typedef std::map< CreatorFn, Conversion > ConverterTypesMap;
 		typedef std::set< Conversion > ConversionsSet;
-				
-		static ConvertersMap &converters();		
-		static ConverterTypesMap &converterTypes();		
+
+		static ConvertersMap &converters();
+		static ConverterTypesMap &converterTypes();
 		static ConversionsSet &conversionsSet();
 };
 

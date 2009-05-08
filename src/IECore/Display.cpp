@@ -89,7 +89,7 @@ bool Display::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	const Display *tOther = static_cast<const Display *>( other.get() );
 
 	// check name
@@ -97,25 +97,25 @@ bool Display::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	// check type
 	if( m_type!=tOther->m_type )
 	{
 		return false;
 	}
-	
+
 	// check data
 	if( m_data!=tOther->m_data )
 	{
 		return false;
 	}
-	
+
 	// check parameters
 	if( !m_parameters->isEqualTo( tOther->m_parameters ) )
 	{
 		return false;
 	}
-	
+
 	return true;
 }
 

@@ -46,37 +46,37 @@ template<typename P, typename V>
 class CSGImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 {
 	public:
-		
+
 		typedef P Point;
 		typedef VectorTraits<P> PointTraits;
 		typedef typename VectorTraits<P>::BaseType PointBaseType;
 		typedef V Value;
 		typedef VectorTraits<V> ValueTraits;
 		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-		
+
 		typedef ImplicitSurfaceFunction<P, V> Fn;
-		
+
 		IE_CORE_DECLAREMEMBERPTR2( CSGImplicitSurfaceFunction<P, V> );
-		
+
 		typedef enum
 		{
 			Union,
 			Intersection,
 			Difference
 		} Mode;
-	
+
 		/// Construct a new implicit surface from the two given functions and the specified CSG operation
 		CSGImplicitSurfaceFunction( typename Fn::Ptr fn1, typename Fn::Ptr fn2, Mode mode );
-		
+
 		Value operator()( const Point &p );
-		
+
 		virtual Value getValue( const Point &p );
-		
+
 	protected:
 
 		typename Fn::Ptr m_fn1, m_fn2;
 		Mode m_mode;
-		
+
 };
 
 typedef CSGImplicitSurfaceFunction<Imath::V3f, float>  CSGImplicitSurfaceFunctionV3ff;

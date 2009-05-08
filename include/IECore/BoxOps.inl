@@ -62,30 +62,30 @@ template <typename T>
 T boxIntersection( const T &box, const T &box2 )
 {
 	typename BoxTraits<T>::BaseType min, max;
-	
+
         for( unsigned int d = 0; d < BoxTraits<T>::BaseType::dimensions(); ++d )
         {
-                vecSet( min, d, 
-			std::max( 
+                vecSet( min, d,
+			std::max(
 				vecGet( BoxTraits<T>::min( box ), d ),
 				vecGet( BoxTraits<T>::min( box2 ), d )
 			)
 		);
-		
-		vecSet( max, d, 
-			std::min( 
+
+		vecSet( max, d,
+			std::min(
 				vecGet( BoxTraits<T>::max( box ), d ),
 				vecGet( BoxTraits<T>::max( box2 ), d )
 			)
 		);
-		
+
 		/// Check for no intersection
                 if( vecGet( max, d ) < vecGet( min, d ) )
                 {
                         return BoxTraits<T>::create();
                 }
         }
-                
+
         return BoxTraits<T>::create( min, max );
 }
 
@@ -93,8 +93,8 @@ template<typename T>
 inline void boxExtend( T &box, const typename BoxTraits<T>::BaseType &p )
 {
 	typename BoxTraits<T>::BaseType min = BoxTraits<T>::min( box );
-	typename BoxTraits<T>::BaseType max = BoxTraits<T>::max( box );	
-	
+	typename BoxTraits<T>::BaseType max = BoxTraits<T>::max( box );
+
 	for( unsigned int d = 0; d < BoxTraits<T>::BaseType::dimensions(); ++d )
         {
 		if ( vecGet( p, d ) < vecGet( min, d ) )
@@ -106,20 +106,20 @@ inline void boxExtend( T &box, const typename BoxTraits<T>::BaseType &p )
 			vecSet( max, d, vecGet( p, d ) );
 		}
 	}
-	
+
 	BoxTraits<T>::setMin( box, min );
-	BoxTraits<T>::setMax( box, max );	
+	BoxTraits<T>::setMax( box, max );
 }
 
 template<typename T>
 inline void boxExtend( T &box, const T &box2 )
 {
 	typename BoxTraits<T>::BaseType min = BoxTraits<T>::min( box );
-	typename BoxTraits<T>::BaseType max = BoxTraits<T>::max( box );	
-	
+	typename BoxTraits<T>::BaseType max = BoxTraits<T>::max( box );
+
 	typename BoxTraits<T>::BaseType min2 = BoxTraits<T>::min( box2 );
-	typename BoxTraits<T>::BaseType max2 = BoxTraits<T>::max( box2 );		
-	
+	typename BoxTraits<T>::BaseType max2 = BoxTraits<T>::max( box2 );
+
 	for( unsigned int d = 0; d < BoxTraits<T>::BaseType::dimensions(); ++d )
         {
 		if ( vecGet( min2, d ) < vecGet( min, d ) )
@@ -131,17 +131,17 @@ inline void boxExtend( T &box, const T &box2 )
 			vecSet( max, d, vecGet( max2, d ) );
 		}
 	}
-	
+
 	BoxTraits<T>::setMin( box, min );
-	BoxTraits<T>::setMax( box, max );	
+	BoxTraits<T>::setMax( box, max );
 }
 
 template <typename T>
 bool boxIntersects(const T &box, const typename BoxTraits<T>::BaseType &p)
 {
 	typename BoxTraits<T>::BaseType min = BoxTraits<T>::min( box );
-	typename BoxTraits<T>::BaseType max = BoxTraits<T>::max( box );	
-	
+	typename BoxTraits<T>::BaseType max = BoxTraits<T>::max( box );
+
 	for( unsigned int d = 0; d < BoxTraits<T>::BaseType::dimensions(); ++d )
         {
 		if ( vecGet( p, d ) < vecGet( min, d ) )
@@ -153,7 +153,7 @@ bool boxIntersects(const T &box, const typename BoxTraits<T>::BaseType &p)
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -162,10 +162,10 @@ bool boxIntersects( const T &box, const T &box2 )
 {
 	typename BoxTraits<T>::BaseType min = BoxTraits<T>::min( box );
 	typename BoxTraits<T>::BaseType max = BoxTraits<T>::max( box );
-	
+
 	typename BoxTraits<T>::BaseType min2 = BoxTraits<T>::min( box2 );
-	typename BoxTraits<T>::BaseType max2 = BoxTraits<T>::max( box2 );		
-	
+	typename BoxTraits<T>::BaseType max2 = BoxTraits<T>::max( box2 );
+
 	for( unsigned int d = 0; d < BoxTraits<T>::BaseType::dimensions(); ++d )
 	{
 		if ( vecGet( max2, d ) < vecGet( min, d ) )
@@ -177,7 +177,7 @@ bool boxIntersects( const T &box, const T &box2 )
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -186,10 +186,10 @@ bool boxContains( const T &box, const T &containee )
 {
 	typename BoxTraits<T>::BaseType min = BoxTraits<T>::min( box );
 	typename BoxTraits<T>::BaseType max = BoxTraits<T>::max( box );
-	
+
 	typename BoxTraits<T>::BaseType cMin = BoxTraits<T>::min( containee );
 	typename BoxTraits<T>::BaseType cMax = BoxTraits<T>::max( containee );
-	
+
 	for( unsigned int d=0; d<BoxTraits<T>::BaseType::dimensions(); d++ )
 	{
 		if( vecGet( cMin, d ) < vecGet( min, d ) )
@@ -222,22 +222,22 @@ bool boxIntersects(
 
 	Vec minB = BoxTraits<T>::min( box );
 	Vec maxB = BoxTraits<T>::max( box );
-	
+
 	unsigned int dimension = VectorTraits<Vec>::dimensions();
 	assert( dimension >= 2 );
 
 	bool inside = true;
 	std::vector<char> quadrant;
 	quadrant.resize(dimension);
-	
-	Vec maxT;	
+
+	Vec maxT;
 	Vec candidatePlane;
 
 	for ( unsigned int i = 0; i < dimension; i++ )
 	{
 		if ( vecGet( origin, i ) < vecGet( minB, i ))
 		{
-			quadrant[i] = left;			
+			quadrant[i] = left;
 			vecSet( candidatePlane, i, vecGet( minB, i ) );
 			inside = false;
 		}

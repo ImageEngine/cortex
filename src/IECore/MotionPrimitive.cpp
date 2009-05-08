@@ -106,7 +106,7 @@ void MotionPrimitive::render( RendererPtr renderer ) const
 	size_t vs = m_snapshots.begin()->second->variableSize( PrimitiveVariable::Varying );
 	size_t ves = m_snapshots.begin()->second->variableSize( PrimitiveVariable::Vertex );
 	size_t fs = m_snapshots.begin()->second->variableSize( PrimitiveVariable::FaceVarying );
-	
+
 	set<float> times;
 	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 	{

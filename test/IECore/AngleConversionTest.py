@@ -39,14 +39,14 @@ import IECore
 class AngleConversionTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		d = IECore.V3f( 180, 90, 360 )
 		r = IECore.degreesToRadians( d )
 		self.assert_( isinstance( r, IECore.V3f ) )
 		self.assert_( r.equalWithAbsError( d * math.pi / 180.0, 0.0001 ) )
-		
+
 		self.assertAlmostEqual( IECore.radiansToDegrees( math.pi ), 180, 6 )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

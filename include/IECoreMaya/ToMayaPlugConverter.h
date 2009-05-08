@@ -60,12 +60,12 @@ class ToMayaPlugConverter : public ToMayaConverter
 		/// consider that MStatus might be a better return type, and that we might also
 		/// want a converter to create a new plug rather than just fill an existing one.
 		virtual bool convert( MPlug &plug ) const;
-		
+
 		/// \todo Implement this as a genuine factory which creates subclasses.
 		static ToMayaPlugConverterPtr create( const IECore::ObjectPtr src );
-		
+
 	private :
-	
+
 		ToMayaPlugConverter( IECore::ConstObjectPtr obj );
 
 };

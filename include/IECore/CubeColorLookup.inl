@@ -52,7 +52,7 @@ template<typename T>
 CubeColorLookup<T>::CubeColorLookup() : m_dimension( 2, 2, 2 ), m_domain( VecType( 0, 0, 0 ), VecType( 1, 1, 1 ) ), m_interpolation( Linear )
 {
 	m_data.reserve( 2 * 2 * 2 );
-	
+
 	m_data.push_back( ColorType( 0, 0, 0 ) );
 	m_data.push_back( ColorType( 0, 0, 1 ) );
 	m_data.push_back( ColorType( 0, 1, 0 ) );
@@ -61,7 +61,7 @@ CubeColorLookup<T>::CubeColorLookup() : m_dimension( 2, 2, 2 ), m_domain( VecTyp
 	m_data.push_back( ColorType( 1, 0, 1 ) );
 	m_data.push_back( ColorType( 1, 1, 0 ) );
 	m_data.push_back( ColorType( 1, 1, 1 ) );
-	
+
 	assert( (int)( m_data.size() ) == m_dimension.x * m_dimension.y * m_dimension.z );
 }
 
@@ -84,21 +84,21 @@ void CubeColorLookup<T>::setCube( const Imath::V3i &dimension, const DataType &d
 	{
 		throw InvalidArgumentException( "CubeColorLookup: Data of invalid length given for specified dimension" );
 	}
-	
+
 	if ( dimension.x < 2 || dimension.y < 2 || dimension.z < 2 )
 	{
 		throw InvalidArgumentException( "CubeColorLookup: Dimension must be at least 2 in every axis" );
 	}
-	
+
 	if ( domain.isEmpty() )
 	{
 		throw InvalidArgumentException( "CubeColorLookup: Cannot specify empty domain" );
 	}
-	
+
 	m_dimension = dimension;
-	m_data = data;	
-	m_domain = domain;	
-	
+	m_data = data;
+	m_domain = domain;
+
 	assert( m_data.size() > 0 );
 }
 
@@ -115,7 +115,7 @@ typename CubeColorLookup<T>::ColorType CubeColorLookup<T>::operator() ( const Co
 {
 	assert( m_data.size() > 0 );
 	boost::const_multi_array_ref< ColorType, 3 > colorArray( &m_data[0], boost::extents[ m_dimension.x ][ m_dimension.y ][ m_dimension.z ] );
-	
+
 	const ColorType clampedColor = Imath::closestPointInBox( color, m_domain );
 
 	switch ( m_interpolation )
@@ -123,65 +123,65 @@ typename CubeColorLookup<T>::ColorType CubeColorLookup<T>::operator() ( const Co
 		case NoInterpolation :
 			{
 				const VecType idx = normalizedCoordinates( clampedColor );
-				
+
 				return colorArray[ (int)( idx.x + 0.5 ) ][ (int)( idx.y + 0.5 ) ][ (int)( idx.z + 0.5 ) ];
 			}
 			break;
-			
+
 		case Linear:
 			{
 				LinearInterpolator<ColorType> interp;
-				
+
 				const VecType idx = normalizedCoordinates( clampedColor );
-				
+
 				int ix = (int)floor( idx.x );
 				int iy = (int)floor( idx.y );
 				int iz = (int)floor( idx.z );
-				
+
 				assert( ix >= 0 );
-				assert( iy >= 0 );				
-				assert( iz >= 0 );				
-				
+				assert( iy >= 0 );
+				assert( iz >= 0 );
+
 				T fx = idx.x - (T)ix;
 				T fy = idx.y - (T)iy;
 				T fz = idx.z - (T)iz;
-				
+
 				assert( fx >= -Imath::limits<T>::epsilon() );
 				assert( fx <= T(1.0) + Imath::limits<T>::epsilon() );
-				
+
 				assert( fy >= -Imath::limits<T>::epsilon() );
 				assert( fy <= T(1.0) + Imath::limits<T>::epsilon() );
-				
+
 				assert( fz >= -Imath::limits<T>::epsilon() );
 				assert( fz <= T(1.0) + Imath::limits<T>::epsilon() );
-				
+
 				ColorType tmp1[2];
 				ColorType tmp2[2];
 				ColorType tmp3[2];
-				
+
 				for ( int x = 0; x <= 1; x ++ )
 				{
 					int xidx = clamp( ix + x, 0, m_dimension.x - 1 );
-					
+
 					for ( int y = 0; y <= 1; y ++ )
 					{
 						int yidx = clamp( iy + y, 0, m_dimension.y - 1 );
-						
+
 						for ( int z = 0; z <= 1; z ++ )
 						{
 							int zidx = clamp( iz + z, 0, m_dimension.z - 1 );
-							
+
 							tmp1[ z ] = colorArray[ xidx ][ yidx ][ zidx ];
 						}
-						
+
 						interp( tmp1[0], tmp1[1], fz, tmp2[ y ] );
 					}
-					
-					 interp( tmp2[ 0 ], tmp2[ 1 ], fy, tmp3[ x ] );				
+
+					 interp( tmp2[ 0 ], tmp2[ 1 ], fy, tmp3[ x ] );
 				}
-				
+
 				ColorType result;
-				interp( tmp3[ 0 ], tmp3[ 1 ], fx, result );				
+				interp( tmp3[ 0 ], tmp3[ 1 ], fx, result );
 				return result;
 			}
 			break;
@@ -225,8 +225,8 @@ void CubeColorLookup<T>::setInterpolation( Interpolation i )
 template<typename T>
 typename CubeColorLookup<T>::VecType CubeColorLookup<T>::normalizedCoordinates( const ColorType &color ) const
 {
-	return VecType(	
-		( color.x - m_domain.min.x ) / ( m_domain.max.x - m_domain.min.x ) * (T)( m_dimension.x - 1 ),	
+	return VecType(
+		( color.x - m_domain.min.x ) / ( m_domain.max.x - m_domain.min.x ) * (T)( m_dimension.x - 1 ),
 		( color.y - m_domain.min.y ) / ( m_domain.max.y - m_domain.min.y ) * (T)( m_dimension.y - 1 ),
 		( color.z - m_domain.min.z ) / ( m_domain.max.z - m_domain.min.z ) * (T)( m_dimension.z - 1 )
 	);

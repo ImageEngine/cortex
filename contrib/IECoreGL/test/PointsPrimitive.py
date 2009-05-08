@@ -44,10 +44,10 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 	## \todo Make this actually assert something
 	def testVertexAttributes( self ) :
-	
+
 		fragmentSource = """
 		uniform int greyTo255;
-		
+
 		void main()
 		{
 			float g = float( greyTo255 ) / 255.0;
@@ -66,20 +66,20 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		
+
 		r.worldBegin()
 		# we have to make this here so that the shaders that get made are made in the
 		# correct GL context. My understanding is that all shaders should work in all
 		# GL contexts in the address space, but that doesn't seem to be the case.
 		#w = SceneViewer( "scene", r.scene() )
-		
+
 		r.concatTransform( M44f.createTranslated( V3f( -2, -2, 5 ) ) )
 		r.shader( "surface", "grey", { "gl:fragmentSource" : StringData( fragmentSource ) } )
 		r.points( numPoints, { "P" : p, "greyTo255" : g } )
-		
+
 		r.worldEnd()
-	
+
 		#w.start()
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

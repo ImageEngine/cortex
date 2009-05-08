@@ -40,7 +40,7 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 
 	@staticmethod
 	def makeColorCube( dim, gamma = None ) :
-		
+
 		cubeData = Color3fVectorData()
 
 		for x in range( 0, dim.x ) :
@@ -55,19 +55,19 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 						color.g = math.pow( color.g, 1.0 / gamma )
 						color.b = math.pow( color.b, 1.0 / gamma )
 
-					cubeData.append( color )	
+					cubeData.append( color )
 
 		return CubeColorLookupf( dim, cubeData )
 
 	def testIdentity( self ) :
-	
+
 		cubeLookup = CubeColorLookupf()
-			
+
 		op = CubeColorTransformOp()
-		
+
 		window = Box2i( V2i( 0, 0 ), V2i( 2, 2 ) )
 		img = ImagePrimitive( window, window )
-		
+
 		rData = FloatVectorData()
 		rData.append( 0.0 )
 		rData.append( 0.0 )
@@ -76,9 +76,9 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 		rData.append( 1.0 )
 		rData.append( 1.0 )
 		rData.append( 1.0 )
-		rData.append( 1.0 )		
-		rData.append( 0.5 )						
-		
+		rData.append( 1.0 )
+		rData.append( 0.5 )
+
 		gData = FloatVectorData()
 		gData.append( 0.0 )
 		gData.append( 0.0 )
@@ -89,84 +89,7 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 		gData.append( 1.0 )
 		gData.append( 1.0 )
 		gData.append( 0.5 )
-		
-		bData = FloatVectorData()
-		bData.append( 0.0 )
-		bData.append( 1.0 )
-		bData.append( 0.0 )
-		bData.append( 1.0 )
-		bData.append( 0.0 )
-		bData.append( 1.0 )
-		bData.append( 0.0 )
-		bData.append( 1.0 )
-		bData.append( 0.5 )			
-		
-		numPixels = len( gData )
-		
-		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, rData )
-		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, gData )
-		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, bData )				
-		
-		self.assert_( img.arePrimitiveVariablesValid() )
-		
-		result = op(
-			input = img,
-			cube = cubeLookup
-		)
-		
-		for i in range( 0, numPixels ) :
-			
-			self.assertEqual( result["R"].data[i], rData[i] )
-			self.assertEqual( result["G"].data[i], gData[i] )
-			self.assertEqual( result["B"].data[i], bData[i] )
-		
-		self.assertEqual( result, img )
-		
-	def testInvertRed( self ) :
-	
-		testData = Color3fVectorData(
-			[
-				Color3f( 1, 0, 0 ),
-				Color3f( 1, 0, 1 ),
-				Color3f( 1, 1, 0 ),
-				Color3f( 1, 1, 1 ),
-				Color3f( 0, 0, 0 ),
-				Color3f( 0, 0, 1 ),
-				Color3f( 0, 1, 0 ),
-				Color3f( 0, 1, 1 ),				
-			]
-		)
-		
-		cubeLookup = CubeColorLookupf( V3i( 2, 2, 2 ), testData )
-			
-		op = CubeColorTransformOp()
-		
-		window = Box2i( V2i( 0, 0 ), V2i( 2, 2 ) )
-		img = ImagePrimitive( window, window )
-		
-		rData = FloatVectorData()
-		rData.append( 0.0 )
-		rData.append( 0.0 )
-		rData.append( 0.0 )
-		rData.append( 0.0 )
-		rData.append( 1.0 )
-		rData.append( 1.0 )
-		rData.append( 1.0 )
-		rData.append( 1.0 )		
-		rData.append( 0.5 )						
-		
-		gData = FloatVectorData()
-		gData.append( 0.0 )
-		gData.append( 0.0 )
-		gData.append( 1.0 )
-		gData.append( 1.0 )		
-		gData.append( 0.0 )
-		gData.append( 0.0 )
-		gData.append( 1.0 )
-		gData.append( 1.0 )
-		gData.append( 0.5 )
-		assert( len( rData ) == len( gData ) )
-		
+
 		bData = FloatVectorData()
 		bData.append( 0.0 )
 		bData.append( 1.0 )
@@ -177,32 +100,109 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 		bData.append( 0.0 )
 		bData.append( 1.0 )
 		bData.append( 0.5 )
-		assert( len( bData ) == len( gData ) )					
-		
+
 		numPixels = len( gData )
-		
+
 		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, rData )
 		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, gData )
-		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, bData )				
-		
+		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, bData )
+
 		self.assert_( img.arePrimitiveVariablesValid() )
-		
+
 		result = op(
 			input = img,
 			cube = cubeLookup
 		)
-		
-		self.assertNotEqual( img, result )
-		
+
 		for i in range( 0, numPixels ) :
-			
+
+			self.assertEqual( result["R"].data[i], rData[i] )
+			self.assertEqual( result["G"].data[i], gData[i] )
+			self.assertEqual( result["B"].data[i], bData[i] )
+
+		self.assertEqual( result, img )
+
+	def testInvertRed( self ) :
+
+		testData = Color3fVectorData(
+			[
+				Color3f( 1, 0, 0 ),
+				Color3f( 1, 0, 1 ),
+				Color3f( 1, 1, 0 ),
+				Color3f( 1, 1, 1 ),
+				Color3f( 0, 0, 0 ),
+				Color3f( 0, 0, 1 ),
+				Color3f( 0, 1, 0 ),
+				Color3f( 0, 1, 1 ),
+			]
+		)
+
+		cubeLookup = CubeColorLookupf( V3i( 2, 2, 2 ), testData )
+
+		op = CubeColorTransformOp()
+
+		window = Box2i( V2i( 0, 0 ), V2i( 2, 2 ) )
+		img = ImagePrimitive( window, window )
+
+		rData = FloatVectorData()
+		rData.append( 0.0 )
+		rData.append( 0.0 )
+		rData.append( 0.0 )
+		rData.append( 0.0 )
+		rData.append( 1.0 )
+		rData.append( 1.0 )
+		rData.append( 1.0 )
+		rData.append( 1.0 )
+		rData.append( 0.5 )
+
+		gData = FloatVectorData()
+		gData.append( 0.0 )
+		gData.append( 0.0 )
+		gData.append( 1.0 )
+		gData.append( 1.0 )
+		gData.append( 0.0 )
+		gData.append( 0.0 )
+		gData.append( 1.0 )
+		gData.append( 1.0 )
+		gData.append( 0.5 )
+		assert( len( rData ) == len( gData ) )
+
+		bData = FloatVectorData()
+		bData.append( 0.0 )
+		bData.append( 1.0 )
+		bData.append( 0.0 )
+		bData.append( 1.0 )
+		bData.append( 0.0 )
+		bData.append( 1.0 )
+		bData.append( 0.0 )
+		bData.append( 1.0 )
+		bData.append( 0.5 )
+		assert( len( bData ) == len( gData ) )
+
+		numPixels = len( gData )
+
+		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, rData )
+		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, gData )
+		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, bData )
+
+		self.assert_( img.arePrimitiveVariablesValid() )
+
+		result = op(
+			input = img,
+			cube = cubeLookup
+		)
+
+		self.assertNotEqual( img, result )
+
+		for i in range( 0, numPixels ) :
+
 			self.assertEqual( result["R"].data[i], 1.0 - rData[i] )
 			self.assertEqual( result["G"].data[i], gData[i] )
 			self.assertEqual( result["B"].data[i], bData[i] )
-	
-	
+
+
 	def testDomain( self ) :
-	
+
 		testData = Color3fVectorData(
 			[
 				Color3f( 1, 1, 1 ),
@@ -212,17 +212,17 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 				Color3f( 2, 1, 1 ),
 				Color3f( 2, 1, 2 ),
 				Color3f( 2, 2, 1 ),
-				Color3f( 2, 2, 2 ),				
+				Color3f( 2, 2, 2 ),
 			]
 		)
-		
+
 		cubeLookup = CubeColorLookupf( V3i( 2, 2, 2 ), testData, Box3f( V3f( 1, 1, 1 ), V3f( 2, 2, 2 ) ) )
-			
+
 		op = CubeColorTransformOp()
-		
+
 		window = Box2i( V2i( 0, 0 ), V2i( 2, 2 ) )
 		img = ImagePrimitive( window, window )
-		
+
 		rData = FloatVectorData()
 		rData.append( 1.0 )
 		rData.append( 1.0 )
@@ -231,9 +231,9 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 		rData.append( 2.0 )
 		rData.append( 2.0 )
 		rData.append( 2.0 )
-		rData.append( 2.0 )		
-		rData.append( 1.5 )						
-		
+		rData.append( 2.0 )
+		rData.append( 1.5 )
+
 		gData = FloatVectorData()
 		gData.append( 1.0 )
 		gData.append( 1.0 )
@@ -245,7 +245,7 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 		gData.append( 2.0 )
 		gData.append( 1.5 )
 		assert( len( rData ) == len( gData ) )
-		
+
 		bData = FloatVectorData()
 		bData.append( 1.0 )
 		bData.append( 2.0 )
@@ -256,50 +256,50 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 		bData.append( 1.0 )
 		bData.append( 2.0 )
 		bData.append( 1.5 )
-		assert( len( bData ) == len( gData ) )					
-		
+		assert( len( bData ) == len( gData ) )
+
 		numPixels = len( gData )
-		
+
 		img["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, rData )
 		img["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, gData )
-		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, bData )				
-		
+		img["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, bData )
+
 		self.assert_( img.arePrimitiveVariablesValid() )
-		
+
 		result = op(
 			input = img,
 			cube = cubeLookup
 		)
-		
+
 		self.assertEqual( img, result )
-			
+
 	def testLarge( self ) :
-	
-		dim = V3i( 10, 10, 10 )															
-						
-		cubeLookup = CubeColorTransformOpTest.makeColorCube( dim, gamma = 1.5 )								
-	
+
+		dim = V3i( 10, 10, 10 )
+
+		cubeLookup = CubeColorTransformOpTest.makeColorCube( dim, gamma = 1.5 )
+
 		img = Reader.create( "test/IECore/data/jpg/exif.jpg").read()
-		
+
 		op = CubeColorTransformOp()
-		
+
 		result = op(
 			input = img,
-			cube = cubeLookup,			
+			cube = cubeLookup,
 		)
-		
+
 		expectedResult = Reader.create( "test/IECore/data/expectedResults/cubeColorTransformOp1.jpg").read()
-		
+
 		op = ImageDiffOp()
 		res = op(
                         imageA = result,
                         imageB = expectedResult
                 )
-                
+
                 self.failIf( res.value )
-		
-			
-		
+
+
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

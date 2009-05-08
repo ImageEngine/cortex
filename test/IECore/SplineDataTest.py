@@ -40,93 +40,93 @@ import IECore
 class SplineDataTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		d = IECore.SplineffData()
 		self.assertEqual( d.value, IECore.Splineff() )
-		
+
 		s = IECore.Splineff( IECore.CubicBasisf.bezier() )
 		d = IECore.SplineffData( s )
-		
+
 		self.assertEqual( d.value, s )
-		
+
 	def testValueAccess( self ) :
-	
+
 		d = IECore.SplineffData()
 		d.value.basis.step = 10
-		
+
 		self.assertEqual( d.value.basis.step, 10 )
-		
+
 		d.value = IECore.Splineff( IECore.CubicBasisf.linear() )
 		self.assertEqual( d.value, IECore.Splineff( IECore.CubicBasisf.linear() ) )
-	
+
 	def testCopy( self ) :
-	
+
 		d = IECore.SplineffData()
 		dd = d.copy()
-		
+
 		self.assertEqual( d, dd )
-		
+
 		dd.value.basis.step = 10
-		
+
 		self.assertNotEqual( d, dd )
 
 	def testIO( self ) :
-	
+
 		s = IECore.Splineff( IECore.CubicBasisf.bezier() )
 		s[0] = 1
 		s[1] = 2
 		s[2] = 3
 		s[3] = 4
-		
-		sd = IECore.SplineffData( s )
-		
-		IECore.ObjectWriter( sd, "test/IECore/SplineData.cob" ).write()
-		
-		sdd = IECore.ObjectReader( "test/IECore/SplineData.cob" ).read()
-		
-		self.assertEqual( sd, sdd )
-		
-	def testColorIO( self ) :
-	
-		s = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
-		s[0] = IECore.Color3f( 1 )
-		s[1] = IECore.Color3f( 2 )
-		s[2] = IECore.Color3f( 3 )
-		s[3] = IECore.Color3f( 4 )
-		
-		sd = IECore.SplinefColor3fData( s )
-		
-		IECore.ObjectWriter( sd, "test/IECore/SplineData.cob" ).write()
-		
-		sdd = IECore.ObjectReader( "test/IECore/SplineData.cob" ).read()
-		
-		self.assertEqual( sd, sdd )
-		
-	def testRepr( self ) :	
-	
-		s = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
-		s[0] = IECore.Color3f( 1 )
-		s[1] = IECore.Color3f( 2 )
-		s[2] = IECore.Color3f( 3 )
-		s[3] = IECore.Color3f( 4 )
-		
-		sd = IECore.SplinefColor3fData( s )
-		
-		self.assertEqual( repr(sd), "IECore.SplinefColor3fData( " + repr(s) + " )" ) 
-		
-		self.assertEqual( sd, eval( repr(sd) ) )
-		
-	def setUp(self):
-        
-		if os.path.isfile( "test/IECore/SplineData.cob" ) :
-			os.remove( "test/IECore/SplineData.cob" )			
 
-	def tearDown(self):
-        
+		sd = IECore.SplineffData( s )
+
+		IECore.ObjectWriter( sd, "test/IECore/SplineData.cob" ).write()
+
+		sdd = IECore.ObjectReader( "test/IECore/SplineData.cob" ).read()
+
+		self.assertEqual( sd, sdd )
+
+	def testColorIO( self ) :
+
+		s = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
+		s[0] = IECore.Color3f( 1 )
+		s[1] = IECore.Color3f( 2 )
+		s[2] = IECore.Color3f( 3 )
+		s[3] = IECore.Color3f( 4 )
+
+		sd = IECore.SplinefColor3fData( s )
+
+		IECore.ObjectWriter( sd, "test/IECore/SplineData.cob" ).write()
+
+		sdd = IECore.ObjectReader( "test/IECore/SplineData.cob" ).read()
+
+		self.assertEqual( sd, sdd )
+
+	def testRepr( self ) :
+
+		s = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
+		s[0] = IECore.Color3f( 1 )
+		s[1] = IECore.Color3f( 2 )
+		s[2] = IECore.Color3f( 3 )
+		s[3] = IECore.Color3f( 4 )
+
+		sd = IECore.SplinefColor3fData( s )
+
+		self.assertEqual( repr(sd), "IECore.SplinefColor3fData( " + repr(s) + " )" )
+
+		self.assertEqual( sd, eval( repr(sd) ) )
+
+	def setUp(self):
+
 		if os.path.isfile( "test/IECore/SplineData.cob" ) :
 			os.remove( "test/IECore/SplineData.cob" )
 
-		
+	def tearDown(self):
+
+		if os.path.isfile( "test/IECore/SplineData.cob" ) :
+			os.remove( "test/IECore/SplineData.cob" )
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

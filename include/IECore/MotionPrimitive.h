@@ -43,20 +43,20 @@ namespace IECore
 /// The MotionPrimitive is a simple means of constructing and rendering a
 /// motionBegin/motionEnd block containing a Primitive. There's nothing to
 /// stop you from calling motionBegin/motionEnd to construct motion blocks yourself
-/// but this form is simple, and loadable and savable and copyable and all that. 
+/// but this form is simple, and loadable and savable and copyable and all that.
 class MotionPrimitive : public VisibleRenderable
 {
 	public:
-	
+
 		/// A type to map between points in time and corresponding
 		/// Primitives.
 		typedef std::map<float, PrimitivePtr> SnapshotMap;
-		
+
 		MotionPrimitive();
 		virtual ~MotionPrimitive();
-				
+
 		IE_CORE_DECLAREOBJECT( MotionPrimitive, VisibleRenderable );
-		
+
 		//! @name Snapshots
 		////////////////////////////////////////////////////
 		//@{
@@ -72,18 +72,18 @@ class MotionPrimitive : public VisibleRenderable
 		void removeSnapshot( float time );
 		void removeSnapshot( PrimitivePtr primitive );
 		//@}
-		
+
 		/// May throw an Exception if the contained Primitives are not
 		/// compatible with each other.
 		virtual void render( RendererPtr renderer ) const;
 		virtual Imath::Box3f bound() const;
-			
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
-		
+
 		SnapshotMap m_snapshots;
-		
+
 };
 
 IE_CORE_DECLAREPTR( MotionPrimitive );

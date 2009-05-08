@@ -46,7 +46,7 @@
 
 #include "IECore/TypedData.h"
 
-namespace IECore 
+namespace IECore
 {
 
 // vectors for basic types

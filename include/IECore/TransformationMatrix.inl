@@ -39,21 +39,21 @@ namespace IECore
 {
 
 template <class T>
-TransformationMatrix<T>::TransformationMatrix() : scalePivot( 0, 0, 0), scale( 1, 1, 1 ), shear( 0, 0, 0 ), scalePivotTranslation( 0, 0, 0 ), 
+TransformationMatrix<T>::TransformationMatrix() : scalePivot( 0, 0, 0), scale( 1, 1, 1 ), shear( 0, 0, 0 ), scalePivotTranslation( 0, 0, 0 ),
 						rotatePivot( 0, 0, 0 ), rotationOrientation(), rotate(), rotatePivotTranslation( 0, 0, 0 ), translate( 0, 0, 0 )
 {
 }
 
 template <class T>
 TransformationMatrix<T>::TransformationMatrix( const Imath::Vec3< T > s, const Imath::Euler< T > r, const Imath::Vec3< T > t ) :
-		scalePivot( 0, 0, 0), scale( s ), shear( 0, 0, 0 ), scalePivotTranslation( 0, 0, 0 ), 
+		scalePivot( 0, 0, 0), scale( s ), shear( 0, 0, 0 ), scalePivotTranslation( 0, 0, 0 ),
 						rotatePivot( 0, 0, 0 ), rotationOrientation(), rotate( r ), rotatePivotTranslation( 0, 0, 0 ), translate( t )
 {
 }
 
 template <class T>
 TransformationMatrix<T>::TransformationMatrix( const TransformationMatrix &cp ) :
-		scalePivot( cp.scalePivot ), scale( cp.scale ), shear( cp.shear ), scalePivotTranslation( cp.scalePivotTranslation ), 
+		scalePivot( cp.scalePivot ), scale( cp.scale ), shear( cp.shear ), scalePivotTranslation( cp.scalePivotTranslation ),
 						rotatePivot( cp.rotatePivot ), rotationOrientation( cp.rotationOrientation ), rotate( cp.rotate ),
 						rotatePivotTranslation( cp.rotatePivotTranslation ), translate( cp.translate )
 {
@@ -69,14 +69,14 @@ template <class T>
 bool TransformationMatrix<T>::operator == (const TransformationMatrix &t) const
 {
 	return ( scalePivot == t.scalePivot && scale == t.scale && shear == t.shear && scalePivotTranslation == t.scalePivotTranslation &&
-			rotatePivot == t.rotatePivot && rotationOrientation.normalized() == t.rotationOrientation.normalized() && 
+			rotatePivot == t.rotatePivot && rotationOrientation.normalized() == t.rotationOrientation.normalized() &&
 			rotate == t.rotate && rotate.order() == t.rotate.order() &&	rotatePivotTranslation == t.rotatePivotTranslation && translate == t.translate );
 }
 
 template<class T>
 std::ostream &operator << ( std::ostream &os, const TransformationMatrix<T> &x )
 {
-	os << "sp : " << x.scalePivot << " s : " << x.scale << " sh " << x.shear << " spt " << x.scalePivotTranslation << " rp " << x.rotatePivot << 
+	os << "sp : " << x.scalePivot << " s : " << x.scale << " sh " << x.shear << " spt " << x.scalePivotTranslation << " rp " << x.rotatePivot <<
 		" ro : " << x.rotationOrientation << " r : " << x.rotate << " rpt : " << x.rotatePivotTranslation << " t : " << x.translate;
 	return os;
 }

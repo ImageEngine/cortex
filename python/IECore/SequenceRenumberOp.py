@@ -37,7 +37,7 @@ from IECore import *
 class SequenceRenumberOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "SequenceRenumberOp", "Renumbers file sequences.",
 			FileSequenceParameter(
 				name = "result",
@@ -47,7 +47,7 @@ class SequenceRenumberOp( Op ) :
 				allowEmptyString = True,
 			)
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				FileSequenceParameter(
@@ -78,18 +78,18 @@ class SequenceRenumberOp( Op ) :
 		)
 
 	def doOperation( self, operands ) :
-	
+
 		src = self.parameters()["src"].getFileSequenceValue()
 		dst = src.copy()
 		if operands["dst"].value!="" :
 			dst.fileName = operands["dst"].value
 
 		frames = [ x * operands["multiply"].value + operands["offset"].value for x in src.frameList.asList() ]
-		
+
 		dst.frameList = frameListFromList( frames )
-		
+
 		mv( src, dst )
-		
+
 		return StringData( dst.fileName )
 
 registerRunTimeTyped( SequenceRenumberOp, 100004, Op )

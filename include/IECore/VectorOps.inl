@@ -100,7 +100,7 @@ inline T vecMul( const T& v1, typename VectorTraits<T>::BaseType v2)
 {
 	T result;
 	vecMul( v1, v2, result );
-	return result;	
+	return result;
 }
 
 template<typename T>
@@ -252,13 +252,13 @@ template<typename T>
 inline T vecCross( const T &v1, const T &v2 )
 {
 	assert( VectorTraits<T>::dimensions() == 3 );
-	
+
 	return T(
 		vecGet( v1, 1 ) * vecGet( v2, 2 ) - vecGet( v1, 2 ) * vecGet( v2, 1 ),
 		vecGet( v1, 2 ) * vecGet( v2, 0 ) - vecGet( v1, 0 ) * vecGet( v2, 2 ),
 		vecGet( v1, 0 ) * vecGet( v2, 1 ) - vecGet( v1, 1 ) * vecGet( v2, 0 )
-	);				
-	
+	);
+
 }
 
 } // namespace IECore

@@ -46,25 +46,25 @@ template<typename T>
 class TypedParameter : public Parameter
 {
 	public :
-	
+
 		typedef T ValueType;
 		typedef TypedData<T> ObjectType;
 
-		IE_CORE_DECLAREMEMBERPTR( TypedParameter<T> );		
+		IE_CORE_DECLAREMEMBERPTR( TypedParameter<T> );
 		IE_CORE_DECLAREPTR( ObjectType );
-		
+
 		typedef std::pair<std::string, T> Preset;
 		typedef std::pair<std::string, ObjectTypePtr> ObjectPreset;
 		typedef std::vector<Preset> PresetsContainer;
 		typedef std::vector<ObjectPreset> ObjectPresetsContainer;
-	
+
 		/// Constructs a new ObjectType object to hold the default value.
 		TypedParameter( const std::string &name, const std::string &description, const T &defaultValue = T(),
 			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
 		/// Takes a copy of defaultValue for use as the default value.
 		TypedParameter( const std::string &name, const std::string &description, ObjectTypePtr defaultValue,
 			const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
-		
+
 		//! @name RunTimeTyped functions
 		////////////////////////////////////
 		//@{
@@ -78,7 +78,7 @@ class TypedParameter : public Parameter
 		static bool inheritsFrom( const char *typeName );
 		static TypeId baseTypeId();
 		static const char *baseTypeName();
-		typedef Parameter BaseClass;		
+		typedef Parameter BaseClass;
 		//@}
 
 		//! @name Object functions
@@ -87,14 +87,14 @@ class TypedParameter : public Parameter
 		typename TypedParameter<T>::Ptr copy() const;
 		virtual bool isEqualTo( ConstObjectPtr other ) const;
 		//@}
-			
+
 		/// Implemented to return true only if value is of type TypedData<T>.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
-		
+
 		/// Convenience function for getting the default value, which avoids all the hoop jumping
 		/// needed to extract the value from the Object returned by Parameter::defaultValue().
 		const ValueType &typedDefaultValue() const;
-		
+
 		/// Convenience function for value getting, which avoids all the hoop jumping
 		/// needed to extract the value from the Object returned by Parameter::getValue().
 		/// Throws an Exception if the value is not valid.
@@ -103,21 +103,21 @@ class TypedParameter : public Parameter
 		/// Convenience function for value setting, constructs a TypedData<T> from value
 		/// and calls Parameter::setValue().
 		void setTypedValue( const T &value );
-	
+
 	protected :
-	
+
 		TypedParameter();
 
 		virtual void copyFrom( ConstObjectPtr other, CopyContext *context );
 		virtual void save( SaveContext *context ) const;
 		virtual void load( LoadContextPtr context );
 		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
-	
+
 	private :
-	
+
 		static const TypeDescription<TypedParameter<T> > g_typeDescription;
 		friend class TypeDescription<TypedParameter<T> >;
-				
+
 };
 
 } // namespace IECore

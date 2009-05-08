@@ -42,30 +42,30 @@ CachedImplicitSurfaceFunction<P,V>::CachedImplicitSurfaceFunction( typename Cach
 	assert( tolerance >= 0.0 );
 
 	m_fn = fn;
-	m_tolerance = tolerance;			
-}		
+	m_tolerance = tolerance;
+}
 
 template<typename P, typename V>
 typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::operator()( const CachedImplicitSurfaceFunction<P,V>::Point &p )
-{	
-	/// Offset such that a cell centre is aligned with the origin			
+{
+	/// Offset such that a cell centre is aligned with the origin
 	Key cacheKey(
 		(KeyBaseType)((PointTraits::get(p, 0) - m_tolerance / 0.5) / m_tolerance),
 		(KeyBaseType)((PointTraits::get(p, 1) - m_tolerance / 0.5) / m_tolerance),
 		(KeyBaseType)((PointTraits::get(p, 2) - m_tolerance / 0.5) / m_tolerance)
-	);		
+	);
 
 	typename Cache::const_iterator it = m_cache.find( cacheKey );
 	if ( it != m_cache.end() )
-	{		
+	{
 		return it->second;
 	}
 
-	Value v = m_fn->operator()(p);	
-	
+	Value v = m_fn->operator()(p);
+
 	m_cache.insert( typename Cache::value_type( cacheKey, v ) );
 
-	return v;						
+	return v;
 }
 
 template<typename P, typename V>
@@ -78,8 +78,8 @@ template<typename P, typename V>
 typename CachedImplicitSurfaceFunction<P,V>::Cache::size_type CachedImplicitSurfaceFunction<P,V>::size() const
 {
 	return m_cache.size();
-}	
-	
+}
+
 template<typename P, typename V>
 typename CachedImplicitSurfaceFunction<P,V>::Value CachedImplicitSurfaceFunction<P,V>::getValue( const CachedImplicitSurfaceFunction<P,V>::Point &p )
 {

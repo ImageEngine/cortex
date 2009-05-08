@@ -114,7 +114,7 @@ IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( MFnNurbsCurv
 	{
 		periodic = true;
 	}
-	
+
 	// get the points and convert them
 	MPointArray mPoints;
 	fnCurve.getCVs( mPoints, space() );
@@ -124,14 +124,14 @@ IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( MFnNurbsCurv
 		// remove the duplicates.
 		mPoints.setLength( mPoints.length() - mDegree );
 	}
-	
+
 	bool duplicateEnds = false;
 	if( !periodic && mDegree==3 )
 	{
 		// there's an implicit duplication of the end points that we need to make explicit
 		duplicateEnds = true;
 	}
-	
+
 	IECore::V3fVectorDataPtr pointsData = new IECore::V3fVectorData;
 	std::vector<Imath::V3f> &points = pointsData->writable();
 	std::vector<Imath::V3f>::iterator transformDst;
@@ -147,9 +147,9 @@ IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( MFnNurbsCurv
 		points.resize( mPoints.length() );
 		transformDst = points.begin();
 	}
-	
+
 	std::transform( MArrayIter<MPointArray>::begin( mPoints ), MArrayIter<MPointArray>::end( mPoints ), transformDst, IECore::VecConvert<MPoint, V3f>() );
-	
+
 	if( duplicateEnds )
 	{
 		points[points.size()-1] = IECore::convert<Imath::V3f>( mPoints[mPoints.length()-1] );

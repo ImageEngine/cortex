@@ -44,22 +44,22 @@ namespace IECore
 template<typename T>
 class CubicBasis
 {
-	
+
 	public :
-	
+
 		typedef T BaseType;
 		typedef Imath::Matrix44<T> MatrixType;
-	
+
 		MatrixType matrix;
 		unsigned step;
 
 		CubicBasis( const MatrixType &m, unsigned s );
-		
+
 		template<class S>
 		inline void coefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const;
 		template<class S>
 		inline void coefficients( S t, S c[4] ) const;
-				
+
 		template<class S>
 		inline S operator() ( S t, S p0, S p1, S p2, S p3 ) const;
 		template<class S>
@@ -68,15 +68,15 @@ class CubicBasis
 		inline S operator() ( typename S::BaseType t, const S &p0, const S &p1, const S &p2, const S &p3 ) const;
 		template<class S>
 		inline S operator() ( typename S::BaseType t, const S p[4] ) const;
-				
+
 		//! @name Derivatives
 		/// Methods for computing the first derivatives with respect to 't', which for a curve is also its tangent at 't'.
-		//@{		
+		//@{
 		template<class S>
 		inline void derivativeCoefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const;
 		template<class S>
-		inline void derivativeCoefficients( S t, S c[4] ) const;		
-		
+		inline void derivativeCoefficients( S t, S c[4] ) const;
+
 		template<class S>
 		inline S derivative( S t, S p0, S p1, S p2, S p3 ) const;
 		template<class S>
@@ -86,15 +86,15 @@ class CubicBasis
 		template<class S>
 		inline S derivative( typename S::BaseType t, const S p[4] ) const;
 		//@}
-		
+
 		bool operator==( const CubicBasis &rhs ) const;
 		bool operator!=( const CubicBasis &rhs ) const;
-		
+
 		static const CubicBasis &linear();
 		static const CubicBasis &bezier();
 		static const CubicBasis &bSpline();
 		static const CubicBasis &catmullRom();
-		
+
 };
 
 typedef CubicBasis<float> CubicBasisf;

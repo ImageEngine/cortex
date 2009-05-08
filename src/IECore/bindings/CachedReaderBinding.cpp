@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -67,9 +67,9 @@ void bindCachedReader()
 		.def( "memoryUsage", &CachedReader::memoryUsage )
 		.def( "clear", &CachedReader::clear )
 		.add_property( "searchPath", make_function( &CachedReader::getSearchPath, return_value_policy<copy_const_reference>() ), &CachedReader::setSearchPath )
-		.add_property( "maxMemory", &CachedReader::getMaxMemory, &CachedReader::setMaxMemory )		
+		.add_property( "maxMemory", &CachedReader::getMaxMemory, &CachedReader::setMaxMemory )
 		.def( "defaultCachedReader", &CachedReader::defaultCachedReader ).staticmethod( "defaultCachedReader" )
-	;	
+	;
 }
-	
+
 }

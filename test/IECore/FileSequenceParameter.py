@@ -40,27 +40,27 @@ import os
 class TestFileSequenceParameter( unittest.TestCase ) :
 
 	def mkSequence( self, sequence ) :
-	
+
 		directory = "test/sequences/parameterTest"
-	
+
 		os.system( "rm -rf " + directory )
 		os.system( "mkdir -p " + directory )
-		
+
 		for f in sequence.fileNames() :
 			os.system( "touch '" + directory + "/" + f + "'" )
 
-	def test( self ) :	
-	
+	def test( self ) :
+
 		s = IECore.FileSequence( "a.#.tif", IECore.FrameRange( 1, 10 ) )
 		self.mkSequence( s )
-		
+
 		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.MustExist )
 		# should raise because it's not a valid sequence string
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "hello" ) )
 		# should raise because it doesn't exist
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "hello.###.tif" ) )
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) )
-		
+
 		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.MustNotExist )
 		# should raise because it's not a valid sequence string
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "hello" ) )
@@ -68,42 +68,42 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		p.setValidatedValue( IECore.StringData( "hello.###.tif" ) )
 		# should raise because the sequence exists
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) )
-		
+
 		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.DontCare )
 		# should raise because it's not a valid sequence string
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "hello" ) )
 		p.setValidatedValue( IECore.StringData( "hello.###.tif" ) )
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) )
-		
+
 		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
 		p.setFileSequenceValue( IECore.FileSequence( "a.###.tif", IECore.FrameRange( 1, 10 ) ) )
 		self.assertEqual( p.getValue(), IECore.StringData( "a.###.tif" ) )
-		
+
 	def testEmptyString( self ) :
-	
+
 		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.MustExist, allowEmptyString=True )
 		# should be fine, as we allow the empty string, and that should override the file existence checks
 		p.setValidatedValue( IECore.StringData( "" ) )
 		self.assertEqual( p.valueValid( IECore.StringData( "" ) )[0], True )
-		
+
 	def testNotAString( self ) :
-	
+
 		p = IECore.FileSequenceParameter( name = "n", description = "d" )
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.IntData( 1 ) )
-		
+
 	def testExtensions( self ) :
-	
+
 		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.DontCare, extensions="tif exr jpg" )
 		self.assertEqual( p.extensions, [ "tif", "exr", "jpg" ] )
 		self.assert_( p.valueValid( IECore.StringData( "a.#.tif" ) )[0] )
 		self.assert_( not p.valueValid( IECore.StringData( "a.#.gif" ) )[0] )
-		
+
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "dsds.###" ) )
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "dsds.###.gif" ) )
 		p.setValidatedValue( IECore.StringData( "dsds.##.tif" ) )
-		
-	def testSpacesInFilename( self ) :	
-	
+
+	def testSpacesInFilename( self ) :
+
 		s = IECore.FileSequence( "test with spaces .#.tif", IECore.FrameRange( 5, 10 ) )
 		self.mkSequence( s )
 		p = IECore.FileSequenceParameter(
@@ -112,9 +112,9 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 			check = IECore.FileSequenceParameter.CheckType.MustExist,
 			extensions="tif exr jpg"
 		)
-		
+
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/test with spaces .#.tif 5-10" ) )
-		
+
 		s = IECore.FileSequence( "test with   spaces  .#.tif", IECore.FrameRange( 5, 10 ) )
 		self.mkSequence( s )
 		p = IECore.FileSequenceParameter(
@@ -123,9 +123,9 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 			check = IECore.FileSequenceParameter.CheckType.MustExist,
 			extensions="tif exr jpg"
 		)
-		
+
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/test with   spaces  .#.tif 5-10" ) )
 
-		
+
 if __name__ == "__main__":
         unittest.main()

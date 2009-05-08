@@ -41,17 +41,17 @@ import IECoreRI
 class TextTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testText.tif"
-	
+
 	def test( self ) :
-	
+
 		os.environ["IECORE_FONT_PATHS"] = "test"
-		
+
 		r = IECoreRI.Renderer( "" )
-		
+
 		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test" ) )
 		r.setOption( "searchPath:font", IECore.StringData( "test/IECore/data/fonts" ) )
 		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test/IECore/data/fonts" ) )
-		
+
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -60,25 +60,25 @@ class TextTest( unittest.TestCase ) :
 			}
 		)
 		r.display( self.outputFileName, "tiff", "rgba", {} )
-		
+
 		r.worldBegin()
-		
+
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0.1, -3 ) ) )
 		r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.15 ) ) )
-		
+
 		r.text( "Vera.ttf", "hello world", 1, {} )
-	
+
 		r.worldEnd()
 
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
 		expectedImage = IECore.Reader.create( "test/IECoreRI/data/textImages/helloWorld.tif" ).read()
-		
+
 		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
-																
+
 	def tearDown( self ) :
 
 		if os.path.exists( self.outputFileName ) :
 			os.remove( self.outputFileName )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

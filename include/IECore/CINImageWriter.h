@@ -54,7 +54,7 @@ class CINImageWriter : public ImageWriter
 		/// Construct an CINImageWriter for the given image and output filename
 		CINImageWriter( ObjectPtr object, const std::string &fileName );
 		virtual ~CINImageWriter();
-		
+
 		virtual std::string destinationColorSpace() const ;
 
 	private:
@@ -65,9 +65,9 @@ class CINImageWriter : public ImageWriter
 		virtual void writeImage( const std::vector<std::string> &names,
 		                         ConstImagePrimitivePtr image,
 		                         const Imath::Box2i &dw ) const;
-					
-		struct ChannelConverter;			
-					
+
+		struct ChannelConverter;
+
 };
 
 IE_CORE_DECLAREPTR(CINImageWriter);

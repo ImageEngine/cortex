@@ -52,37 +52,37 @@ struct InterpolatedCacheHelper
 {
 	typedef std::vector<InterpolatedCache::HeaderHandle> HeaderHandleVector;
 	typedef std::vector<InterpolatedCache::ObjectHandle> ObjectHandleVector;
-	typedef std::vector<InterpolatedCache::AttributeHandle> AttributeHandleVector;	
-	
+	typedef std::vector<InterpolatedCache::AttributeHandle> AttributeHandleVector;
+
 	static list objects(ConstInterpolatedCachePtr cache)
 	{
 		list objects;
-		
+
 		ObjectHandleVector o;
 		cache->objects(o);
 		for (ObjectHandleVector::const_iterator it = o.begin(); it != o.end(); ++it)
 		{
 			objects.append<std::string>(*it);
 		}
-		
-		
+
+
 		return objects;
 	}
 
 	static list headers(ConstInterpolatedCachePtr cache)
 	{
 		list headers;
-		
+
 		HeaderHandleVector o;
 		cache->headers(o);
 		for (HeaderHandleVector::const_iterator it = o.begin(); it != o.end(); ++it)
 		{
 			headers.append<std::string>(*it);
 		}
-		
+
 		return headers;
 	}
-	
+
 	static list attributes(ConstInterpolatedCachePtr cache, const InterpolatedCache::ObjectHandle &obj, object regex)
 	{
 		list attributes;
@@ -109,7 +109,7 @@ struct InterpolatedCacheHelper
 		{
 			attributes.append<std::string>(*it);
 		}
-		
+
 		return attributes;
 	}
 };
@@ -118,7 +118,7 @@ void bindInterpolatedCache()
 {
 	bool (InterpolatedCache::*containsObj)(const InterpolatedCache::ObjectHandle &) const = &InterpolatedCache::contains;
 	bool (InterpolatedCache::*containsObjAttr)(const InterpolatedCache::ObjectHandle &, const InterpolatedCache::AttributeHandle &) const = &InterpolatedCache::contains;
-	
+
 	typedef class_< InterpolatedCache, InterpolatedCachePtr > InterpolatedCachePyClass;
 
 	RefCountedClass<InterpolatedCache, RefCounted> interpolatedCacheClass( "InterpolatedCache" );
@@ -132,16 +132,16 @@ void bindInterpolatedCache()
 		;
 	}
 	interpolatedCacheClass
-		.def( 
+		.def(
 			init< optional< const std::string &, double, InterpolatedCache::Interpolation, const OversamplesCalculator & > >
-			( 
+			(
 				(
-					arg( "pathTemplate" ) = std::string(""), 
+					arg( "pathTemplate" ) = std::string(""),
 					arg( "frame" ) = double(0.0),
 					arg( "interpolation" ) = InterpolatedCache::None,
 					arg( "oversamplesCalculator" ) = OversamplesCalculator()
 				)
-			) 
+			)
 		)
 		.def("setPathTemplate", &InterpolatedCache::setPathTemplate )
 		.def("getPathTemplate", &InterpolatedCache::getPathTemplate, return_value_policy<copy_const_reference>() )
@@ -154,7 +154,7 @@ void bindInterpolatedCache()
 		.def("readHeader", (ObjectPtr (InterpolatedCache::*) ( const InterpolatedCache::HeaderHandle & ) const )&InterpolatedCache::readHeader)
 		.def("readHeader", (CompoundObjectPtr (InterpolatedCache::*)() const )&InterpolatedCache::readHeader)
 		.def("contains", containsObj)
-		.def("contains", containsObjAttr)		
+		.def("contains", containsObjAttr)
 		.def("objects", &InterpolatedCacheHelper::objects)
 		.def("headers", &InterpolatedCacheHelper::headers)
 		.def("attributes", make_function( &InterpolatedCacheHelper::attributes, default_call_policies(), ( boost::python::arg_( "obj" ), boost::python::arg_( "regex" ) = object() ) ) )

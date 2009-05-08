@@ -42,9 +42,9 @@ using namespace Imath;
 MeshPrimitiveBuilder::MeshPrimitiveBuilder()
 {
 	m_P = new V3fVectorData();
-	m_N = new V3fVectorData();			
+	m_N = new V3fVectorData();
 	m_verticesPerFace = new IntVectorData();
-	m_vertexIds = new IntVectorData();			
+	m_vertexIds = new IntVectorData();
 }
 
 namespace IECore
@@ -54,8 +54,8 @@ template<>
 void MeshPrimitiveBuilder::addVertex<float>( const Imath::Vec3<float> &p, const Imath::Vec3<float> &n )
 {
 	assert( m_P );
-	assert( m_N );	
-	
+	assert( m_N );
+
 	m_P->writable().push_back( p );
 	m_N->writable().push_back( n.normalized() );
 }
@@ -64,8 +64,8 @@ template<>
 void MeshPrimitiveBuilder::addVertex<double>( const Imath::Vec3<double> &p, const Imath::Vec3<double> &n )
 {
 	assert( m_P );
-	assert( m_N );	
-	
+	assert( m_N );
+
 	m_P->writable().push_back( Imath::V3f( p.x, p.y, p.z ) );
 	m_N->writable().push_back( Imath::V3f( n.x, n.y, n.z ).normalized() );
 }
@@ -83,11 +83,11 @@ void MeshPrimitiveBuilder::addTriangle( int v0, int v1, int v2 )
 	m_vertexIds->writable().push_back ( v1 );
 	m_vertexIds->writable().push_back ( v2 );
 }
-		
+
 MeshPrimitivePtr MeshPrimitiveBuilder::mesh() const
-{	
-	MeshPrimitivePtr m = new MeshPrimitive( m_verticesPerFace, m_vertexIds, "linear", m_P );						
-	m->variables["N"] =  IECore::PrimitiveVariable( IECore::PrimitiveVariable::Varying, m_N->copy() );	
-			
+{
+	MeshPrimitivePtr m = new MeshPrimitive( m_verticesPerFace, m_vertexIds, "linear", m_P );
+	m->variables["N"] =  IECore::PrimitiveVariable( IECore::PrimitiveVariable::Varying, m_N->copy() );
+
 	return m;
 }

@@ -62,7 +62,7 @@ class CineonToLinearOp : public ChannelOp
 		ConstIntParameterPtr refBlackValParameter() const;
 
 		static CompoundParameterPtr createCineonSettings();
-	
+
 	protected :
 
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
@@ -72,11 +72,11 @@ class CineonToLinearOp : public ChannelOp
 		IntParameterPtr m_refBlackVal;
 
 		struct Converter;
-		
+
 	private :
-	
+
 		static ColorSpaceTransformOp::ColorSpaceDescription<CineonToLinearOp> g_colorSpaceDescription;
-	
+
 };
 
 IE_CORE_DECLAREPTR( CineonToLinearOp );

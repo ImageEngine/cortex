@@ -46,7 +46,7 @@
 
 #include <string>
 
-namespace IECore 
+namespace IECore
 {
 
 // simple typeddata types
@@ -130,9 +130,9 @@ IE_CORE_DECLAREPTR( QuatdData );
 /// long and int were both 32-bits wide on 32-bit platforms)
 class LongDataAlias : private IntData
 {
-	protected:	
-		static TypeDescription<IntData> m_typeDescription;	
-		~LongDataAlias() {};	
+	protected:
+		static TypeDescription<IntData> m_typeDescription;
+		~LongDataAlias() {};
 };
 
 } // namespace IECore

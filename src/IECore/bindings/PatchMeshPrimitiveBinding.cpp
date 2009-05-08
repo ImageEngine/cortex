@@ -50,12 +50,12 @@ void bindPatchMeshPrimitive()
 		.def( "uBasis", &PatchMeshPrimitive::uBasis, return_value_policy<copy_const_reference>() )
 		.def( "vBasis", &PatchMeshPrimitive::vBasis, return_value_policy<copy_const_reference>() )
 		.def( "uPoints", &PatchMeshPrimitive::uPoints )
-		.def( "vPoints", &PatchMeshPrimitive::vPoints )	
+		.def( "vPoints", &PatchMeshPrimitive::vPoints )
 		.def( "uPatches", &PatchMeshPrimitive::uPatches )
-		.def( "vPatches", &PatchMeshPrimitive::vPatches )		
+		.def( "vPatches", &PatchMeshPrimitive::vPatches )
 		.def( "uPeriodic", &PatchMeshPrimitive::uPeriodic )
-		.def( "vPeriodic", &PatchMeshPrimitive::vPeriodic )		
+		.def( "vPeriodic", &PatchMeshPrimitive::vPeriodic )
 	;
 }
-	
+
 } // namespace IECore

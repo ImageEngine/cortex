@@ -54,8 +54,8 @@ class JPEGImageWriter : public ImageWriter
 		/// Construct an JPEGImageWriter for the given image and output filename
 		JPEGImageWriter(ObjectPtr object, const std::string & fileName);
 		virtual ~JPEGImageWriter();
-		
-		virtual std::string destinationColorSpace() const ;		
+
+		virtual std::string destinationColorSpace() const ;
 
 		IntParameterPtr qualityParameter();
 		ConstIntParameterPtr qualityParameter() const;
@@ -63,7 +63,7 @@ class JPEGImageWriter : public ImageWriter
 	private:
 
 		static const WriterDescription<JPEGImageWriter> m_writerDescription;
-		
+
 		struct ChannelConverter;
 
 		/// write the image
@@ -72,7 +72,7 @@ class JPEGImageWriter : public ImageWriter
 		                         const Imath::Box2i &dw ) const;
 
 		void constructParameters();
-		
+
 		IntParameterPtr m_qualityParameter;
 
 };

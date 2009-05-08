@@ -40,55 +40,55 @@ import os.path
 class FnConverterHolder( IECoreMaya.FnParameterisedHolder ) :
 
 	def __init__( self, node ) :
-	
+
 		IECoreMaya.FnParameterisedHolder.__init__( self, node )
-		
+
 		if self.typeName()!="ieConverterHolder" :
-		
+
 			raise TypeError( "\"%s\" is not a ConverterHolder." )
-	
+
 	## Returns the converter held by this node
 	def converter( self ) :
-	
+
 		c = self.getParameterised()
 		c = c[0]
 		if not c or not c.isInstanceOf( IECoreMaya.Converter.staticTypeId() ) :
 			return None
-			
+
 		return c
-	
-	## Performs a conversion at the specified frame		
+
+	## Performs a conversion at the specified frame
 	def convertAtFrame( self, frame ) :
-		
+
 		c = self.converter()
 		if not c :
 			raise RuntimeError( "No converter found on node \"%s\"." % self.name() )
-			
+
 		fileName = str( maya.cmds.getAttr( self.name() + ".fileName", asString = True ) )
 		try :
 			f = IECore.FileSequence( fileName, IECore.FrameRange( frame, frame ) )
 			fileName = f.fileNameForFrame( frame )
 		except :
 			pass
-			
+
 		if fileName=="" :
 			raise RuntimeError( "No filename specified on node \"%s\"." % self.name() )
-		
+
 		maya.cmds.currentTime( frame )
 		o = c.convert()
 		if not o :
 			raise RuntimeError( "Conversion failed for node \"%s\"." % self.name() )
-		
+
 		w = IECore.Writer.create( o, fileName )
 		if not w :
 			ext = os.path.splitext( fileName )[1]
 			raise RuntimeError(	"Unable to create a Writer for object of type \"%s\" and file type \"%s\"." % ( o.typeName(), ext ) )
-		
+
 		w.write()
-		
+
 	## Performs a conversion for every frame in an IECore.FrameList object
 	def convertAtFrames( self, frameList ) :
-		
+
 		for f in frameList.asList() :
-		
+
 			self.convertAtFrame( f )

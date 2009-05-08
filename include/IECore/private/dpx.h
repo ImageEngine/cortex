@@ -86,8 +86,8 @@ typedef struct _image_information {
     U32    eol_padding;      /* end of line padding used in element */
     U32    eo_image_padding; /* end of image padding used in element */
     ASCII  description[32];  /* description of element */
-  } image_element[8];         
-  
+  } image_element[8];
+
   U8 reserved[52];             /* reserved for future use (padding) */
 } DPXImageInformation;
 

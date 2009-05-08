@@ -60,7 +60,7 @@ static void triangulateLoops( T &t, list loops )
 	for( unsigned i=0; i<s; i++ )
 	{
 		typename LoopVector::ConstPtr loop = extract<typename LoopVector::ConstPtr>( loops[i] );
-		l.push_back( typename T::Loop( loop->readable().begin(), loop->readable().end() ) );		
+		l.push_back( typename T::Loop( loop->readable().begin(), loop->readable().end() ) );
 	}
 	t.triangulate( l.begin(), l.end() );
 }

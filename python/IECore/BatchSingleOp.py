@@ -41,9 +41,9 @@ class BatchSingleOp( Op ) :
 
 	## If classLoader is None then ClassLoader.defaultOpLoader() will be used.
 	def __init__( self, classLoader = None ) :
-	
-		Op.__init__( self, 
-			"BatchSingleOp", 
+
+		Op.__init__( self,
+			"BatchSingleOp",
 			"Executes a single Op multiple times.",
 			IntParameter(
 				name = "result",
@@ -63,7 +63,7 @@ class BatchSingleOp( Op ) :
 
 		self.__ops = []
 		self.__classLoader = classLoader or ClassLoader.defaultOpLoader()
-		
+
 		self.parameters().addParameters(
 			[
 				ValidatedStringParameter(

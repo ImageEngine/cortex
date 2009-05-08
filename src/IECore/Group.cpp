@@ -113,7 +113,7 @@ void Group::clearState()
 {
 	m_state.clear();
 }
-		
+
 const Group::StateContainer &Group::state() const
 {
 	return m_state;
@@ -137,18 +137,18 @@ void Group::addChild( VisibleRenderablePtr child )
 void Group::removeChild( VisibleRenderablePtr child )
 {
 	ChildContainer::iterator it = find( m_children.begin(), m_children.end(), child );
-	
+
 	if( it==m_children.end() )
 	{
 		throw Exception( "Child is not a member of Group" );
 	}
-	
+
 	GroupPtr gChild = runTimeCast<Group>( child );
 	if( gChild )
 	{
 		gChild->m_parent = 0;
 	}
-	
+
 	m_children.erase( it );
 }
 
@@ -159,7 +159,7 @@ void Group::clearChildren()
 		removeChild( m_children[0] );
 	}
 }
-		
+
 const Group::ChildContainer &Group::children() const
 {
 	return m_children;
@@ -225,7 +225,7 @@ void Group::save( SaveContext *context ) const
 			string name = str( boost::format( "%d" ) % i );
 			context->save( *it, container, name );
 			i++;
-		}	
+		}
 	container->chdir( ".." );
 }
 
@@ -256,7 +256,7 @@ void Group::load( LoadContextPtr context )
 		for( IndexedIO::EntryList::const_iterator it=l.begin(); it!=l.end(); it++ )
 		{
 			addChild( context->load<VisibleRenderable>( container, it->id() ) );
-		}	
+		}
 	container->chdir( ".." );
 }
 
@@ -268,7 +268,7 @@ bool Group::isEqualTo( ConstObjectPtr other ) const
 	}
 
 	const Group *tOther = static_cast<const Group *>( other.get() );
-	
+
 	// check transform
 	if( (bool)m_transform != (bool)tOther->m_transform )
 	{
@@ -279,33 +279,33 @@ bool Group::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	// check state
 	if( m_state.size()!=tOther->m_state.size() )
 	{
 		return false;
 	}
 	for( size_t i=0; i<m_state.size(); i++ )
-	{	
+	{
 		if( !m_state[i]->isEqualTo( tOther->m_state[i] ) )
 		{
 			return false;
 		}
 	}
-	
+
 	// check children
 	if( m_children.size()!=tOther->m_children.size() )
 	{
 		return false;
 	}
 	for( size_t i=0; i<m_children.size(); i++ )
-	{	
+	{
 		if( !m_children[i]->isEqualTo( tOther->m_children[i] ) )
 		{
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 

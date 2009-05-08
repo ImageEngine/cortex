@@ -53,18 +53,18 @@ class NumericParameterWrap : public NumericParameter<T>, public Wrapper<NumericP
 	public :
 
 		NumericParameterWrap( PyObject *self, const std::string &n, const std::string &d, T v = T(), T minValue = Imath::limits<T>::min(),
-			T maxValue = Imath::limits<T>::max(), const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+			T maxValue = Imath::limits<T>::max(), const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )
 			:	NumericParameter<T>( n, d, v, minValue, maxValue, parameterPresets<typename NumericParameter<T>::PresetsContainer>( p ), po, ud ), Wrapper<NumericParameter<T> >( self, this ) {};
-		
+
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( NumericParameter<T> );
-		IE_CORE_DECLAREMEMBERPTR( NumericParameterWrap<T> );		
+		IE_CORE_DECLAREMEMBERPTR( NumericParameterWrap<T> );
 };
 
 template<typename T>
 static void bindNumericParameter()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<NumericParameter<T>, typename NumericParameterWrap<T>::Ptr>()
 		.def(
 			init<const std::string &, const std::string &, boost::python::optional< T, T, T, const object &, bool, CompoundObjectPtr> >
@@ -73,8 +73,8 @@ static void bindNumericParameter()
 					arg( "name" ),
 					arg( "description" ),
 					arg( "defaultValue" ) = T(),
-					arg( "minValue" ) = Imath::limits<T>::min(),						
-					arg( "maxValue" ) = Imath::limits<T>::max(),	
+					arg( "minValue" ) = Imath::limits<T>::min(),
+					arg( "maxValue" ) = Imath::limits<T>::max(),
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false,
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
@@ -88,7 +88,7 @@ static void bindNumericParameter()
 		.def( "setTypedValue", &NumericParameter<T>::setNumericValue )		// added for consistency
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( NumericParameter<T> )
 		.def( "hasMinValue", &NumericParameter<T>::hasMinValue )
-		.def( "hasMaxValue", &NumericParameter<T>::hasMaxValue )		
+		.def( "hasMaxValue", &NumericParameter<T>::hasMaxValue )
 		.add_property( "minValue", &NumericParameter<T>::minValue )
 		.add_property( "maxValue", &NumericParameter<T>::maxValue )
 	;

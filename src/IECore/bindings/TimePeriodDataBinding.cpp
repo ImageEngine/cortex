@@ -104,7 +104,7 @@ static const TimePeriod &getValue( TimePeriodDataPtr data )
 void bindTimePeriodData()
 {
 	PyDateTime_IMPORT;
-		
+
 	RunTimeTypedClass<TimePeriodData>()
 		.def( init<>() )
 		.def( init<const TimePeriodData::ValueType &>() )

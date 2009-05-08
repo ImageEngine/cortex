@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -51,14 +51,14 @@ void bindCamera()
 {
 	RunTimeTypedClass<Camera>()
 		.def( init< optional< const std::string &, TransformPtr, CompoundDataPtr > >
-			( 
-				( 
-					arg( "name" ) = std::string( "default" ), 
-					arg( "transform" ) = TransformPtr(), 
-					
+			(
+				(
+					arg( "name" ) = std::string( "default" ),
+					arg( "transform" ) = TransformPtr(),
+
 					/// We need to explicitly make this a CompoundData::Ptr so that boost.python finds the correct to_python converter
 					arg( "parameters" ) = CompoundData::Ptr( new CompoundData() )
-				) 
+				)
 			)
 		)
 		.def( "setName", &Camera::setName )

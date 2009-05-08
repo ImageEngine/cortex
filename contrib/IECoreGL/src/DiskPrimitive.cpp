@@ -61,7 +61,7 @@ float DiskPrimitive::getRadius() const
 {
 	return m_radius;
 }
-	
+
 void DiskPrimitive::setZ( float z )
 {
 	m_z = z;

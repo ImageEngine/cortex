@@ -43,20 +43,20 @@ init( False )
 class TestHitRecord( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		d = HitRecord( 1, 2, InternedString( "hello" ) )
-	
+
 		self.assertEqual( d.depthMin, 1 )
 		self.assertEqual( d.depthMax, 2 )
 		self.assertEqual( d.name, InternedString( "hello" ) )
-		
+
 		d2 = HitRecord( 1.5, 2, InternedString( "goodbye" ) )
-	
+
 		self.assertEqual( d2.depthMin, 1.5 )
 		self.assertEqual( d2.depthMax, 2 )
 		self.assertEqual( d2.name, InternedString( "goodbye" ) )
-		
+
 		self.assert_( d < d2 )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

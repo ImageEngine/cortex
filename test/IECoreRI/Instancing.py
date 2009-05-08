@@ -40,76 +40,76 @@ import os
 class InstancingTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
-		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )		
-		
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
+
 		r.command( "ri:objectBegin", { "name" : StringData( "myObject" ) } )
 		r.geometry( "teapot", {}, {} )
 		r.command( "ri:objectEnd", {} )
-		
+
 		r.worldBegin()
-		
+
 		r.command( "ri:objectInstance", { "name" : StringData( "myObject" ) } )
 		r.worldEnd()
-	
+
 		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
-		
+
 		self.assert_( "ObjectBegin" in rib )
 		self.assert_( "ObjectEnd" in rib )
 		self.assert_( "ObjectInstance" in rib )
-		
-	
+
+
 	def test2( self ) :
-	
-		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing2.rib" )		
-		
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing2.rib" )
+
 		r.command( "objectBegin", { "name" : StringData( "myObject" ) } )
 		r.geometry( "teapot", {}, {} )
 		r.command( "objectEnd", {} )
-		
+
 		r.worldBegin()
-		
+
 		r.command( "objectInstance", { "name" : StringData( "myObject" ) } )
-		
+
 		r.worldEnd()
 
 		rib = "".join( open( "test/IECoreRI/output/instancing2.rib" ).readlines() )
-		
+
 		self.assert_( "ObjectBegin" in rib )
 		self.assert_( "ObjectEnd" in rib )
 		self.assert_( "ObjectInstance" in rib )
 
 	def testInstancingAPI( self ) :
-	
-		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing3.rib" )		
-		
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing3.rib" )
+
 		r.instanceBegin( "myObject", {} )
 		r.geometry( "teapot", {}, {} )
 		r.instanceEnd()
-		
+
 		r.worldBegin()
-		
+
 		r.instance( "myObject" )
-		
+
 		r.worldEnd()
 
 		rib = "".join( open( "test/IECoreRI/output/instancing3.rib" ).readlines() )
-		
+
 		self.assert_( "ObjectBegin" in rib )
 		self.assert_( "ObjectEnd" in rib )
 		self.assert_( "ObjectInstance" in rib )
-				
+
 	def tearDown( self ) :
-	
+
 		files = [
 			"test/IECoreRI/output/instancing.rib",
 			"test/IECoreRI/output/instancing2.rib",
 			"test/IECoreRI/output/instancing3.rib",
 		]
-		
+
 		for f in files :
 			if os.path.exists( f ):
 				os.remove( f )
-					
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

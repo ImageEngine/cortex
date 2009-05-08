@@ -46,11 +46,11 @@ namespace IECore
 
 void bindCineonToLinearOp()
 {
-	
+
 	RunTimeTypedClass<CineonToLinearOp>()
 		.def( init<>() )
 	;
-	
+
 }
 
 } // namespace IECore

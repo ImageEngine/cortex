@@ -40,17 +40,17 @@
 namespace IECore
 {
 
-/// A template class to tranform Imath random number generators 
+/// A template class to tranform Imath random number generators
 /// into a model of STL RandomNumberGenerator function objects.
 template<typename T>
 class ImathRandAdapter
 {
 	T m_rand;
-	
+
 	public:
 		ImathRandAdapter(unsigned long int seed) : m_rand(seed)
 		{}
-		
+
 		int operator()(int n)
 		{
 			int result = m_rand.nexti() % n;

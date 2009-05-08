@@ -60,7 +60,7 @@ void WrapperGarbageCollectorBase::setCollectThreshold( size_t t )
 {
 	g_allocThreshold = t;
 }
-		
+
 size_t WrapperGarbageCollectorBase::getCollectThreshold()
 {
 	return g_allocThreshold;

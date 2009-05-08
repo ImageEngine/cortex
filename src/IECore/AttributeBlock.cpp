@@ -52,4 +52,4 @@ AttributeBlock::~AttributeBlock()
 		m_renderer->attributeEnd();
 	}
 }
-		
+

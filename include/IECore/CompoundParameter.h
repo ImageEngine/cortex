@@ -46,14 +46,14 @@ namespace IECore
 class CompoundParameter : public Parameter
 {
 	public :
-	
+
 		IE_CORE_DECLAREOBJECT( CompoundParameter, Parameter );
-	
+
 		/// A type to map from names to Parameters.
 		typedef std::map<InternedString, ParameterPtr> ParameterMap;
 		/// A type to hold a vector of Parameters.
 		typedef std::vector<ParameterPtr> ParameterVector;
-		
+
 		/// Creates an empty CompoundParameter.
 		CompoundParameter( const std::string &name = "", const std::string &description = "", ConstCompoundObjectPtr userData=0 );
 		/// Create a CompoundParameter containing all the parameters in the range specified
@@ -61,10 +61,10 @@ class CompoundParameter : public Parameter
 		/// to ParameterPtr objects.
 		template<typename I>
 		CompoundParameter( const std::string &name, const std::string &description, I membersBegin, I membersEnd, ConstCompoundObjectPtr userData=0 );
-		
+
 		//! @name Parameter method overrides.
 		////////////////////////////////////////////////////////////////////////
-		//@{				
+		//@{
 		/// Implemented to return a CompoundObject representing the default values
 		/// of all the child objects.
 		virtual ConstObjectPtr defaultValue() const;
@@ -145,14 +145,14 @@ class CompoundParameter : public Parameter
 		/// named parameter doesn't exist.
 		ObjectPtr getValidatedParameterValue( const std::string &name );
 		//@}
-		
-	private :	
+
+	private :
 
 		ParameterMap m_namesToParameters;
 		ParameterVector m_parameters;
-		
+
 		static const unsigned int g_ioVersion;
-		
+
 };
 
 IE_CORE_DECLAREPTR( CompoundParameter );

@@ -37,7 +37,7 @@
 
 #include "IECore/DisplayDriver.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h" 
+#include "IECore/VectorTypedData.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 #include "IECore/bindings/Wrapper.h"
 
@@ -49,11 +49,11 @@ namespace IECore {
 class DisplayDriverCreatorWrap : public DisplayDriver::DisplayDriverCreator, public Wrapper<DisplayDriver::DisplayDriverCreator>
 {
 	public :
-		
+
 		DisplayDriverCreatorWrap( PyObject *self ) : DisplayDriverCreator(), Wrapper<DisplayDriver::DisplayDriverCreator>( self, this )
 		{
 		};
-		
+
 		virtual DisplayDriverPtr create( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
 		{
 			override c = this->get_override( "create" );
@@ -66,8 +66,8 @@ class DisplayDriverCreatorWrap : public DisplayDriver::DisplayDriverCreator, pub
 					channelList.append( *iterX );
 					iterX++;
 				}
-				
-				DisplayDriverPtr r = c( displayWindow, dataWindow, channelList, 
+
+				DisplayDriverPtr r = c( displayWindow, dataWindow, channelList,
 					const_pointer_cast<CompoundData>( parameters ) );
 				if( !r )
 				{
@@ -122,7 +122,7 @@ std::vector< T > listToVector( const boost::python::list &names )
 
 static DisplayDriverPtr displayDriverCreate( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const boost::python::list &channelNames, CompoundDataPtr parameters )
 {
-	return DisplayDriver::create( displayWindow, dataWindow, listToVector<std::string>(channelNames), parameters ); 
+	return DisplayDriver::create( displayWindow, dataWindow, listToVector<std::string>(channelNames), parameters );
 }
 
 void bindDisplayDriver()

@@ -47,7 +47,7 @@ using namespace std;
 using namespace IECore;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( PathVectorParameter );
-const unsigned int PathVectorParameter::g_ioVersion = 1;	
+const unsigned int PathVectorParameter::g_ioVersion = 1;
 
 PathVectorParameter::PathVectorParameter()
 {
@@ -109,7 +109,7 @@ bool PathVectorParameter::valueValid( ConstObjectPtr value, std::string *reason 
 	try
 	{
 		for ( StringVectorData::ValueType::const_iterator it = s->readable().begin(); it != s->readable().end(); ++it )
-		{		
+		{
 			boost::filesystem::path p( *it );
 		}
 	}
@@ -160,7 +160,7 @@ void PathVectorParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
 	StringVectorParameter::copyFrom( other, context );
 	const PathVectorParameter *tOther = static_cast<const PathVectorParameter *>( other.get() );
-	
+
 	m_allowEmptyList = tOther->m_allowEmptyList;
 	m_check = tOther->m_check;
 }
@@ -169,7 +169,7 @@ void PathVectorParameter::save( SaveContext *context ) const
 {
 	StringVectorParameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	
+
 	unsigned char tmp = m_allowEmptyList;
 	container->write( "m_allowEmptyList", tmp );
 	tmp = m_check;
@@ -181,13 +181,13 @@ void PathVectorParameter::load( LoadContextPtr context )
 	StringVectorParameter::load( context );
 	unsigned int v = g_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	unsigned char tmp;
 	container->read( "m_allowEmptyList", tmp );
 	m_allowEmptyList = tmp;
 	container->read( "check", tmp );
 	m_check = (CheckType)tmp;
-	
+
 }
 
 bool PathVectorParameter::isEqualTo( ConstObjectPtr other ) const
@@ -196,7 +196,7 @@ bool PathVectorParameter::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	const PathVectorParameter *tOther = static_cast<const PathVectorParameter *>( other.get() );
 	return m_allowEmptyList==tOther->m_allowEmptyList && m_check==tOther->m_check;
 }

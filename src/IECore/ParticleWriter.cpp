@@ -82,7 +82,7 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 	vector<string> allNames;
 	ConstPointsPrimitivePtr cd = particleObject();
 	for( PrimitiveVariableMap::const_iterator it=cd->variables.begin(); it!=cd->variables.end(); it++ )
-	{					
+	{
 		if ( testTypedData<TypeTraits::IsVectorTypedData>( it->second.data ) )
 		{
 			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( it->second.data );
@@ -101,17 +101,17 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 			// in which case it's suitable for saving as a constant particle attribute
 
 			despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( it->second.data );
-			allNames.push_back( it->first );			
+			allNames.push_back( it->first );
 		}
 	}
-	
+
 	ConstStringVectorDataPtr d = static_pointer_cast<const StringVectorData>( parameters()->parameter<StringVectorParameter>( "attributes" )->getValue() );
 	if( !d->readable().size() )
 	{
 		names = allNames;
 		return;
 	}
-		
+
 	names.clear();
 	for( vector<string>::const_iterator it = d->readable().begin(); it!=d->readable().end(); it++ )
 	{

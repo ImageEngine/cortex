@@ -43,7 +43,7 @@ enum TypeId
 	FromNukeConverterTypeId = 107000,
 	MeshFromNukeTypeId = 107001,
 	LastCoreNukeTypeId = 107999
-};	
+};
 
 } // namespace IECoreNuke
 

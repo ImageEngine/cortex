@@ -139,7 +139,7 @@ std::string DPXImageReader::sourceColorSpace() const
 {
 	/// This isn't strictly true, but as the reader currently stands it performs the Cineon-Linear
 	/// conversion for us. Eventually, this will start returning "cineon", and the ImageReader base
-	/// class will handle the appropriate color conversions.	
+	/// class will handle the appropriate color conversions.
 	return "linear";
 }
 
@@ -169,7 +169,7 @@ DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i
 		mask = 1 + (mask << 1);
 	}
 	mask <<= ((32 - bpp) - channelOffset * bpp);
-	
+
 	CineonToLinearDataConversion< unsigned short, half > converter;
 
 	HalfVectorDataPtr dataContainer = new HalfVectorData();
@@ -179,14 +179,14 @@ DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i
 	data.resize( area );
 
 	int dataWidth = 1 + dataWindow.size().x;
-	
+
 	Box2i wholeDataWindow = this->dataWindow();
-	
-	const int yMin = dataWindow.min.y - wholeDataWindow.min.y;	
-	const int yMax = dataWindow.max.y - wholeDataWindow.min.y;	
-	
+
+	const int yMin = dataWindow.min.y - wholeDataWindow.min.y;
+	const int yMax = dataWindow.max.y - wholeDataWindow.min.y;
+
 	const int xMin = dataWindow.min.x - wholeDataWindow.min.x;
-	const int xMax = dataWindow.max.x - wholeDataWindow.min.x;			
+	const int xMax = dataWindow.max.x - wholeDataWindow.min.x;
 
 	int dataY = 0;
 	for ( int y = yMin ; y <= yMax ; ++y, ++dataY )
@@ -269,34 +269,34 @@ bool DPXImageReader::open( bool throwOnFailure )
 			m_header->m_imageInformation.element_number      = reverseBytes(m_header->m_imageInformation.element_number);
 			m_header->m_imageInformation.pixels_per_line     = reverseBytes(m_header->m_imageInformation.pixels_per_line);
 			m_header->m_imageInformation.lines_per_image_ele = reverseBytes(m_header->m_imageInformation.lines_per_image_ele);
-			
+
 			for ( unsigned i = 0; i < 8; i ++)
 			{
 				m_header->m_imageInformation.image_element[i].packing = reverseBytes(m_header->m_imageInformation.image_element[i].packing);
 				m_header->m_imageInformation.image_element[i].encoding = reverseBytes(m_header->m_imageInformation.image_element[i].encoding);
 			}
 		}
-		
+
 		if ( m_header->m_imageInformation.element_number != 1 )
 		{
 			throw IOException( "DPXImageReader: Invalid number of elements in image while reading " + fileName() );
 		}
-		
+
 		if ( m_header->m_imageInformation.image_element[0].bit_size != 10 )
 		{
 			throw IOException( "DPXImageReader: Invalid bitdepth (only 10-bit images are supported) while reading " + fileName() );
 		}
-		
+
 		if ( m_header->m_imageInformation.image_element[0].descriptor != 50 )
 		{
 			throw IOException( boost::str( boost::format( "DPXImageReader: Cannot read image '%s' of type '%s' ( only RGB are supported)" ) % fileName() % descriptorStr( m_header->m_imageInformation.image_element[0].descriptor ) ) );
 		}
-		
+
 		if ( m_header->m_imageInformation.image_element[0].packing != 1 )
 		{
 			throw IOException( "DPXImageReader: Found invalid image packing while reading " + fileName() );
 		}
-		
+
 		if ( m_header->m_imageInformation.image_element[0].encoding != 0 )
 		{
 			throw IOException( "DPXImageReader: Found invalid image encoding while reading " + fileName() );
@@ -309,7 +309,7 @@ bool DPXImageReader::open( bool throwOnFailure )
 		{
 			throw IOException( "DPXImageReader: Error reading " + fileName() );
 		}
-		
+
 		// Read the data into the buffer - remember that we're currently packing upto 3 channels into each 32-bit "cell"
 		int bufferSize = ( std::max<unsigned int>( 1u, 3 / 3 ) ) * m_bufferWidth * m_bufferHeight;
 		m_buffer.resize( bufferSize, 0 );
@@ -337,8 +337,8 @@ bool DPXImageReader::open( bool throwOnFailure )
 
 const char* DPXImageReader::descriptorStr( int descriptor ) const
 {
-	switch ( descriptor ) 
-	{	
+	switch ( descriptor )
+	{
 		case 0 :
 		case 150:
 		case 151:
@@ -346,7 +346,7 @@ const char* DPXImageReader::descriptorStr( int descriptor ) const
 		case 153:
 		case 154:
 		case 155:
-		case 156: 
+		case 156:
 			  return "User-defined";
 		case 1  : return "Red";
 		case 2  : return "Green";
@@ -361,12 +361,12 @@ const char* DPXImageReader::descriptorStr( int descriptor ) const
 		case 52 : return "ABGR";
 		case 100: return "CbYCrY";
 		case 101: return "CbYaCrYa";
-		case 102: return "CbYCr";		
+		case 102: return "CbYCr";
 		case 103: return "CbYCra";
-		
-		default : return "Unknown";						
+
+		default : return "Unknown";
 	}
-	
+
 	assert( false );
 	return 0;
 }

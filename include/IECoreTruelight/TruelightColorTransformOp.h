@@ -60,10 +60,10 @@ class TruelightColorTransformOp : public IECore::ColorTransformOp
 
 		IECore::StringParameterPtr displayParameter();
 		IECore::ConstStringParameterPtr displayParameter() const;
-		
+
 		IECore::IntParameterPtr inputSpaceParameter();
 		IECore::ConstIntParameterPtr inputSpaceParameter() const;
-		
+
 		IECore::BoolParameterPtr rawTruelightOutputParameter();
 		IECore::ConstBoolParameterPtr rawTruelightOutputParameter() const;
 
@@ -72,12 +72,12 @@ class TruelightColorTransformOp : public IECore::ColorTransformOp
 		std::string commands() const;
 
 	protected :
-	
+
 		virtual void begin( IECore::ConstCompoundObjectPtr operands );
 		virtual void transform( Imath::Color3f &color ) const;
 
 	private :
-	
+
 		void maybeWarn() const;
 
 		void setInstanceFromParameters() const;
@@ -89,7 +89,7 @@ class TruelightColorTransformOp : public IECore::ColorTransformOp
 		IECore::SRGBToLinearDataConversion<float, float> m_srgbToLinearConversion;
 
 		void *m_instance; // truelight instance
-		
+
 };
 
 IE_CORE_DECLAREPTR( TruelightColorTransformOp )

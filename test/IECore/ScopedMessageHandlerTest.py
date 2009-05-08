@@ -38,29 +38,29 @@ import unittest
 class ScopedMessageHandlerTest( unittest.TestCase ) :
 
 	def setUp( self ) :
-	
+
 		## \todo We should just expose Msg.currentHandler() instead of use this
 		# ugly construct
 		self.oldHandler = IECore.Msg.popHandler()
 		IECore.Msg.pushHandler( self.oldHandler )
 
 	def test( self ) :
-	
+
 		m = IECore.CapturingMessageHandler()
 		s = IECore.ScopedMessageHandler( m )
-		
+
 		IECore.msg( IECore.Msg.Level.Error, "A", "AAA" )
 		self.assertEqual( len( m.messages ), 1 )
 		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Error )
 		self.assertEqual( m.messages[0].context, "A" )
 		self.assertEqual( m.messages[0].message, "AAA" )
-		
-	def tearDown( self ) :			
-		
+
+	def tearDown( self ) :
+
 		currentHandler = IECore.Msg.popHandler()
 		assert( currentHandler.isSame( self.oldHandler ) )
 		IECore.Msg.pushHandler( currentHandler )
 
 if __name__ == "__main__":
-	unittest.main()   
+	unittest.main()
 

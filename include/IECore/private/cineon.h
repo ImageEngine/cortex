@@ -52,10 +52,10 @@
 #define S32 int
 #define U8 unsigned char
 
-// The assumption the relation of code value to data metric is linear is made. Therefore, given 
-// the minimum and maximum code values for a given (colour) channel, and the associated metric 
-// quantity represented, any value in between can be found via linear interpolation. For example, 
-// if the minimum code value is 0, representing 0.2 log exposure, and the maximum code value is 
+// The assumption the relation of code value to data metric is linear is made. Therefore, given
+// the minimum and maximum code values for a given (colour) channel, and the associated metric
+// quantity represented, any value in between can be found via linear interpolation. For example,
+// if the minimum code value is 0, representing 0.2 log exposure, and the maximum code value is
 // 1169 representing 3.4 log exposure, then a code value of 584 represents 1.8 log exposure.
 
 namespace IECore {
@@ -63,11 +63,11 @@ namespace IECore {
 typedef struct fileinformation {
   U32 magic;                    // Magic number (802A5FD7 - hex) indicates
                                 // the start of image file and byte ordering
-    
+
   U32 image_data_offset;        // Offset to image data in bytes
 
   U32 section_header_length;    // Generic (fixed format) section header
-                                // length in bytes	
+                                // length in bytes
 
   U32 industry_header_length;   // Industry specific (fixed format) section
 				// header length in bytes
@@ -82,7 +82,7 @@ typedef struct fileinformation {
   ASCII file_name[100];         // Image file name
 
   ASCII creation_date[12];      // Creation date "yyyy:mm:dd"
-    
+
   ASCII creation_time[12];      // Creation time "hh:mm:ssxxx" (xxx for timezone)
 
   ASCII reserved[36];           // reserved for future use
@@ -129,7 +129,7 @@ typedef struct image_information {
   // byte_0     0 = Universal metric
   // 		1 - 254 = vendor specific (i.e. 1 = Kodak);
 
-  // byte_1	if Byte 0 = 0 
+  // byte_1	if Byte 0 = 0
   // 	        Universal Metric
   // 	        0 = B & W
   //            1 = red        (r,g,b printing density)
@@ -139,21 +139,21 @@ typedef struct image_information {
   //            5 = green      (r,g,b CCIR XA/11)
   //            6 = blue       (r,g,b CCIR XA/11)
   //            7 - 254        TBD - reserved
-  
+
   //            if 0 < byte_0 < 255
   //            0 - 254        Vendor defined
 
   R32 white_point_x;          // White point (colour temperature) - x, y pair
   R32 white_point_y;          // White point (colour temperature) - x, y pair
 
-  R32 red_primary_x;          // Red primary chromaticity - x, y pair 
-  R32 red_primary_y;          // Red primary chromaticity - x, y pair 
+  R32 red_primary_x;          // Red primary chromaticity - x, y pair
+  R32 red_primary_y;          // Red primary chromaticity - x, y pair
 
-  R32 green_primary_x;        // Green primary chromaticity - x, y pair 
-  R32 green_primary_y;        // Green primary chromaticity - x, y pair 
+  R32 green_primary_x;        // Green primary chromaticity - x, y pair
+  R32 green_primary_y;        // Green primary chromaticity - x, y pair
 
-  R32 blue_primary_x;         // Blue primary chromaticity - x, y pair 
-  R32 blue_primary_y;         // Blue primary chromaticity - x, y pair 
+  R32 blue_primary_x;         // Blue primary chromaticity - x, y pair
+  R32 blue_primary_y;         // Blue primary chromaticity - x, y pair
 
   ASCII label[200];           // Label text (other label info in user
                               // area - font, size, location)
@@ -163,7 +163,7 @@ typedef struct image_information {
 } ImageInformation;
 
 
-typedef struct imagedataformatinformation { 
+typedef struct imagedataformatinformation {
 
   U8 interleave;                // Data interleave (if all channels are not
                                 // the same sptial resolution, data interleave must be 2, channel interleave)
@@ -179,7 +179,7 @@ typedef struct imagedataformatinformation {
                                 // 3 = word (16 bit) bondaries - left justified
                                 // 4 = word ( 16 bit) boundaries - right justified
                                 // 5 = longword ( 32 bit ) boundaries - left justified
-                                // 6 = longword ( 32 bit ) boundaries - right justified 
+                                // 6 = longword ( 32 bit ) boundaries - right justified
 
                                 // High order bit = 0 - pack at most one pixel per cell
                                 // High order bit = 1 - pack at many fields as possible per cell
@@ -203,17 +203,17 @@ typedef struct imagedataformatinformation {
 // Note 1 (on "packing" options 1-6)
 // Define a CELL to be a BYTE (8 bits), WORD (16 bits) or LONGWORD (32bits).
 //
-// Define a FIELD to be one occurence of a channel value. For example, with 3 channels 
-// (r,g,b), pixel interleaved, field 1 is r1, field 2 is g1, field 3 is b1, field 4 is r2, etc. 
+// Define a FIELD to be one occurence of a channel value. For example, with 3 channels
+// (r,g,b), pixel interleaved, field 1 is r1, field 2 is g1, field 3 is b1, field 4 is r2, etc.
 // With 3 channels (r, g, b), channel interleaved, field 1 is r1, field 2 is r2, field 3 is r3, etc.
 //
-// The high order bit of the packing specifier either restricts packing to at most one pixel 
+// The high order bit of the packing specifier either restricts packing to at most one pixel
 // (n channels) per cell, or allows fields from adjacent pixels to spill over cell boundaries.
 //
 // How to intepret PACKING specifier
 //
 // If number of channels = 1 OR data interleave = 1 or 2 (line or channel interleave):
-//   Pack as many fields into the cell as possible, with appropriate justification, then align 
+//   Pack as many fields into the cell as possible, with appropriate justification, then align
 //   on the next cell boundary. The high order bit is a "don't care" in this case.
 //
 // If number of channels is > 1 AND data interleave = 0 (pixel interleave)
@@ -222,12 +222,12 @@ typedef struct imagedataformatinformation {
 //
 //      n = number of channels
 //
-//      Pack as many fields into the cell as posssible up to n fields, with appropriate 
-//      justification, then align on the next cell boundary. 
+//      Pack as many fields into the cell as posssible up to n fields, with appropriate
+//      justification, then align on the next cell boundary.
 //
 //   If the high order bit is set
 //
-//      Pack as many fields into the cell as possible, with appropriate justification, then alighn on the next cell boundary. 
+//      Pack as many fields into the cell as possible, with appropriate justification, then alighn on the next cell boundary.
 //
 // Examples
 //

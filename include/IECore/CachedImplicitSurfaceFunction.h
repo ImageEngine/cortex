@@ -45,29 +45,29 @@
 namespace IECore
 {
 
-/// A template to define an implicit surface function, which returns a value of type template parameter V when passed 
+/// A template to define an implicit surface function, which returns a value of type template parameter V when passed
 /// a location of type template parameter P
 template<typename P, typename V>
 class CachedImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 {
 	public:
-	
+
 		typedef P Point;
 		typedef VectorTraits<P> PointTraits;
 		typedef typename VectorTraits<P>::BaseType PointBaseType;
 		typedef V Value;
 		typedef VectorTraits<V> ValueTraits;
 		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-		
+
 		typedef ImplicitSurfaceFunction<P, V> Fn;
-				
+
 		IE_CORE_DECLAREMEMBERPTR2( CachedImplicitSurfaceFunction<P, V> );
-		
+
 	protected:
-	
+
 		typedef long KeyBaseType;
 		typedef Imath::Vec3<KeyBaseType> Key;
-			
+
 		struct Hash
 		{
 			size_t operator()( const Key &t ) const
@@ -76,32 +76,32 @@ class CachedImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 			}
 
 		};
-				
-		typedef HashTable< Key, Value, Hash > Cache;	
-				
-	public:	
-		
-		
+
+		typedef HashTable< Key, Value, Hash > Cache;
+
+	public:
+
+
 		CachedImplicitSurfaceFunction( typename Fn::Ptr fn, PointBaseType tolerance = Imath::limits<PointBaseType>::epsilon() );
-		
+
 		/// Returns the value of the underlying function
 		inline Value operator()( const Point &p );
-		
+
 		/// Clears all the cache function values
 		void clear();
-		
+
 		/// Returns the number of entries held in the cache
 		typename Cache::size_type size() const;
-						
+
 		virtual Value getValue( const Point &p );
-		
+
 	protected:
-		
+
 		Cache m_cache;
-				
+
 		typename Fn::Ptr m_fn;
 		PointBaseType m_tolerance;
-		
+
 };
 
 typedef CachedImplicitSurfaceFunction<Imath::V3f, float> CachedImplicitSurfaceFunctionV3ff;

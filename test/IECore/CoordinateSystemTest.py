@@ -39,27 +39,27 @@ import IECore
 class CoordinateSystemTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		a = IECore.CoordinateSystem( "a" )
 		self.assertEqual( a.getName(), "a" )
-		
+
 		a.setName( "b" )
 		self.assertEqual( a.getName(), "b" )
-		
+
 		aa = a.copy()
 		self.assertEqual( a, aa )
-		
+
 		IECore.ObjectWriter( a, "test/IECore/data/coordSys.cob" ).write()
 		aaa = IECore.ObjectReader( "test/IECore/data/coordSys.cob" ).read()
-		
+
 		self.assertEqual( aaa, aa )
 		self.assertEqual( aaa.getName(), "b" )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.exists( "test/IECore/data/coordSys.cob" ) :
-		
+
 			os.remove( "test/IECore/data/coordSys.cob" )
-		
+
 if __name__ == "__main__":
 	unittest.main()

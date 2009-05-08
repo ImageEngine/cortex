@@ -47,21 +47,21 @@ class ImageFile : public MPxImageFile
 	public:
 		ImageFile();
 		virtual ~ImageFile();
-		
+
 		static void* creator();
-		
+
 		virtual MStatus open( MString pathname, MImageFileInfo* info );
 		virtual MStatus load( MImage& image, unsigned int idx );
 		virtual MStatus glLoad( const MImageFileInfo& info, unsigned int imageNumber );
-	
+
 	protected:
-	
+
 		void populateImage( float* pixels ) const;
-	
+
 		IECore::FloatVectorDataPtr m_rData, m_gData, m_bData, m_aData;
 		unsigned int m_numChannels;
 		unsigned int m_width, m_height;
-		
+
 		struct ChannelConverter;
 };
 

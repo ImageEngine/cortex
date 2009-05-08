@@ -83,7 +83,7 @@ RandomRotationOp::RandomRotationOp()
 		"The maximum rotation speed.",
 		2.0f
 	);
-	
+
 	parameters()->addParameter( m_seedParameter );
 	parameters()->addParameter( m_timeParameter );
 	parameters()->addParameter( m_speedMinParameter );
@@ -150,7 +150,7 @@ ObjectPtr RandomRotationOp::doOperation( ConstCompoundObjectPtr operands )
 	float time = m_timeParameter->getNumericValue();
 	float minSpeed = m_speedMinParameter->getNumericValue();
 	float maxSpeed = m_speedMaxParameter->getNumericValue();
-	
+
 	ConstObjectPtr seed = m_seedParameter->getValue();
 	switch( seed->typeId() )
 	{
@@ -161,7 +161,7 @@ ObjectPtr RandomRotationOp::doOperation( ConstCompoundObjectPtr operands )
 		case IntVectorDataTypeId :
 			return doOp<IntVectorData>( static_pointer_cast<const IntVectorData>( seed ), time, minSpeed, maxSpeed );
 		case UIntVectorDataTypeId :
-			return doOp<UIntVectorData>( static_pointer_cast<const UIntVectorData>( seed ), time, minSpeed, maxSpeed );		
+			return doOp<UIntVectorData>( static_pointer_cast<const UIntVectorData>( seed ), time, minSpeed, maxSpeed );
 		default :
 			return 0; // shouldn't get here
 	}

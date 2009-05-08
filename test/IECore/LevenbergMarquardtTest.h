@@ -86,20 +86,20 @@ struct LevenbergMarquardtTestSuite : public boost::unit_test::test_suite
 		addSimple();
 		addCurveFit();
 	}
-	
+
 	void addSimple()
 	{
 		static boost::shared_ptr< LevenbergMarquardtTestSimple<T> > instance( new LevenbergMarquardtTestSimple<T>() );
 		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestSimple<T>::test, instance ) );
 	}
-	
+
 	void addCurveFit()
 	{
 		static boost::shared_ptr< LevenbergMarquardtTestPolynomialFit<T> > instance( new LevenbergMarquardtTestPolynomialFit<T>() );
 		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<1>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<2>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<3>, instance ) );		
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<4>, instance ) );						
+		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<3>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<4>, instance ) );
 	}
 };
 

@@ -49,7 +49,7 @@ using namespace IECoreMaya;
 
 MObject CacheSet::aActive;
 MObject CacheSet::aFrameRate;
-MObject CacheSet::aOversamples;		
+MObject CacheSet::aOversamples;
 MObject CacheSet::aOutFrameMel;
 
 MTypeId CacheSet::id( CacheSetId );
@@ -77,30 +77,30 @@ MStatus CacheSet::initialize()
 	MStatus s;
 	MFnNumericAttribute nAttr;
 	MFnTypedAttribute tAttr;
-	
+
 	aActive = nAttr.create("active", "a", MFnNumericData::kBoolean, true, &s);
 	nAttr.setReadable(true);
-	nAttr.setWritable(true);	
-	nAttr.setStorable(true);	
-	nAttr.setKeyable(true);	
+	nAttr.setWritable(true);
+	nAttr.setStorable(true);
+	nAttr.setKeyable(true);
 
 	aFrameRate = nAttr.create("frameRate", "fr", MFnNumericData::kDouble, 24.0, &s);
 	nAttr.setReadable(true);
 	nAttr.setWritable(true);
 	nAttr.setStorable(true);
 	nAttr.setMin(1.0);
-	
+
 	aOversamples = nAttr.create("oversamples", "os", MFnNumericData::kInt, 1, &s);
 	nAttr.setReadable(true);
 	nAttr.setWritable(true);
 	nAttr.setStorable(true);
 	nAttr.setMin(1);
-	
+
 	aOutFrameMel = tAttr.create("outFrameMel", "ofc", MFnData::kString);
 	tAttr.setWritable(false);
 	tAttr.setReadable(true);
-	
-	
+
+
 	s = addAttribute(aActive);
 	assert(s);
 
@@ -112,10 +112,10 @@ MStatus CacheSet::initialize()
 
 	s = addAttribute(aOutFrameMel);
 	assert(s);
-	
+
 	s = attributeAffects(aActive, aOutFrameMel);
 	assert(s);
-	
+
 	return MS::kSuccess;
 }
 
@@ -126,13 +126,13 @@ MString CacheSet::melFromStringArray(const MStringArray &a) const
 	{
 		if (i != 0)
 		{
-			mel += ", ";	
-		}	
-		mel += "\"";	
+			mel += ", ";
+		}
+		mel += "\"";
 		mel += a[i];
 		mel += "\"";
 	}
 	mel += "}";
-	
+
 	return mel;
 }

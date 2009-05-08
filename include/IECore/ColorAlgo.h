@@ -42,7 +42,7 @@ namespace IECore
 template<typename T, typename S>
 typename T::BaseType luminance( const T &color, const S &weights );
 
-/// The weights used by this function are those defined by 
+/// The weights used by this function are those defined by
 /// ITU-R Recommendation BT.709.
 /// See http://www.faqs.org/faqs/graphics/colorspace-faq/ section C-9
 template<typename T>

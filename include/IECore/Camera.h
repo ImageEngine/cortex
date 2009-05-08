@@ -45,11 +45,11 @@ IE_CORE_FORWARDDECLARE( Transform )
 class Camera : public PreWorldRenderable
 {
 	public:
-	
+
 		Camera( const std::string &name = "default",
 			TransformPtr transform = 0, CompoundDataPtr parameters = new CompoundData );
 		virtual ~Camera();
-				
+
 		IE_CORE_DECLAREOBJECT( Camera, PreWorldRenderable );
 
 		void setName( const std::string &name );
@@ -59,7 +59,7 @@ class Camera : public PreWorldRenderable
 		/// May return 0 if no transform has been applied.
 		TransformPtr getTransform();
 		ConstTransformPtr getTransform() const;
-		
+
 		CompoundDataMap &parameters();
 		const CompoundDataMap &parameters() const;
 		/// This is mostly of use for the binding - the parameters()
@@ -74,13 +74,13 @@ class Camera : public PreWorldRenderable
 		void addStandardParameters();
 
 		virtual void render( RendererPtr renderer ) const;
-			
+
 	private:
-	
+
 		std::string m_name;
 		TransformPtr m_transform;
 		CompoundDataPtr m_parameters;
-	
+
 		static const unsigned int m_ioVersion;
 };
 

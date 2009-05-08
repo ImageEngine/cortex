@@ -41,7 +41,7 @@
 
 #include <string>
 
-namespace IECore 
+namespace IECore
 {
 
 typedef TypedData < boost::posix_time::time_duration > TimeDurationData;

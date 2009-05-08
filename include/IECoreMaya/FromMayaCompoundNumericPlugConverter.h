@@ -42,24 +42,24 @@
 namespace IECoreMaya
 {
 
-template<typename F, typename T> 
+template<typename F, typename T>
 class FromMayaCompoundNumericPlugConverter : public FromMayaPlugConverter
 {
 
 	public :
-	
+
 		FromMayaCompoundNumericPlugConverter( const MPlug &plug );
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( FromMayaCompoundNumericPlugConverter, FromMayaPlugConverter )
-		
+
 	protected :
-		
+
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		static Description<FromMayaCompoundNumericPlugConverter> m_description;
-		
+
 };
 
 typedef FromMayaCompoundNumericPlugConverter<Imath::V2f, IECore::V2iData> FromMayaCompoundNumericPlugConverterV2fV2i;

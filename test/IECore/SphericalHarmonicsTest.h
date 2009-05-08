@@ -104,22 +104,22 @@ class SphericalHarmonicsRotationMatrixTest
 };
 
 struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
-{	
-	
+{
+
 	SphericalHarmonicsTestSuite() : boost::unit_test::test_suite("SphericalHarmonicsTestSuite")
 	{
 		addSphericalHarmonicsFunctionTest< float >();
 		addSphericalHarmonicsFunctionTest< double >();
 		addSphericalHarmonicsProjectorTest< double,10,20000 >();
 		addSphericalHarmonicsRotationMatrixTest< double >();
-		
+
 	}
 
 	template< typename T >
 	void addSphericalHarmonicsFunctionTest()
 	{
 		static boost::shared_ptr< SphericalHarmonicsFunctionTest< T > > instance(new SphericalHarmonicsFunctionTest<T>());
-		
+
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsFunctionTest< T >::testEvaluation), instance ) );
 	}
 
@@ -127,7 +127,7 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 	void addSphericalHarmonicsProjectorTest()
 	{
 		static boost::shared_ptr< SphericalHarmonicsProjectorTest< T,bands,samples > > instance(new SphericalHarmonicsProjectorTest<T,bands,samples>());
-		
+
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testProjection), instance ) );
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testPolarProjection1D), instance ) );
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testPolarProjection3D), instance ) );
@@ -139,11 +139,11 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 	void addSphericalHarmonicsRotationMatrixTest()
 	{
 		static boost::shared_ptr< SphericalHarmonicsRotationMatrixTest< T > > instance(new SphericalHarmonicsRotationMatrixTest<T>());
-		
+
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsRotationMatrixTest< T >::testRotation), instance ) );
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsRotationMatrixTest< T >::testRotation3D), instance ) );
 	}
-	
+
 };
 }
 

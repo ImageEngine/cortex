@@ -39,34 +39,34 @@ import math
 class PolygonAlgoTest( unittest.TestCase ) :
 
 	def testNormal( self ) :
-	
+
 		p = V3fVectorData( [
 			V3f( 0, 0, 0 ),
 			V3f( 1, 0, 0 ),
 			V3f( 1, 1, 0 ),
 			V3f( 0, 1, 0 )
 		] )
-				
+
 		self.assertEqual( polygonNormal( p ), V3f( 0, 0, 1 ) )
-		
+
 		p = V3fVectorData( [
 			V3f( 0, 0, 0 ),
 			V3f( 0, 1, 0 ),
 			V3f( 1, 1, 0 ),
 			V3f( 1, 0, 0 ),
 		] )
-		
+
 		self.assertEqual( polygonNormal( p ), V3f( 0, 0, -1 ) )
-	
+
 	def testConcaveNormal( self ) :
-		
+
 		p = V3fVectorData( [
 			V3f( 0, 0, 0 ),
 			V3f( 1, -1, 0 ),
 			V3f( 0.2, 0, 0 ),
 			V3f( 1, 1, 0 ),
 		] )
-		
+
 		self.assertEqual( polygonNormal( p ), V3f( 0, 0, 1 ) )
 
 		p = V3fVectorData( [
@@ -75,18 +75,18 @@ class PolygonAlgoTest( unittest.TestCase ) :
 			V3f( 0.2, 0, 0 ),
 			V3f( 1, -1, 0 ),
 		] )
-		
+
 		self.assertEqual( polygonNormal( p ), V3f( 0, 0, -1 ) )
-	
+
 	def testWinding2D( self ) :
-	
+
 		p = V2fVectorData( [
 			V2f( 0, 0 ),
 			V2f( 1, 0 ),
 			V2f( 1, 1 ),
 			V2f( 0, 1 ),
 		] )
-		
+
 		self.assertEqual( polygonWinding( p ), Winding.CounterClockwise )
 		self.assertNotEqual( polygonWinding( p ), Winding.Clockwise )
 
@@ -96,19 +96,19 @@ class PolygonAlgoTest( unittest.TestCase ) :
 			V2f( 1, 1 ),
 			V2f( 1, 0 ),
 		] )
-		
+
 		self.assertNotEqual( polygonWinding( p ), Winding.CounterClockwise )
 		self.assertEqual( polygonWinding( p ), Winding.Clockwise )
 
 	def testWinding3D( self ) :
-	
+
 		p = V3fVectorData( [
 			V3f( 0, 0, 0 ),
 			V3f( 1, 0, 0 ),
 			V3f( 1, 1, 0 ),
 			V3f( 0, 1, 0 ),
 		] )
-		
+
 		self.assertEqual( polygonWinding( p, V3f( 0, 0, -1 ) ), Winding.CounterClockwise )
 		self.assertNotEqual( polygonWinding( p, V3f( 0, 0, -1 ) ), Winding.Clockwise )
 		self.assertEqual( polygonWinding( p, V3f( 0, 0, 1 ) ), Winding.Clockwise )
@@ -120,22 +120,22 @@ class PolygonAlgoTest( unittest.TestCase ) :
 			V3f( 1, 1, 0 ),
 			V3f( 1, 0, 0 ),
 		] )
-		
+
 		self.assertNotEqual( polygonWinding( p, V3f( 0, 0, -1 ) ), Winding.CounterClockwise )
 		self.assertEqual( polygonWinding( p, V3f( 0, 0, -1 ) ), Winding.Clockwise )
 		self.assertEqual( polygonWinding( p, V3f( 0, 0, 1 ) ), Winding.CounterClockwise )
 		self.assertNotEqual( polygonWinding( p, V3f( 0, 0, 1 ) ), Winding.Clockwise )
-	
+
 	def testBound( self ) :
-			
+
 		p = V3fVectorData( [
 			V3f( 0, 0, 0 ),
 			V3f( 1, 0, 0 ),
 			V3f( 1, 1, 0 ),
 			V3f( 0, 1, 0 ),
 		] )
-		
+
 		self.assertEqual( polygonBound( p ), Box3f( V3f( 0 ), V3f( 1, 1, 0 ) ) )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

@@ -46,7 +46,7 @@ namespace IECore
 
 void bindSRGBToLinearOp()
 {
-	
+
 	RunTimeTypedClass<SRGBToLinearOp>()
 		.def( init<>() )
 	;

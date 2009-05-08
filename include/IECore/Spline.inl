@@ -80,7 +80,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	{
 		throw( Exception( "Spline has excess points (but not enough for an extra segment)." ) );
 	}
-	
+
 	typedef typename PointContainer::const_iterator It;
 
 	// find the first segment where seg( 0 ) > x. the segment before that is the one we're interested in.
@@ -89,7 +89,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	X co[4];
 	basis.coefficients( X( 0 ), co );
 	X xp[4];
-	
+
 	It testSegment = points.begin();
 	do
 	{
@@ -98,7 +98,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 		{
 			testSegment++;
 		}
-		
+
 		bool overrun = false;
 		It xIt( testSegment );
 		for( unsigned i=0; i<4; i++ )
@@ -115,7 +115,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 		{
 			break;
 		}
-	
+
 	} while( xp[0] * co[0] + xp[1] * co[1] + xp[2] * co[2] + xp[3] * co[3] < x );
 	// get the x values of the control values for the segment in question
 	It xIt( segment );
@@ -158,7 +158,7 @@ inline X Spline<X,Y>::solve( X x, Y segment[4] ) const
 	segment[3] = (*s++).second;
 	return t;
 }
-		
+
 template<typename X, typename Y>
 inline Y Spline<X,Y>::operator() ( X x ) const
 {
@@ -168,7 +168,7 @@ inline Y Spline<X,Y>::operator() ( X x ) const
 	basis.coefficients( t, c[0], c[1], c[2], c[3] );
 	return c[0] * y[0] + c[1] * y[1] + c[2] * y[2] + c[3] * y[3];
 }
-	
+
 template<typename X, typename Y>
 inline bool Spline<X,Y>::operator==( const Spline &rhs ) const
 {

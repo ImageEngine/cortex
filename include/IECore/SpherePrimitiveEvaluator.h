@@ -43,80 +43,80 @@
 namespace IECore
 {
 
-/// An implementation of PrimitiveEvaluator to allow spatial queries to be performed on spheres. 
+/// An implementation of PrimitiveEvaluator to allow spatial queries to be performed on spheres.
 /// \todo Currently ignores zMin, zMax, thetaMax parameters, instead assuming that there sphere is whole and facing outwards.
 class SpherePrimitiveEvaluator : public PrimitiveEvaluator
 {
 	public:
-	
+
 		typedef SpherePrimitive PrimitiveType;
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( SpherePrimitiveEvaluator, PrimitiveEvaluator );
-					
+
 		class Result : public PrimitiveEvaluator::Result
 		{
 			friend class SpherePrimitiveEvaluator;
-			
+
 			public:
-			
+
 				IE_CORE_DECLAREMEMBERPTR( Result );
-			
+
 				Result();
-	
-				Imath::V3f point() const;								
+
+				Imath::V3f point() const;
 				Imath::V3f normal() const;
 				Imath::V2f uv() const;
 				Imath::V3f uTangent() const;
-				Imath::V3f vTangent() const;		
-				
+				Imath::V3f vTangent() const;
+
 				Imath::V3f          vectorPrimVar( const PrimitiveVariable &pv ) const;
 				float               floatPrimVar ( const PrimitiveVariable &pv ) const;
 				int                 intPrimVar   ( const PrimitiveVariable &pv ) const;
 				const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const;
 				Imath::Color3f      colorPrimVar ( const PrimitiveVariable &pv ) const;
 				half                halfPrimVar  ( const PrimitiveVariable &pv ) const;
-				
+
 			protected:
-			
+
 				Imath::V3f m_p;
-							
+
 				template<typename T>
 				T getPrimVar( const PrimitiveVariable &pv ) const;
-			
-			
+
+
 		};
-		IE_CORE_DECLAREPTR( Result );		
-		
+		IE_CORE_DECLAREPTR( Result );
+
 		SpherePrimitiveEvaluator( ConstSpherePrimitivePtr sphere );
-		
+
 		virtual ~SpherePrimitiveEvaluator();
-		
+
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
-		
+
 		ConstPrimitivePtr primitive() const;
-		
+
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
-		
+
 		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;
-		
+
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
-		
+
 		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
-		
-		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
+
+		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const;
-			
-		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
+
+		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
-			
-		virtual float volume() const;	
+
+		virtual float volume() const;
 
 		virtual Imath::V3f centerOfGravity() const;
-		
+
 		virtual float surfaceArea() const;
-							
+
 	protected:
-	
+
 		ConstSpherePrimitivePtr m_sphere;
 };
 

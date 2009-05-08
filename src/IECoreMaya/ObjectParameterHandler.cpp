@@ -59,15 +59,15 @@ MStatus ObjectParameterHandler::update( IECore::ConstParameterPtr parameter, MOb
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnGenericAttribute fnGAttr;
 	if( !fnGAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
 	}
-	
-	fnGAttr.addAccept( ObjectData::id );		
-	
+
+	fnGAttr.addAccept( ObjectData::id );
+
 	for (IECore::ObjectParameter::TypeIdSet::const_iterator it = p->validTypes().begin(); it != p->validTypes().end(); ++it)
 	{
 		ConstParameterHandlerPtr h = ParameterHandler::get( *it );
@@ -79,7 +79,7 @@ MStatus ObjectParameterHandler::update( IECore::ConstParameterPtr parameter, MOb
 			}
 		}
 	}
-		
+
 	return MS::kSuccess;
 }
 
@@ -89,16 +89,16 @@ MObject ObjectParameterHandler::create( IECore::ConstParameterPtr parameter, con
 	if( !p )
 	{
 		return MObject::kNullObj;
-	}	
-	
+	}
+
 	MFnGenericAttribute fnGAttr;
-	
+
 	MObject result = fnGAttr.create( attributeName, attributeName );
-			
+
 	update( parameter, result );
 	return result;
 }
-	
+
 MStatus ObjectParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstObjectParameterPtr p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
@@ -113,7 +113,7 @@ MStatus ObjectParameterHandler::setValue( IECore::ConstParameterPtr parameter, M
 	{
 		ConstParameterHandlerPtr h = ParameterHandler::get( *it );
 		if (h)
-		{	
+		{
 			if ( h->setValue( parameter, plug) )
 			{
 				return MS::kSuccess;
@@ -121,19 +121,19 @@ MStatus ObjectParameterHandler::setValue( IECore::ConstParameterPtr parameter, M
 		}
 	}
 
-	MStatus s;	
-	
+	MStatus s;
+
 	MFnPluginData fnData;
 	MObject plugData = fnData.create( ObjectData::id );
 	assert( plugData != MObject::kNullObj );
-	
+
 	s = fnData.setObject( plugData );
 	assert(s);
-	
+
 	ObjectData* data = dynamic_cast<ObjectData *>( fnData.data(&s) );
 	assert(s);
 	assert(data);
-	
+
 	data->setObject( p->getValue()->copy() );
 	return plug.setValue( plugData );
 }
@@ -156,9 +156,9 @@ MStatus ObjectParameterHandler::setValue( const MPlug &plug, IECore::ParameterPt
 			{
 				return MS::kSuccess;
 			}
-		}	
+		}
 	}
-	
+
 	MStatus s;
 	MObject plugData;
 	s = plug.getValue( plugData );
@@ -166,21 +166,21 @@ MStatus ObjectParameterHandler::setValue( const MPlug &plug, IECore::ParameterPt
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnPluginData fnData( plugData, &s );
 	if (!s)
 	{
 		return MS::kFailure;
 	}
-	
+
 	ObjectData *data = dynamic_cast<ObjectData *>( fnData.data( &s ) );
 	if (!data || !s)
 	{
 		return MS::kFailure;
-		
+
 	}
 
 	parameter->setValue( data->getObject() );
-		
-	return MS::kSuccess;			
+
+	return MS::kSuccess;
 }

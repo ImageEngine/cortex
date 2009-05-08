@@ -77,9 +77,9 @@ void DeferredRendererImplementation::worldBegin()
 	}
 	m_transformStack = TransformStack();
 	m_transformStack.push( M44f() );
-	
+
 	m_stateStack.push_back( new State( false ) );
-	
+
 	m_groupStack.push( m_scene->root() ); /// \todo this group should have the attribute state accumulated before worldBegin
 }
 
@@ -91,7 +91,7 @@ void DeferredRendererImplementation::worldEnd()
 	}
 	m_transformStack = TransformStack();
 	m_transformStack.push( M44f() );
-	
+
 	/// \todo This is where we would do our rendering and saving of images.
 }
 
@@ -101,7 +101,7 @@ void DeferredRendererImplementation::transformBegin()
 	g->setTransform( m_transformStack.top() );
 	m_groupStack.top()->addChild( g );
 	m_groupStack.push( g );
-	
+
 	m_transformStack.push( M44f() );
 }
 
@@ -129,7 +129,7 @@ void DeferredRendererImplementation::attributeBegin()
 	g->setState( new State( **(m_stateStack.rbegin()) ) );
 	m_groupStack.top()->addChild( g );
 	m_groupStack.push( g );
-	
+
 	m_transformStack.push( M44f() );
 	m_stateStack.push_back( new State( false ) );
 }
@@ -170,7 +170,7 @@ void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )
 	g->setTransform( m_transformStack.top() );
 	g->setState( new State( **(m_stateStack.rbegin()) ) );
 	g->addChild( primitive );
-	
+
 	m_groupStack.top()->addChild( g );
 }
 

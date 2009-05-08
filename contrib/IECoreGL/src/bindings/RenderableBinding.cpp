@@ -52,5 +52,5 @@ void bindRenderable()
 		.def( "bound", &Renderable::bound )
 	;
 }
-	
+
 }

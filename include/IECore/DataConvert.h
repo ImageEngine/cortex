@@ -51,8 +51,8 @@ namespace IECore
 /// FloatVectorPataPtr result = convert( myUIntVectorDataPtr );
 /// \endcode
 ///
-/// The "Enable" template parameter is for internal use only. 
-/// 
+/// The "Enable" template parameter is for internal use only.
+///
 /// There are two variants of the function, one which constructs the conversion using its default
 /// constructor, the other takes an instance of the Conversion class (to allow for external
 /// initialization)
@@ -60,7 +60,7 @@ template<typename From, typename To, typename Conversion, typename Enable = void
 struct DataConvert
 {
 	typename To::Ptr operator()( typename From::ConstPtr from );
-	
+
 	typename To::Ptr operator()( typename From::ConstPtr from, Conversion &c );
 };
 

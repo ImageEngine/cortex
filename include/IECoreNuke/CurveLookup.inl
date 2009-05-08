@@ -109,7 +109,7 @@ void CurveLookup<T>::knob( DD::Image::Knob_Callback f )
 		m_curveDescriptions->push_back( endMarker );
 		m_curves = new DD::Image::LookupCurves( &*(m_curveDescriptions->begin()) );
 	}
-	LookupCurves_knob( f, m_curves, m_name.c_str(), m_label.c_str() ); 	
+	LookupCurves_knob( f, m_curves, m_name.c_str(), m_label.c_str() );
 #else
 	if( !m_namesAndDefaultsPtrs.size() )
 	{
@@ -144,14 +144,14 @@ void CurveLookup<T>::validate( T xMin, T xMax, unsigned numSamples )
 		validate( i, xMin, xMax, numSamples );
 	}
 }
-		
+
 template<class T>
 void CurveLookup<T>::validate( unsigned curveIndex, T xMin, T xMax, unsigned numSamples )
 {
 	assert( numSamples>=2 );
 	assert( curveIndex<numCurves() );
 	m_lookups.resize( numCurves() );
-	
+
 	Lookup &lookup = m_lookups[curveIndex];
 	lookup.values.resize( numSamples );
 	T xStep = (xMax - xMin) / (numSamples-1);
@@ -160,7 +160,7 @@ void CurveLookup<T>::validate( unsigned curveIndex, T xMin, T xMax, unsigned num
 	{
 #ifdef IECORENUKE_NO_ANIMATION
 		lookup.values[i] = m_curves->getValue( curveIndex, x );
-#else	
+#else
 		lookup.values[i] = m_curves[curveIndex]->evaluate( x );
 #endif
 		x += xStep;
@@ -216,12 +216,12 @@ inline T CurveLookup<T>::evaluate( unsigned curveIndex, T x ) const
 	{
 		 ff = f - fi;
 	}
-	
+
 	assert( fi >= 0 );
 	assert( fi + 1 < (int)lookup.values.size() );
 	return Imath::lerp( lookup.values[fi], lookup.values[fi+1], ff );
 }
-		
+
 } // namespace IECoreNuke
 
 #endif // IECORENUKE_CURVELOOKUP_INL

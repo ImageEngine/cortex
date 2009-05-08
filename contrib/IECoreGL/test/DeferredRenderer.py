@@ -41,87 +41,87 @@ import IECoreGL
 IECoreGL.init( False )
 
 class TestDeferredRenderer( unittest.TestCase ) :
-	
+
 	def __traverseGroup( self, g, result ) :
-				
+
 		n = g.getState().get( IECoreGL.NameStateComponent.staticTypeId() )
-	
+
 		if n != None:
-	
+
 			result.append( n.name() )
-			
+
 		else :
-			
+
 			result.append( "None" )
-		
+
 		for c in g.children() :
-		
+
 			self.__traverseGroup( c, result )
-	
+
 	def __buildGroup( self, parent, depth, name, maxDepth = 10 ) :
 		""" Build a random hierarchy with uniquely named children """
-	
+
 		if depth >= maxDepth :
-		
+
 			return
-			
-		numChildren = int( 4 * random.random() )	
-		
+
+		numChildren = int( 4 * random.random() )
+
 		for c in range( 0, numChildren ) :
-		
+
 			n = name + "." + str( c )
-		
+
 			child = IECore.Group()
-			
+
 			attributes = IECore.AttributeState()
 			child.addState( attributes )
 
 			attributes.attributes["name"] = IECore.StringData( n )
-						
+
 			parent.addChild( child )
-			
+
 			if random.random() > 0.1 :
 				self.__buildGroup( child, depth + 1, n, maxDepth = maxDepth )
-		
-	def testSceneOrder( self ) :			
-	
+
+	def testSceneOrder( self ) :
+
 		# Make sure that scene order is consistent across multiple renders/renderers
-	
+
 		random.seed( 300 )
 		root = IECore.Group()
 		self.__buildGroup( root, 0, "root" )
-		
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		
+
 		r.worldBegin()
 		root.render( r )
 		r.worldEnd()
-		
+
 		result = []
 		self.__traverseGroup( r.scene().root(), result )
-		
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		
+
 		r.worldBegin()
 		root.render( r )
 		r.worldEnd()
-		
+
 		result2 = []
 		self.__traverseGroup( r.scene().root(), result2 )
-				
+
 		self.assertEqual( result, result2 )
-		
+
 		r.worldBegin()
 		root.render( r )
 		r.worldEnd()
-		
+
 		result2 = []
 		self.__traverseGroup( r.scene().root(), result2 )
-		
+
 		self.assertEqual( result, result2 )
-			
-		
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

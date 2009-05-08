@@ -58,10 +58,10 @@ class CameraController : public IECore::RefCounted
 
 		void setCamera( CameraPtr camera );
 		CameraPtr getCamera();
-		
+
 		void setCentreOfInterest( float centreOfInterest );
 		float getCentreOfInterest();
-		
+
 		/// Changes the camera resolution, modifying the screen window
 		/// to preserve the horizontal framing and change the vertical
 		/// framing to maintain aspect ratio.
@@ -76,12 +76,12 @@ class CameraController : public IECore::RefCounted
 		void track( int dx, int dy );
 		void tumble( int dx, int dy );
 		void dolly( int dx, int dy );
-		
+
 	private :
-	
+
 		CameraPtr m_camera;
 		float m_centreOfInterest;
-		
+
 };
 
 IE_CORE_DECLAREPTR( CameraController );

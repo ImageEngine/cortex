@@ -157,7 +157,7 @@ static Box3fDataPtr bound3( typename P::ConstPtr pData, typename R::ConstPtr rDa
 		rLength = rData->readable().size();
 		r = &(rData->readable()[0]);
 	}
-	
+
 	size_t i = 0;
 	for( typename P::ValueType::const_iterator pIt = pVector.begin(); pIt!=pVector.end(); pIt++ )
 	{
@@ -172,7 +172,7 @@ static Box3fDataPtr bound3( typename P::ConstPtr pData, typename R::ConstPtr rDa
 			Point rr( r[i] * rMult );
 			b.min -= rr;
 			b.max += rr;
-			
+
 		}
 		result.extendBy( b );
 		i++;

@@ -41,9 +41,9 @@ import re
 class NukeFileExaminer( FileExaminer ) :
 
 	def __init__( self, fileName ) :
-	
+
 		FileExaminer.__init__( self, fileName )
-		
+
 	def dependencies( self ) :
 
 		## I'd rather this was implemented as some sort of batch script
@@ -58,7 +58,7 @@ class NukeFileExaminer( FileExaminer ) :
 			lines = f.readlines()
 		finally :
 			f.close()
-		
+
 		# find the frame range for the script
 		rootNodes = self.__findNodes( "Root", lines )
 		if len( rootNodes )==1 :
@@ -68,50 +68,50 @@ class NukeFileExaminer( FileExaminer ) :
 			raise Exception( "No Root node found." )
 		else :
 			raise Exception( "More than one root node." )
-		
+
 		# find all the file references
 		##################################################
-		
+
 		result = set()
-		
+
 		# first find read nodes
 		readNodes = self.__findNodes( "Read", lines )
 		for readNode in readNodes :
-			
-			fileName = self.__knobValue( "file", readNode, "" )		
-			proxyFileName = self.__knobValue( "proxy", readNode, "" )	
+
+			fileName = self.__knobValue( "file", readNode, "" )
+			proxyFileName = self.__knobValue( "proxy", readNode, "" )
 			firstFrame = int( self.__knobValue( "first", readNode, "1" ) )
 			lastFrame = int( self.__knobValue( "last", readNode, "1" ) )
 			firstFrame = max( scriptFirstFrame, firstFrame )
 			lastFrame = min( scriptLastFrame, lastFrame )
-			
+
 			if fileName!="" :
 				result.add( self.__convertFileName( fileName, firstFrame, lastFrame ) )
 			if proxyFileName!="" :
 				result.add( self.__convertFileName( proxyFileName, firstFrame, lastFrame ) )
-				
+
 		# now find read geo nodes
 		readGeoNodes = self.__findNodes( "ReadGeo", lines )
 		for readGeoNode in readGeoNodes :
-			
-			fileName = self.__knobValue( "file", readGeoNode, "" )		
+
+			fileName = self.__knobValue( "file", readGeoNode, "" )
 			if fileName!="" :
 				result.add( self.__convertFileName( fileName, scriptFirstFrame, scriptLastFrame ) )
-			
+
 		# now find grain nodes
 		grainNodes = self.__findNodes( "ScannedGrain", lines )
 		for grainNode in grainNodes :
-		
+
 			fileName = self.__knobValue( "fullGrain", grainNode, "" )
 			if fileName!="" :
 				firstFrame = int( self.__knobValue( "fullGrain.first_frame", grainNode, "1" ) )
 				lastFrame = int( self.__knobValue( "fullGrain.last_frame", grainNode, "50" ) )
 				result.add( self.__convertFileName( fileName, firstFrame, lastFrame ) )
-							
+
 		return result
-	
+
 	def __findNodes( self, nodeType, lines ) :
-	
+
 		result = []
 		startIndex = 0
 		while startIndex < len( lines ) :
@@ -121,48 +121,48 @@ class NukeFileExaminer( FileExaminer ) :
 				startIndex = r[1]
 			else :
 				break
-				
+
 		return result
-		
+
 	def __findNode( self, nodeType, lines, startIndex ) :
-	
+
 		for i in range( startIndex, len( lines ) ) :
-			
+
 			words = lines[i].split()
-			
-			if len( words ) == 2 and words[0]==nodeType and words[1]=="{" :			
-		
+
+			if len( words ) == 2 and words[0]==nodeType and words[1]=="{" :
+
 				node = []
 				for j in range( i, len( lines ) ) :
-				
+
 					node.append( lines[j] )
 					if lines[j].strip() == "}" :
 						return node, j + 1
-		
+
 		return None
-	
+
 	def __knobValue( self, knobName, node, default ) :
-	
+
 		for line in node[1:-1] :
-						
+
 			words = line.split()
 			if len( words )==2 and words[0]==knobName :
 				return words[1]
-				
+
 		return default
-	
+
 	def __convertFileName( self, fileName, firstFrame, lastFrame ) :
-	
+
 		m = re.compile( "^(.*)%([0-9]*)d(.*)$" ).match( fileName )
 		if m :
-					
+
 			padding = 1
 			padder = m.group( 2 )
 			if len( padder ) :
-			
+
 				if ' ' in fileName :
 					raise Exception( "Sequence fileName \%s\" contains a space." % fileName )
-			
+
 				if padder[0]=="0" :
 					padding = int( padder[1:] )
 				else :
@@ -170,11 +170,11 @@ class NukeFileExaminer( FileExaminer ) :
 					# nuke seems to pad with spaces. we won't accept
 					# spaces in a filename
 					raise Exception( "Filename \"%s\" is padded with spaces." % fileName )
-				
+
 			return m.group( 1 ) + "".ljust( padding, '#' ) + m.group( 3 ) + " " + str( IECore.FrameRange( firstFrame, lastFrame ) )
-		
+
 		else :
-		
+
 			return fileName
-				
+
 FileExaminer.registerExaminer( [ "nk" ], NukeFileExaminer )

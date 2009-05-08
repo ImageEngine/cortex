@@ -41,29 +41,29 @@ import maya.cmds
 class FromMayaConverterTest( unittest.TestCase ) :
 
 	def testFactory( self ) :
-		
+
 		sphereTransform = maya.cmds.polySphere()[0]
 		sphereShape = maya.cmds.listRelatives( sphereTransform, shapes=True )[0]
-		
+
 		# get a converter for a plug
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) + ".translateX" )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) + ".translateX", IECore.TypeId.FloatData )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 
 		# get a converter for a dag node
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ), IECore.TypeId.Group )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
-		
+
 		# get a converter for a shape node
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ), IECore.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
 

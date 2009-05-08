@@ -39,7 +39,7 @@ import os.path
 class CheckFileDependenciesOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "CheckFileDependenciesOp", "Checks that the dependencies of a file exist.",
 			Parameter(
 				name = "result",
@@ -47,7 +47,7 @@ class CheckFileDependenciesOp( Op ) :
 				defaultValue = StringVectorData()
 			)
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				FileNameParameter(
@@ -63,7 +63,7 @@ class CheckFileDependenciesOp( Op ) :
 					description = "When on, recursively searches the file dependency tree and checks all dependencies.",
 					defaultValue = False,
 				),
-				StringParameter( 
+				StringParameter(
 					name = "resultType",
 					description = "The format of the result",
 					defaultValue = "string",
@@ -77,32 +77,32 @@ class CheckFileDependenciesOp( Op ) :
 		)
 
 	def doOperation( self, operands ) :
-		
+
 		dependencies = FileDependenciesOp()( file = operands.file, recurse = operands.recurse, resultType = "stringVector" )
-		
+
 		missingFiles = []
 		for dependency in dependencies :
-				
+
 			if FileSequence.fileNameValidator().match( dependency ) :
-				
+
 				s = dependency.split()
 				sequence = FileSequence( s[0], FrameList.parse( s[1] ) )
-				
+
 				frames = sequence.frameList.asList()
 				frames.sort()
 				missingFrames = []
 				for frame in frames :
 					if not os.path.exists( sequence.fileNameForFrame( frame ) ) :
 						missingFrames.append( frame )
-						
+
 				if len( missingFrames ) :
 					missingFiles.append( FileSequence( s[0], frameListFromList( missingFrames ) ) )
-				
+
 			else :
-			
+
 				if not os.path.exists( dependency ) :
 					missingFiles.append( dependency )
-		
+
 		if operands.resultType.value == "string" :
 			return StringData( "\n".join( [str(s) for s in missingFiles] ) )
 		else :

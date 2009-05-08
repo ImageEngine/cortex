@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
@@ -259,7 +259,7 @@ static void geometry( Renderer &r, const std::string &type, const dict &topology
 {
 	CompoundDataMap t;
 	fillCompoundDataMap( t, topology );
-	
+
 	PrimitiveVariableMap p;
 	fillPrimitiveVariableMap( p, primVars );
 	r.geometry( type, t, p );
@@ -299,7 +299,7 @@ void bindRenderer()
 		.def("getTransform", (Imath::M44f (Renderer::*)( const std::string &) const ) &Renderer::getTransform)
 		.def("concatTransform", &Renderer::concatTransform)
 		.def("coordinateSystem", &Renderer::coordinateSystem)
-		
+
 		.def("attributeBegin", &Renderer::attributeBegin)
 		.def("attributeEnd", &Renderer::attributeEnd)
 		.def("setAttribute", &Renderer::setAttribute)
@@ -307,7 +307,7 @@ void bindRenderer()
 
 		.def("shader", &shader)
 		.def("light", &light)
-		
+
 		.def("motionBegin", &motionBegin)
 		.def("motionEnd", &Renderer::motionEnd)
 
@@ -321,7 +321,7 @@ void bindRenderer()
 		.def("nurbs", &nurbs)
 		.def("patchMesh", &patchMesh)
 		.def("geometry", &geometry)
-		
+
 		.def("procedural", &Renderer::procedural)
 
 		.def("instanceBegin", &instanceBegin)
@@ -329,15 +329,15 @@ void bindRenderer()
 		.def("instance", &Renderer::instance)
 
 		.def("command", &command)
-		
+
 	;
-	
+
 	RefCountedClass<Renderer::Procedural, RefCounted, ProceduralWrapPtr>( "Procedural" )
 		.def( init<>() )
 		.def( "bound", &Renderer::Procedural::bound )
 		.def( "render", &Renderer::Procedural::render )
 	;
-	
+
 }
-	
+
 } // namespace IECore

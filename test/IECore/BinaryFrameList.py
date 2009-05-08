@@ -39,53 +39,53 @@ from IECore import *
 class testBinaryFrameList( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		r = BinaryFrameList( FrameRange( 1, 5) )
 		self.assertEqual( r.asList(), [ 1, 5, 3, 2, 4 ] )
-		
+
 		r = BinaryFrameList( FrameRange( 1, 3) )
 		self.assertEqual( r.asList(), [ 1, 3, 2 ] )
-		
+
 		r = BinaryFrameList( FrameRange( 1, 6) )
 		self.assertEqual( r.asList(), [ 1, 6, 3, 2, 4, 5 ] )
-		
+
 		r = BinaryFrameList( FrameRange( 1, 7) )
 		self.assertEqual( r.asList(), [ 1, 7, 4, 2, 5, 3, 6 ] )
-		
+
 	def testParsing( self ) :
-	
+
 		r = FrameList.parse( "1-5b" )
 		self.assert_( isinstance( r, BinaryFrameList ) )
 		self.assertEqual( r.asList(), [ 1, 5, 3, 2, 4 ] )
-		
+
 	def testStr( self ) :
-	
+
 		r = BinaryFrameList( FrameRange( 1, 11, 2 ) )
 		self.assertEqual( str( r ), "1-11x2b" )
-		
+
 		r = BinaryFrameList( CompoundFrameList( [ FrameRange( 1, 10 ), FrameRange( 20, 30 ) ] )  )
 		self.assertEqual( str( r ), "(1-10,20-30)b" )
-		
+
 	def testRepr( self ) :
 		import IECore
-		
+
 		r = BinaryFrameList( FrameRange( 1, 11, 2 ) )
 		self.assertEqual( r, eval( repr( r ) ) )
-		
+
 		r = BinaryFrameList( CompoundFrameList( [ FrameRange( 1, 10 ), FrameRange( 20, 30 ) ] )  )
 		self.assertEqual( r, eval( repr( r ) ) )
-		
+
 	def testPreservation( self ) :
-	
+
 		for i in range( 1, 1000 ) :
-		
+
 			s = FrameRange( random.randint( 1, 100 ), random.randint( 100, 200 ) )
 			ss = BinaryFrameList( s )
-			
+
 			sl = s.asList()
 			ssl = ss.asList()
 			self.assertEqual( len( sl ), len( ssl ) )
-			
+
 			for f in sl :
 				self.assert_( f in ssl )
 

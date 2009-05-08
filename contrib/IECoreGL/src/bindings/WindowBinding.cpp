@@ -50,12 +50,12 @@ class WindowWrap : public Window, public IECore::Wrapper<Window>
 {
 
 	public :
-	
+
 		WindowWrap( PyObject *self, const std::string &title )
 			:	Window( title ), IECore::Wrapper<Window>( self, this )
 		{
 		}
-		
+
 		virtual void display()
 		{
 			try
@@ -83,7 +83,7 @@ class WindowWrap : public Window, public IECore::Wrapper<Window>
 				IECore::msg( IECore::Msg::Error, "WindowWrap::display", "Caught unknown exception" );
 			}
 		}
-		
+
 		virtual void reshape( int width, int height )
 		{
 			try
@@ -110,8 +110,8 @@ class WindowWrap : public Window, public IECore::Wrapper<Window>
 			{
 				IECore::msg( IECore::Msg::Error, "WindowWrap::reshape", "Caught unknown exception" );
 			}
-		}		
-		
+		}
+
 
 };
 

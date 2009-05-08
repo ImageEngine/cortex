@@ -72,16 +72,16 @@ class PathVectorParameter : public StringVectorParameter
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
 
 	protected :
-		
+
 		// for io and copying
 		PathVectorParameter();
 		friend class TypeDescription<PathVectorParameter>;
-		
+
 	private :
 
 		bool m_allowEmptyList;
 		CheckType m_check;
-		
+
 		static const unsigned int g_ioVersion;
 
 };

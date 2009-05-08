@@ -51,7 +51,7 @@ FrameBuffer::FrameBuffer()
 	{
 		throw Exception( "FrameBuffers not supported by this OpenGL implementation.");
 	}
-	glGenFramebuffersEXT( 1, &m_frameBuffer ); 
+	glGenFramebuffersEXT( 1, &m_frameBuffer );
 }
 
 FrameBuffer::~FrameBuffer()
@@ -69,7 +69,7 @@ unsigned int FrameBuffer::maxColors()
 void FrameBuffer::setColor( ColorTexturePtr texture, unsigned int index )
 {
 	saveAndBind();
-	
+
 		if( index )
 		{
 			IECore::msg( IECore::Msg::Warning, "FrameBuffer::setColor", "Attachment points other than 0 not implemented yet." );
@@ -77,7 +77,7 @@ void FrameBuffer::setColor( ColorTexturePtr texture, unsigned int index )
 		glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture->m_texture, 0 );
 		m_colorAttachments.resize( std::max( (unsigned int)m_colorAttachments.size(), (unsigned int)index + 1 ) );
 		m_colorAttachments[index] = texture;
-		
+
 	restore();
 }
 
@@ -98,7 +98,7 @@ ConstColorTexturePtr FrameBuffer::getColor( unsigned int index ) const
 	}
 	return m_colorAttachments[index];
 }
-	
+
 void FrameBuffer::setDepth( DepthTexturePtr depthTexture )
 {
 	saveAndBind();
@@ -125,7 +125,7 @@ void FrameBuffer::validate() const
 		GLenum status;
 		status = glCheckFramebufferStatusEXT( GL_FRAMEBUFFER_EXT );
 	restore();
-	
+
     switch( status )
 	{
 		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:

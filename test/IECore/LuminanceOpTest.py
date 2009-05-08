@@ -38,9 +38,9 @@ from IECore import *
 class LuminanceOpTest( unittest.TestCase ) :
 
 	def testParameterDefaults( self ) :
-	
+
 		o = LuminanceOp()
-		
+
 		self.assertEqual( o["colorPrimVar"].getTypedValue(), "Cs" )
 		self.assertEqual( o["redPrimVar"].getTypedValue(), "R" )
 		self.assertEqual( o["greenPrimVar"].getTypedValue(), "G" )
@@ -49,7 +49,7 @@ class LuminanceOpTest( unittest.TestCase ) :
 		self.assertEqual( o["removeColorPrimVars"].getTypedValue(), True )
 
 	def testSeparateRGB( self ) :
-	
+
 		p = PointsPrimitive( 3 )
 
 		r = FloatVectorData( [ 1, 2, 3 ] )
@@ -61,20 +61,20 @@ class LuminanceOpTest( unittest.TestCase ) :
 		p["B"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, b )
 
 		pp = LuminanceOp()( input=p, weights=Color3f( 1, 2, 3 ) )
-		
+
 		self.assert_( not "R" in pp )
 		self.assert_( not "G" in pp )
 		self.assert_( not "B" in pp )
-		
+
 		self.assert_( "Y" in pp )
 		self.assertEqual( pp["Y"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-		
+
 		self.assertAlmostEqual( pp["Y"].data[0], 30 )
 		self.assertAlmostEqual( pp["Y"].data[1], 36 )
 		self.assertAlmostEqual( pp["Y"].data[2], 42 )
-		
+
 	def testCs( self ) :
-	
+
 		p = PointsPrimitive( 2 )
 
 		cs = Color3fVectorData( [ Color3f( 1, 2, 3 ), Color3f( 10, 11, 12 ) ] )
@@ -85,10 +85,10 @@ class LuminanceOpTest( unittest.TestCase ) :
 		self.assert_( "Cs" in pp )
 		self.assert_( "Y" in pp )
 		self.assertEqual( pp["Y"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-		
+
 		self.assertAlmostEqual( pp["Y"].data[0], 14 )
 		self.assertAlmostEqual( pp["Y"].data[1], 68 )
 
 if __name__ == "__main__":
 	unittest.main()
-	
+

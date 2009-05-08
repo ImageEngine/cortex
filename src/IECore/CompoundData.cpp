@@ -76,7 +76,7 @@ void CompoundData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 	{
 		accumulator.accumulate( iter->second );
 		iter++;
-	}	
+	}
 }
 
 template<>

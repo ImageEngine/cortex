@@ -60,45 +60,45 @@ class LRUCache
 		typedef Key KeyType;
 		typedef Data DataType;
 		typedef GetterFn GetterFnType;
-		
+
 		typedef typename GetterFn::Cost Cost;
-		
+
 		LRUCache();
 		virtual ~LRUCache();
-	
+
 		void clear();
-		
+
 		// Erases the given key if it is contained in the cache. Returns whether any item was removed.
 		bool erase( const Key &key );
-		
+
 		/// Set the maximum cost of the items held in the cache, discarding any if necessary
 		void setMaxCost( Cost maxCost );
-		
+
 		/// Get the maximum possible cost of cacheable items
 		Cost getMaxCost() const;
-		
+
 		/// Returns the current cost of items held in the cache
 		Cost currentCost() const;
-		
+
 		/// Retrieve the item from the cache, computing it if necessary. Returns true if successful and "data" has been set, else
 		/// returns false and the value of "data" is undefined.
 		/// \todo Consider use of boost::optional to remove need for bool flag
 		bool get( const Key& key, GetterFn fn, Data &data ) const;
-		
+
 	protected:
-		
+
 		typedef std::pair<Data, Cost> DataCost;
-	
-		typedef std::list< std::pair<Key, DataCost> > List;		
-		
+
+		typedef std::list< std::pair<Key, DataCost> > List;
+
 		typedef std::map< Key, typename List::iterator > Cache;
-	
+
 		/// Clear out any data with a least-recently-used strategy until the current cost does not exceed the specified cost.
 		void limitCost( Cost cost ) const;
-				
+
 		Cost m_maxCost;
 		mutable Cost m_currentCost;
-		
+
 		mutable List m_list;
 		mutable Cache m_cache;
 };

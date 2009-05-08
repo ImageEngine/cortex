@@ -42,9 +42,9 @@ import os
 class RIBFileExaminer( FileExaminer ) :
 
 	def __init__( self, fileName ) :
-	
+
 		FileExaminer.__init__( self, fileName )
-		
+
 	def dependencies( self ) :
 
 		pipe = os.popen( "ribdepends \"%s\"" % self.getFileName(), 'r' )
@@ -52,19 +52,19 @@ class RIBFileExaminer( FileExaminer ) :
 		status = pipe.close()
 		if status :
 			raise RuntimeError( "Error running ribdepends" )
-		
-		goodIdentifiers = [ 's', 't', 'x', 'u', 'c' ]	
+
+		goodIdentifiers = [ 's', 't', 'x', 'u', 'c' ]
 		files = []
 		for line in lines :
 			if len( line ) > 4 :
 				if line[0]=='[' and line[2:4]=="] " and line[1] in goodIdentifiers :
-				
+
 					files.append( line[4:].strip() )
-		
+
 		result = set()
 		for f in files :
 			result.add( f )
-		
+
 		return result
-				
+
 FileExaminer.registerExaminer( [ "rib" ], RIBFileExaminer )

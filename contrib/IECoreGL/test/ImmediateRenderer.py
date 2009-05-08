@@ -43,13 +43,13 @@ init( False )
 class TestImmediateRenderer( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		outputFileName = os.path.dirname( __file__ ) + "/output/testImmediate.tif"
-	
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		
+
 		r.camera( "main", {
 				"projection" : StringData( "perspective" ),
 				"projection:fov" : FloatData( 45 ),
@@ -59,13 +59,13 @@ class TestImmediateRenderer( unittest.TestCase ) :
 			}
 		)
 		r.display( outputFileName, "tif", "rgba", {} )
-		
+
 		r.worldBegin()
-		
+
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 0, 0, 1 ) ) } )
 		r.geometry( "sphere", {}, {} )
-		
+
 		r.concatTransform( M44f.createTranslated( V3f( 0, 1, 0 ) ) )
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 1, 0 ) ) } )
 		r.geometry( "sphere", {}, {} )
@@ -78,7 +78,7 @@ class TestImmediateRenderer( unittest.TestCase ) :
 		r = e.R()
 		g = e.G()
 		b = e.B()
-				
+
 		e.pointAtUV( V2f( 0.5, 0 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 1 )
 		self.assertEqual( result.floatPrimVar( r ), 1 )
@@ -94,17 +94,17 @@ class TestImmediateRenderer( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( r ), 0 )
 		self.assertEqual( result.floatPrimVar( g ), 0 )
 		self.assertEqual( result.floatPrimVar( b ), 0 )
-		
+
 
 	def tearDown( self ) :
 
 		files = [
 			os.path.dirname( __file__ ) + "/output/testImmediate.tif",
 		]
-		
+
 		for f in files :
 			if os.path.exists( f ) :
 				os.remove( f )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

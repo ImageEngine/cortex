@@ -44,7 +44,7 @@ namespace IECore
 /// which will extract a pointer to T from a SWIG wrapped object. This allows
 /// functions accepting T * to be bound as usual using boost::python, but to
 /// operate on objects which were bound with SWIG. The current implementation
-/// is inherently dangerous in that it'll happily return a T * from any 
+/// is inherently dangerous in that it'll happily return a T * from any
 /// SWIG object regardless of whether or not that object is holding the right
 /// type - for this reason it's best to use it in controlled circumstances.
 /// See the IECoreMaya bindings for examples - they use this class to allow
@@ -55,7 +55,7 @@ class PointerFromSWIG
 	public :
 
 		PointerFromSWIG();
-		
+
 };
 
 } // namespace IECore

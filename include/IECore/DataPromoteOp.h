@@ -53,26 +53,26 @@ namespace IECore
 class DataPromoteOp : public Op
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( DataPromoteOp, Op );
-		
+
 		DataPromoteOp();
 		virtual ~DataPromoteOp();
-		
+
 	protected :
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-	
+
 	private :
-	
+
 		struct Promote1Fn;
-		
+
 		template<typename T, typename E=void >
 		struct Promote2Fn
 		{
-			BOOST_STATIC_ASSERT( sizeof(T) == 0 );	
+			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 		};
-		
+
 		ObjectParameterPtr m_objectParameter;
 		IntParameterPtr m_targetTypeParameter;
 };

@@ -51,15 +51,15 @@ class MeshPrimitiveImplicitSurfaceFunction : public PrimitiveImplicitSurfaceFunc
 {
         public:
 		IE_CORE_DECLAREMEMBERPTR( MeshPrimitiveImplicitSurfaceFunction );
-		
+
 		MeshPrimitiveImplicitSurfaceFunction( MeshPrimitivePtr mesh );
-		
+
 		virtual ~MeshPrimitiveImplicitSurfaceFunction();
-                
-		// Retrieve the signed distance from the mesh at the given point              
+
+		// Retrieve the signed distance from the mesh at the given point
                 Value operator()( const Point &p );
-		
-		// Retrieve the signed distance from the mesh at the given point		
+
+		// Retrieve the signed distance from the mesh at the given point
 		virtual Value getValue( const Point &p );
 };
 

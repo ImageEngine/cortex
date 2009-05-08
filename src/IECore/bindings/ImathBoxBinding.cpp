@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -52,12 +52,12 @@
 using namespace boost::python;
 using namespace Imath;
 
-namespace IECore 
+namespace IECore
 {
-		
+
 template<typename T>
 class_< Box<T> > bindBox(const char *bindName);
-	
+
 void bindImathBox()
 {
 	bindBox<V2f>("Box2f");
@@ -75,7 +75,7 @@ void bindImathBox()
 	bindBox<V3i>("Box3i");
 }
 
-/// \todo The only reason this is a macro is so that it can turn the class type to a string. We should probably do this 
+/// \todo The only reason this is a macro is so that it can turn the class type to a string. We should probably do this
 /// with a small traits class instead, and get rid of the macro.
 #define DEFINEBOXSTRSPECIALISATION( BOX )				\
 														\
@@ -104,31 +104,31 @@ DEFINEBOXSTRSPECIALISATION( Box2f );
 DEFINEBOXSTRSPECIALISATION( Box3f );
 DEFINEBOXSTRSPECIALISATION( Box2d );
 DEFINEBOXSTRSPECIALISATION( Box3d );
-	
+
 template<typename T>
 class_< Box<T> > bindBox(const char *bindName)
-{	
+{
 	void (Box<T>::*eb1)(const T&) = &Box<T>::extendBy;
 	void (Box<T>::*eb2)(const Box<T>&) = &Box<T>::extendBy;
-	
+
 	bool (Box<T>::*i1)(const T&) const = &Box<T>::intersects;
-	bool (Box<T>::*i2)(const Box<T>&) const = &Box<T>::intersects;	
-	
+	bool (Box<T>::*i2)(const Box<T>&) const = &Box<T>::intersects;
+
 	class_< Box<T> > myClass(bindName);
 	myClass.def_readwrite("min", &Box<T>::min)
-		.def_readwrite("max", &Box<T>::max)		
-	
+		.def_readwrite("max", &Box<T>::max)
+
 		.def(init<>())
 		.def(init<T>())
 		.def(init<T, T>())
-	
+
 		.def(self == self)
 		.def(self != self)
-	
+
 		.def("makeEmpty", &Box<T>::makeEmpty)
 		.def("extendBy", eb1)
 		.def("extendBy", eb2)
-	
+
 		.def("size", &Box<T>::size)
 		.def("center", &Box<T>::center)
 		.def("intersects", i1)
@@ -136,7 +136,7 @@ class_< Box<T> > bindBox(const char *bindName)
 		.def("contains", &boxContains<Box<T> > )
 
 		.def("majorAxis", &Box<T>::majorAxis)
-		
+
 		.def("isEmpty", &Box<T>::isEmpty)
 		.def("hasVolume", &Box<T>::hasVolume)
 
@@ -146,6 +146,6 @@ class_< Box<T> > bindBox(const char *bindName)
 		.def( "__repr__", &IECore::repr<Box<T> > )
 	;
 	return myClass;
-}	
+}
 
 }

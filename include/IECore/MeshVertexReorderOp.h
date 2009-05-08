@@ -54,37 +54,37 @@ class MeshVertexReorderOp : public MeshPrimitiveOp
 		virtual ~MeshVertexReorderOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshVertexReorderOp, MeshPrimitiveOp );
-		
+
 		V3iParameterPtr startingVerticesParameter();
-		ConstV3iParameterPtr startingVerticesParameter() const;		
+		ConstV3iParameterPtr startingVerticesParameter() const;
 
 	protected:
-	
+
 		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
-	
+
 	private :
-	
+
 		V3iParameterPtr m_startingVerticesParameter;
-	
+
 		struct ReorderFn;
 		struct HandleErrors;
-		
+
 		typedef int FaceId;
 		typedef int EdgeId;
 		typedef int VertexId;
-		
+
 		typedef std::pair< VertexId, VertexId > Edge;
-		
+
 		typedef std::vector< FaceId > FaceList;
 		typedef std::set< FaceId > FaceSet;
-		typedef std::vector< Edge > EdgeList;		
+		typedef std::vector< Edge > EdgeList;
 		typedef std::vector<VertexId> VertexList;
-		
+
 		typedef std::map< FaceId, EdgeList > FaceToEdgesMap;
 		typedef std::map< FaceId, VertexList > FaceToVerticesMap;
 		typedef std::map< VertexId, FaceSet > VertexToFacesMap;
 		typedef std::map< Edge, FaceList > EdgeToConnectedFacesMap;
-		
+
 		FaceToEdgesMap m_faceToEdgesMap;
 		FaceToVerticesMap m_faceToVerticesMap;
 		EdgeToConnectedFacesMap m_edgeToConnectedFacesMap;
@@ -92,24 +92,24 @@ class MeshVertexReorderOp : public MeshPrimitiveOp
 		VertexList m_faceVaryingOffsets;
 		int m_numFaces;
 		int m_numVerts;
-		
+
 		void buildInternalTopology( ConstMeshPrimitivePtr mesh );
-		
+
 		int faceDirection( FaceId face, Edge edge );
-				
+
 		void visitFace(
 			ConstMeshPrimitivePtr mesh,
 			FaceId currentFace,
 			Edge currentEdge,
 			std::vector<VertexId> &vertexMap,
-			std::vector<VertexId> &vertexRemap,			
+			std::vector<VertexId> &vertexRemap,
 			std::vector<int> &newVerticesPerFace,
 			std::vector<VertexId> &newVertexIds,
 			std::vector<int> &faceVaryingRemap,
-			std::vector<int> &faceRemap,			
+			std::vector<int> &faceRemap,
 			int &nextVertex
 		);
-		
+
 };
 
 IE_CORE_DECLAREPTR( MeshVertexReorderOp );

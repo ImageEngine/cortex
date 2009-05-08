@@ -61,7 +61,7 @@ GLuint NameStateComponent::glName() const
 {
 	return m_it->second;
 }
-			
+
 void NameStateComponent::bind() const
 {
 	glLoadName( m_it->second );

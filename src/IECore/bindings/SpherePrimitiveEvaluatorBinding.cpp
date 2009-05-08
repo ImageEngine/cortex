@@ -49,7 +49,7 @@ void bindSpherePrimitiveEvaluator()
 	object s = RunTimeTypedClass<SpherePrimitiveEvaluator>()
 		.def( init< SpherePrimitivePtr > () )
 	;
-	
+
 	{
 		scope ss( s );
 		RefCountedClass<SpherePrimitiveEvaluator::Result, PrimitiveEvaluator::Result>( "Result" )

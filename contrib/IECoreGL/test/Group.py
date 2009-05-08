@@ -42,14 +42,14 @@ init( False )
 class TestGroup( unittest.TestCase ) :
 
 	def test( self ) :
-		
+
 		g = Group()
-		
+
 		self.assertEqual( g.getTransform(), M44f() )
 		g.setTransform( M44f.createScaled( V3f( 3 ) ) )
 		self.assertEqual( g.getTransform(), M44f.createScaled( V3f( 3 ) ) )
-		
+
 		self.assertEqual( g.children(), [] )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

@@ -51,14 +51,14 @@ class MeshNormalsOp : public MeshPrimitiveOp
 		IE_CORE_DECLARERUNTIMETYPED( MeshNormalsOp, MeshPrimitiveOp );
 
 	protected:
-	
+
 		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
-	
+
 	private :
-	
-		struct CalculateNormals;	
+
+		struct CalculateNormals;
 		struct HandleErrors;
-		
+
 };
 
 IE_CORE_DECLAREPTR( MeshNormalsOp );

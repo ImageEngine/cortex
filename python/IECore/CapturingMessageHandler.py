@@ -42,17 +42,17 @@ from IECore import MessageHandler, Struct
 class CapturingMessageHandler( MessageHandler ) :
 
 	def __init__( self ) :
-	
+
 		MessageHandler.__init__( self )
-		
+
 		self.messages = []
 
 	def handle( self, level, context, message ) :
-	
+
 		s = Struct()
 		s.level = level
 		s.context = context
 		s.message = message
-		
+
 		self.messages.append( s )
-		
+

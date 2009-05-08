@@ -52,21 +52,21 @@ namespace IECore
 class Primitive : public VisibleRenderable
 {
 	public:
-	
+
 		Primitive();
 		virtual ~Primitive();
-				
+
 		IE_CORE_DECLAREABSTRACTOBJECT( Primitive, VisibleRenderable );
-		
+
 		/// Variables a stored as a public map for easy manipulation.
 		PrimitiveVariableMap variables;
-		
+
 		/// Returns true if the given primitive variable has the correct size for its interpolation type
 		bool isPrimitiveVariableValid( const PrimitiveVariable &pv ) const;
 
 		/// Returns true if all primitive variables have the correct size for their interpolation type
 		bool arePrimitiveVariablesValid() const;
-		
+
 		/// Guesses a suitable interpolation type for a PrimitiveVariable containing
 		/// the specified number of data elements. Returns PrimitiveVariable::Invalid
 		/// if no such interpolation exists. Note that for a given size multiple
@@ -83,19 +83,19 @@ class Primitive : public VisibleRenderable
 		/// Convenience function which finds the size of data and calls the above
 		/// method.
 		PrimitiveVariable::Interpolation inferInterpolation( ConstDataPtr data ) const;
-				
+
 		/// Implemented to return a box containing all the points in the variable
 		/// "P" if it exists.
 		virtual Imath::Box3f bound() const;
-		
+
 		/// Returns the number of values a piece of data must provide for the given
 		/// interpolation type. Must be implemented in all derived classes.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const = 0;
-			
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Primitive );

@@ -41,9 +41,9 @@ import os
 import math
 
 class UserAtributesTest( unittest.TestCase ) :
-	
+
 	def testUserAttributes( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.worldBegin()
@@ -54,12 +54,12 @@ class UserAtributesTest( unittest.TestCase ) :
 		self.assertEqual( r.getAttribute( "user:test" ), IECore.FloatData( 1 ) )
 
 		r.attributeBegin()
-		
+
 		self.assertEqual( r.getAttribute( "user:test" ), IECore.FloatData( 1 ) )
-		
+
 		r.setAttribute( "user:test2", IECore.IntData( 10 ) )
 		self.assertEqual( r.getAttribute( "user:test2" ), IECore.IntData( 10 ) )
-		
+
 		r.attributeEnd()
 
 		self.assertEqual( r.getAttribute( "user:test" ), IECore.FloatData( 1 ) )
@@ -68,4 +68,4 @@ class UserAtributesTest( unittest.TestCase ) :
 		r.worldEnd()
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

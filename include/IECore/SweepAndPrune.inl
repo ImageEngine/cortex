@@ -61,31 +61,31 @@ SweepAndPrune<BoundIterator, CB>::~SweepAndPrune( )
 template<typename BoundIterator, template<typename> class CB>
 bool SweepAndPrune<BoundIterator, CB>::axisIntersects( const Bound &b0, const Bound &b1, char axis )
 {
-	if ( vecGet( BoxTraits<Bound>::max(b0), axis ) < vecGet( BoxTraits<Bound>::min(b1), axis ) 
+	if ( vecGet( BoxTraits<Bound>::max(b0), axis ) < vecGet( BoxTraits<Bound>::min(b1), axis )
 	     ||  vecGet( BoxTraits<Bound>::min(b0), axis ) > vecGet( BoxTraits<Bound>::max(b1), axis ) )
 	{
 		assert( !b0.intersects(b1) );
 		return false;
 	}
-	
+
 	return true;
 }
 
 template<typename BoundIterator, template<typename> class CB>
 void SweepAndPrune<BoundIterator, CB>::intersectingBounds( BoundIterator first, BoundIterator last, typename SweepAndPrune<BoundIterator, CB>::Callback &cb, AxisOrder axisOrder )
-{	
+{
 	unsigned long numBounds = std::distance( first, last );
-	
+
 	/// Can't radix sort more than this!
 	assert( numBounds <= std::numeric_limits< uint32_t >::max() );
-	
+
 	if (! numBounds )
 	{
 		return;
 	}
 
 	char axes[3] = { 0, 1, 2 };
-	
+
 	switch (axisOrder)
 	{
 		case XYZ :
@@ -103,12 +103,12 @@ void SweepAndPrune<BoundIterator, CB>::intersectingBounds( BoundIterator first, 
 		default:
 			assert( false );
 	}
-	
+
 	assert( axes[0] + axes[1] + axes[2] == 3 );
 
 	typedef std::pair< bool, BoundIterator> IntervalId;
-		
-	std::vector<IntervalId> intervalIds;	
+
+	std::vector<IntervalId> intervalIds;
 	std::vector<float> boundExtents;
 	boundExtents.reserve( numBounds * 2 );
 	intervalIds.reserve( numBounds * 2 );
@@ -117,36 +117,36 @@ void SweepAndPrune<BoundIterator, CB>::intersectingBounds( BoundIterator first, 
 	{
 		boundExtents.push_back( vecGet( BoxTraits<Bound>::min(*it), axes[0] ) );
 		intervalIds.push_back( IntervalId( true, it  ) );
-		
+
 		boundExtents.push_back( vecGet( BoxTraits<Bound>::max(*it), axes[0] ) );
 		intervalIds.push_back( IntervalId( false, it ) );
 	}
-	
+
 	assert( boundExtents.size() == intervalIds.size() );
 
 	const std::vector<unsigned int> &sortedIndices = m_radixSort( boundExtents );
-		
+
 	typedef std::vector<BoundIterator> ActiveSet;
 	ActiveSet activeSet;
-	
+
 	for ( std::vector<unsigned int>::const_iterator st = sortedIndices.begin(); st != sortedIndices.end(); ++st )
 	{
 		const IntervalId &id = intervalIds[ *st ];
-		
+
 		if ( id.first )
 		{
 			const Bound& bound0 = *id.second;
 
 			for ( typename ActiveSet::const_iterator it = activeSet.begin(); it != activeSet.end(); it++ )
 			{
-				assert( id.second != *it );								
-				
+				assert( id.second != *it );
+
 				if ( axisIntersects( bound0, **it, axes[1] ) )
 				{
 					if ( axisIntersects( bound0, **it, axes[2] ) )
 					{
 						assert( bound0.intersects( **it ) );
-	
+
 						cb( id.second, *it );
 					}
 					else
@@ -159,16 +159,16 @@ void SweepAndPrune<BoundIterator, CB>::intersectingBounds( BoundIterator first, 
 					assert( !bound0.intersects( **it ) );
 				}
 			}
-		
+
 			activeSet.push_back( id.second );
 		}
-		else		
+		else
 		{
-			assert( activeSet.size() );			
+			assert( activeSet.size() );
 			typename ActiveSet::iterator it = std::find ( activeSet.begin(), activeSet.end(), id.second );
 			assert( it != activeSet.end() );
 			activeSet.erase( it );
-		}		
+		}
 	}
 }
 

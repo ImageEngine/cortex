@@ -43,9 +43,9 @@ namespace IECore
 {
 
 /// A simple class to allow, for example, extra data to be added to a class for use in cases where simply
-/// adding member data would break the library's binary compatibility. 
+/// adding member data would break the library's binary compatibility.
 /// Template with the type of the class that data is being added to, the type of the data being
-/// added, and policy for deleting that data when the class is destructed. The latter allows use of 
+/// added, and policy for deleting that data when the class is destructed. The latter allows use of
 /// dynamically-allocated data and arrays.
 ///
 /// It the responsibility of the client of this class to implement all creation, deletion, and copy semantics.
@@ -63,7 +63,7 @@ namespace IECore
 ///
 /// #include "A.h"
 /// #include "IECore/ClassData.h"
-/// 
+///
 /// static IECore::ClassData< A, int > g_classData;
 ///
 /// A::A()
@@ -79,37 +79,37 @@ namespace IECore
 template< typename ClassTypeT, typename DataTypeT, typename DataDeletePolicyT = NullDeleter<DataTypeT> >
 class ClassData
 {
-	public:	
-	
+	public:
+
 		typedef ClassTypeT        ClassType;
-		typedef DataTypeT         DataType;		
-		typedef DataDeletePolicyT DataDeletePolicy;				
-	
+		typedef DataTypeT         DataType;
+		typedef DataDeletePolicyT DataDeletePolicy;
+
 		/// Exercises DataDeletePolicy on all held data
 		virtual ~ClassData();
-	
+
 		/// Create some uninitialized data for the given class
 		DataType &create( const ClassType* classOwner );
-		
-		/// Create some data with initial value as specified for the given class		
+
+		/// Create some data with initial value as specified for the given class
 		DataType &create( const ClassType* classOwner, const DataType &d );
-		
+
 		/// Const access to the data associated with the class. If the data has not yet been created
 		/// the behaviour is undefined.
 		const DataType &operator[]( const ClassType *classOwner ) const;
-						
+
 		/// Read/write access to the data associated with the class. If the data has not yet been created
 		/// the behaviour is undefined.
 		DataType &operator[]( const ClassType *classOwner );
-		
+
 		/// Exercise DataDeletePolicy on the classOwner's data, and remove it. If the data has not yet been created
 		/// the behaviour is undefined.
 		void erase( const ClassType *classOwner );
-		
+
 	protected:
-	
+
 		typedef std::map< const ClassType*, DataType > ClassDataMap;
-		ClassDataMap m_classDataMap;		
+		ClassDataMap m_classDataMap;
 };
 
 } // namespace IECore

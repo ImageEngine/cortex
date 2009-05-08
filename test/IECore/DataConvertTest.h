@@ -50,36 +50,36 @@ namespace IECore
 void addDataConvertTest( boost::unit_test::test_suite* test );
 
 struct DataConvertTest
-{	
+{
 	template<typename F, typename T>
 	void testVectorData()
 	{
 		typename F::Ptr from = new F();
-		
+
 		from->writable().resize( 1024 );
-		
+
 		for ( unsigned i = 0; i < 1024; i ++ )
 		{
 			from->writable()[i] = i;
 		}
-		
+
 		typedef CineonToLinearDataConversion< typename F::ValueType::value_type, typename T::ValueType::value_type > Conv;
-		
+
 		typename T::Ptr to = DataConvert< F, T, Conv >()( from );
 		BOOST_CHECK( to );
-		BOOST_CHECK_EQUAL( (int)to->readable().size(), 1024 );		
+		BOOST_CHECK_EQUAL( (int)to->readable().size(), 1024 );
 		BOOST_CHECK_CLOSE( (float)to->readable()[512], 0.257f, 0.05f );
 	}
-	
+
 	template<typename F, typename T>
 	void testSimpleData()
 	{
 		typename F::Ptr from = new F();
-		
+
 		from->writable() = 512;
-		
+
 		typedef CineonToLinearDataConversion< typename F::ValueType, typename T::ValueType > Conv;
-		
+
 		typename T::Ptr to = DataConvert< F, T, Conv >()( from );
 		BOOST_CHECK( to );
 		BOOST_CHECK_CLOSE( (float)to->readable(), 0.257f, 0.05f );
@@ -88,37 +88,37 @@ struct DataConvertTest
 
 struct DataConvertTestSuite : public boost::unit_test::test_suite
 {
-	
+
 	DataConvertTestSuite() : boost::unit_test::test_suite( "DataConvertTestSuite" )
 	{
 		static boost::shared_ptr<DataConvertTest> instance( new DataConvertTest() );
-				
+
 		testVectorData( instance );
 		testSimpleData( instance );
-	}		
-	
+	}
+
 	void testVectorData( boost::shared_ptr<DataConvertTest> instance )
 	{
 		void (DataConvertTest::*fn)() = 0;
-		
+
 		fn = &DataConvertTest::testVectorData< UIntVectorData, FloatVectorData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );		
-		
+		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+
 		fn = &DataConvertTest::testVectorData< ShortVectorData, DoubleVectorData >;
 		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
 	}
-	
+
 	void testSimpleData( boost::shared_ptr<DataConvertTest> instance )
 	{
 		void (DataConvertTest::*fn)() = 0;
-		
+
 		fn = &DataConvertTest::testSimpleData< UIntData, FloatData >;
 		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		
+
 		fn = &DataConvertTest::testSimpleData< ShortData, DoubleData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );		
-	}	
-		
+		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+	}
+
 };
 
 }

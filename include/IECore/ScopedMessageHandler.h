@@ -51,17 +51,17 @@ class ScopedMessageHandler : public boost::noncopyable
 {
 
 	public :
-	
+
 		/// Pushes the handler as the current MessageHandler.
 		ScopedMessageHandler( MessageHandlerPtr handler );
 		/// Pops the previously pushed MessageHandler, throwing
 		/// an Exception if it is not the current one.
 		~ScopedMessageHandler();
-		
+
 	private :
-	
+
 		MessageHandlerPtr m_handler;
-		
+
 };
 
 }; // namespace IECore

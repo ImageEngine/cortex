@@ -38,19 +38,19 @@ import IECore
 class TestRemovePrimVar( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		p = r.read()
 		numPrimVars = len( p )
-		
+
 		toRemove = [ "particleId", "mass", "lastWorldVelocity", "worldVelocityInObjectSpace" ]
 		for n in toRemove :
 			self.assert_( n in p )
-		
+
 		o = IECore.RemovePrimitiveVariables()
 		o["input"].setValue( p )
 		o["names"].setValue( IECore.StringVectorData( toRemove ) )
-		
+
 		pp = o()
 		self.assertEqual( len( pp ), numPrimVars - len( toRemove ) )
 		for n in toRemove :
@@ -58,13 +58,13 @@ class TestRemovePrimVar( unittest.TestCase ) :
 
 		for n in toRemove :
 			self.assert_( not n in pp )
-			
+
 		self.assert_( not pp.isSame( p ) )
-		
+
 		o["copyInput"].setValue( IECore.BoolData( False ) )
 		ppp = o()
 		self.assert_( ppp.isSame( p ) )
-			
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

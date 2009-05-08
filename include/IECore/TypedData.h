@@ -57,20 +57,20 @@ namespace IECore
 /// like baseReadable, baseWritable and baseSize. They are available
 /// only when the data can be seen as an array of a base type. Use
 /// hasBase for checking that.
-template <class T> 
+template <class T>
 class TypedData : public Data
 {
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( TypedData );
-		
+
 		typedef T ValueType;
-	
+
 		/// Default constructor.
 		TypedData();
 		/// Constructor based on the stored data type.
 		TypedData(const T &data);
-		
+
 		//! @name RunTimeTyped interface
 		////////////////////////////////////////////////////////////
 		//@{
@@ -86,14 +86,14 @@ class TypedData : public Data
 		static const char *baseTypeName();
 		typedef Data BaseClass;
 		//@}
-		
+
 		//! @name Object interface
 		////////////////////////////////////////////////////////////
 		//@{
 		typename TypedData<T>::Ptr copy() const;
 		bool isEqualTo( ConstObjectPtr other ) const;
 		//@}
-		
+
 		/// Equivalent to writable() = data
 		void operator = (const T &data);
 		/// Equivalent to writable() = typedData.readable()
@@ -104,7 +104,7 @@ class TypedData : public Data
 		/// get read-write access to the internal data structure.
 		T &writable();
 
-		/// base type used in the internal data structure.		
+		/// base type used in the internal data structure.
 		typedef typename TypedDataTraits< TypedData<T> >::BaseType BaseType;
 
 		/// defines whether the internal data structure has a single base type.
@@ -121,13 +121,13 @@ class TypedData : public Data
 		/// return the size of the internal data structure in terms of base type elements.
 		/// Throws an Exception if this type has no single base type.
 		size_t baseSize() const;
-		
+
 	protected:
-	
+
 		virtual ~TypedData();
-		
+
 		static Object::TypeDescription<TypedData<T> > m_typeDescription;
-		
+
 		virtual void copyFrom( ConstObjectPtr other, CopyContext *context );
 		virtual void save( SaveContext *context ) const;
 		virtual void load( LoadContextPtr context );
@@ -135,7 +135,7 @@ class TypedData : public Data
 		/// a given T then you must provide an accurate specialisation
 		/// for this function.
 		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
-		
+
 		class DataHolder : public RefCounted
 		{
 			public:

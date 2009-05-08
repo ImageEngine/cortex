@@ -73,7 +73,7 @@ void bindBezierAlgo()
 	def( "bezierSubdivide", &bezierSubdivideBinding<Imath::V2d> );
 	def( "bezierSubdivide", &bezierSubdivideBinding<Imath::V3f> );
 	def( "bezierSubdivide", &bezierSubdivideBinding<Imath::V3d> );
-	
+
 	def( "bezierSubdivide", &bezierSubdivideBindingQuadratic<Imath::V2f> );
 	def( "bezierSubdivide", &bezierSubdivideBindingQuadratic<Imath::V2d> );
 	def( "bezierSubdivide", &bezierSubdivideBindingQuadratic<Imath::V3f> );

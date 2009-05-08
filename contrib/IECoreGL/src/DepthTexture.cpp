@@ -52,7 +52,7 @@ DepthTexture::DepthTexture( unsigned int width, unsigned height, IECore::ConstDa
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-	
+
 	if( !z )
 	{
 		glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT,
@@ -65,7 +65,7 @@ DepthTexture::DepthTexture( unsigned int width, unsigned height, IECore::ConstDa
 
 	Exception::throwIfError();
 }
-				
+
 DepthTexture::~DepthTexture()
 {
 }

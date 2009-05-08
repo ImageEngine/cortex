@@ -48,20 +48,20 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 class VectorDataFilterOp : public ModifyOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( VectorDataFilterOp, ModifyOp );
-		
+
 		VectorDataFilterOp();
 		virtual ~VectorDataFilterOp();
-		
+
 	protected :
-				
+
 		virtual void modify( ObjectPtr object, ConstCompoundObjectPtr operands );
-	
+
 		ObjectParameterPtr m_filterParameter;
 		BoolParameterPtr m_invertFilterParameter;
 		BoolParameterPtr m_clipParameter;
-		
+
 };
 
 IE_CORE_DECLAREPTR( VectorDataFilterOp );

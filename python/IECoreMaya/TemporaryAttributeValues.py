@@ -45,12 +45,12 @@ import StringUtil
 class TemporaryAttributeValues :
 
 	def __init__( self, attributeAndValues = {}, **kw ) :
-	
+
 		self.__attributesAndValues = attributeAndValues
 		self.__attributesAndValues.update( kw )
-		
+
 	def __enter__( self ) :
-	
+
 		handlers = {
 			"enum" : self.__simpleAttrHandler,
 			"bool" : self.__simpleAttrHandler,
@@ -65,17 +65,17 @@ class TemporaryAttributeValues :
 			"short3" : IECore.curry( self.__numeric3AttrHandler, attributeType="short3" ),
 			"string" : self.__stringAttrHandler,
 		}
-	
+
 		self.__restoreCommands = []
 		for attr, value in self.__attributesAndValues.items() :
-		
+
 			# check we can handle this type
 			attrType = maya.cmds.getAttr( attr, type=True )
 			handler = handlers.get( attrType, None )
 			if not handler :
 				raise TypeError( "Attribute \"%s\" has unsupported type \"%s\"." % ( attr, attrType ) )
-			
-			# store a command to restore the attribute value later			
+
+			# store a command to restore the attribute value later
 			node = StringUtil.nodeFromAttributePath( attr )
 			s = maya.OpenMaya.MSelectionList()
 			s.add( attr )
@@ -84,33 +84,33 @@ class TemporaryAttributeValues :
 			commands = []
 			p.getSetAttrCmds( commands )
 			for c in commands :
-			
+
 				c = c.lstrip()
 				assert( c.startswith( "setAttr \"." ) )
 				c = "setAttr \"" + node + c[9:]
 				self.__restoreCommands.append( c )
-		
+
 			# and change the attribute value
 			handler( attr, value )
-	
+
 	def __exit__( self, type, value, traceBack ) :
-	
+
 		for c in self.__restoreCommands :
-		
+
 			maya.mel.eval( c )
-		
+
 	def __simpleAttrHandler( self, attr, value ) :
-	
+
 		maya.cmds.setAttr( attr, value )
-	
+
 	def __numeric2AttrHandler( self, attr, value, attributeType ) :
-	
+
 		maya.cmds.setAttr( attr, value[0], value[1], type=attributeType )
 
 	def __numeric3AttrHandler( self, attr, value, attributeType ) :
-	
+
 		maya.cmds.setAttr( attr, value[0], value[1], value[2], type=attributeType )
-		
+
 	def __stringAttrHandler( self, attr, value ) :
-	
+
 		maya.cmds.setAttr( attr, value, type="string" )

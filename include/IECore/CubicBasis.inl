@@ -57,7 +57,7 @@ inline void CubicBasis<T>::coefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const
 	c2 = matrix[0][2] * t3 + matrix[1][2] * t2 + matrix[2][2] * t + matrix[3][2];
 	c3 = matrix[0][3] * t3 + matrix[1][3] * t2 + matrix[2][3] * t + matrix[3][3];
 }
-	
+
 template<typename T>
 template<class S>
 inline void CubicBasis<T>::coefficients( S t, S c[4] ) const
@@ -82,7 +82,7 @@ inline S CubicBasis<T>::operator() ( S t, const S p[4] ) const
 	coefficients( t, c0, c1, c2, c3 );
 	return c0 * p[0] + c1 * p[1] + c2 * p[2] + c3 * p[3];
 }
-				
+
 template<typename T>
 template<class S>
 inline S CubicBasis<T>::operator() ( typename S::BaseType t, const S &p0, const S &p1, const S &p2, const S &p3 ) const
@@ -150,7 +150,7 @@ inline S CubicBasis<T>::derivative( typename S::BaseType t, const S p[4] ) const
 {
 	return derivative( t, p[0], p[1], p[2], p[3] );
 }
-		
+
 template<typename T>
 bool CubicBasis<T>::operator==( const CubicBasis &rhs ) const
 {
@@ -170,14 +170,14 @@ const CubicBasis<T> &CubicBasis<T>::linear()
 		MatrixType(
 			 0,  0, -1,  1,
 			 0,  0,  1,  0,
-			 0,  0,  0,  0, 
+			 0,  0,  0,  0,
 			 0,  0,  0,  0
 		),
 		1
 	);
 	return m;
 }
-		
+
 template<typename T>
 const CubicBasis<T> &CubicBasis<T>::bezier()
 {
@@ -185,7 +185,7 @@ const CubicBasis<T> &CubicBasis<T>::bezier()
 		MatrixType(
 			-1,  3, -3,  1,
 			 3, -6,  3,  0,
-			-3,  3,  0,  0, 
+			-3,  3,  0,  0,
 			 1,  0,  0,  0
 		),
 		3
@@ -201,7 +201,7 @@ const CubicBasis<T> &CubicBasis<T>::bSpline()
 			-1/6.0f,  3/6.0f, -3/6.0f,  1/6.0f,
 			 3/6.0f, -6/6.0f,  3/6.0f,       0,
 			-3/6.0f,       0,  3/6.0f,       0,
-			 1/6.0f,  4/6.0f,  1/6.0f,       0 
+			 1/6.0f,  4/6.0f,  1/6.0f,       0
 		),
 		1
 	);
@@ -216,13 +216,13 @@ const CubicBasis<T> &CubicBasis<T>::catmullRom()
 			-1/2.0f,  3/2.0f, -3/2.0f,  1/2.0f,
 			 2/2.0f, -5/2.0f,  4/2.0f, -1/2.0f,
 			-1/2.0f,       0,  1/2.0f,       0,
-			      0,  2/2.0f,       0,       0 
+			      0,  2/2.0f,       0,       0
 		),
 		1
 	);
 	return m;
 }
-	
+
 } // namespace IECore
 
 #endif // IECORE_CUBICBASIS_INL

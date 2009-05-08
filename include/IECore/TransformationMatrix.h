@@ -77,7 +77,7 @@ class TransformationMatrix
 		Imath::Matrix44<T> transform( ) const;
 
 		bool operator == (const TransformationMatrix &t) const;
-		
+
 };
 
 template<class T>

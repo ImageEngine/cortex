@@ -47,14 +47,14 @@ template<typename T>
 class TypedPrimitiveOp : public ModifyOp
 {
 	public :
-	
+
 		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOp<T> )
-		
-		typedef T PrimitiveType;		
-		
+
+		typedef T PrimitiveType;
+
 		TypedPrimitiveOp( const std::string name, const std::string description );
 		virtual ~TypedPrimitiveOp();
-		
+
 		//! @name RunTimeTyped functions
 		////////////////////////////////////
 		//@{
@@ -70,28 +70,28 @@ class TypedPrimitiveOp : public ModifyOp
 		static const char *baseTypeName();
 		typedef ModifyOp BaseClass;
 		//@}
-		
+
 	protected :
-		
+
 		/// Must be implemented by all subclasses.
 		virtual void modifyTypedPrimitive( typename T::Ptr typedPrimitive, ConstCompoundObjectPtr operands ) = 0;
-		
+
 	private :
-	
+
 		/// Implemented to call modifyTypedPrimitive
 		void modify( ObjectPtr primitive, ConstCompoundObjectPtr operands );
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedPrimitiveOp<T> );
-	
+
 };
 
 #define IE_CORE_DEFINETYPEDPRIMITIVEOP( TNAME ) \
 	typedef TypedPrimitiveOp<TNAME> (TNAME ## Op); \
 	typedef TypedPrimitiveOp<TNAME>::Ptr (TNAME ## OpPtr); \
 	typedef TypedPrimitiveOp<TNAME>::ConstPtr (Const ## TNAME ## OpPtr);
-	
-IE_CORE_DEFINETYPEDPRIMITIVEOP( MeshPrimitive )	
-IE_CORE_DEFINETYPEDPRIMITIVEOP( ImagePrimitive )	
+
+IE_CORE_DEFINETYPEDPRIMITIVEOP( MeshPrimitive )
+IE_CORE_DEFINETYPEDPRIMITIVEOP( ImagePrimitive )
 
 } // namespace IECore
 

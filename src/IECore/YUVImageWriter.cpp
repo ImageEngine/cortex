@@ -84,7 +84,7 @@ void YUVImageWriter::constructParameters()
 	        YUV420P,
 	        formatPresets
 	);
-	
+
 	V2fParameter::PresetsContainer kBkRPresets;
 	kBkRPresets.push_back( V2fParameter::Preset( "rec601", V2f( 0.114,  0.299  ) ) );
 	kBkRPresets.push_back( V2fParameter::Preset( "rec709", V2f( 0.0722, 0.2126 ) ) );
@@ -95,33 +95,33 @@ void YUVImageWriter::constructParameters()
 		kBkRPresets,
 		false
 	);
-	
+
 	Box3f defaultRange = Box3f( V3f( 0.0f, 0.0f, 0.0f ), V3f( 1.0f, 1.0f, 1.0f ) );
-	
+
 	Box3fParameter::PresetsContainer rangePresets;
 	rangePresets.push_back( Box3fParameter::Preset( "zeroToOne", defaultRange ) );
-	rangePresets.push_back( Box3fParameter::Preset( "standardScaling", Box3f( 
-		V3f( 
-			16.0f / 255.0f, 
+	rangePresets.push_back( Box3fParameter::Preset( "standardScaling", Box3f(
+		V3f(
+			16.0f / 255.0f,
 			16.0f / 255.0f,
 			16.0f / 255.0f
-		), 
-		V3f( 
-			235.0f / 255.0f, 
-			240.0f / 255.0f, 
-			240.0f / 255.0f		
+		),
+		V3f(
+			235.0f / 255.0f,
+			240.0f / 255.0f,
+			240.0f / 255.0f
 		)
 	) ) );
-	
+
 	m_rangeParameter = new Box3fParameter(
 		"range",
 		"Specifies the floating-point min/max of the YUV components, to allow rescaling due to addition of head-room and/or toe-room. The standardScaling preset "
 		"gives, in 8-bit representation, a standard range of 16-235 for Y, and 16-240 for U and V",
-		
+
 		defaultRange,
 		rangePresets
 	);
-				
+
 	parameters()->addParameter( m_formatParameter );
 	parameters()->addParameter( m_kBkRParameter );
 	parameters()->addParameter( m_rangeParameter );
@@ -145,7 +145,7 @@ ConstIntParameterPtr YUVImageWriter::formatParameter() const
 {
 	return m_formatParameter;
 }
-	
+
 V2fParameterPtr YUVImageWriter::kBkRParameter()
 {
 	return m_kBkRParameter;
@@ -155,7 +155,7 @@ ConstV2fParameterPtr YUVImageWriter::kBkRParameter() const
 {
 	return m_kBkRParameter;
 }
-	
+
 Box3fParameterPtr YUVImageWriter::rangeParameter()
 {
 	return m_rangeParameter;
@@ -171,12 +171,12 @@ struct YUVImageWriter::ChannelConverter
 	typedef void ReturnType;
 
 	std::string m_channelName;
-	ConstImagePrimitivePtr m_image;	
+	ConstImagePrimitivePtr m_image;
 	Box2i m_dataWindow;
 	int m_channelOffset;
 	Color3fVectorDataPtr m_rgbData;
 
-	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, int channelOffset, Color3fVectorDataPtr rgbData  ) 
+	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, int channelOffset, Color3fVectorDataPtr rgbData  )
 	: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_channelOffset( channelOffset ), m_rgbData( rgbData )
 	{
 	}
@@ -188,31 +188,31 @@ struct YUVImageWriter::ChannelConverter
 
 		const typename T::ValueType &data = dataContainer->readable();
 		ScaledDataConversion<typename T::ValueType::value_type, float> converter;
-		
+
 		typedef boost::multi_array_ref< const typename T::ValueType::value_type, 2 > SourceArray2D;
 		typedef boost::multi_array_ref< Color3f, 2 > TargetArray2D;
-		
+
 		const SourceArray2D sourceData( &data[0], extents[ m_image->getDataWindow().size().y + 1 ][ m_image->getDataWindow().size().x + 1 ] );
 		TargetArray2D targetData( &m_rgbData->writable()[0], extents[ m_image->getDisplayWindow().size().y + 1 ][ m_image->getDisplayWindow().size().x + 1 ] );
-		
+
 		const Box2i copyRegion = boxIntersection( m_dataWindow, boxIntersection( m_image->getDisplayWindow(), m_image->getDataWindow() ) );
-		
+
 		for ( int y = copyRegion.min.y; y <= copyRegion.max.y ; y++ )
 		{
 			for ( int x = copyRegion.min.x; x <= copyRegion.max.x ; x++ )
-			{				
+			{
 				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ][ m_channelOffset ]
-					= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] );			
+					= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] );
 			}
 		}
 	};
-	
+
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
-			throw InvalidArgumentException( ( boost::format( "YUVImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+			throw InvalidArgumentException( ( boost::format( "YUVImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
 		}
 	};
 };
@@ -220,48 +220,48 @@ struct YUVImageWriter::ChannelConverter
 void YUVImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
 {
 	const V2f &kBkR = m_kBkRParameter->getTypedValue();
-	const Box3f &range = m_rangeParameter->getTypedValue();	
-	
+	const Box3f &range = m_rangeParameter->getTypedValue();
+
 	if ( range.isEmpty() )
 	{
-		throw InvalidArgumentException("YUVImageWriter: Empty YUV range specified ");	
+		throw InvalidArgumentException("YUVImageWriter: Empty YUV range specified ");
 	}
-	
+
 	const float kB = kBkR.x;
-	const float kR = kBkR.y;	
+	const float kR = kBkR.y;
 
 	int displayWidth  = 1 + image->getDisplayWindow().size().x;
 	int displayHeight = 1 + image->getDisplayWindow().size().y;
-	
+
 	if ( displayWidth % 2 != 0 || displayHeight % 2 != 0 )
 	{
 		throw IOException("YUVImageWriter: Unsupported resolution");
 	}
 
 	vector<string>::const_iterator rIt = std::find( names.begin(), names.end(), "R" );
-	vector<string>::const_iterator gIt = std::find( names.begin(), names.end(), "G" );	
+	vector<string>::const_iterator gIt = std::find( names.begin(), names.end(), "G" );
 	vector<string>::const_iterator bIt = std::find( names.begin(), names.end(), "B" );
-	
+
 	if ( rIt == names.end() || gIt == names.end() || bIt == names.end() )
 	{
-		throw IOException("YUVImageWriter: Unsupported channel names specified");		
-	} 
+		throw IOException("YUVImageWriter: Unsupported channel names specified");
+	}
 
 	std::ofstream outFile( fileName().c_str(), std::ios::trunc | std::ios::binary | std::ios::out );
 	if (! outFile.is_open() )
 	{
 		throw IOException("Could not open '" + fileName() + "' for writing.");
 	}
-		
+
 	Color3fVectorDataPtr rgbData = new Color3fVectorData();
 	rgbData->writable().resize( displayWidth * displayHeight, Color3f(0,0,0) );
-	
+
 	try
-	{	
+	{
 		for ( vector<string>::const_iterator it = names.begin(); it != names.end(); it++ )
 		{
 			const string &name = *it;
-			
+
 			if (!( name == "R" || name == "G" || name == "B" ) )
 			{
 				msg( Msg::Warning, "YUVImageWriter", format( "Channel \"%s\" was not encoded." ) % name );
@@ -277,81 +277,81 @@ void YUVImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 			{
 				channelOffset = 1;
 			}
-			else 
+			else
 			{
 				assert( name == "B" );
 				channelOffset = 2;
 			}
-			
+
 			// get the image channel
-			assert( image->variables.find( name ) != image->variables.end() );			
+			assert( image->variables.find( name ) != image->variables.end() );
 			DataPtr dataContainer = image->variables.find( name )->second.data;
 			assert( dataContainer );
-			
+
 			ChannelConverter converter( *it, image, dataWindow, channelOffset, rgbData );
-		
-			despatchTypedData<			
-				ChannelConverter, 
+
+			despatchTypedData<
+				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( dataContainer, converter );	
+			>( dataContainer, converter );
 
 		}
-		
+
 		V3fVectorDataPtr yuvData = new V3fVectorData();
 		yuvData->writable().resize( displayWidth * displayHeight, V3f(0,0,0) );
-		
+
 		assert( yuvData->readable().size() == rgbData->readable().size() );
-		
+
 		for ( int i = 0; i < displayWidth * displayHeight; i ++ )
 		{
-			Color3f rgb = rgbData->readable()[i]; 
-			
+			Color3f rgb = rgbData->readable()[i];
+
 			if ( rgb.x < 0.0 ) rgb.x = 0;
-			if ( rgb.x > 1.0 ) rgb.x = 1.0;			
-			
+			if ( rgb.x > 1.0 ) rgb.x = 1.0;
+
 			if ( rgb.y < 0.0 ) rgb.y = 0;
-			if ( rgb.y > 1.0 ) rgb.y = 1.0;			
-			
+			if ( rgb.y > 1.0 ) rgb.y = 1.0;
+
 			if ( rgb.z < 0.0 ) rgb.z = 0;
-			if ( rgb.z > 1.0 ) rgb.z = 1.0;									
-			
+			if ( rgb.z > 1.0 ) rgb.z = 1.0;
+
 			V3f yPbPr;
-			
+
 			float &Y = yPbPr.x;
 			float &Pb = yPbPr.y;
-			float &Pr = yPbPr.z;	
-			
+			float &Pr = yPbPr.z;
+
 			Y = kR * rgb.x + ( 1.0 - kR - kB ) * rgb.y + kB * rgb.z;
 			Pb = 0.5 * ( rgb.z - Y ) / ( 1.0 - kB );
 			Pr = 0.5 * ( rgb.x - Y ) / ( 1.0 - kR );
-			
+
 			V3f yCbCr = yPbPr;
-			
+
 			/// Map from 0-1
 			yCbCr.y += 0.5;
-			yCbCr.z += 0.5;	
+			yCbCr.z += 0.5;
 
 			/// Apply any scaling for "head-room" and "toe-room"
 			yCbCr.x	= ( yCbCr.x * ( range.max.x - range.min.x ) ) + range.min.x;
 			yCbCr.y	= ( yCbCr.y * ( range.max.y - range.min.y ) ) + range.min.y;
 			yCbCr.z	= ( yCbCr.z * ( range.max.z - range.min.z ) ) + range.min.z;
-			
+
 			yuvData->writable()[i] = yCbCr;
 		}
-		
+
 		/// \todo Chroma-filtering. Ideally we should do a proper sampled downsize of the chroma, rather than skipping data
 		/// elements. This would avoid any aliasing.
-		
+
 		int lumaStepX = 1;
 		int lumaStepY = 1;
-		
+
 		int chromaUStepX = 1;
-		int chromaUStepY = 1;		
-		
-		int chromaVStepX = 1;		
+		int chromaUStepY = 1;
+
+		int chromaVStepX = 1;
 		int chromaVStepY = 1;
-		
+
 		switch ( m_formatParameter->getNumericValue() )
 		{
 			case YUV420P :
@@ -359,61 +359,61 @@ void YUVImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 				chromaUStepX = 2;
 				chromaUStepY = 2;
 				chromaVStepX = 2;
-				chromaVStepY = 2;				
+				chromaVStepY = 2;
 				break;
 			case YUV422P :
 				/// Half horizonal res in U and V
 				chromaUStepX = 2;
 				chromaUStepY = 1;
 				chromaVStepX = 2;
-				chromaVStepY = 1;				
-				break;	
+				chromaVStepY = 1;
+				break;
 			case YUV444P :
 				/// Full res in U and V
-				break;		
+				break;
 			default :
 				assert( false );
-		}				
-					
+		}
+
 		ScaledDataConversion<float, unsigned char> converter;
-		/// Y-plane				
+		/// Y-plane
 		for ( int y = 0; y < displayHeight; y += lumaStepX )
 		{
 			for ( int x = 0; x < displayWidth; x += lumaStepY )
-			{								
+			{
 				const V3f yCbCr = yuvData->readable()[y*displayWidth + x];
-				
+
 				const unsigned char val = converter( yCbCr.x );
-				
+
 				outFile.write( (const char*)&val, 1 );
 			}
 		}
-		
-		/// U-plane			
+
+		/// U-plane
 		for ( int y = 0; y < displayHeight; y+=chromaUStepX )
 		{
 			for ( int x = 0; x < displayWidth; x+=chromaUStepY )
-			{								
+			{
 				const V3f yCbCr = yuvData->readable()[y*displayWidth + x];
-				
+
 				const unsigned char val = converter( yCbCr.y );
-				
+
 				outFile.write( (const char*)&val, 1 );
 			}
 		}
-		
-		/// V-plane			
+
+		/// V-plane
 		for ( int y = 0; y < displayHeight; y+=chromaVStepX )
 		{
 			for ( int x = 0; x < displayWidth; x+=chromaVStepY )
-			{								
+			{
 				const V3f yCbCr = yuvData->readable()[y*displayWidth + x];
-				
+
 				const unsigned char val = converter( yCbCr.z );
-				
+
 				outFile.write( (const char*)&val, 1 );
 			}
-		}		
+		}
 	}
 	catch ( std::exception &e )
 	{

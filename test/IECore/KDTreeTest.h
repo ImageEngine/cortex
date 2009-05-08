@@ -49,38 +49,38 @@ namespace IECore
 {
 
 void addKDTreeTest(boost::unit_test::test_suite* test);
-	
+
 template<typename T>
 class KDTreeTest
 {
 	public:
 		KDTreeTest(unsigned int numPoints);
 		virtual ~KDTreeTest();
-	
+
 		void testNearestNeighour();
 		void testNearestNeighours();
 		void testNearestNNeighours();
-	
+
 	private:
-		
+
 		/// Some typedefs for convenience
 		typedef std::vector<T> PointVector;
 		typedef KDTree<typename PointVector::const_iterator> Tree;
 		typedef std::vector< typename Tree::Iterator > NeighbourVector;
-	
+
 		std::vector<T> m_points;
 		Tree *m_tree;
 		Imath::Rand32 m_randGen;
 		unsigned int m_numPoints;
-	
+
 		typename  Tree::Iterator randomPoint();
-		
+
 };
 
 template<unsigned int N>
 struct KDTreeTestSuite : public boost::unit_test::test_suite
 {
-	
+
 	KDTreeTestSuite() : boost::unit_test::test_suite("KDTreeTestSuite")
 	{
 		addTest<Imath::V3f>();
@@ -88,12 +88,12 @@ struct KDTreeTestSuite : public boost::unit_test::test_suite
 		addTest<Imath::V2f>();
 		addTest<Imath::V2d>();
 	}
-	
+
 	template<typename T>
-	void addTest()		
-	{	
+	void addTest()
+	{
 		static boost::shared_ptr<KDTreeTest<T> > instance(new KDTreeTest<T>(N));
-	
+
 		add( BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNeighour, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNeighours, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNNeighours, instance ) );

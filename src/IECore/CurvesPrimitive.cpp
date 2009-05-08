@@ -41,7 +41,7 @@ const unsigned int CurvesPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CurvesPrimitive );
 
 CurvesPrimitive::CurvesPrimitive()
-	:	
+	:
 		m_basis( CubicBasisf::linear() ),
 		m_linear( true ),
 		m_periodic( false ),
@@ -67,10 +67,10 @@ CurvesPrimitive::CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const Cub
 		{
 			m_numFaceVarying += numSegments( i ) + 1;
 		}
-		
+
 		m_numVerts += v[i];
 	}
-	
+
 	if( p )
 	{
 		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, p->copy() );
@@ -100,7 +100,7 @@ bool CurvesPrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -129,14 +129,14 @@ void CurvesPrimitive::save( IECore::Object::SaveContext *context ) const
 	// we could recompute these on loading, but it'd take a while and the overhead
 	// of storing them isn't great.
 	container->write( "numVerts", m_numVerts );
-	container->write( "numFaceVarying", m_numFaceVarying );	
+	container->write( "numFaceVarying", m_numFaceVarying );
 }
 
 void CurvesPrimitive::load( IECore::Object::LoadContextPtr context )
 {
 	Primitive::load( context );
 	unsigned int v = m_ioVersion;
-	
+
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 	float *f = m_basis.matrix.getValue();
 	container->read( "basisMatrix", f, 16 );
@@ -171,7 +171,7 @@ bool CurvesPrimitive::periodic() const
 {
 	return m_periodic;
 }
-		
+
 void CurvesPrimitive::render( RendererPtr renderer ) const
 {
 	renderer->curves( m_basis, m_periodic, m_vertsPerCurve, variables );
@@ -201,7 +201,7 @@ size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 	{
 		throw Exception( "Curve index out of range." );
 	}
-	
+
 	switch( interpolation )
 	{
 		case PrimitiveVariable::Constant :
@@ -210,7 +210,7 @@ size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 			return 1;
 		case PrimitiveVariable::Varying :
 		case PrimitiveVariable::FaceVarying :
-			if( m_periodic ) 
+			if( m_periodic )
 			{
 				return numSegments( curveIndex );
 			}
@@ -284,7 +284,7 @@ unsigned int CurvesPrimitive::numSegments( bool linear, int step, bool periodic,
 			{
 				throw Exception( "Cubic curve with extra vertices." );
 			}
-			return (numVerts - 4 )/ step + 1;	
+			return (numVerts - 4 )/ step + 1;
 		}
 	}
 }

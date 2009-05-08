@@ -39,18 +39,18 @@ import datetime
 class DateTimeParameterTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		now = datetime.datetime.now()
-	
+
 		p = IECore.DateTimeParameter(
 			name = "testName",
 			description = "testName description",
 			defaultValue = now
 		)
-			
+
 		self.assertEqual( p.getValue(), IECore.DateTimeData( now ) )
 
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

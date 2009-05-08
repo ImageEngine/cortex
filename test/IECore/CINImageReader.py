@@ -52,7 +52,7 @@ class TestCINReader(unittest.TestCase):
 		self.assertEqual( type(r), CINImageReader )
 		h = r.readHeader()
 
-		channelNames = h['channelNames']		
+		channelNames = h['channelNames']
 		self.assertEqual( len( channelNames ), 3 )
 		self.assert_( "R" in channelNames )
 		self.assert_( "G" in channelNames )
@@ -67,61 +67,61 @@ class TestCINReader(unittest.TestCase):
 		self.assertEqual(type(r), CINImageReader)
 
 		img = r.read()
-		
+
 		self.assertEqual(type(img), ImagePrimitive)
 
 	def testDataWindowRead( self ):
 
 		r = Reader.create( "test/IECore/data/cinFiles/uvMap.512x256.cin" )
 		self.assertEqual( type(r), CINImageReader )
-		
+
 		dataWindow = Box2i(
-			V2i(360, 160), 
+			V2i(360, 160),
 			V2i(399, 199)
 		)
-		
+
 		r.parameters()["dataWindow"].setValue( Box2iData( dataWindow ) )
 
 		img = r.read()
 
 		self.assertEqual( type(img), ImagePrimitive )
-		
+
 		self.assertEqual( img.dataWindow, dataWindow )
 		self.assertEqual( img.displayWindow, Box2i( V2i( 0, 0 ), V2i( 511, 255 ) ) )
-		
+
 		self.assertEqual( len(img["R"].data), 40 * 40 )
-		
+
 		ipe = PrimitiveEvaluator.create( img )
 		self.assert_( ipe.R() )
 		self.assert_( ipe.G() )
 		self.assert_( ipe.B() )
 		self.failIf ( ipe.A() )
-		
+
 		result = ipe.createResult()
-				
+
 		# Check that the color at the bottom-right of the image is black - ordinarialy it would
 		# be yellow, but we're deliberately not reading the entire image
 		found = ipe.pointAtPixel( V2i( 511, 255 ), result )
-		self.assert_( found )		
-		color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
-				result.halfPrimVar( ipe.B() )
-			)		
-		expectedColor = V3f( 0, 0, 0 )
-		self.assert_( ( color - expectedColor).length() < 1.e-3 )
-		
-		found = ipe.pointAtPixel( V2i( 380, 180 ), result )
 		self.assert_( found )
-		
 		color = V3f(
 				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
+				result.halfPrimVar( ipe.G() ),
 				result.halfPrimVar( ipe.B() )
 			)
-					
-		expectedColor = V3f( 0.744141, 0.70459, 0 )		
-					
+		expectedColor = V3f( 0, 0, 0 )
+		self.assert_( ( color - expectedColor).length() < 1.e-3 )
+
+		found = ipe.pointAtPixel( V2i( 380, 180 ), result )
+		self.assert_( found )
+
+		color = V3f(
+				result.halfPrimVar( ipe.R() ),
+				result.halfPrimVar( ipe.G() ),
+				result.halfPrimVar( ipe.B() )
+			)
+
+		expectedColor = V3f( 0.744141, 0.70459, 0 )
+
 		self.assert_( ( color - expectedColor).length() < 1.e-3 )
 
 	def testChannelRead(self):
@@ -129,86 +129,86 @@ class TestCINReader(unittest.TestCase):
 		# create a reader, constrain to a sub-image, R and G channels
 		r = Reader.create( "test/IECore/data/cinFiles/uvMap.512x256.cin" )
 		self.assertEqual( type(r), CINImageReader )
-		
+
 		r.parameters()["dataWindow"].setValue( Box2iData( Box2i( V2i(100, 100), V2i(199, 199) ) ) )
 		r.parameters()["channels"].setValue( StringVectorData( ["R", "G"] ) )
 
 		img = r.read()
 		self.assertEqual( type(img), ImagePrimitive )
-		
+
 	def testOrientation( self ) :
 		""" Test orientation of Cineon files """
-	
+
 		img = Reader.create( "test/IECore/data/cinFiles/uvMap.512x256.cin" ).read()
-		
+
 		ipe = PrimitiveEvaluator.create( img )
 		self.assert_( ipe.R() )
 		self.assert_( ipe.G() )
 		self.assert_( ipe.B() )
 		self.failIf ( ipe.A() )
-		
+
 		result = ipe.createResult()
-		
+
 		colorMap = {
 			V2i( 0 ,    0 ) :  V3f( 0, 0, 0 ),
 			V2i( 511,   0 ) :  V3f( 1, 0, 0 ),
 			V2i( 0,   255 ) :  V3f( 0, 1, 0 ),
 			V2i( 511, 255 ) :  V3f( 1, 1, 0 ),
 		}
-		
+
 		for point, expectedColor in colorMap.items() :
-		
+
 			found = ipe.pointAtPixel( point, result )
 			self.assert_( found )
-			
+
 			color = V3f(
 				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
+				result.halfPrimVar( ipe.G() ),
 				result.halfPrimVar( ipe.B() )
 			)
-						
-			self.assert_( ( color - expectedColor).length() < 1.e-6 )	
-		
+
+			self.assert_( ( color - expectedColor).length() < 1.e-6 )
+
 	def testAll( self ):
-		
+
 		fileNames = glob.glob( "test/IECore/data/cinFiles/*.cin" )
 		expectedFailures = []
-		
+
 		# Silence any warnings while the tests run
 		MessageHandler.pushHandler( NullMessageHandler() )
-		
-		
+
+
 		try:
-		
+
 			for f in fileNames:
-			
-				r = CINImageReader( f ) 
-				
+
+				r = CINImageReader( f )
+
 				if f in expectedFailures :
-					
+
 					self.assertRaises( RuntimeError, r.read )
-				
+
 				else :
-				
+
 					self.assert_( CINImageReader.canRead( f ) )
 					self.failIf( JPEGImageReader.canRead( f ) )
 					self.failIf( EXRImageReader.canRead( f ) )
-					self.failIf( TIFFImageReader.canRead( f ) )					
+					self.failIf( TIFFImageReader.canRead( f ) )
 
 					img = r.read()
 					self.assertEqual( type(img), ImagePrimitive )
-					self.assert_( img.arePrimitiveVariablesValid() )	
-				
-		except:
-		
-			raise	
-			
-		finally:
-			
-			MessageHandler.popHandler()		
-		
+					self.assert_( img.arePrimitiveVariablesValid() )
 
-                			
+		except:
+
+			raise
+
+		finally:
+
+			MessageHandler.popHandler()
+
+
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

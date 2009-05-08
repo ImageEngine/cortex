@@ -46,18 +46,18 @@ namespace IECore
 
 struct ImagePrimitiveEvaluatorHelper
 {
-	
+
 	static bool pointAtPixel( ImagePrimitiveEvaluator &evaluator, const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result )
 	{
 		evaluator.validateResult( result );
-		
+
 		return evaluator.pointAtPixel( pixel, result );
 	}
-	
+
 	static object R( ImagePrimitiveEvaluator &evaluator )
 	{
 		PrimitiveVariableMap::const_iterator it = evaluator.R();
-		
+
 		if ( it != evaluator.primitive()->variables.end() )
 		{
 			return object( it->second );
@@ -67,11 +67,11 @@ struct ImagePrimitiveEvaluatorHelper
 			return object();
 		}
 	}
-	
+
 	static object G( ImagePrimitiveEvaluator &evaluator )
 	{
 		PrimitiveVariableMap::const_iterator it = evaluator.G();
-		
+
 		if ( it != evaluator.primitive()->variables.end() )
 		{
 			return object( it->second );
@@ -81,11 +81,11 @@ struct ImagePrimitiveEvaluatorHelper
 			return object();
 		}
 	}
-	
+
 	static object B( ImagePrimitiveEvaluator &evaluator )
 	{
 		PrimitiveVariableMap::const_iterator it = evaluator.B();
-		
+
 		if ( it != evaluator.primitive()->variables.end() )
 		{
 			return object( it->second );
@@ -95,11 +95,11 @@ struct ImagePrimitiveEvaluatorHelper
 			return object();
 		}
 	}
-	
+
 	static object A( ImagePrimitiveEvaluator &evaluator )
 	{
 		PrimitiveVariableMap::const_iterator it = evaluator.A();
-		
+
 		if ( it != evaluator.primitive()->variables.end() )
 		{
 			return object( it->second );
@@ -109,11 +109,11 @@ struct ImagePrimitiveEvaluatorHelper
 			return object();
 		}
 	}
-	
+
 	static object Y( ImagePrimitiveEvaluator &evaluator )
 	{
 		PrimitiveVariableMap::const_iterator it = evaluator.Y();
-		
+
 		if ( it != evaluator.primitive()->variables.end() )
 		{
 			return object( it->second );
@@ -123,12 +123,12 @@ struct ImagePrimitiveEvaluatorHelper
 			return object();
 		}
 	}
-	
+
 };
 
 void bindImagePrimitiveEvaluator()
 {
-	
+
 	object m = RunTimeTypedClass<ImagePrimitiveEvaluator>()
 		.def( init< ImagePrimitivePtr > () )
 		.def( "pointAtPixel", &ImagePrimitiveEvaluatorHelper::pointAtPixel )
@@ -138,7 +138,7 @@ void bindImagePrimitiveEvaluator()
 		.def( "A", &ImagePrimitiveEvaluatorHelper::A )
 		.def( "Y", &ImagePrimitiveEvaluatorHelper::Y )
 	;
-	
+
 	{
 		scope ms( m );
 		RefCountedClass<ImagePrimitiveEvaluator::Result, PrimitiveEvaluator::Result >( "Result" )
@@ -148,9 +148,9 @@ void bindImagePrimitiveEvaluator()
 			.def( "ushortPrimVar", &ImagePrimitiveEvaluator::Result::ushortPrimVar )
 			.def( "charPrimVar", &ImagePrimitiveEvaluator::Result::charPrimVar )
 			.def( "ucharPrimVar", &ImagePrimitiveEvaluator::Result::ucharPrimVar )
-			
+
 		;
-	
+
 	}
 }
 

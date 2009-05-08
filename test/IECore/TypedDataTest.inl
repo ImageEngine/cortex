@@ -38,30 +38,30 @@ using namespace std;
 
 namespace IECore
 {
-template<typename T>		
+template<typename T>
 typename T::value_type VectorTypedDataTest<T>::f1(unsigned int i) const
 {
 	return static_cast<typename T::value_type>(sqrt((double)i));
 }
 
-template<typename T>		
+template<typename T>
 typename T::value_type VectorTypedDataTest<T>::f2(unsigned int i) const
 {
 	return static_cast<typename T::value_type>((double)i/3.0);
 }
-	
-template<typename T>	
+
+template<typename T>
 unsigned int VectorTypedDataTest<T>::randomElementPos()
 {
 	return (int)(m_randGen.nextf() * m_size) % m_size;
 }
-		
-	
+
+
 template<typename T>
 VectorTypedDataTest<T>::VectorTypedDataTest(unsigned int size) : m_size(size)
 {
 	m_data = new TypedData<T>();
-	
+
 	for (unsigned int i = 0; i < size; i++)
 	{
 		typename T::value_type v = f1(i);
@@ -84,7 +84,7 @@ template<typename T>
 void VectorTypedDataTest<T>::testRead()
 {
 	BOOST_CHECK_EQUAL(m_data->readable().size(), m_size);
-	
+
 	if (m_size)
 	{
 		// Check a random 5% of points
@@ -95,32 +95,32 @@ void VectorTypedDataTest<T>::testRead()
 			BOOST_CHECK_EQUAL(m_data->readable()[pos], f1(pos) );
 		}
 	}
-	
-	
+
+
 }
 template<typename T>
 void VectorTypedDataTest<T>::testWrite()
 {
 	BOOST_CHECK_EQUAL(m_data->readable().size(), m_size);
-	
+
 	if (m_size)
 	{
 		// Check a random 5% of points
 		const int numPoints = std::max<int>(1, (int)(m_size * 0.05));
-	
+
 		for (int i = 0; i < numPoints; i++)
 		{
 			int pos = randomElementPos();
-		
-			const typename T::value_type oldValue = m_data->readable()[pos];		
+
+			const typename T::value_type oldValue = m_data->readable()[pos];
 			const typename T::value_type newValue = f2(pos);
-		
+
 			m_data->writable()[pos] = newValue;
-				
+
 			BOOST_CHECK_EQUAL(m_data->readable()[pos], newValue);
-		
+
 			m_data->writable()[pos] = oldValue;
-		
+
 			BOOST_CHECK_EQUAL(m_data->readable()[pos], oldValue);
 		}
 	}
@@ -132,9 +132,9 @@ void VectorTypedDataTest<T>::testAssign()
 {
 	boost::intrusive_ptr<TypedData<T> > assign = new TypedData<T>();
 	*assign = *m_data;
-	
+
 	BOOST_CHECK_EQUAL( assign->readable().size(), m_data->readable().size() );
-	
+
 	if (m_size)
 	{
 		// Check a random 5% of points
@@ -177,9 +177,9 @@ void SimpleTypedDataTest<T>::testWrite()
 template<typename T>
 void SimpleTypedDataTest<T>::testAssign()
 {
-	boost::intrusive_ptr<TypedData<T> > other = new TypedData<T>();	
+	boost::intrusive_ptr<TypedData<T> > other = new TypedData<T>();
 	*other = *m_data;
-	
+
 	BOOST_CHECK_EQUAL( other->readable(), static_cast<T>(3.0) );
 }
 
@@ -192,9 +192,9 @@ void SimpleTypedDataTest<T>::testMemoryUsage()
 template<typename T>
 void SimpleTypedDataTest<T>::testIsEqualTo()
 {
-	boost::intrusive_ptr<TypedData<T> > other = new TypedData<T>();	
+	boost::intrusive_ptr<TypedData<T> > other = new TypedData<T>();
 	other->writable() = static_cast<T>(3.0);
-	
+
 	BOOST_CHECK( m_data->isEqualTo(other) );
 }
 

@@ -59,31 +59,31 @@ class FromMayaImageConverter : public FromMayaConverter
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaImageConverter, FromMayaImageConverterTypeId, FromMayaConverter );
-		
+
 		FromMayaImageConverter( MImage &image );
-	
+
 		/// The MImage which will be converted by the convert() function.
-		const MImage &image() const;	
-		
+		const MImage &image() const;
+
 		IECore::BoolParameterPtr depthParameter();
-		IECore::BoolParameterPtr depthParameter() const;			
-		
+		IECore::BoolParameterPtr depthParameter() const;
+
 	protected :
-				
+
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
-		
+
 		IECore::BoolParameterPtr m_depthParameter;
-		
+
 	private :
 
 		/// This is mutable here because Maya isn't const-correct. It's not a copy because it appears that the default assignment/copy operators for
 		/// MImage can create two instances which reference the same data. When one of them dies, the other is then in an invalid state which can
 		/// crash Maya.
 		MImage &m_image;
-		
-		template<typename T> 
+
+		template<typename T>
 		void writeChannels( IECore::ImagePrimitivePtr target, const std::vector< std::string > &channelNames ) const;
-		
+
 		void writeDepth( IECore::ImagePrimitivePtr target, const float *depth ) const;
 
 };

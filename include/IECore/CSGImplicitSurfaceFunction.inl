@@ -37,34 +37,34 @@
 namespace IECore
 {
 
-template<typename P, typename V>	
+template<typename P, typename V>
 CSGImplicitSurfaceFunction<P,V>::CSGImplicitSurfaceFunction( typename Fn::Ptr fn1, typename Fn::Ptr fn2, Mode mode ) : m_fn1(fn1), m_fn2(fn2), m_mode(mode)
 {
 	assert( m_fn1 );
-	assert( m_fn2 );			
+	assert( m_fn2 );
 }
 
 template<typename P, typename V>
 typename CSGImplicitSurfaceFunction<P,V>::Value CSGImplicitSurfaceFunction<P,V>::operator()( const Point &p )
 {
 	assert( m_fn1 );
-	assert( m_fn2 );			
+	assert( m_fn2 );
 
 	switch (m_mode)
 	{
-		case Union:					
+		case Union:
 			return std::min(
-				m_fn1->operator()(p), 
+				m_fn1->operator()(p),
 				m_fn2->operator()(p)
 			);
 		case Intersection:
 			return std::max(
-				m_fn1->operator()(p), 
+				m_fn1->operator()(p),
 				m_fn2->operator()(p)
 			);
-		case Difference:	
+		case Difference:
 			return std::max(
-				m_fn1->operator()(p), 
+				m_fn1->operator()(p),
 				-m_fn2->operator()(p)
 			);
 		default:

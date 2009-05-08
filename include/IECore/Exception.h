@@ -44,93 +44,93 @@ namespace IECore
 {
 	/// The base class from which all IE core library exceptions should derive.
 	class Exception : public std::exception
-	{				
+	{
 		public:
 			/// Construct with cause of exception
 			Exception(const char *what);
 			Exception(const std::string &what);
-		
+
 			virtual ~Exception() throw ();
-			
+
 			// Return type of exception
 			virtual const char *type() const throw();
-		
+
 			/// Return cause of exception
 			virtual const char* what() const throw();
-			
+
 			/// Appends the given string to the cause of the current exception
 			Exception &append( const std::string &s );
-			
-			/// Appends the given string to the cause of the current exception			
-			Exception &append( const char *s );	
-			
+
+			/// Appends the given string to the cause of the current exception
+			Exception &append( const char *s );
+
 			/// Prepends the given string to the cause of the current exception
 			Exception &prepend( const std::string &s );
-			
-			/// Prepends the given string to the cause of the current exception			
-			Exception &prepend( const char *s );			
-		
+
+			/// Prepends the given string to the cause of the current exception
+			Exception &prepend( const char *s );
+
 		protected:
-		
+
 			class RefCountedString : public RefCounted, public std::string
 			{
 				public:
 					RefCountedString(const char * s) : std::string(s) {}
 					RefCountedString(const std::string &s) : std::string(s) {}
 			};
-			
+
 			IE_CORE_DECLAREPTR( RefCountedString )
-	
+
 			RefCountedStringPtr m_what;
 	};
-	
+
 	/// Base class for Input/Output exceptions
 	class IOException : public Exception
 	{
 		public:
 			IOException(const char *what) : Exception(what) {};
 			IOException(const std::string &what) : Exception(what) {};
-			
+
 			virtual const char *type() const throw() { return "I/O Exception"; }
 	};
-	
+
 	/// A class to represent "file not found" exceptions
 	class FileNotFoundIOException : public IOException
 	{
 		public:
 			FileNotFoundIOException(const char *what) : IOException(what) {};
 			FileNotFoundIOException(const std::string &what) : IOException(what) {};
-			
-			virtual const char *type() const throw() { return "File Not Found"; }			
+
+			virtual const char *type() const throw() { return "File Not Found"; }
 	};
-	
+
 	/// Base class for Invalid Argument exceptions
 	class InvalidArgumentException : public Exception
 	{
 		public:
 			InvalidArgumentException(const char *what) : Exception(what) {};
 			InvalidArgumentException(const std::string &what) : Exception(what) {};
-			
+
 			virtual const char *type() const throw() { return "Invalid Argument"; }
 	};
-	
+
 	/// A class to represent "permission denied" exceptions
 	class PermissionDeniedIOException : public IOException
 	{
 		public:
 			PermissionDeniedIOException(const char *what) : IOException(what) {};
 			PermissionDeniedIOException(const std::string &what) : IOException(what) {};
-			
-			virtual const char *type() const throw() { return "Permission Denied"; }			
+
+			virtual const char *type() const throw() { return "Permission Denied"; }
 	};
-	
+
 	/// A class to represent "not implemented" exceptions
 	class NotImplementedException : public Exception
 	{
 		public:
 			NotImplementedException(const char *what) : Exception(what) {};
 			NotImplementedException(const std::string &what) : Exception(what) {};
-			
+
 			virtual const char *type() const throw() { return "Not Implemented"; }
 	};
 }

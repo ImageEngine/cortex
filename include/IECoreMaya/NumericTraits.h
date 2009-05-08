@@ -55,7 +55,7 @@ struct NumericTraits
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 		return MFnNumericData::kInvalid;
 	}
-	
+
 	/// For compound numeric types, returns the maya data type suitable for representing
 	/// a single element of the compound.
 	static MFnNumericData::Type baseDataType()
@@ -63,7 +63,7 @@ struct NumericTraits
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 		return MFnNumericData::kInvalid;
 	}
-	
+
 	/// Returns whether or not the maya useAsColor() flag should be set on attributes
 	/// representing this kind of data.
 	static bool isColor()

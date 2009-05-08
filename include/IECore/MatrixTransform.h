@@ -43,23 +43,23 @@ namespace IECore
 class MatrixTransform : public Transform
 {
 	public:
-	
+
 		IE_CORE_DECLAREOBJECT( MatrixTransform, Transform );
-		
+
 		MatrixTransform( const Imath::M44f &matrix = Imath::M44f() );
 		virtual ~MatrixTransform();
-		
+
 		virtual void render( RendererPtr renderer ) const;
 		virtual Imath::M44f transform( float time = 0 ) const;
-		
+
 		/// The transform this object applies. It can
 		/// be modified freely.
 		Imath::M44f matrix;
-			
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
-		
+
 };
 
 IE_CORE_DECLAREPTR( MatrixTransform );

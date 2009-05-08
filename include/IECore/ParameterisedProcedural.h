@@ -57,12 +57,12 @@ IE_CORE_FORWARDDECLARE( CompoundObject )
 class ParameterisedProcedural : public VisibleRenderable, public ParameterisedInterface
 {
 	public:
-	
+
 		ParameterisedProcedural();
 		virtual ~ParameterisedProcedural();
-				
+
 		IE_CORE_DECLAREABSTRACTOBJECT( ParameterisedProcedural, VisibleRenderable );
-				
+
 		/// Calls render( renderer, true, true, true, false );
 		virtual void render( RendererPtr renderer ) const;
 		/// An additional render method to provide finer grained control. When inAttributeBlock is true,
@@ -72,7 +72,7 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 		/// output the procedural geometry. When immediateGeometry is true, the doRender method is called immediately
 		/// rather than being deferred within a renderer-procedural() call.
 		void render( RendererPtr renderer, bool inAttributeBlock, bool withState, bool withGeometry, bool immediateGeometry ) const;
-		
+
 		/// Forwards to doBound().
 		virtual Imath::Box3f bound() const;
 
@@ -80,7 +80,7 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 		virtual ConstCompoundParameterPtr parameters() const;
 
 	protected :
-	
+
 		/// May be implemented by derived classes to output attributes which must
 		/// be set outside of the procedural - for instance to ensure the procedural
 		/// has the necessary visibility attributes for it to be expanded in the first
@@ -93,17 +93,17 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 		/// Must be implemented by derived classes - the contents of args is
 		/// guaranteed to have been validated.
 		virtual void doRender( RendererPtr renderer, ConstCompoundObjectPtr args ) const = 0;
-			
+
 	private:
-	
+
 		// Implements Renderer::Procedural to forward to one of these.
 		class Forwarder;
 		friend class Forwarder;
-		
+
 		CompoundParameterPtr m_parameters;
-		
+
 		static const unsigned int m_ioVersion;
-		
+
 };
 
 IE_CORE_DECLAREPTR( ParameterisedProcedural );

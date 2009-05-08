@@ -41,7 +41,7 @@ import IECoreMaya
 class BakeTransform( IECore.Op ) :
 
 	def __init__( self ) :
-	
+
 		IECore.Op.__init__( self, "BakeTransform", "Bakes transforms from one object onto another.",
 			IECoreMaya.DAGPathParameter(
 				name = "result",
@@ -50,7 +50,7 @@ class BakeTransform( IECore.Op ) :
 				allowEmptyString = True,
 			)
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				IECoreMaya.DAGPathParameter(
@@ -79,28 +79,28 @@ class BakeTransform( IECore.Op ) :
 					description = "If this is specified then the transform attributes which are"
 						"keyframed on the destination object are also locked.",
 					defaultValue = False,
-				),	
+				),
 			]
 		)
-	
+
 	@staticmethod
 	def transferTransform( src, dst, setKey=True ) :
-				
+
 		worldMatrixConverter = IECoreMaya.FromMayaPlugConverter.create( str(src.fullPathName()) + ".worldMatrix" )
 		worldMatrix = worldMatrixConverter.convert().value
 		e = worldMatrix.rotate
 		maya.cmds.xform( dst.fullPathName(), translation=tuple( worldMatrix.translate ), rotation=[math.degrees(x) for x in e], scale=tuple( worldMatrix.scale ) )
 		maya.cmds.setKeyframe( dst.fullPathName(), attribute=["translate", "rotate", "scale"] )
-		
+
 	@staticmethod
 	def lockTransform( transform ) :
-		
+
 		transformName = transform.fullPathName()
 		maya.cmds.setAttr( str( transformName ) + ".translate", lock=True )
 		maya.cmds.setAttr( str( transformName ) + ".rotate", lock=True )
 		maya.cmds.setAttr( str( transformName ) + ".scale", lock=True )
 		maya.cmds.setAttr( str( transformName ) + ".shear", lock=True )
-			
+
 	def doOperation( self, operands ) :
 
 		if maya.cmds.objExists( operands.dst.value ) :
@@ -120,7 +120,7 @@ class BakeTransform( IECore.Op ) :
 
 			maya.cmds.currentTime( float( f ) )
 			self.transferTransform( src, dst, True )
-			
+
 		# fix discontinuous rotations
 		maya.cmds.filterCurve( dstPath + ".rotateX", dstPath + ".rotateY", dstPath + ".rotateZ" )
 

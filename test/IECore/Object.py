@@ -38,7 +38,7 @@ from IECore import *
 class TestObject( unittest.TestCase ) :
 
 	def setUp( self ) :
-	
+
 		self.typeNames = [
 			"FloatTypedData",
 			"FloatVectorData",
@@ -56,28 +56,28 @@ class TestObject( unittest.TestCase ) :
 				return issubclass(c, IECore.Data) and not (c is IECore.Data)
 			except:
 				return False
-	
+
 		dataClasses = filter(test, map(lambda x: getattr(IECore, x), dir(IECore)))
 		notDefinedClasses = set(dataClasses).difference(IECore.getDataDerivedTypes())
 		if len(notDefinedClasses) > 0:
 			raise Exception, "The following classes were not defined on the conversion dictionaire: " + \
 					", ".join( map(str, notDefinedClasses) ) + ".\nPlease, add them on DataTraits.py"
-		
+
 	def testObjectCreateAndCast( self ):
 		"""
-		Tests if all Object derived classes can be created using the factory function and 
+		Tests if all Object derived classes can be created using the factory function and
 		if they can be casted to Object pointers.
 		PS: Data derived objects should be casted down to Data. Because Data is casted to Object.
 		"""
-		
+
 		import IECore
-		
+
 		def objectDerived(c):
 			try:
 				return issubclass(c, IECore.Object) and not IECore.Object.isAbstractType(c.__name__)
 			except:
 				return False
-	
+
 		group = CompoundObject()
 		objectClasses = filter(objectDerived, map(lambda x: getattr(IECore, x), dir(IECore)))
 		notCreated = []
@@ -116,41 +116,41 @@ class TestObject( unittest.TestCase ) :
 		t = CompoundData( { "first": o["first"] } )
 
 	def testTypeIdToNameMapping( self ) :
-	
+
 		for tId in TypeId.values.values() :
-		
+
 			if tId==TypeId.Invalid :
 				continue
-			
+
 			if Object.isType( tId ) :
 				self.assertEqual( tId, Object.typeIdFromTypeName( Object.typeNameFromTypeId( tId ) ) )
 
 	def testCreate( self ) :
-		
+
 		for tId in TypeId.values.values() :
-		
+
 			if tId==TypeId.Invalid :
 				continue
-				
+
 			if Object.isType( tId ) and not Object.isAbstractType( tId ) :
-						
+
 				o = Object.create( tId )
 				self.assertEqual( o.typeId(), tId )
 				self.assertEqual( o.typeName(), Object.typeNameFromTypeId( tId ) )
 				oo = Object.create( Object.typeNameFromTypeId( tId ) )
 				self.assertEqual( oo.typeId(), tId )
-				
+
 	def testCopy( self ) :
-	
+
 		for tId in TypeId.values.values() :
-		
+
 			if tId==TypeId.Invalid :
 				continue
 			if Object.isType( tId ) and not Object.isAbstractType( tId ) :
-				
+
 				o = Object.create( tId )
 				oo = o.copy()
 				self.assertEqual( o, oo )
-			
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

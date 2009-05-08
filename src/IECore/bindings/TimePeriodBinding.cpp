@@ -53,9 +53,9 @@ std::string repr<TimePeriod>( TimePeriod &x )
 {
 	object beginObject( x.begin() );
 	assert( beginObject.attr( "__repr__" ) != object() );
-	
+
 	object endObject( x.end() );
-	assert( endObject.attr( "__repr__" ) != object() );	
+	assert( endObject.attr( "__repr__" ) != object() );
 
 	std::stringstream s;
 
@@ -75,67 +75,67 @@ std::string str<TimePeriod>( TimePeriod &x )
 
 	s << posix_time::to_simple_string( x.begin() );
 	s << " ";
-	s << posix_time::to_simple_string( x.end() );	
-	
+	s << posix_time::to_simple_string( x.end() );
+
 	return s.str();
 }
 
 struct TimePeriodHelper
-{		
+{
 	static TimePeriod intersection( TimePeriod &x, const TimePeriod &d )
 	{
 		return x.intersection( d );
 	}
-	
+
 	static TimePeriod merge( TimePeriod &x, const TimePeriod &d )
 	{
 		return x.merge( d );
 	}
-	
+
 	static TimePeriod span( TimePeriod &x, const TimePeriod &d )
 	{
 		return x.span( d );
 	}
-	
+
 	static bool contains( TimePeriod &x, const TimePeriod &d )
 	{
 		return x.contains( d );
 	}
-	
+
 };
 
 void bindTimePeriod()
 {
 	bool (TimePeriod::*containsTime)( const posix_time::ptime & ) const = &TimePeriod::contains;
-	
+
 	class_< TimePeriod >( "TimePeriod", no_init )
 		.def( init< posix_time::ptime, posix_time::ptime >() )
 		.def( init< posix_time::ptime, posix_time::time_duration >() )
 		.def( init< TimePeriod >() )
 		.def( "shift", &TimePeriod::shift )
-		
+
 		.def( "begin", &TimePeriod::begin )
-		.def( "end", &TimePeriod::end )		
-		.def( "last", &TimePeriod::last )								
+		.def( "end", &TimePeriod::end )
+		.def( "last", &TimePeriod::last )
 		.def( "length", &TimePeriod::length )
 		.def( "isNull", &TimePeriod::is_null )
-		.def( "contains", containsTime )		
-		.def( "containsTimePeriod", &TimePeriodHelper::contains )				
-		.def( "intersects", &TimePeriod::intersects )				
-		.def( "intersection", &TimePeriodHelper::intersection )				
-		.def( "merge", &TimePeriodHelper::merge )				
-		.def( "span", &TimePeriodHelper::span )						
+		.def( "contains", containsTime )
+		.def( "containsTimePeriod", &TimePeriodHelper::contains )
+		.def( "intersects", &TimePeriod::intersects )
+		.def( "intersection", &TimePeriodHelper::intersection )
+		.def( "merge", &TimePeriodHelper::merge )
+		.def( "span", &TimePeriodHelper::span )
 		.def( "__repr__", &repr<TimePeriod> )
 		.def( "__str__", &str<TimePeriod> )
-		
+
 		.def( self == self )
 		.def( self != self )
 		.def( self > self )
 		.def( self < self )
 		.def( self >= self )
-		.def( self <= self )						
+		.def( self <= self )
 	;
-	
+
 	implicitly_convertible<TimePeriod, boost::posix_time::time_period>();
 }
 

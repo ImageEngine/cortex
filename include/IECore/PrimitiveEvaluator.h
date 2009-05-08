@@ -55,37 +55,37 @@ IE_CORE_FORWARDDECLARE( PrimitiveEvaluator );
 class PrimitiveEvaluator : public RunTimeTyped
 {
 	public:
-	
+
 		typedef PrimitiveEvaluatorPtr ( *CreatorFn )( ConstPrimitivePtr );
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( PrimitiveEvaluator, RunTimeTyped );
-	
+
 		/// An interface defining the possible results returned from a query. Attempting to read back the results of a failed
 		/// query will yield undefined values.
 		class Result : public RefCounted
 		{
 			public:
-			
+
 				IE_CORE_DECLAREMEMBERPTR( Result );
-			
+
 				virtual ~Result();
-				
+
 				/// Returns the point computed by the query.
 				virtual Imath::V3f point() const =0;
-				
+
 				/// Returns the geometric normal. Shading normals should be evaluated via an appropriate
 				/// primitive variable.
 				virtual Imath::V3f normal() const =0;
-				
+
 				/// Returns the UV from the result point.
 				virtual Imath::V2f uv() const =0;
-				
+
 				/// Return the surface tangent along U
 				virtual Imath::V3f uTangent() const =0;
-				
-				/// Return the surface tangent along U				
-				virtual Imath::V3f vTangent() const =0;				
-				
+
+				/// Return the surface tangent along U
+				virtual Imath::V3f vTangent() const =0;
+
 				//! @name Primitive Variable Functions
 				/// These functions evaluate the given primitive variable using the appropriate interpolation type. Passing
 				/// an invalid primvar leads to undefined behaviour, but will most likely crash the application.
@@ -96,60 +96,60 @@ class PrimitiveEvaluator : public RunTimeTyped
 				virtual const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const =0;
 				virtual Imath::Color3f      colorPrimVar ( const PrimitiveVariable &pv ) const =0;
 				virtual half                halfPrimVar  ( const PrimitiveVariable &pv ) const =0;
-				//@}			
+				//@}
 		};
 		IE_CORE_DECLAREPTR( Result );
-		
+
 		/// Returns a primitive evaluator which is compatible with the given primitive, from those
 		/// evaluator types which have been registered.
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
-		
+
 		virtual ~PrimitiveEvaluator();
-				
+
 		/// Create a result instance which is suitable for passing to one of the query methods
 		virtual ResultPtr createResult() const = 0;
-				
-		/// Returns the primitive which we're currently evaluating		
+
+		/// Returns the primitive which we're currently evaluating
 		virtual ConstPrimitivePtr primitive() const = 0;
-		
+
 		//! @name Query Functions
 		//@{
-		
+
 		/// Computes the signed distance between the given point and the primitive. By default this is
 		/// just the signed distance between the point, and the plane specified by the closest point and normal,
 		/// but derived class are free to override it as they see fit. Returns true on success.
 		virtual bool signedDistance( const Imath::V3f &p, float &distance ) const;
-		
-		/// Computes the surface area of the primitive 
+
+		/// Computes the surface area of the primitive
 		virtual float surfaceArea() const=0;
-		
+
 		/// Computes the volume of the primitive. The result is undefined if the primitive is not closed, or self intersects.
 		virtual float volume() const=0;
-		
+
 		/// Computes the primitive's center of gravity. The result is undefined if the primitive is not closed, or self intersects.
 		virtual Imath::V3f centerOfGravity() const=0;
 
 		/// Find the closest point on the primitive to the given query point. Returns true on success.
 		virtual bool closestPoint( const Imath::V3f &p, const ResultPtr &result ) const =0;
-		
-		/// Find the point on the primitive at the given query UV. Returns true on success		
+
+		/// Find the point on the primitive at the given query UV. Returns true on success
 		virtual bool pointAtUV( const Imath::V2f &uv, const ResultPtr &result ) const =0;
-		
+
 		/// Finds the closest intersection point for the given ray. Optionally specify a maximum distance of interest.
 		/// Returns true if an intersection was found.
-		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
+		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 			const ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const =0;
 
 		/// Finds all intersection points for the given ray. Optionally specify a maximum distance of interest.
-		/// Returns the number of interections found.		
-		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
+		/// Returns the number of interections found.
+		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const =0;
-		
+
 		//@}
-		
+
 		/// Throws an exception if the passed result type is not compatible with the current evaluator
 		virtual void validateResult( const ResultPtr &result ) const =0;
-		
+
 		/// A class to allow registration of primitive evaluators with the system. Simply declare an instance
 		/// of Description< YourEvaluatorType, YourPrimitiveType >
 		template< typename E, typename P = typename E::PrimitiveType >
@@ -160,15 +160,15 @@ class PrimitiveEvaluator : public RunTimeTyped
 				registerCreator( P::staticTypeId(), & E::create );
 			}
 		};
-		
+
 	private:
-	
+
 		static void registerCreator( TypeId id, CreatorFn f );
-		
+
 		typedef std::map< TypeId, CreatorFn > CreatorMap;
-		
+
 		static CreatorMap &getCreateFns();
-				
+
 };
 
 IE_CORE_DECLAREPTR( PrimitiveEvaluator );

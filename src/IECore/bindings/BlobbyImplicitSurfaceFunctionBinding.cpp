@@ -47,11 +47,11 @@ template<typename T>
 void bindBlobbyImplicitSurfaceFunction( const char *name )
 {
 	typedef ImplicitSurfaceFunction<typename T::Point, typename T::Value> Base;
-	
+
 	RefCountedClass<T, Base>( name )
-		.def( init< typename T::PointVectorData::ConstPtr, ConstDoubleVectorDataPtr, ConstDoubleVectorDataPtr > () )		
+		.def( init< typename T::PointVectorData::ConstPtr, ConstDoubleVectorDataPtr, ConstDoubleVectorDataPtr > () )
 	;
-	
+
 }
 
 void bindBlobbyImplicitSurfaceFunction()
@@ -59,7 +59,7 @@ void bindBlobbyImplicitSurfaceFunction()
 	bindBlobbyImplicitSurfaceFunction<BlobbyImplicitSurfaceFunctionV3ff>( "BlobbyImplicitSurfaceFunctionV3ff" );
 	bindBlobbyImplicitSurfaceFunction<BlobbyImplicitSurfaceFunctionV3fd>( "BlobbyImplicitSurfaceFunctionV3fd" );
 	bindBlobbyImplicitSurfaceFunction<BlobbyImplicitSurfaceFunctionV3df>( "BlobbyImplicitSurfaceFunctionV3df" );
-	bindBlobbyImplicitSurfaceFunction<BlobbyImplicitSurfaceFunctionV3dd>( "BlobbyImplicitSurfaceFunctionV3dd" );	
+	bindBlobbyImplicitSurfaceFunction<BlobbyImplicitSurfaceFunctionV3dd>( "BlobbyImplicitSurfaceFunctionV3dd" );
 }
 
 } // namespace IECore

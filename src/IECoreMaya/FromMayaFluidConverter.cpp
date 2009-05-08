@@ -133,14 +133,14 @@ void FromMayaFluidConverter::addPrimVar( IECore::PrimitivePtr primitive, const s
 {
 	MStatus s;
 	float *mayaPtr = ((fnFluid).*(fn))( &s );
-	if ( s )																	
-	{					
-		assert( mayaPtr );														
-		FloatVectorDataPtr floatData = new FloatVectorData();					
-		floatData->writable().resize( numPoints );								
-		std::copy( mayaPtr, mayaPtr + numPoints, &(floatData->writable()[0]) );	
-		PrimitiveVariable newVar( PrimitiveVariable::Vertex, floatData );		
-		primitive->variables[ name ] = newVar;											
+	if ( s )
+	{
+		assert( mayaPtr );
+		FloatVectorDataPtr floatData = new FloatVectorData();
+		floatData->writable().resize( numPoints );
+		std::copy( mayaPtr, mayaPtr + numPoints, &(floatData->writable()[0]) );
+		PrimitiveVariable newVar( PrimitiveVariable::Vertex, floatData );
+		primitive->variables[ name ] = newVar;
 	}
 }
 
@@ -165,7 +165,7 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( const MDagPa
 }
 
 IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fnFluid ) const
-{	
+{
 	MStatus s;
 	unsigned int nPoints = fnFluid.gridSize( &s );
 	if ( !s )
@@ -191,7 +191,7 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fn
 	{
 		return 0;
 	}
-	
+
 	MPoint centerPos;
 	for ( unsigned int x = 0; x < xRes; x++ )
 	{
@@ -206,7 +206,7 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fn
 				}
 				positions[p] = IECore::convert< V3f >( centerPos );
 				fnFluid.index( p, xRes, yRes, zRes, xVel, yVel, zVel );
-				
+
 				/// \todo Does this work for 2D fluids? And wouldn't we like the option to convert those to ImagePrimitives instead?
 				assert( velX );
 				assert( velY );
@@ -231,7 +231,7 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fn
 	}
 
 	PointsPrimitivePtr pp = new PointsPrimitive( nPoints );
-	
+
 	if( matrixMultiplier )
 	{
 		matrixMultiplier->inputParameter()->setValue( positionsData );
@@ -254,7 +254,7 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fn
 	{
 		addPrimVar( pp, "density", nPoints, fnFluid, &MFnFluid::density );
 	}
-	
+
 	if( m_pressureParameter->getTypedValue() )
 	{
 		addPrimVar( pp, "pressure", nPoints, fnFluid, &MFnFluid::pressure );
@@ -293,8 +293,8 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fn
 				colorVector[i] = V3f( redPtr[i], greenPtr[i], bluePtr[i] );
 			}
 			PrimitiveVariable varColor( PrimitiveVariable::Vertex, colorData );
-			
-			/// \todo Why not "Cs"? 
+
+			/// \todo Why not "Cs"?
 			pp->variables["color"] = varColor;
 		}
 	}

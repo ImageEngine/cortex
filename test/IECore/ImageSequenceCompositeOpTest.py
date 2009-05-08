@@ -38,51 +38,51 @@ import unittest
 from IECore import *
 
 class ImageSequenceCompositeOpTest( unittest.TestCase ) :
-		
+
 	def testConstruction( self ) :
-	
+
 		op = ImageSequenceCompositeOp()
 		self.assertEqual( op.parameters()["operation"].getValue().value, ImageCompositeOp.Operation.Over )
-		
+
 	def testSimple( self ) :
-	
+
 		expectedSequence = FileSequence( "test/IECore/data/expectedResults/imageSequenceCompositeOp.####.exr", FrameRange( 1,6 ) )
 		outputSequence = FileSequence( "test/IECore/imageSequenceCompositeOpTest.####.exr", FrameRange( 1,6 ) )
-	
+
 		op = ImageSequenceCompositeOp()
 		op.parameters()['fileSequence1'].setFileSequenceValue( FileSequence( "test/IECore/data/exrFiles/checkerAnimated.####.exr", FrameRange( 1,6 ) ) )
-		op.parameters()['fileSequence2'].setFileSequenceValue( FileSequence( "test/IECore/data/exrFiles/colorBarsAnimated.####.exr", FrameRange( 1,6 ) ) )	
+		op.parameters()['fileSequence2'].setFileSequenceValue( FileSequence( "test/IECore/data/exrFiles/colorBarsAnimated.####.exr", FrameRange( 1,6 ) ) )
 		op.parameters()['outputFileSequence'].setValue( StringData( str( outputSequence ) ) )
-		
+
 		op()
-				
+
 		for i in range( 1, 6 ) :
-	
+
 			result = Reader.create( outputSequence.fileNameForFrame( i ) ).read()
-			expectedResult = Reader.create( expectedSequence.fileNameForFrame( i ) ).read()	
-			
-			diffOp = ImageDiffOp()	
- 
+			expectedResult = Reader.create( expectedSequence.fileNameForFrame( i ) ).read()
+
+			diffOp = ImageDiffOp()
+
 			diff = diffOp(
                         	imageA = result,
                         	imageB = expectedResult
                 	)
 
- 			self.failIf( diff.value )	
-			
+ 			self.failIf( diff.value )
+
 	def setUp( self ) :
-	
+
 		self.tearDown()
-		
+
 	def tearDown( self ) :
-	
-		outputSequence = FileSequence( "test/IECore/imageSequenceCompositeOpTest.####.exr", FrameRange( 1,6 ) )	
-		
+
+		outputSequence = FileSequence( "test/IECore/imageSequenceCompositeOpTest.####.exr", FrameRange( 1,6 ) )
+
 		for i in range( 1, 7 ) :
-		
+
 			filename = outputSequence.fileNameForFrame( i )
 			if os.path.exists( filename ):
-				os.remove( filename )		
+				os.remove( filename )
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

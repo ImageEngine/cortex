@@ -44,26 +44,26 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 template<>
 std::string repr( FileSequence &x )
 {
 	std::stringstream s;
-	
+
 	s << "IECore.FileSequence( '";
-	
+
 	s << x.getFileName();
-	
+
 	s <<"', ";
-	
+
 	object item( x.getFrameList() );
-	
+
 	s << call_method< std::string >( item.ptr(), "__repr__" );
 
 	s << " ) ";
-	
+
 	return s.str();
 }
 
@@ -74,55 +74,55 @@ std::string str( FileSequence &x )
 }
 
 struct FileSequenceHelper
-{	
+{
 	static list fileNames( const FileSequence &x )
 	{
 		list result;
-		
+
 		std::vector< std::string > f ;
-		
+
 		x.fileNames( f );
-		
+
 		for ( std::vector< std::string >::const_iterator it = f.begin(); it != f.end(); ++it )
 		{
 			result.append( *it );
 		}
-		
+
 		return result;
 	}
-	
+
 	static list clumpedFileNames( const FileSequence &x, unsigned clumpSize )
 	{
 		list result;
-		
+
 		std::vector< std::vector< std::string > > f;
 		x.clumpedFileNames( clumpSize, f );
-		
+
 		for ( std::vector< std::vector< std::string > >::const_iterator it = f.begin(); it != f.end(); ++it )
 		{
 			const std::vector< std::string > &clump = *it;
-			
+
 			list clumpList;
-			
+
 			for ( std::vector< std::string >::const_iterator cit = clump.begin(); cit != clump.end(); ++cit )
 			{
 				clumpList.append( *cit );
 			}
-		
+
 			result.append( clumpList );
 		}
-		
+
 		return result;
 	}
-			
-	static object mapTo( const FileSequence &x, ConstFileSequencePtr other, bool asList )	
-	{			
+
+	static object mapTo( const FileSequence &x, ConstFileSequencePtr other, bool asList )
+	{
 		if ( asList )
 		{
 			std::vector< std::pair< std::string, std::string > > result;
-		
+
 			x.mapTo( other, result );
-		
+
 			list l;
 			for (std::vector< std::pair< std::string, std::string > >::const_iterator it = result.begin(); it != result.end(); ++it )
 			{
@@ -134,9 +134,9 @@ struct FileSequenceHelper
 		else
 		{
 			std::map< std::string, std::string > result;
-		
+
 			x.mapTo( other, result );
-		
+
 			dict d;
 			for ( std::map< std::string, std::string >::const_iterator it = result.begin(); it != result.end(); ++it )
 			{
@@ -146,8 +146,8 @@ struct FileSequenceHelper
 			return d;
 		}
 	}
-	
-	static object mapTo( const FileSequence &x, ConstFileSequencePtr other )	
+
+	static object mapTo( const FileSequence &x, ConstFileSequencePtr other )
 	{
 		return mapTo( x, other, false );
 	}
@@ -155,30 +155,30 @@ struct FileSequenceHelper
 
 
 void bindFileSequence()
-{	
+{
 	object (*mapTo1)( const FileSequence &, ConstFileSequencePtr, bool ) = &FileSequenceHelper::mapTo;
-	object (*mapTo2)( const FileSequence &, ConstFileSequencePtr ) = &FileSequenceHelper::mapTo;	
+	object (*mapTo2)( const FileSequence &, ConstFileSequencePtr ) = &FileSequenceHelper::mapTo;
 
-	RunTimeTypedClass<FileSequence>()	
+	RunTimeTypedClass<FileSequence>()
 		.def( init< const std::string &, FrameListPtr >() )
 		.add_property( "frameList", &FileSequence::getFrameList, &FileSequence::setFrameList )
-		.add_property( "fileName", make_function( &FileSequence::getFileName, return_value_policy<copy_const_reference>() ), &FileSequence::setFileName )							
+		.add_property( "fileName", make_function( &FileSequence::getFileName, return_value_policy<copy_const_reference>() ), &FileSequence::setFileName )
 		.def( "getPadding", &FileSequence::getPadding )
-		.def( "setPadding", &FileSequence::setPadding )		
+		.def( "setPadding", &FileSequence::setPadding )
 		.def( "getPrefix", &FileSequence::getPrefix )
-		.def( "setPrefix", &FileSequence::setPrefix )				
+		.def( "setPrefix", &FileSequence::setPrefix )
 		.def( "getSuffix", &FileSequence::getSuffix )
-		.def( "setSuffix", &FileSequence::setSuffix )						
-		.def( "copy", &FileSequence::copy )	
+		.def( "setSuffix", &FileSequence::setSuffix )
+		.def( "copy", &FileSequence::copy )
 		.def( "fileNameForFrame", &FileSequence::fileNameForFrame )
 		.def( "frameForFileName", &FileSequence::frameForFileName )
 		.def( "fileNames", &FileSequenceHelper::fileNames )
-		.def( "clumpedFileNames", &FileSequenceHelper::clumpedFileNames )					
-		.def( "mapTo", mapTo1 )					
-		.def( "mapTo", mapTo2 )							
+		.def( "clumpedFileNames", &FileSequenceHelper::clumpedFileNames )
+		.def( "mapTo", mapTo1 )
+		.def( "mapTo", mapTo2 )
 		.def( "__repr__", repr< FileSequence > )
-		.def( "__str__", str< FileSequence > )	
-		.def( self == self )	
+		.def( "__str__", str< FileSequence > )
+		.def( self == self )
 	;
 
 }

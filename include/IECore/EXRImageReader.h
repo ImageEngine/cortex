@@ -70,7 +70,7 @@ class EXRImageReader : public ImageReader
 
 		template<class T>
 		DataPtr readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow, const Imf::Channel *channel );
-		
+
 		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow );
 
 		static const ReaderDescription<EXRImageReader> g_readerDescription;

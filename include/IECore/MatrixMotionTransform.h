@@ -43,32 +43,32 @@ namespace IECore
 class MatrixMotionTransform : public Transform
 {
 	public:
-	
+
 		/// A type to map between points in time and
 		/// corresponding matrices.
 		typedef std::map<float, Imath::M44f> SnapshotMap;
 
 		IE_CORE_DECLAREOBJECT( MatrixMotionTransform, Transform );
-		
+
 		MatrixMotionTransform();
 		virtual ~MatrixMotionTransform();
-		
+
 		virtual void render( RendererPtr renderer ) const;
 		virtual Imath::M44f transform( float time = 0 ) const;
-		
+
 		//! @name Snapshots
 		////////////////////////////////////////////
 		//@{
 		const SnapshotMap &snapshots() const;
 		SnapshotMap &snapshots();
 		//@}
-			
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
-		
+
 		SnapshotMap m_snapshots;
-		
+
 };
 
 IE_CORE_DECLAREPTR( MatrixMotionTransform );

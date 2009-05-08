@@ -60,7 +60,7 @@ struct ViewportPostProcessCallbackHelper
                 {
                         throw InvalidArgumentException( "ViewportPostProcessCallback: Invalid modelPane name specified" );
                 }
-                
+
                 if ( !isModelPanel )
                 {
                         throw InvalidArgumentException( "ViewportPostProcessCallback: modelPanel '" + panelName + "' does not exist" );
@@ -69,7 +69,7 @@ struct ViewportPostProcessCallbackHelper
 		s = ViewportPostProcessCallback::registerCallback( panelName.c_str(), postProcess );
                 IECoreMaya::StatusException::throwIfError( s );
 	}
-	
+
 	static void deregisterCallback( const std::string &panelName )
 	{
 		MStatus s = ViewportPostProcessCallback::deregisterCallback( panelName.c_str() );
@@ -79,8 +79,8 @@ struct ViewportPostProcessCallbackHelper
 };
 
 void bindViewportPostProcessCallback()
-{	
-	RefCountedClass<ViewportPostProcessCallback, RefCounted>( "ViewportPostProcessCallback" )				
+{
+	RefCountedClass<ViewportPostProcessCallback, RefCounted>( "ViewportPostProcessCallback" )
 		.def( "registerCallback", &ViewportPostProcessCallbackHelper::registerCallback ).staticmethod( "registerCallback" )
 		.def( "deregisterCallback", &ViewportPostProcessCallbackHelper::deregisterCallback ).staticmethod( "deregisterCallback" )
 	;

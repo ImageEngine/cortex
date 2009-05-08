@@ -63,19 +63,19 @@ ImagePrimitive::ImagePrimitive( const Box2i &dataWindow, const Box2i &displayWin
 Box3f ImagePrimitive::bound() const
 {
 	assert( ! m_displayWindow.isEmpty() );
-	
+
 	/// \todo We might need to include any pixel aspect ratio in this bound
 
 	V3f boxMin( m_displayWindow.min.x, m_displayWindow.min.y, 0.0 );
-	
+
 	/// We add one here because the displayWindow is measured in pixels, and is inclusive. That is, an image
 	/// which has a displayWindow of (0,0)->(0,0) contains exactly one pixel.
 
 	V3f boxMax( 1.0f + m_displayWindow.max.x, 1.0f + m_displayWindow.max.y, 0.0 );
-	
+
 	V3f center = (boxMin + boxMax) / 2.0;
-	
-	return Box3f( boxMin - center, boxMax - center );	      
+
+	return Box3f( boxMin - center, boxMax - center );
 }
 
 const Box2i &ImagePrimitive::getDataWindow() const
@@ -123,7 +123,7 @@ size_t ImagePrimitive::variableSize( PrimitiveVariable::Interpolation interpolat
 void ImagePrimitive::render(RendererPtr renderer) const
 {
 	assert( renderer );
-	
+
 	renderer->image(m_dataWindow, m_displayWindow, variables);
 }
 
@@ -153,7 +153,7 @@ void ImagePrimitive::save(IECore::Object::SaveContext *context) const
 	container->write("displayWindowMinY", m_displayWindow.min.y);
 	container->write("displayWindowMaxX", m_displayWindow.max.x);
 	container->write("displayWindowMaxY", m_displayWindow.max.y);
-	
+
 	container->write("dataWindowMinX", m_dataWindow.min.x);
 	container->write("dataWindowMinY", m_dataWindow.min.y);
 	container->write("dataWindowMaxX", m_dataWindow.max.x);
@@ -173,7 +173,7 @@ void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
 	container->read("displayWindowMinY", m_displayWindow.min.y);
 	container->read("displayWindowMaxX", m_displayWindow.max.x);
 	container->read("displayWindowMaxY", m_displayWindow.max.y);
-	
+
 	if ( v < 1 )
 	{
 		m_dataWindow = m_displayWindow;
@@ -234,7 +234,7 @@ bool ImagePrimitive::channelValid( const PrimitiveVariable &pv, std::string *rea
 		}
 		return false;
 	}
-	
+
 	if( !despatchTraitsTest<TypeTraits::IsNumericVectorTypedData>( pv.data ) )
 	{
 		if( reason )
@@ -243,7 +243,7 @@ bool ImagePrimitive::channelValid( const PrimitiveVariable &pv, std::string *rea
 		}
 		return false;
 	}
-	
+
 	size_t size = despatchTypedData<TypedDataSize>( pv.data );
 	size_t numPixels = variableSize( PrimitiveVariable::Vertex );
 	if( size!=numPixels )
@@ -254,7 +254,7 @@ bool ImagePrimitive::channelValid( const PrimitiveVariable &pv, std::string *rea
 		}
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -271,14 +271,14 @@ bool ImagePrimitive::channelValid( const std::string &name, std::string *reason 
 	}
 	return channelValid( it->second, reason );
 }
-		
+
 void ImagePrimitive::channelNames( vector<string> &names ) const
 {
 	// copy in the names of channels from the map
 	names.clear();
-	
+
 	for ( PrimitiveVariableMap::const_iterator i = variables.begin(); i != variables.end(); ++i )
-	{	
+	{
 		if( channelValid( i->second ) )
 		{
 			names.push_back( i->first );

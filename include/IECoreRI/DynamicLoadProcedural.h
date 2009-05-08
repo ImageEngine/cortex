@@ -52,11 +52,11 @@ class DynamicLoadProcedural : public IECore::Renderer::Procedural
 		virtual void render( IECore::RendererPtr renderer );
 
 	private :
-	
+
 		Imath::Box3f m_bound;
 		std::string m_dsoName;
 		std::string m_dsoData;
-	
+
 };
 
 } // namespace IECoreRI

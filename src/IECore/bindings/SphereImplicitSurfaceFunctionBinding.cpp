@@ -47,7 +47,7 @@ template<typename T>
 void bindSphereImplicitSurfaceFunction( const char *name )
 {
 	typedef ImplicitSurfaceFunction<typename T::Point, typename T::Value> Base;
-	
+
 	RefCountedClass<T, Base>( name )
 		.def( init< const typename T::Point  &, typename T::PointBaseType> () )
 	;
@@ -58,7 +58,7 @@ void bindSphereImplicitSurfaceFunction()
 	bindSphereImplicitSurfaceFunction<SphereImplicitSurfaceFunctionV3ff>( "SphereImplicitSurfaceFunctionV3ff" );
 	bindSphereImplicitSurfaceFunction<SphereImplicitSurfaceFunctionV3fd>( "SphereImplicitSurfaceFunctionV3fd" );
 	bindSphereImplicitSurfaceFunction<SphereImplicitSurfaceFunctionV3df>( "SphereImplicitSurfaceFunctionV3df" );
-	bindSphereImplicitSurfaceFunction<SphereImplicitSurfaceFunctionV3dd>( "SphereImplicitSurfaceFunctionV3dd" );	
+	bindSphereImplicitSurfaceFunction<SphereImplicitSurfaceFunctionV3dd>( "SphereImplicitSurfaceFunctionV3dd" );
 }
 
 } // namespace IECore

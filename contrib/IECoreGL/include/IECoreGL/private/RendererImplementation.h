@@ -40,10 +40,10 @@ class RendererImplementation : public IECore::RunTimeTyped
 		virtual void transformBegin() = 0;
 		virtual void transformEnd() = 0;
 		virtual void concatTransform( const Imath::M44f &matrix ) = 0;
-		
+
 		virtual void attributeBegin() = 0;
 		virtual void attributeEnd() = 0;
-		
+
 		virtual void addState( StateComponentPtr state ) = 0;
 		virtual StateComponentPtr getState( IECore::TypeId type ) = 0;
 		template <class T>

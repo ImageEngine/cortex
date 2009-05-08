@@ -36,46 +36,46 @@ import unittest
 from IECore import *
 
 class UniformRandomPointDistributionOpTest( unittest.TestCase ) :
-    
+
 	def testSimple( self ) :
-			
+
 		m = Reader.create( "test/IECore/data/cobFiles/ball.cob" ).read()
-				
+
 		op = UniformRandomPointDistributionOp()
-		
+
 		p = op(
 			mesh = m,
 			numPoints = 10000,
 			seed = 10
 		)
-		
+
 		self.assert_( "P" in p )
-		self.failIf( "s" in p )		
+		self.failIf( "s" in p )
 		self.failIf( "t" in p )
-		
+
 		self.assertEqual( len( p["P"].data ), 10000 )
-		
+
 	def testST( self ) :
-			
+
 		m = Reader.create( "test/IECore/data/cobFiles/ball.cob" ).read()
-				
+
 		op = UniformRandomPointDistributionOp()
-		
+
 		p = op(
 			mesh = m,
 			numPoints = 10000,
 			seed = 10,
 			addST = True
 		)
-		
+
 		self.assert_( "P" in p )
-		self.assert_( "s" in p )		
+		self.assert_( "s" in p )
 		self.assert_( "t" in p )
-		
+
 		self.assertEqual( len( p["P"].data ), 10000 )
 		self.assertEqual( len( p["s"].data ), 10000 )
 		self.assertEqual( len( p["t"].data ), 10000 )
 
 if __name__ == "__main__":
-	unittest.main()   
-	        
+	unittest.main()
+

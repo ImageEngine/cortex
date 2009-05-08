@@ -119,7 +119,7 @@ struct DataPromoteOp::Promote2Fn<T, typename boost::enable_if< TypeTraits::IsSim
 	template<typename F>
 	ReturnType operator()( typename F::ConstPtr d ) const
 	{
-		assert( d );	
+		assert( d );
 		typename T::Ptr result = new T;
 
 		result->writable() = typename T::ValueType( d->readable() );
@@ -163,7 +163,7 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 {
 	ReturnType operator()( typename F::ConstPtr d, TypeId targetType ) const
 	{
-		assert( d );	
+		assert( d );
 		switch ( targetType )
 		{
 		case V2fVectorDataTypeId :
@@ -202,7 +202,7 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 {
 	ReturnType operator()( typename F::ConstPtr d, TypeId targetType ) const
 	{
-		assert( d );	
+		assert( d );
 		switch ( targetType )
 		{
 		case V2fDataTypeId :

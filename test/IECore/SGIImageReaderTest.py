@@ -52,7 +52,7 @@ class SGIImageReaderTest(unittest.TestCase):
 		self.assertEqual( type(r), SGIImageReader )
 		h = r.readHeader()
 
-		channelNames = h['channelNames']		
+		channelNames = h['channelNames']
 		self.assertEqual( len( channelNames ), 3 )
 		self.assert_( "R" in channelNames )
 		self.assert_( "G" in channelNames )
@@ -67,18 +67,18 @@ class SGIImageReaderTest(unittest.TestCase):
 		self.assertEqual(type(r), SGIImageReader)
 
 		img = r.read()
-		
+
 		self.assertEqual(type(img), ImagePrimitive)
 
 	def testDataWindowRead( self ):
-	
+
 		for f in glob.glob( "test/IECore/data/sgiFiles/uvMap.512x256.*sgi" ) :
 
 			r = Reader.create( f )
 			self.assertEqual( type(r), SGIImageReader )
 
 			dataWindow = Box2i(
-				V2i(360, 160), 
+				V2i(360, 160),
 				V2i(399, 199)
 			)
 
@@ -104,12 +104,12 @@ class SGIImageReaderTest(unittest.TestCase):
 			# Check that the color at the bottom-right of the image is black - ordinarialy it would
 			# be yellow, but we're deliberately not reading the entire image
 			found = ipe.pointAtPixel( V2i( 511, 255 ), result )
-			self.assert_( found )		
+			self.assert_( found )
 			color = V3f(
 					result.floatPrimVar( ipe.R() ),
-					result.floatPrimVar( ipe.G() ), 
+					result.floatPrimVar( ipe.G() ),
 					result.floatPrimVar( ipe.B() )
-				)		
+				)
 			expectedColor = V3f( 0, 0, 0 )
 			self.assert_( ( color - expectedColor).length() < 1.e-3 )
 
@@ -118,16 +118,16 @@ class SGIImageReaderTest(unittest.TestCase):
 
 			color = V3f(
 					result.floatPrimVar( ipe.R() ),
-					result.floatPrimVar( ipe.G() ), 
+					result.floatPrimVar( ipe.G() ),
 					result.floatPrimVar( ipe.B() )
 				)
 
-			expectedColor = V3f( 0.741176, 0.705882, 0 )		
-			
+			expectedColor = V3f( 0.741176, 0.705882, 0 )
+
 			if not ( ( color - expectedColor).length() < 1.e-2 ):
-			
+
 				print f,   color, expectedColor
-			
+
 			self.assert_( ( color - expectedColor).length() < 1.e-2 )
 
 	def testChannelRead(self):
@@ -135,21 +135,21 @@ class SGIImageReaderTest(unittest.TestCase):
 		# create a reader, constrain to a sub-image, R and G channels
 		r = Reader.create( "test/IECore/data/sgiFiles/uvMap.512x256.8bit.sgi" )
 		self.assertEqual( type(r), SGIImageReader )
-		
+
 		r.parameters()["dataWindow"].setValue( Box2iData( Box2i( V2i(100, 100), V2i(199, 199) ) ) )
 		r.parameters()["channels"].setValue( StringVectorData( ["R", "G"] ) )
 
 		img = r.read()
 		self.assertEqual( type(img), ImagePrimitive )
-		
+
 	def testOrientation( self ) :
 		""" Test orientation of SGI files """
-	
+
 		for f in glob.glob( "test/IECore/data/sgiFiles/uvMap.512x256.*sgi" ) :
 
 			r = Reader.create( f )
 			img = r.read()
-		
+
 			ipe = PrimitiveEvaluator.create( img )
 			self.assert_( ipe.R() )
 			self.assert_( ipe.G() )
@@ -172,57 +172,57 @@ class SGIImageReaderTest(unittest.TestCase):
 
 				color = V3f(
 					result.floatPrimVar( ipe.R() ),
-					result.floatPrimVar( ipe.G() ), 
+					result.floatPrimVar( ipe.G() ),
 					result.floatPrimVar( ipe.B() )
 				)
-				
+
 				if not ( ( color - expectedColor).length() < 1.e-2 ):
-			
+
 					print f,   color, expectedColor
 
-				self.assert_( ( color - expectedColor).length() < 1.e-2 )	
-		
+				self.assert_( ( color - expectedColor).length() < 1.e-2 )
+
 	def testAll( self ):
-		
+
 		fileNames = glob.glob( "test/IECore/data/sgiFiles/*.sgi" )
 		expectedFailures = []
-		
+
 		# Silence any warnings while the tests run
 		MessageHandler.pushHandler( NullMessageHandler() )
-		
-		
+
+
 		try:
-		
+
 			for f in fileNames:
-			
-				r = SGIImageReader( f ) 
-				
+
+				r = SGIImageReader( f )
+
 				if f in expectedFailures :
-					
+
 					self.assertRaises( RuntimeError, r.read )
-				
+
 				else :
-				
+
 					self.assert_( SGIImageReader.canRead( f ) )
 					self.failIf( JPEGImageReader.canRead( f ) )
 					self.failIf( EXRImageReader.canRead( f ) )
-					self.failIf( TIFFImageReader.canRead( f ) )					
-					self.failIf( CINImageReader.canRead( f ) )										
+					self.failIf( TIFFImageReader.canRead( f ) )
+					self.failIf( CINImageReader.canRead( f ) )
 
 					img = r.read()
 					self.assertEqual( type(img), ImagePrimitive )
-					self.assert_( img.arePrimitiveVariablesValid() )	
-				
-		except:
-		
-			raise	
-			
-		finally:
-			
-			MessageHandler.popHandler()		
-		
+					self.assert_( img.arePrimitiveVariablesValid() )
 
-                			
+		except:
+
+			raise
+
+		finally:
+
+			MessageHandler.popHandler()
+
+
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

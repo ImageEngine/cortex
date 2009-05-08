@@ -54,18 +54,18 @@ template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type > : public DataConversion< F, T >
 {
 	typedef ScaledDataConversion< T, F > InverseType;
-	
+
 	T operator()( F f ) const
 	{
-		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );	
+		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );
 		float result = static_cast<float>(f) / std::numeric_limits<F>::max() * std::numeric_limits<T>::max();
 		return static_cast<T>( round( result ) );
 	}
-	
+
 	InverseType inverse() const
 	{
 		return InverseType();
-	}		
+	}
 };
 
 template<typename F, typename T>
@@ -86,8 +86,8 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 	T operator()( F f ) const
 	{
 		BOOST_STATIC_ASSERT( boost::is_signed< T >::value );
-		f = std::max<F>( f, (F)( -1.0 ) );		
-		f = std::min<F>( f, (F)( 1.0 ) );				
+		f = std::max<F>( f, (F)( -1.0 ) );
+		f = std::min<F>( f, (F)( 1.0 ) );
 		float result = static_cast<float>(f) * std::numeric_limits<T>::max();
 		return static_cast<T>( round( result ) );
 	}
@@ -97,10 +97,10 @@ template<typename F, typename T>
 struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type > : public DataConversion< F, T >
 {
 	T operator()( F f ) const
-	{		
+	{
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
 		f = std::max<F>( f, (F)(std::numeric_limits<T>::min() ) );
-		f = std::min<F>( f, (F)( 1.0 ) );	
+		f = std::min<F>( f, (F)( 1.0 ) );
 		float result = static_cast<float>(f) * std::numeric_limits<T>::max();
 		return static_cast<T>( round( result ) );
 	}
@@ -116,7 +116,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 		float result = static_cast<float>(f) / std::numeric_limits<F>::max();
 		return static_cast<T>( result );
 	}
-	
+
 	InverseType inverse() const
 	{
 		return InverseType();
@@ -132,7 +132,7 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 	{
 		return static_cast<T>( f );
 	}
-	
+
 	InverseType inverse() const
 	{
 		return InverseType();

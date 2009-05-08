@@ -47,71 +47,71 @@ namespace IECore
 class IndexedIOPath
 {
 	public:
-	
+
 		static const char g_separator = '/';
-	
+
 		/// Create a default path rooted at "/"
 		IndexedIOPath();
-		
+
 		/// Create a path with a user-defined root and relative path
 		IndexedIOPath( const std::string &root, const std::string &path = "");
-		
-		/// Assignment operator.		
+
+		/// Assignment operator.
 		IndexedIOPath& operator=(const IndexedIOPath &other);
-			
+
 		/// Retrieve the root path of this directory, as specified in the
-		/// constructor		
+		/// constructor
 		const std::string &rootPath() const;
-		
+
 		/// Retrieve just the relative portion of this path
 		const std::string &relativePath() const;
-		
+
 		/// Retrieve the full path, root + relative
 		const std::string &fullPath() const;
-		
+
 		/// Append a path, similar to a "chdir" operation. Valid paths
-		/// might be "/", "..", "/a/b", "a/b", etc.		
+		/// might be "/", "..", "/a/b", "a/b", etc.
 		void append( const std::string &path );
-		
+
 		/// Returns a copy of this object with the given path appended.
 		IndexedIOPath appended( const std::string &path ) const;
-		
-		/// Test the validity of the given file/directory name.	
+
+		/// Test the validity of the given file/directory name.
 		static bool validFilename( const std::string &n );
-		
+
 		std::string head() const;
-		
+
 		std::string tail() const;
-		
+
 		bool hasRootDirectory() const;
-		
+
 	protected:
-	
+
 		void buildPath() const;
 		void buildRelativePath() const;
-	
+
 		typedef std::vector<std::string> StringVector;
-			
+
 		std::string m_root;
 		StringVector m_relativePathParts;
 
-		mutable bool m_relativePathValid;	
+		mutable bool m_relativePathValid;
 		mutable std::string m_relativePath;
-		
+
 		mutable bool m_pathValid;
 		mutable std::string m_path;
-		
+
 		unsigned m_relativePathSize;
-	
+
 		unsigned m_rootSize;
-		
+
 		bool m_isAbsolute;
-		
-		mutable bool m_headValid;	
+
+		mutable bool m_headValid;
 		mutable std::string m_head;
-		
-		mutable bool m_tailValid;	
-		mutable std::string m_tail;		
+
+		mutable bool m_tailValid;
+		mutable std::string m_tail;
 
 };
 

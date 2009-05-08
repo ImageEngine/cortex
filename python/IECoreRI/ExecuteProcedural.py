@@ -41,12 +41,12 @@ import IECoreRI
 # useful to use this in the command string for a dynamicload procedural
 # that executes python.
 def executeProcedural( name, version, args ) :
-	
+
 	procedural = IECore.ClassLoader.defaultProceduralLoader().load( name, version )()
-	
+
 	if procedural :
-	
+
 		IECore.ParameterParser().parse( args, procedural.parameters() )
-		
+
 		renderer = IECoreRI.Renderer()
 		procedural.render( renderer, inAttributeBlock=False, withState=False, withGeometry=True, immediateGeometry=True )

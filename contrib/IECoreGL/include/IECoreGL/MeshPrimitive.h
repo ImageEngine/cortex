@@ -54,25 +54,25 @@ class MeshPrimitive : public Primitive
 		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds, IECore::ConstV3fVectorDataPtr points );
 		virtual ~MeshPrimitive();
 
-		IECore::ConstIntVectorDataPtr vertexIds() const;		
+		IECore::ConstIntVectorDataPtr vertexIds() const;
 
 		virtual Imath::Box3f bound() const;
-		
+
 		virtual size_t vertexAttributeSize() const;
-		
+
 	protected :
-		
+
 		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
-	
+
 	private :
-	
+
 		IECore::ConstIntVectorDataPtr m_vertIds;
-		
+
 		Imath::Box3f m_bound;
-		
+
 		/// So TextPrimitive can use the render( state, style ) method.
 		friend class TextPrimitive;
-	
+
 };
 
 IE_CORE_DECLAREPTR( MeshPrimitive );

@@ -44,42 +44,42 @@ namespace IECore
 class LuminanceOp : public PrimitiveOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( LuminanceOp, PrimitiveOp );
-		
+
 		LuminanceOp();
 		virtual ~LuminanceOp();
-		
+
 		StringParameterPtr colorPrimVarParameter();
 		ConstStringParameterPtr colorPrimVarParameter() const;
-		
+
 		StringParameterPtr redPrimVarParameter();
 		ConstStringParameterPtr redPrimVarParameter() const;
-		
+
 		StringParameterPtr greenPrimVarParameter();
 		ConstStringParameterPtr greenPrimVarParameter() const;
-		
+
 		StringParameterPtr bluePrimVarParameter();
 		ConstStringParameterPtr bluePrimVarParameter() const;
-		
+
 		Color3fParameterPtr weightsParameter();
 		ConstColor3fParameterPtr weightsParameter() const;
-		
+
 		StringParameterPtr luminancePrimVarParameter();
 		ConstStringParameterPtr luminancePrimVarParameter() const;
-		
+
 		BoolParameterPtr removeColorPrimVarsParameter();
 		ConstBoolParameterPtr removeColorPrimVarsParameter() const;
-	
+
 	protected :
-		
-		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );		
+
+		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );
 
 	private :
-			
+
 		template <typename T>
 		void calculate( const T *r, const T *g, const T *b, int steps[3], int size, T *y );
-		
+
 		StringParameterPtr m_colorPrimVarParameter;
 		StringParameterPtr m_redPrimVarParameter;
 		StringParameterPtr m_greenPrimVarParameter;

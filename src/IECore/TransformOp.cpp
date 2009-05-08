@@ -46,7 +46,7 @@ TransformOp::TransformOp()
 {
 	m_multiplyOp = new MatrixMultiplyOp;
 	m_multiplyOp->copyParameter()->setTypedValue( false );
-	
+
 	StringVectorDataPtr pDefault = new StringVectorData;
 	pDefault->writable().push_back( "P" );
 	m_pointPrimVarsParameter = new StringVectorParameter(
@@ -54,7 +54,7 @@ TransformOp::TransformOp()
 		"The names of primitive variables which should be transformed as points.",
 		pDefault
 	);
-	
+
 	m_vectorPrimVarsParameter = new StringVectorParameter(
 		"vectorPrimVars",
 		"The names of primitive variables which should be transformed as vectors.",
@@ -68,7 +68,7 @@ TransformOp::TransformOp()
 		"The names of primitive variables which should be transformed as normals.",
 		nDefault
 	);
-	
+
 	parameters()->addParameter( m_multiplyOp->matrixParameter() );
 	parameters()->addParameter( m_pointPrimVarsParameter );
 	parameters()->addParameter( m_vectorPrimVarsParameter );
@@ -140,7 +140,7 @@ void TransformOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPt
 			m_multiplyOp->operate();
 		}
 	}
-	
+
 	m_multiplyOp->modeParameter()->setNumericValue( MatrixMultiplyOp::Normal );
 	const std::vector<std::string> &n = m_normalPrimVarsParameter->getTypedValue();
 	for( std::vector<std::string>::const_iterator it = n.begin(); it!=n.end(); it++ )

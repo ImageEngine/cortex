@@ -53,5 +53,5 @@ void bindColorTexture()
 		.def( init<IECore::ImagePrimitivePtr>() )
 	;
 }
-	
+
 }

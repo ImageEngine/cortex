@@ -33,25 +33,25 @@ class ImmediateRendererImplementation : public RendererImplementation
 		virtual void transformBegin();
 		virtual void transformEnd();
 		virtual void concatTransform( const Imath::M44f &matrix );
-		
+
 		virtual void attributeBegin();
 		virtual void attributeEnd();
-		
+
 		virtual void addState( StateComponentPtr state );
 		virtual StateComponentPtr getState( IECore::TypeId type );
 
 		virtual void addPrimitive( PrimitivePtr primitive );
-		
+
 	private :
 
 		CameraPtr m_camera;
 		FrameBufferPtr m_frameBuffer;
-		
+
 		std::vector<ConstDisplayPtr> m_displays;
-		
+
 		typedef std::stack<StatePtr> StateStack;
 		StateStack m_stateStack;
-		
+
 };
 
 IE_CORE_DECLAREPTR( ImmediateRendererImplementation );

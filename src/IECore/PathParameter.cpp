@@ -47,7 +47,7 @@ using namespace std;
 using namespace IECore;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( PathParameter );
-const unsigned int PathParameter::g_ioVersion = 1;	
+const unsigned int PathParameter::g_ioVersion = 1;
 
 PathParameter::PathParameter()
 {
@@ -102,7 +102,7 @@ bool PathParameter::valueValid( ConstObjectPtr value, std::string *reason ) cons
 			return true;
 		}
 	}
-	
+
 	// existence check
 	if ( boost::filesystem::exists(boost::filesystem::path( s->readable() ) ) )
 	{
@@ -115,7 +115,7 @@ bool PathParameter::valueValid( ConstObjectPtr value, std::string *reason ) cons
 			return false;
 		}
 	}
-	else 
+	else
 	{
 		if ( mustExist() )
 		{
@@ -126,7 +126,7 @@ bool PathParameter::valueValid( ConstObjectPtr value, std::string *reason ) cons
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -138,7 +138,7 @@ void PathParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
 	StringParameter::copyFrom( other, context );
 	const PathParameter *tOther = static_cast<const PathParameter *>( other.get() );
-	
+
 	m_allowEmptyString = tOther->m_allowEmptyString;
 	m_check = tOther->m_check;
 }
@@ -147,7 +147,7 @@ void PathParameter::save( SaveContext *context ) const
 {
 	StringParameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	
+
 	unsigned char tmp = m_allowEmptyString;
 	container->write( "allowEmptyString", tmp );
 	tmp = m_check;
@@ -159,13 +159,13 @@ void PathParameter::load( LoadContextPtr context )
 	StringParameter::load( context );
 	unsigned int v = g_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	unsigned char tmp;
 	container->read( "allowEmptyString", tmp );
 	m_allowEmptyString = tmp;
 	container->read( "check", tmp );
 	m_check = (CheckType)tmp;
-	
+
 }
 
 bool PathParameter::isEqualTo( ConstObjectPtr other ) const
@@ -174,7 +174,7 @@ bool PathParameter::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	const PathParameter *tOther = static_cast<const PathParameter *>( other.get() );
 	return m_allowEmptyString==tOther->m_allowEmptyString && m_check==tOther->m_check;
 }

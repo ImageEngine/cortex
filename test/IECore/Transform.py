@@ -39,39 +39,39 @@ from IECore import *
 class TestTransform( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		m = MatrixTransform( M44f() )
 		self.assertEqual( m.transform(), M44f() )
 		self.assertEqual( m.transform( 1 ), M44f() )
 		self.assertEqual( m.matrix, M44f() )
-		
+
 		m = MatrixTransform( M44f.createTranslated( V3f( 1, 2, 3 ) ) )
 		self.assertEqual( m.transform(), M44f.createTranslated( V3f( 1, 2, 3 ) ) )
 		self.assertEqual( m.transform( 1 ), M44f.createTranslated( V3f( 1, 2, 3 ) ) )
 		self.assertEqual( m.matrix, M44f.createTranslated( V3f( 1, 2, 3 ) ) )
-		
+
 		mm = m.copy()
-		
+
 		self.assertEqual( m, mm )
-		
+
 		Writer.create( mm, "test/transform.cob" ).write()
 		mmm = Reader.create( "test/transform.cob" ).read()
-		
+
 		self.assertEqual( mm, mmm )
-		
+
 	def testMotionTransform( self ) :
-	
+
 		m = MatrixMotionTransform()
 		self.assertEqual( m.transform(), M44f() )
 		self.assertEqual( m.transform( 2 ), M44f() )
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )
 		self.assertEqual( len( m ), 0 )
-		
+
 		t1 = M44f.createTranslated( V3f( 0, 1, 0 ) )
 		t2 = M44f.createTranslated( V3f( 0, 5, 0 ) )
 		tMid = M44f.createTranslated( V3f( 0, 3, 0 ) )
-		
+
 		m[0] = t1
 		self.assertEqual( len( m ), 1 )
 		self.assertEqual( m.keys(), [ 0 ] )
@@ -79,8 +79,8 @@ class TestTransform( unittest.TestCase ) :
 		self.assertEqual( m.transform(), t1 )
 		self.assertEqual( m.transform( -1 ), t1 )
 		self.assertEqual( m.transform( 0 ), t1 )
-		self.assertEqual( m.transform( 1 ), t1 )		
-		
+		self.assertEqual( m.transform( 1 ), t1 )
+
 		m[1] = t2
 		self.assertEqual( len( m ), 2 )
 		self.assertEqual( m.keys(), [ 0, 1 ] )
@@ -90,24 +90,24 @@ class TestTransform( unittest.TestCase ) :
 		self.assertEqual( m.transform( 1 ), t2 )
 		self.assertEqual( m.transform( 2 ), t2 )
 		self.assertEqual( m.transform( 0.5 ), tMid )
-		
+
 		mm = m.copy()
-		
+
 		self.assertEqual( m, mm )
-		
+
 		Writer.create( mm, "test/motionTransform.cob" ).write()
 		mmm = Reader.create( "test/motionTransform.cob" ).read()
-		
+
 		self.assertEqual( mm, mmm )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile("test/motionTransform.cob"):
 			os.remove("test/motionTransform.cob")
-			
+
 		if os.path.isfile("test/transform.cob"):
-			os.remove("test/transform.cob")			
-		
+			os.remove("test/transform.cob")
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

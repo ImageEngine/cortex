@@ -37,65 +37,65 @@ import unittest
 from IECore import *
 
 class RadixSortTest( unittest.TestCase ) :
-    
+
 	def testFloat( self ) :
-		
+
 		random.seed( 12 )
-			
+
 		s = RadixSort()
-		
+
 		d = FloatVectorData()
-		
+
 		for i in range( 0, 10000 ):
 			d.append( random.uniform( FloatData().minValue, FloatData().maxValue ) )
-			
-		idx = s.sort( d )	
-		
+
+		idx = s.sort( d )
+
 		self.assertEqual( len(idx), 10000 )
-		
+
 		for i in range( 1, 10000 ):
-		
+
 			self.assert_( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )
-			
+
 	def testInt( self ) :
-	
+
 		random.seed( 13 )
-			
+
 		s = RadixSort()
-		
+
 		d = IntVectorData()
-		
+
 		for i in range( 0, 10000 ):
 			d.append( int( random.uniform( IntData().minValue, IntData().maxValue ) ) )
-			
-		idx = s.sort( d )	
-		
+
+		idx = s.sort( d )
+
 		self.assertEqual( len(idx), 10000 )
-		
+
 		for i in range( 1, 10000 ):
-		
-			self.assert_( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )	
-			
+
+			self.assert_( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )
+
 	def testUInt( self ) :
-	
+
 		random.seed( 14 )
-			
+
 		s = RadixSort()
-		
+
 		d = UIntVectorData()
-		
+
 		for i in range( 0, 10000 ):
 			d.append( int( random.uniform( UIntData().minValue, UIntData().maxValue ) ) )
-			
-		idx = s.sort( d )	
-		
+
+		idx = s.sort( d )
+
 		self.assertEqual( len(idx), 10000 )
-		
+
 		for i in range( 1, 10000 ):
-		
-			self.assert_( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )				
-		
-		
+
+			self.assert_( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )
+
+
 if __name__ == "__main__":
-	unittest.main()   
-	        
+	unittest.main()
+

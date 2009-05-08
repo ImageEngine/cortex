@@ -59,13 +59,13 @@ class ImageWriter : public Writer
 
 		/// Convenience function to access the channels specified in parameters
 		void imageChannels( std::vector<std::string> &names ) const;
-		
+
 		/// Returns the name of default colorspace in which the Writer expects to receive images.
 		virtual std::string destinationColorSpace() const = 0;
 
 	protected:
-	
-		ImageWriter( const std::string &name, const std::string &description );	
+
+		ImageWriter( const std::string &name, const std::string &description );
 
 		/// Return the image object to write
 		ConstImagePrimitivePtr getImage() const;
@@ -76,7 +76,7 @@ class ImageWriter : public Writer
 		                         const Imath::Box2i &dataWindow	) const = 0;
 
 	private :
-		
+
 		/// Implementation of Writer::doWrite(). Calls through to writeImage()
 		virtual void doWrite();
 

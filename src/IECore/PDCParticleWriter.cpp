@@ -106,32 +106,32 @@ static void writeSimpleAttr( ofstream &oStream, typename T::ConstPtr attr )
 }
 
 void PDCParticleWriter::doWrite()
-{	
+{
 	// write the header
 	int numParticles = particleCount();
-	
+
 	ofstream oStream( fileName().c_str() );
 	if( !oStream.is_open() )
 	{
 		throw IOException( ( format( "Unable to open file \%s\"." ) % fileName() ).str() );
 	}
-	
+
 	char pdc[4] = { 'P', 'D', 'C', ' ' };
 	oStream.write( pdc, 4 );
-	
+
 	int fileVersion = 1; fileVersion = asBigEndian( fileVersion );
 	oStream.write( (const char *)&fileVersion, sizeof( fileVersion ) );
-	
+
 	int one = 1; one = asBigEndian( one );
 	oStream.write( (const char *)&one, sizeof( one ) );
-	
+
 	int unused = 0; unused = asBigEndian( unused );
 	oStream.write( (const char *)&unused, sizeof( unused ) );
 	oStream.write( (const char *)&unused, sizeof( unused ) );
 
 	int numParticlesReversed = asBigEndian( numParticles );
 	oStream.write( (const char *)&numParticlesReversed, sizeof( numParticlesReversed ) );
-	
+
 	// check each attribute is of an appropriate type
 	const PrimitiveVariableMap &pv = particleObject()->variables;
 	vector<string> attrNames;
@@ -151,7 +151,7 @@ void PDCParticleWriter::doWrite()
 			msg( Msg::Warning, "PDCParticleWriter::write", format( "Attribute \"%s\" is of unsupported type \"%s\"." ) % *it % attr->typeName() );
 		}
 	}
-		
+
 	// write out the attributes
 	int numAttrs = checkedAttrNames.size();
 	int numAttrsReversed = asBigEndian( numAttrs );
@@ -162,7 +162,7 @@ void PDCParticleWriter::doWrite()
 		int nameLengthReversed = asBigEndian( nameLength );
 		oStream.write( (const char *)&nameLengthReversed, sizeof( nameLengthReversed ) );
 		oStream.write( it->c_str(), nameLength );
-		
+
 		DataPtr attr = pv.find( *it )->second.data;
 		switch( attr->typeId() )
 		{
@@ -182,7 +182,7 @@ void PDCParticleWriter::doWrite()
 					writeAttr<DoubleVectorData, double, 1>( oStream, d );
 				}
 				break;
-				
+
 			case V3dVectorDataTypeId :
 				{
 					int type = 5; type = asBigEndian( type );
@@ -214,8 +214,8 @@ void PDCParticleWriter::doWrite()
 					V3dDataPtr d = static_pointer_cast<V3dData>( attr );
 					writeSimpleAttr<V3dData, double, 3>( oStream, d );
 				}
-				break;	
-				
+				break;
+
 			default :
 				// we should never get here because we checked the types above
 				assert( 0 );

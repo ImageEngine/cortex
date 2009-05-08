@@ -40,36 +40,36 @@ import socket
 class TestPDCWriter( unittest.TestCase ) :
 
 	def testBasics( self ) :
-	
+
 		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
 		p = r.read()
-		
+
 		w = IECore.Writer.create( p, "test/compoundData.cob" )
 		w.write()
-		
+
 		r = IECore.Reader.create( "test/compoundData.cob" )
 		p2 = r.read()
-		
-		self.assertEqual( p, p2 )			
+
+		self.assertEqual( p, p2 )
 
 	def testHeader( self ) :
-	
+
 		o = IECore.IntData()
-		
+
 		w = IECore.Writer.create( o, "test/intData.cob" )
 		w.header.getValue()["testHeaderData"] = IECore.StringData( "i am part of a header" )
 		w.header.getValue()["testHeaderData2"] = IECore.IntData( 100 )
 		w.write()
-		
+
 		h = IECore.Reader.create( "test/intData.cob" ).readHeader()
-		
+
 		for k in w.header.getValue().keys() :
 			self.assertEqual( w.header.getValue()[k], h[k] )
-		
+
 		self.assertEqual( h["host"].value, socket.gethostname() )
 		self.assertEqual( h["ieCoreVersion"].value, IECore.versionString() )
 		self.assertEqual( h["typeName"].value, "IntData" )
-				
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

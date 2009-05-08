@@ -38,20 +38,20 @@ from IECore import *
 class TestCurry( unittest.TestCase ) :
 
 	def concat( self, *args, **kw ) :
-	
+
 		result =  "".join( args )
 		for k,v in kw.items() :
 			result = result + k + v
-			
+
 		return result
-		
+
 	def test( self ) :
-		
+
 		f = curry( self.concat, "a", "b", "c", d="e", f="g" )
 		self.assertEqual( f(), "abcdefg" )
 		self.assertEqual( f( d="d" ), "abcddfg" )
 		self.assertEqual( f( f="f" ), "abcdeff" )
 		self.assertEqual( f( "A", "B" ), "abcABdefg" )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

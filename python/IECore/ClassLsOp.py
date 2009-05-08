@@ -39,7 +39,7 @@ import os.path
 class ClassLsOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "ClassLsOp", "Lists installed classes which can be loaded with IECore.ClassLoader.",
 			Parameter(
 				name = "result",
@@ -47,7 +47,7 @@ class ClassLsOp( Op ) :
 				defaultValue = StringVectorData()
 			)
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				StringParameter(
@@ -91,7 +91,7 @@ class ClassLsOp( Op ) :
 		)
 
 	def doOperation( self, operands ) :
-	
+
 		t = operands.type.value
 		if t=="procedural" :
 			loader = ClassLoader.defaultProceduralLoader()
@@ -102,16 +102,16 @@ class ClassLsOp( Op ) :
 				raise RuntimeError( "Cannot specify both searchPath and searchPathEnvVar." )
 			if not operands.searchPath.value and not operands.searchPathEnvVar.value :
 				raise RuntimeError( "Must specify either searchPath or searchPathEnvVar." )
-				
+
 			if operands.searchPath.value :
 				sp = SearchPath( operands.searchPath.value, ":" )
 			else :
 				sp = SearchPath( os.path.expandvars( os.environ[operands.searchPathEnvVar.value] ), ":" )
-				
+
 			loader = ClassLoader( sp )
-			
-		classes = loader.classNames( operands.match.value )	
-							
+
+		classes = loader.classNames( operands.match.value )
+
 		if operands.resultType.value == "string" :
 			return StringData( "\n".join( classes ) )
 		else :

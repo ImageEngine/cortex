@@ -36,18 +36,18 @@ import IECore
 
 def __parseDateTime( args, parameter ) :
 
-	import datetime	
+	import datetime
 
 	if not len( args ) :
 		raise SyntaxError( "Expected date/time." )
 
-			
+
 	dateStr = args[0]
 	if not type( dateStr ) is str :
 		raise SyntaxError( "Expected date/time." )
-	
+
 	for format in [ "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d" ] :
-	
+
 		try :
 			date = datetime.datetime.strptime( dateStr, format )
 			d = IECore.DateTimeData( date )
@@ -56,10 +56,10 @@ def __parseDateTime( args, parameter ) :
 			return
 		except :
 			pass
-	
-	# If no day specified, use today		
+
+	# If no day specified, use today
 	for format in [ "%H:%M:%S", "%H:%M" ] :
-	
+
 		try :
 			date = datetime.datetime.strptime( dateStr, format )
 			today = datetime.datetime.now()
@@ -70,19 +70,19 @@ def __parseDateTime( args, parameter ) :
 			return
 		except :
 			pass
-			
-	raise SyntaxError( "Not a valid date/time: '%s'" % ( dateStr ) )		
 
-	
+	raise SyntaxError( "Not a valid date/time: '%s'" % ( dateStr ) )
+
+
 def __serialiseDateTime( parameter ) :
 
 	dt = parameter.getTypedValue()
-	
+
 	# strptime does not support fractional seconds
 	dt = dt.replace( microsecond = 0 )
 
-	return "'" + str( dt ) + "'"	
-			
+	return "'" + str( dt ) + "'"
+
 IECore.ParameterParser.registerType( IECore.DateTimeParameter.staticTypeId(), __parseDateTime, __serialiseDateTime )
-	
+
 __all__ = []

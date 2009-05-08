@@ -40,78 +40,78 @@ from IECore import *
 class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 	def testSimple( self ):
-	
+
 		p = V3fVectorData()
 		v = FloatVectorData()
-		
+
 		p.append( V3f( -1,  1, 0 ) )
-		p.append( V3f( -1, -1, 0 ) )		
-		p.append( V3f(  1,  1, 0 ) )		
-		p.append( V3f(  1, -1, 0 ) )						
-		
+		p.append( V3f( -1, -1, 0 ) )
+		p.append( V3f(  1,  1, 0 ) )
+		p.append( V3f(  1, -1, 0 ) )
+
 		v.append( 1 )
 		v.append( 2 )
 		v.append( 3 )
-		v.append( 4 )						
-	
+		v.append( 4 )
+
 		idw = InverseDistanceWeightedInterpolationV3ff( p, v, 1 )
-		
+
 		for i in range( 0, 4 ):
-		
+
 			res = idw( p[i] )
-			
+
 			self.assertAlmostEqual( res, v[i] )
-			
+
 	def testRandomPoints( self ):
-	
+
 		random.seed( 1 )
-	
+
 		p = V2fVectorData()
 		v = FloatVectorData()
-		
+
 		size = 256
 		numPoints = 100
-								
+
 		for i in range( 0, numPoints ):
-		
+
 			p.append( V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
 			v.append( random.uniform( 0, 1 ) )
-		
-		idw = InverseDistanceWeightedInterpolationV2ff( p, v, 10 )	
-			
+
+		idw = InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
+
 		b = Box2i( V2i(0, 0), V2i( size-1, size-1 ) )
-				
+
 		o = 0
 		f = FloatVectorData( size * size )
 		for i in range( 0, size ):
-		
+
 			for j in range( 0, size ) :
-			
+
 				r =  idw( V2f( i, j ) )
 
 				f[o] = r
 				o = o + 1
-			
-		i = ImagePrimitive( b, b )					
+
+		i = ImagePrimitive( b, b )
 		i["r"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
 		i["g"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
 		i["b"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
-		
+
 		Writer.create( i, "test/inverseDistanceWeightedInterpolationV2ff.exr" ).write()
-		
+
 		op = ImageDiffOp()
 		res = op(
 			imageA = i,
 			imageB = Reader.create( "test/IECore/data/expectedResults/inverseDistanceWeightedInterpolationV2ff.exr" ).read()
 		)
-		
+
 		self.failIf( res.value )
-		
+
 	def tearDown( self ) :
-				
+
 		if os.path.isfile( 'test/inverseDistanceWeightedInterpolationV2ff.exr' ):
 			os.remove( 'test/inverseDistanceWeightedInterpolationV2ff.exr' )
-		
-	
+
+
 if __name__ == "__main__":
 	unittest.main()

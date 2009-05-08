@@ -42,7 +42,7 @@
 
 #include <vector>
 
-namespace IECore 
+namespace IECore
 {
 
 /// A smoothstep shaped falloff for use with the PerlinNoise class.
@@ -89,37 +89,37 @@ class PerlinNoise
 		typedef V Value;
 		typedef VectorTraits<V> ValueTraits;
 		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-	
+
 		/// Constructs a new PerlinNoise object, passing the seed used
 		/// by the random number generator to construct the
 		/// gradient and permutations tables.
 		PerlinNoise( unsigned long int seed = 0 );
 		/// Copy constructor
 		PerlinNoise( const PerlinNoise &other );
-		
+
 		/// Reinitialises the random gradient table using a
 		/// potentially different seed.
 		void initGradients( unsigned long int seed );
-		
+
 		/// Computes the noise value at the given point. The components
 		/// of the returned value will range from -0.5 to 0.5.
 		inline Value noise( const Point &p ) const;
-		
+
 		/// Computes the noise value at the given point. The components
 		/// of the returned value will range from -0.5 to 0.5.
 		inline Value operator()( const Point &p ) const;
 
 	private :
-	
+
 		static inline ValueBaseType weight( PointBaseType t );
-	
+
 		inline Value noiseWalk( int *pi, const Point &pf, int d ) const;
-	
+
 		static const unsigned int m_maxPointDimensions = 4;
 		static const unsigned int m_permSize = 256;
 		std::vector<unsigned int> m_perm;
 		std::vector<Value> m_grad;
-		
+
 		F m_falloff;
 
 };

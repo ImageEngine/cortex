@@ -39,11 +39,11 @@ import IECore
 class NamespacePollutionTest( unittest.TestCase ) :
 
 	def test( self) :
-	
+
 		d = dir( IECore )
 		for n in [ "os", "glob", "re", "shutil", "IECore", "shlex", "sys",
 			"traceback", "inspect", "string" ] :
 			self.assert_( not n in d )
 
 if __name__ == "__main__":
-    unittest.main()   	
+    unittest.main()

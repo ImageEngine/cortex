@@ -38,15 +38,15 @@ using namespace std;
 
 namespace IECore
 {
-	
+
 template<typename T>
 typename KDTreeTest<T>::Tree::Iterator KDTreeTest<T>::randomPoint()
 {
 	unsigned int testPtIdx = (unsigned int)(m_numPoints * m_randGen.nextf()) % m_numPoints;
-	
+
 	return m_points.begin() + testPtIdx;
 }
-	
+
 template<typename T>
 KDTreeTest<T>::KDTreeTest(unsigned int numPoints) : m_numPoints(numPoints)
 {
@@ -59,7 +59,7 @@ KDTreeTest<T>::KDTreeTest(unsigned int numPoints) : m_numPoints(numPoints)
 			p[j] = m_randGen.nextf();
 		m_points[i] = p;
 	}
-		
+
 	m_tree = new Tree( m_points.begin(), m_points.end(), 16 );
 }
 
@@ -85,86 +85,86 @@ void KDTreeTest<T>::testNearestNeighours()
 	Rand32 r;
 	NeighbourVector nearNeighbours;
 	for( typename Tree::Iterator it=m_points.begin(); it!=m_points.end(); it++ )
-	{		
+	{
 		typename T::BaseType radius = 0.05;
 		unsigned int numNeighbours = m_tree->nearestNeighbours( *it, radius, nearNeighbours );
-		
+
 		BOOST_CHECK(numNeighbours <= m_numPoints);
-		
+
 		typename NeighbourVector::const_iterator nit = nearNeighbours.begin();
 		for (; nit != nearNeighbours.end(); ++nit)
-		{	
+		{
 			// Each point should be within the given radius
 			BOOST_CHECK( vecDistance2(**nit, *it) <= radius * radius );
 
 			// A randomly chosen point which wasn't in the list of near neighbours should be further away than the
 			// given radius
-			
+
 			typename Tree::Iterator testPoint = randomPoint();
-			
+
 			if (std::find( nearNeighbours.begin(), nearNeighbours.end(), testPoint) == nearNeighbours.end())
 			{
 				BOOST_CHECK( vecDistance2(*it, *testPoint) >= radius * radius );
 			}
-			
+
 		}
 	}
 }
 
 template<typename T>
 void KDTreeTest<T>::testNearestNNeighours()
-{		
+{
 	unsigned int neighboursRequested = 4;
-	NeighbourVector nearNeighbours;	
+	NeighbourVector nearNeighbours;
 	for( typename Tree::Iterator it=m_points.begin(); it!=m_points.end(); it++ )
-	{				
+	{
 		unsigned int numNeighbours = m_tree->nearestNNeighbours( *it, neighboursRequested,  nearNeighbours );
 		BOOST_CHECK(numNeighbours <= neighboursRequested);
-		
+
 		// One of our nearest-N neighbours should be the actual nearest!
 		BOOST_CHECK( std::find( nearNeighbours.begin(), nearNeighbours.end(), m_tree->nearestNeighbour( *it ))
 				!= nearNeighbours.end() );
-		
+
 		// Make sure points are returned in order furthest->closest
 		typename NeighbourVector::const_iterator nit;
 		for (nit = nearNeighbours.begin(); nit != nearNeighbours.end(); ++nit)
-		{	
+		{
 			if (nit != nearNeighbours.begin())
 			{
-				BOOST_CHECK( vecDistance2(**nit, *it) <= 
+				BOOST_CHECK( vecDistance2(**nit, *it) <=
 					vecDistance2(**(nit-1), *it)
 					);
 			}
 		}
-		
-		typename Tree::Iterator furthest = nearNeighbours[0];	
-		
+
+		typename Tree::Iterator furthest = nearNeighbours[0];
+
 		for (nit = nearNeighbours.begin(); nit != nearNeighbours.end(); ++nit)
-		{	
+		{
 			// A randomly chosen point which wasn't in the list of near neighbours should be further away than the
 			// further point
-		
+
 			typename Tree::Iterator randomPt = randomPoint();
-			
+
 			if (std::find( nearNeighbours.begin(), nearNeighbours.end(), randomPt) == nearNeighbours.end())
 			{
 				typename T::BaseType distanceToRandomPt = vecDistance2(*randomPt, *it);
 				typename T::BaseType distanceToFurthestNeighbour = vecDistance2(*furthest, *it);
-				
-				BOOST_CHECK( distanceToRandomPt >= distanceToFurthestNeighbour);				
+
+				BOOST_CHECK( distanceToRandomPt >= distanceToFurthestNeighbour);
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	// Check for equivalence with nearestNeighbour when only 1 neighbour is requested.
 	for( typename Tree::Iterator it=m_points.begin(); it!=m_points.end(); it++ )
 	{
-		NeighbourVector nearNeighbours;	
+		NeighbourVector nearNeighbours;
 		unsigned int numNeighbours = m_tree->nearestNNeighbours( *it, 1, nearNeighbours );
 		BOOST_CHECK(numNeighbours == 1);
-		
+
 		typename Tree::Iterator p1 = m_tree->nearestNeighbour(*it);
 		typename Tree::Iterator p2 = nearNeighbours[0];
 

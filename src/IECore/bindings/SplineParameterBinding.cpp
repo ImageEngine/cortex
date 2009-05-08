@@ -45,7 +45,7 @@ void bindSplineParameter()
 	bindTypedParameter<Splineff>();
 	bindTypedParameter<Splinedd>();
 	bindTypedParameter<SplinefColor3f>();
-	bindTypedParameter<SplinefColor4f>();	
+	bindTypedParameter<SplinefColor4f>();
 }
 
 } // namespace IECore

@@ -51,17 +51,17 @@ WarpOp::WarpOp( const std::string &name, const std::string &description )
 	filterPresets.push_back( IntParameter::Preset( "None", WarpOp::None ) );
 	filterPresets.push_back( IntParameter::Preset( "Bilinear", WarpOp::Bilinear ) );
 	m_filterParameter = new IntParameter(
-		"filter", 
+		"filter",
 		"Defines the filter to be used on the warped coordinates.",
 		(int)WarpOp::Bilinear,
-		(int)WarpOp::None, 
+		(int)WarpOp::None,
 		(int)WarpOp::TypeCount - 1,
-		filterPresets, 
+		filterPresets,
 		true
 	);
-	
+
 	parameters()->addParameter( m_filterParameter );
-	
+
 }
 
 WarpOp::~WarpOp()
@@ -167,9 +167,9 @@ struct WarpOp::Warp
 				for( int x=m_outputDataWindow.min.x; x<=m_outputDataWindow.max.x; x++, pixelIndex++ )
 				{
 					computePixelCoordinates( x, y, x1, y1, x2, y2, ratioX, ratioY );
-					LinearInterpolator<double>()( (double)clampXY<V>( inBuffer, x1, y1, inputWidth, inputHeight ), 
+					LinearInterpolator<double>()( (double)clampXY<V>( inBuffer, x1, y1, inputWidth, inputHeight ),
 												  (double)clampXY<V>( inBuffer, x2, y1, inputWidth, inputHeight ), ratioX, r1 );
-					LinearInterpolator<double>()( (double)clampXY<V>( inBuffer, x1, y2, inputWidth, inputHeight ), 
+					LinearInterpolator<double>()( (double)clampXY<V>( inBuffer, x1, y2, inputWidth, inputHeight ),
 												  (double)clampXY<V>( inBuffer, x2, y2, inputWidth, inputHeight ), ratioX, r2 );
 					LinearInterpolator<double>()( r1, r2, ratioY, r );
 					outBuffer[pixelIndex] = (V)r;
@@ -181,7 +181,7 @@ struct WarpOp::Warp
 			throw Exception("Invalid filter type!");
 		}
 	}
-	
+
 	private :
 		WarpOpPtr m_warpOp;
 		WarpOp::FilterType m_filter;

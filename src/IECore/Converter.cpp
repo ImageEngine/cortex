@@ -40,7 +40,7 @@ IE_CORE_DEFINERUNTIMETYPED( Converter );
 
 Converter::Converter( const std::string &name, const std::string &description )
 	:	Parameterised( name, description )
-{	
+{
 }
 
 Converter::~Converter()

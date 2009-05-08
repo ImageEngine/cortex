@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -59,10 +59,10 @@ void bindRefCounted()
 		.add_static_property( "garbageCollectionThreshold", &WrapperGarbageCollectorBase::getCollectThreshold, &WrapperGarbageCollectorBase::setCollectThreshold )
 		.def( "collectGarbage", &WrapperGarbageCollector::collect ).staticmethod( "collectGarbage" )
 	;
-	
+
 	IntrusivePtrToPython<RefCounted>();
 	IntrusivePtrFromPython<RefCounted>();
-		
+
 	implicitly_convertible<RefCountedPtr, ConstRefCountedPtr>();
 }
 

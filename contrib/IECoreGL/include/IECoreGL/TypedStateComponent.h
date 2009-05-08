@@ -46,15 +46,15 @@ template<typename T, unsigned int TId>
 class TypedStateComponent : public StateComponent
 {
 	public :
-	
+
 		typedef T ValueType;
-	
+
 		typedef boost::intrusive_ptr<TypedStateComponent> Ptr;
 		typedef boost::intrusive_ptr<const TypedStateComponent> ConstPtr;
-	
+
 		TypedStateComponent();
 		TypedStateComponent( const T &value );
-	
+
 		//! @name RunTimeTyped interface
 		////////////////////////////////////////////////////
 		//@{
@@ -68,9 +68,9 @@ class TypedStateComponent : public StateComponent
 		static bool inheritsFrom( const char *typeName );
 		static IECore::TypeId baseTypeId();
 		static const char *baseTypeName();
-		typedef StateComponent BaseClass;		
+		typedef StateComponent BaseClass;
 		//@}
-		
+
 		//! @name Bindable interface
 		////////////////////////////////////////////////////
 		//@{
@@ -79,15 +79,15 @@ class TypedStateComponent : public StateComponent
 		//@}
 
 		const T &value() const;
-		
+
 		static T defaultValue();
-		
+
 	private :
 
 		T m_value;
-		
+
 		static Description<TypedStateComponent<T, TId> > g_description;
-		
+
 };
 
 /// Use this macro to specialise the necessary parts of a TypedStateComponent instantiation.
@@ -108,12 +108,12 @@ class TypedStateComponent : public StateComponent
 	BASETYPE TYPE::defaultValue()															\
 	{																						\
 		return DEFAULTVALUE;																\
-	}						
+	}
 
 #define IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( TYPE, TYPEID, BASETYPE, DEFAULTVALUE )	\
 	IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )								\
 	template class TypedStateComponent<BASETYPE, TYPEID>;										\
-	
+
 /// \todo Now there are loads of these typedefs I think they should really be defined in the places
 /// they're used - so PrimitiveBound would be a typedef member in Primitive etc. This would help people
 /// see where StateComponents have effect, and also provide a better location for documenting them. Otherwise
@@ -195,7 +195,7 @@ template<>
 GLbitfield DoubleSidedStateComponent::mask() const;
 
 /// Used to implement the "rightHandedOrientation" Renderer attribute. Implemented by calling
-/// glFrontFace( GL_CCW ) when true and glFrontFace( GL_CW ) when false. 
+/// glFrontFace( GL_CCW ) when true and glFrontFace( GL_CW ) when false.
 typedef TypedStateComponent<bool, RightHandedOrientationStateComponentTypeId> RightHandedOrientationStateComponent;
 template<>
 void RightHandedOrientationStateComponent::bind() const;

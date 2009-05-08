@@ -73,7 +73,7 @@ class AssociatedLegendre
 		static void computeFactorials( unsigned int l );
 
 	private :
-		
+
 		static std::vector< double > &factorials();
 };
 

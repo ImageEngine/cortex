@@ -50,41 +50,41 @@ namespace IECore
 {
 
 template<typename F, typename T>
-XYZToXYYColorTransform<F, T>::XYZToXYYColorTransform() 
-{	
+XYZToXYYColorTransform<F, T>::XYZToXYYColorTransform()
+{
 	m_referenceWhite.x = 0.312713;
 	m_referenceWhite.y = 0.329016;
 }
 
 template<typename F, typename T>
 template<typename C>
-XYZToXYYColorTransform<F, T>::XYZToXYYColorTransform(		
-	const C &referenceWhite						
-) 
+XYZToXYYColorTransform<F, T>::XYZToXYYColorTransform(
+	const C &referenceWhite
+)
 {
 	typedef VectorTraits<C> VecTraits;
 	m_referenceWhite.x = VecTraits::get( referenceWhite, 0 );
-	m_referenceWhite.y = VecTraits::get( referenceWhite, 1 );	
+	m_referenceWhite.y = VecTraits::get( referenceWhite, 1 );
 }
 
 template<typename F, typename T>
 T XYZToXYYColorTransform<F, T>::transform( const F &f )
 {
 	Imath::V3f xyz = IECore::convert< Imath::V3f >( f );
-	
+
 	Imath::V3f xyY;
-	
+
 	float denom = xyz.x + xyz.y + xyz.z;
 	if ( Imath::Math<float>::fabs( denom ) <= Imath::limits<float>::epsilon() )
 	{
-		return T( m_referenceWhite.x, m_referenceWhite.y, 1.0 );	
+		return T( m_referenceWhite.x, m_referenceWhite.y, 1.0 );
 	}
-	
+
 	xyY.x = xyz.x / denom;
 	xyY.z = xyz.y;
-	xyY.y = xyz.y / denom;	
-	
-	return IECore::convert<T>( xyY );		
+	xyY.y = xyz.y / denom;
+
+	return IECore::convert<T>( xyY );
 }
 
 template<typename F, typename T>

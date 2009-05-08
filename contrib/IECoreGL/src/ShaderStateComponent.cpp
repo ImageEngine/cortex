@@ -61,7 +61,7 @@ ShaderStateComponent::ShaderStateComponent( ShaderPtr shader, IECore::ConstCompo
 		m_textureParameters = *textureParameterValues;
 	}
 }
-		
+
 void ShaderStateComponent::bind() const
 {
 	if( m_shader )
@@ -85,9 +85,9 @@ void ShaderStateComponent::bind() const
 				if( i>=texUnits.size() )
 				{
 					IECore::msg( IECore::Msg::Warning, "ShaderStateComponent::bind", boost::format( "Not enough texture units - skipping texture for \"%s\"." ) % it->first );
-					continue;					
+					continue;
 				}
-				
+
 				glActiveTexture( texUnits[i] );
 				it->second->bind();
 				m_shader->setParameter( it->first, i );
@@ -110,7 +110,7 @@ void ShaderStateComponent::bind() const
 
 GLbitfield ShaderStateComponent::mask() const
 {
-	if( m_shader ) 
+	if( m_shader )
 	{
 		return m_shader->mask() | GL_TEXTURE_BIT;
 	}

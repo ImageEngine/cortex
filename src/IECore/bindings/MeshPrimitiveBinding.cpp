@@ -42,17 +42,17 @@ using namespace boost::python;
 
 namespace IECore
 {
-	
+
 	static IntVectorDataPtr verticesPerFace( const MeshPrimitive &p )
 	{
 		return p.verticesPerFace()->copy();
 	}
-	
+
 	static IntVectorDataPtr vertexIds( const MeshPrimitive &p )
 	{
 		return p.vertexIds()->copy();
 	}
-	
+
 	void bindMeshPrimitive()
 	{
 		RunTimeTypedClass<MeshPrimitive>()
@@ -66,5 +66,5 @@ namespace IECore
 			.def( "createPlane", &MeshPrimitive::createPlane ).staticmethod( "createPlane" )
 		;
 	}
-	
+
 }

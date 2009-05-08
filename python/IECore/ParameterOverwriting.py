@@ -55,7 +55,7 @@ def __parameterSmartSetValue( self, value ):
 def __compoundParameterSmartSetValue( self, value ):
 	"""
 	Smart setValue operator for CompoundParameter objects. Uses introspection on the given value to define
-	how the value will be assigned to the CompoundParameter object. 
+	how the value will be assigned to the CompoundParameter object.
 	"""
 
 	if isinstance( value, IECore.CompoundObject ):

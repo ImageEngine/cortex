@@ -48,22 +48,22 @@ using namespace boost;
 
 static ParameterHandler::Description< BoolParameterHandler > registrar( IECore::BoolParameter::staticTypeId() );
 
-MStatus BoolParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const 
+MStatus BoolParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
 	IECore::ConstBoolParameterPtr p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnNumericAttribute fnNAttr( attribute );
 	if( !fnNAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
 	}
-	
+
 	fnNAttr.setDefault( p->typedDefaultValue() );
-	
+
 	return MS::kSuccess;
 }
 
@@ -74,13 +74,13 @@ MObject BoolParameterHandler::create( IECore::ConstParameterPtr parameter, const
 	{
 		return MObject::kNullObj;
 	}
-	
+
 	MFnNumericAttribute fnNAttr;
 	MObject result = fnNAttr.create( attributeName, attributeName, MFnNumericData::kBoolean, p->typedDefaultValue() );
 	update( parameter, result );
 	return result;
 }
-		
+
 MStatus BoolParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstBoolParameterPtr p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
@@ -88,7 +88,7 @@ MStatus BoolParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPl
 	{
 		return MS::kFailure;
 	}
-	
+
 	return plug.setValue( p->getTypedValue() );
 }
 
@@ -99,7 +99,7 @@ MStatus BoolParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr 
 	{
 		return MS::kFailure;
 	}
-	
+
 	bool v;
 	MStatus result;
 	result = plug.getValue( v );

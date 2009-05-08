@@ -50,10 +50,10 @@ MeshPrimitive::MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds, IECore::Con
 	:	m_vertIds( vertIds->copy() )
 {
 	assert( points );
-	
+
 	m_points = points->copy();
 	assert( m_points );
-	
+
 	const vector<V3f> &p = m_points->readable();
 	for( unsigned int i=0; i<p.size(); i++ )
 	{
@@ -70,56 +70,56 @@ IECore::ConstIntVectorDataPtr MeshPrimitive::vertexIds() const
 {
 	return m_vertIds;
 }
-	
+
 size_t MeshPrimitive::vertexAttributeSize() const
 {
 	return m_vertIds->readable().size();
 }
-				
+
 void MeshPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 {
 	assert( m_points );
-		
+
 	setVertexAttributes( state );
-	
-	const vector<V3f> &points = m_points->readable();	
+
+	const vector<V3f> &points = m_points->readable();
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer( 3, GL_FLOAT, 0, &points[0] );	
-	
+	glVertexPointer( 3, GL_FLOAT, 0, &points[0] );
+
 	if ( m_normals )
 	{
-		const vector<V3f> &normals = m_normals->readable();	
+		const vector<V3f> &normals = m_normals->readable();
 		glEnableClientState(GL_NORMAL_ARRAY);
-		glNormalPointer( GL_FLOAT, 0, &normals[0] );	
+		glNormalPointer( GL_FLOAT, 0, &normals[0] );
 	}
-	
+
 	if ( m_texCoords )
 	{
-		const vector<V2f> &texCoords = m_texCoords->readable();	
+		const vector<V2f> &texCoords = m_texCoords->readable();
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 0, &texCoords[0] );	
+		glTexCoordPointer(2, GL_FLOAT, 0, &texCoords[0] );
 	}
-	
+
 	if ( m_colors )
 	{
-		const vector<Color3f> &colors = m_colors->readable();	
+		const vector<Color3f> &colors = m_colors->readable();
 		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(3, GL_FLOAT, 0, &colors[0] );		
+		glColorPointer(3, GL_FLOAT, 0, &colors[0] );
 	}
-	
+
 	glDrawArrays( GL_TRIANGLES, 0, vertexAttributeSize() );
-	
+
 	glDisableClientState(GL_VERTEX_ARRAY);
 	if ( m_normals )
 	{
 		glDisableClientState(GL_NORMAL_ARRAY);
 	}
-	
+
 	if ( m_texCoords )
 	{
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
-	
+
 	if ( m_colors )
 	{
 		glDisableClientState(GL_COLOR_ARRAY);

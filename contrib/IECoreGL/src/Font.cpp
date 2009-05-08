@@ -58,7 +58,7 @@ IECore::FontPtr Font::coreFont()
 {
 	return m_font;
 }
-		
+
 ConstMeshPrimitivePtr Font::mesh( char c )
 {
 	MeshMap::const_iterator it = m_meshes.find( c );
@@ -66,23 +66,23 @@ ConstMeshPrimitivePtr Font::mesh( char c )
 	{
 		return it->second;
 	}
-	
+
 	ToGLMeshConverter converter( m_font->mesh( c ) );
 	ConstMeshPrimitivePtr mesh = boost::static_pointer_cast<const MeshPrimitive>( converter.convert() );
 	m_meshes[c] = mesh;
-	
+
 	return mesh;
 }
-		
+
 ConstAlphaTexturePtr Font::texture()
 {
 	if( m_texture )
 	{
 		return m_texture;
 	}
-	
+
 	IECore::ConstImagePrimitivePtr image = m_font->image();
-	
+
 	IECore::ConstFloatVectorDataPtr y = image->getChannel<float>( "Y" );
 	Imath::V2i s = image->getDataWindow().size() + Imath::V2i( 1 );
 	m_texture = new AlphaTexture( s.x, s.y, y );

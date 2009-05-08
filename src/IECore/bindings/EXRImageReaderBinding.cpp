@@ -52,8 +52,8 @@ void bindEXRImageReader()
 		.def( init<const std::string &>() )
 		.def( "canRead", &EXRImageReader::canRead ).staticmethod( "canRead" )
 	;
-	
+
 }
-  
+
 } // namespace IECore
 

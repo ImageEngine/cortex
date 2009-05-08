@@ -40,64 +40,64 @@ from ParameterUI import ParameterUI
 class SplineParameterUI( ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
-	
+
 		ParameterUI.__init__( self, node, parameter, **kw )
-				
+
 		self._layout = maya.cmds.rowLayout(
 			numberOfColumns = 3,
 			rowAttach = [ ( 1, "top", 0 ), ( 2, "both", 0 ), ( 3, "both", 0 ) ]
 		)
-		
+
 		maya.cmds.text(
 			label = self.label(),
 			font = "smallPlainLabelFont",
 			align = "right",
 			annotation = self.description(),
 		)
-		
+
 		self.__gradientControl = maya.cmds.gradientControl()
 		self.__button = maya.cmds.button( label = ">")
 		self.__editWindow = None
-		
+
 		self.replace( node, parameter )
-								
+
 	def replace( self, node, parameter ) :
-		
+
 		ParameterUI.replace( self, node, parameter )
 		maya.cmds.gradientControl( self.__gradientControl, edit=True, attribute=self.plugName() )
 		maya.cmds.button( self.__button, edit=True, command=self.__openEditWindow )
 		self.__editWindow = None
-	
+
 	## Returns True if we're a color ramp and False if we're a greyscale curve.
 	def __colored( self ) :
-	
+
 		plugName = self.plugName()
 		attrName = plugName.split( "." )[-1]
 		return maya.cmds.objExists( plugName + "[0]." + attrName + "_ColorR" )
-		
+
 	def __openEditWindow( self, unused ) :
-	
+
 		if not self.__editWindow :
-			
+
 			self.__editWindow = maya.cmds.window( self.nodeName() + " " + self.label(), retain=True, widthHeight=[ 600, 300 ] )
-			
+
 			layout = maya.cmds.formLayout()
-			
+
 			positionControl = maya.cmds.attrFieldSliderGrp( label = "Selected position", columnWidth=[ ( 1, 100 ) ] )
-	
+
 			if self.__colored() :
 				valueControl = maya.cmds.attrColorSliderGrp( label = "Selected colour", showButton=False, columnWidth=[ ( 1, 90 ) ] )
 			else :
 				valueControl = maya.cmds.attrFieldSliderGrp( label = "Selected value", columnWidth=[ ( 1, 90 ) ] )
-	
+
 			gradientControl = maya.cmds.gradientControl(
 				attribute=self.plugName(),
 				selectedColorControl=valueControl,
 				selectedPositionControl=positionControl
 			)
-			
+
 			maya.cmds.formLayout( layout,
-				edit=True, 
+				edit=True,
 				attachForm = [
 					( positionControl, "left", 5 ),
 					( positionControl, "bottom", 15 ),
@@ -112,7 +112,7 @@ class SplineParameterUI( ParameterUI ) :
 				]
 			)
 		maya.cmds.showWindow( self.__editWindow )
-		
+
 ParameterUI.registerUI( IECore.TypeId.SplinefColor3fParameter, SplineParameterUI )
 ParameterUI.registerUI( IECore.TypeId.SplinefColor4fParameter, SplineParameterUI )
 ParameterUI.registerUI( IECore.TypeId.SplineffParameter, SplineParameterUI )

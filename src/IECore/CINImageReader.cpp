@@ -64,7 +64,7 @@ struct CINImageReader::Header
 	ImageInformation m_imageInformation;
 	ImageDataFormatInformation m_imageDataFormatInformation;
 	ImageOriginationInformation m_imageOriginationInformation;
-	
+
 	/// Map from channel names to index into ImageInformation.channel_information array
 	typedef map< string, int > ChannelOffsetMap;
 	map< string, int > m_channelOffsets;
@@ -115,7 +115,7 @@ bool CINImageReader::canRead( const string &fileName )
 	{
 		return false;
 	}
-	
+
 	return magic == 0xd75f2a80 || magic == 0x802a5fd7;
 }
 
@@ -124,9 +124,9 @@ void CINImageReader::channelNames( vector<string> &names )
 	names.clear();
 
 	open( true );
-	
+
 	assert( m_header );
-	
+
 	for ( Header::ChannelOffsetMap::const_iterator it = m_header->m_channelOffsets.begin(); it != m_header->m_channelOffsets.end(); ++it )
 	{
 		names.push_back( it->first );
@@ -156,7 +156,7 @@ std::string CINImageReader::sourceColorSpace() const
 {
 	/// This isn't strictly true, but as the reader currently stands it performs the Cineon-Linear
 	/// conversion for us. Eventually, this will start returning "cineon", and the ImageReader base
-	/// class will handle the appropriate color conversions.	
+	/// class will handle the appropriate color conversions.
 	return "linear";
 }
 
@@ -170,16 +170,16 @@ DataPtr CINImageReader::readChannel( const string &name, const Imath::Box2i &dat
 	{
 		return 0;
 	}
-	
+
 	assert( m_header );
-	
+
 	// figure out the offset into the bitstream for the given channel
 	assert( m_header->m_channelOffsets.find( name ) != m_header->m_channelOffsets.end() );
 	int channelOffset = m_header->m_channelOffsets[name];
 
 	assert( (int)m_header->m_imageInformation.channel_information[channelOffset].bpp == 10 );
 	int bpp = m_header->m_imageInformation.channel_information[channelOffset].bpp;
-	
+
 	// form the mask for this channel
 	unsigned int mask = 0;
 	for (int pi = 0; pi < bpp; ++pi)
@@ -187,7 +187,7 @@ DataPtr CINImageReader::readChannel( const string &name, const Imath::Box2i &dat
 		mask = 1 + (mask << 1);
 	}
 	mask <<= ((32 - bpp) - channelOffset * bpp);
-	
+
 	CineonToLinearDataConversion< unsigned short, half > converter;
 
 	HalfVectorDataPtr dataContainer = new HalfVectorData();
@@ -197,14 +197,14 @@ DataPtr CINImageReader::readChannel( const string &name, const Imath::Box2i &dat
 	data.resize( area );
 
 	int dataWidth = 1 + dataWindow.size().x;
-	
+
 	Box2i wholeDataWindow = this->dataWindow();
-	
-	const int yMin = dataWindow.min.y - wholeDataWindow.min.y;	
-	const int yMax = dataWindow.max.y - wholeDataWindow.min.y;	
-	
+
+	const int yMin = dataWindow.min.y - wholeDataWindow.min.y;
+	const int yMax = dataWindow.max.y - wholeDataWindow.min.y;
+
 	const int xMin = dataWindow.min.x - wholeDataWindow.min.x;
-	const int xMax = dataWindow.max.x - wholeDataWindow.min.x;			
+	const int xMax = dataWindow.max.x - wholeDataWindow.min.x;
 
 	int dataY = 0;
 	for ( int y = yMin ; y <= yMax ; ++y, ++dataY )
@@ -224,7 +224,7 @@ DataPtr CINImageReader::readChannel( const string &name, const Imath::Box2i &dat
 
 			// assume we have 10bit log, two wasted bits aligning to 32 longword
 			unsigned short cv = (unsigned short) ( ( mask & cell ) >> ( 2 + ( 2 - channelOffset ) * bpp ) );
-			assert( cv < 1024 );			
+			assert( cv < 1024 );
 			data[dataOffset] = converter( cv );
 		}
 	}
@@ -237,7 +237,7 @@ bool CINImageReader::open( bool throwOnFailure )
 	if ( fileName() == m_bufferFileName )
 	{
 		assert( m_header );
-		
+
 		return true;
 	}
 
@@ -254,61 +254,61 @@ bool CINImageReader::open( bool throwOnFailure )
 		{
 			throw IOException( "CINImageReader: Could not open " + fileName() );
 		}
-		
+
 		in.read( reinterpret_cast<char*>(&m_header->m_fileInformation), sizeof(m_header->m_fileInformation) );
 		if ( in.fail() )
 		{
 			throw IOException( "CINImageReader: Error reading " + fileName() );
 		}
-		
+
 		/// This code works correctly on both big- and little-endian platforms
 		m_reverseBytes = false;
 		if ( m_header->m_fileInformation.magic == 0xd75f2a80 )
 		{
 			m_reverseBytes = true;
-		} 
+		}
 		else if ( m_header->m_fileInformation.magic != 0x802a5fd7 )
-		{		
+		{
 			throw IOException( "CINImageReader: Invalid Cineon magic number while reading " + fileName() );
 		}
-		
+
 		in.read( reinterpret_cast<char*>(&m_header->m_imageInformation), sizeof(m_header->m_imageInformation) );
 		if ( in.fail() )
 		{
 			throw IOException( "CINImageReader: Error reading " + fileName() );
 		}
-		
+
 		in.read( reinterpret_cast<char*>(&m_header->m_imageDataFormatInformation), sizeof(m_header->m_imageDataFormatInformation) );
 		if ( in.fail() )
 		{
 			throw IOException( "CINImageReader: Error reading " + fileName() );
 		}
-		
+
 		if ( (int)m_header->m_imageDataFormatInformation.packing != 5 )
 		{
 			throw IOException( "CINImageReader: Unsupported data packing in file " + fileName() );
 		}
-		
+
 		if ( (int)m_header->m_imageDataFormatInformation.interleave != 0 )
 		{
 			throw IOException( "CINImageReader: Unsupported data interleaving in file " + fileName() );
 		}
-		
+
 		if ( (int)m_header->m_imageDataFormatInformation.data_signed != 0 )
 		{
 			throw IOException( "CINImageReader: Unsupported data signing in file " + fileName() );
 		}
-		
+
 		if ( (int)m_header->m_imageDataFormatInformation.sense != 0 )
 		{
 			throw IOException( "CINImageReader: Unsupported data sense in file " + fileName() );
-		}		
-		
+		}
+
 		if ( (int)m_header->m_imageDataFormatInformation.eol_padding != 0 || (int)m_header->m_imageDataFormatInformation.eoc_padding != 0 )
 		{
 			throw IOException( "CINImageReader: Unsupported data padding in file " + fileName() );
-		}				
-		
+		}
+
 		in.read( reinterpret_cast<char*>(&m_header->m_imageOriginationInformation), sizeof(m_header->m_imageOriginationInformation) );
 		if ( in.fail() )
 		{
@@ -321,7 +321,7 @@ bool CINImageReader::open( bool throwOnFailure )
 			m_header->m_fileInformation.industry_header_length = reverseBytes( m_header->m_fileInformation.industry_header_length );
 			m_header->m_fileInformation.variable_header_length = reverseBytes( m_header->m_fileInformation.variable_header_length );
 		}
-		
+
 		if ( (int)m_header->m_imageInformation.orientation != 0 )
 		{
 			throw IOException( "CINImageReader: Unsupported image orientation in file " + fileName() );
@@ -333,7 +333,7 @@ bool CINImageReader::open( bool throwOnFailure )
 
 			if ( m_reverseBytes )
 			{
-				channelInformation.pixels_per_line = reverseBytes( channelInformation.pixels_per_line );	
+				channelInformation.pixels_per_line = reverseBytes( channelInformation.pixels_per_line );
 				channelInformation.lines_per_image = reverseBytes( channelInformation.lines_per_image );
 			}
 
@@ -349,7 +349,7 @@ bool CINImageReader::open( bool throwOnFailure )
 					throw IOException( "CINImageReader: Cannot read channels of differing dimensions in file " + fileName() );
 				}
 			}
-						
+
 			if ( (int)channelInformation.bpp != 10 )
 			{
 				throw IOException( ( boost::format( "CINImageReader: Unsupported bits-per-pixel (%d) in file %s ") % (int)channelInformation.bpp % fileName() ).str() );
@@ -371,16 +371,16 @@ bool CINImageReader::open( bool throwOnFailure )
 			else if ( channelInformation.byte_1 == 2 )
 			{
 				m_header->m_channelOffsets["G"] = i;
-			} 
+			}
 			else if ( channelInformation.byte_1 == 3 )
 			{
 				m_header->m_channelOffsets["B"] = i;
-			} 
+			}
 			else
 			{
 				throw IOException( "CINImageReader: Unsupported channel type while reading " + fileName() );
 			}
-			
+
 			/// \todo Because we only deal with 10-bit values packed into 32-bit structures, we can only handle a maximum of 3
 			/// channels for the time being.
 			if ( m_header->m_channelOffsets.size() > 3 )
@@ -399,18 +399,18 @@ bool CINImageReader::open( bool throwOnFailure )
 		// Read the data into the buffer - remember that we're currently packing upto 3 channels into each 32-bit "cell"
 		int bufferSize = ( std::max<unsigned int>( 1u, m_header->m_channelOffsets.size() / 3 ) ) * m_bufferWidth * m_bufferHeight;
 		m_buffer.resize( bufferSize, 0 );
-		
+
 		in.read( reinterpret_cast<char*>(&m_buffer[0]), sizeof(unsigned int) * bufferSize );
 		if ( in.fail() )
 		{
 			throw IOException( "CINImageReader: Error reading " + fileName() );
-		}		
+		}
 	}
 	catch (...)
 	{
 		delete m_header;
 		m_header = 0;
-		
+
 		if ( throwOnFailure )
 		{
 			throw;

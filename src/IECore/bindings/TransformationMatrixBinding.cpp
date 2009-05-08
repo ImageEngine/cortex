@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -46,7 +46,7 @@ using namespace boost::python;
 using namespace Imath;
 using namespace std;
 
-namespace IECore 
+namespace IECore
 {
 
 template<typename T>
@@ -60,7 +60,7 @@ void bindTransformationMatrix()
 
 template<typename T>
 void bindTypedTransformationMatrix(const char *bindName)
-{	
+{
 	class_< TransformationMatrix<T> >(bindName)
 		.def_readwrite("scalePivot", &TransformationMatrix<T>::scalePivot)
 		.def_readwrite("scale", &TransformationMatrix<T>::scale)
@@ -75,7 +75,7 @@ void bindTypedTransformationMatrix(const char *bindName)
 		.def(init<>())
 		.def(init< const Imath::Vec3< T >, const Imath::Euler< T >, const Imath::Vec3< T > >())
 		.def(init< const TransformationMatrix<T> &>())
-	
+
 		.add_property( "transform",	&TransformationMatrix<T>::transform )
 
 		.def(self == self)

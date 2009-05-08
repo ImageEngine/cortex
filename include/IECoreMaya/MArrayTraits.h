@@ -144,7 +144,7 @@ struct MArrayTraits<MObjectArray>
 	static MFn::Type dataType()
 	{
 		return MFn::kInvalid;
-	}; 
+	};
 };
 
 template<>

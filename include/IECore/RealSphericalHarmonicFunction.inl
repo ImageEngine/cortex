@@ -43,19 +43,19 @@ V RealSphericalHarmonicFunction<V>::evaluate( unsigned int l, int m, V theta, V 
 {
 	if ( m > 0 )
 	{
-		return Imath::Math<V>::sqrt(2.0) * 
-				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(m) ) * 
-				Imath::Math<V>::cos( m*phi ) * 
+		return Imath::Math<V>::sqrt(2.0) *
+				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(m) ) *
+				Imath::Math<V>::cos( m*phi ) *
 				AssociatedLegendre<double>::evaluate( l, static_cast<unsigned int>(m), Imath::Math<V>::cos( theta ) );
 	}
 	if ( m < 0 )
 	{
-		return Imath::Math<V>::sqrt(2.0) * 
-				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(-m) ) * 
-				Imath::Math<V>::sin( -m*phi ) * 
+		return Imath::Math<V>::sqrt(2.0) *
+				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(-m) ) *
+				Imath::Math<V>::sin( -m*phi ) *
 				AssociatedLegendre<double>::evaluate( l, static_cast<unsigned int>(-m), Imath::Math<V>::cos( theta ) );
 	}
-	return AssociatedLegendre<double>::normalizationFactor( l, 0 ) * 
+	return AssociatedLegendre<double>::normalizationFactor( l, 0 ) *
 				AssociatedLegendre<double>::evaluate( l, 0, Imath::Math<V>::cos(theta) );
 }
 

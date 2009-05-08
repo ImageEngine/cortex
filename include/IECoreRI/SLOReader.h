@@ -54,15 +54,15 @@ class SLOReader : public IECore::Reader
 		virtual ~SLOReader();
 
 		static bool canRead( const std::string &fileName );
-	
+
 	protected :
-				
+
 		virtual IECore::ObjectPtr doOperation( IECore::ConstCompoundObjectPtr operands );
-	
+
 	private :
-		
+
 		static const ReaderDescription<SLOReader> m_readerDescription;
-	
+
 };
 
 IE_CORE_DECLAREPTR( SLOReader );

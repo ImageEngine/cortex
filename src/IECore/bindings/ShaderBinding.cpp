@@ -52,5 +52,5 @@ namespace IECore
 			.add_property( "parameters", &Shader::parametersData )
 		;
 	}
-	
+
 }

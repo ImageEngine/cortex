@@ -40,16 +40,16 @@ from IECore import *
 from IECoreMaya import *
 
 class TestConverterHolder( unittest.TestCase ) :
-		
+
 	def test( self ) :
-	
+
 		""" Test ConverterHolder """
-		n = cmds.createNode( "ieConverterHolder" )	
+		n = cmds.createNode( "ieConverterHolder" )
 		c = FnConverterHolder( str(n) )
 		self.assert_( c )
-		
+
 		# \todo Add a FromMayaMeshConverter, pass in a mesh shape, and assert that we get a MeshPrimitive out
 
 
 if __name__ == "__main__":
-	MayaUnitTest.TestProgram()	 
+	MayaUnitTest.TestProgram()

@@ -61,7 +61,7 @@ class CINImageReader : public ImageReader
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
-		virtual std::string sourceColorSpace() const ;		
+		virtual std::string sourceColorSpace() const ;
 
 	private:
 
@@ -86,7 +86,7 @@ class CINImageReader : public ImageReader
 		std::string m_bufferFileName;
 		unsigned int m_bufferWidth, m_bufferHeight;
 		bool m_reverseBytes;
-		
+
 		struct Header;
 		Header *m_header;
 };

@@ -36,7 +36,7 @@ import unittest
 
 from IECore import *
 
-	
+
 class TestOptionalCompoundParameter( unittest.TestCase ) :
 
 	def testAttributeAccess( self ):
@@ -49,7 +49,7 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 		self.assertEqual( p.userData(), CompoundObject() )
 
 	def testConstructor( self ) :
-	
+
 		p = OptionalCompoundParameter( "n", "d", members = [ StringParameter( "a", "a", "", presets = ( ( "b", StringData( "b" ) ), ), presetsOnly = True ) ] )
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
@@ -57,9 +57,9 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 		self.assertEqual( len( p.values() ), 1 )
 		self.assertEqual( len( p ), 1 )
 		self.assertEqual (p.userData(), CompoundObject() )
-	
+
 	def testLateValidation( self ) :
-	
+
 		p = OptionalCompoundParameter(
 			name = "c",
 			description = "d",
@@ -68,13 +68,13 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 				FloatParameter( "f", "d", 2 )
 			]
 		)
-		
+
 		p.validate()
 		p.setValue( CompoundObject( { "i" : IntData( 10 ), "f" : FloatData( 20 ) } ) )
 		p.validate()
 		self.assertEqual( p["i"].getValue(),  IntData( 10 ) )
 		self.assertEqual( p["f"].getValue(),  FloatData( 20 ) )
-		
+
 		p.setValue( CompoundObject( { "i" : IntData( 10 ) } ) )
 		self.assertRaises( RuntimeError, p.validate )
 		self.assertRaises( RuntimeError, p.getValidatedValue )
@@ -167,7 +167,7 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 		self.assert_( p["i"].getTypedValue() == 20 )
 		p["i"] = IntData(30)
 		self.assert_( p["i"].getTypedValue() == 30 )
-				
-									
+
+
 if __name__ == "__main__":
         unittest.main()

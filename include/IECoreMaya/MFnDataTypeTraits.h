@@ -70,7 +70,7 @@ struct MFnDataTypeTraits
 {
 	/// The Maya value type
 	typedef void ValueType;
-	
+
 	/// The Dependecny Graph data type
 	static MFn::Type dataType()
 	{
@@ -82,7 +82,7 @@ template<>
 struct MFnDataTypeTraits<MFnData::kMatrix>
 {
 	typedef MMatrix ValueType;
-	
+
 	static MFn::Type dataType()
 	{
 		return MFn::kMatrixData;
@@ -93,7 +93,7 @@ template<>
 struct MFnDataTypeTraits<MFnData::kString>
 {
 	typedef MString ValueType;
-	
+
 	static MFn::Type dataType()
 	{
 		return MFn::kStringData;
@@ -104,7 +104,7 @@ template<>
 struct MFnDataTypeTraits<MFnData::kStringArray>
 {
 	typedef MStringArray ValueType;
-	
+
 	static MFn::Type dataType()
 	{
 		return MFn::kStringArrayData;
@@ -115,7 +115,7 @@ template<>
 struct MFnDataTypeTraits<MFnData::kVectorArray>
 {
 	typedef MVectorArray ValueType;
-	
+
 	static MFn::Type dataType()
 	{
 		return MFn::kVectorArrayData;
@@ -126,7 +126,7 @@ template<>
 struct MFnDataTypeTraits<MFnData::kPointArray>
 {
 	typedef MPointArray ValueType;
-	
+
 	static MFn::Type dataType()
 	{
 		return MFn::kPointArrayData;
@@ -137,7 +137,7 @@ template<>
 struct MFnDataTypeTraits<MFnData::kIntArray>
 {
 	typedef MIntArray ValueType;
-	
+
 	static MFn::Type dataType()
 	{
 		return MFn::kIntArrayData;
@@ -148,7 +148,7 @@ template<>
 struct MFnDataTypeTraits<MFnData::kDoubleArray>
 {
 	typedef MDoubleArray ValueType;
-	
+
 	static MFn::Type dataType()
 	{
 		return MFn::kDoubleArrayData;

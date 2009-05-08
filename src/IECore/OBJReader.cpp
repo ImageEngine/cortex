@@ -82,7 +82,7 @@ OBJReader::OBJReader( const string &name )
 bool OBJReader::canRead( const string &fileName )
 {
 	// there really are no magic numbers, .obj is a simple ascii text file
-	
+
 	// so: enforce at least that the file has '.obj' extension
 	if(fileName.rfind(".obj") != fileName.length() - 4)
 		return false;
@@ -97,10 +97,10 @@ ObjectPtr OBJReader::doOperation(ConstCompoundObjectPtr operands)
 	// for now we are going to retrieve vertex, texture, normal coordinates, faces.
 	// later (when we have the primitives), we will handle a larger subset of the
 	// OBJ format
-	
+
 	IntVectorDataPtr vpf = new IntVectorData();
 	m_vpf = &vpf->writable();
-	
+
 	IntVectorDataPtr vids = new IntVectorData();
 	m_vids = &vids->writable();
 
@@ -120,15 +120,15 @@ ObjectPtr OBJReader::doOperation(ConstCompoundObjectPtr operands)
 	FloatVectorDataPtr tTextureCoordinates = new FloatVectorData();
 	m_tTextureCoordinates = &tTextureCoordinates->writable();
 	mesh->variables.insert(PrimitiveVariableMap::value_type("t", PrimitiveVariable(i, tTextureCoordinates)));
-	
+
 	// build normals
 	V3fVectorDataPtr normals = new V3fVectorData();
 	m_normals = &normals->writable();
 	mesh->variables.insert(PrimitiveVariableMap::value_type("N", PrimitiveVariable(i, normals)));
-	
+
 	// parse the file
 	parseOBJ();
-	
+
 	// create our MeshPrimitive
 	mesh->setTopology(vpf, vids, "linear");
 	return mesh;
@@ -147,7 +147,7 @@ void OBJReader::parseVertex(const char * begin, const char * end)
 	v[0] = vec[0];
  	v[1] = vec[1];
  	v[2] = vec[2];
-	
+
 	// add this vertex
 	m_vertices->push_back(v);
 }
@@ -164,7 +164,7 @@ void OBJReader::parseTextureCoordinate(const char * begin, const char * end)
 	vt[0] = vec[0];
  	vt[1] = vec[1];
 	vt[2] = vec.size() == 3 ? vec[2] : 0.0f;
-	
+
 	// add this texture coordinate
 	m_introducedTextureCoordinates.push_back(vt);
 }
@@ -181,7 +181,7 @@ void OBJReader::parseNormal(const char * begin, const char * end)
 	vn[0] = vec[0];
 	vn[1] = vec[1];
 	vn[2] = vec[2];
-	
+
 	// add this normal
 	m_introducedNormals.push_back(vn);
 }
@@ -198,10 +198,10 @@ void OBJReader::parseFace(const char * begin, const char * end)
 			("/" >> (int_p[append(tvec)] | epsilon_p) >> "/" >> (int_p[append(nvec)] | epsilon_p))
 			| epsilon_p
 		);
-	
+
 	srule face = "f"  >> entry >> entry >> entry >> *(entry);
 	parse_info<> result = parse(begin, face, space_p);
-		
+
 	// push back the degree of the face
 	m_vpf->push_back(vec.size());
 
@@ -213,7 +213,7 @@ void OBJReader::parseFace(const char * begin, const char * end)
 		m_vids->push_back(*i > 0 ? *i - 1 : m_vertices->size() + *i);
 	}
 
-	
+
 	// merge in texture coordinates and normals, if present
 	// OBJ format requires an encoding for faces which uses one of the vertex/texture/normal specifications
 	// consistently across the entire face.  eg. we can have all v/vt/vn, or all v//vn, or all v, but not
@@ -263,7 +263,7 @@ void OBJReader::parseFace(const char * begin, const char * end)
 		{
 			m_sTextureCoordinates->push_back(0.0f);
 			m_tTextureCoordinates->push_back(0.0f);
-		}		
+		}
 	}
 }
 
@@ -291,7 +291,7 @@ void OBJReader::parseOBJ() {
 
 	// see
 	// http://local.wasp.uwa.edu.au/~pbourke/dataformats/obj/
-	
+
 	// vertices
 	srule vertex         = ("v"  >> real_p >> real_p >> real_p) [bind(&OBJReader::parseVertex,            ref(this), _1, _2)];
 	srule vertex_texture = ("vt" >> real_p >> real_p)           [bind(&OBJReader::parseTextureCoordinate, ref(this), _1, _2)];
@@ -304,7 +304,7 @@ void OBJReader::parseOBJ() {
 	// srule vertex_basis_matrix  = "bmat";
 	// srule vertex_step_size  = "step" >> int_p >> int_p;
 	srule vertex_type = vertex | vertex_texture | vertex_normal;
-	
+
 	// elements
 	srule point = "p" >> real_p >> *(real_p);
 	srule  line = "l" >> int_p >> int_p >> *(int_p);
@@ -313,7 +313,7 @@ void OBJReader::parseOBJ() {
 	// srule curve_2d = "curv2";
 	// srule surface = "surf";
 	srule element = point | line | face;
-	
+
  	// free-form curve / surface statements
 	// srule parameter = "parm";
 	// srule trim_loop = "trim";
@@ -321,7 +321,7 @@ void OBJReader::parseOBJ() {
 	// srule special_curve = "scrv";
 	// srule special_point = "sp";
 	// srule end_statement = "end";
-	
+
 	// connectivity
 	//srule connect = "con";
 
@@ -331,7 +331,7 @@ void OBJReader::parseOBJ() {
 	//	srule merging_group = "mg";
 	srule object_name = "o" >> int_p;
 	srule grouping = group_name | object_name;
-	
+
 	// display and render attributes
 	// srule bevel_interpretation = "bevel";
 	// srule color_interpolation = "c_interp";

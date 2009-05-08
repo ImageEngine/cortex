@@ -52,5 +52,5 @@ void bindTexture()
 		.def( "imagePrimitive", &Texture::imagePrimitive )
 	;
 }
-	
+
 }

@@ -46,7 +46,7 @@ namespace IECore
 
 void bindMeshTangentsOp()
 {
-	
+
 	RunTimeTypedClass<MeshTangentsOp>()
 		.def( init<>() )
 	;

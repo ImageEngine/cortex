@@ -41,7 +41,7 @@
 #include "IECoreMaya/MArrayIter.h"
 
 namespace IECoreMaya
-{	
+{
 
 /// A KDTree typedef for use with the MVector point type.
 typedef IECore::KDTree<MArrayIter<MVectorArray>::ConstIterator> MVectorTree;

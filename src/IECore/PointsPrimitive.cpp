@@ -60,7 +60,7 @@ PointsPrimitive::PointsPrimitive( V3fVectorDataPtr points, FloatVectorDataPtr ra
 PointsPrimitive::~PointsPrimitive()
 {
 }
-				
+
 void PointsPrimitive::copyFrom( IECore::ConstObjectPtr other, IECore::Object::CopyContext *context )
 {
 	Primitive::copyFrom( other, context );

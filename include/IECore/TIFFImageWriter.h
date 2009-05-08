@@ -48,7 +48,7 @@ namespace IECore
 {
 
 /// The TIFFImageWriter class serializes images to the Tagged Image File Format (TIFF) format
-/// 
+///
 /// The tags which may be written into the files are:
 ///
 /// TIFFTAG_PHOTOMETRIC<br>
@@ -82,8 +82,8 @@ class TIFFImageWriter : public ImageWriter
 		/// construct an TIFFImageWriter for the given image and output filename
 		TIFFImageWriter( ObjectPtr object, const std::string &fileName );
 		virtual ~TIFFImageWriter();
-		
-		virtual std::string destinationColorSpace() const ;		
+
+		virtual std::string destinationColorSpace() const ;
 
 	private:
 
@@ -92,9 +92,9 @@ class TIFFImageWriter : public ImageWriter
 		virtual void writeImage( const std::vector<std::string> &names,
 		                         ConstImagePrimitivePtr image,
 		                         const Imath::Box2i &dataWindow	) const;
-					 
+
 		template<typename ChannelData>
-		struct ChannelConverter;			 
+		struct ChannelConverter;
 
 		template<typename T>
 		void encodeChannels( ConstImagePrimitivePtr image, const std::vector<std::string> &names,

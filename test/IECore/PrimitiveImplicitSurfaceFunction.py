@@ -41,19 +41,19 @@ from IECore import *
 class TestPrimitiveImplicitSurfaceFunction( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		# Poly sphere of radius 1
 		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
-				
+
 		a = PrimitiveImplicitSurfaceFunction( m )
-			
+
 		v = a.getValue( V3f(10,0,0) )
-		self.assert_( math.fabs( v - 9 ) < 0.5 )		
-		
+		self.assert_( math.fabs( v - 9 ) < 0.5 )
+
 		v = a.getValue( V3f(0,0,0) )
-		self.assert_( math.fabs( v ) - 1  < 0.5 )					
-				
-	
+		self.assert_( math.fabs( v ) - 1  < 0.5 )
+
+
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

@@ -53,27 +53,27 @@ struct ColorTransform : public std::unary_function<F, T>
 
 	typedef F FromType;
 	typedef T ToType;
-	
+
 	/// The type of the converter that can perform the inverse transformation
 	typedef ColorTransform<T, F> InverseType;
-	
+
 	virtual ~ColorTransform()
 	{
 	}
-	
+
 	T operator()( const F &f )
 	{
 		return transform( f );
 	}
-	
+
 	InverseType inverse() const
 	{
 		/// Function is not invertible
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 	}
-	
+
 	virtual T transform( const F &f ) = 0;
-	
+
 };
 
 } // namespace IECore

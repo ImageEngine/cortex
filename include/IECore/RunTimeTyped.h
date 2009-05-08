@@ -53,7 +53,7 @@ namespace IECore
 	static IECore::TypeId staticTypeId() { return TYPENAME ## TypeId; };\
 	static const char *staticTypeName() { return #TYPENAME; };\
 	static IECore::TypeId baseTypeId() { return BaseClass::staticTypeId(); };\
-	static const char *baseTypeName() { return BaseClass::staticTypeName(); };	
+	static const char *baseTypeName() { return BaseClass::staticTypeName(); };
 
 #define IE_CORE_DECLAREEXTENSIONTYPEFNS( TYPENAME, TYPEID )\
 	virtual IECore::TypeId typeId() const { return IECore::TypeId(TYPEID); };\
@@ -61,12 +61,12 @@ namespace IECore
 	static IECore::TypeId staticTypeId() { return IECore::TypeId(TYPEID); };\
 	static const char *staticTypeName() { return #TYPENAME; };\
 	static IECore::TypeId baseTypeId() { return BaseClass::staticTypeId(); };\
-	static const char *baseTypeName() { return BaseClass::staticTypeName(); };	
-		
+	static const char *baseTypeName() { return BaseClass::staticTypeName(); };
+
 #define IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS()																										\
 	virtual bool isInstanceOf( IECore::TypeId typeId ) const { return typeId==staticTypeId() ? true : BaseClass::isInstanceOf( typeId ); };						\
 	virtual bool isInstanceOf( const char *typeName ) const { return !strcmp( typeName, staticTypeName() ) ? true : BaseClass::isInstanceOf( typeName ); };			\
-	
+
 #define IE_CORE_DECLAREINHERITSFROMFUNCTIONS()																										\
 	static bool inheritsFrom( IECore::TypeId typeId ) { return BaseClass::staticTypeId()==typeId ? true : BaseClass::inheritsFrom( typeId ); };					\
 	static bool inheritsFrom( const char *typeName ) { return !strcmp(BaseClass::staticTypeName(), typeName ) ? true : BaseClass::inheritsFrom( typeName ); }		\
@@ -75,13 +75,13 @@ namespace IECore
 	private: \
 	static const IECore::RunTimeTyped::TypeDescription<TYPE> g_typeDescription;\
 	public:
-	
+
 #define IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( TYPE )																	\
-	const IECore::RunTimeTyped::TypeDescription<TYPE> TYPE::g_typeDescription;		
-	
+	const IECore::RunTimeTyped::TypeDescription<TYPE> TYPE::g_typeDescription;
+
 #define IE_CORE_DEFINERUNTIMETYPED( TYPE )																	\
 	IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( TYPE )
-		
+
 /// Use this macro within the public section of an IECore class declaration to
 /// implement all necessary RunTimeTyped functions. TYPE is the name of
 /// the class and BASETYPE is the name of the base class. The TypeId
@@ -93,9 +93,9 @@ namespace IECore
 	IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS()\
 	IE_CORE_DECLAREINHERITSFROMFUNCTIONS()\
 	IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TYPE ) \
-	
-	
-	
+
+
+
 /// Use this macro within the public section of an extension library class declaration to
 /// implement all necessary RunTimeTyped functions. TYPE is the name of
 /// the class and BASETYPE is the name of the base class. TYPEID is a unique numeric type
@@ -193,7 +193,7 @@ namespace IECore
 	{																			\
 		return !strcmp( BASETYPENAME::staticTypeName(), typeName ) ? true : BASETYPENAME::inheritsFrom( typeName );	\
 	}																			\
-	
+
 /// An abstract base class for objects whose type we wish to determine at runtime.
 /// The rationale for using such a type system rather than the std c++
 /// typeid() stuff is as follows :
@@ -208,15 +208,15 @@ namespace IECore
 class RunTimeTyped : public RefCounted
 {
 	public:
-	
+
 		/// A typedef for the class this class derives from. All RunTimeTyped classes define this typedef.
 		typedef RefCounted BaseClass;
-		
+
 		IE_CORE_DECLAREMEMBERPTR( RunTimeTyped );
-		
+
 		RunTimeTyped();
 		virtual ~RunTimeTyped();
-		
+
 		//! @name Type identification functions.
 		/// These functions provide useful queries about the typing
 		/// of both classes and instances. They must be reimplemented
@@ -225,7 +225,7 @@ class RunTimeTyped : public RefCounted
 		/// macro.
 		////////////////////////////////////////////////////////////
 		//@{
-		
+
 		/// Returns a unique numeric identifier for the type
 		/// of this instance. For classes defined in the core library
 		///  this should be a member of the TypeId enum defined in IECore/TypeIds.h
@@ -233,47 +233,47 @@ class RunTimeTyped : public RefCounted
 		/// Returns a unique name for the type of this instance. This should be
 		/// implemented to return the class name.
 		virtual const char *typeName() const;
-		
+
 		/// Returns the TypeId for this class, without needing an instance.
 		static TypeId staticTypeId();
 		/// Returns the type name for this class, without needing an instance.
 		static const char *staticTypeName();
-		
-		/// Returns the TypeId of the base of this class, without needing an instance. 
+
+		/// Returns the TypeId of the base of this class, without needing an instance.
 		/// The base type of RunTimeTyped itself is defined to be InvalidTypeId;
 		static TypeId baseTypeId();
-		
-		/// Returns the type name of the base of this class, without needing an instance. 
+
+		/// Returns the type name of the base of this class, without needing an instance.
 		/// The base type name of RunTimeTyped itself is defined to be "InvalidType";
-		static const char *baseTypeName();		
-		
+		static const char *baseTypeName();
+
 		/// Returns true if this object is an instance of the specified type,
 		/// or of a class inherited from the specified type.
 		virtual bool isInstanceOf( TypeId typeId ) const;
 		/// Returns true if this object is an instance of the specified type,
 		/// or of a class inherited from the specified type.
 		virtual bool isInstanceOf( const char *typeName ) const;
-		
+
 		/// Returns true if this class inherits from the specified type.
 		static bool inheritsFrom( TypeId typeId );
 		/// Returns true if this class inherits from the specified type.
 		static bool inheritsFrom( const char *typeName );
-		
+
 		/// Returns the base type of the given type, or InvalidTypeId if no such base exists.
 		static TypeId baseTypeId( TypeId typeId );
-		
+
 		/// Returns all bases of the given type, or an empty vector if no such bases exist.
 		/// The elements are ordered by "distance" from the given TypeId. That is to say, the first
 		/// element will be the immediate base class, and the last elemenet will be RunTimeTyped.
 		/// Should not be called during static initialization as it's likely that not all types will
 		/// have been registered at that point, so to do so would yield an incomplete list.
-		static const std::vector<TypeId> &baseTypeIds( TypeId typeId );		
-		
+		static const std::vector<TypeId> &baseTypeIds( TypeId typeId );
+
 		/// Returns all derived types of the given type, or an empty set if no such derived types exist.
 		/// Should not be called during static initialization as it's likely that not all types will
 		/// have been registered at that point, so to do so would yield an incomplete list.
-		static const std::set<TypeId> &derivedTypeIds( TypeId typeId );	
-		
+		static const std::set<TypeId> &derivedTypeIds( TypeId typeId );
+
 		/// Returns the corresponding TypeId for the specified
 		/// typeName, or InvalidTypeId if typeName is not a
 		/// registered type.
@@ -282,37 +282,37 @@ class RunTimeTyped : public RefCounted
 		/// TypeId, or InvalidTypeId if typeId is not a
 		/// registered type.
 		static const char *typeNameFromTypeId( TypeId typeId );
-		
+
 		/// Allows external modules to register their own type ids
-		static void registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId );	
+		static void registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId );
 		//@}
-		
+
 	protected :
-	
+
 		template<class T>
 		struct TypeDescription
 		{
 			TypeDescription();
 		};
-		
+
 		typedef std::map< TypeId, TypeId > BaseTypeRegistryMap;
 		typedef std::map< TypeId, std::vector<TypeId> > BaseTypesRegistryMap;
-		typedef std::map< TypeId, std::set< TypeId > > DerivedTypesRegistryMap;		
-		
+		typedef std::map< TypeId, std::set< TypeId > > DerivedTypesRegistryMap;
+
 		static BaseTypeRegistryMap &baseTypeRegistry();
 		static DerivedTypesRegistryMap &derivedTypesRegistry();
-		
+
 		static BaseTypesRegistryMap &completeBaseTypesRegistry();
 		static DerivedTypesRegistryMap &completeDerivedTypesRegistry();
-		
-		static void derivedTypeIdsWalk( TypeId typeId, std::set<TypeId> & );			
-		
+
+		static void derivedTypeIdsWalk( TypeId typeId, std::set<TypeId> & );
+
 		typedef std::map<TypeId, std::string> TypeIdsToTypeNamesMap;
 		typedef std::map<std::string, TypeId> TypeNamesToTypeIdsMap;
-		
+
 		static TypeIdsToTypeNamesMap &typeIdsToTypeNames();
 		static TypeNamesToTypeIdsMap &typeNamesToTypeIds();
-			
+
 };
 
 IE_CORE_DECLAREPTR( RunTimeTyped );
@@ -335,8 +335,8 @@ T *runTimeCast( S *src );
 template<typename T, typename S>
 inline boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<S> &src );
 
-/// Equivalent to static_cast, but using the type identifaction system implemented in 
-/// RunTimeTyped to fire an assert if the equivalent runTimeCast would not succeed. 
+/// Equivalent to static_cast, but using the type identifaction system implemented in
+/// RunTimeTyped to fire an assert if the equivalent runTimeCast would not succeed.
 /// In a non-asserted build this will compile directly down to a single static_cast.
 template<typename T, typename S>
 inline T* assertedStaticCast( S* src );

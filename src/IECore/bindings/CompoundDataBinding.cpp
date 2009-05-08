@@ -425,14 +425,14 @@ class CompoundTypedDataFunctions
 			}
 			return newTuple;
 		}
-		
+
 		/// \todo Move outside template so that it specialises the repr() in IECoreBinding.h
 		static std::string repr( TypedData< Container > &x )
-		{	
+		{
 			std::stringstream s;
-			
+
 			s << "IECore." << x.typeName() << "(";
-		
+
 			bool added = false;
 			for (
 				typename Container::const_iterator it = x.readable().begin();
@@ -446,31 +446,31 @@ class CompoundTypedDataFunctions
 				if ( item.attr( "__repr__" ) != object() )
 				{
 					std::string v = call_method< std::string >( item.ptr(), "__repr__" );
-						
+
 					if ( !added )
 					{
 						added = true;
-						s << "{";	
+						s << "{";
 					}
 					else
 					{
 						s << ",";
 					}
-					
+
 					s << "'";
 					s << key;
 					s << "':";
-					s << v;							
+					s << v;
 				}
 			}
-		
+
 			if ( added )
 			{
 				s << "}";
 			}
-		
+
 			s << ")";
-			
+
 			return s.str();
 		}
 
@@ -509,7 +509,7 @@ void bindCompoundData()
 		.def( "__setitem__", &ThisBinder::setItem, "index assignment operator.\nWorks exactly like on python dicts but only accepts Data objects as the new value." )
 		.def( "__delitem__", &ThisBinder::delItem, "index deletion operator.\nWorks exactly like on python dicts." )
 		.def( "__len__", &ThisBinder::len, "Length operator." )
-		.def( "__contains__", &ThisBinder::has_key, "In operator.\nWorks exactly like on python dicts." )		
+		.def( "__contains__", &ThisBinder::has_key, "In operator.\nWorks exactly like on python dicts." )
 		.def( "size", &ThisBinder::len, "m.size()\nReturns the number of elements on m. Same result as the len operator." )
 		.def( "__cmp__", &ThisBinder::invalidOperator, "Raises an exception. CompoundData does not support comparison operators." )
 		.def( "__repr__", &ThisBinder::repr )

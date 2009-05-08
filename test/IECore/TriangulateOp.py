@@ -45,216 +45,216 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 		verticesPerFace = IntVectorData()
 		verticesPerFace.append( 4 )
-		
+
 		vertexIds = IntVectorData()
 		vertexIds.append( 0 )
 		vertexIds.append( 1 )
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
-		
+
 		P = V3fVectorData()
 		P.append( V3f( -1, 0, -1 ) )
 		P.append( V3f( -1, 0,  1 ) )
 		P.append( V3f(  1, 0,  1 ) )
 		P.append( V3f(  1, 0, -1 ) )
-		
+
 		m = MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
-		
+
 		fv = IntVectorData()
 		fv.append( 5 )
 		fv.append( 6 )
 		fv.append( 7 )
-		fv.append( 8 )		
+		fv.append( 8 )
 		m["fv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, fv )
-		
+
 		u = FloatVectorData()
 		u.append( 1.0 )
 		m["u"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, u )
-								
+
 		op = TriangulateOp()
-		
-		result = op(			
+
+		result = op(
 			input = m
 		)
-		
+
 		self.assert_( "P" in result )
-		
+
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		resultP = result["P"].data
-		
+
 		self.assertEqual( len(resultP), 4 )
 		for i in range(0, 4) :
 			self.assert_( ( resultP[i] - P[i] ).length() < 0.001 )
-			
-		self.assertEqual( len(result.vertexIds), 6 )	
-			
+
+		self.assertEqual( len(result.vertexIds), 6 )
+
 		for faceVertexCount in result.verticesPerFace :
 			self.assertEqual( faceVertexCount, 3 )
-			
+
 		for vId in result.vertexIds:
-			self.assert_( vId < len(resultP) )	
-					
+			self.assert_( vId < len(resultP) )
+
 		self.assert_( "fv" in result )
 		fv = result["fv"]
-		self.assertEqual( len(fv.data), len(result.vertexIds) )	
-		
+		self.assertEqual( len(fv.data), len(result.vertexIds) )
+
 		for i in fv.data:
 			self.assert_( i >= 5 and i <= 8 )
-			
-		
-	def testQuadrangulatedSphere( self ) :
-		""" Test TriangulateOp with a quadrangulated poly sphere"""	
 
-		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()		
+
+	def testQuadrangulatedSphere( self ) :
+		""" Test TriangulateOp with a quadrangulated poly sphere"""
+
+		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()
 		P = m["P"].data
-		
+
 		self.assertEqual ( len( m.vertexIds ), 1560 )
-								
+
 		op = TriangulateOp()
-		
-		result = op(			
+
+		result = op(
 			input = m
 		)
-		
+
 		self.assert_( result.arePrimitiveVariablesValid() )
-		
+
 		self.assert_( "P" in result )
 
 		resultP = result["P"].data
-		
+
 		self.assertEqual( len( resultP ), len( P ) )
 		for i in range(0, len( resultP ) ) :
 			self.assert_( ( resultP[i] - P[i] ).length() < 0.001 )
-			
+
 		for faceVertexCount in result.verticesPerFace :
 			self.assertEqual( faceVertexCount, 3 )
-			
+
 		for vId in result.vertexIds:
-			self.assert_( vId < len(resultP) )	
-					
-		self.assertEqual ( len( result.vertexIds ), 2280 )	
+			self.assert_( vId < len(resultP) )
+
+		self.assertEqual ( len( result.vertexIds ), 2280 )
 
 
-	def testTriangulatedSphere( self ) :	
+	def testTriangulatedSphere( self ) :
 		""" Test TriangulateOp with a triangulated poly sphere"""
-	
-		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()		
-		
+
+		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
+
 		op = TriangulateOp()
-		
-		result = op(			
+
+		result = op(
 			input = m
 		)
-				
+
 		self.assert_( result.arePrimitiveVariablesValid() )
-		
+
 		# As input was already triangulated, the result should be exactly the same
 		self.assertEqual( m, result )
-		
+
 	def testNonPlanar( self ) :
 		""" Test TriangulateOp with a nonplanar polygon"""
-			
-	
+
+
 		verticesPerFace = IntVectorData()
 		verticesPerFace.append( 4 )
-		
+
 		vertexIds = IntVectorData()
 		vertexIds.append( 0 )
 		vertexIds.append( 1 )
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
-		
+
 		P = V3dVectorData()
 		P.append( V3d( -1, 0, -1 ) )
 		P.append( V3d( -1, 0,  1 ) )
 		P.append( V3d(  1, 0,  1 ) )
 		P.append( V3d(  1, 1, -1 ) )
-		
+
 		m = MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
-												
+
 		op = TriangulateOp()
-		
+
 		op.parameters().input = m
-		
+
 		# Non-planar faces not supported by default
 		self.assertRaises( RuntimeError, op )
-		
+
 		op.parameters().throwExceptions = False
 		result = op()
-		
-		
+
+
 	def testConcave( self ) :
 		""" Test TriangulateOp with a concave polygon"""
-		
+
 		verticesPerFace = IntVectorData()
 		verticesPerFace.append( 4 )
-		
+
 		vertexIds = IntVectorData()
 		vertexIds.append( 0 )
 		vertexIds.append( 1 )
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
-		
+
 		P = V3dVectorData()
 		P.append( V3d( -1, 0, -1 ) )
 		P.append( V3d( -1, 0,  1 ) )
 		P.append( V3d(  1, 0,  1 ) )
 		P.append( V3d(  -0.9, 0, -0.9 ) )
-		
+
 		m = MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
-												
+
 		op = TriangulateOp()
-		
+
 		op.parameters().input = m
-		
+
 		# Concave faces not supported by default
 		self.assertRaises( RuntimeError, op )
-		
+
 		op.parameters().throwExceptions = False
 		result = op()
-		
+
 	def testErrors( self ):
 		""" Test TriangulateOp with invalid P data """
-				
+
 		verticesPerFace = IntVectorData()
 		verticesPerFace.append( 4 )
-		
+
 		vertexIds = IntVectorData()
 		vertexIds.append( 0 )
 		vertexIds.append( 1 )
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
-		
+
 		P = FloatVectorData()
 		P.append( 1 )
 		P.append( 2 )
 		P.append( 3 )
 		P.append( 4 )
-		
+
 		m = MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
-												
+
 		op = TriangulateOp()
-		
+
 		op.parameters().input = m
-		
+
 		# FloatVectorData not valid for "P"
-		self.assertRaises( RuntimeError, op )	
-		
+		self.assertRaises( RuntimeError, op )
+
 	def testConstantPrimVars( self ) :
-	
-		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()		
-		
+
+		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()
+
 		m["constantScalar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) )
 		m["constantArray"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, StringVectorData( [ "one", "two" ] ) )
-		
-		result = TriangulateOp()( input = m )	
+
+		result = TriangulateOp()( input = m )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

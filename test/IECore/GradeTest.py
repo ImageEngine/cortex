@@ -43,21 +43,21 @@ class TestGradeColorTransformOp( unittest.TestCase ) :
 	testImgName = "test/IECore/data/exrFiles/gradedRampTest.exr"
 
 	def __verifyImageRGB( self, imgNew, imgOrig, msq = 0.05):
-	
+
 		self.assertEqual( type(imgNew), ImagePrimitive )
-		
+
 		op = ImageDiffOp()
-		
+
 		res = op(
 			imageA = imgNew,
 			imageB = imgOrig,
 			maxError = msq,
 			skipMissingChannels = True
 		)
-		
+
 		self.failIf( res.value )
 
-	# Apply a grade operation over the ramp.dpx file and compare results with an image 
+	# Apply a grade operation over the ramp.dpx file and compare results with an image
 	# generated from Nuke with the following grade node parameters:
 	# blackpoint {0.01 0.04 0.02 0}
 	# whitepoint {0.8 0.4 0.66 1}
@@ -86,7 +86,7 @@ class TestGradeColorTransformOp( unittest.TestCase ) :
 
 	# Test if the identity operation works
 	def testGradeTransformIdentity( self ) :
-	
+
 		rampImg = Reader.create( "test/IECore/data/exrFiles/ramp.exr" )()
 		grade = Grade()
 		grade['blackPoint'] = Color3f( 0, 0, 0 )
@@ -107,4 +107,4 @@ class TestGradeColorTransformOp( unittest.TestCase ) :
 
 if __name__ == "__main__":
 	unittest.main()
-	
+

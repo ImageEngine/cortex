@@ -38,7 +38,7 @@
 #include <string>
 #include <list>
 
-namespace IECore 
+namespace IECore
 {
 
 class FileIndexedIO;
@@ -50,20 +50,20 @@ namespace IndexedIO
 		Read      = 1L << 0,
 		Write     = 1L << 1,
 		Append    = 1L << 2,
-		
+
 		Shared    = 1L << 3,
 		Exclusive = 1L << 4,
 	} ;
-	
+
 	typedef unsigned OpenMode;
-	
+
 	typedef enum
 	{
 		Directory=0,
 		File
 	} EntryType;
-	
-			
+
+
 	typedef enum
 	{
 		Invalid=0,
@@ -94,15 +94,15 @@ namespace IndexedIO
 		UInt64,
 		UInt64Array
 	} DataType;
-	
+
 	typedef std::string EntryID;
-	
+
 	/// A representation of a single file/directory
 	class Entry
-	{	
+	{
 		public:
 			Entry();
-			
+
 			Entry( const EntryID &id, EntryType eType, DataType dType, unsigned long arrayLength);
 
 			/// ID, or name, of the file/directory
@@ -110,41 +110,41 @@ namespace IndexedIO
 
 			/// Returns either Directory or File.
 			EntryType entryType() const;
-		
+
 			/// Should only be called on instances which represent files. Returns the type of data held by in the file. If this entry does not represent a file
 			/// an IOException is thrown.
 			DataType dataType() const;
-			
-			/// Convenience method to return if entry respresents an array. If Entry's datatype is not an array then an IOException is thrown. 
+
+			/// Convenience method to return if entry respresents an array. If Entry's datatype is not an array then an IOException is thrown.
 			bool isArray() const;
-					
-			/// Convenience method to return size of array. If Entry's datatype is not an array then an IOException is thrown. 
+
+			/// Convenience method to return size of array. If Entry's datatype is not an array then an IOException is thrown.
 			unsigned long arrayLength() const;
-			
+
 			/// Convenience method to return if a data is an array or not
 			static bool isArray( DataType dType );
-		
+
 		protected:
-		
+
 			EntryID m_ID;
 			EntryType m_entryType;
 			DataType m_dataType;
 			unsigned long m_arrayLength;
-	};	
-	
-	typedef std::list< Entry > EntryList;	
-	
+	};
+
+	typedef std::list< Entry > EntryList;
+
 	// Method for establishing flattened size of a data object
 	template<typename T>
 	struct DataSizeTraits;
-	
+
 	// Method for flatting/unflattening data objects
 	template<typename T>
 	struct DataFlattenTraits;
-	
+
 	template<typename T>
 	struct DataTypeTraits;
-}	
+}
 }
 
 #include "IndexedIO.inl"

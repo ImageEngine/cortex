@@ -40,31 +40,31 @@ import IECore
 class ObjectVectorTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		o = IECore.ObjectVector()
-	
+
 		self.assertEqual( len( o ), 0 )
-		
+
 		m1 = IECore.FloatData()
 		m2 = IECore.FloatData()
 		m3 = IECore.FloatData()
-		
+
 		o.append( m1 )
 		self.assertEqual( len( o ), 1 )
 		self.assert_( o[0].isSame( m1 ) )
 		self.assert_( o[-1].isSame( m1 ) )
-		self.assertRaises( IndexError, o.__getitem__, 1 )		
+		self.assertRaises( IndexError, o.__getitem__, 1 )
 		self.assertRaises( IndexError, o.__getitem__, -2 )
-		
+
 		o.append( m2 )
 		self.assertEqual( len( o ), 2 )
 		self.assert_( o[0].isSame( m1 ) )
 		self.assert_( o[1].isSame( m2 ) )
 		self.assert_( o[-1].isSame( m2 ) )
 		self.assert_( o[-2].isSame( m1 ) )
-		self.assertRaises( IndexError, o.__getitem__, 2 )		
+		self.assertRaises( IndexError, o.__getitem__, 2 )
 		self.assertRaises( IndexError, o.__getitem__, -3 )
-		
+
 		o.append( m3 )
 		self.assertEqual( len( o ), 3 )
 		self.assert_( o[0].isSame( m1 ) )
@@ -73,39 +73,39 @@ class ObjectVectorTest( unittest.TestCase ) :
 		self.assert_( o[-1].isSame( m3 ) )
 		self.assert_( o[-2].isSame( m2 ) )
 		self.assert_( o[-3].isSame( m1 ) )
-		self.assertRaises( IndexError, o.__getitem__, 3 )		
+		self.assertRaises( IndexError, o.__getitem__, 3 )
 		self.assertRaises( IndexError, o.__getitem__, -4 )
-	
+
 		l = [ m1, m2, m3 ]
 		i = 0
 		for v in o :
 			self.assert_( l[i].isSame( v ) )
 			i += 1
-			
+
 		del o[1]
 		self.assertEqual( len( o ), 2 )
 		self.assert_( o[0].isSame( m1 ) )
 		self.assert_( o[1].isSame( m3 ) )
 		self.assert_( o[-1].isSame( m3 ) )
 		self.assert_( o[-2].isSame( m1 ) )
-		self.assertRaises( IndexError, o.__getitem__, 2 )		
+		self.assertRaises( IndexError, o.__getitem__, 2 )
 		self.assertRaises( IndexError, o.__getitem__, -3 )
-	
+
 		oo = o.copy()
 		self.assertEqual( o, oo )
 		oo.append( m2 )
 		self.assertNotEqual( o, oo )
-		
+
 		IECore.ObjectWriter( o, "test/IECore/objectVector.cob" ).write()
 		ooo = IECore.ObjectReader( "test/IECore/objectVector.cob" ).read()
-		
+
 		self.assertEqual( o, ooo )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.exists( "test/IECore/objectVector.cob" ) :
 			os.remove( "test/IECore/objectVector.cob" )
-		
-	
+
+
 if __name__ == "__main__":
         unittest.main()

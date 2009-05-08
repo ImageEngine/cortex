@@ -42,7 +42,7 @@ using namespace IECore;
 IE_CORE_DEFINERUNTIMETYPED( ImageDisplayDriver );
 
 ImageDisplayDriver::ImageDisplayDriver( const Box2i &displayWindow, const Box2i &dataWindow, const vector<string> &channelNames, ConstCompoundDataPtr parameters ) :
-		DisplayDriver( displayWindow, dataWindow, channelNames, parameters ), 
+		DisplayDriver( displayWindow, dataWindow, channelNames, parameters ),
 		m_image( new ImagePrimitive( dataWindow, displayWindow ) )
 {
 	for ( vector<string>::const_iterator it = channelNames.begin(); it != channelNames.end(); it++ )

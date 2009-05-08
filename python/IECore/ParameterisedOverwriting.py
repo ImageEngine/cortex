@@ -50,7 +50,7 @@ def __parameterisedSetItemOp( self, attrName, attrValue ):
 	except:
 		# it's probably a derived class and the constructor did not initialized Parameterised.
 		# So the attribute must be a class attribute and not a Parameter attribute.
-		# \todo Might want to rethink this logic	
+		# \todo Might want to rethink this logic
 		self.__dict__[ attrName ] = attrValue
 	else:
 		if parameters.has_key( attrName ):
@@ -77,7 +77,7 @@ def __parameterisedSetAttrOp( self, attrName, attrValue ):
 			warnings.warn( "Access to Parameters as attributes is deprecated - please use item style access instead.", DeprecationWarning, 2 )
 		else:
 			# allow assignment of other attributes to the object.
-			self.__dict__[ attrName ] = attrValue	
+			self.__dict__[ attrName ] = attrValue
 
 IECore.Parameterised.__setitem__ = __parameterisedSetItemOp
 IECore.Parameterised.__setattr__ = __parameterisedSetAttrOp

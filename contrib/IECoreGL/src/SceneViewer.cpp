@@ -69,7 +69,7 @@ void SceneViewer::display()
 	glClearColor( 0.0, 0.0, 0.0, 0.0 );
 	glClearDepth( 1.0 );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		
+
 	m_scene->render();
 	glutSwapBuffers();
 }
@@ -79,7 +79,7 @@ void SceneViewer::motion( int x, int y )
 	if( mouseDown( GLUT_LEFT_BUTTON ) && mouseDown( GLUT_MIDDLE_BUTTON ) )
 	{
 		V2i lastDrag = lastMouseDragPosition();
-		m_cameraController->dolly( x - lastDrag.x, y - lastDrag.y );	
+		m_cameraController->dolly( x - lastDrag.x, y - lastDrag.y );
 		postRedisplay();
 	}
 	else if( mouseDown( GLUT_MIDDLE_BUTTON ) )
@@ -92,9 +92,9 @@ void SceneViewer::motion( int x, int y )
 	{
 		V2i lastDrag = lastMouseDragPosition();
 		m_cameraController->tumble( x - lastDrag.x, y - lastDrag.y );
-		postRedisplay();		
+		postRedisplay();
 	}
-	
+
 	Window::motion( x, y );
 }
 

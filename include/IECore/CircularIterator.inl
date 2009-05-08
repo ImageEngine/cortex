@@ -48,7 +48,7 @@ struct CircularIteratorHelp
 	{
 		return c ? c->begin() : b;
 	}
-	
+
 	static Iterator end( Iterator b, Container *c )
 	{
 		return c ? c->end() : b;

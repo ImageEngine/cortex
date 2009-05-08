@@ -50,7 +50,7 @@ Imath::Matrix44<T> matrixFromBasis( const Imath::Vec3<T> &x, const Imath::Vec3<T
 	result[1][2] = y[2];
 	result[2][0] = z[0];
 	result[2][1] = z[1];
-	result[2][2] = z[2];	
+	result[2][2] = z[2];
 	result[3][0] = o[0];
 	result[3][1] = o[1];
 	result[3][2] = o[2];
@@ -62,11 +62,11 @@ float determinant( const Imath::Matrix33<T> &m )
 {
 	// a(ei-fh) - b(di-fg) + c(dh-eg)
 	return
-		
-		m[0][0] * ( m[1][1] * m[2][2] - m[1][2] * m[2][1] ) - 
-		m[0][1] * ( m[1][0] * m[2][2] - m[1][2] * m[2][0] ) + 
+
+		m[0][0] * ( m[1][1] * m[2][2] - m[1][2] * m[2][1] ) -
+		m[0][1] * ( m[1][0] * m[2][2] - m[1][2] * m[2][0] ) +
 		m[0][2] * ( m[1][0] * m[2][1] - m[1][1] * m[2][0] );
-		
+
 }
 
 template<class T>
@@ -87,42 +87,42 @@ float determinant( const Imath::Matrix44<T> &m )
 	// d * | e f g |
 	//     | i j k |
 	//     | m n o |
-	
+
 	return
-	
+
 		m[0][0] * determinant(
-			Imath::M33f( 
+			Imath::M33f(
 				m[1][1], m[1][2], m[1][3],
 				m[2][1], m[2][2], m[2][3],
 				m[3][1], m[3][2], m[3][3]
 			)
-		) - 
-		
+		) -
+
 		m[0][1] * determinant(
-			Imath::M33f( 
+			Imath::M33f(
 				m[1][0], m[1][2], m[1][3],
 				m[2][0], m[2][2], m[2][3],
 				m[3][0], m[3][2], m[3][3]
 			)
 		) +
-		
-		 
+
+
 		m[0][2] * determinant(
-			Imath::M33f( 
+			Imath::M33f(
 				m[1][0], m[1][1], m[1][3],
 				m[2][0], m[2][1], m[2][3],
 				m[3][0], m[3][1], m[3][3]
 			)
 		) -
-		
+
 		m[0][3] * determinant(
-			Imath::M33f( 
+			Imath::M33f(
 				m[1][0], m[1][1], m[1][2],
 				m[2][0], m[2][1], m[2][2],
 				m[3][0], m[3][1], m[3][2]
 			)
 		)
-	
+
 	;
 }
 

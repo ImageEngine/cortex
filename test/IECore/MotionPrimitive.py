@@ -40,7 +40,7 @@ from IECore import *
 class TestMotionPrimitive( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		m = MotionPrimitive()
 		self.assert_( m.isInstanceOf( "MotionPrimitive" ) )
 		self.assert_( m.isInstanceOf( "VisibleRenderable" ) )
@@ -48,14 +48,14 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )
 		self.assertEqual( len( m ), 0 )
-		
+
 		self.assertRaises( Exception, m.__setitem__, "notAFloat", PointsPrimitive( 1 ) )
-		
+
 		m[0] = PointsPrimitive( 1 )
 		self.assertEqual( len( m ), 1 )
 		self.assertEqual( m.keys(), [ 0 ] )
 		self.assertEqual( m.values(), [ PointsPrimitive( 1 ) ] )
-		
+
 		m[1] = PointsPrimitive( 1 )
 		self.assertEqual( len( m ), 2 )
 		self.assertEqual( m.keys(), [ 0, 1 ] )
@@ -63,27 +63,27 @@ class TestMotionPrimitive( unittest.TestCase ) :
 
 		iface = IndexedIOInterface.create( "test/motionPrimitive.fio", "/", IndexedIOOpenMode.Write )
 		m.save( iface, "test" )
-		
+
 		mm = Object.load( iface, "test" )
 		self.assertEqual( m, mm )
-		
+
 		mmm = m.copy()
 		self.assertEqual( m, mmm )
-		
+
 		del m[0]
 		self.assertEqual( len( m ), 1 )
 		self.assertEqual( m.keys(), [ 1 ] )
 		self.assertEqual( m.values(), [ PointsPrimitive( 1 ) ] )
-		
+
 		del m[1]
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )
 		self.assertEqual( len( m ), 0 )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile( "test/motionPrimitive.fio" ):
 			os.remove( "test/motionPrimitive.fio" )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

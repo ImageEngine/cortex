@@ -41,21 +41,21 @@ import os
 class ArrayPrimVarTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		m["testOne"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "one", "two" ] ) )
 		m["testTwo"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "apple", "banana", "beetroot" ] ) )
 		m["testThree"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "hi" ) )
 		m["testFour"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ] ) )
 		m["testFive"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 10, 11, 12 ] ) )
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testArrayPrimVar.rib" )
 		r.worldBegin()
-		
+
 		m.render( r )
-		
+
 		r.worldEnd()
-		
+
 		rib = "".join( open( "test/IECoreRI/output/testArrayPrimVar.rib" ).readlines() )
 
 		self.assert_( '"constant string testOne[2]" [ "one" "two" ]' in rib )
@@ -63,11 +63,11 @@ class ArrayPrimVarTest( unittest.TestCase ) :
 		self.assert_( '"constant string testTwo[3]" [ "apple" "banana" "beetroot" ]' in rib )
 		self.assert_( '"constant vector testFour[2]" [ 0 0 0 1 1 1 ]' in rib )
 		self.assert_( '"constant float testFive[3]" [ 10 11 12 ]' in rib )
-			
+
 	def tearDown( self ) :
-	
+
 		if os.path.exists( "test/IECoreRI/output/testArrayPrimVar.rib" ) :
 			os.remove( "test/IECoreRI/output/testArrayPrimVar.rib" )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

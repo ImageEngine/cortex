@@ -47,7 +47,7 @@ FromMayaObjectDataConverter::FromMayaObjectDataConverter( const MObject &object 
 	:	FromMayaObjectConverter( "FromMayaObjectDataConverter", "Converts IECoreMaya::ObjectData to an IECore::Object.", object )
 {
 }
-		
+
 ObjectPtr FromMayaObjectDataConverter::doConversion( const MObject &obj, ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
@@ -56,20 +56,20 @@ ObjectPtr FromMayaObjectDataConverter::doConversion( const MObject &obj, ConstCo
 	{
 		return 0;
 	}
-	
+
 	/// If we ever support more than one type of data, we can handle them here.
 	const ObjectData *objectData = dynamic_cast< const ObjectData * >( fnPluginData.data( &s ) );
 	if ( !objectData || !s )
 	{
 		return 0;
 	}
-	
+
 	ConstObjectPtr object = objectData->getObject();
 	if ( !object )
 	{
 		return 0;
 	}
-	
+
 	assert( object );
-	return object->copy();	
+	return object->copy();
 }

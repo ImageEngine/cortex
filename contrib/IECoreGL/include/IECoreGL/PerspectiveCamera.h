@@ -60,11 +60,11 @@ class PerspectiveCamera : public Camera
 		/// \todo Should the render() method actually draw a representation of the camera,
 		/// and some other method be used for setting the camera up?
 		virtual void render( ConstStatePtr state ) const;
-		
+
 	protected :
-	
+
 		float m_fov;
-		
+
 };
 
 IE_CORE_DECLAREPTR( PerspectiveCamera );

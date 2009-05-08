@@ -50,13 +50,13 @@ namespace IECore
 class PathVectorParameterWrap : public PathVectorParameter, public Wrapper<PathVectorParameter>
 {
 	public:
-	
+
 		PathVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, ConstStringVectorDataPtr dv, bool ae = true,
-			PathVectorParameter::CheckType c = PathVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+			PathVectorParameter::CheckType c = PathVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )
 			:	PathVectorParameter( n, d, dv->readable(), ae, c, parameterPresets<PathVectorParameter::PresetsContainer>( p ), po, ud ), Wrapper<PathVectorParameter>( self, this )
 		{
 		}
-		
+
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( PathVectorParameter );
 
 };
@@ -65,7 +65,7 @@ IE_CORE_DECLAREPTR( PathVectorParameterWrap );
 void bindPathVectorParameter()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<PathVectorParameter, PathVectorParameterWrapPtr> pathVectorParamClass;
 	{
 		// define enum before functions.
@@ -77,26 +77,26 @@ void bindPathVectorParameter()
 		;
 	}
 	pathVectorParamClass
-		.def( 
+		.def(
 			init< const std::string &, const std::string &, ConstStringVectorDataPtr, boost::python::optional<bool, PathVectorParameter::CheckType, const object &, bool, CompoundObjectPtr > >
-			( 
-				( 
-					arg( "name" ), 
-					arg( "description" ), 
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
 					arg( "defaultValue" ),
 					arg( "allowEmptyList" ) = true,
 					arg( "check" ) = PathVectorParameter::DontCare,
 					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false , 
+					arg( "presetsOnly" ) = false ,
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
-				) 
+				)
 			)
 		)
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( PathVectorParameter )
 		.add_property( "mustExist", &PathVectorParameter::mustExist )
 		.add_property( "mustNotExist", &PathVectorParameter::mustNotExist )
 		.add_property( "allowEmptyList", &PathVectorParameter::allowEmptyList )
-	;	
+	;
 }
 
 } // namespace IECore

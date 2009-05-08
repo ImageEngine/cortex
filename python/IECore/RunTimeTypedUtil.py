@@ -37,6 +37,6 @@ def makeRunTimeTyped( typ, typId, baseClass ) :
 
 	import warnings
 	from IECore import registerRunTimeTyped
-	
+
 	warnings.warn( "makeRunTimeTyped is deprecated - please use registerRunTimeTyped instead.", DeprecationWarning, 2 )
 	registerRunTimeTyped( typ, typId, baseClass )

@@ -40,33 +40,33 @@ PrimitiveImplicitSurfaceFunction::PrimitiveImplicitSurfaceFunction()
 {
 }
 
-PrimitiveImplicitSurfaceFunction::PrimitiveImplicitSurfaceFunction(  PrimitivePtr primitive ) 
+PrimitiveImplicitSurfaceFunction::PrimitiveImplicitSurfaceFunction(  PrimitivePtr primitive )
 {
 	m_evaluator = PrimitiveEvaluator::create( primitive );
-	
+
 	if (! m_evaluator )
 	{
 		throw InvalidArgumentException( "Cannot create evaluator in PrimitiveImplicitSurfaceFunction" );
 	}
 }
 
-PrimitiveImplicitSurfaceFunction::~PrimitiveImplicitSurfaceFunction()		
+PrimitiveImplicitSurfaceFunction::~PrimitiveImplicitSurfaceFunction()
 {
 }
 
 PrimitiveImplicitSurfaceFunction::Value PrimitiveImplicitSurfaceFunction::operator()( const PrimitiveImplicitSurfaceFunction::Point &p )
-{	
+{
 	float distance = 0.0f;
 	bool success = m_evaluator->signedDistance( p, distance );
-	
+
 	if (success)
-	{				
+	{
 		return distance;
 	}
 	else
 	{
 		return Imath::limits<PrimitiveImplicitSurfaceFunction::Value>::min();
-	}	
+	}
 }
 
 PrimitiveImplicitSurfaceFunction::Value PrimitiveImplicitSurfaceFunction::getValue( const Point &p )

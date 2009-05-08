@@ -42,12 +42,12 @@ namespace IECoreMaya
 
 /// A ParameterHandler which deals with CompoundParameters, representing them as simple
 /// message attributes. Note that no attempt is made to represent the children of the compound - separate
-/// calls to other parameter handlers should be used to do that. 
+/// calls to other parameter handlers should be used to do that.
 class CompoundParameterHandler : public ParameterHandler
 {
 
 	protected:
-	
+
 		virtual MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const;
 		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const;
 		virtual MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;

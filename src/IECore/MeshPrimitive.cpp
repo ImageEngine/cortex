@@ -80,7 +80,7 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 {
 	assert( verticesPerFace );
 	assert( vertexIds );
-	
+
 	vector<int>::const_iterator minIt = min_element( verticesPerFace->readable().begin(), verticesPerFace->readable().end() );
 	if( minIt!=verticesPerFace->readable().end() )
 	{
@@ -89,7 +89,7 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 			throw Exception( "Bad topology - number of vertices per face less than 3." );
 		}
 	}
-		
+
 	minIt = min_element( vertexIds->readable().begin(), vertexIds->readable().end() );
 	{
 		if( minIt!=vertexIds->readable().end() && *minIt<0 )
@@ -103,7 +103,7 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 	{
 		throw Exception( "Bad topology - number of vertexIds not equal to sum of verticesPerFace" );
 	}
-	
+
 	m_verticesPerFace = verticesPerFace->copy();
 	m_vertexIds = vertexIds->copy();
 	if( m_vertexIds->readable().size() )
@@ -121,27 +121,27 @@ void MeshPrimitive::setInterpolation( const std::string &interpolation )
 {
 	m_interpolation = interpolation;
 }
-		
+
 size_t MeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch(interpolation)
 	{
 		case PrimitiveVariable::Constant :
 			return 1;
-			
+
 		case PrimitiveVariable::Uniform :
 			return m_verticesPerFace->readable().size();
-			
+
 		case PrimitiveVariable::Vertex :
 		case PrimitiveVariable::Varying:
 			return m_numVertices;
-			
+
 		case PrimitiveVariable::FaceVarying:
 			return m_vertexIds->readable().size();
-			
+
 		default :
 			return 0;
-		
+
 	}
 }
 
@@ -179,16 +179,16 @@ void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
 {
 	Primitive::load(context);
 	unsigned int v = m_ioVersion;
-	
+
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	m_verticesPerFace = context->load<IntVectorData>( container, "verticesPerFace" );
 	m_vertexIds = context->load<IntVectorData>( container, "vertexIds" );
 
 	unsigned int numVertices;
 	container->read( "numVertices", numVertices );
 	m_numVertices = numVertices;
-	
+
 	container->read( "interpolation", m_interpolation );
 }
 
@@ -198,9 +198,9 @@ bool MeshPrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	const MeshPrimitive *tOther = static_cast<const MeshPrimitive *>( other.get() );
-	
+
 	if( m_numVertices!=tOther->m_numVertices )
 	{
 		return false;
@@ -217,7 +217,7 @@ bool MeshPrimitive::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -257,7 +257,7 @@ MeshPrimitivePtr MeshPrimitive::createBox( Box3f b )
 
 	verticesPerFaceVec.resize( sizeof( verticesPerFace ) / sizeof( int ) );
 	memcpy( &verticesPerFaceVec[0], &verticesPerFace[0], sizeof( verticesPerFace ) );
-	
+
 	vertexIdsVec.resize( sizeof( vertexIds ) / sizeof( int ) );
 	memcpy( &vertexIdsVec[0], &vertexIds[0], sizeof( vertexIds ) );
 
@@ -268,19 +268,19 @@ MeshPrimitivePtr MeshPrimitive::createPlane( Box2f b )
 {
 	IntVectorDataPtr verticesPerFace = new IntVectorData;
 	verticesPerFace->writable().push_back( 4 );
-	
+
 	IntVectorDataPtr vertexIds = new IntVectorData;
 	vertexIds->writable().push_back( 0 );
 	vertexIds->writable().push_back( 1 );
 	vertexIds->writable().push_back( 2 );
 	vertexIds->writable().push_back( 3 );
-	
+
 	V3fVectorDataPtr p = new V3fVectorData;
 	p->writable().push_back( V3f( b.min.x, b.min.y, 0 ) );
 	p->writable().push_back( V3f( b.max.x, b.min.y, 0 ) );
 	p->writable().push_back( V3f( b.max.x, b.max.y, 0 ) );
 	p->writable().push_back( V3f( b.min.x, b.max.y, 0 ) );
-	
+
 	FloatVectorDataPtr s = new FloatVectorData;
 	FloatVectorDataPtr t = new FloatVectorData;
 	s->writable().push_back( 0 );
@@ -291,10 +291,10 @@ MeshPrimitivePtr MeshPrimitive::createPlane( Box2f b )
 	t->writable().push_back( 0 );
 	s->writable().push_back( 0 );
 	t->writable().push_back( 0 );
-	
+
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", p );
 	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, s );
 	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, t );
-	
+
 	return result;
 }

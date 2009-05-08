@@ -60,7 +60,7 @@ IE_CORE_DEFINERUNTIMETYPED( SGIImageReader );
 
 struct SGIImageReader::Header
 {
-	struct FileHeader 
+	struct FileHeader
 	{
 			uint16_t  m_magic;
 			uint8_t   m_storageFormat;
@@ -68,10 +68,10 @@ struct SGIImageReader::Header
 			uint16_t  m_dimension;
 			uint16_t  m_xSize;
 			uint16_t  m_ySize;
-			uint16_t  m_zSize;		
+			uint16_t  m_zSize;
 			uint32_t  m_pixMin;
 			uint32_t  m_pixMax;
-		private:	
+		private:
 			uint32_t  m_dummy1;
 		public:
 			char      m_imageName[80];
@@ -79,18 +79,18 @@ struct SGIImageReader::Header
 		private:
 			char      m_dummy2[404];
 	};
-	
+
 	BOOST_STATIC_ASSERT( (sizeof( FileHeader ) == 512 ) );
-	
+
 	FileHeader m_fileHeader;
-	
-	/// Buffer-relative indices and lengths for the RLE scanlines. Note that the file stores them 
+
+	/// Buffer-relative indices and lengths for the RLE scanlines. Note that the file stores them
 	/// as file-relative offsets, and we transform them on load.
 	std::vector< uint32_t > m_offsetTable;
 	std::vector< uint32_t > m_lengthTable;
-	
+
 	typedef map< string, int > ChannelOffsetMap;
-	map< string, int > m_channelOffsets;	
+	map< string, int > m_channelOffsets;
 };
 
 const Reader::ReaderDescription<SGIImageReader> SGIImageReader::m_readerDescription( "sgi rgb rgba bw" );
@@ -133,25 +133,25 @@ bool SGIImageReader::canRead( const string &fileName )
 	{
 		return false;
 	}
-	
+
 	/// SGI files are written big-endian. Nuke seems to support little-endian files, but this isn't in the spec.
 	if ( littleEndian() )
 	{
 		if ( reverseBytes( magic ) == 474 )
 		{
 			return true;
-		} 
+		}
 	}
 	else
 	{
 		assert( bigEndian() );
-		
+
 		if ( magic == 474 )
 		{
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -160,7 +160,7 @@ void SGIImageReader::channelNames( vector<string> &names )
 	names.clear();
 
 	open( true );
-	
+
 	assert( m_header );
 
 	for ( Header::ChannelOffsetMap::const_iterator it = m_header->m_channelOffsets.begin(); it != m_header->m_channelOffsets.end(); ++it )
@@ -199,78 +199,78 @@ DataPtr SGIImageReader::readChannel( const string &name, const Imath::Box2i &dat
 	{
 		return 0;
 	}
-	
+
 	assert( m_header );
-	
+
 	if ( m_header->m_fileHeader.m_bytesPerChannel == 1 )
 	{
 		return readTypedChannel< unsigned char >( name, dataWindow );
-	}	
+	}
 	else
 	{
 		assert ( m_header->m_fileHeader.m_bytesPerChannel == 2 );
 		return readTypedChannel< unsigned short >( name, dataWindow );
-	}	
+	}
 }
 
 template<typename T>
 DataPtr SGIImageReader::readTypedChannel( const std::string &name, const Box2i &dataWindow )
 {
 	assert( open() );
-	
+
 	assert( m_header );
-	
+
 	typename TypedData< std::vector<T > >::ConstPtr dataBuffer = assertedStaticCast< TypedData< std::vector<T > > >( m_buffer );
 	assert( dataBuffer );
-	
+
 	const typename TypedData< std::vector<T > >::ValueType &buffer = dataBuffer->readable();
-		
+
 	assert( m_header->m_channelOffsets.find( name ) != m_header->m_channelOffsets.end() );
 	int channelOffset = m_header->m_channelOffsets[name];
-	
+
 	FloatVectorDataPtr dataContainer = new FloatVectorData();
-	
+
 	FloatVectorData::ValueType &data = dataContainer->writable();
 	int area = ( dataWindow.size().x + 1 ) * ( dataWindow.size().y + 1 );
 	assert( area >= 0 );
 	data.resize( area );
 
-	int dataWidth = 1 + dataWindow.size().x;	
+	int dataWidth = 1 + dataWindow.size().x;
 
 	Box2i wholeDataWindow = this->dataWindow();
-	
-	int wholeDataHeight = 1 + wholeDataWindow.size().y;	
-	int wholeDataWidth = 1 + wholeDataWindow.size().x;		
-	
-	const int yMin = dataWindow.min.y - wholeDataWindow.min.y;	
-	const int yMax = dataWindow.max.y - wholeDataWindow.min.y;	
-	
+
+	int wholeDataHeight = 1 + wholeDataWindow.size().y;
+	int wholeDataWidth = 1 + wholeDataWindow.size().x;
+
+	const int yMin = dataWindow.min.y - wholeDataWindow.min.y;
+	const int yMax = dataWindow.max.y - wholeDataWindow.min.y;
+
 	const int xMin = dataWindow.min.x - wholeDataWindow.min.x;
 	const int xMax = dataWindow.max.x - wholeDataWindow.min.x;
-	
+
 	ScaledDataConversion<T, float> converter;
-		
+
 	if ( m_header->m_fileHeader.m_storageFormat >= 1 ) /// RLE
-	{				
+	{
 		int dataY = 0;
 		for ( int y = yMin ; y <= yMax ; ++y, ++dataY )
 		{
 			assert( yMin >= 0 );
-			assert( yMin < wholeDataHeight );			
-			
+			assert( yMin < wholeDataHeight );
+
 			/// Images are unencoded "upside down" (flipped in Y), for our purposes
 			uint32_t rowOffset = m_header->m_offsetTable[ channelOffset * wholeDataHeight + ( wholeDataHeight - 1 - y ) ];
-			
+
 			if ( rowOffset >= buffer.size() )
 			{
 				throw IOException( "SGIImageReader: Invalid RLE row offset found while reading " + fileName() );
 			}
-			
+
 			std::vector<T> scanline( wholeDataWidth );
-			
+
 			uint32_t scanlineOffset = 0;
 			bool done = false;
-			
+
 			while ( !done )
 			{
 				T pixel = buffer[ rowOffset ++ ];
@@ -284,16 +284,16 @@ DataPtr SGIImageReader::readTypedChannel( const std::string &name, const Box2i &
 				else
 				{
 					if ( pixel & 0x80 )
-					{					
+					{
 						if ( scanlineOffset + count - 1 >= scanline.size() || rowOffset + count - 1 >= buffer.size() )
 						{
 							throw IOException( "SGIImageReader: Invalid RLE data found while reading " + fileName() );
 						}
-							
+
 						while ( count -- )
 						{
 							assert( scanlineOffset < scanline.size() );
-							assert( rowOffset < buffer.size() );							
+							assert( rowOffset < buffer.size() );
 							scanline[ scanlineOffset++ ] = buffer[ rowOffset ++ ];
 						}
 					}
@@ -301,28 +301,28 @@ DataPtr SGIImageReader::readTypedChannel( const std::string &name, const Box2i &
 					{
 						if ( scanlineOffset + count - 1 >= scanline.size() || rowOffset - 1 >= buffer.size() )
 						{
-							throw IOException( "SGIImageReader: Invalid RLE data found while reading " + fileName() );						
+							throw IOException( "SGIImageReader: Invalid RLE data found while reading " + fileName() );
 						}
-						
-						assert( rowOffset < buffer.size() );													
+
+						assert( rowOffset < buffer.size() );
 						pixel = buffer[ rowOffset ++ ];
-																		
+
 						while ( count -- )
-						{			
-							assert( scanlineOffset < scanline.size() );										
+						{
+							assert( scanlineOffset < scanline.size() );
 							scanline[ scanlineOffset++ ] = pixel;
 						}
-					}	
-				}			
+					}
+				}
 			}
-			
+
 			if ( scanlineOffset != scanline.size() )
 			{
 				throw IOException( "SGIImageReader: Error occurred during RLE decode while reading " + fileName() );
 			}
-			
+
 			int dataOffset = dataY * dataWidth;
-			
+
 			for ( int x = xMin; x <= xMax ; ++x, ++dataOffset  )
 			{
 				data[dataOffset] = converter( scanline[x] );
@@ -330,7 +330,7 @@ DataPtr SGIImageReader::readTypedChannel( const std::string &name, const Box2i &
 		}
 	}
 	else /// Not RLE
-	{		
+	{
 		int dataY = 0;
 
 		for ( int y = dataWindow.min.y; y <= dataWindow.max.y; ++y, ++dataY )
@@ -346,7 +346,7 @@ DataPtr SGIImageReader::readTypedChannel( const std::string &name, const Box2i &
 			}
 		}
 	}
-	
+
 	return dataContainer;
 }
 
@@ -356,7 +356,7 @@ bool SGIImageReader::open( bool throwOnFailure )
 	{
 		assert( m_header );
 		assert( m_buffer );
-		
+
 		return true;
 	}
 
@@ -372,58 +372,58 @@ bool SGIImageReader::open( bool throwOnFailure )
 		{
 			throw IOException( "SGIImageReader: Could not open " + fileName() );
 		}
-		
+
 		in.read( reinterpret_cast<char*>(&m_header->m_fileHeader), sizeof(Header::FileHeader) );
 		if ( in.fail() )
 		{
 			throw IOException( "SGIImageReader: Error reading " + fileName() );
 		}
-		
+
 		m_reverseBytes = false;
 		if ( reverseBytes( m_header->m_fileHeader.m_magic ) == 474 )
 		{
 			m_reverseBytes = true;
-			
-			m_header->m_fileHeader.m_dimension = reverseBytes( m_header->m_fileHeader.m_dimension );						
+
+			m_header->m_fileHeader.m_dimension = reverseBytes( m_header->m_fileHeader.m_dimension );
 			m_header->m_fileHeader.m_xSize = reverseBytes( m_header->m_fileHeader.m_xSize );
 			m_header->m_fileHeader.m_ySize = reverseBytes( m_header->m_fileHeader.m_ySize );
-			m_header->m_fileHeader.m_zSize = reverseBytes( m_header->m_fileHeader.m_zSize );									
-			m_header->m_fileHeader.m_pixMin = reverseBytes( m_header->m_fileHeader.m_pixMin );									
-			m_header->m_fileHeader.m_pixMax = reverseBytes( m_header->m_fileHeader.m_pixMax );															
-			m_header->m_fileHeader.m_colorMap = reverseBytes( m_header->m_fileHeader.m_colorMap );			
-		} 
+			m_header->m_fileHeader.m_zSize = reverseBytes( m_header->m_fileHeader.m_zSize );
+			m_header->m_fileHeader.m_pixMin = reverseBytes( m_header->m_fileHeader.m_pixMin );
+			m_header->m_fileHeader.m_pixMax = reverseBytes( m_header->m_fileHeader.m_pixMax );
+			m_header->m_fileHeader.m_colorMap = reverseBytes( m_header->m_fileHeader.m_colorMap );
+		}
 		else if ( m_header->m_fileHeader.m_magic != 474 )
-		{		
+		{
 			throw IOException( "SGIImageReader: Invalid magic number while reading " + fileName() );
 		}
-		
+
 		if ( m_header->m_fileHeader.m_dimension != 1 && m_header->m_fileHeader.m_dimension != 2 && m_header->m_fileHeader.m_dimension != 3 )
 		{
 			throw IOException( "SGIImageReader: Invalid dimension while reading " + fileName() );
 		}
-		
+
 		m_bufferWidth = m_header->m_fileHeader.m_xSize;
-		
+
 		if (  m_header->m_fileHeader.m_dimension == 1 )
 		{
 			m_bufferHeight = 1;
 		}
 		else
 		{
-			m_bufferHeight = m_header->m_fileHeader.m_ySize;		
+			m_bufferHeight = m_header->m_fileHeader.m_ySize;
 		}
-		
+
 		if ( m_header->m_fileHeader.m_bytesPerChannel != 1 && m_header->m_fileHeader.m_bytesPerChannel != 2 )
 		{
 			throw IOException( "SGIImageReader: Invalid bitdepth while reading " + fileName() );
 		}
-		
+
 		if ( m_header->m_fileHeader.m_colorMap != 0 )
 		{
 			/// Other color maps are obsolete
 			throw IOException( "SGIImageReader: Unsupported color map while reading " + fileName() );
 		}
-		
+
 		if ( m_header->m_fileHeader.m_dimension == 1 )
 		{
 			m_header->m_channelOffsets["Y"] = 0;
@@ -451,56 +451,56 @@ bool SGIImageReader::open( bool throwOnFailure )
 				m_header->m_channelOffsets["A"] = 3;
 			}
 		}
-		
+
 		in.seekg( 512, std::ios_base::beg );
 		if ( in.fail() )
 		{
 			throw IOException( "SGIImageReader: Cannot read truncated image file " + fileName() );
 		}
-		
+
 		/// Number of elements in the buffer
-		uint32_t bufferSize = 0;		
-		
-		if ( m_header->m_fileHeader.m_storageFormat >= 1 ) 
+		uint32_t bufferSize = 0;
+
+		if ( m_header->m_fileHeader.m_storageFormat >= 1 )
 		{
 			uint32_t tableLength = m_header->m_fileHeader.m_ySize * m_header->m_fileHeader.m_zSize;
-			
+
 			m_header->m_offsetTable.resize( tableLength );
 			m_header->m_lengthTable.resize( tableLength );
-			
+
 			in.read( reinterpret_cast<char*>( &m_header->m_offsetTable[0] ), sizeof( uint32_t ) * tableLength );
 			if ( in.fail() )
 			{
 				throw IOException( "SGIImageReader: Error reading scanline offset table in " + fileName() );
 			}
-			
+
 			in.read( reinterpret_cast<char*>( &m_header->m_lengthTable[0] ), sizeof( uint32_t ) * tableLength );
 			if ( in.fail() )
 			{
 				throw IOException( "SGIImageReader: Error reading scanline length table in " + fileName() );
 			}
-			
+
 			if ( m_reverseBytes )
 			{
-				std::transform( m_header->m_offsetTable.begin(), m_header->m_offsetTable.end(), m_header->m_offsetTable.begin(), reverseBytes<uint32_t> );			
-				std::transform( m_header->m_lengthTable.begin(), m_header->m_lengthTable.end(), m_header->m_lengthTable.begin(), reverseBytes<uint32_t> );				
+				std::transform( m_header->m_offsetTable.begin(), m_header->m_offsetTable.end(), m_header->m_offsetTable.begin(), reverseBytes<uint32_t> );
+				std::transform( m_header->m_lengthTable.begin(), m_header->m_lengthTable.end(), m_header->m_lengthTable.begin(), reverseBytes<uint32_t> );
 			}
-			
-			const uint32_t tableEnd = in.tellg();	
-					
+
+			const uint32_t tableEnd = in.tellg();
+
 			for ( uint32_t i = 0; i < tableLength; i ++ )
 			{
 				/// Convert char-sized offsets which are relative to the start of the file into buffer-sized offsets relative to the start of the image buffer
 				m_header->m_offsetTable[i] -= tableEnd;
-				assert( m_header->m_offsetTable[i] % m_header->m_fileHeader.m_bytesPerChannel == 0 );				
+				assert( m_header->m_offsetTable[i] % m_header->m_fileHeader.m_bytesPerChannel == 0 );
 				m_header->m_offsetTable[i] /= m_header->m_fileHeader.m_bytesPerChannel;
 
 				/// Convert lengths, also
-				assert( m_header->m_lengthTable[i] % m_header->m_fileHeader.m_bytesPerChannel == 0 );				
+				assert( m_header->m_lengthTable[i] % m_header->m_fileHeader.m_bytesPerChannel == 0 );
 				m_header->m_lengthTable[i] /= m_header->m_fileHeader.m_bytesPerChannel;
-								
+
 				bufferSize = std::max( bufferSize, m_header->m_offsetTable[i] + m_header->m_lengthTable[i] );
-			}								
+			}
 		}
 		else
 		{
@@ -515,20 +515,20 @@ bool SGIImageReader::open( bool throwOnFailure )
 			else if ( m_header->m_fileHeader.m_dimension == 3 )
 			{
 				bufferSize = m_header->m_fileHeader.m_xSize * m_header->m_fileHeader.m_ySize * m_header->m_fileHeader.m_zSize;
-			}			
+			}
 		}
-		
+
 		if ( m_header->m_fileHeader.m_bytesPerChannel == 1 )
 		{
 			UCharVectorDataPtr buffer = new UCharVectorData();
 			buffer->writable().resize( bufferSize, 0 );
-			
+
 			in.read( reinterpret_cast<char*>( &buffer->writable()[0] ), bufferSize );
 			if ( in.fail() )
 			{
 				throw IOException( "SGIImageReader: Error reading image data in " + fileName() );
 			}
-			
+
 			m_buffer = buffer;
 		}
 		else
@@ -536,23 +536,23 @@ bool SGIImageReader::open( bool throwOnFailure )
 			assert( m_header->m_fileHeader.m_bytesPerChannel == 2 );
 			UShortVectorDataPtr buffer = new UShortVectorData();
 			buffer->writable().resize( bufferSize, 0 );
-			
+
 			in.read( reinterpret_cast<char*>( &buffer->writable()[0] ), bufferSize * sizeof( uint16_t ) );
-			
+
 			if ( m_reverseBytes )
 			{
 				std::transform( buffer->writable().begin(), buffer->writable().end(), buffer->writable().begin(), reverseBytes<UShortVectorData::ValueType::value_type> );
 			}
-			
+
 			m_buffer = buffer;
-		}		
+		}
 	}
 	catch (...)
 	{
 		m_bufferFileName.clear();
 		m_header.reset();
 		m_buffer = 0;
-		
+
 		if ( throwOnFailure )
 		{
 			throw;

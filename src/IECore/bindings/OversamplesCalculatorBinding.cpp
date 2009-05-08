@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -41,7 +41,7 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 tuple tickInterval( const OversamplesCalculator &o, float f )
@@ -56,17 +56,17 @@ tuple tickInterval( const OversamplesCalculator &o, float f )
 void bindOversamplesCalculator()
 {
 	class_< OversamplesCalculator >( "OversamplesCalculator", no_init )
-		.def( 
+		.def(
 			init< optional< float, unsigned, unsigned > >
-			( 
+			(
 				(
-					arg( "frameRate" ) = float(24.0), 
-					arg( "samplesPerFrame" ) = unsigned(1), 
-					arg( "ticksPerSecond" ) = unsigned(6000) 
+					arg( "frameRate" ) = float(24.0),
+					arg( "samplesPerFrame" ) = unsigned(1),
+					arg( "ticksPerSecond" ) = unsigned(6000)
 				)
-			) 
+			)
 		)
-				
+
 		.def( "setFrameRate", &OversamplesCalculator::setFrameRate )
 		.def( "getFrameRate", &OversamplesCalculator::getFrameRate )
 		.def( "setSamplesPerFrame", &OversamplesCalculator::setSamplesPerFrame )
@@ -76,8 +76,8 @@ void bindOversamplesCalculator()
 		.def( "framesToTicks", &OversamplesCalculator::framesToTicks )
 		.def( "ticksToFrames", &OversamplesCalculator::ticksToFrames )
 		.def( "nearestTick", &OversamplesCalculator::nearestTick )
-		.def( "tickInterval", &tickInterval )		
+		.def( "tickInterval", &tickInterval )
 	;
-}	
+}
 
 } // namespace IECore

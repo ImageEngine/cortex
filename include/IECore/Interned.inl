@@ -73,7 +73,7 @@ Interned<T, Hash>::Interned( const char *value )
 // this is implemented in Interned.cpp.
 template<>
 InternedString::Interned( const char *value );
-		
+
 template<typename T, typename Hash>
 Interned<T, Hash>::~Interned()
 {
@@ -114,7 +114,7 @@ size_t Interned<T, Hash>::size()
 {
 	return hashSet()->size();
 };
- 
+
 template<typename T, typename Hash>
 typename Interned<T, Hash>::HashSet *Interned<T, Hash>::hashSet()
 {

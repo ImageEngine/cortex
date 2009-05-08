@@ -39,7 +39,7 @@ namespace IECore
 {
 #define IECORE_DOUBLEMAGICROUNDEPS	(.5-1.4e-11)
 
-#if (defined(__linux__) && defined(__i386__)) || defined(WIN32)	
+#if (defined(__linux__) && defined(__i386__)) || defined(WIN32)
 	#define IECORE_DOUBLEMAGIC			double (6755399441055744.0)
 
 	inline int fastFloat2Int( double v )
@@ -69,13 +69,13 @@ namespace IECore
 	{
 		return fastFloatRound( v + IECORE_DOUBLEMAGICROUNDEPS );
 	}
-	
+
 	union FastFloatFloatInt
 	{
 		float f;
 		int i;
 	};
-	
+
 	// From: http://www.beyond3d.com/articles/fastinvsqrt/
 	inline float fastFloatInvSqrt( float x )
 	{
@@ -109,8 +109,8 @@ namespace IECore
 	{
 		return (int)ceilf( v );
 	}
-	
-	
+
+
 	inline float fastFloatInvSqrt( float x )
 	{
 		return 1.0f / sqrtf(x);

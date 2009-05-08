@@ -49,7 +49,7 @@ IE_CORE_FORWARDDECLARE( Camera );
 class Scene : public Renderable
 {
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Scene, SceneTypeId, Renderable );
 
 		Scene();
@@ -63,7 +63,7 @@ class Scene : public Renderable
 		/// and then call render() with it.
 		void render() const;
 		virtual Imath::Box3f bound() const;
-		
+
 		/// Fills hits with HitRecords for all primitives which are visible within the specified
 		/// region. The region is specified in NDC space (0,0 at top left) in the same
 		/// way a crop window would be. As with the render() method, if the Scene has a camera
@@ -72,7 +72,7 @@ class Scene : public Renderable
 		/// \todo Have an overload which takes a Box2i specifying a raster space region
 		/// instead.
 		unsigned select( const Imath::Box2f &region, std::list<HitRecord> &hits ) const;
-		
+
 		/// Sets the camera used to view the scene. If unspecified then
 		/// you may position the scene using raw gl calls before
 		/// calling Scene::render(). If a camera is specified however, then
@@ -80,18 +80,18 @@ class Scene : public Renderable
 		void setCamera( CameraPtr camera );
 		CameraPtr getCamera();
 		ConstCameraPtr getCamera() const;
-				
+
 		/// Returns the root node for the scene. The
 		/// scene can be edited by editing the root node.
 		GroupPtr root();
 		/// Returns the root node for the scene.
 		ConstGroupPtr root() const;
-	
+
 	private :
-	
+
 		GroupPtr m_root;
 		CameraPtr m_camera;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Scene );

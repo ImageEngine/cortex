@@ -42,7 +42,7 @@ using namespace boost::python;
 
 namespace IECore
 {
-	
+
 static IntVectorDataPtr verticesPerFace( const CurvesPrimitive &p )
 {
 	return p.verticesPerCurve()->copy();
@@ -62,5 +62,5 @@ void bindCurvesPrimitive()
 		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned )const)&CurvesPrimitive::numSegments )
 	;
 }
-	
+
 } // namespace IECore

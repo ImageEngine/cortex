@@ -61,5 +61,5 @@ void bindPerspectiveCamera()
 		.def( "render", &PerspectiveCamera::render )
 	;
 }
-	
+
 }

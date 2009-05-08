@@ -48,19 +48,19 @@ class ImageUnpremultiplyOp : public ChannelOp
 		virtual ~ImageUnpremultiplyOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( ImageUnpremultiplyOp, ChannelOp );
-		
+
 		StringParameterPtr alphaChannelNameParameter();
-		ConstStringParameterPtr alphaChannelNameParameter() const;		
-	
+		ConstStringParameterPtr alphaChannelNameParameter() const;
+
 	protected :
-	
+
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
 
 		struct ToFloatVectorData;
 		struct UnpremultFn;
-		
+
 		StringParameterPtr m_alphaChannelNameParameter;
-	
+
 };
 
 IE_CORE_DECLAREPTR( ImageUnpremultiplyOp );

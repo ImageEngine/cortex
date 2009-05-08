@@ -59,9 +59,9 @@ static void fixSocketFlags( int socketDesc )
 	}
 }
 
-DisplayDriverServer::DisplayDriverServer( int portNumber ) : 
-		m_endpoint(tcp::v4(), portNumber), 
-		m_service(), 
+DisplayDriverServer::DisplayDriverServer( int portNumber ) :
+		m_endpoint(tcp::v4(), portNumber),
+		m_service(),
 		m_acceptor( m_service ),
 		m_thread(),
 		m_startThread(false)
@@ -152,7 +152,7 @@ unsigned char *DisplayDriverServer::Header::buffer()
 bool DisplayDriverServer::Header::valid()
 {
 	if ( m_header[orderMagicNumber] != magicNumber || m_header[orderProtocolVersion] != currentProtocolVersion ||
-		( m_header[orderMessageType] != imageOpen && m_header[orderMessageType] != imageData && 
+		( m_header[orderMessageType] != imageOpen && m_header[orderMessageType] != imageData &&
 			m_header[orderMessageType] != imageClose && m_header[orderMessageType] != exception ) )
 	{
 		return false;
@@ -162,7 +162,7 @@ bool DisplayDriverServer::Header::valid()
 
 size_t DisplayDriverServer::Header::getDataSize()
 {
-	return (unsigned int)m_header[orderDataSize1] | ((unsigned int)m_header[orderDataSize2] << 8) | 
+	return (unsigned int)m_header[orderDataSize1] | ((unsigned int)m_header[orderDataSize2] << 8) |
 				((unsigned int)m_header[orderDataSize3] << 16) | ((unsigned int)m_header[orderDataSize4] << 24);
 }
 
@@ -171,7 +171,7 @@ void DisplayDriverServer::Header::setDataSize( size_t dataSize )
 	m_header[orderDataSize1] = dataSize & 0xff;
 	m_header[orderDataSize2] = ( dataSize >> 8 ) & 0xff;
 	m_header[orderDataSize3] = ( dataSize >> 16 ) & 0xff;
-	m_header[orderDataSize4] = ( dataSize >> 24 ) & 0xff;					
+	m_header[orderDataSize4] = ( dataSize >> 24 ) & 0xff;
 }
 
 DisplayDriverServer::MessageType DisplayDriverServer::Header::messageType()
@@ -181,7 +181,7 @@ DisplayDriverServer::MessageType DisplayDriverServer::Header::messageType()
 
 /* DisplayDriverServer::Session functions */
 
-DisplayDriverServer::Session::Session( boost::asio::io_service& io_service, boost::mutex &mutex) : 
+DisplayDriverServer::Session::Session( boost::asio::io_service& io_service, boost::mutex &mutex) :
 	m_mutex( mutex ),m_socket( io_service ), m_displayDriver(0), m_buffer( new CharVectorData( ) )
 {
 }
@@ -246,12 +246,12 @@ void DisplayDriverServer::Session::handleReadHeader( const boost::system::error_
 				boost::bind(&DisplayDriverServer::Session::handleReadDataParameters, SessionPtr(this),
 				boost::asio::placeholders::error));
 		break;
-			
+
 	case imageClose:
 		if ( m_displayDriver )
 		{
 			m_mutex.lock();
-			try 
+			try
 			{
 				m_displayDriver->imageClose();
 			}
@@ -348,7 +348,7 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 		msg( Msg::Error, "DisplayDriverServer::Session::handleReadOpenParameters", e.what() );
 		m_socket.close();
 	}
-	
+
 }
 
 void DisplayDriverServer::Session::handleReadDataParameters( const boost::system::error_code& error )
@@ -371,7 +371,7 @@ void DisplayDriverServer::Session::handleReadDataParameters( const boost::system
 	// get imageData parameters
 	Box2iDataPtr box;
 	FloatVectorDataPtr data;
-		
+
 	m_mutex.lock();
 	try
 	{

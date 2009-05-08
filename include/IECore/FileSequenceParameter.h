@@ -44,7 +44,7 @@
 namespace IECore
 {
 
-/// The FileSequenceParameter class implements a Parameter to define FileSequences. 
+/// The FileSequenceParameter class implements a Parameter to define FileSequences.
 /// As it can't store FileSequence objects as its value (they're not derived from Object) it stores
 /// a string representing the sequence instead, but provides methods for turning this into a FileSequence.
 /// \todo Have this support the specification of frame ranges as well (in a form like "fileName.#.ext 1-20")
@@ -52,54 +52,54 @@ namespace IECore
 /// for frame ranges.
 class FileSequenceParameter : public PathParameter
 {
-	public:		
-	
+	public:
+
 		typedef std::vector< std::string > ExtensionList;
-	
+
 		IE_CORE_DECLAREOBJECT( FileSequenceParameter, PathParameter );
-		
+
 		FileSequenceParameter( const std::string &name, const std::string &description,	const std::string &defaultValue = "", bool allowEmptyString = true, CheckType check = PathParameter::DontCare,
 			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
 			const ExtensionList &extensions = ExtensionList() );
-				
+
 		virtual ~FileSequenceParameter();
-		
+
 		const ExtensionList &getExtensions() const;
 		void setExtensions( const ExtensionList &extensions );
-		
+
 		/// Returns true only if the value is StringData and matches the FileSequence::fileNameValidator
 		/// regex. Also checks that the sequence exists or doesn't exist based on the CheckType passed to
  		/// the constructor.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
-		
-		void setFileSequenceValue( ConstFileSequencePtr frameList );	
-		
+
+		void setFileSequenceValue( ConstFileSequencePtr frameList );
+
 		/// Gets the internal StringData value and creates a FileSequence
 		/// from it using the ls() function. Note that this can return 0
-		/// if check is DontCare and no matching sequence exists on disk.	
+		/// if check is DontCare and no matching sequence exists on disk.
 		FileSequencePtr getFileSequenceValue() const;
-		
+
 	protected :
-	
+
 		FileSequenceParameter();
 		friend class TypeDescription<FileSequenceParameter>;
-			
+
 		/// Find the longest space-delimited tail substring that is a parseable FrameList and
-		/// return a FileSequence instance which contains that FrameList. Everything before that is considered to 
-		/// be part of the filename. Previous implementations would just split on the first space character 
+		/// return a FileSequence instance which contains that FrameList. Everything before that is considered to
+		/// be part of the filename. Previous implementations would just split on the first space character
 		/// encountered, but this wouldn't allow for the filename portion of the value to include spaces itself.
 		FileSequencePtr parseFileSequence( const std::string &fileSequenceString ) const;
-	
+
 		ExtensionList m_extensions;
 
 	private :
-	
+
 		static const unsigned int g_ioVersion;
-					
+
 };
 
 IE_CORE_DECLAREPTR( FileSequenceParameter );
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_FILESEQUENCEPARAMETER_H

@@ -39,12 +39,12 @@ import IECore
 class AttributeStateTest( unittest.TestCase ) :
 
 	def testCopy( self ) :
-	
+
 		a = IECore.AttributeState()
 		a.attributes["test"] = IECore.FloatData( 10 )
-		
+
 		aa = a.copy()
 		self.assertEqual( a, aa )
-	
+
 if __name__ == "__main__":
 	unittest.main()

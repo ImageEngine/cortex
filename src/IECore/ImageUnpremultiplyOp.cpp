@@ -51,7 +51,7 @@ ImageUnpremultiplyOp::ImageUnpremultiplyOp(): ChannelOp( "ImageUnpremultiplyOp",
 		"The name of the alpha channel to unpremultiply by",
 		"A"
 	);
-	
+
 	parameters()->addParameter( m_alphaChannelNameParameter );
 }
 
@@ -72,37 +72,37 @@ ConstStringParameterPtr ImageUnpremultiplyOp::alphaChannelNameParameter() const
 struct ImageUnpremultiplyOp::ToFloatVectorData
 {
 	typedef FloatVectorDataPtr ReturnType;
-	
+
 	template<typename T>
 	ReturnType operator()( typename T::ConstPtr dataPtr )
-	{	
-		return DataConvert< T, FloatVectorData, ScaledDataConversion< typename T::ValueType::value_type, float > >()( dataPtr );			
+	{
+		return DataConvert< T, FloatVectorData, ScaledDataConversion< typename T::ValueType::value_type, float > >()( dataPtr );
 	}
 };
 
 struct ImageUnpremultiplyOp::UnpremultFn
 {
 	typedef void ReturnType;
-	
+
 	ConstFloatVectorDataPtr m_alphaChannel;
-	
+
 	UnpremultFn( ConstFloatVectorDataPtr alphaChannel ) : m_alphaChannel( alphaChannel )
 	{
 		assert( m_alphaChannel );
 	}
-	
+
 	template<typename T>
 	ReturnType operator()( typename T::Ptr dataPtr )
 	{
 		typedef typename T::ValueType Container;
 		typedef typename Container::value_type ValueType;
 		typedef typename Container::iterator Iterator;
-		
+
 		ScaledDataConversion< ValueType, float > toFloat;
-		ScaledDataConversion< float, ValueType > fromFloat;		
-		
+		ScaledDataConversion< float, ValueType > fromFloat;
+
 		FloatVectorData::ValueType::const_iterator alphaIt = m_alphaChannel->readable().begin();
-		
+
 		Container &data = dataPtr->writable();
 		for ( typename Container::iterator it = data.begin(); it != data.end(); ++it, ++alphaIt )
 		{
@@ -112,7 +112,7 @@ struct ImageUnpremultiplyOp::UnpremultFn
 			{
 				channelValue /= *alphaIt;
 			}
-			
+
 			*it = fromFloat( channelValue );
 		}
 	}
@@ -121,17 +121,17 @@ struct ImageUnpremultiplyOp::UnpremultFn
 void ImageUnpremultiplyOp::modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels )
 {
 	const std::string &alphaChannelName = m_alphaChannelNameParameter->getTypedValue();
-	
+
 	const StringVectorParameter::ValueType &channelNames = channelNamesParameter()->getTypedValue();
-	
+
 	if ( std::find( channelNames.begin(), channelNames.end(), alphaChannelName ) != channelNames.end() )
 	{
 		throw InvalidArgumentException( "ImageUnpremultiplyOp: Specified channel names list contains alpha channel" );
 	}
-			
+
 	ImagePrimitivePtr image = assertedStaticCast< ImagePrimitive >( inputParameter()->getValue() );
-	
-	const PrimitiveVariableMap::const_iterator it = image->variables.find( alphaChannelName );	
+
+	const PrimitiveVariableMap::const_iterator it = image->variables.find( alphaChannelName );
 	if ( it == image->variables.end() )
 	{
 		throw InvalidArgumentException( "ImageUnpremultiplyOp: Cannot find specified alpha channel" );

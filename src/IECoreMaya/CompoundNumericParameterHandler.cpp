@@ -70,18 +70,18 @@ MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr pa
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnNumericAttribute fnNAttr( attribute );
 	if( !fnNAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
 	}
-	
+
 	if( fnNAttr.unitType()!=NumericTraits<T>::dataType() )
 	{
 		return MS::kFailure;
 	}
-	
+
 	/// Set the default value one child attribute at a time. It would appear that using the variants of setDefault
 	/// whicn take 2 or 3 arguments can exercise a Maya bug.
 	T defValue = p->typedDefaultValue();
@@ -104,7 +104,7 @@ MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr pa
 			return s;
 		}
 	}
-	
+
 #ifndef NDEBUG
 	/// Verify that the defaults have been set correctly. Only do this in asserted builds.
 	switch( T::dimensions() )
@@ -125,46 +125,46 @@ MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr pa
 				assert( s );
 				assert( c0 == defValue[0] );
 				assert( c1 == defValue[1] );
-				assert( c2 == defValue[2] );								
+				assert( c2 == defValue[2] );
 			}
 			break;
 		default :
 			assert( false );
 	}
-#endif	
-			
+#endif
+
 	fnNAttr.setUsedAsColor( NumericTraits<T>::isColor() );
-	
+
 	bool keyable = true;
 	bool channelBox = true;
-	
+
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
 	assert( userData );
-	
+
 	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
 	if (maya)
 	{
-		const IECore::ConstBoolDataPtr keyableData = maya->member<const IECore::BoolData>("keyable");		
+		const IECore::ConstBoolDataPtr keyableData = maya->member<const IECore::BoolData>("keyable");
 		if (keyableData)
 		{
 			keyable = keyableData->readable();
 		}
-		
-		const IECore::ConstBoolDataPtr channelBoxData = maya->member<const IECore::BoolData>("channelBox");		
+
+		const IECore::ConstBoolDataPtr channelBoxData = maya->member<const IECore::BoolData>("channelBox");
 		if (channelBoxData)
 		{
 			channelBox = channelBoxData->readable();
 		}
-	}	
-	
+	}
+
 	fnNAttr.setKeyable( keyable );
-	
+
 	// Calling setChannelBox(true) disables keying
 	if (!keyable)
 	{
 		fnNAttr.setChannelBox( channelBox );
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -176,7 +176,7 @@ MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr pa
 	{
 		return MObject::kNullObj;
 	}
-	
+
 	MFnNumericAttribute fnNAttr;
 	MObject result;
 	switch( T::dimensions() )
@@ -191,7 +191,7 @@ MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr pa
 			break;
 		case 3 :
 			if( NumericTraits<T>::isColor() )
-			{			
+			{
 				result = fnNAttr.createColor( attributeName, attributeName );
 			}
 			else
@@ -203,14 +203,14 @@ MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr pa
 			}
 			break;
 		default :
-			assert( false );	
+			assert( false );
 			result = MObject::kNullObj;
 	}
-	
+
 	update( parameter, result );
 	return result;
 }
-		
+
 template<typename T>
 MStatus CompoundNumericParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
@@ -219,12 +219,12 @@ MStatus CompoundNumericParameterHandler<T>::setValue( IECore::ConstParameterPtr 
 	{
 		return MS::kFailure;
 	}
-	
+
 	if( plug.numChildren() != T::dimensions() )
 	{
 		return MS::kFailure;
 	}
-	
+
 	T v = p->getTypedValue();
 	for( unsigned i=0; i<plug.numChildren(); i++ )
 	{
@@ -246,12 +246,12 @@ MStatus CompoundNumericParameterHandler<T>::setValue( const MPlug &plug, IECore:
 	{
 		return MS::kFailure;
 	}
-	
+
 	if( plug.numChildren() != T::dimensions() )
 	{
 		return MS::kFailure;
 	}
-	
+
 	T v;
 	for( unsigned i=0; i<plug.numChildren(); i++ )
 	{
@@ -261,7 +261,7 @@ MStatus CompoundNumericParameterHandler<T>::setValue( const MPlug &plug, IECore:
 			return s;
 		}
 	}
-	
+
 	p->setTypedValue( v );
 	return MS::kSuccess;
 }

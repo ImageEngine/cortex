@@ -51,12 +51,12 @@ ColorTexture::ColorTexture( unsigned int width, unsigned int height )
 {
 	glGenTextures( 1, &m_texture );
 	glBindTexture( GL_TEXTURE_2D, m_texture );
-		
+
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-	
+
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 		GL_FLOAT, 0 );
 }
@@ -93,22 +93,22 @@ ColorTexture::ColorTexture( IECore::ConstImagePrimitivePtr image )
 	static const char *greenNames[] = { "g", "G", "green", 0 };
 	static const char *blueNames[] = { "b", "B", "blue", 0 };
 	static const char *alphaNames[] = { "a", "A", "alpha", 0 };
-	
+
 	IECore::ConstDataPtr r = findChannel( image->variables, redNames );
 	IECore::ConstDataPtr g = findChannel( image->variables, greenNames );
 	IECore::ConstDataPtr b = findChannel( image->variables, blueNames );
 	IECore::ConstDataPtr a = findChannel( image->variables, alphaNames );
-	
+
 	if( !(r && g && b) )
 	{
 		throw Exception( "Unsupported color format." );
 	}
-	
+
 	int width = image->getDataWindow().size().x + 1;
 	int height = image->getDataWindow().size().y + 1;
 	construct( width, height, r, g, b, a );
 }
-				
+
 ColorTexture::~ColorTexture()
 {
 }
@@ -122,7 +122,7 @@ void ColorTexture::construct( unsigned int width, unsigned int height, IECore::C
 	{
 		throw Exception( "Channel types do not match." );
 	}
-		
+
 	if( r->typeId()==UCharVectorData::staticTypeId() )
 	{
 		castConstruct<UCharVectorData>( width, height, r, g, b, a );
@@ -172,20 +172,20 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, b
 	boost::intrusive_ptr<const T> g,  boost::intrusive_ptr<const T> b, boost::intrusive_ptr<const T> a )
 {
 	typedef typename T::ValueType::value_type ElementType;
-	
+
 	const std::vector<ElementType> &rr = r->readable();
 	const std::vector<ElementType> &rg = g->readable();
 	const std::vector<ElementType> &rb = b->readable();
 	const std::vector<ElementType> *ra = a ? &a->readable() : 0;
-	
+
 	unsigned int n = width * height;
 	if( rr.size()!=n || rg.size()!=n || rb.size()!=n || (ra && ra->size()!=n) )
 	{
 		throw IECore::Exception( "Image data has wrong size." );
 	}
-	
+
 	std::vector<ElementType> interleaved( n * (ra ? 4 : 3) );
-	
+
 	unsigned int i = 0;
 	for( int y=height-1; y>=0; y-- )
 	{
@@ -193,7 +193,7 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, b
 		const ElementType *dg = &rg[y*width];
 		const ElementType *db = &rb[y*width];
 		const ElementType *da = ra ? &(*ra)[y*width] : 0;
-		
+
 		for( unsigned int x=0; x<width; x++ )
 		{
 			interleaved[i++] = dr[x];
@@ -205,52 +205,52 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, b
 			}
 		}
 	}
-	
+
 	glGenTextures( 1, &m_texture );
 	glBindTexture( GL_TEXTURE_2D, m_texture );
-	
+
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	
+
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-	
+
 	glTexImage2D( GL_TEXTURE_2D, 0, ra ? GL_RGBA : GL_RGB, width, height, 0, ra ? GL_RGBA : GL_RGB,
 		NumericTraits<ElementType>::glType(), &interleaved[0] );
-		
+
 	Exception::throwIfError();
-	
+
 }
 
 ImagePrimitivePtr ColorTexture::imagePrimitive() const
 {
 	glPushAttrib( mask() );
-		
+
 		bind();
-	
+
 		GLint width = 0;
 		GLint height = 0;
 		glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );
 		glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height );
-			
+
 		GLint internalFormat = 0;
 		glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFormat );
 
 		unsigned int numChannels = 4;
 		vector<float> data( width * height * numChannels );
-		
+
 		glGetTexImage( GL_TEXTURE_2D, 0, internalFormat, GL_FLOAT, &data[0] );
-		
+
 		FloatVectorDataPtr rd = new FloatVectorData();
 		vector<float> &r = rd->writable(); r.resize( width * height );
-		
+
 		FloatVectorDataPtr gd = new FloatVectorData();
 		vector<float> &g = gd->writable(); g.resize( width * height );
-		
+
 		FloatVectorDataPtr bd = new FloatVectorData();
 		vector<float> &b = bd->writable(); b.resize( width * height );
-		
+
 		FloatVectorDataPtr ad = 0;
 		vector<float> *a = 0;
 		if( internalFormat==GL_RGBA )
@@ -258,7 +258,7 @@ ImagePrimitivePtr ColorTexture::imagePrimitive() const
 			ad = new FloatVectorData();
 			a = &ad->writable(); a->resize( width * height );
 		}
-		
+
 		unsigned int i = 0;
 		for( int y=height-1; y>=0; y-- )
 		{
@@ -277,7 +277,7 @@ ImagePrimitivePtr ColorTexture::imagePrimitive() const
 				}
 			}
 		}
-			
+
 		Box2i imageExtents( V2i( 0, 0 ), V2i( width-1, height-1 ) );
 		ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
 		image->variables["R"] = PrimitiveVariable( PrimitiveVariable::Vertex, rd );
@@ -287,8 +287,8 @@ ImagePrimitivePtr ColorTexture::imagePrimitive() const
 		{
 			image->variables["A"] = PrimitiveVariable( PrimitiveVariable::Vertex, ad );
 		}
-	
+
 	glPopAttrib();
-	
+
 	return image;
 }

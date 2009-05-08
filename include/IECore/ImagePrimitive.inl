@@ -44,7 +44,7 @@
 #include "IECore/Exception.h"
 #include "IECore/TypeTraits.h"
 
-namespace IECore 
+namespace IECore
 {
 
 template<typename T>
@@ -57,7 +57,7 @@ typename TypedData<std::vector<T> >::Ptr ImagePrimitive::getChannel( const std::
 	}
 	return 0;
 }
-		
+
 template<typename T>
 typename TypedData<std::vector<T> >::ConstPtr ImagePrimitive::getChannel( const std::string &name ) const
 {
@@ -68,10 +68,10 @@ typename TypedData<std::vector<T> >::ConstPtr ImagePrimitive::getChannel( const 
 	}
 	return 0;
 }
-			
+
 template<class T>
 typename TypedData<std::vector<T> >::Ptr ImagePrimitive::createChannel( const std::string &name )
-{	
+{
 	/// This assert enforces the comments regarding permissible channel types in ImagePrimitive.h
 	BOOST_STATIC_ASSERT( (
 		boost::mpl::or_<
@@ -81,13 +81,13 @@ typename TypedData<std::vector<T> >::Ptr ImagePrimitive::createChannel( const st
 		>::value
 	) );
 	typename TypedData<std::vector<T> >::Ptr channel = new TypedData<std::vector<T> >;
-	
+
 	typename std::vector<T>::size_type area = ( 1 + m_dataWindow.max.x - m_dataWindow.min.x ) * ( 1 + m_dataWindow.max.y - m_dataWindow.min.y );
 
 	channel->writable().resize( area );
-	
+
 	variables.insert( PrimitiveVariableMap::value_type( name, PrimitiveVariable( PrimitiveVariable::Vertex, channel ) ) );
-	
+
 	return channel;
 }
 

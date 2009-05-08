@@ -68,41 +68,41 @@ TypedData<T>::~TypedData()
 // runtimetyped interface
 //////////////////////////////////////////////////////////////////////////////////////
 
-template <class T> 
+template <class T>
 TypeId TypedData<T>::typeId() const
 {
 	assert( 0 ); // this function must be specialised for each data type!
 	return InvalidTypeId;
 }
 
-template <class T> 
+template <class T>
 TypeId TypedData<T>::staticTypeId()
 {
 	assert( 0 ); // this function must be specialised for each data type!
 	return InvalidTypeId;
 }
 
-template <class T> 
+template <class T>
 const char *TypedData<T>::typeName() const
 {
 	assert( 0 ); // this function must be specialised for each data type!
 	return "";
 }
 
-template <class T> 
+template <class T>
 const char *TypedData<T>::staticTypeName()
 {
 	assert( 0 ); // this function must be specialised for each data type!
 	return "";
 }
 
-template <class T> 
+template <class T>
 TypeId TypedData<T>::baseTypeId()
 {
 	return Data::staticTypeId();
 }
 
-template <class T> 
+template <class T>
 const char *TypedData<T>::baseTypeName()
 {
 	return Data::staticTypeName();
@@ -139,12 +139,12 @@ bool TypedData<T>::inheritsFrom( const char *typeName )
 {
 	return !strcmp( Data::staticTypeName(), typeName ) ? true : Data::inheritsFrom( typeName );
 }
-		
+
 //////////////////////////////////////////////////////////////////////////////////////
 // object interface
 //////////////////////////////////////////////////////////////////////////////////////
 
-template <class T> 
+template <class T>
 typename TypedData<T>::Ptr TypedData<T>::copy() const
 {
 	return boost::static_pointer_cast<TypedData<T> >( Data::copy() );
@@ -181,7 +181,7 @@ void TypedData<T>::load( LoadContextPtr context )
 		// backwards compatibility with old files
 		unsigned int v = 0;
 		IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-		container->read( "value", writable() );	
+		container->read( "value", writable() );
 	}
 }
 
@@ -207,7 +207,7 @@ bool TypedData<T>::isEqualTo( ConstObjectPtr other ) const
 //////////////////////////////////////////////////////////////////////////////////////
 
 template<class T>
-void TypedData<T>::operator = (const T &data) 
+void TypedData<T>::operator = (const T &data)
 {
 	writable() = data;
 }
@@ -219,10 +219,10 @@ void TypedData<T>::operator = (const TypedData<T> &typedData)
 }
 
 template<class T>
-const T & TypedData<T>::readable() const 
+const T & TypedData<T>::readable() const
 {
 	assert( m_data );
-	
+
 	return m_data->data;
 }
 
@@ -230,11 +230,11 @@ template<class T>
 T & TypedData<T>::writable()
 {
 	assert( m_data );
-	if (m_data->refCount() > 1) 
+	if (m_data->refCount() > 1)
 	{
 		// duplicate the data
 
-		m_data = new DataHolder(m_data->data);			
+		m_data = new DataHolder(m_data->data);
 	}
 	return m_data->data;
 }

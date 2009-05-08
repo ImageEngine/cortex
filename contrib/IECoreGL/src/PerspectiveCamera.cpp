@@ -65,12 +65,12 @@ void PerspectiveCamera::render( ConstStatePtr state ) const
 {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
-	
+
 	float r = m_clippingPlanes[0] * tan( M_PI * m_fov / 360.0 );
-	
+
 	glFrustum( r * m_screenWindow.min.x, r * m_screenWindow.max.x,
 		r * m_screenWindow.min.y, r * m_screenWindow.max.y,
 		m_clippingPlanes[0], m_clippingPlanes[1] );
-		
+
 	setModelViewMatrix();
 }

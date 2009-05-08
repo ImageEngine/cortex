@@ -78,16 +78,16 @@ class TIFFImageReader : public ImageReader
 		virtual ~TIFFImageReader();
 
 		static bool canRead( const std::string &filename );
-		
+
 		/// A TIFF image can contain multiple directories (images), each capable of having its own resolution.
 		/// This method returns the number of directories present in the file so that we can then call setDirectory()
 		/// in order to read a specific image from the file.
 		unsigned int numDirectories();
-		
+
 		/// Sets the index of the directory we want to read from the TIFF file. By default we read out the first directory
-		/// present.		
+		/// present.
 		void setDirectory( unsigned int directoryIndex );
-		
+
 		//! @name ImageReader interface
 		/// Please note that these methods operate on the current TIFF directory.
                 //@{
@@ -95,9 +95,9 @@ class TIFFImageReader : public ImageReader
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
-		virtual std::string sourceColorSpace() const ;		
+		virtual std::string sourceColorSpace() const ;
 		//@}
-		
+
 	private:
 
 		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow );
@@ -112,14 +112,14 @@ class TIFFImageReader : public ImageReader
 
 		/// Opens the file, if necessary, and reads the image information from the current directory, returning true on
 		/// success and false on failure. On success, the member data derived from the TIFF's "header" will be valid (e.g.
-		/// the channel names. bits per sample, data window, etc).If throwOnFailure is true then a descriptive Exception is 
+		/// the channel names. bits per sample, data window, etc).If throwOnFailure is true then a descriptive Exception is
 		/// thrown rather than false being returned.
 		bool readCurrentDirectory( bool throwOnFailure = false );
-		
+
 		// tiff image pointer
 		tiff *m_tiffImage;
 		std::string m_tiffImageFileName;
-		
+
 		unsigned int m_currentDirectoryIndex;
 		unsigned int m_numDirectories;
 		bool m_haveDirectory;

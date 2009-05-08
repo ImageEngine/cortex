@@ -51,9 +51,9 @@ IE_CORE_DECLAREPTR( ToMayaObjectConverter );
 /// convertions to MObject datatype.
 class ToMayaObjectConverter : public ToMayaConverter
 {
-	
+
 	public :
-			
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaObjectConverter, ToMayaObjectConverterTypeId, ToMayaConverter );
 
 		/// Converts the IECore::Object into the given MObject and returns True if successful and false otherwise.
@@ -62,27 +62,27 @@ class ToMayaObjectConverter : public ToMayaConverter
 		/// is passed then a new one should be created. We also probably need a ToMayaShapeConverter base class with
 		/// some parentOrOwner type semantics.
 		bool convert( MObject &object ) const;
-		
+
 		/// Creates a converter which will convert the given IECore::Object to a maya object
 		/// of any relevant type. Returns 0 if no such converter can be found.
 		static ToMayaObjectConverterPtr create( IECore::ConstObjectPtr object );
 		/// Creates a converter which will convert the given IECore::Object to a MObject
 		/// of the specified type. Returns 0 if no such converter can be found.
 		static ToMayaObjectConverterPtr create( IECore::ConstObjectPtr object, MFn::Type resultType );
-		
+
 	protected :
-	
+
 		ToMayaObjectConverter( const std::string &name, const std::string &description, IECore::ConstObjectPtr object );
 
 		/// Must be implemented by subclasses. Is guaranteed only to be called when object()
 		/// returns a valid IECore::Object of a type specified when the converter was registered.
 		/// \todo I don't think that guarantee is accurate at all.
 		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const = 0;
-	
+
 		typedef ToMayaObjectConverterPtr (*CreatorFn)( IECore::ConstObjectPtr object );
 
 		static void registerConverter( IECore::TypeId fromType, const MFn::Type resultType, CreatorFn creator );
-	
+
 		/// Creating a static instance of one of these (templated on your Converter type)
 		/// within your class will register your converter with the factory mechanism.
 		template<class T>
@@ -103,9 +103,9 @@ class ToMayaObjectConverter : public ToMayaConverter
 			Types( IECore::TypeId from, MFn::Type result );
 			IECore::TypeId fromType;
 			MFn::Type resultType;
-			bool operator < ( const Types &other ) const; 
+			bool operator < ( const Types &other ) const;
 		};
-		
+
 		typedef std::map<Types, CreatorFn> TypesToFnsMap;
 		static TypesToFnsMap *typesToFns();
 

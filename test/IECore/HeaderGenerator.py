@@ -44,7 +44,7 @@ class TestHeaderGenerator(unittest.TestCase):
 
 	def testHeader(self):
 		"""Test HeaderGenerator"""
-		
+
 		header = HeaderGenerator.header()
 		self.assertEqual( header['ieCoreVersion'].value, versionString() )
 		( sysname, nodename, release, version, machine ) = os.uname()
@@ -55,16 +55,16 @@ class TestHeaderGenerator(unittest.TestCase):
 		self.assertEqual( header["host"]["machineName"].value, machine )
 		self.assertEqual( header["userName"].value, pwd.getpwuid( os.getuid() ).pw_name )
 		self.assert_( header.has_key( "timeStamp" ) )
-		
+
 	def testBackwardsCompatibility(self ):
-		
+
 		# Make sure we read the "userID" member (previously type LongData, now type IntData) correctly.
 		header = Reader.create( "test/IECore/data/cobFiles/header.cob" ).read()
-		
+
 		self.assertEqual( header["userID"].value, 523 )
-		
-		
-		
+
+
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

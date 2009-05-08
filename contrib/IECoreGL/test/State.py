@@ -42,12 +42,12 @@ init( False )
 class TestState( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		s = State( False )
 		self.assert_( not s.isComplete() )
-		
+
 		s = State( True )
 		self.assert_( s.isComplete() )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

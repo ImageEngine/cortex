@@ -46,7 +46,7 @@ namespace Detail
 struct TypedDataTest
 {
 	typedef bool ReturnType;
-	
+
 	template< typename T >
 	ReturnType operator()( typename T::ConstPtr d ) const
 	{

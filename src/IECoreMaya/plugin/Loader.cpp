@@ -43,50 +43,50 @@ MStatus initializePlugin( MObject obj )
 {
 	assert( !g_libraryHandle );
 	MFnPlugin plugin(obj, "Image Engine", "1.0");
-	
+
 	std::string pluginName = plugin.name().asChar();
 	std::string pluginPath = plugin.loadPath().asChar();
-	
+
 	std::string implName = pluginPath + "/impl/" + pluginName + ".so";
-	
+
  	g_libraryHandle = dlopen( implName.c_str(), RTLD_NOW | RTLD_GLOBAL );
-	
+
 	if (! g_libraryHandle )
 	{
 		return MS::kFailure;
 	}
-	
-	void *initializeSymbol = dlsym( g_libraryHandle, "_Z16initializePlugin7MObject" );	
+
+	void *initializeSymbol = dlsym( g_libraryHandle, "_Z16initializePlugin7MObject" );
 	if ( ! initializeSymbol )
 	{
 		dlclose( g_libraryHandle );
 		g_libraryHandle = 0;
 		return MS::kFailure;
 	}
-	
+
 	typedef MStatus (*InitializePluginFn)( MObject );
-	
+
 	InitializePluginFn initializePluginImpl = (InitializePluginFn)( initializeSymbol );
-	
+
 	return initializePluginImpl( obj );
 }
 
 MStatus uninitializePlugin( MObject obj )
-{ 
+{
 	MFnPlugin plugin(obj);
 	assert( g_libraryHandle );
 	void *uninitializeSymbol = dlsym( g_libraryHandle, "_Z18uninitializePlugin7MObject" );
-	
+
 	if ( !uninitializeSymbol )
 	{
 		dlclose( g_libraryHandle );
 		g_libraryHandle = 0;
 		return MS::kFailure;
 	}
-	
+
 	typedef MStatus (*UninitializePluginFn)( MObject );
 	UninitializePluginFn uninitializePluginImpl = (UninitializePluginFn)( uninitializeSymbol );
-		
+
 	MStatus s = uninitializePluginImpl( obj );
 	dlclose( g_libraryHandle );
 	g_libraryHandle = 0;

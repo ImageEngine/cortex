@@ -59,7 +59,7 @@ RadixSort::~RadixSort()
 
 void RadixSort::resize( unsigned int s )
 {
-	m_ranks->writable().resize( s );	
+	m_ranks->writable().resize( s );
 	m_ranks2->writable().resize( s );
 }
 
@@ -67,12 +67,12 @@ template<typename T>
 bool RadixSort::checkPassValidity( const std::vector<T> &input, unsigned int pass, unsigned int* &curCount, unsigned char &uniqueVal )
 {
 	curCount = &m_histogram[ pass << 8 ];
-	
-#ifdef IE_CORE_BIG_ENDIAN	
+
+#ifdef IE_CORE_BIG_ENDIAN
 	uniqueVal = *((( unsigned char* )( &input[0] ) ) + sizeof(T) - 1 - pass );
 #else
 	uniqueVal = *((( unsigned char* )( &input[0] ) ) + pass );
-#endif	
+#endif
 
 	if ( curCount[ uniqueVal ] == input.size() )
 	{
@@ -89,7 +89,7 @@ void RadixSort::checkResize( unsigned int s )
 	if ( s != curSize )
 	{
 		resize( s );
-		
+
 		m_currentSize = s;
 		m_currentSize |= 0x80000000;
 	}
@@ -107,7 +107,7 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<float>
 	}
 
 	const unsigned int *input = ( const unsigned int * ) &input2[0];
-	
+
 	bool alreadySorted = createHistograms< float >( input2 );
 	if ( alreadySorted )
 	{
@@ -141,17 +141,17 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<float>
 				}
 
 				const unsigned char *inputBytes = ( const unsigned char * ) input;
-#ifdef IE_CORE_BIG_ENDIAN			
+#ifdef IE_CORE_BIG_ENDIAN
 				inputBytes += sizeof(float) - 1 - j;
 #else
 				inputBytes += j;
-#endif		
+#endif
 
 				if ( m_currentSize & 0x80000000 )
 				{
 					for ( unsigned int i = 0; i < nb; i++ )
 					{
-						*m_link[ inputBytes[i<<2] ]++ = i;						
+						*m_link[ inputBytes[i<<2] ]++ = i;
 					}
 					m_currentSize&=0x7fffffff;
 				}
@@ -261,13 +261,13 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<unsign
 {
 	const unsigned int nb = input2.size();
 	checkResize( nb );
-	
+
 	if ( !nb )
 	{
 		return m_ranks->readable();
 	}
 	const unsigned int *input = &input2[0];
-	
+
 	bool alreadySorted = createHistograms< unsigned int >( input2 );
 	if ( alreadySorted )
 	{
@@ -281,25 +281,25 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<unsign
 		bool performPass = checkPassValidity( input2, j, curCount, uniqueVal );
 
 		if ( performPass )
-		{		
+		{
 			m_link[0] = &m_ranks2->writable()[0];
-				
+
 			for( unsigned int i = 1; i < 256; i++ )
 			{
 				m_link[i] = m_link[i - 1] + curCount[ i - 1 ];
-			} 
-			
+			}
+
 			const unsigned char *inputBytes = ( const unsigned char * )( input );
-#ifdef IE_CORE_BIG_ENDIAN			
+#ifdef IE_CORE_BIG_ENDIAN
 			inputBytes += sizeof(unsigned int) - 1 - j;
 #else
 			inputBytes += j;
-#endif			
-			
+#endif
+
 			if (m_currentSize & 0x80000000)
 			{
 				for ( unsigned int i = 0; i < nb; i++ )
-				{					
+				{
 					*m_link[ inputBytes[ (i<<2) ] ]++ = i;
 				}
 				m_currentSize &= 0x7fffffff;
@@ -309,13 +309,13 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<unsign
 				for ( UIntVectorData::ValueType::const_iterator it = m_ranks->readable().begin(); it != m_ranks->readable().end(); ++it )
 				{
 					unsigned int id = *it;
-					
+
 					*m_link[ inputBytes[ (id << 2) ] ]++ = id;
-				}	
+				}
 			}
-			
+
 			std::swap( m_ranks, m_ranks2 );
-		}		
+		}
 	}
 
 	return m_ranks->readable();
@@ -325,24 +325,24 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<int> &
 {
 	const unsigned int nb = input2.size();
 	checkResize( nb );
-	
+
 	if ( !nb )
 	{
 		return m_ranks->readable();
 	}
 	const unsigned int *input = ( const unsigned int * ) &input2[0];
-	
+
 	bool alreadySorted = createHistograms< int >( input2 );
 	if ( alreadySorted )
 	{
 		return m_ranks->readable();
 	}
-	
+
 	unsigned int numNegativeValues = 0;
-	unsigned int* h3= &m_histogram[768];	
+	unsigned int* h3= &m_histogram[768];
 	for ( unsigned int i = 128; i < 256; i++ )
 	{
-		numNegativeValues += h3[i];		
+		numNegativeValues += h3[i];
 	}
 
 	for ( unsigned int j = 0; j < 4; j ++ )
@@ -360,7 +360,7 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<int> &
 				for( unsigned int i = 1; i < 256; i++ )
 				{
 					m_link[i] = m_link[i - 1] + curCount[ i - 1 ];
-				} 
+				}
 			}
 			else
 			{
@@ -368,21 +368,21 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<int> &
 				for( unsigned int i = 1; i < 128; i++ )
 				{
 					m_link[i] = m_link[i - 1] + curCount[ i - 1 ];
-				} 
+				}
 				m_link[128] = &m_ranks2->writable()[0];
 				for( unsigned int i = 129; i < 256; i++ )
 				{
 					m_link[i] = m_link[i - 1] + curCount[ i - 1 ];
-				} 
+				}
 			}
-			
+
 			const unsigned char *inputBytes = ( const unsigned char * )( input );
-#ifdef IE_CORE_BIG_ENDIAN			
+#ifdef IE_CORE_BIG_ENDIAN
 			inputBytes += sizeof(int) - 1 - j;
 #else
 			inputBytes += j;
-#endif		
-			
+#endif
+
 			if (m_currentSize & 0x80000000)
 			{
 				for ( unsigned int i = 0; i < nb; i++ )
@@ -397,11 +397,11 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<int> &
 				{
 					unsigned int id = *it;
 					*m_link[ inputBytes[ id << 2 ] ]++ = id;
-				}	
+				}
 			}
-			
+
 			std::swap( m_ranks, m_ranks2 );
-		}		
+		}
 	}
 
 	return m_ranks->readable();
@@ -412,7 +412,7 @@ template<typename T>
 bool RadixSort::createHistograms( const std::vector<T> &input )
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 4 );
-	
+
 	memset( &m_histogram[0], 0, 256 * 4 * sizeof( unsigned int ) );
 
 	const unsigned char *p = reinterpret_cast< const unsigned char * > ( &input[0] );
@@ -423,12 +423,12 @@ bool RadixSort::createHistograms( const std::vector<T> &input )
 	unsigned int *h2 = &m_histogram[256];
 	unsigned int *h1 = &m_histogram[512];
 	unsigned int *h0 = &m_histogram[768];
-#else	
+#else
 	unsigned int *h0 = &m_histogram[0];
 	unsigned int *h1 = &m_histogram[256];
 	unsigned int *h2 = &m_histogram[512];
 	unsigned int *h3 = &m_histogram[768];
-#endif	
+#endif
 
 	bool alreadySorted = true;
 
@@ -452,7 +452,7 @@ bool RadixSort::createHistograms( const std::vector<T> &input )
 			h0[ *p++ ] ++;
 			h1[ *p++ ] ++;
 			h2[ *p++ ] ++;
-			h3[ *p++ ] ++;	
+			h3[ *p++ ] ++;
 		}
 
 		if ( alreadySorted )

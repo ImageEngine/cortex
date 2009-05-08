@@ -101,7 +101,7 @@ static void delItem( Primitive &p, const std::string &n )
 }
 
 void bindPrimitive()
-{	
+{
 	RunTimeTypedClass<Primitive>()
 		.def( "variableSize", &Primitive::variableSize )
 		.def( "__len__", &len )
@@ -115,7 +115,7 @@ void bindPrimitive()
 		.def( "arePrimitiveVariablesValid", &Primitive::arePrimitiveVariablesValid)
 		.def( "inferInterpolation", (PrimitiveVariable::Interpolation (Primitive::*)( ConstDataPtr ) const)&Primitive::inferInterpolation )
 		.def( "inferInterpolation", (PrimitiveVariable::Interpolation (Primitive::*)( size_t ) const)&Primitive::inferInterpolation )
-	;	
+	;
 }
 
 }

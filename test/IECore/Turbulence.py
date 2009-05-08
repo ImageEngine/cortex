@@ -37,77 +37,77 @@ import unittest
 import IECore
 
 class TestTurbulence( unittest.TestCase ) :
-	
+
 	def testConstructors( self ) :
-	
+
 		t = IECore.TurbulenceV2ff()
 		self.assertEqual( t.octaves, 4 )
 		self.assertEqual( t.gain, 0.5 )
 		self.assertEqual( t.lacunarity, IECore.V2f( 2.0 ) )
 		self.assertEqual( t.turbulent, True )
-		
+
 		t = IECore.TurbulenceV2ff( 2, 1, IECore.V2f( 3.0 ), False )
 		self.assertEqual( t.octaves, 2 )
 		self.assertEqual( t.gain, 1 )
 		self.assertEqual( t.lacunarity, IECore.V2f( 3.0 ) )
 		self.assertEqual( t.turbulent, False )
-		
+
 		t = IECore.TurbulenceV2ff(
 			octaves = 3,
 			gain = 1.4,
 			lacunarity = IECore.V2f( 3.0 ),
 			turbulent = False
 		)
-		
+
 		self.assertEqual( t.octaves, 3 )
 		self.assertAlmostEqual( t.gain, 1.4 )
 		self.assertEqual( t.lacunarity, IECore.V2f( 3.0 ) )
 		self.assertEqual( t.turbulent, False )
-		
+
 	def test2d( self ) :
-	
+
 		t = IECore.TurbulenceV2ff(
 			octaves = 4,
 			gain = 0.35,
 			lacunarity = IECore.V2f( 2.0 ),
 			turbulent = False
 		)
-		
+
 		width = 400
 		height = 400
-				
+
 		f = IECore.FloatVectorData( width * height )
 		o = 0
 		for i in range( 0, height ) :
 			for j in range( 0, width ) :
 				f[o] = 0.5 + t.turbulence( IECore.V2f( i/50.0, j/50.0 ) )
 				o += 1
-			
-		b = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )		
+
+		b = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )
 		i = IECore.ImagePrimitive( b, b )
 		i["r"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["g"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["b"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 
 		IECore.Writer.create( i, "test/turbulenceV2ff.exr" ).write()
-		
+
 	def testNaN( self ) :
-	
+
 		t = IECore.TurbulenceV2ff(
 			octaves = 28,
 			gain = 0.35,
 			lacunarity = IECore.V2f( 2.0 ),
 			turbulent = True
 		)
-		
+
 		f = t.turbulence( IECore.V2f( 21.3, 51.2 ) )
 		self.assert_( f == f ) # Known bug
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile( "test/turbulenceV2ff.exr" ) :
 			os.remove( "test/turbulenceV2ff.exr" )
-						
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

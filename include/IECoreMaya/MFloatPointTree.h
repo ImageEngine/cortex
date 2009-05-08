@@ -43,7 +43,7 @@
 
 namespace IECoreMaya
 {
-	
+
 /// A KDTree typedef for use with the MFloatPoint point type.
 typedef KDTree<MFloatPoint *> MPointTree;
 

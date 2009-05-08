@@ -39,7 +39,7 @@
 
 using namespace IECore;
 
-const unsigned int BlindDataHolder::m_ioVersion = 1;	
+const unsigned int BlindDataHolder::m_ioVersion = 1;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(BlindDataHolder);
 
@@ -56,7 +56,7 @@ BlindDataHolder::BlindDataHolder(CompoundDataPtr data) : m_data(data)
 BlindDataHolder::BlindDataHolder( const BlindDataHolder &other )
 {
 	m_data = other.m_data;
-	
+
 	assert(m_data);
 }
 
@@ -80,7 +80,7 @@ void BlindDataHolder::save( SaveContext *context ) const
 {
 	Object::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), m_ioVersion );
-	
+
 	assert(m_data);
 	context->save( m_data, container, "blindData");
 }
@@ -90,7 +90,7 @@ void BlindDataHolder::load( LoadContextPtr context )
 	Object::load( context );
 	unsigned int v = m_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	m_data = context->load<CompoundData>( container, "blindData");	
+	m_data = context->load<CompoundData>( container, "blindData");
 	assert(m_data);
 }
 
@@ -101,7 +101,7 @@ bool BlindDataHolder::isEqualTo( ConstObjectPtr other ) const
 		return false;
 	}
 	BlindDataHolder::ConstPtr tOther = boost::static_pointer_cast<const BlindDataHolder>( other );
-	
+
 	return m_data->isEqualTo( tOther->m_data );
 }
 

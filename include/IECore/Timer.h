@@ -37,7 +37,7 @@
 
 #include "boost/timer.hpp"
 
-namespace IECore 
+namespace IECore
 {
 
 /// A class useful for simple timing of operations.
@@ -70,9 +70,9 @@ class Timer
 		/// for. This includes previous start()/stop() time periods
 		/// and the current period if running() is true.
 		double totalElapsed() const;
-		
+
 	private :
-	
+
 		bool m_running;
 		double m_accumulated;
 		boost::timer m_timer;

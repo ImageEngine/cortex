@@ -53,18 +53,18 @@ namespace IECore
 class MedianCutSampler : public Op
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( MedianCutSampler, Op );
-		
+
 		MedianCutSampler();
 		virtual ~MedianCutSampler();
-		
+
 		ImagePrimitiveParameterPtr imageParameter();
 		ConstImagePrimitiveParameterPtr imageParameter() const;
-		
+
 		StringParameterPtr channelNameParameter();
 		ConstStringParameterPtr channelNameParameter() const;
-		
+
 		IntParameterPtr subdivisionDepthParameter();
 		ConstIntParameterPtr subdivisionDepthParameter() const;
 
@@ -81,14 +81,14 @@ class MedianCutSampler : public Op
 	protected :
 
 		ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-		
+
 	private :
-		
+
 		ImagePrimitiveParameterPtr m_imageParameter;
 		StringParameterPtr m_channelNameParameter;
 		IntParameterPtr m_subdivisionDepthParameter;
 		IntParameterPtr m_projectionParameter;
-		
+
 };
 
 IE_CORE_DECLAREPTR( MedianCutSampler );

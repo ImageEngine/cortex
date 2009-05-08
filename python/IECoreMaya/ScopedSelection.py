@@ -46,15 +46,15 @@ import weakref
 class ScopedSelection :
 
 	def __init__( self ) :
-	
+
 		selection = maya.cmds.ls( selection=True )
 		ScopedSelection.__selections[weakref.ref(self, ScopedSelection.__weakRefCallback)] = selection
-	
+
 	@classmethod
 	def __weakRefCallback( cls, w ) :
-	
+
 		maya.cmds.select( cls.__selections[w], replace=True )
 		del cls.__selections[w]
-	
+
 	__selections = {}
-		
+

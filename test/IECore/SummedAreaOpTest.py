@@ -39,19 +39,19 @@ import math
 class SummedAreaOpTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
 		y = IECore.FloatVectorData( [ 1, 2, 3, 4 ] )
 		i = IECore.ImagePrimitive( b, b )
 		i["Y"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, y )
-		
+
 		ii = IECore.SummedAreaOp()( input=i, channels=IECore.StringVectorData( ["Y"] ) )
-		
+
 		yy = ii["Y"].data
 		self.assertEqual( yy[0], 1 )
 		self.assertEqual( yy[1], 3 )
 		self.assertEqual( yy[2], 4 )
 		self.assertEqual( yy[3], 10 )
-					
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

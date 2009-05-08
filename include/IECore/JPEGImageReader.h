@@ -56,26 +56,26 @@ class JPEGImageReader : public ImageReader
 
 		//! @name Image specific reading functions
 		///////////////////////////////////////////////////////////////
-		//@{	
+		//@{
 		/// Fills the passed vector with the names of all channels within the file.
 		virtual void channelNames( std::vector<std::string> &names );
-		
+
 		/// Returns true if the file is complete. This intended as a cheaper alternative to loading the
 		/// whole file to determine completeness.
 		virtual bool isComplete();
-		
+
 		/// Returns the dataWindow contained in the file. This is the dataWindow that
 		/// will be loaded if the dataWindowParameter() is left at its default value.
 		virtual Imath::Box2i dataWindow();
-		
+
 		/// Returns the displayWindow contained in the file. This is the displayWindow
 		/// that will be loaded if the displayWindowParameter() is left at its default value.
 		virtual Imath::Box2i displayWindow();
-		
+
 		/// Returns the name of default colorspace in which the Reader returns images.
-		virtual std::string sourceColorSpace() const ;		
+		virtual std::string sourceColorSpace() const ;
 		//@}
-		
+
 
 
 	private:
@@ -87,19 +87,19 @@ class JPEGImageReader : public ImageReader
 
 		/// Opens the file, if necessary, and fills the buffer. Throws an IOException if an error occurs.
 		/// Tries to open the file, returning true on success and false on failure. On success,
-                /// m_buffer, m_bufferWidth, m_bufferHeight, m_bufferFileName, and m_numChannels will be valid. 
+                /// m_buffer, m_bufferWidth, m_bufferHeight, m_bufferFileName, and m_numChannels will be valid.
 		/// If throwOnFailure is true then a descriptive Exception is thrown rather than false being returned.
                 bool open( bool throwOnFailure = false );
 
 		/// The filename we filled the buffer from
 		std::string m_bufferFileName;
 
-		/// Decompressed image data buffer 
+		/// Decompressed image data buffer
 		std::vector<unsigned char> m_buffer;
-		
+
 		/// Information gathered from header
 		int m_bufferWidth;
-		int m_bufferHeight;		
+		int m_bufferHeight;
 		int m_numChannels;
 };
 

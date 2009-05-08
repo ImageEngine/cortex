@@ -63,132 +63,132 @@ namespace IECoreMaya
 void addObjectDataTest( boost::unit_test::test_suite* test );
 
 struct ObjectDataTest
-{	
+{
 	void testConstruction()
 	{
 		MStatus s;
 		s = MGlobal::executeCommand( "loadPlugin \"ObjectDataTestNode.py\"" );
 		BOOST_CHECK( s );
-		
+
 		MFnDependencyNode fnDN;
-		
+
 		MObject node = fnDN.create( "ieObjectDataTestNode", &s );
 		BOOST_CHECK( s );
-		
+
 		MPlug plug = fnDN.findPlug( "objectData", &s );
-		BOOST_CHECK( s );		
+		BOOST_CHECK( s );
 		BOOST_CHECK( !plug.isNull() );
-		
+
 		MObject data;
 		s = plug.getValue( data );
-		BOOST_CHECK( s );		
-		
+		BOOST_CHECK( s );
+
 		MFnPluginData fnData( data, &s );
-		BOOST_CHECK( s );		
-		
+		BOOST_CHECK( s );
+
 		BOOST_CHECK( fnData.data() );
-		
+
 		ObjectData* objectData = dynamic_cast< ObjectData * >( fnData.data() );
 		BOOST_CHECK( objectData );
-		
-		BOOST_CHECK( objectData->getObject() == 0 );				
+
+		BOOST_CHECK( objectData->getObject() == 0 );
 	}
-	
+
 	void testReadWrite()
 	{
 		MString sceneName;
-	
+
 		MStatus s;
 		s = MGlobal::executeCommand( "loadPlugin \"ObjectDataTestNode.py\"" );
 		BOOST_CHECK( s );
-		
+
 		MFnDependencyNode fnDN;
-		
+
 		MObject node = fnDN.create( "ieObjectDataTestNode", &s );
 		BOOST_CHECK( s );
-		
+
 		MString nodeName = fnDN.name();
-		
+
 		MPlug plug = fnDN.findPlug( "objectData", &s );
-		BOOST_CHECK( s );		
+		BOOST_CHECK( s );
 		BOOST_CHECK( !plug.isNull() );
-		
+
 		MObject data;
 		s = plug.getValue( data );
-		BOOST_CHECK( s );		
-		
+		BOOST_CHECK( s );
+
 		MFnPluginData fnData( data, &s );
-		BOOST_CHECK( s );		
-		
+		BOOST_CHECK( s );
+
 		ObjectData* objectData = dynamic_cast< ObjectData * >( fnData.data() );
 		BOOST_CHECK( objectData );
-				
-		CompoundDataPtr testCompoundData = new CompoundData();				
+
+		CompoundDataPtr testCompoundData = new CompoundData();
 		testCompoundData->writable()["val1"] = new FloatData( 1.0f );
 		testCompoundData->writable()["val2"] = new StringData( "val2Data" );
-		testCompoundData->writable()["val3"] = new CompoundData();		
-		runTimeCast<CompoundData>(testCompoundData->writable()["val3"])->writable()["val3.val1"] = new IntData(100);				
-		
+		testCompoundData->writable()["val3"] = new CompoundData();
+		runTimeCast<CompoundData>(testCompoundData->writable()["val3"])->writable()["val3.val1"] = new IntData(100);
+
 		data = fnData.create( ObjectDataId, &s );
 		BOOST_CHECK( s );
-		objectData = dynamic_cast< ObjectData * >( fnData.data() );		
-		BOOST_CHECK( objectData );		
+		objectData = dynamic_cast< ObjectData * >( fnData.data() );
+		BOOST_CHECK( objectData );
 		objectData->setObject( testCompoundData );
-		
+
 		s = plug.setValue( data );
-		BOOST_CHECK( s );		
-								
+		BOOST_CHECK( s );
+
 		s = MGlobal::executeCommand( "file -rename \"ObjectDataTest.ma\"" );
-		BOOST_CHECK( s );				
+		BOOST_CHECK( s );
 		s = MGlobal::executeCommand( "file -type \"mayaAscii\" -save", sceneName );
 		BOOST_CHECK( s );
 		s = MGlobal::executeCommand( "file -force -new" );
-		BOOST_CHECK( s );		
+		BOOST_CHECK( s );
 		s = MGlobal::executeCommand( "file -force -open \"" + sceneName + "\"" );
 		BOOST_CHECK( s );
-		
+
 		MSelectionList list;
-		list.add( nodeName + ".objectData" );		
-		
+		list.add( nodeName + ".objectData" );
+
 		s = list.getPlug( 0, plug );
 		BOOST_CHECK( s );
 		s = plug.getValue( data );
 		BOOST_CHECK( s );
-		s = fnData.setObject( data );	
+		s = fnData.setObject( data );
 		BOOST_CHECK( s );
-		objectData = dynamic_cast< ObjectData * >( fnData.data() );		
-		BOOST_CHECK( objectData );		
-		BOOST_CHECK( objectData->getObject() );		
-		BOOST_CHECK( testCompoundData.get() != objectData->getObject().get() );		
+		objectData = dynamic_cast< ObjectData * >( fnData.data() );
+		BOOST_CHECK( objectData );
+		BOOST_CHECK( objectData->getObject() );
+		BOOST_CHECK( testCompoundData.get() != objectData->getObject().get() );
 		BOOST_CHECK( testCompoundData->isEqualTo( objectData->getObject() ) );
-		
-		fs::remove( fs::path( sceneName.asChar() ) );		
-								
+
+		fs::remove( fs::path( sceneName.asChar() ) );
+
 		s = MGlobal::executeCommand( "file -rename \"ObjectDataTest.mb\"" );
 		BOOST_CHECK( s );
 		s = MGlobal::executeCommand( "file -type \"mayaBinary\" -save", sceneName );
 		BOOST_CHECK( s );
 		s = MGlobal::executeCommand( "file -force -new" );
-		BOOST_CHECK( s );		
+		BOOST_CHECK( s );
 		s = MGlobal::executeCommand( "file -force -open \"" + sceneName + "\"" );
 		BOOST_CHECK( s );
-		
+
 		list.clear();
-		list.add( nodeName + ".objectData" );		
-		
+		list.add( nodeName + ".objectData" );
+
 		s = list.getPlug( 0, plug );
 		BOOST_CHECK( s );
 		s = plug.getValue( data );
 		BOOST_CHECK( s );
-		s = fnData.setObject( data );	
+		s = fnData.setObject( data );
 		BOOST_CHECK( s );
-		objectData = dynamic_cast< ObjectData * >( fnData.data() );		
-		BOOST_CHECK( objectData );		
+		objectData = dynamic_cast< ObjectData * >( fnData.data() );
+		BOOST_CHECK( objectData );
 		BOOST_CHECK( objectData->getObject() );
 		BOOST_CHECK( testCompoundData.get() != objectData->getObject().get() );
 		BOOST_CHECK( testCompoundData->isEqualTo( objectData->getObject() ) );
-		
-		fs::remove( fs::path( sceneName.asChar() ) );		
+
+		fs::remove( fs::path( sceneName.asChar() ) );
 	}
 };
 

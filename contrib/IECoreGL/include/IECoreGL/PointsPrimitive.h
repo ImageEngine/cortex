@@ -70,33 +70,33 @@ class PointsPrimitive : public Primitive
 			IECore::ConstFloatVectorDataPtr widths = 0,
 			IECore::ConstFloatVectorDataPtr heights = 0,
 			IECore::ConstFloatVectorDataPtr rotations = 0 );
-			
+
 		virtual ~PointsPrimitive();
 
 		virtual Imath::Box3f bound() const;
 
 		virtual size_t vertexAttributeSize() const;
-		
+
 	protected :
-		
+
 		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;
-		
+
 	private :
-	
+
 		const Imath::Color3f *setOrReturnColor() const;
-	
+
 		template<typename T>
 		static const T *dataAndStride( typename IECore::TypedData<std::vector<T> >::ConstPtr data, T *defaultValue, unsigned int &stride );
-	
+
 		void renderPoints( ConstStatePtr state, IECore::TypeId style ) const;
 		void renderDisks( ConstStatePtr state, IECore::TypeId style ) const;
 		void renderQuads( ConstStatePtr state, IECore::TypeId style ) const;
 		void renderSpheres( ConstStatePtr state, IECore::TypeId style ) const;
-	
+
 		IECore::V3fVectorDataPtr m_points;
 		IECore::Color3fVectorDataPtr m_colors;
 		IECore::FloatVectorDataPtr m_alphas;
-		
+
 		Type m_type;
 		static float g_defaultWidth;
 		IECore::FloatVectorDataPtr m_widths;
@@ -104,9 +104,9 @@ class PointsPrimitive : public Primitive
 		IECore::FloatVectorDataPtr m_heights;
 		static float g_defaultRotation;
 		IECore::FloatVectorDataPtr m_rotations;
-		
+
 		Imath::Box3f m_bound;
-		
+
 		void depthSort() const;
 		mutable bool m_renderSorted;
 		mutable std::vector<unsigned int> m_depthOrder;

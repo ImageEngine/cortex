@@ -53,4 +53,4 @@ ScopedMessageHandler::~ScopedMessageHandler()
 		throw Exception( "Bad MessageHandler nesting detected in ScopedMessageHandler::~ScopedMessageHandler" );
 	}
 }
-		
+

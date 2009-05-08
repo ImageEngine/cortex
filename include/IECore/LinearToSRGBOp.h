@@ -50,16 +50,16 @@ class LinearToSRGBOp : public ChannelOp
 		virtual ~LinearToSRGBOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( LinearToSRGBOp, ChannelOp );
-	
+
 	protected :
-	
+
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
-	
+
 		struct Converter;
-		
+
 	private :
-	
-		static ColorSpaceTransformOp::ColorSpaceDescription<LinearToSRGBOp> g_colorSpaceDescription;		
+
+		static ColorSpaceTransformOp::ColorSpaceDescription<LinearToSRGBOp> g_colorSpaceDescription;
 };
 
 IE_CORE_DECLAREPTR( LinearToSRGBOp );

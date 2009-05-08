@@ -54,7 +54,7 @@ inline T radiansToDegrees( const T &value )
 {
 	return value * T( 180.0/M_PI );
 }
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_ANGLECONVERSION_H

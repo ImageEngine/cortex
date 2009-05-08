@@ -363,7 +363,7 @@ class VectorTypedDataFunctions
 
 		//
 		// Math Operators
-		// 
+		//
 
 /// \todo Get rid of this macro
 #define BINARY_OPERATOR_CODE(op)																\
@@ -634,7 +634,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 	}																									\
 	return s.str();																						\
 }																										\
- 
+
 /// \todo Get rid of these macros
 #define BASIC_VECTOR_BINDING(T, Tname)																	\
 		typedef TypedData< std::vector< T > > ThisClass;															\

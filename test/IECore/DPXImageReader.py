@@ -40,7 +40,7 @@ from IECore import *
 class TestDPXReader(unittest.TestCase):
 
 	def testConstruction(self):
-	
+
 		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
 		self.assertEqual( type(r), DPXImageReader )
 
@@ -49,7 +49,7 @@ class TestDPXReader(unittest.TestCase):
 		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
 		self.assertEqual( type(r), DPXImageReader )
 
-		img = r.read()		
+		img = r.read()
 		self.assertEqual( type(img), ImagePrimitive )
 
 	def testReadHeader( self ):
@@ -58,7 +58,7 @@ class TestDPXReader(unittest.TestCase):
 		self.assertEqual( type(r), DPXImageReader )
 		h = r.readHeader()
 
-		channelNames = h['channelNames']		
+		channelNames = h['channelNames']
 		self.assertEqual( len( channelNames ), 3 )
 		self.assert_( "R" in channelNames )
 		self.assert_( "G" in channelNames )
@@ -69,75 +69,75 @@ class TestDPXReader(unittest.TestCase):
 
 	def testOrientation( self ) :
 		""" Test orientation of DPX files """
-	
+
 		img = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" ).read()
-		
+
 		ipe = PrimitiveEvaluator.create( img )
 		self.assert_( ipe.R() )
 		self.assert_( ipe.G() )
 		self.assert_( ipe.B() )
 		self.failIf ( ipe.A() )
-		
+
 		result = ipe.createResult()
-		
+
 		colorMap = {
 			V2i( 0 ,    0 ) :  V3f( 0, 0, 0 ),
 			V2i( 511,   0 ) :  V3f( 1, 0, 0 ),
 			V2i( 0,   255 ) :  V3f( 0, 1, 0 ),
 			V2i( 511, 255 ) :  V3f( 1, 1, 0 ),
 		}
-		
+
 		for point, expectedColor in colorMap.items() :
-		
+
 			found = ipe.pointAtPixel( point, result )
 			self.assert_( found )
-			
+
 			color = V3f(
 				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ), 
+				result.halfPrimVar( ipe.G() ),
 				result.halfPrimVar( ipe.B() )
 			)
-						
+
 			self.assert_( ( color - expectedColor).length() < 1.e-6 )
-			
+
 	def testAll( self ):
-	
+
 		fileNames = glob.glob( "test/IECore/data/dpx/*.dpx" )
 		expectedFailures = [ "test/IECore/data/dpx/colorBarsWithAlpha.dpx" ]
-		
+
 		# Silence any warnings while the tests run
 		MessageHandler.pushHandler( NullMessageHandler() )
-		
+
 		try:
-		
+
 			for f in fileNames:
-			
-				r = DPXImageReader( f ) 
-				
+
+				r = DPXImageReader( f )
+
 				if f in expectedFailures :
-				
+
 					self.assertRaises( RuntimeError, r.read )
-					
+
 				else :
-			
+
 					self.assert_( DPXImageReader.canRead( f ) )
 					self.failIf( JPEGImageReader.canRead( f ) )
 					self.failIf( EXRImageReader.canRead( f ) )
-					self.failIf( TIFFImageReader.canRead( f ) )									
+					self.failIf( TIFFImageReader.canRead( f ) )
 
 					img = r.read()
 					self.assertEqual( type(img), ImagePrimitive )
-					self.assert_( img.arePrimitiveVariablesValid() )	
-				
+					self.assert_( img.arePrimitiveVariablesValid() )
+
 		except:
-		
-			raise	
-			
+
+			raise
+
 		finally:
-			
-			MessageHandler.popHandler()		
-							
-			
+
+			MessageHandler.popHandler()
+
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

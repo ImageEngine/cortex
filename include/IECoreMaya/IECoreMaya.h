@@ -49,7 +49,7 @@ MStatus uninitialize( MFnPlugin &plugin );
 ///
 /// The IECoreMaya library provides the core C++ framework for all Maya development
 /// within Cortex. Wherever possible, Maya-specific routines should be implemented
-/// within this library rather than within their respective tools. Code which is 
+/// within this library rather than within their respective tools. Code which is
 /// truly generic and unrelated to Maya should be placed in the main IECore library.
 ///
 /// \section mainPageDependencies Dependencies

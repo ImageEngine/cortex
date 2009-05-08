@@ -54,25 +54,25 @@ IE_CORE_DECLAREPTR( ParameterHandler );
 
 /// \todo Documentation!
 class ParameterHandler : public IECore::RefCounted
-{	
+{
 	friend class Parameter;
-	friend class ObjectParameterHandler;	
-	
+	friend class ObjectParameterHandler;
+
 	public :
 
 		/// \todo This should be called create() to match every other factory
 		/// interface we have elsewhere.
 		/// Return a handler which can deal with the given parameter
 		static ConstParameterHandlerPtr get( IECore::ConstParameterPtr parameter );
-		
+
 		/// Return a handler which can deal with the given object
 		static ConstParameterHandlerPtr get( IECore::ConstObjectPtr object );
-		
+
 		/// Return a handler which can deal with an object or parameter of the given type id
-		static ConstParameterHandlerPtr get( IECore::TypeId id );		
-		
+		static ConstParameterHandlerPtr get( IECore::TypeId id );
+
 		virtual ~ParameterHandler();
-		
+
 		template<class T>
 		struct Description
 		{
@@ -81,20 +81,20 @@ class ParameterHandler : public IECore::RefCounted
 			/// to find handlers based on the typeIds of objects it can contain.
 			Description( IECore::TypeId parameterType, IECore::TypeId dataType = IECore::InvalidTypeId);
 		};
-		
+
 	protected:
-	
+
 		virtual MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const = 0;
 		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const = 0;
 		virtual MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const = 0;
-		virtual MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const = 0;		
-		
+		virtual MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const = 0;
+
 	private:
-	
+
 		static void registerHandler( IECore::TypeId parameterType, IECore::TypeId dataType, ConstParameterHandlerPtr handler );
-        
+
 		typedef std::map<IECore::TypeId, ConstParameterHandlerPtr> HandlerMap;
-		
+
 		static HandlerMap &handlers();
 };
 

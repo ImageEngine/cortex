@@ -42,37 +42,37 @@ import IECore
 class ImathRootsTest( unittest.TestCase ) :
 
 	def testLinear( self ) :
-	
+
 		x = IECore.solveLinear( 1, 1 )
 		self.assert_( isinstance( x, tuple ) )
 		self.assertEqual( len( x ), 1 )
 		self.assertEqual( x[0], -1 )
-		
+
 		x = IECore.solveLinear( 0, 1 )
 		self.assert_( isinstance( x, tuple ) )
 		self.assertEqual( len( x ), 0 )
-		
+
 		self.assertRaises( ArithmeticError, IECore.solveLinear, 0, 0 )
-	
+
 	def testQuadratic( self ) :
-	
+
 		x = IECore.solveQuadratic( 1, 0, -1 )
 		self.assert_( isinstance( x, tuple ) )
 		self.assertEqual( len( x ), 2 )
 		self.assert_( -1 in x )
 		self.assert_( 1 in x )
-		
+
 		self.assertRaises( ArithmeticError, IECore.solveQuadratic, 0, 0, 0 )
-		
+
 	def testCubic( self ) :
-	
+
 		x = IECore.solveCubic( 1, 0, 0, -1 )
 		self.assert_( isinstance( x, tuple ) )
 		self.assertEqual( len( x ), 1 )
 		self.assertEqual( x[0], 1 )
-		
-		self.assertRaises( ArithmeticError, IECore.solveCubic, 0, 0, 0, 0 )	
-			
+
+		self.assertRaises( ArithmeticError, IECore.solveCubic, 0, 0, 0, 0 )
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

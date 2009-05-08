@@ -41,39 +41,39 @@ import IECoreRI
 class RIBWriterTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/ribWriter.rib"
-	
+
 	def test( self ) :
-	
+
 		self.assertEqual( IECoreRI.RIBWriter.baseTypeName(), "Writer" )
-	
+
 		cube = IECore.ObjectReader( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-	
+
 		writer = IECoreRI.RIBWriter( cube, self.outputFileName )
 		writer.write()
-		
+
 		l = "".join( file( self.outputFileName ).readlines() )
 		self.assert_( "PointsGeneralPolygons" in l )
 		self.assert_( "WorldBegin" not in l )
 		self.assert_( "WorldEnd" not in l )
 
 	def testWithWorld( self ) :
-	
+
 		cube = IECore.ObjectReader( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-	
+
 		writer = IECoreRI.RIBWriter( cube, self.outputFileName )
-		
+
 		writer["worldBlock"].setTypedValue( True )
 		writer.write()
-		
+
 		l = "".join( file( self.outputFileName ).readlines() )
 		self.assert_( "PointsGeneralPolygons" in l )
 		self.assert_( "WorldBegin" in l )
 		self.assert_( "WorldEnd" in l )
-					
+
 	def tearDown( self ) :
 
 		if os.path.exists( self.outputFileName ) :
 			os.remove( self.outputFileName )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

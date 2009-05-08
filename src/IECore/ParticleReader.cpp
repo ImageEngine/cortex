@@ -54,7 +54,7 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( ParticleReader );
 
-ParticleReader::ParticleReader( const std::string &name, const std::string &description ) 
+ParticleReader::ParticleReader( const std::string &name, const std::string &description )
 		:	Reader( name, description, new ObjectParameter( "result", "The loaded object.", new NullObject, PointsPrimitive::staticTypeId() ) )
 {
 	m_percentageParameter = new FloatParameter(
@@ -64,14 +64,14 @@ ParticleReader::ParticleReader( const std::string &name, const std::string &desc
 		0.0f,
 		100.0f
 	);
-	
+
 	m_percentageSeedParameter = new IntParameter(
 		"percentageSeed",
 		"Used to control which particles are loaded when percentage is not 100. Different seeds give \
 		different sets of particles.",
-		0 
+		0
 	);
-		
+
 	m_attributesParameter = new StringVectorParameter(
 		"attributes",
 		"A list of attributes to load. If the list is empty then all attributes are loaded."
@@ -90,7 +90,7 @@ ParticleReader::ParticleReader( const std::string &name, const std::string &desc
 		realTypePresets,
 		true
 	);
-	
+
 	parameters()->addParameter( m_percentageParameter );
 	parameters()->addParameter( m_percentageSeedParameter );
 	parameters()->addParameter( m_attributesParameter );
@@ -149,7 +149,7 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 	for( vector<string>::const_iterator it = attributes.begin(); it!=attributes.end(); it++ )
 	{
 		DataPtr d = readAttribute( *it );
-		
+
 		if ( testTypedData<TypeTraits::IsVectorTypedData>( d ) )
 		{
 			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( d );
@@ -159,11 +159,11 @@ ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
 				haveNumPoints = true;
 			}
 			if( s==result->getNumPoints() )
-			{			
+			{
 				result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Vertex, d ) ) );
 			}
 			else
-			{			
+			{
 				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % *it % result->getNumPoints() % s );
 			}
 		}
@@ -189,14 +189,14 @@ void ParticleReader::particleAttributes( std::vector<std::string> &names )
 {
 	vector<string> allNames;
 	attributeNames( allNames );
-	
+
 	ConstStringVectorDataPtr d = m_attributesParameter->getTypedValidatedValue<StringVectorData>();
 	if( !d->readable().size() )
 	{
 		names = allNames;
 		return;
 	}
-	
+
 	names.clear();
 	for( vector<string>::const_iterator it = d->readable().begin(); it!=d->readable().end(); it++ )
 	{

@@ -65,15 +65,15 @@ void bindTurbulence()
 	bindTurb<TurbulenceV3ff>( "TurbulenceV3ff" );
 	bindTurb<TurbulenceV2ff>( "TurbulenceV2ff" );
 	bindTurb<Turbulenceff>( "Turbulenceff" );
-	
+
 	bindTurb<TurbulenceV3fV2f>( "TurbulenceV3fV2f" );
 	bindTurb<TurbulenceV2fV2f>( "TurbulenceV2fV2f" );
 	bindTurb<TurbulencefV2f>( "TurbulencefV2f" );
-	
+
 	bindTurb<TurbulenceV3fV3f>( "TurbulenceV3fV3f" );
 	bindTurb<TurbulenceV2fV3f>( "TurbulenceV2fV3f" );
 	bindTurb<TurbulencefV3f>( "TurbulencefV3f" );
-	
+
 	bindTurb<TurbulenceV3fColor3f>( "TurbulenceV3fColor3f" );
 	bindTurb<TurbulenceV2fColor3f>( "TurbulenceV2fColor3f" );
 	bindTurb<TurbulencefColor3f>( "TurbulencefColor3f" );

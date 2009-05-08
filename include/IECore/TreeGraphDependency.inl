@@ -56,7 +56,7 @@ void TreeGraphDependency<T>::update( const T &node, typename DirtyList::iterator
 	{
 		return;
 	}
-	
+
 	// update child nodes first.
 	while( pos != m_dirtyNodes.begin() )
 	{
@@ -78,7 +78,7 @@ void TreeGraphDependency<T>::update( const T &node, typename DirtyList::iterator
 			break;
 		}
 	}
-	
+
 	if ( pos == m_dirtyNodes.end() || *pos != node )
 	{
 		// If this node wasn't actually dirty, return right now.

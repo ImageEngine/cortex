@@ -207,10 +207,10 @@ template< typename T > struct IsNumericSimpleTypedData : boost::mpl::and_< IsSim
 template< typename T > struct IsNumericTypedData : boost::mpl::or_< IsNumericSimpleTypedData<T>, IsNumericVectorTypedData<T> > {};
 
 /// IsInterpolable
-/// This represents all types for which interpolators in Interpolator.h can be instantiated, not necessarily those for which we *want* to perform interpolation 
+/// This represents all types for which interpolators in Interpolator.h can be instantiated, not necessarily those for which we *want* to perform interpolation
 /// on. For example integral types, while technically interpolable, probably don't want to be interpolated in specific situations.
-template< typename T > struct IsInterpolable 
-	: boost::mpl::or_< 
+template< typename T > struct IsInterpolable
+	: boost::mpl::or_<
 		boost::is_arithmetic<T>,
 		boost::mpl::or_<
 			IsColor<T>,

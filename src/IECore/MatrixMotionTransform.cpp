@@ -54,7 +54,7 @@ MatrixMotionTransform::MatrixMotionTransform()
 MatrixMotionTransform::~MatrixMotionTransform()
 {
 }
-		
+
 void MatrixMotionTransform::render( RendererPtr renderer ) const
 {
 	if( !m_snapshots.size() )
@@ -66,7 +66,7 @@ void MatrixMotionTransform::render( RendererPtr renderer ) const
 		renderer->concatTransform( m_snapshots.begin()->second );
 		return;
 	}
-	
+
 	set<float> times;
 	for( SnapshotMap::const_iterator it = m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 	{
@@ -110,7 +110,7 @@ MatrixMotionTransform::SnapshotMap &MatrixMotionTransform::snapshots()
 {
 	return m_snapshots;
 }
-		
+
 void MatrixMotionTransform::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
 	Transform::copyFrom( other, context );

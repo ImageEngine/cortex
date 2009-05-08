@@ -42,19 +42,19 @@ class TestMeshPrimitiveImplicitSurfaceOp( unittest.TestCase ) :
 
 	def test( self ) :
 		""" Test MeshPrimitiveImplicitSurfaceOp """
-	
+
 		# Poly sphere of radius 1
 		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob" ).read()
 		radius = 1.0
-				
+
 		a = MeshPrimitiveImplicitSurfaceOp()
-		
+
 		thresholds = [ -0.8, -0.5, -0.2, 0.0, 0.2, 0.5, 0.8 ]
-		
+
 		maxAbsError = 0.2
-		
+
 		for threshold in thresholds:
-		
+
 			res = a(
 				resolution = V3i( 20, 20, 20 ),
 				bound = Box3f(
@@ -67,14 +67,14 @@ class TestMeshPrimitiveImplicitSurfaceOp( unittest.TestCase ) :
 			)
 
 			pData = res["P"].data
-			
+
 			# It's now easy to establish how big the new sphere should be, from its original radius and
 			# the threshold
 			for p in pData:
 				self.assert_( math.fabs( p.length() - ( radius + threshold ) ) < maxAbsError )
-			
-			
-	
+
+
+
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

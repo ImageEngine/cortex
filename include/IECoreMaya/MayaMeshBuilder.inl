@@ -50,7 +50,7 @@ template<>
 struct MayaMeshBuilder<double>::Data
 {
 	MPointArray m_P;
-	MVectorArray m_N;		
+	MVectorArray m_N;
 	MIntArray m_verticesPerFace;
 	MIntArray m_vertexIds;
 };
@@ -59,7 +59,7 @@ template<>
 struct MayaMeshBuilder<float>::Data
 {
 	MFloatPointArray m_P;
-	MVectorArray m_N;		
+	MVectorArray m_N;
 	MIntArray m_verticesPerFace;
 	MIntArray m_vertexIds;
 };
@@ -67,29 +67,29 @@ struct MayaMeshBuilder<float>::Data
 template<typename T>
 MayaMeshBuilder<T>::MayaMeshBuilder( MObject parentOrOwner ) : m_parentOrOwner( parentOrOwner )
 {
-	m_data = new Data();		
-	
+	m_data = new Data();
+
 }
 
 template<typename T>
 MayaMeshBuilder<T>::~MayaMeshBuilder()
 {
-	delete m_data;			
+	delete m_data;
 }
 
 
-template<>				
+template<>
 inline void MayaMeshBuilder<float>::addVertex( const Imath::V3f &p, const Imath::V3f &n )
 {
 	m_data->m_P.append( MFloatPoint( p.x, p.y, p.z ) );
-	m_data->m_N.append( MFloatVector( n.x, n.y, n.z ) );	
+	m_data->m_N.append( MFloatVector( n.x, n.y, n.z ) );
 }
 
-template<>				
+template<>
 inline void MayaMeshBuilder<double>::addVertex( const Imath::V3d &p, const Imath::V3d &n )
 {
 	m_data->m_P.append( MPoint( p.x, p.y, p.z ) );
-	m_data->m_N.append( MVector( n.x, n.y, n.z ) );	
+	m_data->m_N.append( MVector( n.x, n.y, n.z ) );
 }
 
 template<typename T>
@@ -101,41 +101,41 @@ inline void MayaMeshBuilder<T>::addTriangle( int v0, int v1, int v2 )
 	m_data->m_vertexIds.append( v1 );
 	m_data->m_vertexIds.append( v2 );
 }
-		
-template<typename T>		
+
+template<typename T>
 inline MObject MayaMeshBuilder<T>::mesh() const
 {
 	MStatus s;
 	MFnMesh fnMesh;
 
 	MObject result = fnMesh.create(
-		m_data->m_P.length(),	
-		m_data->m_verticesPerFace.length(), 
+		m_data->m_P.length(),
+		m_data->m_verticesPerFace.length(),
 		m_data->m_P,
-		m_data->m_verticesPerFace, 
+		m_data->m_verticesPerFace,
 		m_data->m_vertexIds,
 		m_parentOrOwner,
 		&s
 	);
-	
+
 	if (!s)
 	{
 		throw StatusException( s );
 	}
 	assert( result != MObject::kNullObj );
-	
+
 	MIntArray vertexList;
 	for (unsigned i = 0; i < m_data->m_N.length(); ++i)
 	{
 		vertexList.append( i );
 	}
-	
+
 	fnMesh.setVertexNormals(
 		m_data->m_N,
 		vertexList
 	);
 
 	return m_parentOrOwner;
-}				
+}
 
 }

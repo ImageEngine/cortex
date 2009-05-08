@@ -38,26 +38,26 @@ from IECore import *
 class TestPointMeshOp( unittest.TestCase ) :
 
 	def testFloat( self ) :
-		
+
 		o = PointMeshOp()
-		
+
 		points = V3fVectorData()
 		radius = DoubleVectorData()
 		strength = DoubleVectorData()
-		
+
 		bound = Box3f( V3f( -1, -1, -1 ), V3f( 1, 15, 1) )
 		resolution = V3i( 10, 80, 10 )
 		threshold = 0.1
-		
+
 		for i in range( 0, 10):
 			points.append( V3f(0, i, 0 ) )
 			radius.append( 0.8 )
 			strength.append( 1 )
-			
+
 		self.assertEqual( len(points), 10 )
 		self.assertEqual( len(radius), 10 )
-		self.assertEqual( len(strength), 10 )				
-		
+		self.assertEqual( len(strength), 10 )
+
 		m = o(
 			points = points,
 			radius = radius,
@@ -65,34 +65,34 @@ class TestPointMeshOp( unittest.TestCase ) :
 			threshold = threshold,
 			bound = bound,
 			resolution = resolution
-		)	
+		)
 
 		# Verified by eye
-		self.assert_( len(m.vertexIds) > 9000)	
-		self.assert_( len(m.vertexIds) < 11000)			
-				
-		
+		self.assert_( len(m.vertexIds) > 9000)
+		self.assert_( len(m.vertexIds) < 11000)
+
+
 	def testDouble( self ) :
-		
+
 		o = PointMeshOp()
-		
+
 		points = V3dVectorData()
 		radius = DoubleVectorData()
 		strength = DoubleVectorData()
-		
+
 		bound = Box3f( V3f( -1, -1, -1 ), V3f( 1, 15, 1) )
 		resolution = V3i( 10, 80, 10 )
 		threshold = 0.1
-		
+
 		for i in range( 0, 10):
 			points.append( V3d(0, i, 0 ) )
 			radius.append( 0.8 )
 			strength.append( 1 )
-			
+
 		self.assertEqual( len(points), 10 )
 		self.assertEqual( len(radius), 10 )
-		self.assertEqual( len(strength), 10 )				
-		
+		self.assertEqual( len(strength), 10 )
+
 		m = o(
 			points = points,
 			radius = radius,
@@ -100,14 +100,14 @@ class TestPointMeshOp( unittest.TestCase ) :
 			threshold = threshold,
 			bound = bound,
 			resolution = resolution
-		)	
-		
+		)
+
 		# Verified by eye
-		self.assert_( len(m.vertexIds) > 9000)	
-		self.assert_( len(m.vertexIds) < 11000)			
-		
-				
+		self.assert_( len(m.vertexIds) > 9000)
+		self.assert_( len(m.vertexIds) < 11000)
+
+
 
 if __name__ == "__main__":
 	unittest.main()
-	
+

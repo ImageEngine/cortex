@@ -183,22 +183,22 @@ struct IECoreGL::Renderer::MemberData
 		vector<CameraPtr> cameras;
 		vector<DisplayPtr> displays;
 	} options;
-	
+
 	/// This is used only before worldBegin, so we can correctly get the transforms for cameras.
 	/// After worldBegin the transform stack is taken care of by the backend implementations.
 	std::stack<Imath::M44f> transformStack;
-	
+
 	struct Attributes
 	{
 		IECore::CompoundDataMap userAttributes;
 	};
 	std::stack<Attributes> attributeStack;
-	
+
 	bool inWorld;
 	RendererImplementationPtr implementation;
 	ShaderLoaderPtr shaderLoader;
 	TextureLoaderPtr textureLoader;
-	
+
 #ifdef IECORE_WITH_FREETYPE
 	typedef std::map<std::string, FontPtr> FontMap;
 	FontMap fonts;
@@ -213,10 +213,10 @@ struct IECoreGL::Renderer::MemberData
 IECoreGL::Renderer::Renderer()
 {
 	m_data = new MemberData;
-	
+
 	m_data->options.mode = MemberData::Immediate;
 	m_data->options.shutter = V2f( 0 );
-	
+
 	const char *fontPath = getenv( "IECORE_FONT_PATHS" );
 	m_data->options.fontSearchPath = fontPath ? fontPath : "";
 	const char *shaderPath = getenv( "IECOREGL_SHADER_PATHS" );
@@ -225,10 +225,10 @@ IECoreGL::Renderer::Renderer()
 	m_data->options.shaderIncludePath = m_data->options.shaderIncludePathDefault = shaderIncludePath ? shaderIncludePath : "";
 	const char *texturePath = getenv( "IECOREGL_TEXTURE_PATHS" );
 	m_data->options.textureSearchPath = m_data->options.textureSearchPathDefault = texturePath ? texturePath : "";
-	
+
 	m_data->transformStack.push( M44f() );
 	m_data->attributeStack.push( MemberData::Attributes() );
-	
+
 	m_data->inWorld = false;
 	m_data->implementation = 0;
 	m_data->shaderLoader = 0;
@@ -388,7 +388,7 @@ void IECoreGL::Renderer::setOption( const std::string &name, IECore::ConstDataPt
 		msg( Msg::Warning, "Renderer::setOption", "Cannot call setOption after worldBegin()." );
 		return;
 	}
-	
+
 	const OptionSetterMap *o = optionSetters();
 	OptionSetterMap::const_iterator it = o->find( name );
 	if( it!=o->end() )
@@ -431,7 +431,7 @@ IECore::ConstDataPtr IECoreGL::Renderer::getOption( const std::string &name ) co
 		msg( Msg::Warning, "Renderer::getOption", boost::format( "Unsuppported option \"%s\"." ) % name );
 		return 0;
 	}
-	
+
 	return 0;
 }
 
@@ -443,7 +443,7 @@ void IECoreGL::Renderer::camera( const std::string &name, const IECore::Compound
 		msg( Msg::Warning, "IECoreGL::Renderer::camera", "Cameras can not be specified after worldBegin." );
 		return;
 	}
-	
+
 	try
 	{
 		IECore::CameraPtr coreCamera = new IECore::Camera( name, 0, new CompoundData( parameters ) );
@@ -481,9 +481,9 @@ void IECoreGL::Renderer::worldBegin()
 		msg( Msg::Warning, "Renderer::worldBegin", "Cannot call worldBegin() again before worldEnd()." );
 		return;
 	}
-	
+
 	m_data->inWorld = true;
-	
+
 	if( m_data->options.mode==MemberData::Deferred )
 	{
 		m_data->implementation = new DeferredRendererImplementation;
@@ -492,7 +492,7 @@ void IECoreGL::Renderer::worldBegin()
 	{
 		m_data->implementation = new ImmediateRendererImplementation;
 	}
-		
+
 	if( m_data->options.shaderSearchPath==m_data->options.shaderSearchPathDefault && m_data->options.shaderIncludePath==m_data->options.shaderIncludePathDefault )
 	{
 		// use the shared default cache if we can
@@ -503,7 +503,7 @@ void IECoreGL::Renderer::worldBegin()
 		IECore::SearchPath includePaths( m_data->options.shaderIncludePath, ":" );
 		m_data->shaderLoader = new ShaderLoader( IECore::SearchPath( m_data->options.shaderSearchPath, ":" ), &includePaths );
 	}
-	
+
 	if( m_data->options.textureSearchPath==m_data->options.textureSearchPathDefault )
 	{
 		// use the shared default cache if we can
@@ -513,7 +513,7 @@ void IECoreGL::Renderer::worldBegin()
 	{
 		m_data->textureLoader = new TextureLoader( IECore::SearchPath( m_data->options.textureSearchPath, ":" ) );
 	}
-	
+
 	if( m_data->options.cameras.size() )
 	{
 		for( unsigned int i=0; i<m_data->options.cameras.size(); i++ )
@@ -529,7 +529,7 @@ void IECoreGL::Renderer::worldBegin()
 		IECoreGL::CameraPtr camera = IECore::runTimeCast<IECoreGL::Camera>( ToGLCameraConverter( defaultCamera ).convert() );
 		m_data->implementation->addCamera( camera );
 	}
-	
+
 	for( unsigned int i=0; i<m_data->options.displays.size(); i++ )
 	{
 		m_data->implementation->addDisplay( m_data->options.displays[i] );
@@ -632,7 +632,7 @@ void IECoreGL::Renderer::concatTransform( const Imath::M44f &m )
 	else
 	{
 		m_data->transformStack.top() = m * m_data->transformStack.top();
-		
+
 	}
 }
 
@@ -744,7 +744,7 @@ static IECore::ConstDataPtr blendFactorGetter( const std::string &name, const IE
 		case GL_CONSTANT_ALPHA :
 			return new StringData( "constantAlpha" );
 		case GL_ONE_MINUS_CONSTANT_ALPHA :
-			return new StringData( "oneMinusConstantAlpha" );	
+			return new StringData( "oneMinusConstantAlpha" );
 		default :
 			msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
 			return new StringData( "invalid" );
@@ -758,7 +758,7 @@ static void blendFactorSetter( const std::string &name, IECore::ConstDataPtr val
 	{
 		return;
 	}
-	
+
 	GLenum f;
 	const std::string &v = d->readable();
 	if( v=="zero" )
@@ -863,7 +863,7 @@ static void blendEquationSetter( const std::string &name, IECore::ConstDataPtr v
 	{
 		return;
 	}
-	
+
 	GLenum f;
 	const std::string &v = d->readable();
 	if( v=="add" )
@@ -891,7 +891,7 @@ static void blendEquationSetter( const std::string &name, IECore::ConstDataPtr v
 		msg( Msg::Error, "Renderer::setAttribute", boost::format( "Unsupported value \"%s\" for attribute \"%s\"." ) % v % name );
 		return;
 	}
-	
+
 	memberData->implementation->addState( new BlendEquationStateComponent( f ) );
 }
 
@@ -1169,7 +1169,7 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 				return false;
 			}
 		}
-	
+
 		if( value->isInstanceOf( StringData::staticTypeId() ) )
 		{
 			// should be a texture parameter
@@ -1201,7 +1201,7 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 				op->splineParameter()->setValue( value );
 				op->resolutionParameter()->setTypedValue( V2i( 8, 512 ) );
 				ImagePrimitivePtr image = boost::static_pointer_cast<ImagePrimitive>( op->operate() );
-								
+
 				TexturePtr texture = 0;
 				if( image->variables.find( "R" )!=image->variables.end() )
 				{
@@ -1211,7 +1211,7 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 				{
 					texture = new LuminanceTexture( image );
 				}
-				shaderState->textureValues()[name] = texture;	
+				shaderState->textureValues()[name] = texture;
 			}
 			else
 			{
@@ -1249,7 +1249,7 @@ void IECoreGL::Renderer::shader( const std::string &type, const std::string &nam
 	if( type=="surface" || type=="gl:surface" )
 	{
 		ShaderPtr s = 0;
-		
+
 		string fragSrc = parameterValue<string>( "gl:fragmentSource", parameters, "" );
 		string vertSrc = parameterValue<string>( "gl:vertexSource", parameters, "" );
 		if( fragSrc!="" || vertSrc!="" )
@@ -1280,7 +1280,7 @@ void IECoreGL::Renderer::shader( const std::string &type, const std::string &nam
 				msg( Msg::Error, "Renderer::shader", boost::format( "Failed to load shader \"%s\"." ) % name );
 			}
 		}
-		
+
 		if( s )
 		{
 			// validate the parameter types and load any texture parameters.
@@ -1309,7 +1309,7 @@ void IECoreGL::Renderer::light( const std::string &name, const IECore::CompoundD
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// motion 
+// motion
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void IECoreGL::Renderer::motionBegin( const std::set<float> times )
@@ -1323,7 +1323,7 @@ void IECoreGL::Renderer::motionEnd()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// primitives 
+// primitives
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // adds a primitive into the renderer implementation, first extracting any primitive variables that represent
@@ -1333,7 +1333,7 @@ void IECoreGL::Renderer::motionEnd()
 // should return non-const data either. When we do varying primvars look into storing the uniform ones on the primitive too,
 // and see if that might solve our problem somewhat.
 /// \todo the addVertexAttributes is bit of a hack - MeshPrimitives have their own mechanisms for adding vertex attributes to take into
-/// account changes of detail from varying->facevarying. 
+/// account changes of detail from varying->facevarying.
 /// \todo Ditch this entire function. Vertex attributes should be added by the relevant converter classes (like MeshPrimitive does), and the
 /// uniform primvar shader overrides should be stored on the primitive and dealt with at draw time.
 static void addPrimitive( IECoreGL::PrimitivePtr primitive, const IECore::PrimitiveVariableMap &primVars, IECoreGL::Renderer::MemberData *memberData, bool addVertexAttributes = true )
@@ -1361,7 +1361,7 @@ static void addPrimitive( IECoreGL::PrimitivePtr primitive, const IECore::Primit
 	if( ss && ss->shader() )
 	{
 		ShaderStateComponentPtr shaderState = new ShaderStateComponent( ss->shader(), ss->parameterValues(), &ss->textureValues() );
-		
+
 		unsigned int parmsAdded = 0;
 		for( PrimitiveVariableMap::const_iterator it = primVars.begin(); it!=primVars.end(); it++ )
 		{
@@ -1397,7 +1397,7 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 		msg( Msg::Warning, "Renderer::points", "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
 		return;
 	}
-	
+
 	// get type
 	PointsPrimitive::Type type = PointsPrimitive::Disk;
 	if( ConstStringDataPtr t = findPrimVar<StringData>( "type", PrimitiveVariable::Uniform, primVars ) )
@@ -1423,16 +1423,16 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 			msg( Msg::Warning, "Renderer::points", boost::format( "Unknown type \"%s\" - reverting to particle type." ) % t->readable() );
 		}
 	}
-	
+
 	// get colors
 	PrimitiveVariable::Interpolation colorInterpolations[] = { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::Invalid };
 	ConstColor3fVectorDataPtr colors = findPrimVar<Color3fVectorData>( "Cs", colorInterpolations, primVars );
-	
+
 	// get widths
 	ConstFloatDataPtr constantWidth = findPrimVar<FloatData>( "constantwidth", PrimitiveVariable::Constant, primVars );
 	PrimitiveVariable::Interpolation widthInterpolations[] = { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::Invalid };
 	ConstFloatVectorDataPtr widths = findPrimVar<FloatVectorData>( "width", widthInterpolations, primVars );
-	
+
 	if( constantWidth )
 	{
 		if( widths )
@@ -1452,12 +1452,12 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 			widths = newWidths;
 		}
 	}
-	
+
 	// compute heights
 	ConstFloatDataPtr constantAspectData = findPrimVar<FloatData>( "patchaspectratio", PrimitiveVariable::Constant, primVars );
-	PrimitiveVariable::Interpolation aspectInterpolations[] = { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::Invalid }; 
+	PrimitiveVariable::Interpolation aspectInterpolations[] = { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::Invalid };
 	ConstFloatVectorDataPtr aspectData = findPrimVar<FloatVectorData>( "patchaspectratio", aspectInterpolations, primVars );
-	
+
 	ConstFloatVectorDataPtr heights = 0;
 	if( !constantAspectData && !aspectData )
 	{
@@ -1497,7 +1497,7 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 			heights = h;
 		}
 	}
-	
+
 	// get rotations
 	PrimitiveVariable::Interpolation rotationInterpolations[] = { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::Invalid };
 	ConstFloatVectorDataPtr rotations = findPrimVar<FloatVectorData>( "patchrotation", rotationInterpolations, primVars );
@@ -1527,13 +1527,13 @@ void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic
 	{
 		widthData = findPrimVar<FloatData>( "constantwidth", PrimitiveVariable::Constant, primVars );
 	}
-	
+
 	float width = 1;
 	if( widthData )
 	{
 		width = widthData->readable();
 	}
-	
+
 	CurvesPrimitivePtr prim = new CurvesPrimitive( basis, periodic, numVertices, points, width );
 	addPrimitive( prim, primVars, m_data );
 }
@@ -1562,24 +1562,24 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 			}
 			catch( const std::exception &e )
 			{
-				IECore::msg( IECore::Msg::Warning, "Renderer::text", e.what() ); 
+				IECore::msg( IECore::Msg::Warning, "Renderer::text", e.what() );
 			}
 		}
 		m_data->fonts[font] = f;
 	}
-	
+
 	if( !f )
 	{
-		IECore::msg( IECore::Msg::Warning, "Renderer::text", boost::format( "Font \"%s\" not found." ) % font ); 	
+		IECore::msg( IECore::Msg::Warning, "Renderer::text", boost::format( "Font \"%s\" not found." ) % font );
 		return;
 	}
-	
+
 	f->coreFont()->setKerning( kerning );
-	
+
 	TextPrimitivePtr prim = new TextPrimitive( text, f );
 	addPrimitive( prim, primVars, m_data );
 #else
-	IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." ); 	
+	IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." );
 #endif // IECORE_WITH_FREETYPE
 }
 
@@ -1591,7 +1591,7 @@ void IECoreGL::Renderer::sphere( float radius, float zMin, float zMax, float the
 
 static IECoreGL::ShaderPtr imageShader()
 {
-	static const char *fragSrc = 
+	static const char *fragSrc =
 		"uniform sampler2D texture;"
 		""
 		"void main()"
@@ -1612,7 +1612,7 @@ static IECoreGL::ShaderPtr imageShader()
 		}
 		t = true;
 	}
-	return s;	
+	return s;
 }
 
 /// \todo This positions images incorrectly when dataWindow!=displayWindow. This is because the texture
@@ -1622,7 +1622,7 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 {
 	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );
 	image->variables = primVars;
-	
+
 	ShaderPtr shader = imageShader();
 	if( shader )
 	{
@@ -1639,7 +1639,7 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 		{
 			msg( Msg::Warning, "Renderer::image", "Texture conversion failed." );
 		}
-	
+
 		if( texture )
 		{
 			ShaderStateComponent::TexturesMap textures;
@@ -1654,26 +1654,26 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 		/// in a StateComponent
 		msg( Msg::Warning, "Renderer::image", "Unable to create shader to display image." );
 	}
-	
+
 	m_data->implementation->transformBegin();
-	
+
 		Box3f bound = image->bound();
 		V3f center = bound.center();
-		
+
 		M44f xform;
 		xform[3][0] = center.x;
-		xform[3][1] = center.y;		
+		xform[3][1] = center.y;
 		xform[3][2] = center.z;
-		
+
 		xform[0][0] = boxSize( bound ).x ;
 		xform[1][1] = boxSize( bound ).y ;
-		xform[2][2] = 1.0;		
-			
+		xform[2][2] = 1.0;
+
 		m_data->implementation->concatTransform( xform );
 		QuadPrimitivePtr quad = new QuadPrimitive( 1.0, 1.0 );
 		m_data->implementation->addPrimitive( quad );
-		
-	m_data->implementation->transformEnd();	
+
+	m_data->implementation->transformEnd();
 }
 
 void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
@@ -1682,11 +1682,11 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 	{
 		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
 		m->variables = primVars;
-		
+
 		if( interpolation!="linear" )
 		{
 			// it's a subdivision mesh. in the absence of a nice subdivision algorithm to display things with,
-			// we can at least make things look a bit nicer by calculating some smooth shading normals. 
+			// we can at least make things look a bit nicer by calculating some smooth shading normals.
 			// if interpolation is linear and no normals are provided then we assume the faceted look is intentional.
 			if( primVars.find( "N" )==primVars.end() )
 			{
@@ -1696,7 +1696,7 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 				normalOp->operate();
 			}
 		}
-		
+
 		MeshPrimitivePtr prim = boost::static_pointer_cast<MeshPrimitive>( ToGLMeshConverter( m ).convert() );
 		addPrimitive( prim, primVars, m_data, false );
 	}

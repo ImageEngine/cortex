@@ -38,68 +38,68 @@ import IECore
 class TestClassLoader( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
-		
+
 		self.assertEqual( l.classNames(), ["bad", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", 'stringParsing'] )
 		self.assertEqual( l.classNames( "p*" ), ["parameterTypes", "path.With.Dot/multiply", "presetParsing"] )
 		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
 		self.assertEqual( l.getDefaultVersion( "presetParsing" ), 1 )
 		self.assertEqual( l.getDefaultVersion( "stringParsing" ), 1 )
 		self.assertEqual( l.versions( "maths/multiply" ), [ 1, 2 ] )
-		
+
 		o = l.load( "maths/multiply" )()
 		self.assertEqual( len( o.parameters() ), 2 )
 
 		self.assertEqual( l.versions( "maths/multiply" ), [ 1, 2 ] )
 
 	def testFinalSlash( self ) :
-	
+
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops/", ":" ) )
 		self.assertEqual( l.classNames(), ["bad", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", 'stringParsing'] )
-		
+
 	def testStaticLoaders( self ) :
-	
+
 		l = IECore.ClassLoader.defaultOpLoader()
 		ll = IECore.ClassLoader.defaultOpLoader()
 		lll = IECore.ClassLoader.defaultLoader( "IECORE_OP_PATHS" )
 		self.assert_( l is ll )
 		self.assert_( l is lll )
 		self.assert_( isinstance( l, IECore.ClassLoader ) )
-		
+
 		l = IECore.ClassLoader.defaultProceduralLoader()
 		ll = IECore.ClassLoader.defaultProceduralLoader()
 		lll = IECore.ClassLoader.defaultLoader( "IECORE_PROCEDURAL_PATHS" )
 		self.assert_( l is ll )
 		self.assert_( l is lll )
 		self.assert_( isinstance( l, IECore.ClassLoader ) )
-		
+
 	def testRefresh( self ) :
-	
+
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
-		
+
 		c = l.classNames()
 		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
 		l.setDefaultVersion( "maths/multiply", 1 )
 		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 1 )
-		
+
 		l.refresh()
 		self.assertEqual( c, l.classNames() )
 		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 1 )
-		
+
 	def testDotsInPath( self ) :
-	
+
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
-		
+
 		c = l.load( "path.With.Dot/multiply" )
-		
+
 	def testExceptions( self ) :
-	
+
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		self.assertRaises( RuntimeError, l.getDefaultVersion, "thisOpDoesntExist" )
 		self.assertRaises( RuntimeError, l.setDefaultVersion, "thisOpDoesntExist", 1 )
 		self.assertRaises( TypeError, l.setDefaultVersion, "maths/multiply", "iShouldBeAnInt" )
 		self.assertRaises( RuntimeError, l.setDefaultVersion, "maths/multiply", 10 )
-		
+
 if __name__ == "__main__":
         unittest.main()

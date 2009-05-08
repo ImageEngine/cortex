@@ -68,7 +68,7 @@ typename T::ConstPtr Parameter::getTypedValidatedValue() const
 {
 	return runTimeCast<const T>( getValidatedValue() );
 }
-		
+
 } // namespace IECore
 
 #endif // IE_CORE_PARAMETER_INL

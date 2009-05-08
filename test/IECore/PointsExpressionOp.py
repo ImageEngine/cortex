@@ -38,46 +38,46 @@ from IECore import *
 class TestPointsExpressionTest( unittest.TestCase ) :
 
 	def setUp( self ) :
-	
+
 		numPoints = 100
-		
+
 		points = V3fVectorData( numPoints )
 		colors = Color3fVectorData( numPoints )
 		ints = IntVectorData( numPoints )
-		
+
 		self.p = PointsPrimitive( numPoints )
 		self.p["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, points )
 		self.p["Cs"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, colors )
 		self.p["int"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, ints )
 
 	def testRemoval( self ) :
-		
+
 		o = PointsExpressionOp()
 		p = o( input = self.p, expression = "remove = i % 2" )
-		
+
 		self.assertEqual( p.numPoints, self.p.numPoints / 2 )
 		for k in p.keys() :
 			self.assertEqual( len( p[k].data ), len( self.p[k].data ) / 2 )
-			
+
 	def testAssignment( self ) :
-	
+
 		o = PointsExpressionOp()
 		p = o( input = self.p, expression = "int = i * 10" )
-		
+
 		self.assertEqual( p.numPoints, self.p.numPoints )
 		ints = p["int"].data
 		for i in range( p.numPoints ) :
 			self.assertEqual( i * 10, ints[i] )
 
 	def testGlobals( self ) :
-	
+
 		o = PointsExpressionOp()
 		p = o( input = self.p, expression = "P = V3f( i )" )
-		
+
 		points = p["P"].data
 		for i in range( p.numPoints ) :
 			self.assert_( points[i].equalWithAbsError( V3f( i ), 0.0001 ) )
-			
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

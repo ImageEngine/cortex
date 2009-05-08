@@ -39,67 +39,67 @@ from IECore import *
 class ImageCompositeOpTest( unittest.TestCase ) :
 
 	def __test( self, operation, expectedResultFileName ) :
-	
+
 		op = ImageCompositeOp()
-		
+
 		imageA = Reader.create( "test/IECore/data/exrFiles/checker1Premult.exr" ).read()
 		imageB = Reader.create( "test/IECore/data/exrFiles/checker2Premult.exr" ).read()
-		
+
 		result = op(
 			input = imageB,
 			imageA = imageA,
 			operation = operation
 		)
-		
+
 		expectedResult = Reader.create( expectedResultFileName ).read()
 		diffOp = ImageDiffOp()
- 
+
 		diff = diffOp(
                         imageA = result,
                         imageB = expectedResult
                 )
 
  		self.failIf( diff.value )
-		
+
 	def testConstruction( self ) :
-	
+
 		op = ImageCompositeOp()
 		self.assertEqual( op.parameters()["operation"].getValue().value, ImageCompositeOp.Operation.Over )
-		self.assertEqual( op.parameters()["alphaChannelName"].getValue().value, "A" )		
+		self.assertEqual( op.parameters()["alphaChannelName"].getValue().value, "A" )
 		self.assertEqual( op.parameters()["channels"].getValue(), StringVectorData( [ "R", "G", "B" ] ) )
-		
+
 	def testChannelSubset( self ):
-	
+
 		op = ImageCompositeOp()
-		
+
 		imageA = Reader.create( "test/IECore/data/exrFiles/checker1Premult.exr" ).read()
 		imageB = Reader.create( "test/IECore/data/exrFiles/checker2Premult.exr" ).read()
-		
+
 		result = op(
 			input = imageB,
 			imageA = imageA,
 			channels = StringVectorData( [ "R", "G" ] ),
 			operation = ImageCompositeOp.Operation.Over
-		)	
-		
+		)
+
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 	def testOver( self ) :
-	
+
 		self.__test( ImageCompositeOp.Operation.Over, "test/IECore/data/expectedResults/imageCompositeOpOver.exr" )
-		
+
 	def testMax( self ) :
-	
+
 		self.__test( ImageCompositeOp.Operation.Max, "test/IECore/data/expectedResults/imageCompositeOpMax.exr" )
-		
+
 	def testMin( self ) :
-	
+
 		self.__test( ImageCompositeOp.Operation.Min, "test/IECore/data/expectedResults/imageCompositeOpMin.exr" )
-		
-	def testMultiply( self ) :		
-	
-		self.__test( ImageCompositeOp.Operation.Multiply, "test/IECore/data/expectedResults/imageCompositeOpMultiply.exr" )			
-		
+
+	def testMultiply( self ) :
+
+		self.__test( ImageCompositeOp.Operation.Multiply, "test/IECore/data/expectedResults/imageCompositeOpMultiply.exr" )
+
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

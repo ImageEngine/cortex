@@ -115,32 +115,32 @@ float MappedRandomPointDistributionOp::density( ConstMeshPrimitivePtr mesh, cons
 	assert( m_imageEvaluator->primitive() );
 	assert( runTimeCast<const ImagePrimitive>( m_imageEvaluator->primitive() ) );
 	assert( m_channelIterator != runTimeCast<const ImagePrimitive>( m_imageEvaluator->primitive() )->variables.end() );
-	
+
 	/// \todo Texture repeat
 	float repeatU = 1.0;
 	float repeatV = 1.0;
-	
-	/// \todo Wrap modes	
+
+	/// \todo Wrap modes
 	bool wrapU = true;
 	bool wrapV = true;
-	
+
 	Imath::V2f placedUv(
 		uv.x * repeatU,
 		uv.y * repeatV
 	);
-	
+
 	if ( wrapU )
 	{
 		placedUv.x = fmod( (double)placedUv.x, 1.0 );
 	}
-	
+
 	if ( wrapV )
 	{
 		placedUv.y = fmod( (double)placedUv.y, 1.0 );
-	}	
-	
+	}
+
 	bool found = m_imageEvaluator->pointAtUV( placedUv, m_result );
-		
+
 	if ( found )
 	{
 		return m_result->floatPrimVar( m_channelIterator->second );

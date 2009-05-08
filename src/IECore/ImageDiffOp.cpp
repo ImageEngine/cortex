@@ -62,7 +62,7 @@ IE_CORE_DEFINERUNTIMETYPED( ImageDiffOp );
 
 ImageDiffOp::ImageDiffOp()
 		:	Op(
-		        staticTypeName(),			
+		        staticTypeName(),
 			"Evaluates the root-mean-squared error between two images and returns true if it "
 			"exceeds a specified threshold. Unless the \"skip missing channels\" parameter is "
 			"enabled, it will also return true if either image contains a channel which  "
@@ -149,7 +149,7 @@ ConstBoolParameterPtr ImageDiffOp::skipMissingChannels() const
 	return m_skipMissingChannelsParameter;
 }
 
-/// A class to use a ScaledDataConversion to transform image data to floating point, to allow for simple measuring of 
+/// A class to use a ScaledDataConversion to transform image data to floating point, to allow for simple measuring of
 /// error between two potentially different data types (e.g. UShort and Half)
 struct ImageDiffOp::FloatConverter
 {
@@ -182,31 +182,31 @@ ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 	{
 		throw InvalidArgumentException( "ImageDiffOp: NULL image specified as input parameter" );
 	}
-	
+
 	assert( imageA );
 	assert( imageB );
-	
+
 	if ( !imageA->arePrimitiveVariablesValid() || !imageB->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "ImageDiffOp: Image with invalid primitive variables specified as input parameter" );
 	}
-	
+
 	if ( imageA->getDisplayWindow() != imageB->getDisplayWindow() )
 	{
 		return new BoolData( true );
 	}
-	
+
 	/// Use the CropOp to expand the dataWindows of both images to fill the display window
 	ImageCropOpPtr cropOp = new ImageCropOp();
 	cropOp->matchDataWindowParameter()->setTypedValue( true );
 	cropOp->cropBoxParameter()->setTypedValue( imageA->getDisplayWindow() );
-	
-	cropOp->inputParameter()->setValue( imageA );	
+
+	cropOp->inputParameter()->setValue( imageA );
 	imageA = runTimeCast< ImagePrimitive >( cropOp->operate() );
-	
-	cropOp->inputParameter()->setValue( imageB );	
+
+	cropOp->inputParameter()->setValue( imageB );
 	imageB = runTimeCast< ImagePrimitive >( cropOp->operate() );
-	
+
 	const float maxError = m_maxErrorParameter->getNumericValue();
 
 	const bool skipMissingChannels = m_skipMissingChannelsParameter->getTypedValue();
@@ -215,37 +215,37 @@ ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 	imageA->channelNames( channelsA );
 
 	if ( !skipMissingChannels )
-	{	
+	{
 		std::vector< std::string > channelsB, channelsIntersection ;
-		
+
 		imageA->channelNames( channelsA );
-		imageB->channelNames( channelsB );		
-		
+		imageB->channelNames( channelsB );
+
 		std::set_intersection(
-			channelsA.begin(), channelsA.end(), 
-			channelsB.begin(), channelsB.end(), 
+			channelsA.begin(), channelsA.end(),
+			channelsB.begin(), channelsB.end(),
 			std::inserter( channelsIntersection, channelsIntersection.begin() )
 		);
-	
+
 		if ( channelsIntersection != channelsA || channelsIntersection != channelsB )
 		{
 			return new BoolData( true );
-		}	
+		}
 	}
 
 	for ( std::vector< std::string >::const_iterator it = channelsA.begin(); it != channelsA.end(); ++it )
 	{
-		PrimitiveVariableMap::const_iterator aPrimVarIt = imageA->variables.find( *it );	
+		PrimitiveVariableMap::const_iterator aPrimVarIt = imageA->variables.find( *it );
 		assert( aPrimVarIt != imageA->variables.end() );
 		assert( aPrimVarIt->second.interpolation == PrimitiveVariable::Vertex );
-		
+
 		PrimitiveVariableMap::const_iterator bPrimVarIt = imageB->variables.find( *it );
 		if ( bPrimVarIt == imageB->variables.end() )
 		{
 			assert( skipMissingChannels );
 			continue;
 		}
-		
+
 		assert( bPrimVarIt->second.interpolation == PrimitiveVariable::Vertex );
 
 		DataPtr aData = aPrimVarIt->second.data;
@@ -261,13 +261,13 @@ ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 			msg( Msg::Warning, "ImageDiffOp", "Exact same data found in two different input images.");
 			continue;
 		}
-		
+
 		if ( !aData || !bData )
 		{
 			msg( Msg::Warning, "ImageDiffOp", "Null data present in input image.");
 			return new BoolData( true );
 		}
-		
+
 		assert( aData );
 		assert( bData );
 
@@ -283,7 +283,7 @@ ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 		{
 			msg( Msg::Warning, "ImageDiffOp", boost::format( "Could not convert data for image channel '%s' to floating point" ) % *it );
 			return new BoolData( true );
-		}	
+		}
 
 		assert( aFloatData );
 		assert( bFloatData );
@@ -293,7 +293,7 @@ ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
 		if ( rms > maxError )
 		{
 			return new BoolData( true );
-		}		
+		}
 	}
 
 	return new BoolData( false );

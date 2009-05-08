@@ -37,13 +37,13 @@
 
 #include "IECore/ImageDisplayDriver.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h" 
+#include "IECore/VectorTypedData.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
 
 using namespace boost;
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 template< typename T >

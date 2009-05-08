@@ -46,17 +46,17 @@ IE_CORE_FORWARDDECLARE( Renderer );
 class Renderable : public BlindDataHolder
 {
 	public:
-	
+
 		Renderable();
 		virtual ~Renderable();
-				
+
 		IE_CORE_DECLAREABSTRACTOBJECT( Renderable, BlindDataHolder );
-		
+
 		/// Render the object held by this instance via the given renderer.
 		virtual void render( RendererPtr renderer ) const = 0;
-	
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
 };
 

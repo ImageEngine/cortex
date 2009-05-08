@@ -105,7 +105,7 @@ static boost::python::list values( MatrixMotionTransform &p )
 
 
 void bindMatrixMotionTransform()
-{	
+{
 	RunTimeTypedClass<MatrixMotionTransform>()
 		.def( init<>() )
 		.def( "__len__", &len )

@@ -67,7 +67,7 @@ void Renderer::camera( const std::string &name, const IECore::CompoundDataMap &p
 {
 	m_implementation->camera( name, parameters );
 }
-		
+
 void Renderer::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
 {
 	m_implementation->display( name, type, data, parameters );

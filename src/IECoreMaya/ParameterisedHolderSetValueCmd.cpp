@@ -64,11 +64,11 @@ void *ParameterisedHolderSetValueCmd::creator()
 MSyntax ParameterisedHolderSetValueCmd::newSyntax()
 {
 	MSyntax s;
-	
+
 	s.addFlag( "p", "plug", MSyntax::kString );
-	
+
 	s.setObjectType( MSyntax::kSelectionList, 1, 1 );
-	
+
 	return s;
 }
 
@@ -80,21 +80,21 @@ bool ParameterisedHolderSetValueCmd::isUndoable() const
 MStatus ParameterisedHolderSetValueCmd::doIt( const MArgList &argList )
 {
 	MArgDatabase args( syntax(), argList );
-	
+
 	// get the node we're operating on
 	MSelectionList objects;
 	args.getObjects( objects );
-	MStringArray selStr; objects.getSelectionStrings( selStr );	
+	MStringArray selStr; objects.getSelectionStrings( selStr );
 	assert( objects.length()==1 );
 	MObject node;
 	objects.getDependNode( 0, node );
 	MFnDependencyNode fnNode( node );
-	MPxNode *userNode = fnNode.userNode();	
+	MPxNode *userNode = fnNode.userNode();
 	m_parameterisedHolder = dynamic_cast<ParameterisedHolderInterface *>( userNode );
 	if( !m_parameterisedHolder )
 	{
 		return MStatus::kFailure;
-	}	
+	}
 
 	// see if we're being asked to operate on a specific parameter or
 	// just the whole thing.
@@ -119,11 +119,11 @@ MStatus ParameterisedHolderSetValueCmd::doIt( const MArgList &argList )
 
 	IECore::ParameterisedInterface *interface = m_parameterisedHolder->getParameterisedInterface();
 	IECore::ParameterPtr parameter = m_parameter ? m_parameter : interface->parameters();
-		
+
 	// we must copy the value here, as the m_originalValue = parm->getValue() below updates the value in place,
-	// which would modify tmp if it weren't a copy. 
+	// which would modify tmp if it weren't a copy.
 	IECore::CompoundObjectPtr tmp = boost::static_pointer_cast<IECore::CompoundObject>( parameter->getValue() )->copy();
-		
+
 		m_newValue = parameter->getValue()->copy();
 		if( m_parameter )
 		{
@@ -134,9 +134,9 @@ MStatus ParameterisedHolderSetValueCmd::doIt( const MArgList &argList )
 			m_parameterisedHolder->setParameterisedValues();
 		}
 		m_originalValue = parameter->getValue();
-	
+
 	parameter->setValue( tmp );
-	
+
 	return redoIt();
 }
 
@@ -146,12 +146,12 @@ MStatus ParameterisedHolderSetValueCmd::redoIt()
 	{
 		return MStatus::kFailure;
 	}
-	
+
 	IECore::ParameterisedInterface *interface = m_parameterisedHolder->getParameterisedInterface();
 	IECore::ParameterPtr parameter = m_parameter ? m_parameter : interface->parameters();
 
 	IECore::ObjectPtr tmp = parameter->getValue();
-	
+
 		parameter->setValue( m_newValue );
 		if( m_parameter )
 		{
@@ -161,9 +161,9 @@ MStatus ParameterisedHolderSetValueCmd::redoIt()
 		{
 			m_parameterisedHolder->setNodeValues();
 		}
-		
+
 	parameter->setValue( tmp );
-	
+
 	return MStatus::kSuccess;
 }
 
@@ -178,7 +178,7 @@ MStatus ParameterisedHolderSetValueCmd::undoIt()
 	IECore::ParameterPtr parameter = m_parameter ? m_parameter : interface->parameters();
 
 	IECore::ObjectPtr tmp = parameter->getValue();
-	
+
 		parameter->setValue( m_originalValue );
 		if( m_parameter )
 		{
@@ -188,7 +188,7 @@ MStatus ParameterisedHolderSetValueCmd::undoIt()
 		{
 			m_parameterisedHolder->setNodeValues();
 		}
-		
+
 	parameter->setValue( tmp );
 
 	return MStatus::kSuccess;

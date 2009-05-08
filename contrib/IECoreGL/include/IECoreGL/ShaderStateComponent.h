@@ -61,11 +61,11 @@ class ShaderStateComponent : public StateComponent
 		typedef std::map<std::string, ConstTexturePtr> TexturesMap;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ShaderStateComponent, ShaderStateComponentTypeId, StateComponent );
-		
+
 		ShaderStateComponent();
 		ShaderStateComponent( ShaderPtr shader, IECore::ConstCompoundDataPtr parameterValues = 0,
 			const TexturesMap *textureParameterValues = 0 );
-		
+
 		//! @name Bindable interface
 		////////////////////////////////////////////////////
 		//@{

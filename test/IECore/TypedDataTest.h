@@ -48,30 +48,30 @@ namespace IECore
 {
 
 void addTypedDataTest(boost::unit_test::test_suite* test);
-	
+
 template<typename T>
 class VectorTypedDataTest
 {
 	public:
 		VectorTypedDataTest(unsigned int size);
 		virtual ~VectorTypedDataTest();
-	
+
 		/// Some simple repeatable functions which are used to fill the vector with some initial data
 		typename T::value_type f1(unsigned int i) const;
 		typename T::value_type f2(unsigned int i) const;
-	
+
 		void testSize();
 		void testRead();
 		void testWrite();
 		void testAssign();
-	
+
 		unsigned int randomElementPos();
-	
+
 		unsigned int m_size;
 		boost::intrusive_ptr<TypedData<T> > m_data;
-	
+
 		Imath::Rand32 m_randGen;
-		
+
 };
 
 template<typename T>
@@ -80,7 +80,7 @@ class SimpleTypedDataTest
 	public:
 		SimpleTypedDataTest();
 		virtual ~SimpleTypedDataTest();
-			
+
 		void testRead();
 		void testWrite();
 		void testAssign();
@@ -88,20 +88,20 @@ class SimpleTypedDataTest
 		void testIsEqualTo();
 
 		boost::intrusive_ptr< TypedData<T> > m_data;
-		
+
 };
 
 
 template<unsigned int N>
 struct TypedDataTestSuite : public boost::unit_test::test_suite
 {
-	
+
 	TypedDataTestSuite() : boost::unit_test::test_suite("TypedDataTestSuite")
 	{
-		addVectorTypedDataTest<std::vector<float> >();		
+		addVectorTypedDataTest<std::vector<float> >();
 		addVectorTypedDataTest<std::vector<int> >();
 		addVectorTypedDataTest<std::vector<double> >();
-		
+
 		addSimpleTypedDataTest<float>();
 		addSimpleTypedDataTest<double>();
 		addSimpleTypedDataTest<int>();
@@ -109,27 +109,27 @@ struct TypedDataTestSuite : public boost::unit_test::test_suite
 		addSimpleTypedDataTest<char>();
 		addSimpleTypedDataTest<unsigned char>();
 	}
-	
+
 	template<typename T>
-	void addVectorTypedDataTest()		
-	{	
+	void addVectorTypedDataTest()
+	{
 		static boost::shared_ptr<VectorTypedDataTest<T> > instance(new VectorTypedDataTest<T>(N));
-	
+
 		add( BOOST_CLASS_TEST_CASE( &VectorTypedDataTest<T>::testSize, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &VectorTypedDataTest<T>::testRead, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &VectorTypedDataTest<T>::testWrite, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &VectorTypedDataTest<T>::testAssign, instance ) );		
+		add( BOOST_CLASS_TEST_CASE( &VectorTypedDataTest<T>::testAssign, instance ) );
 	}
-	
+
 	template<typename T>
-	void addSimpleTypedDataTest()		
+	void addSimpleTypedDataTest()
 	{
 		static boost::shared_ptr<SimpleTypedDataTest<T> > instance(new SimpleTypedDataTest<T>());
-		
+
 		add( BOOST_CLASS_TEST_CASE( &SimpleTypedDataTest<T>::testRead, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &SimpleTypedDataTest<T>::testWrite, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &SimpleTypedDataTest<T>::testAssign, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &SimpleTypedDataTest<T>::testIsEqualTo, instance ) );		
+		add( BOOST_CLASS_TEST_CASE( &SimpleTypedDataTest<T>::testIsEqualTo, instance ) );
 	}
 };
 

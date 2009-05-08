@@ -43,14 +43,14 @@ init( False )
 class TestTexture( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
-		
+
 		t = ColorTexture( i )
-		
+
 		ii = t.imagePrimitive()
-		
+
 		EXRImageWriter( ii, "/tmp/t.exr" ).write()
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

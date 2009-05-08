@@ -39,15 +39,15 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-namespace IECore 
+namespace IECore
 {
 
 /// A default constructable boost::posix_time::time_period, for use as parameter to IECore::TypedData template
 class TimePeriod : public  boost::posix_time::time_period
 {
 	public :
-		TimePeriod();		
-		TimePeriod( const boost::posix_time::time_period &tp );		
+		TimePeriod();
+		TimePeriod( const boost::posix_time::time_period &tp );
 		TimePeriod( const boost::posix_time::ptime &p, const boost::posix_time::time_duration &td );
 		TimePeriod( const boost::posix_time::ptime &p1, const boost::posix_time::ptime &p2 );
 };

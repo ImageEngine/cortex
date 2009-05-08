@@ -80,7 +80,7 @@ static ModifyOpPtr creator( const std::string &inputColorSpace, const std::strin
 {
         assert( data );
         PyObject *d = (PyObject *)( data );
-        
+
         return call< ModifyOpPtr >( d, inputColorSpace, outputColorSpace );
 }
 
@@ -95,12 +95,12 @@ void bindColorSpaceTransformOp()
 
 	RunTimeTypedClass<ColorSpaceTransformOp>()
 		.def( init<>() )
-		
+
 		.def( "registerConversion", registerConversion ).staticmethod( "registerConversion" )
-		
+
 		.def( "inputColorSpaces", inputColorSpaces ).staticmethod( "inputColorSpaces" )
 		.def( "outputColorSpaces", outputColorSpaces ).staticmethod( "outputColorSpaces" )
-		.def( "colorSpaces", colorSpaces ).staticmethod( "colorSpaces" )				
+		.def( "colorSpaces", colorSpaces ).staticmethod( "colorSpaces" )
 	;
 
 }

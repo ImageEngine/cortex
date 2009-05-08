@@ -48,24 +48,24 @@ class FromCoreConverter : public Converter
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( FromCoreConverter, Converter );
-	
+
 		/// The parameter holding the object to be converted.
 		ObjectParameterPtr srcParameter();
 		ConstObjectParameterPtr srcParameter() const;
-		
+
 	protected :
-	
+
 		FromCoreConverter( const std::string &name, const std::string &description, TypeId supportedType );
 		FromCoreConverter( const std::string &name, const std::string &description, const ObjectParameter::TypeIdSet &supportedTypes );
 		FromCoreConverter( const std::string &name, const std::string &description, const TypeId *supportedTypes );
 		virtual ~FromCoreConverter();
-		
+
 	private :
-	
+
 		ObjectParameterPtr m_srcParameter;
-	
+
 };
 
 IE_CORE_DECLAREPTR( FromCoreConverter );

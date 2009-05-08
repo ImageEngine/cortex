@@ -53,9 +53,9 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 	public :
 
 		typedef RefCountedClass<T, typename T::BaseClass, Ptr> BaseClass;
-	
+
 		RunTimeTypedClass( const char *docString = 0 );
-			
+
 };
 
 #define IE_COREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME )\

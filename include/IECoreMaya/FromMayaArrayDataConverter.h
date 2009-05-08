@@ -54,15 +54,15 @@ class FromMayaArrayDataConverter : public FromMayaObjectConverter
 {
 
 	public :
-	
+
 		FromMayaArrayDataConverter( const MObject &object );
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( FromMayaArrayDataConverter, FromMayaObjectConverter )
-		
+
 	protected :
-	
+
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-	
+
 		static FromMayaObjectConverterDescription<FromMayaArrayDataConverter> m_description;
 
 };

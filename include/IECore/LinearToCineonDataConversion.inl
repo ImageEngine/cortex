@@ -52,7 +52,7 @@ LinearToCineonDataConversion<F, T>::LinearToCineonDataConversion() : m_LUT( 1024
 	m_filmGamma = 0.6f;
 	m_refWhiteVal = 685;
 	m_refBlackVal = 95;
-		
+
 	m_LUTValid = false;
 }
 
@@ -61,8 +61,8 @@ LinearToCineonDataConversion<F, T>::LinearToCineonDataConversion( float filmGamm
 {
 	m_filmGamma = filmGamma;
 	m_refWhiteVal = refWhiteVal;
-	m_refBlackVal = refBlackVal;	
-	
+	m_refBlackVal = refBlackVal;
+
 	m_LUTValid = false;
 }
 
@@ -73,7 +73,7 @@ T LinearToCineonDataConversion<F, T>::operator()( F f ) const
 	std::iterator_traits<std::vector<float>::const_iterator>::difference_type v = std::distance( lookupTable().begin(), it );
 
 	assert( (double)v >= (double)Imath::limits<T>::min() );
-	assert( (double)v <= (double)Imath::limits<T>::max() );		
+	assert( (double)v <= (double)Imath::limits<T>::max() );
 
 	return T( v ) ;
 }
@@ -85,13 +85,13 @@ const std::vector<float> &LinearToCineonDataConversion<F, T>::lookupTable() cons
 	{
 		float refMult = 0.002f / m_filmGamma;
 		float blackOffset = Imath::Math<float>::pow( 10.0f, ( m_refBlackVal - m_refWhiteVal ) * refMult );
-	
+
 		assert( m_LUT.size() == 1024 );
 		for ( unsigned i = 0; i < 1024; ++i )
 		{
 			m_LUT[i] = ( Imath::Math<float>::pow( 10.0f, ( (float)i + 0.5 - m_refWhiteVal ) * refMult ) - blackOffset ) / ( 1.0f - blackOffset );
 		}
-		m_LUTValid = true;	
+		m_LUTValid = true;
 	}
 
 	assert( m_LUT.size() == 1024 );

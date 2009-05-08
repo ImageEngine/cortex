@@ -40,7 +40,7 @@ namespace IECore
 
 /// A simple traits class that can be used to derive appropriate types for
 /// storing vectors, boxes, etc, in, given the dimension "N" of the space
-/// and numeric base type "T". 
+/// and numeric base type "T".
 ///
 /// For example, DimensionTraits< 3, float >::VectorType is defined to be Imath::V3f
 ///
@@ -48,10 +48,10 @@ namespace IECore
 template< int N, typename T = void >
 struct DimensionTraits
 {
-	BOOST_STATIC_ASSERT( sizeof( T ) == 0 );	
-	
+	BOOST_STATIC_ASSERT( sizeof( T ) == 0 );
+
 	typedef void VectorType;
-	typedef void BoxType;	
+	typedef void BoxType;
 	typedef void PlaneType;
 	typedef void LineSegmentType;
 };

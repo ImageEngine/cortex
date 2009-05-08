@@ -48,15 +48,15 @@ class ToMayaConverter : public IECore::FromCoreConverter
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaConverter, ToMayaConverterTypeId, IECore::FromCoreConverter );
-		
+
 	protected:
-	
+
 		ToMayaConverter( const std::string &name, const std::string &description, IECore::TypeId supportedType );
-		
+
 		virtual ~ToMayaConverter();
-	
+
 };
 
 IE_CORE_DECLAREPTR( ToMayaConverter );

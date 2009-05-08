@@ -41,30 +41,30 @@ import os
 class MultipleContextsTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		r1 = IECoreRI.Renderer( "test/IECoreRI/output/contextOne.rib" )
 		r2 = IECoreRI.Renderer( "test/IECoreRI/output/contextTwo.rib" )
-		
+
 		self.assertEqual( r1.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
 		self.assertEqual( r2.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
-		
+
 		r1.setAttribute( "doubleSided", IECore.BoolData( False ) )
 		self.assertEqual( r1.getAttribute( "doubleSided" ), IECore.BoolData( False ) )
 		self.assertEqual( r2.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
 		r1.setAttribute( "doubleSided", IECore.BoolData( True ) )
 		self.assertEqual( r1.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
 		self.assertEqual( r2.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
-		
+
 		r2.setAttribute( "doubleSided", IECore.BoolData( False ) )
 		self.assertEqual( r1.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
 		self.assertEqual( r2.getAttribute( "doubleSided" ), IECore.BoolData( False ) )
-		
+
 	def tearDown( self ) :
-	
+
 		for f in [ "contextOne.rib", "contextTwo.rib" ] :
 			ff = "test/IECoreRI/output/" + f
 			if os.path.exists( ff ) :
 				os.remove( ff )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

@@ -50,7 +50,7 @@ template<typename PointIterator, typename MeshBuilder = MeshPrimitiveBuilder >
 class Triangulator : public RefCounted
 {
 	public :
-	
+
 		typedef PointIterator Iterator;
 		typedef typename std::iterator_traits<PointIterator>::value_type Point;
 		typedef typename VectorTraits<Point>::BaseType BaseType;
@@ -58,12 +58,12 @@ class Triangulator : public RefCounted
 		/// A loop is defined by an iterator range from it's first
 		/// to last point.
 		typedef std::pair<PointIterator, PointIterator> Loop;
-		
+
 		IE_CORE_DECLAREMEMBERPTR( Triangulator );
-		
+
 		Triangulator( typename MeshBuilder::Ptr builder );
 		virtual ~Triangulator();
-		
+
 		/// Triangulates the polygon specified by the points in the
 		/// specified iterator range. Points must be planar and have
 		/// an anticlockwise winding order.
@@ -95,11 +95,11 @@ class Triangulator : public RefCounted
 		typedef LineSegment<Point> Edge;
 
 		void triangulate( VertexList &vertices, unsigned size );
-		
+
 		typename MeshBuilder::Ptr m_builder;
 		// the number of vertices already in the mesh at the start of each triangulate() call
 		unsigned m_baseVertexIndex;
-		
+
 };
 
 typedef Triangulator<std::vector<Imath::V2f>::const_iterator> V2fTriangulator;

@@ -48,29 +48,29 @@ namespace IECore
 class ReversedFrameList : public ReorderedFrameList
 {
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( ReversedFrameList, ReorderedFrameList );
-		
-		ReversedFrameList( FrameListPtr frameList = 0 );		
-		
+
+		ReversedFrameList( FrameListPtr frameList = 0 );
+
 		virtual ~ReversedFrameList();
 
-		virtual void asList( std::vector<Frame> &frames ) const ;				
+		virtual void asList( std::vector<Frame> &frames ) const ;
 		virtual std::string asString() const;
 		virtual bool isEqualTo( ConstFrameListPtr other ) const ;
 		virtual FrameListPtr copy() const ;
 
 		static std::string suffix();
-		
+
 		static FrameListPtr parse( const std::string &frameList );
-		
+
 	private :
-	
-		static FrameList::Parser< ReversedFrameList > g_parserRegistrar;			
+
+		static FrameList::Parser< ReversedFrameList > g_parserRegistrar;
 };
 
 IE_CORE_DECLAREPTR( ReversedFrameList );
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_REVERSEDFRAMELIST_H

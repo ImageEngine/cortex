@@ -50,17 +50,17 @@ class ParameterParser :
 	## Parses the args to set the values of the parameters
 	# held by a CompoundParameter object. args may either be a list of strings or a string
 	# itself, in which case it will be tokenised using shlex.split().
-	# 
+	#
 	# Parsing expects a series of entries of the form -parameterName value(s). It
 	# is also possible to specify a series of child parameters which can be parsed without
 	# their name being specified - this provides much less verbose command lines for commonly
 	# used parameters, and the possibility of supporting the very common "command [options] filenames"
 	# form of command. Flagless parameters are specified as userData in the parameters object passed -
-	# this should be a StringVectorData named "flagless" in a CompoundData called "parser" - 
+	# this should be a StringVectorData named "flagless" in a CompoundData called "parser" -
 	# these flagless parameters are parsed in the order they are specified in the data element.
 	# If parsing fails at any time then a descriptive exception is raised.
 	def parse(self, args, parameters):
-			
+
 		if type( args ) is str :
 			args = shlex.split( args )
 
@@ -71,12 +71,12 @@ class ParameterParser :
 				flagless = parameters.userData()["parser"]["flagless"]
 				if not flagless.isInstanceOf( IECore.StringVectorData.staticTypeId() ) :
 					raise TypeError( "\"flagless\" parameters must be specified by a StringVectorData instance." )
-				
+
 		parmsFound = {}
 		result = parameters.defaultValue
 		args = args[:] # a copy we can mess around with
 		while len(args):
-		
+
 			# get the name of the parameter being specified
 			if len( args[0] ) and args[0][0]=="-" :
 				name = args[0][1:]
@@ -99,11 +99,11 @@ class ParameterParser :
 					if not nameSplit[i] in p:
 						raise SyntaxError( "\"%s\" is not a parameter name." % name )
 					p = p[nameSplit[i]]
-			
+
 			if len( args ) :
-								
+
 				# see if the argument being specified is a preset name, in which case we
-				# don't need a special parser.	
+				# don't need a special parser.
 				if args[0] in p.presets() :
 
 					p.setValue( args[0] )
@@ -132,9 +132,9 @@ class ParameterParser :
 					p.setValidatedValue( r )
 					del args[0]
 					continue
-			
-			# we're gonna need a specialised parser	
-			parmType = p.typeId()			
+
+			# we're gonna need a specialised parser
+			parmType = p.typeId()
 			if not parmType in self.__typesToParsers :
 				raise SyntaxError( "No parser available for parameter \"%s\"." % name )
 
@@ -148,7 +148,7 @@ class ParameterParser :
 	# This string can later be passed to parse() to retrieve the values. May
 	# throw an exception if the value held by any of the parameters is not valid.
 	def serialise( self, parameters ) :
-	
+
 		return self.__serialiseWalk( parameters, "" )
 
 	def __serialiseWalk(self, parameter, rootName):
@@ -157,7 +157,7 @@ class ParameterParser :
 		"""
 
 		result = ''
-		
+
 		if parameter.isInstanceOf("CompoundParameter"):
 
 			# concatenate the path
@@ -166,7 +166,7 @@ class ParameterParser :
 
 			# recurse
 			result = ' '.join(map(lambda cp: self.__serialiseWalk(parameter[cp], path), parameter.keys()))
-			
+
 		else:
 
 			# leaf parameter
@@ -183,23 +183,23 @@ class ParameterParser :
 
 			# serialize
 			result = '-' + rootName + parameter.name + ' ' + s
-				
+
 		return result
 
 	@classmethod
 	## Registers a parser and serialiser for a new Parameter type.
 	def registerType( cls, typeId, parser, serialiser ) :
-	
+
 		cls.__typesToParsers[typeId] = parser
 		cls.__typesToSerialisers[typeId] = serialiser
-		
+
 	@classmethod
 	## Registers a default parser and serialiser for a Parameter type
 	# for which repr( parameter.getValue() ) yields a valid python statement.
 	def registerTypeWithRepr( cls, typeId ) :
-	
+
 		cls.__typesToParsers[typeId] = None
-		cls.__typesToSerialisers[typeId] = _serialiseUsingRepr	
+		cls.__typesToSerialisers[typeId] = _serialiseUsingRepr
 
 ###################################################################################################################
 # quoting and unquoting methods used in string parameters
@@ -213,7 +213,7 @@ def __strUnquote( txt ):
 	return txt
 
 def __strQuote( txt ):
-	
+
 	quotedTxt = quote( txt )
 	# if the string has special characters, we force the quoted version. Also if it's empty string or starts with '-' or 'read:' to
 	# avoid confusion with the parser options, parameter names and O.S. parse errors.
@@ -296,7 +296,7 @@ def __parseNumericCompound( dataType, elementType, n, integer, args, parameter )
 			except :
 				raise SyntaxError( "Expected %d float values." % n )
 
-	parameter.setValidatedValue( dataType( elementType( *values ) ) )	
+	parameter.setValidatedValue( dataType( elementType( *values ) ) )
 
 def __parseBox( dataType, boxType, elementType, integer, args, parameter ) :
 
@@ -362,7 +362,7 @@ def __parseBoolArray( args, parameter ) :
 		"on" : True,
 		"off" : False,
 	}
-	
+
 	done = False
 	while len( args ) and not done :
 		a = args[0]
@@ -376,7 +376,7 @@ def __parseBoolArray( args, parameter ) :
 				del args[0]
 			except :
 				done = True
-				
+
 	parameter.setValidatedValue( d )
 
 def __parseNumericArray( dataType, integer, args, parameter ) :
@@ -409,7 +409,7 @@ def __serialiseStringArray( parameter ) :
 
 	result = []
 	for i in parameter.getValue() :
-		
+
 #		result.append( "'" + __strQuote(i) + "'" )
 		result.append( "'" + i + "'" )
 
@@ -420,7 +420,7 @@ def __serialiseUsingStr( parameter ) :
 
 def _serialiseUsingRepr( parameter ) :
 	return "'python:" + repr( parameter.getValidatedValue() ) + "'"
-			
+
 ParameterParser.registerType( IECore.BoolParameter.staticTypeId(), __parseBool, __serialiseUsingStr )
 ParameterParser.registerType( IECore.IntParameter.staticTypeId(), ( lambda args, parameter : __parseNumeric( IECore.IntData, True, args, parameter ) ), __serialiseUsingStr )
 ParameterParser.registerType( IECore.FloatParameter.staticTypeId(), ( lambda args, parameter : __parseNumeric( IECore.FloatData, False, args, parameter ) ), __serialiseUsingStr )
@@ -456,5 +456,5 @@ ParameterParser.registerType( IECore.Box2iParameter.staticTypeId(), ( lambda arg
 ParameterParser.registerType( IECore.Box3iParameter.staticTypeId(), ( lambda args, parameter : __parseBox( IECore.Box3iData, IECore.Box3i, IECore.V3i, True, args, parameter ) ), __serialiseUsingStr )
 ParameterParser.registerType( IECore.SplineffParameter.staticTypeId(), None, _serialiseUsingRepr )
 ParameterParser.registerType( IECore.SplinefColor3fParameter.staticTypeId(), None, _serialiseUsingRepr )
-		
+
 __all__ = [ "ParameterParser" ]

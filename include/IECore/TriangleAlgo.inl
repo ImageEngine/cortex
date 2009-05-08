@@ -53,7 +53,7 @@ typename VectorTraits<Vec>::BaseType triangleArea( const Vec &v0, const Vec &v1,
 template<class Vec>
 Vec triangleNormal( const Vec &v0, const Vec &v1, const Vec &v2 )
 {
-	Vec n = (v1-v0).cross(v2-v0);	
+	Vec n = (v1-v0).cross(v2-v0);
 	vecNormalize( n );
 	return n;
 }
@@ -79,12 +79,12 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 
 	Vec triOrigin = v0;
 	Vec triEdge0, triEdge1;
-	
+
 	vecSub( v1, v0, triEdge0 );
 	vecSub( v2, v0, triEdge1 );
-	
+
 	Vec kDiff;
-	vecSub( triOrigin, p, kDiff );	
+	vecSub( triOrigin, p, kDiff );
 
 	Real a00 = vecDot( triEdge0, triEdge0 );
 	Real a01 = vecDot( triEdge0, triEdge1 );
@@ -330,11 +330,11 @@ template<class Vec>
 int triangleBarycentricFeature( const Vec &barycentric, typename VectorTraits<Vec>::BaseType tolerance )
 {
 	typedef typename VectorTraits<Vec>::BaseType Real;
-	
+
 	bool bx = VectorTraits<Vec>::get( barycentric, 0 ) > tolerance;
 	bool by = VectorTraits<Vec>::get( barycentric, 1 ) > tolerance;
 	bool bz = VectorTraits<Vec>::get( barycentric, 2 ) > tolerance;
-	
+
 	if (bx && by && bz)
 	{
 		return 0;
@@ -363,18 +363,18 @@ int triangleBarycentricFeature( const Vec &barycentric, typename VectorTraits<Ve
 	{
 		assert(bz);
 		return 2;
-	}	
+	}
 }
 
 template<class Vec>
 int triangleClosestFeature( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p )
 {
 	typedef typename VectorTraits<Vec>::BaseType Real;
-	
-	Imath::Vec3<Real> barycentric;	
+
+	Imath::Vec3<Real> barycentric;
 	triangleClosestPoint( v0, v1, v2, p, barycentric);
-	
-	return triangleBarycentricFeature( barycentric );	
+
+	return triangleBarycentricFeature( barycentric );
 }
 
 
@@ -383,7 +383,7 @@ template<class Vec>
 bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p )
 {
 	typedef typename VectorTraits<Vec>::BaseType Real;
-			
+
 	Vec a = v2 - v0;
 	Vec b = v1 - v0;
 	Vec c = p - v0;
@@ -395,7 +395,7 @@ bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const V
 	Real dotBC = b.dot( c );
 
 	Real d = Real( 1 ) / ( dotAA * dotBB - dotAB * dotAB );
-	
+
 	Real u = (dotBB * dotAC - dotAB * dotBC) * d;
 	if( u < Real( 0 ) || u > Real( 1 ) )
 	{
@@ -406,8 +406,8 @@ bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const V
 	if( v < Real( 0 ) || u + v > Real( 1 ) )
 	{
 		return false;
-	} 
-	
+	}
+
 	return true;
 }
 

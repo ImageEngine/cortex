@@ -96,6 +96,6 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindToGLCameraConverter();
 	bindAlphaTexture();
 	bindLuminanceTexture();
-	
+
 	def( "init", &IECoreGL::init );
 }

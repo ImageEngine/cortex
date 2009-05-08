@@ -53,12 +53,12 @@ IE_CORE_FORWARDDECLARE( Object );
 	private :																											\
 		static const IECore::Object::TypeDescription<TYPENAME> m_typeDescription;										\
 	public :																											\
-	
+
 #define IE_CORE_DECLAREABSTRACTOBJECTTYPEDESCRIPTION( TYPENAME )														\
 	private :																											\
 		static const IECore::Object::AbstractTypeDescription<TYPENAME> m_typeDescription;								\
 	public :																											\
-		
+
 #define IE_CORE_DECLAREOBJECTMEMBERFNS( TYPENAME )																		\
 	public :																											\
 		TYPENAME::Ptr copy() const { return boost::static_pointer_cast<TYPENAME>( Object::copy() ); }	\
@@ -91,7 +91,7 @@ IE_CORE_FORWARDDECLARE( Object );
 
 #define IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( TYPENAME )																	\
 	const IECore::Object::TypeDescription<TYPENAME> TYPENAME::m_typeDescription											\
-	
+
 #define IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( TYPENAME )															\
 	const IECore::Object::AbstractTypeDescription<TYPENAME> TYPENAME::m_typeDescription									\
 
@@ -99,13 +99,13 @@ IE_CORE_FORWARDDECLARE( Object );
 class Object : public RunTimeTyped, private boost::noncopyable
 {
 	public:
-		
+
 		Object();
-		
+
 		virtual ~Object();
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( Object, RunTimeTyped );
-		
+
 		//! @name Object interface
 		/// The following functions define the interface to which
 		/// all Object subclasses must adhere. Note that the
@@ -119,7 +119,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// Returns a deep copy of this object. In subclasses an
 		/// identical function is provided which returns a pointer
 		/// to the subclass rather than to this base class.
-		ObjectPtr copy() const;		
+		ObjectPtr copy() const;
 		/// Saves the object in the current directory of ioInterface, in
 		/// a subdirectory with the specified name.
 		void save( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name ) const;
@@ -143,7 +143,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// Returns the number of bytes this instance occupies in memory.
 		size_t memoryUsage() const;
 		//@}
-				
+
 		//! @name Object factory
 		/// The following static functions provide the ability to
 		/// create an Object of a given type or typeId, as well
@@ -152,10 +152,10 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		//@{
 		/// Returns true if typeId is a valid registered Object type.
 		static bool isType( TypeId typeId );
-		/// Returns true if typeName is a valid registered Object type.	
+		/// Returns true if typeName is a valid registered Object type.
 		static bool isType( const std::string &typeName );
 		/// Returns true if typeId is a valid registered abstract Object type -
-		/// one which cannot be instantiated with create().		
+		/// one which cannot be instantiated with create().
 		static bool isAbstractType( TypeId typeId );
 		/// As above but taking a type name.
 		static bool isAbstractType( const std::string &typeName );
@@ -164,20 +164,20 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		static ObjectPtr create( TypeId typeId );
 		/// Creates an instance of an object of the specified type.
 		/// Throws an Exception if typeName is not a valid type.
-		static ObjectPtr create( const std::string &typeName );		
+		static ObjectPtr create( const std::string &typeName );
 		/// Loads an object previously saved with the given name in the current directory
 		/// of ioInterface.
-		static ObjectPtr load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name );		
+		static ObjectPtr load( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &name );
 		//@}
-		
+
 		typedef ObjectPtr (*CreatorFn)( void *data );
-		
+
 		/// Register a new Object-derived type with the system. The specified void* data is passed into the creator function
 		static void registerType( TypeId typeId, const std::string &typeName, CreatorFn creator, void *data = 0 );
 
-	
+
 	protected :
-		
+
 		/// Instantiating an instance of TypeDescription<YourClass>
 		/// causes the registration of your class with the IECore type
 		/// system. It's essential that all subclasses of
@@ -189,7 +189,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 			public :
 				/// Registers the object using its static typeId and static typename
 				TypeDescription();
-				
+
 				/// Registers the object using a specified typeId and typename
 				TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName );
 			private :
@@ -205,7 +205,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 			public :
 				AbstractTypeDescription();
 		};
-				
+
 		/// A simple class used in the copyFrom() method to provide
 		/// a means of copying Object derived member data while
 		/// ensuring the uniqueness of copies of objects in the case
@@ -219,16 +219,16 @@ class Object : public RunTimeTyped, private boost::noncopyable
 			private :
 				std::map<ConstObjectPtr, ObjectPtr> m_copies;
 		};
-		
+
 		/// Must be implemented in all subclasses to make a deep copy of
 		/// all member data, after calling BaseClass::copyFrom() to allow
 		/// the base class to do the same. When making copies of held member
 		/// data derived from Object, you /must/ use the context object provided,
 		/// rather than calling copy() or copyFrom() yourself.
-		/// \todo Think about adding public access to copyFrom() by providing a small 
+		/// \todo Think about adding public access to copyFrom() by providing a small
 		/// method which creates a new CopyContext, similar to how copy, load, and save work.
 		virtual void copyFrom( ConstObjectPtr other, CopyContext *context ) = 0;
-		
+
 		/// The class provided to the save() method implemented by subclasses.
 		class SaveContext
 		{
@@ -258,20 +258,20 @@ class Object : public RunTimeTyped, private boost::noncopyable
 				/// using this container, it provides performance benefits only in extreme cases!
 				IndexedIOInterfacePtr rawContainer();
 			private :
-				
+
 				typedef std::map<ConstObjectPtr, IndexedIO::EntryID> SavedObjectMap;
 				typedef std::map<IndexedIOInterfacePtr, IndexedIO::EntryID> ContainerRootsMap;
-				
+
 				SaveContext( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &root,
 					boost::shared_ptr<SavedObjectMap> savedObjects, boost::shared_ptr<ContainerRootsMap> containerRoots );
-				
+
 				IndexedIOInterfacePtr m_ioInterface;
 				IndexedIO::EntryID m_root;
 				boost::shared_ptr<SavedObjectMap> m_savedObjects;
 				boost::shared_ptr<ContainerRootsMap> m_containerRoots;
-		
+
 		};
-		
+
 		/// The class provided to the load() method implemented by subclasses.
 		class LoadContext : public RefCounted
 		{
@@ -294,20 +294,20 @@ class Object : public RunTimeTyped, private boost::noncopyable
 			private :
 				typedef std::map< IndexedIO::EntryID, ObjectPtr> LoadedObjectMap;
 				typedef std::map<IndexedIOInterfacePtr, IndexedIO::EntryID> ContainerRootsMap;
-				
+
 				LoadContext( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &root,
 					boost::shared_ptr<LoadedObjectMap> loadedObjects, boost::shared_ptr<ContainerRootsMap> containerRoots );
-				
+
 				ObjectPtr loadObjectOrReference( IndexedIOInterfacePtr container, const IndexedIO::EntryID &name );
 				ObjectPtr loadObject( const IndexedIO::EntryID &path );
-				
+
 				IndexedIOInterfacePtr m_ioInterface;
 				IndexedIO::EntryID m_root;
 				boost::shared_ptr<LoadedObjectMap> m_loadedObjects;
 				boost::shared_ptr<ContainerRootsMap> m_containerRoots;
 		};
 		IE_CORE_DECLAREPTR( LoadContext );
-		
+
 		/// Must be implemented in all derived classes. Implementations should first call the parent class
 		/// save() method, then call context->container() before filling the returned container with
 		/// their member data. Classes with no member data may omit the call to container(), resulting
@@ -320,7 +320,7 @@ class Object : public RunTimeTyped, private boost::noncopyable
 		/// by any of the core types. A call to context->container() will throw an Exception if the corresponding
 		/// save() method did not create a container.
 		virtual void load( LoadContextPtr context ) = 0;
-		
+
 		/// The class provided to the memoryUsage() virtual method implemented
 		/// by subclasses.
 		class MemoryAccumulator
@@ -341,17 +341,17 @@ class Object : public RunTimeTyped, private boost::noncopyable
 				std::set<const void *> m_accumulated;
 				size_t m_total;
 		};
-		
+
 		/// Must be implemented in all derived classes to specify the amount of memory they are
 		/// using. An implementation must add it's memory usage to the accumulator before calling
 		/// memoryUsage() on its base class.
 		virtual void memoryUsage( MemoryAccumulator &accumulator ) const = 0;
-		
+
 	private :
-				
+
 		struct TypeInformation;
 		static TypeInformation *typeInformation();
-		
+
 		static const AbstractTypeDescription<Object> m_typeDescription;
 
 		static const unsigned int m_ioVersion;

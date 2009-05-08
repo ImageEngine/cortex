@@ -45,15 +45,15 @@ template<typename From>
 class ToMayaMatrixDataConverter : public ToMayaObjectConverter
 {
 	public:
-	
+
 		ToMayaMatrixDataConverter( IECore::ConstObjectPtr object );
-		
+
 	protected:
-	
+
 		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const;
-		
+
 		typedef ToMayaObjectConverterDescription<ToMayaMatrixDataConverter> Description;
-		static Description g_description;		
+		static Description g_description;
 };
 
 }

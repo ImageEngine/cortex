@@ -39,25 +39,25 @@ import unittest
 import IECore
 
 class CurveExtrudeOpTest( unittest.TestCase ) :
-	
+
 	def testIt( self ) :
-	
+
 		c = IECore.Reader.create( "test/IECore/data/cobFiles/torusCurves.cob" ).read()
 		assert( c.arePrimitiveVariablesValid() )
-		
+
 		op = IECore.CurveExtrudeOp()
-		
+
 		patchGroup = op(
 			curves = c,
 			resolution = IECore.V2i( 6, 30 )
 		)
-		
+
 		self.assertEqual( len( patchGroup.children() ), 193 )
-		
+
 		for child in patchGroup.children() :
-		
+
 			self.assert_( child.arePrimitiveVariablesValid() )
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

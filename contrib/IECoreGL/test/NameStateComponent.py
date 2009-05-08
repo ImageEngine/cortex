@@ -43,16 +43,16 @@ init( False )
 class TestNameStateComponent( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		n = NameStateComponent()
 		self.assertEqual( n.name(), "unnamed" )
 		n = NameStateComponent()
 		self.assertEqual( n.name(), "unnamed" )
-	
+
 		n = NameStateComponent( "sphere" )
 		self.assertEqual( n.name(), "sphere" )
 		n = NameStateComponent( "sphere" )
 		self.assertEqual( n.name(), "sphere" )
-	
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

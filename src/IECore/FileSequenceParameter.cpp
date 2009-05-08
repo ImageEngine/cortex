@@ -55,9 +55,9 @@ FileSequenceParameter::FileSequenceParameter()
 {
 }
 
-FileSequenceParameter::FileSequenceParameter( 
-	const std::string &name, const std::string &description, const std::string &defaultValue, 
-	bool allowEmptyString, CheckType check, const StringParameter::PresetsContainer &presets, bool presetsOnly, 
+FileSequenceParameter::FileSequenceParameter(
+	const std::string &name, const std::string &description, const std::string &defaultValue,
+	bool allowEmptyString, CheckType check, const StringParameter::PresetsContainer &presets, bool presetsOnly,
 	ConstCompoundObjectPtr userData, const ExtensionList &extensions
 ) : PathParameter( name, description, defaultValue, allowEmptyString, check, presets, presetsOnly, userData ),
     m_extensions( extensions )
@@ -82,20 +82,20 @@ bool FileSequenceParameter::valueValid( ConstObjectPtr value, std::string *reaso
 {
 	/// we can't call PathParameter::valueValid() because that would do existence checking on
 	/// our path specifier with the # characters in it, and that would yield the wrong results
-	/// so we call StringParameter.valueValid and do the rest ourselves.	
+	/// so we call StringParameter.valueValid and do the rest ourselves.
 	if ( !StringParameter::valueValid( value ) )
 	{
 		return false;
 	}
-	
+
 	ConstStringDataPtr stringDataValue = assertedStaticCast< const StringData >( value );
 	const std::string &stringValue = stringDataValue->readable();
-		
+
 	if ( allowEmptyString() && !stringValue.size() )
 	{
 		return true;
 	}
-	
+
 	if ( ! boost::regex_match( stringValue, FileSequence::fileNameValidator() ) )
 	{
 		if ( reason )
@@ -104,7 +104,7 @@ bool FileSequenceParameter::valueValid( ConstObjectPtr value, std::string *reaso
 		}
 		return false;
 	}
-	
+
 	FileSequencePtr fileSequence = 0;
 	try
 	{
@@ -118,17 +118,17 @@ bool FileSequenceParameter::valueValid( ConstObjectPtr value, std::string *reaso
 		}
 		return false;
 	}
-	
+
 	assert( fileSequence );
-	
+
 	if ( m_extensions.size() )
-	{	
+	{
 		std::string ext = boost::filesystem::extension( fileSequence->getFileName() );
 		if ( ext.size() && ext[0] == '.' )
 		{
 			ext = ext.substr( 1, ext.size() - 1 );
 		}
-	
+
 		if ( std::find( m_extensions.begin(), m_extensions.end(), ext ) == m_extensions.end() )
 		{
 			if ( reason )
@@ -138,12 +138,12 @@ bool FileSequenceParameter::valueValid( ConstObjectPtr value, std::string *reaso
 			return false;
 		}
 	}
-	
+
 	if ( mustExist() )
 	{
 		FileSequencePtr s = 0;
 		ls( fileSequence->getFileName(), s );
-		
+
 		if ( !s )
 		{
 			if ( reason )
@@ -157,7 +157,7 @@ bool FileSequenceParameter::valueValid( ConstObjectPtr value, std::string *reaso
 	{
 		FileSequencePtr s = 0;
 		ls( fileSequence->getFileName(), s );
-		
+
 		if ( s )
 		{
 			if ( reason )
@@ -167,51 +167,51 @@ bool FileSequenceParameter::valueValid( ConstObjectPtr value, std::string *reaso
 			return false;
 		}
 	}
-	
+
 	return true;
 }
-		
+
 void FileSequenceParameter::setFileSequenceValue( ConstFileSequencePtr fileSequence )
 {
 	//// \todo Don't throw away the FrameList here!
 	setValue( new StringData( fileSequence->getFileName() ) );
 }
-		
+
 FileSequencePtr FileSequenceParameter::getFileSequenceValue() const
 {
 	const std::string &fileSequenceStr = getTypedValue();
-	
+
 	if ( fileSequenceStr.find_first_of( ' ' ) == std::string::npos )
 	{
 		FileSequencePtr result = 0;
 		ls( fileSequenceStr, result );
 		return result;
 	}
-	
+
 	return parseFileSequence( fileSequenceStr );
 }
 
 FileSequencePtr FileSequenceParameter::parseFileSequence( const std::string &fileSequenceStr ) const
 {
 	std::string fileSequenceCopy = fileSequenceStr;
-	
+
 	std::string::size_type spaceIndex = fileSequenceCopy.find_first_of( " " );
-	
+
 	bool found = false;
-	
+
 	std::string filename = fileSequenceStr;
-	
+
 	FrameListPtr frameList = FrameList::parse( "" );
-	
+
 	while ( !found && spaceIndex != std::string::npos )
 	{
-		
+
 		std::string head = fileSequenceStr.substr( 0, spaceIndex );
-		std::string tail = fileSequenceStr.substr( spaceIndex+1, fileSequenceStr.size() - spaceIndex - 1 );		
+		std::string tail = fileSequenceStr.substr( spaceIndex+1, fileSequenceStr.size() - spaceIndex - 1 );
 		assert( head + " " + tail == fileSequenceStr );
-		
+
 		filename = head;
-		
+
 		try
 		{
 			frameList = FrameList::parse( tail );
@@ -219,17 +219,17 @@ FileSequencePtr FileSequenceParameter::parseFileSequence( const std::string &fil
 		}
 		catch ( Exception &e )
 		{
-			fileSequenceCopy = fileSequenceCopy.substr( 0, spaceIndex ) 
+			fileSequenceCopy = fileSequenceCopy.substr( 0, spaceIndex )
 				+ "*"
 				+ fileSequenceCopy.substr( spaceIndex+1, fileSequenceStr.size() - spaceIndex - 1 )
 			;
-			
+
 			spaceIndex = fileSequenceCopy.find_first_of( " " );
-		}	
+		}
 	}
-	
+
 	return new FileSequence( filename, frameList );
-	
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ void FileSequenceParameter::save( SaveContext *context ) const
 {
 	PathParameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	
+
 	std::string extensions = join( m_extensions, " " );
 	container->write( "extensions", extensions );
 }
@@ -257,7 +257,7 @@ void FileSequenceParameter::load( LoadContextPtr context )
 	PathParameter::load( context );
 	unsigned int v = g_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	m_extensions.clear();
 	std::string extensions;
 	container->read( "extensions", extensions );

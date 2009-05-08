@@ -51,7 +51,7 @@ void bindImageDiffOp()
 	RunTimeTypedClass<ImageDiffOp>()
 		.def( init<>() )
 	;
-	
+
 }
 
 } // namespace IECore

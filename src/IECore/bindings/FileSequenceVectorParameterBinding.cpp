@@ -47,26 +47,26 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, public Wrapper< FileSequenceVectorParameter >
 {
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( FileSequenceVectorParameterWrap );
-	
+
 	protected:
-	
+
 		static FileSequenceVectorParameter::ExtensionList makeExtensions( object extensions )
 		{
 			FileSequenceVectorParameter::ExtensionList result;
-			
+
 			extract<list> ee( extensions );
 			if ( ee.check() )
-			{			
+			{
 				list ext = ee();
-				
+
 				for ( long i = 0; i < len( ext ); i++ )
 				{
 					extract< std::string > ex( ext[i] );
@@ -77,7 +77,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 
 					result.push_back( ex() );
 				}
-			
+
 			}
 			else
 			{
@@ -86,7 +86,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 				{
 					std::string ext = ee();
 					boost::tokenizer< boost::char_separator<char> > t( ext, boost::char_separator<char>( " " ) );
-					
+
 					for ( boost::tokenizer<boost::char_separator<char> >::const_iterator it = t.begin(); it != t.end(); ++it )
 					{
 						result.push_back( *it );
@@ -97,10 +97,10 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 					throw InvalidArgumentException( "FileSequenceVectorParameter: Invalid extensions value" );
 				}
 			}
-			
+
 			return result;
 		}
-		
+
 		static std::vector<std::string> makeDefault( object defaultValue )
 		{
 			try
@@ -111,30 +111,30 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 			{
 				throw InvalidArgumentException( "FileSequenceVectorParameter: Invalid default value" );
 			}
-			
+
 		}
 
 		/// Allow construction from either a list of strings/FileSequences, or a StringVectorData
 		static std::vector<std::string> makeFromObject( object defaultValue )
 		{
 			std::vector<std::string> result;
-		
+
 			extract<list> de( defaultValue );
 			if( de.check() )
 			{
 				list l = de();
-				
+
 				for ( long i = 0; i < len( l ); i++ )
 				{
-					
+
 					extract<std::string> ee( l[i] );
-					
+
 					if ( ee.check() )
 					{
 						result.push_back( ee() );
 					}
 					else
-					{					
+					{
 						extract<FileSequence *> ee( l[i] );
 
 						if ( ee.check() )
@@ -146,10 +146,10 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 							throw InvalidArgumentException( "FileSequenceVectorParameter: Invalid value" );
 						}
 					}
-					
+
 				}
 			}
-			else			
+			else
 			{
 				extract<StringVectorData *> de( defaultValue );
 				if( de.check() )
@@ -161,28 +161,28 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 					throw InvalidArgumentException( "FileSequenceParameter: Invalid value" );
 				}
 			}
-			
+
 			return result;
 		}
-				
+
 	public :
 
-		FileSequenceVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = list(), bool allowEmptyList = true, FileSequenceVectorParameter::CheckType check = FileSequenceVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )	
+		FileSequenceVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = list(), bool allowEmptyList = true, FileSequenceVectorParameter::CheckType check = FileSequenceVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )
 			:	FileSequenceVectorParameter( n, d, makeDefault( dv ), allowEmptyList, check, parameterPresets<FileSequenceVectorParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceVectorParameter >( self, this ) {};
-					
+
 		list getExtensionsWrap() const
 		{
 			FileSequenceVectorParameter::ExtensionList extensions = FileSequenceVectorParameter::getExtensions();
-			
+
 			list result;
 			for ( FileSequenceVectorParameter::ExtensionList::const_iterator it = extensions.begin(); it != extensions.end(); ++it )
 			{
 				result.append( *it );
 			}
-			
+
 			return result;
 		}
-		
+
 		void setExtensionsWrap( object ext )
 		{
 			for ( long i = 0; i < len( ext ); i++)
@@ -190,7 +190,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 				FileSequenceVectorParameter::setExtensions( makeExtensions( ext ) );
 			}
 		}
-		
+
 		void setFileSequenceValuesWrap( list l )
 		{
 			std::vector< FileSequencePtr > seqs;
@@ -204,24 +204,24 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 				else
 				{
 					throw InvalidArgumentException( "FileSequenceVectorParameter: Invalid argument to setFileSequenceValues" );
-				}								
+				}
 			}
-									
-			setFileSequenceValues( seqs );		
+
+			setFileSequenceValues( seqs );
 		}
-		
+
 		list getFileSequenceValuesWrap() const
 		{
 			list r;
-			
+
 			std::vector< FileSequencePtr > sequences;
 			getFileSequenceValues( sequences );
-			
+
 			for ( std::vector< FileSequencePtr >::const_iterator it = sequences.begin(); it != sequences.end(); ++it )
 			{
 				r.append( *it );
 			}
-			
+
 			return r;
 		}
 
@@ -229,31 +229,31 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 };
 
 void bindFileSequenceVectorParameter()
-{	
+{
 
 	RunTimeTypedClass<FileSequenceVectorParameter, FileSequenceVectorParameterWrap::Ptr>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceVectorParameter::CheckType, const object &, bool, CompoundObjectPtr, object > >
-			( 
-				( 
-					arg( "name" ), 
-					arg( "description" ), 
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
 					arg( "defaultValue" ) = list(),
 					arg( "allowEmptyList" ) = true,
-					arg( "check" ) = FileSequenceVectorParameter::DontCare, 
+					arg( "check" ) = FileSequenceVectorParameter::DontCare,
 					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false , 
+					arg( "presetsOnly" ) = false ,
 					arg( "userData" ) = CompoundObject::Ptr( 0 ),
 					arg( "extensions" ) = list()
-				) 
-			) 
+				)
+			)
 		)
-		.def( "getFileSequenceValues", &FileSequenceVectorParameterWrap::getFileSequenceValuesWrap )	
+		.def( "getFileSequenceValues", &FileSequenceVectorParameterWrap::getFileSequenceValuesWrap )
 		.def( "setFileSequenceValues", &FileSequenceVectorParameterWrap::setFileSequenceValuesWrap )
 		.add_property( "extensions",&FileSequenceVectorParameterWrap::getExtensionsWrap, &FileSequenceVectorParameterWrap::setExtensionsWrap )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FileSequenceVectorParameter )
 	;
-	
+
 }
 
 }

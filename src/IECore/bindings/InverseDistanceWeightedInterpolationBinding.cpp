@@ -54,18 +54,18 @@ namespace IECore
 
 template<typename T>
 void bindInverseDistanceWeightedInterpolation(const char *bindName);
-	
+
 void bindInverseDistanceWeightedInterpolation()
 {
 	bindInverseDistanceWeightedInterpolation< InverseDistanceWeightedInterpolationV2ff >("InverseDistanceWeightedInterpolationV2ff");
 	bindInverseDistanceWeightedInterpolation< InverseDistanceWeightedInterpolationV2dd >("InverseDistanceWeightedInterpolationV2dd");
 	bindInverseDistanceWeightedInterpolation< InverseDistanceWeightedInterpolationV3ff >("InverseDistanceWeightedInterpolationV3ff");
 	bindInverseDistanceWeightedInterpolation< InverseDistanceWeightedInterpolationV3dd >("InverseDistanceWeightedInterpolationV3dd");
-	
+
 	bindInverseDistanceWeightedInterpolation< InverseDistanceWeightedInterpolationV2fV2f >("InverseDistanceWeightedInterpolationV2fV2f");
 	bindInverseDistanceWeightedInterpolation< InverseDistanceWeightedInterpolationV2dV2d >("InverseDistanceWeightedInterpolationV2dV2d");
 	bindInverseDistanceWeightedInterpolation< InverseDistanceWeightedInterpolationV3fV3f >("InverseDistanceWeightedInterpolationV3fV3f");
-	bindInverseDistanceWeightedInterpolation< InverseDistanceWeightedInterpolationV3dV3d >("InverseDistanceWeightedInterpolationV3dV3d");	
+	bindInverseDistanceWeightedInterpolation< InverseDistanceWeightedInterpolationV3dV3d >("InverseDistanceWeightedInterpolationV3dV3d");
 }
 
 template<typename T>
@@ -73,42 +73,42 @@ struct InverseDistanceWeightedInterpolationWrapper
 {
 	typedef TypedData<std::vector<typename T::Point> > PointData;
 	IE_CORE_DECLAREPTR( PointData )
-	
+
 	typedef TypedData<std::vector<typename T::Value> > ValueData;
-	IE_CORE_DECLAREPTR( ValueData )	
-	
+	IE_CORE_DECLAREPTR( ValueData )
+
 	T* m_idw;
-	
+
 	PointDataPtr m_points;
-	ValueDataPtr m_values;	
-		
+	ValueDataPtr m_values;
+
 	InverseDistanceWeightedInterpolationWrapper(PointDataPtr points, ValueDataPtr values, unsigned int numNeighbours)
 	{
 		m_points = points->copy();
-		m_values = values->copy();		
+		m_values = values->copy();
 		m_idw = new T(
-			m_points->readable().begin(), 
+			m_points->readable().begin(),
 			m_points->readable().end(),
-			m_values->readable().begin(), 
+			m_values->readable().begin(),
 			m_values->readable().end(),
 			numNeighbours
 		);
 		assert(m_idw);
 	}
-	
+
 	virtual ~InverseDistanceWeightedInterpolationWrapper()
 	{
 		assert(m_idw);
 		delete m_idw;
 	}
-	
+
 	inline typename T::Value call( const typename T::Point &p ) const
 	{
 		assert(m_idw);
 		return (*m_idw)( p );
 	}
-	
-	
+
+
 };
 
 template<typename T>

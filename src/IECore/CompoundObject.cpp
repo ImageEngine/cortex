@@ -39,7 +39,7 @@ using namespace std;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CompoundObject );
 
-const unsigned int CompoundObject::m_ioVersion = 0;	
+const unsigned int CompoundObject::m_ioVersion = 0;
 
 CompoundObject::CompoundObject()
 {

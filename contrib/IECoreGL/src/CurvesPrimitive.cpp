@@ -90,19 +90,19 @@ void CurvesPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 	else
 	{
 		renderRibbons( state, style );
-	}	
+	}
 }
 
 void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) const
 {
 	const V3f *p = &(m_points->readable()[0]);
 	const std::vector<int> &v = m_vertsPerCurve->readable();
-	
+
 	glLineWidth( state->get<GLLineWidth>()->value() );
-	
+
 	if( m_basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
 	{
-		
+
 		glEnableClientState( GL_VERTEX_ARRAY );
 
 			for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++ )
@@ -117,11 +117,11 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 	}
 	else
 	{
-	
+
 		unsigned baseIndex = 0;
 		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++ )
 		{
-		
+
 			unsigned numPoints = *vIt;
 			unsigned numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );
 			unsigned pi = 0;
@@ -131,9 +131,9 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 				const V3f &p1 = p[baseIndex+((pi+1)%numPoints)];
 				const V3f &p2 = p[baseIndex+((pi+2)%numPoints)];
 				const V3f &p3 = p[baseIndex+((pi+3)%numPoints)];
-				
+
 				glBegin( GL_LINE_STRIP );
-				
+
 					unsigned steps = 10; /// \todo Calculate this based on projected size on the screen
 					for( unsigned ti=0; ti<=steps; ti++ )
 					{
@@ -141,15 +141,15 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 						V3f pp = m_basis( t, p0, p1, p2, p3 );
 						glVertex3f( pp[0], pp[1], pp[2] );
 					}
-					
+
 				glEnd();
 				pi += m_basis.step;
 			}
-			
+
 			baseIndex += numPoints;
-		
+
 		}
-		
+
 	}
 }
 
@@ -172,23 +172,23 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 	float halfWidth = m_width/2.0f;
 	const V3f *points = &(m_points->readable()[0]);
 	const std::vector<int> &vertsPerCurve = m_vertsPerCurve->readable();
-	
+
 	V3f cameraCentre = Camera::positionInObjectSpace();
 	V3f cameraView = -Camera::viewDirectionInObjectSpace();
-	bool perspective = Camera::perspectiveProjection();	
-	
+	bool perspective = Camera::perspectiveProjection();
+
 	if( m_basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
 	{
-		
+
 		// linear. implemented separately because for this we don't have to worry about
 		// subdividing etc.
-		
+
 		unsigned basePointIndex = 0;
 		for( std::vector<int>::const_iterator vIt = vertsPerCurve.begin(); vIt!=vertsPerCurve.end(); vIt++ )
 		{
 			unsigned numPoints = *vIt;
 			unsigned numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );
-			
+
 			glBegin( GL_QUAD_STRIP );
 
 				for( unsigned i=0; i<=numSegments; i++ )
@@ -208,19 +208,19 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 						pi1 = clamp( pi1, 0, (int)numPoints-1 );
 						pi2 = clamp( pi2, 0, (int)numPoints-1 );
 					}
-				
+
 					const V3f &p0 = points[basePointIndex+pi0];
 					const V3f &p1 = points[basePointIndex+pi1];
 					const V3f &p2 = points[basePointIndex+pi2];
-					
+
 					V3f vBefore = (p1-p0).normalized();
 					V3f vAfter = (p2-p1).normalized();
-					
+
 					V3f normal;
-					V3f uTangent = uTangentAndNormal( p1, cameraCentre, cameraView, perspective, vBefore + vAfter, normal ); 
-					
+					V3f uTangent = uTangentAndNormal( p1, cameraCentre, cameraView, perspective, vBefore + vAfter, normal );
+
 					float sinTheta = uTangent.dot( vBefore );
-					float cosTheta = sqrt( 1.0f - sinTheta * sinTheta );					
+					float cosTheta = sqrt( 1.0f - sinTheta * sinTheta );
 					uTangent *= halfWidth / cosTheta;
 					glNormal( normal );
 					glVertex( p1 - uTangent );
@@ -228,24 +228,24 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 				}
 
 			glEnd();
-			
+
 			basePointIndex += numPoints;
 		}
-			
+
 	}
 	else
 	{
-	
+
 		unsigned basePointIndex = 0;
 		for( std::vector<int>::const_iterator vIt = vertsPerCurve.begin(); vIt!=vertsPerCurve.end(); vIt++ )
 		{
-		
+
 			unsigned numPoints = *vIt;
 			unsigned numSegments = IECore::CurvesPrimitive::numSegments( m_basis, m_periodic, numPoints );
 			unsigned pi = 0;
-			
+
 			glBegin( GL_QUAD_STRIP );
-							
+
 				V3f lastP( 0 );
 				V3f lastV( 0 );
 				V3f firstP( 0 );
@@ -258,7 +258,7 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 					const V3f &p1 = points[basePointIndex+((pi+1)%numPoints)];
 					const V3f &p2 = points[basePointIndex+((pi+2)%numPoints)];
 					const V3f &p3 = points[basePointIndex+((pi+3)%numPoints)];
-			
+
 					unsigned steps = 10; /// \todo Calculate this based on projected size on the screen
 					bool lastSegment = i==(numSegments-1);
 					unsigned tiLimit = steps - 1;
@@ -304,16 +304,16 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 						}
 						else
 						{
-						
+
 							V3f vAvg = (v + lastV) / 2.0f;
 							V3f normal;
 							V3f uTangent = uTangentAndNormal( lastP, cameraCentre, cameraView, perspective, vAvg, normal );
-							uTangent *= halfWidth;					
-		
+							uTangent *= halfWidth;
+
 							glNormal( normal );
 							glVertex( lastP - uTangent );
 							glVertex( lastP + uTangent );
-							
+
 							if( i==0 && ti==2 )
 							{
 								// save for joining up periodic curves at the end
@@ -321,7 +321,7 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 								firstUTangent = uTangent;
 								firstNormal = normal;
 							}
-							
+
 							if( lastSegment && ti==tiLimit )
 							{
 								// the last point of all.
@@ -348,21 +348,21 @@ void CurvesPrimitive::renderRibbons( ConstStatePtr state, IECore::TypeId style )
 									glVertex( firstP + firstUTangent );
 								}
 							}
-							
+
 						}
-						
+
 						lastP = p;
 						lastV = v;
 					}
 
 					pi += m_basis.step;
 				}
-			
+
 			glEnd();
 			basePointIndex += numPoints;
-		
+
 		}
-		
+
 	}
 
 }

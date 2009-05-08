@@ -39,69 +39,69 @@ import math
 class FontTest( unittest.TestCase ) :
 
 	def testConstructors( self ) :
-	
+
 		f = Font( "test/IECore/data/fonts/Vera.ttf" )
 
 		self.assertRaises( Exception, Font, "notAFont" )
-	
+
 	def test( self ) :
-	
+
 		f = Font( "test/IECore/data/fonts/Vera.ttf" )
-		
+
 		g = f.meshGroup( "hello world" )
 		m = f.mesh( "hello world" )
-		
+
 		self.assert_( g.isInstanceOf( Group.staticTypeId() ) )
 		self.assert_( m.isInstanceOf( MeshPrimitive.staticTypeId() ) )
-						
+
 		v = 0
 		for c in g.children() :
-				
+
 			self.assert_( c.isInstanceOf( Group.staticTypeId() ) )
 			self.assertEqual( len( c.children() ), 1 )
 			self.assert_( c.children()[0].isInstanceOf( MeshPrimitive.staticTypeId() ) )
-			
+
 			v += c.children()[0]["P"].data.size()
-			
+
 		self.assertEqual( v, m["P"].data.size() )
-	
+
 	def testCharBound( self ) :
-	
+
 		f = Font( "test/IECore/data/fonts/Vera.ttf" )
-		
+
 		b = f.bound()
 		for c in range( 0, 128 ) :
-		
+
 			bb = f.bound( chr( c ) )
 			self.assert_( b.contains( bb ) )
-	
+
 	def testImages( self ) :
-	
+
 		f = Font( "test/IECore/data/fonts/Vera.ttf" )
 		f.setResolution( 300 )
-		
+
 		for c in range( 0, 128 ) :
-				
+
 			i = f.image( chr( c ) )
 			self.assert_( i.displayWindow.contains( i.dataWindow ) )
 			self.assert_( len( i ), 1 )
 			self.assert_( "Y" in i )
 			self.assert_( i.channelValid( "Y" ) )
-		
+
 	def testWholeImage( self ) :
-	
+
 		f = Font( "test/IECore/data/fonts/Vera.ttf" )
 		f.setResolution( 50 )
-		
+
 		a = f.image( 'a' )
 		i = f.image()
-		
+
 		self.assertEqual( (a.displayWindow.size().x + 1) * 16, i.displayWindow.size().x + 1 )
 		self.assertEqual( (a.displayWindow.size().y + 1) * 8, i.displayWindow.size().y + 1 )
-		
+
 		self.assert_( len( i ), 1 )
 		self.assert_( "Y" in i )
 		self.assert_( i.channelValid( "Y" ) )
-								
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

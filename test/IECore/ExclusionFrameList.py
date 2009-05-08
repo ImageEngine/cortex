@@ -38,17 +38,17 @@ from IECore import *
 class ExclusionFrameListTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		f = ExclusionFrameList( FrameRange( 1, 10 ), FrameRange( 1, 11, 2 ) )
 		self.assert_( isinstance( f, ExclusionFrameList ) )
 		self.assertEqual( f.asList(), [ 2, 4, 6, 8, 10 ] )
 
 	def testStr( self ) :
-	
+
 		f = ExclusionFrameList( FrameRange( 1, 10 ), FrameRange( 1, 11, 2 ) )
 		self.assert_( isinstance( f, ExclusionFrameList ) )
 		self.assertEqual( str( f ), "1-10!1-11x2" )
-		
+
 	def testRepr( self ) :
 		import IECore
 		f = ExclusionFrameList( FrameRange( 1, 10 ), FrameRange( 1, 11, 2 ) )
@@ -59,11 +59,11 @@ class ExclusionFrameListTest( unittest.TestCase ) :
 		f = FrameList.parse( "20-30!25" )
 		self.assert_( isinstance( f, ExclusionFrameList ) )
 		self.assertEqual( f.asList(), [ 20, 21, 22, 23, 24, 26, 27, 28, 29, 30 ] )
-		
+
 	def testParsingPrecedence( self ) :
-	
+
 		"""CompoundFrameList takes precedence over ExclusionFrameList when parsing."""
-	
+
 		f = FrameList.parse( "1,2,10-15!12,17" )
 		self.assert_( isinstance( f, CompoundFrameList ) )
 		self.assertEqual( f.asList(), [ 1, 2, 10, 11, 13, 14, 15, 17 ] )

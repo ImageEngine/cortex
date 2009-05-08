@@ -62,36 +62,36 @@ ShaderPtr ShaderLoader::load( const std::string &name )
 	{
 		return it->second;
 	}
-	
+
 	path vertexPath = m_searchPaths.find( name + ".vert" );
 	path fragmentPath = m_searchPaths.find( name + ".frag" );
-	
+
 	if( vertexPath.empty() && fragmentPath.empty() )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderLoader::load", boost::format( "Couldn't find \"%s\"." ) % name );
 		return 0;
 	}
-	
+
 	string vertexSrc = "";
 	if( !vertexPath.empty() )
 	{
 		vertexSrc = readFile( vertexPath.string() );
 	}
-	
+
 	string fragmentSrc = "";
 	if( !fragmentPath.empty() )
 	{
 		fragmentSrc = readFile( fragmentPath.string() );
 	}
-	
+
 	if( vertexSrc=="" && fragmentSrc=="" )
 	{
 		return 0;
 	}
-			
+
 	ShaderPtr s = new Shader( vertexSrc, fragmentSrc );
 	m_loadedShaders[name] = s;
-	
+
 	return s;
 }
 
@@ -116,7 +116,7 @@ std::string ShaderLoader::readFile( const std::string &fileName )
 		getline( f, line );
 		result += line + "\n";
 	}
-	
+
 	if( m_preprocess )
 	{
 		try
@@ -128,7 +128,7 @@ std::string ShaderLoader::readFile( const std::string &fileName )
 			Context ctx( result.begin(), result.end(), fileName.c_str() );
 			// set the language so that #line directives aren't inserted (they make the ati shader compiler barf)
 			ctx.set_language( boost::wave::support_normal );
-			
+
 			for( list<path>::const_iterator it=m_preprocessorSearchPaths.paths.begin(); it!=m_preprocessorSearchPaths.paths.end(); it++ )
 			{
 				string p = (*it).string();

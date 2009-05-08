@@ -52,22 +52,22 @@ IE_CORE_FORWARDDECLARE( CompoundObject );
 class AttributeCache : public RefCounted
 {
 	public:
-				
+
 		typedef std::string ObjectHandle;
 		typedef std::string HeaderHandle;
 		typedef std::string AttributeHandle;
-		
+
 		IE_CORE_DECLAREMEMBERPTR( AttributeCache )
-		
+
 		///Open the cache, using the specified open mode
 		AttributeCache( const std::string &filename, IndexedIO::OpenMode mode );
-		
+
 		///Write a piece of data associated with the specified object and attribute to the cache.
-		void write( const ObjectHandle &obj, const AttributeHandle &attr, ObjectPtr data );	
+		void write( const ObjectHandle &obj, const AttributeHandle &attr, ObjectPtr data );
 
 		///Write data associated with the specified header to the cache.
 		void writeHeader( const HeaderHandle &hdr, ObjectPtr data );
-	
+
 		///Read a piece of data associated with the specified object and attribute from the cache.
 		///Throws an exception if the requested data is not present in the cache.
 		ObjectPtr read( const ObjectHandle &obj, const AttributeHandle &attr );
@@ -81,47 +81,47 @@ class AttributeCache : public RefCounted
 		///Throws an exception if the requested header is not present in the cache.
 		ObjectPtr readHeader( const HeaderHandle &hdr );
 
-		///Read all header data present in the cache. 
+		///Read all header data present in the cache.
 		///Creates a CompoundObject with the header names as keys.
 		CompoundObjectPtr readHeader( );
-		
+
 		///Retrieve the list of object handles from the cache
 		void objects(std::vector<ObjectHandle> &objs);
 
 		///Retrieve the list of header handles from the cache
 		void headers(std::vector<HeaderHandle> &hds);
-		
+
 		///Retrieve the list of attribute handles from the specified objects. Throws
 		///an exception if the object is not within the cache.
 		void attributes(const ObjectHandle &obj, std::vector<AttributeHandle> &attrs);
-		
+
 		///Retrieve the list of attribute handles that match the given regex from the specified objects.
 		/// Throws an exception if the object is not within the cache.
 		void attributes(const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs);
 
 		///Determines whether or not the cache contains the specified object
 		bool contains( const ObjectHandle &obj );
-		
+
 		///Determines whether or not the cache contains the specified object and attribute
 		bool contains( const ObjectHandle &obj, const AttributeHandle &attr );
 
 		///Removes an object from the cache file.
 		void remove( const ObjectHandle &obj );
-	
+
 		///Removes an object's attribute from the cache file.
 		void remove( const ObjectHandle &obj, const AttributeHandle &attr );
 
 		///Removes a header from the cache file.
 		void removeHeader( const HeaderHandle &hdr );
-								
+
 	protected:
 
 		IndexedIOInterfacePtr m_io;
-		
+
 };
 
 IE_CORE_DECLAREPTR( AttributeCache );
-	
+
 } // namespace IECore
 
 #endif //IE_CORE_ATTRIBUTECACHE_H

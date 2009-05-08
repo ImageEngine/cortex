@@ -50,26 +50,26 @@ namespace IECore
 class ImageCompositeOp : public ImagePrimitiveOp
 {
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( ImageCompositeOp, ImagePrimitiveOp );
-	
+
 		typedef enum
-		{	
-			Over,			
+		{
+			Over,
 			Max,
 			Min,
 			Multiply,
 		} Operation;
-		
+
 		typedef enum
 		{
 			Premultiplied,
 			Unpremultiplied,
 		} InputMode;
-	
+
 		ImageCompositeOp();
 		virtual ~ImageCompositeOp();
-		
+
 		/// \todo Create a new base class containing a channelNames parameter, shared with ChannelOp?
 		StringVectorParameterPtr channelNamesParameter();
 		ConstStringVectorParameterPtr channelNamesParameter() const;
@@ -82,36 +82,36 @@ class ImageCompositeOp : public ImagePrimitiveOp
 
 		IntParameterPtr operationParameter();
 		ConstIntParameterPtr operationParameter() const;
-				
+
 		IntParameterPtr inputModeParameter();
 		ConstIntParameterPtr inputModeParameter() const;
-		
+
 	protected :
-	
+
 		typedef enum
 		{
 			Union,
 			Intersection
 		} DataWindowResult;
-		
+
 		typedef float (*CompositeFn)( float, float, float, float );
-						
+
 		void composite( CompositeFn fn, DataWindowResult dwr, ImagePrimitivePtr imageB, ConstCompoundObjectPtr operands );
-		
+
 		virtual void modifyTypedPrimitive( ImagePrimitivePtr imageB, ConstCompoundObjectPtr operands );
-		
+
 		StringVectorParameterPtr m_channelNamesParameter;
 		StringParameterPtr m_alphaChannelNameParameter;
 		ImagePrimitiveParameterPtr m_imageAParameter;
 		IntParameterPtr m_operationParameter;
 		IntParameterPtr m_inputModeParameter;
-		
+
 	private :
 		struct ChannelConverter;
-	
+
 		FloatVectorDataPtr getChannelData( ImagePrimitivePtr image, const std::string &channelName, bool mustExist = true );
-		float readChannelData( ConstImagePrimitivePtr image, ConstFloatVectorDataPtr data, const Imath::V2i &pixel );	
-	
+		float readChannelData( ConstImagePrimitivePtr image, ConstFloatVectorDataPtr data, const Imath::V2i &pixel );
+
 };
 
 IE_CORE_DECLAREPTR( ImageCompositeOp );

@@ -48,9 +48,9 @@ namespace IECoreRI
 /// multiple return paths leaving you in the wrong context.
 class ScopedContext : public boost::noncopyable
 {
-	
+
 	public :
-	
+
 		/// Saves the current context and instates the
 		/// specified context with RiContext(). If context
 		/// is RI_NULL then does nothing.
@@ -59,12 +59,12 @@ class ScopedContext : public boost::noncopyable
 		/// the context specified in the constructor was RI_NULL
 		/// in which case it does nothing.
 		~ScopedContext();
-		
+
 	private :
-		
+
 		bool m_contextWasNull;
 		RtContextHandle m_previousContext;
-		
+
 };
 
 } // namespace IECoreRI

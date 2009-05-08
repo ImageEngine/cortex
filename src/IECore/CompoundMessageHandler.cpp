@@ -46,7 +46,7 @@ CompoundMessageHandler::CompoundMessageHandler( const std::set<MessageHandlerPtr
 	: handlers( initialHandlers )
 {
 }
-		
+
 void CompoundMessageHandler::handle( Level level, const std::string &context, const std::string &message )
 {
 	set<MessageHandlerPtr>::iterator it;

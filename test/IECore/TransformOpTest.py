@@ -38,15 +38,15 @@ from IECore import *
 class TestTransformOp( unittest.TestCase ) :
 
 	def testParameterDefaults( self ) :
-		
+
 		o = TransformOp()
-		
+
 		self.assertEqual( o["pointPrimVars"].getValue(), StringVectorData( [ "P" ] ) )
 		self.assertEqual( o["vectorPrimVars"].getValue(), StringVectorData() )
 		self.assertEqual( o["normalPrimVars"].getValue(), StringVectorData( [ "N" ] ) )
 
 	def testTranformation( self ) :
-	
+
 		m = MeshPrimitive.createBox( Box3f( V3f( -1 ), V3f( 1 ) ) )
 		mt = TransformOp()( input=m, matrix = M44fData( M44f.createTranslated( V3f( 1 ) ) ) )
 
@@ -54,4 +54,4 @@ class TestTransformOp( unittest.TestCase ) :
 
 if __name__ == "__main__":
 	unittest.main()
-	
+

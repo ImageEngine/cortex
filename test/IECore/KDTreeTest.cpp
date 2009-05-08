@@ -38,7 +38,7 @@ namespace IECore
 {
 
 void addKDTreeTest(boost::unit_test::test_suite* test)
-{	
+{
 	test->add( new KDTreeTestSuite<10>() );
 	test->add( new KDTreeTestSuite<1500>() );
 }

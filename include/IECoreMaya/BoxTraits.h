@@ -49,7 +49,7 @@ template<>
 struct BoxTraits<MBoundingBox>
 {
 	typedef MPoint BaseType;
-	
+
 	/// Create a box from the minimum and maximum corner points
 	static MBoundingBox create( const MPoint &min, const MPoint &max )
 	{
@@ -62,35 +62,35 @@ struct BoxTraits<MBoundingBox>
 		return box.min();
 	}
 
-	/// Return the box's maximum corner point	
+	/// Return the box's maximum corner point
 	static MPoint max( const MBoundingBox& box )
 	{
 		return box.max();
-	}	
-	
+	}
+
 	/// Return the dimensions of the box
 	static MPoint size( const MBoundingBox& box )
 	{
 		return MPoint( box.width(), box.height(), box.depth() );
 	}
-	
+
 	/// Return the center point of the box
 	static MPoint center( const MBoundingBox& box )
 	{
 		return box.center();
-	}	
-	
+	}
+
 	/// Return true if the box is considered to be empty
 	static bool isEmpty( const MBoundingBox& box )
-	{	
-		return box.width() * box.height() * box.depth() <= Imath::limits<double>::epsilon() ;				
+	{
+		return box.width() * box.height() * box.depth() <= Imath::limits<double>::epsilon() ;
 	}
-	
+
 	/// Modify the box such that it is considered to be empty
 	static void makeEmpty( MBoundingBox& box )
 	{
 		box.clear();
-		
+
 		assert( isEmpty(box) );
 	}
 
@@ -98,29 +98,29 @@ struct BoxTraits<MBoundingBox>
 	static void extendBy( MBoundingBox& box, const MPoint& p )
 	{
 		box.expand( p );
-		
+
 		assert( intersects( box, p ) );
 	}
 
-	/// Enlarge the box to include the given box	
+	/// Enlarge the box to include the given box
 	static void extendBy( MBoundingBox& box, const MBoundingBox& box2 )
 	{
 		box.expand( box2 );
-		
+
 		assert( intersects( box, box2 ) );
 	}
-		
-	/// Return true if the box contains the given box	
+
+	/// Return true if the box contains the given box
 	static bool intersects( const MBoundingBox& box, const MPoint& p )
 	{
 		return box.contains( p );
 	}
-	
+
 	/// Return true if the two boxes intersect
 	static bool intersects( const MBoundingBox& box, const MBoundingBox& box2 )
 	{
 		assert( box.intersects( box2 ) == box2.intersects( box ) );
-		
+
 		return box.intersects( box2 );
 	}
 };

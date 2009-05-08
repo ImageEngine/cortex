@@ -48,7 +48,7 @@ template<typename F, typename T>
 ToMayaObjectConverter::ToMayaObjectConverterDescription< ToMayaArrayDataConverter<F, T> > ToMayaArrayDataConverter<F, T>::g_description( F::staticTypeId(), MArrayTraits<T>::dataType() );
 
 template<typename F, typename T>
-ToMayaArrayDataConverter<F, T>::ToMayaArrayDataConverter( IECore::ConstObjectPtr object ) 
+ToMayaArrayDataConverter<F, T>::ToMayaArrayDataConverter( IECore::ConstObjectPtr object )
 : ToMayaObjectConverter( "ToMayaArrayDataConverter", "Converts IECore::VectorData objects to a Maya object.", object)
 {
 }
@@ -57,24 +57,24 @@ template<typename F, typename T>
 bool ToMayaArrayDataConverter<F, T>::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
-	
+
 	typename F::ConstPtr dataPtr = IECore::runTimeCast<const F>(from);
 	assert( dataPtr );
-	
+
 	typename MArrayTraits<T>::DataFn fnData;
-	
+
 	const typename F::ValueType &v = dataPtr->readable();
-	
+
 	T array;
 	array.setLength( v.size() );
-	
+
 	for (unsigned i = 0; i < v.size(); i++)
 	{
 		array[i] = IECore::convert< typename MArrayTraits<T>::ValueType, typename F::ValueType::value_type >( v[i] );
 	}
-		
+
 	to = fnData.create( array, &s );
-	
+
 	return s;
 }
 

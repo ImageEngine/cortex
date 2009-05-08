@@ -42,7 +42,7 @@ MStatus initializePlugin( MObject obj )
 }
 
 MStatus uninitializePlugin( MObject obj )
-{ 
+{
 	MStatus s;
 	MFnPlugin plugin(obj);
 	IECoreMaya::uninitialize( plugin );

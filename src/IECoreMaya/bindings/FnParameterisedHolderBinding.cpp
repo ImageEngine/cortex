@@ -53,7 +53,7 @@ using namespace boost::python;
 static ParameterisedHolderInterface *interface( MFnDependencyNode *fnDN )
 {
 	assert( fnDN );
-	
+
 	MPxNode *userNode = fnDN->userNode();
 	if( userNode )
 	{
@@ -70,7 +70,7 @@ static ParameterisedHolderInterface *interface( MFnDependencyNode *fnDN )
 static void setParameterised( MFnDependencyNode *fnDN, RunTimeTypedPtr p )
 {
 	assert( fnDN );
-	
+
 	StatusException::throwIfError( interface(fnDN)->setParameterised( p ) );
 }
 
@@ -84,7 +84,7 @@ static void setParameterised2( MFnDependencyNode *fnDN, const std::string &class
 static void updateParameterised( MFnDependencyNode *fnDN )
 {
 	assert( fnDN );
-	
+
 	StatusException::throwIfError( interface(fnDN)->updateParameterised() );
 }
 
@@ -94,35 +94,35 @@ static boost::python::tuple getParameterised( MFnDependencyNode *fnDN )
 
 	std::string className; int classVersion = 0; std::string searchPath;
 	RunTimeTypedPtr p = interface( fnDN )->getParameterised( &className, &classVersion, &searchPath );
-	return boost::python::make_tuple( p, className, classVersion, searchPath );	
+	return boost::python::make_tuple( p, className, classVersion, searchPath );
 }
 
 static void setNodeValues( MFnDependencyNode *fnDN )
 {
 	assert( fnDN );
 
-	StatusException::throwIfError( interface( fnDN )->setNodeValues() );			
+	StatusException::throwIfError( interface( fnDN )->setNodeValues() );
 }
 
 static void setNodeValue( MFnDependencyNode *fnDN, ParameterPtr pa )
-{	
+{
 	assert( fnDN );
-	
-	StatusException::throwIfError( interface( fnDN )->setNodeValue( pa ) );	
+
+	StatusException::throwIfError( interface( fnDN )->setNodeValue( pa ) );
 }
 
 static void setParameterisedValues( MFnDependencyNode *fnDN )
 {
 	assert( fnDN );
 
-	StatusException::throwIfError( interface( fnDN )->setParameterisedValues() );			
+	StatusException::throwIfError( interface( fnDN )->setParameterisedValues() );
 }
 
 static void setParameterisedValue( MFnDependencyNode *fnDN, ParameterPtr pa )
-{	
+{
 	assert( fnDN );
 
-	StatusException::throwIfError( interface( fnDN )->setParameterisedValue( pa ) );	
+	StatusException::throwIfError( interface( fnDN )->setParameterisedValue( pa ) );
 }
 
 static std::string parameterPlug( MFnDependencyNode *fnDN, ParameterPtr pa )
@@ -156,8 +156,8 @@ void IECoreMaya::bindFnParameterisedHolder()
 	def( "_parameterisedHolderSetParameterisedValue", &setParameterisedValue );
 	def( "_parameterisedHolderParameterPlug", &parameterPlug );
 	def( "_parameterisedHolderPlugParameter", &plugParameter );
-	
+
 	PointerFromSWIG<MFnDependencyNode>();
 	PointerFromSWIG<MPlug>();
-	
+
 }

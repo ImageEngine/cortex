@@ -91,12 +91,12 @@ struct DPXImageWriter::ChannelConverter
 	typedef void ReturnType;
 
 	std::string m_channelName;
-	ConstImagePrimitivePtr m_image;	
+	ConstImagePrimitivePtr m_image;
 	Box2i m_dataWindow;
 	unsigned int m_bitShift;
 	std::vector<unsigned int> &m_imageBuffer;
 
-	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, unsigned int bitShift, std::vector<unsigned int> &imageBuffer  ) 
+	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, unsigned int bitShift, std::vector<unsigned int> &imageBuffer  )
 	: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_bitShift( bitShift ), m_imageBuffer( imageBuffer )
 	{
 	}
@@ -107,38 +107,38 @@ struct DPXImageWriter::ChannelConverter
 		assert( dataContainer );
 
 		const typename T::ValueType &data = dataContainer->readable();
-	
+
 		CompoundDataConversion<
-			ScaledDataConversion<typename T::ValueType::value_type, float>, 
-			LinearToCineonDataConversion<float, unsigned int> 
+			ScaledDataConversion<typename T::ValueType::value_type, float>,
+			LinearToCineonDataConversion<float, unsigned int>
 		> converter;
-		
+
 		typedef boost::multi_array_ref< const typename T::ValueType::value_type, 2 > SourceArray2D;
 		typedef boost::multi_array_ref< unsigned int, 2 > TargetArray2D;
-		
+
 		const SourceArray2D sourceData( &data[0], extents[ m_image->getDataWindow().size().y + 1 ][ m_image->getDataWindow().size().x + 1 ] );
 		TargetArray2D targetData( &m_imageBuffer[0], extents[ m_image->getDisplayWindow().size().y + 1 ][ m_image->getDisplayWindow().size().x + 1 ] );
-		
+
 		const Box2i copyRegion = boxIntersection( m_dataWindow, boxIntersection( m_image->getDisplayWindow(), m_image->getDataWindow() ) );
-		
+
 		for ( int y = copyRegion.min.y; y <= copyRegion.max.y ; y++ )
 		{
 			for ( int x = copyRegion.min.x; x <= copyRegion.max.x ; x++ )
-			{				
-				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ] 
-					|= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) << m_bitShift;			
+			{
+				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ]
+					|= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) << m_bitShift;
 			}
 		}
 	};
-	
+
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );
-		
-			throw InvalidArgumentException( ( boost::format( "DPXImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+
+			throw InvalidArgumentException( ( boost::format( "DPXImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
 		}
 	};
 };
@@ -152,7 +152,7 @@ void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	{
 		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
 	}
-	
+
 	/// We'd like RGB to be at the front, in that order, because it seems that not all readers support the channel identifiers!
 	vector<string> desiredChannelOrder;
 	desiredChannelOrder.push_back( "R" );
@@ -178,7 +178,7 @@ void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	}
 
 	assert( names.size() == filteredNames.size() );
-	
+
 	Box2i displayWindow = image->getDisplayWindow();
 
 	int displayWidth  = 1 + displayWindow.size().x;
@@ -223,15 +223,15 @@ void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	boost::posix_time::time_duration time = utc.time_of_day();
 
 	snprintf((char *) fi.create_time,  sizeof( fi.create_time ), "%04d:%02d:%02d:%02d:%02d:%02d:%s",
-	        static_cast<int>( date.year() ), 
-		static_cast<int>( date.month() ), 
+	        static_cast<int>( date.year() ),
+		static_cast<int>( date.month() ),
 		static_cast<int>( date.day() ),
-	        time.hours(), 
-		time.minutes(), 
-		time.seconds(), 
+	        time.hours(),
+		time.minutes(),
+		time.seconds(),
 		"UTC"
 	);
-	
+
 	snprintf((char *) fi.creator, sizeof( fi.creator ), "cortex");
 	snprintf((char *) fi.project, sizeof( fi.project ), "cortex");
 	snprintf((char *) fi.copyright, sizeof( fi.copyright ), "Unknown");
@@ -255,7 +255,7 @@ void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 		ie.ref_low_quantity = 0.0;
 		ie.ref_high_data = 1023;
 		ie.ref_high_quantity = 2.046;
-		
+
 		ie.ref_low_data = asBigEndian<>(ie.ref_low_data);
 		ie.ref_low_quantity = asBigEndian<>(ie.ref_low_quantity);
 		ie.ref_high_data = asBigEndian<>(ie.ref_high_data);
@@ -284,34 +284,34 @@ void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 	{
 		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
 	}
-	
+
 	out.write(reinterpret_cast<char *>(&ii),  sizeof(ii));
 	if ( out.fail() )
 	{
 		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
 	}
-	
+
 	out.write(reinterpret_cast<char *>(&ioi), sizeof(ioi));
 	if ( out.fail() )
 	{
 		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
 	}
-		
+
 	out.write(reinterpret_cast<char *>(&mpf), sizeof(mpf));
 	if ( out.fail() )
 	{
 		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
 	}
-		
+
 	out.write(reinterpret_cast<char *>(&th),  sizeof(th));
 	if ( out.fail() )
 	{
 		throw IOException( "DPXImageWriter: Error writing to " + fileName() );
 	}
-	
+
 	// write the data
 	vector<unsigned int> imageBuffer( displayWidth*displayHeight, 0 );
-	
+
 	int offset = 0;
 	vector<string>::const_iterator i = filteredNames.begin();
 	while (i != filteredNames.end())
@@ -322,7 +322,7 @@ void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 			++i;
 			continue;
 		}
-		
+
 		int bpp = 10;
 		unsigned int shift = (32 - bpp) - (offset*bpp);
 
@@ -331,12 +331,12 @@ void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 		assert( dataContainer );
 
 		ChannelConverter converter( *i, image, dataWindow, shift, imageBuffer );
-		
-		despatchTypedData<			
-			ChannelConverter, 
+
+		despatchTypedData<
+			ChannelConverter,
 			TypeTraits::IsNumericVectorTypedData,
 			ChannelConverter::ErrorHandler
-		>( dataContainer, converter );	
+		>( dataContainer, converter );
 
 		++i;
 		++offset;

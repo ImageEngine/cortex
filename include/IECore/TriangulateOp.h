@@ -55,22 +55,22 @@ class TriangulateOp : public TypedPrimitiveOp<MeshPrimitive>
 		virtual ~TriangulateOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( TriangulateOp, MeshPrimitiveOp );
-		
+
 		BoolParameterPtr throwExceptionsParameter();
-		ConstBoolParameterPtr throwExceptionsParameter() const;		
-		
+		ConstBoolParameterPtr throwExceptionsParameter() const;
+
 		FloatParameterPtr toleranceParameter();
 		ConstFloatParameterPtr toleranceParameter() const;
 
 	protected:
-	
+
 		struct TriangulateFn;
-	
+
 		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
-		
+
 		BoolParameterPtr m_throwExceptionsParameter;
 		FloatParameterPtr m_toleranceParameter;
-	
+
 };
 
 IE_CORE_DECLAREPTR( TriangulateOp );

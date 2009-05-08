@@ -55,59 +55,59 @@ MeshPrimitiveImplicitSurfaceOp::MeshPrimitiveImplicitSurfaceOp() : MeshPrimitive
 		"The threshold at which to generate the surface.",
 		0.0
 	);
-        
+
 	m_resolutionParameter = new V3iParameter(
 		"resolution",
 		"The resolution",
 		V3i( 10, 10, 10 )
 	);
-        
+
 	m_boundExtendParameter = new FloatParameter(
 		"boundExtend",
 		"The bound's radius, even if calculated by automatic bounding, is increased by this amount.",
 		0.05,
 		0.0
 	);
-	
+
 	m_automaticBoundParameter = new BoolParameter(
 		"automaticBound",
 		"Enable to calculate the bound automatically. Disable to specify an explicit bound.",
 		true
-	);		
-	
+	);
+
 	m_boundParameter = new Box3fParameter(
 		"bound",
 		"The bound",
 		Box3f( V3d( -1, -1, -1 ), V3d( 1, 1, 1 ) )
 	);
-	
+
 	IntParameter::PresetsContainer gridMethodPresets;
 	gridMethodPresets.push_back( IntParameter::Preset( "Resolution", Resolution ) );
 	gridMethodPresets.push_back( IntParameter::Preset( "Division Size", DivisionSize ) );
-	
+
 	m_gridMethodParameter = new IntParameter(
 		"gridMethod",
 		"s",
 		Resolution,
-		Resolution, 
+		Resolution,
 		DivisionSize,
 		gridMethodPresets,
-		true		
+		true
 	);
-	
+
 	m_divisionSizeParameter = new V3fParameter(
 		"divisionSize",
 		"The dimensions of each element in the grid",
 		V3f( 10, 10, 10 )
-	);	
-		
+	);
+
 	parameters()->addParameter( m_thresholdParameter );
-	parameters()->addParameter( m_gridMethodParameter );	
+	parameters()->addParameter( m_gridMethodParameter );
 	parameters()->addParameter( m_resolutionParameter );
-	parameters()->addParameter( m_divisionSizeParameter );	
+	parameters()->addParameter( m_divisionSizeParameter );
 	parameters()->addParameter( m_automaticBoundParameter );
-	parameters()->addParameter( m_boundExtendParameter );					
-	parameters()->addParameter( m_boundParameter );	
+	parameters()->addParameter( m_boundExtendParameter );
+	parameters()->addParameter( m_boundParameter );
 }
 
 MeshPrimitiveImplicitSurfaceOp::~MeshPrimitiveImplicitSurfaceOp()
@@ -190,33 +190,33 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 
 	bool automaticBound = boost::static_pointer_cast<const BoolData>(m_automaticBoundParameter->getValue())->readable();
 	Box3f bound;
-	
+
 	if (automaticBound)
-	{	
+	{
 		bound.makeEmpty();
-		
+
 		PrimitiveVariableMap::const_iterator it = typedPrimitive->variables.find("P");
-		
+
 		if (it != typedPrimitive->variables.end())
 		{
 			const DataPtr &verticesData = it->second.data;
-						
+
 			/// \todo Use depatchTypedData
 			if (runTimeCast<V3fVectorData>(verticesData))
 			{
 				ConstV3fVectorDataPtr p = runTimeCast<V3fVectorData>(verticesData);
-				
-				for ( V3fVectorData::ValueType::const_iterator it = p->readable().begin(); 
+
+				for ( V3fVectorData::ValueType::const_iterator it = p->readable().begin();
 					it != p->readable().end(); ++it)
 				{
 					bound.extendBy( *it );
 				}
 			}
 			else if (runTimeCast<V3dVectorData>(verticesData))
-			{		
+			{
 				ConstV3dVectorDataPtr p = runTimeCast<V3dVectorData>(verticesData);
-				
-				for ( V3dVectorData::ValueType::const_iterator it = p->readable().begin(); 
+
+				for ( V3dVectorData::ValueType::const_iterator it = p->readable().begin();
 					it != p->readable().end(); ++it)
 				{
 					bound.extendBy( *it );
@@ -236,68 +236,68 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 	{
 		bound = boost::static_pointer_cast<const Box3fData>(m_boundParameter->getValue())->readable();
 	}
-	
+
 	float boundExtend = m_boundExtendParameter->getNumericValue();
 	bound.min -= V3f( boundExtend, boundExtend, boundExtend );
-	bound.max += V3f( boundExtend, boundExtend, boundExtend );	
-		
-	
+	bound.max += V3f( boundExtend, boundExtend, boundExtend );
+
+
 	V3i resolution;
 	int gridMethod = m_gridMethodParameter->getNumericValue();
 	if ( gridMethod == Resolution )
-	{	
-		resolution = boost::static_pointer_cast<const V3iData>(m_resolutionParameter->getValue())->readable();	
+	{
+		resolution = boost::static_pointer_cast<const V3iData>(m_resolutionParameter->getValue())->readable();
 	}
 	else if ( gridMethod == DivisionSize )
 	{
 		V3f divisionSize = boost::static_pointer_cast<const V3fData>(m_divisionSizeParameter->getValue())->readable();
-		
+
 		resolution.x = (int)((bound.max.x - bound.min.x) / divisionSize.x);
 		resolution.y = (int)((bound.max.y - bound.min.y) / divisionSize.y);
-		resolution.z = (int)((bound.max.z - bound.min.z) / divisionSize.z);				
-		
+		resolution.z = (int)((bound.max.z - bound.min.z) / divisionSize.z);
+
 	}
 	else
 	{
 		assert( false );
-	}	
-	
-	
+	}
+
+
 	resolution.x = std::max( 1, resolution.x );
 	resolution.y = std::max( 1, resolution.y );
-	resolution.z = std::max( 1, resolution.z );		
-	
+	resolution.z = std::max( 1, resolution.z );
+
 	/// Calculate a tolerance which is half the size of the smallest grid division
 	double cacheTolerance = ((bound.max.x - bound.min.x) / (double)resolution.x) / 2.0;
 	cacheTolerance = std::min(cacheTolerance, ((bound.max.y - bound.min.y) / (double)resolution.y) / 2.0 );
-	cacheTolerance = std::min(cacheTolerance, ((bound.max.z - bound.min.z) / (double)resolution.z) / 2.0 );	
+	cacheTolerance = std::min(cacheTolerance, ((bound.max.z - bound.min.z) / (double)resolution.z) / 2.0 );
 
 	MeshPrimitiveBuilderPtr builder = new MeshPrimitiveBuilder();
 
-	typedef MarchingCubes< CachedImplicitSurfaceFunction< V3f, float > > Marcher ;								
-				
+	typedef MarchingCubes< CachedImplicitSurfaceFunction< V3f, float > > Marcher ;
+
 	MeshPrimitiveImplicitSurfaceFunctionPtr fn = new MeshPrimitiveImplicitSurfaceFunction( typedPrimitive );
 
 	Marcher::Ptr m = new Marcher
-	( 
+	(
 		new CachedImplicitSurfaceFunction< V3f, float >(
-			fn,						
+			fn,
 			cacheTolerance
 		),
 
 		builder
 	);
 
-	m->march( Box3f( bound.min, bound.max ), resolution, threshold );	
+	m->march( Box3f( bound.min, bound.max ), resolution, threshold );
 	MeshPrimitivePtr resultMesh = builder->mesh();
 	typedPrimitive->variables.clear();
-	
-	typedPrimitive->setTopology( 
+
+	typedPrimitive->setTopology(
 		resultMesh->verticesPerFace(),
 		resultMesh->vertexIds()
 	);
 
 	typedPrimitive->variables["P"] = PrimitiveVariable( resultMesh->variables["P"].interpolation, resultMesh->variables["P"].data->copy() );
-	typedPrimitive->variables["N"] = PrimitiveVariable( resultMesh->variables["N"].interpolation, resultMesh->variables["N"].data->copy() );	
-			
+	typedPrimitive->variables["N"] = PrimitiveVariable( resultMesh->variables["N"].interpolation, resultMesh->variables["N"].data->copy() );
+
 }

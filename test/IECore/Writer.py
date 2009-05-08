@@ -36,41 +36,41 @@ import unittest
 import IECore
 
 class TestWriter( unittest.TestCase ) :
-    
+
 	def testSupportedExtensions( self ) :
-	
+
 		e = IECore.Writer.supportedExtensions()
 		for ee in e :
 			self.assert_( type( ee ) is str )
-		
+
 		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob" ]
 		if IECore.withTIFF() :
 			expectedExtensions += [ "tif", "tiff" ]
 		if IECore.withJPEG() :
 			expectedExtensions += [ "jpg", "jpeg" ]
-						
+
 		for ee in expectedExtensions :
 			self.assert_( ee in e )
-			
-		self.assert_( not "obj" in expectedExtensions )	
-			
+
+		self.assert_( not "obj" in expectedExtensions )
+
 		e = IECore.Writer.supportedExtensions( IECore.TypeId.ImageWriter )
 		for ee in e :
-			self.assert_( type( ee ) is str )	
+			self.assert_( type( ee ) is str )
 		expectedImageWriterExtensions = [ "exr", "cin", "dpx", "yuv" ]
 		if IECore.withTIFF() :
 			expectedImageWriterExtensions += [ "tif", "tiff" ]
 		if IECore.withJPEG() :
 			expectedImageWriterExtensions += [ "jpg", "jpeg" ]
-						
+
 		self.assertEqual( set( expectedImageWriterExtensions ), set( e ) )
-			
+
 		self.assert_( not "pdc" in expectedImageWriterExtensions )
-		self.assert_( not "cob" in expectedImageWriterExtensions )		
-			
-				
-							
+		self.assert_( not "cob" in expectedImageWriterExtensions )
+
+
+
 
 if __name__ == "__main__":
-	unittest.main()   
-	        
+	unittest.main()
+

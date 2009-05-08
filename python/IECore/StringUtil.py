@@ -51,4 +51,4 @@ def wrap( text, width ) :
                               ) >= width)],
                    word),
                   text.split(' ')
-                 )	
+                 )

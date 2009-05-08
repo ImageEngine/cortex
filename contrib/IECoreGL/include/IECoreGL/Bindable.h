@@ -55,9 +55,9 @@ class Bindable : public IECore::RunTimeTyped, boost::noncopyable
 
 		Bindable();
 		virtual ~Bindable();
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Bindable, BindableTypeId, IECore::RunTimeTyped );
-		
+
 		/// Binds the object into the current OpenGL state in whatever way
 		/// is relevant to that object (install a shader, make a texture current, enable/disable
 		/// something etc.).

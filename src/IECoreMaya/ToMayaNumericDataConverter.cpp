@@ -64,12 +64,12 @@ ToMayaNumericDataConverter::ToMayaNumericDataConverter( ConstObjectPtr object )
 	:	ToMayaObjectConverter( "ToMayaNumericDataConverter", "Converts IECore::Data types to maya numeric data objects.", object )
 {
 }
-		
+
 bool ToMayaNumericDataConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
 	MFnNumericData fnData( to, &s );
-	
+
 	switch ( fnData.numericType() )
 	{
 		case MFnNumericData::k2Short:
@@ -78,51 +78,51 @@ bool ToMayaNumericDataConverter::doConversion( IECore::ConstObjectPtr from, MObj
 			if (data == 0)
 			{
 				return false;
-			}			
+			}
 
 			s = fnData.setData( (short)data->readable().x, (short)data->readable().y );
-			return (s);			
-		}	
+			return (s);
+		}
 		case MFnNumericData::k3Short:
 		{
 			ConstV3iDataPtr data = runTimeCast<const V3iData>( from );
 			if (data == 0)
 			{
 				return false;
-			}			
+			}
 
 			s = fnData.setData( (short)data->readable().x, (short)data->readable().y, (short)data->readable().z );
-			return (s);			
-		}	
+			return (s);
+		}
 		case MFnNumericData::k2Int:
 		{
 			ConstV2iDataPtr data = runTimeCast<const V2iData>( from );
 			if (data == 0)
 			{
 				return false;
-			}			
+			}
 
 			s = fnData.setData( (int)data->readable().x, (int)data->readable().y );
-			return (s);			
-		}	
+			return (s);
+		}
 		case MFnNumericData::k3Int:
 		{
 			ConstV3iDataPtr data = runTimeCast<const V3iData>( from );
 			if (data == 0)
 			{
 				return false;
-			}			
+			}
 
 			s = fnData.setData( (int)data->readable().x, (int)data->readable().y, (int)data->readable().z );
-			return (s);		
-		}	
+			return (s);
+		}
 		case MFnNumericData::k2Float:
 		{
 			ConstV2fDataPtr data = runTimeCast<const V2fData>( from );
 			if (data == 0)
 			{
 				return false;
-			}			
+			}
 
 			s = fnData.setData( data->readable().x, data->readable().y );
 			return (s);
@@ -133,7 +133,7 @@ bool ToMayaNumericDataConverter::doConversion( IECore::ConstObjectPtr from, MObj
 			if (data == 0)
 			{
 				return false;
-			}			
+			}
 
 			s = fnData.setData( data->readable().x, data->readable().y, data->readable().z );
 			return (s);
@@ -144,30 +144,30 @@ bool ToMayaNumericDataConverter::doConversion( IECore::ConstObjectPtr from, MObj
 			if (data == 0)
 			{
 				return false;
-			}			
+			}
 
 			s = fnData.setData( data->readable().x, data->readable().y );
 			return (s);
-		}		
+		}
 		case MFnNumericData::k3Double:
 		{
 			ConstV3dDataPtr data = runTimeCast<const V3dData>( from );
 			if (data == 0)
 			{
 				return false;
-			}			
+			}
 
 			s = fnData.setData( data->readable().x, data->readable().y, data->readable().z );
 			return (s);
-		}		
-		case MFnNumericData::kDouble:		
-		case MFnNumericData::kFloat:		
-		case MFnNumericData::kInt:		
+		}
+		case MFnNumericData::kDouble:
+		case MFnNumericData::kFloat:
+		case MFnNumericData::kInt:
 		case MFnNumericData::kBoolean:
 		case MFnNumericData::kByte:
 		case MFnNumericData::kChar:
-		case MFnNumericData::kShort:		
+		case MFnNumericData::kShort:
 		default:
 			return false;
-	}	
+	}
 }

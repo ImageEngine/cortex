@@ -52,11 +52,11 @@ class FileNameParameterWrap : public FileNameParameter, public Wrapper<FileNameP
 	public :
 
 		FileNameParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &e, const std::string &dv, bool ae,
-			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud )	
+			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud )
 			:	FileNameParameter( n, d, e, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud ), Wrapper<FileNameParameter>( self, this ) {};
-		
+
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( FileNameParameter );
-		
+
 };
 IE_CORE_DECLAREPTR( FileNameParameterWrap );
 
@@ -83,7 +83,7 @@ void bindFileNameParameter()
 					arg( "name" ),
 					arg( "description" ),
 					arg( "extensions" ) = std::string( "" ),
-					arg( "defaultValue" ) = std::string( "" ),						
+					arg( "defaultValue" ) = std::string( "" ),
 					arg( "allowEmptyString" ) = true,
 					arg( "check" ) = PathParameter::DontCare,
 					arg( "presets" ) = boost::python::tuple(),

@@ -135,13 +135,13 @@ struct JPEGImageWriter::ChannelConverter
 	typedef void ReturnType;
 
 	std::string m_channelName;
-	ConstImagePrimitivePtr m_image;	
+	ConstImagePrimitivePtr m_image;
 	Box2i m_dataWindow;
 	int m_numChannels;
 	int m_channelOffset;
 	std::vector<unsigned char> &m_imageBuffer;
 
-	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, int numChannels, int channelOffset, std::vector<unsigned char> &imageBuffer  ) 
+	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, int numChannels, int channelOffset, std::vector<unsigned char> &imageBuffer  )
 	: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_numChannels( numChannels ), m_channelOffset( channelOffset ), m_imageBuffer( imageBuffer )
 	{
 	}
@@ -153,31 +153,31 @@ struct JPEGImageWriter::ChannelConverter
 
 		const typename T::ValueType &data = dataContainer->readable();
 		ScaledDataConversion<typename T::ValueType::value_type, unsigned char> converter;
-		
+
 		typedef boost::multi_array_ref< const typename T::ValueType::value_type, 2 > SourceArray2D;
 		typedef boost::multi_array_ref< unsigned char, 3 > TargetArray3D;
-		
+
 		const SourceArray2D sourceData( &data[0], extents[ m_image->getDataWindow().size().y + 1 ][ m_image->getDataWindow().size().x + 1 ] );
 		TargetArray3D targetData( &m_imageBuffer[0], extents[ m_image->getDisplayWindow().size().y + 1 ][ m_image->getDisplayWindow().size().x + 1 ][ m_numChannels ] );
-		
+
 		const Box2i copyRegion = boxIntersection( m_dataWindow, boxIntersection( m_image->getDisplayWindow(), m_image->getDataWindow() ) );
-		
+
 		for ( int y = copyRegion.min.y; y <= copyRegion.max.y ; y++ )
 		{
 			for ( int x = copyRegion.min.x; x <= copyRegion.max.x ; x++ )
-			{				
+			{
 				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ][ m_channelOffset ]
-					= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] );			
+					= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] );
 			}
 		}
 	};
-	
+
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
-			throw InvalidArgumentException( ( boost::format( "JPEGImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+			throw InvalidArgumentException( ( boost::format( "JPEGImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
 		}
 	};
 };
@@ -185,10 +185,10 @@ struct JPEGImageWriter::ChannelConverter
 void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
 {
 	vector<string>::const_iterator rIt = std::find( names.begin(), names.end(), "R" );
-	vector<string>::const_iterator gIt = std::find( names.begin(), names.end(), "G" );	
+	vector<string>::const_iterator gIt = std::find( names.begin(), names.end(), "G" );
 	vector<string>::const_iterator bIt = std::find( names.begin(), names.end(), "B" );
-	vector<string>::const_iterator yIt = std::find( names.begin(), names.end(), "Y" );		
-	
+	vector<string>::const_iterator yIt = std::find( names.begin(), names.end(), "Y" );
+
 	int numChannels = 0;
 	J_COLOR_SPACE colorSpace = JCS_RGB;
 	if ( rIt != names.end() && gIt != names.end() && bIt != names.end() )
@@ -198,23 +198,23 @@ void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 			throw IOException("JPEGImageWriter: Unsupported channel names specified");
 		}
 		numChannels = 3;
-	} 
-	else if ( yIt != names.end() ) 
+	}
+	else if ( yIt != names.end() )
 	{
 		if ( rIt != names.end() || gIt != names.end() || bIt != names.end() )
 		{
 			throw IOException("JPEGImageWriter: Unsupported channel names specified");
 		}
-		
+
 		colorSpace = JCS_GRAYSCALE;
 		numChannels = 1;
 	}
-	
+
 	if( !numChannels )
 	{
 		throw IOException( "JPEGImageWriter: Unsupported channel names specified." );
 	}
-	
+
 	assert( numChannels == 1 || numChannels == 3 );
 
 	FILE *outFile = 0;
@@ -261,7 +261,7 @@ void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 
 		int quality = qualityParameter()->getNumericValue();
 		assert( quality >= 0 );
-		assert( quality <= 100 );		
+		assert( quality <= 100 );
 
 		// force baseline-JPEG (8bit) values with TRUE
 		jpeg_set_quality(&cinfo, quality, TRUE);
@@ -289,12 +289,12 @@ void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 			}
 			else if ( name == "G" )
 			{
-				assert( colorSpace == JCS_RGB );			
+				assert( colorSpace == JCS_RGB );
 				channelOffset = 1;
 			}
 			else if ( name == "B" )
 			{
-				assert( colorSpace == JCS_RGB );			
+				assert( colorSpace == JCS_RGB );
 				channelOffset = 2;
 			}
 			else
@@ -305,17 +305,17 @@ void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimiti
 			}
 
 			// get the image channel
-			assert( image->variables.find( name ) != image->variables.end() );			
+			assert( image->variables.find( name ) != image->variables.end() );
 			DataPtr dataContainer = image->variables.find( name )->second.data;
 			assert( dataContainer );
-			
+
 			ChannelConverter converter( *it, image, dataWindow, numChannels, channelOffset, imageBuffer );
-		
-			despatchTypedData<			
-				ChannelConverter, 
+
+			despatchTypedData<
+				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( dataContainer, converter );	
+			>( dataContainer, converter );
 
 		}
 

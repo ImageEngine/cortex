@@ -47,21 +47,21 @@ namespace IECore
 /// A class which can temporarily translate errors from libtiff into longjumps to the given buffer -
 /// it registers a new TIFFErrorHandler in its constructor, restoring the previous state in its destructor.
 /// This works a bit like the error handling present in libjpeg.
-class ScopedTIFFErrorHandler 
+class ScopedTIFFErrorHandler
 {
 	public:
 		ScopedTIFFErrorHandler( );
 		virtual ~ScopedTIFFErrorHandler();
-		
+
 		jmp_buf m_jmpBuffer;
 		std::string m_errorMessage;
-		
+
 	protected:
-		
+
 		static std::vector< ScopedTIFFErrorHandler * > &handlers();
-				
+
 		static void output(const char* module, const char* fmt, va_list ap);
-		
+
 		TIFFErrorHandler m_previousHandler;
 };
 

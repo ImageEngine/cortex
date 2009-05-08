@@ -130,7 +130,7 @@ static void densities( const vector<Vec3<T> > &points, int numNeighbours, T mult
 
 	Tree tree( points.begin(), points.end() );
 	vector<typename Tree::Iterator> neighbours;
-		
+
 	result.resize( points.size() );
 	for( unsigned int i=0; i<points.size(); i++ )
 	{
@@ -164,7 +164,7 @@ ObjectPtr PointDensitiesOp::doOperation( ConstCompoundObjectPtr operands )
 				densities<double>( boost::static_pointer_cast<const V3dVectorData>( points )->readable(), numNeighbours, multiplier, resultT->writable() );
 				result = resultT;
 			}
-			break;	
+			break;
 		default :
 			// should never get here
 			assert( 0 );

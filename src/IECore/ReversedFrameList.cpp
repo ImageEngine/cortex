@@ -56,22 +56,22 @@ ReversedFrameList::~ReversedFrameList()
 void ReversedFrameList::asList( std::vector<Frame> &frames ) const
 {
 	frames.clear();
-	
+
 	m_frameList->asList( frames );
-	
+
 	std::reverse( frames.begin(), frames.end() );
-	
+
 #ifndef NDEBUG
 	std::vector<Frame> origList;
-	m_frameList->asList( origList );	
+	m_frameList->asList( origList );
 	assert( frames.size() == origList.size() );
-#endif	
+#endif
 }
 
 std::string ReversedFrameList::asString() const
 {
 	std::string s = m_frameList->asString();
-	
+
 	if ( s.find_first_of( ',' ) != std::string::npos )
 	{
 		return "(" + s + ")" + suffix();
@@ -98,12 +98,12 @@ std::string ReversedFrameList::suffix()
 }
 
 FrameListPtr ReversedFrameList::parse( const std::string &frameList )
-{	
+{
 	FrameListPtr l = parseForChildList<ReversedFrameList>( frameList );
 	if ( l )
 	{
 		return new ReversedFrameList( l );
 	}
-	
+
 	return 0;
 }

@@ -61,7 +61,7 @@ FromMayaImageConverter::FromMayaImageConverter( MImage &image ) : FromMayaConver
 		"When this is on the depth channel (if present), is added as primitive variable 'Z'",
 		true
 	);
-	
+
 	parameters()->addParameter( m_depthParameter );
 }
 
@@ -80,16 +80,16 @@ BoolParameterPtr FromMayaImageConverter::depthParameter() const
 	return m_depthParameter;
 }
 
-template<typename T> 
+template<typename T>
 void FromMayaImageConverter::writeChannels( ImagePrimitivePtr target, const std::vector< std::string > &channelNames ) const
 {
 	assert( target );
 	unsigned numChannels = m_image.depth() / ( m_image.pixelType() == MImage::kFloat ? sizeof(float) : sizeof(unsigned char) );
 	unsigned width, height;
-	MStatus s = m_image.getSize( width, height );	
+	MStatus s = m_image.getSize( width, height );
 	assert( width );
 	assert( height );
-	
+
 	std::vector< boost::multi_array_ref< float, 2 > > channelArrays;
 
 	for ( std::vector< std::string >::const_iterator it = channelNames.begin(); it != channelNames.end(); ++it )
@@ -105,67 +105,67 @@ void FromMayaImageConverter::writeChannels( ImagePrimitivePtr target, const std:
 	for ( unsigned x = 0; x < width; x++ )
 	{
 		for ( unsigned y = 0; y < height; y++ )
-		{				
+		{
 			for ( unsigned c = 0; c < channelNames.size(); c++ )
-			{	
-				/// Vertical flip, to match Maya					
-				channelArrays[c][height - 1 - y][x] = converter( pixels[y][x][c] );										
-			}				
+			{
+				/// Vertical flip, to match Maya
+				channelArrays[c][height - 1 - y][x] = converter( pixels[y][x][c] );
+			}
 		}
-	}	
+	}
 }
 
 void FromMayaImageConverter::writeDepth( ImagePrimitivePtr target, const float *depth ) const
 {
 	assert( target );
 	unsigned width, height;
-	MStatus s = m_image.getSize( width, height );	
+	MStatus s = m_image.getSize( width, height );
 	assert( width );
 	assert( height );
-	
+
 	boost::multi_array_ref< const float, 2 > depthArray( depth, boost::extents[height][width] );
-	
+
 	FloatVectorDataPtr targetDepth = new FloatVectorData();
 	targetDepth->writable().resize( width * height );
-	
+
 	boost::multi_array_ref< float, 2 > targetDepthArray( &(targetDepth->writable()[0]), boost::extents[height][width] );
 
 	for ( unsigned x = 0; x < width; x++ )
 	{
 		for ( unsigned y = 0; y < height; y++ )
-		{				
-			/// Vertical flip, to match Maya					
-			targetDepthArray[height - 1 - y][x] = depthArray[y][x];													
+		{
+			/// Vertical flip, to match Maya
+			targetDepthArray[height - 1 - y][x] = depthArray[y][x];
 		}
 	}
-	
-	target->variables["Z"] = PrimitiveVariable( PrimitiveVariable::Vertex, targetDepth );	
+
+	target->variables["Z"] = PrimitiveVariable( PrimitiveVariable::Vertex, targetDepth );
 }
 
 ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands ) const
 {
 	assert( operands );
-	
+
 	unsigned width, height;
-	MStatus s = m_image.getSize( width, height );		
-	
+	MStatus s = m_image.getSize( width, height );
+
 	if ( !s || width * height == 0 )
 	{
 		return new ImagePrimitive();
 	}
-		
+
 	Imath::Box2i dataWindow( Imath::V2i( 0, 0 ),Imath::V2i( width - 1 , height - 1 ) );
 	assert( !dataWindow.isEmpty() );
-	
+
 	ImagePrimitivePtr img = new ImagePrimitive( dataWindow, dataWindow );
-	
+
 	std::vector< std::string > channels;
 	if ( m_image.isRGBA() )
 	{
 		channels.push_back( "R" );
 		channels.push_back( "G" );
 		channels.push_back( "B" );
-		channels.push_back( "A" );								
+		channels.push_back( "A" );
 	}
 	else
 	{
@@ -174,46 +174,46 @@ ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands 
 		channels.push_back( "R" );
 		channels.push_back( "A" );
 	}
-	
+
 	unsigned numChannels = m_image.depth() / ( m_image.pixelType() == MImage::kFloat ? sizeof(float) : sizeof(unsigned char) );
 	while ( channels.size() > numChannels )
 	{
 		channels.pop_back();
 	}
-	
+
 	if ( channels.size() < 3 )
 	{
 		throw InvalidArgumentException( "FromMayaImageConverter: MImage has unsupported channel count" );
 	}
 	assert( channels.size() == 3 || channels.size() == 4 );
 	assert( channels.size() <= numChannels );
-			
+
 	for ( std::vector< std::string >::const_iterator it = channels.begin(); it != channels.end(); ++it )
-	{	
+	{
 		FloatVectorDataPtr data = new FloatVectorData();
 		assert( data );
-		
+
 		data->writable().resize( width * height );
-	
+
 		img->variables[ *it ] = PrimitiveVariable( PrimitiveVariable::Vertex, data ) ;
 	}
-		
+
 	switch ( m_image.pixelType() )
 	{
 		case MImage::kFloat :
 			writeChannels<float>( img, channels );
 			break;
 		case MImage::kByte :
-			writeChannels<unsigned char>( img, channels );		
+			writeChannels<unsigned char>( img, channels );
 			break;
-		default :		
+		default :
 			throw InvalidArgumentException( "FromMayaImageConverter: MImage has unknown pixel type" );
 	}
-	
+
 	if ( m_depthParameter->getTypedValue() )
-	{			
+	{
 		if ( m_image.haveDepth() )
-		{	
+		{
 			float *depth = m_image.depthMap();
 			assert( depth );
 			unsigned depthWidth = 0, depthHeight = 0;
@@ -226,11 +226,11 @@ ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands 
 				throw InvalidArgumentException( "FromMayaImageConverter: Different color/depth resolutions" );
 			}
 
-			writeDepth( img, depth );		
+			writeDepth( img, depth );
 		}
 	}
-	
+
 	assert( img->arePrimitiveVariablesValid() );
-	
+
 	return img;
 }

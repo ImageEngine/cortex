@@ -40,7 +40,7 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 struct half_to_float

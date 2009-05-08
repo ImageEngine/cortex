@@ -60,7 +60,7 @@ FrameListParameter::FrameListParameter()
 
 FrameListParameter::FrameListParameter( const std::string &name, const std::string &description, const std::string &defaultValue, bool allowEmptyList,
 			const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
-			: StringParameter( name, description, new StringData( defaultValue ), ::convertPresets( presets ), presetsOnly, userData ), 
+			: StringParameter( name, description, new StringData( defaultValue ), ::convertPresets( presets ), presetsOnly, userData ),
 			m_allowEmptyList( allowEmptyList )
 {
 
@@ -68,39 +68,39 @@ FrameListParameter::FrameListParameter( const std::string &name, const std::stri
 
 FrameListParameter::FrameListParameter( const std::string &name, const std::string &description, StringDataPtr defaultValue, bool allowEmptyList,
 			const ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData  )
-			: StringParameter( name, description, defaultValue, presets, presetsOnly, userData ), 
+			: StringParameter( name, description, defaultValue, presets, presetsOnly, userData ),
 			m_allowEmptyList( allowEmptyList )
 {
 }
 
 FrameListParameter::~FrameListParameter()
 {
-}		
-	
+}
+
 bool FrameListParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
 {
 	if( !StringParameter::valueValid( value, reason ) )
 	{
 		return false;
 	}
-	
+
 	ConstStringDataPtr stringValue = assertedStaticCast<const StringData>( value );
-	
+
 	try
 	{
 		FrameListPtr frameList = FrameList::parse( stringValue->readable() );
 		assert( frameList ); // If we didn't throw an exception, we must have successfully created a FrameList instance
-		
+
 		if ( !m_allowEmptyList && frameList->isInstanceOf( EmptyFrameListTypeId ) )
 		{
 			if ( reason )
 			{
 				*reason = "Value must not be empty.";
 			}
-			
+
 			return false;
 		}
-		
+
 	}
 	catch ( std::exception &e )
 	{
@@ -108,13 +108,13 @@ bool FrameListParameter::valueValid( ConstObjectPtr value, std::string *reason )
 		{
 			*reason = e.what();
 		}
-		
+
 		return false;
 	}
-			
+
 	return true;
 }
-		
+
 void FrameListParameter::setFrameListValue( ConstFrameListPtr frameList )
 {
 	assert( frameList );
@@ -141,7 +141,7 @@ void FrameListParameter::save( SaveContext *context ) const
 {
 	StringParameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	
+
 	unsigned char tmp = m_allowEmptyList;
 	container->write( "allowEmptyList", tmp );
 }
@@ -151,7 +151,7 @@ void FrameListParameter::load( LoadContextPtr context )
 	StringParameter::load( context );
 	unsigned int v = g_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	unsigned char tmp;
 	container->read( "allowEmptyList", tmp );
 	m_allowEmptyList = tmp;

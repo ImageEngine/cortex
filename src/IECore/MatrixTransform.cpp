@@ -49,7 +49,7 @@ MatrixTransform::MatrixTransform( const Imath::M44f &m )
 MatrixTransform::~MatrixTransform()
 {
 }
-		
+
 void MatrixTransform::render( RendererPtr renderer ) const
 {
 	renderer->concatTransform( matrix );

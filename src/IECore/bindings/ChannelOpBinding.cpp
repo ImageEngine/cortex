@@ -46,10 +46,10 @@ namespace IECore
 
 void bindChannelOp()
 {
-	
+
 	RunTimeTypedClass<ChannelOp>()
 	;
-	
+
 }
 
 } // namespace IECore

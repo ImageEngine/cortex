@@ -44,12 +44,12 @@ import IECoreMaya
 class ParameterPanel :
 
 	panels = {}
-	
+
 	@staticmethod
 	def trashDropCallback( dragControl, dropControl, messages, x, y, dragType, container ) :
-	
+
 		if len(messages) == 2 and messages.pop(0) == "ParameterUI" :
-		
+
 			argsDictStr = messages.pop()
 			argsDict = eval( argsDictStr )
 
@@ -57,130 +57,130 @@ class ParameterPanel :
 
 	@staticmethod
 	def newControlDropCallback( dragControl, dropControl, messages, x, y, dragType, container ) :
-				
+
 		if len(messages) == 2 and messages.pop(0) == "ParameterUI" :
-					
+
 			argsDictStr = messages.pop()
 			argsDict = eval( argsDictStr )
-				
-			container.addControl( argsDict['nodeName'], argsDict['longParameterName'] )				
-						
+
+			container.addControl( argsDict['nodeName'], argsDict['longParameterName'] )
+
 
 	class ParameterUIContainer :
-	
+
 		def __init__( self ) :
 
-			self.formLayout = None		
+			self.formLayout = None
 			self.containerLayout = maya.cmds.setParent( query = True )
 			self.parameters = []
 			self.parameterLayouts = {}
-						
+
 			self.restoreParameters = []
-			
+
 		def addControl( self, node, longParameterName ) :
-					
-			fnPH = IECoreMaya.FnParameterisedHolder( node )			
+
+			fnPH = IECoreMaya.FnParameterisedHolder( node )
 			parameterised = fnPH.getParameterised()[0]
 
 			parameter = parameterised.parameters()
 
 			for p in longParameterName.split( '.' ) :
-			
+
 				if p :
 
 					parameter = getattr( parameter, p )
-				
-			assert( self.containerLayout )		
+
+			assert( self.containerLayout )
 			maya.cmds.setParent( self.containerLayout )
-			
+
 			if not ( node, longParameterName ) in self.parameterLayouts:
-	
+
 				n = longParameterName.split(".")
-				
+
 				if type( n ) is list:
-				
-					# Take off the last element (to retrieve the parent parameter name), 
+
+					# Take off the last element (to retrieve the parent parameter name),
 					# because ParameterUI.create will add it again.
 					n.pop()
 					parentParameterName = ".".join( n )
-					
+
 				else :
-				
+
 					parentParameterName = longParameterName
 
-				newLayout = IECoreMaya.ParameterUI.create( 
-					node, 
-					parameter, 
+				newLayout = IECoreMaya.ParameterUI.create(
+					node,
+					parameter,
 					labelWithNodeName = True,
 					longParameterName = parentParameterName,
 					withCompoundFrame = True
 				).layout()
-				
+
 				self.parameters.append( ( node, longParameterName ) )
 				self.parameterLayouts[ ( node, longParameterName ) ] = newLayout
-				
+
 				maya.cmds.file(
 					modified = True
 				)
-			
-						
+
+
 		def removeControl( self, node, longParameterName, deferredUIDeletion = False ) :
-		
+
 			# In case another panel's control has been dropped onto our trash can
 			if not ( node, longParameterName ) in self.parameterLayouts :
-			
-				return		
-		
+
+				return
+
 			layoutToDelete = self.parameterLayouts[ ( node, longParameterName ) ]
-		
+
 			if maya.cmds.layout( layoutToDelete, query = True, exists = True ) :
-		
+
 				if deferredUIDeletion :
 
-					# We don't want to delete the UI in the middle of a drag'n'drop event, it crashes Maya			
+					# We don't want to delete the UI in the middle of a drag'n'drop event, it crashes Maya
 					maya.cmds.evalDeferred( "import maya.cmds as cmds; cmds.deleteUI( '%s', layout = True)" % ( layoutToDelete ) )
 
 				else :
 
-					maya.cmds.deleteUI( '%s' % ( layoutToDelete ), layout = True) 
-		
+					maya.cmds.deleteUI( '%s' % ( layoutToDelete ), layout = True)
+
 			del self.parameterLayouts[ ( node, longParameterName ) ]
-			
+
 			self.parameters.remove( ( node, longParameterName ) )
-			
+
 			maya.cmds.file(
 				modified = True
 			)
-			
-		# We have the "args" argument to allow use in a Maya UI callback, which passes us extra arguments that we don't need	
+
+		# We have the "args" argument to allow use in a Maya UI callback, which passes us extra arguments that we don't need
 		def removeAllControls( self, args = None ) :
-						
+
 			toRemove = list( self.parameters )
-		
+
 			for i in toRemove :
-			
+
 				self.removeControl( i[0], i[1] )
-				
-			assert( len( self.parameters ) == 0 )	
+
+			assert( len( self.parameters ) == 0 )
 			assert( len( self.parameterLayouts ) == 0 )
-			
-		
+
+
 		def add( self, panel ):
-		
+
 			try :
 				self.parameterLayouts = {}
-				
+
 				# If "add" has been called, and we already have some parameters, it means we're been torn-off and should
-				# recreate all our controls in the new window. 
-				
+				# recreate all our controls in the new window.
+
 				if not self.restoreParameters and self.parameters :
-				
+
 					self.restoreParameters = list( self.parameters )
-				
+
 				self.parameters = []
-							
-				maya.cmds.waitCursor( state = True )	
-				
+
+				maya.cmds.waitCursor( state = True )
+
 				menuBar = maya.cmds.scriptedPanel(
 					panel,
 					query = True,
@@ -190,7 +190,7 @@ class ParameterPanel :
 				self.formLayout = maya.cmds.formLayout(
 					numberOfDivisions = 100
 				)
-							
+
 				maya.cmds.setParent(
 					menuBar
 				)
@@ -211,26 +211,26 @@ class ParameterPanel :
 					dropCallback = IECore.curry( ParameterPanel.newControlDropCallback, container = self ),
 					parent = self.formLayout
 				)
-				
+
 				trashCan = maya.cmds.iconTextStaticLabel(
 					image = "smallTrash.xpm",
-					label = "", 
+					label = "",
 					height = 20,
 					dropCallback = IECore.curry( ParameterPanel.trashDropCallback, container = self ),
-					parent = self.formLayout					
+					parent = self.formLayout
 				)
-				
+
 				maya.cmds.rowLayout( parent = scrollPane )
-				
+
 				self.containerLayout = maya.cmds.columnLayout(
 				)
 
-				maya.cmds.formLayout( 
-					self.formLayout, 
-					edit=True, 
+				maya.cmds.formLayout(
+					self.formLayout,
+					edit=True,
 					attachForm = [
-						( trashCan, 'bottom', 5 ), 
-						( trashCan, 'right', 5 ), 
+						( trashCan, 'bottom', 5 ),
+						( trashCan, 'right', 5 ),
 
 						( scrollPane, 'top', 5 ),
 						( scrollPane, 'left', 5 ),
@@ -242,108 +242,108 @@ class ParameterPanel :
 						( trashCan, 'left' ),
 						( trashCan, 'top' )
 					]
-				)				
+				)
 
 				for i in self.restoreParameters :
 
-					self.addControl( i[0], i[1] )	
+					self.addControl( i[0], i[1] )
 
 				self.restoreParameters = []
-				
+
 			except :
-			
+
 				raise
-				
+
 			finally :
-			
-				maya.cmds.waitCursor( state = False )	
-		
+
+				maya.cmds.waitCursor( state = False )
+
 		def delete( self ) :
-		
+
 			self.removeAllControls()
-			
+
 		def init( self ) :
-		
+
 			# Called after a scene has been loaded (or after a "file | new" operation), and "add" has already been called.
-		
+
 			pass
-			
+
 		def remove( self ) :
-		
+
 			# Called before tearing-off
-		
+
 			pass
-					
+
 		def restoreData( self ) :
-		
+
 			version = 1
-		
-			return repr( ( version, self.parameters ) ) 
+
+			return repr( ( version, self.parameters ) )
 
 		def restore( self, data ) :
-			
+
 			self.removeAllControls()
-			
+
 			dataTuple = eval( data )
-			
+
 			version = dataTuple[0]
-				
+
 			self.restoreParameters = dataTuple[1]
-			
+
 			if self.formLayout :
-			
+
 				for i in self.restoreParameters :
 
-					self.addControl( i[0], i[1] )	
+					self.addControl( i[0], i[1] )
 
-				self.restoreParameters = []	
+				self.restoreParameters = []
 
 
 	@staticmethod
 	def create( panel ) :
-		
+
 		ParameterPanel.panels[ panel ] = ParameterPanel.ParameterUIContainer()
-		
-		
-	@staticmethod	
+
+
+	@staticmethod
 	def init( panel ) :
-	
+
 		assert( panel in ParameterPanel.panels )
-		
-		ParameterPanel.panels[ panel ].init()	
-				
-	
-	@staticmethod	
+
+		ParameterPanel.panels[ panel ].init()
+
+
+	@staticmethod
 	def add( panel ) :
-	
+
 		assert( panel in ParameterPanel.panels )
-	
-		ParameterPanel.panels[ panel ].add( panel )		
-		
-	@staticmethod	
+
+		ParameterPanel.panels[ panel ].add( panel )
+
+	@staticmethod
 	def remove( panel ) :
-	
+
 		assert( panel in ParameterPanel.panels )
-		
-		ParameterPanel.panels[ panel ].remove()			
-		
-	@staticmethod	
+
+		ParameterPanel.panels[ panel ].remove()
+
+	@staticmethod
 	def delete( panel ) :
-	
+
 		assert( panel in ParameterPanel.panels )
-		
-		ParameterPanel.panels[ panel ].delete()	
-		
-	@staticmethod	
+
+		ParameterPanel.panels[ panel ].delete()
+
+	@staticmethod
 	def save( panel ) :
-	
+
 		assert( panel in ParameterPanel.panels )
-	
+
 		return 'ieParameterPanelRestore("%s", "%s")' % ( panel, ParameterPanel.panels[ panel ].restoreData() )
-		
-	@staticmethod	
+
+	@staticmethod
 	def restore( panel, data ) :
-	
+
 		assert( panel in ParameterPanel.panels )
-	
-		ParameterPanel.panels[ panel ].restore( data )	
+
+		ParameterPanel.panels[ panel ].restore( data )

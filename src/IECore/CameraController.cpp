@@ -77,7 +77,7 @@ void CameraController::setCamera( CameraPtr camera )
 		m_transform = new MatrixTransform( transform->transform() );
 		m_camera->setTransform( m_transform );
 	}
-	
+
 	m_centreOfInterest = 1;
 }
 
@@ -102,7 +102,7 @@ void CameraController::setResolution( const Imath::V2i &resolution )
 	float oldAspect = (float)oldRes.x/(float)oldRes.y;
 	float badAspect = (float)resolution.x/(float)resolution.y;
 	float yScale = oldAspect / badAspect;
-	
+
 	m_resolution->writable() = V2i( resolution.x, resolution.y );
 	Box2f screenWindow = m_screenWindow->readable();
 	screenWindow.min.y *= yScale;
@@ -136,19 +136,19 @@ void CameraController::frame( const Imath::Box3f &box, const Imath::V3f &viewDir
 	// translate the camera back until the box is completely visible
 	M44f inverseCameraMatrix = cameraMatrix.inverse();
 	Box3f cBox = transform( box, inverseCameraMatrix );
-	
+
 	Box2f screenWindow = m_screenWindow->readable();
 	if( m_projection->readable()=="perspective" )
 	{
 		// perspective. leave the field of view and screen window as is and translate
 		// back till the box is wholly visible. this currently assumes the screen window
-		// is centred about the camera axis.		
+		// is centred about the camera axis.
 		float z0 = cBox.size().x / screenWindow.size().x;
 		float z1 = cBox.size().y / screenWindow.size().y;
-				
+
 		m_centreOfInterest = std::max( z0, z1 ) / tan( M_PI * m_fov->readable() / 360.0 ) + cBox.max.z +
 			m_clippingPlanes->readable()[0];
-		
+
 		cameraMatrix.translate( V3f( 0.0f, 0.0f, m_centreOfInterest ) );
 	}
 	else
@@ -157,18 +157,18 @@ void CameraController::frame( const Imath::Box3f &box, const Imath::V3f &viewDir
 		// to frame the box, maintaining the aspect ratio of the screen window.
 		m_centreOfInterest = cBox.max.z + m_clippingPlanes->readable()[0] + 0.1; // 0.1 is a fudge factor
 		cameraMatrix.translate( V3f( 0.0f, 0.0f, m_centreOfInterest ) );
-		
+
 		float xScale = cBox.size().x / screenWindow.size().x;
 		float yScale = cBox.size().y / screenWindow.size().y;
 		float scale = std::max( xScale, yScale );
-		
+
 		V2f newSize = screenWindow.size() * scale;
 		screenWindow.min.x = cBox.center().x - newSize.x / 2.0f;
 		screenWindow.min.y = cBox.center().y - newSize.y / 2.0f;
 		screenWindow.max.x = cBox.center().x + newSize.x / 2.0f;
 		screenWindow.max.y = cBox.center().y + newSize.y / 2.0f;
 	}
-	
+
 	m_transform->matrix = cameraMatrix;
 	m_screenWindow->writable() = screenWindow;
 }
@@ -181,7 +181,7 @@ void CameraController::unproject( const Imath::V2i rasterPosition, Imath::V3f &n
 		lerp( screenWindow.min.x, screenWindow.max.x, ndc.x ),
 		lerp( screenWindow.max.y, screenWindow.min.y, ndc.y )
 	);
-		
+
 	const V2f &clippingPlanes = m_clippingPlanes->readable();
 	if( m_projection->readable()=="perspective" )
 	{
@@ -222,7 +222,7 @@ void CameraController::motionUpdate( const Imath::V2i &newPosition )
 			break;
 		case Dolly :
 			dolly( newPosition );
-			break;				
+			break;
 		default :
 			throw Exception( "CameraController not in motion." );
 	}
@@ -240,7 +240,7 @@ void CameraController::motionEnd( const Imath::V2i &endPosition )
 			break;
 		case Dolly :
 			dolly( endPosition );
-			break;				
+			break;
 		default :
 			break;
 	}
@@ -251,7 +251,7 @@ void CameraController::track( const Imath::V2i &p )
 {
 	V2i resolution = m_resolution->readable();
 	Box2f screenWindow = m_screenWindow->readable();
-	
+
 	V2i d = p - m_motionStart;
 	V3f translate( 0.0f );
 	translate.x = -screenWindow.size().x * (float)d.x/(float)resolution.x;
@@ -268,25 +268,25 @@ void CameraController::track( const Imath::V2i &p )
 void CameraController::tumble( const Imath::V2i &p )
 {
 	V2i d = p - m_motionStart;
-	
+
 	V3f centreOfInterestInWorld = V3f( 0, 0, -m_centreOfInterest ) * m_motionMatrix;
 	V3f xAxisInWorld = V3f( 1, 0, 0 );
 	m_motionMatrix.multDirMatrix( xAxisInWorld, xAxisInWorld );
 	xAxisInWorld.normalize();
-	
+
 	M44f t;
 	t.translate( -centreOfInterestInWorld );
-	
-		
+
+
 		t.rotate( V3f( 0, -d.x / 100.0f, 0 ) );
 
 		M44f xRotate;
 		xRotate.setAxisAngle( xAxisInWorld, -d.y / 100.0f );
-	
+
 		t = xRotate * t;
-	
+
 	t.translate( centreOfInterestInWorld );
-	
+
 	m_transform->matrix = m_motionMatrix * t;
 }
 
@@ -295,7 +295,7 @@ void CameraController::dolly( const Imath::V2i &p )
 	V2i resolution = m_resolution->readable();
 	V2f dv = V2f( (p - m_motionStart) ) / resolution;
 	float d = dv.x - dv.y;
-		
+
 	if( m_projection->readable()=="perspective" )
 	{
 		M44f t = m_motionMatrix;
@@ -314,7 +314,7 @@ void CameraController::dolly( const Imath::V2i &p )
 			lerp( screenWindow.min.x, screenWindow.max.x, centreNDC.x ),
 			lerp( screenWindow.max.y, screenWindow.min.y, centreNDC.y )
 		);
-		
+
 		float scale = 1.0f - d;
 		if( scale > 0.001 )
 		{

@@ -48,9 +48,9 @@ namespace IECore {
 class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransformOp>
 {
 	public :
-		
+
 		ColorTransformOpWrap( PyObject *self, const std::string name, const std::string description ) : ColorTransformOp( name, description ), Wrapper<ColorTransformOp>( self, this ) {};
-		
+
 		virtual void begin( ConstCompoundObjectPtr operands )
 		{
 			override o = this->get_override( "begin" );
@@ -59,7 +59,7 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 				o( const_pointer_cast<CompoundObject>( operands ) );
 			}
 		}
-		
+
 		virtual void transform( Imath::Color3f &color ) const
 		{
 			override o = this->get_override( "transform" );
@@ -82,14 +82,14 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 				o();
 			}
 		}
-			
+
 };
 IE_CORE_DECLAREPTR( ColorTransformOpWrap );
 
 void bindColorTransformOp()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<ColorTransformOp, ColorTransformOpWrapPtr>( "ColorTransformOp" )
 		.def( init< const std::string, const std::string>( ( arg( "name" ), arg( "description" ) ) ) )
 	;

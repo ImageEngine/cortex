@@ -52,32 +52,32 @@ using namespace IECoreMaya;
 using namespace Imath;
 using namespace boost;
 
-template<> ParameterHandler::Description< FloatSplineParameterHandler<  IECore::Splineff > > 
+template<> ParameterHandler::Description< FloatSplineParameterHandler<  IECore::Splineff > >
 	FloatSplineParameterHandler<  IECore::Splineff >::g_registrar( IECore::SplineffParameter::staticTypeId() );
-	
-template<> ParameterHandler::Description< FloatSplineParameterHandler<  IECore::Splinedd > > 
-	FloatSplineParameterHandler<  IECore::Splinedd >::g_registrar( IECore::SplineddParameter::staticTypeId() );	
+
+template<> ParameterHandler::Description< FloatSplineParameterHandler<  IECore::Splinedd > >
+	FloatSplineParameterHandler<  IECore::Splinedd >::g_registrar( IECore::SplineddParameter::staticTypeId() );
 
 template<typename S>
-MStatus FloatSplineParameterHandler<S>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const 
+MStatus FloatSplineParameterHandler<S>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
 	assert( parameter );
-	
+
 	typename IECore::TypedParameter< S >::ConstPtr p = IECore::runTimeCast<const IECore::TypedParameter< S > >( parameter );
 	if( !p )
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnCompoundAttribute fnCAttr( attribute );
 	if( !fnCAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
 	}
-	
+
 	/// \todo See if the attribute is of type CurveRamp - can't do this yet as we can't construct
 	/// an MRampAttribute from just the MObject. We need either the node, too, or an MPlug
-			
+
 	return MS::kSuccess;
 }
 
@@ -91,15 +91,15 @@ MObject FloatSplineParameterHandler<S>::create( IECore::ConstParameterPtr parame
 	{
 		return MObject::kNullObj;
 	}
-	
+
 	MRampAttribute fnRAttr;
 	MObject result = fnRAttr.createCurveRamp( attributeName, attributeName );
-	
+
 	update( parameter, result );
 	return result;
 }
 
-template<typename S>		
+template<typename S>
 MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	assert( parameter );
@@ -108,32 +108,32 @@ MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 	{
 		return MS::kFailure;
 	}
-	
+
 	MRampAttribute fnRAttr( plug );
 	if ( !fnRAttr.isCurveRamp() )
 	{
 		return MS::kFailure;
 	}
-	
+
 	const S &spline = p->getTypedValue();
-	
-	MStatus s;	
+
+	MStatus s;
 	MFloatArray values;
 	MFloatArray positions;
 	MIntArray interps;
-	MIntArray indices;	
+	MIntArray indices;
 	fnRAttr.getEntries( indices, positions, values, interps, &s );
 	assert( s );
 	positions.clear();
 	values.clear();
 	interps.clear();
-	
+
 	assert( indices.length() == fnRAttr.getNumEntries() );
-	
+
 	size_t pointsSizeMinus2 = spline.points.size() - 2;
 	unsigned idx = 0;
 	unsigned expectedPoints = 0;
-	unsigned reusedIndices = 0;	
+	unsigned reusedIndices = 0;
 	for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end(); ++it, ++idx )
 	{
 		// we commonly double up the endpoints on cortex splines to force interpolation to the end.
@@ -144,76 +144,76 @@ MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 		{
 			continue;
 		}
-		
+
 		expectedPoints ++;
-		
+
 		if ( idx < std::min( 2u, indices.length() ) )
 		{
 			reusedIndices ++;
 			fnRAttr.setPositionAtIndex( it->first, indices[ idx ], &s );
 			assert( s );
-			fnRAttr.setValueAtIndex( static_cast<float>( it->second ), indices[ idx ], &s );	
+			fnRAttr.setValueAtIndex( static_cast<float>( it->second ), indices[ idx ], &s );
 			assert( s );
-			fnRAttr.setInterpolationAtIndex( MRampAttribute::kSpline, indices[ idx ], &s );		
+			fnRAttr.setInterpolationAtIndex( MRampAttribute::kSpline, indices[ idx ], &s );
 			assert( s );
 		}
 		else
-		{	
+		{
 			values.append(  it->second );
-			positions.append( it->first );	
-			interps.append( MRampAttribute::kSpline );	
+			positions.append( it->first );
+			interps.append( MRampAttribute::kSpline );
 		}
 	}
-	
+
 	assert( positions.length() == values.length() );
 	assert( positions.length() == interps.length() );
-	assert( expectedPoints == reusedIndices + positions.length() );	
-		
+	assert( expectedPoints == reusedIndices + positions.length() );
+
 #ifndef NDEBUG
 	unsigned int oldNumEntries = fnRAttr.getNumEntries();
-#endif		
-	
+#endif
+
 	fnRAttr.addEntries( positions, values, interps, &s );
 	assert( s );
-	
+
 	assert( fnRAttr.getNumEntries() == oldNumEntries + positions.length() );
-	
+
 	/// Remove all the indices we just reused
 	for ( unsigned i = 0; i < reusedIndices ; i ++ )
 	{
 		assert( indices.length() > 0 );
 		indices.remove( 0 );
 	}
-	
+
 	/// Delete any ununsed indices
 	if ( indices.length() )
 	{
 		fnRAttr.deleteEntries( indices, &s );
 		assert( s );
-	}		
-	
-#ifndef NDEBUG	
+	}
+
+#ifndef NDEBUG
 	{
 		assert( fnRAttr.getNumEntries() == expectedPoints );
-		
+
 		MIntArray indices;
 		MFloatArray positions;
 		MFloatArray values;
 		MIntArray interps;
-		fnRAttr.getEntries( indices, positions, values, interps, &s );				
+		fnRAttr.getEntries( indices, positions, values, interps, &s );
 		assert( s );
-		assert( expectedPoints == positions.length() );		
+		assert( expectedPoints == positions.length() );
 		assert( expectedPoints == values.length() );
 		assert( expectedPoints == interps.length() );
 		assert( expectedPoints == indices.length() );
-		
+
 		for ( unsigned i = 0; i < positions.length(); i++ )
-		{			
+		{
 			float position = positions[ i ];
 			float value = values[ i ];
-			
+
 			bool found = false;
-			
+
 			for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end() && !found; ++it )
 			{
 				if ( fabs( it->first - position ) < 1.e-3f && fabs( it->second - value ) < 1.e-3f )
@@ -221,11 +221,11 @@ MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 					found = true;
 				}
 			}
-			assert( found );			
-		}			
+			assert( found );
+		}
 	}
-#endif	
-	
+#endif
+
 	return MS::kSuccess;
 }
 
@@ -239,22 +239,22 @@ MStatus FloatSplineParameterHandler<S>::setValue( const MPlug &plug, IECore::Par
 	{
 		return MS::kFailure;
 	}
-	
+
 	S spline;
-	
+
 	MStatus s;
-	MRampAttribute fnRAttr( plug, &s );	
+	MRampAttribute fnRAttr( plug, &s );
 	assert( s );
-	
+
 	if ( !fnRAttr.isCurveRamp() )
 	{
 		return MS::kFailure;
-	}	
-	
+	}
+
 	if ( fnRAttr.getNumEntries( &s ) > 0 )
 	{
 		assert( s );
-		
+
 		MIntArray indices;
 		MFloatArray positions;
 		MFloatArray values;
@@ -266,38 +266,38 @@ MStatus FloatSplineParameterHandler<S>::setValue( const MPlug &plug, IECore::Par
 		{
 			return MS::kFailure;
 		}
-		
+
 		for ( unsigned i = 0; i < positions.length(); i ++)
-		{	
+		{
 			spline.points.insert(
-				typename S::PointContainer::value_type( 
+				typename S::PointContainer::value_type(
 					static_cast< typename S::XType >( positions[i] ), static_cast< typename S::YType >( values[ i ] )
-				) 
+				)
 			);
-		}	
+		}
 	}
-	
+
 	// maya seems to do an implicit doubling up of the end points to cause interpolation to the ends.
 	// our spline has no such implicit behaviour so we explicitly double up.
 	if( spline.points.size() )
 	{
-#ifndef NDEBUG	
+#ifndef NDEBUG
 		size_t oldSplineSize = spline.points.size();
-#endif		
-		
+#endif
+
 		assert( spline.points.begin()->first <= spline.points.rbegin()->first );
 		spline.points.insert( *spline.points.begin() );
 		spline.points.insert( *spline.points.rbegin() );
 		assert( spline.points.size() == oldSplineSize + 2 );
 	}
-	
+
 	p->setTypedValue( spline );
-	
+
 	if( spline.points.size() )
 	{
 		assert( spline.points.size() >= 2 );
 		assert( spline.points.size() == fnRAttr.getNumEntries() + 2 );
 	}
-		
+
 	return MS::kSuccess;
 }

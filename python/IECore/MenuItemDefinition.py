@@ -64,25 +64,25 @@ class MenuItemDefinition :
 	__slots__ = [ "command", "secondaryCommand", "divider", "active", "description", "subMenu" ]
 
 	def __init__( self, dictionary = None, **kwArgs ) :
-	
+
 		self.command = None
 		self.secondaryCommand = None
 		self.divider = False
 		self.active = True
 		self.description = ""
 		self.subMenu = None
-		
+
 		if dictionary :
 			for k, v in dictionary.items() :
 				setattr( self, k, v )
-	
+
 		for k, v in kwArgs.items() :
 			setattr( self, k, v )
-			
+
 	def __repr__( self ) :
-	
+
 		d = {}
 		for s in self.__slots__ :
 			d[s] = getattr( self, s )
-			
+
 		return "MenuItemDefinition( " + repr( d ) + " )"

@@ -55,23 +55,23 @@ class OpHolder : public ParameterisedHolder<BaseType>
 {
 
 	public:
-		
+
 		OpHolder();
 		virtual ~OpHolder();
-		
-		static void *creator();				
-		static MStatus initialize();		
+
+		static void *creator();
+		static MStatus initialize();
 		static MTypeId id;
-				
+
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
-		
+
 		virtual MStatus compute( const MPlug &plug, MDataBlock &block );
-		
+
 		virtual IECore::RunTimeTypedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
-		
+
 		virtual MStatus setOp( const std::string &className, int classVersion  );
-		virtual IECore::OpPtr getOp( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );	
-	
+		virtual IECore::OpPtr getOp( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
+
 };
 
 typedef OpHolder<MPxNode> OpHolderNode;

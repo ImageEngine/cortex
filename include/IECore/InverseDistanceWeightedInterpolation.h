@@ -41,53 +41,53 @@
 
 namespace IECore
 {
-	
+
 /// The InverseDistanceWeightedInterpolation class provides interpolation of scattered data. It is
 /// templated so that it can operate on a wide variety of point/value types, and uses
-/// the VectorTraits.h and VectorOps.h functionality to assist in this. 
+/// the VectorTraits.h and VectorOps.h functionality to assist in this.
 /// NB. The Value must be default constructible, and define sensible value=value+value, and value=value*scalar operators
 template< typename PointIterator, typename ValueIterator >
 class InverseDistanceWeightedInterpolation
 {
 	public :
-	
+
 		typedef typename std::iterator_traits<PointIterator>::value_type Point;
 		typedef typename VectorTraits<Point>::BaseType PointBaseType;
-		
+
 		typedef typename std::iterator_traits<ValueIterator>::value_type Value;
-	
+
 		/// Creates the interpolator. Note that it does not own the passed points or values -
-		/// it is up to you to ensure that they remain valid and unchanged as long as the 
+		/// it is up to you to ensure that they remain valid and unchanged as long as the
 		/// interpolator is in use.
-		/// \param firstPoint Iterator to first point  
-		/// \param lastPoint Iterator to last point  
-		/// \param firstValue Iterator to first value  
-		/// \param lastValue Iterator to last value  
+		/// \param firstPoint Iterator to first point
+		/// \param lastPoint Iterator to last point
+		/// \param firstValue Iterator to first value
+		/// \param lastValue Iterator to last value
 		/// \param numNeighbours The amount of nearest-neighbour points to consider when performing interpolation. More usually yields slower, but better results.
 		/// \param maxLeafSize The number of points to store in each KDTree bucket
 		InverseDistanceWeightedInterpolation(
 			PointIterator firstPoint,
-			PointIterator lastPoint, 
+			PointIterator lastPoint,
 			ValueIterator firstValue,
 			ValueIterator lastValue,
 			unsigned int numNeighbours,
 			int maxLeafSize=4
 		);
-		
+
 		virtual ~InverseDistanceWeightedInterpolation();
-		
+
 		/// Evaluate the interpolated value for the specified point
 		Value operator()( const Point &p ) const;
-			
-			
+
+
 	private :
-	
-		typedef KDTree<PointIterator> Tree;		
-		Tree *m_tree;	
-		
-		typedef std::map< PointIterator, ValueIterator > ValueMap;		
+
+		typedef KDTree<PointIterator> Tree;
+		Tree *m_tree;
+
+		typedef std::map< PointIterator, ValueIterator > ValueMap;
 		ValueMap m_map;
-		
+
 		unsigned int m_numNeighbours;
 };
 

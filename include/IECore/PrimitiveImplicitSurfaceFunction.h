@@ -51,24 +51,24 @@ class PrimitiveImplicitSurfaceFunction : public ImplicitSurfaceFunction< Imath::
 {
         public:
 		IE_CORE_DECLAREMEMBERPTR( PrimitiveImplicitSurfaceFunction );
-		
+
 		/// Construct the function from the given Primitive. If a PrimitiveEvaluator cannot be created from it an
 		/// InvalidArgumentException is thrown.
 		PrimitiveImplicitSurfaceFunction( PrimitivePtr primitive );
-		
+
 		virtual ~PrimitiveImplicitSurfaceFunction();
-                
-		// Retrieve the signed distance from the primitive at the given point              
+
+		// Retrieve the signed distance from the primitive at the given point
                 Value operator()( const Point &p );
-		
-		// Retrieve the signed distance from the primitive at the given point		
+
+		// Retrieve the signed distance from the primitive at the given point
 		virtual Value getValue( const Point &p );
 
-		
+
 	protected:
-	
-		PrimitiveImplicitSurfaceFunction();	
-	
+
+		PrimitiveImplicitSurfaceFunction();
+
 		PrimitiveEvaluatorPtr m_evaluator;
 };
 

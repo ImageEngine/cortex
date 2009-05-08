@@ -58,7 +58,7 @@ struct MObjectFromPython
 			return 0;
 		}
 	}
-	
+
 	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
 	{
 		void *storage = ((converter::rvalue_from_python_storage<MObject>*)data)->storage.bytes;
@@ -78,15 +78,15 @@ struct MObjectFromPython
 
 		MSelectionList s;
 		StatusException::throwIfError( s.add( objectName ) );
-		
+
 		MObject object;
 		StatusException::throwIfError( s.getDependNode( 0, object ) );
-		
+
 		new (storage) MObject( object );
 		data->convertible = storage;
 	}
 };
-   
+
 void bindMObjectFromPython()
 {
 	converter::registry::push_back(

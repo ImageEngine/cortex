@@ -53,13 +53,13 @@ class FilteredMessageHandler : public MessageHandler
 		/// Creates a message handler that filter messages and outputs
 		/// to another message handler. The handler will hold an intrusive
 		/// pointer to the given message handler so that the object
-		/// will not be destroyed before the destruction of this one. 
+		/// will not be destroyed before the destruction of this one.
 		FilteredMessageHandler( MessageHandlerPtr handler );
-		
+
 	protected :
-	
+
 		virtual ~FilteredMessageHandler();
-		
+
 
 	protected :
 

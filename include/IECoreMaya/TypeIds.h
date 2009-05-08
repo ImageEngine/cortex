@@ -40,7 +40,7 @@ namespace IECoreMaya
 
 enum TypeId
 {
-	
+
 	FromMayaConverterTypeId = 109000,
 	FromMayaObjectConverterTypeId = 109001,
 	FromMayaPlugConverterTypeId = 109002,
@@ -61,10 +61,10 @@ enum TypeId
 	ToMayaMeshConverterTypeId = 109017,
 	ToMayaArrayDataConverterTypeId = 109018,
 	ToMayaPlugConverterTypeId = 109019,
-	FromMayaPluginDataPlugConverterTypeId = 109020,	
+	FromMayaPluginDataPlugConverterTypeId = 109020,
 	FromMayaTransformConverterTypeId = 109021,
-	FromMayaImageConverterTypeId = 109022,	
-	ToMayaImageConverterTypeId = 109023,	
+	FromMayaImageConverterTypeId = 109022,
+	ToMayaImageConverterTypeId = 109023,
 	PlaybackFrameListTypeId = 109024,
 	FromMayaUnitPlugConverterfTypeId = 109025,
 	FromMayaUnitPlugConverterdTypeId = 109026,
@@ -102,7 +102,7 @@ enum TypeId
 	FromMayaCompoundNumericPlugConverterV3dC3fTypeId = 109058,
 	FromMayaTransformationMatrixfConverterTypeId = 109059,
 	FromMayaTransformationMatrixdConverterTypeId = 109060,
-	
+
 	LastTypeId = 109999
 
 };

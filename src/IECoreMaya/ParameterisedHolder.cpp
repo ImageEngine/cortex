@@ -114,7 +114,7 @@ template<typename B>
 void ParameterisedHolder<B>::postConstructor()
 {
 	B::setExistWithoutInConnections(true);
-	B::setExistWithoutOutConnections(true);	
+	B::setExistWithoutOutConnections(true);
 }
 
 template<typename B>
@@ -134,35 +134,35 @@ template<typename B>
 MStatus ParameterisedHolder<B>::shouldSave( const MPlug &plug, bool &isSaving )
 {
 	/// Maya 8.5 crashes when saving a GenericAttribute (such as that
-	/// created by the MeshParameterHandler) containing an "empty" mesh. 
+	/// created by the MeshParameterHandler) containing an "empty" mesh.
 	/// This only applies to ASCII files, saving to binary works. Here
 	/// we prevent Maya saving the value.
-	
+
 	isSaving = true;
 	ParameterPtr parameter = plugParameter( plug );
-	
+
 	if ( parameter )
 	{
 		ObjectPtr value = parameter->getValue();
-		
+
 		if (! value )
 		{
 			isSaving = false;
 			return MS::kSuccess;
 		}
-		
+
 		MeshPrimitivePtr mesh = runTimeCast< MeshPrimitive >( value );
 		if ( mesh )
 		{
 			MeshPrimitivePtr emptyMesh = new MeshPrimitive();
 			if ( mesh->isEqualTo( emptyMesh ) )
-			{			
+			{
 				isSaving = false;
 				return MS::kSuccess;
 			}
 		}
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -187,39 +187,39 @@ MStatus ParameterisedHolder<B>::initialize()
 	MStatus s;
 	MFnTypedAttribute tAttr;
 	MFnNumericAttribute nAttr;
-	
+
 	aParameterisedClassName = tAttr.create( "className", "clas", MFnData::kString );
 	tAttr.setReadable(true);
 	tAttr.setWritable(true);
-	tAttr.setStorable(true);	
+	tAttr.setStorable(true);
 	tAttr.setConnectable(false);
 	tAttr.setHidden(true);
-	
+
 	s = B::addAttribute( aParameterisedClassName );
 	assert(s);
-	
+
 	aParameterisedVersion = nAttr.create("version", "ver", MFnNumericData::kInt, 1, &s );
 	assert(s);
 	nAttr.setReadable(true);
 	nAttr.setWritable(true);
-	nAttr.setStorable(true);	
+	nAttr.setStorable(true);
 	nAttr.setConnectable(false);
 	nAttr.setHidden(true);
-	
-	
+
+
 	s = B::addAttribute( aParameterisedVersion );
 	assert(s);
-	
+
 	aParameterisedSearchPathEnvVar = tAttr.create("searchPathEnvVar", "spev", MFnData::kString );
 	tAttr.setReadable(true);
 	tAttr.setWritable(true);
-	tAttr.setStorable(true);	
+	tAttr.setStorable(true);
 	tAttr.setConnectable(false);
-	tAttr.setHidden(true);	
-	
-	s = B::addAttribute( aParameterisedSearchPathEnvVar );	
+	tAttr.setHidden(true);
+
+	s = B::addAttribute( aParameterisedSearchPathEnvVar );
 	assert(s);
-		
+
 	aDynamicParameters = tAttr.create( "dynamicParameters", "dprm", ObjectData::id );
 	tAttr.setKeyable( false );
 	tAttr.setReadable( true );
@@ -227,10 +227,10 @@ MStatus ParameterisedHolder<B>::initialize()
 	tAttr.setStorable( true );
 	tAttr.setConnectable( false );
 	tAttr.setHidden( true );
-	
+
 	s = B::addAttribute( aDynamicParameters );
 	assert( s );
-	
+
 	return MS::kSuccess;
 }
 
@@ -246,14 +246,14 @@ MStatus ParameterisedHolder<B>::setParameterised( IECore::RunTimeTypedPtr p )
 
 	m_parameterised = p;
 	m_failedToLoad = false;
-	
+
 	MStatus s = createAndRemoveAttributes();
 	if( !s )
 	{
 		m_parameterised = 0;
 		return s;
 	}
-	
+
 	return MStatus::kSuccess;
 }
 
@@ -266,10 +266,10 @@ MStatus ParameterisedHolder<B>::setParameterised( const std::string &className, 
 	MStatus s = pClassName.setValue( className.c_str() );
 	pVersion.setValue( classVersion );
 	pSearchPathEnvVar.setValue( searchPathEnvVar.c_str() );
-			
+
 	m_parameterised = 0;
 	m_failedToLoad = false;
-	
+
 	if( getParameterised() )
 	{
 		return MStatus::kSuccess;
@@ -280,7 +280,7 @@ MStatus ParameterisedHolder<B>::setParameterised( const std::string &className, 
 
 template<typename B>
 MStatus ParameterisedHolder<B>::updateParameterised()
-{	
+{
 	IECore::CompoundObjectPtr dynamicParameters = getDynamicParameters();
 	MStatus s = createAndRemoveAttributes( dynamicParameters );
 	setDynamicParameters( dynamicParameters );
@@ -293,16 +293,16 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::getParameterised( std::string *c
 	MPlug pClassName( B::thisMObject(), aParameterisedClassName );
 	MPlug pVersion( B::thisMObject(), aParameterisedVersion );
 	MPlug pSearchPathEnvVar( B::thisMObject(), aParameterisedSearchPathEnvVar );
-	
+
 	MString className;
 	int version;
 	MString searchPathEnvVar;
-	
+
 	MStatus s = pClassName.getValue( className );
-		
+
 	pVersion.getValue( version );
-	pSearchPathEnvVar.getValue( searchPathEnvVar );	
-		
+	pSearchPathEnvVar.getValue( searchPathEnvVar );
+
 	if( !m_parameterised && !m_failedToLoad )
 	{
 		m_failedToLoad = true;
@@ -323,7 +323,7 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::getParameterised( std::string *c
 			}
 		}
 	}
-	
+
 	// fill output parameters
 	if( m_parameterised )
 	{
@@ -340,7 +340,7 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::getParameterised( std::string *c
 			*searchPathEnvVarOut = searchPathEnvVar.asChar();
 		}
 	}
-	
+
 	return m_parameterised;
 }
 
@@ -349,9 +349,9 @@ MStatus ParameterisedHolder<B>::setNodeValues()
 {
 	// to update the parameter->name map if necessary
 	getParameterised();
-	
+
 	MFnDependencyNode fnDN( B::thisMObject() );
-	
+
 	ParameterToAttributeNameMap::const_iterator it;
 	for( it=m_parametersToAttributeNames.begin(); it!=m_parametersToAttributeNames.end(); it++ )
 	{
@@ -390,13 +390,13 @@ MStatus ParameterisedHolder<B>::setNodeValue( ParameterPtr pa )
 	{
 		return MStatus::kFailure;
 	}
-	
+
 	MStatus s = MS::kSuccess;
-		
+
 	try
-	{	
+	{
 		s = IECoreMaya::Parameter::setValue( pa, p );
-	} 
+	}
 	catch ( std::exception &e )
 	{
 		msg( Msg::Error, "ParameterisedHolder::setNodeValues", boost::format( "Caught exception while setting parameter value to attribute %s : %s" ) % p.name().asChar() % e.what());
@@ -407,18 +407,18 @@ MStatus ParameterisedHolder<B>::setNodeValue( ParameterPtr pa )
 		msg( Msg::Error, "ParameterisedHolder::setNodeValues", boost::format( "Caught exception while setting parameter value to attribute %s" ) % p.name().asChar());
 		s = MS::kFailure;
 	}
-	
+
 	return s;
 }
-		
+
 template<typename B>
 MStatus ParameterisedHolder<B>::setParameterisedValues()
 {
 	// to update the parameter->name map if necessary
 	getParameterised();
-	
+
 	MFnDependencyNode fnDN( B::thisMObject() );
-	
+
 	ParameterToAttributeNameMap::const_iterator it;
 	for( it=m_parametersToAttributeNames.begin(); it!=m_parametersToAttributeNames.end(); it++ )
 	{
@@ -457,24 +457,24 @@ MStatus ParameterisedHolder<B>::setParameterisedValue( ParameterPtr pa )
 	{
 		return MStatus::kFailure;
 	}
-	
+
 	MStatus s = MS::kSuccess;
-		
+
 	try
-	{	
+	{
 		s = IECoreMaya::Parameter::setValue( p, pa );
 	}
 	catch ( std::exception &e )
 	{
 		msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s : %s" ) % p.name().asChar() % e.what());
 		s = MS::kFailure;
-	} 
+	}
 	catch (...)
 	{
 		msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s" ) % p.name().asChar());
 		s = MS::kFailure;
 	}
-	
+
 	return s;
 }
 
@@ -483,13 +483,13 @@ MPlug ParameterisedHolder<B>::parameterPlug( IECore::ConstParameterPtr parameter
 {
 	// to update the parameter->name map if necessary
 	getParameterised();
-	
+
 	ParameterToAttributeNameMap::const_iterator it = m_parametersToAttributeNames.find( const_pointer_cast<IECore::Parameter>( parameter ) );
 	if( it==m_parametersToAttributeNames.end() )
 	{
 		return MPlug();
 	}
-	
+
 	MFnDependencyNode fnDN( B::thisMObject() );
 	return MPlug( B::thisMObject(), fnDN.attribute( it->second ) );
 }
@@ -498,7 +498,7 @@ template<typename B>
 IECore::ParameterPtr ParameterisedHolder<B>::plugParameter( const MPlug &plug )
 {
 	assert( ! plug.isNull() );
-	
+
 	// to update the parameter->name map if necessary
 	getParameterised();
 	AttributeNameToParameterMap::const_iterator it = m_attributeNamesToParameters.find( plug.partialName() );
@@ -512,14 +512,14 @@ IECore::ParameterPtr ParameterisedHolder<B>::plugParameter( const MPlug &plug )
 template<typename B>
 IECore::RunTimeTypedPtr ParameterisedHolder<B>::loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar )
 {
-	string toExecute = boost::str( format( 
+	string toExecute = boost::str( format(
 			"IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n"
 		) % searchPathEnvVar.asChar() % className.asChar() % classVersion
 	);
 
 	try
 	{
-		handle<> resultHandle( PyRun_String( 
+		handle<> resultHandle( PyRun_String(
 			toExecute.c_str(),
 			Py_eval_input, PythonCmd::globalContext().ptr(),
 			PythonCmd::globalContext().ptr() )
@@ -530,16 +530,16 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::loadClass( const MString &classN
 	catch( error_already_set & )
 	{
 		MFnDependencyNode fnDN( B::thisMObject() );
-	
+
 		msg( Msg::Error, "ParameterisedHolder::loadClass",
 			boost::format( "Unable to load class \"%s\" version %d into node %s." ) % className.asChar() % classVersion % fnDN.name().asChar());
-			
+
 		PyErr_Print();
 	}
 	catch( ... )
 	{
 		MFnDependencyNode fnDN( B::thisMObject() );
-	
+
 		msg( Msg::Error, "ParameterisedHolder::loadClass",
 			boost::format( "Unable to load class \"%s\" version %d into node %s." ) % className.asChar() % classVersion % fnDN.name().asChar());
 	}
@@ -551,7 +551,7 @@ MStatus ParameterisedHolder<B>::createAndRemoveAttributes( IECore::CompoundObjec
 {
 	m_attributeNamesToParameters.clear();
 	m_parametersToAttributeNames.clear();
-	
+
 	MStatus s;
 	if( m_parameterised )
 	{
@@ -563,14 +563,14 @@ MStatus ParameterisedHolder<B>::createAndRemoveAttributes( IECore::CompoundObjec
 			return s;
 		}
 	}
-			
+
 	s = removeUnecessaryAttributes( dynamicParameterStorage );
 	if( !s )
 	{
 		msg( Msg::Error, "ParameterisedHolder::createAndRemoveAttributes", "Failed to remove unecessary attributes." );
 		return s;
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -578,20 +578,20 @@ template<typename B>
 MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName, IECore::CompoundObjectPtr dynamicParameterStorage )
 {
 	MFnDependencyNode fnDN( B::thisMObject() );
-	
+
 	MString thisNodeName = B::name();
 	MFnDagNode fnDAGN( B::thisMObject() );
 	if( fnDAGN.hasObj( B::thisMObject() ) )
 	{
 		thisNodeName = fnDAGN.fullPathName();
 	}
-	
+
 	const CompoundParameter::ParameterVector &children = parameter->orderedParameters();
 	for( size_t i=0; i<children.size(); i++ )
 	{
 		string attributeName = rootName + "_" + children[i]->name();
 		MString mAttributeName = attributeName.c_str();
-		
+
 		m_attributeNamesToParameters[mAttributeName] = children[i];
 		m_parametersToAttributeNames[children[i]] = mAttributeName;
 
@@ -603,7 +603,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 		if( !attribute.isNull() )
 		{
 			s = IECoreMaya::Parameter::update( children[i], attribute );
-			
+
 			if( !s )
 			{
 				// failed to update (parameter type probably changed).
@@ -646,7 +646,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 			if ( connectionsFromMe.length() || connectionsToMe.length() )
 			{
 				MDGModifier dgMod;
-				MPlug plug( B::thisMObject(), attribute );	
+				MPlug plug( B::thisMObject(), attribute );
 				for (unsigned i = 0; i < connectionsFromMe.length(); i++)
 				{
 					dgMod.connect( plug, connectionsFromMe[i] );
@@ -682,7 +682,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 							std::string cmd = string( "connectAttr " ) + defaultConnection + " " + thisNodeName.asChar() + "." + plug.partialName().asChar();
 							MDGModifier dgMod;
 							dgMod.commandToExecute( cmd.c_str() );
-							dgMod.doIt();					
+							dgMod.doIt();
 						}
 						it = mayaUserData.find( "defaultExpression" );
 						if ( it != mayaUserData.end() && it->second->typeId() == StringDataTypeId )
@@ -704,7 +704,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 				return s;
 			}
 		}
-		
+
 		// recurse to the children if this is a compound child
 		CompoundParameterPtr compoundChild = runTimeCast<CompoundParameter>( children[i] );
 		if( compoundChild )
@@ -726,7 +726,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 					}
 				}
 			}
-		
+
 			MStatus s = createAttributesWalk( compoundChild, rootName + "_" + compoundChild->name(), dynamicParameterStorageForWalk );
 			if( !s )
 			{
@@ -734,7 +734,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 			}
 		}
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -743,17 +743,17 @@ MStatus ParameterisedHolder<B>::removeUnecessaryAttributes( IECore::CompoundObje
 {
 	/// \todo Make this a parameter, but only when the library's major version is incremented
 	const std::string &rootName = "parm_";
-	
+
 	MObjectArray toRemove;
 	MFnDependencyNode fnDN( B::thisMObject() );
 	for( unsigned i=0; i<fnDN.attributeCount(); i++ )
 	{
 		MObject attr = fnDN.attribute( i );
 		MFnAttribute fnAttr( attr );
-				
+
 		MString attrName = fnAttr.name();
 		if( 0==strncmp( attrName.asChar(), rootName.c_str(), rootName.size() ) )
-		{			
+		{
 			if( m_attributeNamesToParameters.find( fnAttr.name() )==m_attributeNamesToParameters.end() )
 			{
 				if( fnAttr.parent().isNull() )
@@ -776,7 +776,7 @@ MStatus ParameterisedHolder<B>::removeUnecessaryAttributes( IECore::CompoundObje
 			return s;
 		}
 	}
-	
+
 	// remove dynamic parameters from our stash if they've been removed from the held object
 	if( dynamicParameterStorage )
 	{
@@ -803,7 +803,7 @@ MStatus ParameterisedHolder<B>::removeUnecessaryAttributes( IECore::CompoundObje
 				}
 				cIt++;
 			}
-			
+
 			if( !parameters.size() )
 			{
 				IECore::CompoundObject::ObjectMap::iterator nIt = pIt; nIt++;
@@ -816,14 +816,14 @@ MStatus ParameterisedHolder<B>::removeUnecessaryAttributes( IECore::CompoundObje
 			}
 		}
 	}
-	
+
 	return MStatus::kSuccess;
 }
 
 template<typename B>
 CompoundObjectPtr ParameterisedHolder<B>::getDynamicParameters()
 {
-	MPlug pDynamicParameters( B::thisMObject(), aDynamicParameters );	
+	MPlug pDynamicParameters( B::thisMObject(), aDynamicParameters );
 	MObject oDynamicParameters = pDynamicParameters.asMObject();
 	MFnPluginData fnDynamicParameters( oDynamicParameters );
 	ObjectData *oData = static_cast<ObjectData *>( fnDynamicParameters.data() );
@@ -840,7 +840,7 @@ CompoundObjectPtr ParameterisedHolder<B>::getDynamicParameters()
 template<typename B>
 void ParameterisedHolder<B>::setDynamicParameters( IECore::CompoundObjectPtr dynamicParameters )
 {
-	MPlug pDynamicParameters( B::thisMObject(), aDynamicParameters );	
+	MPlug pDynamicParameters( B::thisMObject(), aDynamicParameters );
 	MFnPluginData fnPD;
 	MObject o = fnPD.create( ObjectData::id );
 	ObjectData *oData = static_cast<ObjectData *>( fnPD.data() );
@@ -856,14 +856,14 @@ void ParameterisedHolder<B>::addDynamicParameters()
 	{
 		return;
 	}
-		
+
 	IECore::CompoundObjectPtr dynParmsO = getDynamicParameters();
 	IECore::CompoundObject::ObjectMap &dynParms = dynParmsO->members();
 	for( IECore::CompoundObject::ObjectMap::iterator it=dynParms.begin(); it!=dynParms.end(); it++ )
-	{		
+	{
 		// find the parent parameter we should add to
 		IECore::CompoundParameterPtr parentParameter = dynamic_cast<IECore::ParameterisedInterface *>( m_parameterised.get() )->parameters();
-	
+
 		typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
 		Tokenizer nameParts( it->first.value(), char_separator<char>( "_" ) );
 		Tokenizer::const_iterator tIt = nameParts.begin();
@@ -875,23 +875,23 @@ void ParameterisedHolder<B>::addDynamicParameters()
 				break;
 			}
 		}
-		
+
 		if( !parentParameter  )
 		{
 			IECore::msg( IECore::Msg::Warning, "ParameterisedHolder::addDynamicParameters", boost::format( "Unable to find parent parameter for dynamic parameters below \"%s\"." ) % it->first.value() );
 			continue;
 		}
-						
+
 		// add the parameters
-		
+
 		ObjectVectorPtr parametersO = IECore::runTimeCast<IECore::ObjectVector>( it->second );
-		
+
 		if( !parametersO )
 		{
 			IECore::msg( IECore::Msg::Warning, "ParameterisedHolder::addDynamicParameters", boost::format( "Unable to find any dynamic children for \"%s\"." ) % it->first.value() );
 			continue;
 		}
-		
+
 		IECore::ObjectVector::MemberContainer &parameters = parametersO->members();
 		for( IECore::ObjectVector::MemberContainer::iterator it=parameters.begin(); it!=parameters.end(); it++ )
 		{
@@ -904,7 +904,7 @@ void ParameterisedHolder<B>::addDynamicParameters()
 	}
 }
 
-// specialisations of the different typeIds	
+// specialisations of the different typeIds
 template<>
 MTypeId ParameterisedHolderNode::id( ParameterisedHolderNodeId );
 
@@ -952,7 +952,7 @@ MTypeId ParameterisedHolderImagePlane::id( ParameterisedHolderImagePlaneId );
 
 template<>
 MString ParameterisedHolderImagePlane::typeName( "ieParameterisedHolderImagePlane" );
-						
+
 // explicit instantiation
 template class ParameterisedHolder<MPxNode>;
 template class ParameterisedHolder<MPxLocatorNode>;

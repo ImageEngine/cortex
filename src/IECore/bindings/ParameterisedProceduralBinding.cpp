@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -54,12 +54,12 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 {
 
 	public :
-	
+
 		ParameterisedProceduralWrap( PyObject *self )
 			: Wrapper<ParameterisedProcedural>( self, this )
 		{
 		}
-		
+
 		virtual void doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const
 		{
 			try
@@ -86,7 +86,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 			{
 				msg( Msg::Error, "ParameterisedProceduralWrap::doRenderState", "Caught unknown exception" );
 			}
-		
+
 		}
 
 		virtual Imath::Box3f doBound( ConstCompoundObjectPtr args ) const
@@ -117,7 +117,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 			}
 			return Imath::Box3f(); // empty
 		}
-		
+
 		virtual void doRender( RendererPtr r, ConstCompoundObjectPtr args ) const
 		{
 			// ideally we might not do any exception handling here, and always leave it to the host.
@@ -147,7 +147,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 				msg( Msg::Error, "ParameterisedProceduralWrap::doRender", "Caught unknown exception" );
 			}
 		}
-		
+
 		IE_COREPYTHON_RUNTIMETYPEDWRAPPERFNS( ParameterisedProcedural );
 
 };
@@ -166,7 +166,7 @@ static ParameterPtr parameterisedProceduralGetItem( ParameterisedProcedural &o, 
 
 void bindParameterisedProcedural()
 {
-	
+
 	RunTimeTypedClass<ParameterisedProcedural, ParameterisedProceduralWrapPtr>()
 		.def( init<>() )
 		.def( "parameters", (CompoundParameterPtr (ParameterisedProcedural::*)())&ParameterisedProcedural::parameters )
@@ -174,7 +174,7 @@ void bindParameterisedProcedural()
 		.def( "render", (void (ParameterisedProcedural::*)( RendererPtr, bool, bool, bool, bool ) const )&ParameterisedProcedural::render, ( arg( "renderer" ), arg( "inAttributeBlock" ) = true, arg( "withState" ) = true, arg( "withGeometry" ) = true, arg( "immediateGeometry" ) = false ) )
 		.def( "__getitem__", &parameterisedProceduralGetItem )
 	;
-		
+
 }
-	
+
 } // namespace IECore

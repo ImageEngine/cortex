@@ -41,15 +41,15 @@ import os
 class DataTraitsTest( unittest.TestCase ) :
 
 	__simpleData = [ BoolData(), CharData(), StringData() ]
-	
+
 	__simpleNumericData = [ UCharData(), IntData(), UIntData(), FloatData(), DoubleData(),
 				HalfData(), ShortData(), UShortData(), Int64Data(), UInt64Data() ]
-	
+
 	##\ todo: it seems that vectors, colors, and boxes shouldn't qualify as matrixData
 	__matrixData = [ V2fData(), V2dData(), V2iData(), V3fData(), V3dData(), V3iData(),
 			 Color3fData(), Color3dData(), Color4fData(), Color4dData(), Box2iData(), Box3iData(), Box2fData(),
 			 Box2dData(), Box3fData(), Box3dData(), M33fData(), M33dData(), M44fData(), M44dData() ]
-	
+
 	__sequenceData = [ BoolVectorData(), CharVectorData(), UCharVectorData(), StringVectorData(),
 			   IntVectorData(), UIntVectorData(), HalfVectorData(), FloatVectorData(), DoubleVectorData(),
 			   ShortVectorData(), UShortVectorData(), Int64VectorData(), UInt64VectorData(), V2fVectorData(),
@@ -58,22 +58,22 @@ class DataTraitsTest( unittest.TestCase ) :
 			   Box3iVectorData(), Box3fVectorData(), Box3dVectorData(), M33fVectorData(), M33dVectorData(),
 			   M44fVectorData(), M44dVectorData(), Color3fVectorData(), Color3dVectorData(), Color4fVectorData(),
 			   Color4dVectorData() ]
-	
+
 	##\ todo: it seems that transformation matrices should qualify as matrixData
 	__complexData = [ TransformationMatrixfData(), TransformationMatrixdData(), QuatfData(), QuatdData(),
 			  SplineffData(), SplineddData(), SplinefColor3fData(), SplinefColor4fData(),
 			  CubeColorLookupfData(), CubeColorLookupdData() ]
-		
+
 	__compoundData = [ CompoundData() ]
-	
+
 	def testIsSimpleDataType( self ) :
-	
+
 		trueData = []
 		trueData.extend( DataTraitsTest.__simpleData )
 		trueData.extend( DataTraitsTest.__simpleNumericData )
 		for data in trueData :
 			self.assertTrue( DataTraits.isSimpleDataType( data ) )
-		
+
 		falseData = []
 		falseData.extend( DataTraitsTest.__matrixData )
 		falseData.extend( DataTraitsTest.__sequenceData )
@@ -81,14 +81,14 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__compoundData )
 		for data in falseData :
 			self.assertFalse( DataTraits.isSimpleDataType( data ) )
-	
+
 	def testIsSimpleNumericDataType( self ) :
-		
+
 		trueData = []
 		trueData.extend( DataTraitsTest.__simpleNumericData )
 		for data in trueData :
 			self.assertTrue( DataTraits.isSimpleNumericDataType( data ) )
-		
+
 		falseData = []
 		falseData.extend( DataTraitsTest.__simpleData )
 		falseData.extend( DataTraitsTest.__matrixData )
@@ -97,14 +97,14 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__compoundData )
 		for data in falseData :
 			self.assertFalse( DataTraits.isSimpleNumericDataType( data ) )
-	
+
 	def testIsMatrixDataType( self ) :
-		
+
 		trueData = []
 		trueData.extend( DataTraitsTest.__matrixData )
 		for data in trueData :
 			self.assertTrue( DataTraits.isMatrixDataType( data ) )
-		
+
 		falseData = []
 		falseData.extend( DataTraitsTest.__simpleData )
 		falseData.extend( DataTraitsTest.__simpleNumericData )
@@ -113,14 +113,14 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__compoundData )
 		for data in falseData :
 			self.assertFalse( DataTraits.isMatrixDataType( data ) )
-	
+
 	def testIsMappingDataType( self ) :
-		
+
 		trueData = []
 		trueData.extend( DataTraitsTest.__compoundData )
 		for data in trueData :
 			self.assertTrue( DataTraits.isMappingDataType( data ) )
-		
+
 		falseData = []
 		falseData.extend( DataTraitsTest.__simpleData )
 		falseData.extend( DataTraitsTest.__simpleNumericData )
@@ -129,14 +129,14 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__matrixData )
 		for data in falseData :
 			self.assertFalse( DataTraits.isMappingDataType( data ) )
-	
+
 	def testIsSequenceDataType( self ) :
-		
+
 		trueData = []
 		trueData.extend( DataTraitsTest.__sequenceData )
 		for data in trueData :
 			self.assertTrue( DataTraits.isSequenceDataType( data ) )
-		
+
 		falseData = []
 		falseData.extend( DataTraitsTest.__simpleData )
 		falseData.extend( DataTraitsTest.__simpleNumericData )
@@ -145,7 +145,7 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__compoundData )
 		for data in falseData :
 			self.assertFalse( DataTraits.isSequenceDataType( data ) )
-	
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

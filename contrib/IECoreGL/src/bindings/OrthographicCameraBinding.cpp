@@ -58,5 +58,5 @@ void bindOrthographicCamera()
 		.def( "render", &OrthographicCamera::render )
 	;
 }
-	
+
 }

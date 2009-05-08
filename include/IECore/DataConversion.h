@@ -48,25 +48,25 @@ struct DataConversion : public std::unary_function<F, T>
 {
 	typedef F FromType;
 	typedef T ToType;
-	
+
 	/// The type of the converter that can perform the inverse transformation
 	typedef void InverseType;
-	
+
 	virtual ~DataConversion()
 	{
 	}
-	
+
 	T operator()( F f ) const
 	{
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 	}
-	
+
 	InverseType inverse() const
 	{
 		/// Function is not invertible
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 	}
-	
+
 };
 
 } // namespace IECore

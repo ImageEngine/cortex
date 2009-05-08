@@ -54,10 +54,10 @@ void bindMayaMeshBuilder( const char *name )
 		.def( init< MObject > () )
 		.def( "addVertex", &T::addVertex )
 		.def( "addTriangle", &T::addTriangle )
-		.def( "mesh", &T::mesh )								
+		.def( "mesh", &T::mesh )
 	;
-	
-	implicitly_convertible< typename T::Ptr, RefCountedPtr>();	
+
+	implicitly_convertible< typename T::Ptr, RefCountedPtr>();
 }
 
 void bindMayaMeshBuilder()

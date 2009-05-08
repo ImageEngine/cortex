@@ -37,7 +37,7 @@ from IECore import *
 class LsHeaderOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "LsHeaderOp", "Lists the contents of file headers using reader classes such as AttributeCache, HierarchicalCache and Reader.",
 			Parameter(
 				name = "result",
@@ -45,9 +45,9 @@ class LsHeaderOp( Op ) :
 				defaultValue = StringVectorData()
 			)
 		)
-		
+
 		self.parameters().addParameters(
-		
+
 			[
 				FileNameParameter(
 					name = "file",
@@ -71,7 +71,7 @@ class LsHeaderOp( Op ) :
 			]
 		)
 
-		self.userData()["UI"] = CompoundObject( 
+		self.userData()["UI"] = CompoundObject(
 									{
 										"showResult": BoolData( True ),
 										"closeAfterExecution": BoolData( True ),
@@ -122,10 +122,10 @@ class LsHeaderOp( Op ) :
 
 		headerLines = []
 		formatCompound( headers, headerLines )
-	
+
 		if operands.resultType.value == "string" :
 			return StringData( "\n".join( headerLines ) )
 		else :
 			return StringVectorData( headerLines )
-		
+
 registerRunTimeTyped( LsHeaderOp, 100015, Op )

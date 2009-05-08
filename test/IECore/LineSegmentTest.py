@@ -39,30 +39,30 @@ from IECore import *
 class LineSegmentTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		l = LineSegment3f()
-		
+
 		p0 = V3f( 1, 2, 3 )
 		p1 = V3f( 4, 5, 6 )
 		l = LineSegment3f( p0, p1 )
-		
+
 		self.assertEqual( l.p0, p0 )
 		self.assertEqual( l.p1, p1 )
-		
+
 	def testPointAccess( self ) :
-	
-		l = LineSegment3f()	
-	
+
+		l = LineSegment3f()
+
 		l.p0 = V3f( 1, 2, 3 )
 		self.assertEqual( l.p0, V3f( 1, 2, 3 ) )
-	
+
 		l.p1 = V3f( 4, 5, 6 )
 		self.assertEqual( l.p1, V3f( 4, 5, 6 ) )
-	
+
 	def testCall( self ) :
-	
+
 		l = LineSegment3f( V3f( 0 ), V3f( 1 ) )
-		
+
 		self.assertEqual( l( 0 ), V3f( 0 ) )
 		self.assertEqual( l( 1 ), V3f( 1 ) )
 		self.assertEqual( l( 0.5 ), V3f( 0.5 ) )
@@ -70,87 +70,87 @@ class LineSegmentTest( unittest.TestCase ) :
 		self.assertEqual( l( 2 ), V3f( 2 ) )
 
 	def testLength( self ) :
-	
+
 		l = LineSegment3f( V3f( 1 ), V3f( 2 ) )
-		
+
 		self.assertEqual( l.length(), V3f( 1 ).length() )
 		self.assertEqual( l.length2(), V3f( 1 ).length2() )
-		
+
 	def testClosestPointTo( self ) :
-	
+
 		l = LineSegment3f( V3f( 1 ), V3f( 2 ) )
-		
+
 		r = Rand32( 100 )
-		
+
 		for i in range( 0, 1000 ) :
-		
+
 			p = l( r.nextf( 0, 1 ) )
 			self.assert_( l.closestPointTo( p ).equalWithAbsError( p, 0.00001 ) )
-			
+
 		for i in range( 0, 1000 ) :
-		
+
 			p = l( r.nextf( -1, 0 ) )
 			self.assert_( l.closestPointTo( p ).equalWithAbsError( l.p0, 0.00001 ) )
-				
+
 		for i in range( 0, 1000 ) :
-		
+
 			p = l( r.nextf( 1, 2 ) )
 			self.assert_( l.closestPointTo( p ).equalWithAbsError( l.p1, 0.00001 ) )
-		
+
 		t = l.direction().cross( V3f( 0, 1, 0 ) )
 		for i in range( 0, 1000 ) :
-		
+
 			pl = l( r.nextf( 0, 1 ) )
 			pt = pl + t * r.nextf( -10, 10 )
 			self.assert_( l.closestPointTo( pt ).equalWithAbsError( pl, 0.00001 ) )
-			
+
 		for i in range( 0, 1000 ) :
-		
+
 			pl = l( r.nextf( 1, 2 ) )
 			pt = pl + t * r.nextf( -10, 10 )
 			self.assert_( l.closestPointTo( pt ).equalWithAbsError( l.p1, 0.00001 ) )
 
 		for i in range( 0, 1000 ) :
-		
+
 			pl = l( r.nextf( -1, 0 ) )
 			pt = pl + t * r.nextf( -10, 10 )
 			self.assert_( l.closestPointTo( pt ).equalWithAbsError( l.p0, 0.00001 ) )
-	
+
 	def testClosestPoints( self ) :
-	
+
 		r = Rand32( 100 )
 		for i in range( 0, 1000 ) :
-		
+
 			x = r.nextf( -10, 10 )
 			y = r.nextf( -10, 10 )
 			z1 = r.nextf( -10, 10 )
 			z2 = r.nextf( -10, 10 )
-			
+
 			l1 = LineSegment3f( V3f( -10, y, z1 ), V3f( 10, y, z1 ) )
 			l2 = LineSegment3f( V3f( x, -10, z2 ), V3f( x, 10, z2 ) )
-		
+
 			p1, p2 = l1.closestPoints( l2 )
 			p3, p4 = l2.closestPoints( l1 )
-	
+
 			self.assert_( p1.equalWithAbsError( p4, 0.00001 ) )
 			self.assert_( p2.equalWithAbsError( p3, 0.00001 ) )
-			
+
 		# |
 		# |
 		# |  ------
 		# |
-		# |	
+		# |
 		l1 = LineSegment3f( V3f( 0, 0, 0 ), V3f( 0, 2, 0 ) )
 		l2 = LineSegment3f( V3f( 1, 1, 0 ), V3f( 3, 1, 0 ) )
-		
+
 		p1, p2 = l1.closestPoints( l2 )
 		p3, p4 = l2.closestPoints( l1 )
 		self.assertEqual( p1, p4 )
 		self.assertEqual( p2, p3 )
-	
+
 		self.assertEqual( p1, V3f( 0, 1, 0 ) )
 		self.assertEqual( p2, V3f( 1, 1, 0 ) )
-		
+
 		# \
 		#  \
 		#
@@ -159,52 +159,52 @@ class LineSegmentTest( unittest.TestCase ) :
 
 		l1 = LineSegment3f( V3f( 0, 0, 0 ), V3f( 2, 2, 0 ) )
 		l2 = LineSegment3f( V3f( 0, 5, 0 ), V3f( 2, 3, 0 ) )
-		
+
 		p1, p2 = l1.closestPoints( l2 )
 		p3, p4 = l2.closestPoints( l1 )
 		self.assertEqual( p1, p4 )
 		self.assertEqual( p2, p3 )
-	
+
 		self.assertEqual( p1, V3f( 2, 2, 0 ) )
 		self.assertEqual( p2, V3f( 2, 3, 0 ) )
-		
+
 	def testTransform( self ) :
-	
+
 		l1 = LineSegment3f( V3f( 0, 0, 0 ), V3f( 0, 2, 0 ) )
 		l2 = LineSegment3f( l1 )
 		self.assertEqual( l1, l2 )
-		
+
 		t = M44f.createTranslated( V3f( 1 ) )
-		
+
 		l3 = l2 * t
 		self.assertEqual( l1, l2 )
 		self.assertEqual( l3.p0, l2.p0 + V3f( 1 ) )
 		self.assertEqual( l3.p1, l2.p1 + V3f( 1 ) )
-		
+
 		l1 *= t
 		self.assertEqual( l1.p0, l2.p0 + V3f( 1 ) )
 		self.assertEqual( l1.p1, l2.p1 + V3f( 1 ) )
-		
+
 	def testIntersect( self ) :
-	
+
 		l = LineSegment3f( V3f( 0, -1, 0 ), V3f( 0, 1, 0 ) )
 		p = Plane3f( V3f( 0, 1, 0 ), 0 )
 		self.assertEqual( l.intersect( p ), ( True, V3f( 0, 0, 0 ) ) )
 		self.assertEqual( l.intersectT( p ), ( True, 0.5 ) )
-		
+
 		p = Plane3f( V3f( -1, 0, 0 ), 10 )
 		self.assertEqual( l.intersect( p )[0], False )
-		self.assertEqual( l.intersectT( p )[0], False )		
-							
+		self.assertEqual( l.intersectT( p )[0], False )
+
 	def testRepr( self ) :
-	
+
 		p0 = V3f( 0, 0, 0 )
-		p1 = V3f( 0, 0, 0 )		
-	
+		p1 = V3f( 0, 0, 0 )
+
 		l = LineSegment3f( p0, p1 )
-		self.assertEqual( repr(l), "IECore.LineSegment3f( " + repr(p0) + ", " + repr(p1) + " )" )	
-		
-		
-		
+		self.assertEqual( repr(l), "IECore.LineSegment3f( " + repr(p0) + ", " + repr(p1) + " )" )
+
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

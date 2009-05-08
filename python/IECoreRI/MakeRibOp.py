@@ -38,7 +38,7 @@ import IECoreRI
 class MakeRibOp( IECore.Op ) :
 
 	def __init__( self ) :
-	
+
 		IECore.Op.__init__( self, "MakeRibOp", "Converts files to rib format.",
 			IECore.FileNameParameter(
 				name = "result",
@@ -50,7 +50,7 @@ class MakeRibOp( IECore.Op ) :
 		)
 
 		self.parameters().addParameters(
-		
+
 			[
 				IECore.FileNameParameter(
 					name = "src",
@@ -75,15 +75,15 @@ class MakeRibOp( IECore.Op ) :
 		)
 
 	def doOperation( self, operands ) :
-	
+
 		reader = IECore.Reader.create( operands.src.value )
 		if not reader :
 			raise Exception( "Unable to create a Reader for \"%s\." % operands.src.value )
-			
+
 		renderable = reader.read()
 		if not renderable or not renderable.inheritsFrom( IECore.Renderable.staticTypeId() ) :
 			raise Exception( "\"%s\ does not contain a Renderable object." % operands.src.value )
-			
+
 		renderer = IECoreRI.RIRenderer( operands.dst.value )
 		if operands.addWorld.value :
 			renderer.worldBegin()
@@ -92,5 +92,5 @@ class MakeRibOp( IECore.Op ) :
 
 		if operands.addWorld.value :
 			renderer.worldEnd()
-		
-		return operands.dst	
+
+		return operands.dst

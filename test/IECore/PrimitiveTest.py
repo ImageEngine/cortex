@@ -40,9 +40,9 @@ from IECore import *
 class PrimitiveTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		m = MeshPrimitive( IntVectorData( [ 3, 3 ] ), IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
-		
+
 		self.assertEqual( m.inferInterpolation( 1 ), PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m.inferInterpolation( 2 ), PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( m.inferInterpolation( 4 ), PrimitiveVariable.Interpolation.Vertex )
@@ -56,16 +56,16 @@ class PrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( m.inferInterpolation( IntVectorData( [ 1, 2, 3, 4 ] ) ), PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( m.inferInterpolation( IntVectorData( [ 1, 2, 3, 4, 5, 6 ] ) ), PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( m.inferInterpolation( IntVectorData( [ 1, 2, 3, 4, 5, 6, 7 ] ) ), PrimitiveVariable.Interpolation.Invalid )
-		
+
 	def testPrimitiveVariableValidity( self ) :
-	
+
 		m = MeshPrimitive( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 1, 2 ] ) )
-		
+
 		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( [ 1 ] ) ) ) )
 		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatData( 1 ) ) ) )
-		
+
 		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3 ] ) ) ) )
 		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3, 4 ] ) ) ) )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

@@ -71,13 +71,13 @@ import maya.mel
 # print mr, mr()
 #
 # You would hope the weakref would no longer be valid, but it is - indicating the leak.
-# 
+#
 # \todo We might be able to work around this by passing executable strings to the postMenuCommand,
-# with keys to some dictionary which stores the MenuDefinitions. Then we can remove the 
+# with keys to some dictionary which stores the MenuDefinitions. Then we can remove the
 # definitions from some uiDeleted scriptjob for the menu. Alternatively Alias could fix the damn
 # thing themselves.
-def createMenu( definition, parent, label="", insertAfter=None, radialPosition=None ) :	
-	
+def createMenu( definition, parent, label="", insertAfter=None, radialPosition=None ) :
+
 	menu = None
 	if maya.cmds.window( parent, query=True, exists=True ) :
 		# parent is a window - we're sticking it in the menubar
@@ -91,12 +91,12 @@ def createMenu( definition, parent, label="", insertAfter=None, radialPosition=N
 			kw["radialPosition"] = radialPosition
 		menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True, **kw )
 	else :
-		# assume parent is a control which can accept a popup menu 
+		# assume parent is a control which can accept a popup menu
 		menu = maya.cmds.popupMenu( parent=parent )
-		
+
 	maya.cmds.menu( menu, edit=True, postMenuCommand = lambda : __postMenu( menu, definition ) )
 	return menu
-	
+
 # We don't know what the extra argument maya wants to pass to callbacks is, so
 # we have to wrap them so we can throw away that argument
 def __callbackWrapper( cb, a ) :

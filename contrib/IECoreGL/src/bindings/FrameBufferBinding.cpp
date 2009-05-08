@@ -59,5 +59,5 @@ void bindFrameBuffer()
 		.def( "validate", &FrameBuffer::validate )
 	;
 }
-	
+
 }

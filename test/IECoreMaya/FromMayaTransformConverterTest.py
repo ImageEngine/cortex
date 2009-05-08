@@ -41,55 +41,55 @@ import maya.cmds
 class FromMayaTransformConverterTest( unittest.TestCase ) :
 
 	def test( self ) :
-		
+
 		locatorTransform = maya.cmds.spaceLocator()[0]
-		
+
 		c = IECoreMaya.FromMayaDagNodeConverter.create( str( locatorTransform ), IECore.TypeId.TransformationMatrixdData )
-		
+
 		self.assertEqual( IECoreMaya.TypeId.FromMayaTransformConverter, IECoreMaya.FromMayaTransformConverter.staticTypeId() )
 		self.assertEqual( c.typeId(), IECoreMaya.FromMayaTransformConverter.staticTypeId() )
-		
+
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, IECore.M44d() )
-		
+
 		maya.cmds.xform( locatorTransform, translation=( 1, 2, 3 ) )
-		
+
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 1, 2, 3 ) ) )
-		
+
 		group = maya.cmds.group( locatorTransform )
-		
+
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 1, 2, 3 ) ) )
-		
+
 		maya.cmds.xform( group, translation=( 1, 0, 10 ) )
-		
+
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 2, 2, 13 ) ) )
-		
+
 		c["space"].setValue( "Local" )
-		
+
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 1, 2, 3 ) ) )
-		
+
 		locatorShape = maya.cmds.listRelatives( locatorTransform, children=True )[0]
-		
+
 		c = IECoreMaya.FromMayaTransformConverter( str( locatorShape ) )
-		
+
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 2, 2, 13 ) ) )
-	
+
 		c["space"].setValue( "Local" )
-		
+
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, IECore.M44d() )
-				
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

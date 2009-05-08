@@ -41,13 +41,13 @@ import nuke
 class KnobAccessorsTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		n = nuke.nodes.RadialDistort()
 		k = n.knob( "scale" )
-		
+
 		self.assertEqual( IECoreNuke.getKnobValue( k ), IECore.V3f( 1 ) )
 		self.assertEqual( IECoreNuke.getKnobValue( k, resultType=IECore.V3d ), IECore.V3d( 1 ) )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

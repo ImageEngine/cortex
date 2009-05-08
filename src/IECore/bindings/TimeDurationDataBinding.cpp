@@ -56,9 +56,9 @@ static int getMicroseconds( const posix_time::time_duration &dur )
 {
 	static long ticksPerSecond = posix_time::time_duration::ticks_per_second();
 	long fractionalSeconds = dur.fractional_seconds();
-	
+
 	static const int oneMillion = 1000000;
-	
+
 	/// Prevent over/underflow
 	if ( ticksPerSecond > oneMillion )
 	{
@@ -105,7 +105,7 @@ struct TimeDurationFromPythonDelta
 		{
 			days = -days;
 		}
-				
+
 		posix_time::time_duration td = posix_time::hours(24)*days
 			+ posix_time::seconds( pyDelta->seconds )
 			+ posix_time::microseconds( pyDelta->microseconds );
@@ -113,8 +113,8 @@ struct TimeDurationFromPythonDelta
 		if ( isNegative )
 		{
 			td = td.invert_sign();
-		}		
-		
+		}
+
 
 		void* storage = (( converter::rvalue_from_python_storage<posix_time::time_duration>* ) data )->storage.bytes;
 		new( storage ) posix_time::time_duration( td );
@@ -131,12 +131,12 @@ struct TimeDurationToPythonDelta
 			days --;
 		long seconds = td.total_seconds() - days * ( 24 * 60 * 60 );
 		long microSeconds = getMicroseconds( td );
-		
+
 		if ( days < 0 )
 		{
 			microSeconds = 1000000 - 1 - microSeconds;
 		}
-		
+
 		return PyDelta_FromDSU( days, seconds, microSeconds );
 	}
 };

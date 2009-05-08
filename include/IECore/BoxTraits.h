@@ -46,7 +46,7 @@ namespace IECore
 {
 
 /// The BoxTypeTraits struct provides a means of deriving the vector base types of different box
-/// classes within templated code. 
+/// classes within templated code.
 template<typename T>
 struct BoxTypeTraits
 {
@@ -59,13 +59,13 @@ template<typename T>
 struct BoxTraits
 {
 	typedef typename BoxTypeTraits<T>::BaseType BaseType;
-	
+
 	/// Create a box from the minimum and maximum corner points
 	static T create( const BaseType &min, const BaseType &max )
 	{
 		return T( min, max );
 	}
-	
+
 	/// Create an empty box
 	static T create()
 	{
@@ -78,12 +78,12 @@ struct BoxTraits
 		return box.min;
 	}
 
-	/// Return the box's maximum corner point	
+	/// Return the box's maximum corner point
 	static BaseType max( const T &box )
 	{
 		return box.max;
 	}
-	
+
 	static void setMin( T &box, const BaseType &p )
 	{
 		box.min = p;
@@ -92,19 +92,19 @@ struct BoxTraits
 	static void setMax( T &box, const BaseType &p )
 	{
 		box.max = p;
-	}		
-	
+	}
+
 	/// Return true if the box is considered to be empty
 	static bool isEmpty( const T &box )
 	{
 		return box.isEmpty();
 	}
-	
+
 	/// Modify the box such that it is considered to be empty
 	static void makeEmpty( T &box )
 	{
 		box.makeEmpty();
-		
+
 		assert( isEmpty(box) );
 	}
 };
@@ -127,13 +127,13 @@ template<>
 struct BoxTypeTraits<Imath::Box3f>
 {
 	typedef Imath::V3f BaseType;
-	
+
 };
 
 template<>
 struct BoxTypeTraits<Imath::Box3d>
 {
-	typedef Imath::V3d BaseType;	
+	typedef Imath::V3d BaseType;
 
 };
 
@@ -141,7 +141,7 @@ template<>
 struct BoxTypeTraits<Imath::Box2s>
 {
 	typedef Imath::V2s BaseType;
-	
+
 };
 
 template<>
@@ -154,15 +154,15 @@ struct BoxTypeTraits<Imath::Box2i>
 template<>
 struct BoxTypeTraits<Imath::Box2f>
 {
-	typedef Imath::V2f BaseType;	
+	typedef Imath::V2f BaseType;
 
 };
 
 template<>
 struct BoxTypeTraits<Imath::Box2d>
 {
-	typedef Imath::V2d BaseType;	
-	
+	typedef Imath::V2d BaseType;
+
 };
 
 

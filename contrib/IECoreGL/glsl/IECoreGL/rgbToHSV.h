@@ -38,12 +38,12 @@
 vec3 rgbToHSV( vec3 rgb )
 {
 	vec3 result;
-	
+
 	float minc = min( min( rgb.r, rgb.g ), rgb.b );
 	float maxc = max( max( rgb.r, rgb.g ), rgb.b );
-	
+
 	result.b = maxc; // v
-	
+
 	float delta = maxc - minc;
 	if( maxc != 0.0 )
 	{
@@ -55,7 +55,7 @@ vec3 rgbToHSV( vec3 rgb )
 		result.r = 0.0;
 		return result;
 	}
-	
+
 	if( delta==0.0 )
 	{
 		result.r = 0;
@@ -75,14 +75,14 @@ vec3 rgbToHSV( vec3 rgb )
 			result.r = 4.0 + (rgb.r - rgb.g) / delta;
 		}
 	}
-	
+
 	result.r /= 6.0; // we'll keep hue in the 0-1 range
-	
+
 	if( result.r < 0.0 )
 	{
 		result.r += 1.0;
 	}
-	
+
 	return result;
 }
 

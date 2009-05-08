@@ -47,15 +47,15 @@ MeshPrimitiveImplicitSurfaceFunction::MeshPrimitiveImplicitSurfaceFunction( Mesh
 {
 	TriangulateOpPtr op = new TriangulateOp();
 	op->inputParameter()->setValue( mesh );
-	
+
 	mesh = runTimeCast< MeshPrimitive > ( op->operate() );
-	
+
 	m_evaluator = PrimitiveEvaluator::create( mesh );
-	
+
 	if (! m_evaluator )
 	{
 		throw InvalidArgumentException( "Cannot create evaluator in MeshPrimitiveImplicitSurfaceFunction" );
-	}	
+	}
 }
 
 MeshPrimitiveImplicitSurfaceFunction::~MeshPrimitiveImplicitSurfaceFunction()

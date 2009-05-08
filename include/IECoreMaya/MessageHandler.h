@@ -42,7 +42,7 @@ namespace IECoreMaya
 
 class MessageHandler : public IECore::MessageHandler
 {
-	
+
 	public :
 
 		virtual void handle( Level level, const std::string &context, const std::string &message );

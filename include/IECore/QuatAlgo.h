@@ -97,7 +97,7 @@ slerp(const Imath::Quat<T> &q1,const Imath::Quat<T> &q2, T t)
     // web page, The Right Way to Calculate Stuff, at
     // http://www.plunk.org/~hatch/rightway.php
     //
-	
+
     T a = IECore::angle4D (q1, q2);
     T s = 1 - t;
 

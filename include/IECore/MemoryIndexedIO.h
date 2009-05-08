@@ -49,10 +49,10 @@ class MemoryIndexedIO : public FileIndexedIO
 		IE_CORE_DECLAREMEMBERPTR( MemoryIndexedIO );
 
 		MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode);
-		
-		virtual ~MemoryIndexedIO();		
-		ConstCharVectorDataPtr buffer();		
-	
+
+		virtual ~MemoryIndexedIO();
+		ConstCharVectorDataPtr buffer();
+
 	protected:
 };
 

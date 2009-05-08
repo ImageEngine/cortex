@@ -38,61 +38,61 @@ from IECore import *
 class testReversedFrameList( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		r = ReversedFrameList( FrameRange( 1, 11, 2 ) )
 		self.assertEqual( r.asList(), [ 11, 9, 7, 5, 3, 1 ] )
-		
+
 	def testParsing( self ) :
-	
+
 		r = FrameList.parse( "1-10r" )
 		self.assert_( isinstance( r, ReversedFrameList ) )
 		rr = range( 1, 11 )
 		rr.reverse()
 		self.assertEqual( r.asList(), rr )
-		
+
 		r = FrameList.parse( "1-4,5-10r" )
 		self.assert_( isinstance( r, CompoundFrameList ) )
 		self.assertEqual( r.asList(), [ 1, 2, 3, 4, 10, 9, 8, 7, 6, 5 ] )
-		
+
 		r = FrameList.parse( "(1-4,5-10)r" )
 		self.assert_( isinstance( r, ReversedFrameList ) )
 		self.assertEqual( r.asList(), [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ] )
-		
+
 		r = FrameList.parse( "( 5-10 )r" )
 		self.assert_( isinstance( r, ReversedFrameList ) )
 		self.assertEqual( r.asList(), [ 10, 9, 8, 7, 6, 5 ] )
-		
+
 	def testStr( self ) :
-	
+
 		r = ReversedFrameList( FrameRange( 1, 11, 2 ) )
 		self.assertEqual( str( r ), "1-11x2r" )
-		
+
 		r = ReversedFrameList( CompoundFrameList( [ FrameRange( 1, 10 ), FrameRange( 20, 30 ) ] )  )
 		self.assertEqual( str( r ), "(1-10,20-30)r" )
-		
+
 		r = CompoundFrameList( [ FrameRange( 1, 10 ), ReversedFrameList( FrameRange( 20, 30 ) ) ] )
 		self.assertEqual( str( r ), "1-10,20-30r" )
-		
+
 	def testRepr( self ) :
-	
+
 		import IECore
-		
+
 		r = ReversedFrameList( FrameRange( 1, 11, 2 ) )
 		self.assertEqual( r, eval( repr( r ) ) )
-		
+
 		r = ReversedFrameList( CompoundFrameList( [ FrameRange( 1, 10 ), FrameRange( 20, 30 ) ] )  )
 		self.assertEqual( r, eval( repr( r ) ) )
-		
+
 		r = CompoundFrameList( [ FrameRange( 1, 10 ), ReversedFrameList( FrameRange( 20, 30 ) ) ] )
 		self.assertEqual( r, eval( repr( r ) ) )
-		
+
 	def testImpactOnOtherParsing( self ) :
-	
+
 		r = FrameList.parse( "(1-10)" )
 		self.assertEqual( r.start, 1 )
 		self.assertEqual( r.end, 10 )
 		self.assertEqual( r.step, 1 )
-		
+
 		r = FrameList.parse( "( 1-10 )" )
 		self.assertEqual( r.start, 1 )
 		self.assertEqual( r.end, 10 )

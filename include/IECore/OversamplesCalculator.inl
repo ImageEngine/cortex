@@ -49,7 +49,7 @@ OversamplesCalculator<U>::OversamplesCalculator( double frameRate, int desiredOv
 		m_oversamples ++;
 		step = (double)U / (m_frameRate * m_oversamples);
 	}
-	
+
 	if (fabs(step - floor(step)) > 0.0001)
 	{
 		throw IECore::Exception( "Unsupported oversamples/frame rate combination." );

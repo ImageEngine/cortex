@@ -65,7 +65,7 @@ bool DirNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) c
 	{
 		return false;
 	}
-	
+
 	ConstStringDataPtr s = static_pointer_cast<const StringData>( value );
 
 	// empty check
@@ -75,7 +75,7 @@ bool DirNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) c
 		// skip the other checks
 		return true;
 	}
-	
+
 	// dir type check
 	if( boost::filesystem::exists(boost::filesystem::path(s->readable())) &&
 		 !boost::filesystem::is_directory(boost::filesystem::path(s->readable())))

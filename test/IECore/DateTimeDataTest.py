@@ -41,64 +41,64 @@ import datetime
 class DateTimeDataTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		dd = IECore.DateTimeData()
-		
+
 		d = datetime.datetime( 2009, 2, 12 )
 		dd = IECore.DateTimeData( d )
-		
-		
+
+
 	def testValueAccess( self ) :
-	
+
 		d = datetime.datetime( 2009, 2, 12 )
 		dd = IECore.DateTimeData( d )
-				
+
 		self.assertEqual( dd.value.year, 2009 )
-	
+
 	def testCopy( self ) :
-	
+
 		d = IECore.DateTimeData( datetime.datetime.now() )
 		dd = d.copy()
-		
+
 		self.assertEqual( d, dd )
-		
+
 		# Same time tomorrow
 		d.value += datetime.timedelta( days = 1 )
-		
+
 		self.assertNotEqual( d, dd )
 
 	def testIO( self ) :
-		
-		d = IECore.DateTimeData()		
-		IECore.ObjectWriter( d, "test/IECore/DateTimeData.cob" ).write()		
-		dd = IECore.ObjectReader( "test/IECore/DateTimeData.cob" ).read()		
+
+		d = IECore.DateTimeData()
+		IECore.ObjectWriter( d, "test/IECore/DateTimeData.cob" ).write()
+		dd = IECore.ObjectReader( "test/IECore/DateTimeData.cob" ).read()
 		self.assertEqual( d, dd )
-		
-		d = IECore.DateTimeData( datetime.datetime.now() )		
-		IECore.ObjectWriter( d, "test/IECore/DateTimeData.cob" ).write()		
-		dd = IECore.ObjectReader( "test/IECore/DateTimeData.cob" ).read()		
+
+		d = IECore.DateTimeData( datetime.datetime.now() )
+		IECore.ObjectWriter( d, "test/IECore/DateTimeData.cob" ).write()
+		dd = IECore.ObjectReader( "test/IECore/DateTimeData.cob" ).read()
 		self.assertEqual( d, dd )
-		
-	def testRepr( self ) :	
-	
+
+	def testRepr( self ) :
+
 		d = datetime.datetime.now()
 		dd = IECore.DateTimeData(d)
-		
-		self.assertEqual( repr(dd), "IECore.DateTimeData( " + repr(d) + " )" ) 
-		
-		self.assertEqual( dd, eval( repr(dd) ) )
-		
-	def setUp(self):
-        
-		if os.path.isfile( "test/IECore/DateTimeData.cob" ) :
-			os.remove( "test/IECore/DateTimeData.cob" )			
 
-	def tearDown(self):
-        
+		self.assertEqual( repr(dd), "IECore.DateTimeData( " + repr(d) + " )" )
+
+		self.assertEqual( dd, eval( repr(dd) ) )
+
+	def setUp(self):
+
 		if os.path.isfile( "test/IECore/DateTimeData.cob" ) :
 			os.remove( "test/IECore/DateTimeData.cob" )
 
-		
+	def tearDown(self):
+
+		if os.path.isfile( "test/IECore/DateTimeData.cob" ) :
+			os.remove( "test/IECore/DateTimeData.cob" )
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

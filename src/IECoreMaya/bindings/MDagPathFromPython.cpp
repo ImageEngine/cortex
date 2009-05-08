@@ -58,7 +58,7 @@ struct MDagPathFromPython
 			return 0;
 		}
 	}
-	
+
 	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
 	{
 		void *storage = ((converter::rvalue_from_python_storage<MDagPath>*)data)->storage.bytes;
@@ -78,15 +78,15 @@ struct MDagPathFromPython
 
 		MSelectionList s;
 		StatusException::throwIfError( s.add( name ) );
-		
+
 		MDagPath path;
 		StatusException::throwIfError( s.getDagPath( 0, path ) );
-		
+
 		new (storage) MDagPath( path );
 		data->convertible = storage;
 	}
 };
-   
+
 void bindMDagPathFromPython()
 {
 	converter::registry::push_back(

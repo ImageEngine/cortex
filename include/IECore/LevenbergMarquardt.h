@@ -85,7 +85,7 @@ class LevenbergMarquardt : public boost::noncopyable
 		BOOST_STATIC_ASSERT( boost::is_floating_point<T>::value );
 
 	public:
-	
+
 		typedef T ValueType;
 		typedef ErrorFn ErrorFunctionType;
 		typedef Traits<T> TraitsType;
@@ -109,15 +109,15 @@ class LevenbergMarquardt : public boost::noncopyable
 		        T epsilon = Traits<T>::machinePrecision(),
 		        T stepBound = T(100)
 		);
-		
+
 		void getParameters(
 		        T &ftol,
 		        T &xtol,
 		        T &gtol,
 		        T &epsilon,
 		        T &stepBound
-		) const;				
-		
+		) const;
+
 		void setMaxCalls( unsigned maxCalls );
 		unsigned getMaxCalls() const;
 

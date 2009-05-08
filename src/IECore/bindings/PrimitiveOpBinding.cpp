@@ -49,9 +49,9 @@ namespace IECore {
 class PrimitiveOpWrap : public PrimitiveOp, public Wrapper<PrimitiveOp>
 {
 	public :
-		
+
 		PrimitiveOpWrap( PyObject *self, const std::string name, const std::string description ) : PrimitiveOp( name, description ), Wrapper<PrimitiveOp>( self, this ) {};
-		
+
 		virtual void modifyPrimitive( PrimitivePtr object, ConstCompoundObjectPtr operands )
 		{
 			this->get_override( "modifyPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) );

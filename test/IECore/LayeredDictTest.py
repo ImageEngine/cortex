@@ -38,7 +38,7 @@ import IECore
 class LayeredDictTest( unittest.TestCase ) :
 
 	def testDict( self ) :
-	
+
 		dict1 = {
 			"a" : 10,
 			"b" : {
@@ -47,7 +47,7 @@ class LayeredDictTest( unittest.TestCase ) :
 			},
 			"e" : 40,
 		}
-		
+
 		dict2 = {
 			"a" : 20,
 			"b" : {
@@ -58,9 +58,9 @@ class LayeredDictTest( unittest.TestCase ) :
 				"h" : 1
 			},
 		}
-		
+
 		d = IECore.LayeredDict( [ dict1, dict2 ] )
-		
+
 		self.assertEqual( d["a"], 10 )
 		self.assertEqual( d["b"]["c"], 20 )
 		self.assertEqual( d["b"]["d"], 30 )
@@ -69,10 +69,10 @@ class LayeredDictTest( unittest.TestCase ) :
 		self.assertEqual( d["b"]["h"], 1 )
 
 		self.assertRaises( KeyError, d.__getitem__, "z" )
-		
-		
+
+
 	def testCompoundObject( self ) :
-	
+
 		dict1 = IECore.CompoundObject(
 			{
 				"a" : IECore.IntData( 10 ),
@@ -83,8 +83,8 @@ class LayeredDictTest( unittest.TestCase ) :
 				"e" : IECore.IntData( 40 ),
 			}
 		)
-	
-		dict2 = IECore.CompoundObject( 
+
+		dict2 = IECore.CompoundObject(
 			{
 				"a" : IECore.IntData( 20 ),
 				"b" : {
@@ -98,7 +98,7 @@ class LayeredDictTest( unittest.TestCase ) :
 		)
 
 		d = IECore.LayeredDict( [ dict1, dict2 ] )
-		
+
 		self.assertEqual( d["a"], IECore.IntData( 10 ) )
 		self.assertEqual( d["b"]["c"], IECore.IntData( 20 ) )
 		self.assertEqual( d["b"]["d"], IECore.IntData( 30 ) )
@@ -107,9 +107,9 @@ class LayeredDictTest( unittest.TestCase ) :
 		self.assertEqual( d["b"]["h"], IECore.IntData( 1 ) )
 
 		self.assertRaises( KeyError, d.__getitem__, "z" )
-	
+
 	def testKeys( self ) :
-	
+
 		dict1 = {
 			"a" : 10,
 			"b" : {
@@ -118,8 +118,8 @@ class LayeredDictTest( unittest.TestCase ) :
 			},
 			"e" : 40,
 		}
-		
-		dict2 = IECore.CompoundObject( 
+
+		dict2 = IECore.CompoundObject(
 			{
 				"a" : IECore.IntData( 20 ),
 				"b" : {
@@ -134,57 +134,57 @@ class LayeredDictTest( unittest.TestCase ) :
 		)
 
 		d = IECore.LayeredDict( [ dict1, dict2 ] )
-		
+
 		self.assertEqual( set( d.keys() ), set( [ "a", "b", "e", "i" ] ) )
 		self.assertEqual( set( d["b"].keys() ), set( [ "c", "d", "f", "h" ] ) )
-	
+
 	def testContains( self ) :
-	
+
 		dict1 = {
 			"a" : 10,
 			"b" : {
 			},
 			"e" : 40,
 		}
-		
-		dict2 = IECore.CompoundObject( 
+
+		dict2 = IECore.CompoundObject(
 			{
 				"b" : IECore.CompoundObject(),
 				"i" : IECore.IntData( 1 )
 			}
 		)
-		
+
 		d = IECore.LayeredDict( [ dict1, dict2 ] )
-		
+
 		self.assert_( "a" in d )
 		self.assert_( "b" in d )
 		self.assert_( "e" in d )
 		self.assert_( "i" in d )
 		self.assert_( not "x" in d )
-	
+
 	def testGet( self ) :
-	
+
 		dict1 = {
 			"a" : 10,
 			"e" : 40,
 		}
-		
-		dict2 = IECore.CompoundObject( 
+
+		dict2 = IECore.CompoundObject(
 			{
 				"a" : IECore.StringData( "hello" ),
 				"b" : IECore.FloatData( 10 ),
 				"i" : IECore.IntData( 1 )
 			}
 		)
-		
+
 		d = IECore.LayeredDict( [ dict1, dict2 ] )
-		
+
 		self.assertEqual( d.get( "a", None ), 10 )
 		self.assertEqual( d.get( "b", None ), IECore.FloatData( 10 ) )
 		self.assertEqual( d.get( "i", None ), IECore.IntData( 1 ) )
 		self.assertEqual( d.get( "e", None ), 40 )
 		self.assertEqual( d.get( "x", 11 ), 11 )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

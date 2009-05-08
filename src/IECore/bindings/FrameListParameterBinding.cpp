@@ -47,15 +47,15 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 class FrameListParameterWrap : public FrameListParameter, public Wrapper< FrameListParameter >
 {
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( FrameListParameterWrap );
-	
+
 	protected:
 
 		/// Allow construction from either a string, StringData, or a FrameList
@@ -66,7 +66,7 @@ class FrameListParameterWrap : public FrameListParameter, public Wrapper< FrameL
 			{
 				return new StringData( de() );
 			}
-			else			
+			else
 			{
 				extract<StringData *> de( defaultValue );
 				if( de.check() )
@@ -90,34 +90,34 @@ class FrameListParameterWrap : public FrameListParameter, public Wrapper< FrameL
 
 	public :
 
-		FrameListParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )	
+		FrameListParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )
 			:	FrameListParameter( n, d, makeDefault( dv ), allowEmptyList, parameterPresets<FrameListParameter::ObjectPresetsContainer>( p ), po, ud ), Wrapper< FrameListParameter >( self, this ) {};
-		
+
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( FrameListParameter );
 };
 
 
 void bindFrameListParameter()
-{	
+{
 	using boost::python::arg;
 
 	RunTimeTypedClass<FrameListParameter, FrameListParameterWrap::Ptr>()
-		.def( 
+		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, const dict &, bool, CompoundObjectPtr > >
-			( 
-				( 
-					arg( "name" ), 
-					arg( "description" ), 
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
 					arg( "defaultValue" ) = object( std::string( "" ) ),
 					arg( "allowEmptyList" ) = true,
 					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false , 
+					arg( "presetsOnly" ) = false ,
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
-				) 
+				)
 			)
 		)
-		.def( "getFrameListValue", &FrameListParameter::getFrameListValue )	
-		.def( "setFrameListValue", &FrameListParameter::setFrameListValue )	
+		.def( "getFrameListValue", &FrameListParameter::getFrameListValue )
+		.def( "setFrameListValue", &FrameListParameter::setFrameListValue )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FrameListParameter )
 	;
 

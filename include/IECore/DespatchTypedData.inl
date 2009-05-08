@@ -59,14 +59,14 @@ struct DespatchTypedData
 	struct Func
 	{
 		typedef typename Functor::ReturnType ReturnType;
-	
+
 		ReturnType operator()( typename DataType::Ptr data, Functor &functor, ErrorHandler &errorHandler )
-		{				
-			assert( data );		
-			
+		{
+			assert( data );
+
 			errorHandler.template operator()< DataType, Functor >( data, functor );
-			
-			return ReturnType();				
+
+			return ReturnType();
 		}
 	};
 
@@ -74,14 +74,14 @@ struct DespatchTypedData
 	struct Func< Enabler, typename boost::enable_if< Enabler<DataType> >::type >
 	{
 		typedef typename Functor::ReturnType ReturnType;
-	
+
 		ReturnType operator()( typename DataType::Ptr data, Functor &functor, ErrorHandler & )
-		{	
-			assert( data );	
-			
+		{
+			assert( data );
+
 			return functor.template operator()<DataType>( data );
 		}
-	};	
+	};
 };
 
 struct DespatchTypedDataExceptionError
@@ -89,7 +89,7 @@ struct DespatchTypedDataExceptionError
 	template<typename T, typename F>
 	void operator()( typename T::ConstPtr data, const F& functor )
 	{
-		throw InvalidArgumentException( ( boost::format( "Unhandled data of type %s encountered by DespatchTypedData" ) % data->typeName() ).str() );		
+		throw InvalidArgumentException( ( boost::format( "Unhandled data of type %s encountered by DespatchTypedData" ) % data->typeName() ).str() );
 	}
 };
 
@@ -154,7 +154,7 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 		case UInt64DataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, UInt64Data, ErrorHandler >
-			::template Func<Enabler>()( boost::static_pointer_cast<UInt64Data>( data ), functor, errorHandler );	
+			::template Func<Enabler>()( boost::static_pointer_cast<UInt64Data>( data ), functor, errorHandler );
 		case StringDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, StringData, ErrorHandler >
@@ -270,7 +270,7 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 		case SplinefColor4fDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, SplinefColor4fData, ErrorHandler >
-			::template Func<Enabler>()( boost::static_pointer_cast<SplinefColor4fData>( data ), functor, errorHandler );	
+			::template Func<Enabler>()( boost::static_pointer_cast<SplinefColor4fData>( data ), functor, errorHandler );
 		case CubeColorLookupfDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, CubeColorLookupfData, ErrorHandler >
@@ -278,20 +278,20 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 		case CubeColorLookupdDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, CubeColorLookupdData, ErrorHandler >
-			::template Func<Enabler>()( boost::static_pointer_cast<CubeColorLookupdData>( data ), functor, errorHandler );			
+			::template Func<Enabler>()( boost::static_pointer_cast<CubeColorLookupdData>( data ), functor, errorHandler );
 		case DateTimeDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, DateTimeData, ErrorHandler >
-			::template Func<Enabler>()( boost::static_pointer_cast<DateTimeData>( data ), functor, errorHandler );	
+			::template Func<Enabler>()( boost::static_pointer_cast<DateTimeData>( data ), functor, errorHandler );
 		case TimePeriodDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, TimePeriodData, ErrorHandler >
-			::template Func<Enabler>()( boost::static_pointer_cast<TimePeriodData>( data ), functor, errorHandler );	
+			::template Func<Enabler>()( boost::static_pointer_cast<TimePeriodData>( data ), functor, errorHandler );
 		case TimeDurationDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, TimeDurationData, ErrorHandler >
-			::template Func<Enabler>()( boost::static_pointer_cast<TimeDurationData>( data ), functor, errorHandler );		
-				
+			::template Func<Enabler>()( boost::static_pointer_cast<TimeDurationData>( data ), functor, errorHandler );
+
 		case FloatVectorDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, FloatVectorData, ErrorHandler >
@@ -335,7 +335,7 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 		case UInt64VectorDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, UInt64VectorData, ErrorHandler >
-			::template Func<Enabler>()( boost::static_pointer_cast<UInt64VectorData>( data ), functor, errorHandler );	
+			::template Func<Enabler>()( boost::static_pointer_cast<UInt64VectorData>( data ), functor, errorHandler );
 		case StringVectorDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, StringVectorData, ErrorHandler >
@@ -454,7 +454,7 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data )
 struct TypedDataSize
 {
 	typedef size_t ReturnType;
-	
+
 	template<typename T, typename Enable = void>
 	struct TypedDataSizeHelper
 	{
@@ -464,7 +464,7 @@ struct TypedDataSize
 			return 0;
 		}
 	};
-	
+
 	template<typename T>
 	ReturnType operator()( typename T::ConstPtr data ) const
 	{
@@ -478,7 +478,7 @@ struct TypedDataSize::TypedDataSizeHelper< T, typename boost::enable_if< TypeTra
 {
 	size_t operator()( typename T::ConstPtr data ) const
 	{
-		assert( data );	
+		assert( data );
 		return 1;
 	}
 };
@@ -496,7 +496,7 @@ struct TypedDataSize::TypedDataSizeHelper< T, typename boost::enable_if< TypeTra
 struct TypedDataAddress
 {
 	typedef const void *ReturnType;
-	
+
 	template<typename T, typename Enable = void>
 	struct TypedDataAddressHelper
 	{
@@ -506,7 +506,7 @@ struct TypedDataAddress
 			return 0;
 		}
 	};
-	
+
 	template<typename T>
 	ReturnType operator()( typename T::ConstPtr data ) const
 	{
@@ -520,7 +520,7 @@ struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< T
 {
 	const void *operator()( typename T::ConstPtr data ) const
 	{
-		assert( data );	
+		assert( data );
 		return &( data->readable() );
 	}
 };
@@ -538,7 +538,7 @@ struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< T
 struct TypedDataInterpolation
 {
 	typedef PrimitiveVariable::Interpolation ReturnType;
-	
+
 	template< typename T, typename Enable = void >
 	struct TypedDataInterpolationHelper
 	{
@@ -547,7 +547,7 @@ struct TypedDataInterpolation
 			return PrimitiveVariable::Invalid;
 		}
 	};
-	
+
 	template< typename T >
 	ReturnType operator()( typename T::ConstPtr d ) const
 	{
@@ -582,7 +582,7 @@ bool despatchTraitsTest( const DataPtr &data )
 struct TraitsTest
 {
 	typedef bool ReturnType;
-	
+
 	template< typename T >
 	ReturnType operator()( typename T::ConstPtr d ) const
 	{

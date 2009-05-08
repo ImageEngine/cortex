@@ -104,7 +104,7 @@ static boost::python::list values( MotionPrimitive &p )
 
 
 void bindMotionPrimitive()
-{	
+{
 	RunTimeTypedClass<MotionPrimitive>()
 		.def( init<>() )
 		.def( "__len__", &len )

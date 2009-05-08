@@ -47,19 +47,19 @@ IE_CORE_FORWARDDECLARE( Primitive )
 class PrimitiveOp : public ModifyOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( PrimitiveOp, ModifyOp );
-		
+
 		PrimitiveOp( const std::string &name, const std::string &description );
 		virtual ~PrimitiveOp();
-		
+
 	protected :
-		
+
 		/// Implemented to call modifyPrimitive()
 		virtual void modify( ObjectPtr object, ConstCompoundObjectPtr operands );
 		/// Must be implemented by all subclasses.
-		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands ) = 0;		
-	
+		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands ) = 0;
+
 };
 
 IE_CORE_DECLAREPTR( PrimitiveOp );

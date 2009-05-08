@@ -50,11 +50,11 @@ class SweepAndPrune
 	public:
 		typedef BoundIterator Iterator;
 		typedef typename std::iterator_traits<BoundIterator>::value_type Bound;
-		
+
 		typedef CB<BoundIterator> Callback;
-		
+
 		typedef enum
-		{	
+		{
 			XYZ,
 			XZY,
 			YXZ,
@@ -62,16 +62,16 @@ class SweepAndPrune
 			ZXY,
 			ZYX
 		} AxisOrder;
-	
+
 		SweepAndPrune();
 		virtual ~SweepAndPrune();
-		
+
 		void intersectingBounds( BoundIterator first, BoundIterator last, Callback &cb, AxisOrder axisOrder = XZY );
-		
+
 	protected:
-	
+
 		inline bool axisIntersects( const Bound &b1, const Bound &b2, char axis );
-	
+
 		RadixSort m_radixSort;
 };
 

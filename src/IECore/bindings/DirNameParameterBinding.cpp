@@ -52,18 +52,18 @@ class DirNameParameterWrap : public DirNameParameter, public Wrapper<DirNamePara
 	public :
 
 		DirNameParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
-			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud )	
+			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud )
 			:	DirNameParameter( n, d, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud ), Wrapper<DirNameParameter>( self, this ) {};
-		
+
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( DirNameParameter );
-		
+
 };
 IE_CORE_DECLAREPTR( DirNameParameterWrap );
 
 void bindDirNameParameter()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<DirNameParameter, DirNameParameterWrapPtr>()
 		.def(
 			init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
@@ -71,7 +71,7 @@ void bindDirNameParameter()
 				(
 					arg( "name" ),
 					arg( "description" ),
-					arg( "defaultValue" ) = std::string( "" ),						
+					arg( "defaultValue" ) = std::string( "" ),
 					arg( "allowEmptyString" ) = true,
 					arg( "check" ) = PathParameter::DontCare,
 					arg( "presets" ) = boost::python::tuple(),

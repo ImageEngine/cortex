@@ -63,7 +63,7 @@ class StatusException : public IECore::Exception
 		/// If status represents an error, throws StatusException( status ),
 		/// otherwise does nothing and returns.
 		static void throwIfError( const MStatus &status );
-		
+
 };
 
 } // namespace IECoreMaya

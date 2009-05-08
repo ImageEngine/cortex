@@ -47,13 +47,13 @@ template<typename T>
 void bindCSGImplicitSurfaceFunction( const char *name )
 {
 	typedef ImplicitSurfaceFunction<typename T::Point, typename T::Value> Base;
-	
+
 	object csg = RefCountedClass<T, Base>( name )
 		.def( init< typename T::Fn::Ptr, typename T::Fn::Ptr, typename T::Mode > () )
 	;
-		
+
 	scope csgScope( csg );
-	
+
 	enum_< typename T::Mode> ("Mode")
 		.value("Union", T::Union)
 		.value("Intersection", T::Intersection)
@@ -67,7 +67,7 @@ void bindCSGImplicitSurfaceFunction()
 	bindCSGImplicitSurfaceFunction<CSGImplicitSurfaceFunctionV3ff>( "CSGImplicitSurfaceFunctionV3ff" );
 	bindCSGImplicitSurfaceFunction<CSGImplicitSurfaceFunctionV3fd>( "CSGImplicitSurfaceFunctionV3fd" );
 	bindCSGImplicitSurfaceFunction<CSGImplicitSurfaceFunctionV3df>( "CSGImplicitSurfaceFunctionV3df" );
-	bindCSGImplicitSurfaceFunction<CSGImplicitSurfaceFunctionV3dd>( "CSGImplicitSurfaceFunctionV3dd" );	
+	bindCSGImplicitSurfaceFunction<CSGImplicitSurfaceFunctionV3dd>( "CSGImplicitSurfaceFunctionV3dd" );
 }
 
 } // namespace IECore

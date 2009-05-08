@@ -72,12 +72,12 @@ const std::vector<std::string> &FileNameParameter::extensions() const
 }
 
 bool FileNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
-{	
+{
 	if (!PathParameter::valueValid( value, reason ) )
 	{
 		return false;
 	}
-	
+
 	ConstStringDataPtr s = static_pointer_cast<const StringData>( value );
 
 	// empty check
@@ -97,13 +97,13 @@ bool FileNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) 
 		bool found = false;
 		for( vector<string>::const_iterator it=exts.begin(); it!=exts.end(); it++ )
 		{
-			if( ("."+*it)==ext )	
+			if( ("."+*it)==ext )
 			{
 				found = true;
 				break;
 			}
 		}
-		
+
 		if( !found )
 		{
 			if( reason )
@@ -113,7 +113,7 @@ bool FileNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) 
 			return false;
 		}
 	}
-	
+
 	// file type check
 	if( boost::filesystem::exists(boost::filesystem::path( s->readable())) &&
 		 boost::filesystem::is_directory(boost::filesystem::path( s->readable())) )
@@ -142,7 +142,7 @@ void FileNameParameter::save( SaveContext *context ) const
 {
 	PathParameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	
+
 	std::string extensions = join( m_extensions, " " );
 	container->write( "extensions", extensions );
 }
@@ -152,7 +152,7 @@ void FileNameParameter::load( LoadContextPtr context )
 	PathParameter::load( context );
 	unsigned int v = g_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	m_extensions.clear();
 	std::string extensions;
 	container->read( "extensions", extensions );

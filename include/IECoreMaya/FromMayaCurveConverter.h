@@ -47,28 +47,28 @@ namespace IECoreMaya
 /// Converts maya curveShape objects into IECore::CurvesPrimitive objects.
 class FromMayaCurveConverter : public FromMayaShapeConverter
 {
-	
+
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaCurveConverter, FromMayaCurveConverterTypeId, FromMayaShapeConverter );
-		
+
 		FromMayaCurveConverter( const MObject &object );
 		FromMayaCurveConverter( const MDagPath &dagPath );
-		
+
 		IECore::BoolParameterPtr linearParameter();
 		IECore::ConstBoolParameterPtr linearParameter() const;
-				
+
 	protected :
-	
+
 		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
 		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		void constructCommon();
-	
+
 		IECore::PrimitivePtr doPrimitiveConversion( MFnNurbsCurve &fnCurve ) const;
-	
+
 		static Description<FromMayaCurveConverter> m_description;
 
 		IECore::BoolParameterPtr m_linearParameter;

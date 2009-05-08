@@ -83,7 +83,7 @@ void bindPolygonAlgo()
 
 	def( "polygonWinding", &polygonWindingBinding3D<V3fVectorData> );
 	def( "polygonWinding", &polygonWindingBinding3D<V3dVectorData> );
-	
+
 	def( "polygonBound", &polygonBoundBinding<V2fVectorData> );
 	def( "polygonBound", &polygonBoundBinding<V3fVectorData> );
 	def( "polygonBound", &polygonBoundBinding<V2dVectorData> );

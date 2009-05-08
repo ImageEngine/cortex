@@ -52,5 +52,5 @@ void bindRenderer()
 		.def( "scene", &Renderer::scene )
 	;
 }
-	
+
 }

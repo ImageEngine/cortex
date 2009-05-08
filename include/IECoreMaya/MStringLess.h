@@ -49,7 +49,7 @@ template<>
 struct less<MString> : binary_function<MString, MString, bool>
 {
 	bool operator()( const MString &a, const MString &b ) const
-	{ 
+	{
 		return strcmp( a.asChar(), b.asChar() ) < 0;
 	}
 };

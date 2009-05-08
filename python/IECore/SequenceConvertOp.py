@@ -37,7 +37,7 @@ from IECore import *
 class SequenceConvertOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "SequenceConvertOp",
 			"This Op converts file sequences from one format to another. "
 			"It supports all input formats for which a reader is available "
@@ -55,7 +55,7 @@ class SequenceConvertOp( Op ) :
 				allowEmptyString = True,
 			)
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				FileSequenceParameter(
@@ -78,7 +78,7 @@ class SequenceConvertOp( Op ) :
 		)
 
 	def doOperation( self, operands ) :
-	
+
 		src = self.parameters()["src"].getFileSequenceValue()
 		dst = src.copy()
 		dst.fileName = operands.dst.value
@@ -94,7 +94,7 @@ class SequenceConvertOp( Op ) :
 			for (sf, df) in zip(src.fileNames(), dst.fileNames()):
 				img = Reader.create(sf).read()
 				Writer.create(img, df).write()
-			
+
 		return StringData(dst.fileName)
 
 registerRunTimeTyped( SequenceConvertOp, 100014, Op )

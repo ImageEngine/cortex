@@ -54,21 +54,21 @@ class FromMayaNumericDataConverter : public FromMayaObjectConverter
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaNumericDataConverter, FromMayaNumericDataConverterTypeId, FromMayaObjectConverter );
 
 		FromMayaNumericDataConverter( const MObject &object );
-		
+
 	protected :
-	
+
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
 
 		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Double;
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Float;		
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Int;		
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Short;		
+		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Float;
+		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Int;
+		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Short;
 		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Double;
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Float;		
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Int;		
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Short;		
+		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Float;
+		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Int;
+		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Short;
 };
 
 IE_CORE_DECLAREPTR( FromMayaNumericDataConverter );

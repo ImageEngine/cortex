@@ -55,19 +55,19 @@ ConstParameterHandlerPtr ParameterHandler::get( IECore::TypeId id )
 {
 	const HandlerMap &h = handlers();
 	HandlerMap::const_iterator it = h.find( id );
-	
+
 	if( it!=h.end() )
 	{
 	        return it->second;
 	}
-	
+
 	return 0;
 }
 
 ParameterHandler::HandlerMap &ParameterHandler::handlers()
 {
 	static HandlerMap *g_handlers = new HandlerMap();
-	 
+
 	return *g_handlers;
 }
 
@@ -75,9 +75,9 @@ void ParameterHandler::registerHandler( IECore::TypeId parameterType, IECore::Ty
 {
 	assert( parameterType != IECore::InvalidTypeId );
 	handlers()[parameterType] = handler;
-	
+
 	if ( dataType != IECore::InvalidTypeId )
 	{
-		handlers()[dataType] = handler;	
+		handlers()[dataType] = handler;
 	}
 }

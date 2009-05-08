@@ -43,12 +43,12 @@ using namespace boost;
 using namespace boost::python;
 
 namespace IECore {
-	
+
 	void bindOBJReader()
 	{
 		RunTimeTypedClass<OBJReader>()
 			.def(init<const std::string &>())
 		;
   }
-  
+
 } // namespace IECore

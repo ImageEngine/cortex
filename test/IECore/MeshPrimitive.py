@@ -40,7 +40,7 @@ from IECore import *
 class TestMeshPrimitive( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		m = MeshPrimitive()
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Uniform ), 0 )
@@ -51,15 +51,15 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.vertexIds, IntVectorData() )
 		self.assertEqual( m.interpolation, "linear" )
 		self.assertEqual( m, m.copy() )
-		
+
 		iface = IndexedIOInterface.create( "test/IECore/mesh.fio", "/", IndexedIOOpenMode.Write )
 		m.save( iface, "test" )
 		mm = Object.load( iface, "test" )
 		self.assertEqual( m, mm )
-		
+
 		vertsPerFace = IntVectorData( [ 3, 3 ] )
 		vertexIds = IntVectorData( [ 0, 1, 2, 1, 2, 3 ] )
-		
+
 		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Uniform ), 2 )
@@ -77,28 +77,28 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m, mm )
 
 		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
-		
-		
+
+
 		mm = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
-		
+
 		self.assert_( mm.arePrimitiveVariablesValid() );
-	
+
 	def testSetInterpolation( self ) :
-	
+
 		m = MeshPrimitive()
 		self.assertEqual( m.interpolation, "linear" )
 		m.interpolation = "catmullClark"
 		self.assertEqual( m.interpolation, "catmullClark" )
-		
+
 	def testEmptyMeshConstructor( self ) :
-	
+
 		m = MeshPrimitive( IntVectorData(), IntVectorData(), "linear", V3fVectorData() )
 		self.assert_( m.arePrimitiveVariablesValid() )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile("test/IECore/mesh.fio"):
 			os.remove("test/IECore/mesh.fio")
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

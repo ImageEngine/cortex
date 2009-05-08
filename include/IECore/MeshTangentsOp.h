@@ -48,35 +48,35 @@ class MeshTangentsOp : public MeshPrimitiveOp
 
 		MeshTangentsOp();
 		virtual ~MeshTangentsOp();
-		
+
 		StringParameterPtr uPrimVarNameParameter();
-		ConstStringParameterPtr uPrimVarNameParameter() const;		
-		
-		StringParameterPtr vPrimVarNameParameter();		
-		ConstStringParameterPtr vPrimVarNameParameter() const;	
-		
+		ConstStringParameterPtr uPrimVarNameParameter() const;
+
+		StringParameterPtr vPrimVarNameParameter();
+		ConstStringParameterPtr vPrimVarNameParameter() const;
+
 		StringParameterPtr uTangentPrimVarNameParameter();
-		ConstStringParameterPtr uTangentPrimVarNameParameter() const;		
-		
-		StringParameterPtr vTangentPrimVarNameParameter();		
-		ConstStringParameterPtr vTangentPrimVarNameParameter() const;			
+		ConstStringParameterPtr uTangentPrimVarNameParameter() const;
+
+		StringParameterPtr vTangentPrimVarNameParameter();
+		ConstStringParameterPtr vTangentPrimVarNameParameter() const;
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshTangentsOp, MeshPrimitiveOp );
 
 	protected:
-	
+
 		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
-	
+
 	private :
-		
+
 		StringParameterPtr m_uPrimVarNameParameter;
-		StringParameterPtr m_vPrimVarNameParameter;	
+		StringParameterPtr m_vPrimVarNameParameter;
 		StringParameterPtr m_uTangentPrimVarNameParameter;
-		StringParameterPtr m_vTangentPrimVarNameParameter;		
-	
-		struct CalculateTangents;	
+		StringParameterPtr m_vTangentPrimVarNameParameter;
+
+		struct CalculateTangents;
 		struct HandleErrors;
-		
+
 };
 
 IE_CORE_DECLAREPTR( MeshTangentsOp );

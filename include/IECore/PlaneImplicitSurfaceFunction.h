@@ -47,46 +47,46 @@ template<typename P, typename V>
 class PlaneImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 {
 	public:
-		
+
 		typedef P Point;
 		typedef VectorTraits<P> PointTraits;
 		typedef typename VectorTraits<P>::BaseType PointBaseType;
 		typedef V Value;
 		typedef VectorTraits<V> ValueTraits;
 		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-			
+
 		IE_CORE_DECLAREMEMBERPTR2( PlaneImplicitSurfaceFunction<P, V> );
-	
+
 		/// Construct an implicit plane from a normal and a distance from the origin
 		PlaneImplicitSurfaceFunction( const Point &normal, PointBaseType distance ) : m_normal( normal ), m_distance( distance )
 		{
 			vecNormalize( m_normal );
 		}
-		
+
 		/// Construct an implicit plane from a normal and a point on the plane
 		PlaneImplicitSurfaceFunction( const Point &normal, const Point &origin ) : m_normal( normal )
 		{
 			vecNormalize( m_normal );
-			
+
 			m_distance = -vecDot( m_normal, origin );
-		}				
-		
+		}
+
 		Value operator()( const Point &p )
 		{
 			return vecDot( m_normal, p ) + m_distance;
 		}
-		
+
 		virtual Value getValue( const Point &p )
-		{									
+		{
 			return this->operator()(p);
 		}
-		
+
 	protected:
 
 		Point m_normal;
 		PointBaseType m_distance;
 
-		
+
 };
 
 typedef PlaneImplicitSurfaceFunction<Imath::V3f, float>  PlaneImplicitSurfaceFunctionV3ff;

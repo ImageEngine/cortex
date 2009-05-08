@@ -57,16 +57,16 @@ def getKnobValue( knob, **kwArgs ) :
 	f = __getters.get( knob.__class__, None )
 	if not f :
 		raise RuntimeError( "No get accessor registered for type %s", str( knob.__class__ ) )
-		
+
 	return f( knob, **kwArgs )
-	
+
 def setKnobValue( knob, value, **kwArgs ) :
 
 	f = __setters.get( knob.__class__, None )
 	if not f :
 		raise RuntimeError( "No set accessor registered for type %s", str( knob.__class__ ) )
-		
-	return f( knob, value, **kwArgs )	
+
+	return f( knob, value, **kwArgs )
 
 ##########################################################################
 # accessor implementations
@@ -77,12 +77,12 @@ def setKnobValue( knob, value, **kwArgs ) :
 def __getXY( knob, resultType=IECore.V2f ) :
 
 	return resultType( knob.getValue( 0 ), knob.getValue( 1 ) )
-	
+
 def __setXY( knob, value ) :
 
 	knob.setValue( value[0], 0 )
 	knob.setValue( value[1], 1 )
-	
+
 registerAccessors( nuke.XY_Knob, __getXY, __setXY )
 
 # XYZ Knob
@@ -90,13 +90,13 @@ registerAccessors( nuke.XY_Knob, __getXY, __setXY )
 def __getXYZ( knob, resultType=IECore.V3f ) :
 
 	return resultType( knob.getValue( 0 ), knob.getValue( 1 ), knob.getValue( 2 ) )
-	
+
 def __setXYZ( knob, value ) :
 
 	knob.setValue( value[0], 0 )
 	knob.setValue( value[1], 1 )
 	knob.setValue( value[2], 2 )
-	
+
 registerAccessors( nuke.XYZ_Knob, __getXYZ, __setXYZ )
 registerAccessors( nuke.Scale_Knob, __getXYZ, __setXYZ )
 
@@ -105,11 +105,11 @@ registerAccessors( nuke.Scale_Knob, __getXYZ, __setXYZ )
 def __getColor( knob, resultType=IECore.Color3f ) :
 
 	return resultType( knob.getValue( 0 ), knob.getValue( 1 ), knob.getValue( 2 ) )
-	
+
 def __setColor( knob, value ) :
 
 	knob.setValue( value[0], 0 )
 	knob.setValue( value[1], 1 )
 	knob.setValue( value[2], 2 )
-	
+
 registerAccessors( nuke.Color_Knob, __getColor, __setColor )

@@ -57,7 +57,7 @@ struct MStringFromPython
 			return 0;
 		}
 	}
-	
+
 	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
 	{
 		void *storage = ((converter::rvalue_from_python_storage<MString>*)data)->storage.bytes;
@@ -74,11 +74,11 @@ struct MStringFromPython
 		{
 			new (storage) MString( PyString_AsString( obj ) );
 		}
-		
+
 		data->convertible = storage;
 	}
 };
-   
+
 void bindMStringFromPython()
 {
 	converter::registry::push_back(

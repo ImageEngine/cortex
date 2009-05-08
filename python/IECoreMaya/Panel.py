@@ -53,47 +53,47 @@ class Panel( IECoreMaya.UIElement ) :
 	# this method implements the create, init and add callbacks of the
 	# maya scripted panel).
 	def __init__( self, topLevelUI ) :
-	
+
 		IECoreMaya.UIElement.__init__( self, topLevelUI )
-	
+
 	## Must be implemented by subclasses to return a python object
 	# representing their state. This is used for both persistence
 	# across scene save and load, but also for when a panel is torn
 	# off or reparented.
 	def _saveState( self ) :
-	
+
 		raise NotImplementedError
-	
+
 	## Must be implemented to restore a state previously saved with
 	# _saveState.
 	def _restoreState( self, state ) :
-	
+
 		raise NotImplementedError
-	
+
 	## Call this to instantiate a panel. Note that one panel instantiation
 	# as far as maya is concerned may result in multiple IECoreMaya.Panel instantiations -
 	# typically one for each time maya wishes to reparent or copy the panel.
 	@classmethod
 	def create( cls, label=None ) :
-		
+
 		typeName = cls.__name__
 		panel = maya.cmds.scriptedPanel( unParent=True, type=typeName, label=typeName )
 		if label :
 			maya.cmds.scriptedPanel( panel, edit=True, label=label )
 		return panel
-	
+
 	## Must be called to register all subclasses. This should
 	# typically be done during plugin initialisation.
 	@classmethod
 	def registerPanel( cls, subclass ) :
-	
+
 		typeName = subclass.__name__
 		if not maya.cmds.scriptedPanelType( typeName, exists=True ) :
-			
+
 			# we have to implement the mel callbacks in iePanel.mel
 			# as maya doesn't implement python scripted panels. the mel
 			# methods we use call straight back to the implementations
-			# below.	
+			# below.
 			t = maya.cmds.scriptedPanelType(
 				typeName,
 				createCallback="iePanelCreate",
@@ -103,96 +103,96 @@ class Panel( IECoreMaya.UIElement ) :
 				saveStateCallback="iePanelSave",
 				deleteCallback="iePanelDelete",
 			)
-			
+
 			# t=0 is always returned in batch mode, probably because
 			# batch mode can't handle UI callback creation
 			assert( t==typeName or t==0)
 			cls.__panelTypes[t] = subclass
-			
+
 		else :
-		
+
 			assert( cls.__panelTypes[typeName]==subclass )
-			
+
 	# maps from the maya panel name to a record of the Panel instance and state for
 	# that panel
 	__panels = {}
 	# maps from the maya panel type to the Panel subclass for that type
 	__panelTypes = {}
-	
+
 	## The methods below implement the callbacks maya requires by using the methods
 	## defined above.
 	##############################################################################
-			
+
 	@classmethod
 	def __create( cls, panelName ) :
-			
+
 		t = maya.cmds.scriptedPanel( panelName, query=True, type=True )
 		panelType = cls.__panelTypes[t]
-	
+
 		panelRecord = IECore.Struct()
 		panelRecord.type = panelType
 		panelRecord.instance = None
 		panelRecord.state = None
 		Panel.__panels[panelName] = panelRecord
-				
+
 	@classmethod
 	def __init( cls, panelName ) :
-	
+
 		# we don't need to do anything here
 		pass
-		
+
 	@classmethod
 	def __add( cls, panelName ) :
-			
+
 		panelRecord = cls.__panels[panelName]
 		assert( not panelRecord.instance )
-		
+
 		panelRecord.instance = panelRecord.type()
 		if panelRecord.state :
 			panelRecord.instance._restoreState( panelRecord.state )
-		
+
 	@classmethod
 	def __remove( cls, panelName ) :
-		
+
 		panelRecord = cls.__panels[panelName]
 		assert( panelRecord.instance )
-		
+
 		panelRecord.state = panelRecord.instance._saveState()
 		panelRecord.instance = None
-		
+
 	@classmethod
 	def __save( cls, panelName ) :
-	
+
 		panelRecord = cls.__panels[panelName]
 		if panelRecord.instance :
 			state = panelRecord.instance._saveState()
 		else :
 			state = panelRecord.state
-			
+
 		if not state :
 			return ""
-		
+
 		pickledState = pickle.dumps( state )
 		encodedState = pickledState.encode( "hex" )
 		return "iePanelRestore( \"%s\", \"%s\" )" % ( panelName, encodedState )
-				
+
 	@classmethod
 	def __delete( cls, panelName ) :
-	
+
 		del cls.__panels[panelName]
-	
+
 	# This one isn't actually a required part of the maya protocol, but
 	# we call it in the saved state strings to restore layouts when files
 	# are opened.
 	@classmethod
 	def __restore( cls, panelName, encodedState ) :
-			
+
 		panelRecord = cls.__panels[panelName]
 		decodedState = encodedState.decode( "hex" )
 		unpickledState = pickle.loads( decodedState )
-		
+
 		panelRecord.state = unpickledState
 		if panelRecord.instance :
 			panelRecord.instance._restoreState( panelRecord.state )
-		
+
 	__panelStates = {}

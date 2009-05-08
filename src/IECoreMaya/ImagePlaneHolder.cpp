@@ -70,7 +70,7 @@ ImagePlaneHolder::~ImagePlaneHolder()
 void ImagePlaneHolder::postConstructor()
 {
 	setExistWithoutInConnections(true);
-	setExistWithoutOutConnections(true);	
+	setExistWithoutOutConnections(true);
 }
 
 void *ImagePlaneHolder::creator()
@@ -81,7 +81,7 @@ void *ImagePlaneHolder::creator()
 MStatus ImagePlaneHolder::initialize()
 {
 	return inheritAttributesFrom( ParameterisedHolderImagePlane::typeName );
-}	 
+}
 
 MStatus ImagePlaneHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
@@ -92,14 +92,14 @@ MStatus ImagePlaneHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plu
 	{
 		setImageDirty();
 	}
-		
+
 	return ParameterisedHolderImagePlane::setDependentsDirty( plug, plugArray );
 }
 
 MStatus ImagePlaneHolder::loadImageMap ( const MString &fileName, int frame, MImage &image )
 {
 	IECore::OpPtr op = getOp();
-	
+
 	if (op)
 	{
 		IECore::ObjectPtr result;
@@ -112,25 +112,25 @@ MStatus ImagePlaneHolder::loadImageMap ( const MString &fileName, int frame, MIm
 			{
 				return MS::kFailure;
 			}
-			
+
 			ImagePrimitivePtr imageResult = runTimeCast< ImagePrimitive >( result );
-		
+
 			if (!imageResult )
 			{
 				MGlobal::displayError( "ImagePlaneHolder: Op did not return an ImagePrimtiive" ); // \todo
 				return MS::kFailure;
 			}
 
-			ToMayaImageConverterPtr toMaya = ToMayaImageConverter::create( imageResult );	
+			ToMayaImageConverterPtr toMaya = ToMayaImageConverter::create( imageResult );
 
 			MStatus s = toMaya->convert( image );
 			if ( !s )
 			{
 				return MS::kFailure;
 			}
-			
+
 			return MS::kSuccess;
-		} 		
+		}
 		catch( std::exception &e )
 		{
 			MGlobal::displayError( e.what() );
@@ -139,18 +139,18 @@ MStatus ImagePlaneHolder::loadImageMap ( const MString &fileName, int frame, MIm
 		catch( boost::python::error_already_set & )
 		{
 			PyErr_Print();
-			return MS::kFailure;			
-		}		
+			return MS::kFailure;
+		}
 		catch (...)
 		{
 			MGlobal::displayError( "ImagePlaneHolder: Caught unknown error" );
-			return MS::kFailure;		
-		}	
+			return MS::kFailure;
+		}
 	}
 
 	return MS::kFailure;
 }
-		
+
 MStatus ImagePlaneHolder::setOp( const std::string &className, int classVersion )
 {
         return setParameterised( className, classVersion, "IECORE_OP_PATHS");
@@ -158,5 +158,5 @@ MStatus ImagePlaneHolder::setOp( const std::string &className, int classVersion 
 
 IECore::OpPtr ImagePlaneHolder::getOp( std::string *className, int *classVersion )
 {
-        return IECore::runTimeCast<IECore::Op>( getParameterised( className, classVersion ) );       
+        return IECore::runTimeCast<IECore::Op>( getParameterised( className, classVersion ) );
 }

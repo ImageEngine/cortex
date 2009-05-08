@@ -56,14 +56,14 @@ class UVDistortOp : public WarpOp
 		ConstObjectParameterPtr uvMapParameter() const;
 
 		IE_CORE_DECLARERUNTIMETYPED( UVDistortOp, WarpOp );
-	
+
 	protected :
-	
+
 		virtual void begin( ConstCompoundObjectPtr operands );
 		virtual Imath::Box2i warpedDataWindow( const Imath::Box2i &dataWindow ) const;
 		virtual Imath::V2f warp( const Imath::V2f &p ) const;
 		virtual void end();
-	
+
 	private :
 
 		ObjectParameterPtr m_uvMapParameter;

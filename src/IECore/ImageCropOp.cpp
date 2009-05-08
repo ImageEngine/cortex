@@ -72,8 +72,8 @@ ImageCropOp::ImageCropOp()
 
 	m_matchDataWindowParameter = new BoolParameter(
 		"matchDataWindow",
-		"if On then the dataWindow will match displayWindow. Otherwise it will be intersected against the given crop box.",	
-		
+		"if On then the dataWindow will match displayWindow. Otherwise it will be intersected against the given crop box.",
+
 		/// \todo The original intent was that this default should be false, but when specifying "new BoolData(false)" as
 		/// the default value it seems the compiler would prefer to convert the BoolData* to a bool over a BoolData::Ptr.
 		/// Consider changing the default if required, but only on the next major version change.
@@ -84,12 +84,12 @@ ImageCropOp::ImageCropOp()
 
 	m_resetOriginParameter = new BoolParameter(
 		"resetOrigin",
-		"if On then the resulting image will have it's top-left corner at (0,0).",	
+		"if On then the resulting image will have it's top-left corner at (0,0).",
 		true
 	);
 
 	parameters()->addParameter( m_resetOriginParameter );
-	
+
 	m_intersectParameter = new BoolParameter(
 		"intersect",
 		"If enabled then the display window of the resultant image will be cropped against the crop reigion too",
@@ -97,8 +97,8 @@ ImageCropOp::ImageCropOp()
 	);
 
 	parameters()->addParameter( m_intersectParameter );
-	
-	
+
+
 	/// \todo Add "reformat" parameter, like Nuke
 	/// Current behaviour is to reformat, so take care to set the default accordingly.
 }
@@ -150,11 +150,11 @@ ConstBoolParameterPtr ImageCropOp::intersectParameter() const
 struct ImageCropOp::ImageCropFn
 {
 	typedef DataPtr ReturnType;
-	
+
 	const Imath::Box2i m_sourceDataWindow;
 	const Imath::Box2i m_croppedDataWindow;
-	const Imath::Box2i m_targetDataWindow;	
-	
+	const Imath::Box2i m_targetDataWindow;
+
 	ImageCropFn( const Imath::Box2i &sourceDataWindow, const Imath::Box2i &croppedDataWindow, const Imath::Box2i &targetDataWindow )
 	: m_sourceDataWindow( sourceDataWindow ), m_croppedDataWindow( croppedDataWindow ), m_targetDataWindow( targetDataWindow )
 	{
@@ -164,9 +164,9 @@ struct ImageCropOp::ImageCropFn
 	ReturnType operator()( typename T::ConstPtr sourceData ) const
 	{
 		assert( sourceData );
-		
+
 		typename T::Ptr newChannel = new T();
-		
+
 		int sourceWidth = m_sourceDataWindow.max.x - m_sourceDataWindow.min.x + 1;
 
 		int targetWidth = m_targetDataWindow.max.x - m_targetDataWindow.min.x + 1;
@@ -175,11 +175,11 @@ struct ImageCropOp::ImageCropFn
 
 #ifndef NDEBUG
 		int numPixelsCopied = 0;
-#endif		
+#endif
 
 		typename T::ValueType &target = newChannel->writable();
 		target.resize( targetArea, 0 );
-					
+
 		const typename T::ValueType &source = sourceData->readable();
 
 		/// \todo Optimize
@@ -191,7 +191,7 @@ struct ImageCropOp::ImageCropFn
 				if ( m_sourceDataWindow.intersects( copyPixel ) && m_targetDataWindow.intersects( copyPixel ) )
 				{
 					assert( boxIntersection( m_sourceDataWindow, m_targetDataWindow ).intersects( copyPixel ) );
-				
+
 					int sourceOffset = sourceWidth * ( copyPixel.y - m_sourceDataWindow.min.y ) + ( copyPixel.x - m_sourceDataWindow.min.x );
 					assert( sourceOffset >= 0 );
 					assert( sourceOffset < (int)source.size() );
@@ -202,7 +202,7 @@ struct ImageCropOp::ImageCropFn
 					target[ targetOffset++ ] = source[ sourceOffset++ ];
 #ifndef NDEBUG
 					numPixelsCopied ++;
-#endif					
+#endif
 				}
 				else
 				{
@@ -210,18 +210,18 @@ struct ImageCropOp::ImageCropFn
 				}
 			}
 		}
-		
+
 		assert( (int)target.size() == targetArea );
 		assert( numPixelsCopied <= (int)target.size() );
-		
-		assert( newChannel );			
+
+		assert( newChannel );
 		return newChannel;
 	}
 
 };
 
 void ImageCropOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands )
-{	
+{
 	// Validate the input image
 	if ( !image->arePrimitiveVariablesValid() )
 	{
@@ -233,7 +233,7 @@ void ImageCropOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundOb
 	{
 		throw InvalidArgumentException( "ImageCropOp: Specified crop box is empty" );
 	}
-	
+
 	const bool resetOrigin = m_resetOriginParameter->getTypedValue();
 	const bool intersect = m_intersectParameter->getTypedValue();
 
@@ -247,12 +247,12 @@ void ImageCropOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundOb
 		croppedDisplayWindow = cropBox;
 	}
 	const Imath::Box2i &dataWindow = image->getDataWindow();
-	
+
 	Imath::Box2i croppedDataWindow = boxIntersection( cropBox, dataWindow );
-	
+
 	Imath::Box2i newDisplayWindow = croppedDisplayWindow;
 	Imath::Box2i newDataWindow;
-	
+
 	const bool matchDataWindow = m_matchDataWindowParameter->getTypedValue();
 	if ( matchDataWindow )
 	{
@@ -265,14 +265,14 @@ void ImageCropOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundOb
 
 	for ( PrimitiveVariableMap::iterator varIt = image->variables.begin(); varIt != image->variables.end(); varIt++ )
 	{
-		PrimitiveVariable &channel = varIt->second;		
+		PrimitiveVariable &channel = varIt->second;
 
 		switch ( channel.interpolation )
 		{
 			case PrimitiveVariable::Vertex:
 			case PrimitiveVariable::Varying:
 			case PrimitiveVariable::FaceVarying:
-				{			
+				{
 					DataPtr data = channel.data;
 					assert( data );
 					ImageCropFn fn( dataWindow, croppedDataWindow, newDataWindow );
@@ -281,7 +281,7 @@ void ImageCropOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundOb
 					assert( channel.data );
 				}
 				break;
-			
+
 			default:
 				/// Nothing to do for these channel types
 				assert( channel.interpolation == PrimitiveVariable::Constant || channel.interpolation == PrimitiveVariable::Uniform );
@@ -294,22 +294,22 @@ void ImageCropOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundOb
 #ifndef NDEBUG
 		V2i newDisplayWindowSize = newDisplayWindow.size();
 		V2i newDataWindowSize = newDataWindow.size();
-#endif	
+#endif
 		newDisplayWindow.max = newDisplayWindow.max - newDisplayWindow.min;
 		newDataWindow.min = newDataWindow.min - newDisplayWindow.min;
 		newDataWindow.max = newDataWindow.max - newDisplayWindow.min;
 		newDisplayWindow.min = Imath::V2i( 0, 0 );
 		assert( newDisplayWindowSize == newDisplayWindow.size() );
 		assert( newDataWindowSize == newDataWindow.size() );
-	}	
+	}
 	image->setDataWindow( newDataWindow );
 	image->setDisplayWindow( newDisplayWindow );
-		
+
 	if ( matchDataWindow )
 	{
 		assert( image->getDisplayWindow() == image->getDataWindow() );
 	}
-	
+
 	assert( image->arePrimitiveVariablesValid() );
 }
 

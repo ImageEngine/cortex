@@ -81,8 +81,8 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 	if( !m_namesToParameters.size() )
 	{
 		return pr;
-	}	
-	
+	}
+
 	// get a references for each child preset map.
 	// we only want to call presets() once for
 	// each child as the map returned may change between calls.
@@ -91,7 +91,7 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 	{
 		childPresets.push_back( &(m_parameters[i]->presets()) );
 	}
-	
+
 	// find the intersection of all the child preset names
 	set<string> names;
 	for( PresetsContainer::const_iterator it=childPresets[0]->begin(); it!=childPresets[0]->end(); it++ )
@@ -110,7 +110,7 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 			names.insert( it->first );
 		}
 	}
-	
+
 	for( set<string>::const_iterator nIt=names.begin(); nIt!=names.end(); nIt++ )
 	{
 		CompoundObjectPtr o = new CompoundObject;
@@ -120,7 +120,7 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 		}
 		pr.push_back( Preset( *nIt, o ) );
 	}
-	
+
 	return pr;
 }
 
@@ -135,7 +135,7 @@ bool CompoundParameter::presetsOnly() const
 	}
 	return true;
 }
-	
+
 void CompoundParameter::setValue( ObjectPtr value )
 {
 	Parameter::setValue( value );
@@ -166,7 +166,7 @@ ObjectPtr CompoundParameter::getValue()
 	{
 		return value;
 	}
-	
+
 	CompoundObject::ObjectMap &m = tValue->members();
 	for( ParameterMap::const_iterator it=m_namesToParameters.begin(); it!=m_namesToParameters.end(); it++ )
 	{
@@ -240,7 +240,7 @@ void CompoundParameter::addParameter( ParameterPtr parameter )
 		throw Exception( boost::str( boost::format( "Child parameter named \"%s\" already exists." ) % parameter->name() ) );
 	}
 	m_namesToParameters.insert( ParameterMap::value_type( parameter->internedName(), parameter ) );
-	m_parameters.push_back( parameter );	
+	m_parameters.push_back( parameter );
 }
 
 void CompoundParameter::insertParameter( ParameterPtr parameter, ConstParameterPtr other )
@@ -278,7 +278,7 @@ void CompoundParameter::removeParameter( ParameterPtr parameter )
 			tValue->members().erase( oIt );
 		}
 	}
-	
+
 }
 
 void CompoundParameter::removeParameter( const std::string &name )
@@ -290,7 +290,7 @@ void CompoundParameter::removeParameter( const std::string &name )
 	}
 	removeParameter( it->second );
 }
-		
+
 const CompoundParameter::ParameterMap &CompoundParameter::parameters() const
 {
 	return m_namesToParameters;
@@ -374,7 +374,7 @@ void CompoundParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
 	Parameter::copyFrom( other, context );
 	const CompoundParameter *tOther = static_cast<const CompoundParameter *>( other.get() );
-	
+
 	m_namesToParameters.clear();
 	m_parameters.clear();
 	for( ParameterVector::const_iterator it=tOther->m_parameters.begin(); it!=tOther->m_parameters.end(); it++ )
@@ -387,7 +387,7 @@ void CompoundParameter::save( SaveContext *context ) const
 {
 	Parameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	
+
 	container->mkdir( "parameters" );
 	container->chdir( "parameters" );
 		unsigned i = 0;
@@ -415,8 +415,8 @@ void CompoundParameter::load( LoadContextPtr context )
 			ParameterPtr parameter = context->load<Parameter>( container, it->id() );
 			size_t i = boost::lexical_cast<size_t>( it->id() );
 			m_namesToParameters.insert( ParameterMap::value_type( parameter->internedName(), parameter ) );
-			m_parameters[i] = parameter;	
-		}	
+			m_parameters[i] = parameter;
+		}
 	container->chdir( ".." );
 }
 
@@ -426,14 +426,14 @@ bool CompoundParameter::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
-	
+
+
 	const CompoundParameter *tOther = static_cast<const CompoundParameter *>( other.get() );
 	if( tOther->m_parameters.size()!=m_parameters.size() )
 	{
 		return false;
 	}
-	
+
 	for( unsigned i=0; i<m_parameters.size(); i++ )
 	{
 		if( !m_parameters[i]->isEqualTo( tOther->m_parameters[i] ) )
@@ -441,7 +441,7 @@ bool CompoundParameter::isEqualTo( ConstObjectPtr other ) const
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 

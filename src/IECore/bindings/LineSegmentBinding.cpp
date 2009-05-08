@@ -78,19 +78,19 @@ const char *typeName<LineSegment3d>()
 
 template<class L>
 static std::string repr( L &x )
-{	
+{
 	std::stringstream s;
 
 	s << "IECore." << typeName<L>() << "( ";
-	
+
 	object item0( x.p0 );
 	assert( item0.attr( "__repr__" ) != object() );
 	s << call_method< std::string >( item0.ptr(), "__repr__" ) << ", ";
-	
-	object item1( x.p1 );	
-	assert( item1.attr( "__repr__" ) != object() );	
-	s << call_method< std::string >( item1.ptr(), "__repr__" ) << " )";	
-	
+
+	object item1( x.p1 );
+	assert( item1.attr( "__repr__" ) != object() );
+	s << call_method< std::string >( item1.ptr(), "__repr__" ) << " )";
+
 	return s.str();
 }
 
@@ -107,7 +107,7 @@ static tuple intersect(  const L &l, const Imath::Plane3< typename L::BaseType >
 {
 	typename L::Point pt;
 	bool hit = l.intersect( plane, pt );
-	return make_tuple( hit, pt );	
+	return make_tuple( hit, pt );
 }
 
 template<class L>
@@ -115,7 +115,7 @@ static tuple intersectT(  const L &l, const Imath::Plane3< typename L::BaseType 
 {
 	typename L::BaseType d;
 	bool hit = l.intersectT( plane, d );
-	return make_tuple( hit, d );	
+	return make_tuple( hit, d );
 }
 
 template<typename Vec>
@@ -175,8 +175,8 @@ static void bind2D()
 		.def( "length", &L::length )
 		.def( "length2", &L::length2 )
 		.def( "closestPointTo", &L::closestPointTo )
-		.def( "distanceTo", (typename L::BaseType (L::*)( const Vec & ) const)&L::distanceTo )	
-		.def( "distance2To", (typename L::BaseType (L::*)( const Vec & ) const)&L::distance2To )		
+		.def( "distanceTo", (typename L::BaseType (L::*)( const Vec & ) const)&L::distanceTo )
+		.def( "distance2To", (typename L::BaseType (L::*)( const Vec & ) const)&L::distance2To )
 		.def( self *= M() )
 		.def( self * M() )
 		.def( self == self )

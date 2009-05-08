@@ -42,58 +42,58 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 	## Initialise the function set for the given procedural object, which may
 	# either be an MObject or a node name in string or unicode form.
 	def __init__( self, object ) :
-	
+
 		FnParameterisedHolder.__init__( self, object )
 
 	## Creates a new node with the specified name and holding the specified procedural
 	# class type. Returns a function set instance operating on this new node.
 	@staticmethod
 	def create( nodeName, className, classVersion=-1 ) :
-	
+
 		holder = maya.mel.eval( "ieProceduralHolderCreate( \"%s\", \"%s\", %d )" % ( nodeName, className, classVersion ) )
 		return FnProceduralHolder( holder )
 
 	## Convenience method to call setParameterised with the environment variable
 	# for the searchpaths set to "IECORE_PROCEDURAL_PATHS".
 	def setProcedural( self, className, classVersion ) :
-	
+
 		self.setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" )
 
 	## Convenience method to return the ParameterisedProcedural class held inside this
 	# node.
 	def getProcedural( self ) :
-	
+
 		return self.getParameterised()[0]
 
 	## Returns a set of the names of any currently selected components. These names
 	# are specified by the procedural by setting the "name" attribute in the
 	# renderer.
 	def selectedComponentNames( self ) :
-	
+
 		result = set()
-	
+
 		s = maya.OpenMaya.MSelectionList()
 		maya.OpenMaya.MGlobal.getActiveSelectionList( s )
 
 		fullPathName = self.fullPathName()
 		for i in range( 0, s.length() ) :
-		
+
 			try :
-			
+
 				p = maya.OpenMaya.MDagPath()
 				c = maya.OpenMaya.MObject()
 				s.getDagPath( i, p, c )
-				
+
 				if p.node()==self.object() :
-					
+
 					fnC = maya.OpenMaya.MFnSingleIndexedComponent( c )
 					a = maya.OpenMaya.MIntArray()
 					fnC.getElements( a )
-					
+
 					for j in range( 0, a.length() ) :
-						
+
 						result.add( maya.cmds.getAttr( fullPathName + ".proceduralComponents[" + str( a[j] ) + "]" ) )
-					
+
 			except :
 				pass
 
@@ -102,10 +102,10 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 	## Selects the components specified by the passed names. If replace is True
 	# then the current selection is deselected first.
 	def selectComponentNames( self, componentNames ) :
-	
+
 		if not isinstance( componentNames, set ) :
 			componentNames = set( componentNames )
-	
+
 		fullPathName = self.fullPathName()
 		validIndices = maya.cmds.getAttr( fullPathName + ".proceduralComponents", multiIndices=True )
 		toSelect = []
@@ -113,12 +113,12 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 			componentName = maya.cmds.getAttr( fullPathName + ".proceduralComponents[" + str( i ) + "]" )
 			if componentName in componentNames :
 				toSelect.append( fullPathName + ".f[" + str( i ) + "]" )
-				
+
 		maya.cmds.select( clear=True )
 		maya.cmds.selectMode( component=True )
 		maya.cmds.hilite( fullPathName )
 		for s in toSelect :
-			maya.cmds.select( s, add=True )		
-		
-		 
+			maya.cmds.select( s, add=True )
+
+
 

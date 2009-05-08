@@ -47,18 +47,18 @@ IndexedIOFilter::~IndexedIOFilter()
 }
 
 void IndexedIOFilter::add(const IndexedIOFilterPtr &f)
-{	
+{
 	IndexedIOFilterPtr current = this;
-	
+
 	while (current)
-	{	
+	{
 		if (current == f)
 		{
 			return;
 		}
 		current = current->m_next;
 	}
-	
+
 	m_next = f;
 }
 
@@ -76,20 +76,20 @@ struct Filter
 	Filter(const IndexedIOFilterPtr &f) : m_f(f)
 	{
 	}
-	
+
 	bool operator()(const IndexedIO::Entry& e) const
 	{
 		return m_f->filter(e);
 	}
-		
+
 };
-		
+
 unsigned int IndexedIOFilter::apply( IndexedIO::EntryList &l)
 {
 	unsigned sizeBefore = l.size();
-	
+
 	l.remove_if( Filter(this) );
-	
+
 	return sizeBefore - l.size();
 }
 
@@ -98,7 +98,7 @@ unsigned int IndexedIOFilter::apply( IndexedIO::EntryList &l)
 IndexedIONullFilter::IndexedIONullFilter()
 {
 }
-	
+
 bool IndexedIONullFilter::filter( const IndexedIO::Entry &e) const
 {
 	return IndexedIOFilter::filter(e) || false;
@@ -110,7 +110,7 @@ IndexedIOEntryTypeFilter::IndexedIOEntryTypeFilter(IndexedIO::EntryType typ)
 : m_entryType(typ)
 {
 }
-	
+
 bool IndexedIOEntryTypeFilter::filter( const IndexedIO::Entry &e) const
 {
 	return IndexedIOFilter::filter(e) || (e.entryType() != m_entryType);
@@ -122,10 +122,10 @@ IndexedIORegexFilter::IndexedIORegexFilter(const std::string &regex)
 {
 	m_regex = boost::regex(regex);
 }
-	
+
 bool IndexedIORegexFilter::filter( const IndexedIO::Entry &e) const
 {
-	boost::cmatch what; 
-	
+	boost::cmatch what;
+
 	return IndexedIOFilter::filter(e) || ! regex_match(e.id().c_str(), what, m_regex);
 }

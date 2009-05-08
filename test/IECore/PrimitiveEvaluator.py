@@ -39,9 +39,9 @@ class TestPrimitiveEvaluator( unittest.TestCase ) :
 
 	def testPrimitiveEvaluator( self ) :
 		""" Testing PrimitiveEvaluator """
-		
+
 		self.assertRaises( RuntimeError, PrimitiveEvaluator )
-			
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

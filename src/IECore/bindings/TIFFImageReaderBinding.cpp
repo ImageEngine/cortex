@@ -51,7 +51,7 @@ void bindTIFFImageReader()
 		.def( init<const std::string &>() )
 		.def( "canRead", &TIFFImageReader::canRead ).staticmethod( "canRead" )
 		.def( "numDirectories", &TIFFImageReader::numDirectories )
-		.def( "setDirectory", &TIFFImageReader::setDirectory )		
+		.def( "setDirectory", &TIFFImageReader::setDirectory )
 	;
 }
 

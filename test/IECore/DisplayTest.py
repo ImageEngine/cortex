@@ -41,7 +41,7 @@ class DisplayTest( unittest.TestCase ) :
 	fileName = "test/IECore/data/display.cob"
 
 	def test( self ) :
-	
+
 		c = IECore.Display()
 		self.assertEqual( c.getName(), "default" )
 		self.assertEqual( c.getType(), "exr" )
@@ -54,35 +54,35 @@ class DisplayTest( unittest.TestCase ) :
 		self.assertEqual( cc.getData(), "rgba" )
 		self.assertEqual( cc.parameters(), IECore.CompoundData() )
 		self.assertEqual( cc, c )
-		
+
 		IECore.Writer.create( cc, self.fileName ).write()
 		ccc = IECore.Reader.create( self.fileName ).read()
-		
+
 		self.assertEqual( c, ccc )
-		
+
 		c.setName( "n" )
 		self.assertEqual( c.getName(), "n" )
-		
+
 		c.setType( "t" )
 		self.assertEqual( c.getType(), "t" )
-		
+
 		c.setData( "z" )
 		self.assertEqual( c.getData(), "z" )
-		
+
 		c.parameters()["compression"] = IECore.StringData( "piz" )
 		self.assertEqual( c.parameters()["compression"], IECore.StringData( "piz" ) )
-		
+
 		cc = c.copy()
 		self.assertEqual( cc, c )
-		
+
 		IECore.Writer.create( cc, self.fileName ).write()
 		ccc = IECore.Reader.create( self.fileName ).read()
 		self.assertEqual( ccc, c )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile( self.fileName ) :
-			os.remove( self.fileName )	
+			os.remove( self.fileName )
 
 if __name__ == "__main__":
         unittest.main()

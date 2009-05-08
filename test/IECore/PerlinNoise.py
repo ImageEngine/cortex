@@ -40,12 +40,12 @@ import random
 class TestPerlinNoise( unittest.TestCase ) :
 
 	def testff( self ) :
-	
+
 		n = IECore.PerlinNoiseff()
-		
+
 		width = 200
 		height = 200
-				
+
 		f = IECore.FloatVectorData( width * height )
 		o = 0
 		for i in range( 0, height ) :
@@ -53,15 +53,15 @@ class TestPerlinNoise( unittest.TestCase ) :
 			for j in range( 0, width ) :
 				f[o] = v
 				o += 1
-		
-		b = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )		
+
+		b = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )
 		i = IECore.ImagePrimitive( b, b )
 		i["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
-		
+
 		e = IECore.Reader.create( "test/IECore/data/expectedResults/perlinff.exr" ).read()
-		
+
 		op = IECore.ImageDiffOp()
 
 		res = op(
@@ -72,29 +72,29 @@ class TestPerlinNoise( unittest.TestCase ) :
 
 		self.failIf( res.value ) # Tested against OpenEXR 1.6.1
 
-			
+
 	def testV2ff( self ) :
-	
+
 		n = IECore.PerlinNoiseV2ff()
-	
+
 		width = 200
 		height = 200
-				
+
 		f = IECore.FloatVectorData( width * height )
 		o = 0
 		for i in range( 0, height ) :
 			for j in range( 0, width ) :
 				f[o] = 0.5 + n.noise( IECore.V2f( i/50.0, j/50.0 ) )
 				o += 1
-		
-		b = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )		
-		i = IECore.ImagePrimitive( b, b ) 
+
+		b = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )
+		i = IECore.ImagePrimitive( b, b )
 		i["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
-		
+
 		e = IECore.Reader.create( "test/IECore/data/expectedResults/perlinV2ff.exr" ).read()
-		
+
 		op = IECore.ImageDiffOp()
 
 		res = op(
@@ -104,14 +104,14 @@ class TestPerlinNoise( unittest.TestCase ) :
 		)
 
 		self.failIf( res.value ) # Tested against OpenEXR 1.6.1
-		
+
 	def testV3ff( self ) :
-	
+
 		n = IECore.PerlinNoiseV3ff()
-		
+
 		width = 200
 		height = 200
-				
+
 		f = IECore.FloatVectorData( width * height )
 		for frame in range( 0, 5 ) :
 			o = 0
@@ -119,32 +119,32 @@ class TestPerlinNoise( unittest.TestCase ) :
 				for j in range( 0, width ) :
 					f[o] = 0.5 + n.noise( IECore.V3f( i/50.0, j/50.0, frame/10.0 ) )
 					o += 1
-						
-			b = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )		
+
+			b = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )
 			i = IECore.ImagePrimitive( b, b )
 			i["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 			i["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 			i["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
-			
+
 			e = IECore.Reader.create( "test/IECore/data/expectedResults/perlin3d.%.4d.exr" % frame ).read()
-		
+
 			op = IECore.ImageDiffOp()
-                
+
 			res = op(
 				imageA = i,
 				imageB = e,
 				maxError = 0.0005
 			)
-                
+
 			self.failIf( res.value ) # Tested against OpenEXR 1.6.1
 
 	def testV2fColor3f( self ) :
-	
+
 		n = IECore.PerlinNoiseV2fColor3f()
-	
+
 		width = 200
 		height = 200
-				
+
 		r = IECore.FloatVectorData( width * height )
 		g = IECore.FloatVectorData( width * height )
 		b = IECore.FloatVectorData( width * height )
@@ -156,15 +156,15 @@ class TestPerlinNoise( unittest.TestCase ) :
 				g[o] = c.g + 0.5
 				b[o] = c.b + 0.5
 				o += 1
-		
-		box = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )		
-		i = IECore.ImagePrimitive( box, box ) 
+
+		box = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )
+		i = IECore.ImagePrimitive( box, box )
 		i["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, r )
 		i["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, g )
 		i["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, b )
-		
+
 		e = IECore.Reader.create( "test/IECore/data/expectedResults/perlinV2fColor3f.exr" ).read()
-		
+
 		op = IECore.ImageDiffOp()
 
 		res = op(
@@ -190,8 +190,8 @@ class TestPerlinNoise( unittest.TestCase ) :
 #			vv = n.noiseVector( p, v )
 #
 #		print t.stop()
-#		self.assert_( vv.isSame( v ) )	
-		
+#		self.assert_( vv.isSame( v ) )
+
 		# results
 		######################################################
 		# initial implementation (better weight interpolation)
@@ -303,20 +303,20 @@ class TestPerlinNoise( unittest.TestCase ) :
 		# 7.18
 		#
 		######################################################
-		
+
 	def testRepeatability( self ) :
-	
+
 		n = IECore.PerlinNoiseV2ff( 10 )
 		n2 = IECore.PerlinNoiseV2ff( 10 )
-	
+
 		width = 200
 		height = 200
-				
+
 		for i in range( 0, height ) :
 			for j in range( 0, width ) :
 				self.assertAlmostEqual( n.noise( IECore.V2f( i/50.0, j/50.0 ) ), n2.noise( IECore.V2f( i/50.0, j/50.0 ) ), 10 )
-					
-							
+
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

@@ -64,7 +64,7 @@ class LevenbergMarquardtTestSimple<T>::Fn
 			{
 				/// Distance between our guess and the real function
 				errors->writable()[i-1] = Imath::Math<T>::fabs(
-					parameters->readable()[i-1] - 
+					parameters->readable()[i-1] -
 					i * i
 				);
 			}
@@ -136,19 +136,19 @@ class LevenbergMarquardtTestPolynomialFit<T>::Fn
 		        typename TypedData< std::vector<T> >::Ptr errors
 		)
 		{
-		
+
 			boost::array<T, N> testCoeffs;
 			for ( unsigned i = 0; i < N; i ++ )
 			{
 				testCoeffs[i] = parameters->readable()[i];
 			}
-								
+
 			for ( unsigned i = 0; i < m_num; i ++ )
-			{			
+			{
 				/// Evaluate in range [-5, 5]
 				T v1 = boost::math::tools::evaluate_polynomial<N, T, T>( testCoeffs, (T(i) / m_num - 0.5) * 10.0 );
-				T v2 = boost::math::tools::evaluate_polynomial<N, T, T>( m_coeffs, (T(i) / m_num - 0.5) * 10.0);				
-			
+				T v2 = boost::math::tools::evaluate_polynomial<N, T, T>( m_coeffs, (T(i) / m_num - 0.5) * 10.0);
+
 				/// Distance between our guess and the real function
 				errors->writable()[i] = Imath::Math<T>::fabs( v1 - v2 );
 			}
@@ -158,7 +158,7 @@ class LevenbergMarquardtTestPolynomialFit<T>::Fn
 		{
 			return m_num;
 		}
-		
+
 		void check( typename TypedData< std::vector<T> >::ConstPtr parameters )
 		{
 			for ( unsigned i = 0; i < N; i ++ )
@@ -188,13 +188,13 @@ template<typename T>
 template<int N>
 void LevenbergMarquardtTestPolynomialFit<T>::test()
 {
-	Imath::Rand32 r( 88 );	
-	
+	Imath::Rand32 r( 88 );
+
 	const unsigned numTests = 20;
 	const int numSamples = N * 5;
-	
+
 	for ( unsigned j = 0; j < numTests; j ++ )
-	{		
+	{
 		Fn<N> fn( numSamples, r );
 
 		typename TypedData< std::vector<T> >::Ptr params = new TypedData< std::vector<T> >();
@@ -204,13 +204,13 @@ void LevenbergMarquardtTestPolynomialFit<T>::test()
 
 		IECore::LevenbergMarquardt< T, Fn<N> > lm;
 		lm.solve( params, fn );
-		
+
 		typename TypedData< std::vector<T> >::Ptr errors = new TypedData< std::vector<T> >();
 		errors->writable().resize( numSamples, 1.0 );
 
 		/// Find the coefficients used in the test function
 		fn( params, errors );
-		
+
 		/// Verify
 		fn.check( params );
 	}

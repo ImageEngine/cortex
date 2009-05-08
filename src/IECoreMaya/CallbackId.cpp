@@ -53,7 +53,7 @@ CallbackId::~CallbackId()
 		MMessage::removeCallback( m_id );
 	}
 }
-	
+
 const CallbackId &CallbackId::operator = ( MCallbackId id )
 {
 	if( m_id )
@@ -63,7 +63,7 @@ const CallbackId &CallbackId::operator = ( MCallbackId id )
 	m_id = id;
 	return *this;
 }
-	
+
 
 CallbackId::CallbackId( const CallbackId &other )
 {

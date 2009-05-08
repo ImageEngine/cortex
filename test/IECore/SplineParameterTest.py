@@ -38,16 +38,16 @@ import IECore
 class SplineParameterTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		p = IECore.SplinefColor3fParameter(
 			name = "testName",
 			description = "testName description",
 			defaultValue = IECore.SplinefColor3f()
 		)
-			
+
 		self.assertEqual( p.getValue(), IECore.SplinefColor3fData() )
 
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

@@ -178,7 +178,7 @@ string str<TYPE>( TYPE &x )																				\
 	stringstream s;																						\
 	s << x;																								\
 	return s.str();																						\
-}				
+}
 
 DEFINENUMERICSTRSPECIALISATION( bool );
 DEFINENUMERICSTRSPECIALISATION( int );
@@ -206,7 +206,7 @@ string str<TypedData<TYPE> >( TypedData<TYPE> &x )														\
 	stringstream s;																						\
 	s << str( const_cast<TYPE &>( x.readable() ) );														\
 	return s.str();																						\
-}						
+}
 
 DEFINETYPEDDATASTRSPECIALISATION( bool );
 DEFINETYPEDDATASTRSPECIALISATION( char );
@@ -258,7 +258,7 @@ struct TypedDataFromType
 			&construct,
 			type_id<typename T::Ptr>()
 		);
-	
+
 	}
 
 	static void *convertible( PyObject *obj )
@@ -270,7 +270,7 @@ struct TypedDataFromType
 		}
 		return 0;
 	}
-	
+
 	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
 	{
 		void *storage = ((converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
@@ -292,7 +292,7 @@ struct TypedDataFromType<BoolData>
 			&construct,
 			type_id<BoolDataPtr>()
 		);
-	
+
 	}
 
 	static void *convertible( PyObject *obj )
@@ -303,7 +303,7 @@ struct TypedDataFromType<BoolData>
 		}
 		return 0;
 	}
-	
+
 	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
 	{
 		void *storage = ((converter::rvalue_from_python_storage<BoolDataPtr>*)data)->storage.bytes;
@@ -321,7 +321,7 @@ template<class T>
 static RunTimeTypedClass<T> bindSimpleData()
 {
 	TypedDataFromType<T>();
-	
+
 	RunTimeTypedClass<T> result;
 	result.def( "__init__", make_constructor( &ConstructHelper<T>::construct ), "Construct with no specified value." );
 	result.def( "__init__", make_constructor( &constructWithValue<T> ), "Construct with the specified value." );
@@ -352,47 +352,47 @@ void bindAllSimpleTypedData()
 	sdc.def("__cmp__", &cmp<StringData> );
 
 	bindSimpleData<BoolData>();
-	
+
 	RunTimeTypedClass<IntData> idc = bindSimpleData<IntData>();
 	bindNumericMethods( idc );
 	idc.def( "__int__", &getValue<IntData> );
-	
+
 	RunTimeTypedClass<UIntData> uidc = bindSimpleData<UIntData>();
 	bindNumericMethods( uidc );
 	uidc.def( "__long__", &getValue<UIntData> );
-	
+
 	RunTimeTypedClass<FloatData > fdc = bindSimpleData<FloatData>();
 	bindNumericMethods( fdc );
 	fdc.def( "__float__", &getValue<FloatData> );
-	
+
 	RunTimeTypedClass<DoubleData> ddc = bindSimpleData<DoubleData>();
 	bindNumericMethods( ddc );
 	ddc.def( "__float__", &getValue<DoubleData> );
-	
+
 	RunTimeTypedClass<CharData> cdc = bindSimpleData<CharData>();
 	bindNumericMethods( cdc );
-	
+
 	RunTimeTypedClass<UCharData> ucdc = bindSimpleData<UCharData>();
 	bindNumericMethods( ucdc );
 	ucdc.def( "__int__", &getValue<UCharData> );
 	ucdc.def( "__chr__", &getValue<UCharData> );
-	
+
 	RunTimeTypedClass<HalfData> hdc = bindSimpleData<HalfData>();
 	bindNumericMethods( hdc );
 	hdc.def( "__float__", &getValue<HalfData> );
-	
+
 	RunTimeTypedClass<ShortData> shdc = bindSimpleData<ShortData>();
 	bindNumericMethods( shdc );
 	shdc.def( "__int__", &getValue<ShortData> );
-	
+
 	RunTimeTypedClass<UShortData> ushdc = bindSimpleData<UShortData>();
 	bindNumericMethods( ushdc );
 	ushdc.def( "__int__", &getValue<UShortData> );
-	
+
 	RunTimeTypedClass<Int64Data> i64dc = bindSimpleData<Int64Data>();
 	bindNumericMethods( i64dc );
 	i64dc.def( "__long__", &getValue<Int64Data> );
-	
+
 	RunTimeTypedClass<UInt64Data> ui64dc = bindSimpleData<UInt64Data>();
 	bindNumericMethods( ui64dc );
 	ui64dc.def( "__long__", &getValue<UInt64Data> );
@@ -402,43 +402,43 @@ void bindAllSimpleTypedData()
 	bindSimpleData<V3iData>();
 
 	bindSimpleData<V2fData>();
-	
+
 	bindSimpleData<V3fData>();
-	
+
 	bindSimpleData<V2dData>();
-	
+
 	bindSimpleData<V3dData>();
 
 	bindSimpleData<Box2iData>();
-	
+
 	bindSimpleData<Box3iData>();
-	
+
 	bindSimpleData<Box2fData>();
-	
+
 	bindSimpleData<Box3fData>();
-	
+
 	bindSimpleData<Box2dData>();
-	
+
 	bindSimpleData<Box3dData>();
 
 	bindSimpleData<M33fData>();
-	
+
 	bindSimpleData<M33dData>();
-	
+
 	bindSimpleData<M44fData>();
-	
+
 	bindSimpleData<M44dData>();
-	
+
 	bindSimpleData<QuatfData>();
-	
+
 	bindSimpleData<QuatdData>();
-	
+
 	bindSimpleData<Color3fData>();
-	
+
 	bindSimpleData<Color3dData>();
-	
+
 	bindSimpleData<Color4fData>();
-	
+
 	bindSimpleData<Color4dData>();
 
 }

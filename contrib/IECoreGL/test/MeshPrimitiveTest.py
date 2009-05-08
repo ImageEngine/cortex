@@ -44,58 +44,58 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 	## \todo Make this actually assert something
 	def testVertexAttributes( self ) :
-	
+
 		vertexSource = """
 		attribute vec2 st;
 		varying vec4 stColor;
-		
+
 		void main()
 		{
 			gl_Position = ftransform();
-			
-			stColor = vec4(st.x, st.y, 0.0, 1.0);			
+
+			stColor = vec4(st.x, st.y, 0.0, 1.0);
 		}
 		"""
-	
+
 		fragmentSource = """
 		varying vec4 stColor;
-		
+
 		void main()
 		{
 			gl_FragColor = stColor;
 		}
 		"""
-		
+
 		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
-		
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		
+
 		r.worldBegin()
 		# we have to make this here so that the shaders that get made are made in the
 		# correct GL context. My understanding is that all shaders should work in all
 		# GL contexts in the address space, but that doesn't seem to be the case.
 		#w = SceneViewer( "scene", r.scene() )
-		
+
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -15 ) ) )
-		r.shader( "surface", "showST", 
+		r.shader( "surface", "showST",
 			{ "gl:fragmentSource" : StringData( fragmentSource ),
-			  "gl:vertexSource" :   StringData( vertexSource   ) 
+			  "gl:vertexSource" :   StringData( vertexSource   )
 			}
 		)
-		
+
 		primVars = {}
-		
-		primVars["P"] = m["P"]		
+
+		primVars["P"] = m["P"]
 		primVars["s"] = m["s"]
 		primVars["t"] = m["t"]
-		primVars["N"] = m["N"]		
-		
+		primVars["N"] = m["N"]
+
 		r.mesh( m.verticesPerFace, m.vertexIds, m.interpolation, primVars )
-		
+
 		r.worldEnd()
-	
+
 		#w.start()
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

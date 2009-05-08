@@ -45,14 +45,14 @@ namespace IECoreMaya
 
 /// A base class from which nodes to hold IECore::ParameterisedInterface objects
 /// should multiply inherit (for example, Maya RI procedurals).
-class ParameterisedHolderInterface 
+class ParameterisedHolderInterface
 {
 
 	public:
-	
+
 		ParameterisedHolderInterface();
 		virtual ~ParameterisedHolderInterface();
-		
+
 		/// Sets the Parameterised object this node is holding. An IECore.ClassLoader object will be
 		/// used with searchpaths obtained from the specified environment variable to actually load
 		/// the Parameterised object. This mechanism is used rather than passing a ParameterisedPtr
@@ -78,15 +78,15 @@ class ParameterisedHolderInterface
 		/// Sets the attribute of the node to reflect the current value
 		/// of the specified parameter in the held Parameterised object. Performs validation
 		/// of the parameter values and will return kFailure if any one is not valid.
-		virtual MStatus setNodeValue( IECore::ParameterPtr pa ) = 0;		
+		virtual MStatus setNodeValue( IECore::ParameterPtr pa ) = 0;
 		/// Sets the values of the parameters of the held Parameterised object
 		/// to reflect the values of the attributes of the node. Performs validation
 		/// of the parameter values and will return kFailure if any one in not valid.
 		virtual MStatus setParameterisedValues() = 0;
 		/// Sets the value of the specified parameter of the held Parameterised object
 		/// to reflect the value of the corresponding attribute on the node. Performs validation
-		/// of the parameter values and will return kFailure if any one in not valid.		
-		virtual MStatus setParameterisedValue( IECore::ParameterPtr pa ) = 0;		
+		/// of the parameter values and will return kFailure if any one in not valid.
+		virtual MStatus setParameterisedValue( IECore::ParameterPtr pa ) = 0;
 		/// Returns the plug used to represent the specified parameter, which should
 		/// be a child of getParameterised()->parameters(). On failure returns a plug
 		/// for which plug.isNull() returns true.
@@ -94,7 +94,7 @@ class ParameterisedHolderInterface
 		/// Returns the parameter represented by the specified plug, returning 0
 		/// if no such parameter exists.
 		virtual IECore::ParameterPtr plugParameter( const MPlug &plug ) = 0;
-	
+
 };
 
 }

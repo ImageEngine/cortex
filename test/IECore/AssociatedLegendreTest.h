@@ -58,8 +58,8 @@ class AssociatedLegendreTest
 };
 
 struct AssociatedLegendreTestSuite : public boost::unit_test::test_suite
-{	
-	
+{
+
 	AssociatedLegendreTestSuite() : boost::unit_test::test_suite("AssociatedLegendreTestSuite")
 	{
 		addAssociatedLegendreTest<double>();
@@ -69,11 +69,11 @@ struct AssociatedLegendreTestSuite : public boost::unit_test::test_suite
 	void addAssociatedLegendreTest()
 	{
 		static boost::shared_ptr< AssociatedLegendreTest< T > > instance(new AssociatedLegendreTest<T>());
-		
+
 		add( BOOST_CLASS_TEST_CASE( &(AssociatedLegendreTest< T >::testEvaluation), instance ) );
 		add( BOOST_CLASS_TEST_CASE( &(AssociatedLegendreTest< T >::testDepthEvaluation), instance ) );
 	}
-	
+
 };
 }
 

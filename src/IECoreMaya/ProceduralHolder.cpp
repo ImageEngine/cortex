@@ -94,15 +94,15 @@ void *ProceduralHolder::creator()
 {
 	return new ProceduralHolder;
 }
-			 
+
 MStatus ProceduralHolder::initialize()
-{	
+{
 	MStatus s = inheritAttributesFrom( ParameterisedHolderComponentShape::typeName );
 	assert( s );
-	
+
 	MFnNumericAttribute nAttr;
 	MFnTypedAttribute tAttr;
-	
+
 	aGLPreview = nAttr.create( "glPreview", "glpr", MFnNumericData::kBoolean, 1, &s );
 	assert( s );
 	nAttr.setReadable( true );
@@ -110,10 +110,10 @@ MStatus ProceduralHolder::initialize()
 	nAttr.setStorable( true );
 	nAttr.setConnectable( true );
 	nAttr.setHidden( false );
-	
+
 	s = addAttribute( aGLPreview );
 	assert( s );
-	
+
 	aTransparent = nAttr.create( "transparent", "trans", MFnNumericData::kBoolean, 0, &s );
 	assert( s );
 	nAttr.setReadable( true );
@@ -121,10 +121,10 @@ MStatus ProceduralHolder::initialize()
 	nAttr.setStorable( true );
 	nAttr.setConnectable( true );
 	nAttr.setHidden( false );
-	
+
 	s = addAttribute( aTransparent );
 	assert( s );
-	
+
 	aDrawBound = nAttr.create( "drawBound", "dbnd", MFnNumericData::kBoolean, 1, &s );
 	assert( s );
 	nAttr.setReadable( true );
@@ -132,17 +132,17 @@ MStatus ProceduralHolder::initialize()
 	nAttr.setStorable( true );
 	nAttr.setConnectable( true );
 	nAttr.setHidden( false );
-	
+
 	s = addAttribute( aDrawBound );
 	assert( s );
-	
+
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	assert( defaultState );
 	assert( defaultState->isComplete() );
 	MFnStringData fnData;
 	MObject defaultValue = fnData.create( defaultState->get<const IECoreGL::NameStateComponent>()->name().c_str(), &s );
 	assert( s );
-	
+
 	aProceduralComponents = tAttr.create( "proceduralComponents", "prcm", MFnData::kString, defaultValue, &s );
 	assert( s );
 	tAttr.setReadable( true );
@@ -151,11 +151,11 @@ MStatus ProceduralHolder::initialize()
 	tAttr.setConnectable( true );
 	tAttr.setHidden( true );
 	tAttr.setArray( true );
-	tAttr.setUsesArrayDataBuilder( true );	
-	
+	tAttr.setUsesArrayDataBuilder( true );
+
 	s = addAttribute( aProceduralComponents );
-	assert( s );	
-	
+	assert( s );
+
 	return MS::kSuccess;
 }
 
@@ -170,7 +170,7 @@ MBoundingBox ProceduralHolder::boundingBox() const
 	{
 		return m_bound;
 	}
-		
+
 	m_bound = MBoundingBox( MPoint( -1, -1, -1 ), MPoint( 1, 1, 1 ) );
 
 	ParameterisedProceduralPtr p = const_cast<ProceduralHolder*>(this)->getProcedural();
@@ -198,7 +198,7 @@ MBoundingBox ProceduralHolder::boundingBox() const
 			msg( Msg::Error, "ProceduralHolder::boundingBox", "Exception thrown in Procedural::bound" );
 		}
 	}
-	
+
 	m_boundDirty = false;
 	return m_bound;
 }
@@ -213,10 +213,10 @@ MStatus ProceduralHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plu
 		m_boundDirty = m_sceneDirty = true;
 		childChanged( kBoundingBoxChanged ); // this is necessary to cause maya to redraw
 	}
-	
+
 	return ParameterisedHolderComponentShape::setDependentsDirty( plug, plugArray );
 }
-				
+
 MStatus ProceduralHolder::setProcedural( const std::string &className, int classVersion )
 {
 	return setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" );
@@ -233,7 +233,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 	{
 		return m_scene;
 	}
-	
+
 	m_scene = 0;
 	ParameterisedProceduralPtr p = ((ProceduralHolder*)this)->getProcedural();
 	if( p )
@@ -244,14 +244,14 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 			IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 			renderer->setOption( "gl:mode", new StringData( "deferred" ) );
 			renderer->worldBegin();
-			
+
 				p->render( renderer );
-			
+
 			renderer->worldEnd();
-			
+
 			m_scene = renderer->scene();
 			m_scene->setCamera( 0 );
-			
+
 			buildComponents();
 		}
 		catch( boost::python::error_already_set )
@@ -267,7 +267,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 			msg( Msg::Error, "ProceduralHolder::scene", "Exception thrown in Procedural::render" );
 		}
 	}
-	
+
 	m_sceneDirty = false;
 	return m_scene;
 }
@@ -275,26 +275,26 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 void ProceduralHolder::componentToPlugs( MObject &component, MSelectionList &selectionList ) const
 {
 	MStatus s;
-	
-	if ( component.hasFn( MFn::kSingleIndexedComponent ) ) 
-	{ 
-		MFnSingleIndexedComponent fnComp( component, &s ); 
+
+	if ( component.hasFn( MFn::kSingleIndexedComponent ) )
+	{
+		MFnSingleIndexedComponent fnComp( component, &s );
 		assert( s );
-		MObject thisNode = thisMObject(); 
-		MPlug plug( thisNode, aProceduralComponents ); 
+		MObject thisNode = thisMObject();
+		MPlug plug( thisNode, aProceduralComponents );
 		assert( !plug.isNull() );
-		
-		int len = fnComp.elementCount( &s ); 
+
+		int len = fnComp.elementCount( &s );
 		assert( s );
-		for ( int i = 0; i < len; i++ ) 
-		{ 
-			MPlug compPlug = plug.elementByLogicalIndex( fnComp.element(i), &s ); 
+		for ( int i = 0; i < len; i++ )
+		{
+			MPlug compPlug = plug.elementByLogicalIndex( fnComp.element(i), &s );
 			assert( s );
 			assert( !compPlug.isNull() );
-			
-			selectionList.add( compPlug ); 
-		} 
-	} 	
+
+			selectionList.add( compPlug );
+		}
+	}
 }
 
 MPxSurfaceShape::MatchResult ProceduralHolder::matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list )
@@ -307,16 +307,16 @@ MPxSurfaceShape::MatchResult ProceduralHolder::matchComponent( const MSelectionL
 		int dim = attrSpec.dimensions();
 
 		if ( (dim > 0) && (attrSpec.name() == "proceduralComponents" || attrSpec.name() == "prcm" || attrSpec.name() == "f" ) )
-		{	
+		{
 			int numComponents = m_componentToGroupMap.size();
 
 			MAttributeIndex attrIndex = attrSpec[0];
-			
+
 			if ( attrIndex.type() != MAttributeIndex::kInteger )
 			{
 				return MPxSurfaceShape::kMatchInvalidAttributeRange;
 			}
-			
+
 			int upper = numComponents - 1;
 			int lower = 0;
 			if ( attrIndex.hasLowerBound() )
@@ -331,7 +331,7 @@ MPxSurfaceShape::MatchResult ProceduralHolder::matchComponent( const MSelectionL
 			// Check the attribute index range is valid
 			if ( (attrIndex.hasRange() && !attrIndex.hasValidRange() ) || (upper >= numComponents) || (lower < 0 ) )
 			{
-				return MPxSurfaceShape::kMatchInvalidAttributeRange;		
+				return MPxSurfaceShape::kMatchInvalidAttributeRange;
 			}
 
 			MDagPath path;
@@ -344,54 +344,54 @@ MPxSurfaceShape::MatchResult ProceduralHolder::matchComponent( const MSelectionL
 			{
 				fnComp.addElement( i );
 			}
-			
+
 			list.add( path, comp );
 
 			return MPxSurfaceShape::kMatchOk;
-		}	
+		}
 	}
 
-	return MPxSurfaceShape::matchComponent( item, spec, list );	
+	return MPxSurfaceShape::matchComponent( item, spec, list );
 }
 
 void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group )
-{	
+{
 	assert( nameState );
 	assert( group );
-	assert( group->getState() );				
-	
-	MStatus s;	
-	
+	assert( group->getState() );
+
+	MStatus s;
+
 	if (  group->getState()->get< IECoreGL::NameStateComponent >() )
 	{
 		nameState = group->getState()->get< IECoreGL::NameStateComponent >();
 	}
 
-	const std::string &name = nameState->name();		
+	const std::string &name = nameState->name();
 	int compId = nameState->glName();
-	
+
 	ComponentsMap::const_iterator it = m_componentsMap.find( name );
 	if( it == m_componentsMap.end() )
-	{		
+	{
 		compId = m_componentsMap.size();
-				
+
 		/// Reserve slot in the componentsMap. The exact component ID gets generated later, once all components have been
 		/// traversed. IDs are then assigned in ascending order whilst iterating over the component map, which is sorted by name. This
 		/// ensures a consistent ordering of components from frame to frame, which we'd not otherwise get due to IECore::Group using
 		/// a regular set (sorted by pointer) to store its children.
-		m_componentsMap[name] = ComponentsMap::mapped_type( 0, group );				
-	}		
-		
+		m_componentsMap[name] = ComponentsMap::mapped_type( 0, group );
+	}
+
 	const IECoreGL::Group::ChildContainer &children = group->children();
-	
+
 	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
 	{
 		assert( *it );
-		
-		group = runTimeCast< IECoreGL::Group >( *it );		
+
+		group = runTimeCast< IECoreGL::Group >( *it );
 		if ( group )
-		{		
-			buildComponents( nameState, group );			
+		{
+			buildComponents( nameState, group );
 		}
 	}
 }
@@ -400,37 +400,37 @@ void ProceduralHolder::buildComponents()
 {
 	MStatus s;
 	MDataBlock block = forceCache();
-	
+
 	MArrayDataHandle cH = block.outputArrayValue( aProceduralComponents, &s );
 	assert( s );
 
 	m_componentsMap.clear();
 
 	m_componentToGroupMap.clear();
-	
+
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	assert( defaultState );
 	assert( defaultState->isComplete() );
 	assert( defaultState->get<const IECoreGL::NameStateComponent>() );
-		
+
 	assert( m_scene );
 	assert( m_scene->root() );
-	
+
 	buildComponents( defaultState->get<const IECoreGL::NameStateComponent>(), m_scene->root() );
-	
-	
+
+
 	MArrayDataBuilder builder = cH.builder( &s );
 	assert( s );
-	
+
 	int compId = 0;
 	ComponentsMap::iterator it = m_componentsMap.begin();
 	for ( ; it != m_componentsMap.end(); it ++ )
 	{
 		/// Build the mapping that goes from ID -> ( name, group )
 		m_componentToGroupMap[compId].insert( ComponentToGroupMap::mapped_type::value_type( it->first.value(), it->second.second ) );
-	
+
 		it->second.first = compId ++;
-		
+
 		MFnStringData fnData;
 		MObject data = fnData.create( MString( it->first.value().c_str() ) );
 		MDataHandle h = builder.addElement( it->second.first, &s );
@@ -439,10 +439,10 @@ void ProceduralHolder::buildComponents()
 		s = h.set( data );
 		assert( s );
 	}
-	
+
 	s = cH.set( builder );
 	assert( s );
-	
+
 #ifndef NDEBUG
 	MPlug plug( thisMObject(), aProceduralComponents );
 	for ( ComponentsMap::const_iterator it = m_componentsMap.begin(); it != m_componentsMap.end(); ++it )
@@ -454,11 +454,11 @@ void ProceduralHolder::buildComponents()
 		assert( s );
 		MFnStringData fnData( obj, &s );
 		assert( s );
-		
+
 		assert( fnData.string() == MString( it->first.value().c_str() ) );
 	}
-	
-#endif	
+
+#endif
 }
-				
+
 

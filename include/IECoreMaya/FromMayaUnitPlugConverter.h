@@ -38,43 +38,43 @@
 #include "IECoreMaya/FromMayaPlugConverter.h"
 
 #include "IECore/NumericParameter.h"
-	
+
 namespace IECoreMaya
 {
 
-template<typename T> 
+template<typename T>
 class FromMayaUnitPlugConverter : public FromMayaPlugConverter
 {
 
 	public :
-	
+
 		FromMayaUnitPlugConverter( const MPlug &plug );
-		
+
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( FromMayaUnitPlugConverter, FromMayaPlugConverter )
-		
+
 		IECore::IntParameterPtr angleUnitParameter();
 		IECore::ConstIntParameterPtr angleUnitParameter() const;
-		
+
 		IECore::IntParameterPtr distanceUnitParameter();
 		IECore::ConstIntParameterPtr distanceUnitParameter() const;
-		
+
 		IECore::IntParameterPtr timeUnitParameter();
 		IECore::ConstIntParameterPtr timeUnitParameter() const;
-		
+
 	protected :
-		
+
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		IECore::IntParameterPtr m_angleUnitParameter;
 		IECore::IntParameterPtr m_distanceUnitParameter;
 		IECore::IntParameterPtr m_timeUnitParameter;
-	
+
 		static Description<FromMayaUnitPlugConverter> m_angleDescription;
 		static Description<FromMayaUnitPlugConverter> m_distanceDescription;
 		static Description<FromMayaUnitPlugConverter> m_timeDescription;
-		
+
 };
 
 typedef FromMayaUnitPlugConverter<float> FromMayaUnitPlugConverterf;

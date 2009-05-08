@@ -48,11 +48,11 @@ IE_CORE_FORWARDDECLARE( FromMayaDagNodeConverter );
 /// maya dag node objects into IECore objects.
 class FromMayaDagNodeConverter : public FromMayaObjectConverter
 {
-	
+
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaDagNodeConverter, FromMayaDagNodeConverterTypeId, FromMayaObjectConverter );
-		
+
 		//! @name Factory
 		/////////////////////////////////////////////////////////////////////////////////
 		//@{
@@ -61,9 +61,9 @@ class FromMayaDagNodeConverter : public FromMayaObjectConverter
 		/// will do. Returns 0 if no suitable converter can be found.
 		static FromMayaDagNodeConverterPtr create( const MDagPath &dagPath, IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
-		
+
 	protected :
-	
+
 		FromMayaDagNodeConverter( const std::string &name, const std::string &description, const MDagPath &dagPath );
 
 		/// No need to override this in derived classes - override the function below instead.
@@ -89,11 +89,11 @@ class FromMayaDagNodeConverter : public FromMayaObjectConverter
 	private :
 
 		MDagPath m_dagPath;
-		
+
 		typedef FromMayaDagNodeConverterPtr (*CreatorFn)( const MDagPath &dagPath );
 		typedef std::pair<MFn::Type, IECore::TypeId> Types;
 		typedef std::map<Types, CreatorFn> TypesToFnsMap;
-		
+
 		static TypesToFnsMap *typesToFns();
 		static void registerConverter( const MFn::Type fromType, IECore::TypeId resultType, CreatorFn creator );
 

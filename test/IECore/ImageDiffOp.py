@@ -37,101 +37,101 @@ import sys
 from IECore import *
 
 class TestImageDiffOp(unittest.TestCase):
-		
+
 	def testSimple(self):
-		
+
 		op = ImageDiffOp()
-		
+
 		imageA = Reader.create( "test/IECore/data/tiff/uvMap.512x256.32bit.tif" ).read()
 		imageB = Reader.create( "test/IECore/data/cinFiles/uvMap.512x256.cin" ).read()
 		res = op(
 			imageA = imageA,
 			imageB = imageB
 		)
-		
+
 		self.failIf( res.value )
-		
+
 		imageA = Reader.create( "test/IECore/data/tiff/uvMap.512x256.32bit.tif" ).read()
 		imageB = Reader.create( "test/IECore/data/tiff/uvMap.200x100.rgba.16bit.tif" ).read()
-		
+
 		res = op(
 			imageA = imageA,
 			imageB = imageB
 		)
-		
-		self.assert_( res.value )	
-		
+
+		self.assert_( res.value )
+
 		imageA = Reader.create( "test/IECore/data/tiff/uvMap.512x256.16bit.tif" ).read()
 		imageB = Reader.create( "test/IECore/data/tiff/uvMapUpsideDown.512x256.16bit.tif" ).read()
-		
+
 		res = op(
 			imageA = imageA,
 			imageB = imageB
 		)
-		
-		self.assert_( res.value )	
-		
+
+		self.assert_( res.value )
+
 		imageA = Reader.create( "test/IECore/data/tiff/uvMap.512x256.32bit.tif" ).read()
-				
+
 		m = CapturingMessageHandler()
 		s = ScopedMessageHandler( m )
-		
+
 		res = op(
 			imageA = imageA,
 			imageB = imageA
 		)
-		
+
 		self.assertEqual( len( m.messages ), 1 )
 		self.assertEqual( m.messages[0].level, Msg.Level.Warning )
 		self.assertEqual( m.messages[0].message, "Exact same image specified as both input parameters." )
-		
+
 		self.failIf( res.value )
-		
+
 		s = None
-		
+
 		res = op(
 			imageA = imageA,
 			imageB = imageA.copy()
 		)
-		
-		self.failIf( res.value )	
+
+		self.failIf( res.value )
 
 	def testMissingChannels(self):
-		
+
 		op = ImageDiffOp()
-		
+
 		w = Box2i( V2i( 0, 0 ), V2i( 99, 99 ) )
-		
+
 		f = FloatVectorData()
 		f.resize( 100 * 100, 0 )
-		
+
 		imageA = ImagePrimitive( w, w )
 		imageB = ImagePrimitive( w, w )
-		
+
 		# Both images have channel "R"
 		imageA["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
 		imageB["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
 
-		# Only imageA has channel "G"		
-		imageA["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )		
-		
+		# Only imageA has channel "G"
+		imageA["G"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
+
 		res = op(
 			imageA = imageA,
 			imageB = imageB,
 			skipMissingChannels = False
 		)
-		
+
 		self.assert_( res.value )
-		
+
 		res = op(
 			imageA = imageA,
 			imageB = imageB,
 			skipMissingChannels = True
 		)
-		
+
 		self.failIf( res.value )
-		
-                			
+
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

@@ -34,23 +34,23 @@
 
 
 // Partially specialize for TransformationMatrix
-// Assumes the two rotate members have the same rotation order and that they are sufficiently close 
+// Assumes the two rotate members have the same rotation order and that they are sufficiently close
 // to each other so that the euler interpolation will look good.
 template<typename T>
 struct LinearInterpolator< TransformationMatrix<T> >
 {
-	void operator()(const TransformationMatrix<T> &y0, 
+	void operator()(const TransformationMatrix<T> &y0,
 			const TransformationMatrix<T> &y1,
-			double x, 
+			double x,
 			TransformationMatrix<T> &result) const
-	{	
+	{
 		LinearInterpolator< Imath::Vec3< T > >()( y0.scalePivot, y1.scalePivot, x, result.scalePivot );
 		LinearInterpolator< Imath::Vec3< T > >()( y0.scale, y1.scale, x, result.scale );
 		LinearInterpolator< Imath::Vec3< T > >()( y0.shear, y1.shear, x, result.shear );
 		LinearInterpolator< Imath::Vec3< T > >()( y0.scalePivotTranslation, y1.scalePivotTranslation, x, result.scalePivotTranslation );
 		LinearInterpolator< Imath::Vec3< T > >()( y0.rotatePivot, y1.rotatePivot, x, result.rotatePivot );
 		LinearInterpolator< Imath::Quat< T > >()( y0.rotationOrientation, y1.rotationOrientation, x, result.rotationOrientation );
-			
+
 		/// \todo We're doing the interpolation using quaternions so we get the shortest rotation, but this is
 		/// throwing away the continuity that the eulers provide. we need to give some more thought to how we do this.
 		/// this code is currently primarily used as part of the following process :
@@ -68,34 +68,34 @@ struct LinearInterpolator< TransformationMatrix<T> >
 		/// instance if we don't intend to go to a matrix form at the end.
 		///
 		/// We should review the following :
-		/// 
+		///
 		///		* What members the TransformationMatrix has and why, and how this relates to
 		/// 	  the maya MTransformationMatrix class. Do we really need all those pivots and offsets?
 		///		* What we cache and how for transformation caches. Eulers? Quaternions? World space? Local space with hierarchies?
 		///		* How those caches are used in renderman, nuke and elsewhere.
 		///		* What should be in cortex and what shouldn't.
-		
+
 		Imath::Quat<T> q0 = y0.rotate.toQuat();
 		Imath::Quat<T> q1 = y1.rotate.toQuat();
 		Imath::Quat<T> q; LinearInterpolator<Imath::Quat<T> >()( q0, q1, x, q );
-		result.rotate.extract( q );		
-		
+		result.rotate.extract( q );
+
 		LinearInterpolator< Imath::Vec3< T > >()( y0.rotatePivotTranslation, y1.rotatePivotTranslation, x, result.rotatePivotTranslation );
 		LinearInterpolator< Imath::Vec3< T > >()( y0.translate, y1.translate, x, result.translate );
 	}
 };
 
 // Partially specialize for TransformationMatrix
-// Assumes the two rotate members have the same rotation order and that they are sufficiently close 
+// Assumes the two rotate members have the same rotation order and that they are sufficiently close
 // to each other so that the euler interpolation will look good.
 template<typename T>
 struct CubicInterpolator< TransformationMatrix<T> >
 {
-	void operator()(const TransformationMatrix<T> &y0, 
+	void operator()(const TransformationMatrix<T> &y0,
 			const TransformationMatrix<T> &y1,
 			const TransformationMatrix<T> &y2,
 			const TransformationMatrix<T> &y3,
-			double x, 
+			double x,
 			TransformationMatrix<T> &result) const
 	{
 		CubicInterpolator< Imath::Vec3< T > >()( y0.scalePivot, y1.scalePivot, y2.scalePivot, y3.scalePivot, x, result.scalePivot );

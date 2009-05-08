@@ -41,14 +41,14 @@ from IECore import *
 class ImageSequenceCompositeOp( SequenceMergeOp ) :
 
 	def __init__( self ) :
-	
+
 		SequenceMergeOp.__init__(
-			self, 
-			"ImageSequenceCompositeOp", 
-			"The ImageSequenceCompositeOp does a simple A-over-B composite of two input sequences of image files",			
+			self,
+			"ImageSequenceCompositeOp",
+			"The ImageSequenceCompositeOp does a simple A-over-B composite of two input sequences of image files",
 			extensions = [ "tif", "tiff", "exr", "cin", "dpx", "jpg" ]
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				IntParameter(
@@ -64,19 +64,19 @@ class ImageSequenceCompositeOp( SequenceMergeOp ) :
 				),
 			]
 		)
-		
+
 	def _merge( self, fileName1, fileName2, outputFileName ) :
-						
+
 		image1 = Reader.create( fileName1 ).read()
 		if not image1.isInstanceOf( "ImagePrimitive" ) :
 			raise RuntimeError( "ImageSequenceCompositeOp: Could not load image from from '%s'" % ( fileName1 ) )
-			
+
 		image2 = Reader.create( fileName2 ).read()
 		if not image2.isInstanceOf( "ImagePrimitive" ) :
 			raise RuntimeError( "ImageSequenceCompositeOp: Could not load image from from '%s'" % ( fileName2 ) )
-				
+
 		op = ImageCompositeOp()
-		
+
 		resultImage = op(
 			input = image2,
 			imageA = image1,
@@ -84,7 +84,7 @@ class ImageSequenceCompositeOp( SequenceMergeOp ) :
 			inputMode = ImageCompositeOp.InputMode.Unpremultiplied,
 		)
 		Writer.create( resultImage, outputFileName ).write()
-		
+
 		return True
 
 registerRunTimeTyped( ImageSequenceCompositeOp, 100025, SequenceMergeOp )

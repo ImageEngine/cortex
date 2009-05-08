@@ -43,7 +43,7 @@ namespace IECore
 void bindCubeColorLookupParameter()
 {
 	bindTypedParameter<CubeColorLookupf>();
-	bindTypedParameter<CubeColorLookupd>();    
+	bindTypedParameter<CubeColorLookupd>();
 }
 
 } // namespace IECore

@@ -46,26 +46,26 @@ namespace IECore
 class AttributeState : public StateRenderable
 {
 	public:
-	
+
 		AttributeState( const CompoundDataMap &attributes = CompoundDataMap() );
 		virtual ~AttributeState();
-				
+
 		IE_CORE_DECLAREOBJECT( AttributeState, StateRenderable );
-		
+
 		CompoundDataMap &attributes();
 		const CompoundDataMap &attributes() const;
 		/// This is mostly of use for the binding - the attributes()
 		/// function gives more direct access to the contents of the CompoundData
 		/// (it calls readable() or writable() for you).
 		CompoundDataPtr attributesData();
-		
+
 		/// Calls renderer->setAttribute() for each name, data pair in attributes()
 		virtual void render( RendererPtr renderer ) const;
-	
+
 	private:
 
 		CompoundDataPtr m_attributes;
-	
+
 		static const unsigned int m_ioVersion;
 };
 

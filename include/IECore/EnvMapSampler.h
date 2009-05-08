@@ -48,27 +48,27 @@ namespace IECore
 class EnvMapSampler : public Op
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( EnvMapSampler, Op );
-		
+
 		EnvMapSampler();
 		virtual ~EnvMapSampler();
-		
+
 		ImagePrimitiveParameterPtr imageParameter();
 		ConstImagePrimitiveParameterPtr imageParameter() const;
-		
+
 		IntParameterPtr subdivisionDepthParameter();
-		ConstIntParameterPtr subdivisionDepthParameter() const;	
+		ConstIntParameterPtr subdivisionDepthParameter() const;
 
 	protected :
 
 		ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-		
+
 	private :
-		
+
 		ImagePrimitiveParameterPtr m_imageParameter;
 		IntParameterPtr m_subdivisionDepthParameter;
-		
+
 };
 
 IE_CORE_DECLAREPTR( EnvMapSampler );

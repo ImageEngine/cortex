@@ -64,7 +64,7 @@ DataType Entry::dataType() const
 	{
 		throw IOException( "IndexedIO Entry '" + m_ID + "' has no data type - it is a directory" );
 	}
-	
+
 	return m_dataType;
 }
 
@@ -102,6 +102,6 @@ unsigned long Entry::arrayLength() const
 	{
 		throw IOException( "IndexedIO Entry '" + m_ID + "' is not an array" );
 	}
-	
-	return m_arrayLength;	
+
+	return m_arrayLength;
 }

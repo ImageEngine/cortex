@@ -52,29 +52,29 @@ class TestHierarchicalCache(unittest.TestCase):
 
 	def testConstructors(self):
 		"""Test HierarchicalCache constructors"""
-		
-		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write) 
-		
+
+		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write)
+
 	def testReadWrite(self):
 		"""Test HierarchicalCache read/write"""
-		
-		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write) 		
-		
+
+		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write)
+
 		for (objIndex,obj) in enumerate(self.cachedObjectNames):
 			# Make some random vertex data
-			
+
 			dataWritten = V3fVectorData()
-			
+
 			numPts = int(random.random())
 			numPts = numPts * numPts * 100
-			
+
 			for i in range(0, numPts):
 				dataWritten.append( V3f( random.random(), random.random(), random.random() ) )
-			
+
 			cache.write(obj, "P", dataWritten)
-			
+
 			dataRead = cache.read(obj, "P")
-			
+
 			self.assertEqual( dataWritten, dataRead )
 			self.failIf( cache.isTransform( obj ) )
 			self.failIf( cache.isShape( obj ) )
@@ -90,7 +90,7 @@ class TestHierarchicalCache(unittest.TestCase):
 				self.assertEqual( cache.transformMatrix( obj ), self.objectNodes[ objIndex ] )
 
 			dataRead = cache.read(obj)
-			
+
 			self.assertEqual( dataWritten, dataRead["P"] )
 
 		self.assertEqual( set( self.cachedObjectNames ).union( self.undirectlyCachedObjects ), set( cache.objects() ) )
@@ -104,7 +104,7 @@ class TestHierarchicalCache(unittest.TestCase):
 
 		self.assertEqual( len( cache.children( self.cachedObjectNames[0] ) ), 2 )
 		self.assertEqual( len( cache.children( self.undirectlyCachedObjects[0] ) ), 1 )
-		
+
 		self.assertRaises( RuntimeError, cache.children, self.uncachedObjectNames[0] )
 
 	def testNameFunctions(self):
@@ -117,61 +117,61 @@ class TestHierarchicalCache(unittest.TestCase):
 		self.assertRaises( RuntimeError, HierarchicalCache.absoluteName, "/child", "/parent" )
 		self.assertRaises( RuntimeError, HierarchicalCache.absoluteName, "child", "parent" )
 		self.assertRaises( RuntimeError, HierarchicalCache.absoluteName, "child", "" )
-		self.assertRaises( RuntimeError, HierarchicalCache.absoluteName, "child", "." )		
+		self.assertRaises( RuntimeError, HierarchicalCache.absoluteName, "child", "." )
 
 		self.assertEqual( HierarchicalCache.relativeName( "/test" ), "test" )
 		self.assertEqual( HierarchicalCache.relativeName( "/test/" ), "test" )
 		self.assertEqual( HierarchicalCache.relativeName( "/base/test" ), "test" )
 		self.assertEqual( HierarchicalCache.relativeName( "/base/test/" ), "test" )
 
-		self.assertRaises( RuntimeError, HierarchicalCache.relativeName, "child" )		
-		self.assertRaises( RuntimeError, HierarchicalCache.parentName, "/" )				
+		self.assertRaises( RuntimeError, HierarchicalCache.relativeName, "child" )
+		self.assertRaises( RuntimeError, HierarchicalCache.parentName, "/" )
 
 		self.assertEqual( HierarchicalCache.parentName( "/t" ), "/" )
 		self.assertEqual( HierarchicalCache.parentName( "/base/" ), "/" )
 		self.assertEqual( HierarchicalCache.parentName( "/base/test" ), "/base" )
 		self.assertEqual( HierarchicalCache.parentName( "/base/test/" ), "/base" )
 
-		self.assertRaises( RuntimeError, HierarchicalCache.parentName, "base" )	
-		self.assertRaises( RuntimeError, HierarchicalCache.parentName, "" )	
+		self.assertRaises( RuntimeError, HierarchicalCache.parentName, "base" )
+		self.assertRaises( RuntimeError, HierarchicalCache.parentName, "" )
 
 		self.assertEqual( HierarchicalCache.rootName(), "/" )
 
 	def testReadWriteHeaders(self):
 		"""Test HierarchicalCache read/write headers"""
-		
-		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write) 		
-		
+
+		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write)
+
 		for obj in self.cachedHeaderNames:
 			# Make some random data
-			
+
 			dataWritten = V3fVectorData()
-			
+
 			numPts = int(random.random())
 			numPts = numPts * numPts * 100
-			
+
 			for i in range(0, numPts):
 				dataWritten.append( V3f( random.random(), random.random(), random.random() ) )
-			
+
 			cache.writeHeader(obj, dataWritten)
-			
+
 			dataRead = cache.readHeader(obj)
-			
+
 			self.assertEqual( dataWritten, dataRead )
 
 			dataRead = cache.readHeader()
-			
+
 			self.assertEqual( dataWritten, dataRead[ obj ] )
 
 		self.assertEqual( set( self.cachedHeaderNames ).intersection( cache.headers() ), set( self.cachedHeaderNames ) )
 
 	def testAttributes(self):
 		"""Test HierarchicalCache attributes"""
-		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write) 		
+		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write)
 		cache.write( self.cachedObjectNames[0], "attrib1", V3fData( V3f( 1 ) ) )
 		cache.write( self.cachedObjectNames[0], "attrib2", IntData( 1 ) )
 		cache.write( self.cachedObjectNames[3], "other", IntData(0) )
-		
+
 		self.assertEqual( len( cache.attributes( self.cachedObjectNames[0] )), 2 )
 		self.assertEqual( len( cache.attributes( self.cachedObjectNames[0], "attrib[12]" )), 2 )
 		self.assertEqual( len( cache.attributes( self.cachedObjectNames[3], "other" )), 1 )
@@ -179,7 +179,7 @@ class TestHierarchicalCache(unittest.TestCase):
 	def testRemove(self):
 		"""Test HierarchicalCache remove"""
 
-		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write) 
+		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write)
 		cache.write( self.cachedObjectNames[0], "attrib1", V3fData( V3f( 1 ) ) )
 		cache.write( self.cachedObjectNames[0], "attrib2", IntData( 1 ) )
 		cache.write( self.cachedObjectNames[1], "attrib3", IntData(0) )
@@ -198,22 +198,22 @@ class TestHierarchicalCache(unittest.TestCase):
 		self.assertEqual( cache.objects(), [ self.cachedObjectNames[0], self.cachedObjectNames[3] ] )
 		self.assert_( self.cachedHeaderNames[1] in cache.headers() )
 		self.assert_( not self.cachedHeaderNames[0] in cache.headers() )
-		
+
 	def testContains(self):
 		"""Test HierarchicalCache contains"""
-		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write) 		
-		
+		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Write)
+
 		for obj in self.cachedObjectNames:
 			# Create some dummy data (contents not important for this test)
-			
+
 			dataWritten = V3fVectorData()
 			dataWritten.append( V3f( 1, 1, 1) )
-			
+
 			cache.write(obj, "P", dataWritten)
-						
+
 			self.assert_( cache.contains( obj ) )
 			self.assert_( cache.contains( obj, "P" ) )
-			
+
 		for obj in self.uncachedObjectNames:
 			self.failIf( cache.contains( obj ) )
 			self.failIf( cache.contains( obj ), "not_in_cache" )
@@ -225,7 +225,7 @@ class TestHierarchicalCache(unittest.TestCase):
 			pass
 		else:
 			raise Exception, "Should not accept relative paths!"
-			
+
 	def testOverwriting( self ):
 		"""Test HierarchicalCache overwriting"""
 		cache = None
@@ -235,25 +235,25 @@ class TestHierarchicalCache(unittest.TestCase):
 		cache.write("/Object1/Object3", "Attribute1", IntData(1) )
 		cache.write("/Object1/Object3", MeshPrimitive() )
 		cache.write("/Object1", M44f() )
-		
+
 		cache = None
 		cache = HierarchicalCache( "./test/HierarchicalCache.fio", IndexedIOOpenMode.Read)
 		self.assertEqual( len( cache.attributes( "/Object1" ) ), 1 )
 		self.assertEqual( len( cache.attributes( "/Object1/Object3" ) ), 1 )
 		self.assert_( cache.isTransform( "/Object1" ) )
 		self.assert_( cache.isShape( "/Object1/Object3" ) )
-		 
+
 		cache = None
 		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Append)
 		cache.write("/Object1", "Attribute1", IntData(1) )
 		cache.write("/Object2", "Attribute1", IntData(1) )
 		cache.write("/Object1/Object3", "Attribute1", IntData(1) )
-		cache.write("/Object1", "Attribute2", IntData(2) )		
+		cache.write("/Object1", "Attribute2", IntData(2) )
 		cache.write("/Object2", "Attribute2", IntData(2) )
 		cache.write("/Object1/Object3", "Attribute2", IntData(2) )
 		cache.write("/Object1/", MeshPrimitive() )
 		cache.write("/Object1/Object3/", M44f() )
-		
+
 		cache = None
 		cache = HierarchicalCache( "./test/HierarchicalCache.fio", IndexedIOOpenMode.Read)
 		self.assertEqual( len( cache.attributes( "/Object1" ) ), 2 )
@@ -307,11 +307,11 @@ class TestHierarchicalCache(unittest.TestCase):
 		self.assertEqual( cache.bound( "/t" ), Box3f( V3f( 0,0,1 ), V3f( 0,1,2 ) ) )
 		cache.remove( "/t" )
 		self.assertEqual( cache.bound( "/" ), Box3f( V3f( 0,0,1 ), V3f( 0,0,1 ) ) )
-	
+
 	def testOverwriteFailure( self ) :
-	
+
 		cache = HierarchicalCache("./test/HierarchicalCache.fio", IndexedIOOpenMode.Append)
-		
+
 		# write an object
 		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
 		cache.write( "/o1", m )
@@ -322,29 +322,29 @@ class TestHierarchicalCache(unittest.TestCase):
 		self.assertEqual( mm, m )
 		del mm["P"]
 		self.assertNotEqual( mm, m )
-		
+
 		# write that over the old one
 		cache.write( "/o1", mm )
-		
+
 		# and check that the contents of the cache
 		# is the new object and not the old one
-		
+
 		self.assertEqual( cache.shape( "/o1" ), mm )
 		self.assertNotEqual( cache.shape( "/o1" ), m )
-		
+
 	def setUp(self):
-		
+
 		# cleanup
-		if os.path.isfile("./test/HierarchicalCache.fio") :	
-			os.remove("./test/HierarchicalCache.fio")	
+		if os.path.isfile("./test/HierarchicalCache.fio") :
+			os.remove("./test/HierarchicalCache.fio")
 
 	def tearDown(self):
-		
+
 		# cleanup
-		if os.path.isfile("./test/HierarchicalCache.fio") :	
-			os.remove("./test/HierarchicalCache.fio")				
-				
-		
+		if os.path.isfile("./test/HierarchicalCache.fio") :
+			os.remove("./test/HierarchicalCache.fio")
+
+
 if __name__ == "__main__":
-	unittest.main()   
-	
+	unittest.main()
+

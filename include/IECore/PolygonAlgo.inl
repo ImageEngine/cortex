@@ -47,7 +47,7 @@ template<typename Iterator>
 typename std::iterator_traits<Iterator>::value_type polygonNormal( Iterator first, Iterator last )
 {
 	// Newell's method.
-	typedef typename std::iterator_traits<Iterator>::value_type Vec; 
+	typedef typename std::iterator_traits<Iterator>::value_type Vec;
 	typedef CircularIterator<Iterator> CircularIt;
 
 	Vec n( 0 );
@@ -58,11 +58,11 @@ typename std::iterator_traits<Iterator>::value_type polygonNormal( Iterator firs
 	{
 		const Vec &v0 = *v0It;
 		const Vec &v1 = *v1It;
-		
+
 		n.x += (v0.y - v1.y) * (v0.z + v1.z);
 		n.y += (v0.z - v1.z) * (v0.x + v1.x);
-		n.z += (v0.x - v1.x) * (v0.y + v1.y);		
-		
+		n.z += (v0.x - v1.x) * (v0.y + v1.y);
+
 		v0It++;
 		v1It++;
 	}
@@ -89,15 +89,15 @@ Winding polygonWinding( Iterator first, Iterator last )
 	{
 		const Vec &v0 = *v0It;
 		const Vec &v1 = *v1It;
-		
-		z += (v0.x - v1.x) * (v0.y + v1.y);		
-	
+
+		z += (v0.x - v1.x) * (v0.y + v1.y);
+
 		v0It++;
 		v1It++;
 	}
 	while( v0It != first );
 
-	return z < Real( 0 ) ? ClockwiseWinding : CounterClockwiseWinding; 
+	return z < Real( 0 ) ? ClockwiseWinding : CounterClockwiseWinding;
 }
 
 template<typename Iterator>

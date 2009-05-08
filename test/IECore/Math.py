@@ -39,16 +39,16 @@ import IECore
 class MathTest( unittest.TestCase ) :
 
 	def testSign( self ) :
-	
+
 		self.assertEqual( IECore.sign( 0 ), 0 )
 		self.assertEqual( IECore.sign( 1 ), 1 )
 		self.assertEqual( IECore.sign( 1000 ), 1 )
 		self.assertEqual( IECore.sign( -1 ), -1 )
 		self.assertEqual( IECore.sign( -1000 ), -1 )
-		
+
 		self.assertEqual( IECore.sign( 0.0 ), 0 )
 		self.assertEqual( IECore.sign( 0.1 ), 1 )
 		self.assertEqual( IECore.sign( -0.1 ), -1 )
-			
+
 if __name__ == "__main__":
 	unittest.main()

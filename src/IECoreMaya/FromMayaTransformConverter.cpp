@@ -55,7 +55,7 @@ FromMayaDagNodeConverter::Description<FromMayaTransformConverter> FromMayaTransf
 FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( staticTypeName(), "Converts transform nodes.",  dagPath )
 {
-	
+
 	IECore::IntParameter::PresetsContainer spacePresets;
 	spacePresets.push_back( IECore::IntParameter::Preset( "Local", Local ) );
 	spacePresets.push_back( IECore::IntParameter::Preset( "World", World ) );
@@ -70,7 +70,7 @@ FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath 
 	);
 
 	parameters()->addParameter( m_spaceParameter );
-	
+
 	m_lastRotationValid = false;
 	m_eulerFilterParameter = new IECore::BoolParameter(
 		"eulerFilter",
@@ -80,9 +80,9 @@ FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath 
 		"of transformations which will interpolate smoothly.",
 		false
 	);
-	
+
 	parameters()->addParameter( m_eulerFilterParameter );
-	
+
 	/// \todo We need this parameter because we're finding that our conversion of the maya
 	/// MTransformationMatrix class to our TransformationMatrix classes isn't yielding the same
 	/// results when the pivot is non-zero. We should figure out the real reason for that rather
@@ -93,7 +93,7 @@ FromMayaTransformConverter::FromMayaTransformConverter( const MDagPath &dagPath 
 		"adjusting the transform to maintain the same positioning.",
 		false
 	);
-	
+
 	parameters()->addParameter( m_zeroPivotsParameter );
 }
 
@@ -126,11 +126,11 @@ IECore::ConstBoolParameterPtr FromMayaTransformConverter::zeroPivotsParameter() 
 {
 	return m_zeroPivotsParameter;
 }
-				
+
 IECore::ObjectPtr FromMayaTransformConverter::doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
-{	
+{
 	MTransformationMatrix transform;
-	
+
 	if( m_spaceParameter->getNumericValue()==Local )
 	{
 		MFnTransform fnT( dagPath );
@@ -139,34 +139,34 @@ IECore::ObjectPtr FromMayaTransformConverter::doConversion( const MDagPath &dagP
 	else
 	{
 		unsigned instIndex = dagPath.instanceNumber();
-	
+
 		MObject dagNode = dagPath.node();
 		MFnDependencyNode fnN( dagNode );
-		
+
 		MPlug plug = fnN.findPlug( "worldMatrix" );
 		MPlug instPlug = plug.elementByLogicalIndex( instIndex );
-		
+
 		MObject matrix;
 		instPlug.getValue( matrix );
-		
+
 		MFnMatrixData fnM( matrix );
 		transform = fnM.transformation();
 	}
-	
+
 	if( m_zeroPivotsParameter->getTypedValue() )
 	{
 		transform.setScalePivot( MPoint( 0, 0, 0 ), MSpace::kTransform, true );
 		transform.setRotatePivot( MPoint( 0, 0, 0 ), MSpace::kTransform, true );
 	}
-	
+
 	if( m_eulerFilterParameter->getTypedValue() && m_lastRotationValid )
 	{
 		transform.rotateTo( transform.eulerRotation().closestSolution( m_lastRotation ) );
 	}
-	
+
 	m_lastRotation = transform.eulerRotation();
 	m_lastRotationValid = true;
-	
+
 	return new IECore::TransformationMatrixdData( IECore::convert<IECore::TransformationMatrixd, MTransformationMatrix>( transform ) );
 }
-			
+

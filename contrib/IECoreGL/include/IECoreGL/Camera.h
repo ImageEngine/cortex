@@ -64,13 +64,13 @@ class Camera : public Renderable
 		/// Specifies the transform of the camera relative to the world.
 		void setTransform( const Imath::M44f &transform );
 		const Imath::M44f &getTransform() const;
-		
+
 		void setResolution( const Imath::V2i &resolution );
 		const Imath::V2i &getResolution() const;
-		
+
 		void setScreenWindow( const Imath::Box2f &screenWindow );
 		const Imath::Box2f &getScreenWindow() const;
-		
+
 		void setClippingPlanes( const Imath::V2f &clippingPlanes );
 		const Imath::V2f &getClippingPlanes() const;
 
@@ -100,16 +100,16 @@ class Camera : public Renderable
 		/// relative to the current GL transform.
 		static Imath::V3f upInObjectSpace();
 		//@}
-	
+
 	protected :
-	
+
 		void setModelViewMatrix() const;
-	
+
 		Imath::M44f m_transform;
 		Imath::V2i m_resolution;
 		Imath::Box2f m_screenWindow;
 		Imath::V2f m_clippingPlanes;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Camera );

@@ -42,52 +42,52 @@ class TestBlindDataHolder(unittest.TestCase):
 	def testConstructors(self):
 		"""Test BlindDataHolder constructors"""
 		b = BlindDataHolder()
-		
+
 		c = CompoundData()
 		c["floatData"] = FloatData(3.0)
-		
+
 		b = BlindDataHolder(c)
-		
+
 		self.assertEqual( b.typeName(), "BlindDataHolder" )
 		self.failIf( Object.isAbstractType( "BlindDataHolder") )
-		
+
 	def testBlindData(self):
 		"""Test BlindDataHolder blindData"""
-		
+
 		b = BlindDataHolder()
-		
+
 		b.blindData()["floatData"] = FloatData(1.0)
 		b.blindData()["intData"] = IntData(-5)
-		
+
 		self.assertEqual( b.blindData()["floatData"].value, 1.0 )
-		self.assertEqual( b.blindData()["intData"].value, -5 )		
-		
+		self.assertEqual( b.blindData()["intData"].value, -5 )
+
 		self.assertEqual( len(b.blindData()), 2 )
-		
+
 	def testLoadSave(self):
-	
-		"""Test BlindDataHolder load/save"""	
-		
+
+		"""Test BlindDataHolder load/save"""
+
 		iface = IndexedIOInterface.create( "test/BlindDataHolder.fio", "/", IndexedIOOpenMode.Write )
-		
+
 		b1 = BlindDataHolder()
-		
+
 		b1.blindData()["floatData"] = FloatData(1.0)
 		b1.blindData()["intData"] = IntData(-5)
 
 		b1.save( iface, "test" )
 
-		b2 = Object.load( iface, "test" )	
+		b2 = Object.load( iface, "test" )
 		self.assertEqual( b1, b2 )
-		
+
 	def tearDown(self):
-	
+
 		if os.path.isfile("./test/BlindDataHolder.fio") :
                         os.remove("./test/BlindDataHolder.fio")
 
-		
 
-		
-	
+
+
+
 if __name__ == "__main__":
         unittest.main()

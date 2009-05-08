@@ -46,14 +46,14 @@ namespace IECore
 class PreWorldRenderable : public Renderable
 {
 	public:
-	
+
 		PreWorldRenderable();
 		virtual ~PreWorldRenderable();
-				
+
 		IE_CORE_DECLAREABSTRACTOBJECT( PreWorldRenderable, Renderable );
-			
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
 };
 

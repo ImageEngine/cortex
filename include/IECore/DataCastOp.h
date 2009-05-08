@@ -46,24 +46,24 @@ namespace IECore
 class DataCastOp : public Op
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( DataCastOp, Op );
-		
+
 		DataCastOp();
 		virtual ~DataCastOp();
-		
+
 		ObjectParameterPtr objectParameter();
 		ConstObjectParameterPtr objectParameter() const;
-		
+
 		IntParameterPtr targetTypeParameter();
-		ConstIntParameterPtr targetTypeParameter() const;		
-		
+		ConstIntParameterPtr targetTypeParameter() const;
+
 	protected :
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-	
+
 	private :
-		
+
 		ObjectParameterPtr m_objectParameter;
 		IntParameterPtr m_targetTypeParameter;
 };

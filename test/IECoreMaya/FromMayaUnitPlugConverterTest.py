@@ -41,33 +41,33 @@ import maya.cmds
 class FromMayaUnitPlugConverterTest( unittest.TestCase ) :
 
 	def testDistance( self ) :
-		
+
 		locator = maya.cmds.spaceLocator()[0]
 		maya.cmds.move( 1, 2, 3, locator )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
-		v = converter.convert()		
+		v = converter.convert()
 		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
 		self.assertEqual( v.value, 1 )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateY", IECore.FloatData.staticTypeId() )
-		v = converter.convert()		
+		v = converter.convert()
 		self.assert_( v.isInstanceOf( IECore.FloatData.staticTypeId() ) )
 		self.assertEqual( v.value, 2 )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateZ" )
 		self.assertEqual( converter["distanceUnit"].getCurrentPresetName(), "Centimeters" )
 		converter["distanceUnit"].setValue( "Meters" )
-		v = converter.convert()		
+		v = converter.convert()
 		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
 		self.assertEqual( v.value, 0.03 )
-	
+
 	def testTypeIds( self ) :
-	
+
 		locator = maya.cmds.spaceLocator()[0]
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
 		self.assertEqual( converter.typeId(), IECoreMaya.TypeId.FromMayaUnitPlugConverterd )
 		self.assertEqual( converter.typeName(), "FromMayaUnitPlugConverterd" )
-							
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

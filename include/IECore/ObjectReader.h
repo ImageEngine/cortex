@@ -57,21 +57,21 @@ class ObjectReader : public Reader
 
 		/// Returns true if the given file is potentially readable as an Object
 		static bool canRead( const std::string &fileName );
-		
-		/// Returns the file header in the file specified by fileName(). This is intended to 
+
+		/// Returns the file header in the file specified by fileName(). This is intended to
 		/// give fast access to some information about the contents of the file, without
 		/// having to load the entire thing.
 		virtual CompoundObjectPtr readHeader();
-		
+
 	protected:
-	
+
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-	
+
 		static IndexedIOInterfacePtr open( const std::string &fileName );
-					
+
 	private :
-	
-		static const ReaderDescription<ObjectReader> g_readerDescription;				
+
+		static const ReaderDescription<ObjectReader> g_readerDescription;
 };
 
 IE_CORE_DECLAREPTR( ObjectReader );

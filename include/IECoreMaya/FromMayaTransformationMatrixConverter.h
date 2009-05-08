@@ -54,11 +54,11 @@ class FromMayaTransformationMatrixConverter : public FromMayaObjectConverter
 		FromMayaTransformationMatrixConverter( const MObject &object );
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( FromMayaTransformationMatrixConverter, FromMayaObjectConverter )
-		
+
 	protected :
-	
+
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-				
+
 	private :
 
 		static FromMayaObjectConverterDescription<FromMayaTransformationMatrixConverter> m_description;

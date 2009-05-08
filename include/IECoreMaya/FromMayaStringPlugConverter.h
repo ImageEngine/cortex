@@ -44,19 +44,19 @@ class FromMayaStringPlugConverter : public FromMayaPlugConverter
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaStringPlugConverter, FromMayaStringPlugConverterTypeId, FromMayaPlugConverter );
 
 		FromMayaStringPlugConverter( const MPlug &plug );
-		
+
 	protected :
-		
+
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		static Description<FromMayaStringPlugConverter> m_description;
-		
+
 };
 
 } // namespace IECoreMaya

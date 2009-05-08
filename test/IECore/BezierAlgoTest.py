@@ -39,47 +39,47 @@ import math
 class BezierAlgoTest( unittest.TestCase ) :
 
 	def testCubic( self ) :
-	
+
 		def c( p, v ) :
-		
+
 			p.append( V3f( v[0], v[1], 0 ) )
-		
+
 		p = V3fVectorData()
 		bezierSubdivide( V2f( 0 ), V2f( 0, 1 ), V2f( 1, 1 ), V2f( 1, 0 ), 0.01, lambda v : c( p, v ) )
-		
+
 		self.assertEqual( p[0], V3f( 0 ) )
 		self.assertEqual( p[-1], V3f( 1, 0, 0 ) )
-		
-		
+
+
 		b = Box3f( V3f( 0, 0, 0 ), V3f( 1, 1, 0 ) )
 		for i in range( 0, p.size()-1 ) :
-		
+
 			self.assert_( b.intersects( p[i] ) )
 			self.assert_( (p[i] - p[i+1]).length() < 0.18 )
-	
+
 	def testQuadratic( self ) :
-	
+
 		def c( p, v ) :
-		
+
 			p.append( V3f( v[0], v[1], 0 ) )
-		
+
 		p = V3fVectorData()
 		bezierSubdivide( V2f( 0 ), V2f( 1, 1 ), V2f( 2, 0 ), 0.01, lambda v : c( p, v ) )
-		
+
 		self.assertEqual( p[0], V3f( 0 ) )
 		self.assertEqual( p[-1], V3f( 2, 0, 0 ) )
-		
-		
+
+
 		b = Box3f( V3f( 0, 0, 0 ), V3f( 2, 1, 0 ) )
 		for i in range( 0, p.size()-1 ) :
-		
+
 			self.assert_( b.intersects( p[i] ) )
 			self.assert_( (p[i] - p[i+1]).length() < 0.18 )
-		
+
 		# useful for making a visual check
 		#m = MeshPrimitive( IntVectorData( [ p.size() ] ), IntVectorData( range(p.size() ) ), "linear", p )
 		#Writer.create( m, "/tmp/bezier.cob" ).write()
-		
-		
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

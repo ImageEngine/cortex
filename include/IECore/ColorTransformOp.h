@@ -48,32 +48,32 @@ namespace IECore
 class ColorTransformOp : public PrimitiveOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( ColorTransformOp, PrimitiveOp );
-		
+
 		ColorTransformOp( const std::string &name, const std::string &description );
 		virtual ~ColorTransformOp();
-		
+
 		StringParameterPtr colorPrimVarParameter();
 		ConstStringParameterPtr colorPrimVarParameter() const;
-		
+
 		StringParameterPtr redPrimVarParameter();
 		ConstStringParameterPtr redPrimVarParameter() const;
-		
+
 		StringParameterPtr greenPrimVarParameter();
 		ConstStringParameterPtr greenPrimVarParameter() const;
-		
+
 		StringParameterPtr bluePrimVarParameter();
 		ConstStringParameterPtr bluePrimVarParameter() const;
-		
+
 		StringParameterPtr alphaPrimVarParameter();
 		ConstStringParameterPtr alphaPrimVarParameter() const;
-		
+
 		BoolParameterPtr premultipliedParameter();
 		ConstBoolParameterPtr premultipliedParameter() const;
-		
+
 	protected :
-			
+
 		/// Called once per operation. This is an opportunity to perform any preprocessing
 		/// necessary before many calls to transform() are made.
 		virtual void begin( ConstCompoundObjectPtr operands );
@@ -83,20 +83,20 @@ class ColorTransformOp : public PrimitiveOp
 		/// Called once per operation, after all calls to transform() have been made - even if
 		// /transform() throws an exception. This is an opportunity to perform any cleanup necessary.
 		virtual void end();
-		
+
 	private :
-	
+
 		/// Implemented in terms of begin(), transform() and end(), which should be implemented
 		/// appropriately by subclasses.
-		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );		
-		
+		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );
+
 		template<typename T>
 		const typename T::BaseType *alphaData( PrimitivePtr primitive, size_t requiredElements );
 		template <typename T>
 		void transformSeparate( PrimitivePtr primitive, ConstCompoundObjectPtr operands, typename T::Ptr r, typename T::Ptr g, typename T::Ptr b );
 		template <typename T>
 		void transformInterleaved( PrimitivePtr primitive, ConstCompoundObjectPtr operands, typename T::Ptr colors );
-		
+
 		StringParameterPtr m_colorPrimVarParameter;
 		StringParameterPtr m_redPrimVarParameter;
 		StringParameterPtr m_greenPrimVarParameter;

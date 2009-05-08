@@ -48,24 +48,24 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 class RandomRotationOp : public Op
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( RandomRotationOp, Op );
-		
+
 		RandomRotationOp();
 		virtual ~RandomRotationOp();
-		
+
 		ObjectParameterPtr seedParameter();
 		ConstObjectParameterPtr seedParameter() const;
-		
+
 		FloatParameterPtr timeParameter();
 		ConstFloatParameterPtr timeParameter() const;
-		
+
 		FloatParameterPtr speedMinParameter();
 		ConstFloatParameterPtr speedMinParameter() const;
-		
+
 		FloatParameterPtr speedMaxParameter();
 		ConstFloatParameterPtr speedMaxParameter() const;
-		
+
 		/// The core algorithm, for those who want direct access from C++ without
 		/// all the Op wrapping.
 		template<typename SeedIt, typename OutputIt>
@@ -77,13 +77,13 @@ class RandomRotationOp : public Op
 			typename std::iterator_traits<OutputIt>::value_type::BaseType speedMax,
 			OutputIt result
 		);
-						
+
 	protected :
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-	
+
 	private :
-		
+
 		ObjectParameterPtr m_seedParameter;
 		FloatParameterPtr m_timeParameter;
 		FloatParameterPtr m_speedMinParameter;

@@ -51,12 +51,12 @@ namespace IECore
 class Grade : public ColorTransformOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( Grade, ColorTransformOp );
-		
+
 		Grade();
 		virtual ~Grade();
-		
+
 		Color3fParameterPtr blackPointParameter();
 		ConstColor3fParameterPtr blackPointParameter() const;
 
@@ -71,7 +71,7 @@ class Grade : public ColorTransformOp
 
 		Color3fParameterPtr multiplyParameter();
 		ConstColor3fParameterPtr multiplyParameter() const;
-		
+
 		Color3fParameterPtr offsetParameter();
 		ConstColor3fParameterPtr offsetParameter() const;
 
@@ -83,15 +83,15 @@ class Grade : public ColorTransformOp
 
 		BoolParameterPtr whiteClampParameter();
 		ConstBoolParameterPtr whiteClampParameter() const;
-		
+
 	protected :
-			
+
 		/// initializes temporary values A, B and 1/gamma.
 		virtual void begin( ConstCompoundObjectPtr operands );
 		virtual void transform( Imath::Color3f &color ) const;
-		
+
 	private :
-	
+
 		Color3fParameterPtr m_blackPointParameter;
 		Color3fParameterPtr m_whitePointParameter;
 		Color3fParameterPtr m_liftParameter;

@@ -53,8 +53,8 @@ static void dataSetter( PrimitiveVariable &p, DataPtr d )
 }
 
 void bindPrimitiveVariable()
-{	
-	
+{
+
 	scope varScope = class_<PrimitiveVariable>( "PrimitiveVariable", no_init )
 		.def( init<PrimitiveVariable::Interpolation, DataPtr>() )
 		.def_readwrite( "interpolation", &PrimitiveVariable::interpolation )
@@ -68,7 +68,7 @@ void bindPrimitiveVariable()
 		.value( "Varying", PrimitiveVariable::Varying )
 		.value( "FaceVarying", PrimitiveVariable::FaceVarying )
 	;
-	
+
 }
 
 }

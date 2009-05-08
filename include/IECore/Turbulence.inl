@@ -35,7 +35,7 @@
 #ifndef IE_CORE_TURBULENCE_INL
 #define IE_CORE_TURBULENCE_INL
 
-namespace IECore 
+namespace IECore
 {
 
 template<typename N>
@@ -141,7 +141,7 @@ void Turbulence<N>::calculateScaleAndOffset()
 		vecSetAll( m_offset, 0 );
 	}
 }
-		
+
 template<typename N>
 typename Turbulence<N>::Value Turbulence<N>::turbulence( const Point &p ) const
 {

@@ -43,27 +43,27 @@ init( False )
 class TestShader( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		self.assertRaises( RuntimeError, Shader, "i don't think i'm valid", "me neither" )
-		
+
 		vertexSource = """
 		void main()
 		{
 			gl_Position = ftransform();
 		}
 		"""
-		
+
 		fragmentSource = """
 		void main()
 		{
 			gl_FragColor = vec4( 1, 0.5, 0.25, 1 );
 		}
 		"""
-		
+
 		Shader( vertexSource, fragmentSource )
 
 	def testParameters( self ) :
-	
+
 		vertexSource = """
 		attribute float floatAttrib;
 		varying float varyingFloatParm;
@@ -73,36 +73,36 @@ class TestShader( unittest.TestCase ) :
 			varyingFloatParm = floatAttrib * gl_Position.x;
 		}
 		"""
-	
+
 		fragmentSource = """
 		uniform bool boolParm;
 		uniform int intParm;
 		uniform float floatParm;
-		
+
 		uniform bvec2 bvec2Parm;
 		uniform bvec3 bvec3Parm;
 		// uniform ivec4 bvec4Parm; // we have no suitable datatype for specifying this in IECore
-		
+
 		uniform ivec2 ivec2Parm;
 		uniform ivec3 ivec3Parm;
 		// uniform ivec4 ivec4Parm; // we have no suitable datatype for specifying this in IECore
-		
+
 		uniform vec2 vec2Parm;
 		uniform vec3 vec3Parm;
 		uniform vec4 vec4Parm;
-		
+
 		uniform sampler2D s2D;
-				
+
 		uniform struct {
 			int i;
 			float f;
 		} s;
-		
+
 		uniform mat3 mat3Parm;
 		uniform mat4 mat4Parm;
-		
+
 		varying float varyingFloatParm;
-		
+
 		void main()
 		{
 			float x = vec4Parm.r + vec3Parm.g + vec2Parm.y + floatParm + float( intParm ) + float( boolParm );
@@ -116,7 +116,7 @@ class TestShader( unittest.TestCase ) :
 
 		s = Shader( vertexSource, fragmentSource )
 		self.assert_( s==s )
-		
+
 		expectedParameterNamesAndTypes = {
 			"boolParm" : TypeId.BoolData,
 			"intParm" : TypeId.IntData,
@@ -134,7 +134,7 @@ class TestShader( unittest.TestCase ) :
 			"mat3Parm" : TypeId.M33fData,
 			"mat4Parm" : TypeId.M44fData,
 		}
-		
+
 		parameterNames = s.parameterNames()
 		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndTypes ) )
 		for n in expectedParameterNamesAndTypes.keys() :
@@ -142,7 +142,7 @@ class TestShader( unittest.TestCase ) :
 			self.assert_( s.hasParameter( n ) )
 			self.assert_( not s.hasParameter( n + "VeryUnlikelySuffix" ) )
 			self.assertEqual( s.parameterType( n ), expectedParameterNamesAndTypes[n] )
-			
+
 		expectedNamesAndValues = {
 			"boolParm" : BoolData( 0 ),
 			"intParm" : IntData( 0 ),
@@ -157,22 +157,22 @@ class TestShader( unittest.TestCase ) :
 		}
 		for name, value in expectedNamesAndValues.items() :
 			self.assertEqual( s.getParameter( name ), value )
-		
+
 		# must bind a shader before setting parameters
 		s.bind()
-		
+
 		s.setParameter( "intParm", IntData( 1 ) )
 		self.assertEqual( s.getParameter( "intParm" ), IntData( 1 ) )
-		
+
 		s.setParameter( "boolParm", IntData( 2 ) )
 		self.assertEqual( s.getParameter( "boolParm" ), BoolData( 1 ) )
-		
+
 		s.setParameter( "boolParm", BoolData( False ) )
 		self.assertEqual( s.getParameter( "boolParm" ), BoolData( False ) )
-		
+
 		s.setParameter( "boolParm", BoolData( True ) )
 		self.assertEqual( s.getParameter( "boolParm" ), BoolData( True ) )
-		
+
 		s.setParameter( "boolParm", BoolData( 2 ) )
 		self.assertEqual( s.getParameter( "boolParm" ), BoolData( 1 ) )
 
@@ -205,13 +205,13 @@ class TestShader( unittest.TestCase ) :
 
 		s.setParameter( "s.f", FloatData( 1 ) )
 		self.assertEqual( s.getParameter( "s.f" ), FloatData( 1 ) )
-		
+
 		s.setParameter( "mat3Parm", M33fData( M33f.createTranslated( V2f( 1, 2 ) ) ) )
 		self.assertEqual( s.getParameter( "mat3Parm" ), M33fData( M33f.createTranslated( V2f( 1, 2 ) ) ) )
-		
+
 		s.setParameter( "mat4Parm", M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 		self.assertEqual( s.getParameter( "mat4Parm" ), M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
-		
+
 		# check that setting invalid values throws an Exception
 		self.assertRaises( Exception, s.setParameter, "iDontExist", FloatData( 2 ) )
 		self.assertRaises( Exception, s.setParameter, "boolParm", FloatData( 2 ) )
@@ -229,41 +229,41 @@ class TestShader( unittest.TestCase ) :
 		self.assert_( s.valueValid( "boolParm", BoolData( True ) ) )
 
 	def testRendererCall( self ) :
-		
+
 		## \todo We need image output from the renderer so we don't have to look at
 		# it in a window.
-		
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.setOption( "gl:searchPath:texture", StringData( os.path.dirname( __file__ ) + "/images" ) )
 		r.worldBegin()
-		
+
 		# we have to make this here so that the shaders that get made are made in the
 		# correct GL context. My understanding is that all shaders should work in all
 		# GL contexts in the address space, but that doesn't seem to be the case.
 		#w = SceneViewer( "scene", r.scene() )
-		
+
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 5 ) ) )
-		
+
 		r.attributeBegin()
 		r.setAttribute( "color", Color3fData( Color3f( 1, 0, 1 ) ) )
 		r.shader( "surface", "grey", { "greyValue" : FloatData( 0.5 ) } )
 		r.geometry( "sphere", {}, {} )
 		r.attributeEnd()
-		
+
 		r.attributeBegin()
 		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0.5, 0.25 ) ) } )
 		r.geometry( "sphere", {}, {} )
 		r.attributeEnd()
-		
+
 		r.attributeBegin()
 		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
 		r.shader( "surface", "image", { "texture" : StringData( "colorBarsH512x512.exr" ) } )
 		r.geometry( "sphere", {}, {} )
 		r.attributeEnd()
-		
+
 		r.attributeBegin()
 		vertexSource = """
 		void main()
@@ -271,21 +271,21 @@ class TestShader( unittest.TestCase ) :
 			gl_Position = ftransform() + vec4( 0, 1, 0, 0 );
 		}
 		"""
-		
+
 		fragmentSource = """
 		void main()
 		{
 			gl_FragColor = vec4( 1, 0, 0, 1 );
 		}
 		"""
-		
+
 		r.shader( "surface", "redTranslated", { "gl:vertexSource" : StringData( vertexSource ), "gl:fragmentSource" : StringData( fragmentSource ) } )
 		r.geometry( "sphere", {}, {} )
 		r.attributeEnd()
-		
+
 		r.worldEnd()
-	
+
 		#w.start()
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

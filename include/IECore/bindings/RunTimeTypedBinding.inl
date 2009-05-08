@@ -86,12 +86,12 @@ template<typename T, typename Ptr>
 RunTimeTypedClass<T, Ptr>::RunTimeTypedClass( const char *docString )
 	:	BaseClass( Detail::nameWithoutNamespace( T::staticTypeName() ), docString )
 {
-	
+
 	BaseClass::BaseClass::def( "typeId", &Detail::typeId<T> );
 	BaseClass::BaseClass::def( "typeName", &Detail::typeName<T> );
-	BaseClass::BaseClass::def( "isInstanceOf", &Detail::isInstanceOf<T> );	
+	BaseClass::BaseClass::def( "isInstanceOf", &Detail::isInstanceOf<T> );
 	BaseClass::BaseClass::def( "isInstanceOf", &Detail::isInstanceOf2<T> );
-	
+
 	BaseClass::BaseClass::def( "staticTypeName", &T::staticTypeName );
 	BaseClass::BaseClass::staticmethod( "staticTypeName" );
 

@@ -63,7 +63,7 @@ T adjustSaturation( const T &color, typename T::BaseType saturation )
 	desaturated[0] = l;
 	desaturated[1] = l;
 	desaturated[2] = l;
-	return Imath::lerp( desaturated, color, saturation ); 
+	return Imath::lerp( desaturated, color, saturation );
 }
 
 template<typename T>

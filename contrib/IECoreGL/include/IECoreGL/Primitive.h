@@ -61,7 +61,7 @@ class Primitive : public Renderable
 
 		Primitive();
 		virtual ~Primitive();
-		
+
 		/// Renders the Primitive in the current
 		/// OpenGL context. The Primitive will draw itself
 		/// using the style represented by state, allowing
@@ -74,7 +74,7 @@ class Primitive : public Renderable
 		/// in different OpenGL states, once for each style
 		/// present in state.
 		virtual void render( ConstStatePtr state ) const;
-	
+
 		/// Returns the number of expected data values for
 		/// vertex attributes. Returns 0 if vertex attributes
 		/// are not supported. The default implementation
@@ -87,9 +87,9 @@ class Primitive : public Renderable
 		/// Takes a copy of data. Throws an Exception if this primitive doesn't support
 		/// vertex attributes, or if the data supplied is not suitable.
 		void addVertexAttribute( const std::string &name, IECore::ConstDataPtr data );
-	
+
 	protected :
-	
+
 		/// Must be implemented by subclasses. This function is called several
 		/// times by the standard render() call, once for each style of rendering
 		/// requested in state (wireframe, solid etc). The TypeId of the StateComponent
@@ -97,7 +97,7 @@ class Primitive : public Renderable
 		/// for the particular style (e.g. PrimitiveWireframeTypeId is passed for
 		/// wireframe rendering).
 		virtual void render( ConstStatePtr state, IECore::TypeId style ) const = 0;
-		
+
 		/// Can be called from a derived class' render() method to set
 		/// varying parameters of the current shader based on the
 		/// data from vertex attributes. This must /not/ be called unless the style
@@ -114,17 +114,17 @@ class Primitive : public Renderable
 		/// true if TransparentShadingStateComponent is true and
 		/// PrimitiveTransparencySortStateComponent is true.
 		bool depthSortRequested( ConstStatePtr state ) const;
-		
+
 		/// Standard OpenGL vertex arrays
 		IECore::ConstV3fVectorDataPtr m_points;
-		IECore::ConstV3fVectorDataPtr m_normals;		
-		IECore::ConstColor3fVectorDataPtr m_colors;				
-		IECore::ConstV2fVectorDataPtr m_texCoords;		
-		
+		IECore::ConstV3fVectorDataPtr m_normals;
+		IECore::ConstColor3fVectorDataPtr m_colors;
+		IECore::ConstV2fVectorDataPtr m_texCoords;
+
 	private :
-	
+
 		struct SetVertexAttribute;
-		
+
 		struct IntData
 		{
 			IntData() {};
@@ -145,9 +145,9 @@ class Primitive : public Renderable
 			std::map<GLint, IntData> intDataMap;
 			std::map<GLint, FloatData> floatDataMap;
 		} m_vertexToUniform;
-	
+
 		typedef std::map<std::string, IECore::ConstDataPtr> VertexAttributeMap;
-		VertexAttributeMap m_vertexAttributes;				
+		VertexAttributeMap m_vertexAttributes;
 };
 
 IE_CORE_DECLAREPTR( Primitive );

@@ -42,35 +42,35 @@ class FileExaminer :
 	## Accepts a single argument, the name of the file to be
 	# examined.
 	def __init__( self, fileName ) :
-	
+
 		if type( fileName )!=str :
 			raise TypeError( "FileName parameter must be a string." )
 
 		self.__fileName = fileName
-	
-	## Sets the name of the file to be examined.	
+
+	## Sets the name of the file to be examined.
 	def setFileName( self, fileName ) :
-	
+
 		self.__fileName = fileName
-	
+
 	## Returns the name of the file to be examined.
 	def getFileName( self ) :
-	
-		return self.__fileName	
-	
+
+		return self.__fileName
+
 	## Returns a set of dependencies for the file being examined.
 	# The set can contain both fileName strings and also strings
 	# specifying FileSequence objects in the form "sequence.#.ext frameRange".
 	def dependencies( self ) :
-	
+
 		return set()
-	
+
 	## Recursively declares dependencies for all
 	# files starting with the specified file, returning a set of
-	# strings.		
+	# strings.
 	@staticmethod
 	def allDependencies( fileName ) :
-	
+
 		examiner = FileExaminer.create( fileName )
 		if not examiner :
 			return set()
@@ -90,8 +90,8 @@ class FileExaminer :
 				else :
 					result.update( allDependencies( dependency ) )
 
-			return result			
-			
+			return result
+
 	## Creates an appropriate FileExaminer subclass for
 	# the given fileName, returning None if no such
 	# implementation exists.
@@ -107,23 +107,23 @@ class FileExaminer :
 
 		if not ext in FileExaminer.__examiners :
 			return None
-			
+
 		return FileExaminer.__examiners[ext]( fileName )
 
 	## Returns a list of extensions for which FileExaminer
 	# implementations have been registered
 	@staticmethod
 	def supportedExtensions() :
-	
+
 		return FileExaminer.__examiners.keys()
-		
+
 	## Registers a class which implements the FileExaminer
 	# interface for files specified in the list of extensions.
-	@staticmethod 
+	@staticmethod
 	def registerExaminer( extensions, examinerClass ) :
-	
+
 		for ext in extensions :
-		
+
 			FileExaminer.__examiners[ext] = examinerClass
-		
+
 	__examiners = {}

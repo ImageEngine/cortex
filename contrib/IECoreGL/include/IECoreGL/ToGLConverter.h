@@ -50,15 +50,15 @@ class ToGLConverter : public IECore::FromCoreConverter
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLConverter, ToGLConverterTypeId, IECore::FromCoreConverter );
-	
+
 		/// Returns the object in srcParameter() converted to an appropriate IECoreGL
 		/// type.
 		IECore::RunTimeTypedPtr convert();
-		
+
 	protected :
-	
+
 		ToGLConverter( const std::string &name, const std::string &description, IECore::TypeId supportedType );
 		virtual ~ToGLConverter();
 
@@ -67,7 +67,7 @@ class ToGLConverter : public IECore::FromCoreConverter
 		/// this function will never be called when the contents of the parameters
 		/// are in a bad state. Must be implemented in derived classes.
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const = 0;
-			
+
 };
 
 IE_CORE_DECLAREPTR( ToGLConverter );

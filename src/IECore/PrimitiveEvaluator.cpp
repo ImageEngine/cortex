@@ -53,26 +53,26 @@ void PrimitiveEvaluator::registerCreator( TypeId id, CreatorFn f )
 {
 	assert( f );
 	assert( f != &PrimitiveEvaluator::create );
-	
+
         CreatorMap &createFns = getCreateFns();
-        
+
         assert( createFns.find( id ) == createFns.end() );
-        
+
         createFns.insert( CreatorMap::value_type( id, f) );
 }
 
 PrimitiveEvaluatorPtr PrimitiveEvaluator::create( ConstPrimitivePtr primitive )
 {
 	assert( primitive );
-	
+
         const CreatorMap &createFns = getCreateFns();
-        
+
         CreatorMap::const_iterator it = createFns.find( primitive->typeId() );
         if (it == createFns.end())
         {
                 return 0;
         }
-        
+
         return (it->second)(primitive);
 }
 
@@ -85,7 +85,7 @@ PrimitiveEvaluator::Result::~Result()
 }
 
 bool PrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distance ) const
-{	
+{
 	distance = 0.0f;
 	ResultPtr result = createResult();
 
@@ -94,11 +94,11 @@ bool PrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distance ) 
 	{
 		return false;
 	}
-	
+
 	float planeConstant = result->normal().dot( result->point() );
-	float sign = result->normal().dot( p ) - planeConstant;             
-                                                                
+	float sign = result->normal().dot( p ) - planeConstant;
+
 	distance = (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
-	
+
 	return true;
 }

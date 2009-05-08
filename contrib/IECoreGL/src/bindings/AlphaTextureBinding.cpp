@@ -52,5 +52,5 @@ void bindAlphaTexture()
 		.def( init<IECore::ImagePrimitivePtr, bool>() )
 	;
 }
-	
+
 }

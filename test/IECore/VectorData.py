@@ -54,7 +54,7 @@ class BaseVectorDataTest:
 		v3 = _vector([_c(23), _c(4), _c(34), _c(12)])
 		v4 = _vector(10)
 		self.assertEqual( len( v4 ), 10 )
-		
+
 	def testResize(self):
 		"""Test resizing"""
 		_vector = self.vectorFactory
@@ -74,7 +74,7 @@ class BaseVectorDataTest:
 		del(v[-2])
 		self.assertEqual(len(v), 3)
 		self.assert_(v[-2] == _c(3))
-		
+
 		v.resize( 10 )
 		self.assertEqual( len( v ), 10 )
 		v2 = v.copy()
@@ -82,14 +82,14 @@ class BaseVectorDataTest:
 		self.assertEqual( len( v ), 2 )
 		self.assertEqual( v[0], v2[0] )
 		self.assertEqual( v[1], v2[1] )
-		
+
 		v = self.vectorFactory()
 		e = self.valueFactory( 10 )
 		v.resize( 100, e )
 		self.assertEqual( v.size(), 100 )
 		for i in range( 0, 100 ) :
 			self.assertEqual( v[i], e )
-		
+
 	def testAssignment(self):
 		"""Test assignment"""
 		_vector = self.vectorFactory
@@ -105,7 +105,7 @@ class BaseVectorDataTest:
 		self.assertEqual(len(v1), len(v2))
 		self.assertEqual(v1[0], v2[0])
 		self.assertEqual(v1[1], v2[1])
-		
+
 	def testNegativeIndexing(self):
 		"""Test negative indexing"""
 		_vector = self.vectorFactory
@@ -113,7 +113,7 @@ class BaseVectorDataTest:
 		v1 = _vector([_c(1), _c(2)])
 		self.assertEqual(v1[-1], _c(2))
 		self.assertEqual(v1[-2], _c(1))
-		
+
 	def testCopyOnWrite(self):
 		"""Test copy-on-write behavior"""
 		_vector = self.vectorFactory
@@ -126,7 +126,7 @@ class BaseVectorDataTest:
 		v1.append(_c(5));
 		self.assertEqual(len(v1), 3)
 		self.assertEqual(len(v2), 2)
-		
+
 	def testContains(self):
 		"""Test contains, index and count functions"""
 		_vector = self.vectorFactory
@@ -139,7 +139,7 @@ class BaseVectorDataTest:
 		self.assertEqual(v1.index(_c(2)), 1)
 		self.assertEqual(v1.index(_c(2), 2), 2)
 		self.assertEqual(v1.index(_c(2), 2, 3), 2)
-		
+
 	def testExtend(self):
 		"""Test extend function"""
 		_vector = self.vectorFactory
@@ -156,7 +156,7 @@ class BaseVectorDataTest:
 		v1.insert(-100, _c(6))
 		v1.insert(4, _c(10))
 		self.assert_(v1 == _vector([_c(6), _c(9), _c(1), _c(2), _c(10), _c(3), _c(4), _c(8), _c(5), _c(7)]))
-	
+
 	def testSlices(self):
 		"""Test slicing behavior"""
 		_vector = self.vectorFactory
@@ -192,7 +192,7 @@ class BaseVectorDataTest:
 		self.assert_(not v1 == v2)
 		del(v1[-1])
 		self.assert_(v1 == v3)
-	
+
 	def testComparison(self):
 		"""Test comparison function"""
 		_vector = self.vectorFactory
@@ -262,7 +262,7 @@ class BaseVectorDataTest:
 		self.assert_(v2 >= v5)
 		self.assert_(not v2 < v5)
 		self.assert_(v2 > v5)
-		
+
 		self.assert_(not v3 == v1)
 		self.assert_(not v3 <= v1)
 		self.assert_(v3 >= v1)
@@ -280,13 +280,13 @@ class BaseVectorDataTest:
 		self.assert_(not v3 >= v4)
 		self.assert_(v3 < v4)
 		self.assert_(not v3 > v4)
-		
+
 		self.assert_(not v5 == v3)
 		self.assert_(not v5 <= v3)
 		self.assert_(v5 >= v3)
 		self.assert_(not v5 < v3)
 		self.assert_(v5 > v3)
-		
+
 	def testSumOperations(self):
 		"""Test sum operations"""
 		_vector = self.vectorFactory
@@ -381,31 +381,31 @@ class FloatVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test FloatVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test FloatVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test FloatVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test FloatVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test FloatVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test FloatVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test FloatVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test FloatVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
@@ -413,27 +413,27 @@ class FloatVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testEquality(self):
 		"""Test FloatVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
-			
+
 	def testComparison(self):
 		"""Test FloatVectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test FloatVectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test FloatVectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test FloatVectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test FloatVectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test FloatVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
@@ -447,31 +447,31 @@ class HalfVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test HalfVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test HalfVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test HalfVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test HalfVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test HalfVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test HalfVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test HalfVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test FloatVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
@@ -479,31 +479,31 @@ class HalfVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testEquality(self):
 		"""Test HalfVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
-			
+
 	def testComparison(self):
 		"""Test HalfVectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test HalfVectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test HalfVectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test HalfVectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test HalfVectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test HalfVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
-						
+
 class DoubleVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
@@ -513,35 +513,35 @@ class DoubleVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test DoubleVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test DoubleVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test DoubleVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test DoubleVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test DoubleVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test DoubleVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test DoubleVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test DoubleVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
-			
+
 	def testEquality(self):
 		"""Test DoubleVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
@@ -549,23 +549,23 @@ class DoubleVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testComparison(self):
 		"""Test DoubleVectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test DoubleVectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test DoubleVectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test DoubleVectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test DoubleVectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test DoubleVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
@@ -579,35 +579,35 @@ class IntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test IntVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test IntVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test IntVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test IntVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test IntVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test IntVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test IntVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test IntVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
-			
+
 	def testEquality(self):
 		"""Test IntVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
@@ -615,23 +615,23 @@ class IntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testComparison(self):
 		"""Test IntVectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test IntVectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test IntVectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test IntVectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test IntVectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test IntVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
@@ -645,31 +645,31 @@ class UIntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test UIntVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test UIntVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test UIntVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test UIntVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test UIntVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test UIntVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test UIntVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test UIntVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
@@ -677,27 +677,27 @@ class UIntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testEquality(self):
 		"""Test UIntVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
-			
+
 	def testComparison(self):
 		"""Test UIntVectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test UIntVectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test UIntVectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test UIntVectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test UIntVectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test UIntVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
@@ -711,31 +711,31 @@ class CharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test CharVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test CharVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test CharVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test CharVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test CharVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test CharVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test CharVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test CharVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
@@ -743,27 +743,27 @@ class CharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testEquality(self):
 		"""Test CharVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
-			
+
 	def testComparison(self):
 		"""Test CharVectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test CharVectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test CharVectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test CharVectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test CharVectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test CharVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
@@ -778,35 +778,35 @@ class UCharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test UCharVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test UCharVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test UCharVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test UCharVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test UCharVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test UCharVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test UCharVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test UCharVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
-			
+
 	def testEquality(self):
 		"""Test UCharVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
@@ -814,23 +814,23 @@ class UCharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testComparison(self):
 		"""Test UCharVectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test UCharVectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test UCharVectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test UCharVectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test UCharVectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test UCharVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
@@ -844,35 +844,35 @@ class ShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test ShortVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test ShortVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test ShortVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test ShortVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test ShortVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test ShortVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test ShortVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test ShortVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
-			
+
 	def testEquality(self):
 		"""Test ShortVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
@@ -880,23 +880,23 @@ class ShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testComparison(self):
 		"""Test ShortVectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test ShortVectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test ShortVectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test ShortVectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test ShortVectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test ShortVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
@@ -910,35 +910,35 @@ class UShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test UShortVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test UShortVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test UShortVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test UShortVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test UShortVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test UShortVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test UShortVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test UShortVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
-			
+
 	def testEquality(self):
 		"""Test UShortVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
@@ -946,27 +946,27 @@ class UShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testComparison(self):
 		"""Test UShortVectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test UShortVectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test UShortVectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test UShortVectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test UShortVectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test UShortVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
-		
+
 class Int64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
@@ -976,35 +976,35 @@ class Int64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test Int64VectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test Int64VectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test Int64VectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test Int64VectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test Int64VectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test Int64VectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test Int64VectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test Int64VectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
-			
+
 	def testEquality(self):
 		"""Test Int64VectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
@@ -1012,23 +1012,23 @@ class Int64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testComparison(self):
 		"""Test Int64VectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test Int64VectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test Int64VectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test Int64VectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test Int64VectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test Int64VectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
@@ -1042,35 +1042,35 @@ class UInt64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test UInt64VectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test UInt64VectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test UInt64VectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test UInt64VectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test UInt64VectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test UInt64VectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test UInt64VectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test UInt64VectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
-			
+
 	def testEquality(self):
 		"""Test UInt64VectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
@@ -1078,27 +1078,27 @@ class UInt64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testComparison(self):
 		"""Test UInt64VectorData comparison function"""
 		BaseVectorDataTest.testComparison(self)
-				
+
 	def testSumOperations(self):
 		"""Test UInt64VectorData sum operations"""
 		BaseVectorDataTest.testSumOperations(self)
-		
+
 	def testSubOperations(self):
 		"""Test UInt64VectorData subtraction operations"""
 		BaseVectorDataTest.testSubOperations(self)
-		
+
 	def testMultOperations(self):
 		"""Test UInt64VectorData multiplication operations"""
 		BaseVectorDataTest.testMultOperations(self)
-				
+
 	def testDivOperations(self):
 		"""Test UInt64VectorData division operations"""
 		BaseVectorDataTest.testDivOperations(self)
-				
+
 	def testByValueItem(self):
 		"""Test UInt64VectorData by value return type"""
-		BaseVectorDataTest.testByValueItem(self)		
-		
+		BaseVectorDataTest.testByValueItem(self)
+
 class StringVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
@@ -1108,35 +1108,35 @@ class StringVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test StringVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
-		
+
 	def testResize(self):
 		"""Test StringVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
-				
+
 	def testAssignment(self):
 		"""Test StringVectorData assignment"""
 		BaseVectorDataTest.testAssignment(self)
-				
+
 	def testNegativeIndexing(self):
 		"""Test StringVectorData negative indexing"""
 		BaseVectorDataTest.testNegativeIndexing(self)
-				
+
 	def testCopyOnWrite(self):
 		"""Test StringVectorData copy-on-write behavior"""
 		BaseVectorDataTest.testCopyOnWrite(self)
-				
+
 	def testContains(self):
 		"""Test StringVectorData contains function"""
 		BaseVectorDataTest.testContains(self)
-				
+
 	def testExtend(self):
 		"""Test StringVectorData extend function"""
 		BaseVectorDataTest.testExtend(self)
-			
+
 	def testSlices(self):
 		"""Test StringVectorData slicing behavior"""
 		BaseVectorDataTest.testSlices(self)
-			
+
 	def testEquality(self):
 		"""Test StringVectorData equality function"""
 		BaseVectorDataTest.testEquality(self)
@@ -1144,51 +1144,51 @@ class StringVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testComparison(self):
 		"""Test StringVectorData comparison function"""
 		pass
-				
+
 	def testSumOperations(self):
 		"""Test StringVectorData sum operations"""
 		pass
-		
+
 	def testSubOperations(self):
 		"""Test StringVectorData subtraction operations"""
 		pass
-		
+
 	def testMultOperations(self):
 		"""Test StringVectorData multiplication operations"""
 		pass
-				
+
 	def testDivOperations(self):
 		"""Test StringVectorData division operations"""
 		pass
-				
+
 	def testByValueItem(self):
 		"""Test StringVectorData by value return type"""
-		BaseVectorDataTest.testByValueItem(self)	
+		BaseVectorDataTest.testByValueItem(self)
 
 class TestVectorDataStrRepr( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		l = [ V3f( 2 ), V3f( 4 ), V3f( 5 ) ]
 		d = V3fVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
 		self.assertEqual( "IECore.V3fVectorData( [ " + ", ".join( [repr( x ) for x in l] ) + " ] )", repr( d ) )
-		
+
 		l = [ "one", "two", "three" ]
 		d = StringVectorData( l )
 		self.assertEqual( " ".join( l ), str( d ) )
 		self.assertEqual( "IECore.StringVectorData( [ " + ", ".join( ["\""+x+"\"" for x in l] ) + " ] )", repr( d ) )
-		
+
 		l = [ 1, 2, 3 ]
 		d = IntVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
 		self.assertEqual( "IECore.IntVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
-		
+
 		l = [ 1, 2, 3 ]
 		d = ShortVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
 		self.assertEqual( "IECore.ShortVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
-	
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

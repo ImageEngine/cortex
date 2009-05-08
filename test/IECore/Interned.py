@@ -38,29 +38,29 @@ from IECore import *
 class TestInterned( unittest.TestCase ) :
 
 	def test( self ) :
-		
+
 		originalSize = InternedString.size()
-		
+
 		s1 = InternedString( "nothingElseIsUsingThisStringYet" )
 		s2 = InternedString( "nothingElseIsUsingThisStringYet" )
 		self.assertEqual( s1, s2 )
 		self.assertEqual( str( s1 ), "nothingElseIsUsingThisStringYet" )
 		self.assertEqual( str( s1 ), str( s2 ) )
 		self.assertEqual( InternedString.size(), originalSize + 1 )
-				
+
 		s3 = InternedString( "nothingElseIsUsingThisStringYetEither" )
 		self.assertNotEqual( s1, s3 )
 		self.assertEqual( str( s3 ), "nothingElseIsUsingThisStringYetEither" )
 		self.assertEqual( str( s1 ), "nothingElseIsUsingThisStringYet" )
 		self.assertEqual( str( s2 ), "nothingElseIsUsingThisStringYet" )
 		self.assertEqual( InternedString.size(), originalSize + 2 )
-		
+
 		s4 = InternedString( s1 )
 		self.assertEqual( s1, s4 )
 		self.assertEqual( s2, s4 )
 		self.assertNotEqual( s3, s4 )
 		self.assertEqual( InternedString.size(), originalSize + 2 )
-		
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

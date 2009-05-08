@@ -40,7 +40,7 @@
 namespace IECore
 {
 
-/// See http://en.wikipedia.org/wiki/SRGB_color_space for implementation details	
+/// See http://en.wikipedia.org/wiki/SRGB_color_space for implementation details
 template<typename F, typename T>
 T SRGBToLinearDataConversion<F, T>::operator()( F f ) const
 {

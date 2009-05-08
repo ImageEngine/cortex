@@ -48,7 +48,7 @@ template<typename T>
 class NumericParameter : public Parameter
 {
 	public :
-	
+
 		typedef T ValueType;
 		typedef TypedData<T> ObjectType;
 		IE_CORE_DECLAREMEMBERPTR( NumericParameter<T> );
@@ -56,14 +56,14 @@ class NumericParameter : public Parameter
 		typedef std::pair<std::string, T> Preset;
 		typedef std::vector<Preset> PresetsContainer;
 		typedef Parameter BaseClass;
-	
+
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue = T(),
 			T minValue = Imath::limits<T>::min(), T maxValue = Imath::limits<T>::max(),
 			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
-			
+
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue,
-			const PresetsContainer &presets, ConstCompoundObjectPtr userData = 0 );	
-		
+			const PresetsContainer &presets, ConstCompoundObjectPtr userData = 0 );
+
 		//! @name RunTimeTyped functions
 		////////////////////////////////////
 		//@{
@@ -78,25 +78,25 @@ class NumericParameter : public Parameter
 		static TypeId baseTypeId();
 		static const char *baseTypeName();
 		//@}
-		
+
 		//! @name Object functions
 		////////////////////////////////////
 		//@{
 		typename NumericParameter<T>::Ptr copy() const;
 		virtual bool isEqualTo( ConstObjectPtr other ) const;
 		//@}
-		
+
 		bool hasMinValue() const;
 		T minValue() const;
-		
+
 		bool hasMaxValue() const;
 		T maxValue() const;
-		
+
 		/// Convenience function for getting the default value, which avoids all
 		/// the hoop jumping needed to extract the value from the Object returned
 		/// by Parameter::defaultValue()
 		T numericDefaultValue() const;
-		
+
 		/// Convenience function for value getting, which avoids all the hoop
 		/// jumping needed to extract the value from the Object returned
 		/// by Parameter::getValue(). Throws an exception if the value is not
@@ -105,13 +105,13 @@ class NumericParameter : public Parameter
 		/// Convenience function for value setting - constructs a TypedData<T>
 		/// from value and calls Parameter::setValue()
 		void setNumericValue( T value );
-		
+
 		/// Implemented to return true only if value is of type TypedData<T> and if
-		/// min <= value->readable() <= max.		
+		/// min <= value->readable() <= max.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
 
 	protected :
-	
+
 		// constructor for use during load/copy
 		NumericParameter();
 
@@ -120,11 +120,11 @@ class NumericParameter : public Parameter
 		virtual void load( LoadContextPtr context );
 		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
 
-	private :	
+	private :
 
 		T m_min;
 		T m_max;
-	
+
 		static TypeDescription<NumericParameter<T> > g_typeDescription;
 		friend class TypeDescription<NumericParameter<T> >;
 

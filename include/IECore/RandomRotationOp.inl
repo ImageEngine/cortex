@@ -67,7 +67,7 @@ void RandomRotationOp::generate(
 		*result++ = rotated.v;
 	}
 }
-		
+
 } // namespace IECore
 
 #endif // IECORE_RANDOMROTATIONOP_H

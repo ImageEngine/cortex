@@ -42,13 +42,13 @@ init( False )
 class TestWindow( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		w = Window( "title" )
 		self.assertEqual( w.getTitle(), "title" )
 		w.setTitle( "new title" )
 		self.assertEqual( w.getTitle(), "new title" )
-		
+
 		w.start()
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

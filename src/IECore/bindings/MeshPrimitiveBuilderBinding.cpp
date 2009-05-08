@@ -48,9 +48,9 @@ void bindMeshPrimitiveBuilder()
 	RefCountedClass<MeshPrimitiveBuilder, RefCounted>( "MeshPrimitiveBuilder" )
 		.def( init<> () )
 		.def( "addVertex", &MeshPrimitiveBuilder::addVertex<float> )
-		.def( "addVertex", &MeshPrimitiveBuilder::addVertex<double> )		
+		.def( "addVertex", &MeshPrimitiveBuilder::addVertex<double> )
 		.def( "addTriangle", &MeshPrimitiveBuilder::addTriangle )
-		.def( "mesh", &MeshPrimitiveBuilder::mesh )								
+		.def( "mesh", &MeshPrimitiveBuilder::mesh )
 	;
 }
 

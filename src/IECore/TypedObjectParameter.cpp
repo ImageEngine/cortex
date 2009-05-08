@@ -74,45 +74,45 @@ template<typename T>
 Parameter::PresetsContainer TypedObjectParameter<T>::makePresets( const ObjectPresetsContainer &presets )
 {
 	Parameter::PresetsContainer result; result.reserve( presets.size() );
-	
+
 	result.insert( result.end(), presets.begin(), presets.end() );
-	
+
 	return result;
 }
 
-template <typename T> 
+template <typename T>
 TypeId TypedObjectParameter<T>::typeId() const
 {
 	return staticTypeId();
 }
 
-template <typename T> 
+template <typename T>
 TypeId TypedObjectParameter<T>::staticTypeId()
 {
 	assert( 0 ); // this function must be specialised for each type!
 	return InvalidTypeId;
 }
 
-template <typename T> 
+template <typename T>
 const char *TypedObjectParameter<T>::typeName() const
 {
 	return staticTypeName();
 }
 
-template <typename T> 
+template <typename T>
 const char *TypedObjectParameter<T>::staticTypeName()
 {
 	assert( 0 ); // this function must be specialised for each type!
 	return "";
 }
 
-template <class T> 
+template <class T>
 TypeId TypedObjectParameter<T>::baseTypeId()
 {
 	return ObjectParameter::staticTypeId();
 }
 
-template <class T> 
+template <class T>
 const char *TypedObjectParameter<T>::baseTypeName()
 {
 	return ObjectParameter::staticTypeName();
@@ -189,7 +189,7 @@ bool TypedObjectParameter<T>::valueValid( ConstObjectPtr value, std::string *rea
 		return # TNAME;\
 	}\
 	template class TypedObjectParameter<T>;
-	
+
 namespace IECore
 {
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( Renderable, RenderableParameter );
@@ -209,4 +209,4 @@ IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( CurvesPrimitive, CurvesPrimiti
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( PointsPrimitive, PointsPrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( CompoundObject, CompoundObjectParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ObjectVector, ObjectVectorParameter );
-}	
+}

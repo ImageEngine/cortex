@@ -54,25 +54,25 @@ class MemoryStream
 		struct category
 		: public boost::iostreams::device_tag
 	        { };
-		
+
 		MemoryStream();
-	
+
 		/// Construct a new stream pointing to the existing buffer. Optionally, ownership of this
 		/// buffer can be passed to the stream. In this case it is assumed that it was allocated
 		/// with new[] and can safely be deleted with delete[].
 		MemoryStream( char *buf, std::streamsize sz, bool ownsBuf = false );
-				
-		/// Read from the stream		
+
+		/// Read from the stream
 		std::streamsize read(char* s, std::streamsize n);
-		
+
 		/// Write to the stream
 		std::streamsize write(const char* s, std::streamsize n);
-		
+
 		/// Retrieve a reference to the contents of the stream.
 		void get( char *& data, std::streamsize &sz ) const;
-		
+
 	private:
-	
+
 		struct Impl : public IECore::RefCounted
 		{
 			Impl();
@@ -84,28 +84,28 @@ class MemoryStream
 			std::streamsize read(char* s, std::streamsize n);
 
 			std::streamsize write(const char* s, std::streamsize n);
-			
+
 			char *m_head;
 			char *m_next;
-		
+
 			std::streamsize m_size;
 			std::streamsize m_bufSize;
-		
+
 			bool m_ownsBuf;
 		};
-		
+
 		IE_CORE_DECLAREPTR( Impl );
-		ImplPtr m_impl;	
+		ImplPtr m_impl;
 };
 
 struct MemoryStreamSource : private MemoryStream
 {
 	typedef char                          char_type;
 	typedef boost::iostreams::source_tag  category;
-	
+
 	using MemoryStream::read;
 	using MemoryStream::get;
-	
+
 	MemoryStreamSource(char *buf, std::streamsize sz, bool ownsBuf = false);
 };
 
@@ -113,10 +113,10 @@ struct MemoryStreamSink : private MemoryStream
 {
 	typedef char                        char_type;
 	typedef boost::iostreams::sink_tag  category;
-	
+
 	using MemoryStream::write;
 	using MemoryStream::get;
-	
+
 	MemoryStreamSink();
 };
 

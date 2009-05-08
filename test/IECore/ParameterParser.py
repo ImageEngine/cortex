@@ -38,7 +38,7 @@ import IECore
 class testParameterParser( unittest.TestCase ) :
 
 	def testMultiply( self ) :
-	
+
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		a = l.load( "maths/multiply" )()
 
@@ -48,9 +48,9 @@ class testParameterParser( unittest.TestCase ) :
 		self.assertEqual( a(), IECore.IntData( 200 ) )
 
 	def testParameterTypes( self ) :
-	
+
 		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
-		
+
 		IECore.ParameterParser().parse( [
 			"-a", "10",
 			"-b", "20.2",
@@ -75,34 +75,34 @@ class testParameterParser( unittest.TestCase ) :
 			"-v", "25", "26", "27",
 			"-w", "0-500x250",
 			], a.parameters() )
-		
+
 		a()
-		
+
 	def testPresetParsing( self ) :
-	
+
 		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "presetParsing" )()
-		
+
 		IECore.ParameterParser().parse( [
 			"-h", "x",
 			"-compound", "one",
 			], a.parameters() )
-		
+
 		a()
-		
+
 	def testReadParsing( self ) :
-	
+
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		a = l.load( "maths/multiply" )()
 
 		p = a.parameters()
 		IECore.ParameterParser().parse( ["-a", "read:test/IECore/data/cobFiles/intDataTen.cob", "-b", "30" ], p )
-		
+
 		self.assertEqual( a(), IECore.IntData( 300 ) )
-		
+
 	def testSerialising( self ) :
-	
+
 		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
-		
+
 		IECore.ParameterParser().parse( [
 			"-a", "10",
 			"-b", "20.2",
@@ -127,40 +127,40 @@ class testParameterParser( unittest.TestCase ) :
 			"-v", "25", "26", "27",
 			"-w", "0-500x250",
 			], a.parameters() )
-			
+
 		a()
-		
+
 		s = IECore.ParameterParser().serialise( a.parameters() )
 		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
 		IECore.ParameterParser().parse( s, a.parameters() )
-		
+
 		a()
-		
+
 	def testStringParsing( self ) :
-	
+
 		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "stringParsing" )()
-		
+
 		IECore.ParameterParser().parse( [
 			"-emptyString", "",
 			"-normalString", "hello",
 			"-stringWithSpace", "hello there",
 			"-stringWithManySpaces", "hello there old chap",
 			], a.parameters() )
-		
+
 		a()
-		
+
 		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "stringParsing" )()
-		
+
 		IECore.ParameterParser().parse( "-emptyString '' -normalString 'hello' -stringWithSpace 'hello there' -stringWithManySpaces 'hello there old chap'", a.parameters() )
-		
+
 		a()
-		
+
 	def testFlaglessParsing( self ) :
-	
+
 		parameters = IECore.CompoundParameter(
-		
+
 			members = [
-		
+
 				IECore.IntParameter(
 					name = "a",
 					description = "",
@@ -176,11 +176,11 @@ class testParameterParser( unittest.TestCase ) :
 					description = "",
 					defaultValue = 3
 				),
-				
+
 			],
-			
+
 			userData = {
-		
+
 				"parser" : {
 
 					"flagless" : IECore.StringVectorData( [ "b", "c" ] )
@@ -188,11 +188,11 @@ class testParameterParser( unittest.TestCase ) :
 				}
 
 			}
-			
+
 		)
-		
+
 		# check that normal parsing still works
-		
+
 		IECore.ParameterParser().parse( [
 				"-a", "10",
 				"-b", "hello",
@@ -200,53 +200,53 @@ class testParameterParser( unittest.TestCase ) :
 			],
 			parameters
 		)
-		
+
 		self.assertEqual( parameters["a"].getNumericValue(), 10 )
 		self.assertEqual( parameters["b"].getTypedValue(), "hello" )
 		self.assertEqual( parameters["c"].getNumericValue(), 4 )
-		
+
 		# check that flagless parsing works
-		
+
 		IECore.ParameterParser().parse( [
 				"-a", "15",
 				"goodbye", "20"
 			],
 			parameters
 		)
-		
+
 		self.assertEqual( parameters["a"].getNumericValue(), 15 )
 		self.assertEqual( parameters["b"].getTypedValue(), "goodbye" )
 		self.assertEqual( parameters["c"].getNumericValue(), 20 )
-		
+
 		# check that invalid stuff is still detected
-		
+
 		self.assertRaises( SyntaxError, IECore.ParameterParser().parse,
 			[ "-iDontExist", "10" ],
 			parameters,
 		)
-		
+
 		self.assertRaises( SyntaxError, IECore.ParameterParser().parse,
 			[ "-a" ],
 			parameters,
 		)
-		
+
 		self.assertRaises( SyntaxError, IECore.ParameterParser().parse,
 			[ "too", "2", "many", "flaglessValues" ],
 			parameters,
 		)
-		
+
 	def testEvalParsing( self ) :
-		
+
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		a = l.load( "maths/multiply" )()
 
 		p = a.parameters()
 		IECore.ParameterParser().parse( ["-a", "python:IECore.IntData( 20 )", "-b", "30" ], p )
-		self.assertEqual( p["a"].getValue(), IECore.IntData( 20 ) )		
+		self.assertEqual( p["a"].getValue(), IECore.IntData( 20 ) )
 		self.assertEqual( a(), IECore.IntData( 600 ) )
-	
+
 	def testSplineParsing( self ) :
-	
+
 		p = IECore.CompoundParameter(
 			members = [
 				IECore.SplineffParameter(
@@ -256,24 +256,24 @@ class testParameterParser( unittest.TestCase ) :
 				),
 			]
 		)
-		
+
 		s = IECore.ParameterParser().serialise( p )
 		v = p["a"].getValue().copy()
-		
+
 		p["a"].setValue( IECore.SplineffData() )
 		self.assertNotEqual( p["a"].getValue(), v )
-		
+
 		IECore.ParameterParser().parse( s, p )
-		
+
 		self.assertEqual( p["a"].getValue(), v )
-		
+
 	def testDatetimeParsing( self ) :
-	
+
 		import datetime
-	
+
 		now = datetime.datetime.now()
 		now = now.replace( microsecond = 0 )
-	
+
 		p = IECore.CompoundParameter(
 			members = [
 					IECore.DateTimeParameter(
@@ -283,33 +283,33 @@ class testParameterParser( unittest.TestCase ) :
 					),
 				]
 		)
-		
+
 		s = IECore.ParameterParser().serialise( p )
 		v = p["testName"].getValue().copy()
-		
+
 		p["testName"].setValue( IECore.DateTimeData() )
 		self.assertNotEqual( p["testName"].getValue(), v )
-		
+
 		IECore.ParameterParser().parse( s, p )
-		
-		self.assertEqual( p["testName"].getValue(), v )	
-		
+
+		self.assertEqual( p["testName"].getValue(), v )
+
 		IECore.ParameterParser().parse( ["-testName", "2009-02-13" ], p )
-		IECore.ParameterParser().parse( ["-testName", "2009-02-13 10:42:13" ], p )				
+		IECore.ParameterParser().parse( ["-testName", "2009-02-13 10:42:13" ], p )
 		IECore.ParameterParser().parse( ["-testName", "2009-02-13 10:42" ], p )
-		
+
 		IECore.ParameterParser().parse( ["-testName", "10:42" ], p )
 		IECore.ParameterParser().parse( ["-testName", "18:12:32" ], p )
-		
+
 	def testEmptyVector( self ) :
 		""" Test that serializing then parsing a vector with no elements in it succeeds """
-	
+
 		p = IECore.StringVectorParameter( name = "name", description = "description", defaultValue = IECore.StringVectorData() )
-		s = IECore.ParameterParser().serialise( p )	
-		IECore.ParameterParser().parse( s, p )	
-		
+		s = IECore.ParameterParser().serialise( p )
+		IECore.ParameterParser().parse( s, p )
+
 	def testNoValueProvidedSyntaxError( self ) :
-	
+
 		p = IECore.CompoundParameter(
 			members = [
 				IECore.StringParameter(
@@ -349,18 +349,18 @@ class testParameterParser( unittest.TestCase ) :
 				),
 			]
 		)
-		
+
 		parser = IECore.ParameterParser()
 
-		self.assertRaises( SyntaxError, parser.parse, "-string", p )	
-		self.assertRaises( SyntaxError, parser.parse, "-int", p )	
-		self.assertRaises( SyntaxError, parser.parse, "-float", p )	
-		self.assertRaises( SyntaxError, parser.parse, "-bool", p )	
+		self.assertRaises( SyntaxError, parser.parse, "-string", p )
+		self.assertRaises( SyntaxError, parser.parse, "-int", p )
+		self.assertRaises( SyntaxError, parser.parse, "-float", p )
+		self.assertRaises( SyntaxError, parser.parse, "-bool", p )
 		self.assertRaises( SyntaxError, parser.parse, "-v21", p )
 		self.assertRaises( SyntaxError, parser.parse, "-box3f", p )
 		self.assertRaises( SyntaxError, parser.parse, "-spline", p )
-		
-	
+
+
 	#def testQuotingOnStringParameters( self ):
 
 	#	a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
@@ -372,7 +372,7 @@ class testParameterParser( unittest.TestCase ) :
 
 	#	s = IECore.ParameterParser().serialise( a.parameters() )
 	#	IECore.ParameterParser().parse( s, a.parameters() )
-					
+
 	#	self.assertEqual( a.parameters().getValue().d, oldParams.d )
 	#	self.assertEqual( a.parameters().getValue().f, oldParams.f )
 

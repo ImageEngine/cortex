@@ -41,7 +41,7 @@ using namespace boost;
 using namespace std;
 using namespace IECore;
 
-const unsigned int ValidatedStringParameter::g_ioVersion = 1;	
+const unsigned int ValidatedStringParameter::g_ioVersion = 1;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( ValidatedStringParameter );
 
@@ -112,7 +112,7 @@ void ValidatedStringParameter::copyFrom( ConstObjectPtr other, CopyContext *cont
 {
 	StringParameter::copyFrom( other, context );
 	const ValidatedStringParameter *tOther = static_cast<const ValidatedStringParameter *>( other.get() );
-	
+
 	m_regex = tOther->m_regex;
 	m_regexDescription = tOther->m_regexDescription;
 	m_allowEmptyString = tOther->m_allowEmptyString;
@@ -122,12 +122,12 @@ void ValidatedStringParameter::save( SaveContext *context ) const
 {
 	StringParameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	
+
 	container->write( "regex", m_regex );
 	container->write( "regexDescription", m_regexDescription );
 	unsigned char tmp = m_allowEmptyString;
 	container->write( "m_allowEmptyString", tmp );
-		
+
 }
 
 void ValidatedStringParameter::load( LoadContextPtr context )
@@ -135,7 +135,7 @@ void ValidatedStringParameter::load( LoadContextPtr context )
 	StringParameter::load( context );
 	unsigned int v = g_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	container->read( "regex", m_regex );
 	container->read( "regexDescription", m_regexDescription );
 	unsigned char tmp;
@@ -149,7 +149,7 @@ bool ValidatedStringParameter::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	const ValidatedStringParameter *tOther = static_cast<const ValidatedStringParameter *>( other.get() );
 	return m_regex==tOther->m_regex && m_regexDescription==tOther->m_regexDescription && m_allowEmptyString==tOther->m_allowEmptyString;
 }

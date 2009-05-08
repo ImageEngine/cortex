@@ -39,23 +39,23 @@ from IECore import *
 class SearchPathTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		s = SearchPath()
 		self.assertEqual( s.paths, [] )
 		s.setPaths( "a:b:c", ":" )
 		self.assertEqual( s.paths, [ "a", "b", "c" ] )
 		s.paths = [ "one", "two", "three" ]
 		self.assertEqual( s.paths, [ "one", "two", "three" ] )
-		
+
 		s = SearchPath( "a:b:c", ":" )
 		self.assertEqual( s.paths, [ "a", "b", "c" ] )
 		self.assertEqual( s.getPaths( ":" ), "a:b:c" )
-	
+
 	def testFind( self ) :
-	
+
 		s = SearchPath( "test/IECore/data/pdcFiles", ":" )
-		
+
 		self.assertEqual( s.find( "particleShape1.250.pdc" ), "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

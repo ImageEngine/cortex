@@ -79,15 +79,15 @@ ImageCompositeOp::ImageCompositeOp() : ImagePrimitiveOp( "ImageCompositeOp", "Im
 	defaultChannels->writable().push_back( "R" );
 	defaultChannels->writable().push_back( "G" );
 	defaultChannels->writable().push_back( "B" );
-	
+
 	m_channelNamesParameter = new StringVectorParameter(
 		"channels",
 		"The names of the channels to modify.",
 		defaultChannels
 	);
-	
+
 	m_alphaChannelNameParameter = new StringParameter(
-		"alphaChannelName", 
+		"alphaChannelName",
 		"The name of the channel which holds the alpha. This is used for both images.",
 		"A"
 	);
@@ -98,11 +98,11 @@ ImageCompositeOp::ImageCompositeOp() : ImagePrimitiveOp( "ImageCompositeOp", "Im
 		"Therefore parameter named 'input' represents imageB",
 		new ImagePrimitive()
 	);
-	
+
 	IntParameter::PresetsContainer inputModePresets;
 	inputModePresets.push_back( IntParameter::Preset( "Premultiplied", Premultiplied ) );
 	inputModePresets.push_back( IntParameter::Preset( "Unpremultiplied", Unpremultiplied ) );
-	
+
 	m_inputModeParameter = new IntParameter(
 		"inputMode",
 		"States whether the input images are premultiplied by their alpha.",
@@ -114,7 +114,7 @@ ImageCompositeOp::ImageCompositeOp() : ImagePrimitiveOp( "ImageCompositeOp", "Im
 	parameters()->addParameter( m_channelNamesParameter );
 	parameters()->addParameter( m_alphaChannelNameParameter );
 	parameters()->addParameter( m_imageAParameter );
-	parameters()->addParameter( m_inputModeParameter );	
+	parameters()->addParameter( m_inputModeParameter );
 }
 
 ImageCompositeOp::~ImageCompositeOp()
@@ -174,9 +174,9 @@ ConstIntParameterPtr ImageCompositeOp::inputModeParameter() const
 struct ImageCompositeOp::ChannelConverter
 {
 	typedef FloatVectorDataPtr ReturnType;
-	
+
 	const std::string &m_channelName;
-	
+
 	ChannelConverter( const std::string &channelName ) : m_channelName( channelName )
 	{
 	}
@@ -185,21 +185,21 @@ struct ImageCompositeOp::ChannelConverter
 	ReturnType operator()( typename T::Ptr data )
 	{
 		assert( data );
-			
+
 		return DataConvert < T, FloatVectorData, ScaledDataConversion< typename T::ValueType::value_type, float> >()
 		(
 			boost::static_pointer_cast<const T>( data )
 		);
 	};
-	
+
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );
-		
-			throw InvalidArgumentException( ( boost::format( "ImageCompositeOp: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );		
+
+			throw InvalidArgumentException( ( boost::format( "ImageCompositeOp: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
 		}
 	};
 };
@@ -207,14 +207,14 @@ struct ImageCompositeOp::ChannelConverter
 FloatVectorDataPtr ImageCompositeOp::getChannelData( ImagePrimitivePtr image, const std::string &channelName, bool mustExist )
 {
 	assert( image );
-	
+
 	PrimitiveVariableMap::iterator it = image->variables.find( channelName );
 	if( it==image->variables.end() )
 	{
 		if ( mustExist )
 		{
 			throw Exception( str( format( "ImageCompositeOp: Channel \"%s\" does not exist." ) % channelName ) );
-		} 
+		}
 		else
 		{
 			return 0;
@@ -232,11 +232,11 @@ FloatVectorDataPtr ImageCompositeOp::getChannelData( ImagePrimitivePtr image, co
 	{
 		throw Exception( str( format( "ImageCompositeOp: Primitive variable \"%s\" has no data." ) % channelName ) );
 	}
-	
+
 	ChannelConverter converter( channelName );
-	
-	return despatchTypedData<			
-			ChannelConverter, 
+
+	return despatchTypedData<
+			ChannelConverter,
 			TypeTraits::IsNumericVectorTypedData,
 			ChannelConverter::ErrorHandler
 		>( it->second.data, converter );
@@ -246,23 +246,23 @@ float ImageCompositeOp::readChannelData( ConstImagePrimitivePtr image, ConstFloa
 {
 	assert( image );
 	assert( data );
-		
+
 	V2i offset = pixel - image->getDataWindow().min;
 	if ( offset.x < 0 || offset.y < 0 )
 	{
 		return 0.0f;
 	}
-	
+
 	const int width = image->getDataWindow().size().x + 1;
 	const int height = image->getDataWindow().size().y + 1;
-	
+
 	if ( offset.x >= width || offset.y >= height )
 	{
 		return 0.0f;
 	}
-	
+
 	const int idx = offset.y * width + offset.x;
-	
+
 	assert( idx >= 0 );
 	assert( idx < (int)data->readable().size() );
 	return data->readable()[ idx ];
@@ -273,41 +273,41 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 	assert( fn );
 	assert( imageB );
 	assert( operands );
-	
+
 	const StringVectorParameter::ValueType &channelNames = channelNamesParameter()->getTypedValue();
 	if ( !channelNames.size() )
 	{
 		throw InvalidArgumentException( "ImageCompositeOp: No channels specified" );
-	}			
-	
+	}
+
 	ImagePrimitivePtr imageA = runTimeCast< ImagePrimitive > ( imageAParameter()->getValue() );
 	assert( imageA );
-	
+
 	const std::string &alphaChannel = alphaChannelNameParameter()->getTypedValue();
-	if ( !imageA->arePrimitiveVariablesValid() )	
+	if ( !imageA->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "ImageCompositeOp: Input image has invalid channels" );
 	}
-	
+
 	const int inputMode = m_inputModeParameter->getNumericValue();
 	if ( inputMode == Unpremultiplied )
 	{
 		ImagePremultiplyOpPtr premultOp = new ImagePremultiplyOp();
 		premultOp->alphaChannelNameParameter()->setTypedValue( alphaChannel );
 		premultOp->channelNamesParameter()->setTypedValue( channelNames );
-		
+
 		if ( imageA->variables.find( alphaChannel ) != imageA->variables.end() )
 		{
 			/// Make a new imageA, premultiplied
 			premultOp->copyParameter()->setTypedValue( true );
 			premultOp->inputParameter()->setValue( imageA );
-		
+
 			imageA = assertedStaticCast< ImagePrimitive >( premultOp->operate() );
 			assert( imageA->arePrimitiveVariablesValid() );
 		}
-		
+
 		if ( imageB->variables.find( alphaChannel ) != imageB->variables.end() )
-		{		
+		{
 			/// Premultiply imageB in-place
 			premultOp->copyParameter()->setTypedValue( false );
 			premultOp->inputParameter()->setValue( imageB );
@@ -318,51 +318,51 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 	{
 		assert( inputMode == Premultiplied );
 	}
-	
+
 
 	const Imath::Box2i displayWindow = imageB->getDisplayWindow();
-	
+
 	Imath::Box2i newDataWindow = imageB->getDataWindow();
-	
+
 	if ( dwr == Union )
-	{				
-		newDataWindow.extendBy( imageA->getDataWindow() );		
+	{
+		newDataWindow.extendBy( imageA->getDataWindow() );
 	}
 	else
 	{
 		assert( dwr == Intersection );
 		newDataWindow = boxIntersection( newDataWindow, imageA->getDataWindow() );
 	}
-	
+
 	newDataWindow = boxIntersection( newDataWindow, displayWindow );
-	
+
 	ImageCropOpPtr cropOp = new ImageCropOp();
 
 	/// Need to make sure that we don't create a new image here - we want to modify the current one in-place. So,
 	/// we turn off the "copy" parameter of ModifyOp.
-	cropOp->copyParameter()->setTypedValue( false );	
-	cropOp->inputParameter()->setValue( imageB );	
+	cropOp->copyParameter()->setTypedValue( false );
+	cropOp->inputParameter()->setValue( imageB );
 	cropOp->cropBoxParameter()->setTypedValue( newDataWindow );
 	cropOp->matchDataWindowParameter()->setTypedValue( true );
 	cropOp->resetOriginParameter()->setTypedValue( false );
-		
+
 	cropOp->operate();
-	
-	assert( imageB->arePrimitiveVariablesValid() );	
-	assert( imageB->getDataWindow() == newDataWindow );	
-	
+
+	assert( imageB->arePrimitiveVariablesValid() );
+	assert( imageB->getDataWindow() == newDataWindow );
+
 	/// \todo Use the "reformat" parameter of the ImageCropOp to do this, when it's implemented
-	imageB->setDisplayWindow( displayWindow );	
-		
+	imageB->setDisplayWindow( displayWindow );
+
 	FloatVectorDataPtr aAlphaData = getChannelData( imageA, alphaChannel, false );
 	FloatVectorDataPtr bAlphaData = getChannelData( imageB, alphaChannel, false );
-		
+
 	const int newWidth = newDataWindow.size().x + 1;
-	const int newHeight = newDataWindow.size().y + 1;	
+	const int newHeight = newDataWindow.size().y + 1;
 	const int newArea = newWidth * newHeight;
-	
+
 	assert( newArea == (int)imageB->variableSize( PrimitiveVariable::Vertex ) );
-			
+
 	for( unsigned i=0; i<channelNames.size(); i++ )
 	{
 		const StringVectorParameter::ValueType::value_type &channelName = channelNames[i];
@@ -370,12 +370,12 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 		FloatVectorDataPtr aData = getChannelData( imageA, channelName );
 		assert( aData->readable().size() == imageA->variableSize( PrimitiveVariable::Vertex ) );
 		FloatVectorDataPtr bData = getChannelData( imageB, channelName );
-		assert( bData->readable().size() == imageB->variableSize( PrimitiveVariable::Vertex ) );		
+		assert( bData->readable().size() == imageB->variableSize( PrimitiveVariable::Vertex ) );
 		FloatVectorDataPtr newBData = new FloatVectorData();
-		
+
 		newBData->writable().resize( newArea );
-		imageB->variables[ channelName ].data = newBData;		
-		
+		imageB->variables[ channelName ].data = newBData;
+
 		for ( int y = newDataWindow.min.y; y <= newDataWindow.max.y; y++ )
 		{
 			int offset = (y - newDataWindow.min.y ) * newWidth;
@@ -383,32 +383,32 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 			{
 				float aVal = readChannelData( imageA, aData, V2i( x, y ) );
 				float bVal = readChannelData( imageB, bData, V2i( x, y ) );
-				
-				float aAlpha = aAlphaData ? readChannelData( imageA, aAlphaData, V2i( x, y ) ) : 1.0f;			
+
+				float aAlpha = aAlphaData ? readChannelData( imageA, aAlphaData, V2i( x, y ) ) : 1.0f;
 				float bAlpha = bAlphaData ? readChannelData( imageB, bAlphaData, V2i( x, y ) ) : 1.0f;
-				
+
 				assert( offset >= 0 );
 				assert( offset < (int)newBData->readable().size() );
-				newBData->writable()[ offset  ] = fn( aVal, aAlpha, bVal, bAlpha );				
+				newBData->writable()[ offset  ] = fn( aVal, aAlpha, bVal, bAlpha );
 			}
-		}				
+		}
 	}
-	
+
 	/// displayWindow should be unchanged
 	assert( imageB->getDisplayWindow() == displayWindow );
 	assert( imageB->arePrimitiveVariablesValid() );
-	
+
 	/// If input images were unpremultiplied, then ensure that the output is also
 	if ( inputMode == Unpremultiplied && imageB->variables.find( alphaChannel ) != imageB->variables.end() )
 	{
 		ImageUnpremultiplyOpPtr unpremultOp = new ImageUnpremultiplyOp();
-		/// Unpremultiply imageB in-place		
+		/// Unpremultiply imageB in-place
 		unpremultOp->copyParameter()->setTypedValue( false );
 		unpremultOp->channelNamesParameter()->setTypedValue( channelNames );
 		unpremultOp->alphaChannelNameParameter()->setTypedValue( alphaChannel );
 		unpremultOp->inputParameter()->setValue( imageB );
-		unpremultOp->operate();	
-		assert( imageB->arePrimitiveVariablesValid() );	
+		unpremultOp->operate();
+		assert( imageB->arePrimitiveVariablesValid() );
 	}
 	else
 	{
@@ -418,30 +418,30 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 
 void ImageCompositeOp::modifyTypedPrimitive( ImagePrimitivePtr imageB, ConstCompoundObjectPtr operands )
 {
-	if ( !imageB->arePrimitiveVariablesValid() )	
+	if ( !imageB->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "ImageCompositeOp: Input image has invalid channels" );
 	}
-	
+
 	const Operation operation = (Operation)operationParameter()->getNumericValue();
-	
-	switch (operation) 
+
+	switch (operation)
 	{
 		case Over :
 			composite( compositeOver<float>, Union, imageB, operands );
 			break;
 		case Max :
 			composite( compositeMax<float>, Union, imageB, operands );
-			break;	
+			break;
 		case Min :
 			composite( compositeMin<float>, Intersection, imageB, operands );
 			break;
 		case Multiply :
 			composite( compositeMultiply<float>, Intersection, imageB, operands );
-			break;				
-						
-		default :		
-			assert( false );	
+			break;
+
+		default :
+			assert( false );
 	}
 }
 

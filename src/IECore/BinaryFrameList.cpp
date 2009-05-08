@@ -56,71 +56,71 @@ BinaryFrameList::~BinaryFrameList()
 void BinaryFrameList::asList( std::vector<Frame> &frames ) const
 {
 	frames.clear();
-	
+
 	std::vector<Frame> l;
 	m_frameList->asList( l );
-	
+
 	if ( l.size() <= 2 )
 	{
 		return;
 	}
 #ifndef NDEBUG
 	size_t oldSize = l.size();
-#endif	
-	
+#endif
+
 	frames.push_back( *l.begin() );
 	l.erase( l.begin() );
 	frames.push_back( *l.rbegin() );
 	l.pop_back();
-	
+
 	assert( l.size() + 2 == oldSize );
 	assert( frames.size() == 2 );
-	
+
 	std::list< std::vector< Frame > > toVisit;
 	toVisit.push_back( l );
 	while ( toVisit.size() )
 	{
 		std::vector< Frame > n = *toVisit.begin();
 		toVisit.pop_front();
-		
+
 		if ( n.size() > 1 )
 		{
 			size_t mid = ( n.size() - 1 ) / 2;
-			
+
 			std::vector< Frame >::iterator midIt = n.begin();
 			size_t i = 0;
 			while ( i++ != mid )
 			{
 				++ midIt;
 			}
-			
+
 			frames.push_back( *midIt );
-			
+
 			std::vector< Frame > head( n.begin(), midIt );
-			std::vector< Frame > tail( midIt+1, n.end() );			
-			
+			std::vector< Frame > tail( midIt+1, n.end() );
+
 			toVisit.push_back( head );
-			toVisit.push_back( tail );			
-			 
+			toVisit.push_back( tail );
+
 		}
 		else if ( n.size() )
 		{
 			frames.push_back( *n.begin() );
 		}
 	}
-	
+
 #ifndef NDEBUG
 	std::vector<Frame> origList;
-	m_frameList->asList( origList );	
+	m_frameList->asList( origList );
 	assert( frames.size() == origList.size() );
-#endif	
+#endif
 }
 
 
 std::string BinaryFrameList::asString() const
 {
 	std::string s = m_frameList->asString();
-	
+
 	if ( s.find_first_of( ',' ) != std::string::npos )
 	{
 		return "(" + s + ")" + suffix();
@@ -142,12 +142,12 @@ std::string BinaryFrameList::suffix()
 }
 
 FrameListPtr BinaryFrameList::parse( const std::string &frameList )
-{	
+{
 	FrameListPtr l = parseForChildList<BinaryFrameList>( frameList );
 	if ( l )
 	{
 		return new BinaryFrameList( l );
 	}
-	
+
 	return 0;
 }

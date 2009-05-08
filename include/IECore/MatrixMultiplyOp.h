@@ -47,15 +47,15 @@ namespace IECore
 class MatrixMultiplyOp : public ModifyOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( MatrixMultiplyOp, ModifyOp );
-		
+
 		MatrixMultiplyOp();
 		virtual ~MatrixMultiplyOp();
 
 		ObjectParameterPtr matrixParameter();
 		ConstObjectParameterPtr matrixParameter() const;
-		
+
 		/// An enumeration for the different ways of interpreting
 		/// the vectors to be transformed. These are the acceptable
 		/// values for modeParameter()->setTypedValue().
@@ -65,16 +65,16 @@ class MatrixMultiplyOp : public ModifyOp
 			Vector = 1,
 			Normal = 2
 		};
-		
+
 		IntParameterPtr modeParameter();
 		ConstIntParameterPtr modeParameter() const;
 
 	protected :
-	
+
 		virtual void modify( ObjectPtr toModify, ConstCompoundObjectPtr operands );
-		
+
 	private :
-		
+
 		ObjectParameterPtr m_matrixParameter;
 		IntParameterPtr m_modeParameter;
 

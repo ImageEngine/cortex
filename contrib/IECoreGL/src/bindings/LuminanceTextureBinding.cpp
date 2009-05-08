@@ -52,5 +52,5 @@ void bindLuminanceTexture()
 		.def( init<IECore::ImagePrimitivePtr, bool>() )
 	;
 }
-	
+
 }

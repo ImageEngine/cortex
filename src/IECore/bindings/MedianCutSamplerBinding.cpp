@@ -45,11 +45,11 @@ namespace IECore
 
 void bindMedianCutSampler()
 {
-	
+
 	scope s = RunTimeTypedClass<MedianCutSampler>()
 		.def( init<>() )
 	;
-	
+
 	enum_<MedianCutSampler::Projection>( "Projection" )
 		.value( "Invalid", MedianCutSampler::Invalid )
 		.value( "Rectilinear", MedianCutSampler::Rectilinear )

@@ -39,7 +39,7 @@ from IECore import *
 class TestCompoundVectorParameter( unittest.TestCase ) :
 
 	def testConstruction( self ) :
-		
+
 		c = CompoundVectorParameter( 'a', 'dest' )
 		# test valid parameters
 		c.addParameter( IntVectorParameter( 'a', '', IntVectorData( [ 1, 2 ] ) ) )
@@ -64,5 +64,5 @@ class TestCompoundVectorParameter( unittest.TestCase ) :
 		c.validate()
 
 		c.addParameter( IntVectorParameter( 'c', '', IntVectorData( [ 1, 2,3 ] ) ) )
-		
+
 		self.assertRaises( Exception, c.validate )

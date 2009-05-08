@@ -102,7 +102,7 @@ class DisplayDriver : public RunTimeTyped
 		};
 		IE_CORE_DECLAREPTR( DisplayDriverCreator )
 
-		// factory function for display drivers. 
+		// factory function for display drivers.
 		static DisplayDriverPtr create( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
 
 		// Registers a factory function for display drivers.

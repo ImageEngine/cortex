@@ -41,9 +41,9 @@ import maya.cmds
 class FromMayaPlugConverterTest( unittest.TestCase ) :
 
 	def testFactory( self ) :
-		
+
 		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".translateX" )
 		self.assert_( converter )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
@@ -51,11 +51,11 @@ class FromMayaPlugConverterTest( unittest.TestCase ) :
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX" )
 		self.assert_( converter )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scale" )
 		self.assert_( converter )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString( locator + ".translateX" ) )
 		self.assert_( converter )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
@@ -63,12 +63,12 @@ class FromMayaPlugConverterTest( unittest.TestCase ) :
 	def testTransformationMatrix( self ) :
 
 		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".worldMatrix", IECore.TransformationMatrixdData.staticTypeId() )
 		self.assert_( converter )
 
 		transform = converter.convert()
 		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
-							
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

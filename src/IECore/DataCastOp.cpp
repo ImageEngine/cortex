@@ -76,7 +76,7 @@ DataCastOp::DataCastOp()
 		"The target Data typeId.",
 		InvalidTypeId,
 		0,
-		Imath::limits<int>::max()		
+		Imath::limits<int>::max()
 	);
 	parameters()->addParameter( m_objectParameter );
 	parameters()->addParameter( m_targetTypeParameter );
@@ -203,7 +203,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 			switch ( targetType )
 			{
 				CASTDATA( Double, Float )
-				CASTDATA( Double, Half )				
+				CASTDATA( Double, Half )
 				CASTVECTORDATA( Double, DoubleVector )
 				default:	break;
 			}
@@ -212,11 +212,11 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 			switch ( targetType )
 			{
 				CASTDATA( Half, Float )
-				CASTDATA( Half, Double )				
+				CASTDATA( Half, Double )
 				CASTVECTORDATA( Half, HalfVector )
 				default:	break;
 			}
-			break;				
+			break;
 		case CharDataTypeId:
 			switch ( targetType )
 			{
@@ -244,7 +244,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( UShort, Short )
 				default:	break;
 			}
-			break;	
+			break;
 		case Int64DataTypeId:
 			switch ( targetType )
 			{
@@ -258,7 +258,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( UInt64, Int64 )
 				default:	break;
 			}
-			break;		
+			break;
 		case IntDataTypeId:
 			switch ( targetType )
 			{
@@ -430,7 +430,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( M44d, M44f )
 				CASTVECTORDATA( M44d, DoubleVector )
 				CASTVECTORDATA( M44d, FloatVector )
-				CASTVECTORDATA( M44d, HalfVector )				
+				CASTVECTORDATA( M44d, HalfVector )
 				default:	break;
 			}
 			break;
@@ -440,7 +440,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( Quatf, Quatd )
 				CASTVECTORDATA( Quatf, DoubleVector )
 				CASTVECTORDATA( Quatf, FloatVector )
-				CASTVECTORDATA( Quatf, HalfVector )								
+				CASTVECTORDATA( Quatf, HalfVector )
 				default:	break;
 			}
 			break;
@@ -470,7 +470,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				default:	break;
 			}
 			break;
-		
+
 
 		// Vectors
 
@@ -505,7 +505,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( FloatVector, Box3f )
 				CASTDATA( FloatVector, TransformationMatrixf )
 				CASTVECTORDATA( FloatVector, IntVector )
-				CASTVECTORDATA( FloatVector, HalfVector )				
+				CASTVECTORDATA( FloatVector, HalfVector )
 				CASTVECTORDATA( FloatVector, DoubleVector )
 				CASTVECTORDATA( FloatVector, V2fVector )
 				CASTVECTORDATA( FloatVector, V3fVector )
@@ -532,7 +532,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( DoubleVector, Box3d )
 				CASTDATA( DoubleVector, TransformationMatrixd )
 				CASTVECTORDATA( DoubleVector, IntVector )
-				CASTVECTORDATA( DoubleVector, HalfVector )				
+				CASTVECTORDATA( DoubleVector, HalfVector )
 				CASTVECTORDATA( DoubleVector, FloatVector )
 				CASTVECTORDATA( DoubleVector, V2fVector )
 				CASTVECTORDATA( DoubleVector, V3fVector )
@@ -550,7 +550,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 			{
 				CASTDATA( HalfVector, Half )
 				CASTVECTORDATA( HalfVector, IntVector )
-				CASTVECTORDATA( HalfVector, HalfVector )				
+				CASTVECTORDATA( HalfVector, HalfVector )
 				CASTVECTORDATA( HalfVector, FloatVector )
 				CASTVECTORDATA( HalfVector, V2fVector )
 				CASTVECTORDATA( HalfVector, V3fVector )
@@ -560,10 +560,10 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTVECTORDATA( HalfVector, M33dVector )
 				CASTVECTORDATA( HalfVector, M44dVector )
 				CASTVECTORDATA( HalfVector, Box2dVector )
-				CASTVECTORDATA( HalfVector, Box3dVector )			
+				CASTVECTORDATA( HalfVector, Box3dVector )
 				default:	break;
 			}
-			break;	
+			break;
 		case IntVectorDataTypeId:
 			switch ( targetType )
 			{
@@ -574,7 +574,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTDATA( IntVector, Box3i )
 				CASTVECTORDATA( IntVector, UIntVector )
 				CASTVECTORDATA( IntVector, Int64Vector )
-				CASTVECTORDATA( IntVector, UInt64Vector )				
+				CASTVECTORDATA( IntVector, UInt64Vector )
 				default:	break;
 			}
 			break;
@@ -603,7 +603,7 @@ ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
 				CASTVECTORDATA( UInt64Vector, Int64Vector )
 				default:	break;
 			}
-			break;	
+			break;
 		case V2fVectorDataTypeId:
 			switch ( targetType )
 			{

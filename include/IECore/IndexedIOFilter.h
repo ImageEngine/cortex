@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #ifndef IE_CORE_INDEXEDIOFILTER_H
-#define IE_CORE_INDEXEDIOFILTER_H 
+#define IE_CORE_INDEXEDIOFILTER_H
 
 #include "boost/regex.hpp"
 
@@ -42,28 +42,28 @@
 
 namespace IECore
 {
-		
+
 IE_CORE_FORWARDDECLARE( IndexedIOFilter );
 
 /// An interface to allow arbitrary filtering of IndexedIO::EntryList objects. For example,
 /// to filter out all files that are larger than a certain size, or of a particular data type.
 class IndexedIOFilter : public RefCounted
 {
-				
+
 	public:
 		IndexedIOFilter();
 		virtual ~IndexedIOFilter();
-			
+
 		/// Chains an additional filter to the end, resulting in a logical OR.
 		virtual void add(const IndexedIOFilterPtr &f);
-		
+
 		/// Applies the filter to an entry list
-		virtual unsigned int apply( IndexedIO::EntryList &l);		
-	
+		virtual unsigned int apply( IndexedIO::EntryList &l);
+
 		/// Derived classes should implement this method, returning 'true' if they
 		/// want to filter out the passed in Entry.
 		virtual bool filter( const IndexedIO::Entry &e) const = 0;
-	
+
 	private:
 		IndexedIOFilterPtr m_next;
 };
@@ -71,9 +71,9 @@ class IndexedIOFilter : public RefCounted
 /// A Null filter. Performs no filtering.
 class IndexedIONullFilter : public IndexedIOFilter
 {
-	public:		
+	public:
 		IndexedIONullFilter();
-	
+
 		virtual bool filter( const IndexedIO::Entry &e) const;
 };
 
@@ -82,14 +82,14 @@ IE_CORE_DECLAREPTR( IndexedIONullFilter );
 /// A class to filter out Entries which don't have the specified type.
 class IndexedIOEntryTypeFilter : public IndexedIOFilter
 {
-	public:		
+	public:
 		IndexedIOEntryTypeFilter(IndexedIO::EntryType typ);
-	
+
 		virtual bool filter( const IndexedIO::Entry &e) const;
-	
+
 	protected:
 		IndexedIO::EntryType m_entryType;
-			
+
 };
 
 IE_CORE_DECLAREPTR( IndexedIOEntryTypeFilter );
@@ -97,14 +97,14 @@ IE_CORE_DECLAREPTR( IndexedIOEntryTypeFilter );
 /// A class to filter out Entries whose names don't match the specified regular expression
 class IndexedIORegexFilter : public IndexedIOFilter
 {
-	public:		
+	public:
 		IndexedIORegexFilter(const std::string &regex);
-	
+
 		virtual bool filter( const IndexedIO::Entry &e) const;
-	
+
 	protected:
 		boost::regex m_regex;
-			
+
 };
 
 IE_CORE_DECLAREPTR( IndexedIORegexFilter );

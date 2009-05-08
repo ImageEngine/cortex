@@ -45,13 +45,13 @@ namespace IECore
 static list baseTypeIds( TypeId typeId )
 {
 	list result;
-	
+
 	const std::vector<TypeId> &ids = RunTimeTyped::baseTypeIds( typeId );
 	for( std::vector<TypeId>::const_iterator it = ids.begin(); it != ids.end(); ++it )
 	{
 		result.append( *it );
 	}
-	
+
 	return result;
 }
 
@@ -63,7 +63,7 @@ static list derivedTypeIds( TypeId typeId )
 	{
 		result.append( *it );
 	}
-	
+
 	return result;
 }
 
@@ -76,9 +76,9 @@ void bindRunTimeTyped()
 		.staticmethod( "typeIdFromTypeName" )
 		.def( "typeNameFromTypeId", &RunTimeTyped::typeNameFromTypeId )
 		.staticmethod( "typeNameFromTypeId" )
-		.def( "registerType",  &RunTimeTyped::registerType ).staticmethod( "registerType" )		
+		.def( "registerType",  &RunTimeTyped::registerType ).staticmethod( "registerType" )
 	;
-	
+
 }
 
 }

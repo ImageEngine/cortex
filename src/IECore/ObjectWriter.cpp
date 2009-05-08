@@ -72,15 +72,15 @@ bool ObjectWriter::canWrite( ConstObjectPtr object, const std::string &fileName 
 }
 
 void ObjectWriter::doWrite()
-{	
+{
 	IndexedIOInterfacePtr io = new FileIndexedIO( fileName(), "/", IndexedIO::Exclusive | IndexedIO::Write);
-	
+
 	/// \todo Establish why we only accept CompoundData / Data here when HeaderGenerator::header(), for example,
 	/// returns a CompoundObject
-	
+
 	// write the header
 	CompoundDataPtr header = static_pointer_cast<CompoundData>( m_headerParameter->getValue()->copy() );
-	
+
 	header->writable()["typeName"] = new StringData( object()->typeName() );
 
 	CompoundObjectPtr genericHeader = HeaderGenerator::header();
@@ -92,9 +92,9 @@ void ObjectWriter::doWrite()
 			header->writable()[ it->first ] = static_pointer_cast< Data >( it->second );
 		}
 	}
-	
+
 	((ObjectPtr)header)->save( io, "header" );
-	
+
 	// write the object
 	object()->save( io, "object" );
 }
@@ -107,6 +107,6 @@ void ObjectWriter::constructParameters()
 		new CompoundData,
 		CompoundData::staticTypeId()
 	);
-		
+
 	parameters()->addParameter( m_headerParameter );
 }

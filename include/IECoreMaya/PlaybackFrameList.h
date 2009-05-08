@@ -48,40 +48,40 @@ namespace IECoreMaya
 class PlaybackFrameList : public IECore::FrameList
 {
 	public:
-	
+
 		typedef enum
 		{
 			Animation,
 			Playback,
 		} Range;
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PlaybackFrameList, PlaybackFrameListTypeId, IECore::FrameList );
-		
-		PlaybackFrameList( Range r );		
-		
+
+		PlaybackFrameList( Range r );
+
 		virtual ~PlaybackFrameList();
 
-		Range getRange() const;			
+		Range getRange() const;
 		void setRange( Range r );
 
-		virtual void asList( std::vector<Frame> &frames ) const ;				
+		virtual void asList( std::vector<Frame> &frames ) const ;
 		virtual std::string asString() const;
 		virtual bool isEqualTo( IECore::ConstFrameListPtr other ) const ;
 		virtual IECore::FrameListPtr copy() const ;
-		
+
 		static IECore::FrameListPtr parse( const std::string &frameList );
-		
+
 	protected :
-	
-		Range m_range;	
-		
+
+		Range m_range;
+
 	private :
-	
-		static IECore::FrameList::Parser< PlaybackFrameList > g_parserRegistrar;			
+
+		static IECore::FrameList::Parser< PlaybackFrameList > g_parserRegistrar;
 };
 
 IE_CORE_DECLAREPTR( PlaybackFrameList );
-	
+
 } // namespace IECoreMaya
 
 #endif // IE_COREMAYA_PLAYBACKFRAMELIST_H

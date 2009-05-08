@@ -41,7 +41,7 @@ from IECore import *
 class TestWrapperGarbageCollection( unittest.TestCase ) :
 
 	def test( self ) :
-		
+
 		# collect garbage from previous tests
 		gc.collect()
 		RefCounted.collectGarbage()
@@ -51,11 +51,11 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
-		del f 
+		del f
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
-		
+
 		f = FileSequenceParameter( "f", "d" )
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
 		f2 = FileSequenceParameter( "f", "d" )
@@ -74,7 +74,7 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
-		
+
 		RefCounted.garbageCollectionThreshold = 10
 		self.assertEqual( RefCounted.garbageCollectionThreshold, 10 )
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
@@ -90,36 +90,36 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		del f
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
-		
+
 	def test2( self ) :
-	
+
 		"""This test exposes a bug which caused memory to leak."""
-	
+
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
-		
+
 		class PythonOp( Op ) :
-		
+
 			def __init__( self ) :
-			
+
 				Op.__init__( self, "opName", "opDescription", StringParameter( name = "result", description = "", defaultValue = "" ) )
 				self.parameters().addParameter( StringParameter( name = "name", description = "", defaultValue="john" ) )
-				
+
 		o = PythonOp()
 		del o
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
-	
+
 	def testWeakRef( self ) :
-	
+
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
-		
+
 		self.callbackCalled = False
 		def callback( w ) :
-		
+
 			self.callbackCalled = True
-		
+
 		o = Renderer.Procedural()
 		w = weakref.ref( o, callback )
 		self.assert_( w() is o )
@@ -128,6 +128,6 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
 		self.assertEqual( self.callbackCalled, True )
 		self.assertEqual( w(), None )
-		
+
 if __name__ == "__main__":
         unittest.main()

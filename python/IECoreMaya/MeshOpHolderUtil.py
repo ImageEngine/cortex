@@ -66,10 +66,10 @@ def __hasTweaks( meshDagPath ):
 	fnDN = OpenMaya.MFnDependencyNode( meshDagPath.node() )
 
 	# Tweaks exist only if the multi "pnts" attribute contains plugs
-	# which contain non-zero tweak values. 	
+	# which contain non-zero tweak values.
 	tweakPlug = fnDN.findPlug("pnts")
 	if not tweakPlug.isNull():
-	
+
 		if not tweakPlug.isArray():
 			raise RuntimeError( "tweakPlug is not an array plug" )
 
@@ -80,7 +80,7 @@ def __hasTweaks( meshDagPath ):
 				tweakData = __getFloat3PlugValue(tweak)
 				if 0 != tweakData.x or 0 != tweakData.y or 0 != tweakData.z:
 					return True
-					
+
 	return False
 
 def __hasHistory( meshDagPath ):
@@ -90,48 +90,48 @@ def __hasHistory( meshDagPath ):
 	return fnDN.findPlug("inMesh").isConnected()
 
 def __processUpstreamNode(data, meshDagPath, dgModifier):
-	
+
 	if __hasHistory( meshDagPath ):
-		# Just swap the connections around		
-		tempPlugArray = OpenMaya.MPlugArray()		
+		# Just swap the connections around
+		tempPlugArray = OpenMaya.MPlugArray()
 		data.meshNodeDestPlug.connectedTo(tempPlugArray, True, False)
 		assert( tempPlugArray.length() == 1 )
-		
+
 		data.upstreamNodeSrcPlug = tempPlugArray[0]
 
 		data.upstreamNodeShape = data.upstreamNodeSrcPlug.node()
-		
+
 		data.upstreamNodeSrcAttr = data.upstreamNodeSrcPlug.attribute()
 
 		dgModifier.disconnect(data.upstreamNodeSrcPlug, data.meshNodeDestPlug)
 		dgModifier.doIt()
-		
-	else:	
+
+	else:
 		# Duplicate mesh, mark as "intermediate", and reconnect in the DAG
 		dagNodeFn = OpenMaya.MFnDagNode( data.meshNodeShape )
 
 		data.upstreamNodeTransform = dagNodeFn.duplicate(False, False)
 		dagNodeFn.setObject(data.upstreamNodeTransform)
-		
+
 		fDagModifier = OpenMaya.MDagModifier()
 
 		if dagNodeFn.childCount() < 1:
 			raise RuntimeError( "Duplicated mesh has no shape" )
-						
+
 		data.upstreamNodeShape = dagNodeFn.child(0)
 
 		fDagModifier.reparentNode(data.upstreamNodeShape, data.meshNodeTransform)
 		fDagModifier.doIt()
-		
+
 		dagNodeFn.setObject(data.upstreamNodeShape)
 		dagNodeFn.setIntermediateObject(True)
 
 		data.upstreamNodeSrcAttr = dagNodeFn.attribute("outMesh")
 		data.upstreamNodeSrcPlug = dagNodeFn.findPlug("outMesh")
-		
+
 		fDagModifier.deleteNode(data.upstreamNodeTransform)
 		fDagModifier.doIt()
-	
+
 def __processTweaks(data, dgModifier, modifierNode):
 
 	tweakIndexArray = OpenMaya.MIntArray()
@@ -162,7 +162,7 @@ def __processTweaks(data, dgModifier, modifierNode):
 		tweak = meshTweakPlug.elementByPhysicalIndex(i)
 
 		if not tweak.isNull():
-		
+
 			tweakIndexArray.append( tweak.logicalIndex() )
 
 			tweakData = tweak.asMObject()
@@ -226,14 +226,14 @@ def __processTweaks(data, dgModifier, modifierNode):
 			if 0 < tweakDstConnectionCountArray[i*numChildren + j]:
 				dgModifier.connect(tweakDstConnectionPlugArray[dstOffset], tweakChild)
 				dstOffset += 1
-	
+
 	tweakDestPlug = OpenMaya.MPlug( tweakNode, tweakNodeDestAttr )
 	dgModifier.connect( data.upstreamNodeSrcPlug, tweakDestPlug )
 
 	tweakSrcPlug = OpenMaya.MPlug( tweakNode, tweakNodeSrcAttr)
 	modifierDestPlug = OpenMaya.MPlug( modifierNode, data.modifierNodeDestAttr )
-	dgModifier.connect( tweakSrcPlug, modifierDestPlug )				
-	
+	dgModifier.connect( tweakSrcPlug, modifierDestPlug )
+
 def __connectNodes( modifierNode, meshDagPath ):
 	class MeshOpHolderData:
 		def __init__(self):
@@ -249,19 +249,19 @@ def __connectNodes( modifierNode, meshDagPath ):
 
 			self.modifierNodeSrcAttr = OpenMaya.MObject()
 			self.modifierNodeDestAttr = OpenMaya.MObject()
-		
+
 	data = MeshOpHolderData()
-	
+
 	fnDN = OpenMaya.MFnDependencyNode( modifierNode )
 	data.modifierNodeSrcAttr = fnDN.attribute("result")
 	data.modifierNodeDestAttr = fnDN.attribute("parm_input")
-	
+
 	data.meshNodeShape = meshDagPath.node()
 	dagNodeFn = OpenMaya.MFnDagNode( data.meshNodeShape )
-	
+
 	if dagNodeFn.parentCount() == 0:
 		raise RuntimeError( "Mesh shape has no parent transform" )
-		
+
 	data.meshNodeTransform = dagNodeFn.parent(0)
 	data.meshNodeDestPlug = dagNodeFn.findPlug("inMesh")
 	data.meshNodeDestAttr = data.meshNodeDestPlug.attribute()
@@ -269,81 +269,81 @@ def __connectNodes( modifierNode, meshDagPath ):
 	dgModifier = OpenMaya.MDGModifier()
 	__processUpstreamNode(data, meshDagPath, dgModifier)
 
-	if __hasTweaks( meshDagPath ):	
+	if __hasTweaks( meshDagPath ):
 		__processTweaks(data, dgModifier, modifierNode)
 	else:
 		modifierDestPlug = OpenMaya.MPlug(modifierNode, data.modifierNodeDestAttr)
-		dgModifier.connect(data.upstreamNodeSrcPlug, modifierDestPlug)			
-	
+		dgModifier.connect(data.upstreamNodeSrcPlug, modifierDestPlug)
+
 	modifierSrcPlug = OpenMaya.MPlug(modifierNode, data.modifierNodeSrcAttr)
-	meshDestAttr = OpenMaya.MPlug(data.meshNodeShape, data.meshNodeDestAttr)	
-	
+	meshDestAttr = OpenMaya.MPlug(data.meshNodeShape, data.meshNodeDestAttr)
+
 	dgModifier.connect(modifierSrcPlug, meshDestAttr)
 
 	dgModifier.doIt()
-	
+
 def __setParameters( op, kw ):
 
 	for paramName, paramValue in kw.items():
 		op.parameters().setValidatedParameterValue( paramName, paramValue )
-	
+
 
 def __createMeshOpNode( className, classVersion, **kw ):
 
 	shortClassName = className.split( '/' ).pop()
 
-	modifierNodeName = cmds.createNode( "ieOpHolderNode", name = shortClassName + "#" )	
-	
-	ph = IECoreMaya.FnParameterisedHolder( modifierNodeName )	
+	modifierNodeName = cmds.createNode( "ieOpHolderNode", name = shortClassName + "#" )
+
+	ph = IECoreMaya.FnParameterisedHolder( modifierNodeName )
 	op = ph.setParameterised( className, classVersion, "IECORE_OP_PATHS" )
-					
+
 	__setParameters( op, kw )
-	
+
 	selList = OpenMaya.MSelectionList()
-	selList.add( modifierNodeName )						
-	modifierNode = OpenMaya.MObject()	
+	selList.add( modifierNodeName )
+	modifierNode = OpenMaya.MObject()
 	s = selList.getDependNode( 0, modifierNode )
-	
+
 	return modifierNode
-	
+
 def __applyMeshOp( meshNode, className, classVersion, kw ):
 
 	op = IECore.ClassLoader.defaultOpLoader().load( className, classVersion )
-		
-	__setParameters( op, **kw )	
-	
+
+	__setParameters( op, **kw )
+
 	# \todo Apply op and convert result back into original object
-	
-	
+
+
 def create( meshDagPath, className, classVersion, **kw):
 
-	if type(meshDagPath) is str:	
+	if type(meshDagPath) is str:
 		sel = OpenMaya.MSelectionList()
 		sel.add( meshDagPath )
 		meshDagPath = OpenMaya.MDagPath()
 		sel.getDagPath( 0,  meshDagPath)
 		meshDagPath.extendToShape()
-	
+
 	constructionHistoryEnabled = IECoreMaya.mel("constructionHistory -q -tgl").value
 
 	if not __hasHistory( meshDagPath ) and constructionHistoryEnabled == 0:
-	
+
 		# \todo we can't actually do this right now because we're unable to convert the resultant MeshPrimitive
 		# back into the original meshNode MObject given to us
 		raise RuntimeError( "Currently unable to apply MeshOp in-place " )
-		
+
 		meshNode = meshDagPath.node()
 
 		__applyMeshOp(meshNode, className, classVersion, **kw )
-		
+
 		return None
 	else:
 		modifierNode = __createMeshOpNode( className, classVersion, **kw )
 
 		__connectNodes( modifierNode, meshDagPath )
-		
+
 		fnDN = OpenMaya.MFnDependencyNode( modifierNode )
-		
+
 		return str( fnDN.name() )
 
 
@@ -353,28 +353,28 @@ def createUI( className, classVersion, **kw ):
 	# a mesh component is currently selected
 	selectedTransforms = cmds.ls( selection = True, type = "transform" ) or []
 	selectedTransformMeshShapes = cmds.listRelatives( selectedTransforms, type = "mesh" ) or []
-	
+
 	selectedMeshes = cmds.ls( selection = True, type = "mesh" ) or []
 	selectedMeshes += selectedTransformMeshShapes
-	
+
 	if not selectedMeshes:
 		raise RuntimeError( "No mesh selected" )
-		
+
 	modifierNodes = []
-	
+
 	for mesh in selectedMeshes:
-	
+
 		sel = OpenMaya.MSelectionList()
 		sel.add( mesh )
 		meshDagPath = OpenMaya.MDagPath()
 		sel.getDagPath( 0,  meshDagPath)
 		meshDagPath.extendToShape()
-		
+
 		modifierNode = create( meshDagPath, className, classVersion, **kw )
-		
+
 		if modifierNode :
-		
+
 			modifierNodes += [ modifierNode ]
-			
-			
-	return modifierNodes	
+
+
+	return modifierNodes

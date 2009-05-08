@@ -46,13 +46,13 @@ class FromMayaMatrixDataConverter : public FromMayaObjectConverter
 {
 
 	public :
-	
+
 		FromMayaMatrixDataConverter( const MObject &object );
-		
+
 	protected :
-	
+
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-	
+
 		static FromMayaObjectConverterDescription<FromMayaMatrixDataConverter> m_description;
 
 };

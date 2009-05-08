@@ -49,11 +49,11 @@ class FromMayaObjectDataConverter : public FromMayaObjectConverter
 	public :
 
 		FromMayaObjectDataConverter( const MObject &object );
-		
+
 	protected :
-	
+
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-				
+
 	private :
 
 		static FromMayaObjectConverterDescription<FromMayaObjectDataConverter> g_description;

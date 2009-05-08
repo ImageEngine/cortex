@@ -51,29 +51,29 @@ IE_CORE_FORWARDDECLARE( CompoundObject );
 class Op : public Parameterised
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( Op, Parameterised );
-		
+
 		/// Derived classes must pass a suitable resultParameter in their
-		/// initialiser. Also, every non-abstract derived class from Op should 
-		/// provide a default constructor so that it's possible to extract the 
-		/// parameters from an unknown Op (method used in ClassLoader). 
+		/// initialiser. Also, every non-abstract derived class from Op should
+		/// provide a default constructor so that it's possible to extract the
+		/// parameters from an unknown Op (method used in ClassLoader).
 		Op( const std::string name, const std::string description, ParameterPtr resultParameter );
 
 		/// Alternative constructor for replacing the internal CompoundParameter object by another
 		/// derived class from CompoundParameter.
 		Op( const std::string name, const std::string description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter );
-		
+
 		virtual ~Op();
-		
+
 		/// Performs the operation using the current values of parameters().
 		/// Throws an Exception if the parameter values are not valid.
 		ObjectPtr operate();
-		
+
 		/// Returns a parameter describing the result of the operation - the
 		/// value of this parameter is always the value last returned by operate.
 		ConstParameterPtr resultParameter() const;
-		
+
 	protected :
 
 		/// Called by operate() to actually perform the operation. operands
@@ -82,9 +82,9 @@ class Op : public Parameterised
 		/// are in a bad state.
 		/// \todo This should be const.
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands ) = 0;
-		
+
 	private :
-	
+
 		ParameterPtr m_resultParameter;
 
 };

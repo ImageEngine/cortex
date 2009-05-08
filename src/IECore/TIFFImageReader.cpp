@@ -116,7 +116,7 @@ bool TIFFImageReader::canRead( const string &fileName )
 		return false;
 	}
 
-	return magic == 0x002a4949 || magic == reverseBytes<unsigned int>(0x002a4949) 		
+	return magic == 0x002a4949 || magic == reverseBytes<unsigned int>(0x002a4949)
 		|| magic == 0x4d4d002a || magic == reverseBytes<unsigned int>(0x4d4d002a) ;
 }
 
@@ -212,7 +212,7 @@ std::string TIFFImageReader::sourceColorSpace() const
 unsigned int TIFFImageReader::numDirectories()
 {
 	open( true );
-	
+
 	return m_numDirectories;
 }
 
@@ -223,7 +223,7 @@ void TIFFImageReader::setDirectory( unsigned int directoryIndex )
 	{
 		throw InvalidArgumentException( ( boost::format( "TIFFImageReader: Cannot read directory %s of %s in \"%s\"" ) % (directoryIndex+1) % numDirs % fileName() ).str() );
 	}
-	
+
 	m_currentDirectoryIndex = directoryIndex;
 }
 
@@ -286,7 +286,7 @@ DataPtr TIFFImageReader::readTypedChannel( const std::string &name, const Box2i 
 
 	int dataWidth = 1 + dataWindow.size().x;
 	int bufferDataWidth = 1 + m_dataWindow.size().x;
-	
+
 	ScaledDataConversion<T, float> converter;
 
 	int dataY = 0;
@@ -300,7 +300,7 @@ DataPtr TIFFImageReader::readTypedChannel( const std::string &name, const Box2i 
 			assert( buf );
 
 			// \todo Currently, we only support PLANARCONFIG_CONTIG for TIFFTAG_PLANARCONFIG.
-			assert( m_planarConfig ==  PLANARCONFIG_CONTIG );	
+			assert( m_planarConfig ==  PLANARCONFIG_CONTIG );
 			FloatVectorData::ValueType::size_type dataOffset = dataY * dataWidth + dataX;
 			assert( dataOffset < data.size() );
 
@@ -377,14 +377,14 @@ void TIFFImageReader::readBuffer()
 
 	int width = boxSize( m_dataWindow ).x + 1;
 	int height = boxSize( m_dataWindow ).y + 1;
-	
+
 	// \todo Currently, we only support PLANARCONFIG_CONTIG for TIFFTAG_PLANARCONFIG.
-	assert( m_planarConfig ==  PLANARCONFIG_CONTIG );	
-	std::vector<unsigned char>::size_type bufLineSize = (size_t)( (float)m_bitsPerSample / 8 * m_samplesPerPixel * width );	
+	assert( m_planarConfig ==  PLANARCONFIG_CONTIG );
+	std::vector<unsigned char>::size_type bufLineSize = (size_t)( (float)m_bitsPerSample / 8 * m_samplesPerPixel * width );
 	std::vector<unsigned char>::size_type bufSize = bufLineSize * height;
 	assert( bufSize );
 	m_buffer.resize( bufSize, 0 );
-	
+
 	if ( TIFFIsTiled( m_tiffImage ) )
 	{
 		tsize_t tileSize = TIFFTileSize( m_tiffImage );
@@ -396,7 +396,7 @@ void TIFFImageReader::readBuffer()
 		{
 			throw IOException( ( boost::format("TIFFImageReader: Unsupported value (%d) for TIFFTAG_TILEWIDTH while reading %s") % tileWidth % fileName() ).str() );
 		}
-		
+
 		int tileLength = tiffField<uint32>( TIFFTAG_TILELENGTH );
 		if ( tileLength == 0 )
 		{
@@ -405,26 +405,26 @@ void TIFFImageReader::readBuffer()
 
 		std::vector<unsigned char>::size_type pixelSize = (size_t)( (float)m_bitsPerSample / 8 * m_samplesPerPixel );
 		std::vector<unsigned char>::size_type tileLineSize = pixelSize * tileWidth;
-		std::vector<unsigned char>::size_type tileBufSize = tileLineSize * tileLength;		
+		std::vector<unsigned char>::size_type tileBufSize = tileLineSize * tileLength;
 		std::vector<unsigned char> tileBuffer;
 		tileBuffer.resize( tileBufSize, 0 );
-		
+
 		int x = 0;
 		int y = 0;
-		
+
 		/// Read each tile
 		for ( ttile_t tile = 0; tile < numTiles; tile++ )
 		{
 			tsize_t imageOffset = y * bufLineSize + x * ( bufLineSize / width );
 			int result = TIFFReadEncodedTile( m_tiffImage, tile, &tileBuffer[0], tileSize );
-			
+
 			if ( result == -1 )
 			{
 				throw IOException( (boost::format( "TIFFImageReader: Error on tile number %d while reading %s") % tile % fileName() ).str() );
 			}
-						
+
 			/// Copy the tile into its rightful place in the image buffer.
-			/// We have to be careful here as the image might not be an exact 
+			/// We have to be careful here as the image might not be an exact
 			/// multiple of tiles, in which case we can't copy the tiles round the
 			/// edges in their entirety as that would give us buffer overruns.
 			int rowsToCopy = min( tileLength, height - y );
@@ -436,9 +436,9 @@ void TIFFImageReader::readBuffer()
 				imageOffset += bufLineSize;
 				tileOffset += tileLineSize;
 			}
-			
+
 			x = x + tileWidth;
-			
+
 			if ( x >= width )
 			{
 				x = 0;
@@ -466,12 +466,12 @@ void TIFFImageReader::readBuffer()
 }
 
 bool TIFFImageReader::open( bool throwOnFailure )
-{			
+{
 	if ( m_tiffImage )
 	{
 		if ( m_tiffImageFileName == fileName() )
 		{
-			return true;			
+			return true;
 		}
 		else
 		{
@@ -480,9 +480,9 @@ bool TIFFImageReader::open( bool throwOnFailure )
 			m_buffer.clear();
 		}
 	}
-	
+
 	try
-	{				
+	{
 		if ( ! m_tiffImage )
 		{
 			m_tiffImage = TIFFOpen( fileName().c_str(), "r" );
@@ -492,24 +492,24 @@ bool TIFFImageReader::open( bool throwOnFailure )
 				throw IOException( ( boost::format("TIFFImageReader: Could not open %s ") % fileName() ).str() );
 			}
 		}
-		
+
 		ScopedTIFFErrorHandler errorHandler;
 		if ( setjmp( errorHandler.m_jmpBuffer ) )
 		{
 			throw IOException( errorHandler.m_errorMessage );
 		}
-		
-		m_numDirectories = 1;	
+
+		m_numDirectories = 1;
 		TIFFSetDirectory( m_tiffImage, 0 );
 		while ( !TIFFLastDirectory( m_tiffImage ) )
 		{
 			m_numDirectories ++;
-			
+
 			TIFFReadDirectory( m_tiffImage );
 		}
-	
+
 		TIFFSetDirectory( m_tiffImage, 0 );
-		
+
 		m_tiffImageFileName = fileName();
 	}
 	catch ( ... )
@@ -526,25 +526,25 @@ bool TIFFImageReader::open( bool throwOnFailure )
 
 	return m_tiffImage != 0;
 }
-	
+
 bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
-{		
+{
 	if ( !open( throwOnFailure ) )
 	{
 		return false;
 	}
-	
+
 	assert ( m_tiffImage );
-	
-	
+
+
 	try
-	{	
+	{
 		ScopedTIFFErrorHandler errorHandler;
 		if ( setjmp( errorHandler.m_jmpBuffer ) )
 		{
 			throw IOException( errorHandler.m_errorMessage );
 		}
-				
+
 		if ( m_haveDirectory && m_currentDirectoryIndex == TIFFCurrentDirectory( m_tiffImage ) )
 		{
 			return true;
@@ -553,13 +553,13 @@ bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
 		{
 			int res = TIFFSetDirectory( m_tiffImage, m_currentDirectoryIndex );
 			if ( res != 1 )
-			{						
-				return false;			
+			{
+				return false;
 			}
-		}		
+		}
 
-		m_buffer.clear();	
-				
+		m_buffer.clear();
+
 		int width = tiffField<uint32>( TIFFTAG_IMAGEWIDTH );
 		if ( width == 0 )
 		{

@@ -46,7 +46,7 @@ namespace IECore
 
 void bindLinearToRec709Op()
 {
-	
+
 	RunTimeTypedClass<LinearToRec709Op>()
 		.def( init<>() )
 	;

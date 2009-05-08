@@ -39,12 +39,12 @@ def curry( *bakeArgs, **bakeKwds ) :
 
 	func = bakeArgs[0]
 	bakeArgs = bakeArgs[1:]
-	
+
 	def curriedFunction( *callTimeArgs, **callTimeKwds ) :
 		args = bakeArgs + callTimeArgs
 		kwds = bakeKwds.copy()
 		kwds.update( callTimeKwds )
-		
+
 		return func( *args, **kwds )
-		
+
 	return curriedFunction

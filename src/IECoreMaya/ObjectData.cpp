@@ -109,13 +109,13 @@ MStatus ObjectData::readASCII( const MArgList &argList, unsigned int &endOfTheLa
 }
 
 MStatus ObjectData::readBinary( istream& in, unsigned length )
-{	
+{
 	CharVectorDataPtr buf = new CharVectorData( );
 	buf->writable().resize( length );
 	CharVectorData::ValueType &data = buf->writable();
 
 	in.read( &data[0], length );
-	
+
 	try
 	{
 		MemoryIndexedIOPtr io = new MemoryIndexedIO( buf, "/", IndexedIO::Exclusive | IndexedIO::Read );
@@ -173,7 +173,7 @@ MStatus ObjectData::writeBinary( ostream& out )
 			const CharVectorData::ValueType &data = buf->readable();
 
 			int sz = data.size();
-			out.write( &data[0], sz );			
+			out.write( &data[0], sz );
 		}
 		catch ( std::exception &e )
 		{
@@ -194,7 +194,7 @@ ObjectData::CopyMode ObjectData::getCopyMode() const
 {
 	return m_copyMode;
 }
-		
+
 void ObjectData::copy( const MPxData &other )
 {
 	const ObjectData *otherData = dynamic_cast<const ObjectData *>( &other );

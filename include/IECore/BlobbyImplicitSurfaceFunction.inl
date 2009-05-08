@@ -39,9 +39,9 @@
 namespace IECore
 {
 
-template<typename P, typename V>	
+template<typename P, typename V>
 BlobbyImplicitSurfaceFunction<P,V>::BlobbyImplicitSurfaceFunction( typename PointVectorData::ConstPtr p, ConstDoubleVectorDataPtr r, ConstDoubleVectorDataPtr s ) : m_p( p ), m_radius( r ), m_strength( s )
-{		
+{
 	assert( m_p );
 	assert( m_radius );
 	assert( m_strength );
@@ -57,16 +57,16 @@ BlobbyImplicitSurfaceFunction<P,V>::BlobbyImplicitSurfaceFunction( typename Poin
 
 	typename PointVector::const_iterator pit = m_p->readable().begin();
 
-	std::vector<double>::const_iterator rit = m_radius->readable().begin();			
+	std::vector<double>::const_iterator rit = m_radius->readable().begin();
 
 	for (; pit != m_p->readable().end(); ++pit, ++rit)
 	{
 		Point boundMin, boundMax, boundRadius;
-		
+
 		vecSetAll( boundRadius, *rit );
 		vecSub( *pit, boundRadius, boundMin );
-		vecAdd( *pit, boundRadius, boundMax );		
-		
+		vecAdd( *pit, boundRadius, boundMax );
+
 		m_bounds.push_back( BoxTraits<Bound>::create( boundMin, boundMax ) );
 	}
 
@@ -74,17 +74,17 @@ BlobbyImplicitSurfaceFunction<P,V>::BlobbyImplicitSurfaceFunction( typename Poin
 
 	m_tree = new Tree( m_bounds.begin(), m_bounds.end() );
 
-	assert( m_tree );			
+	assert( m_tree );
 }
-		
-template<typename P, typename V>	
+
+template<typename P, typename V>
 BlobbyImplicitSurfaceFunction<P,V>::~BlobbyImplicitSurfaceFunction()
 {
 	assert( m_tree );
 	delete m_tree;
 }
 
-template<typename P, typename V>	
+template<typename P, typename V>
 typename BlobbyImplicitSurfaceFunction<P,V>::Value BlobbyImplicitSurfaceFunction<P,V>::operator()( const Point &p )
 {
 	assert( m_tree );
@@ -102,21 +102,21 @@ typename BlobbyImplicitSurfaceFunction<P,V>::Value BlobbyImplicitSurfaceFunction
 	{
 		const int boundIndex = std::distance<BoundVectorConstIterator>( m_bounds.begin(), *it );
 		assert( boundIndex >= 0 );
-		assert( boundIndex < (int)m_bounds.size() );		
+		assert( boundIndex < (int)m_bounds.size() );
 
 		Point sep;
 		vecSub( m_p->readable()[ boundIndex ] , p, sep );
 		PointBaseType distSqrd = vecDot( sep, sep );
-		
-		const Value &b = m_radius->readable()[ boundIndex ];	
-		
+
+		const Value &b = m_radius->readable()[ boundIndex ];
+
 		const Value bSqrd = b * b;
-		
+
 		if (distSqrd < bSqrd)
 		{
 			/// Simple falloff function, similar to metaballs function but faster to compute. Hits zero when b==r, also.
-			totalInfluence += m_strength->readable()[ boundIndex ] * ( 
-				1.0 
+			totalInfluence += m_strength->readable()[ boundIndex ] * (
+				1.0
 				- (4.0 * distSqrd*distSqrd*distSqrd) / (9.0 * bSqrd * bSqrd * bSqrd)
 				+ (17.0 * distSqrd * distSqrd) / (9.0 * bSqrd * bSqrd)
 				- (22.0 * distSqrd) / (9.0 * bSqrd)
@@ -127,7 +127,7 @@ typename BlobbyImplicitSurfaceFunction<P,V>::Value BlobbyImplicitSurfaceFunction
 	return totalInfluence;
 }
 
-template<typename P, typename V>			
+template<typename P, typename V>
 typename BlobbyImplicitSurfaceFunction<P,V>::Value BlobbyImplicitSurfaceFunction<P,V>::getValue( const Point &p )
 {
 	return this->operator()(p);

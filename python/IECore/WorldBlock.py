@@ -37,15 +37,15 @@
 class WorldBlock :
 
 	def __init__( self, renderer ) :
-	
+
 		self.__renderer = renderer
 
 	def __enter__( self ) :
-	
+
 		self.__renderer.worldBegin()
-	
+
 	def __exit__( self, type, value, traceBack ) :
-	
+
 		self.__renderer.worldEnd()
-		
-	
+
+

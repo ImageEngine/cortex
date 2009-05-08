@@ -141,19 +141,19 @@ HierarchicalCache::ObjectHandle HierarchicalCache::absoluteName( const ObjectHan
 	{
 		throw Exception( std::string( "Invalid relative name ") + relativeName );
 	}
-	
+
 	IndexedIOPath parentPath( parent );
-	
+
 	return parentPath.appended( relativeName ).fullPath();
 }
 
 HierarchicalCache::ObjectHandle HierarchicalCache::relativeName( const ObjectHandle &obj )
-{	
+{
 	if ( !IndexedIOPath(obj).hasRootDirectory() )
 	{
 		throw Exception( std::string( "Invalid object name ") + obj );
 	}
-	
+
 	IndexedIOPath pathObj( canonicalName(obj) );
 	return pathObj.tail();
 }
@@ -164,12 +164,12 @@ HierarchicalCache::ObjectHandle HierarchicalCache::parentName( const ObjectHandl
 	{
 		throw Exception( std::string( "Root node has no parents.") );
 	}
-	
+
 	if ( !IndexedIOPath( obj ).hasRootDirectory() )
 	{
 		throw Exception( std::string( "Invalid object name ") + obj );
 	}
-	
+
 	IndexedIOPath pathObj( canonicalName(obj) );
 	return pathObj.head();
 }
@@ -199,17 +199,17 @@ void HierarchicalCache::objectPath( const ObjectHandle &obj, IndexedIO::EntryID 
 		path = "/";
 		return;
 	}
-	
+
 	if ( !IndexedIOPath( obj ).hasRootDirectory() )
 	{
 		throw Exception( std::string( "Invalid object name ") + obj );
 	}
-	
+
 	IndexedIOPath objPath( canonicalName(obj) );
-	
+
 	path = "";
 	std::string str = objPath.fullPath();
-	
+
 	std::string::size_type s;
 	while ( ( s = str.find_first_of('/') ) != std::string::npos)
 	{
@@ -217,7 +217,7 @@ void HierarchicalCache::objectPath( const ObjectHandle &obj, IndexedIO::EntryID 
 		path += "/children/";
 		str = str.substr( s+1, std::string::npos );
 	}
-	
+
 	path += str;
 }
 
@@ -225,27 +225,27 @@ void HierarchicalCache::attributesPath( const ObjectHandle &obj, IndexedIO::Entr
 {
 	IndexedIO::EntryID ioPath;
 	objectPath( obj, ioPath );
-	
+
 	IndexedIOPath objPath( ioPath );
 	objPath .append( "attributes" );
-	
-	path = objPath.fullPath();		
+
+	path = objPath.fullPath();
 }
 
 void HierarchicalCache::attributePath( const ObjectHandle &obj, const AttributeHandle &attr, IndexedIO::EntryID &path )
 {
 	IndexedIO::EntryID ioPath;
 	objectPath( obj, ioPath );
-	
+
 	IndexedIOPath objPath( ioPath );
 	objPath.append("attributes");
-	
+
 	/// \todo Establish why this function is ever being called with an empty attribute name
 	if ( attr.size() )
 	{
-		objPath.append(attr);	
+		objPath.append(attr);
 	}
-	
+
 	path = objPath.fullPath();
 }
 
@@ -265,7 +265,7 @@ void HierarchicalCache::updateNode( const ObjectHandle &obj )
 		// object doesn't exist anymore...
 		return;
 	}
-	
+
 	VisibleRenderablePtr s = loadShape();
 	if ( s )
 	{
@@ -287,12 +287,12 @@ void HierarchicalCache::updateNode( const ObjectHandle &obj )
 	{
 		IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
 		IndexedIO::EntryList directories = m_io->ls(filter);
-		
+
 		for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 		{
 			m_io->chdir( it->id() );
 			Imath::Box3f box;
-			
+
 			if ( loadBound( box ) )
 			{
 				myBox.extendBy( box );
@@ -305,7 +305,7 @@ void HierarchicalCache::updateNode( const ObjectHandle &obj )
 	if ( !myBox.isEmpty() )
 	{
 		Imath::M44f m;
-		
+
 		if ( loadTransform( m ) )
 		{
 			myBox = Imath::transform( myBox, m );
@@ -322,7 +322,7 @@ void HierarchicalCache::updateBound( const ObjectHandle &obj, Imath::Box3f box )
 	objectPath( obj, p );
 	m_io->chdir( p );
 	Imath::Box3f oldBox;
-	
+
 	bool hasOldBox = loadBound( oldBox );
 
 	if ( hasOldBox && oldBox == box )
@@ -440,7 +440,7 @@ void HierarchicalCache::write( const ObjectHandle &obj, ConstVisibleRenderablePt
 	catch (IECore::Exception &e)
 	{
 	}
-	
+
 	boost::static_pointer_cast<const Object>(shape)->save(m_io, "shape" );
 	m_io->chdir( ".." );
 
@@ -484,7 +484,7 @@ CompoundObjectPtr HierarchicalCache::read( const ObjectHandle &obj )
 
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
 		ObjectPtr data = Object::load( m_io, it->id() );
@@ -508,9 +508,9 @@ CompoundObjectPtr HierarchicalCache::readHeader( )
 	m_io->chdir("/HierarchicalCache");
 
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
 		ObjectPtr data = Object::load( m_io, it->id() );
@@ -523,14 +523,14 @@ CompoundObjectPtr HierarchicalCache::readHeader( )
 void HierarchicalCache::headers(std::vector<HierarchicalCache::HeaderHandle> &hds)
 {
 	hds.clear();
-	
+
 	m_io->chdir("/HierarchicalCache");
-	
+
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
-	hds.reserve( directories.size() );	
+
+	hds.reserve( directories.size() );
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
 		hds.push_back( it->id() );
@@ -555,11 +555,11 @@ void HierarchicalCache::recursiveObjects(std::vector<ObjectHandle> &objs, const 
 		// no directory, no children
 		return;
 	}
-	
+
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	totalSize += directories.size();
 	objs.reserve( totalSize );
 
@@ -581,7 +581,7 @@ bool HierarchicalCache::contains( const ObjectHandle &obj )
 	try
 	{
 		m_io->chdir( p );
-	} 
+	}
 	catch (IECore::Exception &e)
 	{
 		return false;
@@ -596,7 +596,7 @@ bool HierarchicalCache::contains( const ObjectHandle &obj, const AttributeHandle
 	try
 	{
 		m_io->chdir( p );
-	} 
+	}
 	catch (IECore::Exception &e)
 	{
 		return false;
@@ -611,7 +611,7 @@ void HierarchicalCache::attributes(const ObjectHandle &obj, std::vector<Attribut
 	IndexedIO::EntryID p;
 	attributePath( obj, "", p );
 
-	try 
+	try
 	{
 		m_io->chdir(p);
 	}
@@ -622,11 +622,11 @@ void HierarchicalCache::attributes(const ObjectHandle &obj, std::vector<Attribut
 		// if the object exists, returns empty list because there could be no "attributes" directory.
 		return;
 	}
-	
+
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	attrs.reserve( directories.size() );
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
@@ -637,10 +637,10 @@ void HierarchicalCache::attributes(const ObjectHandle &obj, std::vector<Attribut
 void HierarchicalCache::attributes(const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs)
 {
 	attrs.clear();
-	
+
 	IndexedIO::EntryID p;
 	attributePath( obj, "", p );
-	try 
+	try
 	{
 		m_io->chdir(p);
 	}
@@ -651,12 +651,12 @@ void HierarchicalCache::attributes(const ObjectHandle &obj, const std::string re
 		// if the object exists, returns empty list because there could be no "attributes" directory.
 		return;
 	}
-	
+
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
 	filter->add( new IndexedIORegexFilter(  regex ) );
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	attrs.reserve( directories.size() );
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
@@ -677,7 +677,7 @@ void HierarchicalCache::remove( const ObjectHandle &obj )
 	m_io->chdir("children");
 	m_io->rm( relativeName(obj) );
 
-	// deleted items are "clean" 
+	// deleted items are "clean"
 	m_dependency->clear( canonicalName( obj ) );
 	// parent is dirty now.
 	m_dependency->setDirty( parent );
@@ -745,7 +745,7 @@ void HierarchicalCache::children(  const ObjectHandle &obj, std::vector<ObjectHa
 	objectPath( obj, p );
 	m_io->chdir(p);
 
-	try 
+	try
 	{
 		m_io->chdir( "children" );
 	}
@@ -754,11 +754,11 @@ void HierarchicalCache::children(  const ObjectHandle &obj, std::vector<ObjectHa
 		// if children doesn't exist, returns empty list.
 		return;
 	}
-	
+
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	children.reserve( directories.size() );
 
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
@@ -793,7 +793,7 @@ Imath::M44f HierarchicalCache::transformMatrix( const ObjectHandle &obj )
 	m_io->chdir(p);
 
 	Imath::M44f m;
-	
+
 	if ( !loadTransform( m ) )
 	{
 		throw Exception( "Invalid transform!" );
@@ -885,7 +885,7 @@ Imath::Box3f HierarchicalCache::bound( const ObjectHandle &obj )
 	m_io->chdir(p);
 
 	Imath::Box3f box;
-	
+
 	if ( !loadBound( box ) )
 	{
 		// return an empty bounding box

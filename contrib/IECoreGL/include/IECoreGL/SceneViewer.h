@@ -50,16 +50,16 @@ class SceneViewer : public Window
 {
 
 	public :
-	
+
 		IE_CORE_DECLAREMEMBERPTR( SceneViewer );
-	
+
 		/// Creates a new window with a view onto the
 		/// specified scene.
 		SceneViewer( const std::string &title, ScenePtr scene );
 		virtual ~SceneViewer();
 
 	protected :
-	
+
 		//! @name Callbacks
 		////////////////////////////////////////////////
 		//@{
@@ -68,9 +68,9 @@ class SceneViewer : public Window
 		virtual void motion( int x, int y );
 		virtual void keyboard( unsigned char key, int x, int y );
 		//@}
-		
+
 	private :
-	
+
 		ScenePtr m_scene;
 		CameraControllerPtr m_cameraController;
 

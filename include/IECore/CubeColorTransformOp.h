@@ -52,27 +52,27 @@ namespace IECore
 class CubeColorTransformOp : public ColorTransformOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( CubeColorTransformOp, ColorTransformOp );
-		
+
 		CubeColorTransformOp();
 		virtual ~CubeColorTransformOp();
-		
-		CubeColorLookupfParameterPtr cubeParameter();		
-		ConstCubeColorLookupfParameterPtr cubeParameter() const;		
-		
+
+		CubeColorLookupfParameterPtr cubeParameter();
+		ConstCubeColorLookupfParameterPtr cubeParameter() const;
+
 	protected :
-			
+
 		virtual void begin( ConstCompoundObjectPtr operands );
 
 		virtual void transform( Imath::Color3f &color ) const ;
-		
+
 	private :
-		
+
 		CubeColorLookupfParameterPtr m_cubeParameter;
-		
+
 		ConstCubeColorLookupfDataPtr m_data;
-		
+
 };
 
 IE_CORE_DECLAREPTR( CubeColorTransformOp );

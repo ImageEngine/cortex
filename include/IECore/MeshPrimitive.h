@@ -50,8 +50,8 @@ IE_CORE_FORWARDDECLARE( MeshPrimitive )
 /// setting attributes in the Renderer. This definition of winding order is the same as
 /// the OpenGL and Maya conventions but the opposite of RenderMan's.
 class MeshPrimitive : public Primitive
-{	  
-	
+{
+
 	public:
 
 		IE_CORE_DECLAREOBJECT( MeshPrimitive, Primitive );
@@ -73,7 +73,7 @@ class MeshPrimitive : public Primitive
 		virtual void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
 		void setInterpolation( const std::string &interpolation );
 		//@}
-	
+
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
 		/// Render the mesh
@@ -94,8 +94,8 @@ class MeshPrimitive : public Primitive
 		IntVectorDataPtr m_vertexIds;
 		size_t m_numVertices;
 		std::string m_interpolation;
-			
-};  
+
+};
 
 }
 

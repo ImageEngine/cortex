@@ -50,12 +50,12 @@ class CircularIterator
 {
 
 	public :
-	
+
 		typedef Iterator BaseIterator;
 		typedef typename BaseIterator::pointer pointer;
 		typedef typename BaseIterator::reference reference;
 		typedef typename BaseIterator::value_type value_type;
-	
+
 		/// Uninitialised.
 		CircularIterator();
 		/// Iteration cycles the range between begin and end, not including end.
@@ -71,7 +71,7 @@ class CircularIterator
 		CircularIterator( Container *container );
 		/// As above but starts iteration at position.
 		CircularIterator( Container *container, BaseIterator position );
-				
+
 		CircularIterator &operator++();
 		CircularIterator operator++( int );
 
@@ -88,7 +88,7 @@ class CircularIterator
 
 		CircularIterator &operator=( const BaseIterator &rhs );
 
-	private :	
+	private :
 
 		BaseIterator begin();
 		BaseIterator end();
@@ -97,7 +97,7 @@ class CircularIterator
 		BaseIterator m_begin;
 		BaseIterator m_end;
 		BaseIterator m_it;
-		
+
 };
 
 } // namespace IECore

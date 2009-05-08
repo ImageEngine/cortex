@@ -49,7 +49,7 @@ struct MarchingCubesHelper
 	{
 		marchingCubes.march( bound, res, iso );
 	}
-	
+
 	static void march2( T& marchingCubes, const typename T::BoxType &bound, const Imath::V3i &res )
 	{
 		marchingCubes.march( bound, res );
@@ -62,7 +62,7 @@ void bindMarchingCubes( const char *name )
 	RefCountedClass<T, RefCounted>( name )
 		.def( init< typename T::ImplicitFnType::Ptr, typename T::MeshBuilderType::Ptr > () )
 		.def( "march", &MarchingCubesHelper<T>::march1 )
-		.def( "march", &MarchingCubesHelper<T>::march2 )				
+		.def( "march", &MarchingCubesHelper<T>::march2 )
 	;
 }
 

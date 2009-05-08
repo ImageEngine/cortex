@@ -73,11 +73,11 @@ TypeId RunTimeTyped::baseTypeId()
 {
 	return InvalidTypeId;
 }
-		
+
 const char *RunTimeTyped::baseTypeName()
 {
 	return "InvalidType";
-}	
+}
 
 bool RunTimeTyped::isInstanceOf( TypeId typeId ) const
 {
@@ -104,11 +104,11 @@ bool RunTimeTyped::inheritsFrom( const char *typeName )
 void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId )
 {
 	assert( derivedTypeName );
-	
+
 	{
-		BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();		
+		BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();
 		BaseTypeRegistryMap::iterator lb = baseRegistry.lower_bound( derivedTypeId );
-		if ( lb != baseRegistry.end() && derivedTypeId == lb->first ) 
+		if ( lb != baseRegistry.end() && derivedTypeId == lb->first )
 		{
 			if ( baseTypeId != lb->second )
 			{
@@ -121,16 +121,16 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeNa
 			baseRegistry.insert( lb, BaseTypeRegistryMap::value_type( derivedTypeId, baseTypeId ) );
 		}
 	}
-	
-	/// Inserted derived type id into set of base classes derived type ids 
+
+	/// Inserted derived type id into set of base classes derived type ids
 	DerivedTypesRegistryMap &derivedRegistry = derivedTypesRegistry();
 	derivedRegistry[ baseTypeId ].insert( derivedTypeId );
-		
+
 	/// Put in id->name map
 	{
 		TypeIdsToTypeNamesMap &idsToNames = typeIdsToTypeNames();
 		TypeIdsToTypeNamesMap::iterator lb = idsToNames.lower_bound( derivedTypeId );
-		if ( lb != idsToNames.end() && derivedTypeId == lb->first ) 
+		if ( lb != idsToNames.end() && derivedTypeId == lb->first )
 		{
 			if ( std::string( derivedTypeName ) != lb->second )
 			{
@@ -144,12 +144,12 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeNa
 			assert( !strcmp( typeNameFromTypeId( derivedTypeId ), derivedTypeName ) );
 		}
 	}
-	
+
 	/// Put in name->id map
 	{
 		TypeNamesToTypeIdsMap &namesToIds = typeNamesToTypeIds();
 		TypeNamesToTypeIdsMap::iterator lb = namesToIds.lower_bound( derivedTypeName );
-		if ( lb != namesToIds.end() && derivedTypeName == lb->first ) 
+		if ( lb != namesToIds.end() && derivedTypeName == lb->first )
 		{
 			if ( derivedTypeId != lb->second )
 			{
@@ -162,13 +162,13 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeNa
 			namesToIds.insert( lb, TypeNamesToTypeIdsMap::value_type( derivedTypeName, derivedTypeId ) );
 			assert( typeIdFromTypeName( derivedTypeName ) == derivedTypeId );
 		}
-	}		
+	}
 }
 
 RunTimeTyped::BaseTypeRegistryMap &RunTimeTyped::baseTypeRegistry()
 {
 	static BaseTypeRegistryMap *registry = new BaseTypeRegistryMap();
-	
+
 	assert( registry );
 	return *registry;
 }
@@ -176,8 +176,8 @@ RunTimeTyped::BaseTypeRegistryMap &RunTimeTyped::baseTypeRegistry()
 RunTimeTyped::DerivedTypesRegistryMap &RunTimeTyped::derivedTypesRegistry()
 {
 	static DerivedTypesRegistryMap *registry = new DerivedTypesRegistryMap();
-	
-	assert( registry );	
+
+	assert( registry );
 	return *registry;
 }
 
@@ -185,7 +185,7 @@ TypeId RunTimeTyped::baseTypeId( TypeId typeId )
 {
 	BaseTypeRegistryMap &baseRegistry = baseTypeRegistry();
 	BaseTypeRegistryMap::const_iterator it = baseRegistry.find( typeId );
-	
+
 	if ( it == baseRegistry.end() )
 	{
 		return InvalidTypeId;
@@ -195,64 +195,64 @@ TypeId RunTimeTyped::baseTypeId( TypeId typeId )
 		return it->second;
 	}
 }
-				
+
 const std::vector<TypeId> &RunTimeTyped::baseTypeIds( TypeId typeId )
 {
 	BaseTypesRegistryMap &baseTypes = completeBaseTypesRegistry();
-	
+
 	BaseTypesRegistryMap::iterator it = baseTypes.find( typeId );
 	if ( it != baseTypes.end() )
 	{
 		return it->second;
 	}
-	
+
 	baseTypes.insert( BaseTypesRegistryMap::value_type( typeId, std::vector<TypeId>() ) );
 	it = baseTypes.find( typeId );
 	assert( it != baseTypes.end() );
-	
+
 	TypeId baseType = baseTypeId( typeId );
 	while ( baseType != InvalidTypeId )
 	{
 		it->second.push_back( baseType );
 		baseType = baseTypeId( baseType );
 	}
-	
+
 	return it->second;
 }
-		
+
 const std::set<TypeId> &RunTimeTyped::derivedTypeIds( TypeId typeId )
-{	
-	DerivedTypesRegistryMap &derivedTypes = completeDerivedTypesRegistry();	
+{
+	DerivedTypesRegistryMap &derivedTypes = completeDerivedTypesRegistry();
 	DerivedTypesRegistryMap::iterator it = derivedTypes.find( typeId );
-	
+
 	if ( it == derivedTypes.end() )
 	{
 		derivedTypes.insert( DerivedTypesRegistryMap::value_type( typeId, std::set<TypeId>() ) );
 		it = derivedTypes.find( typeId );
 		assert( it != derivedTypes.end() );
-		
+
 		// Walk over the hierarchy of derived types
 		derivedTypeIdsWalk( typeId, it->second );
 	}
-	
-	return it->second;	
+
+	return it->second;
 }
 
 void RunTimeTyped::derivedTypeIdsWalk( TypeId typeId, std::set<TypeId> &typeIds )
 {
-	DerivedTypesRegistryMap &derivedRegistry = derivedTypesRegistry();	
+	DerivedTypesRegistryMap &derivedRegistry = derivedTypesRegistry();
 	DerivedTypesRegistryMap::const_iterator it = derivedRegistry.find( typeId );
 	if ( it == derivedRegistry.end() )
 	{
 		/// Termination condition: No derived types
 		return;
 	}
-	
+
 	for ( std::set<TypeId>::const_iterator typesIt = it->second.begin(); typesIt != it->second.end(); ++ typesIt )
 	{
 		typeIds.insert( *typesIt );
-		
-		// Recurse down into derived types	
+
+		// Recurse down into derived types
 		derivedTypeIdsWalk( *typesIt, typeIds );
 	}
 }
@@ -274,7 +274,7 @@ RunTimeTyped::DerivedTypesRegistryMap &RunTimeTyped::completeDerivedTypesRegistr
 TypeId RunTimeTyped::typeIdFromTypeName( const char *typeName )
 {
 	assert( typeName );
-	
+
 	TypeNamesToTypeIdsMap &namesToIds = typeNamesToTypeIds();
 	const std::string key( typeName );
 	TypeNamesToTypeIdsMap::const_iterator it = namesToIds.find( key );

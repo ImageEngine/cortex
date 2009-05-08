@@ -46,7 +46,7 @@ namespace IECoreGL
 /// found in the glSelectBuffer.
 class HitRecord
 {
-	
+
 	public :
 
 		/// Construct from a hit record in the format specified
@@ -54,12 +54,12 @@ class HitRecord
 		/// more than one name is specified in the record.
 		HitRecord( const GLuint *hitRecord );
 		HitRecord( float dMin, float dMax, const IECore::InternedString &primName );
-		
+
 		/// The minimum and maximum depths of the hit, normalised
 		/// in the 0-1 range between the near and far clipping planes.
 		float depthMin;
 		float depthMax;
-		
+
 		/// Unlike the gl hit record, the HitRecord stores
 		/// only one name - this is because the NameStateComponent
 		/// and the Renderer "name" attribute specify only a single

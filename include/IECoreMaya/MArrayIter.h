@@ -56,12 +56,12 @@ struct MArrayIter
 	typedef const typename MArrayTraits<T>::ValueType *ConstIterator;
  	typedef std::reverse_iterator<Iterator> ReverseIterator;
  	typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
-		   
+
 	static inline Iterator begin( T &array );
 	static inline ConstIterator begin( const T &array );
 	static inline Iterator end( T &array );
 	static inline ConstIterator end( const T &array );
-	
+
 	static inline ReverseIterator reverseBegin( T &array );
 	static inline ConstReverseIterator reverseBegin( const T &array );
 	static inline ReverseIterator reverseEnd( T &array );
@@ -74,13 +74,13 @@ struct MArrayIter
 template<typename T>
 class MayaAppendIterator : public std::iterator< std::output_iterator_tag, void, void, void, void>
 {
-	
+
 	public:
 
 		typedef T ContainerType;
- 
+
 		explicit MayaAppendIterator(T& x) : m_container(&x) {}
-    
+
 		MayaAppendIterator& operator=(const typename IECoreMaya::MArrayTraits<T>::ValueType &v)
 		{
 			m_container->append(v);
@@ -93,7 +93,7 @@ class MayaAppendIterator : public std::iterator< std::output_iterator_tag, void,
 		}
 
 		MayaAppendIterator& operator++()
-		{ 
+		{
 			return *this;
 		}
 
@@ -101,7 +101,7 @@ class MayaAppendIterator : public std::iterator< std::output_iterator_tag, void,
 		{
 			return *this;
 		}
-		
+
 	protected:
 		T* m_container;
 };
@@ -110,13 +110,13 @@ class MayaAppendIterator : public std::iterator< std::output_iterator_tag, void,
 template<>
 class MayaAppendIterator<MStringArray> : public std::iterator< std::output_iterator_tag, void, void, void, void>
 {
-	
+
 	public:
 
 		typedef MStringArray ContainerType;
- 
+
 		explicit MayaAppendIterator(MStringArray& x) : m_container(&x) {}
-    
+
 		MayaAppendIterator& operator=(const MString &v)
 		{
 			m_container->append(v);
@@ -135,7 +135,7 @@ class MayaAppendIterator<MStringArray> : public std::iterator< std::output_itera
 		}
 
 		MayaAppendIterator& operator++()
-		{ 
+		{
 			return *this;
 		}
 
@@ -143,7 +143,7 @@ class MayaAppendIterator<MStringArray> : public std::iterator< std::output_itera
 		{
 			return *this;
 		}
-		
+
 	protected:
 		MStringArray* m_container;
 

@@ -61,46 +61,46 @@ class Reader : public Op
 		/// more concrete constraints on the type of the result it should
 		/// pass an appropriate resultParameter in its initialiser.
 		Reader( const std::string &name, const std::string &description, ParameterPtr resultParameter = 0 );
-		
+
 		/// Returns the name of the file this Reader
 		/// is set to read. Actually calls parameters()->parameter<FileNameParameter>( "fileName" )->getTypedValue();
 		/// and therefore can potentially throw an Exception if the fileName is invalid.
 		const std::string &fileName() const;
-		
-		/// Returns the file header in the file specified by fileName(). This is intended to 
+
+		/// Returns the file header in the file specified by fileName(). This is intended to
 		/// give fast access to some information about the contents of the file, without
 		/// having to load the entire thing. Classes implementing this method should
 		/// call the base class method first, and append any additional data to the CompoundObject
 		/// it returns.
 		virtual CompoundObjectPtr readHeader();
-		
+
 		/// Reads the file specified by fileName() and
 		/// returns it in the form of an Object. This function
 		/// actually just calls Op::operate() - it's provided for
-		/// backwards compatibility and prettier syntax. 
+		/// backwards compatibility and prettier syntax.
 		ObjectPtr read();
-		
+
 		/// Creates and returns a Reader appropriate to the specified file.
 		/// Throws an Exception if no suitable reader can be found.
 		static ReaderPtr create( const std::string &fileName );
-		
+
 		/// Fills the passed vector with all the extensions for which a Reader is
 		/// available. Extensions are of the form "tif" - ie without a preceding '.'.
 		static void supportedExtensions( std::vector<std::string> &extensions );
-		
+
 		/// Fills the passed vector with all the extensions for which a Reader of, or inherited from, the given type is
 		/// available. Extensions are of the form "tif" - ie without a preceding '.'.
 		static void supportedExtensions( TypeId typeId, std::vector<std::string> &extensions );
-		
+
 	protected :
-	
+
 		/// Definition of a function which can create a Reader when
 		/// given a fileName.
 		typedef ReaderPtr (*CreatorFn)( const std::string &fileName );
 		/// Definition of a function  to answer the
 		/// question can this file be read?
 		typedef bool (*CanReadFn)( const std::string &fileName );
-		
+
 		/// Registers a Reader type which is capable of reading files ending with
 		/// the space separated extensions specified (e.g. "tif tiff"). Before creating a reader the canRead function
 		/// will be called as a final check that the Reader is appropriate - if this returns true
@@ -109,10 +109,10 @@ class Reader : public Op
 		/// you will not call this function directly to register a reader type - you will instead use
 		/// the registration utility class below.
 		static void registerReader( const std::string &extensions, CanReadFn canRead, CreatorFn creator, TypeId typeId );
-	
+
 		/// This utility class is provided to help with Reader registration. By having a private static
 		/// const instance of one of these in your class, it will call registerReader() for you when
-		/// it is constructed. It assumes your Reader class has a constructor taking a fileName as 
+		/// it is constructed. It assumes your Reader class has a constructor taking a fileName as
 		/// const std::string and also has a static canRead function matching the CanReadFn type.
 		template<class T>
 		class ReaderDescription
@@ -122,11 +122,11 @@ class Reader : public Op
 			private :
 				static ReaderPtr creator( const std::string &fileName );
 		};
-		
+
 		FileNameParameterPtr m_fileNameParameter;
-	
+
 	private :
-		
+
 		struct ReaderFns
 		{
 			CreatorFn creator;
@@ -135,7 +135,7 @@ class Reader : public Op
 		};
 		typedef std::map<std::string, ReaderFns> ExtensionsToFnsMap;
 		static ExtensionsToFnsMap *extensionsToFns();
-		
+
 };
 
 } // namespace IECore

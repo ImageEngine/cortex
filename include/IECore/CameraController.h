@@ -51,9 +51,9 @@ class CameraController
 {
 
 	public:
-	
+
 		CameraController( CameraPtr camera );
-				
+
 		void setCamera( CameraPtr camera );
 		CameraPtr getCamera();
 
@@ -66,7 +66,7 @@ class CameraController
 		/// framing to maintain aspect ratio.
 		void setResolution( const Imath::V2i &resolution );
 		const Imath::V2i &getResolution() const;
-		
+
 		/// Moves the camera to frame the specified box, keeping the
 		/// current viewing direction unchanged.
 		void frame( const Imath::Box3f &box );
@@ -74,11 +74,11 @@ class CameraController
 		/// specified direction, and with the specified up vector.
 		void frame( const Imath::Box3f &box, const Imath::V3f &viewDirection,
 			const Imath::V3f &upVector = Imath::V3f( 0, 1, 0 ) );
-		
+
 		/// Computes the points on the near and far clipping planes that correspond
 		/// with the specified raster position. Points are computed in world space.
 		void unproject( const Imath::V2i rasterPosition, Imath::V3f &near, Imath::V3f &far );
-		
+
 		//! @name Motion
 		/// These functions facilitate the implementation of maya style
 		/// camera movement controls within a UI. All coordinates passed
@@ -100,15 +100,15 @@ class CameraController
 		/// End the current motion, ready to call motionStart() again if required.
 		void motionEnd( const Imath::V2i &endPosition );
 		//@}
-		
+
 	private:
-		
+
 		void track( const Imath::V2i &p );
 		void tumble( const Imath::V2i &p );
 		void dolly( const Imath::V2i &p );
-		
+
 		// parts of the camera we manipulate
-		CameraPtr m_camera;		
+		CameraPtr m_camera;
 		V2iDataPtr m_resolution;
 		Box2fDataPtr m_screenWindow;
 		MatrixTransformPtr m_transform;
@@ -123,7 +123,7 @@ class CameraController
 		Imath::M44f m_motionMatrix;
 		float m_motionCentreOfInterest;
 		Imath::Box2f m_motionScreenWindow;
-		
+
 };
 
 }

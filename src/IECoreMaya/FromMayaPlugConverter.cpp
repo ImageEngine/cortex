@@ -103,7 +103,7 @@ void FromMayaPlugConverter::registerConverter( const MFnUnitAttribute::Type from
 FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::TypeId resultType )
 {
 	MObject attribute = plug.attribute();
-	
+
 	if( attribute.hasFn( MFn::kUnitAttribute ) )
 	{
 		MFnUnitAttribute fnUAttr( attribute );
@@ -115,7 +115,7 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 			return result;
 		}
 	}
-	
+
 	if( attribute.hasFn( MFn::kNumericAttribute ) )
 	{
 		MFnNumericAttribute fnNAttr( attribute );
@@ -127,7 +127,7 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 			return result;
 		}
 	}
-	
+
 	if( attribute.hasFn( MFn::kTypedAttribute ) )
 	{
 		MFnTypedAttribute fnTAttr( attribute );
@@ -139,7 +139,7 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 			return result;
 		}
 	}
-	
+
 	MObject o;
 	plug.getValue( o );
 	if( resultType==IECore::InvalidTypeId )
@@ -148,6 +148,6 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 	}
 	else
 	{
-		return FromMayaObjectConverter::create( o, resultType );	
+		return FromMayaObjectConverter::create( o, resultType );
 	}
 }

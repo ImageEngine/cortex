@@ -50,18 +50,18 @@ class ToGLMeshConverter : public ToGLConverter
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLMeshConverter, ToGLMeshConverterTypeId, ToGLConverter );
-		
+
 		ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert = 0 );
 		virtual ~ToGLMeshConverter();
-		
+
 	protected :
-	
+
 		class ToFaceVaryingConverter;
-	
+
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
-			
+
 };
 
 IE_CORE_DECLAREPTR( ToGLMeshConverter );

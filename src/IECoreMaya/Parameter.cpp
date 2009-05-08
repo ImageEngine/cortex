@@ -47,7 +47,7 @@ MObject Parameter::create( IECore::ConstParameterPtr parameter, const MString &a
 {
 	assert( parameter );
 	assert( attributeName.length() );
-	
+
 	ConstParameterHandlerPtr h = ParameterHandler::get( parameter );
 	if( !h )
 	{
@@ -59,7 +59,7 @@ MObject Parameter::create( IECore::ConstParameterPtr parameter, const MString &a
 MStatus Parameter::update( IECore::ConstParameterPtr parameter, MObject &attribute )
 {
 	assert( parameter );
-	
+
 	ConstParameterHandlerPtr h = ParameterHandler::get( parameter );
 	if( !h )
 	{
@@ -72,9 +72,9 @@ MStatus Parameter::setValue( IECore::ConstParameterPtr parameter, MPlug &plug )
 {
 	assert( parameter );
 	assert( ! plug.isNull() );
-	
+
 	if ( plug.isFreeToChange( false, true ) == MPlug::kFreeToChange )
-	{	
+	{
 		ConstParameterHandlerPtr h = ParameterHandler::get( parameter );
 		if( !h )
 		{
@@ -92,7 +92,7 @@ MStatus Parameter::setValue( const MPlug &plug, IECore::ParameterPtr parameter )
 {
 	assert( parameter );
 	assert( ! plug.isNull() );
-	
+
 	ConstParameterHandlerPtr h = ParameterHandler::get( boost::static_pointer_cast< const IECore::Parameter > (parameter) );
 	if( !h )
 	{

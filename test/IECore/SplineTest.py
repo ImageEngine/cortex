@@ -40,60 +40,60 @@ import IECore
 class SplineTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-		
+
 		s = IECore.Splineff()
 		self.assertEqual( s.basis, IECore.CubicBasisf.catmullRom() )
 		self.assertEqual( s.keys(), () )
 		self.assertEqual( s.values(), () )
 		self.assertEqual( s.items(), () )
 		self.assertEqual( len( s ), 0 )
-		
+
 		s = IECore.Splineff( IECore.CubicBasisf.bezier() )
 		self.assertEqual( s.basis, IECore.CubicBasisf.bezier() )
 		self.assertEqual( s.keys(), () )
 		self.assertEqual( s.values(), () )
 		self.assertEqual( s.items(), () )
 		self.assertEqual( len( s ), 0 )
-		
+
 		s = IECore.Splineff( IECore.CubicBasisf.bSpline(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 20, 0 ), ( 21, 2 ) ) )
 		self.assertEqual( s.basis, IECore.CubicBasisf.bSpline() )
 		self.assertEqual( s.keys(), ( 0, 10, 20, 20, 21 ) )
 		self.assertEqual( s.values(), ( 1, 2, 0, 0, 2 ) )
 		self.assertEqual( s.items(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 20, 0 ), ( 21, 2 ) ) )
 		self.assertEqual( len( s ), 5 )
-		
+
 	def testPointEditing( self ) :
-	
+
 		s = IECore.Splineff()
 		self.assertEqual( len( s ), 0 )
-		
+
 		s[0] = 10
 		s[1] = 20
 		s[2] = 40
 		s[10] = 50
-		
+
 		self.assertEqual( len( s ), 4 )
-		
+
 		self.assertEqual( s.keys(), ( 0, 1, 2, 10 ) )
 		self.assertEqual( s.values(), ( 10, 20, 40, 50 ) )
 		self.assertEqual( s.points(), s.items() )
 		self.assertEqual( s.points(), ( ( 0, 10 ), ( 1, 20 ), ( 2, 40 ), ( 10, 50 ) ) )
-		
+
 		self.assert_( 0 in s )
 		self.assert_( 1 in s )
 		self.assert_( 2 in s )
 		self.assert_( 10 in s )
 		self.assert_( not 20 in s )
-		
+
 		self.assertEqual( s[0], 10 )
 		self.assertEqual( s[1], 20 )
 		self.assertEqual( s[2], 40 )
 		self.assertEqual( s[10], 50 )
-		
+
 		self.assertRaises( IndexError, s.__getitem__, 100 )
-		
+
 		del s[0]
-		
+
 		self.assertEqual( len( s ), 3 )
 
 		self.assert_( not 0 in s )
@@ -104,60 +104,60 @@ class SplineTest( unittest.TestCase ) :
 		self.assertEqual( s.values(), ( 20, 40, 50 ) )
 		self.assertEqual( s.points(), s.items() )
 		self.assertEqual( s.points(), ( ( 1, 20 ), ( 2, 40 ), ( 10, 50 ) ) )
-		
+
 	def testPointMultiplicity( self ) :
-	
+
 		## We use a multimap to store the points so that we can have knot multiplicities.
 		# This makes the dictionary style syntax slightly less intuitive.
-		
+
 		s = IECore.Splineff()
 		self.assertEqual( len( s ), 0 )
-		
+
 		s[0] = 1
 		self.assertEqual( len( s ), 1 )
 		s[0] = 1
 		self.assertEqual( len( s ), 2 )
-		
+
 		self.assertEqual( s[0], 1 )
 		self.assertEqual( s.points(), ( ( 0, 1 ), ( 0, 1 ) ) )
 		self.assertEqual( s.keys(), ( 0, 0 ) )
 		self.assertEqual( s.values(), ( 1, 1 ) )
-		
+
 		del s[0]
 		self.assertEqual( len( s ), 0 )
-		
+
 	def testSolveAndCall( self ) :
-	
+
 		random.seed( 0 )
 		for i in range( 0, 100 ) :
-				
+
 			s = IECore.Splineff()
 			x = 0
-		
+
 			for i in range( 0, 40 ) :
-			
+
 				s[x] = random.uniform( 0, 10 )
 				x += 1 + random.uniform( 0, 1 )
-			
+
 			xv = s.keys()
 			yv = s.values()
-		
+
 			for i in range( 0, 1000 ) :
-			
+
 				# evaluate an x,y point on the curve directly
 				# ourselves
 				t = i / 1000.0
 				c = s.basis.coefficients( t )
 				x = xv[0] * c[0] + xv[1] * c[1] + xv[2] * c[2] + xv[3] * c[3]
 				y = yv[0] * c[0] + yv[1] * c[1] + yv[2] * c[2] + yv[3] * c[3]
-				
+
 				# then check that solving for x gives y
 				yy = s( x )
-				
+
 				self.assertAlmostEqual( yy, y, 3 )
 
 	def testRepr( self ) :
-	
+
 		s = IECore.Splineff()
 		s[0] = 10
 		s[1] = 20
@@ -166,7 +166,7 @@ class SplineTest( unittest.TestCase ) :
 
 		ss = eval( repr( s ) )
 		self.assertEqual( s, ss )
-		
+
 		s = IECore.SplinefColor3f()
 		s[0] = IECore.Color3f( 1, 0, 0 )
 		s[1] = IECore.Color3f( 0, 1, 0 )
@@ -175,15 +175,15 @@ class SplineTest( unittest.TestCase ) :
 
 		ss = eval( repr( s ) )
 		self.assertEqual( s, ss )
-	
+
 	def testInterval( self ) :
-	
+
 		s = IECore.Splineff()
 		s[10] = 100
 		s[20] = 200
-		
+
 		self.assertEqual( s.interval(), ( 10, 20 ) )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

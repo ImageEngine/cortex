@@ -43,7 +43,7 @@ import maya.cmds
 class TemporaryAttributeValuesTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		s = maya.cmds.spaceLocator()[0]
 
 		maya.cmds.addAttr( s, at="enum", sn="enumTest", enumName="A:B:C", defaultValue = 1 )
@@ -51,19 +51,19 @@ class TemporaryAttributeValuesTest( unittest.TestCase ) :
 
 		maya.cmds.addAttr( s, at="bool", sn="boolTest", defaultValue=1 )
 		self.assertEqual( maya.cmds.getAttr( s + ".boolTest" ), 1 )
-		
+
 		maya.cmds.addAttr( s, at="float", sn="floatTest" )
 		self.assertEqual( maya.cmds.getAttr( s + ".floatTest" ), 0 )
-		
+
 		maya.cmds.addAttr( s, at="long", sn="intTest" )
 		self.assertEqual( maya.cmds.getAttr( s + ".intTest" ), 0 )
-		
+
 		maya.cmds.addAttr( s, at="float2", sn="float2Test" )
 		maya.cmds.addAttr( s, at="float", sn="float2TestX", parent="float2Test" )
 		maya.cmds.addAttr( s, at="float", sn="float2TestY", parent="float2Test" )
 		self.assertEqual( maya.cmds.getAttr( s + ".float2TestX" ), 0 )
 		self.assertEqual( maya.cmds.getAttr( s + ".float2TestY" ), 0 )
-		
+
 		maya.cmds.addAttr( s, at="long2", sn="int2Test" )
 		maya.cmds.addAttr( s, at="long", sn="int2TestX", parent="int2Test", defaultValue=1 )
 		maya.cmds.addAttr( s, at="long", sn="int2TestY", parent="int2Test", defaultValue=2 )
@@ -90,9 +90,9 @@ class TemporaryAttributeValuesTest( unittest.TestCase ) :
 		maya.cmds.addAttr( s, dt="string", sn="stringTest" )
 		maya.cmds.setAttr( s + ".stringTest", "hi", type="string" )
 		self.assertEqual( maya.cmds.getAttr( s + ".stringTest" ), "hi" )
-		
+
 		context = IECoreMaya.TemporaryAttributeValues(
-			{	
+			{
 				s + ".enumTest" : 2,
 				s + ".boolTest" : False,
 				s + ".floatTest" : 10,
@@ -104,9 +104,9 @@ class TemporaryAttributeValuesTest( unittest.TestCase ) :
 				s + ".stringTest" : "bye",
 			}
 		)
-		
-		with context : 
-		
+
+		with context :
+
 			self.assertEqual( maya.cmds.getAttr( s + ".enumTest" ), 2 )
 			self.assertEqual( maya.cmds.getAttr( s + ".boolTest" ), 0 )
 			self.assertEqual( maya.cmds.getAttr( s + ".floatTest" ), 10 )
@@ -122,7 +122,7 @@ class TemporaryAttributeValuesTest( unittest.TestCase ) :
 			self.assertEqual( maya.cmds.getAttr( s + ".short3TestY" ), 2 )
 			self.assertEqual( maya.cmds.getAttr( s + ".short3TestZ" ), -1 )
 			self.assertEqual( maya.cmds.getAttr( s + ".stringTest" ), "bye" )
-		
+
 		self.assertEqual( maya.cmds.getAttr( s + ".enumTest" ), 1 )
 		self.assertEqual( maya.cmds.getAttr( s + ".boolTest" ), 1 )
 		self.assertEqual( maya.cmds.getAttr( s + ".floatTest" ), 0 )
@@ -135,7 +135,7 @@ class TemporaryAttributeValuesTest( unittest.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( s + ".float3TestY" ), 20 )
 		self.assertEqual( maya.cmds.getAttr( s + ".float3TestZ" ), 30 )
 		self.assertEqual( maya.cmds.getAttr( s + ".stringTest" ), "hi" )
-	
-		
+
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

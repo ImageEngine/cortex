@@ -54,27 +54,27 @@ IE_CORE_FORWARDDECLARE( FrameBuffer );
 class Texture : public Bindable
 {
 	public :
-		
+
 		friend class FrameBuffer;
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Texture, TextureTypeId, Bindable );
-		
+
 		/// Creates a texture object to wrap the already created
 		/// GL texture specified.
 		Texture( GLuint texture );
 		virtual ~Texture();
-		
+
 		/// Binds the texture as the current GL texture.
 		virtual void bind() const;
 		virtual GLbitfield mask() const;
-		
+
 		/// Creates an ImagePrimitive using the texture contents.
 		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
-		
+
 	protected :
-	
+
 		Texture();
-		
+
 		/// Derived classes must set this in their constructor.
 		GLuint m_texture;
 

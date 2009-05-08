@@ -41,64 +41,64 @@ import maya.cmds
 class FromMayaParticleConverterTest( unittest.TestCase ) :
 
 	def testSimple( self ) :
-	
+
 		particle = maya.cmds.particle( n = 'particles' )[0]
 		particle = maya.cmds.listRelatives( particle, shapes = True )[0]
-		
+
 		converter = IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECore.PointsPrimitive.staticTypeId() )
-		
+
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaParticleConverter ) ) )
-		
+
 		particle = converter.convert()
-		
+
 		self.assert_( particle.isInstanceOf( IECore.PointsPrimitive.staticTypeId() ) )
-		self.assert_( particle.arePrimitiveVariablesValid() )	
+		self.assert_( particle.arePrimitiveVariablesValid() )
 		self.assertEqual( particle.numPoints, maya.cmds.particle( 'particles', q = True, count = True ) )
-		
+
 		self.assert_( "P" in particle )
-		self.assert_( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )		
+		self.assert_( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
 		self.assert_( "velocity" in particle )
 		self.assert_( particle["velocity"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
-		
+
 		# We don't get this by default, and we didn't request it
 		self.failIf( "mass" in particle )
-				
+
 	def testEmitter( self ) :
-	
+
 		maya.cmds.emitter( speed = 2.00, rate = 1000, n = 'emitter' )
 		particle = maya.cmds.particle( n = 'particles' )[0]
 		particle = maya.cmds.listRelatives( particle, shapes = True )[0]
 		maya.cmds.connectDynamic( 'particles', em = 'emitter' )
-		
-		for i in range( 0, 25 ) :		
+
+		for i in range( 0, 25 ) :
 			maya.cmds.currentTime( i )
-			
+
 		converter = IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECore.PointsPrimitive.staticTypeId() )
-		
+
 		converter.parameters().attributeNames = IECore.StringVectorData( [ "velocity", "mass" ] )
-		
+
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaParticleConverter ) ) )
-		
+
 		particle = converter.convert()
-		
+
 		self.assert_( particle.isInstanceOf( IECore.PointsPrimitive.staticTypeId() ) )
 		self.assert_( particle.arePrimitiveVariablesValid() )
 		self.assertEqual( particle.numPoints, maya.cmds.particle( 'particles', q = True, count = True ) )
 		self.assert_( particle.numPoints > 900 )
 		self.assert_( particle.numPoints < 1100 )
 		self.assert_( "P" in particle )
-		self.assert_( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )		
-		self.assert_( "velocity" in particle )	
+		self.assert_( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
+		self.assert_( "velocity" in particle )
 		self.assert_( particle["velocity"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
-		self.assert_( "mass" in particle )			
-		self.assert_( particle["mass"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )		
-		
+		self.assert_( "mass" in particle )
+		self.assert_( particle["mass"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+
 	def testErrors( self ) :
-	
+
 		particle = maya.cmds.particle( n = 'particles' )[0]
 		particle = maya.cmds.listRelatives( particle, shapes = True )[0]
-		
-		self.failIf( IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECore.MeshPrimitive.staticTypeId() ) )		
-									
+
+		self.failIf( IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECore.MeshPrimitive.staticTypeId() ) )
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

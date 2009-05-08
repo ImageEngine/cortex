@@ -43,9 +43,9 @@
 
 namespace IECore
 {
-	
+
 IE_CORE_FORWARDDECLARE(MeshPrimitive);
-	
+
 /// The OBJReader class defines a class for reading OBJ mesh data.
 /// This is a subset of the full setup of objects encodable in OBJ.
 class OBJReader : public Reader
@@ -61,11 +61,11 @@ class OBJReader : public Reader
 	protected:
 
 		ObjectPtr doOperation(ConstCompoundObjectPtr operands);
-	
+
 	private:
-	
+
 		static const ReaderDescription<OBJReader> m_readerDescription;
-	
+
 		// top-level parse method
 		void parseOBJ();
 
@@ -74,7 +74,7 @@ class OBJReader : public Reader
 		void parseTextureCoordinate(const char *, const char *);
 		void parseNormal(const char *, const char *);
 
-		// elements	
+		// elements
 		void parseFace(const char *, const char *);
 
 		// grouping
@@ -84,13 +84,13 @@ class OBJReader : public Reader
 		std::vector<int> *m_vpf, *m_vids;
 		std::vector<Imath::V3f> *m_vertices, *m_normals;
 		std::vector<float> *m_sTextureCoordinates, *m_tTextureCoordinates;
-	
+
 		// local data for assembling mesh
 		std::vector<Imath::V3f> m_introducedNormals, m_introducedTextureCoordinates;
 };
 
 IE_CORE_DECLAREPTR(OBJReader);
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_OBJREADER_H

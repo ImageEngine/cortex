@@ -49,31 +49,31 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 class MappedRandomPointDistributionOp : public UniformRandomPointDistributionOp
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( MappedRandomPointDistributionOp, UniformRandomPointDistributionOp );
-		
+
 		MappedRandomPointDistributionOp();
 		virtual ~MappedRandomPointDistributionOp();
-		
+
 		ImagePrimitiveParameterPtr imageParameter();
-		ConstImagePrimitiveParameterPtr imageParameter() const;			
-		
+		ConstImagePrimitiveParameterPtr imageParameter() const;
+
 		StringParameterPtr channelNameParameter();
-		ConstStringParameterPtr channelNameParameter() const;		
-		
+		ConstStringParameterPtr channelNameParameter() const;
+
 	protected :
-	
+
 		/// Derived classes can override this method and return a number in the range [0,1] defining the
 		/// required density at the given point.
 		virtual float density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const;
-		
+
 	private :
-	
+
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-		
+
 		ImagePrimitiveParameterPtr m_imageParameter;
 		StringParameterPtr m_channelNameParameter;
-		
+
 		ImagePrimitiveEvaluatorPtr m_imageEvaluator;
 		PrimitiveVariableMap::iterator m_channelIterator;
 		PrimitiveEvaluator::ResultPtr m_result;

@@ -51,12 +51,12 @@ class ChannelOp : public ImagePrimitiveOp
 		virtual ~ChannelOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( ChannelOp, ImagePrimitiveOp );
-	
+
 		StringVectorParameterPtr channelNamesParameter();
 		ConstStringVectorParameterPtr channelNamesParameter() const;
-	
+
 	protected :
-	
+
 		typedef std::vector<DataPtr> ChannelVector;
 
 		/// Should be implemented by derived classes to modify the data in the passes channels in place.
@@ -70,14 +70,14 @@ class ChannelOp : public ImagePrimitiveOp
 		/// things are right now, every derived class is iterating over the channels vector - there's not much else they can do - so it would
 		/// make sense to move that step to the base class.
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels ) = 0;
-	
+
 	private :
-	
-		/// Implemented to call modifyChannels(). 
+
+		/// Implemented to call modifyChannels().
 		virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
-	
+
 		StringVectorParameterPtr m_channelNamesParameter;
-				
+
 };
 
 IE_CORE_DECLAREPTR( ChannelOp );

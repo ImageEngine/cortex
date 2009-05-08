@@ -38,15 +38,15 @@
 #include "IECore/TypedData.inl"
 #include "IECore/DateTimeData.h"
 
-namespace IECore 
+namespace IECore
 {
 
 IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TimePeriodData, TimePeriodDataTypeId )
 IE_CORE_DEFINETYPEDDATANOBASESIZE( TimePeriodData )
 
-template<> 
+template<>
 void TypedData< TimePeriod >::save( SaveContext *context ) const
-{  
+{
 	Data::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
 
@@ -54,17 +54,17 @@ void TypedData< TimePeriod >::save( SaveContext *context ) const
 	container->write( "end", boost::posix_time::to_iso_string( readable().end() ) );
 }
 
-template<> 
+template<>
 void TypedData< TimePeriod >::load( LoadContextPtr context )
 {
-	Data::load( context );	
-	
+	Data::load( context );
+
 	unsigned int v = 0;
-	
+
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	std::string beginStr;
-	container->read( "begin", beginStr );			
+	container->read( "begin", beginStr );
 	boost::posix_time::ptime begin;
 	try
 	{
@@ -89,11 +89,11 @@ void TypedData< TimePeriod >::load( LoadContextPtr context )
 		{
 			throw;
 		}
-	}	
-	
+	}
+
 	std::string endStr;
-	container->read( "end", endStr );		
-	boost::posix_time::ptime end;	
+	container->read( "end", endStr );
+	boost::posix_time::ptime end;
 	try
 	{
 		end = boost::posix_time::from_iso_string( endStr );
@@ -117,7 +117,7 @@ void TypedData< TimePeriod >::load( LoadContextPtr context )
 		{
 			throw;
 		}
-	}				
+	}
 
 	writable() = boost::posix_time::time_period( begin, end );
 }

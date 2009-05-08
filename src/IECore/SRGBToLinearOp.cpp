@@ -46,7 +46,7 @@ IE_CORE_DEFINERUNTIMETYPED( SRGBToLinearOp );
 ColorSpaceTransformOp::ColorSpaceDescription<SRGBToLinearOp> SRGBToLinearOp::g_colorSpaceDescription( "srgb", "linear" );
 
 SRGBToLinearOp::SRGBToLinearOp()
-	:	ChannelOp( "SRGBToLinearOp", 
+	:	ChannelOp( "SRGBToLinearOp",
 				   "Applies SRGB to linear conversion on ImagePrimitive channels."
 		)
 {
@@ -59,7 +59,7 @@ SRGBToLinearOp::~SRGBToLinearOp()
 struct SRGBToLinearOp::Converter
 {
 	typedef void ReturnType;
-	
+
 	template<typename T>
 	ReturnType operator()( typename T::Ptr data )
 	{

@@ -49,7 +49,7 @@ static ObjectPtr creator( void *data )
 {
 	assert( data );
 	PyObject *d = (PyObject *)(data );
-	
+
 	ObjectPtr r = call< ObjectPtr >( d );
 	return r;
 }
@@ -58,7 +58,7 @@ static void registerType( TypeId typeId, const std::string &typeName, PyObject *
 {
 	assert( createFn );
 	Py_INCREF( createFn );
-	Object::registerType( typeId, typeName, creator, (void*)createFn );	
+	Object::registerType( typeId, typeName, creator, (void*)createFn );
 }
 
 static void registerAbstractType( TypeId typeId, const std::string &typeName )
@@ -81,7 +81,7 @@ void bindObject()
 		.staticmethod( "isAbstractType" )
 		.def( "create", (ObjectPtr (*)( const std::string &) )&Object::create )
 		.def( "create", (ObjectPtr (*)( TypeId ) )&Object::create )
-		.staticmethod( "create" )		
+		.staticmethod( "create" )
 		.def( "load", (ObjectPtr (*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & ) )&Object::load )
 		.staticmethod( "load" )
 		.def( "save", (void (Object::*)( IndexedIOInterfacePtr, const IndexedIO::EntryID & )const )&Object::save )
@@ -90,7 +90,7 @@ void bindObject()
 		.def( "registerType", registerAbstractType )
 		.staticmethod( "registerType" )
 	;
-	
+
 }
 
 }

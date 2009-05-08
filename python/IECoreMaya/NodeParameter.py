@@ -43,7 +43,7 @@ class NodeParameter( IECore.StringParameter ):
 
 	## \todo Use Enum for this
 	class CheckType:
-		
+
 		DontCare = 0
 		MustExist = 1
 		MustNotExist = 2
@@ -56,9 +56,9 @@ class NodeParameter( IECore.StringParameter ):
 	typeRegex - regular expression used on parameter validation that validates based on the maya node type. Disable filtering using None.
 	typeRegexDescription - human readable description for the regular expression used to filter node types. It's used when the validation fails.
 	"""
-	def __init__( self, name, description, defaultValue = "", allowEmptyString = True, 
+	def __init__( self, name, description, defaultValue = "", allowEmptyString = True,
 		check = CheckType.DontCare, typeRegex = None, typeRegexDescription = "", presets = {}, presetsOnly = False, userData = IECore.CompoundObject() ) :
-		
+
 		IECore.StringParameter.__init__( self, name, description, defaultValue, presets, presetsOnly, userData )
 
 		self.allowEmptyString = allowEmptyString
@@ -84,7 +84,7 @@ class NodeParameter( IECore.StringParameter ):
 		elif attrName == "allowEmptyString":
 			return self.__allowEmptyString
 		else:
-			return self.__dict__[ attrName ]			
+			return self.__dict__[ attrName ]
 
 	"""
 	Returns a regular expression that matches only valid Maya dependency nodes
@@ -94,12 +94,12 @@ class NodeParameter( IECore.StringParameter ):
 		return re.compile( "^(\|?[^\t\n\r\f\v\|]+)+\|?$" )
 
 	"""
-	Returns (True, "") only if the value is a correct dependency nodestring and also checks that the node exists or doesn't exist 
+	Returns (True, "") only if the value is a correct dependency nodestring and also checks that the node exists or doesn't exist
 	based on the CheckType passed to the constructor.
 	Otherwise returns (False, errorMessage).
 	"""
 	def valueValid( self, value ) :
-	
+
 		v = IECore.StringParameter.valueValid( self, value )
 		if not v[0] :
 			return v
@@ -135,20 +135,20 @@ class NodeParameter( IECore.StringParameter ):
 
 			if not exist:
 				return False, "Node %s does not exist" % value.value
-			
+
 		elif self.mustNotExist :
 
 			if exist:
 				return False, "Node %s already exists" % value.value
 
-		return True, ""	
+		return True, ""
 
 	"""
 	Sets the internal StringData value from the given dependency node MObject
-	"""	
+	"""
 	def setNodeValue( self, node ) :
 		self.setValue( IECore.StringData( MFnDependencyNode( node ).name() ) )
-	
+
 	"""
 	Returns an MObject that corresponds to the dependency node of the current value.
 	"""

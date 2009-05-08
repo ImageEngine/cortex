@@ -45,41 +45,41 @@ namespace IECore
 class FrameRange : public FrameList
 {
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( FrameRange, FrameList );
-	
+
 		FrameRange( Frame start, Frame end, Frame step = 1 );
 		virtual ~FrameRange();
-		
+
 		virtual void asList( std::vector<Frame> &frames ) const ;
 		virtual std::string asString() const ;
 		virtual bool isEqualTo( ConstFrameListPtr other ) const;
-		virtual FrameListPtr copy() const;		
-		
+		virtual FrameListPtr copy() const;
+
 		static FrameListPtr parse( const std::string &frameList );
-		
+
 		Frame getStart();
 		void setStart( Frame start );
-		
+
 		Frame getEnd();
-		void setEnd( Frame end );	
-		
+		void setEnd( Frame end );
+
 		Frame getStep();
 		void setStep( Frame step );
-		
+
 	protected :
-	
+
 		Frame m_start;
 		Frame m_end;
 		Frame m_step;
-		
+
 	private :
-	
-		static FrameList::Parser< FrameRange > g_parserRegistrar;			
+
+		static FrameList::Parser< FrameRange > g_parserRegistrar;
 };
 
 IE_CORE_DECLAREPTR( FrameRange );
-	
+
 } // namespace IECore
 
 

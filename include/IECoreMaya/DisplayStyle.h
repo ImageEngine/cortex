@@ -54,21 +54,21 @@ class DisplayStyle : public boost::noncopyable
 {
 
 	public :
-	
+
 		DisplayStyle();
 		~DisplayStyle();
-	
+
 		/// Returns a base state suitable for representing objects in the the style specified
 		/// by maya. If setCurrentColor is true then the current gl color is also translated
 		/// appropriately into the State (for bounding box, wireframe and points modes only).
 		IECoreGL::ConstStatePtr baseState( M3dView::DisplayStyle style, bool transferCurrentColor=true );
-	
+
 	private :
-			
+
 		struct Data;
-		
+
 		Data *m_data;
-		
+
 };
 
 } // namespace IECoreMaya

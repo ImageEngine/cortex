@@ -58,17 +58,17 @@ MStatus SystemExitCmd::doIt( const MArgList &args )
 		displayError("Must specify exit status");
 		return MS::kFailure;
 	}
-	
+
 	MStatus s;
-	
+
 	int exitStatus = args.asInt(0, &s);
-	
+
 	if (!s)
 	{
 		displayError("Exit status must be an integer");
 		return MS::kFailure;
 	}
-	
+
 	exit( exitStatus );
 
 	return MS::kSuccess;

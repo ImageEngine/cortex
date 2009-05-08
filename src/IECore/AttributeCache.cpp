@@ -46,7 +46,7 @@ using namespace IECore;
 AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode mode )
 {
 	m_io = IndexedIOInterface::create(filename, "/", mode );
-	
+
 	if ( mode == IndexedIO::Write || mode == IndexedIO::Append )
 	{
 		m_io->mkdir("/headers");
@@ -101,9 +101,9 @@ CompoundObjectPtr AttributeCache::read( const ObjectHandle &obj )
 	m_io->chdir(obj);
 
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
 		ObjectPtr data = Object::load( m_io, it->id() );
@@ -127,9 +127,9 @@ CompoundObjectPtr AttributeCache::readHeader( )
 	m_io->chdir("/headers");
 
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
 		ObjectPtr data = Object::load( m_io, it->id() );
@@ -142,14 +142,14 @@ CompoundObjectPtr AttributeCache::readHeader( )
 void AttributeCache::headers(std::vector<AttributeCache::HeaderHandle> &hds)
 {
 	hds.clear();
-	
+
 	m_io->chdir("/headers");
-	
+
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
-	hds.reserve( directories.size() );	
+
+	hds.reserve( directories.size() );
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
 		hds.push_back( it->id() );
@@ -159,27 +159,27 @@ void AttributeCache::headers(std::vector<AttributeCache::HeaderHandle> &hds)
 void AttributeCache::objects(std::vector<AttributeCache::ObjectHandle> &objs)
 {
 	objs.clear();
-	
+
 	m_io->chdir("/objects");
-	
+
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
-	objs.reserve( directories.size() );	
+
+	objs.reserve( directories.size() );
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
 		objs.push_back( it->id() );
 	}
 }
-		
+
 bool AttributeCache::contains( const ObjectHandle &obj )
 {
 	m_io->chdir("/objects");
 	try
 	{
 		m_io->chdir( obj );
-	} 
+	}
 	catch (IECore::Exception &e)
 	{
 		return false;
@@ -194,25 +194,25 @@ bool AttributeCache::contains( const ObjectHandle &obj, const AttributeHandle &a
 	{
 		m_io->chdir( obj );
 		m_io->chdir( attr );
-	} 
+	}
 	catch (IECore::Exception &e)
 	{
 		return false;
 	}
 	return true;
 }
-				
+
 void AttributeCache::attributes(const ObjectHandle &obj, std::vector<AttributeHandle> &attrs)
 {
 	attrs.clear();
-	
+
 	m_io->chdir("/objects");
 	m_io->chdir(obj);
-	
+
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	attrs.reserve( directories.size() );
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{
@@ -223,15 +223,15 @@ void AttributeCache::attributes(const ObjectHandle &obj, std::vector<AttributeHa
 void AttributeCache::attributes(const ObjectHandle &obj, const std::string regex, std::vector<AttributeHandle> &attrs)
 {
 	attrs.clear();
-	
+
 	m_io->chdir("/objects");
 	m_io->chdir(obj);
-	
+
 	IndexedIOEntryTypeFilterPtr filter = new IndexedIOEntryTypeFilter(IndexedIO::Directory);
 	filter->add( new IndexedIORegexFilter(  regex ) );
-	
+
 	IndexedIO::EntryList directories = m_io->ls(filter);
-	
+
 	attrs.reserve( directories.size() );
 	for (IndexedIO::EntryList::const_iterator it = directories.begin(); it != directories.end(); ++it)
 	{

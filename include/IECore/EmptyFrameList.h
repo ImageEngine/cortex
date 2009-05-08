@@ -45,25 +45,25 @@ namespace IECore
 class EmptyFrameList : public FrameList
 {
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( EmptyFrameList, FrameList );
-	
+
 		EmptyFrameList();
 		virtual ~EmptyFrameList();
-		
-		virtual void asList( std::vector<Frame> &frames ) const ;		
+
+		virtual void asList( std::vector<Frame> &frames ) const ;
 		virtual std::string asString() const ;
 		virtual FrameListPtr copy() const ;
-		
+
 		static FrameListPtr parse( const std::string &frameList );
-		
+
 	private :
-	
-		static FrameList::Parser< EmptyFrameList > g_parserRegistrar;			
+
+		static FrameList::Parser< EmptyFrameList > g_parserRegistrar;
 };
 
 IE_CORE_DECLAREPTR( EmptyFrameList );
-	
+
 } // namespace IECore
 
 

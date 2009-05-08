@@ -47,7 +47,7 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 struct FileSequenceFunctionsHelper
@@ -55,7 +55,7 @@ struct FileSequenceFunctionsHelper
 	static list findSequences( list namesList )
 	{
 		list result;
-		
+
 		std::vector< std::string > names;
 		for ( long i = 0; i < len( namesList ); i++ )
 		{
@@ -64,27 +64,27 @@ struct FileSequenceFunctionsHelper
 			{
 				throw InvalidArgumentException( "findSequences: List element is not a string" );
 			}
-			
+
 			names.push_back( ex() );
 		}
-		
+
 		std::vector< FileSequencePtr > sequences;
 		IECore::findSequences( names, sequences );
 		for ( std::vector< FileSequencePtr >::const_iterator it = sequences.begin(); it != sequences.end(); ++it )
 		{
 			result.append( *it );
 		}
-				
+
 		return result;
 	}
-	
+
 	static object ls( const std::string &path )
 	{
 		if ( boost::regex_match( path, FileSequence::fileNameValidator() ) )
-		{		
+		{
 			FileSequencePtr sequence = 0;
 			IECore::ls( path, sequence );
-			
+
 			if ( sequence )
 			{
 				return object( sequence );
@@ -102,14 +102,14 @@ struct FileSequenceFunctionsHelper
 
 			return result;
 		}
-		
+
 		return object();
 	}
-	
+
 	static FrameListPtr frameListFromList( list l )
 	{
 		std::vector< FrameList::Frame > frameList;
-		
+
 		for ( long i = 0; i < len( l ); i++ )
 		{
 			extract< FrameList::Frame > ex( l[i] );
@@ -117,19 +117,19 @@ struct FileSequenceFunctionsHelper
 			{
 				throw InvalidArgumentException( "frameListFromList: List element is not an integer" );
 			}
-			
+
 			frameList.push_back( ex() );
 		}
-		
+
 		return IECore::frameListFromList( frameList );
 	}
 };
 
 void bindFileSequenceFunctions()
-{	
+{
 	def( "findSequences", &FileSequenceFunctionsHelper::findSequences );
-	def( "ls", &FileSequenceFunctionsHelper::ls );		
-	def( "frameListFromList", &FileSequenceFunctionsHelper::frameListFromList );	
+	def( "ls", &FileSequenceFunctionsHelper::ls );
+	def( "frameListFromList", &FileSequenceFunctionsHelper::frameListFromList );
 }
 
 }

@@ -46,7 +46,7 @@ namespace IECore
 {
 
 // Class that projects functions on spherical harmonics objects.
-// The object defines a distribution of points over the sphere surface and uses that distribution to 
+// The object defines a distribution of points over the sphere surface and uses that distribution to
 // project a given function onto a spherical harmonics object.
 // Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
 template < typename V >
@@ -66,7 +66,7 @@ class SphericalHarmonicsProjector
 		SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates );
 
 		// uses given non-uniform point distribution and weights.
-		// The weight should be proportional to each sample's spherical area. 
+		// The weight should be proportional to each sample's spherical area.
 		// Uniform distribution results in weight constant = 4*PI
 		SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates, const std::vector< V > &weights );
 
@@ -87,17 +87,17 @@ class SphericalHarmonicsProjector
 
 		// Projects just one sample point at the given coordinate index.
 		// The function does the appropriate initialization and finalization of the spherical harmonics object on the first and last samples.
-		template< typename U > 
+		template< typename U >
 		void operator()( unsigned int coordinateIndex, const U &value, SphericalHarmonics< U > &result ) const;
 
 		// Sets the given SphericalHarmonics object with the projection of the given functor for every polar coordinate.
 		// the value stored in the spherical harmonics is the same as the functor return type.
-		template< typename T, typename U > 
+		template< typename T, typename U >
 		void polarProjection( T functor,  SphericalHarmonics< U > &result ) const;
 
 		// Sets the given SphericalHarmonics object with the projection of the given functor for every euclidean direction.
 		// the value stored in the spherical harmonics is the same as the functor return type.
-		template< typename T, typename U > 
+		template< typename T, typename U >
 		void euclideanProjection( T functor, SphericalHarmonics< U > & result ) const;
 
 		// make sure the evaluations go up to the given number of bands.

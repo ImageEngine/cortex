@@ -70,7 +70,7 @@ bool withTIFF()
 	return true;
 #else
 	return false;
-#endif	
+#endif
 }
 
 bool withJPEG()
@@ -79,7 +79,7 @@ bool withJPEG()
 	return true;
 #else
 	return false;
-#endif	
+#endif
 }
 
 bool withFreeType()
@@ -88,7 +88,7 @@ bool withFreeType()
 	return true;
 #else
 	return false;
-#endif	
+#endif
 }
 
 }

@@ -48,31 +48,31 @@ class TestAttributeCache:
 
 	def testSingleWrite(self):
 		"""Test AttributeCache read/write"""
-		
+
 		cache = AttributeCache("./AttributeCache.fio", IndexedIOOpenMode.Write)
-		
+
 		for obj in self.cachedObjectNames:
 			# Make some random vertex data
-			
+
 			dataWritten = V3fVectorData()
-			
+
 			numPts = int(random.random())
 			numPts = numPts * numPts * 500
-			
+
 			for i in range(0, numPts):
 				dataWritten.append( V3f( random.random(), random.random(), random.random() ) )
-			
+
 			cache.write(obj, "P", dataWritten)
-		
+
 	def testMultipleWrite(self):
-		
+
 		for i in xrange(0,200):
 			self.testSingleWrite()
 
 	def printTop( self ):
 
 		os.system( 'top -b -n 1 -p %d' % os.getpid() )
-		
+
 
 print "before single tests"
 a = TestAttributeCache()

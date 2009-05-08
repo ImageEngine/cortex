@@ -40,9 +40,9 @@ namespace IECore
 
 
 template < typename V >
-SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int samples, unsigned long int seed ) : 
+SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int samples, unsigned long int seed ) :
 	m_bands( 0 ),
-	m_sphericalCoordinates(), 
+	m_sphericalCoordinates(),
 	m_euclidianCoordinates(),
 	m_shEvaluations(),
 	m_weights( 0 )
@@ -82,19 +82,19 @@ SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int sample
 }
 
 template < typename V >
-SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates ) : 
+SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates ) :
 	m_bands( 0 ),
-	m_sphericalCoordinates( sphericalCoordinates ), 
+	m_sphericalCoordinates( sphericalCoordinates ),
 	m_euclidianCoordinates( 0 ),
 	m_shEvaluations(),
 	m_weights( 0 )
 {
 }
-	
+
 template < typename V >
 SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates, const std::vector< V > &weights ) :
 	m_bands( 0 ),
-	m_sphericalCoordinates( sphericalCoordinates ), 
+	m_sphericalCoordinates( sphericalCoordinates ),
 	m_euclidianCoordinates( 0 ),
 	m_shEvaluations(),
 	m_weights( weights )
@@ -119,7 +119,7 @@ const std::vector< Imath::Vec3< V > > &SphericalHarmonicsProjector<V>::euclidian
 }
 
 template< typename V >
-template< typename U > 
+template< typename U >
 void SphericalHarmonicsProjector<V>::operator()( unsigned int coordinateIndex, const U &value, SphericalHarmonics< U > &result ) const
 {
 	if ( coordinateIndex == 0 )
@@ -165,7 +165,7 @@ void SphericalHarmonicsProjector<V>::operator()( unsigned int coordinateIndex, c
 }
 
 template< typename V >
-template< typename T, typename U > 
+template< typename T, typename U >
 void SphericalHarmonicsProjector<V>::polarProjection( T functor, SphericalHarmonics< U > &result ) const
 {
 	double factor;
@@ -205,7 +205,7 @@ void SphericalHarmonicsProjector<V>::polarProjection( T functor, SphericalHarmon
 }
 
 template< typename V >
-template< typename T, typename U > 
+template< typename T, typename U >
 void SphericalHarmonicsProjector<V>::euclideanProjection( T functor, SphericalHarmonics< U > &result ) const
 {
 	double factor;
@@ -214,7 +214,7 @@ void SphericalHarmonicsProjector<V>::euclideanProjection( T functor, SphericalHa
 
 	// make sure our internal object is created.
 	euclidianCoordinates();
-	
+
 	// zero coefficients to start accumulation.
 	for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
 	{

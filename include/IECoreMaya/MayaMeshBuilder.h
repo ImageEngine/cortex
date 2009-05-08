@@ -49,37 +49,37 @@ namespace IECoreMaya
 {
 
 /// MayaMeshBuilder is a class which allows construction of Maya mesh data, templated
-/// on the base type of the resulting point/normal data (e.g. float or double). 
+/// on the base type of the resulting point/normal data (e.g. float or double).
 template<typename T>
 class MayaMeshBuilder : public IECore::RefCounted
 {
 	public:
-	
+
 		typedef T BaseType;
-	
+
 		typedef boost::intrusive_ptr <MayaMeshBuilder<T> > Ptr;
 		typedef boost::intrusive_ptr< const MayaMeshBuilder<T> > ConstPtr;
-	
-		MayaMeshBuilder( MObject parentOrOwner );		
+
+		MayaMeshBuilder( MObject parentOrOwner );
 		virtual ~MayaMeshBuilder();
 
-		/// Add a vertex position and normal						
+		/// Add a vertex position and normal
 		void addVertex( const Imath::Vec3<T> &p, const Imath::Vec3<T> &n );
 
 		/// Construct a triangle from the 3 specified vertex indices
 		void addTriangle( int v0, int v1, int v2 );
-				
-		/// Retrieve the resultant mesh as MFnMeshData		
+
+		/// Retrieve the resultant mesh as MFnMeshData
 		MObject mesh() const;
-		
+
 	protected:
 		MObject m_parentOrOwner;
-		
-		struct Data;
-		
-		Data *m_data;		
 
-};       
+		struct Data;
+
+		Data *m_data;
+
+};
 
 }
 

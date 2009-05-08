@@ -68,5 +68,5 @@ void bindGroup()
 		.def( "children", &children, "Returns a list referencing the children of the group - modifying the list has no effect on the Group." )
 	;
 }
-	
+
 }

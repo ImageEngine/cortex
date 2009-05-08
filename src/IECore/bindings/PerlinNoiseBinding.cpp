@@ -83,15 +83,15 @@ void bindPerlinNoise()
 	bindNoise<PerlinNoiseV3ff>( "PerlinNoiseV3ff" );
 	bindNoise<PerlinNoiseV2ff>( "PerlinNoiseV2ff" );
 	bindNoise<PerlinNoiseff>( "PerlinNoiseff" );
-	
+
 	bindNoise<PerlinNoiseV3fV2f>( "PerlinNoiseV3fV2f" );
 	bindNoise<PerlinNoiseV2fV2f>( "PerlinNoiseV2fV2f" );
 	bindNoise<PerlinNoisefV2f>( "PerlinNoisefV2f" );
-	
+
 	bindNoise<PerlinNoiseV3fV3f>( "PerlinNoiseV3fV3f" );
 	bindNoise<PerlinNoiseV2fV3f>( "PerlinNoiseV2fV3f" );
 	bindNoise<PerlinNoisefV3f>( "PerlinNoisefV3f" );
-	
+
 	bindNoise<PerlinNoiseV3fColor3f>( "PerlinNoiseV3fColor3f" );
 	bindNoise<PerlinNoiseV2fColor3f>( "PerlinNoiseV2fColor3f" );
 	bindNoise<PerlinNoisefColor3f>( "PerlinNoisefColor3f" );

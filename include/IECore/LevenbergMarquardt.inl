@@ -116,13 +116,13 @@ void LevenbergMarquardt<T, ErrorFn, Traits>::getParameters(
 ) const
 {
 	ftol = m_ftol;
-	xtol = m_xtol;	
-	gtol = m_gtol;		
+	xtol = m_xtol;
+	gtol = m_gtol;
 	epsilon = m_epsilon;
 	stepBound = m_stepBound;
 }
 
-	
+
 template<typename T, typename ErrorFn, template<typename> class Traits>
 void LevenbergMarquardt<T, ErrorFn, Traits>::setMaxCalls( unsigned maxCalls )
 {

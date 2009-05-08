@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -50,7 +50,7 @@ using namespace boost::python;
 using namespace Imath;
 using namespace std;
 
-namespace IECore 
+namespace IECore
 {
 
 template<typename T>
@@ -88,29 +88,29 @@ DEFINEPLANEPECIALISATION( Plane3d );
 
 template<typename T>
 void bindPlane3(const char *bindName)
-{	
+{
 
 	void (Plane3<T>::*set1)(const Vec3<T> &, T) = &Plane3<T>::set;
 	void (Plane3<T>::*set2)(const Vec3<T> &, const Vec3<T> &) = &Plane3<T>::set;
-	void (Plane3<T>::*set3)(const Vec3<T> &, const Vec3<T> &, const Vec3<T> &) = &Plane3<T>::set;		
+	void (Plane3<T>::*set3)(const Vec3<T> &, const Vec3<T> &, const Vec3<T> &) = &Plane3<T>::set;
 
 	class_< Plane3<T> >(bindName)
 		.def_readwrite("normal", &Plane3<T>::normal)
 		.def_readwrite("distance", &Plane3<T>::distance)
-		
+
 		.def(init<>())
 		.def(init<const Vec3<T> &, T>())
 		.def(init<const Vec3<T> &, const Vec3<T> & >())
 		.def(init<const Vec3<T> &, const Vec3<T> &, const Vec3<T> & >())
-		
+
 		.def( "set", set1 )
 		.def( "set", set2 )
-		.def( "set", set3 )				
+		.def( "set", set3 )
 
 		.def( "distanceTo",  &Plane3<T>::distanceTo )
-		.def( "reflectPoint",  &Plane3<T>::reflectPoint )		
-		.def( "reflectVector",  &Plane3<T>::reflectVector )		
-		
+		.def( "reflectPoint",  &Plane3<T>::reflectPoint )
+		.def( "reflectVector",  &Plane3<T>::reflectVector )
+
 		.def( "__str__", &IECore::str<Plane3<T> > )
 		.def( "__repr__", &IECore::repr<Plane3<T> > )
 	;

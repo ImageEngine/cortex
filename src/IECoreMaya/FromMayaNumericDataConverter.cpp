@@ -62,122 +62,122 @@ FromMayaNumericDataConverter::FromMayaNumericDataConverter( const MObject &objec
 	:	FromMayaObjectConverter( "FromMayaNumericDataConverter", "Converts types compatible with MFnNumericData.", object )
 {
 }
-		
+
 IECore::ObjectPtr FromMayaNumericDataConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
 	MFnNumericData fnData( object, &s );
-	
+
 	switch (fnData.numericType())
 	{
 		case MFnNumericData::k2Short:
 		{
 			short s1, s2;
 			s = fnData.getData( s1, s2 );
-			assert(s);			
-			
+			assert(s);
+
 			V2iDataPtr data = new V2iData();
 			data->writable().x = s1;
-			data->writable().y = s2;						
-			
-			return data;			
-		}	
+			data->writable().y = s2;
+
+			return data;
+		}
 		case MFnNumericData::k3Short:
 		{
 			short s1, s2, s3;
 			s = fnData.getData( s1, s2, s3 );
-			assert(s);			
-			
+			assert(s);
+
 			V3iDataPtr data = new V3iData();
 			data->writable().x = s1;
 			data->writable().y = s2;
 			data->writable().z = s3;
-			
-			return data;			
-		}	
+
+			return data;
+		}
 		case MFnNumericData::k2Int:
 		{
 			int i1, i2;
 			s = fnData.getData( i1, i2 );
-			assert(s);			
-			
+			assert(s);
+
 			V2iDataPtr data = new V2iData();
 			data->writable().x = i1;
-			data->writable().y = i2;						
-			
-			return data;			
-		}	
+			data->writable().y = i2;
+
+			return data;
+		}
 		case MFnNumericData::k3Int:
 		{
 			int i1, i2, i3;
 			s = fnData.getData( i1, i2, i3);
-			assert(s);			
-			
+			assert(s);
+
 			V3iDataPtr data = new V3iData();
 			data->writable().x = i1;
 			data->writable().y = i2;
 			data->writable().z = i3;
-			
-			return data;			
-		}	
+
+			return data;
+		}
 		case MFnNumericData::k2Float:
 		{
 			float f1, f2;
 			s = fnData.getData( f1, f2 );
-			assert(s);			
-			
+			assert(s);
+
 			V2fDataPtr data = new V2fData();
 			data->writable().x = f1;
-			data->writable().y = f2;						
-			
-			return data;			
+			data->writable().y = f2;
+
+			return data;
 		}
 		case MFnNumericData::k3Float:
 		{
 			float f1, f2, f3;
 			s = fnData.getData( f1, f2, f3 );
-			assert(s);			
-			
+			assert(s);
+
 			V3fDataPtr data = new V3fData();
 			data->writable().x = f1;
 			data->writable().y = f2;
 			data->writable().z = f3;
-			
-			return data;			
+
+			return data;
 		}
 		case MFnNumericData::k2Double:
 		{
 			double d1, d2;
 			s = fnData.getData( d1, d2 );
-			assert(s);			
-			
+			assert(s);
+
 			V2dDataPtr data = new V2dData();
 			data->writable().x = d1;
-			data->writable().y = d2;						
-			
-			return data;			
-		}		
+			data->writable().y = d2;
+
+			return data;
+		}
 		case MFnNumericData::k3Double:
 		{
 			double d1, d2, d3;
 			s = fnData.getData( d1, d2, d3 );
-			assert(s);			
-			
+			assert(s);
+
 			V3dDataPtr data = new V3dData();
 			data->writable().x = d1;
 			data->writable().y = d2;
 			data->writable().z = d3;
-			
-			return data;			
-		}		
-		case MFnNumericData::kDouble:		
-		case MFnNumericData::kFloat:		
-		case MFnNumericData::kInt:		
+
+			return data;
+		}
+		case MFnNumericData::kDouble:
+		case MFnNumericData::kFloat:
+		case MFnNumericData::kInt:
 		case MFnNumericData::kBoolean:
 		case MFnNumericData::kByte:
 		case MFnNumericData::kChar:
-		case MFnNumericData::kShort:		
+		case MFnNumericData::kShort:
 		default:
 			return 0;
-	}	
+	}
 }

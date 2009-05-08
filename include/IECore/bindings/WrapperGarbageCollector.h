@@ -48,9 +48,9 @@ namespace IECore
 //\todo Optimize the collect() function. The function is taking too much tests on reference counting when many objects are allocated.
 class WrapperGarbageCollector : public WrapperGarbageCollectorBase
 {
-				
+
 	public :
-	
+
 		WrapperGarbageCollector( PyObject *pyObject, RefCounted *object )
 			:	m_pyObject( pyObject ), m_object( object )
 		{
@@ -63,11 +63,11 @@ class WrapperGarbageCollector : public WrapperGarbageCollectorBase
 
 			g_refCountedToPyObject[object] = pyObject;
 		}
-		
+
 		virtual ~WrapperGarbageCollector()
 		{
 			g_refCountedToPyObject.erase( m_object );
-		}		
+		}
 
 		static void collect()
 		{
@@ -99,12 +99,12 @@ class WrapperGarbageCollector : public WrapperGarbageCollectorBase
 			/// \todo Revisit this with a better thought out strategy, perhaps like python's own garbage collector.
 			g_allocThreshold = std::max( size_t( 50 ), g_refCountedToPyObject.size() );
 		}
-		
+
 	protected :
-	
+
 		PyObject *m_pyObject;
 		RefCounted *m_object;
-			
+
 };
 
 }

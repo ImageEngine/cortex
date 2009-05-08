@@ -49,12 +49,12 @@ class HeaderGenerator
 {
 	public :
 		typedef void (*DataHeaderFn)( CompoundObjectPtr );
-	
+
 		static CompoundObjectPtr header();
 		static bool registerDataHeaderGenerator( DataHeaderFn generator );
 
 	private :
-	
+
 		static std::vector<DataHeaderFn> m_generators;
 };
 

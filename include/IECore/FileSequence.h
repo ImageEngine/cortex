@@ -54,83 +54,83 @@ IE_CORE_FORWARDDECLARE( FileSequence );
 class FileSequence : public RunTimeTyped
 {
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( FileSequence, RunTimeTyped );
-	
+
 		/// Constructs a new FileSequence object with the specified fileName, and FrameList.
 		/// fileName must be a string containing a single sequence of at least # character - this
-		/// represents the location and padding of the frame numbers. 
+		/// represents the location and padding of the frame numbers.
 		FileSequence( const std::string &fileName, FrameListPtr frameList );
 		virtual ~FileSequence();
-		
+
 		const std::string &getFileName() const;
 		void setFileName( const std::string &fileName );
-		
-		FrameListPtr getFrameList();			
+
+		FrameListPtr getFrameList();
 		void setFrameList( FrameListPtr frameList );
-		
+
 		std::string asString() const;
-		
+
 		/// Returns the frame number padding - this is calculated by looking at the
 		/// number of # characters in the fileName
 		unsigned getPadding() const;
-		
+
 		/// Sets the frame number padding - this is achieved by modifying the number of # characters
 		/// in the fileName
 		void setPadding( unsigned padding );
-		
+
 		/// Returns the part of the fileName before the # sequence representing the frame number.
 		std::string getPrefix() const;
-		
+
 		/// Sets the part of fileName before the # sequence to the string specified by prefix.
 		void setPrefix( const std::string &prefix );
-		
+
 		/// Returns the part of fileName following the # sequence representing the frame number.
 		std::string getSuffix() const;
-		
+
 		/// Sets the part of fileName following the # sequence to the string specified by suffix.
 		void setSuffix( const std::string &suffix );
-		
+
 		/// Returns a filename for the sequence represented by this object, with the frame number
 		/// specified by the frameNumber parameter
 		std::string fileNameForFrame( FrameList::Frame frameNumber ) const;
-		
+
 		/// Returns the frame number of a filename from this sequence.
 		FrameList::Frame frameForFileName( const std::string &fileName ) const;
-		
+
 		/// Generates a list of all filenames represented by this object, ordered according to
 		/// the ordering of frames in the FrameList.
 		void fileNames( std::vector< std::string > &f ) const;
-		
+
 		/// Generates a list of lists of filenames represented by this object, with no more
 		/// than clumpSize filenames in each sublist.
 		void clumpedFileNames( unsigned clumpSize, std::vector< std::vector < std::string > > &f ) const;
-		
+
 		/// Returns a deep copy of this object.
 		FileSequencePtr copy() const;
-		
+
 		void mapTo( ConstFileSequencePtr other, std::vector< std::pair< std::string, std::string > > &result ) const;
-		
+
 		void mapTo( ConstFileSequencePtr other, std::map< std::string, std::string > &result ) const;
-	
+
 		/// Returns a regular expression that matches only valid filenames. Matches 1, 2, and 3 of any
 		/// resulting matches are the prefix, padding and suffix of the matched filename.
-		static boost::regex fileNameValidator();				
-		
+		static boost::regex fileNameValidator();
+
 		bool operator ==( const FileSequence &other ) const;
-		
+
 	protected :
-	
+
 		std::string m_fileName;
 		FrameListPtr m_frameList;
-		
+
 		/// Returns a boost::format for expanding out the filename with a frame number. Due to limitations in boost::format
 		/// we need use a different template depending on the sign of the frame number.
 		boost::format fileNameTemplate( bool negativeFrame ) const;
-			
-		
+
+
 };
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_FILESEQUENCE_H

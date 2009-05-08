@@ -78,7 +78,7 @@ void bindSearchPath()
 		.def( "setPaths", &SearchPath::setPaths )
 		.def( "getPaths", &SearchPath::getPaths )
 		.def( self == self  )
-		.add_property( "paths", &getPaths, &setPaths )	
+		.add_property( "paths", &getPaths, &setPaths )
 	;
 }
 

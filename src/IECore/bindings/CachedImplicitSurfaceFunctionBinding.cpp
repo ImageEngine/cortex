@@ -52,13 +52,13 @@ template<typename T>
 void bindCachedImplicitSurfaceFunction( const char *name )
 {
 	typedef ImplicitSurfaceFunction< typename T::Point, typename T::Value> Base;
-	
+
 	RefCountedClass<T, Base>( name )
 		.def( init< typename Base::Ptr, optional< typename T::PointBaseType > > () )
 		.def( "clear", &T::clear )
-		.def( "size", &T::size )		
+		.def( "size", &T::size )
 
-	;	
+	;
 }
 
 void bindCachedImplicitSurfaceFunction()
@@ -66,7 +66,7 @@ void bindCachedImplicitSurfaceFunction()
 	bindCachedImplicitSurfaceFunction<CachedImplicitSurfaceFunctionV3ff>( "CachedImplicitSurfaceFunctionV3ff" );
 	bindCachedImplicitSurfaceFunction<CachedImplicitSurfaceFunctionV3fd>( "CachedImplicitSurfaceFunctionV3fd" );
 	bindCachedImplicitSurfaceFunction<CachedImplicitSurfaceFunctionV3df>( "CachedImplicitSurfaceFunctionV3df" );
-	bindCachedImplicitSurfaceFunction<CachedImplicitSurfaceFunctionV3dd>( "CachedImplicitSurfaceFunctionV3dd" );	
+	bindCachedImplicitSurfaceFunction<CachedImplicitSurfaceFunctionV3dd>( "CachedImplicitSurfaceFunctionV3dd" );
 }
 
 } // namespace IECore

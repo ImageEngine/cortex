@@ -42,7 +42,7 @@ namespace IECore
 {
 
 /// A base class for warp operations on ImagePrimitive objects.
-// This Op modifies an image by remapping pixels values to other locations. 
+// This Op modifies an image by remapping pixels values to other locations.
 // The display window does not change in this process, but the data window may change.
 // The mapping is determined by the derived classes. The base class is responsible for resizing the
 // data window and applying filter on the colors based on the floating point positions returned by warp method.
@@ -59,9 +59,9 @@ class WarpOp : public ImagePrimitiveOp
 		ConstIntParameterPtr filterParameter() const;
 
 		IE_CORE_DECLARERUNTIMETYPED( WarpOp, ImagePrimitiveOp );
-	
+
 	protected :
-	
+
 		/// Implemented to call begin(), warpedDataWindow(), warp() and end(). Derived classes should implement those functions rather than
 		/// this function.
 		virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
@@ -75,15 +75,15 @@ class WarpOp : public ImagePrimitiveOp
 		virtual Imath::Box2i warpedDataWindow( const Imath::Box2i &dataWindow ) const;
 		/// Called once per element (pixel for ImagePrimitives).
 		/// Must be implemented by subclasses to determine where the color will come from.
-		/// The returned coordinate is on pixel space of the input image and the given V2f coordinates are on the 
+		/// The returned coordinate is on pixel space of the input image and the given V2f coordinates are on the
 		/// output image pixel space.
 		virtual Imath::V2f warp( const Imath::V2f &p ) const = 0;
 		/// Called once per operation, after all calls to transform() have been made. This is
 		/// an opportunity to perform any cleanup necessary.
 		virtual void end();
-	
+
 	private :
-	
+
 		IntParameterPtr m_filterParameter;
 
 		struct Warp;

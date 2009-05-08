@@ -67,7 +67,7 @@ ImageReader::ImageReader( const std::string &name, const std::string &descriptio
 		"independent of the dataWindow parameter."
 	);
 
-	m_channelNamesParameter = new StringVectorParameter( 
+	m_channelNamesParameter = new StringVectorParameter(
 		"channels",
 		"The names of all channels to load from the file. If the list is empty (the default value) "
 		"then all channels are loaded."
@@ -87,7 +87,7 @@ ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 		displayWind = displayWindow();
 	}
 	Box2i dataWind = dataWindowToRead();
-	
+
 
 	// create our ImagePrimitive
 	ImagePrimitivePtr image = new ImagePrimitive( dataWind, displayWind );
@@ -103,15 +103,15 @@ ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 	while( ci != channelNames.end() )
 	{
 		DataPtr d = readChannel( *ci, dataWind );
-		
+
 		assert( d  );
 		assert( d->typeId()==FloatVectorDataTypeId || d->typeId()==HalfVectorDataTypeId || d->typeId()==IntVectorDataTypeId );
-		
+
 		PrimitiveVariable p( PrimitiveVariable::Vertex, d );
 		assert( image->isPrimitiveVariableValid( p ) );
-		
+
 		image->variables[*ci] = p;
-		
+
 		ci++;
 	}
 

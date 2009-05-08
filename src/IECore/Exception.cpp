@@ -74,7 +74,7 @@ Exception &Exception::append( const char *s )
 {
 	assert( s );
 	return append( std::string(s) );
-}	
+}
 
 Exception &Exception::prepend( const std::string &s )
 {
@@ -86,4 +86,4 @@ Exception &Exception::prepend( const char *s )
 {
 	assert( s );
 	return prepend( std::string( s ) );
-}			
+}

@@ -47,7 +47,7 @@ BoxPrimitive::BoxPrimitive( const Imath::Box3f &box )
 BoxPrimitive::~BoxPrimitive()
 {
 }
-		
+
 void BoxPrimitive::setBox( const Imath::Box3f &box )
 {
 	m_box = box;
@@ -57,26 +57,26 @@ const Imath::Box3f BoxPrimitive::getBox() const
 {
 	return m_box;
 }
-		
+
 void BoxPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 {
 	glBegin( GL_QUADS );
-	
+
 		glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
 		glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
 		glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
 		glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
-		
+
 		glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
 		glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
 		glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
 		glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
-		
+
 		glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
 		glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
 		glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
 		glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
-		
+
 		glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
 		glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
 		glVertex3f( m_box.min.x, m_box.max.y, m_box.min.z );
@@ -86,12 +86,12 @@ void BoxPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 		glVertex3f( m_box.max.x, m_box.max.y, m_box.min.z );
 		glVertex3f( m_box.max.x, m_box.max.y, m_box.max.z );
 		glVertex3f( m_box.min.x, m_box.max.y, m_box.max.z );
-		
+
 		glVertex3f( m_box.min.x, m_box.min.y, m_box.min.z );
 		glVertex3f( m_box.min.x, m_box.min.y, m_box.max.z );
 		glVertex3f( m_box.max.x, m_box.min.y, m_box.max.z );
 		glVertex3f( m_box.max.x, m_box.min.y, m_box.min.z );
-		
+
 	glEnd();
 }
 

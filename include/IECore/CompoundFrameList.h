@@ -46,42 +46,42 @@ namespace IECore
 class CompoundFrameList : public FrameList
 {
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( CompoundFrameList, FrameList );
-	
+
 		CompoundFrameList();
-		
+
 		/// Constructs a CompoundFrameList object given a list
 		/// of FrameList objects. These can subsequently be accessed and modified
 		/// via the frameLists method
-		CompoundFrameList( const std::vector< FrameListPtr > frameLists );		
+		CompoundFrameList( const std::vector< FrameListPtr > frameLists );
 		virtual ~CompoundFrameList();
-		
+
 		std::vector< FrameListPtr > &getFrameLists();
 		const std::vector< FrameListPtr > &getFrameLists() const;
 		void setFrameLists( const std::vector< FrameListPtr > & );
-		
+
 		/// Returns all the frames represented by the FrameLists in self.frameLists.
 		/// Frames are returned in the order specified by self.frameLists, but duplicate
 		/// frames will be omitted.
-		virtual void asList( std::vector<Frame> &frames ) const ;		
-		virtual std::string asString() const;		
+		virtual void asList( std::vector<Frame> &frames ) const ;
+		virtual std::string asString() const;
 		virtual bool isEqualTo( ConstFrameListPtr other ) const;
 		virtual FrameListPtr copy() const ;
-		
+
 		static FrameListPtr parse( const std::string &frameList );
-		
+
 	protected :
-	
-		std::vector< FrameListPtr > m_frameLists;	
-		
+
+		std::vector< FrameListPtr > m_frameLists;
+
 	private :
-	
-		static FrameList::Parser< CompoundFrameList > g_parserRegistrar;			
+
+		static FrameList::Parser< CompoundFrameList > g_parserRegistrar;
 };
 
 IE_CORE_DECLAREPTR( CompoundFrameList );
-	
+
 } // namespace IECore
 
 

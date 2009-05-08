@@ -66,30 +66,30 @@ namespace IECoreMaya
 class ViewportPostProcessCallback : public IECore::RefCounted
 {
 	public :
-	
+
 		IE_CORE_DECLAREMEMBERPTR( ViewportPostProcessCallback );
-	
+
 		static MStatus registerCallback( const MString &panelName, ViewportPostProcessPtr postProcess );
 		static MStatus deregisterCallback( const MString &panelName );
-		
+
 	protected :
-	
+
 		ViewportPostProcessCallback( const MString &panelName, ViewportPostProcessPtr postProcess );
 		virtual ~ViewportPostProcessCallback();
-	
+
 	 	static void viewPreRender( const MString &panelName, void *clientData );
                 static void viewPostRender( const MString &panelName, void *clientData );
-		
+
 		typedef std::map< std::string, ViewportPostProcessCallback::Ptr> Instances;
 		static Instances g_instances;
                 static size_t g_numInstances;
-		
+
 		MCallbackId m_viewPreRenderId;
-                MCallbackId m_viewPostRenderId; 
+                MCallbackId m_viewPostRenderId;
                 MCallbackId m_idleId;
-		
+
 		ViewportPostProcessPtr m_postProcess;
-		
+
 		MString m_panelName;
 };
 

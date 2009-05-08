@@ -135,7 +135,7 @@ DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::
 	typedef TypedData<vector<T> > DataType;
 	typename DataType::Ptr data = new DataType;
 	data->writable().resize( numPixels );
-	
+
 	Imath::Box2i fullDataWindow = this->dataWindow();
 	if( fullDataWindow.min.x==dataWindow.min.x && fullDataWindow.max.x==dataWindow.max.x )
 	{
@@ -167,13 +167,13 @@ DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::
 		T *tmpBufferTransferStart = &(tmpBuffer[0]) + dataWindow.min.x - fullDataWindow.min.x;
 		size_t tmpBufferTransferLength = pixelDimensions.x * sizeof( T );
 		T *transferDestination = &(data->writable()[0]);
-		
-		// slice has yStride of 0 so each successive scanline just overwrites the previous one		
+
+		// slice has yStride of 0 so each successive scanline just overwrites the previous one
 		Slice slice( channel->type, (char *)(&(tmpBuffer[0]) - fullDataWindow.min.x), sizeof(T), 0 );
 		FrameBuffer frameBuffer;
 		frameBuffer.insert( name.c_str(), slice );
 		m_inputFile->setFrameBuffer( frameBuffer );
-		
+
 		int yStart = dataWindow.min.y;
 		int yEnd = dataWindow.max.y;
 		int yStep = 1;
@@ -191,51 +191,51 @@ DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::
 			// so we can read incomplete files
 			msg( Msg::Warning, "EXRImageReader::readChannel", e.what() );
 			return data;
-		}	
+		}
 	}
-	
+
 #ifndef NDEBUG
 	for ( typename DataType::ValueType::const_iterator it = data->readable().begin(); it != data->readable().end(); ++it )
 	{
 		assert( *it == *it ); // Will fail iff NaN
 	}
-#endif	
-	
+#endif
+
 	return data;
 }
 
 DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dataWindow )
 {
 	open( true );
-	
+
 	try
 	{
-		
+
 		const Channel *channel = m_inputFile->header().channels().findChannel( name.c_str() );
 		assert( channel );
 		assert( channel->xSampling==1 ); /// \todo Support subsampling when we have a need for it
 		assert( channel->ySampling==1 );
-			
+
 		switch( channel->type )
 		{
-	
+
 			case UINT :
 				BOOST_STATIC_ASSERT( sizeof( unsigned int ) == 4 );
-				return readTypedChannel<unsigned int>( name, dataWindow, channel );	
+				return readTypedChannel<unsigned int>( name, dataWindow, channel );
 
 			case HALF :
-				return readTypedChannel<half>( name, dataWindow, channel );	
+				return readTypedChannel<half>( name, dataWindow, channel );
 
 			case FLOAT :
 				BOOST_STATIC_ASSERT( sizeof( float ) == 4 );
-				return readTypedChannel<float>( name, dataWindow, channel );	
+				return readTypedChannel<float>( name, dataWindow, channel );
 
 			default:
 				throw IOException( ( boost::format( "EXRImageReader : Unsupported data type for channel \"%s\"" ) % name ).str() );
-		
+
 		}
-		
-	} 
+
+	}
 	catch ( Exception &e )
 	{
 		throw;
@@ -266,7 +266,7 @@ bool EXRImageReader::open( bool throwOnFailure )
 
 	delete m_inputFile;
 	m_inputFile = 0;
-		
+
 	try
 	{
 		m_inputFile = new Imf::InputFile( fileName().c_str() );
@@ -283,7 +283,7 @@ bool EXRImageReader::open( bool throwOnFailure )
 		{
 			throw IOException( string( "Failed to open file \"" ) + fileName() + "\"" );
 		}
-	}	
+	}
 
 	return true;
 }

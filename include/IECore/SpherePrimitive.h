@@ -43,15 +43,15 @@ namespace IECore
 
 /// SpherePrimitive represents a renderable parametric sphere
 class SpherePrimitive : public Primitive
-{	  
-	
+{
+
 	public:
 
 		IE_CORE_DECLAREOBJECT( SpherePrimitive, Primitive );
 
 		/// Construct a full sphere of radius 1.
 		SpherePrimitive();
-		
+
 		/// Construct a sphere with specified parameterisation. zMin and zMax differ from the Renderman specification
 		/// slightly in that they're given as a proportion of that radius, so they should fall within the range [-1, 1 ]
 		SpherePrimitive( float radius, float zMin = -1.0f, float zMax = 1.0f, float thetaMax = 360.0f );
@@ -60,23 +60,23 @@ class SpherePrimitive : public Primitive
 		/// These functions allow access to get and set the sphere's geometry after construction.
 		/////////////////////////////////////////////////////////////////////////////
 		//@{
-		
+
 		float radius() const;
 		float zMin() const;
 		float zMax() const;
-		
+
 		/// The returned value is specified in degrees
-		float thetaMax() const;	
-		
+		float thetaMax() const;
+
 		void setRadius( float r );
 		void setZMin( float zm );
 		void setZMax( float zm );
-		
-		/// The value of thetaMax shoud be specified in degrees		
-		void setThetaMax( float tm );						
-		
+
+		/// The value of thetaMax shoud be specified in degrees
+		void setThetaMax( float tm );
+
 		//@}
-	
+
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
 		/// Render the sphere
@@ -85,14 +85,14 @@ class SpherePrimitive : public Primitive
 	private:
 
 		static const unsigned int m_ioVersion;
-		
+
 		float m_radius;
 		float m_zMin;
 		float m_zMax;
 		float m_thetaMax;
-			
-};  
-	
+
+};
+
 IE_CORE_DECLAREPTR( SpherePrimitive );
 
 }

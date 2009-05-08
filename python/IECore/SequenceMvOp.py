@@ -37,7 +37,7 @@ from IECore import *
 class SequenceMvOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "SequenceMvOp", "Moves file sequences.",
 			FileSequenceParameter(
 				name = "result",
@@ -47,7 +47,7 @@ class SequenceMvOp( Op ) :
 				allowEmptyString = True,
 			)
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				FileSequenceParameter(
@@ -68,11 +68,11 @@ class SequenceMvOp( Op ) :
 		)
 
 	def doOperation( self, operands ) :
-	
+
 		src = self.parameters()["src"].getFileSequenceValue()
 		dst = src.copy() # to get the frameList
 		dst.fileName = operands.dst.value
-		
+
 		mv( src, dst )
 
 		return StringData( dst.fileName )

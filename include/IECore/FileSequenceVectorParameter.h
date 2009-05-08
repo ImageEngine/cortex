@@ -44,7 +44,7 @@
 namespace IECore
 {
 
-/// The FileSequenceParameter class implements a Parameter to hold a list of FileSequences. 
+/// The FileSequenceParameter class implements a Parameter to hold a list of FileSequences.
 /// As it can't store FileSequence objects as its value (they're not derived from Object) it stores
 /// a list of string representing the sequences instead, but provides methods for turning these
 ///  into a list of FileSequence objects.
@@ -53,56 +53,56 @@ namespace IECore
 /// for frame ranges.
 class FileSequenceVectorParameter : public PathVectorParameter
 {
-	public:		
-	
+	public:
+
 		typedef std::vector< std::string > ExtensionList;
-	
+
 		IE_CORE_DECLAREOBJECT( FileSequenceVectorParameter, PathVectorParameter );
-		
+
 		FileSequenceVectorParameter( const std::string &name, const std::string &description, const std::vector< std::string > &defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
 			const StringVectorParameter::PresetsContainer &presets = StringVectorParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
 			const ExtensionList &extensions = ExtensionList() );
-				
+
 		virtual ~FileSequenceVectorParameter();
-		
+
 		const ExtensionList &getExtensions() const;
 		void setExtensions( const ExtensionList &extensions );
-		
+
 		/// Returns true only if the value is StringVectorData and each string matches the FileSequence::fileNameValidator
 		/// regex. Also checks that the sequences exist or don't exist based on the CheckType passed to
  		/// the constructor.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
-		
-		void setFileSequenceValues( const std::vector< FileSequencePtr > &sequences );	
-		
+
+		void setFileSequenceValues( const std::vector< FileSequencePtr > &sequences );
+
 		/// Gets the internal StringData value and creates a FileSequence
 		/// from it using the ls() function. Note that this can return 0
-		/// if check is DontCare and no matching sequence exists on disk.	
+		/// if check is DontCare and no matching sequence exists on disk.
 		void getFileSequenceValues( std::vector< FileSequencePtr > &sequences ) const;
-		
+
 	protected :
-	
-		
+
+
 		/// Find the longest space-delimited tail substring that is a parseable FrameList and
-		/// return a FileSequence instance which contains that FrameList. Everything before that is considered to 
-		/// be part of the filename. Previous implementations would just split on the first space character 
+		/// return a FileSequence instance which contains that FrameList. Everything before that is considered to
+		/// be part of the filename. Previous implementations would just split on the first space character
 		/// encountered, but this wouldn't allow for the filename portion of the value to include spaces itself.
 		FileSequencePtr parseFileSequence( const std::string &fileSequenceString ) const;
-	
+
 		ExtensionList m_extensions;
-	
+
 		// for io and copying
 		FileSequenceVectorParameter();
 		friend class TypeDescription<FileSequenceVectorParameter>;
-	
+
 	private :
-	
+
 		static const unsigned int g_ioVersion;
-			
+
 };
 
 IE_CORE_DECLAREPTR( FileSequenceVectorParameter );
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_FILESEQUENCEVECTORPARAMETER_H

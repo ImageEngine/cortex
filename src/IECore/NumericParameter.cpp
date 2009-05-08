@@ -71,7 +71,7 @@ NumericParameter<T>::NumericParameter()
 template<typename T>
 NumericParameter<T>::NumericParameter( const std::string &name, const std::string &description, T defaultValue,
 	T minValue, T maxValue, const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
-	:	Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), presetsOnly, userData ), m_min( minValue ), m_max( maxValue )	
+	:	Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), presetsOnly, userData ), m_min( minValue ), m_max( maxValue )
 {
 	if ( defaultValue < minValue || defaultValue > maxValue )
 	{
@@ -84,32 +84,32 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 	const PresetsContainer &presets, ConstCompoundObjectPtr userData )
 	: Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), true, userData ), m_min( Imath::limits<T>::min() ), m_max( Imath::limits<T>::max() )
 {
-}	
+}
 
 /////////////////////////////////////////////////////////////////////////////////////
 // runtimetyped stuff
 /////////////////////////////////////////////////////////////////////////////////////
 
-template <class T> 
+template <class T>
 TypeId NumericParameter<T>::typeId() const
 {
 	return staticTypeId();
 }
 
-template <class T> 
+template <class T>
 TypeId NumericParameter<T>::staticTypeId()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return InvalidTypeId;
 }
 
-template <class T> 
+template <class T>
 const char *NumericParameter<T>::typeName() const
 {
 	return staticTypeName();
 }
 
-template <class T> 
+template <class T>
 const char *NumericParameter<T>::staticTypeName()
 {
 	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
@@ -117,13 +117,13 @@ const char *NumericParameter<T>::staticTypeName()
 }
 
 
-template <class T> 
+template <class T>
 TypeId NumericParameter<T>::baseTypeId()
-{	
+{
 	return Parameter::staticTypeId();
 }
 
-template <class T> 
+template <class T>
 const char *NumericParameter<T>::baseTypeName()
 {
 	return Parameter::staticTypeName();
@@ -165,7 +165,7 @@ bool NumericParameter<T>::inheritsFrom( const char *typeName )
 // object stuff
 /////////////////////////////////////////////////////////////////////////////////////
 
-template <class T> 
+template <class T>
 typename NumericParameter<T>::Ptr NumericParameter<T>::copy() const
 {
 	return boost::static_pointer_cast<NumericParameter<T> >( copy() );
@@ -185,8 +185,8 @@ void NumericParameter<T>::save( SaveContext *context ) const
 {
 	Parameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	container->write( "min", m_min );	
-	container->write( "max", m_max );	
+	container->write( "min", m_min );
+	container->write( "max", m_max );
 }
 
 template<class T>
@@ -219,7 +219,7 @@ void NumericParameter<T>::memoryUsage( Object::MemoryAccumulator &a ) const
 
 /////////////////////////////////////////////////////////////////////////////////////
 // other stuff
-/////////////////////////////////////////////////////////////////////////////////////					
+/////////////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
 bool NumericParameter<T>::hasMinValue() const
@@ -267,8 +267,8 @@ template<typename T>
 void NumericParameter<T>::setNumericValue( T value )
 {
 	setValue( new TypedData<T>( value ) );
-}	
-								
+}
+
 template<typename T>
 bool NumericParameter<T>::valueValid( ConstObjectPtr value, std::string *reason ) const
 {
@@ -298,7 +298,7 @@ bool NumericParameter<T>::valueValid( ConstObjectPtr value, std::string *reason 
 
 /////////////////////////////////////////////////////////////////////////////////////
 // specialisation and template instantiation
-/////////////////////////////////////////////////////////////////////////////////////	
+/////////////////////////////////////////////////////////////////////////////////////
 
 
 #define IE_CORE_DEFINENUMERICPARAMETERSPECIALISATION( T, TNAME )					\
@@ -318,7 +318,7 @@ bool NumericParameter<T>::valueValid( ConstObjectPtr value, std::string *reason 
 	template class NumericParameter<T>;												\
 
 namespace IECore
-{	
+{
 IE_CORE_DEFINENUMERICPARAMETERSPECIALISATION( int, IntParameter )
 IE_CORE_DEFINENUMERICPARAMETERSPECIALISATION( float, FloatParameter )
 IE_CORE_DEFINENUMERICPARAMETERSPECIALISATION( double, DoubleParameter )

@@ -73,14 +73,14 @@ float QuadPrimitive::getHeight() const
 {
 	return m_height;
 }
-				
+
 void QuadPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 {
-	
+
 	glBegin( GL_QUADS );
-	
+
 		glNormal3f( 0, 0, 1.0f );
-	
+
 		glTexCoord2f( 0.0f, 0.0f );
 		glVertex2f( -m_width/2, -m_height/2 );
 		glTexCoord2f( 1.0f, 0.0f );

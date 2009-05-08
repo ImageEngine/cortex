@@ -56,16 +56,16 @@ FileSystemIndexedIO::FileSystemIndexedIO(const std::string &path, const IndexedI
 {
 	validateOpenMode(mode);
 	m_mode = mode;
-	
+
 	IndexedIOPath tmp( path );
 	tmp.append(root);
-	
-	
+
+
 	m_currentDirectory = IndexedIOPath( tmp.fullPath() );
-		
+
 	std::string d = m_currentDirectory.appended(".").fullPath();
 
-	if (mode & IndexedIO::Read) 
+	if (mode & IndexedIO::Read)
 	{
 		// Reading
 		if (!fs::exists(d))
@@ -74,7 +74,7 @@ FileSystemIndexedIO::FileSystemIndexedIO(const std::string &path, const IndexedI
 		}
 	}
 	else
-	{		
+	{
 		// Writing
 		if (mode & IndexedIO::Write)
 		{
@@ -83,18 +83,18 @@ FileSystemIndexedIO::FileSystemIndexedIO(const std::string &path, const IndexedI
 				rm(".");
 			}
 		}
-		
+
 		mkdir(".");
 	}
-	
+
 	if (!fs::exists(d))
 	{
 		throw IOException(d);
 	}
-	
+
 	chdir(".");
-}	
-		
+}
+
 FileSystemIndexedIO::~FileSystemIndexedIO()
 {
 }
@@ -105,27 +105,27 @@ IndexedIO::OpenMode FileSystemIndexedIO::openMode() const
 }
 
 IndexedIOInterfacePtr FileSystemIndexedIO::resetRoot() const
-{	
+{
 	IndexedIO::OpenMode mode = m_mode;
-	
+
 	if (mode & IndexedIO::Write)
 	{
 		mode &= ~IndexedIO::Write;
 		assert( (mode & IndexedIO::Shared) == (m_mode & IndexedIO::Shared) );
 		assert( (mode & IndexedIO::Exclusive) == (m_mode & IndexedIO::Exclusive) );
-		assert( !(mode & IndexedIO::Write) );	
+		assert( !(mode & IndexedIO::Write) );
 		mode |= IndexedIO::Append;
 	}
-	
+
 	return new FileSystemIndexedIO( m_currentDirectory.fullPath(), "/", mode);
 }
-		
+
 void FileSystemIndexedIO::chdir(const IndexedIO::EntryID &name)
 {
 	readable(name);
-	
+
 	const std::string d = m_currentDirectory.appended(name).fullPath();
-		
+
 	if ( !fs::exists( d ) )
 	{
 		throw FileNotFoundIOException(name);
@@ -133,135 +133,135 @@ void FileSystemIndexedIO::chdir(const IndexedIO::EntryID &name)
 
 	m_currentDirectory.append(name);
 }
-	
+
 void FileSystemIndexedIO::mkdir(const IndexedIO::EntryID &name)
 {
 	const std::string d = m_currentDirectory.appended(name).fullPath();
-	
+
 	if ( fs::exists( d ) )
 	{
 		return;
 	}
-	
+
 	fs::create_directory(d);
-	
+
 	if ( !fs::exists( d ) )
 	{
 		throw IOException(name);
 	}
 }
-		
+
 IndexedIO::EntryID FileSystemIndexedIO::pwd()
 {
 	readable(".");
-	
+
 	return m_currentDirectory.relativePath();
 }
 
 IndexedIO::EntryList FileSystemIndexedIO::ls(IndexedIOFilterPtr f)
-{	
+{
 	IndexedIO::EntryList result;
-	
+
 	readable(".");
-	
+
 	const std::string fullPath = m_currentDirectory.fullPath();
 	if ( !fs::exists( fullPath ) )
 	{
 		throw FileNotFoundIOException( fullPath );
 	}
-	
+
 	fs::directory_iterator dirIt (fullPath);
 	const fs::directory_iterator endIt;
 	for (; dirIt != endIt; ++dirIt)
 	{
 		if ( fs::is_directory( *dirIt ) )
-		{			
+		{
 			result.push_back( IndexedIO::Entry( dirIt->path().leaf(), IndexedIO::Directory, IndexedIO::Invalid, 0 ) );
 		}
 		else
-		{			
+		{
 			fs::fstream f( *dirIt, std::ios::binary | std::ios::in );
-			
+
 			if (! f.is_open() || !f.good())
 			{
 				throw IOException( fullPath );
 			}
-			
+
 			unsigned long size = 0;
 			IndexedIO::DataType datatype = IndexedIO::Invalid;
-	
+
 			f.read( reinterpret_cast<char *>(&size), sizeof(unsigned long ) );
 			if (f.fail()) throw IOException( fullPath );
-			
+
 			unsigned long arrayLength = 0;
 			f.read( reinterpret_cast<char *>(&arrayLength), sizeof(unsigned long) );
 			if (f.fail()) throw IOException( fullPath );
-				
+
 			f.read( reinterpret_cast<char *>(&datatype), sizeof(IndexedIO::DataType) );
 			if (f.fail()) throw IOException( fullPath );
-			
+
 			f.close();
-			
+
 			result.push_back( IndexedIO::Entry( dirIt->path().leaf(), IndexedIO::File, datatype, arrayLength) );
 		}
 	}
-	
+
 	if (f)
 	{
 		f->apply(result);
-	}	
-	
+	}
+
 	return result;
 }
 
 unsigned long FileSystemIndexedIO::rm(const IndexedIO::EntryID &name)
 {
 	writable(name);
-	
+
 	const std::string d = m_currentDirectory.appended(name).fullPath();
-	
+
 	if ( !fs::exists( d ) )
 	{
 		throw FileNotFoundIOException(name);
 	}
-	
+
 	return fs::remove_all( d );
 }
 
 IndexedIO::Entry FileSystemIndexedIO::ls(const IndexedIO::EntryID &name)
 {
 	readable(name);
-	
+
 	const std::string p = m_currentDirectory.appended(name).fullPath();
-	
+
 	if ( !fs::exists( p ) )
 	{
 		throw FileNotFoundIOException(name);
 	}
-	
+
 	if ( fs::is_directory( p ) )
 	{
 		return IndexedIO::Entry( name, IndexedIO::Directory, IndexedIO::Invalid, 0 );
 	}
-	
+
 	fs::fstream f( p, std::ios::binary | std::ios::in );
 	if (!f.is_open() || f.fail()) throw IOException(name);
-			
+
 	unsigned long size = 0;
 	IndexedIO::DataType datatype = IndexedIO::Invalid;
-	
+
 	f.read( reinterpret_cast<char *>(&size), sizeof(unsigned long) );
 	if (f.fail()) throw IOException(name);
-	
-	unsigned long arrayLength = 0;	
+
+	unsigned long arrayLength = 0;
 	f.read( reinterpret_cast<char *>(&arrayLength), sizeof(unsigned long) );
 	if (f.fail()) throw IOException(name);
-		
+
 	f.read( reinterpret_cast<char *>(&datatype), sizeof(IndexedIO::DataType) );
 	if (f.fail()) throw IOException(name);
-			
+
 	f.close();
-	
+
 	return IndexedIO::Entry(name, IndexedIO::File, datatype, arrayLength);
 }
 
@@ -270,11 +270,11 @@ template<typename T>
 void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength)
 {
 	writable(name);
-	
+
 	const IndexedIO::DataType datatype = IndexedIO::DataTypeTraits<T*>::type();
-	
+
 	const std::string p = m_currentDirectory.appended(name).fullPath();
-	
+
 	if (fs::exists(p))
 	{
 		if (m_mode & IndexedIO::Write || m_mode & IndexedIO::Append)
@@ -288,31 +288,31 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsi
 	}
 
 	fs::fstream f( p , std::ios::binary | std::ios::out );
-	
+
 	if (! f.is_open() )
 	{
 		throw IOException(name);
 	}
 
 	unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
-	
+
 	f.write( reinterpret_cast<const char *>(&size), sizeof(unsigned long) );
 	if (f.fail()) throw IOException(name);
-		
+
 	f.write( reinterpret_cast<const char *>(&arrayLength), sizeof(unsigned long) );
 	if (f.fail()) throw IOException(name);
-		
+
 	f.write( reinterpret_cast<const char *>(&datatype), sizeof(IndexedIO::DataType) );
 	if (f.fail()) throw IOException(name);
-		
+
 	const char *data = IndexedIO::DataFlattenTraits<T*>::flatten(x, arrayLength);
-		
+
 	f.write(data, size);
-	
+
 	IndexedIO::DataFlattenTraits<T*>::free(data);
-	
+
 	if (f.fail()) throw IOException(name);
-		
+
 	f.close();
 }
 
@@ -321,51 +321,51 @@ template<typename T>
 void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const
 {
 	readable(name);
-	
+
 	const std::string p = m_currentDirectory.appended(name).fullPath();
-	
+
 	if (! fs::exists(p))
-	{		
+	{
 		throw FileNotFoundIOException(name);
 	}
-	
+
 	fs::fstream f( p , std::ios::binary | std::ios::in);
 	if (! f.is_open() || !f.good() )
 	{
 		throw IOException(name);
 	}
-	
+
 	try
-	{	
+	{
 		unsigned long size = 0;
 		IndexedIO::DataType datatype = IndexedIO::Invalid;
-				
+
 		f.read( reinterpret_cast<char *>(&size), sizeof(unsigned long) );
 		if (f.fail()) throw IOException(name);
-			
+
 		unsigned long length = 0;
 		f.read( reinterpret_cast<char *>(&length), sizeof(unsigned long) );
 		if (f.fail()) throw IOException(name);
-			
+
 		if (length != arrayLength)
 		{
 			throw IOException(name);
 		}
-			
+
 		f.read( reinterpret_cast<char *>(&datatype), sizeof(IndexedIO::DataType) );
 		if (f.fail()) throw IOException(name);
-		
+
 		if (datatype != IndexedIO::DataTypeTraits<T*>::type())
 		{
 			throw IOException(name);
 		}
-		
+
 		std::vector<char> buf( size );
 		f.read(&buf[0], size);
 		if (f.fail()) throw IOException(name);
-		
+
 		IndexedIO::DataFlattenTraits<T*>::unflatten(&buf[0], x, arrayLength);
-	}	
+	}
 	catch (std::exception &e)
 	{
 		f.close();
@@ -382,7 +382,7 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 	writable(name);
 
 	IndexedIO::DataType datatype = IndexedIO::DataTypeTraits<T>::type();
-	
+
 	std::string p = m_currentDirectory.appended(name).fullPath();
 	if (fs::exists(p))
 	{
@@ -395,79 +395,79 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 			throw IOException(name);
 		}
 	}
-	
+
 	fs::fstream f( p , std::ios::binary | std::ios::out);
-	
+
 	if (! f.is_open() )
 	{
 		throw IOException(name);
 	}
 	const char *data = 0;
-	
+
 	try
-	{		
+	{
 		unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
-	
+
 		f.write( reinterpret_cast<const char *>(&size), sizeof(unsigned long) );
 		if (f.fail()) throw IOException(name);
-			
+
 		unsigned long arrayLength = 0;
 		f.write( reinterpret_cast<const char *>(&arrayLength), sizeof(unsigned long) );
 		if (f.fail()) throw IOException(name);
-	
+
 		f.write( reinterpret_cast<const char *>(&datatype), sizeof(IndexedIO::DataType) );
 		if (f.fail()) throw IOException(name);
-			
+
 		data = IndexedIO::DataFlattenTraits<T>::flatten(x);
-		f.write( data, size );		
-		if (f.fail()) throw IOException(name);						
-	} 
+		f.write( data, size );
+		if (f.fail()) throw IOException(name);
+	}
 	catch (std::exception &e)
-	{		
-		IndexedIO::DataFlattenTraits<T>::free(data);		
-		f.close();		
-		
+	{
+		IndexedIO::DataFlattenTraits<T>::free(data);
+		f.close();
+
 		throw;
 	}
 
-	IndexedIO::DataFlattenTraits<T>::free(data);	
-	f.close();		
+	IndexedIO::DataFlattenTraits<T>::free(data);
+	f.close();
 }
-		
+
 /// Read a POD type
 template<typename T>
 void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 {
 	readable(name);
-	
+
 	const std::string p = m_currentDirectory.appended(name).fullPath();
-	
+
 	if (! fs::exists(p))
 	{
 		throw FileNotFoundIOException(name);
 	}
-	
+
 	fs::fstream f( p , std::ios::binary | std::ios::in);
 	if (! f.is_open() || !f.good() )
 	{
 		throw IOException(name);
 	}
-	
+
 	try
-	{	
+	{
 		unsigned long size = 0;
 		IndexedIO::DataType datatype = IndexedIO::Invalid;
-	
+
 		f.read( reinterpret_cast<char *>(&size), sizeof(unsigned long) );
 		if (f.fail()) throw IOException(name);
-			
+
 		unsigned long arrayLength = 0;
 		f.read( reinterpret_cast<char *>(&arrayLength), sizeof(unsigned long) );
 		if (f.fail()) throw IOException(name);
-	
+
 		f.read( reinterpret_cast<char *>(&datatype), sizeof(IndexedIO::DataType) );
 		if (f.fail()) throw IOException(name);
-	
+
 		if (datatype != IndexedIO::DataTypeTraits<T>::type())
 		{
 			throw IOException(name);
@@ -475,17 +475,17 @@ void FileSystemIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 
 		std::vector<char> buf( size );
 		f.read(&buf[0], size);
-		if (f.fail()) throw IOException(name);		 
-			
+		if (f.fail()) throw IOException(name);
+
 		IndexedIO::DataFlattenTraits<T>::unflatten( &buf[0], x );
 	}
 	catch (std::exception &e)
 	{
 		f.close();
-		
+
 		throw;
-	}	
-	
+	}
+
 	f.close();
 }
 
@@ -495,12 +495,12 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const float *x, 
 }
 
 void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength)
-{	
+{
 	write<double>(name, x, arrayLength);
 }
 
 void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength)
-{	
+{
 	write<half>(name, x, arrayLength);
 }
 
@@ -518,7 +518,7 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const uint64_t *
 {
 	write<uint64_t>(name, x, arrayLength);
 }
-	
+
 void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const float &x)
 {
 	write<float>(name, x);
@@ -537,7 +537,7 @@ void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const half &x)
 void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const int &x)
 {
 	write<int>(name, x);
-}	
+}
 
 void FileSystemIndexedIO::write(const IndexedIO::EntryID &name, const int64_t &x)
 {

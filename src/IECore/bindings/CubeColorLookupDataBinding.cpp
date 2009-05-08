@@ -52,19 +52,19 @@ namespace IECore
 
 template<class T>
 static std::string repr( T &x )
-{	
+{
 	std::stringstream s;
-			
+
 	s << "IECore." << x.typeName() << "( ";
-	
+
 	object item( x.readable() );
-	
+
 	assert( item.attr( "__repr__" ) != object() );
-			
+
 	s << call_method< std::string >( item.ptr(), "__repr__" );
-	
+
 	s << " )";
-	
+
 	return s.str();
 }
 

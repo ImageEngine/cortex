@@ -45,11 +45,11 @@ namespace IECore
 
 void bindTriangulateOp()
 {
-	
+
 	RunTimeTypedClass<TriangulateOp>()
 		.def( init< >() )
 	;
-	
+
 }
 
 } // namespace IECore

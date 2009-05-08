@@ -49,10 +49,10 @@ namespace IECore
 {
 
 static std::string repr( CompoundObject &o )
-{	
+{
 	std::stringstream s;
 
-	s << "IECore." << o.typeName() << "(";		
+	s << "IECore." << o.typeName() << "(";
 
 	bool added = false;
 	for (
@@ -69,7 +69,7 @@ static std::string repr( CompoundObject &o )
 			if ( !added )
 			{
 				added = true;
-				s << "{";	
+				s << "{";
 			}
 			else
 			{
@@ -79,7 +79,7 @@ static std::string repr( CompoundObject &o )
 			s << "'";
 			s << key;
 			s << "':";
-			s << v;					
+			s << v;
 		}
 	}
 
@@ -184,7 +184,7 @@ static boost::python::list values( const CompoundObject &o )
 class CompoundObjectFromPythonDict
 {
 	public :
-	
+
 		CompoundObjectFromPythonDict()
 		{
 			converter::registry::push_back(
@@ -193,8 +193,8 @@ class CompoundObjectFromPythonDict
 				type_id<CompoundObjectPtr> ()
 			);
 		}
-		
-	private :	
+
+	private :
 
 		static void *convertible( PyObject *obj_ptr )
 		{
@@ -219,7 +219,7 @@ class CompoundObjectFromPythonDict
 			new( storage ) CompoundObjectPtr( compoundObjectFromDict( d ) );
 			data->convertible = storage;
 		}
-	
+
 		static CompoundObjectPtr compoundObjectFromDict( const dict &v )
 		{
 			CompoundObjectPtr x = new CompoundObject();
@@ -231,7 +231,7 @@ class CompoundObjectFromPythonDict
 				object key(keys[i]);
 				object value(values[i]);
 				extract< const std::string > keyElem(key);
-				if (!keyElem.check()) 
+				if (!keyElem.check())
 				{
 					PyErr_SetString(PyExc_TypeError, "Incompatible key type. Only strings accepted.");
 					throw_error_already_set();
@@ -250,13 +250,13 @@ class CompoundObjectFromPythonDict
 					setItem( *x, keyElem(), *sub );
 					continue;
 				}
-				else 
+				else
 				{
 					PyErr_SetString(PyExc_TypeError, "Incompatible value type - must be Object or dict.");
 					throw_error_already_set();
 				}
 			}
-			
+
 			return x;
 		}
 };
@@ -267,14 +267,14 @@ static void update( CompoundObject &x, ConstCompoundObjectPtr y )
 	assert( y );
 	CompoundObject::ObjectMap::const_iterator it = y->members().begin();
 
-	for (; it != y->members().end(); it++) 
+	for (; it != y->members().end(); it++)
 	{
 		setItem( x, it->first, *it->second );
 	}
 }
 
 /// copy constructor
-static CompoundObjectPtr copyConstructor( ConstCompoundObjectPtr other ) 
+static CompoundObjectPtr copyConstructor( ConstCompoundObjectPtr other )
 {
 	assert( other );
 	CompoundObjectPtr r = new CompoundObject();
@@ -284,7 +284,7 @@ static CompoundObjectPtr copyConstructor( ConstCompoundObjectPtr other )
 
 void bindCompoundObject()
 {
-	
+
 	RunTimeTypedClass<CompoundObject>()
 		.def( init<>() )
 		.def("__init__", make_constructor(&copyConstructor), "Copy constructor.")
@@ -302,9 +302,9 @@ void bindCompoundObject()
 		.def( "values", &values )
 		.def( "update", &update )
 	;
-	
+
 	CompoundObjectFromPythonDict();
-	
+
 }
 
 } // namespace IECore

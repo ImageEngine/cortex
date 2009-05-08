@@ -52,19 +52,19 @@ namespace IECoreMaya
 class ImageViewportPostProcess : public ViewportPostProcess
 {
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( ImageViewportPostProcess )
-	
+
 		ImageViewportPostProcess();
 		virtual ~ImageViewportPostProcess();
-				
+
 	protected:
-	
+
 		/// Performs in-place modification of the given ImagePrimitive. Derived classes need to implement this.
 		virtual void postRender( const std::string &panelName, IECore::ImagePrimitivePtr image ) = 0;
-		
+
 	private :
-		
+
 		/// Performs the appropriate MImage<->ImagePrimitive conversions around call through to abstract ImageViewportPostProcess::postRender()
 		virtual void postRender( const std::string &panelName, MImage &image );
 };

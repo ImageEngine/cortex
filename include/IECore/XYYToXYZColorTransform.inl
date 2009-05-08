@@ -50,21 +50,21 @@ namespace IECore
 {
 
 template<typename F, typename T>
-XYYToXYZColorTransform<F, T>::XYYToXYZColorTransform() 
-{	
+XYYToXYZColorTransform<F, T>::XYYToXYZColorTransform()
+{
 	m_referenceWhite.x = 0.312713;
 	m_referenceWhite.y = 0.329016;
 }
 
 template<typename F, typename T>
 template<typename C>
-XYYToXYZColorTransform<F, T>::XYYToXYZColorTransform(		
-	const C &referenceWhite						
-) 
+XYYToXYZColorTransform<F, T>::XYYToXYZColorTransform(
+	const C &referenceWhite
+)
 {
 	typedef VectorTraits<C> VecTraits;
 	m_referenceWhite.x = VecTraits::get( referenceWhite, 0 );
-	m_referenceWhite.y = VecTraits::get( referenceWhite, 1 );	
+	m_referenceWhite.y = VecTraits::get( referenceWhite, 1 );
 }
 
 template<typename F, typename T>
@@ -75,14 +75,14 @@ T XYYToXYZColorTransform<F, T>::transform( const F &f )
 	{
 		return IECore::convert<T>( Imath::V3f( 0, 0, 0 ) );
 	}
-	
+
 	Imath::V3f xyz;
-	
+
 	xyz.x = xyy.x * xyy.z / xyy.y;
 	xyz.y = xyy.z;
 	xyz.z = ( 1.0 - xyy.x - xyy.y ) * xyy.z / xyy.y;
-	
-	return IECore::convert<T>( xyz );		
+
+	return IECore::convert<T>( xyz );
 }
 
 template<typename F, typename T>

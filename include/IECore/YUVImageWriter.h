@@ -48,18 +48,18 @@ namespace IECore
 class YUVImageWriter : public ImageWriter
 {
 	public:
-	
+
 		typedef enum
 		{
 			/// Write a YUV 4:2:0 file as 3 separate image planes, Y followed by U, then V
 			YUV420P,
-			
+
 			/// Write a YUV 4:2:2 file as 3 separate image planes, Y followed by U, then V
 			YUV422P,
-			
+
 			/// Write a YUV 4:4:4 file as 3 separate image planes, Y followed by U, then V
 			YUV444P,
-			
+
 		} Format;
 
 		IE_CORE_DECLARERUNTIMETYPED( YUVImageWriter, ImageWriter )
@@ -69,22 +69,22 @@ class YUVImageWriter : public ImageWriter
 		/// Construct an YUVImageWriter for the given image and output filename
 		YUVImageWriter(ObjectPtr object, const std::string & fileName);
 		virtual ~YUVImageWriter();
-		
-		virtual std::string destinationColorSpace() const ;		
+
+		virtual std::string destinationColorSpace() const ;
 
 		IntParameterPtr formatParameter();
 		ConstIntParameterPtr formatParameter() const;
-		
+
 		V2fParameterPtr kBkRParameter();
 		ConstV2fParameterPtr kBkRParameter() const;
-		
-		Box3fParameterPtr rangeParameter();		
-		ConstBox3fParameterPtr rangeParameter() const;	
+
+		Box3fParameterPtr rangeParameter();
+		ConstBox3fParameterPtr rangeParameter() const;
 
 	private:
 
 		static const WriterDescription<YUVImageWriter> m_writerDescription;
-		
+
 		struct ChannelConverter;
 
 		/// write the image
@@ -93,7 +93,7 @@ class YUVImageWriter : public ImageWriter
 		                         const Imath::Box2i &dw ) const;
 
 		void constructParameters();
-		
+
 		IntParameterPtr m_formatParameter;
 		V2fParameterPtr m_kBkRParameter;
 		Box3fParameterPtr m_rangeParameter;

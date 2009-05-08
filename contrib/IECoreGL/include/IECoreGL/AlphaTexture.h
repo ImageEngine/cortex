@@ -43,26 +43,26 @@ namespace IECoreGL
 class AlphaTexture : public Texture
 {
 	public :
-				
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::AlphaTexture, AlphaTextureTypeId, Texture );
-		
+
 		/// Constructs a texture using the specified data.
 		AlphaTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr a, bool mipMap=true );
-		
+
 		/// Creates an AlphaTexture from the specified image. Currently ignores the display window and uses only
 		/// the data window. Image must have an "A" channel.
 		AlphaTexture( IECore::ConstImagePrimitivePtr image, bool mipMap=true );
-					
+
 		virtual ~AlphaTexture();
 
 		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
 
 	private :
-	
+
 		struct Constructor;
-	
+
 		void construct( unsigned int width, unsigned int height, IECore::ConstDataPtr a, bool mipMap );
-				
+
 };
 
 IE_CORE_DECLAREPTR( AlphaTexture );

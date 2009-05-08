@@ -48,18 +48,18 @@ namespace IECore
 class AttributeBlock : public boost::noncopyable
 {
 	public :
-	
+
 		/// Starts a new attribute block, calling renderer->attributeBegin(). If active is false
 		/// then nothing is done.
 		AttributeBlock( RendererPtr renderer, bool active=true );
 		/// Closes the attribute block by calling renderer->attributeEnd(). If active was false
 		/// in the constructor then nothing is done.
 		~AttributeBlock();
-				
+
 	private :
-			
+
 		RendererPtr m_renderer;
-				
+
 };
 
 } // namespace IECore

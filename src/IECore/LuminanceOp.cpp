@@ -47,56 +47,56 @@ IE_CORE_DEFINERUNTIMETYPED( LuminanceOp );
 LuminanceOp::LuminanceOp()
 	:	PrimitiveOp( staticTypeName(), "Calculates luminance and adds it as a primitive variable." )
 {
-	
+
 	m_colorPrimVarParameter = new StringParameter(
-		"colorPrimVar", 
+		"colorPrimVar",
 		"The name of the primitive variable which holds colour data. This "
 		"can have data of type Color3fData or Color3fVectorData.",
 		"Cs"
 	);
-	
+
 	m_redPrimVarParameter = new StringParameter(
-		"redPrimVar", 
+		"redPrimVar",
 		"The name of the primitive variable which holds the red channel of the colour data. This "
 		"can have data of type HalfData, HalfVectorData, FloatData or FloatVectorData. "
 		"However, The type of this primvar must match the type of the other colour component primvars.",
 		"R"
 	);
-	
+
 	m_greenPrimVarParameter = new StringParameter(
-		"greenPrimVar", 
+		"greenPrimVar",
 		"The name of the primitive variable which holds the green channel of the colour data. This "
 		"can have data of type HalfData, HalfVectorData, FloatData or FloatVectorData. "
 		"However, The type of this primvar must match the type of the other colour component primvars.",
 		"G"
 	);
-	
+
 	m_bluePrimVarParameter = new StringParameter(
-		"bluePrimVar", 
+		"bluePrimVar",
 		"The name of the primitive variable which holds the blue channel of the colour data. This "
 		"can have data of type HalfData, HalfVectorData, FloatData or FloatVectorData. "
 		"However, The type of this primvar must match the type of the other colour component primvars.",
 		"B"
 	);
-	
+
 	m_weightsParameter = new Color3fParameter(
 		"weights",
 		"The weights used in averaging the rgb values to produce luminance.",
 		Color3f( 0.2125, 0.7154, 0.0721 )
 	);
-	
+
 	m_luminancePrimVarParameter = new StringParameter(
-		"luminancePrimVar", 
+		"luminancePrimVar",
 		"The name of the primitive variable to hold the resulting luminance data.",
 		"Y"
 	);
-	
+
 	m_removeColorPrimVarsParameter = new BoolParameter(
-		"removeColorPrimVars", 
+		"removeColorPrimVars",
 		"When this is true, the input primitive variables are removed after luminance is calculated.",
 		true
 	);
-	
+
 	parameters()->addParameter( m_colorPrimVarParameter );
 	parameters()->addParameter( m_redPrimVarParameter );
 	parameters()->addParameter( m_greenPrimVarParameter );
@@ -104,7 +104,7 @@ LuminanceOp::LuminanceOp()
 	parameters()->addParameter( m_weightsParameter );
 	parameters()->addParameter( m_luminancePrimVarParameter );
 	parameters()->addParameter( m_removeColorPrimVarsParameter );
-	
+
 }
 
 LuminanceOp::~LuminanceOp()
@@ -181,7 +181,7 @@ ConstBoolParameterPtr LuminanceOp::removeColorPrimVarsParameter() const
 {
 	return m_removeColorPrimVarsParameter;
 }
-		
+
 template<typename T>
 void LuminanceOp::calculate( const T *r, const T *g, const T *b, int steps[3], int size, T *y )
 {
@@ -313,19 +313,19 @@ void LuminanceOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPt
 					);
 					luminanceData = l;
 				}
-				break;	
+				break;
 			default :
 				throw Exception( "PrimitiveVariables have unsupported type." );
 				break;
 		}
 		interpolation = rIt->second.interpolation;
 	}
-	
+
 	assert( interpolation != PrimitiveVariable::Invalid );
 	assert( luminanceData );
-	
+
 	primitive->variables[luminancePrimVarParameter()->getTypedValue()] = PrimitiveVariable( interpolation, luminanceData );
-	
+
 	if( removeColorPrimVarsParameter()->getTypedValue() )
 	{
 		primitive->variables.erase( colorPrimVarParameter()->getTypedValue() );

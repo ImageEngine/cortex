@@ -59,10 +59,10 @@ IECore::ObjectPtr FromMayaMatrixDataConverter<T>::doConversion( const MObject &o
 	{
 		return 0;
 	}
-	
+
 	MMatrix mayaMatrix = fnMD.matrix();
 	typename T::ValueType coreMatrix = IECore::convert<typename T::ValueType>( mayaMatrix );
-	
+
 	return new T( coreMatrix );
 }
 

@@ -44,10 +44,10 @@ enum TypeId
 	RendererTypeId = 106002,
 	RIBWriterTypeId = 106003,
 	SLOReaderTypeId = 106004,
-	
+
 	/// If we ever get here we should start over again
-	LastCoreRITypeId = 106999,	
-};	
+	LastCoreRITypeId = 106999,
+};
 
 } // namespace IECoreRI
 

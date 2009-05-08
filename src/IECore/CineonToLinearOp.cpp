@@ -47,7 +47,7 @@ IE_CORE_DEFINERUNTIMETYPED( CineonToLinearOp );
 ColorSpaceTransformOp::ColorSpaceDescription<CineonToLinearOp> CineonToLinearOp::g_colorSpaceDescription( "cineon", "linear" );
 
 CineonToLinearOp::CineonToLinearOp()
-	:	ChannelOp( "CineonToLinearOp", 
+	:	ChannelOp( "CineonToLinearOp",
 				   "Applies Cineon to linear conversion on ImagePrimitive channels."
 		)
 {
@@ -151,7 +151,7 @@ struct CineonToLinearOp::Converter
 			m_filmGamma(filmGamma), m_refWhiteVal(refWhiteVal), m_refBlackVal(refBlackVal)
 		{
 		}
-	
+
 		template<typename T>
 		ReturnType operator()( typename T::Ptr data )
 		{
@@ -172,14 +172,14 @@ struct CineonToLinearOp::Converter
 		float m_filmGamma;
 		int m_refWhiteVal;
 		int m_refBlackVal;
-	
+
 };
 
 void CineonToLinearOp::modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels )
 {
 	CineonToLinearOp::Converter converter(
-		filmGammaParameter()->getNumericValue(), 
-		refWhiteValParameter()->getNumericValue(), 
+		filmGammaParameter()->getNumericValue(),
+		refWhiteValParameter()->getNumericValue(),
 		refBlackValParameter()->getNumericValue()
 	);
 

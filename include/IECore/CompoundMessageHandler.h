@@ -61,8 +61,8 @@ class CompoundMessageHandler : public MessageHandler
 		/// member so that it can be modified to
 		/// add and remove handlers.
 		std::set<MessageHandlerPtr> handlers;
-	
-		virtual void handle( Level level, const std::string &context, const std::string &message );	
+
+		virtual void handle( Level level, const std::string &context, const std::string &message );
 
 };
 

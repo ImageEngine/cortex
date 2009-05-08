@@ -68,7 +68,7 @@ void Warp::_validate( bool forReal )
 
 void Warp::_request( int x, int y, int r, int t, const DD::Image::ChannelSet &channels, int count )
 {
-	// request the whole damn thing - we've no idea what the warp will do.	
+	// request the whole damn thing - we've no idea what the warp will do.
 	input( 0 )->request( channels, count );
 }
 
@@ -81,10 +81,10 @@ void Warp::engine( int y, int x, int r, const DD::Image::ChannelSet &channels, D
 	{
 		return;
 	}
-	
+
 	// now write into the warp channels
 	///////////////////////////////////
-	
+
 	// storing an array of pointers to the writable data seems marginally faster
 	// than calling Row::writable() in the inner loop.
 	ChannelSet changingChannels = out_channels(); changingChannels &= channels;
@@ -93,16 +93,16 @@ void Warp::engine( int y, int x, int r, const DD::Image::ChannelSet &channels, D
 	{
 		writableChannels[c] = out.writable( c );
 	}
-		
+
 	int xEnd = x + (r - x);
 	Pixel pixel( changingChannels );
 	for( ; x<xEnd; x++ )
 	{
 		V2f p = warp( V2f( x, y ) );
-	
+
 		/// \todo Figure out a better filter area using adjacent warp() results.
 		input0().sample( p.x + 0.5, p.y + 0.5, 1.0f, 1.0f, pixel );
-		
+
 		for( Channel c=changingChannels.first(); c; c=changingChannels.next( c ) )
 		{
 			writableChannels[c][x] = pixel[c];

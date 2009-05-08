@@ -77,15 +77,15 @@ namespace
 
 void PythonCmd::import( const std::string &moduleName )
 {
-	
+
 	try
 	{
-		string toExecute = boost::str( format( 
+		string toExecute = boost::str( format(
 				"import %1%\n"
 			) % moduleName
 		);
-		
-		handle<> ignored( PyRun_String( 
+
+		handle<> ignored( PyRun_String(
 			toExecute.c_str(),
 			Py_file_input, g_globalContext.ptr(),
 			g_globalContext.ptr() )
@@ -94,8 +94,8 @@ void PythonCmd::import( const std::string &moduleName )
 	catch ( error_already_set & )
 	{
 		PyErr_Print();
-	}	
-	
+	}
+
 }
 
 void PythonCmd::initialize()
@@ -104,41 +104,41 @@ void PythonCmd::initialize()
 	{
 		/// Maya (8.5 onwards) may have already initialized Maya for us
 		if (!Py_IsInitialized())
-		{	
+		{
 			Py_Initialize();
 		}
-		
+
 		assert( Py_IsInitialized() );
 
 		/// We need a valid current state to be able to execute Python. It seems
 		/// that Maya 8.5 can leave us without one set, in which case we have
 		/// to go and find one.
-		PyThreadState *currentState = PyThreadState_GET();		
+		PyThreadState *currentState = PyThreadState_GET();
 		if (!currentState)
-		{		
-			PyInterpreterState *interp = PyInterpreterState_Head();			
+		{
+			PyInterpreterState *interp = PyInterpreterState_Head();
 			currentState = PyInterpreterState_ThreadHead( interp );
-		}		
+		}
 		assert( currentState );
 
 		/// Bring the current state into effect
-		PyThreadState_Swap(currentState);			
+		PyThreadState_Swap(currentState);
 
 		/// Initialize the __main__ module if not already present
 		PyObject* sysModules = PyImport_GetModuleDict();
 		assert(sysModules);
-		
+
    		object mainModule(borrowed(PyDict_GetItemString(sysModules, "__main__")));
 		if (!mainModule)
 		{
 			mainModule = object(borrowed(Py_InitModule("__main__", initial_methods)));
-		}		
+		}
 		assert( mainModule );
-		
+
 		/// Retrieve the global context from the __main__ module
 		g_globalContext = mainModule.attr("__dict__");
 		assert( g_globalContext );
-		
+
 		// Suppress warnings about mismatched API versions. We build IE modules
 		// against python2.5 for use elsewhere, but then use them in maya with python 2.4.
 		// Testing suggests that there are no ill effects of the mismatch. To be on the safe side
@@ -158,12 +158,12 @@ void PythonCmd::initialize()
 		{
 			PyErr_Print();
 		}
-		
+
 		import( "IECore" );
 		import( "IECoreMaya" );
-	
+
 		g_initialized = true;
-		
+
 	}
 }
 
@@ -171,9 +171,9 @@ void PythonCmd::uninitialize()
 {
 	if (g_initialized)
 	{
-#if MAYA_API_VERSION < 850	
+#if MAYA_API_VERSION < 850
 		Py_Finalize();
-#endif		
+#endif
 		g_contextMap.clear();
 	}
 	g_initialized = false;
@@ -205,22 +205,22 @@ MSyntax PythonCmd::newSyntax()
 
 	s = syn.addFlag( kCommandFlag, kCommandFlagLong, MSyntax::kString );
 	assert(s);
-	
+
 	s = syn.addFlag( kFileFlag, kFileFlagLong, MSyntax::kString );
 	assert(s);
-	
+
 	s = syn.addFlag( kEvalFlag, kEvalFlagLong, MSyntax::kString );
 	assert(s);
-	
+
 	s = syn.addFlag( kContextFlag, kContextFlagLong, MSyntax::kString );
 	assert(s);
-	
+
 	s = syn.addFlag( kCreateContextFlag, kCreateContextFlagLong, MSyntax::kString );
 	assert(s);
-	
+
 	s = syn.addFlag( kDeleteContextFlag, kDeleteContextFlagLong, MSyntax::kString );
-	assert(s);	
-	
+	assert(s);
+
 	return syn;
 }
 
@@ -229,20 +229,20 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 {
 	MStatus s;
 	MArgDatabase args( syntax(), argList );
-	
+
 	if (args.isFlagSet( kCommandFlag ) && args.isFlagSet( kFileFlag ) )
 	{
 		displayError("Must specify only one of " + MString(kCommandFlagLong) + "/" + MString(kFileFlagLong));
 		return MS::kFailure;
 	}
-	
+
 	list argv;
-	
+
 	PySys_SetObject("argv", argv.ptr());
-	
+
 	object *context = &g_globalContext;
 	assert(context);
-	
+
 	if (args.isFlagSet( kContextFlagLong ) )
 	{
 		if (args.isFlagSet( kCreateContextFlagLong ) || args.isFlagSet( kDeleteContextFlagLong ) )
@@ -250,24 +250,24 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 			displayError("Syntax error");
 			return MS::kFailure;
 		}
-		
+
 		if (!args.isFlagSet( kCommandFlagLong ) && !args.isFlagSet( kFileFlagLong ) )
 		{
 			displayError("Must specify one of " + MString(kCommandFlagLong) + "/" + MString(kFileFlagLong) );
 			return MS::kFailure;
 		}
-		
+
 		MString contextName;
 		s = args.getFlagArgument( kContextFlagLong, 0, contextName );
 		assert(s);
-		
+
 		ContextMap::iterator it = g_contextMap.find( contextName.asChar() );
 		if (it == g_contextMap.end())
 		{
 			displayError("Context does not exist");
 			return MS::kFailure;
 		}
-		
+
 		context = &(it->second);
 		assert( context != &g_globalContext );
 	}
@@ -279,11 +279,11 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 			displayError("Syntax error");
 			return MS::kFailure;
 		}
-		
+
 		MString contextName;
 		s = args.getFlagArgument( kCreateContextFlagLong, 0, contextName );
 		assert(s);
-		
+
 		ContextMap::iterator it = g_contextMap.find( contextName.asChar() );
 		if (it != g_contextMap.end())
 		{
@@ -298,7 +298,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 		assert( context != &g_globalContext );
 		return MS::kSuccess;
 	}
-	
+
 	if (args.isFlagSet( kDeleteContextFlagLong ) )
 	{
 		if (args.isFlagSet( kContextFlagLong ) || args.isFlagSet( kCreateContextFlagLong ) )
@@ -306,17 +306,17 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 			displayError("Syntax error");
 			return MS::kFailure;
 		}
-		
+
 		if (args.isFlagSet( kCommandFlagLong ) || args.isFlagSet( kFileFlagLong ) )
 		{
 			displayError("Syntax error");
 			return MS::kFailure;
 		}
-		
+
 		MString contextName;
 		s = args.getFlagArgument( kDeleteContextFlagLong, 0, contextName );
 		assert(s);
-		
+
 		ContextMap::iterator it = g_contextMap.find( contextName.asChar() );
 		if (it == g_contextMap.end())
 		{
@@ -325,14 +325,14 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 		else
 		{
 			g_contextMap.erase( it );
-		}		
+		}
 		return MS::kSuccess;
 	}
-	
+
 	assert(context);
-	
+
 	if (args.isFlagSet( kCommandFlagLong ) )
-	{	
+	{
 		if (args.isFlagSet( kFileFlagLong ) || args.isFlagSet( kEvalFlagLong ) )
 		{
 			displayError("Must specify only one of " + MString(kCommandFlagLong) + "/" + MString(kFileFlagLong) + "/" + MString(kEvalFlagLong));
@@ -340,9 +340,9 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 		}
 		MString cmd;
 		s = args.getFlagArgument( kCommandFlagLong, 0, cmd );
-		
+
 		argv.append( "<string>" );
-		
+
 		try
 		{
 			handle<> ignored((
@@ -368,26 +368,26 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 
 	}
 	else if (args.isFlagSet( kFileFlagLong ) )
-	{	
+	{
 		if (args.isFlagSet( kCommandFlagLong ) || args.isFlagSet( kEvalFlagLong ) )
 		{
 			displayError("Must specify only one of " + MString(kCommandFlagLong) + "/" + MString(kFileFlagLong) + "/" + MString(kEvalFlagLong) );
 			return MS::kFailure;
 		}
-		
+
 		MString filename;
 		s = args.getFlagArgument( kFileFlagLong, 0, filename );
 		assert(s);
-		
+
 		argv.append( filename.asChar() ); // causes python to print out the filename appropriately in a stack trace
-		
+
 		FILE *fp = fopen( filename.asChar(), "r" );
 		if (!fp)
 		{
 			displayError( MString("Cannot open file ") + filename );
 			return MS::kFailure;
 		}
-		
+
 		try
 		{
 			handle<> ignored((
@@ -414,19 +414,19 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 		}
 	}
 	else if (args.isFlagSet( kEvalFlagLong ) )
-	{	
+	{
 		if (args.isFlagSet( kCommandFlagLong ) || args.isFlagSet( kFileFlagLong ) )
 		{
 			displayError("Must specify only one of " + MString(kCommandFlagLong) + "/" + MString(kFileFlagLong) + "/" + MString(kEvalFlagLong) );
 			return MS::kFailure;
 		}
-		
+
 		MString cmd;
 		s = args.getFlagArgument( kEvalFlagLong, 0, cmd );
 		assert(s);
-		
+
 		argv.append( cmd.asChar() );
-		
+
 		try
 		{
 			handle<> resultHandle( (
@@ -437,7 +437,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 					context->ptr()
 				)
 			) );
-			
+
 			object result( resultHandle );
 			string strResult = extract<string>( boost::python::str( result ) )();
 			setResult( strResult.c_str() );
@@ -453,7 +453,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 			displayError( "Caught unexpected exception" );
 			return MS::kFailure;
 		}
-	}		
+	}
 
 	return MS::kFailure;
 }

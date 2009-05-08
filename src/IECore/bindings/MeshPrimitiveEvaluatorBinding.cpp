@@ -46,21 +46,21 @@ namespace IECore
 {
 
 void bindMeshPrimitiveEvaluator()
-{	
+{
 	object m = RunTimeTypedClass<MeshPrimitiveEvaluator>()
 		.def( init< MeshPrimitivePtr > () )
 	;
-	
+
 	{
 		scope ms( m );
 		typedef class_< MeshPrimitiveEvaluator::Result, MeshPrimitiveEvaluator::ResultPtr, bases< PrimitiveEvaluator::Result >, boost::noncopyable > ResultPyClass;
-		
+
 		RefCountedClass<MeshPrimitiveEvaluator::Result, PrimitiveEvaluator::Result>( "Result" )
 			.def( "triangleIndex", &MeshPrimitiveEvaluator::Result::triangleIndex )
-			.def( "barycentricCoordinates", &MeshPrimitiveEvaluator::Result::barycentricCoordinates, return_value_policy<copy_const_reference>() )			
-			.def( "vertexIds", &MeshPrimitiveEvaluator::Result::vertexIds, return_value_policy<copy_const_reference>() )						
+			.def( "barycentricCoordinates", &MeshPrimitiveEvaluator::Result::barycentricCoordinates, return_value_policy<copy_const_reference>() )
+			.def( "vertexIds", &MeshPrimitiveEvaluator::Result::vertexIds, return_value_policy<copy_const_reference>() )
 		;
-	
+
 	}
 }
 

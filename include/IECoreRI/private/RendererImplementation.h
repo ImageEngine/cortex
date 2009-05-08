@@ -57,7 +57,7 @@ class RendererImplementation : public IECore::Renderer
 
 		RendererImplementation( IECoreRI::Renderer *parent );
 		RendererImplementation( IECoreRI::Renderer *parent, const std::string &name );
-		
+
 		virtual ~RendererImplementation();
 
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
@@ -90,7 +90,7 @@ class RendererImplementation : public IECore::Renderer
 
 		virtual void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars );
 		virtual void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
-		
+
 		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() );
@@ -98,9 +98,9 @@ class RendererImplementation : public IECore::Renderer
 
 		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars );
 		virtual void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars );
-		
+
 		virtual void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars );
-		
+
 		virtual void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars );
 
 		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
@@ -110,34 +110,34 @@ class RendererImplementation : public IECore::Renderer
 		virtual void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void instanceEnd();
 		virtual void instance( const std::string &name );
-		
+
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 	private :
-	
+
 		// Does things common to both constructors
 		void constructCommon();
-	
+
 		IECoreRI::Renderer *m_parent;
 		RtContextHandle m_context;
-	
+
 		typedef void (RendererImplementation::*SetOptionHandler)( const std::string &name, IECore::ConstDataPtr d );
 		typedef IECore::ConstDataPtr (RendererImplementation::*GetOptionHandler)( const std::string &name ) const;
 		typedef std::map<std::string, SetOptionHandler> SetOptionHandlerMap;
 		typedef std::map<std::string, GetOptionHandler> GetOptionHandlerMap;
 		SetOptionHandlerMap m_setOptionHandlers;
 		GetOptionHandlerMap m_getOptionHandlers;
-		
+
 		void setFontSearchPathOption( const std::string &name, IECore::ConstDataPtr d );
 		void setShaderSearchPathOption( const std::string &name, IECore::ConstDataPtr d );
 		void setPixelSamplesOption( const std::string &name, IECore::ConstDataPtr d );
 		IECore::ConstDataPtr getFontSearchPathOption( const std::string &name ) const;
 		IECore::ConstDataPtr getShutterOption( const std::string &name ) const;
 		IECore::ConstDataPtr getResolutionOption( const std::string &name ) const;
-		
+
 		IECore::CameraPtr m_camera;
 		void outputCamera( IECore::CameraPtr camera );
-		
+
 		struct AttributeState
 		{
 			AttributeState();
@@ -147,14 +147,14 @@ class RendererImplementation : public IECore::Renderer
 		std::stack<AttributeState> m_attributeStack;
 		static const unsigned int g_shaderCacheSize;
 		IECore::CachedReaderPtr m_shaderCache;
-		
+
 		typedef void (RendererImplementation::*SetAttributeHandler)( const std::string &name, IECore::ConstDataPtr d );
 		typedef IECore::ConstDataPtr (RendererImplementation::*GetAttributeHandler)( const std::string &name ) const;
 		typedef std::map<std::string, SetAttributeHandler> SetAttributeHandlerMap;
 		typedef std::map<std::string, GetAttributeHandler> GetAttributeHandlerMap;
 		SetAttributeHandlerMap m_setAttributeHandlers;
 		GetAttributeHandlerMap m_getAttributeHandlers;
-		
+
 		void setShadingRateAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setMatteAttribute( const std::string &name, IECore::ConstDataPtr d );
 		void setColorAttribute( const std::string &name, IECore::ConstDataPtr d );
@@ -171,7 +171,7 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getDoubleSidedAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getRightHandedOrientationAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getNameAttribute( const std::string &name ) const;
-		
+
 		struct ProcData
 		{
 			IECore::Renderer::ConstProceduralPtr proc;
@@ -179,13 +179,13 @@ class RendererImplementation : public IECore::Renderer
 		};
 		static void procSubdivide( void *data, float detail );
 		static void procFree( void *data );
-		
+
 		typedef IECore::DataPtr ( RendererImplementation::*CommandHandler)( const std::string &name, const IECore::CompoundDataMap &parameters );
 		typedef std::map<std::string, CommandHandler> CommandHandlerMap;
 		CommandHandlerMap m_commandHandlers;
-		
+
 		IECore::DataPtr  readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
-		
+
 		typedef std::map<std::string, const void *> ObjectHandleMap;
 		ObjectHandleMap m_objectHandles;
 		IECore::DataPtr objectBeginCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
@@ -201,7 +201,7 @@ class RendererImplementation : public IECore::Renderer
 #endif
 
 		static std::vector<int> g_nLoops;
-		
+
 		/// Renderman treats curve basis as an attribute, whereas we want to treat it as
 		/// part of the topology of primitives. It makes no sense as an attribute, as it changes the
 		/// size of primitive variables - an attribute which makes a primitive invalid is dumb. This
@@ -217,7 +217,7 @@ class RendererImplementation : public IECore::Renderer
 		/// True when an RiMotionBegin call has been emitted but we have not yet emitted the matching RiMotionEnd.
 		bool m_inMotion;
 		std::vector<float> m_delayedMotionTimes;
-		
+
 };
 
 } // namespace IECoreRI

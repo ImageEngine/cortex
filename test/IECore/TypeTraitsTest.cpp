@@ -133,23 +133,23 @@ BOOST_STATIC_ASSERT( (IsNumericSimpleTypedData<UInt64Data>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsNumericSimpleTypedData<char> >::value) );
 
 /// IsInterpolable
-BOOST_STATIC_ASSERT( (IsInterpolable<int>::value) );	
-BOOST_STATIC_ASSERT( (IsInterpolable<Imath::Color3f>::value) );	
-BOOST_STATIC_ASSERT( (IsInterpolable<Imath::V2d>::value) );	
-BOOST_STATIC_ASSERT( (IsInterpolable<Imath::Box3f>::value) );	
+BOOST_STATIC_ASSERT( (IsInterpolable<int>::value) );
+BOOST_STATIC_ASSERT( (IsInterpolable<Imath::Color3f>::value) );
+BOOST_STATIC_ASSERT( (IsInterpolable<Imath::V2d>::value) );
+BOOST_STATIC_ASSERT( (IsInterpolable<Imath::Box3f>::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolable<std::string> >::value) );
 
 /// IsInterpolableVectorTypedData
-BOOST_STATIC_ASSERT( (IsInterpolableVectorTypedData<HalfVectorData>::value) );	
+BOOST_STATIC_ASSERT( (IsInterpolableVectorTypedData<HalfVectorData>::value) );
 BOOST_STATIC_ASSERT( (IsInterpolableVectorTypedData<Color4fVectorData>::value) );
-BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableVectorTypedData<FloatData> >::value) );	
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableVectorTypedData<FloatData> >::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableVectorTypedData<StringData> >::value) );
 
 /// IsInterpolableSimpleTypedData
-BOOST_STATIC_ASSERT( (IsInterpolableSimpleTypedData<IntData>::value) );	
+BOOST_STATIC_ASSERT( (IsInterpolableSimpleTypedData<IntData>::value) );
 BOOST_STATIC_ASSERT( (IsInterpolableSimpleTypedData<V2iData>::value) );
-BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableSimpleTypedData<DateTimeData> >::value) );	
-BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableSimpleTypedData<IntVectorData> >::value) );	
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableSimpleTypedData<DateTimeData> >::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolableSimpleTypedData<IntVectorData> >::value) );
 
 /// IsSpline
 BOOST_STATIC_ASSERT( (IsSpline< Spline<float, float> >::value) );

@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -54,7 +54,7 @@ using namespace Imath;
 using namespace std;
 
 // Binding implementations
-namespace IECore 
+namespace IECore
 {
 
 template<class L>
@@ -101,27 +101,27 @@ void bindImathMatrix()
 
 	bindMatrix44<float>();
 	bindMatrix44<double>();
-}	
+}
 
 template<typename T>
 struct MatrixBaseType
-{	
+{
 	typedef float BaseType;
 };
-		
+
 template<>
 struct MatrixBaseType< M33d >
 {
 	typedef double BaseType;
 };
-	
+
 template<>
 struct MatrixBaseType< M44d >
 {
 	typedef double BaseType;
 };
 
-template <typename T> 
+template <typename T>
 struct MatrixDimensions
 {
 	static tuple get(const T &x)
@@ -146,9 +146,9 @@ M *constructFromList( list l )
 	{
 		throw InvalidArgumentException( std::string( "Invalid list length given to IECore." ) + typeName<M>() + " constructor" );
 	}
-	
+
 	M *r = new M();
-	
+
 	int i = 0;
 	for ( unsigned row = 0; row < MatrixTraits<M>::dimensions(); row ++ )
 	{
@@ -159,51 +159,51 @@ M *constructFromList( list l )
 			{
 				throw InvalidArgumentException( std::string( "Invalid list element given to IECore." ) + typeName<M>() + " constructor" );
 			}
-		
+
 			(*r)[row][col] = ex();
 		}
 	}
-	
+
 	return r ;
 }
 
 template<typename T>
 struct MatrixWrapper
-{		
+{
 	typedef typename MatrixBaseType<T>::BaseType V;
 	static V get(const T &m, tuple i)
-	{	
+	{
 		static tuple dims = MatrixDimensions<T>::get(m);
-		
+
 		int x = extract<int>(i[0]);
 		int y = extract<int>(i[1]);
-		
+
 		if (x < 0 || x >= extract<int>(dims[0]) ||
 			y < 0 || y >= extract<int>(dims[1]))
 		{
 			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
-			throw std::out_of_range("");	
-		}		
-		
+			throw std::out_of_range("");
+		}
+
 		return m[x][y];
 	}
-	
+
 	static void set(T &m, tuple i, const V &v)
 	{
 		static tuple dims = MatrixDimensions<T>::get(m);
-		
+
 		int x = extract<int>(i[0]);
 		int y = extract<int>(i[1]);
-		
+
 		if (x < 0 || x >= extract<int>(dims[0]) ||
 			y < 0 || y >= extract<int>(dims[1]))
 		{
 			/// \todo Give a description of the error! NB Boost 1.38.0 will translate these into IndexError python exceptions
-			throw std::out_of_range("");	
-		}		
-		
+			throw std::out_of_range("");
+		}
+
 		m[x][y] = v;
-	}	
+	}
 };
 
 template<typename M, typename V>
@@ -383,7 +383,7 @@ string str<TYPE>( TYPE &x )\
 		}\
 	}\
 	return s.str();\
-}		
+}
 
 DEFINEMATRIXSTRSPECIALISATION( M33f, 3 );
 DEFINEMATRIXSTRSPECIALISATION( M33d, 3 );
@@ -393,107 +393,107 @@ DEFINEMATRIXSTRSPECIALISATION( M44d, 4 );
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Matrix33InvertOverloads, invert, 0, 1);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Matrix33InverseOverloads, inverse, 0, 1);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Matrix33GJInvertOverloads, gjInvert, 0, 1);
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Matrix33GJInverseOverloads, gjInverse, 0, 1);		
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Matrix33GJInverseOverloads, gjInverse, 0, 1);
 
 template<typename T>
 void bindMatrix33()
 {
-	const Matrix33<T> &(Matrix33<T>::*setScale1)(const Vec2<T> &) = &Matrix33<T>::setScale;	
-	const Matrix33<T> &(Matrix33<T>::*setScale2)(T) = &Matrix33<T>::setScale;	
-	
+	const Matrix33<T> &(Matrix33<T>::*setScale1)(const Vec2<T> &) = &Matrix33<T>::setScale;
+	const Matrix33<T> &(Matrix33<T>::*setScale2)(T) = &Matrix33<T>::setScale;
+
 	const Matrix33<T> &(Matrix33<T>::*setShear1)(const T &) = &Matrix33<T>::template setShear<T>;
 	const Matrix33<T> &(Matrix33<T>::*setShear2)(const Vec2<T> &) = &Matrix33<T>::template setShear<T>;
-	
+
 	const Matrix33<T> &(Matrix33<T>::*shear1)(const T &) = &Matrix33<T>::template shear<T>;
 	const Matrix33<T> &(Matrix33<T>::*shear2)(const Vec2<T> &) = &Matrix33<T>::template shear<T>;
-	
+
 	const char *bindName = typeName<Matrix33<T> >();
-	
+
 	class_< Matrix33<T> >( bindName )
 		//.def_readwrite("x", &Matrix33<T>::x)
 		.def(init<>())
 		.def(init<T>())
 		.def(init<T, T, T, T, T, T, T, T, T>())
-		
+
 		.def(init<const Matrix33<T> &>())
-		
+
 		.def("__init__", make_constructor( &constructFromList< Matrix33<T> > ) )
-	
+
 		.def("dimensions", &MatrixDimensions<Matrix33<T> >::get)
-	
+
 		// [] operator support
 		.def("__getitem__", &MatrixWrapper< Matrix33<T> >::get)
 		.def("__setitem__", &MatrixWrapper< Matrix33<T> >::set)
-		
+
 		.def("makeIdentity", &Matrix33<T>::makeIdentity)
-	
+
 		.def(self == self)
 		.def(self != self)
-	
+
 		.def("equalWithAbsError", &Matrix33<T>::equalWithAbsError)
 		.def("equalWithRelError", &Matrix33<T>::equalWithRelError)
-	
+
 		.def(self += self)
 		.def(self += T())
 		.def(self + self)
-	
+
 		.def(self -= self)
 		.def(self -= T())
 		.def(self - self)
-		
+
 		.def(- self)
 		.def("negate", &Matrix33<T>::negate, return_self<>())
-		
+
 		.def(self *= T())
 		.def(self * T())
-		
+
 		.def(self *= self)
 		.def(self * self)
-		
+
 		.def("multVecMatrix", multVecMatrix<Matrix33<T>, Vec2<T> > )
 		.def("multDirMatrix", multDirMatrix<Matrix33<T>, Vec2<T> > )
-		
+
 		.def(self /= T())
 		.def(self / T())
-		
+
 		.def("transpose", &Matrix33<T>::transpose, return_self<>())
 		.def("transposed", &Matrix33<T>::transposed)
-		
+
 		.def("invert", &Matrix33<T>::invert, return_self<>(), Matrix33InvertOverloads() )
 		.def("inverse", &Matrix33<T>::inverse, Matrix33InverseOverloads() )
 		.def("gjInvert", &Matrix33<T>::gjInvert, return_self<>(), Matrix33GJInvertOverloads() )
 		.def("gjInverse", &Matrix33<T>::gjInverse, Matrix33GJInverseOverloads() )
-		
+
 		.def("setRotation", &Matrix33<T>::template setRotation<T>, return_self<>())
 		.def("rotate", &Matrix33<T>::template rotate<T>, return_self<>())
-		
+
 		.def("setScale", setScale1, return_self<>())
 		.def("setScale", setScale2, return_self<>())
-		
+
 		.def("scale", &Matrix33<T>::template scale<T>, return_self<>())
 		.def("setTranslation", &Matrix33<T>::template setTranslation<T>, return_self<>())
-		
+
 		.def("translation", &Matrix33<T>::translation)
 		.def("translate", &Matrix33<T>::template translate<T>, return_self<>())
-		
+
 		.def("setShear", setShear1, return_self<>())
 		.def("setShear", setShear2, return_self<>())
-		
+
 		.def("shear", shear1, return_self<>())
 		.def("shear", shear2, return_self<>())
-		
+
 		.def("baseTypeMin", &Matrix33<T>::baseTypeMin).staticmethod("baseTypeMin")
 		.def("baseTypeMax", &Matrix33<T>::baseTypeMax).staticmethod("baseTypeMax")
 		.def("baseTypeSmallest", &Matrix33<T>::baseTypeSmallest).staticmethod("baseTypeSmallest")
 		.def("baseTypeEpsilon", &Matrix33<T>::baseTypeEpsilon).staticmethod("baseTypeEpsilon")
-		
-		.def("__str__", &IECore::str<Matrix33<T> > ) 
+
+		.def("__str__", &IECore::str<Matrix33<T> > )
 		.def("__repr__", &IECore::repr<Matrix33<T> > )
-		
+
 		.def("createScaled", &createScaled<Matrix33<T>, Vec2<T> > ).staticmethod( "createScaled" )
 		.def("createTranslated", &createTranslated<Matrix33<T>, Vec2<T> > ).staticmethod( "createTranslated" )
 		.def("createRotated", &createRotated<Matrix33<T>, T > ).staticmethod( "createRotated" )
-		
+
 		.def("extractScaling", &extractScaling<Matrix33<T>, Vec2<T> > )
 		.def("sansScaling", (Matrix33<T>(*)( const Matrix33<T> &))&sansScaling2<Matrix33<T> > )
 		.def("removeScaling", &removeScaling<Matrix33<T> > )
@@ -502,10 +502,10 @@ void bindMatrix33()
 		.def("removeScalingAndShear", &removeScalingAndShear<Matrix33<T> > )
 		.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear33<T> )
 		.def("extractSHRT", &extractSHRT33<T> )
-		
+
 		.def("determinant", (float (*)( const Matrix33<T> & ))&IECore::determinant<T> )
 	;
-	
+
 }
 
 
@@ -517,108 +517,108 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Matrix44GJInverseOverloads, gjInverse, 0,
 template<typename T>
 void bindMatrix44()
 {
-	const Matrix44<T> &(Matrix44<T>::*setScale1)(const Vec3<T> &) = &Matrix44<T>::setScale;	
-	const Matrix44<T> &(Matrix44<T>::*setScale2)(T) = &Matrix44<T>::setScale;	
-	
+	const Matrix44<T> &(Matrix44<T>::*setScale1)(const Vec3<T> &) = &Matrix44<T>::setScale;
+	const Matrix44<T> &(Matrix44<T>::*setScale2)(T) = &Matrix44<T>::setScale;
+
 	//const Matrix44<T> &(Matrix44<T>::*setShear1)(const Shear6<T> &) = &Matrix44<T>::template setShear<T>;
 	const Matrix44<T> &(Matrix44<T>::*setShear2)(const Vec3<T> &) = &Matrix44<T>::template setShear<T>;
-	
+
 	//const Matrix44<T> &(Matrix44<T>::*shear1)(const Shear6<T> &) = &Matrix44<T>::template shear<T>;
 	const Matrix44<T> &(Matrix44<T>::*shear2)(const Vec3<T> &) = &Matrix44<T>::template shear<T>;
-	
+
 	const char *bindName = typeName<Matrix44<T> >();
-	
+
 	class_< Matrix44<T> >( bindName )
-		
+
 		.def(init<>())
 		.def(init<T>())
 		.def(init<T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T>())
 		.def(init<Matrix33<T>, Vec3<T> >())
 		.def(init<const Matrix44<T> &>())
-		
-		.def("__init__", make_constructor( &constructFromList< Matrix44<T> > ) )		
-		
+
+		.def("__init__", make_constructor( &constructFromList< Matrix44<T> > ) )
+
 		//.def(self = T())
-		
+
 		.def("dimensions", &MatrixDimensions<Matrix44<T> >::get)
-	
+
 		// [] operator support
 		.def("__getitem__", &MatrixWrapper< Matrix44<T> >::get)
 		.def("__setitem__", &MatrixWrapper< Matrix44<T> >::set)
-		
+
 		.def("makeIdentity", &Matrix44<T>::makeIdentity)
-	
+
 		.def(self == self)
 		.def(self != self)
-	
+
 		.def("equalWithAbsError", &Matrix44<T>::equalWithAbsError)
 		.def("equalWithRelError", &Matrix44<T>::equalWithRelError)
-	
+
 		.def(self += self)
 		.def(self += T())
 		.def(self + self)
-	
+
 		.def(self -= self)
 		.def(self -= T())
 		.def(self - self)
-		
+
 		.def(- self)
 		.def("negate", &Matrix44<T>::negate, return_self<>())
-		
+
 		.def(self *= T())
 		.def(self * T())
-		
+
 		.def(self *= self)
 		.def(self * self)
-		
+
 		.def("multVecMatrix", multVecMatrix<Matrix44<T>, Vec3<T> > )
 		.def("multDirMatrix", multDirMatrix<Matrix44<T>, Vec3<T> > )
-		
+
 		.def(self /= T())
 		.def(self / T())
-		
+
 		.def("transpose", &Matrix44<T>::transpose, return_self<>())
 		.def("transposed", &Matrix44<T>::transposed)
-		
+
 		.def("invert", &Matrix44<T>::invert, return_self<>(), Matrix44InvertOverloads() )
 		.def("inverse", &Matrix44<T>::inverse, Matrix44InverseOverloads() )
 		.def("gjInvert", &Matrix44<T>::gjInvert, return_self<>(), Matrix44GJInvertOverloads() )
 		.def("gjInverse", &Matrix44<T>::gjInverse, Matrix44GJInverseOverloads() )
-		
+
 		.def("setEulerAngles", &Matrix44<T>::template setEulerAngles<T>, return_self<>())
 		.def("setAxisAngle", &Matrix44<T>::template setAxisAngle<T>, return_self<>())
 		.def("rotate", &Matrix44<T>::template rotate<T>, return_self<>())
-		
+
 		.def("setScale", setScale1, return_self<>())
 		.def("setScale", setScale2, return_self<>())
-		
+
 		.def("scale", &Matrix44<T>::template scale<T>, return_self<>())
 		.def("setTranslation", &Matrix44<T>::template setTranslation<T>, return_self<>())
-		
+
 		.def("translation", &Matrix44<T>::translation)
 		.def("translate", &Matrix44<T>::template translate<T>, return_self<>())
-		
+
 		//.def("setShear", setShear1, return_self<>())
 		.def("setShear", setShear2, return_self<>())
-		
+
 		//.def("shear", shear1, return_self<>())
 		.def("shear", shear2, return_self<>())
-		
+
 		.def("baseTypeMin", &Matrix44<T>::baseTypeMin).staticmethod("baseTypeMin")
 		.def("baseTypeMax", &Matrix44<T>::baseTypeMax).staticmethod("baseTypeMax")
 		.def("baseTypeSmallest", &Matrix44<T>::baseTypeSmallest).staticmethod("baseTypeSmallest")
 		.def("baseTypeEpsilon", &Matrix44<T>::baseTypeEpsilon).staticmethod("baseTypeEpsilon")
-		
-		.def("__str__", &IECore::str<Matrix44<T> > ) 
+
+		.def("__str__", &IECore::str<Matrix44<T> > )
 		.def("__repr__", &IECore::repr<Matrix44<T> > )
-		
+
 		.def("createScaled", &createScaled<Matrix44<T>, Vec3<T> > ).staticmethod( "createScaled" )
 		.def("createTranslated", &createTranslated<Matrix44<T>, Vec3<T> > ).staticmethod( "createTranslated" )
 		.def("createRotated", &createRotated<Matrix44<T>, Vec3<T> > ).staticmethod( "createRotated" )
 		.def("createAimed", &Imath::rotationMatrix<T> )
 		.def("createAimed", &Imath::rotationMatrixWithUpDir<T> ).staticmethod( "createAimed" )
 		.def("createFromBasis", &matrixFromBasis<T> ).staticmethod( "createFromBasis" )
-		
+
 		.def("extractScaling", &extractScaling<Matrix44<T>, Vec3<T> > )
 		.def("sansScaling", &sansScaling2<Matrix44<T> > )
 		.def("removeScaling", &removeScaling<Matrix44<T> > )
@@ -630,9 +630,9 @@ void bindMatrix44()
 		.def("extractEulerXYZ", &extractEulerZYX<Matrix44<T>, Vec3<T> > )
 		.def("extractQuat", &extractQuat<T> )
 		.def("extractSHRT", &extractSHRT44<T> )
-		
+
 		.def("determinant", (float (*)( const Matrix44<T> & ))&IECore::determinant<T> )
-	;	
+	;
 }
 
 }

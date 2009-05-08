@@ -59,13 +59,13 @@ class SGIImageReader : public ImageReader
 		virtual bool isComplete();
 		virtual Imath::Box2i dataWindow();
 		virtual Imath::Box2i displayWindow();
-		virtual std::string sourceColorSpace() const ;		
+		virtual std::string sourceColorSpace() const ;
 
 	private:
 
 
 		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow );
-				
+
 		template<typename T>
 		DataPtr readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow );
 
@@ -84,7 +84,7 @@ class SGIImageReader : public ImageReader
 		std::string m_bufferFileName;
 		unsigned int m_bufferWidth, m_bufferHeight;
 		bool m_reverseBytes;
-		
+
 		struct Header;
 		boost::shared_ptr<Header> m_header;
 };

@@ -54,7 +54,7 @@ template<>
 struct MImageAccessor< float >
 {
 	typedef float* ReturnType;
-	
+
 	static ReturnType getPixels( MImage &i )
 	{
 		return i.floatPixels();
@@ -65,7 +65,7 @@ template<>
 struct MImageAccessor< unsigned char >
 {
 	typedef unsigned char* ReturnType;
-	
+
 	static ReturnType getPixels( MImage &i )
 	{
 		return i.pixels();

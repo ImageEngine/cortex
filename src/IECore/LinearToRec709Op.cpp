@@ -47,7 +47,7 @@ IE_CORE_DEFINERUNTIMETYPED( LinearToRec709Op );
 ColorSpaceTransformOp::ColorSpaceDescription<LinearToRec709Op> LinearToRec709Op::g_colorSpaceDescription( "linear", "rec709" );
 
 LinearToRec709Op::LinearToRec709Op()
-	:	ChannelOp( "LinearToRec709", 
+	:	ChannelOp( "LinearToRec709",
 				   "Applies linear to Rec709 conversion on ImagePrimitive channels."
 		)
 {
@@ -60,7 +60,7 @@ LinearToRec709Op::~LinearToRec709Op()
 struct LinearToRec709Op::Converter
 {
 	typedef void ReturnType;
-	
+
 	template<typename T>
 	ReturnType operator()( typename T::Ptr data )
 	{

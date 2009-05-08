@@ -113,7 +113,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(not a == c)
 		self.assertEqual( str( DoubleData() ), "0" )
 		self.assertEqual( repr( DoubleData() ), "IECore.DoubleData( 0 )" )
-		
+
 	def testCharData(self):
 		"""Test CharData"""
 		a = CharData()
@@ -148,7 +148,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(not a == c)
 		self.assertEqual( str( UCharData() ), "0" )
 		self.assertEqual( repr( UCharData() ), "IECore.UCharData( 0 )" )
-		
+
 	def testHalfData(self):
 		"""Test HalfData"""
 		a = HalfData()
@@ -166,7 +166,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(not a == c)
 		self.assertEqual( str( HalfData() ), "0" )
 		self.assertEqual( repr( HalfData() ), "IECore.HalfData( 0 )" )
-		
+
 	def testShortData(self):
 		"""Test ShortData"""
 		a = ShortData()
@@ -184,7 +184,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(not a == c)
 		self.assertEqual( str( ShortData() ), "0" )
 		self.assertEqual( repr( ShortData() ), "IECore.ShortData( 0 )" )
-		
+
 	def testUShortData(self):
 		"""Test UShortData"""
 		a = UShortData()
@@ -202,7 +202,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(not a == c)
 		self.assertEqual( str( UShortData() ), "0" )
 		self.assertEqual( repr( UShortData() ), "IECore.UShortData( 0 )" )
-		
+
 	def testInt64Data(self):
 		"""Test Int64Data"""
 		a = Int64Data()
@@ -220,7 +220,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(not a == c)
 		self.assertEqual( str( Int64Data() ), "0" )
 		self.assertEqual( repr( Int64Data() ), "IECore.Int64Data( 0 )" )
-		
+
 	def testUInt64Data(self):
 		"""Test UInt64Data"""
 		a = UInt64Data()
@@ -237,12 +237,12 @@ class SimpleTypedDataTest(unittest.TestCase):
 		self.assert_(a == b)
 		self.assert_(not a == c)
 		self.assertEqual( str( UInt64Data() ), "0" )
-		self.assertEqual( repr( UInt64Data() ), "IECore.UInt64Data( 0 )" )		
-		
-			
-		
+		self.assertEqual( repr( UInt64Data() ), "IECore.UInt64Data( 0 )" )
+
+
+
 	def testImathVecTypes(self):
-		
+
 		types = [
 			[V2fData, V2f],
 			[V3fData, V3f],
@@ -252,13 +252,13 @@ class SimpleTypedDataTest(unittest.TestCase):
 			[Color3dData, Color3d],
 			[Color4fData, Color4f],
 			[Color4dData, Color4d], ]
-			 
+
 		for t, vt in types :
-		
+
 			v = vt( 10 )
 			self.assertEqual( " ".join( ["10"] * vt.dimensions() ), str( t( v ) ) )
 			self.assertEqual( "IECore." + t.__name__ + "( " + "IECore." + vt.__name__ + "( " + ", ".join( ["10"] * vt.dimensions() ) + " ) )", repr( t( v ) ) )
-			
+
 			for i in range( 0, 1000 ) :
 				v = vt( random.uniform( -100, 100 ) )
 				d = t( v )
@@ -266,31 +266,31 @@ class SimpleTypedDataTest(unittest.TestCase):
 				v2 = vt( random.uniform( -100, 100 ) )
 				d.value = v2
 				self.assertEqual( d.value, v2 )
-				
+
 	def testImathBoxTypes(self):
-		
+
 		types = [
 			[Box2fData, Box2f, V2f],
 			[Box3fData, Box3f, V3f],
 			[Box2dData, Box2d, V2d],
 			[Box3dData, Box3d, V3d] ]
-			 
+
 		for t, bt, vt in types :
-		
+
 			v = vt( 1 )
 			b = bt( v, v )
 			self.assertEqual( " ".join( ["1"]*vt.dimensions()*2 ), str( t( b ) ) )
 			vr = "IECore." + vt.__name__ + "( " + ", ".join( ["1"]*vt.dimensions() ) + " )"
 			br = "IECore." + bt.__name__ + "( " + vr + ", " + vr + " )"
 			self.assertEqual( "IECore." + t.__name__ + "( " + br + " )", repr( t( b ) ) )
-			
+
 			for i in range( 0, 1000 ) :
-			
+
 				b = bt()
 				for j in range( 0, 10 ) :
-				
+
 					b.extendBy( vt( random.uniform( -100, 100 ) ) )
-					
+
 				v = t( b )
 				self.assertEqual( v.value, b )
 				b2 = bt()
@@ -300,7 +300,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 class BoolDataTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		a = BoolData()
 		self.assert_(type(a) is BoolData)
 		b = IntData(True)
@@ -309,30 +309,30 @@ class BoolDataTest( unittest.TestCase ) :
 		b.value = False
 		self.assertEqual(b.value, False)
 		self.assertEqual(c.value, True)
-		
+
 	def testStreaming( self ) :
-	
+
 		o = BoolData( True )
 		self.assertEqual( o.value, True )
-		
+
 		iface = IndexedIOInterface.create( "test/IECore/o.fio", "/", IndexedIOOpenMode.Write )
-		
+
 		o.save( iface, "test" )
 		oo = Object.load( iface, "test" )
 		self.assertEqual( o, oo )
-		
+
 		o = BoolData( False )
 		self.assertEqual( o.value, False )
-		
+
 		o.save( iface, "test" )
 		oo = Object.load( iface, "test" )
 		self.assertEqual( o, oo )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile("test/IECore/o.fio"):
-			os.remove("test/IECore/o.fio")		
-			
+			os.remove("test/IECore/o.fio")
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

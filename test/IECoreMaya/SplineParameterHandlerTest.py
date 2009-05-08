@@ -64,7 +64,7 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 					),
 				)
 			)
-			
+
 	class TestClassColor( IECore.Parameterised ) :
 
 		def __init__( self ) :
@@ -87,12 +87,12 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 						),
 					),
 				)
-			)		
+			)
 
 	def testRoundTripFloat( self ) :
-				
+
 		node = maya.cmds.createNode( "ieParameterisedHolderNode" )
-	
+
 		parameterised = SplineParameterHandlerTest.TestClassFloat()
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 		fnPH.setParameterised( parameterised )
@@ -101,24 +101,24 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 		numTests = 10
 
 		for i in range( 0, numTests ) :
-							
+
 			numPoints = int( random.random() * 12 ) + 2
-			
+
 			splinePoints = []
-			
+
 			for j in range( 0, numPoints ) :
-			
+
 				splinePoints.append( ( random.random(), random.random() ) )
-				
+
 			splinePoints.sort()
-				
+
 			splinePoints.insert( 0, splinePoints[0] )
 			splinePoints.append( splinePoints[-1] )
 			assert( len( splinePoints ) >= 4 )
-		
-			splineData = IECore.SplineffData( 
-				IECore.Splineff( 
-					IECore.CubicBasisf.catmullRom(), 			
+
+			splineData = IECore.SplineffData(
+				IECore.Splineff(
+					IECore.CubicBasisf.catmullRom(),
 					splinePoints
 				)
 			)
@@ -128,23 +128,23 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 			# Put the value to the node's attributes
 			fnPH.setNodeValue( parameterised.parameters()["spline"], False )
 
-			# Retrieve the value from the node's attributes		
+			# Retrieve the value from the node's attributes
 			fnPH.setParameterisedValue( parameterised.parameters()["spline"] )
 
 			# The parameter value should not have changed
-			
+
 			data = parameterised.parameters()["spline"].getValue()
-			self.assertEqual( len( data.value ), len( splineData.value ) )	
-			
+			self.assertEqual( len( data.value ), len( splineData.value ) )
+
 			for i in range( 0, len( data.value ) ) :
-			
+
 				self.assertAlmostEqual( data.value.keys()[i], splineData.value.keys()[i] )
-				self.assertAlmostEqual( data.value.values()[i], splineData.value.values()[i] )		
-				
+				self.assertAlmostEqual( data.value.values()[i], splineData.value.values()[i] )
+
 	def testRoundTripColor( self ) :
-				
+
 		node = maya.cmds.createNode( "ieParameterisedHolderNode" )
-	
+
 		parameterised = SplineParameterHandlerTest.TestClassColor()
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 		fnPH.setParameterised( parameterised )
@@ -153,24 +153,24 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 		numTests = 10
 
 		for i in range( 0, numTests ) :
-							
+
 			numPoints = int( random.random() * 12 ) + 2
-			
+
 			splinePoints = []
-			
+
 			for j in range( 0, numPoints ) :
-			
+
 				splinePoints.append( ( random.random(), IECore.Color3f( random.random(), random.random(), random.random() ) ) )
-				
+
 			splinePoints.sort()
-				
+
 			splinePoints.insert( 0, splinePoints[0] )
 			splinePoints.append( splinePoints[-1] )
 			assert( len( splinePoints ) >= 4 )
-		
-			splineData = IECore.SplinefColor3fData( 
-				IECore.SplinefColor3f( 
-					IECore.CubicBasisf.catmullRom(), 			
+
+			splineData = IECore.SplinefColor3fData(
+				IECore.SplinefColor3f(
+					IECore.CubicBasisf.catmullRom(),
 					splinePoints
 				)
 			)
@@ -180,27 +180,27 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 			# Put the value to the node's attributes
 			fnPH.setNodeValue( parameterised.parameters()["spline"], False )
 
-			# Retrieve the value from the node's attributes		
+			# Retrieve the value from the node's attributes
 			fnPH.setParameterisedValue( parameterised.parameters()["spline"] )
 
 			# The parameter value should not have changed
-			
+
 			data = parameterised.parameters()["spline"].getValue()
 			self.assertEqual( len( data.value ), len( splineData.value ) )
-			
+
 			for i in range( 0, len( data.value ) ) :
-			
+
 				self.assertAlmostEqual( data.value.keys()[i], splineData.value.keys()[i] )
-				
+
 				c1 = data.value.values()[i]
 				c2 = splineData.value.values()[i]
-				
+
 				v1 = IECore.V3f( c1[0], c1[1], c1[2] )
-				v2 = IECore.V3f( c2[0], c2[1], c2[2] )				
-				
-				
+				v2 = IECore.V3f( c2[0], c2[1], c2[2] )
+
+
 				self.assert_( ( v1 - v2 ).length() < 1.e-4 )
-		
-	
+
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

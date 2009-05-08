@@ -71,7 +71,7 @@ float ieRaySphereIntersection(
 		solutions = (t0 > epsilon) ? 1 : 0;
 	}
 	else
-	{                    
+	{
 		solutions = 0;
 	}
 	return solutions;

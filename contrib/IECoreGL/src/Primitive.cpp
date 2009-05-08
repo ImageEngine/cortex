@@ -62,21 +62,21 @@ Primitive::Primitive() : m_points( 0 ), m_normals( 0 ), m_colors( 0 ), m_texCoor
 Primitive::~Primitive()
 {
 }
-	
+
 void Primitive::render( ConstStatePtr state ) const
 {
 	if( !state->isComplete() )
 	{
 		throw Exception( "Primitive::render called with incomplete state object." );
 	}
-	
+
 	Shader *shader = const_cast<Shader *>( state->get<ShaderStateComponent>()->shader().get() );
 	// get ready in case the derived class wants to call setVertexAttributesAsUniforms
 	setupVertexAttributesAsUniform( shader );
 
 	glPushAttrib( GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
 	glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
-	
+
 		if( depthSortRequested( state ) )
 		{
 			glDepthMask( false );
@@ -104,7 +104,7 @@ void Primitive::render( ConstStatePtr state ) const
 		{
 			glUseProgram( 0 );
 		}
-		
+
 			if( state->get<PrimitiveOutline>()->value() )
 			{
 				glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -140,7 +140,7 @@ void Primitive::render( ConstStatePtr state ) const
 				glColor4f( c[0], c[1], c[2], c[3] );
 				render( state, PrimitivePoints::staticTypeId() );
 			}
-			
+
 			if( state->get<PrimitiveBound>()->value() )
 			{
 				Box3f b = bound();
@@ -170,12 +170,12 @@ void Primitive::render( ConstStatePtr state ) const
 					glVertex3f( b.min.x, b.max.y, b.max.z );
 				glEnd();
 			}
-			
+
 		if( program )
 		{
 			glUseProgram( program );
 		}
-		
+
 	glPopClientAttrib();
 	glPopAttrib();
 }
@@ -191,7 +191,7 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	{
 		throw Exception( std::string( typeName() ) + " does not support vertex attributes." );
 	}
-	
+
 	size_t s = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsTypedData >( boost::const_pointer_cast<IECore::Data>( data ) );
 
 	size_t rightSize = vertexAttributeSize();
@@ -199,7 +199,7 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	{
 		throw Exception( boost::str( format( "Vertex attribute \"%s\" has wrong number of elements (%d but expected %d)." ) % name % s % rightSize ) );
 	}
-	
+
 	if ( name == "P" )
 	{
 		m_points = IECore::runTimeCast< const IECore::V3fVectorData >( data );
@@ -207,7 +207,7 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	else if ( name == "Cs" )
 	{
 		m_colors = IECore::runTimeCast< const IECore::Color3fVectorData >( data );
-	} 
+	}
 	else if ( name == "N" )
 	{
 		m_normals = IECore::runTimeCast< const IECore::V3fVectorData >( data );
@@ -216,16 +216,16 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 	{
 		m_texCoords = IECore::runTimeCast< const IECore::V2fVectorData >( data );
 	}
-	
+
 	m_vertexAttributes[name] = data->copy();
 }
 
 struct Primitive::SetVertexAttribute
 {
 	typedef const void ReturnType;
-	
+
 	GLint m_vertexArrayIndex;
-	
+
 	SetVertexAttribute( GLint vertexArrayIndex ) : m_vertexArrayIndex( vertexArrayIndex )
 	{
 	}
@@ -246,7 +246,7 @@ void Primitive::setVertexAttributes( ConstStatePtr state ) const
 	{
 		return;
 	}
-	
+
 	Shader *shader = const_cast<Shader *>( state->get<ShaderStateComponent>()->shader().get() );
 	if( !shader )
 	{
@@ -256,7 +256,7 @@ void Primitive::setVertexAttributes( ConstStatePtr state ) const
 	GLint numAttributes = 0;
 	glGetProgramiv( shader->m_program, GL_ACTIVE_ATTRIBUTES, &numAttributes );
 	GLint maxAttributeNameLength = 0;
-	glGetProgramiv( shader->m_program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength ); 
+	glGetProgramiv( shader->m_program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength );
 	vector<char> name; name.resize( maxAttributeNameLength );
 	for( int i=0; i<numAttributes; i++ )
 	{
@@ -269,7 +269,7 @@ void Primitive::setVertexAttributes( ConstStatePtr state ) const
 			if( it!=m_vertexAttributes.end() )
 			{
 				SetVertexAttribute a( glGetAttribLocation( shader->m_program, &name[0] ) ) ;
-								
+
 				IECore::despatchTypedData< SetVertexAttribute, IECore::TypeTraits::IsVectorTypedData >( boost::const_pointer_cast<IECore::Data>( it->second ), a );
 			}
 		}
@@ -302,14 +302,14 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 		m_vertexToUniform.shader = 0;
 		return;
 	}
-	
+
 	if( s==m_vertexToUniform.shader && (*s)==(*m_vertexToUniform.shader) )
 	{
 		return;
 	}
-	
+
 	m_vertexToUniform.intDataMap.clear();
-	
+
 	for( VertexAttributeMap::const_iterator it=m_vertexAttributes.begin(); it!=m_vertexAttributes.end(); it++ )
 	{
 		try
@@ -319,7 +319,7 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 			{
 				case IECore::IntVectorDataTypeId :
 					m_vertexToUniform.intDataMap[parameterIndex] = IntData( static_pointer_cast<const IECore::IntVectorData>( it->second )->baseReadable(), 1 );
-					break;					
+					break;
 				case IECore::V2iVectorDataTypeId :
 					m_vertexToUniform.intDataMap[parameterIndex] = IntData( static_pointer_cast<const IECore::V2iVectorData>( it->second )->baseReadable(), 2 );
 					break;
@@ -337,7 +337,7 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 					break;
 				case IECore::Color3fVectorDataTypeId :
 					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( static_pointer_cast<const IECore::Color3fVectorData>( it->second )->baseReadable(), 3 );
-					break;			
+					break;
 				default :
 					break;
 			}
@@ -346,7 +346,7 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 		{
 		}
 	}
-		
+
 	m_vertexToUniform.shader = s;
 }
 

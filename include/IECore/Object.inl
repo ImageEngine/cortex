@@ -70,7 +70,7 @@ Object::TypeDescription<T>::TypeDescription( TypeId alternateTypeId, const std::
 template<class T>
 ObjectPtr Object::TypeDescription<T>::creator( void *data )
 {
-	assert( !data ); // We don't expect to receive any data here. 
+	assert( !data ); // We don't expect to receive any data here.
 	return new T;
 }
 

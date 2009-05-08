@@ -40,33 +40,33 @@ import IECoreRI
 class TeapotProcedural( IECore.ParameterisedProcedural ) :
 
 	def __init__( self ) :
-	
+
 		IECore.ParameterisedProcedural.__init__( self )
-		
+
 		self.boundCalled = False
 		self.renderCalled = False
 		self.renderStateCalled = False
 
 	def doBound( self, args ) :
-	
+
 		self.boundCalled = True
 		return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
-		
+
 	def doRenderState( self, renderer, args ) :
-		
+
 		self.renderStateCalled = True
 		renderer.setAttribute( "ri:visibility:diffuse", IECore.BoolData( 1 ) )
-		
+
 	def doRender( self, renderer, args ) :
-		
+
 		self.renderCalled = True
 		renderer.geometry( "teapot", {}, {} )
-		
+
 
 class ParameterisedProceduralTest( unittest.TestCase ) :
 
 	def checkContents( self, fileName, expectedElements, unexpectedElements ) :
-	
+
 		l = file( fileName ).readlines()
 		lineIndex = 0
 		for expected in expectedElements :
@@ -81,18 +81,18 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 		for e in unexpectedElements :
 			for ll in l :
 				self.assert_( e not in ll )
-			
+
 	def testNormalCall( self ) :
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testParameterisedProcedural.rib" )
 		r.worldBegin()
-		
+
 		t = TeapotProcedural()
-		
+
 		t.render( r )
-		
+
 		r.worldEnd()
-	
+
 		self.checkContents(
 			"test/IECoreRI/output/testParameterisedProcedural.rib",
 			[
@@ -103,22 +103,22 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 			],
 			[]
 		)
-		
+
 		self.assertEqual( t.renderStateCalled, True )
 		self.assertEqual( t.boundCalled, True )
 		self.assertEqual( t.renderCalled, True )
 
 	def testStateOnly( self ) :
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testParameterisedProcedural.rib" )
 		r.worldBegin()
-		
+
 		t = TeapotProcedural()
-		
+
 		t.render( r, inAttributeBlock=False, withState=True, withGeometry=False )
-		
+
 		r.worldEnd()
-	
+
 		self.checkContents(
 			"test/IECoreRI/output/testParameterisedProcedural.rib",
 			[
@@ -130,22 +130,22 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 				"AttributeEnd",
 			],
 		)
-		
+
 		self.assertEqual( t.renderStateCalled, True )
 		self.assertEqual( t.boundCalled, False )
 		self.assertEqual( t.renderCalled, False )
-		
+
 	def testImmediateGeometryOnly( self ) :
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testParameterisedProcedural.rib" )
 		r.worldBegin()
-		
+
 		t = TeapotProcedural()
-		
+
 		t.render( r, inAttributeBlock=False, withState=False, withGeometry=True, immediateGeometry=True )
-		
+
 		r.worldEnd()
-	
+
 		self.checkContents(
 			"test/IECoreRI/output/testParameterisedProcedural.rib",
 			[
@@ -157,20 +157,20 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 				"AttributeEnd",
 			],
 		)
-		
+
 		self.assertEqual( t.renderStateCalled, False )
 		self.assertEqual( t.boundCalled, False )
-		self.assertEqual( t.renderCalled, True )	
-							
+		self.assertEqual( t.renderCalled, True )
+
 	def tearDown( self ) :
-	
+
 		files = [
 			"test/IECoreRI/output/testParameterisedProcedural.rib"
 		]
 		for f in files :
 			if os.path.exists( f ):
-				os.remove( f )		
-			
-		
+				os.remove( f )
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

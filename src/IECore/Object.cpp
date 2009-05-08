@@ -70,8 +70,8 @@ struct Object::TypeInformation
 	typedef std::pair< CreatorFn, void *> CreatorAndData;
 	typedef std::map< TypeId, CreatorAndData > TypeIdsToCreatorsMap;
 	typedef std::map< std::string, CreatorAndData > TypeNamesToCreatorsMap;
-	
-	TypeIdsToCreatorsMap typeIdsToCreators;	
+
+	TypeIdsToCreatorsMap typeIdsToCreators;
 	TypeNamesToCreatorsMap typeNamesToCreators;
 };
 
@@ -101,12 +101,12 @@ Object::SaveContext::SaveContext( IndexedIOInterfacePtr ioInterface, const Index
 	:	m_ioInterface( ioInterface ), m_root( root ), m_savedObjects( savedObjects ), m_containerRoots( containerRoots )
 {
 }
-					
+
 IndexedIOInterfacePtr Object::SaveContext::container( const std::string &typeName, unsigned int ioVersion )
 {
-		
+
 	m_ioInterface->chdir( m_root );
-		
+
 		m_ioInterface->mkdir( typeName );
 		m_ioInterface->chdir( typeName );
 			m_ioInterface->write( "ioVersion", ioVersion );
@@ -114,7 +114,7 @@ IndexedIOInterfacePtr Object::SaveContext::container( const std::string &typeNam
 			m_ioInterface->chdir( "data" );
 				IndexedIOInterfacePtr container = m_ioInterface->resetRoot();
 				(*m_containerRoots)[container] = m_ioInterface->pwd();
-							 
+
 	return container;
 }
 
@@ -138,9 +138,9 @@ void Object::SaveContext::save( ConstObjectPtr toSave, IndexedIOInterfacePtr con
 
 		container->mkdir( name );
 		container->chdir( name );
-		
+
 			(*m_savedObjects)[toSave] = (*m_containerRoots)[container] + container->pwd();
-			
+
 			container->write( "type", toSave->typeName() );
 			container->mkdir( "data" );
 			container->chdir( "data" );
@@ -173,7 +173,7 @@ Object::LoadContext::LoadContext( IndexedIOInterfacePtr ioInterface, const Index
 IndexedIOInterfacePtr Object::LoadContext::container( const std::string &typeName, unsigned int &ioVersion )
 {
 	m_ioInterface->chdir( m_root );
-	
+
 		m_ioInterface->chdir( typeName );
 			unsigned int v;
 			m_ioInterface->read( "ioVersion", v );
@@ -185,7 +185,7 @@ IndexedIOInterfacePtr Object::LoadContext::container( const std::string &typeNam
 			m_ioInterface->chdir( "data" );
 				IndexedIOInterfacePtr container = m_ioInterface->resetRoot();
 				(*m_containerRoots)[container] = m_ioInterface->pwd();
-	
+
 	return container;
 }
 
@@ -207,7 +207,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOInterfacePtr cont
 	else
 	{
 		IndexedIOPath path( (*m_containerRoots)[container] );
-		path.append( container->pwd() ); 
+		path.append( container->pwd() );
 		path.append( name );
 		return loadObject( path.fullPath() );
 	}
@@ -216,28 +216,28 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( IndexedIOInterfacePtr cont
 // this function can only load concrete objects. it can't load references to
 // objects. path is relative to the root of m_ioInterface
 ObjectPtr Object::LoadContext::loadObject( const IndexedIO::EntryID &path )
-{	
+{
 	LoadedObjectMap::iterator it = m_loadedObjects->find( path );
 	if( it!=m_loadedObjects->end() )
 	{
 		return it->second;
 	}
-			
+
 	ObjectPtr result = 0;
-	
+
 	m_ioInterface->chdir( m_root );
-	
+
 		m_ioInterface->chdir( path );
 			string type = "";
 			m_ioInterface->read( "type", type );
-			m_ioInterface->chdir( "data" );	
-		
+			m_ioInterface->chdir( "data" );
+
 				result = create( type );
 				LoadContextPtr context = new LoadContext( m_ioInterface, m_ioInterface->pwd(), m_loadedObjects, m_containerRoots );
 				result->load( context );
-		
+
 			(*m_loadedObjects)[path] = result;
-					
+
 	return result;
 }
 
@@ -277,7 +277,7 @@ size_t Object::MemoryAccumulator::total() const
 {
 	return m_total;
 }
-	
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // object interface stuff
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -330,7 +330,7 @@ bool Object::operator!=( const Object &other ) const
 {
 	return isNotEqualTo( ConstObjectPtr( &other ) );
 }
-		
+
 void Object::save( SaveContext *context ) const
 {
 }
@@ -360,7 +360,7 @@ bool Object::isType( TypeId typeId )
 	TypeInformation *i = typeInformation();
 	return i->typeIdsToCreators.find( typeId )!=i->typeIdsToCreators.end();
 }
-		 
+
 bool Object::isType( const std::string &typeName )
 {
 	TypeInformation *i = typeInformation();
@@ -405,12 +405,12 @@ ObjectPtr Object::create( TypeId typeId )
 		throw Exception( ( boost::format( "Type %d is not a registered Object type." ) % typeId ).str() );
 	}
 	const TypeInformation::CreatorAndData &creatorAndData = it->second;
-	
+
 	if( !creatorAndData.first )
 	{
 		throw Exception( ( boost::format( "Type %d is an abstract type." ) % typeId ).str() );
 	}
-	
+
 	return creatorAndData.first( creatorAndData.second );
 }
 
@@ -423,12 +423,12 @@ ObjectPtr Object::create( const std::string &typeName )
 		throw Exception( ( boost::format( "Type \"%s\" is not a registered Object type." ) % typeName ).str() );
 	}
 	const TypeInformation::CreatorAndData &creatorAndData = it->second;
-	
+
 	if( !creatorAndData.first )
 	{
 		throw Exception( ( boost::format( "Type \"%s\" is an abstract type." ) % typeName ).str() );
 	}
-	
+
 	return creatorAndData.first( creatorAndData.second );
 }
 
@@ -438,7 +438,7 @@ ObjectPtr Object::load( IndexedIOInterfacePtr ioInterface, const IndexedIO::Entr
 	// from always having to balance chdirs() to return to the original
 	// directory after an operation. this results in fewer chdir calls and faster
 	// loading.
-	
+
 	IndexedIOInterfacePtr i = ioInterface->resetRoot();
 	LoadContextPtr context( new LoadContext( i ) );
 	ObjectPtr result = context->load<Object>( i, name );

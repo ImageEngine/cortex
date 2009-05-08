@@ -41,7 +41,7 @@
 #ifndef IE_CORE_FASTFLOAT_H
 #define IE_CORE_FASTFLOAT_H
 
-namespace IECore 
+namespace IECore
 {
 
 inline int fastFloat2Int( double v );

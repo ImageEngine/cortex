@@ -50,87 +50,87 @@ def __formatNumericParameter( parm, formatter ) :
 
 	## \todo Could this be put somewhere generally useful?
 	def formatFloat( f ) :
-	
+
 		f = "%.10f" % f
 		f = f.rstrip( "0" )
 		f = f.rstrip( "." )
 		return f
 
 	__formatParameter( parm, formatter )
-	
+
 	formatter.indent()
 
 	if not parm.presetsOnly :
-	
+
 		if isinstance( parm, IECore.IntData ) :
 			minValue = str( parm.minValue )
 			maxValue = str( parm.maxValue )
 		else :
 			minValue = formatFloat( parm.minValue )
 			maxValue = formatFloat( parm.maxValue )
-			
+
 		if parm.hasMinValue() and parm.hasMaxValue() :
 			formatter.paragraph( "Range : %s - %s" % ( minValue, maxValue ) )
 		elif parm.hasMinValue() :
 			formatter.paragraph( "Min : %s" % minValue )
 		elif parm.hasMaxValue() :
 			formatter.paragraph( "Max : %s" % maxValue )
-		
+
 		formatter.unindent()
 
 def __formatFileNameParameter( parm, formatter ) :
 
 	__formatParameter( parm, formatter )
 	formatter.indent()
-	
+
 	e = parm.extensions
 	if len( e ) :
 		formatter.paragraph( "Valid extensions : " + " ".join( e ) )
-		
+
 	if parm.mustExist :
 		formatter.paragraph( "File must exist" )
-		
+
 	if parm.mustNotExist :
-		formatter.paragraph( "File must not exist" )	
-	
+		formatter.paragraph( "File must not exist" )
+
 	if not parm.allowEmptyString :
 		formatter.paragraph( "File must be specified" )
-	
+
 	formatter.unindent()
-	
+
 def __formatDirNameParameter( parm, formatter ) :
 
 	__formatParameter( parm, formatter )
 	formatter.indent()
-		
+
 	if parm.mustExist :
 		formatter.paragraph( "Directory must exist" )
-		
+
 	if parm.mustNotExist :
-		formatter.paragraph( "Directory must not exist" )	
-	
+		formatter.paragraph( "Directory must not exist" )
+
 	if not parm.allowEmptyString :
 		formatter.paragraph( "Directory must be specified" )
-	
-	formatter.unindent()	
-	
+
+	formatter.unindent()
+
 def __formatFileSequenceParameter( parm, formatter ) :
 
 	__formatParameter( parm, formatter )
 	formatter.indent()
-		
+
 	if parm.mustExist :
 		formatter.paragraph( "Sequence must exist" )
-		
+
 	if parm.mustNotExist :
-		formatter.paragraph( "Sequence must not exist" )	
-	
+		formatter.paragraph( "Sequence must not exist" )
+
 	if not parm.allowEmptyString :
 		formatter.paragraph( "Sequence must be specified" )
-		
+
 	formatter.paragraph( "Values must be of the form \"something.###.ext\"" )
-	
-	formatter.unindent()	
+
+	formatter.unindent()
 
 def __formatCompoundParameter( parm, formatter ) :
 
@@ -145,27 +145,27 @@ def __formatParameter( parm, formatter ) :
 
 	formatter.heading( parm.name + " (" + parm.__class__.__name__.replace( "Parameter", "" ) + ")" )
 	formatter.paragraph( parm.description )
-	
+
 	formatter.indent()
-	
+
 	d = parm.defaultValue
 	defaultPresetName = None
 	for k, v in parm.presets().items() :
 		if d == v :
 			defaultPresetName = k
 			break
-	
+
 	if defaultPresetName :
 		formatter.paragraph( "Default : " + defaultPresetName )
 	elif isinstance( d, IECore.Data ) and hasattr( d, "value" ) :
 		formatter.paragraph( "Default : " + str( d.value ) )
-	
+
 	if len( parm.presetNames() ) :
 		formatter.paragraph( "Presets : " )
 		formatter.indent()
 		formatter.paragraph( "\n".join( parm.presetNames() ) )
 		formatter.unindent()
-		
+
 	formatter.unindent()
 
 __formatters = {

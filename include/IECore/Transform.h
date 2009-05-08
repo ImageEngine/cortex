@@ -47,20 +47,20 @@ namespace IECore
 class Transform : public StateRenderable
 {
 	public:
-	
+
 		Transform();
 		virtual ~Transform();
-				
+
 		IE_CORE_DECLAREABSTRACTOBJECT( Transform, StateRenderable );
-		
+
 		/// Returns the transform this object represents,
 		/// evaluated at the requested time.
 		virtual Imath::M44f transform( float time = 0 ) const = 0;
-			
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Transform );

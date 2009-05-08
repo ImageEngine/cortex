@@ -40,26 +40,26 @@ from IECore import *
 class TestTypedPrimitiveOp( unittest.TestCase ) :
 
 	class MeshCopyOp( MeshPrimitiveOp ) :
-	
+
 		def __init__( self ):
-		
+
 			MeshPrimitiveOp.__init__( self, "MeshCopyOp", "A simple op to copy meshes" )
-			
+
 		def modifyTypedPrimitive( self, mesh, operands ) :
-		
+
 			# ModifyOp should automatically copy the input for us, so we can just
 			# return it.
-			
+
 			return mesh
 
 	def testMeshPrimitiveOp( self ) :
 		""" Test TypedPrimitiveOp for use with MeshPrimitive """
 		op = TestTypedPrimitiveOp.MeshCopyOp()
-		
+
 		inputMesh = MeshPrimitive()
-		
+
 		outputMesh = op( input = inputMesh )
-		
+
 		self.assert_( outputMesh.isInstanceOf( TypeId.MeshPrimitive ) )
 		self.failIf( inputMesh is outputMesh )
 		self.assertEqual( inputMesh, outputMesh )

@@ -48,7 +48,7 @@ class CallbackIdWrapper : public CallbackId
 {
 
 	public :
-	
+
 		CallbackIdWrapper( PyObject *id )
 			// extract the MCallbackId from the SWIG object we're being passed. This isn't
 			// typesafe in any way - calling with anything other than the correct type
@@ -67,7 +67,7 @@ class CallbackIdWrapper : public CallbackId
 			/// \todo Remove this when a future maya version fixes the bug.
 			Py_INCREF( id );
 		}
-	
+
 };
 
 void bindCallbackId()

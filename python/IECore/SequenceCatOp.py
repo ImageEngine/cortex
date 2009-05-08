@@ -37,16 +37,16 @@ from IECore import *
 class SequenceCatOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "SequenceCatOp", "Concatenates file sequences to stdout.",
 			IntParameter(
 				name = "result",
 				description = "The number of files .",
-				defaultValue = 0,				
+				defaultValue = 0,
 			)
 		)
-		
-		self.parameters().addParameter(			
+
+		self.parameters().addParameter(
 			FileSequenceParameter(
 				name = "src",
 				description = "The source file sequence.",
@@ -57,9 +57,9 @@ class SequenceCatOp( Op ) :
 		)
 
 	def doOperation( self, operands ) :
-	
+
 		src = self.parameters()["src"].getFileSequenceValue()
-				
+
 		cat( src )
 
 		return IntData( len( src.fileNames() ) )

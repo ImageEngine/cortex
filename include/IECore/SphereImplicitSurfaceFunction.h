@@ -47,38 +47,38 @@ template<typename P, typename V>
 class SphereImplicitSurfaceFunction : public ImplicitSurfaceFunction<P, V>
 {
 	public:
-		
+
 		typedef P Point;
 		typedef VectorTraits<P> PointTraits;
 		typedef typename VectorTraits<P>::BaseType PointBaseType;
 		typedef V Value;
 		typedef VectorTraits<V> ValueTraits;
 		typedef typename VectorTraits<V>::BaseType ValueBaseType;
-		
+
 		IE_CORE_DECLAREMEMBERPTR2( SphereImplicitSurfaceFunction<P, V> );
-	
+
 		SphereImplicitSurfaceFunction( const Point &center, PointBaseType radius ) : m_center( center ), m_radius( radius )
 		{
 		}
-		
+
 		Value operator()( const Point &p )
 		{
 			Point separation;
 			vecSub( p, m_center, separation );
-			
+
 			return -(1.0 - ( vecDistance( p, m_center ) / m_radius ));
 		}
-		
+
 		virtual Value getValue( const Point &p )
-		{									
+		{
 			return this->operator()(p);
 		}
-		
+
 	protected:
 
 		Point m_center;
 		PointBaseType m_radius;
-		
+
 };
 
 typedef SphereImplicitSurfaceFunction<Imath::V3f, float>  SphereImplicitSurfaceFunctionV3ff;

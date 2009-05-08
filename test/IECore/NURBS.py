@@ -40,7 +40,7 @@ from IECore import *
 class TestNURBSPrimitive( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		n = NURBSPrimitive()
 		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
@@ -50,7 +50,7 @@ class TestNURBSPrimitive( unittest.TestCase ) :
 		ObjectWriter( n, "test/IECore/nurbs.fio" ).write()
 		nn = ObjectReader( "test/IECore/nurbs.fio" ).read()
 		self.assertEqual( n, nn )
-			
+
 		n = NURBSPrimitive( 3, FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ), 0, 4,
 			2, FloatVectorData( [ 0, 0, 1, 1 ] ), 0, 1 )
 		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -70,12 +70,12 @@ class TestNURBSPrimitive( unittest.TestCase ) :
 		nn = ObjectReader( "test/IECore/nurbs.fio" ).read()
 		self.assertEqual( n, nn )
 		nnn = nn.copy()
-		self.assertEqual( nnn, n )		
-		
+		self.assertEqual( nnn, n )
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile("test/IECore/nurbs.fio"):
 			os.remove("test/IECore/nurbs.fio")
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

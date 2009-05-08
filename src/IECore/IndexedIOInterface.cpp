@@ -47,17 +47,17 @@ namespace fs = boost::filesystem;
 IndexedIOInterfacePtr IndexedIOInterface::create( const std::string &path, const IndexedIO::EntryID &root, IndexedIO::OpenMode mode )
 {
 	IndexedIOInterfacePtr result = 0;
-	
+
 	std::string extension = fs::extension(path);
-	
+
 	const CreatorMap &createFns = getCreateFns();
-	
+
 	CreatorMap::const_iterator it = createFns.find(extension);
 	if (it == createFns.end())
 	{
 		throw IOException(path);
 	}
-	
+
 	return (it->second)(path, root, mode);
 }
 
@@ -73,9 +73,9 @@ void IndexedIOInterface::supportedExtensions( std::vector<std::string> &extensio
 void IndexedIOInterface::registerCreator( const std::string &extension, CreatorFn f )
 {
 	CreatorMap &createFns = getCreateFns();
-	
+
 	assert( createFns.find(extension) == createFns.end() );
-	
+
 	createFns.insert( CreatorMap::value_type(extension, f) );
 }
 
@@ -98,22 +98,22 @@ void IndexedIOInterface::writable(const IndexedIO::EntryID &name) const
 void IndexedIOInterface::validateOpenMode(IndexedIO::OpenMode &mode)
 {
 	// Clear 'other' bits
-	mode &= IndexedIO::Read | IndexedIO::Write | IndexedIO::Append 
+	mode &= IndexedIO::Read | IndexedIO::Write | IndexedIO::Append
 			| IndexedIO::Shared | IndexedIO::Exclusive;
-	
+
 	// Check for mutual exclusivity
 	if ((mode & IndexedIO::Shared)
 		&& (mode & IndexedIO::Exclusive))
-	{		
+	{
 		throw InvalidArgumentException("Incorrect IndexedIO open mode specified");
 	}
-	
+
 	if ((mode & IndexedIO::Write)
 		&& (mode & IndexedIO::Append))
-	{	
+	{
 		throw InvalidArgumentException("Incorrect IndexedIO open mode specified");
 	}
-		
+
 	// Set up default as 'read'
 	if (!(mode & IndexedIO::Read
 		|| mode & IndexedIO::Write
@@ -122,13 +122,13 @@ void IndexedIOInterface::validateOpenMode(IndexedIO::OpenMode &mode)
 	{
 		mode |= IndexedIO::Read;
 	}
-	
+
 	// Set up default as 'shared'
 	if (!(mode & IndexedIO::Shared
 		|| mode & IndexedIO::Exclusive))
 	{
 		mode |= IndexedIO::Shared;
 	}
-	
+
 }
 

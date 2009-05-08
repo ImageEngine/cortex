@@ -38,30 +38,30 @@ import IECore
 class TypeIdTest( unittest.TestCase ) :
 
 	def testNoDuplicates( self ) :
-	
+
 		#boost.python.enum doesn't allow us to ensure that no duplicate values are in it. Here we do a simple verification to ensure
 		#that the value of each attribute IECore.TypeId.XXXXX is present in the "values" array. If it's not, the likely cause
 		#is a duplicate.
-		
+
 		ids = {}
-	
-		num = 0	
+
+		num = 0
 		for i in dir( IECore.TypeId ) :
-		
+
 			if i != "name" and i != "values" and not i.startswith('_') :
 
 				v = getattr( IECore.TypeId, i )
-				
-				if v in ids :
-				
-					raise RuntimeError ("TypeId for %s is a duplicate of %s" % ( i, ids[v] ) )
-					
-				ids[v] = i	
-					
-				num = num + 1
-				
-		self.assertEqual( num, len( IECore.TypeId.values ) )	
 
-		
+				if v in ids :
+
+					raise RuntimeError ("TypeId for %s is a duplicate of %s" % ( i, ids[v] ) )
+
+				ids[v] = i
+
+				num = num + 1
+
+		self.assertEqual( num, len( IECore.TypeId.values ) )
+
+
 if __name__ == "__main__":
         unittest.main()

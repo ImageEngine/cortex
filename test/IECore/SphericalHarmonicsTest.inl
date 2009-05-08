@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "OpenEXR/ImathMath.h"
-#include "IECore/SimpleTypedData.h" 
+#include "IECore/SimpleTypedData.h"
 #include "IECore/PointsPrimitive.h"
 #include "IECore/Writer.h"
 
@@ -123,7 +123,7 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testProjection()
 	{
 		projector.template operator()<>( i, lightFunctor( projector.sphericalCoordinates()[i] ), sh1D );
 	}
-	
+
 	T e = 0.01;
 	int i = 0;
 	for ( it = sh1D.coefficients().begin(); it != sh1D.coefficients().end(); it++, i++ )
@@ -152,12 +152,12 @@ class SphericalHarmonicsProjectorExt : public SphericalHarmonicsProjector<V>
 		void reconstruction( const SphericalHarmonics< T > &sh, std::vector< T > &result )
 		{
 			result.resize( this->m_shEvaluations.size() );
-		
+
 			typename std::vector< T >::iterator rit = result.begin();
 			typename SphericalHarmonics<T>::CoefficientVector::const_iterator shIt;
 			typename SphericalHarmonicsProjector<V>::EvaluationVector::const_iterator eIt;
 			typename SphericalHarmonicsProjector<V>::EvaluationSamples::const_iterator it;
-		
+
 			for ( it = this->m_shEvaluations.begin(); it != this->m_shEvaluations.end(); it++, rit++ )
 			{
 				T acc(0);
@@ -200,17 +200,17 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection1D
 	points->variables["constantwidth"].data = new FloatData(0.04);
 	points->variables["constantwidth"].interpolation = PrimitiveVariable::Constant;
 	typename std::vector<Imath::V3f>::iterator PIT = POINTS->writable().begin();
-	for ( it = func1DValues.begin(), eIt = projector.euclidianCoordinates().begin(); 
+	for ( it = func1DValues.begin(), eIt = projector.euclidianCoordinates().begin();
 			it != func1DValues.end() && eIt != projector.euclidianCoordinates().end(); it++, eIt++, PIT++ )
 	{
 		*PIT = *eIt * ( *it );
-	}	
+	}
 	Writer::create( points, "/tmp/reconstruction.cob" )->write();
 #endif
-	
+
 	int errors = 0;
 	T e = 0.15;
-	for ( it = func1DValues.begin(), pIt = projector.sphericalCoordinates().begin(); 
+	for ( it = func1DValues.begin(), pIt = projector.sphericalCoordinates().begin();
 			it != func1DValues.end() && pIt != projector.sphericalCoordinates().end(); it++, pIt++ )
 	{
 		if (!Imath::equalWithRelError ( polar1DFunctor(*pIt), *it, e))
@@ -256,16 +256,16 @@ void SphericalHarmonicsProjectorTest< T, bands, samples >::testPolarProjection3D
 	for ( it3d = func3DValues.begin(); it3d != func3DValues.end(); it3d++, PIT++ )
 	{
 		*PIT = *it3d;
-	}	
+	}
 	Writer::create( points, "/tmp/reconstruction3d.cob" )->write();
 #endif
 
 	int errors = 0;
 	T e = 0.3;
-	for ( it3d = func3DValues.begin(), pIt = projector.sphericalCoordinates().begin(); 
+	for ( it3d = func3DValues.begin(), pIt = projector.sphericalCoordinates().begin();
 			it3d != func3DValues.end() && pIt != projector.sphericalCoordinates().end(); it3d++, pIt++ )
 	{
-		if ( !(*it3d).equalWithAbsError( polar3DFunctor( *pIt ), e) ) 
+		if ( !(*it3d).equalWithAbsError( polar3DFunctor( *pIt ), e) )
 		{
 			BOOST_CHECK_EQUAL( *it3d, polar3DFunctor( *pIt ) );
 			if ( ++errors > 10 )
@@ -292,10 +292,10 @@ void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection
 	// test 1D euclidian projection
 	projector.template euclideanProjection<>( euclidian1DFunctor, sh1D );
 	projector.reconstruction( sh1D, func1DValues );
-	
+
 	int errors = 0;
 	T e = 0.15;
-	for ( it = func1DValues.begin(), eIt = projector.euclidianCoordinates().begin(); 
+	for ( it = func1DValues.begin(), eIt = projector.euclidianCoordinates().begin();
 			it != func1DValues.end() && eIt != projector.euclidianCoordinates().end(); it++, eIt++ )
 	{
 		if (!Imath::equalWithRelError ( *it, euclidian1DFunctor(*eIt), e))
@@ -327,10 +327,10 @@ void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection
 
 	int errors = 0;
 	T e = 0.3;
-	for ( it3d = func3DValues.begin(), eIt = projector.euclidianCoordinates().begin(); 
+	for ( it3d = func3DValues.begin(), eIt = projector.euclidianCoordinates().begin();
 			it3d != func3DValues.end() && eIt != projector.euclidianCoordinates().end(); it3d++, eIt++ )
 	{
-		if ( !(*it3d).equalWithAbsError( euclidian3DFunctor( *eIt ), e) ) 
+		if ( !(*it3d).equalWithAbsError( euclidian3DFunctor( *eIt ), e) )
 		{
 			BOOST_CHECK_EQUAL( *it3d, euclidian3DFunctor( *eIt ) );
 			if ( ++errors > 10 )
@@ -411,7 +411,7 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation()
 	points->variables["constantwidth"].data = new FloatData(0.04);
 	points->variables["constantwidth"].interpolation = PrimitiveVariable::Constant;
 	typename std::vector<Imath::V3f>::iterator PIT = POINTS->writable().begin();
-	for ( itN = normalValues.begin(), eIt = projector.euclidianCoordinates().begin(); 
+	for ( itN = normalValues.begin(), eIt = projector.euclidianCoordinates().begin();
 			itN != normalValues.end() && eIt != projector.euclidianCoordinates().end(); itN++, eIt++, PIT++ )
 	{
 		*PIT = *eIt * ( *itN );
@@ -478,7 +478,7 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
 	for ( itN = normalValues.begin(); itN != normalValues.end(); itN++, PIT++ )
 	{
 		*PIT = *itN;
-	}	
+	}
 	Writer::create( points, "/tmp/rotation3d.cob" )->write();
 #endif
 

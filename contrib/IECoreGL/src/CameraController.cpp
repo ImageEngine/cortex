@@ -75,7 +75,7 @@ void CameraController::reshape( int resolutionX, int resolutionY )
 	float oldAspect = (float)oldRes.x/(float)oldRes.y;
 	float badAspect = (float)resolutionX/(float)resolutionY;
 	float yScale = oldAspect / badAspect;
-	
+
 	m_camera->setResolution( V2i( resolutionX, resolutionY ) );
 	Box2f screenWindow = m_camera->getScreenWindow();
 	screenWindow.min.y *= yScale;
@@ -104,7 +104,7 @@ void CameraController::frame( const Imath::Box3f &box, const Imath::V3f &viewDir
 	// translate the camera back until the box is completely visible
 	M44f inverseCameraMatrix = cameraMatrix.inverse();
 	Box3f cBox = transform( box, inverseCameraMatrix );
-	
+
 	Box2f screenWindow = m_camera->getScreenWindow();
 	if( m_camera->isInstanceOf( PerspectiveCamera::staticTypeId() ) )
 	{
@@ -112,12 +112,12 @@ void CameraController::frame( const Imath::Box3f &box, const Imath::V3f &viewDir
 		// back till the box is wholly visible. this currently assumes the screen window
 		// is centred about the camera axis.
 		PerspectiveCameraPtr perspCamera = static_pointer_cast<PerspectiveCamera>( m_camera );
-		
+
 		float z0 = cBox.size().x / screenWindow.size().x;
 		float z1 = cBox.size().y / screenWindow.size().y;
-		
+
 		m_centreOfInterest = max( z0, z1 ) / tan( M_PI * perspCamera->getFOV() / 360.0 ) + cBox.size().z / 2.0f;
-		
+
 		cameraMatrix.translate( V3f( 0.0f, 0.0f, m_centreOfInterest ) );
 	}
 	else
@@ -126,27 +126,27 @@ void CameraController::frame( const Imath::Box3f &box, const Imath::V3f &viewDir
 		// to frame the box, maintaining the aspect ratio of the screen window.
 		m_centreOfInterest = cBox.size().z / 2.0f + m_camera->getClippingPlanes()[0];
 		cameraMatrix.translate( V3f( 0.0f, 0.0f, m_centreOfInterest ) );
-		
+
 		float xScale = cBox.size().x / screenWindow.size().x;
 		float yScale = cBox.size().y / screenWindow.size().y;
 		float scale = max( xScale, yScale );
-		
+
 		V2f newSize = screenWindow.size() * scale;
 		screenWindow.min.x = cBox.center().x - newSize.x / 2.0f;
 		screenWindow.min.y = cBox.center().y - newSize.y / 2.0f;
 		screenWindow.max.x = cBox.center().x + newSize.x / 2.0f;
 		screenWindow.max.y = cBox.center().y + newSize.y / 2.0f;
 	}
-	
+
 	m_camera->setTransform( cameraMatrix );
 	m_camera->setScreenWindow( screenWindow );
 }
-		
+
 void CameraController::track( int dx, int dy )
 {
 	V2i resolution = m_camera->getResolution();
 	Box2f screenWindow = m_camera->getScreenWindow();
-	
+
 	V3f translate( 0.0f );
 	translate.x = -screenWindow.size().x * (float)dx/(float)resolution.x;
 	translate.y = screenWindow.size().y * (float)dy/(float)resolution.y;
@@ -167,16 +167,16 @@ void CameraController::tumble( int dx, int dy )
 	M44f ti = t.inverse();
 	V3f yAxis( 0.0f, 1.0f, 0.f );
 	ti.multDirMatrix( yAxis, yAxis );
-	
+
 	t.translate( V3f( 0.0f, 0.0f, -m_centreOfInterest ) );
-	
+
 		t.rotate( V3f( -dy, 0.0f, 0.0f ) / 100.0f );
 		M44f yRotate;
 		yRotate.setAxisAngle( yAxis, -dx / 100.0f );
 		t = yRotate * t;
 
 	t.translate( V3f( 0.0f, 0.0f, m_centreOfInterest ) );
-	
+
 	m_camera->setTransform( t );
 }
 
@@ -184,7 +184,7 @@ void CameraController::dolly( int dx, int dy )
 {
 	V2i resolution = m_camera->getResolution();
 	float d = (float)dx/(float)resolution.x + (float)dy/(float)resolution.y;
-	
+
 	if( m_camera->isInstanceOf( PerspectiveCamera::staticTypeId() ) )
 	{
 		M44f t = m_camera->getTransform();

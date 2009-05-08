@@ -52,9 +52,9 @@ struct MImageAccessor
 	BOOST_STATIC_ASSERT( sizeof( T ) == 0 );
 
 	typedef void ReturnType;
-	
+
 	static ReturnType getPixels( MImage &i )
-	{	
+	{
 	}
 };
 

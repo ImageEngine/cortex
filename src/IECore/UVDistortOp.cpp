@@ -48,19 +48,19 @@ using namespace Imath;
 IE_CORE_DEFINERUNTIMETYPED( UVDistortOp );
 
 UVDistortOp::UVDistortOp()
-	:	WarpOp( 
-			"UVDistortOp", 
+	:	WarpOp(
+			"UVDistortOp",
 			"Distorts an ImagePrimitive by using a UV map as reference. The UV map must have the same pixel aspect then the image to be distorted. "
 			"The resulting image will have the same data window as the reference UV map."
 		), m_u(0), m_v(0)
 {
 	m_uvMapParameter = new ObjectParameter(
-		"uvMap", 
+		"uvMap",
 		"Image with the red and green values being floating point normalized coordinates (x,y) from the undistorted image.",
 		new NullObject,
 		ImagePrimitiveTypeId
 	);
-	
+
 	parameters()->addParameter( m_uvMapParameter );
 }
 
@@ -131,7 +131,7 @@ struct UVDistortOp::Lookup
 		Lookup( unsigned pos ) : m_pos( pos )
 		{
 		}
-	
+
 		template<typename T>
 		ReturnType operator()( typename T::ConstPtr data )
 		{
@@ -153,9 +153,9 @@ Imath::V2f UVDistortOp::warp( const Imath::V2f &p ) const
 	unsigned pos = x + y * (m_uvSize.x + 1);
 
 	UVDistortOp::Lookup lookup( pos );
-	
+
 	return Imath::V2f(
-		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_u), lookup ), 
+		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_u), lookup ),
 		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_v), lookup )
 	) * m_imageSize + m_imageOrigin;
 }

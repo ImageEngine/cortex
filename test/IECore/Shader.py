@@ -39,20 +39,20 @@ from IECore import *
 class TestShader( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		s = Shader()
 		self.assertEqual( s.name, "defaultsurface" )
 		self.assertEqual( s.type, "surface" )
 		self.assertEqual( len( s.parameters ), 0 )
 		self.assertEqual( s.parameters.typeName(), "CompoundData" )
-		
+
 		s = Shader( "marble", "surface" )
 		self.assertEqual( s.name, "marble" )
 		self.assertEqual( s.type, "surface" )
-		
+
 		ss = s.copy()
 		self.assertEqual( ss.name, s.name )
 		self.assertEqual( ss.type, s.type )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

@@ -45,37 +45,37 @@ namespace IECore
 class ExclusionFrameList : public FrameList
 {
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( ExclusionFrameList, FrameList );
-	
+
 		ExclusionFrameList( FrameListPtr frameList, FrameListPtr exclusionFrameList );
 		virtual ~ExclusionFrameList();
-						
+
 		void setFrameList( FrameListPtr frameList );
 		FrameListPtr getFrameList();
-		
+
 		void setExclusionFrameList( FrameListPtr exclusionFrameList );
 		FrameListPtr getExclusionFrameList();
-		
-		virtual void asList( std::vector<Frame> &frames ) const ;		
-		virtual std::string asString() const ;		
+
+		virtual void asList( std::vector<Frame> &frames ) const ;
+		virtual std::string asString() const ;
 		virtual bool isEqualTo( ConstFrameListPtr other ) const;
 		virtual FrameListPtr copy() const ;
-		
+
 		static FrameListPtr parse( const std::string &frameList );
-		
+
 	protected :
-	
+
 		FrameListPtr m_frameList;
 		FrameListPtr m_exclusionFrameList;
-		
+
 	private :
-	
-		static FrameList::Parser< ExclusionFrameList > g_parserRegistrar;			
+
+		static FrameList::Parser< ExclusionFrameList > g_parserRegistrar;
 };
 
 IE_CORE_DECLAREPTR( ExclusionFrameList );
-	
+
 } // namespace IECore
 
 

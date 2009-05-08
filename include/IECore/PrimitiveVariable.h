@@ -76,10 +76,10 @@ struct PrimitiveVariable {
 	/// Constant interpolated data can be represented by any type of Data.
 	DataPtr data;
 };
-		
+
 /// A simple type to hold named PrimitiveVariables.
 typedef std::map<std::string, PrimitiveVariable> PrimitiveVariableMap;
 
 } // namespace IECore
-		
+
 #endif // IE_CORE_PRIMITIVEVARIABLE_H

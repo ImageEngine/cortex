@@ -58,15 +58,15 @@ MStatus MeshParameterHandler::update( IECore::ConstParameterPtr parameter, MObje
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnGenericAttribute fnGAttr( attribute );
 	if( !fnGAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
 	}
-	
+
 	fnGAttr.addAccept( MFnData::kMesh );
-				
+
 	return MS::kSuccess;
 }
 
@@ -77,19 +77,19 @@ MObject MeshParameterHandler::create( IECore::ConstParameterPtr parameter, const
 	{
 		return MObject::kNullObj;
 	}
-	
+
 	/// Use a generic attribute, so we could eventually accept other ObjectParamter types, too.
 	MFnGenericAttribute fnGAttr;
 	MObject result = fnGAttr.create( attributeName, attributeName );
-	
+
 	if ( !update( parameter, result ) )
 	{
 		return MObject::kNullObj;
 	}
-	
+
 	return result;
 }
-	
+
 MStatus MeshParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstObjectParameterPtr p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
@@ -97,23 +97,23 @@ MStatus MeshParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPl
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnMeshData fnData;
 	MObject data = fnData.create();
 
-	/// \todo Pull in userData from parameter to set up conversion parameters	
+	/// \todo Pull in userData from parameter to set up conversion parameters
 	ToMayaObjectConverterPtr converter = ToMayaObjectConverter::create( p->getValue(), MFn::kMeshData );
 	assert(converter);
 	bool conversionSuccess = converter->convert( data );
-	
+
 	if ( !conversionSuccess )
 	{
 		return MS::kFailure;
 	}
-	
+
 	/// \todo It seems like this can occassionally fail, usually with an empty mesh, but sometimes not. Try to establish exactly why.
 	plug.setValue( data );
-	
+
 	return MS::kSuccess;
 }
 
@@ -123,16 +123,16 @@ MStatus MeshParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr 
 	if( !p )
 	{
 		return MS::kFailure;
-	}	
-	
+	}
+
 	MObject v;
 	MStatus result = plug.getValue( v );
 	if( result )
 	{
 		/// \todo Pull in userData from parameter to set up conversion parameters
-		FromMayaMeshConverterPtr converter = boost::dynamic_pointer_cast< FromMayaMeshConverter > ( FromMayaObjectConverter::create( v, IECore::MeshPrimitive::staticTypeId() ) );				
+		FromMayaMeshConverterPtr converter = boost::dynamic_pointer_cast< FromMayaMeshConverter > ( FromMayaObjectConverter::create( v, IECore::MeshPrimitive::staticTypeId() ) );
 		assert(converter);
-		
+
 		converter->spaceParameter()->setNumericValue( (int)FromMayaMeshConverter::World );
 		p->setValue( converter->convert() );
 	}

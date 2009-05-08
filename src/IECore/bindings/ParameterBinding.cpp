@@ -113,19 +113,19 @@ IE_CORE_DECLAREPTR( ParameterWrap );
 void bindParameter()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<Parameter, ParameterWrapPtr>()
-		.def( 
+		.def(
 			init< const std::string &, const std::string &, ObjectPtr, boost::python::optional<const boost::python::object &, bool, CompoundObjectPtr > >
-			( 
-				( 
-					arg( "name" ), 
-					arg( "description" ), 
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
 					arg( "defaultValue" ),
 					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false , 
+					arg( "presetsOnly" ) = false ,
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
-				) 
+				)
 			)
 		)
 		.add_property( "name", make_function( &Parameter::name, return_value_policy<copy_const_reference>() ) )
@@ -146,7 +146,7 @@ void bindParameter()
 		.def( "presetValues", &presetValues, "Returns a tuple containing the values of all presets for the parameter." )
 		.def( "userData", (CompoundObjectPtr (Parameter::*)())&Parameter::userData )
 	;
-	
+
 }
 
 } // namespace IECore

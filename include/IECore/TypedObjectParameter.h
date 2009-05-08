@@ -67,16 +67,16 @@ template<typename T>
 class TypedObjectParameter : public ObjectParameter
 {
 	public :
-		
+
 		IE_CORE_DECLAREMEMBERPTR( TypedObjectParameter<T> );
 		typedef T ObjectType;
 		typedef typename T::Ptr ObjectTypePtr;
 		typedef typename T::ConstPtr ConstObjectTypePtr;
 		typedef std::pair<std::string, ObjectTypePtr> ObjectPreset;
 		typedef std::vector<ObjectPreset> ObjectPresetsContainer;
-		
-		TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );		
-		
+
+		TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );
+
 		//! @name RunTimeTyped functions
 		////////////////////////////////////
 		//@{
@@ -98,21 +98,21 @@ class TypedObjectParameter : public ObjectParameter
 		//@{
 		typename TypedObjectParameter<T>::Ptr copy() const;
 		//@}
-		
+
 		/// Implemented to return true only if value is of type T.
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
-		
+
 	protected:
-	
+
 		TypedObjectParameter();
-		
+
 		static PresetsContainer makePresets( const ObjectPresetsContainer &presets );
-		
+
 	private :
-		
+
 		static TypeDescription<TypedObjectParameter<T> > g_typeDescription;
 		friend class TypeDescription<TypedObjectParameter<T> >;
-		
+
 };
 
 /// \todo Split some of these off into separate files to speed up compilation

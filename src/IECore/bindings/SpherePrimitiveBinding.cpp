@@ -42,12 +42,12 @@ using namespace boost::python;
 
 namespace IECore
 {
-	
+
 void bindSpherePrimitive()
 {
 	RunTimeTypedClass<SpherePrimitive>()
 		.def( init<>() )
-		.def( init< float, optional< float, float, float > >() )		
+		.def( init< float, optional< float, float, float > >() )
 		.def( "radius", &SpherePrimitive::radius )
 		.def( "zMin", &SpherePrimitive::zMin )
 		.def( "zMax", &SpherePrimitive::zMax )
@@ -58,5 +58,5 @@ void bindSpherePrimitive()
 		.def( "setThetaMax", &SpherePrimitive::setThetaMax )
 	;
 }
-	
+
 }

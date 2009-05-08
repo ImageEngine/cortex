@@ -36,7 +36,7 @@
 #define IECORENUKE_CURVELOOKUP_H
 
 #include "DDImage/Description.h"
-#if DD_IMAGE_VERSION_MAJOR >= 5 && DD_IMAGE_VERSION_MINOR > 0 
+#if DD_IMAGE_VERSION_MAJOR >= 5 && DD_IMAGE_VERSION_MINOR > 0
 #define IECORENUKE_NO_ANIMATION
 #endif
 
@@ -64,9 +64,9 @@ class CurveLookup
 {
 
 	public :
-	
+
 		typedef T BaseType;
-	
+
 		CurveLookup( const std::string &name, const std::string &label, const std::string &toolTip = "" );
 		~CurveLookup();
 		/// Call this in the constructor for a node, to add as many curves as required. Returns the index
@@ -92,18 +92,18 @@ class CurveLookup
 		inline T evaluate( unsigned curveIndex, T x ) const;
 
 	private :
-	
+
 		/// No copying please
 		CurveLookup( const CurveLookup<T> &other );
 		const CurveLookup<T> &operator=( const CurveLookup &other );
-	
+
 		unsigned numCurves() const;
-	
+
 		std::string m_name;
 		std::string m_label;
 		std::string m_toolTip;
-		
-#ifdef IECORENUKE_NO_ANIMATION	
+
+#ifdef IECORENUKE_NO_ANIMATION
 		std::vector<std::string> *m_namesAndDefaultsStrings;
 		std::vector<DD::Image::CurveDescription> *m_curveDescriptions;
 		DD::Image::LookupCurves *m_curves;
@@ -120,7 +120,7 @@ class CurveLookup
 			float xMax;
 			float xMult;
 		};
-		
+
 		std::vector<Lookup>	m_lookups;
 
 };

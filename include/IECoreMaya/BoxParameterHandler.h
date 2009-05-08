@@ -50,7 +50,7 @@ class BoxParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const;
-		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const; 
+		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const;
 		virtual MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
 };

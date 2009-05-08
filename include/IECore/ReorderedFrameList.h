@@ -42,35 +42,35 @@ namespace IECore
 
 /// The ReorderedFrameList is a base class for any FrameList classes which
 /// hold a child FrameList and return some reordering of that list in the
-/// asList() method. 
+/// asList() method.
 class ReorderedFrameList : public FrameList
 {
 	public:
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( ReorderedFrameList, FrameList );
-		
+
 		ReorderedFrameList( FrameListPtr frameList );
-		
+
 		FrameListPtr getFrameList();
 		void setFrameList( FrameListPtr frameList );
-		
+
 		virtual ~ReorderedFrameList();
-		
-		virtual bool isEqualTo( ConstFrameListPtr other ) const;				
-				
+
+		virtual bool isEqualTo( ConstFrameListPtr other ) const;
+
 	protected :
-	
-		FrameListPtr m_frameList;	
-		
+
+		FrameListPtr m_frameList;
+
 		/// This utility can be used by the parse functions in derived classes.
 		/// It matches strings like "(...)s" or "...s", where s is the suffix. It
 		/// then returns a FrameList parsed from the "..." section.
 		template< typename T >
-		static FrameListPtr parseForChildList( const std::string &frameList );	
+		static FrameListPtr parseForChildList( const std::string &frameList );
 };
 
 IE_CORE_DECLAREPTR( ReorderedFrameList );
-	
+
 } // namespace IECore
 
 #include "IECore/ReorderedFrameList.inl"

@@ -49,24 +49,24 @@ class ToCoreConverter : public Converter
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( ToCoreConverter, Converter );
-	
+
 		/// Returns the converted maya object in a suitable IECore
 		/// format.
 		IECore::ObjectPtr convert() const;
-		
+
 	protected :
-	
+
 		ToCoreConverter( const std::string &name, const std::string &description );
 		virtual ~ToCoreConverter();
-		
+
 		/// Called by convert() to actually perform the operation.
 		/// operands contains the result of parameters()->getValidatedValue() -
 		/// this function will never be called when the contents of the parameters
 		/// are in a bad state. Must be implemented in derived classes.
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const = 0;
-	
+
 };
 
 IE_CORE_DECLAREPTR( ToCoreConverter );

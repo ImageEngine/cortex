@@ -48,124 +48,124 @@ namespace IECore
 class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 {
 	public:
-	
+
 		typedef MeshPrimitive PrimitiveType;
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( MeshPrimitiveEvaluator, PrimitiveEvaluator );
-					
+
 		class Result : public PrimitiveEvaluator::Result
 		{
 			friend class MeshPrimitiveEvaluator;
-			
+
 			public:
-			
+
 				IE_CORE_DECLAREMEMBERPTR( Result );
-			
+
 				Result();
-	
+
 				Imath::V3f point() const;
 				Imath::V3f normal() const;
 				Imath::V2f uv() const;
 				Imath::V3f uTangent() const;
-				Imath::V3f vTangent() const;		
-				
+				Imath::V3f vTangent() const;
+
 				Imath::V3f          vectorPrimVar( const PrimitiveVariable &pv ) const;
 				float               floatPrimVar ( const PrimitiveVariable &pv ) const;
 				int                 intPrimVar   ( const PrimitiveVariable &pv ) const;
 				const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const;
 				Imath::Color3f      colorPrimVar ( const PrimitiveVariable &pv ) const;
 				half                halfPrimVar  ( const PrimitiveVariable &pv ) const;
-	
+
 				unsigned int        triangleIndex() const;
 				const Imath::V3f   &barycentricCoordinates() const;
 				const Imath::V3i   &vertexIds() const;
-				
+
 			protected:
-			
+
 				Imath::V3i m_vertexIds;
 				Imath::V3f m_bary;
 				Imath::V3f m_p;
 				Imath::V3f m_n;
 				Imath::V2f m_uv;
 				unsigned int m_triangleIdx;
-							
+
 				template<typename T>
 				T getPrimVar( const PrimitiveVariable &pv ) const;
-			
-			
+
+
 		};
-		IE_CORE_DECLAREPTR( Result );		
-		
+		IE_CORE_DECLAREPTR( Result );
+
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
-		
+
 		MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh );
-		
+
 		virtual ~MeshPrimitiveEvaluator();
-		
+
 		virtual ConstPrimitivePtr primitive() const;
-		
+
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
-		
+
 		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;
-						
+
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
-		
+
 		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
-		
-		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
+
+		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const;
-			
-		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
+
+		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
-			
+
 		virtual bool signedDistance( const Imath::V3f &p, float &distance ) const;
-			
-		virtual float volume() const;	
+
+		virtual float volume() const;
 
 		virtual Imath::V3f centerOfGravity() const;
-		
+
 		virtual float surfaceArea() const;
-					
+
 	protected:
-	
+
 		ConstMeshPrimitivePtr m_mesh;
-		
-		/// Must be default constructible for use as element with 
+
+		/// Must be default constructible for use as element with
 		struct BoundedTriangle : public Imath::Box3f
 		{
 			typedef Imath::V3f BaseType;
-			
+
 			BoundedTriangle()
 			{
-				makeEmpty();				
+				makeEmpty();
 			}
-			
+
 			BoundedTriangle( const Imath::Box3f &bound, Imath::V3i vertexIds, int idx ) : Imath::Box3f( bound ), m_vertexIds( vertexIds ), m_triangleIndex( idx )
-			{												
+			{
 			}
-			
+
 			Imath::V3i m_vertexIds;
 			unsigned int m_triangleIndex;
 		};
-		
+
 		ConstV3fVectorDataPtr m_verts;
-		
+
 		typedef std::vector< BoundedTriangle > BoundedTriangleVector;
-		
+
 		BoundedTriangleVector m_triangles;
-		
+
 		typedef BoundedKDTree< BoundedTriangleVector::iterator > BoundedTriangleTree;
-		
+
 		BoundedTriangleTree *m_tree;
-				
-		bool pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;				
-		void closestPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const;		
+
+		bool pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
+		void closestPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const;
 		bool intersectionPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
-		void intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;		
-		
+		void intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;
+
 		void calculateMassProperties() const;
 		void calculateAverageNormals() const;
-		
+
 		BoundedTriangleVector m_uvTriangles;
 		BoundedTriangleTree *m_uvTree;
 
@@ -174,22 +174,22 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 		mutable bool m_haveMassProperties;
 		mutable float m_volume;
-		mutable Imath::V3f m_centerOfGravity;	
+		mutable Imath::V3f m_centerOfGravity;
 		mutable Imath::M33f m_inertia;
 
 		mutable bool m_haveSurfaceArea;
 		mutable float m_surfaceArea;
-		
+
 		mutable bool m_haveAverageNormals;
 		typedef int VertexIndex;
 		typedef int TriangleIndex;
-		typedef std::pair<VertexIndex, VertexIndex> Edge;		
-		
-		typedef std::map< Edge, Imath::V3f > EdgeAverageNormals;		
+		typedef std::pair<VertexIndex, VertexIndex> Edge;
+
+		typedef std::map< Edge, Imath::V3f > EdgeAverageNormals;
 		mutable EdgeAverageNormals m_edgeAverageNormals;
-	
+
 		mutable V3fVectorDataPtr m_vertexAngleWeightedNormals;
-				
+
 };
 
 IE_CORE_DECLAREPTR( MeshPrimitiveEvaluator );

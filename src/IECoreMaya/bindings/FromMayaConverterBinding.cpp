@@ -56,7 +56,7 @@ static IECoreMaya::FromMayaConverterPtr create( const char *n, IECore::TypeId re
 {
 	MSelectionList l;
 	StatusException::throwIfError( l.add( MString( n ) ) );
-	
+
 	MDagPath p;
 	MStatus s;
 
@@ -87,7 +87,7 @@ static IECoreMaya::FromMayaConverterPtr create( const char *n, IECore::TypeId re
 				return c;
 			}
 		}
-	
+
 		MObject o;
 		s = l.getDependNode( 0, o );
 		if( s )
@@ -99,7 +99,7 @@ static IECoreMaya::FromMayaConverterPtr create( const char *n, IECore::TypeId re
 			}
 		}
 	}
-	
+
 	return 0;
 }
 

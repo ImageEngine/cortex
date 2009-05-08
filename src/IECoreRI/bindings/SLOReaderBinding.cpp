@@ -51,5 +51,5 @@ void bindSLOReader()
 		.def( init<const std::string &>() )
 	;
 }
-	
+
 }

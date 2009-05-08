@@ -45,9 +45,9 @@ namespace IECoreMaya
 {
 
 void bindMayaTypeId()
-{	
+{
 	/// We use a helper class written in Python to allow conversion of these to proper SWIG MTypeId objects
-	enum_< long int > ( "_MayaTypeId" )			
+	enum_< long int > ( "_MayaTypeId" )
 		.value( "CacheSet", CacheSetId )
 		.value( "ObjectData", ObjectDataId )
 		.value( "ParameterisedHolderLocator", ParameterisedHolderLocatorId )
@@ -61,7 +61,7 @@ void bindMayaTypeId()
 		.value( "ParameterisedHolderNode", ParameterisedHolderNodeId )
 		.value( "ProceduralHolder", ProceduralHolderId )
 		.value( "TransientParameterisedHolderNode", TransientParameterisedHolderNodeId )
-		.value( "ParameterisedHolderImagePlane", ParameterisedHolderImagePlaneId )	
+		.value( "ParameterisedHolderImagePlane", ParameterisedHolderImagePlaneId )
 		.value( "ImagePlaneHolder", ImagePlaneHolderId )
 	;
 }

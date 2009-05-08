@@ -56,7 +56,7 @@ struct DimensionTraits<1, T>
 	typedef T VectorType;
 	typedef void BoxType;
 	typedef void PlaneType;
-	typedef void LineSegmentType;	
+	typedef void LineSegmentType;
 };
 
 /// 2-D partial specialization
@@ -76,11 +76,11 @@ template<typename T>
 struct DimensionTraits<3, T>
 {
 	BOOST_STATIC_ASSERT( boost::is_arithmetic<T>::value );
-	typedef T ValueType;	
+	typedef T ValueType;
 	typedef Imath::Vec3<T> VectorType;
 	typedef Imath::Box< VectorType > BoxType;
 	typedef Imath::Plane3<T> PlaneType;
-	typedef LineSegment< VectorType > LineSegmentType;	
+	typedef LineSegment< VectorType > LineSegmentType;
 };
 
 }

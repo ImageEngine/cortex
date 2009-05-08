@@ -40,221 +40,221 @@ class TestKDTree:
 	treeSizes = [0, 1, 10, 100]
 	radii = [0.01, 0.05, 0.1, 1]
 	numNeighbours = [1, 4, 10, 20]
-	
+
 	def doNearestNeighbour(self, numPoints):
-		
+
 		self.makeTree(numPoints)
-		
+
 		for i in range(0, numPoints):
 			pIdx = self.tree.nearestNeighbour( self.points[i] )
 			self.assert_(pIdx >= 0)
 			self.assert_(pIdx < numPoints)
 			nearestPt = self.points[pIdx]
-			
+
 			self.assertEqual( pIdx, i )
 			self.assert_( nearestPt.equalWithRelError(self.points[i], 0.00001) )
-	
+
 	def doNearestNeighbours(self, numPoints):
-		
+
 		self.makeTree(numPoints)
-		
+
 		for i in range(0, numPoints):
 			for r in self.radii:
 				pIdxArray = self.tree.nearestNeighbours( self.points[i], r )
-				
+
 				for pIdx in pIdxArray:
 					self.assert_(pIdx >= 0)
 					self.assert_(pIdx < numPoints)
 					nearestPt = self.points[pIdx]
 					distToNearest = (self.points[pIdx] - self.points[i]).length()
-			
+
 					self.assert_( distToNearest <= r )
-					
+
 	def doNearestNNeighbours(self, numPoints):
-		
+
 		self.makeTree( numPoints )
-		
+
 		for i in range(0, numPoints) :
-		
+
 			for n in self.numNeighbours :
-			
+
 				testPoint = self.points[i]
-			
+
 				pIdxArray = self.tree.nearestNNeighbours( testPoint, n )
-				
+
 				# check we've been given as many neighbours as we asked for,
 				# or the whole tree if there aren't enough points
 				self.assertEqual( len( pIdxArray ), min( n, numPoints ) )
-				
+
 				# check that all indices are in range
 				for pIdx in pIdxArray :
-				
+
 					self.assert_(pIdx >= 0)
 					self.assert_(pIdx < numPoints)
-					
+
 				# check that points are ordered by distance
 				d = ( self.points[pIdxArray[0]] - testPoint ).length()
 				for pIdx in pIdxArray[1:] :
-					
+
 					dd = ( self.points[pIdx] - testPoint ).length()
 					self.assert_( dd < d )
 					d = dd
-				
+
 				# check that no points not in neighbours are closer than
-				# the furthest neighbour	
+				# the furthest neighbour
 				furthestNeighbourDistance = (self.points[pIdxArray[0]] - testPoint).length()
 				for i in range( 0, numPoints ) :
-				
+
 					if not i in pIdxArray :
-					
+
 						d = (self.points[i] - testPoint).length()
 						self.assert_( d > furthestNeighbourDistance )
 
 class TestKDTreeV2f(unittest.TestCase, TestKDTree):
-		
+
 	def makeTree(self, numPoints):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numPoints)
 		self.points = V2fVectorData()
-		
+
 		for i in range(0, numPoints):
 			self.points.append( V2f( random.random(), random.random() ) )
-				
+
 		self.tree = V2fTree( self.points )
-	
+
 	def testConstructors(self):
 		"""Test KDTreeV2f constructors"""
-		
+
 		for t in self.treeSizes:
-			self.makeTree(t)		
-						
+			self.makeTree(t)
+
 	def testNearestNeighbour(self):
 		"""Test KDTreeV2f nearestNeighbour"""
-		
+
 		for t in self.treeSizes:
-			self.doNearestNeighbour(t)						
-	
+			self.doNearestNeighbour(t)
+
 	def testNearestNeighbours(self):
 		"""Test KDTreeV2f nearestNeighbours"""
-		
+
 		for t in self.treeSizes:
 			self.doNearestNeighbours(t)
-					
+
 	def testNearestNNeighbours(self):
 		"""Test KDTreeV2f nearestNNeighbours"""
-		
+
 		for t in self.treeSizes:
 			self.doNearestNNeighbours(t)
-			
+
 class TestKDTreeV2d(unittest.TestCase, TestKDTree):
-	
+
 	def makeTree(self, numPoints):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numPoints)
 		self.points = V2dVectorData()
-		
+
 		for i in range(0, numPoints):
 			self.points.append( V2d( random.random(), random.random() ) )
-				
+
 		self.tree = V2dTree( self.points )
-	
+
 	def testConstructors(self):
 		"""Test KDTreeV2d constructors"""
-		
+
 		for t in self.treeSizes:
-			self.makeTree(t)		
-				
+			self.makeTree(t)
+
 	def testNearestNeighbour(self):
 		"""Test KDTreeV2d nearestNeighbour"""
-		
+
 		for t in self.treeSizes:
-			self.doNearestNeighbour(t)	
-					
+			self.doNearestNeighbour(t)
+
 	def testNearestNeighbours(self):
 		"""Test KDTreeV2d nearestNeighbours"""
-		
+
 		for t in self.treeSizes:
 			self.doNearestNeighbours(t)
-				
+
 	def testNearestNNeighbours(self):
 		"""Test KDTreeV2d nearestNNeighbours"""
-		
+
 		for t in self.treeSizes:
-			self.doNearestNNeighbours(t)			
+			self.doNearestNNeighbours(t)
 
 class TestKDTreeV3f(unittest.TestCase, TestKDTree):
-	
+
 	def makeTree(self, numPoints):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numPoints)
 		self.points = V3fVectorData()
-		
+
 		for i in range(0, numPoints):
 			self.points.append( V3f( random.random(), random.random(), random.random() ) )
-				
+
 		self.tree = V3fTree( self.points )
-	
+
 	def testConstructors(self):
 		"""Test KDTreeV3f constructors"""
-		
+
 		for t in self.treeSizes:
-			self.makeTree(t)		
-		
+			self.makeTree(t)
+
 	def testNearestNeighbour(self):
 		"""Test KDTreeV3f nearestNeighbour"""
-		
+
 		for t in self.treeSizes:
-			self.doNearestNeighbour(t)	
-					
+			self.doNearestNeighbour(t)
+
 	def testNearestNeighbours(self):
 		"""Test KDTreeV3f nearestNeighbours"""
-		
+
 		for t in self.treeSizes:
 			self.doNearestNeighbours(t)
-		
+
 	def testNearestNNeighbours(self):
 		"""Test KDTreeV3f nearestNNeighbours"""
-		
+
 		for t in self.treeSizes:
 			self.doNearestNNeighbours(t)
-		
+
 class TestKDTreeV3d(unittest.TestCase, TestKDTree):
-	
+
 	def makeTree(self, numPoints):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numPoints)
 		self.points = V3dVectorData()
-		
+
 		for i in range(0, numPoints):
 			self.points.append( V3d( random.random(), random.random(), random.random() ) )
-				
+
 		self.tree = V3dTree( self.points )
-	
+
 	def testConstructors(self):
 		"""Test KDTreeV3d constructors"""
-		
+
 		for t in self.treeSizes:
-			self.makeTree(t)		
-				
+			self.makeTree(t)
+
 	def testNearestNeighbour(self):
 		"""Test KDTreeV3d nearestNeighbour"""
-		
+
 		for t in self.treeSizes:
-			self.doNearestNeighbour(t)	
-					
+			self.doNearestNeighbour(t)
+
 	def testNearestNeighbours(self):
 		"""Test KDTreeV3d nearestNeighbours"""
-		
+
 		for t in self.treeSizes:
 			self.doNearestNeighbours(t)
-				
+
 	def testNearestNNeighbours(self):
 		"""Test KDTreeV3d nearestNNeighbours"""
-		
+
 		for t in self.treeSizes:
-			self.doNearestNNeighbours(t)		
-			
-			
-	
+			self.doNearestNNeighbours(t)
+
+
+
 if __name__ == "__main__":
 	unittest.main()

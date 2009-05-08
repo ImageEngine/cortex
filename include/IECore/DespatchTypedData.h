@@ -80,7 +80,7 @@ namespace IECore
 ///	ReturnType operator()( typename T::Ptr data )
 ///	{
 ///         // Deal with the data and, optionally, return some value
-///	}	 	
+///	}
 ///};
 /// \endcode
 ///
@@ -102,16 +102,16 @@ template< class Functor, template<typename> class Enabler >
 typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &functor );
 
 /// Convenience version of despatchTypedData, which throws an InvalidArgumentException when data which doesn't match the Enabler
-/// is encountered. 
+/// is encountered.
 template< class Functor, template<typename> class Enabler >
 typename Functor::ReturnType despatchTypedData( const DataPtr &data );
 
-/// Convenience version of despatchTypedData which operates on all TypedData classes, and constructs an ErrorHandler 
+/// Convenience version of despatchTypedData which operates on all TypedData classes, and constructs an ErrorHandler
 /// using its default constructor
 template< class Functor >
 typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &functor );
 
-/// Convenience version of despatchTypedData which operates on all TypedData classes, constructs the ErrorHandler 
+/// Convenience version of despatchTypedData which operates on all TypedData classes, constructs the ErrorHandler
 /// and Functor using their default constructors, and throws an InvalidArgumentException when data which isn't TypedData
 /// is encountered.
 template< class Functor >

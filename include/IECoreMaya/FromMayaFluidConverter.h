@@ -48,7 +48,7 @@ namespace IECoreMaya
 /// Converts a Maya Fluid to an IECore::PointsPrimitive with appropriate primitive variables
 class FromMayaFluidConverter : public FromMayaShapeConverter
 {
-	
+
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaFluidConverter, FromMayaFluidConverterTypeId, FromMayaShapeConverter );
@@ -57,16 +57,16 @@ class FromMayaFluidConverter : public FromMayaShapeConverter
 		FromMayaFluidConverter( const MDagPath &dagPath );
 
 		virtual ~FromMayaFluidConverter();
-		
+
 	protected :
-	
+
 		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
 		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		void constructCommon();
-	
+
 		IECore::PrimitivePtr doPrimitiveConversion( MFnFluid &fnFluid ) const;
 		void addPrimVar( IECore::PrimitivePtr primitive, const std::string &name, size_t numPoints, MFnFluid &fnFluid, float *(MFnFluid::*fn)( MStatus * ) ) const;
 
@@ -80,7 +80,7 @@ class FromMayaFluidConverter : public FromMayaShapeConverter
 		IECore::BoolParameterPtr m_textureCoordinatesParameter;
 
 		static Description<FromMayaFluidConverter> m_description;
-		
+
 };
 
 IE_CORE_DECLAREPTR( FromMayaFluidConverter )

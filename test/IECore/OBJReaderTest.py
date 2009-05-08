@@ -42,43 +42,43 @@ class TestOBJReader(unittest.TestCase):
     def testRead(self):
 
         self.testfile = 'test/IECore/data/obj/triangle.obj'
-        
+
         r = IECore.Reader.create(self.testfile)
         self.assertEqual(type(r), IECore.OBJReader)
-        
+
         mesh = r.read()
 
     def testReadNormals(self):
 
         self.testfile = 'test/IECore/data/obj/triangle_normals.obj'
-        
+
         r = IECore.Reader.create(self.testfile)
         self.assertEqual(type(r), IECore.OBJReader)
-        
+
         mesh = r.read()
 
-                                        
+
 
     def testReadNoTexture(self):
 
         self.testfile = 'test/IECore/data/obj/triangle_no_texture.obj'
-        
+
         r = IECore.Reader.create(self.testfile)
         self.assertEqual(type(r), IECore.OBJReader)
-        
+
         mesh = r.read()
 
 
     def testGroups(self):
 
         self.testfile = 'test/IECore/data/obj/groups.obj'
-        
+
         r = IECore.Reader.create(self.testfile)
         self.assertEqual(type(r), IECore.OBJReader)
-        
-        mesh = r.read()
-                                        
 
-                                        
+        mesh = r.read()
+
+
+
 if __name__ == "__main__":
-        unittest.main()   
+        unittest.main()

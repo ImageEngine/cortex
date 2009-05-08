@@ -71,23 +71,23 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 {
 
 	public:
-		
+
 		ParameterisedHolder();
 		virtual ~ParameterisedHolder();
-		
-		static void *creator();				
+
+		static void *creator();
 		static MStatus initialize();
-		
+
 		/// This is a template class instantiated into many different
 		/// classes, so we specialise these in the implementation.
 		static MTypeId id;
 		static MString typeName;
-		
+
 		virtual void postConstructor();
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus shouldSave( const MPlug &plug, bool &isSaving );
 		virtual void copyInternalData( MPxNode *node );
-				
+
 		//! @name ParameterisedHolderInterface implementation
 		/////////////////////////////////////////////////////////////////////////////////////////
 		//@{
@@ -105,7 +105,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		virtual MPlug parameterPlug( IECore::ConstParameterPtr parameter );
 		virtual IECore::ParameterPtr plugParameter( const MPlug &plug );
 		//@}
-		
+
 		//! @name Attributes
 		/////////////////////////////////////////////////////////////////////////////////////////
 		static MObject aParameterisedClassName;
@@ -113,11 +113,11 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		static MObject aParameterisedSearchPathEnvVar;
 		static MObject aDynamicParameters;
 		//@}
-		
+
 	private:
-		
+
 		IECore::RunTimeTypedPtr loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar );
-		
+
 		/// Creates (or updates existing) attributes for each parameter. Removes any old attributes no longer
 		/// needed. If dynamicParameterStorage is specified then any new Parameters for which attributes must be
 		/// created are placed in there - this is used by updateParameterised() to store dynamic parameters.
@@ -132,7 +132,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		AttributeNameToParameterMap	m_attributeNamesToParameters;
 
 		MStatus removeUnecessaryAttributes( IECore::CompoundObjectPtr dynamicParameterStorage );
-		
+
 		// We store the Parameters which were added dynamically inside a CompoundObject within a plug
 		// value on the node. This allows us to recreate those Parameters when the node is copied or
 		// saved and then loaded. The keys in the CompoundObject are the names of the parameters which
@@ -144,26 +144,26 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		// Parameterised object. This means parameters can be added on the fly and they'll survive
 		// node duplication and file save/load.
 		void addDynamicParameters();
-		
+
 		class PLCB : public PostLoadCallback
 		{
 			public:
 				PLCB( ParameterisedHolder<BaseType> *node );
 			protected:
-			
+
 				ParameterisedHolder<BaseType> *m_node;
-				
+
 				void postLoad();
 		};
 		IE_CORE_DECLAREPTR( PLCB );
-		
+
 		PLCBPtr m_plcb;
-		
+
 	protected :
-	
+
 		IECore::RunTimeTypedPtr m_parameterised;
-		bool m_failedToLoad; // to avoid constantly trying to reload things that aren't there						
-		
+		bool m_failedToLoad; // to avoid constantly trying to reload things that aren't there
+
 };
 
 typedef ParameterisedHolder<MPxNode> ParameterisedHolderNode;

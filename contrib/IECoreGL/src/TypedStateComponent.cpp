@@ -38,7 +38,7 @@ using namespace Imath;
 
 namespace IECoreGL
 {
-	
+
 // color specialisation and instantiation
 /////////////////////////////////////////////////////////////////////
 

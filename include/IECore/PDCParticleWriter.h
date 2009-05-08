@@ -50,13 +50,13 @@ class PDCParticleWriter : public ParticleWriter
 
 		PDCParticleWriter( );
 		PDCParticleWriter( ObjectPtr object, const std::string &fileName );
-		
+
 	private :
-	
+
 		virtual void doWrite();
-		
+
 		static const WriterDescription<PDCParticleWriter> m_writerDescription;
-		
+
 };
 
 IE_CORE_DECLAREPTR( PDCParticleWriter );

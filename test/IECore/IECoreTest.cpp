@@ -67,9 +67,9 @@ using boost::test_tools::output_test_stream;
 using namespace IECore;
 
 test_suite* init_unit_test_suite( int argc, char* argv[] )
-{	
+{
 	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
-	
+
 	try
 	{
 		addBoostUnitTestTest(test);
@@ -88,12 +88,12 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addAssociatedLegendreTest(test);
 		addSphericalHarmonicsTest(test);
 		addLevenbergMarquardtTest(test);
-	} 
+	}
 	catch (std::exception &ex)
 	{
 		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
 		throw;
 	}
-	
+
 	return test;
 }

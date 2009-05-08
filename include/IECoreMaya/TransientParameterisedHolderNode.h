@@ -44,22 +44,22 @@ namespace IECoreMaya
 {
 
 /// The TransientParameterisedHolderNode is a special type of ParameterisedHolderNode which only exists for the purposes of being
-/// able to create Attribute Editor panels out of "thin air". One of thse node types can be created temporarily for this purpose, 
+/// able to create Attribute Editor panels out of "thin air". One of thse node types can be created temporarily for this purpose,
 /// having the same lifespan as the UI's containing layout.
 class TransientParameterisedHolderNode : public ParameterisedHolderNode
 {
 	public:
-		
+
 		TransientParameterisedHolderNode();
 		virtual ~TransientParameterisedHolderNode();
-		
-		static void *creator();				
+
+		static void *creator();
 		static MStatus initialize();
-		
+
 		/// This is a template class instantiated into many different
 		/// classes, so we specialise these in the implementation.
 		static MTypeId id;
-		static MString typeName;					
+		static MString typeName;
 };
 
 }

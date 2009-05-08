@@ -40,14 +40,14 @@ from IECore import *
 from IECoreMaya import *
 
 class TestPlaybackFrameList( unittest.TestCase ) :
-		
-	def test( self ):	
+
+	def test( self ):
 		""" Test PlaybackFrameList """
 
-		r = PlaybackFrameList( PlaybackFrameList.Range.Animation )	
-		
+		r = PlaybackFrameList( PlaybackFrameList.Range.Animation )
+
 		l = r.asList()
-		
+
 		self.assertEqual( l, range( int( cmds.playbackOptions( query=True, animationStartTime=True ) ),
 		                            int( cmds.playbackOptions( query=True, animationEndTime=True ) + 1 ) ) )
 

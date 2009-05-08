@@ -60,13 +60,13 @@ struct IndexedIOTestDataTraits
 		assert(false);
 		return "";
 	}
-	
+
 	static T value()
 	{
 		assert(false);
 		return T();
 	}
-	
+
 	static void check(const T& v1)
 	{
 		BOOST_CHECK_EQUAL(v1, value());
@@ -81,13 +81,13 @@ struct IndexedIOTestDataTraits<T*>
 		assert(false);
 		return "";
 	}
-	
+
 	static T* value()
 	{
 		assert(false);
 		return 0;
 	}
-	
+
 	static void check(T *v1)
 	{
 		for (int i = 0; i < 10; i++)
@@ -100,16 +100,16 @@ struct IndexedIOTestDataTraits<T*>
 template<typename T>
 struct IndexedIOTest
 {
-	
+
 	IndexedIOTest(const FilenameList &filenames) : m_filenames(filenames) {};
-	
+
 	template<typename D>
 	void test()
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
 			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
-		
+
 			bool exists = true;
 			try
 			{
@@ -119,7 +119,7 @@ struct IndexedIOTest
 			{
 				exists = false;
 			}
-		
+
 			if ( exists )
 			{
 				D v;
@@ -128,14 +128,14 @@ struct IndexedIOTest
 			}
 		}
 	}
-	
+
 	template<typename D>
 	void testArray()
 	{
 		for (FilenameList::const_iterator it = m_filenames.begin(); it != m_filenames.end(); ++it)
 		{
 			IndexedIOInterfacePtr io = new T(*it, "/", IndexedIO::Read );
-			
+
 			bool exists = true;
 			try
 			{
@@ -145,113 +145,113 @@ struct IndexedIOTest
 			{
 				exists = false;
 			}
-			
+
 			if ( exists )
-			{		
+			{
 				D *v = new D[10] ;
 				io->read(IndexedIOTestDataTraits<D*>::name(), v, 10 );
-			
+
 				IndexedIOTestDataTraits<D*>::check(v);
-				delete[] v;				
-			}			
+				delete[] v;
+			}
 		}
 	}
-	
+
 	template<typename D>
 	void write( IndexedIOInterfacePtr io)
 	{
 		assert(io);
-		
+
 		io->write( IndexedIOTestDataTraits<D>::name(), IndexedIOTestDataTraits<D>::value() );
 		io->ls( IndexedIOTestDataTraits<D>::name() );
 	}
-	
+
 	template<typename D>
 	void writeArray( IndexedIOInterfacePtr io)
 	{
 		assert(io);
-		
-		io->write( IndexedIOTestDataTraits<D*>::name(), IndexedIOTestDataTraits<D*>::value(), 10 ); 
+
+		io->write( IndexedIOTestDataTraits<D*>::name(), IndexedIOTestDataTraits<D*>::value(), 10 );
 		io->ls( IndexedIOTestDataTraits<D*>::name() );
 	}
-	
+
 	void write(const std::string &filename)
 	{
 		IndexedIOInterfacePtr io = new T(filename, "/", IndexedIO::Write );
-		
+
 		write<float>(io);
 		write<double>(io);
 		write<half>(io);
 		write<int>(io);
 		write<int64_t>(io);
-		write<uint64_t>(io);		
+		write<uint64_t>(io);
 		write<std::string>(io);
 		write<unsigned int>(io);
 		write<char>(io);
 		write<unsigned char>(io);
 		write<short>(io);
-		write<unsigned short>(io);		
-		
-		
+		write<unsigned short>(io);
+
+
 		writeArray<float>(io);
 		writeArray<double>(io);
 		writeArray<half>(io);
 		writeArray<int>(io);
 		writeArray<int64_t>(io);
-		writeArray<uint64_t>(io);		
+		writeArray<uint64_t>(io);
 		writeArray<std::string>(io);
 		writeArray<unsigned int>(io);
 		writeArray<char>(io);
 		writeArray<unsigned char>(io);
 		writeArray<short>(io);
-		writeArray<unsigned short>(io);		
-		
+		writeArray<unsigned short>(io);
+
 	}
-	
+
 	FilenameList m_filenames;
 };
 
 template<typename T>
 struct IndexedIOTestSuite : public boost::unit_test::test_suite
 {
-	
+
 	IndexedIOTestSuite() : boost::unit_test::test_suite("IndexedIOTestSuite")
 	{
 		FilenameList filenames;
 		getFilenames(filenames);
-			
+
 		static boost::shared_ptr<IndexedIOTest<T> > instance(new IndexedIOTest<T>(filenames));
-		
+
 		/// Uncomment this line to write out new test data - change architecture first
-		//instance->write("./test/IECore/data/" + extension() + "Files/" + IECore::versionString() + "/cent5.x86_64/types." + extension());		
-		
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<float>, instance ) );				
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<double>, instance ) );		
+		//instance->write("./test/IECore/data/" + extension() + "Files/" + IECore::versionString() + "/cent5.x86_64/types." + extension());
+
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<float>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<double>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<half>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<int>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<int64_t>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<uint64_t>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<std::string>, instance ) );								
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<unsigned int>, instance ) );				
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<char>, instance ) );				
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<unsigned char>, instance ) );				
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<std::string>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<unsigned int>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<char>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template test<unsigned char>, instance ) );
 
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<float>, instance ) );				
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<double>, instance ) );		
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<float>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<double>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<half>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<int>, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<int64_t>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<uint64_t>, instance ) );		
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<std::string>, instance ) );								
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<unsigned int>, instance ) );				
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<char>, instance ) );				
-		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<unsigned char>, instance ) );				
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<uint64_t>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<std::string>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<unsigned int>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<char>, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &IndexedIOTest<T>::template testArray<unsigned char>, instance ) );
 
 
 	}
-	
+
 	std::string extension() const;
-	
+
 	void getFilenames( FilenameList &filenames );
 };
 }

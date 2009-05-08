@@ -43,7 +43,7 @@ bool CachedReader::CacheFn::get( const std::string &file, ConstObjectPtr &object
 {
 	object = 0;
 	cost = 0;
-	
+
 	// if we've failed to read it before then don't try again
 	if( m_unreadables.count( file ) )
 	{
@@ -69,14 +69,14 @@ bool CachedReader::CacheFn::get( const std::string &file, ConstObjectPtr &object
 		}
 		throw Exception( "Could not find file '" + file + "' at the following paths: " + pathList );
 	}
-	
+
 	ReaderPtr r = Reader::create( resolvedPath.string() );
 	if( !r )
 	{
 		m_unreadables.insert( file );
 		throw Exception( "Could not create reader for '" + resolvedPath.string() + "'" );
 	}
-	
+
 	object = r->read();
 	/// \todo Why would this ever be NULL? Wouldn't we have thrown an exception already if
 	/// we were unable to read the file?
@@ -85,23 +85,23 @@ bool CachedReader::CacheFn::get( const std::string &file, ConstObjectPtr &object
 		m_unreadables.insert( file );
 		throw Exception( "Reader for '" + resolvedPath.string() + "' returned no data" );
 	}
-	
+
 	cost = object->memoryUsage();
-	
+
 	return true;
 }
 
 CachedReader::CachedReader( const SearchPath &paths, size_t maxMemory )
 {
 	m_fn.m_paths = paths;
-	
+
 	m_cache.setMaxCost( maxMemory );
 }
-		
+
 ConstObjectPtr CachedReader::read( const std::string &file )
 {
 	ConstObjectPtr data;
-	
+
 	bool result = m_cache.get( file, m_fn, data );
 	assert( result );
 	(void) result;

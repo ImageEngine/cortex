@@ -47,41 +47,41 @@ namespace IECoreGL
 class ColorTexture : public Texture
 {
 	public :
-				
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ColorTexture, ColorTextureTypeId, Texture );
-		
+
 		/// Constructs an empty texture of the specified dimensions.
 		ColorTexture( unsigned int width, unsigned int height );
 		/// Constructs a new ColorTexture. All channels must be of the same type, and must
 		/// be some form of numeric VectorData.
 		ColorTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
 			IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a = 0 );
-		
+
 		/// Creates a ColorTexture from the specified image. Accepts channels with names
 		/// "r", "R", "red", "g", "G", "green", "b", "B", "blue", "a", "A" and "alpha".
-		/// Currently ignores the display window and uses only the data window. 
+		/// Currently ignores the display window and uses only the data window.
 		/// Image must have at least RGB channels and all channels
 		/// must be of the same type.
 		ColorTexture( IECore::ConstImagePrimitivePtr image );
-					
+
 		virtual ~ColorTexture();
 
 		/// Creates an ImagePrimitive using the texture contents.
 		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
 
 	private :
-	
+
 		void construct( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
 			IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a );
-	
+
 		template<typename T>
 		void castConstruct( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
 			IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a );
-	
+
 		template<typename T>
 		void templateConstruct( unsigned int width, unsigned int height, boost::intrusive_ptr<const T> r,
 			boost::intrusive_ptr<const T> g,  boost::intrusive_ptr<const T> b, boost::intrusive_ptr<const T> a );
-					
+
 };
 
 IE_CORE_DECLAREPTR( ColorTexture );

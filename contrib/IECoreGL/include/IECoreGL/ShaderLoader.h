@@ -61,7 +61,7 @@ class ShaderLoader : public IECore::RefCounted
 {
 
 	public :
-	
+
 		IE_CORE_DECLAREMEMBERPTR( ShaderLoader );
 
 		/// Creates a ShaderLoader which will search for
@@ -72,7 +72,7 @@ class ShaderLoader : public IECore::RefCounted
 		/// Loads the Shader of the specified name. Returns 0
 		/// if no such Shader can be found.
 		ShaderPtr load( const std::string &name );
-		
+
 		/// Removes any cached shaders.
 		void clear();
 
@@ -83,7 +83,7 @@ class ShaderLoader : public IECore::RefCounted
 		/// IECOREGL_SHADER_INCLUDE_PATHS environment
 		/// variable.
 		static ShaderLoaderPtr defaultShaderLoader();
-		
+
 	private :
 
 		typedef std::map<std::string, ShaderPtr> ShaderMap;
@@ -92,7 +92,7 @@ class ShaderLoader : public IECore::RefCounted
 		IECore::SearchPath m_searchPaths;
 		bool m_preprocess;
 		IECore::SearchPath m_preprocessorSearchPaths;
-		
+
 		std::string readFile( const std::string &fileName );
 
 };

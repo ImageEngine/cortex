@@ -201,7 +201,7 @@ enum TypeId
 	PointDensitiesOpTypeId = 158,
 	DPXImageWriterTypeId = 159,
 	BoolVectorDataTypeId = 160,
-	VectorDataFilterOpTypeId = 161,	
+	VectorDataFilterOpTypeId = 161,
 	RenderableParameterTypeId = 162,
 	StateRenderableParameterTypeId = 163,
 	AttributeStateParameterTypeId = 164,
@@ -226,27 +226,27 @@ enum TypeId
 	RandomRotationOpTypeId = 183,
 	V2iVectorDataTypeId = 184,
 	V3iVectorDataTypeId = 185,
-	PointMeshOpTypeId = 186,	
+	PointMeshOpTypeId = 186,
 	ParticleMeshOpTypeId = 187,
 	HalfDataTypeId = 188,
-	MeshPrimitiveOpTypeId = 189,		
+	MeshPrimitiveOpTypeId = 189,
 	PrimitiveEvaluatorTypeId = 190,
 	MeshPrimitiveEvaluatorTypeId = 191,
 	MeshPrimitiveImplicitSurfaceOpTypeId = 192,
-	TriangulateOpTypeId = 193,	
+	TriangulateOpTypeId = 193,
 	SpherePrimitiveEvaluatorTypeId = 194,
 	SpherePrimitiveTypeId = 195,
 	ConverterTypeId = 196,
 	ToCoreConverterTypeId = 197,
 	ImageCropOpTypeId = 198,
 	MeshPrimitiveShrinkWrapOpTypeId = 199,
-	ImagePrimitiveEvaluatorTypeId = 200,	
+	ImagePrimitiveEvaluatorTypeId = 200,
 	FromCoreConverterTypeId = 201,
 	ShortDataTypeId = 202,
 	UShortDataTypeId = 203,
 	ShortVectorDataTypeId = 204,
 	UShortVectorDataTypeId = 205,
-	PathVectorParameterTypeId = 206,	
+	PathVectorParameterTypeId = 206,
 	ColorTransformOpTypeId = 207,
 	TransformOpTypeId = 208,
 	ImageDiffOpTypeId = 209,
@@ -260,7 +260,7 @@ enum TypeId
 	UInt64DataTypeId = 217,
 	Int64VectorDataTypeId = 218,
 	UInt64VectorDataTypeId = 219,
-	MappedRandomPointDistributionOpTypeId = 220,	
+	MappedRandomPointDistributionOpTypeId = 220,
 	PointRepulsionOpTypeId = 221,
 	LuminanceOpTypeId = 222,
 	ImagePrimitiveOpTypeId = 223,
@@ -280,7 +280,7 @@ enum TypeId
 	SplineddParameterTypeId = 237,
 	SplinefColor3fParameterTypeId = 238,
 	SplinefColor4fParameterTypeId = 239,
-	CompoundObjectParameterTypeId = 240,	
+	CompoundObjectParameterTypeId = 240,
 	DisplayDriverTypeId = 241,
 	DisplayDriverCreatorTypeId = 242,
 	ImageDisplayDriverTypeId = 243,
@@ -307,7 +307,7 @@ enum TypeId
 	ObjectVectorParameterTypeId = 264,
 	YUVImageWriterTypeId = 265,
 	ImageCompositeOpTypeId = 266,
-	ImagePremultiplyOpTypeId = 267,	
+	ImagePremultiplyOpTypeId = 267,
 	ImageUnpremultiplyOpTypeId = 268,
 	DateTimeDataTypeId = 269,
 	DateTimeParameterTypeId = 270,
@@ -326,50 +326,50 @@ enum TypeId
 	ReorderedFrameListTypeId = 283,
 	BinaryFrameListTypeId = 284,
 	ReversedFrameListTypeId = 285,
-	ExclusionFrameListTypeId = 286,	   
-	FrameListParameterTypeId = 287, 
+	ExclusionFrameListTypeId = 286,
+	FrameListParameterTypeId = 287,
 	FileSequenceTypeId = 288,
 	FileSequenceParameterTypeId = 289,
 	FileSequenceVectorParameterTypeId = 290,
 	ParameterisedProceduralTypeId = 291,
 	ColorSpaceTransformOpTypeId = 292,
-	
+
 	// Remember to update TypeIdBinding.cpp !!!
-	
+
 	// If we ever get this far then the core library is too big.
 	LastCoreTypeId = 99999,
 	// All RunTimeTyped derived classes in extension
 	// libraries should use a TypeId in the following range.
-	// Don't put the TypeId in here. For python derived classes use 
-	// the registerTypeId function in RunTimeTypedUtil.py to register the 
+	// Don't put the TypeId in here. For python derived classes use
+	// the registerTypeId function in RunTimeTypedUtil.py to register the
 	// TypeId into the python TypeId enum and check for conflicts.
 	FirstExtensionTypeId = 100000,
-	
+
 	FirstCoreDynamicsTypeId = 104000,
 	LastCoreDynamicsTypeId = 104999,
-	
+
 	FirstCoreGLTypeId = 105000,
-	LastCoreGLTypeId = 105999,	
-	
+	LastCoreGLTypeId = 105999,
+
 	FirstCoreRITypeId = 106000,
 	LastCoreRITypeId = 106999,
-	
+
 	FirstCoreNukeTypeId = 107000,
 	LastCoreNukeTypeId = 107999,
-	
+
 	FirstCoreTruelightTypeId = 108000,
 	LastCoreTruelightTypeId = 108999,
-	
+
 	FirstCoreMayaTypeId = 109000,
 	LastCoreMayaTypeId = 109999,
-	
+
 	FirstIERenderTypeId = 110000,
-	LastIERenderTypeId = 110499,	
+	LastIERenderTypeId = 110499,
 
 	LastExtensionTypeId = 399999,
 	// Any TypeIds beyond this point can be considered safe for private internal use.
-	
-};	
+
+};
 
 } // namespace IECore
 

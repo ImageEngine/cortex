@@ -69,23 +69,23 @@ ToMayaPlugConverterPtr ToMayaPlugConverter::create( const IECore::ObjectPtr src 
 bool ToMayaPlugConverter::convert( MPlug &plug ) const
 {
 	ConstObjectPtr toConvert = srcParameter()->getValidatedValue();
-	
+
 	MStatus s;
-	
+
 	MObject attr = plug.attribute();
-	
+
 	// uses the same types used in FromMayaPlugConverter.
 	if (attr.hasFn(MFn::kUnitAttribute))
 	{
 		MFnUnitAttribute fnAttr( attr, &s );
-		
+
 		switch (fnAttr.unitType())
 		{
 			case MFnUnitAttribute::kTime:
 			{
 
 				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
-				if (data == 0) 
+				if (data == 0)
 				{
 					return false;
 				}
@@ -93,14 +93,14 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 				MTime t;
 				t.setUnit( MTime::kSeconds );
 				t.setValue( data->readable() );
-				
+
 				s = plug.setValue(t);
 				return (s);
 			}
 			case MFnUnitAttribute::kAngle:
 			{
 				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
-				if (data == 0) 
+				if (data == 0)
 				{
 					return false;
 				}
@@ -108,14 +108,14 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 				MAngle a;
 				a.setUnit( MAngle::kRadians );
 				a.setValue( data->readable() );
-				
+
 				s = plug.setValue(a);
 				return (s);
 			}
 			case MFnUnitAttribute::kDistance:
 			{
 				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
-				if (data == 0) 
+				if (data == 0)
 				{
 					return false;
 				}
@@ -123,7 +123,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 				MDistance d;
 				d.setUnit( MDistance::kCentimeters );
 				d.setValue( data->readable() );
-				
+
 				s = plug.setValue(d);
 				return (s);
 			}
@@ -135,7 +135,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 	{
 		MFnNumericAttribute fnAttr( attr, &s );
 		assert(s);
-		
+
 		switch (fnAttr.unitType())
 		{
 			case MFnNumericData::kDouble:
@@ -148,18 +148,18 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 
 				s = plug.setValue( data->readable() );
 				return (s);
-			}		
+			}
 			case MFnNumericData::kFloat:
 			{
 				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
-				if (data == 0) 
+				if (data == 0)
 				{
 					return false;
 				}
 
 				s = plug.setValue( data->readable() );
 				return (s);
-			}		
+			}
 			case MFnNumericData::kInt:
 			{
 				ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
@@ -192,7 +192,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 
 				s = plug.setValue( static_cast<char>( data->readable() ) );
 				return (s);
-			}			
+			}
 			case MFnNumericData::kShort:
 			case MFnNumericData::kByte:
 			{
@@ -204,12 +204,12 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 
 				s = plug.setValue( static_cast<short>( data->readable() ) );
 				return (s);
-			}	
+			}
 			default:
 				// Fall-through to MObject conversion.
 				break;
 		}
-		
+
 	}
 	else if (attr.hasFn(MFn::kEnumAttribute))
 	{
@@ -222,13 +222,13 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 		s = plug.setValue( (short) data->readable() );
 		return (s);
 	}
-	
+
 	try
 	{
 		MObject value;
 		s = plug.getValue( value );
 		assert(s);
-		
+
 		ToMayaObjectConverterPtr objectConverter = ToMayaObjectConverter::create( toConvert );
 
 		if (objectConverter)
@@ -244,6 +244,6 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 	catch (...)
 	{
 	}
-	
+
 	return false;
 }

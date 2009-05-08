@@ -91,7 +91,7 @@ std::string FileSequence::asString() const
 unsigned FileSequence::getPadding() const
 {
 	unsigned count = 0;
-	
+
 	for ( std::string::const_iterator it = m_fileName.begin(); it != m_fileName.end(); ++it )
 	{
 		if ( *it == '#' )
@@ -110,13 +110,13 @@ void FileSequence::setPadding( unsigned padding )
 	{
 		oldPaddingStr += "#";
 	}
-	
+
 	std::string newPaddingStr = "";
 	for ( unsigned i = 0; i < padding; i++)
 	{
 		newPaddingStr += "#";
 	}
-	
+
 	std::string newFileName = m_fileName;
 	boost::replace_all( newFileName, oldPaddingStr, newPaddingStr );
 	setFileName( newFileName );
@@ -126,8 +126,8 @@ std::string FileSequence::getPrefix() const
 {
 	std::string::size_type p = m_fileName.find_first_of( '#' );
 	assert( p != std::string::npos );
-	
-	return m_fileName.substr( 0, p );	
+
+	return m_fileName.substr( 0, p );
 }
 
 void FileSequence::setPrefix( const std::string &prefix )
@@ -160,33 +160,33 @@ FrameList::Frame FileSequence::frameForFileName( const std::string &fileName ) c
 {
 	std::string prefix = getPrefix();
 	std::string suffix = getSuffix();
-	
+
 	if ( fileName.substr( 0, prefix.size() ) != prefix || fileName.substr( fileName.size() - suffix.size(), suffix.size() ) != suffix )
 	{
 		throw InvalidArgumentException( ( boost::format( "Filename \"%s\" is not a part of sequence \"%s\"." ) % fileName % asString() ).str() );
 	}
 
 	std::string frameStr = fileName.substr( prefix.size(), fileName.size() - suffix.size() - prefix.size() );
-	
+
 	if ( frameStr.size() == 0 )
 	{
 		throw InvalidArgumentException( ( boost::format( "Filename \"%s\" is not a part of sequence \"%s\"." ) % fileName % asString() ).str() );
 	}
-	
+
 	return boost::lexical_cast< FrameList::Frame >( frameStr );
 }
 
 void FileSequence::fileNames( std::vector< std::string > &f ) const
 {
 	f.clear();
-	
+
 	boost::format posFmt = fileNameTemplate( false );
-	boost::format negFmt = fileNameTemplate( true );	
-	
+	boost::format negFmt = fileNameTemplate( true );
+
 	std::vector< FrameList::Frame > frames;
-	
+
 	m_frameList->asList( frames );
-	
+
 	for ( std::vector< FrameList::Frame >::const_iterator it = frames.begin(); it != frames.end(); ++it )
 	{
 		boost::format &fmt = *it < 0 ? negFmt : posFmt ;
@@ -197,26 +197,26 @@ void FileSequence::fileNames( std::vector< std::string > &f ) const
 void FileSequence::clumpedFileNames( unsigned clumpSize, std::vector< std::vector < std::string > > &f ) const
 {
 	f.clear();
-	
+
 	boost::format posFmt = fileNameTemplate( false );
 	boost::format negFmt = fileNameTemplate( true );
-	
+
 	std::vector< std::vector< FrameList::Frame > > clumpedFrames;
-	
+
 	m_frameList->asClumpedList( clumpedFrames, clumpSize );
-		
+
 	for ( std::vector< std::vector< FrameList::Frame > >::const_iterator it = clumpedFrames.begin(); it != clumpedFrames.end(); ++it )
-	{		
+	{
 		const std::vector< FrameList::Frame > &clump = *it;
-		
+
 		f.push_back( std::vector< std::string >() );
-		
+
 		for ( std::vector< FrameList::Frame > ::const_iterator cit = clump.begin(); cit != clump.end(); ++cit )
-		{	
+		{
 			boost::format &fmt = *cit < 0 ? negFmt : posFmt ;
 			f.back().push_back( ( fmt % *cit ).str() );
 		}
-	}	
+	}
 }
 
 FileSequencePtr FileSequence::copy() const
@@ -228,19 +228,19 @@ void FileSequence::mapTo( ConstFileSequencePtr other, std::vector< std::pair< st
 {
 	assert( other );
 	result.clear();
-	
+
 	std::vector< std::string > names, otherNames;
-	
+
 	fileNames( names );
 	other->fileNames( otherNames );
-	
+
 	if ( names.size() != otherNames.size() )
 	{
 		throw InvalidArgumentException( "FileSequence.mapTo() : FileSequence objects contain different numbers of frames." );
 	}
-	
+
 	size_t numNames = names.size();
-	
+
 	result.reserve( numNames );
 	for ( size_t i = 0; i < numNames; i++)
 	{
@@ -252,19 +252,19 @@ void FileSequence::mapTo( ConstFileSequencePtr other, std::map< std::string, std
 {
 	assert( other );
 	result.clear();
-	
+
 	std::vector< std::string > names, otherNames;
-	
+
 	fileNames( names );
 	other->fileNames( otherNames );
-	
+
 	if ( names.size() != otherNames.size() )
 	{
 		throw InvalidArgumentException( "FileSequence.mapTo() : FileSequence objects contain different numbers of frames." );
 	}
-	
+
 	size_t numNames = names.size();
-	
+
 	for ( size_t i = 0; i < numNames; i++)
 	{
 		result[ names[i] ] = otherNames[i] ;
@@ -289,10 +289,10 @@ boost::format FileSequence::fileNameTemplate( bool negativeFrame ) const
 	{
 		paddingStr += "#";
 	}
-	
+
 	std::string f = m_fileName;
 	boost::replace_all( f, "%", "%%" );
 	boost::replace_all( f, paddingStr, ( boost::format( "%%0%dd" ) % ( negativeFrame ? padding + 1 : padding ) ).str() );
-	
+
 	return boost::format( f );
 }

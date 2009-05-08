@@ -52,5 +52,5 @@ void bindDepthTexture()
 		.def( init<unsigned int, unsigned int, IECore::ConstDataPtr>() )
 	;
 }
-	
+
 }

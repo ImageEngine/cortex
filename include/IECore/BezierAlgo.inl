@@ -62,7 +62,7 @@ void bezierSubdivideWalk( const Vec &v0, const Vec &v1, const Vec &v2, const Vec
 		Vec p1223 = Imath::lerp( p12, p23, 0.5 );
 		Vec p01121223 = Imath::lerp( p0112, p1223, 0.5 );
 		bezierSubdivideWalk( v0, p01, p0112, p01121223, tolerance2, f );
-		bezierSubdivideWalk( p01121223, p1223, p23, v3, tolerance2, f );	
+		bezierSubdivideWalk( p01121223, p1223, p23, v3, tolerance2, f );
 	}
 }
 
@@ -80,7 +80,7 @@ void bezierSubdivideWalk( const Vec &v0, const Vec &v1, const Vec &v2, typename 
 		Vec p12 = Imath::lerp( v1, v2, 0.5 );
 		Vec p0112 = Imath::lerp( p01, p12, 0.5 );
 		bezierSubdivideWalk( v0, p01, p0112, tolerance2, f );
-		bezierSubdivideWalk( p0112, p12, v2, tolerance2, f );	
+		bezierSubdivideWalk( p0112, p12, v2, tolerance2, f );
 	}
 }
 

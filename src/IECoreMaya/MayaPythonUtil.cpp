@@ -61,7 +61,7 @@ IECore::DataPtr executeMel( const std::string &cmd )
 {
 	MCommandResult result;
 	MStatus s = MGlobal::executeCommand( cmd.c_str(), result, false, false );
-	
+
 	if (s)
 	{
 		return IECore::convert<IECore::DataPtr>( result );
@@ -70,7 +70,7 @@ IECore::DataPtr executeMel( const std::string &cmd )
 	{
 		throw StatusException(s);
 	}
-	
+
 	return 0;
 }
 

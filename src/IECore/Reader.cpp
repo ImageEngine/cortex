@@ -58,13 +58,13 @@ Reader::Reader(  const std::string &name, const std::string &description, Parame
 CompoundObjectPtr Reader::readHeader()
 {
 	CompoundObjectPtr header = new CompoundObject();
-	
+
 	return header;
 }
 
 ObjectPtr Reader::read()
 {
-	/// \todo Perhaps we should append the fileName() to any exceptions thrown by operate() before re-raising them? 
+	/// \todo Perhaps we should append the fileName() to any exceptions thrown by operate() before re-raising them?
 	/// Use of boost.exception might make this easier.
 	return operate();
 }
@@ -115,7 +115,7 @@ ReaderPtr Reader::create( const std::string &fileName )
 void Reader::supportedExtensions( std::vector<std::string> &extensions )
 {
 	ExtensionsToFnsMap *m = extensionsToFns();
-	assert( m );	
+	assert( m );
 	for( ExtensionsToFnsMap::const_iterator it=m->begin(); it!=m->end(); it++ )
 	{
 		extensions.push_back( it->first.substr( 1 ) );
@@ -126,10 +126,10 @@ void Reader::supportedExtensions( TypeId typeId, std::vector<std::string> &exten
 {
 	extensions.clear();
 	ExtensionsToFnsMap *m = extensionsToFns();
-	assert( m );	
-	
+	assert( m );
+
 	const std::set< TypeId > &derivedTypes = RunTimeTyped::derivedTypeIds( typeId );
-	
+
 	for( ExtensionsToFnsMap::const_iterator it=m->begin(); it!=m->end(); it++ )
 	{
 		if ( it->second.typeId == typeId || std::find( derivedTypes.begin(), derivedTypes.end(), it->second.typeId ) != derivedTypes.end() )
@@ -144,9 +144,9 @@ void Reader::registerReader( const std::string &extensions, CanReadFn canRead, C
 	assert( canRead );
 	assert( creator );
 	assert( typeId != InvalidTypeId );
-	
+
 	ExtensionsToFnsMap *m = extensionsToFns();
-	assert( m );	
+	assert( m );
 	vector<string> splitExt;
 	split( splitExt, extensions, is_any_of( " " ) );
 	ReaderFns r;

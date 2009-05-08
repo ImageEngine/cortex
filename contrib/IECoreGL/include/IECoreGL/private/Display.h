@@ -10,7 +10,7 @@ IE_CORE_FORWARDDECLARE( FrameBuffer );
 
 class Display : public IECore::RefCounted
 {
-	
+
 	public :
 
 		/// A copy is taken of parameters

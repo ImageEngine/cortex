@@ -52,7 +52,7 @@ template<typename T>
 struct Hash
 {
 	size_t operator()( const T &s ) const
-	{		
+	{
 		return static_cast<size_t>(s);
 	}
 };
@@ -61,7 +61,7 @@ template<typename T>
 struct Hash<T*>
 {
 	size_t operator()( const T *s ) const
-	{		
+	{
 		return reinterpret_cast<size_t>(s);
 	}
 };
@@ -71,14 +71,14 @@ struct Hash<const char *>
 {
 	/// Dan Bernstein's original string hash
 	size_t operator()( const char *s ) const
-	{	
+	{
 		assert(s);
 		size_t hash = 5381;
 		while (*s)
 		{
 			hash = ( ( hash << 5 ) + hash ) + *s++;
 		}
-		
+
 		return hash;
 	}
 };
@@ -88,13 +88,13 @@ struct Hash<std::string>
 {
 	/// Dan Bernstein's original string hash
 	size_t operator()( const std::string &s ) const
-	{		
+	{
 		size_t hash = 5381;
 		for ( std::string::size_type i = 0; i < s.length(); i++)
 		{
 			hash = ( ( hash << 5 ) + hash ) + s[i];
 		}
-		
+
 		return hash;
 	}
 };
@@ -106,15 +106,15 @@ struct HashTable : public boost::multi_index::multi_index_container
 			std::pair< Key, Data >,
 			boost::multi_index::indexed_by<
 				boost::multi_index::hashed_non_unique<
-					boost::multi_index::member<std::pair< Key, Data >, Key, &std::pair< Key, Data >::first>, 
-					HashFn 
+					boost::multi_index::member<std::pair< Key, Data >, Key, &std::pair< Key, Data >::first>,
+					HashFn
 				>
 			>
-		> 
+		>
 {
 	typedef Key key_type;
 	typedef Data data_type;
-	typedef std::pair< Key, Data > value_type;	
+	typedef std::pair< Key, Data > value_type;
 };
 
 } // namespace IECore

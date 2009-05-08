@@ -98,7 +98,7 @@ boost::filesystem::path SearchPath::find( const boost::filesystem::path &file ) 
 			return "";
 		}
 	}
-	
+
 	// do some searching
 	for( list<path>::const_iterator it = paths.begin(); it!=paths.end(); it++ )
 	{

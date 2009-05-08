@@ -52,7 +52,7 @@ struct ExtractStringFromUnicode
 			return 0;
 		}
 	}
-	
+
 	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
 	{
 		void *storage = ((converter::rvalue_from_python_storage<std::string>*)data)->storage.bytes;
@@ -71,7 +71,7 @@ struct ExtractStringFromUnicode
 		}
 	}
 };
-   
+
 void bindUnicodeToString()
 {
 	// we don't use unicode in the cortex api, but we often end up passing unicode strings

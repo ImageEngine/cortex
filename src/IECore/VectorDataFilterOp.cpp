@@ -87,7 +87,7 @@ VectorDataFilterOp::~VectorDataFilterOp()
 struct Filter
 {
 	typedef void ReturnType;
-	
+
 	bool invert;
 	bool clip;
 	const vector<bool> *filter;
@@ -97,12 +97,12 @@ struct Filter
 	{
 		assert( data );
 		assert( filter );
-		
+
 		typedef typename T::ValueType Vector;
-		
+
 		const Vector &v = data->readable();
 		Vector vf;
-		typename Vector::const_iterator vIt = v.begin();		
+		typename Vector::const_iterator vIt = v.begin();
 		typename Vector::const_iterator vItEnd = vIt + min( v.size(), filter->size() );
 		vector<bool>::const_iterator fIt = filter->begin();
 		for( ; vIt!=vItEnd; vIt++, fIt++ )

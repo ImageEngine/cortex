@@ -52,16 +52,16 @@ IE_CORE_FORWARDDECLARE( DepthTexture );
 class FrameBuffer : public Bindable
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::FrameBuffer, FrameBufferTypeId, Bindable );
-		
+
 		/// Makes a new framebuffer. At this point the buffer is empty - you must use
 		/// the set*() functions below to provide locations to draw to before using
 		/// it. Throws an Exception if framebuffers are not supported by the OpenGL
 		/// implementation.
 		FrameBuffer();
 		virtual ~FrameBuffer();
-		
+
 		/// Returns the maximum number of color attachments available
 		/// in the calls below (the maximum allowable value for index).
 		static unsigned int maxColors();
@@ -82,28 +82,28 @@ class FrameBuffer : public Bindable
 		/// Returns the texture being used for the depth buffer, or 0 if
 		/// none has been specified.
 		ConstDepthTexturePtr getDepth() const;
-		
+
 		/// Throws a descriptive Exception if there is any problem with the
 		/// framebuffer.
 		void validate() const;
-		
+
 		/// Binds the framebuffer as the current GL buffer.
 		virtual void bind() const;
 		/// Returns 0 - don't know of a bitfield for pushing the
 		/// current framebuffer. Use glBindFramebufferEXT( 0 ) to
 		/// restore the usual render target.
 		virtual GLbitfield mask() const;
-		
+
 	private :
-	
+
 		GLuint m_frameBuffer;
 		std::vector<ColorTexturePtr> m_colorAttachments;
 		DepthTexturePtr m_depthAttachment;
-		
+
 		void saveAndBind() const;
 		void restore() const;
 		mutable GLint m_savedFrameBuffer;
-		
+
 };
 
 IE_CORE_DECLAREPTR( FrameBuffer );

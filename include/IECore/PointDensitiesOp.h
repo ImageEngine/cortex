@@ -47,32 +47,32 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 class PointDensitiesOp : public Op
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( PointDensitiesOp, Op );
-		
+
 		PointDensitiesOp();
 		virtual ~PointDensitiesOp();
-		
+
 		/// The Parameter for the input point cloud.
 		ObjectParameterPtr pointParameter();
 		ConstObjectParameterPtr pointParameter() const;
-		
+
 		/// The Parameter that specifies how many neighbours to use
 		/// in estimating the density.
 		IntParameterPtr numNeighboursParameter();
 		ConstIntParameterPtr numNeighboursParameter() const;
-		
+
 		/// The Parameter that specifies a simple multiplier on
 		/// the density value.
 		DoubleParameterPtr multiplierParameter();
 		ConstDoubleParameterPtr multiplierParameter() const;
-		
+
 	protected :
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-	
+
 	private :
-		
+
 		ObjectParameterPtr m_pointParameter;
 		IntParameterPtr m_numNeighboursParameter;
 		DoubleParameterPtr m_multiplierParameter;

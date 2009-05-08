@@ -35,23 +35,23 @@
 from IECore import *
 
 class presetParsing( Op ) :
-	
+
 	def __init__( self ) :
-	
+
 		Op.__init__( self,
 			"presetParsing",
 			"An Op to test the parsing of parameter presets.",
-			IntParameter( 
+			IntParameter(
 				name = "result",
 				description = "d",
 				defaultValue = 2,
 			)
 		)
-		
+
 		self.parameters().addParameters(
-		
-			[	
-			
+
+			[
+
 				V3fParameter(
 					name = "h",
 					description = "a v3f",
@@ -99,20 +99,20 @@ class presetParsing( Op ) :
 					]
 
 				)
-					
+
 			]
 		)
-	
+
 	def doOperation( self, operands ) :
-		
+
 		assert operands["h"] == V3fData( V3f( 1, 0, 0 ) )
-		
+
 		assert operands["i"] == V2dData( V2d( 0 ) )
-	
+
 		compoundPreset = CompoundObject()
 		compoundPreset["j"] = V3dData( V3d( 1 ) )
 		compoundPreset["k"] = M44fData( M44f( 1 ) )
 		assert operands["compound"] == compoundPreset
-	
+
 		return IntData( 1 )
 

@@ -49,22 +49,22 @@ namespace IECore
 
 
 template<typename T>
-class ImplicitWrap : 
-	public ImplicitSurfaceFunction<typename T::Point, typename T::Value>, 
+class ImplicitWrap :
+	public ImplicitSurfaceFunction<typename T::Point, typename T::Value>,
 	public Wrapper<ImplicitSurfaceFunction<typename T::Point, typename T::Value> >
 {
 	public :
 
 		IE_CORE_DECLAREMEMBERPTR( ImplicitWrap<T> );
-				
+
 		ImplicitWrap( PyObject *self ) : ImplicitSurfaceFunction<typename T::Point, typename T::Value >(), Wrapper<ImplicitSurfaceFunction< typename T::Point, typename T::Value> >( self, this )
 		{
 		}
-		
+
 		virtual ~ImplicitWrap()
 		{
 		}
-		
+
 		virtual typename T::Value getValue( const typename T::Point &p )
 		{
 			override o = this->get_override( "getValue" );
@@ -85,7 +85,7 @@ void bindImplicit( const char *name )
 {
 	RefCountedClass<T, RefCounted, typename ImplicitWrap<T>::Ptr >( name )
 		.def( init<> () )
-		.def( "getValue", pure_virtual( &T::getValue ) )		
+		.def( "getValue", pure_virtual( &T::getValue ) )
 	;
 }
 
@@ -94,7 +94,7 @@ void bindImplicitSurfaceFunction()
 	bindImplicit<ImplicitSurfaceFunctionV3ff>( "ImplicitSurfaceFunctionV3ff" );
 	bindImplicit<ImplicitSurfaceFunctionV3fd>( "ImplicitSurfaceFunctionV3fd" );
 	bindImplicit<ImplicitSurfaceFunctionV3df>( "ImplicitSurfaceFunctionV3df" );
-	bindImplicit<ImplicitSurfaceFunctionV3dd>( "ImplicitSurfaceFunctionV3dd" );	
+	bindImplicit<ImplicitSurfaceFunctionV3dd>( "ImplicitSurfaceFunctionV3dd" );
 }
 
 } // namespace IECore

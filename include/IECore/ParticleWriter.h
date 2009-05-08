@@ -53,18 +53,18 @@ class ParticleWriter : public Writer
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPED( ParticleWriter, Writer )
-				
+
 		/// Default implementation just checks that object is a PointsPrimitive instance.
 		static bool canWrite( ConstObjectPtr object, const std::string &fileName );
-		
+
 	protected :
-	
+
 		ParticleWriter( const std::string &name, const std::string &description );
-	
+
 		/// ParticleWriters only write objects of the PointsPrimitive type,
 		/// so this function returns object() already cast and ready.
 		ConstPointsPrimitivePtr particleObject();
-	
+
 		/// Convenience functions to access the values held in parameters().
 		/// Fills names with the unions of the attributes requested to be
 		/// saved and those actually present in the object being saved.
@@ -73,7 +73,7 @@ class ParticleWriter : public Writer
 		StringVectorParameterPtr m_attributesParameter;
 		/// Returns the number of particles in particleObject()
 		size_t particleCount();
-		
+
 };
 
 IE_CORE_DECLAREPTR( ParticleWriter );

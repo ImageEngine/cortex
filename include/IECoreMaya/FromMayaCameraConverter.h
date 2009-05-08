@@ -45,15 +45,15 @@ namespace IECoreMaya
 
 class FromMayaCameraConverter : public FromMayaDagNodeConverter
 {
-	
+
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaCameraConverter, FromMayaCameraConverterTypeId, FromMayaDagNodeConverter );
-		
+
 		FromMayaCameraConverter( const MDagPath &dagPath );
-		
+
 	protected :
-	
+
 		virtual IECore::ObjectPtr doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
@@ -64,13 +64,13 @@ class FromMayaCameraConverter : public FromMayaDagNodeConverter
 			RenderGlobals = 1,
 			Specified = 2,
 		};
-	
+
 		IECore::IntParameterPtr m_resolutionMode;
 		IECore::V2iParameterPtr m_resolution;
 
 		static FromMayaDagNodeConverter::Description<FromMayaCameraConverter> m_description;
 
-		
+
 };
 
 IE_CORE_DECLAREPTR( FromMayaCameraConverter )

@@ -54,20 +54,20 @@ class DPXImageWriter : public ImageWriter
 		/// Construct an DPXImageWriter for the given image and output filename
 		DPXImageWriter( ObjectPtr object, const std::string &fileName );
 		virtual ~DPXImageWriter();
-		
+
 		virtual std::string destinationColorSpace() const ;
 
 	private:
 
 		static const WriterDescription<DPXImageWriter> m_writerDescription;
-		
+
 		/// write the associated image
-		virtual void writeImage( const std::vector<std::string> &names, 
+		virtual void writeImage( const std::vector<std::string> &names,
 		                         ConstImagePrimitivePtr image,
 		                         const Imath::Box2i &dataWindow ) const;
-					
-		struct ChannelConverter;			
-		
+
+		struct ChannelConverter;
+
 };
 
 IE_CORE_DECLAREPTR(DPXImageWriter);

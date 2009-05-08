@@ -51,14 +51,14 @@ class LineSegment
 {
 
 	public :
-	
+
 		typedef T Point;
 		typedef typename VectorTraits<T>::BaseType BaseType;
-	
+
 		/// Line endpoints can be accessed directly.
 		T p0;
 		T p1;
-		
+
 		/// Uninitialised.
 		LineSegment();
 		LineSegment( const T &P0, const T &P1 );
@@ -68,7 +68,7 @@ class LineSegment
 		bool operator==( const S &other ) const;
 		template<class S>
 		bool operator!=( const S &other ) const;
-		
+
 		/// Matrix multiplication. These functions
 		/// transform both endpoints.
 		template<class S>
@@ -77,14 +77,14 @@ class LineSegment
 		LineSegment operator *( const S &m ) const;
 
 		/// Returns the point on the line at parameter t.
-		/// t ranges from 0 at p0 to 1 at p1. 
+		/// t ranges from 0 at p0 to 1 at p1.
 		T operator() ( BaseType t ) const;
 
 		/// p0 - p1
 		T direction() const;
 		/// (p0 - p1).normalized()
 		T normalizedDirection() const;
-		
+
 		/// Distance between p0 and p1
 		BaseType length() const;
 		/// Distance squared between p0 and p1
@@ -95,19 +95,19 @@ class LineSegment
 		/// to line, and places the corresponding point on line in
 		/// otherPoint.
 		T closestPoints( const LineSegment &line, T &otherPoint ) const;
-		
+
 		BaseType distanceTo( const T &point ) const;
 		/// Returns the shortest squared distance to the point.
 		BaseType distance2To( const T &point ) const;
 		BaseType distanceTo( const LineSegment &line ) const;
 		/// Returns the shortest squared distance to the line.
 		BaseType distance2To( const LineSegment &line ) const;
-		
+
 		template<class S>
 		bool intersect( const Imath::Plane3<S> &plane, T &intersection ) const;
 		template<class S>
 		bool intersectT( const Imath::Plane3<S> &plane, BaseType &t ) const;
-		
+
 };
 
 typedef LineSegment<Imath::V3f> LineSegment3f;

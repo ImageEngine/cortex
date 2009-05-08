@@ -40,58 +40,58 @@ from IECore import *
 class CubeColorLookupDataTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		d1 = CubeColorLookupfData()
 
-		
+
 	def testIO( self ) :
-	
-		d1 = CubeColorLookupfData()		
-		ObjectWriter( d1, "test/IECore/CubeColorLookupData.cob" ).write()		
+
+		d1 = CubeColorLookupfData()
+		ObjectWriter( d1, "test/IECore/CubeColorLookupData.cob" ).write()
 		self.assertEqual( d1, ObjectReader( "test/IECore/CubeColorLookupData.cob" ).read() )
-		
+
 		d2 = CubeColorLookupdData()
-		ObjectWriter( d2, "test/IECore/CubeColorLookupData.cob" ).write()		
+		ObjectWriter( d2, "test/IECore/CubeColorLookupData.cob" ).write()
 		self.assertEqual( d2, ObjectReader( "test/IECore/CubeColorLookupData.cob" ).read() )
-		
-		d3 = CubeColorLookupfData( 
-			CubeColorLookupf( 
-				V3i( 2, 2, 2 ), 
-				
+
+		d3 = CubeColorLookupfData(
+			CubeColorLookupf(
+				V3i( 2, 2, 2 ),
+
 				[
-					Color3f( 1, 1, 1 ), 
-					Color3f( 2, 2, 2 ), 
-					Color3f( 3, 3, 3 ), 
-					Color3f( 4, 4, 4 ), 
-					Color3f( 5, 5, 5 ), 
-					Color3f( 6, 6, 6 ), 
-					Color3f( 7, 7, 7 ), 
-					Color3f( 8, 8, 8 ), 
-				], 
-				
+					Color3f( 1, 1, 1 ),
+					Color3f( 2, 2, 2 ),
+					Color3f( 3, 3, 3 ),
+					Color3f( 4, 4, 4 ),
+					Color3f( 5, 5, 5 ),
+					Color3f( 6, 6, 6 ),
+					Color3f( 7, 7, 7 ),
+					Color3f( 8, 8, 8 ),
+				],
+
 				Box3f(
-					V3f( -1, -1, -1 ), 				
+					V3f( -1, -1, -1 ),
 					V3f( 1, 1, 1 )
 				),
-				
+
 				CubeColorLookupf.Interpolation.NoInterpolation )
 		)
-		ObjectWriter( d3, "test/IECore/CubeColorLookupData.cob" ).write()		
+		ObjectWriter( d3, "test/IECore/CubeColorLookupData.cob" ).write()
 		self.assertEqual( d3, ObjectReader( "test/IECore/CubeColorLookupData.cob" ).read() )
-				
-		
+
+
 	def setUp(self):
-        
+
 		if os.path.isfile( "test/IECore/CubeColorLookupData.cob" ) :
-			os.remove( "test/IECore/CubeColorLookupData.cob" )			
+			os.remove( "test/IECore/CubeColorLookupData.cob" )
 
 	def tearDown(self):
-        
+
 		if os.path.isfile( "test/IECore/CubeColorLookupData.cob" ) :
-			os.remove( "test/IECore/CubeColorLookupData.cob" )	
-		
-				
-		
+			os.remove( "test/IECore/CubeColorLookupData.cob" )
+
+
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

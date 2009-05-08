@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -48,7 +48,7 @@
 using namespace boost::python;
 using namespace Imath;
 
-namespace IECore 
+namespace IECore
 {
 
 template<typename T>
@@ -60,11 +60,11 @@ static T *construct( const V3i &dimension, object o, const typename T::BoxType &
 	}
 
 	extract<ColorTransformOpPtr> ex( o );
-	
+
 	if ( ex.check() )
 	{
 		ColorTransformOpPtr op = ex();
-		
+
 		typename T::DataType data;
 		typedef TypedData< typename T::DataType > TypedDataType;
 
@@ -79,17 +79,17 @@ static T *construct( const V3i &dimension, object o, const typename T::BoxType &
 			for ( int y = 0; y < dimension.y; y++ )
 			{
 				for ( int z = 0; z < dimension.z; z++ )
-				{			
-					samplePoints.push_back( 
-						Color3f( 
-							domainSize.x * x / ( dimension.x - 1 ) + domain.min.x, 
+				{
+					samplePoints.push_back(
+						Color3f(
+							domainSize.x * x / ( dimension.x - 1 ) + domain.min.x,
 							domainSize.y * y / ( dimension.y - 1 ) + domain.min.y,
 							domainSize.z * z / ( dimension.z - 1 ) + domain.min.z
 						)
-					);								
-				}		
+					);
+				}
 			}
-		}	
+		}
 		assert( (int)samplePoints.size() == dimension.x * dimension.y * dimension.z );
 
 		Box2i window( V2i( 0, 0 ), V2i( samplePoints.size() - 1, 0 ) );
@@ -103,12 +103,12 @@ static T *construct( const V3i &dimension, object o, const typename T::BoxType &
 		ImagePrimitivePtr result = runTimeCast< ImagePrimitive> ( op->operate() );
 		assert( result );
 		assert( result->variables.find( "Cs" ) != result->variables.end() );
-		assert( result->variables.find( "Cs" )->second.data );	
+		assert( result->variables.find( "Cs" )->second.data );
 		assert( runTimeCast< TypedDataType >( result->variables.find( "Cs" )->second.data ) );
 
 		const typename T::DataType &resultData = runTimeCast< TypedDataType >( result->variables.find( "Cs" )->second.data)->readable();
 
-		return new T( dimension, resultData, domain, interpolation);	
+		return new T( dimension, resultData, domain, interpolation);
 	}
 	else
 	{
@@ -119,7 +119,7 @@ static T *construct( const V3i &dimension, object o, const typename T::BoxType &
 		{
 			typename T::ColorType c = extract< typename T::ColorType >( o[i] );
 			data.push_back( c );
-		}	
+		}
 		return new T( dimension, data, domain, interpolation );
 	}
 }
@@ -129,13 +129,13 @@ static object getData( const CubeColorLookup<T> &o )
 {
 	list result;
 	const std::vector< Color3< T > > &data = o.data();
-	
+
 	for ( typename std::vector< Color3< T > >::const_iterator it = data.begin(); it != data.end(); ++it )
 	{
 		result.append( *it );
-		
+
 	}
-	
+
 	return result;
 }
 
@@ -147,32 +147,32 @@ void bindCubeColorLookup( const char *name )
 		.def( "__call__", &T::operator() )
 		.def( "dimension", &T::dimension, return_value_policy<copy_const_reference>() )
 		.def( "domain", &T::domain, return_value_policy<copy_const_reference>() )
-		.def( "data", &getData<T> )		
-		.def( "getInterpolation", &T::getInterpolation )						
-		.def( "setInterpolation", &T::setInterpolation )						
-				
+		.def( "data", &getData<T> )
+		.def( "getInterpolation", &T::getInterpolation )
+		.def( "setInterpolation", &T::setInterpolation )
+
 		.def( self==self )
 		.def( self!=self )
 	;
-	
+
 	{
 		scope s( o );
 
 		enum_< typename T::Interpolation >( "Interpolation" )
 			.value( "NoInterpolation", T::NoInterpolation )
-			.value( "Linear", T::Linear )	
-		;	
+			.value( "Linear", T::Linear )
+		;
 	}
-	
+
 	/// Define this here because it depends on the "Interpolation" enum, defined above.
 	o
 		.def( "__init__",
-			make_constructor( 
+			make_constructor(
 				&construct<T>,
 				default_call_policies(),
-				(arg_("dimension"), arg_("data"), arg_("domain") = typename T::BoxType( typename T::VecType( 0, 0, 0 ), typename T::VecType( 1, 1, 1 ) ), arg_("interpolation") = T::Linear) 
-			) 
-		);		
+				(arg_("dimension"), arg_("data"), arg_("domain") = typename T::BoxType( typename T::VecType( 0, 0, 0 ), typename T::VecType( 1, 1, 1 ) ), arg_("interpolation") = T::Linear)
+			)
+		);
 }
 
 void bindCubeColorLookup()

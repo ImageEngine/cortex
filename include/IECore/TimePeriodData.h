@@ -40,7 +40,7 @@
 
 #include <string>
 
-namespace IECore 
+namespace IECore
 {
 
 typedef TypedData < TimePeriod > TimePeriodData;

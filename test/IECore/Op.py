@@ -38,18 +38,18 @@ from IECore import *
 class PythonOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "opName", "opDescription", StringParameter( name = "result", description = "", defaultValue = "" ) )
 		self.parameters().addParameter( StringParameter( name = "name", description = "", defaultValue = "john" ) )
 
 	def doOperation( self, operands ) :
-	
+
 		return StringData( operands['name'].value )
 
 class TestPythonOp( unittest.TestCase ) :
 
 	def testNewOp( self ) :
-	
+
 		o = PythonOp()
 		self.assertEqual( o.operate(), StringData( "john" ) )
 		o.parameters()["name"].setValue( StringData( "jim" ) )
@@ -61,7 +61,7 @@ class TestPythonOp( unittest.TestCase ) :
 		o = PythonOp()
 		self.assertEqual( o( name = "jim" ), StringData( "jim" ) )
 		self.assertEqual( o( name = StringData( "jimbo" ) ), StringData( "jimbo" ) )
-		
+
 		result = o( name = "roger" )
 		self.assertEqual( result, StringData( "roger" ) )
 		self.assertEqual( o.resultParameter().getValue(), result )
@@ -69,8 +69,8 @@ class TestPythonOp( unittest.TestCase ) :
 	def testDefaultConstructor( self ):
 		import IECore
 		exceptionList = [	IECore.Reader, IECore.Writer,
-							IECore.ImageReader, IECore.ImageWriter, 
-							IECore.ParticleReader, IECore.ParticleWriter 
+							IECore.ImageReader, IECore.ImageWriter,
+							IECore.ParticleReader, IECore.ParticleWriter
 						]
 		def test(c):
 			try:
@@ -79,7 +79,7 @@ class TestPythonOp( unittest.TestCase ) :
 					f = c()
 			except:
 				return False
-	
+
 		RefCounted.collectGarbage()
 		badClasses = filter(test, map(lambda x: getattr(IECore, x), dir(IECore)))
 		if len(badClasses) > 0:
@@ -87,7 +87,7 @@ class TestPythonOp( unittest.TestCase ) :
 					string.join(map(str, badClasses), ", ")
 
 	def testSpecializedCompoundParameter( self ):
-		
+
 		# This Ops shows how to make cross-validation on Op parameters.
 		# Op that will only operate if the 'first' parameter is greater then the 'second' parameter.
 		class GreaterThenOp( Op ) :
@@ -95,8 +95,8 @@ class TestPythonOp( unittest.TestCase ) :
 			class MyCompound( CompoundParameter ):
 				def __init__( self ):
 					CompoundParameter.__init__( self,
-							name = '', 
-							description = '', 
+							name = '',
+							description = '',
 							members = [
 								IntParameter( 'first', '', 0 ),
 								IntParameter( 'second', '', 0 ),
@@ -128,4 +128,4 @@ class TestPythonOp( unittest.TestCase ) :
 
 if __name__ == "__main__":
 	unittest.main()
-	
+

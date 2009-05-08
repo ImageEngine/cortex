@@ -38,7 +38,7 @@
 
 namespace IECore
 {
-	
+
 
 template < typename V >
 V AssociatedLegendre<V>::evaluate( unsigned int mm, V x )
@@ -129,7 +129,7 @@ void AssociatedLegendre<V>::computeFactorials( unsigned int l )
 	}
 
 	previous = f[curSize-1];
-	
+
 	for ( std::vector<double>::iterator it = f.begin() + curSize; curSize < newSize; curSize++, it++ )
 	{
 		*it = previous * curSize;

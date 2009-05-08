@@ -47,28 +47,28 @@ namespace IECore
 class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 {
 	public:
-	
+
 		typedef ImagePrimitive PrimitiveType;
-	
+
 		IE_CORE_DECLARERUNTIMETYPED( ImagePrimitiveEvaluator, PrimitiveEvaluator );
-					
+
 		class Result : public PrimitiveEvaluator::Result
 		{
 			friend class ImagePrimitiveEvaluator;
-			
+
 			public:
-				
+
 				IE_CORE_DECLAREMEMBERPTR( Result );
-				
+
 				Result( const Imath::Box3f &bound, const Imath::Box2i &dataWindow );
 				virtual ~Result();
-	
-				Imath::V3f point() const;								
+
+				Imath::V3f point() const;
 				Imath::V3f normal() const;
 				Imath::V2f uv() const;
 				Imath::V3f uTangent() const;
-				Imath::V3f vTangent() const;		
-				
+				Imath::V3f vTangent() const;
+
 				Imath::V3f          vectorPrimVar( const PrimitiveVariable &pv ) const;
 				float               floatPrimVar ( const PrimitiveVariable &pv ) const;
 				int                 intPrimVar   ( const PrimitiveVariable &pv ) const;
@@ -80,76 +80,76 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 				const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const;
 				Imath::Color3f      colorPrimVar ( const PrimitiveVariable &pv ) const;
 				half                halfPrimVar  ( const PrimitiveVariable &pv ) const;
-				
+
 				Imath::V2i pixel() const;
-				
+
 			protected:
-			
+
 				Imath::Box3f m_bound;
 				Imath::V3f m_p;
 				Imath::Box2i m_dataWindow;
-			
+
 				template<typename T>
 				T getPrimVar( const PrimitiveVariable &pv ) const;
-				
+
 				template<typename T>
 				T indexData( const std::vector<T> &data, const Imath::V2i &p ) const;
-			
+
 		};
-		IE_CORE_DECLAREPTR( Result );		
-		
+		IE_CORE_DECLAREPTR( Result );
+
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
-		
+
 		ImagePrimitiveEvaluator( ConstImagePrimitivePtr image );
-		
+
 		virtual ~ImagePrimitiveEvaluator();
-		
+
 		virtual ConstPrimitivePtr primitive() const;
-		
+
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
-		
-		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;	
-						
+
+		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;
+
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
-		
+
 		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
-		
+
 		/// Returns the object-space point at the center of the specified pixel
 		virtual bool pointAtPixel( const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result ) const;
-		
-		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction, 
+
+		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 			const PrimitiveEvaluator::ResultPtr &result, float maxDistance = Imath::limits<float>::max() ) const;
-			
-		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction, 
+
+		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
-			
-		virtual float volume() const;	
+
+		virtual float volume() const;
 
 		virtual Imath::V3f centerOfGravity() const;
-		
+
 		virtual float surfaceArea() const;
-		
+
 		/// Returns the "R" (red) channel of the image, if available. Otherwise returns the variables' "end" iterator.
 		PrimitiveVariableMap::const_iterator R() const;
-		
-		/// Returns the "G" (green) channel of the image, if available. Otherwise returns the variables' "end" iterator.		
+
+		/// Returns the "G" (green) channel of the image, if available. Otherwise returns the variables' "end" iterator.
 		PrimitiveVariableMap::const_iterator G() const;
-		
-		/// Returns the "B" (blue) channel of the image, if available. Otherwise returns the variables' "end" iterator.		
+
+		/// Returns the "B" (blue) channel of the image, if available. Otherwise returns the variables' "end" iterator.
 		PrimitiveVariableMap::const_iterator B() const;
-		
-		/// Returns the "A" (alpha) channel of the image, if available. Otherwise returns the variables' "end" iterator.		
+
+		/// Returns the "A" (alpha) channel of the image, if available. Otherwise returns the variables' "end" iterator.
 		PrimitiveVariableMap::const_iterator A() const;
-		
-		/// Returns the "Y" (luminance) channel of the image, if available. Otherwise returns the variables' "end" iterator.		
+
+		/// Returns the "Y" (luminance) channel of the image, if available. Otherwise returns the variables' "end" iterator.
 		PrimitiveVariableMap::const_iterator Y() const;
-		
-		
-					
+
+
+
 	protected:
-	
+
 		ConstImagePrimitivePtr m_image;
-				
+
 };
 
 IE_CORE_DECLAREPTR( ImagePrimitiveEvaluator );

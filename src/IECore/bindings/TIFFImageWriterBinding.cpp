@@ -52,7 +52,7 @@ void bindTIFFImageWriter()
 		.def( init<>() )
 		.def( init<ObjectPtr, const std::string &>() )
 	;
-	
+
 	enum_<int>( "Compression" )
 		.value( "Deflate", COMPRESSION_DEFLATE )
 		.value( "LZW",     COMPRESSION_LZW )

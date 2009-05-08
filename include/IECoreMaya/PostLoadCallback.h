@@ -47,22 +47,22 @@ namespace IECoreMaya
 /// ensures that all Maya callbacks are removed when the instance is deleted.
 class PostLoadCallback : public IECore::RefCounted
 {
-	friend class PostLoadCallbackData;	
-	
+	friend class PostLoadCallbackData;
+
 	public:
-	
-		/// Construct a new callback instance		
+
+		/// Construct a new callback instance
 		PostLoadCallback();
 		virtual ~PostLoadCallback();
-	
+
 	protected:
-	
+
 		/// To be overridden by derived classes to implement custom behaviour
 		virtual void postLoad() = 0;
-	
-		class PostLoadCallbackData;		
+
+		class PostLoadCallbackData;
 		PostLoadCallbackData* m_data;
-		
+
 
 };
 

@@ -60,20 +60,20 @@ class TextureLoader : public IECore::RefCounted
 		TextureLoader( const IECore::SearchPath &searchPaths );
 
 		TexturePtr load( const std::string &name );
-		
+
 		/// Removes any cached textures.
 		void clear();
-		
+
 		/// Returns a static TextureLoader instance that everyone
 		/// can use. This has searchpaths set using the
 		/// IECOREGL_TEXTURE_PATHS environment variable.
 		static TextureLoaderPtr defaultTextureLoader();
 
 	private :
-	
+
 		typedef std::map<std::string, TexturePtr> TexturesMap;
 		TexturesMap m_loadedTextures;
-		
+
 		IECore::SearchPath m_searchPaths;
 
 };

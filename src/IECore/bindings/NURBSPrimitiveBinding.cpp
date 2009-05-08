@@ -42,17 +42,17 @@ using namespace boost::python;
 
 namespace IECore
 {
-	
+
 	static FloatVectorDataPtr uKnot( const NURBSPrimitive &p )
 	{
 		return p.uKnot()->copy();
 	}
-	
+
 	static FloatVectorDataPtr vKnot( const NURBSPrimitive &p )
 	{
 		return p.vKnot()->copy();
 	}
-	
+
 	void bindNURBSPrimitive()
 	{
 		RunTimeTypedClass<NURBSPrimitive>()
@@ -73,5 +73,5 @@ namespace IECore
 			.def( "setTopology", &NURBSPrimitive::setTopology )
 		;
 	}
-	
+
 }

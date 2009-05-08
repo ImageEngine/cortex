@@ -44,7 +44,7 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 template<>
@@ -54,7 +54,7 @@ std::string repr( FrameRange &x )
 }
 
 void bindFrameRange()
-{	
+{
 	RunTimeTypedClass<FrameRange>()
 		.def( init< FrameList::Frame, FrameList::Frame, optional< FrameList::Frame > >
 			(
@@ -67,7 +67,7 @@ void bindFrameRange()
 		)
 		.add_property( "start", &FrameRange::getStart, &FrameRange::setStart )
 		.add_property( "end", &FrameRange::getEnd, &FrameRange::setEnd )
-		.add_property( "step", &FrameRange::getStep, &FrameRange::setStep )				
+		.add_property( "step", &FrameRange::getStep, &FrameRange::setStep )
 		.def( "__repr__", repr< FrameRange > )
 		.def( self == self )
 	;

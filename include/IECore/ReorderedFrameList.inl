@@ -44,23 +44,23 @@ template< typename T>
 FrameListPtr ReorderedFrameList::parseForChildList( const std::string &frameList )
 {
 	std::string suffix = T::suffix();
-	
+
 	if ( frameList.size() < suffix.size() || frameList.rfind( suffix, frameList.size() - 1 ) != frameList.size() - suffix.size() )
 	{
 		return 0;
 	}
-		
+
 	std::string s = frameList.substr( 0, frameList.size() - suffix.size() );
 	assert( s + suffix == frameList );
-		
+
 	if ( (  s.size() >= 2 && s[0] == '(' && s[ s.size() - 1 ] == ')' ) || ( s.find_first_of( ',' ) == std::string::npos ) )
 	{
 		return FrameList::parse( s );
 	}
-	
+
 	return 0;
 }
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_REORDEREDFRAMELIST_INL

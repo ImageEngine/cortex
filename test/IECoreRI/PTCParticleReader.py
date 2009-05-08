@@ -65,11 +65,11 @@ if hasattr( IECoreRI, "PTCParticleReader" ):
 			r['percentage'] = 50
 			pointCloud2 = r.read()
 			self.assertEqual( len( pointCloud2["P"].data ), 1502 )
-			
+
 		def testCanRead(self) :
-		
+
 			self.assertEqual( IECoreRI.PTCParticleReader.canRead( "test/IECoreRI/data/test.3Dbake" ), True )
 			self.assertEqual( IECoreRI.PTCParticleReader.canRead( "test/IECoreRI/data/sphere.cob" ), False )
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

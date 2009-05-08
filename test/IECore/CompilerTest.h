@@ -49,7 +49,7 @@ namespace IECore
 void addCompilerTest(boost::unit_test::test_suite* test);
 
 struct CompilerTest
-{		
+{
 
 	void runTest1()
 	{
@@ -71,7 +71,7 @@ struct CompilerTest
 		ln.dir = Imath::V3f(  0.898071, -0.0705415, 0.434157 );
 
 
-		Imath::V3f hitPoint, bary;			
+		Imath::V3f hitPoint, bary;
 		bool front;
 
 		/// This seems to be failing on gcc4.2.3 with optimisations -O2, and -O3. -O1 seems fine.
@@ -81,13 +81,13 @@ struct CompilerTest
 
 
 struct CompilerTestSuite : public boost::unit_test::test_suite
-{	
-	
+{
+
 	CompilerTestSuite() : boost::unit_test::test_suite("CompilerTestSuite")
 	{
 		boost::shared_ptr<CompilerTest> instance(new CompilerTest());
-		
-		add( BOOST_CLASS_TEST_CASE( &CompilerTest::runTest1, instance ) );		
+
+		add( BOOST_CLASS_TEST_CASE( &CompilerTest::runTest1, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CompilerTest::runTest2, instance ) );
 	}
 };

@@ -49,17 +49,17 @@ IE_CORE_FORWARDDECLARE( NullObject )
 class NullObject : public Object
 {
 	public:
-	
+
 		NullObject();
 		virtual ~NullObject();
-		
+
 		IE_CORE_DECLAREOBJECT( NullObject, Object );
-		
+
 		static NullObjectPtr defaultNullObject();
-		
+
 	private :
 
-		static const unsigned int m_ioVersion;	
+		static const unsigned int m_ioVersion;
 
 };
 

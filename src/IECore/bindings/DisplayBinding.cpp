@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -52,15 +52,15 @@ void bindDisplay()
 	RunTimeTypedClass<Display>()
 		.def(
 		 	init< optional< const std::string &, const std::string &, const std::string &, CompoundDataPtr > >
-			( 
-				( 
-					arg( "name" ) = std::string( "default" ), 
+			(
+				(
+					arg( "name" ) = std::string( "default" ),
 					arg( "type" ) = std::string( "exr" ),
 					arg( "data" ) = std::string( "rgba" ),
-					
-					/// We need to explicitly make this a CompoundData::Ptr so that boost.python finds the correct to_python converter					
+
+					/// We need to explicitly make this a CompoundData::Ptr so that boost.python finds the correct to_python converter
 					arg( "parameters" ) = CompoundData::Ptr( new CompoundData() )
-				) 
+				)
 			)
 		)
 		.def( "setName", &Display::setName )

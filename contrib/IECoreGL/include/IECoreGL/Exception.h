@@ -47,7 +47,7 @@ namespace IECoreGL
 class Exception : public IECore::Exception
 {
 	public :
-	
+
 		/// Constructs an Exception to represent the specified
 		/// GL error code. Exception::what() will return a
 		/// descriptive string for that particular error.
@@ -60,7 +60,7 @@ class Exception : public IECore::Exception
 		static void throwIfError();
 		/// Throws an Exception if error is anything other than
 		/// GL_NO_ERROR.
-		static void throwIfError( GLenum error );	
+		static void throwIfError( GLenum error );
 
 };
 

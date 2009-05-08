@@ -64,7 +64,7 @@ class Wrapper : public boost::python::wrapper<T>, public WrapperGarbageCollector
 			boost::python::detail::initialize_wrapper(m_pyObject, this);
 			Py_INCREF(m_pyObject);
 		}
-	
+
 		virtual ~Wrapper()
 		{
 			assert(m_pyObject);
@@ -77,16 +77,16 @@ class Wrapper : public boost::python::wrapper<T>, public WrapperGarbageCollector
 				Py_DECREF(m_pyObject);
 			}
 		}
-		
+
 		boost::python::override get_override(const char *name) const
 		{
 			assert(m_pyObject);
 			assert(m_pyObject == boost::python::detail::wrapper_base_::get_owner(*this));
-			
+
 			boost::python::override func = this->boost::python::wrapper<T>::get_override(name);
 			return func;
 		}
-		
+
 };
 
 }

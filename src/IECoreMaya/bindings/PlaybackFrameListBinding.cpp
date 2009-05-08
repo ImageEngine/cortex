@@ -66,18 +66,18 @@ namespace IECoreMaya
 {
 
 void bindPlaybackFrameList()
-{	
+{
 	object o = RunTimeTypedClass<PlaybackFrameList>()
 		.def( init< PlaybackFrameList::Range >() )
-		.add_property( "range", &PlaybackFrameList::getRange, &PlaybackFrameList::setRange )		
+		.add_property( "range", &PlaybackFrameList::getRange, &PlaybackFrameList::setRange )
 	;
-	
+
 	scope oS( o );
-	
+
 	enum_< PlaybackFrameList::Range >( "Range" )
 		.value( "Animation", PlaybackFrameList::Animation )
 		.value( "Playback", PlaybackFrameList::Playback )
-	;		
+	;
 }
 
 }

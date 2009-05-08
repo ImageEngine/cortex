@@ -43,13 +43,13 @@ IECoreGL.init( False )
 class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testCurves.tif"
-	
+
 	def performTest( self, curvesPrimitive, attributes=[], testPixels=[], testImage=None ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		
+
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -58,17 +58,17 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
-		
+
 		r.worldBegin()
-		
+
 		for a in attributes :
 			r.setAttribute( a[0], a[1] )
-		
+
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		
+
 		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
 		curvesPrimitive.render( r )
-	
+
 		r.worldEnd()
 
 		i = IECore.Reader.create( self.outputFileName ).read()
@@ -78,9 +78,9 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		r = e.R()
 		g = e.G()
 		b = e.B()
-		
+
 		for t in testPixels :
-		
+
 			e.pointAtUV( t[0], result )
 			c = IECore.Color4f(
 				result.floatPrimVar( r ),
@@ -88,55 +88,55 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				result.floatPrimVar( b ),
 				result.floatPrimVar( a )
 			)
-			
+
 			self.assertEqual( c, t[1] )
-		
+
 		if testImage :
-		
+
 			# blue where there must be an object
 			# red where we don't mind
 			# black where there must be nothing
-			
+
 			a = i["A"].data
-			
+
 			i2 = IECore.Reader.create( testImage ).read()
 			r2 = i2["R"].data
 			b2 = i2["B"].data
 			for i in range( r2.size() ) :
-							
+
 				if b2[i] > 0.5 :
 					self.assertEqual( a[i], 1 )
 				elif r2[i] < 0.5 :
 					self.assertEqual( a[i], 0 )
-				
+
 	def testAttributes( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-				
+
 		r.worldBegin()
-		
+
 		self.assertEqual( r.getAttribute( "gl:curvesPrimitive:useGLLines" ), IECore.BoolData( False ) )
 		self.assertEqual( r.getAttribute( "gl:curvesPrimitive:glLineWidth" ), IECore.FloatData( 1 ) )
 		self.assertEqual( r.getAttribute( "gl:curvesPrimitive:ignoreBasis" ), IECore.BoolData( False ) )
-				
+
 		r.setAttribute( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) )
 		self.assertEqual( r.getAttribute( "gl:curvesPrimitive:useGLLines" ), IECore.BoolData( True ) )
-				
+
 		r.setAttribute( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 2 ) )
 		self.assertEqual( r.getAttribute( "gl:curvesPrimitive:glLineWidth" ), IECore.FloatData( 2 ) )
-		
+
 		r.setAttribute( "gl:curvesPrimitive:ignoreBasis", IECore.BoolData( True ) )
 		self.assertEqual( r.getAttribute( "gl:curvesPrimitive:ignoreBasis" ), IECore.BoolData( True ) )
-	
+
 		r.worldEnd()
-		
+
 	def testLinearNonPeriodicAsLines( self ) :
-	
+
 		self.performTest(
-		
+
 			IECore.CurvesPrimitive(
-			
+
 				IECore.IntVectorData( [ 4, 4 ] ),
 				IECore.CubicBasisf.linear(),
 				False,
@@ -146,14 +146,14 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 						IECore.V3f( 0, 0, 0 ),
 						IECore.V3f( 0, 0.5, 0 ),
 						IECore.V3f( 0.5, 0.5, 0 ),
-						
+
 						IECore.V3f( 0.5, 0.5, 0 ),
 						IECore.V3f( 1, 0.5, 0 ),
 						IECore.V3f( 1, 1, 0 ),
 						IECore.V3f( 0, 1, 0 ),
 					]
 				)
-		
+
 			),
 			[
 				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
@@ -177,11 +177,11 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		)
 
 	def testOverriddenLinearPeriodicAsLines( self ) :
-	
+
 		self.performTest(
-		
+
 			IECore.CurvesPrimitive(
-			
+
 				IECore.IntVectorData( [ 4 ] ),
 				IECore.CubicBasisf.bSpline(),
 				True,
@@ -193,7 +193,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 						IECore.V3f( 1, 1, 0 ),
 					]
 				)
-		
+
 			),
 			[
 				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
@@ -214,16 +214,16 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( IECore.V2f( 0.9, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
 				( IECore.V2f( 0.9, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
 				( IECore.V2f( 0.1, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				
+
 			]
 		)
-		
+
 	def testLinearPeriodicAsLines( self ) :
-	
+
 		self.performTest(
-		
+
 			IECore.CurvesPrimitive(
-			
+
 				IECore.IntVectorData( [ 4 ] ),
 				IECore.CubicBasisf.linear(),
 				True,
@@ -235,7 +235,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 						IECore.V3f( 1, 1, 0 ),
 					]
 				)
-		
+
 			),
 			[
 				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
@@ -255,16 +255,16 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( IECore.V2f( 0.9, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
 				( IECore.V2f( 0.9, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
 				( IECore.V2f( 0.1, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				
+
 			]
 		)
-		
+
 	def testBSplinePeriodicAsLines( self ) :
-	
+
 		self.performTest(
-		
+
 			IECore.CurvesPrimitive(
-			
+
 				IECore.IntVectorData( [ 4 ] ),
 				IECore.CubicBasisf.bSpline(),
 				True,
@@ -276,7 +276,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 						IECore.V3f( 1, 1, 0 ),
 					]
 				)
-		
+
 			),
 			[
 				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 2 ) ),
@@ -285,10 +285,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			[
 			],
 			os.path.dirname( __file__ ) + "/images/periodicBSpline.tif"
-		)	
+		)
 
 	def testBSplinePeriodicAsRibbons( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
@@ -305,9 +305,9 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		)
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		self.performTest(
-		
+
 			c,
 			[
 				( "gl:primitive:wireframe", IECore.BoolData( True ) ),
@@ -315,12 +315,12 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			[
 			],
 			os.path.dirname( __file__ ) + "/images/bSplineCircle.tif"
-		)	
-		
+		)
+
 	def testBezierAsRibbons( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bezier(),
 			False,
@@ -335,7 +335,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		)
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		self.performTest(
 			c,
 			[
@@ -344,12 +344,12 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			[
 			],
 			os.path.dirname( __file__ ) + "/images/bezierHorseShoe.tif"
-		)	
+		)
 
 	def testLinearRibbons( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
 			False,
@@ -364,7 +364,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		)
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.035 ) )
-		
+
 		self.performTest(
 			c,
 			[
@@ -374,11 +374,11 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			os.path.dirname( __file__ ) + "/images/linearHorseShoeRibbon.tif"
 		)
-		
+
 	def testLinearPeriodicRibbons( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
 			True,
@@ -393,7 +393,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		)
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		self.performTest(
 			c,
 			[
@@ -402,12 +402,12 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			[
 			],
 			os.path.dirname( __file__ ) + "/images/linearPeriodicRibbon.tif"
-		)		
+		)
 
 	def testSeveralBSplineRibbons( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4, 4 ] ),
 			IECore.CubicBasisf.bSpline(),
 			True,
@@ -417,7 +417,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 					IECore.V3f( 0.2, 0.2, 0 ),
 					IECore.V3f( 0.2, 0.4, 0 ),
 					IECore.V3f( 0.4, 0.4, 0 ),
-					
+
 					IECore.V3f( 0.8, 0.6, 0 ),
 					IECore.V3f( 0.6, 0.6, 0 ),
 					IECore.V3f( 0.6, 0.8, 0 ),
@@ -427,7 +427,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		)
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.035 ) )
-		
+
 		self.performTest(
 			c,
 			[
@@ -437,12 +437,12 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			os.path.dirname( __file__ ) + "/images/twoBSplineCircles.tif"
 		)
-		
+
 	def testSeveralBSplineLines( self ) :
-			
+
 		self.performTest(
 			IECore.CurvesPrimitive(
-			
+
 				IECore.IntVectorData( [ 4, 4 ] ),
 				IECore.CubicBasisf.bSpline(),
 				True,
@@ -469,9 +469,9 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			os.path.dirname( __file__ ) + "/images/twoBSplineCirclesAsLines.tif"
 		)
-		
+
 	def testRibbonWindingOrder( self ) :
-		
+
 		c = IECore.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
@@ -488,8 +488,8 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		)
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
-			
+
+
 		self.performTest(
 			c,
 			[
@@ -498,12 +498,12 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			[
 			],
 			os.path.dirname( __file__ ) + "/images/bSplineCircle.tif"
-		)		
-	
+		)
+
 	def testLinearRibbonWindingOrder( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
-			
+
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
 			True,
@@ -518,7 +518,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		)
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
-		
+
 		self.performTest(
 			c,
 			[
@@ -528,11 +528,11 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			os.path.dirname( __file__ ) + "/images/linearPeriodicRibbon.tif"
 		)
-					
+
 	def tearDown( self ) :
 
 		if os.path.exists( self.outputFileName ) :
 			os.remove( self.outputFileName )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

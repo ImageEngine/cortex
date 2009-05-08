@@ -41,63 +41,63 @@ import datetime
 class TimeDurationDataTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		dd = IECore.TimeDurationData()
-		
+
 		d = datetime.timedelta( days = 15, hours = 3, minutes = 56, seconds = 12 )
 		dd = IECore.TimeDurationData( d )
-		
-		
+
+
 	def testValueAccess( self ) :
-	
+
 		d = datetime.timedelta( days = 15, hours = 3, minutes = 56, seconds = 12 )
 		dd = IECore.TimeDurationData( d )
-				
+
 		self.assertEqual( dd.value.days, 15 )
-	
+
 	def testCopy( self ) :
-	
+
 		d = IECore.TimeDurationData( datetime.timedelta( days = 1 ) )
 		dd = d.copy()
-		
+
 		self.assertEqual( d, dd )
-		
+
 		d.value += datetime.timedelta( days = 1 )
-		
+
 		self.assertNotEqual( d, dd )
 
 	def testIO( self ) :
-		
-		d = IECore.TimeDurationData()		
-		IECore.ObjectWriter( d, "test/IECore/TimeDurationData.cob" ).write()		
-		dd = IECore.ObjectReader( "test/IECore/TimeDurationData.cob" ).read()		
+
+		d = IECore.TimeDurationData()
+		IECore.ObjectWriter( d, "test/IECore/TimeDurationData.cob" ).write()
+		dd = IECore.ObjectReader( "test/IECore/TimeDurationData.cob" ).read()
 		self.assertEqual( d, dd )
-		
-		d = IECore.TimeDurationData( datetime.timedelta( days = 1 ) )		
-		IECore.ObjectWriter( d, "test/IECore/TimeDurationData.cob" ).write()		
-		dd = IECore.ObjectReader( "test/IECore/TimeDurationData.cob" ).read()		
+
+		d = IECore.TimeDurationData( datetime.timedelta( days = 1 ) )
+		IECore.ObjectWriter( d, "test/IECore/TimeDurationData.cob" ).write()
+		dd = IECore.ObjectReader( "test/IECore/TimeDurationData.cob" ).read()
 		self.assertEqual( d, dd )
-		
-	def testRepr( self ) :	
-	
+
+	def testRepr( self ) :
+
 		d = datetime.timedelta( days = 15, hours = 3, minutes = 56, seconds = 12 )
 		dd = IECore.TimeDurationData(d)
-		
-		self.assertEqual( repr(dd), "IECore.TimeDurationData( " + repr(d) + " )" ) 
-		
-		self.assertEqual( dd, eval( repr(dd) ) )
-		
-	def setUp(self):
-        
-		if os.path.isfile( "test/IECore/TimeDurationData.cob" ) :
-			os.remove( "test/IECore/TimeDurationData.cob" )			
 
-	def tearDown(self):
-        
+		self.assertEqual( repr(dd), "IECore.TimeDurationData( " + repr(d) + " )" )
+
+		self.assertEqual( dd, eval( repr(dd) ) )
+
+	def setUp(self):
+
 		if os.path.isfile( "test/IECore/TimeDurationData.cob" ) :
 			os.remove( "test/IECore/TimeDurationData.cob" )
 
-		
+	def tearDown(self):
+
+		if os.path.isfile( "test/IECore/TimeDurationData.cob" ) :
+			os.remove( "test/IECore/TimeDurationData.cob" )
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

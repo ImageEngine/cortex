@@ -37,15 +37,15 @@
 
 /*
 * Rotation class for Spherical Harmonics.
-* Implements complex spherical harmonics rotation as described in 
+* Implements complex spherical harmonics rotation as described in
 * Choi, Cheol Ho et al, "Rapid and stable determination of rotation
 * matrices between spherical harmonics by direct recursion", J. Chem.
 * Phys. Vol 111, No. 19, 1999, pp 8825-8831.
 *
-* In order to actually work, I've changed the following equations: 
-* Equation 8.7: I used transposed W instead of the hermitian conjugate of W. That's the only way that 
-*     the solution for R at equation 8.15 can be computed from F and G at 5.4-5.5 and 8.4-8.7. 
-* Equation 8.10: looks wrong because it always compute the same value for m!=0. 
+* In order to actually work, I've changed the following equations:
+* Equation 8.7: I used transposed W instead of the hermitian conjugate of W. That's the only way that
+*     the solution for R at equation 8.15 can be computed from F and G at 5.4-5.5 and 8.4-8.7.
+* Equation 8.10: looks wrong because it always compute the same value for m!=0.
 *     Figuring out the correct values for alpha and beta that fit the equations 8.11-8.14 is hard.
 *     Instead, I've reapplied equation 8.7 and found the following relationships that substitutes 8.11-8.14:
 *     i=0,j=0: R(i,j) = F(0,0) + i*G(0,0) ( G(0,0) is always zero )
@@ -108,7 +108,7 @@ class SphericalHarmonicsRotationMatrix
 		Imath::Matrix44< V > m_3dRotation;
 		mutable std::vector< V > m_squareRoots;
 		mutable std::vector< std::vector<V> > m_R;
-		mutable std::vector< std::vector<V> > m_F;	
+		mutable std::vector< std::vector<V> > m_F;
 		mutable std::vector< std::vector<V> > m_G;
 		mutable bool m_newRotation;
 

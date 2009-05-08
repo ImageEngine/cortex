@@ -104,7 +104,7 @@ void FrameRange::setStep( Frame step )
 	m_step = step;
 }
 
-void FrameRange::asList( std::vector<Frame> &frames ) const 
+void FrameRange::asList( std::vector<Frame> &frames ) const
 {
 	frames.clear();
 	for ( Frame f = m_start; f <= m_end; f += m_step )
@@ -135,9 +135,9 @@ bool FrameRange::isEqualTo( ConstFrameListPtr other ) const
 	{
 		return false;
 	}
-	
+
 	ConstFrameRangePtr otherF = assertedStaticCast< const FrameRange >( other );
-	
+
 	return m_start == otherF->m_start && m_end == otherF->m_end && m_step == otherF->m_step ;
 }
 
@@ -156,7 +156,7 @@ FrameListPtr FrameRange::parse( const std::string &frameList )
 	catch ( boost::bad_lexical_cast )
 	{
 	}
-	
+
 	boost::regex re( "^(-?[0-9]+)(-)(-?[0-9]+)(x-?[0-9]+)?$" );
 	boost::smatch matches;
 	if ( boost::regex_match( frameList, matches, re ) )
@@ -164,16 +164,16 @@ FrameListPtr FrameRange::parse( const std::string &frameList )
 		Frame start = boost::lexical_cast<Frame>( std::string( matches[1].first, matches[1].second ) );
 		Frame end = boost::lexical_cast<Frame>( std::string( matches[3].first, matches[3].second ) );
 		Frame step = 1;
-		
+
 		if ( matches.size() > 4 && matches[4].matched )
 		{
-			/// The +1 is there because we want to skip the "x" 
+			/// The +1 is there because we want to skip the "x"
 			step = boost::lexical_cast<Frame>( std::string( matches[4].first + 1, matches[4].second ) );
 		}
-		
+
 		return new FrameRange( start, end, step );
 	}
-	
+
 	return 0;
 }
 

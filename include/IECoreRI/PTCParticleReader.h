@@ -65,9 +65,9 @@ class PTCParticleReader : public IECore::ParticleReader
 	protected :
 
 		/// Returns a PointsPrimitive object containing all the
-		/// attributes requested. It also fills up the blindData dictionary under "PTCParticleIO" key 
-		/// with the information available in the pointcloud header file 
-		/// (worldToEye, worldToNdc, boundingBox, xResolution, yResolution and aspectRatio, variableTypes). 
+		/// attributes requested. It also fills up the blindData dictionary under "PTCParticleIO" key
+		/// with the information available in the pointcloud header file
+		/// (worldToEye, worldToNdc, boundingBox, xResolution, yResolution and aspectRatio, variableTypes).
 		/// This method overwrites the base class implementation.
 		virtual IECore::ObjectPtr doOperation( IECore::ConstCompoundObjectPtr operands );
 
@@ -84,7 +84,7 @@ class PTCParticleReader : public IECore::ParticleReader
 		// closes current ptcFile.
 		void close();
 
-		struct AttrInfo 
+		struct AttrInfo
 		{
 			PTCParticleIO::VarType type;
 			const float *sourcePtr;
@@ -95,12 +95,12 @@ class PTCParticleReader : public IECore::ParticleReader
 
 		struct PTCParticleIO::PTCHeader m_header;
 		float *m_userDataBuffer;
-	
+
 		template<typename T, typename F>
 		boost::intrusive_ptr<T> filterAttr( boost::intrusive_ptr<F> attr, float percentage );
 
 		// reads several attributes in one operation and returns them in a CompoundData.
-		IECore::CompoundDataPtr readAttributes( const std::vector<std::string> &names );				
+		IECore::CompoundDataPtr readAttributes( const std::vector<std::string> &names );
 };
 
 IE_CORE_DECLAREPTR( PTCParticleReader );

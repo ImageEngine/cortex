@@ -47,26 +47,26 @@
 
 using namespace boost::python;
 
-namespace IECore 
+namespace IECore
 {
 
 class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< FileSequenceParameter >
 {
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( FileSequenceParameterWrap );
-	
+
 	protected:
-	
+
 		static FileSequenceParameter::ExtensionList makeExtensions( object extensions )
 		{
 			FileSequenceParameter::ExtensionList result;
-			
+
 			extract<list> ee( extensions );
 			if ( ee.check() )
-			{			
+			{
 				list ext = ee();
-				
+
 				for ( long i = 0; i < len( ext ); i++ )
 				{
 					extract< std::string > ex( ext[i] );
@@ -77,7 +77,7 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 
 					result.push_back( ex() );
 				}
-			
+
 			}
 			else
 			{
@@ -86,7 +86,7 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 				{
 					std::string ext = ee();
 					boost::tokenizer< boost::char_separator<char> > t( ext, boost::char_separator<char>( " " ) );
-					
+
 					for ( boost::tokenizer<boost::char_separator<char> >::const_iterator it = t.begin(); it != t.end(); ++it )
 					{
 						result.push_back( *it );
@@ -97,7 +97,7 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 					throw InvalidArgumentException( "FileSequenceParameter: Invalid extensions value" );
 				}
 			}
-			
+
 			return result;
 		}
 
@@ -109,7 +109,7 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 			{
 				return de();
 			}
-			else			
+			else
 			{
 				extract<StringData *> de( defaultValue );
 				if( de.check() )
@@ -130,62 +130,62 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 				}
 			}
 		}
-				
+
 	public :
 
-		FileSequenceParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )	
+		FileSequenceParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )
 			:	FileSequenceParameter( n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceParameter >( self, this ) {};
-					
+
 		list getExtensionsWrap()
 		{
 			FileSequenceParameter::ExtensionList extensions = FileSequenceParameter::getExtensions();
-			
+
 			list result;
 			for ( FileSequenceParameter::ExtensionList::const_iterator it = extensions.begin(); it != extensions.end(); ++it )
 			{
 				result.append( *it );
 			}
-			
+
 			return result;
 		}
-		
+
 		void setExtensionsWrap( object ext )
 		{
 			for ( long i = 0; i < len( ext ); i++)
 			{
 				FileSequenceParameter::setExtensions( makeExtensions( ext ) );
 			}
-		}	
+		}
 
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( FileSequenceParameter );
 };
 
 void bindFileSequenceParameter()
-{	
+{
 
 	RunTimeTypedClass<FileSequenceParameter, FileSequenceParameterWrap::Ptr>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceParameter::CheckType, const object &, bool, CompoundObjectPtr, object > >
-			( 
-				( 
-					arg( "name" ), 
-					arg( "description" ), 
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
 					arg( "defaultValue" ) = object( std::string("") ),
 					arg( "allowEmptyString" ) = true,
-					arg( "check" ) = FileSequenceParameter::DontCare, 
+					arg( "check" ) = FileSequenceParameter::DontCare,
 					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false , 
+					arg( "presetsOnly" ) = false ,
 					arg( "userData" ) = CompoundObject::Ptr( 0 ),
 					arg( "extensions" ) = list()
-				) 
-			) 
+				)
+			)
 		)
-		.def( "getFileSequenceValue", &FileSequenceParameter::getFileSequenceValue )	
+		.def( "getFileSequenceValue", &FileSequenceParameter::getFileSequenceValue )
 		.def( "setFileSequenceValue", &FileSequenceParameter::setFileSequenceValue )
 		.add_property( "extensions",&FileSequenceParameterWrap::getExtensionsWrap, &FileSequenceParameterWrap::setExtensionsWrap )
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( FileSequenceParameter )
 	;
-	
+
 }
 
 }

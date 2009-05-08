@@ -51,7 +51,7 @@ class GraphDependency : public RefCounted
 
 		///Triggers recursive computation on all dirty nodes.
 		virtual void update( ) = 0;
-				
+
 		///Triggers recursive computation on all dirty nodes dependent on the given node including itself.
 		virtual void update( const T &node ) = 0;
 

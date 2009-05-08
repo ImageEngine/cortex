@@ -53,21 +53,21 @@ class Font : public IECore::RunTimeTyped
 
 		Font( IECore::FontPtr font );
 		virtual ~Font();
-		
+
 		IECore::FontPtr coreFont();
-		
+
 		ConstMeshPrimitivePtr mesh( char c );
 		ConstAlphaTexturePtr texture();
-		
+
 	private :
-	
+
 		IECore::FontPtr m_font;
-	
+
 		typedef std::map<char, ConstMeshPrimitivePtr> MeshMap;
 		MeshMap m_meshes;
-		
+
 		ConstAlphaTexturePtr m_texture;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Font );

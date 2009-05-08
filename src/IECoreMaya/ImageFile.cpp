@@ -73,24 +73,24 @@ struct ImageFile::ChannelConverter
 	typedef FloatVectorDataPtr ReturnType;
 
 	std::string m_pathName;
-	std::string m_channelName;	
+	std::string m_channelName;
 
 	template<typename T>
 	ReturnType operator()( typename T::ConstPtr data )
 	{
 		assert( data );
-			
+
 		return DataConvert < T,  FloatVectorData, ScaledDataConversion< typename T::ValueType::value_type, float> >()( data );
 	};
-	
+
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
 		void operator()( typename T::ConstPtr data, const F& functor )
 		{
 			assert( data );
-		
-			throw InvalidArgumentException( ( boost::format( "ImageFile: Invalid data type \"%s\" for channel %s while reading %s" ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName % functor.m_pathName ).str() );		
+
+			throw InvalidArgumentException( ( boost::format( "ImageFile: Invalid data type \"%s\" for channel %s while reading %s" ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName % functor.m_pathName ).str() );
 		}
 	};
 };
@@ -99,55 +99,55 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 {
 	ImagePrimitivePtr image;
 	ImageReaderPtr reader;
-	
+
 	try
 	{
 		reader = runTimeCast<ImageReader>( Reader::create( pathName.asChar() ) );
 		if (!reader)
-		{		
+		{
 			return MS::kFailure;
 		}
-		
+
 		image = runTimeCast< ImagePrimitive >( reader->read() );
 		if (!image)
 		{
 			return MS::kFailure;
 		}
-		
+
 		if (!reader->isComplete())
 		{
 			return MS::kFailure;
-		}				
+		}
 	}
 	catch ( std::exception &e )
-	{		
+	{
 		return MS::kFailure;
 	}
-				
+
 	m_width = image->getDataWindow().size().x + 1;
 	m_height = image->getDataWindow().size().y + 1;
-	
+
 	std::vector<std::string> channelNames;
 	image->channelNames( channelNames );
 
-	if ( std::find( channelNames.begin(), channelNames.end(), "R" ) == channelNames.end() 
-		|| std::find( channelNames.begin(), channelNames.end(), "G" ) == channelNames.end() 
+	if ( std::find( channelNames.begin(), channelNames.end(), "R" ) == channelNames.end()
+		|| std::find( channelNames.begin(), channelNames.end(), "G" ) == channelNames.end()
 		|| std::find( channelNames.begin(), channelNames.end(), "B" ) == channelNames.end() )
-	{	
+	{
 		return MS::kFailure;
 	}
 
-	m_numChannels = 3;		
+	m_numChannels = 3;
 	if ( std::find( channelNames.begin(), channelNames.end(), "A" ) != channelNames.end() )
 	{
 		m_numChannels = 4;
-	}		
-	
+	}
+
 	assert( m_numChannels == 3 || m_numChannels == 4 );
-	
+
 	try
-	{	
-	
+	{
+
 		ChannelConverter converter;
 		converter.m_pathName = pathName.asChar();
 
@@ -158,11 +158,11 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 		}
 
 		converter.m_channelName = "R";
-		m_rData = despatchTypedData<			
-				ChannelConverter, 
+		m_rData = despatchTypedData<
+				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( rData, converter );	
+			>( rData, converter );
 
 		DataPtr gData = image->variables["G"].data;
 		if (! gData )
@@ -170,12 +170,12 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 			return MS::kFailure;
 		}
 
-		converter.m_channelName = "G";	
-		m_gData = despatchTypedData<			
-				ChannelConverter, 
+		converter.m_channelName = "G";
+		m_gData = despatchTypedData<
+				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( gData, converter );		
+			>( gData, converter );
 
 		DataPtr bData = image->variables["B"].data;
 		if (! bData )
@@ -183,12 +183,12 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 			return MS::kFailure;
 		}
 
-		converter.m_channelName = "B";	
-		m_bData = despatchTypedData<			
-				ChannelConverter, 
+		converter.m_channelName = "B";
+		m_bData = despatchTypedData<
+				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( bData, converter );	
+			>( bData, converter );
 
 		if ( m_numChannels == 4 )
 		{
@@ -198,32 +198,32 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 				return MS::kFailure;
 			}
 
-			converter.m_channelName = "A";	
-			m_aData = despatchTypedData<			
-				ChannelConverter, 
+			converter.m_channelName = "A";
+			m_aData = despatchTypedData<
+				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( aData, converter );	
+			>( aData, converter );
 		}
-	
-	} 
+
+	}
 	catch ( std::exception &e )
 	{
-		MGlobal::displayError( e.what() );	
+		MGlobal::displayError( e.what() );
 		return MS::kFailure;
 	}
-	
+
 	if (info)
 	{
 		info->width( m_width );
 		info->height( m_height );
-		
-		info->channels( m_numChannels );	
+
+		info->channels( m_numChannels );
 		info->numberOfImages( 1 );
 
 		info->imageType( MImageFileInfo::kImageTypeColor );
-		info->pixelType( MImage::kFloat  );		
-		info->hardwareType( MImageFileInfo::kHwTexture2D  );						
+		info->pixelType( MImage::kFloat  );
+		info->hardwareType( MImageFileInfo::kHwTexture2D  );
 	}
 
 	return MS::kSuccess;
@@ -232,15 +232,15 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 void ImageFile::populateImage( float* pixels ) const
 {
 	assert( pixels );
-			
+
 	for (unsigned y = 0; y < m_height; y++)
-	{		
+	{
 		for (unsigned x = 0; x < m_width; x++)
-		{					
+		{
 			unsigned pixelIndex = ((m_height - y - 1) * m_width) + x;
-				
+
 			assert( pixelIndex < m_width * m_height );
-		
+
 			*pixels++ = m_rData->readable()[ pixelIndex ];
 			*pixels++ = m_gData->readable()[ pixelIndex ];
 			*pixels++ = m_bData->readable()[ pixelIndex ];
@@ -250,25 +250,25 @@ void ImageFile::populateImage( float* pixels ) const
 				*pixels++ = m_aData->readable()[ pixelIndex ];
 			}
 		}
-	}	
+	}
 }
 
 MStatus ImageFile::load( MImage& image, unsigned int idx )
 {
 	MStatus s;
-	
+
 	assert( idx == 0 );
 	assert( m_rData	);
 	assert( m_gData	);
-	assert( m_bData	);		
-	
+	assert( m_bData	);
+
 	s = image.create( m_width, m_height, m_numChannels, MImage::kFloat );
 	assert(s);
-	
+
 	image.setRGBA( true );
-	
-	populateImage( image.floatPixels() );	
-	
+
+	populateImage( image.floatPixels() );
+
 	return MS::kSuccess;
 }
 
@@ -278,12 +278,12 @@ MStatus ImageFile::glLoad( const MImageFileInfo& info, unsigned int idx )
 	assert( m_rData	);
 	assert( m_gData	);
 	assert( m_bData	);
-	
+
 	std::vector<float> pixels;
 	pixels.resize( m_width * m_height * m_numChannels );
-	
+
 	populateImage( &pixels[0] );
-	
+
 	switch (m_numChannels)
 	{
 		case 3:
@@ -293,7 +293,7 @@ MStatus ImageFile::glLoad( const MImageFileInfo& info, unsigned int idx )
 		default:
 			assert(false);
 	}
-		
+
 	return MS::kSuccess;
 }
-	
+

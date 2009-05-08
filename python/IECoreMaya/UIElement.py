@@ -46,27 +46,27 @@ import maya.OpenMayaUI
 class UIElement :
 
 	__instances = {}
-	
+
 	## Derived classes must create a ui element which is the parent of the
 	# rest of their ui, and call this init function passing it as the topLevelUI
 	# parameter. The base class will ensure that the UIElement instance is kept
 	# alive as long as the ui exists, and that it will be destroyed when the
 	# ui is destroyed.
 	def __init__( self, topLevelUI ) :
-	
+
 		instanceRecord = IECore.Struct()
 		instanceRecord.instance = self
 		instanceRecord.callbacks = []
 		instanceRecord.uiDeletedCallbackId = IECoreMaya.CallbackId( maya.OpenMayaUI.MUiMessage.addUiDeletedCallback( topLevelUI, self.__uiDeleted, topLevelUI ) )
 		UIElement.__instances[topLevelUI] = instanceRecord
-	
+
 		self.__topLevelUI = topLevelUI
-				
+
 	## Returns the name of the top level ui element for this instance.
 	def _topLevelUI( self ) :
-	
+
 		return self.__topLevelUI
-	
+
 	## It's very natural to assign member functions to ui callbacks. There is a problem
 	# with this however in that maya leaks references to any python callbacks passed
 	# to it (tested in maya 2008). This causes a reference to be held to the UIElement
@@ -81,16 +81,16 @@ class UIElement :
 	# mel commands even when they're added from python - for instance the outlinerEditor selectCommand
 	# in maya 2008.
 	def _createCallback( self, function, mel=False ) :
-	
+
 		callbacks = self.__instances[self._topLevelUI()].callbacks
 		callbacks.append( function )
-		
+
 		pythonCmd = "import IECoreMaya; IECoreMaya.UIElement._UIElement__invokeCallback( '%s', %d )" % ( self._topLevelUI(), len( callbacks ) - 1 )
 		if not mel :
 			return pythonCmd
 		else :
 			return "python( \"%s\" )" % pythonCmd
-	
+
 	## This is called when the maya ui element corresponding to this
 	# instance is deleted. It may be reimplemented by derived classes
 	# to perform any necessary cleanup. One item of cleanup that might be
@@ -100,17 +100,17 @@ class UIElement :
 	# dying, and the callbacks will continue to be despatched despite the
 	# fact that the ui has long gone.
 	def _topLevelUIDeleted( self ) :
-		
+
 		pass
-	
+
 	@staticmethod
 	def __uiDeleted( topLevelUI ) :
-				
+
 		UIElement.__instances[topLevelUI].instance._topLevelUIDeleted()
 		del UIElement.__instances[topLevelUI]
 
 	@staticmethod
 	def __invokeCallback( topLevelUI, callbackIndex, *args ) :
-				
+
 		callback = UIElement.__instances[topLevelUI].callbacks[callbackIndex]
 		callback( *args )

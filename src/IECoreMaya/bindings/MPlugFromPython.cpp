@@ -58,7 +58,7 @@ struct MPlugFromPython
 			return 0;
 		}
 	}
-	
+
 	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
 	{
 		void *storage = ((converter::rvalue_from_python_storage<MPlug>*)data)->storage.bytes;
@@ -78,15 +78,15 @@ struct MPlugFromPython
 
 		MSelectionList s;
 		StatusException::throwIfError( s.add( plugName ) );
-		
+
 		MPlug plug;
 		StatusException::throwIfError( s.getPlug( 0, plug ) );
-		
+
 		new (storage) MPlug( plug );
 		data->convertible = storage;
 	}
 };
-   
+
 void bindMPlugFromPython()
 {
 	converter::registry::push_back(

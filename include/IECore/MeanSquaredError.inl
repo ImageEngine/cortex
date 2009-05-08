@@ -49,10 +49,10 @@ template<typename T, typename R>
 struct MeanSquaredError< T, R, typename boost::enable_if< boost::is_arithmetic<T> >::type >
 {
 	typedef R ReturnType;
-	
+
 	R operator()( const T &a, const T &b ) const
 	{
-		return ( a - b ) * ( a - b );		
+		return ( a - b ) * ( a - b );
 	}
 };
 
@@ -64,21 +64,21 @@ struct MeanSquaredError< std::vector<T>, R, typename boost::enable_if< boost::is
 	R operator()( const std::vector<T> &a, const std::vector<T> &b ) const
 	{
 		assert( a.size() == b.size() );
-		
+
 		typename std::vector<T>::size_type n = a.size();
-		
+
 		if ( !n )
 		{
 			return R(0);
 		}
-		
+
 		R e( 0 );
 		for ( typename std::vector<T>::size_type i = 0; i < n; i++)
 		{
 			e += ( a[i] - b[i] ) * ( a[i] - b[i] );
 		}
-		
-		return e / n;		
+
+		return e / n;
 	}
 };
 
@@ -88,11 +88,11 @@ struct MeanSquaredError< T, R, typename boost::enable_if< TypeTraits::IsNumericV
 	typedef R ReturnType;
 
 	R operator()( typename T::ConstPtr a, typename T::ConstPtr b ) const
-	{	
+	{
 		assert( a );
-		assert( b );			
-	
-		return MeanSquaredError< typename T::ValueType, R >::operator()( a->readable(), b->readable() );		
+		assert( b );
+
+		return MeanSquaredError< typename T::ValueType, R >::operator()( a->readable(), b->readable() );
 	}
 };
 
@@ -104,9 +104,9 @@ struct MeanSquaredError< T, R, typename boost::enable_if< TypeTraits::IsNumericS
 	R operator()( typename T::ConstPtr a, typename T::ConstPtr b ) const
 	{
 		assert( a );
-		assert( b );			
-		
-		return MeanSquaredError< T, R >::operator()( a->readable(), b->readable() );		
+		assert( b );
+
+		return MeanSquaredError< T, R >::operator()( a->readable(), b->readable() );
 	}
 };
 

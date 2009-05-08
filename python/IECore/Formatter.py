@@ -34,25 +34,25 @@
 
 ## The Formatter class defines an interface for specifying
 # simple structured output without having to be concerned
-# with exactly how that output is displayed.	
+# with exactly how that output is displayed.
 #
 # \ingroup python
 class Formatter :
-	
+
 	def heading( self, name ) :
-		
+
 		raise NotImplementedError
-	
+
 	def paragraph( self, name ) :
-		
+
 		raise NotImplementedError
-				
+
 	def indent( self ) :
-	
+
 		raise NotImplementedError
-		
+
 	def unindent( self ) :
-	
+
 		raise NotImplementedError
-		
-	
+
+

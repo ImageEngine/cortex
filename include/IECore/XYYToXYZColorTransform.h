@@ -46,30 +46,30 @@ template< typename, typename > class XYZToXYYColorTransform;
 /// A templated ColorTransform class to perform xyY->XYZ color transformations
 template<typename F, typename T>
 class XYYToXYZColorTransform : public ColorTransform< F, T >
-{	
+{
 	public:
 		typedef XYZToXYYColorTransform< T, F > InverseType;
-	
+
 		/// Creates a default transform using the following whitepoint xy chromacity
-		/// w: 0.312713, 0.329016	
+		/// w: 0.312713, 0.329016
 		/// This white point is only used if you need the inverse transform.
 		XYYToXYZColorTransform();
-	
+
 		/// Creates a transform using the specified xy whitepoint chromacity (which is only ever used
 		/// if you need the inverse transform, too). Class "C" should be a 2d vector type compatible with IECore::VectorTraits.
 		template< typename C >
-		XYYToXYZColorTransform(		
-			const C &referenceWhite						
+		XYYToXYZColorTransform(
+			const C &referenceWhite
 		);
 
 		/// Perform the conversion
 		virtual T transform( const F &f );
-		
+
 		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;
-	
+
 	private:
-	
+
 		Imath::V2f m_referenceWhite;
 };
 

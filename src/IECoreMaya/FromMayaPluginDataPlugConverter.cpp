@@ -60,12 +60,12 @@ IECore::ObjectPtr FromMayaPluginDataPlugConverter::doConversion( IECore::ConstCo
 	{
 		return 0;
 	}
-	
+
 	FromMayaObjectConverterPtr c = FromMayaObjectConverter::create( data );
 	if ( !c )
 	{
 		return 0;
 	}
-	
+
 	return c->convert();
 }

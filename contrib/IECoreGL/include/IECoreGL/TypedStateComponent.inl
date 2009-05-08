@@ -59,7 +59,7 @@ IECore::TypeId TypedStateComponent<T,TId>::typeId() const
 {
 	return (IECore::TypeId)TId;
 }
-		
+
 template<typename T, unsigned int TId>
 bool TypedStateComponent<T,TId>::isInstanceOf( IECore::TypeId typeId ) const
 {

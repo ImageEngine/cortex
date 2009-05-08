@@ -39,55 +39,55 @@ import IECore
 class ParameterisedProceduralTest( unittest.TestCase ) :
 
 	def testObject( self ) :
-	
+
 		self.assert_( IECore.Object.isType( IECore.TypeId.ParameterisedProcedural ) )
 		self.assert_( IECore.Object.isAbstractType( IECore.TypeId.ParameterisedProcedural ) )
 		self.assertRaises( RuntimeError, IECore.Object.create, IECore.TypeId.ParameterisedProcedural )
 
-		self.assert_( IECore.Object.isType( IECore.TypeId.ReadProcedural ) )		
+		self.assert_( IECore.Object.isType( IECore.TypeId.ReadProcedural ) )
 		self.failIf( IECore.Object.isAbstractType( IECore.TypeId.ReadProcedural ) )
 		p = IECore.Object.create( IECore.TypeId.ReadProcedural )
-		
-	def testRunTimeTyped( self ) :	
-		
+
+	def testRunTimeTyped( self ) :
+
 		self.assertEqual( IECore.ReadProcedural.staticTypeName(), "ReadProcedural" )
-		self.assertEqual( IECore.ReadProcedural.staticTypeId(), IECore.TypeId.ReadProcedural )		
-		
+		self.assertEqual( IECore.ReadProcedural.staticTypeId(), IECore.TypeId.ReadProcedural )
+
 		p = IECore.ReadProcedural()
 		self.assertEqual( p.typeName(), "ReadProcedural" )
-		self.assertEqual( p.typeId(), IECore.TypeId.ReadProcedural )				
+		self.assertEqual( p.typeId(), IECore.TypeId.ReadProcedural )
 
 	def testParameterAccess( self ) :
-		
+
 		p = IECore.ReadProcedural()
 
 		self.assert_( p["files"]["name"].isInstanceOf( IECore.FileNameParameter.staticTypeId() ) )
 		self.assert_( p.parameters().isInstanceOf( IECore.CompoundParameter.staticTypeId() ) )
 		self.assert_( p.parameters()["files"].isSame( p["files"] ) )
-	
+
 	def testGrouping( self ) :
-	
+
 		p = IECore.ReadProcedural()
 		g = IECore.Group()
 		g.addChild( p )
-	
+
 	def testNoTypeIdOverride( self ) :
-	
+
 		## Really all the typeid functions should be overridden in all python
 		# derived classes, but that won't always be the case and we sure don't
 		# want things to blow up if they're absent.
-	
+
 		class T( IECore.ParameterisedProcedural ) :
-		
+
 			def __init__( self ) :
-				
+
 				IECore.ParameterisedProcedural.__init__( self )
-				
+
 		t = T()
 		self.assertEqual( t.typeId(), IECore.ParameterisedProcedural.staticTypeId() )
 		self.assertEqual( t.typeName(), IECore.ParameterisedProcedural.staticTypeName() )
 		self.failUnless( t.isInstanceOf( IECore.ParameterisedProcedural.staticTypeId() ) )
 		self.failUnless( t.isInstanceOf( IECore.ParameterisedProcedural.staticTypeName() ) )
-	
+
 if __name__ == "__main__":
         unittest.main()

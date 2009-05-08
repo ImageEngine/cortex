@@ -44,18 +44,18 @@ class OrientationTest( unittest.TestCase ) :
 	## Makes a plane on the XY plane which appears with an anticlockwise winding order when
 	# viewing down the negative Z axis.
 	def makePlane( self ) :
-	
+
 		V = IECore.V3f
 		p = IECore.V3fVectorData( [ V( 1, -1, 0 ), V( 1, 1, 0 ), V( -1, 1, 0 ), V( -1, -1, 0 ) ] )
 		nVerts = IECore.IntVectorData( [ 4 ] )
 		vertIds = IECore.IntVectorData( [ 0, 1, 2, 3 ] )
-		
+
 		return IECore.MeshPrimitive( nVerts, vertIds, "linear", p )
-		
+
 	def testMesh( self ) :
-	
+
 		"""Check that anticlockwise winding order is considered front facing by default."""
-	
+
 		# render a single sided plane that shouldn't be backface culled
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testOrientation.tif", "tiff", "rgba", {} )
@@ -64,7 +64,7 @@ class OrientationTest( unittest.TestCase ) :
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		self.makePlane().render( r )
 		r.worldEnd()
-		
+
 		# check that something appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testOrientation.tif" ).read()
 		e = IECore.PrimitiveEvaluator.create( i )
@@ -73,7 +73,7 @@ class OrientationTest( unittest.TestCase ) :
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 1 )
 		del r
-		
+
 		# render a plane that should be backface culled
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testOrientation.tif", "tiff", "rgba", {} )
@@ -83,7 +83,7 @@ class OrientationTest( unittest.TestCase ) :
 		r.concatTransform( IECore.M44f.createRotated( IECore.V3f( 0, math.pi, 0 ) ) )
 		self.makePlane().render( r )
 		r.worldEnd()
-		
+
 		# check that nothing appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testOrientation.tif" ).read()
 		e = IECore.PrimitiveEvaluator.create( i )
@@ -93,7 +93,7 @@ class OrientationTest( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( a ), 0 )
 
 	def testFlippingTransforms( self ) :
-	
+
 		"""Check that flipping transforms are automatically compensated for."""
 		outputFileName = os.path.dirname( __file__ ) + "/output/testOrientation.tif"
 		# render a single sided plane that shouldn't be backface culled, even though
@@ -109,7 +109,7 @@ class OrientationTest( unittest.TestCase ) :
 		self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( False ) )
 		self.makePlane().render( r )
 		r.worldEnd()
-		
+
 		# check that something appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
 		e = IECore.PrimitiveEvaluator.create( i )
@@ -117,11 +117,11 @@ class OrientationTest( unittest.TestCase ) :
 		a = e.A()
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 1 )
-			
+
 	def tearDown( self ) :
-	
+
 		if os.path.exists( "test/IECoreRI/output/testOrientation.tif" ) :
 			os.remove( "test/IECoreRI/output/testOrientation.tif" )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

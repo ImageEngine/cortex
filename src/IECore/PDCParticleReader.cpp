@@ -99,7 +99,7 @@ bool PDCParticleReader::open()
 		{
 			return false;
 		}
-		
+
 		char pdc[4];
 		m_iStream->read( pdc, 4 );
 		if( strncmp( "PDC ", pdc, 4 ) )
@@ -107,9 +107,9 @@ bool PDCParticleReader::open()
 			m_header.valid = false;
 			return false;
 		}
-		
+
 		m_iStream->read( (char *)&m_header.version, sizeof( m_header.version ) );
-		
+
 		int endian = 0;
 		m_iStream->read( (char *)&endian, sizeof( endian ) );
 		if( endian!=1 )
@@ -121,22 +121,22 @@ bool PDCParticleReader::open()
 		{
 			m_header.reverseBytes = false;
 		}
-		
+
 		if( m_header.version > 1 )
 		{
-			msg( Msg::Warning, "PDCParticleReader::open()", format( "File \"%s\" has unknown version %d." ) % fileName() % m_header.version ); 
+			msg( Msg::Warning, "PDCParticleReader::open()", format( "File \"%s\" has unknown version %d." ) % fileName() % m_header.version );
 		}
-		
+
 		int unused = 0;
 		m_iStream->read( (char *)&unused, sizeof( unused ) );
 		m_iStream->read( (char *)&unused, sizeof( unused ) );
-		
+
 		m_iStream->read( (char *)&m_header.numParticles, sizeof( m_header.numParticles ) );
 		if( m_header.reverseBytes )
 		{
 			m_header.numParticles = reverseBytes( m_header.numParticles );
 		}
-				
+
 		int numAttributes;
 		m_iStream->read( (char *)&numAttributes, sizeof( numAttributes ) );
 		if( m_header.reverseBytes )
@@ -194,13 +194,13 @@ bool PDCParticleReader::open()
 					break;
 				case VectorArray :
 					m_iStream->seekg( sizeof( double ) * 3 * m_header.numParticles, ios_base::cur );
-					break;					
+					break;
 				default :
 					assert( r.type < 6 ); // unknown type
 			}
-			
+
 		}
-		
+
 		m_header.valid = m_iStream->good();
 		m_streamFileName = fileName();
 		m_idAttribute = 0;
@@ -253,7 +253,7 @@ typename T::Ptr PDCParticleReader::filterAttr( typename F::ConstPtr attr, float 
 	{
 		ConstDoubleVectorDataPtr idAttr = idAttribute();
 		if( idAttr )
-		{	
+		{
 			// percentage filtering (and type conversion if necessary)
 			typename T::Ptr result( new T );
 			const typename F::ValueType &in = attr->readable();
@@ -278,7 +278,7 @@ typename T::Ptr PDCParticleReader::filterAttr( typename F::ConstPtr attr, float 
 			// fall through to allow basic loading to happen anyway.
 		}
 	}
-	
+
 	if( T::staticTypeId()!=F::staticTypeId() )
 	{
 		// type conversion only
@@ -289,7 +289,7 @@ typename T::Ptr PDCParticleReader::filterAttr( typename F::ConstPtr attr, float 
 		copy( in.begin(), in.end(), out.begin() );
 		return result;
 	}
-	
+
 	// no filtering of any sort needed
 	return typename T::Ptr( (T *)attr.get() );
 }
@@ -306,7 +306,7 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 	{
 		return 0;
 	}
-	
+
 	DataPtr result = 0;
 	switch( it->second.type )
 	{
@@ -314,7 +314,7 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 			{
 				IntDataPtr d( new IntData );
 				readElements( &d->writable(), it->second.position, 1 );
-				result = d;			
+				result = d;
 			}
 			break;
 		case IntegerArray :
@@ -404,14 +404,14 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 						break;
 				}
 			}
-			break;	
+			break;
 		default :
 			assert( it->second.type < 6 ); // unknown type
-	
+
 	}
 	return result;
 }
-	
+
 ConstDoubleVectorDataPtr PDCParticleReader::idAttribute()
 {
 	if( !open() )

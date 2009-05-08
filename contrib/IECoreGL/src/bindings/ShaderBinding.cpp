@@ -82,5 +82,5 @@ void bindShader()
 		.def( self==self )
 	;
 }
-	
+
 }

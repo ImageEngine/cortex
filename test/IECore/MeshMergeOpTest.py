@@ -39,18 +39,18 @@ import math
 class MeshMergeOpTest( unittest.TestCase ) :
 
 	def testPlanes( self ) :
-	
+
 		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
 		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
-		
+
 		merged = MeshMergeOp()( input=p1, mesh=p2 )
-		
+
 		for v in PrimitiveVariable.Interpolation.values :
 			i = PrimitiveVariable.Interpolation( v )
 			if i!=PrimitiveVariable.Interpolation.Invalid and i!=PrimitiveVariable.Interpolation.Constant :
 				self.assertEqual( merged.variableSize( i ), p1.variableSize( i ) + p2.variableSize( i ) )
-		
+
 		self.assertEqual( len( merged["P"].data ), len( p1["P"].data ) + len( p2["P"].data ) )
-					
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

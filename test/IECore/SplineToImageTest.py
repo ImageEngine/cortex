@@ -42,21 +42,21 @@ class SplineToImageTest(unittest.TestCase):
 	def test( self ) :
 
 		s = IECore.Splineff()
-		
+
 		s[0] = 1
 		s[0] = 1
 		s[1] = 0
 		s[1] = 0
-		
+
 		sd = IECore.SplineffData( s )
-		
-		i = IECore.SplineToImage()( spline=sd, resolution=IECore.V2i( 10, 256 ) )		
-		
+
+		i = IECore.SplineToImage()( spline=sd, resolution=IECore.V2i( 10, 256 ) )
+
 		self.assertEqual( i.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 9, 255 ) ) )
 		self.assertEqual( i.displayWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 9, 255 ) ) )
 		self.assertEqual( len( i ), 1 )
-		self.assert_( "Y" in i )	
+		self.assert_( "Y" in i )
 
 if __name__ == "__main__":
-	unittest.main()   
+	unittest.main()
 

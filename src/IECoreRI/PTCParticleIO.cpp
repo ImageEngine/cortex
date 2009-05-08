@@ -40,7 +40,7 @@
 using namespace IECoreRI;
 using namespace IECoreRI::PTCParticleIO;
 
-PTCType IECoreRI::PTCParticleIO::ptcVariableTypes[] = 
+PTCType IECoreRI::PTCParticleIO::ptcVariableTypes[] =
 {
 	{ "color", 3 },
 	{ "point", 3 },

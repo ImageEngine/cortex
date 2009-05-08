@@ -41,12 +41,12 @@ import maya.cmds
 class FromMayaCameraConverterTest( unittest.TestCase ) :
 
 	def test( self ) :
-				
+
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape" )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCameraConverter ) ) )
-		
+
 		camera = converter.convert()
 		self.assert_( camera.isInstanceOf( IECore.Camera.staticTypeId() ) )
-								
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram( testRunner = unittest.TextTestRunner( stream = MayaUnitTest.SplitStream(), verbosity = 2 ) )

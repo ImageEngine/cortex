@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -53,13 +53,13 @@ static std::vector<ObjectVector>::size_type convertIndex( ObjectVector &o, long 
 	{
 		index += s;
 	}
-	
+
 	if( index >= s || index < 0 )
 	{
 		PyErr_SetString( PyExc_IndexError, "Index out of range" );
 		throw_error_already_set();
 	}
-	
+
 	return index;
 }
 
@@ -97,7 +97,7 @@ void bindObjectVector()
 		.def( "__setitem__", &setItem )
 		.def( "__delitem__", &delItem )
 		.def( "append", &append )
-	;	
+	;
 }
 
 } // namespace IECore

@@ -52,49 +52,49 @@ class BoundedKDTree
 
 		typedef BoundIterator Iterator;
 		typedef typename std::iterator_traits<BoundIterator>::value_type Bound;
-		typedef typename BoxTraits<Bound>::BaseType BaseType;			
+		typedef typename BoxTraits<Bound>::BaseType BaseType;
 		class Node;
 		typedef std::vector<Node> NodeVector;
 		typedef typename NodeVector::size_type NodeIndex;
-				
+
 		/// Creates a tree for the fast searching of bounds.
 		/// Note that the tree does not own the passed bounds -
 		/// it is up to you to ensure that they remain valid and
 		/// unchanged as long as the BoundedKDTree is in use.
 		BoundedKDTree( BoundIterator first, BoundIterator last, int maxLeafSize=4 );
-		
-		/// Populates the passed vector of iterators with the bounds which intersect "b". Returns the number of bounds found.		
+
+		/// Populates the passed vector of iterators with the bounds which intersect "b". Returns the number of bounds found.
 		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
 		template<typename S>
-		unsigned int intersectingBounds( const S &b, std::vector<BoundIterator> &bounds ) const;		
-		
-		/// Direct access to the index of the root node		
+		unsigned int intersectingBounds( const S &b, std::vector<BoundIterator> &bounds ) const;
+
+		/// Direct access to the index of the root node
 		NodeIndex rootIndex() const;
-		
+
 		/// Retrieve the node associated with a given index
 		const Node& node( NodeIndex idx ) const;
-		
+
 		/// Retrieve the index of the "low" child node
 		static NodeIndex lowChildIndex( NodeIndex index );
 
-		/// Retrieve the index of the "high" child node		
+		/// Retrieve the index of the "high" child node
 		static NodeIndex highChildIndex( NodeIndex index );
 
 	private:
-	
+
 		typedef std::vector<BoundIterator> Permutation;
 		typedef typename Permutation::iterator PermutationIterator;
 		typedef typename Permutation::const_iterator PermutationConstIterator;
-						
+
 		class AxisSort;
-		
+
 		unsigned char majorAxis( PermutationConstIterator permFirst, PermutationConstIterator permLast );
 		void build( NodeIndex nodeIndex, PermutationIterator permFirst, PermutationIterator permLast );
 		void bound( NodeIndex nodeIndex );
-		
+
 		template<typename S>
 		void intersectingBoundsWalk( NodeIndex nodeIndex, const S &p, std::vector<BoundIterator> &bounds ) const;
-		
+
 		Permutation m_perm;
 		NodeVector m_nodes;
 		const int m_maxLeafSize;
@@ -106,8 +106,8 @@ class BoundedKDTree<BoundIterator>::Node
 {
 	public :
 
-		/// Must be default constructible for use as element within std::vector			
-		Node();			
+		/// Must be default constructible for use as element within std::vector
+		Node();
 
 		inline bool isLeaf() const;
 
@@ -117,18 +117,18 @@ class BoundedKDTree<BoundIterator>::Node
 
 		inline bool isBranch() const;
 
-		inline unsigned char cutAxis() const;				
+		inline unsigned char cutAxis() const;
 
-		inline const Bound &bound() const;				
+		inline const Bound &bound() const;
 
 	private :
-	
+
 		friend class BoundedKDTree<BoundIterator>;
 
 		inline void makeLeaf( PermutationIterator permFirst, PermutationIterator permLast );
 		inline void makeBranch( unsigned char cutAxis );
 
-		inline Bound &bound();	
+		inline Bound &bound();
 
 		unsigned char m_cutAxisAndLeaf;
 
@@ -140,7 +140,7 @@ class BoundedKDTree<BoundIterator>::Node
 			BoundIterator *last;
 		} m_perm;
 };
-	
+
 typedef BoundedKDTree<std::vector<Imath::Box2f>::const_iterator> Box2fTree;
 typedef BoundedKDTree<std::vector<Imath::Box2d>::const_iterator> Box2dTree;
 typedef BoundedKDTree<std::vector<Imath::Box3f>::const_iterator> Box3fTree;

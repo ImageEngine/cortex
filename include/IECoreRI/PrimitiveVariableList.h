@@ -59,7 +59,7 @@ class PrimitiveVariableList
 		/// as you still use the PrimitiveVariableList.
 		PrimitiveVariableList( const IECore::PrimitiveVariableMap &primVars,
 			const std::map<std::string, std::string> *typeHints = 0 );
-		
+
 		/// Returns the number of primitive variables, to be passed as the
 		/// n argument to the Ri call.
 		int n();
@@ -71,18 +71,18 @@ class PrimitiveVariableList
 		/// have been cast to a non-const form to fit the Ri interface, but
 		/// you must absolutely not modify the data.
 		void **values();
-	
+
 	private :
-	
+
 		const char *type( const std::string &name, IECore::ConstDataPtr d, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
 		const char *interpolation( IECore::PrimitiveVariable::Interpolation i );
 		const void *value( IECore::DataPtr d );
-		
+
 		std::vector<std::string> m_strings;
 		std::vector<const char *> m_tokens;
 		std::vector<const void *> m_values;
 		std::vector<const char *> m_charPtrs;
-	
+
 };
 
 } // namespace IECoreRI

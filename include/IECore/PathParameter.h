@@ -53,7 +53,7 @@ class PathParameter : public StringParameter
 			MustExist,
 			MustNotExist,
 		} CheckType;
-	
+
 		PathParameter( const std::string &name, const std::string &description,
 			const std::string &defaultValue = "", bool allowEmptyString = true, CheckType check = PathParameter::DontCare,
 			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
@@ -61,7 +61,7 @@ class PathParameter : public StringParameter
 		bool allowEmptyString() const;
 		bool mustExist() const;
 		bool mustNotExist() const;
-		
+
 		/// Returns false if :
 		///
 		/// * allowEmptyString() is false and the string is empty.
@@ -71,15 +71,15 @@ class PathParameter : public StringParameter
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
 
 	protected :
-	
+
 		PathParameter();
 		friend class TypeDescription<PathParameter>;
 
 	private :
-	
+
 		bool m_allowEmptyString;
 		CheckType m_check;
-		
+
 		static const unsigned int g_ioVersion;
 
 };

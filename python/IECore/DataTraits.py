@@ -42,12 +42,12 @@ import datetime
 import _IECore as IECore
 from Log import *
 
-## Utility function that recognizes objects that are simple types. That means, 
-# have one single value on it and are not IMath data types. 
+## Utility function that recognizes objects that are simple types. That means,
+# have one single value on it and are not IMath data types.
 # VectorData, CompoundData and IMath-type Data are not simple.
 # Returns a boolean indicating if the given object is a simple Data.
 def isSimpleDataType(obj):
-	
+
 	if not isinstance(obj, IECore.Data):
 		return False
 	if hasattr(obj.__class__, "value"):
@@ -60,7 +60,7 @@ def isSimpleDataType(obj):
 			return True
 	return False
 
-##	Utility function that recognizes objects that are numeric simple types. That means, 
+##	Utility function that recognizes objects that are numeric simple types. That means,
 #	have one single value on it, and it is numeric. For example, IntData. But not
 #	IntVectorData, nor CharData which just accepts characters (up to now).
 def isSimpleNumericDataType(obj):
@@ -79,7 +79,7 @@ def isSimpleNumericDataType(obj):
 ## Utility function that recognizes objects that hold values as matrices.
 # For example the IMath types: V2f, M33f, Color3f. But not vectors of those types.
 def isMatrixDataType(obj):
-	
+
 	if not hasattr(obj.__class__, "value"):
 		return False
 	##\ todo: this attr doesn't guarantee a matrix or not. Quats and transformation matrices don't have dimension attrs
@@ -125,8 +125,8 @@ __dataTypesConversionDict = {
 	IECore.ShortData: (int, False),
 	IECore.UShortData: (int, False),
 	IECore.Int64Data: (int, False),
-	IECore.UInt64Data: (int, False),	
-		
+	IECore.UInt64Data: (int, False),
+
 
 	IECore.V2fData: (IECore.V2f, True),
 	IECore.V2dData: (IECore.V2d, True),
@@ -163,7 +163,7 @@ __dataTypesConversionDict = {
 	IECore.ShortVectorData: (list, False, int),
 	IECore.UShortVectorData: (list, False, int),
 	IECore.Int64VectorData: (list, False, int),
-	IECore.UInt64VectorData: (list, False, int),	
+	IECore.UInt64VectorData: (list, False, int),
 	IECore.V2fVectorData: (list, False, IECore.V2f),
 	IECore.V2dVectorData: (list, False, IECore.V2d),
 	IECore.V2iVectorData: (list, False, IECore.V2i),
@@ -191,15 +191,15 @@ __dataTypesConversionDict = {
 
 	IECore.TransformationMatrixfData: ( IECore.TransformationMatrixf, True ),
 	IECore.TransformationMatrixdData: ( IECore.TransformationMatrixd, True ),
-	
+
 	IECore.SplineffData: ( IECore.Splineff, True ),
 	IECore.SplineddData: ( IECore.Splinedd, True ),
 	IECore.SplinefColor3fData: ( IECore.SplinefColor3f, True ),
 	IECore.SplinefColor4fData: ( IECore.SplinefColor4f, True ),
-	
+
 	IECore.CubeColorLookupfData: ( IECore.CubeColorLookupf, True ),
 	IECore.CubeColorLookupdData: ( IECore.CubeColorLookupd, True ),
-	
+
 	IECore.DateTimeData: ( datetime.datetime, True ),
 	IECore.TimeDurationData: ( datetime.timedelta, True ),
 	IECore.TimePeriodData: ( IECore.TimePeriod, True ),
@@ -209,17 +209,17 @@ __dataTypesConversionDict = {
 
 ## Function that returns a list of Data derived classes.
 def getDataDerivedTypes():
-	
+
 	dataTypesList = __dataTypesConversionDict.keys()
 	dataTypesList.remove(IECore.Data)
 	return dataTypesList
 
-## Returns the type (class) for the element type hold on the instances of the given Data type. In fact, returns the class that is 
+## Returns the type (class) for the element type hold on the instances of the given Data type. In fact, returns the class that is
 # used to instantiate the Data type.
 # For example, if the Data class returns true from isSequenceType(), then this function returns the type 'list'.
 # See also: valueTypeFromSequenceType()
 def elementTypeFromDataType(dataType):
-	
+
 	dataInfo = __dataTypesConversionDict[dataType]
 	if dataInfo is None:
 		raise TypeError, "This Data class can not be instantiated."
@@ -228,7 +228,7 @@ def elementTypeFromDataType(dataType):
 ## Returns the type (class) used on each indexed value on the given sequence type.
 # For example: it returns 'int' for the IntVectorData class.
 def valueTypeFromSequenceType(sequenceType):
-	
+
 	dataInfo = __dataTypesConversionDict[sequenceType]
 	if dataInfo is None:
 		raise TypeError, "This Data class can not be instantiated."
@@ -238,7 +238,7 @@ def valueTypeFromSequenceType(sequenceType):
 
 ## Returns the Data class that is instantiable given an element type.
 def dataTypeFromElementType(elementType):
-	
+
 	for (dataType, value) in __dataTypesConversionDict.items():
 		if value is None:
 			continue
@@ -249,7 +249,7 @@ def dataTypeFromElementType(elementType):
 ## Returns the Data class that is instantiable given a element data object.
 # It also instantiate container Data objects, like VectorData and CompoundData, given the proper list and dict.
 def dataTypeFromElement(element):
-	
+
 	# threat the VectorData type exception...
 	if isinstance(element, list) and len(element) > 0:
 		# We have to check the list contents.
@@ -268,10 +268,10 @@ def dataTypeFromElement(element):
 def dataFromElement(element):
 
 	# An empty list or empty set is ambiguous - we don't know if it should be a StringVectorData, IntVectorData, or anything
-	if element == [] or element == set() : 
-	
+	if element == [] or element == set() :
+
 		raise RuntimeError, "Cannot determine Data type for ambiguous element: %s" % ( str( element ) )
-	
+
 	dataType = dataTypeFromElement(element)
 	return dataType(element)
 

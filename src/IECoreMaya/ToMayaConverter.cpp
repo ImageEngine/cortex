@@ -44,7 +44,7 @@ ToMayaConverter::ToMayaConverter( const std::string &name, const std::string &de
 	:	IECore::FromCoreConverter( name, description, supportedType )
 {
 }
-		
+
 ToMayaConverter::~ToMayaConverter()
 {
 }

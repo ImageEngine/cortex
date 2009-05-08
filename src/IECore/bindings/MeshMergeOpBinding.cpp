@@ -46,11 +46,11 @@ namespace IECore
 
 void bindMeshMergeOp()
 {
-	
+
 	RunTimeTypedClass<MeshMergeOp>()
 		.def( init<>() )
 	;
-	
+
 }
 
 } // namespace IECore

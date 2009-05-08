@@ -61,7 +61,7 @@ if hasattr( IECoreRI, "PTCParticleWriter" ):
 			r = None
 
 		def __testWriteFromFactory(self):
-			
+
 			self.__cleanUp()
 
 			r = IECore.Reader.create(self.testfile)
@@ -87,7 +87,7 @@ if hasattr( IECoreRI, "PTCParticleWriter" ):
 			normals = pointCloud["N"].data
 			for (i, x) in enumerate( pointCloud2[ "P" ].data ):
 				for ( j, y ) in enumerate( pointCloud[ "P" ].data ):
-					
+
 					if data2Dict.has_key( j ):
 						continue
 
@@ -119,14 +119,14 @@ if hasattr( IECoreRI, "PTCParticleWriter" ):
 
 			pointCloud[ "P" ] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( data ) )
 			pointCloud[ "another" ] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( data ) )
-			pointCloud.blindData()["PTCParticleIO"] = IECore.CompoundData( 
-					{	 
-						"xResolution": IECore.FloatData( 640 ), 
-						"yResolution": IECore.FloatData( 480 ), 
-						"aspectRatio": IECore.FloatData( 1.0 ), 
-						"worldToEye": worldToEye, 
+			pointCloud.blindData()["PTCParticleIO"] = IECore.CompoundData(
+					{
+						"xResolution": IECore.FloatData( 640 ),
+						"yResolution": IECore.FloatData( 480 ),
+						"aspectRatio": IECore.FloatData( 1.0 ),
+						"worldToEye": worldToEye,
 						"worldToNdc": worldToNdc,
-					} 
+					}
 			)
 
 			w = IECoreRI.PTCParticleWriter( pointCloud, self.tmpfile )
@@ -142,10 +142,10 @@ if hasattr( IECoreRI, "PTCParticleWriter" ):
 				self.assertEqual( len( pointCloud[var].data ), len( pointCloud2[var].data ) )
 				for value in pointCloud[ var ].data :
 					self.assert_( value in pointCloud2[var].data )
-			
+
 			self.assertEqual( worldToEye, pointCloud2.blindData()['PTCParticleIO']['worldToEye'] )
 			self.assertEqual( worldToNdc, pointCloud2.blindData()['PTCParticleIO']['worldToNdc'] )
-	
+
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

@@ -39,28 +39,28 @@ from IECore import *
 class ImagePremultiplyOpTest( unittest.TestCase ) :
 
 	def testConstruction( self ) :
-	
+
 		op = ImagePremultiplyOp()
-		
+
 	def testSimple( self ) :
-	
+
 		img = Reader.create( "test/IECore/data/exrFiles/checker2Unpremult.exr" ).read()
-		
+
 		op = ImagePremultiplyOp()
-		
+
 		result = op(
 			input = img,
 			channels = StringVectorData( [ "R", "G", "B" ] ),
 			alphaChannelName = "A"
 		)
-			
+
 		expectedResult = Reader.create( "test/IECore/data/exrFiles/checker2Premult.exr" ).read()
-		
+
 		diffOp = ImageDiffOp()
 		diff = diffOp( imageA = result, imageB = expectedResult ).value
 		self.failIf( diff )
-				
+
 
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

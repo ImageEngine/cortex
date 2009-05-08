@@ -45,31 +45,31 @@ namespace IECoreGL
 class LuminanceTexture : public Texture
 {
 	public :
-				
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::LuminanceTexture, LuminanceTextureTypeId, Texture );
-		
+
 		/// Constructs a new LuminanceTexture. Both channels must be of the same type, and must
 		/// be some form of numeric VectorData. The alpha channel may be omitted.
 		LuminanceTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr y,
 			IECore::ConstDataPtr a = 0, bool mipMap=true );
-		
+
 		/// Creates a LuminanceTexture from the specified image. Accepts channels with names
 		/// "Y" and "A". Currently ignores the display window and uses only
 		/// the data window. Image must have at least the "Y" channel and if specified the
 		/// "A" channel must be of the same type.
 		LuminanceTexture( IECore::ConstImagePrimitivePtr image, bool mipMap=true );
-					
+
 		virtual ~LuminanceTexture();
 
 		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
 
 	private :
-	
+
 		struct Constructor;
-	
+
 		void construct( unsigned int width, unsigned int height, IECore::ConstDataPtr y,
 			IECore::ConstDataPtr a, bool mipMap );
-				
+
 };
 
 IE_CORE_DECLAREPTR( LuminanceTexture );

@@ -41,25 +41,25 @@ import IECoreRI
 class CoordinateSystemTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/coordSys.rib"
-	
+
 	def test( self ) :
-	
+
 		r = IECoreRI.Renderer( self.outputFileName )
-		
+
 		r.worldBegin()
-			
+
 		c = IECore.CoordinateSystem( "helloWorld" )
 		c.render( r )
-			
+
 		r.worldEnd()
-		
+
 		l = "".join( file( self.outputFileName ).readlines() )
 		self.assert_( "CoordinateSystem \"helloWorld\"" in l )
-					
+
 	def tearDown( self ) :
 
 		if os.path.exists( self.outputFileName ) :
 			os.remove( self.outputFileName )
-				
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

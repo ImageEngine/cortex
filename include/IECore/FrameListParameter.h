@@ -43,39 +43,39 @@ namespace IECore
 
 class FrameListParameter : public StringParameter
 {
-	public:		
-	
+	public:
+
 		IE_CORE_DECLAREOBJECT( FrameListParameter, StringParameter );
-		
+
 		FrameListParameter( const std::string &name, const std::string &description, const std::string &defaultValue = std::string(), bool allowEmptyList = true,
 			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
-		
+
 		FrameListParameter( const std::string &name, const std::string &description, StringDataPtr defaultValue, bool allowEmptyList = true,
 			const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
-			
+
 		virtual ~FrameListParameter();
-		
+
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
-		
-		void setFrameListValue( ConstFrameListPtr frameList );		
+
+		void setFrameListValue( ConstFrameListPtr frameList );
 		FrameListPtr getFrameListValue() const;
-		
+
 	protected :
-	
+
 		// for io and copying
 		FrameListParameter();
 		friend class TypeDescription<FrameListParameter>;
-	
+
 		bool m_allowEmptyList;
-	
+
 	private :
-	
+
 		static const unsigned int g_ioVersion;
-			
+
 };
 
 IE_CORE_DECLAREPTR( FrameListParameter );
-	
+
 } // namespace IECore
 
 #endif // IE_CORE_FRAMELISTPARAMETER_H

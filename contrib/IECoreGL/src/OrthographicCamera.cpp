@@ -57,6 +57,6 @@ void OrthographicCamera::render( ConstStatePtr state ) const
 	glOrtho( m_screenWindow.min.x, m_screenWindow.max.x,
 		m_screenWindow.min.y, m_screenWindow.max.y,
 		m_clippingPlanes[0], m_clippingPlanes[1] );
-			
+
 	setModelViewMatrix();
 }

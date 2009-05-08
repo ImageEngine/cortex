@@ -260,7 +260,7 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 	def tearDown(self):
 		if os.path.exists( self.testFile ):
 			os.remove( self.testFile )
-					
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

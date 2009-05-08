@@ -87,7 +87,7 @@ void Camera::load( LoadContextPtr context )
 	PreWorldRenderable::load( context );
 	unsigned int v = m_ioVersion;
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	
+
 	container->read( "name", m_name );
 	m_transform = 0;
 	try
@@ -106,7 +106,7 @@ bool Camera::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	const Camera *tOther = static_cast<const Camera *>( other.get() );
 
 	// check name
@@ -114,24 +114,24 @@ bool Camera::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	
+
 	// check transform
 	if( (bool)m_transform != (bool)tOther->m_transform )
 	{
 		return false;
 	}
-	
+
 	if( m_transform && !tOther->m_transform->isEqualTo( m_transform ) )
 	{
 		return false;
 	}
-	
+
 	// check parameters
 	if( !m_parameters->isEqualTo( tOther->m_parameters ) )
 	{
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -155,7 +155,7 @@ const std::string &Camera::getName() const
 {
 	return m_name;
 }
-		
+
 void Camera::setTransform( TransformPtr transform )
 {
 	m_transform = transform;
@@ -195,12 +195,12 @@ void Camera::addStandardParameters()
 	{
 		resolution = boost::static_pointer_cast<V2iData>( resIt->second )->readable();
 	}
-	if( resolution.x < 1 || resolution.y < 1 ) 
+	if( resolution.x < 1 || resolution.y < 1 )
 	{
 		resolution = V2i( 640, 480 );
 		parameters()["resolution"] = new V2iData( resolution );
 	}
-	
+
 	// screen window
 	Box2f screenWindow;
 	CompoundDataMap::const_iterator screenWindowIt=parameters().find( "screenWindow" );
@@ -223,11 +223,11 @@ void Camera::addStandardParameters()
 			screenWindow.min.y = -1;
 			screenWindow.max.y = 1;
 			screenWindow.min.x = -aspectRatio;
-			screenWindow.max.x = aspectRatio;			
+			screenWindow.max.x = aspectRatio;
 		}
 		parameters()["screenWindow"] = new Box2fData( screenWindow );
 	}
-	
+
 	// crop window
 	Box2f cropWindow;
 	CompoundDataMap::const_iterator cropWindowIt=parameters().find( "cropWindow" );
@@ -241,7 +241,7 @@ void Camera::addStandardParameters()
 		cropWindow = Box2f( V2f( 0 ), V2f( 1 ) );
 		parameters()["cropWindow"] = new Box2fData( cropWindow );
 	}
-	
+
 	// projection
 	string projection = "";
 	CompoundDataMap::const_iterator projectionIt=parameters().find( "projection" );
@@ -254,7 +254,7 @@ void Camera::addStandardParameters()
 		projection = "orthographic";
 		parameters()["projection"] = new StringData( projection );
 	}
-	
+
 	// fov
 	if( projection=="perspective" )
 	{
@@ -270,7 +270,7 @@ void Camera::addStandardParameters()
 			parameters()["projection:fov"] = new FloatData( fov );
 		}
 	}
-	
+
 	// clipping planes
 	V2f clippingPlanes( -1.0f );
 	CompoundDataMap::const_iterator clippingIt=parameters().find( "clippingPlanes" );
@@ -283,7 +283,7 @@ void Camera::addStandardParameters()
 		clippingPlanes = V2f( 0.01f, 100000.0f );
 		parameters()["clippingPlanes"] = new V2fData( clippingPlanes );
 	}
-	
+
 	// shutter
 	V2f shutter( 1.0f, -1.0f );
 	CompoundDataMap::const_iterator shutterIt=parameters().find( "shutter" );
@@ -305,9 +305,9 @@ void Camera::render( RendererPtr renderer ) const
 		renderer->transformBegin();
 		m_transform->render( renderer );
 	}
-	
+
 		renderer->camera( m_name, m_parameters->readable() );
-	
+
 	if( m_transform )
 	{
 		renderer->transformEnd();

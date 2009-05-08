@@ -49,19 +49,19 @@ namespace IECore
 class VisibleRenderable : public Renderable
 {
 	public:
-	
+
 		VisibleRenderable();
 		virtual ~VisibleRenderable();
-				
+
 		IE_CORE_DECLAREABSTRACTOBJECT( VisibleRenderable, Renderable );
-		
+
 		/// Returns the bounding box for the rendered objects.
 		virtual Imath::Box3f bound() const = 0;
-			
+
 	private:
-	
+
 		static const unsigned int m_ioVersion;
-		
+
 };
 
 IE_CORE_DECLAREPTR( VisibleRenderable );

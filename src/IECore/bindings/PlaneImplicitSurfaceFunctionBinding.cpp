@@ -47,7 +47,7 @@ template<typename T>
 void bindPlaneImplicitSurfaceFunction( const char *name )
 {
 	typedef ImplicitSurfaceFunction<typename T::Point, typename T::Value> Base;
-	
+
 	RefCountedClass<T, Base>( name )
 		.def( init< const typename T::Point  &, typename T::PointBaseType> () )
 		.def( init< const typename T::Point  &, const typename T::Point  &> () )
@@ -59,7 +59,7 @@ void bindPlaneImplicitSurfaceFunction()
 	bindPlaneImplicitSurfaceFunction<PlaneImplicitSurfaceFunctionV3ff>( "PlaneImplicitSurfaceFunctionV3ff" );
 	bindPlaneImplicitSurfaceFunction<PlaneImplicitSurfaceFunctionV3fd>( "PlaneImplicitSurfaceFunctionV3fd" );
 	bindPlaneImplicitSurfaceFunction<PlaneImplicitSurfaceFunctionV3df>( "PlaneImplicitSurfaceFunctionV3df" );
-	bindPlaneImplicitSurfaceFunction<PlaneImplicitSurfaceFunctionV3dd>( "PlaneImplicitSurfaceFunctionV3dd" );	
+	bindPlaneImplicitSurfaceFunction<PlaneImplicitSurfaceFunctionV3dd>( "PlaneImplicitSurfaceFunctionV3dd" );
 }
 
 } // namespace IECore

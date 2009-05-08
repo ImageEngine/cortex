@@ -58,13 +58,13 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
 	ImageViewportPostProcessWrapper(PyObject *self ) : ImageViewportPostProcess(), Wrapper<ImageViewportPostProcess>( self, this )
         {
         }
-	
+
 	virtual ~ImageViewportPostProcessWrapper()
 	{
 	}
-	
-	virtual bool needsDepth () const 
-	{  
+
+	virtual bool needsDepth () const
+	{
 		override o = this->get_override( "needsDepth" );
                 if( o )
                 {
@@ -81,11 +81,11 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
                 else
                 {
                         return ImageViewportPostProcess::needsDepth();
-                }	
+                }
 	}
 
 	virtual void preRender( const std::string &panelName )
-	{  
+	{
 		override o = this->get_override( "preRender" );
                 if( o )
                 {
@@ -101,9 +101,9 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
 		else
 		{
 			ImageViewportPostProcess::preRender( panelName );
-		}	
+		}
 	}
-	
+
 	virtual void postRender( const std::string &panelName, IECore::ImagePrimitivePtr image )
 	{
 		override o = this->get_override( "postRender" );
@@ -123,7 +123,7 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
 			/// Maya would crash if we were to throw an exception here
 			MGlobal::displayError( "ImageViewportPostProcess: postRender() python method not defined" );
                 }
-	
+
 	}
 };
 IE_CORE_DECLAREPTR( ImageViewportPostProcessWrapper );
@@ -131,7 +131,7 @@ IE_CORE_DECLAREPTR( ImageViewportPostProcessWrapper );
 void bindImageViewportPostProcess()
 {
 	typedef class_< ImageViewportPostProcess, ImageViewportPostProcessWrapperPtr, bases< ViewportPostProcess >, boost::noncopyable > ImageViewportPostProcessPyClass;
-	
+
 	RefCountedClass<ImageViewportPostProcess, ViewportPostProcess, ImageViewportPostProcessWrapperPtr>( "ImageViewportPostProcess" )
 		.def( init<>() )
 		.def( "needsDepth", &ImageViewportPostProcessWrapper::needsDepth )

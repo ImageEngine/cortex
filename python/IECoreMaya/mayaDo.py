@@ -37,7 +37,7 @@ import os, sys
 
 """
 Utility function that provides easy access to Ops inside maya using a similar interface as the DO command line.
-It tries to find the actions in the following contexts: (1) maya/<MAYA_MAJOR_VERSION>/<OP>, (2) maya/<MAYA_MAJOR_VERSION>/*/<OP>, (3) maya/<OP> and lastly, (4) */<OP> 
+It tries to find the actions in the following contexts: (1) maya/<MAYA_MAJOR_VERSION>/<OP>, (2) maya/<MAYA_MAJOR_VERSION>/*/<OP>, (3) maya/<OP> and lastly, (4) */<OP>
 Returns the Op result if execution succeeds, and None if execution fails for any reason.
 """
 def mayaDo( opName, opVersion = None, help = False, **opArgs ):
@@ -55,7 +55,7 @@ def mayaDo( opName, opVersion = None, help = False, **opArgs ):
 					plugins = loader.classNames( "*/%s" % opName )
 					# eliminate actions in maya because they may be for other maya versions.
 					plugins = filter( lambda x: not x.startswith( "maya/" ), plugins )
-			
+
 		if not len( plugins ) :
 			IECore.error( "Action \"%s\" does not exist.\n" % opName )
 			return None

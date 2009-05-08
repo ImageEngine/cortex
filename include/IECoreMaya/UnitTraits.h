@@ -47,7 +47,7 @@ template<typename T>
 struct UnitTraits
 {
 	typedef void UnitType;
-	
+
 	static MFnUnitAttribute::Type unitType()
 	{
 		return MFnUnitAttribute::kInvalid;
@@ -58,7 +58,7 @@ template<>
 struct UnitTraits<MTime>
 {
 	typedef MTime UnitType;
-	
+
 	static MFnUnitAttribute::Type unitType()
 	{
 		return MFnUnitAttribute::kTime;
@@ -69,7 +69,7 @@ template<>
 struct UnitTraits<MAngle>
 {
 	typedef MAngle UnitType;
-	
+
 	static MFnUnitAttribute::Type unitType()
 	{
 		return MFnUnitAttribute::kAngle;
@@ -80,7 +80,7 @@ template<>
 struct UnitTraits<MDistance>
 {
 	typedef MDistance UnitType;
-	
+
 	static MFnUnitAttribute::Type unitType()
 	{
 		return MFnUnitAttribute::kDistance;

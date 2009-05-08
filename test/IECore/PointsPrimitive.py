@@ -39,32 +39,32 @@ from IECore import *
 class TestPointsPrimitive( unittest.TestCase ) :
 
 	def testPrimitiveVariable( self ) :
-	
+
 		v = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) )
 		self.assertEqual( v.interpolation, PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( v.data, FloatData( 1 ) )
-		
+
 		v.interpolation = PrimitiveVariable.Interpolation.Vertex
 		self.assertEqual( v.interpolation, PrimitiveVariable.Interpolation.Vertex )
 		v.data = IntVectorData( [ 1, 2, 3, 4 ] )
 		self.assertEqual( v.data, IntVectorData( [ 1, 2, 3, 4 ] ) )
-		
+
 	def testPrimitive( self ) :
-	
+
 		"""This test mainly tests the Primitive aspects of the PointPrimitive"""
-	
+
 		p = PointsPrimitive( 10 )
-		
+
 		self.assertEqual( p.numPoints, 10 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Varying ), 10 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Vertex ), 10 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 10 )
-		
+
 		self.assertEqual( p, p )
 		self.assertEqual( p, p.copy() )
-		
+
 		# try adding a primvar
 		self.assertEqual( len( p ), 0 )
 		self.assert_( not "P" in p )
@@ -74,13 +74,13 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( len( p ), 1 )
 		self.assert_( "P" in p )
 		self.assertEqual( p["P"].data, V3fVectorData() )
-		
+
 		# and removing it
 		self.assertEqual( p["P"].interpolation, PrimitiveVariable.Interpolation.Vertex )
 		del p["P"]
 		self.assertEqual( len( p ), 0 )
 		self.assert_( not "P" in p )
-		
+
 		# and adding it and another
 		p["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData() )
 		self.assert_( not "N" in p )
@@ -89,13 +89,13 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( len( p ), 2 )
 		self.assertEqual( p["N"].data, V3fVectorData() )
 		self.assertEqual( p["N"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-		
+
 		# and overwriting one with the other
 		p["N"] = p["P"]
 		self.assert_( p["N"].data.isSame( p["P"].data ) )
-		
+
 	def testConstructors( self ) :
-	
+
 		p = PointsPrimitive( 20 )
 		self.assertEqual( p.numPoints, 20 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -104,7 +104,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Vertex ), 20 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 20 )
 		self.assertEqual( len( p ), 0 )
-		
+
 		p = PointsPrimitive( V3fVectorData( [ V3f( 1 ) ] ) )
 		self.assertEqual( p.numPoints, 1 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -116,7 +116,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assert_( "P" in p )
 		self.assertEqual( p["P"].data, V3fVectorData( [ V3f( 1 ) ] ) )
 		self.assertEqual( p["P"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-		
+
 		p = PointsPrimitive( V3fVectorData( [ V3f( 1 ) ] ), FloatVectorData( [ 1 ] ) )
 		self.assertEqual( p.numPoints, 1 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -131,13 +131,13 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( p["P"].interpolation, PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p["r"].data, FloatVectorData( [ 1 ] ) )
 		self.assertEqual( p["r"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-		
+
 	def testNumPointsAccess( self ) :
-	
+
 		p = PointsPrimitive( 20 )
 		self.assertEqual( p.numPoints, 20 )
 		p.numPoints = 40
 		self.assertEqual( p.numPoints, 40 )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

@@ -54,9 +54,9 @@ struct MDataHandleAccessor
 	BOOST_STATIC_ASSERT( sizeof( T ) == 0 );
 
 	typedef void ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
-	{	
+	{
 	}
 };
 

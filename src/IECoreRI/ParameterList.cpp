@@ -67,13 +67,13 @@ ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const s
 		}
 	}
 }
-			
+
 ParameterList::ParameterList( const std::string &name, IECore::ConstDataPtr parameter, const std::map<std::string, std::string> *typeHints )
 {
 	reserve( parameter );
 	appendParameter( name, parameter, typeHints );
 }
-			
+
 int ParameterList::n()
 {
 	return m_tokens.size();
@@ -144,8 +144,8 @@ const void *ParameterList::value( IECore::ConstDataPtr d )
 		m_ints.push_back( static_pointer_cast<const BoolData>( d )->readable() );
 		return &*(m_ints.rbegin());
 	}
-	
-	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );	
+
+	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );
 }
 
 void ParameterList::reserve( const IECore::CompoundDataMap &parameters )

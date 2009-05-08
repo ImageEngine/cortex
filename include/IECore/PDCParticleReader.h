@@ -57,15 +57,15 @@ class PDCParticleReader : public ParticleReader
 		virtual ~PDCParticleReader();
 
 		static bool canRead( const std::string &fileName );
-		
+
 		virtual unsigned long numParticles();
 		virtual void attributeNames( std::vector<std::string> &names );
 		virtual DataPtr readAttribute( const std::string &name );
-					
+
 	private :
-	
+
 		static const ReaderDescription<PDCParticleReader> m_readerDescription;
-	
+
 		enum AttributeType
 		{
 			Integer = 0,
@@ -75,13 +75,13 @@ class PDCParticleReader : public ParticleReader
 			Vector = 4,
 			VectorArray = 5,
 		};
-	
+
 		struct Record
 		{
 			int type;
 			std::streampos position;
 		};
-	
+
 		// makes sure that m_iStream is open and that m_header is full.
 		// returns true on success and false on failure.
 		bool open();
@@ -95,17 +95,17 @@ class PDCParticleReader : public ParticleReader
 			int numParticles;
 			std::map<std::string, Record> attributes;
 		} m_header;
-	
+
 		template<typename T>
 		void readElements( T *buffer, std::streampos pos, unsigned long n ) const;
-		
+
 		template<typename T, typename F>
 		typename T::Ptr filterAttr( typename F::ConstPtr attr, float percentage );
-	
+
 		// loads particleId in a completely unfiltered state
 		ConstDoubleVectorDataPtr idAttribute();
 		DoubleVectorDataPtr m_idAttribute;
-				
+
 };
 
 IE_CORE_DECLAREPTR( PDCParticleReader );

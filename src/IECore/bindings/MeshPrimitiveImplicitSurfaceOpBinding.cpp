@@ -49,11 +49,11 @@ namespace IECore
 
 void bindMeshPrimitiveImplicitSurfaceOp()
 {
-	
+
 	RunTimeTypedClass<MeshPrimitiveImplicitSurfaceOp>()
 		.def( init< >() )
 	;
-	
+
 }
 
 } // namespace IECore

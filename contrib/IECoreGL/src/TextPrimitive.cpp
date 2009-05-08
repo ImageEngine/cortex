@@ -76,7 +76,7 @@ TextPrimitive::TextPrimitive( const std::string &text, FontPtr font )
 		m_bound.min = V3f( b.min.x, b.min.y, 0 );
 		m_bound.max = V3f( b.max.x, b.max.y, 0 );
 	}
-	
+
 }
 
 TextPrimitive::~TextPrimitive()
@@ -119,9 +119,9 @@ void TextPrimitive::renderMeshes( ConstStatePtr state, IECore::TypeId style ) co
 			m_meshes.push_back( mesh );
 		}
 	}
-	
+
 	glPushMatrix();
-	
+
 		for( unsigned i=0; i<m_meshes.size(); i++ )
 		{
 			m_meshes[i]->render( state, style );
@@ -130,7 +130,7 @@ void TextPrimitive::renderMeshes( ConstStatePtr state, IECore::TypeId style ) co
 				glTranslate( m_advances[i] );
 			}
 		}
-	
+
 	glPopMatrix();
 }
 
@@ -139,7 +139,7 @@ void TextPrimitive::renderSprites( ConstStatePtr state, IECore::TypeId style ) c
 	Box2f charBound = m_font->coreFont()->bound();
 	glPushAttrib( GL_TEXTURE_BIT | GL_ENABLE_BIT );
 	glPushMatrix();
-	
+
 		/// \todo We need a better way of dealing with shader push/pop
 		/// How about some sort of ScopedProgram class which cleans up
 		/// after itself on destruction? Maybe we should generalise that
@@ -167,33 +167,33 @@ void TextPrimitive::renderSprites( ConstStatePtr state, IECore::TypeId style ) c
 			char c = m_text[i];
 			int tx = c % 16;
 			int ty = 7 - (c / 16);
-			
+
 			glBegin( GL_QUADS );
-			
+
 				glTexCoord2f( tx * sStep + eps, ty * tStep + eps );
 				glVertex2f( charBound.min.x, charBound.min.y );
-				
+
 				glTexCoord2f( (tx + 1) * sStep - eps, ty * tStep + eps );
 				glVertex2f( charBound.max.x, charBound.min.y );
-				
+
 				glTexCoord2f( (tx + 1) * sStep - eps, (ty + 1) * tStep - eps );
 				glVertex2f( charBound.max.x, charBound.max.y );
-				
+
 				glTexCoord2f( tx * sStep + eps, (ty + 1) * tStep - eps);
 				glVertex2f( charBound.min.x, charBound.max.y );
-			
+
 			glEnd();
 			if( i<m_advances.size() )
 			{
 				glTranslate( m_advances[i] );
 			}
 		}
-		
+
 		if( GLEW_VERSION_2_0 )
 		{
 			glUseProgram( oldProgram );
 		}
-	
+
 	glPopMatrix();
 	glPopAttrib();
 }

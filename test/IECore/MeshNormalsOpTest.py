@@ -39,56 +39,56 @@ import math
 class MeshNormalsOpTest( unittest.TestCase ) :
 
 	def testPlane( self ) :
-	
+
 		p = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
 		if "N" in p :
 			del p["N"]
 		self.assert_( not "N" in p )
-		
+
 		pp = MeshNormalsOp()( input=p )
-		
+
 		self.assert_( "N" in pp )
 		self.assertEqual( pp["N"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-		
+
 		normals = pp["N"].data
 		self.assert_( normals.isInstanceOf( V3fVectorData.staticTypeId() ) )
 		self.assertEqual( normals.size(), pp.variableSize( PrimitiveVariable.Interpolation.Vertex ) )
-		
+
 		for n in normals :
-		
+
 			self.assertEqual( n, V3f( 0, 0, 1 ) )
 
 	def testOnlyNAdded( self ) :
-	
+
 		p = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
 		pp = MeshNormalsOp()( input=p )
 		del pp["N"]
-		
+
 		self.assertEqual( pp, p )
-		
+
 	def testSphere( self ) :
-	
+
 		s = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		del s["N"]
 		self.assert_( not "N" in s )
-		
+
 		ss = MeshNormalsOp()( input=s )
-		
+
 		self.assert_( "N" in ss )
 		self.assertEqual( ss["N"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-		
+
 		normals = ss["N"].data
 		self.assert_( normals.isInstanceOf( V3fVectorData.staticTypeId() ) )
 		self.assertEqual( normals.size(), ss.variableSize( PrimitiveVariable.Interpolation.Vertex ) )
-		
+
 		points = ss["P"].data
 		for i in range( 0, normals.size() ) :
-		
+
 			self.assert_( math.fabs( normals[i].length() - 1 ) < 0.001 )
-		
+
 			p = points[i].normalize()
 			self.assert_( normals[i].dot( p ) > 0.99 )
 			self.assert_( normals[i].dot( p ) < 1.01 )
-			
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

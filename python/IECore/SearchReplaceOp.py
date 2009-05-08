@@ -41,7 +41,7 @@ from IECore import *
 class SearchReplaceOp( Op ) :
 
 	def __init__( self ) :
-	
+
 		Op.__init__( self, "SearchReplaceOp", "Performs a search and replace on ASCII text files.",
 			FileNameParameter(
 				name = "result",
@@ -50,7 +50,7 @@ class SearchReplaceOp( Op ) :
 				allowEmptyString = True,
 			)
 		)
-		
+
 		self.parameters().addParameters(
 			[
 				FileNameParameter(
@@ -86,51 +86,51 @@ class SearchReplaceOp( Op ) :
 		)
 
 	def doOperation( self, operands ) :
-	
+
 		source = operands["source"].value
-		destination = operands["destination"].value		
-		
-		searchFor = operands["searchFor"].value		
+		destination = operands["destination"].value
+
+		searchFor = operands["searchFor"].value
 		if not operands["regexpSearch"] :
 			searchFor = re.escape( searchFor )
-			
-		replaceWith = operands["replaceWith"].value	
-		
+
+		replaceWith = operands["replaceWith"].value
+
 		inFileStat = os.stat( source ).st_mode
-		
-		inFile = open( source, "r" )		
-		
+
+		inFile = open( source, "r" )
+
 		if source == destination :
-			
+
 			inPlace = True
 			fd = tempfile.mkstemp()
-			
+
 		else :
-		
+
 			inPlace = False
 			fd = ( os.open( destination, os.O_WRONLY | os.O_TRUNC | os.O_CREAT ), destination )
-				
-		outFile = os.fdopen( fd[0], "w" )	
-		
-		
-		inLine = inFile.readline()				
+
+		outFile = os.fdopen( fd[0], "w" )
+
+
+		inLine = inFile.readline()
 		while inLine :
-			
+
 			outLine = re.sub( searchFor, replaceWith, inLine )
 			os.write( fd[0], outLine )
-			
+
 			inLine = inFile.readline()
-								
+
 		inFile.close()
 		outFile.close()
-		
+
 		if inPlace :
-									
+
 			shutil.move( destination, destination + ".bak" )
 			shutil.move( fd[1], destination )
-										
+
 		os.chmod( destination, inFileStat )
-					
+
 		return StringData( destination )
 
 registerRunTimeTyped( SearchReplaceOp, 100016, Op )

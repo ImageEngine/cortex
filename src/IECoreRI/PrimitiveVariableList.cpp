@@ -58,22 +58,22 @@ PrimitiveVariableList::PrimitiveVariableList( const IECore::PrimitiveVariableMap
 			case StringVectorDataTypeId :
 				numStrings += static_pointer_cast<StringVectorData>( it->second.data )->readable().size();
 				break;
-				
+
 			case StringDataTypeId :
 				numStrings++;
 				break;
-				
+
 			default :
-			
+
 				break;
-		
+
 		}
 	}
-	
+
 	// reserve the space
 	m_strings.reserve( numStrings );
 	m_charPtrs.reserve( numStrings );
-	
+
 	// build the tokens and values arrays
 	for( it=primVars.begin(); it!=primVars.end(); it++ )
 	{
@@ -212,6 +212,6 @@ const void *PrimitiveVariableList::value( IECore::DataPtr d )
 		}
 		return (&*(m_charPtrs.rbegin())) - ( sd.readable().size() - 1 );
 	}
-	
-	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );	
+
+	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );
 }

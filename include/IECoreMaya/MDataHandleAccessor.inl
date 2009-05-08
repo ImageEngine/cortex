@@ -54,10 +54,10 @@ template<>
 struct MDataHandleAccessor< MObject >
 {
 	typedef MObject ReturnType;
-	
+
 	static ReturnType get( MDataHandle &h )
 	{
-		return h.data();	
+		return h.data();
 	}
 };
 
@@ -65,10 +65,10 @@ template<>
 struct MDataHandleAccessor< bool >
 {
 	typedef bool &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asBool();	
+		return h.asBool();
 	}
 };
 
@@ -76,10 +76,10 @@ template<>
 struct MDataHandleAccessor< char >
 {
 	typedef char &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asChar();	
+		return h.asChar();
 	}
 };
 
@@ -87,10 +87,10 @@ template<>
 struct MDataHandleAccessor< unsigned char >
 {
 	typedef unsigned char &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asUChar();	
+		return h.asUChar();
 	}
 };
 
@@ -98,10 +98,10 @@ template<>
 struct MDataHandleAccessor< short >
 {
 	typedef short &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asShort();	
+		return h.asShort();
 	}
 };
 
@@ -109,10 +109,10 @@ template<>
 struct MDataHandleAccessor< int >
 {
 	typedef int &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asInt();	
+		return h.asInt();
 	}
 };
 
@@ -120,10 +120,10 @@ template<>
 struct MDataHandleAccessor< void* >
 {
 	typedef void *&ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asAddr();	
+		return h.asAddr();
 	}
 };
 
@@ -131,10 +131,10 @@ template<>
 struct MDataHandleAccessor< float >
 {
 	typedef float &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asFloat();	
+		return h.asFloat();
 	}
 };
 
@@ -142,10 +142,10 @@ template<>
 struct MDataHandleAccessor< double >
 {
 	typedef double &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asDouble();	
+		return h.asDouble();
 	}
 };
 
@@ -153,10 +153,10 @@ template<>
 struct MDataHandleAccessor< MDistance >
 {
 	typedef MDistance ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asDistance();	
+		return h.asDistance();
 	}
 };
 
@@ -164,10 +164,10 @@ template<>
 struct MDataHandleAccessor< MAngle >
 {
 	typedef MAngle ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asAngle();	
+		return h.asAngle();
 	}
 };
 
@@ -175,10 +175,10 @@ template<>
 struct MDataHandleAccessor< MTime >
 {
 	typedef MTime ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asTime();	
+		return h.asTime();
 	}
 };
 
@@ -186,10 +186,10 @@ template<>
 struct MDataHandleAccessor< short2 >
 {
 	typedef short2 &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asShort2();	
+		return h.asShort2();
 	}
 };
 
@@ -197,10 +197,10 @@ template<>
 struct MDataHandleAccessor< int2 >
 {
 	typedef int2 &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asInt2();	
+		return h.asInt2();
 	}
 };
 
@@ -208,10 +208,10 @@ template<>
 struct MDataHandleAccessor< float2 >
 {
 	typedef float2 &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asFloat2();	
+		return h.asFloat2();
 	}
 };
 
@@ -219,10 +219,10 @@ template<>
 struct MDataHandleAccessor< double2 >
 {
 	typedef double2 &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asDouble2();	
+		return h.asDouble2();
 	}
 };
 
@@ -230,10 +230,10 @@ template<>
 struct MDataHandleAccessor< short3 >
 {
 	typedef short3 &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asShort3();	
+		return h.asShort3();
 	}
 };
 
@@ -241,10 +241,10 @@ template<>
 struct MDataHandleAccessor< int3 >
 {
 	typedef int3 &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asInt3();	
+		return h.asInt3();
 	}
 };
 
@@ -252,10 +252,10 @@ template<>
 struct MDataHandleAccessor< float3 >
 {
 	typedef float3 &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asFloat3();	
+		return h.asFloat3();
 	}
 };
 
@@ -263,10 +263,10 @@ template<>
 struct MDataHandleAccessor< double3 >
 {
 	typedef double3 &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asDouble3();	
+		return h.asDouble3();
 	}
 };
 
@@ -274,10 +274,10 @@ template<>
 struct MDataHandleAccessor< MVector >
 {
 	typedef MVector &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asVector();	
+		return h.asVector();
 	}
 };
 
@@ -285,10 +285,10 @@ template<>
 struct MDataHandleAccessor< MFloatVector >
 {
 	typedef MFloatVector &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asFloatVector();	
+		return h.asFloatVector();
 	}
 };
 
@@ -296,10 +296,10 @@ template<>
 struct MDataHandleAccessor< MMatrix >
 {
 	typedef MMatrix &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asMatrix();	
+		return h.asMatrix();
 	}
 };
 
@@ -307,10 +307,10 @@ template<>
 struct MDataHandleAccessor< MFloatMatrix >
 {
 	typedef MFloatMatrix &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asFloatMatrix();	
+		return h.asFloatMatrix();
 	}
 };
 
@@ -318,10 +318,10 @@ template<>
 struct MDataHandleAccessor< MString >
 {
 	typedef MString &ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asString();	
+		return h.asString();
 	}
 };
 
@@ -329,10 +329,10 @@ template<>
 struct MDataHandleAccessor< MPxData * >
 {
 	typedef MPxData *ReturnType;
-	
+
 	static ReturnType get( const MDataHandle &h )
 	{
-		return h.asPluginData();	
+		return h.asPluginData();
 	}
 };
 

@@ -40,9 +40,9 @@ import MayaUnitTest
 class DAGPathParametersTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		p1 = IECoreMaya.DAGPathVectorParameter( "n", "d" )
 		p2 = IECoreMaya.DAGPathParameter( "n", "d" )
-		
+
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

@@ -47,40 +47,40 @@ using namespace IECoreMaya;
 class PostLoadCallback::PostLoadCallbackData
 {
 	friend class PostLoadCallback;
-	
+
 	public:
-	
+
 		PostLoadCallbackData(PostLoadCallback* plcb) :  m_plcb( plcb )
-		{				
-			MStatus s;	
-		
+		{
+			MStatus s;
+
 			m_callbacks.append( MSceneMessage::addCallback( MSceneMessage::kAfterOpen, &afterLoad, this, &s ) );
-			assert(s);	
+			assert(s);
 			m_callbacks.append( MSceneMessage::addCallback( MSceneMessage::kAfterImport, &afterLoad, this, &s ) );
-			assert(s);	
+			assert(s);
 			m_callbacks.append( MSceneMessage::addCallback( MSceneMessage::kAfterReference, &afterLoad, this, &s ) );
-			assert(s);	
+			assert(s);
 		}
-		
+
 		~PostLoadCallbackData()
 		{
-			MMessage::removeCallbacks( m_callbacks );			
-		}			
-		
+			MMessage::removeCallbacks( m_callbacks );
+		}
+
 		static void afterLoad(void *clientData)
 		{
 			assert( clientData );
 			PostLoadCallbackData* data = static_cast<PostLoadCallbackData *>( clientData );
-			
+
 			assert( data->m_plcb );
 			data->m_plcb->postLoad();
 		}
-		
+
 	private:
-		
+
 		MCallbackIdArray m_callbacks;
-	
-		PostLoadCallback* m_plcb;				
+
+		PostLoadCallback* m_plcb;
 };
 
 PostLoadCallback::PostLoadCallback()

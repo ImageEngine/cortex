@@ -68,31 +68,31 @@ struct SweepAndPruneTest
 	{
 		typedef std::set< std::pair< unsigned int, unsigned int > > IntersectingBoundIndices;
 		IntersectingBoundIndices m_indices;
-				
-		BoundIterator m_begin;	
+
+		BoundIterator m_begin;
 		unsigned int m_numBoxesPerTest;
-	
+
 		TestCallback( BoundIterator begin, unsigned int numBoxesPerTest ) : m_begin( begin ), m_numBoxesPerTest( numBoxesPerTest )
-		{			
+		{
 		}
-			
+
 		void operator()( BoundIterator b1, BoundIterator b2 )
 		{
-			BOOST_CHECK( b1->intersects( *b2 ) );	
-			
+			BOOST_CHECK( b1->intersects( *b2 ) );
+
 			unsigned int idx0 = std::distance( m_begin, b1 );
 			unsigned int idx1 = std::distance( m_begin, b2 );
 
 			BOOST_CHECK( idx0 < m_numBoxesPerTest );
-			BOOST_CHECK( idx1 < m_numBoxesPerTest );				
+			BOOST_CHECK( idx1 < m_numBoxesPerTest );
 
-			BOOST_CHECK( idx0 != idx1 );				
-#ifndef NDEBUG				
+			BOOST_CHECK( idx0 != idx1 );
+#ifndef NDEBUG
 			unsigned oldSize = m_indices.size();
-#endif				
+#endif
 
-			m_indices.insert( IntersectingBoundIndices::value_type( idx0, idx1 ) );			
-			m_indices.insert( IntersectingBoundIndices::value_type( idx1, idx0 ) );							
+			m_indices.insert( IntersectingBoundIndices::value_type( idx0, idx1 ) );
+			m_indices.insert( IntersectingBoundIndices::value_type( idx1, idx0 ) );
 
 			assert( m_indices.size() == oldSize + 2);
 		}
@@ -103,10 +103,10 @@ struct SweepAndPruneTest
 	{
 		unsigned seed = 42;
 		boost::mt19937 generator( static_cast<boost::mt19937::result_type>( seed ) );
-		
+
 		typedef typename BoxTraits<T>::BaseType VecType;
 		typedef typename VectorTraits<VecType>::BaseType BaseType;
-		
+
 		boost::uniform_real<> uni_dist( 0.0f, 1.0f );
 		boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni( generator, uni_dist );
 
@@ -114,7 +114,7 @@ struct SweepAndPruneTest
 		const unsigned numTests = 10u;
 		const unsigned numBoxesPerTest = 1000u;
 		const unsigned numPostChecksPerTest = numBoxesPerTest;
-		
+
 		for ( unsigned i = 0; i < numTests; i ++ )
 		{
 			std::vector<T> input;
@@ -122,25 +122,25 @@ struct SweepAndPruneTest
 			for ( unsigned n = 0; n < numBoxesPerTest; n++ )
 			{
 				T b;
-				
+
 				VecType corner( uni() * 5.0, uni() * 5.0, uni() * 5.0 );
-				VecType size( uni(), uni(), uni() ); 
-				
+				VecType size( uni(), uni(), uni() );
+
 				b.extendBy( corner );
-				b.extendBy( corner + size );	
-							
+				b.extendBy( corner + size );
+
 				input.push_back( b );
 			}
 
 			typedef typename std::vector<T>::iterator BoundIterator;
-			
+
 			typedef SweepAndPrune<BoundIterator, TestCallback> SAP;
-						
-			SAP sap;			
+
+			SAP sap;
 			typename SAP::Callback cb( input.begin(), numBoxesPerTest );
 
 			sap.intersectingBounds( input.begin(), input.end(), cb, SAP::XZY );
-												
+
 			/// Pick some random box pairs
 			for ( unsigned n = 0; n < numPostChecksPerTest; n++ )
 			{
@@ -149,21 +149,21 @@ struct SweepAndPruneTest
 				do
 				{
 					idx1 = (unsigned int)( uni() * numBoxesPerTest );
-				} 
+				}
 				while ( idx0 == idx1 );
-				
+
 				assert( idx0 != idx1 );
 				assert( idx0 < numBoxesPerTest );
-				assert( idx1 < numBoxesPerTest );				
-				
-				/// If SweepAndPrune hasn't determined this pair is intersecting, verify it actually is not.								
+				assert( idx1 < numBoxesPerTest );
+
+				/// If SweepAndPrune hasn't determined this pair is intersecting, verify it actually is not.
 				if ( cb.m_indices.find( typename TestCallback<BoundIterator>::IntersectingBoundIndices::value_type( idx0, idx1 ) ) == cb.m_indices.end() )
 				{
 					const T &bound0 = input[ idx0 ];
 					const T &bound1 = input[ idx1 ];
-					
+
 					BOOST_CHECK( ! bound0.intersects( bound1 ) );
-				}				
+				}
 			}
 		}
 	}
@@ -177,7 +177,7 @@ struct SweepAndPruneTestSuite : public boost::unit_test::test_suite
 		static boost::shared_ptr<SweepAndPruneTest> instance( new SweepAndPruneTest() );
 
 		add( BOOST_CLASS_TEST_CASE( &SweepAndPruneTest::test<Imath::Box3f>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &SweepAndPruneTest::test<Imath::Box3d>, instance ) );		
+		add( BOOST_CLASS_TEST_CASE( &SweepAndPruneTest::test<Imath::Box3d>, instance ) );
 	}
 
 };

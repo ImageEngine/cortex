@@ -46,21 +46,21 @@ IE_CORE_DECLAREPTR( ToMayaMeshConverter );
 class ToMayaMeshConverter : public ToMayaObjectConverter
 {
 	public:
-	
+
 		ToMayaMeshConverter( IECore::ConstObjectPtr object );
-		
+
 	protected:
-	
+
 		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const;
-		
+
 		typedef ToMayaObjectConverterDescription<ToMayaMeshConverter> Description;
 		static Description g_meshDataDescription;
 		static Description g_meshDescription;
-		
+
 	private:
-	
-		void addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, IECore::ConstMeshPrimitivePtr mesh, const std::string &sPrimVarName, const std::string &tPrimVarName, MString *uvSetName = 0 ) const; 			
-		
+
+		void addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, IECore::ConstMeshPrimitivePtr mesh, const std::string &sPrimVarName, const std::string &tPrimVarName, MString *uvSetName = 0 ) const;
+
 };
 
 }

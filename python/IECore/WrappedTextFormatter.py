@@ -41,46 +41,46 @@ import sys
 #
 # \ingroup python
 class WrappedTextFormatter( Formatter.Formatter ) :
-	
+
 	def __init__( self, outputFile, wrapWidth = 80 ) :
-	
+
 		self.__file = outputFile
 		self.__wrapWidth = wrapWidth
 		self.__indentation = 0
 		self.__numNewLines = -1
-				
+
 	def heading( self, name ) :
-	
+
 		name = name.strip()
-	
+
 		self.__blankLine()
 		self.__indent()
 		self.__output( str( name ) + "\n" )
 		self.__indent()
 		self.__output( "".rjust( len( name ), "-" ) + "\n\n" )
-		
+
 		return self
-		
+
 	def paragraph( self, text ) :
-	
+
 		self.__blankLine()
 		lines = StringUtil.wrap( str( text ).rstrip(), self.__wrapWidth ).split( "\n" )
 		for line in lines :
 			self.__indent()
 			self.__output( line + "\n" )
-		
+
 	def indent( self ) :
-	
+
 		self.__indentation += 1
 		return self
-		
+
 	def unindent( self ) :
-	
+
 		self.__indentation -= 1
 		return self
 
 	def __output( self, text ) :
-	
+
 		self.__file.write( text )
 		self.__numNewLines = 0
 		while self.__numNewLines < len( text ) :
@@ -89,17 +89,17 @@ class WrappedTextFormatter( Formatter.Formatter ) :
 				self.__numNewLines += 1
 			else :
 				break
-				
+
 		#sys.stdout.write( "OUTPUT " + str( self.__numNewLines ) + "\n" )
-					
+
 	def __indent( self ) :
-	
+
 		self.__output( "".rjust( self.__indentation * 4 ) )
 
 	def __blankLine( self ) :
-	
+
 		if self.__numNewLines == -1 :
 			return
-							
+
 		for i in range( self.__numNewLines, 2 ) :
 			self.__file.write( "\n" )

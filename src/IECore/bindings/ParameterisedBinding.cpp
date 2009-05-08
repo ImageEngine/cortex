@@ -49,7 +49,7 @@ class ParameterisedWrap : public Parameterised, public Wrapper<Parameterised>
 	public :
 		ParameterisedWrap( PyObject *self, const std::string &name, const std::string &description ) : Parameterised( name, description ), Wrapper<Parameterised>( self, this ) {};
 		ParameterisedWrap( PyObject *self, const std::string &name, const std::string &description, CompoundParameterPtr compoundParameter ) : Parameterised( name, description, compoundParameter ), Wrapper<Parameterised>( self, this ) {};
-};		
+};
 IE_CORE_DECLAREPTR( ParameterisedWrap );
 
 static ParameterPtr parameterisedGetItem( Parameterised &o, const std::string &n )
@@ -75,7 +75,7 @@ static ParameterPtr parameterisedGetAttr( Parameterised &o, const std::string &n
 void bindParameterised()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<Parameterised, ParameterisedWrapPtr>()
 		.def( init< const std::string, const std::string>( ( arg( "name" ), arg( "description") ) ) )
 		.def( init< const std::string, const std::string, CompoundParameterPtr >( ( arg( "name" ), arg( "description") , arg( "compoundParameter") ) ) )
@@ -87,7 +87,7 @@ void bindParameterised()
 		.def( "__getattr__", &parameterisedGetAttr )
 		.def( "userData", (CompoundObjectPtr (Parameterised::*)())&Parameterised::userData )
 	;
-	
+
 }
 
 } // namespace IECore

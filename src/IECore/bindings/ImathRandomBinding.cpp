@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -50,7 +50,7 @@ using namespace boost::python;
 using namespace boost;
 using namespace Imath;
 
-namespace IECore 
+namespace IECore
 {
 
 template<typename R>
@@ -77,7 +77,7 @@ struct Vectoriser
 	typedef typename ResultType::Ptr ResultTypePtr;
 	typedef typename ResultType::ValueType ValueType;
 	typedef typename ValueType::iterator Iterator;
-	
+
 	static ResultTypePtr vectorise( R &r, size_t size )
 	{
 		ResultTypePtr result = new ResultType;
@@ -89,7 +89,7 @@ struct Vectoriser
 		}
 		return result;
 	};
-	
+
 	template<typename S>
 	static ResultTypePtr vectoriseSeededT( R &r, typename S::ConstPtr seeds )
 	{
@@ -105,7 +105,7 @@ struct Vectoriser
 		}
 		return result;
 	}
-	
+
 	static ResultTypePtr vectoriseSeeded( R &r, ConstDataPtr seeds )
 	{
 		switch( seeds->typeId() )
@@ -117,7 +117,7 @@ struct Vectoriser
 			case IntVectorDataTypeId :
 				return vectoriseSeededT<IntVectorData>( r, static_pointer_cast<const IntVectorData>( seeds ) );
 			case UIntVectorDataTypeId :
-				return vectoriseSeededT<UIntVectorData>( r, static_pointer_cast<const UIntVectorData>( seeds ) );		
+				return vectoriseSeededT<UIntVectorData>( r, static_pointer_cast<const UIntVectorData>( seeds ) );
 			default :
 				throw Exception( "Unsupported type for seeds parameter." );
 		}
@@ -128,7 +128,7 @@ struct Vectoriser
 
 template<typename T, typename F>
 void bindRand( const char *className )
-{	
+{
 
 	class_<T>( className )
 		.def( init<unsigned long int>() )
@@ -200,7 +200,7 @@ void bindRand( const char *className )
 		.def( "cosineHemispheredVector", &Vectoriser<T, V3d, &cosineHemisphereRand<V3d, T> >::vectoriseSeeded )
 		.def( "cosineHemispheredfVector", &Vectoriser<T, V3d, &cosineHemisphereRand<V3d, T> >::vectorise )
 	;
-	
+
 }
 
 void bindImathRandom()

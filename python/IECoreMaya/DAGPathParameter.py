@@ -44,7 +44,7 @@ class DAGPathParameter( IECore.StringParameter ):
 
 	## \todo Use Enum for this
 	class CheckType:
-		
+
 		DontCare = 0
 		MustExist = 1
 		MustNotExist = 2
@@ -57,9 +57,9 @@ class DAGPathParameter( IECore.StringParameter ):
 	typeRegex - regular expression used on parameter validation that validates based on the maya node type. Disable filtering using None.
 	typeRegexDescription - human readable description for the regular expression used to filter node types. It's used when the validation fails.
 	"""
-	def __init__( self, name, description, defaultValue = "", allowEmptyString = True, 
+	def __init__( self, name, description, defaultValue = "", allowEmptyString = True,
 		check = CheckType.DontCare, typeRegex = None, typeRegexDescription = "", presets = (), presetsOnly = False, userData = IECore.CompoundObject() ) :
-		
+
 		IECore.StringParameter.__init__( self, name, description, defaultValue, presets, presetsOnly, userData )
 
 		self.__allowEmptyString = allowEmptyString
@@ -95,12 +95,12 @@ class DAGPathParameter( IECore.StringParameter ):
 		return re.compile( "^(\|?[^\t\n\r\f\v\|]+)+\|?$" )
 
 	"""
-	Returns (True, "") only if the value is a correct DAG path string and also checks that the DAG node exists or doesn't exist 
+	Returns (True, "") only if the value is a correct DAG path string and also checks that the DAG node exists or doesn't exist
 	based on the CheckType passed to the constructor.
 	Otherwise returns (False, errorMessage).
 	"""
 	def valueValid( self, value ) :
-	
+
 		v = IECore.StringParameter.valueValid( self, value )
 		if not v[0] :
 			return v
@@ -136,20 +136,20 @@ class DAGPathParameter( IECore.StringParameter ):
 
 			if not exist:
 				return False, "DAG node %s does not exist" % value.value
-			
+
 		elif self.mustNotExist :
 
 			if exist:
 				return False, "DAG node %s already exists" % value.value
 
-		return True, ""	
+		return True, ""
 
 	"""
 	Sets the internal StringData value from the given MDagPath object
-	"""	
+	"""
 	def setDAGPathValue( self, dagNode ) :
 		self.setValue( IECore.StringData( dagNode.fullPathName() ) )
-	
+
 	"""
 	Returns a MDagPath for the current node.
 	Note that this can return None if check is DontCare and no matching node exists in Maya.

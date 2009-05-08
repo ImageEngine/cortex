@@ -202,7 +202,7 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, double x, Ob
 
 		default :
 
-			// unknown types.			
+			// unknown types.
 			return false;
 	}
 	return true;
@@ -399,7 +399,7 @@ bool ObjectInterpolator( const ObjectPtr &y0, const ObjectPtr & y1, const Object
 
 		default :
 
-			// unknown types.			
+			// unknown types.
 			return false;
 	}
 	return true;

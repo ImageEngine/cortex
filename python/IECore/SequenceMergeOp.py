@@ -41,20 +41,20 @@ from IECore import *
 class SequenceMergeOp( Op ) :
 
 	def __init__( self, name, description, extensions = [] ) :
-	
+
 		assert( type( extensions ) is list )
-	
+
 		Op.__init__(
-			self, 
-			name, 
-			description, 
-			StringVectorParameter( 
+			self,
+			name,
+			description,
+			StringVectorParameter(
 				name = "result",
 				description = "The names of the files created",
 				defaultValue = StringVectorData([])
 			)
 		)
-				
+
 		self.parameters().addParameters(
 			[
 				FileSequenceParameter(
@@ -76,37 +76,37 @@ class SequenceMergeOp( Op ) :
 				FileSequenceParameter(
 					name = "outputFileSequence",
 					description = "The output file sequence to generate. For each frame in this sequence, the corresponding inputs for that frame are merged",
-					defaultValue = "",					
+					defaultValue = "",
 					allowEmptyString = False,
 					check = FileSequenceParameter.CheckType.MustNotExist,
 				),
 			]
 		)
-	
+
 	# Derived classes should override this method, and merge the files given in "fileName1" and "fileName2" into "outputFileName",
 	# returning True on success or False on failure.
 	def _merge( self, fileName1, fileName2, outputFileName ) :
-	
-		pass	
-		
+
+		pass
+
 	def doOperation( self, args ) :
-	
+
 		fileSequence1 = self.parameters()['fileSequence1'].getFileSequenceValue()
 		fileSequence2 = self.parameters()['fileSequence2'].getFileSequenceValue()
 		outputFileSequence = self.parameters()['outputFileSequence'].getFileSequenceValue()
-		
+
 		resultFiles = []
-				
+
 		for frame in outputFileSequence.frameList.asList() :
-		
+
 			fileName1 = fileSequence1.fileNameForFrame( frame )
 			fileName2 = fileSequence2.fileNameForFrame( frame )
 			outputFileName = outputFileSequence.fileNameForFrame( frame )
-		
+
 			if self._merge( fileName1, fileName2, outputFileName ) :
-			
+
 				resultFiles.append( outputFileName )
-			
-		return StringVectorData( resultFiles )	
+
+		return StringVectorData( resultFiles )
 
 registerRunTimeTyped( SequenceMergeOp, 100024, Op )

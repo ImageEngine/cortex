@@ -49,8 +49,8 @@ class OptionalCompoundParameter( IECore.CompoundParameter ):
 		self.__obligatoryParameterNames = None
 
 	## Defines a list of parameter names that must be validated.
-	# The non listed parameters are treated as 
-	# optional. That means they can be set to NullObject. The obligatoryParameterNames can also be None. 
+	# The non listed parameters are treated as
+	# optional. That means they can be set to NullObject. The obligatoryParameterNames can also be None.
 	# In that case the validation used is from CompoundParameter
 	def setObligatoryParameterNames( self, obligatoryParameterNames = None ):
 		self.__obligatoryParameterNames = set( obligatoryParameterNames )
@@ -68,7 +68,7 @@ class OptionalCompoundParameter( IECore.CompoundParameter ):
 		return isinstance( self[ paramName ].getValue(), IECore.NullObject )
 
 	## Overwrites default validation method from CompoundParameter.
-	# This function does not validate undefined parameters ( values equal to NullObject ) not listed in the 
+	# This function does not validate undefined parameters ( values equal to NullObject ) not listed in the
 	# obligatory parameter list.
 	def valueValid( self, value ) :
 

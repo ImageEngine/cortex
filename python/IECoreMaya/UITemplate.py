@@ -40,13 +40,13 @@ import maya.cmds
 class UITemplate :
 
 	def __init__( self, name ) :
-	
+
 		self.__name = name
-		
+
 	def __enter__( self ) :
-	
+
 		maya.cmds.setUITemplate( self.__name, pushTemplate=True )
-		
+
 	def __exit__( self, type, value, traceBack) :
-	
+
 		maya.cmds.setUITemplate( self.__name, popTemplate=True )

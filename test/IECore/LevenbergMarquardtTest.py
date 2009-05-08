@@ -39,38 +39,38 @@ import IECore
 class LevenbergMarquardtTest( unittest.TestCase ) :
 
 	class Fn( IECore.LevenbergMarquardtd.ErrorFn ) :
-	
+
 		def __init__( self ) :
-		
+
 			IECore.LevenbergMarquardtd.ErrorFn.__init__( self )
-			
+
 		def numErrors( self ) :
-		
+
 			return 10
-			
+
 		def computeErrors( self, parameters, errors ) :
-			
+
 			for i in xrange( 0, self.numErrors() ) :
-			
-				errors[i] = math.fabs(  
+
+				errors[i] = math.fabs(
 					math.pow( i, parameters[0] ) -
 					math.pow( i, 2.0 )
 				)
 
 	# Simple test of binding. More complete tests present in C++ test suite.
 	def test( self ) :
-		
+
 		lm = IECore.LevenbergMarquardtd()
-		
+
 		parameters = IECore.DoubleVectorData()
 		parameters.append( 1.0 )
-		 
+
 		fn = LevenbergMarquardtTest.Fn()
-		
+
 		lm.solve( parameters, fn )
-				
+
 		self.assertAlmostEqual( parameters[0], 2.0 )
-		
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

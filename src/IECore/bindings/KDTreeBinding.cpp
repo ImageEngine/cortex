@@ -54,7 +54,7 @@ namespace IECore
 
 template<typename T>
 void bindKDTree(const char *bindName);
-	
+
 void bindKDTree()
 {
 	bindKDTree< V2fTree >("V2fTree");
@@ -68,78 +68,78 @@ struct KDTreeWrapper
 {
 	typedef TypedData<std::vector<typename T::Point> > PointData;
 	IE_CORE_DECLAREPTR( PointData )
-	
+
 	T* m_tree;
-	
+
 	PointDataPtr m_points;
-		
+
 	KDTreeWrapper(PointDataPtr points)
 	{
 		m_points = points->copy();
 		m_tree = new T(m_points->readable().begin(), m_points->readable().end());
 	}
-	
+
 	virtual ~KDTreeWrapper()
 	{
 		assert(m_tree);
 		delete m_tree;
 	}
-	
+
 	long nearestNeighbour( const typename T::Point &p)
 	{
 		assert(m_tree);
-		
+
 		typename T::Iterator it = m_tree->nearestNeighbour(p);
-		
+
 		return std::distance( m_points->readable().begin(), it );
 	}
-	
+
 	IntVectorDataPtr nearestNeighbours(const typename T::Point &p, typename T::Point::BaseType r)
 	{
 		assert(m_tree);
-		
+
 		typedef std::vector<typename T::Iterator> PointArray;
-		
+
 		PointArray points;
-		
+
 		unsigned int num = m_tree->nearestNeighbours(p, r, points);
-		
+
 		IntVectorDataPtr indices = new IntVectorData();
-		
+
 		indices->writable().reserve( num );
-		
+
 		for (typename PointArray::const_iterator it = points.begin(); it != points.end(); ++it)
 		{
 			indices->writable().push_back(  std::distance( m_points->readable().begin(), *it ) );
 		}
-		
+
 		return indices;
-		
+
 	}
-	
+
 	IntVectorDataPtr nearestNNeighbours(const typename T::Point &p, unsigned int numNeighbours)
 	{
 		assert(m_tree);
-		
+
 		typedef std::vector<typename T::Iterator> PointArray;
-		
+
 		PointArray points;
-		
+
 		unsigned int num = m_tree->nearestNNeighbours(p, numNeighbours, points);
-		
+
 		IntVectorDataPtr indices = new IntVectorData();
-		
+
 		indices->writable().reserve( num );
-		
+
 		for (typename PointArray::const_iterator it = points.begin(); it != points.end(); ++it)
 		{
 			indices->writable().push_back(  std::distance( m_points->readable().begin(), *it ) );
 		}
-		
+
 		return indices;
-		
-	}	
-	
+
+	}
+
 };
 
 

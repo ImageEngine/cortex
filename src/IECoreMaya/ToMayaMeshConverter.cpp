@@ -56,18 +56,18 @@ using namespace IECoreMaya;
 ToMayaMeshConverter::Description ToMayaMeshConverter::g_meshDataDescription( IECore::MeshPrimitive::staticTypeId(), MFn::kMeshData );
 ToMayaMeshConverter::Description ToMayaMeshConverter::g_meshDescription( IECore::MeshPrimitive::staticTypeId(), MFn::kMesh );
 
-ToMayaMeshConverter::ToMayaMeshConverter( IECore::ConstObjectPtr object ) 
+ToMayaMeshConverter::ToMayaMeshConverter( IECore::ConstObjectPtr object )
 : ToMayaObjectConverter( "ToMayaMeshConverter", "Converts IECore::MeshPrimitive objects to a Maya object.", object)
 {
 }
 
 void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, IECore::ConstMeshPrimitivePtr mesh, const std::string &sPrimVarName, const std::string &tPrimVarName, MString *uvSetName ) const
-{	
+{
 	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.find( sPrimVarName );
 	bool haveS = sIt != mesh->variables.end();
-	IECore::PrimitiveVariableMap::const_iterator tIt = mesh->variables.find( tPrimVarName );	
+	IECore::PrimitiveVariableMap::const_iterator tIt = mesh->variables.find( tPrimVarName );
 	bool haveT = tIt != mesh->variables.end();
-	
+
 	if ( haveS && haveT )
 	{
 		if ( sIt->second.interpolation != IECore::PrimitiveVariable::FaceVarying )
@@ -93,9 +93,9 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 		}
 
 		/// \todo Employ some M*Array converters to simplify this
-		int numUVs = mesh->variableSize( IECore::PrimitiveVariable::FaceVarying );											
+		int numUVs = mesh->variableSize( IECore::PrimitiveVariable::FaceVarying );
 
-		MFloatArray uArray;												
+		MFloatArray uArray;
 		IECore::ConstFloatVectorDataPtr u = IECore::runTimeCast<const IECore::FloatVectorData>(sIt->second.data);
 
 		if ( !u )
@@ -118,7 +118,7 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 		assert( (int)v->readable().size() == numUVs );
 		vArray.setLength( numUVs );
 
-	
+
 		/// \todo The FromMayaMeshConverter inverts the UVs - shouldn't we do the same here?
 		/// Whatever we do we need to ensure that cortex treats UV orientation consistently everywhere.
 		/// This means in the ImagePrimitive, the Renderer classes and the ImagePrimitiveEvaluator to name
@@ -128,7 +128,7 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 		for ( int i = 0; i < numUVs; i++)
 		{
 			uArray[i] = u->readable()[i];
-			vArray[i] = v->readable()[i];					
+			vArray[i] = v->readable()[i];
 			uvIds[i] = i;
 		}
 
@@ -148,14 +148,14 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 		if ( !s )
 		{
 			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to assign UVs." );
-			return;			
-		}		
+			return;
+		}
 	}
-	else if ( haveS )		
+	else if ( haveS )
 	{
 		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "Primitive variable \"%s\" found, but not \"%s\"." ) % sPrimVarName % tPrimVarName );
 	}
-	else if ( haveT )		
+	else if ( haveT )
 	{
 		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "Primitive variable \"%s\" found, but not \"%s\"." ) % tPrimVarName % sPrimVarName );
 	}
@@ -168,22 +168,22 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MStatus s;
-	
+
 	IECore::ConstMeshPrimitivePtr mesh = IECore::runTimeCast<const IECore::MeshPrimitive>( from );
 	assert( mesh );
-	
+
 	if ( !mesh->arePrimitiveVariablesValid() )
 	{
 		return false;
 	}
-		
+
 	MFloatPointArray vertexArray;
 	MIntArray polygonCounts;
 	MIntArray polygonConnects;
-	
+
 	MFnMesh fnMesh;
-	
-	int numVertices = 0;	
+
+	int numVertices = 0;
 	IECore::PrimitiveVariableMap::const_iterator it = mesh->variables.find("P");
 	if ( it != mesh->variables.end() )
 	{
@@ -197,7 +197,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 			for (int i = 0; i < numVertices; i++)
 			{
 				vertexArray[i] = IECore::convert<MFloatPoint, Imath::V3f>( p->readable()[i] );
-			}	
+			}
 		}
 		else
 		{
@@ -205,32 +205,32 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 			if (p)
 			{
 				numVertices = p->readable().size();
-					
+
 				vertexArray.setLength( numVertices );
 				for (int i = 0; i < numVertices; i++)
 				{
 					vertexArray[i] = IECore::convert<MFloatPoint, Imath::V3d>( p->readable()[i] );
-				}	
+				}
 			}
 			else
-			{	
+			{
 				// "P" is not convertible to an array of "points"
 				return false;
 			}
-		}	
+		}
 	}
 
-						
+
 	IECore::ConstIntVectorDataPtr verticesPerFace = mesh->verticesPerFace();
 	assert( verticesPerFace );
 	int numPolygons = verticesPerFace->readable().size();
-	
+
 	polygonCounts.setLength( numPolygons );
 	for (int i = 0; i < numPolygons; i++)
 	{
 		polygonCounts[i] = verticesPerFace->readable()[i];
 	}
-	
+
 	IECore::ConstIntVectorDataPtr vertexIds = mesh->vertexIds();
 	assert( vertexIds );
 	int numPolygonConnects = vertexIds->readable().size();
@@ -239,20 +239,20 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 	{
 		polygonConnects[i] = vertexIds->readable()[i];
 	}
-			
+
 	fnMesh.create( numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, to, &s );
-	
+
 	if (!s)
-	{			
+	{
 		return false;
 	}
-	
+
 	it = mesh->variables.find("N");
 	if ( it != mesh->variables.end() )
 	{
 		if (it->second.interpolation == IECore::PrimitiveVariable::FaceVarying )
-		{	
-			/// \todo Employ some M*Array converters to simplify this		
+		{
+			/// \todo Employ some M*Array converters to simplify this
 			MFloatVectorArray vertexNormalsArray;
 			IECore::ConstV3fVectorDataPtr n = IECore::runTimeCast<const IECore::V3fVectorData>(it->second.data);
 			if (n)
@@ -263,9 +263,9 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				for (int i = 0; i < numVertexNormals; i++)
 				{
 					vertexNormalsArray[i] = IECore::convert<MFloatVector, Imath::V3f>( n->readable()[i] );
-				}	
+				}
 
-				fnMesh.setNormals( vertexNormalsArray );			
+				fnMesh.setNormals( vertexNormalsArray );
 			}
 			else
 			{
@@ -286,30 +286,30 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				else
 				{
 					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"N\" has unsupported type \"%s\"." ) % it->second.data->typeName() );
-				}				
-			}			
+				}
+			}
 		}
 		else
 		{
 			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "PrimitiveVariable \"N\" has unsupported interpolation (expected FaceVarying)." );
-		}	
+		}
 	}
-		
-	/// Add default UV set	
+
+	/// Add default UV set
 	addUVSet( fnMesh, polygonCounts, mesh, "s", "t" );
-	
+
 	/// Add other UV sets
 	std::set< std::string > uvSets;
 	for ( it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
 	{
 		const std::string &sName = it->first;
-		
+
 		size_t suffixOffset = sName.rfind( "_s" );
-		
+
 		if ( ( suffixOffset != std::string::npos) && ( suffixOffset == sName.length() - 2 ) )
 		{
 			std::string uvSetNameStr = sName.substr( 0, suffixOffset );
-			
+
 			if ( uvSetNameStr.size() )
 			{
 				MString uvSetName = uvSetNameStr.c_str();
@@ -317,35 +317,35 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 
 				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, &uvSetName );
 
-				uvSets.insert( uvSetNameStr );						
+				uvSets.insert( uvSetNameStr );
 			}
 		}
 	}
-	
+
 	/// We do the search again, but looking for primvars ending "_t", so we can catch cases where either "UVSETNAME_s" or "UVSETNAME_t" is present, but not both, taking care
 	/// not to attempt adding any duplicate sets
 	for ( it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
 	{
 		const std::string &tName = it->first;
-		
+
 		size_t suffixOffset = tName.rfind( "_t" );
-		
+
 		if ( ( suffixOffset != std::string::npos) && ( suffixOffset == tName.length() - 2 ) )
 		{
 			std::string uvSetNameStr = tName.substr( 0, suffixOffset );
-			
+
 			if ( uvSetNameStr.size() && uvSets.find( uvSetNameStr ) == uvSets.end() )
-			{			
+			{
 				MString uvSetName = uvSetNameStr.c_str();
 				std::string sName = uvSetNameStr + "_s";
-			
+
 				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, &uvSetName );
-				uvSets.insert( uvSetNameStr );	
+				uvSets.insert( uvSetNameStr );
 			}
 		}
 	}
-	
+
 	/// \todo Other primvars, e.g. vertex color ("Cs")
-	
+
 	return true;
 }

@@ -48,24 +48,24 @@ class Warp : public DD::Image::Iop
 {
 
 	public :
-	
+
 		Warp( Node *node );
 		virtual ~Warp();
-	
+
 	protected :
-	
+
 		/// Must be implemented by subclasses to return the pixel position from the
 		/// input that should be used to fill the outputPixel. This function will
 		/// be called from multiple threads.
 		virtual Imath::V2f warp( const Imath::V2f &outputPixel ) const = 0;
-	
+
 		virtual void knobs( DD::Image::Knob_Callback f );
 		virtual void _validate( bool forReal );
 		virtual void _request( int x, int y, int r, int t, const DD::Image::ChannelSet &channels, int count );
 		virtual void engine( int y, int x, int r, const DD::Image::ChannelSet &channels, DD::Image::Row &out );
 
 	private :
-	
+
 		DD::Image::ChannelSet m_channels;
 
 };

@@ -60,17 +60,17 @@ IECore::ObjectPtr FromMayaArrayDataConverter<F,T>::doConversion( const MObject &
 	{
 		return 0;
 	}
-	
+
 	F array = fnArrayData.array();
 	typename T::Ptr resultData = new T;
 	typename T::ValueType &resultArray = resultData->writable();
-	
+
 	resultArray.resize( array.length() );
 	for( unsigned int i=0; i<resultArray.size(); i++ )
 	{
 		resultArray[i] = IECore::convert<typename T::ValueType::value_type, typename MArrayTraits<F>::ValueType>( array[i] );
 	}
-	
+
 	return resultData;
 }
 

@@ -38,7 +38,7 @@ from IECore import *
 class TestTypedDataAsObject( unittest.TestCase ) :
 
 	def testSimpleCopy( self ) :
-	
+
 		o = IntData( 1 )
 		self.assertEqual( o.value, 1 )
 		self.assertEqual( o, o )
@@ -48,58 +48,58 @@ class TestTypedDataAsObject( unittest.TestCase ) :
 		oo = o.copy()
 		self.assertEqual( oo.value, 2 )
 		self.assertEqual( o, oo )
-		
+
 		o.value = 3
 		self.assertEqual( o.value, 3 )
 		self.assertEqual( oo.value, 2 )
 		self.assertNotEqual( o, oo )
-		
+
 		oo.value = 4
 		self.assertEqual( o.value, 3 )
 		self.assertEqual( oo.value, 4 )
 		self.assertNotEqual( o, oo )
-		
+
 	def testCompoundCopy( self ) :
-	
+
 		"""CompoundData must specialise the copyFrom() method
 		to ensure that a genuine deep copy of the data is produced.
 		This tests that."""
-	
+
 		a = IntData( 2 )
 		self.assertEqual( a.value, 2 )
 		self.assertEqual( a, a )
-		
+
 		c = CompoundData()
 		c["A"] = a
 		self.assertEqual( c["A"].value, 2 )
-		
+
 		a.value = 3
 		self.assertEqual( a.value, 3 )
 		self.assertEqual( c["A"].value, 3 )
-		
+
 		self.assert_( a.isSame( c["A"] ) )
-		
+
 		cc = c.copy()
-		
+
 		self.assert_( a.isSame( c["A"] ) )
 		self.assert_( not a.isSame( cc["A"] ) )
 		self.assertEqual( c, cc )
-		
+
 		a.value = 10
 		self.assertEqual( a.value, 10 )
 		self.assertEqual( c["A"].value, 10 )
 		self.assertEqual( cc["A"].value, 3 )
 		self.assertNotEqual( c, cc )
-		
+
 		cc["A"].value = 100
 		self.assertEqual( cc["A"].value, 100 )
 		self.assertEqual( c["A"].value, 10 )
 		self.assertEqual( a.value, 10 )
 		self.assertNotEqual( c, cc )
-		
+
 		a.value = 100
 		self.assertEqual( c, cc )
-		
+
 
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()

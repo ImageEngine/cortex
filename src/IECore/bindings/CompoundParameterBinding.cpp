@@ -49,7 +49,7 @@ namespace IECore
 class CompoundParameterWrap : public CompoundParameter, public Wrapper< CompoundParameter >
 {
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( CompoundParameterWrap );
 
 	protected:
@@ -79,7 +79,7 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 	public :
 
 		CompoundParameterWrap( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = 0 )
-			:	CompoundParameter( name, description, userData ), Wrapper< CompoundParameter >( self, this ) 
+			:	CompoundParameter( name, description, userData ), Wrapper< CompoundParameter >( self, this )
 		{
 			addParametersFromMembers( members );
 		}
@@ -100,7 +100,7 @@ static ParameterPtr compoundParameterGetItem( CompoundParameter &o, const char *
 	{
 		return it->second;
 	}
-	
+
 	throw Exception( std::string("Bad index: ") + n );
 }
 
@@ -163,18 +163,18 @@ static boost::python::list parameterPath( CompoundParameter &o, ConstParameterPt
 void bindCompoundParameter()
 {
 	using boost::python::arg ;
-	
+
 	RunTimeTypedClass<CompoundParameter, CompoundParameterWrap::Ptr>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional<const list &, CompoundObjectPtr > >
-			( 
+			(
 				(
 					arg( "name" ) = std::string(""),
 					arg( "description" ) = std::string(""),
 					arg( "members" ) = list(),
 					arg( "userData" ) = CompoundObject::Ptr( 0 )
 				)
-			) 
+			)
 		)
 		.def( "__len__", &compoundParameterLen )
 		.def( "__getitem__", &compoundParameterGetItem )
@@ -189,9 +189,9 @@ void bindCompoundParameter()
 		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( CompoundParameter )
 		.def( "insertParameter", &CompoundParameter::insertParameter )
 		.def( "removeParameter", (void (CompoundParameter::*)(ParameterPtr)) &CompoundParameter::removeParameter )
-		.def( "removeParameter", (void (CompoundParameter::*)(const std::string&)) &CompoundParameter::removeParameter )				
-		.def( "parameter", (ParameterPtr (CompoundParameter::*)(const std::string&)) &CompoundParameter::parameter<Parameter> )				
-		.def( "parameterPath", &parameterPath )				
+		.def( "removeParameter", (void (CompoundParameter::*)(const std::string&)) &CompoundParameter::removeParameter )
+		.def( "parameter", (ParameterPtr (CompoundParameter::*)(const std::string&)) &CompoundParameter::parameter<Parameter> )
+		.def( "parameterPath", &parameterPath )
 	;
 
 }

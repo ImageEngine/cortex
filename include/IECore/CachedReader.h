@@ -66,7 +66,7 @@ class CachedReader : public RefCounted
 		/// given paths and load them. Up to maxMemory bytes of
 		/// memory will be used to cache loading.
 		CachedReader( const SearchPath &paths, size_t maxMemory );
-		
+
 		/// Searches for the given file and loads it if found.
 		/// Throws an exception in case it cannot be found or no suitable Reader
 		/// exists. The Object is returned with only const access as
@@ -74,26 +74,26 @@ class CachedReader : public RefCounted
 		/// call the copy() function on it if you wish to have something
 		/// you are free to modify.
 		ConstObjectPtr read( const std::string &file );
-		
+
 		/// Returns the amount of memory currently occupied by
 		/// the cache.
 		size_t memoryUsage() const;
 		/// Frees all memory used by the cache.
 		void clear();
-		
+
 		/// Returns the SearchPath in use.
 		const SearchPath &getSearchPath() const;
 		/// Changes the SearchPath used to find files. Note
 		/// that this calls clear(), as changing the paths
 		/// potentially invalidates the contents of the cache.
 		void setSearchPath( const SearchPath &paths );
-		
+
 		/// Returns the maximum amount of memory the cache will use.
 		size_t getMaxMemory() const;
 		/// Sets the maximum amount of memory the cache will use. If this
 		/// is less than memoryUsage() then cache removals will result.
 		void setMaxMemory( size_t maxMemory );
-		
+
 		/// Returns a static CachedReader instance to be used by anything
 		/// wishing to share it's cache with others. It makes sense to use
 		/// this wherever possible to conserve memory. This initially
@@ -103,25 +103,25 @@ class CachedReader : public RefCounted
 		/// by the ConfigLoader, to avoid multiple clients fighting over the
 		/// same set of settings.
 		static CachedReaderPtr defaultCachedReader();
-		
+
 	private :
-	
+
 		struct CacheFn
 		{
 			typedef size_t Cost;
 			SearchPath m_paths;
 			std::set<std::string> m_unreadables;
-			
+
 			// Returns true if the "data" and "cost" arguments were computed from the "key", otherwise returns false
 			bool get( const std::string &key, ConstObjectPtr &data, Cost &cost );
 		};
-	
+
 		typedef LRUCache< std::string, ConstObjectPtr, CacheFn> Cache;
-		
+
 		CacheFn m_fn;
-		
+
 		Cache m_cache;
-		
+
 };
 
 IE_CORE_DECLAREPTR( CachedReader )

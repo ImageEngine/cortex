@@ -46,22 +46,22 @@ namespace IECore
 
 void bindImageCompositeOp()
 {
-	
+
 	object o = RunTimeTypedClass<ImageCompositeOp>()
 		.def( init<>() )
 	;
-	
+
 	scope s( o );
-	
+
 	enum_< ImageCompositeOp::Operation >( "Operation" )
-		.value( "Over", ImageCompositeOp::Over )	
+		.value( "Over", ImageCompositeOp::Over )
 		.value( "Max", ImageCompositeOp::Max )
 		.value( "Min", ImageCompositeOp::Min )
 		.value( "Multiply", ImageCompositeOp::Multiply )
 	;
-	
+
 	enum_< ImageCompositeOp::InputMode >( "InputMode" )
-		.value( "Premultiplied", ImageCompositeOp::Premultiplied )	
+		.value( "Premultiplied", ImageCompositeOp::Premultiplied )
 		.value( "Unpremultiplied", ImageCompositeOp::Unpremultiplied )
 	;
 

@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings 
+// This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
@@ -44,7 +44,7 @@ using namespace boost::python;
 using namespace Imath;
 using namespace std;
 
-namespace IECore 
+namespace IECore
 {
 
 #define REPR_SPECIALISATION( TYPE )																		\
@@ -96,7 +96,7 @@ void bindCubicBasis( const char *name )
 		.def( "derivative", (V2f (T::*) ( float, const V2f &, const V2f &, const V2f &, const V2f &)const)&T::template derivative<V2f> )
 		.def( "derivative", (V3f (T::*) ( float, const V3f &, const V3f &, const V3f &, const V3f &)const)&T::template derivative<V3f> )
 		.def( "derivative", (V2d (T::*) ( double, const V2d &, const V2d &, const V2d &, const V2d &)const)&T::template derivative<V2d> )
-		.def( "derivative", (V3d (T::*) ( double, const V3d &, const V3d &, const V3d &, const V3d &)const)&T::template derivative<V3d> )				
+		.def( "derivative", (V3d (T::*) ( double, const V3d &, const V3d &, const V3d &, const V3d &)const)&T::template derivative<V3d> )
 		.def( self==self )
 		.def( self!=self )
 		.def( "linear", &T::linear, return_value_policy<copy_const_reference>() ).staticmethod( "linear" )

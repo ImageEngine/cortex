@@ -44,22 +44,22 @@ namespace IECore
 class ObjectVector : public Object
 {
 	public:
-	
+
 		ObjectVector();
 		virtual ~ObjectVector();
-		
+
 		IE_CORE_DECLAREOBJECT( ObjectVector, Object );
-		
+
 		typedef std::vector<ObjectPtr> MemberContainer;
-		
+
 		MemberContainer &members();
 		const MemberContainer &members() const;
-		
+
 	private :
-	
+
 		MemberContainer m_members;
 
-		static const unsigned int m_ioVersion;	
+		static const unsigned int m_ioVersion;
 
 };
 

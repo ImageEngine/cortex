@@ -49,12 +49,12 @@ namespace IECore {
 class ModifyOpWrap : public ModifyOp, public Wrapper<ModifyOp>
 {
 	public :
-		
+
 		ModifyOpWrap( PyObject *self, const std::string name, const std::string description, ParameterPtr resultParameter, ParameterPtr inputParameter )
 			: ModifyOp( name, description, resultParameter, inputParameter ), Wrapper<ModifyOp>( self, this )
 		{
 		};
-		
+
 		virtual void modify( ObjectPtr object, ConstCompoundObjectPtr operands )
 		{
 			this->get_override( "modify" )( object, const_pointer_cast<CompoundObject>( operands ) );

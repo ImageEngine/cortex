@@ -50,31 +50,31 @@ namespace IECore
 class MeshPrimitiveBuilder : public RefCounted
 {
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( MeshPrimitiveBuilder );
-	
+
 		MeshPrimitiveBuilder();
 
 		/// Add a vertex position and normal
-		template<typename T>						
+		template<typename T>
 		void addVertex( const Imath::Vec3<T> &p, const Imath::Vec3<T> &n );
 
-		/// Construct a triangle from the 3 specified vertex indices. The winding order 
+		/// Construct a triangle from the 3 specified vertex indices. The winding order
 		/// here matches that of IECore::MeshPrimitive
 		void addTriangle( int v0, int v1, int v2 );
-				
-		/// Retrieve the resultant mesh		
+
+		/// Retrieve the resultant mesh
 		MeshPrimitivePtr mesh() const;
-		
+
 	protected:
-				
+
 		V3fVectorDataPtr m_P;
-		V3fVectorDataPtr m_N;		
+		V3fVectorDataPtr m_N;
 		IntVectorDataPtr m_verticesPerFace;
 		IntVectorDataPtr m_vertexIds;
 };
 
-IE_CORE_DECLAREPTR( MeshPrimitiveBuilder );     
+IE_CORE_DECLAREPTR( MeshPrimitiveBuilder );
 
 }
 

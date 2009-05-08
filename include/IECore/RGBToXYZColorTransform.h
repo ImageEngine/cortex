@@ -46,57 +46,57 @@ template< typename, typename > class XYZToRGBColorTransform;
 /// A templated ColorTransform class to perform RGB->XYZ color transformations
 template<typename F, typename T>
 class RGBToXYZColorTransform : public ColorTransform< F, T >
-{	
+{
 	public:
-	
+
 		typedef XYZToRGBColorTransform< T, F > InverseType;
-		
+
 		/// Creates a default transform using the following xy chromacities:
 		///      x     y
 		/// r: 0.64, 0.33
-		/// g: 0.3, 0.6 
-		/// b: 0.15, 0.06 
+		/// g: 0.3, 0.6
+		/// b: 0.15, 0.06
 		/// w: 0.312713, 0.329016
 		RGBToXYZColorTransform();
-	
+
 		/// Creates a transform using the specified 3x3 matrix, which should be convertible
 		/// to Imath::M33f using IECore::convert
 		template< typename M >
 		RGBToXYZColorTransform( const M &matrix );
-		
+
 		/// Creates a transform using the specified xy chromacities. Class "C" should
 		/// be a 2d vector type compatible with IECore::VectorTraits.
 		template< typename C >
-		RGBToXYZColorTransform(		
+		RGBToXYZColorTransform(
 			const C &rChromacity,
 			const C &gChromacity,
 			const C &bChromacity,
-			
-			const C &referenceWhite						
+
+			const C &referenceWhite
 		);
 
 		/// Perform the conversion. Each component of the input should be in the range [0,1]
 		virtual T transform( const F &f );
-		
+
 		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;
-		
+
 		/// Retrieves the matrix used to perform the transformation
 		const Imath::M33f &matrix() const;
-		
+
 	protected :
-	
+
 		template< typename C >
-		void setMatrix(	
+		void setMatrix(
 			const C &rChromacity,
 			const C &gChromacity,
 			const C &bChromacity,
-			
-			const C &referenceWhite						
+
+			const C &referenceWhite
 		);
-	
+
 	private:
-	
+
 		Imath::M33f m_matrix;
 };
 

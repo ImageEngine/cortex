@@ -76,117 +76,117 @@ ParticleMeshOp::ParticleMeshOp()
 		)
 	)
 {
-	
+
 	m_fileNameParameter = new FileNameParameter(
 		"filename",
 		"Filename of PDC to generate mesh from",
 		""
 	);
-	
+
 	m_positionAttributeParameter = new StringParameter(
 		"positionAttribute",
 		"Name of attribute specifying particle positions",
 		"worldPosition"
 	);
-	
+
 	m_useRadiusAttributeParameter = new BoolParameter(
 		"useRadiusAttribute",
 		"Use per-particle radii",
 		true
 	);
-	
+
 	m_radiusAttributeParameter = new StringParameter(
 		"radiusAttribute",
 		"Name of attribute specifying radii",
 		"radiusPP"
 	);
-	
+
 	m_radiusParameter = new FloatParameter(
 		"radius",
 		"Radius to use when not reading an attribute",
 		1.0
 	);
-	
+
 	m_radiusScaleParameter = new FloatParameter(
 		"radiusScale",
 		"Factor to multiply all radii by",
 		1.0
 	);
-	
+
 	m_useStrengthAttributeParameter = new BoolParameter(
 		"useStrengthAttribute",
 		"Use per-particle strength",
 		false
 	);
-	
+
 	m_strengthAttributeParameter = new StringParameter(
 		"strengthAttribute",
 		"Name of attribute specifying strength",
 		"strengthPP"
 	);
-	
+
 	m_strengthParameter = new FloatParameter(
 		"strength",
 		"Strength to use when not reading an attribute",
 		1.0
 	);
-	
+
 	m_strengthScaleParameter = new FloatParameter(
 		"strengthScale",
 		"Factor to multiply all strength by",
 		1.0
-	);	
-	
+	);
+
 	m_thresholdParameter = new FloatParameter(
 		"threshold",
 		"The threshold at which to generate the surface.",
 		0.0
 	);
-	
+
 	m_resolutionParameter = new V3iParameter(
 		"resolution",
 		"The resolution",
 		V3i( 10, 10, 10 )
 	);
-	
+
 	m_automaticBoundParameter = new BoolParameter(
 		"automaticBound",
 		"Enable to calculate the bound automatically. Disable to specify an explicit bound.",
 		true
 	);
-	
+
 	m_boundExtendParameter = new FloatParameter(
 		"boundExtend",
 		"The bound's radius, even if calculated by automatic bounding, is increased by this amount.",
 		0.0,
 		0.0
-	);		
-	
+	);
+
 	m_boundParameter = new Box3fParameter(
 		"bound",
 		"The bound",
 		Box3f( V3f( -1, -1, -1 ), V3f( 1, 1, 1 ) )
 	);
-	
+
 	IntParameter::PresetsContainer gridMethodPresets;
 	gridMethodPresets.push_back( IntParameter::Preset( "Resolution", Resolution ) );
 	gridMethodPresets.push_back( IntParameter::Preset( "Division Size", DivisionSize ) );
-	
+
 	m_gridMethodParameter = new IntParameter(
 		"gridMethod",
 		"s",
 		Resolution,
-		Resolution, 
+		Resolution,
 		DivisionSize,
 		gridMethodPresets,
-		true		
+		true
 	);
-	
+
 	m_divisionSizeParameter = new V3fParameter(
 		"divisionSize",
 		"The dimensions of each element in the grid",
 		V3f( 1, 1, 1 )
-	);	
+	);
 
 	parameters()->addParameter( m_fileNameParameter );
 	parameters()->addParameter( m_positionAttributeParameter );
@@ -199,14 +199,14 @@ ParticleMeshOp::ParticleMeshOp()
 	parameters()->addParameter( m_strengthParameter );
 	parameters()->addParameter( m_strengthScaleParameter );
 	parameters()->addParameter( m_thresholdParameter );
-	parameters()->addParameter( m_gridMethodParameter );	
+	parameters()->addParameter( m_gridMethodParameter );
 	parameters()->addParameter( m_resolutionParameter );
-	parameters()->addParameter( m_divisionSizeParameter );	
+	parameters()->addParameter( m_divisionSizeParameter );
 	parameters()->addParameter( m_automaticBoundParameter );
-	parameters()->addParameter( m_boundExtendParameter );					
-	parameters()->addParameter( m_boundParameter );		
+	parameters()->addParameter( m_boundExtendParameter );
+	parameters()->addParameter( m_boundParameter );
 
-	/// \todo Allow use of particle cache sequence, rather than single file	
+	/// \todo Allow use of particle cache sequence, rather than single file
 }
 
 ParticleMeshOp::~ParticleMeshOp()
@@ -384,36 +384,36 @@ FloatParameterPtr ParticleMeshOp::boundExtendParameter() const
 }
 
 ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
-{	
+{
 	MeshPrimitiveBuilderPtr builder = new MeshPrimitiveBuilder();
-	
+
 	ConstObjectPtr fileNameData = fileNameParameter()->getValue();
 	const std::string &fileName = boost::static_pointer_cast<const StringData>(fileNameData)->readable();
-	
+
 	ParticleReaderPtr reader = boost::static_pointer_cast< ParticleReader > ( Reader::create( fileName ) );
 	if (!reader)
 	{
-		
+
 		throw IOException( "Could not create reader for particle cache file" );
-	}	
-	
+	}
+
 	ConstObjectPtr positionAttributeData = positionAttributeParameter()->getValue();
-	const std::string &positionAttribute = boost::static_pointer_cast<const StringData>(positionAttributeData)->readable();	
+	const std::string &positionAttribute = boost::static_pointer_cast<const StringData>(positionAttributeData)->readable();
 	DataPtr positionData = reader->readAttribute( positionAttribute );
-	
+
 	/// \todo Detect V3fVectorData for positional information then automatically allow FloatVectorData for radius/strength
 	V3dVectorDataPtr position = boost::static_pointer_cast< V3dVectorData >( positionData );
 	if (!position)
 	{
 		throw InvalidArgumentException("Could not read position data");
 	}
-		
+
 	DoubleVectorDataPtr radius;
 	bool useRadiusAttribute = boost::static_pointer_cast<const BoolData>(m_useRadiusAttributeParameter->getValue())->readable();
 	if ( useRadiusAttribute )
 	{
 		ConstObjectPtr radiusAttributeData = radiusAttributeParameter()->getValue();
-		const std::string &radiusAttribute = boost::static_pointer_cast<const StringData>(radiusAttributeData)->readable();	
+		const std::string &radiusAttribute = boost::static_pointer_cast<const StringData>(radiusAttributeData)->readable();
 		DataPtr radiusData = reader->readAttribute( radiusAttribute );
 		radius = boost::static_pointer_cast< DoubleVectorData >( radiusData );
 		if (!radius)
@@ -426,105 +426,105 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	{
 		radius = new DoubleVectorData();
 		radius->writable().resize( reader->numParticles(), m_radiusParameter->getNumericValue() );
-	}	
-	
-	
+	}
+
+
 	double radiusScale = m_radiusScaleParameter->getNumericValue();
 	for (DoubleVectorData::ValueType::iterator it = radius->writable().begin(); it != radius->writable().end(); ++it)
-	{	
+	{
 		*it *= radiusScale;
 	}
 
-	DoubleVectorDataPtr strength;	
+	DoubleVectorDataPtr strength;
 	bool useStrengthAttribute = boost::static_pointer_cast<const BoolData>(m_useStrengthAttributeParameter->getValue())->readable();
 	if ( useStrengthAttribute )
 	{
 		ConstObjectPtr strengthAttributeData = strengthAttributeParameter()->getValue();
-		const std::string &strengthAttribute = boost::static_pointer_cast<const StringData>(strengthAttributeData)->readable();	
+		const std::string &strengthAttribute = boost::static_pointer_cast<const StringData>(strengthAttributeData)->readable();
 		DataPtr strengthData = reader->readAttribute( strengthAttribute );
 		strength = boost::static_pointer_cast< DoubleVectorData >( strengthData );
 		if (!strength)
 		{
 			throw InvalidArgumentException("Could not read strengthPP attribute data");
 		}
-		strength = strength->copy();		
+		strength = strength->copy();
 	}
 	else
 	{
 		strength = new DoubleVectorData();
-		strength->writable().resize( reader->numParticles(), m_strengthParameter->getNumericValue() );	
+		strength->writable().resize( reader->numParticles(), m_strengthParameter->getNumericValue() );
 	}
 
 	double strengthScale = m_strengthScaleParameter->getNumericValue();
 	for (DoubleVectorData::ValueType::iterator it = strength->writable().begin(); it != strength->writable().end(); ++it)
-	{	
+	{
 		*it *= strengthScale;
 	}
-		
+
 	if ( position->readable().size() != reader->numParticles()
 		|| radius->readable().size() != reader->numParticles()
 		|| strength->readable().size() != reader->numParticles() )
 	{
 		throw InvalidArgumentException("Position/radius/strength array lengths mismatch");
 	}
-	
+
 	bool automaticBound = boost::static_pointer_cast<const BoolData>(m_automaticBoundParameter->getValue())->readable();
 	Box3f bound;
-	
+
 	if (automaticBound)
 	{
 		PointBoundsOpPtr pointBoundsOp = new PointBoundsOp();
-		
+
 		pointBoundsOp->pointParameter()->setValue( positionData );
-		
+
 		pointBoundsOp->radiusParameter()->setValue( radius );
-				
+
 		ObjectPtr result = pointBoundsOp->operate();
-		
+
 		Box3fDataPtr boxResult = runTimeCast<Box3fData> ( result );
-		
+
 		assert( boxResult );
-		
+
 		bound = boxResult->readable();
 	}
 	else
 	{
 		bound = boost::static_pointer_cast<const Box3fData>(m_boundParameter->getValue())->readable();
 	}
-	
+
 	double boundExtend = m_boundExtendParameter->getNumericValue();
 	bound.min -= V3f( boundExtend, boundExtend, boundExtend );
-	bound.max += V3f( boundExtend, boundExtend, boundExtend );	
-		
-	
+	bound.max += V3f( boundExtend, boundExtend, boundExtend );
+
+
 	V3i resolution;
 	int gridMethod = m_gridMethodParameter->getNumericValue();
 	if ( gridMethod == Resolution )
-	{	
-		resolution = boost::static_pointer_cast<const V3iData>(m_resolutionParameter->getValue())->readable();	
+	{
+		resolution = boost::static_pointer_cast<const V3iData>(m_resolutionParameter->getValue())->readable();
 	}
 	else if ( gridMethod == DivisionSize )
 	{
 		V3f divisionSize = boost::static_pointer_cast<const V3fData>(m_divisionSizeParameter->getValue())->readable();
-		
+
 		resolution.x = (int)((bound.max.x - bound.min.x) / divisionSize.x);
 		resolution.y = (int)((bound.max.y - bound.min.y) / divisionSize.y);
-		resolution.z = (int)((bound.max.z - bound.min.z) / divisionSize.z);				
-		
+		resolution.z = (int)((bound.max.z - bound.min.z) / divisionSize.z);
+
 	}
 	else
 	{
 		assert( false );
 	}
-			
-	PointMeshOpPtr pointMeshOp = new PointMeshOp();	
-		
+
+	PointMeshOpPtr pointMeshOp = new PointMeshOp();
+
 	pointMeshOp->pointParameter()->setValue( position->copy() );
 	pointMeshOp->radiusParameter()->setValue( radius );
-	pointMeshOp->strengthParameter()->setValue( strength );		
+	pointMeshOp->strengthParameter()->setValue( strength );
 	pointMeshOp->thresholdParameter()->setNumericValue( m_thresholdParameter->getNumericValue() );
 	pointMeshOp->resolutionParameter()->setTypedValue( resolution );
-	pointMeshOp->boundParameter()->setTypedValue( Box3f( bound.min, bound.max ) );	
+	pointMeshOp->boundParameter()->setTypedValue( Box3f( bound.min, bound.max ) );
 
 	return pointMeshOp->operate();
 }

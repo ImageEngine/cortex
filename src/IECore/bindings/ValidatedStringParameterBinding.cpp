@@ -55,18 +55,18 @@ class ValidatedStringParameterWrap : public ValidatedStringParameter, public Wra
 	public :
 
 		ValidatedStringParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &r, const std::string &rd,
-			const std::string &dv, bool ae, object &p, bool po, CompoundObjectPtr ud )	
+			const std::string &dv, bool ae, object &p, bool po, CompoundObjectPtr ud )
 			:	ValidatedStringParameter( n, d, r, rd, dv, ae, parameterPresets<ValidatedStringParameter::PresetsContainer>( p ), po, ud ), Wrapper<ValidatedStringParameter>( self, this ) {};
-		
+
 		IE_COREPYTHON_PARAMETERWRAPPERFNS( ValidatedStringParameter );
-		
+
 };
 IE_CORE_DECLAREPTR( ValidatedStringParameterWrap );
 
 void bindValidatedStringParameter()
 {
 	using boost::python::arg;
-	
+
 	RunTimeTypedClass<ValidatedStringParameter, ValidatedStringParameterWrapPtr>()
 		.def(
 			init< const std::string &, const std::string &, const std::string &, const std::string &, const std::string &, bool, object &, bool, CompoundObjectPtr >
@@ -74,9 +74,9 @@ void bindValidatedStringParameter()
 				(
 					arg( "name" ),
 					arg( "description" ),
-					arg( "regex" ),					
-					arg( "regexDescription" ) = std::string( "" ),					
-					arg( "defaultValue" ) = std::string( "" ),						
+					arg( "regex" ),
+					arg( "regexDescription" ) = std::string( "" ),
+					arg( "defaultValue" ) = std::string( "" ),
 					arg( "allowEmptyString" ) = true,
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false,

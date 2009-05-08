@@ -116,10 +116,10 @@ static void normals( const vector<T> &points, int numNeighbours, vector<T> &resu
 {
 	typedef KDTree<typename vector<T>::const_iterator > Tree;
 	typedef typename T::BaseType Real;
-	
+
 	Tree tree( points.begin(), points.end() );
 	vector<typename Tree::Iterator> neighbours;
-		
+
 	result.resize( points.size() );
 
 	for( unsigned int i=0; i<points.size(); i++ )
@@ -136,7 +136,7 @@ static void normals( const vector<T> &points, int numNeighbours, vector<T> &resu
 ObjectPtr PointNormalsOp::doOperation( ConstCompoundObjectPtr operands )
 {
 	const int numNeighbours = m_numNeighboursParameter->getNumericValue();
-	
+
 	ConstObjectPtr points = pointParameter()->getValue();
 	ObjectPtr result = 0;
 	switch( points->typeId() )
@@ -154,7 +154,7 @@ ObjectPtr PointNormalsOp::doOperation( ConstCompoundObjectPtr operands )
 				normals<V3d>( boost::static_pointer_cast<const V3dVectorData>( points )->readable(), numNeighbours, resultT->writable() );
 				result = resultT;
 			}
-			break;	
+			break;
 		default :
 			// should never get here
 			assert( 0 );

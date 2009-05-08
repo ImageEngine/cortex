@@ -39,7 +39,7 @@ vec3 diffuse( vec3 P, vec3 N, vec3 Cl[gl_MaxLights], vec3 L[gl_MaxLights], int n
 {
 	vec3 result;
 	for( int i=0 ; i<nLights; i++ )
-	{	
+	{
 		result += Cl[i] * max( 0.0, dot( N, normalize( L[i] ) ) );
 	}
 	return result;

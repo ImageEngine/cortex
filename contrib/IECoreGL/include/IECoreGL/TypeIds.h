@@ -102,10 +102,10 @@ enum TypeId
 	LuminanceTextureTypeId = 105059,
 	AlphaTextureTypeId = 105060,
 	GroupTypeId = 105061,
-	SceneTypeId = 105062,	
+	SceneTypeId = 105062,
 	TextPrimitiveTypeTypeId = 105063,
-	LastCoreGLTypeId = 105999,	
-};	
+	LastCoreGLTypeId = 105999,
+};
 
 } // namespace IECoreGL
 

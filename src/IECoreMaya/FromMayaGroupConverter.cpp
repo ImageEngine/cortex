@@ -59,7 +59,7 @@ FromMayaDagNodeConverter::Description<FromMayaGroupConverter> FromMayaGroupConve
 FromMayaGroupConverter::FromMayaGroupConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( staticTypeName(), "Converts transforms to Group objects.", dagPath )
 {
-	
+
 	/// \todo I see no need for this to be a parameter. Surely it should be a given that we ignore intermediates?
 	BoolParameterPtr ignoreIntermediateObjects = new BoolParameter(
 		"ignoreIntermediateObjects",
@@ -73,7 +73,7 @@ FromMayaGroupConverter::FromMayaGroupConverter( const MDagPath &dagPath )
 	parameters()->addParameter( m_meshParameters );
 
 }
-		
+
 IECore::ObjectPtr FromMayaGroupConverter::doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
 {
 	bool ignoreIntermediate = false;
@@ -86,10 +86,10 @@ IECore::ObjectPtr FromMayaGroupConverter::doConversion( const MDagPath &dagPath,
 	if( dagPath.apiType()==MFn::kTransform )
 	{
 		MFnDagNode fnDagNode( dagPath );
-		
-	 	GroupPtr result = new Group();		
+
+	 	GroupPtr result = new Group();
 		result->setTransform( new MatrixTransform( matConvert<MMatrix, M44f>( fnDagNode.transformationMatrix() ) ) );
-		
+
 		unsigned int n = dagPath.childCount();
 		for( unsigned int i=0; i<n; i++ )
 		{
@@ -126,7 +126,7 @@ IECore::ObjectPtr FromMayaGroupConverter::doConversion( const MDagPath &dagPath,
 		{
 			c = FromMayaShapeConverter::create( dagPath, VisibleRenderable::staticTypeId() );
 		}
-		
+
 		if( c )
 		{
 			return c->convert();

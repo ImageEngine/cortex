@@ -44,36 +44,36 @@ namespace IECore
 class Shader : public StateRenderable
 {
 	public:
-	
+
 		Shader( const std::string &name="defaultsurface", const std::string &type="surface", const CompoundDataMap &parameters = CompoundDataMap() );
 		virtual ~Shader();
-				
+
 		IE_CORE_DECLAREABSTRACTOBJECT( Shader, StateRenderable );
-		
+
 		const std::string &getName() const;
 		void setName( const std::string &name );
-		
+
 		const std::string &getType() const;
 		void setType( const std::string &type );
-		
+
 		CompoundDataMap &parameters();
 		const CompoundDataMap &parameters() const;
 		/// This is mostly of use for the binding - the parameters()
 		/// function gives more direct access to the contents of the CompoundData
 		/// (it calls readable() or writable() for you).
 		CompoundDataPtr parametersData();
-		
+
 		/// Sets this shader as the current shader in Renderer.
 		virtual void render( RendererPtr renderer ) const;
-	
+
 	private:
-	
+
 		static TypeDescription<Shader> m_description;
-		
+
 		std::string m_name;
 		std::string m_type;
 		CompoundDataPtr m_parameters;
-	
+
 		static const unsigned int m_ioVersion;
 };
 

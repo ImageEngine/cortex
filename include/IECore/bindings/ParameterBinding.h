@@ -98,7 +98,7 @@ T parameterPresets( const boost::python::object &o );
 #define IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( CLASSNAME )																								\
 	def( "valueValid", &valueValid<CLASSNAME>, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." )	\
 	.def( "valueValid", &valueValid2, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." )			\
-		
+
 template<typename T>
 boost::python::tuple valueValid( const T &that, ConstObjectPtr value );
 

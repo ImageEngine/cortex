@@ -41,64 +41,64 @@ import datetime
 class TimePeriodDataTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		dd = IECore.TimePeriodData()
-		
+
 		d = IECore.TimePeriod( datetime.datetime.now(), datetime.timedelta( days = 1 ) )
 		dd = IECore.TimePeriodData( d )
-		
+
 	def testValueAccess( self ) :
-	
+
 		d = IECore.TimePeriod( datetime.datetime.now(), datetime.timedelta( days = 1 ) )
 		dd = IECore.TimePeriodData( d )
-				
+
 		self.assertEqual( dd.value.length().days, 1 )
-	
+
 	def testCopy( self ) :
-	
+
 		d = IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime.now(), datetime.timedelta( days = 1 ) ) )
 		dd = d.copy()
-		
+
 		self.assertEqual( d, dd )
-		
+
 		s = d.value
 		s.shift( datetime.timedelta( days = 1 ) )
 		d.value = s
-		
+
 		self.assertNotEqual( d, dd )
 
 	def testIO( self ) :
-		
-		d = IECore.TimePeriodData()		
-		IECore.ObjectWriter( d, "test/IECore/TimePeriodData.cob" ).write()		
-		dd = IECore.ObjectReader( "test/IECore/TimePeriodData.cob" ).read()		
+
+		d = IECore.TimePeriodData()
+		IECore.ObjectWriter( d, "test/IECore/TimePeriodData.cob" ).write()
+		dd = IECore.ObjectReader( "test/IECore/TimePeriodData.cob" ).read()
 		self.assertEqual( d, dd )
-		
-		d = IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime.now(), datetime.timedelta( days = 1 ) ) )		
-		IECore.ObjectWriter( d, "test/IECore/TimePeriodData.cob" ).write()		
-		dd = IECore.ObjectReader( "test/IECore/TimePeriodData.cob" ).read()		
+
+		d = IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime.now(), datetime.timedelta( days = 1 ) ) )
+		IECore.ObjectWriter( d, "test/IECore/TimePeriodData.cob" ).write()
+		dd = IECore.ObjectReader( "test/IECore/TimePeriodData.cob" ).read()
 		self.assertEqual( d, dd )
-		
-	def testRepr( self ) :	
-	
+
+	def testRepr( self ) :
+
 		d = IECore.TimePeriod( datetime.datetime.now(), datetime.timedelta( days = 1 ) )
 		dd = IECore.TimePeriodData(d)
-		
-		self.assertEqual( repr(dd), "IECore.TimePeriodData( " + repr(d) + " )" ) 
-		
-		self.assertEqual( dd, eval( repr(dd) ) )
-		
-	def setUp(self):
-        
-		if os.path.isfile( "test/IECore/TimePeriodData.cob" ) :
-			os.remove( "test/IECore/TimePeriodData.cob" )			
 
-	def tearDown(self):
-        
+		self.assertEqual( repr(dd), "IECore.TimePeriodData( " + repr(d) + " )" )
+
+		self.assertEqual( dd, eval( repr(dd) ) )
+
+	def setUp(self):
+
 		if os.path.isfile( "test/IECore/TimePeriodData.cob" ) :
 			os.remove( "test/IECore/TimePeriodData.cob" )
 
-		
+	def tearDown(self):
+
+		if os.path.isfile( "test/IECore/TimePeriodData.cob" ) :
+			os.remove( "test/IECore/TimePeriodData.cob" )
+
+
 if __name__ == "__main__":
-    unittest.main()   
+    unittest.main()
 

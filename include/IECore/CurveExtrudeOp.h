@@ -53,31 +53,31 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 class CurveExtrudeOp : public Op
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( CurveExtrudeOp, Op );
-		
+
 		CurveExtrudeOp();
 		virtual ~CurveExtrudeOp();
-		
+
 		CurvesPrimitiveParameterPtr curvesParameter();
 		ConstCurvesPrimitiveParameterPtr curvesParameter() const;
-		
-		V2iParameterPtr resolutionParameter();				
-		ConstV2iParameterPtr resolutionParameter() const;		
-		
+
+		V2iParameterPtr resolutionParameter();
+		ConstV2iParameterPtr resolutionParameter() const;
+
 	protected :
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
-		
+
 		void buildReferenceFrames( const std::vector< Imath::V3f > &points, std::vector< Imath::V3f > &tangents, std::vector< Imath::M44f > &frames ) const;
-		
+
 		PatchMeshPrimitivePtr buildPatchMesh( ConstCurvesPrimitivePtr curves, unsigned curveIndex, unsigned vertexOffset, unsigned varyingOffset ) const;
-	
+
 	private :
-		
+
 		CurvesPrimitiveParameterPtr m_curvesParameter;
 		V2iParameterPtr m_resolutionParameter;
-		
+
 		struct VaryingFn;
 		struct VertexFn;
 		struct UniformFn;

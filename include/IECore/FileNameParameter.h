@@ -45,16 +45,16 @@ namespace IECore
 class FileNameParameter : public PathParameter
 {
 	public :
-	
+
 		IE_CORE_DECLAREOBJECT( FileNameParameter, PathParameter )
-	
+
 		FileNameParameter( const std::string &name, const std::string &description,
 			const std::string &extensions = "", const std::string &defaultValue = "", bool allowEmptyString = true,
 			PathParameter::CheckType check = PathParameter::DontCare,
 			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
 
 		const std::vector<std::string> &extensions() const;
-		
+
 		/// Returns false if :
 		///
 		/// * PathParameter.valueValid() returns false.
@@ -63,17 +63,17 @@ class FileNameParameter : public PathParameter
 		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
 
 	protected :
-	
+
 		// for io and copying
 		FileNameParameter();
 		friend class TypeDescription<FileNameParameter>;
 
 	private :
-	
+
 		std::vector<std::string> m_extensions;
-		
+
 		static const unsigned int g_ioVersion;
-		
+
 };
 
 IE_CORE_DECLAREPTR( FileNameParameter )
