@@ -63,9 +63,10 @@ if targetApp and (compiler or compilerVersion) :
 	raise RuntimeError( "Must specify only one of COMPILER or APP" )
 
 if targetApp :
-	if targetApp!="nuke" :
+	if targetApp not in ( "nuke", "maya" ) :
 		raise RuntimeError( "Check config logic applies to the new app and remove this exception." )
 	targetAppVersion = getOption( "APP_VERSION", os.environ.get( targetApp.upper() + "_VERSION" ) )
+		
 	targetAppReg = IEEnv.registry["apps"][targetApp][targetAppVersion][platform]
 	compiler = targetAppReg["compiler"]
 	compilerVersion = targetAppReg["compilerVersion"]
@@ -206,19 +207,20 @@ try :
 except :
 	pass
 	
-# find maya, provided we're not building for some other app
-if not targetApp :
+# find maya if we're building for maya
+if targetApp=="maya" :
 
-	mayaVersion = getOption( "MAYA_VERSION", os.environ["MAYA_VERSION"] )
-	mayaMajorVersion = mayaVersion
-	try :
-		mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
-		mayaMajorVersion = mayaReg["majorVersion"]
-		if compiler==mayaReg["compiler"] and compilerVersion==mayaReg["compilerVersion"] :
-			MAYA_ROOT = mayaReg["location"]
-			MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
-	except :
-		pass
+	mayaVersion = targetAppVersion
+
+	mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
+	mayaMajorVersion = mayaReg["majorVersion"]
+	MAYA_ROOT = mayaReg["location"]
+	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
+	INSTALL_MAYALIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_MEL_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/mel/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
+	INSTALL_MAYAPLUGIN_NAME = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
+	WITH_MAYA_PLUGIN_LOADER = 1
+
 else :
 
 	mayaMajorVersion = "0" # it needs a value just for the install setup below to execute			
@@ -269,13 +271,9 @@ else :
 	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 
-INSTALL_MAYALIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_RSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/rsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"
-INSTALL_MEL_DIR = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/mel/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
-INSTALL_MAYAPLUGIN_NAME = "$INSTALL_PREFIX/tools/maya/" + mayaMajorVersion + "/plugins/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION/$IECORE_NAME"
-WITH_MAYA_PLUGIN_LOADER = 1
 
 # set up a post install script to make op wrappers for IECore
 INSTALL_CORE_POST_COMMAND="scons -i -f config/ie/postCoreInstall INSTALLPREFIX=$INSTALL_PREFIX MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install"

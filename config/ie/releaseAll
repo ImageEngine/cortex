@@ -25,7 +25,8 @@ def build( extraArgs = [] ) :
 if IEEnv.platform() == "rhel4.i686" :
 
 	build( [ "COMPILER_VERSION=4.0.2" ] )
-	build( [ "COMPILER_VERSION=4.1.2", "MAYA_VERSION=2008" ] )
+	build( [ "COMPILER_VERSION=4.1.2" ] )
+	build( [ "APP=maya", "APP_VERSION=2008" ] )
 	build( [ "APP=nuke", "APP_VERSION=5.1v1" ] )
 	build( [ "APP=nuke", "APP_VERSION=5.1v2" ] )
 	build( [ "APP=nuke", "APP_VERSION=5.1v3" ] )
@@ -48,7 +49,8 @@ elif IEEnv.platformOS() == "osx104" or IEEnv.platformOS() == "osx105" :
 elif IEEnv.platform() == "cent5.x86_64" :
 
 	build( [ "COMPILER_VERSION=3.4.6" ] )
-	build( [ "COMPILER_VERSION=4.1.2", "MAYA_VERSION=2008" ] )
+	build( [ "COMPILER_VERSION=4.1.2" ] )
+	build( [ "APP=maya", "APP_VERSION=2009" ] )
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=8.0.42" ] )
 	build( [ "APP=nuke", "APP_VERSION=5.1v2" ] )
 	build( [ "APP=nuke", "APP_VERSION=5.1v3" ] )
