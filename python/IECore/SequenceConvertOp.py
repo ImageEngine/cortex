@@ -81,13 +81,13 @@ class SequenceConvertOp( Op ) :
 
 		src = self.parameters()["src"].getFileSequenceValue()
 		dst = src.copy()
-		dst.fileName = operands.dst.value
+		dst.fileName = operands["dst"].value
 
 		# compare extensions, if extensions match, simply copy
 		if src.fileName.split('.')[-1] == dst.fileName.split('.')[-1]:
 			cpOp = SequenceCpOp()
-			cpOp['src'] = operands.src
-			cpOp['dst'] = operands.dst
+			cpOp['src'] = operands["src"]
+			cpOp['dst'] = operands["dst"]
 			cpOp()
 		else:
 			# if extensions don't match, read and write

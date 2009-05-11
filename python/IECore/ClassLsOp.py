@@ -54,11 +54,11 @@ class ClassLsOp( Op ) :
 					name = "type",
 					description = "The type of class to list.",
 					defaultValue = "procedural",
-					presets = {
-						"Procedural" : "procedural",
-						"Op" : "op",
-						"Other" : "other",
-					},
+					presets = (
+						( "Procedural", "procedural" ),
+						( "Op", "op" ),
+						( "Other", "other" ),
+					),
 					presetsOnly = True,
 				),
 				StringParameter(
@@ -81,10 +81,10 @@ class ClassLsOp( Op ) :
 					name = "resultType",
 					description = "The format of the result",
 					defaultValue = "string",
-					presets = {
-						"string" : "string",
-						"stringVector" : "stringVector",
-					},
+					presets = (
+						( "string", "string" ),
+						( "stringVector", "stringVector" ),
+					),
 					presetsOnly = True,
 				)
 			]
@@ -92,27 +92,27 @@ class ClassLsOp( Op ) :
 
 	def doOperation( self, operands ) :
 
-		t = operands.type.value
+		t = operands["type"].value
 		if t=="procedural" :
 			loader = ClassLoader.defaultProceduralLoader()
 		elif t=="op" :
 			loader = ClassLoader.defaultOpLoader()
 		else :
-			if operands.searchPath.value and operands.searchPathEnvVar.value :
+			if operands["searchPath"].value and operands["searchPathEnvVar"].value :
 				raise RuntimeError( "Cannot specify both searchPath and searchPathEnvVar." )
-			if not operands.searchPath.value and not operands.searchPathEnvVar.value :
+			if not operands["searchPath"].value and not operands["searchPathEnvVar"].value :
 				raise RuntimeError( "Must specify either searchPath or searchPathEnvVar." )
 
-			if operands.searchPath.value :
-				sp = SearchPath( operands.searchPath.value, ":" )
+			if operands["searchPath"].value :
+				sp = SearchPath( operands["searchPath"].value, ":" )
 			else :
-				sp = SearchPath( os.path.expandvars( os.environ[operands.searchPathEnvVar.value] ), ":" )
+				sp = SearchPath( os.path.expandvars( os.environ[operands["searchPathEnvVar"].value] ), ":" )
 
 			loader = ClassLoader( sp )
 
-		classes = loader.classNames( operands.match.value )
+		classes = loader.classNames( operands["match"].value )
 
-		if operands.resultType.value == "string" :
+		if operands["resultType"].value == "string" :
 			return StringData( "\n".join( classes ) )
 		else :
 			return StringVectorData( classes )

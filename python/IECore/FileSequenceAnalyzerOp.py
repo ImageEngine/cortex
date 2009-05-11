@@ -86,7 +86,7 @@ class FileSequenceAnalyzerOp( Op ):
 
 		fileSequence = p['fileSequence'].getFileSequenceValue()
 
-		if args.frameList.value == "":
+		if args["frameList"].value == "":
 			expectedFrameList = fileSequence.frameList
 		else:
 			expectedFrameList = p['frameList'].getFrameListValue()
@@ -112,7 +112,7 @@ class FileSequenceAnalyzerOp( Op ):
 
 		# check for corrupted files
 		corrupted = []
-		if args.checkFiles.value and len( nonMissingFrames ):
+		if args["checkFiles"].value and len( nonMissingFrames ):
 
 			# currently we only have methods for checking image files. So we have to identify if it is an image sequence
 			try:
@@ -133,8 +133,8 @@ class FileSequenceAnalyzerOp( Op ):
 
 		# check for abrupt size changes on the sequence.
 		suspicious = []
-		if args.expectedSizeReduction.value != 100:
-			minSizeRatio = 1. - ( args.expectedSizeReduction.value / 100.0 )
+		if args["expectedSizeReduction"].value != 100:
+			minSizeRatio = 1. - ( args["expectedSizeReduction"].value / 100.0 )
 			previousSize = -1
 			previousGoodFrame = -1
 			for f in nonCorruptedFrames:

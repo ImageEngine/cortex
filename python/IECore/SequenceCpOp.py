@@ -71,7 +71,7 @@ class SequenceCpOp( Op ) :
 
 		src = self.parameters()["src"].getFileSequenceValue()
 		dst = src.copy() # to get the frameList
-		dst.fileName = operands.dst.value
+		dst.fileName = operands["dst"].value
 
 		cp(	src, dst )
 

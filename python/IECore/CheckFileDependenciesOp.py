@@ -67,10 +67,10 @@ class CheckFileDependenciesOp( Op ) :
 					name = "resultType",
 					description = "The format of the result",
 					defaultValue = "string",
-					presets = {
-						"string" : "string",
-						"stringVector" : "stringVector",
-					},
+					presets = (
+						( "string", "string" ),
+						( "stringVector", "stringVector" ),
+					),
 					presetsOnly = True,
 				)
 			]
@@ -78,7 +78,7 @@ class CheckFileDependenciesOp( Op ) :
 
 	def doOperation( self, operands ) :
 
-		dependencies = FileDependenciesOp()( file = operands.file, recurse = operands.recurse, resultType = "stringVector" )
+		dependencies = FileDependenciesOp()( file = operands["file"], recurse = operands["recurse"], resultType = "stringVector" )
 
 		missingFiles = []
 		for dependency in dependencies :
@@ -103,7 +103,7 @@ class CheckFileDependenciesOp( Op ) :
 				if not os.path.exists( dependency ) :
 					missingFiles.append( dependency )
 
-		if operands.resultType.value == "string" :
+		if operands["resultType"].value == "string" :
 			return StringData( "\n".join( [str(s) for s in missingFiles] ) )
 		else :
 			return StringVectorData( [str(s) for s in missingFiles] )

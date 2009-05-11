@@ -72,7 +72,7 @@ Otherwise it will return the number of suspicious frames (strange file sizes).""
 		missing = self.missingFrames()
 		missing.sort()
 
-		info( "Checking sequence:", args.fileSequence.value, "..." )
+		info( "Checking sequence:", args["fileSequence"].value, "..." )
 
 		if len(missing):
 			error( "Missing frames:", ','.join( map( str, missing ) ) )

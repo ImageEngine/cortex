@@ -67,10 +67,10 @@ class FileDependenciesOp( Op ) :
 					name = "resultType",
 					description = "The format of the result",
 					defaultValue = "string",
-					presets = {
-						"string" : "string",
-						"stringVector" : "stringVector",
-					},
+					presets = (
+						( "string", "string" ),
+						( "stringVector", "stringVector" ),
+					),
 					presetsOnly = True,
 				)
 			]
@@ -79,15 +79,15 @@ class FileDependenciesOp( Op ) :
 	def doOperation( self, operands ) :
 
 		files = set()
-		if operands.recurse.value :
+		if operands["recurse"].value :
 
-			files = FileExaminer.allDependencies( operands.file.value )
+			files = FileExaminer.allDependencies( operands["file"].value )
 
 		else :
 
-			files = FileExaminer.create( operands.file.value ).dependencies()
+			files = FileExaminer.create( operands["file"].value ).dependencies()
 
-		if operands.resultType.value == "string" :
+		if operands["resultType"].value == "string" :
 			return StringData( "\n".join( [str(s) for s in files] ) )
 		else :
 			return StringVectorData( [str(s) for s in files] )

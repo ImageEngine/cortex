@@ -125,22 +125,22 @@ class BatchSingleOp( Op ) :
 
 	# multiple jobs ( only used in IEFarm )
 	def multipleJobs( self, operands ):
-		if operands.orderIsImportant.value:
+		if operands["orderIsImportant"].value:
 			# if order is important, keep it as one single job.
 			return [ operands ]
 		else:
 			# if order is not important then breaks each Op on a separate job.
 			jobs = []
-			for i in xrange( 0, len(operands.opParameters) ):
+			for i in xrange( 0, len(operands["opParameters"]) ):
 				newOperands = self.parameters().defaultValue
-				newOperands['opName'] = operands.opName
-				newOperands['opParameters'] = StringVectorData( [ operands.opParameters[i] ] )
-				newOperands['orderIsImportant'] = operands.orderIsImportant
+				newOperands['opName'] = operands["opName"]
+				newOperands['opParameters'] = StringVectorData( [ operands["opParameters"][i] ] )
+				newOperands['orderIsImportant'] = operands["orderIsImportant"]
 				jobs.append( newOperands )
 			return jobs
 
 	def jobName( self, args ):
-		return "BatchSingleOp - " + args.opName.value
+		return "BatchSingleOp - " + args["opName"].value
 
 	def doOperation( self, operands ) :
 

@@ -62,8 +62,8 @@ class SequenceRmOp( Op ) :
 
 	def doOperation( self, operands ) :
 
-		rm(	self.parameters()["seq"].getFileSequenceValue() )
+		rm( self.parameters()["seq"].getFileSequenceValue() )
 
-		return StringData( operands.seq.value )
+		return StringData( operands["seq"].value )
 
 registerRunTimeTyped( SequenceRmOp, 100003, Op )

@@ -62,10 +62,10 @@ class LsHeaderOp( Op ) :
 					name = "resultType",
 					description = "The format of the result",
 					defaultValue = "string",
-					presets = {
-						"string" : "string",
-						"stringVector" : "stringVector",
-					},
+					presets = (
+						( "string", "string" ),
+						( "stringVector", "stringVector" ),
+					),
 					presetsOnly = True,
 				)
 			]
@@ -80,26 +80,27 @@ class LsHeaderOp( Op ) :
 
 	def doOperation( self, operands ) :
 
+		# \todo Do the exception handling properly!
 		headers = None
 		try:
-			cache = HierarchicalCache( operands.file.value, IndexedIOOpenMode.Read )
+			cache = HierarchicalCache( operands["file"].value, IndexedIOOpenMode.Read )
 			headers = cache.readHeader()
 		except:
 			debugException( "Error reading header as HierarchicalCache." )
 			try:
-				cache = AttributeCache( operands.file.value, IndexedIOOpenMode.Read )
+				cache = AttributeCache( operands["file"].value, IndexedIOOpenMode.Read )
 				headers = cache.readHeader()
 			except:
 				debugException( "Error reading header as AttributeCache." )
 				try:
-					reader = Reader.create( operands.file.value )
+					reader = Reader.create( operands["file"].value )
 					headers = reader.readHeader()
 				except:
 					debugException( "Error reading header as Reader." )
 					headers = None
 
 		if headers is None:
-			raise Exception, ("Could not get header from file " + operands.file.value)
+			raise Exception, ("Could not get header from file " + operands["file"].value)
 
 		def formatCompound( compound, lines, level = 0 ):
 			levelStr = "";
