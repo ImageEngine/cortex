@@ -89,7 +89,6 @@ from CapturingMessageHandler import CapturingMessageHandler
 from FileSequenceAnalyzerOp import FileSequenceAnalyzerOp
 from CheckImagesOp import CheckImagesOp
 from FileSequenceGraphOp import FileSequenceGraphOp
-from BatchSingleOp import BatchSingleOp
 from LayeredDict import LayeredDict
 from CompoundVectorParameter import CompoundVectorParameter
 from AttributeBlock import AttributeBlock
