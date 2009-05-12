@@ -204,6 +204,9 @@ try :
 	dlReg = IEEnv.registry["apps"]["3delight"][getOption( "DL_VERSION", os.environ["DL_VERSION"] )][platform]
 	RMAN_ROOT = dlReg["location"]
 	os.environ["DELIGHT_CONF"] = "/software/config/3delight"
+	
+	# Add ribdepends location to path
+	os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
 except :
 	pass
 	
