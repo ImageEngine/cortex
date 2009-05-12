@@ -59,12 +59,12 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 };
 
 #define IE_COREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME )\
-	virtual TypeId typeId() const\
+	virtual IECore::TypeId typeId() const\
 	{\
 		if( boost::python::override f = this->get_override( "typeId" ) )\
 		{\
 			boost::python::object res = f(); \
-			return boost::python::extract<TypeId>( res );\
+			return boost::python::extract<IECore::TypeId>( res );\
 		}\
 		return CLASSNAME::typeId();\
 	}\
@@ -77,7 +77,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 		}\
 		return CLASSNAME::typeName();\
 	}\
-	virtual bool isInstanceOf( TypeId typeId ) const\
+	virtual bool isInstanceOf( IECore::TypeId typeId ) const\
 	{\
 		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
 		{\
