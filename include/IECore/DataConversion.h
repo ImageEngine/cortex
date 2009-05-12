@@ -51,6 +51,10 @@ struct DataConversion : public std::unary_function<F, T>
 
 	/// The type of the converter that can perform the inverse transformation
 	typedef void InverseType;
+	
+	/// Some converions will return the exact same value (and the exact same type) as the input - they can be marked as "identity" conversions. This means
+	/// that DataConvert, for example, can optimise specific cases.
+	typedef boost::false_type IsIdentity;
 
 	virtual ~DataConversion()
 	{

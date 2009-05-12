@@ -51,7 +51,35 @@ namespace IECore
 {
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type > : public DataConversion< F, T >
+struct ScaledDataConversion< F, T, typename boost::enable_if< boost::is_same< F, T> >::type > : public DataConversion< F, T >
+{
+	typedef ScaledDataConversion< T, F > InverseType;
+	typedef boost::true_type IsIdentity;
+
+	inline T operator()( F f ) const
+	{
+		return f;
+	}
+
+	InverseType inverse() const
+	{
+		return InverseType();
+	}
+};
+
+template<typename F, typename T>
+struct ScaledDataConversion< 
+	F, T, 
+	typename boost::enable_if<
+		boost::mpl::and_<
+			boost::mpl::not_< boost::is_same< F, T> >, 
+			boost::mpl::and_<
+				boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, 
+				boost::is_signed<T> 
+			>
+		>
+	>::type 
+> : public DataConversion< F, T >
 {
 	typedef ScaledDataConversion< T, F > InverseType;
 
@@ -69,7 +97,18 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type > : public DataConversion< F, T >
+struct ScaledDataConversion< 
+	F, T, 
+	typename boost::enable_if<
+		boost::mpl::and_<
+			boost::mpl::not_< boost::is_same< F, T> >, 
+			boost::mpl::and_<
+				boost::mpl::and_< boost::is_integral<F>, boost::is_integral<T> >, 
+				boost::is_unsigned<T> 
+			>
+		>
+	>::type 
+> : public DataConversion< F, T >
 {
 	T operator()( F f ) const
 	{
@@ -81,7 +120,18 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_signed<T> > >::type > : public DataConversion< F, T >
+struct ScaledDataConversion< 
+	F, T, 
+	typename boost::enable_if<
+		boost::mpl::and_<
+			boost::mpl::not_< boost::is_same< F, T> >, 
+			boost::mpl::and_<
+				boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, 
+				boost::is_signed<T> 
+			>
+		>
+	>::type 
+> : public DataConversion< F, T >
 {
 	T operator()( F f ) const
 	{
@@ -94,7 +144,18 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, boost::is_unsigned<T> > >::type > : public DataConversion< F, T >
+struct ScaledDataConversion< 
+	F, T, 
+	typename boost::enable_if<
+		boost::mpl::and_<
+			boost::mpl::not_< boost::is_same< F, T> >, 
+			boost::mpl::and_<
+				boost::mpl::and_< boost::is_floating_point<F>, boost::is_integral<T> >, 
+				boost::is_unsigned<T> 
+			>
+		>
+	>::type 
+> : public DataConversion< F, T >
 {
 	T operator()( F f ) const
 	{
@@ -107,7 +168,15 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 };
 
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_integral<F>, boost::is_floating_point<T> > >::type > : public DataConversion< F, T >
+struct ScaledDataConversion< 
+	F, T, 
+	typename boost::enable_if<
+		boost::mpl::and_<
+			boost::mpl::not_< boost::is_same< F, T> >, 
+			boost::mpl::and_< boost::is_integral<F>, boost::is_floating_point<T> > 
+		>
+	>::type 
+> : public DataConversion< F, T >
 {
 	typedef ScaledDataConversion< T, F > InverseType;
 
@@ -123,12 +192,21 @@ struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< 
 	}
 };
 
+
 template<typename F, typename T>
-struct ScaledDataConversion< F, T, typename boost::enable_if< boost::mpl::and_< boost::is_floating_point<F>, boost::is_floating_point<T> > >::type > : public DataConversion< F, T >
+struct ScaledDataConversion< 
+	F, T, 
+	typename boost::enable_if<
+		boost::mpl::and_<
+			boost::mpl::not_< boost::is_same< F, T> >, 
+			boost::mpl::and_< boost::is_floating_point<F>, boost::is_floating_point<T> > 
+		>
+	>::type 
+> : public DataConversion< F, T >
 {
 	typedef ScaledDataConversion< T, F > InverseType;
 
-	T operator()( F f ) const
+	inline T operator()( F f ) const
 	{
 		return static_cast<T>( f );
 	}

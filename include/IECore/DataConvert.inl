@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,12 +35,31 @@
 #include <cassert>
 
 #include "boost/utility/enable_if.hpp"
+#include "boost/mpl/and.hpp"
+#include "boost/mpl/not.hpp"
 
 namespace IECore
 {
 
+/// Optimised specialisation for identity conversions - just returns a cheap copy of the original data
 template<typename F, typename T, typename C>
-struct DataConvert< F, T, C, typename boost::enable_if< TypeTraits::IsVectorTypedData<F> >::type >
+struct DataConvert< F, T, C, typename boost::enable_if< typename C::IsIdentity >::type >
+{
+	typename T::Ptr operator()( typename F::ConstPtr f )
+	{
+		assert( f );
+		return f->copy();
+	}
+
+	typename T::Ptr operator()( typename F::ConstPtr f, C &c )
+	{
+		assert( f );
+		return f->copy();
+	}
+};
+
+template<typename F, typename T, typename C>
+struct DataConvert< F, T, C, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< typename C::IsIdentity >, TypeTraits::IsVectorTypedData<F> > >::type >
 {
 
 	typename T::Ptr operator()( typename F::ConstPtr f )
@@ -65,7 +84,7 @@ struct DataConvert< F, T, C, typename boost::enable_if< TypeTraits::IsVectorType
 };
 
 template<typename F, typename T, typename C>
-struct DataConvert< F, T, C, typename boost::enable_if< TypeTraits::IsSimpleTypedData<F> >::type >
+struct DataConvert< F, T, C, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< typename C::IsIdentity >, TypeTraits::IsSimpleTypedData<F> > >::type >
 {
 	typename T::Ptr operator()( typename F::ConstPtr f )
 	{
