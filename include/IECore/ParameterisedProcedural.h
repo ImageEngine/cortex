@@ -58,11 +58,15 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 {
 	public:
 
-		ParameterisedProcedural();
+		ParameterisedProcedural( const std::string &description = "" );
+		
 		virtual ~ParameterisedProcedural();
-
+		
 		IE_CORE_DECLAREABSTRACTOBJECT( ParameterisedProcedural, VisibleRenderable );
-
+		
+		/// Returns a description for this parameterised object.
+		const std::string &description() const;
+		
 		/// Calls render( renderer, true, true, true, false );
 		virtual void render( RendererPtr renderer ) const;
 		/// An additional render method to provide finer grained control. When inAttributeBlock is true,
@@ -100,6 +104,7 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 		class Forwarder;
 		friend class Forwarder;
 
+		std::string m_description;
 		CompoundParameterPtr m_parameters;
 
 		static const unsigned int m_ioVersion;

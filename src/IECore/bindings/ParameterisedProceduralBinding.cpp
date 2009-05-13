@@ -54,12 +54,17 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 {
 
 	public :
-
+/*
 		ParameterisedProceduralWrap( PyObject *self )
-			: Wrapper<ParameterisedProcedural>( self, this )
+			: ParameterisedProcedural(), Wrapper<ParameterisedProcedural>( self, this )
 		{
 		}
-
+*/
+		ParameterisedProceduralWrap( PyObject *self, const std::string &description="" )
+			: ParameterisedProcedural( description ), Wrapper<ParameterisedProcedural>( self, this )
+		{
+		}
+		
 		virtual void doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const
 		{
 			try
@@ -169,6 +174,8 @@ void bindParameterisedProcedural()
 
 	RunTimeTypedClass<ParameterisedProcedural, ParameterisedProceduralWrapPtr>()
 		.def( init<>() )
+		.def( init< const std::string >( arg( "description") ) )
+		.add_property( "description", make_function( &ParameterisedProcedural::description, return_value_policy<copy_const_reference>() ) )
 		.def( "parameters", (CompoundParameterPtr (ParameterisedProcedural::*)())&ParameterisedProcedural::parameters )
 		.def( "render", (void (ParameterisedProcedural::*)( RendererPtr ) const )&ParameterisedProcedural::render )
 		.def( "render", (void (ParameterisedProcedural::*)( RendererPtr, bool, bool, bool, bool ) const )&ParameterisedProcedural::render, ( arg( "renderer" ), arg( "inAttributeBlock" ) = true, arg( "withState" ) = true, arg( "withGeometry" ) = true, arg( "immediateGeometry" ) = false ) )

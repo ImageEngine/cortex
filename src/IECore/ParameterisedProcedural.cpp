@@ -43,14 +43,21 @@ IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( ParameterisedProcedural );
 
 const unsigned int ParameterisedProcedural::m_ioVersion = 0;
 
-ParameterisedProcedural::ParameterisedProcedural()
-	:	m_parameters( new CompoundParameter )
+ParameterisedProcedural::ParameterisedProcedural( const std::string &description )
+	:	m_description( description ), m_parameters( new CompoundParameter )
 {
 }
+
 
 ParameterisedProcedural::~ParameterisedProcedural()
 {
 }
+
+const std::string &ParameterisedProcedural::description() const
+{
+	return m_description;
+}
+
 
 void ParameterisedProcedural::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
