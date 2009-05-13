@@ -54,12 +54,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 {
 
 	public :
-/*
-		ParameterisedProceduralWrap( PyObject *self )
-			: ParameterisedProcedural(), Wrapper<ParameterisedProcedural>( self, this )
-		{
-		}
-*/
+
 		ParameterisedProceduralWrap( PyObject *self, const std::string &description="" )
 			: ParameterisedProcedural( description ), Wrapper<ParameterisedProcedural>( self, this )
 		{
