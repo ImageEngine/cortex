@@ -73,13 +73,14 @@ void bindTypedTransformationMatrix(const char *bindName)
 		.def_readwrite("translate", &TransformationMatrix<T>::translate)
 
 		.def(init<>())
-		.def(init< const Imath::Vec3< T >, const Imath::Euler< T >, const Imath::Vec3< T > >())
+		.def(init< const Imath::Vec3< T > &, const Imath::Euler< T > &, const Imath::Vec3< T > & >())
 		.def(init< const TransformationMatrix<T> &>())
 
 		.add_property( "transform",	&TransformationMatrix<T>::transform )
 
 		.def(self == self)
-
+		
+		/// \todo repr/str
 	;
 }
 

@@ -45,7 +45,7 @@ TransformationMatrix<T>::TransformationMatrix() : scalePivot( 0, 0, 0), scale( 1
 }
 
 template <class T>
-TransformationMatrix<T>::TransformationMatrix( const Imath::Vec3< T > s, const Imath::Euler< T > r, const Imath::Vec3< T > t ) :
+TransformationMatrix<T>::TransformationMatrix( const Imath::Vec3< T > &s, const Imath::Euler< T > &r, const Imath::Vec3< T > &t ) :
 		scalePivot( 0, 0, 0), scale( s ), shear( 0, 0, 0 ), scalePivotTranslation( 0, 0, 0 ),
 						rotatePivot( 0, 0, 0 ), rotationOrientation(), rotate( r ), rotatePivotTranslation( 0, 0, 0 ), translate( t )
 {
