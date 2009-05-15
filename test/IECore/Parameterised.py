@@ -69,6 +69,10 @@ class TestParameterised( unittest.TestCase ) :
 	def testAttributeDeprecation( self ) :
 
 		b = derived()
+		
+		self.assert_( hasattr( b, "objectAttribute1" ) )
+		self.failIf( hasattr( b, "doesNotExist" ) )
+		
 		self.assertRaises( DeprecationWarning, getattr, b, "number" )
 		self.assertRaises( DeprecationWarning, setattr, b, "number", 10 )
 
