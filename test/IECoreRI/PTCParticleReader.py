@@ -66,6 +66,18 @@ if hasattr( IECoreRI, "PTCParticleReader" ):
 			pointCloud2 = r.read()
 			self.assertEqual( len( pointCloud2["P"].data ), 1502 )
 
+		def testColorLoading( self ) :
+		
+			r = IECoreRI.PTCParticleReader( "test/IECoreRI/data/cube.ptc" )
+			n = r.numParticles()
+			
+			p = r.read()
+			self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), n )
+			
+			c = p["Ci"].data
+			self.assertEqual( len( c ), n )
+			self.assert_( c.isInstanceOf( IECore.Color3fVectorData.staticTypeId() ) )
+			
 		def testCanRead(self) :
 
 			self.assertEqual( IECoreRI.PTCParticleReader.canRead( "test/IECoreRI/data/test.3Dbake" ), True )

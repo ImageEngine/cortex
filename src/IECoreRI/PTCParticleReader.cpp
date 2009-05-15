@@ -487,6 +487,12 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 		switch( type )
 		{
 		case PTCParticleIO::Color:
+			{
+				Color3fVectorDataPtr d = new Color3fVectorData();
+				d->writable().resize( numParticles() );
+				dataVector = d;
+				break;
+			}
 		case PTCParticleIO::Point:
 		case PTCParticleIO::Normal:
 		case PTCParticleIO::Vector:
@@ -532,6 +538,14 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			attributePtr = it->second.sourcePtr;
 			switch (it->second.targetData->typeId())
 			{
+			case Color3fVectorDataTypeId :
+				{
+					Color3f &c = boost::static_pointer_cast<Color3fVectorData>(it->second.targetData)->writable()[ i ];
+					c[0] = attributePtr[0];
+					c[1] = attributePtr[1];
+					c[2] = attributePtr[2];
+					break;
+				}
 			case V3fVectorDataTypeId:
 				{
 					V3f &p = boost::static_pointer_cast<V3fVectorData>(it->second.targetData)->writable()[ i ];
@@ -566,6 +580,17 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 		switch( attrIt->second.type )
 		{
 		case PTCParticleIO::Color:
+			switch( realType() )
+			{
+				case ParticleReader::Native :
+				case ParticleReader::Float :
+					filteredData = filterAttr<Color3fVectorData, Color3fVectorData>( boost::static_pointer_cast<Color3fVectorData>(attrIt->second.targetData), particlePercentage() );
+					break;
+				case ParticleReader::Double :
+					filteredData = filterAttr<Color3dVectorData, Color3fVectorData>( boost::static_pointer_cast<Color3fVectorData>(attrIt->second.targetData), particlePercentage() );
+					break;
+			}
+			break;
 		case PTCParticleIO::Point:
 		case PTCParticleIO::Normal:
 		case PTCParticleIO::Vector:
