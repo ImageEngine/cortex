@@ -402,6 +402,12 @@ void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const P
 }
 
 template<class PointIterator>
+inline typename KDTree<PointIterator>::NodeIndex KDTree<PointIterator>::numNodes() const
+{
+	return m_nodes.size();
+}
+
+template<class PointIterator>
 inline const typename KDTree<PointIterator>::Node &KDTree<PointIterator>::node( NodeIndex index ) const
 {
 	return m_nodes[index];

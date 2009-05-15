@@ -84,6 +84,8 @@ class KDTree
 		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
 		unsigned int nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<PointIterator> &nearNeighbours ) const;
 
+		/// Returns the number of nodes in the tree.
+		inline NodeIndex numNodes() const;
 		/// Returns the specified Node of the tree. See rootIndex(), lowChildIndex() and highChildIndex() for
 		/// means of getting appropriate indices. This can be used to implement algorithms not provided as
 		/// member functions.
