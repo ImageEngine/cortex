@@ -127,10 +127,10 @@ class TestRunTimeTyped( unittest.TestCase ) :
 				typeIds[t.staticTypeId()] = t.__name__
 
 
-	def testMakeRunTimeTyped( self ) :
+	def testRegisterRunTimeTyped( self ) :
 
 		# should raise because 100009 is already been registered as OptionalCompoundParameter
-		self.assertRaises( RuntimeError, IECore.makeRunTimeTyped, IECore.FileSequenceParameter, 100009, IECore.PathParameter )
+		self.assertRaises( RuntimeError, IECore.registerRunTimeTyped, IECore.FileSequenceParameter, 100009, IECore.PathParameter )
 
 		self.assertEqual( IECore.TypeId.FileSequenceParameter, IECore.FileSequenceParameter.staticTypeId() )
 		self.assertEqual( IECore.TypeId.FileSequenceParameter, IECore.FileSequenceParameter( "", "" ).typeId() )
