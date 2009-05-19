@@ -77,8 +77,10 @@ class SpherePrimitive : public Primitive
 
 		//@}
 
+
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
+		virtual Imath::Box3f bound() const;
 		/// Render the sphere
 		virtual void render( RendererPtr renderer ) const;
 

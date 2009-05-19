@@ -137,6 +137,15 @@ size_t SpherePrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 	}
 }
 
+Imath::Box3f SpherePrimitive::bound() const
+{
+	/// \todo Take into account thetamax
+	return Box3f(
+		V3f( -m_radius, -m_radius, m_radius * m_zMin ),
+		V3f( m_radius, m_radius, m_radius * m_zMax )
+	);
+}
+
 void SpherePrimitive::render( RendererPtr renderer ) const
 {
 	assert( renderer );
