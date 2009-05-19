@@ -61,9 +61,7 @@ template <class T>
 class TypedData : public Data
 {
 	public:
-
-		IE_CORE_DECLAREMEMBERPTR( TypedData );
-
+	
 		typedef T ValueType;
 
 		/// Default constructor.
@@ -71,21 +69,7 @@ class TypedData : public Data
 		/// Constructor based on the stored data type.
 		TypedData(const T &data);
 
-		//! @name RunTimeTyped interface
-		////////////////////////////////////////////////////////////
-		//@{
-		virtual TypeId typeId() const;
-		virtual const char *typeName() const;
-		virtual bool isInstanceOf( TypeId typeId ) const;
-		virtual bool isInstanceOf( const char *typeName ) const;
-		static TypeId staticTypeId();
-		static const char *staticTypeName();
-		static bool inheritsFrom( TypeId typeId );
-		static bool inheritsFrom( const char *typeName );
-		static TypeId baseTypeId();
-		static const char *baseTypeName();
-		typedef Data BaseClass;
-		//@}
+		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedData<T>, Data );
 
 		//! @name Object interface
 		////////////////////////////////////////////////////////////

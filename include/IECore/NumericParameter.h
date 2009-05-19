@@ -51,11 +51,10 @@ class NumericParameter : public Parameter
 
 		typedef T ValueType;
 		typedef TypedData<T> ObjectType;
-		IE_CORE_DECLAREMEMBERPTR( NumericParameter<T> );
+
 		IE_CORE_DECLAREPTR( ObjectType );
 		typedef std::pair<std::string, T> Preset;
 		typedef std::vector<Preset> PresetsContainer;
-		typedef Parameter BaseClass;
 
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue = T(),
 			T minValue = Imath::limits<T>::min(), T maxValue = Imath::limits<T>::max(),
@@ -64,20 +63,7 @@ class NumericParameter : public Parameter
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue,
 			const PresetsContainer &presets, ConstCompoundObjectPtr userData = 0 );
 
-		//! @name RunTimeTyped functions
-		////////////////////////////////////
-		//@{
-		virtual TypeId typeId() const;
-		virtual const char *typeName() const;
-		virtual bool isInstanceOf( TypeId typeId ) const;
-		virtual bool isInstanceOf( const char *typeName ) const;
-		static TypeId staticTypeId();
-		static const char *staticTypeName();
-		static bool inheritsFrom( TypeId typeId );
-		static bool inheritsFrom( const char *typeName );
-		static TypeId baseTypeId();
-		static const char *baseTypeName();
-		//@}
+		IECORE_RUNTIMETYPED_DECLARETEMPLATE( NumericParameter<T>, Parameter );
 
 		//! @name Object functions
 		////////////////////////////////////

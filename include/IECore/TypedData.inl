@@ -64,81 +64,6 @@ TypedData<T>::~TypedData()
 {
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
-// runtimetyped interface
-//////////////////////////////////////////////////////////////////////////////////////
-
-template <class T>
-TypeId TypedData<T>::typeId() const
-{
-	assert( 0 ); // this function must be specialised for each data type!
-	return InvalidTypeId;
-}
-
-template <class T>
-TypeId TypedData<T>::staticTypeId()
-{
-	assert( 0 ); // this function must be specialised for each data type!
-	return InvalidTypeId;
-}
-
-template <class T>
-const char *TypedData<T>::typeName() const
-{
-	assert( 0 ); // this function must be specialised for each data type!
-	return "";
-}
-
-template <class T>
-const char *TypedData<T>::staticTypeName()
-{
-	assert( 0 ); // this function must be specialised for each data type!
-	return "";
-}
-
-template <class T>
-TypeId TypedData<T>::baseTypeId()
-{
-	return Data::staticTypeId();
-}
-
-template <class T>
-const char *TypedData<T>::baseTypeName()
-{
-	return Data::staticTypeName();
-}
-
-template<class T>
-bool TypedData<T>::isInstanceOf( TypeId typeId ) const
-{
-	if( typeId==staticTypeId() )
-	{
-		return true;
-	}
-	return Data::isInstanceOf( typeId );
-}
-
-template<class T>
-bool TypedData<T>::isInstanceOf( const char *typeName ) const
-{
-	if( !strcmp( typeName, staticTypeName() ) )
-	{
-		return true;
-	}
-	return Data::isInstanceOf( typeName );
-}
-
-template<class T>
-bool TypedData<T>::inheritsFrom( TypeId typeId )
-{
-	return Data::staticTypeId()==typeId ? true : Data::inheritsFrom( typeId );
-}
-
-template<class T>
-bool TypedData<T>::inheritsFrom( const char *typeName )
-{
-	return !strcmp( Data::staticTypeName(), typeName ) ? true : Data::inheritsFrom( typeName );
-}
 
 //////////////////////////////////////////////////////////////////////////////////////
 // object interface
@@ -290,28 +215,8 @@ typename TypedData<T>::BaseType *TypedData<T>::baseWritable()
 // macros for TypedData function specializations
 //////////////////////////////////////////////////////////////////////////////////////
 
-#define IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID )			\
-																			\
-	template<>																\
-	TypeId TNAME::typeId() const											\
-	{																		\
-		return TID;															\
-	}																		\
-	template<>																\
-	TypeId TNAME::staticTypeId()											\
-	{																		\
-		return TID;															\
-	}																		\
-	template<>																\
-	const char *TNAME::typeName() const										\
-	{																		\
-		return #TNAME;														\
-	}																		\
-	template<>																\
-	const char *TNAME::staticTypeName()										\
-	{																		\
-		return #TNAME;														\
-	}																		\
+#define IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID ) \
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID, Data )
 
 #define IE_CORE_DEFINETYPEDDATANOBASESIZE( TNAME )							\
 	template <>																\

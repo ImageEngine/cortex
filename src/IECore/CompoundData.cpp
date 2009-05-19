@@ -42,29 +42,7 @@ using namespace IECore;
 namespace IECore
 {
 
-template<>
-TypeId CompoundData::typeId() const
-{
-	return CompoundDataTypeId;
-}
-
-template<>
-TypeId CompoundData::staticTypeId()
-{
-	return CompoundDataTypeId;
-}
-
-template<>
-const char *CompoundData::typeName() const
-{
-	return "CompoundData";
-}
-
-template<>
-const char *CompoundData::staticTypeName()
-{
-	return "CompoundData";
-}
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CompoundData, CompoundDataTypeId, Data );
 
 template<>
 void CompoundData::memoryUsage( Object::MemoryAccumulator &accumulator ) const

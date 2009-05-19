@@ -87,81 +87,6 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-// runtimetyped stuff
-/////////////////////////////////////////////////////////////////////////////////////
-
-template <class T>
-TypeId NumericParameter<T>::typeId() const
-{
-	return staticTypeId();
-}
-
-template <class T>
-TypeId NumericParameter<T>::staticTypeId()
-{
-	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
-	return InvalidTypeId;
-}
-
-template <class T>
-const char *NumericParameter<T>::typeName() const
-{
-	return staticTypeName();
-}
-
-template <class T>
-const char *NumericParameter<T>::staticTypeName()
-{
-	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
-	return "";
-}
-
-
-template <class T>
-TypeId NumericParameter<T>::baseTypeId()
-{
-	return Parameter::staticTypeId();
-}
-
-template <class T>
-const char *NumericParameter<T>::baseTypeName()
-{
-	return Parameter::staticTypeName();
-}
-
-template<class T>
-bool NumericParameter<T>::isInstanceOf( TypeId typeId ) const
-{
-	if( typeId==staticTypeId() )
-	{
-		return true;
-	}
-	return Parameter::isInstanceOf( typeId );
-}
-
-template<class T>
-bool NumericParameter<T>::isInstanceOf( const char *typeName ) const
-{
-	if( !strcmp( typeName, staticTypeName() ) )
-	{
-		return true;
-	}
-	return Parameter::isInstanceOf( typeName );
-}
-
-template<class T>
-bool NumericParameter<T>::inheritsFrom( TypeId typeId )
-{
-	return Parameter::staticTypeId()==typeId ? true : Parameter::inheritsFrom( typeId );
-}
-
-template<class T>
-bool NumericParameter<T>::inheritsFrom( const char *typeName )
-{
-	return !strcmp( Parameter::staticTypeName(), typeName ) ? true : Parameter::inheritsFrom( typeName );
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
 // object stuff
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -301,21 +226,10 @@ bool NumericParameter<T>::valueValid( ConstObjectPtr value, std::string *reason 
 /////////////////////////////////////////////////////////////////////////////////////
 
 
-#define IE_CORE_DEFINENUMERICPARAMETERSPECIALISATION( T, TNAME )					\
-																					\
-	template<>																		\
-	TypeId NumericParameter<T>::staticTypeId()										\
-	{																				\
-		return TNAME ## TypeId;														\
-	}																				\
-																					\
-	template<>																		\
-	const char *NumericParameter<T>::staticTypeName()								\
-	{																				\
-		return # TNAME;																\
-	}																				\
-																					\
-	template class NumericParameter<T>;												\
+#define IE_CORE_DEFINENUMERICPARAMETERSPECIALISATION( T, TNAME ) \
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME ## TypeId, Parameter ); \
+	\
+	template class NumericParameter<T>;
 
 namespace IECore
 {
