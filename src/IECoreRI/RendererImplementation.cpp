@@ -974,7 +974,7 @@ void IECoreRI::RendererImplementation::light( const std::string &name, const IEC
 // motion blur
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreRI::RendererImplementation::motionBegin( const std::set<float> times )
+void IECoreRI::RendererImplementation::motionBegin( const std::set<float> &times )
 {
 	m_delayedMotionTimes.resize( times.size() );
 	unsigned int i = 0;

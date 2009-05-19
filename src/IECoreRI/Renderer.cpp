@@ -153,7 +153,7 @@ void Renderer::light( const std::string &name, const IECore::CompoundDataMap &pa
 	m_implementation->light( name, parameters );
 }
 
-void Renderer::motionBegin( const std::set<float> times )
+void Renderer::motionBegin( const std::set<float> &times )
 {
 	m_implementation->motionBegin( times );
 }

@@ -270,8 +270,7 @@ class Renderer : public RunTimeTyped
 		/// Starts a new motion block. You should then make times.size() calls
 		/// to one of the primitive or transform functions to specify the motion
 		/// for the block.
-		/// \todo Make "times" a const reference
-		virtual void motionBegin( const std::set<float> times ) = 0;
+		virtual void motionBegin( const std::set<float> &times ) = 0;
 		/// Ends a motion block. Should be called when times.size() calls to an
 		/// appropriate primitive or transform function have been made following
 		/// a motionBegin() call.

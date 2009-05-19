@@ -1312,7 +1312,7 @@ void IECoreGL::Renderer::light( const std::string &name, const IECore::CompoundD
 // motion
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreGL::Renderer::motionBegin( const std::set<float> times )
+void IECoreGL::Renderer::motionBegin( const std::set<float> &times )
 {
 	msg( Msg::Warning, "Renderer::motionBegin", "Not implemented" );
 }

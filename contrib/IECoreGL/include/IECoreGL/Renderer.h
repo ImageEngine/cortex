@@ -302,7 +302,7 @@ class Renderer : public IECore::Renderer
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const IECore::CompoundDataMap &parameters );
 
-		virtual void motionBegin( const std::set<float> times );
+		virtual void motionBegin( const std::set<float> &times );
 		virtual void motionEnd();
 
 		/// Supports the following primitive variables :
