@@ -335,6 +335,8 @@ void bindTypeId()
 		.value( "FileSequenceVectorParameter", FileSequenceVectorParameterTypeId )
 		.value( "ParameterisedProcedural", ParameterisedProceduralTypeId )
 		.value( "ColorSpaceTransformOp", ColorSpaceTransformOpTypeId )
+		.value( "TGAImageReader", TGAImageReaderTypeId )
+		.value( "TGAImageWriter", TGAImageWriterTypeId )		
 	;
 }
 

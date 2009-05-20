@@ -333,6 +333,8 @@ enum TypeId
 	FileSequenceVectorParameterTypeId = 290,
 	ParameterisedProceduralTypeId = 291,
 	ColorSpaceTransformOpTypeId = 292,
+	TGAImageReaderTypeId = 293,
+	TGAImageWriterTypeId = 294,		
 
 	// Remember to update TypeIdBinding.cpp !!!
 
