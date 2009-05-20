@@ -40,7 +40,7 @@
 #include "IECore/Op.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedObjectParameter.h"
+#include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/PatchMeshPrimitive.h"
 

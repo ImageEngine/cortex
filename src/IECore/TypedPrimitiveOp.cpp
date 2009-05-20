@@ -69,89 +69,9 @@ void TypedPrimitiveOp<T>::modify( ObjectPtr primitive, ConstCompoundObjectPtr op
 template<typename T>
 const RunTimeTyped::TypeDescription< TypedPrimitiveOp<T> > TypedPrimitiveOp<T>::g_typeDescription;
 
-template <typename T>
-TypeId TypedPrimitiveOp<T>::typeId() const
-{
-	return staticTypeId();
-}
-
-template <typename T>
-TypeId TypedPrimitiveOp<T>::staticTypeId()
-{
-	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
-	return InvalidTypeId;
-}
-
-template <typename T>
-const char *TypedPrimitiveOp<T>::typeName() const
-{
-	return staticTypeName();
-}
-
-template <typename T>
-const char *TypedPrimitiveOp<T>::staticTypeName()
-{
-	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
-	return "";
-}
-
-template <class T>
-TypeId TypedPrimitiveOp<T>::baseTypeId()
-{
-	return ModifyOp::staticTypeId();
-}
-
-template <class T>
-const char *TypedPrimitiveOp<T>::baseTypeName()
-{
-	return ModifyOp::staticTypeName();
-}
-
-template<typename T>
-bool TypedPrimitiveOp<T>::isInstanceOf( TypeId typeId ) const
-{
-	if( typeId==staticTypeId() )
-	{
-		return true;
-	}
-	return ModifyOp::isInstanceOf( typeId );
-}
-
-template<typename T>
-bool TypedPrimitiveOp<T>::isInstanceOf( const char *typeName ) const
-{
-	if( !strcmp( typeName, staticTypeName() ) )
-	{
-		return true;
-	}
-	return ModifyOp::isInstanceOf( typeName );
-}
-
-template<typename T>
-bool TypedPrimitiveOp<T>::inheritsFrom( TypeId typeId )
-{
-	return ModifyOp::staticTypeId()==typeId ? true : ModifyOp::inheritsFrom( typeId );
-}
-
-template<typename T>
-bool TypedPrimitiveOp<T>::inheritsFrom( const char *typeName )
-{
-	return !strcmp( ModifyOp::staticTypeName(), typeName ) ? true : ModifyOp::inheritsFrom( typeName );
-}
-
 #define IE_CORE_DEFINETYPEDPRIMITIVEOPSPECIALISATION( T, TNAME ) \
 	\
-	template<> \
-	TypeId TypedPrimitiveOp<T>::staticTypeId() \
-	{ \
-		return TNAME ## TypeId; \
-	} \
-	\
-	template<> \
-	const char *TypedPrimitiveOp<T>::staticTypeName() \
-	{ \
-		return # TNAME; \
-	} \
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId, ModifyOp );\
 	\
 	template class TypedPrimitiveOp<T>;
 

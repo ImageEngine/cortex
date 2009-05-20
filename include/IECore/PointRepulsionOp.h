@@ -39,7 +39,7 @@
 #include "IECore/NumericParameter.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedObjectParameter.h"
+#include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/PrimitiveVariable.h"
 #include "IECore/Random.h"
 

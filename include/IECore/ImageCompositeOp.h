@@ -40,7 +40,7 @@
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
-#include "IECore/TypedObjectParameter.h"
+#include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/ImagePrimitive.h"
 

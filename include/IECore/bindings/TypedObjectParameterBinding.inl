@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +32,32 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MESHMERGEOP_H
-#define IECORE_MESHMERGEOP_H
+#ifndef IE_COREPYTHON_TYPEDOBJECTPARAMETERBINDING_INL
+#define IE_COREPYTHON_TYPEDOBJECTPARAMETERBINDING_INL
 
-#include "IECore/TypedPrimitiveOp.h"
-#include "IECore/TypedPrimitiveParameter.h"
+#include <string>
+
+#include "IECore/bindings/Wrapper.h"
+#include "IECore/bindings/ParameterBinding.h"
+
+#include "IECore/TypedObjectParameter.h"
 
 namespace IECore
 {
 
-/// A MeshPrimitiveOp to merge one mesh with another.
-class MeshMergeOp : public MeshPrimitiveOp
+template<typename T>
+class TypedObjectParameterWrap : public TypedObjectParameter<T>, public Wrapper< TypedObjectParameter<T> >
 {
-	public :
+	public:
 
-		MeshMergeOp();
-		virtual ~MeshMergeOp();
+		IE_CORE_DECLAREMEMBERPTR( TypedObjectParameterWrap<T> );
 
-		IE_CORE_DECLARERUNTIMETYPED( MeshMergeOp, MeshPrimitiveOp );
+		TypedObjectParameterWrap( PyObject *self, const std::string &n, const std::string &d, typename T::Ptr dv, const boost::python::object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )
+			:	TypedObjectParameter<T>( n, d, dv, parameterPresets<typename TypedObjectParameter<T>::ObjectPresetsContainer>( p ), po, ud ), Wrapper< TypedObjectParameter<T> >( self, this ) {};
 
-		MeshPrimitiveParameterPtr meshParameter();
-		ConstMeshPrimitiveParameterPtr meshParameter() const;
-
-	protected :
-
-		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
-
-	private :
-
-		struct AppendPrimVars;
-
-		MeshPrimitiveParameterPtr m_meshParameter;
-
+		IE_COREPYTHON_PARAMETERWRAPPERFNS( TypedObjectParameter<T> );
 };
 
-IE_CORE_DECLAREPTR( MeshMergeOp );
+}
 
-} // namespace IECore
-
-#endif // IECORE_MESHMERGEOP_H
-
+#endif // IE_COREPYTHON_TYPEDOBJECTPARAMETERBINDING_INL

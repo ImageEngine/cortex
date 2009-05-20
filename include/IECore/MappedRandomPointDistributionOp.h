@@ -38,6 +38,7 @@
 #include "IECore/UniformRandomPointDistributionOp.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/ImagePrimitiveEvaluator.h"
+#include "IECore/TypedPrimitiveParameter.h"
 
 namespace IECore
 {

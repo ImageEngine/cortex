@@ -39,7 +39,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedObjectParameter.h"
+#include "IECore/TypedPrimitiveParameter.h"
 
 namespace IECore
 {

@@ -47,29 +47,13 @@ template<typename T>
 class TypedPrimitiveOp : public ModifyOp
 {
 	public :
-
-		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOp<T> )
-
+	
 		typedef T PrimitiveType;
 
 		TypedPrimitiveOp( const std::string name, const std::string description );
 		virtual ~TypedPrimitiveOp();
-
-		//! @name RunTimeTyped functions
-		////////////////////////////////////
-		//@{
-		virtual TypeId typeId() const;
-		virtual const char *typeName() const;
-		virtual bool isInstanceOf( TypeId typeId ) const;
-		virtual bool isInstanceOf( const char *typeName ) const;
-		static TypeId staticTypeId();
-		static const char *staticTypeName();
-		static bool inheritsFrom( TypeId typeId );
-		static bool inheritsFrom( const char *typeName );
-		static TypeId baseTypeId();
-		static const char *baseTypeName();
-		typedef ModifyOp BaseClass;
-		//@}
+		
+		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedPrimitiveOp<T>, ModifyOp );
 
 	protected :
 
@@ -87,8 +71,7 @@ class TypedPrimitiveOp : public ModifyOp
 
 #define IE_CORE_DEFINETYPEDPRIMITIVEOP( TNAME ) \
 	typedef TypedPrimitiveOp<TNAME> (TNAME ## Op); \
-	typedef TypedPrimitiveOp<TNAME>::Ptr (TNAME ## OpPtr); \
-	typedef TypedPrimitiveOp<TNAME>::ConstPtr (Const ## TNAME ## OpPtr);
+	IE_CORE_DECLAREPTR( TNAME ## Op );
 
 IE_CORE_DEFINETYPEDPRIMITIVEOP( MeshPrimitive )
 IE_CORE_DEFINETYPEDPRIMITIVEOP( ImagePrimitive )

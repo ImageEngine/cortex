@@ -32,14 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include "boost/static_assert.hpp"
 
-#include "IECore/bindings/TypedObjectParameterBinding.h"
-#include "IECore/bindings/Wrapper.h"
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
-#include "IECore/bindings/Wrapper.h"
+#include "IECore/Object.h"
 
 #include "IECore/Renderable.h"
 #include "IECore/StateRenderable.h"
@@ -50,61 +47,64 @@
 #include "IECore/MatrixTransform.h"
 #include "IECore/VisibleRenderable.h"
 #include "IECore/Group.h"
-#include "IECore/MotionPrimitive.h"
-#include "IECore/Primitive.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/PointsPrimitive.h"
 #include "IECore/ObjectVector.h"
-
-using namespace std;
-using namespace boost;
-using namespace boost::python;
 
 namespace IECore
 {
 
 template<typename T>
-static void bindTypedObjectParameter()
+TypedObjectParameter<T>::TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
+
+template<typename T>
+TypedObjectParameter<T>::TypedObjectParameter()
 {
-	using boost::python::arg;
-	
-	RunTimeTypedClass<TypedObjectParameter<T>, typename TypedObjectParameterWrap<T>::Ptr >()
-		.def(
-			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
-			(
-				(
-					arg( "name" ),
-					arg( "description" ),
-					arg( "defaultValue" ),
-					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false ,
-					arg( "userData" ) = CompoundObject::Ptr( 0 )
-				)
-			)
-		)
-		.IE_COREPYTHON_DEFPARAMETERWRAPPERFNS( TypedObjectParameter<T> )
-	;
 }
 
-void bindTypedObjectParameter()
+template<typename T>
+TypedObjectParameter<T>::TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+	: ObjectParameter(  name, description, defaultValue, T::staticTypeId(), makePresets( presets) , presetsOnly, userData )
 {
-	bindTypedObjectParameter<Renderable>();
-	bindTypedObjectParameter<StateRenderable>();
-	bindTypedObjectParameter<AttributeState>();
-	bindTypedObjectParameter<Shader>();
-	bindTypedObjectParameter<Transform>();
-	bindTypedObjectParameter<MatrixMotionTransform>();
-	bindTypedObjectParameter<MatrixTransform>();
-	bindTypedObjectParameter<VisibleRenderable>();
-	bindTypedObjectParameter<Group>();
-	bindTypedObjectParameter<MotionPrimitive>();
-	bindTypedObjectParameter<Primitive>();
-	bindTypedObjectParameter<MeshPrimitive>();
-	bindTypedObjectParameter<CurvesPrimitive>();
-	bindTypedObjectParameter<PointsPrimitive>();
-	bindTypedObjectParameter<CompoundObject>();
-	bindTypedObjectParameter<ObjectVector>();
 }
 
-} // namespace IECore
+template<typename T>
+Parameter::PresetsContainer TypedObjectParameter<T>::makePresets( const ObjectPresetsContainer &presets )
+{
+	Parameter::PresetsContainer result; result.reserve( presets.size() );
+
+	result.insert( result.end(), presets.begin(), presets.end() );
+
+	return result;
+}
+
+template<typename T>
+typename TypedObjectParameter<T>::Ptr TypedObjectParameter<T>::copy() const
+{
+	return boost::static_pointer_cast<TypedObjectParameter<T> >( copy() );
+}
+
+template<typename T>
+bool TypedObjectParameter<T>::valueValid( ConstObjectPtr value, std::string *reason ) const
+{
+	if( !ObjectParameter::valueValid( value, reason ) )
+	{
+		return false;
+	}
+	ConstObjectTypePtr tValue = runTimeCast<const ObjectType>( value );
+	if( !tValue )
+	{
+		if( reason )
+		{
+			*reason = std::string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"";
+		}
+		return false;
+	}
+	return true;
+}
+
+#define IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( T, TNAME )\
+	\
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId, ObjectParameter );\
+	\
+	template class TypedObjectParameter<T>;
+
+}
