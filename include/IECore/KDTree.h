@@ -60,11 +60,20 @@ class KDTree
 		typedef std::vector<Node> NodeVector;
 		typedef typename NodeVector::size_type NodeIndex;
 
+		/// Constructs an unititialised tree - you must call init()
+		/// before using it.
+		KDTree();
+
 		/// Creates a tree for the fast searching of points.
 		/// Note that the tree does not own the passed points -
 		/// it is up to you to ensure that they remain valid and
 		/// unchanged as long as the KDTree is in use.
 		KDTree( PointIterator first, PointIterator last, int maxLeafSize=4 );
+
+		/// Builds the tree for the specified points - the iterator range
+		/// must remain valid and unchanged as long as the tree is in use.
+		/// This method can be called again to rebuild the tree at any time. 
+		void init( PointIterator first, PointIterator last, int maxLeafSize=4  );
 
 		/// Returns an iterator to the nearest neighbour to the point p.
 		PointIterator nearestNeighbour( const Point &p ) const;
@@ -120,8 +129,8 @@ class KDTree
 
 		Permutation m_perm;
 		NodeVector m_nodes;
-		const int m_maxLeafSize;
-		const PointIterator m_lastPoint;
+		int m_maxLeafSize;
+		PointIterator m_lastPoint;
 
 };
 
