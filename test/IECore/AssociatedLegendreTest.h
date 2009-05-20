@@ -35,10 +35,10 @@
 #ifndef IE_CORE_ASSOCIATEDLEGENDRETEST_H
 #define IE_CORE_ASSOCIATEDLEGENDRETEST_H
 
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
+#include "boost/test/unit_test.hpp"
+#include "boost/test/floating_point_comparison.hpp"
 
-#include <IECore/AssociatedLegendre.h>
+#include "IECore/AssociatedLegendre.h"
 
 namespace IECore
 {

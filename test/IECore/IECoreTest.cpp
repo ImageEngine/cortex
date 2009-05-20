@@ -36,13 +36,13 @@
 
 #include "OpenEXR/ImathColor.h"
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/results_reporter.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test_log.hpp>
-#include <boost/test/framework.hpp>
-#include <boost/test/detail/unit_test_parameters.hpp>
+#include "boost/test/test_tools.hpp"
+#include "boost/test/results_reporter.hpp"
+#include "boost/test/unit_test_suite.hpp"
+#include "boost/test/output_test_stream.hpp"
+#include "boost/test/unit_test_log.hpp"
+#include "boost/test/framework.hpp"
+#include "boost/test/detail/unit_test_parameters.hpp"
 
 #include "KDTreeTest.h"
 #include "TypedDataTest.h"

@@ -40,10 +40,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 
-#include <IECore/IECore.h>
+#include "boost/test/unit_test.hpp"
+#include "boost/test/floating_point_comparison.hpp"
+
+#include "IECore/IECore.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/VectorTraits.h"
 #include "IECore/MarchingCubes.h"

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,12 +35,12 @@
 #ifndef IE_CORE_INTERPOLATORTEST_H
 #define IE_CORE_INTERPOLATORTEST_H
 
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
+#include "boost/test/unit_test.hpp"
+#include "boost/test/floating_point_comparison.hpp"
 
-#include <OpenEXR/ImathVec.h>
+#include "OpenEXR/ImathVec.h"
 
-#include <IECore/Interpolator.h>
+#include "IECore/Interpolator.h"
 
 namespace IECore
 {

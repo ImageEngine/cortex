@@ -35,11 +35,12 @@
 #ifndef IE_CORE_SPHERICALHARMONICSTEST_H
 #define IE_CORE_SPHERICALHARMONICSTEST_H
 
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
-#include <IECore/SphericalHarmonics.h>
-#include <IECore/SphericalHarmonicsProjector.h>
-#include <IECore/SphericalHarmonicsRotationMatrix.h>
+#include "boost/test/unit_test.hpp"
+#include "boost/test/floating_point_comparison.hpp"
+
+#include "IECore/SphericalHarmonics.h"
+#include "IECore/SphericalHarmonicsProjector.h"
+#include "IECore/SphericalHarmonicsRotationMatrix.h"
 
 namespace IECore
 {

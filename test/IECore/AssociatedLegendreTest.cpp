@@ -34,7 +34,7 @@
 
 #include <iostream>
 
-#include <IECore/AssociatedLegendre.h>
+#include "IECore/AssociatedLegendre.h"
 
 #include "AssociatedLegendreTest.h"
 #include "AssociatedLegendreTest.inl"

@@ -34,7 +34,7 @@
 
 #include <iostream>
 
-#include <IECore/SphericalHarmonics.h>
+#include "IECore/SphericalHarmonics.h"
 
 #include "SphericalHarmonicsTest.h"
 #include "SphericalHarmonicsTest.inl"
