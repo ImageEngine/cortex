@@ -40,7 +40,7 @@ using namespace IECore;
 
 IE_CORE_DEFINERUNTIMETYPED( ModifyOp );
 
-ModifyOp::ModifyOp( const std::string name, const std::string description, ParameterPtr resultParameter, ParameterPtr inputParameter )
+ModifyOp::ModifyOp( const std::string &name, const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter )
 	:	Op( name, description, resultParameter )
 {
 	parameters()->addParameter( inputParameter );

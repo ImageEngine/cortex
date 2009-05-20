@@ -50,7 +50,7 @@ class TypedPrimitiveOp : public ModifyOp
 	
 		typedef T PrimitiveType;
 
-		TypedPrimitiveOp( const std::string name, const std::string description );
+		TypedPrimitiveOp( const std::string &name, const std::string &description );
 		virtual ~TypedPrimitiveOp();
 		
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedPrimitiveOp<T>, ModifyOp );

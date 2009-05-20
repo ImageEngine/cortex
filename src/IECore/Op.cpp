@@ -39,12 +39,12 @@ using namespace IECore;
 
 IE_CORE_DEFINERUNTIMETYPED( Op );
 
-Op::Op(  const std::string name, const std::string description, ParameterPtr resultParameter )
+Op::Op(  const std::string &name, const std::string &description, ParameterPtr resultParameter )
 	:	Parameterised( name, description ), m_resultParameter( resultParameter )
 {
 }
 
-Op::Op(  const std::string name, const std::string description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter )
+Op::Op(  const std::string &name, const std::string &description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter )
 	:	Parameterised( name, description, compoundParameter ), m_resultParameter( resultParameter )
 {
 }

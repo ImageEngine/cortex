@@ -54,7 +54,7 @@ class ModifyOp : public Op
 
 		IE_CORE_DECLARERUNTIMETYPED( ModifyOp, Op );
 
-		ModifyOp( const std::string name, const std::string description, ParameterPtr resultParameter, ParameterPtr inputParameter );
+		ModifyOp( const std::string &name, const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter );
 		virtual ~ModifyOp();
 
 		ParameterPtr inputParameter();

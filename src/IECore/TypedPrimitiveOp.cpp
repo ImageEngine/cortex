@@ -45,7 +45,7 @@
 using namespace IECore;
 
 template<typename T>
-TypedPrimitiveOp<T>::TypedPrimitiveOp( const std::string name, const std::string description )
+TypedPrimitiveOp<T>::TypedPrimitiveOp( const std::string &name, const std::string &description )
 	:	ModifyOp( name, description, new ObjectParameter( "result", "The result", new T(), T::staticTypeId() ), new ObjectParameter( "input", "The Primitive to modify", new T(), T::staticTypeId() ) )
 {
 }
