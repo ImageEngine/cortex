@@ -197,7 +197,7 @@ class CompoundTypedDataFunctions
 			typename Container::const_iterator iterX = xData.begin();
 			while ( iterX != xData.end() )
 			{
-				newList.append( boost::python::make_tuple( iterX->first.c_str(), iterX->second ) );
+				newList.append( boost::python::make_tuple( iterX->first, iterX->second ) );
 				iterX++;
 			}
 			return newList;
@@ -415,7 +415,7 @@ class CompoundTypedDataFunctions
 			typename Container::iterator iterX = xData.begin();
 			if ( iterX != xData.end() )
 			{
-				newTuple = boost::python::make_tuple( iterX->first.c_str(), iterX->second );
+				newTuple = boost::python::make_tuple( iterX->first, iterX->second );
 				xData.erase( iterX );
 			}
 			else

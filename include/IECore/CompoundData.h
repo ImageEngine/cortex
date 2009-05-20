@@ -38,7 +38,8 @@
 #ifndef IE_CORE_COMPOUNDDATA_H
 #define IE_CORE_COMPOUNDDATA_H
 
-#include "TypedData.h"
+#include "IECore/TypedData.h"
+#include "IECore/Interned.h"
 
 #include <map>
 #include <string>
@@ -47,7 +48,7 @@ namespace IECore
 {
 
 /// The type of Data held by the CompoundData typedef.
-typedef std::map< std::string, DataPtr > CompoundDataMap;
+typedef std::map< InternedString, DataPtr > CompoundDataMap;
 /// A subclass of Data which stores a map of other named Data
 /// objects - a CompoundDataMap. This is accessible as usual
 /// via the readable() and writable() member functions.
