@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,40 +32,55 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_REALSPHERICALHARMONICFUNCTION_H
-#define IECORE_REALSPHERICALHARMONICFUNCTION_H
+#ifndef IE_CORE_EUCLIDIANTOSPHERICALTRANSFORM_INL
+#define IE_CORE_EUCLIDIANTOSPHERICALTRANSFORM_INL
 
-#include "boost/static_assert.hpp"
-#include "boost/type_traits.hpp"
-#include <vector>
+#include <cassert>
+
+#include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathMath.h"
+
+#include "IECore/VectorTraits.h"
 
 namespace IECore
 {
 
-// Class for computing Real Spherical Harmonics functions
-// Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
-template < typename V >
-class RealSphericalHarmonicFunction
+template<typename F, typename T>
+EuclidianToSphericalTransform<F, T>::EuclidianToSphericalTransform()
 {
-	public :
+}
 
-		BOOST_STATIC_ASSERT( boost::is_floating_point<V>::value );
+template<typename F, typename T>
+T EuclidianToSphericalTransform<F, T>::transform( const F &f )
+{
+	typedef typename VectorTraits<T>::BaseType U;
+	U len = f.length();
+	F v( f );
+	v.normalize();
+	U phi = Imath::Math< U >::atan2( v.y, v.x );
+	if ( phi < 0 )
+	{
+		phi += static_cast< U >( 2*M_PI );
+	}
+	T res;
+	res[0] = phi;
+	res[1] = Imath::Math< U >::acos( v.z );
+	if ( TypeTraits::IsVec3<F>::value )
+	{
+		res[2] = len;
+	}
+	return res;
+}
 
-		// compute the real harmonic function for the given band l and parameter m at the spherical coordinates theta and phi.
-		// l is in the range [0,MAX_BAND]
-		// m is in the range [-l,l]
-		// phi is in the range [0,2*pi]
-		// theta is in the range [0,pi]
-		static V evaluate( V phi, V theta, unsigned int l, int m );
+template<typename F, typename T>
+typename EuclidianToSphericalTransform<F, T>::InverseType EuclidianToSphericalTransform<F, T>::inverse() const
+{
+	return InverseType();
+}
 
-		// computes all the bands for the given spherical coordinates and stores the results on the given array.
-		// the order in the array follows: index = l*(l+1)+m where l is [0,bands-1] and m[-l,l].
-		static void evaluate( V phi, V theta, unsigned int bands, std::vector<V> &result );
-
-};
 
 } // namespace IECore
 
-#include "RealSphericalHarmonicFunction.inl"
+#endif // IE_CORE_EUCLIDIANTOSPHERICALTRANSFORM_INL
 
-#endif // IECORE_REALSPHERICALHARMONICFUNCTION_H

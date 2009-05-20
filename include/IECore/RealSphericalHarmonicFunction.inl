@@ -39,28 +39,28 @@ namespace IECore
 {
 
 template < typename V >
-V RealSphericalHarmonicFunction<V>::evaluate( unsigned int l, int m, V theta, V phi )
+V RealSphericalHarmonicFunction<V>::evaluate( V phi, V theta, unsigned int l, int m )
 {
 	if ( m > 0 )
 	{
-		return Imath::Math<V>::sqrt(2.0) *
-				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(m) ) *
-				Imath::Math<V>::cos( m*phi ) *
+		return Imath::Math<V>::sqrt(2.0) * 
+				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(m) ) * 
+				Imath::Math<V>::cos( m*phi ) * 
 				AssociatedLegendre<double>::evaluate( l, static_cast<unsigned int>(m), Imath::Math<V>::cos( theta ) );
 	}
 	if ( m < 0 )
 	{
-		return Imath::Math<V>::sqrt(2.0) *
-				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(-m) ) *
-				Imath::Math<V>::sin( -m*phi ) *
+		return Imath::Math<V>::sqrt(2.0) * 
+				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(-m) ) * 
+				Imath::Math<V>::sin( -m*phi ) * 
 				AssociatedLegendre<double>::evaluate( l, static_cast<unsigned int>(-m), Imath::Math<V>::cos( theta ) );
 	}
-	return AssociatedLegendre<double>::normalizationFactor( l, 0 ) *
+	return AssociatedLegendre<double>::normalizationFactor( l, 0 ) * 
 				AssociatedLegendre<double>::evaluate( l, 0, Imath::Math<V>::cos(theta) );
 }
 
 template < typename V >
-void RealSphericalHarmonicFunction<V>::evaluate( unsigned int bands, V theta, V phi, std::vector<V> &result )
+void RealSphericalHarmonicFunction<V>::evaluate( V phi, V theta, unsigned int bands, std::vector<V> &result )
 {
 	result.resize( bands * bands );
 	typename std::vector<V>::iterator it = result.begin();
@@ -68,7 +68,7 @@ void RealSphericalHarmonicFunction<V>::evaluate( unsigned int bands, V theta, V 
 	{
 		for (int m = -static_cast<int>(l); m <= static_cast<int>(l); m++, it++ )
 		{
-			*it = evaluate( l, m, theta, phi );
+			*it = evaluate( phi, theta, l, m );
 		}
 	}
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,40 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_REALSPHERICALHARMONICFUNCTION_H
-#define IECORE_REALSPHERICALHARMONICFUNCTION_H
+#ifndef IE_CORE_EUCLIDIANTOSPHERICALTRANSFORM_H
+#define IE_CORE_EUCLIDIANTOSPHERICALTRANSFORM_H
 
 #include "boost/static_assert.hpp"
-#include "boost/type_traits.hpp"
-#include <vector>
+#include "IECore/SpaceTransform.h"
+#include "IECore/TypeTraits.h"
 
 namespace IECore
 {
 
-// Class for computing Real Spherical Harmonics functions
-// Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
-template < typename V >
-class RealSphericalHarmonicFunction
+/// Forward declaration
+template< typename, typename > class SphericalToEuclidianTransform;
+
+/// A templated SpaceTransform class to perform Euclidian to Spherical coordinates.
+/// The Spherical coordinate structure can optionally have a third component specifying the radius. So type F can be either Imath::Vec2<> or Imath::Vec3<>.
+/// Check documentation about SphericalToEuclidianTransform for more details on spherical coordinates.
+template<typename F, typename T>
+class EuclidianToSphericalTransform : public SpaceTransform< F, T >
 {
-	public :
+	public:
+		BOOST_STATIC_ASSERT( ( TypeTraits::IsVec3<F>::value ) );
+		BOOST_STATIC_ASSERT( ( boost::mpl::or_< TypeTraits::IsVec3<T>, TypeTraits::IsVec2<T> >::value == true ) );
 
-		BOOST_STATIC_ASSERT( boost::is_floating_point<V>::value );
+		typedef EuclidianToSphericalTransform< T, F > InverseType;
 
-		// compute the real harmonic function for the given band l and parameter m at the spherical coordinates theta and phi.
-		// l is in the range [0,MAX_BAND]
-		// m is in the range [-l,l]
-		// phi is in the range [0,2*pi]
-		// theta is in the range [0,pi]
-		static V evaluate( V phi, V theta, unsigned int l, int m );
+		EuclidianToSphericalTransform();
 
-		// computes all the bands for the given spherical coordinates and stores the results on the given array.
-		// the order in the array follows: index = l*(l+1)+m where l is [0,bands-1] and m[-l,l].
-		static void evaluate( V phi, V theta, unsigned int bands, std::vector<V> &result );
+		/// Perform the conversion.
+		virtual T transform( const F &f );
 
+		/// Returns an instance of a class able to perform the inverse conversion
+		InverseType inverse() const;
 };
 
 } // namespace IECore
 
-#include "RealSphericalHarmonicFunction.inl"
+#include "IECore/EuclidianToSphericalTransform.inl"
 
-#endif // IECORE_REALSPHERICALHARMONICFUNCTION_H
+#endif // IE_CORE_EUCLIDIANTOSPHERICALTRANSFORM_H

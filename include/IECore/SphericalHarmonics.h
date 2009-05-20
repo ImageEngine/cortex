@@ -36,6 +36,7 @@
 #define IECORE_SPHERICALHARMONICS_H
 
 #include "IECore/VectorTraits.h"
+#include "OpenEXR/ImathVec.h"
 #include <vector>
 
 namespace IECore
@@ -47,7 +48,7 @@ namespace IECore
 // \todo test dot() function and add common operators such as +.
 // \todo see if we can get the result type of multiplying two objects using data traits and apply it to dot() then create ^ operator.
 template < typename V >
-class SphericalHarmonics
+class SphericalHarmonics 
 {
 	public :
 		typedef typename VectorTraits<V>::BaseType BaseType;
@@ -81,11 +82,11 @@ class SphericalHarmonics
 			return m_coefficients;
 		}
 
-		// evaluates the spherical harmonics at polar coordinates theta and phi.
-		inline V operator() ( BaseType theta, BaseType phi ) const;
+		// evaluates the spherical harmonics at spherical coordinates phi and theta.
+		inline V operator() ( const Imath::Vec2< BaseType > &phiTheta ) const;
 
-		// evaluates the spherical harmonics at polar coordinates theta and phi up to the given number of bands.
-		inline V operator() ( BaseType theta, BaseType phi, unsigned int bands ) const;
+		// evaluates the spherical harmonics at spherical coordinates phi and theta up to the given number of bands.
+		inline V operator() ( const Imath::Vec2< BaseType > &phiTheta, unsigned int bands ) const;
 
 		// dot product on the coefficient vectors.
 		// The return value is dependent on the result of the multiplication between the two harmonics coefficients.

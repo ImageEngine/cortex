@@ -40,7 +40,7 @@ namespace IECore
 {
 
 template < typename V >
-V SphericalHarmonics<V>::operator() ( BaseType theta, BaseType phi ) const
+V SphericalHarmonics<V>::operator() ( const Imath::Vec2< BaseType > &phiTheta ) const
 {
 	V res(0);
 	typename CoefficientVector::const_iterator cit = m_coefficients.begin();
@@ -48,14 +48,14 @@ V SphericalHarmonics<V>::operator() ( BaseType theta, BaseType phi ) const
 	{
 		for (int m = -static_cast<int>(l); m <= static_cast<int>(l); m++, cit++ )
 		{
-			res += (*cit) * V( RealSphericalHarmonicFunction< BaseType >::evaluate( l, m, theta, phi ) );
+			res += (*cit) * V( RealSphericalHarmonicFunction< BaseType >::evaluate( phiTheta.x, phiTheta.y, l, m ) );
 		}
 	}
 	return res;
 }
 
 template < typename V >
-V SphericalHarmonics<V>::operator() ( BaseType theta, BaseType phi, unsigned int bands ) const
+V SphericalHarmonics<V>::operator() ( const Imath::Vec2< BaseType > &phiTheta, unsigned int bands ) const
 {
 	if ( bands > m_bands )
 	{
@@ -67,7 +67,7 @@ V SphericalHarmonics<V>::operator() ( BaseType theta, BaseType phi, unsigned int
 	{
 		for (int m = -static_cast<int>(l); m <= static_cast<int>(l); m++, cit++ )
 		{
-			res += (*cit) * V( RealSphericalHarmonicFunction< BaseType >::evaluate( l, m, theta, phi ) );
+			res += (*cit) * V( RealSphericalHarmonicFunction< BaseType >::evaluate( phiTheta.x, phiTheta.y, l, m ) );
 		}
 	}
 	return res;

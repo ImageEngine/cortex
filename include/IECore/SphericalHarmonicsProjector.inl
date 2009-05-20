@@ -34,15 +34,16 @@
 
 #include <cassert>
 #include "OpenEXR/ImathRandom.h"
+#include "IECore/SphericalToEuclidianTransform.h"
 
 namespace IECore
 {
 
 
 template < typename V >
-SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int samples, unsigned long int seed ) :
+SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int samples, unsigned long int seed ) : 
 	m_bands( 0 ),
-	m_sphericalCoordinates(),
+	m_sphericalCoordinates(), 
 	m_euclidianCoordinates(),
 	m_shEvaluations(),
 	m_weights( 0 )
@@ -63,8 +64,8 @@ SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int sample
 		{
 			V x = (a + random.nextf()) * invN;
 			V y = (b + random.nextf()) * invN;
-			sc[0] = 2.0 * Imath::Math<float>::acos( sqrt( 1.0 - x ) );
-			sc[1] = 2.0 * M_PI * y;
+			sc[0] = 2.0 * M_PI * x;
+			sc[1] = 2.0 * Imath::Math<float>::acos( sqrt( 1.0 - y ) );
 			*it = sc;
 		}
 	}
@@ -74,17 +75,17 @@ SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int sample
 	{
 		V x = random.nextf();
 		V y = random.nextf();
-		sc[0] = 2.0 * Imath::Math<float>::acos( sqrt( 1.0 - x ) );
-		sc[1] = 2.0 * M_PI * y;
+		sc[0] = 2.0 * M_PI * x;
+		sc[1] = 2.0 * Imath::Math<float>::acos( sqrt( 1.0 - y ) );
 		*it = sc;
 	}
 
 }
 
 template < typename V >
-SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates ) :
+SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates ) : 
 	m_bands( 0 ),
-	m_sphericalCoordinates( sphericalCoordinates ),
+	m_sphericalCoordinates( sphericalCoordinates ), 
 	m_euclidianCoordinates( 0 ),
 	m_shEvaluations(),
 	m_weights( 0 )
@@ -94,7 +95,7 @@ SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< 
 template < typename V >
 SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates, const std::vector< V > &weights ) :
 	m_bands( 0 ),
-	m_sphericalCoordinates( sphericalCoordinates ),
+	m_sphericalCoordinates( sphericalCoordinates ), 
 	m_euclidianCoordinates( 0 ),
 	m_shEvaluations(),
 	m_weights( weights )
@@ -110,16 +111,17 @@ const std::vector< Imath::Vec3< V > > &SphericalHarmonicsProjector<V>::euclidian
 		m_euclidianCoordinates.resize( m_sphericalCoordinates.size() );
 		typename std::vector< Imath::Vec3<V> >::iterator it = m_euclidianCoordinates.begin();
 		typename std::vector< Imath::Vec2<V> >::const_iterator cit = m_sphericalCoordinates.begin();
+		SphericalToEuclidianTransform< Imath::Vec2<V>, Imath::Vec3<V> > spaceConverter;
 		for ( ; it != m_euclidianCoordinates.end(); it++, cit++ )
 		{
-			*it = sphericalCoordsToUnitVector( *cit );
+			*it = spaceConverter.transform( *cit );
 		}
 	}
 	return m_euclidianCoordinates;
 }
 
 template< typename V >
-template< typename U >
+template< typename U > 
 void SphericalHarmonicsProjector<V>::operator()( unsigned int coordinateIndex, const U &value, SphericalHarmonics< U > &result ) const
 {
 	if ( coordinateIndex == 0 )
@@ -165,7 +167,7 @@ void SphericalHarmonicsProjector<V>::operator()( unsigned int coordinateIndex, c
 }
 
 template< typename V >
-template< typename T, typename U >
+template< typename T, typename U > 
 void SphericalHarmonicsProjector<V>::polarProjection( T functor, SphericalHarmonics< U > &result ) const
 {
 	double factor;
@@ -205,7 +207,7 @@ void SphericalHarmonicsProjector<V>::polarProjection( T functor, SphericalHarmon
 }
 
 template< typename V >
-template< typename T, typename U >
+template< typename T, typename U > 
 void SphericalHarmonicsProjector<V>::euclideanProjection( T functor, SphericalHarmonics< U > &result ) const
 {
 	double factor;
@@ -214,7 +216,7 @@ void SphericalHarmonicsProjector<V>::euclideanProjection( T functor, SphericalHa
 
 	// make sure our internal object is created.
 	euclidianCoordinates();
-
+	
 	// zero coefficients to start accumulation.
 	for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
 	{
@@ -247,13 +249,6 @@ void SphericalHarmonicsProjector<V>::euclideanProjection( T functor, SphericalHa
 }
 
 template< typename V >
-Imath::Vec3<V> SphericalHarmonicsProjector<V>::sphericalCoordsToUnitVector( const Imath::Vec2<V> &sphericalCoord )
-{
-	V sinTheta = Imath::Math<V>::sin( sphericalCoord.x );
-	return Imath::Vec3<V>( sinTheta*Imath::Math<V>::cos( sphericalCoord.y), sinTheta*Imath::Math<V>::sin( sphericalCoord.y ), Imath::Math<V>::cos( sphericalCoord.x ));
-}
-
-template< typename V >
 void SphericalHarmonicsProjector<V>::computeSamples( unsigned int bands ) const
 {
 	if ( m_bands >= bands )
@@ -265,7 +260,7 @@ void SphericalHarmonicsProjector<V>::computeSamples( unsigned int bands ) const
 	typename std::vector< Imath::Vec2<V> >::const_iterator cit = m_sphericalCoordinates.begin();
 	for ( typename EvaluationSamples::iterator it = m_shEvaluations.begin(); it != m_shEvaluations.end(); it++, cit++ )
 	{
-		RealSphericalHarmonicFunction<V>::evaluate( m_bands, static_cast<V>(cit->x), static_cast<V>(cit->y), *it );
+		RealSphericalHarmonicFunction<V>::evaluate( static_cast<V>(cit->x), static_cast<V>(cit->y), m_bands, *it );
 	}
 
 }

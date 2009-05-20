@@ -60,6 +60,7 @@
 #include "AssociatedLegendreTest.h"
 #include "SphericalHarmonicsTest.h"
 #include "LevenbergMarquardtTest.h"
+#include "SpaceTransformTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -88,6 +89,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addAssociatedLegendreTest(test);
 		addSphericalHarmonicsTest(test);
 		addLevenbergMarquardtTest(test);
+		addSpaceTransformTest(test);
 	}
 	catch (std::exception &ex)
 	{
