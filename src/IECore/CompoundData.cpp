@@ -52,6 +52,8 @@ void CompoundData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 	CompoundDataMap::const_iterator iter = data.begin();
 	while (iter != data.end())
 	{
+		/// \todo Accumulate size of keys, too (iter->first), as this
+		/// can be significant
 		accumulator.accumulate( iter->second );
 		iter++;
 	}
