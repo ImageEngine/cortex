@@ -132,9 +132,10 @@ bool CompoundObject::isEqualTo( ConstObjectPtr other ) const
 void CompoundObject::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Object::memoryUsage( a );
-	a.accumulate( sizeof( ObjectMap ) );
+	a.accumulate( m_members.size() * sizeof( ObjectMap::value_type ) );	
 	for( ObjectMap::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
 	{
 		a.accumulate( it->second );
 	}
 }
+

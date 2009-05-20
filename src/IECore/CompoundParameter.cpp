@@ -448,8 +448,11 @@ bool CompoundParameter::isEqualTo( ConstObjectPtr other ) const
 void CompoundParameter::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Parameter::memoryUsage( a );
+	a.accumulate( m_parameters.capacity() * sizeof( ParameterVector::value_type ) );
 	for( ParameterVector::const_iterator it=m_parameters.begin(); it!=m_parameters.end(); it++ )
 	{
 		a.accumulate( *it );
 	}
+	
+	a.accumulate( m_namesToParameters.size() * sizeof( ParameterMap::value_type ) );
 }
