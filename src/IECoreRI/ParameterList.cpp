@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const s
 	CompoundDataMap::const_iterator it;
 	for( it=parameters.begin(); it!=parameters.end(); it++ )
 	{
-		if( 0==it->first.compare( 0, prefix.size(), prefix ) )
+		if( 0==it->first.value().compare( 0, prefix.size(), prefix ) )
 		{
 			appendParameter( string( it->first, prefix.size() ), it->second, typeHints );
 		}
