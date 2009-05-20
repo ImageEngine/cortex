@@ -227,7 +227,7 @@ bool NumericParameter<T>::valueValid( ConstObjectPtr value, std::string *reason 
 
 
 #define IE_CORE_DEFINENUMERICPARAMETERSPECIALISATION( T, TNAME ) \
-	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME ## TypeId, Parameter ); \
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME ## TypeId ); \
 	\
 	template class NumericParameter<T>;
 

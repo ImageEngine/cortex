@@ -267,20 +267,10 @@ void TypedParameter<T>::memoryUsage( Object::MemoryAccumulator &a ) const
 /////////////////////////////////////////////////////////////////////////////////////
 
 
-#define IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( T, TNAME )						\
-																					\
-	template<>																		\
-	TypeId TypedParameter<T>::staticTypeId()										\
-	{																				\
-		return TNAME ## TypeId;														\
-	}																				\
-																					\
-	template<>																		\
-	const char *TypedParameter<T>::staticTypeName()									\
-	{																				\
-		return # TNAME;																\
-	}																				\
-																					\
+#define IE_CORE_DEFINETYPEDPARAMETERSPECIALISATION( T, TNAME ) \
+	\
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
+	\
 	template class TypedParameter<T>;
 
 }

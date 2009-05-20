@@ -50,7 +50,6 @@ class TypedParameter : public Parameter
 		typedef T ValueType;
 		typedef TypedData<T> ObjectType;
 
-		IE_CORE_DECLAREMEMBERPTR( TypedParameter<T> );
 		IE_CORE_DECLAREPTR( ObjectType );
 
 		typedef std::pair<std::string, T> Preset;
@@ -65,21 +64,7 @@ class TypedParameter : public Parameter
 		TypedParameter( const std::string &name, const std::string &description, ObjectTypePtr defaultValue,
 			const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
 
-		//! @name RunTimeTyped functions
-		////////////////////////////////////
-		//@{
-		virtual TypeId typeId() const;
-		virtual const char *typeName() const;
-		virtual bool isInstanceOf( TypeId typeId ) const;
-		virtual bool isInstanceOf( const char *typeName ) const;
-		static TypeId staticTypeId();
-		static const char *staticTypeName();
-		static bool inheritsFrom( TypeId typeId );
-		static bool inheritsFrom( const char *typeName );
-		static TypeId baseTypeId();
-		static const char *baseTypeName();
-		typedef Parameter BaseClass;
-		//@}
+		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedParameter<T>, Parameter );
 
 		//! @name Object functions
 		////////////////////////////////////

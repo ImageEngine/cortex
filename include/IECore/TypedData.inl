@@ -216,7 +216,7 @@ typename TypedData<T>::BaseType *TypedData<T>::baseWritable()
 //////////////////////////////////////////////////////////////////////////////////////
 
 #define IE_CORE_DEFINECOMMONTYPEDDATASPECIALISATION( TNAME, TID ) \
-	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID, Data )
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )
 
 #define IE_CORE_DEFINETYPEDDATANOBASESIZE( TNAME )							\
 	template <>																\

@@ -103,7 +103,7 @@ bool TypedObjectParameter<T>::valueValid( ConstObjectPtr value, std::string *rea
 
 #define IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( T, TNAME )\
 	\
-	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId, ObjectParameter );\
+	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
 	template class TypedObjectParameter<T>;
 

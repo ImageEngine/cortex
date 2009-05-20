@@ -126,7 +126,7 @@ namespace IECore
 
 /// Use this macro within a .cpp file to implement the RunTimeTyped methods of
 /// a template class.
-#define IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TYPENAME, TYPEID, BASETYPENAME )		\
+#define IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TYPENAME, TYPEID )		\
 																				\
 																				\
 	template<>																	\
@@ -153,13 +153,13 @@ namespace IECore
 	template<> 																	\
 	IECore::TypeId TYPENAME::baseTypeId()										\
 	{																			\
-		return BASETYPENAME::staticTypeId();									\
+		return BaseClass::staticTypeId();									\
 	}																			\
 																				\
 	template<> 																	\
 	const char *TYPENAME::baseTypeName()										\
 	{																			\
-		return BASETYPENAME::staticTypeName();									\
+		return BaseClass::staticTypeName();									\
 	}																			\
 																				\
 	template<>																	\
@@ -169,7 +169,7 @@ namespace IECore
 		{																		\
 			return true;														\
 		}																		\
-		return BASETYPENAME::isInstanceOf( typeId );							\
+		return BaseClass::isInstanceOf( typeId );							\
 	}																			\
 																				\
 	template<>																	\
@@ -179,19 +179,19 @@ namespace IECore
 		{																		\
 			return true;														\
 		}																		\
-		return BASETYPENAME::isInstanceOf( typeName );							\
+		return BaseClass::isInstanceOf( typeName );							\
 	}																			\
 																				\
 	template<>																	\
 	bool TYPENAME::inheritsFrom( IECore::TypeId typeId )						\
 	{																			\
-		return BASETYPENAME::staticTypeId()==typeId ? true : BASETYPENAME::inheritsFrom( typeId );	\
+		return BaseClass::staticTypeId()==typeId ? true : BaseClass::inheritsFrom( typeId );	\
 	}																			\
 																				\
 	template<>																	\
 	bool TYPENAME::inheritsFrom( const char *typeName )							\
 	{																			\
-		return !strcmp( BASETYPENAME::staticTypeName(), typeName ) ? true : BASETYPENAME::inheritsFrom( typeName );	\
+		return !strcmp( BaseClass::staticTypeName(), typeName ) ? true : BaseClass::inheritsFrom( typeName );	\
 	}																			\
 
 /// An abstract base class for objects whose type we wish to determine at runtime.

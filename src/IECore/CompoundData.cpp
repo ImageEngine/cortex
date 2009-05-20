@@ -42,7 +42,7 @@ using namespace IECore;
 namespace IECore
 {
 
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CompoundData, CompoundDataTypeId, Data );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CompoundData, CompoundDataTypeId );
 
 template<>
 void CompoundData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
