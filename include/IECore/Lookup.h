@@ -54,6 +54,8 @@ class Lookup
 		typedef X XType;
 		typedef Y YType;
 	
+		Lookup();
+	
 		template<class Function>
 		Lookup( const Function &function, XType xMin, XType xMax, unsigned numSamples );
 

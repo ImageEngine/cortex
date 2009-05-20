@@ -43,6 +43,14 @@ namespace IECore
 {
 
 template<typename X, typename Y>
+Lookup<X, Y>::Lookup()
+	:	m_xMin( 0 ), m_xMax( 1 ), m_xMult( 1 )
+{
+	m_values.push_back( Y( 0 ) );
+	m_values.push_back( Y( 1 ) );
+}
+
+template<typename X, typename Y>
 template<class Function>
 Lookup<X, Y>::Lookup( const Function &function, XType xMin, XType xMax, unsigned numSamples )
 {
