@@ -155,9 +155,8 @@ class CompoundDataTest(unittest.TestCase):
 		prev = v1.popitem()
 		self.assertEqual(len(v1), 3)
 		
-		self.assert_(v1.pop("x", IECore.UIntData(10)) == IECore.UIntData(10))
-		self.assert_(v1.pop("3", IECore.UIntData(10)) == IECore.FloatData(4))
-		self.assertEqual(len(v1), 2)
+		self.assertEqual(v1.pop("x", IECore.UIntData(10)), IECore.UIntData(10))
+		self.assertEqual(len(v1), 3)
 
 	def testKeyValues(self):
 		"""Test keys/values listing"""
