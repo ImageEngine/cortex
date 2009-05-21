@@ -67,9 +67,9 @@ class Lookup
 	private :
 	
 		std::vector<Y> m_values;
-		float m_xMin;
-		float m_xMax;
-		float m_xMult;
+		XType m_xMin;
+		XType m_xMax;
+		XType m_xMult;
 				
 };
 
