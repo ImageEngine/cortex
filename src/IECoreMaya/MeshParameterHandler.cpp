@@ -39,7 +39,7 @@
 #include "IECoreMaya/FromMayaMeshConverter.h"
 #include "IECoreMaya/MeshParameterHandler.h"
 
-#include "IECore/TypedObjectParameter.h"
+#include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/MeshPrimitive.h"
 
 #include "maya/MFnGenericAttribute.h"

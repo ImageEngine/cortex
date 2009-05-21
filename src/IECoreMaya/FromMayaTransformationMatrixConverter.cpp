@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -86,8 +86,8 @@ IECore::ObjectPtr FromMayaTransformationMatrixConverter<T>::doConversion( const 
 	return 0;
 }
 
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaTransformationMatrixfConverter, FromMayaTransformationMatrixfConverterTypeId, FromMayaObjectConverter )
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaTransformationMatrixdConverter, FromMayaTransformationMatrixdConverterTypeId, FromMayaObjectConverter )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaTransformationMatrixfConverter, FromMayaTransformationMatrixfConverterTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaTransformationMatrixdConverter, FromMayaTransformationMatrixdConverterTypeId )
 
 template class FromMayaTransformationMatrixConverter<TransformationMatrixfData>;
 template class FromMayaTransformationMatrixConverter<TransformationMatrixdData>;
