@@ -154,7 +154,7 @@ class CompoundDataTest(unittest.TestCase):
 		self.assertEqual(len(v1), 4)
 		prev = v1.popitem()
 		self.assertEqual(len(v1), 3)
-		self.assert_(prev == ('0', IECore.FloatData(1.2)))
+		
 		self.assert_(v1.pop("x", IECore.UIntData(10)) == IECore.UIntData(10))
 		self.assert_(v1.pop("3", IECore.UIntData(10)) == IECore.FloatData(4))
 		self.assertEqual(len(v1), 2)
@@ -162,14 +162,14 @@ class CompoundDataTest(unittest.TestCase):
 	def testKeyValues(self):
 		"""Test keys/values listing"""
 		v1 = IECore.CompoundData()
-		v1["0"] = IECore.FloatData(1.2)
-		v1["1"] = IECore.FloatData(2.3)
+		v1["0"] = IECore.FloatData(1)
+		v1["1"] = IECore.FloatData(2)
 		v1["2"] = IECore.FloatData(3)
-		self.assert_(v1.keys() == ['0', '1', '2'])
+		self.assertEqual( set( v1.keys() ), set( ['0', '1', '2'] ) )
 		vals = v1.values()
-		self.assert_(vals == [IECore.FloatData(1.2), IECore.FloatData(2.3), IECore.FloatData(3)])
-		items = v1.items()
-		self.assert_(items == [('0', IECore.FloatData(1.2)), ('1', IECore.FloatData(2.3)), ('2', IECore.FloatData(3))])
+		self.assertEqual( set( [ x.value for x in vals ] ), set( [ 1, 2, 3 ] ) )
+		items = v1.items()		
+		self.assertEqual( set( [ ( x[0], x[1].value ) for x in items ] ), set( [ ( "0", 1 ), ( "1", 2 ), ( "2", 3 ) ] ) )
 
 	def testEquality(self):
 		"""Test equality function"""
