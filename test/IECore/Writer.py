@@ -43,7 +43,7 @@ class TestWriter( unittest.TestCase ) :
 		for ee in e :
 			self.assert_( type( ee ) is str )
 
-		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob" ]
+		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "tga" ]
 		if IECore.withTIFF() :
 			expectedExtensions += [ "tif", "tiff" ]
 		if IECore.withJPEG() :
@@ -57,7 +57,7 @@ class TestWriter( unittest.TestCase ) :
 		e = IECore.Writer.supportedExtensions( IECore.TypeId.ImageWriter )
 		for ee in e :
 			self.assert_( type( ee ) is str )
-		expectedImageWriterExtensions = [ "exr", "cin", "dpx", "yuv" ]
+		expectedImageWriterExtensions = [ "exr", "cin", "dpx", "yuv", "tga" ]
 		if IECore.withTIFF() :
 			expectedImageWriterExtensions += [ "tif", "tiff" ]
 		if IECore.withJPEG() :

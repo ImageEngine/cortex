@@ -55,7 +55,7 @@ class TestReader(unittest.TestCase):
 		e = Reader.supportedExtensions( TypeId.ImageReader )
 		for ee in e :
 			self.assert_( type( ee ) is str )
-		expectedImageReaderExtensions = [ "exr", "cin", "dpx", "sgi", "bw", "rgba", "rgb", "tdl" ]
+		expectedImageReaderExtensions = [ "exr", "cin", "dpx", "sgi", "bw", "rgba", "rgb", "tdl", "tga" ]
 		if withTIFF() :
 			expectedImageReaderExtensions += [ "tif", "tiff" ]
 		if withJPEG() :

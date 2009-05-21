@@ -198,6 +198,8 @@ from LevenbergMarquardtTest import *
 from TypedDataTest import *
 from DataTraitsTest import *
 from ColorSpaceTransformOpTest import *
+from TGAImageReaderTest import *
+from TGAImageWriterTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
