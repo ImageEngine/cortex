@@ -62,7 +62,7 @@ static ParameterPtr parameterisedGetItem( Parameterised &o, const std::string &n
 	return p;
 }
 
-static object parameterisedGetAttr( Parameterised &o, const std::string &n )
+static ParameterPtr parameterisedGetAttr( Parameterised &o, const std::string &n )
 {
 	ParameterPtr p = o.parameters()->parameter<Parameter>( n );
 	
@@ -73,7 +73,7 @@ static object parameterisedGetAttr( Parameterised &o, const std::string &n )
 			// warning converted to exception;
 			throw error_already_set();
 		}
-		return object( p );
+		return p;
 	}
 	
 	PyErr_SetString( PyExc_KeyError, ( "'"  + n + "'" ).c_str() );
