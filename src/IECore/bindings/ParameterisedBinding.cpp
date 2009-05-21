@@ -62,14 +62,22 @@ static ParameterPtr parameterisedGetItem( Parameterised &o, const std::string &n
 	return p;
 }
 
-static ParameterPtr parameterisedGetAttr( Parameterised &o, const std::string &n )
+static object parameterisedGetAttr( Parameterised &o, const std::string &n )
 {
-	if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to Parameters as attributes is deprecated - please use item style access instead.", 1 ) )
+	ParameterPtr p = o.parameters()->parameter<Parameter>( n );
+	
+	if ( p )
 	{
-		// warning converted to exception;
-		throw error_already_set();
+		if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to Parameters as attributes is deprecated - please use item style access instead.", 1 ) )
+		{
+			// warning converted to exception;
+			throw error_already_set();
+		}
+		return object( p );
 	}
-	return parameterisedGetItem( o, n );
+	
+	PyErr_SetString( PyExc_KeyError, ( "'"  + n + "'" ).c_str() );
+	throw error_already_set();
 }
 
 void bindParameterised()
