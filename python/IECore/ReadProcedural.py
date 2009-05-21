@@ -139,6 +139,10 @@ class ReadProcedural( ParameterisedProcedural ) :
 
 			return bound
 
+	def doRenderState( self, renderer, args ) :
+	
+		pass
+
 	def doRender( self, renderer, args ) :
 
 		fileNames = self.__allFileNames( args )
