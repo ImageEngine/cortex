@@ -67,10 +67,13 @@ class SubsurfaceTest( unittest.TestCase ) :
 		l = "".join( file( self.outputFileName ).readlines() )
 
 		p1 = l.find( 'Attribute "visibility" "string subsurface" [ "test" ]' )
-		p2 = l.find( 'Attribute "subsurface" "color meanfreepath" [ 1 1 1 ] "color reflectance" [ 0 0 0 ] "float refractionindex" [ 1.3 ] "float scale" [ 0.1 ] "float shadingrate" [ 10 ]' )
+		p2 = l.find( 'Attribute "subsurface"' )
 		self.assertNotEqual( p1, -1 )
 		self.assertNotEqual( p2, -1 )
 		self.assert_( p2 > p1 )
+		for a in ( '"color meanfreepath" [ 1 1 1 ]', '"color reflectance" [ 0 0 0 ]', '"float refractionindex" [ 1.3 ]', '"float scale" [ 0.1 ]', '"float shadingrate" [ 10 ]' ) :
+			p3 = l.find( a )
+			self.assert_( p3 > p2 )
 
 	def tearDown( self ) :
 
