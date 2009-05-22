@@ -65,6 +65,7 @@ static Parameter::PresetsContainer convertPresets( const typename NumericParamet
 
 template<typename T>
 NumericParameter<T>::NumericParameter()
+	:	m_min( Imath::limits<T>::min() ), m_max( Imath::limits<T>::max() )
 {
 }
 
