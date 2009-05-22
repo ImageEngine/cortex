@@ -56,7 +56,8 @@ struct LinearInterpolator< TransformationMatrix<T> >
 		/// this code is currently primarily used as part of the following process :
 		///
 		/// 1) We take a maya dag node and extract the transform using an IECoreMaya::FromMayaTransformConverter with
-		/// space set to world and with the euler filter on.
+		/// space set to world and with the euler filter on. We have to zero the pivots while doing this otherwise we get bad
+		/// interpolations later.
 		/// 2 ) We put the transform in an AttributeCache.
 		/// 3 ) We read the cache using an InterpolatedCache, to get accurate positions at subframe locations for
 		/// specifying motion blocks to 3delight. Those positions are given to the renderer as simple matrices.
@@ -71,6 +72,8 @@ struct LinearInterpolator< TransformationMatrix<T> >
 		///
 		///		* What members the TransformationMatrix has and why, and how this relates to
 		/// 	  the maya MTransformationMatrix class. Do we really need all those pivots and offsets?
+		///			* We can't use them when getting global matrices out of maya
+		///			* If we do need them for other uses then can we avoid storing them in caches if they're zero?
 		///		* What we cache and how for transformation caches. Eulers? Quaternions? World space? Local space with hierarchies?
 		///		* How those caches are used in renderman, nuke and elsewhere.
 		///		* What should be in cortex and what shouldn't.

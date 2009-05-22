@@ -243,10 +243,8 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 		# try rotation interpolation...
 		d = TransformationMatrixdData( TransformationMatrixd( V3d(2,3,4), Eulerd( 1., 2., 3. ), V3d(1,2,3) ) )
 		e = linearObjectInterpolation( b, d, 0.2 )
-		self.assertAlmostEqual( (e.value.rotate - Eulerd( 0.2, 0.4, 0.6 )).length(), 0, 2 )
-		c = linearObjectInterpolation( d, d, 0.8 )
-		self.assertAlmostEqual( (c.value.rotate - d.value.rotate).length(), 0, 2 )
-
+		self.assert_( e.value.rotate.equalWithAbsError( V3d( -0.341406, 0.189475, 0.191253 ), 0.001 ) )
+		
 	def testComparison(self):
 		"""Test TransformationMatrixdData comparison"""
 		a = TransformationMatrixdData()
