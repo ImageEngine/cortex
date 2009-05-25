@@ -137,7 +137,19 @@ BOOST_STATIC_ASSERT( (IsInterpolable<int>::value) );
 BOOST_STATIC_ASSERT( (IsInterpolable<Imath::Color3f>::value) );
 BOOST_STATIC_ASSERT( (IsInterpolable<Imath::V2d>::value) );
 BOOST_STATIC_ASSERT( (IsInterpolable<Imath::Box3f>::value) );
+BOOST_STATIC_ASSERT( (IsInterpolable<std::vector<Imath::Box3f> >::value) );
+BOOST_STATIC_ASSERT( (IsInterpolable<const TypedData< std::vector<Imath::V2i> > >::value) );
 BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsInterpolable<std::string> >::value) );
+
+/// IsStrictlyInterpolable
+BOOST_STATIC_ASSERT( (IsStrictlyInterpolable<float>::value) );
+BOOST_STATIC_ASSERT( (IsStrictlyInterpolable<Imath::Color3f>::value) );
+BOOST_STATIC_ASSERT( (IsStrictlyInterpolable<Imath::V2d>::value) );
+BOOST_STATIC_ASSERT( (IsStrictlyInterpolable<Imath::Box3f>::value) );
+BOOST_STATIC_ASSERT( (IsStrictlyInterpolable<std::vector<Imath::Box3f> >::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsStrictlyInterpolable <const TypedData< std::vector<Imath::V2i> > > >::value) );
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsStrictlyInterpolable<std::string> >::value) );
+
 
 /// IsInterpolableVectorTypedData
 BOOST_STATIC_ASSERT( (IsInterpolableVectorTypedData<HalfVectorData>::value) );
