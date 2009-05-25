@@ -36,9 +36,7 @@ import IECore
 import IECoreMaya
 import unittest
 import MayaUnitTest
-import maya.cmds
 import maya.OpenMaya as OpenMaya
-import weakref
 
 class PythonTest( unittest.TestCase ) :
 
