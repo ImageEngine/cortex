@@ -95,6 +95,12 @@ class InterpolatedCache : public RefCounted
 
 		///Returns the current interpolation method.
 		Interpolation getInterpolation() const;
+		
+		///Sets the OversamplesCalculator.
+		void setOversamplesCalculator( const OversamplesCalculator & );
+
+		///Returns the current OversamplesCalculator.
+		OversamplesCalculator getOversamplesCalculator() const;
 
 		///Read a piece of data associated with the specified object and attribute from the cache.
 		///Throws an exception if the requested data is not present in the cache or if the cache file is not found.

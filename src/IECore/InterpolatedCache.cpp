@@ -106,6 +106,17 @@ InterpolatedCache::Interpolation InterpolatedCache::getInterpolation() const
 	return m_interpolation;
 }
 
+void InterpolatedCache::setOversamplesCalculator( const OversamplesCalculator &oc )
+{
+	m_oversamplesCalculator = oc;
+}
+
+OversamplesCalculator InterpolatedCache::getOversamplesCalculator() const
+{
+	return m_oversamplesCalculator;
+}
+
+
 ObjectPtr InterpolatedCache::read( const ObjectHandle &obj, const AttributeHandle &attr ) const
 {
 	updateCacheFiles();
