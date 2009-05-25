@@ -400,9 +400,9 @@ void SphericalHarmonicsRotationMatrix<V>::computeComplexRotation() const
 
 	// compute band 1 from rotation matrix
 	setF( 1, -1, -1, (m_3dRotation[1][1] + m_3dRotation[0][0]) / 2 );
-	setF( 1, -1,  0, m_3dRotation[0][2] / m_squareRoots[2] );
+	setF( 1, -1,  0, -m_3dRotation[0][2] / m_squareRoots[2] );
 	setF( 1, -1,  1, (m_3dRotation[1][1] - m_3dRotation[0][0]) / 2 );
-	setF( 1,  0, -1, m_3dRotation[2][0] / m_squareRoots[2] );
+	setF( 1,  0, -1, -m_3dRotation[2][0] / m_squareRoots[2] );
 	setF( 1,  0,  0, m_3dRotation[2][2] );
 	setF( 1,  0,  1, -F(1,0,-1) );
 	setF( 1,  1, -1, F(1,-1,1) );
@@ -410,9 +410,9 @@ void SphericalHarmonicsRotationMatrix<V>::computeComplexRotation() const
 	setF( 1,  1,  1, F(1,-1,-1) );
 
 	setG( 1, -1, -1, (m_3dRotation[1][0] - m_3dRotation[0][1]) / 2 );
-	setG( 1, -1,  0, m_3dRotation[1][2] / m_squareRoots[2] );
+	setG( 1, -1,  0, -m_3dRotation[1][2] / m_squareRoots[2] );
 	setG( 1, -1,  1, -(m_3dRotation[1][0] + m_3dRotation[0][1]) / 2 );
-	setG( 1,  0, -1, -m_3dRotation[2][1] / m_squareRoots[2] );
+	setG( 1,  0, -1, m_3dRotation[2][1] / m_squareRoots[2] );
 	setG( 1,  0,  0, 0 );
 	setG( 1,  0,  1, G(1,0,-1) );
 	setG( 1,  1, -1, -G(1,-1,1) );

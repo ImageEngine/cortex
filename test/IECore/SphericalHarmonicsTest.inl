@@ -348,7 +348,7 @@ void SphericalHarmonicsProjectorTest<T, bands, samples>::testEuclidianProjection
 template< typename T >
 Euler<T> SphericalHarmonicsRotationMatrixTest<T>::rotation()
 {
-	return Euler<T>(  M_PI / 3, M_PI / 5, M_PI / 10 );
+	return Euler<T>(  M_PI * 1.8, M_PI * 0.8, M_PI * 0.5 );
 }
 
 template< typename T >
@@ -384,51 +384,43 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation()
 	SphericalHarmonicsProjectorExt<T> projector( 5000 );
 	typename std::vector< Imath::Vec2<T> >::const_iterator pIt;
 
-	// apply euclidian projection
 	SphericalHarmonics< T > sh( bands );
-
-	std::vector< T > normalValues;
-	std::vector< T > rotatedValues;
-	typename std::vector< T >::const_iterator itN;
-	typename std::vector< T >::const_iterator itR;
-
-	projector.template euclideanProjection<>( rotatedFunctor, sh );
-	projector.reconstruction( sh, rotatedValues );
-
-	SphericalHarmonicsRotationMatrix<T> shRotation;
-	shRotation.setRotation( rotation().toMatrix44() );
 	projector.template euclideanProjection<>( normalFunctor, sh );
-	sh *= shRotation;
-	projector.reconstruction( sh, normalValues );
 
-#ifdef SAVE_ROTATION
-	typename std::vector< Imath::Vec3<T> >::const_iterator eIt;
-	PointsPrimitivePtr points = new PointsPrimitive( projector.euclidianCoordinates().size() );
-	V3fVectorDataPtr POINTS = new V3fVectorData();
-	FloatVectorDataPtr RADIUS = new FloatVectorData();
-	POINTS->writable().resize( projector.euclidianCoordinates().size() );
-	RADIUS->writable().resize( projector.euclidianCoordinates().size(), 0.04 );
-	points->variables["P"].data = POINTS;
-	points->variables["P"].interpolation = PrimitiveVariable::Vertex;
-	points->variables["constantwidth"].data = new FloatData(0.04);
-	points->variables["constantwidth"].interpolation = PrimitiveVariable::Constant;
-	typename std::vector<Imath::V3f>::iterator PIT = POINTS->writable().begin();
-	for ( itN = normalValues.begin(), eIt = projector.euclidianCoordinates().begin();
-			itN != normalValues.end() && eIt != projector.euclidianCoordinates().end(); itN++, eIt++, PIT++ )
-	{
-		*PIT = *eIt * ( *itN );
-	}
-	Writer::create( points, "/tmp/rotation.cob" )->write();
-#endif
+	SphericalHarmonics< T > shRot = sh;
+	SphericalHarmonicsRotationMatrix<T> shRotation;
 
-	int errors = 0;
-	T e = 0.1;
 	Imath::Matrix44<T> m = rotation().toMatrix44();
-	for ( itN = normalValues.begin(), itR = rotatedValues.begin(); itN != normalValues.end(); itN++, itR++ )
+	shRotation.setRotation( m );
+	shRot *= shRotation;
+
+	SphericalToEuclidianTransform< Imath::Vec2<T>, Imath::Vec3<T> > sph2euc;
+	EuclidianToSphericalTransform< Imath::Vec3<T>, Imath::Vec2<T> > euc2sph;
+
+	typename std::vector< Imath::Vec2< T > >::const_iterator it;
+	int errors = 0;
+	T e = 0.01;
+	Imath::Vec3<T> euc;
+	Imath::Vec2<T> sph;
+	T rotSHValue, shValueRot;
+
+	m.gjInvert();
+	for ( it = projector.sphericalCoordinates().begin(); it != projector.sphericalCoordinates().end(); it++ )
 	{
-		if ( !Imath::equalWithRelError(*itR, *itN, e ) )
+		euc = sph2euc.transform( *it );
+		sph = euc2sph.transform( euc );
+
+		if ( !(*it).equalWithRelError(sph, e ) )
 		{
-			BOOST_CHECK_EQUAL( *itR, *itN );
+			BOOST_CHECK_EQUAL( *it, sph );
+		}
+
+		rotSHValue = shRot( *it );
+		shValueRot = sh( euc2sph( euc * m ) ); 
+
+		if (!Imath::equalWithRelError ( shValueRot,rotSHValue, e))
+		{
+			BOOST_CHECK_EQUAL( shValueRot, rotSHValue );
 			if ( ++errors > 10 )
 			{
 				cout << "Could have more errors..." << endl;
@@ -441,7 +433,7 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation()
 template< typename T >
 void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
 {
-	unsigned int bands = 3;
+	unsigned int bands = 5;
 
 	// create normal distribution of samples
 	SphericalHarmonicsProjectorExt<T> projector( 5000 );
@@ -453,7 +445,8 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
 	SphericalHarmonics< Imath::Vec3<T> > shRot = sh;
 	SphericalHarmonicsRotationMatrix<T> shRotation;
 
-	shRotation.setRotation( rotation().toMatrix44() );
+	Imath::Matrix44<T> m = rotation().toMatrix44();
+	shRotation.setRotation( m );
 	shRot *= shRotation;
 
 	SphericalToEuclidianTransform< Imath::Vec2<T>, Imath::Vec3<T> > sph2euc;
@@ -461,18 +454,18 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
 
 	typename std::vector< Imath::Vec2< T > >::const_iterator it;
 	int errors = 0;
-	T e = 0.3;
+	T e = 0.01;
 	Imath::Vec3<T> euc;
 	Imath::Vec2<T> sph;
 	Imath::Vec3<T> rotSHValue, shValueRot;
-	Imath::Matrix44<T> m = rotation().toMatrix44();
 
+	m.gjInvert();
 	for ( it = projector.sphericalCoordinates().begin(); it != projector.sphericalCoordinates().end(); it++ )
 	{
 		euc = sph2euc.transform( *it );
 		sph = euc2sph.transform( euc );
 
-		if ( !(*it).equalWithAbsError(sph, e ) )
+		if ( !(*it).equalWithRelError(sph, e ) )
 		{
 			BOOST_CHECK_EQUAL( *it, sph );
 		}
@@ -480,7 +473,7 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
 		rotSHValue = shRot( *it );
 		shValueRot = sh( euc2sph( euc * m ) ); 
 
-		if ( !shValueRot.equalWithAbsError(rotSHValue, e ) )
+		if ( !shValueRot.equalWithRelError(rotSHValue, e ) )
 		{
 			BOOST_CHECK_EQUAL( shValueRot, rotSHValue );
 			if ( ++errors > 10 )

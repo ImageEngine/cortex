@@ -59,7 +59,16 @@ namespace IECore
 *     i<0,j>0 or i>0,j<0: R(i,j) = ((-1)^|j|*G(-|i|,|j|) + sign(j)*G(-|i|,-|j|)
 *     i=0,j>0 or i>0,j=0: R(i,j) = sqrt(2)*F(-|i|,-|j|)
 *     i=0,j<0 or i<0,j=0: R(i,j) = sign(j+.5)*sqrt(2)*G(-|i|,-|j|)
+*
 * Lucio Moser March 2009
+* 
+* Additional changes to the original equations:
+* The resulting SH rotation was not matching IECore/OpenEXR rotation conventions ( right-hand rule for X, Y and Z ).
+* In order to match it I've reverted signs on the following cells of the M44 rotation matrix 
+* before computing the complex rotation matrix:
+* R(0,2), R(2,0), R(1,2), R(2,1).
+*
+* Lucio Moser May 2009
 *
 * \todo Current implementation does not take advantage of the matrix sparsity.
 */
