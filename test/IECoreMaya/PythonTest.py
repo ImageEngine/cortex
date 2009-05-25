@@ -49,6 +49,23 @@ class PythonTest( unittest.TestCase ) :
 		# exceptions
 		c = OpenMaya.MTime( 1, OpenMaya.MTime.kSeconds )
 		self.assertEqual( c.as( OpenMaya.MTime.kMilliseconds ), 1000 )
+		
+		# Currently, http://www.python.org/doc/2.5.1/ref/keywords.html states
+		# that "as" is only recognized as a keyword once with_statement has been
+		# imported		
+		code = \
+"""from __future__ import with_statement
+oneSecond = OpenMaya.MTime( 1, OpenMaya.MTime.kSeconds )
+milli = oneSecond.as( OpenMaya.MTime.kMilliseconds ), 1000 )
+"""
+		try :
+			exec( code )
+			self.assert_( False )
+		except SyntaxError, e:
+			self.assertEqual( str(e), "invalid syntax (<string>, line 3)" )
+		except :
+			self.assert_( False )
+		
 
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
