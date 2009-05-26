@@ -48,14 +48,14 @@
 
 namespace IECore
 {
-/// A function object which performs linear interpolation
 
+/// A function object which performs linear interpolation
 template<typename T>
 struct LinearInterpolator;
 
+/// A function object which performs cubic interpolation
 template<typename T>
 struct CubicInterpolator;
-
 
 template<typename T>
 struct LinearInterpolator
@@ -65,7 +65,6 @@ struct LinearInterpolator
 
 };
 
-/// A function object which performs cubic interpolation
 template<typename T>
 struct CubicInterpolator
 {
