@@ -200,6 +200,7 @@ from DataTraitsTest import *
 from ColorSpaceTransformOpTest import *
 from TGAImageReaderTest import *
 from TGAImageWriterTest import *
+from BINParticleWriterTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

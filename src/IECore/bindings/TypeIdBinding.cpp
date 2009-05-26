@@ -336,7 +336,9 @@ void bindTypeId()
 		.value( "ParameterisedProcedural", ParameterisedProceduralTypeId )
 		.value( "ColorSpaceTransformOp", ColorSpaceTransformOpTypeId )
 		.value( "TGAImageReader", TGAImageReaderTypeId )
-		.value( "TGAImageWriter", TGAImageWriterTypeId )		
+		.value( "TGAImageWriter", TGAImageWriterTypeId )
+		.value( "BINParticleReader", BINParticleReaderTypeId )		
+		.value( "BINParticleWriter", BINParticleWriterTypeId )		
 	;
 }
 

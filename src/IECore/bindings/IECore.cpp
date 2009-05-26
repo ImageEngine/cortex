@@ -244,6 +244,7 @@
 #include "IECore/bindings/ParameterisedProceduralBinding.h"
 #include "IECore/bindings/LevenbergMarquardtBinding.h"
 #include "IECore/bindings/ColorSpaceTransformOpBinding.h"
+#include "IECore/bindings/BINParticleWriterBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -478,6 +479,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
 	bindColorSpaceTransformOp();
+	bindBINParticleWriter();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

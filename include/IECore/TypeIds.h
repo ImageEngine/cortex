@@ -334,7 +334,9 @@ enum TypeId
 	ParameterisedProceduralTypeId = 291,
 	ColorSpaceTransformOpTypeId = 292,
 	TGAImageReaderTypeId = 293,
-	TGAImageWriterTypeId = 294,		
+	TGAImageWriterTypeId = 294,
+	BINParticleReaderTypeId = 295,		
+	BINParticleWriterTypeId = 296,		
 
 	// Remember to update TypeIdBinding.cpp !!!
 
