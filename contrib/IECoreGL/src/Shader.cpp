@@ -37,6 +37,7 @@
 #include "IECoreGL/Texture.h"
 
 #include "IECore/SimpleTypedData.h"
+#include "IECore/MessageHandler.h"
 
 #include "boost/format.hpp"
 
@@ -72,10 +73,10 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 	glLinkProgram( m_program );
 	GLint linkStatus = 0;
 	glGetProgramiv( m_program, GL_LINK_STATUS, &linkStatus );
+	GLint logLength = 0;
+	glGetProgramiv( m_program, GL_INFO_LOG_LENGTH, &logLength );
 	if( !linkStatus )
-	{
-		GLint logLength = 0;
-		glGetProgramiv( m_program, GL_INFO_LOG_LENGTH, &logLength );
+	{		
 		std::string message = "Unknown linking error.";
 		if( logLength )
 		{
@@ -85,6 +86,14 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 		}
 		release();
 		throw Exception( message );
+	}
+	else if ( logLength > 1 )
+	{
+		std::string message;
+		vector<char> log( logLength, ' ' );
+		glGetProgramInfoLog( m_program, logLength, 0, &log[0] );
+		message = &log[0];
+		IECore::msg( IECore::Msg::Warning, "IECoreGL::Shader", message );
 	}
 
 	// build the parameter description map
@@ -134,10 +143,10 @@ void Shader::compile( const std::string &source, GLenum type, GLuint &shader )
 		glCompileShader( shader );
 		GLint compileStatus = 0;
 		glGetShaderiv( shader, GL_COMPILE_STATUS, &compileStatus );
+		GLint logLength = 0;
+		glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &logLength );
 		if( !compileStatus )
-		{
-			GLint logLength = 0;
-			glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &logLength );
+		{			
 			std::string message = "Unknown compilation error.";
 			if( logLength )
 			{
@@ -149,6 +158,15 @@ void Shader::compile( const std::string &source, GLenum type, GLuint &shader )
 			release();
 			throw Exception( message );
 		}
+		else if ( logLength > 1 )
+		{
+			std::string message;
+			vector<char> log( logLength, ' ' );
+			GLsizei l;
+			glGetShaderInfoLog( shader, logLength, &l, &log[0] );
+			message = &log[0];
+			IECore::msg( IECore::Msg::Warning, "IECoreGL::Shader", message );
+		}				
 	}
 
 }
