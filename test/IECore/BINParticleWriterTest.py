@@ -60,8 +60,8 @@ class BINParticleWriterTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/particleShape1.250.bin" ) :
-			os.remove( "test/particleShape1.250.bin" )
+		if os.path.isfile( "test/particleMesh.bin" ) :
+			os.remove( "test/particleMesh.bin" )
 
 if __name__ == "__main__":
 	unittest.main()
