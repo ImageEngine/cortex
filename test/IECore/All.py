@@ -201,6 +201,7 @@ from ColorSpaceTransformOpTest import *
 from TGAImageReaderTest import *
 from TGAImageWriterTest import *
 from BINParticleWriterTest import *
+from BINMeshReaderTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

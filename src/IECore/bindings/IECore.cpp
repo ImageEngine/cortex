@@ -245,6 +245,7 @@
 #include "IECore/bindings/LevenbergMarquardtBinding.h"
 #include "IECore/bindings/ColorSpaceTransformOpBinding.h"
 #include "IECore/bindings/BINParticleWriterBinding.h"
+#include "IECore/bindings/BINMeshReaderBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -480,6 +481,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLevenbergMarquardt();
 	bindColorSpaceTransformOp();
 	bindBINParticleWriter();
+	bindBINMeshReader();	
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -339,6 +339,7 @@ void bindTypeId()
 		.value( "TGAImageWriter", TGAImageWriterTypeId )
 		.value( "BINParticleReader", BINParticleReaderTypeId )		
 		.value( "BINParticleWriter", BINParticleWriterTypeId )		
+		.value( "BINMeshReader", BINMeshReaderTypeId )				
 	;
 }
 

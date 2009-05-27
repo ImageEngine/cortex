@@ -337,6 +337,7 @@ enum TypeId
 	TGAImageWriterTypeId = 294,
 	BINParticleReaderTypeId = 295,		
 	BINParticleWriterTypeId = 296,		
+	BINMeshReaderTypeId = 297,			
 
 	// Remember to update TypeIdBinding.cpp !!!
 
