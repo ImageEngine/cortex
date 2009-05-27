@@ -106,7 +106,7 @@ ObjectPtr OBJReader::doOperation(ConstCompoundObjectPtr operands)
 
 	PrimitiveVariable::Interpolation i = PrimitiveVariable::Vertex;
 
-	MeshPrimitive *mesh = new MeshPrimitive();
+	MeshPrimitivePtr mesh = new MeshPrimitive();
 
 	V3fVectorDataPtr vertices = new V3fVectorData();
 	m_vertices = &vertices->writable();
