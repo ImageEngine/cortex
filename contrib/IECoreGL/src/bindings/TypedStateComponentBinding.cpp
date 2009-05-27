@@ -79,6 +79,7 @@ void bindTypedStateComponent( const char *className )
 {
 	IECore::RunTimeTypedClass<T>()
 		.def( init< const typename T::ValueType & >() )
+		.add_property( "value", make_function( &T::value, return_value_policy<copy_const_reference>() ) )
 	;
 }
 
