@@ -145,6 +145,7 @@
 #include "IECore/bindings/SphereImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/PlaneImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/BlobbyImplicitSurfaceFunctionBinding.h"
+#include "IECore/bindings/ZhuBridsonImplicitSurfaceFunctionBinding.h"
 #include "IECore/bindings/ParticleMeshOpBinding.h"
 #include "IECore/bindings/TypedPrimitiveOpBinding.h"
 #include "IECore/bindings/PrimitiveEvaluatorBinding.h"
@@ -376,6 +377,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSphereImplicitSurfaceFunction();
 	bindPlaneImplicitSurfaceFunction();
 	bindBlobbyImplicitSurfaceFunction();
+	bindZhuBridsonImplicitSurfaceFunction();	
 	bindParticleMeshOp();
 	bindTypedPrimitiveOp();
 	bindPrimitiveEvaluator();
