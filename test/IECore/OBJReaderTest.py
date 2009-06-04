@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,53 +32,70 @@
 #
 ##########################################################################
 
-
 import unittest
 import sys
 import IECore
 
-class TestOBJReader(unittest.TestCase):
+class TestOBJReader( unittest.TestCase ) :
 
-    def testRead(self):
+	def testRead( self ) :
+	
+		self.testfile = 'test/IECore/data/obj/triangle.obj'
 
-        self.testfile = 'test/IECore/data/obj/triangle.obj'
+		r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECore.OBJReader)
 
-        r = IECore.Reader.create(self.testfile)
-        self.assertEqual(type(r), IECore.OBJReader)
+		mesh = r.read()
 
-        mesh = r.read()
+		self.failUnless( mesh.isInstanceOf( IECore.MeshPrimitive.staticTypeId() ) )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertEqual( len( mesh ), 1 )
+		self.failUnless( "P" in mesh )
+		
+	def testReadNormals( self ) :
+		
+		self.testfile = 'test/IECore/data/obj/triangle_normals.obj'
 
-    def testReadNormals(self):
+		r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECore.OBJReader)
 
-        self.testfile = 'test/IECore/data/obj/triangle_normals.obj'
+		mesh = r.read()
+		
+		self.failUnless( mesh.isInstanceOf( IECore.MeshPrimitive.staticTypeId() ) )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertEqual( len( mesh ), 4 )
+		self.failUnless( "P" in mesh )
+		self.failUnless( "N" in mesh )
+		self.failUnless( "s" in mesh )
+		self.failUnless( "t" in mesh )
 
-        r = IECore.Reader.create(self.testfile)
-        self.assertEqual(type(r), IECore.OBJReader)
+	def testReadNoTexture( self ) :
+		
+		self.testfile = 'test/IECore/data/obj/triangle_no_texture.obj'
+		
+		r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECore.OBJReader)
 
-        mesh = r.read()
+		mesh = r.read()
+		
+		self.failUnless( mesh.isInstanceOf( IECore.MeshPrimitive.staticTypeId() ) )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertEqual( len( mesh ), 2 )
+		self.failUnless( "P" in mesh )
+		self.failUnless( "N" in mesh )
 
+	def testGroups( self ) :
+		
+		self.testfile = 'test/IECore/data/obj/groups.obj'
 
+		r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECore.OBJReader)
 
-    def testReadNoTexture(self):
-
-        self.testfile = 'test/IECore/data/obj/triangle_no_texture.obj'
-
-        r = IECore.Reader.create(self.testfile)
-        self.assertEqual(type(r), IECore.OBJReader)
-
-        mesh = r.read()
-
-
-    def testGroups(self):
-
-        self.testfile = 'test/IECore/data/obj/groups.obj'
-
-        r = IECore.Reader.create(self.testfile)
-        self.assertEqual(type(r), IECore.OBJReader)
-
-        mesh = r.read()
-
-
+		mesh = r.read()
+		
+		self.failUnless( mesh.isInstanceOf( IECore.MeshPrimitive.staticTypeId() ) )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
 
 if __name__ == "__main__":
-        unittest.main()
+	
+	unittest.main()
