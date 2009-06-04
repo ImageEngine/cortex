@@ -104,33 +104,38 @@ ObjectPtr OBJReader::doOperation(ConstCompoundObjectPtr operands)
 	IntVectorDataPtr vids = new IntVectorData();
 	m_vids = &vids->writable();
 
-	PrimitiveVariable::Interpolation i = PrimitiveVariable::Vertex;
-
-	MeshPrimitivePtr mesh = new MeshPrimitive();
-
 	V3fVectorDataPtr vertices = new V3fVectorData();
 	m_vertices = &vertices->writable();
-	mesh->variables.insert(PrimitiveVariableMap::value_type("P", PrimitiveVariable(i, vertices)));
 
  	// separate texture coordinates
 	FloatVectorDataPtr sTextureCoordinates = new FloatVectorData();
 	m_sTextureCoordinates = &sTextureCoordinates->writable();
-	mesh->variables.insert(PrimitiveVariableMap::value_type("s", PrimitiveVariable(i, sTextureCoordinates)));
 
 	FloatVectorDataPtr tTextureCoordinates = new FloatVectorData();
 	m_tTextureCoordinates = &tTextureCoordinates->writable();
-	mesh->variables.insert(PrimitiveVariableMap::value_type("t", PrimitiveVariable(i, tTextureCoordinates)));
 
 	// build normals
 	V3fVectorDataPtr normals = new V3fVectorData();
 	m_normals = &normals->writable();
-	mesh->variables.insert(PrimitiveVariableMap::value_type("N", PrimitiveVariable(i, normals)));
 
 	// parse the file
 	parseOBJ();
 
 	// create our MeshPrimitive
-	mesh->setTopology(vpf, vids, "linear");
+	MeshPrimitivePtr mesh = new MeshPrimitive( vpf, vids, "linear", vertices );
+	if( sTextureCoordinates->readable().size() )
+	{
+		mesh->variables.insert(PrimitiveVariableMap::value_type("s", PrimitiveVariable( PrimitiveVariable::FaceVarying, sTextureCoordinates)));
+	
+	}
+	if( tTextureCoordinates->readable().size() )
+	{
+		mesh->variables.insert(PrimitiveVariableMap::value_type("t", PrimitiveVariable(  PrimitiveVariable::FaceVarying, tTextureCoordinates)));
+	}
+	if( normals->readable().size() )
+	{
+		mesh->variables.insert(PrimitiveVariableMap::value_type("N", PrimitiveVariable(  PrimitiveVariable::FaceVarying, normals)));
+	}
 	return mesh;
 }
 
