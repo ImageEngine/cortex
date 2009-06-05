@@ -77,7 +77,6 @@ struct TGAImageReader::Header
 	char imageDescriptor;
 };
 
-IE_CORE_DEFINERUNTIMETYPED( TGAImageReader );
 const Reader::ReaderDescription<TGAImageReader> TGAImageReader::m_readerDescription( "tga" );
 
 TGAImageReader::TGAImageReader() :
@@ -118,14 +117,13 @@ void TGAImageReader::channelNames( vector<string> &names )
 
 	assert( m_header );
 
+	names.push_back( "B" );
+	names.push_back( "G" );
+	names.push_back( "R" );
 	if ( m_header->pixelDepth == 32 )
 	{
 		names.push_back( "A" );
 	}
-
-	names.push_back( "B" );
-	names.push_back( "G" );
-	names.push_back( "R" );
 
 }
 
@@ -194,11 +192,29 @@ DataPtr TGAImageReader::readChannel( const string &name, const Imath::Box2i &dat
 	const int samplesPerPixel = m_header->pixelDepth == 24 ? 3 : 4 ;
 
 	int dataY = 0;
-	for ( int y = dataWindow.min.y - m_dataWindow.min.y ; y <= dataWindow.max.y - m_dataWindow.min.y ; ++y, ++dataY )
-	{
-		int dataX = 0;
+	int dataYinc = 1;
 
-		for ( int x = dataWindow.min.x - m_dataWindow.min.x;  x <= dataWindow.max.x - m_dataWindow.min.x ; ++x, ++dataX )
+	if ( !(m_header->imageDescriptor & 1<<5) )
+	{
+		// bottom-up order.
+		dataYinc = -1;
+		dataY = dataWindow.size().y;
+	}
+
+	int dataXstart = 0;
+	int dataXinc = 1;
+	if ( m_header->imageDescriptor & 1<<4 )
+	{
+		// right-left order.
+		dataXstart = dataWindow.size().x;
+		dataXinc = -1;
+	}
+
+	for ( int y = dataWindow.min.y - m_dataWindow.min.y ; y <= dataWindow.max.y - m_dataWindow.min.y ; ++y, dataY += dataYinc )
+	{
+		int dataX = dataXstart;
+
+		for ( int x = dataWindow.min.x - m_dataWindow.min.x;  x <= dataWindow.max.x - m_dataWindow.min.x ; ++x, dataX += dataXinc )
 		{
 			const uint8_t* buf = reinterpret_cast< uint8_t* >( & m_buffer[0] );
 			assert( buf );
@@ -244,16 +260,59 @@ void TGAImageReader::readBuffer()
 	uint32_t pixelCount = m_header->imageWidth * m_header->imageHeight;
 	uint16_t bytesPerPixel = ( int )(( float )m_header->pixelDepth / 8.0 + 0.5 );
 	uint32_t bufferSize = pixelCount * bytesPerPixel;
-	m_buffer.resize( bufferSize );
+	m_buffer.resize( bufferSize, 0 );
 
 	ifstream in( fileName().c_str() );
 	in.seekg( 18, ios_base::beg );
-	in.read( reinterpret_cast<char*>( &m_buffer[0] ), bufferSize );
-	if ( in.fail() )
-	{
-		throw IOException( "TGAImageReader: Error reading " + fileName() );
-	}
 
+	if ( m_header->imageType == 2 )
+	{
+		// uncompressed format
+		in.read( reinterpret_cast<char*>( &m_buffer[0] ), bufferSize );
+		if ( in.fail() )
+		{
+			throw IOException( "TGAImageReader: Error reading " + fileName() );
+		}
+	}
+	else
+	{
+		// RLE compression
+		char repetitionByte;
+		char rleValue[4];
+		int counter;
+		
+		std::vector<char>::iterator bufIt = m_buffer.begin();
+
+		while( bufIt != m_buffer.end() && !in.fail() )
+		{
+			in.read( &repetitionByte, 1 );
+			if ( !in.fail() )
+			{
+				counter = ( ((unsigned char)repetitionByte) & ((1<<7)-1) ) + 1;
+				if ( repetitionByte & (1<<7) )
+				{
+					// RLE encoded
+					in.read( rleValue, bytesPerPixel );
+					for ( int c = 0; c < counter; c++ )
+					{
+						std::copy( rleValue, rleValue + bytesPerPixel, bufIt );
+						bufIt += bytesPerPixel;
+					}
+				}
+				else
+				{
+					// RAW
+					in.read( &(*bufIt), bytesPerPixel * counter );
+					bufIt += bytesPerPixel * counter;
+				}
+			}
+		}
+		if ( in.fail() )
+		{
+			// so we can read incomplete files
+			msg( Msg::Warning, "TGAImageReader::readChannel", "Incomplete file" );
+		}
+	}
 	m_bufferFileName = fileName();
 }
 
@@ -300,7 +359,7 @@ bool TGAImageReader::open( bool throwOnFailure )
 			throw IOException(( boost::format( "TGAImageReader: Unsupported color map type (%d) in file %s" ) % ( int )m_header->colorMapType % fileName() ).str() );
 		}
 
-		if ( m_header->imageType != 2 )
+		if ( m_header->imageType != 2 && m_header->imageType != 10 )
 		{
 			throw IOException(( boost::format( "TGAImageReader: Unsupported image type (%d) in file %s" ) % ( int )m_header->imageType % fileName() ).str() );
 		}
@@ -308,22 +367,6 @@ bool TGAImageReader::open( bool throwOnFailure )
 		if ( m_header->pixelDepth != 24 &&  m_header->pixelDepth != 32 )
 		{
 			throw IOException(( boost::format( "TGAImageReader: Unsupported pixel depth (%d) in file %s" ) % ( int )m_header->pixelDepth % fileName() ).str() );
-		}
-
-		bool topFirst = false;
-		if ( m_header->imageDescriptor & 1<<5 )
-		{
-			topFirst = true;
-		}
-		bool rightFirst = false;
-		if ( m_header->imageDescriptor & 1<<4 )
-		{
-			rightFirst = true;
-		}
-
-		if ( !topFirst || rightFirst )
-		{
-			throw IOException(( boost::format( "TGAImageReader: Unsupported image orientation in file %s" ) % fileName() ).str() );
 		}
 
 		int alphaChannelBits = m_header->imageDescriptor & 0xf;
