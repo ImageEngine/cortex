@@ -56,6 +56,7 @@ using namespace std;
 using namespace boost;
 using namespace Imath;
 
+IE_CORE_DEFINERUNTIMETYPED( TGAImageWriter )
 const Writer::WriterDescription<TGAImageWriter> TGAImageWriter::m_writerDescription( "tga" );
 
 TGAImageWriter::TGAImageWriter() :

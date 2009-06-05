@@ -77,6 +77,7 @@ struct TGAImageReader::Header
 	char imageDescriptor;
 };
 
+IE_CORE_DEFINERUNTIMETYPED( TGAImageReader );
 const Reader::ReaderDescription<TGAImageReader> TGAImageReader::m_readerDescription( "tga" );
 
 TGAImageReader::TGAImageReader() :
