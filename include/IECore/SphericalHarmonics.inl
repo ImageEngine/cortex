@@ -35,23 +35,49 @@
 #include <cassert>
 #include "IECore/VectorTraits.h"
 #include "IECore/RealSphericalHarmonicFunction.h"
+#include "IECore/EuclidianToSphericalTransform.h"
 
 namespace IECore
 {
 
 template < typename V >
+SphericalHarmonics<V>::SphericalHarmonics( unsigned int bands ) : m_bands(bands)
+{
+	m_coefficients.resize( bands * bands, V(0) );
+}
+
+template < typename V >
+SphericalHarmonics<V>::SphericalHarmonics( const SphericalHarmonics &sh ) : m_bands( sh.bands() )
+{
+	m_coefficients.resize( sh.coefficients().size() );
+	std::copy( sh.coefficients().begin(), sh.coefficients().end(), m_coefficients.begin() );
+}
+
+template < typename V >
+SphericalHarmonics<V>::~SphericalHarmonics()
+{
+}
+
+template < typename V >
+const SphericalHarmonics<V> & SphericalHarmonics<V>::operator =( const SphericalHarmonics<V> &sh )
+{
+	m_bands = sh.bands();
+	m_coefficients.resize( sh.coefficients().size() );
+	std::copy( sh.coefficients().begin(), sh.coefficients().end(), m_coefficients.begin() );
+	return *this;
+}
+
+template < typename V >
+void SphericalHarmonics<V>::setBands( unsigned int bands )
+{
+	m_bands = bands;
+	m_coefficients.resize( bands * bands, V(0) );
+}
+
+template < typename V >
 V SphericalHarmonics<V>::operator() ( const Imath::Vec2< BaseType > &phiTheta ) const
 {
-	V res(0);
-	typename CoefficientVector::const_iterator cit = m_coefficients.begin();
-	for ( unsigned int l = 0; l < m_bands; l++ )
-	{
-		for (int m = -static_cast<int>(l); m <= static_cast<int>(l); m++, cit++ )
-		{
-			res += (*cit) * V( RealSphericalHarmonicFunction< BaseType >::evaluate( phiTheta.x, phiTheta.y, l, m ) );
-		}
-	}
-	return res;
+	return operator()( phiTheta, m_bands );
 }
 
 template < typename V >
@@ -61,6 +87,10 @@ V SphericalHarmonics<V>::operator() ( const Imath::Vec2< BaseType > &phiTheta, u
 	{
 		bands = m_bands;
 	}
+	SHEvaluator evaluator( this );
+	RealSphericalHarmonicFunction< BaseType >::evaluate( phiTheta.x, phiTheta.y, bands, evaluator );
+	return evaluator.result();
+/*
 	V res(0);
 	typename CoefficientVector::const_iterator cit = m_coefficients.begin();
 	for ( unsigned int l = 0; l < bands; l++ )
@@ -71,6 +101,19 @@ V SphericalHarmonics<V>::operator() ( const Imath::Vec2< BaseType > &phiTheta, u
 		}
 	}
 	return res;
+*/
+}
+
+template < typename V >
+V SphericalHarmonics<V>::operator() ( const Imath::Vec3< BaseType > &xyz ) const
+{
+	return operator()( EuclidianToSphericalTransform< Imath::Vec3< BaseType >, Imath::Vec2< BaseType > >().transform( xyz ), m_bands );
+}
+
+template < typename V >
+V SphericalHarmonics<V>::operator() ( const Imath::Vec3< BaseType > &xyz, unsigned int bands ) const
+{
+	return operator()( EuclidianToSphericalTransform< Imath::Vec3< BaseType >, Imath::Vec2< BaseType > >().transform( xyz ), bands );
 }
 
 template< typename V >
@@ -86,6 +129,125 @@ R SphericalHarmonics<V>::dot( const SphericalHarmonics<T> &s ) const
 		res += (*ita) * (*itb);
 	}
 	return res;
+}
+
+template< typename V >
+template < typename T >
+void SphericalHarmonics<V>::convolve( const SphericalHarmonics<T> &sh )
+{
+	const int numBands = std::min( m_bands, sh.bands() );
+	typename CoefficientVector::iterator it = m_coefficients.begin();
+	for( int l=0; l<numBands; l++ )
+	{
+		const double alpha = sqrt( 4*M_PI / (2*l + 1) );
+		T coeffs = sh.coefficients()[ l*(l+1) ];
+		for( int m=-l; m <= l; m++, it++ )
+		{
+			(*it) *= alpha * coeffs;
+		}
+	}
+	for( ; it != m_coefficients.end(); it++ )
+	{
+		(*it) = 0;
+	}
+}
+
+template <class S>
+SphericalHarmonics<S> operator + ( const SphericalHarmonics<S> &lsh, const SphericalHarmonics<S> &rsh )
+{
+	SphericalHarmonics<S> sh( max( lsh.bands(), rsh.bands() ) );
+	typename SphericalHarmonics<S>::CoefficientVector::iterator it;
+	typename SphericalHarmonics<S>::CoefficientVector::const_iterator lit, rit;
+	for ( it = sh.coefficients().begin(), rit = rsh.coefficients().begin(), lit = lsh.coefficients().begin(); rit != rsh.coefficients().end() && lit != lsh.coefficients().end(); it++, rit++, lit++ )
+	{
+		*it = (*lit) + (*rit);
+	}
+	for ( ; rit != rsh.coefficients().end(); it++, rit++ )
+	{
+		*it = (*rit);
+	}
+	for ( ; lit != lsh.coefficients().end(); it++, lit++ )
+	{
+		*it = (*lit);
+	}
+	return sh;
+}
+
+template <class S>
+const SphericalHarmonics<S> & operator += ( SphericalHarmonics<S> &lsh, const SphericalHarmonics<S> &rsh )
+{
+	if ( lsh.bands() < rsh.bands() )
+	{
+		lsh.setBands( rsh.bands() );
+	}
+	typename SphericalHarmonics<S>::CoefficientVector::iterator it;
+	typename SphericalHarmonics<S>::CoefficientVector::const_iterator cit;
+	for ( cit = rsh.coefficients().begin(), it = lsh.coefficients().begin(); cit != rsh.coefficients().end() && it != lsh.coefficients().end(); cit++, it++ )
+	{
+		*it += (*cit);
+	}
+	return lsh;
+}
+
+template <class S>
+SphericalHarmonics<S> operator - ( const SphericalHarmonics<S> &lsh, const SphericalHarmonics<S> &rsh )
+{
+	SphericalHarmonics<S> sh( max( lsh.bands(), rsh.bands() ) );
+	typename SphericalHarmonics<S>::CoefficientVector::iterator it;
+	typename SphericalHarmonics<S>::CoefficientVector::const_iterator lit, rit;
+	for ( it = sh.coefficients().begin(), rit = rsh.coefficients().begin(), lit = lsh.coefficients().begin(); rit != rsh.coefficients().end() && lit != lsh.coefficients().end(); it++, rit++, lit++ )
+	{
+		*it = (*lit) - (*rit);
+	}
+	for ( ; rit != rsh.coefficients().end(); it++, rit++ )
+	{
+		*it = -(*rit);
+	}
+	for ( ; lit != lsh.coefficients().end(); it++, lit++ )
+	{
+		*it = (*lit);
+	}
+	return sh;
+}
+
+template <class S>
+const SphericalHarmonics<S> & operator -= ( SphericalHarmonics<S> &lsh, const SphericalHarmonics<S> &rsh )
+{
+	if ( lsh.bands() < rsh.bands() )
+	{
+		lsh.setBands( rsh.bands() );
+	}
+	typename SphericalHarmonics<S>::CoefficientVector::iterator it;
+	typename SphericalHarmonics<S>::CoefficientVector::const_iterator cit;
+	for ( cit = rsh.coefficients().begin(), it = lsh.coefficients().begin(); cit != rsh.coefficients().end() && it != lsh.coefficients().end(); cit++, it++ )
+	{
+		*it -= (*cit);
+	}
+	return lsh;
+}
+
+template <class S, class T>
+SphericalHarmonics<S> operator * ( const SphericalHarmonics<S> &lsh, const T &scale )
+{
+	SphericalHarmonics<S> sh( lsh.bands() );
+	typename SphericalHarmonics<S>::CoefficientVector::iterator it;
+	typename SphericalHarmonics<S>::CoefficientVector::const_iterator lit;
+	for ( it = sh.coefficients().begin(), lit = lsh.coefficients().begin(); lit != lsh.coefficients().end(); it++, lit++ )
+	{
+		*it = (*lit) * scale;
+	}
+	return sh;
+}
+
+template <class S, class T>
+const SphericalHarmonics<S> & operator *= ( SphericalHarmonics<S> &lsh, const T &scale )
+{
+	typename SphericalHarmonics<S>::CoefficientVector::iterator it;
+	for ( it = lsh.coefficients().begin(); it != lsh.coefficients().end(); it++ )
+	{
+		*it *= scale;
+	}
+	return lsh;
 }
 
 

@@ -66,7 +66,7 @@ T EuclidianToSphericalTransform<F, T>::transform( const F &f )
 	T res;
 	res[0] = phi;
 	res[1] = Imath::Math< U >::acos( v.z );
-	if ( TypeTraits::IsVec3<F>::value )
+	if ( TypeTraits::IsVec3<T>::value )
 	{
 		res[2] = len;
 	}

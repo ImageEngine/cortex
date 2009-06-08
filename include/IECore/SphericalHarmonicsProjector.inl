@@ -159,10 +159,7 @@ void SphericalHarmonicsProjector<V>::operator()( unsigned int coordinateIndex, c
 			const double weight = 4 * M_PI;
 			factor = weight / (double)m_shEvaluations.size();
 		}
-		for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
-		{
-			*rit *= factor;
-		}
+		result *= factor;
 	}
 }
 
@@ -200,10 +197,7 @@ void SphericalHarmonicsProjector<V>::polarProjection( T functor, SphericalHarmon
 		const double weight = 4 * M_PI;
 		factor = weight / (double)m_shEvaluations.size();
 	}
-	for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
-	{
-		*rit *= factor;
-	}
+	result *= factor;
 }
 
 template< typename V >
@@ -242,10 +236,7 @@ void SphericalHarmonicsProjector<V>::euclideanProjection( T functor, SphericalHa
 		const double weight = 4 * M_PI;
 		factor = weight / m_shEvaluations.size();
 	}
-	for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
-	{
-		*rit *= factor;
-	}
+	result *= factor;
 }
 
 template< typename V >

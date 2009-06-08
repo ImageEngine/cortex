@@ -37,6 +37,7 @@
 
 #include "boost/static_assert.hpp"
 #include "boost/type_traits.hpp"
+#include "boost/function.hpp"
 #include <vector>
 
 namespace IECore
@@ -62,6 +63,12 @@ class RealSphericalHarmonicFunction
 		// the order in the array follows: index = l*(l+1)+m where l is [0,bands-1] and m[-l,l].
 		static void evaluate( V phi, V theta, unsigned int bands, std::vector<V> &result );
 
+		// computes all the bands for the given spherical coordinates and calls the given functor passing l,m and the computed value.
+		static void evaluate( V phi, V theta, unsigned int bands, boost::function< void ( unsigned int, int, V ) > functor );
+
+	private :
+
+		static V evaluateFromLegendre( V phi, unsigned int l, int m, double legendreEval );
 };
 
 } // namespace IECore

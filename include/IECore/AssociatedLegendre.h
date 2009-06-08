@@ -44,7 +44,6 @@ namespace IECore
 
 // Implements associated Legendre polynomial computation.
 // Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
-// \todo provide a way to compute all the polynomials from band 0 to N taking advantage of the recurrence rules. Then add the same functionality in RealSphericalHarmonicFunction.
 template < typename V >
 class AssociatedLegendre
 {
@@ -56,11 +55,11 @@ class AssociatedLegendre
 		// uses formula: ((-1)^mm) * (2mm-1))!! * (1-x^2)^(mm/2)
 		static V evaluate( unsigned int mm, V x );
 
-		// computes the function for a given band l and parameter m based on  previous computed values for band l and parameters m-1 and m-2.
+		// computes the function for a given band l and parameter m based on previous computed values for bands l-1 and l-2 with parameter m.
 		static V evaluateFromRecurrence1( unsigned int l, unsigned int m, V x, V p1, V p2 );
 
-		// computes the function for a given band m and parameter m+1 based on  previous computed value for band m and parameters m.
-		static V evaluateFromRecurrence2( unsigned int m, V x, V p1 );
+		// computes the function for a given band l+1 and parameter l based on previous computed value for band l and parameters l.
+		static V evaluateFromRecurrence2( unsigned int l, V x, V p1 );
 
 		// computes the function for a given band l and parameter m.
 		static V evaluate( unsigned int l, unsigned int m, V x );

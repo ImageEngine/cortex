@@ -64,9 +64,9 @@ V AssociatedLegendre<V>::evaluateFromRecurrence1( unsigned int l, unsigned int m
 }
 
 template < typename V >
-V AssociatedLegendre<V>::evaluateFromRecurrence2( unsigned int m, V x, V p1 )
+V AssociatedLegendre<V>::evaluateFromRecurrence2( unsigned int l, V x, V p1 )
 {
-	return static_cast<V>( x*(2.0*m+1.0)*p1 );
+	return static_cast<V>( x*(2.0*l+1.0)*p1 );
 }
 
 template < typename V >

@@ -47,11 +47,14 @@ namespace IECore
 void addSphericalHarmonicsTest(boost::unit_test::test_suite* test);
 
 template<typename T >
-class SphericalHarmonicsFunctionTest
+class SphericalHarmonicsTest
 {
 	public:
 
-		void testEvaluation();
+		void testFunctionEvaluation();
+		void testConstruction();
+		void testDotProduct();
+		void testArithmeticOperations();
 };
 
 template<typename T, int bands, unsigned int samples >
@@ -109,19 +112,22 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 
 	SphericalHarmonicsTestSuite() : boost::unit_test::test_suite("SphericalHarmonicsTestSuite")
 	{
-		addSphericalHarmonicsFunctionTest< float >();
-		addSphericalHarmonicsFunctionTest< double >();
+		addSphericalHarmonicsTest< float >();
+		addSphericalHarmonicsTest< double >();
 		addSphericalHarmonicsProjectorTest< double,10,20000 >();
 		addSphericalHarmonicsRotationMatrixTest< double >();
 
 	}
 
 	template< typename T >
-	void addSphericalHarmonicsFunctionTest()
+	void addSphericalHarmonicsTest()
 	{
-		static boost::shared_ptr< SphericalHarmonicsFunctionTest< T > > instance(new SphericalHarmonicsFunctionTest<T>());
+		static boost::shared_ptr< SphericalHarmonicsTest< T > > instance(new SphericalHarmonicsTest<T>());
 
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsFunctionTest< T >::testEvaluation), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTest< T >::testFunctionEvaluation), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTest< T >::testConstruction), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTest< T >::testDotProduct), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTest< T >::testArithmeticOperations), instance ) );
 	}
 
 	template< typename T, int bands, int samples >

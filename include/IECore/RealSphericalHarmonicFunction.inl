@@ -41,22 +41,8 @@ namespace IECore
 template < typename V >
 V RealSphericalHarmonicFunction<V>::evaluate( V phi, V theta, unsigned int l, int m )
 {
-	if ( m > 0 )
-	{
-		return Imath::Math<V>::sqrt(2.0) * 
-				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(m) ) * 
-				Imath::Math<V>::cos( m*phi ) * 
-				AssociatedLegendre<double>::evaluate( l, static_cast<unsigned int>(m), Imath::Math<V>::cos( theta ) );
-	}
-	if ( m < 0 )
-	{
-		return Imath::Math<V>::sqrt(2.0) * 
-				AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(-m) ) * 
-				Imath::Math<V>::sin( -m*phi ) * 
-				AssociatedLegendre<double>::evaluate( l, static_cast<unsigned int>(-m), Imath::Math<V>::cos( theta ) );
-	}
-	return AssociatedLegendre<double>::normalizationFactor( l, 0 ) * 
-				AssociatedLegendre<double>::evaluate( l, 0, Imath::Math<V>::cos(theta) );
+	unsigned int absM = (unsigned int)( m < 0 ? -m : m );
+	return evaluateFromLegendre( phi, l, m, AssociatedLegendre<double>::evaluate( l, absM, Imath::Math<V>::cos( theta ) ) );
 }
 
 template < typename V >
@@ -74,5 +60,61 @@ void RealSphericalHarmonicFunction<V>::evaluate( V phi, V theta, unsigned int ba
 
 }
 
+template < typename V >
+V RealSphericalHarmonicFunction<V>::evaluateFromLegendre( V phi, unsigned int l, int m, double legendreEval )
+{
+	static const V sqrt2 = Imath::Math<V>::sqrt(2.0);
+	if ( m > 0 )
+	{
+		return sqrt2 * AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(m) ) * Imath::Math<V>::cos( m*phi ) * legendreEval;
+	}
+	if ( m < 0 )
+	{
+		return sqrt2 * AssociatedLegendre<double>::normalizationFactor( l, static_cast<unsigned int>(-m) ) * Imath::Math<V>::sin( -m*phi ) * legendreEval;
+	}
+	return AssociatedLegendre<double>::normalizationFactor( l, 0 ) * legendreEval;
+}
+
+template< typename V >
+void RealSphericalHarmonicFunction<V>::evaluate( V phi, V theta, unsigned int bands, boost::function< void ( unsigned int, int, V ) > functor )
+{
+	V cosTheta = Imath::Math<V>::cos(theta);
+	V p1, p2, pl;
+	for ( unsigned int l = 0; l < bands; l++ )
+	{
+		// compute Pmm ( l = m )
+		p2 = AssociatedLegendre<double>::evaluate( l, cosTheta );
+		functor( l, (int)l, evaluateFromLegendre( phi, l, (int)l, p2 ) );
+		if ( l )
+		{
+			functor( l, -(int)l, evaluateFromLegendre( phi, l, -(int)l, p2 ) );
+		}
+
+		if ( l == bands - 1 )
+			continue;
+
+		// compute Pm+1m ( l = m+1 )
+		p1 = AssociatedLegendre<double>::evaluateFromRecurrence2( l, cosTheta, p2 );
+		functor( l+1, (int)l, evaluateFromLegendre( phi, l+1, (int)l, p1 ) );
+		// compute m negative
+		if ( l )
+		{
+			functor( l+1, -(int)l, evaluateFromLegendre( phi, l+1, -(int)l, p1 ) );
+		}
+
+		// compute Pm+1+xm ( l = [m+1,m+1+x] )
+		for ( unsigned int ll = l+2; ll < bands; ll++ )
+		{
+			pl = AssociatedLegendre<double>::evaluateFromRecurrence1( ll, (int)l, cosTheta, p1, p2 );
+			functor( ll, (int)l, evaluateFromLegendre( phi, ll, (int)l, pl ) );
+			if ( l )
+			{
+				functor( ll, -(int)l, evaluateFromLegendre( phi, ll, -(int)l, pl ) );
+			}
+			p2 = p1;
+			p1 = pl;
+		}
+	}
+}
 
 } // namespace IECore

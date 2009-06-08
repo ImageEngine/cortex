@@ -38,6 +38,7 @@
 #include "IECore/Writer.h"
 #include "IECore/SphericalToEuclidianTransform.h"
 #include "IECore/EuclidianToSphericalTransform.h"
+#include "IECore/Interpolator.h"
 
 #include <algorithm>
 #include <vector>
@@ -51,21 +52,152 @@ namespace IECore
 
 
 template<typename T >
-void SphericalHarmonicsFunctionTest< T >::testEvaluation()
+void SphericalHarmonicsTest< T >::testFunctionEvaluation()
 {
 	T theta = 0.2;
 	T phi = 0.3;
 	T res;
-	for ( unsigned int l = 0; l < 50; l++ )
+	for ( unsigned int l = 0; l < 25; l++ )
 	{
-		for ( unsigned int m = -m; m <= l; m++ )
+		for ( int m = -(int)l; m <= (int)l; m++ )
 		{
 			res = RealSphericalHarmonicFunction<T>::evaluate( phi, theta, l, m );
 			BOOST_CHECK( !isnan( res ) );
+			SphericalHarmonics< T > sh( l+1 );
+			sh.coefficients()[ l*(l+1)+m ] = 1;
+			BOOST_CHECK_EQUAL( sh( Imath::Vec2<T>( phi, theta ) ), res );
 		}
 	}
 }
 
+template<typename T >
+void SphericalHarmonicsTest< T >::testConstruction()
+{
+	// default constructor
+	SphericalHarmonics< T > sh1;
+	BOOST_CHECK_EQUAL( sh1.bands(), (unsigned)0 );
+	BOOST_CHECK_EQUAL( sh1.coefficients().size(), (unsigned)0 );
+	SphericalHarmonics< T > sh2( 3 );
+	BOOST_CHECK_EQUAL( sh2.bands(), (unsigned)3 );
+	BOOST_CHECK_EQUAL( sh2.coefficients().size(), (unsigned)3*3 );
+	BOOST_CHECK_EQUAL( sh2.coefficients()[ 2 ], 0 );
+
+	// write access to coefficients
+	for ( int i = 0; i < 3*3; i++ )
+	{
+		sh2.coefficients()[ i ] = i+1;
+	}
+
+	// copy constructor
+	SphericalHarmonics< T > sh3( sh2 );
+	BOOST_CHECK_EQUAL( sh3.bands(), (unsigned)3 );
+	BOOST_CHECK_EQUAL( sh3.coefficients().size(), (unsigned)3*3 );
+	for ( int i = 0; i < 3*3; i++ )
+	{
+		BOOST_CHECK_EQUAL( sh3.coefficients()[ i ], i + 1 ); 
+	}
+	
+	// copy operation
+	SphericalHarmonics< T > sh4( 1 );
+	sh4 = sh2;
+	BOOST_CHECK_EQUAL( sh4.bands(), (unsigned)3 );
+	BOOST_CHECK_EQUAL( sh4.coefficients().size(), (unsigned)3*3 );
+	for ( int i = 0; i < 3*3; i++ )
+	{
+		BOOST_CHECK_EQUAL( sh4.coefficients()[ i ], i + 1 ); 
+	}
+
+	// setting number of bands
+	sh4.setBands( 2 );
+	BOOST_CHECK_EQUAL( sh4.bands(), (unsigned)2 );
+	BOOST_CHECK_EQUAL( sh4.coefficients().size(), (unsigned)2*2 );
+
+	sh4.setBands( 4 );
+	BOOST_CHECK_EQUAL( sh4.bands(), (unsigned)4 );
+	BOOST_CHECK_EQUAL( sh4.coefficients().size(), (unsigned)4*4 );
+	for ( int i = 0; i < 2*2; i++ )
+	{
+		BOOST_CHECK_EQUAL( sh4.coefficients()[ i ], i + 1 ); 
+	}
+	for ( int i = 2*2; i < 4*4; i++ )
+	{
+		BOOST_CHECK_EQUAL( sh4.coefficients()[ i ], 0 ); 
+	}
+}
+
+template<typename T >
+void SphericalHarmonicsTest< T >::testDotProduct()
+{
+	SphericalHarmonics< T > sh1, sh2( 3 );
+	for ( int i = 0; i < 3*3; i++ )
+	{
+		sh2.coefficients()[ i ] = i+1;
+	}
+
+	// same size
+	sh1 = sh2;
+	sh1.setBands( 2 );
+
+	BOOST_CHECK_EQUAL( (sh1.template dot< T, T >( sh1 )), 1*1 + 2*2 + 3*3 + 4*4 );
+	BOOST_CHECK_EQUAL( (sh2.template dot< T, T >( sh2 )), 1*1 + 2*2 + 3*3 + 4*4 + 5*5 + 6*6 + 7*7 + 8*8 + 9*9 );
+	
+	// bigger
+	BOOST_CHECK_EQUAL( (sh1.template dot< T, T >( sh2 )), 1*1 + 2*2 + 3*3 + 4*4 );
+
+	// smaller
+	BOOST_CHECK_EQUAL( ( sh2 ^ sh1 ), 1*1 + 2*2 + 3*3 + 4*4 );
+
+}
+
+template<typename T >
+void SphericalHarmonicsTest< T >::testArithmeticOperations()
+{
+
+	SphericalHarmonics< T > sh1( 3 ), sh2, sh3, sh4, sh2b, sh3b, sh4b, sh5;
+	for ( int i = 0; i < 3*3; i++ )
+	{
+		sh1.coefficients()[ i ] = i+1;
+	}
+
+	// plus
+	sh2 = sh1 + sh1;
+	// inplace plus
+	sh2b = sh1;
+	sh2b += sh1;
+	// minus
+	sh3 = sh1 - sh1;
+	// inplace minus
+	sh3b = sh1;
+	sh3b -= sh1;
+	// scale
+	sh4 = sh1 * 3;
+	// inplace scale
+	sh4b = sh1;
+	sh4b *= 3;
+	// linear interpolation
+	LinearInterpolator< SphericalHarmonics< T > >()( sh1, sh4, 0.5, sh5 );
+
+	for ( int i = 0; i < 3*3; i++ )
+	{
+		
+		BOOST_CHECK_EQUAL( sh2.coefficients()[i], (i+1)*2 );
+		BOOST_CHECK_EQUAL( sh3.coefficients()[i], 0 );
+		BOOST_CHECK_EQUAL( sh4.coefficients()[i], (i+1)*3 );
+
+		T v = sh5.coefficients()[i];
+		if ( fabs( v - (T)(i+1)*2) > 0.01 )
+		{
+			BOOST_CHECK_EQUAL( sh5.coefficients()[i], (T)(i+1)*2 );
+		}
+
+		// inplace checks
+		BOOST_CHECK_EQUAL( sh2b.coefficients()[i], (i+1)*2 );
+		BOOST_CHECK_EQUAL( sh3b.coefficients()[i], 0 );
+		BOOST_CHECK_EQUAL( sh4b.coefficients()[i], (i+1)*3 );
+
+	}
+
+}
 
 template<typename T, int bands, unsigned int samples >
 T SphericalHarmonicsProjectorTest< T, bands, samples >::lightFunctor( const Imath::Vec2<T> &polar )

@@ -38,3 +38,6 @@ using namespace IECore;
 
 template class SphericalHarmonics<float>;
 template class SphericalHarmonics<double>;
+
+template class SphericalHarmonics< Imath::V3f >;
+template class SphericalHarmonics< Imath::V3d >;
