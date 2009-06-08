@@ -45,7 +45,6 @@ namespace IECore
 
 // Class for representing a set of real spherical harmonics basis functions scaled by coefficients.
 // Based mainly on "Spherical Harmonic Lighting: The Gritty Details" by Robin Green.
-// \todo see if we can get the result type of multiplying two objects using data traits and apply it to dot() then create ^ operator.
 template < typename V >
 class SphericalHarmonics 
 {
@@ -96,16 +95,16 @@ class SphericalHarmonics
 		inline V operator() ( const Imath::Vec3< BaseType > &xyz, unsigned int bands ) const;
 
 		// dot product on the coefficient vectors.
-		// The return value is dependent on the result of the multiplication between the two harmonics coefficients.
-		template <typename T, typename R>
-		R dot( const SphericalHarmonics<T> &s ) const;
+		// This operators only works if the left SH object is templated on the most complex data type such that V ^ T results in V type.
+		template <typename T>
+		V dot( const SphericalHarmonics<T> &s ) const;
 
 		// dot product operator
 		// This operators only works if the left SH object is templated on the most complex data type such that V ^ T results in V type.
 		template < typename T >
 		V operator ^ ( const SphericalHarmonics<T> &s ) const
 		{
-			return dot< T, V >( s );
+			return dot( s );
 		}
 
 		// convolves a given SH kernel on the current SH object.
@@ -118,21 +117,24 @@ class SphericalHarmonics
 		class SHEvaluator
 		{
 			public:
-				SHEvaluator( const SphericalHarmonics *sh ) : m_result(0), m_coeffs( sh->coefficients().begin() )
-				{
-				}
+				SHEvaluator( const SphericalHarmonics *sh ) : m_result(0), m_coeffs( sh->coefficients().begin() ) 	{}
 
 				void operator() ( unsigned int l, int m, BaseType v )
 				{
-					m_result += m_coeffs[ l*(l+1)+m ] * V(v);
+					if ( Imath::V3f( m_coeffs[ l*(l+1)+m ] ).length() > 0 )
+					{
+						m_result += m_coeffs[ l*(l+1)+m ] * V(v);
+					}
 				}
 
-				const V & result() const
+				V result() const
 				{
 					return m_result;
 				}
 
 			private:
+
+				SHEvaluator( const SHEvaluator &eval ) {}
 
 				V m_result;
 				typename std::vector< V >::const_iterator m_coeffs;

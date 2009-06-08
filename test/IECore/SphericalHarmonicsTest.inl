@@ -65,7 +65,11 @@ void SphericalHarmonicsTest< T >::testFunctionEvaluation()
 			BOOST_CHECK( !isnan( res ) );
 			SphericalHarmonics< T > sh( l+1 );
 			sh.coefficients()[ l*(l+1)+m ] = 1;
-			BOOST_CHECK_EQUAL( sh( Imath::Vec2<T>( phi, theta ) ), res );
+			T v = sh( Imath::Vec2<T>( phi, theta ) );
+			if (!equalWithRelError ( v, res, (T)0.001) )
+			{
+				BOOST_CHECK_EQUAL( v, res );
+			}
 		}
 	}
 }
@@ -138,11 +142,11 @@ void SphericalHarmonicsTest< T >::testDotProduct()
 	sh1 = sh2;
 	sh1.setBands( 2 );
 
-	BOOST_CHECK_EQUAL( (sh1.template dot< T, T >( sh1 )), 1*1 + 2*2 + 3*3 + 4*4 );
-	BOOST_CHECK_EQUAL( (sh2.template dot< T, T >( sh2 )), 1*1 + 2*2 + 3*3 + 4*4 + 5*5 + 6*6 + 7*7 + 8*8 + 9*9 );
+	BOOST_CHECK_EQUAL( (sh1.template dot( sh1 )), 1*1 + 2*2 + 3*3 + 4*4 );
+	BOOST_CHECK_EQUAL( (sh2.template dot( sh2 )), 1*1 + 2*2 + 3*3 + 4*4 + 5*5 + 6*6 + 7*7 + 8*8 + 9*9 );
 	
 	// bigger
-	BOOST_CHECK_EQUAL( (sh1.template dot< T, T >( sh2 )), 1*1 + 2*2 + 3*3 + 4*4 );
+	BOOST_CHECK_EQUAL( (sh1.template dot( sh2 )), 1*1 + 2*2 + 3*3 + 4*4 );
 
 	// smaller
 	BOOST_CHECK_EQUAL( ( sh2 ^ sh1 ), 1*1 + 2*2 + 3*3 + 4*4 );
@@ -185,7 +189,7 @@ void SphericalHarmonicsTest< T >::testArithmeticOperations()
 		BOOST_CHECK_EQUAL( sh4.coefficients()[i], (i+1)*3 );
 
 		T v = sh5.coefficients()[i];
-		if ( fabs( v - (T)(i+1)*2) > 0.01 )
+		if ( !Imath::equalWithRelError( v, (T)(i+1)*2, (T)0.01) )
 		{
 			BOOST_CHECK_EQUAL( sh5.coefficients()[i], (T)(i+1)*2 );
 		}

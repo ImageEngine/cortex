@@ -88,20 +88,8 @@ V SphericalHarmonics<V>::operator() ( const Imath::Vec2< BaseType > &phiTheta, u
 		bands = m_bands;
 	}
 	SHEvaluator evaluator( this );
-	RealSphericalHarmonicFunction< BaseType >::evaluate( phiTheta.x, phiTheta.y, bands, evaluator );
+	RealSphericalHarmonicFunction< BaseType >::evaluate( phiTheta.x, phiTheta.y, bands, boost::ref( evaluator ) );
 	return evaluator.result();
-/*
-	V res(0);
-	typename CoefficientVector::const_iterator cit = m_coefficients.begin();
-	for ( unsigned int l = 0; l < bands; l++ )
-	{
-		for (int m = -static_cast<int>(l); m <= static_cast<int>(l); m++, cit++ )
-		{
-			res += (*cit) * V( RealSphericalHarmonicFunction< BaseType >::evaluate( phiTheta.x, phiTheta.y, l, m ) );
-		}
-	}
-	return res;
-*/
 }
 
 template < typename V >
@@ -117,10 +105,10 @@ V SphericalHarmonics<V>::operator() ( const Imath::Vec3< BaseType > &xyz, unsign
 }
 
 template< typename V >
-template< typename T, typename R >
-R SphericalHarmonics<V>::dot( const SphericalHarmonics<T> &s ) const
+template< typename T >
+V SphericalHarmonics<V>::dot( const SphericalHarmonics<T> &s ) const
 {
-	T res(0);
+	V res(0);
 	typename CoefficientVector::const_iterator ita = m_coefficients.begin();
 	typename SphericalHarmonics<T>::CoefficientVector::const_iterator itb = s.coefficients().begin();
 
@@ -139,16 +127,16 @@ void SphericalHarmonics<V>::convolve( const SphericalHarmonics<T> &sh )
 	typename CoefficientVector::iterator it = m_coefficients.begin();
 	for( int l=0; l<numBands; l++ )
 	{
-		const double alpha = sqrt( 4*M_PI / (2*l + 1) );
+		const BaseType alpha = sqrt( 4*M_PI / (2*l + 1) );
 		T coeffs = sh.coefficients()[ l*(l+1) ];
 		for( int m=-l; m <= l; m++, it++ )
 		{
-			(*it) *= alpha * coeffs;
+			(*it) *= coeffs * alpha;
 		}
 	}
 	for( ; it != m_coefficients.end(); it++ )
 	{
-		(*it) = 0;
+		(*it) = V(0);
 	}
 }
 
