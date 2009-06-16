@@ -121,7 +121,10 @@ void TGAImageReader::channelNames( vector<string> &names )
 	names.push_back( "B" );
 	names.push_back( "G" );
 	names.push_back( "R" );
-	if ( m_header->pixelDepth == 32 )
+
+	int alphaChannelBits = m_header->imageDescriptor & 0xf;
+
+	if ( m_header->pixelDepth == 32 && alphaChannelBits )
 	{
 		names.push_back( "A" );
 	}
@@ -372,7 +375,7 @@ bool TGAImageReader::open( bool throwOnFailure )
 
 		int alphaChannelBits = m_header->imageDescriptor & 0xf;
 
-		if ( m_header->pixelDepth == 32 && alphaChannelBits != 8 )
+		if ( m_header->pixelDepth == 32 && alphaChannelBits && alphaChannelBits != 8 )
 		{
 			throw IOException(( boost::format( "TGAImageReader: Unsupported alpha channel bits (%d) for pixel depth %d in file %s" ) % alphaChannelBits % ( int )m_header->pixelDepth % fileName() ).str() );
 		}
