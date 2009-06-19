@@ -133,7 +133,7 @@ class Reader : public Op
 			CanReadFn canRead;
 			TypeId typeId;
 		};
-		typedef std::map<std::string, ReaderFns> ExtensionsToFnsMap;
+		typedef std::multimap<std::string, ReaderFns> ExtensionsToFnsMap;
 		static ExtensionsToFnsMap *extensionsToFns();
 
 };

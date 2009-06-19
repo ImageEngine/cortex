@@ -83,12 +83,19 @@ ReaderPtr Reader::create( const std::string &fileName )
 	if( ext!="" )
 	{
 		ExtensionsToFnsMap::const_iterator it = m->find( ext );
+		
 		if( it!=m->end() )
 		{
 			knownExtension = true;
-			if( it->second.canRead( fileName ) )
-			{
-				return it->second.creator( fileName );
+			
+			ExtensionsToFnsMap::const_iterator lastElement = m->upper_bound( ext );
+			
+			for ( ; it != lastElement; ++it )
+			{			
+				if( it->second.canRead( fileName ) )
+				{
+					return it->second.creator( fileName );
+				}
 			}
 		}
 	}
@@ -114,12 +121,19 @@ ReaderPtr Reader::create( const std::string &fileName )
 
 void Reader::supportedExtensions( std::vector<std::string> &extensions )
 {
+	extensions.clear();
 	ExtensionsToFnsMap *m = extensionsToFns();
 	assert( m );
+	
+	std::set<std::string> uniqueExtensions;
+	
 	for( ExtensionsToFnsMap::const_iterator it=m->begin(); it!=m->end(); it++ )
 	{
-		extensions.push_back( it->first.substr( 1 ) );
+		uniqueExtensions.insert( it->first.substr( 1 ) );
 	}
+	
+	extensions.resize( uniqueExtensions.size() );
+	std::copy( uniqueExtensions.begin(), uniqueExtensions.end(), extensions.begin() );
 }
 
 void Reader::supportedExtensions( TypeId typeId, std::vector<std::string> &extensions )
@@ -127,6 +141,8 @@ void Reader::supportedExtensions( TypeId typeId, std::vector<std::string> &exten
 	extensions.clear();
 	ExtensionsToFnsMap *m = extensionsToFns();
 	assert( m );
+	
+	std::set<std::string> uniqueExtensions;
 
 	const std::set< TypeId > &derivedTypes = RunTimeTyped::derivedTypeIds( typeId );
 
@@ -134,9 +150,12 @@ void Reader::supportedExtensions( TypeId typeId, std::vector<std::string> &exten
 	{
 		if ( it->second.typeId == typeId || std::find( derivedTypes.begin(), derivedTypes.end(), it->second.typeId ) != derivedTypes.end() )
 		{
-			extensions.push_back( it->first.substr( 1 ) );
+			uniqueExtensions.insert( it->first.substr( 1 ) );
 		}
 	}
+
+	extensions.resize( uniqueExtensions.size() );	
+	std::copy( uniqueExtensions.begin(), uniqueExtensions.end(), extensions.begin() );
 }
 
 void Reader::registerReader( const std::string &extensions, CanReadFn canRead, CreatorFn creator, TypeId typeId )
