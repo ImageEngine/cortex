@@ -132,6 +132,18 @@ void adjustSaturationInPlace( T &c, typename T::BaseType s )
 }
 
 template<typename T>
+T hsvToRGB( const T &c )
+{
+	return hsv2rgb( c );
+}
+
+template<typename T>
+T rgbToHSV( const T &c )
+{
+	return rgb2hsv( c );
+}
+
+template<typename T>
 void bindColorCommon( class_<T> &c )
 {
 
@@ -176,6 +188,9 @@ void bindColorCommon( class_<T> &c )
 
 	.def( "linearToSRGB", &linearToSRGB<T> )
 	.def( "sRGBToLinear", &sRGBToLinear<T> )
+
+	.def( "hsvToRGB", &hsvToRGB<T> )
+	.def( "rgbToHSV", &rgbToHSV<T> )
 
 	.def( "__str__", &str<T> )
 	.def( "__repr__", &repr<T> );

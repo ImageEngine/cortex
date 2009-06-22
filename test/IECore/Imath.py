@@ -1039,6 +1039,19 @@ class ImathColor3Test( unittest.TestCase ) :
 		c.adjustSaturation( 0 )
 		self.assertEqual( c[0], c[1] )
 		self.assertEqual( c[0], c[2] )
+		
+	def testHSVTransforms( self ) :
+	
+		c = Color3f( 0.1, 0.2, 0.3 )
+		
+		chsv = c.rgbToHSV()
+		self.assertEqual( c, Color3f( 0.1, 0.2, 0.3 ) )
+		self.failUnless( isinstance( chsv, Color3f ) )
+		self.failUnless( chsv.equalWithAbsError( Color3f( 0.5833, 0.6667, 0.3 ), 0.001 ) )
+		
+		crgb = chsv.hsvToRGB()
+		self.failUnless( chsv.equalWithAbsError( Color3f( 0.5833, 0.6667, 0.3 ), 0.001 ) )
+		self.failUnless( crgb.equalWithAbsError( c, 0.001 ) )
 
 class ImathColor4Test( unittest.TestCase ) :
 
