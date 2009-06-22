@@ -241,6 +241,21 @@ class VectorTypedDataFunctions
 		}
 
 		/// binding for append function
+		/// \todo We should be able to "extend" by anything iterable here, but this code
+		/// explicitly checks for "list" and "ThisClass" types - anything else is a failure.
+		/// This prevents us from doing something like....
+		///
+		/// a = FloatVectorData()
+		/// b = V3f()
+		/// a.extend( b ) # "Invalid Parameter"
+		///
+		/// While....
+		/// 
+		/// a = []
+		/// b = V3f()
+		/// a.extend( b ) # a is now [ 0.0, 0.0, 0.0 ]
+		///
+		/// ... works fine.
 		static void extend( ThisClass &x, boost::python::object v )
 		{
 			Container temp;
