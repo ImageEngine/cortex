@@ -67,13 +67,6 @@ class AssociatedLegendre
 		// computes the normalization factor for the function on a given band l and parameter m.
 		static V normalizationFactor( unsigned int l, unsigned int m );
 
-		// precomputes factorials necessary for computation of the given band l.
-		// this function is called from normalizationFactor but if you want to preallocate them, you can call it directly.
-		static void computeFactorials( unsigned int l );
-
-	private :
-
-		static std::vector< double > &factorials();
 };
 
 } // namespace IECore

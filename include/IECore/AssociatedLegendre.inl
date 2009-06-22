@@ -34,6 +34,7 @@
 
 #include <cassert>
 
+#include "boost/math/special_functions/factorials.hpp"
 #include "OpenEXR/ImathMath.h"
 
 namespace IECore
@@ -97,44 +98,8 @@ V AssociatedLegendre<V>::evaluate( unsigned int l, unsigned int m, V x )
 template < typename V >
 V AssociatedLegendre<V>::normalizationFactor( unsigned int l, unsigned int m )
 {
-	computeFactorials(l);
-	std::vector< double > &f = factorials();
-	double temp = ((2.0 * l + 1.0) * f[l-m]) / (4.0*M_PI*f[l+m]);
+	double temp = ((2.0 * l + 1.0) * boost::math::factorial< double >(l-m) ) / (4.0*M_PI * boost::math::factorial< double >(l+m) );
 	return static_cast<V>( sqrt(temp) );
-}
-
-template< typename V >
-std::vector< double > &AssociatedLegendre<V>::factorials()
-{
-	static std::vector< double > f;
-	return f;
-}
-
-template < typename V >
-void AssociatedLegendre<V>::computeFactorials( unsigned int l )
-{
-	std::vector< double > &f = factorials();
-	unsigned int curSize = f.size();
-	unsigned int newSize = l*2+1;
-	if ( curSize >= newSize )
-	{
-		return;
-	}
-	f.resize( newSize );
-	double previous = 1;
-	if (!curSize)
-	{
-		f[0] = 1;
-		curSize++;
-	}
-
-	previous = f[curSize-1];
-
-	for ( std::vector<double>::iterator it = f.begin() + curSize; curSize < newSize; curSize++, it++ )
-	{
-		*it = previous * curSize;
-		previous = *it;
-	}
 }
 
 }	// namespace IECore
