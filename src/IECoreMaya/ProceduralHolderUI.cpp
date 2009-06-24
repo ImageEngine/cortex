@@ -237,6 +237,13 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 	MDrawData drawData = request.drawData();
 	ProceduralHolder *proceduralHolder = (ProceduralHolder *)drawData.geometry();
 	assert( proceduralHolder );
+	
+	/// If the scene is "dirty" then we should throw away everything we know about the hilite state before all the Groups
+	/// pointed to by the m_stateMap keys are deleted!
+	if ( proceduralHolder->m_sceneDirty )
+	{
+		resetHilites();
+	}
 
 	view.beginGL();
 
