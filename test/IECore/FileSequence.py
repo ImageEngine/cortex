@@ -304,12 +304,34 @@ class testLs( unittest.TestCase ) :
 		s.append( FileSequence( "b.####.b", FrameRange( 0, 10 ) ) )
 		s.append( FileSequence( "c####.b", FrameRange( -100, 100 ) ) )
 		s.append( FileSequence( "d####", FrameRange( -100, -90 ) ) )
-		s.append( FileSequence( "e###.b", FrameRange( 100, 200 ) ) )
 		s.append( FileSequence( "x#.tif", FrameRange( 10, 20 ) ) )
 		s.append( FileSequence( "y.######.tif", FrameRange( 100, 200 ) ) )
 
 		self.doSequences( s )
 
+	def testUnorderedSequences( self ) :
+		
+		os.system( "rm -rf test/sequences/lsTest" )
+		os.system( "mkdir -p test/sequences/lsTest" )
+
+		s = FileSequence( "a.###.b", FrameRange.parse( '100-110, 1-10' ) )
+		fileNames = s.fileNames()
+		
+		for f in fileNames :
+			os.system( "touch 'test/sequences/lsTest/" + f + "'" )
+
+		l = ls( "test/sequences/lsTest" )
+
+		self.assertEqual( len( l ), 1 )
+		
+		fileNames.sort()
+		lFileNames = l[0].fileNames()
+		lFileNames.sort()
+		
+		for f in fileNames :
+			i = fileNames.index( f )
+			self.assertEqual( f, lFileNames[i] )
+	
 	def testNumberedSequences( self ) :
 
 		s = []
