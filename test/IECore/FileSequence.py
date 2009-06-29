@@ -304,6 +304,7 @@ class testLs( unittest.TestCase ) :
 		s.append( FileSequence( "b.####.b", FrameRange( 0, 10 ) ) )
 		s.append( FileSequence( "c####.b", FrameRange( -100, 100 ) ) )
 		s.append( FileSequence( "d####", FrameRange( -100, -90 ) ) )
+		s.append( FileSequence( "e###.b", FrameRange( 100, 200 ) ) )
 		s.append( FileSequence( "x#.tif", FrameRange( 10, 20 ) ) )
 		s.append( FileSequence( "y.######.tif", FrameRange( 100, 200 ) ) )
 
