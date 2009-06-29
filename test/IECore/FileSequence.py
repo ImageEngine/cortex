@@ -331,6 +331,8 @@ class testLs( unittest.TestCase ) :
 		for f in fileNames :
 			i = fileNames.index( f )
 			self.assertEqual( f, lFileNames[i] )
+		
+		os.system( "rm -rf test/sequences/lsTest" )
 	
 	def testNumberedSequences( self ) :
 
