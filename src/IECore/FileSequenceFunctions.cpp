@@ -86,7 +86,11 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 	{
 		const SequenceMap::key_type &fixes = it->first;
 		const Frames &frames = it->second;
-
+		// todo: could be more efficient by writing a custom comparison function that uses indexes 
+		//	 into the const Frames vector rather than duplicating the strings and sorting them directly
+		Frames sortedFrames = frames;
+		std::sort( sortedFrames.begin(), sortedFrames.end() );
+		
 		/// in diabolical cases the elements of frames may not all have the same padding
 		/// so we'll sort them out into padded and unpadded frame sequences here, by creating
 		/// a map of padding->list of frames. unpadded things will be considered to have a padding
@@ -94,7 +98,7 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 		typedef std::vector< FrameList::Frame > NumericFrames;
 		typedef std::map< unsigned int, NumericFrames > PaddingToFramesMap;
 		PaddingToFramesMap paddingToFrames;
-		for ( Frames::const_iterator fIt = frames.begin(); fIt != frames.end(); ++fIt )
+		for ( Frames::const_iterator fIt = sortedFrames.begin(); fIt != sortedFrames.end(); ++fIt )
 		{
 			std::string frame = *fIt;
 			int sign = 1;
