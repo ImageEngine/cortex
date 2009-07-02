@@ -159,6 +159,8 @@ void bindLevenbergMarquardt( const char *name )
 		.def( "setParameters", &LevenbergMarquardtWrapper<T>::setParameters )
 		.def( "getParameters", &LevenbergMarquardtWrapper<T>::getParameters )
 		.def( "solve", &LevenbergMarquardtWrapper<T>::solve )
+		.def( "setMaxCalls", &LevenbergMarquardtWrapper<T>::setMaxCalls )
+		.def( "getMaxCalls", &LevenbergMarquardtWrapper<T>::getMaxCalls )
 	;
 
 	{
