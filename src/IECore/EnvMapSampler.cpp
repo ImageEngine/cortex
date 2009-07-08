@@ -40,7 +40,6 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/LuminanceOp.h"
 #include "IECore/AngleConversion.h"
-#include "IECore/SphericalToEuclidianTransform.h"
 
 using namespace IECore;
 using namespace boost;
@@ -145,9 +144,6 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 	float radiansPerPixel = M_PI / (dataWindow.size().y + 1);
 	float angleAtTop = ( M_PI - radiansPerPixel ) / 2.0f;
 
-	Imath::M44f rotX90 = Imath::Eulerf( -M_PI * 0.5, 0, 0 ).toMatrix44();
-	SphericalToEuclidianTransform< Imath::V2f, Imath::V3f > sph2euc;
-
 	for( unsigned i=0; i<centroids.size(); i++ )
 	{
 		const Box2i &area = areas[i];
@@ -170,11 +166,15 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 		color /= red.size();
 		colors.push_back( color );
 
-		Imath::V2f phiTheta( lerpfactor( (float)centroids[i].x, (float)dataWindow.min.x, (float)dataWindow.max.x ) * 2 * M_PI,
-							 lerpfactor( (float)centroids[i].y, (float)dataWindow.min.y, (float)dataWindow.max.y ) * M_PI
-		);
-		// rotate coordinates along X axis so that the image maps Y coordinates to the vertical direction instead of Z.
-		V3f direction = sph2euc.transform( phiTheta ) * rotX90;
+		float phi = angleAtTop - (centroids[i].y - dataWindow.min.y) * radiansPerPixel;
+
+		V3f direction;
+		direction.y = sinf( phi );
+		float r = cosf( phi );
+		float theta = 2 * M_PI * lerpfactor( (float)centroids[i].x, (float)dataWindow.min.x, (float)dataWindow.max.x );
+		direction.x = r * cosf( theta );
+		direction.z = r * sinf( theta );
+
 		directions.push_back( -direction ); // negated so we output the direction the light shines in
 	}
 
