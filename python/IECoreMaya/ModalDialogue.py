@@ -60,7 +60,7 @@ class ModalDialogue( IECoreMaya.UIElement ) :
 
 		ModalDialogue.__toInstantiate = cls
 		title = maya.mel.eval( 'interToUI( "%s" )' % cls.__name__ )
-		result = maya.cmds.layoutDialog( ui = 'python "import IECoreMaya; IECoreMaya.ModalDialogue._ModalDialogue__instantiate()"', title=title )
+		result = maya.cmds.layoutDialog( ui = 'import IECoreMaya; IECoreMaya.ModalDialogue._ModalDialogue__instantiate()', title=title )
 		return result
 
 	@classmethod
