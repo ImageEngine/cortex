@@ -80,10 +80,18 @@ bool ParameterisedHolderSetValueCmd::isUndoable() const
 MStatus ParameterisedHolderSetValueCmd::doIt( const MArgList &argList )
 {
 	MArgDatabase args( syntax(), argList );
-
+	
 	// get the node we're operating on
 	MSelectionList objects;
-	args.getObjects( objects );
+	//args.getObjects( objects ); // leaving for further investigation
+	// \todo: MArgDatabase.getObjects() seems to be broken in Maya 2009.
+	// It returns and empty MSelectionList when the argList is a ParameterisedHolderSet
+	// Note that the MArgDatabase still seems to be valid, since we extract the plug name later on
+	// Creating the MSelectionList directly from argList instead.
+	MString objectStr;
+	argList.get( 0, objectStr );
+	objects.add( objectStr );
+	
 	MStringArray selStr; objects.getSelectionStrings( selStr );
 	assert( objects.length()==1 );
 	MObject node;
