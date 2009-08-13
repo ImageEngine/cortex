@@ -59,6 +59,10 @@ class PathVectorParameter : public StringVectorParameter
 		                     const std::vector<std::string> &defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
 		                     const StringVectorParameter::PresetsContainer &presets = StringVectorParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
 
+		PathVectorParameter( const std::string &name, const std::string &description,
+		                     ObjectTypePtr defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
+		                     const StringVectorParameter::ObjectPresetsContainer &presets = StringVectorParameter::ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+
 		bool allowEmptyList() const;
 		bool mustExist() const;
 		bool mustNotExist() const;

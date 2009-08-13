@@ -63,6 +63,10 @@ class FileSequenceVectorParameter : public PathVectorParameter
 			const StringVectorParameter::PresetsContainer &presets = StringVectorParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
 			const ExtensionList &extensions = ExtensionList() );
 
+		FileSequenceVectorParameter( const std::string &name, const std::string &description, ObjectTypePtr defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
+			const StringVectorParameter::ObjectPresetsContainer &presets = StringVectorParameter::ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
+			const ExtensionList &extensions = ExtensionList() );
+
 		virtual ~FileSequenceVectorParameter();
 
 		const ExtensionList &getExtensions() const;

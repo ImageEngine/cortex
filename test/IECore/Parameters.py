@@ -1206,6 +1206,27 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
 		self.assertEqual( p.presetValues(), ( PointsPrimitive( 1 ), PointsPrimitive( 2 ), PointsPrimitive( 3 ), PointsPrimitive( 4 ) ) )
 
+class TestIntVectorParameter( unittest.TestCase ) :
+
+	def test( self ) :
+
+		dv = IntVectorData()
+
+		p = IntVectorParameter(
+			name = "f",
+			description = "d",
+			defaultValue = dv,
+			presets = (
+				( "preset1", IntVectorData( [ 1, 2 ] ) ),
+			)
+		)
+
+		self.assertEqual( p.name, "f" )
+		self.assertEqual( p.description, "d" )
+		self.assertEqual( p.userData(), CompoundObject() )
+		self.assertEqual( p.valueValid()[0], True )
+		p.validate()
+
 class TestPathVectorParameter( unittest.TestCase ) :
 
 	def test( self ) :
@@ -1217,7 +1238,10 @@ class TestPathVectorParameter( unittest.TestCase ) :
 			description = "d",
 			defaultValue = dv,
 			check = PathVectorParameter.CheckType.MustExist,
-			allowEmptyList = True
+			allowEmptyList = True,
+			presets = (
+				( "preset1", StringVectorData( [ 'one', 'two' ] ) ),
+			)
 		)
 
 		self.assertEqual( p.name, "f" )
@@ -1241,6 +1265,31 @@ class TestPathVectorParameter( unittest.TestCase ) :
 				allowEmptyList = False,
 		)
 		self.assertRaises( RuntimeError, p.validate )
+
+class TestFileSequenceVectorParameter( unittest.TestCase ) :
+
+	def test( self ) :
+
+		dv = StringVectorData()
+
+		p = FileSequenceVectorParameter(
+			name = "f",
+			description = "d",
+			defaultValue = dv,
+			check = FileSequenceVectorParameter.CheckType.MustExist,
+			allowEmptyList = True,
+			presets = (
+				( "preset1", StringVectorData( [ 'one', 'two' ] ) ),
+			)
+		)
+
+		self.assertEqual( p.name, "f" )
+		self.assertEqual( p.description, "d" )
+		self.assertEqual( p.mustExist, True )
+		self.assertEqual( p.allowEmptyList, True )
+		self.assertEqual( p.userData(), CompoundObject() )
+		self.assertEqual( p.valueValid()[0], True )
+		p.validate()
 
 class TestObjectMethods( unittest.TestCase ) :
 

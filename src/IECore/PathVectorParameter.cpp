@@ -60,6 +60,13 @@ PathVectorParameter::PathVectorParameter( const std::string &name, const std::st
 {
 }
 
+PathVectorParameter::PathVectorParameter( const std::string &name, const std::string &description,
+                              ObjectTypePtr defaultValue, bool allowEmptyList, CheckType check,
+                              const StringVectorParameter::ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
+		:	StringVectorParameter( name, description, defaultValue, presets, presetsOnly, userData ), m_allowEmptyList( allowEmptyList ), m_check( check )
+{
+}
+
 bool PathVectorParameter::allowEmptyList() const
 {
 	return m_allowEmptyList;

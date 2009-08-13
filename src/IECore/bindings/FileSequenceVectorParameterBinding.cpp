@@ -101,7 +101,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 			return result;
 		}
 
-		static std::vector<std::string> makeDefault( object defaultValue )
+		static StringVectorDataPtr makeDefault( object defaultValue )
 		{
 			try
 			{
@@ -115,9 +115,10 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 		}
 
 		/// Allow construction from either a list of strings/FileSequences, or a StringVectorData
-		static std::vector<std::string> makeFromObject( object defaultValue )
+		static StringVectorDataPtr makeFromObject( object defaultValue )
 		{
-			std::vector<std::string> result;
+			StringVectorDataPtr data = new StringVectorData();
+			std::vector<std::string> &result = data->writable();
 
 			extract<list> de( defaultValue );
 			if( de.check() )
@@ -154,7 +155,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 				extract<StringVectorData *> de( defaultValue );
 				if( de.check() )
 				{
-					return de()->readable();
+					return de();
 				}
 				else
 				{
@@ -162,13 +163,13 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 				}
 			}
 
-			return result;
+			return data;
 		}
 
 	public :
 
 		FileSequenceVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = list(), bool allowEmptyList = true, FileSequenceVectorParameter::CheckType check = FileSequenceVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )
-			:	FileSequenceVectorParameter( n, d, makeDefault( dv ), allowEmptyList, check, parameterPresets<FileSequenceVectorParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceVectorParameter >( self, this ) {};
+			:	FileSequenceVectorParameter( n, d, makeDefault( dv ), allowEmptyList, check, parameterPresets<FileSequenceVectorParameter::ObjectPresetsContainer>( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceVectorParameter >( self, this ) {};
 
 		list getExtensionsWrap() const
 		{

@@ -64,6 +64,15 @@ FileSequenceVectorParameter::FileSequenceVectorParameter( const std::string &nam
 {
 }
 
+FileSequenceVectorParameter::FileSequenceVectorParameter( const std::string &name, const std::string &description,
+	ObjectTypePtr defaultValue, bool allowEmptyList, CheckType check,
+	const StringVectorParameter::ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData,
+	const ExtensionList &extensions )
+ : PathVectorParameter( name, description, defaultValue, allowEmptyList, check, presets, presetsOnly, userData ),
+    m_extensions( extensions )
+{
+}
+
 FileSequenceVectorParameter::~FileSequenceVectorParameter()
 {
 }
