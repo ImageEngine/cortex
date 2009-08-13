@@ -54,6 +54,7 @@ elif IEEnv.platform() == "cent5.x86_64" :
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=8.5.9" ] )
 	build( [ "APP=nuke", "APP_VERSION=5.1v2" ] )
 	build( [ "APP=nuke", "APP_VERSION=5.1v3" ] )
+	build( [ "APP=nuke", "APP_VERSION=5.1v6" ] )
 
 else :
 
