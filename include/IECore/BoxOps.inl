@@ -224,11 +224,10 @@ bool boxIntersects(
 	Vec maxB = BoxTraits<T>::max( box );
 
 	unsigned int dimension = VectorTraits<Vec>::dimensions();
-	assert( dimension >= 2 );
+	assert( dimension >= 2 && dimension <= 4 );
 
 	bool inside = true;
-	std::vector<char> quadrant;
-	quadrant.resize(dimension);
+	char quadrant[4];
 
 	Vec maxT;
 	Vec candidatePlane;
