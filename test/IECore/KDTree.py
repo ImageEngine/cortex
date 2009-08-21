@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -110,6 +110,25 @@ class TestKDTree:
 						d = (self.points[i] - testPoint).length()
 						self.assert_( d > furthestNeighbourDistance )
 
+	def doEnclosedPoints( self, numPoints ) :
+	
+		self.makeTree( numPoints )
+		
+		for i in range( 0, 1000 ) :
+		
+			b = self.randomBox()
+			
+			p = self.tree.enclosedPoints( b )
+			
+			s = set( p )
+			for i in range( self.points.size() ) :
+				
+				if b.intersects( self.points[i] ) :
+					self.failUnless( i in s )
+				else :
+					self.failIf( i in s )
+				
+
 class TestKDTreeV2f(unittest.TestCase, TestKDTree):
 
 	def makeTree(self, numPoints):
@@ -121,6 +140,12 @@ class TestKDTreeV2f(unittest.TestCase, TestKDTree):
 			self.points.append( V2f( random.random(), random.random() ) )
 
 		self.tree = V2fTree( self.points )
+		
+	def randomBox( self ) :
+	
+		min = V2f( random.random(), random.random() )
+		max = min + V2f( random.random(), random.random() )
+		return Box2f( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV2f constructors"""
@@ -145,6 +170,12 @@ class TestKDTreeV2f(unittest.TestCase, TestKDTree):
 
 		for t in self.treeSizes:
 			self.doNearestNNeighbours(t)
+			
+	def testEnclosedPoints(self):
+		"""Test KDTreeV2f enclosedPoints"""
+
+		for t in self.treeSizes:
+			self.doEnclosedPoints(t)		
 
 class TestKDTreeV2d(unittest.TestCase, TestKDTree):
 
@@ -158,6 +189,12 @@ class TestKDTreeV2d(unittest.TestCase, TestKDTree):
 
 		self.tree = V2dTree( self.points )
 
+	def randomBox( self ) :
+	
+		min = V2d( random.random(), random.random() )
+		max = min + V2d( random.random(), random.random() )
+		return Box2d( min, max )
+		
 	def testConstructors(self):
 		"""Test KDTreeV2d constructors"""
 
@@ -182,6 +219,12 @@ class TestKDTreeV2d(unittest.TestCase, TestKDTree):
 		for t in self.treeSizes:
 			self.doNearestNNeighbours(t)
 
+	def testEnclosedPoints(self):
+		"""Test KDTreeV2d enclosedPoints"""
+
+		for t in self.treeSizes:
+			self.doEnclosedPoints(t)		
+
 class TestKDTreeV3f(unittest.TestCase, TestKDTree):
 
 	def makeTree(self, numPoints):
@@ -194,6 +237,12 @@ class TestKDTreeV3f(unittest.TestCase, TestKDTree):
 
 		self.tree = V3fTree( self.points )
 
+	def randomBox( self ) :
+	
+		min = V3f( random.random(), random.random(), random.random() )
+		max = min + V3f( random.random(), random.random(), random.random() )
+		return Box3f( min, max )
+		
 	def testConstructors(self):
 		"""Test KDTreeV3f constructors"""
 
@@ -218,6 +267,12 @@ class TestKDTreeV3f(unittest.TestCase, TestKDTree):
 		for t in self.treeSizes:
 			self.doNearestNNeighbours(t)
 
+	def testEnclosedPoints(self):
+		"""Test KDTreeV3f enclosedPoints"""
+
+		for t in self.treeSizes:
+			self.doEnclosedPoints(t)		
+
 class TestKDTreeV3d(unittest.TestCase, TestKDTree):
 
 	def makeTree(self, numPoints):
@@ -229,6 +284,12 @@ class TestKDTreeV3d(unittest.TestCase, TestKDTree):
 			self.points.append( V3d( random.random(), random.random(), random.random() ) )
 
 		self.tree = V3dTree( self.points )
+
+	def randomBox( self ) :
+	
+		min = V3d( random.random(), random.random(), random.random() )
+		max = min + V3d( random.random(), random.random(), random.random() )
+		return Box3d( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV3d constructors"""
@@ -254,6 +315,11 @@ class TestKDTreeV3d(unittest.TestCase, TestKDTree):
 		for t in self.treeSizes:
 			self.doNearestNNeighbours(t)
 
+	def testEnclosedPoints(self):
+		"""Test KDTreeV3d enclosedPoints"""
+
+		for t in self.treeSizes:
+			self.doEnclosedPoints(t)		
 
 
 if __name__ == "__main__":

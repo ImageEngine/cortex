@@ -35,6 +35,7 @@
 #include <algorithm>
 #include "OpenEXR/ImathLimits.h"
 #include "IECore/VectorOps.h"
+#include "IECore/BoxOps.h"
 
 namespace IECore
 {
@@ -244,6 +245,13 @@ unsigned int KDTree<PointIterator>::nearestNeighbours( const Point &p, BaseType 
 }
 
 template<class PointIterator>
+template<typename Box, typename OutputIterator>
+void KDTree<PointIterator>::enclosedPoints( const Box &bound, OutputIterator it ) const
+{
+	enclosedPointsWalk( rootIndex(), bound, it );
+}
+
+template<class PointIterator>
 unsigned int KDTree<PointIterator>::nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<PointIterator> &nearNeighbours ) const
 {
 	nearNeighbours.clear();
@@ -409,6 +417,37 @@ void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const P
 		if( d*d < maxDistSquared || nearNeighbours.size()<numNeighbours )
 		{
 			nearestNNeighboursWalk( secondChild, p, numNeighbours, nearNeighbours, maxDistSquared );
+		}
+	}
+}
+
+template<class PointIterator>
+template<typename Box, typename OutputIterator>
+void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, OutputIterator it ) const
+{
+	const Node &node = m_nodes[nodeIndex];
+	
+	if( node.isLeaf() )
+	{
+		PointIterator *permLast = node.permLast();
+		for( PointIterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		{
+			const Point &pp = **perm;
+			if( boxIntersects( bound, pp ) )
+			{
+				*it++ = *perm;
+			}
+		}
+	}
+	else
+	{
+		if( vecGet( BoxTraits<Box>::min( bound ), node.cutAxis() ) <= node.cutValue() )
+		{
+			enclosedPointsWalk( lowChildIndex( nodeIndex ), bound, it );
+		}
+		if( vecGet( BoxTraits<Box>::max( bound ), node.cutAxis() ) >= node.cutValue() )
+		{
+			enclosedPointsWalk( highChildIndex( nodeIndex ), bound, it );
 		}
 	}
 }

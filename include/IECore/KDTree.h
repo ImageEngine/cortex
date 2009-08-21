@@ -87,11 +87,16 @@ class KDTree
 
 		/// Populates the passed vector of iterators with the neighbours of point p which are closer than radius r. Returns the number of points found.
 		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
+		/// See enclosedPoints for an example of this form.
 		unsigned int nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const;
 
 		/// Populates the passed vector of iterators with the N closest neighbours to p. Returns the number of points found.
 		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
 		unsigned int nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<PointIterator> &nearNeighbours ) const;
+
+		/// Finds all the points contained by the specified bound, outputting them to the specified iterator.
+		template<typename Box, typename OutputIterator>
+		void enclosedPoints( const Box &bound, OutputIterator it ) const;
 
 		/// Returns the number of nodes in the tree.
 		inline NodeIndex numNodes() const;
@@ -122,6 +127,9 @@ class KDTree
 		void nearestNeighbourWalk( NodeIndex nodeIndex, const Point &p, PointIterator &closestPoint, BaseType &distSquared ) const;
 
 		void nearestNeighboursWalk( NodeIndex nodeIndex, const Point &p, BaseType r2, std::vector<PointIterator> &nearNeighbours ) const;
+
+		template<typename Box, typename OutputIterator>
+		void enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, OutputIterator it ) const;
 
 		struct NearNeighbour;
 

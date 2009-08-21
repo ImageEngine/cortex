@@ -38,6 +38,7 @@
 
 #include <cassert>
 #include <string>
+#include <iterator>
 
 #include "IECore/RefCounted.h"
 #include "IECore/KDTree.h"
@@ -66,6 +67,7 @@ void bindKDTree()
 template<typename T>
 struct KDTreeWrapper
 {
+	typedef Imath::Box<typename T::Point> Box;
 	typedef TypedData<std::vector<typename T::Point> > PointData;
 	IE_CORE_DECLAREPTR( PointData )
 
@@ -139,6 +141,26 @@ struct KDTreeWrapper
 		return indices;
 
 	}
+	
+	IntVectorDataPtr enclosedPoints( const Box &bound )
+	{
+		typedef std::vector<typename T::Iterator> PointArray;
+
+		PointArray points;
+
+		m_tree->enclosedPoints( bound, std::back_insert_iterator<PointArray>( points ) );
+
+		IntVectorDataPtr indices = new IntVectorData();
+
+		indices->writable().reserve( points.size() );
+
+		for (typename PointArray::const_iterator it = points.begin(); it != points.end(); ++it)
+		{
+			indices->writable().push_back(  std::distance( m_points->readable().begin(), *it ) );
+		}
+
+		return indices;
+	}
 
 };
 
@@ -151,6 +173,7 @@ void bindKDTree(const char *bindName)
 		.def("nearestNeighbour", &KDTreeWrapper<T>::nearestNeighbour )
 		.def("nearestNeighbours", &KDTreeWrapper<T>::nearestNeighbours )
 		.def("nearestNNeighbours", &KDTreeWrapper<T>::nearestNNeighbours )
+		.def("enclosedPoints", &KDTreeWrapper<T>::enclosedPoints )
 		;
 }
 
