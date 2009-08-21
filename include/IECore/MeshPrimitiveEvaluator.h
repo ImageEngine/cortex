@@ -144,6 +144,9 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 			{
 			}
 
+			/// \todo There's no need to store these things - they can all be calculated based on the
+			/// offset of the bound in the bound vector. We should just use Box3f for the bound.
+			/// See pointAtUVWalk for examples of how this can be achieved.
 			Imath::V3i m_vertexIds;
 			unsigned int m_triangleIndex;
 		};
@@ -158,17 +161,22 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 		BoundedTriangleTree *m_tree;
 
-		bool pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
+		bool pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, const ResultPtr &result ) const;
 		void closestPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const;
 		bool intersectionPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
 		void intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;
 
 		void calculateMassProperties() const;
 		void calculateAverageNormals() const;
+		
+		typedef Imath::Box2f UVBound;
+		typedef std::vector<UVBound> UVBoundVector;
+		typedef BoundedKDTree<UVBoundVector::iterator> UVBoundTree;
+		UVBoundVector m_uvTriangles;
+		
+		UVBoundTree *m_uvTree;
 
-		BoundedTriangleVector m_uvTriangles;
-		BoundedTriangleTree *m_uvTree;
-
+		void triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const;
 		PrimitiveVariable m_u;
 		PrimitiveVariable m_v;
 
