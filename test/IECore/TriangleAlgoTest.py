@@ -76,6 +76,25 @@ class TriangleAlgoTest( unittest.TestCase ) :
 
 		n = triangleNormal( v0, v1, v2 )
 		self.assertEqual( n, V3f( 0, 0, 1 ) )
+		
+	def testContainsPointWithBarycentric( self ) :
+	
+		r = Rand32()
+		v0 = V3f( 0, 0, 0 )
+		v1 = V3f( 1, 0, 0 )
+		v2 = V3f( 0, 1, 0 )
+
+		for i in range( 0, 10000 ) :
+		
+			b = V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
+			b.z = 1 - ( b.x + b.y )
+			p = trianglePoint( v0, v1, v2, b )
+			if p.x < 0 or p.y < 0 or p.x + p.y > 1 :
+				self.failIf( triangleContainsPoint( v0, v1, v2, p ) )
+			else :
+				bb = triangleContainsPoint( v0, v1, v2, p )
+				self.failUnless( bb.equalWithAbsError( b, 0.0001 ) )
+				
 
 if __name__ == "__main__":
     unittest.main()

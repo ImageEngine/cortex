@@ -81,6 +81,9 @@ int triangleClosestFeature( const Vec &v0, const Vec &v1, const Vec &v2, const V
 template<class Vec>
 bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p );
 
+template<class Vec>
+bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric );
+
 } // namespace IECore
 
 #include "IECore/TriangleAlgo.inl"

@@ -43,12 +43,26 @@ namespace IECore
 {
 
 template<typename Vec>
+object triangleContainsPointWrapper( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p )
+{
+	Vec b;
+	if( triangleContainsPoint( v0, v1, v2, p, b ) )
+	{
+		return object( b );
+	}
+	else
+	{
+		return object( false );
+	}
+}
+
+template<typename Vec>
 static void bind()
 {
 	def( "triangleArea", &triangleArea<Vec> );
 	def( "triangleNormal", &triangleNormal<Vec> );
 	def( "trianglePoint", &trianglePoint<Vec> );
-	def( "triangleContainsPoint", &triangleContainsPoint<Vec> );
+	def( "triangleContainsPoint", &triangleContainsPointWrapper<Vec> );
 }
 
 void bindTriangleAlgo()

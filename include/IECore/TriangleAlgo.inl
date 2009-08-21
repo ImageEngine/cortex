@@ -377,10 +377,9 @@ int triangleClosestFeature( const Vec &v0, const Vec &v1, const Vec &v2, const V
 	return triangleBarycentricFeature( barycentric );
 }
 
-
 /// Derived from article at http://www.blackpawn.com/texts/pointinpoly/default.html
 template<class Vec>
-bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p )
+bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric )
 {
 	typedef typename VectorTraits<Vec>::BaseType Real;
 
@@ -396,19 +395,27 @@ bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const V
 
 	Real d = Real( 1 ) / ( dotAA * dotBB - dotAB * dotAB );
 
-	Real u = (dotBB * dotAC - dotAB * dotBC) * d;
-	if( u < Real( 0 ) || u > Real( 1 ) )
+	barycentric.z = (dotBB * dotAC - dotAB * dotBC) * d;
+	if( barycentric.z < Real( 0 ) || barycentric.z > Real( 1 ) )
 	{
 		return false;
 	}
 
-	Real v = (dotAA * dotBC - dotAB * dotAC) * d;
-	if( v < Real( 0 ) || u + v > Real( 1 ) )
+	barycentric.y = (dotAA * dotBC - dotAB * dotAC) * d;
+	if( barycentric.y < Real( 0 ) || barycentric.z + barycentric.y > Real( 1 ) )
 	{
 		return false;
 	}
 
+	barycentric.x = Real( 1 ) - barycentric.z - barycentric.y;
 	return true;
+}
+
+template<class Vec>
+bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p )
+{
+	Imath::Vec3<typename VectorTraits<Vec>::BaseType> barycentric;
+	return triangleContainsPoint( v0, v1, v2, p, barycentric );
 }
 
 } // namespace IECore
