@@ -340,6 +340,7 @@ void bindTypeId()
 		.value( "BINParticleReader", BINParticleReaderTypeId )		
 		.value( "BINParticleWriter", BINParticleWriterTypeId )		
 		.value( "BINMeshReader", BINMeshReaderTypeId )				
+		.value( "BGEOParticleReader", BGEOParticleReaderTypeId )
 	;
 }
 
