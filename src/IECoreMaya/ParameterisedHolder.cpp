@@ -625,6 +625,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 			MStatus s = fnDN.addAttribute( attribute );
 			if( !s )
 			{
+				msg( Msg::Error, "ParameterisedHolder::createAttributesWalk", boost::format( "Failed to create attribute to represent parameter \"%s\" of type \"%s\"" ) % children[i]->name() % children[i]->typeName() );
 				return s;
 			}
 
