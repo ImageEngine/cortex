@@ -78,6 +78,7 @@ class BGEOParticleReader : public ParticleReader
 		{
 			Float = 0,
 			Integer = 1,
+			Index = 4,
 			Vector = 5,
 		};
 		
@@ -85,7 +86,8 @@ class BGEOParticleReader : public ParticleReader
 		{
 			std::string name;
 			AttributeType type;
-			int size;
+			short size;
+			std::vector<std::string> indexableValues;
 		};
 		
 		struct AttrInfo

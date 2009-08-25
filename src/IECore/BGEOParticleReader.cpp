@@ -155,19 +155,25 @@ bool BGEOParticleReader::open()
 		
 		for( int i=0; i<m_header.numPointAttribs; i++ )
 		{
-			// skip 2 bytes // todo: find out what these bytes represent
-			m_iStream->seekg( sizeof( short ), ios_base::cur );
+			short nameLength;
+			m_iStream->read( (char *)&nameLength, sizeof( nameLength ) );
+			nameLength = asBigEndian( nameLength );
 			
 			Record r;
-			std::getline( *m_iStream, r.name, '\0' );
-			m_iStream->read( (char *)&r.size, sizeof( char ) );
+			char c;
+			for( int j=0; j < nameLength; j++ )
+			{
+				m_iStream->read( &c, 1 );
+				r.name += c;
+			}
+			
+			m_iStream->read( (char *)&r.size, sizeof( r.size ) );
+			r.size = asBigEndian( r.size );
 			
 			int type;
 			m_iStream->read( (char *)&type, sizeof( type ) );
 			type = asBigEndian( type );
 			r.type = (AttributeType)type;
-						
-			m_header.attributes.push_back( r );
 			
 			switch( r.type )
 			{
@@ -177,12 +183,31 @@ bool BGEOParticleReader::open()
 				case Integer :
 					m_iStream->seekg( sizeof( int ) * r.size, ios_base::cur );
 					break;
+				case Index :
+					int size;
+					m_iStream->read( (char *)&size, sizeof( size ) );
+					size = asBigEndian( size );
+					for ( int j=0; j < size; j++ )
+					{
+						m_iStream->read( (char *)&nameLength, sizeof( nameLength ) );
+						nameLength = asBigEndian( nameLength );
+						string value;
+						for( int k=0; k < nameLength; k++ )
+						{
+							m_iStream->read( &c, 1 );
+							value += c;
+						}
+						r.indexableValues.push_back( value );
+					}
+					break;
 				case Vector :
 					m_iStream->seekg( sizeof( float ) * r.size, ios_base::cur );
 					break;
 				default :
 					assert( r.type < 6 ); // unknown type
 			}
+			
+			m_header.attributes.push_back( r );
 		}
 		
 		m_header.firstPointPosition = m_iStream->tellg();
@@ -353,6 +378,7 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 		V2fVectorDataPtr v2fVector = 0;
 		FloatVectorDataPtr floatVector = 0;
 		IntVectorDataPtr intVector = 0;
+		StringVectorDataPtr stringVector = 0;
 		DataPtr dataVector = 0;
 
 		switch( it->size )
@@ -370,6 +396,13 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 				intVector = new IntVectorData();
 				intVector->writable().resize( numParticles() );
 				dataVector = intVector;
+				break;
+			}
+			else if ( it->type == Index )
+			{
+				stringVector = new StringVectorData();
+				stringVector->writable().resize( numParticles() );
+				dataVector = stringVector;
 				break;
 			}
 		case 2:
@@ -407,7 +440,7 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 			{
 				readAttributeData( floatAttributePtr, it->info.size+1 );
 			}
-			else if ( it->info.type == Integer )
+			else if ( it->info.type == Integer || it->info.type == Index )
 			{
 				readAttributeData( intAttributePtr, it->info.size );
 			}
@@ -439,6 +472,12 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 			case IntVectorDataTypeId:
 				boost::static_pointer_cast<IntVectorData>(it->targetData)->writable()[ i ] = intAttributePtr[0];
 				break;
+			case StringVectorDataTypeId:
+				{
+					std::string value = it->info.indexableValues.at( intAttributePtr[0] );
+					boost::static_pointer_cast<StringVectorData>(it->targetData)->writable()[ i ] = value;
+					break;
+				}
 			default:
 				msg( Msg::Error, "BGEOParticleReader::readAttributes()", format( "Internal error. Unrecognized typeId '%d'." ) % it->targetData->typeId() );
 				return 0;
@@ -470,6 +509,11 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 			else if ( attrIt->info.type == Integer )
 			{
 				filteredData = filterAttr<IntVectorData, IntVectorData>( boost::static_pointer_cast<IntVectorData>(attrIt->targetData), particlePercentage() );
+				break;
+			}
+			else if ( attrIt->info.type == Index )
+			{
+				filteredData = filterAttr<StringVectorData, StringVectorData>( boost::static_pointer_cast<StringVectorData>(attrIt->targetData), particlePercentage() );
 				break;
 			}
 		case 2:

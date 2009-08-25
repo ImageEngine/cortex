@@ -60,6 +60,9 @@ class TestBGEOReader( unittest.TestCase ) :
 			"pstate" : IECore.IntVectorData,
 			"id" : IECore.IntVectorData,
 			"parent" : IECore.IntVectorData,
+			"spriteshop" : IECore.StringVectorData,
+			"spriterot" : IECore.FloatVectorData,
+			"spritescale" : IECore.V3fVectorData,			
 		}
 		self.assertEqual( len( attrNames ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
@@ -77,6 +80,9 @@ class TestBGEOReader( unittest.TestCase ) :
 			self.assert_( abs( p.x ) < 0.2 )
 			self.assert_( abs( p.x ) < 0.2 )
 			self.assert_( abs( p.z ) < 0.2 )
+		
+		for s in c["spriteshop"].data :
+			self.assertEqual( s, '/shop/sprite/sprite' )
 
 		self.assertEqual( c["id"].data, IECore.IntVectorData( range( 1, 27 ) ) )
 
@@ -114,6 +120,9 @@ class TestBGEOReader( unittest.TestCase ) :
 			"pstate" : IECore.IntVectorData,
 			"id" : IECore.IntVectorData,
 			"parent" : IECore.IntVectorData,
+			"spriteshop" : IECore.StringVectorData,
+			"spriterot" : IECore.DoubleVectorData,
+			"spritescale" : IECore.V3dVectorData,
 		}
 		
 		c = r.read()
@@ -149,6 +158,9 @@ class TestBGEOReader( unittest.TestCase ) :
 			"pstate" : IECore.IntVectorData,
 			"id" : IECore.IntVectorData,
 			"parent" : IECore.IntVectorData,
+			"spriteshop" : IECore.StringVectorData,
+			"spriterot" : IECore.FloatVectorData,
+			"spritescale" : IECore.V3fVectorData,
 		}
 
 		c = r.read()
