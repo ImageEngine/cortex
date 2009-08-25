@@ -41,6 +41,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/Timer.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/TestTypedData.h"
 
 #include "OpenEXR/ImathRandom.h"
 
@@ -202,7 +203,6 @@ unsigned long BGEOParticleReader::numParticles()
 
 void BGEOParticleReader::attributeNames( std::vector<std::string> &names )
 {
-	names.clear();
 	if( open() )
 	{
 		vector<Record>::const_iterator it;
@@ -225,6 +225,7 @@ ObjectPtr BGEOParticleReader::doOperation( ConstCompoundObjectPtr operands )
 
 	}
 
+	bool haveNumPoints = false;
 	for( vector<Record>::const_iterator it = m_header.attributes.begin(); it!=m_header.attributes.end(); it++ )
 	{
 		CompoundDataMap::const_iterator itData = attributeData->readable().find( it->name );
@@ -233,28 +234,33 @@ ObjectPtr BGEOParticleReader::doOperation( ConstCompoundObjectPtr operands )
 			msg( Msg::Warning, "ParticleReader::doOperation", format( "Attribute %s expected but not found." ) % it->name );
 			continue;
 		}
-
+		
 		DataPtr d = itData->second;
-
-		PrimitiveVariable::Interpolation interp = despatchTypedData< TypedDataInterpolation, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );
-
-		if ( interp == PrimitiveVariable::Invalid )
+		
+		if ( testTypedData<TypeTraits::IsVectorTypedData>( d ) )
 		{
-			msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to unsupported type \"%s\"." ) % it->name % d->typeName() );
+			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( d );
+			if( !haveNumPoints )
+			{
+				result->setNumPoints( s );
+				haveNumPoints = true;
+			}
+			if( s==result->getNumPoints() )
+			{
+				result->variables.insert( PrimitiveVariableMap::value_type( it->name, PrimitiveVariable( PrimitiveVariable::Vertex, d ) ) );
+			}
+			else
+			{
+				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % it->name % result->getNumPoints() % s );
+			}
 		}
-		else
+		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( d ) )
 		{
-			result->variables.insert( PrimitiveVariableMap::value_type( it->name, PrimitiveVariable( interp, d ) ) );
+			result->variables.insert( PrimitiveVariableMap::value_type( it->name, PrimitiveVariable( PrimitiveVariable::Constant, d ) ) );
 		}
 	}
 
 	return result;
-}
-
-template< class T, class F >
-T convertion( const F &in )
-{
-	return T( in );
 }
 
 template<typename T, typename F>
@@ -270,13 +276,15 @@ boost::intrusive_ptr<T> BGEOParticleReader::filterAttr( boost::intrusive_ptr<F> 
 		float fraction = percentage / 100.0f;
 		Rand48 r;
 		r.init( seed );
+		
 		for( typename F::ValueType::size_type i=0; i<in.size(); i++ )
 		{
 			if( r.nextf() <= fraction )
 			{
-				out.push_back( convertion< typename T::ValueType::value_type, typename F::ValueType::value_type >( in[i] ) );
+				out.push_back( in[i] );
 			}
 		}
+		
 		return result;
 	}
 
