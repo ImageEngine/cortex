@@ -197,7 +197,7 @@ bool CompoundParameter::valueValid( ConstObjectPtr value, std::string *reason ) 
 	{
 		if( reason )
 		{
-			*reason = "Value is not a CompoundObject.";
+			*reason = boost::str( boost::format( "Value is of type \"%s\" and not of type \"CompoundObject\"." ) % value->typeName() );
 		}
 		return false;
 	}
