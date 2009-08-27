@@ -60,6 +60,13 @@ class Primitive : public VisibleRenderable
 
 		/// Variables a stored as a public map for easy manipulation.
 		PrimitiveVariableMap variables;
+		
+		/// Convenience function to find name in variables, and returning a runTimeCast to the requested type. If requiredInterpolation is
+		/// specified then 0 is returned if the interpolation doesn't match.
+		template<typename T>
+		typename T::Ptr variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid );
+		template<typename T>
+		typename T::ConstPtr variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid ) const;
 
 		/// Returns true if the given primitive variable has the correct size for its interpolation type
 		bool isPrimitiveVariableValid( const PrimitiveVariable &pv ) const;
@@ -101,5 +108,7 @@ class Primitive : public VisibleRenderable
 IE_CORE_DECLAREPTR( Primitive );
 
 } // namespace IECore
+
+#include "IECore/Primitive.inl"
 
 #endif // IE_CORE_PRIMITIVE_H
