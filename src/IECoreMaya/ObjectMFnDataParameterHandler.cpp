@@ -125,7 +125,10 @@ MStatus ObjectMFnDataParameterHandler<T, D>::setValue( IECore::ConstParameterPtr
 	}
 
 	ToMayaObjectConverterPtr converter = ToMayaObjectConverter::create( v, MFnDataTypeTraits<D>::dataType() );
-	assert( converter );
+	if( !converter )
+	{
+		return MS::kFailure;
+	}
 
 	MObject obj;
 	bool success = converter->convert( obj );
