@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -116,6 +116,13 @@ class Primitive : public Renderable
 		bool depthSortRequested( ConstStatePtr state ) const;
 
 		/// Standard OpenGL vertex arrays
+		/// \todo I'm not a fan of these guys. They're only used by the MeshPrimitive,
+		/// and are irrelevant to many of the other Primitive derived classes. PointsPrimitive
+		/// also duplicates them which can't be a good thing either. The ToGLMeshPrimitiveConverter
+		/// has to do special case things with most of them anyway, so perhaps it could just pass 'em
+		/// into the MeshPrimitive constructor? In any case I think the whole attribute thing needs
+		/// a bit of a rejig, and in the process we need to allow uniform data for curves
+		/// and suchlike too.
 		IECore::ConstV3fVectorDataPtr m_points;
 		IECore::ConstV3fVectorDataPtr m_normals;
 		IECore::ConstColor3fVectorDataPtr m_colors;
