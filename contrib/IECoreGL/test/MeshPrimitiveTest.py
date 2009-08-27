@@ -39,9 +39,7 @@ import os
 
 import IECore
 import IECoreGL
-#from IECore import *
 
-#from IECoreGL import *
 IECoreGL.init( False )
 
 class MeshPrimitiveTest( unittest.TestCase ) :
