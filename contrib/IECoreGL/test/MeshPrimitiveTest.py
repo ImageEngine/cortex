@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,17 +32,22 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import unittest
-import random
+import os
 
-from IECore import *
+import IECore
+import IECoreGL
+#from IECore import *
 
-from IECoreGL import *
-init( False )
+#from IECoreGL import *
+IECoreGL.init( False )
 
 class MeshPrimitiveTest( unittest.TestCase ) :
 
-	## \todo Make this actually assert something
+	outputFileName = os.path.dirname( __file__ ) + "/output/testMesh.tif"
+
 	def testVertexAttributes( self ) :
 
 		vertexSource = """
@@ -66,36 +71,35 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		}
 		"""
 
-		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 
-		r.worldBegin()
-		# we have to make this here so that the shaders that get made are made in the
-		# correct GL context. My understanding is that all shaders should work in all
-		# GL contexts in the address space, but that doesn't seem to be the case.
-		#w = SceneViewer( "scene", r.scene() )
-
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -15 ) ) )
-		r.shader( "surface", "showST",
-			{ "gl:fragmentSource" : StringData( fragmentSource ),
-			  "gl:vertexSource" :   StringData( vertexSource   )
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			}
 		)
+		r.display( self.outputFileName, "tif", "rgba", {} )
 
-		primVars = {}
+		with IECore.WorldBlock( r ) :
 
-		primVars["P"] = m["P"]
-		primVars["s"] = m["s"]
-		primVars["t"] = m["t"]
-		primVars["N"] = m["N"]
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -15 ) ) )
+			r.shader( "surface", "showST",
+				{ "gl:fragmentSource" : IECore.StringData( fragmentSource ),
+				  "gl:vertexSource" : IECore.StringData( vertexSource   )
+				}
+			)
 
-		r.mesh( m.verticesPerFace, m.vertexIds, m.interpolation, primVars )
+			m.render( r )
 
-		r.worldEnd()
-
-		#w.start()
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/meshST.tif" ).read()
+		actualImage = IECore.Reader.create( self.outputFileName ).read()
+		
+		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
 if __name__ == "__main__":
     unittest.main()
