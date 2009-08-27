@@ -1409,10 +1409,11 @@ if doConfigure :
 
 			for line in open( str( nukeVersionHeader ) ) :
 				w = line.split()
-				if w[0]=="#define" and w[1]=="kDDImageVersionMajorNum" :
-					nukeMajorVersion = int( w[2] )
-				elif w[0]=="#define" and w[1]=="kDDImageVersionMinorNum" :
-					nukeMinorVersion = int( w[2] )
+				if len( w ) > 1 :
+					if w[0]=="#define" and w[1]=="kDDImageVersionMajorNum" :
+						nukeMajorVersion = int( w[2] )
+					elif w[0]=="#define" and w[1]=="kDDImageVersionMinorNum" :
+						nukeMinorVersion = int( w[2] )
 					
 		else :
 		
