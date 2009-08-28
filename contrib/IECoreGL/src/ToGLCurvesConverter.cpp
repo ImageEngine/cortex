@@ -73,6 +73,8 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 		width = widthData->readable();
 	}
 
-	CurvesPrimitive::Ptr result = new CurvesPrimitive( curves->basis(), curves->periodic(), curves->verticesPerCurve(), points, width );
+	IECore::Color3fVectorData::ConstPtr colorData = curves->variableData<IECore::Color3fVectorData>( "Cs", IECore::PrimitiveVariable::Uniform );
+
+	CurvesPrimitive::Ptr result = new CurvesPrimitive( curves->basis(), curves->periodic(), curves->verticesPerCurve(), points, width, colorData );
 	return result;
 }

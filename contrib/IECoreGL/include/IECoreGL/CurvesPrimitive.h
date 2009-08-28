@@ -51,7 +51,7 @@ class CurvesPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::CurvesPrimitive, CurvesPrimitiveTypeId, Primitive );
 
 		CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve,
-			IECore::ConstV3fVectorDataPtr points, float width=1.0f );
+			IECore::ConstV3fVectorDataPtr points, float width=1.0f, IECore::Color3fVectorData::ConstPtr colors=0 );
 		virtual ~CurvesPrimitive();
 
 		virtual Imath::Box3f bound() const;
@@ -91,6 +91,7 @@ class CurvesPrimitive : public Primitive
 		bool m_periodic;
 		IECore::IntVectorDataPtr m_vertsPerCurve;
 		IECore::V3fVectorDataPtr m_points;
+		IECore::Color3fVectorData::Ptr m_colors;
 		float m_width;
 
 };

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -44,7 +44,31 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testCurves.tif"
 
-	def performTest( self, curvesPrimitive, attributes=[], testPixels=[], testImage=None ) :
+	def showColorShader( self ) :
+	
+		vs = """
+		void main()
+		{
+			gl_Position = ftransform();
+			gl_FrontColor = gl_Color;
+			gl_BackColor = gl_Color;
+		}
+		"""
+	
+		fs = """
+		void main()
+		{
+			gl_FragColor = gl_Color;
+		}
+		"""
+		
+		s = IECore.Shader( "showColor", "surface" )
+		s.parameters["gl:fragmentSource"] = IECore.StringData( fs )
+		s.parameters["gl:vertexSource"] = IECore.StringData( vs )
+		
+		return s
+
+	def performTest( self, curvesPrimitive, attributes=[], testPixels=[], testImage=None, shader=None, diffImage=None ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
@@ -66,7 +90,11 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+		if shader :
+			shader.render( r )
+		else :
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+
 		curvesPrimitive.render( r )
 
 		r.worldEnd()
@@ -108,6 +136,13 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 					self.assertEqual( a[i], 1 )
 				elif r2[i] < 0.5 :
 					self.assertEqual( a[i], 0 )
+		
+		if diffImage :
+					
+			expectedImage = IECore.Reader.create( diffImage ).read()
+		
+			self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = i, maxError = 0.05 ).value, False )
+		
 
 	def testAttributes( self ) :
 
@@ -529,6 +564,41 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/images/linearPeriodicRibbon.tif"
 		)
 
+	def testLinearLinesWithUniformColor( self ) :
+
+		c = IECore.CurvesPrimitive(
+
+			IECore.IntVectorData( [ 4, 4 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[
+					IECore.V3f( 1, 0, 0 ),
+					IECore.V3f( 0, 0, 0 ),
+					IECore.V3f( 0, 0.5, 0 ),
+					IECore.V3f( 0.5, 0.5, 0 ),
+
+					IECore.V3f( 0.5, 0.5, 0 ),
+					IECore.V3f( 1, 0.5, 0 ),
+					IECore.V3f( 1, 1, 0 ),
+					IECore.V3f( 0, 1, 0 ),
+				]
+			)
+
+		)
+		c["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) )
+
+		self.performTest(
+
+			c,
+			[
+				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
+				( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) ),
+			],
+			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/linearLinesWithUniformColor.tif",
+			shader = self.showColorShader(),
+		)
+		
 	def tearDown( self ) :
 
 		if os.path.exists( self.outputFileName ) :

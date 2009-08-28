@@ -57,8 +57,8 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CurvesPrimitive::GLLineWi
 
 IE_CORE_DEFINERUNTIMETYPED( CurvesPrimitive );
 
-CurvesPrimitive::CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve, IECore::ConstV3fVectorDataPtr points, float width )
-	:	m_basis( basis ), m_periodic( periodic ), m_vertsPerCurve( vertsPerCurve->copy() ), m_points( points->copy() ), m_width( width )
+CurvesPrimitive::CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve, IECore::ConstV3fVectorDataPtr points, float width, IECore::Color3fVectorData::ConstPtr colors )
+	:	m_basis( basis ), m_periodic( periodic ), m_vertsPerCurve( vertsPerCurve->copy() ), m_points( points->copy() ), m_width( width ), m_colors( colors ? colors->copy() : 0 )
 {
 	const vector<V3f> &pd = m_points->readable();
 	for( vector<V3f>::const_iterator it=pd.begin(); it!=pd.end(); it++ )
@@ -98,15 +98,23 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 	const V3f *p = &(m_points->readable()[0]);
 	const std::vector<int> &v = m_vertsPerCurve->readable();
 
+	const Color3f *c = m_colors ? &(m_colors->readable()[0]) : 0;
+
 	glLineWidth( state->get<GLLineWidth>()->value() );
 
 	if( m_basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
 	{
-
+		
 		glEnableClientState( GL_VERTEX_ARRAY );
 
 			for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++ )
 			{
+				if( c )
+				{
+					glColor3f( c->x, c->y, c->z );
+					c++;
+				}
+
 				glVertexPointer( 3, GL_FLOAT, 0, p );
 				glDrawArrays( m_periodic ? GL_LINE_LOOP : GL_LINE_STRIP, 0, *vIt );
 				p += *vIt;
