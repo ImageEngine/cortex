@@ -419,34 +419,37 @@ MStatus ParameterisedHolder<B>::setParameterisedValues()
 
 	MFnDependencyNode fnDN( B::thisMObject() );
 
+	bool allGood = true;
 	ParameterToAttributeNameMap::const_iterator it;
 	for( it=m_parametersToAttributeNames.begin(); it!=m_parametersToAttributeNames.end(); it++ )
 	{
 		MPlug p = fnDN.findPlug( it->second );
 		if( p.isNull() )
 		{
-			return MStatus::kFailure;
+			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Unable to find plug for parameter %s" ) %  it->first->name() );
+			allGood = false;
 		}
 		try
 		{
 			MStatus s = Parameter::setValue( p, it->first );
 			if( !s )
 			{
-				return s;
+				msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Failed to set parameter value from %s" ) % p.name().asChar() );
+				allGood = false;
 			}
 		}
 		catch( std::exception &e )
 		{
 			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s : %s" ) % p.name().asChar() % e.what());
-			return MStatus::kFailure;
+			allGood = false;
 		}
 		catch( ... )
 		{
 			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s" ) % p.name().asChar() );
-			return MStatus::kFailure;
+			allGood = false;
 		}
 	}
-	return MStatus::kSuccess;
+	return allGood ? MStatus::kSuccess : MStatus::kFailure;
 }
 
 template<typename B>
