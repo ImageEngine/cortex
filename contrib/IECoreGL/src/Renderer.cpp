@@ -60,6 +60,7 @@
 #include "IECoreGL/Font.h"
 #include "IECoreGL/TextPrimitive.h"
 #include "IECoreGL/DiskPrimitive.h"
+#include "IECoreGL/ToGLCurvesConverter.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -71,6 +72,7 @@
 #include "IECore/MeshNormalsOp.h"
 #include "IECore/SplineData.h"
 #include "IECore/SplineToImage.h"
+#include "IECore/CurvesPrimitive.h"
 
 #include <stack>
 
@@ -1029,9 +1031,9 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["name"] = nameSetter;
 		(*a)["doubleSided"] = typedAttributeSetter<DoubleSidedStateComponent>;
 		(*a)["rightHandedOrientation"] = typedAttributeSetter<RightHandedOrientationStateComponent>;
-		(*a)["gl:curvesPrimitive:useGLLines"] = typedAttributeSetter<CurvesPrimitive::UseGLLines>;
-		(*a)["gl:curvesPrimitive:glLineWidth"] = typedAttributeSetter<CurvesPrimitive::GLLineWidth>;
-		(*a)["gl:curvesPrimitive:ignoreBasis"] = typedAttributeSetter<CurvesPrimitive::IgnoreBasis>;
+		(*a)["gl:curvesPrimitive:useGLLines"] = typedAttributeSetter<IECoreGL::CurvesPrimitive::UseGLLines>;
+		(*a)["gl:curvesPrimitive:glLineWidth"] = typedAttributeSetter<IECoreGL::CurvesPrimitive::GLLineWidth>;
+		(*a)["gl:curvesPrimitive:ignoreBasis"] = typedAttributeSetter<IECoreGL::CurvesPrimitive::IgnoreBasis>;
 		(*a)["gl:smoothing:points"] = typedAttributeSetter<PointSmoothingStateComponent>;
 		(*a)["gl:smoothing:lines"] = typedAttributeSetter<LineSmoothingStateComponent>;
 		(*a)["gl:smoothing:polygons"] = typedAttributeSetter<PolygonSmoothingStateComponent>;
@@ -1071,9 +1073,9 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["name"] = nameGetter;
 		(*a)["doubleSided"] = typedAttributeGetter<DoubleSidedStateComponent>;
 		(*a)["rightHandedOrientation"] = typedAttributeGetter<RightHandedOrientationStateComponent>;
-		(*a)["gl:curvesPrimitive:useGLLines"] = typedAttributeGetter<CurvesPrimitive::UseGLLines>;
-		(*a)["gl:curvesPrimitive:glLineWidth"] = typedAttributeGetter<CurvesPrimitive::GLLineWidth>;
-		(*a)["gl:curvesPrimitive:ignoreBasis"] = typedAttributeGetter<CurvesPrimitive::IgnoreBasis>;
+		(*a)["gl:curvesPrimitive:useGLLines"] = typedAttributeGetter<IECoreGL::CurvesPrimitive::UseGLLines>;
+		(*a)["gl:curvesPrimitive:glLineWidth"] = typedAttributeGetter<IECoreGL::CurvesPrimitive::GLLineWidth>;
+		(*a)["gl:curvesPrimitive:ignoreBasis"] = typedAttributeGetter<IECoreGL::CurvesPrimitive::IgnoreBasis>;
 		(*a)["gl:smoothing:points"] = typedAttributeGetter<PointSmoothingStateComponent>;
 		(*a)["gl:smoothing:lines"] = typedAttributeGetter<LineSmoothingStateComponent>;
 		(*a)["gl:smoothing:polygons"] = typedAttributeGetter<PolygonSmoothingStateComponent>;
@@ -1515,27 +1517,18 @@ void IECoreGL::Renderer::disk( float radius, float z, float thetaMax, const IECo
 
 void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
-	ConstV3fVectorDataPtr points = findPrimVar<V3fVectorData>( "P", PrimitiveVariable::Vertex, primVars );
-	if( !points )
+	try
 	{
-		msg( Msg::Warning, "Renderer::curves", "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
+		IECore::CurvesPrimitivePtr c = new IECore::CurvesPrimitive( numVertices, basis, periodic );
+		c->variables = primVars;
+		CurvesPrimitivePtr prim = boost::static_pointer_cast<CurvesPrimitive>( ToGLCurvesConverter( c ).convert() );
+		addPrimitive( prim, primVars, m_data, false );
+	}
+	catch( const std::exception &e )
+	{
+		msg( Msg::Warning, "Renderer::curves", e.what() );
 		return;
 	}
-
-	ConstFloatDataPtr widthData = findPrimVar<FloatData>( "width", PrimitiveVariable::Constant, primVars );
-	if( !widthData  )
-	{
-		widthData = findPrimVar<FloatData>( "constantwidth", PrimitiveVariable::Constant, primVars );
-	}
-
-	float width = 1;
-	if( widthData )
-	{
-		width = widthData->readable();
-	}
-
-	CurvesPrimitivePtr prim = new CurvesPrimitive( basis, periodic, numVertices, points, width );
-	addPrimitive( prim, primVars, m_data );
 }
 
 void IECoreGL::Renderer::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
