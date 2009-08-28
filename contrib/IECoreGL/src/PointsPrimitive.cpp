@@ -57,7 +57,7 @@ IE_CORE_DEFINERUNTIMETYPED( PointsPrimitive );
 
 float PointsPrimitive::g_defaultWidth = 1;
 float PointsPrimitive::g_defaultHeight = 1;
-float PointsPrimitive::g_defaultRotation = 1;
+float PointsPrimitive::g_defaultRotation = 0;
 
 PointsPrimitive::PointsPrimitive( Type type,
 	IECore::ConstV3fVectorDataPtr p,
@@ -218,7 +218,9 @@ void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) c
 
 	V3f cameraCentre = Camera::positionInObjectSpace();
 	V3f cameraUp = Camera::upInObjectSpace();
-
+	V3f cameraView = -Camera::viewDirectionInObjectSpace();
+	bool perspective = Camera::perspectiveProjection();
+	
 	const std::vector<V3f> &p = m_points->readable();
 
 	const Color3f *c = setOrReturnColor();
@@ -244,7 +246,7 @@ void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) c
 			}
 		}
 
-		M44f aim = alignZAxisWithTargetDir( cameraCentre - p[i], cameraUp );
+		M44f aim = alignZAxisWithTargetDir( perspective ? cameraCentre - p[i] : cameraView, cameraUp );
 		glPushMatrix();
 			glTranslatef( p[i][0], p[i][1], p[i][2] );
 			glMultMatrixf( aim.getValue() );
@@ -261,8 +263,11 @@ void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) c
 void PointsPrimitive::renderQuads( ConstStatePtr state, IECore::TypeId style ) const
 {
 	QuadPrimitivePtr quad = new QuadPrimitive();
+	
 	V3f cameraCentre = Camera::positionInObjectSpace();
 	V3f cameraUp = Camera::upInObjectSpace();
+	V3f cameraView = -Camera::viewDirectionInObjectSpace();
+	bool perspective = Camera::perspectiveProjection();
 
 	const std::vector<V3f> &p = m_points->readable();
 
@@ -300,7 +305,7 @@ void PointsPrimitive::renderQuads( ConstStatePtr state, IECore::TypeId style ) c
 			}
 		}
 
-		M44f aim = alignZAxisWithTargetDir( cameraCentre - p[i], cameraUp );
+		M44f aim = alignZAxisWithTargetDir( perspective ? cameraCentre - p[i] : cameraView, cameraUp );
 
 		glPushMatrix();
 			glTranslatef( p[i][0], p[i][1], p[i][2] );

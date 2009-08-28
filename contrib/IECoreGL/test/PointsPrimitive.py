@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,17 +32,21 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import unittest
 import random
+import os
 
-from IECore import *
+import IECore
+import IECoreGL
 
-from IECoreGL import *
-init( False )
+IECoreGL.init( False )
 
 class TestPointsPrimitive( unittest.TestCase ) :
 
-	## \todo Make this actually assert something
+	outputFileName = os.path.dirname( __file__ ) + "/output/testPoints.tif"
+
 	def testVertexAttributes( self ) :
 
 		fragmentSource = """
@@ -56,30 +60,97 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		"""
 
 		numPoints = 100
-		p = V3fVectorData( numPoints )
-		g = IntVectorData( numPoints )
+		p = IECore.V3fVectorData( numPoints )
+		g = IECore.IntVectorData( numPoints )
+		random.seed( 0 )
 		for i in range( 0, numPoints ) :
-			p[i] = V3f( random.random() * 4, random.random() * 4, 0 )
+			p[i] = IECore.V3f( random.random() * 4, random.random() * 4, random.random() * 4 )
 			g[i] = int( random.uniform( 0.0, 255.0 ) )
-		p = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, p )
-		g = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, g )
+		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p )
+		g = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, g )
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 
-		r.worldBegin()
-		# we have to make this here so that the shaders that get made are made in the
-		# correct GL context. My understanding is that all shaders should work in all
-		# GL contexts in the address space, but that doesn't seem to be the case.
-		#w = SceneViewer( "scene", r.scene() )
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "tif", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, -10 ) ) )
+			r.shader( "surface", "grey", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
+			r.points( numPoints, { "P" : p, "greyTo255" : g } )
 
-		r.concatTransform( M44f.createTranslated( V3f( -2, -2, 5 ) ) )
-		r.shader( "surface", "grey", { "gl:fragmentSource" : StringData( fragmentSource ) } )
-		r.points( numPoints, { "P" : p, "greyTo255" : g } )
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/pointVertexAttributes.tif" ).read()
+		actualImage = IECore.Reader.create( self.outputFileName ).read()
+		
+		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
-		r.worldEnd()
+	def performAimTest( self, projection, expectedImage, particleType ) :
+	
+		fragmentSource = """
+		void main()
+		{
+			gl_FragColor = vec4( 1, 1, 1, 1 );
+		}
+		"""
+		
+		p = IECore.V3fVectorData()
+		for x in range( -2, 3 ) :
+			for y in range( -2, 3 ) :
+				p.append( IECore.V3f( x, y, 0 ) )
+		
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 
-		#w.start()
+		r.camera( "main", {
+				"projection" : IECore.StringData( projection ),
+				"projection:fov" : IECore.FloatData( 20 ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+			}
+		)
+		r.display( self.outputFileName, "tif", "rgba", {} )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			
+			r.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
+			r.points( p.size(), { 
+					"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p ),
+					"constantwidth" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.75 ) ),
+					"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( particleType ) )
+				}
+			)
 
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/" + expectedImage ).read()
+		actualImage = IECore.Reader.create( self.outputFileName ).read()
+		
+		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+
+	def testPerspectiveAimedPoints( self ) :
+	
+		self.performAimTest( "perspective", "aimedPerspectivePoints.tif", "particle" )
+		
+	def testOrthographicAimedPoints( self ) :
+	
+		self.performAimTest( "orthographic", "aimedOrthographicPoints.tif", "particle" )
+		
+	def testPerspectiveAimedPatches( self ) :
+	
+		self.performAimTest( "perspective", "aimedPerspectivePatches.tif", "patch" )
+		
+	def testOrthographicAimedPatches( self ) :
+	
+		self.performAimTest( "orthographic", "aimedOrthographicPatches.tif", "patch" )		
+		
 if __name__ == "__main__":
     unittest.main()
