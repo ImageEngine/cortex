@@ -149,9 +149,10 @@ bool BGEOParticleReader::open()
 		// add P since it is always present but not listed in PointAttribs
 		Record r;
 		r.name = "P";
-		r.size = 3;
+		r.size = 4;
 		r.type = Vector;
 		m_header.attributes.push_back( r );
+		m_header.dataSize = r.size * sizeof( float );
 		
 		for( int i=0; i<m_header.numPointAttribs; i++ )
 		{
@@ -174,18 +175,21 @@ bool BGEOParticleReader::open()
 			m_iStream->read( (char *)&type, sizeof( type ) );
 			type = asBigEndian( type );
 			r.type = (AttributeType)type;
-			
+						
 			switch( r.type )
 			{
 				case Float :
 					m_iStream->seekg( sizeof( float ) * r.size, ios_base::cur );
+					m_header.dataSize += r.size * sizeof( float );
 					break;
 				case Integer :
 					m_iStream->seekg( sizeof( int ) * r.size, ios_base::cur );
+					m_header.dataSize += r.size * sizeof( int );
 					break;
 				case Index :
 					int size;
 					m_iStream->read( (char *)&size, sizeof( size ) );
+					m_header.dataSize += r.size * sizeof( int );
 					size = asBigEndian( size );
 					for ( int j=0; j < size; j++ )
 					{
@@ -202,6 +206,7 @@ bool BGEOParticleReader::open()
 					break;
 				case Vector :
 					m_iStream->seekg( sizeof( float ) * r.size, ios_base::cur );
+					m_header.dataSize += r.size * sizeof( float );
 					break;
 				default :
 					assert( r.type < 6 ); // unknown type
@@ -240,23 +245,25 @@ void BGEOParticleReader::attributeNames( std::vector<std::string> &names )
 
 ObjectPtr BGEOParticleReader::doOperation( ConstCompoundObjectPtr operands )
 {
+	vector<string> attributes;
+	particleAttributes( attributes );
 	size_t nParticles = numParticles();
 	PointsPrimitivePtr result = new PointsPrimitive( nParticles );
 
-	CompoundDataPtr attributeData = readAttributes();
-	if ( !result )
+	CompoundDataPtr attributeData = readAttributes( attributes );
+	if ( !attributeData )
 	{
 		throw Exception( ( format( "Failed to load \"%s\"." ) % fileName() ).str() );
 
 	}
 
 	bool haveNumPoints = false;
-	for( vector<Record>::const_iterator it = m_header.attributes.begin(); it!=m_header.attributes.end(); it++ )
+	for( vector<string>::const_iterator it = attributes.begin(); it!=attributes.end(); it++ )
 	{
-		CompoundDataMap::const_iterator itData = attributeData->readable().find( it->name );
+		CompoundDataMap::const_iterator itData = attributeData->readable().find( *it );
 		if ( itData == attributeData->readable().end() )
 		{
-			msg( Msg::Warning, "ParticleReader::doOperation", format( "Attribute %s expected but not found." ) % it->name );
+			msg( Msg::Warning, "ParticleReader::doOperation", format( "Attribute %s expected but not found." ) % *it );
 			continue;
 		}
 		
@@ -272,16 +279,16 @@ ObjectPtr BGEOParticleReader::doOperation( ConstCompoundObjectPtr operands )
 			}
 			if( s==result->getNumPoints() )
 			{
-				result->variables.insert( PrimitiveVariableMap::value_type( it->name, PrimitiveVariable( PrimitiveVariable::Vertex, d ) ) );
+				result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Vertex, d ) ) );
 			}
 			else
 			{
-				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % it->name % result->getNumPoints() % s );
+				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % *it % result->getNumPoints() % s );
 			}
 		}
 		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( d ) )
 		{
-			result->variables.insert( PrimitiveVariableMap::value_type( it->name, PrimitiveVariable( PrimitiveVariable::Constant, d ) ) );
+			result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Constant, d ) ) );
 		}
 	}
 
@@ -329,20 +336,24 @@ boost::intrusive_ptr<T> BGEOParticleReader::filterAttr( boost::intrusive_ptr<F> 
 }
 
 template<typename T>
-void BGEOParticleReader::readAttributeData( T *buffer, unsigned long n ) const
+void BGEOParticleReader::readAttributeData( char **dataBuffer, T *attrBuffer, unsigned long n ) const
 {
-	m_iStream->read( (char *)buffer, n * sizeof( T ) );
-	for( unsigned long i=0; i<n; i++ )
+	for( unsigned long i=0; i < n; i++ )
 	{
-		*buffer = asBigEndian( *buffer );
-		buffer++;
+		T *data = (T*)*dataBuffer;
+		*dataBuffer += sizeof( T );
+		
+		*attrBuffer = asBigEndian( *data );
+		attrBuffer++;
 	}
-	assert( m_iStream->good() );
 }
 
 DataPtr BGEOParticleReader::readAttribute( const std::string &name )
 {
-	CompoundDataPtr result = readAttributes();
+	std::vector< std::string > names;
+	names.push_back( name );
+	CompoundDataPtr result = readAttributes( names );
+	
 	if (!result)
 	{
 		return 0;
@@ -355,7 +366,7 @@ DataPtr BGEOParticleReader::readAttribute( const std::string &name )
 	return it->second;
 }
 
-CompoundDataPtr BGEOParticleReader::readAttributes()
+CompoundDataPtr BGEOParticleReader::readAttributes( const std::vector<std::string> &names )
 {
 	if( !open() )
 	{
@@ -368,7 +379,7 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 	
 	int intAttribBuffer[ 3 ];
 	int *intAttributePtr = &intAttribBuffer[0];
-	float floatAttribBuffer[ 3 ];
+	float floatAttribBuffer[ 4 ];
 	float *floatAttributePtr = &floatAttribBuffer[0];
 	
 	vector<Record>::const_iterator it;
@@ -380,42 +391,42 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 		IntVectorDataPtr intVector = 0;
 		StringVectorDataPtr stringVector = 0;
 		DataPtr dataVector = 0;
-
-		switch( it->size )
+		
+		if ( it->size == 1 )
 		{
-		case 1:
 			if ( it->type == Float )
 			{
 				floatVector = new FloatVectorData();
 				floatVector->writable().resize( numParticles() );
 				dataVector = floatVector;
-				break;
 			}
 			else if ( it->type == Integer )
 			{
 				intVector = new IntVectorData();
 				intVector->writable().resize( numParticles() );
 				dataVector = intVector;
-				break;
 			}
 			else if ( it->type == Index )
 			{
 				stringVector = new StringVectorData();
 				stringVector->writable().resize( numParticles() );
 				dataVector = stringVector;
-				break;
 			}
-		case 2:
+		}
+		else if ( it->size == 2 )
+		{
 			v2fVector = new V2fVectorData();
 			v2fVector->writable().resize( numParticles() );
 			dataVector = v2fVector;
-			break;
-		case 3:
+		}
+		else if ( it->size == 3 || it->size == 4 )
+		{
 			v3fVector = new V3fVectorData();
 			v3fVector->writable().resize( numParticles() );
 			dataVector = v3fVector;
-			break;
-		default:
+		}
+		else
+		{
 			msg( Msg::Error, "BGEOParticleReader::readAttributes()", format( "Internal error. Unrecognized type '%d' of size '%d' while loading attribute %s." ) % it->type % it->size % it->name );
 			return 0;
 		}
@@ -428,25 +439,25 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 		attrInfo.push_back( info );
 	}
 		
+	// read all of the data at once
+	std::vector<char> dataBuffer;
+	dataBuffer.resize( m_header.numPoints * m_header.dataSize );
+	char *dataBufferPtr = &dataBuffer[0];
 	m_iStream->seekg( ios_base::beg + m_header.firstPointPosition );
-	
+	m_iStream->read( dataBufferPtr, m_header.numPoints * m_header.dataSize );
 	for ( int i = 0; i < m_header.numPoints; i++)
 	{
 		std::vector< struct AttrInfo >::iterator it;
 		for (it = attrInfo.begin(); it != attrInfo.end(); it++)
 		{
 			// P contains an additional byte in the BGEO
-			if ( it->info.name == "P" )
+			if ( it->info.type == Integer || it->info.type == Index )
 			{
-				readAttributeData( floatAttributePtr, it->info.size+1 );
-			}
-			else if ( it->info.type == Integer || it->info.type == Index )
-			{
-				readAttributeData( intAttributePtr, it->info.size );
+				readAttributeData( &dataBufferPtr, intAttributePtr, it->info.size );
 			}
 			else
 			{
-				readAttributeData( floatAttributePtr, it->info.size );
+				readAttributeData( &dataBufferPtr, floatAttributePtr, it->info.size );
 			}
 			
 			switch (it->targetData->typeId())
@@ -489,9 +500,14 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 	std::vector< struct AttrInfo >::const_iterator attrIt;
 	for( attrIt=attrInfo.begin(); attrIt!=attrInfo.end(); attrIt++ )
 	{
-		switch( attrIt->info.size )
+		// The data had to be read, but we don't need to filter or store it
+		if( find( names.begin(), names.end(), attrIt->info.name ) == names.end() )
 		{
-		case 1:
+			continue;
+		}
+		
+		if ( attrIt->info.size == 1 )
+		{
 			if ( attrIt->info.type == Float )
 			{
 				switch( realType() )
@@ -504,19 +520,18 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 					filteredData = filterAttr<DoubleVectorData, FloatVectorData>( boost::static_pointer_cast<FloatVectorData>(attrIt->targetData), particlePercentage() );
 					break;
 				}
-				break;
 			}
 			else if ( attrIt->info.type == Integer )
 			{
 				filteredData = filterAttr<IntVectorData, IntVectorData>( boost::static_pointer_cast<IntVectorData>(attrIt->targetData), particlePercentage() );
-				break;
 			}
 			else if ( attrIt->info.type == Index )
 			{
 				filteredData = filterAttr<StringVectorData, StringVectorData>( boost::static_pointer_cast<StringVectorData>(attrIt->targetData), particlePercentage() );
-				break;
 			}
-		case 2:
+		}
+		else if ( attrIt->info.size == 2 )
+		{
 			if ( attrIt->info.type == Float )
 			{
 				switch( realType() )
@@ -529,9 +544,10 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 					filteredData = filterAttr<V2dVectorData, V2fVectorData>( boost::static_pointer_cast<V2fVectorData>(attrIt->targetData), particlePercentage() );
 					break;
 				}
-				break;
 			}
-		case 3:
+		}
+		else if ( attrIt->info.size == 3 || attrIt->info.size == 4 )
+		{
 			if ( ( attrIt->info.type == Float ) || ( attrIt->info.type == Vector ) )
 			{
 				switch( realType() )
@@ -544,9 +560,10 @@ CompoundDataPtr BGEOParticleReader::readAttributes()
 					filteredData = filterAttr<V3dVectorData, V3fVectorData>( boost::static_pointer_cast<V3fVectorData>(attrIt->targetData), particlePercentage() );
 					break;
 				}
-				break;
 			}
-		default:
+		}
+		else
+		{
 			msg( Msg::Error, "BGEOParticleReader::readAttributes()", format( "Internal error. Unrecognized type '%d' of size '%d' while converting attribute %s." ) % attrIt->info.type % attrIt->info.size % attrIt->info.name );
 			return 0;
 		}

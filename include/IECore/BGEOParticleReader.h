@@ -114,17 +114,18 @@ class BGEOParticleReader : public ParticleReader
 			int numPrimAttribs;
 			int numDetailAttribs;
 			int firstPointPosition;
+			int dataSize;
 			std::vector<Record> attributes;
 		} m_header;
 		
 		template<typename T>
-		void readAttributeData( T *buffer, unsigned long n ) const;
+		void readAttributeData( char **dataBuffer, T *attrBuffer, unsigned long n ) const;
 		
 		template<typename T, typename F>
 		boost::intrusive_ptr<T> filterAttr( boost::intrusive_ptr<F> attr, float percentage );
 		
 		// reads all attributes from m_header.attributes and returns CoumpoundData containing the results
-		IECore::CompoundDataPtr readAttributes();
+		IECore::CompoundDataPtr readAttributes( const std::vector<std::string> &names );
 };
 
 IE_CORE_DECLAREPTR( BGEOParticleReader );
