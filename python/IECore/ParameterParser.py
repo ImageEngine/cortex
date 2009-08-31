@@ -152,39 +152,30 @@ class ParameterParser :
 		return self.__serialiseWalk( parameters, "" )
 
 	def __serialiseWalk(self, parameter, rootName):
-		"""
-		recursively assemble a serialized command-line argument style parameter instance
-		"""
 
-		result = ''
-
-		if parameter.isInstanceOf("CompoundParameter"):
-
-			# concatenate the path
-			path = rootName
-			if parameter.name: path = path + parameter.name + '.'
-
-			# recurse
-			result = ' '.join(map(lambda cp: self.__serialiseWalk(parameter[cp], path), parameter.keys()))
-
-		else:
-
-			# leaf parameter
-			parmType = parameter.typeId()
-			if not parmType in self.__typesToSerialisers:
+		parmType = parameter.typeId()
+		if not parmType in self.__typesToSerialisers :
+			# no registered serialiser
+			if parameter.isInstanceOf( IECore.CompoundParameter.staticTypeId() ) :
+				# but it's a CompoundParameter so we can just recurse.
+				path = rootName
+				if parameter.name :
+					path = path + parameter.name + '.'
+				# recurse
+				return ' '.join( map( lambda cp: self.__serialiseWalk(parameter[cp], path), parameter.keys() ) )
+			else :
+				# no serialiser available and not a CompoundParameter - bail
 				raise RuntimeError("No serialiser available for parameter \"%s\"" % parameter.name)
-
-			# find the appropriate serializer for the given parameter type
+		else :
+			# we have a registered serialiser - use it
 			f = self.__typesToSerialisers[parmType]
 			try:
-				s = f(parameter)
+				s = f( parameter )
 			except Exception, e:
 				raise RuntimeError("Problem serialising parameter \"%s\" : %s" % (parameter.name, e))
 
 			# serialize
-			result = '-' + rootName + parameter.name + ' ' + s
-
-		return result
+			return '-' + rootName + parameter.name + ' ' + s
 
 	@classmethod
 	## Registers a parser and serialiser for a new Parameter type.
