@@ -54,13 +54,16 @@ ConstParameterHandlerPtr ParameterHandler::get( IECore::ConstObjectPtr object )
 ConstParameterHandlerPtr ParameterHandler::get( IECore::TypeId id )
 {
 	const HandlerMap &h = handlers();
-	HandlerMap::const_iterator it = h.find( id );
-
-	if( it!=h.end() )
-	{
-	        return it->second;
-	}
-
+	
+	do {
+		HandlerMap::const_iterator it = h.find( id );
+		if( it!=h.end() )
+		{
+			return it->second;
+		}
+		id = IECore::RunTimeTyped::baseTypeId( id );
+	} while( id!=IECore::InvalidTypeId );
+	
 	return 0;
 }
 

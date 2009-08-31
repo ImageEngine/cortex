@@ -445,7 +445,15 @@ class ParameterUI :
 		except:
 			pass
 
-		if not ( parameter.typeId(), uiTypeHint ) in ParameterUI.handlers:
+		handlerType = None
+		typeId = parameter.typeId()
+		while typeId!=IECore.TypeId.Invalid :
+			handlerType = ParameterUI.handlers.get( ( typeId, uiTypeHint ), None )
+			if handlerType is not None :
+				break
+			typeId = IECore.RunTimeTyped.baseTypeId( typeId )
+				
+		if handlerType is None :
 			IECore.msg( IECore.Msg.Level.Warning, "ParameterUI.create", "No UI registered for parameters of type \"%s\"" % parameter.typeName() )
 			return None
 
@@ -455,7 +463,6 @@ class ParameterUI :
 			kw['longParameterName'] = parameter.name
 
 
-		handlerType = ParameterUI.handlers[ (parameter.typeId(), uiTypeHint) ]
 		parameterUI = handlerType( parameterisedHolderNode, parameter, **kw )
 
 		return parameterUI
