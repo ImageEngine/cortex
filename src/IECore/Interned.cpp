@@ -39,6 +39,17 @@
 namespace IECore
 {
 
+// It's essential that this implementation isn't visible from the headers.
+// If it is then other libraries/modules linking IECore can end up with
+// their own copy of the function, and therefore of the HashSet itself.
+// This causes lookups to fail and bad things to happen.
+template<typename T, typename Hash>
+typename Interned<T, Hash>::HashSet *Interned<T, Hash>::hashSet()
+{
+	static HashSet *h = new HashSet;
+	return h;
+}
+
 struct StringCStringEqual
 {
 	bool operator()( const char *c, const std::string &s ) const
@@ -66,5 +77,8 @@ InternedString::Interned( const char *value )
 		m_value = &(*(h->insert( std::string( value ) ).first ) );
 	}
 }
+
+// explicit instantiation
+template class Interned<std::string>;
 
 } // namespace IECore

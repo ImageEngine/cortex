@@ -115,13 +115,6 @@ size_t Interned<T, Hash>::size()
 	return hashSet()->size();
 };
 
-template<typename T, typename Hash>
-typename Interned<T, Hash>::HashSet *Interned<T, Hash>::hashSet()
-{
-	static HashSet *h = new HashSet;
-	return h;
-}
-
 } // namespace IECore
 
 #endif // IECORE_INTERNED_INL
