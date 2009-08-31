@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,13 +34,13 @@
 
 import IECore
 import shlex
-from urllib import quote, unquote
 
 ## This class defines a means of parsing a list of string arguments with respect to a Parameter definition.
 # It's main use is in providing values to be passed to Op instances in the do script. It now also provides
 # the reverse operation - serialising parameter values into a form which can later be parsed.
 #
-# \todo Enable urllib.quote / unquote methods on string based-parameters. And also it's test case.
+# \todo Perhaps serialise() could return a list of strings rather than a concatenated string, and then
+# different clients could deal with any quoting issues themselves.
 # \ingroup python
 class ParameterParser :
 
@@ -202,27 +202,6 @@ class ParameterParser :
 		cls.__typesToSerialisers[typeId] = _serialiseUsingRepr
 
 ###################################################################################################################
-# quoting and unquoting methods used in string parameters
-###################################################################################################################
-
-def __strUnquote( txt ):
-
-	if txt.startswith("%Q%") and txt.endswith( "%Q%" ):
-		return unquote( txt[ 3: len(txt) - 3 ] )
-
-	return txt
-
-def __strQuote( txt ):
-
-	quotedTxt = quote( txt )
-	# if the string has special characters, we force the quoted version. Also if it's empty string or starts with '-' or 'read:' to
-	# avoid confusion with the parser options, parameter names and O.S. parse errors.
-	if txt != quotedTxt or len(txt) == 0 or txt.startswith('-') or txt.startswith("read:"):
-		return "%Q%" + quotedTxt + "%Q%"
-
-	return txt
-
-###################################################################################################################
 # parsers and serialisers for the built in parameter types
 ###################################################################################################################
 
@@ -327,7 +306,6 @@ def __parseBox( dataType, boxType, elementType, integer, args, parameter ) :
 	parameter.setValidatedValue( dataType( boxType( elementType( *values[:n/2] ), elementType( *values[n/2:] ) ) ) )
 
 def __parseString( args, parameter ) :
-#	parameter.setValidatedValue( IECore.StringData( __strUnquote(args[0]) ) )
 	parameter.setValidatedValue( IECore.StringData( args[0] ) )
 	del args[0]
 
@@ -340,7 +318,6 @@ def __parseStringArray( args, parameter ) :
 		if len(a) and a[0] == "-" :
 			foundFlag = True
 		else :
-#			d.append( __strUnquote(a) )
 			d.append( a )
 			del args[0]
 
@@ -402,7 +379,6 @@ def __parseNumericArray( dataType, integer, args, parameter ) :
 
 def __serialiseString( parameter ) :
 
-#	return "'" + __strQuote(parameter.getTypedValue()) + "'"
 	return "'" + parameter.getTypedValue() + "'"
 
 def __serialiseStringArray( parameter ) :
@@ -410,7 +386,6 @@ def __serialiseStringArray( parameter ) :
 	result = []
 	for i in parameter.getValue() :
 
-#		result.append( "'" + __strQuote(i) + "'" )
 		result.append( "'" + i + "'" )
 
 	return " ".join( result )
