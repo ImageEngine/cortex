@@ -157,6 +157,12 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 			self.assertAlmostEqual( ( p - r.point()).length(), 0 )
 
+		# test the uvBound method
+		uvb = Box2f()
+		for i in range( 0, len( s ) ) :
+			uvb.extendBy( V2f( s[i], t[i] ) )
+			
+		self.assertEqual( mpe.uvBound(), uvb )
 
 	def testSphereMesh( self ) :
 		""" Testing MeshPrimitiveEvaluator with sphere mesh"""

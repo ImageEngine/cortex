@@ -1260,6 +1260,15 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIn
 	}
 }
 
+const Imath::Box2f MeshPrimitiveEvaluator::uvBound() const
+{
+	if( !m_uvTree )
+	{
+		return Imath::Box2f();
+	}
+	return m_uvTree->node( m_uvTree->rootIndex() ).bound();
+}
+
 void MeshPrimitiveEvaluator::triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const
 {
 	const std::vector<float> &u = ((FloatVectorData *)(m_u.data.get()))->readable();

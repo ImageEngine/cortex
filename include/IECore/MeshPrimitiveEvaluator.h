@@ -125,6 +125,9 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual Imath::V3f centerOfGravity() const;
 
 		virtual float surfaceArea() const;
+		
+		/// Returns a bounding box covering all the uv coordinates of the mesh.
+		const Imath::Box2f uvBound() const;
 
 	protected:
 
