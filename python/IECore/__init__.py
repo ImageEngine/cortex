@@ -97,6 +97,7 @@ from WorldBlock import WorldBlock
 from SequenceMergeOp import SequenceMergeOp
 from ImageSequenceCompositeOp import ImageSequenceCompositeOp
 from DateTimeParameterParser import *
+from MotionBlock import MotionBlock
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *

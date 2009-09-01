@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,51 +32,34 @@
 #
 ##########################################################################
 
-import warnings
-warnings.filterwarnings( "error", "Access to Parameters as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Access to CompoundObject children as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Access to CompoundParameter children as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Specifying presets as a dictionary is deprecated - pass a tuple of tuples instead.", DeprecationWarning )
+from __future__ import with_statement
 
-import sys
+import unittest
 import IECore
+import IECoreRI
+import os.path
+import os
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
-from Orientation import *
-from MultipleContextsTest import *
-from Camera import *
-from CurvesTest import *
-from TextureOrientationTest import *
-from ArrayPrimVarTest import *
-from CoordinateSystemTest import *
-from IlluminateTest import *
-from SubsurfaceTest import *
-from PatchMeshTest import *
-from RIBWriterTest import *
-from ParameterisedProcedural import *
-from MotionTest import MotionTest
+class MotionTest( unittest.TestCase ) :
 
-if IECore.withFreeType() :
+	def test( self ) :
 
-	from TextTest import *
+		r = IECoreRI.Renderer( "test/IECoreRI/output/motionTest.rib" )
+		with IECore.WorldBlock( r ) :
+		
+			with IECore.MotionBlock( r, [ 1.75, 2.25 ] ) :
+			
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) )
 
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
+		l = "\n".join( file( "test/IECoreRI/output/motionTest.rib" ).readlines() )
+		self.assert_( "MotionBegin [ 1.75 2.25 ]" in l )
+		self.assert_( "MotionEnd" in l )
 
-	def __init__( self ) :
+	def tearDown( self ) :
+	
+		if os.path.exists( "test/IECoreRI/output/motionTest.rib" ) :
+			os.remove( "test/IECoreRI/output/motionTest.rib" )
 
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+if __name__ == "__main__":
+    unittest.main()
