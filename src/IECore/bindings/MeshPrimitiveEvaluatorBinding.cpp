@@ -49,6 +49,7 @@ void bindMeshPrimitiveEvaluator()
 {
 	object m = RunTimeTypedClass<MeshPrimitiveEvaluator>()
 		.def( init< MeshPrimitivePtr > () )
+		.def( "uvBound", &MeshPrimitiveEvaluator::uvBound )	
 	;
 
 	{
