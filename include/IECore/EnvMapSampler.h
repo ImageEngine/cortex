@@ -45,6 +45,7 @@ namespace IECore
 /// This class uses the MedianCutSampler to calculate a distribution
 /// of light positions and orientations based on a lat-long environment
 /// map image.
+/// \todo: use SphericalToEuclidianTransform that is based on right-hand coordinate system. Currently it is left-hand to match 3delight environment light mapping. But maya and nuke and the spherical harmonics implementation in IECore are right-handed.
 class EnvMapSampler : public Op
 {
 	public :
