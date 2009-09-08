@@ -46,8 +46,9 @@ namespace IECore
 template< typename, typename > class SphericalToEuclidianTransform;
 
 /// A templated SpaceTransform class to perform Euclidian to Spherical coordinates.
-/// The Spherical coordinate structure can optionally have a third component specifying the radius. So type F can be either Imath::Vec2<> or Imath::Vec3<>.
+/// The Spherical coordinate structure can optionally have a third component specifying the radius. So type T can be either Imath::Vec2<> or Imath::Vec3<>.
 /// Check documentation about SphericalToEuclidianTransform for more details on spherical coordinates.
+/// \todo We should probably use the more popular spelling of Euclidean.
 template<typename F, typename T>
 class EuclidianToSphericalTransform : public SpaceTransform< F, T >
 {
@@ -65,6 +66,11 @@ class EuclidianToSphericalTransform : public SpaceTransform< F, T >
 		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;
 };
+
+typedef EuclidianToSphericalTransform<Imath::V3f, Imath::V2f> EuclidianToSphericalTransform3f2f;
+typedef EuclidianToSphericalTransform<Imath::V3f, Imath::V3f> EuclidianToSphericalTransform3f3f;
+typedef EuclidianToSphericalTransform<Imath::V3d, Imath::V2d> EuclidianToSphericalTransform3d2d;
+typedef EuclidianToSphericalTransform<Imath::V3d, Imath::V3d> EuclidianToSphericalTransform3d3d;
 
 } // namespace IECore
 
