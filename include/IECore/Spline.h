@@ -60,6 +60,7 @@ class Spline
 
 		typedef CubicBasis<XType> Basis;
 		typedef std::multimap<X, Y> PointContainer;
+		typedef typename PointContainer::value_type Point;
 
 		/// The Spline is defined by a basis and a mapping from
 		/// X to Y values defining control points for the spline.
