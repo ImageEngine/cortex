@@ -171,7 +171,7 @@ class NukeFileExaminer( FileExaminer ) :
 					# spaces in a filename
 					raise Exception( "Filename \"%s\" is padded with spaces." % fileName )
 
-			return m.group( 1 ) + "".ljust( padding, '#' ) + m.group( 3 ) + " " + str( IECore.FrameRange( firstFrame, lastFrame ) )
+			return m.group( 1 ) + "".ljust( padding, '#' ) + m.group( 3 ) + " " + str( IECore.FrameRange( min( firstFrame, lastFrame ), max( firstFrame, lastFrame ) ) )
 
 		else :
 
