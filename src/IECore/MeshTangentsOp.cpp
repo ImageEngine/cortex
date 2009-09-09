@@ -47,7 +47,7 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( MeshTangentsOp );
 
-MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( staticTypeName(), "Calculates vertex normals for a mesh." )
+MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( staticTypeName(), "Calculates mesh tangents with respect to texture coordinates." )
 {
 	m_uPrimVarNameParameter = new StringParameter(
 		"uPrimVarName",
