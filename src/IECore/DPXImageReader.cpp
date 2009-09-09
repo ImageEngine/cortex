@@ -277,9 +277,14 @@ bool DPXImageReader::open( bool throwOnFailure )
 			}
 		}
 
-		if ( m_header->m_imageInformation.element_number != 1 )
+		if ( m_header->m_imageInformation.element_number < 1 )
 		{
 			throw IOException( "DPXImageReader: Invalid number of elements in image while reading " + fileName() );
+		}
+
+		for ( int i = 1; i < m_header->m_imageInformation.element_number; i++ )
+		{
+			msg( Msg::Warning, "DPXImageReader", format( "Ignoring non-supported channel %s in file %s" ) % descriptorStr( m_header->m_imageInformation.image_element[i].descriptor ) % fileName() );
 		}
 
 		if ( m_header->m_imageInformation.image_element[0].bit_size != 10 )
