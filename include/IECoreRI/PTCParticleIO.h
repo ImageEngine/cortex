@@ -35,6 +35,8 @@
 #ifndef IE_CORERI_PTCPARTICLEIO_H
 #define IE_CORERI_PTCPARTICLEIO_H
 
+#include "pointcloud.h"
+
 #define PTC_HEADER_BBOX_FLOATS			6
 #define PTC_HEADER_MATRIX_FLOATS		16
 #define PTC_HEADER_FORMAT_FLOATS		3
@@ -89,6 +91,14 @@ namespace PTCParticleIO
 	extern PTCType ptcVariableTypes[];
 
 	extern void checkPTCParticleIO();
+
+#ifdef PRMANEXPORT
+	/// This typedef is used to deal with different argument definitions in
+	/// prman and 3delight.
+	typedef char ** CharPtrPtr;
+#else
+	typedef const char ** CharPtrPtr;
+#endif
 
 } // namespace PTCParticleIO
 

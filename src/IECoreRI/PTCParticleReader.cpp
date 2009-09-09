@@ -83,7 +83,7 @@ bool PTCParticleReader::canRead( const std::string &fileName )
 {
 	int nvars;
 	PtcPointCloud ptcFile;
-	ptcFile = PtcOpenPointCloudFile( fileName.c_str(), &nvars, NULL, NULL );
+	ptcFile = PtcOpenPointCloudFile( (char *)fileName.c_str(), &nvars, NULL, NULL );
 	if (!ptcFile)
 	{
 		return false;
@@ -136,7 +136,7 @@ bool PTCParticleReader::open()
 
 		// This is ugly but necessary. Calling PtcOpenPointCloudFile with NULL pointers didn't failed but also didn't returned the number of variables anyways...
 
-		m_ptcFile = PtcOpenPointCloudFile( fileName().c_str(), &m_header.nvars, (const char **)m_header.vartypes, (const char **)m_header.varnames );
+		m_ptcFile = PtcOpenPointCloudFile( (char *)fileName().c_str(), &m_header.nvars, (PTCParticleIO::CharPtrPtr)m_header.vartypes, (PTCParticleIO::CharPtrPtr)m_header.varnames );
 		if (!m_ptcFile)
 		{
 			msg( Msg::Warning, "PTCParticleReader::open()", format( "Could not open TRC file \"%s\"." ) % fileName() );

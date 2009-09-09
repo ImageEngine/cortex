@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -335,7 +335,7 @@ void PTCParticleWriter::doWrite()
 	}
 
 	/// Creating file
-	PtcPointCloud ptcFile = PtcCreatePointCloudFile( fileName().c_str(), m_header.nvars, m_header.vartypes, m_header.varnames, &m_header.world2eye[0], &m_header.world2ndc[0], &m_header.format[0] );
+	PtcPointCloud ptcFile = PtcCreatePointCloudFile( (char *)fileName().c_str(), m_header.nvars, (PTCParticleIO::CharPtrPtr)m_header.vartypes, (PTCParticleIO::CharPtrPtr)m_header.varnames, &m_header.world2eye[0], &m_header.world2ndc[0], &m_header.format[0] );
 	if ( !ptcFile )
 	{
 		throw IOException( ( format( "Unable to create file \%s\"." ) % fileName() ).str() );

@@ -934,29 +934,31 @@ coreTestEnv.Alias( "testCorePython", corePythonTest )
 riEnv = coreEnv.Copy( IECORE_NAME = "IECoreRI" )
 riEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
-riEnv.Append(
-	LIBS = [
-		"3delight",
-	]
-)
 
 riPythonEnv = pythonEnv.Copy( IECORE_NAME = "IECoreRI" )
+riPythonEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riPythonEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
-riPythonEnv.Append(
-	LIBS = [
-		"3delight",
-	]
-)
 
 if doConfigure :
 
 	c = Configure( riEnv )
 
-	if not c.CheckLibWithHeader( "3delight", "ri.h", "CXX" ) :
-		sys.stderr.write( "WARNING : no 3delight library found, not building IECoreRI - check RMAN_ROOT.\n" )
+	haveDelight = c.CheckLibWithHeader( "3delight", "ri.h", "CXX" )
+	havePRMan = c.CheckLibWithHeader( "prman", "ri.h", "CXX" )
+
+	if not haveDelight and not havePRMan :
+	
+		sys.stderr.write( "WARNING : no 3delight or prman library found, not building IECoreRI - check RMAN_ROOT.\n" )
 		c.Finish()
 
 	else :
+	
+		if haveDelight :
+			riEnv.Append( LIBS = [ "3delight" ] )
+			riPythonEnv.Append( LIBS = [ "3delight" ] )
+		else :
+			riEnv.Append( LIBS = [ "prman" ] )
+			riPythonEnv.Append( LIBS = [ "prman" ] )
 	
 		riSources = glob.glob( "src/IECoreRI/*.cpp" )
 		riHeaders = glob.glob( "include/IECoreRI/*.h" ) + glob.glob( "include/IECoreRI/*.inl" )

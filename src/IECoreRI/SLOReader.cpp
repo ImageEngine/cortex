@@ -45,6 +45,10 @@
 
 #include "slo.h"
 
+#ifdef PRMANEXPORT
+typedef POINT3D SLO_POINT;
+#endif
+
 using namespace IECore;
 using namespace IECoreRI;
 using namespace boost;
@@ -70,7 +74,7 @@ SLOReader::~SLOReader()
 
 bool SLOReader::canRead( const std::string &fileName )
 {
-	if( Slo_SetShader( fileName.c_str() ) )
+	if( Slo_SetShader( (char *)fileName.c_str() ) )
 	{
 		return false;
 	}
@@ -80,7 +84,7 @@ bool SLOReader::canRead( const std::string &fileName )
 
 ObjectPtr SLOReader::doOperation( ConstCompoundObjectPtr operands )
 {
-	if( Slo_SetShader( fileName().c_str() ) )
+	if( Slo_SetShader( (char *)fileName().c_str() ) )
 	{
 		return 0;
 	}
