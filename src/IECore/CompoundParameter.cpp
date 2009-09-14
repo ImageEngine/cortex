@@ -357,7 +357,7 @@ bool CompoundParameter::parameterPath( ConstParameterPtr child, std::vector<std:
 			{
 				if( c->parameterPath( child, path ) )
 				{
-					path.insert( path.begin(),  name() );
+					path.insert( path.begin(), c->name() );
 					return true;
 				}
 			}

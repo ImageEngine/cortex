@@ -836,6 +836,25 @@ class TestCompoundParameter( unittest.TestCase ) :
 		self.assertEqual( p.parameterPath( p["c"]["j"] ), [ "c", "j" ] )
 		self.assertEqual( p.parameterPath( IntParameter( "i", "d", 10 ) ), [] )
 		self.assertEqual( p["c"].parameterPath( p["c"]["j"] ), [ "j" ] )
+		
+	def testParameterPathBug( self ) :
+	
+		p = CompoundParameter( name="c", description="" )
+		p.addParameter(
+		
+			CompoundParameter(
+				name = "n",
+				description = "",
+				members = [
+					IntParameter( name="i", description="", defaultValue = 1 ),
+					CompoundParameter( name="j", description="", members = [ IntParameter( "k", "", 10 ) ] )
+				]
+			)
+		
+		)
+		
+		self.assertEqual( p.parameterPath( p["n"]["i"] ), [ "n", "i" ] )
+		self.assertEqual( p.parameterPath( p["n"]["j"]["k"] ), [ "n", "j", "k" ] )
 
 class TestValidatedStringParameter( unittest.TestCase ) :
 
