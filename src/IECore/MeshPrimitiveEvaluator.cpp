@@ -249,8 +249,6 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 		m_v = primVarIt->second;
 	}
 
-	ResultPtr input = new Result();
-
 	unsigned int triangleIdx = 0;
 	for ( IntVectorData::ValueType::const_iterator it = m_mesh->verticesPerFace()->readable().begin();
 		it != m_mesh->verticesPerFace()->readable().end(); ++it, ++triangleIdx)
@@ -282,35 +280,14 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 
 		if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
 		{
-			input->m_vertexIds = triangleVertexIds;
-			input->m_triangleIdx = triangleIdx;
+			Imath::V2f uv[3];
+			triangleUVs( triangleIdx, triangleVertexIds, uv );
 
-			input->m_bary = V3f( 1, 0, 0 );
-			Box2f uvBound(
-				V2f(
-					input->floatPrimVar( m_u ),
-					input->floatPrimVar( m_v )
-				)
-			);
-
-			input->m_bary = V3f( 0, 1, 0 );
-			uvBound.extendBy(
-				V2f(
-					input->floatPrimVar( m_u ),
-					input->floatPrimVar( m_v )
-				)
-			);
-
-			input->m_bary = V3f( 0, 0, 1 );
-			uvBound.extendBy(
-				V2f(
-					input->floatPrimVar( m_u ),
-					input->floatPrimVar( m_v )
-				)
-			);
+			Box2f uvBound( uv[0] );
+			uvBound.extendBy( uv[1] );
+			uvBound.extendBy( uv[2] );
 
 			m_uvTriangles.push_back( uvBound );
-
 		}
 	}
 
