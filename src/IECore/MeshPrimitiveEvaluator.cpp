@@ -279,7 +279,7 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 		bound.extendBy( p1 );
 		bound.extendBy( p2 );
 
-		m_triangles.push_back( BoundedTriangle( bound, triangleVertexIds, triangleIdx ) );
+		m_triangles.push_back( bound );
 
 		if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
 		{
@@ -294,7 +294,7 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 		}
 	}
 	
-	m_tree = new BoundedTriangleTree( m_triangles.begin(), m_triangles.end() );
+	m_tree = new TriangleBoundTree( m_triangles.begin(), m_triangles.end() );
 
 	if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
 	{
@@ -826,27 +826,31 @@ int MeshPrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, const 
 	return results.size();
 }
 
-void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const
+void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const
 {
 	assert( m_tree );
 
-	const BoundedTriangleTree::Node &node = m_tree->node( nodeIndex );
+	const TriangleBoundTree::Node &node = m_tree->node( nodeIndex );
 	if( node.isLeaf() )
 	{
-		BoundedTriangleTree::Iterator *permLast = node.permLast();
-		for( BoundedTriangleTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
-		{
-			const BoundedTriangle &bb = **perm;
+		const std::vector<int> &meshVertexIds = m_mesh->vertexIds()->readable();
 
-			assert( bb.m_vertexIds[0] < (int)( m_verts->readable().size() ) );
-			assert( bb.m_vertexIds[1] < (int)( m_verts->readable().size() ) );
-			assert( bb.m_vertexIds[2] < (int)( m_verts->readable().size() ) );
+		TriangleBoundTree::Iterator *permLast = node.permLast();
+		for( TriangleBoundTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		{
+			size_t triangleIndex = *perm - m_triangles.begin(); // triangle index is just the distance of the triangle from the beginning of the vector
+			size_t vertIdOffset = triangleIndex * 3;
+			Imath::V3i vertexIds( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
+			
+			assert( vertexIds[0] < (int)( m_verts->readable().size() ) );
+			assert( vertexIds[1] < (int)( m_verts->readable().size() ) );
+			assert( vertexIds[2] < (int)( m_verts->readable().size() ) );
 
 			V3f bary;
 			float dSqrd = triangleClosestBarycentric(
-				m_verts->readable()[bb.m_vertexIds[0]],
-				m_verts->readable()[bb.m_vertexIds[1]],
-				m_verts->readable()[bb.m_vertexIds[2]],
+				m_verts->readable()[vertexIds[0]],
+				m_verts->readable()[vertexIds[1]],
+				m_verts->readable()[vertexIds[2]],
 				p,
 				bary );
 
@@ -855,11 +859,8 @@ void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex no
 				closestDistanceSqrd = dSqrd;
 
 				result->m_bary = bary;
-				result->m_vertexIds[0] = bb.m_vertexIds[0];
-				result->m_vertexIds[1] = bb.m_vertexIds[1];
-				result->m_vertexIds[2] = bb.m_vertexIds[2];
-
-				result->m_triangleIdx = bb.m_triangleIndex;
+				result->m_vertexIds = vertexIds;
+				result->m_triangleIdx = triangleIndex;
 
 				if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
 				{
@@ -869,9 +870,9 @@ void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex no
 					);
 				}
 
-				const Imath::V3f &p0 = m_verts->readable()[ bb.m_vertexIds[0] ];
-				const Imath::V3f &p1 = m_verts->readable()[ bb.m_vertexIds[1] ];
-				const Imath::V3f &p2 = m_verts->readable()[ bb.m_vertexIds[2] ];
+				const Imath::V3f &p0 = m_verts->readable()[vertexIds[0]];
+				const Imath::V3f &p1 = m_verts->readable()[vertexIds[1]];
+				const Imath::V3f &p2 = m_verts->readable()[vertexIds[2]];
 
 				result->m_p = trianglePoint( p0, p1, p2, result->m_bary );
 
@@ -884,29 +885,29 @@ void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex no
 		/// Descend into the closest box first
 
 		float dHigh = vecDistance(
-			closestPointInBox( p, m_tree->node( BoundedTriangleTree::highChildIndex( nodeIndex ) ).bound() ),
+			closestPointInBox( p, m_tree->node( TriangleBoundTree::highChildIndex( nodeIndex ) ).bound() ),
 			p
 		);
 
 		float dLow = vecDistance(
-			closestPointInBox( p, m_tree->node( BoundedTriangleTree::lowChildIndex( nodeIndex ) ).bound() ),
+			closestPointInBox( p, m_tree->node( TriangleBoundTree::lowChildIndex( nodeIndex ) ).bound() ),
 			p
 		);
 
-		BoundedTriangleTree::NodeIndex firstChild, secondChild;
+		TriangleBoundTree::NodeIndex firstChild, secondChild;
 
 		float dSecond;
 
 		if (dHigh < dLow)
 		{
-			firstChild = BoundedTriangleTree::highChildIndex( nodeIndex );
-			secondChild = BoundedTriangleTree::lowChildIndex( nodeIndex );
+			firstChild = TriangleBoundTree::highChildIndex( nodeIndex );
+			secondChild = TriangleBoundTree::lowChildIndex( nodeIndex );
 			dSecond = dLow;
 		}
 		else
 		{
-			firstChild = BoundedTriangleTree::lowChildIndex( nodeIndex );
-			secondChild = BoundedTriangleTree::highChildIndex( nodeIndex );
+			firstChild = TriangleBoundTree::lowChildIndex( nodeIndex );
+			secondChild = TriangleBoundTree::highChildIndex( nodeIndex );
 			dSecond = dHigh;
 		}
 
@@ -919,7 +920,7 @@ void MeshPrimitiveEvaluator::closestPointWalk( BoundedTriangleTree::NodeIndex no
 	}
 }
 
-bool MeshPrimitiveEvaluator::pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, const ResultPtr &result ) const
+bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, const ResultPtr &result ) const
 {
 	assert( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid);
 	assert( m_uvTree );
@@ -990,28 +991,31 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeI
 }
 
 
-bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const
+bool MeshPrimitiveEvaluator::intersectionPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const
 {
 	assert( m_tree );
 
-	const BoundedTriangleTree::Node &node = m_tree->node( nodeIndex );
+	const TriangleBoundTree::Node &node = m_tree->node( nodeIndex );
 
 	if( node.isLeaf() )
 	{
-		BoundedTriangleTree::Iterator *permLast = node.permLast();
+		const std::vector<int> &meshVertexIds = m_mesh->vertexIds()->readable();
+		TriangleBoundTree::Iterator *permLast = node.permLast();
 		bool intersects = false;
 
-		for( BoundedTriangleTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		for( TriangleBoundTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
-			const BoundedTriangle &bb = **perm;
+			size_t triangleIndex = *perm - m_triangles.begin(); // triangle index is just the distance of the triangle from the beginning of the vector
+			size_t vertIdOffset = triangleIndex * 3;
+			Imath::V3i vertexIds( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
 
-			assert( bb.m_vertexIds[0] < (int)( m_verts->readable().size() ) );
-			assert( bb.m_vertexIds[1] < (int)( m_verts->readable().size() ) );
-			assert( bb.m_vertexIds[2] < (int)( m_verts->readable().size() ) );
+			assert( vertexIds < (int)( m_verts->readable().size() ) );
+			assert( vertexIds < (int)( m_verts->readable().size() ) );
+			assert( vertexIds < (int)( m_verts->readable().size() ) );
 
-			const Imath::V3f &p0 = m_verts->readable()[ bb.m_vertexIds[0] ];
-			const Imath::V3f &p1 = m_verts->readable()[ bb.m_vertexIds[1] ];
-			const Imath::V3f &p2 = m_verts->readable()[ bb.m_vertexIds[2] ];
+			const Imath::V3f &p0 = m_verts->readable()[ vertexIds[0] ];
+			const Imath::V3f &p1 = m_verts->readable()[ vertexIds[1] ];
+			const Imath::V3f &p2 = m_verts->readable()[ vertexIds[2] ];
 
 			V3f hitPoint, bary;
 			bool front;
@@ -1025,11 +1029,8 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 					maxDistSqrd = dSqrd;
 
 					result->m_bary = bary;
-					result->m_vertexIds[0] = bb.m_vertexIds[0];
-					result->m_vertexIds[1] = bb.m_vertexIds[1];
-					result->m_vertexIds[2] = bb.m_vertexIds[2];
-
-					result->m_triangleIdx = bb.m_triangleIndex;
+					result->m_vertexIds = vertexIds;
+					result->m_triangleIdx = triangleIndex;
 
 					result->m_p = hitPoint;
 
@@ -1055,7 +1056,7 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 	{
 		V3f highHitPoint;
 		bool highHit = boxIntersects(
-			m_tree->node( BoundedTriangleTree::highChildIndex( nodeIndex ) ).bound(),
+			m_tree->node( TriangleBoundTree::highChildIndex( nodeIndex ) ).bound(),
 			ray.pos,
 			ray.dir,
 			highHitPoint
@@ -1063,7 +1064,7 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 
 		V3f lowHitPoint;
 		bool lowHit = boxIntersects(
-			m_tree->node( BoundedTriangleTree::lowChildIndex( nodeIndex ) ).bound(),
+			m_tree->node( TriangleBoundTree::lowChildIndex( nodeIndex ) ).bound(),
 			ray.pos,
 			ray.dir,
 			lowHitPoint
@@ -1103,18 +1104,18 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 			{
 				/// Descend into the closest intersection first
 
-				BoundedTriangleTree::NodeIndex firstChild, secondChild;
+				TriangleBoundTree::NodeIndex firstChild, secondChild;
 				float dSecond;
 				if (dHigh < dLow)
 				{
-					firstChild = BoundedTriangleTree::highChildIndex( nodeIndex );
-					secondChild = BoundedTriangleTree::lowChildIndex( nodeIndex );
+					firstChild = TriangleBoundTree::highChildIndex( nodeIndex );
+					secondChild = TriangleBoundTree::lowChildIndex( nodeIndex );
 					dSecond = dLow;
 				}
 				else
 				{
-					firstChild = BoundedTriangleTree::lowChildIndex( nodeIndex );
-					secondChild = BoundedTriangleTree::highChildIndex( nodeIndex );
+					firstChild = TriangleBoundTree::lowChildIndex( nodeIndex );
+					secondChild = TriangleBoundTree::highChildIndex( nodeIndex );
 					dSecond = dHigh;
 				}
 
@@ -1136,13 +1137,13 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 			}
 			else
 			{
-				return intersectionPointWalk( BoundedTriangleTree::lowChildIndex( nodeIndex ), ray, maxDistSqrd, result, hit );
+				return intersectionPointWalk( TriangleBoundTree::lowChildIndex( nodeIndex ), ray, maxDistSqrd, result, hit );
 			}
 
 		}
 		else if (highHit)
 		{
-			return intersectionPointWalk( BoundedTriangleTree::highChildIndex( nodeIndex ), ray, maxDistSqrd, result, hit );
+			return intersectionPointWalk( TriangleBoundTree::highChildIndex( nodeIndex ), ray, maxDistSqrd, result, hit );
 		}
 
 
@@ -1151,27 +1152,30 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( BoundedTriangleTree::NodeInd
 
 }
 
-void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const
+void MeshPrimitiveEvaluator::intersectionPointsWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const
 {
 	assert( m_tree );
 
-	const BoundedTriangleTree::Node &node = m_tree->node( nodeIndex );
+	const TriangleBoundTree::Node &node = m_tree->node( nodeIndex );
 
 	if( node.isLeaf() )
 	{
-		BoundedTriangleTree::Iterator *permLast = node.permLast();
+		const std::vector<int> &meshVertexIds = m_mesh->vertexIds()->readable();
+		TriangleBoundTree::Iterator *permLast = node.permLast();
 
-		for( BoundedTriangleTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		for( TriangleBoundTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
-			const BoundedTriangle &bb = **perm;
+			size_t triangleIndex = *perm - m_triangles.begin(); // triangle index is just the distance of the triangle from the beginning of the vector
+			size_t vertIdOffset = triangleIndex * 3;
+			Imath::V3i vertexIds( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
 
-			assert( bb.m_vertexIds[0] < (int)( m_verts->readable().size() ) );
-			assert( bb.m_vertexIds[1] < (int)( m_verts->readable().size() ) );
-			assert( bb.m_vertexIds[2] < (int)( m_verts->readable().size() ) );
+			assert( vertexIds[0] < (int)( m_verts->readable().size() ) );
+			assert( vertexIds[1] < (int)( m_verts->readable().size() ) );
+			assert( vertexIds[2] < (int)( m_verts->readable().size() ) );
 
-			const Imath::V3f &p0 =  m_verts->readable()[ bb.m_vertexIds[0] ];
-			const Imath::V3f &p1 =  m_verts->readable()[ bb.m_vertexIds[1] ];
-			const Imath::V3f &p2 =  m_verts->readable()[ bb.m_vertexIds[2] ];
+			const Imath::V3f &p0 =  m_verts->readable()[ vertexIds[0] ];
+			const Imath::V3f &p1 =  m_verts->readable()[ vertexIds[1] ];
+			const Imath::V3f &p2 =  m_verts->readable()[ vertexIds[2] ];
 
 			V3f hitPoint, bary;
 			bool front;
@@ -1185,11 +1189,8 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIn
 					ResultPtr result = new Result();
 
 					result->m_bary = bary;
-					result->m_vertexIds[0] = bb.m_vertexIds[0];
-					result->m_vertexIds[1] = bb.m_vertexIds[1];
-					result->m_vertexIds[2] = bb.m_vertexIds[2];
-
-					result->m_triangleIdx = bb.m_triangleIndex;
+					result->m_vertexIds = vertexIds;
+					result->m_triangleIdx = triangleIndex;
 
 					result->m_p = hitPoint;
 
@@ -1214,7 +1215,7 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIn
 
 		/// Test highChild bound for intersection, descending into children if necessary
 		bool hit = boxIntersects(
-			m_tree->node( BoundedTriangleTree::highChildIndex( nodeIndex ) ).bound(),
+			m_tree->node( TriangleBoundTree::highChildIndex( nodeIndex ) ).bound(),
 			ray.pos,
 			ray.dir,
 			hitPoint
@@ -1222,12 +1223,12 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIn
 
 		if ( hit && vecDistance2( hitPoint, ray.pos ) < maxDistSqrd )
 		{
-			intersectionPointsWalk( BoundedTriangleTree::highChildIndex( nodeIndex ), ray, maxDistSqrd, results );
+			intersectionPointsWalk( TriangleBoundTree::highChildIndex( nodeIndex ), ray, maxDistSqrd, results );
 		}
 
 		/// Test lowChild bound for intersection, descending into children if necessary
 		hit = boxIntersects(
-			m_tree->node( BoundedTriangleTree::lowChildIndex( nodeIndex ) ).bound(),
+			m_tree->node( TriangleBoundTree::lowChildIndex( nodeIndex ) ).bound(),
 			ray.pos,
 			ray.dir,
 			hitPoint
@@ -1235,7 +1236,7 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( BoundedTriangleTree::NodeIn
 
 		if ( hit && vecDistance2( hitPoint, ray.pos ) < maxDistSqrd )
 		{
-			intersectionPointsWalk( BoundedTriangleTree::lowChildIndex( nodeIndex ), ray, maxDistSqrd, results );
+			intersectionPointsWalk( TriangleBoundTree::lowChildIndex( nodeIndex ), ray, maxDistSqrd, results );
 		}
 	}
 }

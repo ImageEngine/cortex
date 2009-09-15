@@ -132,53 +132,28 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 	protected:
 
 		ConstMeshPrimitivePtr m_mesh;
-
-		/// Must be default constructible for use as element with
-		struct BoundedTriangle : public Imath::Box3f
-		{
-			typedef Imath::V3f BaseType;
-
-			BoundedTriangle()
-			{
-				makeEmpty();
-			}
-
-			BoundedTriangle( const Imath::Box3f &bound, Imath::V3i vertexIds, int idx ) : Imath::Box3f( bound ), m_vertexIds( vertexIds ), m_triangleIndex( idx )
-			{
-			}
-
-			/// \todo There's no need to store these things - they can all be calculated based on the
-			/// offset of the bound in the bound vector. We should just use Box3f for the bound.
-			/// See pointAtUVWalk for examples of how this can be achieved.
-			Imath::V3i m_vertexIds;
-			unsigned int m_triangleIndex;
-		};
-
 		ConstV3fVectorDataPtr m_verts;
 
-		typedef std::vector< BoundedTriangle > BoundedTriangleVector;
+		typedef Imath::Box3f TriangleBound;
+		typedef std::vector<TriangleBound> TriangleBoundVector;
+		TriangleBoundVector m_triangles;
+		typedef BoundedKDTree<TriangleBoundVector::iterator> TriangleBoundTree;
+		TriangleBoundTree *m_tree;
 
-		BoundedTriangleVector m_triangles;
+		typedef Imath::Box2f UVBound;
+		typedef std::vector<UVBound> UVBoundVector;
+		typedef BoundedKDTree<UVBoundVector::iterator> UVBoundTree;
+		UVBoundVector m_uvTriangles;		
+		UVBoundTree *m_uvTree;
 
-		typedef BoundedKDTree< BoundedTriangleVector::iterator > BoundedTriangleTree;
-
-		BoundedTriangleTree *m_tree;
-
-		bool pointAtUVWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, const ResultPtr &result ) const;
-		void closestPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const;
-		bool intersectionPointWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
-		void intersectionPointsWalk( BoundedTriangleTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;
+		bool pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, const ResultPtr &result ) const;
+		void closestPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const;
+		bool intersectionPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float &maxDistSqrd, const ResultPtr &result, bool &hit ) const;
+		void intersectionPointsWalk( TriangleBoundTree::NodeIndex nodeIndex, const Imath::Line3f &ray, float maxDistSqrd, std::vector<PrimitiveEvaluator::ResultPtr> &results ) const;
 
 		void calculateMassProperties() const;
 		void calculateAverageNormals() const;
 		
-		typedef Imath::Box2f UVBound;
-		typedef std::vector<UVBound> UVBoundVector;
-		typedef BoundedKDTree<UVBoundVector::iterator> UVBoundTree;
-		UVBoundVector m_uvTriangles;
-		
-		UVBoundTree *m_uvTree;
-
 		void triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const;
 		PrimitiveVariable m_u;
 		PrimitiveVariable m_v;
