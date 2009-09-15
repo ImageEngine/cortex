@@ -220,7 +220,6 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 
 	m_mesh = mesh->copy();
 
-	IntVectorData::ValueType::const_iterator vertexIdIt = m_mesh->vertexIds()->readable().begin();
 
 	PrimitiveVariableMap::const_iterator primVarIt = m_mesh->variables.find("P");
 	if ( primVarIt == m_mesh->variables.end() )
@@ -249,11 +248,13 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 		m_v = primVarIt->second;
 	}
 
-	m_triangles.reserve( m_mesh->verticesPerFace()->readable().size() );
-	m_uvTriangles.reserve( m_mesh->verticesPerFace()->readable().size() );
+	const std::vector<int> &verticesPerFace = m_mesh->verticesPerFace()->readable();
+	m_triangles.reserve( verticesPerFace.size() );
+	m_uvTriangles.reserve( verticesPerFace.size() );
 	unsigned int triangleIdx = 0;
-	for ( IntVectorData::ValueType::const_iterator it = m_mesh->verticesPerFace()->readable().begin();
-		it != m_mesh->verticesPerFace()->readable().end(); ++it, ++triangleIdx)
+	IntVectorData::ValueType::const_iterator vertexIdIt = m_mesh->vertexIds()->readable().begin();
+	for ( IntVectorData::ValueType::const_iterator it = verticesPerFace.begin();
+		it != verticesPerFace.end(); ++it, ++triangleIdx)
 	{
 
 		if (*it != 3 )
