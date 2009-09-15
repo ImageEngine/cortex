@@ -249,6 +249,8 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 		m_v = primVarIt->second;
 	}
 
+	m_triangles.reserve( m_mesh->verticesPerFace()->readable().size() );
+	m_uvTriangles.reserve( m_mesh->verticesPerFace()->readable().size() );
 	unsigned int triangleIdx = 0;
 	for ( IntVectorData::ValueType::const_iterator it = m_mesh->verticesPerFace()->readable().begin();
 		it != m_mesh->verticesPerFace()->readable().end(); ++it, ++triangleIdx)
@@ -290,7 +292,7 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 			m_uvTriangles.push_back( uvBound );
 		}
 	}
-
+	
 	m_tree = new BoundedTriangleTree( m_triangles.begin(), m_triangles.end() );
 
 	if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
