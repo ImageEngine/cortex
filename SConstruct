@@ -287,6 +287,8 @@ o.Add(
 
 # Debug options
 
+## \todo This isn't doing anything useful in this file - but the ie config relies on it. Move the
+# DEBUG and WITH_ASSERTS logic from config/ie/options into this file.
 o.Add(
 	BoolOption( "DEBUG", "Set this to build without optimisation and with debug symbols.", False ),
 )
