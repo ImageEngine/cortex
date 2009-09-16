@@ -249,6 +249,12 @@ BoundedKDTree<BoundIterator>::BoundedKDTree( BoundIterator first, BoundIterator 
 }
 
 template<class BoundIterator>
+typename BoundedKDTree<BoundIterator>::NodeIndex BoundedKDTree<BoundIterator>::numNodes() const
+{
+	return m_nodes.size();
+}
+
+template<class BoundIterator>
 const typename BoundedKDTree<BoundIterator>::Node& BoundedKDTree<BoundIterator>::node( NodeIndex idx ) const
 {
 	assert( idx >= 0 );

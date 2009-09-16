@@ -68,11 +68,14 @@ class BoundedKDTree
 		template<typename S>
 		unsigned int intersectingBounds( const S &b, std::vector<BoundIterator> &bounds ) const;
 
-		/// Direct access to the index of the root node
-		NodeIndex rootIndex() const;
+		/// Returns the number of nodes in the tree.
+		inline NodeIndex numNodes() const;
 
 		/// Retrieve the node associated with a given index
 		const Node& node( NodeIndex idx ) const;
+		
+		/// Returns the index for the root node
+		NodeIndex rootIndex() const;
 
 		/// Retrieve the index of the "low" child node
 		static NodeIndex lowChildIndex( NodeIndex index );
