@@ -103,6 +103,7 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual ~MeshPrimitiveEvaluator();
 
 		virtual ConstPrimitivePtr primitive() const;
+		MeshPrimitive::ConstPtr mesh() const;
 
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
 
@@ -129,20 +130,47 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		/// Returns a bounding box covering all the uv coordinates of the mesh.
 		const Imath::Box2f uvBound() const;
 
+		//! @name Internal KDTrees.
+		/// The MeshPrimitiveEvaluator uses internal KDTrees to perform many of
+		/// its queries. Const access is provided to these so that clients can use them
+		/// in implementing their own algorithms.
+		//////////////////////////////////////////////////////////////////////////
+		//@{
+		/// A type for storing the bounding box for a triangle.
+		typedef Imath::Box3f TriangleBound;
+		/// A type for storing an array of bounding boxes, one per triangle.
+		typedef std::vector<TriangleBound> TriangleBoundVector;
+		/// A BoundedKDTree providing accelerated lookups of triangles using their bounding boxes.
+		typedef BoundedKDTree<TriangleBoundVector::iterator> TriangleBoundTree;
+		/// Returns a pointer to the bounding boxes for each triangle.
+		const TriangleBoundVector *triangleBounds() const;
+		/// Returns a pointer to a tree that can be used for performing fast spacial queries.
+		///  The iterators in this tree point to elements in the vector returned by triangleBounds().
+		const TriangleBoundTree *triangleBoundTree() const;
+		
+		/// A type for storing the uv bounding box for a triangle.
+		typedef Imath::Box2f UVBound;
+		/// A type for storing an array of uv bounds, one per triangle.
+		typedef std::vector<UVBound> UVBoundVector;
+		/// A BoundedKDTree providing accelerated lookups of triangles using their uv bounds.
+		typedef BoundedKDTree<UVBoundVector::iterator> UVBoundTree;
+		/// Returns a pointer to the uv bounding boxes for each triangle. Note that this function may
+		/// return 0 in the case of the mesh not having suitable uvs.
+		const UVBoundVector *uvBounds() const;
+		/// Returns a pointer to a tree than can be used for performing fast uv queries. The iterators
+		/// in this tree point to the elements in the vector returned by uvBounds(). Note that
+		/// this function may return 0 in the case of the mesh not having suitable uvs.
+		const UVBoundTree *uvBoundTree() const;
+		//@}
+		
 	protected:
 
 		ConstMeshPrimitivePtr m_mesh;
 		ConstV3fVectorDataPtr m_verts;
 
-		typedef Imath::Box3f TriangleBound;
-		typedef std::vector<TriangleBound> TriangleBoundVector;
 		TriangleBoundVector m_triangles;
-		typedef BoundedKDTree<TriangleBoundVector::iterator> TriangleBoundTree;
 		TriangleBoundTree *m_tree;
 
-		typedef Imath::Box2f UVBound;
-		typedef std::vector<UVBound> UVBoundVector;
-		typedef BoundedKDTree<UVBoundVector::iterator> UVBoundTree;
 		UVBoundVector m_uvTriangles;		
 		UVBoundTree *m_uvTree;
 

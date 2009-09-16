@@ -330,6 +330,11 @@ ConstPrimitivePtr MeshPrimitiveEvaluator::primitive() const
 	return m_mesh;
 }
 
+MeshPrimitive::ConstPtr MeshPrimitiveEvaluator::mesh() const
+{
+	return m_mesh;
+}
+
 float MeshPrimitiveEvaluator::volume() const
 {
 	if ( !m_haveMassProperties )
@@ -1009,9 +1014,9 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( TriangleBoundTree::NodeIndex
 			size_t vertIdOffset = triangleIndex * 3;
 			Imath::V3i vertexIds( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
 
-			assert( vertexIds < (int)( m_verts->readable().size() ) );
-			assert( vertexIds < (int)( m_verts->readable().size() ) );
-			assert( vertexIds < (int)( m_verts->readable().size() ) );
+			assert( vertexIds[0] < (int)( m_verts->readable().size() ) );
+			assert( vertexIds[1] < (int)( m_verts->readable().size() ) );
+			assert( vertexIds[2] < (int)( m_verts->readable().size() ) );
 
 			const Imath::V3f &p0 = m_verts->readable()[ vertexIds[0] ];
 			const Imath::V3f &p1 = m_verts->readable()[ vertexIds[1] ];
@@ -1248,6 +1253,26 @@ const Imath::Box2f MeshPrimitiveEvaluator::uvBound() const
 		return Imath::Box2f();
 	}
 	return m_uvTree->node( m_uvTree->rootIndex() ).bound();
+}
+
+const MeshPrimitiveEvaluator::TriangleBoundVector *MeshPrimitiveEvaluator::triangleBounds() const
+{
+	return &m_triangles;
+}
+
+const MeshPrimitiveEvaluator::TriangleBoundTree *MeshPrimitiveEvaluator::triangleBoundTree() const
+{
+	return m_tree;
+}
+
+const MeshPrimitiveEvaluator::UVBoundVector *MeshPrimitiveEvaluator::uvBounds() const
+{
+	return m_uvTree ? &m_uvTriangles : 0;
+}
+
+const MeshPrimitiveEvaluator::UVBoundTree *MeshPrimitiveEvaluator::uvBoundTree() const
+{
+	return m_uvTree;
 }
 
 void MeshPrimitiveEvaluator::triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const
