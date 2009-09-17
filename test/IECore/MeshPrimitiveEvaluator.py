@@ -319,6 +319,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
 			mpe = PrimitiveEvaluator.create( m )
 			r = mpe.createResult()
+			r2 = mpe.createResult()
 
 			# Make sure that the closest hit point found with intersectionPoint() is actually the closest, by
 			# comparing long-hand with the list of all intersections.
@@ -348,6 +349,15 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 
 					self.assert_( (r.point() - closestHit.point() ).length() < 1.e-4 )
+					
+					barycentricQuerySucceeded = mpe.barycentricPosition( r.triangleIndex(), r.barycentricCoordinates(), r2 )
+					self.failUnless( barycentricQuerySucceeded )
+					self.failUnless( r.point().equalWithAbsError( r2.point(), 0.00001 ) )
+					self.failUnless( r.normal().equalWithAbsError( r2.normal(), 0.00001 ) )
+					self.failUnless( r.barycentricCoordinates().equalWithAbsError( r2.barycentricCoordinates(), 0.00001 ) )
+					self.assertEqual( r.triangleIndex(), r2.triangleIndex() )
+					
+					
 				else:
 
 					hits = mpe.intersectionPoints( origin, direction )

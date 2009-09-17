@@ -831,6 +831,41 @@ int MeshPrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, const 
 	return results.size();
 }
 
+bool MeshPrimitiveEvaluator::barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, const PrimitiveEvaluator::ResultPtr &result ) const
+{
+	if( triangleIndex > m_triangles.size() )
+	{
+		return false;
+	}
+
+	Result *r = static_cast<Result *>( result.get() );
+	
+	r->m_triangleIdx = triangleIndex;
+	r->m_bary = barycentricCoordinates;
+	
+	const std::vector<int> &meshVertexIds = m_mesh->vertexIds()->readable();
+	size_t vertIdOffset = triangleIndex * 3;
+	r->m_vertexIds = Imath::V3i( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
+
+	const Imath::V3f &p0 = m_verts->readable()[ r->m_vertexIds[0] ];
+	const Imath::V3f &p1 = m_verts->readable()[ r->m_vertexIds[1] ];
+	const Imath::V3f &p2 = m_verts->readable()[ r->m_vertexIds[2] ];
+
+	r->m_p = trianglePoint( p0, p1, p2, r->m_bary );
+
+	r->m_n = triangleNormal( p0, p1, p2 );
+
+	if( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
+	{
+		r->m_uv = V2f(
+			r->floatPrimVar( m_u ),
+			r->floatPrimVar( m_v )
+		);
+	}
+				
+	return true;
+}
+
 void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex nodeIndex, const V3f &p, float &closestDistanceSqrd, const ResultPtr &result ) const
 {
 	assert( m_tree );

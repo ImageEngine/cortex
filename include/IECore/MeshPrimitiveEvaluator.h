@@ -119,6 +119,9 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
 
+		/// A query specific to the MeshPrimitiveEvaluator, this just chooses a barycentric position on a specific triangle.
+		bool barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, const PrimitiveEvaluator::ResultPtr &result ) const;
+
 		virtual bool signedDistance( const Imath::V3f &p, float &distance ) const;
 
 		virtual float volume() const;
@@ -126,6 +129,7 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual Imath::V3f centerOfGravity() const;
 
 		virtual float surfaceArea() const;
+		
 		
 		/// Returns a bounding box covering all the uv coordinates of the mesh.
 		const Imath::Box2f uvBound() const;

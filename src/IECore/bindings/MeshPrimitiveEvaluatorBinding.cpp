@@ -45,10 +45,17 @@ using namespace boost::python;
 namespace IECore
 {
 
+static bool barycentricPosition( const MeshPrimitiveEvaluator &e, unsigned int t, const Imath::V3f &b, const PrimitiveEvaluator::ResultPtr &r )
+{
+	e.validateResult( r );
+	return e.barycentricPosition( t, b, r );
+}
+
 void bindMeshPrimitiveEvaluator()
 {
 	object m = RunTimeTypedClass<MeshPrimitiveEvaluator>()
 		.def( init< MeshPrimitivePtr > () )
+		.def( "barycentricPosition", &barycentricPosition )
 		.def( "uvBound", &MeshPrimitiveEvaluator::uvBound )	
 	;
 
