@@ -413,6 +413,43 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		p2 = fnPH2.getParameterised()[0]
 		self.assertEqual( fnPH2.parameterPlug( p2["iAmDynamic"]["iAmDynamicToo"] ).asInt(), 2 )
 
+	def testDirectSettingOfOp( self ) :
+	
+		class TestOp( IECore.Op ) :
+		
+			def __init__( self ) :
+			
+				IECore.Op.__init__( self,
+					"test",
+					"",
+					IECore.FloatParameter(
+						"result",
+						"",
+						0.0
+					),
+				)
+				
+				self.parameters().addParameter(
+
+					IECore.FloatParameter(
+						"a",
+						"",
+						0.0
+					)
+
+				)
+				
+			def doOperation( self, operands ) :
+			
+				return IECore.FloatData( operands["a"].value )
+				
+		node = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnParameterisedHolder( str( node ) )
+
+		op = TestOp()
+		fnOH.setParameterised( op )
+	
+		self.failUnless( cmds.objExists( node + ".result" ) )
 
 	def tearDown( self ) :
 
