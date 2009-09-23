@@ -64,6 +64,7 @@ class BoundedKDTree
 		BoundedKDTree( BoundIterator first, BoundIterator last, int maxLeafSize=4 );
 
 		/// Populates the passed vector of iterators with the bounds which intersect "b". Returns the number of bounds found.
+		/// \threading May be called by multiple concurrent threads provided they each use a different vector for the result.
 		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
 		template<typename S>
 		unsigned int intersectingBounds( const S &b, std::vector<BoundIterator> &bounds ) const;
@@ -139,7 +140,10 @@ class BoundedKDTree<BoundIterator>::Node
 
 		struct
 		{
+			/// \todo Could this be 0 for branch nodes? This could allow us to remove m_cutAxisAndLeaf.
 			BoundIterator *first;
+			/// \todo Could we just store an offset instead of last? If we limit the maxLeafSize to 255
+			/// then this could be a single byte instead of 8 bytes.
 			BoundIterator *last;
 		} m_perm;
 };

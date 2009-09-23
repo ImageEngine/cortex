@@ -87,6 +87,9 @@ class NumericParameter : public Parameter
 		/// jumping needed to extract the value from the Object returned
 		/// by Parameter::getValue(). Throws an exception if the value is not
 		/// valid.
+		/// \threading This is not threadsafe due to the use of intrusive_ptrs
+		/// internally to validate the value.
+		/// \todo Make this safe to call from multiple threads.
 		T getNumericValue() const;
 		/// Convenience function for value setting - constructs a TypedData<T>
 		/// from value and calls Parameter::setValue()

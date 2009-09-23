@@ -78,6 +78,7 @@ bool withFreeType();
 /// \ref mainPageAlgorithmsSection <br>
 /// \ref mainPagePythonSection <br>
 /// \ref mainPageApplicationSupportSection <br>
+/// \ref mainPageThreadingSection <br>
 ///
 /// \section mainPageMathSection Math
 ///
@@ -263,5 +264,17 @@ bool withFreeType();
 ///
 /// The generic functionality contained within IECore is interfaced with specific 3rd party applications and frameworks using additional
 /// libraries. These libraries include \ref IECoreMaya, IECoreNuke, IECoreGL and IECoreTruelight.
+///
+/// \section mainPageThreadingSection Threading
+///
+/// Much of the library is not threadsafe. In particular the construction, destruction and assignment of boost::intrusive_ptrs is not threadsafe
+/// when multiple concurrent threads are referring to the same object. We may address this in a future version either by using atomic operations
+/// for the reference counting or by making more use of raw pointers in function arguments and results. In general it's best to assume that thread
+/// safety doesn't exist unless specified otherwise - specific threading considerations are documented in paragraphs entitled "Threading" within
+/// the class documentation.
+///
+/// Despite these limitations it is possible to write threaded code making use of a number of useful features of the libraries. See the IECore::PrimitiveEvaluator,
+/// IECore::KDTree and IECore::BoundedKDTree classes for examples of some algorithms which may be used concurrently by parallel threads.
+
 
 #endif // IE_CORE_CORE_H

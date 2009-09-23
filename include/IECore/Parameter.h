@@ -148,12 +148,25 @@ class Parameter : public Object
 		virtual ObjectPtr getValue();
 		/// Returns the value held by this parameter. Note that this
 		/// value may not be valid.
+		/// \threading This is not threadsafe due to the use of an intrusive_ptr
+		/// return value. We could really do with it being though, as it's a common
+		/// requirement to have multiple threads acting based on the same set of
+		/// input parameters - presently we have to stash the values elsewhere
+		/// before entering threaded code.
+		/// \todo Address the threading issue (either return a raw pointer or
+		/// investigate the use of atomic operations for reference counting).
 		virtual ConstObjectPtr getValue() const;
 		/// Returns the value held by this parameter if it is valid, throwing
 		/// an Exception if it is not.
 		ObjectPtr getValidatedValue();
 		/// Returns the value held by this parameter if it is valid, throwing
 		/// an Exception if it is not.
+		/// \threading This is not threadsafe due to the use of an intrusive_ptr
+		/// return value. We could really do with it being though, as it's a common
+		/// requirement to have multiple threads acting based on the same set of
+		/// input parameters.
+		/// \todo Address the threading issue (either return a raw pointer or
+		/// investigate the use of atomic operations for reference counting).
 		ConstObjectPtr getValidatedValue() const;
 		/// Convenience function returning runTimeCast<T>( getValue() ).
 		template<typename T>

@@ -150,6 +150,7 @@ void KDTree<PointIterator>::init( PointIterator first, PointIterator last, int m
 		m_perm[i++] = it;
 	}
 
+	/// \todo Can we reserve() enough space for m_nodes before doing this?
 	build( rootIndex(), m_perm.begin(), m_perm.end() );
 }
 

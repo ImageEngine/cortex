@@ -244,6 +244,7 @@ BoundedKDTree<BoundIterator>::BoundedKDTree( BoundIterator first, BoundIterator 
 		m_perm[i++] = it;
 	}
 
+	/// \todo Can we reserve() enough space for m_nodes before doing this?
 	build( rootIndex(), m_perm.begin(), m_perm.end() );
 	bound( rootIndex() );
 }

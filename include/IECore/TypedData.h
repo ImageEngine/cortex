@@ -53,7 +53,7 @@ namespace IECore
 /// you can therefore only use only the typedefs in SimpleTypedData.h,
 /// VectorTypedData.h and CompoundData.h rather than being able
 /// to instantiate the template for arbitrary data types.
-/// It also provides low level access to its data throught functions
+/// It also provides low level access to its data through functions
 /// like baseReadable, baseWritable and baseSize. They are available
 /// only when the data can be seen as an array of a base type. Use
 /// hasBase for checking that.
@@ -83,26 +83,32 @@ class TypedData : public Data
 		/// Equivalent to writable() = typedData.readable()
 		void operator = (const TypedData<T> &typedData);
 
-		/// get read-only access to the internal data structure.
+		/// Gives read-only access to the internal data structure.
+		/// \threading It's safe for multiple concurrent threads to
+		/// call readable() on the same instance, provided that no
+		/// concurrent modifications are being made to that instance.
 		const T &readable() const;
-		/// get read-write access to the internal data structure.
+		/// Gives read-write access to the internal data structure.
+		/// \threading Because calling writable() may cause data to be
+		/// copied behind the scenes, it may not be called while
+		/// other threads are operating on the same instance.
 		T &writable();
 
-		/// base type used in the internal data structure.
+		/// Base type used in the internal data structure.
 		typedef typename TypedDataTraits< TypedData<T> >::BaseType BaseType;
 
-		/// defines whether the internal data structure has a single base type.
+		/// Defines whether the internal data structure has a single base type.
 		static bool hasBase();
 
-		/// get low level read-only access to the internal data structure as a reference to the first element on an array of base type.
+		/// Get low level read-only access to the internal data structure as a reference to the first element on an array of base type.
 		/// Throws an Exception if this type has no single base type.
 		const BaseType *baseReadable() const;
 
-		/// get low level read-write access to the internal data structure as a reference to the first element on an array of base type.
+		/// Get low level read-write access to the internal data structure as a reference to the first element on an array of base type.
 		/// Throws an Exception if this type has no single base type.
 		BaseType *baseWritable();
 
-		/// return the size of the internal data structure in terms of base type elements.
+		/// Return the size of the internal data structure in terms of base type elements.
 		/// Throws an Exception if this type has no single base type.
 		size_t baseSize() const;
 

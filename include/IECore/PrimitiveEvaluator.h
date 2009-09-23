@@ -62,6 +62,7 @@ class PrimitiveEvaluator : public RunTimeTyped
 
 		/// An interface defining the possible results returned from a query. Attempting to read back the results of a failed
 		/// query will yield undefined behaviour.
+		/// \threading Implementations should ensure that it's safe to call multiple Result methods concurrently.
 		class Result : public RefCounted
 		{
 			public:
@@ -116,6 +117,10 @@ class PrimitiveEvaluator : public RunTimeTyped
 		/// The ResultPtr passed to each of the methods below must previously have been created
 		/// by a call to the createResult() method on the same evaluator instance as is being called -
 		/// passing any other result will cause undefined behaviour.
+		/// \threading Query implementations should ensure that they may be called from multiple
+		/// concurrent threads provided that a unique Result instance is used per thread. This
+		/// implies that all query data must be stored in the Result and not in the
+		/// PrimitiveEvaluator itself.
 		////////////////////////////////////////////////////////////////////////////////////////
 		//@{
 

@@ -72,10 +72,13 @@ class KDTree
 
 		/// Builds the tree for the specified points - the iterator range
 		/// must remain valid and unchanged as long as the tree is in use.
-		/// This method can be called again to rebuild the tree at any time. 
+		/// This method can be called again to rebuild the tree at any time.
+		/// \threading This can't be called while other threads are
+		/// making queries.
 		void init( PointIterator first, PointIterator last, int maxLeafSize=4  );
 
 		/// Returns an iterator to the nearest neighbour to the point p.
+		/// \threading May be called by multiple concurrent threads.
 		PointIterator nearestNeighbour( const Point &p ) const;
 		/// Returns an iterator to the nearest neighbour to the point p, and places
 		/// the squared distance between these two points in distSquared. The initial value
@@ -83,18 +86,22 @@ class KDTree
 		/// than sqrt(distSquared) to p. In the event of no such point being found, an iterator
 		/// to the end of the points is returned (the "last" parameter which was passed to
 		/// the constructor).
+		/// \threading May be called by multiple concurrent threads.
 		PointIterator nearestNeighbour( const Point &p, BaseType &distSquared ) const;
 
 		/// Populates the passed vector of iterators with the neighbours of point p which are closer than radius r. Returns the number of points found.
 		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
 		/// See enclosedPoints for an example of this form.
+		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
 		unsigned int nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const;
 
 		/// Populates the passed vector of iterators with the N closest neighbours to p. Returns the number of points found.
 		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
+		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
 		unsigned int nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<PointIterator> &nearNeighbours ) const;
 
 		/// Finds all the points contained by the specified bound, outputting them to the specified iterator.
+		/// \threading May be called by multiple concurrent threads.
 		template<typename Box, typename OutputIterator>
 		void enclosedPoints( const Box &bound, OutputIterator it ) const;
 
@@ -177,6 +184,8 @@ class KDTree<PointIterator>::Node
 			BaseType m_cutValue;
 			struct {
 				PointIterator *first;
+				/// \todo Could we just store an offset instead of last? If we limit the maxLeafSize to 255
+				/// then this could be a single byte instead of 8 bytes.
 				PointIterator *last;
 			} m_perm;
 		};
