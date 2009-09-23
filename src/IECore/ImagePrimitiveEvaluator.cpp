@@ -122,7 +122,7 @@ unsigned int ImagePrimitiveEvaluator::Result::uintPrimVar( const PrimitiveVariab
 
 const std::string &ImagePrimitiveEvaluator::Result::stringPrimVar( const PrimitiveVariable &pv ) const
 {
-	StringDataPtr data = runTimeCast< StringData >( pv.data );
+	StringData *data = runTimeCast< StringData >( pv.data.get() );
 
 	if (data)
 	{
@@ -130,7 +130,7 @@ const std::string &ImagePrimitiveEvaluator::Result::stringPrimVar( const Primiti
 	}
 	else
 	{
-		StringVectorDataPtr data = runTimeCast< StringVectorData >( pv.data );
+		StringVectorData *data = runTimeCast< StringVectorData >( pv.data.get() );
 
 		if (data)
 		{
@@ -197,9 +197,7 @@ T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) con
 	if ( pv.interpolation == PrimitiveVariable::Constant )
 	{
 		typedef TypedData<T> Data;
-		typedef typename Data::Ptr DataPtr;
-
-		DataPtr data = runTimeCast< Data >( pv.data );
+		const Data *data = runTimeCast< Data >( pv.data.get() );
 
 		if (data)
 		{
@@ -208,8 +206,7 @@ T ImagePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) con
 	}
 
 	typedef TypedData< std::vector<T> > VectorData;
-	typedef typename VectorData::Ptr VectorDataPtr;
-	VectorDataPtr data = runTimeCast< VectorData >( pv.data );
+	const VectorData *data = runTimeCast< VectorData >( pv.data.get() );
 
 	if (!data)
 	{
@@ -368,7 +365,7 @@ PrimitiveEvaluator::ResultPtr ImagePrimitiveEvaluator::createResult() const
 
 bool ImagePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	ResultPtr r = boost::dynamic_pointer_cast< Result >( result );
+	Result *r = static_cast<Result *>( result.get() );
 	assert( r );
 
 	r->m_p = closestPointInBox( p, m_image->bound() );
@@ -378,7 +375,7 @@ bool ImagePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluat
 
 bool ImagePrimitiveEvaluator::pointAtUV( const V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	ResultPtr r = boost::dynamic_pointer_cast< Result >( result );
+	Result *r = static_cast<Result *>( result.get() );
 	assert( r );
 
 	if ( uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 )
@@ -397,7 +394,7 @@ bool ImagePrimitiveEvaluator::pointAtUV( const V2f &uv, const PrimitiveEvaluator
 
 bool ImagePrimitiveEvaluator::pointAtPixel( const Imath::V2i &pixel, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	ResultPtr r = boost::dynamic_pointer_cast< Result >( result );
+	Result *r = static_cast<Result *>( result.get() );
 	assert( r );
 
 	V3f imageSize = boxSize( m_image->bound() );
@@ -418,9 +415,11 @@ bool ImagePrimitiveEvaluator::pointAtPixel( const Imath::V2i &pixel, const Primi
 bool ImagePrimitiveEvaluator::intersectionPoint( const V3f &origin, const V3f &direction,
                 const PrimitiveEvaluator::ResultPtr &result, float maxDistance ) const
 {
-	ResultPtr r = boost::dynamic_pointer_cast< Result >( result );
+	Result *r = static_cast<Result *>( result.get() );
 	assert( r );
 
+	/// \todo Why are we doing dynamic memory allocation in here? Why doesn't intersectionPoints()
+	/// use intersectionPoint() and not the other way round? We only expect one hit at most after all.
 	std::vector<PrimitiveEvaluator::ResultPtr> results;
 
 	int numIntersections = intersectionPoints( origin, direction, results, maxDistance );
@@ -456,7 +455,7 @@ int ImagePrimitiveEvaluator::intersectionPoints( const V3f &origin, const V3f &d
 	{
 		if ( ( origin - hitPoint ).length2() < maxDistance * maxDistance )
 		{
-			ResultPtr result = boost::dynamic_pointer_cast< Result >( createResult() );
+			ResultPtr result = boost::static_pointer_cast< Result >( createResult() );
 			result->m_p = hitPoint;
 
 			results.push_back( result );
