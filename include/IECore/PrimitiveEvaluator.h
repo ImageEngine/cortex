@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ class PrimitiveEvaluator : public RunTimeTyped
 		IE_CORE_DECLARERUNTIMETYPED( PrimitiveEvaluator, RunTimeTyped );
 
 		/// An interface defining the possible results returned from a query. Attempting to read back the results of a failed
-		/// query will yield undefined values.
+		/// query will yield undefined behaviour.
 		class Result : public RefCounted
 		{
 			public:
@@ -113,6 +113,10 @@ class PrimitiveEvaluator : public RunTimeTyped
 		virtual ConstPrimitivePtr primitive() const = 0;
 
 		//! @name Query Functions
+		/// The ResultPtr passed to each of the methods below must previously have been created
+		/// by a call to the createResult() method on the same evaluator instance as is being called -
+		/// passing any other result will cause undefined behaviour.
+		////////////////////////////////////////////////////////////////////////////////////////
 		//@{
 
 		/// Computes the signed distance between the given point and the primitive. By default this is
