@@ -341,6 +341,9 @@ void bindTypeId()
 		.value( "BINParticleWriter", BINParticleWriterTypeId )		
 		.value( "BINMeshReader", BINMeshReaderTypeId )				
 		.value( "BGEOParticleReader", BGEOParticleReaderTypeId )
+		.value( "NParticleReader", NParticleReaderTypeId )
+		.value( "IFFImageReader", IFFImageReaderTypeId )
+		.value( "IFFHairReader", IFFHairReaderTypeId )
 	;
 }
 

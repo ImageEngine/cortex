@@ -339,6 +339,9 @@ enum TypeId
 	BINParticleWriterTypeId = 296,		
 	BINMeshReaderTypeId = 297,
 	BGEOParticleReaderTypeId = 298,
+	NParticleReaderTypeId = 299,
+	IFFImageReaderTypeId = 300,
+	IFFHairReaderTypeId = 301,
 
 	// Remember to update TypeIdBinding.cpp !!!
 
