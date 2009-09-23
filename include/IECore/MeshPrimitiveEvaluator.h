@@ -171,6 +171,7 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 		ConstMeshPrimitivePtr m_mesh;
 		ConstV3fVectorDataPtr m_verts;
+		const std::vector<int> *m_meshVertexIds;
 
 		TriangleBoundVector m_triangles;
 		TriangleBoundTree *m_tree;

@@ -234,6 +234,8 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 		throw InvalidArgumentException( "Mesh given to MeshPrimitiveEvaluator has no \"P\" primvar of type V3fVectorData");
 	}
 
+	m_meshVertexIds = &(m_mesh->vertexIds()->readable());
+
 	m_u.interpolation = PrimitiveVariable::Invalid;
 	primVarIt = m_mesh->variables.find("s");
 	if ( primVarIt != m_mesh->variables.end() )
@@ -252,7 +254,7 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 	m_triangles.reserve( verticesPerFace.size() );
 	m_uvTriangles.reserve( verticesPerFace.size() );
 	unsigned int triangleIdx = 0;
-	IntVectorData::ValueType::const_iterator vertexIdIt = m_mesh->vertexIds()->readable().begin();
+	IntVectorData::ValueType::const_iterator vertexIdIt = m_meshVertexIds->begin();
 	for ( IntVectorData::ValueType::const_iterator it = verticesPerFace.begin();
 		it != verticesPerFace.end(); ++it, ++triangleIdx)
 	{
@@ -360,7 +362,7 @@ float MeshPrimitiveEvaluator::surfaceArea() const
 	if ( !m_haveSurfaceArea )
 	{
 		m_surfaceArea = 0.0f;
-		IntVectorData::ValueType::const_iterator vertexIdIt = m_mesh->vertexIds()->readable().begin();
+		IntVectorData::ValueType::const_iterator vertexIdIt = m_meshVertexIds->begin();
 
 		for ( IntVectorData::ValueType::const_iterator it = m_mesh->verticesPerFace()->readable().begin();
 			it != m_mesh->verticesPerFace()->readable().end(); ++it )
@@ -388,7 +390,7 @@ void MeshPrimitiveEvaluator::calculateMassProperties() const
 
 	double integral[10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
-	IntVectorData::ValueType::const_iterator vertexIdIt = m_mesh->vertexIds()->readable().begin();
+	IntVectorData::ValueType::const_iterator vertexIdIt = m_meshVertexIds->begin();
 
 	for ( IntVectorData::ValueType::const_iterator it = m_mesh->verticesPerFace()->readable().begin();
 		it != m_mesh->verticesPerFace()->readable().end(); ++it )
@@ -469,7 +471,6 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 {
 	assert( m_mesh );
 
-	ConstIntVectorDataPtr vertexIds = m_mesh->vertexIds();
 	ConstIntVectorDataPtr verticesPerFace = m_mesh->verticesPerFace();
 
 #ifndef NDEBUG
@@ -483,9 +484,9 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 	typedef std::map< VertexIndex, std::set<TriangleIndex> > VertexConnectivity;
 	VertexConnectivity vertexConnectivity;
 
-	IntVectorData::ValueType::const_iterator it = vertexIds->readable().begin();
+	IntVectorData::ValueType::const_iterator it = m_meshVertexIds->begin();
 	int triangleIndex = 0;
-	while ( it != vertexIds->readable().end() )
+	while ( it != m_meshVertexIds->end() )
 	{
 		VertexIndex v0 = *it ++;
 		VertexIndex v1 = *it ++;
@@ -518,13 +519,13 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 		{
 
 			/// Find the vertices associated with this triangle
-			VertexIndex v0 = vertexIds->readable()[ (*faceIt) * 3 + 0 ];
+			VertexIndex v0 = (*m_meshVertexIds)[ (*faceIt) * 3 + 0 ];
 			assert( vertexConnectivity[ v0 ].find( *faceIt ) != vertexConnectivity[ v0 ].end() );
 
-			VertexIndex v1 = vertexIds->readable()[ (*faceIt) * 3 + 1 ];
+			VertexIndex v1 = (*m_meshVertexIds)[ (*faceIt) * 3 + 1 ];
 			assert( vertexConnectivity[ v1 ].find( *faceIt ) != vertexConnectivity[ v1 ].end() );
 
-			VertexIndex v2 = vertexIds->readable()[ (*faceIt) * 3 + 2 ];
+			VertexIndex v2 = (*m_meshVertexIds)[ (*faceIt) * 3 + 2 ];
 			assert( vertexConnectivity[ v2 ].find( *faceIt ) != vertexConnectivity[ v2 ].end() );
 
 			/// Find the two edges that go from the current vertex (i) to the other	two triangle vertices
@@ -572,9 +573,9 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 
 	EdgeConnectivity edgeConnectivity;
 
-	it = vertexIds->readable().begin();
+	it = m_meshVertexIds->begin();
 	triangleIndex = 0;
-	while ( it != vertexIds->readable().end() )
+	while ( it != m_meshVertexIds->end() )
 	{
 		VertexIndex v0 = *it ++;
 		VertexIndex v1 = *it ++;
@@ -613,13 +614,13 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 		TriangleIndex triangle0 = it->second[0];
 		TriangleIndex triangle1 = it->second[1];
 
-		VertexIndex v00 = vertexIds->readable()[ triangle0 * 3 + 0 ];
-		VertexIndex v01 = vertexIds->readable()[ triangle0 * 3 + 1 ];
-		VertexIndex v02 = vertexIds->readable()[ triangle0 * 3 + 2 ];
+		VertexIndex v00 = (*m_meshVertexIds)[ triangle0 * 3 + 0 ];
+		VertexIndex v01 = (*m_meshVertexIds)[ triangle0 * 3 + 1 ];
+		VertexIndex v02 = (*m_meshVertexIds)[ triangle0 * 3 + 2 ];
 
-		VertexIndex v10 = vertexIds->readable()[ triangle1 * 3 + 0 ];
-		VertexIndex v11 = vertexIds->readable()[ triangle1 * 3 + 1 ];
-		VertexIndex v12 = vertexIds->readable()[ triangle1 * 3 + 2 ];
+		VertexIndex v10 = (*m_meshVertexIds)[ triangle1 * 3 + 0 ];
+		VertexIndex v11 = (*m_meshVertexIds)[ triangle1 * 3 + 1 ];
+		VertexIndex v12 = (*m_meshVertexIds)[ triangle1 * 3 + 2 ];
 
 		const Imath::V3f &p00 = m_verts->readable()[ v00 ];
 		const Imath::V3f &p01 = m_verts->readable()[ v01 ];
@@ -671,8 +672,6 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 
 			const V3i &triangleVertexIds = result->vertexIds();
 			Edge edge;
-
-			ConstIntVectorDataPtr vertexIds = m_mesh->vertexIds();
 
 			if ( region == 1 )
 			{
@@ -843,9 +842,8 @@ bool MeshPrimitiveEvaluator::barycentricPosition( unsigned int triangleIndex, co
 	r->m_triangleIdx = triangleIndex;
 	r->m_bary = barycentricCoordinates;
 	
-	const std::vector<int> &meshVertexIds = m_mesh->vertexIds()->readable();
 	size_t vertIdOffset = triangleIndex * 3;
-	r->m_vertexIds = Imath::V3i( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
+	r->m_vertexIds = Imath::V3i( (*m_meshVertexIds)[vertIdOffset], (*m_meshVertexIds)[vertIdOffset+1], (*m_meshVertexIds)[vertIdOffset+2] );
 
 	const Imath::V3f &p0 = m_verts->readable()[ r->m_vertexIds[0] ];
 	const Imath::V3f &p1 = m_verts->readable()[ r->m_vertexIds[1] ];
@@ -873,14 +871,12 @@ void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex node
 	const TriangleBoundTree::Node &node = m_tree->node( nodeIndex );
 	if( node.isLeaf() )
 	{
-		const std::vector<int> &meshVertexIds = m_mesh->vertexIds()->readable();
-
 		TriangleBoundTree::Iterator *permLast = node.permLast();
 		for( TriangleBoundTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
 			size_t triangleIndex = *perm - m_triangles.begin(); // triangle index is just the distance of the triangle from the beginning of the vector
 			size_t vertIdOffset = triangleIndex * 3;
-			Imath::V3i vertexIds( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
+			Imath::V3i vertexIds( (*m_meshVertexIds)[vertIdOffset], (*m_meshVertexIds)[vertIdOffset+1], (*m_meshVertexIds)[vertIdOffset+2] );
 			
 			assert( vertexIds[0] < (int)( m_verts->readable().size() ) );
 			assert( vertexIds[1] < (int)( m_verts->readable().size() ) );
@@ -974,15 +970,13 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, co
 
 	if( node.isLeaf() )
 	{
-
-		const std::vector<int> &meshVertexIds = m_mesh->vertexIds()->readable();
 		
 		UVBoundTree::Iterator *permLast = node.permLast();
 		for( UVBoundTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
 			size_t triangleIndex = *perm - m_uvTriangles.begin(); // triangle index is just the distance of the triangle from the beginning of the vector
 			size_t vertIdOffset = triangleIndex * 3;
-			Imath::V3i vertexIds( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
+			Imath::V3i vertexIds( (*m_meshVertexIds)[vertIdOffset], (*m_meshVertexIds)[vertIdOffset+1], (*m_meshVertexIds)[vertIdOffset+2] );
 
 			Imath::V2f uv[3];
 			triangleUVs( triangleIndex, vertexIds, uv );
@@ -1039,7 +1033,6 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( TriangleBoundTree::NodeIndex
 
 	if( node.isLeaf() )
 	{
-		const std::vector<int> &meshVertexIds = m_mesh->vertexIds()->readable();
 		TriangleBoundTree::Iterator *permLast = node.permLast();
 		bool intersects = false;
 
@@ -1047,7 +1040,7 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( TriangleBoundTree::NodeIndex
 		{
 			size_t triangleIndex = *perm - m_triangles.begin(); // triangle index is just the distance of the triangle from the beginning of the vector
 			size_t vertIdOffset = triangleIndex * 3;
-			Imath::V3i vertexIds( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
+			Imath::V3i vertexIds( (*m_meshVertexIds)[vertIdOffset], (*m_meshVertexIds)[vertIdOffset+1], (*m_meshVertexIds)[vertIdOffset+2] );
 
 			assert( vertexIds[0] < (int)( m_verts->readable().size() ) );
 			assert( vertexIds[1] < (int)( m_verts->readable().size() ) );
@@ -1200,14 +1193,13 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( TriangleBoundTree::NodeInde
 
 	if( node.isLeaf() )
 	{
-		const std::vector<int> &meshVertexIds = m_mesh->vertexIds()->readable();
 		TriangleBoundTree::Iterator *permLast = node.permLast();
 
 		for( TriangleBoundTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
 			size_t triangleIndex = *perm - m_triangles.begin(); // triangle index is just the distance of the triangle from the beginning of the vector
 			size_t vertIdOffset = triangleIndex * 3;
-			Imath::V3i vertexIds( meshVertexIds[vertIdOffset], meshVertexIds[vertIdOffset+1], meshVertexIds[vertIdOffset+2] );
+			Imath::V3i vertexIds( (*m_meshVertexIds)[vertIdOffset], (*m_meshVertexIds)[vertIdOffset+1], (*m_meshVertexIds)[vertIdOffset+2] );
 
 			assert( vertexIds[0] < (int)( m_verts->readable().size() ) );
 			assert( vertexIds[1] < (int)( m_verts->readable().size() ) );
