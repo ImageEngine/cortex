@@ -272,11 +272,11 @@ static void instanceBegin( Renderer &r, const std::string &name, const dict &par
 	r.instanceBegin( name, p );
 }
 
-static void command( Renderer &r, const std::string &name, const dict &parameters )
+static IECore::DataPtr command( Renderer &r, const std::string &name, const dict &parameters )
 {
 	CompoundDataMap p;
 	fillCompoundDataMap( p, parameters );
-	r.command( name, p );
+	return r.command( name, p );
 }
 
 void bindRenderer()
