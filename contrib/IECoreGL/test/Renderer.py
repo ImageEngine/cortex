@@ -422,7 +422,7 @@ class TestRenderer( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/output/testPrimVars.tif",
 			os.path.dirname( __file__ ) + "/output/testImage.tif",
 			os.path.dirname( __file__ ) + "/output/testStackBug.tif",
-#			os.path.dirname( __file__ ) + "/output/proceduralTest.tif",
+			os.path.dirname( __file__ ) + "/output/proceduralTest.tif",
 		]
 
 		for f in files :
