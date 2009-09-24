@@ -248,6 +248,7 @@
 #include "IECore/bindings/BINParticleWriterBinding.h"
 #include "IECore/bindings/BINMeshReaderBinding.h"
 #include "IECore/bindings/BGEOParticleReaderBinding.h"
+#include "IECore/bindings/NParticleReaderBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -486,6 +487,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBINParticleWriter();
 	bindBINMeshReader();
 	bindBGEOParticleReader();
+	bindNParticleReader();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

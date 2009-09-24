@@ -203,6 +203,7 @@ from TGAImageWriterTest import *
 from BINParticleWriterTest import *
 from BINMeshReaderTest import *
 from BGEOParticleReader import *
+from NParticleReader import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
