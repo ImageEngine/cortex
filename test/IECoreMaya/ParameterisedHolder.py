@@ -451,6 +451,47 @@ class TestParameterisedHolder( unittest.TestCase ) :
 	
 		self.failUnless( cmds.objExists( node + ".result" ) )
 
+	def testLazySettingFromCompoundPlugs( self ) :
+	
+		class TestProcedural( IECore.ParameterisedProcedural ) :
+		
+			def __init__( self ) :
+			
+				IECore.ParameterisedProcedural.__init__( self, "" )
+				
+				self.parameters().addParameter(
+				
+					IECore.V3fParameter(
+						"halfSize",
+						"",
+						IECore.V3f( 0 )
+					)
+				
+				)
+				
+			def doBound( self, args ) :
+			
+				return IECore.Box3f( -args["halfSize"].value, args["halfSize"].value )
+			
+			def doRenderState( self, args ) :
+			
+				pass
+					
+			def doRender( self, args ) :
+			
+				pass
+	
+		node = cmds.createNode( "ieProceduralHolder" )
+		fnPH = IECoreMaya.FnParameterisedHolder( str( node ) )
+		
+		p = TestProcedural()
+		fnPH.setParameterised( p )
+		
+		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( 0, 0, 0 )] )
+		cmds.setAttr( fnPH.parameterPlugPath( p["halfSize"] ), 1, 2, 3 )
+		
+		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( -1, -2, -3 )] )
+		
 	def tearDown( self ) :
 
 		for f in [ "test/IECoreMaya/reference.ma" , "test/IECoreMaya/referenceMaster.ma", "test/IECoreMaya/dynamicParameters.ma" ] :

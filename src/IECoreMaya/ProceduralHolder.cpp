@@ -176,7 +176,7 @@ MBoundingBox ProceduralHolder::boundingBox() const
 	ParameterisedProceduralPtr p = const_cast<ProceduralHolder*>(this)->getProcedural();
 	if( p )
 	{
-		const_cast<ProceduralHolder*>(this)->setParameterisedValues();
+		const_cast<ProceduralHolder*>(this)->setParameterisedValues( true /* lazy */ );
 		try
 		{
 			Box3f b = p->bound();
@@ -238,7 +238,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 	ParameterisedProceduralPtr p = ((ProceduralHolder*)this)->getProcedural();
 	if( p )
 	{
-		setParameterisedValues();
+		setParameterisedValues( true /* lazy */ );
 		try
 		{
 			IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
@@ -368,13 +368,10 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 	}
 
 	const std::string &name = nameState->name();
-	int compId = nameState->glName();
 
 	ComponentsMap::const_iterator it = m_componentsMap.find( name );
 	if( it == m_componentsMap.end() )
 	{
-		compId = m_componentsMap.size();
-
 		/// Reserve slot in the componentsMap. The exact component ID gets generated later, once all components have been
 		/// traversed. IDs are then assigned in ascending order whilst iterating over the component map, which is sorted by name. This
 		/// ensures a consistent ordering of components from frame to frame, which we'd not otherwise get due to IECore::Group using

@@ -45,6 +45,7 @@ class MPxComponentShape;
 class MPxImagePlane;
 
 #include "IECore/Parameterised.h"
+#include "IECore/ClassData.h"
 
 #include "IECoreMaya/ParameterisedHolderInterface.h"
 #include "IECoreMaya/MStringLess.h"
@@ -114,6 +115,12 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		static MObject aDynamicParameters;
 		//@}
 
+	protected :
+	
+		/// As for setParameterisedValues(), but when lazy==true, the work is only done for parameters whose
+		/// plug value has changed since the last time the value was set.
+		MStatus setParameterisedValues( bool lazy );
+
 	private:
 
 		IECore::RunTimeTypedPtr loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar );
@@ -132,6 +139,11 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		AttributeNameToParameterMap	m_attributeNamesToParameters;
 
 		MStatus removeUnecessaryAttributes( IECore::CompoundObjectPtr dynamicParameterStorage );
+
+		typedef std::set<IECore::ParameterPtr> ParameterSet;
+		/// Parameters for which the node value has changed since the last time they were set.
+		static IECore::ClassData<ParameterisedHolder, ParameterSet> g_dirtyParameters;
+		ParameterSet &dirtyParameters();
 
 		// We store the Parameters which were added dynamically inside a CompoundObject within a plug
 		// value on the node. This allows us to recreate those Parameters when the node is copied or

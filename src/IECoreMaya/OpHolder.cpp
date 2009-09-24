@@ -120,7 +120,7 @@ MStatus OpHolder<B>::compute( const MPlug &plug, MDataBlock &block )
 
 		try
 		{
-			ParameterisedHolder<B>::setParameterisedValues();
+			ParameterisedHolder<B>::setParameterisedValues( true /* lazy */ );
 			result = op->operate();
 			if (!result)
 			{

@@ -87,6 +87,9 @@ template<typename B>
 MObject ParameterisedHolder<B>::aDynamicParameters;
 
 template<typename B>
+ClassData<ParameterisedHolder<B>, typename ParameterisedHolder<B>::ParameterSet> ParameterisedHolder<B>::g_dirtyParameters;
+
+template<typename B>
 ParameterisedHolder<B>::PLCB::PLCB( ParameterisedHolder<B> *node) : m_node(node)
 {
 }
@@ -103,11 +106,13 @@ ParameterisedHolder<B>::ParameterisedHolder()
 	:	m_parameterised( 0 ), m_failedToLoad( false )
 {
 	m_plcb = new PLCB( this );
+	g_dirtyParameters.create( this );
 }
 
 template<typename B>
 ParameterisedHolder<B>::~ParameterisedHolder()
 {
+	g_dirtyParameters.erase( this );
 }
 
 template<typename B>
@@ -127,6 +132,30 @@ MStatus ParameterisedHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArra
 		m_parameterised = 0;
 		m_failedToLoad = false;
 	}
+	else
+	{	
+		// if the plug represents a parameter then we add that parameter to a list
+		// of dirty parameters. this lets us optimise setParameterisedValues so we only
+		// set the values of parameters whose plugs have changed since last time.
+		// we only bother doing this if we've loaded the class already, as calling plugParameter()
+		// would otherwise cause a premature loading of the class. when we load the class all parameters
+		// are marked as dirty anyway so there's no point worrying about it here.
+		if( m_parameterised )
+		{
+			MPlug p = plug;
+			ParameterPtr parameter = 0;
+			do
+			{
+				parameter = plugParameter( p );
+				p = p.parent();
+			} while( !parameter && !p.isNull() );
+			if( parameter )
+			{
+				dirtyParameters().insert( parameter );
+			}
+		}
+	}
+	
 	return B::setDependentsDirty( plug, plugArray );
 }
 
@@ -414,15 +443,34 @@ MStatus ParameterisedHolder<B>::setNodeValue( ParameterPtr pa )
 template<typename B>
 MStatus ParameterisedHolder<B>::setParameterisedValues()
 {
+	return setParameterisedValues( false /* not lazy */ );
+}
+
+template<typename B>
+typename ParameterisedHolder<B>::ParameterSet &ParameterisedHolder<B>::dirtyParameters()
+{
+	return g_dirtyParameters[this];
+}
+
+template<typename B>
+MStatus ParameterisedHolder<B>::setParameterisedValues( bool lazy )
+{
 	// to update the parameter->name map if necessary
 	getParameterised();
 
 	MFnDependencyNode fnDN( B::thisMObject() );
+	
+	const ParameterSet &dirtyParms = dirtyParameters();
 
 	bool allGood = true;
 	ParameterToAttributeNameMap::const_iterator it;
 	for( it=m_parametersToAttributeNames.begin(); it!=m_parametersToAttributeNames.end(); it++ )
 	{
+		if( lazy && dirtyParms.find( it->first )==dirtyParms.end() )
+		{
+			continue;
+		}
+	
 		MPlug p = fnDN.findPlug( it->second );
 		if( p.isNull() )
 		{
@@ -436,6 +484,10 @@ MStatus ParameterisedHolder<B>::setParameterisedValues()
 			{
 				msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Failed to set parameter value from %s" ) % p.name().asChar() );
 				allGood = false;
+			}
+			else
+			{
+				dirtyParameters().erase( it->first );
 			}
 		}
 		catch( std::exception &e )
@@ -466,6 +518,10 @@ MStatus ParameterisedHolder<B>::setParameterisedValue( ParameterPtr pa )
 	try
 	{
 		s = IECoreMaya::Parameter::setValue( p, pa );
+		if( s )
+		{
+			dirtyParameters().erase( pa );
+		}
 	}
 	catch ( std::exception &e )
 	{
@@ -597,6 +653,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 
 		m_attributeNamesToParameters[mAttributeName] = children[i];
 		m_parametersToAttributeNames[children[i]] = mAttributeName;
+		dirtyParameters().insert( children[i] );
 
 		MPlugArray connectionsFromMe, connectionsToMe;
 
