@@ -147,7 +147,18 @@ MStatus ParameterisedHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArra
 			do
 			{
 				parameter = plugParameter( p );
-				p = p.parent();
+				if( p.isChild() )
+				{
+					p = p.parent();
+				}
+				else if( p.isElement() )
+				{
+					p = p.array();
+				}
+				else
+				{
+					p = MPlug();
+				}
 			} while( !parameter && !p.isNull() );
 			if( parameter )
 			{

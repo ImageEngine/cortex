@@ -491,7 +491,65 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		cmds.setAttr( fnPH.parameterPlugPath( p["halfSize"] ), 1, 2, 3 )
 		
 		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( -1, -2, -3 )] )
+	
+	def testLazySettingFromArrayPlugs( self ) :
+	
+		class TestProcedural( IECore.ParameterisedProcedural ) :
 		
+			def __init__( self ) :
+			
+				IECore.ParameterisedProcedural.__init__( self, "" )
+				
+				self.parameters().addParameter( 
+				
+					IECore.SplineffParameter(
+						"spline",
+						"",
+						defaultValue = IECore.SplineffData(
+							IECore.Splineff(
+								IECore.CubicBasisf.catmullRom(),
+								(
+									( 0, 1 ),
+									( 0, 1 ),
+									( 1, 0 ),
+									( 1, 0 ),
+								),
+							),
+						),
+					),
+				
+				)
+				
+			def doBound( self, args ) :
+			
+				v = args["spline"].value.points()[0][1]
+			
+				return IECore.Box3f( IECore.V3f( -v ), IECore.V3f( v ) )
+			
+			def doRenderState( self, args ) :
+			
+				pass
+					
+			def doRender( self, args ) :
+			
+				pass
+	
+		node = cmds.createNode( "ieProceduralHolder" )
+		fnPH = IECoreMaya.FnParameterisedHolder( str( node ) )
+		
+		p = TestProcedural()
+		fnPH.setParameterised( p )
+		
+		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( -1, -1, -1 )] )
+		
+		plugPath = fnPH.parameterPlugPath( p["spline"] )
+		plugName = plugPath.partition( "." )[2]
+		pointValuePlugPath = plugPath + "[0]." + plugName + "_FloatValue"
+		
+		cmds.setAttr( pointValuePlugPath, 2 )
+		
+		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( -2, -2, -2 )] )
+			
 	def tearDown( self ) :
 
 		for f in [ "test/IECoreMaya/reference.ma" , "test/IECoreMaya/referenceMaster.ma", "test/IECoreMaya/dynamicParameters.ma" ] :
