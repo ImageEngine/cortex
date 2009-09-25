@@ -65,6 +65,8 @@ void bindGroup()
 		.def( "setState", &Group::setState )
 		.def( "getState", (StatePtr(Group::*)())&Group::getState )
 		.def( "addChild", &Group::addChild )
+		.def( "removeChild", &Group::removeChild )
+		.def( "clearChildren", &Group::clearChildren )
 		.def( "children", &children, "Returns a list referencing the children of the group - modifying the list has no effect on the Group." )
 	;
 }

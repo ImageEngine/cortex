@@ -133,6 +133,16 @@ void Group::addChild( RenderablePtr child )
 	m_children.push_back( child );
 }
 
+void Group::removeChild( RenderablePtr child )
+{
+	m_children.remove( child );
+}
+
+void Group::clearChildren()
+{
+	m_children.clear();
+}
+
 const Group::ChildContainer &Group::children() const
 {
 	return m_children;
