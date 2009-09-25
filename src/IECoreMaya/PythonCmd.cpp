@@ -161,6 +161,7 @@ void PythonCmd::initialize()
 
 		import( "IECore" );
 		import( "IECoreMaya" );
+		import( "IECoreGL" );
 
 		g_initialized = true;
 
