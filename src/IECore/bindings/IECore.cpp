@@ -249,6 +249,7 @@
 #include "IECore/bindings/BINMeshReaderBinding.h"
 #include "IECore/bindings/BGEOParticleReaderBinding.h"
 #include "IECore/bindings/NParticleReaderBinding.h"
+#include "IECore/bindings/IFFHairReaderBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -488,6 +489,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBINMeshReader();
 	bindBGEOParticleReader();
 	bindNParticleReader();
+	bindIFFHairReader();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
