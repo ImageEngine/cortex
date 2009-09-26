@@ -204,6 +204,7 @@ from BINParticleWriterTest import *
 from BINMeshReaderTest import *
 from BGEOParticleReader import *
 from NParticleReader import *
+from IFFHairReader import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
