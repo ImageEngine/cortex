@@ -53,6 +53,7 @@
 #include "IECore/VectorOps.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/CompoundParameter.h"
 
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnTypedAttribute.h"
@@ -74,14 +75,17 @@ MObject ProceduralHolder::aGLPreview;
 MObject ProceduralHolder::aTransparent;
 MObject ProceduralHolder::aDrawBound;
 MObject ProceduralHolder::aProceduralComponents;
+ClassData<ProceduralHolder, IECoreGL::RendererPtr> ProceduralHolder::g_lastRenderer;
 
 ProceduralHolder::ProceduralHolder()
 	:	m_boundDirty( true ), m_sceneDirty( true )
 {
+	g_lastRenderer.create( this, 0 );
 }
 
 ProceduralHolder::~ProceduralHolder()
 {
+	g_lastRenderer.erase( this );
 }
 
 void ProceduralHolder::postConstructor()
@@ -241,30 +245,55 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 		setParameterisedValues( true /* lazy */ );
 		try
 		{
-			IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
-			renderer->setOption( "gl:mode", new StringData( "deferred" ) );
-			renderer->worldBegin();
+			IECoreGL::RendererPtr &m_lastRenderer = lastRenderer();
+			IECoreGL::RendererPtr rendererToReuse = 0;
+			boost::python::object pythonProcedural( p );
+			if( m_lastRenderer && PyObject_HasAttrString( pythonProcedural.ptr(), "willRerender" ) )
+			{
+				/// \todo Consider how we might modify the ParameterisedProcedural (and possibly Renderer::Procedural?) interface
+				/// to properly support rerendering. Do this in conjunction with the todo in IECoreGL::Renderer::command() (about formalising a
+				/// proper interface for specifying scene edits to a Renderer).
+				bool rerender = boost::python::extract<bool>( pythonProcedural.attr( "willRerender" )( m_lastRenderer, p->parameters()->getValue() ) );
+				if( rerender )
+				{
+					rendererToReuse = m_lastRenderer;
+				}
+			}
 
-				p->render( renderer );
+			if( rendererToReuse )
+			{
+				p->render( rendererToReuse );
+				m_scene = rendererToReuse->scene();
+			}
+			else
+			{
+				IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
+				renderer->setOption( "gl:mode", new StringData( "deferred" ) );
+				renderer->worldBegin();
 
-			renderer->worldEnd();
+					p->render( renderer );
 
-			m_scene = renderer->scene();
-			m_scene->setCamera( 0 );
+				renderer->worldEnd();
 
+				m_scene = renderer->scene();
+				m_scene->setCamera( 0 );
+
+				m_lastRenderer = renderer;
+			}
+			
 			buildComponents();
 		}
 		catch( boost::python::error_already_set )
 		{
 			PyErr_Print();
 		}
-		catch( IECore::Exception &e )
+		catch( const std::exception &e )
 		{
 			msg( Msg::Error, "ProceduralHolder::scene", e.what() );
 		}
 		catch( ... )
 		{
-			msg( Msg::Error, "ProceduralHolder::scene", "Exception thrown in Procedural::render" );
+			msg( Msg::Error, "ProceduralHolder::scene", "Caught unknown exception" );
 		}
 	}
 
@@ -459,3 +488,7 @@ void ProceduralHolder::buildComponents()
 }
 
 
+IECoreGL::RendererPtr &ProceduralHolder::lastRenderer()
+{
+	return g_lastRenderer[this];
+}
