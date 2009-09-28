@@ -1756,9 +1756,87 @@ void IECoreGL::Renderer::instance( const std::string &name )
 // commands
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+typedef IECore::DataPtr (*Command)( const std::string &name, const IECore::CompoundDataMap &parameters, IECoreGL::Renderer::MemberData *memberData );
+typedef std::map<string, Command> CommandMap;
+
+bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, const std::string &objectName )
+{
+	ConstNameStateComponentPtr stateName = child->getState()->get<NameStateComponent>();
+	if( stateName && stateName->name()==objectName )
+	{
+		if( parent )
+		{
+			parent->removeChild( child );
+		}
+		else
+		{
+			// no parent, ie we're at the root of the Scene. just remove all the children.
+			child->clearChildren();
+		}
+		return true;
+	}
+	
+	bool result = false;
+	IECoreGL::Group::ChildContainer::const_iterator it = child->children().begin();
+	while( it!=child->children().end() )
+	{
+		IECoreGL::GroupPtr g = IECore::runTimeCast<IECoreGL::Group>( *it );
+		it++;
+		if( g )
+		{
+			result = result || removeObjectWalk( child, g, objectName );
+		}
+	}
+	return result;
+}
+
+IECore::DataPtr removeObjectCommand( const std::string &name, const IECore::CompoundDataMap &parameters, IECoreGL::Renderer::MemberData *memberData )
+{
+	DeferredRendererImplementationPtr r = runTimeCast<DeferredRendererImplementation>( memberData->implementation );
+	if( !r )
+	{
+		msg( Msg::Warning, "Renderer::command", "removeObject command operates only in deferred mode" );
+		return 0;
+	}
+	
+	string objectName = parameterValue<string>( "name", parameters, "" );
+	if( objectName=="" )
+	{
+		msg( Msg::Warning, "Renderer::command", "removeObject command expects StringData parameter \"name\"" );
+		return 0;
+	}
+	
+	ScenePtr scene = r->scene();
+	bool result = removeObjectWalk( 0, r->scene()->root(), objectName );
+
+	return new IECore::BoolData( result );
+}
+
+static const CommandMap &commands()
+{
+	static CommandMap c;
+	if( !c.size() )
+	{
+		c["removeObject"] = removeObjectCommand;
+	}
+	return c;
+}
+
 IECore::DataPtr IECoreGL::Renderer::command( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "Renderer::command", "Not implemented" );
+	const CommandMap &c = commands();
+	CommandMap::const_iterator it = c.find( name );
+	if( it!=c.end() )
+	{
+		return it->second( name, parameters, m_data );
+	}
+	
+	if( name.compare( 0, 3, "gl:" )==0 || name.find( ':' )==string::npos )
+	{
+		msg( Msg::Warning, "Renderer::command", boost::format( "Unsuppported command \"%s\"." ) % name );
+		return 0;
+	}
+
 	return 0;
 }
 

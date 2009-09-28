@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
 import unittest
 import os
 import os.path
@@ -415,6 +417,27 @@ class TestRenderer( unittest.TestCase ) :
 		r.shader( "surface", "failWithoutPreprocessing", {} )
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		r.worldEnd()
+
+	def testRemoveObject( self ) :
+	
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		with WorldBlock( r ) :
+		
+			r.setAttribute( "name", "sphereOne" )
+		
+			r.sphere( 1, -1, 1, 360, {} )
+			
+			r.setAttribute( "name", "sphereTwo" )
+		
+			r.sphere( 1, -1, 1, 360, {} )
+
+		s = r.scene()
+		self.assertEqual( len( s.root().children() ), 2 )
+		
+		commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
+		self.assertEqual( commandResult, BoolData( True ) )
+		self.assertEqual( len( s.root().children() ), 1 )
 
 	def tearDown( self ) :
 

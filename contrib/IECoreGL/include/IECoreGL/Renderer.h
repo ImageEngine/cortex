@@ -382,6 +382,13 @@ class Renderer : public IECore::Renderer
 		virtual void instanceEnd();
 		virtual void instance( const std::string &name );
 
+		/// \par Commands implemented
+		///
+		/// "removeObject"<br>
+		/// Expects a StringData parameter named "name", which specifies the name of an object to remove from the scene.
+		/// This only has any effect in deferred mode.
+		/// \todo Consider generalising an interface for scene edits and making it a standard part of the documentation
+		/// in IECore. Any such interface should take into account support for PRMan's new rerendering API.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		struct MemberData;
