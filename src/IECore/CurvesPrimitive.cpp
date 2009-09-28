@@ -36,6 +36,7 @@
 #include "IECore/Renderer.h"
 
 using namespace IECore;
+using namespace Imath;
 
 const unsigned int CurvesPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CurvesPrimitive );
@@ -287,4 +288,47 @@ unsigned int CurvesPrimitive::numSegments( bool linear, int step, bool periodic,
 			return (numVerts - 4 )/ step + 1;
 		}
 	}
+}
+
+CurvesPrimitivePtr CurvesPrimitive::createBox( const Imath::Box3f &b )
+{
+	IntVectorDataPtr vertsPerCurveData = new IntVectorData;
+	std::vector<int> &vertsPerCurve = vertsPerCurveData->writable();
+	vertsPerCurve.reserve( 6 );
+	
+	V3fVectorDataPtr pData = new V3fVectorData;
+	std::vector<V3f> &p = pData->writable();
+	p.reserve( 18 );
+	
+	vertsPerCurve.push_back( 5 );
+	p.push_back( b.min );
+	p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
+	p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
+	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
+	p.push_back( b.min );
+	
+	vertsPerCurve.push_back( 5 );
+	p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
+	p.push_back( V3f( b.max.x, b.max.y, b.min.z ) );
+	p.push_back( V3f( b.max.x, b.max.y, b.max.z ) );
+	p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
+	p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
+
+	vertsPerCurve.push_back( 2 );
+	p.push_back( b.min );
+	p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
+
+	vertsPerCurve.push_back( 2 );
+	p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
+	p.push_back( V3f( b.max.x, b.max.y, b.min.z ) );
+
+	vertsPerCurve.push_back( 2 );
+	p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
+	p.push_back( V3f( b.max.x, b.max.y, b.max.z ) );
+	
+	vertsPerCurve.push_back( 2 );
+	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
+	p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
+	
+	return new CurvesPrimitive( vertsPerCurveData, CubicBasisf::linear(), false, pData );
 }

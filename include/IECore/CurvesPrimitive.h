@@ -68,6 +68,9 @@ class CurvesPrimitive : public Primitive
 		/// Returns the number of segments of a curve with the given topology.
 		static unsigned numSegments( const CubicBasisf &basis, bool periodic, unsigned numVerts );
 
+		/// Creates a wireframe box of the specified size.
+		static Ptr createBox( const Imath::Box3f &b );
+
 	protected :
 
 		/// Throws an exception if numVerts is an inappropriate number for the current basis.

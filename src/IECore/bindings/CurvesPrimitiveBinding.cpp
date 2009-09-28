@@ -60,6 +60,7 @@ void bindCurvesPrimitive()
 		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation )const)&CurvesPrimitive::variableSize )
 		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation, unsigned )const)&CurvesPrimitive::variableSize )
 		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned )const)&CurvesPrimitive::numSegments )
+		.def( "createBox", &CurvesPrimitive::createBox ).staticmethod( "createBox" )
 	;
 }
 
