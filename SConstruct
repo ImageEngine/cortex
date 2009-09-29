@@ -68,7 +68,7 @@ o.Add(
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-O2" ]
+	[ "-pipe", "-Wall", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
 )
 
 o.Add(
@@ -80,7 +80,7 @@ o.Add(
 o.Add(
 	"PYTHONCXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation of Python bindings.",
-	[ "-pipe", "-Wall", "-O2" ]
+	[ "-pipe", "-Wall", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
 )
 
 o.Add(
@@ -283,14 +283,6 @@ o.Add(
 		"Set this to install the Maya plugin with a stub loader.",
 		 False
 	),
-)
-
-# Debug options
-
-## \todo This isn't doing anything useful in this file - but the ie config relies on it. Move the
-# DEBUG and WITH_ASSERTS logic from config/ie/options into this file.
-o.Add(
-	BoolOption( "DEBUG", "Set this to build without optimisation and with debug symbols.", False ),
 )
 
 # Build options
@@ -573,7 +565,10 @@ env.Prepend(
 )
 
 if env["PLATFORM"]=="darwin" :
-	env.Append( CXXFLAGS = "-Wno-long-double" )
+	# os x versions before snow leopard require the no-long-double flag
+	compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
+	if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :	
+		env.Append( CXXFLAGS = "-Wno-long-double" )
 			
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
