@@ -166,10 +166,10 @@ class IFFFile : public RefCounted, private boost::noncopyable
 	private :
 		
 		bool open();
+		std::ifstream *m_iStream;
 		std::string m_streamFileName;
 		
 		Chunk *m_root;
-		std::ifstream *m_iStream;
 		
 		// reads data from the char buffer into a more specific buffer, accounting for byte order
 		template<typename T>
