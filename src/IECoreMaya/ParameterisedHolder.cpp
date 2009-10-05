@@ -466,53 +466,104 @@ typename ParameterisedHolder<B>::ParameterSet &ParameterisedHolder<B>::dirtyPara
 template<typename B>
 MStatus ParameterisedHolder<B>::setParameterisedValues( bool lazy )
 {
-	// to update the parameter->name map if necessary
-	getParameterised();
+	ParameterisedInterface *parameterisedInterface = getParameterisedInterface();
+	if( !parameterisedInterface )
+	{
+		return MS::kFailure;
+	}
+	
+	MStatus s;
+	setParameterisedValuesWalk( lazy, parameterisedInterface->parameters(), s, dirtyParameters() );
+	return s;
+}
 
+template<typename B>
+bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::ParameterPtr parameter, MStatus &status, const ParameterSet &dirtyParms )
+{
 	MFnDependencyNode fnDN( B::thisMObject() );
 	
-	const ParameterSet &dirtyParms = dirtyParameters();
-
-	bool allGood = true;
-	ParameterToAttributeNameMap::const_iterator it;
-	for( it=m_parametersToAttributeNames.begin(); it!=m_parametersToAttributeNames.end(); it++ )
-	{
-		if( lazy && dirtyParms.find( it->first )==dirtyParms.end() )
-		{
-			continue;
-		}
+	// traverse child parameters if we have them
 	
-		MPlug p = fnDN.findPlug( it->second );
-		if( p.isNull() )
+	bool childParametersWereSet = false;
+	if( parameter->isInstanceOf( CompoundParameter::staticTypeId() ) )
+	{
+		CompoundParameterPtr compoundParameter = boost::static_pointer_cast<CompoundParameter>( parameter );
+		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
+		for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 		{
-			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Unable to find plug for parameter %s" ) %  it->first->name() );
-			allGood = false;
+			bool b = setParameterisedValuesWalk( lazy, *cIt, status, dirtyParms );
+			childParametersWereSet = childParametersWereSet || b;
 		}
-		try
+	}
+
+	// then set this parameter if necessary
+	
+	bool thisParameterWasSet = false;
+	if( parameter->name()!="" && (!lazy || dirtyParms.find( parameter )!=dirtyParms.end()) )
+	{
+		ParameterToAttributeNameMap::const_iterator nIt = m_parametersToAttributeNames.find( parameter );
+		if( nIt==m_parametersToAttributeNames.end() )
 		{
-			MStatus s = Parameter::setValue( p, it->first );
-			if( !s )
+			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Unable to find plug name for parameter %s" ) % parameter->name() );
+			status = MS::kFailure;
+		}
+		else
+		{
+		
+			MPlug p = fnDN.findPlug( nIt->second );
+			if( p.isNull() )
 			{
-				msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Failed to set parameter value from %s" ) % p.name().asChar() );
-				allGood = false;
+				msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Unable to find plug for parameter %s" ) %  parameter->name() );
+				status = MS::kFailure;
 			}
 			else
 			{
-				dirtyParameters().erase( it->first );
+				try
+				{
+					MStatus s = Parameter::setValue( p, parameter );
+					if( !s )
+					{
+						msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Failed to set parameter value from %s" ) % p.name().asChar() );
+						status = s;
+					}
+					else
+					{
+						dirtyParameters().erase( parameter );
+						thisParameterWasSet = true;
+					}
+				}
+				catch( std::exception &e )
+				{
+					msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s : %s" ) % p.name().asChar() % e.what());
+					status = MS::kFailure;
+				}
+				catch( ... )
+				{
+					msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s" ) % p.name().asChar() );
+					status = MS::kFailure;
+				}
 			}
 		}
-		catch( std::exception &e )
+	}
+	
+	// increment the updateCount if necessary
+	
+	if( thisParameterWasSet || childParametersWereSet )
+	{
+		CompoundObjectPtr userData = parameter->userData();
+		IntDataPtr updateCount = userData->member<IntData>( "updateCount" );
+		if( !updateCount )
 		{
-			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s : %s" ) % p.name().asChar() % e.what());
-			allGood = false;
+			updateCount = new IntData( 0 );
+			userData->members()["updateCount"] = updateCount;
 		}
-		catch( ... )
+		else
 		{
-			msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s" ) % p.name().asChar() );
-			allGood = false;
+			updateCount->writable()++;
 		}
 	}
-	return allGood ? MStatus::kSuccess : MStatus::kFailure;
+	
+	return childParametersWereSet || thisParameterWasSet;
 }
 
 template<typename B>

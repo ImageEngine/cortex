@@ -124,7 +124,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 	private:
 
 		IECore::RunTimeTypedPtr loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar );
-
+	
 		/// Creates (or updates existing) attributes for each parameter. Removes any old attributes no longer
 		/// needed. If dynamicParameterStorage is specified then any new Parameters for which attributes must be
 		/// created are placed in there - this is used by updateParameterised() to store dynamic parameters.
@@ -145,6 +145,8 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		static IECore::ClassData<ParameterisedHolder, ParameterSet> g_dirtyParameters;
 		ParameterSet &dirtyParameters();
 
+		bool setParameterisedValuesWalk( bool lazy, IECore::ParameterPtr parameter, MStatus &status, const ParameterSet &dirtyParms );
+		
 		// We store the Parameters which were added dynamically inside a CompoundObject within a plug
 		// value on the node. This allows us to recreate those Parameters when the node is copied or
 		// saved and then loaded. The keys in the CompoundObject are the names of the parameters which
