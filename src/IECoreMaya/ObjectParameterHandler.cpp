@@ -60,7 +60,7 @@ MStatus ObjectParameterHandler::update( IECore::ConstParameterPtr parameter, MOb
 		return MS::kFailure;
 	}
 
-	MFnGenericAttribute fnGAttr;
+	MFnGenericAttribute fnGAttr( attribute );
 	if( !fnGAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
@@ -177,7 +177,6 @@ MStatus ObjectParameterHandler::setValue( const MPlug &plug, IECore::ParameterPt
 	if (!data || !s)
 	{
 		return MS::kFailure;
-
 	}
 
 	parameter->setValue( data->getObject() );
