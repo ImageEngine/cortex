@@ -95,6 +95,10 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m = MeshPrimitive( IntVectorData(), IntVectorData(), "linear", V3fVectorData() )
 		self.assert_( m.arePrimitiveVariablesValid() )
 
+	def testEqualityOfEmptyMeshes( self ) :
+	
+		self.assertEqual( MeshPrimitive(), MeshPrimitive() )
+
 	def tearDown( self ) :
 
 		if os.path.isfile("test/IECore/mesh.fio"):
