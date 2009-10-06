@@ -80,6 +80,10 @@ class CachedReader : public RefCounted
 		size_t memoryUsage() const;
 		/// Frees all memory used by the cache.
 		void clear();
+		/// Clears the cache for the given file.
+		void clear( const std::string &file );
+		/// Forces insertion on the cache for a file that is already loaded on memory.
+		void insert( const std::string &file, ConstObjectPtr obj );
 
 		/// Returns the SearchPath in use.
 		const SearchPath &getSearchPath() const;

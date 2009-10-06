@@ -34,6 +34,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <math.h>
 
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
@@ -220,6 +221,32 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence )
 		{
 			sequence = *it;
 			return;
+		}
+		// Also accept frame ranges with same number of digits on start and end frames.
+		if ( (*it)->getFrameList()->typeId() == FrameRangeTypeId )
+		{
+			FrameRangePtr fr = boost::static_pointer_cast< FrameRange >( (*it)->getFrameList() );
+			FrameList::Frame startFrame, endFrame;
+			startFrame = fr->getStart();
+			endFrame = fr->getEnd();
+			// if goes through 0 then this is a no.
+			if ( !(startFrame < 0 && endFrame > 0) )
+			{
+				unsigned int startDigits = 1;
+				if ( startFrame > 0 )
+					startDigits = static_cast<unsigned int>(floor(log10( static_cast<double>(abs(startFrame)) ))) + 1;
+
+				unsigned int endDigits = 1;
+				if ( endFrame > 0 )
+					endDigits = static_cast<unsigned int>(floor(log10( static_cast<double>(abs(endFrame)) ))) + 1;
+
+				if ( startDigits == endDigits && startDigits == padding )
+				{
+					sequence = *it;
+					return;
+				}
+			}
+
 		}
 	}
 }

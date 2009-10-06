@@ -367,6 +367,24 @@ class testLs( unittest.TestCase ) :
 
 		os.system( "rm -rf test/sequences/lsTest" )
 
+	def testAmbiguousPadding( self ):
+		
+		os.system( "rm -rf test/sequences/lsTest" )
+		os.system( "mkdir -p test/sequences/lsTest" )
+
+		s1 = FileSequence( "test/sequences/lsTest/a.#.tif", FrameRange( 100, 110 ) )
+
+		for f in s1.fileNames() :
+			os.system( "touch '" + f + "'" )
+
+		l = ls( "test/sequences/lsTest/a.#.tif" )
+		self.assertEqual( s1, l )
+
+		l = ls( "test/sequences/lsTest/a.###.tif" )
+		self.assertEqual( s1, l )
+
+		os.system( "rm -rf test/sequences/lsTest" )
+
 	def testMinLength( self ) :
 
 		"""Verify that single files on their own aren't treated as sequences even

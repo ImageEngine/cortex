@@ -66,9 +66,23 @@ class CachedReaderTest( unittest.TestCase ) :
 		r.maxMemory = oo.memoryUsage() / 2
 		self.assertEqual( r.memoryUsage(), 0 )
 
+		r.maxMemory = oo.memoryUsage() * 2
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		r.clear()
 		self.assertEqual( r.memoryUsage(), 0 )
+
+		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )
+		r.clear( "I don't exist" )
+		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )
+		r.clear( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		self.assertEqual( r.memoryUsage(), 0 )
+
+		# testing insert.
+		r.insert( "test/IECore/data/pdcFiles/particleShape1.250.pdc", oo )
+		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )
+		o2 = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		self.assertEqual( oo, o2 )
 
 	def testDefault( self ) :
 

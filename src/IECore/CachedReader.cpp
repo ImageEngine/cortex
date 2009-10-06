@@ -109,6 +109,12 @@ ConstObjectPtr CachedReader::read( const std::string &file )
 	return data;
 }
 
+void CachedReader::insert( const std::string &file, ConstObjectPtr obj )
+{
+	m_cache.set( file, obj, obj->memoryUsage() );
+	m_fn.m_unreadables.erase( file );
+}
+
 size_t CachedReader::memoryUsage() const
 {
 	return m_cache.currentCost();
@@ -117,6 +123,13 @@ size_t CachedReader::memoryUsage() const
 void CachedReader::clear()
 {
 	m_cache.clear();
+	m_fn.m_unreadables.clear();
+}
+
+void CachedReader::clear( const std::string &file )
+{
+	m_cache.erase( file );
+	m_fn.m_unreadables.erase( file );
 }
 
 const SearchPath &CachedReader::getSearchPath() const

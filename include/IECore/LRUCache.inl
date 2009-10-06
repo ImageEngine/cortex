@@ -94,35 +94,7 @@ bool LRUCache<Key, Data, GetterFn>::get( const Key& key, GetterFn fn, Data &data
 
 		if (found)
 		{
-			if (cost > m_maxCost)
-			{
-				/// Don't store as we'll exceed the maximum cost immediately.
-
-				return true;
-			}
-
-			/// If necessary, clear out any data with a least-recently-used strategy until we
-			/// have enough remaining "cost" to store.
-			limitCost( m_maxCost - cost );
-
-			/// If there's still room to store.....
-			if (m_currentCost + cost <= m_maxCost )
-			{
-				/// Update the cost to reflect the storage of the new item
-				m_currentCost += cost;
-
-				/// Insert the item at the front of the list
-				std::pair<Key, DataCost> listEntry( key, DataCost( data, cost ) );
-				m_list.push_front( listEntry );
-
-				/// Add the item to the map
-				std::pair<typename Cache::iterator, bool> it  = m_cache.insert( typename Cache::value_type( key, m_list.begin() ) );
-				assert( it.second );
-				assert( m_list.size() == m_cache.size() );
-
-				assert( data == (it.first->second)->second.first );
-			}
-
+			set( key, data, cost );
 			return true;
 		}
 		else
@@ -147,6 +119,38 @@ bool LRUCache<Key, Data, GetterFn>::get( const Key& key, GetterFn fn, Data &data
 		data = (it->second)->second.first;
 
 		return true;
+	}
+}
+
+template<typename Key, typename Data, typename GetterFn>
+void LRUCache<Key, Data, GetterFn>::set( const Key& key, Data data, Cost cost ) const
+{
+	if (cost > m_maxCost)
+	{
+		/// Don't store as we'll exceed the maximum cost immediately.
+		return;
+	}
+
+	/// If necessary, clear out any data with a least-recently-used strategy until we
+	/// have enough remaining "cost" to store.
+	limitCost( m_maxCost - cost );
+
+	/// If there's still room to store.....
+	if (m_currentCost + cost <= m_maxCost )
+	{
+		/// Update the cost to reflect the storage of the new item
+		m_currentCost += cost;
+
+		/// Insert the item at the front of the list
+		std::pair<Key, DataCost> listEntry( key, DataCost( data, cost ) );
+		m_list.push_front( listEntry );
+
+		/// Add the item to the map
+		std::pair<typename Cache::iterator, bool> it  = m_cache.insert( typename Cache::value_type( key, m_list.begin() ) );
+		assert( it.second );
+		assert( m_list.size() == m_cache.size() );
+
+		assert( data == (it.first->second)->second.first );
 	}
 }
 
@@ -179,6 +183,7 @@ bool LRUCache<Key, Data, GetterFn>::erase( const Key &key )
 		return false;
 	}
 
+	m_currentCost -= (it->second )->second.second;
 	m_list.erase( it->second );
 	m_cache.erase( it );
 
