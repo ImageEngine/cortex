@@ -55,6 +55,8 @@
 #include "maya/MFnExpression.h"
 #include "maya/MFnDagNode.h"
 #include "maya/MFnPluginData.h"
+#include "maya/MFnMesh.h"
+#include "maya/MFnGenericAttribute.h"
 
 #include "IECoreMaya/ParameterisedHolder.h"
 #include "IECoreMaya/Parameter.h"
@@ -65,7 +67,6 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
-#include "IECore/MeshPrimitive.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/ObjectVector.h"
 
@@ -173,36 +174,27 @@ MStatus ParameterisedHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArra
 template<typename B>
 MStatus ParameterisedHolder<B>::shouldSave( const MPlug &plug, bool &isSaving )
 {
-	/// Maya 8.5 crashes when saving a GenericAttribute (such as that
+	/// Maya 8.5 and 2009 crash when saving a GenericAttribute (such as that
 	/// created by the MeshParameterHandler) containing an "empty" mesh.
 	/// This only applies to ASCII files, saving to binary works. Here
 	/// we prevent Maya saving the value.
 
 	isSaving = true;
 	ParameterPtr parameter = plugParameter( plug );
-
-	if ( parameter )
+	if( parameter )
 	{
-		ObjectPtr value = parameter->getValue();
-
-		if (! value )
+		MFnGenericAttribute fnGA;
+		if( fnGA.hasObj( plug.attribute() ) )
 		{
-			isSaving = false;
-			return MS::kSuccess;
-		}
-
-		MeshPrimitivePtr mesh = runTimeCast< MeshPrimitive >( value );
-		if ( mesh )
-		{
-			MeshPrimitivePtr emptyMesh = new MeshPrimitive();
-			if ( mesh->isEqualTo( emptyMesh ) )
+			MObject value = plug.asMObject();
+			MFnMesh fnMesh( value );
+			if( fnMesh.hasObj( value ) && fnMesh.numPolygons()==0 )
 			{
 				isSaving = false;
-				return MS::kSuccess;
 			}
 		}
 	}
-
+	
 	return MS::kSuccess;
 }
 
