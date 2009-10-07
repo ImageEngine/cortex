@@ -80,6 +80,13 @@ typename LRUCache<Key, Data, GetterFn>::Cost LRUCache<Key, Data, GetterFn>::curr
 }
 
 template<typename Key, typename Data, typename GetterFn>
+bool LRUCache<Key, Data, GetterFn>::cached( const Key& key ) const
+{
+	typename Cache::iterator it = m_cache.find( key );
+	return ( it != m_cache.end() );
+}
+
+template<typename Key, typename Data, typename GetterFn>
 bool LRUCache<Key, Data, GetterFn>::get( const Key& key, GetterFn fn, Data &data ) const
 {
 	typename Cache::iterator it = m_cache.find( key );
@@ -94,7 +101,7 @@ bool LRUCache<Key, Data, GetterFn>::get( const Key& key, GetterFn fn, Data &data
 
 		if (found)
 		{
-			set( key, data, cost );
+			cache( key, data, cost );
 			return true;
 		}
 		else
@@ -123,7 +130,14 @@ bool LRUCache<Key, Data, GetterFn>::get( const Key& key, GetterFn fn, Data &data
 }
 
 template<typename Key, typename Data, typename GetterFn>
-void LRUCache<Key, Data, GetterFn>::set( const Key& key, Data data, Cost cost ) const
+void LRUCache<Key, Data, GetterFn>::set( const Key& key, Data data, Cost cost )
+{
+	erase( key );
+	cache( key, data, cost );
+}
+
+template<typename Key, typename Data, typename GetterFn>
+void LRUCache<Key, Data, GetterFn>::cache( const Key& key, Data data, Cost cost ) const
 {
 	if (cost > m_maxCost)
 	{

@@ -115,6 +115,11 @@ void CachedReader::insert( const std::string &file, ConstObjectPtr obj )
 	m_fn.m_unreadables.erase( file );
 }
 
+bool CachedReader::cached( const std::string &file ) const
+{
+	return m_cache.cached( file );
+}
+
 size_t CachedReader::memoryUsage() const
 {
 	return m_cache.currentCost();

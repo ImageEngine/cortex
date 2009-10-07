@@ -84,6 +84,8 @@ class CachedReader : public RefCounted
 		void clear( const std::string &file );
 		/// Forces insertion on the cache for a file that is already loaded on memory.
 		void insert( const std::string &file, ConstObjectPtr obj );
+		/// Returns true if the object is cached on memory.
+		bool cached( const std::string &file ) const;
 
 		/// Returns the SearchPath in use.
 		const SearchPath &getSearchPath() const;

@@ -87,7 +87,10 @@ class LRUCache
 		bool get( const Key& key, GetterFn fn, Data &data ) const;
 
 		/// Forces registration of an object on the cache.
-		void set( const Key& key, Data data, Cost cost ) const;
+		void set( const Key& key, Data data, Cost cost );
+
+		/// Returns true if the object is in the cache.
+		bool cached( const Key& key ) const;
 
 	protected:
 
@@ -99,6 +102,8 @@ class LRUCache
 
 		/// Clear out any data with a least-recently-used strategy until the current cost does not exceed the specified cost.
 		void limitCost( Cost cost ) const;
+
+		void cache( const Key& key, Data data, Cost cost ) const;
 
 		Cost m_maxCost;
 		mutable Cost m_currentCost;

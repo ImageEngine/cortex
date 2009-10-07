@@ -83,6 +83,11 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )
 		o2 = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( oo, o2 )
+		# testing overwritting existing item with insert
+		r.insert( "test/IECore/data/pdcFiles/particleShape1.250.pdc", o )
+		self.assertEqual( r.memoryUsage(), o.memoryUsage() )
+		o2 = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		self.assertEqual( o, o2 )
 
 	def testDefault( self ) :
 
