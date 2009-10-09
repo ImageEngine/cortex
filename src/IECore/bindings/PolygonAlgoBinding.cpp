@@ -68,6 +68,12 @@ static Box<typename VecData::ValueType::value_type> polygonBoundBinding( typenam
 	return polygonBound( p->readable().begin(), p->readable().end() );
 }
 
+template<typename VecData>
+static typename VecData::ValueType::value_type::BaseType polygonAreaBinding( typename VecData::Ptr p )
+{
+	return polygonArea( p->readable().begin(), p->readable().end() );
+}
+
 void bindPolygonAlgo()
 {
 	enum_<Winding>( "Winding" )
@@ -88,6 +94,9 @@ void bindPolygonAlgo()
 	def( "polygonBound", &polygonBoundBinding<V3fVectorData> );
 	def( "polygonBound", &polygonBoundBinding<V2dVectorData> );
 	def( "polygonBound", &polygonBoundBinding<V3dVectorData> );
+	
+	def( "polygonArea", &polygonAreaBinding<V3fVectorData> );
+	def( "polygonArea", &polygonAreaBinding<V3dVectorData> );
 }
 
 } // namespace IECore

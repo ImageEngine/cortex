@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,13 +40,17 @@
 namespace IECore
 {
 
-/// Returns the normalised normal for the polygon specified by the 3D vertices in the
+/// Returns the normalized normal for the polygon specified by the 3D vertices in the
 /// given iterator range. Copes properly with concave polygons. Assumes a
 /// righthanded (counter-clockwise) winding order, meaning that the normal will
 /// face towards an observer who sees the loop from first to last as being
 /// counter-clockwise.
 template<typename Iterator>
 typename std::iterator_traits<Iterator>::value_type polygonNormal( Iterator first, Iterator last );
+
+/// As above, but only normalizes the normal if normalised==true.
+template<typename Iterator>
+typename std::iterator_traits<Iterator>::value_type polygonNormal( Iterator first, Iterator last, bool normalized );
 
 /// An enum used to specify the winding order of
 /// polygons.
@@ -70,6 +74,10 @@ Winding polygonWinding( Iterator first, Iterator last, const typename std::itera
 /// Returns the bounding box of the polygon specified by the vertices in the given iterator range.
 template<typename Iterator>
 Imath::Box<typename std::iterator_traits<Iterator>::value_type> polygonBound( Iterator first, Iterator last );
+
+/// Returns the area of the polygon specified by the vertices in the given iterator range.
+template<typename Iterator>
+typename std::iterator_traits<Iterator>::value_type::BaseType polygonArea( Iterator first, Iterator last );
 
 } // namespace IECore
 

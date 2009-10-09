@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,6 +46,12 @@ namespace IECore
 template<typename Iterator>
 typename std::iterator_traits<Iterator>::value_type polygonNormal( Iterator first, Iterator last )
 {
+	return polygonNormal( first, last, true );
+}
+
+template<typename Iterator>
+typename std::iterator_traits<Iterator>::value_type polygonNormal( Iterator first, Iterator last, bool normalized )
+{
 	// Newell's method.
 	typedef typename std::iterator_traits<Iterator>::value_type Vec;
 	typedef CircularIterator<Iterator> CircularIt;
@@ -68,7 +74,7 @@ typename std::iterator_traits<Iterator>::value_type polygonNormal( Iterator firs
 	}
 	while( v0It != first );
 
-	return n.normalized();
+	return normalized ? n.normalized() : n;
 }
 
 template<typename Iterator>
@@ -118,6 +124,12 @@ Imath::Box<typename std::iterator_traits<Iterator>::value_type> polygonBound( It
 		result.extendBy( *it );
 	}
 	return result;
+}
+
+template<typename Iterator>
+typename std::iterator_traits<Iterator>::value_type::BaseType polygonArea( Iterator first, Iterator last )
+{
+	return polygonNormal( first, last, false ).length() / 2.0;
 }
 
 } // namespace IECore
