@@ -205,6 +205,7 @@ from BINMeshReaderTest import *
 from BGEOParticleReader import *
 from NParticleReader import *
 from IFFHairReader import *
+from FaceAreaOpTest import FaceAreaOpTest
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

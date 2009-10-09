@@ -342,6 +342,7 @@ enum TypeId
 	NParticleReaderTypeId = 299,
 	IFFImageReaderTypeId = 300,
 	IFFHairReaderTypeId = 301,
+	FaceAreaOpTypeId = 302,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

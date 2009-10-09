@@ -250,6 +250,7 @@
 #include "IECore/bindings/BGEOParticleReaderBinding.h"
 #include "IECore/bindings/NParticleReaderBinding.h"
 #include "IECore/bindings/IFFHairReaderBinding.h"
+#include "IECore/bindings/FaceAreaOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -490,6 +491,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBGEOParticleReader();
 	bindNParticleReader();
 	bindIFFHairReader();
+	bindFaceAreaOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

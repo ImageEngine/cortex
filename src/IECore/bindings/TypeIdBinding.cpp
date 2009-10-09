@@ -344,6 +344,7 @@ void bindTypeId()
 		.value( "NParticleReader", NParticleReaderTypeId )
 		.value( "IFFImageReader", IFFImageReaderTypeId )
 		.value( "IFFHairReader", IFFHairReaderTypeId )
+		.value( "FaceAreaOp", FaceAreaOpTypeId )
 	;
 }
 

@@ -34,6 +34,7 @@
 
 #include "IECore/MeshPrimitive.h"
 #include "IECore/Renderer.h"
+#include "IECore/PolygonIterator.h"
 
 #include <algorithm>
 #include <numeric>
@@ -122,6 +123,16 @@ void MeshPrimitive::setInterpolation( const std::string &interpolation )
 	m_interpolation = interpolation;
 }
 
+PolygonIterator MeshPrimitive::faceBegin()
+{
+	return PolygonIterator( m_verticesPerFace->readable().begin(), m_vertexIds->readable().begin(), 0 );
+}
+
+PolygonIterator MeshPrimitive::faceEnd()
+{
+	return PolygonIterator( m_verticesPerFace->readable().end(), m_vertexIds->readable().end(), m_vertexIds->readable().size() );
+}
+		
 size_t MeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch(interpolation)

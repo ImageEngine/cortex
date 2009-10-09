@@ -43,6 +43,8 @@ namespace IECore
 
 IE_CORE_FORWARDDECLARE( MeshPrimitive )
 
+class PolygonIterator;
+
 /// The MeshPrimitive represents a collection of polygonal faces. The faces should
 /// be planar and may not have holes, but can have concavities. By default a polygon
 /// is considered frontfacing if it's vertices wind in an anticlockwise direction from the
@@ -72,7 +74,10 @@ class MeshPrimitive : public Primitive
 		const std::string &interpolation() const;
 		virtual void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
 		void setInterpolation( const std::string &interpolation );
+		PolygonIterator faceBegin();
+		PolygonIterator faceEnd();
 		//@}
+
 
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
