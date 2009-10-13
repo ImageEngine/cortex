@@ -92,11 +92,12 @@ class CachedReaderTest( unittest.TestCase ) :
 	def testDefault( self ) :
 
 		os.environ["IECORE_CACHEDREADER_PATHS"] = "a:test:path"
+		os.environ["IECORE_CACHEDREADER_MEMORY"] = "200"
 
 		r = CachedReader.defaultCachedReader()
 		r2 = CachedReader.defaultCachedReader()
 		self.assert_( r.isSame( r2 ) )
-		self.assertEqual( r.maxMemory, 1024 * 1024 * 100 )
+		self.assertEqual( r.maxMemory, 1024 * 1024 * 200 )
 		self.assertEqual( r.searchPath, SearchPath( "a:test:path", ":" ) )
 
 if __name__ == "__main__":

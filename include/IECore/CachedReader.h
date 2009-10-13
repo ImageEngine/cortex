@@ -103,7 +103,8 @@ class CachedReader : public RefCounted
 		/// Returns a static CachedReader instance to be used by anything
 		/// wishing to share it's cache with others. It makes sense to use
 		/// this wherever possible to conserve memory. This initially
-		/// has a memory limit of 100Mb and searchPaths set from the
+		/// has a memory limit specified in megabytes by the IECORE_CACHEDREADER_MEMORY
+		/// environment variable and searchPaths set from the
 		/// IECORE_CACHEDREADER_PATHS environment variable. If either of these
 		/// need changing it's recommended to do that from a config file loaded
 		/// by the ConfigLoader, to avoid multiple clients fighting over the

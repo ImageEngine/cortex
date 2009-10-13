@@ -35,6 +35,8 @@
 #include "IECore/CachedReader.h"
 #include "IECore/Object.h"
 
+#include "boost/lexical_cast.hpp"
+
 using namespace IECore;
 using namespace boost::filesystem;
 using namespace std;
@@ -163,8 +165,11 @@ CachedReaderPtr CachedReader::defaultCachedReader()
 	static CachedReaderPtr c = 0;
 	if( !c )
 	{
+		const char *m = getenv( "IECORE_CACHEDREADER_MEMORY" );
+		int mi = m ? boost::lexical_cast<int>( m ) : 100;
+	
 		const char *sp = getenv( "IECORE_CACHEDREADER_PATHS" );
-		c = new CachedReader( SearchPath( sp ? sp : "", ":" ), 1024 * 1024 * 100 );
+		c = new CachedReader( SearchPath( sp ? sp : "", ":" ), 1024 * 1024 * mi );
 	}
 	return c;
 }
