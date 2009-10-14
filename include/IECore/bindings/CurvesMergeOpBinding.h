@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,52 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDPRIMITIVEOP_H
-#define IE_CORE_TYPEDPRIMITIVEOP_H
-
-#include "IECore/PrimitiveOp.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/ImagePrimitive.h"
-#include "IECore/CurvesPrimitive.h"
+#ifndef IECOREPYTHON_CURVESMERGEOPBINDING_H
+#define IECOREPYTHON_CURVESMERGEOPBINDING_H
 
 namespace IECore
 {
 
-/// The TypedPrimitiveOp template defines a base class for Ops which modify primitives of a specific type.
-template<typename T>
-class TypedPrimitiveOp : public ModifyOp
-{
-	public :
-	
-		typedef T PrimitiveType;
-
-		TypedPrimitiveOp( const std::string &name, const std::string &description );
-		virtual ~TypedPrimitiveOp();
-		
-		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedPrimitiveOp<T>, ModifyOp );
-
-	protected :
-
-		/// Must be implemented by all subclasses.
-		virtual void modifyTypedPrimitive( typename T::Ptr typedPrimitive, ConstCompoundObjectPtr operands ) = 0;
-
-	private :
-
-		/// Implemented to call modifyTypedPrimitive
-		void modify( ObjectPtr primitive, ConstCompoundObjectPtr operands );
-
-		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedPrimitiveOp<T> );
-
-};
-
-#define IE_CORE_DEFINETYPEDPRIMITIVEOP( TNAME ) \
-	typedef TypedPrimitiveOp<TNAME> (TNAME ## Op); \
-	IE_CORE_DECLAREPTR( TNAME ## Op );
-
-IE_CORE_DEFINETYPEDPRIMITIVEOP( MeshPrimitive )
-IE_CORE_DEFINETYPEDPRIMITIVEOP( ImagePrimitive )
-IE_CORE_DEFINETYPEDPRIMITIVEOP( CurvesPrimitive )
+void bindCurvesMergeOp();
 
 } // namespace IECore
 
-#endif // IE_CORE_TYPEDPRIMITIVEOP_H
+#endif // IECOREPYTHON_CURVESMERGEOPBINDING_H

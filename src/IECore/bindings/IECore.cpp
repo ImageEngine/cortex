@@ -251,6 +251,7 @@
 #include "IECore/bindings/NParticleReaderBinding.h"
 #include "IECore/bindings/IFFHairReaderBinding.h"
 #include "IECore/bindings/FaceAreaOpBinding.h"
+#include "IECore/bindings/CurvesMergeOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -492,6 +493,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindNParticleReader();
 	bindIFFHairReader();
 	bindFaceAreaOp();
+	bindCurvesMergeOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

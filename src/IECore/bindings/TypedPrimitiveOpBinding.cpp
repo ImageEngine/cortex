@@ -77,6 +77,7 @@ void bindTypedPrimitiveOp()
 {
 	bindTypedPrimitiveOp< MeshPrimitive >();
 	bindTypedPrimitiveOp< ImagePrimitive >();
+	bindTypedPrimitiveOp< CurvesPrimitive >();
 }
 
 } // namespace IECore

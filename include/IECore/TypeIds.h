@@ -343,6 +343,8 @@ enum TypeId
 	IFFImageReaderTypeId = 300,
 	IFFHairReaderTypeId = 301,
 	FaceAreaOpTypeId = 302,
+	CurvesMergeOpTypeId = 303,
+	CurvesPrimitiveOpTypeId = 304,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

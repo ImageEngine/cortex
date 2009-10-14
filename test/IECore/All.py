@@ -206,6 +206,7 @@ from BGEOParticleReader import *
 from NParticleReader import *
 from IFFHairReader import *
 from FaceAreaOpTest import FaceAreaOpTest
+from CurvesMergeOpTest import CurvesMergeOpTest
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

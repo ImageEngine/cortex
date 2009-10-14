@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,52 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDPRIMITIVEOP_H
-#define IE_CORE_TYPEDPRIMITIVEOP_H
+#ifndef IECORE_CURVESMERGEOP_H
+#define IECORE_CURVESMERGEOP_H
 
-#include "IECore/PrimitiveOp.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/ImagePrimitive.h"
-#include "IECore/CurvesPrimitive.h"
+#include "IECore/TypedPrimitiveOp.h"
+#include "IECore/TypedPrimitiveParameter.h"
 
 namespace IECore
 {
 
-/// The TypedPrimitiveOp template defines a base class for Ops which modify primitives of a specific type.
-template<typename T>
-class TypedPrimitiveOp : public ModifyOp
+/// An op to merge one set of curves with another.
+class CurvesMergeOp : public CurvesPrimitiveOp
 {
 	public :
-	
-		typedef T PrimitiveType;
 
-		TypedPrimitiveOp( const std::string &name, const std::string &description );
-		virtual ~TypedPrimitiveOp();
-		
-		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedPrimitiveOp<T>, ModifyOp );
+		CurvesMergeOp();
+		virtual ~CurvesMergeOp();
+
+		IE_CORE_DECLARERUNTIMETYPED( CurvesMergeOp, CurvesPrimitiveOp );
+
+		CurvesPrimitiveParameterPtr curvesParameter();
+		ConstCurvesPrimitiveParameterPtr curvesParameter() const;
 
 	protected :
 
-		/// Must be implemented by all subclasses.
-		virtual void modifyTypedPrimitive( typename T::Ptr typedPrimitive, ConstCompoundObjectPtr operands ) = 0;
+		virtual void modifyTypedPrimitive( CurvesPrimitivePtr curves, ConstCompoundObjectPtr operands );
 
 	private :
 
-		/// Implemented to call modifyTypedPrimitive
-		void modify( ObjectPtr primitive, ConstCompoundObjectPtr operands );
+		struct AppendPrimVars;
 
-		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedPrimitiveOp<T> );
+		CurvesPrimitiveParameterPtr m_curvesParameter;
 
 };
 
-#define IE_CORE_DEFINETYPEDPRIMITIVEOP( TNAME ) \
-	typedef TypedPrimitiveOp<TNAME> (TNAME ## Op); \
-	IE_CORE_DECLAREPTR( TNAME ## Op );
-
-IE_CORE_DEFINETYPEDPRIMITIVEOP( MeshPrimitive )
-IE_CORE_DEFINETYPEDPRIMITIVEOP( ImagePrimitive )
-IE_CORE_DEFINETYPEDPRIMITIVEOP( CurvesPrimitive )
+IE_CORE_DECLAREPTR( CurvesMergeOp );
 
 } // namespace IECore
 
-#endif // IE_CORE_TYPEDPRIMITIVEOP_H
+#endif // IECORE_CURVESMERGEOP_H
+

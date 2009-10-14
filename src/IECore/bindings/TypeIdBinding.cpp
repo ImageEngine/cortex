@@ -345,6 +345,8 @@ void bindTypeId()
 		.value( "IFFImageReader", IFFImageReaderTypeId )
 		.value( "IFFHairReader", IFFHairReaderTypeId )
 		.value( "FaceAreaOp", FaceAreaOpTypeId )
+		.value( "CurvesMergeOp", CurvesMergeOpTypeId )
+		.value( "CurvesPrimitiveOp", CurvesPrimitiveOpTypeId )
 	;
 }
 
