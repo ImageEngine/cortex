@@ -53,24 +53,9 @@ CurvesPrimitive::CurvesPrimitive()
 }
 
 CurvesPrimitive::CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const CubicBasisf &basis, bool periodic, ConstV3fVectorDataPtr p )
-	:	m_basis( basis ), m_periodic( periodic ), m_vertsPerCurve( vertsPerCurve->copy() ), m_numVerts( 0 ), m_numFaceVarying( 0 )
+	: 	m_basis( CubicBasisf::linear() )
 {
-	m_linear = m_basis==CubicBasisf::linear();
-
-	const std::vector<int> &v = m_vertsPerCurve->readable();
-	for( size_t i=0; i<v.size(); i++ )
-	{
-		if( m_periodic )
-		{
-			m_numFaceVarying += numSegments( i );
-		}
-		else
-		{
-			m_numFaceVarying += numSegments( i ) + 1;
-		}
-
-		m_numVerts += v[i];
-	}
+	setTopology( vertsPerCurve, basis, periodic );
 
 	if( p )
 	{
@@ -171,6 +156,31 @@ const CubicBasisf &CurvesPrimitive::basis() const
 bool CurvesPrimitive::periodic() const
 {
 	return m_periodic;
+}
+
+void CurvesPrimitive::setTopology( ConstIntVectorDataPtr verticesPerCurve, const CubicBasisf &basis, bool periodic )
+{
+	m_basis = basis;
+	m_linear = m_basis==CubicBasisf::linear();
+	m_periodic = periodic;
+	m_vertsPerCurve = verticesPerCurve->copy();
+
+	m_numVerts = 0;
+	m_numFaceVarying = 0;
+	const std::vector<int> &v = m_vertsPerCurve->readable();
+	for( size_t i=0; i<v.size(); i++ )
+	{
+		if( m_periodic )
+		{
+			m_numFaceVarying += numSegments( i );
+		}
+		else
+		{
+			m_numFaceVarying += numSegments( i ) + 1;
+		}
+
+		m_numVerts += v[i];
+	}
 }
 
 void CurvesPrimitive::render( RendererPtr renderer ) const

@@ -56,6 +56,7 @@ class CurvesPrimitive : public Primitive
 		ConstIntVectorDataPtr verticesPerCurve() const;
 		const CubicBasisf &basis() const;
 		bool periodic() const;
+		void setTopology( ConstIntVectorDataPtr verticesPerCurve, const CubicBasisf &basis, bool periodic );
 
 		virtual void render( RendererPtr renderer ) const;
 		/// Follows the RenderMan specification for variable sizes.

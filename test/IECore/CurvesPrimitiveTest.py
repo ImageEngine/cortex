@@ -141,6 +141,32 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.FaceVarying, 0 ), 2 )
 		self.assertEqual( c.numSegments( 0 ), 1 )
 
+	def testSetTopology( self ) :
+
+		c = CurvesPrimitive( IntVectorData( [ 4 ] ), CubicBasisf.bSpline(), True )
+
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Vertex ), 4 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Varying ), 4 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 4 )
+		
+		newVertsPerCurve = IntVectorData( [ 4, 4 ] )
+		c.setTopology( newVertsPerCurve, CubicBasisf.bezier(), False )
+		
+		self.assertEqual( c.verticesPerCurve(), newVertsPerCurve )
+		self.assertEqual( c.basis(), CubicBasisf.bezier() )
+		self.assertEqual( c.periodic(), False )
+		
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Uniform ), 2 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Varying ), 4 )
+		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 4 )
+		
+		newVertsPerCurve.append( 10 )
+		self.assertEqual( c.verticesPerCurve(), IntVectorData( [ 4, 4 ] ) )
+		
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/IECore/data/curves.cob" ) :
