@@ -33,6 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/TypedPrimitiveParameter.h"
+#include "IECore/MotionPrimitive.h"
+#include "IECore/Primitive.h"
+#include "IECore/ImagePrimitive.h"
+#include "IECore/MeshPrimitive.h"
+#include "IECore/CurvesPrimitive.h"
+#include "IECore/PointsPrimitive.h"
 
 namespace IECore
 {

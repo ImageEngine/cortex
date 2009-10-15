@@ -36,15 +36,16 @@
 #define IE_CORE_TYPEDPRIMITIVEPARAMETER_H
 
 #include "IECore/TypedObjectParameter.h"
-#include "IECore/MotionPrimitive.h"
-#include "IECore/Primitive.h"
-#include "IECore/ImagePrimitive.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/PointsPrimitive.h"
 
 namespace IECore
 {
+
+IE_CORE_FORWARDDECLARE( MotionPrimitive )
+IE_CORE_FORWARDDECLARE( Primitive )
+IE_CORE_FORWARDDECLARE( ImagePrimitive )
+IE_CORE_FORWARDDECLARE( MeshPrimitive )
+IE_CORE_FORWARDDECLARE( CurvesPrimitive )
+IE_CORE_FORWARDDECLARE( PointsPrimitive )
 
 typedef TypedObjectParameter<ImagePrimitive> ImagePrimitiveParameter;
 typedef TypedObjectParameter<MotionPrimitive> MotionPrimitiveParameter;
