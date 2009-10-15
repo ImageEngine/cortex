@@ -61,7 +61,6 @@ void bindMeshPrimitiveEvaluator()
 
 	{
 		scope ms( m );
-		typedef class_< MeshPrimitiveEvaluator::Result, MeshPrimitiveEvaluator::ResultPtr, bases< PrimitiveEvaluator::Result >, boost::noncopyable > ResultPyClass;
 
 		RefCountedClass<MeshPrimitiveEvaluator::Result, PrimitiveEvaluator::Result>( "Result" )
 			.def( "triangleIndex", &MeshPrimitiveEvaluator::Result::triangleIndex )
