@@ -53,6 +53,7 @@ class CurvesPrimitive : public Primitive
 
 		IE_CORE_DECLAREOBJECT( CurvesPrimitive, Primitive );
 
+		size_t numCurves() const;
 		ConstIntVectorDataPtr verticesPerCurve() const;
 		const CubicBasisf &basis() const;
 		bool periodic() const;

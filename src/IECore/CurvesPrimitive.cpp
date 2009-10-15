@@ -143,6 +143,11 @@ void CurvesPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_vertsPerCurve );
 }
 
+size_t CurvesPrimitive::numCurves() const
+{
+	return m_vertsPerCurve->readable().size();
+}
+
 ConstIntVectorDataPtr CurvesPrimitive::verticesPerCurve() const
 {
 	return m_vertsPerCurve;

@@ -47,24 +47,28 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( c.basis(), CubicBasisf.linear() )
 		self.assertEqual( c.periodic(), False )
 		self.assertEqual( c.keys(), [] )
+		self.assertEqual( c.numCurves(), 0 )
 
 		c = CurvesPrimitive( IntVectorData( [ 2 ] ) )
 		self.assertEqual( c.verticesPerCurve(), IntVectorData( [ 2 ] ) )
 		self.assertEqual( c.basis(), CubicBasisf.linear() )
 		self.assertEqual( c.periodic(), False )
 		self.assertEqual( c.keys(), [] )
+		self.assertEqual( c.numCurves(), 1 )
 
 		c = CurvesPrimitive( IntVectorData( [ 4 ] ), CubicBasisf.bSpline() )
 		self.assertEqual( c.verticesPerCurve(), IntVectorData( [ 4 ] ) )
 		self.assertEqual( c.basis(), CubicBasisf.bSpline() )
 		self.assertEqual( c.periodic(), False )
 		self.assertEqual( c.keys(), [] )
+		self.assertEqual( c.numCurves(), 1 )
 
 		c = CurvesPrimitive( IntVectorData( [ 4 ] ), CubicBasisf.bSpline(), True )
 		self.assertEqual( c.verticesPerCurve(), IntVectorData( [ 4 ] ) )
 		self.assertEqual( c.basis(), CubicBasisf.bSpline() )
 		self.assertEqual( c.periodic(), True )
 		self.assertEqual( c.keys(), [] )
+		self.assertEqual( c.numCurves(), 1 )
 
 		i = IntVectorData( [ 4 ] )
 		p = V3fVectorData( [ V3f( 0 ), V3f( 1 ), V3f( 2 ), V3f( 3 ) ] )
@@ -157,6 +161,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( c.verticesPerCurve(), newVertsPerCurve )
 		self.assertEqual( c.basis(), CubicBasisf.bezier() )
 		self.assertEqual( c.periodic(), False )
+		self.assertEqual( c.numCurves(), 2 )
 		
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Uniform ), 2 )
