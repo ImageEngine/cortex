@@ -347,6 +347,7 @@ void bindTypeId()
 		.value( "FaceAreaOp", FaceAreaOpTypeId )
 		.value( "CurvesMergeOp", CurvesMergeOpTypeId )
 		.value( "CurvesPrimitiveOp", CurvesPrimitiveOpTypeId )
+		.value( "CurvesPrimitiveEvaluator", CurvesPrimitiveEvaluatorTypeId )
 	;
 }
 

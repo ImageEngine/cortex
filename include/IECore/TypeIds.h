@@ -345,6 +345,7 @@ enum TypeId
 	FaceAreaOpTypeId = 302,
 	CurvesMergeOpTypeId = 303,
 	CurvesPrimitiveOpTypeId = 304,
+	CurvesPrimitiveEvaluatorTypeId = 305,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

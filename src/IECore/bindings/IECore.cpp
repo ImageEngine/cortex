@@ -252,6 +252,7 @@
 #include "IECore/bindings/IFFHairReaderBinding.h"
 #include "IECore/bindings/FaceAreaOpBinding.h"
 #include "IECore/bindings/CurvesMergeOpBinding.h"
+#include "IECore/bindings/CurvesPrimitiveEvaluatorBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -494,6 +495,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindIFFHairReader();
 	bindFaceAreaOp();
 	bindCurvesMergeOp();
+	bindCurvesPrimitiveEvaluator();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
