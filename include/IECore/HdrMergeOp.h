@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,34 +32,57 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MATH_INL
-#define IECORE_MATH_INL
+#ifndef IE_CORE_HDRMERGEOP_H
+#define IE_CORE_HDRMERGEOP_H
+
+#include "IECore/Op.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/NumericParameter.h"
 
 namespace IECore
 {
 
-/// Returns -1 for negative numbers, 1 for positive, and 0 for 0.
-template<typename T>
-int sign( T x )
-{
-	return x < T( 0 ) ? -1 : ( x > T( 0 ) ? 1 : 0 );
-}
+IE_CORE_FORWARDDECLARE( ObjectParameter )
 
-template<typename T>
-T smoothstep( T v0, T v1, T v )
+/// The HdrMergeOp merges a set of images with different exposures into a single HDR image.
+//\todo Take in consideration Alpha channel from input images.
+class HdrMergeOp : public Op
 {
-	T x = (v-v0)/(v1-v0);
-	if ( x > T(0) )
-	{
-		if ( x < T(1) )
-		{
-			return (T(3)-T(2)*x)*x*x;
-		}
-		return T(1);
-	}
-	return T(0);
-}
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPED( HdrMergeOp, Op );
+
+		HdrMergeOp();
+		virtual ~HdrMergeOp();
+
+		/// The Parameter for the group with input images.
+		ObjectParameterPtr inputGroupParameter();
+		ConstObjectParameterPtr inputGroupParameter() const;
+
+		FloatParameterPtr exposureStepParameter();
+		ConstFloatParameterPtr exposureStepParameter() const;
+
+		FloatParameterPtr exposureAdjustmentParameter();
+		ConstFloatParameterPtr exposureAdjustmentParameter() const;
+
+		Box2fParameterPtr windowingParameter();
+		ConstBox2fParameterPtr windowingParameter() const;
+
+	protected :
+
+		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+
+	private :
+
+		ObjectParameterPtr m_inputGroupParameter;
+		FloatParameterPtr m_exposureStepParameter;
+		FloatParameterPtr m_exposureAdjustmentParameter;
+		Box2fParameterPtr m_windowingParameter;
+
+};
+
+IE_CORE_DECLAREPTR( HdrMergeOp );
 
 } // namespace IECore
 
-#endif // IECORE_MATH_INL
+#endif // IE_CORE_HDRMERGEOP_H

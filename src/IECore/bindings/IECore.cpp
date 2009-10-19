@@ -253,6 +253,7 @@
 #include "IECore/bindings/FaceAreaOpBinding.h"
 #include "IECore/bindings/CurvesMergeOpBinding.h"
 #include "IECore/bindings/CurvesPrimitiveEvaluatorBinding.h"
+#include "IECore/bindings/HdrMergeOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -496,6 +497,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindFaceAreaOp();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
+	bindHdrMergeOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

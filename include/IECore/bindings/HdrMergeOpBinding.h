@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,34 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MATH_INL
-#define IECORE_MATH_INL
+#ifndef IECOREPYTHON_HDRMERGEOPBINDING_H
+#define IECOREPYTHON_HDRMERGEOPBINDING_H
 
 namespace IECore
 {
-
-/// Returns -1 for negative numbers, 1 for positive, and 0 for 0.
-template<typename T>
-int sign( T x )
-{
-	return x < T( 0 ) ? -1 : ( x > T( 0 ) ? 1 : 0 );
+void bindHdrMergeOp();
 }
 
-template<typename T>
-T smoothstep( T v0, T v1, T v )
-{
-	T x = (v-v0)/(v1-v0);
-	if ( x > T(0) )
-	{
-		if ( x < T(1) )
-		{
-			return (T(3)-T(2)*x)*x*x;
-		}
-		return T(1);
-	}
-	return T(0);
-}
-
-} // namespace IECore
-
-#endif // IECORE_MATH_INL
+#endif // IECOREPYTHON_HDRMERGEOPBINDING_H

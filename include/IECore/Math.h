@@ -46,6 +46,10 @@ namespace IECore
 template<typename T>
 int sign( T x );
 
+/// Computes smoothstep function from Ken Perlin's original noise implementation.
+template<typename T>
+T smoothstep( T v0, T v1, T x );
+
 } // namespace IECore
 
 #include "IECore/Math.inl"

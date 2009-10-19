@@ -348,6 +348,7 @@ void bindTypeId()
 		.value( "CurvesMergeOp", CurvesMergeOpTypeId )
 		.value( "CurvesPrimitiveOp", CurvesPrimitiveOpTypeId )
 		.value( "CurvesPrimitiveEvaluator", CurvesPrimitiveEvaluatorTypeId )
+		.value( "HdrMergeOp", HdrMergeOpTypeId )
 	;
 }
 
