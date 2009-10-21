@@ -1001,7 +1001,7 @@ if doConfigure :
 		riEnv.Alias( "install", riHeaderInstall )
 		riEnv.Alias( "installRI", riHeaderInstall )
 
-		rslHeaders = glob.glob( "rsl/IECoreRI/*.h" )
+		rslHeaders = glob.glob( "rsl/IECoreRI/*.h" ) + glob.glob( "rsl/IECoreRI/*.inl" )
 		rslHeaderInstall = riEnv.Install( "$INSTALL_RSL_HEADER_DIR/IECoreRI", rslHeaders )
 		riEnv.AddPostAction( "$INSTALL_RSL_HEADER_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riEnv, riEnv["INSTALL_RSL_HEADER_DIR"] ) )
 		riEnv.Alias( "install", rslHeaderInstall )
