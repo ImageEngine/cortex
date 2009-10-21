@@ -43,11 +43,19 @@ namespace IECore
 
 /// Returns a list of FileSequence objects representing all the sequences in names.
 /// names is just a list of arbitrary strings, which may or may not represent files
-/// on disk.
+/// on disk. The returned sequences have at least 2 elements.
 void findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences );
 
-/// Generates all sequences residing in given directory in the form of a list of FileSequences.
+/// Returns a list of FileSequence objects representing all the sequences in names.
+/// names is just a list of arbitrary strings, which may or may not represent files
+/// on disk. The returned sequences have at least the minSequenceSize elements.
+void findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize );
+
+/// Generates all sequences with at least 2 files residing in given directory in the form of a list of FileSequences.
 void ls( const std::string &path, std::vector< FileSequencePtr > &sequences );
+
+/// Generates all sequences with at least minSequenceSize elements residing in given directory in the form of a list of FileSequences.
+void ls( const std::string &path, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize );
 
 /// Attempts to find a sequnece matching the given sequence template (e.g. with at least one '#' character).
 void ls( const std::string &sequencePath, FileSequencePtr &sequence );

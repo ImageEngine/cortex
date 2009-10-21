@@ -53,7 +53,7 @@
 
 using namespace IECore;
 
-void IECore::findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences )
+void IECore::findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize )
 {
 	sequences.clear();
 
@@ -131,8 +131,8 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 			std::vector< FrameList::Frame > expandedFrameList;
 			frameList->asList( expandedFrameList );
 
-			/// remove any sequences with less than two files
-			if ( expandedFrameList.size() >= 2 )
+			/// remove any sequences with less than the given minimum.
+			if ( expandedFrameList.size() >= minSequenceSize )
 			{
 				std::string frameTemplate;
 				for ( PaddingToFramesMap::key_type i = 0; i < padding; i++ )
@@ -151,7 +151,13 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 	}
 }
 
-void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequences )
+void IECore::findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences )
+{
+	/// ignore any sequences with less than two files
+	findSequences( names, sequences, 2 );
+}
+
+void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize )
 {
 	sequences.clear();
 
@@ -164,8 +170,14 @@ void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequen
 			files.push_back( it->leaf() );
 		}
 
-		findSequences( files, sequences );
+		findSequences( files, sequences, minSequenceSize );
 	 }
+}
+
+void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequences )
+{
+	/// ignore any sequences with less than two files
+	ls( path, sequences, 2 );
 }
 
 void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence )
