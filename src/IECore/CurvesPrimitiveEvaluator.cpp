@@ -72,10 +72,19 @@ T CurvesPrimitiveEvaluator::Result::primVar( const PrimitiveVariable &primVar, c
 		case PrimitiveVariable::Vertex :
 			{
 				const vector<T> &d = static_cast<TypedData<vector<T> > *>( primVar.data.get() )->readable();
-				return	(T)( coefficients[0] * d[m_vertexDataIndices[0]] +
+				
+				if ( m_linear )
+				{
+					return	(T)( coefficients[0] * d[m_vertexDataIndices[0]] +
+						coefficients[1] * d[m_vertexDataIndices[1]] );
+				}
+				else
+				{
+					return	(T)( coefficients[0] * d[m_vertexDataIndices[0]] +
 						coefficients[1] * d[m_vertexDataIndices[1]] +
 						coefficients[2] * d[m_vertexDataIndices[2]] +
 						coefficients[3] * d[m_vertexDataIndices[3]] );
+				}
 			}
 		case PrimitiveVariable::Varying :
 		case PrimitiveVariable::FaceVarying :
@@ -190,7 +199,7 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 		m_vertexDataIndices[3] = o + ( ( i + 3 ) % numVertices );
 		
 		m_varyingDataIndices[0] = evaluator->m_varyingDataOffsets[m_curveIndex] + segment;
-		m_varyingDataIndices[0] = evaluator->m_varyingDataOffsets[m_curveIndex] + ( segment % numSegments );
+		m_varyingDataIndices[1] = evaluator->m_varyingDataOffsets[m_curveIndex] + ( segment % numSegments );
 	}
 	else
 	{
@@ -245,6 +254,7 @@ PrimitiveEvaluator::ResultPtr CurvesPrimitiveEvaluator::createResult() const
 {
 	Result *result = new Result;
 	result->m_p = m_p;
+	result->m_linear = m_curvesPrimitive->basis() == CubicBasisf::linear();
 	return result;
 }
 

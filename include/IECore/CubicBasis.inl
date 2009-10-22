@@ -168,10 +168,10 @@ const CubicBasis<T> &CubicBasis<T>::linear()
 {
 	static CubicBasis<T> m(
 		MatrixType(
-			 0,  0, -1,  1,
-			 0,  0,  1,  0,
 			 0,  0,  0,  0,
-			 0,  0,  0,  0
+			 0,  0,  0,  0,
+			-1,  1,  0,  0,
+			 1,  0,  0,  0
 		),
 		1
 	);

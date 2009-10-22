@@ -93,6 +93,7 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 				unsigned m_vertexDataIndices[4];
 				unsigned m_varyingDataIndices[2];
 				PrimitiveVariable m_p;
+				bool m_linear;
 				
 		};
 		IE_CORE_DECLAREPTR( Result );

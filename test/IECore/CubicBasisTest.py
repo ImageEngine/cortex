@@ -138,6 +138,18 @@ class CubicTest( unittest.TestCase ) :
 		b = IECore.CubicBasisf.bezier()
 		bb = eval( repr( b ) )
 		self.assertEqual( b, bb )
+		
+	def testLinearCoefficients( self ) :
+		
+		b = CubicBasisf.linear()
+		for i in range( 0, 100 ) :
+			t = i / 99.0
+			c = b.coefficients( t )
+			
+			self.assertAlmostEqual( c[0], 1-t )
+			self.assertAlmostEqual( c[1], t )
+			self.assertAlmostEqual( c[2], 0 )
+			self.assertAlmostEqual( c[3], 0 )
 
 if __name__ == "__main__":
     unittest.main()
