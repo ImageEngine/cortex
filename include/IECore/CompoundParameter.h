@@ -110,6 +110,8 @@ class CompoundParameter : public Parameter
 		/// Removes the parameter with the given name. Throws an Exception if no
 		/// such named parameter exists.
 		void removeParameter( const std::string &name );
+		/// Removes all child parameters.
+		void clearParameters();
 		/// Gives access to the parameters which are members of this compound in
 		/// a form which maps from parameter names to parameters.
 		/// The map itself cannot be modified (the parameters are fixed) but the values

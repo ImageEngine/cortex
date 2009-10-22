@@ -856,6 +856,25 @@ class TestCompoundParameter( unittest.TestCase ) :
 		self.assertEqual( p.parameterPath( p["n"]["i"] ), [ "n", "i" ] )
 		self.assertEqual( p.parameterPath( p["n"]["j"]["k"] ), [ "n", "j", "k" ] )
 
+	def testClearParameters( self ) :
+	
+		a = CompoundParameter( "a", "a desc",
+			members = [
+				StringParameter( "b", "b desc", "test 1 ok!"),
+				StringParameter( "d", "d desc", "test 2 failed!"),
+			]
+		)
+		
+		self.assertEqual( len( a ), 2 )
+		
+		a.clearParameters()
+		self.assertEqual( len( a ), 0 )
+		self.assertEqual( a.keys(), [] )
+		self.assertEqual( a.values(), [] )
+				
+		self.assertRaises( Exception, a.__getitem__, "b" )
+		self.assertRaises( Exception, a.__getitem__, "d" )
+			
 class TestValidatedStringParameter( unittest.TestCase ) :
 
 	def test( self ) :

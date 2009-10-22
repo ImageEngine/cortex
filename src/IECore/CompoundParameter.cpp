@@ -291,6 +291,14 @@ void CompoundParameter::removeParameter( const std::string &name )
 	removeParameter( it->second );
 }
 
+void CompoundParameter::clearParameters()
+{
+	while( m_parameters.size() )
+	{
+		removeParameter( m_parameters[0] );
+	}
+}
+
 const CompoundParameter::ParameterMap &CompoundParameter::parameters() const
 {
 	return m_namesToParameters;
