@@ -52,6 +52,8 @@ namespace IECore
 /// much more flexible. However, without using intermodule_holder
 /// we get crashes at program termination, and using it we get gcc
 /// crashes during compilation (with gcc 4.0.2).
+/// \threading Constructing an instance of Interned is not threadsafe,
+/// this really needs to be addressed.
 template<typename T, typename Hash=Hash<T> >
 class Interned
 {
