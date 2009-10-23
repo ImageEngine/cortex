@@ -131,6 +131,9 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		////////////////////////////////////////////////////////////////////////////////////////
 		//@{
 		bool pointAtV( unsigned curveIndex, float v, const PrimitiveEvaluator::ResultPtr &result ) const;
+		/// Returns the length of the given curve from vStart to vEnd.
+		/// Returns 0.0f if inappropriate parameters are given.
+		float curveLength( unsigned curveIndex, float vStart=0.0f, float vEnd=1.0f ) const;
 		//@}
 
 	private :

@@ -56,9 +56,16 @@ void bindCurvesPrimitiveEvaluator()
 {
 	scope s = RunTimeTypedClass<CurvesPrimitiveEvaluator>()
 		.def( init<CurvesPrimitivePtr>() )
-		.def( "pointAtV", &pointAtV )	
+		.def( "pointAtV", &pointAtV )
+		.def( "curveLength", &CurvesPrimitiveEvaluator::curveLength,
+			(
+				arg( "curveIndex" ),
+				arg( "vStart" ) = 0.0f,
+				arg( "vEnd" ) = 1.0f
+			)
+		)
 	;
-
+	
 	RefCountedClass<CurvesPrimitiveEvaluator::Result, PrimitiveEvaluator::Result>( "Result" )
 		.def( "curveIndex", &CurvesPrimitiveEvaluator::Result::curveIndex )
 	;

@@ -305,11 +305,68 @@ int CurvesPrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 
 bool CurvesPrimitiveEvaluator::pointAtV( unsigned curveIndex, float v, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	if( curveIndex > m_verticesPerCurve.size() || v < 0.0f || v > 1.0f )
+	if( curveIndex >= m_verticesPerCurve.size() || v < 0.0f || v > 1.0f )
 	{
 		return false;
 	}
 	Result *typedResult = static_cast<Result *>( result.get() );
 	typedResult->init( curveIndex, v, this );
 	return true;
+}
+
+float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, float vEnd ) const
+{
+	if( curveIndex >= m_verticesPerCurve.size() || vStart >= vEnd || vStart < 0.0f || vStart > 1.0f || vEnd < 0.0f || vEnd > 1.0f )
+	{
+		return 0.0f;
+	}
+	
+	float samples = m_curvesPrimitive->numSegments( curveIndex ) * 10.0f;
+	float vStep = ( vEnd - vStart ) / samples;
+	float length = 0.0f;
+	Imath::V3f current( 0, 0, 0 );
+	
+	Result typedResult;
+	typedResult.m_p = m_p;
+	typedResult.m_linear = m_curvesPrimitive->basis() == CubicBasisf::linear();
+	typedResult.init( curveIndex, vStart, this );
+	Imath::V3f previous = typedResult.point();
+	
+	if ( typedResult.m_linear )
+	{
+		float firstV = 0.0f;
+		float lastV = 1.0f;
+		vStep = 1.0f / m_curvesPrimitive->numSegments( curveIndex );
+		
+		while ( firstV <= vStart )
+		{
+			firstV += vStep;
+		}
+		while ( lastV >= vEnd )
+		{
+			lastV -= vStep;
+		}
+		
+		for ( float v = firstV; v <= vEnd; v = ( v == lastV ) ? vEnd : v + vStep )
+		{
+			typedResult.init( curveIndex, v, this );
+			
+			current = typedResult.point();
+			length += ( current - previous ).length();
+			previous = current;
+		}
+		
+		return length;
+	}
+	
+	for ( float v = vStart + vStep; v <= vEnd; v += vStep )
+	{
+		typedResult.init( curveIndex, v, this );
+		
+		current = typedResult.point();
+		length += ( current - previous ).length();
+		previous = current;
+	}
+ 	
+	return length;
 }

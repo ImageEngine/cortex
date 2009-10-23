@@ -40,7 +40,7 @@ import IECore
 
 class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
-	def runPointAtVTest( self, curvesPrimitive, expectedPositions=None, visualTest=False, printPoints=False ) :
+	def runPointAtVTest( self, curvesPrimitive, expectedPositions=None, expectedLengths=None, visualTest=False, printPoints=False ) :
 	
 		e = IECore.CurvesPrimitiveEvaluator( curvesPrimitive )
 		r = e.createResult()
@@ -60,7 +60,17 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			self.assertEqual( len( p ), len( expectedPositions ) )
 			for i in range( 0, len( p ) ) :
 				self.failUnless( p[i].equalWithAbsError( expectedPositions[i], 0.00001 ) )
-
+		
+		if expectedLengths :
+			
+			self.assertEqual( curvesPrimitive.numCurves(), len( expectedLengths ) )
+			linearNonPeriodic = ( curvesPrimitive.basis() == IECore.CubicBasisf.linear() ) and not curvesPrimitive.periodic()
+			for i in range( 0, curvesPrimitive.numCurves() ) :
+				if linearNonPeriodic :
+					self.assertEqual( e.curveLength( i ), expectedLengths[i] )
+				else :
+					self.assertAlmostEqual( e.curveLength( i ), expectedLengths[i], 5 )
+		
 		if printPoints :
 		
 			print repr( p ).replace( "),", "),\n" )
@@ -166,7 +176,87 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			IECore.V3f( 1.83333, 0.833333, 0 )
 		] )
 		
-		self.runPointAtVTest( c, expectedPositions=expected, visualTest=False, printPoints=False )
+		lengths = IECore.FloatVectorData( [ 2.1398146 ] )
+		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+	
+	def test3SegmentBSplineDoubledEndpoints( self ) :
+
+		v = IECore.V3f
+		c = IECore.CurvesPrimitive(
+		
+			IECore.IntVectorData( [ 8 ] ),
+			IECore.CubicBasisf.bSpline(),
+			False,
+			IECore.V3fVectorData(
+				[
+					v( 0, 1, 0 ),
+					v( 0, 1, 0 ),
+					v( 0, 0, 0 ),
+					v( 1, 0, 0 ),
+					v( 1, 1, 0 ),
+					v( 2, 1, 0 ),
+					v( 2, 0, 0 ),
+					v( 2, 0, 0 )
+				]
+			)
+		)
+		
+		expected = IECore.V3fVectorData( [ 
+			 IECore.V3f( 0, 0.833333, 0 ),
+			 IECore.V3f( 0.00017708, 0.777461, 0 ),
+			 IECore.V3f( 0.00141664, 0.713301, 0 ),
+			 IECore.V3f( 0.00478117, 0.642979, 0 ),
+			 IECore.V3f( 0.0113331, 0.568619, 0 ),
+			 IECore.V3f( 0.0221351, 0.492347, 0 ),
+			 IECore.V3f( 0.0382494, 0.416288, 0 ),
+			 IECore.V3f( 0.0607386, 0.342566, 0 ),
+			 IECore.V3f( 0.0906652, 0.273306, 0 ),
+			 IECore.V3f( 0.129092, 0.210634, 0 ),
+			 IECore.V3f( 0.177076, 0.156671, 0 ),
+			 IECore.V3f( 0.234776, 0.112939, 0 ),
+			 IECore.V3f( 0.300338, 0.0796196, 0 ),
+			 IECore.V3f( 0.371638, 0.0567125, 0 ),
+			 IECore.V3f( 0.44655, 0.0442177, 0 ),
+			 IECore.V3f( 0.52295, 0.0421352, 0 ),
+			 IECore.V3f( 0.598712, 0.0504651, 0 ),
+			 IECore.V3f( 0.671711, 0.0692073, 0 ),
+			 IECore.V3f( 0.739824, 0.0983618, 0 ),
+			 IECore.V3f( 0.800923, 0.137929, 0 ),
+			 IECore.V3f( 0.852931, 0.187885, 0 ),
+			 IECore.V3f( 0.89553, 0.247327, 0 ),
+			 IECore.V3f( 0.930691, 0.314207, 0 ),
+			 IECore.V3f( 0.960539, 0.386399, 0 ),
+			 IECore.V3f( 0.987201, 0.461779, 0 ),
+			 IECore.V3f( 1.0128, 0.538221, 0 ),
+			 IECore.V3f( 1.03946, 0.613601, 0 ),
+			 IECore.V3f( 1.06931, 0.685793, 0 ),
+			 IECore.V3f( 1.10447, 0.752673, 0 ),
+			 IECore.V3f( 1.14707, 0.812115, 0 ),
+			 IECore.V3f( 1.19908, 0.862071, 0 ),
+			 IECore.V3f( 1.26018, 0.901638, 0 ),
+			 IECore.V3f( 1.32829, 0.930793, 0 ),
+			 IECore.V3f( 1.40129, 0.949535, 0 ),
+			 IECore.V3f( 1.47705, 0.957865, 0 ),
+			 IECore.V3f( 1.55345, 0.955782, 0 ),
+			 IECore.V3f( 1.62836, 0.943288, 0 ),
+			 IECore.V3f( 1.69966, 0.92038, 0 ),
+			 IECore.V3f( 1.76522, 0.887061, 0 ),
+			 IECore.V3f( 1.82292, 0.843329, 0 ),
+			 IECore.V3f( 1.87091, 0.789366, 0 ),
+			 IECore.V3f( 1.90933, 0.726694, 0 ),
+			 IECore.V3f( 1.93926, 0.657435, 0 ),
+			 IECore.V3f( 1.96175, 0.583712, 0 ),
+			 IECore.V3f( 1.97786, 0.507653, 0 ),
+			 IECore.V3f( 1.98867, 0.431381, 0 ),
+			 IECore.V3f( 1.99522, 0.357021, 0 ),
+			 IECore.V3f( 1.99858, 0.286699, 0 ),
+			 IECore.V3f( 1.99982, 0.222539, 0 ),
+			 IECore.V3f( 2, 0.166667, 0 ) ] )
+		
+		lengths = IECore.FloatVectorData( [ 3.61808 ] )
+		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
 	
 	def test2Curve3SegmentBSpline( self ) :
 
@@ -297,7 +387,9 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			IECore.V3f( 1.83333, 1.83333, 0 )
 		] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, visualTest=False, printPoints=False )
+		lengths = IECore.FloatVectorData( [ 2.1398146, 2.1398146 ] )
+		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
 
 	def testPeriodicBSpline( self ) :
 
@@ -370,9 +462,10 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			IECore.V3f( 0.166667, 0.166667, 0 )
 		] )
 
+		lengths = IECore.FloatVectorData( [ 2.917539119 ] )
 		
-		self.runPointAtVTest( c, expectedPositions=expected, visualTest=False, printPoints=False )
-		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+	
 	def test2CurvePeriodicBSpline( self ) :
 
 		v = IECore.V3f
@@ -498,8 +591,10 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			IECore.V3f( 0.166667, 1.16667, 0 )
 		] )
 		
-		self.runPointAtVTest( c, expectedPositions=expected, visualTest=False, printPoints=False )	
+		lengths = IECore.FloatVectorData( [ 2.917539119, 2.917539119 ] )
 		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+	
 	def test3SegmentLinear( self ) :
 
 		v = IECore.V3f
@@ -571,7 +666,87 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			 IECore.V3f( 2, 0.102041, 0 ),
 			 IECore.V3f( 2, 0, 0 ) ] )
 		
-		self.runPointAtVTest( c, expectedPositions=expected, visualTest=False, printPoints=False )
+		lengths = IECore.FloatVectorData( [ 5.0 ] )
+		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+	
+	def test3SegmentLinearDoubledEndpoints( self ) :
+
+		v = IECore.V3f
+		c = IECore.CurvesPrimitive(
+		
+			IECore.IntVectorData( [ 8 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[
+					v( 0, 1, 0 ),
+					v( 0, 1, 0 ),
+					v( 0, 0, 0 ),
+					v( 1, 0, 0 ),
+					v( 1, 1, 0 ),
+					v( 2, 1, 0 ),
+					v( 2, 0, 0 ),
+					v( 2, 0, 0 )
+				]
+			)
+		)
+		
+		expected = IECore.V3fVectorData( [
+			 IECore.V3f( 0, 1, 0 ),
+			 IECore.V3f( 0, 1, 0 ),
+			 IECore.V3f( 0, 1, 0 ),
+			 IECore.V3f( 0, 1, 0 ),
+			 IECore.V3f( 0, 1, 0 ),
+			 IECore.V3f( 0, 1, 0 ),
+			 IECore.V3f( 0, 1, 0 ),
+			 IECore.V3f( 0, 1, 0 ),
+			 IECore.V3f( 0, 0.857143, 0 ),
+			 IECore.V3f( 0, 0.714286, 0 ),
+			 IECore.V3f( 0, 0.571429, 0 ),
+			 IECore.V3f( 0, 0.428571, 0 ),
+			 IECore.V3f( 0, 0.285714, 0 ),
+			 IECore.V3f( 0, 0.142857, 0 ),
+			 IECore.V3f( 0, 0, 0 ),
+			 IECore.V3f( 0.142857, 0, 0 ),
+			 IECore.V3f( 0.285714, 0, 0 ),
+			 IECore.V3f( 0.428571, 0, 0 ),
+			 IECore.V3f( 0.571429, 0, 0 ),
+			 IECore.V3f( 0.714286, 0, 0 ),
+			 IECore.V3f( 0.857143, 0, 0 ),
+			 IECore.V3f( 1, 0, 0 ),
+			 IECore.V3f( 1, 0.142857, 0 ),
+			 IECore.V3f( 1, 0.285714, 0 ),
+			 IECore.V3f( 1, 0.428571, 0 ),
+			 IECore.V3f( 1, 0.571429, 0 ),
+			 IECore.V3f( 1, 0.714286, 0 ),
+			 IECore.V3f( 1, 0.857143, 0 ),
+			 IECore.V3f( 1, 1, 0 ),
+			 IECore.V3f( 1.14286, 1, 0 ),
+			 IECore.V3f( 1.28571, 1, 0 ),
+			 IECore.V3f( 1.42857, 1, 0 ),
+			 IECore.V3f( 1.57143, 1, 0 ),
+			 IECore.V3f( 1.71429, 1, 0 ),
+			 IECore.V3f( 1.85714, 1, 0 ),
+			 IECore.V3f( 2, 1, 0 ),
+			 IECore.V3f( 2, 0.857143, 0 ),
+			 IECore.V3f( 2, 0.714286, 0 ),
+			 IECore.V3f( 2, 0.571429, 0 ),
+			 IECore.V3f( 2, 0.428572, 0 ),
+			 IECore.V3f( 2, 0.285714, 0 ),
+			 IECore.V3f( 2, 0.142857, 0 ),
+			 IECore.V3f( 2, 0, 0 ),
+			 IECore.V3f( 2, 0, 0 ),
+			 IECore.V3f( 2, 0, 0 ),
+			 IECore.V3f( 2, 0, 0 ),
+			 IECore.V3f( 2, 0, 0 ),
+			 IECore.V3f( 2, 0, 0 ),
+			 IECore.V3f( 2, 0, 0 ),
+			 IECore.V3f( 2, 0, 0 ) ] )
+				
+		lengths = IECore.FloatVectorData( [ 5.0 ] )
+		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
 	
 	def test2Curve3SegmentLinear( self ) :
 
@@ -699,8 +874,10 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			 IECore.V3f( 2, 1.20408, 0 ),
 			 IECore.V3f( 2, 1.10204, 0 ),
 			 IECore.V3f( 2, 1, 0 ) ] )
-
-		self.runPointAtVTest( c, expectedPositions=expected, visualTest=False, printPoints=False )
+		
+		lengths = IECore.FloatVectorData( [ 5.0, 5.0 ] )
+		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
 	
 	def test3SegmentPeriodicLinear( self ) :
 
@@ -773,7 +950,9 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			 IECore.V3f( 0.244898, 0.877551, 0 ),
 			 IECore.V3f( 0, 1, 0 ) ] )
 		
-		self.runPointAtVTest( c, expectedPositions=expected, visualTest=False, printPoints=False )
+		lengths = IECore.FloatVectorData( [ 7.23606777 ] )
+		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
 	
 	def test2Curve3SegmentPeriodicLinear( self ) :
 
@@ -902,7 +1081,9 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			 IECore.V3f( 0.244898, 1.87755, 0 ),
 			 IECore.V3f( 0, 2, 0 ) ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, visualTest=False, printPoints=False )
+		lengths = IECore.FloatVectorData( [ 7.23606777, 7.23606777 ] )
+		
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
 
 if __name__ == "__main__":
 	unittest.main()
