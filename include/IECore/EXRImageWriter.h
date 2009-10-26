@@ -36,6 +36,7 @@
 #define IE_CORE_EXRIMAGEWRITER_H
 
 #include "IECore/ImageWriter.h"
+#include "IECore/NumericParameter.h"
 
 // ILM
 #include "OpenEXR/Iex.h"
@@ -64,6 +65,9 @@ class EXRImageWriter : public ImageWriter
 		EXRImageWriter( ObjectPtr object, const std::string & fileName );
 
 		virtual std::string destinationColorSpace() const ;
+
+		IntParameterPtr compressionParameter();
+		ConstIntParameterPtr compressionParameter() const;
 
 	private:
 

@@ -38,6 +38,7 @@
 #include "IECore/ByteOrder.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/CompoundParameter.h"
 #include "IECore/BoxOps.h"
 
 #include "boost/format.hpp"
@@ -69,11 +70,45 @@ EXRImageWriter::EXRImageWriter(ObjectPtr image, const string &fileName)
 
 	m_objectParameter->setValue( image );
 	m_fileNameParameter->setTypedValue( fileName );
+
+	// compression parameter
+	IntParameter::PresetsContainer compressionPresets;
+	compressionPresets.push_back( IntParameter::Preset( "none", NO_COMPRESSION ) );
+	compressionPresets.push_back( IntParameter::Preset( "rle", RLE_COMPRESSION ) );
+	compressionPresets.push_back( IntParameter::Preset( "zips", ZIPS_COMPRESSION ) );
+	compressionPresets.push_back( IntParameter::Preset( "zip", ZIP_COMPRESSION ) );
+	compressionPresets.push_back( IntParameter::Preset( "piz", PIZ_COMPRESSION ) );
+	compressionPresets.push_back( IntParameter::Preset( "pxr24", PXR24_COMPRESSION ) );
+	compressionPresets.push_back( IntParameter::Preset( "b44", B44_COMPRESSION ) );
+	compressionPresets.push_back( IntParameter::Preset( "b44a", B44A_COMPRESSION ) );
+
+	IntParameterPtr compressionParameter = new IntParameter(
+	        "compression",
+	        "EXR compression method",
+	        PIZ_COMPRESSION,
+	        NO_COMPRESSION,
+	        NUM_COMPRESSION_METHODS - 1,
+	        compressionPresets,
+	        true
+	);
+
+	parameters()->addParameter( compressionParameter );
+
 }
 
 std::string EXRImageWriter::destinationColorSpace() const
 {
 	return "linear";
+}
+
+IntParameterPtr EXRImageWriter::compressionParameter()
+{
+	return parameters()->parameter< IntParameter >( "compression" );
+}
+
+ConstIntParameterPtr EXRImageWriter::compressionParameter() const
+{
+	return parameters()->parameter< IntParameter >( "compression" );
 }
 
 void EXRImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow) const
@@ -86,8 +121,8 @@ void EXRImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 
 	try
 	{
-		/// \todo Add parameters for compression, etc
-		Header header(width, height, 1, Imath::V2f(0.0, 0.0), 1, INCREASING_Y, PIZ_COMPRESSION);
+		Header header(width, height, 1, Imath::V2f(0.0, 0.0), 1, INCREASING_Y, 
+			static_cast<Compression>(compressionParameter()->getNumericValue()) );
 		header.dataWindow() = dataWindow;
 		header.displayWindow() = image->getDisplayWindow();
 
