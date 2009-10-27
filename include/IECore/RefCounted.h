@@ -67,6 +67,9 @@ typedef boost::intrusive_ptr< const TYPENAME > Const ## TYPENAME ## Ptr; \
 	IE_CORE_DECLAREPTR( TYPENAME )											\
 
 /// A simple class to count references.
+/// \todo Disallow construction on the heap by having a private destructor - do we
+/// need to do this for all derived classes as well?
+/// \todo Disallow copy construction by inheriting from boost::noncopyable.
 class RefCounted
 {
 	public:
