@@ -1367,6 +1367,7 @@ if doConfigure :
 		mayaTestEnv.Alias( "testMaya", mayaTest )
 		
 		mayaPythonExecutable = "mayapy"
+		mayaPythonTestEnv["ENV"]["PYTHONPATH"] = mayaPythonTestEnv["ENV"]["PYTHONPATH"] + ":contrib/IECoreGL/python"
 		
 		mayaPythonTest = mayaPythonTestEnv.Command( "test/IECoreMaya/resultsPython.txt", mayaPythonModule, mayaPythonExecutable + " $TEST_MAYA_SCRIPT" )
 		NoCache( mayaPythonTest )
