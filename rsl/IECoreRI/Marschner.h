@@ -71,18 +71,18 @@ color ieMarschner( varying vector eye; varying vector light; uniform float refra
 	float cosLight = cos(light[1]);
 	float finalScale = invSqrCosRelativeTheta*cosLight;
 
-	uniform float rWidth = 5; 
+	uniform float rWidth = 5;
 	float MR = ieMarschnerM( shiftR, widthR, rWidth, averageTheta );
 	float MTT = ieMarschnerM( shiftTT, widthTT, rWidth/2, averageTheta );
 	float MTRT = ieMarschnerM( shiftTRT, widthTRT, rWidth*2, averageTheta );
 
-	color NR = ieMarschnerNP( absorption, light, 0, refraction, etaPerp, etaParal, relativeAzimuth );
+	color NR = ieMarschnerNP( absorption, light, 0, refraction, etaPerp, etaParal, ieMarschnerTargetAngle(0,relativeAzimuth) );
 	outR = MR*NR*finalScale;
 
-	color NTT = ieMarschnerNP( absorption, light, 1, refraction, etaPerp, etaParal, relativeAzimuth );
+	color NTT = ieMarschnerNP( absorption, light, 1, refraction, etaPerp, etaParal, ieMarschnerTargetAngle(1,relativeAzimuth) );
 	outTT = MTT*NTT*finalScale;
 
-	color NTRT = ieMarschnerNTRT( absorption, light, refractionTRT, etaPerpTRT, etaParalTRT, relativeAzimuth, causticLimit, causticWidth, glintScale, causticFade );
+	color NTRT = ieMarschnerNTRT( absorption, light, refractionTRT, etaPerpTRT, etaParalTRT, ieMarschnerTargetAngle(2,relativeAzimuth), causticLimit, causticWidth, glintScale, causticFade );
 	outTRT = MTRT*NTRT*finalScale;
  
 	return outR + outTT + outTRT;

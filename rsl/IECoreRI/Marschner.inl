@@ -170,10 +170,9 @@ color ieMarschnerA( varying color absorption; varying vector light; uniform floa
 	return fresnel * segmentAbsorption;
 }
 
-float ieMarschnerRoots( uniform float p; varying float eta; varying float relativeAzimuth; output varying float targetAngle; output varying float roots[] )
+float ieMarschnerTargetAngle( uniform float p; varying float relativeAzimuth )
 {
-	float rootCount;
-	targetAngle = abs(relativeAzimuth);
+	float targetAngle = abs(relativeAzimuth);
 
 	// set right range to match polynomial representation of the real curve.
 	if ( p != 1 )
@@ -185,6 +184,12 @@ float ieMarschnerRoots( uniform float p; varying float eta; varying float relati
 		// offset center
 		targetAngle += p*PI;
 	}
+	return targetAngle;
+}
+
+float ieMarschnerRoots( uniform float p; varying float eta; varying float targetAngle; output varying float roots[] )
+{
+	float rootCount;
 	// Computes the roots of: o(p,y) - targetAngle = 0
 	// by using the polynomial approximation: o(p,y) = (6pc / PI - 2)y - 8(pc/PI^3)y^3 + pPI where c = asin( 1/eta )^-1
 	uniform float pi3 = PI*PI*PI;
@@ -193,11 +198,10 @@ float ieMarschnerRoots( uniform float p; varying float eta; varying float relati
 	return rootCount;
 }
 
-color ieMarschnerNP( varying color absorption; varying vector light; uniform float p; varying float refraction; varying float etaPerp; varying float etaParal; varying float relativeAzimuth )
+color ieMarschnerNP( varying color absorption; varying vector light; uniform float p; varying float refraction; varying float etaPerp; varying float etaParal; varying float targetAngle )
 {
-	float targetAngle = 0;
 	float roots[3] = { 0,0,0 };
-	float rootCount = ieMarschnerRoots( p, etaPerp, relativeAzimuth, targetAngle, roots );
+	float rootCount = ieMarschnerRoots( p, etaPerp, targetAngle, roots );
 
 	color result = 0;
 	uniform float denomMin = 1e-5;
@@ -218,10 +222,9 @@ color ieMarschnerNP( varying color absorption; varying vector light; uniform flo
 	return result;
 }
 
-color ieMarschnerNTRT( varying color absorption; varying vector light; varying float refraction; varying float etaPerp; varying float etaParal; varying float relativeAzimuth; uniform float causticLimit; uniform float causticWidth; uniform float glintScale; uniform float causticFade )
+color ieMarschnerNTRT( varying color absorption; varying vector light; varying float refraction; varying float etaPerp; varying float etaParal; varying float targetAngle; uniform float causticLimit; uniform float causticWidth; uniform float glintScale; uniform float causticFade )
 {
 	float dH, t, hc, Oc1, Oc2;
-	float targetAngle = 0;
 	if ( etaPerp < 2 )
 	{
 		float ddexitAngle;
@@ -251,7 +254,7 @@ color ieMarschnerNTRT( varying color absorption; varying vector light; varying f
 	float causticRight = ieGaussian( a, b, c, targetAngle - Oc2 );
 	color glintAbsorption = ieMarschnerA( absorption, light, 2, asin(hc), refraction, etaPerp, etaParal );
 
-	color result = ieMarschnerNP( absorption, light, 2, refraction, etaPerp, etaParal, relativeAzimuth );
+	color result = ieMarschnerNP( absorption, light, 2, refraction, etaPerp, etaParal, targetAngle );
 	result *= 1 - t*causticLeft/causticCenter;
 	result *= 1 - t*causticRight/causticCenter;
 	result += glintAbsorption*t*glintScale*dH*(causticLeft + causticRight);
