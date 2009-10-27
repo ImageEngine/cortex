@@ -62,6 +62,11 @@ MeshPrimitive::MeshPrimitive( ConstIntVectorDataPtr verticesPerFace, ConstIntVec
 	}
 }
 
+size_t MeshPrimitive::numFaces() const
+{
+	return m_verticesPerFace->readable().size();
+}
+
 ConstIntVectorDataPtr MeshPrimitive::verticesPerFace() const
 {
 	return m_verticesPerFace;

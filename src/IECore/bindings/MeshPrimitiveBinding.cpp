@@ -58,6 +58,10 @@ namespace IECore
 		RunTimeTypedClass<MeshPrimitive>()
 			.def( init<>() )
 			.def( init<IntVectorDataPtr, IntVectorDataPtr, optional<const std::string &, V3fVectorDataPtr> >() )
+			.def( "numFaces", &MeshPrimitive::numFaces )
+			/// \todo I'd rather see these bound as functions rather than properties so they match the C++ interface.
+			/// I think this is particularly important for verticesPerFace and vertexIds as it's pretty unintuitive that a property
+			/// should return a copy. This is something we need to be more consistent about throughout cortex.
 			.add_property( "verticesPerFace", &verticesPerFace, "A copy of the mesh's list of vertices per face." )
 			.add_property( "vertexIds", &vertexIds, "A copy of the mesh's list of vertex ids." )
 			.add_property( "interpolation", make_function( &MeshPrimitive::interpolation, return_value_policy<copy_const_reference>() ), &MeshPrimitive::setInterpolation )

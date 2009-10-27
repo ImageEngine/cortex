@@ -69,6 +69,7 @@ class MeshPrimitive : public Primitive
 		/// These functions allow access to get and set topology after construction.
 		/////////////////////////////////////////////////////////////////////////////
 		//@{
+		size_t numFaces() const;
 		ConstIntVectorDataPtr verticesPerFace() const;
 		ConstIntVectorDataPtr vertexIds() const;
 		const std::string &interpolation() const;
@@ -77,7 +78,6 @@ class MeshPrimitive : public Primitive
 		PolygonIterator faceBegin();
 		PolygonIterator faceEnd();
 		//@}
-
 
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
