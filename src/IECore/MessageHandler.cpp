@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -73,9 +73,9 @@ MessageHandlerPtr MessageHandler::popHandler()
 	return h;
 }
 
-MessageHandlerPtr MessageHandler::currentHandler()
+MessageHandler *MessageHandler::currentHandler()
 {
-	return handlerStack()->top();
+	return handlerStack()->top().get();
 }
 
 std::stack<MessageHandlerPtr> *MessageHandler::handlerStack()

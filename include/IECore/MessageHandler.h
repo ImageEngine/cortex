@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,7 +52,6 @@ IE_CORE_DECLAREPTR( MessageHandler );
 /// uniform interface for outputting messages, with the possibility
 /// to implement multiple message handlers appropriate to
 /// specific application contexts.
-/// \todo Thread safety
 class MessageHandler : public RefCounted
 {
 
@@ -72,6 +71,8 @@ class MessageHandler : public RefCounted
 		//! @name Message output
 		/// These functions all output a message via the current
 		/// MessageHandler object.
+		/// \threading These functions are threadsafe provided that
+		/// the current handler's handle() method is also threadsafe.
 		///////////////////////////////////////////////////////
 		//@{
 		/// Output a message to the current handler.
@@ -88,6 +89,8 @@ class MessageHandler : public RefCounted
 		/// previous handler upon exiting that context. At startup
 		/// a single default handler resides on the stack - it
 		/// is an error to try to pop this.
+		/// \threading It is not safe to manipulate the handler stack from
+		/// concurrent threads.
 		///////////////////////////////////////////////////////
 		//@{
 		/// Pushes a new MessageHandler onto the stack. This will
@@ -114,7 +117,7 @@ class MessageHandler : public RefCounted
 	private :
 
 		/// Returns the current handler.
-		static MessageHandlerPtr currentHandler();
+		static MessageHandler *currentHandler();
 		/// Returns the stack of message handlers.
 		static std::stack<MessageHandlerPtr> *handlerStack();
 
