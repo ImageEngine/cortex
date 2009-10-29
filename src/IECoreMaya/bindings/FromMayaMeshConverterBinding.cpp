@@ -49,5 +49,6 @@ void IECoreMaya::bindFromMayaMeshConverter()
 		.def( "normals", &FromMayaMeshConverter::normals )
 		.def( "s", &FromMayaMeshConverter::s )
 		.def( "t", &FromMayaMeshConverter::t )
+		.def( "stIndices", &FromMayaMeshConverter::stIndices )
 	;
 }

@@ -37,6 +37,7 @@ import IECoreMaya
 import unittest
 import MayaUnitTest
 import maya.cmds
+import os.path
 
 class FromMayaMeshConverterTest( unittest.TestCase ) :
 
@@ -185,7 +186,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECore.MeshPrimitive.staticTypeId() )
 		m = converter.convert()
 
-		self.assertEqual( len( m.keys() ), 6 )
+		self.assertEqual( len( m.keys() ), 7 )
 		self.assertEqual( m["Double"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m["Double"].data, IECore.FloatData( 1 ) )
 		self.assertEqual( m["DoubleArray"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
@@ -202,6 +203,26 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		converter["space"].setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
 		m = converter.convert()
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( m.bound() ) )
+
+	def testSharedSTIndices( self ) :
+	
+		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/twoTrianglesWithSharedUVs.ma", force = True, open = True )
+		
+		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
+		
+		self.failUnless( "stIndices" in mesh )
+		self.assertEqual( mesh["stIndices"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["stIndices"].data, IECore.IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
+		
+	def testSplitSTIndices( self ) :
+			
+		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/twoTrianglesWithSplitUVs.ma", force = True, open = True )
+		
+		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
+		
+		self.failUnless( "stIndices" in mesh )
+		self.assertEqual( mesh["stIndices"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["stIndices"].data, IECore.IntVectorData( [ 0, 1, 5, 2, 4, 3 ] ) )	
 
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

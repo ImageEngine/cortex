@@ -74,6 +74,13 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 		IECore::FloatVectorDataPtr s( const MString &uvSet="" ) const;
 		/// Returns just the t for the mesh.
 		IECore::FloatVectorDataPtr t( const MString &uvSet="" ) const;
+		/// Returns the facevarying uv indexes for the specified uv set,
+		/// or the current set if not specified. This can be necessary for
+		/// some algorithms as the facevarying uv data returned from the above
+		/// functions has thrown away the concept of two faces sharing the same
+		/// logical uv at a vertex. By comparing the uv indices this information can be
+		/// obtained.
+		IECore::IntVectorDataPtr stIndices( const MString &uvSet="" ) const;
 
 		//! @name Parameter accessors
 		//////////////////////////////////////////////////////////

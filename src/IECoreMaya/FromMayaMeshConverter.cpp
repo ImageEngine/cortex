@@ -304,6 +304,24 @@ IECore::FloatVectorDataPtr FromMayaMeshConverter::t( const MString &uvSet ) cons
 	return sOrT( uvSet, 1 );
 }
 
+IECore::IntVectorDataPtr FromMayaMeshConverter::stIndices( const MString &uvSet ) const
+{
+	MFnMesh fnMesh( object() );
+	IntVectorDataPtr resultData = new IntVectorData;
+	vector<int> &result = resultData->writable();
+	result.resize( fnMesh.numFaceVertices() );
+	int numPolygons = fnMesh.numPolygons();
+	unsigned int resultIndex = 0;
+	for( int i=0; i<numPolygons; i++ )
+	{
+		for( int j=0; j<fnMesh.polygonVertexCount( i ); j++ )
+		{
+			fnMesh.getPolygonUVid( i, j, result[resultIndex++], &uvSet );
+		}
+	}
+	return resultData;
+}
+
 IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnMesh fnMesh( object );
@@ -356,12 +374,14 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	{
 		FloatVectorDataPtr sData = s( uvSets[i] );
 		FloatVectorDataPtr tData = t( uvSets[i] );
+		IntVectorDataPtr stIndicesData = stIndices( uvSets[i] );
 		if( uvSets[i]==currentUVSet )
 		{
 			if( m_st->getTypedValue() )
 			{
 				result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
 				result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+				result->variables["stIndices"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
 			}
 		}
 		else
@@ -370,8 +390,10 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 			{
 				MString sName = uvSets[i] + "_s";
 				MString tName = uvSets[i] + "_t";
+				MString indicesName = uvSets[i] + "Indices";
 				result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
 				result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+				result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
 			}
 		}
 	}
