@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,34 +33,101 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 import math
 
 class MeshTangentsOpTest( unittest.TestCase ) :
-
-	def testSphere( self ) :
-
-		mesh = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
-		self.assert_( not "uTangent" in mesh )
-		self.assert_( not "vTangent" in mesh )
-		self.assert_( not "sTangent" in mesh )
-		self.assert_( not "tTangent" in mesh )
-
-		res = MeshTangentsOp()(
+	
+	def testSimpleTriangleWithNoIndices( self ) :
+	
+		verticesPerFace = IECore.IntVectorData( [ 3 ] )
+		vertexIds = IECore.IntVectorData( [ 0, 1, 2 ] )
+		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 0, 1, 0 ) ] )
+		s = IECore.FloatVectorData( [ 0, 1, 0 ] )
+		t = IECore.FloatVectorData( [ 0, 0, 1 ] )
+		
+		mesh = IECore.MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
+		mesh["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, s )
+		mesh["t"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, t )
+	
+		mesh = IECore.MeshTangentsOp() (
+			input = mesh,
+			uPrimVarName = "s",
+			vPrimVarName = "t",
+			uTangentPrimVarName = "sTangent",
+			vTangentPrimVarName = "tTangent",
+			uvIndicesPrimVarName = ""
+		)
+		
+		self.assert_( "sTangent" in mesh )
+		self.assert_( "tTangent" in mesh )
+		self.assert_( mesh.arePrimitiveVariablesValid() )
+		
+		self.assertEqual( mesh["sTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["tTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )	
+		
+		for v in mesh["sTangent"].data :
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
+		for v in mesh["tTangent"].data :
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 1, 0 ), 0.000001 ) )
+					
+	def testJoinedUVEdges( self ) :
+			
+		mesh = IECore.ObjectReader( "test/IECore/data/cobFiles/twoTrianglesWithSharedUVs.cob" ).read()
+		self.assert_( mesh.arePrimitiveVariablesValid() )
+		
+		mesh = IECore.MeshTangentsOp() (
 			input = mesh,
 			uPrimVarName = "s",
 			vPrimVarName = "t",
 			uTangentPrimVarName = "sTangent",
 			vTangentPrimVarName = "tTangent",
 		)
+		
+		self.assert_( not "uTangent" in mesh )
+		self.assert_( not "vTangent" in mesh )
+		self.assert_( "sTangent" in mesh )
+		self.assert_( "tTangent" in mesh )
+		self.assert_( mesh.arePrimitiveVariablesValid() )
+		
+		self.assertEqual( mesh["sTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["tTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )	
+		
+		for v in mesh["sTangent"].data :
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
+		for v in mesh["tTangent"].data :
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 0, -1 ), 0.000001 ) )	
+			
+	def testSplitAndOpposedUVEdges( self ) :
+	
+		mesh = IECore.ObjectReader( "test/IECore/data/cobFiles/twoTrianglesWithSplitAndOpposedUVs.cob" ).read()
+	
+		mesh = IECore.MeshTangentsOp() (
+			input = mesh,
+			uPrimVarName = "s",
+			vPrimVarName = "t",
+			uTangentPrimVarName = "sTangent",
+			vTangentPrimVarName = "tTangent",
+		)
+		
+		self.assert_( not "uTangent" in mesh )
+		self.assert_( not "vTangent" in mesh )
+		self.assert_( "sTangent" in mesh )
+		self.assert_( "tTangent" in mesh )
+		self.assert_( mesh.arePrimitiveVariablesValid() )
+		
+		self.assertEqual( mesh["sTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["tTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 
-		self.assert_( not "uTangent" in res )
-		self.assert_( not "vTangent" in res )
-		self.assert_( "sTangent" in res )
-		self.assert_( "tTangent" in res )
-
-		self.assert_( res.arePrimitiveVariablesValid() )
-
-
+		for v in mesh["sTangent"].data[:3] :
+			self.failUnless( v.equalWithAbsError( IECore.V3f( -1, 0, 0 ), 0.000001 ) )
+		for v in mesh["sTangent"].data[3:] :
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
+			
+		for v in mesh["tTangent"].data[:3] :
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 0, 1 ), 0.000001 ) )
+		for v in mesh["tTangent"].data[3:] :
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 0, -1 ), 0.000001 ) )		
+		
 if __name__ == "__main__":
     unittest.main()

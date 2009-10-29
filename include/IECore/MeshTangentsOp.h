@@ -54,6 +54,9 @@ class MeshTangentsOp : public MeshPrimitiveOp
 
 		StringParameterPtr vPrimVarNameParameter();
 		ConstStringParameterPtr vPrimVarNameParameter() const;
+		
+		StringParameterPtr uvIndicesPrimVarNameParameter();
+		ConstStringParameterPtr uvIndicesPrimVarNameParameter() const;
 
 		StringParameterPtr uTangentPrimVarNameParameter();
 		ConstStringParameterPtr uTangentPrimVarNameParameter() const;

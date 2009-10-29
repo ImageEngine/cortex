@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <cassert>
+#include <algorithm>
 
 #include "boost/format.hpp"
 
@@ -60,6 +61,15 @@ MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( staticTypeName(), "Calculate
 		"vPrimVarName description",
 		"t"
 	);
+	
+	StringParameterPtr uvIndicesPrimVarNameParameter = new StringParameter(
+		"uvIndicesPrimVarName",
+		"This primitive variable must be FaceVarying IntVectorData, and store indices for the uvs referenced "
+		"in the u and v primvars. See IECoreMaya::FromMayaMeshConverter for an example of getting such indices. "
+		"You may set this to the empty string if no indices are available, but this will mean that the tangents will "
+		"be incorrect across uv boundaries.",
+		"stIndices"
+	);
 
 	m_uTangentPrimVarNameParameter = new StringParameter(
 		"uTangentPrimVarName",
@@ -75,6 +85,7 @@ MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( staticTypeName(), "Calculate
 
 	parameters()->addParameter( m_uPrimVarNameParameter );
 	parameters()->addParameter( m_vPrimVarNameParameter );
+	parameters()->addParameter( uvIndicesPrimVarNameParameter );
 	parameters()->addParameter( m_uTangentPrimVarNameParameter );
 	parameters()->addParameter( m_vTangentPrimVarNameParameter );
 }
@@ -103,6 +114,16 @@ ConstStringParameterPtr MeshTangentsOp::vPrimVarNameParameter() const
 	return m_vPrimVarNameParameter;
 }
 
+StringParameterPtr MeshTangentsOp::uvIndicesPrimVarNameParameter()
+{
+	return parameters()->parameter<StringParameter>( "uvIndicesPrimVarName" );
+}
+
+ConstStringParameterPtr MeshTangentsOp::uvIndicesPrimVarNameParameter() const
+{
+	return parameters()->parameter<StringParameter>( "uvIndicesPrimVarName" );
+}
+		
 StringParameterPtr MeshTangentsOp::uTangentPrimVarNameParameter()
 {
 	return m_uTangentPrimVarNameParameter;
@@ -127,8 +148,8 @@ struct MeshTangentsOp::CalculateTangents
 {
 	typedef void ReturnType;
 
-	CalculateTangents( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds, ConstFloatVectorDataPtr uData, ConstFloatVectorDataPtr vData )
-		:	m_vertsPerFace( vertsPerFace ), m_vertIds( vertIds ), m_uData( uData ), m_vData( vData )
+	CalculateTangents( const vector<int> &vertsPerFace, const vector<int> &vertIds, const vector<float> &u, const vector<float> &v, const vector<int> &uvIndices )
+		:	m_vertsPerFace( vertsPerFace ), m_vertIds( vertIds ), m_u( u ), m_v( v ), m_uvIds( uvIndices )
 	{
 
 	}
@@ -139,46 +160,44 @@ struct MeshTangentsOp::CalculateTangents
 		typedef typename T::ValueType VecContainer;
 		typedef typename VecContainer::value_type Vec;
 
-		const IntVectorData::ValueType::size_type numFaces = m_vertsPerFace->readable().size();
-
-		const typename T::ValueType &points = data->readable();
-		const IntVectorData::ValueType &vertIds = m_vertIds->readable();
-
-		typename T::Ptr uTangentData = new T();
-		m_uTangentData = uTangentData;
-		typename T::Ptr vTangentData = new T();
-		m_vTangentData = vTangentData;
-
-		VecContainer &uTangent = uTangentData->writable();
-		VecContainer &vTangent = vTangentData->writable();
-
-		uTangent.resize( points.size(), Vec( 0 ) );
-		vTangent.resize( points.size(), Vec( 0 ) );
-
-		typename T::Ptr normalsData = new T;
-		VecContainer &normals = normalsData->writable();
-		normals.resize( points.size(), Vec( 0 ) );
-
-		const int *vertId = &(vertIds[0]);
-		for ( IntVectorData::ValueType::size_type f = 0; f < numFaces; f++ )
+		const VecContainer &points = data->readable();
+		
+		// the uvIndices array is indexed as with any other facevarying data. the values in the
+		// array specify the connectivity of the uvs - where two facevertices have the same index
+		// they are known to be sharing a uv. for each one of these unique indices we compute
+		// the tangents and normal, by accumulating all the tangents and normals for the faces
+		// that reference them. we then take this data and shuffle it back into facevarying
+		// primvars for the mesh.
+		int numUniqueTangents = 1 + *max_element( m_uvIds.begin(), m_uvIds.end() );
+		
+		VecContainer uTangents( numUniqueTangents, Vec( 0 ) );
+		VecContainer vTangents( numUniqueTangents, Vec( 0 ) );
+		VecContainer normals( numUniqueTangents, Vec( 0 ) );
+		
+		for( size_t faceIndex = 0; faceIndex < m_vertsPerFace.size() ; faceIndex++ )
 		{
-			assert( m_vertsPerFace->readable()[f] == 3 );
+			
+			assert( m_vertsPerFace[faceIndex] == 3 );
 
-			assert( f*3 + 2 < m_vertIds->readable().size() );
-			const int &v0 = m_vertIds->readable()[ f*3 + 0 ];
-			const int &v1 = m_vertIds->readable()[ f*3 + 1 ];
-			const int &v2 = m_vertIds->readable()[ f*3 + 2 ];
+			// indices into the facevarying data for this face 
+			size_t fvi0 = faceIndex * 3;
+			size_t fvi1 = fvi0 + 1;
+			size_t fvi2 = fvi1 + 1;
+			assert( fvi2 < m_vertIds.size() );
+			assert( fvi2 < m_u.size() );
+			assert( fvi2 < m_v.size() );
+			
+			// positions for each vertex of this face
+			const Vec &p0 = points[ m_vertIds[ fvi0 ] ];
+			const Vec &p1 = points[ m_vertIds[ fvi1 ] ];
+			const Vec &p2 = points[ m_vertIds[ fvi2 ] ];
 
-			const Vec &p0 = data->readable()[ v0 ];
-			const Vec &p1 = data->readable()[ v1 ];
-			const Vec &p2 = data->readable()[ v2 ];
+			// uv coordinates for each vertex of this face
+			const Imath::V2f uv0( m_u[ fvi0 ], m_v[ fvi0 ] );
+			const Imath::V2f uv1( m_u[ fvi1 ], m_v[ fvi1 ] );
+			const Imath::V2f uv2( m_u[ fvi2 ], m_v[ fvi2 ] );
 
-			assert( f*3 + 2 < m_uData->readable().size() );
-			assert( f*3 + 2 < m_vData->readable().size() );
-			const Imath::V2f uv0( m_uData->readable()[ f*3 + 0 ], m_vData->readable()[ f*3 + 0 ] );
-			const Imath::V2f uv1( m_uData->readable()[ f*3 + 1 ], m_vData->readable()[ f*3 + 1 ] );
-			const Imath::V2f uv2( m_uData->readable()[ f*3 + 2 ], m_vData->readable()[ f*3 + 2 ] );
-
+			// compute tangents and normal for this face
 			const Vec e0 = p1 - p0;
 			const Vec e1 = p2 - p0;
 
@@ -191,42 +210,71 @@ struct MeshTangentsOp::CalculateTangents
 			Vec normal = (p2-p1).cross(p0-p1);
 			normal.normalize();
 
-			for ( unsigned i = 0; i < 3; i++ )
-			{
-				uTangent[*vertId] += tangent;
-				vTangent[*vertId] += bitangent;
-
-				normals[*vertId] += normal;
-
-				vertId++;
-			}
+			// and accumlate them into the computation so far
+			uTangents[ m_uvIds[fvi0] ] += tangent;
+			uTangents[ m_uvIds[fvi1] ] += tangent;
+			uTangents[ m_uvIds[fvi2] ] += tangent;
+			
+			vTangents[ m_uvIds[fvi0] ] += bitangent;
+			vTangents[ m_uvIds[fvi1] ] += bitangent;
+			vTangents[ m_uvIds[fvi2] ] += bitangent;
+			
+			normals[ m_uvIds[fvi0] ] += normal;
+			normals[ m_uvIds[fvi1] ] += normal;
+			normals[ m_uvIds[fvi2] ] += normal;
+			
 		}
 
-		for ( typename T::ValueType::size_type i = 0; i < points.size(); i++ )
+		// normalize and orthogonalize everything
+		for( size_t i = 0; i < uTangents.size(); i++ )
 		{
-			assert( i < uTangentData->readable().size() );
-			assert( i < vTangentData->readable().size() );
-
 			normals[i].normalize();
 
-			uTangent[i].normalize();
-			vTangent[i].normalize();
+			uTangents[i].normalize();
+			vTangents[i].normalize();
 
-			/// Make uTangent/vTangent orthogonal to normal
-			uTangent[i] -= normals[i] * uTangent[i].dot( normals[i] );
-			vTangent[i] -= normals[i] * vTangent[i].dot( normals[i] );
+			// Make uTangent/vTangent orthogonal to normal
+			uTangents[i] -= normals[i] * uTangents[i].dot( normals[i] );
+			vTangents[i] -= normals[i] * vTangents[i].dot( normals[i] );
+		
+			// make things less sinister
+			if( uTangents[i].cross( vTangents[i] ).dot( normals[i] ) < 0.0f )
+			{
+				uTangents[i] *= -1.0f;
+			}
 		}
+		
+		// convert the tangents back to facevarying data and add that to the mesh
+		typename T::Ptr fvUD = new T();
+		typename T::Ptr fvVD = new T();
+		fvUTangentsData = fvUD;
+		fvVTangentsData = fvVD;
+		
+		VecContainer &fvUTangents = fvUD->writable();
+		VecContainer &fvVTangents = fvVD->writable();
+		fvUTangents.resize( m_uvIds.size() );
+		fvVTangents.resize( m_uvIds.size() );
+		
+		for( unsigned i=0; i<m_uvIds.size(); i++ )
+		{
+			fvUTangents[i] = uTangents[m_uvIds[i]];
+			fvVTangents[i] = vTangents[m_uvIds[i]];
+		}
+
 	}
-
-	DataPtr m_uTangentData;
-	DataPtr m_vTangentData;
-
+	
+	// this is the data filled in by operator() above, ready to be added onto the mesh
+	DataPtr fvUTangentsData;
+	DataPtr fvVTangentsData;
+	
 	private :
 
-		ConstIntVectorDataPtr m_vertsPerFace;
-		ConstIntVectorDataPtr m_vertIds;
-		ConstFloatVectorDataPtr m_uData;
-		ConstFloatVectorDataPtr m_vData;
+		const vector<int> &m_vertsPerFace;
+		const vector<int> &m_vertIds;
+		const vector<float> &m_u;
+		const vector<float> &m_v;
+		const vector<int> &m_uvIds;
+		
 };
 
 struct MeshTangentsOp::HandleErrors
@@ -241,21 +289,18 @@ struct MeshTangentsOp::HandleErrors
 
 void MeshTangentsOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
 {
-	PrimitiveVariableMap::const_iterator pvIt = mesh->variables.find( "P" );
-	if( pvIt==mesh->variables.end() || !pvIt->second.data )
-	{
-		throw InvalidArgumentException( "MeshTangentsOp : MeshPrimitive has no \"P\" primitive variable." );
-	}
-
 	if( !mesh->arePrimitiveVariablesValid( ) )
 	{
 		throw InvalidArgumentException( "MeshTangentsOp : MeshPrimitive variables are invalid." );
 	}
-
-	DataPtr pData = pvIt->second.data;
+	
+	DataPtr pData = mesh->variableData<Data>( "P", PrimitiveVariable::Vertex );
+	if( !pData )
+	{
+		throw InvalidArgumentException( "MeshTangentsOp : MeshPrimitive has no Vertex \"P\" primitive variable." );
+	}
 
 	ConstIntVectorDataPtr vertsPerFace = mesh->verticesPerFace();
-
 	for ( IntVectorData::ValueType::const_iterator it = vertsPerFace->readable().begin(); it != vertsPerFace->readable().end(); ++it )
 	{
 		if ( *it != 3 )
@@ -266,64 +311,43 @@ void MeshTangentsOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundO
 
 	const std::string &uPrimVarName = uPrimVarNameParameter()->getTypedValue();
 	const std::string &vPrimVarName = vPrimVarNameParameter()->getTypedValue();
+	const std::string &uvIndicesPrimVarName = uvIndicesPrimVarNameParameter()->getTypedValue();
 
-	PrimitiveVariableMap::const_iterator uIt = mesh->variables.find( uPrimVarName );
-	if ( uIt == mesh->variables.end() )
+	FloatVectorDataPtr uData = mesh->variableData<FloatVectorData>( uPrimVarName, PrimitiveVariable::FaceVarying );
+	if( !uData )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive has no \"%s\" primitive variable."  ) % ( uPrimVarName ) ).str() );
+		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive has no FaceVarying FloatVectorData primitive variable named \"%s\"."  ) % ( uPrimVarName ) ).str() );
 	}
 
-	PrimitiveVariableMap::const_iterator vIt = mesh->variables.find( vPrimVarName );
-	if ( vIt == mesh->variables.end() )
+	FloatVectorDataPtr vData = mesh->variableData<FloatVectorData>( vPrimVarName, PrimitiveVariable::FaceVarying );
+	if( !uData )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive has no \"%s\" primitive variable."  ) % ( vPrimVarName ) ).str() );
+		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive has no FaceVarying FloatVectorData primitive variable named \"%s\"."  ) % ( vPrimVarName ) ).str() );
 	}
 
-	FloatVectorDataPtr uData = runTimeCast< FloatVectorData > ( uIt->second.data );
-	if ( !uData )
+	ConstIntVectorDataPtr uvIndicesData = 0;
+	if( uvIndicesPrimVarName=="" )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive primitive variable \"%s\" is not of type FloatVectorData."  ) % ( uPrimVarName ) ).str() );
+		uvIndicesData = mesh->vertexIds();
 	}
-
-	FloatVectorDataPtr vData = runTimeCast< FloatVectorData > ( vIt->second.data );
-	if ( !uData )
+	else
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive primitive variable \"%s\" is not of type FloatVectorData."  ) % ( vPrimVarName ) ).str() );
+		uvIndicesData = mesh->variableData<IntVectorData>( uvIndicesPrimVarName, PrimitiveVariable::FaceVarying );
+		if( !uvIndicesData )
+		{
+			throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive has no FaceVarying IntVectorData primitive variable named \"%s\"."  ) % ( uvIndicesPrimVarName ) ).str() );
+		}
 	}
-
-	if ( uIt->second.interpolation != PrimitiveVariable::FaceVarying )
-	{
-		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive primitive variable \"%s\" must have FaceVarying interpolation."  ) % ( uPrimVarName ) ).str() );
-	}
-
-	if ( vIt->second.interpolation != PrimitiveVariable::FaceVarying )
-	{
-		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive primitive variable \"%s\" must have FaceVarying interpolation."  ) % ( vPrimVarName ) ).str() );
-	}
-
+	
 	DataCastOpPtr dco = new DataCastOp();
 	dco->targetTypeParameter()->setNumericValue( FloatVectorDataTypeId );
 
-	dco->objectParameter()->setValue( uData );
-	FloatVectorDataPtr uFloatData = runTimeCast< FloatVectorData >( dco->operate() );
-	if ( uFloatData->readable().size() != mesh->variableSize( PrimitiveVariable::FaceVarying  ) )
-	{
-		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive primitive variable \"%s\" must have be of simple numeric type."  ) % ( uPrimVarName ) ).str() );
-	}
-
-	dco->objectParameter()->setValue( vData );
-	FloatVectorDataPtr vFloatData = runTimeCast< FloatVectorData >( dco->operate() );
-	if ( vFloatData->readable().size() != mesh->variableSize( PrimitiveVariable::FaceVarying  ) )
-	{
-		throw InvalidArgumentException( ( boost::format( "MeshTangentsOp : MeshPrimitive primitive variable \"%s\" must have be of simple numeric type."  ) % ( vPrimVarName ) ).str() );
-	}
-
-	CalculateTangents f( vertsPerFace, mesh->vertexIds(), uFloatData, vFloatData );
+	CalculateTangents f( vertsPerFace->readable(), mesh->vertexIds()->readable(), uData->readable(), vData->readable(), uvIndicesData->readable() );
 
 	despatchTypedData<CalculateTangents, TypeTraits::IsVec3VectorTypedData, HandleErrors>( pData, f );
 
-	mesh->variables[ uTangentPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( PrimitiveVariable::Varying, f.m_uTangentData->copy() );
-	mesh->variables[ vTangentPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( PrimitiveVariable::Varying, f.m_vTangentData->copy() );
+	mesh->variables[ uTangentPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( PrimitiveVariable::FaceVarying, f.fvUTangentsData );
+	mesh->variables[ vTangentPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( PrimitiveVariable::FaceVarying, f.fvVTangentsData );
 
 	assert( mesh->arePrimitiveVariablesValid() );
 }
