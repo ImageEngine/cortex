@@ -45,6 +45,7 @@ using namespace boost::python;
 namespace IECore
 {
 
+/// \todo: this should return a tuple rather than a list
 static list children( Group &g )
 {
 	list result;
@@ -55,6 +56,7 @@ static list children( Group &g )
 	return result;
 }
 
+/// \todo: this should return a tuple rather than a list
 static list state( Group &g )
 {
 	list result;
