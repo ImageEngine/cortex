@@ -36,6 +36,8 @@
 
 #include "IECore/Exception.h"
 
+#include "boost/format.hpp"
+
 using namespace IECoreGL;
 
 IE_CORE_DEFINERUNTIMETYPED( NameStateComponent );
@@ -78,7 +80,10 @@ const std::string &NameStateComponent::nameFromGLName( GLuint glName )
 	NameMap::nth_index<1>::type::const_iterator it = index.find( glName );
 	if( it==index.end() )
 	{
-		throw IECore::Exception( "NameStateComponent::nameFromGLName : Invalid glName" );
+		throw IECore::InvalidArgumentException( boost::str(
+				boost::format( "NameStateComponent::nameFromGLName : Invalid glName (%1%)" ) % glName 
+			)
+		);
 	}
 	return it->first.value();
 }
