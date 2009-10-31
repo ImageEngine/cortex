@@ -48,10 +48,9 @@ class TypeIdTest( unittest.TestCase ) :
 		num = 0
 		for i in dir( IECore.TypeId ) :
 
-			if i != "name" and i != "values" and not i.startswith('_') :
-
-				v = getattr( IECore.TypeId, i )
-
+			v = getattr( IECore.TypeId, i )
+			if type( v ) is IECore.TypeId :
+				
 				if v in ids :
 
 					raise RuntimeError ("TypeId for %s is a duplicate of %s" % ( i, ids[v] ) )
