@@ -148,7 +148,7 @@ void FromMayaMeshConverter::constructCommon()
 
 	m_extraST = new BoolParameter(
 		"extraST",
-		"When this is on any additional uv sets are added to the result as primitive variables named \"setName_s\" and \"setName_t\".",
+		"When this is on, all uv sets are added to the result as primitive variables named \"setName_s\" and \"setName_t\".",
 		true,
 		extraSTPresets
 	);
@@ -384,17 +384,15 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 				result->variables["stIndices"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
 			}
 		}
-		else
+		
+		if( m_extraST->getTypedValue() )
 		{
-			if( m_extraST->getTypedValue() )
-			{
-				MString sName = uvSets[i] + "_s";
-				MString tName = uvSets[i] + "_t";
-				MString indicesName = uvSets[i] + "Indices";
-				result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-				result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
-				result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
-			}
+			MString sName = uvSets[i] + "_s";
+			MString tName = uvSets[i] + "_t";
+			MString indicesName = uvSets[i] + "Indices";
+			result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
+			result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+			result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
 		}
 	}
 

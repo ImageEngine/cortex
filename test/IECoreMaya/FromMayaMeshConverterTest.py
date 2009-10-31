@@ -186,7 +186,7 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECore.MeshPrimitive.staticTypeId() )
 		m = converter.convert()
 
-		self.assertEqual( len( m.keys() ), 7 )
+		self.assertEqual( len( m.keys() ), 10 )
 		self.assertEqual( m["Double"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m["Double"].data, IECore.FloatData( 1 ) )
 		self.assertEqual( m["DoubleArray"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
@@ -224,5 +224,35 @@ class FromMayaMeshConverterTest( unittest.TestCase ) :
 		self.assertEqual( mesh["stIndices"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["stIndices"].data, IECore.IntVectorData( [ 0, 1, 5, 2, 4, 3 ] ) )	
 
+	def testExtraSTs( self ) :
+	
+		plane = maya.cmds.polyPlane( ch=False, subdivisionsX=1, subdivisionsY=1 )
+		plane = maya.cmds.listRelatives( plane, shapes=True )[0]
+		
+		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECore.MeshPrimitive.staticTypeId() )
+		m = converter.convert()
+		
+		self.assert_( "s" in m )
+		self.assert_( "t" in m )
+		self.assert_( "stIndices" in m )
+		self.assert_( "map1_s" in m )
+		self.assert_( "map1_t" in m )
+		self.assert_( "map1Indices" in m )
+		
+		maya.cmds.polyUVSet( plane, copy=True, uvSet="map1", newUVSet="map2" )
+		
+		m = converter.convert()
+				
+		self.assert_( "s" in m )
+		self.assert_( "t" in m )
+		self.assert_( "stIndices" in m )
+		self.assert_( "map1_s" in m )
+		self.assert_( "map1_t" in m )
+		self.assert_( "map1Indices" in m )
+		self.assert_( "map2_s" in m )
+		self.assert_( "map2_t" in m )
+		self.assert_( "map2Indices" in m )
+		
+		
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
