@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/filesystem.hpp"
+
 #include "IECoreGL/IECoreGL.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/GLUT.h"
@@ -49,11 +51,17 @@ void IECoreGL::init( bool glAlreadyInitialised )
 	{
 		if( !glAlreadyInitialised )
 		{
-			int argc = 2;
-			// on the mac, glut changes working directory during initialisation
-			// unless you pass the -useWorkingDir option
-			const char *argv[] = { "IECoreGL", "-useWorkingDir" };
-			glutInit( &argc, const_cast<char**>( argv ) );
+			
+			// the mac version of glut changes the current directory during initialisation,
+			// so we have to change it back again ourselves.
+			boost::filesystem::path currentPath = boost::filesystem::current_path();
+			
+				int argc = 1;
+				const char *argv[] = { "IECoreGL" };
+				glutInit( &argc, const_cast<char**>( argv ) );
+			
+			boost::filesystem::current_path( currentPath );
+			
 			/// \todo We're making a window here to make glut initialise a gl context,
 			/// so that glewInit() works. But we should figure out how to initialise
 			/// GL ourselves and avoid the annoying window popping up at the beginning.
