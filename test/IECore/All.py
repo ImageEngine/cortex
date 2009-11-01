@@ -230,5 +230,10 @@ class SplitStream :
 
 		sys.stderr.write( l )
 		self.__f.write( l )
+		
+	def flush( self ) :
+	
+		sys.stderr.flush()
+		self.__f.flush()
 
 unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
