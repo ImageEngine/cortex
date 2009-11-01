@@ -225,6 +225,7 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, b
 
 ImagePrimitivePtr ColorTexture::imagePrimitive() const
 {
+
 	glPushAttrib( mask() );
 
 		bind();
@@ -240,7 +241,7 @@ ImagePrimitivePtr ColorTexture::imagePrimitive() const
 		unsigned int numChannels = 4;
 		vector<float> data( width * height * numChannels );
 
-		glGetTexImage( GL_TEXTURE_2D, 0, internalFormat, GL_FLOAT, &data[0] );
+		glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, &data[0] );
 
 		FloatVectorDataPtr rd = new FloatVectorData();
 		vector<float> &r = rd->writable(); r.resize( width * height );
@@ -253,7 +254,10 @@ ImagePrimitivePtr ColorTexture::imagePrimitive() const
 
 		FloatVectorDataPtr ad = 0;
 		vector<float> *a = 0;
-		if( internalFormat==GL_RGBA )
+		// there are potentially loads of different internal formats which denote alpha.
+		// these are the only ones encountered so far, but it's not a great way of testing
+		// and i can't find another way of doing it.
+		if( internalFormat==GL_RGBA || internalFormat==GL_RGBA8_EXT )
 		{
 			ad = new FloatVectorData();
 			a = &ad->writable(); a->resize( width * height );
@@ -290,5 +294,7 @@ ImagePrimitivePtr ColorTexture::imagePrimitive() const
 
 	glPopAttrib();
 
+	Exception::throwIfError();
+	
 	return image;
 }
