@@ -549,10 +549,41 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		cmds.setAttr( pointValuePlugPath, 2 )
 		
 		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( -2, -2, -2 )] )
+	
+	def testObjectParameterIOProblem( self ) :
+	
+		fnPH = IECoreMaya.FnProceduralHolder.create( "procedural", "image", 1 )
+		p = fnPH.getProcedural()
+		
+		w = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) )
+		image = IECore.ImagePrimitive( w, w )
+		image.createFloatChannel( "Y" )
+		image.createFloatChannel( "A" )
+		p.parameters()["image"].setValue( image )
+		fnPH.setNodeValues()
+		
+		cmds.file( rename = os.getcwd() + "/test/IECoreMaya/dynamicParameters.ma" )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+
+		cmds.file( new = True, force = True )
+		cmds.file( scene, open = True )
+		
+		fnPH = IECoreMaya.FnProceduralHolder( "proceduralShape" )
+		fnPH.setParameterisedValues()
+		p = fnPH.getProcedural()
+				
+		i2 = p.parameters()["image"].getValue()
+		
+		self.assertEqual( p.parameters()["image"].getValue(), image )
 			
 	def tearDown( self ) :
 
-		for f in [ "test/IECoreMaya/reference.ma" , "test/IECoreMaya/referenceMaster.ma", "test/IECoreMaya/dynamicParameters.ma" ] :
+		for f in [
+			"test/IECoreMaya/reference.ma" ,
+			"test/IECoreMaya/referenceMaster.ma",
+			"test/IECoreMaya/dynamicParameters.ma",
+			"test/IECoreMaya/imageProcedural.ma",
+		] :
 
 			if os.path.exists( f ) :
 

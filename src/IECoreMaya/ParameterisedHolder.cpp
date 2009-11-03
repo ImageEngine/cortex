@@ -69,6 +69,7 @@
 #include "IECore/Object.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/ObjectVector.h"
+#include "IECore/ObjectParameter.h"
 
 #include <stdlib.h>
 
@@ -710,6 +711,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 		dirtyParameters().insert( children[i] );
 
 		MPlugArray connectionsFromMe, connectionsToMe;
+		ObjectPtr valueBeforeAttributeRemoval = 0;
 
 		// try to reuse the old attribute if we can
 		MObject attribute = fnDN.attribute( mAttributeName );
@@ -724,10 +726,29 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 				// remove the current attribute and fall through to the create
 				// code
 
+				// remember connections so we can remake them for the new
+				// attribute.
 				MPlug plug( B::thisMObject(), attribute );
 				plug.connectedTo( connectionsFromMe, false, true );
 				plug.connectedTo( connectionsToMe, true, false );
 
+				// remember value so we can set it again for the new attribute.
+				// we only do this for ObjectParameters to work around a maya bug which prevents
+				// ObjectParameterHandler::update from working correctly. after saving and loading
+				// a file, maya has somehow transformed the generic attribute into a typed attribute,
+				// so we have to accept that the ObjectParameterHandler will fail and then just
+				// stick the value back in once the attribute is remade.
+				if( children[i]->isInstanceOf( IECore::ObjectParameter::staticTypeId() ) )
+				{
+					MObject plugData = plug.asMObject();
+					MFnPluginData fnData( plugData );
+					ObjectData *data = dynamic_cast<ObjectData *>( fnData.data() );
+					if( data )
+					{
+						valueBeforeAttributeRemoval = data->getObject();
+					}
+				}
+				
 				fnDN.removeAttribute( attribute );
 			}
 		}
@@ -811,7 +832,14 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 				}
 			}
 
-			/// Set the value of the attribute, in case it differs from the default
+			// restore any parameter value from a deleted-and-remade attribute if it is still valid for the
+			// parameter.
+			if( valueBeforeAttributeRemoval && children[i]->valueValid( valueBeforeAttributeRemoval ) )
+			{
+				children[i]->setValue( valueBeforeAttributeRemoval );
+			}
+
+			/// and set the value of the attribute, in case it differs from the default
 			MPlug plug( B::thisMObject(), attribute );
 			s = IECoreMaya::Parameter::setValue( children[i], plug );
 			if( !s )
