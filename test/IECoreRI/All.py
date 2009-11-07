@@ -61,6 +61,7 @@ from PatchMeshTest import *
 from RIBWriterTest import *
 from ParameterisedProcedural import *
 from MotionTest import MotionTest
+from PythonProceduralTest import PythonProceduralTest
 
 if IECore.withFreeType() :
 

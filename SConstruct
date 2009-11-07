@@ -361,6 +361,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_RMANPROCEDURAL_NAME",
+	"The name under which to install the renderman procedurals.",
+	"$INSTALL_PREFIX/rmanProcedurals/$IECORE_NAME",
+)
+
+o.Add(
 	"INSTALL_RSL_HEADER_DIR",
 	"The directory in which to install RSL headers.",
 	"$INSTALL_PREFIX/rsl",
@@ -936,6 +942,8 @@ riPythonEnv = pythonEnv.Copy( IECORE_NAME = "IECoreRI" )
 riPythonEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riPythonEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
+riPythonProceduralEnv = riPythonEnv.Copy( IECORE_NAME = "iePython" )
+
 if doConfigure :
 
 	c = Configure( riEnv )
@@ -985,6 +993,7 @@ if doConfigure :
 		riEnv.Prepend( LIBPATH = [ "./lib" ] )
 		riEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 	
+		# library
 		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riSources )
 		riEnv.Depends( coreInstallSync, riLibrary )
 		riLibraryInstall = riEnv.Install( os.path.dirname( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riLibrary )
@@ -995,18 +1004,32 @@ if doConfigure :
 		riEnv.Alias( "installRI", riLibraryInstall )
 		riEnv.Alias( "installLib", [ riLibraryInstall ] )
 
+		# headers
 		riHeaderInstall = riEnv.Install( "$INSTALL_HEADER_DIR/IECoreRI", riHeaders )
 		riEnv.Depends( riHeaderInstall, coreInstallSync )
 		riEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riEnv, riEnv["INSTALL_HEADER_DIR"] ) )
 		riEnv.Alias( "install", riHeaderInstall )
 		riEnv.Alias( "installRI", riHeaderInstall )
 
+		# python procedural
+		riPythonProcedural = riPythonProceduralEnv.SharedLibrary( "src/rmanProcedurals/python/" + os.path.basename( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ), "src/rmanProcedurals/python/Procedural.cpp" )
+		riPythonProceduralEnv.Depends( coreInstallSync, riPythonProcedural )
+		riPythonProceduralInstall = riEnv.Install( os.path.dirname( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ), riPythonProcedural )
+		riPythonProceduralEnv.NoCache( riPythonProceduralInstall )
+		riPythonProceduralEnv.Depends( riPythonProceduralInstall, coreInstallSync )		
+		riPythonProceduralEnv.AddPostAction( riPythonProceduralInstall, lambda target, source, env : makeLibSymLinks( riPythonProceduralEnv, libNameVar="INSTALL_RMANPROCEDURAL_NAME" ) )
+		riPythonProceduralEnv.Alias( "install", riPythonProceduralInstall )
+		riPythonProceduralEnv.Alias( "installRI", riPythonProceduralInstall )
+		riPythonProceduralForTest = riPythonProceduralEnv.Command( "src/rmanProcedurals/python/python.so", riPythonProcedural, Copy( "$TARGET", "$SOURCE" ) )
+
+		# rsl headers
 		rslHeaders = glob.glob( "rsl/IECoreRI/*.h" ) + glob.glob( "rsl/IECoreRI/*.inl" )
 		rslHeaderInstall = riEnv.Install( "$INSTALL_RSL_HEADER_DIR/IECoreRI", rslHeaders )
 		riEnv.AddPostAction( "$INSTALL_RSL_HEADER_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riEnv, riEnv["INSTALL_RSL_HEADER_DIR"] ) )
 		riEnv.Alias( "install", rslHeaderInstall )
 		riEnv.Alias( "installRI", rslHeaderInstall )
 		
+		# python module
 		riPythonEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
@@ -1028,8 +1051,9 @@ if doConfigure :
 			riPythonEnv.Alias( "install", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
 			riPythonEnv.Alias( "installRI", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
 
-		Default( [ riLibrary, riPythonModule ] )
+		Default( [ riLibrary, riPythonModule, riPythonProcedural ] )
 		
+		# tests
 		riTestEnv = testEnv.Copy()
 
 		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
@@ -1041,7 +1065,7 @@ if doConfigure :
 		
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " $TEST_RI_SCRIPT" )
 		NoCache( riTest )
-		riTestEnv.Depends( riTest, corePythonModule )
+		riTestEnv.Depends( riTest, [ corePythonModule + riPythonProceduralForTest ] )
 		riTestEnv.Depends( riTest, glob.glob( "test/IECoreRI/*.py" ) )
 		riTestEnv.Alias( "testRI", riTest )
 

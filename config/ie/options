@@ -200,8 +200,9 @@ if PYTHON_LINK_FLAGS=="" :
 	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion 
 
 # find 3delight
+dlVersion = getOption( "DL_VERSION", os.environ["DL_VERSION"] )
 try :
-	dlReg = IEEnv.registry["apps"]["3delight"][getOption( "DL_VERSION", os.environ["DL_VERSION"] )][platform]
+	dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
 	RMAN_ROOT = dlReg["location"]
 	os.environ["DELIGHT_CONF"] = "/software/config/3delight"
 	
@@ -276,6 +277,7 @@ else :
 
 INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_RSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/rsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
+INSTALL_RMANPROCEDURAL_NAME = "$INSTALL_PREFIX/tools/3delight/" + dlVersion + "/procedurals/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 INSTALL_DOC_DIR = "$INSTALL_PREFIX/doc/tools/lib/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 
 # set up a post install script to make op wrappers for IECore
