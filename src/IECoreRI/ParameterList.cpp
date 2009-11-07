@@ -217,44 +217,50 @@ void ParameterList::appendParameter( const std::string &name, IECore::ConstDataP
 	{
 		const IECore::Splineff &spline = static_cast<const SplineffData *>( d.get() )->readable();
 		size_t size = spline.points.size();
-		// put all the positions in one array parameter
-		m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
-		m_tokens.push_back( m_strings.rbegin()->c_str() );
-		m_values.push_back( &(m_floats[0]) + m_floats.size() );
-		for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+		if ( size )
 		{
-			m_floats.push_back( it->first );
-		}
-		// and put all the values in another
-		m_strings.push_back( boost::str( boost::format( "float %sValues[%d]" ) % name % size ) );
-		m_tokens.push_back( m_strings.rbegin()->c_str() );
-		m_values.push_back( &(m_floats[0]) + m_floats.size() );
-		for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
-		{
-			m_floats.push_back( it->second );
+			// put all the positions in one array parameter
+			m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
+			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_values.push_back( &(m_floats[0]) + m_floats.size() );
+			for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+			{
+				m_floats.push_back( it->first );
+			}
+			// and put all the values in another
+			m_strings.push_back( boost::str( boost::format( "float %sValues[%d]" ) % name % size ) );
+			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_values.push_back( &(m_floats[0]) + m_floats.size() );
+			for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+			{
+				m_floats.push_back( it->second );
+			}
 		}
 	}
 	else if( typeId==SplinefColor3fDataTypeId )
 	{
 		const IECore::SplinefColor3f &spline = static_cast<const SplinefColor3fData *>( d.get() )->readable();
 		size_t size = spline.points.size();
-		// put all the positions in one array parameter
-		m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
-		m_tokens.push_back( m_strings.rbegin()->c_str() );
-		m_values.push_back( &(m_floats[0]) + m_floats.size() );
-		for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+		if ( size )
 		{
-			m_floats.push_back( it->first );
-		}
-		// and put all the values in another
-		m_strings.push_back( boost::str( boost::format( "color %sValues[%d]" ) % name % size ) );
-		m_tokens.push_back( m_strings.rbegin()->c_str() );
-		m_values.push_back( &(m_floats[0]) + m_floats.size() );
-		for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
-		{
-			m_floats.push_back( it->second[0] );
-			m_floats.push_back( it->second[1] );
-			m_floats.push_back( it->second[2] );
+			// put all the positions in one array parameter
+			m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
+			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_values.push_back( &(m_floats[0]) + m_floats.size() );
+			for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+			{
+				m_floats.push_back( it->first );
+			}
+			// and put all the values in another
+			m_strings.push_back( boost::str( boost::format( "color %sValues[%d]" ) % name % size ) );
+			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_values.push_back( &(m_floats[0]) + m_floats.size() );
+			for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
+			{
+				m_floats.push_back( it->second[0] );
+				m_floats.push_back( it->second[1] );
+				m_floats.push_back( it->second[2] );
+			}
 		}
 	}
 	else
