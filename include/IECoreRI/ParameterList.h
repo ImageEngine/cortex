@@ -82,7 +82,7 @@ class ParameterList
 
 	private :
 
-		const char *type( const std::string &name, IECore::ConstDataPtr d, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
+		const char *type( const std::string &name, IECore::ConstDataPtr d, bool &isArray, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
 		const void *value( IECore::ConstDataPtr d );
 
 		// Call one of these to reserve enough space in the arrays below to represent all the parameters.

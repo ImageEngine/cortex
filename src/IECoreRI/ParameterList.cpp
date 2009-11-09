@@ -89,12 +89,14 @@ void **ParameterList::values()
 	return (void **)&*(m_values.begin());
 }
 
-const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d, size_t &arraySize, const std::map<std::string, std::string> *typeHints )
+const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d, bool &isArray, size_t &arraySize, const std::map<std::string, std::string> *typeHints )
 {
 	arraySize = 0;
+	isArray = false;
 	switch( d->typeId() )
 	{
 		case V3fVectorDataTypeId :
+			isArray = true;
 			arraySize = static_pointer_cast<const V3fVectorData>( d )->readable().size();
 		case V3fDataTypeId :
 			if( typeHints )
@@ -107,19 +109,23 @@ const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d
 			}
 			return "vector";
 		case Color3fVectorDataTypeId :
+			isArray = true;
 			arraySize = static_pointer_cast<const Color3fVectorData>( d )->readable().size();
 		case Color3fDataTypeId :
 			return "color";
 		case FloatVectorDataTypeId :
+			isArray = true;
 			arraySize = static_pointer_cast<const FloatVectorData>( d )->readable().size();
 		case FloatDataTypeId :
 			return "float";
 		case IntVectorDataTypeId :
+			isArray = true;
 			arraySize = static_pointer_cast<const IntVectorData>( d )->readable().size();
 		case IntDataTypeId :
 		case BoolDataTypeId :
 			return "int";
 		case StringVectorDataTypeId :
+			isArray = true;
 			arraySize = static_pointer_cast<const StringVectorData>( d )->readable().size();
 		case StringDataTypeId :
 			return "string";
@@ -236,6 +242,11 @@ void ParameterList::appendParameter( const std::string &name, IECore::ConstDataP
 				m_floats.push_back( it->second );
 			}
 		}
+		else
+		{
+			msg( Msg::Warning, "ParameterList::appendParameter", format( "Splineff \"%s\" has no points and will be ignored." ) % name );
+			return;
+		}
 	}
 	else if( typeId==SplinefColor3fDataTypeId )
 	{
@@ -262,17 +273,31 @@ void ParameterList::appendParameter( const std::string &name, IECore::ConstDataP
 				m_floats.push_back( it->second[2] );
 			}
 		}
+		else
+		{
+			msg( Msg::Warning, "ParameterList::appendParameter", format( "SplinefColor3f \"%s\" has no points and will be ignored." ) % name );
+			return;
+		}
 	}
 	else
 	{
 		// other types are easier - they map to just a single parameter
+		bool isArray = false;
 		size_t arraySize = 0;
-		const char *t = type( name, d, arraySize, typeHints );
+		const char *t = type( name, d, isArray, arraySize, typeHints );
 		if( t )
 		{
-			if( arraySize )
+			if( isArray )
 			{
-				m_strings.push_back( boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ) );
+				if ( arraySize )
+				{
+					m_strings.push_back( boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ) );
+				}
+				else
+				{
+					msg( Msg::Warning, "ParameterList::appendParameter", format( "Array \"%s\" has zero length and will be ignored." ) % name );
+					return;
+				}
 			}
 			else
 			{
