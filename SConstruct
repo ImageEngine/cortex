@@ -944,6 +944,9 @@ riPythonEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
 riPythonProceduralEnv = riPythonEnv.Copy( IECORE_NAME = "iePython" )
 
+haveRI = False
+riLibs = []
+
 if doConfigure :
 
 	c = Configure( riEnv )
@@ -958,13 +961,14 @@ if doConfigure :
 
 	else :
 	
+		haveRI = True
 		if haveDelight :
-			riEnv.Append( LIBS = [ "3delight" ] )
-			riPythonEnv.Append( LIBS = [ "3delight" ] )
+			riLibs = [ "3delight" ]
 		else :
-			riEnv.Append( LIBS = [ "prman" ] )
-			riPythonEnv.Append( LIBS = [ "prman" ] )
-	
+			riLibs = [ "prman" ]
+		riEnv.Append( LIBS = riLibs )
+		riPythonEnv.Append( LIBS = riLibs )
+		
 		riSources = glob.glob( "src/IECoreRI/*.cpp" )
 		riHeaders = glob.glob( "include/IECoreRI/*.h" ) + glob.glob( "include/IECoreRI/*.inl" )
 		riPythonSources = glob.glob( "src/IECoreRI/bindings/*.cpp" )
@@ -1265,6 +1269,17 @@ if doConfigure :
 		mayaPythonScripts = glob.glob( "python/IECoreMaya/*.py" )
 		mayaMel = glob.glob( "mel/IECoreMaya/*.mel" )
 		mayaPluginSources = [ "src/IECoreMaya/plugin/Plugin.cpp" ]
+
+		# deal with adding or removing renderman bits as necessary
+		if haveRI :
+			mayaEnv.Append( LIBS = riLibs )
+			mayaEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
+			mayaEnv.Append( CPPFLAGS = "-DIECOREMAYA_WITH_RI" )
+			mayaEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
+			mayaEnv.Append( CPPFLAGS = [ "-DIECORERI_RMANPROCEDURAL_NAME=" + os.path.basename( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ) ] )
+			mayaEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		else :
+			mayaSources.remove( "src/IECoreMaya/DelightProceduralCacheCommand.cpp" )
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process

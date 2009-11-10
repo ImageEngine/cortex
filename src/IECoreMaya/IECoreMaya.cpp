@@ -66,6 +66,7 @@
 #include "IECoreMaya/ImageFile.h"
 #include "IECoreMaya/ImagePlaneHolder.h"
 #include "IECoreMaya/ParameterisedHolderSetValueCmd.h"
+#include "IECoreMaya/DelightProceduralCacheCommand.h"
 
 namespace IECoreMaya
 {
@@ -149,6 +150,10 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerCommand( "ieSystemExit", SystemExitCmd::creator );
 
 		s = plugin.registerCommand( "ieParameterisedHolderSetValue", ParameterisedHolderSetValueCmd::creator, ParameterisedHolderSetValueCmd::newSyntax );
+
+#ifdef IECOREMAYA_WITH_RI
+		s = plugin.registerCommand( "ieDelightProceduralCache", DelightProceduralCacheCommand::creator, DelightProceduralCacheCommand::newSyntax );
+#endif
 
 		MStringArray imageFileExtensions;
 		imageFileExtensions.append( "exr" );
