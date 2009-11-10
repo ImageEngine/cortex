@@ -130,9 +130,12 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 
 		return self.fullPathName() + "." + plugName
 
-	## Returns the IECore.Parameter object being represented by the given OpenMaya.MPlug
-	# instance.
+	## Returns the IECore.Parameter object being represented by the given fullPathName
+	# of the maya plug or its OpenMaya.MPlug instance.
 	def plugParameter( self, plug ) :
+
+		if isinstance( plug, str ) or isinstance( plug, unicode ) :
+			plug = StringUtil.plugFromString( plug )
 
 		return _IECoreMaya._parameterisedHolderPlugParameter( self, plug )
 
