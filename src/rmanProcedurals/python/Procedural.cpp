@@ -62,9 +62,14 @@ static void initialise()
 		
 		// load the IECoreRI and IECore modules so people don't have to do that in the string
 		// they pass to be executed. this also means people don't have to worry about which
-		// version to load.
-		string toExecute =  "import IECore\nimport IECoreRI\n";
-		
+		// version to load. also set the dlopen flags to include RTLD_GLOBAL to avoid the dreaded
+		// cross module rtti errors on linux.
+		string toExecute =	"import sys\n"
+							"import ctypes\n"
+							"sys.setdlopenflags( sys.getdlopenflags() | ctypes.RTLD_GLOBAL )\n"
+							"import IECore\n"
+							"import IECoreRI\n";
+							
 		handle<> ignored( PyRun_String( 
 			toExecute.c_str(),
 			Py_file_input, g_mainModuleNamespace.ptr(),
