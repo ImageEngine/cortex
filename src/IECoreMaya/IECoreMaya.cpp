@@ -212,6 +212,10 @@ MStatus uninitialize(MFnPlugin &plugin)
 
 		s = plugin.deregisterCommand( "ieParameterisedHolderSetValue" );
 
+#ifdef IECOREMAYA_WITH_RI
+		s = plugin.deregisterCommand( "ieDelightProceduralCache" );
+#endif
+
 		s = plugin.deregisterData( ObjectData::id );
 
 		s = plugin.deregisterImageFile( "ieImageFile" );
