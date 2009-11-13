@@ -199,15 +199,16 @@ PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 if PYTHON_LINK_FLAGS=="" :
 	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion 
 
-# find 3delight
+# find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
 dlVersion = getOption( "DL_VERSION", os.environ["DL_VERSION"] )
 try :
 	dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
-	RMAN_ROOT = dlReg["location"]
-	os.environ["DELIGHT_CONF"] = "/software/config/3delight"
+	if dlReg["compiler"]==compiler and dlReg["compilerVersion"]==compilerVersion :
+		RMAN_ROOT = dlReg["location"]
+		os.environ["DELIGHT_CONF"] = "/software/config/3delight"
 	
-	# Add ribdepends location to path
-	os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
+		# Add ribdepends location to path
+		os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
 except :
 	pass
 	
