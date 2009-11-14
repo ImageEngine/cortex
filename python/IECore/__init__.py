@@ -98,6 +98,7 @@ from SequenceMergeOp import SequenceMergeOp
 from ImageSequenceCompositeOp import ImageSequenceCompositeOp
 from DateTimeParameterParser import *
 from MotionBlock import MotionBlock
+from SubstitutedDict import SubstitutedDict
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *

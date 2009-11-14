@@ -208,6 +208,7 @@ from IFFHairReader import *
 from FaceAreaOpTest import FaceAreaOpTest
 from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
+from SubstitutedDictTest import SubstitutedDictTest
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *
