@@ -69,7 +69,7 @@ typename TypedData<std::vector<T> >::ConstPtr ImagePrimitive::getChannel( const 
 	return 0;
 }
 
-template<class T>
+template<typename T>
 typename TypedData<std::vector<T> >::Ptr ImagePrimitive::createChannel( const std::string &name )
 {
 	/// This assert enforces the comments regarding permissible channel types in ImagePrimitive.h
@@ -90,6 +90,39 @@ typename TypedData<std::vector<T> >::Ptr ImagePrimitive::createChannel( const st
 
 	return channel;
 }
+
+
+//! @name Creation
+/// Functinos to assist with creation of common types of ImagePrimitives
+template<typename T>
+ImagePrimitivePtr ImagePrimitive::createRGB( const Imath::Color3<T> &fillColor, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow )
+{
+	
+	ImagePrimitivePtr result = new ImagePrimitive( dataWindow, displayWindow );
+
+	typename TypedData<std::vector<T> >::Ptr rData = result->createChannel<T>( "R" );
+	typename TypedData<std::vector<T> >::Ptr gData = result->createChannel<T>( "G" );
+	typename TypedData<std::vector<T> >::Ptr bData = result->createChannel<T>( "B" );
+	
+	std::fill( rData->writable().begin(), rData->writable().end(), fillColor[0] );
+	std::fill( gData->writable().begin(), gData->writable().end(), fillColor[1] );
+	std::fill( bData->writable().begin(), bData->writable().end(), fillColor[2] );
+
+	return result;
+}
+
+template<typename T>
+ImagePrimitivePtr ImagePrimitive::createGreyscale( const T fillValue, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow )
+{
+	ImagePrimitivePtr result = new ImagePrimitive( dataWindow, displayWindow );
+
+	typename TypedData<std::vector<T> >::Ptr yData = result->createChannel<T>( "Y" );
+
+	std::fill( yData->writable().begin(), yData->writable().end(), fillValue );
+
+	return result;
+}
+
 
 }
 

@@ -221,7 +221,63 @@ class TestImagePrimitive( unittest.TestCase ) :
 		i["PP"] = pp
 		self.assertEqual( i.channelValid( "PP" ), False )
 		self.assertEqual( i.getChannel( "PP" ), None )
+	
+	def testConenienceConstructors( self ) :
+		""" Test ImagePrimitive convienience constructors """
+		
+		window1Min = V2i(  0,  0 )
+		window1Max = V2i( 15, 15 )		
+		w1 = Box2i( window1Min, window1Max )
+		
+		window2Min = V2i(  4,  4 )
+		window2Max = V2i( 11, 11 )		
+		w2 = Box2i( window2Min, window2Max )
+		
+		fill = Color3f( 0.49, 0.50, 0.51 )
+		i = ImagePrimitive.createRGBFloat( fill, w1, w2 )
 
+		self.assert_( i.isInstanceOf( ImagePrimitive.staticTypeId() ) )
+	
+		self.assert_( "R" in i )
+		self.assert_( "G" in i )
+		self.assert_( "B" in i )
+		self.assert_( "Y" not in i )
+
+		self.assertEqual( i.dataWindow, w1 )
+		self.assertEqual( i.displayWindow, w2 )
+		
+		self.assert_( i["R"].data.isInstanceOf( FloatVectorData.staticTypeId() ) )
+		self.assert_( i["G"].data.isInstanceOf( FloatVectorData.staticTypeId() ) )
+		self.assert_( i["B"].data.isInstanceOf( FloatVectorData.staticTypeId() ) )
+
+		self.assertEqual( i["R"].data.size(), 256 )	
+		self.assertEqual( i["G"].data.size(), 256 )	
+		self.assertEqual( i["B"].data.size(), 256 )	
+
+		for p in ( 0, 63, 127, 255 ) :
+			self.assertEqual( i["R"].data[ p ], fill[0] )
+			self.assertEqual( i["G"].data[ p ], fill[1] )
+			self.assertEqual( i["B"].data[ p ], fill[2] )
+		
+		fill = 0.5	
+		i = ImagePrimitive.createGreyscaleFloat( fill, w1, w2 )
+		
+		self.assert_( i.isInstanceOf( ImagePrimitive.staticTypeId() ) )
+
+		self.assert_( "R" not in i )
+		self.assert_( "G" not in i )
+		self.assert_( "B" not in i )
+		self.assert_( "Y" in i )
+
+		self.assertEqual( i.dataWindow, w1 )
+		self.assertEqual( i.displayWindow, w2 )
+		
+		self.assert_( i["Y"].data.isInstanceOf( FloatVectorData.staticTypeId() ) )
+		self.assertEqual( i["Y"].data.size(), 256 )	
+
+		for p in ( 0, 63, 127, 255 ) :
+			self.assertEqual( i["Y"].data[ p ], fill )
+			
 	def tearDown( self ) :
 
 		if os.path.exists( "test/IECore/data/output.cob" ) :

@@ -154,7 +154,16 @@ class ImagePrimitive : public Primitive
 		template<typename T>
 		typename TypedData<std::vector<T> >::Ptr createChannel( const std::string &name );
 		//@}
+		
+		//! @name Creation
+		/// Convienience functions to create ImagePrimitives pre-filled with a default value
+		template<typename T>
+		static Ptr createRGB( const Imath::Color3<T> &fillColor, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow );
+		template<typename T>
+		static Ptr createGreyscale( const T fillValue, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow );
+		//@}
 
+	
 	private:
 
 		/// the full parameters for image position and dimension

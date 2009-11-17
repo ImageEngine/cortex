@@ -110,6 +110,12 @@ void bindImagePrimitive()
 		.def( "createHalfChannel", &ImagePrimitive::createChannel<half> )
 		.def( "createUIntChannel", &ImagePrimitive::createChannel<unsigned int> )
 
+		.def( "createRGBFloat", &ImagePrimitive::createRGB<float> )
+		.staticmethod( "createRGBFloat" )
+		
+		.def( "createGreyscaleFloat", &ImagePrimitive::createGreyscale<float> )
+		.staticmethod( "createGreyscaleFloat" )
+		
 	;
 
 }
