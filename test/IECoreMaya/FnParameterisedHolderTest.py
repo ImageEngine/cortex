@@ -87,6 +87,7 @@ class FnParameterisedHolderTest( unittest.TestCase ) :
 		self.assert_( iPlug.asInt(), 1 )
 
 		self.assert_( fnPH.plugParameter( iPlug ).isSame( op["i"] ) )
+		self.assert_( fnPH.plugParameter( iPlug.name() ).isSame( op["i"] ) )
 
 		iPlug.setInt( 2 )
 		fnPH.setParameterisedValue( op["i"] )
