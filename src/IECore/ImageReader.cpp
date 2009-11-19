@@ -105,7 +105,7 @@ ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 		DataPtr d = readChannel( *ci, dataWind );
 
 		assert( d  );
-		assert( d->typeId()==FloatVectorDataTypeId || d->typeId()==HalfVectorDataTypeId || d->typeId()==IntVectorDataTypeId );
+		assert( d->typeId()==FloatVectorDataTypeId || d->typeId()==HalfVectorDataTypeId || d->typeId()==UIntVectorDataTypeId );
 
 		PrimitiveVariable p( PrimitiveVariable::Vertex, d );
 		assert( image->isPrimitiveVariableValid( p ) );
