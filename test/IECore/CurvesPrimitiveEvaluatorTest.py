@@ -38,6 +38,8 @@ import math
 import unittest
 import IECore
 
+## \todo: add tests for Varying prim vars
+
 class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 	def runPointAtVTest( self, curvesPrimitive, expectedPositions=None, expectedLengths=None, visualTest=False, printPoints=False ) :

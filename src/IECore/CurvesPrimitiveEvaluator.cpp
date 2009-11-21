@@ -90,7 +90,7 @@ T CurvesPrimitiveEvaluator::Result::primVar( const PrimitiveVariable &primVar, c
 		case PrimitiveVariable::FaceVarying :
 			{
 				const vector<T> &d = static_cast<TypedData<vector<T> > *>( primVar.data.get() )->readable();
-				return lerp( d[0], d[1], m_segmentV );
+				return lerp( d[m_varyingDataIndices[0]], d[m_varyingDataIndices[1]], m_segmentV );
 			}
 		default :
 			throw InvalidArgumentException( "PrimitiveVariable has invalid interpolation" );
