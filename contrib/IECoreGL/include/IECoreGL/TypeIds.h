@@ -105,6 +105,7 @@ enum TypeId
 	SceneTypeId = 105062,
 	TextPrimitiveTypeTypeId = 105063,
 	ToGLCurvesConverterTypeId = 105064,
+	ToGLTextureConverterTypeId = 105065,
 	LastCoreGLTypeId = 105999,
 };
 

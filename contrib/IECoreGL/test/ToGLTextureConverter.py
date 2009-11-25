@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,40 +32,67 @@
 #
 ##########################################################################
 
-import warnings
-warnings.filterwarnings( "error", "Access to Parameters as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Access to CompoundObject children as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Access to CompoundParameter children as attributes is deprecated - please use item style access instead.", DeprecationWarning )
-warnings.filterwarnings( "error", "Specifying presets as a dictionary is deprecated - pass a tuple of tuples instead.", DeprecationWarning )
+import unittest
+import os.path
 
-import IECore
+from IECore import *
 
-from Shader import *
-from State import *
-from ShaderLoader import *
-from Renderer import *
-from Group import *
-from Texture import *
-from ImmediateRenderer import *
-from NameStateComponent import *
-from HitRecord import *
-from Selection import *
-from Camera import *
-from Image import *
-from PointsPrimitive import *
-from Orientation import *
-from CurvesPrimitiveTest import *
-from MeshPrimitiveTest import *
-from AlphaTextureTest import *
-from LuminanceTextureTest import *
-from UserAttributesTest import *
-from DeferredRenderer import *
-from DiskPrimitiveTest import DiskPrimitiveTest
-from ToGLTextureConverter import TestToGLTexureConverter
+from IECoreGL import *
+init( False )
 
-if IECore.withFreeType() :
+class TestToGLTexureConverter( unittest.TestCase ) :
 
-	from TextTest import *
+
+	def testFromImage( self ) :
+		""" Test conversion from an ImagePrimitive """
+
+		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+
+		t = ToGLTextureConverter( i ).convert()
+		self.failIf( not t.isInstanceOf( Texture.staticTypeId() ) ) 
+		
+		ii = t.imagePrimitive()
+
+		res = ImageDiffOp()(
+			imageA = i,
+			imageB = ii,
+			maxError = 0.01,
+			skipMissingChannels = False
+		)
+		
+		self.failIf( res.value )
+
+
+	def testFromCompoundData( self ) :
+		""" Test conversion from a CompoundData representation of an ImagePrimitive """
+		
+		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+
+		cd = CompoundData()
+		cd["displayWindow"] = Box2iData( i.displayWindow )
+		cd["dataWindow"] = Box2iData( i.dataWindow )
+
+		cnd = CompoundData()
+		for channel in i.channelNames() :
+			cnd[ channel ] = i[ channel ].data
+
+		cd["channels"] = cnd
+
+		t = ToGLTextureConverter( cd ).convert()
+		self.failIf( not t.isInstanceOf( Texture.staticTypeId() ) ) 
+		
+		ii = t.imagePrimitive()
+
+		res = ImageDiffOp()(
+			imageA = i,
+			imageB = ii,
+			maxError = 0.01,
+			skipMissingChannels = False
+		)
+
+		self.failIf( res.value )
+
+
 
 if __name__ == "__main__":
     unittest.main()

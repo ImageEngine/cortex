@@ -61,6 +61,7 @@
 #include "IECoreGL/TextPrimitive.h"
 #include "IECoreGL/DiskPrimitive.h"
 #include "IECoreGL/ToGLCurvesConverter.h"
+#include "IECoreGL/ToGLTextureConverter.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -1187,6 +1188,29 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 						return true;
 					}
 				}
+			}
+			else
+			{
+				msg( Msg::Error, context, boost::format( "Shader parameter \"%s\" is not a texture parameter." ) % name );
+				return false;
+			}
+		}
+		else if( value->isInstanceOf( CompoundData::staticTypeId() ) )
+		{			
+			
+			/// \todo: do we need to support compound data for cases other than textures?
+			CompoundDataPtr data = boost::static_pointer_cast<CompoundData>( value );
+			if ( data->readable().find( "dataWindow" ) == data->readable().end() )
+			{
+				msg( Msg::Error, context, boost::format( "Compound data parameter \"%s\" is missing the dataWindow element." ) % name );
+				return false;
+			}
+			
+			// should be a texture parameter
+			if( shaderState->shader()->parameterType( name )==Texture::staticTypeId() )
+			{
+				TexturePtr texture = boost::static_pointer_cast<Texture>( ToGLTextureConverter( data ).convert() );
+				shaderState->textureValues()[name] = texture;
 			}
 			else
 			{
