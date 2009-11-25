@@ -1200,17 +1200,20 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 			
 			/// \todo: do we need to support compound data for cases other than textures?
 			CompoundDataPtr data = boost::static_pointer_cast<CompoundData>( value );
-			if ( data->readable().find( "dataWindow" ) == data->readable().end() )
-			{
-				msg( Msg::Error, context, boost::format( "Compound data parameter \"%s\" is missing the dataWindow element." ) % name );
-				return false;
-			}
-			
+				
 			// should be a texture parameter
 			if( shaderState->shader()->parameterType( name )==Texture::staticTypeId() )
 			{
-				TexturePtr texture = boost::static_pointer_cast<Texture>( ToGLTextureConverter( data ).convert() );
-				shaderState->textureValues()[name] = texture;
+				try
+				{	
+					TexturePtr texture = boost::static_pointer_cast<Texture>( ToGLTextureConverter( data ).convert() );
+					shaderState->textureValues()[name] = texture;
+				} 
+				catch( const std::exception &e )
+				{
+					msg( Msg::Error, "Renderer::shader", boost::format( "Error recreating ImagePrimitive from CompoundData object. (%s)." ) % e.what() );
+				}
+		
 			}
 			else
 			{
