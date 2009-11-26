@@ -1198,7 +1198,6 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 		else if( value->isInstanceOf( CompoundData::staticTypeId() ) )
 		{			
 			
-			/// \todo: do we need to support compound data for cases other than textures?
 			CompoundDataPtr data = boost::static_pointer_cast<CompoundData>( value );
 				
 			// should be a texture parameter
