@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -153,6 +153,16 @@ class TestGroup( unittest.TestCase ) :
 		self.assert_( s[0].isSame( a1 ) )
 		self.assert_( s[1].isSame( a2 ) )
 		self.assert_( s[2].isSame( a3 ) )
+
+	def testAddNullState( self ) :
+	
+		g = Group()
+		self.assertRaises( Exception, g.addState, None )
+
+	def testAddNullChild( self ) :
+	
+		g = Group()
+		self.assertRaises( Exception, g.addChild, None )
 
 	def tearDown( self ) :
 

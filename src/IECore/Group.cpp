@@ -92,6 +92,10 @@ Imath::M44f Group::globalTransformMatrix( float time ) const
 
 void Group::addState( StateRenderablePtr state )
 {
+	if( !state )
+	{
+		throw InvalidArgumentException( "Cannot add null state object." );
+	}
 	if( state->isInstanceOf( Transform::staticTypeId() ) )
 	{
 		throw Exception( "Transforms cannot be added as state." );
@@ -121,6 +125,11 @@ const Group::StateContainer &Group::state() const
 
 void Group::addChild( VisibleRenderablePtr child )
 {
+	if( !child )
+	{
+		throw InvalidArgumentException( "Cannot add null child object." );
+	}
+	
 	GroupPtr gChild = runTimeCast<Group>( child );
 	if( gChild )
 	{
