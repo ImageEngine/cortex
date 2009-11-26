@@ -32,67 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LOOKUP_INL
-#define IECORE_LOOKUP_INL
+#ifndef IECORE_LOOKUPTEST_H
+#define IECORE_LOOKUPTEST_H
 
-#include "OpenEXR/ImathFun.h"
-
-#include "IECore/FastFloat.h"
+#include "boost/test/unit_test.hpp"
 
 namespace IECore
 {
 
-template<typename X, typename Y>
-Lookup<X, Y>::Lookup()
-	:	m_xMin( 0 ), m_xMax( 1 ), m_xMult( 1 )
-{
-	m_values.push_back( Y( 0 ) );
-	m_values.push_back( Y( 1 ) );
+void addLookupTest( boost::unit_test::test_suite *test );
+
 }
 
-template<typename X, typename Y>
-template<class Function>
-Lookup<X, Y>::Lookup( const Function &function, XType xMin, XType xMax, unsigned numSamples )
-{
-	init( function, xMin, xMax, numSamples );
-}
+#endif // IECORE_LOOKUPTEST_H
 
-template<typename X, typename Y>
-template<class Function>
-void Lookup<X, Y>::init( const Function &function, XType xMin, XType xMax, unsigned numSamples )
-{
-	m_values.resize( numSamples );
-	X xStep = (xMax - xMin) / (numSamples -1 );
-	X x = xMin;
-	for( unsigned i=0; i<numSamples; i++ )
-	{
-		m_values[i] = function( x );
-		x += xStep;
-	}
-	m_xMin = xMin;
-	m_xMax = xMax;
-	m_xMult = (numSamples-1) / (xMax - xMin);
-}
-		
-template<typename X, typename Y>
-inline Y Lookup<X, Y>::operator() ( X x ) const
-{
-	X f = (x - m_xMin) * m_xMult;
-	int fi = fastFloatFloor( f );
-	
-	if( fi < 0 )
-	{
-		return m_values[0];
-	}
-	else if( (unsigned)fi+1 >= m_values.size() )
-	{
-		return m_values[m_values.size()-1];
-	}
-	
-	X ff = f - fi;
-	return Imath::lerp( m_values[fi], m_values[fi+1], ff );
-}
-				
-} // namespace IECore
-
-#endif // IECORE_LOOKUP_INL

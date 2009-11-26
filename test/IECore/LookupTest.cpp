@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,71 +33,78 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <math.h>
 
-#include "OpenEXR/ImathColor.h"
+#include "IECore/Lookup.h"
 
-#include "boost/test/test_tools.hpp"
-#include "boost/test/results_reporter.hpp"
-#include "boost/test/unit_test_suite.hpp"
-#include "boost/test/output_test_stream.hpp"
-#include "boost/test/unit_test_log.hpp"
-#include "boost/test/framework.hpp"
-#include "boost/test/detail/unit_test_parameters.hpp"
-
-#include "KDTreeTest.h"
-#include "TypedDataTest.h"
-#include "InterpolatorTest.h"
-#include "IndexedIOTest.h"
-#include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
-#include "DataConversionTest.h"
-#include "DataConvertTest.h"
-#include "DespatchTypedDataTest.h"
-#include "CompilerTest.h"
-#include "RadixSortTest.h"
-#include "SweepAndPruneTest.h"
-#include "ColorTransformTest.h"
-#include "AssociatedLegendreTest.h"
-#include "SphericalHarmonicsTest.h"
-#include "LevenbergMarquardtTest.h"
-#include "SpaceTransformTest.h"
 #include "LookupTest.h"
 
+using namespace boost;
 using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
 
-using namespace IECore;
-
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+namespace IECore
 {
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
 
-	try
+struct NanFunctor
+{
+	float operator() ( float x ) const
 	{
-		addBoostUnitTestTest(test);
-		addKDTreeTest(test);
-		addTypedDataTest(test);
-		addInterpolatorTest(test);
-		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
-		addDataConversionTest(test);
-		addDataConvertTest(test);
-		addDespatchTypedDataTest(test);
-		addCompilerTest(test);
-		addRadixSortTest(test);
-		addSweepAndPruneTest(test);
-		addColorTransformTest(test);
-		addAssociatedLegendreTest(test);
-		addSphericalHarmonicsTest(test);
-		addLevenbergMarquardtTest(test);
-		addSpaceTransformTest(test);
-		addLookupTest(test);
+		return NAN;
 	}
-	catch (std::exception &ex)
+};
+
+struct LinearFunctor
+{
+	float operator() ( float x ) const
 	{
-		std::cerr << "Failed to create test suite: " << ex.what() << std::endl;
-		throw;
+		return x;
+	}
+};
+
+struct LookupTest
+{
+
+	void test1()
+	{
+		Lookupff l( LinearFunctor(), -10.0f, 10.0f, 20 );
+		
+		const unsigned testPoints = 250;
+		for( unsigned i=0; i<testPoints; i++ )
+		{
+			float x = (float)i/(float)( testPoints-1 );
+			BOOST_CHECK( fabs( x - l( x ) ) < 0.00001f );
+		}
+		
+		BOOST_CHECK( fabs( -10.0f - l( -11.0f ) ) < 0.00001f );
+		BOOST_CHECK( fabs( 10.0f - l( 11.0f ) ) < 0.00001f );
+	}
+	
+	void test2()
+	{
+		Lookupff l( NanFunctor(), 0.0f, 1.0f, 50 );
+		l.init( LinearFunctor(), 0.0f, 1.0f, 25 );
+	
+		BOOST_CHECK( fabs( 1.0f - l( 1.0f ) ) < 0.00001f );
 	}
 
-	return test;
+};
+
+
+struct LookupTestSuite : public boost::unit_test::test_suite
+{
+
+	LookupTestSuite() : boost::unit_test::test_suite( "LookupTestSuite" )
+	{
+		boost::shared_ptr<LookupTest> instance( new LookupTest() );
+
+		add( BOOST_CLASS_TEST_CASE( &LookupTest::test1, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &LookupTest::test2, instance ) );
+	}
+};
+
+void addLookupTest(boost::unit_test::test_suite* test)
+{
+	test->add( new LookupTestSuite( ) );
 }
+
+} // namespace IECore
