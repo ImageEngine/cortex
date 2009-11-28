@@ -74,7 +74,7 @@ void Primitive::render( ConstStatePtr state ) const
 	// get ready in case the derived class wants to call setVertexAttributesAsUniforms
 	setupVertexAttributesAsUniform( shader );
 
-	glPushAttrib( GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
+	glPushAttrib( GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
 	glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
 
 		if( depthSortRequested( state ) )
