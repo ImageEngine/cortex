@@ -492,11 +492,16 @@ class CompoundParameterUI( ParameterUI ) :
 
 					visible = True
 
-
+ 
 		if not visible :
 
 			return
-
+			
+		if 'hierarchyDepth' in kw :
+			kw['hierarchyDepth'] += 1 
+		else :
+			kw['hierarchyDepth'] = 0	
+		
 		self.__childUIsLayout = None
 		self.__childUIs = {}
 
@@ -515,16 +520,31 @@ class CompoundParameterUI( ParameterUI ) :
 		else:
 			# \todo Retrieve the "collapsed" state
 			collapsed = True
-
+			
+			label = self.label()
+			font = "boldLabelFont"
+			
+			label = "  " * kw['hierarchyDepth'] + label
+										
+			if kw['hierarchyDepth'] == 2 :
+			
+				font = "smallBoldLabelFont"
+				
+			elif kw['hierarchyDepth'] >= 3 :
+			
+				font = "tinyBoldLabelFont"
+				label = " " * ( kw['hierarchyDepth'] - 2 ) + label
+				
 			self._layout = cmds.frameLayout(
-				label = self.label(),
+				label = label,
+				font = font,
 				borderVisible = False,
 				preExpandCommand = IECore.curry( self.__createChildUIs, **kw),
 				collapseCommand = self.__collapse,
 				collapsable = True,
 				collapse = collapsed,
 			)
-
+			
 			if not collapsed:
 				self.__createChildUIs( **kw )
 
