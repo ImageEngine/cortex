@@ -38,7 +38,7 @@ import math
 import unittest
 import IECore
 
-## \todo: add tests for Varying prim vars
+## \todo: add tests for Varying prim vars 
 
 class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
