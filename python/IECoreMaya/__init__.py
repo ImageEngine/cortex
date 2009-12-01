@@ -64,3 +64,4 @@ from FnOpHolder import FnOpHolder
 from UITemplate import UITemplate
 from FnParameterisedHolderSet import FnParameterisedHolderSet
 from TemporaryAttributeValues import TemporaryAttributeValues
+from GenericConnectionUI import GenericConnectionUI
