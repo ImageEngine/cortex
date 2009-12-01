@@ -38,16 +38,17 @@
 // Solves a * x + b == 0
 float ieSolveLinear( varying float a; varying float b; output varying float root )
 {
+	float rootCount = -1;
 	if (a != 0)
 	{
 		root = -b / a;
-		return 1;
+		rootCount = 1;
 	}
 	else if (b != 0)
 	{
-		return 0;
+		rootCount = 0;
 	}
-	return -1;
+	return rootCount;
 }
 
 float ieCubicRoot( varying float v )
@@ -58,26 +59,29 @@ float ieCubicRoot( varying float v )
 float ieSolveQuadratic( varying float a; varying float b; varying float c; output varying float roots[] )
 {
 	uniform float epsilon = 1e-16;
-
+	float rootCount = 0;
 	if (abs(a) < epsilon)
 	{
-		return ieSolveLinear( b, c, roots[0] );
+		rootCount = ieSolveLinear( b, c, roots[0] );
 	}
-	float D = b*b-4*a*c;
+	else
+	{
+		float D = b*b-4*a*c;
 
-	if (abs(D) < epsilon)
-	{
-		roots[0] = -b/(2*a);
-		return 1;
+		if (abs(D) < epsilon)
+		{
+			roots[0] = -b/(2*a);
+			rootCount = 1;
+		}
+		else if (D > 0)
+		{
+			float s = sqrt(D);
+			roots[0] = (-b + s) / (2 * a);
+			roots[1] = (-b - s) / (2 * a);
+		    rootCount = 2;
+		}
 	}
-	if (D > 0)
-	{
-		float s = sqrt(D);
-		roots[0] = (-b + s) / (2 * a);
-		roots[1] = (-b - s) / (2 * a);
-	    return 2;
-	}
-    return 0;
+	return rootCount;
 }
 
 // Computes real roots for a given cubic polynomial (x^3+Ax^2+Bx+C = 0).
@@ -85,32 +89,35 @@ float ieSolveQuadratic( varying float a; varying float b; varying float c; outpu
 float ieSolveNormalizedCubic( varying float A; varying float B; varying float C; output varying float roots[] )
 {
 	uniform float epsilon = 1e-16;
+	float rootCount = 0;
 	if ( abs(C) < epsilon)
 	{
 		// 1 or 2 roots
-		return ieSolveQuadratic( 1, A, B, roots );
+		rootCount = ieSolveQuadratic( 1, A, B, roots );
 	}
-
-	float Q = (3*B - A*A)/9;
-	float R = (9*A*B - 27*C - 2*A*A*A)/54;
-	float D = Q*Q*Q + R*R;	// polynomial discriminant
-	float rootCount = 1;
-
-	if (D > 0) // complex or duplicate roots
+	else
 	{
-		float sqrtD = sqrt(D);
-		float S = ieCubicRoot( R + sqrtD );
-		float T = ieCubicRoot( R - sqrtD );
-		roots[0] = (-A/3 + (S + T));   // one real root
-	}
-	else  // 3 real roots
-	{
-		float th = acos( R/sqrt(-(Q*Q*Q)) );
-		float sqrtQ = sqrt(-Q);
-		roots[0] = (2*sqrtQ*cos(th/3) - A/3);
-		roots[1] = (2*sqrtQ*cos((th + 2*PI)/3) - A/3);
-		roots[2] = (2*sqrtQ*cos((th + 4*PI)/3) - A/3);
-		rootCount = 3;
+		float Q = (3*B - A*A)/9;
+		float R = (9*A*B - 27*C - 2*A*A*A)/54;
+		float D = Q*Q*Q + R*R;	// polynomial discriminant
+
+		if (D > 0) // complex or duplicate roots
+		{
+			float sqrtD = sqrt(D);
+			float S = ieCubicRoot( R + sqrtD );
+			float T = ieCubicRoot( R - sqrtD );
+			roots[0] = (-A/3 + (S + T));   // one real root
+			rootCount = 1;
+		}
+		else  // 3 real roots
+		{
+			float th = acos( R/sqrt(-(Q*Q*Q)) );
+			float sqrtQ = sqrt(-Q);
+			roots[0] = (2*sqrtQ*cos(th/3) - A/3);
+			roots[1] = (2*sqrtQ*cos((th + 2*PI)/3) - A/3);
+			roots[2] = (2*sqrtQ*cos((th + 4*PI)/3) - A/3);
+			rootCount = 3;
+		}
 	}
 	return rootCount;
 }
@@ -118,11 +125,17 @@ float ieSolveNormalizedCubic( varying float A; varying float B; varying float C;
 float ieSolveCubic( varying float a; varying float b; varying float c; varying float d; output varying float roots[] )
 {
 	float epsilon = 1e-16;
+	float rootCount;
 	if (abs(a) < epsilon)
 	{
-		return ieSolveQuadratic (b, c, d, roots);
+		rootCount = ieSolveQuadratic (b, c, d, roots);
     }
-	return ieSolveNormalizedCubic (b / a, c / a, d / a, roots);
+	else
+	{
+		rootCount = ieSolveNormalizedCubic (b / a, c / a, d / a, roots);
+	}
+	return rootCount;
 }
+
 
 #endif // IECORERI_ROOTS_H
