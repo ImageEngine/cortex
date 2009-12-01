@@ -135,6 +135,20 @@ MStatus MeshParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr 
 
 		converter->spaceParameter()->setNumericValue( (int)FromMayaMeshConverter::World );
 		p->setValue( converter->convert() );
+		return MS::kSuccess;
 	}
-	return result;
+	else
+	{
+		// technically we should be returning the error status here, but we don't
+		// as this case appears to be pretty common, and the resulting errors tend to be
+		// annoying rather than helpful.
+		//
+		// the failure to get the plug value appears to be because we don't save
+		// empty mesh values to file (see ParameterisedHolder::shouldSave).
+		// this means that when the file is loaded again the plug.getValue()
+		// method will fail and we end up here. the best thing we can do in this
+		// case seems to be to assume that the value should be an empty mesh.
+		p->setValue( new IECore::MeshPrimitive() );
+		return MS::kSuccess;
+	}
 }
