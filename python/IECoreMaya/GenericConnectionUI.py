@@ -63,7 +63,8 @@ class GenericConnectionUI( IECoreMaya.ParameterUI ) :
 				width = 15
 			)
 			
-			maya.cmds.text( align="left", label="Not connected", font="tinyBoldLabelFont" )
+			text = maya.cmds.text( align="left", label="Not connected", font="tinyBoldLabelFont" )
+			self._addPopupMenu( parentUI=text, attributeName = self.plugName() )
 			
 			maya.cmds.setParent( ".." )
 			
