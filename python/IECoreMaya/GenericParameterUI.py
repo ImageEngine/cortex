@@ -4,7 +4,7 @@ import maya.cmds
 
 import IECoreMaya.ParameterUI
 
-class GenericConnectionUI( IECoreMaya.ParameterUI ) :
+class GenericParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
 	
@@ -142,4 +142,4 @@ class GenericConnectionUI( IECoreMaya.ParameterUI ) :
 		
 		
 import IECore					   
-IECoreMaya.ParameterUI.registerUI( IECore.TypeId.MeshPrimitiveParameter, GenericConnectionUI )
+IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Parameter, GenericParameterUI )
