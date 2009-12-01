@@ -39,6 +39,7 @@
 #include "IECoreMaya/BoolParameterHandler.h"
 
 #include "IECore/TypedParameter.h"
+#include "IECore/CompoundObject.h"
 
 #include "maya/MFnNumericAttribute.h"
 
@@ -63,7 +64,37 @@ MStatus BoolParameterHandler::update( IECore::ConstParameterPtr parameter, MObje
 	}
 
 	fnNAttr.setDefault( p->typedDefaultValue() );
+	
+	bool keyable = true;
+	bool channelBox = true;
 
+	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
+	assert( userData );
+
+	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
+	if (maya)
+	{
+		const IECore::ConstBoolDataPtr keyableData = maya->member<const IECore::BoolData>("keyable");
+		if (keyableData)
+		{
+			keyable = keyableData->readable();
+		}
+
+		const IECore::ConstBoolDataPtr channelBoxData = maya->member<const IECore::BoolData>("channelBox");
+		if (channelBoxData)
+		{
+			channelBox = channelBoxData->readable();
+		}
+	}
+
+	fnNAttr.setKeyable( keyable );
+
+	// Calling setChannelBox(true) disables keying
+	if (!keyable)
+	{
+		fnNAttr.setChannelBox( channelBox );
+	}
+	
 	return MS::kSuccess;
 }
 
