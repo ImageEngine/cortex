@@ -39,6 +39,7 @@
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/FloatSplineParameterHandler.h"
+#include "IECoreMaya/MArrayIter.h"
 
 #include "IECore/SplineParameter.h"
 
@@ -47,6 +48,7 @@
 #include "maya/MFloatArray.h"
 #include "maya/MIntArray.h"
 #include "maya/MGlobal.h"
+#include "maya/MFnDagNode.h"
 
 using namespace IECoreMaya;
 using namespace Imath;
@@ -118,94 +120,105 @@ MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 	const S &spline = p->getTypedValue();
 
 	MStatus s;
-	MFloatArray values;
-	MFloatArray positions;
-	MIntArray interps;
-	MIntArray indices;
-	fnRAttr.getEntries( indices, positions, values, interps, &s );
+	MIntArray indicesToReuse;
+	plug.getExistingArrayAttributeIndices( indicesToReuse, &s );
 	assert( s );
-	positions.clear();
-	values.clear();
-	interps.clear();
+	
+	int nextNewLogicalIndex = 0;
+	if( indicesToReuse.length() )
+	{
+		nextNewLogicalIndex = 1 + *std::max_element( MArrayIter<MIntArray>::begin( indicesToReuse ), MArrayIter<MIntArray>::end( indicesToReuse ) );
+	}
 
-	assert( indices.length() == fnRAttr.getNumEntries() );
+	assert( indicesToReuse.length() == fnRAttr.getNumEntries() );
 
 	size_t pointsSizeMinus2 = spline.points.size() - 2;
-	unsigned idx = 0;
-	unsigned expectedPoints = 0;
-	unsigned reusedIndices = 0;
-	for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end(); ++it, ++idx )
+	unsigned pointIndex = 0;
+	unsigned numExpectedPoints = 0;
+	for ( typename S::PointContainer::const_iterator it = spline.points.begin(); it != spline.points.end(); ++it, ++pointIndex )
 	{
 		// we commonly double up the endpoints on cortex splines to force interpolation to the end.
 		// maya does this implicitly, so we skip duplicated endpoints when passing the splines into maya.
 		// this avoids users having to be responsible for managing the duplicates, and gives them some consistency
 		// with the splines they edit elsewhere in maya.
-		if( idx==1 && *it == *spline.points.begin() || idx==pointsSizeMinus2 && *it == *spline.points.rbegin()  )
+		if( pointIndex==1 && *it == *spline.points.begin() || pointIndex==pointsSizeMinus2 && *it == *spline.points.rbegin()  )
 		{
 			continue;
 		}
 
-		expectedPoints ++;
-
-		if ( idx < std::min( 2u, indices.length() ) )
+		MPlug pointPlug;
+		if( indicesToReuse.length() )
 		{
-			reusedIndices ++;
-			fnRAttr.setPositionAtIndex( it->first, indices[ idx ], &s );
-			assert( s );
-			fnRAttr.setValueAtIndex( static_cast<float>( it->second ), indices[ idx ], &s );
-			assert( s );
-			fnRAttr.setInterpolationAtIndex( MRampAttribute::kSpline, indices[ idx ], &s );
-			assert( s );
+			pointPlug = plug.elementByLogicalIndex( indicesToReuse[0] );
+			indicesToReuse.remove( 0 );
 		}
 		else
 		{
-			values.append(  it->second );
-			positions.append( it->first );
-			interps.append( MRampAttribute::kSpline );
+			// this creates us a new spline point for us, and avoids the bug in MRampAttribute::addEntries which
+			// somehow manages to create duplicate logical indexes.
+			pointPlug = plug.elementByLogicalIndex( nextNewLogicalIndex++ );			
+		}
+		
+		s = pointPlug.child( 0 ).setValue( it->first ); assert( s );
+		s = pointPlug.child( 1 ).setValue( it->second ); assert( s );
+		s = pointPlug.child( 2 ).setValue( MRampAttribute::kSpline ); assert( s );
+	
+		numExpectedPoints++;
+	}
+
+	// delete any of the original indices which we didn't reuse. we can't use MRampAttrubute::deleteEntries
+	// here as it's utterly unreliable.
+	if( indicesToReuse.length() )
+	{
+		MString plugName = plug.name();
+		MObject node = plug.node();
+		MFnDagNode fnDAGN( node );
+		if( fnDAGN.hasObj( node ) )
+		{
+			plugName = fnDAGN.fullPathName() + "." + plug.partialName();
+		}
+		for( unsigned i=0; i<indicesToReuse.length(); i++ )
+		{
+			// using mel because there's no equivalant api method as far as i know.
+			MString command = "removeMultiInstance -b true \"" + plugName + "[" + indicesToReuse[i] + "]\"";
+			s = MGlobal::executeCommand( command );
+			assert( s );
+			if( !s )
+			{
+				return s;
+			}
 		}
 	}
-
-	assert( positions.length() == values.length() );
-	assert( positions.length() == interps.length() );
-	assert( expectedPoints == reusedIndices + positions.length() );
-
-#ifndef NDEBUG
-	unsigned int oldNumEntries = fnRAttr.getNumEntries();
-#endif
-
-	fnRAttr.addEntries( positions, values, interps, &s );
-	assert( s );
-
-	assert( fnRAttr.getNumEntries() == oldNumEntries + positions.length() );
-
-	/// Remove all the indices we just reused
-	for ( unsigned i = 0; i < reusedIndices ; i ++ )
-	{
-		assert( indices.length() > 0 );
-		indices.remove( 0 );
-	}
-
-	/// Delete any ununsed indices
-	if ( indices.length() )
-	{
-		fnRAttr.deleteEntries( indices, &s );
-		assert( s );
-	}
-
+	
 #ifndef NDEBUG
 	{
-		assert( fnRAttr.getNumEntries() == expectedPoints );
+		MIntArray allLogicalIndices; plug.getExistingArrayAttributeIndices( allLogicalIndices );
+		assert( fnRAttr.getNumEntries() == numExpectedPoints );
+		assert( fnRAttr.getNumEntries() == allLogicalIndices.length() );
+		
+		// the MRampAttribute has the wonderful "feature" that addEntries() is somehow capable
+		// of creating duplicate logical array indices, which causes no end of trouble
+		// down the line. check that we've managed to avoid this pitfall.
+		std::set<int> uniqueIndices;
+		std::copy(
+			MArrayIter<MIntArray>::begin( allLogicalIndices ),
+			MArrayIter<MIntArray>::end( allLogicalIndices ),
+			std::insert_iterator<std::set<int> >( uniqueIndices, uniqueIndices.begin() )
+		);
+		assert( uniqueIndices.size()==allLogicalIndices.length() );
 
+		// then check that every element of the ramp has a suitable equivalent in
+		// the original spline
 		MIntArray indices;
 		MFloatArray positions;
 		MFloatArray values;
 		MIntArray interps;
 		fnRAttr.getEntries( indices, positions, values, interps, &s );
 		assert( s );
-		assert( expectedPoints == positions.length() );
-		assert( expectedPoints == values.length() );
-		assert( expectedPoints == interps.length() );
-		assert( expectedPoints == indices.length() );
+		assert( numExpectedPoints == positions.length() );
+		assert( numExpectedPoints == values.length() );
+		assert( numExpectedPoints == interps.length() );
+		assert( numExpectedPoints == indices.length() );
 
 		for ( unsigned i = 0; i < positions.length(); i++ )
 		{

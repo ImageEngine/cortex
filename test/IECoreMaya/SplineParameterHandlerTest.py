@@ -38,6 +38,7 @@ import IECoreMaya
 import unittest
 import MayaUnitTest
 import maya.cmds
+import os
 
 class SplineParameterHandlerTest( unittest.TestCase ) :
 
@@ -98,7 +99,7 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 		fnPH.setParameterised( parameterised )
 
 		random.seed( 199 )
-		numTests = 10
+		numTests = 100
 
 		for i in range( 0, numTests ) :
 
@@ -200,7 +201,96 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 
 
 				self.assert_( ( v1 - v2 ).length() < 1.e-4 )
+	
+	def testRoundTripAfterSerialisation( self ) :
+	
+		# make a scene with an OpHolder holding an op with a spline parameter
+		fnOH = IECoreMaya.FnOpHolder.create( "test", "splineInput", 1 )
+		opNode = fnOH.fullPathName()
+		op = fnOH.getOp()
+		
+		# save it		
+		maya.cmds.file( rename = os.getcwd() + "/test/IECoreMaya/splineParameterHandlerTest.ma" )
+		sceneFileName = maya.cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		# load it
+		maya.cmds.file( new=True, force=True )
+		maya.cmds.file( sceneFileName, force=True, open=True )
+		
+		fnOH = IECoreMaya.FnOpHolder( opNode )
+		op = fnOH.getOp()
+		
+		# stick a new value on
+		splineData = IECore.SplineffData(
+			IECore.Splineff(
+				IECore.CubicBasisf.catmullRom(), (
+					( 0, 0.644737 ),
+					( 0, 0.644737 ),
+					( 0.257426, 0.0789474 ),
+					( 1, -0.3 ),
+					( 1, -0.3 )
+				)
+			)
+		)
+		
+		op["spline"].setValue( splineData )
+		
+		# convert the value to maya
+		fnOH.setNodeValue( op["spline"] )
+		
+		# convert it back
+		fnOH.setParameterisedValue( op["spline"] )
 
+		# make sure it worked
+		splineData2 = op["spline"].getValue()
+		self.assertEqual( splineData, splineData2 )
+		
+		# do it all again just for kicks
+		op["spline"].setValue( splineData )
+		fnOH.setNodeValue( op["spline"] )
+		fnOH.setParameterisedValue( op["spline"] )
+		splineData2 = op["spline"].getValue()
+		self.assertEqual( splineData, splineData2 )
+
+	def testSparseEntries( self ) :
+		
+		# load a scene where we have a spline parameter with sparse entries.
+		maya.cmds.file( os.getcwd() + "/test/IECoreMaya/scenes/splineWithSparseEntries.ma", force=True, open=True )
+		
+		fnOH = IECoreMaya.FnOpHolder( "test" )
+		op = fnOH.getOp()
+		
+		# stick a new value on
+		splineData = IECore.SplineffData(
+			IECore.Splineff(
+				IECore.CubicBasisf.catmullRom(), (
+					( 0, 0.644737 ),
+					( 0, 0.644737 ),
+					( 0.257426, 0.0789474 ),
+					( 1, -0.3 ),
+					( 1, -0.3 )
+				)
+			)
+		)
+		
+		op["spline"].setValue( splineData )
+		
+		# convert the value to maya
+		fnOH.setNodeValue( op["spline"] )
+		
+		# convert it back
+		fnOH.setParameterisedValue( op["spline"] )
+
+		# make sure it worked
+		splineData2 = op["spline"].getValue()
+		self.assertEqual( splineData, splineData2 )
+		
+		# do it all again just for kicks
+		op["spline"].setValue( splineData )
+		fnOH.setNodeValue( op["spline"] )
+		fnOH.setParameterisedValue( op["spline"] )
+		splineData2 = op["spline"].getValue()
+		self.assertEqual( splineData, splineData2 )
 
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()

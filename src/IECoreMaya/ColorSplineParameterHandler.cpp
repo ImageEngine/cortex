@@ -179,6 +179,8 @@ MStatus ColorSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 	unsigned int oldNumEntries = fnRAttr.getNumEntries();
 #endif
 
+	/// \todo We had to stop using this call in FloatSplineParameterHandler due to maya bugs. see
+	/// if the same applies here.
 	fnRAttr.addEntries( positions, colors, interps, &s );
 	assert( s );
 
@@ -194,6 +196,8 @@ MStatus ColorSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 	/// Delete any ununsed indices
 	if ( indices.length() )
 	{
+		/// \todo We had to stop using this call in FloatSplineParameterHandler due to maya bugs. see
+		/// if the same applies here.
 		fnRAttr.deleteEntries( indices, &s );
 		assert( s );
 	}
