@@ -12,7 +12,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 		
 		self.__layout1 = maya.cmds.rowLayout(
 			numberOfColumns = 2,
-			columnWidth2 = [ self.textColumnWidthIndex, 250 ]
+			columnWidth2 = [ self.textColumnWidthIndex, IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 + 25 + 25 ]
 		)
 		
 		maya.cmds.text( label = self.label(), font="smallPlainLabelFont", align="right", annotation=self.description() )
@@ -50,21 +50,21 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 
 			maya.cmds.rowLayout(
 				numberOfColumns = 2,
-				columnWidth2 = [ 20, 160 ]
-			)
-			
-			maya.cmds.iconTextButton(
-				annotation = "Clicking this takes you the connection editor for this connection.",
-				style = "textOnly",
-				label = "...",
-				font = "boldLabelFont",
-				command = IECore.curry( self.__showConnectionEditor, None ),
-				height = 20,
-				width = 15
+				columnWidth2 = [ IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 + 4, 20 ],
 			)
 			
 			text = maya.cmds.text( align="left", label="Not connected", font="tinyBoldLabelFont" )
 			self._addPopupMenu( parentUI=text, attributeName = self.plugName() )
+			
+			maya.cmds.iconTextButton(
+				annotation = "Clicking this takes you the connection editor for this connection.",
+				style = "iconOnly",
+				image = "listView.xpm",
+				font = "boldLabelFont",
+				command = IECore.curry( self.connectionEditor, None, leftHandNode = None ),
+				height = 20,
+				width = 20
+			)
 			
 			maya.cmds.setParent( ".." )
 			
@@ -84,60 +84,43 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 		
 	def __drawConnection( self, plugName ) :
 	
+		fieldWidth = IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 - 25 
+	
 		maya.cmds.rowLayout(
 			numberOfColumns = 3,
-			columnWidth3 = [ 20, 25, 180 ]
+			columnWidth3 = [ fieldWidth , 25, 25 ]
 		)
-
+	
+		name = maya.cmds.text( l=plugName, font="tinyBoldLabelFont", align="left",
+							   width=fieldWidth, height = 20, ann=plugName )
+							   
+		self._addPopupMenu( parentUI=name, attributeName = self.plugName() )
+	
 		maya.cmds.iconTextButton(
 			annotation = "Clicking this takes you the connection editor for this connection.",
-			style = "textOnly",
-			label = "...",
+			style = "iconOnly",
+			image = "listView.xpm",
 			font = "boldLabelFont",
-			command = IECore.curry( self.__showConnectionEditor, plugName ),
+			command = IECore.curry( self.connectionEditor, None, leftHandNode = plugName ),
 			height = 20,
-			width = 15
+			width = 20
 		)
-		
+			
 		maya.cmds.iconTextButton(
-			annotation = "Clicking this will dissconnect this connection.",
-			style = "textOnly",
-			label = "x",
-			command = IECore.curry( self.__breakConnection, plugName ),
+			annotation = "Clicking this will take you to the node sourcing this connection.",
+			style = "iconOnly",
+			image = "navButtonConnected.xpm",
+			command = IECore.curry( self.showEditor, None, plugName ),
 			height = 20,
 		)
-		
-		name = maya.cmds.text( l=plugName, font="tinyBoldLabelFont", align="left", width=180, height = 20 )
-		self._addPopupMenu( parentUI=name, attributeName = self.plugName() )
 		
 		maya.cmds.setParent( ".." )
-
 
 	def __showAE( self, plugName ) :
 	
 		import maya.mel
-		maya.mel.eval( "showEditor \"" + plugName + "\"" ) 
+		maya.mel.eval( "showEditor \"" + plugName.split(".")[0] + "\"" ) 
 
-	def __showConnectionEditor( self, plugName ) :
-	
-		import maya.mel
-		maya.mel.eval(
-				str("ConnectionEditor;"+
-				"nodeOutliner -e -replace %(right)s connectWindow|tl|cwForm|connectWindowPane|rightSideCW;"+
-				"connectWindowSetRightLabel %(right)s;") % { 'right' : self.nodeName() } )
-		
-		if plugName :
-	
-			maya.mel.eval(
-				str("nodeOutliner -e -replace %(left)s connectWindow|tl|cwForm|connectWindowPane|leftSideCW;"+
-				"connectWindowSetLeftLabel %(left)s;" ) % { 'left' : plugName.split(".")[0] } )
-
-
-	def __breakConnection( self, plugName ) :
-		
-		import maya.mel
-		maya.cmds.disconnectAttr( plugName, self.plugName() )
-		maya.mel.eval( 'evalDeferred( "updateAE %s;")' % ( self.nodeName() ) )
 		
 		
 		

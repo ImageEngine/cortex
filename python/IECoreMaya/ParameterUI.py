@@ -144,8 +144,9 @@ class ParameterUI :
 
 	## Computes a wrapped annotation/tooltip for the ui
 	def description( self ):
-
-		return IECore.StringUtil.wrap( self.parameter.description, 48 )
+		
+		extended = "%s\n\n%s" % ( self.plugName().split(".")[1], self.parameter.description )
+		return IECore.StringUtil.wrap( extended, 48 )
 
 	## Creates a drop-down selection list and returns True if the parameter is set to "presets only". Otherwise returns False.
 	## \todo This needs some sort of attribute changed callback so the menu updates when the attribute changes for some other reason.
@@ -231,23 +232,53 @@ class ParameterUI :
 			connections = True,
 			skipConversionNodes = True
 		)
+		
+		cmds.menuItem(
+			parent = popupMenu,
+			label = "Connection Editor...",
+			command = IECore.curry( self.connectionEditor )
+		)
 
-		if connections:
-
+		if connections :
+			
 			cmds.menuItem(
 				parent = popupMenu,
-				label = connections[1],
-
-				command = IECore.curry( self.showEditor, attributeName = connections[1] )
+				divider = True
 			)
 
+			for i in xrange( 0, len(connections), 2 ):
+
+				conItem = cmds.menuItem(
+					parent = popupMenu,
+					subMenu = True,
+					label = connections[i+1],
+
+				)
+
+				cmds.menuItem(
+					parent = conItem,
+					label = "Connection Editor...",
+					command = IECore.curry( self.connectionEditor, leftHandNode = connections[i+1] )
+				)
+
+				cmds.menuItem(
+					parent = conItem,
+					label = "Open AE...",
+					command = IECore.curry( self.showEditor, attributeName = connections[i+1] )
+				)
+
+				cmds.menuItem(
+					parent = conItem,
+					label = "Break Connection",
+					command = IECore.curry( self.disconnect, source = connections[i+1],
+											destination = connections[i], refreshAE = self.nodeName() )
+				)
+				
 			cmds.menuItem(
 				parent = popupMenu,
-				label = "Break Connection",
-
-				command = IECore.curry( self.disconnect, source = connections[1], destination = connections[0] )
-			)
-
+				divider = True
+			)			
+						
 			return True
 
 		else:
@@ -370,7 +401,7 @@ class ParameterUI :
 
 		cmds.delete( nodeName )
 
-	def expressionEditor( self, args, attributeName = None):
+	def expressionEditor( self, args, attributeName = None ):
 
 		split = attributeName.split('.', 1 )
 		node = split[0]
@@ -380,9 +411,28 @@ class ParameterUI :
 
 		IECoreMaya.mel( melCmd.encode('ascii') )
 
-	def disconnect( self, args, source = None, destination = None):
+	def connectionEditor( self, args, leftHandNode = None ) :
+	
+		import maya.mel
+		maya.mel.eval(
+				str("ConnectionEditor;"+
+				"nodeOutliner -e -replace %(right)s connectWindow|tl|cwForm|connectWindowPane|rightSideCW;"+
+				"connectWindowSetRightLabel %(right)s;") % { 'right' : self.nodeName() } )
+		
+		if leftHandNode :
+	
+			maya.mel.eval(
+				str("nodeOutliner -e -replace %(left)s connectWindow|tl|cwForm|connectWindowPane|leftSideCW;"+
+				"connectWindowSetLeftLabel %(left)s;" ) % { 'left' : leftHandNode.split(".")[0] } )
+
+	def disconnect( self, args, source = None, destination = None, refreshAE = None ):
 
 		cmds.disconnectAttr( source, destination )
+		
+		if refreshAE :
+			import maya.mel
+			maya.mel.eval( 'evalDeferred( "updateAE %s;")' % refreshAE )
+
 
 	def setKey( self, args, **kw ):
 
