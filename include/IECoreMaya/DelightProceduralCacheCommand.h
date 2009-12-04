@@ -66,6 +66,7 @@ class DelightProceduralCacheCommand : public MPxCommand
 		{
 			std::string className;
 			int classVersion;
+			Imath::Box3f bound; // the union of the procedural bound across all sample times
 			IECore::ParameterisedProceduralPtr procedural;
 		};		
 		typedef std::map<std::string, CachedProcedural> ProceduralMap;

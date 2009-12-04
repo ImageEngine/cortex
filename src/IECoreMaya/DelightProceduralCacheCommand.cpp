@@ -38,7 +38,7 @@
 #include "maya/MSyntax.h"
 #include "maya/MArgParser.h"
 #include "maya/MStringArray.h"
-#include "maya/MFnDependencyNode.h"
+#include "maya/MFnDagNode.h"
 #include "maya/MSelectionList.h"
 
 #include "IECore/CompoundParameter.h"
@@ -50,6 +50,7 @@
 #include "IECoreMaya/DelightProceduralCacheCommand.h"
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/PythonCmd.h"
+#include "IECoreMaya/Convert.h"
 
 #include "ri.h"
 
@@ -107,11 +108,8 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 	MArgParser parser( syntax(), args );
 	MStatus s;
 	
-	
 	if( parser.isFlagSet( "-a" ) )
 	{
-		
-		
 		MStringArray objectNames;
 		s = parser.getObjects( objectNames );
 		if( !s || objectNames.length()!=1 )
@@ -119,11 +117,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			displayError( "DelightProceduralCacheCommand::doIt : unable to get object name argument." );
 			return s;
 		}
-		if( g_procedurals.find( objectNames[0].asChar() )!=g_procedurals.end() )
-		{
-			// we only need to cache the first sample
-			return MStatus::kSuccess;
-		}
+		
 		MSelectionList sel;
 		sel.add( objectNames[0] );
 		MObject oDepNode;
@@ -133,24 +127,36 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			displayError( "DelightProceduralCacheCommand::doIt : unable to get dependency node for \"" + objectNames[0] + "\"." );
 			return s;
 		}
-		MFnDependencyNode fnDepNode( oDepNode );
-		IECoreMaya::ProceduralHolder *pHolder = dynamic_cast<IECoreMaya::ProceduralHolder *>( fnDepNode.userNode() );
+		MFnDagNode fnDagNode( oDepNode );
+		IECoreMaya::ProceduralHolder *pHolder = dynamic_cast<IECoreMaya::ProceduralHolder *>( fnDagNode.userNode() );
 		if( !pHolder )
 		{
 			displayError( "DelightProceduralCacheCommand::doIt : \"" + objectNames[0] + "\" is not a procedural holder node." );
 			return MStatus::kFailure;
 		}
 		
-		CachedProcedural cachedProcedural;
-		cachedProcedural.procedural = pHolder->getProcedural( &cachedProcedural.className, &cachedProcedural.classVersion );
-		if( !cachedProcedural.procedural )
+		ProceduralMap::iterator pIt = g_procedurals.find( objectNames[0].asChar() );
+		if( pIt!=g_procedurals.end() )
 		{
-			displayError( "DelightProceduralCacheCommand::doIt : failed to get procedural from \"" + objectNames[0] + "\"." );
-			return MStatus::kFailure;
+			// we already got the procedural on the first sample, but we should expand the bounding box for this sample
+			pIt->second.bound.extendBy( IECore::convert<Imath::Box3f>( fnDagNode.boundingBox() ) );
+			return MStatus::kSuccess;
 		}
-		
-		pHolder->setParameterisedValues(); // we're relying on nothing setting different values between now and the time we emit the procedural
-		g_procedurals[objectNames[0].asChar()] = cachedProcedural;
+		else
+		{
+			pHolder->setParameterisedValues(); // we're relying on nothing setting different values between now and the time we emit the procedural
+			
+			CachedProcedural cachedProcedural;
+			cachedProcedural.procedural = pHolder->getProcedural( &cachedProcedural.className, &cachedProcedural.classVersion );
+			if( !cachedProcedural.procedural )
+			{
+				displayError( "DelightProceduralCacheCommand::doIt : failed to get procedural from \"" + objectNames[0] + "\"." );
+				return MStatus::kFailure;
+			}
+			cachedProcedural.bound = IECore::convert<Imath::Box3f>( fnDagNode.boundingBox() );
+			
+			g_procedurals[objectNames[0].asChar()] = cachedProcedural;
+		}
 
 		return MStatus::kSuccess;
 	}
@@ -204,14 +210,13 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 				return MStatus::kFailure;
 			}
 			
-			Imath::Box3f bound = it->second.procedural->bound();
-			if( bound.isEmpty() )
+			if( it->second.bound.isEmpty() )
 			{
 				displayWarning( "DelightProceduralCacheCommand::doIt : not outputting procedural \"" + objectNames[0] + "\" because it has an empty bounding box." );
 				return MS::kSuccess;
 			}
 			RtBound rtBound;
-			IECore::convert( bound, rtBound );
+			IECore::convert( it->second.bound, rtBound );
 			
 			IECore::RendererPtr renderer = new IECoreRI::Renderer();
 			IECore::AttributeBlock attributeBlock( renderer, 1 );
