@@ -177,7 +177,7 @@ class ParameterUI :
 				height = 23 #\ todo
 			)
 
-			self._addPopupMenu( parentUI=self.__popupControl, attributeName = self.plugName() )
+			self._addPopupMenu( parentUI=self.__popupControl, attributeName = self.plugName(), button1 = True )
 
 			cmds.setParent("..")
 
@@ -221,6 +221,10 @@ class ParameterUI :
 				maya.cmds.deleteUI( m, menu=True )
 
 		cmds.popupMenu( parent = parentUI, postMenuCommand = IECore.curry( self.buildPopupMenu, **kw ) )
+
+		if "button1" in kw and kw["button1"] :
+			cmds.popupMenu( parent = parentUI, button=1, postMenuCommand = IECore.curry( self.buildPopupMenu, **kw ) )
+
 
 	def __buildConnectionsPopupMenu( self, popupMenu, ownerControl, **kw ):
 
