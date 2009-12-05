@@ -78,6 +78,14 @@ static tuple derivativeCoefficients( const T &b, typename T::BaseType t )
 }
 
 template<typename T>
+static tuple integralCoefficients( const T &b, typename T::BaseType t0, typename T::BaseType t1 )
+{
+	typename T::BaseType c0, c1, c2, c3;
+	b.integralCoefficients( t0, t1, c0, c1, c2, c3 );
+	return make_tuple( c0, c1, c2, c3 );
+}
+
+template<typename T>
 void bindCubicBasis( const char *name )
 {
 	typedef typename T::BaseType BaseType;
@@ -87,6 +95,7 @@ void bindCubicBasis( const char *name )
 		.def_readwrite( "step", &T::step )
 		.def( "coefficients", &coefficients<T> )
 		.def( "derivativeCoefficients", &derivativeCoefficients<T> )
+		.def( "integralCoefficients", &integralCoefficients<T> )
 		.def( "__call__", (BaseType (T::*) ( BaseType, BaseType, BaseType, BaseType, BaseType )const)&T::template operator()<BaseType> )
 		.def( "__call__", (V2f (T::*) ( float, const V2f &, const V2f &, const V2f &, const V2f &)const)&T::template operator()<V2f> )
 		.def( "__call__", (V3f (T::*) ( float, const V3f &, const V3f &, const V3f &, const V3f &)const)&T::template operator()<V3f> )
@@ -97,6 +106,11 @@ void bindCubicBasis( const char *name )
 		.def( "derivative", (V3f (T::*) ( float, const V3f &, const V3f &, const V3f &, const V3f &)const)&T::template derivative<V3f> )
 		.def( "derivative", (V2d (T::*) ( double, const V2d &, const V2d &, const V2d &, const V2d &)const)&T::template derivative<V2d> )
 		.def( "derivative", (V3d (T::*) ( double, const V3d &, const V3d &, const V3d &, const V3d &)const)&T::template derivative<V3d> )
+		.def( "integral", (BaseType (T::*) ( BaseType, BaseType, BaseType, BaseType, BaseType, BaseType )const)&T::template integral<BaseType> )
+		.def( "integral", (V2f (T::*) ( float, float, const V2f &, const V2f &, const V2f &, const V2f &)const)&T::template integral<V2f> )
+		.def( "integral", (V3f (T::*) ( float, float, const V3f &, const V3f &, const V3f &, const V3f &)const)&T::template integral<V3f> )
+		.def( "integral", (V2d (T::*) ( double, double, const V2d &, const V2d &, const V2d &, const V2d &)const)&T::template integral<V2d> )
+		.def( "integral", (V3d (T::*) ( double, double, const V3d &, const V3d &, const V3d &, const V3d &)const)&T::template integral<V3d> )
 		.def( self==self )
 		.def( self!=self )
 		.def( "linear", &T::linear, return_value_policy<copy_const_reference>() ).staticmethod( "linear" )

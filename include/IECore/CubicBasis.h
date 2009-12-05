@@ -70,7 +70,9 @@ class CubicBasis
 		inline S operator() ( typename S::BaseType t, const S p[4] ) const;
 
 		//! @name Derivatives
-		/// Methods for computing the first derivatives with respect to 't', which for a curve is also its tangent at 't'.
+		/// Methods for computing the first derivatives with respect to 't', which for a
+		/// curve is also its tangent at 't'.
+		////////////////////////////////////////////////////////////////////////////////////////
 		//@{
 		template<class S>
 		inline void derivativeCoefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const;
@@ -85,6 +87,25 @@ class CubicBasis
 		inline S derivative( typename S::BaseType t, const S &p0, const S &p1, const S &p2, const S &p3 ) const;
 		template<class S>
 		inline S derivative( typename S::BaseType t, const S p[4] ) const;
+		//@}
+
+		//! @name Integrals
+		/// Methods for computing integrals
+		////////////////////////////////////////////////////////////////////////////////////////
+		//@{
+		template<class S>
+		inline void integralCoefficients( S t0, S t1, S &c0, S &c1, S &c2, S &c3 ) const;
+		template<class S>
+		inline void integralCoefficients( S t0, S t1, S c[4] ) const;
+		
+		template<class S>
+		inline S integral( S t0, S t1, S p0, S p1, S p2, S p3 ) const;
+		template<class S>
+		inline S integral( S t0, S t1, const S p[4] ) const;
+		template<class S>
+		inline S integral( typename S::BaseType t0, typename S::BaseType t1, const S &p0, const S &p1, const S &p2, const S &p3 ) const;
+		template<class S>
+		inline S integral( typename S::BaseType t0, typename S::BaseType t1, const S p[4] ) const;
 		//@}
 
 		bool operator==( const CubicBasis &rhs ) const;

@@ -152,6 +152,78 @@ inline S CubicBasis<T>::derivative( typename S::BaseType t, const S p[4] ) const
 }
 
 template<typename T>
+template<class S>
+inline void CubicBasis<T>::integralCoefficients( S t0, S t1, S &c0, S &c1, S &c2, S &c3 ) const
+{
+	S t02 = t0 * t0;
+	S t03 = t02 * t0;
+	S t04 = t03 * t0;
+	
+	S t12 = t1 * t1;
+	S t13 = t12 * t1;
+	S t14 = t13 * t1;
+	
+	t02 /= 2.0f;
+	t03 /= 3.0f;
+	t04 /= 4.0f;
+	
+	t12 /= 2.0f;
+	t13 /= 3.0f;
+	t14 /= 4.0f;
+	
+	c0 = matrix[0][0] * t14 + matrix[1][0] * t13 + matrix[2][0] * t12 + matrix[3][0] * t1;
+	c1 = matrix[0][1] * t14 + matrix[1][1] * t13 + matrix[2][1] * t12 + matrix[3][1] * t1;
+	c2 = matrix[0][2] * t14 + matrix[1][2] * t13 + matrix[2][2] * t12 + matrix[3][2] * t1;
+	c3 = matrix[0][3] * t14 + matrix[1][3] * t13 + matrix[2][3] * t12 + matrix[3][3] * t1;
+	
+	c0 -= matrix[0][0] * t04 + matrix[1][0] * t03 + matrix[2][0] * t02 + matrix[3][0] * t0;
+	c1 -= matrix[0][1] * t04 + matrix[1][1] * t03 + matrix[2][1] * t02 + matrix[3][1] * t0;
+	c2 -= matrix[0][2] * t04 + matrix[1][2] * t03 + matrix[2][2] * t02 + matrix[3][2] * t0;
+	c3 -= matrix[0][3] * t04 + matrix[1][3] * t03 + matrix[2][3] * t02 + matrix[3][3] * t0;
+}
+
+template<typename T>
+template<class S>
+inline void CubicBasis<T>::integralCoefficients( S t0, S t1, S c[4] ) const
+{
+	integralCoefficients( t0, t1, c[0], c[1], c[2], c[3] );
+}
+
+template<typename T>
+template<class S>
+inline S CubicBasis<T>::integral( S t0, S t1, S p0, S p1, S p2, S p3 ) const
+{
+	S c0, c1, c2, c3;
+	integralCoefficients( t0, t1, c0, c1, c2, c3 );
+	return c0 * p0 + c1 * p1 + c2 * p2 + c3 * p3;
+}
+
+template<typename T>
+template<class S>
+inline S CubicBasis<T>::integral( S t0, S t1, const S p[4] ) const
+{
+	S c0, c1, c2, c3;
+	integralCoefficients( t0, t1, c0, c1, c2, c3 );
+	return c0 * p[0] + c1 * p[1] + c2 * p[2] + c3 * p[3];
+}
+
+template<typename T>
+template<class S>
+inline S CubicBasis<T>::integral( typename S::BaseType t0, typename S::BaseType t1, const S &p0, const S &p1, const S &p2, const S &p3 ) const
+{
+	typename S::BaseType c0, c1, c2, c3;
+	integralCoefficients( t0, t1, c0, c1, c2, c3 );
+	return c0 * p0 + c1 * p1 + c2 * p2 + c3 * p3;
+}
+
+template<typename T>
+template<class S>
+inline S CubicBasis<T>::integral( typename S::BaseType t0, typename S::BaseType t1, const S p[4] ) const
+{
+	return integral( t0, t1, p[0], p[1], p[2], p[3] );
+}
+
+template<typename T>
 bool CubicBasis<T>::operator==( const CubicBasis &rhs ) const
 {
 	return step==rhs.step && matrix==rhs.matrix;

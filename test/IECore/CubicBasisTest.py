@@ -34,6 +34,7 @@
 
 import math
 import unittest
+import random
 from IECore import *
 
 class CubicTest( unittest.TestCase ) :
@@ -151,6 +152,39 @@ class CubicTest( unittest.TestCase ) :
 			self.assertAlmostEqual( c[2], 0 )
 			self.assertAlmostEqual( c[3], 0 )
 
+	def testIntegral( self ) :
+	
+		random.seed( 200 )
+	
+		b = CubicBasisf.catmullRom()
+		for i in range( 0, 1000 ) :
+		
+			p0 = random.random()
+			p1 = random.random()
+			p2 = random.random()
+			p3 = random.random()
+			
+			t0 = random.random()
+			t1 = random.random()
+				
+			steps = 1000
+			tStep = (t1 - t0) / (steps-1)
+			a = 0
+			prevV = None
+			for j in range( 0, steps ) :
+			
+				t = t0 + j * tStep
+				
+				v =  b( t, p0, p1, p2, p3 )
+				
+				if prevV is not None :
+					a += tStep * ( v + prevV ) / 2.0
+				
+				prevV = v
+			
+			self.assertAlmostEqual( a, b.integral( t0, t1, p0, p1, p2, p3 ), 6 )
+			
+			
 if __name__ == "__main__":
     unittest.main()
 
