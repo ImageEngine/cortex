@@ -43,6 +43,8 @@ namespace IECoreRI
 {
 
 /// An IECore::Renderer subclass which renders through the renderman interface.
+/// \threading It is not safe to call the methods of this class from multiple concurrent threads.
+/// \todo Make this threadsafe (this means thinking of an alternative to RendererImplementation::m_inMotion)
 class Renderer : public IECore::Renderer
 {
 
