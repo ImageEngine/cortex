@@ -62,6 +62,7 @@
 #include "LevenbergMarquardtTest.h"
 #include "SpaceTransformTest.h"
 #include "LookupTest.h"
+#include "StringAlgoTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -92,6 +93,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addLevenbergMarquardtTest(test);
 		addSpaceTransformTest(test);
 		addLookupTest(test);
+		addStringAlgoTest(test);
 	}
 	catch (std::exception &ex)
 	{
