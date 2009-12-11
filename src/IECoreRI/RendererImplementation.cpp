@@ -47,7 +47,6 @@
 #include "IECore/Group.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
-#include "boost/algorithm/string/join.hpp"
 #include "boost/format.hpp"
 
 #include <iostream>
