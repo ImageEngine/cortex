@@ -618,7 +618,7 @@ Imf::Int64 FileIndexedIO::Index::write( std::ostream & f )
 {
 	/// Write index at end
 	std::streampos indexStart = m_next;
-
+	
 	f.seekp( m_next, std::ios::beg );
 
 	m_offset = indexStart;
@@ -1366,7 +1366,7 @@ FileIndexedIO::IndexedFile::~IndexedFile()
 				int err = truncate( m_filename.c_str(), *indexEnd );
 				if ( err != 0 )
 				{
-					msg( Msg::Error, "FileIndexedIO", boost::format ( "Error truncating file '%s' to %d bytes: %s" ) % m_filename % (*indexEnd) % strerror( errno ) );
+					msg( Msg::Error, "FileIndexedIO", boost::format ( "Error truncating file '%s' to %d bytes: %s" ) % m_filename % (*indexEnd) % strerror( err ) );
 				}
 				return;
 			}
