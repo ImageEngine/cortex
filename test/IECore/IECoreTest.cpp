@@ -97,9 +97,9 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		
 #ifdef IECORE_WITH_BOOSTFACTORIAL
 
-			addAssociatedLegendreTest(test);
-			addSphericalHarmonicsTest(test);
-			addLevenbergMarquardtTest(test);
+		addAssociatedLegendreTest(test);
+		addSphericalHarmonicsTest(test);
+		addLevenbergMarquardtTest(test);
 
 #endif
 
