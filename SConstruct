@@ -343,14 +343,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_HOUDINILIB_NAME",
-	"The name under which to install the houdini libraries. This "
-	"can be used to build and install the library for multiple "
-	"Houdini versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_PYTHON_DIR",
 	"The directory in which to install python modules.",
 	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
@@ -856,6 +848,7 @@ if doConfigure :
 	
 	if c.CheckCXXHeader( "boost/math/special_functions/factorials.hpp" ) :
 		coreEnv.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
+		coreTestEnv.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
 		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
 	else :
 		sys.stderr.write( "WARNING: boost/math/special_functions/factorials.hpp not found, some functionality will be disabled.\n" )
@@ -955,7 +948,13 @@ coreTestEnv.Append(
 	CPPPATH = [ "test/IECore" ],
 )
 
-coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", glob.glob( "test/IECore/*.cpp" ) )
+coreTestSources = glob.glob( "test/IECore/*.cpp" )
+if '-DIECORE_WITH_BOOSTFACTORIAL' not in coreTestEnv['CPPFLAGS'] :
+	coreTestSources.remove( "test/IECore/AssociatedLegendreTest.cpp" )
+	coreTestSources.remove( "test/IECore/SphericalHarmonicsTest.cpp" )
+	coreTestSources.remove( "test/IECore/LevenbergMarquardtTest.cpp" )
+
+coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
 
 coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest >& test/IECore/results.txt" )
 NoCache( coreTest )

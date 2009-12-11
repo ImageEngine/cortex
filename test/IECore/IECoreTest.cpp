@@ -57,9 +57,15 @@
 #include "RadixSortTest.h"
 #include "SweepAndPruneTest.h"
 #include "ColorTransformTest.h"
-#include "AssociatedLegendreTest.h"
-#include "SphericalHarmonicsTest.h"
-#include "LevenbergMarquardtTest.h"
+
+#ifdef IECORE_WITH_BOOSTFACTORIAL
+	
+	#include "AssociatedLegendreTest.h"
+	#include "SphericalHarmonicsTest.h"
+	#include "LevenbergMarquardtTest.h"
+
+#endif
+
 #include "SpaceTransformTest.h"
 #include "LookupTest.h"
 #include "StringAlgoTest.h"
@@ -88,12 +94,12 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addRadixSortTest(test);
 		addSweepAndPruneTest(test);
 		addColorTransformTest(test);
-
+		
 #ifdef IECORE_WITH_BOOSTFACTORIAL
 
-		addAssociatedLegendreTest(test);
-		addSphericalHarmonicsTest(test);
-		addLevenbergMarquardtTest(test);
+			addAssociatedLegendreTest(test);
+			addSphericalHarmonicsTest(test);
+			addLevenbergMarquardtTest(test);
 
 #endif
 

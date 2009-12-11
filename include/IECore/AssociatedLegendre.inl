@@ -34,15 +34,8 @@
 
 #include <cassert>
 
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-
-	#include "boost/math/special_functions/factorials.hpp"
-
-#endif
-
+#include "boost/math/special_functions/factorials.hpp"
 #include "OpenEXR/ImathMath.h"
-
-#include "IECore/Exception.h"
 
 namespace IECore
 {
@@ -105,18 +98,7 @@ V AssociatedLegendre<V>::evaluate( unsigned int l, unsigned int m, V x )
 template < typename V >
 V AssociatedLegendre<V>::normalizationFactor( unsigned int l, unsigned int m )
 {
-
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-
 	double temp = ((2.0 * l + 1.0) * boost::math::factorial< double >(l-m) ) / (4.0*M_PI * boost::math::factorial< double >(l+m) );
-
-#else
-	
-	double temp = 1.0;
-	throw Exception( "AssociatedLegendre::normalizationFactor: boost/math/special_functions/factorials.hpp not found." );
-	
-#endif
-
 	return static_cast<V>( sqrt(temp) );
 }
 
