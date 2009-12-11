@@ -167,7 +167,6 @@ from SplineDataTest import *
 from TypeIdTest import *
 from LayeredDictTest import *
 from SplineParameterTest import *
-from DisplayDriverTest import *
 from AttributeStateTest import *
 from CoordinateSystemTest import *
 from SplineToImageTest import *
@@ -209,6 +208,9 @@ from FaceAreaOpTest import FaceAreaOpTest
 from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from SubstitutedDictTest import SubstitutedDictTest
+
+if IECore.withASIO() :
+	from DisplayDriverTest import *
 
 if IECore.withTIFF() :
 	from TIFFImageReader import *

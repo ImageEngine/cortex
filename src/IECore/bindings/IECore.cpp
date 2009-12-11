@@ -351,7 +351,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMatrixMotionTransform();
 	bindGroup();
 	bindAttributeState();
-	bindOBJReader();
 	bindNullObject();
 	bindObjectInterpolator();
 	bindPointNormalsOp();
@@ -441,11 +440,19 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMeshVertexReorderOp();
 	bindSpline();
 	bindSplineData();
+	bindCoordinateSystem();
+
+#ifdef IECORE_WITH_ASIO
+	
 	bindDisplayDriver();
 	bindImageDisplayDriver();
-	bindCoordinateSystem();
 	bindClientDisplayDriver();
 	bindDisplayDriverServer();
+	// see note in Sconstruct re IECORE_WITH_ASIO and OBJReader
+	bindOBJReader();
+
+#endif
+	
 	bindSplineToImage();
 	bindDisplay();
 	bindMeshTangentsOp();
@@ -503,6 +510,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
+	def( "withASIO", &IECore::withASIO );
 	def( "withTIFF", &IECore::withTIFF );
 	def( "withJPEG", &IECore::withJPEG );
 	def( "withFreeType", &IECore::withFreeType );

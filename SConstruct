@@ -343,6 +343,14 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_HOUDINILIB_NAME",
+	"The name under which to install the houdini libraries. This "
+	"can be used to build and install the library for multiple "
+	"Houdini versions.",
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
+)
+
+o.Add(
 	"INSTALL_PYTHON_DIR",
 	"The directory in which to install python modules.",
 	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
@@ -627,7 +635,7 @@ if doConfigure :
 	)
 	if int( env["BOOST_MINOR_VERSION"] ) >=35 :
 		env.Append( LIBS = [ "boost_system" + env["BOOST_LIB_SUFFIX"] ] )
-		
+	
 	if not c.CheckLibWithHeader( env.subst( "boost_iostreams" + env["BOOST_LIB_SUFFIX"] ), "boost/filesystem/path.hpp", "CXX" ) :
 		sys.stderr.write( "ERROR : unable to find the boost libraries - check BOOST_LIB_PATH.\n" )
 		Exit( 1 )
@@ -827,7 +835,35 @@ corePythonScripts = glob.glob( "python/IECore/*.py" )
 if doConfigure :
 
 	c = Configure( coreEnv )
-
+		
+	if c.CheckCXXHeader( "boost/asio.hpp" ) :
+		coreEnv.Append( CPPFLAGS = '-DIECORE_WITH_ASIO' )
+		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_ASIO' )
+	else :
+		sys.stderr.write( "WARNING: boost/asio.hpp not found, some functionality will be disabled.\n" )
+		coreSources.remove( "src/IECore/ClientDisplayDriver.cpp" )
+		coreSources.remove( "src/IECore/DisplayDriver.cpp" )
+		coreSources.remove( "src/IECore/ImageDisplayDriver.cpp" )
+		coreSources.remove( "src/IECore/DisplayDriverServer.cpp" )
+		corePythonSources.remove( "src/IECore/bindings/ClientDisplayDriverBinding.cpp" )
+		corePythonSources.remove( "src/IECore/bindings/DisplayDriverServerBinding.cpp" )
+		corePythonSources.remove( "src/IECore/bindings/DisplayDriverBinding.cpp" )
+		corePythonSources.remove( "src/IECore/bindings/ImageDisplayDriverBinding.cpp" )
+		## \todo: OBJReader needs a version of boost::bind that doesn't give warnings when some
+		## placeholders aren't bound (which is true of any boost version that includes asio.hpp)
+		coreSources.remove( "src/IECore/OBJReader.cpp" )
+		corePythonSources.remove( "src/IECore/bindings/OBJReaderBinding.cpp" )
+	
+	if c.CheckCXXHeader( "boost/math/special_functions/factorials.hpp" ) :
+		coreEnv.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
+		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
+	else :
+		sys.stderr.write( "WARNING: boost/math/special_functions/factorials.hpp not found, some functionality will be disabled.\n" )
+		coreSources.remove( "src/IECore/AssociatedLegendre.cpp" )
+		coreSources.remove( "src/IECore/SphericalHarmonics.cpp" )
+		coreSources.remove( "src/IECore/SphericalHarmonicsRotationMatrix.cpp" )
+		coreSources.remove( "src/IECore/SphericalHarmonicsProjector.cpp" )
+	
 	if c.CheckLibWithHeader( "tiff", "tiff.h", "CXX" ) :
 		c.env.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )
 		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )

@@ -88,9 +88,15 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addRadixSortTest(test);
 		addSweepAndPruneTest(test);
 		addColorTransformTest(test);
+
+#ifdef IECORE_WITH_BOOSTFACTORIAL
+
 		addAssociatedLegendreTest(test);
 		addSphericalHarmonicsTest(test);
 		addLevenbergMarquardtTest(test);
+
+#endif
+
 		addSpaceTransformTest(test);
 		addLookupTest(test);
 		addStringAlgoTest(test);

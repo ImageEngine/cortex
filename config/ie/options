@@ -63,7 +63,7 @@ if targetApp and (compiler or compilerVersion) :
 	raise RuntimeError( "Must specify only one of COMPILER or APP" )
 
 if targetApp :
-	if targetApp not in ( "nuke", "maya" ) :
+	if targetApp not in ( "nuke", "maya", "houdini" ) :
 		raise RuntimeError( "Check config logic applies to the new app and remove this exception." )
 	targetAppVersion = getOption( "APP_VERSION", os.environ.get( targetApp.upper() + "_VERSION" ) )
 		
@@ -211,7 +211,10 @@ try :
 		os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
 except :
 	pass
-	
+
+# ask for opengl support
+WITH_GL=1
+
 # find maya if we're building for maya
 if targetApp=="maya" :
 
@@ -241,7 +244,21 @@ if IEEnv.platform() != "osx104.i686" and IEEnv.platform() != "osx105.i686" and t
 			INSTALL_NUKEPYTHON_DIR = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 	except :
 		pass
+
+# find houdini if we're building for houdini
+if targetApp=="houdini" :
+
+	houdiniVersion = targetAppVersion
+
+	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
+	boostVersion = houdiniReg["boostVersion"]
+	boost_Version = boostVersion.replace( ".", "_" )
+	BOOST_INCLUDE_PATH = "/software/tools/include/boost/" + boostVersion
+	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-" + boost_Version
 	
+	## \todo: debug boost 1.33.1 backward compatibility issues within IECoreGL
+	WITH_GL=0
+
 # find truelight, unless we're on osx, where we haven't got it to link yet
 if not IEEnv.platformOS().startswith("osx") :
 	try :
@@ -254,9 +271,6 @@ else :
 
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
-
-# ask for opengl support
-WITH_GL=1
 
 # import vars we need to get our doxygen and python wrappers working
 ENV_VARS_TO_IMPORT="PATH COMPILER COMPILER_VERSION PYTHONPATH IEENV_ROOT IEENV_WORKING_PATH IEENV_LIBRARY_PREFIX_PATH DOXYGEN_VERSION IEENV_DEBUG IEENV_DEBUG_PYTHON IEENV_DEBUGGER IEENV_DEBUGGER_ARGS DELIGHT_CONF SCONS_VERSION DL_VERSION DL_SHADERS_PATH DL_DISPLAYS_PATH"

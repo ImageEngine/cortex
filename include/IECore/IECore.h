@@ -50,7 +50,11 @@ int patchVersion();
 /// Returns a string of the form "major.minor.patch"
 const std::string &versionString();
 
-/// Returns true if IECore was build with TIFF support
+/// Returns true if IECore was built with boost::asio support
+bool withASIO();
+/// Returns true if IECore was built with boost::math::factorial support
+bool withBoostFactorial();
+/// Returns true if IECore was built with TIFF support
 bool withTIFF();
 /// Returns true if IECore was built with JPEG support
 bool withJPEG();
