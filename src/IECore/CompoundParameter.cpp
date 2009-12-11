@@ -34,7 +34,6 @@
 
 #include <algorithm>
 
-#include "boost/bind.hpp"
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
@@ -91,7 +90,7 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 	{
 		childPresets.push_back( &(m_parameters[i]->presets()) );
 	}
-
+	
 	// find the intersection of all the child preset names
 	set<string> names;
 	for( PresetsContainer::const_iterator it=childPresets[0]->begin(); it!=childPresets[0]->end(); it++ )
@@ -99,7 +98,16 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 		bool ok = true;
 		for( size_t i=1; i<m_parameters.size(); i++ )
 		{
-			if( find_if( childPresets[i]->begin(), childPresets[i]->end(), bind( &Preset::first, _1 )==it->first )==childPresets[i]->end() )
+			PresetsContainer::const_iterator cIt;
+			for( cIt=childPresets[i]->begin(); cIt != childPresets[i]->end(); cIt++ )
+			{
+				if ( it->first == cIt->first )
+				{
+					break;
+				}
+			}
+			
+			if( cIt==childPresets[i]->end() )
 			{
 				ok = false;
 				break;
@@ -110,17 +118,26 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 			names.insert( it->first );
 		}
 	}
-
-	for( set<string>::const_iterator nIt=names.begin(); nIt!=names.end(); nIt++ )
+	
+ 	for( set<string>::const_iterator nIt=names.begin(); nIt!=names.end(); nIt++ )
 	{
 		CompoundObjectPtr o = new CompoundObject;
+		
 		for( size_t i=0; i<m_parameters.size(); i++ )
 		{
-			o->members()[m_parameters[i]->name()] = find_if( childPresets[i]->begin(), childPresets[i]->end(), bind( &Preset::first, _1 )==*nIt )->second;
+			PresetsContainer::const_iterator cIt;
+			for( cIt=childPresets[i]->begin(); cIt != childPresets[i]->end(); cIt++ )
+			{
+				if ( *nIt == cIt->first )
+				{
+					o->members()[m_parameters[i]->name()] = cIt->second;
+					break;
+				}
+			}
 		}
 		pr.push_back( Preset( *nIt, o ) );
 	}
-
+	
 	return pr;
 }
 

@@ -34,8 +34,6 @@
 
 #include <algorithm>
 
-#include "boost/bind.hpp"
-
 #include "IECore/Parameter.h"
 #include "IECore/Exception.h"
 #include "IECore/NullObject.h"
@@ -364,7 +362,16 @@ void Parameter::setValidatedValue( ObjectPtr value )
 void Parameter::setValue( const std::string &presetName )
 {
 	const PresetsContainer &pr = presets();
-	PresetsContainer::const_iterator it = find_if( pr.begin(), pr.end(), bind( &Preset::first, _1 )==presetName );
+	
+	PresetsContainer::const_iterator it;
+	for( it=pr.begin(); it != pr.end(); it++ )
+	{
+		if ( presetName == it->first )
+		{
+			break;
+		}
+	}
+	
 	if( it==pr.end() )
 	{
 		throw Exception( string( "Preset \"" ) + presetName + "\" does not exist." );
