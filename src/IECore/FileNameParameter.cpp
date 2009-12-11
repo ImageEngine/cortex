@@ -34,12 +34,12 @@
 
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/StringAlgo.h"
 
 #include "boost/format.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/convenience.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/algorithm/string/join.hpp"
 #include "boost/algorithm/string/classification.hpp"
 
 #include <algorithm>
@@ -143,7 +143,8 @@ void FileNameParameter::save( SaveContext *context ) const
 	PathParameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
 
-	std::string extensions = join( m_extensions, " " );
+	std::string extensions = join( m_extensions.begin(), m_extensions.end(), " " );
+	
 	container->write( "extensions", extensions );
 }
 

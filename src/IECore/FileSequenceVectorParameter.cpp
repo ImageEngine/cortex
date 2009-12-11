@@ -37,13 +37,13 @@
 
 #include "boost/filesystem/convenience.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/algorithm/string/join.hpp"
 #include "boost/algorithm/string/classification.hpp"
 
 #include "IECore/FileSequenceVectorParameter.h"
 #include "IECore/FileSequenceFunctions.h"
 #include "IECore/FrameList.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/StringAlgo.h"
 
 using namespace IECore;
 using namespace boost;
@@ -134,7 +134,7 @@ bool FileSequenceVectorParameter::valueValid( ConstObjectPtr value, std::string 
 
 		if ( m_extensions.size() )
 		{
-			std::string ext = boost::filesystem::extension( fileSequence->getFileName() );
+			std::string ext = boost::filesystem::extension( boost::filesystem::path( fileSequence->getFileName() ) );
 			if ( ext.size() && ext[0] == '.' )
 			{
 				ext = ext.substr( 1, ext.size() - 1 );
@@ -282,8 +282,9 @@ void FileSequenceVectorParameter::save( SaveContext *context ) const
 {
 	PathVectorParameter::save( context );
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-
-	std::string extensions = join( m_extensions, " " );
+	
+	std::string extensions = join( m_extensions.begin(), m_extensions.end(), " " );
+	
 	container->write( "extensions", extensions );
 }
 
