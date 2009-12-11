@@ -36,6 +36,7 @@
 #include <cassert>
 #include <math.h>
 
+#include "boost/version.hpp"
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
@@ -50,6 +51,18 @@
 #include "IECore/CompoundFrameList.h"
 #include "IECore/EmptyFrameList.h"
 #include "IECore/FrameRange.h"
+
+#if BOOST_VERSION < 103400
+
+	// Boost versions prior to 1.34.0 performed unwanted file name checking. Disabling.
+	static bool boostFilesystemDefaultNameCheckOverride()
+	{
+		boost::filesystem::path::default_name_check( boost::filesystem::no_check );
+		return true;
+	}
+	static bool boostFilesystemDefaultNameCheckOverrideResult = boostFilesystemDefaultNameCheckOverride();
+
+#endif
 
 using namespace IECore;
 
@@ -195,9 +208,9 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence )
 
  	std::vector< std::string > files;
 
-	boost::filesystem::path dir = boost::filesystem::path( sequencePath ).parent_path();
+	boost::filesystem::path dir = boost::filesystem::path( sequencePath ).branch_path();
 
-	std::string baseSequencePath = boost::filesystem::path( sequencePath ).filename();
+	std::string baseSequencePath = boost::filesystem::path( sequencePath ).leaf();
 
 	const std::string::size_type first = baseSequencePath.find_first_of( '#' );
 	assert( first != std::string::npos );
@@ -214,13 +227,14 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence )
 	}
 
 	boost::filesystem::directory_iterator end;
+
 	for ( boost::filesystem::directory_iterator it( dirToCheck ); it != end; ++it )
 	{
 		const std::string &fileName = it->leaf();
 
 		if ( fileName.substr( 0, prefix.size() ) == prefix && fileName.substr( fileName.size() - suffix.size(), suffix.size() ) == suffix )
 		{
-			files.push_back( ( dir / fileName ).string() );
+			files.push_back( ( dir / boost::filesystem::path( fileName ) ).string() );
 		}
 	}
 
