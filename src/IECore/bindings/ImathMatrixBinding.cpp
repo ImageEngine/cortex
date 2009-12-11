@@ -142,7 +142,7 @@ struct MatrixDimensions< Matrix44<T> >
 template<typename M>
 M *constructFromList( list l )
 {
-	if ( len( l ) != (int)(MatrixTraits<M>::dimensions() * MatrixTraits<M>::dimensions() ) )
+	if ( IECore::len( l ) != (int)(MatrixTraits<M>::dimensions() * MatrixTraits<M>::dimensions() ) )
 	{
 		throw InvalidArgumentException( std::string( "Invalid list length given to IECore." ) + typeName<M>() + " constructor" );
 	}

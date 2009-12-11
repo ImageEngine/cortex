@@ -35,6 +35,8 @@
 #ifndef IE_COREPYTHON_PARAMETERBINDING_INL
 #define IE_COREPYTHON_PARAMETERBINDING_INL
 
+#include "IECore/bindings/IECoreBinding.h"
+
 namespace IECore
 {
 
@@ -71,11 +73,11 @@ T parameterPresets( const boost::python::object &o )
 		return result;
 	}
 
-	size_t s = boost::python::len( o );
+	size_t s = IECore::len( o );
 	for( size_t i=0; i<s; i++ )
 	{
 		boost::python::tuple preset = boost::python::extract<boost::python::tuple>( o[i] )();
-		size_t ts = boost::python::len( preset );
+		size_t ts = IECore::len( preset );
 		if( ts!=2 )
 		{
 			PyErr_SetString( PyExc_ValueError, "Preset must be a tuple of the form ( name, value ).");

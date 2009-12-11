@@ -67,7 +67,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 			{
 				list ext = ee();
 
-				for ( long i = 0; i < len( ext ); i++ )
+				for ( long i = 0; i < IECore::len( ext ); i++ )
 				{
 					extract< std::string > ex( ext[i] );
 					if ( !ex.check() )
@@ -125,7 +125,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 			{
 				list l = de();
 
-				for ( long i = 0; i < len( l ); i++ )
+				for ( long i = 0; i < IECore::len( l ); i++ )
 				{
 
 					extract<std::string> ee( l[i] );
@@ -186,7 +186,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 
 		void setExtensionsWrap( object ext )
 		{
-			for ( long i = 0; i < len( ext ); i++)
+			for ( long i = 0; i < IECore::len( ext ); i++)
 			{
 				FileSequenceVectorParameter::setExtensions( makeExtensions( ext ) );
 			}
@@ -195,7 +195,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 		void setFileSequenceValuesWrap( list l )
 		{
 			std::vector< FileSequencePtr > seqs;
-			for ( long i = 0; i < len( l ); i++ )
+			for ( long i = 0; i < IECore::len( l ); i++ )
 			{
 				extract< FileSequence *> e( l[i] );
 				if ( e.check() )

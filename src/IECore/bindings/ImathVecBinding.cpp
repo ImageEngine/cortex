@@ -193,7 +193,7 @@ DEFINEVECSTRSPECIALISATION( V3d );
 template<typename V>
 V *constructFromList( list l )
 {
-	if ( len( l ) != (int)V::dimensions() )
+	if ( IECore::len( l ) != (int)V::dimensions() )
 	{
 		throw InvalidArgumentException( std::string( "Invalid list length given to IECore." ) + typeName<V>() + " constructor" );
 	}

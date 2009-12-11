@@ -67,7 +67,7 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 			{
 				list ext = ee();
 
-				for ( long i = 0; i < len( ext ); i++ )
+				for ( long i = 0; i < IECore::len( ext ); i++ )
 				{
 					extract< std::string > ex( ext[i] );
 					if ( !ex.check() )
@@ -151,7 +151,7 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 
 		void setExtensionsWrap( object ext )
 		{
-			for ( long i = 0; i < len( ext ); i++)
+			for ( long i = 0; i < IECore::len( ext ); i++)
 			{
 				FileSequenceParameter::setExtensions( makeExtensions( ext ) );
 			}

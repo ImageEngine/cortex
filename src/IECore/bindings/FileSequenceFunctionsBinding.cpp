@@ -57,7 +57,7 @@ struct FileSequenceFunctionsHelper
 		list result;
 
 		std::vector< std::string > names;
-		for ( long i = 0; i < len( namesList ); i++ )
+		for ( long i = 0; i < IECore::len( namesList ); i++ )
 		{
 			extract< std::string > ex( namesList[i] );
 			if ( !ex.check() )
@@ -110,7 +110,7 @@ struct FileSequenceFunctionsHelper
 	{
 		std::vector< FrameList::Frame > frameList;
 
-		for ( long i = 0; i < len( l ); i++ )
+		for ( long i = 0; i < IECore::len( l ); i++ )
 		{
 			extract< FrameList::Frame > ex( l[i] );
 			if ( !ex.check() )

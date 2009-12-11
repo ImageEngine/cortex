@@ -51,7 +51,7 @@ static CompoundFrameListPtr constructFromList( list l )
 {
 	std::vector< FrameListPtr > frameLists;
 
-	for ( long i = 0; i < len( l ); i++ )
+	for ( long i = 0; i < IECore::len( l ); i++ )
 	{
 		extract< FrameListPtr > ex( l[i] );
 
@@ -84,7 +84,7 @@ static void setFrameLists( CompoundFrameList &x, list l )
 {
 	std::vector< FrameListPtr > frameLists;
 
-	for ( long i = 0; i < len( l ); i++ )
+	for ( long i = 0; i < IECore::len( l ); i++ )
 	{
 		extract< FrameListPtr > ex( l[i] );
 

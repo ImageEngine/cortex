@@ -35,6 +35,8 @@
 #ifndef IE_COREPYTHON_IECOREBINDING_H
 #define IE_COREPYTHON_IECOREBINDING_H
 
+#include "boost/python.hpp"
+
 #include <string>
 
 namespace IECore
@@ -71,6 +73,21 @@ std::string str( T &x );
 ///       easily bind templates without the need for macros to instantiate all the repr variations.
 template<typename T>
 std::string repr( T &x );
+
+
+/// For backwards compatibility with older versions of boost,
+/// which don't provide boost::python::len
+inline ssize_t len( const boost::python::object &obj )
+{
+	ssize_t result = PyObject_Length( obj.ptr() );
+	
+	if( PyErr_Occurred() )
+	{
+		boost::python::throw_error_already_set();
+	}
+	
+	return result;
+}
 
 }
 
