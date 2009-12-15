@@ -190,6 +190,13 @@ class Renderer : public IECore::Renderer
 		/// is a problem as we can't specify order in the AttributeState or Group objects (see todo items there). We therefore
 		/// support their specification as a single CompoundData, and ensure that they are specified in an appropriate order.
 		/// \todo Do the todo items in IECore::Group and IECore::AttributeState and deprecate the ri:subsurface call.
+		///
+		/// \li <b>"ri:detail" Box3fData</b><br>
+		/// Passed to RiDetail.
+		///
+		/// \li <b>"ri:detailRange" FloatVectorData</b><br>
+		/// Passed to RiDetailRange. The FloatVectorData must have length 4.
+		/// \todo Consider whether or not we should have a standard LOD mechanism defined in IECore.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		/// \par Currently supported attributes :
 		///

@@ -62,6 +62,7 @@ from RIBWriterTest import *
 from ParameterisedProcedural import *
 from MotionTest import MotionTest
 from PythonProceduralTest import PythonProceduralTest
+from DetailTest import DetailTest
 
 if IECore.withFreeType() :
 

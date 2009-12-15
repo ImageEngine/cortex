@@ -141,6 +141,8 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_setAttributeHandlers["ri:geometricApproximation:focusFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
 	m_setAttributeHandlers["name"] = &IECoreRI::RendererImplementation::setNameAttribute;
 	m_setAttributeHandlers["ri:subsurface"] = &IECoreRI::RendererImplementation::setSubsurfaceAttribute;
+	m_setAttributeHandlers["ri:detail"] = &IECoreRI::RendererImplementation::setDetailAttribute;
+	m_setAttributeHandlers["ri:detailRange"] = &IECoreRI::RendererImplementation::setDetailRangeAttribute;
 
 	m_getAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::getShadingRateAttribute;
 	m_getAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::getMatteAttribute;
@@ -740,6 +742,39 @@ void IECoreRI::RendererImplementation::setSubsurfaceAttribute( const std::string
 	ssParms->writable().erase( "visibility" );
 	ParameterList pl( ssParms->readable() );
 	RiAttributeV( "subsurface", pl.n(), pl.tokens(), pl.values() );
+}
+
+void IECoreRI::RendererImplementation::setDetailAttribute( const std::string &name, IECore::ConstDataPtr d )
+{
+	ConstBox3fDataPtr b = runTimeCast<const Box3fData>( d );
+	if( !b )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setDetailAttribute", format( "%s attribute expects a Box3fData value." ) % name );
+		return;
+	}
+	
+	RtBound bound;
+	convert( b->readable(), bound );
+	RiDetail( bound );
+}
+
+void IECoreRI::RendererImplementation::setDetailRangeAttribute( const std::string &name, IECore::ConstDataPtr d )
+{
+	ConstFloatVectorDataPtr f = runTimeCast<const FloatVectorData>( d );
+	if( !f )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setDetailRangeAttribute", format( "%s attribute expects a FloatVectorData value." ) % name );
+		return;
+	}
+	
+	const vector<float> &values = f->readable();
+	if( values.size()!=4 )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setDetailRangeAttribute", format( "Value must contain 4 elements (found %d)." ) %  values.size() );
+		return;
+	}
+	
+	RiDetailRange( values[0], values[1], values[2], values[3] );
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::string &name ) const
