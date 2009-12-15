@@ -121,6 +121,12 @@ struct PrimitiveEvaluatorHelper
 
 		return result;
 	}
+
+	static PrimitivePtr primitive( PrimitiveEvaluator &evaluator )
+	{
+		return evaluator.primitive()->copy();
+	}
+
 };
 
 void bindPrimitiveEvaluator()
@@ -142,7 +148,7 @@ void bindPrimitiveEvaluator()
 		.def( "intersectionPoint", intersectionPointMaxDist )
 		.def( "intersectionPoints", intersectionPoints )
 		.def( "intersectionPoints", intersectionPointsMaxDist )
-		.def( "primitive", &PrimitiveEvaluator::primitive )
+		.def( "primitive", &PrimitiveEvaluatorHelper::primitive )
 		.def( "volume", &PrimitiveEvaluator::volume )
 		.def( "centerOfGravity", &PrimitiveEvaluator::centerOfGravity )
 		.def( "surfaceArea", &PrimitiveEvaluator::surfaceArea )
