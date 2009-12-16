@@ -38,6 +38,7 @@
 #include <cassert>
 
 #include "OpenEXR/ImathLimits.h"
+#include "OpenEXR/ImathLineAlgo.h"
 
 #include "IECore/VectorOps.h"
 
@@ -416,6 +417,23 @@ bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const V
 {
 	Imath::Vec3<typename VectorTraits<Vec>::BaseType> barycentric;
 	return triangleContainsPoint( v0, v1, v2, p, barycentric );
+}
+
+template <class Vec>
+bool triangleRayIntersection( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &origin, const Vec &dir, Vec &pt, Vec &barycentric, bool &front )
+{
+	Imath::Line3< typename Vec::BaseType > l;
+	l.pos = origin;
+	l.dir = dir;
+	bool res = intersect( l, v0, v1, v2, pt, barycentric, front);
+	if ( res )
+	{
+		if ( dir.dot(pt - origin) < 0 )
+		{
+			res = false;
+		}
+	}
+	return res;
 }
 
 } // namespace IECore

@@ -84,6 +84,10 @@ bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const V
 template<class Vec>
 bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric );
 
+/// Returns true if the ray hits the triangle. Also fills pt, barycentric and front in the same way as Imath::intersect()
+template <class Vec>
+bool triangleRayIntersection( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &origin, const Vec &dir, Vec &pt, Vec &barycentric, bool &front );
+
 } // namespace IECore
 
 #include "IECore/TriangleAlgo.inl"

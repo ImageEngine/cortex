@@ -1053,7 +1053,7 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( TriangleBoundTree::NodeIndex
 			V3f hitPoint, bary;
 			bool front;
 
-			if ( intersect( ray, p0, p1, p2, hitPoint, bary, front ) )
+			if ( triangleRayIntersection( p0, p1, p2, ray.pos, ray.dir, hitPoint, bary, front ) )
 			{
 				float dSqrd = vecDistance2( hitPoint, ray.pos );
 
@@ -1212,7 +1212,7 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( TriangleBoundTree::NodeInde
 			V3f hitPoint, bary;
 			bool front;
 
-			if ( intersect( ray, p0, p1, p2, hitPoint, bary, front ) )
+			if ( triangleRayIntersection( p0, p1, p2, ray.pos, ray.dir, hitPoint, bary, front ) )
 			{
 				float dSqrd = vecDistance2( hitPoint, ray.pos );
 

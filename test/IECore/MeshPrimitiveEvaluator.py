@@ -282,6 +282,17 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			for hit in hits:
 				self.assert_( math.fabs( hit.point().length() - 1 ) < 0.1 )
 
+	def testCylinderMesh( self ) :
+		"""Testing special case of intersection query."""
+		m = Reader.create( "test/IECore/data/cobFiles/cylinder3Mesh.cob" ) ()
+		e = MeshPrimitiveEvaluator( m )
+		res = e.createResult()
+		self.failIf( e.intersectionPoint( V3f(0.5,0,0.5), V3f(1,0,0), res ) )
+		self.assert_( e.intersectionPoint( V3f(0.5,0,0.5), V3f(-1,0,0), res ) )
+
+		self.failIf( e.intersectionPoints( V3f(0.5,0,0.5), V3f(1,0,0) ) )
+		self.assert_( e.intersectionPoints( V3f(0.5,0,0.5), V3f(-1,0,0) ) )
+
 
 	def testRandomTriangles( self ) :
 		""" Testing MeshPrimitiveEvaluator with random triangles"""
