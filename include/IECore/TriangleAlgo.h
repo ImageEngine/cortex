@@ -85,6 +85,7 @@ template<class Vec>
 bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric );
 
 /// Returns true if the ray hits the triangle. Also fills pt, barycentric and front in the same way as Imath::intersect()
+/// This function treats the ray as finite on the origin and infinite on the other end and Imath::intersect considers both ends to be infinite.
 template <class Vec>
 bool triangleRayIntersection( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &origin, const Vec &dir, Vec &pt, Vec &barycentric, bool &front );
 
