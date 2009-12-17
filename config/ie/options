@@ -290,7 +290,7 @@ if targetApp :
 	# boost version houdini needs, whereas the other libraries are linking to the correct boost version for
 	# 3delight and the rest of the world. the same potential exists for other app specific builds too so we just
 	# install the procedurals into /tmp where they can't do any harm.
-	INSTALL_RMANPROCEDURAL_NAME = "/tmp/unwantedRManProcedurals/$IECORE_NAME"
+	INSTALL_RMANPROCEDURAL_NAME = "/tmp/unwantedRManProcedurals/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 else :
 	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
