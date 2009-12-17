@@ -99,6 +99,7 @@ from ImageSequenceCompositeOp import ImageSequenceCompositeOp
 from DateTimeParameterParser import *
 from MotionBlock import MotionBlock
 from SubstitutedDict import SubstitutedDict
+from VisualiserProcedural import VisualiserProcedural
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
