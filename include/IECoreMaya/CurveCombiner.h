@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,39 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-#include <cassert>
+#ifndef IECOREMAYA_CURVECOMBINER_H
+#define IECOREMAYA_CURVECOMBINER_H
 
-#include "IECoreMaya/MayaTypeIds.h"
-
-#include "maya/MTypeId.h"
-
-using namespace boost::python;
+#include "maya/MPxNode.h"
 
 namespace IECoreMaya
 {
 
-void bindMayaTypeId()
+/// The CurveCombiner node takes multiple maya nurbsCurve inputs and
+/// combines them into a single IECore::CurvesPrimitive output.
+class CurveCombiner : public MPxNode
 {
-	/// We use a helper class written in Python to allow conversion of these to proper SWIG MTypeId objects
-	enum_< long int > ( "_MayaTypeId" )
-		.value( "CacheSet", CacheSetId )
-		.value( "ObjectData", ObjectDataId )
-		.value( "ParameterisedHolderLocator", ParameterisedHolderLocatorId )
-		.value( "ParameterisedHolderDeformer", ParameterisedHolderDeformerId )
-		.value( "ParameterisedHolderField", ParameterisedHolderFieldId )
-		.value( "ParameterisedHolderSet", ParameterisedHolderSetId )
-		.value( "OpHolderNode", OpHolderNodeId )
-		.value( "ConverterHolder", ConverterHolderId )
-		.value( "ParameterisedHolderSurfaceShape", ParameterisedHolderSurfaceShapeId )
-		.value( "ParameterisedHolderComponentShape", ParameterisedHolderComponentShapeId )
-		.value( "ParameterisedHolderNode", ParameterisedHolderNodeId )
-		.value( "ProceduralHolder", ProceduralHolderId )
-		.value( "TransientParameterisedHolderNode", TransientParameterisedHolderNodeId )
-		.value( "ParameterisedHolderImagePlane", ParameterisedHolderImagePlaneId )
-		.value( "ImagePlaneHolder", ImagePlaneHolderId )
-		.value( "CurveCombiner", CurveCombinerId )
-	;
-}
+
+	public :
+
+		CurveCombiner();
+		virtual ~CurveCombiner();
+
+		static void *creator();
+		static MStatus initialize();
+		static const MTypeId id;
+		static const MString typeName;
+		
+		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
+
+		static MObject aInputCurves;
+		static MObject aOutputCurves;
+
+};
 
 } // namespace IECoreMaya
+
+#endif // IECOREMAYA_CURVECOMBINER_H

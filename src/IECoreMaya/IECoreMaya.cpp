@@ -67,6 +67,7 @@
 #include "IECoreMaya/ImagePlaneHolder.h"
 #include "IECoreMaya/ParameterisedHolderSetValueCmd.h"
 #include "IECoreMaya/DelightProceduralCacheCommand.h"
+#include "IECoreMaya/CurveCombiner.h"
 
 namespace IECoreMaya
 {
@@ -143,6 +144,10 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerNode( "ieImagePlaneHolder", ImagePlaneHolder::id,
 			ImagePlaneHolder::creator, ImagePlaneHolder::initialize, MPxNode::kImagePlaneNode );
 		assert( s );
+		
+		s = plugin.registerNode( CurveCombiner::typeName, CurveCombiner::id,
+			CurveCombiner::creator, CurveCombiner::initialize, MPxNode::kDependNode );
+		assert( s );
 
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
@@ -205,6 +210,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );
 		s = plugin.deregisterNode( ParameterisedHolderImagePlane::id );
 		s = plugin.deregisterNode( ImagePlaneHolder::id );
+		s = plugin.deregisterNode( CurveCombiner::id );
 
 		s = plugin.deregisterCommand( "iePython" );
 		s = plugin.deregisterCommand( "ieSystemExit" );
