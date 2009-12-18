@@ -161,7 +161,9 @@ MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 		
 		s = pointPlug.child( 0 ).setValue( it->first ); assert( s );
 		s = pointPlug.child( 1 ).setValue( it->second ); assert( s );
-		s = pointPlug.child( 2 ).setValue( MRampAttribute::kSpline ); assert( s );
+		// hardcoding interpolation of 3 (spline) because the MRampAttribute::MInterpolation enum values don't actually
+		// correspond to the necessary plug values at all.
+		s = pointPlug.child( 2 ).setValue( 3 ); assert( s );
 	
 		numExpectedPoints++;
 	}
