@@ -81,9 +81,8 @@ PTCParticleReader::~PTCParticleReader()
 
 bool PTCParticleReader::canRead( const std::string &fileName )
 {
-	int nvars;
 	PtcPointCloud ptcFile;
-	ptcFile = PtcOpenPointCloudFile( (char *)fileName.c_str(), &nvars, NULL, NULL );
+	ptcFile = PtcSafeOpenPointCloudFile( (char *)fileName.c_str() );
 	if (!ptcFile)
 	{
 		return false;
@@ -135,7 +134,8 @@ bool PTCParticleReader::open()
 		m_header.hasBbox = m_header.hasWorld2eye = m_header.hasWorld2ndc = m_header.hasFormat = false;
 
 		// This is ugly but necessary. Calling PtcOpenPointCloudFile with NULL pointers didn't failed but also didn't returned the number of variables anyways...
-
+		/// \todo We should be using PtcSafeOpenPointCloudFile here instead. We could then clean up the stuff in the header where we
+		/// use the nasty PTC_MAX_VARIABLES stuff.
 		m_ptcFile = PtcOpenPointCloudFile( (char *)fileName().c_str(), &m_header.nvars, (PTCParticleIO::CharPtrPtr)m_header.vartypes, (PTCParticleIO::CharPtrPtr)m_header.varnames );
 		if (!m_ptcFile)
 		{
