@@ -34,25 +34,11 @@ if IEEnv.platform() == "rhel4.i686" :
 	build( [ "COMPILER_VERSION=3.3.4" ] )
 	build( [ "COMPILER_VERSION=4.0.1" ] )
 
-	
-elif IEEnv.platformOS() == "osx104" or IEEnv.platformOS() == "osx105" :
-	
-	if os.path.exists( ".sconsign.dblite" ) :
-		
-		os.remove( ".sconsign.dblite" )
-		
-	if os.path.exists( ".sconf_temp" ) :
-		
-		shutil.rmtree( ".sconf_temp" )	
-	build()
-
-elif IEEnv.platform() == "cent5.x86_64" :
+if IEEnv.platform() == "cent5.x86_64" :
 
 	build( [ "COMPILER_VERSION=3.4.6" ] )
-	build( [ "COMPILER_VERSION=4.1.2" ] )
-	build( [ "APP=maya", "APP_VERSION=2009", "DL_VERSION=8.5.9" ] )
-	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=8.5.42" ] )
 	build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION=9.0.2" ] )
+	build( [ "APP=maya", "APP_VERSION=2009", "DL_VERSION=9.0.2" ] )
 	build( [ "APP=nuke", "APP_VERSION=5.1v6" ] )
 	build( [ "APP=nuke", "APP_VERSION=5.2v1" ] )
 	build( [ "APP=houdini", "APP_VERSION=10.0.295" ] )
