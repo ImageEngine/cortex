@@ -74,10 +74,11 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "hello" ) )
 		p.setValidatedValue( IECore.StringData( "hello.###.tif" ) )
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) )
-
+		
 		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
 		p.setFileSequenceValue( IECore.FileSequence( "a.###.tif", IECore.FrameRange( 1, 10 ) ) )
-		self.assertEqual( p.getValue(), IECore.StringData( "a.###.tif" ) )
+		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
+		self.assertEqual( p.getValue(), IECore.StringData( "a.###.tif 1-10" ) )
 
 	def testEmptyString( self ) :
 
