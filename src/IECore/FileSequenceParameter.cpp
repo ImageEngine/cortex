@@ -173,14 +173,15 @@ bool FileSequenceParameter::valueValid( ConstObjectPtr value, std::string *reaso
 
 void FileSequenceParameter::setFileSequenceValue( ConstFileSequencePtr fileSequence )
 {
-	//// \todo Don't throw away the FrameList here!
+	/// \todo Don't throw away the FrameList here!
 	setValue( new StringData( fileSequence->getFileName() ) );
 }
 
 FileSequencePtr FileSequenceParameter::getFileSequenceValue() const
 {
 	const std::string &fileSequenceStr = getTypedValue();
-
+	
+	/// \todo Consider returning an EmptyFrameList rather than checking the filesystem
 	if ( fileSequenceStr.find_first_of( ' ' ) == std::string::npos )
 	{
 		FileSequencePtr result = 0;
