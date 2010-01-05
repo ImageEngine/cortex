@@ -182,6 +182,7 @@ FileSequencePtr FileSequenceParameter::getFileSequenceValue() const
 	const std::string &fileSequenceStr = getTypedValue();
 	
 	/// \todo Consider returning an EmptyFrameList rather than checking the filesystem
+	/// note that Several Ops make the assumption that this will check the filesystem (e.g. SequenceRmOp)
 	if ( fileSequenceStr.find_first_of( ' ' ) == std::string::npos )
 	{
 		FileSequencePtr result = 0;
