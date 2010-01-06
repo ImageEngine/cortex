@@ -115,6 +115,7 @@ class SequenceLsOp( Op ) :
 						( "nuke", "nuke -v <PREFIX>%0<PADDINGSIZE>d<SUFFIX> <FIRST>,<LAST>" ),
 						( "fcheck", "fcheck -n <FIRST> <LAST> <STEP> <PREFIX><@PADDING><SUFFIX>" ),
 						( "frameCycler", "framecycler <PREFIX><#PADDING><SUFFIX>" ),
+						( "rv", "rv <PREFIX><#PADDING><SUFFIX>" ),
 					)
 				),
 				StringVectorParameter(
