@@ -67,6 +67,8 @@ class PointDistribution : public boost::noncopyable
 		/// densitySampler must have signature float( const Imath::V2f &pos ) and return a density in the range 0-1.
 		///
 		/// pointEmitter is called for each point generated and must have the signature void( const Imath::V2f &pos ).
+		/// \todo This isn't particularly efficient when the bounds are small, as many points are considered and rejected. It might
+		/// be possible to improve this by using some sort of acceleration structure within the Tile class.
 		template<typename DensityFunction, typename PointFunction>
 		void operator () ( const Imath::Box2f &bounds, float density, DensityFunction &densitySampler, PointFunction &pointEmitter ) const;
 	
