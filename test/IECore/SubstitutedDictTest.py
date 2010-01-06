@@ -45,13 +45,21 @@ class SubstitutedDictTest( unittest.TestCase ) :
 				{
 					"c" : IECore.StringData( "goodbye ${place}" )
 				}
-			)	
+			)
 		}
 		
 		ds = IECore.SubstitutedDict( d, { "name" : "john", "place" : "london" } )
 		
 		self.assertEqual( ds["a"], "hello john" )
 		self.assertEqual( ds["b"]["c"], IECore.StringData( "goodbye london" ) )
+		self.failUnless( isinstance( ds["b"], IECore.SubstitutedDict ) )
+		self.assertEqual( ds.get( "a" ), "hello john" )
+		self.assertEqual( ds.get( "notThere" ), None )
+		self.assertEqual( ds.get( "notThere", 10 ), 10 )
+		self.assertEqual( ds.get( "a", substituted=False ), "hello ${name}" )
+		self.assertEqual( ds.get( "b", substituted=False )["c"], IECore.StringData( "goodbye ${place}" ) )
+		self.failUnless( ds.get( "b", substituted=False ).isInstanceOf( IECore.CompoundObject.staticTypeId() ) )
+		self.assertEqual( ds.get( "notThere", substituted=False ), None )
 		
 if __name__ == "__main__":
     unittest.main()

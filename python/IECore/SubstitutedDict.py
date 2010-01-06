@@ -69,10 +69,12 @@ class SubstitutedDict :
 	
 		return self.__dict.keys()
 
-	def get( self, key, defaultValue ) :
+	def get( self, key, defaultValue=None, substituted=True ) :
 	
 		try :
-			return self.__getitem__( key )
+			if substituted :
+				return self.__getitem__( key )
+			else :
+				return self.__dict[key]
 		except KeyError :
 			return defaultValue
-			
