@@ -77,8 +77,8 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		
 		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
 		p.setFileSequenceValue( IECore.FileSequence( "a.###.tif", IECore.FrameRange( 1, 10 ) ) )
-		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
-		self.assertEqual( p.getValue(), IECore.StringData( "a.###.tif 1-10" ) )
+		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) ) # Known bug
+		self.assertEqual( p.getValue(), IECore.StringData( "a.###.tif 1-10" ) ) # Known bug
 
 	def testEmptyString( self ) :
 
