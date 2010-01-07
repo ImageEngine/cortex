@@ -42,11 +42,18 @@ using namespace boost::python;
 
 namespace IECore
 {
+
+	static ShaderPtr construct( const std::string &name="defaultsurface", const std::string &type="surface", CompoundDataPtr parameters = 0 )
+	{
+		return new Shader( name, type, parameters ? parameters->readable() : CompoundDataMap() );
+	}
+
 	void bindShader()
 	{
 		RunTimeTypedClass<Shader>()
 			.def( init<>() )
 			.def( init<optional<const std::string &, const std::string &, const CompoundDataMap &> >() )
+			.def( "__init__", make_constructor( &construct, default_call_policies(), ( boost::python::arg_( "name" )="defaultsurface", boost::python::arg_( "type" )="surface", boost::python::arg_( "parameters" )=0 ) ) )
 			.add_property( "name", make_function( &Shader::getName, return_value_policy<copy_const_reference>() ), &Shader::setName )
 			.add_property( "type", make_function( &Shader::getType, return_value_policy<copy_const_reference>() ), &Shader::setType )
 			.add_property( "parameters", &Shader::parametersData )
