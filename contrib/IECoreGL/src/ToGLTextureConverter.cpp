@@ -165,7 +165,7 @@ IECore::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::C
 		IECore::FloatVectorDataPtr channelData = IECore::runTimeCast<IECore::FloatVectorData>( itChannels->second );
 		if ( ! channelData )
 		{
-			throw IECore::Exception( "Invald channel data found in ImagePrimitive representation, only float data is supported.");
+			throw IECore::Exception( "Invald channel data found in ImagePrimitive representation, only 32bit float data is supported. Please check texture.");
 		}
 
 		newImage->variables.insert( IECore::PrimitiveVariableMap::value_type( itChannels->first, IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, channelData ) ) );
