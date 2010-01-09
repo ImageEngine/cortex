@@ -888,24 +888,10 @@ if doConfigure :
 				
 	c.Finish()
 
-
-# This is a simple mechanism to ensure that all of the installs get performed only after all of the builds
-# have been done. We make this coreInstallSync object depend on every build action, and every install action
-# depends on the coreInstallSync object. The reason we want to do this is so that, for example, the time between a 
-# library being installed and its corresponding python binding library being installed is minimised. If we did
-# not do this then there could be a potentially long period of time when the two co-dependent libraries won't
-# link together at runtime due to mismatched versions.
-#
-# NB ":" is the "null" command
-coreInstallSync = coreEnv.Command( "coreInstallSync.out", "", ":" )
-NoCache( coreInstallSync )
-
 # library
 coreLibrary = coreEnv.SharedLibrary( "lib/" + os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreSources )
-coreEnv.Depends( coreInstallSync, coreLibrary )
 coreLibraryInstall = coreEnv.Install( os.path.dirname( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreLibrary )
 coreEnv.NoCache( coreLibraryInstall )
-coreEnv.Depends( coreLibraryInstall, coreInstallSync )
 coreEnv.AddPostAction( coreLibraryInstall, lambda target, source, env : makeLibSymLinks( coreEnv ) )
 coreEnv.Alias( "install", [ coreLibraryInstall ] )
 coreEnv.Alias( "installCore", [ coreLibraryInstall ] )
@@ -914,7 +900,6 @@ coreEnv.Alias( "installLib", [ coreLibraryInstall ] )
 # headers
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
 headerInstall += coreEnv.Install( "$INSTALL_HEADER_DIR/IECore/bindings", coreBindingHeaders )
-coreEnv.Depends( headerInstall, coreInstallSync )
 coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
 coreEnv.Alias( "install", headerInstall )
 coreEnv.Alias( "installCore", headerInstall )
@@ -923,14 +908,11 @@ coreEnv.Alias( "installCore", headerInstall )
 corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 corePythonModule = corePythonEnv.SharedLibrary( "python/IECore/_IECore", corePythonSources )
 corePythonEnv.Depends( corePythonModule, coreLibrary )
-corePythonEnv.Depends( coreInstallSync, corePythonModule )
 
 corePythonModuleInstall = corePythonEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
-coreEnv.Depends( corePythonModuleInstall, coreInstallSync )
 corePythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
 corePythonEnv.Alias( "install", corePythonModuleInstall )
 corePythonEnv.Alias( "installCore", corePythonModuleInstall )
-corePythonEnv.Depends( corePythonModuleInstall, coreInstallSync )
 
 Default( coreLibrary, corePythonModule )
 
@@ -1034,10 +1016,8 @@ if doConfigure :
 	
 		# library
 		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riSources )
-		riEnv.Depends( coreInstallSync, riLibrary )
 		riLibraryInstall = riEnv.Install( os.path.dirname( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riLibrary )
 		riEnv.NoCache( riLibraryInstall )
-		riEnv.Depends( riLibraryInstall, coreInstallSync )		
 		riEnv.AddPostAction( riLibraryInstall, lambda target, source, env : makeLibSymLinks( riEnv ) )
 		riEnv.Alias( "install", riLibraryInstall )
 		riEnv.Alias( "installRI", riLibraryInstall )
@@ -1045,17 +1025,14 @@ if doConfigure :
 
 		# headers
 		riHeaderInstall = riEnv.Install( "$INSTALL_HEADER_DIR/IECoreRI", riHeaders )
-		riEnv.Depends( riHeaderInstall, coreInstallSync )
 		riEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riEnv, riEnv["INSTALL_HEADER_DIR"] ) )
 		riEnv.Alias( "install", riHeaderInstall )
 		riEnv.Alias( "installRI", riHeaderInstall )
 
 		# python procedural
 		riPythonProcedural = riPythonProceduralEnv.SharedLibrary( "src/rmanProcedurals/python/" + os.path.basename( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ), "src/rmanProcedurals/python/Procedural.cpp" )
-		riPythonProceduralEnv.Depends( coreInstallSync, riPythonProcedural )
 		riPythonProceduralInstall = riEnv.Install( os.path.dirname( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ), riPythonProcedural )
 		riPythonProceduralEnv.NoCache( riPythonProceduralInstall )
-		riPythonProceduralEnv.Depends( riPythonProceduralInstall, coreInstallSync )		
 		riPythonProceduralEnv.AddPostAction( riPythonProceduralInstall, lambda target, source, env : makeLibSymLinks( riPythonProceduralEnv, libNameVar="INSTALL_RMANPROCEDURAL_NAME" ) )
 		riPythonProceduralEnv.Alias( "install", riPythonProceduralInstall )
 		riPythonProceduralEnv.Alias( "installRI", riPythonProceduralInstall )
@@ -1076,11 +1053,9 @@ if doConfigure :
 			]
 		)
 		riPythonModule = riPythonEnv.SharedLibrary( "python/IECoreRI/_IECoreRI", riPythonSources )
-		riPythonEnv.Depends( coreInstallSync, riPythonModule )		
 		riPythonEnv.Depends( riPythonModule, riLibrary )
 
 		riPythonModuleInstall = riPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreRI", riPythonScripts + riPythonModule )
-		riPythonEnv.Depends( riPythonModuleInstall, coreInstallSync )
 		riPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riPythonEnv, riPythonEnv["INSTALL_PYTHON_DIR"] ) )
 		riPythonEnv.Alias( "install", riPythonModuleInstall )
 		riPythonEnv.Alias( "installRI", riPythonModuleInstall )
@@ -1179,10 +1154,8 @@ if env["WITH_GL"] and doConfigure :
 			glSources.remove( "contrib/IECoreGL/src/TextPrimitive.cpp" )
 		
 		glLibrary = glEnv.SharedLibrary( "lib/" + os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glSources )
-		glEnv.Depends( coreInstallSync, glLibrary )
 		glLibraryInstall = glEnv.Install( os.path.dirname( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glLibrary )
 		glEnv.NoCache( glLibraryInstall )
-		glEnv.Depends( glLibraryInstall, coreInstallSync )
 		glEnv.AddPostAction( glLibraryInstall, lambda target, source, env : makeLibSymLinks( glEnv ) )
 		glEnv.Alias( "install", glLibraryInstall )
 		glEnv.Alias( "installGL", glLibraryInstall )
@@ -1190,7 +1163,6 @@ if env["WITH_GL"] and doConfigure :
 
 		glHeaders = glob.glob( "contrib/IECoreGL/include/IECoreGL/*.h" ) + glob.glob( "contrib/IECoreGL/include/IECoreGL/*.inl" )
 		glHeaderInstall = glEnv.Install( "$INSTALL_HEADER_DIR/IECoreGL", glHeaders )
-		glEnv.Depends( glHeaderInstall, coreInstallSync )
 		glEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_HEADER_DIR"] ) )
 		glEnv.Alias( "install", glHeaderInstall )
 		glEnv.Alias( "installGL", glHeaderInstall )
@@ -1212,12 +1184,10 @@ if env["WITH_GL"] and doConfigure :
 			]
 		)
 		glPythonModule = glPythonEnv.SharedLibrary( "contrib/IECoreGL/python/IECoreGL/_IECoreGL", glPythonSources )
-		glPythonEnv.Depends( coreInstallSync, glPythonModule )
 		glPythonEnv.Depends( glPythonModule, glLibrary )
 
 		glPythonScripts = glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" )
 		glPythonModuleInstall = glPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )		
-		glPythonEnv.Depends( glPythonModuleInstall, coreInstallSync )
 		glPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glPythonEnv, glPythonEnv["INSTALL_PYTHON_DIR"] ) )
 		glPythonEnv.Alias( "install", glPythonModuleInstall )
 		glPythonEnv.Alias( "installGL", glPythonModuleInstall )
@@ -1324,10 +1294,8 @@ if doConfigure :
 
 		# maya library
 		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaSources )
-		mayaEnv.Depends( coreInstallSync, mayaLibrary )
 		mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaLibrary )
 		mayaEnv.NoCache( mayaLibraryInstall )
-		mayaEnv.Depends( mayaLibraryInstall, coreInstallSync )
 		mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv, "INSTALL_MAYALIB_NAME" ) )
 		mayaEnv.Alias( "install", mayaLibraryInstall )
 		mayaEnv.Alias( "installMaya", mayaLibraryInstall )
@@ -1336,14 +1304,12 @@ if doConfigure :
  		# maya headers
 		mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
 		mayaHeaderInstall += mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya/bindings", mayaBindingHeaders )		
-		mayaEnv.Depends( mayaHeaderInstall, coreInstallSync )			
 		mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
 		mayaEnv.Alias( "install", mayaHeaderInstall )
 		mayaEnv.Alias( "installMaya", mayaHeaderInstall )
 
 		# maya mel
 		mayaMelInstall = mayaEnv.Install( "$INSTALL_MEL_DIR", mayaMel )
-		mayaEnv.Depends( mayaMelInstall, coreInstallSync )
 		mayaEnv.AddPostAction( "$INSTALL_MEL_DIR", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_MEL_DIR"] ) )
 		mayaEnv.Alias( "install", mayaMelInstall )
 		mayaEnv.Alias( "installMaya", mayaMelInstall )
@@ -1372,7 +1338,6 @@ if doConfigure :
 			
 			mayaPluginLoader = mayaPluginLoaderEnv.SharedLibrary( mayaPluginTarget, mayaPluginLoaderSources, SHLIBPREFIX="" )
 			mayaPluginLoaderInstall = mayaPluginLoaderEnv.InstallAs( mayaPluginLoaderEnv.subst( "$INSTALL_MAYAPLUGIN_NAME$SHLIBSUFFIX" ), mayaPluginLoader )
-			mayaPluginLoaderEnv.Depends( mayaPluginLoaderInstall, coreInstallSync )
 			mayaPluginLoaderEnv.AddPostAction( mayaPluginLoaderInstall, lambda target, source, env : makeSymLinks( mayaPluginLoaderEnv, mayaPluginLoaderEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
 			mayaPluginLoaderEnv.Alias( "install", mayaPluginLoaderInstall )
 			mayaPluginLoaderEnv.Alias( "installMaya", mayaPluginLoaderInstall )
@@ -1385,7 +1350,6 @@ if doConfigure :
 		mayaPlugin = mayaPluginEnv.SharedLibrary( mayaPluginTarget, mayaPluginSources, SHLIBPREFIX="" )
 		mayaPluginInstall = mayaPluginEnv.Install( os.path.dirname( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPlugin )
 		mayaPluginEnv.Depends( mayaPlugin, corePythonModule )
-		mayaPluginEnv.Depends( mayaPluginInstall, coreInstallSync )
 		
 		mayaPluginEnv.AddPostAction( mayaPluginInstall, lambda target, source, env : makeSymLinks( mayaPluginEnv, mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
 		mayaPluginEnv.Alias( "install", mayaPluginInstall )
@@ -1402,7 +1366,6 @@ if doConfigure :
 		mayaPythonEnv.Depends( mayaPythonModule, mayaLibrary )
 
 		mayaPythonModuleInstall = mayaPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
-		mayaPythonEnv.Depends( mayaPythonModuleInstall, coreInstallSync )
 		mayaPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonEnv, mayaPythonEnv["INSTALL_PYTHON_DIR"] ) )
 		mayaPythonEnv.Alias( "install", mayaPythonModuleInstall )
 		mayaPythonEnv.Alias( "installMaya", mayaPythonModuleInstall )
@@ -1541,22 +1504,18 @@ if doConfigure :
 				nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )
 
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
-				nukeEnv.Depends( coreInstallSync, nukeLibrary )
 				nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeLibrary )
-				nukeEnv.Depends( nukeLibraryInstall, coreInstallSync )
 				nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv, "INSTALL_NUKELIB_NAME" ) )
 				nukeEnv.Alias( "install", nukeLibraryInstall )
 				nukeEnv.Alias( "installNuke", nukeLibraryInstall )
 				nukeEnv.Alias( "installLib", [ nukeLibraryInstall ] )
 
 				nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
-				nukeEnv.Depends( nukeHeaderInstall, coreInstallSync )
 				nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
 				nukeEnv.Alias( "installNuke", nukeHeaderInstall )
 				nukeEnv.Alias( "install", nukeHeaderInstall )
 
 				nukePythonModuleInstall = nukePythonEnv.Install( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", nukePythonScripts )
-				nukePythonEnv.Depends( nukePythonModuleInstall, coreInstallSync )
 				nukePythonEnv.AddPostAction( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukePythonEnv, nukePythonEnv["INSTALL_NUKEPYTHON_DIR"] ) )
 				nukePythonEnv.Alias( "install", nukePythonModuleInstall )
 				nukePythonEnv.Alias( "installNuke", nukePythonModuleInstall )
@@ -1620,10 +1579,8 @@ if doConfigure :
 		# library
 		truelightLibrary = truelightEnv.SharedLibrary( "lib/" + os.path.basename( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightSources )
 		truelightEnv.Depends( truelightLibrary, coreLibrary )
-		truelightEnv.Depends( coreInstallSync, truelightLibrary )
 		truelightLibraryInstall = truelightEnv.Install( os.path.dirname( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightLibrary )
 		truelightEnv.NoCache( truelightLibraryInstall )
-		truelightEnv.Depends( truelightLibraryInstall, coreInstallSync )
 		truelightEnv.AddPostAction( truelightLibraryInstall, lambda target, source, env : makeLibSymLinks( truelightEnv ) )
 		truelightEnv.Alias( "install", truelightLibraryInstall )
 		truelightEnv.Alias( "installTruelight", truelightLibraryInstall )
@@ -1631,7 +1588,6 @@ if doConfigure :
 
 		# headers
 		truelightHeaderInstall = truelightEnv.Install( "$INSTALL_HEADER_DIR/IECoreTruelight", truelightHeaders )
-		truelightEnv.Depends( truelightHeaderInstall, coreInstallSync )
 		truelightEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreTruelight", lambda target, source, env : makeSymLinks( truelightEnv, truelightEnv["INSTALL_HEADER_DIR"] ) )
 		truelightEnv.Alias( "installTruelight", truelightHeaderInstall )
 		truelightEnv.Alias( "install", truelightHeaderInstall )
@@ -1645,11 +1601,9 @@ if doConfigure :
 
 		truelightPythonModule = truelightPythonEnv.SharedLibrary( "python/IECoreTruelight/_IECoreTruelight", truelightPythonSources )
 		truelightPythonEnv.Depends( truelightPythonModule, corePythonModule )
-		truelightPythonEnv.Depends( coreInstallSync, truelightPythonModule )		
 		truelightPythonEnv.Depends( truelightPythonModule, truelightLibrary )
 		
 		truelightPythonModuleInstall = truelightPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreTruelight", truelightPythonScripts + truelightPythonModule )
-		truelightPythonEnv.Depends( truelightPythonModuleInstall, coreInstallSync )
 		truelightPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreTruelight", lambda target, source, env : makeSymLinks( truelightPythonEnv, truelightPythonEnv["INSTALL_PYTHON_DIR"] ) )
 		truelightPythonEnv.Alias( "install", truelightPythonModuleInstall )
 		truelightPythonEnv.Alias( "installTruelight", truelightPythonModuleInstall )
@@ -1713,6 +1667,8 @@ if doConfigure :
 		docEnv.Depends( docs, doxyfile["HTML_STYLESHEET"] )						
 				
 		docEnv.Alias( "doc", "doc/html/index.html" )
+		
+		Default( docs )
 
 		# \todo This won't reinstall the documentation if the directory already exists
 		installDoc = docEnv.Install( "$INSTALL_DOC_DIR", "doc/html" )

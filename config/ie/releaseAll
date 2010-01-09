@@ -7,20 +7,19 @@ import os
 import os.path
 import shutil
 
-global args
-args = [ "scons", "install", "INSTALL_PREFIX=/software" ]
-
 def build( extraArgs = [] ) :
-
-	global args
 	
-	buildArgs = list( args )
+	buildArgs = [ "INSTALL_PREFIX=/software" ]
 	buildArgs.extend( extraArgs )
 	buildArgs.extend( sys.argv[1:] )	
 	
-	if subprocess.call( buildArgs ) != 0 :
+	if subprocess.call( [ "scons" ] + buildArgs ) != 0 :
 	
-		raise RuntimeError("Error : " + str( " ".join( buildArgs ) ) )
+		raise RuntimeError("Error : scons " + str( " ".join( buildArgs ) ) )
+		
+	if subprocess.call( [ "scons", "install" ] + buildArgs ) != 0 :
+	
+		raise RuntimeError("Error : scons install " + str( " ".join( buildArgs ) ) )
 
 if IEEnv.platformOS() == "osx104" or IEEnv.platformOS() == "osx105" :
 	
@@ -31,6 +30,7 @@ if IEEnv.platformOS() == "osx104" or IEEnv.platformOS() == "osx105" :
 	if os.path.exists( ".sconf_temp" ) :
 		
 		shutil.rmtree( ".sconf_temp" )	
+		
 	build()
 
 elif IEEnv.platform() == "cent5.x86_64" :
