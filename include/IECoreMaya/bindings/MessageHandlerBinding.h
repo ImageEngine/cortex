@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,27 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_MESSAGEHANDLER_H
-#define IE_COREMAYA_MESSAGEHANDLER_H
-
-#include "IECore/MessageHandler.h"
+#ifndef IECOREMAYA_MESSAGEHANDLERBINDING_H
+#define IECOREMAYA_MESSAGEHANDLERBINDING_H
 
 namespace IECoreMaya
 {
 
-class MessageHandler : public IECore::MessageHandler
-{
+void bindMessageHandler();
 
-	public :
+}
 
-		IE_CORE_DECLAREMEMBERPTR( MessageHandler );
-
-		virtual void handle( Level level, const std::string &context, const std::string &message );
-
-};
-
-IE_CORE_DECLAREPTR( MessageHandler );
-
-} // namespace IECoreMaya
-
-#endif // IE_COREMAYA_MESSAGEHANDLER_H
+#endif // IECOREMAYA_MESSAGEHANDLERBINDING_H

@@ -76,6 +76,7 @@
 #include "IECoreMaya/bindings/FromMayaArrayDataConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaCompoundNumericPlugConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaTransformationMatrixConverterBinding.h"
+#include "IECoreMaya/bindings/MessageHandlerBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -126,4 +127,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaArrayDataConverter();
 	bindFromMayaCompoundNumericPlugConverter();
 	bindFromMayaTransformationMatrixConverter();
+	bindMessageHandler();
 }

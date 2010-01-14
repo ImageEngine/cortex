@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,27 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_MESSAGEHANDLER_H
-#define IE_COREMAYA_MESSAGEHANDLER_H
+#include "boost/python.hpp"
 
-#include "IECore/MessageHandler.h"
+#include "IECore/bindings/RefCountedBinding.h"
+
+#include "IECoreMaya/MessageHandler.h"
+
+using namespace boost::python;
 
 namespace IECoreMaya
 {
 
-class MessageHandler : public IECore::MessageHandler
+void bindMessageHandler()
 {
 
-	public :
+	IECore::RefCountedClass<IECoreMaya::MessageHandler, IECore::MessageHandler>( "MessageHandler" )
+		.def( init<>() )
+	;
 
-		IE_CORE_DECLAREMEMBERPTR( MessageHandler );
+}
 
-		virtual void handle( Level level, const std::string &context, const std::string &message );
-
-};
-
-IE_CORE_DECLAREPTR( MessageHandler );
-
-} // namespace IECoreMaya
-
-#endif // IE_COREMAYA_MESSAGEHANDLER_H
+}
