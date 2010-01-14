@@ -50,6 +50,13 @@ IE_CORE_DEFINERUNTIMETYPED( MeshTangentsOp );
 
 MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( staticTypeName(), "Calculates mesh tangents with respect to texture coordinates." )
 {
+	/// \todo Add this parameter to a member variable and update pPrimVarNameParameter() functions.
+	StringParameterPtr pPrimVarNameParameter = new StringParameter(
+		"pPrimVarName",	
+		"pPrimVarName description",
+		"P"
+	);
+
 	m_uPrimVarNameParameter = new StringParameter(
 		"uPrimVarName",
 		"uPrimVarName description",
@@ -83,6 +90,7 @@ MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( staticTypeName(), "Calculate
 		"vTangent"
 	);
 
+	parameters()->addParameter( pPrimVarNameParameter );
 	parameters()->addParameter( m_uPrimVarNameParameter );
 	parameters()->addParameter( m_vPrimVarNameParameter );
 	parameters()->addParameter( uvIndicesPrimVarNameParameter );
@@ -92,6 +100,16 @@ MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( staticTypeName(), "Calculate
 
 MeshTangentsOp::~MeshTangentsOp()
 {
+}
+
+StringParameterPtr MeshTangentsOp::pPrimVarNameParameter()
+{
+	return parameters()->parameter<StringParameter>( "pPrimVarName" );
+}
+
+ConstStringParameterPtr MeshTangentsOp::pPrimVarNameParameter() const
+{
+	return parameters()->parameter<StringParameter>( "pPrimVarName" );
 }
 
 StringParameterPtr MeshTangentsOp::uPrimVarNameParameter()
@@ -282,7 +300,7 @@ struct MeshTangentsOp::HandleErrors
 	template<typename T, typename F>
 	void operator()( typename T::ConstPtr d, const F &f )
 	{
-		string e = boost::str( boost::format( "MeshTangentsOp : \"P\" has unsupported data type \"%s\"." ) % d->typeName() );
+		string e = boost::str( boost::format( "MeshTangentsOp : pPrimVarName parameter has unsupported data type \"%s\"." ) % d->typeName() );
 		throw InvalidArgumentException( e );
 	}
 };
@@ -294,10 +312,12 @@ void MeshTangentsOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundO
 		throw InvalidArgumentException( "MeshTangentsOp : MeshPrimitive variables are invalid." );
 	}
 	
-	DataPtr pData = mesh->variableData<Data>( "P", PrimitiveVariable::Vertex );
+	const std::string &pPrimVarName = pPrimVarNameParameter()->getTypedValue();
+	DataPtr pData = mesh->variableData<Data>( pPrimVarName, PrimitiveVariable::Vertex );
 	if( !pData )
 	{
-		throw InvalidArgumentException( "MeshTangentsOp : MeshPrimitive has no Vertex \"P\" primitive variable." );
+		string e = boost::str( boost::format( "MeshTangentsOp : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % pPrimVarName );
+		throw InvalidArgumentException( e );
 	}
 
 	ConstIntVectorDataPtr vertsPerFace = mesh->verticesPerFace();

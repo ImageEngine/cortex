@@ -34,6 +34,7 @@
 
 #include "IECore/MeshNormalsOp.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/CompoundParameter.h"
 
 #include "boost/format.hpp"
 
@@ -44,10 +45,46 @@ IE_CORE_DEFINERUNTIMETYPED( MeshNormalsOp );
 
 MeshNormalsOp::MeshNormalsOp() : MeshPrimitiveOp( staticTypeName(), "Calculates vertex normals for a mesh." )
 {
+	/// \todo Add this parameter to a member variable and update pPrimVarNameParameter() functions.
+	StringParameterPtr pPrimVarNameParameter = new StringParameter(
+		"pPrimVarName",	
+		"Input primitive variable name.",
+		"P"
+	);
+
+	/// \todo Add this parameter to a member variable and update nPrimVarNameParameter() functions.
+	StringParameterPtr nPrimVarNameParameter = new StringParameter(
+		"nPrimVarName",
+		"Output primitive variable name.",
+		"N"
+	);
+
+	parameters()->addParameter( pPrimVarNameParameter );
+	parameters()->addParameter( nPrimVarNameParameter );
 }
 
 MeshNormalsOp::~MeshNormalsOp()
 {
+}
+
+StringParameterPtr MeshNormalsOp::pPrimVarNameParameter()
+{
+	return parameters()->parameter<StringParameter>( "pPrimVarName" );
+}
+
+ConstStringParameterPtr MeshNormalsOp::pPrimVarNameParameter() const
+{
+	return parameters()->parameter<StringParameter>( "pPrimVarName" );
+}
+
+StringParameterPtr MeshNormalsOp::nPrimVarNameParameter()
+{
+	return parameters()->parameter<StringParameter>( "nPrimVarName" );
+}
+
+ConstStringParameterPtr MeshNormalsOp::nPrimVarNameParameter() const
+{
+	return parameters()->parameter<StringParameter>( "nPrimVarName" );
 }
 
 struct MeshNormalsOp::CalculateNormals
@@ -112,26 +149,29 @@ struct MeshNormalsOp::HandleErrors
 	template<typename T, typename F>
 	void operator()( typename T::ConstPtr d, const F &f )
 	{
-		string e = boost::str( boost::format( "MeshNormalsOp : \"P\" has unsupported data type \"%s\"." ) % d->typeName() );
+		string e = boost::str( boost::format( "MeshNormalsOp : pPrimVarName parameter has unsupported data type \"%s\"." ) % d->typeName() );
 		throw InvalidArgumentException( e );
 	}
 };
 
 void MeshNormalsOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
 {
-	PrimitiveVariableMap::const_iterator pvIt = mesh->variables.find( "P" );
+	const std::string &pPrimVarName = pPrimVarNameParameter()->getTypedValue();
+	PrimitiveVariableMap::const_iterator pvIt = mesh->variables.find( pPrimVarName );
 	if( pvIt==mesh->variables.end() || !pvIt->second.data )
 	{
-		throw InvalidArgumentException( "MeshNormalsOp : MeshPrimitive has no \"P\" primitive variable." );
+		string e = boost::str( boost::format( "MeshNormalsOp : MeshPrimitive has no \"%s\" primitive variable." ) % pPrimVarName );
+		throw InvalidArgumentException( e );
 	}
 
 	if( !mesh->isPrimitiveVariableValid( pvIt->second ) )
 	{
-		throw InvalidArgumentException( "MeshNormalsOp : \"P\" primitive variable is invalid." );
+		string e = boost::str( boost::format( "MeshNormalsOp : \"%s\" primitive variable is invalid." ) % pPrimVarName );
+		throw InvalidArgumentException( e );
 	}
 
 	CalculateNormals f( mesh->verticesPerFace(), mesh->vertexIds() );
 	DataPtr n = despatchTypedData<CalculateNormals, TypeTraits::IsVec3VectorTypedData, HandleErrors>( pvIt->second.data, f );
 
-	mesh->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, n );
+	mesh->variables[ nPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( PrimitiveVariable::Vertex, n );
 }

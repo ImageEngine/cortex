@@ -50,6 +50,13 @@ class MeshNormalsOp : public MeshPrimitiveOp
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshNormalsOp, MeshPrimitiveOp );
 
+		StringParameterPtr pPrimVarNameParameter();
+		ConstStringParameterPtr pPrimVarNameParameter() const;
+
+		StringParameterPtr nPrimVarNameParameter();
+		ConstStringParameterPtr nPrimVarNameParameter() const;
+
+
 	protected:
 
 		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );

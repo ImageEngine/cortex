@@ -49,6 +49,9 @@ class MeshTangentsOp : public MeshPrimitiveOp
 		MeshTangentsOp();
 		virtual ~MeshTangentsOp();
 
+		StringParameterPtr pPrimVarNameParameter();
+		ConstStringParameterPtr pPrimVarNameParameter() const;
+
 		StringParameterPtr uPrimVarNameParameter();
 		ConstStringParameterPtr uPrimVarNameParameter() const;
 
