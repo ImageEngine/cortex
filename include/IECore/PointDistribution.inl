@@ -97,7 +97,7 @@ void PointDistribution::processTile( const Tile &tile, const Imath::V2f &bottomL
 	float factor = 1.0f / density;
 	for( unsigned i=0; i<potentialPoints; i++ )
 	{
-		const Imath::V2f &p = bottomLeft + tile.points[i];
+		const Imath::V2f p = bottomLeft + tile.points[i];
 		if( !bounds.intersects( p ) )
 		{
 			continue;
@@ -133,7 +133,7 @@ void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomL
 	
 	for( int i=0; i<potentialPoints; i++ )
 	{
-		const Imath::V2f &p = bottomLeft + tile.subPoints[i] * tileSize;
+		const Imath::V2f p = bottomLeft + tile.subPoints[i] * tileSize;
 		if( !bounds.intersects( p ) )
 		{
 			continue;
