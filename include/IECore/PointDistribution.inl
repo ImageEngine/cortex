@@ -127,11 +127,11 @@ void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomL
 	
 	float tileArea = tileSize * tileSize;
 	float numPointsInTile = density * tileArea;
-	unsigned potentialPoints = std::min( tile.subPoints.size(), (size_t)numPointsInTile - tile.points.size() );
+	int potentialPoints = std::min( (int)tile.subPoints.size(), (int)numPointsInTile - (int)tile.points.size() );
 	
 	float factor = 1.0f / ( numPointsInTile );
 	
-	for( unsigned i=0; i<potentialPoints; i++ )
+	for( int i=0; i<potentialPoints; i++ )
 	{
 		const Imath::V2f &p = bottomLeft + tile.subPoints[i] * tileSize;
 		if( !bounds.intersects( p ) )
