@@ -208,6 +208,7 @@ from FaceAreaOpTest import FaceAreaOpTest
 from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from SubstitutedDictTest import SubstitutedDictTest
+from PointDistributionTest import PointDistributionTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

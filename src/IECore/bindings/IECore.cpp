@@ -254,6 +254,7 @@
 #include "IECore/bindings/CurvesMergeOpBinding.h"
 #include "IECore/bindings/CurvesPrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/HdrMergeOpBinding.h"
+#include "IECore/bindings/PointDistributionBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -505,6 +506,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
 	bindHdrMergeOp();
+	bindPointDistribution();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
