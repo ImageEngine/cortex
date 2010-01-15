@@ -827,7 +827,15 @@ class PathParameterUI( ParameterUI ) :
 
 	def openDialog( self ) :
 
-		pass
+		defaultPath = ''
+		userData = self.parameter.userData()
+		if 'UI' in userData and 'defaultPath' in userData['UI'] :
+			defaultPath = os.path.expandvars( userData['UI']['defaultPath'].value )
+			defaultPath += '*'
+		
+		selection = cmds.fileDialog( directoryMask=defaultPath ).encode('ascii')
+		
+		return selection
 
 
 class FileNameParameterUI( PathParameterUI ) :
@@ -838,7 +846,7 @@ class FileNameParameterUI( PathParameterUI ) :
 
 	def openDialog( self ) :
 
-		selection = cmds.fileDialog().encode('ascii')
+		selection = PathParameterUI.openDialog( self )
 
 		if len(selection):
 
@@ -855,7 +863,7 @@ class DirNameParameterUI( PathParameterUI ) :
 
 	def openDialog( self ) :
 
-		selection = cmds.fileDialog().encode('ascii')
+		selection = PathParameterUI.openDialog( self )
 
 		if len(selection):
 			d = os.path.dirname(selection)
@@ -872,7 +880,7 @@ class FileSequenceParameterUI( PathParameterUI ) :
 
 	def openDialog( self ) :
 
-		selection = cmds.fileDialog().encode('ascii')
+		selection = PathParameterUI.openDialog( self )
 
 		if len(selection):
 			d = os.path.dirname(selection)
