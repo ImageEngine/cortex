@@ -90,6 +90,14 @@ MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( staticTypeName(), "Calculate
 		"vTangent"
 	);
 
+	/// \todo add this parameter on a member variable, update orthogonalizeTangentsParameter() and set default value to true.
+	BoolParameterPtr orthogonalizeTangentsParameter = new BoolParameter(
+		"orthogonalizeTangents",
+		"Make sure tangent and bitangent are orthogonal.",
+		false
+	);
+
+	parameters()->addParameter( orthogonalizeTangentsParameter );
 	parameters()->addParameter( pPrimVarNameParameter );
 	parameters()->addParameter( m_uPrimVarNameParameter );
 	parameters()->addParameter( m_vPrimVarNameParameter );
@@ -111,6 +119,17 @@ ConstStringParameterPtr MeshTangentsOp::pPrimVarNameParameter() const
 {
 	return parameters()->parameter<StringParameter>( "pPrimVarName" );
 }
+
+BoolParameterPtr MeshTangentsOp::orthogonalizeTangentsParameter()
+{
+	return parameters()->parameter<BoolParameter>( "orthogonalizeTangents" );
+}
+
+ConstBoolParameterPtr MeshTangentsOp::orthogonalizeTangentsParameter() const
+{
+	return parameters()->parameter<BoolParameter>( "orthogonalizeTangents" );
+}
+
 
 StringParameterPtr MeshTangentsOp::uPrimVarNameParameter()
 {
@@ -166,8 +185,8 @@ struct MeshTangentsOp::CalculateTangents
 {
 	typedef void ReturnType;
 
-	CalculateTangents( const vector<int> &vertsPerFace, const vector<int> &vertIds, const vector<float> &u, const vector<float> &v, const vector<int> &uvIndices )
-		:	m_vertsPerFace( vertsPerFace ), m_vertIds( vertIds ), m_u( u ), m_v( v ), m_uvIds( uvIndices )
+	CalculateTangents( const vector<int> &vertsPerFace, const vector<int> &vertIds, const vector<float> &u, const vector<float> &v, const vector<int> &uvIndices, bool orthoTangents )
+		:	m_vertsPerFace( vertsPerFace ), m_vertIds( vertIds ), m_u( u ), m_v( v ), m_uvIds( uvIndices ), m_orthoTangents( orthoTangents )
 	{
 
 	}
@@ -254,6 +273,15 @@ struct MeshTangentsOp::CalculateTangents
 			// Make uTangent/vTangent orthogonal to normal
 			uTangents[i] -= normals[i] * uTangents[i].dot( normals[i] );
 			vTangents[i] -= normals[i] * vTangents[i].dot( normals[i] );
+
+			uTangents[i].normalize();
+			vTangents[i].normalize();
+
+			if ( m_orthoTangents )
+			{
+				vTangents[i] -= uTangents[i] * vTangents[i].dot( uTangents[i] );
+				vTangents[i].normalize();
+			}
 		
 			// make things less sinister
 			if( uTangents[i].cross( vTangents[i] ).dot( normals[i] ) < 0.0f )
@@ -292,6 +320,7 @@ struct MeshTangentsOp::CalculateTangents
 		const vector<float> &m_u;
 		const vector<float> &m_v;
 		const vector<int> &m_uvIds;
+		bool m_orthoTangents;
 		
 };
 
@@ -362,7 +391,9 @@ void MeshTangentsOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundO
 	DataCastOpPtr dco = new DataCastOp();
 	dco->targetTypeParameter()->setNumericValue( FloatVectorDataTypeId );
 
-	CalculateTangents f( vertsPerFace->readable(), mesh->vertexIds()->readable(), uData->readable(), vData->readable(), uvIndicesData->readable() );
+	bool orthoTangents = orthogonalizeTangentsParameter()->getTypedValue();
+
+	CalculateTangents f( vertsPerFace->readable(), mesh->vertexIds()->readable(), uData->readable(), vData->readable(), uvIndicesData->readable(), orthoTangents );
 
 	despatchTypedData<CalculateTangents, TypeTraits::IsVec3VectorTypedData, HandleErrors>( pData, f );
 
