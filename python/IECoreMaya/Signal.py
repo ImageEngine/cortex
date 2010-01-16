@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,37 +32,33 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+## A basis for a signal/connect mechanism 
+# 
+# \example
+#
+# def myPrint( info ) :
+#     print( info )
+#
+# s = IECore.Signal()
+# s.connect( myPrint )
+#
+# # Call the signal
+# s( "Hello" )
 
-from ParameterUI import ParameterUI
-from SplineParameterUI import SplineParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
-from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
-from MayaTypeId import MayaTypeId
-from ParameterPanel import ParameterPanel
-from AttributeEditorControl import AttributeEditorControl
-from FnProceduralHolder import FnProceduralHolder
-from UIElement import UIElement
-from OpWindow import OpWindow
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
-from UndoDisabled import UndoDisabled
-from ModalDialogue import ModalDialogue
-from Panel import Panel
-from WaitCursor import WaitCursor
-from FnOpHolder import FnOpHolder
-from UITemplate import UITemplate
-from FnParameterisedHolderSet import FnParameterisedHolderSet
-from TemporaryAttributeValues import TemporaryAttributeValues
-from GenericParameterUI import GenericParameterUI
-from Signal import Signal
+class Signal() :
+
+	def __init__( self ) :
+	
+		self.__slots = []
+		
+	def __call__( self, *args, **kw ) :
+	
+		for c in self.__slots :
+			c( *args, **kw )
+			
+	def connect( self, callable ) :
+		self.__slots.append( callable )
+		
+	def disconnect( self, callable ) :
+		self.__slots.remove( callable )
+		
