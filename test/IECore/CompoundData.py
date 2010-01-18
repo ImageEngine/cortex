@@ -108,6 +108,8 @@ class CompoundDataTest(unittest.TestCase):
 		self.assert_(v1.get("0") == IECore.FloatData(1.2))
 		self.assert_(v1.get("0", IECore.IntData(10)) == IECore.FloatData(1.2))
 		self.assert_(v1.get("xx", IECore.IntData(10)) == IECore.IntData(10))
+		self.assert_(v1.get("xx") == None)
+		self.assert_(v1.get("xx", None ) == None)
 		self.assertEqual(len(v1), 3)
 
 	def testUpdate(self):

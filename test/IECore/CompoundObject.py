@@ -71,6 +71,12 @@ class testCompoundObject( unittest.TestCase ) :
 		self.assert_( o.has_key("a") )
 		self.assert_( o.has_key("b") )
 		self.assert_( not o.has_key("c") )
+		# also test get
+		self.assert_(o.get("a") == IECore.IntData( 1 ))
+		self.assert_(o.get("b", IECore.IntData( 1 )) == IECore.FloatData( 1.0 ))
+		self.assert_(o.get("xx", IECore.IntData(10)) == IECore.IntData(10))
+		self.assert_(o.get("xx") == None)
+		self.assert_(o.get("xx", None ) == None)
 
 	def testDictConstructorRecursion( self ) :
 

@@ -282,6 +282,18 @@ static CompoundObjectPtr copyConstructor( ConstCompoundObjectPtr other )
 	return r;
 }
 
+/// binding for get method
+static ObjectPtr get( const CompoundObject &o, const std::string key, ObjectPtr defaultValue )
+{
+	CompoundObject::ObjectMap::const_iterator it = o.members().find( key );
+	if ( it == o.members().end() )
+	{
+		return defaultValue;
+	}
+	// return the value from the CompoundObject
+	return it->second;
+}
+
 void bindCompoundObject()
 {
 
@@ -301,6 +313,13 @@ void bindCompoundObject()
 		.def( "keys", &keys )
 		.def( "values", &values )
 		.def( "update", &update )
+		.def( "get", &get, "m.get(k [, v])\nReturns m[k] if found; otherwise, returns v.",
+			(
+				boost::python::arg( "self" ),
+				boost::python::arg( "key" ),
+				boost::python::arg( "defaultValue" ) = object()
+			)
+		)
 	;
 
 	CompoundObjectFromPythonDict();

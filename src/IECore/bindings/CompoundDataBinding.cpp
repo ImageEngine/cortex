@@ -286,13 +286,6 @@ class CompoundTypedDataFunctions
 
 		/// binding for get method
 		static data_type
-		get2( TypedData< Container > &x, PyObject *i )
-		{
-			return get( x, i, Py_None );
-		}
-
-		/// binding for get method
-		static data_type
 		get( TypedData< Container > &x, PyObject *i, PyObject *v )
 		{
 			key_type key = convertKey( x, i );
@@ -300,11 +293,6 @@ class CompoundTypedDataFunctions
 			typename Container::const_iterator value = xData.find( key );
 			if ( value == xData.end() )
 			{
-				if ( v == Py_None )
-				{
-					PyErr_SetString( PyExc_KeyError, key );
-					throw_error_already_set();
-				}
 				extract<data_type> elem( v );
 				if ( elem.check() )
 				{
@@ -521,8 +509,13 @@ void bindCompoundData()
 		.def( "update", &ThisBinder::update1, "m.update(b)\nAdds all objects from b to m. b can be a CompoundData or a python dict." )
 		.def( "update", &ThisBinder::update2 )
 		.def( "values", &ThisBinder::values, "m.values()\nReturns a list of all values in m." )
-		.def( "get", &ThisBinder::get, "m.get(k [, v])\nReturns m[k] if found; otherwise, returns v." )
-		.def( "get", &ThisBinder::get2 )
+		.def( "get", &ThisBinder::get, "m.get(k [, v])\nReturns m[k] if found; otherwise, returns v.",
+			(
+				boost::python::arg( "self" ),
+				boost::python::arg( "key" ),
+				boost::python::arg( "defaultValue" ) = object()
+			)
+		)
 		.def( "setdefault", &ThisBinder::setdefault, "m.setdefault(k [, v])\nReturns m[k] if found; otherwise, returns v and sets m[k] = v." )
 		.def( "setdefault", &ThisBinder::setdefault2 )
 		.def( "pop", &ThisBinder::pop, "m.pop(k [,default])\nReturns m[k] if found and removes it from m; otherwise, returns default if supplied or raises KeyError if not." )
