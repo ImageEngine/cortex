@@ -65,4 +65,3 @@ from UITemplate import UITemplate
 from FnParameterisedHolderSet import FnParameterisedHolderSet
 from TemporaryAttributeValues import TemporaryAttributeValues
 from GenericParameterUI import GenericParameterUI
-from Signal import Signal
