@@ -826,22 +826,17 @@ class PathParameterUI( ParameterUI ) :
 			cmds.connectControl( self.__textField, self.plugName() )
 
 	def openDialog( self ) :
-	
-		dialogPath = None
+		
+		uiUserData = self.parameter.userData().get( 'UI', {} )
+		dialogPath = uiUserData.get( 'defaultPath', IECore.StringData() ).value
+		obeyDefaultPath = uiUserData.get( 'obeyDefaultPath', IECore.BoolData() ).value
 		currentPath = self.parameter.getTypedValue()
-		if currentPath :
-			currentPath = os.path.abspath( currentPath )
-			currentPath = os.path.dirname( currentPath )
-			dialogPath = currentPath + "/*"
-	
-		if not dialogPath :
-			defaultPath = ''
-			userData = self.parameter.userData()
-			if 'UI' in userData and 'defaultPath' in userData['UI'] :
-				defaultPath = os.path.expandvars( userData['UI']['defaultPath'].value )
-				defaultPath += '*'
-			dialogPath = defaultPath
-			
+		
+		if currentPath and not obeyDefaultPath :
+			dialogPath = os.path.dirname( currentPath )
+		
+		dialogPath = os.path.expandvars( dialogPath )
+		dialogPath = os.path.join( dialogPath, '*' )
 		
 		selection = cmds.fileDialog( directoryMask=dialogPath ).encode('ascii')
 		
