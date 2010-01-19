@@ -36,26 +36,33 @@ import IECore
 import maya.OpenMaya
 import StringUtil
 
-## This class extends mayas MFnDagNode to add assorted helper functions.
+## This class extends Maya's MFnDagNode to add assorted helper functions.
 class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 
-	def __init__( self, object ) :
+	## \param obj - MObject, This can also be a string or an MObjectHandle.
+	def __init__( self, obj ) :
 	
-		if isinstance( object, str ) or isinstance( object, unicode ) :
-			object = StringUtil.dependencyNodeFromString( object )
+		if isinstance( obj, str ) or isinstance( obj, unicode ) :
+		
+			obj = StringUtil.dependencyNodeFromString( obj )
+		
+		elif isinstance( obj, maya.OpenMaya.MObjectHandle ) :
+		
+			assert( obj.isValid() )
+			obj = obj.object()		
 
-		maya.OpenMaya.MFnDagNode.__init__( self, object )
+		maya.OpenMaya.MFnDagNode.__init__( self, obj )
 
-	## Utility function to determine wether a node is actually hidden in maya.
-	# This includes the effect of any patents visibility.
+	## Determines whether the DAG node is actually hidden in Maya.
+	# This includes the effect of any parents visibility.
 	# \return Bool
 	def isHidden( self ) :
 
 		return bool( self.hiddenPathNames( True ) )
 
-	## Utility function to determine which of a node and its parent hierarchy are hidden.
-	# \param includeSelf (bool). When True, the object itself will be listed if
-	# it is hidden too. When False, only parents will be listed. Defaults to True.
+	## Retrieves the names of any part of the nodes parent hierarchy that is hidden.
+	# \param includeSelf - Bool, When True, the object itself will be listed if
+	# it is hidden. When False, only parents will be listed. Defaults to True.
 	# \return A list of hidden objects by name.
 	def hiddenPathNames( self, includeSelf=True, o=None, hidden=None ) :
 
