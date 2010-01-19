@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,37 +32,50 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+import IECore
+import maya.OpenMaya
+import StringUtil
 
-from ParameterUI import ParameterUI
-from SplineParameterUI import SplineParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
-from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
-from MayaTypeId import MayaTypeId
-from ParameterPanel import ParameterPanel
-from AttributeEditorControl import AttributeEditorControl
-from FnProceduralHolder import FnProceduralHolder
-from UIElement import UIElement
-from OpWindow import OpWindow
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
-from UndoDisabled import UndoDisabled
-from ModalDialogue import ModalDialogue
-from Panel import Panel
-from WaitCursor import WaitCursor
-from FnOpHolder import FnOpHolder
-from UITemplate import UITemplate
-from FnParameterisedHolderSet import FnParameterisedHolderSet
-from TemporaryAttributeValues import TemporaryAttributeValues
-from GenericParameterUI import GenericParameterUI
-from FnDagNode import FnDagNode  
+## This class extends mayas MFnDagNode to add assorted helper functions.
+class FnDagNode( maya.OpenMaya.MFnDagNode ) :
+
+	def __init__( self, object ) :
+	
+		if isinstance( object, str ) or isinstance( object, unicode ) :
+			object = StringUtil.dependencyNodeFromString( object )
+
+		maya.OpenMaya.MFnDagNode.__init__( self, object )
+
+	## Utility function to determine wether a node is actually hidden in maya.
+	# This includes the effect of any patents visibility.
+	# \return Bool
+	def isHidden( self ) :
+
+		return bool( self.hiddenPathNames( True ) )
+
+	## Utility function to determine which of a node and its parent hierarchy are hidden.
+	# \param includeSelf (bool). When True, the object itself will be listed if
+	# it is hidden too. When False, only parents will be listed. Defaults to True.
+	# \return A list of hidden objects by name.
+	def hiddenPathNames( self, includeSelf=True, o=None, hidden=None ) :
+
+		if not o :
+			o = self.name()
+			
+		if not isinstance( hidden, list ) :
+			hidden = []
+
+		if includeSelf :
+			attr = "%s.visibility" % o
+			if maya.cmds.objExists( o ) and not maya.cmds.getAttr( attr ) :
+				hidden.append( o )
+
+		parents = maya.cmds.listRelatives( o, parent=True )
+		if parents :
+			for p in parents :
+				self.hiddenPathNames( True, p, hidden )
+
+		return hidden
+
+
+
