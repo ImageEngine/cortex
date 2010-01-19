@@ -98,6 +98,9 @@ class KDTree
 		/// Populates the passed vector of iterators with the N closest neighbours to p. Returns the number of points found.
 		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
 		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
+		/// \todo I'm pretty sure this is unecessarily slow due to the use of an stl::set internally - I think an stl heap might be
+		/// a much better choice. Do we also want the heap to be passed from outside so it can be reused in a series of queries
+		/// to avoid unecessary allocations?
 		unsigned int nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<PointIterator> &nearNeighbours ) const;
 
 		/// Finds all the points contained by the specified bound, outputting them to the specified iterator.
