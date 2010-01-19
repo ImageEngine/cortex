@@ -113,5 +113,10 @@ Imath::M44d convert( const DD::Image::Matrix4 &from )
 	return result;
 }
 
+template<>
+Imath::Box2i convert( const DD::Image::Box &from )
+{
+	return Imath::Box2i( Imath::V2i( from.x(), from.y() ), Imath::V2i( from.r(), from.t() ) );
+}
 
 } // namespace IECore
