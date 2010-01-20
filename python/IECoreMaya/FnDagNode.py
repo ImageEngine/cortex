@@ -64,25 +64,32 @@ class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 	# \param includeSelf - Bool, When True, the object itself will be listed if
 	# it is hidden. When False, only parents will be listed. Defaults to True.
 	# \return A list of hidden objects by name.
-	def hiddenPathNames( self, includeSelf=True, o=None, hidden=None ) :
+	def hiddenPathNames( self, includeSelf=True ) :
 
-		if not o :
-			o = self.name()
+		hidden = []
+		
+		# Maya always returns a list from listRelatives.
+		parent = [] 
+
+		if includeSelf :			
+			parent = [ self.fullPathName() ]
+		else :
+			parent	= maya.cmds.listRelatives( self.fullPathName(), parent=True )
+	
+		while parent :
 			
-		if not isinstance( hidden, list ) :
-			hidden = []
-
-		if includeSelf :
+			assert( len(parent) == 1 )
+			
+			o = parent[0]	
 			attr = "%s.visibility" % o
-			if maya.cmds.objExists( o ) and not maya.cmds.getAttr( attr ) :
+		
+			if maya.cmds.objExists( attr ) and not maya.cmds.getAttr( attr ) :
 				hidden.append( o )
-
-		parents = maya.cmds.listRelatives( o, parent=True )
-		if parents :
-			for p in parents :
-				self.hiddenPathNames( True, p, hidden )
+		
+			parent	= maya.cmds.listRelatives( o, parent=True )
 
 		return hidden
+
 
 
 
