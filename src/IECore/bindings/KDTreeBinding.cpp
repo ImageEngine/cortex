@@ -119,6 +119,9 @@ struct KDTreeWrapper
 
 	}
 
+	/// \todo Switch this to use the faster form rather than the deprecated form, and bind the Neighbour
+	/// class so everything can be returned in a list. Change the tests to reflect this fact.
+	/// Wait till the next major version (5) before doing this.
 	IntVectorDataPtr nearestNNeighbours(const typename T::Point &p, unsigned int numNeighbours)
 	{
 		assert(m_tree);

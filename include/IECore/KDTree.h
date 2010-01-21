@@ -95,13 +95,14 @@ class KDTree
 		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
 		unsigned int nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const;
 
-		/// Populates the passed vector of iterators with the N closest neighbours to p. Returns the number of points found.
-		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
-		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
-		/// \todo I'm pretty sure this is unecessarily slow due to the use of an stl::set internally - I think an stl heap might be
-		/// a much better choice. Do we also want the heap to be passed from outside so it can be reused in a series of queries
-		/// to avoid unecessary allocations?
+		/// \deprecated Use the function below instead - it has much improved performance and provides additional information in the result.
+		/// \todo Remove for next major version.
 		unsigned int nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<PointIterator> &nearNeighbours ) const;
+		
+		struct Neighbour;
+		/// Populates the passed vector with the N closest neighbours to p, sorted with the closest first. Returns the number found.
+		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
+		unsigned int nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<Neighbour> &nearNeighbours ) const;
 
 		/// Finds all the points contained by the specified bound, outputting them to the specified iterator.
 		/// \threading May be called by multiple concurrent threads.
@@ -141,9 +142,13 @@ class KDTree
 		template<typename Box, typename OutputIterator>
 		void enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, OutputIterator it ) const;
 
+		/// \todo Remove for next major version.
 		struct NearNeighbour;
 
+		/// \todo Remove for next major version.
 		void nearestNNeighboursWalk( NodeIndex nodeIndex, const Point &p, unsigned int numNeighbours, std::set<NearNeighbour> &nearNeighbours, BaseType &maxDistSquared ) const;
+		
+		void nearestNNeighboursWalk( NodeIndex nodeIndex, const Point &p, unsigned int numNeighbours, std::vector<Neighbour> &nearNeighbours, BaseType &maxDistSquared ) const;
 
 		Permutation m_perm;
 		NodeVector m_nodes;
@@ -193,6 +198,27 @@ class KDTree<PointIterator>::Node
 			} m_perm;
 		};
 
+};
+
+/// The Neighbour class is used to return information from the KDTree::nearestNNeighbours() query.
+template<class PointIterator>
+class KDTree<PointIterator>::Neighbour
+{
+	public :
+
+		Neighbour( Iterator p, BaseType d2 )
+			:	point( p ), distSquared( d2 )
+		{
+		}
+		
+		Iterator point;
+		BaseType distSquared;
+	
+		bool operator < ( const Neighbour &other ) const
+		{
+			return distSquared < other.distSquared;
+		}
+		
 };
 
 typedef KDTree<std::vector<Imath::V2f>::const_iterator> V2fTree;

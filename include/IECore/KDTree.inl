@@ -275,6 +275,21 @@ unsigned int KDTree<PointIterator>::nearestNNeighbours( const Point &p, unsigned
 }
 
 template<class PointIterator>
+unsigned int KDTree<PointIterator>::nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<Neighbour> &nearNeighbours ) const
+{
+	nearNeighbours.clear();
+
+	if( numNeighbours )
+	{
+		BaseType maxDistSquared = Imath::limits<BaseType>::max();
+		nearestNNeighboursWalk( rootIndex(), p, numNeighbours, nearNeighbours, maxDistSquared );
+		std::sort_heap( nearNeighbours.begin(), nearNeighbours.end() );
+	}
+
+	return nearNeighbours.size();
+}
+
+template<class PointIterator>
 void KDTree<PointIterator>::nearestNeighbourWalk( NodeIndex nodeIndex, const Point &p, PointIterator &closestPoint, BaseType &distSquared ) const
 {
 	const Node &node = m_nodes[nodeIndex];
@@ -395,6 +410,68 @@ void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const P
 				it = nearNeighbours.begin();
 				assert( it->m_distSqrd >= nearNeighbours.rbegin()->m_distSqrd );
 				maxDistSquared = it->m_distSqrd;
+			}
+		}
+	}
+	else
+	{
+		// node is a branch
+		BaseType d = p[node.cutAxis()] - node.cutValue();
+		NodeIndex firstChild, secondChild;
+		if( d>0.0 )
+		{
+			firstChild = highChildIndex( nodeIndex );
+			secondChild = lowChildIndex( nodeIndex );
+		}
+		else
+		{
+			firstChild = lowChildIndex( nodeIndex );
+			secondChild = highChildIndex( nodeIndex );
+		}
+
+		nearestNNeighboursWalk( firstChild, p, numNeighbours, nearNeighbours, maxDistSquared );
+		if( d*d < maxDistSquared || nearNeighbours.size()<numNeighbours )
+		{
+			nearestNNeighboursWalk( secondChild, p, numNeighbours, nearNeighbours, maxDistSquared );
+		}
+	}
+}
+
+template<class PointIterator>
+void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const Point &p, unsigned int numNeighbours, std::vector<Neighbour> &nearNeighbours, BaseType &maxDistSquared ) const
+{
+	const Node &node = m_nodes[nodeIndex];
+	if( node.isLeaf() )
+	{
+		PointIterator *permLast = node.permLast();
+		for( PointIterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		{
+			const Point &pp = **perm;
+			BaseType dist2 = vecDistance2( p, pp );
+
+			if( dist2 < maxDistSquared || nearNeighbours.size() < numNeighbours )
+			{
+				Neighbour n( *perm, dist2 );
+				assert( nearNeighbours.size() <= numNeighbours );
+
+				if( nearNeighbours.size() == numNeighbours )
+				{
+					std::pop_heap( nearNeighbours.begin(), nearNeighbours.end() );
+					*(nearNeighbours.rbegin()) = n;
+				}
+				else
+				{
+					nearNeighbours.push_back( n );
+				}
+				
+				std::push_heap( nearNeighbours.begin(), nearNeighbours.end() );
+
+				assert( nearNeighbours.size() > 0 );
+				
+				// first element is furthest point away
+				typename std::vector<Neighbour>::const_iterator it = nearNeighbours.begin();
+				assert( it->distSquared >= nearNeighbours.rbegin()->distSquared );
+				maxDistSquared = it->distSquared;
 			}
 		}
 	}
