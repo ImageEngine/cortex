@@ -963,6 +963,9 @@ static void nameSetter( const std::string &name, IECore::ConstDataPtr value, IEC
 
 static IECore::ConstDataPtr textPrimitiveTypeGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
+
+#ifdef IECORE_WITH_FREETYPE
+
 	TextPrimitive::ConstTypePtr b = memberData->implementation->getState<TextPrimitive::Type>();
 	switch( b->value() )
 	{
@@ -974,10 +977,21 @@ static IECore::ConstDataPtr textPrimitiveTypeGetter( const std::string &name, co
 			msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
 			return new StringData( "invalid" );
 	}
+	
+#else
+
+	IECore::msg( IECore::Msg::Warning, "Renderer::getAttribute", "IECore was not built with FreeType support." );
+	return 0;
+
+#endif // IECORE_WITH_FREETYPE
+	
 }
 
 static void textPrimitiveTypeSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
 {
+
+#ifdef IECORE_WITH_FREETYPE
+
 	ConstStringDataPtr d = castWithWarning<const StringData>( value, name, "Renderer::setAttribute" );
 	if( !d )
 	{
@@ -999,6 +1013,13 @@ static void textPrimitiveTypeSetter( const std::string &name, IECore::ConstDataP
 		return;
 	}
 	memberData->implementation->addState( new TextPrimitive::Type( t ) );
+
+#else
+
+	IECore::msg( IECore::Msg::Warning, "Renderer::setAttribute", "IECore was not built with FreeType support." );
+
+#endif // IECORE_WITH_FREETYPE
+
 }
 
 static const AttributeSetterMap *attributeSetters()

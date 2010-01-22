@@ -107,7 +107,8 @@ class TestRenderer( unittest.TestCase ) :
 			self.assertEqual( r.getAttribute( "gl:smoothing:points" ), BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:smoothing:lines" ), BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "mesh" ) )
+			if withFreeType() :
+				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "mesh" ) )
 
 			r.setAttribute( "color", Color3fData( Color3f( 0, 1, 2 ) ) )
 			self.assertEqual( r.getAttribute( "color" ), Color3fData( Color3f( 0, 1, 2 ) ) )
@@ -160,8 +161,9 @@ class TestRenderer( unittest.TestCase ) :
 			r.setAttribute( "gl:smoothing:polygons", BoolData( True ) )
 			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), BoolData( True ) )
 
-			r.setAttribute( "gl:textPrimitive:type", StringData( "sprite" ) )
-			self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "sprite" ) )
+			if withFreeType() :
+				r.setAttribute( "gl:textPrimitive:type", StringData( "sprite" ) )
+				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "sprite" ) )
 
 			r.worldEnd()
 
