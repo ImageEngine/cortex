@@ -37,7 +37,7 @@
 
 #include "OpenEXR/ImathLimits.h"
 
-#include <GL/gl.h>
+#include "IECoreGL/GL.h"
 
 #include "maya/MGlobal.h"
 #include "maya/MImage.h"

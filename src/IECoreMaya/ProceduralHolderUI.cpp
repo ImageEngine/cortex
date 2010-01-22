@@ -346,7 +346,7 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 
 	bool hilited = (selectInfo.displayStatus() == M3dView::kHilite);
 
-	static const unsigned int selectBufferSize = 20000; // enough to select 5000 distinct objects
+	static const GLsizei selectBufferSize = 20000; // enough to select 5000 distinct objects
 	static GLuint selectBuffer[selectBufferSize];
 
 	IECoreGL::ConstScenePtr scene = proceduralHolder->scene();

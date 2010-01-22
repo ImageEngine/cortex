@@ -1221,13 +1221,10 @@ mayaEnvSets = {
 
 mayaEnvAppends = {
 	"CPPPATH" : [
-		"$MAYA_ROOT/include",
 		"contrib/IECoreGL/include",
 		"$GLEW_INCLUDE_PATH",
 	],
-	"LIBPATH" : [ "$MAYA_ROOT/lib" ],
 	"LIBS" : [
-		"OpenMayalib",
 		"OpenMaya",
 		"OpenMayaUI",
 		"OpenMayaAnim",
@@ -1242,7 +1239,17 @@ mayaEnvAppends = {
 }
 
 if env["PLATFORM"]=="posix" :
-	mayaEnvAppends["CPPFLAGS"].append( "-DLINUX" )
+	mayaEnvAppends["CPPFLAGS"] += ["-DLINUX"]
+	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/lib"]
+	mayaEnvAppends["CPPPATH"] += ["$MAYA_ROOT/include"]
+	mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
+
+elif env["PLATFORM"]=="darwin" :
+	mayaEnvAppends["CPPFLAGS"]  += ["-DOSMac_","-DOSMac_MachO_"]
+	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/MacOS"]
+	mayaEnvAppends["CPPPATH"] += ["$MAYA_ROOT/../../devkit/include"]
+	mayaEnvAppends["LIBS"] += ["Foundation", "OpenMayaRender"]
+	mayaEnvAppends["FRAMEWORKS"] = ["AGL", "OpenGL"]
 
 mayaEnv = env.Copy( **mayaEnvSets )
 mayaEnv.Append( **mayaEnvAppends )
@@ -1322,7 +1329,10 @@ if doConfigure :
 				os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ),
 			]
 		)
-		
+		if env["PLATFORM"]=="darwin" :
+			mayaPluginEnv['SHLINKFLAGS'] = '$LINKFLAGS -bundle'
+			mayaPluginEnv['SHLIBSUFFIX'] =  '.bundle'
+			
 		mayaPluginTarget = "plugins/maya/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) )
 		
 		if env["WITH_MAYA_PLUGIN_LOADER"] :

@@ -83,12 +83,14 @@ using namespace IECoreMaya;
 
 using namespace boost::python;
 
-/// Maya is built with 4-byte Unicode characters, so we need to ensure that we're doing
+/// \todo create proper assertions for unicode length for each version of Maya by OS.
+/// Note: the line sizeof(Py_UNICODE) does not work on OSX
+#ifdef LINUX
+/// On Linux Maya is built with 4-byte Unicode characters, so we need to ensure that we're doing
 /// the same so that all external symbols resolve correctly at runtime.
 #if ( MAYA_API_VERSION >= 2008 )
-/// \todo Assert for earlier versions too, once installations of Python 2.5 for gcc4.0.2
-/// are built correctly
 BOOST_STATIC_ASSERT(sizeof(Py_UNICODE) == 4);
+#endif
 #endif
 
 BOOST_PYTHON_MODULE(_IECoreMaya)
