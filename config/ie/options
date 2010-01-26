@@ -192,7 +192,7 @@ pythonRoot = os.path.join( pythonReg["location"], compiler, compilerVersion )
 if IEEnv.platformOS().startswith( "osx" ):
 	pythonRoot = os.path.join( pythonRoot, "Python.framework", "Versions", pythonVersion )
 
-PYTHON = os.path.join( pythonRoot, "bin", "python" + pythonVersion )
+PYTHON = "/software/tools/wrappers/python%s" % pythonVersion
 PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/" + pythonReg["include"] + "/python" + pythonVersion
 PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 
@@ -294,7 +294,7 @@ if targetApp :
 else :
 	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
-	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/2.5/" + platform + "/" + compiler + "/" + compilerVersion + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/" + pythonVersion + "/" + platform + "/" + compiler + "/" + compilerVersion + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_RMANPROCEDURAL_NAME = "$INSTALL_PREFIX/tools/3delight/" + dlVersion + "/procedurals/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 
 INSTALL_GLSL_HEADER_DIR =  "$INSTALL_PREFIX/tools/glsl/$IECORE_NAME/$IECORE_MAJORMINORPATCH_VERSION"
