@@ -68,7 +68,8 @@ class ChannelOp : public ImagePrimitiveOp
 		///		* the dataWindow is not empty.
 		/// \todo ChannelVector doesn't contain any indicator as to which channel is which, so why not just pass a single channel at a time? As
 		/// things are right now, every derived class is iterating over the channels vector - there's not much else they can do - so it would
-		/// make sense to move that step to the base class.
+		/// make sense to move that step to the base class. If we pass a single channel at a time then we could also thread the computation of
+		/// the different channels.
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels ) = 0;
 
 	private :
