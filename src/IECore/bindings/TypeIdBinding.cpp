@@ -349,6 +349,7 @@ void bindTypeId()
 		.value( "CurvesPrimitiveOp", CurvesPrimitiveOpTypeId )
 		.value( "CurvesPrimitiveEvaluator", CurvesPrimitiveEvaluatorTypeId )
 		.value( "HdrMergeOp", HdrMergeOpTypeId )
+		.value( "HitMissTransform", HitMissTransformTypeId )
 	;
 }
 

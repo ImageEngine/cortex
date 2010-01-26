@@ -347,6 +347,7 @@ enum TypeId
 	CurvesPrimitiveOpTypeId = 304,
 	CurvesPrimitiveEvaluatorTypeId = 305,
 	HdrMergeOpTypeId = 306,
+	HitMissTransformTypeId = 307,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

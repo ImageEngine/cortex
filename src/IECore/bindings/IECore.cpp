@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -255,6 +255,7 @@
 #include "IECore/bindings/CurvesPrimitiveEvaluatorBinding.h"
 #include "IECore/bindings/HdrMergeOpBinding.h"
 #include "IECore/bindings/PointDistributionBinding.h"
+#include "IECore/bindings/HitMissTransformBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -507,6 +508,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurvesPrimitiveEvaluator();
 	bindHdrMergeOp();
 	bindPointDistribution();
+	bindHitMissTransform();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
