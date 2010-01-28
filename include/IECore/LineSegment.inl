@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -116,15 +116,23 @@ typename LineSegment<T>::BaseType LineSegment<T>::length2() const
 template<class T>
 T LineSegment<T>::closestPointTo( const T &point ) const
 {
+	BaseType t;
+	return closestPointTo( point, t );
+}
+
+template<class T>
+T LineSegment<T>::closestPointTo( const T &point, BaseType &t ) const
+{
 	T d = direction();
 	BaseType l2 = d.length2();
 	if( l2==0 )
 	{
+		t = 0;
 		return p0;
 	}
 
-	BaseType t = (point-p0).dot( d ) / l2;
-	return (*this)( Imath::clamp( t, BaseType( 0 ), BaseType( 1 ) ) );
+	t = Imath::clamp( (point-p0).dot( d ) / l2, BaseType( 0 ), BaseType( 1 ) );
+	return (*this)( t );
 }
 
 template<class T>

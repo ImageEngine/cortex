@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -90,7 +90,10 @@ class LineSegment
 		/// Distance squared between p0 and p1
 		BaseType length2() const;
 
+		/// Returns the point on this LineSeqment which is closest to the specified point.
 		T closestPointTo( const T &point ) const;
+		/// As above but also fills in t with the parameter value at the point.
+		T closestPointTo( const T &point, BaseType &t ) const;
 		/// Returns the point on this LineSeqment which is closest
 		/// to line, and places the corresponding point on line in
 		/// otherPoint.

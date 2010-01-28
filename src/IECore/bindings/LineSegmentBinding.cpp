@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -138,7 +138,7 @@ static void bind3D()
 		.def( "normalizedDirection", &L::normalizedDirection )
 		.def( "length", &L::length )
 		.def( "length2", &L::length2 )
-		.def( "closestPointTo", &L::closestPointTo )
+		.def( "closestPointTo", (Vec (L::*)( const Vec & ) const)&L::closestPointTo )
 		.def( "closestPoints", &closestPoints<L> )
 		.def( "distanceTo", (typename L::BaseType (L::*)( const Vec & ) const)&L::distanceTo )
 		.def( "distanceTo", (typename L::BaseType (L::*)( const L & ) const)&L::distanceTo )
@@ -174,7 +174,7 @@ static void bind2D()
 		.def( "normalizedDirection", &L::normalizedDirection )
 		.def( "length", &L::length )
 		.def( "length2", &L::length2 )
-		.def( "closestPointTo", &L::closestPointTo )
+		.def( "closestPointTo", (Vec (L::*)( const Vec & ) const)&L::closestPointTo )
 		.def( "distanceTo", (typename L::BaseType (L::*)( const Vec & ) const)&L::distanceTo )
 		.def( "distance2To", (typename L::BaseType (L::*)( const Vec & ) const)&L::distance2To )
 		.def( self *= M() )
