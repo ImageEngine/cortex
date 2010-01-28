@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -232,11 +232,23 @@ void BoundedKDTree<BoundIterator>::build( NodeIndex nodeIndex, PermutationIterat
 	}
 }
 
+template<class BoundIterator>
+BoundedKDTree<BoundIterator>::BoundedKDTree()
+{
+}
 
 template<class BoundIterator>
 BoundedKDTree<BoundIterator>::BoundedKDTree( BoundIterator first, BoundIterator last, int maxLeafSize )
-	:	m_maxLeafSize( maxLeafSize ), m_lastBound( last )
 {
+	init( first, last, maxLeafSize );
+}
+
+template<class BoundIterator>
+void BoundedKDTree<BoundIterator>::init( BoundIterator first, BoundIterator last, int maxLeafSize )
+{
+	m_maxLeafSize = maxLeafSize;
+	m_lastBound = last;
+	
 	m_perm.resize( last - first );
 	unsigned int i=0;
 	for( BoundIterator it=first; it!=last; it++ )

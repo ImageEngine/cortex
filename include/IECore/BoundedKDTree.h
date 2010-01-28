@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,11 +57,22 @@ class BoundedKDTree
 		typedef std::vector<Node> NodeVector;
 		typedef typename NodeVector::size_type NodeIndex;
 
+		/// Construncts an uninitialised tree - you must call init() before
+		/// using it.
+		BoundedKDTree();
+
 		/// Creates a tree for the fast searching of bounds.
 		/// Note that the tree does not own the passed bounds -
 		/// it is up to you to ensure that they remain valid and
 		/// unchanged as long as the BoundedKDTree is in use.
 		BoundedKDTree( BoundIterator first, BoundIterator last, int maxLeafSize=4 );
+
+		/// Builds the tree for the specified bounds - the iterator range
+		/// must remain valid and unchanged as long as the tree is in use.
+		/// This method can be called again to rebuild the tree at any time.
+		/// \threading This can't be called while other threads are
+		/// making queries.
+		void init( BoundIterator first, BoundIterator last, int maxLeafSize=4 );
 
 		/// Populates the passed vector of iterators with the bounds which intersect "b". Returns the number of bounds found.
 		/// \threading May be called by multiple concurrent threads provided they each use a different vector for the result.
@@ -101,8 +112,8 @@ class BoundedKDTree
 
 		Permutation m_perm;
 		NodeVector m_nodes;
-		const int m_maxLeafSize;
-		const BoundIterator m_lastBound;
+		int m_maxLeafSize;
+		BoundIterator m_lastBound;
 };
 
 template<class BoundIterator>
