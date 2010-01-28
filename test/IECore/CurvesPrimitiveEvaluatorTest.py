@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1086,6 +1086,57 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 		lengths = IECore.FloatVectorData( [ 7.23606777, 7.23606777 ] )
 		
 		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+
+	def testClosestPoint( self ) :
+	
+		rand = IECore.Rand32()
+	
+		for basis in ( IECore.CubicBasisf.linear(), IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bSpline(), IECore.CubicBasisf.catmullRom() ) :
+		
+			for i in range( 0, 10 ) :
+			
+				p = IECore.V3fVectorData()
+				vertsPerCurve = IECore.IntVectorData()
+				
+				numCurves = int( rand.nextf( 1, 10 ) )
+				for c in range( 0, numCurves ) :
+				
+					numSegments = int( rand.nextf( 1, 10 ) )
+					numVerts = 4 + basis.step * ( numSegments - 1 )
+					
+					vertsPerCurve.append( numVerts )
+					
+					for i in range( 0, numVerts ) :
+					
+						p.append( rand.nextV3f() + IECore.V3f( c * 2 ) )
+				
+				curves = IECore.CurvesPrimitive( vertsPerCurve, basis, False, p )
+				
+				curves["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.01 ) )
+				IECore.ObjectWriter( curves, "/tmp/curves.cob" ).write()
+									
+				e = IECore.CurvesPrimitiveEvaluator( curves )
+				result = e.createResult()
+				
+				for c in range( 0, numCurves ) :
+				
+					numSteps = 100
+					for vi in range( 0, numSteps ) :
+					
+						v = float( vi ) / ( numSteps - 1 )
+						
+						e.pointAtV( c, v, result )
+						p = result.point()
+						
+						success = e.closestPoint( p, result )
+						self.failUnless( success )
+
+						p2 = result.point()
+						c2 = result.curveIndex()
+						v2 = result.uv()[1]
+						
+						self.failUnless( abs( (p2 - p).length() ) < 0.05 )
+						self.assertEqual( c2, c )
 
 if __name__ == "__main__":
 	unittest.main()

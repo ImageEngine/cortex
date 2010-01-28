@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #define IECORE_CURVESPRIMITIVEEVALUATOR_H
 
 #include "IECore/PrimitiveEvaluator.h"
+#include "IECore/BoundedKDTree.h"
 
 namespace IECore
 {
@@ -117,7 +118,6 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual float volume() const;
 		/// Not yet implemented.
 		virtual Imath::V3f centerOfGravity() const;
-		/// Not yet implemented.
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
 		/// Returns pointAtV( 0, uv[1], result ).
 		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
@@ -147,6 +147,15 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		std::vector<int> m_vertexDataOffsets; // one value per curve
 		std::vector<int> m_varyingDataOffsets; // one value per curve
 		PrimitiveVariable m_p;
+		
+		void buildTree();
+		bool m_haveTree;
+		Box3fTree m_tree;
+		std::vector<Imath::Box3f> m_treeBounds;
+		struct Line;
+		std::vector<Line> m_treeLines;
+		
+		void closestPointWalk( Box3fTree::NodeIndex nodeIndex, const Imath::V3f &p, unsigned &curveIndex, float &v, float &closestDistSquared ) const;
 		
 };
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,7 @@
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/FastFloat.h"
+#include "IECore/LineSegment.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -212,13 +213,44 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 		m_varyingDataIndices[1] = m_varyingDataIndices[0] + 1;
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////
+// Implementation of CurvesPrimitiveEvaluator::Line
+//////////////////////////////////////////////////////////////////////////
+
+struct CurvesPrimitiveEvaluator::Line
+{
+	public :
+	
+		Line( const V3f &p1, const V3f &p2, unsigned curveIndex, float vMin, float vMax )
+			:	m_lineSegment( p1, p2 ), m_curveIndex( curveIndex ), m_vMin( vMin ), m_vMax( vMax )
+		{
+		}
+	
+		/// \todo I wonder if this could be derived on the fly from a min/max flag per axis and the
+		/// bound for the Line? It would save memory and perhaps lead to speedups.
+		const LineSegment3f &lineSegment() const { return m_lineSegment; }
+		int curveIndex() const { return m_curveIndex; }
+		float vMin() const { return m_vMin; }
+		float vMax() const { return m_vMax; }
+	
+		static int linesPerCurveSegment() { return 20; };
+	
+	private :
+	
+		LineSegment3f m_lineSegment;
+		int m_curveIndex;
+		float m_vMin;
+		float m_vMax;
+		
+};
 				
 //////////////////////////////////////////////////////////////////////////
 // Implementation of Evaluator
 //////////////////////////////////////////////////////////////////////////
 
 CurvesPrimitiveEvaluator::CurvesPrimitiveEvaluator( ConstCurvesPrimitivePtr curves )
-	:	m_curvesPrimitive( curves->copy() ), m_verticesPerCurve( m_curvesPrimitive->verticesPerCurve()->readable() )
+	:	m_curvesPrimitive( curves->copy() ), m_verticesPerCurve( m_curvesPrimitive->verticesPerCurve()->readable() ), m_haveTree( false )
 {
 	m_vertexDataOffsets.reserve( m_verticesPerCurve.size() );
 	m_varyingDataOffsets.reserve( m_verticesPerCurve.size() );
@@ -283,7 +315,78 @@ Imath::V3f CurvesPrimitiveEvaluator::centerOfGravity() const
 
 bool CurvesPrimitiveEvaluator::closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	throw NotImplementedException( __PRETTY_FUNCTION__ );
+	if( !m_verticesPerCurve.size() )
+	{
+		return false;
+	}
+
+	Result *typedResult = static_cast<Result *>( result.get() );
+	// the cast isn't pretty but i think is the best of the alternatives. we want to delay building the tree until the first
+	// closestPoint() query so people don't pay the overhead if they're just using other queries. the alternative to
+	// the cast is to make the tree members mutable, but i'd rather keep them immutable so that the compiler tells us if
+	// we do anything wrong during the query.
+	const_cast<CurvesPrimitiveEvaluator *>( this )->buildTree();
+
+	unsigned curveIndex = 0;
+	float v = -1;
+	float distSquared = Imath::limits<float>::max();
+	closestPointWalk( m_tree.rootIndex(), p, curveIndex, v, distSquared );
+	typedResult->init( curveIndex, v, this );
+	
+	return true;
+}
+
+void CurvesPrimitiveEvaluator::closestPointWalk( Box3fTree::NodeIndex nodeIndex, const Imath::V3f &p, unsigned &curveIndex, float &v, float &closestDistSquared ) const
+{
+	assert( m_haveTree );
+
+	const Box3fTree::Node &node = m_tree.node( nodeIndex );
+	if( node.isLeaf() )
+	{
+		Box3fTree::Iterator *permLast = node.permLast();
+		for( Box3fTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		{
+			const Line &line = m_treeLines[*perm - m_treeBounds.begin()];
+			
+			float t;
+			V3f cp = line.lineSegment().closestPointTo( p, t );
+			float d2 = (cp - p).length2();
+			
+			if( d2 < closestDistSquared )
+			{
+				closestDistSquared = d2;
+				curveIndex = line.curveIndex();
+				v = lerp( line.vMin(), line.vMax(), t );
+			}
+		}
+	}
+	else
+	{
+
+		Box3fTree::NodeIndex lowChild = Box3fTree::lowChildIndex( nodeIndex );
+		Box3fTree::NodeIndex highChild = Box3fTree::highChildIndex( nodeIndex );
+
+		float d2Low = ( closestPointInBox( p, m_tree.node( lowChild ).bound() ) - p ).length2();
+		float d2High = ( closestPointInBox( p, m_tree.node( highChild ).bound() ) - p ).length2();
+	
+		if( d2Low < d2High )
+		{
+			closestPointWalk( lowChild, p, curveIndex, v, closestDistSquared );
+			if( d2High < closestDistSquared )
+			{
+				closestPointWalk( highChild, p, curveIndex, v, closestDistSquared );
+			}
+		}
+		else
+		{
+			closestPointWalk( highChild, p, curveIndex, v, closestDistSquared );
+			if( d2Low < closestDistSquared )
+			{
+				closestPointWalk( lowChild, p, curveIndex, v, closestDistSquared );
+			}
+		}
+
+	}
 }
 
 bool CurvesPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
@@ -369,4 +472,67 @@ float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, 
 	}
  	
 	return length;
+}
+
+void CurvesPrimitiveEvaluator::buildTree()
+{
+	if( m_haveTree )
+	{
+		return;
+	}
+		
+	bool linear = m_curvesPrimitive->basis() == CubicBasisf::linear();
+	const std::vector<V3f> &p = static_cast<const V3fVectorData *>( m_p.data.get() )->readable();
+	PrimitiveEvaluator::ResultPtr result = createResult();
+	
+	size_t numCurves = m_curvesPrimitive->numCurves();
+	for( size_t curveIndex = 0; curveIndex<numCurves; curveIndex++ )
+	{
+		if( linear )
+		{
+			int numVertices = m_verticesPerCurve[curveIndex];
+			int vertIndex = m_vertexDataOffsets[curveIndex];
+			float prevV = 0.0f;
+			for( int i=0; i<numVertices; i++, vertIndex++ )
+			{
+				float v = clamp( (float)i/(float)(numVertices-1), 0.0f, 1.0f );
+				if( i!=0 )
+				{
+					Box3f b;
+					b.extendBy( p[vertIndex-1] );
+					b.extendBy( p[vertIndex] );
+					m_treeBounds.push_back( b );
+					m_treeLines.push_back( Line(  p[vertIndex-1], p[vertIndex], curveIndex, prevV, v ) );
+				}
+				prevV = v;				
+			}
+		}
+		else
+		{
+			unsigned numSegments = m_curvesPrimitive->numSegments( curveIndex );
+			int steps = numSegments * Line::linesPerCurveSegment();
+			V3f prevP( 0 );
+			float prevV = 0;
+			for( int i=0; i<steps; i++ )
+			{
+				float v = clamp( (float)i/(float)(steps-1), 0.0f, 1.0f );
+				pointAtV( curveIndex, v, result );
+				V3f p = result->point();
+				if( i!=0 )
+				{
+					Box3f b;
+					b.extendBy( prevP );
+					b.extendBy( p );
+					m_treeBounds.push_back( b );
+					m_treeLines.push_back( Line( prevP, p, curveIndex, prevV, v ) );
+				}
+
+				prevP = p;
+				prevV = v;
+			}
+		}
+	}
+	
+	m_tree.init( m_treeBounds.begin(), m_treeBounds.end() );
+	m_haveTree = true;
 }
