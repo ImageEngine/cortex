@@ -172,6 +172,14 @@ struct IndexedIOInterfaceHelper
 				return readSingle<unsigned char>(p, name, entry);
 			case IndexedIO::UCharArray:
 				return readArray<unsigned char>(p, name, entry);
+			case IndexedIO::Short:
+				return readSingle<short>(p, name, entry);
+			case IndexedIO::ShortArray:
+				return readArray<short>(p, name, entry);
+			case IndexedIO::UShort:
+				return readSingle<unsigned short>(p, name, entry);
+			case IndexedIO::UShortArray:
+				return readArray<unsigned short>(p, name, entry);
 			default:
 				throw IOException(name);
 		}
