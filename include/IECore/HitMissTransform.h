@@ -42,7 +42,8 @@ namespace IECore
 {
 
 /// Implements the hit and miss transform, which can be used for thinning and
-/// thickening and various other operations on binary images. See the following
+/// thickening and various other operations on binary images. Note that the ImageThinner
+/// provides a much more refined thinning than this class. See the following
 /// webpage for a nice friendly description.
 ///
 /// http://homepages.inf.ed.ac.uk/rbf/HIPR2/hitmiss.htm

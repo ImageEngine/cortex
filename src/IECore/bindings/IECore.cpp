@@ -256,6 +256,8 @@
 #include "IECore/bindings/HdrMergeOpBinding.h"
 #include "IECore/bindings/PointDistributionBinding.h"
 #include "IECore/bindings/HitMissTransformBinding.h"
+#include "IECore/bindings/CurveTracerBinding.h"
+#include "IECore/bindings/ImageThinnerBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECore;
@@ -509,6 +511,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindHdrMergeOp();
 	bindPointDistribution();
 	bindHitMissTransform();
+	bindCurveTracer();
+	bindImageThinner();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
