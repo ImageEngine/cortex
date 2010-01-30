@@ -214,6 +214,9 @@ void bindSpline( const char *name )
 		.def( self==self )
 		.def( self!=self )
 		.def( "__repr__", &repr<T> )
+		.def( "integral", (typename T::YType (T::*)() const )&T::integral )
+		.def( "integral", (typename T::YType (T::*)( typename T::XType, typename T::XType ) const )&T::integral )
+		.def( "derivative", &T::derivative )
 	;
 }
 

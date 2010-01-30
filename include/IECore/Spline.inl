@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -167,6 +167,126 @@ inline Y Spline<X,Y>::operator() ( X x ) const
 	X c[4];
 	basis.coefficients( t, c[0], c[1], c[2], c[3] );
 	return c[0] * y[0] + c[1] * y[1] + c[2] * y[2] + c[3] * y[3];
+}
+
+template<typename X, typename Y>
+inline Y Spline<X,Y>::derivative( X x ) const
+{
+	X xc[4];
+	Y yc[4];
+	typename PointContainer::const_iterator s;
+	X t = solve( x, s );
+	xc[0] = (*s).first;
+	yc[0] = (*s++).second;
+	xc[1] = (*s).first;
+	yc[1] = (*s++).second;
+	xc[2] = (*s).first;
+	yc[2] = (*s++).second;
+	xc[3] = (*s).first;
+	yc[3] = (*s++).second;
+	return basis.derivative( t, yc ) / basis.derivative( t, xc );
+}
+
+template<typename X, typename Y>
+inline Y Spline<X,Y>::integral( X t0, X t1, typename Spline<X,Y>::PointContainer::const_iterator segment ) const
+{
+	X xp[4] = { X(0), X(0), X(0), X(0) };
+	Y yp[4] = { Y(0), Y(0), Y(0), Y(0) };
+
+	for( unsigned i=0; i<4; i++ )
+	{
+		if( segment==points.end() )
+		{
+			throw( Exception( "Not enough control points to evaluate integral." ) );
+		}
+		xp[i] = segment->first;
+		yp[i] = segment->second;
+		segment++;
+	}
+
+	X cX[4];
+	Y cY[4];
+
+	cX[0] = basis.matrix[0][0]*xp[0] + basis.matrix[0][1]*xp[1] + basis.matrix[0][2]*xp[2] + basis.matrix[0][3]*xp[3];
+	cX[1] = basis.matrix[1][0]*xp[0] + basis.matrix[1][1]*xp[1] + basis.matrix[1][2]*xp[2] + basis.matrix[1][3]*xp[3];
+	cX[2] = basis.matrix[2][0]*xp[0] + basis.matrix[2][1]*xp[1] + basis.matrix[2][2]*xp[2] + basis.matrix[2][3]*xp[3];
+	cX[3] = basis.matrix[3][0]*xp[0] + basis.matrix[3][1]*xp[1] + basis.matrix[3][2]*xp[2] + basis.matrix[3][3]*xp[3];
+
+	cY[0] = basis.matrix[0][0]*yp[0] + basis.matrix[0][1]*yp[1] + basis.matrix[0][2]*yp[2] + basis.matrix[0][3]*yp[3];
+	cY[1] = basis.matrix[1][0]*yp[0] + basis.matrix[1][1]*yp[1] + basis.matrix[1][2]*yp[2] + basis.matrix[1][3]*yp[3];
+	cY[2] = basis.matrix[2][0]*yp[0] + basis.matrix[2][1]*yp[1] + basis.matrix[2][2]*yp[2] + basis.matrix[2][3]*yp[3];
+	cY[3] = basis.matrix[3][0]*yp[0] + basis.matrix[3][1]*yp[1] + basis.matrix[3][2]*yp[2] + basis.matrix[3][3]*yp[3];
+
+	// integral polynomial coefficients
+	Y C1 = ( cY[0]*cX[0] ) / 2;
+	Y C2 = ( cY[0]*cX[1]*2 + cY[1]*cX[0]*3 ) / 5;
+	Y C3 = ( cY[0]*cX[2] + cY[1]*cX[1]*2 + cY[2]*cX[0]*3 ) / 4;
+	Y C4 = ( cY[1]*cX[2] + cY[2]*cX[1]*2 + cY[3]*cX[0]*3 ) / 3;
+	Y C5 = ( cY[2]*cX[2] + cY[3]*cX[1]*2 ) / 2;
+	Y C6 = cY[3]*cX[2];
+
+	// powers of t0 and t1
+	X t02 = t0 * t0;
+	X t03 = t02 * t0;
+	X t04 = t02 * t02;
+	X t05 = t04 * t0;
+	X t06 = t03 * t03;
+	X t12 = t1 * t1;
+	X t13 = t12 * t1;
+	X t14 = t12 * t12;
+	X t15 = t14 * t1;
+	X t16 = t13 * t13;
+
+	return C1*(t16 - t06) + C2*(t15 - t05) + C3*(t14 - t04) + C4*(t13 - t03) + C5*(t12 - t02) + C6*(t1 - t0);
+}
+
+template<typename X, typename Y>
+inline Y Spline<X,Y>::integral( X t0, typename Spline<X,Y>::PointContainer::const_iterator segment0, X t1, typename Spline<X,Y>::PointContainer::const_iterator segment1 ) const
+{
+	X initT = t0;
+	X endT = 1;
+	Y accum(0);
+	typename PointContainer::const_iterator it = segment0;
+	typename PointContainer::const_iterator itEnd = segment1;
+	itEnd++;
+	for ( it = segment0; it != itEnd; ) 
+	{
+		if ( it == segment1 )
+		{
+			endT = t1;
+		}
+		accum += integral( initT, endT, it );
+		initT = 0;
+		for ( unsigned i = 0; i < basis.step && it != itEnd; i++ )
+		{
+			it++;
+		}
+	}
+	return accum;
+}
+
+template<typename X, typename Y>
+inline Y Spline<X,Y>::integral( X x0, X x1 ) const
+{
+	typename PointContainer::const_iterator s0;
+	X t0 = solve( x0, s0 );
+	typename PointContainer::const_iterator s1;
+	X t1 = solve( x1, s1 );
+	return integral( t0, s0, t1, s1 );
+}
+
+template<typename X, typename Y>
+inline Y Spline<X,Y>::integral() const
+{
+	if ( points.size() < 4 )
+		return Y(0);
+
+	typename PointContainer::const_iterator itEnd = points.end();
+	itEnd--;
+	itEnd--;
+	itEnd--;
+	itEnd--;
+	return integral( X(0), points.begin(), X(1), itEnd );
 }
 
 template<typename X, typename Y>

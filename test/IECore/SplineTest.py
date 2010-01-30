@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -144,12 +144,15 @@ class SplineTest( unittest.TestCase ) :
 
 			for i in range( 0, 1000 ) :
 
+				# select a segment
+				seg = int(random.uniform( 0, int(len(xv) / 4) ))
+				seg -= seg % s.basis.step
 				# evaluate an x,y point on the curve directly
 				# ourselves
 				t = i / 1000.0
 				c = s.basis.coefficients( t )
-				x = xv[0] * c[0] + xv[1] * c[1] + xv[2] * c[2] + xv[3] * c[3]
-				y = yv[0] * c[0] + yv[1] * c[1] + yv[2] * c[2] + yv[3] * c[3]
+				x = xv[seg+0] * c[0] + xv[seg+1] * c[1] + xv[seg+2] * c[2] + xv[seg+3] * c[3]
+				y = yv[seg+0] * c[0] + yv[seg+1] * c[1] + yv[seg+2] * c[2] + yv[seg+3] * c[3]
 
 				# then check that solving for x gives y
 				yy = s( x )
@@ -181,8 +184,73 @@ class SplineTest( unittest.TestCase ) :
 		s = IECore.Splineff()
 		s[10] = 100
 		s[20] = 200
-
 		self.assertEqual( s.interval(), ( 10, 20 ) )
+
+		s = IECore.Splineff( IECore.CubicBasisf.bSpline(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ) )
+		(t,seg) = s.solve( s.interval()[0] )
+		(t2,seg2) = s.solve( s.interval()[0] + 0.1 )
+		self.assert_( t2 > t ) # Known problem to fix in Cortex 5
+		(t,seg) = s.solve( s.interval()[1] )
+		(t2,seg2) = s.solve( s.interval()[1] - 0.1 )
+		self.assert_( t2 < t ) # Known problem to fix in Cortex 5
+
+	def testIntegral( self ) :
+	
+		def computeIntegrals( s, interval = None ):
+
+			if interval:
+				integral = s.integral( interval[0], interval[1] )
+			else:
+				interval = []
+				# compute interval from spline until interval() is not fixed....
+				cc = s.basis.coefficients(0)
+				xs = s.keys()
+				xx = list( xs )[ 0:4 ]
+				interval.append( cc[0]*xx[0]+cc[1]*xx[1]+cc[2]*xx[2]+cc[3]*xx[3] )
+				cc = s.basis.coefficients(1)
+				xx = list( xs )[ len(xs)-4:len(xs) ]
+				interval.append( cc[0]*xx[0]+cc[1]*xx[1]+cc[2]*xx[2]+cc[3]*xx[3] )
+
+				integral = s.integral()
+
+			base = interval[0]
+			scale = interval[1]-interval[0]
+
+			N = 200
+			dx = (float(scale) / N )
+			summedArea = 0
+			for i in xrange(0,N):
+				x = (i+0.5)*dx + base
+				v = s( x )
+				summedArea += v*dx
+
+			return ( integral, summedArea )
+
+		# testing bSpline basis integral with 4 control points
+		s = IECore.Splineff( IECore.CubicBasisf.bSpline(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ) )
+		( integral, summedArea ) = computeIntegrals(s)
+		self.assertAlmostEqual( integral, summedArea, 2 )
+
+		# testing bSpline basis integral with 5 control points
+		s = IECore.Splineff( IECore.CubicBasisf.bSpline(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ), ( 22, 4 ) ) )
+		( integral, summedArea ) = computeIntegrals(s)
+		self.assertAlmostEqual( integral, summedArea, 2 )
+		( integral, summedArea ) = computeIntegrals(s, [12,20])
+		self.assertAlmostEqual( integral, summedArea, 2 )
+
+		# testing catmullRom basis integral
+		s = IECore.Splineff( IECore.CubicBasisf.catmullRom(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ), ( 22, 4 ) ) )
+		( integral, summedArea ) = computeIntegrals(s)
+		self.assertAlmostEqual( integral, summedArea, 2 )
+		( integral, summedArea ) = computeIntegrals(s, [12,20])
+		self.assertAlmostEqual( integral, summedArea, 2 )
+
+		# testing bezier basis integral
+		s = IECore.Splineff( IECore.CubicBasisf.bezier(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ), ( 22, 4 ), ( 23, 0 ), ( 24, 1 ) ) )
+		( integral, summedArea ) = computeIntegrals(s)
+		self.assertAlmostEqual( integral, summedArea, 3 )
+		( integral, summedArea ) = computeIntegrals(s, [12,20])
+		self.assertAlmostEqual( integral, summedArea, 3 )
 
 if __name__ == "__main__":
     unittest.main()

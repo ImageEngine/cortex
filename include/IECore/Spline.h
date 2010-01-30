@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,6 +72,7 @@ class Spline
 		Spline( const Basis &basis, const PointContainer &points );
 
 		/// Returns the range of the spline in the X direction.
+		/// \todo This function actually returns the extreme control points. It should compute x at t=0 and t=1 instead.
 		XInterval interval() const;
 
 		/// Find the appropriate segment and parametric position to determine
@@ -86,8 +87,22 @@ class Spline
 		/// Uses solve() to evaluate the y value for a given x position.
 		inline Y operator() ( X x ) const;
 
+		/// Returns dY/dX at given X.
+		inline Y derivative( X x ) const;
+
+		/// Returns integral Y with respect to X for the given interval
+		inline Y integral( X x0, X x1 ) const;
+
+		/// Returns the integral Y with respect to X over the spline domain
+		inline Y integral() const;
+
 		inline bool operator==( const Spline &rhs ) const;
 		inline bool operator!=( const Spline &rhs ) const;
+
+	private :
+
+		inline Y integral( X t0, X t1, typename PointContainer::const_iterator segment ) const;
+		inline Y integral( X t0, typename PointContainer::const_iterator segment0, X t1, typename PointContainer::const_iterator segment1 ) const;
 
 };
 
