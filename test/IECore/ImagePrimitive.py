@@ -297,8 +297,8 @@ class TestImagePrimitive( unittest.TestCase ) :
 		self.assertEqual( m2, m.inverse() )
 		
 		m = i.objectToUVMatrix()
-		self.assertEqual( V2f( -0.5 ) * m, V2f( 0 ) )
-		self.assertEqual( V2f( 0.5 ) * m, V2f( 1 ) )
+		self.assertEqual( V2f( -0.5 ) * m, V2f( 0, 1 ) )
+		self.assertEqual( V2f( 0.5 ) * m, V2f( 1, 0 ) )
 		m2 = i.uvToObjectMatrix()
 		self.assertEqual( m2, m.inverse() )
 		
@@ -318,8 +318,8 @@ class TestImagePrimitive( unittest.TestCase ) :
 		i = ImagePrimitive( twoPixelWindow, twoPixelWindow )
 		
 		m = i.pixelToObjectMatrix()
-		self.assertEqual( V2f( 0 ) * m, V2f( -0.5 ) )
-		self.assertEqual( V2f( 1 ) * m, V2f( 0.5 ) )
+		self.assertEqual( V2f( 0 ) * m, V2f( -0.5, 0.5 ) )
+		self.assertEqual( V2f( 1 ) * m, V2f( 0.5, -0.5 ) )
 		m2 = i.objectToPixelMatrix()
 		self.assertEqual( m2, m.inverse() )
 		
@@ -330,8 +330,8 @@ class TestImagePrimitive( unittest.TestCase ) :
 		self.assertEqual( m2, m.inverse() )
 		
 		m = i.objectToUVMatrix()
-		self.assertEqual( V2f( -1 ) * m, V2f( 0 ) )
-		self.assertEqual( V2f( 1 ) * m, V2f( 1 ) )
+		self.assertEqual( V2f( -1 ) * m, V2f( 0, 1 ) )
+		self.assertEqual( V2f( 1 ) * m, V2f( 1, 0 ) )
 		m2 = i.uvToObjectMatrix()
 		self.assertEqual( m2, m.inverse() )
 		
@@ -351,8 +351,8 @@ class TestImagePrimitive( unittest.TestCase ) :
 		i = ImagePrimitive( threeTwoPixelWindowOffset, threeTwoPixelWindowOffset )
 		
 		m = i.pixelToObjectMatrix()
-		self.assertEqual( V2f( 10, 20 ) * m, V2f( -1, -0.5 ) )
-		self.assertEqual( V2f( 12, 21 ) * m, V2f( 1, 0.5 ) )
+		self.assertEqual( V2f( 10, 20 ) * m, V2f( -1, 0.5 ) )
+		self.assertEqual( V2f( 12, 21 ) * m, V2f( 1, -0.5 ) )
 		m2 = i.objectToPixelMatrix()
 		self.assertEqual( m2, m.inverse() )
 		
@@ -363,8 +363,8 @@ class TestImagePrimitive( unittest.TestCase ) :
 		self.assertEqual( m2, m.inverse() )
 		
 		m = i.objectToUVMatrix()
-		self.assertEqual( V2f( -1.5, -1 ) * m, V2f( 0 ) )
-		self.assertEqual( V2f( 1.5, 1 ) * m, V2f( 1 ) )
+		self.assertEqual( V2f( -1.5, -1 ) * m, V2f( 0, 1 ) )
+		self.assertEqual( V2f( 1.5, 1 ) * m, V2f( 1, 0 ) )
 		m2 = i.uvToObjectMatrix()
 		self.assertEqual( m2, m.inverse() )
 		
