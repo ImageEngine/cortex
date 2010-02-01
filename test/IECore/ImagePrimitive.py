@@ -304,6 +304,13 @@ class TestImagePrimitive( unittest.TestCase ) :
 		
 		self.failUnless( ( i.objectToUVMatrix() * i.uvToPixelMatrix() ).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
 		self.failUnless( ( i.pixelToUVMatrix() * i.uvToObjectMatrix() ).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
+		
+		self.assertEqual( i.matrix( ImagePrimitive.Space.UV, ImagePrimitive.Space.Pixel ), i.uvToPixelMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.UV, ImagePrimitive.Space.Object ), i.uvToObjectMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Pixel, ImagePrimitive.Space.UV ), i.pixelToUVMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Pixel, ImagePrimitive.Space.Object ), i.pixelToObjectMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Object, ImagePrimitive.Space.Pixel ), i.objectToPixelMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Object, ImagePrimitive.Space.UV ), i.objectToUVMatrix() )
 				
 		# two pixel image 0,0 -> 1,1
 
@@ -331,6 +338,13 @@ class TestImagePrimitive( unittest.TestCase ) :
 		self.failUnless( ( i.objectToUVMatrix() * i.uvToPixelMatrix() ).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
 		self.failUnless( ( i.pixelToUVMatrix() * i.uvToObjectMatrix() ).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
 
+		self.assertEqual( i.matrix( ImagePrimitive.Space.UV, ImagePrimitive.Space.Pixel ), i.uvToPixelMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.UV, ImagePrimitive.Space.Object ), i.uvToObjectMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Pixel, ImagePrimitive.Space.UV ), i.pixelToUVMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Pixel, ImagePrimitive.Space.Object ), i.pixelToObjectMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Object, ImagePrimitive.Space.Pixel ), i.objectToPixelMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Object, ImagePrimitive.Space.UV ), i.objectToUVMatrix() )
+
 		# three by two pixel image 10,20 -> 12,21
 
 		threeTwoPixelWindowOffset = Box2i( V2i( 10, 20 ), V2i( 12, 21 ) )
@@ -356,6 +370,13 @@ class TestImagePrimitive( unittest.TestCase ) :
 		
 		self.failUnless( ( i.objectToUVMatrix() * i.uvToPixelMatrix() ).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
 		self.failUnless( ( i.pixelToUVMatrix() * i.uvToObjectMatrix() ).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
+
+		self.assertEqual( i.matrix( ImagePrimitive.Space.UV, ImagePrimitive.Space.Pixel ), i.uvToPixelMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.UV, ImagePrimitive.Space.Object ), i.uvToObjectMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Pixel, ImagePrimitive.Space.UV ), i.pixelToUVMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Pixel, ImagePrimitive.Space.Object ), i.pixelToObjectMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Object, ImagePrimitive.Space.Pixel ), i.objectToPixelMatrix() )
+		self.assertEqual( i.matrix( ImagePrimitive.Space.Object, ImagePrimitive.Space.UV ), i.objectToUVMatrix() )
 			
 	def tearDown( self ) :
 

@@ -91,7 +91,7 @@ static StringVectorDataPtr channelNames( ImagePrimitive &that )
 
 void bindImagePrimitive()
 {
-	RunTimeTypedClass<ImagePrimitive>()
+	scope s = RunTimeTypedClass<ImagePrimitive>()
 		.def( init<>() )
 		.def( init<Imath::Box2i, Imath::Box2i>() )
 
@@ -110,6 +110,8 @@ void bindImagePrimitive()
 		.def( "pixelToUVMatrix", &ImagePrimitive::pixelToUVMatrix )
 		.def( "uvToPixelMatrix", &ImagePrimitive::uvToPixelMatrix )
 
+		.def( "matrix", &ImagePrimitive::matrix )
+
 		.def( "channelValid", &channelValid, ( arg_( "image" ), arg_( "primVar" ), arg_( "wantReason" ) = false ) )
 		.def( "channelValid", &channelValid2, ( arg_( "image" ), arg_( "primVarName" ), arg_( "wantReason" ) = false ) )
 		.def( "getChannel", &getChannel )
@@ -126,6 +128,13 @@ void bindImagePrimitive()
 		.staticmethod( "createGreyscaleFloat" )
 		
 	;
+	
+	enum_<ImagePrimitive::Space>( "Space" )
+		.value( "Invalid", ImagePrimitive::Invalid )
+		.value( "Pixel", ImagePrimitive::Pixel )
+		.value( "UV", ImagePrimitive::UV )
+		.value( "Object", ImagePrimitive::Object )
+	;		
 
 }
 

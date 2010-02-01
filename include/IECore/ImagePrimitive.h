@@ -125,6 +125,17 @@ class ImagePrimitive : public Primitive
 		/// Functions to help with conversions between pixel, uv, and object spaces.
 		//////////////////////////////////////////////////////////////////////////////
 		//@{
+		
+		/// The different coordinate systems that can be used to specify a point within
+		/// the image.
+		enum Space
+		{
+			Invalid,
+			Pixel,
+			UV,
+			Object
+		};
+		
 		Imath::M33f objectToUVMatrix() const;
 		Imath::M33f uvToObjectMatrix() const;
 		
@@ -133,7 +144,9 @@ class ImagePrimitive : public Primitive
 		
 		Imath::M33f pixelToUVMatrix() const;
 		Imath::M33f uvToPixelMatrix() const;
-		//@}	
+		
+		Imath::M33f matrix( Space inputSpace, Space outputSpace ) const;
+		//@}
 
 		//! @name Channels
 		/// Channels of the image are just primitive variables with the following

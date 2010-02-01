@@ -271,6 +271,59 @@ M33f ImagePrimitive::uvToPixelMatrix() const
 	result.scale( V2f( size.x, size.y ) );
 	return result;
 }
+
+Imath::M33f ImagePrimitive::matrix( Space inputSpace, Space outputSpace ) const
+{
+	switch( inputSpace )
+	{
+		case Pixel :
+			
+			switch( outputSpace )
+			{
+				case Pixel :
+					return M33f();
+				case UV :
+					return pixelToUVMatrix();
+				case Object :
+					return pixelToObjectMatrix();
+				default :
+					throw Exception( "Unknown output space" );
+			}
+			
+		case UV :
+		
+			switch( outputSpace )
+			{
+				case Pixel :
+					return uvToPixelMatrix();
+				case UV :
+					return M33f();
+				case Object :
+					return uvToObjectMatrix();
+				default :
+					throw Exception( "Unknown output space" );
+			}
+		
+		case Object :
+	
+			switch( outputSpace )
+			{
+				case Pixel :
+					return objectToPixelMatrix();
+				case UV :
+					return objectToUVMatrix();
+				case Object :
+					return M33f();
+				default :
+					throw Exception( "Unknown output space" );
+			}
+		
+		default :
+			
+			throw Exception( "Unknown input space" );
+			
+	};
+}
 		
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Channel methods
