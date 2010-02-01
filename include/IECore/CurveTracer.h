@@ -41,14 +41,13 @@
 #include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
+#include "IECore/ImagePrimitive.h"
 
 namespace IECore
 {
 
 /// The CurveTracer class takes images like those produced by the
 /// ImageThinner and outputs a CurvesPrimitive matching the lines.
-/// \todo Make it possible to control the output coordinate system
-/// of the curves.
 class CurveTracer : public Op
 {
 	public :
@@ -84,6 +83,9 @@ class CurveTracer : public Op
 
 		IntParameterPtr catmullRomStepParameter();
 		ConstIntParameterPtr catmullRomStepParameter() const;
+		
+		IntParameterPtr outputSpaceParameter();
+		ConstIntParameterPtr outputSpaceParameter() const;
 		
 	protected :
 

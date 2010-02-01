@@ -38,12 +38,12 @@
 
 #include "IECore/CurveTracer.h"
 #include "IECore/NullObject.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/PointsPrimitive.h"
 #include "IECore/ObjectWriter.h"
 #include "IECore/VecAlgo.h"
+#include "IECore/TransformOp.h"
 
 using namespace IECore;
 using namespace boost;
@@ -133,6 +133,23 @@ CurveTracer::CurveTracer()
 
 	parameters()->addParameter( catmullRomStepParameter );
 
+	IntParameter::PresetsContainer outputSpacePresets;
+	outputSpacePresets.push_back( IntParameter::Preset( "pixel", ImagePrimitive::Pixel ) );
+	outputSpacePresets.push_back( IntParameter::Preset( "uv", ImagePrimitive::UV ) );
+	outputSpacePresets.push_back( IntParameter::Preset( "object", ImagePrimitive::Object ) );
+	
+	IntParameterPtr outputSpaceParameter = new IntParameter(
+		"outputSpace",
+		"The coordinate system to output the curves in.",
+		ImagePrimitive::Pixel,
+		ImagePrimitive::Pixel,
+		ImagePrimitive::Object,
+		outputSpacePresets,
+		true
+	);
+
+	parameters()->addParameter( outputSpaceParameter );
+	
 }
 
 CurveTracer::~CurveTracer()
@@ -198,7 +215,17 @@ ConstIntParameterPtr CurveTracer::catmullRomStepParameter() const
 {
 	return parameters()->parameter<IntParameter>( "catmullRomStep" );
 }
-				
+
+IntParameterPtr CurveTracer::outputSpaceParameter()
+{
+	return parameters()->parameter<IntParameter>( "outputSpace" );
+}
+
+ConstIntParameterPtr CurveTracer::outputSpaceParameter() const
+{
+	return parameters()->parameter<IntParameter>( "outputSpace" );
+}
+		
 ObjectPtr CurveTracer::doOperation( ConstCompoundObjectPtr operands )
 {
 	
@@ -230,6 +257,24 @@ ObjectPtr CurveTracer::doOperation( ConstCompoundObjectPtr operands )
 		(OutputType)operands->member<IntData>( "outputType" )->readable(),
 		operands->member<IntData>( "catmullRomStep" )->readable()
 	);
+	
+	// transform it to the output space
+	ImagePrimitive::Space space = (ImagePrimitive::Space)operands->member<IntData>( "outputSpace" )->readable();
+	M33f t = image->matrix( ImagePrimitive::Pixel, space );
+	M44f t3d( 
+		t[0][0], t[0][1], 0.0f, t[0][2],
+		t[1][0], t[1][1], 0.0f, t[1][2],
+		   0.0f,	0.0f, 0.0f, 0.0f, 	
+		t[2][0], t[2][1], 0.0f, t[2][2]
+	);
+	t3d.translate( V3f( -1, -1, 0 ) ); // to correct for the padding introduced during tracing.
+	TransformOpPtr transformOp = new TransformOp();
+	transformOp->inputParameter()->setValue( result );
+	transformOp->copyParameter()->setTypedValue( false );
+	transformOp->matrixParameter()->setValue( new M44fData( t3d ) );
+	transformOp->operate();
+	
+	// add color if requested
 	if( operands->member<BoolData>( "color" )->readable() )
 	{
 		colorCurves( result );
@@ -506,25 +551,25 @@ CurvesPrimitivePtr CurveTracer::buildCurves( Graph &graph, OutputType type, int 
 		
 		int numVerts = 2;		
 		V2i vp = vertexPositions[v1];
-		verts->writable().push_back( V3f( vp.x, -vp.y, 0.0f ) );
+		verts->writable().push_back( V3f( vp.x, vp.y, 0.0f ) );
 		if( type==CatmullRom )
 		{
 			numVerts++;
-			verts->writable().push_back( V3f( vp.x, -vp.y, 0.0f ) );
+			verts->writable().push_back( V3f( vp.x, vp.y, 0.0f ) );
 		}
 
 		for( unsigned i = type==Linear ? 0 : catmullRomStep; i<pixels.size(); i += type==Linear ? 1 : catmullRomStep )
 		{
 			numVerts++;
-			verts->writable().push_back( V3f( pixels[i].x, -pixels[i].y, 0.f ) );
+			verts->writable().push_back( V3f( pixels[i].x, pixels[i].y, 0.f ) );
 		}
 		
 		vp = vertexPositions[v2];
-		verts->writable().push_back( V3f( vp.x, -vp.y, 0.0f ) );
+		verts->writable().push_back( V3f( vp.x, vp.y, 0.0f ) );
 		if( type==CatmullRom )
 		{
 			numVerts++;
-			verts->writable().push_back( V3f( vp.x, -vp.y, 0.0f ) );
+			verts->writable().push_back( V3f( vp.x, vp.y, 0.0f ) );
 		}	
 
 		vertsPerCurve->writable().push_back( numVerts );

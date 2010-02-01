@@ -56,11 +56,45 @@ class CurveTracerTest( unittest.TestCase ) :
 		for y in range( 0, size.y ) :
 			for x in range( 0, size.x ) :
 				if pixels[pi] > 0.5 :
-					pp = IECore.V3f( x, -y, 0 )
+					pp = IECore.V3f( x, y, 0 )
 					e.closestPoint( pp, r )
 					self.failUnless( abs( ( pp - r.point() ).length() ) < 3 )
 				pi += 1
+	
+	def testPixelOutputSpace( self ) :
+	
+		i = IECore.Reader.create( "test/IECore/data/tiff/singlePixelT.tif" ).read()
 				
+		o = IECore.CurveTracer()
+		c = o( image=i, channelName="R", minimumLength=0 )
+		
+		self.assertEqual( c.bound(), IECore.Box3f( IECore.V3f( 1, 7, 0 ), IECore.V3f( 9, 11, 0 ) ) )
+		self.failUnless( IECore.V3f( 1, 7, 0 ) in c["P"].data )
+		self.failUnless( IECore.V3f( 7, 11, 0 ) in c["P"].data )
+		self.failUnless( IECore.V3f( 9, 7, 0 ) in c["P"].data )
+		
+	def testUVOutputSpace( self ) :
+	
+		i = IECore.Reader.create( "test/IECore/data/tiff/singlePixelT.tif" ).read()
+				
+		o = IECore.CurveTracer()
+		o["outputSpace"].setValue( "uv" )
+		c = o( image=i, channelName="R", minimumLength=0 )
+		
+		self.failUnless( c.bound().min.equalWithAbsError( IECore.V3f( 0.1, 0.5, 0 ), 0.00001  ) )
+		self.failUnless( c.bound().max.equalWithAbsError( IECore.V3f( 0.633333, 0.7666666, 0 ), 0.00001  ) )
+	
+	def testObjectOutputSpace( self ) :
+	
+		i = IECore.Reader.create( "test/IECore/data/tiff/singlePixelT.tif" ).read()
+				
+		o = IECore.CurveTracer()
+		o["outputSpace"].setValue( "object" )
+		c = o( image=i, channelName="R", minimumLength=0 )
+				
+		self.failUnless( c.bound().min.equalWithAbsError( IECore.V3f( -6, -4, 0 ), 0.00001  ) )
+		self.failUnless( c.bound().max.equalWithAbsError( IECore.V3f( 2, 0, 0 ), 0.00001  ) )
+					
 if __name__ == "__main__":
 	unittest.main()
 
