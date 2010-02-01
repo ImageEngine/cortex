@@ -101,6 +101,15 @@ void bindImagePrimitive()
 		.add_property( "displayWindow", make_function( &ImagePrimitive::getDisplayWindow,
 	                	return_value_policy<copy_const_reference>() ), &ImagePrimitive::setDisplayWindow )
 
+		.def( "objectToUVMatrix", &ImagePrimitive::objectToUVMatrix )
+		.def( "uvToObjectMatrix", &ImagePrimitive::uvToObjectMatrix )
+
+		.def( "objectToPixelMatrix", &ImagePrimitive::objectToPixelMatrix )
+		.def( "pixelToObjectMatrix", &ImagePrimitive::pixelToObjectMatrix )
+		
+		.def( "pixelToUVMatrix", &ImagePrimitive::pixelToUVMatrix )
+		.def( "uvToPixelMatrix", &ImagePrimitive::uvToPixelMatrix )
+
 		.def( "channelValid", &channelValid, ( arg_( "image" ), arg_( "primVar" ), arg_( "wantReason" ) = false ) )
 		.def( "channelValid", &channelValid2, ( arg_( "image" ), arg_( "primVarName" ), arg_( "wantReason" ) = false ) )
 		.def( "getChannel", &getChannel )

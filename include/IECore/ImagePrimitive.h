@@ -70,7 +70,7 @@ namespace IECore
 /// to be zero (i.e. black/transparent). This means that the number of data elements stored in each
 /// channel should equal to the area of the data window.
 ///
-/// In object-space, the ImagePrimitive is represented as a unit plane centered on the origin, with scale (width, height) in axes (X, Y).
+/// In object-space, the ImagePrimitive is represented as a plane centered on the origin, with size (width, height) in axes (X, Y).
 /// The normal is pointing down the negative Z-axis.
 ///
 /// Pixel-space runs from the display window origin in the top-left corner, to the display window's maximum in
@@ -81,6 +81,8 @@ namespace IECore
 /// and (1,1) at the maximum of the display window.
 ///
 /// \todo Define standard depth channel ("Z"? "depth"?)
+/// \todo I think we should perhaps rethink the centering of the object space. It seems odd that rendering two images
+/// where one has an offset display window should result in them rendering over the top of each other.
 class ImagePrimitive : public Primitive
 {
 
@@ -118,6 +120,20 @@ class ImagePrimitive : public Primitive
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
 		virtual void render( RendererPtr renderer ) const;
+
+		//! @name Spaces
+		/// Functions to help with conversions between pixel, uv, and object spaces.
+		//////////////////////////////////////////////////////////////////////////////
+		//@{
+		Imath::M33f objectToUVMatrix() const;
+		Imath::M33f uvToObjectMatrix() const;
+		
+		Imath::M33f objectToPixelMatrix() const;
+		Imath::M33f pixelToObjectMatrix() const;
+		
+		Imath::M33f pixelToUVMatrix() const;
+		Imath::M33f uvToPixelMatrix() const;
+		//@}	
 
 		//! @name Channels
 		/// Channels of the image are just primitive variables with the following

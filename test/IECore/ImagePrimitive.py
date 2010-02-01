@@ -278,6 +278,84 @@ class TestImagePrimitive( unittest.TestCase ) :
 
 		for p in ( 0, 63, 127, 255 ) :
 			self.assertEqual( i["Y"].data[ p ], fill )
+	
+	def testSpaces( self ) :
+	
+		# one pixel image 0,0 -> 0,0
+	
+		onePixelWindow = Box2i( V2i( 0 ), V2i( 0 ) )
+		i = ImagePrimitive( onePixelWindow, onePixelWindow )
+		
+		m = i.pixelToObjectMatrix()
+		self.assertEqual( V2f( 0 ) * m, V2f( 0 ) )
+		m2 = i.objectToPixelMatrix()
+		self.assertEqual( m2, m.inverse() )
+		
+		m = i.pixelToUVMatrix()
+		self.assertEqual( V2f( 0 ) * m, V2f( 0.5 ) )
+		m2 = i.uvToPixelMatrix()
+		self.assertEqual( m2, m.inverse() )
+		
+		m = i.objectToUVMatrix()
+		self.assertEqual( V2f( -0.5 ) * m, V2f( 0 ) )
+		self.assertEqual( V2f( 0.5 ) * m, V2f( 1 ) )
+		m2 = i.uvToObjectMatrix()
+		self.assertEqual( m2, m.inverse() )
+		
+		self.failUnless( ( i.objectToUVMatrix() * i.uvToPixelMatrix() ).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
+		self.failUnless( ( i.pixelToUVMatrix() * i.uvToObjectMatrix() ).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
+				
+		# two pixel image 0,0 -> 1,1
+
+		twoPixelWindow = Box2i( V2i( 0 ), V2i( 1 ) )
+		i = ImagePrimitive( twoPixelWindow, twoPixelWindow )
+		
+		m = i.pixelToObjectMatrix()
+		self.assertEqual( V2f( 0 ) * m, V2f( -0.5 ) )
+		self.assertEqual( V2f( 1 ) * m, V2f( 0.5 ) )
+		m2 = i.objectToPixelMatrix()
+		self.assertEqual( m2, m.inverse() )
+		
+		m = i.pixelToUVMatrix()
+		self.assertEqual( V2f( 0 ) * m, V2f( 0.25 ) )
+		self.assertEqual( V2f( 1 ) * m, V2f( 0.75 ) )
+		m2 = i.uvToPixelMatrix()
+		self.assertEqual( m2, m.inverse() )
+		
+		m = i.objectToUVMatrix()
+		self.assertEqual( V2f( -1 ) * m, V2f( 0 ) )
+		self.assertEqual( V2f( 1 ) * m, V2f( 1 ) )
+		m2 = i.uvToObjectMatrix()
+		self.assertEqual( m2, m.inverse() )
+		
+		self.failUnless( ( i.objectToUVMatrix() * i.uvToPixelMatrix() ).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
+		self.failUnless( ( i.pixelToUVMatrix() * i.uvToObjectMatrix() ).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
+
+		# three by two pixel image 10,20 -> 12,21
+
+		threeTwoPixelWindowOffset = Box2i( V2i( 10, 20 ), V2i( 12, 21 ) )
+		i = ImagePrimitive( threeTwoPixelWindowOffset, threeTwoPixelWindowOffset )
+		
+		m = i.pixelToObjectMatrix()
+		self.assertEqual( V2f( 10, 20 ) * m, V2f( -1, -0.5 ) )
+		self.assertEqual( V2f( 12, 21 ) * m, V2f( 1, 0.5 ) )
+		m2 = i.objectToPixelMatrix()
+		self.assertEqual( m2, m.inverse() )
+		
+		m = i.pixelToUVMatrix()
+		self.failUnless( ( V2f( 10, 20 ) * m ).equalWithAbsError( V2f( 1/6.0, 1/4.0 ), 0.00001 ) )
+		self.failUnless( ( V2f( 12, 21 ) * m ).equalWithAbsError( V2f( 5/6.0, 3/4.0 ), 0.00001 ) )
+		m2 = i.uvToPixelMatrix()
+		self.assertEqual( m2, m.inverse() )
+		
+		m = i.objectToUVMatrix()
+		self.assertEqual( V2f( -1.5, -1 ) * m, V2f( 0 ) )
+		self.assertEqual( V2f( 1.5, 1 ) * m, V2f( 1 ) )
+		m2 = i.uvToObjectMatrix()
+		self.assertEqual( m2, m.inverse() )
+		
+		self.failUnless( ( i.objectToUVMatrix() * i.uvToPixelMatrix() ).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
+		self.failUnless( ( i.pixelToUVMatrix() * i.uvToObjectMatrix() ).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
 			
 	def tearDown( self ) :
 

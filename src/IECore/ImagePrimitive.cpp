@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -210,6 +210,68 @@ void ImagePrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( sizeof(m_dataWindow) );
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+// Space methods
+///////////////////////////////////////////////////////////////////////////////////////////
+
+M33f ImagePrimitive::objectToUVMatrix() const
+{
+	M33f result;
+	const Box2i &displayWindow = getDisplayWindow();
+	V2i size = displayWindow.size() + V2i( 1 );
+	result.scale( V2f( 1.0f ) / V2f( size.x, size.y ) );
+	result.translate( V2f( size.x, size.y ) / 2.0f );
+	return result;
+}
+
+M33f ImagePrimitive::uvToObjectMatrix() const
+{
+	M33f result;
+	const Box2i &displayWindow = getDisplayWindow();
+	V2i size = displayWindow.size() + V2i( 1 );
+	result.translate( - V2f( size.x, size.y ) / 2.0f );
+	result.scale( V2f( size.x, size.y ) );
+	return result;
+}
+
+M33f ImagePrimitive::objectToPixelMatrix() const
+{
+	M33f result;
+	const Box2i &displayWindow = getDisplayWindow();
+	V2i size = displayWindow.size();
+	result.translate( V2f( displayWindow.min.x, displayWindow.min.y ) + V2f( size.x, size.y ) / 2.0f );
+	return result;
+}
+
+M33f ImagePrimitive::pixelToObjectMatrix() const
+{
+	M33f result;
+	const Box2i &displayWindow = getDisplayWindow();
+	V2i size = displayWindow.size();
+	result.translate( -V2f( displayWindow.min.x, displayWindow.min.y ) - V2f( size.x, size.y ) / 2.0f );
+	return result;
+}
+		
+M33f ImagePrimitive::pixelToUVMatrix() const
+{
+	M33f result;
+	const Box2i &displayWindow = getDisplayWindow();
+	V2i size = displayWindow.size() + V2i( 1 );
+	result.scale( V2f( 1.0f ) / V2f( size.x, size.y ) );
+	result.translate( V2f( 0.5f ) - V2f( displayWindow.min.x, displayWindow.min.y ) );
+	return result;
+}
+
+M33f ImagePrimitive::uvToPixelMatrix() const
+{
+	M33f result;
+	const Box2i &displayWindow = getDisplayWindow();
+	V2i size = displayWindow.size() + V2i( 1 );
+	result.translate( V2f( displayWindow.min.x, displayWindow.min.y ) - V2f( 0.5f ) );
+	result.scale( V2f( size.x, size.y ) );
+	return result;
+}
+		
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Channel methods
 ///////////////////////////////////////////////////////////////////////////////////////////
