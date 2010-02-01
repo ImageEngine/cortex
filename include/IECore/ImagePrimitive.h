@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -156,7 +156,7 @@ class ImagePrimitive : public Primitive
 		//@}
 		
 		//! @name Creation
-		/// Convienience functions to create ImagePrimitives pre-filled with a default value
+		/// Convenience functions to create ImagePrimitives pre-filled with a default value
 		template<typename T>
 		static Ptr createRGB( const Imath::Color3<T> &fillColor, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow );
 		template<typename T>
