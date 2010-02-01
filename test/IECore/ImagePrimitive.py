@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -222,8 +222,9 @@ class TestImagePrimitive( unittest.TestCase ) :
 		self.assertEqual( i.channelValid( "PP" ), False )
 		self.assertEqual( i.getChannel( "PP" ), None )
 	
-	def testConenienceConstructors( self ) :
-		""" Test ImagePrimitive convienience constructors """
+	def testConvenienceConstructors( self ) :
+	
+		""" Test ImagePrimitive convenience constructors """
 		
 		window1Min = V2i(  0,  0 )
 		window1Max = V2i( 15, 15 )		
