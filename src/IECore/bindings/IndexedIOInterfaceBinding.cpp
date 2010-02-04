@@ -222,6 +222,8 @@ void bindIndexedIOInterface(const char *bindName)
 	void (IndexedIOInterface::*writeUInt)(const IndexedIO::EntryID &, const unsigned int &) = &IndexedIOInterface::write;
 	void (IndexedIOInterface::*writeChar)(const IndexedIO::EntryID &, const char &) = &IndexedIOInterface::write;
 	void (IndexedIOInterface::*writeUChar)(const IndexedIO::EntryID &, const unsigned char &) = &IndexedIOInterface::write;
+	void (IndexedIOInterface::*writeShort)(const IndexedIO::EntryID &, const short &) = &IndexedIOInterface::write;
+	void (IndexedIOInterface::*writeUShort)(const IndexedIO::EntryID &, const unsigned short &) = &IndexedIOInterface::write;
 #endif
 
 
@@ -255,7 +257,11 @@ void bindIndexedIOInterface(const char *bindName)
 		.value("Char", IndexedIO::Char)
 		.value("CharArray", IndexedIO::CharArray)
 		.value("UChar", IndexedIO::UChar)
-		.value("UChar", IndexedIO::UCharArray)
+		.value("UCharArray", IndexedIO::UCharArray)
+		.value("Short", IndexedIO::Long)
+		.value("ShortArray", IndexedIO::ShortArray)
+		.value("UShort", IndexedIO::Long)
+		.value("UShortArray", IndexedIO::UShortArray)
 		.export_values()
 	;
 
@@ -282,6 +288,8 @@ void bindIndexedIOInterface(const char *bindName)
 		.def("write", writeUInt)
 		.def("write", writeChar)
 		.def("write", writeUChar)
+		.def("write", writeShort)
+		.def("write", writeUShort)
 #endif
 		.def("read", &IndexedIOInterfaceHelper::read)
 		.def("create", &IndexedIOInterface::create ).staticmethod("create")
