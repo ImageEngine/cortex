@@ -77,6 +77,28 @@ class CubicTest( unittest.TestCase ) :
 		c = b.coefficients( 1 )
 		self.assertEqual( len( c ), 4 )
 		self.assertEqual( c, ( 0, 0, 0, 1 ) )
+		
+	def testDerivativeCoefficients( self ) :
+	
+		b = CubicBasisf.bezier()
+		
+		c = b.derivativeCoefficients( 0 )
+		self.assertEqual( len( c ), 4 )
+		self.assertEqual( c, ( -3, 3, 0, 0 ) )
+
+		c = b.derivativeCoefficients( 1 )
+		self.assertEqual( len( c ), 4 )
+		self.assertEqual( c, ( 0, 0, -3, 3 ) )
+		
+		b = CubicBasisf.linear()
+		
+		c = b.derivativeCoefficients( 0 )
+		self.assertEqual( len( c ), 4 )
+		self.assertEqual( c, ( -1, 1, 0, 0 ) )
+
+		c = b.derivativeCoefficients( 1 )
+		self.assertEqual( len( c ), 4 )
+		self.assertEqual( c, ( -1, 1, 0, 0 ) )
 
 	def testCall( self ) :
 

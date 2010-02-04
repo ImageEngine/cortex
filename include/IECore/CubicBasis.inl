@@ -103,11 +103,12 @@ template<typename T>
 template<class S>
 inline void CubicBasis<T>::derivativeCoefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const
 {
-	S t2 = t * t;
-	c0 = matrix[0][0] * 3.0 * t2 + matrix[1][0] * 2.0 * t + matrix[2][0];
-	c1 = matrix[0][1] * 3.0 * t2 + matrix[1][1] * 2.0 * t + matrix[2][1];
-	c2 = matrix[0][2] * 3.0 * t2 + matrix[1][2] * 2.0 * t + matrix[2][2];
-	c3 = matrix[0][3] * 3.0 * t2 + matrix[1][3] * 2.0 * t + matrix[2][3];
+	S twoT = 2.0 * t;
+	S threeT2 = 3.0 * t * t;
+	c0 = matrix[0][0] * threeT2 + matrix[1][0] * twoT + matrix[2][0];
+	c1 = matrix[0][1] * threeT2 + matrix[1][1] * twoT + matrix[2][1];
+	c2 = matrix[0][2] * threeT2 + matrix[1][2] * twoT + matrix[2][2];
+	c3 = matrix[0][3] * threeT2 + matrix[1][3] * twoT + matrix[2][3];
 }
 
 template<typename T>
