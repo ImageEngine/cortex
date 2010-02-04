@@ -52,6 +52,21 @@ static bool pointAtV( const CurvesPrimitiveEvaluator &e, unsigned curveIndex, fl
 	return e.pointAtV( curveIndex, v, r );
 }
 
+static IntVectorDataPtr verticesPerCurve( const CurvesPrimitiveEvaluator &e )
+{
+	return new IntVectorData( e.verticesPerCurve() );
+}
+
+static IntVectorDataPtr vertexDataOffsets( const CurvesPrimitiveEvaluator &e )
+{
+	return new IntVectorData( e.vertexDataOffsets() );
+}
+
+static IntVectorDataPtr varyingDataOffsets( const CurvesPrimitiveEvaluator &e )
+{
+	return new IntVectorData( e.varyingDataOffsets() );
+}
+
 void bindCurvesPrimitiveEvaluator()
 {
 	scope s = RunTimeTypedClass<CurvesPrimitiveEvaluator>()
@@ -64,6 +79,9 @@ void bindCurvesPrimitiveEvaluator()
 				arg( "vEnd" ) = 1.0f
 			)
 		)
+		.def( "verticesPerCurve", &verticesPerCurve )
+		.def( "vertexDataOffsets", &vertexDataOffsets )
+		.def( "varyingDataOffsets", &varyingDataOffsets )
 	;
 	
 	RefCountedClass<CurvesPrimitiveEvaluator::Result, PrimitiveEvaluator::Result>( "Result" )
