@@ -139,6 +139,7 @@ class PrimitiveEvaluator : public RunTimeTyped
 		virtual Imath::V3f centerOfGravity() const=0;
 
 		/// Find the closest point on the primitive to the given query point. Returns true on success.
+		/// \todo Extend this to pass a maximum distance past which results are no longer interesting.
 		virtual bool closestPoint( const Imath::V3f &p, const ResultPtr &result ) const =0;
 
 		/// Find the point on the primitive at the given query UV. Returns true on success
