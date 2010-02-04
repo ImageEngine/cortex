@@ -84,6 +84,8 @@ class MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 				Imath::V3i m_vertexIds;
 				Imath::V3f m_bary;
+				/// \todo I don't see why we have to compute these for every query when we don't even
+				/// know if they'll be requested.
 				Imath::V3f m_p;
 				Imath::V3f m_n;
 				Imath::V2f m_uv;
