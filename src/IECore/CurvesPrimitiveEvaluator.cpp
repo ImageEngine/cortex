@@ -536,3 +536,18 @@ void CurvesPrimitiveEvaluator::buildTree()
 	m_tree.init( m_treeBounds.begin(), m_treeBounds.end() );
 	m_haveTree = true;
 }
+
+const std::vector<int> &CurvesPrimitiveEvaluator::verticesPerCurve() const
+{
+	return m_verticesPerCurve;
+}
+
+const std::vector<int> &CurvesPrimitiveEvaluator::vertexDataOffsets() const
+{
+	return m_vertexDataOffsets;
+}
+
+const std::vector<int> &CurvesPrimitiveEvaluator::varyingDataOffsets() const
+{
+	return m_varyingDataOffsets;
+}

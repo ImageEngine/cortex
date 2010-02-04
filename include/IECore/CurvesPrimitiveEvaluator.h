@@ -118,6 +118,10 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual float volume() const;
 		/// Not yet implemented.
 		virtual Imath::V3f centerOfGravity() const;
+		/// \threading The first call to this method creates an acceleration structure which will be reused
+		/// by all subsequent queries. Following the first call this method can be called from multiple
+		/// concurrent threads but the first call itself must have completed before this can happen.
+		/// \todo Sort out this mess.
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
 		/// Returns pointAtV( 0, uv[1], result ).
 		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
@@ -136,6 +140,23 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		/// Returns the length of the given curve from vStart to vEnd.
 		/// Returns 0.0f if inappropriate parameters are given.
 		float curveLength( unsigned curveIndex, float vStart=0.0f, float vEnd=1.0f ) const;
+		//@}
+
+		//! @name Topology access
+		/// These functions make it easier to index curve data manually in cases where the
+		/// queries above are not sufficient.
+		////////////////////////////////////////////////////////////////////////////////////////
+		//@{
+		/// Equivalent to CurvesPrimitive::verticesPerCurve() but returns a reference to
+		/// the vector within the IntVectorData. This is threadsafe whereas the other is not
+		/// (due to constructing a smart pointer for the return value).
+		/// \todo Make CurvesPrimitive::verticesPerCurve() threadsafe.
+		const std::vector<int> &verticesPerCurve() const;
+		/// One value per curve, storing the offset to the first vertex value for
+		/// that curve.
+		const std::vector<int> &vertexDataOffsets() const;
+		/// As above but providing the offset for data with varying interpolation.
+		const std::vector<int> &varyingDataOffsets() const;
 		//@}
 
 	private :
