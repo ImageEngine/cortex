@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -86,36 +86,49 @@ MStatus BoxParameterHandler<T>::update( IECore::ConstParameterPtr parameter, MOb
 		return MS::kFailure;
 	}
 
+	// Set the default value for the leaf attributes individually. Calling
+	// the variants of setDefault that set several components at a time
+	// seems to exercise a maya bug. See similar comment in CompoundNumericParameterHandler.
 	Box<T> defValue = p->typedDefaultValue();
 	MStatus s;
-	switch( T::dimensions() )
+	for( unsigned i=0; i<T::dimensions(); i++ )
 	{
-		case 2 :
-			s = fnMinAttr.setDefault( defValue.min[0], defValue.min[1] );
-			if( !s )
-			{
-				return s;
-			}
-			s = fnMaxAttr.setDefault( defValue.max[0], defValue.max[1] );
-			if( !s )
-			{
-				return s;
-			}
-			break;
-		case 3 :
-			s = fnMinAttr.setDefault( defValue.min[0], defValue.min[1], defValue.min[2] );
-			if( !s )
-			{
-				return s;
-			}
-			s = fnMaxAttr.setDefault( defValue.max[0], defValue.max[1], defValue.max[2] );
-			if( !s )
-			{
-				return s;
-			}
-			break;
-		default :
-			return MS::kFailure;
+		MObject minChildAttr = fnMinAttr.child( i, &s );
+		if( !s )
+		{
+			return s;
+		}
+		
+		MObject maxChildAttr = fnMaxAttr.child( i, &s );
+		if( !s )
+		{
+			return s;
+		}	
+	
+		MFnNumericAttribute fnMinChildAttr( minChildAttr, &s );
+		if( !s )
+		{
+			return s;
+		}
+		
+		MFnNumericAttribute fnMaxChildAttr( maxChildAttr, &s );
+		if( !s )
+		{
+			return s;
+		}
+		
+		s = fnMinChildAttr.setDefault( defValue.min[i] );
+		if( !s )
+		{
+			return s;
+		}
+		
+		s = fnMaxChildAttr.setDefault( defValue.max[i] );
+		if( !s )
+		{
+			return s;
+		}
+		
 	}
 
 	return MS::kSuccess;

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -481,6 +481,24 @@ class FnParameterisedHolderTest( unittest.TestCase ) :
 
 		self.assertEqual( fnOH.parameterPlug( p["i"] ).asInt(), 10 )
 		self.assertEqual( fnOH.parameterPlug( p["f"] ).asInt(), 2 )
+
+	def testBoxDefaultValue( self ) :
+
+		node = maya.cmds.createNode( "ieOpHolderNode" )
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+
+		op = IECore.ClassLoader.defaultOpLoader().load( "parameterTypes", 1 )()
+		op.parameters().removeParameter( "m" ) # no color4f support in maya
+
+		fnPH.setParameterised( op )
+		
+		node, plug = fnPH.parameterPlugPath( op["s"] ).split( "." )
+		self.assertEqual( maya.cmds.attributeQuery( plug + "Min", listDefault=True, node=node ), [ -1.0, -1.0 ] )
+		self.assertEqual( maya.cmds.attributeQuery( plug + "Max", listDefault=True, node=node ), [ 1.0, 1.0 ] )
+
+		node, plug = fnPH.parameterPlugPath( op["t"] ).split( "." )
+		self.assertEqual( maya.cmds.attributeQuery( plug + "Min", listDefault=True, node=node ), [ -1.0, -1.0, -1.0 ] )
+		self.assertEqual( maya.cmds.attributeQuery( plug + "Max", listDefault=True, node=node ), [ 1.0, 1.0, 1.0 ] )
 
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
