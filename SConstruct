@@ -1427,6 +1427,7 @@ if doConfigure :
 		if env["WITH_MAYA_PLUGIN_LOADER"] :
 			mayaPythonTestEnv.Depends( mayaPythonTest, mayaPluginLoader )
 		mayaPythonTestEnv.Alias( "testMaya", mayaPythonTest )			
+		mayaPythonTestEnv.Alias( "testMayaPython", mayaPythonTest )			
 
 ###########################################################################################
 # Build and install the coreNuke library and headers
