@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,7 @@ namespace IECore
 {
 #define IECORE_DOUBLEMAGICROUNDEPS	(.5-1.4e-11)
 
-#if (defined(__linux__) && defined(__i386__)) || defined(WIN32)
+#if (defined(__linux__) && ( defined(__i386__) || defined(__x86_64__) ) ) || defined(WIN32)
 	#define IECORE_DOUBLEMAGIC			double (6755399441055744.0)
 
 	inline int fastFloat2Int( double v )
@@ -115,7 +115,7 @@ namespace IECore
 	{
 		return 1.0f / sqrtf(x);
 	}
-
+	
 #endif
 
 } // namespace IECore
