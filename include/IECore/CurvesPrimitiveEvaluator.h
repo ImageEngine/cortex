@@ -79,10 +79,13 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 			
 				friend class CurvesPrimitiveEvaluator;
 			
-				Result();
-				
-				void init( unsigned curveIndex, float v, const CurvesPrimitiveEvaluator *evaluator );
+				Result( PrimitiveVariable p, bool linear, bool periodic );
 								
+				typedef void (Result::*InitFunction)( unsigned curveIndex, float v, const CurvesPrimitiveEvaluator *evaluator );
+
+				template<bool linear, bool periodic>
+				void init( unsigned curveIndex, float v, const CurvesPrimitiveEvaluator *evaluator );
+				
 				template<typename T>
 				T primVar( const PrimitiveVariable &pv, const float *coefficients ) const;
 				
@@ -95,6 +98,8 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 				unsigned m_varyingDataIndices[2];
 				PrimitiveVariable m_p;
 				bool m_linear;
+				InitFunction m_init;
+				
 				
 		};
 		IE_CORE_DECLAREPTR( Result );

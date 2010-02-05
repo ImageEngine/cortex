@@ -50,8 +50,37 @@ IE_CORE_DEFINERUNTIMETYPED( CurvesPrimitiveEvaluator );
 // Implementation of Result
 //////////////////////////////////////////////////////////////////////////
 
-CurvesPrimitiveEvaluator::Result::Result()
+CurvesPrimitiveEvaluator::Result::Result( PrimitiveVariable p, bool linear, bool periodic )
+	:	m_p( p ), m_linear( linear )
 {
+	// this is slightly curious. what we're doing is choosing a specific instantiation of
+	// the init() template function and storing it as a pointer to a member function. because
+	// the periodic and linear arguments are template arguments rather than parameters, the
+	// compiler makes a specifically optimised version of the function for each of our four
+	// cases. this lets us write the init() function in a readable form and leaves the optimisation
+	// to the compiler.
+	if( periodic )
+	{
+		if( m_linear )
+		{
+			m_init = &Result::init<true, true>;
+		}
+		else
+		{
+			m_init = &Result::init<false, true>;
+		}
+	}
+	else
+	{
+		if( linear )
+		{
+			m_init = &Result::init<true, false>;
+		}
+		else
+		{
+			m_init = &Result::init<false, false>;
+		}
+	}
 }
 
 template<class T>
@@ -175,42 +204,87 @@ half CurvesPrimitiveEvaluator::Result::halfPrimVar( const PrimitiveVariable &pv 
 	return primVar<half>( pv, m_coefficients );
 }
 
+template<bool linear, bool periodic>
 void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const CurvesPrimitiveEvaluator *evaluator )
 {
 	m_curveIndex = curveIndex;
 	m_v = v;
 
-	unsigned numSegments = evaluator->m_curvesPrimitive->numSegments( m_curveIndex );
+	int numVertices = evaluator->m_verticesPerCurve[curveIndex];
+	const CubicBasisf &basis = evaluator->m_curvesPrimitive->basis();
+
+	unsigned numSegments = 0;
+	if( linear )
+	{
+		if( periodic )
+		{
+			numSegments = numVertices;
+		}
+		else
+		{
+			numSegments = numVertices - 1;
+		}
+	}
+	else
+	{
+		if( periodic )
+		{
+			numSegments = numVertices / basis.step;
+		}
+		else
+		{
+			numSegments = (numVertices - 4 ) / basis.step + 1;
+		}
+	}
+	
 	float vv = v * numSegments;
 	unsigned segment = min( (unsigned)fastFloatFloor( vv ), numSegments - 1 );
 	m_segmentV = vv - segment;
 	
-	const CubicBasisf &basis = evaluator->m_curvesPrimitive->basis();
-	basis.coefficients( m_segmentV, m_coefficients );
-	basis.derivativeCoefficients( m_segmentV, m_derivativeCoefficients );
+	unsigned o = evaluator->m_vertexDataOffsets[m_curveIndex];
+	unsigned i = segment * basis.step;
 	
-	if( evaluator->m_curvesPrimitive->periodic() )
+	if( linear )
 	{
-		int numVertices = evaluator->m_verticesPerCurve[curveIndex];
-		unsigned o = evaluator->m_vertexDataOffsets[m_curveIndex];
-		unsigned i = segment * basis.step;
-		m_vertexDataIndices[0] = o + i;
-		m_vertexDataIndices[1] = o + ( ( i + 1 ) % numVertices );
-		m_vertexDataIndices[2] = o + ( ( i + 2 ) % numVertices );
-		m_vertexDataIndices[3] = o + ( ( i + 3 ) % numVertices );
-		
-		m_varyingDataIndices[0] = evaluator->m_varyingDataOffsets[m_curveIndex] + segment;
-		m_varyingDataIndices[1] = evaluator->m_varyingDataOffsets[m_curveIndex] + ( segment % numSegments );
+		m_coefficients[0] = 1.0f - m_segmentV;
+		m_coefficients[1] = m_segmentV;
+		m_derivativeCoefficients[0] = 1.0f;
+		m_derivativeCoefficients[1] = -1.0f;
+		m_vertexDataIndices[0] = m_varyingDataIndices[0] = o + i;
+		if( periodic )
+		{
+			m_vertexDataIndices[1] = m_varyingDataIndices[1] = o + ( ( i + 1 ) % numVertices );
+		}
+		else
+		{
+			m_vertexDataIndices[1] = m_varyingDataIndices[1] = m_vertexDataIndices[0] + 1;
+		}
 	}
 	else
 	{
-		m_vertexDataIndices[0] = evaluator->m_vertexDataOffsets[m_curveIndex] + segment * basis.step;
-		m_vertexDataIndices[1] = m_vertexDataIndices[0] + 1;
-		m_vertexDataIndices[2] = m_vertexDataIndices[1] + 1;
-		m_vertexDataIndices[3] = m_vertexDataIndices[2] + 1;
-	
-		m_varyingDataIndices[0] = evaluator->m_varyingDataOffsets[m_curveIndex] + segment;
-		m_varyingDataIndices[1] = m_varyingDataIndices[0] + 1;
+		basis.coefficients( m_segmentV, m_coefficients );
+		basis.derivativeCoefficients( m_segmentV, m_derivativeCoefficients );
+		
+		if( periodic )
+		{
+			m_vertexDataIndices[0] = o + i;
+			m_vertexDataIndices[1] = o + ( ( i + 1 ) % numVertices );
+			m_vertexDataIndices[2] = o + ( ( i + 2 ) % numVertices );
+			m_vertexDataIndices[3] = o + ( ( i + 3 ) % numVertices );
+
+			m_varyingDataIndices[0] = evaluator->m_varyingDataOffsets[m_curveIndex] + segment;
+			m_varyingDataIndices[1] = evaluator->m_varyingDataOffsets[m_curveIndex] + ( segment % numSegments );
+		}
+		else
+		{
+			m_vertexDataIndices[0] = evaluator->m_vertexDataOffsets[m_curveIndex] + segment * basis.step;
+			m_vertexDataIndices[1] = m_vertexDataIndices[0] + 1;
+			m_vertexDataIndices[2] = m_vertexDataIndices[1] + 1;
+			m_vertexDataIndices[3] = m_vertexDataIndices[2] + 1;
+
+			m_varyingDataIndices[0] = evaluator->m_varyingDataOffsets[m_curveIndex] + segment;
+			m_varyingDataIndices[1] = m_varyingDataIndices[0] + 1;
+		}
 	}
 }
 
@@ -284,10 +358,7 @@ ConstPrimitivePtr CurvesPrimitiveEvaluator::primitive() const
 
 PrimitiveEvaluator::ResultPtr CurvesPrimitiveEvaluator::createResult() const
 {
-	Result *result = new Result;
-	result->m_p = m_p;
-	result->m_linear = m_curvesPrimitive->basis() == CubicBasisf::linear();
-	return result;
+	return new Result( m_p, m_curvesPrimitive->basis() == CubicBasisf::linear(), m_curvesPrimitive->periodic() );
 }
 
 void CurvesPrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
@@ -331,7 +402,7 @@ bool CurvesPrimitiveEvaluator::closestPoint( const Imath::V3f &p, const Primitiv
 	float v = -1;
 	float distSquared = Imath::limits<float>::max();
 	closestPointWalk( m_tree.rootIndex(), p, curveIndex, v, distSquared );
-	typedResult->init( curveIndex, v, this );
+	(typedResult->*typedResult->m_init)( curveIndex, v, this );
 	
 	return true;
 }
@@ -413,7 +484,7 @@ bool CurvesPrimitiveEvaluator::pointAtV( unsigned curveIndex, float v, const Pri
 		return false;
 	}
 	Result *typedResult = static_cast<Result *>( result.get() );
-	typedResult->init( curveIndex, v, this );
+	(typedResult->*typedResult->m_init)( curveIndex, v, this );
 	return true;
 }
 
@@ -429,10 +500,8 @@ float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, 
 	float length = 0.0f;
 	Imath::V3f current( 0, 0, 0 );
 	
-	Result typedResult;
-	typedResult.m_p = m_p;
-	typedResult.m_linear = m_curvesPrimitive->basis() == CubicBasisf::linear();
-	typedResult.init( curveIndex, vStart, this );
+	Result typedResult( m_p, m_curvesPrimitive->basis() == CubicBasisf::linear(), m_curvesPrimitive->periodic() );
+	(typedResult.*typedResult.m_init)( curveIndex, vStart, this );
 	Imath::V3f previous = typedResult.point();
 	
 	if ( typedResult.m_linear )
@@ -452,7 +521,7 @@ float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, 
 		
 		for ( float v = firstV; v <= vEnd; v = ( v == lastV ) ? vEnd : v + vStep )
 		{
-			typedResult.init( curveIndex, v, this );
+			(typedResult.*typedResult.m_init)( curveIndex, v, this );
 			
 			current = typedResult.point();
 			length += ( current - previous ).length();
@@ -464,7 +533,7 @@ float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, 
 	
 	for ( float v = vStart + vStep; v <= vEnd; v += vStep )
 	{
-		typedResult.init( curveIndex, v, this );
+		(typedResult.*typedResult.m_init)( curveIndex, v, this );
 		
 		current = typedResult.point();
 		length += ( current - previous ).length();
