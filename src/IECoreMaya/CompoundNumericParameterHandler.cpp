@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,7 +83,7 @@ MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr pa
 	}
 
 	/// Set the default value one child attribute at a time. It would appear that using the variants of setDefault
-	/// whicn take 2 or 3 arguments can exercise a Maya bug.
+	/// which take 2 or 3 arguments can exercise a Maya bug.
 	T defValue = p->typedDefaultValue();
 	for( unsigned i=0; i<T::dimensions(); i++ )
 	{
