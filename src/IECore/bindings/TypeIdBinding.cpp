@@ -352,6 +352,7 @@ void bindTypeId()
 		.value( "HitMissTransform", HitMissTransformTypeId )
 		.value( "CurveTracer", CurveTracerTypeId )
 		.value( "ImageThinner", ImageThinnerTypeId )
+		.value( "CurveLineariser", CurveLineariserTypeId )
 	;
 }
 

@@ -212,6 +212,7 @@ from PointDistributionTest import PointDistributionTest
 from HitMissTransformTest import HitMissTransformTest
 from CurveTracerTest import CurveTracerTest
 from ImageThinnerTest import ImageThinnerTest
+from CurveLineariserTest import CurveLineariserTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

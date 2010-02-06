@@ -350,6 +350,7 @@ enum TypeId
 	HitMissTransformTypeId = 307,
 	CurveTracerTypeId = 308,
 	ImageThinnerTypeId = 309,
+	CurveLineariserTypeId = 310,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

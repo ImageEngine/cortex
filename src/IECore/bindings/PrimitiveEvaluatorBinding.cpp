@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -129,6 +129,33 @@ struct PrimitiveEvaluatorHelper
 
 };
 
+static object primVar( PrimitiveEvaluator::Result &r, PrimitiveVariable &v )
+{
+	switch( v.data->typeId() )
+	{
+		case V3fDataTypeId :
+		case V3fVectorDataTypeId :
+			return object( r.vectorPrimVar( v ) );
+		case FloatDataTypeId :
+		case FloatVectorDataTypeId :
+			return object( r.floatPrimVar( v ) );
+		case IntDataTypeId :
+		case IntVectorDataTypeId :
+			return object( r.intPrimVar( v ) );
+		case StringDataTypeId :
+		case StringVectorDataTypeId :
+			return object( r.stringPrimVar( v ) );
+		case Color3fDataTypeId :
+		case Color3fVectorDataTypeId :
+			return object( r.colorPrimVar( v ) );
+		case HalfDataTypeId :
+		case HalfVectorDataTypeId :
+			return object( r.halfPrimVar( v ) );	
+		default :
+			throw Exception( "Unsupported PrimitiveVariable datatype." );
+	}
+}
+
 void bindPrimitiveEvaluator()
 {
 	list (*intersectionPoints)(PrimitiveEvaluator&, const Imath::V3f &, const Imath::V3f &) = &PrimitiveEvaluatorHelper::intersectionPoints;
@@ -168,6 +195,7 @@ void bindPrimitiveEvaluator()
 			.def( "stringPrimVar", &PrimitiveEvaluator::Result::stringPrimVar, return_value_policy<copy_const_reference>() )
 			.def( "colorPrimVar", &PrimitiveEvaluator::Result::colorPrimVar )
 			.def( "halfPrimVar", &PrimitiveEvaluator::Result::halfPrimVar )
+			.def( "primVar", &primVar )
 		;
 
 	}
