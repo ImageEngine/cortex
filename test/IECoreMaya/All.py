@@ -63,7 +63,6 @@ from CallbackIdTest import *
 from TemporaryAttributeValuesTest import *
 from SplineParameterHandlerTest import *
 from DAGPathParametersTest import *
-from PythonTest import *
 
 import MayaUnitTest
 
