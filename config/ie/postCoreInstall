@@ -42,7 +42,7 @@
 import sys
 
 import VersionControl 
-VersionControl.setVersion('IEBuild', '1.19.0') 
+VersionControl.setVersion('IEBuild', '2.24.4') 
 import IEBuild  
 
 ieCoreMajorVersion=ARGUMENTS['MAJOR']
