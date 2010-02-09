@@ -50,6 +50,11 @@ class SplitStream :
 		sys.stderr.write( l )
 		self.__f.write( l )
 
+	def flush( self ) :
+
+		sys.stderr.flush()
+		self.__f.flush()
+
 
 class TestSuite( unittest.TestSuite ) :
 
