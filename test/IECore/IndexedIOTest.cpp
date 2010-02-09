@@ -59,6 +59,7 @@ void IndexedIOTestSuite<FileIndexedIO>::getFilenames( FilenameList &filenames )
 	filenames.push_back("./test/IECore/data/fioFiles/3.0.0/rhel4.i686/types.fio");
 	filenames.push_back("./test/IECore/data/fioFiles/3.0.0/cent5.x86_64/types.fio");
 	filenames.push_back("./test/IECore/data/fioFiles/4.16.0/cent5.x86_64/types.fio");
+	filenames.push_back("./test/IECore/data/fioFiles/5.0.0/cent5.x86_64/types.fio");
 }
 
 /// float
