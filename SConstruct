@@ -41,8 +41,8 @@ import re
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
-ieCoreMajorVersion=4
-ieCoreMinorVersion=17
+ieCoreMajorVersion=5
+ieCoreMinorVersion=0
 ieCorePatchVersion=0
 
 ###########################################################################################
@@ -276,6 +276,11 @@ o.Add(
 	"/usr/flexlm/license.dat",
 )
 
+o.Add(
+	"MAYA_ADLM_ENV_FILE",
+	"The path to ADLM env xml file to use as of Maya 2010.",
+	"/usr/adlm/AdlmThinClientCustomEnv.xml",
+)
 
 o.Add(
 	BoolOption( 
@@ -1410,7 +1415,8 @@ if doConfigure :
 		mayaTestEnv["ENV"]["PYTHONHOME"] = mayaTestEnv.subst( "$MAYA_ROOT" )
 		mayaTestEnv["ENV"]["MAYA_LOCATION"] = mayaTestEnv.subst( "$MAYA_ROOT" )
 		mayaTestEnv["ENV"]["LM_LICENSE_FILE"] = env["MAYA_LICENSE_FILE"]
-				
+		mayaTestEnv["ENV"]["AUTODESK_ADLM_THINCLIENT_ENV"] = env["MAYA_ADLM_ENV_FILE"]
+		
 		mayaTestProgram = mayaTestEnv.Program( "test/IECoreMaya/IECoreMayaTest", glob.glob( "test/IECoreMaya/*.cpp" ) )
 		mayaTest = mayaTestEnv.Command( "test/IECoreMaya/results.txt", mayaTestProgram, "test/IECoreMaya/IECoreMayaTest >& test/IECoreMaya/results.txt" )
 		NoCache( mayaTest )
