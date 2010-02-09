@@ -421,6 +421,11 @@ ConstDoubleVectorDataPtr PDCParticleReader::idAttribute()
 	if( !m_idAttribute )
 	{
 		map<string, Record>::const_iterator it = m_header.attributes.find( "particleId" );
+		if( it == m_header.attributes.end() )
+		{
+			it = m_header.attributes.find( "id" );
+		}
+		
 		if( it!=m_header.attributes.end() )
 		{
 			if( it->second.type==DoubleArray )
