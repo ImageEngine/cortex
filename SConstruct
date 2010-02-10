@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -89,6 +89,26 @@ o.Add(
 	[]
 )
 
+# TBB options
+
+o.Add(
+	"TBB_INCLUDE_PATH",
+	"The path to the tbb include directory.",
+	"/usr/local/include/tbb",
+)
+
+o.Add(
+	"TBB_LIB_PATH",
+	"The path to the tbb library directory.",
+	"/usr/local/lib",
+)
+
+o.Add(
+	"TBB_LIB_SUFFIX",
+	"The suffix appended to the names of the tbb libraries. You can modify this "
+	"to link against libraries installed with non-defalt names.",
+	"",
+)
 
 # Boost options
 
@@ -555,6 +575,7 @@ env.Append(
 env.Prepend(
 	CPPPATH = [
 		"include",
+		"$TBB_INCLUDE_PATH",
 		"$OPENEXR_INCLUDE_PATH",
 		# we use "OpenEXR/x.h" and they use "x.h"
 		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
@@ -564,6 +585,7 @@ env.Prepend(
 		"$FREETYPE_INCLUDE_PATH",
 	],
 	LIBPATH = [
+		"$TBB_LIB_PATH",
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
 		"$JPEG_LIB_PATH",
@@ -640,6 +662,10 @@ if doConfigure :
 	if not c.CheckLibWithHeader( "Iex" + env["OPENEXR_LIB_SUFFIX"], "OpenEXR/ImfInputFile.h", "C++" ) :
 		sys.stderr.write( "ERROR : unable to find the OpenEXR libraries - check OPENEXR_INCLUDE_PATH and OPENEXR_LIB_PATH.\n" )
 		Exit( 1 )
+		
+	if not c.CheckLibWithHeader( "tbb" + env["TBB_LIB_SUFFIX"], "tbb/tbb.h", "C++" ) :
+		sys.stderr.write( "ERROR : unable to find the TBB libraries - check TBB_INCLUDE_PATH and TBB_LIB_PATH.\n" )
+		Exit( 1 )	
 		
 	c.Finish()
 		
