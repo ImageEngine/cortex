@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+// Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -133,8 +133,8 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 
 	public :
 
-		FileSequenceParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )
-			:	FileSequenceParameter( n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceParameter >( self, this ) {};
+		FileSequenceParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list(), size_t minSequenceSize = 2 )
+			:	FileSequenceParameter( n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ), minSequenceSize ), Wrapper< FileSequenceParameter >( self, this ) {};
 
 		list getExtensionsWrap()
 		{
@@ -165,7 +165,7 @@ void bindFileSequenceParameter()
 
 	RunTimeTypedClass<FileSequenceParameter, FileSequenceParameterWrap::Ptr>()
 		.def(
-			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceParameter::CheckType, const object &, bool, CompoundObjectPtr, object > >
+			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceParameter::CheckType, const object &, bool, CompoundObjectPtr, object, int > >
 			(
 				(
 					arg( "name" ),
@@ -176,7 +176,8 @@ void bindFileSequenceParameter()
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false ,
 					arg( "userData" ) = CompoundObject::Ptr( 0 ),
-					arg( "extensions" ) = list()
+					arg( "extensions" ) = list(),
+					arg( "minSequenceSize" ) = 2
 				)
 			)
 		)

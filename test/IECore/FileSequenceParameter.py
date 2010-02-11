@@ -79,10 +79,27 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		
 		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.MustExist )
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) )
+		# for MustExist getFileSequence should use ls internally.
 		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
 		p.setFileSequenceValue( IECore.FileSequence( "test/sequences/parameterTest/a.#.tif", IECore.FrameRange( 1, 10 ) ) )
+		# Setting a frame range should reflect on the parameter value.
 		self.assertEqual( p.getValue(), IECore.StringData( "test/sequences/parameterTest/a.#.tif 1-10" ) )
 		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
+
+	def testMinSequenceSize( self ):
+
+		s = IECore.FileSequence( "a.#.tif", IECore.FrameRange( 1, 1 ) )
+		self.mkSequence( s )
+
+		path = IECore.StringData( "test/sequences/parameterTest/a.#.tif" )
+		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.MustExist )
+		# default parameter uses min length 2...
+		self.assertRaises( RuntimeError, p.setValidatedValue, path )
+
+		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.MustExist, minSequenceSize = 1 )
+		p.setValidatedValue( path )
+		# custom parameter uses min sequence length 1, should work.
+		self.assertEqual( p.getFileSequenceValue().frameList, s.frameList )
 
 	def testEmptyString( self ) :
 

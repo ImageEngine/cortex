@@ -58,9 +58,9 @@ FileSequenceParameter::FileSequenceParameter()
 FileSequenceParameter::FileSequenceParameter(
 	const std::string &name, const std::string &description, const std::string &defaultValue,
 	bool allowEmptyString, CheckType check, const StringParameter::PresetsContainer &presets, bool presetsOnly,
-	ConstCompoundObjectPtr userData, const ExtensionList &extensions
+	ConstCompoundObjectPtr userData, const ExtensionList &extensions, size_t minSequenceSize
 ) : PathParameter( name, description, defaultValue, allowEmptyString, check, presets, presetsOnly, userData ),
-    m_extensions( extensions )
+    m_extensions( extensions ), m_minSequenceSize(minSequenceSize)
 {
 }
 
@@ -142,7 +142,7 @@ bool FileSequenceParameter::valueValid( const Object *value, std::string *reason
 	if ( mustExist() )
 	{
 		FileSequencePtr s = 0;
-		ls( fileSequence->getFileName(), s );
+		ls( fileSequence->getFileName(), s, m_minSequenceSize );
 
 		if ( !s )
 		{
@@ -156,7 +156,7 @@ bool FileSequenceParameter::valueValid( const Object *value, std::string *reason
 	else if ( mustNotExist() )
 	{
 		FileSequencePtr s = 0;
-		ls( fileSequence->getFileName(), s );
+		ls( fileSequence->getFileName(), s, m_minSequenceSize );
 
 		if ( s )
 		{
@@ -185,13 +185,12 @@ FileSequencePtr FileSequenceParameter::getFileSequenceValue() const
 		if ( mustExist() )
 		{
 			FileSequencePtr result = 0;
-			ls( fileSequenceStr, result );
+			ls( fileSequenceStr, result, m_minSequenceSize );
 			return result;
 		}
 	}
 	return new FileSequence( fileSequenceStr );
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Object implementation

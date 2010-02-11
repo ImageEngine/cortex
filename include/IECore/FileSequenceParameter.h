@@ -58,9 +58,11 @@ class FileSequenceParameter : public PathParameter
 
 		IE_CORE_DECLAREOBJECT( FileSequenceParameter, PathParameter );
 
+		/// Constructs a FileSequenceParameter
+		/// \param minSequenceSize Specifies how many files must exist on the file sequence in order to validate the parameter (only used if check type is MustExist).
 		FileSequenceParameter( const std::string &name, const std::string &description,	const std::string &defaultValue = "", bool allowEmptyString = true, CheckType check = PathParameter::DontCare,
 			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
-			const ExtensionList &extensions = ExtensionList() );
+			const ExtensionList &extensions = ExtensionList(), size_t minSequenceSize = 2 );
 
 		virtual ~FileSequenceParameter();
 
@@ -89,6 +91,7 @@ class FileSequenceParameter : public PathParameter
 		friend class TypeDescription<FileSequenceParameter>;
 
 		ExtensionList m_extensions;
+		size_t m_minSequenceSize;
 
 	private :
 
