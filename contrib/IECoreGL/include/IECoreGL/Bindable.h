@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,15 +40,13 @@
 
 #include "IECore/RunTimeTyped.h"
 
-#include "boost/utility.hpp"
-
 namespace IECoreGL
 {
 
 /// The Bindable class provides an abstract base class
 /// for all classes which can bind to OpenGL, modifying
 /// the state in some way.
-class Bindable : public IECore::RunTimeTyped, boost::noncopyable
+class Bindable : public IECore::RunTimeTyped
 {
 
 	public :

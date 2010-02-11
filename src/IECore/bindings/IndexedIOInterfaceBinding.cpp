@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -378,7 +378,7 @@ void bindIndexedIOEntryList(const char *bindName)
 
 void bindIndexedIOFilter(const char *bindName)
 {
-	class_< IndexedIOFilter, boost::noncopyable, IndexedIOFilterPtr>(bindName, no_init)
+	RefCountedClass<IndexedIOFilter, RefCounted>( bindName )
 		.def("add", &IndexedIOFilter::add )
 		.def("apply", &IndexedIOFilter::apply )
 		.def("filter", &IndexedIOFilter::filter )
@@ -387,31 +387,22 @@ void bindIndexedIOFilter(const char *bindName)
 
 void bindIndexedIONullFilter(const char *bindName)
 {
-	class_<IndexedIONullFilter, IndexedIONullFilterPtr, bases<IndexedIOFilter> >(bindName, no_init)
+	RefCountedClass<IndexedIONullFilter, IndexedIOFilter>( bindName )
 		.def(init<>())
 	;
-
-	// Ensure we can upcast from a IndexedIOEntryTypeFilterPtr to a IndexedIOFilterPtr
-	implicitly_convertible< IndexedIONullFilterPtr, IndexedIOFilterPtr >();
 }
 
 
 void bindIndexedIOEntryTypeFilter(const char *bindName)
 {
-	class_<IndexedIOEntryTypeFilter, IndexedIOEntryTypeFilterPtr, bases<IndexedIOFilter> >(bindName, no_init)
+	RefCountedClass<IndexedIOEntryTypeFilter, IndexedIOFilter>( bindName )
 		.def(init<IndexedIO::EntryType>())
 	;
-
-	// Ensure we can upcast from a IndexedIOEntryTypeFilterPtr to a IndexedIOFilterPtr
-	implicitly_convertible< IndexedIOEntryTypeFilterPtr, IndexedIOFilterPtr >();
 }
 
 void bindIndexedIORegexFilter(const char *bindName)
 {
-	class_<IndexedIORegexFilter, IndexedIORegexFilterPtr, bases<IndexedIOFilter> >(bindName, no_init)
+	RefCountedClass<IndexedIORegexFilter, IndexedIOFilter>( bindName )
 		.def(init<const std::string &>())
 	;
-
-	// Ensure we can upcast from a IndexedIOEntryTypeFilterPtr to a IndexedIOFilterPtr
-	implicitly_convertible< IndexedIORegexFilterPtr, IndexedIOFilterPtr >();
 }

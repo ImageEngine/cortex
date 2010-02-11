@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,6 @@
 #include <vector>
 #include <fstream>
 
-#include "boost/noncopyable.hpp"
 #include "OpenEXR/ImathVec.h"
 #include "IECore/RefCounted.h"
 
@@ -49,7 +48,7 @@ IE_CORE_FORWARDDECLARE( IFFFile );
 
 /// The IFFFile class defines a low level class for reading IFF files.
 /// For specific IFF file types use a more specific implementation (i.e. NParticleReader, IFFHairReader, IFFImageReader).
-class IFFFile : public RefCounted, private boost::noncopyable
+class IFFFile : public RefCounted
 {
 	public :
 

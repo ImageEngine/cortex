@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,6 +36,7 @@
 #define IE_CORE_REFCOUNTED_H
 
 #include "boost/intrusive_ptr.hpp"
+#include "boost/noncopyable.hpp"
 
 #include <cassert>
 
@@ -69,8 +70,7 @@ typedef boost::intrusive_ptr< const TYPENAME > Const ## TYPENAME ## Ptr; \
 /// A simple class to count references.
 /// \todo Disallow construction on the heap by having a private destructor - do we
 /// need to do this for all derived classes as well?
-/// \todo Disallow copy construction by inheriting from boost::noncopyable.
-class RefCounted
+class RefCounted : private boost::noncopyable
 {
 	public:
 

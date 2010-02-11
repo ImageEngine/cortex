@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,6 @@
 #include <stdint.h>
 
 #include "boost/filesystem/path.hpp"
-#include "boost/noncopyable.hpp"
 
 #include "OpenEXR/half.h"
 
@@ -56,7 +55,7 @@ IE_CORE_FORWARDDECLARE( IndexedIOInterface );
 
 /// Abstract interface to define operations on a random-access indexed input/output device. All methods throw an instance of IOException,
 /// or one of its subclasses, if an error is encountered.
-class IndexedIOInterface : public RefCounted, private boost::noncopyable
+class IndexedIOInterface : public RefCounted
 {
 	public:
 
