@@ -124,7 +124,7 @@ class SequenceLsOp( Op ) :
 						"means that any sequence will be listed. The . character should be omitted from the extension.",
 					defaultValue = StringVectorData(),
 					presets = (
-						( "images", StringVectorData( [ "tif", "tiff", "jpg", "jpeg", "exr", "cin", "dpx", "ppm", "png", "gif", "iff" ] ) ),
+						( "images", StringVectorData( [ "tif", "tiff", "jpg", "jpeg", "exr", "cin", "dpx", "ppm", "png", "gif", "iff", "raw", "cr2" ] ) ),
 					)
 				),
 				CompoundParameter(
