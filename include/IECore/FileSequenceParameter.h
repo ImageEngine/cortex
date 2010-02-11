@@ -88,12 +88,6 @@ class FileSequenceParameter : public PathParameter
 		FileSequenceParameter();
 		friend class TypeDescription<FileSequenceParameter>;
 
-		/// Find the longest space-delimited tail substring that is a parseable FrameList and
-		/// return a FileSequence instance which contains that FrameList. Everything before that is considered to
-		/// be part of the filename. Previous implementations would just split on the first space character
-		/// encountered, but this wouldn't allow for the filename portion of the value to include spaces itself.
-		FileSequencePtr parseFileSequence( const std::string &fileSequenceString ) const;
-
 		ExtensionList m_extensions;
 
 	private :

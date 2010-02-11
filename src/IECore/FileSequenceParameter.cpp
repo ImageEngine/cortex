@@ -44,7 +44,6 @@
 #include "IECore/FrameList.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/StringAlgo.h"
-#include "IECore/EmptyFrameList.h"
 
 using namespace IECore;
 using namespace boost;
@@ -109,7 +108,7 @@ bool FileSequenceParameter::valueValid( const Object *value, std::string *reason
 	FileSequencePtr fileSequence = 0;
 	try
 	{
-		fileSequence = parseFileSequence( stringValue );
+		fileSequence = new FileSequence( stringValue );
 	}
 	catch ( Exception &e )
 	{
@@ -189,55 +188,10 @@ FileSequencePtr FileSequenceParameter::getFileSequenceValue() const
 			ls( fileSequenceStr, result );
 			return result;
 		}
-		else
-		{
-			return new FileSequence( fileSequenceStr, new EmptyFrameList() );
-		}
 	}
-
-	return parseFileSequence( fileSequenceStr );
+	return new FileSequence( fileSequenceStr );
 }
 
-FileSequencePtr FileSequenceParameter::parseFileSequence( const std::string &fileSequenceStr ) const
-{
-	std::string fileSequenceCopy = fileSequenceStr;
-
-	std::string::size_type spaceIndex = fileSequenceCopy.find_first_of( " " );
-
-	bool found = false;
-
-	std::string filename = fileSequenceStr;
-
-	FrameListPtr frameList = FrameList::parse( "" );
-
-	while ( !found && spaceIndex != std::string::npos )
-	{
-
-		std::string head = fileSequenceStr.substr( 0, spaceIndex );
-		std::string tail = fileSequenceStr.substr( spaceIndex+1, fileSequenceStr.size() - spaceIndex - 1 );
-		assert( head + " " + tail == fileSequenceStr );
-
-		filename = head;
-
-		try
-		{
-			frameList = FrameList::parse( tail );
-			found = true;
-		}
-		catch ( Exception &e )
-		{
-			fileSequenceCopy = fileSequenceCopy.substr( 0, spaceIndex )
-				+ "*"
-				+ fileSequenceCopy.substr( spaceIndex+1, fileSequenceStr.size() - spaceIndex - 1 )
-			;
-
-			spaceIndex = fileSequenceCopy.find_first_of( " " );
-		}
-	}
-
-	return new FileSequence( filename, frameList );
-
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Object implementation

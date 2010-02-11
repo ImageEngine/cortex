@@ -54,6 +54,46 @@ FileSequence::FileSequence( const std::string &fileName, FrameListPtr frameList 
 	setFrameList( frameList );
 }
 
+FileSequence::FileSequence( const std::string &fileSequenceStr )
+{
+	std::string fileSequenceCopy = fileSequenceStr;
+
+	std::string::size_type spaceIndex = fileSequenceCopy.find_first_of( " " );
+
+	bool found = false;
+
+	std::string filename = fileSequenceStr;
+
+	FrameListPtr frameList = FrameList::parse( "" );
+
+	while ( !found && spaceIndex != std::string::npos )
+	{
+
+		std::string head = fileSequenceStr.substr( 0, spaceIndex );
+		std::string tail = fileSequenceStr.substr( spaceIndex+1, fileSequenceStr.size() - spaceIndex - 1 );
+		assert( head + " " + tail == fileSequenceStr );
+
+		filename = head;
+
+		try
+		{
+			frameList = FrameList::parse( tail );
+			found = true;
+		}
+		catch ( Exception &e )
+		{
+			fileSequenceCopy = fileSequenceCopy.substr( 0, spaceIndex )
+				+ "*"
+				+ fileSequenceCopy.substr( spaceIndex+1, fileSequenceStr.size() - spaceIndex - 1 )
+			;
+
+			spaceIndex = fileSequenceCopy.find_first_of( " " );
+		}
+	}
+	setFileName( filename );
+	setFrameList( frameList );
+}
+
 FileSequence::~FileSequence()
 {
 }

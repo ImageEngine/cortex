@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,6 +61,12 @@ class FileSequence : public RunTimeTyped
 		/// fileName must be a string containing a single sequence of at least # character - this
 		/// represents the location and padding of the frame numbers.
 		FileSequence( const std::string &fileName, FrameListPtr frameList );
+	
+		/// Constructs a new FileSequence object by parsing the given string.
+		/// Find the longest space-delimited tail substring that is a parseable FrameList and
+		/// creates a FileSequence instance which contains that FrameList. Everything before that is considered to
+		/// be part of the filename.
+		FileSequence( const std::string &fileSequenceStr );
 		virtual ~FileSequence();
 
 		const std::string &getFileName() const;

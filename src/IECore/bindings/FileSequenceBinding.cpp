@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -161,6 +161,7 @@ void bindFileSequence()
 
 	RunTimeTypedClass<FileSequence>()
 		.def( init< const std::string &, FrameListPtr >() )
+		.def( init< const std::string & >() )
 		.add_property( "frameList", &FileSequence::getFrameList, &FileSequence::setFrameList )
 		.add_property( "fileName", make_function( &FileSequence::getFileName, return_value_policy<copy_const_reference>() ), &FileSequence::setFileName )
 		.def( "getPadding", &FileSequence::getPadding )

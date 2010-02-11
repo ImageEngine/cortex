@@ -125,6 +125,17 @@ class testFileSequence( unittest.TestCase ) :
 		s = FileSequence( "seq.#.tif", FrameRange( 0, 2 ) )
 		self.assertEqual( s.fileNames(), ["seq.0.tif", "seq.1.tif", "seq.2.tif"] )
 
+	def testFrameListConstructor( self ):
+		
+		s = FileSequence( "seq.#.tif 0-2" )
+		self.assertEqual( s.fileNames(), ["seq.0.tif", "seq.1.tif", "seq.2.tif"] )
+
+		s = FileSequence( "with space.#.tif 5-6" )
+		self.assertEqual( s.fileNames(), ["with space.5.tif", "with space.6.tif"] )
+
+		s = FileSequence( "seq.#.tif" )
+		self.assertEqual( s.fileNames(), [] )
+
 	def testPadding( self ) :
 
 		s = FileSequence( "seq.#.tif", FrameRange( 0, 2 ) )
