@@ -126,3 +126,4 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 		
 import IECore					   
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Parameter, GenericParameterUI )
+IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Parameter, GenericParameterUI, 'generic' )
