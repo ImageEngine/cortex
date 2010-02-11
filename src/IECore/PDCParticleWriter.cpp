@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -105,7 +105,7 @@ static void writeSimpleAttr( ofstream &oStream, typename T::ConstPtr attr )
 	}
 }
 
-void PDCParticleWriter::doWrite()
+void PDCParticleWriter::doWrite( const CompoundObject *operands )
 {
 	// write the header
 	int numParticles = particleCount();

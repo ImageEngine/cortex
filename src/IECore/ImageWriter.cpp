@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -92,10 +92,10 @@ void ImageWriter::imageChannels( vector<string> &names ) const
 ConstImagePrimitivePtr ImageWriter::getImage() const
 {
 	/// \todo This case isn't good until we're making the input parameter accept only ImagePrimitive instances
-	return boost::static_pointer_cast<const ImagePrimitive>(object());
+	return static_cast<const ImagePrimitive *>( object() );
 }
 
-void ImageWriter::doWrite()
+void ImageWriter::doWrite( const CompoundObject *operands )
 {
 	// write the image channel data
 	vector<string> channels;

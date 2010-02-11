@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,7 +71,7 @@ bool ObjectWriter::canWrite( ConstObjectPtr object, const std::string &fileName 
 	return true;
 }
 
-void ObjectWriter::doWrite()
+void ObjectWriter::doWrite( const CompoundObject *operands )
 {
 	IndexedIOInterfacePtr io = new FileIndexedIO( fileName(), "/", IndexedIO::Exclusive | IndexedIO::Write);
 

@@ -78,7 +78,7 @@ class ImageWriter : public Writer
 	private :
 
 		/// Implementation of Writer::doWrite(). Calls through to writeImage()
-		virtual void doWrite();
+		virtual void doWrite( const CompoundObject *operands );
 
 		StringVectorParameterPtr m_channelsParameter;
 

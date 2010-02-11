@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,7 +67,7 @@ class RIBWriter : public IECore::Writer
 
 	protected :
 
-		virtual void doWrite();
+		virtual void doWrite( const IECore::CompoundObject *operands );
 
 	private :
 

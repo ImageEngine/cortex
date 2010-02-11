@@ -67,7 +67,7 @@ ConstPointsPrimitivePtr ParticleWriter::particleObject()
 {
 	/// \todo this cast is no longer ok - once we've adjusted the input object Parameter we can use the validation
 	/// on there to do our work for us.
-	return static_pointer_cast<const PointsPrimitive>( object() );
+	return static_cast<const PointsPrimitive *>( object() );
 }
 
 size_t ParticleWriter::particleCount()

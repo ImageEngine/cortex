@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -69,7 +69,7 @@ class Writer : public Op
 		/// Returns the Object this Writer will use
 		/// to write the file. This is just a convenience returning the equivalent of
 		/// parameters()->parameter<Parameter>( "object" )->getValue().
-		ConstObjectPtr object() const;
+		const Object *object() const;
 
 		/// Writes object() to fileName(). This just calls operate() and is provided
 		/// for backwards compatibility and pretty syntax.
@@ -91,10 +91,9 @@ class Writer : public Op
 		/// Implemented to call doWrite(), so derived classes need only implement that.
 		ObjectPtr doOperation( ConstCompoundObjectPtr operands );
 
-		/// Must be implemented by subclasses to write object() to fileName(). Implementation
+		/// Must be implemented by subclasses to write object() to fileName(). Implementations
 		/// should throw an Exception on failure.
-		/// \todo Surely doWrite should be passed the operands that are passed to doOperation?
-		virtual void doWrite() = 0;
+		virtual void doWrite( const CompoundObject *operands ) = 0;
 
 		/// Definition of a function which can create a Writer when
 		/// given an object and fileName.

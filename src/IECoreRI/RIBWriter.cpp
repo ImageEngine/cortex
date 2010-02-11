@@ -78,11 +78,11 @@ IECore::ConstBoolParameterPtr RIBWriter::worldBlockParameter() const
 	return m_worldBlockParameter;
 }
 
-void RIBWriter::doWrite()
+void RIBWriter::doWrite( const IECore::CompoundObject *operands )
 {
 	RendererPtr renderer = new Renderer( fileName() );
 
-	IECore::RenderablePtr renderable = static_pointer_cast<IECore::Renderable>( const_pointer_cast<IECore::Object>( object() ) );
+	IECore::Renderable *renderable = static_cast<IECore::Renderable *>( const_cast<IECore::Object *>( object() ) );
 	if( !m_worldBlockParameter->getTypedValue() )
 	{
 		renderable->render( renderer );

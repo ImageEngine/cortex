@@ -59,7 +59,7 @@ class ObjectWriter : public Writer
 
 	protected :
 
-		virtual void doWrite();
+		virtual void doWrite( const CompoundObject *operands );
 
 		ObjectParameterPtr m_headerParameter;
 

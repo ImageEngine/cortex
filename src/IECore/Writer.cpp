@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -76,7 +76,7 @@ const std::string &Writer::fileName() const
 	return m_fileNameParameter->getTypedValue();
 }
 
-ConstObjectPtr Writer::object() const
+const Object *Writer::object() const
 {
 	return m_objectParameter->getValue();
 }
@@ -89,7 +89,7 @@ void Writer::write()
 
 ObjectPtr Writer::doOperation( ConstCompoundObjectPtr operands )
 {
-	doWrite();
+	doWrite( operands.get() );
 	return m_objectParameter->getValue();
 }
 

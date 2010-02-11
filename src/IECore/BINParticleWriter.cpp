@@ -552,7 +552,7 @@ void BINParticleWriter::getMaxMinAvg( ConstFloatVectorDataPtr data, float &mx, f
 	avg /= ( float ) valueArray.size();
 }
 
-void BINParticleWriter::doWrite()
+void BINParticleWriter::doWrite( const CompoundObject *operands )
 {
 	ConstV3fVectorDataPtr positionData = getPrimVar< V3fVectorData >( m_positionPrimVarParameter );
 	ConstV3fVectorDataPtr velocityData = getPrimVar< V3fVectorData >( m_velocityPrimVarParameter );
