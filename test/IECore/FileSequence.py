@@ -372,7 +372,8 @@ class testLs( unittest.TestCase ) :
 		os.system( "rm -rf test/sequences/lsTest" )
 		os.system( "mkdir -p test/sequences/lsTest" )
 
-		s1 = FileSequence( "test/sequences/lsTest/a.#.tif", FrameRange( 100, 110 ) )
+		s1 = FileSequence( "test/sequences/lsTest/a.#.tif", FrameRange( 99, 110 ) )
+		s2 = FileSequence( "test/sequences/lsTest/a.##.tif", FrameRange( 99, 110 ) )
 
 		for f in s1.fileNames() :
 			os.system( "touch '" + f + "'" )
@@ -380,8 +381,8 @@ class testLs( unittest.TestCase ) :
 		l = ls( "test/sequences/lsTest/a.#.tif" )
 		self.assertEqual( s1, l )
 
-		l = ls( "test/sequences/lsTest/a.###.tif" )
-		self.assertEqual( s1, l )
+		l = ls( "test/sequences/lsTest/a.##.tif" )
+		self.assertEqual( s2, l )
 
 		os.system( "rm -rf test/sequences/lsTest" )
 
@@ -393,6 +394,10 @@ class testLs( unittest.TestCase ) :
 		l = findSequences( [ "a.0001.tif", "b.0010.gif", "b.0011.gif" ] )
 		self.assertEqual( len( l ), 1 )
 		self.assertEqual( l[0], FileSequence( "b.####.gif", FrameRange( 10, 11 ) ) )
+
+	def testSpecialExtensions( self ):
+		l = findSequences( [ "a.001.cr2", "b.002.cr2", "b.003.cr2" ] )
+		self.assertEqual( len( l ), 1 )
 
 	def testErrors( self ):
 
