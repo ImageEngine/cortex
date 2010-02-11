@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -405,6 +405,19 @@ class testLs( unittest.TestCase ) :
 		l = findSequences( [ "a.0001.tif", "b.0010.gif", "b.0011.gif" ] )
 		self.assertEqual( len( l ), 1 )
 		self.assertEqual( l[0], FileSequence( "b.####.gif", FrameRange( 10, 11 ) ) )
+
+		s1 = FileSequence( "test/sequences/lsTest/a.#.tif", FrameRange( 1, 1 ) )
+		for f in s1.fileNames() :
+			os.system( "touch '" + f + "'" )
+
+		l = ls( "test/sequences/lsTest/a.#.tif" )
+		self.assertEqual( None, l )
+
+		l = ls( "test/sequences/lsTest/a.#.tif", 1 )
+		self.assertEqual( s1, l )
+
+		os.system( "rm -rf test/sequences/lsTest" )
+
 
 	def testSpecialExtensions( self ):
 		l = findSequences( [ "a.001.cr2", "b.002.cr2", "b.003.cr2" ] )

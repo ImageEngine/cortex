@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,14 +51,11 @@ void findSequences( const std::vector< std::string > &names, std::vector< FileSe
 /// on disk. The returned sequences have at least the minSequenceSize elements.
 void findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize );
 
-/// Generates all sequences with at least 2 files residing in given directory in the form of a list of FileSequences.
-void ls( const std::string &path, std::vector< FileSequencePtr > &sequences );
-
 /// Generates all sequences with at least minSequenceSize elements residing in given directory in the form of a list of FileSequences.
-void ls( const std::string &path, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize );
+void ls( const std::string &path, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize = 2 );
 
 /// Attempts to find a sequnece matching the given sequence template (e.g. with at least one '#' character).
-void ls( const std::string &sequencePath, FileSequencePtr &sequence );
+void ls( const std::string &sequencePath, FileSequencePtr &sequence, size_t minSequenceSize = 2 );
 
 /// Returns a FrameList instance that "best" represents the specified list of integer
 /// frame numbers. This function attempts to be intelligent and uses a CompoundFrameList

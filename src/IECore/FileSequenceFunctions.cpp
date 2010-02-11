@@ -175,8 +175,8 @@ void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequen
 {
 	sequences.clear();
 
-	 if ( boost::filesystem::is_directory( path ) )
-	 {
+	if ( boost::filesystem::is_directory( path ) )
+	{
 		boost::filesystem::directory_iterator end;
 	 	std::vector< std::string > files;
 		for ( boost::filesystem::directory_iterator it( path ); it != end; ++it )
@@ -185,16 +185,10 @@ void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequen
 		}
 
 		findSequences( files, sequences, minSequenceSize );
-	 }
+	}
 }
 
-void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequences )
-{
-	/// ignore any sequences with less than two files
-	ls( path, sequences, 2 );
-}
-
-void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence )
+void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, size_t minSequenceSize )
 {
 	sequence = 0;
 	boost::smatch matches;
@@ -240,7 +234,7 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence )
 	}
 
 	std::vector< FileSequencePtr > sequences;
-	findSequences( files, sequences );
+	findSequences( files, sequences, minSequenceSize );
 
 	for ( std::vector< FileSequencePtr >::iterator it = sequences.begin(); it != sequences.end() ; ++it )
 	{

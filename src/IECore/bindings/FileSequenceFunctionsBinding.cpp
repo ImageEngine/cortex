@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -78,12 +78,12 @@ struct FileSequenceFunctionsHelper
 		return result;
 	}
 
-	static object ls( const std::string &path )
+	static object ls( const std::string &path, size_t minSequenceSize = 2 )
 	{
 		if ( boost::regex_match( path, FileSequence::fileNameValidator() ) )
 		{
 			FileSequencePtr sequence = 0;
-			IECore::ls( path, sequence );
+			IECore::ls( path, sequence, minSequenceSize );
 
 			if ( sequence )
 			{
@@ -94,7 +94,7 @@ struct FileSequenceFunctionsHelper
 		{
 			list result;
 			std::vector< FileSequencePtr > sequences;
-			IECore::ls( path, sequences );
+			IECore::ls( path, sequences, minSequenceSize );
 			for ( std::vector< FileSequencePtr >::const_iterator it = sequences.begin(); it != sequences.end(); ++it )
 			{
 				result.append( *it );
@@ -128,7 +128,7 @@ struct FileSequenceFunctionsHelper
 void bindFileSequenceFunctions()
 {
 	def( "findSequences", &FileSequenceFunctionsHelper::findSequences );
-	def( "ls", &FileSequenceFunctionsHelper::ls );
+	def( "ls", &FileSequenceFunctionsHelper::ls, ( arg_("path"), arg_( "minSequenceSize" ) = 2 ) );
 	def( "frameListFromList", &FileSequenceFunctionsHelper::frameListFromList );
 }
 
