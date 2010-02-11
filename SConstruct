@@ -520,13 +520,14 @@ o.Add(
 	""
 )
 	
+libraryPathEnvVar = "DYLD_LIBRARY_PATH" if Environment()["PLATFORM"]=="darwin" else "LD_LIBRARY_PATH"
 o.Add(
 	"TEST_LIBRARY_PATH_ENV_VAR",
 	"This is a curious one, probably only ever necessary at image engine. It "
 	"specifies the name of an environment variable used to specify the library "
 	"search paths correctly when running the tests. Defaults to LD_LIBRARY_PATH on "
 	"Linux and DYLD_LIBRARY_PATH on OSX.",
-	"DYLD_LIBRARY_PATH" if Environment()["PLATFORM"]=="darwin" else "LD_LIBRARY_PATH"
+	libraryPathEnvVar
 )
 
 # Documentation options
@@ -748,7 +749,7 @@ if testEnv["TEST_LIBPATH"] != "" :
 	testEnvLibPath += ":" + testEnv["TEST_LIBPATH"]
 
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
-testEnv["ENV"]["DYLD_LIBRARY_PATH" if Environment()["PLATFORM"]=="darwin" else "LD_LIBRARY_PATH"] = testEnvLibPath
+testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
 testEnv["ENV"]["IECORE_PROCEDURAL_PATHS"] = "test/IECore/procedurals"
 testEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECore/ops"
 
@@ -1420,9 +1421,11 @@ if doConfigure :
 		
 		mayaTestEnv = testEnv.Copy()
 		
-		mayaTestEnv["ENV"][mayaTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + mayaEnv.subst( ":".join( [ "./lib" ] + mayaPythonEnv["LIBPATH"] ) )
+		mayaTestLibPaths = mayaEnv.subst( ":".join( [ "./lib" ] + mayaPythonEnv["LIBPATH"] ) )
 		if haveRI :
-			mayaTestEnv["ENV"][mayaTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + mayaEnv.subst( "$RMAN_ROOT/lib" )
+			mayaTestLibPaths += ":" + mayaEnv.subst( "$RMAN_ROOT/lib" )
+		mayaTestEnv["ENV"][mayaTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + mayaTestLibPaths
+		mayaTestEnv["ENV"][libraryPathEnvVar] += ":" + mayaTestLibPaths
 		
 		mayaTestEnv["ENV"]["PATH"] = mayaEnv.subst( "$MAYA_ROOT/bin:" ) + mayaEnv["ENV"]["PATH"]
 		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya:./test/IECoreMaya/plugins"
