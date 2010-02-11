@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,7 +68,7 @@ ObjectParameter::ObjectParameter( const std::string &name, const std::string &de
 	}
 }
 
-bool ObjectParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool ObjectParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	if( !Parameter::valueValid( value, reason ) )
 	{

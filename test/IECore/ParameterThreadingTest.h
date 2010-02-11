@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,52 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_VALIDATEDSTRINGPARAMETER_H
-#define IE_CORE_VALIDATEDSTRINGPARAMETER_H
+#ifndef IECORE_PARAMETERTHREADINGTEST_H
+#define IECORE_PARAMETERTHREADINGTEST_H
 
-#include "IECore/SimpleTypedParameter.h"
+#include "boost/test/unit_test.hpp"
 
 namespace IECore
 {
 
-/// This class implements a StringParameter object with validation
-/// of the value based on regular expressions.
-class ValidatedStringParameter : public StringParameter
-{
-	public :
+void addParameterThreadingTest( boost::unit_test::test_suite *test );
 
-		IE_CORE_DECLAREOBJECT( ValidatedStringParameter, StringParameter );
+}
 
-		ValidatedStringParameter( const std::string &name, const std::string &description,
-			const std::string &regex, const std::string &regexDescription = "", const std::string &defaultValue = "", bool allowEmptyString = true,
-			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+#endif // IECORE_PARAMETERTHREADINGTEST_H
 
-		const std::string &regex() const;
-		const std::string &regexDescription() const;
-		bool allowEmptyString() const;
-
-		/// Implemented to return true only if value is an instance of StringData and
-		/// the contained string matches the regular expression specified in the constructor.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
-
-	protected :
-
-		ValidatedStringParameter();
-
-	private :
-
-		friend class TypeDescription<ValidatedStringParameter>;
-
-		std::string m_regex;
-		std::string m_regexDescription;
-		bool m_allowEmptyString;
-
-		static const unsigned int g_ioVersion;
-
-};
-
-IE_CORE_DECLAREPTR( ValidatedStringParameter )
-
-} // namespace IECore
-
-#endif // IE_CORE_VALIDATEDSTRINGPARAMETER_H

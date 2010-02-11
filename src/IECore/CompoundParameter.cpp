@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,17 +57,17 @@ CompoundParameter::CompoundParameter( const std::string &name, const std::string
 // to date in addParameter(). But I'd anticipate us allowing the modification of the default and
 // the presets in future versions, in which case we'd need an implementation like that below, so
 // i'm going with that.
-ConstObjectPtr CompoundParameter::defaultValue() const
+const Object *CompoundParameter::defaultValue() const
 {
-	ConstCompoundObjectPtr constValue = static_pointer_cast<const CompoundObject>( Parameter::defaultValue() );
+	const CompoundObject *constValue = static_cast<const CompoundObject *>( Parameter::defaultValue() );
 	// naughty? not really i reckon - it results in the right semantics to the outside
 	// observer.
-	CompoundObjectPtr value = const_pointer_cast<CompoundObject>( constValue );
+	CompoundObject *value = const_cast<CompoundObject *>( constValue );
 	value->members().clear();
 	CompoundObject::ObjectMap &m = value->members();
 	for( ParameterMap::const_iterator it=m_namesToParameters.begin(); it!=m_namesToParameters.end(); it++ )
 	{
-		m[it->first] = const_pointer_cast<Object>( it->second->defaultValue() );
+		m[it->first] = const_cast<Object *>( it->second->defaultValue() );
 	}
 	return value;
 }
@@ -175,10 +175,10 @@ void CompoundParameter::setValue( ObjectPtr value )
 	}
 }
 
-ObjectPtr CompoundParameter::getValue()
+Object *CompoundParameter::getValue()
 {
-	ObjectPtr value = Parameter::getValue();
-	CompoundObjectPtr tValue = runTimeCast<CompoundObject>( value );
+	Object *value = Parameter::getValue();
+	CompoundObject *tValue = runTimeCast<CompoundObject>( value );
 	if( !tValue )
 	{
 		return value;
@@ -192,24 +192,24 @@ ObjectPtr CompoundParameter::getValue()
 	return tValue;
 }
 
-ConstObjectPtr CompoundParameter::getValue() const
+const Object *CompoundParameter::getValue() const
 {
 	// naughty?
 	// we cast away constness from this to allow us to update the compound value
 	// before returning it, which actually results in the correct semantics at the
 	// interface level.
 	CompoundParameter *mutableThis = const_cast<CompoundParameter *>( this );
-	ObjectPtr value = mutableThis->getValue();
+	Object *value = mutableThis->getValue();
 	return value;
 }
 
-bool CompoundParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool CompoundParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	if( !Parameter::valueValid( value, reason ) )
 	{
 		return false;
 	}
-	ConstCompoundObjectPtr tValue = runTimeCast<const CompoundObject>( value );
+	const CompoundObject *tValue = runTimeCast<const CompoundObject>( value );
 	if( !tValue )
 	{
 		if( reason )
@@ -241,7 +241,7 @@ bool CompoundParameter::valueValid( ConstObjectPtr value, std::string *reason ) 
 		else
 		{
 			/// \todo Prepend the child parameter name to the message to make it more useful.
-			if( !pIt->second->valueValid( it->second, reason ) )
+			if( !pIt->second->valueValid( it->second.get(), reason ) )
 			{
 				return false;
 			}
@@ -346,9 +346,9 @@ void CompoundParameter::setValidatedParameterValue( const std::string &name, Obj
 	p->setValidatedValue( value );
 }
 
-ObjectPtr CompoundParameter::getParameterValue( const std::string &name )
+Object *CompoundParameter::getParameterValue( const std::string &name )
 {
-	ParameterPtr p = parameter<Parameter>( name );
+	Parameter *p = parameter<Parameter>( name );
 	if( !p )
 	{
 		throw Exception( string("Parameter ") + name + " doesn't exist" );
@@ -356,9 +356,9 @@ ObjectPtr CompoundParameter::getParameterValue( const std::string &name )
 	return p->getValue();
 }
 
-ObjectPtr CompoundParameter::getValidatedParameterValue( const std::string &name )
+Object *CompoundParameter::getValidatedParameterValue( const std::string &name )
 {
-	ParameterPtr p = parameter<Parameter>( name );
+	Parameter *p = parameter<Parameter>( name );
 	if( !p )
 	{
 		throw Exception( string("Parameter ") + name + " doesn't exist" );
@@ -366,7 +366,7 @@ ObjectPtr CompoundParameter::getValidatedParameterValue( const std::string &name
 	return p->getValidatedValue();
 }
 
-bool CompoundParameter::parameterPath( ConstParameterPtr child, std::vector<std::string> &path ) const
+bool CompoundParameter::parameterPath( const Parameter *child, std::vector<std::string> &path ) const
 {
 	for( ParameterVector::const_iterator it=m_parameters.begin(); it!=m_parameters.end(); it++ )
 	{
@@ -377,7 +377,7 @@ bool CompoundParameter::parameterPath( ConstParameterPtr child, std::vector<std:
 		}
 		else
 		{
-			ConstCompoundParameterPtr c = runTimeCast<const CompoundParameter>( *it );
+			const CompoundParameter *c = runTimeCast<const CompoundParameter>( it->get() );
 			if( c )
 			{
 				if( c->parameterPath( child, path ) )

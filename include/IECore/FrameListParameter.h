@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,7 +55,7 @@ class FrameListParameter : public StringParameter
 
 		virtual ~FrameListParameter();
 
-		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
 
 		void setFrameListValue( ConstFrameListPtr frameList );
 		FrameListPtr getFrameListValue() const;

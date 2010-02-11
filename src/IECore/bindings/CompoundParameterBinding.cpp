@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -148,10 +148,15 @@ static void compoundParameterAddParameters( CompoundParameter &o, const boost::p
 	o.addParameters( pp.begin(), pp.end() );
 }
 
+static ParameterPtr parameter( CompoundParameter &o, const char *name )
+{
+	return o.parameter<Parameter>( name );
+}
+
 static boost::python::list parameterPath( CompoundParameter &o, ConstParameterPtr child )
 {
 	std::vector<std::string> p;
-	o.parameterPath( child, p );
+	o.parameterPath( child.get(), p );
 	boost::python::list result;
 	for( std::vector<std::string>::const_iterator it=p.begin(); it!=p.end(); it++ )
 	{
@@ -191,7 +196,7 @@ void bindCompoundParameter()
 		.def( "removeParameter", (void (CompoundParameter::*)(ParameterPtr)) &CompoundParameter::removeParameter )
 		.def( "removeParameter", (void (CompoundParameter::*)(const std::string&)) &CompoundParameter::removeParameter )
 		.def( "clearParameters", &CompoundParameter::clearParameters )
-		.def( "parameter", (ParameterPtr (CompoundParameter::*)(const std::string&)) &CompoundParameter::parameter<Parameter> )
+		.def( "parameter", &parameter )
 		.def( "parameterPath", &parameterPath )
 	;
 

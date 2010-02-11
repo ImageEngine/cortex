@@ -188,7 +188,7 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 {
 	const float threshold = m_thresholdParameter->getNumericValue();
 
-	bool automaticBound = boost::static_pointer_cast<const BoolData>(m_automaticBoundParameter->getValue())->readable();
+	bool automaticBound = static_cast<const BoolData *>( m_automaticBoundParameter->getValue() )->readable();
 	Box3f bound;
 
 	if (automaticBound)
@@ -234,7 +234,7 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 	}
 	else
 	{
-		bound = boost::static_pointer_cast<const Box3fData>(m_boundParameter->getValue())->readable();
+		bound = static_cast<const Box3fData *>( m_boundParameter->getValue() )->readable();
 	}
 
 	float boundExtend = m_boundExtendParameter->getNumericValue();
@@ -246,11 +246,11 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr type
 	int gridMethod = m_gridMethodParameter->getNumericValue();
 	if ( gridMethod == Resolution )
 	{
-		resolution = boost::static_pointer_cast<const V3iData>(m_resolutionParameter->getValue())->readable();
+		resolution = static_cast<const V3iData *>( m_resolutionParameter->getValue() )->readable();
 	}
 	else if ( gridMethod == DivisionSize )
 	{
-		V3f divisionSize = boost::static_pointer_cast<const V3fData>(m_divisionSizeParameter->getValue())->readable();
+		V3f divisionSize = static_cast<const V3fData *>( m_divisionSizeParameter->getValue() )->readable();
 
 		resolution.x = (int)((bound.max.x - bound.min.x) / divisionSize.x);
 		resolution.y = (int)((bound.max.y - bound.min.y) / divisionSize.y);

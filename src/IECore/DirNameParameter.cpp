@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,14 +59,14 @@ DirNameParameter::DirNameParameter( const std::string &name, const std::string &
 {
 }
 
-bool DirNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool DirNameParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	if (!PathParameter::valueValid( value, reason ) )
 	{
 		return false;
 	}
 
-	ConstStringDataPtr s = static_pointer_cast<const StringData>( value );
+	const StringData *s = static_cast<const StringData *>( value );
 
 	// empty check
 	if( s->readable()=="" )

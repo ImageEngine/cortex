@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -81,7 +81,7 @@ ConstObjectParameterPtr UVDistortOp::uvMapParameter() const
 void UVDistortOp::begin( ConstCompoundObjectPtr operands )
 {
 	assert( runTimeCast< ImagePrimitive >(m_uvMapParameter->getValue()) );
-	ImagePrimitivePtr uvImage = static_pointer_cast<ImagePrimitive>(m_uvMapParameter->getValue());
+	ImagePrimitive *uvImage = static_cast<ImagePrimitive *>(m_uvMapParameter->getValue());
 	PrimitiveVariableMap::iterator mit;
 	mit = uvImage->variables.find( "R" );
 	if ( mit == uvImage->variables.end() )
@@ -112,7 +112,7 @@ void UVDistortOp::begin( ConstCompoundObjectPtr operands )
 	}
 
 	assert( runTimeCast< ImagePrimitive >(inputParameter()->getValue()) );
-	ImagePrimitivePtr inputImage = static_pointer_cast<ImagePrimitive>( inputParameter()->getValue() );
+	ImagePrimitive *inputImage = static_cast<ImagePrimitive *>( inputParameter()->getValue() );
 	m_uvSize = uvImage->getDataWindow().size();
 	m_uvOrigin = uvImage->getDataWindow().min;
 	m_imageSize = inputImage->getDisplayWindow().size();

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -104,7 +104,7 @@ struct MeshMergeOp::AppendPrimVars
 
 void MeshMergeOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
 {
-	ConstMeshPrimitivePtr mesh2 = boost::static_pointer_cast<const MeshPrimitive>( m_meshParameter->getValue() );
+	const MeshPrimitive *mesh2 = static_cast<const MeshPrimitive *>( m_meshParameter->getValue() );
 
 	const vector<int> &verticesPerFace1 = mesh->verticesPerFace()->readable();
 	const vector<int> &vertexIds1 = mesh->vertexIds()->readable();

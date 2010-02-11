@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,14 +75,14 @@ bool PathParameter::mustNotExist() const
 	return ( m_check == PathParameter::MustNotExist );
 }
 
-bool PathParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool PathParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	if( !StringParameter::valueValid( value, reason ) )
 	{
 		return false;
 	}
 	// if the above passed we know we have a string
-	ConstStringDataPtr s = static_pointer_cast<const StringData>( value );
+	const StringData *s = static_cast<const StringData *>( value );
 
 	// empty check
 	if( !allowEmptyString() && s->readable()=="" )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -243,7 +243,7 @@ ObjectPtr DataPromoteOp::doOperation( ConstCompoundObjectPtr operands )
 	assert( operands );
 
 	const TypeId targetType = (TypeId)m_targetTypeParameter->getNumericValue();
-	DataPtr srcData = static_pointer_cast<Data>( m_objectParameter->getValue() );
+	Data *srcData = static_cast<Data *>( m_objectParameter->getValue() );
 	assert( srcData );
 
 	Promote1Fn fn( targetType );

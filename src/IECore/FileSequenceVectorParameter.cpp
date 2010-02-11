@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -87,7 +87,7 @@ void FileSequenceVectorParameter::setExtensions( const ExtensionList &extensions
 	m_extensions = extensions;
 }
 
-bool FileSequenceVectorParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool FileSequenceVectorParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	/// we can't call PathParameter::valueValid() because that would do existence checking on
 	/// our path specifier with the # characters in it, and that would yield the wrong results
@@ -97,7 +97,7 @@ bool FileSequenceVectorParameter::valueValid( ConstObjectPtr value, std::string 
 		return false;
 	}
 
-	ConstStringVectorDataPtr stringVectorDataValue = assertedStaticCast< const StringVectorData >( value );
+	const StringVectorData *stringVectorDataValue = assertedStaticCast<const StringVectorData>( value );
 	const StringVectorData::ValueType &stringVectorValue = stringVectorDataValue->readable();
 
 	if ( allowEmptyList() && !stringVectorValue.size() )

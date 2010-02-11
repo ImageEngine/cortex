@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -834,7 +834,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 
 			// restore any parameter value from a deleted-and-remade attribute if it is still valid for the
 			// parameter.
-			if( valueBeforeAttributeRemoval && children[i]->valueValid( valueBeforeAttributeRemoval ) )
+			if( valueBeforeAttributeRemoval && children[i]->valueValid( valueBeforeAttributeRemoval.get() ) )
 			{
 				children[i]->setValue( valueBeforeAttributeRemoval );
 			}

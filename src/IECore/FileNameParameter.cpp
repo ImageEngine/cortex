@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,14 +71,14 @@ const std::vector<std::string> &FileNameParameter::extensions() const
 	return m_extensions;
 }
 
-bool FileNameParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool FileNameParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	if (!PathParameter::valueValid( value, reason ) )
 	{
 		return false;
 	}
 
-	ConstStringDataPtr s = static_pointer_cast<const StringData>( value );
+	const StringData *s = static_cast<const StringData *>( value );
 
 	// empty check
 	if( s->readable()=="" )

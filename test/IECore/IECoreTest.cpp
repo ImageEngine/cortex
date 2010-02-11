@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -69,6 +69,7 @@
 #include "SpaceTransformTest.h"
 #include "LookupTest.h"
 #include "StringAlgoTest.h"
+#include "ParameterThreadingTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -106,6 +107,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addSpaceTransformTest(test);
 		addLookupTest(test);
 		addStringAlgoTest(test);
+		addParameterThreadingTest(test);
 	}
 	catch (std::exception &ex)
 	{

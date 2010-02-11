@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,7 +70,7 @@ class FileSequenceParameter : public PathParameter
 		/// Returns true only if the value is StringData and matches the FileSequence::fileNameValidator
 		/// regex. Also checks that the sequence exists or doesn't exist based on the CheckType passed to
  		/// the constructor.
-		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
 
 		void setFileSequenceValue( ConstFileSequencePtr frameList );
 

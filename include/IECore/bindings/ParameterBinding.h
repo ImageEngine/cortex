@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,19 +77,19 @@ T parameterPresets( const boost::python::object &o );
 /// It defines virtual overrides to forward calls into python as appropriate.
 /// See src/bindings/PathParameterBinding.cpp for an example of use, and the discussion above
 /// for a description of what is going on.
-#define IE_COREPYTHON_PARAMETERWRAPPERFNS( CLASSNAME )								\
-	virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const	\
-	{																				\
-		if( boost::python::override f = this->get_override( "valueValid" ) )								\
-		{																			\
-			boost::python::tuple r = f( boost::const_pointer_cast<Object>( value ) );		\
-			if( reason )															\
-			{																		\
-				*reason = boost::python::extract<std::string>( r[1] );								\
-			}																		\
-			return boost::python::extract<bool>( r[0] );											\
-		}																			\
-		return CLASSNAME::valueValid( value, reason );								\
+#define IE_COREPYTHON_PARAMETERWRAPPERFNS( CLASSNAME )									\
+	virtual bool valueValid( const Object *value, std::string *reason = 0 ) const		\
+	{																					\
+		if( boost::python::override f = this->get_override( "valueValid" ) )			\
+		{																				\
+			boost::python::tuple r = f( ObjectPtr( const_cast<Object *>( value ) ) );	\
+			if( reason )																\
+			{																			\
+				*reason = boost::python::extract<std::string>( r[1] );					\
+			}																			\
+			return boost::python::extract<bool>( r[0] );								\
+		}																				\
+		return CLASSNAME::valueValid( value, reason );									\
 	}
 
 /// Use this within the class bindings to define the valueValid functions in python.

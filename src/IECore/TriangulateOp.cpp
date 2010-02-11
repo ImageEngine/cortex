@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -359,7 +359,7 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundOb
 	}
 
 	const float tolerance = toleranceParameter()->getNumericValue();
-	bool throwExceptions = boost::static_pointer_cast<const BoolData>(throwExceptionsParameter()->getValue())->readable();
+	bool throwExceptions = static_cast<const BoolData *>(throwExceptionsParameter()->getValue())->readable();
 
 	PrimitiveVariableMap::const_iterator pvIt = mesh->variables.find("P");
 	if (pvIt != mesh->variables.end())

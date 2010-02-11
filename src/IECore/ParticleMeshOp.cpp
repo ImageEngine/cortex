@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -409,7 +409,7 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	}
 
 	DoubleVectorDataPtr radius;
-	bool useRadiusAttribute = boost::static_pointer_cast<const BoolData>(m_useRadiusAttributeParameter->getValue())->readable();
+	bool useRadiusAttribute = static_cast<const BoolData *>( m_useRadiusAttributeParameter->getValue() )->readable();
 	if ( useRadiusAttribute )
 	{
 		ConstObjectPtr radiusAttributeData = radiusAttributeParameter()->getValue();
@@ -436,7 +436,7 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	}
 
 	DoubleVectorDataPtr strength;
-	bool useStrengthAttribute = boost::static_pointer_cast<const BoolData>(m_useStrengthAttributeParameter->getValue())->readable();
+	bool useStrengthAttribute = static_cast<const BoolData *>( m_useStrengthAttributeParameter->getValue() )->readable();
 	if ( useStrengthAttribute )
 	{
 		ConstObjectPtr strengthAttributeData = strengthAttributeParameter()->getValue();
@@ -468,7 +468,7 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 		throw InvalidArgumentException("Position/radius/strength array lengths mismatch");
 	}
 
-	bool automaticBound = boost::static_pointer_cast<const BoolData>(m_automaticBoundParameter->getValue())->readable();
+	bool automaticBound = static_cast<const BoolData *>( m_automaticBoundParameter->getValue() )->readable();
 	Box3f bound;
 
 	if (automaticBound)
@@ -489,7 +489,7 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	}
 	else
 	{
-		bound = boost::static_pointer_cast<const Box3fData>(m_boundParameter->getValue())->readable();
+		bound = static_cast<const Box3fData *>( m_boundParameter->getValue() )->readable();
 	}
 
 	double boundExtend = m_boundExtendParameter->getNumericValue();
@@ -501,11 +501,11 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	int gridMethod = m_gridMethodParameter->getNumericValue();
 	if ( gridMethod == Resolution )
 	{
-		resolution = boost::static_pointer_cast<const V3iData>(m_resolutionParameter->getValue())->readable();
+		resolution = static_cast<const V3iData *>( m_resolutionParameter->getValue() )->readable();
 	}
 	else if ( gridMethod == DivisionSize )
 	{
-		V3f divisionSize = boost::static_pointer_cast<const V3fData>(m_divisionSizeParameter->getValue())->readable();
+		V3f divisionSize = static_cast<const V3fData *>( m_divisionSizeParameter->getValue() )->readable();
 
 		resolution.x = (int)((bound.max.x - bound.min.x) / divisionSize.x);
 		resolution.y = (int)((bound.max.y - bound.min.y) / divisionSize.y);

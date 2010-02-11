@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -130,7 +130,7 @@ MStatus ParameterisedHolderSetValueCmd::doIt( const MArgList &argList )
 
 	// we must copy the value here, as the m_originalValue = parm->getValue() below updates the value in place,
 	// which would modify tmp if it weren't a copy.
-	IECore::CompoundObjectPtr tmp = boost::static_pointer_cast<IECore::CompoundObject>( parameter->getValue() )->copy();
+	IECore::CompoundObjectPtr tmp = static_cast<IECore::CompoundObject *>( parameter->getValue() )->copy();
 
 		m_newValue = parameter->getValue()->copy();
 		if( m_parameter )

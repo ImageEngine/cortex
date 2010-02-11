@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,7 +58,7 @@ class ObjectParameter : public Parameter
 		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
 
 		/// Returns false if isn't an instance of any type in validTypes(), or any type derived from those types
-		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
 
 		/// Returns a set containing the valid types.
 		const TypeIdSet &validTypes() const;

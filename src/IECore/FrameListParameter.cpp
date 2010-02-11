@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,14 +77,14 @@ FrameListParameter::~FrameListParameter()
 {
 }
 
-bool FrameListParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool FrameListParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	if( !StringParameter::valueValid( value, reason ) )
 	{
 		return false;
 	}
 
-	ConstStringDataPtr stringValue = assertedStaticCast<const StringData>( value );
+	const StringData *stringValue = assertedStaticCast<const StringData>( value );
 
 	try
 	{

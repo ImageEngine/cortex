@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -254,9 +254,9 @@ const std::string &Parameter::description() const
 	return m_description;
 }
 
-ConstObjectPtr Parameter::defaultValue() const
+const Object *Parameter::defaultValue() const
 {
-	return m_defaultValue;
+	return m_defaultValue.get();
 }
 
 const Parameter::PresetsContainer &Parameter::presets() const
@@ -269,29 +269,29 @@ bool Parameter::presetsOnly() const
 	return m_presetsOnly;
 }
 
-CompoundObjectPtr Parameter::userData()
+CompoundObject *Parameter::userData()
 {
 	if( !m_userData )
 	{
 		m_userData = new CompoundObject();
 	}
-	return m_userData;
+	return m_userData.get();
 }
 
-ConstCompoundObjectPtr Parameter::userData() const
+const CompoundObject *Parameter::userData() const
 {
 	if( !m_userData )
 	{
 		m_userData = new CompoundObject();
 	}
-	return m_userData;
+	return m_userData.get();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Validation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Parameter::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool Parameter::valueValid( const Object *value, std::string *reason ) const
 {
 	if( value->typeId()==NullObject::staticTypeId() )
 	{
@@ -334,7 +334,7 @@ void Parameter::validate() const
 	}
 }
 
-void Parameter::validate( ConstObjectPtr value ) const
+void Parameter::validate( const Object *value ) const
 {
 	string reason;
 	if( !valueValid( value, &reason ) )
@@ -355,7 +355,7 @@ void Parameter::setValue( ObjectPtr value )
 
 void Parameter::setValidatedValue( ObjectPtr value )
 {
-	validate( value );
+	validate( value.get() );
 	setValue( value );
 }
 
@@ -383,23 +383,23 @@ void Parameter::setValue( const std::string &presetName )
 // Value getting
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ObjectPtr Parameter::getValue()
+Object *Parameter::getValue()
 {
-	return m_value;
+	return m_value.get();
 }
 
-ConstObjectPtr Parameter::getValue() const
+const Object *Parameter::getValue() const
 {
-	return m_value;
+	return m_value.get();
 }
 
-ObjectPtr Parameter::getValidatedValue()
+Object *Parameter::getValidatedValue()
 {
 	validate();
 	return getValue();
 }
 
-ConstObjectPtr Parameter::getValidatedValue() const
+const Object *Parameter::getValidatedValue() const
 {
 	validate();
 	return getValue();
@@ -410,7 +410,7 @@ std::string Parameter::getCurrentPresetName() const
 	// ideally we'd just use m_value for currentValue, which would mean we
 	// didn't have to do a copy of the value. but that breaks with CompoundParameter
 	// as it builds the value dynamically in getValue().
-	ConstObjectPtr currentValue = getValue();
+	const Object *currentValue = getValue();
 	const PresetsContainer &pr = presets();
 	PresetsContainer::const_iterator it;
 	for( it=pr.begin(); it!=pr.end(); it++ )
@@ -420,8 +420,6 @@ std::string Parameter::getCurrentPresetName() const
 			return it->first;
 		}
 	}
-
-	/// \todo Surely we should never get here if m_presetsOnly is true? Assert that, if safe to do so.
 
 	return "";
 }

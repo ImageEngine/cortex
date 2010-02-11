@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -82,7 +82,7 @@ bool PathVectorParameter::mustNotExist() const
 	return ( m_check == PathVectorParameter::MustNotExist );
 }
 
-bool PathVectorParameter::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool PathVectorParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	/// \todo Validate the individual path names using utilities found in boost::filesystem
 
@@ -91,7 +91,7 @@ bool PathVectorParameter::valueValid( ConstObjectPtr value, std::string *reason 
 		return false;
 	}
 	// if the above passed we know we have a string vector
-	ConstStringVectorDataPtr s = static_pointer_cast<const StringVectorData>( value );
+	const StringVectorData *s = static_cast<const StringVectorData *>( value );
 
 	// empty check
 	if ( !allowEmptyList() && !s->readable().size() )

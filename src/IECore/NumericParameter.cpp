@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -174,14 +174,14 @@ T NumericParameter<T>::maxValue() const
 template<typename T>
 T NumericParameter<T>::numericDefaultValue() const
 {
-	typename TypedData<T>::ConstPtr v = static_pointer_cast<const TypedData<T> >( defaultValue() );
+	const TypedData<T> *v = static_cast<const TypedData<T> *>( defaultValue() );
 	return v->readable();
 }
 
 template<typename T>
 T NumericParameter<T>::getNumericValue() const
 {
-	typename TypedData<T>::ConstPtr v = runTimeCast<const TypedData<T> >( getValidatedValue() );
+	const TypedData<T> *v = runTimeCast<const TypedData<T> >( getValidatedValue() );
 	if (!v)
 	{
 		throw Exception( string( "Value is not an instance of \"" ) + ObjectType::staticTypeName() + "\"" );
@@ -196,13 +196,13 @@ void NumericParameter<T>::setNumericValue( T value )
 }
 
 template<typename T>
-bool NumericParameter<T>::valueValid( ConstObjectPtr value, std::string *reason ) const
+bool NumericParameter<T>::valueValid( const Object *value, std::string *reason ) const
 {
 	if( !Parameter::valueValid( value, reason ) )
 	{
 		return false;
 	}
-	ConstObjectTypePtr tValue = runTimeCast<const ObjectType>( value );
+	const ObjectType *tValue = runTimeCast<const ObjectType>( value );
 	if( !tValue )
 	{
 		if( reason )

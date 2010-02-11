@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,7 +77,7 @@ class TypedObjectParameter : public ObjectParameter
 		//@}
 
 		/// Implemented to return true only if value is of type T.
-		virtual bool valueValid( ConstObjectPtr value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
 
 	protected:
 

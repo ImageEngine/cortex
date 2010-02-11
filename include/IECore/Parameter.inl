@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,25 +46,25 @@ inline const InternedString &Parameter::internedName() const
 }
 
 template<typename T>
-typename T::Ptr Parameter::getTypedValue()
+T *Parameter::getTypedValue()
 {
 	return runTimeCast<T>( getValue() );
 }
 
 template<typename T>
-typename T::ConstPtr Parameter::getTypedValue() const
+const T *Parameter::getTypedValue() const
 {
 	return runTimeCast<const T>( getValue() );
 }
 
 template<typename T>
-typename T::Ptr Parameter::getTypedValidatedValue()
+T *Parameter::getTypedValidatedValue()
 {
 	return runTimeCast<T>( getValidatedValue() );
 }
 
 template<typename T>
-typename T::ConstPtr Parameter::getTypedValidatedValue() const
+const T *Parameter::getTypedValidatedValue() const
 {
 	return runTimeCast<const T>( getValidatedValue() );
 }

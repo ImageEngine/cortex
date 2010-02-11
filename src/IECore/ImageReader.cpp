@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -138,7 +138,7 @@ void ImageReader::channelsToRead( vector<string> &names )
 	channelNames( allNames );
 
 	ConstStringVectorParameterPtr p = parameters()->parameter<StringVectorParameter>("channels");
-	ConstStringVectorDataPtr d = static_pointer_cast<const StringVectorData>(p->getValue());
+	const StringVectorData *d = static_cast<const StringVectorData *>( p->getValue() );
 
 	// give all channels when no list is provided
 	if (!d->readable().size())
