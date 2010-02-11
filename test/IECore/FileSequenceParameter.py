@@ -74,11 +74,15 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "hello" ) )
 		p.setValidatedValue( IECore.StringData( "hello.###.tif" ) )
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) )
+		# for MustNotExist and DontCare, the getFileSequenceValue does not check the file system. It returns a FileSequence with EmptyFrameList.
+		self.assertEqual( p.getFileSequenceValue().frameList, IECore.EmptyFrameList() )
 		
+		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.MustExist )
+		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) )
 		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
-		p.setFileSequenceValue( IECore.FileSequence( "a.###.tif", IECore.FrameRange( 1, 10 ) ) )
-		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) ) # Known bug
-		self.assertEqual( p.getValue(), IECore.StringData( "a.###.tif 1-10" ) ) # Known bug
+		p.setFileSequenceValue( IECore.FileSequence( "test/sequences/parameterTest/a.#.tif", IECore.FrameRange( 1, 10 ) ) )
+		self.assertEqual( p.getValue(), IECore.StringData( "test/sequences/parameterTest/a.#.tif 1-10" ) )
+		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
 
 	def testEmptyString( self ) :
 

@@ -72,11 +72,15 @@ class FileSequenceParameter : public PathParameter
  		/// the constructor.
 		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
 
-		void setFileSequenceValue( ConstFileSequencePtr frameList );
+		/// Sets the internal StringData with the textual representation of the given file sequence object.
+		void setFileSequenceValue( ConstFileSequencePtr fileSequence );
 
-		/// Gets the internal StringData value and creates a FileSequence
-		/// from it using the ls() function. Note that this can return 0
-		/// if check is DontCare and no matching sequence exists on disk.
+		/// Gets the internal StringData value and creates a FileSequence with the current frame list
+		/// If no frame list is given on the parameter and it is set to MustExist than
+		/// this function uses the ls() to list from the file system. Note that it could return NULL
+		/// in case it doesn't exist.
+		/// If the parameter is not set to MustExist and no frame list is defined, then it returns a
+		/// FileSequence with EmptyFrameList object.
 		FileSequencePtr getFileSequenceValue() const;
 
 	protected :

@@ -44,6 +44,7 @@
 #include "IECore/FrameList.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/StringAlgo.h"
+#include "IECore/EmptyFrameList.h"
 
 using namespace IECore;
 using namespace boost;
@@ -173,21 +174,25 @@ bool FileSequenceParameter::valueValid( const Object *value, std::string *reason
 
 void FileSequenceParameter::setFileSequenceValue( ConstFileSequencePtr fileSequence )
 {
-	/// \todo Don't throw away the FrameList here!
-	setValue( new StringData( fileSequence->getFileName() ) );
+	setTypedValue( fileSequence->asString() );
 }
 
 FileSequencePtr FileSequenceParameter::getFileSequenceValue() const
 {
 	const std::string &fileSequenceStr = getTypedValue();
 	
-	/// \todo Consider returning an EmptyFrameList rather than checking the filesystem
-	/// note that Several Ops make the assumption that this will check the filesystem (e.g. SequenceRmOp)
 	if ( fileSequenceStr.find_first_of( ' ' ) == std::string::npos )
 	{
-		FileSequencePtr result = 0;
-		ls( fileSequenceStr, result );
-		return result;
+		if ( mustExist() )
+		{
+			FileSequencePtr result = 0;
+			ls( fileSequenceStr, result );
+			return result;
+		}
+		else
+		{
+			return new FileSequence( fileSequenceStr, new EmptyFrameList() );
+		}
 	}
 
 	return parseFileSequence( fileSequenceStr );
