@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -80,8 +80,10 @@ class SequenceConvertOp( Op ) :
 	def doOperation( self, operands ) :
 
 		src = self.parameters()["src"].getFileSequenceValue()
-		dst = src.copy()
-		dst.fileName = operands["dst"].value
+		dst = self.parameters()["dst"].getFileSequenceValue()
+		# if no frame list is specified on the dst parameter, then we use the same as src parameter.
+		if isinstance( dst.frameList, EmptyFrameList ):
+			dst.frameList = src.frameList
 
 		# compare extensions, if extensions match, simply copy
 		if src.fileName.split('.')[-1] == dst.fileName.split('.')[-1]:
@@ -95,6 +97,6 @@ class SequenceConvertOp( Op ) :
 				img = Reader.create(sf).read()
 				Writer.create(img, df).write()
 
-		return StringData(dst.fileName)
+		return StringData(str(dst))
 
 registerRunTimeTyped( SequenceConvertOp, 100014, Op )
