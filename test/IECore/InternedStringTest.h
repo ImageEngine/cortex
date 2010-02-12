@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,73 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_INTERNED_H
-#define IECORE_INTERNED_H
+#ifndef IECORE_INTERNEDSTRINGTEST_H
+#define IECORE_INTERNEDSTRINGTEST_H
 
-#include "IECore/HashTable.h"
-
-#include "boost/multi_index_container.hpp"
-
-#include "tbb/spin_rw_mutex.h"
+#include "boost/test/unit_test.hpp"
 
 namespace IECore
 {
 
-/// The Interned class provides a means of efficiently storing
-/// multiple different objects with the same value. It does this
-/// by keeping a static table with the actual values in it, with
-/// the object instances just referencing the values in the table.
-template<typename T, typename Hash=Hash<T> >
-class Interned
-{
-	public :
+void addInternedStringTest( boost::unit_test::test_suite *test );
 
-		Interned( const T &value );
-		Interned( const Interned<T, Hash> &other );
-		Interned( const char *value );
-		template<typename S>
-		Interned( const S &value );
+}
 
-		~Interned();
+#endif // IECORE_INTERNEDSTRINGTEST_H
 
-		inline bool operator != ( const Interned<T, Hash> &other ) const;
-		inline bool operator == ( const Interned<T, Hash> &other ) const;
-		inline bool operator < ( const Interned<T, Hash> &other ) const;
-
-		inline operator const T & () const;
-
-		const T &value() const;
-
-		static size_t size();
-
-	private :
-
-		typedef boost::multi_index::multi_index_container<
-			T,
-			boost::multi_index::indexed_by<
-				boost::multi_index::hashed_unique<
-					boost::multi_index::identity<T>,
-					Hash
-				>
-			>
-		> HashSet;
-
-		typedef typename HashSet::template nth_index<0>::type Index;
-		typedef typename HashSet::template nth_index_const_iterator<0>::type ConstIterator;
-
-		const T *m_value;
-
-		static HashSet *hashSet();
-		
-		typedef tbb::spin_rw_mutex Mutex;
-		static Mutex *mutex();
-
-};
-
-typedef Interned<std::string> InternedString;
-
-} // namespace IECore
-
-#include "IECore/Interned.inl"
-
-#endif // IECORE_INTERNED_H

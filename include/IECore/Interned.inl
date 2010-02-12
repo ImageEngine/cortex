@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,7 +44,18 @@ template<typename T, typename Hash>
 Interned<T, Hash>::Interned( const T &value )
 {
 	HashSet *h = hashSet();
-	m_value = &(*(h->insert( value ).first));
+	Index &hashIndex = h->template get<0>();
+	Mutex::scoped_lock lock( *mutex(), false ); // read-only lock
+	typename HashSet::const_iterator it = hashIndex.find( value );
+	if( it!=hashIndex.end() )
+	{
+		m_value = &(*it);
+	}
+	else
+	{
+		lock.upgrade_to_writer();
+		m_value = &(*(h->insert( value ).first ) );
+	}
 }
 
 template<typename T, typename Hash>
@@ -58,7 +69,19 @@ template<typename S>
 Interned<T, Hash>::Interned( const S &value )
 {
 	HashSet *h = hashSet();
-	m_value = &(*(h->insert( T( value ) ).first ) );
+	Index &hashIndex = h->template get<0>();
+	T tValue( value );
+	Mutex::scoped_lock lock( *mutex(), false ); // read-only lock
+	typename HashSet::const_iterator it = hashIndex.find( tValue );
+	if( it!=hashIndex.end() )
+	{
+		m_value = &(*it);
+	}
+	else
+	{
+		lock.upgrade_to_writer();
+		m_value = &(*(h->insert( tValue ).first ) );
+	}
 }
 
 template<typename T, typename Hash>

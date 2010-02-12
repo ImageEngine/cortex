@@ -57,6 +57,7 @@
 #include "RadixSortTest.h"
 #include "SweepAndPruneTest.h"
 #include "ColorTransformTest.h"
+#include "InternedStringTest.h"
 
 #ifdef IECORE_WITH_BOOSTFACTORIAL
 	
@@ -70,6 +71,7 @@
 #include "LookupTest.h"
 #include "StringAlgoTest.h"
 #include "ParameterThreadingTest.h"
+#include "InternedStringTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -108,6 +110,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addLookupTest(test);
 		addStringAlgoTest(test);
 		addParameterThreadingTest(test);
+		addInternedStringTest(test);
 	}
 	catch (std::exception &ex)
 	{
