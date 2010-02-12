@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -73,9 +73,9 @@ int NURBSPrimitive::uOrder() const
 	return m_uOrder;
 }
 
-ConstFloatVectorDataPtr NURBSPrimitive::uKnot() const
+const FloatVectorData *NURBSPrimitive::uKnot() const
 {
-	return m_uKnot;
+	return m_uKnot.get();
 }
 
 float NURBSPrimitive::uMin() const
@@ -103,9 +103,9 @@ int NURBSPrimitive::vOrder() const
 	return m_vOrder;
 }
 
-ConstFloatVectorDataPtr NURBSPrimitive::vKnot() const
+const FloatVectorData *NURBSPrimitive::vKnot() const
 {
-	return m_vKnot;
+	return m_vKnot.get();
 }
 
 float NURBSPrimitive::vMin() const

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,8 +70,8 @@ class MeshPrimitive : public Primitive
 		/////////////////////////////////////////////////////////////////////////////
 		//@{
 		size_t numFaces() const;
-		ConstIntVectorDataPtr verticesPerFace() const;
-		ConstIntVectorDataPtr vertexIds() const;
+		const IntVectorData *verticesPerFace() const;
+		const IntVectorData *vertexIds() const;
 		const std::string &interpolation() const;
 		virtual void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
 		void setInterpolation( const std::string &interpolation );
@@ -86,12 +86,10 @@ class MeshPrimitive : public Primitive
 
 		/// Creates a box mesh.
 		/// \todo Add subdivisions and texture coordinates.
-		/// \todo Argument should be const reference
-		static MeshPrimitivePtr createBox( Imath::Box3f b );
+		static MeshPrimitivePtr createBox( const Imath::Box3f &b );
 		/// Creates a plane at z=0, with the geometric normal facing down positive z.
 		/// \todo Add subdivisions.
-		/// \todo Argument should be const reference
-		static MeshPrimitivePtr createPlane( Imath::Box2f b );
+		static MeshPrimitivePtr createPlane( const Imath::Box2f &b );
 
 	private:
 

@@ -175,13 +175,13 @@ class ImagePrimitive : public Primitive
 		/// Returns the data for the named channel, or 0 if it
 		/// doesn't exist or is invalid.
 		template<typename T>
-		typename TypedData<std::vector<T> >::Ptr getChannel( const std::string &name );
+		TypedData<std::vector<T> > *getChannel( const std::string &name );
 		template<typename T>
-		typename TypedData<std::vector<T> >::ConstPtr getChannel( const std::string &name ) const;
+		const TypedData<std::vector<T> > *getChannel( const std::string &name ) const;
 		/// Convenience function to create a channel - this simply creates and adds a PrimitiveVariable of the appropriate
 		/// size and returns a pointer to the data within it. The data is not initialized.
 		template<typename T>
-		typename TypedData<std::vector<T> >::Ptr createChannel( const std::string &name );
+		TypedData<std::vector<T> > *createChannel( const std::string &name );
 		//@}
 		
 		//! @name Creation

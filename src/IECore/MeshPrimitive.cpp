@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,14 +67,14 @@ size_t MeshPrimitive::numFaces() const
 	return m_verticesPerFace->readable().size();
 }
 
-ConstIntVectorDataPtr MeshPrimitive::verticesPerFace() const
+const IntVectorData *MeshPrimitive::verticesPerFace() const
 {
-	return m_verticesPerFace;
+	return m_verticesPerFace.get();
 }
 
-ConstIntVectorDataPtr MeshPrimitive::vertexIds() const
+const IntVectorData *MeshPrimitive::vertexIds() const
 {
-	return m_vertexIds;
+	return m_vertexIds.get();
 }
 
 const std::string &MeshPrimitive::interpolation() const
@@ -244,7 +244,7 @@ void MeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_vertexIds );
 }
 
-MeshPrimitivePtr MeshPrimitive::createBox( Box3f b )
+MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
 {
 	vector< int > verticesPerFaceVec;
 	vector< int > vertexIdsVec;
@@ -280,7 +280,7 @@ MeshPrimitivePtr MeshPrimitive::createBox( Box3f b )
 	return new MeshPrimitive( new IntVectorData(verticesPerFaceVec), new IntVectorData(vertexIdsVec), interpolation, new V3fVectorData(p) );
 }
 
-MeshPrimitivePtr MeshPrimitive::createPlane( Box2f b )
+MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b )
 {
 	IntVectorDataPtr verticesPerFace = new IntVectorData;
 	verticesPerFace->writable().push_back( 4 );

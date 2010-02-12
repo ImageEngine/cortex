@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,13 +60,13 @@ class NURBSPrimitive : public Primitive
 		/////////////////////////////////////////////////////////////////////////////
 		//@{
 		int uOrder() const;
-		ConstFloatVectorDataPtr uKnot() const;
+		const FloatVectorData *uKnot() const;
 		float uMin() const;
 		float uMax() const;
 		int uVertices() const;
 		int uSegments() const;
 		int vOrder() const;
-		ConstFloatVectorDataPtr vKnot() const;
+		const FloatVectorData *vKnot() const;
 		float vMin() const;
 		float vMax() const;
 		int vVertices() const;

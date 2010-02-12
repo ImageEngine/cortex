@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,29 +48,29 @@ namespace IECore
 {
 
 template<typename T>
-typename TypedData<std::vector<T> >::Ptr ImagePrimitive::getChannel( const std::string &name )
+TypedData<std::vector<T> > *ImagePrimitive::getChannel( const std::string &name )
 {
 	std::string reason = "";
 	if( channelValid( name, &reason ) )
 	{
-		return runTimeCast<TypedData<std::vector<T> > >( variables.find( name )->second.data );
+		return runTimeCast<TypedData<std::vector<T> > >( variables.find( name )->second.data.get() );
 	}
 	return 0;
 }
 
 template<typename T>
-typename TypedData<std::vector<T> >::ConstPtr ImagePrimitive::getChannel( const std::string &name ) const
+const TypedData<std::vector<T> > *ImagePrimitive::getChannel( const std::string &name ) const
 {
 	std::string reason = "";
 	if( channelValid( name, &reason ) )
 	{
-		return runTimeCast<TypedData<std::vector<T> > >( variables.find( name )->second.data );
+		return runTimeCast<TypedData<std::vector<T> > >( variables.find( name )->second.data.get() );
 	}
 	return 0;
 }
 
 template<typename T>
-typename TypedData<std::vector<T> >::Ptr ImagePrimitive::createChannel( const std::string &name )
+TypedData<std::vector<T> > *ImagePrimitive::createChannel( const std::string &name )
 {
 	/// This assert enforces the comments regarding permissible channel types in ImagePrimitive.h
 	BOOST_STATIC_ASSERT( (
@@ -88,7 +88,7 @@ typename TypedData<std::vector<T> >::Ptr ImagePrimitive::createChannel( const st
 
 	variables.insert( PrimitiveVariableMap::value_type( name, PrimitiveVariable( PrimitiveVariable::Vertex, channel ) ) );
 
-	return channel;
+	return channel.get();
 }
 
 

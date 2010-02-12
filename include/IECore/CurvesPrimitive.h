@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,7 +54,7 @@ class CurvesPrimitive : public Primitive
 		IE_CORE_DECLAREOBJECT( CurvesPrimitive, Primitive );
 
 		size_t numCurves() const;
-		ConstIntVectorDataPtr verticesPerCurve() const;
+		const IntVectorData *verticesPerCurve() const;
 		const CubicBasisf &basis() const;
 		bool periodic() const;
 		void setTopology( ConstIntVectorDataPtr verticesPerCurve, const CubicBasisf &basis, bool periodic );

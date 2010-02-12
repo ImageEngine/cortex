@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,7 @@ namespace IECore
 {
 
 template<typename T>
-typename T::Ptr Primitive::variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation )
+T *Primitive::variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation )
 {
 	PrimitiveVariableMap::const_iterator it = variables.find( name );
 	if( it==variables.end() )
@@ -50,11 +50,11 @@ typename T::Ptr Primitive::variableData( const std::string &name, PrimitiveVaria
 	{
 		return 0;
 	}
-	return runTimeCast<T>( it->second.data );
+	return runTimeCast<T>( it->second.data.get() );
 }
 
 template<typename T>
-typename T::ConstPtr Primitive::variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation ) const
+const T *Primitive::variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation ) const
 {
 	PrimitiveVariableMap::const_iterator it = variables.find( name );
 	if( it==variables.end() )
@@ -65,7 +65,7 @@ typename T::ConstPtr Primitive::variableData( const std::string &name, Primitive
 	{
 		return 0;
 	}
-	return runTimeCast<const T>( it->second.data );
+	return runTimeCast<const T>( it->second.data.get() );
 }
 
 } // namespace IECore

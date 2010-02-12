@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -89,6 +89,12 @@ static StringVectorDataPtr channelNames( ImagePrimitive &that )
 	return result;
 }
 
+template<typename T>
+static DataPtr createChannel( ImagePrimitive &i, const std::string &name )
+{
+	return i.createChannel<T>( name );
+}
+
 void bindImagePrimitive()
 {
 	scope s = RunTimeTypedClass<ImagePrimitive>()
@@ -117,9 +123,9 @@ void bindImagePrimitive()
 		.def( "getChannel", &getChannel )
 		.def( "channelNames", &channelNames)
 
-		.def( "createFloatChannel", &ImagePrimitive::createChannel<float> )
-		.def( "createHalfChannel", &ImagePrimitive::createChannel<half> )
-		.def( "createUIntChannel", &ImagePrimitive::createChannel<unsigned int> )
+		.def( "createFloatChannel", &createChannel<float> )
+		.def( "createHalfChannel", &createChannel<half> )
+		.def( "createUIntChannel", &createChannel<unsigned int> )
 
 		.def( "createRGBFloat", &ImagePrimitive::createRGB<float> )
 		.staticmethod( "createRGBFloat" )

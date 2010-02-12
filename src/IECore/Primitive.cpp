@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -253,8 +253,8 @@ PrimitiveVariable::Interpolation Primitive::inferInterpolation( size_t numElemen
 	return PrimitiveVariable::Invalid;
 }
 
-PrimitiveVariable::Interpolation Primitive::inferInterpolation( ConstDataPtr data ) const
+PrimitiveVariable::Interpolation Primitive::inferInterpolation( const Data *data ) const
 {
-	size_t s = IECore::despatchTypedData<IECore::TypedDataSize>( boost::const_pointer_cast<Data>( data ) );
+	size_t s = IECore::despatchTypedData<IECore::TypedDataSize>( const_cast<Data *>( data ) );
 	return inferInterpolation( s );
 }

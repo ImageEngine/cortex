@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,9 +64,9 @@ class Primitive : public VisibleRenderable
 		/// Convenience function to find name in variables, and returning a runTimeCast to the requested type. If requiredInterpolation is
 		/// specified then 0 is returned if the interpolation doesn't match.
 		template<typename T>
-		typename T::Ptr variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid );
+		T *variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid );
 		template<typename T>
-		typename T::ConstPtr variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid ) const;
+		const T *variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid ) const;
 
 		/// Returns true if the given primitive variable has the correct size for its interpolation type
 		bool isPrimitiveVariableValid( const PrimitiveVariable &pv ) const;
@@ -89,7 +89,7 @@ class Primitive : public VisibleRenderable
 		PrimitiveVariable::Interpolation inferInterpolation( size_t numElements ) const;
 		/// Convenience function which finds the size of data and calls the above
 		/// method.
-		PrimitiveVariable::Interpolation inferInterpolation( ConstDataPtr data ) const;
+		PrimitiveVariable::Interpolation inferInterpolation( const Data *data ) const;
 
 		/// Implemented to return a box containing all the points in the variable
 		/// "P" if it exists.
