@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -78,7 +78,7 @@ void Renderable::memoryUsage( Object::MemoryAccumulator &a ) const
 }
 
 
-void Renderable::render( RendererPtr renderer ) const
+void Renderable::render( Renderer *renderer ) const
 {
 #ifndef NDEBUG
 	bool unimplemented = false;

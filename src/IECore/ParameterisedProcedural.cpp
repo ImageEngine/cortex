@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -121,12 +121,12 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 		ConstCompoundObjectPtr validatedArgs;
 };
 
-void ParameterisedProcedural::render( RendererPtr renderer ) const
+void ParameterisedProcedural::render( Renderer *renderer ) const
 {
 	render( renderer, true, true, true, false );
 }
 
-void ParameterisedProcedural::render( RendererPtr renderer, bool inAttributeBlock, bool withState, bool withGeometry, bool immediateGeometry ) const
+void ParameterisedProcedural::render( Renderer *renderer, bool inAttributeBlock, bool withState, bool withGeometry, bool immediateGeometry ) const
 {
 	ConstCompoundObjectPtr validatedArgs = parameters()->getTypedValidatedValue<CompoundObject>();
 

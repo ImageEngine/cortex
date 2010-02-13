@@ -82,7 +82,7 @@ class MeshPrimitive : public Primitive
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
 		/// Render the mesh
-		virtual void render( RendererPtr renderer ) const;
+		virtual void render( Renderer *renderer ) const;
 
 		/// Creates a box mesh.
 		/// \todo Add subdivisions and texture coordinates.

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -262,7 +262,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 
 			if( rendererToReuse )
 			{
-				p->render( rendererToReuse );
+				p->render( rendererToReuse.get() );
 				m_scene = rendererToReuse->scene();
 			}
 			else
@@ -271,7 +271,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 				renderer->setOption( "gl:mode", new StringData( "deferred" ) );
 				renderer->worldBegin();
 
-					p->render( renderer );
+					p->render( renderer.get() );
 
 				renderer->worldEnd();
 

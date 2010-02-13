@@ -172,8 +172,8 @@ void bindParameterisedProcedural()
 		.def( init< const std::string >( arg( "description") ) )
 		.add_property( "description", make_function( &ParameterisedProcedural::description, return_value_policy<copy_const_reference>() ) )
 		.def( "parameters", (CompoundParameterPtr (ParameterisedProcedural::*)())&ParameterisedProcedural::parameters )
-		.def( "render", (void (ParameterisedProcedural::*)( RendererPtr ) const )&ParameterisedProcedural::render )
-		.def( "render", (void (ParameterisedProcedural::*)( RendererPtr, bool, bool, bool, bool ) const )&ParameterisedProcedural::render, ( arg( "renderer" ), arg( "inAttributeBlock" ) = true, arg( "withState" ) = true, arg( "withGeometry" ) = true, arg( "immediateGeometry" ) = false ) )
+		.def( "render", (void (ParameterisedProcedural::*)( Renderer * ) const )&ParameterisedProcedural::render )
+		.def( "render", (void (ParameterisedProcedural::*)( Renderer *, bool, bool, bool, bool ) const )&ParameterisedProcedural::render, ( arg( "renderer" ), arg( "inAttributeBlock" ) = true, arg( "withState" ) = true, arg( "withGeometry" ) = true, arg( "immediateGeometry" ) = false ) )
 		.def( "__getitem__", &parameterisedProceduralGetItem )
 	;
 

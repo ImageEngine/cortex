@@ -332,7 +332,7 @@ void Group::memoryUsage( Object::MemoryAccumulator &a ) const
 	}
 }
 
-void Group::render( RendererPtr renderer ) const
+void Group::render( Renderer *renderer ) const
 {
 	renderer->attributeBegin();
 		if( m_transform )

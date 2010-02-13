@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -221,7 +221,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			IECore::RendererPtr renderer = new IECoreRI::Renderer();
 			IECore::AttributeBlock attributeBlock( renderer, 1 );
 			
-				it->second.procedural->render( renderer, false, true, false, false );
+				it->second.procedural->render( renderer.get(), false, true, false, false );
 
 				// tell 3delight we can't run multiple python procedurals concurrently
 				int zero = 0;

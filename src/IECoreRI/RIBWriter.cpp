@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -85,14 +85,14 @@ void RIBWriter::doWrite( const IECore::CompoundObject *operands )
 	IECore::Renderable *renderable = static_cast<IECore::Renderable *>( const_cast<IECore::Object *>( object() ) );
 	if( !m_worldBlockParameter->getTypedValue() )
 	{
-		renderable->render( renderer );
+		renderable->render( renderer.get() );
 	}
 	else
 	{
 		/// \todo When we have a Scene class or other Renderables which specify their own world block
 		/// then we'll have to detect them and act appropriately.
 		renderer->worldBegin();
-			renderable->render( renderer );
+			renderable->render( renderer.get() );
 		renderer->worldEnd();
 	}
 }

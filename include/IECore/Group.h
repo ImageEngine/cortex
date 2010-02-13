@@ -113,7 +113,7 @@ class Group : public VisibleRenderable
 		GroupPtr parent();
 		ConstGroupPtr parent() const;
 
-		virtual void render( RendererPtr renderer ) const;
+		virtual void render( Renderer *renderer ) const;
 		/// Returns the union of the bounds of the children, transformed
 		/// by transformMatrix().
 		virtual Imath::Box3f bound() const;

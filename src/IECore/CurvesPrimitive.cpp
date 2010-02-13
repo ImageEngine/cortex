@@ -188,7 +188,7 @@ void CurvesPrimitive::setTopology( ConstIntVectorDataPtr verticesPerCurve, const
 	}
 }
 
-void CurvesPrimitive::render( RendererPtr renderer ) const
+void CurvesPrimitive::render( Renderer *renderer ) const
 {
 	renderer->curves( m_basis, m_periodic, m_vertsPerCurve, variables );
 }

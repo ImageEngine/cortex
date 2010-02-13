@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,14 +68,14 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 		const std::string &description() const;
 		
 		/// Calls render( renderer, true, true, true, false );
-		virtual void render( RendererPtr renderer ) const;
+		virtual void render( Renderer *renderer ) const;
 		/// An additional render method to provide finer grained control. When inAttributeBlock is true,
 		/// the rendering is all contained within an attributeBegin()/attributeEnd() pair. When withState
 		/// is specified, the doRenderState() method is called to declare the appropriate
 		/// render state. When withGeometry is true then doRender() is called to
 		/// output the procedural geometry. When immediateGeometry is true, the doRender method is called immediately
 		/// rather than being deferred within a renderer-procedural() call.
-		void render( RendererPtr renderer, bool inAttributeBlock, bool withState, bool withGeometry, bool immediateGeometry ) const;
+		void render( Renderer *renderer, bool inAttributeBlock, bool withState, bool withGeometry, bool immediateGeometry ) const;
 
 		/// Forwards to doBound().
 		virtual Imath::Box3f bound() const;

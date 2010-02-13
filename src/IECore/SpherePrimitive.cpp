@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -146,7 +146,7 @@ Imath::Box3f SpherePrimitive::bound() const
 	);
 }
 
-void SpherePrimitive::render( RendererPtr renderer ) const
+void SpherePrimitive::render( Renderer *renderer ) const
 {
 	assert( renderer );
 	renderer->sphere( m_radius, m_zMin, m_zMax, m_thetaMax, variables );

@@ -239,7 +239,7 @@ size_t NURBSPrimitive::variableSize( PrimitiveVariable::Interpolation interpolat
 	}
 }
 
-void NURBSPrimitive::render( RendererPtr renderer ) const
+void NURBSPrimitive::render( Renderer *renderer ) const
 {
 	renderer->nurbs( m_uOrder, m_uKnot, m_uMin, m_uMax, m_vOrder, m_vKnot, m_vMin, m_vMax, variables );
 }

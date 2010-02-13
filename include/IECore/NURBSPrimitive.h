@@ -77,7 +77,7 @@ class NURBSPrimitive : public Primitive
 
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
-		virtual void render( RendererPtr renderer ) const;
+		virtual void render( Renderer *renderer ) const;
 
 	private:
 

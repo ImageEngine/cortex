@@ -59,7 +59,7 @@ class CurvesPrimitive : public Primitive
 		bool periodic() const;
 		void setTopology( ConstIntVectorDataPtr verticesPerCurve, const CubicBasisf &basis, bool periodic );
 
-		virtual void render( RendererPtr renderer ) const;
+		virtual void render( Renderer *renderer ) const;
 		/// Follows the RenderMan specification for variable sizes.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 		/// Returns the variable size for a single curve.
