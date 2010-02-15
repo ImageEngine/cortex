@@ -213,6 +213,7 @@ from HitMissTransformTest import HitMissTransformTest
 from CurveTracerTest import CurveTracerTest
 from ImageThinnerTest import ImageThinnerTest
 from CurveLineariserTest import CurveLineariserTest
+from PresetManagerTest import PresetManagerTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
