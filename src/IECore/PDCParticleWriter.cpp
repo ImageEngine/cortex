@@ -52,12 +52,12 @@ IE_CORE_DEFINERUNTIMETYPED( PDCParticleWriter )
 const Writer::WriterDescription<PDCParticleWriter> PDCParticleWriter::m_writerDescription( "pdc" );
 
 PDCParticleWriter::PDCParticleWriter( )
-	:	ParticleWriter( "PDCParticleWriter", "Creates files in maya pdc format" )
+	:	ParticleWriter( "Creates files in maya pdc format" )
 {
 }
 
 PDCParticleWriter::PDCParticleWriter( ObjectPtr object, const std::string &fileName )
-	:	ParticleWriter( "PDCParticleWriter", "Creates files in maya pdc format" )
+	:	ParticleWriter( "Creates files in maya pdc format" )
 {
 	m_objectParameter->setValue( object );
 	m_fileNameParameter->setTypedValue( fileName );

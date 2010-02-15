@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@ class BakeTransform( IECore.Op ) :
 
 	def __init__( self ) :
 
-		IECore.Op.__init__( self, "BakeTransform", "Bakes transforms from one object onto another.",
+		IECore.Op.__init__( self, "Bakes transforms from one object onto another.",
 			IECoreMaya.DAGPathParameter(
 				name = "result",
 				description = "The name of the baked transform",

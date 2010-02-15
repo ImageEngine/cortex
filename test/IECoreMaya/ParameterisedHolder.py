@@ -109,7 +109,7 @@ class TestParameterisedHolder( unittest.TestCase ) :
 
 				def __init__( self ) :
 
-					IECore.Op.__init__( self, "TestOp", "Tests stuff",
+					IECore.Op.__init__( self, "Tests stuff",
 						IECore.IntParameter(
 							name = "result",
 							description = "",
@@ -420,7 +420,6 @@ class TestParameterisedHolder( unittest.TestCase ) :
 			def __init__( self ) :
 			
 				IECore.Op.__init__( self,
-					"test",
 					"",
 					IECore.FloatParameter(
 						"result",

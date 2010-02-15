@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,7 +62,6 @@ IE_CORE_DEFINERUNTIMETYPED( ImageDiffOp );
 
 ImageDiffOp::ImageDiffOp()
 		:	Op(
-		        staticTypeName(),
 			"Evaluates the root-mean-squared error between two images and returns true if it "
 			"exceeds a specified threshold. Unless the \"skip missing channels\" parameter is "
 			"enabled, it will also return true if either image contains a channel which  "

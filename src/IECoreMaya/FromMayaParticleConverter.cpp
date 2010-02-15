@@ -60,13 +60,13 @@ static const IECore::TypeId toTypes[] = { IECore::BlindDataHolderTypeId, IECore:
 IECoreMaya::FromMayaShapeConverter::Description<FromMayaParticleConverter> FromMayaParticleConverter::m_description( fromTypes, toTypes );
 
 FromMayaParticleConverter::FromMayaParticleConverter( const MObject &object )
-	:	FromMayaShapeConverter( staticTypeName(), "Converts Maya particle shapes into IECore::PointsPrimitive objects.", object )
+	:	FromMayaShapeConverter( "Converts Maya particle shapes into IECore::PointsPrimitive objects.", object )
 {
 	constructCommon();
 }
 
 FromMayaParticleConverter::FromMayaParticleConverter( const MDagPath &dagPath )
-	:	FromMayaShapeConverter( staticTypeName(), "Converts Maya particle shapes into IECore::PointsPrimitive objects.", dagPath )
+	:	FromMayaShapeConverter( "Converts Maya particle shapes into IECore::PointsPrimitive objects.", dagPath )
 {
 	constructCommon();
 }

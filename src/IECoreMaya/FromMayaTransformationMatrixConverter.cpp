@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaTransformati
 
 template<typename T>
 FromMayaTransformationMatrixConverter<T>::FromMayaTransformationMatrixConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaTransformationMatrixConverter", "Converts maya matrix data to IECore::TransformationMatrixData.", object )
+	:	FromMayaObjectConverter( "Converts maya matrix data to IECore::TransformationMatrixData.", object )
 {
 }
 

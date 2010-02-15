@@ -47,14 +47,14 @@ using namespace IECoreMaya;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaShapeConverter );
 
-FromMayaShapeConverter::FromMayaShapeConverter( const std::string &name, const std::string &description, const MObject &object )
-	:	FromMayaObjectConverter( name, description, object )
+FromMayaShapeConverter::FromMayaShapeConverter( const std::string &description, const MObject &object )
+	:	FromMayaObjectConverter( description, object )
 {
 	constructCommon();
 }
 
-FromMayaShapeConverter::FromMayaShapeConverter( const std::string &name, const std::string &description, const MDagPath &dagPath )
-	:	FromMayaObjectConverter( name, description, dagPath.node() ), m_dagPath( dagPath )
+FromMayaShapeConverter::FromMayaShapeConverter( const std::string &description, const MDagPath &dagPath )
+	:	FromMayaObjectConverter( description, dagPath.node() ), m_dagPath( dagPath )
 {
 	constructCommon();
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,8 +50,8 @@ class ModifyOpWrap : public ModifyOp, public Wrapper<ModifyOp>
 {
 	public :
 
-		ModifyOpWrap( PyObject *self, const std::string name, const std::string description, ParameterPtr resultParameter, ParameterPtr inputParameter )
-			: ModifyOp( name, description, resultParameter, inputParameter ), Wrapper<ModifyOp>( self, this )
+		ModifyOpWrap( PyObject *self, const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter )
+			: ModifyOp( description, resultParameter, inputParameter ), Wrapper<ModifyOp>( self, this )
 		{
 		};
 
@@ -66,7 +66,7 @@ IE_CORE_DECLAREPTR( ModifyOpWrap );
 void bindModifyOp()
 {
 	RunTimeTypedClass<ModifyOp, ModifyOpWrapPtr>()
-		.def( init< const std::string, const std::string, ParameterPtr, ParameterPtr >() )
+		.def( init< const std::string &, ParameterPtr, ParameterPtr >() )
 	;
 }
 

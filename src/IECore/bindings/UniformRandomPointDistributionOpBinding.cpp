@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,7 +59,7 @@ class UniformRandomPointDistributionOpWrap :
 		{
 		}
 
-		UniformRandomPointDistributionOpWrap( PyObject *self, const std::string &name, const std::string &description ) : UniformRandomPointDistributionOp( name, description ), Wrapper<UniformRandomPointDistributionOp>( self, this )
+		UniformRandomPointDistributionOpWrap( PyObject *self, const std::string &description ) : UniformRandomPointDistributionOp( description ), Wrapper<UniformRandomPointDistributionOp>( self, this )
 		{
 		}
 
@@ -86,7 +86,7 @@ void bindUniformRandomPointDistributionOp()
 {
 	RunTimeTypedClass<UniformRandomPointDistributionOp, UniformRandomPointDistributionOpWrap::Ptr>()
 		.def( init<>() )
-		.def( init< const std::string &, const std::string &>() )
+		.def( init<const std::string &>() )
 		.def( "density", &UniformRandomPointDistributionOpWrap::density )
 	;
 }

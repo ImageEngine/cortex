@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,8 +47,8 @@ namespace IECore {
 class ParameterisedWrap : public Parameterised, public Wrapper<Parameterised>
 {
 	public :
-		ParameterisedWrap( PyObject *self, const std::string &name, const std::string &description ) : Parameterised( name, description ), Wrapper<Parameterised>( self, this ) {};
-		ParameterisedWrap( PyObject *self, const std::string &name, const std::string &description, CompoundParameterPtr compoundParameter ) : Parameterised( name, description, compoundParameter ), Wrapper<Parameterised>( self, this ) {};
+		ParameterisedWrap( PyObject *self, const std::string &description ) : Parameterised( description ), Wrapper<Parameterised>( self, this ) {};
+		ParameterisedWrap( PyObject *self, const std::string &description, CompoundParameterPtr compoundParameter ) : Parameterised( description, compoundParameter ), Wrapper<Parameterised>( self, this ) {};
 };
 IE_CORE_DECLAREPTR( ParameterisedWrap );
 
@@ -85,9 +85,8 @@ void bindParameterised()
 	using boost::python::arg;
 
 	RunTimeTypedClass<Parameterised, ParameterisedWrapPtr>()
-		.def( init< const std::string, const std::string>( ( arg( "name" ), arg( "description") ) ) )
-		.def( init< const std::string, const std::string, CompoundParameterPtr >( ( arg( "name" ), arg( "description") , arg( "compoundParameter") ) ) )
-		.add_property( "name", make_function( &Parameterised::name, return_value_policy<copy_const_reference>() ) )
+		.def( init< const std::string &>( ( arg( "name" ), arg( "description") ) ) )
+		.def( init< const std::string &, CompoundParameterPtr >( ( arg( "name" ), arg( "description") , arg( "compoundParameter") ) ) )
 		.add_property( "description", make_function( &Parameterised::description, return_value_policy<copy_const_reference>() ) )
 		.def( "parameters", (CompoundParameterPtr (Parameterised::*)())&Parameterised::parameters )
 		.def( "__getitem__", &parameterisedGetItem )

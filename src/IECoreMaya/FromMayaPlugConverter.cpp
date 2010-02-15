@@ -55,7 +55,7 @@ using namespace IECore;
 IE_CORE_DEFINERUNTIMETYPED( FromMayaPlugConverter );
 
 FromMayaPlugConverter::FromMayaPlugConverter( const MPlug &plug )
-	:	FromMayaConverter( "FromMayaPlugConverter", "Converts the value held in a maya plug." ), m_plug( plug )
+	:	FromMayaConverter( "Converts the value held in a maya plug." ), m_plug( plug )
 {
 }
 

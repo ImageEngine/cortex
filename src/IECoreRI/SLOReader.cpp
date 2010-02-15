@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,12 +58,12 @@ using namespace Imath;
 const Reader::ReaderDescription<SLOReader> SLOReader::m_readerDescription( "sdl" );
 
 SLOReader::SLOReader()
-	:	Reader( "SLOReader", "Reads compiled renderman shaders.", new ObjectParameter( "result", "The loaded shader", new NullObject, Shader::staticTypeId() ) )
+	:	Reader( "Reads compiled renderman shaders.", new ObjectParameter( "result", "The loaded shader", new NullObject, Shader::staticTypeId() ) )
 {
 }
 
 SLOReader::SLOReader( const std::string &fileName )
-	:	Reader( "SLOReader", "Reads compiled renderman shaders.", new ObjectParameter( "result", "The loaded shader", new NullObject, Shader::staticTypeId() ) )
+	:	Reader( "Reads compiled renderman shaders.", new ObjectParameter( "result", "The loaded shader", new NullObject, Shader::staticTypeId() ) )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }

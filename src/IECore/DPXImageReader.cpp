@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -69,13 +69,13 @@ struct DPXImageReader::Header
 const Reader::ReaderDescription<DPXImageReader> DPXImageReader::m_readerDescription("dpx");
 
 DPXImageReader::DPXImageReader() :
-		ImageReader("DPXImageReader", "Reads Digital Picture eXchange (DPX) files."),
+		ImageReader( "Reads Digital Picture eXchange (DPX) files."),
 		m_header( 0 )
 {
 }
 
 DPXImageReader::DPXImageReader(const string & fileName) :
-		ImageReader("DPXImageReader", "Reads Digital Picture eXchange (DPX) files."),
+		ImageReader( "Reads Digital Picture eXchange (DPX) files."),
 		m_header( 0 )
 {
 	m_fileNameParameter->setTypedValue(fileName);

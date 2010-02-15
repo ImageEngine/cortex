@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,9 +46,7 @@ IE_CORE_DEFINERUNTIMETYPED( Rec709ToLinearOp );
 ColorSpaceTransformOp::ColorSpaceDescription<Rec709ToLinearOp> Rec709ToLinearOp::g_colorSpaceDescription( "rec709", "linear" );
 
 Rec709ToLinearOp::Rec709ToLinearOp()
-	:	ChannelOp( "Rec709ToLinearOp",
-				   "Applies Rec709 to linear conversion on ImagePrimitive channels."
-		)
+	:	ChannelOp( "Applies Rec709 to linear conversion on ImagePrimitive channels." )
 {
 }
 

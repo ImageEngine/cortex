@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,7 +48,7 @@ FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaArrayDataCon
 
 template<typename F, typename T>
 FromMayaArrayDataConverter<F,T>::FromMayaArrayDataConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaArrayDataConverter", "Converts maya array data types to IECore::TypedVectorData types.", object )
+	:	FromMayaObjectConverter( "Converts maya array data types to IECore::TypedVectorData types.", object )
 {
 }
 

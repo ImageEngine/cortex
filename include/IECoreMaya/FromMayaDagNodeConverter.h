@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,7 +64,7 @@ class FromMayaDagNodeConverter : public FromMayaObjectConverter
 
 	protected :
 
-		FromMayaDagNodeConverter( const std::string &name, const std::string &description, const MDagPath &dagPath );
+		FromMayaDagNodeConverter( const std::string &description, const MDagPath &dagPath );
 
 		/// No need to override this in derived classes - override the function below instead.
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;

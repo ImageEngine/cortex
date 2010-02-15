@@ -68,13 +68,13 @@ FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 FromMayaMeshConverter::FromMayaMeshConverter( const MObject &object )
-	:	FromMayaShapeConverter( "FromMayaShapeConverter", "Converts poly meshes to IECore::MeshPrimitive objects.", object )
+	:	FromMayaShapeConverter( "Converts poly meshes to IECore::MeshPrimitive objects.", object )
 {
 	constructCommon();
 }
 
 FromMayaMeshConverter::FromMayaMeshConverter( const MDagPath &dagPath )
-	:	FromMayaShapeConverter( "FromMayaShapeConverter", "Converts poly meshes to IECore::MeshPrimitive objects.", dagPath )
+	:	FromMayaShapeConverter( "Converts poly meshes to IECore::MeshPrimitive objects.", dagPath )
 {
 	constructCommon();
 }

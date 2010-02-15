@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,7 +57,7 @@ ToMayaMeshConverter::Description ToMayaMeshConverter::g_meshDataDescription( IEC
 ToMayaMeshConverter::Description ToMayaMeshConverter::g_meshDescription( IECore::MeshPrimitive::staticTypeId(), MFn::kMesh );
 
 ToMayaMeshConverter::ToMayaMeshConverter( IECore::ConstObjectPtr object )
-: ToMayaObjectConverter( "ToMayaMeshConverter", "Converts IECore::MeshPrimitive objects to a Maya object.", object)
+: ToMayaObjectConverter( "Converts IECore::MeshPrimitive objects to a Maya object.", object)
 {
 }
 

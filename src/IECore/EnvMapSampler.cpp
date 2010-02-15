@@ -51,7 +51,6 @@ IE_CORE_DEFINERUNTIMETYPED( EnvMapSampler );
 EnvMapSampler::EnvMapSampler()
 	:
 	Op(
-		staticTypeName(),
 		"Samples an environment map to generate lights.",
 		new ObjectParameter( "result",
 			"A CompoundObject containing the light directions and colours.",

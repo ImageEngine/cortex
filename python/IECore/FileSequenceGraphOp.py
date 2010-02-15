@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -43,7 +43,6 @@ class FileSequenceGraphOp( FileSequenceAnalyzerOp ):
 	def __init__( self ):
 
 		FileSequenceAnalyzerOp.__init__( self,
-			name = 'FileSequenceGraphOp',
 			description = 'Creates a bar graph object that represents the file sizes as bar height and file status as bar color.',
 			resultParameter = ObjectParameter(
 								name = 'barGraph',

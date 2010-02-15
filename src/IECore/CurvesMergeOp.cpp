@@ -46,7 +46,7 @@ using namespace std;
 IE_CORE_DEFINERUNTIMETYPED( CurvesMergeOp );
 
 CurvesMergeOp::CurvesMergeOp()
-	:	CurvesPrimitiveOp( staticTypeName(), "Merges one set of curves with another." )
+	:	CurvesPrimitiveOp( "Merges one set of curves with another." )
 {
 	m_curvesParameter = new CurvesPrimitiveParameter(
 		"curves",

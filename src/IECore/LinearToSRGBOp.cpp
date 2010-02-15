@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,9 +47,7 @@ IE_CORE_DEFINERUNTIMETYPED( LinearToSRGBOp );
 ColorSpaceTransformOp::ColorSpaceDescription<LinearToSRGBOp> LinearToSRGBOp::g_colorSpaceDescription( "linear", "srgb" );
 
 LinearToSRGBOp::LinearToSRGBOp()
-	:	ChannelOp( "LinearToSRGB",
-				   "Applies linear to SRGB conversion on ImagePrimitive channels."
-		)
+	:	ChannelOp( "Applies linear to SRGB conversion on ImagePrimitive channels." )
 {
 }
 

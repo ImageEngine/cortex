@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,12 +47,12 @@ IE_CORE_DEFINERUNTIMETYPED( ObjectReader );
 const Reader::ReaderDescription<ObjectReader> ObjectReader::g_readerDescription( "cob" );
 
 ObjectReader::ObjectReader() :
-		Reader( "ObjectReader", "Reads instances of a single Object from a file with a .cob extension" )
+		Reader( "Reads instances of a single Object from a file with a .cob extension" )
 {
 }
 
 ObjectReader::ObjectReader( const std::string &fileName ) :
-		Reader( "ObjectReader", "Reads instances of a single Object from a file with a .cob extension" )
+		Reader( "Reads instances of a single Object from a file with a .cob extension" )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }

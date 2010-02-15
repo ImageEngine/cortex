@@ -56,12 +56,12 @@ IE_CORE_DEFINERUNTIMETYPED( PTCParticleWriter );
 const Writer::WriterDescription<PTCParticleWriter> PTCParticleWriter::m_writerDescription( "3Dbake 3DWbake ptc" );
 
 PTCParticleWriter::PTCParticleWriter( )
-	:	ParticleWriter( "PTCParticleWriter", "Creates files in renderman point cloud format" )
+	:	ParticleWriter( "Creates files in renderman point cloud format" )
 {
 }
 
 PTCParticleWriter::PTCParticleWriter( ObjectPtr object, const std::string &fileName )
-	:	ParticleWriter( "PTCParticleWriter", "Creates files in renderman point cloud format" )
+	:	ParticleWriter( "Creates files in renderman point cloud format" )
 {
 	m_objectParameter->setValue( object );
 	m_fileNameParameter->setTypedValue( fileName );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,8 +54,8 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( ParticleReader );
 
-ParticleReader::ParticleReader( const std::string &name, const std::string &description )
-		:	Reader( name, description, new ObjectParameter( "result", "The loaded object.", new NullObject, PointsPrimitive::staticTypeId() ) )
+ParticleReader::ParticleReader( const std::string &description )
+		:	Reader( description, new ObjectParameter( "result", "The loaded object.", new NullObject, PointsPrimitive::staticTypeId() ) )
 {
 	m_percentageParameter = new FloatParameter(
 		"percentage",

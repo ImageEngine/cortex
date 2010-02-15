@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,12 +65,12 @@ IE_CORE_DEFINERUNTIMETYPED( JPEGImageReader );
 const Reader::ReaderDescription <JPEGImageReader> JPEGImageReader::m_readerDescription ("jpeg jpg");
 
 JPEGImageReader::JPEGImageReader() :
-		ImageReader( "JPEGImageReader", "Reads Joint Photographic Experts Group (JPEG) files" )
+		ImageReader( "Reads Joint Photographic Experts Group (JPEG) files" )
 {
 }
 
 JPEGImageReader::JPEGImageReader(const string & fileName) :
-		ImageReader( "JPEGImageReader", "Reads Joint Photographic Experts Group (JPEG) files" )
+		ImageReader( "Reads Joint Photographic Experts Group (JPEG) files" )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }

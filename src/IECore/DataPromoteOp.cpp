@@ -55,7 +55,6 @@ IE_CORE_DEFINERUNTIMETYPED( DataPromoteOp );
 
 DataPromoteOp::DataPromoteOp()
 		:	Op(
-		        staticTypeName(),
 		        "Promotes scalar data types to compound data types.",
 		        new ObjectParameter(
 		                "result",

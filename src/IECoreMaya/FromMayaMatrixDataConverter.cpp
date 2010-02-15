@@ -47,7 +47,7 @@ FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaMatrixDataCo
 
 template<typename T>
 FromMayaMatrixDataConverter<T>::FromMayaMatrixDataConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaMatrixDataConverter", "Converts maya matrix data to IECore::M44*Data types.", object )
+	:	FromMayaObjectConverter( "Converts maya matrix data to IECore::M44*Data types.", object )
 {
 }
 

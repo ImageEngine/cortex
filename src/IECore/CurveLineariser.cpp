@@ -46,7 +46,7 @@ using namespace Imath;
 IE_CORE_DEFINERUNTIMETYPED( CurveLineariser );
 
 CurveLineariser::CurveLineariser()
-	:	CurvesPrimitiveOp( staticTypeName(), "Converts cubic curves to linear curves." )
+	:	CurvesPrimitiveOp( "Converts cubic curves to linear curves." )
 {
 	FloatParameterPtr verticesPerSegmentParameter = new FloatParameter(
 		"verticesPerSegment",

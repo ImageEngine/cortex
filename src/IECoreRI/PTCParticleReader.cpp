@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,12 +64,12 @@ IE_CORE_DEFINERUNTIMETYPED( PTCParticleReader );
 const Reader::ReaderDescription<PTCParticleReader> PTCParticleReader::m_readerDescription( "3Dbake 3DWbake ptc" );
 
 PTCParticleReader::PTCParticleReader( )
-	:	ParticleReader( "PTCParticleReader", "Reads Renderman point cloud format" ), m_ptcFile( 0 ), m_userDataBuffer( 0 )
+	:	ParticleReader( "Reads Renderman point cloud format" ), m_ptcFile( 0 ), m_userDataBuffer( 0 )
 {
 }
 
 PTCParticleReader::PTCParticleReader( const std::string &fileName )
-	:	ParticleReader( "PTCParticleReader", "Reads Renderman point cloud format" ), m_ptcFile( 0 ), m_userDataBuffer( 0 )
+	:	ParticleReader( "Reads Renderman point cloud format" ), m_ptcFile( 0 ), m_userDataBuffer( 0 )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }

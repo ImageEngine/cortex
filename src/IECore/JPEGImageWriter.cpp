@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,13 +68,13 @@ IE_CORE_DEFINERUNTIMETYPED( JPEGImageWriter )
 const Writer::WriterDescription<JPEGImageWriter> JPEGImageWriter::m_writerDescription("jpeg jpg");
 
 JPEGImageWriter::JPEGImageWriter() :
-		ImageWriter("JPEGImageWriter", "Serializes images to the Joint Photographic Experts Group (JPEG) format")
+		ImageWriter( "Serializes images to the Joint Photographic Experts Group (JPEG) format")
 {
 	constructParameters();
 }
 
 JPEGImageWriter::JPEGImageWriter(ObjectPtr image, const string &fileName) :
-		ImageWriter("JPEGImageWriter", "Serializes images to the Joint Photographic Experts Group (JPEG) format")
+		ImageWriter( "Serializes images to the Joint Photographic Experts Group (JPEG) format")
 {
 	constructParameters();
 	m_objectParameter->setValue( image );

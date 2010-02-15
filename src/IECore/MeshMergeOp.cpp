@@ -46,7 +46,7 @@ using namespace std;
 IE_CORE_DEFINERUNTIMETYPED( MeshMergeOp );
 
 MeshMergeOp::MeshMergeOp()
-	:	MeshPrimitiveOp( staticTypeName(), "Merges one mesh with another." )
+	:	MeshPrimitiveOp( "Merges one mesh with another." )
 {
 	m_meshParameter = new MeshPrimitiveParameter(
 		"mesh",

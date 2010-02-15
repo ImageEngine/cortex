@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,12 +62,12 @@ IE_CORE_DEFINERUNTIMETYPED( BGEOParticleReader );
 const Reader::ReaderDescription<BGEOParticleReader> BGEOParticleReader::m_readerDescription( "bgeo" );
 
 BGEOParticleReader::BGEOParticleReader( )
-	:	ParticleReader( "BGEOParticleReader", "Reads Houdini .bgeo format particle caches" ), m_iStream( 0 )
+	:	ParticleReader( "Reads Houdini .bgeo format particle caches" ), m_iStream( 0 )
 {
 }
 
 BGEOParticleReader::BGEOParticleReader( const std::string &fileName )
-	:	ParticleReader( "BGEOParticleReader", "Reads Houdini .bgeo  format particle caches" ), m_iStream( 0 )
+	:	ParticleReader( "Reads Houdini .bgeo  format particle caches" ), m_iStream( 0 )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }

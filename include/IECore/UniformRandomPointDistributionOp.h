@@ -74,7 +74,7 @@ class UniformRandomPointDistributionOp : public Op
 
 		void constructCommon();
 
-		UniformRandomPointDistributionOp( const std::string &name, const std::string &description );
+		UniformRandomPointDistributionOp( const std::string &description );
 
 		/// Derived classes can override this method and return a number in the range [0,1] defining the
 		/// required density at the given point.

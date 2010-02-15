@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,8 +44,8 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( WarpOp );
 
-WarpOp::WarpOp( const std::string &name, const std::string &description )
-	:	ImagePrimitiveOp( name, description )
+WarpOp::WarpOp( const std::string &description )
+	:	ImagePrimitiveOp( description )
 {
 	IntParameter::PresetsContainer filterPresets;
 	filterPresets.push_back( IntParameter::Preset( "None", WarpOp::None ) );

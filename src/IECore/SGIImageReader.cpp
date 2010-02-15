@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -96,12 +96,12 @@ struct SGIImageReader::Header
 const Reader::ReaderDescription<SGIImageReader> SGIImageReader::m_readerDescription( "sgi rgb rgba bw" );
 
 SGIImageReader::SGIImageReader() :
-		ImageReader( "SGIImageReader", "Reads SGI RGB files." )
+		ImageReader( "Reads SGI RGB files." )
 {
 }
 
 SGIImageReader::SGIImageReader( const string &fileName ) :
-		ImageReader( "SGIImageReader", "Reads SGI RGB  files." )
+		ImageReader( "Reads SGI RGB  files." )
 {
 	m_fileNameParameter->setTypedValue(fileName);
 }

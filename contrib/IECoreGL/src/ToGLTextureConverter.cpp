@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,7 +57,7 @@ using namespace IECoreGL;
 IE_CORE_DEFINERUNTIMETYPED( ToGLTextureConverter );
 
 ToGLTextureConverter::ToGLTextureConverter( IECore::ConstObjectPtr toConvert )
-	:	ToGLConverter( staticTypeName(), "Converts IECore::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId )
+	:	ToGLConverter( "Converts IECore::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<IECore::Object>( toConvert ) );
 }

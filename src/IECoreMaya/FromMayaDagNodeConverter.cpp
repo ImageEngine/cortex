@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,8 +40,8 @@ using namespace IECoreMaya;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaDagNodeConverter );
 
-FromMayaDagNodeConverter::FromMayaDagNodeConverter( const std::string &name, const std::string &description, const MDagPath &dagPath )
-	:	FromMayaObjectConverter( name, description, dagPath.node() ), m_dagPath( dagPath )
+FromMayaDagNodeConverter::FromMayaDagNodeConverter( const std::string &description, const MDagPath &dagPath )
+	:	FromMayaObjectConverter( description, dagPath.node() ), m_dagPath( dagPath )
 {
 }
 

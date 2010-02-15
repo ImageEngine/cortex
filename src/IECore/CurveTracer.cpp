@@ -55,7 +55,6 @@ IE_CORE_DEFINERUNTIMETYPED( CurveTracer );
 CurveTracer::CurveTracer()
 	:
 	Op(
-		staticTypeName(),
 		"Traces curves from an ImagePrimitive prepared previously using the ImageThinner.",
 		new ObjectParameter( "result",
 			"A CurvesPrimitive with curves traced from the input.",

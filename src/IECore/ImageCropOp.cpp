@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,7 +56,6 @@ IE_CORE_DEFINERUNTIMETYPED( ImageCropOp );
 
 ImageCropOp::ImageCropOp()
 	:	ImagePrimitiveOp(
-			staticTypeName(),
 			"Performs cropping over ImagePrimitive objects.\n"
 			"The operation results on an ImagePrimitive with displayWindow equal to the intersection of the given crop box and the original image displayWindow.\n"
 			"If matchDataWindow if On then the dataWindow will match the new displayWindow (new pixels will be filled with zero). Otherwise it will only be intersected against the given crop box."

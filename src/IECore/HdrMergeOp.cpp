@@ -52,7 +52,6 @@ IE_CORE_DEFINERUNTIMETYPED( HdrMergeOp );
 
 HdrMergeOp::HdrMergeOp()
 	:	Op(
-		staticTypeName(),
 		"Merges all the given input images into a single HDR image.",
 		new ObjectParameter(
 			"result",

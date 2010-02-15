@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,8 +48,8 @@ using namespace boost::filesystem;
 
 IE_CORE_DEFINERUNTIMETYPED( Reader );
 
-Reader::Reader(  const std::string &name, const std::string &description, ParameterPtr resultParameter )
-	: 	Op( name, description, resultParameter ? resultParameter : new Parameter( "result", "The loaded object.", new NullObject ) )
+Reader::Reader( const std::string &description, ParameterPtr resultParameter )
+	: 	Op( description, resultParameter ? resultParameter : new Parameter( "result", "The loaded object.", new NullObject ) )
 {
 	m_fileNameParameter = new FileNameParameter( "fileName", "The name of the file to be loaded", "", "", false, PathParameter::MustExist );
 	parameters()->addParameter( m_fileNameParameter );

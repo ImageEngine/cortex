@@ -55,13 +55,13 @@ IE_CORE_DEFINERUNTIMETYPED( FromMayaFluidConverter );
 FromMayaShapeConverter::Description<FromMayaFluidConverter> FromMayaFluidConverter::m_description( MFn::kFluid, PointsPrimitive::staticTypeId() );
 
 FromMayaFluidConverter::FromMayaFluidConverter( const MObject &object )
-	:	FromMayaShapeConverter( staticTypeName(), "Converts maya fluid data to IECore::PointsPrimitive Object", object )
+	:	FromMayaShapeConverter( "Converts maya fluid data to IECore::PointsPrimitive Object", object )
 {
 	constructCommon();
 }
 
 FromMayaFluidConverter::FromMayaFluidConverter( const MDagPath &dagPath )
-	:	FromMayaShapeConverter( staticTypeName(), "Converts maya fluid data to IECore::PointsPrimitive Object", dagPath )
+	:	FromMayaShapeConverter( "Converts maya fluid data to IECore::PointsPrimitive Object", dagPath )
 {
 	constructCommon();
 }

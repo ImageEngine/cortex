@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -74,13 +74,13 @@ IE_CORE_DEFINERUNTIMETYPED( CINImageReader );
 const Reader::ReaderDescription<CINImageReader> CINImageReader::m_readerDescription( "cin" );
 
 CINImageReader::CINImageReader() :
-		ImageReader( "CINImageReader", "Reads Kodak Cineon (CIN) files." ),
+		ImageReader( "Reads Kodak Cineon (CIN) files." ),
 		m_header( 0 )
 {
 }
 
 CINImageReader::CINImageReader( const string &fileName ) :
-		ImageReader( "CINImageReader", "Reads Kodak Cineon (CIN) files." ),
+		ImageReader( "Reads Kodak Cineon (CIN) files." ),
 		m_header( 0 )
 {
 	m_fileNameParameter->setTypedValue(fileName);

@@ -57,13 +57,13 @@ static const IECore::TypeId toTypes[] = { IECore::BlindDataHolderTypeId, IECore:
 IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_description( fromTypes, toTypes );
 
 FromMayaCurveConverter::FromMayaCurveConverter( const MObject &object )
-	:	FromMayaShapeConverter( staticTypeName(), "Converts maya curve shapes into IECore::CurvesPrimitive objects.", object )
+	:	FromMayaShapeConverter( "Converts maya curve shapes into IECore::CurvesPrimitive objects.", object )
 {
 	constructCommon();
 }
 
 FromMayaCurveConverter::FromMayaCurveConverter( const MDagPath &dagPath )
-	:	FromMayaShapeConverter( staticTypeName(), "Converts maya curve shapes into IECore::CurvesPrimitive objects.", dagPath )
+	:	FromMayaShapeConverter( "Converts maya curve shapes into IECore::CurvesPrimitive objects.", dagPath )
 {
 	constructCommon();
 }

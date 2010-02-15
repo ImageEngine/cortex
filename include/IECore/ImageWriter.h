@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,7 +65,7 @@ class ImageWriter : public Writer
 
 	protected:
 
-		ImageWriter( const std::string &name, const std::string &description );
+		ImageWriter( const std::string &description );
 
 		/// Return the image object to write
 		ConstImagePrimitivePtr getImage() const;

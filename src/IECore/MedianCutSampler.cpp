@@ -52,7 +52,6 @@ IE_CORE_DEFINERUNTIMETYPED( MedianCutSampler );
 MedianCutSampler::MedianCutSampler()
 	:
 	Op(
-		staticTypeName(),
 		"Performs importance sampling of an image.",
 		new ObjectParameter( "result",
 			"A CompoundObject containing a vector of areas which cover the image, and all of which "

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,7 +54,7 @@ class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPri
 
 		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOpWrap<T> )
 
-		TypedPrimitiveOpWrap( PyObject *self, const std::string name, const std::string description ) : TypedPrimitiveOp<T>( name, description ), Wrapper<TypedPrimitiveOpWrap<T> >( self, this )
+		TypedPrimitiveOpWrap( PyObject *self, const std::string &description ) : TypedPrimitiveOp<T>( description ), Wrapper<TypedPrimitiveOpWrap<T> >( self, this )
 		{
 		}
 
@@ -69,7 +69,7 @@ template<typename T>
 static void bindTypedPrimitiveOp()
 {
 	RunTimeTypedClass<TypedPrimitiveOp<T>, typename TypedPrimitiveOpWrap<T>::Ptr>()
-		.def( init< const std::string, const std::string>() )
+		.def( init<const std::string &>() )
 	;
 }
 

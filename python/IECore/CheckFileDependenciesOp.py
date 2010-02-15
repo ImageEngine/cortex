@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ class CheckFileDependenciesOp( Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "CheckFileDependenciesOp", "Checks that the dependencies of a file exist.",
+		Op.__init__( self, "Checks that the dependencies of a file exist.",
 			Parameter(
 				name = "result",
 				description = "A list of missing files and file sequences.",

@@ -44,7 +44,7 @@ using namespace Imath;
 IE_CORE_DEFINERUNTIMETYPED( HitMissTransform );
 
 HitMissTransform::HitMissTransform()
-	:	ChannelOp( staticTypeName(), "Performs a hit and miss transformation of an image." )
+	:	ChannelOp( "Performs a hit and miss transformation of an image." )
 {
 	FloatParameterPtr thresholdParameter = new FloatParameter(
 		"threshold",

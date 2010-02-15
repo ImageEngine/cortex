@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,7 +60,6 @@ IE_CORE_DEFINERUNTIMETYPED( CurveExtrudeOp );
 
 CurveExtrudeOp::CurveExtrudeOp()
 	:	Op(
-		staticTypeName(),
 		"The CurveExtrudeOp creates a group of PatchMesh geometries by lofting a circle along each given CurvesPrimitive.",
 		new GroupParameter(
 			"result",

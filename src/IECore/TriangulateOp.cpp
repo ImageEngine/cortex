@@ -44,7 +44,7 @@ using namespace IECore;
 
 IE_CORE_DEFINERUNTIMETYPED( TriangulateOp );
 
-TriangulateOp::TriangulateOp() : MeshPrimitiveOp( staticTypeName(), "A MeshPrimitiveOp to triangulate a mesh" )
+TriangulateOp::TriangulateOp() : MeshPrimitiveOp( "A MeshPrimitiveOp to triangulate a mesh" )
 {
 	m_toleranceParameter = new FloatParameter(
 		"tolerance",

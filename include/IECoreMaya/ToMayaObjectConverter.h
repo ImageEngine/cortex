@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,7 +72,7 @@ class ToMayaObjectConverter : public ToMayaConverter
 
 	protected :
 
-		ToMayaObjectConverter( const std::string &name, const std::string &description, IECore::ConstObjectPtr object );
+		ToMayaObjectConverter( const std::string &description, IECore::ConstObjectPtr object );
 
 		/// Must be implemented by subclasses. Is guaranteed only to be called when object()
 		/// returns a valid IECore::Object of a type specified when the converter was registered.

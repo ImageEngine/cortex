@@ -47,7 +47,7 @@ using namespace Imath;
 IE_CORE_DEFINERUNTIMETYPED( SplineToImage );
 
 SplineToImage::SplineToImage()
-	:	Op( staticTypeName(), "Creates ImagePrimitives from SplineData", new IECore::ObjectParameter( "result", "An image of the spline.", new IECore::NullObject(), ImagePrimitiveTypeId ) )
+	:	Op( "Creates ImagePrimitives from SplineData", new IECore::ObjectParameter( "result", "An image of the spline.", new IECore::NullObject(), ImagePrimitiveTypeId ) )
 {
 
 	static TypeId splineTypes[] = { SplineffDataTypeId, SplinefColor3fDataTypeId, InvalidTypeId };

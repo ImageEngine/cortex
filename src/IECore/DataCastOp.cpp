@@ -55,7 +55,6 @@ IE_CORE_DEFINERUNTIMETYPED( DataCastOp );
 
 DataCastOp::DataCastOp()
 	:	Op(
-		staticTypeName(),
 		"Performs cast conversion on Data types.",
 		new ObjectParameter(
 			"result",

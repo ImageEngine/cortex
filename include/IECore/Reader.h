@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,12 +56,6 @@ class Reader : public Op
 
 		IE_CORE_DECLARERUNTIMETYPED( Reader, Op	 );
 
-		/// If resultParameter is not specified then creates a resultParameter
-		/// which is a simple Parameter instance. If a derived class provides
-		/// more concrete constraints on the type of the result it should
-		/// pass an appropriate resultParameter in its initialiser.
-		Reader( const std::string &name, const std::string &description, ParameterPtr resultParameter = 0 );
-
 		/// Returns the name of the file this Reader
 		/// is set to read. Actually calls parameters()->parameter<FileNameParameter>( "fileName" )->getTypedValue();
 		/// and therefore can potentially throw an Exception if the fileName is invalid.
@@ -93,6 +87,12 @@ class Reader : public Op
 		static void supportedExtensions( TypeId typeId, std::vector<std::string> &extensions );
 
 	protected :
+
+		/// If resultParameter is not specified then creates a resultParameter
+		/// which is a simple Parameter instance. If a derived class provides
+		/// more concrete constraints on the type of the result it should
+		/// pass an appropriate resultParameter in its initialiser.
+		Reader( const std::string &description, ParameterPtr resultParameter = 0 );
 
 		/// Definition of a function which can create a Reader when
 		/// given a fileName.

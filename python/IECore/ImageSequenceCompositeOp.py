@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -44,7 +44,6 @@ class ImageSequenceCompositeOp( SequenceMergeOp ) :
 
 		SequenceMergeOp.__init__(
 			self,
-			"ImageSequenceCompositeOp",
 			"The ImageSequenceCompositeOp does a simple A-over-B composite of two input sequences of image files",
 			extensions = [ "tif", "tiff", "exr", "cin", "dpx", "jpg" ]
 		)

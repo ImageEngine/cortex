@@ -53,13 +53,13 @@ IE_CORE_DEFINERUNTIMETYPED( ObjectWriter )
 const Writer::WriterDescription<ObjectWriter> ObjectWriter::g_writerDescription( "cob" );
 
 ObjectWriter::ObjectWriter()
-	:	Writer( "ObjectWriter", "Writes instances of a single Object to a file with a .cob extension", ObjectTypeId )
+	:	Writer( "Writes instances of a single Object to a file with a .cob extension", ObjectTypeId )
 {
 	constructParameters();
 }
 
 ObjectWriter::ObjectWriter( ObjectPtr object, const std::string &fileName )
-	:	Writer( "ObjectWriter", "Writes instances of a single Object to a file with a .cob extension", ObjectTypeId )
+	:	Writer( "Writes instances of a single Object to a file with a .cob extension", ObjectTypeId )
 {
 	constructParameters();
 	m_objectParameter->setValue( object );

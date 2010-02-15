@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -39,7 +39,6 @@ class multiply( Op ) :
 	def __init__( self ) :
 
 		Op.__init__( self,
-			"multiply",
 			"multiplies two numbers together - in a new and improved version 2!!.",
 			IntParameter(
 				name = "result",

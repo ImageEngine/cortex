@@ -44,7 +44,7 @@ using namespace IECore;
 FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaObjectDataConverter> FromMayaObjectDataConverter::g_description( MFn::kPluginData, Object::staticTypeId() );
 
 FromMayaObjectDataConverter::FromMayaObjectDataConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaObjectDataConverter", "Converts IECoreMaya::ObjectData to an IECore::Object.", object )
+	:	FromMayaObjectConverter( "Converts IECoreMaya::ObjectData to an IECore::Object.", object )
 {
 }
 

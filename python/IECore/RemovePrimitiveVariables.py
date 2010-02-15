@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -39,7 +39,7 @@ class RemovePrimitiveVariables( PrimitiveOp ) :
 
 	def __init__( self ) :
 
-		PrimitiveOp.__init__( self, "RemovePrimitiveVariables", "Removes variables from primitives" )
+		PrimitiveOp.__init__( self, "Removes variables from primitives" )
 
 		self.parameters().addParameters(
 			[

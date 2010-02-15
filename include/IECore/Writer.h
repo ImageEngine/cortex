@@ -85,8 +85,8 @@ class Writer : public Op
 
 	protected :
 
-		Writer( const std::string &name, const std::string &description, TypeId writableType );
-		Writer( const std::string &name, const std::string &description, const ObjectParameter::TypeIdSet &writableTypes );
+		Writer( const std::string &description, TypeId writableType );
+		Writer( const std::string &description, const ObjectParameter::TypeIdSet &writableTypes );
 
 		/// Implemented to call doWrite(), so derived classes need only implement that.
 		ObjectPtr doOperation( ConstCompoundObjectPtr operands );

@@ -49,7 +49,6 @@ IE_CORE_DEFINERUNTIMETYPED( UVDistortOp );
 
 UVDistortOp::UVDistortOp()
 	:	WarpOp(
-			"UVDistortOp",
 			"Distorts an ImagePrimitive by using a UV map as reference. The UV map must have the same pixel aspect then the image to be distorted. "
 			"The resulting image will have the same data window as the reference UV map."
 		), m_u(0), m_v(0)

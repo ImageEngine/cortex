@@ -47,7 +47,7 @@ class ChannelOp : public ImagePrimitiveOp
 {
 	public:
 
-		ChannelOp( const std::string &name, const std::string &description );
+		ChannelOp( const std::string &description );
 		virtual ~ChannelOp();
 
 		IE_CORE_DECLARERUNTIMETYPED( ChannelOp, ImagePrimitiveOp );

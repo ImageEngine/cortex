@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ class SequenceCatOp( Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "SequenceCatOp", "Concatenates file sequences to stdout.",
+		Op.__init__( self, "Concatenates file sequences to stdout.",
 			IntParameter(
 				name = "result",
 				description = "The number of files .",

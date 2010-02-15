@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,12 +63,12 @@ IE_CORE_DEFINERUNTIMETYPED( DPXImageWriter )
 const Writer::WriterDescription<DPXImageWriter> DPXImageWriter::m_writerDescription("dpx");
 
 DPXImageWriter::DPXImageWriter() :
-		ImageWriter("DPXImageWriter", "Serializes images to Digital Picture eXchange 10-bit log image format")
+		ImageWriter( "Serializes images to Digital Picture eXchange 10-bit log image format")
 {
 }
 
 DPXImageWriter::DPXImageWriter( ObjectPtr image, const string &fileName ) :
-		ImageWriter("DPXImageWriter", "Serializes images to Digital Picture eXchange 10-bit log image format")
+		ImageWriter( "Serializes images to Digital Picture eXchange 10-bit log image format")
 {
 	m_objectParameter->setValue( image );
 	m_fileNameParameter->setTypedValue( fileName );

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ class ClassLsOp( Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "ClassLsOp", "Lists installed classes which can be loaded with IECore.ClassLoader.",
+		Op.__init__( self, "Lists installed classes which can be loaded with IECore.ClassLoader.",
 			Parameter(
 				name = "result",
 				description = "A list of classes.",

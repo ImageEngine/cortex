@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,13 +58,13 @@ IE_CORE_DEFINERUNTIMETYPED( YUVImageWriter )
 const Writer::WriterDescription<YUVImageWriter> YUVImageWriter::m_writerDescription("yuv");
 
 YUVImageWriter::YUVImageWriter() :
-		ImageWriter("YUVImageWriter", "Serializes images to the Joint Photographic Experts Group (JPEG) format")
+		ImageWriter( "Serializes images to the Joint Photographic Experts Group (JPEG) format")
 {
 	constructParameters();
 }
 
 YUVImageWriter::YUVImageWriter(ObjectPtr image, const string &fileName) :
-		ImageWriter("YUVImageWriter", "Serializes images to the YUV (YCbCr)")
+		ImageWriter( "Serializes images to the YUV (YCbCr)")
 {
 	constructParameters();
 	m_objectParameter->setValue( image );

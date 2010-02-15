@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,9 +41,9 @@ from IECore import *
 # It checks file size changes, missing files and incomplete images.
 class FileSequenceAnalyzerOp( Op ):
 
-	def __init__( self, name, description, resultParameter, extensions = [] ):
+	def __init__( self, description, resultParameter, extensions = [] ):
 
-		Op.__init__( self, name, description, resultParameter )
+		Op.__init__( self, description, resultParameter )
 
 		self.parameters().addParameters(
 			[

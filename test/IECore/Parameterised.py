@@ -40,7 +40,7 @@ class derived( Parameterised ):
 
 	def __init__( self ):
 		self.objectAttribute1 = 1
-		Parameterised.__init__( self, "name", "description" )
+		Parameterised.__init__( self, "description" )
 		a = self.parameters()
 		self.objectAttribute2 = 2
 		a.addParameter( IntParameter( "number", "number parameter", 0 ) )
@@ -53,7 +53,7 @@ class TestParameterised( unittest.TestCase ) :
 
 	def testUserData( self ) :
 
-		a = Parameterised( "name", "description" )
+		a = Parameterised( "description" )
 		self.assertEqual( a.userData(), CompoundObject() )
 
 	def testSmartAssignment( self ):

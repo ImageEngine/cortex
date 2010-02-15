@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,12 +58,12 @@ IE_CORE_DEFINERUNTIMETYPED( PDCParticleReader );
 const Reader::ReaderDescription<PDCParticleReader> PDCParticleReader::m_readerDescription( "pdc" );
 
 PDCParticleReader::PDCParticleReader( )
-	:	ParticleReader( "PDCParticleReader", "Reads Maya .pdc format particle caches" ), m_iStream( 0 ), m_idAttribute( 0 )
+	:	ParticleReader( "Reads Maya .pdc format particle caches" ), m_iStream( 0 ), m_idAttribute( 0 )
 {
 }
 
 PDCParticleReader::PDCParticleReader( const std::string &fileName )
-	:	ParticleReader( "PDCParticleReader", "Reads Maya .pdc format particle caches" ), m_iStream( 0 ), m_idAttribute( 0 )
+	:	ParticleReader( "Reads Maya .pdc format particle caches" ), m_iStream( 0 ), m_idAttribute( 0 )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }

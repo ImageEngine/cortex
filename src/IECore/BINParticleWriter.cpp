@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,13 +54,13 @@ IE_CORE_DEFINERUNTIMETYPED( BINParticleWriter )
 const Writer::WriterDescription<BINParticleWriter> BINParticleWriter::m_writerDescription( "bin" );
 
 BINParticleWriter::BINParticleWriter( )
-		:	ParticleWriter( "BINParticleWriter", "Creates particle files in Realflow binary format" )
+		:	ParticleWriter( "Creates particle files in Realflow binary format" )
 {
 	constructParameters();
 }
 
 BINParticleWriter::BINParticleWriter( ObjectPtr object, const std::string &fileName )
-		:	ParticleWriter( "BINParticleWriter", "Creates particle files in Realflow binary format" )
+		:	ParticleWriter( "Creates particle files in Realflow binary format" )
 {
 
 	constructParameters();

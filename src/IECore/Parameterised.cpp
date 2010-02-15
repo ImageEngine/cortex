@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,23 +40,18 @@ using namespace IECore;
 
 IE_CORE_DEFINERUNTIMETYPED( Parameterised );
 
-Parameterised::Parameterised(  const std::string &name, const std::string &description )
-	:	m_name( name ), m_description( description ), m_parameters( new CompoundParameter ), m_userData( new CompoundObject )
+Parameterised::Parameterised( const std::string &description )
+	:	m_description( description ), m_parameters( new CompoundParameter ), m_userData( new CompoundObject )
 {
 }
 
-Parameterised::Parameterised(  const std::string &name, const std::string &description, CompoundParameterPtr compoundParameter )
-	:	m_name( name ), m_description( description ), m_parameters( compoundParameter ), m_userData( new CompoundObject )
+Parameterised::Parameterised( const std::string &description, CompoundParameterPtr compoundParameter )
+	:	m_description( description ), m_parameters( compoundParameter ), m_userData( new CompoundObject )
 {
 }
 
 Parameterised::~Parameterised()
 {
-}
-
-const std::string &Parameterised::name() const
-{
-	return m_name;
 }
 
 const std::string &Parameterised::description() const

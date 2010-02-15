@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -45,7 +45,7 @@ class CheckImagesOp( FileSequenceAnalyzerOp ) :
 
 	def __init__( self ) :
 
-		FileSequenceAnalyzerOp.__init__( self, "CheckImagesOp",
+		FileSequenceAnalyzerOp.__init__( self,
 """This Op checks an image file sequence for corrupted and missing files. It also warns of abrupt file size changes.
 The Op will raise an error if there's any missing or corrupt file.
 Otherwise it will return the number of suspicious frames (strange file sizes).""",

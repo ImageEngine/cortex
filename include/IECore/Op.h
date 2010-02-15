@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,11 +58,11 @@ class Op : public Parameterised
 		/// initialiser. Also, every non-abstract derived class from Op should
 		/// provide a default constructor so that it's possible to extract the
 		/// parameters from an unknown Op (method used in ClassLoader).
-		Op( const std::string &name, const std::string &description, ParameterPtr resultParameter );
+		Op( const std::string &description, ParameterPtr resultParameter );
 
 		/// Alternative constructor for replacing the internal CompoundParameter object by another
 		/// derived class from CompoundParameter.
-		Op( const std::string &name, const std::string &description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter );
+		Op( const std::string &description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter );
 
 		virtual ~Op();
 

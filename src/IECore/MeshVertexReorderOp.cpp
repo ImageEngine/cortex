@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,7 +43,7 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( MeshVertexReorderOp );
 
-MeshVertexReorderOp::MeshVertexReorderOp() : MeshPrimitiveOp( staticTypeName(), "Calculates vertex normals for a mesh." )
+MeshVertexReorderOp::MeshVertexReorderOp() : MeshPrimitiveOp( "Calculates vertex normals for a mesh." )
 {
 	m_startingVerticesParameter = new V3iParameter(
 	        "startingVertices",

@@ -48,8 +48,8 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( ParticleWriter )
 
-ParticleWriter::ParticleWriter( const std::string &name, const std::string &description )
-	:	Writer( name, description, PointsPrimitiveTypeId )
+ParticleWriter::ParticleWriter( const std::string &description )
+	:	Writer( description, PointsPrimitiveTypeId )
 {
 	m_attributesParameter = new StringVectorParameter(
 		"attributes",

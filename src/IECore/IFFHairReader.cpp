@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,7 +60,7 @@ IE_CORE_DEFINERUNTIMETYPED( IFFHairReader );
 const Reader::ReaderDescription<IFFHairReader> IFFHairReader::g_readerDescription( "mchp" );
 
 IFFHairReader::IFFHairReader( )
-	:	Reader( "IFFHairReader", "Reads Maya .mc format nCaches", new ObjectParameter( "result", "The loaded object.", new NullObject, CurvesPrimitive::staticTypeId() ) ),
+	:	Reader( "Reads Maya .mc format nCaches", new ObjectParameter( "result", "The loaded object.", new NullObject, CurvesPrimitive::staticTypeId() ) ),
 		m_iffFile( 0 ), m_frames( new IntVectorData )
 {
 	m_frameParameter = new IntParameter( "frameIndex", "Index of the desired frame to be loaded", 0 );
@@ -83,7 +83,7 @@ IFFHairReader::IFFHairReader( )
 }
 
 IFFHairReader::IFFHairReader( const std::string &fileName )
-	:	Reader( "IFFHairReader", "Reads Maya .mc format nCaches", new ObjectParameter( "result", "The loaded object.", new NullObject, CurvesPrimitive::staticTypeId() ) ),
+	:	Reader( "Reads Maya .mc format nCaches", new ObjectParameter( "result", "The loaded object.", new NullObject, CurvesPrimitive::staticTypeId() ) ),
 		m_iffFile( 0 ), m_frames( new IntVectorData )
 {
 	m_fileNameParameter->setTypedValue( fileName );

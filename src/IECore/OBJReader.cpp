@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,11 +72,11 @@ typedef boost::spirit::rule<boost::spirit::phrase_scanner_t> srule;
 
 const Reader::ReaderDescription<OBJReader> OBJReader::m_readerDescription("obj");
 
-OBJReader::OBJReader( const string &name )
-	: Reader(name, "Alias Wavefront OBJ 3D data reader", new ObjectParameter("result", "the loaded 3D object", new
+OBJReader::OBJReader( const std::string &fileName )
+	: Reader( "Alias Wavefront OBJ 3D data reader", new ObjectParameter("result", "the loaded 3D object", new
 	NullObject, MeshPrimitive::staticTypeId()))
 {
-	m_fileNameParameter->setTypedValue(name);
+	m_fileNameParameter->setTypedValue( fileName );
 }
 
 bool OBJReader::canRead( const string &fileName )

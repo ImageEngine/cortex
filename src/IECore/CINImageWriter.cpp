@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,12 +62,12 @@ IE_CORE_DEFINERUNTIMETYPED( CINImageWriter )
 const Writer::WriterDescription<CINImageWriter> CINImageWriter::m_writerDescription("cin");
 
 CINImageWriter::CINImageWriter() :
-		ImageWriter("CINImageWriter", "Serializes images to the Kodak Cineon 10-bit log image format")
+		ImageWriter( "Serializes images to the Kodak Cineon 10-bit log image format")
 {
 }
 
 CINImageWriter::CINImageWriter( ObjectPtr image, const string &fileName ) :
-		ImageWriter("CINImageWriter", "Serializes images to the Kodak Cineon 10-bit log image format")
+		ImageWriter( "Serializes images to the Kodak Cineon 10-bit log image format")
 {
 	m_objectParameter->setValue( image );
 	m_fileNameParameter->setTypedValue( fileName );

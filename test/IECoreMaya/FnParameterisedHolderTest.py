@@ -45,7 +45,7 @@ class TestOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		IECore.Op.__init__( self, "TestOp", "Tests stuff",
+		IECore.Op.__init__( self, "Tests stuff",
 			IECore.IntParameter(
 				name = "result",
 				description = "",
@@ -409,7 +409,7 @@ class FnParameterisedHolderTest( unittest.TestCase ) :
 
 	def testSetNodeValueUndo( self ) :
 
-		p = IECore.Parameterised( "", "" )
+		p = IECore.Parameterised( "" )
 		p.parameters().addParameters(
 			[
 				IECore.IntParameter(

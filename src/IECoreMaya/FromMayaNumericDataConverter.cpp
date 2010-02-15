@@ -59,7 +59,7 @@ FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaNumericDataC
 
 
 FromMayaNumericDataConverter::FromMayaNumericDataConverter( const MObject &object )
-	:	FromMayaObjectConverter( "FromMayaNumericDataConverter", "Converts types compatible with MFnNumericData.", object )
+	:	FromMayaObjectConverter( "Converts types compatible with MFnNumericData.", object )
 {
 }
 

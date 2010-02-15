@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,7 +51,7 @@ class ColorTransformOp : public PrimitiveOp
 
 		IE_CORE_DECLARERUNTIMETYPED( ColorTransformOp, PrimitiveOp );
 
-		ColorTransformOp( const std::string &name, const std::string &description );
+		ColorTransformOp( const std::string &description );
 		virtual ~ColorTransformOp();
 
 		StringParameterPtr colorPrimVarParameter();

@@ -66,7 +66,6 @@ IE_CORE_DEFINERUNTIMETYPED( ParticleMeshOp );
 
 ParticleMeshOp::ParticleMeshOp()
 	:	Op(
-		staticTypeName(),
 		"Calculates mesh from an isosurface defined by a set of points.",
 		new ObjectParameter(
 			"result",

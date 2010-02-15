@@ -49,8 +49,8 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( ImageReader );
 
-ImageReader::ImageReader( const std::string &name, const std::string &description ) :
-		Reader( name, description, new ObjectParameter( "result", "The loaded object", new NullObject, ImagePrimitive::staticTypeId() ) )
+ImageReader::ImageReader( const std::string &description ) :
+		Reader( description, new ObjectParameter( "result", "The loaded object", new NullObject, ImagePrimitive::staticTypeId() ) )
 {
 	m_dataWindowParameter = new Box2iParameter(
 		"dataWindow",

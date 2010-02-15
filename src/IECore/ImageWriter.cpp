@@ -46,8 +46,8 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( ImageWriter )
 
-ImageWriter::ImageWriter( const std::string &name, const std::string &description ) :
-		Writer(name, description, ImagePrimitiveTypeId)
+ImageWriter::ImageWriter( const std::string &description ) :
+		Writer( description, ImagePrimitiveTypeId)
 {
 	m_channelsParameter = new StringVectorParameter("channels", "The list of channels to write.  No list causes all channels to be written." );
 	parameters()->addParameter( m_channelsParameter );

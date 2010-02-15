@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ class LsHeaderOp( Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "LsHeaderOp", "Lists the contents of file headers using reader classes such as AttributeCache, HierarchicalCache and Reader.",
+		Op.__init__( self, "Lists the contents of file headers using reader classes such as AttributeCache, HierarchicalCache and Reader.",
 			Parameter(
 				name = "result",
 				description = "A list of meta-data contained in the file header.",

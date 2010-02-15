@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,13 +40,12 @@ from IECore import *
 # The SequenceMergeOp is a base class for Ops which perform merging of two file sequences into a single file sequence.
 class SequenceMergeOp( Op ) :
 
-	def __init__( self, name, description, extensions = [] ) :
+	def __init__( self, description, extensions = [] ) :
 
 		assert( type( extensions ) is list )
 
 		Op.__init__(
 			self,
-			name,
 			description,
 			StringVectorParameter(
 				name = "result",

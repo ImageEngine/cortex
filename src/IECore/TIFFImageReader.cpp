@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,13 +67,13 @@ IE_CORE_DEFINERUNTIMETYPED( TIFFImageReader );
 const Reader::ReaderDescription<TIFFImageReader> TIFFImageReader::m_readerDescription("tiff tif tdl");
 
 TIFFImageReader::TIFFImageReader()
-		:	ImageReader("TIFFImageReader", "Reads Tagged Image File Format (TIFF) files" ),
+		:	ImageReader( "Reads Tagged Image File Format (TIFF) files" ),
 		m_tiffImage( 0 ), m_currentDirectoryIndex( 0 ), m_numDirectories( 1 ), m_haveDirectory( false )
 {
 }
 
 TIFFImageReader::TIFFImageReader( const string &fileName )
-		:	ImageReader("TIFFImageReader", "Reads Tagged Image File Format (TIFF) files" ),
+		:	ImageReader( "Reads Tagged Image File Format (TIFF) files" ),
 		m_tiffImage( 0 ), m_currentDirectoryIndex( 0 ), m_numDirectories( 1 ), m_haveDirectory( false )
 {
 	m_fileNameParameter->setTypedValue(fileName);

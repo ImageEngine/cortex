@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,7 +58,7 @@ using std::vector;
 IE_CORE_DEFINERUNTIMETYPED( ToMayaImageConverter );
 
 ToMayaImageConverter::ToMayaImageConverter( ConstObjectPtr object )
-	:	ToMayaConverter( "ToMayaImageConverter", "Converts image types.", IECore::ImagePrimitiveTypeId )
+	:	ToMayaConverter( "Converts image types.", IECore::ImagePrimitiveTypeId )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<Object>( object ) );
 

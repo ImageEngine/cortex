@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,7 +75,7 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 		IECore::ConstStringParameterPtr primVarAttrPrefixParameter() const;
 
 		//! @name Factory
-		/// A unctions allow the creation of a specific converter subclass appropriate
+		/// These functions allow the creation of a specific converter subclass appropriate
 		/// to a particular MDagPath instance.
 		/////////////////////////////////////////////////////////////////////////////////
 		//@{
@@ -90,10 +90,10 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 
 	protected :
 
-		FromMayaShapeConverter( const std::string &name, const std::string &description, const MObject &object );
+		FromMayaShapeConverter( const std::string &description, const MObject &object );
 		/// This form is necessary if people want to get the shape in world space - world space queries only ever
 		/// work with an MDagPath.
-		FromMayaShapeConverter( const std::string &name, const std::string &description, const MDagPath &dagPath );
+		FromMayaShapeConverter( const std::string &description, const MDagPath &dagPath );
 
 		/// Implemented to call doPrimitiveConversion(), and then add on primitive variables specified as dynamic attributes
 		/// on the object begin converted. Derived classes need not reimplement this function, but should instead

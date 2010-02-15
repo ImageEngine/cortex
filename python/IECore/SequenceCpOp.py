@@ -38,7 +38,7 @@ class SequenceCpOp( Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "SequenceCpOp", "Copies file sequences.",
+		Op.__init__( self, "Copies file sequences.",
 			FileSequenceParameter(
 				name = "result",
 				description = "The new file sequence.",

@@ -38,7 +38,7 @@ class SequenceConvertOp( Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "SequenceConvertOp",
+		Op.__init__( self,
 			"This Op converts file sequences from one format to another. "
 			"It supports all input formats for which a reader is available "
 			"(" + " ".join( Reader.supportedExtensions() ) + ") and all output "

@@ -38,7 +38,7 @@ class SequenceMvOp( Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "SequenceMvOp", "Moves file sequences.",
+		Op.__init__( self, "Moves file sequences.",
 			FileSequenceParameter(
 				name = "result",
 				description = "The new file sequence.",

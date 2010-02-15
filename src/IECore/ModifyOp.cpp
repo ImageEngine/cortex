@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,8 +40,8 @@ using namespace IECore;
 
 IE_CORE_DEFINERUNTIMETYPED( ModifyOp );
 
-ModifyOp::ModifyOp( const std::string &name, const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter )
-	:	Op( name, description, resultParameter )
+ModifyOp::ModifyOp( const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter )
+	:	Op( description, resultParameter )
 {
 	parameters()->addParameter( inputParameter );
 	m_inputParameter = inputParameter;

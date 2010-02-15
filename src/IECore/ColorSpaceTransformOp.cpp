@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,9 +55,7 @@ using namespace boost;
 IE_CORE_DEFINERUNTIMETYPED( ColorSpaceTransformOp );
 
 ColorSpaceTransformOp::ColorSpaceTransformOp()
-	:	ImagePrimitiveOp( "ColorSpaceTransformOp",
-				   "Converts channels from one named colorspace to another. Additional colorspaces can be registered at runtime."
-		)
+	:	ImagePrimitiveOp( "Converts channels from one named colorspace to another. Additional colorspaces can be registered at runtime." )
 {
 	m_inputColorSpaceParameter = new StringParameter(
 		"inputColorSpace",
