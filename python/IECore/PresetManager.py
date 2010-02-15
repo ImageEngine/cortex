@@ -33,23 +33,28 @@
 ##########################################################################
 
 import os
-from IECore import warning, error, Writer, CompoundParameter
+from IECore import warning, error, Writer, CompoundParameter, ClassLoader, SearchPath
 
 ## This class manages loading and saving named preset values for Parameterised objects.
-# It uses a given class loader to locate the presets. The presets must be classes which the
+# It uses a given SearchPath to locate the presets. The presets must be classes which the
 # __call__ method is implemented and the only parameter passed is the Parameterised object to be modified.
 class PresetManager :
 
 	## Creates a PresetManager which will load parameter presets using the given classLoader.
 	# \param useClassPath If true, then it uses the 'path' member added to the Parameterised objects 
 	# when loaded by ClassLoader. Otherwise it will only use the name of the Parameterised object.
-	def __init__( self, classLoader, useClassPath = True ) :
+	def __init__( self, searchPaths, useClassPath = True ) :
 		self.__useClassPath = useClassPath
-		self.__classLoader = classLoader
+		self.__searchPaths = searchPaths
+		self.__classLoader = ClassLoader( searchPaths )
 
-	## Returns the classLoader object used internally.
-	def classLoader( self ):
-		return self.__classLoader
+	## Returns a copy of the SearchPath object given on the constructor.
+	def searchPaths( self ):
+		return SearchPath( ":".join( self.__searchPaths.paths ), ":" )
+
+	## Refreshes the internal cache for the preset loader.
+	def refresh( self ) :
+		self.__classLoader.refresh()
 
 	## Returns the preset names available for a given parameterised object.
 	def presets( self, parameterised ):
@@ -60,7 +65,7 @@ class PresetManager :
 		if self.__useClassPath :
 			return "%s/%s" % ( parameterised.path, name )
 		else:
-			return "%s/%s" % ( parameterised.name, name )
+			return "%s/%s" % ( parameterised.typeName(), name )
 
 	# This function uses the class name and version from the given parameterised object
 	# to find the correspondent presetName and update the parameterised parameters that match.
@@ -71,7 +76,7 @@ class PresetManager :
 		preset( parameterised )
 
 	# Saves the parameter values for the given Parameterised object only for the given Parameter list as a named preset.
-	# The path should point to a valid location ( used by SearchPaths on the ClassLoader )
+	# The path should point to a valid location ( used by the internal SearchPath )
 	def savePreset( self, parameterised, parameterList, path, presetName ) :
 
 		# in order to match ClassLoader convention, the final path contains the presetVersion (constant) and has .py extension.
@@ -158,3 +163,28 @@ class %s:
 			param.setValue( parameterValue )
 		except Exception, e:
 			warning( "Could not set preset value for parameter %s: %s" % ( ".".join( parameterPath ), str(e) ) )
+
+
+	__defaultManagers = {}
+
+	## Returns a PresetManager configured to load from the paths defined by the
+	# specified environment variable. The same object is returned each time,
+	# allowing one manager to be shared by many callers.
+	# It uses ClassLoader.defaultLoader() method.
+	@classmethod
+	def defaultManager( cls, envVar ) :
+
+		mgr = cls.__defaultManagers.get( envVar, None )
+		if mgr :
+			return mgr
+
+		sp = ""
+		if envVar in os.environ :
+			sp = os.environ[envVar]
+		else :
+			msg( Msg.Level.Warning, "PresetManager.defaultLoader", "Environment variable %s not set." % envVar )
+
+		manager = cls( SearchPath( os.path.expandvars( sp ), ":" ) )
+		cls.__defaultManagers[envVar] = manager
+
+		return manager

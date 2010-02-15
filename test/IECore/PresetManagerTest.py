@@ -38,17 +38,17 @@ import os
 
 class PresetManagerTest( unittest.TestCase ) :
 
+	presetPath = "test/IECore/presets"
+
 	def tearDown( self ) :
 		os.system( "rm -rf test/IECore/presets" )
 
 	def test( self ) :
 
-		presetPath = "test/IECore/presets"
+		if os.path.exists( self.presetPath ):
+			os.system( "rm -rf %s" % self.presetPath )
 
-		if os.path.exists( presetPath ):
-			os.system( "rm -rf %s" % presetPath )
-
-		mgr = IECore.PresetManager( IECore.ClassLoader( IECore.SearchPath( presetPath, ":" ) ) )
+		mgr = IECore.PresetManager( IECore.SearchPath( self.presetPath, ":" ) )
 		op = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
 
 		# make sure the test op did not change
@@ -59,11 +59,11 @@ class PresetManagerTest( unittest.TestCase ) :
 		originalValues = op.parameters().getValue()
 
 		# saves only parameter 'a' and 'compound'
-		mgr.savePreset( op, [ op['a'], op['compound'] ], presetPath, 'testA' )
+		mgr.savePreset( op, [ op['a'], op['compound'] ], self.presetPath, 'testA' )
 		# saves only parameter 'compound.j'
-		mgr.savePreset( op, [ op['compound']['j'] ], presetPath, 'testB' )
+		mgr.savePreset( op, [ op['compound']['j'] ], self.presetPath, 'testB' )
 		# saves all the parameters in the op
-		mgr.savePreset( op, [ op.parameters() ], presetPath, 'testC' )
+		mgr.savePreset( op, [ op.parameters() ], self.presetPath, 'testC' )
 
 		# check if the three presets are listed.
 		self.assertEqual( mgr.presets( op ), [ 'parameterTypes/testA', 'parameterTypes/testB', 'parameterTypes/testC' ] )
@@ -102,6 +102,15 @@ class PresetManagerTest( unittest.TestCase ) :
 		mgr.loadPreset( op, 'testB' )
 		mgr.loadPreset( op, 'testC' )
 		
+	def testFactory( self ):
+
+		os.environ[ 'IECORE_PRESETPATH_TEST' ] = self.presetPath
+
+		mgr = IECore.PresetManager.defaultManager( 'IECORE_PRESETPATH_TEST' )
+		self.assert_( isinstance( mgr, IECore.PresetManager ) )
+		self.assertEqual( mgr.searchPaths().paths, [ self.presetPath ] )
+		mgr2 = IECore.PresetManager.defaultManager( 'IECORE_PRESETPATH_TEST' )
+		self.assertEqual( mgr, mgr2 )
 
 if __name__ == "__main__":
         unittest.main()
