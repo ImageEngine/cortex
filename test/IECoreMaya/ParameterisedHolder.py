@@ -449,6 +449,15 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		fnOH.setParameterised( op )
 	
 		self.failUnless( cmds.objExists( node + ".result" ) )
+		
+		aAttr = fnOH.parameterPlugPath( op["a"] )
+
+		cmds.setAttr( aAttr, 10 )
+		self.assertEqual( cmds.getAttr( node + ".result" ), 10 )
+
+		cmds.setAttr( aAttr, 20 )
+		self.assertEqual( cmds.getAttr( node + ".result" ), 20 )
+
 
 	def testLazySettingFromCompoundPlugs( self ) :
 	

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -154,106 +154,116 @@ MStatus OpHolder<B>::compute( const MPlug &plug, MDataBlock &block )
 }
 
 template<typename B>
-IECore::RunTimeTypedPtr OpHolder<B>::getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut )
+MStatus OpHolder<B>::setParameterised( IECore::RunTimeTypedPtr p )
 {
-	if (!ParameterisedHolder<B>::m_parameterised && !ParameterisedHolder<B>::m_failedToLoad)
+	MStatus s = ParameterisedHolder<B>::setParameterised( p );
+	if( !s )
 	{
-		ParameterisedHolder<B>::getParameterised( classNameOut, classVersionOut, searchPathEnvVarOut );
-
-		if (ParameterisedHolder<B>::m_parameterised && !ParameterisedHolder<B>::m_failedToLoad)
-		{
-			ParameterisedHolder<B>::m_failedToLoad = true;
-
-			IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( ParameterisedHolder<B>::m_parameterised );
-
-			if (op)
-			{
-				MFnDependencyNode fnDN( B::thisMObject() );
-
-				MObject attribute = fnDN.attribute( "result" );
-
-				MPlugArray connectionsFromMe, connectionsToMe;
-
-				if( !attribute.isNull() )
-				{
-					MFnAttribute fnAttr( attribute );
-					fnAttr.setWritable( false );
-					fnAttr.setStorable( false );
-
-					MStatus s = IECoreMaya::Parameter::update( op->resultParameter(), attribute );
-
-					if (s)
-					{
-						ParameterisedHolder<B>::m_failedToLoad = false;
-
-						return ParameterisedHolder<B>::m_parameterised;
-					}
-					// failed to update (parameter type probably changed).
-					// remove the current attribute and fall through to the create
-					// code
-
-					MPlug plug( B::thisMObject(), attribute );
-					plug.connectedTo( connectionsFromMe, false, true );
-					plug.connectedTo( connectionsToMe, true, false );
-
-					/// Make sure we keep the parameter's value as held in the attribute before we remove it!
-					ParameterisedHolder<B>::setParameterisedValues();
-
-					fnDN.removeAttribute( attribute );
-				}
-
-				attribute = IECoreMaya::Parameter::create( op->resultParameter(), "result" );
-				MStatus s = fnDN.addAttribute( attribute );
-
-				MFnAttribute fnAttr( attribute );
-				fnAttr.setWritable( false );
-				fnAttr.setStorable( false );
-
-				if( s )
-				{
-					if ( connectionsFromMe.length() || connectionsToMe.length() )
-					{
-						MDGModifier dgMod;
-						MPlug plug( B::thisMObject(), attribute );
-						for (unsigned i = 0; i < connectionsFromMe.length(); i++)
-						{
-							dgMod.connect( plug, connectionsFromMe[i] );
-						}
-						for (unsigned i = 0; i < connectionsToMe.length(); i++)
-						{
-							dgMod.connect( connectionsToMe[i], plug );
-						}
-
-						dgMod.doIt();
-					}
-
-					ParameterisedHolder<B>::setNodeValues();
-
-					ParameterisedHolder<B>::m_failedToLoad = false;
-
-					return ParameterisedHolder<B>::m_parameterised;
-				}
-
-				// Can't deal with the result attribute - consider this a failure.
-
-				MPlug pClassName( B::thisMObject(), ParameterisedHolder<B>::aParameterisedClassName );
-				MPlug pVersion( B::thisMObject(), ParameterisedHolder<B>::aParameterisedVersion );
-
-				MString className;
-				int version;
-
-				pClassName.getValue( className );
-				pVersion.getValue( version );
-
-				msg( Msg::Error, "OpHolder::getParameterised",
-					boost::format( "Unable to update result attribute to represent class \"%s\" version %d." ) % className.asChar() % version );
-				ParameterisedHolder<B>::m_parameterised = 0;
-			}
-		}
-
+		return s;
 	}
 
-	return ParameterisedHolder<B>::getParameterised( classNameOut, classVersionOut, searchPathEnvVarOut );
+	return createResultAttribute();
+}
+
+template<typename B>
+IECore::RunTimeTypedPtr OpHolder<B>::getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut )
+{
+	bool mustCreateResultAttribute = !ParameterisedHolder<B>::m_parameterised;
+
+	IECore::RunTimeTypedPtr result = ParameterisedHolder<B>::getParameterised( classNameOut, classVersionOut, searchPathEnvVarOut );
+	if( result && mustCreateResultAttribute )
+	{
+		MStatus s = createResultAttribute();
+		if( !s )
+		{
+			ParameterisedHolder<B>::m_parameterised = 0;
+			ParameterisedHolder<B>::m_failedToLoad = true;
+		}
+	}
+	
+	return result;
+}
+
+template<typename B>
+MStatus OpHolder<B>::createResultAttribute()
+{
+	IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( ParameterisedHolder<B>::m_parameterised );
+
+	if( !op )
+	{
+		MString nodeName = ParameterisedHolder<B>::name();
+		msg( Msg::Error, "OpHolder::createResultAttribute", boost::format( "No Op found on node \"%s\"." ) % nodeName.asChar() );
+		return MStatus::kFailure;
+	}
+			
+	MFnDependencyNode fnDN( B::thisMObject() );
+
+	MObject attribute = fnDN.attribute( "result" );
+
+	MPlugArray connectionsFromMe, connectionsToMe;
+
+	if( !attribute.isNull() )
+	{
+		MFnAttribute fnAttr( attribute );
+		fnAttr.setWritable( false );
+		fnAttr.setStorable( false );
+
+		MStatus s = IECoreMaya::Parameter::update( op->resultParameter(), attribute );
+
+		if( s )
+		{
+			return s;
+		}
+		
+		// failed to update (parameter type probably changed).
+		// remove the current attribute and fall through to the create
+		// code
+
+		MPlug plug( B::thisMObject(), attribute );
+		plug.connectedTo( connectionsFromMe, false, true );
+		plug.connectedTo( connectionsToMe, true, false );
+
+		/// Make sure we keep the parameter's value as held in the attribute before we remove it!
+		ParameterisedHolder<B>::setParameterisedValues();
+
+		fnDN.removeAttribute( attribute );
+	}
+
+	attribute = IECoreMaya::Parameter::create( op->resultParameter(), "result" );
+	MStatus s = fnDN.addAttribute( attribute );
+
+	MFnAttribute fnAttr( attribute );
+	fnAttr.setWritable( false );
+	fnAttr.setStorable( false );
+
+	if( s )
+	{
+		if( connectionsFromMe.length() || connectionsToMe.length() )
+		{
+			MDGModifier dgMod;
+			MPlug plug( B::thisMObject(), attribute );
+			for (unsigned i = 0; i < connectionsFromMe.length(); i++)
+			{
+				dgMod.connect( plug, connectionsFromMe[i] );
+			}
+			for (unsigned i = 0; i < connectionsToMe.length(); i++)
+			{
+				dgMod.connect( connectionsToMe[i], plug );
+			}
+
+			dgMod.doIt();
+		}
+
+		ParameterisedHolder<B>::setNodeValues();
+
+		return s;
+	}
+
+	MString nodeName = ParameterisedHolder<B>::name();
+	msg( Msg::Error, "OpHolder::createResultAttribute", boost::format( "Unable to update result attribute to represent class \"%s\" on node \"%s\"." ) % op->typeName() % nodeName.asChar() );
+
+	return MStatus::kFailure;
+
 }
 
 template<typename B>
