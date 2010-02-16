@@ -50,7 +50,6 @@ from _IECore import *
 Msg = MessageHandler
 from registerRunTimeTyped import registerRunTimeTyped
 from registerObject import registerObject
-from RunTimeTypedUtil import *
 from Log import *
 from Formatter import Formatter
 from WrappedTextFormatter import WrappedTextFormatter
