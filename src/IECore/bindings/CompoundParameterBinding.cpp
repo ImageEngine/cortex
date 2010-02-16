@@ -104,16 +104,6 @@ static ParameterPtr compoundParameterGetItem( CompoundParameter &o, const char *
 	throw Exception( std::string("Bad index: ") + n );
 }
 
-static ParameterPtr compoundParameterGetAttr( CompoundParameter &o, const char *n )
-{
-	if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to CompoundParameter children as attributes is deprecated - please use item style access instead.", 1 ) )
-	{
-		// warning converted to exception;
-		throw error_already_set();
-	}
-	return compoundParameterGetItem( o, n );
-}
-
 static bool compoundParameterContains( const CompoundParameter &o, const std::string &n )
 {
 	return o.parameter<const Parameter>( n );
@@ -183,8 +173,6 @@ void bindCompoundParameter()
 		)
 		.def( "__len__", &compoundParameterLen )
 		.def( "__getitem__", &compoundParameterGetItem )
-		/// \todo Remove attribute style access in major version 5.
-		.def( "__getattr__", &compoundParameterGetAttr )
 		.def( "__contains__", &compoundParameterContains )
 		.def( "keys", &compoundParameterKeys )
 		.def( "values", &compoundParameterValues )

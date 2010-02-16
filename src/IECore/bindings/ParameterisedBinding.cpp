@@ -62,24 +62,6 @@ static ParameterPtr parameterisedGetItem( Parameterised &o, const std::string &n
 	return p;
 }
 
-static ParameterPtr parameterisedGetAttr( Parameterised &o, const std::string &n )
-{
-	ParameterPtr p = o.parameters()->parameter<Parameter>( n );
-	
-	if ( p )
-	{
-		if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to Parameters as attributes is deprecated - please use item style access instead.", 1 ) )
-		{
-			// warning converted to exception;
-			throw error_already_set();
-		}
-		return p;
-	}
-	
-	PyErr_SetString( PyExc_KeyError, ( "'"  + n + "'" ).c_str() );
-	throw error_already_set();
-}
-
 void bindParameterised()
 {
 	using boost::python::arg;
@@ -90,8 +72,6 @@ void bindParameterised()
 		.add_property( "description", make_function( &Parameterised::description, return_value_policy<copy_const_reference>() ) )
 		.def( "parameters", (CompoundParameterPtr (Parameterised::*)())&Parameterised::parameters )
 		.def( "__getitem__", &parameterisedGetItem )
-		/// \todo Remove this in major version 5.
-		.def( "__getattr__", &parameterisedGetAttr )
 		.def( "userData", (CompoundObjectPtr (Parameterised::*)())&Parameterised::userData )
 	;
 

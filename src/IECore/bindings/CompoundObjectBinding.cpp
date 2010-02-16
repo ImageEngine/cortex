@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -111,26 +111,6 @@ static ObjectPtr getItem( const CompoundObject &o, const char *n )
 static void setItem( CompoundObject &o, const std::string &n, Object &v )
 {
 	o.members()[n] = &v;
-}
-
-static ObjectPtr getAttr( const CompoundObject &o, const char *n )
-{
-	if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to CompoundObject children as attributes is deprecated - please use item style access instead.", 1 ) )
-	{
-		// warning converted to exception;
-		throw error_already_set();
-	}
-	return getItem( o, n );
-}
-
-static void setAttr( CompoundObject &o, const std::string &n, Object &v )
-{
-	if( PyErr_WarnEx( PyExc_DeprecationWarning, "Access to CompoundObject children as attributes is deprecated - please use item style access instead.", 1 ) )
-	{
-		// warning converted to exception;
-		throw error_already_set();
-	}
-	setItem( o, n, v );
 }
 
 static void delItem( CompoundObject &o, const std::string &n )
@@ -304,9 +284,6 @@ void bindCompoundObject()
 		.def( "__len__", &len )
 		.def( "__getitem__", &getItem )
 		.def( "__setitem__", &setItem )
-		/// \todo Remove attribute access in major version 5.
-		.def( "__getattr__", &getAttr )
-		.def( "__setattr__", &setAttr )
 		.def( "__delitem__", &delItem )
 		.def( "__contains__", &contains )
 		.def( "has_key", &has_key )

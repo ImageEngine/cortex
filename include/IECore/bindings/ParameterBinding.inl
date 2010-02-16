@@ -51,28 +51,7 @@ boost::python::tuple valueValid( const T &that, ConstObjectPtr value )
 template<typename T>
 T parameterPresets( const boost::python::object &o )
 {
-	/// \todo Remove support for the deprecated dictionary style argument for major version 5
 	T result;
-	boost::python::extract<boost::python::dict> ed( o );
-	if( ed.check() )
-	{
-		if( PyErr_WarnEx( PyExc_DeprecationWarning, "Specifying presets as a dictionary is deprecated - pass a list or tuple of tuples instead.", 1 ) )
-		{
-			// warning converted to exception
-			throw boost::python::error_already_set();
-		}
-
-		boost::python::dict dict = ed();
-		boost::python::list keys = dict.keys();
-		boost::python::list values = dict.values();
-		for( int i = 0; i<keys.attr( "__len__" )(); i++ )
-		{
-			result.push_back( typename T::value_type( boost::python::extract<std::string>( keys[i] )(), boost::python::extract<typename T::value_type::second_type>( values[i] )() ) );
-		}
-
-		return result;
-	}
-
 	size_t s = IECore::len( o );
 	for( size_t i=0; i<s; i++ )
 	{

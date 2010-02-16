@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -110,11 +110,15 @@ class testCompoundObject( unittest.TestCase ) :
 
 		self.assertEqual( eval(repr(v1)), v1 )
 
-	def testDeprecatedAttributeAccess( self ) :
+	def testAttributeAccessRemoval( self ) :
+
+		# we used to support access to the children as attributes as well
+		# as as items, but as of version 4 this was deprecated and in version
+		# 5 it was removed.
 
 		v = IECore.CompoundObject( { "a" : IECore.IntData( 1 ) } )
 
-		self.assertRaises( DeprecationWarning, getattr, v, "a" )
+		self.assertRaises( AttributeError, getattr, v, "a" )
 
 if __name__ == "__main__":
         unittest.main()
