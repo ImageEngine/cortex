@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -58,8 +58,6 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 		for i in range( 0, 4 ):
 
-			print i, p[i]
-
 			res = idw( p[i] )
 
 			self.assertAlmostEqual( res, v[i] )
@@ -99,8 +97,6 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 		i["g"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
 		i["b"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
 
-		Writer.create( i, "test/inverseDistanceWeightedInterpolationV2ff.exr" ).write()
-
 		op = ImageDiffOp()
 		res = op(
 			imageA = i,
@@ -108,12 +104,6 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 		)
 
 		self.failIf( res.value )
-
-	def tearDown( self ) :
-
-		if os.path.isfile( 'test/inverseDistanceWeightedInterpolationV2ff.exr' ):
-			os.remove( 'test/inverseDistanceWeightedInterpolationV2ff.exr' )
-
 
 if __name__ == "__main__":
 	unittest.main()
