@@ -129,9 +129,7 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 			for j in range( 0, size ) :
 				queryPoints.append( V2f( i, j ) )
 
-		t = Timer()
 		f = idw( queryPoints )
-		print t.stop()
 
 		b = Box2i( V2i(0, 0), V2i( size-1, size-1 ) )		
 		i = ImagePrimitive( b, b )

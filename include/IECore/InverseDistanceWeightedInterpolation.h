@@ -43,11 +43,8 @@ namespace IECore
 {
 
 /// The InverseDistanceWeightedInterpolation class provides interpolation of scattered data. It is
-/// templated so that it can operate on a wide variety of point/value types, and uses
-/// the VectorTraits.h and VectorOps.h functionality to assist in this.
+/// templated so that it can operate on a wide variety of point/value types.
 /// NB. The Value must be default constructible, and define sensible value=value+value, and value=value*scalar operators
-/// \todo I don't understand why this is using a map to store values. Can we not just require that the
-/// value iterators be random access and index them directly?
 template< typename PointIterator, typename ValueIterator >
 class InverseDistanceWeightedInterpolation
 {
@@ -64,10 +61,10 @@ class InverseDistanceWeightedInterpolation
 		/// Creates the interpolator. Note that it does not own the passed points or values -
 		/// it is up to you to ensure that they remain valid and unchanged as long as the
 		/// interpolator is in use.
-		/// \param firstPoint Iterator to first point
-		/// \param lastPoint Iterator to last point
-		/// \param firstValue Iterator to first value
-		/// \param lastValue Iterator to last value
+		/// \param firstPoint RandomAccessIterator to first point
+		/// \param lastPoint RandomAccessIterator to last point
+		/// \param firstValue RandomAccessIterator to first value
+		/// \param lastValue RandomAccessIterator to last value
 		/// \param numNeighbours The amount of nearest-neighbour points to consider when performing interpolation. More usually yields slower, but better results.
 		/// \param maxLeafSize The number of points to store in each KDTree bucket
 		InverseDistanceWeightedInterpolation(
@@ -93,10 +90,9 @@ class InverseDistanceWeightedInterpolation
 	private :
 
 		Tree *m_tree;
-
-		typedef std::map< PointIterator, ValueIterator > ValueMap;
-		ValueMap m_map;
-
+		PointIterator m_firstPoint;
+		ValueIterator m_firstValue;
+		
 		unsigned int m_numNeighbours;
 };
 
