@@ -87,8 +87,8 @@ void bindOp()
 	using boost::python::arg;
 
 	RunTimeTypedClass<Op, OpWrapPtr>()
-		.def( init< const std::string &, ParameterPtr >( ( arg( "name" ), arg( "description" ), arg( "resultParameter") ) ) )
-		.def( init< const std::string &, CompoundParameterPtr, ParameterPtr >( ( arg( "name" ), arg( "description" ), arg( "compoundParameter" ), arg( "resultParameter") ) ) )
+		.def( init< const std::string &, ParameterPtr >( ( arg( "description" ), arg( "resultParameter") ) ) )
+		.def( init< const std::string &, CompoundParameterPtr, ParameterPtr >( ( arg( "description" ), arg( "compoundParameter" ), arg( "resultParameter") ) ) )
 		.def( "resultParameter", &resultParameter )
 		.def( "operate", &Op::operate )
 		.def( "__call__", &Op::operate )
