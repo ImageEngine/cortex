@@ -58,6 +58,8 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 		for i in range( 0, 4 ):
 
+			print i, p[i]
+
 			res = idw( p[i] )
 
 			self.assertAlmostEqual( res, v[i] )

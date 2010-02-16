@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -107,23 +107,6 @@ class KDTree<PointIterator>::AxisSort
 	private :
 		const unsigned int m_axis;
 };
-
-template<class PointIterator>
-struct KDTree<PointIterator>::NearNeighbour
-{
-	NearNeighbour(PointIterator p, BaseType d) : m_point(p), m_distSqrd(d)
-	{
-	}
-
-	bool operator < (const NearNeighbour &other) const
-	{
-		return m_distSqrd > other.m_distSqrd;
-	}
-
-	const PointIterator m_point;
-	const BaseType m_distSqrd;
-};
-
 
 // initialisation
 
@@ -253,28 +236,6 @@ void KDTree<PointIterator>::enclosedPoints( const Box &bound, OutputIterator it 
 }
 
 template<class PointIterator>
-unsigned int KDTree<PointIterator>::nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<PointIterator> &nearNeighbours ) const
-{
-	nearNeighbours.clear();
-
-	if (numNeighbours)
-	{
-		BaseType maxDistSquared = Imath::limits<BaseType>::max();
-
-		std::set<NearNeighbour> neighbourSet;
-		nearestNNeighboursWalk(rootIndex(), p, numNeighbours, neighbourSet, maxDistSquared );
-
-		typename std::set<NearNeighbour>::const_iterator it = neighbourSet.begin();
-		for (; it != neighbourSet.end(); ++it)
-		{
-			nearNeighbours.push_back( it->m_point );
-		}
-	}
-
-	return nearNeighbours.size();
-}
-
-template<class PointIterator>
 unsigned int KDTree<PointIterator>::nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<Neighbour> &nearNeighbours ) const
 {
 	nearNeighbours.clear();
@@ -370,69 +331,6 @@ void KDTree<PointIterator>::nearestNeighboursWalk( NodeIndex nodeIndex, const Po
 		if( d*d < r2 )
 		{
 			nearestNeighboursWalk( secondChild, p, r2, nearNeighbours );
-		}
-	}
-}
-
-template<class PointIterator>
-void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const Point &p, unsigned int numNeighbours, std::set<NearNeighbour> &nearNeighbours, BaseType &maxDistSquared ) const
-{
-	const Node &node = m_nodes[nodeIndex];
-	if( node.isLeaf() )
-	{
-		PointIterator *permLast = node.permLast();
-		for( PointIterator *perm = node.permFirst(); perm!=permLast; perm++ )
-		{
-			const Point &pp = **perm;
-			BaseType dist2 = vecDistance2( p, pp );
-
-			if( dist2 < maxDistSquared || nearNeighbours.size()<numNeighbours )
-			{
-				NearNeighbour n(*perm, dist2);
-				assert(nearNeighbours.size() <= numNeighbours);
-
-				typename std::set<NearNeighbour>::iterator it;
-				if (nearNeighbours.size() == numNeighbours)
-				{
-					it = nearNeighbours.begin();
-
-					// Make sure we're deleting the most distant point. Nodes are sorted in descending order.
-					assert( it->m_distSqrd >= nearNeighbours.rbegin()->m_distSqrd );
-
-					nearNeighbours.erase( it );
-				}
-				assert(nearNeighbours.size() < numNeighbours);
-				nearNeighbours.insert( n );
-
-				assert(nearNeighbours.size() > 0);
-
-				// First element is furthest point away
-				it = nearNeighbours.begin();
-				assert( it->m_distSqrd >= nearNeighbours.rbegin()->m_distSqrd );
-				maxDistSquared = it->m_distSqrd;
-			}
-		}
-	}
-	else
-	{
-		// node is a branch
-		BaseType d = p[node.cutAxis()] - node.cutValue();
-		NodeIndex firstChild, secondChild;
-		if( d>0.0 )
-		{
-			firstChild = highChildIndex( nodeIndex );
-			secondChild = lowChildIndex( nodeIndex );
-		}
-		else
-		{
-			firstChild = lowChildIndex( nodeIndex );
-			secondChild = highChildIndex( nodeIndex );
-		}
-
-		nearestNNeighboursWalk( firstChild, p, numNeighbours, nearNeighbours, maxDistSquared );
-		if( d*d < maxDistSquared || nearNeighbours.size()<numNeighbours )
-		{
-			nearestNNeighboursWalk( secondChild, p, numNeighbours, nearNeighbours, maxDistSquared );
 		}
 	}
 }

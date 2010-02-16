@@ -128,13 +128,13 @@ static void densities( const vector<Vec3<T> > &points, int numNeighbours, T mult
 	multiplier *= (T)numNeighbours / ((4.0/3.0) * M_PI);
 
 	Tree tree( points.begin(), points.end() );
-	vector<typename Tree::Iterator> neighbours;
+	vector<typename Tree::Neighbour> neighbours;
 
 	result.resize( points.size() );
 	for( unsigned int i=0; i<points.size(); i++ )
 	{
 		tree.nearestNNeighbours( points[i], numNeighbours, neighbours );
-		T r = ((**neighbours.begin()) - points[i]).length();
+		T r = ((*(neighbours.rbegin()->point)) - points[i]).length();
 		result[i] = multiplier / (r*r*r);
 	}
 }

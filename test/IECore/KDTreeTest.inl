@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -83,7 +83,7 @@ template<typename T>
 void KDTreeTest<T>::testNearestNeighours()
 {
 	Rand32 r;
-	NeighbourVector nearNeighbours;
+	IteratorVector nearNeighbours;
 	for( typename Tree::Iterator it=m_points.begin(); it!=m_points.end(); it++ )
 	{
 		typename T::BaseType radius = 0.05;
@@ -91,7 +91,7 @@ void KDTreeTest<T>::testNearestNeighours()
 
 		BOOST_CHECK(numNeighbours <= m_numPoints);
 
-		typename NeighbourVector::const_iterator nit = nearNeighbours.begin();
+		typename IteratorVector::const_iterator nit = nearNeighbours.begin();
 		for (; nit != nearNeighbours.end(); ++nit)
 		{
 			// Each point should be within the given radius
@@ -122,8 +122,17 @@ void KDTreeTest<T>::testNearestNNeighours()
 		BOOST_CHECK(numNeighbours <= neighboursRequested);
 
 		// One of our nearest-N neighbours should be the actual nearest!
-		BOOST_CHECK( std::find( nearNeighbours.begin(), nearNeighbours.end(), m_tree->nearestNeighbour( *it ))
-				!= nearNeighbours.end() );
+		bool foundNearest = false;
+		PointIterator nearest =  m_tree->nearestNeighbour( *it );
+		for( size_t i=0; i<nearNeighbours.size(); i++ )
+		{
+			if( nearNeighbours[i].point == nearest )
+			{
+				foundNearest = true;
+				break;
+			}
+		}
+		BOOST_CHECK( foundNearest );
 
 		// Make sure points are returned in order furthest->closest
 		typename NeighbourVector::const_iterator nit;
@@ -131,13 +140,13 @@ void KDTreeTest<T>::testNearestNNeighours()
 		{
 			if (nit != nearNeighbours.begin())
 			{
-				BOOST_CHECK( vecDistance2(**nit, *it) <=
-					vecDistance2(**(nit-1), *it)
+				BOOST_CHECK( vecDistance2(*(nit->point), *it) >=
+					vecDistance2(*((nit-1)->point), *it)
 					);
 			}
 		}
 
-		typename Tree::Iterator furthest = nearNeighbours[0];
+		typename Tree::Iterator furthest = nearNeighbours.rbegin()->point;
 
 		for (nit = nearNeighbours.begin(); nit != nearNeighbours.end(); ++nit)
 		{
@@ -146,7 +155,17 @@ void KDTreeTest<T>::testNearestNNeighours()
 
 			typename Tree::Iterator randomPt = randomPoint();
 
-			if (std::find( nearNeighbours.begin(), nearNeighbours.end(), randomPt) == nearNeighbours.end())
+			bool found = false;
+			for( size_t i=0; i<nearNeighbours.size(); i++ )
+			{
+				if( nearNeighbours[i].point == randomPt )
+				{
+					found = true;
+					break;
+				}
+			}
+		
+			if( !found )
 			{
 				typename T::BaseType distanceToRandomPt = vecDistance2(*randomPt, *it);
 				typename T::BaseType distanceToFurthestNeighbour = vecDistance2(*furthest, *it);
@@ -166,7 +185,7 @@ void KDTreeTest<T>::testNearestNNeighours()
 		BOOST_CHECK(numNeighbours == 1);
 
 		typename Tree::Iterator p1 = m_tree->nearestNeighbour(*it);
-		typename Tree::Iterator p2 = nearNeighbours[0];
+		typename Tree::Iterator p2 = nearNeighbours[0].point;
 
 		BOOST_CHECK( p1 == p2 );
 	}

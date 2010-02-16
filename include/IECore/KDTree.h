@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -94,10 +94,6 @@ class KDTree
 		/// See enclosedPoints for an example of this form.
 		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
 		unsigned int nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const;
-
-		/// \deprecated Use the function below instead - it has much improved performance and provides additional information in the result.
-		/// \todo Remove for next major version.
-		unsigned int nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<PointIterator> &nearNeighbours ) const;
 		
 		struct Neighbour;
 		/// Populates the passed vector with the N closest neighbours to p, sorted with the closest first. Returns the number found.
@@ -141,13 +137,7 @@ class KDTree
 
 		template<typename Box, typename OutputIterator>
 		void enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, OutputIterator it ) const;
-
-		/// \todo Remove for next major version.
-		struct NearNeighbour;
-
-		/// \todo Remove for next major version.
-		void nearestNNeighboursWalk( NodeIndex nodeIndex, const Point &p, unsigned int numNeighbours, std::set<NearNeighbour> &nearNeighbours, BaseType &maxDistSquared ) const;
-		
+	
 		void nearestNNeighboursWalk( NodeIndex nodeIndex, const Point &p, unsigned int numNeighbours, std::vector<Neighbour> &nearNeighbours, BaseType &maxDistSquared ) const;
 
 		Permutation m_perm;

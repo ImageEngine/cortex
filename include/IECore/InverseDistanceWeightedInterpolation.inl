@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,32 +72,23 @@ typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Val
 {
 	assert( m_tree );
 
-	typedef std::vector<PointIterator> PointIteratorVector;
+	typedef std::vector<typename Tree::Neighbour> NeighbourVector;
 
 	Value result = Value();
 
-	PointIteratorVector nearNeighbours;
+	NeighbourVector nearNeighbours; /// \todo I suspect that allocating this every time is poor for performance.
 	unsigned int neighbourCount = m_tree->nearestNNeighbours( p, m_numNeighbours, nearNeighbours );
-
-	if ( neighbourCount )
+	
+	if( neighbourCount )
 	{
-		PointBaseType distanceToFurthest = 0.0;
 
-		for ( typename PointIteratorVector::const_iterator it = nearNeighbours.begin(); it != nearNeighbours.end(); ++it )
-		{
-			const PointIterator &neighbourPointIt = *it;
-			const Point &neighbourPoint = *neighbourPointIt;
-
-			PointBaseType distanceToNeighbour = std::max<PointBaseType>( vecDistance( p, neighbourPoint ), 1.e-6 );
-			distanceToFurthest = std::max( distanceToNeighbour, distanceToFurthest );
-		}
+		PointBaseType distanceToFurthest = std::max<PointBaseType>( Imath::Math<PointBaseType>::sqrt( nearNeighbours.rbegin()->distSquared ), 1.e-6 );
 
 		PointBaseType totalNeighbourWeight = 0.0;
 
-		for ( typename PointIteratorVector::const_iterator it = nearNeighbours.begin(); it != nearNeighbours.end(); ++it )
+		for( typename NeighbourVector::const_iterator it = nearNeighbours.begin(); it != nearNeighbours.end(); ++it )
 		{
-			const PointIterator &neighbourPointIt = *it;
-			const Point &neighbourPoint = *neighbourPointIt;
+			const PointIterator &neighbourPointIt = it->point;
 
 			typename ValueMap::const_iterator mapIt = m_map.find( neighbourPointIt );
 			assert( mapIt != m_map.end() );
@@ -105,7 +96,7 @@ typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Val
 			const ValueIterator &neighbourValueIt = mapIt->second;
 			const Value &neighbourValue = *neighbourValueIt;
 
-			PointBaseType distanceToNeighbour = std::max<PointBaseType>( vecDistance( p, neighbourPoint ), 1.e-6 );
+			PointBaseType distanceToNeighbour = std::max<PointBaseType>( Imath::Math<PointBaseType>::sqrt( it->distSquared ), 1.e-6 );
 			assert( distanceToNeighbour <= distanceToFurthest );
 
 			// Franke & Nielson's (1980) improvement on Shephard's original weight function

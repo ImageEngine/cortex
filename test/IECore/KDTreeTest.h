@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,8 +65,10 @@ class KDTreeTest
 
 		/// Some typedefs for convenience
 		typedef std::vector<T> PointVector;
+		typedef typename std::vector<T>::const_iterator PointIterator;
 		typedef KDTree<typename PointVector::const_iterator> Tree;
-		typedef std::vector< typename Tree::Iterator > NeighbourVector;
+		typedef std::vector< typename Tree::Iterator > IteratorVector;
+		typedef std::vector< typename Tree::Neighbour > NeighbourVector;
 
 		std::vector<T> m_points;
 		Tree *m_tree;

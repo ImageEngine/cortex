@@ -102,10 +102,10 @@ ConstIntParameterPtr PointNormalsOp::numNeighboursParameter() const
 /// Calculates density at a point by finding the volume of a sphere holding numNeighbours. Doesn't bother
 /// with any constant factors for the density (PI, 4/3, numNeighbours) as these are factored out in the use below anyway.
 template<typename T>
-static inline typename T::Point::BaseType density( const T tree, const typename T::Point &p, int numNeighbours, vector<typename T::Iterator> &neighbours )
+static inline typename T::Point::BaseType density( const T tree, const typename T::Point &p, int numNeighbours, vector<typename T::Neighbour> &neighbours )
 {
 	tree.nearestNNeighbours( p, numNeighbours, neighbours );
-	typename T::Point::BaseType r = ((**neighbours.begin()) - p).length();
+	typename T::Point::BaseType r = ((*(neighbours.rbegin()->point)) - p).length();
 	return 1.0/(r*r*r);
 }
 
@@ -117,7 +117,7 @@ static void normals( const vector<T> &points, int numNeighbours, vector<T> &resu
 	typedef typename T::BaseType Real;
 
 	Tree tree( points.begin(), points.end() );
-	vector<typename Tree::Iterator> neighbours;
+	vector<typename Tree::Neighbour> neighbours;
 
 	result.resize( points.size() );
 
