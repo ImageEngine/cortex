@@ -55,6 +55,9 @@ class InverseDistanceWeightedInterpolation
 
 		typedef typename std::iterator_traits<PointIterator>::value_type Point;
 		typedef typename VectorTraits<Point>::BaseType PointBaseType;
+		
+		typedef KDTree<PointIterator> Tree;
+		typedef std::vector<typename Tree::Neighbour> NeighbourVector;
 
 		typedef typename std::iterator_traits<ValueIterator>::value_type Value;
 
@@ -78,13 +81,17 @@ class InverseDistanceWeightedInterpolation
 
 		virtual ~InverseDistanceWeightedInterpolation();
 
-		/// Evaluate the interpolated value for the specified point
+		/// Evaluate the interpolated value for the specified point.
 		Value operator()( const Point &p ) const;
+		/// As above, but returning information about which neighbours contributed to
+		/// the result. Note that for repeated queries it is quicker to call this method
+		/// reusing the same NeighbourVector than it is to call the version above, which
+		/// has to allocate a NeighbourVector each time.
+		Value operator()( const Point &p, NeighbourVector &neighbours ) const;
 
 
 	private :
 
-		typedef KDTree<PointIterator> Tree;
 		Tree *m_tree;
 
 		typedef std::map< PointIterator, ValueIterator > ValueMap;

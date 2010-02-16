@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -108,7 +108,26 @@ struct InverseDistanceWeightedInterpolationWrapper
 		return (*m_idw)( p );
 	}
 
-
+	ValueDataPtr call2( ConstPointDataPtr pData ) const
+	{
+		assert(m_idw);
+		
+		ValueDataPtr resultData = new ValueData;
+		std::vector<typename T::Value> &v = resultData->writable();
+		
+		const std::vector<typename T::Point> &p = pData->readable();
+		
+		v.resize( p.size() );
+		
+		typename T::NeighbourVector neighbours;
+		for( unsigned i=0; i<p.size(); i++ )
+		{
+			v[i] = (*m_idw)( p[i], neighbours );
+		}
+		
+		return resultData;
+	}
+	
 };
 
 template<typename T>
@@ -117,7 +136,8 @@ void bindInverseDistanceWeightedInterpolation(const char *bindName)
 	class_<InverseDistanceWeightedInterpolationWrapper<T>, boost::noncopyable>(bindName, no_init)
 		.def(init< typename InverseDistanceWeightedInterpolationWrapper<T>::PointDataPtr, typename InverseDistanceWeightedInterpolationWrapper<T>::ValueDataPtr, unsigned int >() )
 		.def( "__call__", &InverseDistanceWeightedInterpolationWrapper<T>::call )
-		;
+		.def( "__call__", &InverseDistanceWeightedInterpolationWrapper<T>::call2 )
+	;
 }
 
 }

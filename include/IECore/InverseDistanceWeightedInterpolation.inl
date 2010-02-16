@@ -34,7 +34,6 @@
 
 #include <algorithm>
 #include "OpenEXR/ImathLimits.h"
-#include "IECore/VectorOps.h"
 
 namespace IECore
 {
@@ -70,23 +69,28 @@ InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::~InverseDist
 template<typename PointIterator, typename ValueIterator>
 typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Value InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::operator()( const Point &p ) const
 {
-	assert( m_tree );
+	NeighbourVector neighbours;
+	return operator() ( p, neighbours );
+}
 
-	typedef std::vector<typename Tree::Neighbour> NeighbourVector;
+template<typename PointIterator, typename ValueIterator>
+typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Value InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::operator()( const Point &p, NeighbourVector &neighbours ) const
+{
+	assert( m_tree );
 
 	Value result = Value();
 
-	NeighbourVector nearNeighbours; /// \todo I suspect that allocating this every time is poor for performance.
-	unsigned int neighbourCount = m_tree->nearestNNeighbours( p, m_numNeighbours, nearNeighbours );
+	neighbours.clear();
+	unsigned int neighbourCount = m_tree->nearestNNeighbours( p, m_numNeighbours, neighbours );
 	
 	if( neighbourCount )
 	{
 
-		PointBaseType distanceToFurthest = std::max<PointBaseType>( Imath::Math<PointBaseType>::sqrt( nearNeighbours.rbegin()->distSquared ), 1.e-6 );
+		PointBaseType distanceToFurthest = std::max<PointBaseType>( Imath::Math<PointBaseType>::sqrt( neighbours.rbegin()->distSquared ), 1.e-6 );
 
 		PointBaseType totalNeighbourWeight = 0.0;
 
-		for( typename NeighbourVector::const_iterator it = nearNeighbours.begin(); it != nearNeighbours.end(); ++it )
+		for( typename NeighbourVector::const_iterator it = neighbours.begin(); it != neighbours.end(); ++it )
 		{
 			const PointIterator &neighbourPointIt = it->point;
 

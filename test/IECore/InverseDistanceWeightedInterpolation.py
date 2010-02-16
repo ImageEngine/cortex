@@ -80,7 +80,7 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 		idw = InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
 
 		b = Box2i( V2i(0, 0), V2i( size-1, size-1 ) )
-
+		
 		o = 0
 		f = FloatVectorData( size * size )
 		for i in range( 0, size ):
@@ -97,13 +97,57 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 		i["g"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
 		i["b"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
 
+		expectedImage = Reader.create( "test/IECore/data/expectedResults/inverseDistanceWeightedInterpolationV2ff.exr" ).read()
+
 		op = ImageDiffOp()
 		res = op(
 			imageA = i,
-			imageB = Reader.create( "test/IECore/data/expectedResults/inverseDistanceWeightedInterpolationV2ff.exr" ).read()
+			imageB = expectedImage
 		)
 
 		self.failIf( res.value )
 
+	def testVectorQueries( self ):
+
+		random.seed( 1 )
+
+		p = V2fVectorData()
+		v = FloatVectorData()
+
+		size = 1024
+		numPoints = 10000
+
+		for i in range( 0, numPoints ):
+
+			p.append( V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
+			v.append( random.uniform( 0, 1 ) )
+
+		idw = InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
+		
+		queryPoints = V2fVectorData()
+		for i in range( 0, size ):
+			for j in range( 0, size ) :
+				queryPoints.append( V2f( i, j ) )
+
+		t = Timer()
+		f = idw( queryPoints )
+		print t.stop()
+
+		b = Box2i( V2i(0, 0), V2i( size-1, size-1 ) )		
+		i = ImagePrimitive( b, b )
+		i["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
+
+		Writer.create( i, "/tmp/t.exr" ).write()
+
+		expectedImage = Reader.create( "test/IECore/data/expectedResults/inverseDistanceWeightedInterpolationVectorV2ff.exr" ).read()
+
+		op = ImageDiffOp()
+		res = op(
+			imageA = i,
+			imageB = expectedImage
+		)
+
+		self.failIf( res.value )
+		
 if __name__ == "__main__":
 	unittest.main()
