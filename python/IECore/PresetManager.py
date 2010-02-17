@@ -80,9 +80,8 @@ class PresetManager :
 	def savePreset( self, parameterised, parameterList, path, presetName ) :
 
 		# in order to match ClassLoader convention, the final path contains the presetVersion (constant) and has .py extension.
-		presetVersion = "1"
-		presetPath = os.path.join( path, self.__presetName( parameterised, presetName ), presetVersion )
-		presetFile = os.path.join( presetPath, presetName + ".py" )
+		presetPath = os.path.join( path, self.__presetName( parameterised, presetName ) )
+		presetFile = os.path.join( presetPath, presetName + "-1.py" )
 
 		tmpParameterList = list( parameterList )
 		parameterPaths = {}

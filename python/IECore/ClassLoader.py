@@ -35,6 +35,7 @@
 import os
 import imp
 import glob
+import re
 import os.path
 from fnmatch import fnmatch
 from IECore import Msg, msg, SearchPath
@@ -48,6 +49,12 @@ from IECore import Msg, msg, SearchPath
 # extension classes, and allows us to create small versioned units
 # of functionality for use all over the place - the ieCore "do" script
 # uses the ClassLoader to find operations it can perform for instance.
+# This class will find files with the following template path:
+# <any path>/<className>/<className>-<version>.py
+# Where [] represents optional field.
+# And for performance sake, it will not explore directories which 
+# contain files that match this:
+# <any path>/<className>/<className>*.*
 class ClassLoader :
 
 	## Creates a ClassLoader which will load
@@ -72,9 +79,8 @@ class ClassLoader :
 		return n
 
 	## Returns the available versions of the specified
-	# class as a list of ints, with the latest version
-	# last. If the class doesn't exist returns an empty
-	# list.
+	# class as a list of ints, with the latest version last. 
+	# If the class doesn't exist returns an empty list.
 	def versions( self, name ) :
 
 		try :
@@ -134,7 +140,7 @@ class ClassLoader :
 			return c["imports"][version]
 
 		nameTail = os.path.basename( name )
-		fileName = os.path.join( name, str(version), nameTail + ".py" )
+		fileName = os.path.join( name, nameTail + "-" + str(version) + ".py" )
 		fileName = self.__searchPaths.find( fileName )
 		if fileName=="" :
 			raise IOError( "Unable to find implementation file for class \"%s\" version %d." % (name, version) )
@@ -216,15 +222,20 @@ class ClassLoader :
 
 	def __updateClassFromSearchPath( self, searchPath, name ) :
 
-		foundAVersion = False
-		nameTail = os.path.split( name )[1]
-		gf = glob.glob( os.path.join( searchPath, name, "*", nameTail + ".py" ) )
+		pattern = re.compile( ".*-(\d+).py$" )
+		pruneDir = False
+		nameTail = os.path.split( name )[-1]
+
+		# globbing for any extension rather than .py to avoid exploring shader 
+		# directories without Python files. Function returns true on those cases.
+		gf = glob.glob( os.path.join( searchPath, name, nameTail + "*.*" ) )
 		for f in gf :
 
-			version = f.split( "/" )[-2]
+			pruneDir = True
 
+			m = re.match( pattern, f )
 			try :
-				version = int( version )
+				version = int( m.group( 1 ) )
 			except :
 				continue
 
@@ -234,9 +245,7 @@ class ClassLoader :
 				c["versions"].append( version )
 				c["versions"].sort()
 
-			foundAVersion = True
-
-		return foundAVersion
+		return pruneDir
 
 	def __findClass( self, name ) :
 
@@ -257,7 +266,7 @@ class ClassLoader :
 		self.__classes = {}
 		for path in self.__searchPaths.paths :
 
-			for root, dirs, files in os.walk( path ) :
+			for root, dirs, files in os.walk( path, followlinks = True ) :
 
 				if path.endswith( '/' ) :
 					nameBase = root[len(path):]
