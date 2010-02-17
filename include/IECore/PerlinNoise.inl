@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,6 +38,7 @@
 #include "IECore/VectorOps.h"
 #include "IECore/FastFloat.h"
 #include "IECore/ImathRandAdapter.h"
+#include "IECore/Math.h"
 
 #include "OpenEXR/ImathFun.h"
 #include "OpenEXR/ImathRandom.h"
@@ -127,6 +128,26 @@ inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::operator()( co
 }
 
 template<typename P, typename V, typename F>
+inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::noise( const Point &p, PointBaseType filterWidth ) const
+{
+	ValueBaseType w = 1.0 - smoothstep( ValueBaseType( 0.2 ), ValueBaseType( 0.6 ), filterWidth ); 
+	if( w > 0.0 )
+	{ 
+		return w * noise( p );
+	}
+	else
+	{
+		return Value( 0 );
+	}
+}
+
+template<typename P, typename V, typename F>
+inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::operator()( const Point &p, PointBaseType filterWidth ) const
+{
+	return noise( p, filterWidth );
+}
+
+template<typename P, typename V, typename F>
 inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::noiseWalk( int *pi, const P &p, int d ) const
 {
 	if( d==-1 )
@@ -152,15 +173,6 @@ inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::noiseWalk( int
 		pi[d] -= 1;
 		return Imath::lerp( v0, v1, m_falloff( vecGet( p, d ) - pi[d] ) );
 	}
-}
-
-template<typename P, typename V, typename F>
-inline typename PerlinNoise<P, V, F>::ValueBaseType PerlinNoise<P, V, F>::weight( PointBaseType t )
-{
-	float t3 = t * t * t;
-	float t4 = t3 * t;
-	return 6.0f * t4 * t - 15.0f * t4 + 10.0f * t3;
-
 }
 
 template<class T>

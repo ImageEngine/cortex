@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ namespace IECore
 
 template<typename N>
 Turbulence<N>::Turbulence( const unsigned int octaves, const Value &gain,
-	const Point &lacunarity, bool turbulent, const N &noise )
+	PointBaseType lacunarity, bool turbulent, const N &noise )
 	:	m_octaves( octaves ), m_gain( gain ), m_lacunarity( lacunarity ), m_turbulent( turbulent ), m_noise( noise )
 {
 	calculateScaleAndOffset();
@@ -80,13 +80,13 @@ const typename Turbulence<N>::Value &Turbulence<N>::getGain() const
 }
 
 template<typename N>
-void Turbulence<N>::setLacunarity( const Point &lacunarity )
+void Turbulence<N>::setLacunarity( PointBaseType lacunarity )
 {
 	m_lacunarity = lacunarity;
 }
 
 template<typename N>
-const typename Turbulence<N>::Point &Turbulence<N>::getLacunarity() const
+typename Turbulence<N>::PointBaseType Turbulence<N>::getLacunarity() const
 {
 	return m_lacunarity;
 }
@@ -145,13 +145,20 @@ void Turbulence<N>::calculateScaleAndOffset()
 template<typename N>
 typename Turbulence<N>::Value Turbulence<N>::turbulence( const Point &p ) const
 {
+	return turbulence( p, 1.0e-6 );
+}
+
+
+template<typename N>
+typename Turbulence<N>::Value Turbulence<N>::turbulence( const Point &p, PointBaseType filterWidth ) const
+{
 	Value result; vecSetAll( result, 0 );
 	Point frequency; vecSetAll( frequency, 1 );
 	Value scale; vecSetAll( scale, 1 );
 	for( unsigned int i=0; i<m_octaves; i++ )
 	{
 		Point pp; vecMul( p, frequency, pp );
-		Value v = m_noise.noise( pp );
+		Value v = m_noise.noise( pp, filterWidth );
 		vecMul( v, scale, v );
 		if( m_turbulent )
 		{
@@ -163,6 +170,7 @@ typename Turbulence<N>::Value Turbulence<N>::turbulence( const Point &p ) const
 		vecAdd( result, v, result );
 		vecMul( scale, m_gain, scale );
 		vecMul( frequency, m_lacunarity, frequency );
+		filterWidth *= m_lacunarity;
 	}
 	vecMul( result, m_scale, result );
 	vecAdd( result, m_offset, result );

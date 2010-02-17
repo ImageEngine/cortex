@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -43,25 +43,25 @@ class TestTurbulence( unittest.TestCase ) :
 		t = IECore.TurbulenceV2ff()
 		self.assertEqual( t.octaves, 4 )
 		self.assertEqual( t.gain, 0.5 )
-		self.assertEqual( t.lacunarity, IECore.V2f( 2.0 ) )
+		self.assertEqual( t.lacunarity, 2 )
 		self.assertEqual( t.turbulent, True )
 
-		t = IECore.TurbulenceV2ff( 2, 1, IECore.V2f( 3.0 ), False )
+		t = IECore.TurbulenceV2ff( 2, 1, 3, False )
 		self.assertEqual( t.octaves, 2 )
 		self.assertEqual( t.gain, 1 )
-		self.assertEqual( t.lacunarity, IECore.V2f( 3.0 ) )
+		self.assertEqual( t.lacunarity, 3 )
 		self.assertEqual( t.turbulent, False )
 
 		t = IECore.TurbulenceV2ff(
 			octaves = 3,
 			gain = 1.4,
-			lacunarity = IECore.V2f( 3.0 ),
+			lacunarity = 3,
 			turbulent = False
 		)
 
 		self.assertEqual( t.octaves, 3 )
 		self.assertAlmostEqual( t.gain, 1.4 )
-		self.assertEqual( t.lacunarity, IECore.V2f( 3.0 ) )
+		self.assertEqual( t.lacunarity, 3 )
 		self.assertEqual( t.turbulent, False )
 
 	def test2d( self ) :
@@ -69,7 +69,7 @@ class TestTurbulence( unittest.TestCase ) :
 		t = IECore.TurbulenceV2ff(
 			octaves = 4,
 			gain = 0.35,
-			lacunarity = IECore.V2f( 2.0 ),
+			lacunarity = 2,
 			turbulent = False
 		)
 
@@ -88,25 +88,30 @@ class TestTurbulence( unittest.TestCase ) :
 		i["r"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["g"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
 		i["b"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
+		
+		e = IECore.Reader.create( "test/IECore/data/expectedResults/turbulence2d.exr" ).read()
 
-		IECore.Writer.create( i, "test/turbulenceV2ff.exr" ).write()
+		op = IECore.ImageDiffOp()
+
+		res = op(
+			imageA = i,
+			imageB = e,
+			maxError = 0.0005
+		)
+
+		self.failIf( res.value )
 
 	def testNaN( self ) :
 
 		t = IECore.TurbulenceV2ff(
 			octaves = 28,
 			gain = 0.35,
-			lacunarity = IECore.V2f( 2.0 ),
+			lacunarity = 2,
 			turbulent = True
 		)
 
 		f = t.turbulence( IECore.V2f( 21.3, 51.2 ) )
-		self.assert_( f == f ) # Known bug
-
-	def tearDown( self ) :
-
-		if os.path.isfile( "test/turbulenceV2ff.exr" ) :
-			os.remove( "test/turbulenceV2ff.exr" )
+		self.assert_( f == f )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -316,6 +316,20 @@ class TestPerlinNoise( unittest.TestCase ) :
 			for j in range( 0, width ) :
 				self.assertAlmostEqual( n.noise( IECore.V2f( i/50.0, j/50.0 ) ), n2.noise( IECore.V2f( i/50.0, j/50.0 ) ), 10 )
 
+
+	def testFilterWidth( self ) :
+	
+		n = IECore.PerlinNoiseV2ff( 0 )
+		
+		for i in range( 1, 50 ) :
+			for j in range( 1, 50 ) :
+				p = IECore.V2f( i/50.0, j/50.0 )
+				self.failUnless( n.noise( p ) != 0 )		
+				self.failUnless( n.noise( p, 0.5 ) != 0 )		
+				self.failUnless( n.noise( p, 0.6 ) == 0 )
+				self.failUnless( n( p ) != 0 )		
+				self.failUnless( n( p, 0.5 ) != 0 )		
+				self.failUnless( n( p, 0.6 ) == 0 )			
 
 if __name__ == "__main__":
 	unittest.main()

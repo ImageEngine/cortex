@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,7 +71,10 @@ void bindNoise( const char *name )
 {
 	class_<T>( name )
 		.def( init<unsigned long int>() )
-		.def( "noise", &T::noise )
+		.def( "noise", (typename T::Value (T::*)( const typename T::Point & ) const )&T::noise )
+		.def( "noise", (typename T::Value (T::*)( const typename T::Point &, typename T::PointBaseType ) const )&T::noise )
+		.def( "__call__", (typename T::Value (T::*)( const typename T::Point & ) const )&T::noise )
+		.def( "__call__", (typename T::Value (T::*)( const typename T::Point &, typename T::PointBaseType ) const )&T::noise )
 		.def( "noiseVector", &noiseVector<T>, "Returns an array of noise values when given an array of points. Optionally the values array to be filled may be passed as the last argument - if not specified then a new array is created." )
 		.def( "noiseVector", &noiseVector2<T> )
 		.def( "initGradients", &T::initGradients )

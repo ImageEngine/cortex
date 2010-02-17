@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,17 +45,18 @@ template<typename T>
 void bindTurb( const char *name )
 {
 	class_<T>( name )
-		.def( init<unsigned int, typename T::Value, typename T::Point, bool, const typename T::Noise &>(
+		.def( init<unsigned int, typename T::Value, typename T::PointBaseType, bool, const typename T::Noise &>(
 				(	boost::python::arg( "octaves" ) = 4,
 					boost::python::arg( "gain" ) = typename T::Value( 0.5 ),
-					boost::python::arg( "lacunarity" ) = typename T::Point( 2.0 ),
+					boost::python::arg( "lacunarity" ) = typename T::PointBaseType( 2.0 ),
 					boost::python::arg( "turbulent" ) = true,
 					boost::python::arg( "noise"  ) = typename T::Noise()			 )
 			) )
-		.def( "turbulence", &T::turbulence )
+		.def( "turbulence", (typename T::Value (T::*)( const typename T::Point & ) const )&T::turbulence )
+		.def( "turbulence", (typename T::Value (T::*)( const typename T::Point &, typename T::PointBaseType ) const )&T::turbulence )
 		.add_property( "octaves", &T::getOctaves, &T::setOctaves )
 		.add_property( "gain", make_function( &T::getGain, return_value_policy<copy_const_reference>() ), &T::setGain )
-		.add_property( "lacunarity", make_function( &T::getLacunarity, return_value_policy<copy_const_reference>() ), &T::setLacunarity )
+		.add_property( "lacunarity", &T::getLacunarity, &T::setLacunarity )
 		.add_property( "turbulent", &T::getTurbulent, &T::setTurbulent )
 	;
 }

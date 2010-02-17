@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -104,14 +104,16 @@ class PerlinNoise
 		/// Computes the noise value at the given point. The components
 		/// of the returned value will range from -0.5 to 0.5.
 		inline Value noise( const Point &p ) const;
+		/// As above but performs antialiasing using frequency clamping.
+		inline Value noise( const Point &p, PointBaseType filterWidth ) const;
 
 		/// Computes the noise value at the given point. The components
 		/// of the returned value will range from -0.5 to 0.5.
 		inline Value operator()( const Point &p ) const;
+		/// As above but performs antialiasing using frequency clamping.
+		inline Value operator()( const Point &p, PointBaseType filterWidth ) const;
 
 	private :
-
-		static inline ValueBaseType weight( PointBaseType t );
 
 		inline Value noiseWalk( int *pi, const Point &pf, int d ) const;
 

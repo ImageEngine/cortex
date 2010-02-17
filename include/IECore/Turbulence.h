@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ class Turbulence
 		/// used for lacunarity and gain so that they can be different in each dimension.
 		/// If turbulent is true you get turbulence if it's false you get fbm.
 		Turbulence( const unsigned int octaves = 4, const Value &gain = Value( 0.5 ),
-			const Point &lacunarity = Point( 2.0 ), bool turbulent = true, const N &noise = N() );
+			PointBaseType lacunarity = 2.0, bool turbulent = true, const N &noise = N() );
 		/// Copy constructor
 		Turbulence( const Turbulence &other );
 
@@ -76,8 +76,8 @@ class Turbulence
 		void setGain( const Value &gain );
 		const Value &getGain() const;
 
-		void setLacunarity( const Point &lacunarity );
-		const Point &getLacunarity() const;
+		void setLacunarity( PointBaseType lacunarity );
+		PointBaseType getLacunarity() const;
 
 		void setTurbulent( bool turbulent );
 		bool getTurbulent() const;
@@ -89,6 +89,8 @@ class Turbulence
 		/// Returns the turbulence value at the specified point. The range
 		/// of the components of the returned value is from -0.5 to 0.5.
 		Value turbulence( const Point &p ) const;
+		/// As above but performs antialiasing using frequency clamping.
+		Value turbulence( const Point &p, PointBaseType filterWidth ) const;
 
 	private :
 
@@ -100,7 +102,7 @@ class Turbulence
 
 		unsigned int m_octaves;
 		Value m_gain;
-		Point m_lacunarity;
+		PointBaseType m_lacunarity;
 		bool m_turbulent;
 
 		Noise m_noise;
