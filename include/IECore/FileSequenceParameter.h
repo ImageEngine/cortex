@@ -47,9 +47,6 @@ namespace IECore
 /// The FileSequenceParameter class implements a Parameter to define FileSequences.
 /// As it can't store FileSequence objects as its value (they're not derived from Object) it stores
 /// a string representing the sequence instead, but provides methods for turning this into a FileSequence.
-/// \todo Have this support the specification of frame ranges as well (in a form like "fileName.#.ext 1-20")
-/// This should be pretty easy to achieve as the FrameList class already defines the serialisation and parsing
-/// for frame ranges.
 class FileSequenceParameter : public PathParameter
 {
 	public:
