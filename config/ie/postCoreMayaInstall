@@ -1,6 +1,6 @@
 ########################################################################## 
 # 
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved. 
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved. 
 # 
 #  Redistribution and use in source and binary forms, with or without 
 #  modification, are permitted provided that the following conditions are 
@@ -42,7 +42,7 @@
 import sys
 
 import VersionControl 
-VersionControl.setVersion('IEBuild', '2.24.4') 
+VersionControl.setVersion('IEBuild', '3.0.0') 
 import IEBuild  
 
 cortexMajorVersion=ARGUMENTS['MAJOR']
