@@ -208,6 +208,7 @@ from CurveTracerTest import CurveTracerTest
 from ImageThinnerTest import ImageThinnerTest
 from CurveLineariserTest import CurveLineariserTest
 from PresetManagerTest import PresetManagerTest
+from IDXReaderTest import IDXReaderTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

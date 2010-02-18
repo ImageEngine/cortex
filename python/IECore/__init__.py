@@ -100,6 +100,7 @@ from MotionBlock import MotionBlock
 from SubstitutedDict import SubstitutedDict
 from VisualiserProcedural import VisualiserProcedural
 from PresetManager import PresetManager
+from IDXReader import IDXReader
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *

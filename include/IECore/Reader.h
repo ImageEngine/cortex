@@ -35,11 +35,13 @@
 #ifndef IE_CORE_READER_H
 #define IE_CORE_READER_H
 
-#include "IECore/Op.h"
-#include "IECore/CompoundObject.h"
-
 #include <map>
 #include <vector>
+
+#include "boost/function.hpp"
+
+#include "IECore/Op.h"
+#include "IECore/CompoundObject.h"
 
 namespace IECore
 {
@@ -74,6 +76,9 @@ class Reader : public Op
 		/// backwards compatibility and prettier syntax.
 		ObjectPtr read();
 
+		//! @name Factory functions
+		///////////////////////////////////////////////////////////////////////////
+		//@{
 		/// Creates and returns a Reader appropriate to the specified file.
 		/// Throws an Exception if no suitable reader can be found.
 		static ReaderPtr create( const std::string &fileName );
@@ -86,20 +91,12 @@ class Reader : public Op
 		/// available. Extensions are of the form "tif" - ie without a preceding '.'.
 		static void supportedExtensions( TypeId typeId, std::vector<std::string> &extensions );
 
-	protected :
-
-		/// If resultParameter is not specified then creates a resultParameter
-		/// which is a simple Parameter instance. If a derived class provides
-		/// more concrete constraints on the type of the result it should
-		/// pass an appropriate resultParameter in its initialiser.
-		Reader( const std::string &description, ParameterPtr resultParameter = 0 );
-
 		/// Definition of a function which can create a Reader when
 		/// given a fileName.
-		typedef ReaderPtr (*CreatorFn)( const std::string &fileName );
+		typedef boost::function<ReaderPtr ( const std::string &fileName )> CreatorFn;
 		/// Definition of a function  to answer the
 		/// question can this file be read?
-		typedef bool (*CanReadFn)( const std::string &fileName );
+		typedef boost::function<bool ( const std::string &fileName )> CanReadFn;
 
 		/// Registers a Reader type which is capable of reading files ending with
 		/// the space separated extensions specified (e.g. "tif tiff"). Before creating a reader the canRead function
@@ -107,8 +104,17 @@ class Reader : public Op
 		/// then the creator function will then be called. If a file has no extension then all registered
 		/// canRead functions are called in a last ditch attempt to find a suitable reader. Typically
 		/// you will not call this function directly to register a reader type - you will instead use
-		/// the registration utility class below.
+		/// the ReaderDescription registration utility class below.
 		static void registerReader( const std::string &extensions, CanReadFn canRead, CreatorFn creator, TypeId typeId );
+		//@}
+		
+	protected :
+
+		/// If resultParameter is not specified then creates a resultParameter
+		/// which is a simple Parameter instance. If a derived class provides
+		/// more concrete constraints on the type of the result it should
+		/// pass an appropriate resultParameter in its initialiser.
+		Reader( const std::string &description, ParameterPtr resultParameter = 0 );
 
 		/// This utility class is provided to help with Reader registration. By having a private static
 		/// const instance of one of these in your class, it will call registerReader() for you when

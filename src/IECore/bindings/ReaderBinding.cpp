@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,7 +36,9 @@
 
 #include "IECore/Reader.h"
 #include "IECore/Object.h"
+#include "IECore/FileNameParameter.h"
 #include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECore/bindings/Wrapper.h"
 
 using std::string;
 using namespace boost;
@@ -69,15 +71,92 @@ static list supportedExtensions( TypeId typeId )
 	return result;
 }
 
+struct ReaderCreator
+{
+
+	ReaderCreator( object fn )
+		:	m_fn( fn )
+	{
+	}
+	
+	ReaderPtr operator()( const std::string &fileName ) 
+	{
+		return extract<ReaderPtr>( m_fn( fileName ) );
+	}
+
+	private :
+	
+		object m_fn;
+
+};
+
+static void registerReader( const std::string &extensions, object &canRead, object &creator, TypeId typeId )
+{
+	Reader::registerReader( extensions, canRead, ReaderCreator( creator ), typeId );
+}
+
+class ReaderWrap : public Reader, public Wrapper<Reader>
+{
+	public :
+
+		ReaderWrap( PyObject *self, const std::string &description, ParameterPtr resultParameter = 0 ) : Reader( description, resultParameter ), Wrapper<Reader>( self, this ) {};
+
+		virtual CompoundObjectPtr readHeader()
+		{
+			override o = this->get_override( "readHeader" );
+			if( o )
+			{
+				CompoundObjectPtr r = o();
+				if( !r )
+				{
+					throw Exception( "readHeader() python method didn't return a CompoundObject." );
+				}
+				return r;
+			}
+			else
+			{
+				return Reader::readHeader();
+			}
+		}
+
+		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands )
+		{
+			override o = this->get_override( "doOperation" );
+			if( o )
+			{
+				ObjectPtr r = o( const_pointer_cast<CompoundObject>( operands ) );
+				if( !r )
+				{
+					throw Exception( "doOperation() python method didn't return an Object." );
+				}
+				return r;
+			}
+			else
+			{
+				throw Exception( "doOperation() python method not defined" );
+			}
+		};
+
+
+};
+IE_CORE_DECLAREPTR( ReaderWrap );
+
 void bindReader()
 {
-	RunTimeTypedClass<Reader>()
+	using boost::python::arg;
+
+	RunTimeTypedClass<Reader, ReaderWrapPtr>()
+		.def( init<const std::string &>( ( arg( "description" ) ) ) )
+		.def( init<const std::string &, ParameterPtr>( ( arg( "description" ), arg( "resultParameter" ) ) ) )
 		.def( "readHeader", &Reader::readHeader )
 		.def( "read", &Reader::read )
+		.def( "readHeader", &Reader::readHeader )
 		.def( "create", &Reader::create ).staticmethod( "create" )
 		.def( "supportedExtensions", ( list(*)( ) ) &supportedExtensions )
 		.def( "supportedExtensions", ( list(*)( IECore::TypeId ) ) &supportedExtensions )
 		.staticmethod( "supportedExtensions" )
+		.def( "registerReader", &registerReader )
+		.staticmethod( "registerReader" )
 	;
 }
 
