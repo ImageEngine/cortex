@@ -646,8 +646,8 @@ class TestCompoundParameter( unittest.TestCase ) :
 		self.assertEqual( p["f"].getValue(),  FloatData( 20 ) )
 
 		p.setValue( CompoundObject( { "i" : IntData( 10 ) } ) )
-		self.assertRaises( RuntimeError, p.validate )
-		self.assertRaises( RuntimeError, p.getValidatedValue )
+		p.validate()
+		p.getValidatedValue()
 		p["f"].setValue( FloatData( 20 ) )
 		p.validate()
 
@@ -879,6 +879,23 @@ class TestCompoundParameter( unittest.TestCase ) :
 				
 		self.assertRaises( Exception, a.__getitem__, "b" )
 		self.assertRaises( Exception, a.__getitem__, "d" )
+
+	def testSetValueWithMissingData( self ) :
+
+		c = CompoundParameter()
+		
+		c1 = StringParameter( "child1", "child1", "child1" )
+		c.addParameter( c1 )
+		
+		preset = c.getValue()
+		
+		c2 = StringParameter( "child2", "child2", "child2" )
+		c2value = c2.getValue()		
+		c.addParameter( c2 )
+		
+		c.setValue( preset )
+			
+		self.assertEqual( c2value, c["child2"].getValue() )
 			
 class TestValidatedStringParameter( unittest.TestCase ) :
 

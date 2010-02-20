@@ -167,10 +167,6 @@ void CompoundParameter::setValue( ObjectPtr value )
 			{
 				it->second->setValue( oIt->second );
 			}
-			else
-			{
-				it->second->setValue( new NullObject );
-			}
 		}
 	}
 }
