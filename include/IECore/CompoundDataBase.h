@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,40 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IECORE_COMPOUNDDATABASE_H
+#define IECORE_COMPOUNDDATABASE_H
 
-#ifndef IECORE_COMPOUNDDATA_H
-#define IECORE_COMPOUNDDATA_H
+#include "IECore/TypedData.h"
+#include "IECore/Interned.h"
 
-#include "IECore/CompoundDataBase.h"
+#include <map>
 
 namespace IECore
 {
 
-/// A class for storing a map of named Data items.
-class CompoundData : public CompoundDataBase
-{
-	public :
-	
-		CompoundData();
-		CompoundData( const CompoundDataMap &members );
+/// The type of Data held by the CompoundData typedef.
+typedef std::map< InternedString, DataPtr > CompoundDataMap;
+/// A subclass of Data which stores a map of other named Data
+/// objects - a CompoundDataMap. This is accessible as usual
+/// via the readable() and writable() member functions. Generally you
+/// wouldn't use this typedef directly, but instead use the CompoundData
+/// derived class which provides several useful utility methods.
+typedef TypedData< CompoundDataMap > CompoundDataBase;
 
-		IE_CORE_DECLAREOBJECT( CompoundData, CompoundDataBase );
-		
-		/// Convenience functions to find a child Data object. In the case of
-		/// the child not existing or not matching the specified type, behaviour
-		/// is defined by the throwExceptions parameter. When true a descriptive
-		/// Exception is thrown, and when false 0 is returned.
-		template<typename T>
-		T *member( const InternedString &name, bool throwExceptions=false );
-		template<typename T>
-		const T *member( const InternedString &name, bool throwExceptions=false ) const;
-		
-};
-
-IE_CORE_DECLAREPTR( CompoundData );
+IE_CORE_DECLAREPTR( CompoundDataBase );
 
 } // namespace IECore
 
-#include "IECore/CompoundData.inl"
-
-#endif // IE_CORE_COMPOUNDDATA_H
+#endif // IECORE_COMPOUNDDATABASE_H

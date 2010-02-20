@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//       other contributors to this software may be used to endorse or
+//	     other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,40 +32,90 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IECORE_COMPOUNDDATA_INL
+#define IECORE_COMPOUNDDATA_INL
 
-#ifndef IECORE_COMPOUNDDATA_H
-#define IECORE_COMPOUNDDATA_H
+#include "boost/format.hpp"
 
-#include "IECore/CompoundDataBase.h"
+#include "IECore/Exception.h"
 
 namespace IECore
 {
 
-/// A class for storing a map of named Data items.
-class CompoundData : public CompoundDataBase
+template<typename T>
+T *CompoundData::member( const InternedString &name, bool throwExceptions )
 {
-	public :
-	
-		CompoundData();
-		CompoundData( const CompoundDataMap &members );
+	CompoundDataMap::const_iterator it = readable().find( name );
+	if( it!=readable().end() )
+	{
+		T *result = runTimeCast<T>( it->second.get() );
+		if( result )
+		{
+			return result;
+		}
+		else
+		{
+			if( throwExceptions )
+			{
+				throw Exception( boost::str( boost::format( "CompoundData child \"%s\" is not of type \"%s\"." ) % T::staticTypeName() ) );
+			}
+			else
+			{
+				return 0;
+			}
+		}
+	}
+	else
+	{
+		if( throwExceptions )
+		{
+			throw Exception( boost::str( boost::format( "CompoundData has no child named \"%s\"." ) % name.value() ) );
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	return 0; // shouldn't get here anyway
+}
 
-		IE_CORE_DECLAREOBJECT( CompoundData, CompoundDataBase );
-		
-		/// Convenience functions to find a child Data object. In the case of
-		/// the child not existing or not matching the specified type, behaviour
-		/// is defined by the throwExceptions parameter. When true a descriptive
-		/// Exception is thrown, and when false 0 is returned.
-		template<typename T>
-		T *member( const InternedString &name, bool throwExceptions=false );
-		template<typename T>
-		const T *member( const InternedString &name, bool throwExceptions=false ) const;
-		
-};
+template<typename T>
+const T *CompoundData::member( const InternedString &name, bool throwExceptions ) const
+{
+	CompoundDataMap::const_iterator it = readable().find( name );
+	if( it!=readable().end() )
+	{
+		const T *result = runTimeCast<T>( it->second.get() );
+		if( result )
+		{
+			return result;
+		}
+		else
+		{
+			if( throwExceptions )
+			{
+				throw Exception( boost::str( boost::format( "CompoundData child \"%s\" is not of type \"%s\"." ) % T::staticTypeName() ) );
+			}
+			else
+			{
+				return 0;
+			}
+		}
+	}
+	else
+	{
+		if( throwExceptions )
+		{
+			throw Exception( boost::str( boost::format( "CompoundData has no child named \"%s\"." ) % name.value() ) );
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	return 0; // shouldn't get here anyway
+}
 
-IE_CORE_DECLAREPTR( CompoundData );
+}; // namespace IECore
 
-} // namespace IECore
-
-#include "IECore/CompoundData.inl"
-
-#endif // IE_CORE_COMPOUNDDATA_H
+#endif // IECORE_COMPOUNDDATA_INL

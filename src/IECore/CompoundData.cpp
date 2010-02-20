@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,115 +33,41 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/CompoundData.h"
-#include "IECore/TypedData.inl"
 
-#include <iostream>
-using namespace std;
 using namespace IECore;
 
-namespace IECore
-{
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CompoundData );
 
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CompoundData, CompoundDataTypeId );
-
-template<>
-void CompoundData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
+CompoundData::CompoundData()
 {
-	Data::memoryUsage( accumulator );
-	const CompoundDataMap &data = readable();
-	accumulator.accumulate( data.size() * sizeof( CompoundDataMap::value_type ) );
-	
-	CompoundDataMap::const_iterator iter = data.begin();
-	while (iter != data.end())
-	{
-		accumulator.accumulate( iter->second );		
-		iter++;
-	}	
 }
 
-template<>
-void CompoundData::copyFrom( ConstObjectPtr other, CopyContext *context )
+CompoundData::CompoundData( const CompoundDataMap &members )
+	:	CompoundDataBase( members )
 {
-	Data::copyFrom( other, context );
-	const CompoundData *tOther = static_cast<const CompoundData *>( other.get() );
-	CompoundDataMap &data = writable();
-	data.clear();
-	const CompoundDataMap &otherData = tOther->readable();
-	for( CompoundDataMap::const_iterator it = otherData.begin(); it!=otherData.end(); it++ )
-	{
-		data[it->first] = context->copy<Data>( it->second );
-	}
 }
 
-template<>
+void CompoundData::copyFrom( ConstObjectPtr other, IECore::Object::CopyContext *context )
+{
+	CompoundDataBase::copyFrom( other, context );
+}
+
+void CompoundData::save( IECore::Object::SaveContext *context ) const
+{
+	CompoundDataBase::save( context );
+}
+
+void CompoundData::load( IECore::Object::LoadContextPtr context )
+{
+	CompoundDataBase::load( context );
+}
+
 bool CompoundData::isEqualTo( ConstObjectPtr other ) const
 {
-	if( !Data::isEqualTo( other ) )
-	{
-		return false;
-	}
-	ConstCompoundDataPtr tOther = boost::static_pointer_cast<const CompoundData>( other );
-	const CompoundDataMap &m1 = readable();
-	const CompoundDataMap &m2 = tOther->readable();
-	if( m1.size()!=m2.size() )
-	{
-		return false;
-	}
-	CompoundDataMap::const_iterator it1 = m1.begin();
-	CompoundDataMap::const_iterator it2 = m2.begin();
-	while( it1!=m1.end() )
-	{
-		if( it1->first!=it2->first )
-		{
-			return false;
-		}
-		if( ! it1->second->isEqualTo( it2->second ) )
-		{
-			return false;
-		}
-		it1++;
-		it2++;
-	}
-	return true;
+	return CompoundDataBase::isEqualTo( other );
 }
 
-template<>
-void CompoundData::save( SaveContext *context ) const
+void CompoundData::memoryUsage( Object::MemoryAccumulator &a ) const
 {
-	Data::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), 0 );
-	container->mkdir( "members" );
-	container->chdir( "members" );
-		const CompoundDataMap &m = readable();
-		CompoundDataMap::const_iterator it;
-		for( it=m.begin(); it!=m.end(); it++ )
-		{
-			context->save( it->second, container, it->first );
-		}
-	container->chdir( ".." );
+	CompoundDataBase::memoryUsage( a );
 }
-
-template<>
-void CompoundData::load( LoadContextPtr context )
-{
-	Data::load( context );
-	unsigned int v = 0;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	CompoundDataMap &m = writable();
-	m.clear();
-	container->chdir( "members" );
-		IndexedIO::EntryList members = container->ls();
-		IndexedIO::EntryList::const_iterator it;
-		for( it=members.begin(); it!=members.end(); it++ )
-		{
-			m[it->id()] = context->load<Data>( container, it->id() );
-		}
-	container->chdir( ".." );
-}
-
-IE_CORE_DEFINETYPEDDATANOBASESIZE( CompoundData )
-
-}
-
-// Instantiate that bad boy.
-template class TypedData<CompoundDataMap>;

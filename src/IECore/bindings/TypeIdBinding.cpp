@@ -353,6 +353,7 @@ void bindTypeId()
 		.value( "CurveTracer", CurveTracerTypeId )
 		.value( "ImageThinner", ImageThinnerTypeId )
 		.value( "CurveLineariser", CurveLineariserTypeId )
+		.value( "CompoundDataBase", CompoundDataBaseTypeId )
 	;
 }
 
