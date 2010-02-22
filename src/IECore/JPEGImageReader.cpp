@@ -47,6 +47,7 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/BoxOps.h"
+#include "IECore/ScaledDataConversion.h"
 
 #include "boost/format.hpp"
 
@@ -137,7 +138,35 @@ std::string JPEGImageReader::sourceColorSpace() const
 	return "srgb";
 }
 
-DataPtr JPEGImageReader::readChannel( const std::string &name, const Imath::Box2i &dataWindow )
+template<typename V>
+DataPtr JPEGImageReader::readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow, int channelOffset )
+{
+	int area = ( dataWindow.size().x + 1 ) * ( dataWindow.size().y + 1 );
+	assert( area >= 0 );
+	int dataWidth = 1 + dataWindow.size().x;
+	int dataY = 0;
+
+	typedef TypedData< std::vector< V > > TargetVector;
+	
+	typename TargetVector::Ptr dataContainer = new TargetVector();
+	typename TargetVector::ValueType &data = dataContainer->writable();
+	data.resize( area );
+
+	ScaledDataConversion< unsigned char, V> converter;
+
+	for ( int y = dataWindow.min.y; y <= dataWindow.max.y; ++y, ++dataY )
+	{
+		typename TargetVector::ValueType::size_type dataOffset = dataY * dataWidth;
+		for ( int x = dataWindow.min.x; x <= dataWindow.max.x; ++x, ++dataOffset )
+		{
+			assert( dataOffset < data.size() );
+			data[dataOffset] = converter( m_buffer[ m_numChannels * ( y * m_bufferWidth + x ) + channelOffset ] );
+		}
+	}
+	return dataContainer;
+}
+
+DataPtr JPEGImageReader::readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw )
 {
 	open( true );
 
@@ -165,28 +194,15 @@ DataPtr JPEGImageReader::readChannel( const std::string &name, const Imath::Box2
 
 	assert( channelOffset < m_numChannels );
 
-	HalfVectorDataPtr dataContainer = new HalfVectorData();
-	HalfVectorData::ValueType &data = dataContainer->writable();
-	int area = ( dataWindow.size().x + 1 ) * ( dataWindow.size().y + 1 );
-	assert( area >= 0 );
-	data.resize( area );
-
-	int dataWidth = 1 + dataWindow.size().x;
-
-	int dataY = 0;
-
-	for ( int y = dataWindow.min.y; y <= dataWindow.max.y; ++y, ++dataY )
+	DataPtr dataContainer = NULL;
+	if ( raw )
 	{
-		HalfVectorData::ValueType::size_type dataOffset = dataY * dataWidth;
-
-		for ( int x = dataWindow.min.x; x <= dataWindow.max.x; ++x, ++dataOffset )
-		{
-			assert( dataOffset < data.size() );
-
-			data[dataOffset] = m_buffer[ m_numChannels * ( y * m_bufferWidth + x ) + channelOffset ] / 255.0f;
-		}
+		dataContainer = readTypedChannel< unsigned char >( name, dataWindow, channelOffset );
 	}
-
+	else
+	{
+		dataContainer = readTypedChannel< float >( name, dataWindow, channelOffset );
+	}
 	return dataContainer;
 }
 

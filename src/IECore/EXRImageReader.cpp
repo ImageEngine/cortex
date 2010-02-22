@@ -41,6 +41,8 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/BoxOps.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/DataConvert.h"
+#include "IECore/ScaledDataConversion.h"
 
 #include "boost/format.hpp"
 
@@ -204,7 +206,7 @@ DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::
 	return data;
 }
 
-DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dataWindow )
+DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dataWindow, bool raw )
 {
 	open( true );
 
@@ -216,15 +218,35 @@ DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dat
 		assert( channel->xSampling==1 ); /// \todo Support subsampling when we have a need for it
 		assert( channel->ySampling==1 );
 
+		DataPtr res;
 		switch( channel->type )
 		{
-
 			case UINT :
 				BOOST_STATIC_ASSERT( sizeof( unsigned int ) == 4 );
-				return readTypedChannel<unsigned int>( name, dataWindow, channel );
+				res = readTypedChannel<unsigned int>( name, dataWindow, channel );
+				if ( raw )
+				{
+					return res;
+				}
+				else
+				{
+					DataConvert< UIntVectorData, FloatVectorData, ScaledDataConversion< unsigned int, float > > converter;
+					ConstUIntVectorDataPtr vec = boost::static_pointer_cast< UIntVectorData >(res);
+					return converter( vec );
+				}
 
 			case HALF :
-				return readTypedChannel<half>( name, dataWindow, channel );
+				res = readTypedChannel<half>( name, dataWindow, channel );
+				if ( raw )
+				{
+					return res;
+				}
+				else
+				{
+					DataConvert< HalfVectorData, FloatVectorData, ScaledDataConversion< half, float > > converter;
+					ConstHalfVectorDataPtr vec = boost::static_pointer_cast< HalfVectorData >(res);
+					return converter( vec );
+				}
 
 			case FLOAT :
 				BOOST_STATIC_ASSERT( sizeof( float ) == 4 );
@@ -234,7 +256,6 @@ DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dat
 				throw IOException( ( boost::format( "EXRImageReader : Unsupported data type for channel \"%s\"" ) % name ).str() );
 
 		}
-
 	}
 	catch ( Exception &e )
 	{

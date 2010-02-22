@@ -156,7 +156,7 @@ std::string TGAImageReader::sourceColorSpace() const
 	return "srgb";
 }
 
-DataPtr TGAImageReader::readChannel( const string &name, const Imath::Box2i &dataWindow )
+DataPtr TGAImageReader::readChannel( const string &name, const Imath::Box2i &dataWindow, bool raw )
 {
 	if ( !open() )
 	{
@@ -166,6 +166,20 @@ DataPtr TGAImageReader::readChannel( const string &name, const Imath::Box2i &dat
 	readBuffer();
 
 	assert( m_header );
+
+	DataPtr dataContainer = NULL;
+
+	if ( raw )
+		dataContainer = readTypedChannel< unsigned char >( name, dataWindow );
+	else
+		dataContainer = readTypedChannel< float >( name, dataWindow );
+
+	return dataContainer;		
+}
+
+template<typename V>
+DataPtr TGAImageReader::readTypedChannel( const std::string &name, const Box2i &dataWindow )
+{
 
 	FloatVectorDataPtr dataContainer = new FloatVectorData();
 
@@ -191,7 +205,7 @@ DataPtr TGAImageReader::readChannel( const string &name, const Imath::Box2i &dat
 	int dataWidth = 1 + dataWindow.size().x;
 	int bufferDataWidth = 1 + m_dataWindow.size().x;
 
-	ScaledDataConversion<uint8_t, float> converter;
+	ScaledDataConversion<uint8_t, V> converter;
 
 	const int samplesPerPixel = m_header->pixelDepth == 24 ? 3 : 4 ;
 

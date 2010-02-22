@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -80,16 +80,16 @@ class JPEGImageReader : public ImageReader
 
 	private:
 
-		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow );
+		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw );
 
 		/// Registers this reader with system
 		static const ReaderDescription<JPEGImageReader> m_readerDescription;
 
 		/// Opens the file, if necessary, and fills the buffer. Throws an IOException if an error occurs.
 		/// Tries to open the file, returning true on success and false on failure. On success,
-                /// m_buffer, m_bufferWidth, m_bufferHeight, m_bufferFileName, and m_numChannels will be valid.
+		/// m_buffer, m_bufferWidth, m_bufferHeight, m_bufferFileName, and m_numChannels will be valid.
 		/// If throwOnFailure is true then a descriptive Exception is thrown rather than false being returned.
-                bool open( bool throwOnFailure = false );
+		bool open( bool throwOnFailure = false );
 
 		/// The filename we filled the buffer from
 		std::string m_bufferFileName;
@@ -101,6 +101,10 @@ class JPEGImageReader : public ImageReader
 		int m_bufferWidth;
 		int m_bufferHeight;
 		int m_numChannels;
+
+		template<typename V>
+		DataPtr readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow, int channelOffset );
+
 };
 
 IE_CORE_DECLAREPTR( JPEGImageReader );

@@ -73,14 +73,22 @@ ImageReader::ImageReader( const std::string &description ) :
 		"then all channels are loaded."
 	);
 
+	m_rawChannelsParameter = new BoolParameter(
+		"rawChannels",
+		"Specifies if the returned data channels should be what's stored in the file. That's not possible when "
+		"the image pixels are not byte aligned. Color space settings will not take effect when this parameter is "
+		"on.",
+		false
+	);
+
 	parameters()->addParameter( m_dataWindowParameter );
 	parameters()->addParameter( m_displayWindowParameter );
 	parameters()->addParameter( m_channelNamesParameter );
+	parameters()->addParameter( m_rawChannelsParameter );
 }
 
 ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 {
-
 	Box2i displayWind = displayWindowParameter()->getTypedValue();
 	if( displayWind.isEmpty() )
 	{
@@ -88,6 +96,7 @@ ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 	}
 	Box2i dataWind = dataWindowToRead();
 
+	bool rawChannels = operands->member< BoolData >( "rawChannels" )->readable();
 
 	// create our ImagePrimitive
 	ImagePrimitivePtr image = new ImagePrimitive( dataWind, displayWind );
@@ -102,23 +111,22 @@ ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 	vector<string>::const_iterator ci = channelNames.begin();
 	while( ci != channelNames.end() )
 	{
-		DataPtr d = readChannel( *ci, dataWind );
+		DataPtr d = readChannel( *ci, dataWind, rawChannels );
 
 		assert( d  );
-		assert( d->typeId()==FloatVectorDataTypeId || d->typeId()==HalfVectorDataTypeId || d->typeId()==UIntVectorDataTypeId );
+		assert( !rawChannels || d->typeId()==FloatVectorDataTypeId );
 
 		PrimitiveVariable p( PrimitiveVariable::Vertex, d );
 		assert( image->isPrimitiveVariableValid( p ) );
 
 		image->variables[*ci] = p;
-
 		ci++;
 	}
 
 	return image;
 }
 
-DataPtr ImageReader::readChannel( const std::string &name )
+DataPtr ImageReader::readChannel( const std::string &name, bool raw )
 {
 	vector<string> allNames;
 	channelNames( allNames );
@@ -129,7 +137,7 @@ DataPtr ImageReader::readChannel( const std::string &name )
 	}
 
 	Box2i d = dataWindowToRead();
-	return readChannel( name, d );
+	return readChannel( name, d, raw );
 }
 
 void ImageReader::channelsToRead( vector<string> &names )
@@ -206,6 +214,16 @@ StringVectorParameterPtr ImageReader::channelNamesParameter()
 ConstStringVectorParameterPtr ImageReader::channelNamesParameter() const
 {
 	return m_channelNamesParameter;
+}
+
+BoolParameterPtr ImageReader::rawChannelsParameter()
+{
+	return m_rawChannelsParameter;
+}
+
+ConstBoolParameterPtr ImageReader::rawChannelsParameter() const
+{
+	return m_rawChannelsParameter;
 }
 
 CompoundObjectPtr ImageReader::readHeader()

@@ -40,6 +40,8 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/BoxOps.h"
+#include "IECore/CompoundDataConversion.h"
+#include "IECore/ScaledDataConversion.h"
 #include "IECore/CineonToLinearDataConversion.h"
 
 #include "IECore/private/dpx.h"
@@ -144,15 +146,13 @@ std::string DPXImageReader::sourceColorSpace() const
 }
 
 /// \todo
-/// we assume here DPX coding in the 'typical' configuration (output by film dumps, nuke, etc).
-/// this is RGB 10bit log for film, pixel-interlaced data.  we convert this to a linear 16-bit (half)
-/// format in the ImagePrimitive.
-DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i &dataWindow )
+/// we assume here CIN coding in the 'typical' configuration (output by film dumps, nuke, etc).
+/// this is RGB 10bit log for film, pixel-interlaced data. We convert this applying 
+/// domain scale as necessary and applying Cineon to Linear conversion.
+template<typename V>
+DataPtr DPXImageReader::readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow )
 {
-	if (!open())
-	{
-		return 0;
-	}
+	typedef TypedData< std::vector< V > > TargetVector;
 
 	/// \todo
 	// kinda useless here, we have implicitly assumed log 10 bit in the surrounding code
@@ -170,10 +170,13 @@ DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i
 	}
 	mask <<= ((32 - bpp) - channelOffset * bpp);
 
-	CineonToLinearDataConversion< unsigned short, half > converter;
+	CompoundDataConversion<
+		CineonToLinearDataConversion<unsigned short,float>,
+		ScaledDataConversion<float, V>
+	> converter;
 
-	HalfVectorDataPtr dataContainer = new HalfVectorData();
-	HalfVectorData::ValueType &data = dataContainer->writable();
+	typename TargetVector::Ptr dataContainer = new TargetVector();
+	typename TargetVector::ValueType &data = dataContainer->writable();
 	int area = ( dataWindow.size().x + 1 ) * ( dataWindow.size().y + 1 );
 	assert( area >= 0 );
 	data.resize( area );
@@ -191,7 +194,7 @@ DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i
 	int dataY = 0;
 	for ( int y = yMin ; y <= yMax ; ++y, ++dataY )
 	{
-		HalfVectorData::ValueType::size_type dataOffset = dataY * dataWidth;
+		typename TargetVector::ValueType::size_type dataOffset = dataY * dataWidth;
 		std::vector<unsigned int>::size_type bufferOffset = y * m_bufferWidth + xMin;
 
 		for ( int x = xMin;  x <= xMax ; ++x, ++dataOffset, ++bufferOffset  )
@@ -209,6 +212,25 @@ DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i
 			assert( cv < 1024 );
 			data[dataOffset] = converter( cv );
 		}
+	}
+	return dataContainer;
+}
+
+DataPtr DPXImageReader::readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw )
+{
+	if (!open())
+	{
+		return 0;
+	}
+
+	DataPtr dataContainer = NULL;
+	if ( raw )
+	{
+		dataContainer = readTypedChannel< unsigned short >( name, dataWindow );
+	}
+	else
+	{
+		dataContainer = readTypedChannel< float >( name, dataWindow );
 	}
 
 	return dataContainer;

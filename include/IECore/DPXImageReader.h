@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,7 +65,7 @@ class DPXImageReader : public ImageReader
 
 	private:
 
-		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow );
+		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw );
 
 
 		// filename associator
@@ -91,6 +91,10 @@ class DPXImageReader : public ImageReader
 		Header *m_header;
 
 		const char* descriptorStr( int descriptor ) const;
+
+		template<typename V>
+		DataPtr readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow );
+
 };
 
 IE_CORE_DECLAREPTR(DPXImageReader);

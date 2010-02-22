@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -100,7 +100,7 @@ class TIFFImageReader : public ImageReader
 
 	private:
 
-		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow );
+		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw );
 
 		// filename associator
 		static const ReaderDescription<TIFFImageReader> m_readerDescription;
@@ -146,7 +146,7 @@ class TIFFImageReader : public ImageReader
 		template<typename T>
 		T tiffFieldDefaulted( unsigned int t );
 
-		template<typename T>
+		template<typename T, typename V>
 		DataPtr readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow );
 
 };

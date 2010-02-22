@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -158,9 +158,9 @@ class TestJPEGReader(unittest.TestCase):
 		found = ipe.pointAtPixel( V2i( 511, 255 ), result )
 		self.assert_( found )
 		color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ),
-				result.halfPrimVar( ipe.B() )
+				result.floatPrimVar( ipe.R() ),
+				result.floatPrimVar( ipe.G() ),
+				result.floatPrimVar( ipe.B() )
 			)
 		expectedColor = V3f( 0, 0, 0 )
 		self.assert_( ( color - expectedColor).length() < 1.e-3 )
@@ -169,9 +169,9 @@ class TestJPEGReader(unittest.TestCase):
 		self.assert_( found )
 
 		color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ),
-				result.halfPrimVar( ipe.B() )
+				result.floatPrimVar( ipe.R() ),
+				result.floatPrimVar( ipe.G() ),
+				result.floatPrimVar( ipe.B() )
 			)
 
 		expectedColor = V3f( 0.741211, 0.706055, 0 )
@@ -203,9 +203,9 @@ class TestJPEGReader(unittest.TestCase):
 			self.assert_( found )
 
 			color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ),
-				result.halfPrimVar( ipe.B() )
+				result.floatPrimVar( ipe.R() ),
+				result.floatPrimVar( ipe.G() ),
+				result.floatPrimVar( ipe.B() )
 			)
 
 			self.assert_( ( color - expectedColor).length() < 1.e-3 )

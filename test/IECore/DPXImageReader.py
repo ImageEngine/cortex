@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -93,9 +93,9 @@ class TestDPXReader(unittest.TestCase):
 			self.assert_( found )
 
 			color = V3f(
-				result.halfPrimVar( ipe.R() ),
-				result.halfPrimVar( ipe.G() ),
-				result.halfPrimVar( ipe.B() )
+				result.floatPrimVar( ipe.R() ),
+				result.floatPrimVar( ipe.G() ),
+				result.floatPrimVar( ipe.B() )
 			)
 
 			self.assert_( ( color - expectedColor).length() < 1.e-6 )

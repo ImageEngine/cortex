@@ -50,7 +50,18 @@ ImageWriter::ImageWriter( const std::string &description ) :
 		Writer( description, ImagePrimitiveTypeId)
 {
 	m_channelsParameter = new StringVectorParameter("channels", "The list of channels to write.  No list causes all channels to be written." );
+
 	parameters()->addParameter( m_channelsParameter );
+}
+
+StringVectorParameterPtr ImageWriter::channelNamesParameter()
+{
+	return m_channelsParameter;
+}
+
+ConstStringVectorParameterPtr ImageWriter::channelNamesParameter() const
+{
+	return m_channelsParameter;
 }
 
 bool ImageWriter::canWrite( ConstObjectPtr image, const string &fileName )
@@ -91,7 +102,6 @@ void ImageWriter::imageChannels( vector<string> &names ) const
 
 ConstImagePrimitivePtr ImageWriter::getImage() const
 {
-	/// \todo This case isn't good until we're making the input parameter accept only ImagePrimitive instances
 	return static_cast<const ImagePrimitive *>( object() );
 }
 

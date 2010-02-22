@@ -39,6 +39,7 @@
 #include <string>
 
 #include "IECore/Writer.h"
+#include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
 
 namespace IECore
@@ -56,6 +57,10 @@ class ImageWriter : public Writer
 
 		/// Checks that object is an ImagePrimitive instance
 		static bool canWrite( ConstObjectPtr object, const std::string &fileName );
+
+		/// The parameter specifying the channels to write.
+		StringVectorParameterPtr channelNamesParameter();
+		ConstStringVectorParameterPtr channelNamesParameter() const;
 
 		/// Convenience function to access the channels specified in parameters
 		void imageChannels( std::vector<std::string> &names ) const;
