@@ -145,7 +145,7 @@ void ImageReader::channelsToRead( vector<string> &names )
 	vector<string> allNames;
 	channelNames( allNames );
 
-	ConstStringVectorParameterPtr p = parameters()->parameter<StringVectorParameter>("channels");
+	ConstStringVectorParameterPtr p = channelNamesParameter();
 	const StringVectorData *d = static_cast<const StringVectorData *>( p->getValue() );
 
 	// give all channels when no list is provided
