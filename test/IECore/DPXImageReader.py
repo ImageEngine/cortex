@@ -52,6 +52,15 @@ class TestDPXReader(unittest.TestCase):
 		img = r.read()
 		self.assertEqual( type(img), ImagePrimitive )
 
+	def testRawRead(self):
+
+		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
+		self.assertEqual( type(r), DPXImageReader )
+		r['rawChannels'] = True
+		img = r.read()
+		self.assertEqual( type(img), ImagePrimitive )
+		self.assertEqual( type(img['R'].data), UShortVectorData )
+
 	def testReadHeader( self ):
 
 		r = Reader.create( "test/IECore/data/dpx/uvMap.512x256.dpx" )
