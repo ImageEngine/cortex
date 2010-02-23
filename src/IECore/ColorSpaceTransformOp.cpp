@@ -70,10 +70,14 @@ ColorSpaceTransformOp::ColorSpaceTransformOp()
 	);
 
 	StringVectorData::ValueType defaultChannels;
-	defaultChannels.push_back( "R,G,B" );
-	m_channelSetsParameter = new StringVectorParameter(
-		"channelSets",
-		"todo",
+	defaultChannels.push_back( "R" );
+	defaultChannels.push_back( "G" );
+	defaultChannels.push_back( "B" );
+	m_channelsParameter = new StringVectorParameter(
+		"channels",
+		"The names of all channels to convert on the image. "
+		"The order of the channels listed is important if the conversion is done by a ColorTransformOp. "
+		"In that case it is expected to receive Red,Green,Blue channels respectively.",
 		new StringVectorData( defaultChannels )
 	);
 
@@ -93,7 +97,7 @@ ColorSpaceTransformOp::ColorSpaceTransformOp()
 
 	parameters()->addParameter( m_inputColorSpaceParameter );
 	parameters()->addParameter( m_outputColorSpaceParameter );
-	parameters()->addParameter( m_channelSetsParameter );
+	parameters()->addParameter( m_channelsParameter );
 	parameters()->addParameter( m_alphaPrimVarParameter );
 	parameters()->addParameter( m_premultipliedParameter );
 }
@@ -122,14 +126,14 @@ ConstStringParameterPtr ColorSpaceTransformOp::outputColorSpaceParameter() const
 	return m_outputColorSpaceParameter;
 }
 
-StringVectorParameterPtr ColorSpaceTransformOp::channelSetsParameter()
+StringVectorParameterPtr ColorSpaceTransformOp::channelsParameter()
 {
-	return m_channelSetsParameter;
+	return m_channelsParameter;
 }
 
-ConstStringVectorParameterPtr ColorSpaceTransformOp::channelSetsParameter() const
+ConstStringVectorParameterPtr ColorSpaceTransformOp::channelsParameter() const
 {
-	return m_channelSetsParameter;
+	return m_channelsParameter;
 }
 
 StringParameterPtr ColorSpaceTransformOp::alphaPrimVarParameter()
@@ -327,22 +331,47 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, Const
 	std::vector< std::string > channelNames;
 	typedef std::vector< std::vector< std::string > > ChannelSets;
 	ChannelSets channelSets;
+	std::vector< std::string > channels;
 
-	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-	for ( std::vector< std::string >::const_iterator it = channelSetsParameter()->getTypedValue().begin(); it != channelSetsParameter()->getTypedValue().end(); ++it )
+	for ( std::vector< std::string >::const_iterator it = channelsParameter()->getTypedValue().begin(); it != channelsParameter()->getTypedValue().end(); ++it )
 	{
-		boost::tokenizer<boost::char_separator<char> > t( *it, char_separator<char>( ", " ) );
+		const std::string &channelName = *it;
 
-		std::vector< std::string > channels;
-		copy( t.begin(), t.end(), back_insert_iterator< std::vector< std::string > >( channels ) );
-		copy( t.begin(), t.end(), back_insert_iterator< std::vector< std::string > >( channelNames ) );
+		channelNames.push_back( channelName );
 
-		if ( channels.size() != 1 && channels.size() != 3 )
+		PrimitiveVariableMap::iterator channelIt = image->variables.find( channelName );
+		if( channelIt==image->variables.end() || !(channelIt->second.data) )
 		{
-			throw InvalidArgumentException( ( boost::format( "ColorSpaceTransformOp: Don't know what to do with channel set '%s' - must specify either 1 or 3 elements" ) % *it ).str()  );
+			throw Exception( str( format( "Channel \"%s\" does not exist." ) % channelName ) );
 		}
 
-		channelSets.push_back( channels );
+		TypeId type = channelIt->second.data->typeId();
+
+		if ( type == Color3fVectorDataTypeId || type == Color3dVectorDataTypeId )
+		{
+			// color data types define the three channels.
+
+			if ( channels.size() )
+			{
+				/// silently ignores malformed sets.
+				channels.clear();
+			}
+			channels.push_back( channelName );
+			channelSets.push_back( channels );
+			channels.clear();
+		}
+		else
+		{
+			// simple data types are assigned to one image channel.
+
+			channels.push_back( channelName );
+
+			if ( channels.size() == 3 )
+			{
+				channelSets.push_back( channels );
+				channels.clear();
+			}
+		}
 	}
 
 	bool first = true;

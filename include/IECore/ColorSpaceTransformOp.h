@@ -73,14 +73,10 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 		StringParameterPtr outputColorSpaceParameter();
 		ConstStringParameterPtr outputColorSpaceParameter() const;
 
-		/// Each string in the vector for this parameter should be a comma-separated list of either 1 or 3 items. If there's only 1 item it's assumed to
-		/// represent the colorPrimVar name, else it's assumed to represent red/green/blue
-		/// An example value might be ["R,G,B","diffuseR,diffuseG,diffuseB"]
-		/// When a ChannelOp is called, it would be passed R,G,B,diffuseR,diffuseG,diffuseB for the channelNames.
-		/// When a ColorTransformOp is called it would be executed twice, once with R, G, B set for the red/green/blue primVar names,
-		/// and once with diffuseR, diffuseG, diffuseB set.
-		StringVectorParameterPtr channelSetsParameter();
-		ConstStringVectorParameterPtr channelSetsParameter() const;
+		/// The order of the channels listed is important if the conversion is done by a ColorTransformOp.
+		/// In that case it is expected to receive Red,Green,Blue channels respectively.
+		StringVectorParameterPtr channelsParameter();
+		ConstStringVectorParameterPtr channelsParameter() const;
 
 		StringParameterPtr alphaPrimVarParameter();
 		ConstStringParameterPtr alphaPrimVarParameter() const;
@@ -122,7 +118,7 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 
 		StringParameterPtr m_inputColorSpaceParameter;
 		StringParameterPtr m_outputColorSpaceParameter;
-		StringVectorParameterPtr m_channelSetsParameter;
+		StringVectorParameterPtr m_channelsParameter;
 		StringParameterPtr m_alphaPrimVarParameter;
 		BoolParameterPtr m_premultipliedParameter;
 
