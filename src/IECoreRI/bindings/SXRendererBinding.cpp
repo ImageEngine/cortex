@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,25 +34,22 @@
 
 #include <boost/python.hpp>
 
-#include "IECoreRI/bindings/RendererBinding.h"
-#include "IECoreRI/bindings/SLOReaderBinding.h"
-
-#include "IECoreRI/bindings/PTCParticleReaderBinding.h"
-#include "IECoreRI/bindings/PTCParticleWriterBinding.h"
-#include "IECoreRI/bindings/RIBWriterBinding.h"
+#include "IECoreRI/SXRenderer.h"
 #include "IECoreRI/bindings/SXRendererBinding.h"
+#include "IECore/bindings/RunTimeTypedBinding.h"
 
-using namespace IECoreRI;
 using namespace boost::python;
+using namespace IECore;
 
-BOOST_PYTHON_MODULE( _IECoreRI )
+namespace IECoreRI
 {
-	bindRenderer();
-	bindSLOReader();
-#ifdef IECORERI_WITH_PTC
-	bindPTCParticleReader();
-	bindPTCParticleWriter();
-#endif // IECORERI_WITH_PTC
-	bindRIBWriter();
-	bindSXRenderer();	
+
+void bindSXRenderer()
+{
+	RunTimeTypedClass<SXRenderer>()
+		.def( init<>() )
+		.def( "shade", &SXRenderer::shade )
+	;
 }
+
+} // namespace IECoreRI

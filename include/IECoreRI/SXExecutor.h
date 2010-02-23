@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,27 +32,45 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECORERI_SXEXECUTOR_H
+#define IECORERI_SXEXECUTOR_H
 
-#include "IECoreRI/bindings/RendererBinding.h"
-#include "IECoreRI/bindings/SLOReaderBinding.h"
+#include "boost/noncopyable.hpp"
 
-#include "IECoreRI/bindings/PTCParticleReaderBinding.h"
-#include "IECoreRI/bindings/PTCParticleWriterBinding.h"
-#include "IECoreRI/bindings/RIBWriterBinding.h"
-#include "IECoreRI/bindings/SXRendererBinding.h"
+#include "sx.h"
 
-using namespace IECoreRI;
-using namespace boost::python;
+#include "IECore/CompoundData.h"
 
-BOOST_PYTHON_MODULE( _IECoreRI )
+namespace IECoreRI
 {
-	bindRenderer();
-	bindSLOReader();
-#ifdef IECORERI_WITH_PTC
-	bindPTCParticleReader();
-	bindPTCParticleWriter();
-#endif // IECORERI_WITH_PTC
-	bindRIBWriter();
-	bindSXRenderer();	
-}
+
+/// This class simplifies the execution of shaders using the Sx library by
+/// wrapping it to accept IECore datatypes for input and output.
+class SXExecutor : public boost::noncopyable
+{
+
+	public :
+	
+		/// Constructs an executor for the specified shader. It is the
+		/// caller's responsibility to ensure that the shader remains alive
+		/// for as long as the executor is in use. shader must be created with
+		/// SxCreateShader and shaderInfo must have been created for the same
+		/// shader using SxCreateShaderInfo - this is due to peculiarities of the Sx api.
+		SXExecutor( SxShader shader, SxShader shaderInfo );
+
+		/// Executes the shader for the specified points.
+		IECore::CompoundDataPtr execute( const IECore::CompoundData *points );
+
+	private :
+
+		struct OutputVariables;
+		struct InputVariables;
+
+		SxShader m_shader;
+		SxShader m_shaderInfo;
+
+};
+
+} // namespace IECoreRI
+
+#endif // IECORERI_SXEXECUTOR_H
