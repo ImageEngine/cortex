@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SPHERICALTOEUCLIDIANTRANSFORM_INL
-#define IE_CORE_SPHERICALTOEUCLIDIANTRANSFORM_INL
+#ifndef IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_INL
+#define IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_INL
 
 #include <cassert>
 
@@ -47,12 +47,12 @@ namespace IECore
 {
 
 template<typename F, typename T>
-SphericalToEuclidianTransform<F, T>::SphericalToEuclidianTransform()
+SphericalToEuclideanTransform<F, T>::SphericalToEuclideanTransform()
 {
 }
 
 template<typename F, typename T>
-T SphericalToEuclidianTransform<F, T>::transform( const F &f )
+T SphericalToEuclideanTransform<F, T>::transform( const F &f )
 {
 	typedef typename VectorTraits< T >::BaseType V;
 	V sinTheta = sin( f.y );
@@ -68,7 +68,7 @@ T SphericalToEuclidianTransform<F, T>::transform( const F &f )
 }
 
 template<typename F, typename T>
-typename SphericalToEuclidianTransform<F, T>::InverseType SphericalToEuclidianTransform<F, T>::inverse() const
+typename SphericalToEuclideanTransform<F, T>::InverseType SphericalToEuclideanTransform<F, T>::inverse() const
 {
 	return InverseType();
 }
@@ -76,5 +76,5 @@ typename SphericalToEuclidianTransform<F, T>::InverseType SphericalToEuclidianTr
 
 } // namespace IECore
 
-#endif // IE_CORE_SPHERICALTOEUCLIDIANTRANSFORM_INL
+#endif // IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_INL
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,7 +34,7 @@
 
 #include <cassert>
 #include "OpenEXR/ImathRandom.h"
-#include "IECore/SphericalToEuclidianTransform.h"
+#include "IECore/SphericalToEuclideanTransform.h"
 
 namespace IECore
 {
@@ -44,7 +44,7 @@ template < typename V >
 SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( unsigned int samples, unsigned long int seed ) : 
 	m_bands( 0 ),
 	m_sphericalCoordinates(), 
-	m_euclidianCoordinates(),
+	m_euclideanCoordinates(),
 	m_shEvaluations(),
 	m_weights( 0 )
 {
@@ -86,7 +86,7 @@ template < typename V >
 SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates ) : 
 	m_bands( 0 ),
 	m_sphericalCoordinates( sphericalCoordinates ), 
-	m_euclidianCoordinates( 0 ),
+	m_euclideanCoordinates( 0 ),
 	m_shEvaluations(),
 	m_weights( 0 )
 {
@@ -96,7 +96,7 @@ template < typename V >
 SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< Imath::Vec2< V > > &sphericalCoordinates, const std::vector< V > &weights ) :
 	m_bands( 0 ),
 	m_sphericalCoordinates( sphericalCoordinates ), 
-	m_euclidianCoordinates( 0 ),
+	m_euclideanCoordinates( 0 ),
 	m_shEvaluations(),
 	m_weights( weights )
 {
@@ -104,20 +104,20 @@ SphericalHarmonicsProjector<V>::SphericalHarmonicsProjector( const std::vector< 
 }
 
 template < typename V >
-const std::vector< Imath::Vec3< V > > &SphericalHarmonicsProjector<V>::euclidianCoordinates() const
+const std::vector< Imath::Vec3< V > > &SphericalHarmonicsProjector<V>::euclideanCoordinates() const
 {
-	if (!m_euclidianCoordinates.size())
+	if (!m_euclideanCoordinates.size())
 	{
-		m_euclidianCoordinates.resize( m_sphericalCoordinates.size() );
-		typename std::vector< Imath::Vec3<V> >::iterator it = m_euclidianCoordinates.begin();
+		m_euclideanCoordinates.resize( m_sphericalCoordinates.size() );
+		typename std::vector< Imath::Vec3<V> >::iterator it = m_euclideanCoordinates.begin();
 		typename std::vector< Imath::Vec2<V> >::const_iterator cit = m_sphericalCoordinates.begin();
-		SphericalToEuclidianTransform< Imath::Vec2<V>, Imath::Vec3<V> > spaceConverter;
-		for ( ; it != m_euclidianCoordinates.end(); it++, cit++ )
+		SphericalToEuclideanTransform< Imath::Vec2<V>, Imath::Vec3<V> > spaceConverter;
+		for ( ; it != m_euclideanCoordinates.end(); it++, cit++ )
 		{
 			*it = spaceConverter.transform( *cit );
 		}
 	}
-	return m_euclidianCoordinates;
+	return m_euclideanCoordinates;
 }
 
 template< typename V >
@@ -209,14 +209,14 @@ void SphericalHarmonicsProjector<V>::euclideanProjection( T functor, SphericalHa
 	computeSamples( result.bands() );
 
 	// make sure our internal object is created.
-	euclidianCoordinates();
+	euclideanCoordinates();
 	
 	// zero coefficients to start accumulation.
 	for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
 	{
 		*rit = U(0);
 	}
-	typename std::vector< Imath::Vec3<V> >::const_iterator cit = m_euclidianCoordinates.begin();
+	typename std::vector< Imath::Vec3<V> >::const_iterator cit = m_euclideanCoordinates.begin();
 	if ( m_weights.size() )
 	{
 		typename std::vector< V >::const_iterator wit = m_weights.begin();

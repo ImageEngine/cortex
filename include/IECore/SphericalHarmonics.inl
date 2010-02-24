@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 #include <cassert>
 #include "IECore/VectorTraits.h"
 #include "IECore/RealSphericalHarmonicFunction.h"
-#include "IECore/EuclidianToSphericalTransform.h"
+#include "IECore/EuclideanToSphericalTransform.h"
 
 namespace IECore
 {
@@ -95,13 +95,13 @@ V SphericalHarmonics<V>::operator() ( const Imath::Vec2< BaseType > &phiTheta, u
 template < typename V >
 V SphericalHarmonics<V>::operator() ( const Imath::Vec3< BaseType > &xyz ) const
 {
-	return operator()( EuclidianToSphericalTransform< Imath::Vec3< BaseType >, Imath::Vec2< BaseType > >().transform( xyz ), m_bands );
+	return operator()( EuclideanToSphericalTransform< Imath::Vec3< BaseType >, Imath::Vec2< BaseType > >().transform( xyz ), m_bands );
 }
 
 template < typename V >
 V SphericalHarmonics<V>::operator() ( const Imath::Vec3< BaseType > &xyz, unsigned int bands ) const
 {
-	return operator()( EuclidianToSphericalTransform< Imath::Vec3< BaseType >, Imath::Vec2< BaseType > >().transform( xyz ), bands );
+	return operator()( EuclideanToSphericalTransform< Imath::Vec3< BaseType >, Imath::Vec2< BaseType > >().transform( xyz ), bands );
 }
 
 template< typename V >

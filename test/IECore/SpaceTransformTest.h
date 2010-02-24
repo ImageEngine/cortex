@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,8 +43,8 @@
 #include <OpenEXR/ImathRandom.h>
 
 #include "OpenEXR/ImathVec.h"
-#include "IECore/EuclidianToSphericalTransform.h"
-#include "IECore/SphericalToEuclidianTransform.h"
+#include "IECore/EuclideanToSphericalTransform.h"
+#include "IECore/SphericalToEuclideanTransform.h"
 
 using namespace Imath;
 
@@ -53,13 +53,13 @@ namespace IECore
 
 void addSpaceTransformTest(boost::unit_test::test_suite* test);
 
-struct EuclidianSphericalTest
+struct EuclideanSphericalTest
 {
 	void test()
 	{
 		Imath::Rand32 r( 88 );
-		SphericalToEuclidianTransform< Imath::V3f, Imath::V3f > sph2euc;
-		EuclidianToSphericalTransform< Imath::V3f, Imath::V3f > euc2sph;
+		SphericalToEuclideanTransform< Imath::V3f, Imath::V3f > sph2euc;
+		EuclideanToSphericalTransform< Imath::V3f, Imath::V3f > euc2sph;
 
 		BOOST_CHECK( Imath::V3f( 0, 0, 2 ).equalWithAbsError( sph2euc( Imath::V3f( 0, 0, 2 ) ), 0.01 ) );
 		BOOST_CHECK( Imath::V3f( 2, 0, 0 ).equalWithAbsError( sph2euc( Imath::V3f( 0, M_PI * 0.5, 2 ) ), 0.01 ) );
@@ -80,8 +80,8 @@ struct EuclidianSphericalTest
 	void testNormalized()
 	{
 		Imath::Rand32 r( 88 );
-		SphericalToEuclidianTransform< Imath::V2f, Imath::V3f > sph2euc;
-		EuclidianToSphericalTransform< Imath::V3f, Imath::V2f > euc2sph;
+		SphericalToEuclideanTransform< Imath::V2f, Imath::V3f > sph2euc;
+		EuclideanToSphericalTransform< Imath::V3f, Imath::V2f > euc2sph;
 
 		BOOST_CHECK( Imath::V3f( 0, 0, 1 ).equalWithAbsError( sph2euc( Imath::V2f( 0, 0 ) ), 0.01 ) );
 		BOOST_CHECK( Imath::V3f( 1, 0, 0 ).equalWithAbsError( sph2euc( Imath::V2f( 0, M_PI * 0.5 ) ), 0.01 ) );
@@ -108,15 +108,15 @@ struct SpaceTransformTestSuite : public boost::unit_test::test_suite
 
 	SpaceTransformTestSuite() : boost::unit_test::test_suite( "SpaceTransformTestSuite" )
 	{
-		static boost::shared_ptr<EuclidianSphericalTest> instance( new EuclidianSphericalTest() );
+		static boost::shared_ptr<EuclideanSphericalTest> instance( new EuclideanSphericalTest() );
 
-		testEuclidianSpherical( instance );
+		testEuclideanSpherical( instance );
 	}
 
-	void testEuclidianSpherical( boost::shared_ptr<EuclidianSphericalTest> instance )
+	void testEuclideanSpherical( boost::shared_ptr<EuclideanSphericalTest> instance )
 	{
-		add( BOOST_CLASS_TEST_CASE( &EuclidianSphericalTest::test, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &EuclidianSphericalTest::testNormalized, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &EuclideanSphericalTest::test, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &EuclideanSphericalTest::testNormalized, instance ) );
 	}
 
 };

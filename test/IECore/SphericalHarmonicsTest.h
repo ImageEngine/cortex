@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,15 +71,15 @@ class SphericalHarmonicsProjectorTest
 		// tests 3D functor with polar coordinates
 		void testPolarProjection3D();
 
-		// tests 1D functor with euclidian coordinates
-		void testEuclidianProjection1D();
+		// tests 1D functor with euclidean coordinates
+		void testEuclideanProjection1D();
 
-		// tests 3D functor with euclidian coordinates
-		void testEuclidianProjection3D();
+		// tests 3D functor with euclidean coordinates
+		void testEuclideanProjection3D();
 
 
-		static T euclidian1DFunctor( const Imath::Vec3<T> &pos );
-		static Imath::Vec3<T> euclidian3DFunctor( const Imath::Vec3<T> &pos );
+		static T euclidean1DFunctor( const Imath::Vec3<T> &pos );
+		static Imath::Vec3<T> euclidean3DFunctor( const Imath::Vec3<T> &pos );
 
 	private:
 
@@ -138,8 +138,8 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testProjection), instance ) );
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testPolarProjection1D), instance ) );
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testPolarProjection3D), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclidianProjection1D), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclidianProjection3D), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclideanProjection1D), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclideanProjection3D), instance ) );
 	}
 
 	template< typename T >

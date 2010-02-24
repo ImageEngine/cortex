@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SPHERICALTOEUCLIDIANTRANSFORM_H
-#define IE_CORE_SPHERICALTOEUCLIDIANTRANSFORM_H
+#ifndef IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_H
+#define IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_H
 
 #include "IECore/SpaceTransform.h"
 #include "boost/static_assert.hpp"
@@ -44,22 +44,21 @@ namespace IECore
 {
 
 /// Forward declaration
-template< typename, typename > class EuclidianToSphericalTransform;
+template< typename, typename > class EuclideanToSphericalTransform;
 
-/// A templated SpaceTransform class to perform Spherical coordinates to Euclidian coordinates.
+/// A templated SpaceTransform class to perform Spherical coordinates to Euclidean coordinates.
 /// Spherical coordinates are defined by two angles: phi and theta stored in x and y components of a Imath::Vec2 structure respectively. They can optionally have a third component specifying the radius. So type F can be either Imath::Vec2<> or Imath::Vec3<>.
 /// The theta ranges from 0 to PI and it represents the angle from Z axis. The phi component ranges from 0 to 2*PI and represents the angle of rotation on the XY plane.
-/// \todo We should probably use the more popular spelling of Euclidean.
 template<typename F, typename T>
-class SphericalToEuclidianTransform : public SpaceTransform< F, T >
+class SphericalToEuclideanTransform : public SpaceTransform< F, T >
 {
 	public:
 		BOOST_STATIC_ASSERT( (boost::mpl::or_< TypeTraits::IsVec3<F>, TypeTraits::IsVec2<F> >::value == true) );
 		BOOST_STATIC_ASSERT( (TypeTraits::IsVec3<T>::value) );
 
-		typedef EuclidianToSphericalTransform< T, F > InverseType;
+		typedef EuclideanToSphericalTransform< T, F > InverseType;
 
-		SphericalToEuclidianTransform();
+		SphericalToEuclideanTransform();
 
 		/// Perform the conversion. The x component should be in the range [0,2*M_PI] and the second [0,M_PI]
 		virtual T transform( const F &f );
@@ -68,13 +67,13 @@ class SphericalToEuclidianTransform : public SpaceTransform< F, T >
 		InverseType inverse() const;
 };
 
-typedef SphericalToEuclidianTransform<Imath::V2f, Imath::V3f> SphericalToEuclidianTransform2f3f;
-typedef SphericalToEuclidianTransform<Imath::V3f, Imath::V3f> SphericalToEuclidianTransform3f3f;
-typedef SphericalToEuclidianTransform<Imath::V2d, Imath::V3d> SphericalToEuclidianTransform2d3d;
-typedef SphericalToEuclidianTransform<Imath::V3d, Imath::V3d> SphericalToEuclidianTransform3d3d;
+typedef SphericalToEuclideanTransform<Imath::V2f, Imath::V3f> SphericalToEuclideanTransform2f3f;
+typedef SphericalToEuclideanTransform<Imath::V3f, Imath::V3f> SphericalToEuclideanTransform3f3f;
+typedef SphericalToEuclideanTransform<Imath::V2d, Imath::V3d> SphericalToEuclideanTransform2d3d;
+typedef SphericalToEuclideanTransform<Imath::V3d, Imath::V3d> SphericalToEuclideanTransform3d3d;
 
 } // namespace IECore
 
-#include "IECore/SphericalToEuclidianTransform.inl"
+#include "IECore/SphericalToEuclideanTransform.inl"
 
-#endif // IE_CORE_SPHERICALTOEUCLIDIANTRANSFORM_H
+#endif // IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_H

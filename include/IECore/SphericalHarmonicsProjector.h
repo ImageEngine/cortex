@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -77,8 +77,8 @@ class SphericalHarmonicsProjector
 			return m_sphericalCoordinates;
 		}
 
-		// returns all the sample coordinates in euclidian space ( unit vector in 3D space ).
-		const std::vector< Imath::Vec3< V > > &euclidianCoordinates() const;
+		// returns all the sample coordinates in euclidean space ( unit vector in 3D space ).
+		const std::vector< Imath::Vec3< V > > &euclideanCoordinates() const;
 
 		// returns the weights for each sample. In case it's uniform distribution it returns empty array.
 		const std::vector< V > &weights() const
@@ -116,7 +116,7 @@ class SphericalHarmonicsProjector
 
 		mutable unsigned int m_bands;
 		std::vector< Imath::Vec2< V > > m_sphericalCoordinates;
-		mutable std::vector< Imath::Vec3< V > > m_euclidianCoordinates;
+		mutable std::vector< Imath::Vec3< V > > m_euclideanCoordinates;
 		mutable EvaluationSamples m_shEvaluations;
 		std::vector< V > m_weights;
 };
