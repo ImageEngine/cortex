@@ -118,20 +118,30 @@ struct SXExecutor::InputVariables
 		void addVariable( const Data *d, const char *name )
 		{
 			typedef IECore::TypedData<std::vector<T> > Data;
-			m_predefinedVarNames.push_back( name );
-			m_varSizes.push_back( sizeof( T ) );
-			m_sizeOfPoint += sizeof( T);
 			if( d )
 			{
+				m_predefinedVarNames.push_back( name );
+				m_varSizes.push_back( sizeof( T ) );
 				const Data *td = static_cast<const Data *>( d );
 				m_varData.push_back( reinterpret_cast<const char *>( &(td->readable()[0]) ) );
 				m_varStrides.push_back( sizeof( T ) );
+				m_sizeOfPoint += sizeof( T);
 			}
 			else
 			{
-				// no data available, fall back to default values.
+				// no data available, fall back to default values if we don't thing they'll
+				// be provided by attributes. for some things (like "t") the Sx library will
+				// crash if they're not specified, but for others (like "Cs") it'll provide
+				// a default value from the attribute state and we don't want to overwrite that.
+				if( 0==strcmp( name, "Cs" ) || 0==strcmp( name, "Os" ) )
+				{
+					return;
+				}
+				m_predefinedVarNames.push_back( name );
+				m_varSizes.push_back( sizeof( T ) );
 				m_varData.push_back( reinterpret_cast<const char *>( g_zeroes ) );
 				m_varStrides.push_back( 0 );
+				m_sizeOfPoint += sizeof( T);
 			}
 		}
 	
