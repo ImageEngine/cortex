@@ -38,6 +38,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/Shader.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/SplineData.h"
 #include "IECore/MatrixAlgo.h"
 #include "IECore/Transform.h"
 #include "IECore/MatrixTransform.h"
@@ -210,7 +211,59 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 				break;
 			case Color3fDataTypeId :
 				SxSetParameter( parameterList, it->first.value().c_str(), SxColor, (void *)&(static_cast<const Color3fData *>( it->second.get() )->readable() ) );
+				break;
+			case SplineffDataTypeId :
+			{
+				const IECore::Splineff &spline = static_cast<const SplineffData *>( it->second.get() )->readable();
+				size_t size = spline.points.size();
+				if( size )
+				{
+					vector<float> positions( size );
+					vector<float> values( size );
+					size_t i = 0;
+					for( IECore::Splineff::PointContainer::const_iterator sIt=spline.points.begin(); sIt!=spline.points.end(); sIt++ )
+					{
+						positions[i] = sIt->first;
+						values[i] = sIt->second;
+						i++;
+					}
+					string positionsName = it->first.value() + "Positions";
+					string valuesName = it->first.value() + "Values";
+					SxSetParameter( parameterList, positionsName.c_str(), SxFloat, &(positions[0]), false, size );
+					SxSetParameter( parameterList, valuesName.c_str(), SxFloat, &(values[0]), false, size );
+				}
+				else
+				{
+					msg( Msg::Warning, "IECoreRI::SXRendererImplementation::shader", boost::format( "SplinefColor3f parameter \"%s\" has no points and will be ignored" ) % it->second->typeName() );
+				}
 				break;	
+			}
+			case SplinefColor3fDataTypeId :
+			{
+				const IECore::SplinefColor3f &spline = static_cast<const SplinefColor3fData *>( it->second.get() )->readable();
+				size_t size = spline.points.size();
+				if( size )
+				{
+					vector<float> positions( size );
+					vector<Color3f> values( size );
+					size_t i = 0;
+					for( IECore::SplinefColor3f::PointContainer::const_iterator sIt=spline.points.begin(); sIt!=spline.points.end(); sIt++ )
+					{
+						positions[i] = sIt->first;
+						values[i] = sIt->second;
+						i++;
+					}
+					string positionsName = it->first.value() + "Positions";
+					string valuesName = it->first.value() + "Values";
+					SxSetParameter( parameterList, positionsName.c_str(), SxFloat, &(positions[0]), false, size );
+					SxSetParameter( parameterList, valuesName.c_str(), SxColor, &(values[0]), false, size );
+				}
+				else
+				{
+					msg( Msg::Warning, "IECoreRI::SXRendererImplementation::shader", boost::format( "SplinefColor3f parameter \"%s\" has no points and will be ignored" ) % it->second->typeName() );
+				}
+				break;	
+			}
 			default :
 				msg( Msg::Warning, "IECoreRI::SXRendererImplementation::shader", boost::format( "Unsupported parameter type \"%s\"" ) % it->second->typeName() );
 		}

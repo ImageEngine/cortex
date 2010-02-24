@@ -45,6 +45,9 @@ using namespace std;
 // InputVariables implementation
 //////////////////////////////////////////////////////////////////////////
 
+// enough zeroes for the default value of all types up to matrix
+static float g_zeroes[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
 struct SXExecutor::InputVariables
 {
 	public :
@@ -60,15 +63,12 @@ struct SXExecutor::InputVariables
 			SxGetPredefinedParameters( shader, &(predefinedParameters[0]), numPredefinedParameters );
 		
 			for( unsigned i=0; i<numPredefinedParameters; i++ )
-			{
-				const Data *d = points->member<Data>( predefinedParameters[i] );
-				if( !d )
-				{
-					continue;
-				}
-
+			{				
 				IECore::TypeId expectedType = predefinedParameterType( predefinedParameters[i] );
-				if( !d->isInstanceOf( expectedType ) )
+			
+				const Data *d = points->member<Data>( predefinedParameters[i] );
+				
+				if( d && !d->isInstanceOf( expectedType ) )
 				{
 					throw Exception( boost::str( boost::format( "Variable \"%s\" has wrong type (\"%s\" but should be \"%s\")." ) % predefinedParameters[i] % d->typeName() % RunTimeTyped::typeNameFromTypeId( expectedType ) ) );
 				}
@@ -106,7 +106,7 @@ struct SXExecutor::InputVariables
 			char *shadingPointData = &(storage[0]);
 			for( unsigned j=0; j<m_predefinedVarNames.size(); j++ )
 			{
-				memcpy( shadingPointData, m_varData[j] + m_varSizes[j] * pointIndex, m_varSizes[j] );
+				memcpy( shadingPointData, m_varData[j] + m_varStrides[j] * pointIndex, m_varSizes[j] );
 				SxSetPredefinedParameter( parameters, m_predefinedVarNames[j].c_str(), shadingPointData );
 				shadingPointData += m_varSizes[j];
 			}
@@ -118,11 +118,21 @@ struct SXExecutor::InputVariables
 		void addVariable( const Data *d, const char *name )
 		{
 			typedef IECore::TypedData<std::vector<T> > Data;
-			const Data *td = static_cast<const Data *>( d );
 			m_predefinedVarNames.push_back( name );
-			m_varData.push_back( reinterpret_cast<const char *>( &(td->readable()[0]) ) );
 			m_varSizes.push_back( sizeof( T ) );
 			m_sizeOfPoint += sizeof( T);
+			if( d )
+			{
+				const Data *td = static_cast<const Data *>( d );
+				m_varData.push_back( reinterpret_cast<const char *>( &(td->readable()[0]) ) );
+				m_varStrides.push_back( sizeof( T ) );
+			}
+			else
+			{
+				// no data available, fall back to default values.
+				m_varData.push_back( reinterpret_cast<const char *>( g_zeroes ) );
+				m_varStrides.push_back( 0 );
+			}
 		}
 	
 		static IECore::TypeId predefinedParameterType( const char *name )
@@ -136,6 +146,22 @@ struct SXExecutor::InputVariables
 			{
 				return V3fVectorDataTypeId;
 			}
+			else if(
+				strcmp( name, "s" )==0 ||
+				strcmp( name, "t" )==0
+			)
+			{
+				return FloatVectorDataTypeId;
+			}
+			else if(
+				strcmp( name, "Cs" )==0 ||
+				strcmp( name, "Os" )==0 ||
+				strcmp( name, "Ci" )==0 ||
+				strcmp( name, "Oi" )==0
+			)
+			{
+				return Color3fVectorDataTypeId;
+			}
 
 			throw Exception( boost::str( boost::format( "Unknown predefined parameter \"%s\"" ) % name ) ); 
 		}
@@ -145,7 +171,9 @@ struct SXExecutor::InputVariables
 		std::vector<std::string> m_predefinedVarNames;
 		std::vector<const char *> m_varData;
 		std::vector<size_t> m_varSizes;
+		std::vector<size_t> m_varStrides;
 		size_t m_sizeOfPoint; // size of data requirements for all variables for a single point
+		
 
 };
 

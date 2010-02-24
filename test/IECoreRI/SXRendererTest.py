@@ -82,6 +82,30 @@ class SXRendererTest( unittest.TestCase ) :
 			image["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, b )
 			
 		IECore.Writer.create( image, fileName ).write()
+	
+	def __rectanglePoints( self, box ) :
+	
+		p = IECore.V3fVectorData()
+		n = IECore.V3fVectorData()
+		i = IECore.V3fVectorData()
+		s = IECore.FloatVectorData()
+		t = IECore.FloatVectorData()
+		for y in range( box.min.y, box.max.y + 1 ) :
+			for x in range( box.min.x, box.max.x + 1 ) :
+				p.append( IECore.V3f( x, y, 0 ) )
+				n.append( IECore.V3f( 0, 0, 1 ) )
+				i.append( IECore.V3f( 0, 0, -1 ) )
+				s.append( float( x ) / box.size().x )
+				t.append( float( y ) / box.size().y )
+				
+		return IECore.CompoundData( {
+			"P" : p,
+			"N" : n,
+			"Ng" : n,
+			"I" : i,
+			"s" : s,
+			"t" : t,
+		} )
 		
 	def test( self ) :
 
@@ -112,11 +136,55 @@ class SXRendererTest( unittest.TestCase ) :
 		self.assertEqual( s["outputColor"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowColor.cob" ).read() )
 		self.assertEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowCI.cob" ).read() )
 		self.assertEqual( s["Oi"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/cowOI.cob" ).read() )
+	
+	def testSplineParameter( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/splineTest.sdl test/IECoreRI/shaders/splineTest.sl" ), 0 )
+
+		r = IECoreRI.SXRenderer()
+		
+		
+		r.shader( "surface", "test/IECoreRI/shaders/splineTest.sdl", {
+			"spl" : IECore.SplinefColor3fData(
+				IECore.SplinefColor3f(
+					IECore.CubicBasisf.catmullRom(),
+					(
+						( 0, IECore.Color3f( 1, 0, 0 ) ),
+						( 0, IECore.Color3f( 1, 0, 0 ) ),
+						( 1, IECore.Color3f( 0, 0, 1 ) ),
+						( 1, IECore.Color3f( 0, 0, 1 ) ),
+					)
+				)
+			)
+		} )
+				
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 10 ) )
+
+		s = r.shade( self.__rectanglePoints( b ) )
+		
+		self.assertEqual( s["Ci"], IECore.ObjectReader( "test/IECoreRI/data/sxOutput/spline.cob" ).read() )
+			
+	# the sx library seems to crash if we don't provide every single predefined variable
+	# it wants. but we want to allow users to not specify everything if they don't want to,
+	# so we try to provide defaults to prevent the crash.
+	def testMissingPredefinedVariables( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/splineTest.sdl test/IECoreRI/shaders/splineTest.sl" ), 0 )
+		r = IECoreRI.SXRenderer()
+		
+		r.shader( "surface", "test/IECoreRI/shaders/splineTest.sdl", {} )
+				
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 100 ) )
+		points = self.__rectanglePoints( b )
+		del points["t"] # remove information the shader requires
+
+		s = r.shade( points )
 			
 	def tearDown( self ) :
 		
 		files = [
 			"test/IECoreRI/shaders/sxTest.sdl",
+			"test/IECoreRI/shaders/splineTest.sdl",
 		]
 		
 		for f in files :
