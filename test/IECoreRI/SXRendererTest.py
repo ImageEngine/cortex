@@ -179,12 +179,36 @@ class SXRendererTest( unittest.TestCase ) :
 		del points["t"] # remove information the shader requires
 
 		s = r.shade( points )
+	
+	def testParameterTypes( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxParameterTest.sdl test/IECoreRI/shaders/sxParameterTest.sl" ), 0 )
+
+		r = IECoreRI.SXRenderer()
+		
+		print 1
+		
+		r.shader( "surface", "test/IECoreRI/shaders/sxParameterTest.sdl", {
+			"mustBeOne" : 1.0,
+			"mustBeRed" : IECore.Color3f( 1, 0, 0 ),
+			"mustBeTwo" : IECore.V3f( 2 ),
+			"mustBeThree" : IECore.V3f( 3 ),
+			"mustBeFour" : IECore.V3f( 4 ),
+			"mustBeHelloWorld" : "helloWorld"
+		} )
+				
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
+
+		s = r.shade( self.__rectanglePoints( b ) )
+		
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 0, 1, 0 ) )
 			
 	def tearDown( self ) :
 		
 		files = [
 			"test/IECoreRI/shaders/sxTest.sdl",
 			"test/IECoreRI/shaders/splineTest.sdl",
+			"test/IECoreRI/shaders/sxParameterTest.sdl",
 		]
 		
 		for f in files :

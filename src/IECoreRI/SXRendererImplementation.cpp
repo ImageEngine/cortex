@@ -200,6 +200,8 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 	{
 		msg( Msg::Error, "IECoreRI::SXRendererImplementation::shader", boost::format( "Unsupported shader type \"%s\"" ) % type );
 	}
+
+	m_shaderInfo = SxCreateShaderInfo( m_context, name.c_str() );
 	
 	SxParameterList parameterList = SxCreateShaderParameterList( m_context );
 	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
@@ -209,9 +211,47 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 			case FloatDataTypeId :
 				SxSetParameter( parameterList, it->first.value().c_str(), SxFloat, (void *)&(static_cast<const FloatData *>( it->second.get() )->readable() ) );
 				break;
+			case V3fDataTypeId :
+				{
+					unsigned numParameters = SxGetNumParameters( m_shaderInfo );
+					SxType type = SxInvalid;
+					for( unsigned i=0; i<numParameters; i++ )
+					{
+						bool varying;
+						SxData defaultValue;
+						unsigned arraySize;
+						const char *name = SxGetParameterInfo( m_shaderInfo, i, &type, &varying, &defaultValue, &arraySize );
+						if( 0==strcmp( name, it->first.value().c_str() ) )
+						{
+							break;
+						}
+						else
+						{
+							type = SxInvalid;
+						}
+					}
+					if( type==SxPoint || type==SxVector || type==SxNormal )
+					{
+						SxSetParameter( parameterList, it->first.value().c_str(), type, (void *)&(static_cast<const V3fData *>( it->second.get() )->readable() ) );
+					}
+					else
+					{
+						msg( Msg::Warning, "IECoreRI::SXRendererImplementation::shader", boost::format( "Parameter \"%s\" is not a point, vector or normal and will be ignored" ) % it->second->typeName() );
+					}
+					break;
+				}
 			case Color3fDataTypeId :
 				SxSetParameter( parameterList, it->first.value().c_str(), SxColor, (void *)&(static_cast<const Color3fData *>( it->second.get() )->readable() ) );
 				break;
+			case M33fDataTypeId :
+				SxSetParameter( parameterList, it->first.value().c_str(), SxMatrix, (void *)&(static_cast<const M33fData *>( it->second.get() )->readable() ) );
+				break;
+			case StringDataTypeId :
+				{
+					const char *s = static_cast<const StringData *>( it->second.get() )->readable().c_str();
+					SxSetParameter( parameterList, it->first.value().c_str(), SxString, &s );
+					break;
+				}
 			case SplineffDataTypeId :
 			{
 				const IECore::Splineff &spline = static_cast<const SplineffData *>( it->second.get() )->readable();
@@ -270,7 +310,6 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 	}
 	
 	m_shader = SxCreateShader( m_context, parameterList, name.c_str(), sxType );
-	m_shaderInfo = SxCreateShaderInfo( m_context, name.c_str() );
 	
 }
 
