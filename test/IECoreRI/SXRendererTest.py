@@ -185,9 +185,7 @@ class SXRendererTest( unittest.TestCase ) :
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxParameterTest.sdl test/IECoreRI/shaders/sxParameterTest.sl" ), 0 )
 
 		r = IECoreRI.SXRenderer()
-		
-		print 1
-		
+				
 		r.shader( "surface", "test/IECoreRI/shaders/sxParameterTest.sdl", {
 			"mustBeOne" : 1.0,
 			"mustBeRed" : IECore.Color3f( 1, 0, 0 ),
