@@ -72,7 +72,6 @@ class Spline
 		Spline( const Basis &basis, const PointContainer &points );
 
 		/// Returns the range of the spline in the X direction.
-		/// \todo This function actually returns the extreme control points. It should compute x at t=0 and t=1 instead.
 		XInterval interval() const;
 
 		/// Find the appropriate segment and parametric position to determine
@@ -103,7 +102,7 @@ class Spline
 
 		inline Y integral( X t0, X t1, typename PointContainer::const_iterator segment ) const;
 		inline Y integral( X t0, typename PointContainer::const_iterator segment0, X t1, typename PointContainer::const_iterator segment1 ) const;
-
+		inline typename PointContainer::const_iterator lastValidSegment() const;
 };
 
 typedef Spline<float, float> Splineff;
