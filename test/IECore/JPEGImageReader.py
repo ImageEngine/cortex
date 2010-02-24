@@ -127,6 +127,7 @@ class TestJPEGReader(unittest.TestCase):
 	def testDataWindowRead( self ):
 
 		r = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" )
+		r['colorSpace'] = 'linear'
 		self.assertEqual( type(r), JPEGImageReader )
 
 		dataWindow = Box2i(
@@ -180,7 +181,9 @@ class TestJPEGReader(unittest.TestCase):
 	def testOrientation( self ) :
 		""" Test orientation of JPEG files """
 
-		img = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" ).read()
+		r = Reader.create( "test/IECore/data/jpg/uvMap.512x256.jpg" )
+		r['colorSpace'] = 'linear'
+		img = r.read()
 
 		ipe = PrimitiveEvaluator.create( img )
 		self.assert_( ipe.R() )

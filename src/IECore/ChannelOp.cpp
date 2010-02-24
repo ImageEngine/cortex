@@ -112,11 +112,9 @@ void ChannelOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObje
 			throw Exception( str( format( "Primitive variable \"%s\" has no data." ) % channelNames[i] ) );
 		}
 
-		if( !it->second.data->isInstanceOf( FloatVectorData::staticTypeId() ) &&
-			!it->second.data->isInstanceOf( HalfVectorData::staticTypeId() ) &&
-			!it->second.data->isInstanceOf( IntVectorData::staticTypeId() ) )
+		if( !it->second.data->isInstanceOf( FloatVectorData::staticTypeId() ) )
 		{
-			throw Exception( str( format( "Primitive variable \"%s\" has inappropriate type." ) % channelNames[i] ) );
+			throw Exception( str( format( "Primitive variable \"%s\" is not a float vector." ) % channelNames[i] ) );
 		}
 
 		size_t size = despatchTypedData<TypedDataSize>( it->second.data );

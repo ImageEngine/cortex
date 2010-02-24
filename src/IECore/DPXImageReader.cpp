@@ -40,9 +40,7 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/BoxOps.h"
-#include "IECore/CompoundDataConversion.h"
 #include "IECore/ScaledDataConversion.h"
-#include "IECore/CineonToLinearDataConversion.h"
 
 #include "IECore/private/dpx.h"
 
@@ -139,16 +137,15 @@ Box2i DPXImageReader::displayWindow()
 
 std::string DPXImageReader::sourceColorSpace() const
 {
-	/// This isn't strictly true, but as the reader currently stands it performs the Cineon-Linear
-	/// conversion for us. Eventually, this will start returning "cineon", and the ImageReader base
-	/// class will handle the appropriate color conversions.
-	return "linear";
+	return "cineon";
 }
 
 /// \todo
 /// we assume here CIN coding in the 'typical' configuration (output by film dumps, nuke, etc).
-/// this is RGB 10bit log for film, pixel-interlaced data. We convert this applying 
-/// domain scale as necessary and applying Cineon to Linear conversion.
+/// this is RGB 10bit log for film, pixel-interlaced data. We convert this to unsigned short 
+/// (using the whole range of 16 bits available ) and then it's converted to the given 
+/// typename V applying domain scale as necessary. Note that there's no cineon to linear conversion as
+/// it's now up to the base class to do it.
 template<typename V>
 DataPtr DPXImageReader::readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow )
 {
@@ -157,6 +154,8 @@ DataPtr DPXImageReader::readTypedChannel( const std::string &name, const Imath::
 	/// \todo
 	// kinda useless here, we have implicitly assumed log 10 bit in the surrounding code
 	int bpp = 10;
+	// that's the bit offset necessary to scale the channel values to unsigned short range of values.
+	int ushortShift = sizeof(unsigned short)*8 - bpp;
 
 	/// \todo
 	// figure out the offset into the bitstream for the given channel
@@ -170,10 +169,7 @@ DataPtr DPXImageReader::readTypedChannel( const std::string &name, const Imath::
 	}
 	mask <<= ((32 - bpp) - channelOffset * bpp);
 
-	CompoundDataConversion<
-		CineonToLinearDataConversion<unsigned short,float>,
-		ScaledDataConversion<float, V>
-	> converter;
+	ScaledDataConversion< unsigned short, V> converter;
 
 	typename TargetVector::Ptr dataContainer = new TargetVector();
 	typename TargetVector::ValueType &data = dataContainer->writable();
@@ -210,7 +206,7 @@ DataPtr DPXImageReader::readTypedChannel( const std::string &name, const Imath::
 			// assume we have 10bit log, two wasted bits aligning to 32 longword
 			unsigned short cv = (unsigned short) ( ( mask & cell ) >> ( 2 + ( 2 - channelOffset ) * bpp ) );
 			assert( cv < 1024 );
-			data[dataOffset] = converter( cv );
+			data[dataOffset] = converter( (cv << ushortShift) + ((1 << ushortShift) - 1) );
 		}
 	}
 	return dataContainer;

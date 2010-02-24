@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -275,6 +275,7 @@ class TestTIFFReader(unittest.TestCase):
 	def testMultiDirectory( self ):
 
 		r = Reader.create( "test/IECore/data/tiff/uvMap.multiRes.32bit.tif" )
+		r['colorSpace'] = 'linear'
 		self.assertEqual( type(r), TIFFImageReader )
 
 		self.assertEqual( r.numDirectories(), 10 )
@@ -377,7 +378,9 @@ class TestTIFFReader(unittest.TestCase):
 
 		"""Check we cope with tiled images where the width and height aren't multiples of the tile size."""
 
-		i = TIFFImageReader( "test/IECore/data/tiff/tilesWithLeftovers.tif" ).read()
+		r = TIFFImageReader( "test/IECore/data/tiff/tilesWithLeftovers.tif" )
+		r['colorSpace'] = 'linear'
+		i = r.read()
 		i2 = EXRImageReader( "test/IECore/data/exrFiles/tiffTileTestExpectedResults.exr" ).read()
 
 		op = ImageDiffOp()

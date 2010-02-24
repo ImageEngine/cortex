@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,8 +63,8 @@ class ChannelOp : public ImagePrimitiveOp
 		/// The base class will already have verified the following :
 		///
 		///		* the channels have an appropriate interpolation value - vertex, varying or facevarying.
-		/// 		* the channels contain the appropriate number of elements for the dataWindow.
-		///		* the channels are all of type FloatVectorData, HalfVectorData or IntVectorData.
+		/// 	* the channels contain the appropriate number of elements for the dataWindow.
+		///		* the channels are all of type FloatVectorData.
 		///		* the dataWindow is not empty.
 		/// \todo ChannelVector doesn't contain any indicator as to which channel is which, so why not just pass a single channel at a time? As
 		/// things are right now, every derived class is iterating over the channels vector - there's not much else they can do - so it would

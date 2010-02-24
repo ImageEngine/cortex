@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -279,7 +279,9 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 
 		cubeLookup = CubeColorTransformOpTest.makeColorCube( dim, gamma = 1.5 )
 
-		img = Reader.create( "test/IECore/data/jpg/exif.jpg").read()
+		r = Reader.create( "test/IECore/data/jpg/exif.jpg")
+		r['colorSpace'] = 'linear'
+		img = r.read()
 
 		op = CubeColorTransformOp()
 
@@ -288,7 +290,9 @@ class CubeColorTransformOpTest( unittest.TestCase ) :
 			cube = cubeLookup,
 		)
 
-		expectedResult = Reader.create( "test/IECore/data/expectedResults/cubeColorTransformOp1.jpg").read()
+		r = Reader.create( "test/IECore/data/expectedResults/cubeColorTransformOp1.jpg" )
+		r['colorSpace'] = 'linear'
+		expectedResult = r.read()
 
 		op = ImageDiffOp()
 		res = op(

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -282,6 +282,7 @@ class TestImagePrimitiveEvaluator( unittest.TestCase ) :
 		""" Upscale a subregion of an image, testing interpolation of primvar evaluation """
 
 		reader = Reader.create( "test/IECore/data/tiff/maya.tiff" )
+		reader['colorSpace'] = 'linear'
 		img = reader.read()
 
 		ipe = PrimitiveEvaluator.create( img )
@@ -322,7 +323,9 @@ class TestImagePrimitiveEvaluator( unittest.TestCase ) :
 				offset = offset + 1
 
 
-		expectedImage = Reader.create( "test/IECore/data/expectedResults/imagePrimitiveEvaluatorUpscale.tiff" ).read()
+		reader = Reader.create( "test/IECore/data/expectedResults/imagePrimitiveEvaluatorUpscale.tiff" )
+		reader['colorSpace'] = 'linear'
+		expectedImage = reader.read()
 
 		op = ImageDiffOp()
 

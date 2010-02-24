@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -75,6 +75,7 @@ class SGIImageReaderTest(unittest.TestCase):
 		for f in glob.glob( "test/IECore/data/sgiFiles/uvMap.512x256.*sgi" ) :
 
 			r = Reader.create( f )
+			r['colorSpace'] = 'linear'
 			self.assertEqual( type(r), SGIImageReader )
 
 			dataWindow = Box2i(

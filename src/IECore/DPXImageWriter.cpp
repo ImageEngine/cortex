@@ -40,8 +40,6 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
-#include "IECore/CompoundDataConversion.h"
-#include "IECore/LinearToCineonDataConversion.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/BoxOps.h"
 
@@ -80,10 +78,7 @@ DPXImageWriter::~DPXImageWriter()
 
 std::string DPXImageWriter::destinationColorSpace() const
 {
-	/// This isn't strictly true, but as the writer currently stands it performs the Linear-Cineon
-	/// conversion for us. Eventually, this will start returning "cineon", and the ImageWriter base
-	/// class will handle the appropriate color conversions.
-	return "linear";
+	return "cineon";
 }
 
 struct DPXImageWriter::ChannelConverter
@@ -108,10 +103,7 @@ struct DPXImageWriter::ChannelConverter
 
 		const typename T::ValueType &data = dataContainer->readable();
 
-		CompoundDataConversion<
-			ScaledDataConversion<typename T::ValueType::value_type, float>,
-			LinearToCineonDataConversion<float, unsigned int>
-		> converter;
+		ScaledDataConversion<typename T::ValueType::value_type, float> converter;
 
 		typedef boost::multi_array_ref< const typename T::ValueType::value_type, 2 > SourceArray2D;
 		typedef boost::multi_array_ref< unsigned int, 2 > TargetArray2D;
@@ -126,7 +118,7 @@ struct DPXImageWriter::ChannelConverter
 			for ( int x = copyRegion.min.x; x <= copyRegion.max.x ; x++ )
 			{
 				targetData[ y - m_image->getDisplayWindow().min.y + copyRegion.min.y ][ x - m_image->getDisplayWindow().min.x + copyRegion.min.x ]
-					|= converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) << m_bitShift;
+					|= ((unsigned int)(converter( sourceData[ y - m_image->getDataWindow().min.y ][ x - m_image->getDataWindow().min.x ] ) * 1023 )) << m_bitShift;
 			}
 		}
 	};

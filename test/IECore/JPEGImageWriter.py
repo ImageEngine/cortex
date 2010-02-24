@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@ from IECore import *
 
 class TestJPEGImageWriter(unittest.TestCase):
 
-	def __verifyImageRGB( self, imgNew, imgOrig ):
+	def __verifyImageRGB( self, imgNew, imgOrig, maxError = 0.004 ):
 
 		self.assertEqual( type(imgNew), ImagePrimitive )
 
@@ -63,7 +63,7 @@ class TestJPEGImageWriter(unittest.TestCase):
 		res = op(
 			imageA = imgNew,
 			imageB = imgOrig,
-			maxError = 0.004,
+			maxError = maxError,
 			skipMissingChannels = True
 		)
 
@@ -207,21 +207,34 @@ class TestJPEGImageWriter(unittest.TestCase):
 
 		dataWindow = displayWindow
 
+		# JPEG default channels are 8-bit
+		rawImage = self.__makeIntImage( dataWindow, displayWindow, dataType = UCharVectorData, maxInt = 2**8-1 )
+
 		for dataType in [ FloatVectorData, HalfVectorData, DoubleVectorData ] :
 
 			self.setUp()
 
+			rawMode = ( dataType != FloatVectorData )
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = Writer.create( imgOrig, "test/IECore/data/jpg/output.jpg" )
 			self.assertEqual( type(w), JPEGImageWriter )
+			w['rawChannels'] = rawMode
 			w.write()
 
 			self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
 
 			# Now we've written the image, verify the rgb
 
-			imgNew = Reader.create( "test/IECore/data/jpg/output.jpg" ).read()
-			self.__verifyImageRGB( imgOrig, imgNew )
+			r = Reader.create( "test/IECore/data/jpg/output.jpg" )
+			r['rawChannels'] = rawMode
+			imgNew = r.read()
+
+			if rawMode :
+				self.assertEqual( type(imgNew['R'].data), UCharVectorData )
+				self.__verifyImageRGB( rawImage, imgNew )
+			else :
+				self.assertEqual( type(imgNew['R'].data), FloatVectorData )
+				self.__verifyImageRGB( imgOrig, imgNew, 0.008 )
 
 			self.tearDown()
 
@@ -231,14 +244,17 @@ class TestJPEGImageWriter(unittest.TestCase):
 
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = Writer.create( imgOrig, "test/IECore/data/jpg/output.jpg" )
+			w['rawChannels'] = True
 			self.assertEqual( type(w), JPEGImageWriter )
 			w.write()
 
 			self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
 
 			# Now we've written the image, verify the rgb
-			imgNew = Reader.create( "test/IECore/data/jpg/output.jpg" ).read()
-			self.__verifyImageRGB( imgOrig, imgNew )
+			r = Reader.create( "test/IECore/data/jpg/output.jpg" )
+			r['rawChannels'] = True
+			imgNew = r.read()
+			self.__verifyImageRGB( rawImage, imgNew )
 
 			self.tearDown()
 
@@ -329,14 +345,17 @@ class TestJPEGImageWriter(unittest.TestCase):
 
 		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
 		self.assertEqual( type(w), JPEGImageWriter )
+		w['colorSpace'] = 'linear'
 		w.write()
 
 		self.assert_( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
 
 		r = Reader.create( "test/IECore/data/jpg/output.jpg" )
+		r['colorSpace'] = 'linear'
 		imgNew = r.read()
 
 		r = Reader.create( "test/IECore/data/expectedResults/windowWrite.jpg" )
+		r['colorSpace'] = 'linear'
 		imgExpected = r.read()
 
 		self.__verifyImageRGB( imgNew, imgExpected )
@@ -344,16 +363,20 @@ class TestJPEGImageWriter(unittest.TestCase):
 	def testOversizeDataWindow( self ) :
 
 		r = Reader.create( "test/IECore/data/exrFiles/oversizeDataWindow.exr" )
+		r['colorSpace'] = 'linear'
 		img = r.read()
 
 		w = Writer.create( img, "test/IECore/data/jpg/output.jpg" )
 		self.assertEqual( type(w), JPEGImageWriter )
+		w['colorSpace'] = 'linear'
 		w.write()
 
 		r = Reader.create( "test/IECore/data/jpg/output.jpg" )
+		r['colorSpace'] = 'linear'
 		imgNew = r.read()
 
 		r = Reader.create( "test/IECore/data/expectedResults/oversizeDataWindow.jpg" )
+		r['colorSpace'] = 'linear'
 		imgExpected = r.read()
 
 		self.__verifyImageRGB( imgNew, imgExpected )

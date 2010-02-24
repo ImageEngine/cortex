@@ -48,8 +48,8 @@ namespace IECore
 {
 
 /// ImagePrimitive represents a 2D bitmap in the form of individual channels, which are stored as primitive variables.
-/// A channel may contain data of half (16-bit float), unsigned int (32-bit integer),
-/// or float (32-bit float) type. The interpretation of these channels broadly matches the EXR
+/// A channel may contain any data vector type, but the Ops that manipulate images implemented in Cortex are specific for
+/// float ( 32-bit ) type. The interpretation of these channels broadly matches the EXR
 /// specification - the following channel names have the specified special meanings, but arbitrary channel names
 /// are permitted and their interpretation is left to the application :
 ///

@@ -181,9 +181,11 @@ template<typename V>
 DataPtr TGAImageReader::readTypedChannel( const std::string &name, const Box2i &dataWindow )
 {
 
-	FloatVectorDataPtr dataContainer = new FloatVectorData();
+	typedef TypedData< std::vector< V > > TargetVector;
 
-	FloatVectorData::ValueType &data = dataContainer->writable();
+	typename TargetVector::Ptr dataContainer = new TargetVector();
+
+	typename TargetVector::ValueType &data = dataContainer->writable();
 
 	std::vector<std::string> names;
 	channelNames( names );
@@ -237,7 +239,7 @@ DataPtr TGAImageReader::readTypedChannel( const std::string &name, const Box2i &
 			const uint8_t* buf = reinterpret_cast< uint8_t* >( & m_buffer[0] );
 			assert( buf );
 
-			FloatVectorData::ValueType::size_type dataOffset = dataY * dataWidth + dataX;
+			typename TargetVector::ValueType::size_type dataOffset = dataY * dataWidth + dataX;
 			assert( dataOffset < data.size() );
 
 			data[dataOffset] = converter( buf[ samplesPerPixel * ( y * bufferDataWidth + x ) + channelOffset ] );

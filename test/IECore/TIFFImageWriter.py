@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -64,7 +64,7 @@ class TestTIFFImageWriter(unittest.TestCase):
 		res = op(
 			imageA = imgNew,
 			imageB = imgOrig,
-			maxError = 0.002,
+			maxError = 0.003,
 			skipMissingChannels = True
 		)
 
@@ -239,21 +239,34 @@ class TestTIFFImageWriter(unittest.TestCase):
 
 		dataWindow = displayWindow
 
+		# TIFF default channels are ushort 16-bit
+		rawImage = self.__makeIntImage( dataWindow, displayWindow, dataType = UShortVectorData, maxInt = 2**16-1 )
+
 		for dataType in [ FloatVectorData, HalfVectorData, DoubleVectorData ] :
 
 			self.setUp()
 
+			rawMode = ( dataType != FloatVectorData )
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
 			self.assertEqual( type(w), TIFFImageWriter )
+			w['rawChannels'] = rawMode
 			w.write()
 
 			self.assert_( os.path.exists( "test/IECore/data/tiff/output.tif" ) )
 
 			# Now we've written the image, verify the rgb
 
-			imgNew = Reader.create( "test/IECore/data/tiff/output.tif" ).read()
-			self.__verifyImageRGB( imgOrig, imgNew )
+			r = Reader.create( "test/IECore/data/tiff/output.tif" )
+			r['rawChannels'] = rawMode
+			imgNew = r.read()
+
+			if rawMode :
+				self.assertEqual( type(imgNew['R'].data), UShortVectorData )
+				self.__verifyImageRGB( rawImage, imgNew )
+			else :
+				self.assertEqual( type(imgNew['R'].data), FloatVectorData )
+				self.__verifyImageRGB( imgOrig, imgNew )
 
 			self.tearDown()
 
@@ -264,13 +277,16 @@ class TestTIFFImageWriter(unittest.TestCase):
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
 			self.assertEqual( type(w), TIFFImageWriter )
+			w['rawChannels'] = True
 			w.write()
 
 			self.assert_( os.path.exists( "test/IECore/data/tiff/output.tif" ) )
 
 			# Now we've written the image, verify the rgb
-			imgNew = Reader.create( "test/IECore/data/tiff/output.tif" ).read()
-			self.__verifyImageRGB( imgOrig, imgNew )
+			r = Reader.create( "test/IECore/data/tiff/output.tif" )
+			r['rawChannels'] = True
+			imgNew = r.read()
+			self.__verifyImageRGB( rawImage, imgNew )
 
 			self.tearDown()
 
@@ -307,11 +323,14 @@ class TestTIFFImageWriter(unittest.TestCase):
 
 		imgOrig = self.__makeComplexImage( dataWindow, displayWindow )
 		w = Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
+		w['colorSpace'] = 'linear'
 		self.assertEqual( type(w), TIFFImageWriter )
 		w.write()
 
 		# Now we've written the image, verify the rgb
-		imgNew = Reader.create( "test/IECore/data/tiff/output.tif" ).read()
+		r = Reader.create( "test/IECore/data/tiff/output.tif" )
+		r['colorSpace'] = 'linear'
+		imgNew = r.read()
 		self.__verifyImageRGB( imgOrig, imgNew )
 
 		self.assert_( "A" in imgNew )
@@ -411,6 +430,7 @@ class TestTIFFImageWriter(unittest.TestCase):
 		imgNew = r.read()
 
 		r = Reader.create( "test/IECore/data/expectedResults/windowWrite.tif" )
+		r['colorSpace'] = 'linear'
 		imgExpected = r.read()
 
 		self.__verifyImageRGB( imgNew, imgExpected )
@@ -442,6 +462,7 @@ class TestTIFFImageWriter(unittest.TestCase):
 		imgNew = r.read()
 
 		r = Reader.create( "test/IECore/data/expectedResults/oversizeDataWindow.tiff" )
+		r['colorSpace'] = 'linear'
 		imgExpected = r.read()
 
 		self.__verifyImageRGB( imgNew, imgExpected )

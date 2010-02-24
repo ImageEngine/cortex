@@ -41,6 +41,7 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/NullObject.h"
 #include "IECore/BoxOps.h"
+#include "IECore/ColorSpaceTransformOp.h"
 
 using namespace std;
 using namespace IECore;
@@ -73,6 +74,27 @@ ImageReader::ImageReader( const std::string &description ) :
 		"then all channels are loaded."
 	);
 
+	std::vector< std::string > colorSpaces;
+	ColorSpaceTransformOp::inputColorSpaces( colorSpaces );
+	StringParameter::PresetsContainer colorSpacesPresets;
+	colorSpacesPresets.push_back( StringParameter::Preset( "Auto Detect", "autoDetect" ) );
+	for ( std::vector< std::string >::const_iterator it = colorSpaces.begin(); it != colorSpaces.end(); it++ )
+	{
+		colorSpacesPresets.push_back( StringParameter::Preset( *it, *it ) );
+	}
+
+	m_colorspaceParameter = new StringParameter(
+		"colorSpace",
+		"Specifies color space that the loaded image was stored. "
+		"The reader always try to return you a linear color space image. "
+		"So if you don't want color maniputation select 'linear'. "
+		"Use Auto Detect for using the default conversions specific to "
+		"the file format of the image.",
+		"autoDetect",
+		colorSpacesPresets,
+		true
+	);
+
 	m_rawChannelsParameter = new BoolParameter(
 		"rawChannels",
 		"Specifies if the returned data channels should be what's stored in the file. That's not possible when "
@@ -84,6 +106,7 @@ ImageReader::ImageReader( const std::string &description ) :
 	parameters()->addParameter( m_dataWindowParameter );
 	parameters()->addParameter( m_displayWindowParameter );
 	parameters()->addParameter( m_channelNamesParameter );
+	parameters()->addParameter( m_colorspaceParameter );
 	parameters()->addParameter( m_rawChannelsParameter );
 }
 
@@ -97,6 +120,11 @@ ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 	Box2i dataWind = dataWindowToRead();
 
 	bool rawChannels = operands->member< BoolData >( "rawChannels" )->readable();
+	std::string colorspace = operands->member< StringData >( "colorSpace" )->readable();
+	if ( colorspace == "autoDetect" )
+	{
+		colorspace = sourceColorSpace();
+	}
 
 	// create our ImagePrimitive
 	ImagePrimitivePtr image = new ImagePrimitive( dataWind, displayWind );
@@ -121,6 +149,18 @@ ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 
 		image->variables[*ci] = p;
 		ci++;
+	}
+
+	if ( colorspace != "linear" && !rawChannels )
+	{
+		// color convert the image to linear colorspace if R,G,B are there.
+		ColorSpaceTransformOpPtr transformOp = new ColorSpaceTransformOp();
+		transformOp->inputColorSpaceParameter()->setTypedValue( colorspace );
+		transformOp->outputColorSpaceParameter()->setTypedValue( "linear" );
+		transformOp->inputParameter()->setValue( image );
+		transformOp->copyParameter()->setTypedValue( false );
+		transformOp->channelsParameter()->setTypedValue( channelNames );
+		transformOp->operate();
 	}
 
 	return image;
@@ -214,6 +254,16 @@ StringVectorParameterPtr ImageReader::channelNamesParameter()
 ConstStringVectorParameterPtr ImageReader::channelNamesParameter() const
 {
 	return m_channelNamesParameter;
+}
+
+StringParameterPtr ImageReader::colorspaceParameter()
+{
+	return m_colorspaceParameter;
+}
+
+ConstStringParameterPtr ImageReader::colorspaceParameter() const
+{
+	return m_colorspaceParameter;
 }
 
 BoolParameterPtr ImageReader::rawChannelsParameter()

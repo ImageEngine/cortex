@@ -49,7 +49,7 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 /// ImageReader's main purpose is to define a standard set of parameters
 /// which all concrete ImageReader implementations obey.  It also defines some pure virtual functions
 /// which allow interface implementors to focus on image-specific code for loading channels.
-/// The ImageReader will return by default an ImagePrimitive with all channels
+/// The ImageReader will return by default an ImagePrimitive in linear colorspace with all channels
 /// converted to FloatVectorData.
 /// If 'rawChannels' is On, then it will return an ImagePrimitive with channels that are the close as 
 /// possible to the original data type stored on the file. Note that most image Ops available on IECore
@@ -79,8 +79,13 @@ class ImageReader : public Reader
 		/// The parameter specifying the channels to load.
 		StringVectorParameterPtr channelNamesParameter();
 		ConstStringVectorParameterPtr channelNamesParameter() const;
+		/// The parameter specifying the colorspace that the loaded image was stored.
+		/// If autoDetect is chosen than it will use the colorspace returned by sourceColorSpace().
+		StringParameterPtr colorspaceParameter();
+		ConstStringParameterPtr colorspaceParameter() const;
 		/// The parameter specifying if the returned data channels should be 
 		/// exactly or as close as possible to what's stored in the file. 
+		/// If True, then colorspace settings will not take effect.
 		BoolParameterPtr rawChannelsParameter();
 		ConstBoolParameterPtr rawChannelsParameter() const;
 		//@}
@@ -140,6 +145,7 @@ class ImageReader : public Reader
 		Box2iParameterPtr m_displayWindowParameter;
 		StringVectorParameterPtr m_channelNamesParameter;
 		BoolParameterPtr m_rawChannelsParameter;
+		StringParameterPtr m_colorspaceParameter;
 };
 
 IE_CORE_DECLAREPTR(ImageReader);

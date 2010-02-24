@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -128,6 +128,7 @@ class TestYUVImageWriter(unittest.TestCase):
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = Writer.create( imgOrig, "test/IECore/data/yuvFiles/output.yuv" )
 			self.assertEqual( type(w), YUVImageWriter )
+			w['rawChannels'] = ( dataType != FloatVectorData )
 			w.write()
 
 			self.assert_( os.path.exists( "test/IECore/data/yuvFiles/output.yuv" ) )
@@ -140,6 +141,7 @@ class TestYUVImageWriter(unittest.TestCase):
 
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = Writer.create( imgOrig, "test/IECore/data/yuvFiles/output.yuv" )
+			w['rawChannels'] = True
 			self.assertEqual( type(w), YUVImageWriter )
 			w.write()
 

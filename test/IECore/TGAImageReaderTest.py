@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -48,8 +48,12 @@ class TGAImageReaderTest(unittest.TestCase):
 		
 	def testRead( self ) :
 	
+		r = Reader.create( "test/IECore/data/tgaFiles/uvMap.256x256.tga" )
+		# original image was stored in linear color space.
+		r['colorSpace'] = 'linear'
+
 		res = ImageDiffOp()(
-			imageA = Reader.create( "test/IECore/data/tgaFiles/uvMap.256x256.tga" ).read(),
+			imageA = r.read(),
 			imageB = Reader.create( "test/IECore/data/exrFiles/uvMap.256x256.exr" ).read()
 		)
 		
@@ -73,6 +77,9 @@ class TGAImageReaderTest(unittest.TestCase):
 	def testDataWindowRead( self ):
 
 		r = Reader.create( "test/IECore/data/tgaFiles/uvMap.512x256.tga" )
+		# original image was stored in linear color space.
+		r['colorSpace'] = 'linear'
+		
 		self.assertEqual( type(r), TGAImageReader )
 
 		dataWindow = Box2i(

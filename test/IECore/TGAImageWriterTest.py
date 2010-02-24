@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@ from IECore import *
 from math import pow
 
 class TGAImageWriterTest(unittest.TestCase):
-	def __verifyImageRGB( self, imgNew, imgOrig ):
+	def __verifyImageRGB( self, imgNew, imgOrig, maxError = 0.002 ):
 
 		self.assertEqual( type(imgNew), ImagePrimitive )
 
@@ -65,7 +65,7 @@ class TGAImageWriterTest(unittest.TestCase):
 		res = op(
 			imageA = imgNew,
 			imageB = imgOrig,
-			maxError = 0.002,
+			maxError = maxError,
 			skipMissingChannels = True
 		)
 
@@ -123,8 +123,8 @@ class TGAImageWriterTest(unittest.TestCase):
 		for y in range( 0, h ) :
 			for x in range( 0, w ) :
 
-				R[offset] = int( maxInt * float(x) / (w - 1) )
-				G[offset] = int( maxInt * float(y) / (h - 1) )
+				R[offset] = int( round( maxInt * (float(x) / (w - 1)) ) )
+				G[offset] = int( round( maxInt * (float(y) / (h - 1)) ) )
 				B[offset] = 0
 
 				offset = offset + 1
@@ -144,21 +144,34 @@ class TGAImageWriterTest(unittest.TestCase):
 
 		dataWindow = displayWindow
 
+		# TGA channels are 8-bit
+		rawImage = self.__makeIntImage( dataWindow, displayWindow, dataType = UCharVectorData, maxInt = 2**8-1 )
+
 		for dataType in [ FloatVectorData, HalfVectorData, DoubleVectorData ] :
 
 			self.setUp()
 
+			rawMode = ( dataType != FloatVectorData )
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = Writer.create( imgOrig, "test/IECore/data/tgaFiles/output.tga" )
 			self.assertEqual( type(w), TGAImageWriter )
+			w['rawChannels'] = rawMode
 			w.write()
 
 			self.assert_( os.path.exists( "test/IECore/data/tgaFiles/output.tga" ) )
 
 			# Now we've written the image, verify the rgb
 
-			imgNew = Reader.create( "test/IECore/data/tgaFiles/output.tga" ).read()
-			self.__verifyImageRGB( imgOrig, imgNew )
+			r = Reader.create( "test/IECore/data/tgaFiles/output.tga" )
+			r['rawChannels'] = rawMode
+			imgNew = r.read()
+
+			if rawMode :
+				self.assertEqual( type(imgNew['R'].data), UCharVectorData )
+				self.__verifyImageRGB( rawImage, imgNew )
+			else :
+				self.assertEqual( type(imgNew['R'].data), FloatVectorData )
+				self.__verifyImageRGB( imgOrig, imgNew )
 
 			self.tearDown()
 
@@ -169,13 +182,16 @@ class TGAImageWriterTest(unittest.TestCase):
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = Writer.create( imgOrig, "test/IECore/data/tgaFiles/output.tga" )
 			self.assertEqual( type(w), TGAImageWriter )
+			w['rawChannels'] = True
 			w.write()
 
 			self.assert_( os.path.exists( "test/IECore/data/tgaFiles/output.tga" ) )
 
 			# Now we've written the image, verify the rgb
-			imgNew = Reader.create( "test/IECore/data/tgaFiles/output.tga" ).read()
-			self.__verifyImageRGB( imgOrig, imgNew )
+			r = Reader.create( "test/IECore/data/tgaFiles/output.tga" )
+			r['rawChannels'] = True
+			imgNew = r.read()
+			self.__verifyImageRGB( rawImage, imgNew )
 
 			self.tearDown()
 
@@ -228,6 +244,8 @@ class TGAImageWriterTest(unittest.TestCase):
 		imgNew = r.read()
 
 		r = Reader.create( "test/IECore/data/expectedResults/windowWrite.tga" )
+		# the test image was originally saved in linear colorspace...
+		r['colorSpace'] = 'linear'
 		imgExpected = r.read()
 
 		self.__verifyImageRGB( imgNew, imgExpected )
@@ -245,6 +263,8 @@ class TGAImageWriterTest(unittest.TestCase):
 		imgNew = r.read()
 
 		r = Reader.create( "test/IECore/data/expectedResults/oversizeDataWindow.tga" )
+		# the test image was originally saved in linear colorspace...
+		r['colorSpace'] = 'linear'
 		imgExpected = r.read()
 
 		self.__verifyImageRGB( imgNew, imgExpected )
