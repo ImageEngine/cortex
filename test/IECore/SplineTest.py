@@ -190,7 +190,6 @@ class SplineTest( unittest.TestCase ) :
 			cc = s.basis.coefficients(1)
 			xx = list( xs )[ len(xs)-4:len(xs) ]
 			end = cc[0]*xx[0]+cc[1]*xx[1]+cc[2]*xx[2]+cc[3]*xx[3]
-			print "computed interval " + str( ( start, end ) )
 			return ( start, end )
 
 		def compareIntervals( i1, i2 ):
@@ -216,8 +215,6 @@ class SplineTest( unittest.TestCase ) :
 			else:
 				interval = s.interval()
 				integral = s.integral()
-
-			print "interval: " + str( interval )
 
 			base = interval[0]
 			scale = interval[1]-interval[0]
