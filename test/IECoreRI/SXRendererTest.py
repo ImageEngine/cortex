@@ -200,6 +200,47 @@ class SXRendererTest( unittest.TestCase ) :
 		s = r.shade( self.__rectanglePoints( b ) )
 		
 		self.assertEqual( s["Ci"][0], IECore.Color3f( 0, 1, 0 ) )
+	
+	def testStack( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxStackTest.sdl test/IECoreRI/shaders/sxStackTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 100 ) )
+		points = self.__rectanglePoints( b )
+		
+		self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
+		self.assertEqual( r.getAttribute( "opacity" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.setAttribute( "color", IECore.Color3f( 1, 0, 0 ) )
+			self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
+					
+			r.shader( "surface", "test/IECoreRI/shaders/sxStackTest.sdl", { "blue" : 1.0 } )
+
+			with IECore.AttributeBlock( r ) :
+
+				r.setAttribute( "color", IECore.Color3f( 0, 1, 0 ) )
+				self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) )
+
+				r.shader( "surface", "test/IECoreRI/shaders/sxStackTest.sdl", { "blue" : 0.5 } )
+
+				s = r.shade( points )
+
+				for c in s["Ci"] :
+					self.assertEqual( c, IECore.Color3f( 0, 0, 0.5 ) )
+					
+			self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
+
+			s = r.shade( points )
+			
+			for c in s["Ci"] :
+				self.assertEqual( c, IECore.Color3f( 0, 0, 1 ) )
+				
+		self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
+		self.assertEqual( r.getAttribute( "opacity" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
 			
 	def tearDown( self ) :
 		
@@ -207,6 +248,7 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxTest.sdl",
 			"test/IECoreRI/shaders/splineTest.sdl",
 			"test/IECoreRI/shaders/sxParameterTest.sdl",
+			"test/IECoreRI/shaders/sxStackTest.sdl",
 		]
 		
 		for f in files :

@@ -113,9 +113,25 @@ class SXRendererImplementation : public IECore::Renderer
 	private :
 	
 		SXRenderer *m_parent;
+		// in an ideal world we'd have one context for each State, but as it stands the Sx library
+		// doesn't appear to properly support the parenting of contexts even though it implies it
+		// should in the documentation. furthermore i can't get SxSetAttribute to have any effect at
+		// all so there's not much point anyway right now.
 		SxContext m_context;
-		SxShader m_shader;
-		SxShader m_shaderInfo;
+		
+		struct State
+		{
+			State();
+			State( const State &other, bool deepCopy );
+			~State();
+			IECore::CompoundDataPtr attributes;
+			SxShader shader;
+			SxShader shaderInfo;
+		};
+		typedef std::stack<State> StateStack;
+		
+		bool m_inWorld;
+		StateStack m_stateStack;
 
 };
 

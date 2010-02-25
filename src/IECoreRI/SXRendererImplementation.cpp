@@ -59,20 +59,41 @@ using namespace std;
 using namespace boost;
 
 ////////////////////////////////////////////////////////////////////////
+// IECoreRI::SXRendererImplementation::State implementation
+////////////////////////////////////////////////////////////////////////
+
+SXRendererImplementation::State::State()
+	:	attributes( new CompoundData() ), shader( 0 ), shaderInfo( 0 )
+{
+}
+
+SXRendererImplementation::State::State( const State &other, bool deepCopy )
+	:	attributes( deepCopy ? other.attributes->copy() : other.attributes ),
+		shader( other.shader ),
+		shaderInfo( other.shaderInfo )
+{
+}
+
+SXRendererImplementation::State::~State()
+{
+}
+			
+////////////////////////////////////////////////////////////////////////
 // IECoreRI::SXRendererImplementation implementation
 ////////////////////////////////////////////////////////////////////////
 
-//const unsigned int IECoreRI::SXRendererImplementation::g_shaderCacheSize = 10 * 1024 * 1024;
-
 IECoreRI::SXRendererImplementation::SXRendererImplementation( IECoreRI::SXRenderer *parent )
-	:	m_parent( parent ), m_context( SxCreateContext() )
+	:	m_parent( parent ), m_context( SxCreateContext() ), m_inWorld( false )
 {
+	m_stateStack.push( State() );
+	setAttribute( "color", new IECore::Color3fData( Color3f( 1 ) ) );
+	setAttribute( "opacity", new IECore::Color3fData( Color3f( 1 ) ) );
+		
 	const char *shaderSearchPath = getenv( "DL_SHADERS_PATH" );
 	if( shaderSearchPath )
 	{
 		SxSetOption( m_context, "searchpath:shader", SxString, (SxData)&shaderSearchPath );
 	}
-	
 }
 
 IECoreRI::SXRendererImplementation::~SXRendererImplementation()
@@ -111,12 +132,23 @@ void IECoreRI::SXRendererImplementation::display( const std::string &name, const
 
 void IECoreRI::SXRendererImplementation::worldBegin()
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::worldBegin", "Not implemented" );
+	if( m_inWorld )
+	{
+		msg( Msg::Warning, "IECoreRI::SXRendererImplementation::worldBegin", "Already in a world block" );
+		return;
+	}
+	m_stateStack.push( State( m_stateStack.top(), true ) );
+	m_inWorld = true;
 }
 
 void IECoreRI::SXRendererImplementation::worldEnd()
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::worldEnd", "Not implemented" );
+	if( !m_inWorld )
+	{
+		msg( Msg::Warning, "IECoreRI::SXRendererImplementation::worldEnd", "No matching worldBegin" );
+		return;
+	}
+	m_stateStack.pop();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -170,27 +202,35 @@ void IECoreRI::SXRendererImplementation::coordinateSystem( const std::string &na
 
 void IECoreRI::SXRendererImplementation::attributeBegin()
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::attributeBegin", "Not implemented" );
+	m_stateStack.push( State( m_stateStack.top(), true ) );
 }
 
 void IECoreRI::SXRendererImplementation::attributeEnd()
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::attributeEnd", "Not implemented" );
+	unsigned minimumStack = m_inWorld ? 2 : 1;
+	if( m_stateStack.size() <= minimumStack )
+	{
+		IECore::msg( IECore::Msg::Error, "IECoreRI::SXRenderer::attributeEnd", "No matching attributeBegin." );
+		return;
+	}
+	m_stateStack.pop();
 }
 
+/// \todo Actually pass the attributes through to the SxContext if we can get that working. Then perhaps store
+/// an SxContext per State entry on the stack - this requires fixes on the 3delight side though.
 void IECoreRI::SXRendererImplementation::setAttribute( const std::string &name, IECore::ConstDataPtr value )
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setAttribute", "Not implemented" );
+	m_stateStack.top().attributes->writable()[name] = value->copy();
 }
 
 IECore::ConstDataPtr IECoreRI::SXRendererImplementation::getAttribute( const std::string &name ) const
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::getAttribute", "Not implemented" );
-	return 0;
+	return m_stateStack.top().attributes->member<Data>( name, false );
 }
 
 void IECoreRI::SXRendererImplementation::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
 {
+	
 	SxShaderType sxType = SxUnknown;
 	if( type=="surface"	|| type=="ri:surface" )
 	{
@@ -201,7 +241,7 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 		msg( Msg::Error, "IECoreRI::SXRendererImplementation::shader", boost::format( "Unsupported shader type \"%s\"" ) % type );
 	}
 
-	m_shaderInfo = SxCreateShaderInfo( m_context, name.c_str() );
+	m_stateStack.top().shaderInfo = SxCreateShaderInfo( m_context, name.c_str() );
 	
 	SxParameterList parameterList = SxCreateShaderParameterList( m_context );
 	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
@@ -213,14 +253,14 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 				break;
 			case V3fDataTypeId :
 				{
-					unsigned numParameters = SxGetNumParameters( m_shaderInfo );
+					unsigned numParameters = SxGetNumParameters( m_stateStack.top().shaderInfo );
 					SxType type = SxInvalid;
 					for( unsigned i=0; i<numParameters; i++ )
 					{
 						bool varying;
 						SxData defaultValue;
 						unsigned arraySize;
-						const char *name = SxGetParameterInfo( m_shaderInfo, i, &type, &varying, &defaultValue, &arraySize );
+						const char *name = SxGetParameterInfo( m_stateStack.top().shaderInfo, i, &type, &varying, &defaultValue, &arraySize );
 						if( 0==strcmp( name, it->first.value().c_str() ) )
 						{
 							break;
@@ -309,7 +349,7 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 		}
 	}
 	
-	m_shader = SxCreateShader( m_context, parameterList, name.c_str(), sxType );
+	m_stateStack.top().shader = SxCreateShader( m_context, parameterList, name.c_str(), sxType );
 	
 }
 
@@ -426,6 +466,6 @@ IECore::DataPtr IECoreRI::SXRendererImplementation::command( const std::string &
 
 IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore::CompoundData *points ) const
 {
-	SXExecutor executor( m_shader, m_shaderInfo );
+	SXExecutor executor( m_stateStack.top().shader,  m_stateStack.top().shaderInfo );
 	return executor.execute( points );
 }
