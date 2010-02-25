@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 ##########################################################################
 
 import os
+import sys
 import unittest
 from IECore import *
 
@@ -163,6 +164,15 @@ class TestGroup( unittest.TestCase ) :
 	
 		g = Group()
 		self.assertRaises( Exception, g.addChild, None )
+
+	def testNoneRefcount( self ) :
+	
+		# exercises a bug whereby we weren't incrementing the reference
+		# count for Py_None when returning it to represent a null pointer.
+		# this led to "Fatal Python error: deallocating None" type crashes
+		g = Group()
+		for i in range( 0, sys.getrefcount( None ) + 100 ) :
+			p = g.parent()
 
 	def tearDown( self ) :
 
