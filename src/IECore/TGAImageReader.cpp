@@ -59,7 +59,7 @@ using namespace std;
 
 struct TGAImageReader::Header
 {
-	char idLength;
+	unsigned char idLength;
 	char colorMapType;
 	char imageType;
 
@@ -283,7 +283,11 @@ void TGAImageReader::readBuffer()
 	m_buffer.resize( bufferSize, 0 );
 
 	ifstream in( fileName().c_str() );
-	in.seekg( 18, ios_base::beg );
+	in.seekg( 18 + (unsigned)m_header->idLength, ios_base::beg );
+	if ( in.fail() )
+	{
+		throw IOException( "TGAImageReader: Error reading " + fileName() );
+	}
 
 	if ( m_header->imageType == 2 )
 	{
@@ -399,13 +403,6 @@ bool TGAImageReader::open( bool throwOnFailure )
 		if ( m_header->pixelDepth == 24 && alphaChannelBits != 0 )
 		{
 			throw IOException(( boost::format( "TGAImageReader: Unsupported alpha channel bits (%d) for pixel depth %d in file %s" ) % alphaChannelBits % ( int )m_header->pixelDepth % fileName() ).str() );
-		}
-
-		/// Image ID (skip)
-		in.seekg( m_header->idLength, ios_base::cur );
-		if ( in.fail() )
-		{
-			throw IOException( "TGAImageReader: Error reading " + fileName() );
 		}
 
 		const V2i origin( m_header->xOrigin, m_header->yOrigin );
