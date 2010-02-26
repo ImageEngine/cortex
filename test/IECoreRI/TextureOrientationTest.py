@@ -69,8 +69,8 @@ class TextureOrientationTest( unittest.TestCase ) :
 
 		testOp = IECore.ImageDiffOp()
 
-		self.assert_( not testOp( imageA=ie, imageB=i1, maxError=0.002 ).value )
-		self.assert_( not testOp( imageA=ie, imageB=i2, maxError=0.002 ).value )
+		self.assert_( not testOp( imageA=ie, imageB=i1, maxError=0.003 ).value )
+		self.assert_( not testOp( imageA=ie, imageB=i2, maxError=0.003 ).value )
 
 	def tearDown( self ) :
 
