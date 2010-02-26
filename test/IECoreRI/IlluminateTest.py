@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@ class IlluminateTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/illuminate.rib"
 
-	def test( self ) :
+	def testDeprecated( self ) :
 
 		r = IECoreRI.Renderer( self.outputFileName )
 
@@ -56,6 +56,25 @@ class IlluminateTest( unittest.TestCase ) :
 		l = "".join( file( self.outputFileName ).readlines() )
 		self.assert_( "Illuminate \"light1\" 1" in l )
 		self.assert_( "Illuminate \"light2\" 0" in l )
+
+	def test( self ) :
+	
+		r = IECoreRI.Renderer( self.outputFileName )
+		
+		r.worldBegin()
+		
+		r.light( "spotlight", "myLightHandle", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ) } )
+		
+		r.illuminate( "myLightHandle", 0 )
+		
+		r.worldEnd()
+
+		l = "".join( file( self.outputFileName ).readlines() )
+
+		self.assert_( "LightSource \"spotlight\" \"myLightHandle\"" in l )
+		self.assert_( '"color colour" [ 1 0 0 ]' in l ) 
+		self.assert_( '"int intensity" [ 2 ]' in l ) 
+		self.assert_( "Illuminate \"myLightHandle\" 0" in l )
 
 	def tearDown( self ) :
 

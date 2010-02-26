@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -975,10 +975,6 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 	{
 		RiDisplacementV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
-	else if( type=="light" || type=="ri:light" )
-	{
-		RiLightSourceV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
-	}
 	else if( type=="atmosphere" || type=="ri:atmosphere" )
 	{
 		RiAtmosphereV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
@@ -998,10 +994,19 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 
 }
 
-void IECoreRI::RendererImplementation::light( const std::string &name, const IECore::CompoundDataMap &parameters )
+void IECoreRI::RendererImplementation::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
-	shader( "light", name, parameters );
+	IECore::CompoundDataMap parametersCopy = parameters;
+	parametersCopy["__handleid"] = new StringData( handle );
+	ParameterList pl( parametersCopy );
+	RiLightSourceV( name.c_str(), pl.n(), pl.tokens(), pl.values() );
+}
+
+void IECoreRI::RendererImplementation::illuminate( const std::string &lightHandle, bool on )
+{
+	ScopedContext scopedContext( m_context );
+	RiIlluminate( (RtLightHandle)lightHandle.c_str(), on );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

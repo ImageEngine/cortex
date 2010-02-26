@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -148,9 +148,14 @@ void Renderer::shader( const std::string &type, const std::string &name, const I
 	m_implementation->shader( type, name, parameters );
 }
 
-void Renderer::light( const std::string &name, const IECore::CompoundDataMap &parameters )
+void Renderer::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
 {
-	m_implementation->light( name, parameters );
+	m_implementation->light( name, handle, parameters );
+}
+
+void Renderer::illuminate( const std::string &lightHandle, bool on )
+{
+	m_implementation->illuminate( lightHandle, on );
 }
 
 void Renderer::motionBegin( const std::set<float> &times )

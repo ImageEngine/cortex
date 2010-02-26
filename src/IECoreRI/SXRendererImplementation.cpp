@@ -353,9 +353,14 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 	
 }
 
-void IECoreRI::SXRendererImplementation::light( const std::string &name, const IECore::CompoundDataMap &parameters )
+void IECoreRI::SXRendererImplementation::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::light", "Not implemented" );
+}
+
+void IECoreRI::SXRendererImplementation::illuminate( const std::string &lightHandle, bool on )
+{
+	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::illuminate", "Not implemented" );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

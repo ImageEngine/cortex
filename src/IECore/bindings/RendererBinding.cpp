@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -175,11 +175,11 @@ static void shader( Renderer &r, const std::string &type, const std::string &nam
 	r.shader( type, name, p );
 }
 
-static void light( Renderer &r, const std::string &name, const dict &parameters )
+static void light( Renderer &r, const std::string &name, const std::string &handle, const dict &parameters )
 {
 	CompoundDataMap p;
 	fillCompoundDataMap( p, parameters );
-	r.light( name, p );
+	r.light( name, handle, p );
 }
 
 static void motionBegin( Renderer &r, const boost::python::list &times )
@@ -307,6 +307,7 @@ void bindRenderer()
 
 		.def("shader", &shader)
 		.def("light", &light)
+		.def("illuminate", &Renderer::illuminate)
 
 		.def("motionBegin", &motionBegin)
 		.def("motionEnd", &Renderer::motionEnd)

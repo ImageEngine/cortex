@@ -143,9 +143,14 @@ void SXRenderer::shader( const std::string &type, const std::string &name, const
 	m_implementation->shader( type, name, parameters );
 }
 
-void SXRenderer::light( const std::string &name, const IECore::CompoundDataMap &parameters )
+void SXRenderer::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
 {
-	m_implementation->light( name, parameters );
+	m_implementation->light( name, handle, parameters );
+}
+
+void SXRenderer::illuminate( const std::string &lightHandle, bool on )
+{
+	m_implementation->illuminate( lightHandle, on );
 }
 
 void SXRenderer::motionBegin( const std::set<float> &times )
