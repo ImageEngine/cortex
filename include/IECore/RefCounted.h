@@ -37,7 +37,7 @@
 
 #include "boost/intrusive_ptr.hpp"
 #include "boost/noncopyable.hpp"
-
+#include "tbb/atomic.h"
 #include <cassert>
 
 namespace IECore
@@ -87,8 +87,7 @@ class RefCounted : private boost::noncopyable
 		inline void removeRef() const
 		{
 			assert( m_numRefs > 0 );
-			m_numRefs--;
-			if( m_numRefs==0 )
+			if( --m_numRefs==0 )
 			{
 				delete this;
 			}
@@ -103,7 +102,7 @@ class RefCounted : private boost::noncopyable
 
 	private :
 
-		mutable RefCount m_numRefs;
+		mutable tbb::atomic<RefCount> m_numRefs;
 
 };
 
