@@ -864,7 +864,7 @@ allCoreEnvs = ( coreEnv, corePythonEnv, corePythonModuleEnv, coreTestEnv )
 # lists of sources
 coreSources = sorted( glob.glob( "src/IECore/*.cpp" ) )
 coreHeaders = glob.glob( "include/IECore/*.h" ) + glob.glob( "include/IECore/*.inl" )
-coreBindingHeaders = glob.glob( "include/IECore/bindings/*.h" ) + glob.glob( "include/IECore/bindings/*.inl" )
+corePythonHeaders = glob.glob( "include/IECorePython/*.h" ) + glob.glob( "include/IECorePython/*.inl" )
 corePythonSources = sorted( glob.glob( "src/IECorePython/*.cpp" ) )
 corePythonModuleSources = sorted( glob.glob( "src/IECorePythonModule/*.cpp" ) )
 corePythonScripts = glob.glob( "python/IECore/*.py" )
@@ -944,7 +944,6 @@ coreEnv.Alias( "installLib", [ coreLibraryInstall ] )
 
 # headers
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
-headerInstall += coreEnv.Install( "$INSTALL_HEADER_DIR/IECore/bindings", coreBindingHeaders )
 coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
 coreEnv.Alias( "install", headerInstall )
 coreEnv.Alias( "installCore", headerInstall )
@@ -952,6 +951,11 @@ coreEnv.Alias( "installCore", headerInstall )
 # python library
 corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 corePythonLibrary = corePythonEnv.SharedLibrary( "lib/" + os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ), corePythonSources )
+
+# python headers
+pythonHeaderInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECorePython", corePythonHeaders )
+coreEnv.Alias( "install", pythonHeaderInstall )
+coreEnv.Alias( "installCore", pythonHeaderInstall )
 
 # python module
 corePythonModuleEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
