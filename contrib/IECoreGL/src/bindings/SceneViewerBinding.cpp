@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,7 @@
 #include "IECoreGL/Camera.h"
 #include "IECoreGL/bindings/SceneViewerBinding.h"
 
-#include "IECore/bindings/RefCountedBinding.h"
+#include "IECorePython/RefCountedBinding.h"
 
 using namespace boost::python;
 
@@ -48,7 +48,7 @@ namespace IECoreGL
 
 void bindSceneViewer()
 {
-	IECore::RefCountedClass<SceneViewer, Window>( "SceneViewer" )
+	IECorePython::RefCountedClass<SceneViewer, Window>( "SceneViewer" )
 		.def( init<std::string, ScenePtr>() )
 	;
 }

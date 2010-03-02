@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@
 #include "IECoreGL/Camera.h"
 #include "IECoreGL/bindings/SceneBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 
@@ -61,7 +61,7 @@ static list select( Scene &s, const Imath::Box2f &b )
 
 void bindScene()
 {
-	IECore::RunTimeTypedClass<Scene>()
+	IECorePython::RunTimeTypedClass<Scene>()
 		.def( init<>() )
 		.def( "root", (GroupPtr (Scene::*)() )&Scene::root )
 		.def( "render", (void (Scene::*)() const )&Scene::render )

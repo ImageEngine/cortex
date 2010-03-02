@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,7 +36,7 @@
 
 #include "IECoreTruelight/TruelightColorTransformOp.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -46,7 +46,7 @@ namespace IECoreTruelight
 
 void bindTruelightColorTransformOp()
 {
-	IECore::RunTimeTypedClass<TruelightColorTransformOp>()
+	IECorePython::RunTimeTypedClass<TruelightColorTransformOp>()
 		.def( init<>() )
 		.def( "commands", &TruelightColorTransformOp::commands )
 	;

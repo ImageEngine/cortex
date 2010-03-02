@@ -352,6 +352,13 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_PYTHONLIB_NAME",
+	"The name under which to install the python library. This can "
+	"be used to build and install the library for multiple python versions.",
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
+)
+
+o.Add(
 	"INSTALL_MAYALIB_NAME",
 	"The name under which to install the maya libraries. This "
 	"can be used to build and install the library for multiple "
@@ -729,11 +736,14 @@ pythonEnv.Append( LIBS = [
 	]
 )
 pythonEnv.Prepend( LIBPATH = [ "./lib" ] )
-pythonEnv["SHLIBPREFIX"] = ""
-pythonEnv["SHLIBSUFFIX"] = ".so"
 
-if pythonEnv["PLATFORM"]=="darwin" :
-	pythonEnv.Append( SHLINKFLAGS = "-single_module" )
+pythonModuleEnv = pythonEnv.Copy()
+
+pythonModuleEnv["SHLIBPREFIX"] = ""
+pythonModuleEnv["SHLIBSUFFIX"] = ".so"
+
+if pythonModuleEnv["PLATFORM"]=="darwin" :
+	pythonModuleEnv.Append( SHLINKFLAGS = "-single_module" )
 	
 ###########################################################################################
 # An environment for running tests
@@ -845,14 +855,18 @@ def makeSymLink( target, source ) :
 ###########################################################################################
 
 coreEnv = env.Copy( IECORE_NAME="IECore" )
-corePythonEnv = pythonEnv.Copy( IECORE_NAME="IECore" )
+corePythonEnv = pythonEnv.Copy( IECORE_NAME="IECorePython" )
+corePythonModuleEnv = pythonModuleEnv.Copy( IECORE_NAME="IECore" )
 coreTestEnv = testEnv.Copy()
+
+allCoreEnvs = ( coreEnv, corePythonEnv, corePythonModuleEnv, coreTestEnv )
 
 # lists of sources
 coreSources = sorted( glob.glob( "src/IECore/*.cpp" ) )
 coreHeaders = glob.glob( "include/IECore/*.h" ) + glob.glob( "include/IECore/*.inl" )
 coreBindingHeaders = glob.glob( "include/IECore/bindings/*.h" ) + glob.glob( "include/IECore/bindings/*.inl" )
-corePythonSources = sorted( glob.glob( "src/IECore/bindings/*.cpp" ) )
+corePythonSources = sorted( glob.glob( "src/IECorePython/*.cpp" ) )
+corePythonModuleSources = sorted( glob.glob( "src/IECorePythonModule/*.cpp" ) )
 corePythonScripts = glob.glob( "python/IECore/*.py" )
 
 # configure checks
@@ -861,8 +875,8 @@ if doConfigure :
 	c = Configure( coreEnv )
 		
 	if c.CheckCXXHeader( "boost/asio.hpp" ) :
-		coreEnv.Append( CPPFLAGS = '-DIECORE_WITH_ASIO' )
-		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_ASIO' )
+		for e in allCoreEnvs :
+			e.Append( CPPFLAGS = '-DIECORE_WITH_ASIO' )
 	else :
 		sys.stderr.write( "WARNING: boost/asio.hpp not found, some functionality will be disabled.\n" )
 		coreSources.remove( "src/IECore/ClientDisplayDriver.cpp" )
@@ -879,9 +893,8 @@ if doConfigure :
 		corePythonSources.remove( "src/IECore/bindings/OBJReaderBinding.cpp" )
 	
 	if c.CheckCXXHeader( "boost/math/special_functions/factorials.hpp" ) :
-		coreEnv.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
-		coreTestEnv.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
-		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
+		for e in allCoreEnvs :
+			e.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
 	else :
 		sys.stderr.write( "WARNING: boost/math/special_functions/factorials.hpp not found, some functionality will be disabled.\n" )
 		coreSources.remove( "src/IECore/AssociatedLegendre.cpp" )
@@ -890,8 +903,8 @@ if doConfigure :
 		coreSources.remove( "src/IECore/SphericalHarmonicsProjector.cpp" )
 	
 	if c.CheckLibWithHeader( "tiff", "tiff.h", "CXX" ) :
-		c.env.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )
-		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )
+		for e in allCoreEnvs :
+			e.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )
 	else :
 		sys.stderr.write( "WARNING: no TIFF library found, no TIFF support, check TIFF_INCLUDE_PATH and TIFF_LIB_PATH.\n" )
 		coreSources.remove( "src/IECore/TIFFImageWriter.cpp" )
@@ -901,8 +914,8 @@ if doConfigure :
 		corePythonSources.remove( "src/IECore/bindings/TIFFImageWriterBinding.cpp" )
 		
 	if c.CheckLibWithHeader( "jpeg", ["stdio.h", "jpeglib.h"], "CXX" ) :
-		c.env.Append( CPPFLAGS = '-DIECORE_WITH_JPEG' )
-		corePythonEnv.Append( CPPFLAGS = '-DIECORE_WITH_JPEG' )
+		for e in allCoreEnvs :
+			e.Append( CPPFLAGS = '-DIECORE_WITH_JPEG' )
 	else :
 		sys.stderr.write( "WARNING: no JPEG library found, no JPEG support, check JPEG_INCLUDE_PATH and JPEG_LIB_PATH.\n" )
 		coreSources.remove( "src/IECore/JPEGImageWriter.cpp" )
@@ -911,8 +924,8 @@ if doConfigure :
 		corePythonSources.remove( "src/IECore/bindings/JPEGImageWriterBinding.cpp" )
 	
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
-		c.env.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
-		corePythonEnv.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
+		for e in allCoreEnvs :
+			e.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
 	else :
 		sys.stderr.write( "WARNING: no FreeType library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
 		coreSources.remove( "src/IECore/Font.cpp" )
@@ -936,17 +949,22 @@ coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env 
 coreEnv.Alias( "install", headerInstall )
 coreEnv.Alias( "installCore", headerInstall )
 
-# python module
+# python library
 corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-corePythonModule = corePythonEnv.SharedLibrary( "python/IECore/_IECore", corePythonSources )
-corePythonEnv.Depends( corePythonModule, coreLibrary )
+corePythonLibrary = corePythonEnv.SharedLibrary( "lib/" + os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ), corePythonSources )
 
-corePythonModuleInstall = corePythonEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
-corePythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
-corePythonEnv.Alias( "install", corePythonModuleInstall )
-corePythonEnv.Alias( "installCore", corePythonModuleInstall )
+# python module
+corePythonModuleEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+corePythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
+corePythonModule = corePythonModuleEnv.SharedLibrary( "python/IECore/_IECore", corePythonModuleSources )
+corePythonModuleEnv.Depends( corePythonModule, coreLibrary )
 
-Default( coreLibrary, corePythonModule )
+corePythonModuleInstall = corePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
+corePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
+corePythonModuleEnv.Alias( "install", corePythonModuleInstall )
+corePythonModuleEnv.Alias( "installCore", corePythonModuleInstall )
+
+Default( coreLibrary, corePythonLibrary, corePythonModule )
 
 # post installation script
 

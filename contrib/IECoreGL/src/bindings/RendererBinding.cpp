@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/bindings/RendererBinding.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -47,7 +47,7 @@ namespace IECoreGL
 
 void bindRenderer()
 {
-	IECore::RunTimeTypedClass<Renderer>()
+	IECorePython::RunTimeTypedClass<Renderer>()
 		.def( init<>() )
 		.def( "scene", &Renderer::scene )
 	;

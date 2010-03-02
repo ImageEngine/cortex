@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/bindings/ShaderBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace std;
@@ -60,7 +60,7 @@ boost::python::list parameterNames( const Shader &s )
 
 void bindShader()
 {
-	IECore::RunTimeTypedClass<Shader>()
+	IECorePython::RunTimeTypedClass<Shader>()
 		.def( init<const std::string &, const std::string &>() )
 		.def( "parameterNames", &parameterNames )
 		.def( "parameterIndex", &Shader::parameterIndex )

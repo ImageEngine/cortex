@@ -36,10 +36,10 @@
 
 #include "IECoreRI/SXRenderer.h"
 #include "IECoreRI/bindings/SXRendererBinding.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
-using namespace IECore;
+using namespace IECorePython;
 
 namespace IECoreRI
 {

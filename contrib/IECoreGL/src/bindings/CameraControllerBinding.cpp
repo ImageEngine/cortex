@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@
 #include "IECoreGL/bindings/CameraControllerBinding.h"
 #include "IECoreGL/Camera.h"
 
-#include "IECore/bindings/RefCountedBinding.h"
+#include "IECorePython/RefCountedBinding.h"
 
 using namespace boost::python;
 
@@ -47,7 +47,7 @@ namespace IECoreGL
 
 void bindCameraController()
 {
-	IECore::RefCountedClass<CameraController, IECore::RefCounted>( "CameraController" )
+	IECorePython::RefCountedClass<CameraController, IECore::RefCounted>( "CameraController" )
 		.def( init<CameraPtr, float>( ( arg( "camera" ), arg( "centreOfInterest" ) = 5.0f ) ) )
 		.def( "setCamera", &CameraController::setCamera )
 		.def( "getCamera", &CameraController::getCamera )

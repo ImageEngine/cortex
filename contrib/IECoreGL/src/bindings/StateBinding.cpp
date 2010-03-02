@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,7 @@
 #include "IECoreGL/bindings/StateBinding.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 
@@ -53,7 +53,7 @@ static StatePtr defaultState()
 
 void bindState()
 {
-	IECore::RunTimeTypedClass<State>()
+	IECorePython::RunTimeTypedClass<State>()
 		.def( init<bool>() )
 		.def( "add", (void (State::*)( StatePtr ) )&State::add )
 		.def( "add", (void (State::*)( StateComponentPtr ) )&State::add )

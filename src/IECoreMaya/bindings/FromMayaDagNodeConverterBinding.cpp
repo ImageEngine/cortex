@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@
 #include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/bindings/FromMayaDagNodeConverterBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "maya/MSelectionList.h"
 #include "maya/MString.h"
@@ -59,7 +59,7 @@ static IECoreMaya::FromMayaDagNodeConverterPtr create( const char *n, IECore::Ty
 void IECoreMaya::bindFromMayaDagNodeConverter()
 {
 
-	scope s = IECore::RunTimeTypedClass<FromMayaDagNodeConverter>()
+	scope s = IECorePython::RunTimeTypedClass<FromMayaDagNodeConverter>()
 		.def( "create", &create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 

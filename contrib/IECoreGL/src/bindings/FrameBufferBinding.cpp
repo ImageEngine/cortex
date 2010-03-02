@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,7 +39,7 @@
 #include "IECoreGL/DepthTexture.h"
 #include "IECoreGL/bindings/FrameBufferBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace std;
@@ -49,7 +49,7 @@ namespace IECoreGL
 
 void bindFrameBuffer()
 {
-	IECore::RunTimeTypedClass<FrameBuffer>()
+	IECorePython::RunTimeTypedClass<FrameBuffer>()
 		.def( init<>() )
 		.def( "maxColors", &FrameBuffer::maxColors ).staticmethod( "maxColors" )
 		.def( "setColor", &FrameBuffer::setColor )

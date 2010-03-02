@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,8 +36,8 @@
 
 #include "IECore/Exception.h"
 
-#include "IECore/bindings/IECoreBinding.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECoreMaya/bindings/PlaybackFrameListBinding.h"
 #include "IECoreMaya/PlaybackFrameList.h"
@@ -45,7 +45,7 @@
 using namespace IECore;
 using namespace boost::python;
 
-namespace IECore
+namespace IECorePython
 {
 	template<>
 	std::string repr( IECoreMaya::PlaybackFrameList &x )
@@ -67,7 +67,7 @@ namespace IECoreMaya
 
 void bindPlaybackFrameList()
 {
-	object o = RunTimeTypedClass<PlaybackFrameList>()
+	object o = IECorePython::RunTimeTypedClass<PlaybackFrameList>()
 		.def( init< PlaybackFrameList::Range >() )
 		.add_property( "range", &PlaybackFrameList::getRange, &PlaybackFrameList::setRange )
 	;

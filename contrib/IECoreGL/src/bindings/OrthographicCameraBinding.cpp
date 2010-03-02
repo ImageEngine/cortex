@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@
 #include "IECoreGL/OrthographicCamera.h"
 #include "IECoreGL/bindings/OrthographicCameraBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 
@@ -47,7 +47,7 @@ namespace IECoreGL
 
 void bindOrthographicCamera()
 {
-	IECore::RunTimeTypedClass<OrthographicCamera>()
+	IECorePython::RunTimeTypedClass<OrthographicCamera>()
 		.def( init<const Imath::M44f &, const Imath::V2i &, const Imath::Box2f &, const Imath::V2f &>( (
 				arg( "transform" ) = Imath::M44f(),
 				arg( "resolution" ) = Imath::V2i( 640, 480 ),

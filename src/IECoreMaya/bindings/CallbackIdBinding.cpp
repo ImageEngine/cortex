@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreMaya/bindings/CallbackIdBinding.h"
 #include "IECoreMaya/CallbackId.h"
 
-#include "IECore/bindings/PointerFromSWIG.h"
+#include "IECorePython/PointerFromSWIG.h"
 
 using namespace boost::python;
 
@@ -53,7 +53,7 @@ class CallbackIdWrapper : public CallbackId
 			// extract the MCallbackId from the SWIG object we're being passed. This isn't
 			// typesafe in any way - calling with anything other than the correct type
 			// is likely to explode. i haven't yet found a good way of checking the type.
-			:	CallbackId( *(MCallbackId *)(((IECore::Detail::PySwigObject *)id)->ptr) )
+			:	CallbackId( *(MCallbackId *)(((IECorePython::Detail::PySwigObject *)id)->ptr) )
 		{
 			// if we allow a bound MCallbackId to die in python then we get this error printing out :
 			//

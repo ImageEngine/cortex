@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreMaya/ToMayaConverter.h"
 #include "IECoreMaya/bindings/ToMayaConverterBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECore/Object.h"
 
@@ -46,6 +46,6 @@ using namespace boost::python;
 
 void IECoreMaya::bindToMayaConverter()
 {
-	IECore::RunTimeTypedClass<ToMayaConverter>()
+	IECorePython::RunTimeTypedClass<ToMayaConverter>()
 	;
 }

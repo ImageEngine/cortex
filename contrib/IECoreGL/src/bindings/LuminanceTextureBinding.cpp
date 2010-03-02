@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreGL/LuminanceTexture.h"
 #include "IECoreGL/bindings/LuminanceTextureBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace std;
@@ -47,7 +47,7 @@ namespace IECoreGL
 
 void bindLuminanceTexture()
 {
-	IECore::RunTimeTypedClass<LuminanceTexture>()
+	IECorePython::RunTimeTypedClass<LuminanceTexture>()
 		.def( init<unsigned int, unsigned int, IECore::ConstDataPtr, IECore::ConstDataPtr, bool>() )
 		.def( init<IECore::ImagePrimitivePtr, bool>() )
 	;

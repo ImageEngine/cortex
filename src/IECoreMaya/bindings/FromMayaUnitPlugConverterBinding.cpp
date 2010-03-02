@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreMaya/FromMayaUnitPlugConverter.h"
 #include "IECoreMaya/bindings/FromMayaUnitPlugConverterBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace IECoreMaya;
 using namespace boost::python;
@@ -45,7 +45,7 @@ using namespace boost::python;
 template<class T>
 static void bind()
 {
-	IECore::RunTimeTypedClass<T>()
+	IECorePython::RunTimeTypedClass<T>()
 	;
 }
 

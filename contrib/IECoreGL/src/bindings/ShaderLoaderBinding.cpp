@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/bindings/ShaderLoaderBinding.h"
-#include "IECore/bindings/RefCountedBinding.h"
+#include "IECorePython/RefCountedBinding.h"
 
 using namespace boost::python;
 
@@ -46,7 +46,7 @@ namespace IECoreGL
 
 void bindShaderLoader()
 {
-	IECore::RefCountedClass<ShaderLoader, IECore::RefCounted>( "ShaderLoader" )
+	IECorePython::RefCountedClass<ShaderLoader, IECore::RefCounted>( "ShaderLoader" )
 		.def( init<const IECore::SearchPath &>() )
 		.def( init<const IECore::SearchPath &, const IECore::SearchPath *>() )
 		.def( "load", &ShaderLoader::load )

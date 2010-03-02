@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreGL/Camera.h"
 #include "IECoreGL/bindings/CameraBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 
@@ -46,7 +46,7 @@ namespace IECoreGL
 
 void bindCamera()
 {
-	IECore::RunTimeTypedClass<Camera>()
+	IECorePython::RunTimeTypedClass<Camera>()
 		.def( "setTransform", &Camera::setTransform )
 		.def( "getTransform", &Camera::getTransform, return_value_policy<copy_const_reference>() )
 		.def( "setResolution", &Camera::setResolution )

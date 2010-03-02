@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,7 @@
 #include "IECoreGL/ToGLTextureConverter.h"
 #include "IECoreGL/bindings/ToGLTextureConverterBinding.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace std;
@@ -47,7 +47,7 @@ namespace IECoreGL
 
 void bindToGLTextureConverter()
 {
-	IECore::RunTimeTypedClass<ToGLTextureConverter>()
+	IECorePython::RunTimeTypedClass<ToGLTextureConverter>()
 		.def( init< IECore::ConstObjectPtr >() )
 	;
 }

@@ -287,6 +287,7 @@ INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
 if targetApp :
 	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/include/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_PYTHONLIB_NAME = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION-python$PYTHON_VERSION"
 	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/" + targetApp + "/" + targetAppVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 	# we don't want to build the renderman procedurals when we build houdini, as otherwise they end
 	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
@@ -297,6 +298,7 @@ if targetApp :
 else :
 	INSTALL_HEADER_DIR = "$INSTALL_PREFIX/tools/include/" + platform + "/cortex/$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_LIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
+	INSTALL_PYTHONLIB_NAME = "$INSTALL_PREFIX/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION-python$PYTHON_VERSION"
 	INSTALL_PYTHON_DIR = "$INSTALL_PREFIX/tools/python/" + pythonVersion + "/" + platform + "/" + compiler + "/" + compilerVersion + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
 	INSTALL_RMANPROCEDURAL_NAME = "$INSTALL_PREFIX/tools/3delight/" + dlVersion + "/procedurals/" + platform + "/cortex/$IECORE_MAJOR_VERSION/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 

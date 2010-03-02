@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,14 +35,15 @@
 #include <boost/python.hpp>
 
 #include "IECoreRI/PTCParticleReader.h"
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;
 using namespace boost;
 using namespace boost::python;
-using namespace IECore;
+using namespace IECorePython;
 
-namespace IECoreRI {
+namespace IECoreRI
+{
 
 void bindPTCParticleReader()
 {

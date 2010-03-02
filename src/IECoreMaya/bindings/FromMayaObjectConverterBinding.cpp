@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/StatusException.h"
 
-#include "IECore/bindings/RunTimeTypedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "maya/MSelectionList.h"
 #include "maya/MString.h"
@@ -48,7 +48,7 @@ using namespace boost::python;
 
 void IECoreMaya::bindFromMayaObjectConverter()
 {
-	IECore::RunTimeTypedClass<FromMayaObjectConverter>()
+	IECorePython::RunTimeTypedClass<FromMayaObjectConverter>()
 		.def( "create", &FromMayaObjectConverter::create, ( arg_( "object" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 	;
 }
