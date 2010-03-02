@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -47,37 +47,41 @@
 using namespace std;
 using namespace boost::python;
 
-static object g_mainModule;
-static object g_mainModuleNamespace;
-
-static void initialise()
+/// We use a static instance of this struct to initialise python when the dso is first loaded.
+struct PythonInitialiser
 {
-	static bool initialised = false;
-	if( !initialised )
+	PythonInitialiser()
 	{
 		// start python
 		Py_Initialize();
-		g_mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
-		g_mainModuleNamespace = g_mainModule.attr( "__dict__" );
+		PyEval_InitThreads();
 		
-		// load the IECoreRI and IECore modules so people don't have to do that in the string
-		// they pass to be executed. this also means people don't have to worry about which
-		// version to load. also set the dlopen flags to include RTLD_GLOBAL to avoid the dreaded
-		// cross module rtti errors on linux.
-		string toExecute =	"import sys\n"
-							"import ctypes\n"
-							"sys.setdlopenflags( sys.getdlopenflags() | ctypes.RTLD_GLOBAL )\n"
-							"import IECore\n"
-							"import IECoreRI\n";
-							
-		handle<> ignored( PyRun_String( 
-			toExecute.c_str(),
-			Py_file_input, g_mainModuleNamespace.ptr(),
-			g_mainModuleNamespace.ptr() ) );
-		
-		initialised = true;
+			mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
+			mainModuleNamespace = mainModule.attr( "__dict__" );
+
+			// load the IECoreRI and IECore modules so people don't have to do that in the string
+			// they pass to be executed. this also means people don't have to worry about which
+			// version to load. also set the dlopen flags to include RTLD_GLOBAL to avoid the dreaded
+			// cross module rtti errors on linux.
+			string toExecute =	"import sys\n"
+								"import ctypes\n"
+								"sys.setdlopenflags( sys.getdlopenflags() | ctypes.RTLD_GLOBAL )\n"
+								"import IECore\n"
+								"import IECoreRI\n";
+
+			handle<> ignored( PyRun_String( 
+				toExecute.c_str(),
+				Py_file_input, mainModuleNamespace.ptr(),
+				mainModuleNamespace.ptr() ) );
+
+		PyEval_ReleaseThread( PyThreadState_Get() );
 	}
-}
+	
+	object mainModule;
+	object mainModuleNamespace;
+};
+
+static PythonInitialiser g_pythonInitialiser;
 
 extern "C"
 {
@@ -89,28 +93,31 @@ RtPointer DLLEXPORT ConvertParameters( RtString paramstr )
 
 RtVoid DLLEXPORT Subdivide( RtPointer data, float detail )
 {
-	try
-	{
-		initialise();
+	PyGILState_STATE gilState = PyGILState_Ensure();
+	
+		try
+		{
+
+			string *i = (string *)data;
+
+			handle<> ignored( PyRun_String( i->c_str(), Py_file_input, g_pythonInitialiser.mainModuleNamespace.ptr(),
+				g_pythonInitialiser.mainModuleNamespace.ptr() ) );
+
+		}
+		catch( const error_already_set &e )
+		{
+			PyErr_Print();
+		}
+		catch( const std::exception &e )
+		{
+			cerr << "ERROR : Python procedural : " << e.what() << endl;
+		}
+		catch( ... )
+		{
+			cerr << "ERROR : Python procedural : caught unknown exception" << endl;
+		}
 		
-		string *i = (string *)data;
-		
-		handle<> ignored( PyRun_String( i->c_str(), Py_file_input, g_mainModuleNamespace.ptr(),
-			g_mainModuleNamespace.ptr() ) );
-		
-	}
-	catch( const error_already_set &e )
-	{
-		PyErr_Print();
-	}
-	catch( const std::exception &e )
-	{
-		cerr << "ERROR : Python procedural : " << e.what() << endl;
-	}
-	catch( ... )
-	{
-		cerr << "ERROR : Python procedural : caught unknown exception" << endl;
-	}
+	PyGILState_Release( gilState );
 }
 
 RtVoid DLLEXPORT Free( RtPointer data )
