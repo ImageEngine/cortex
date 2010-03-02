@@ -35,7 +35,7 @@
 #ifndef IECOREBINDINGS_REFCOUNTEDBINDING_INL
 #define IECOREBINDINGS_REFCOUNTEDBINDING_INL
 
-#include "IECore/WrapperGarbageCollectorBase.h"
+#include "IECorePython/WrapperGarbageCollector.h"
 
 namespace IECorePython
 {
@@ -55,7 +55,7 @@ PyObject *IntrusivePtrToPython<T>::convert( typename T::Ptr const &x )
 		return Py_None;
 	}
 
-	PyObject* converted = IECore::WrapperGarbageCollectorBase::pyObject( x.get() );
+	PyObject* converted = WrapperGarbageCollector::pyObject( x.get() );
 	if( converted )
 	{
 		Py_INCREF( converted );

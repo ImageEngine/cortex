@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,16 +32,66 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/WrapperGarbageCollectorBase.h"
+#include <vector>
 
-using namespace IECore;
+#include "IECorePython/WrapperGarbageCollector.h"
 
-size_t WrapperGarbageCollectorBase::g_allocCount = 0;
-size_t WrapperGarbageCollectorBase::g_allocThreshold = 50;
+using namespace IECorePython;
 
-WrapperGarbageCollectorBase::InstanceMap WrapperGarbageCollectorBase::g_refCountedToPyObject;
+size_t WrapperGarbageCollector::g_allocCount = 0;
+size_t WrapperGarbageCollector::g_allocThreshold = 50;
+WrapperGarbageCollector::InstanceMap WrapperGarbageCollector::g_refCountedToPyObject;
 
-PyObject *WrapperGarbageCollectorBase::pyObject( RefCounted *refCountedObject )
+WrapperGarbageCollector::WrapperGarbageCollector( PyObject *pyObject, IECore::RefCounted *object )
+			:	m_pyObject( pyObject ), m_object( object )
+{
+	g_allocCount++;
+
+	if (g_allocCount >= g_allocThreshold)
+	{
+		collect();
+	}
+
+	g_refCountedToPyObject[object] = pyObject;
+}
+
+WrapperGarbageCollector::~WrapperGarbageCollector()
+{
+	g_refCountedToPyObject.erase( m_object );
+}
+
+void WrapperGarbageCollector::collect()
+{
+	std::vector<PyObject*> toCollect;
+
+	do
+	{
+		toCollect.clear();
+		for( InstanceMap::const_iterator it = g_refCountedToPyObject.begin(); it!=g_refCountedToPyObject.end(); it++ )
+		{
+			if( it->first->refCount()==1 )
+			{
+				if( it->second->ob_refcnt==1 )
+				{
+					toCollect.push_back( it->second );
+				}
+			}
+		}
+
+		for (std::vector<PyObject*>::const_iterator jt = toCollect.begin(); jt != toCollect.end(); ++jt)
+		{
+			Py_DECREF( *jt );
+		}
+	} while( toCollect.size() );
+
+	g_allocCount = 0;
+	/// Scale the collection threshold with the number of objects to be collected, otherwise we get
+	/// awful (quadratic?) behaviour when creating large numbers of objects.
+	/// \todo Revisit this with a better thought out strategy, perhaps like python's own garbage collector.
+	g_allocThreshold = std::max( size_t( 50 ), g_refCountedToPyObject.size() );
+}
+
+PyObject *WrapperGarbageCollector::pyObject( IECore::RefCounted *refCountedObject )
 {
 	InstanceMap::const_iterator it = g_refCountedToPyObject.find( refCountedObject );
 	if( it==g_refCountedToPyObject.end() )
@@ -51,17 +101,17 @@ PyObject *WrapperGarbageCollectorBase::pyObject( RefCounted *refCountedObject )
 	return it->second;
 }
 
-size_t WrapperGarbageCollectorBase::numWrappedInstances()
+size_t WrapperGarbageCollector::numWrappedInstances()
 {
 	return g_refCountedToPyObject.size();
 }
 
-void WrapperGarbageCollectorBase::setCollectThreshold( size_t t )
+void WrapperGarbageCollector::setCollectThreshold( size_t t )
 {
 	g_allocThreshold = t;
 }
 
-size_t WrapperGarbageCollectorBase::getCollectThreshold()
+size_t WrapperGarbageCollector::getCollectThreshold()
 {
 	return g_allocThreshold;
 }

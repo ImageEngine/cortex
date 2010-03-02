@@ -1009,11 +1009,12 @@ riEnv = coreEnv.Copy( IECORE_NAME = "IECoreRI" )
 riEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
-riPythonEnv = pythonEnv.Copy( IECORE_NAME = "IECoreRI" )
-riPythonEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
-riPythonEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
+riPythonModuleEnv = pythonModuleEnv.Copy( IECORE_NAME = "IECoreRI" )
+riPythonModuleEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
+riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
+riPythonModuleEnv.Append( LIBS = corePythonLibrary )
 
-riPythonProceduralEnv = riPythonEnv.Copy( IECORE_NAME = "iePython" )
+riPythonProceduralEnv = riPythonModuleEnv.Copy( IECORE_NAME = "iePython" )
 
 haveRI = False
 riLibs = []
@@ -1038,7 +1039,7 @@ if doConfigure :
 		else :
 			riLibs = [ "prman" ]
 		riEnv.Append( LIBS = riLibs )
-		riPythonEnv.Append( LIBS = riLibs )
+		riPythonModuleEnv.Append( LIBS = riLibs )
 		
 		riSources = glob.glob( "src/IECoreRI/*.cpp" )
 		riHeaders = glob.glob( "include/IECoreRI/*.h" ) + glob.glob( "include/IECoreRI/*.inl" )
@@ -1048,7 +1049,7 @@ if doConfigure :
 		if c.CheckHeader( "pointcloud.h" ) :
 			
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PTC" )
-			riPythonEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PTC" )
+			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PTC" )
 			
 		else :
 		
@@ -1100,31 +1101,31 @@ if doConfigure :
 		riEnv.Alias( "installRI", rslHeaderInstall )
 		
 		# python module
-		riPythonEnv.Append(
+		riPythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
-		riPythonModule = riPythonEnv.SharedLibrary( "python/IECoreRI/_IECoreRI", riPythonSources )
-		riPythonEnv.Depends( riPythonModule, riLibrary )
+		riPythonModule = riPythonModuleEnv.SharedLibrary( "python/IECoreRI/_IECoreRI", riPythonSources )
+		riPythonModuleEnv.Depends( riPythonModule, riLibrary )
 
-		riPythonModuleInstall = riPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreRI", riPythonScripts + riPythonModule )
-		riPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riPythonEnv, riPythonEnv["INSTALL_PYTHON_DIR"] ) )
-		riPythonEnv.Alias( "install", riPythonModuleInstall )
-		riPythonEnv.Alias( "installRI", riPythonModuleInstall )
+		riPythonModuleInstall = riPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreRI", riPythonScripts + riPythonModule )
+		riPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riPythonModuleEnv, riPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		riPythonModuleEnv.Alias( "install", riPythonModuleInstall )
+		riPythonModuleEnv.Alias( "installRI", riPythonModuleInstall )
 
 		if coreEnv["INSTALL_CORERI_POST_COMMAND"]!="" :
 			# this is the only way we could find to get a post action to run for an alias
-			riPythonEnv.Alias( "install", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
-			riPythonEnv.Alias( "installRI", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
+			riPythonModuleEnv.Alias( "install", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
+			riPythonModuleEnv.Alias( "installRI", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" ) 
 
 		Default( [ riLibrary, riPythonModule, riPythonProcedural ] )
 		
 		# tests
 		riTestEnv = testEnv.Copy()
 
-		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
+		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + riEnv.subst( ":".join( [ "./lib" ] + riPythonModuleEnv["LIBPATH"] ) )
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
 		riTestEnv["ENV"]["DELIGHT"] = riEnv.subst( "$RMAN_ROOT" )
 		riTestEnv["ENV"]["DL_SHADERS_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" ) + ":./"
@@ -1228,28 +1229,29 @@ if env["WITH_GL"] and doConfigure :
 		glEnv.Alias( "installGL", glslHeaderInstall )
 		
 		glPythonSources = glob.glob( "contrib/IECoreGL/src/bindings/*.cpp" )
-		glPythonEnv = pythonEnv.Copy( **glEnvSets )
-		glPythonEnv.Append( **glEnvAppends )
-		glPythonEnv.Prepend( **glEnvPrepends )
-		glPythonEnv.Append(
+		glPythonModuleEnv = pythonModuleEnv.Copy( **glEnvSets )
+		glPythonModuleEnv.Append( **glEnvAppends )
+		glPythonModuleEnv.Prepend( **glEnvPrepends )
+		glPythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				corePythonLibrary,
 			]
 		)
-		glPythonModule = glPythonEnv.SharedLibrary( "contrib/IECoreGL/python/IECoreGL/_IECoreGL", glPythonSources )
-		glPythonEnv.Depends( glPythonModule, glLibrary )
+		glPythonModule = glPythonModuleEnv.SharedLibrary( "contrib/IECoreGL/python/IECoreGL/_IECoreGL", glPythonSources )
+		glPythonModuleEnv.Depends( glPythonModule, glLibrary )
 
 		glPythonScripts = glob.glob( "contrib/IECoreGL/python/IECoreGL/*.py" )
-		glPythonModuleInstall = glPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )		
-		glPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glPythonEnv, glPythonEnv["INSTALL_PYTHON_DIR"] ) )
-		glPythonEnv.Alias( "install", glPythonModuleInstall )
-		glPythonEnv.Alias( "installGL", glPythonModuleInstall )
+		glPythonModuleInstall = glPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )		
+		glPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glPythonModuleEnv, glPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		glPythonModuleEnv.Alias( "install", glPythonModuleInstall )
+		glPythonModuleEnv.Alias( "installGL", glPythonModuleInstall )
 
 		if coreEnv["INSTALL_COREGL_POST_COMMAND"]!="" :
 			# this is the only way we could find to get a post action to run for an alias
-			glPythonEnv.Alias( "install", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
-			glPythonEnv.Alias( "installGL", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
+			glPythonModuleEnv.Alias( "install", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
+			glPythonModuleEnv.Alias( "installGL", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
 
 		Default( [ glLibrary, glPythonModule ] )
 
@@ -1284,6 +1286,7 @@ mayaEnvAppends = {
 		"OpenMayaAnim",
 		"OpenMayaFX",
 		"boost_python" + pythonEnv["BOOST_LIB_SUFFIX"],
+		corePythonLibrary,
 	],
 	"CPPFLAGS" : [
 		"-D_BOOL",
@@ -1310,8 +1313,9 @@ mayaEnv.Append( **mayaEnvAppends )
 
 mayaEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 
-mayaPythonEnv = pythonEnv.Copy( **mayaEnvSets )
-mayaPythonEnv.Append( **mayaEnvAppends )
+mayaPythonModuleEnv = pythonModuleEnv.Copy( **mayaEnvSets )
+mayaPythonModuleEnv.Append( **mayaEnvAppends )
+mayaPythonModuleEnv.Append( LIBS = corePythonLibrary )
 
 mayaPluginEnv = mayaEnv.Copy( IECORE_NAME="ieCore" )
 
@@ -1420,30 +1424,30 @@ if doConfigure :
 		mayaPluginEnv.Alias( "installMaya", mayaPluginInstall )
 				
 		# maya python
-		mayaPythonEnv.Append(
+		mayaPythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
-		mayaPythonModule = mayaPythonEnv.SharedLibrary( "python/IECoreMaya/_IECoreMaya", mayaPythonSources )
-		mayaPythonEnv.Depends( mayaPythonModule, mayaLibrary )
+		mayaPythonModule = mayaPythonModuleEnv.SharedLibrary( "python/IECoreMaya/_IECoreMaya", mayaPythonSources )
+		mayaPythonModuleEnv.Depends( mayaPythonModule, mayaLibrary )
 
-		mayaPythonModuleInstall = mayaPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
-		mayaPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonEnv, mayaPythonEnv["INSTALL_PYTHON_DIR"] ) )
-		mayaPythonEnv.Alias( "install", mayaPythonModuleInstall )
-		mayaPythonEnv.Alias( "installMaya", mayaPythonModuleInstall )
+		mayaPythonModuleInstall = mayaPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
+		mayaPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonModuleEnv, mayaPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		mayaPythonModuleEnv.Alias( "install", mayaPythonModuleInstall )
+		mayaPythonModuleEnv.Alias( "installMaya", mayaPythonModuleInstall )
 
 		if coreEnv["INSTALL_COREMAYA_POST_COMMAND"]!="" :
 			# this is the only way we could find to get a post action to run for an alias
-			mayaPythonEnv.Alias( "install", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
-			mayaPythonEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
+			mayaPythonModuleEnv.Alias( "install", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
+			mayaPythonModuleEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" ) 
 
 		Default( [ mayaLibrary, mayaPlugin, mayaPythonModule ] )
 		
 		mayaTestEnv = testEnv.Copy()
 		
-		mayaTestLibPaths = mayaEnv.subst( ":".join( [ "./lib" ] + mayaPythonEnv["LIBPATH"] ) )
+		mayaTestLibPaths = mayaEnv.subst( ":".join( [ "./lib" ] + mayaPythonModuleEnv["LIBPATH"] ) )
 		if haveRI :
 			mayaTestLibPaths += ":" + mayaEnv.subst( "$RMAN_ROOT/lib" )
 		mayaTestEnv["ENV"][mayaTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + mayaTestLibPaths
@@ -1619,7 +1623,8 @@ truelightEnv.Prepend( LIBPATH = [
 	]
 )
 
-truelightPythonEnv = pythonEnv.Copy( IECORE_NAME="IECoreTruelight" )
+truelightPythonModuleEnv = pythonModuleEnv.Copy( IECORE_NAME="IECoreTruelight" )
+truelightPythonModuleEnv.Append( LIBS = corePythonLibrary )
 
 if doConfigure :
 
@@ -1661,20 +1666,20 @@ if doConfigure :
 		truelightEnv.Alias( "install", truelightHeaderInstall )
 		
 		# python
-		truelightPythonEnv.Append( LIBS = [
+		truelightPythonModuleEnv.Append( LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 
-		truelightPythonModule = truelightPythonEnv.SharedLibrary( "python/IECoreTruelight/_IECoreTruelight", truelightPythonSources )
-		truelightPythonEnv.Depends( truelightPythonModule, corePythonModule )
-		truelightPythonEnv.Depends( truelightPythonModule, truelightLibrary )
+		truelightPythonModule = truelightPythonModuleEnv.SharedLibrary( "python/IECoreTruelight/_IECoreTruelight", truelightPythonSources )
+		truelightPythonModuleEnv.Depends( truelightPythonModule, corePythonModule )
+		truelightPythonModuleEnv.Depends( truelightPythonModule, truelightLibrary )
 		
-		truelightPythonModuleInstall = truelightPythonEnv.Install( "$INSTALL_PYTHON_DIR/IECoreTruelight", truelightPythonScripts + truelightPythonModule )
-		truelightPythonEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreTruelight", lambda target, source, env : makeSymLinks( truelightPythonEnv, truelightPythonEnv["INSTALL_PYTHON_DIR"] ) )
-		truelightPythonEnv.Alias( "install", truelightPythonModuleInstall )
-		truelightPythonEnv.Alias( "installTruelight", truelightPythonModuleInstall )
+		truelightPythonModuleInstall = truelightPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreTruelight", truelightPythonScripts + truelightPythonModule )
+		truelightPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreTruelight", lambda target, source, env : makeSymLinks( truelightPythonModuleEnv, truelightPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		truelightPythonModuleEnv.Alias( "install", truelightPythonModuleInstall )
+		truelightPythonModuleEnv.Alias( "installTruelight", truelightPythonModuleInstall )
 		
 		if coreEnv["INSTALL_CORETRUELIGHT_POST_COMMAND"]!="" :
 			# this is the only way we could find to get a post action to run for an alias
@@ -1685,7 +1690,7 @@ if doConfigure :
 		
 		# tests
 		truelightTestEnv = testEnv.Copy()
-		#riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = riEnv.subst( ":".join( [ "./lib" ] + riPythonEnv["LIBPATH"] ) )
+		#riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = riEnv.subst( ":".join( [ "./lib" ] + riPythonModuleEnv["LIBPATH"] ) )
 		truelightTestEnv["ENV"]["TRUELIGHT_ROOT"] = truelightEnv.subst( "$TRUELIGHT_ROOT" )
 		truelightTest = truelightTestEnv.Command( "test/IECoreTruelight/results.txt", truelightPythonModule, pythonExecutable + " $TEST_TRUELIGHT_SCRIPT" )
 		NoCache( truelightTest )

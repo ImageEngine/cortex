@@ -37,74 +37,62 @@
 
 #include <boost/python.hpp>
 
-#include <vector>
+#include <map>
 
 #include "IECore/RefCounted.h"
-#include "IECore/WrapperGarbageCollectorBase.h"
 
 namespace IECorePython
 {
 
+/// This base class is used to store a static map of pointers
+/// to all the Wrapper instances in existence. This is then
+/// used to resolve not only the circular reference problem with
+/// wrapped objects (RefCounted->PyObject->RefCounted) but also
+/// the identity problem when pushing RefCountedPtr to python (we
+/// need to find the corresponding PyObject).
 //\todo Optimize the collect() function. The function is taking too much tests on reference counting when many objects are allocated.
-class WrapperGarbageCollector : public IECore::WrapperGarbageCollectorBase
+class WrapperGarbageCollector
 {
 
 	public :
 
-		WrapperGarbageCollector( PyObject *pyObject, IECore::RefCounted *object )
-			:	m_pyObject( pyObject ), m_object( object )
-		{
-			g_allocCount++;
+		WrapperGarbageCollector( PyObject *pyObject, IECore::RefCounted *object );
+		virtual ~WrapperGarbageCollector();
 
-			if (g_allocCount >= g_allocThreshold)
-			{
-				collect();
-			}
+		/// Returns the number of wrapped instances currently
+		/// in existence.
+		static size_t numWrappedInstances();
 
-			g_refCountedToPyObject[object] = pyObject;
-		}
-
-		virtual ~WrapperGarbageCollector()
-		{
-			g_refCountedToPyObject.erase( m_object );
-		}
-
-		static void collect()
-		{
-			std::vector<PyObject*> toCollect;
-
-			do
-			{
-				toCollect.clear();
-				for( InstanceMap::const_iterator it = g_refCountedToPyObject.begin(); it!=g_refCountedToPyObject.end(); it++ )
-				{
-					if( it->first->refCount()==1 )
-					{
-						if( it->second->ob_refcnt==1 )
-						{
-							toCollect.push_back( it->second );
-						}
-					}
-				}
-
-				for (std::vector<PyObject*>::const_iterator jt = toCollect.begin(); jt != toCollect.end(); ++jt)
-				{
-					Py_DECREF( *jt );
-				}
-			} while( toCollect.size() );
-
-			g_allocCount = 0;
-			/// Scale the collection threshold with the number of objects to be collected, otherwise we get
-			/// awful (quadratic?) behaviour when creating large numbers of objects.
-			/// \todo Revisit this with a better thought out strategy, perhaps like python's own garbage collector.
-			g_allocThreshold = std::max( size_t( 50 ), g_refCountedToPyObject.size() );
-		}
+		/// Sets the number of object instance allocations
+		/// after which a garbage collection pass will be
+		/// performed automatically.
+		static void setCollectThreshold( size_t t );
+		/// Returns the collection threshold.
+		static size_t getCollectThreshold();
+		
+		/// Collects any wrapped objects which exist only because
+		/// of a circular reference between the python wrapper
+		/// and the C++ object.
+		static void collect();
+		
+		/// Returns the python object holding the specified
+		/// object, or 0 if no python object is associated
+		/// with that object.
+		static PyObject *pyObject( IECore::RefCounted *refCountedObject );
 
 	protected :
 
 		PyObject *m_pyObject;
 		IECore::RefCounted *m_object;
 
+	private :
+
+		static size_t g_allocCount;
+		static size_t g_allocThreshold;
+
+		typedef std::map<IECore::RefCounted *, PyObject *> InstanceMap;
+		static InstanceMap g_refCountedToPyObject;
+		
 };
 
 }

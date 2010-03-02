@@ -37,7 +37,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/RefCounted.h"
-#include "IECore/WrapperGarbageCollectorBase.h"
 #include "IECorePython/WrapperGarbageCollector.h"
 #include "IECorePython/RefCountedBinding.h"
 
@@ -56,8 +55,8 @@ void bindRefCounted()
 {
 	class_<RefCounted, boost::noncopyable, RefCountedPtr>( "RefCounted", "A simple class to count references." )
 		.def( "isSame", &is )
-		.def( "numWrappedInstances", &WrapperGarbageCollectorBase::numWrappedInstances ).staticmethod( "numWrappedInstances" )
-		.add_static_property( "garbageCollectionThreshold", &WrapperGarbageCollectorBase::getCollectThreshold, &WrapperGarbageCollectorBase::setCollectThreshold )
+		.def( "numWrappedInstances", &WrapperGarbageCollector::numWrappedInstances ).staticmethod( "numWrappedInstances" )
+		.add_static_property( "garbageCollectionThreshold", &WrapperGarbageCollector::getCollectThreshold, &WrapperGarbageCollector::setCollectThreshold )
 		.def( "collectGarbage", &WrapperGarbageCollector::collect ).staticmethod( "collectGarbage" )
 	;
 
