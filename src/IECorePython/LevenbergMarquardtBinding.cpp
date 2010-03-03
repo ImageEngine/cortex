@@ -96,22 +96,22 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
 		virtual unsigned numErrors()
 		{
 			override o = this->get_override( "numErrors" );
-                	if( o )
-                	{
+			if( o )
+			{
 				try
 				{
-                        		return o();
+            		return o();
 				}
 				catch ( error_already_set )
 				{
 					PyErr_Print();
 					return 0;
 				}
-                	}
-                	else
-                	{
-                        	throw Exception( "LevenbergMarquardt: Error function does not define 'numErrors' instance method" );
-                	}
+			}
+			else
+			{
+        		throw Exception( "LevenbergMarquardt: Error function does not define 'numErrors' instance method" );
+			}
 		}
 
 		virtual void computeErrors(
@@ -120,22 +120,22 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
 		)
 		{
 			override o = this->get_override( "computeErrors" );
-                	if( o )
-                	{
+			if( o )
+			{
 				try
 				{
-                        		o( parameters, errors );
+    				o( parameters, errors );
 				}
 				catch ( error_already_set )
 				{
 					PyErr_Print();
 					return;
 				}
-                	}
-                	else
-                	{
-                        	throw Exception( "LevenbergMarquardt: Error function does not define 'computeErrors' instance method" );
-                	}
+			}
+			else
+			{
+				throw Exception( "LevenbergMarquardt: Error function does not define 'computeErrors' instance method" );
+			}
 		}
 };
 
