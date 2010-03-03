@@ -1269,22 +1269,26 @@ void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralP
 	riBound[3] = bound.max.y;
 	riBound[4] = bound.min.z;
 	riBound[5] = bound.max.z;
-	ProcData *data = new ProcData;
-	data->proc = proc;
-	data->renderer = m_parent;
-	RiProcedural( data, riBound, procSubdivide, procFree );
+
+	proc->addRef(); // we'll remove the reference in procFree
+	RiProcedural( proc.get(), riBound, procSubdivide, procFree );
 }
 
 void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )
 {
-	ProcData *procData = (ProcData *)data;
-	procData->proc->render( procData->renderer );
+	IECore::Renderer::Procedural *procedural = reinterpret_cast<IECore::Renderer::Procedural *>( data );
+	// we used to try to use the same IECoreRI::Renderer that had the original procedural() call issued to it.
+	// this turns out to be incorrect as each procedural subdivide invocation is in a new RtContextHandle
+	// and the original renderer would be trying to switch to its original context. so we just create a temporary
+	// renderer which doesn't own a context and therefore use the context 3delight has arranged to call subdivide with.
+	IECoreRI::RendererPtr renderer = new IECoreRI::Renderer();
+	procedural->render( renderer );
 }
 
 void IECoreRI::RendererImplementation::procFree( void *data )
 {
-	ProcData *procData = (ProcData *)data;
-	delete procData;
+	IECore::Renderer::Procedural *procedural = reinterpret_cast<IECore::Renderer::Procedural *>( data );
+	procedural->removeRef();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -44,6 +44,7 @@
 #include "IECorePython/ParameterisedProceduralBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -63,6 +64,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 		
 		virtual void doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const
 		{
+			ScopedGILLock gilLock;
 			try
 			{
 				override o = this->get_override( "doRenderState" );
@@ -92,6 +94,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 
 		virtual Imath::Box3f doBound( ConstCompoundObjectPtr args ) const
 		{
+			ScopedGILLock gilLock;
 			try
 			{
 				override o = this->get_override( "doBound" );
@@ -121,6 +124,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 
 		virtual void doRender( RendererPtr r, ConstCompoundObjectPtr args ) const
 		{
+			ScopedGILLock gilLock;
 			// ideally we might not do any exception handling here, and always leave it to the host.
 			// but in our case the host is mainly 3delight and that does no exception handling at all.
 			try

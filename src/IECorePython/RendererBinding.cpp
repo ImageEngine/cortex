@@ -43,6 +43,8 @@
 #include "IECorePython/RendererBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost::python;
 using namespace boost;
@@ -58,6 +60,7 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 		ProceduralWrap( PyObject *self ) : Wrapper<Renderer::Procedural>( self, this ) {};
 		virtual Imath::Box3f bound() const
 		{
+			ScopedGILLock gilLock;
 			try
 			{
 				override o = this->get_override( "bound" );
@@ -86,6 +89,7 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 		}
 		virtual void render( RendererPtr r ) const
 		{
+			ScopedGILLock gilLock;
 			// ideally we might not do any exception handling here, and always leave it to the host.
 			// but in our case the host is mainly 3delight and that does no exception handling at all.
 			try
@@ -280,6 +284,12 @@ static IECore::DataPtr command( Renderer &r, const std::string &name, const dict
 	return r.command( name, p );
 }
 
+static void worldEnd( Renderer &r )
+{
+	ScopedGILRelease gilRelease;
+	r.worldEnd();
+}
+
 void bindRenderer()
 {
 	scope rendererScope =  RunTimeTypedClass<Renderer>( "An abstract class to define a renderer" )
@@ -290,7 +300,7 @@ void bindRenderer()
 		.def("display", &display)
 
 		.def("worldBegin", &Renderer::worldBegin)
-		.def("worldEnd", &Renderer::worldEnd)
+		.def("worldEnd", &worldEnd)
 
 		.def("transformBegin", &Renderer::transformBegin)
 		.def("transformEnd", &Renderer::transformEnd)

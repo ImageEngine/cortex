@@ -58,6 +58,7 @@ from MotionTest import MotionTest
 from PythonProceduralTest import PythonProceduralTest
 from DetailTest import DetailTest
 from SXRendererTest import SXRendererTest
+from ProceduralThreadingTest import ProceduralThreadingTest
 
 if IECore.withFreeType() :
 

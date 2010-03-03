@@ -175,11 +175,6 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getRightHandedOrientationAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getNameAttribute( const std::string &name ) const;
 
-		struct ProcData
-		{
-			IECore::Renderer::ConstProceduralPtr proc;
-			IECoreRI::RendererPtr renderer;
-		};
 		static void procSubdivide( void *data, float detail );
 		static void procFree( void *data );
 
