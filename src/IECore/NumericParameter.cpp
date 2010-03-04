@@ -94,7 +94,7 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 template <class T>
 typename NumericParameter<T>::Ptr NumericParameter<T>::copy() const
 {
-	return boost::static_pointer_cast<NumericParameter<T> >( copy() );
+	return staticPointerCast<NumericParameter<T> >( copy() );
 }
 
 template<class T>

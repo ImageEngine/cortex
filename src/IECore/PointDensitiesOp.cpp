@@ -153,14 +153,14 @@ ObjectPtr PointDensitiesOp::doOperation( ConstCompoundObjectPtr operands )
 		case V3fVectorDataTypeId :
 			{
 				FloatVectorDataPtr resultT = new FloatVectorData;
-				densities<float>( boost::static_pointer_cast<const V3fVectorData>( points )->readable(), numNeighbours, multiplier, resultT->writable() );
+				densities<float>( staticPointerCast<const V3fVectorData>( points )->readable(), numNeighbours, multiplier, resultT->writable() );
 				result = resultT;
 			}
 			break;
 		case V3dVectorDataTypeId :
 			{
 				DoubleVectorDataPtr resultT = new DoubleVectorData;
-				densities<double>( boost::static_pointer_cast<const V3dVectorData>( points )->readable(), numNeighbours, multiplier, resultT->writable() );
+				densities<double>( staticPointerCast<const V3dVectorData>( points )->readable(), numNeighbours, multiplier, resultT->writable() );
 				result = resultT;
 			}
 			break;

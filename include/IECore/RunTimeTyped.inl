@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@ namespace IECore
 {
 
 template<typename T, typename S>
-boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src )
+IntrusivePtr<T> runTimeCast( const IntrusivePtr<S> &src )
 {
 	if( !src )
 	{
@@ -49,7 +49,7 @@ boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src )
 	}
 	if( src->isInstanceOf( T::staticTypeId() ) )
 	{
-		return boost::static_pointer_cast<T>( src );
+		return staticPointerCast<T>( src );
 	}
 	return 0;
 }
@@ -69,10 +69,10 @@ T *runTimeCast( S *src )
 }
 
 template<typename T, typename S>
-boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<S> &src )
+IntrusivePtr<T> assertedStaticCast( const IntrusivePtr<S> &src )
 {
 	assert( runTimeCast<T>( src ) );
-	return boost::static_pointer_cast<T>( src );
+	return staticPointerCast<T>( src );
 }
 
 template<typename T, typename S>

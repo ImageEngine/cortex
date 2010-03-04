@@ -35,7 +35,7 @@
 #ifndef IECOREPYTHON_REFCOUNTEDBINDING_H
 #define IECOREPYTHON_REFCOUNTEDBINDING_H
 
-#include "boost/intrusive_ptr.hpp"
+#include "IECore/IntrusivePtr.h"
 
 namespace IECorePython
 {
@@ -64,7 +64,7 @@ struct IntrusivePtrFromPython
 
 /// A class to simplify the binding of RefCounted derived classes - this should be used in place of the usual
 /// boost::python::class_. It deals with many issues relating to intrusive pointers and object identity.
-template<typename T, typename Base, typename Ptr=boost::intrusive_ptr<T> >
+template<typename T, typename Base, typename Ptr=IECore::IntrusivePtr<T> >
 class RefCountedClass : public boost::python::class_<T, Ptr, boost::noncopyable, boost::python::bases<Base> >
 {
 

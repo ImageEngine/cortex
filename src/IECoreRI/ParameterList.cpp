@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -97,7 +97,7 @@ const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d
 	{
 		case V3fVectorDataTypeId :
 			isArray = true;
-			arraySize = static_pointer_cast<const V3fVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const V3fVectorData>( d )->readable().size();
 		case V3fDataTypeId :
 			if( typeHints )
 			{
@@ -110,23 +110,23 @@ const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d
 			return "vector";
 		case Color3fVectorDataTypeId :
 			isArray = true;
-			arraySize = static_pointer_cast<const Color3fVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const Color3fVectorData>( d )->readable().size();
 		case Color3fDataTypeId :
 			return "color";
 		case FloatVectorDataTypeId :
 			isArray = true;
-			arraySize = static_pointer_cast<const FloatVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const FloatVectorData>( d )->readable().size();
 		case FloatDataTypeId :
 			return "float";
 		case IntVectorDataTypeId :
 			isArray = true;
-			arraySize = static_pointer_cast<const IntVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const IntVectorData>( d )->readable().size();
 		case IntDataTypeId :
 		case BoolDataTypeId :
 			return "int";
 		case StringVectorDataTypeId :
 			isArray = true;
-			arraySize = static_pointer_cast<const StringVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const StringVectorData>( d )->readable().size();
 		case StringDataTypeId :
 			return "string";
 		case M44fDataTypeId :
@@ -141,17 +141,17 @@ const void *ParameterList::value( IECore::ConstDataPtr d )
 {
 	if( d->typeId()==StringData::staticTypeId() )
 	{
-		const char *v = static_pointer_cast<const StringData>( d )->readable().c_str();
+		const char *v = staticPointerCast<const StringData>( d )->readable().c_str();
 		m_charPtrs.push_back( v );
 		return &*(m_charPtrs.rbegin());
 	}
 	if( d->typeId()==BoolData::staticTypeId() )
 	{
-		m_ints.push_back( static_pointer_cast<const BoolData>( d )->readable() );
+		m_ints.push_back( staticPointerCast<const BoolData>( d )->readable() );
 		return &*(m_ints.rbegin());
 	}
 
-	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );
+	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( constPointerCast<Data>( d ) );
 }
 
 void ParameterList::reserve( const IECore::CompoundDataMap &parameters )

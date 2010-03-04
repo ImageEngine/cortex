@@ -414,7 +414,7 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, Const
 		{
 			assert( currentConversion->isInstanceOf( ColorTransformOpTypeId ) );
 
-			ColorTransformOpPtr op = boost::dynamic_pointer_cast< ColorTransformOp >( currentConversion );
+			ColorTransformOpPtr op = dynamicPointerCast< ColorTransformOp >( currentConversion );
 
 			for ( ChannelSets::const_iterator it = channelSets.begin(); it != channelSets.end(); ++it )
 			{

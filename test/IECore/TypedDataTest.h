@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,7 +68,7 @@ class VectorTypedDataTest
 		unsigned int randomElementPos();
 
 		unsigned int m_size;
-		boost::intrusive_ptr<TypedData<T> > m_data;
+		IntrusivePtr<TypedData<T> > m_data;
 
 		Imath::Rand32 m_randGen;
 
@@ -87,7 +87,7 @@ class SimpleTypedDataTest
 		void testMemoryUsage();
 		void testIsEqualTo();
 
-		boost::intrusive_ptr< TypedData<T> > m_data;
+		IntrusivePtr< TypedData<T> > m_data;
 
 };
 

@@ -161,7 +161,7 @@ struct ImageDiffOp::FloatConverter
 
 		return DataConvert < T, FloatVectorData, ScaledDataConversion< typename T::ValueType::value_type, float > >()
 		       (
-		               boost::static_pointer_cast<const T>( data )
+		               staticPointerCast<const T>( data )
 		       );
 	};
 };

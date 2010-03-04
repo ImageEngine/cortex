@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -232,7 +232,7 @@ PrimitiveEvaluator::ResultPtr SpherePrimitiveEvaluator::createResult() const
 
 void SpherePrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	if (! boost::dynamic_pointer_cast< SpherePrimitiveEvaluator::Result >( result ) )
+	if (! dynamicPointerCast< SpherePrimitiveEvaluator::Result >( result ) )
 	{
 		throw InvalidArgumentException("SpherePrimitiveEvaluator: Invalid PrimitiveEvaulator result type");
 	}
@@ -245,9 +245,9 @@ ConstPrimitivePtr SpherePrimitiveEvaluator::primitive() const
 
 bool SpherePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	assert( boost::dynamic_pointer_cast< Result >( result ) );
+	assert( dynamicPointerCast< Result >( result ) );
 
-	ResultPtr sr = boost::static_pointer_cast< Result >( result );
+	ResultPtr sr = staticPointerCast< Result >( result );
 
 	sr->m_p = p.normalized() * m_sphere->radius();
 
@@ -256,9 +256,9 @@ bool SpherePrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvalua
 
 bool SpherePrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	assert( boost::dynamic_pointer_cast< Result >( result ) );
+	assert( dynamicPointerCast< Result >( result ) );
 
-	ResultPtr sr = boost::static_pointer_cast< Result >( result );
+	ResultPtr sr = staticPointerCast< Result >( result );
 
 	/// \todo Once we support partial spheres we'll need to get these quantities from the primitive
 	const float zMin = -1.0f;
@@ -286,9 +286,9 @@ bool SpherePrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveE
 bool SpherePrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 	const PrimitiveEvaluator::ResultPtr &result, float maxDistance ) const
 {
-	assert( boost::dynamic_pointer_cast< Result >( result ) );
+	assert( dynamicPointerCast< Result >( result ) );
 
-	ResultPtr sr = boost::static_pointer_cast< Result >( result );
+	ResultPtr sr = staticPointerCast< Result >( result );
 
 	Imath::V3f dir = direction.normalized();
 	(void)direction;
@@ -387,7 +387,7 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 			Imath::V3f p0 = origin + t0 * dir;
 			if ( (origin - p0).length() < maxDistance )
 			{
-				ResultPtr r = boost::static_pointer_cast< Result > ( createResult() );
+				ResultPtr r = staticPointerCast< Result > ( createResult() );
 				r->m_p = p0;
 
 				results.push_back( r );
@@ -400,7 +400,7 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 			Imath::V3f p1 = origin + t1 * dir;
 			if ( (origin - p1).length() < maxDistance )
 			{
-				ResultPtr r = boost::static_pointer_cast< Result > ( createResult() );
+				ResultPtr r = staticPointerCast< Result > ( createResult() );
 				r->m_p = p1;
 
 				results.push_back( r );
@@ -416,7 +416,7 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 			Imath::V3f p = origin + t * dir;
 			if ( (origin - p).length() < maxDistance )
 			{
-				ResultPtr r = boost::static_pointer_cast< Result > ( createResult() );
+				ResultPtr r = staticPointerCast< Result > ( createResult() );
 				r->m_p = p;
 
 				results.push_back( r );

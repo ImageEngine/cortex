@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( Object );
 
 #define IE_CORE_DECLAREOBJECTMEMBERFNS( TYPENAME )																		\
 	public :																											\
-		TYPENAME::Ptr copy() const { return boost::static_pointer_cast<TYPENAME>( Object::copy() ); }	\
+		TYPENAME::Ptr copy() const { return staticPointerCast<TYPENAME>( Object::copy() ); }							\
 		bool isEqualTo( IECore::ConstObjectPtr other ) const;															\
 	protected :																											\
 		virtual void copyFrom( IECore::ConstObjectPtr other, IECore::Object::CopyContext *context );					\
@@ -126,7 +126,7 @@ class Object : public RunTimeTyped
 		/// your base class isEqualTo() and returning false straight away
 		/// if that returns false. The Object level implementation checks that
 		/// the types are identical, so you can safely perform a
-		/// static_pointer_cast<YourClass>( other ) if your base class isEqualTo()
+		/// staticPointerCast<YourClass>( other ) if your base class isEqualTo()
 		/// doesn't return false.
 		virtual bool isEqualTo( ConstObjectPtr other ) const = 0;
 		/// Returns true if this object is not equal to the other. A default
@@ -213,7 +213,7 @@ class Object : public RunTimeTyped
 			public :
 				/// Returns a copy of the specified object.
 				template<class T>
-				boost::intrusive_ptr<T> copy( boost::intrusive_ptr<const T> toCopy );
+				IntrusivePtr<T> copy( IntrusivePtr<const T> toCopy );
 			private :
 				std::map<ConstObjectPtr, ObjectPtr> m_copies;
 		};

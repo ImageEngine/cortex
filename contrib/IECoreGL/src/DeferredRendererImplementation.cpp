@@ -161,7 +161,7 @@ StateComponentPtr DeferredRendererImplementation::getState( IECore::TypeId type 
 			return c;
 		}
 	}
-	return boost::const_pointer_cast<StateComponent>( State::defaultState()->get( type ) );
+	return boost::constPointerCast<StateComponent>( State::defaultState()->get( type ) );
 }
 
 void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )

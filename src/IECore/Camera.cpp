@@ -193,7 +193,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator resIt=parameters().find( "resolution" );
 	if( resIt != parameters().end() && resIt->second->isInstanceOf( V2iDataTypeId ) )
 	{
-		resolution = boost::static_pointer_cast<V2iData>( resIt->second )->readable();
+		resolution = staticPointerCast<V2iData>( resIt->second )->readable();
 	}
 	if( resolution.x < 1 || resolution.y < 1 )
 	{
@@ -206,7 +206,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator screenWindowIt=parameters().find( "screenWindow" );
 	if( screenWindowIt!=parameters().end() && screenWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
 	{
-		screenWindow = boost::static_pointer_cast<Box2fData>( screenWindowIt->second )->readable();
+		screenWindow = staticPointerCast<Box2fData>( screenWindowIt->second )->readable();
 	}
 	if( screenWindow.isEmpty() )
 	{
@@ -233,7 +233,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator cropWindowIt=parameters().find( "cropWindow" );
 	if( cropWindowIt!=parameters().end() && cropWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
 	{
-		cropWindow = boost::static_pointer_cast<Box2fData>( cropWindowIt->second )->readable();
+		cropWindow = staticPointerCast<Box2fData>( cropWindowIt->second )->readable();
 	}
 	if( cropWindow.isEmpty() || cropWindow.min.x < 0.0f || cropWindow.min.y < 0.0f ||
 		cropWindow.max.x > 1.0f || cropWindow.max.y > 1.0f )
@@ -247,7 +247,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator projectionIt=parameters().find( "projection" );
 	if( projectionIt!=parameters().end() && projectionIt->second->isInstanceOf( StringDataTypeId ) )
 	{
-		projection = boost::static_pointer_cast<StringData>( projectionIt->second )->readable();
+		projection = staticPointerCast<StringData>( projectionIt->second )->readable();
 	}
 	if( projection=="" )
 	{
@@ -262,7 +262,7 @@ void Camera::addStandardParameters()
 		CompoundDataMap::const_iterator fovIt=parameters().find( "projection:fov" );
 		if( fovIt!=parameters().end() && fovIt->second->isInstanceOf( FloatDataTypeId ) )
 		{
-			fov = boost::static_pointer_cast<FloatData>( fovIt->second )->readable();
+			fov = staticPointerCast<FloatData>( fovIt->second )->readable();
 		}
 		if( fov < 0.0f )
 		{
@@ -276,7 +276,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator clippingIt=parameters().find( "clippingPlanes" );
 	if( clippingIt != parameters().end() && clippingIt->second->isInstanceOf( V2fDataTypeId ) )
 	{
-		clippingPlanes = boost::static_pointer_cast<V2fData>( clippingIt->second )->readable();
+		clippingPlanes = staticPointerCast<V2fData>( clippingIt->second )->readable();
 	}
 	if( clippingPlanes[0] < 0.0f || clippingPlanes[1] < 0.0f )
 	{
@@ -289,7 +289,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator shutterIt=parameters().find( "shutter" );
 	if( shutterIt != parameters().end() && shutterIt->second->isInstanceOf( V2fDataTypeId ) )
 	{
-		shutter = boost::static_pointer_cast<V2fData>( shutterIt->second )->readable();
+		shutter = staticPointerCast<V2fData>( shutterIt->second )->readable();
 	}
 	if( shutter[0] > shutter[1] )
 	{

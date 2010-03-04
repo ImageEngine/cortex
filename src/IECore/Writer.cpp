@@ -65,7 +65,7 @@ Writer::Writer( const std::string &description, const ObjectParameter::TypeIdSet
 
 void Writer::constructParameters( void )
 {
-	m_objectParameter = new ObjectParameter( "object", "The object to be written", new NullObject, static_pointer_cast<const ObjectParameter>(resultParameter())->validTypes() );
+	m_objectParameter = new ObjectParameter( "object", "The object to be written", new NullObject, staticPointerCast<const ObjectParameter>(resultParameter())->validTypes() );
 	parameters()->addParameter( m_objectParameter );
 	m_fileNameParameter = new FileNameParameter( "fileName", "The filename to be written to.", "", "", false );
 	parameters()->addParameter( m_fileNameParameter );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,7 +56,7 @@ PrimitiveVariableList::PrimitiveVariableList( const IECore::PrimitiveVariableMap
 		switch( type )
 		{
 			case StringVectorDataTypeId :
-				numStrings += static_pointer_cast<StringVectorData>( it->second.data )->readable().size();
+				numStrings += staticPointerCast<StringVectorData>( it->second.data )->readable().size();
 				break;
 
 			case StringDataTypeId :
@@ -123,7 +123,7 @@ const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d
 	switch( t )
 	{
 		case V3fVectorDataTypeId :
-			arraySize = static_pointer_cast<const V3fVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const V3fVectorData>( d )->readable().size();
 			if( name=="P" || name=="Pref"  )
 			{
 				return "point";
@@ -155,19 +155,19 @@ const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d
 			}
 			return "vector";
 		case Color3fVectorDataTypeId :
-			arraySize = static_pointer_cast<const Color3fVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const Color3fVectorData>( d )->readable().size();
 		case Color3fDataTypeId :
 			return "color";
 		case FloatVectorDataTypeId :
-			arraySize = static_pointer_cast<const FloatVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const FloatVectorData>( d )->readable().size();
 		case FloatDataTypeId :
 			return "float";
 		case IntVectorDataTypeId :
-			arraySize = static_pointer_cast<const IntVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const IntVectorData>( d )->readable().size();
 		case IntDataTypeId :
 			return "int";
 		case StringVectorDataTypeId :
-			arraySize = static_pointer_cast<const StringVectorData>( d )->readable().size();
+			arraySize = staticPointerCast<const StringVectorData>( d )->readable().size();
 		case StringDataTypeId :
 			return "string";
 		default :
@@ -199,7 +199,7 @@ const void *PrimitiveVariableList::value( IECore::DataPtr d )
 {
 	if( d->typeId()==StringData::staticTypeId() )
 	{
-		const char *v = static_pointer_cast<StringData>( d )->readable().c_str();
+		const char *v = staticPointerCast<StringData>( d )->readable().c_str();
 		m_charPtrs.push_back( v );
 		return &*(m_charPtrs.rbegin());
 	}
@@ -213,5 +213,5 @@ const void *PrimitiveVariableList::value( IECore::DataPtr d )
 		return (&*(m_charPtrs.rbegin())) - ( sd.readable().size() - 1 );
 	}
 
-	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( boost::const_pointer_cast<Data>( d ) );
+	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( constPointerCast<Data>( d ) );
 }

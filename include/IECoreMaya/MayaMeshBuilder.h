@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,8 +57,8 @@ class MayaMeshBuilder : public IECore::RefCounted
 
 		typedef T BaseType;
 
-		typedef boost::intrusive_ptr <MayaMeshBuilder<T> > Ptr;
-		typedef boost::intrusive_ptr< const MayaMeshBuilder<T> > ConstPtr;
+		typedef IECore::IntrusivePtr <MayaMeshBuilder<T> > Ptr;
+		typedef IECore::IntrusivePtr< const MayaMeshBuilder<T> > ConstPtr;
 
 		MayaMeshBuilder( MObject parentOrOwner );
 		virtual ~MayaMeshBuilder();

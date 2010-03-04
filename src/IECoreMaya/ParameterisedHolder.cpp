@@ -480,7 +480,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 	bool childParametersWereSet = false;
 	if( parameter->isInstanceOf( CompoundParameter::staticTypeId() ) )
 	{
-		CompoundParameterPtr compoundParameter = boost::static_pointer_cast<CompoundParameter>( parameter );
+		CompoundParameterPtr compoundParameter = boost::staticPointerCast<CompoundParameter>( parameter );
 		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 		for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 		{
@@ -598,7 +598,7 @@ MPlug ParameterisedHolder<B>::parameterPlug( IECore::ConstParameterPtr parameter
 	// to update the parameter->name map if necessary
 	getParameterised();
 
-	ParameterToAttributeNameMap::const_iterator it = m_parametersToAttributeNames.find( const_pointer_cast<IECore::Parameter>( parameter ) );
+	ParameterToAttributeNameMap::const_iterator it = m_parametersToAttributeNames.find( constPointerCast<IECore::Parameter>( parameter ) );
 	if( it==m_parametersToAttributeNames.end() )
 	{
 		return MPlug();
@@ -810,11 +810,11 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 					CompoundObject::ObjectMap::const_iterator it = userData.find( "maya" );
 					if ( it != userData.end() && it->second->typeId() == CompoundObjectTypeId )
 					{
-						CompoundObject::ObjectMap &mayaUserData = static_pointer_cast<CompoundObject>(it->second)->members();
+						CompoundObject::ObjectMap &mayaUserData = staticPointerCast<CompoundObject>(it->second)->members();
 						it = mayaUserData.find( "defaultConnection" );
 						if ( it != mayaUserData.end() && it->second->typeId() == StringDataTypeId )
 						{
-							std::string defaultConnection = static_pointer_cast<StringData>(it->second)->readable();
+							std::string defaultConnection = staticPointerCast<StringData>(it->second)->readable();
 							std::string cmd = string( "connectAttr " ) + defaultConnection + " " + thisNodeName.asChar() + "." + plug.partialName().asChar();
 							MDGModifier dgMod;
 							dgMod.commandToExecute( cmd.c_str() );
@@ -823,7 +823,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 						it = mayaUserData.find( "defaultExpression" );
 						if ( it != mayaUserData.end() && it->second->typeId() == StringDataTypeId )
 						{
-							std::string defaultExpression = static_pointer_cast<StringData>(it->second)->readable();
+							std::string defaultExpression = staticPointerCast<StringData>(it->second)->readable();
 							MString cmd = thisNodeName + "." + plug.partialName() + defaultExpression.c_str();
 							MFnExpression expFn;
 							expFn.create( cmd );

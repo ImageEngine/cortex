@@ -166,7 +166,7 @@ bool MatrixMotionTransform::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	ConstMatrixMotionTransformPtr t = static_pointer_cast<const MatrixMotionTransform>( other );
+	ConstMatrixMotionTransformPtr t = staticPointerCast<const MatrixMotionTransform>( other );
 	return m_snapshots == t->m_snapshots;
 }
 

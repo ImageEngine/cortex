@@ -47,7 +47,7 @@ namespace IECorePython
 
 static IntVectorDataPtr frameTimesWrap( NParticleReader &reader )
 {
-	return const_pointer_cast<IntVectorData>( reader.frameTimes() );
+	return constPointerCast<IntVectorData>( reader.frameTimes() );
 }
 
 void bindNParticleReader()

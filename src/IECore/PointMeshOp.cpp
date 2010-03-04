@@ -197,8 +197,8 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	ConstObjectPtr resolutionData = resolutionParameter()->getValue();
 	ConstObjectPtr boundData = boundParameter()->getValue();
 
-	V3i resolution = boost::static_pointer_cast<const V3iData>( resolutionData )->readable();
-	Box3f bound = boost::static_pointer_cast<const Box3fData>( boundData )->readable();
+	V3i resolution = staticPointerCast<const V3iData>( resolutionData )->readable();
+	Box3f bound = staticPointerCast<const Box3fData>( boundData )->readable();
 
 	/// Calculate a tolerance which is half the size of the smallest grid division
 	double cacheTolerance = ((bound.max.x - bound.min.x) / (double)resolution.x) / 2.0;
@@ -215,9 +215,9 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 
 				BlobbyImplicitSurfaceFunction< V3f, float >::Ptr fn = new BlobbyImplicitSurfaceFunction< V3f, float >
 				(
-					boost::static_pointer_cast<const V3fVectorData>( points ),
-					boost::static_pointer_cast<const DoubleVectorData>( radius ),
-					boost::static_pointer_cast<const DoubleVectorData>( strength )
+					staticPointerCast<const V3fVectorData>( points ),
+					staticPointerCast<const DoubleVectorData>( radius ),
+					staticPointerCast<const DoubleVectorData>( strength )
 				);
 
 				Marcher::Ptr m = new Marcher
@@ -239,9 +239,9 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 
 				BlobbyImplicitSurfaceFunction< V3d, double >::Ptr fn = new BlobbyImplicitSurfaceFunction< V3d, double >
 				(
-					boost::static_pointer_cast<const V3dVectorData>( points ),
-					boost::static_pointer_cast<const DoubleVectorData>( radius ),
-					boost::static_pointer_cast<const DoubleVectorData>( strength )
+					staticPointerCast<const V3dVectorData>( points ),
+					staticPointerCast<const DoubleVectorData>( radius ),
+					staticPointerCast<const DoubleVectorData>( strength )
 				);
 
 				Marcher::Ptr m = new Marcher

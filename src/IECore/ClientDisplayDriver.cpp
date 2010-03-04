@@ -67,7 +67,7 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	{
 		throw Exception( "Invalid 'host' type parameter. Should be StringData." );
 	}
-	m_host = static_pointer_cast<const StringData>(data)->readable();
+	m_host = staticPointerCast<const StringData>(data)->readable();
 	it = parameters->readable().find("displayPort");
 	if ( it == parameters->readable().end() )
 	{
@@ -83,7 +83,7 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	{
 		throw Exception( "Invalid 'port' parameter. Should be a StringData." );
 	}
-	m_port = static_pointer_cast<const StringData>(data)->readable();
+	m_port = staticPointerCast<const StringData>(data)->readable();
 
 	tcp::resolver resolver(m_service);
 	tcp::resolver::query query(m_host, m_port);
@@ -187,8 +187,8 @@ void ClientDisplayDriver::imageData( const Box2i &box, const float *data, size_t
 	FloatVectorDataPtr dataData = new FloatVectorData( std::vector<float>( data, data+dataSize ) );
 
 	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), "/", IndexedIO::Exclusive | IndexedIO::Write );
-	static_pointer_cast<Object>(boxData)->save( io, "box" );
-	static_pointer_cast<Object>(dataData)->save( io, "data" );
+	staticPointerCast<Object>(boxData)->save( io, "box" );
+	staticPointerCast<Object>(dataData)->save( io, "data" );
 	buf = io->buffer();
 	size_t blockSize = buf->readable().size();
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -122,7 +122,7 @@ class BGEOParticleReader : public ParticleReader
 		void readAttributeData( char **dataBuffer, T *attrBuffer, unsigned long n ) const;
 		
 		template<typename T, typename F>
-		boost::intrusive_ptr<T> filterAttr( boost::intrusive_ptr<F> attr, float percentage );
+		IntrusivePtr<T> filterAttr( IntrusivePtr<F> attr, float percentage );
 		
 		// reads all attributes from m_header.attributes and returns CoumpoundData containing the results
 		IECore::CompoundDataPtr readAttributes( const std::vector<std::string> &names );

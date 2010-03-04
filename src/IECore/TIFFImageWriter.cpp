@@ -156,7 +156,7 @@ struct TIFFImageWriter::ChannelConverter
 
 		return DataConvert < T, ChannelData, ScaledDataConversion< typename T::ValueType::value_type, typename ChannelData::ValueType::value_type> >()
 		(
-			boost::static_pointer_cast<const T>( data )
+			staticPointerCast<const T>( data )
 		);
 	};
 

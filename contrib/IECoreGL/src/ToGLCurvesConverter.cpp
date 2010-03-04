@@ -44,7 +44,7 @@ using namespace IECoreGL;
 ToGLCurvesConverter::ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert )
 	:	ToGLConverter( "Converts IECore::CurvesPrimitive objects to IECoreGL::CurvesPrimitiveObjects.", IECore::CurvesPrimitiveTypeId )
 {
-	srcParameter()->setValue( boost::const_pointer_cast<IECore::CurvesPrimitive>( toConvert ) );
+	srcParameter()->setValue( boost::constPointerCast<IECore::CurvesPrimitive>( toConvert ) );
 }
 
 ToGLCurvesConverter::~ToGLCurvesConverter()
@@ -53,7 +53,7 @@ ToGLCurvesConverter::~ToGLCurvesConverter()
 
 IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::CurvesPrimitive::ConstPtr curves = boost::static_pointer_cast<const IECore::CurvesPrimitive>( src ); // safe because the parameter validated it for us
+	IECore::CurvesPrimitive::ConstPtr curves = boost::staticPointerCast<const IECore::CurvesPrimitive>( src ); // safe because the parameter validated it for us
 
 	IECore::V3fVectorData::ConstPtr points = curves->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex );
 	if( !points )

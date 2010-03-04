@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -106,7 +106,7 @@ bool CompoundObject::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	CompoundObject::ConstPtr tOther = boost::static_pointer_cast<const CompoundObject>( other );
+	CompoundObject::ConstPtr tOther = staticPointerCast<const CompoundObject>( other );
 	if( m_members.size()!=tOther->m_members.size() )
 	{
 		return false;

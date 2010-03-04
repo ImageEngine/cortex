@@ -151,19 +151,19 @@ void EXRImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 			{
 			case FloatVectorDataTypeId:
 				writeTypedChannel<float>(name, dataWindow,
-				                         boost::static_pointer_cast<const FloatVectorData>(channelData)->readable(),
+				                         staticPointerCast<const FloatVectorData>(channelData)->readable(),
 				                         FLOAT, header, fb);
 				break;
 
 			case UIntVectorDataTypeId:
 				writeTypedChannel<unsigned int>(name, dataWindow,
-				                                boost::static_pointer_cast<const UIntVectorData>(channelData)->readable(),
+				                                staticPointerCast<const UIntVectorData>(channelData)->readable(),
 				                                UINT, header, fb);
 				break;
 
 			case HalfVectorDataTypeId:
 				writeTypedChannel<half>(name, dataWindow,
-				                        boost::static_pointer_cast<const HalfVectorData>(channelData)->readable(),
+				                        staticPointerCast<const HalfVectorData>(channelData)->readable(),
 				                        HALF, header, fb);
 				break;
 

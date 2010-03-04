@@ -143,14 +143,14 @@ ObjectPtr PointNormalsOp::doOperation( ConstCompoundObjectPtr operands )
 		case V3fVectorDataTypeId :
 			{
 				V3fVectorDataPtr resultT = new V3fVectorData;
-				normals<V3f>( boost::static_pointer_cast<const V3fVectorData>( points )->readable(), numNeighbours, resultT->writable() );
+				normals<V3f>( staticPointerCast<const V3fVectorData>( points )->readable(), numNeighbours, resultT->writable() );
 				result = resultT;
 			}
 			break;
 		case V3dVectorDataTypeId :
 			{
 				V3dVectorDataPtr resultT = new V3dVectorData;
-				normals<V3d>( boost::static_pointer_cast<const V3dVectorData>( points )->readable(), numNeighbours, resultT->writable() );
+				normals<V3d>( staticPointerCast<const V3dVectorData>( points )->readable(), numNeighbours, resultT->writable() );
 				result = resultT;
 			}
 			break;

@@ -134,7 +134,7 @@ void AlphaTexture::construct( unsigned int width, unsigned int height, IECore::C
 	c.width = width;
 	c.height = height;
 	c.mipMap = mipMap;
-	m_texture = IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( const_pointer_cast<Data>( a ), c );
+	m_texture = IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( constPointerCast<Data>( a ), c );
 }
 
 

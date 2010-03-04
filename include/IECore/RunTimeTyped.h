@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -317,23 +317,23 @@ class RunTimeTyped : public RefCounted
 
 IE_CORE_DECLAREPTR( RunTimeTyped );
 
-/// Equivalent to boost::dynamic_pointer_cast but using the type identification
+/// Equivalent to boost::dynamicPointerCast but using the type identification
 /// system implemented in RunTimeTyped. This should be used in preference to
-/// both dynamic_cast and boost::dynamic_pointer_cast wherever possible.
+/// both dynamic_cast and boost::dynamicPointerCast wherever possible.
 template<typename T, typename S>
-boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src );
+IntrusivePtr<T> runTimeCast( const IntrusivePtr<S> &src );
 /// Equivalent to dynamic_cast but using the type identification system
 /// implemented in RunTimeTyped. This should be used in preference to
 /// dynamic_cast wherever possible.
 template<typename T, typename S>
 T *runTimeCast( S *src );
 
-/// Equivalent to boost::static_pointer_cast, but using the type identifaction
+/// Equivalent to boost::staticPointerCast, but using the type identifaction
 /// system implemented in RunTimeTyped to fire an assert if the equivalent runTimeCast
 /// would not succeed. In a non-asserted build this will compile directly down to
-/// a single boost::static_pointer_cast.
+/// a single boost::staticPointerCast.
 template<typename T, typename S>
-inline boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<S> &src );
+inline IntrusivePtr<T> assertedStaticCast( const IntrusivePtr<S> &src );
 
 /// Equivalent to static_cast, but using the type identifaction system implemented in
 /// RunTimeTyped to fire an assert if the equivalent runTimeCast would not succeed.

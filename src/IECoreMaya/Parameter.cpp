@@ -93,7 +93,7 @@ MStatus Parameter::setValue( const MPlug &plug, IECore::ParameterPtr parameter )
 	assert( parameter );
 	assert( ! plug.isNull() );
 
-	ConstParameterHandlerPtr h = ParameterHandler::get( boost::static_pointer_cast< const IECore::Parameter > (parameter) );
+	ConstParameterHandlerPtr h = ParameterHandler::get( boost::staticPointerCast< const IECore::Parameter > (parameter) );
 	if( !h )
 	{
 		return MS::kFailure;

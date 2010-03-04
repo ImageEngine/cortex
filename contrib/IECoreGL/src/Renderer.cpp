@@ -1199,7 +1199,7 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 			// should be a texture parameter
 			if( shaderState->shader()->parameterType( name )==Texture::staticTypeId() )
 			{
-				StringDataPtr s = boost::static_pointer_cast<StringData>( value );
+				StringDataPtr s = boost::staticPointerCast<StringData>( value );
 				if( s->readable()!="" )
 				{
 					TexturePtr t = memberData->textureLoader->load( s->readable() );
@@ -1219,14 +1219,14 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 		else if( value->isInstanceOf( CompoundData::staticTypeId() ) )
 		{			
 			
-			CompoundDataPtr data = boost::static_pointer_cast<CompoundData>( value );
+			CompoundDataPtr data = boost::staticPointerCast<CompoundData>( value );
 				
 			// should be a texture parameter
 			if( shaderState->shader()->parameterType( name )==Texture::staticTypeId() )
 			{
 				try
 				{	
-					TexturePtr texture = boost::static_pointer_cast<Texture>( ToGLTextureConverter( data ).convert() );
+					TexturePtr texture = boost::staticPointerCast<Texture>( ToGLTextureConverter( data ).convert() );
 					shaderState->textureValues()[name] = texture;
 				} 
 				catch( const std::exception &e )
@@ -1249,7 +1249,7 @@ static bool checkAndAddShaderParameter( ShaderStateComponentPtr shaderState, con
 				SplineToImagePtr op = new SplineToImage();
 				op->splineParameter()->setValue( value );
 				op->resolutionParameter()->setTypedValue( V2i( 8, 512 ) );
-				ImagePrimitivePtr image = boost::static_pointer_cast<ImagePrimitive>( op->operate() );
+				ImagePrimitivePtr image = boost::staticPointerCast<ImagePrimitive>( op->operate() );
 
 				TexturePtr texture = 0;
 				if( image->variables.find( "R" )!=image->variables.end() )
@@ -1573,7 +1573,7 @@ void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic
 	{
 		IECore::CurvesPrimitivePtr c = new IECore::CurvesPrimitive( numVertices, basis, periodic );
 		c->variables = primVars;
-		CurvesPrimitivePtr prim = boost::static_pointer_cast<CurvesPrimitive>( ToGLCurvesConverter( c ).convert() );
+		CurvesPrimitivePtr prim = boost::staticPointerCast<CurvesPrimitive>( ToGLCurvesConverter( c ).convert() );
 		addPrimitive( prim, primVars, m_data, false );
 	}
 	catch( const std::exception &e )
@@ -1742,7 +1742,7 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 			}
 		}
 
-		MeshPrimitivePtr prim = boost::static_pointer_cast<MeshPrimitive>( ToGLMeshConverter( m ).convert() );
+		MeshPrimitivePtr prim = boost::staticPointerCast<MeshPrimitive>( ToGLMeshConverter( m ).convert() );
 		addPrimitive( prim, primVars, m_data, false );
 	}
 	catch( const std::exception &e )

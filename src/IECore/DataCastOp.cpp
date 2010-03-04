@@ -120,7 +120,7 @@ template< typename S, typename T >
 static typename T::Ptr
 castToData( ConstDataPtr array )
 {
-	typename S::ConstPtr dataArray = static_pointer_cast< const S >( array );
+	typename S::ConstPtr dataArray = staticPointerCast< const S >( array );
 	const typename S::BaseType *source = dataArray->baseReadable();
 	unsigned sourceSize = dataArray->baseSize();
 
@@ -141,7 +141,7 @@ template< typename S, typename T >
 static typename T::Ptr
 castToVectorData( DataPtr array )
 {
-	typename S::ConstPtr dataArray = static_pointer_cast< const S >( array );
+	typename S::ConstPtr dataArray = staticPointerCast< const S >( array );
 	const typename S::BaseType *source = dataArray->baseReadable();
 	unsigned sourceSize = dataArray->baseSize();
 	unsigned targetItemSize = ( sizeof( typename T::ValueType::value_type ) / sizeof( typename T::BaseType ) );

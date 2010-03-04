@@ -154,8 +154,8 @@ Imath::V2f UVDistortOp::warp( const Imath::V2f &p ) const
 	UVDistortOp::Lookup lookup( pos );
 
 	return Imath::V2f(
-		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_u), lookup ),
-		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( const_pointer_cast<Data>(m_v), lookup )
+		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( constPointerCast<Data>(m_u), lookup ),
+		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( constPointerCast<Data>(m_v), lookup )
 	) * m_imageSize + m_imageOrigin;
 }
 

@@ -653,8 +653,8 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 /// \todo Get rid of these macros
 #define BASIC_VECTOR_BINDING(T, Tname)																	\
 		typedef TypedData< std::vector< T > > ThisClass;															\
-		typedef boost::intrusive_ptr< ThisClass > ThisClassPtr;														\
-		typedef boost::intrusive_ptr< const ThisClass > ThisConstClassPtr;											\
+		typedef IECore::IntrusivePtr< ThisClass > ThisClassPtr;														\
+		typedef IECore::IntrusivePtr< const ThisClass > ThisConstClassPtr;											\
 		typedef VectorTypedDataFunctions< std::vector<T> > ThisBinder;												\
 																													\
 		RunTimeTypedClass<ThisClass>(																							\

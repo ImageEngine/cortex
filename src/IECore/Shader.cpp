@@ -96,7 +96,7 @@ bool Shader::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	ConstShaderPtr s = static_pointer_cast<const Shader>( other );
+	ConstShaderPtr s = staticPointerCast<const Shader>( other );
 	if( m_name!=s->m_name )
 	{
 		return false;
@@ -119,7 +119,7 @@ void Shader::memoryUsage( Object::MemoryAccumulator &a ) const
 void Shader::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
 	StateRenderable::copyFrom( other, context );
-	ConstShaderPtr s = static_pointer_cast<const Shader>( other );
+	ConstShaderPtr s = staticPointerCast<const Shader>( other );
 	m_name = s->m_name;
 	m_type = s->m_type;
 	m_parameters = context->copy<CompoundData>( m_parameters );

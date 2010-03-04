@@ -126,5 +126,5 @@ void VectorDataFilterOp::modify( ObjectPtr object, ConstCompoundObjectPtr operan
 	f.invert = operands->member<BoolData>( "invert" )->readable();
 	f.clip = operands->member<BoolData>( "clip" )->readable();
 	f.filter = &( operands->member<BoolVectorData>( "filter" )->readable() );
-	despatchTypedData<Filter, TypeTraits::IsVectorTypedData>( static_pointer_cast<Data>( object ), f );
+	despatchTypedData<Filter, TypeTraits::IsVectorTypedData>( staticPointerCast<Data>( object ), f );
 }

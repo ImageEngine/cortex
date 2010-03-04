@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -88,7 +88,7 @@ struct MarchingCubesTest
 	void testSphere()
 	{
 		typedef MarchingCubes<SphereIsoSurfaceFn, MeshPrimitiveBuilder > Cubes;
-		typedef boost::intrusive_ptr<Cubes> CubesPtr;
+		typedef IntrusivePtr<Cubes> CubesPtr;
 
 		int x = 100;
 		int y = 100;
@@ -124,7 +124,7 @@ struct MarchingCubesTest
 	void testPerlinNoise()
 	{
 		typedef MarchingCubes<PerlinNoiseV3ff, MeshPrimitiveBuilder > Cubes;
-		typedef boost::intrusive_ptr<Cubes> CubesPtr;
+		typedef IntrusivePtr<Cubes> CubesPtr;
 
 		int x = 20;
 		int y = 20;

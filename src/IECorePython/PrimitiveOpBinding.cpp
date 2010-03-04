@@ -58,7 +58,7 @@ class PrimitiveOpWrap : public PrimitiveOp, public Wrapper<PrimitiveOp>
 		virtual void modifyPrimitive( PrimitivePtr object, ConstCompoundObjectPtr operands )
 		{
 			ScopedGILLock gilLock;
-			this->get_override( "modifyPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) );
+			this->get_override( "modifyPrimitive" )( object, constPointerCast<CompoundObject>( operands ) );
 		}
 
 };

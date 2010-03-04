@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -441,7 +441,7 @@ void HierarchicalCache::write( const ObjectHandle &obj, ConstVisibleRenderablePt
 	{
 	}
 
-	boost::static_pointer_cast<const Object>(shape)->save(m_io, "shape" );
+	staticPointerCast<const Object>(shape)->save(m_io, "shape" );
 	m_io->chdir( ".." );
 
 	// ok, so check if this node has children...

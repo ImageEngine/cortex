@@ -308,10 +308,10 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 	try
 	{
 		MemoryIndexedIOPtr io = new MemoryIndexedIO( m_buffer, "/", IndexedIO::Exclusive | IndexedIO::Read );
-		displayWindow = static_pointer_cast<Box2iData>( Object::load( io, "displayWindow" ) );
-		dataWindow = static_pointer_cast<Box2iData>( Object::load( io, "dataWindow" ) );
-		channelNames = static_pointer_cast<StringVectorData>( Object::load( io, "channelNames" ) );
-		parameters = static_pointer_cast<CompoundData>( Object::load( io, "parameters" ) );
+		displayWindow = staticPointerCast<Box2iData>( Object::load( io, "displayWindow" ) );
+		dataWindow = staticPointerCast<Box2iData>( Object::load( io, "dataWindow" ) );
+		channelNames = staticPointerCast<StringVectorData>( Object::load( io, "channelNames" ) );
+		parameters = staticPointerCast<CompoundData>( Object::load( io, "parameters" ) );
 
 		// create a displayDriver using the factory function.
 		m_displayDriver = DisplayDriver::create( displayWindow->readable(), dataWindow->readable(), channelNames->readable(), parameters );
@@ -376,8 +376,8 @@ void DisplayDriverServer::Session::handleReadDataParameters( const boost::system
 	try
 	{
 		MemoryIndexedIOPtr io = new MemoryIndexedIO( m_buffer, "/", IndexedIO::Exclusive | IndexedIO::Read );
-		box = static_pointer_cast<Box2iData>( Object::load( io, "box" ) );
-		data = static_pointer_cast<FloatVectorData>( Object::load( io, "data" ) );
+		box = staticPointerCast<Box2iData>( Object::load( io, "box" ) );
+		data = staticPointerCast<FloatVectorData>( Object::load( io, "data" ) );
 
 		// call imageData passing the data
 		m_displayDriver->imageData( box->readable(), &(data->readable()[0]), data->readable().size() );

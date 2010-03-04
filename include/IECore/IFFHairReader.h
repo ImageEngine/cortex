@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -129,7 +129,7 @@ class IFFHairReader : public Reader
 		RealType realType() const;
 		
 		template<typename T, typename F>
-		boost::intrusive_ptr<T> convertAttr( boost::intrusive_ptr<F> attr );
+		IntrusivePtr<T> convertAttr( IntrusivePtr<F> attr );
 };
 
 IE_CORE_DECLAREPTR( IFFHairReader );

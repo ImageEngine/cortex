@@ -126,8 +126,8 @@ RefCountedClass<T, Base, Ptr>::RefCountedClass( const char *className, const cha
 	boost::mpl::for_each( boost::python::objects::register_base_of<T>(), (typename BaseClass::metadata::bases*)0, (boost::add_pointer<boost::mpl::_>*) 0 );
 
 	// implicit conversions
-	boost::python::implicitly_convertible<boost::intrusive_ptr<T> , boost::intrusive_ptr<Base> >();
-	boost::python::implicitly_convertible<boost::intrusive_ptr<T> , boost::intrusive_ptr<const T> >();
+	boost::python::implicitly_convertible<IECore::IntrusivePtr<T> , IECore::IntrusivePtr<Base> >();
+	boost::python::implicitly_convertible<IECore::IntrusivePtr<T> , IECore::IntrusivePtr<const T> >();
 
 }
 

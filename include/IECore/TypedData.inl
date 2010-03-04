@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,7 +72,7 @@ TypedData<T>::~TypedData()
 template <class T>
 typename TypedData<T>::Ptr TypedData<T>::copy() const
 {
-	return boost::static_pointer_cast<TypedData<T> >( Data::copy() );
+	return staticPointerCast<TypedData<T> >( Data::copy() );
 }
 
 template <class T>
@@ -117,7 +117,7 @@ bool TypedData<T>::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	typename TypedData<T>::ConstPtr tOther = boost::static_pointer_cast<const TypedData<T> >( other );
+	typename TypedData<T>::ConstPtr tOther = staticPointerCast<const TypedData<T> >( other );
 	if( m_data==tOther->m_data )
 	{
 		// comparing the pointers is quick and that's good

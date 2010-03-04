@@ -60,7 +60,7 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 			override o = this->get_override( "begin" );
 			if( o )
 			{
-				o( const_pointer_cast<CompoundObject>( operands ) );
+				o( constPointerCast<CompoundObject>( operands ) );
 			}
 		}
 

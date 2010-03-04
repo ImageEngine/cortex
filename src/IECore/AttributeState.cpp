@@ -79,7 +79,7 @@ bool AttributeState::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	ConstAttributeStatePtr s = static_pointer_cast<const AttributeState>( other );
+	ConstAttributeStatePtr s = staticPointerCast<const AttributeState>( other );
 	return m_attributes->isEqualTo( s->m_attributes );
 }
 
@@ -92,7 +92,7 @@ void AttributeState::memoryUsage( Object::MemoryAccumulator &a ) const
 void AttributeState::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
 	StateRenderable::copyFrom( other, context );
-	ConstAttributeStatePtr s = static_pointer_cast<const AttributeState>( other );
+	ConstAttributeStatePtr s = staticPointerCast<const AttributeState>( other );
 	m_attributes = context->copy<CompoundData>( s->m_attributes );
 }
 

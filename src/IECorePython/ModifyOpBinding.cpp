@@ -61,7 +61,7 @@ class ModifyOpWrap : public ModifyOp, public Wrapper<ModifyOp>
 		virtual void modify( ObjectPtr object, ConstCompoundObjectPtr operands )
 		{
 			ScopedGILLock gilLock;
-			this->get_override( "modify" )( object, const_pointer_cast<CompoundObject>( operands ) );
+			this->get_override( "modify" )( object, constPointerCast<CompoundObject>( operands ) );
 		};
 
 };

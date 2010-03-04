@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -246,7 +246,7 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 		// Also accept frame ranges with number of digits greater than the padding.
 		if ( (*it)->getPadding() == 1 && (*it)->getFrameList()->typeId() == FrameRangeTypeId )
 		{
-			FrameRangePtr fr = boost::static_pointer_cast< FrameRange >( (*it)->getFrameList() );
+			FrameRangePtr fr = staticPointerCast< FrameRange >( (*it)->getFrameList() );
 			FrameList::Frame startFrame, endFrame;
 			startFrame = fr->getStart();
 			endFrame = fr->getEnd();

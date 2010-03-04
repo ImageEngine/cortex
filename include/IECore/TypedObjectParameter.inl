@@ -79,7 +79,7 @@ Parameter::PresetsContainer TypedObjectParameter<T>::makePresets( const ObjectPr
 template<typename T>
 typename TypedObjectParameter<T>::Ptr TypedObjectParameter<T>::copy() const
 {
-	return boost::static_pointer_cast<TypedObjectParameter<T> >( copy() );
+	return staticPointerCast<TypedObjectParameter<T> >( copy() );
 }
 
 template<typename T>

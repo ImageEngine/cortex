@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -328,7 +328,7 @@ PrimitiveEvaluatorPtr ImagePrimitiveEvaluator::create( ConstPrimitivePtr primiti
 
 void ImagePrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	if (! boost::dynamic_pointer_cast< ImagePrimitiveEvaluator::Result >( result ) )
+	if (! dynamicPointerCast< ImagePrimitiveEvaluator::Result >( result ) )
 	{
 		throw InvalidArgumentException("ImagePrimitiveEvaluator: Invalid PrimitiveEvaulator result type");
 	}
@@ -434,7 +434,7 @@ bool ImagePrimitiveEvaluator::intersectionPoint( const V3f &origin, const V3f &d
 		assert( numIntersections == 1 );
 		assert( results.size() == 1 );
 
-		ResultPtr intersectionResult = boost::dynamic_pointer_cast< Result >( results[0] );
+		ResultPtr intersectionResult = dynamicPointerCast< Result >( results[0] );
 		assert( intersectionResult );
 		r->m_p = intersectionResult->m_p;
 
@@ -455,7 +455,7 @@ int ImagePrimitiveEvaluator::intersectionPoints( const V3f &origin, const V3f &d
 	{
 		if ( ( origin - hitPoint ).length2() < maxDistance * maxDistance )
 		{
-			ResultPtr result = boost::static_pointer_cast< Result >( createResult() );
+			ResultPtr result = staticPointerCast< Result >( createResult() );
 			result->m_p = hitPoint;
 
 			results.push_back( result );

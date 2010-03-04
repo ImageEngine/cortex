@@ -229,7 +229,7 @@ void TypedParameter<T>::setTypedValue( const T &value )
 template <class T>
 typename TypedParameter<T>::Ptr TypedParameter<T>::copy() const
 {
-	return boost::static_pointer_cast<TypedParameter<T> >( copy() );
+	return staticPointerCast<TypedParameter<T> >( copy() );
 }
 
 template<class T>

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,17 +41,17 @@ namespace IECore
 {
 
 template<class T>
-boost::intrusive_ptr<T> Object::CopyContext::copy( boost::intrusive_ptr<const T> toCopy )
+IntrusivePtr<T> Object::CopyContext::copy( IntrusivePtr<const T> toCopy )
 {
 	std::map<ConstObjectPtr, ObjectPtr>::const_iterator it = m_copies.find( toCopy );
 	if( it!=m_copies.end() )
 	{
-		return boost::static_pointer_cast<T>( it->second );
+		return staticPointerCast<T>( it->second );
 	}
 	ObjectPtr copy = create( toCopy->typeId() );
 	copy->copyFrom( toCopy, this );
 	m_copies.insert( std::pair<ConstObjectPtr, ObjectPtr>( toCopy, copy ) );
-	return boost::static_pointer_cast<T>( copy );
+	return staticPointerCast<T>( copy );
 }
 
 template<class T>

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -100,7 +100,7 @@ bool BlindDataHolder::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	BlindDataHolder::ConstPtr tOther = boost::static_pointer_cast<const BlindDataHolder>( other );
+	BlindDataHolder::ConstPtr tOther = staticPointerCast<const BlindDataHolder>( other );
 
 	return m_data->isEqualTo( tOther->m_data );
 }

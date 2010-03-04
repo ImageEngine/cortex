@@ -185,9 +185,9 @@ static Box3fDataPtr bound2( typename P::ConstPtr pData, typename R::ConstPtr rDa
 	switch( vData->typeId() )
 	{
 		case V3fVectorDataTypeId :
-			return bound3<P, R, V3fVectorData>( pData, rData, rMult, static_pointer_cast<const V3fVectorData>( vData ), vMult );
+			return bound3<P, R, V3fVectorData>( pData, rData, rMult, staticPointerCast<const V3fVectorData>( vData ), vMult );
 		case V3dVectorDataTypeId :
-			return bound3<P, R, V3dVectorData>( pData, rData, rMult, static_pointer_cast<const V3dVectorData>( vData ), vMult );
+			return bound3<P, R, V3dVectorData>( pData, rData, rMult, staticPointerCast<const V3dVectorData>( vData ), vMult );
 		default :
 			assert( 0 ); // parameter validation should prevent us getting here
 	}
@@ -200,9 +200,9 @@ static Box3fDataPtr bound1( typename P::ConstPtr pData, ConstObjectPtr rData, fl
 	switch( rData->typeId() )
 	{
 		case FloatVectorDataTypeId :
-			return bound2<P, FloatVectorData>( pData, static_pointer_cast<const FloatVectorData>( rData ), rMult, vData, vMult );
+			return bound2<P, FloatVectorData>( pData, staticPointerCast<const FloatVectorData>( rData ), rMult, vData, vMult );
 		case DoubleVectorDataTypeId :
-			return bound2<P, DoubleVectorData>( pData, static_pointer_cast<const DoubleVectorData>( rData ), rMult, vData, vMult );
+			return bound2<P, DoubleVectorData>( pData, staticPointerCast<const DoubleVectorData>( rData ), rMult, vData, vMult );
 		default :
 			assert( 0 ); // parameter validation should prevent us getting here
 	}
@@ -219,9 +219,9 @@ ObjectPtr PointBoundsOp::doOperation( ConstCompoundObjectPtr operands )
 	switch( p->typeId() )
 	{
 		case V3fVectorDataTypeId :
-			return bound1<V3fVectorData>( static_pointer_cast<const V3fVectorData>( p ), r, rm, v, vm );
+			return bound1<V3fVectorData>( staticPointerCast<const V3fVectorData>( p ), r, rm, v, vm );
 		case V3dVectorDataTypeId :
-			return bound1<V3dVectorData>( static_pointer_cast<const V3dVectorData>( p ), r, rm, v, vm );
+			return bound1<V3dVectorData>( staticPointerCast<const V3dVectorData>( p ), r, rm, v, vm );
 		default :
 			assert( 0 ); // parameter validation should prevent us getting here
 	}

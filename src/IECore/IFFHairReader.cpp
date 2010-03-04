@@ -356,11 +356,11 @@ ConstIntVectorDataPtr IFFHairReader::frameTimes()
 }
 
 template<typename T, typename F>
-boost::intrusive_ptr<T> IFFHairReader::convertAttr( boost::intrusive_ptr<F> attr )
+IntrusivePtr<T> IFFHairReader::convertAttr( IntrusivePtr<F> attr )
 {
 	if( T::staticTypeId() != F::staticTypeId() )
 	{
-		boost::intrusive_ptr<T> result( new T );
+		IntrusivePtr<T> result( new T );
 		const typename F::ValueType &in = attr->readable();
 		typename T::ValueType &out = result->writable();
 		out.resize( in.size() );
@@ -369,7 +369,7 @@ boost::intrusive_ptr<T> IFFHairReader::convertAttr( boost::intrusive_ptr<F> attr
 	}
 	
 	// no type conversion necessary
-	return boost::intrusive_ptr<T>( (T *)attr.get() );
+	return IntrusivePtr<T>( (T *)attr.get() );
 }
 
 IFFHairReader::RealType IFFHairReader::realType() const

@@ -76,7 +76,7 @@ bool CoordinateSystem::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	ConstCoordinateSystemPtr c = static_pointer_cast<const CoordinateSystem>( other );
+	ConstCoordinateSystemPtr c = staticPointerCast<const CoordinateSystem>( other );
 	return m_name == c->m_name;
 }
 
@@ -89,7 +89,7 @@ void CoordinateSystem::memoryUsage( Object::MemoryAccumulator &a ) const
 void CoordinateSystem::copyFrom( ConstObjectPtr other, CopyContext *context )
 {
 	StateRenderable::copyFrom( other, context );
-	ConstCoordinateSystemPtr c = static_pointer_cast<const CoordinateSystem>( other );
+	ConstCoordinateSystemPtr c = staticPointerCast<const CoordinateSystem>( other );
 	m_name = c->m_name;
 }
 

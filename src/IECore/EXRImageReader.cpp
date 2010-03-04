@@ -231,7 +231,7 @@ DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dat
 				else
 				{
 					DataConvert< UIntVectorData, FloatVectorData, ScaledDataConversion< unsigned int, float > > converter;
-					ConstUIntVectorDataPtr vec = boost::static_pointer_cast< UIntVectorData >(res);
+					ConstUIntVectorDataPtr vec = staticPointerCast< UIntVectorData >(res);
 					return converter( vec );
 				}
 
@@ -244,7 +244,7 @@ DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dat
 				else
 				{
 					DataConvert< HalfVectorData, FloatVectorData, ScaledDataConversion< half, float > > converter;
-					ConstHalfVectorDataPtr vec = boost::static_pointer_cast< HalfVectorData >(res);
+					ConstHalfVectorDataPtr vec = staticPointerCast< HalfVectorData >(res);
 					return converter( vec );
 				}
 

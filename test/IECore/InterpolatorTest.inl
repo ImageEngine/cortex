@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,9 +70,9 @@ void LinearInterpolatorTest<T>::testTyped()
 {
 	LinearInterpolator<TypedData<T> > interp;
 
-	boost::intrusive_ptr<TypedData<T> > p0, p1;
+	IntrusivePtr<TypedData<T> > p0, p1;
 
-	boost::intrusive_ptr<TypedData<T> > result = new TypedData<T>();
+	IntrusivePtr<TypedData<T> > result = new TypedData<T>();
 
 	p0 = new TypedData<T>(T(0.0));
 	p1 = new TypedData<T>(T(1.0));
@@ -107,7 +107,7 @@ void LinearInterpolatorTest<T>::testVector()
 {
 	LinearInterpolator<TypedData<std::vector<T> > > interp;
 
-	boost::intrusive_ptr<TypedData<std::vector<T> > > p0, p1, result;
+	IntrusivePtr<TypedData<std::vector<T> > > p0, p1, result;
 
 	p0 = new TypedData<std::vector<T> >();
 	p1 = new TypedData<std::vector<T> >();
@@ -165,9 +165,9 @@ void CubicInterpolatorTest<T>::testTyped()
 {
 	CubicInterpolator<TypedData<T > > interp;
 
-	boost::intrusive_ptr<TypedData<T > > result = new TypedData<T>();
+	IntrusivePtr<TypedData<T > > result = new TypedData<T>();
 
-	boost::intrusive_ptr<TypedData<T> > p0, p1, p2, p3;
+	IntrusivePtr<TypedData<T> > p0, p1, p2, p3;
 
 	p0 = new TypedData<T>( T(0.0));
 	p1 = new TypedData<T>( T(0.0));
@@ -204,7 +204,7 @@ void CubicInterpolatorTest<T>::testVector()
 {
 	CubicInterpolator<TypedData<std::vector<T> > > interp;
 
-	boost::intrusive_ptr<TypedData<std::vector<T> > > p0, p1, p2, p3, result;
+	IntrusivePtr<TypedData<std::vector<T> > > p0, p1, p2, p3, result;
 
 	p0 = new TypedData<std::vector<T> >();
 	p1 = new TypedData<std::vector<T> >();

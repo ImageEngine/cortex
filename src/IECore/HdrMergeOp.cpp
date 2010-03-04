@@ -156,9 +156,9 @@ inline void merge( bool firstImage, size_t &pixelCount,
 					FloatVectorDataPtr outR, FloatVectorDataPtr outG, FloatVectorDataPtr outB, FloatVectorDataPtr outA )
 {
 
-	boost::intrusive_ptr< TypedData< std::vector< T > > > inR = img->getChannel< T >( "R" );
-	boost::intrusive_ptr< TypedData< std::vector< T > > > inG = img->getChannel< T >( "G" );
-	boost::intrusive_ptr< TypedData< std::vector< T > > > inB = img->getChannel< T >( "B" );
+	IntrusivePtr< TypedData< std::vector< T > > > inR = img->getChannel< T >( "R" );
+	IntrusivePtr< TypedData< std::vector< T > > > inG = img->getChannel< T >( "G" );
+	IntrusivePtr< TypedData< std::vector< T > > > inB = img->getChannel< T >( "B" );
 
 	if ( firstImage )
 	{
@@ -219,7 +219,7 @@ ObjectPtr HdrMergeOp::doOperation( ConstCompoundObjectPtr operands )
 		{
 			throw Exception( "Input group should contain images only!" );
 		}
-		ImagePrimitivePtr img = static_pointer_cast< ImagePrimitive >(*it);
+		ImagePrimitivePtr img = staticPointerCast< ImagePrimitive >(*it);
 		if ( !((img->getChannel< float >( "R" ) &&
 				img->getChannel< float >( "G" ) &&
 				img->getChannel< float >( "B" )) ||
@@ -260,7 +260,7 @@ ObjectPtr HdrMergeOp::doOperation( ConstCompoundObjectPtr operands )
 	bool firstImage = true;
 	for ( Group::ChildContainer::const_iterator it = images.begin(); it != images.end(); it++, firstImage = false )
 	{
-		ImagePrimitivePtr img = static_pointer_cast< ImagePrimitive >(*it);
+		ImagePrimitivePtr img = staticPointerCast< ImagePrimitive >(*it);
 		float intensityMultiplier = pow( 2.0f, exposure );
 		if ( img->getChannel< float >( "R" ) )
 		{

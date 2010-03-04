@@ -161,10 +161,10 @@ void ColorTexture::castConstruct( unsigned int width, unsigned int height, IECor
 	IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a )
 {
 	templateConstruct( width, height,
-		static_pointer_cast<const T>( r ),
-		static_pointer_cast<const T>( g ),
-		static_pointer_cast<const T>( b ),
-		static_pointer_cast<const T>( a )	);
+		staticPointerCast<const T>( r ),
+		staticPointerCast<const T>( g ),
+		staticPointerCast<const T>( b ),
+		staticPointerCast<const T>( a )	);
 }
 
 template<typename T>

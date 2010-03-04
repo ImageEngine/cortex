@@ -65,7 +65,7 @@ class OpWrap : public Op, public Wrapper<Op>
 			override o = this->get_override( "doOperation" );
 			if( o )
 			{
-				ObjectPtr r = o( const_pointer_cast<CompoundObject>( operands ) );
+				ObjectPtr r = o( constPointerCast<CompoundObject>( operands ) );
 				if( !r )
 				{
 					throw Exception( "doOperation() python method didn't return an Object." );
@@ -84,7 +84,7 @@ IE_CORE_DECLAREPTR( OpWrap );
 
 static ParameterPtr resultParameter( const Op &o )
 {
-	return const_pointer_cast<Parameter>( o.resultParameter() );
+	return constPointerCast<Parameter>( o.resultParameter() );
 }
 
 static ObjectPtr operate( Op &op )

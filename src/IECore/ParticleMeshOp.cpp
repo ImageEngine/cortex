@@ -387,9 +387,9 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	MeshPrimitiveBuilderPtr builder = new MeshPrimitiveBuilder();
 
 	ConstObjectPtr fileNameData = fileNameParameter()->getValue();
-	const std::string &fileName = boost::static_pointer_cast<const StringData>(fileNameData)->readable();
+	const std::string &fileName = staticPointerCast<const StringData>(fileNameData)->readable();
 
-	ParticleReaderPtr reader = boost::static_pointer_cast< ParticleReader > ( Reader::create( fileName ) );
+	ParticleReaderPtr reader = staticPointerCast< ParticleReader > ( Reader::create( fileName ) );
 	if (!reader)
 	{
 
@@ -397,11 +397,11 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	}
 
 	ConstObjectPtr positionAttributeData = positionAttributeParameter()->getValue();
-	const std::string &positionAttribute = boost::static_pointer_cast<const StringData>(positionAttributeData)->readable();
+	const std::string &positionAttribute = staticPointerCast<const StringData>(positionAttributeData)->readable();
 	DataPtr positionData = reader->readAttribute( positionAttribute );
 
 	/// \todo Detect V3fVectorData for positional information then automatically allow FloatVectorData for radius/strength
-	V3dVectorDataPtr position = boost::static_pointer_cast< V3dVectorData >( positionData );
+	V3dVectorDataPtr position = staticPointerCast< V3dVectorData >( positionData );
 	if (!position)
 	{
 		throw InvalidArgumentException("Could not read position data");
@@ -412,9 +412,9 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	if ( useRadiusAttribute )
 	{
 		ConstObjectPtr radiusAttributeData = radiusAttributeParameter()->getValue();
-		const std::string &radiusAttribute = boost::static_pointer_cast<const StringData>(radiusAttributeData)->readable();
+		const std::string &radiusAttribute = staticPointerCast<const StringData>(radiusAttributeData)->readable();
 		DataPtr radiusData = reader->readAttribute( radiusAttribute );
-		radius = boost::static_pointer_cast< DoubleVectorData >( radiusData );
+		radius = staticPointerCast< DoubleVectorData >( radiusData );
 		if (!radius)
 		{
 			throw InvalidArgumentException("Could not read radiusPP attribute data");
@@ -439,9 +439,9 @@ ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
 	if ( useStrengthAttribute )
 	{
 		ConstObjectPtr strengthAttributeData = strengthAttributeParameter()->getValue();
-		const std::string &strengthAttribute = boost::static_pointer_cast<const StringData>(strengthAttributeData)->readable();
+		const std::string &strengthAttribute = staticPointerCast<const StringData>(strengthAttributeData)->readable();
 		DataPtr strengthData = reader->readAttribute( strengthAttribute );
-		strength = boost::static_pointer_cast< DoubleVectorData >( strengthData );
+		strength = staticPointerCast< DoubleVectorData >( strengthData );
 		if (!strength)
 		{
 			throw InvalidArgumentException("Could not read strengthPP attribute data");

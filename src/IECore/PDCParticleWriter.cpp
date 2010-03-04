@@ -170,7 +170,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					int type = 1; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					IntVectorDataPtr d = static_pointer_cast<IntVectorData>( attr );
+					IntVectorDataPtr d = staticPointerCast<IntVectorData>( attr );
 					writeAttr<IntVectorData, int, 1>( oStream, d );
 				}
 				break;
@@ -178,7 +178,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					int type = 3; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					DoubleVectorDataPtr d = static_pointer_cast<DoubleVectorData>( attr );
+					DoubleVectorDataPtr d = staticPointerCast<DoubleVectorData>( attr );
 					writeAttr<DoubleVectorData, double, 1>( oStream, d );
 				}
 				break;
@@ -187,7 +187,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					int type = 5; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					V3dVectorDataPtr d = static_pointer_cast<V3dVectorData>( attr );
+					V3dVectorDataPtr d = staticPointerCast<V3dVectorData>( attr );
 					writeAttr<V3dVectorData, double, 3>( oStream, d );
 				}
 				break;
@@ -195,7 +195,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					int type = 0; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					IntDataPtr d = static_pointer_cast<IntData>( attr );
+					IntDataPtr d = staticPointerCast<IntData>( attr );
 					writeSimpleAttr<IntData, int, 1>( oStream, d );
 				}
 				break;
@@ -203,7 +203,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					int type = 2; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					DoubleDataPtr d = static_pointer_cast<DoubleData>( attr );
+					DoubleDataPtr d = staticPointerCast<DoubleData>( attr );
 					writeSimpleAttr<DoubleData, double, 1>( oStream, d );
 				}
 				break;
@@ -211,7 +211,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					int type = 4; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					V3dDataPtr d = static_pointer_cast<V3dData>( attr );
+					V3dDataPtr d = staticPointerCast<V3dData>( attr );
 					writeSimpleAttr<V3dData, double, 3>( oStream, d );
 				}
 				break;

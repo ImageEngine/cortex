@@ -89,7 +89,7 @@ bool MatrixTransform::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	ConstMatrixTransformPtr t = static_pointer_cast<const MatrixTransform>( other );
+	ConstMatrixTransformPtr t = staticPointerCast<const MatrixTransform>( other );
 	return matrix == t->matrix;
 }
 

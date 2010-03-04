@@ -262,7 +262,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 				IECoreGL::ConstStatePtr wireframeState = m_displayStyle.baseState( M3dView::kWireFrame );
 				m_boxPrimitive->setBox( IECore::convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
 				glPushAttrib( wireframeState->mask() );
-					(boost::static_pointer_cast<IECoreGL::Renderable>( m_boxPrimitive ))->render( wireframeState );
+					(boost::staticPointerCast<IECoreGL::Renderable>( m_boxPrimitive ))->render( wireframeState );
 				glPopAttrib();
 			}
 
@@ -313,7 +313,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 							hiliteGroups(
 								proceduralHolder->m_componentToGroupMap[compId],
 								hilite,
-								boost::const_pointer_cast<IECoreGL::WireframeColorStateComponent>( displayState->get< IECoreGL::WireframeColorStateComponent >() )
+								boost::constPointerCast<IECoreGL::WireframeColorStateComponent>( displayState->get< IECoreGL::WireframeColorStateComponent >() )
 							);
 						}
 					}

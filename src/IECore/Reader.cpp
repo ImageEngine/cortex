@@ -49,7 +49,7 @@ using namespace boost::filesystem;
 IE_CORE_DEFINERUNTIMETYPED( Reader );
 
 Reader::Reader( const std::string &description, ParameterPtr resultParameter )
-	: 	Op( description, resultParameter ? resultParameter : new Parameter( "result", "The loaded object.", new NullObject ) )
+	: 	Op( description, resultParameter ? resultParameter : ParameterPtr( new Parameter( "result", "The loaded object.", new NullObject ) ) )
 {
 	m_fileNameParameter = new FileNameParameter( "fileName", "The name of the file to be loaded", "", "", false, PathParameter::MustExist );
 	parameters()->addParameter( m_fileNameParameter );

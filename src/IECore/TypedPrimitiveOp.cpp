@@ -58,7 +58,7 @@ TypedPrimitiveOp<T>::~TypedPrimitiveOp()
 template<typename T>
 void TypedPrimitiveOp<T>::modify( ObjectPtr primitive, ConstCompoundObjectPtr operands )
 {
-	typename T::Ptr typedPrimitive = boost::dynamic_pointer_cast<T>( primitive );
+	typename T::Ptr typedPrimitive = dynamicPointerCast<T>( primitive );
 
 	// Parameter validation should ensure that this is object is of the correct type, hence the assertion
 	assert( typedPrimitive );

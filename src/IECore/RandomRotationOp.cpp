@@ -154,13 +154,13 @@ ObjectPtr RandomRotationOp::doOperation( ConstCompoundObjectPtr operands )
 	switch( seed->typeId() )
 	{
 		case FloatVectorDataTypeId :
-			return doOp<FloatVectorData>( static_pointer_cast<const FloatVectorData>( seed ), time, minSpeed, maxSpeed );
+			return doOp<FloatVectorData>( staticPointerCast<const FloatVectorData>( seed ), time, minSpeed, maxSpeed );
 		case DoubleVectorDataTypeId :
-			return doOp<DoubleVectorData>( static_pointer_cast<const DoubleVectorData>( seed ), time, minSpeed, maxSpeed );
+			return doOp<DoubleVectorData>( staticPointerCast<const DoubleVectorData>( seed ), time, minSpeed, maxSpeed );
 		case IntVectorDataTypeId :
-			return doOp<IntVectorData>( static_pointer_cast<const IntVectorData>( seed ), time, minSpeed, maxSpeed );
+			return doOp<IntVectorData>( staticPointerCast<const IntVectorData>( seed ), time, minSpeed, maxSpeed );
 		case UIntVectorDataTypeId :
-			return doOp<UIntVectorData>( static_pointer_cast<const UIntVectorData>( seed ), time, minSpeed, maxSpeed );
+			return doOp<UIntVectorData>( staticPointerCast<const UIntVectorData>( seed ), time, minSpeed, maxSpeed );
 		default :
 			return 0; // shouldn't get here
 	}

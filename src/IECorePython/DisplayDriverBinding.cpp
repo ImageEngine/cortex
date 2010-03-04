@@ -72,7 +72,7 @@ class DisplayDriverCreatorWrap : public DisplayDriver::DisplayDriverCreator, pub
 				}
 
 				DisplayDriverPtr r = c( displayWindow, dataWindow, channelList,
-					const_pointer_cast<CompoundData>( parameters ) );
+					constPointerCast<CompoundData>( parameters ) );
 				if( !r )
 				{
 					throw Exception( "create() python method didn't return a DisplayDriver." );

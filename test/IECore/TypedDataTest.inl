@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -130,7 +130,7 @@ void VectorTypedDataTest<T>::testWrite()
 template<typename T>
 void VectorTypedDataTest<T>::testAssign()
 {
-	boost::intrusive_ptr<TypedData<T> > assign = new TypedData<T>();
+	IntrusivePtr<TypedData<T> > assign = new TypedData<T>();
 	*assign = *m_data;
 
 	BOOST_CHECK_EQUAL( assign->readable().size(), m_data->readable().size() );
@@ -177,7 +177,7 @@ void SimpleTypedDataTest<T>::testWrite()
 template<typename T>
 void SimpleTypedDataTest<T>::testAssign()
 {
-	boost::intrusive_ptr<TypedData<T> > other = new TypedData<T>();
+	IntrusivePtr<TypedData<T> > other = new TypedData<T>();
 	*other = *m_data;
 
 	BOOST_CHECK_EQUAL( other->readable(), static_cast<T>(3.0) );
@@ -192,7 +192,7 @@ void SimpleTypedDataTest<T>::testMemoryUsage()
 template<typename T>
 void SimpleTypedDataTest<T>::testIsEqualTo()
 {
-	boost::intrusive_ptr<TypedData<T> > other = new TypedData<T>();
+	IntrusivePtr<TypedData<T> > other = new TypedData<T>();
 	other->writable() = static_cast<T>(3.0);
 
 	BOOST_CHECK( m_data->isEqualTo(other) );

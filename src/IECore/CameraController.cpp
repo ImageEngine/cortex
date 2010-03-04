@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,13 +54,13 @@ void CameraController::setCamera( CameraPtr camera )
 {
 	m_camera = camera;
 	m_camera->addStandardParameters(); // subsequent casts are safe because of this
-	m_resolution = boost::static_pointer_cast<V2iData>( m_camera->parameters()["resolution"] );
-	m_screenWindow = boost::static_pointer_cast<Box2fData>( m_camera->parameters()["screenWindow"] );
-	m_clippingPlanes = boost::static_pointer_cast<V2fData>( m_camera->parameters()["clippingPlanes"] );
-	m_projection = boost::static_pointer_cast<StringData>( m_camera->parameters()["projection"] );
+	m_resolution = staticPointerCast<V2iData>( m_camera->parameters()["resolution"] );
+	m_screenWindow = staticPointerCast<Box2fData>( m_camera->parameters()["screenWindow"] );
+	m_clippingPlanes = staticPointerCast<V2fData>( m_camera->parameters()["clippingPlanes"] );
+	m_projection = staticPointerCast<StringData>( m_camera->parameters()["projection"] );
 	if( m_projection->readable()=="perspective" )
 	{
-		m_fov = boost::static_pointer_cast<FloatData>( m_camera->parameters()["projection:fov"] );
+		m_fov = staticPointerCast<FloatData>( m_camera->parameters()["projection:fov"] );
 	}
 	else
 	{

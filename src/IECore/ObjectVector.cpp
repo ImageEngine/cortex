@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -135,7 +135,7 @@ bool ObjectVector::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	ObjectVector::ConstPtr tOther = boost::static_pointer_cast<const ObjectVector>( other );
+	ObjectVector::ConstPtr tOther = staticPointerCast<const ObjectVector>( other );
 	if( m_members.size()!=tOther->m_members.size() )
 	{
 		return false;

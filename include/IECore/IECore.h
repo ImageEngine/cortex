@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -108,14 +108,14 @@ bool withFreeType();
 /// \section mainPageMemoryManagementSection Memory Management
 ///
 /// IECore uses reference counting for any reasonably complex class. The \link IECore::RefCounted RefCounted \endlink
-/// base class provides an internal reference count for the object, and boost::intrusive_ptr
+/// base class provides an internal reference count for the object, and IECore::IntrusivePtr
 /// is used most places where raw pointers would otherwise be used. This means that
 /// generally you don't need to worry about memory management - objects die appropriately
-/// when the last boost::intrusive_ptr pointing to them goes out of scope.
+/// when the last IntrusivePtr pointing to them goes out of scope.
 ///
 /// For convenience, all classes define typedefs of the form ClassPtr, ConstClassPtr,
 /// Class::Ptr and Class::ConstPtr - these should be used in preference to the
-/// clunkier boost::intrusive_ptr<Class> syntax.
+/// clunkier IntrusivePtr<Class> syntax.
 ///
 /// \code
 ///	{
@@ -271,11 +271,9 @@ bool withFreeType();
 ///
 /// \section mainPageThreadingSection Threading
 ///
-/// Much of the library is not threadsafe. In particular the construction, destruction and assignment of boost::intrusive_ptrs is not threadsafe
-/// when multiple concurrent threads are referring to the same object. We may address this in a future version either by using atomic operations
-/// for the reference counting or by making more use of raw pointers in function arguments and results. In general it's best to assume that thread
-/// safety doesn't exist unless specified otherwise - specific threading considerations are documented in paragraphs entitled "Threading" within
-/// the class documentation.
+/// Much of the library is not threadsafe. In general it's best to assume that thread safety doesn't exist unless specified otherwise - 
+/// specific threading considerations are documented in paragraphs entitled "Threading" within the class documentation.
+/// The reference counting used on RefCounted class is thread safe now.
 ///
 /// Despite these limitations it is possible to write threaded code making use of a number of useful features of the libraries. See the IECore::PrimitiveEvaluator,
 /// IECore::KDTree and IECore::BoundedKDTree classes for examples of some algorithms which may be used concurrently by parallel threads.

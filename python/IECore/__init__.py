@@ -38,11 +38,9 @@
 
 # We register our own IntrusivePtrToPython converter in the bindings based on RefCountedClass. This allows
 # us to deal with object identity issues when pushing wrapped objects back into python. Boost python issues a warning
-# about this as it has already registered a converter, so we ignore the warnings here. The alternative would be to use
-# some other type for the default held type in RefCountedClass, but that means making a new pointer type which tries to
-# act like intrusive_ptr, and that seems to be unecessary bloat compared to just ignoring the warning.
+# about this as it has already registered a converter, so we ignore the warnings here.
 import warnings
-warnings.filterwarnings( "ignore", "to-Python converter for boost::intrusive_ptr.*already registered.", RuntimeWarning )
+warnings.filterwarnings( "ignore", "to-Python converter for IECore::IntrusivePtr.*already registered.", RuntimeWarning )
 
 from _IECore import *
 

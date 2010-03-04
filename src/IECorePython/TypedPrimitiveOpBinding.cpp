@@ -63,7 +63,7 @@ class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPri
 		virtual void modifyTypedPrimitive( typename T::Ptr object, ConstCompoundObjectPtr operands )
 		{
 			ScopedGILLock gilLock;
-			this->get_override( "modifyTypedPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) );
+			this->get_override( "modifyTypedPrimitive" )( object, constPointerCast<CompoundObject>( operands ) );
 		}
 
 };

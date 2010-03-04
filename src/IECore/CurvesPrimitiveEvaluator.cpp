@@ -363,7 +363,7 @@ PrimitiveEvaluator::ResultPtr CurvesPrimitiveEvaluator::createResult() const
 
 void CurvesPrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	if( ! boost::dynamic_pointer_cast<CurvesPrimitiveEvaluator::Result>( result ) )
+	if( ! dynamicPointerCast<CurvesPrimitiveEvaluator::Result>( result ) )
 	{
 		throw InvalidArgumentException( "CurvesPrimitiveEvaluator: Invalid result type" );
 	}

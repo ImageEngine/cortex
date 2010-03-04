@@ -130,9 +130,9 @@ ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
 	MedianCutSamplerPtr sampler = new MedianCutSampler;
 	sampler->imageParameter()->setValue( image );
 	sampler->subdivisionDepthParameter()->setNumericValue( subdivisionDepthParameter()->getNumericValue() );
-	ConstCompoundObjectPtr samples = static_pointer_cast<CompoundObject>( sampler->operate() );
-	const vector<V2f> &centroids = static_pointer_cast<V2fVectorData>( samples->members().find( "centroids" )->second )->readable();
-	const vector<Box2i> &areas = static_pointer_cast<Box2iVectorData>( samples->members().find( "areas" )->second )->readable();
+	ConstCompoundObjectPtr samples = staticPointerCast<CompoundObject>( sampler->operate() );
+	const vector<V2f> &centroids = staticPointerCast<V2fVectorData>( samples->members().find( "centroids" )->second )->readable();
+	const vector<Box2i> &areas = staticPointerCast<Box2iVectorData>( samples->members().find( "areas" )->second )->readable();
 
 	// get light directions and colors from the samples
 	V3fVectorDataPtr directionsData = new V3fVectorData;

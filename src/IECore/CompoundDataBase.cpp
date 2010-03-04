@@ -80,7 +80,7 @@ bool CompoundDataBase::isEqualTo( ConstObjectPtr other ) const
 	{
 		return false;
 	}
-	ConstCompoundDataBasePtr tOther = boost::static_pointer_cast<const CompoundDataBase>( other );
+	ConstCompoundDataBasePtr tOther = staticPointerCast<const CompoundDataBase>( other );
 	const CompoundDataMap &m1 = readable();
 	const CompoundDataMap &m2 = tOther->readable();
 	if( m1.size()!=m2.size() )

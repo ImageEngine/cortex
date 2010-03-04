@@ -58,7 +58,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToMayaPlugConverter );
 ToMayaPlugConverter::ToMayaPlugConverter( ConstObjectPtr object )
 	:	ToMayaConverter( "Places values in plugs.", IECore::ObjectTypeId )
 {
-	srcParameter()->setValue( const_pointer_cast<Object>( object ) );
+	srcParameter()->setValue( constPointerCast<Object>( object ) );
 }
 
 ToMayaPlugConverterPtr ToMayaPlugConverter::create( const IECore::ObjectPtr src )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -740,7 +740,7 @@ PrimitiveEvaluator::ResultPtr MeshPrimitiveEvaluator::createResult() const
 
 void MeshPrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	if (! boost::dynamic_pointer_cast< MeshPrimitiveEvaluator::Result >( result ) )
+	if (! dynamicPointerCast< MeshPrimitiveEvaluator::Result >( result ) )
 	{
 		throw InvalidArgumentException("MeshPrimitiveEvaluator: Invalid PrimitiveEvaulator result type");
 	}
@@ -748,7 +748,7 @@ void MeshPrimitiveEvaluator::validateResult( const PrimitiveEvaluator::ResultPtr
 
 bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	assert( boost::dynamic_pointer_cast< Result >( result ) );
+	assert( dynamicPointerCast< Result >( result ) );
 
 	if ( m_triangles.size() == 0)
 	{
@@ -757,7 +757,7 @@ bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluato
 
 	assert( m_tree );
 
-	ResultPtr mr = boost::static_pointer_cast< Result >( result );
+	ResultPtr mr = staticPointerCast< Result >( result );
 
 	float maxDistSqrd = limits<float>::max();
 
@@ -768,7 +768,7 @@ bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, const PrimitiveEvaluato
 
 bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const
 {
-	assert( boost::dynamic_pointer_cast< Result >( result ) );
+	assert( dynamicPointerCast< Result >( result ) );
 
 	if ( ! m_uvTriangles.size() )
 	{
@@ -776,7 +776,7 @@ bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEva
 	}
 
 	assert( m_uvTree );
-	ResultPtr mr = boost::static_pointer_cast< Result >( result );
+	ResultPtr mr = staticPointerCast< Result >( result );
 
 	return pointAtUVWalk( m_uvTree->rootIndex(), uv, mr );
 }
@@ -784,7 +784,7 @@ bool MeshPrimitiveEvaluator::pointAtUV( const Imath::V2f &uv, const PrimitiveEva
 bool MeshPrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 	const PrimitiveEvaluator::ResultPtr &result, float maxDistance ) const
 {
-	assert( boost::dynamic_pointer_cast< Result >( result ) );
+	assert( dynamicPointerCast< Result >( result ) );
 
 	if ( m_triangles.size() == 0)
 	{
@@ -793,7 +793,7 @@ bool MeshPrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, const 
 
 	assert( m_tree );
 
-	ResultPtr mr = boost::static_pointer_cast< Result >( result );
+	ResultPtr mr = staticPointerCast< Result >( result );
 
 	float maxDistSqrd = maxDistance * maxDistance;
 

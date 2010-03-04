@@ -152,7 +152,7 @@ class ReaderWrap : public Reader, public Wrapper<Reader>
 			override o = this->get_override( "doOperation" );
 			if( o )
 			{
-				ObjectPtr r = o( const_pointer_cast<CompoundObject>( operands ) );
+				ObjectPtr r = o( constPointerCast<CompoundObject>( operands ) );
 				if( !r )
 				{
 					throw Exception( "doOperation() python method didn't return an Object." );

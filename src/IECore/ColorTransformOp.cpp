@@ -189,7 +189,7 @@ const typename T::BaseType *ColorTransformOp::alphaData( PrimitivePtr primitive,
 		throw Exception( "Alpha data type does not match color data type." );
 	}
 
-	typename T::Ptr d = boost::static_pointer_cast<T>( it->second.data );
+	typename T::Ptr d = staticPointerCast<T>( it->second.data );
 	if( d->baseSize()!=requiredElements )
 	{
 		throw Exception( "Alpha data has incorrect number of elements." );
@@ -287,16 +287,16 @@ void ColorTransformOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObj
 		switch( colorIt->second.data->typeId() )
 		{
 			case Color3fDataTypeId :
-				transformInterleaved<Color3fData>( primitive, operands, boost::static_pointer_cast<Color3fData>( colorIt->second.data ) );
+				transformInterleaved<Color3fData>( primitive, operands, staticPointerCast<Color3fData>( colorIt->second.data ) );
 				break;
 			case Color3fVectorDataTypeId :
-				transformInterleaved<Color3fVectorData>( primitive, operands, boost::static_pointer_cast<Color3fVectorData>( colorIt->second.data ) );
+				transformInterleaved<Color3fVectorData>( primitive, operands, staticPointerCast<Color3fVectorData>( colorIt->second.data ) );
 				break;
 			case Color3dDataTypeId :
-				transformInterleaved<Color3dData>( primitive, operands, boost::static_pointer_cast<Color3dData>( colorIt->second.data ) );
+				transformInterleaved<Color3dData>( primitive, operands, staticPointerCast<Color3dData>( colorIt->second.data ) );
 				break;
 			case Color3dVectorDataTypeId :
-				transformInterleaved<Color3dVectorData>( primitive, operands, boost::static_pointer_cast<Color3dVectorData>( colorIt->second.data ) );
+				transformInterleaved<Color3dVectorData>( primitive, operands, staticPointerCast<Color3dVectorData>( colorIt->second.data ) );
 				break;
 			default :
 				throw Exception( "PrimitiveVariable has unsupported type." );
@@ -324,36 +324,36 @@ void ColorTransformOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObj
 				transformSeparate<HalfData>(
 					primitive,
 					operands,
-					boost::static_pointer_cast<HalfData>( rIt->second.data ),
-					boost::static_pointer_cast<HalfData>( gIt->second.data ),
-					boost::static_pointer_cast<HalfData>( bIt->second.data )
+					staticPointerCast<HalfData>( rIt->second.data ),
+					staticPointerCast<HalfData>( gIt->second.data ),
+					staticPointerCast<HalfData>( bIt->second.data )
 				);
 				break;
 			case HalfVectorDataTypeId :
 				transformSeparate<HalfVectorData>(
 					primitive,
 					operands,
-					boost::static_pointer_cast<HalfVectorData>( rIt->second.data ),
-					boost::static_pointer_cast<HalfVectorData>( gIt->second.data ),
-					boost::static_pointer_cast<HalfVectorData>( bIt->second.data )
+					staticPointerCast<HalfVectorData>( rIt->second.data ),
+					staticPointerCast<HalfVectorData>( gIt->second.data ),
+					staticPointerCast<HalfVectorData>( bIt->second.data )
 				);
 				break;
 			case FloatDataTypeId :
 				transformSeparate<FloatData>(
 					primitive,
 					operands,
-					boost::static_pointer_cast<FloatData>( rIt->second.data ),
-					boost::static_pointer_cast<FloatData>( gIt->second.data ),
-					boost::static_pointer_cast<FloatData>( bIt->second.data )
+					staticPointerCast<FloatData>( rIt->second.data ),
+					staticPointerCast<FloatData>( gIt->second.data ),
+					staticPointerCast<FloatData>( bIt->second.data )
 				);
 				break;
 			case FloatVectorDataTypeId :
 				transformSeparate<FloatVectorData>(
 					primitive,
 					operands,
-					boost::static_pointer_cast<FloatVectorData>( rIt->second.data ),
-					boost::static_pointer_cast<FloatVectorData>( gIt->second.data ),
-					boost::static_pointer_cast<FloatVectorData>( bIt->second.data )
+					staticPointerCast<FloatVectorData>( rIt->second.data ),
+					staticPointerCast<FloatVectorData>( gIt->second.data ),
+					staticPointerCast<FloatVectorData>( bIt->second.data )
 				);
 				break;
 			default :
