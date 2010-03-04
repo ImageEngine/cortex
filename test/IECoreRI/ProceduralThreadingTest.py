@@ -138,6 +138,9 @@ class ProceduralThreadingTest( unittest.TestCase ) :
 		# we do the same thing over and over to give it a decent chance of failing
 		# as threading errors are somewhat random.
 		
+		while gc.collect() :
+			pass
+		IECore.RefCounted.collectGarbage()
 		numInstances = IECore.RefCounted.numWrappedInstances()
 		
 		for i in range( 0, 20 ) :
