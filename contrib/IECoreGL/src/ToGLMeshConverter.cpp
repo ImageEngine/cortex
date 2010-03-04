@@ -85,7 +85,7 @@ class ToGLMeshConverter::ToFaceVaryingConverter
 ToGLMeshConverter::ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert )
 	:	ToGLConverter( "Converts IECore::MeshPrimitive objects to IECoreGL::MeshPrimitive objects.", IECore::MeshPrimitiveTypeId )
 {
-	srcParameter()->setValue( boost::constPointerCast<IECore::MeshPrimitive>( toConvert ) );
+	srcParameter()->setValue( IECore::constPointerCast<IECore::MeshPrimitive>( toConvert ) );
 }
 
 ToGLMeshConverter::~ToGLMeshConverter()
@@ -94,7 +94,7 @@ ToGLMeshConverter::~ToGLMeshConverter()
 
 IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::MeshPrimitivePtr mesh = boost::staticPointerCast<IECore::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
+	IECore::MeshPrimitivePtr mesh = IECore::staticPointerCast<IECore::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
 
 	IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
 	op->inputParameter()->setValue( mesh );

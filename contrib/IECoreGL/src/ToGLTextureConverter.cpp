@@ -59,7 +59,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLTextureConverter );
 ToGLTextureConverter::ToGLTextureConverter( IECore::ConstObjectPtr toConvert )
 	:	ToGLConverter( "Converts IECore::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId )
 {
-	srcParameter()->setValue( boost::constPointerCast<IECore::Object>( toConvert ) );
+	srcParameter()->setValue( IECore::constPointerCast<IECore::Object>( toConvert ) );
 }
 
 ToGLTextureConverter::~ToGLTextureConverter()

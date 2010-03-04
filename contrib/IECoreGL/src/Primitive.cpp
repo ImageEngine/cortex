@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -192,7 +192,7 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 		throw Exception( std::string( typeName() ) + " does not support vertex attributes." );
 	}
 
-	size_t s = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsTypedData >( boost::constPointerCast<IECore::Data>( data ) );
+	size_t s = IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsTypedData >( IECore::constPointerCast<IECore::Data>( data ) );
 
 	size_t rightSize = vertexAttributeSize();
 	if( s!=rightSize )
@@ -270,7 +270,7 @@ void Primitive::setVertexAttributes( ConstStatePtr state ) const
 			{
 				SetVertexAttribute a( glGetAttribLocation( shader->m_program, &name[0] ) ) ;
 
-				IECore::despatchTypedData< SetVertexAttribute, IECore::TypeTraits::IsVectorTypedData >( boost::constPointerCast<IECore::Data>( it->second ), a );
+				IECore::despatchTypedData< SetVertexAttribute, IECore::TypeTraits::IsVectorTypedData >( IECore::constPointerCast<IECore::Data>( it->second ), a );
 			}
 		}
 	}
@@ -318,25 +318,25 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 			switch( it->second->typeId() )
 			{
 				case IECore::IntVectorDataTypeId :
-					m_vertexToUniform.intDataMap[parameterIndex] = IntData( staticPointerCast<const IECore::IntVectorData>( it->second )->baseReadable(), 1 );
+					m_vertexToUniform.intDataMap[parameterIndex] = IntData( IECore::staticPointerCast<const IECore::IntVectorData>( it->second )->baseReadable(), 1 );
 					break;
 				case IECore::V2iVectorDataTypeId :
-					m_vertexToUniform.intDataMap[parameterIndex] = IntData( staticPointerCast<const IECore::V2iVectorData>( it->second )->baseReadable(), 2 );
+					m_vertexToUniform.intDataMap[parameterIndex] = IntData( IECore::staticPointerCast<const IECore::V2iVectorData>( it->second )->baseReadable(), 2 );
 					break;
 				case IECore::V3iVectorDataTypeId :
-					m_vertexToUniform.intDataMap[parameterIndex] = IntData( staticPointerCast<const IECore::V3iVectorData>( it->second )->baseReadable(), 3 );
+					m_vertexToUniform.intDataMap[parameterIndex] = IntData( IECore::staticPointerCast<const IECore::V3iVectorData>( it->second )->baseReadable(), 3 );
 					break;
 				case IECore::FloatVectorDataTypeId :
-					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( staticPointerCast<const IECore::FloatVectorData>( it->second )->baseReadable(), 1 );
+					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( IECore::staticPointerCast<const IECore::FloatVectorData>( it->second )->baseReadable(), 1 );
 					break;
 				case IECore::V2fVectorDataTypeId :
-					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( staticPointerCast<const IECore::V2fVectorData>( it->second )->baseReadable(), 2 );
+					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( IECore::staticPointerCast<const IECore::V2fVectorData>( it->second )->baseReadable(), 2 );
 					break;
 				case IECore::V3fVectorDataTypeId :
-					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( staticPointerCast<const IECore::V3fVectorData>( it->second )->baseReadable(), 3 );
+					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( IECore::staticPointerCast<const IECore::V3fVectorData>( it->second )->baseReadable(), 3 );
 					break;
 				case IECore::Color3fVectorDataTypeId :
-					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( staticPointerCast<const IECore::Color3fVectorData>( it->second )->baseReadable(), 3 );
+					m_vertexToUniform.floatDataMap[parameterIndex] = FloatData( IECore::staticPointerCast<const IECore::Color3fVectorData>( it->second )->baseReadable(), 3 );
 					break;
 				default :
 					break;

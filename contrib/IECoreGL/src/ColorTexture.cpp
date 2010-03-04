@@ -168,8 +168,8 @@ void ColorTexture::castConstruct( unsigned int width, unsigned int height, IECor
 }
 
 template<typename T>
-void ColorTexture::templateConstruct( unsigned int width, unsigned int height, boost::intrusive_ptr<const T> r,
-	boost::intrusive_ptr<const T> g,  boost::intrusive_ptr<const T> b, boost::intrusive_ptr<const T> a )
+void ColorTexture::templateConstruct( unsigned int width, unsigned int height, IECore::IntrusivePtr<const T> r,
+	IECore::IntrusivePtr<const T> g,  IECore::IntrusivePtr<const T> b, IECore::IntrusivePtr<const T> a )
 {
 	typedef typename T::ValueType::value_type ElementType;
 

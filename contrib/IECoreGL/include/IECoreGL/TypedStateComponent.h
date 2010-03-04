@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,8 +49,8 @@ class TypedStateComponent : public StateComponent
 
 		typedef T ValueType;
 
-		typedef boost::intrusive_ptr<TypedStateComponent> Ptr;
-		typedef boost::intrusive_ptr<const TypedStateComponent> ConstPtr;
+		typedef IECore::IntrusivePtr<TypedStateComponent> Ptr;
+		typedef IECore::IntrusivePtr<const TypedStateComponent> ConstPtr;
 
 		TypedStateComponent();
 		TypedStateComponent( const T &value );

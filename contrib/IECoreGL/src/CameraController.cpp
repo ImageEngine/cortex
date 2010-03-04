@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -111,7 +111,7 @@ void CameraController::frame( const Imath::Box3f &box, const Imath::V3f &viewDir
 		// perspective. leave the field of view and screen window as is and translate
 		// back till the box is wholly visible. this currently assumes the screen window
 		// is centred about the camera axis.
-		PerspectiveCameraPtr perspCamera = staticPointerCast<PerspectiveCamera>( m_camera );
+		PerspectiveCameraPtr perspCamera = IECore::staticPointerCast<PerspectiveCamera>( m_camera );
 
 		float z0 = cBox.size().x / screenWindow.size().x;
 		float z1 = cBox.size().y / screenWindow.size().y;
@@ -152,7 +152,7 @@ void CameraController::track( int dx, int dy )
 	translate.y = screenWindow.size().y * (float)dy/(float)resolution.y;
 	if( m_camera->isInstanceOf( PerspectiveCamera::staticTypeId() ) )
 	{
-		PerspectiveCameraPtr persp = staticPointerCast<PerspectiveCamera>( m_camera );
+		PerspectiveCameraPtr persp = IECore::staticPointerCast<PerspectiveCamera>( m_camera );
 		translate *= tan( M_PI * persp->getFOV() / 360.0f ) * (float)m_centreOfInterest;
 	}
 
