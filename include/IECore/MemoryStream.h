@@ -42,8 +42,6 @@
 
 #include "IECore/RefCounted.h"
 
-#include "IECore/LRUCache.h"
-
 namespace IECore
 {
 
