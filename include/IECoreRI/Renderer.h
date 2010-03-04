@@ -43,8 +43,10 @@ namespace IECoreRI
 {
 
 /// An IECore::Renderer subclass which renders through the renderman interface.
-/// \threading It is not safe to call the methods of this class from multiple concurrent threads.
-/// \todo Make this threadsafe (this means thinking of an alternative to RendererImplementation::m_inMotion)
+/// \threading Scenes should be described to this class from a single thread.
+/// However, when rendering live (with a Renderer constructed with Renderer( "" )), procedurals may
+/// be expanded concurrently in multiple threads, and in this case each procedural will see a separate
+/// Renderer instance to provide thread safety.
 class Renderer : public IECore::Renderer
 {
 
