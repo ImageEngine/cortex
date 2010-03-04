@@ -51,9 +51,7 @@ namespace IECorePython
 /// \todo I suspect we can completely drop the inheritance
 /// of boost::python::wrapper as we only use it for the get_override method, and
 /// we could copy it out of the boost sources. Doing so would make the rather
-/// complicated class hierarchy here a lot simpler. If we were to create a libIECorePython
-/// we could also collapse WrapperGarbageCollector and WrapperGarbageCollectorBase
-/// into one class which would also make things a little clearer.
+/// complicated class hierarchy here a lot simpler.
 template<typename T>
 class Wrapper : public boost::python::wrapper<T>, public WrapperGarbageCollector
 {
