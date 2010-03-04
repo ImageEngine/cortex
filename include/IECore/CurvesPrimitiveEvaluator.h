@@ -109,8 +109,6 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 
 		virtual ConstPrimitivePtr primitive() const;
 		
-		/// \threading This is not threadsafe! (because it constructs an intrusive_ptr in Result::m_p).
-		/// \todo Make this threadsafe.
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
 		virtual void validateResult( const PrimitiveEvaluator::ResultPtr &result ) const;
 
