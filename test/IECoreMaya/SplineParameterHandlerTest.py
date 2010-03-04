@@ -292,5 +292,13 @@ class SplineParameterHandlerTest( unittest.TestCase ) :
 		splineData2 = op["spline"].getValue()
 		self.assertEqual( splineData, splineData2 )
 
+	def tearDown( self ) :
+	
+		path = os.getcwd() + "/test/IECoreMaya/splineParameterHandlerTest.ma"
+
+		if os.path.exists( path ) :
+
+			os.remove( path )
+		
 if __name__ == "__main__":
 	MayaUnitTest.TestProgram()
