@@ -36,6 +36,7 @@ import unittest
 
 import IECore
 import os
+import shutil
 
 class TestFileSequenceParameter( unittest.TestCase ) :
 
@@ -148,6 +149,13 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/test with   spaces  .#.tif 5-10" ) )
 
+	def tearDown( self ) :
+		
+		directory = "test/sequences"
+
+		if os.path.exists( directory ) :
+
+			shutil.rmtree( directory )
 
 if __name__ == "__main__":
         unittest.main()
