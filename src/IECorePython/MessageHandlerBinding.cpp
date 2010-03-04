@@ -43,6 +43,7 @@
 #include "IECorePython/MessageHandlerBinding.h"
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -58,6 +59,7 @@ class MessageHandlerWrap : public MessageHandler, public Wrapper<MessageHandler>
 
 		virtual void handle( MessageHandler::Level level, const std::string &context, const std::string &message )
 		{
+			ScopedGILLock gilLock;
 			this->get_override( "handle" )( level, context, message );
 		}
 

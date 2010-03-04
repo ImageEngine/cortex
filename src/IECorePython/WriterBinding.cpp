@@ -37,6 +37,7 @@
 #include "IECore/Writer.h"
 #include "IECore/Object.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 using std::string;
 using namespace boost;
@@ -70,10 +71,16 @@ static list supportedExtensions( TypeId typeId )
 	return result;
 }
 
+static void write( IECore::Writer &w )
+{
+	ScopedGILRelease gilRelease;
+	w.write();
+}
+
 void bindWriter()
 {
 	RunTimeTypedClass<Writer>()
-		.def( "write", &Writer::write )
+		.def( "write", &write )
 		.def( "create", &Writer::create ).staticmethod( "create" )
 		.def( "supportedExtensions", ( list(*)( ) )&supportedExtensions )
 		.def( "supportedExtensions", ( list(*)( TypeId ) )&supportedExtensions )

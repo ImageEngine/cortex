@@ -36,6 +36,7 @@
 #define IECOREPYTHON_RUNTIMETYPEDBINDING_H
 
 #include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/ScopedGILLock.h"
 
 namespace IECorePython
 {
@@ -61,6 +62,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 #define IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME )\
 	virtual IECore::TypeId typeId() const\
 	{\
+		ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "typeId" ) )\
 		{\
 			boost::python::object res = f(); \
@@ -70,6 +72,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 	}\
 	virtual const char *typeName() const\
 	{\
+		ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "typeName" ) )\
 		{\
 			boost::python::object res = f(); \
@@ -79,6 +82,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 	}\
 	virtual bool isInstanceOf( IECore::TypeId typeId ) const\
 	{\
+		ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
 		{\
 			boost::python::object res = f( typeId ); \
@@ -88,6 +92,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 	}\
 	virtual bool isInstanceOf( const char *typeName ) const\
 	{\
+		ScopedGILLock gilLock;\
 		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
 		{\
 			boost::python::object res = f( typeName ); \

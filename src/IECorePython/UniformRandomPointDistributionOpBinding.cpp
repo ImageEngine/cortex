@@ -40,6 +40,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -70,6 +71,7 @@ class UniformRandomPointDistributionOpWrap :
 
 		virtual float density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "density" );
 			if( o )
 			{

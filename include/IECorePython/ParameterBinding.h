@@ -41,6 +41,7 @@
 #include "IECore/Parameter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILLock.h"
 
 namespace IECorePython
 {
@@ -80,6 +81,7 @@ T parameterPresets( const boost::python::object &o );
 #define IECOREPYTHON_PARAMETERWRAPPERFNS( CLASSNAME )													\
 	virtual bool valueValid( const IECore::Object *value, std::string *reason = 0 ) const				\
 	{																									\
+		ScopedGILLock gilLock;																			\
 		if( boost::python::override f = this->get_override( "valueValid" ) )							\
 		{																								\
 			boost::python::tuple r = f( IECore::ObjectPtr( const_cast<IECore::Object *>( value ) ) );	\

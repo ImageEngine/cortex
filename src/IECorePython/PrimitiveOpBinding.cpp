@@ -40,6 +40,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -56,6 +57,7 @@ class PrimitiveOpWrap : public PrimitiveOp, public Wrapper<PrimitiveOp>
 
 		virtual void modifyPrimitive( PrimitivePtr object, ConstCompoundObjectPtr operands )
 		{
+			ScopedGILLock gilLock;
 			this->get_override( "modifyPrimitive" )( object, const_pointer_cast<CompoundObject>( operands ) );
 		}
 

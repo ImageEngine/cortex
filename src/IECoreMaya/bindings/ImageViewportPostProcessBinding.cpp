@@ -38,6 +38,7 @@
 
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
 
 #include "IECore/Exception.h"
 
@@ -66,6 +67,7 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
 
 	virtual bool needsDepth () const
 	{
+		ScopedGILLock gilLock;
 		override o = this->get_override( "needsDepth" );
 		if( o )
 		{
@@ -87,6 +89,7 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
 
 	virtual void preRender( const std::string &panelName )
 	{
+		ScopedGILLock gilLock;
 		override o = this->get_override( "preRender" );
 		if( o )
 		{
@@ -107,6 +110,7 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
 
 	virtual void postRender( const std::string &panelName, IECore::ImagePrimitivePtr image )
 	{
+		ScopedGILLock gilLock;
 		override o = this->get_override( "postRender" );
 		if( o )
 		{

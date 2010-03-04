@@ -41,6 +41,8 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILRelease.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -59,6 +61,7 @@ class OpWrap : public Op, public Wrapper<Op>
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands )
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "doOperation" );
 			if( o )
 			{
@@ -84,6 +87,13 @@ static ParameterPtr resultParameter( const Op &o )
 	return const_pointer_cast<Parameter>( o.resultParameter() );
 }
 
+static ObjectPtr operate( Op &op )
+{
+	ScopedGILRelease gilRelease;
+	ObjectPtr result = op.operate();
+	return result;
+}
+
 void bindOp()
 {
 	using boost::python::arg;
@@ -92,8 +102,8 @@ void bindOp()
 		.def( init< const std::string &, ParameterPtr >( ( arg( "description" ), arg( "resultParameter") ) ) )
 		.def( init< const std::string &, CompoundParameterPtr, ParameterPtr >( ( arg( "description" ), arg( "compoundParameter" ), arg( "resultParameter") ) ) )
 		.def( "resultParameter", &resultParameter )
-		.def( "operate", &Op::operate )
-		.def( "__call__", &Op::operate )
+		.def( "operate", &operate )
+		.def( "__call__", &operate )
 	;
 
 }

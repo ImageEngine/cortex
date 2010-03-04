@@ -39,7 +39,7 @@
 #include "IECore/ImplicitSurfaceFunction.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/RefCountedBinding.h"
-
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -68,6 +68,7 @@ class ImplicitWrap :
 
 		virtual typename T::Value getValue( const typename T::Point &p )
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "getValue" );
 			if( o )
 			{

@@ -39,6 +39,8 @@
 #include "IECore/FileNameParameter.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 using std::string;
 using namespace boost;
@@ -82,7 +84,30 @@ struct ReaderCreator
 	
 	ReaderPtr operator()( const std::string &fileName ) 
 	{
-		return extract<ReaderPtr>( m_fn( fileName ) );
+		ScopedGILLock gilLock;
+		ReaderPtr result = extract<ReaderPtr>( m_fn( fileName ) );
+		return result;
+	}
+
+	private :
+	
+		object m_fn;
+
+};
+
+struct ReaderCanRead
+{
+
+	ReaderCanRead( object fn )
+		:	m_fn( fn )
+	{
+	}
+	
+	bool operator()( const std::string &fileName ) 
+	{
+		ScopedGILLock gilLock;
+		bool result = m_fn( fileName );
+		return result;
 	}
 
 	private :
@@ -93,7 +118,7 @@ struct ReaderCreator
 
 static void registerReader( const std::string &extensions, object &canRead, object &creator, TypeId typeId )
 {
-	Reader::registerReader( extensions, canRead, ReaderCreator( creator ), typeId );
+	Reader::registerReader( extensions, ReaderCanRead( canRead ), ReaderCreator( creator ), typeId );
 }
 
 class ReaderWrap : public Reader, public Wrapper<Reader>
@@ -104,6 +129,7 @@ class ReaderWrap : public Reader, public Wrapper<Reader>
 
 		virtual CompoundObjectPtr readHeader()
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "readHeader" );
 			if( o )
 			{
@@ -122,6 +148,7 @@ class ReaderWrap : public Reader, public Wrapper<Reader>
 
 		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands )
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "doOperation" );
 			if( o )
 			{
@@ -142,6 +169,13 @@ class ReaderWrap : public Reader, public Wrapper<Reader>
 };
 IE_CORE_DECLAREPTR( ReaderWrap );
 
+static ObjectPtr read( Reader &reader )
+{
+	ScopedGILRelease gilRelease;
+	ObjectPtr result = reader.read();
+	return result;
+}
+
 void bindReader()
 {
 	using boost::python::arg;
@@ -150,7 +184,7 @@ void bindReader()
 		.def( init<const std::string &>( ( arg( "description" ) ) ) )
 		.def( init<const std::string &, ParameterPtr>( ( arg( "description" ), arg( "resultParameter" ) ) ) )
 		.def( "readHeader", &Reader::readHeader )
-		.def( "read", &Reader::read )
+		.def( "read", &read )
 		.def( "readHeader", &Reader::readHeader )
 		.def( "create", &Reader::create ).staticmethod( "create" )
 		.def( "supportedExtensions", ( list(*)( ) ) &supportedExtensions )

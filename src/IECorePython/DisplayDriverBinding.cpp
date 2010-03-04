@@ -40,6 +40,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -58,6 +59,7 @@ class DisplayDriverCreatorWrap : public DisplayDriver::DisplayDriverCreator, pub
 
 		virtual DisplayDriverPtr create( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
 		{
+			ScopedGILLock gilLock;
 			override c = this->get_override( "create" );
 			if( c )
 			{

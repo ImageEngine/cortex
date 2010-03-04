@@ -38,6 +38,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
@@ -55,6 +56,7 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 
 		virtual void begin( ConstCompoundObjectPtr operands )
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "begin" );
 			if( o )
 			{
@@ -64,6 +66,7 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 
 		virtual void transform( Imath::Color3f &color ) const
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "transform" );
 			if( o )
 			{
@@ -78,6 +81,7 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 
 		virtual void end()
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "end" );
 			if( o )
 			{

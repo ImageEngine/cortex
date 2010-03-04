@@ -36,6 +36,7 @@
 
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/ScopedGILLock.h"
 
 #include "IECore/LevenbergMarquardt.h"
 
@@ -95,6 +96,7 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
 
 		virtual unsigned numErrors()
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "numErrors" );
 			if( o )
 			{
@@ -119,6 +121,7 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
 		        typename TypedData< std::vector<T> >::Ptr errors
 		)
 		{
+			ScopedGILLock gilLock;
 			override o = this->get_override( "computeErrors" );
 			if( o )
 			{

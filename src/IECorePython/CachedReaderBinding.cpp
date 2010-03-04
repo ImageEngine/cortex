@@ -40,6 +40,7 @@
 #include "IECore/Object.h"
 #include "IECorePython/CachedReaderBinding.h"
 #include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -49,6 +50,7 @@ namespace IECorePython
 
 static ObjectPtr read( CachedReader &r, const std::string &f )
 {
+	ScopedGILRelease gilRelease;
 	ConstObjectPtr o = r.read( f );
 	if( o )
 	{

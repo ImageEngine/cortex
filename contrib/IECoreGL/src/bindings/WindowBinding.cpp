@@ -40,6 +40,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/Wrapper.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost::python;
 
@@ -58,6 +59,7 @@ class WindowWrap : public Window, public IECorePython::Wrapper<Window>
 
 		virtual void display()
 		{
+			IECorePython::ScopedGILLock gilLock;
 			try
 			{
 				override o = this->get_override( "display" );
@@ -86,6 +88,7 @@ class WindowWrap : public Window, public IECorePython::Wrapper<Window>
 
 		virtual void reshape( int width, int height )
 		{
+			IECorePython::ScopedGILLock gilLock;
 			try
 			{
 				override o = this->get_override( "reshape" );
