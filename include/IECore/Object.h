@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( Object );
 
 #define IE_CORE_DECLAREOBJECTMEMBERFNS( TYPENAME )																		\
 	public :																											\
-		TYPENAME::Ptr copy() const { return staticPointerCast<TYPENAME>( Object::copy() ); }							\
+		TYPENAME::Ptr copy() const { return IECore::staticPointerCast<TYPENAME>( Object::copy() ); }							\
 		bool isEqualTo( IECore::ConstObjectPtr other ) const;															\
 	protected :																											\
 		virtual void copyFrom( IECore::ConstObjectPtr other, IECore::Object::CopyContext *context );					\
