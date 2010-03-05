@@ -35,6 +35,8 @@
 #ifndef IECORE_CURVESPRIMITIVEEVALUATOR_H
 #define IECORE_CURVESPRIMITIVEEVALUATOR_H
 
+#include "tbb/mutex.h"
+
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/BoundedKDTree.h"
 
@@ -121,10 +123,6 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual float volume() const;
 		/// Not yet implemented.
 		virtual Imath::V3f centerOfGravity() const;
-		/// \threading The first call to this method creates an acceleration structure which will be reused
-		/// by all subsequent queries. Following the first call this method can be called from multiple
-		/// concurrent threads but the first call itself must have completed before this can happen.
-		/// \todo Sort out this mess.
 		virtual bool closestPoint( const Imath::V3f &p, const PrimitiveEvaluator::ResultPtr &result ) const;
 		/// Returns pointAtV( 0, uv[1], result ).
 		virtual bool pointAtUV( const Imath::V2f &uv, const PrimitiveEvaluator::ResultPtr &result ) const;
@@ -172,6 +170,8 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		
 		void buildTree();
 		bool m_haveTree;
+		typedef tbb::mutex TreeMutex;
+		TreeMutex m_treeMutex;
 		Box3fTree m_tree;
 		std::vector<Imath::Box3f> m_treeBounds;
 		struct Line;
