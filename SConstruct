@@ -951,6 +951,12 @@ coreEnv.Alias( "installCore", headerInstall )
 # python library
 corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 corePythonLibrary = corePythonEnv.SharedLibrary( "lib/" + os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ), corePythonSources )
+corePythonLibraryInstall = corePythonEnv.Install( os.path.dirname( corePythonEnv.subst( "$INSTALL_LIB_NAME" ) ), corePythonLibrary )
+corePythonEnv.NoCache( corePythonLibraryInstall )
+corePythonEnv.AddPostAction( corePythonLibraryInstall, lambda target, source, env : makeLibSymLinks( corePythonEnv, libNameVar="INSTALL_PYTHONLIB_NAME" ) )
+corePythonEnv.Alias( "install", [ corePythonLibraryInstall ] )
+corePythonEnv.Alias( "installCore", [ corePythonLibraryInstall ] )
+corePythonEnv.Alias( "installLib", [ corePythonLibraryInstall ] )
 
 # python headers
 pythonHeaderInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECorePython", corePythonHeaders )
@@ -1012,7 +1018,6 @@ riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 riPythonModuleEnv = pythonModuleEnv.Copy( IECORE_NAME = "IECoreRI" )
 riPythonModuleEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
-riPythonModuleEnv.Append( LIBS = corePythonLibrary )
 
 riPythonProceduralEnv = riPythonModuleEnv.Copy( IECORE_NAME = "iePython" )
 
@@ -1068,6 +1073,7 @@ if doConfigure :
 		# part of the configure process
 		riEnv.Prepend( LIBPATH = [ "./lib" ] )
 		riEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		riPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 	
 		# library
 		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ), riSources )
@@ -1236,7 +1242,7 @@ if env["WITH_GL"] and doConfigure :
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				corePythonLibrary,
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 			]
 		)
 		glPythonModule = glPythonModuleEnv.SharedLibrary( "contrib/IECoreGL/python/IECoreGL/_IECoreGL", glPythonSources )
@@ -1286,7 +1292,6 @@ mayaEnvAppends = {
 		"OpenMayaAnim",
 		"OpenMayaFX",
 		"boost_python" + pythonEnv["BOOST_LIB_SUFFIX"],
-		corePythonLibrary,
 	],
 	"CPPFLAGS" : [
 		"-D_BOOL",
@@ -1315,7 +1320,6 @@ mayaEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 
 mayaPythonModuleEnv = pythonModuleEnv.Copy( **mayaEnvSets )
 mayaPythonModuleEnv.Append( **mayaEnvAppends )
-mayaPythonModuleEnv.Append( LIBS = corePythonLibrary )
 
 mayaPluginEnv = mayaEnv.Copy( IECORE_NAME="ieCore" )
 
@@ -1356,6 +1360,7 @@ if doConfigure :
 		mayaEnv.Prepend( LIBPATH = [ "./lib" ] )
 		mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		mayaEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		mayaEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
 		# maya library
 		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaSources )
@@ -1428,6 +1433,7 @@ if doConfigure :
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 			]
 		)
 		mayaPythonModule = mayaPythonModuleEnv.SharedLibrary( "python/IECoreMaya/_IECoreMaya", mayaPythonSources )
@@ -1624,7 +1630,6 @@ truelightEnv.Prepend( LIBPATH = [
 )
 
 truelightPythonModuleEnv = pythonModuleEnv.Copy( IECORE_NAME="IECoreTruelight" )
-truelightPythonModuleEnv.Append( LIBS = corePythonLibrary )
 
 if doConfigure :
 
@@ -1669,6 +1674,7 @@ if doConfigure :
 		truelightPythonModuleEnv.Append( LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 			]
 		)
 
