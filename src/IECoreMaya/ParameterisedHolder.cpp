@@ -480,7 +480,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 	bool childParametersWereSet = false;
 	if( parameter->isInstanceOf( CompoundParameter::staticTypeId() ) )
 	{
-		CompoundParameterPtr compoundParameter = boost::staticPointerCast<CompoundParameter>( parameter );
+		CompoundParameterPtr compoundParameter = staticPointerCast<CompoundParameter>( parameter );
 		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 		for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 		{

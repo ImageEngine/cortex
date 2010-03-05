@@ -47,7 +47,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToMayaObjectConverter );
 ToMayaObjectConverter::ToMayaObjectConverter( const std::string &description, ConstObjectPtr object )
 	:	ToMayaConverter( description, IECore::ObjectTypeId )
 {
-	srcParameter()->setValue( boost::constPointerCast<Object>( object ) );
+	srcParameter()->setValue( constPointerCast<Object>( object ) );
 }
 
 bool ToMayaObjectConverter::convert( MObject &object ) const
