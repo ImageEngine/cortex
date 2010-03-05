@@ -126,7 +126,7 @@ MStatus ParameterisedHolderSetValueCmd::doIt( const MArgList &argList )
 	// store the values we'll be setting in doIt and undoIt
 
 	IECore::ParameterisedInterface *interface = m_parameterisedHolder->getParameterisedInterface();
-	IECore::ParameterPtr parameter = m_parameter ? m_parameter : interface->parameters();
+	IECore::ParameterPtr parameter = m_parameter ? m_parameter : IECore::ParameterPtr(interface->parameters());
 
 	// we must copy the value here, as the m_originalValue = parm->getValue() below updates the value in place,
 	// which would modify tmp if it weren't a copy.
@@ -156,7 +156,7 @@ MStatus ParameterisedHolderSetValueCmd::redoIt()
 	}
 
 	IECore::ParameterisedInterface *interface = m_parameterisedHolder->getParameterisedInterface();
-	IECore::ParameterPtr parameter = m_parameter ? m_parameter : interface->parameters();
+	IECore::ParameterPtr parameter = m_parameter ? m_parameter : IECore::ParameterPtr(interface->parameters());
 
 	IECore::ObjectPtr tmp = parameter->getValue();
 
@@ -183,7 +183,7 @@ MStatus ParameterisedHolderSetValueCmd::undoIt()
 	}
 
 	IECore::ParameterisedInterface *interface = m_parameterisedHolder->getParameterisedInterface();
-	IECore::ParameterPtr parameter = m_parameter ? m_parameter : interface->parameters();
+	IECore::ParameterPtr parameter = m_parameter ? m_parameter : IECore::ParameterPtr(interface->parameters());
 
 	IECore::ObjectPtr tmp = parameter->getValue();
 
