@@ -61,10 +61,10 @@ PointsPrimitive::~PointsPrimitive()
 {
 }
 
-void PointsPrimitive::copyFrom( IECore::ConstObjectPtr other, IECore::Object::CopyContext *context )
+void PointsPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *context )
 {
 	Primitive::copyFrom( other, context );
-	const PointsPrimitive *tOther = static_cast<const PointsPrimitive *>( other.get() );
+	const PointsPrimitive *tOther = static_cast<const PointsPrimitive *>( other );
 	m_numPoints = tOther->getNumPoints();
 }
 
@@ -85,13 +85,13 @@ void PointsPrimitive::load( IECore::Object::LoadContextPtr context )
 	m_numPoints = static_cast<size_t>(numPoints);
 }
 
-bool PointsPrimitive::isEqualTo( ConstObjectPtr other ) const
+bool PointsPrimitive::isEqualTo( const Object *other ) const
 {
 	if( !Primitive::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const PointsPrimitive *tOther = static_cast<const PointsPrimitive *>( other.get() );
+	const PointsPrimitive *tOther = static_cast<const PointsPrimitive *>( other );
 	if( tOther->getNumPoints()!=getNumPoints() )
 	{
 		return false;

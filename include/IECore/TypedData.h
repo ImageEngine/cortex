@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,7 +75,7 @@ class TypedData : public Data
 		////////////////////////////////////////////////////////////
 		//@{
 		typename TypedData<T>::Ptr copy() const;
-		bool isEqualTo( ConstObjectPtr other ) const;
+		bool isEqualTo( const Object *other ) const;
 		//@}
 
 		/// Equivalent to writable() = data
@@ -118,7 +118,7 @@ class TypedData : public Data
 
 		static Object::TypeDescription<TypedData<T> > m_typeDescription;
 
-		virtual void copyFrom( ConstObjectPtr other, CopyContext *context );
+		virtual void copyFrom( const Object *other, CopyContext *context );
 		virtual void save( SaveContext *context ) const;
 		virtual void load( LoadContextPtr context );
 		/// If the memory usage is anything other than sizeof(T) for

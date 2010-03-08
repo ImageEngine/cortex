@@ -76,10 +76,10 @@ typename TypedData<T>::Ptr TypedData<T>::copy() const
 }
 
 template <class T>
-void TypedData<T>::copyFrom( ConstObjectPtr other, CopyContext *context )
+void TypedData<T>::copyFrom( const Object *other, CopyContext *context )
 {
 	Data::copyFrom( other, context );
-	const TypedData<T> *tOther = static_cast<const TypedData<T> *>( other.get() );
+	const TypedData<T> *tOther = static_cast<const TypedData<T> *>( other );
 	m_data = tOther->m_data;
 }
 
@@ -111,13 +111,13 @@ void TypedData<T>::load( LoadContextPtr context )
 }
 
 template <class T>
-bool TypedData<T>::isEqualTo( ConstObjectPtr other ) const
+bool TypedData<T>::isEqualTo( const Object *other ) const
 {
 	if( !Data::isEqualTo( other ) )
 	{
 		return false;
 	}
-	typename TypedData<T>::ConstPtr tOther = staticPointerCast<const TypedData<T> >( other );
+	const TypedData<T> *tOther = static_cast<const TypedData<T> *>( other );
 	if( m_data==tOther->m_data )
 	{
 		// comparing the pointers is quick and that's good

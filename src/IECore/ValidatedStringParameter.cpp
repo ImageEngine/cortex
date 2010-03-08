@@ -108,10 +108,10 @@ bool ValidatedStringParameter::valueValid( const Object *value, std::string *rea
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ValidatedStringParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void ValidatedStringParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	StringParameter::copyFrom( other, context );
-	const ValidatedStringParameter *tOther = static_cast<const ValidatedStringParameter *>( other.get() );
+	const ValidatedStringParameter *tOther = static_cast<const ValidatedStringParameter *>( other );
 
 	m_regex = tOther->m_regex;
 	m_regexDescription = tOther->m_regexDescription;
@@ -143,14 +143,14 @@ void ValidatedStringParameter::load( LoadContextPtr context )
 	m_allowEmptyString = tmp;
 }
 
-bool ValidatedStringParameter::isEqualTo( ConstObjectPtr other ) const
+bool ValidatedStringParameter::isEqualTo( const Object *other ) const
 {
 	if( !StringParameter::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const ValidatedStringParameter *tOther = static_cast<const ValidatedStringParameter *>( other.get() );
+	const ValidatedStringParameter *tOther = static_cast<const ValidatedStringParameter *>( other );
 	return m_regex==tOther->m_regex && m_regexDescription==tOther->m_regexDescription && m_allowEmptyString==tOther->m_allowEmptyString;
 }
 

@@ -98,10 +98,10 @@ typename NumericParameter<T>::Ptr NumericParameter<T>::copy() const
 }
 
 template<class T>
-void NumericParameter<T>::copyFrom( ConstObjectPtr other, CopyContext *context )
+void NumericParameter<T>::copyFrom( const Object *other, CopyContext *context )
 {
 	Parameter::copyFrom( other, context );
-	const NumericParameter<T> *tOther = static_cast<const NumericParameter<T> *>( other.get() );
+	const NumericParameter<T> *tOther = static_cast<const NumericParameter<T> *>( other );
 	m_min = tOther->m_min;
 	m_max = tOther->m_max;
 }
@@ -126,13 +126,13 @@ void NumericParameter<T>::load( LoadContextPtr context )
 }
 
 template<class T>
-bool NumericParameter<T>::isEqualTo( ConstObjectPtr other ) const
+bool NumericParameter<T>::isEqualTo( const Object *other ) const
 {
 	if( !Parameter::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const NumericParameter<T> *tOther = static_cast<const NumericParameter<T> *>( other.get() );
+	const NumericParameter<T> *tOther = static_cast<const NumericParameter<T> *>( other );
 	return m_min==tOther->m_min && m_max==tOther->m_max;
 }
 

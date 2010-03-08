@@ -118,13 +118,13 @@ PatchMeshPrimitive::~PatchMeshPrimitive()
 {
 }
 
-bool PatchMeshPrimitive::isEqualTo( ConstObjectPtr other ) const
+bool PatchMeshPrimitive::isEqualTo( const Object *other ) const
 {
 	if ( !Primitive::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const PatchMeshPrimitive *tOther = static_cast<const PatchMeshPrimitive *>( other.get() );
+	const PatchMeshPrimitive *tOther = static_cast<const PatchMeshPrimitive *>( other );
 	if ( m_uPoints!=tOther->m_uPoints || m_vPoints!=tOther->m_vPoints )
 	{
 		return false;
@@ -149,10 +149,10 @@ bool PatchMeshPrimitive::isEqualTo( ConstObjectPtr other ) const
 	return true;
 }
 
-void PatchMeshPrimitive::copyFrom( ConstObjectPtr other, CopyContext *context )
+void PatchMeshPrimitive::copyFrom( const Object *other, CopyContext *context )
 {
 	Primitive::copyFrom( other, context );
-	const PatchMeshPrimitive *tOther = static_cast<const PatchMeshPrimitive *>( other.get() );
+	const PatchMeshPrimitive *tOther = static_cast<const PatchMeshPrimitive *>( other );
 	m_uPoints = tOther->m_uPoints;
 	m_vPoints = tOther->m_vPoints;
 	m_uBasis = tOther->m_uBasis;

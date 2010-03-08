@@ -113,10 +113,10 @@ const ObjectParameter::TypeIdSet &ObjectParameter::validTypes() const
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ObjectParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void ObjectParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	Parameter::copyFrom( other, context );
-	const ObjectParameter *tOther = static_cast<const ObjectParameter *>( other.get() );
+	const ObjectParameter *tOther = static_cast<const ObjectParameter *>( other );
 
 	m_validTypes = tOther->m_validTypes;
 }
@@ -150,14 +150,14 @@ void ObjectParameter::load( LoadContextPtr context )
 	}
 }
 
-bool ObjectParameter::isEqualTo( ConstObjectPtr other ) const
+bool ObjectParameter::isEqualTo( const Object *other ) const
 {
 	if( !Parameter::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const ObjectParameter *tOther = static_cast<const ObjectParameter *>( other.get() );
+	const ObjectParameter *tOther = static_cast<const ObjectParameter *>( other );
 	return m_validTypes==tOther->m_validTypes;
 }
 

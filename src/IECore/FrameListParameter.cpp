@@ -130,10 +130,10 @@ FrameListPtr FrameListParameter::getFrameListValue() const
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FrameListParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void FrameListParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	StringParameter::copyFrom( other, context );
-	const FrameListParameter *tOther = static_cast<const FrameListParameter *>( other.get() );
+	const FrameListParameter *tOther = static_cast<const FrameListParameter *>( other );
 	m_allowEmptyList = tOther->m_allowEmptyList;
 }
 
@@ -157,13 +157,13 @@ void FrameListParameter::load( LoadContextPtr context )
 	m_allowEmptyList = tmp;
 }
 
-bool FrameListParameter::isEqualTo( ConstObjectPtr other ) const
+bool FrameListParameter::isEqualTo( const Object *other ) const
 {
 	if( !StringParameter::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const FrameListParameter *tOther = static_cast<const FrameListParameter *>( other.get() );
+	const FrameListParameter *tOther = static_cast<const FrameListParameter *>( other );
 	return m_allowEmptyList == tOther->m_allowEmptyList;
 }
 

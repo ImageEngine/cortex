@@ -271,10 +271,10 @@ FileSequencePtr FileSequenceVectorParameter::parseFileSequence( const std::strin
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileSequenceVectorParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void FileSequenceVectorParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	PathVectorParameter::copyFrom( other, context );
-	const FileSequenceVectorParameter *tOther = static_cast<const FileSequenceVectorParameter *>( other.get() );
+	const FileSequenceVectorParameter *tOther = static_cast<const FileSequenceVectorParameter *>( other );
 	m_extensions = tOther->m_extensions;
 }
 
@@ -303,13 +303,13 @@ void FileSequenceVectorParameter::load( LoadContextPtr context )
 	}
 }
 
-bool FileSequenceVectorParameter::isEqualTo( ConstObjectPtr other ) const
+bool FileSequenceVectorParameter::isEqualTo( const Object *other ) const
 {
 	if( !PathVectorParameter::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const FileSequenceVectorParameter *tOther = static_cast<const FileSequenceVectorParameter *>( other.get() );
+	const FileSequenceVectorParameter *tOther = static_cast<const FileSequenceVectorParameter *>( other );
 	return m_extensions == tOther->m_extensions;
 }
 

@@ -59,10 +59,10 @@ const std::string &ParameterisedProcedural::description() const
 }
 
 
-void ParameterisedProcedural::copyFrom( ConstObjectPtr other, CopyContext *context )
+void ParameterisedProcedural::copyFrom( const Object *other, CopyContext *context )
 {
 	VisibleRenderable::copyFrom( other, context );
-	const ParameterisedProcedural *tOther = static_cast<const ParameterisedProcedural *>( other.get() );
+	const ParameterisedProcedural *tOther = static_cast<const ParameterisedProcedural *>( other );
 	m_parameters->setValue( tOther->m_parameters->getValue()->copy() );
 }
 
@@ -81,14 +81,14 @@ void ParameterisedProcedural::load( LoadContextPtr context )
 	m_parameters->setValue( context->load<Object>( container, "parameters" ) );
 }
 
-bool ParameterisedProcedural::isEqualTo( ConstObjectPtr other ) const
+bool ParameterisedProcedural::isEqualTo( const Object *other ) const
 {
 	if( !VisibleRenderable::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const ParameterisedProcedural *tOther = static_cast<const ParameterisedProcedural *>( other.get() );
+	const ParameterisedProcedural *tOther = static_cast<const ParameterisedProcedural *>( other );
 	return m_parameters->getValue()->isEqualTo( tOther->m_parameters->getValue() );
 }
 

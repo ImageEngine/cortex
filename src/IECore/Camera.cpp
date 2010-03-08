@@ -54,10 +54,10 @@ Camera::~Camera()
 {
 }
 
-void Camera::copyFrom( ConstObjectPtr other, CopyContext *context )
+void Camera::copyFrom( const Object *other, CopyContext *context )
 {
 	PreWorldRenderable::copyFrom( other, context );
-	const Camera *tOther = static_cast<const Camera *>( other.get() );
+	const Camera *tOther = static_cast<const Camera *>( other );
 	m_name = tOther->m_name;
 	if( tOther->m_transform )
 	{
@@ -100,14 +100,14 @@ void Camera::load( LoadContextPtr context )
 	m_parameters = context->load<CompoundData>( container, "parameters" );
 }
 
-bool Camera::isEqualTo( ConstObjectPtr other ) const
+bool Camera::isEqualTo( const Object *other ) const
 {
 	if( !PreWorldRenderable::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const Camera *tOther = static_cast<const Camera *>( other.get() );
+	const Camera *tOther = static_cast<const Camera *>( other );
 
 	// check name
 	if( m_name!=tOther->m_name )

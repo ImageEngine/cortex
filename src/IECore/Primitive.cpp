@@ -78,10 +78,10 @@ Imath::Box3f Primitive::bound() const
 	return result;
 }
 
-void Primitive::copyFrom( IECore::ConstObjectPtr other, IECore::Object::CopyContext *context )
+void Primitive::copyFrom( const Object *other, IECore::Object::CopyContext *context )
 {
 	VisibleRenderable::copyFrom( other, context );
-	const Primitive *tOther = static_cast<const Primitive *>( other.get() );
+	const Primitive *tOther = static_cast<const Primitive *>( other );
 	variables.clear();
 	for( PrimitiveVariableMap::const_iterator it=tOther->variables.begin(); it!=tOther->variables.end(); it++ )
 	{
@@ -136,13 +136,13 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 	container->chdir( ".." );
 }
 
-bool Primitive::isEqualTo( ConstObjectPtr other ) const
+bool Primitive::isEqualTo( const Object *other ) const
 {
 	if( !VisibleRenderable::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const Primitive *tOther = static_cast<const Primitive *>( other.get() );
+	const Primitive *tOther = static_cast<const Primitive *>( other );
 	if( tOther->variables!=variables )
 	{
 		return false;

@@ -70,13 +70,13 @@ void CoordinateSystem::render( Renderer *renderer ) const
 	renderer->coordinateSystem( m_name );
 }
 
-bool CoordinateSystem::isEqualTo( ConstObjectPtr other ) const
+bool CoordinateSystem::isEqualTo( const Object *other ) const
 {
 	if( !StateRenderable::isEqualTo( other ) )
 	{
 		return false;
 	}
-	ConstCoordinateSystemPtr c = staticPointerCast<const CoordinateSystem>( other );
+	const CoordinateSystem *c = static_cast<const CoordinateSystem *>( other );
 	return m_name == c->m_name;
 }
 
@@ -86,10 +86,10 @@ void CoordinateSystem::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_name.capacity() + sizeof( m_name ) );
 }
 
-void CoordinateSystem::copyFrom( ConstObjectPtr other, CopyContext *context )
+void CoordinateSystem::copyFrom( const Object *other, CopyContext *context )
 {
 	StateRenderable::copyFrom( other, context );
-	ConstCoordinateSystemPtr c = staticPointerCast<const CoordinateSystem>( other );
+	const CoordinateSystem *c = static_cast<const CoordinateSystem *>( other );
 	m_name = c->m_name;
 }
 

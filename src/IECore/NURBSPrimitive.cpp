@@ -244,10 +244,10 @@ void NURBSPrimitive::render( Renderer *renderer ) const
 	renderer->nurbs( m_uOrder, m_uKnot, m_uMin, m_uMax, m_vOrder, m_vKnot, m_vMin, m_vMax, variables );
 }
 
-void NURBSPrimitive::copyFrom( ConstObjectPtr other, IECore::Object::CopyContext *context )
+void NURBSPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *context )
 {
 	Primitive::copyFrom( other, context );
-	const NURBSPrimitive *tOther = static_cast<const NURBSPrimitive *>( other.get() );
+	const NURBSPrimitive *tOther = static_cast<const NURBSPrimitive *>( other );
 	m_uOrder = tOther->m_uOrder;
 	m_uKnot = context->copy<FloatVectorData>( tOther->m_uKnot );
 	m_uMin = tOther->m_uMin;
@@ -292,14 +292,14 @@ void NURBSPrimitive::load( IECore::Object::LoadContextPtr context )
 	container->read( "vMax", m_vMax );
 }
 
-bool NURBSPrimitive::isEqualTo( ConstObjectPtr other ) const
+bool NURBSPrimitive::isEqualTo( const Object *other ) const
 {
 	if( !Primitive::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const NURBSPrimitive *tOther = static_cast<const NURBSPrimitive *>( other.get() );
+	const NURBSPrimitive *tOther = static_cast<const NURBSPrimitive *>( other );
 
 	if( m_uOrder!=tOther->m_uOrder )
 	{

@@ -196,10 +196,10 @@ FileSequencePtr FileSequenceParameter::getFileSequenceValue() const
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileSequenceParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void FileSequenceParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	PathParameter::copyFrom( other, context );
-	const FileSequenceParameter *tOther = static_cast<const FileSequenceParameter *>( other.get() );
+	const FileSequenceParameter *tOther = static_cast<const FileSequenceParameter *>( other );
 	m_extensions = tOther->m_extensions;
 }
 
@@ -228,13 +228,13 @@ void FileSequenceParameter::load( LoadContextPtr context )
 	}
 }
 
-bool FileSequenceParameter::isEqualTo( ConstObjectPtr other ) const
+bool FileSequenceParameter::isEqualTo( const Object *other ) const
 {
 	if( !PathParameter::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const FileSequenceParameter *tOther = static_cast<const FileSequenceParameter *>( other.get() );
+	const FileSequenceParameter *tOther = static_cast<const FileSequenceParameter *>( other );
 	return m_extensions == tOther->m_extensions;
 }
 

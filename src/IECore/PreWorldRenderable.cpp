@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,7 +48,7 @@ PreWorldRenderable::~PreWorldRenderable()
 {
 }
 
-void PreWorldRenderable::copyFrom( ConstObjectPtr other, CopyContext *context )
+void PreWorldRenderable::copyFrom( const Object *other, CopyContext *context )
 {
 	Renderable::copyFrom( other, context );
 }
@@ -63,7 +63,7 @@ void PreWorldRenderable::load( LoadContextPtr context )
 	Renderable::load( context );
 }
 
-bool PreWorldRenderable::isEqualTo( ConstObjectPtr other ) const
+bool PreWorldRenderable::isEqualTo( const Object *other ) const
 {
 	if( !Renderable::isEqualTo( other ) )
 	{

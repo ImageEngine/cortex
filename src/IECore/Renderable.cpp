@@ -48,7 +48,7 @@ Renderable::~Renderable()
 {
 }
 
-void Renderable::copyFrom( ConstObjectPtr other, CopyContext *context )
+void Renderable::copyFrom( const Object *other, CopyContext *context )
 {
 	BlindDataHolder::copyFrom( other, context );
 }
@@ -63,7 +63,7 @@ void Renderable::load( LoadContextPtr context )
 	BlindDataHolder::load( context );
 }
 
-bool Renderable::isEqualTo( ConstObjectPtr other ) const
+bool Renderable::isEqualTo( const Object *other ) const
 {
 	if( !BlindDataHolder::isEqualTo( other ) )
 	{

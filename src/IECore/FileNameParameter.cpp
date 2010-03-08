@@ -131,10 +131,10 @@ bool FileNameParameter::valueValid( const Object *value, std::string *reason ) c
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileNameParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void FileNameParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	PathParameter::copyFrom( other, context );
-	const FileNameParameter *tOther = static_cast<const FileNameParameter *>( other.get() );
+	const FileNameParameter *tOther = static_cast<const FileNameParameter *>( other );
 	m_extensions = tOther->m_extensions;
 }
 
@@ -163,13 +163,13 @@ void FileNameParameter::load( LoadContextPtr context )
 	}
 }
 
-bool FileNameParameter::isEqualTo( ConstObjectPtr other ) const
+bool FileNameParameter::isEqualTo( const Object *other ) const
 {
 	if( !PathParameter::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const FileNameParameter *tOther = static_cast<const FileNameParameter *>( other.get() );
+	const FileNameParameter *tOther = static_cast<const FileNameParameter *>( other );
 	return m_extensions == tOther->m_extensions;
 }
 

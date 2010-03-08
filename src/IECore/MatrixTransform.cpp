@@ -60,10 +60,10 @@ Imath::M44f MatrixTransform::transform( float time ) const
 	return matrix;
 }
 
-void MatrixTransform::copyFrom( ConstObjectPtr other, CopyContext *context )
+void MatrixTransform::copyFrom( const Object *other, CopyContext *context )
 {
 	Transform::copyFrom( other, context );
-	const MatrixTransform *t = static_cast<const MatrixTransform *>( other.get() );
+	const MatrixTransform *t = static_cast<const MatrixTransform *>( other );
 	matrix = t->matrix;
 }
 
@@ -83,13 +83,13 @@ void MatrixTransform::load( LoadContextPtr context )
 	container->read( "matrix", f, 16 );
 }
 
-bool MatrixTransform::isEqualTo( ConstObjectPtr other ) const
+bool MatrixTransform::isEqualTo( const Object *other ) const
 {
 	if( !Transform::isEqualTo( other ) )
 	{
 		return false;
 	}
-	ConstMatrixTransformPtr t = staticPointerCast<const MatrixTransform>( other );
+	const MatrixTransform *t = static_cast<const MatrixTransform *>( other );
 	return matrix == t->matrix;
 }
 

@@ -134,10 +134,10 @@ bool PathParameter::valueValid( const Object *value, std::string *reason ) const
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PathParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void PathParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	StringParameter::copyFrom( other, context );
-	const PathParameter *tOther = static_cast<const PathParameter *>( other.get() );
+	const PathParameter *tOther = static_cast<const PathParameter *>( other );
 
 	m_allowEmptyString = tOther->m_allowEmptyString;
 	m_check = tOther->m_check;
@@ -168,14 +168,14 @@ void PathParameter::load( LoadContextPtr context )
 
 }
 
-bool PathParameter::isEqualTo( ConstObjectPtr other ) const
+bool PathParameter::isEqualTo( const Object *other ) const
 {
 	if( !StringParameter::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const PathParameter *tOther = static_cast<const PathParameter *>( other.get() );
+	const PathParameter *tOther = static_cast<const PathParameter *>( other );
 	return m_allowEmptyString==tOther->m_allowEmptyString && m_check==tOther->m_check;
 }
 

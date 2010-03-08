@@ -111,10 +111,10 @@ MatrixMotionTransform::SnapshotMap &MatrixMotionTransform::snapshots()
 	return m_snapshots;
 }
 
-void MatrixMotionTransform::copyFrom( ConstObjectPtr other, CopyContext *context )
+void MatrixMotionTransform::copyFrom( const Object *other, CopyContext *context )
 {
 	Transform::copyFrom( other, context );
-	const MatrixMotionTransform *t = static_cast<const MatrixMotionTransform *>( other.get() );
+	const MatrixMotionTransform *t = static_cast<const MatrixMotionTransform *>( other );
 	m_snapshots = t->m_snapshots;
 }
 
@@ -160,13 +160,13 @@ void MatrixMotionTransform::load( LoadContextPtr context )
 	container->chdir( ".." );
 }
 
-bool MatrixMotionTransform::isEqualTo( ConstObjectPtr other ) const
+bool MatrixMotionTransform::isEqualTo( const Object *other ) const
 {
 	if( !Transform::isEqualTo( other ) )
 	{
 		return false;
 	}
-	ConstMatrixMotionTransformPtr t = staticPointerCast<const MatrixMotionTransform>( other );
+	const MatrixMotionTransform *t = static_cast<const MatrixMotionTransform *>( other );
 	return m_snapshots == t->m_snapshots;
 }
 

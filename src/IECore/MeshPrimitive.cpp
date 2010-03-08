@@ -166,10 +166,10 @@ void MeshPrimitive::render( Renderer *renderer ) const
 	renderer->mesh( m_verticesPerFace, m_vertexIds, m_interpolation, variables );
 }
 
-void MeshPrimitive::copyFrom( ConstObjectPtr other, IECore::Object::CopyContext *context )
+void MeshPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *context )
 {
 	Primitive::copyFrom( other, context );
-	const MeshPrimitive *tOther = static_cast<const MeshPrimitive *>( other.get() );
+	const MeshPrimitive *tOther = static_cast<const MeshPrimitive *>( other );
 	m_verticesPerFace = tOther->m_verticesPerFace->copy();
 	m_vertexIds = tOther->m_vertexIds->copy();
 	m_numVertices = tOther->m_numVertices;
@@ -208,14 +208,14 @@ void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
 	container->read( "interpolation", m_interpolation );
 }
 
-bool MeshPrimitive::isEqualTo( ConstObjectPtr other ) const
+bool MeshPrimitive::isEqualTo( const Object *other ) const
 {
 	if( !Primitive::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const MeshPrimitive *tOther = static_cast<const MeshPrimitive *>( other.get() );
+	const MeshPrimitive *tOther = static_cast<const MeshPrimitive *>( other );
 
 	if( m_numVertices!=tOther->m_numVertices )
 	{

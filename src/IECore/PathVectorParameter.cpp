@@ -163,10 +163,10 @@ bool PathVectorParameter::valueValid( const Object *value, std::string *reason )
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PathVectorParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void PathVectorParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	StringVectorParameter::copyFrom( other, context );
-	const PathVectorParameter *tOther = static_cast<const PathVectorParameter *>( other.get() );
+	const PathVectorParameter *tOther = static_cast<const PathVectorParameter *>( other );
 
 	m_allowEmptyList = tOther->m_allowEmptyList;
 	m_check = tOther->m_check;
@@ -197,14 +197,14 @@ void PathVectorParameter::load( LoadContextPtr context )
 
 }
 
-bool PathVectorParameter::isEqualTo( ConstObjectPtr other ) const
+bool PathVectorParameter::isEqualTo( const Object *other ) const
 {
 	if( !StringVectorParameter::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const PathVectorParameter *tOther = static_cast<const PathVectorParameter *>( other.get() );
+	const PathVectorParameter *tOther = static_cast<const PathVectorParameter *>( other );
 	return m_allowEmptyList==tOther->m_allowEmptyList && m_check==tOther->m_check;
 }
 

@@ -47,7 +47,7 @@ CompoundData::CompoundData( const CompoundDataMap &members )
 {
 }
 
-void CompoundData::copyFrom( ConstObjectPtr other, IECore::Object::CopyContext *context )
+void CompoundData::copyFrom( const Object *other, IECore::Object::CopyContext *context )
 {
 	CompoundDataBase::copyFrom( other, context );
 }
@@ -62,7 +62,7 @@ void CompoundData::load( IECore::Object::LoadContextPtr context )
 	CompoundDataBase::load( context );
 }
 
-bool CompoundData::isEqualTo( ConstObjectPtr other ) const
+bool CompoundData::isEqualTo( const Object *other ) const
 {
 	return CompoundDataBase::isEqualTo( other );
 }

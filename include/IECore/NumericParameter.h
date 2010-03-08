@@ -69,7 +69,7 @@ class NumericParameter : public Parameter
 		////////////////////////////////////
 		//@{
 		typename NumericParameter<T>::Ptr copy() const;
-		virtual bool isEqualTo( ConstObjectPtr other ) const;
+		virtual bool isEqualTo( const Object *other ) const;
 		//@}
 
 		bool hasMinValue() const;
@@ -103,7 +103,7 @@ class NumericParameter : public Parameter
 		// constructor for use during load/copy
 		NumericParameter();
 
-		virtual void copyFrom( ConstObjectPtr other, CopyContext *context );
+		virtual void copyFrom( const Object *other, CopyContext *context );
 		virtual void save( SaveContext *context ) const;
 		virtual void load( LoadContextPtr context );
 		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;

@@ -61,10 +61,10 @@ const ObjectVector::MemberContainer &ObjectVector::members() const
 	return m_members;
 }
 
-void ObjectVector::copyFrom( ConstObjectPtr other, CopyContext *context )
+void ObjectVector::copyFrom( const Object *other, CopyContext *context )
 {
 	Object::copyFrom( other, context );
-	const ObjectVector *tOther = static_cast<const ObjectVector *>( other.get() );
+	const ObjectVector *tOther = static_cast<const ObjectVector *>( other );
 	m_members.resize( tOther->m_members.size() );
 	for( unsigned i=0; i<m_members.size(); i++ )
 	{
@@ -129,13 +129,13 @@ void ObjectVector::load( LoadContextPtr context )
 
 }
 
-bool ObjectVector::isEqualTo( ConstObjectPtr other ) const
+bool ObjectVector::isEqualTo( const Object *other ) const
 {
 	if( !Object::isEqualTo( other ) )
 	{
 		return false;
 	}
-	ObjectVector::ConstPtr tOther = staticPointerCast<const ObjectVector>( other );
+	const ObjectVector *tOther = static_cast<const ObjectVector *>( other );
 	if( m_members.size()!=tOther->m_members.size() )
 	{
 		return false;

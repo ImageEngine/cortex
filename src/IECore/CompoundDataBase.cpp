@@ -60,10 +60,10 @@ void CompoundDataBase::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 }
 
 template<>
-void CompoundDataBase::copyFrom( ConstObjectPtr other, CopyContext *context )
+void CompoundDataBase::copyFrom( const Object *other, CopyContext *context )
 {
 	Data::copyFrom( other, context );
-	const CompoundDataBase *tOther = static_cast<const CompoundDataBase *>( other.get() );
+	const CompoundDataBase *tOther = static_cast<const CompoundDataBase *>( other );
 	CompoundDataMap &data = writable();
 	data.clear();
 	const CompoundDataMap &otherData = tOther->readable();
@@ -74,13 +74,13 @@ void CompoundDataBase::copyFrom( ConstObjectPtr other, CopyContext *context )
 }
 
 template<>
-bool CompoundDataBase::isEqualTo( ConstObjectPtr other ) const
+bool CompoundDataBase::isEqualTo( const Object *other ) const
 {
 	if( !Data::isEqualTo( other ) )
 	{
 		return false;
 	}
-	ConstCompoundDataBasePtr tOther = staticPointerCast<const CompoundDataBase>( other );
+	const CompoundDataBase *tOther = static_cast<const CompoundDataBase *>( other );
 	const CompoundDataMap &m1 = readable();
 	const CompoundDataMap &m2 = tOther->readable();
 	if( m1.size()!=m2.size() )

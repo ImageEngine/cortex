@@ -152,10 +152,10 @@ void SpherePrimitive::render( Renderer *renderer ) const
 	renderer->sphere( m_radius, m_zMin, m_zMax, m_thetaMax, variables );
 }
 
-void SpherePrimitive::copyFrom( ConstObjectPtr other, IECore::Object::CopyContext *context )
+void SpherePrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *context )
 {
 	Primitive::copyFrom( other, context );
-	const SpherePrimitive *tOther = static_cast<const SpherePrimitive *>( other.get() );
+	const SpherePrimitive *tOther = static_cast<const SpherePrimitive *>( other );
 	m_radius = tOther->m_radius;
 	m_zMin = tOther->m_zMin;
 	m_zMax = tOther->m_zMax;
@@ -186,14 +186,14 @@ void SpherePrimitive::load( IECore::Object::LoadContextPtr context )
 	container->read( "thetaMax", m_thetaMax );
 }
 
-bool SpherePrimitive::isEqualTo( ConstObjectPtr other ) const
+bool SpherePrimitive::isEqualTo( const Object *other ) const
 {
 	if( !Primitive::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const SpherePrimitive *tOther = static_cast<const SpherePrimitive *>( other.get() );
+	const SpherePrimitive *tOther = static_cast<const SpherePrimitive *>( other );
 
 	if( m_radius!=tOther->m_radius )
 	{

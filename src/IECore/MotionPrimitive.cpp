@@ -147,10 +147,10 @@ Imath::Box3f MotionPrimitive::bound() const
 // Object interface
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void MotionPrimitive::copyFrom( IECore::ConstObjectPtr other, IECore::Object::CopyContext *context )
+void MotionPrimitive::copyFrom( const Object *other, Object::CopyContext *context )
 {
 	VisibleRenderable::copyFrom( other, context );
-	const MotionPrimitive *tOther = static_cast<const MotionPrimitive *>( other.get() );
+	const MotionPrimitive *tOther = static_cast<const MotionPrimitive *>( other );
 	m_snapshots.clear();
 	for( SnapshotMap::const_iterator it=tOther->m_snapshots.begin(); it!=tOther->m_snapshots.end(); it++ )
 	{
@@ -197,13 +197,13 @@ void MotionPrimitive::load( IECore::Object::LoadContextPtr context )
 	container->chdir( ".." );
 }
 
-bool MotionPrimitive::isEqualTo( ConstObjectPtr other ) const
+bool MotionPrimitive::isEqualTo( const Object *other ) const
 {
 	if( !VisibleRenderable::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const MotionPrimitive *tOther = static_cast<const MotionPrimitive *>( other.get() );
+	const MotionPrimitive *tOther = static_cast<const MotionPrimitive *>( other );
 	if( tOther->m_snapshots.size()!=m_snapshots.size() )
 	{
 		return false;

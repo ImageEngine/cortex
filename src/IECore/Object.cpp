@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -124,7 +124,7 @@ IndexedIOInterfacePtr Object::SaveContext::rawContainer()
 	return m_ioInterface->resetRoot();
 }
 
-void Object::SaveContext::save( ConstObjectPtr toSave, IndexedIOInterfacePtr container, const IndexedIO::EntryID &name )
+void Object::SaveContext::save( const Object *toSave, IndexedIOInterfacePtr container, const IndexedIO::EntryID &name )
 {
 	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
 	if( it!=m_savedObjects->end() )
@@ -255,11 +255,11 @@ void Object::MemoryAccumulator::accumulate( size_t bytes )
 	m_total += bytes;
 }
 
-void Object::MemoryAccumulator::accumulate( ConstObjectPtr object )
+void Object::MemoryAccumulator::accumulate( const Object *object )
 {
-	if( m_accumulated.find( object.get() )==m_accumulated.end() )
+	if( m_accumulated.find( object )==m_accumulated.end() )
 	{
-		m_accumulated.insert( object.get() );
+		m_accumulated.insert( object );
 		object->memoryUsage( *this );
 	}
 }
@@ -285,7 +285,7 @@ size_t Object::MemoryAccumulator::total() const
 ObjectPtr Object::copy() const
 {
 	boost::shared_ptr<CopyContext> c( new CopyContext );
-	ObjectPtr result = c->copy( ConstObjectPtr( this ) );
+	ObjectPtr result = c->copy( this );
 	return result;
 }
 
@@ -300,11 +300,11 @@ void Object::save( IndexedIOInterfacePtr ioInterface, const IndexedIO::EntryID &
 	context->save( this, i, name );
 }
 
-void Object::copyFrom( ConstObjectPtr toCopy, CopyContext *context )
+void Object::copyFrom( const Object *toCopy, CopyContext *context )
 {
 }
 
-bool Object::isEqualTo( ConstObjectPtr other ) const
+bool Object::isEqualTo( const Object *other ) const
 {
 	if( typeId()!=other->typeId() )
 	{
@@ -321,7 +321,7 @@ bool Object::operator==( const Object &other ) const
 	return isEqualTo( ConstObjectPtr( &other ) );
 }
 
-bool Object::isNotEqualTo( ConstObjectPtr other ) const
+bool Object::isNotEqualTo( const Object *other ) const
 {
 	return !isEqualTo( other );
 }

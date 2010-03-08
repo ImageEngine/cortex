@@ -47,7 +47,7 @@ Transform::~Transform()
 {
 }
 
-void Transform::copyFrom( ConstObjectPtr other, CopyContext *context )
+void Transform::copyFrom( const Object *other, CopyContext *context )
 {
 	StateRenderable::copyFrom( other, context );
 }
@@ -65,7 +65,7 @@ void Transform::load( LoadContextPtr context )
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 }
 
-bool Transform::isEqualTo( ConstObjectPtr other ) const
+bool Transform::isEqualTo( const Object *other ) const
 {
 	if( !StateRenderable::isEqualTo( other ) )
 	{

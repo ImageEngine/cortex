@@ -69,10 +69,10 @@ CompoundDataPtr BlindDataHolder::blindData() const
 	return m_data;
 }
 
-void BlindDataHolder::copyFrom( ConstObjectPtr other, CopyContext *context )
+void BlindDataHolder::copyFrom( const Object *other, CopyContext *context )
 {
 	Object::copyFrom( other, context );
-	const BlindDataHolder *tOther = static_cast<const BlindDataHolder *>( other.get() );
+	const BlindDataHolder *tOther = static_cast<const BlindDataHolder *>( other );
 	m_data = context->copy<CompoundData>( tOther->m_data );
 }
 
@@ -94,13 +94,13 @@ void BlindDataHolder::load( LoadContextPtr context )
 	assert(m_data);
 }
 
-bool BlindDataHolder::isEqualTo( ConstObjectPtr other ) const
+bool BlindDataHolder::isEqualTo( const Object *other ) const
 {
 	if( !Object::isEqualTo( other ) )
 	{
 		return false;
 	}
-	BlindDataHolder::ConstPtr tOther = staticPointerCast<const BlindDataHolder>( other );
+	const BlindDataHolder *tOther = static_cast<const BlindDataHolder *>( other );
 
 	return m_data->isEqualTo( tOther->m_data );
 }

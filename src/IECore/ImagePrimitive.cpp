@@ -130,13 +130,13 @@ void ImagePrimitive::render( Renderer *renderer ) const
 //
 // handling for serialization
 //
-void ImagePrimitive::copyFrom(ConstObjectPtr rhs, IECore::Object::CopyContext *context )
+void ImagePrimitive::copyFrom( const IECore::Object *rhs, IECore::Object::CopyContext *context )
 {
 	assert( rhs );
 	assert( context );
 
 	Primitive::copyFrom(rhs, context);
-	const ImagePrimitive *p_rhs = static_cast<const ImagePrimitive *>(rhs.get());
+	const ImagePrimitive *p_rhs = static_cast<const ImagePrimitive *>(rhs);
 
 	m_displayWindow = p_rhs->getDisplayWindow();
 	m_dataWindow = p_rhs->getDataWindow();
@@ -187,7 +187,7 @@ void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
 	}
 }
 
-bool ImagePrimitive::isEqualTo(ConstObjectPtr rhs) const
+bool ImagePrimitive::isEqualTo(const IECore::Object *rhs) const
 {
 	assert( rhs );
 
@@ -196,7 +196,7 @@ bool ImagePrimitive::isEqualTo(ConstObjectPtr rhs) const
 		return false;
 	}
 
-	const ImagePrimitive *p_rhs = static_cast<const ImagePrimitive *>(rhs.get());
+	const ImagePrimitive *p_rhs = static_cast<const ImagePrimitive *>(rhs);
 
 	// return true iff we have the same data window.
 	// this is not complete

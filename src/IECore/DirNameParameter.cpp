@@ -93,7 +93,7 @@ bool DirNameParameter::valueValid( const Object *value, std::string *reason ) co
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void DirNameParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void DirNameParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	PathParameter::copyFrom( other, context );
 }
@@ -108,7 +108,7 @@ void DirNameParameter::load( LoadContextPtr context )
 	PathParameter::load( context );
 }
 
-bool DirNameParameter::isEqualTo( ConstObjectPtr other ) const
+bool DirNameParameter::isEqualTo( const Object *other ) const
 {
 	return PathParameter::isEqualTo( other );
 }

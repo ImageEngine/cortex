@@ -80,10 +80,10 @@ Parameter::~Parameter()
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Parameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void Parameter::copyFrom( const Object *other, CopyContext *context )
 {
 	Object::copyFrom( other, context );
-	const Parameter *tOther = static_cast<const Parameter *>( other.get() );
+	const Parameter *tOther = static_cast<const Parameter *>( other );
 
 	m_name = tOther->m_name;
 	m_description = tOther->m_description;
@@ -158,14 +158,14 @@ void Parameter::load( LoadContextPtr context )
 
 }
 
-bool Parameter::isEqualTo( ConstObjectPtr other ) const
+bool Parameter::isEqualTo( const Object *other ) const
 {
 	if( !Object::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const Parameter *tOther = static_cast<const Parameter *>( other.get() );
+	const Parameter *tOther = static_cast<const Parameter *>( other );
 	if( m_name!=tOther->m_name )
 	{
 		return false;

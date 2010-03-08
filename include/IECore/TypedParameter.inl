@@ -233,7 +233,7 @@ typename TypedParameter<T>::Ptr TypedParameter<T>::copy() const
 }
 
 template<class T>
-void TypedParameter<T>::copyFrom( ConstObjectPtr other, CopyContext *context )
+void TypedParameter<T>::copyFrom( const Object *other, CopyContext *context )
 {
 	Parameter::copyFrom( other, context );
 }
@@ -251,7 +251,7 @@ void TypedParameter<T>::load( LoadContextPtr context )
 }
 
 template<class T>
-bool TypedParameter<T>::isEqualTo( ConstObjectPtr other ) const
+bool TypedParameter<T>::isEqualTo( const Object *other ) const
 {
 	return Parameter::isEqualTo( other );
 }

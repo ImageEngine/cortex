@@ -67,13 +67,13 @@ CurvesPrimitive::~CurvesPrimitive()
 {
 }
 
-bool CurvesPrimitive::isEqualTo( ConstObjectPtr other ) const
+bool CurvesPrimitive::isEqualTo( const Object *other ) const
 {
 	if( !Primitive::isEqualTo( other ) )
 	{
 		return false;
 	}
-	const CurvesPrimitive *tOther = static_cast<const CurvesPrimitive *>( other.get() );
+	const CurvesPrimitive *tOther = static_cast<const CurvesPrimitive *>( other );
 	if( m_basis!=tOther->m_basis )
 	{
 		return false;
@@ -90,10 +90,10 @@ bool CurvesPrimitive::isEqualTo( ConstObjectPtr other ) const
 	return true;
 }
 
-void CurvesPrimitive::copyFrom( ConstObjectPtr other, CopyContext *context )
+void CurvesPrimitive::copyFrom( const Object *other, CopyContext *context )
 {
 	Primitive::copyFrom( other, context );
-	const CurvesPrimitive *tOther = static_cast<const CurvesPrimitive *>( other.get() );
+	const CurvesPrimitive *tOther = static_cast<const CurvesPrimitive *>( other );
 	m_basis = tOther->m_basis;
 	m_linear = tOther->m_linear;
 	m_periodic = tOther->m_periodic;

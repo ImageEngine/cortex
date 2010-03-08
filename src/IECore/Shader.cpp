@@ -90,13 +90,13 @@ void Shader::render( Renderer *renderer ) const
 	renderer->shader( m_type, m_name, parameters() );
 }
 
-bool Shader::isEqualTo( ConstObjectPtr other ) const
+bool Shader::isEqualTo( const Object *other ) const
 {
 	if( !StateRenderable::isEqualTo( other ) )
 	{
 		return false;
 	}
-	ConstShaderPtr s = staticPointerCast<const Shader>( other );
+	const Shader *s = static_cast<const Shader *>( other );
 	if( m_name!=s->m_name )
 	{
 		return false;
@@ -116,10 +116,10 @@ void Shader::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_parameters );
 }
 
-void Shader::copyFrom( ConstObjectPtr other, CopyContext *context )
+void Shader::copyFrom( const Object *other, CopyContext *context )
 {
 	StateRenderable::copyFrom( other, context );
-	ConstShaderPtr s = staticPointerCast<const Shader>( other );
+	const Shader *s = static_cast<const Shader *>( other );
 	m_name = s->m_name;
 	m_type = s->m_type;
 	m_parameters = context->copy<CompoundData>( m_parameters );

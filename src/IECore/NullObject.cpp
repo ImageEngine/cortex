@@ -48,7 +48,7 @@ NullObject::~NullObject()
 {
 }
 
-void NullObject::copyFrom( ConstObjectPtr other, CopyContext *context )
+void NullObject::copyFrom( const Object *other, CopyContext *context )
 {
 	Object::copyFrom( other, context );
 }
@@ -66,7 +66,7 @@ void NullObject::load( LoadContextPtr context )
 	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
 }
 
-bool NullObject::isEqualTo( ConstObjectPtr other ) const
+bool NullObject::isEqualTo( const Object *other ) const
 {
 	return Object::isEqualTo( other );
 }

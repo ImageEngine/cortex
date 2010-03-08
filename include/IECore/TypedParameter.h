@@ -70,7 +70,7 @@ class TypedParameter : public Parameter
 		////////////////////////////////////
 		//@{
 		typename TypedParameter<T>::Ptr copy() const;
-		virtual bool isEqualTo( ConstObjectPtr other ) const;
+		virtual bool isEqualTo( const Object *other ) const;
 		//@}
 
 		/// Implemented to return true only if value is of type TypedData<T>.
@@ -95,7 +95,7 @@ class TypedParameter : public Parameter
 
 		TypedParameter();
 
-		virtual void copyFrom( ConstObjectPtr other, CopyContext *context );
+		virtual void copyFrom( const Object *other, CopyContext *context );
 		virtual void save( SaveContext *context ) const;
 		virtual void load( LoadContextPtr context );
 		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;

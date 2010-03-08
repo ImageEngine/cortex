@@ -391,10 +391,10 @@ bool CompoundParameter::parameterPath( const Parameter *child, std::vector<std::
 // Object implementation
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CompoundParameter::copyFrom( ConstObjectPtr other, CopyContext *context )
+void CompoundParameter::copyFrom( const Object *other, CopyContext *context )
 {
 	Parameter::copyFrom( other, context );
-	const CompoundParameter *tOther = static_cast<const CompoundParameter *>( other.get() );
+	const CompoundParameter *tOther = static_cast<const CompoundParameter *>( other );
 
 	m_namesToParameters.clear();
 	m_parameters.clear();
@@ -441,7 +441,7 @@ void CompoundParameter::load( LoadContextPtr context )
 	container->chdir( ".." );
 }
 
-bool CompoundParameter::isEqualTo( ConstObjectPtr other ) const
+bool CompoundParameter::isEqualTo( const Object  *other ) const
 {
 	if( !Parameter::isEqualTo( other ) )
 	{
@@ -449,7 +449,7 @@ bool CompoundParameter::isEqualTo( ConstObjectPtr other ) const
 	}
 
 
-	const CompoundParameter *tOther = static_cast<const CompoundParameter *>( other.get() );
+	const CompoundParameter *tOther = static_cast<const CompoundParameter *>( other );
 	if( tOther->m_parameters.size()!=m_parameters.size() )
 	{
 		return false;
