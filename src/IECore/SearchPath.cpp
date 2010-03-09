@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,6 +56,11 @@ SearchPath::SearchPath( const std::string &paths, const std::string &separators 
 bool SearchPath::operator == ( const SearchPath &s ) const
 {
 	return paths==s.paths;
+}
+
+bool SearchPath::operator != ( const SearchPath &s ) const
+{
+	return paths!=s.paths;
 }
 
 void SearchPath::setPaths( const std::string &paths, const std::string &separators )
