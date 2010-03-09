@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -69,7 +69,9 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 			r.disk( 1, 0, 360, {} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
-		i2 = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/disk.tif" ).read()
+		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/disk.tif" )
+		reader['colorSpace'] = 'linear'
+		i2 = reader.read()
 
 		# blue where there must be an object
 		# red where we don't mind

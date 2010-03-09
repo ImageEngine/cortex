@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -94,7 +94,9 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 			m.render( r )
 
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/meshST.tif" ).read()
+		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/meshST.tif" )
+		reader['colorSpace'] = 'linear'
+		expectedImage = reader.read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		
 		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
