@@ -155,77 +155,77 @@ CurveTracer::~CurveTracer()
 {
 }
 
-ImagePrimitiveParameterPtr CurveTracer::imageParameter()
+ImagePrimitiveParameter * CurveTracer::imageParameter()
 {
 	return parameters()->parameter<ImagePrimitiveParameter>( "image" );
 }
 
-ConstImagePrimitiveParameterPtr CurveTracer::imageParameter() const
+const ImagePrimitiveParameter * CurveTracer::imageParameter() const
 {
 	return parameters()->parameter<ImagePrimitiveParameter>( "image" );
 }
 
-StringParameterPtr CurveTracer::channelNameParameter()
+StringParameter * CurveTracer::channelNameParameter()
 {
 	return parameters()->parameter<StringParameter>( "channelName" );
 }
 
-ConstStringParameterPtr CurveTracer::channelNameParameter() const
+const StringParameter * CurveTracer::channelNameParameter() const
 {
 	return parameters()->parameter<StringParameter>( "channelName" );
 }
 
-FloatParameterPtr CurveTracer::vertexMergeDistanceParameter()
+FloatParameter * CurveTracer::vertexMergeDistanceParameter()
 {
 	return parameters()->parameter<FloatParameter>( "vertexMergeDistance" );
 }
 
-ConstFloatParameterPtr CurveTracer::vertexMergeDistanceParameter() const
+const FloatParameter * CurveTracer::vertexMergeDistanceParameter() const
 {
 	return parameters()->parameter<FloatParameter>( "vertexMergeDistance" );
 }
 		
-FloatParameterPtr CurveTracer::minimumLengthParameter()
+FloatParameter * CurveTracer::minimumLengthParameter()
 {
 	return parameters()->parameter<FloatParameter>( "minimumLength" );
 }
 
-ConstFloatParameterPtr CurveTracer::minimumLengthParameter() const
+const FloatParameter * CurveTracer::minimumLengthParameter() const
 {
 	return parameters()->parameter<FloatParameter>( "minimumLength" );
 }
 
-IntParameterPtr CurveTracer::outputTypeParameter()
+IntParameter * CurveTracer::outputTypeParameter()
 {
 	return parameters()->parameter<IntParameter>( "outputType" );
 }
 
-ConstIntParameterPtr CurveTracer::outputTypeParameter() const
+const IntParameter * CurveTracer::outputTypeParameter() const
 {
 	return parameters()->parameter<IntParameter>( "outputType" );
 }
 
-IntParameterPtr CurveTracer::catmullRomStepParameter()
+IntParameter * CurveTracer::catmullRomStepParameter()
 {
 	return parameters()->parameter<IntParameter>( "catmullRomStep" );
 }
 
-ConstIntParameterPtr CurveTracer::catmullRomStepParameter() const
+const IntParameter * CurveTracer::catmullRomStepParameter() const
 {
 	return parameters()->parameter<IntParameter>( "catmullRomStep" );
 }
 
-IntParameterPtr CurveTracer::outputSpaceParameter()
+IntParameter * CurveTracer::outputSpaceParameter()
 {
 	return parameters()->parameter<IntParameter>( "outputSpace" );
 }
 
-ConstIntParameterPtr CurveTracer::outputSpaceParameter() const
+const IntParameter * CurveTracer::outputSpaceParameter() const
 {
 	return parameters()->parameter<IntParameter>( "outputSpace" );
 }
 		
-ObjectPtr CurveTracer::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr CurveTracer::doOperation( const CompoundObject * operands )
 {
 	
 	// find the channel to operate on
@@ -582,7 +582,7 @@ CurvesPrimitivePtr CurveTracer::buildCurves( Graph &graph, OutputType type, int 
 	);
 }
 
-void CurveTracer::colorCurves( CurvesPrimitivePtr curves ) const
+void CurveTracer::colorCurves( CurvesPrimitive * curves ) const
 {
 	Color3fVectorDataPtr colors = new Color3fVectorData;
 

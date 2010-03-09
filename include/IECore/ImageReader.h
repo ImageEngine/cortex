@@ -71,23 +71,23 @@ class ImageReader : public Reader
 		///////////////////////////////////////////////////////////////
 		//@{
 		/// The parameter specifying the dataWindow of the loaded image.
-		Box2iParameterPtr dataWindowParameter();
-		ConstBox2iParameterPtr dataWindowParameter() const;
+		Box2iParameter * dataWindowParameter();
+		const Box2iParameter * dataWindowParameter() const;
 		/// The parameter specifying the displayWindow of the loaded image.
-		Box2iParameterPtr displayWindowParameter();
-		ConstBox2iParameterPtr displayWindowParameter() const;
+		Box2iParameter * displayWindowParameter();
+		const Box2iParameter * displayWindowParameter() const;
 		/// The parameter specifying the channels to load.
-		StringVectorParameterPtr channelNamesParameter();
-		ConstStringVectorParameterPtr channelNamesParameter() const;
+		StringVectorParameter * channelNamesParameter();
+		const StringVectorParameter * channelNamesParameter() const;
 		/// The parameter specifying the colorspace that the loaded image was stored.
 		/// If autoDetect is chosen than it will use the colorspace returned by sourceColorSpace().
-		StringParameterPtr colorspaceParameter();
-		ConstStringParameterPtr colorspaceParameter() const;
+		StringParameter * colorspaceParameter();
+		const StringParameter * colorspaceParameter() const;
 		/// The parameter specifying if the returned data channels should be 
 		/// exactly or as close as possible to what's stored in the file. 
 		/// If True, then colorspace settings will not take effect.
-		BoolParameterPtr rawChannelsParameter();
-		ConstBoolParameterPtr rawChannelsParameter() const;
+		BoolParameter * rawChannelsParameter();
+		const BoolParameter * rawChannelsParameter() const;
 		//@}
 
 		//! @name Image specific reading functions
@@ -131,7 +131,7 @@ class ImageReader : public Reader
 
 		/// Implemented using displayWindow(), dataWindow(), channelNames() and readChannel().
 		/// Derived classes should implement those methods rather than reimplement this function.
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject *operands );
 
 		/// Read the specified area from the channel with the specified name - this is called
 		/// by the public readChannel() method and the doOperation() method, and must be implemented

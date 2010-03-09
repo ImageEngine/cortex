@@ -67,17 +67,17 @@ UVDistortOp::~UVDistortOp()
 {
 }
 
-ObjectParameterPtr UVDistortOp::uvMapParameter()
+ObjectParameter * UVDistortOp::uvMapParameter()
 {
 	return m_uvMapParameter;
 }
 
-ConstObjectParameterPtr UVDistortOp::uvMapParameter() const
+const ObjectParameter * UVDistortOp::uvMapParameter() const
 {
 	return m_uvMapParameter;
 }
 
-void UVDistortOp::begin( ConstCompoundObjectPtr operands )
+void UVDistortOp::begin( const CompoundObject * operands )
 {
 	assert( runTimeCast< ImagePrimitive >(m_uvMapParameter->getValue()) );
 	ImagePrimitive *uvImage = static_cast<ImagePrimitive *>(m_uvMapParameter->getValue());

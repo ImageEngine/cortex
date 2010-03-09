@@ -120,10 +120,10 @@ class IFFHairReader : public Reader
 		std::map<int, IFFFile::Chunk::ChunkIterator> frameToRootChildren;
 		
 		/// Returns a CurvesPrimitive object containing all the hairs at the given frame
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject * operands );
 		
 		// loads the current channel into the data vector
-		void loadData( IFFFile::Chunk::ChunkIterator channel, V3dVectorDataPtr channelData, int numCVs, bool fromFile=true );
+		void loadData( IFFFile::Chunk::ChunkIterator channel, V3dVectorData * channelData, int numCVs, bool fromFile=true );
 		
 		// convenience function to get the realType
 		RealType realType() const;

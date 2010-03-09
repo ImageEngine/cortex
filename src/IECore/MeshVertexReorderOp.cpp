@@ -58,12 +58,12 @@ MeshVertexReorderOp::~MeshVertexReorderOp()
 {
 }
 
-V3iParameterPtr MeshVertexReorderOp::startingVerticesParameter()
+V3iParameter * MeshVertexReorderOp::startingVerticesParameter()
 {
 	return m_startingVerticesParameter;
 }
 
-ConstV3iParameterPtr MeshVertexReorderOp::startingVerticesParameter() const
+const V3iParameter * MeshVertexReorderOp::startingVerticesParameter() const
 {
 	return m_startingVerticesParameter;
 }
@@ -79,7 +79,7 @@ struct MeshVertexReorderOp::ReorderFn
 	}
 
 	template<typename T>
-	DataPtr operator()( typename T::Ptr d )
+	DataPtr operator()( T * d )
 	{
 		assert( d );
 		typename T::Ptr data = runTimeCast<T>( d->copy() );
@@ -105,7 +105,7 @@ private:
 struct MeshVertexReorderOp::HandleErrors
 {
 	template<typename T, typename F>
-	void operator()( typename T::ConstPtr d, const F &f )
+	void operator()( const T *d, const F &f )
 	{
 		assert( d );
 		string e = boost::str( boost::format( "MeshVertexReorderOp : \"%s\" has unsupported data type \"%s\"." ) % f.m_name % d->typeName() );
@@ -156,7 +156,7 @@ int MeshVertexReorderOp::faceDirection(	FaceId face, Edge edge )
 }
 
 void MeshVertexReorderOp::visitFace(
-        ConstMeshPrimitivePtr mesh,
+        const MeshPrimitive * mesh,
         FaceId currentFace,
         Edge currentEdge,
         std::vector<VertexId> &vertexMap,
@@ -285,7 +285,7 @@ void MeshVertexReorderOp::visitFace(
 	}
 }
 
-void MeshVertexReorderOp::buildInternalTopology( ConstMeshPrimitivePtr mesh )
+void MeshVertexReorderOp::buildInternalTopology( const MeshPrimitive * mesh )
 {
 	assert( mesh );
 
@@ -345,7 +345,7 @@ void MeshVertexReorderOp::buildInternalTopology( ConstMeshPrimitivePtr mesh )
 	}
 }
 
-void MeshVertexReorderOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
+void MeshVertexReorderOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands )
 {
 	PrimitiveVariableMap::const_iterator pvIt = mesh->variables.find( "P" );
 	if ( pvIt==mesh->variables.end() || !pvIt->second.data )

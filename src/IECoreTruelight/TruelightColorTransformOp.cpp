@@ -97,47 +97,47 @@ TruelightColorTransformOp::~TruelightColorTransformOp()
 	TruelightDestroyInstance( m_instance );
 }
 
-IECore::StringParameterPtr TruelightColorTransformOp::profileParameter()
+IECore::StringParameter * TruelightColorTransformOp::profileParameter()
 {
 	return m_profileParameter;
 }
 
-IECore::ConstStringParameterPtr TruelightColorTransformOp::profileParameter() const
+const IECore::StringParameter * TruelightColorTransformOp::profileParameter() const
 {
 	return m_profileParameter;
 }
 
-IECore::StringParameterPtr TruelightColorTransformOp::displayParameter()
+IECore::StringParameter * TruelightColorTransformOp::displayParameter()
 {
 	return m_displayParameter;
 }
 
-IECore::ConstStringParameterPtr TruelightColorTransformOp::displayParameter() const
+const IECore::StringParameter * TruelightColorTransformOp::displayParameter() const
 {
 	return m_displayParameter;
 }
 
-IECore::IntParameterPtr TruelightColorTransformOp::inputSpaceParameter()
+IECore::IntParameter * TruelightColorTransformOp::inputSpaceParameter()
 {
 	return m_inputSpaceParameter;
 }
 
-IECore::ConstIntParameterPtr TruelightColorTransformOp::inputSpaceParameter() const
+const IECore::IntParameter * TruelightColorTransformOp::inputSpaceParameter() const
 {
 	return m_inputSpaceParameter;
 }
 
-IECore::BoolParameterPtr TruelightColorTransformOp::rawTruelightOutputParameter()
+IECore::BoolParameter * TruelightColorTransformOp::rawTruelightOutputParameter()
 {
 	return m_rawTruelightOutputParameter;
 }
 
-IECore::ConstBoolParameterPtr TruelightColorTransformOp::rawTruelightOutputParameter() const
+const IECore::BoolParameter * TruelightColorTransformOp::rawTruelightOutputParameter() const
 {
 	return m_rawTruelightOutputParameter;
 }
 
-void TruelightColorTransformOp::begin( IECore::ConstCompoundObjectPtr operands )
+void TruelightColorTransformOp::begin( const IECore::CompoundObject * operands )
 {
 	assert( operands );
 	assert( m_instance );

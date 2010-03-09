@@ -121,97 +121,97 @@ Grade::~Grade()
 {
 }
 
-Color3fParameterPtr Grade::blackPointParameter()
+Color3fParameter * Grade::blackPointParameter()
 {
 	return m_blackPointParameter;
 }
 
-ConstColor3fParameterPtr Grade::blackPointParameter() const
+const Color3fParameter * Grade::blackPointParameter() const
 {
 	return m_blackPointParameter;
 }
 
-Color3fParameterPtr Grade::whitePointParameter()
+Color3fParameter * Grade::whitePointParameter()
 {
 	return m_whitePointParameter;
 }
 
-ConstColor3fParameterPtr Grade::whitePointParameter() const
+const Color3fParameter * Grade::whitePointParameter() const
 {
 	return m_whitePointParameter;
 }
 
-Color3fParameterPtr Grade::liftParameter()
+Color3fParameter * Grade::liftParameter()
 {
 	return m_liftParameter;
 }
 
-ConstColor3fParameterPtr Grade::liftParameter() const
+const Color3fParameter * Grade::liftParameter() const
 {
 	return m_liftParameter;
 }
 
-Color3fParameterPtr Grade::gainParameter()
+Color3fParameter * Grade::gainParameter()
 {
 	return m_gainParameter;
 }
 
-ConstColor3fParameterPtr Grade::gainParameter() const
+const Color3fParameter * Grade::gainParameter() const
 {
 	return m_gainParameter;
 }
 
-Color3fParameterPtr Grade::multiplyParameter()
+Color3fParameter * Grade::multiplyParameter()
 {
 	return m_multiplyParameter;
 }
 
-ConstColor3fParameterPtr Grade::multiplyParameter() const
+const Color3fParameter * Grade::multiplyParameter() const
 {
 	return m_gainParameter;
 }
 
-Color3fParameterPtr Grade::offsetParameter()
+Color3fParameter * Grade::offsetParameter()
 {
 	return m_offsetParameter;
 }
 
-ConstColor3fParameterPtr Grade::offsetParameter() const
+const Color3fParameter * Grade::offsetParameter() const
 {
 	return m_offsetParameter;
 }
 
-Color3fParameterPtr Grade::gammaParameter()
+Color3fParameter * Grade::gammaParameter()
 {
 	return m_gammaParameter;
 }
 
-ConstColor3fParameterPtr Grade::gammaParameter() const
+const Color3fParameter * Grade::gammaParameter() const
 {
 	return m_gammaParameter;
 }
 
-BoolParameterPtr Grade::blackClampParameter()
+BoolParameter * Grade::blackClampParameter()
 {
 	return m_blackClampParameter;
 }
 
-ConstBoolParameterPtr Grade::blackClampParameter() const
+const BoolParameter * Grade::blackClampParameter() const
 {
 	return m_blackClampParameter;
 }
 
-BoolParameterPtr Grade::whiteClampParameter()
+BoolParameter * Grade::whiteClampParameter()
 {
 	return m_whiteClampParameter;
 }
 
-ConstBoolParameterPtr Grade::whiteClampParameter() const
+const BoolParameter * Grade::whiteClampParameter() const
 {
 	return m_whiteClampParameter;
 }
 
-void Grade::begin( ConstCompoundObjectPtr operands )
+void Grade::begin( const CompoundObject * operands )
 {
 	m_invGamma = m_gammaParameter->getTypedValue();
 	if ( m_invGamma.x == 0.0 || m_invGamma.y == 0.0 || m_invGamma.z == 0 )

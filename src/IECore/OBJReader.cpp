@@ -92,7 +92,7 @@ bool OBJReader::canRead( const string &fileName )
 	return in.is_open();
 }
 
-ObjectPtr OBJReader::doOperation(ConstCompoundObjectPtr operands)
+ObjectPtr OBJReader::doOperation(const CompoundObject * operands)
 {
 	// for now we are going to retrieve vertex, texture, normal coordinates, faces.
 	// later (when we have the primitives), we will handle a larger subset of the

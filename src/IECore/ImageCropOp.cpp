@@ -106,42 +106,42 @@ ImageCropOp::~ImageCropOp()
 {
 }
 
-Box2iParameterPtr ImageCropOp::cropBoxParameter()
+Box2iParameter * ImageCropOp::cropBoxParameter()
 {
 	return m_cropBoxParameter;
 }
 
-ConstBox2iParameterPtr ImageCropOp::cropBoxParameter() const
+const Box2iParameter * ImageCropOp::cropBoxParameter() const
 {
 	return m_cropBoxParameter;
 }
 
-BoolParameterPtr ImageCropOp::matchDataWindowParameter()
+BoolParameter * ImageCropOp::matchDataWindowParameter()
 {
 	return m_matchDataWindowParameter;
 }
 
-ConstBoolParameterPtr ImageCropOp::matchDataWindowParameter() const
+const BoolParameter * ImageCropOp::matchDataWindowParameter() const
 {
 	return m_matchDataWindowParameter;
 }
 
-BoolParameterPtr ImageCropOp::resetOriginParameter()
+BoolParameter * ImageCropOp::resetOriginParameter()
 {
 	return m_resetOriginParameter;
 }
 
-ConstBoolParameterPtr ImageCropOp::resetOriginParameter() const
+const BoolParameter * ImageCropOp::resetOriginParameter() const
 {
 	return m_resetOriginParameter;
 }
 
-BoolParameterPtr ImageCropOp::intersectParameter()
+BoolParameter * ImageCropOp::intersectParameter()
 {
 	return m_intersectParameter;
 }
 
-ConstBoolParameterPtr ImageCropOp::intersectParameter() const
+const BoolParameter * ImageCropOp::intersectParameter() const
 {
 	return m_intersectParameter;
 }
@@ -160,7 +160,7 @@ struct ImageCropOp::ImageCropFn
 	}
 
 	template< typename T>
-	ReturnType operator()( typename T::ConstPtr sourceData ) const
+	ReturnType operator()( const T *sourceData ) const
 	{
 		assert( sourceData );
 
@@ -219,7 +219,7 @@ struct ImageCropOp::ImageCropFn
 
 };
 
-void ImageCropOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands )
+void ImageCropOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundObject * operands )
 {
 	// Validate the input image
 	if ( !image->arePrimitiveVariablesValid() )

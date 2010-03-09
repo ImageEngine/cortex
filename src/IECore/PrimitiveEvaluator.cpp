@@ -54,26 +54,26 @@ void PrimitiveEvaluator::registerCreator( TypeId id, CreatorFn f )
 	assert( f );
 	assert( f != &PrimitiveEvaluator::create );
 
-        CreatorMap &createFns = getCreateFns();
+	CreatorMap &createFns = getCreateFns();
 
-        assert( createFns.find( id ) == createFns.end() );
+	assert( createFns.find( id ) == createFns.end() );
 
-        createFns.insert( CreatorMap::value_type( id, f) );
+	createFns.insert( CreatorMap::value_type( id, f) );
 }
 
 PrimitiveEvaluatorPtr PrimitiveEvaluator::create( ConstPrimitivePtr primitive )
 {
 	assert( primitive );
 
-        const CreatorMap &createFns = getCreateFns();
+	const CreatorMap &createFns = getCreateFns();
 
-        CreatorMap::const_iterator it = createFns.find( primitive->typeId() );
-        if (it == createFns.end())
-        {
-                return 0;
-        }
+	CreatorMap::const_iterator it = createFns.find( primitive->typeId() );
+	if (it == createFns.end())
+	{
+		return 0;
+	}
 
-        return (it->second)(primitive);
+	return (it->second)(primitive);
 }
 
 PrimitiveEvaluator::~PrimitiveEvaluator()

@@ -100,12 +100,12 @@ ImageThinner::~ImageThinner()
 {
 }
 
-FloatParameterPtr ImageThinner::thresholdParameter()
+FloatParameter * ImageThinner::thresholdParameter()
 {
 	return parameters()->parameter<FloatParameter>( "threshold" );
 }
 
-ConstFloatParameterPtr ImageThinner::thresholdParameter() const
+const FloatParameter * ImageThinner::thresholdParameter() const
 {
 	return parameters()->parameter<FloatParameter>( "threshold" );
 }

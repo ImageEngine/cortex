@@ -96,7 +96,7 @@ bool BINMeshReader::canRead( const string &fileName )
 	return magic == 0xDADADADA && !in.fail() ;
 }
 
-ObjectPtr BINMeshReader::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr BINMeshReader::doOperation( const CompoundObject *operands )
 {
 	const std::string &fileName = m_fileNameParameter->getTypedValue();
 	ifstream f( fileName.c_str() );

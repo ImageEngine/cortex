@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -66,15 +66,15 @@ class EXRImageWriter : public ImageWriter
 
 		virtual std::string destinationColorSpace() const ;
 
-		IntParameterPtr compressionParameter();
-		ConstIntParameterPtr compressionParameter() const;
+		IntParameter * compressionParameter();
+		const IntParameter * compressionParameter() const;
 
 	private:
 
 		static const WriterDescription<EXRImageWriter> m_writerDescription;
 
 		virtual void writeImage(const std::vector<std::string> &names,
-		                        ConstImagePrimitivePtr image,
+		                        const ImagePrimitive * image,
 		                        const Imath::Box2i &dw) const;
 
 		template<typename T>

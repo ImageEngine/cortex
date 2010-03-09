@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,22 +54,22 @@ class PointDensitiesOp : public Op
 		virtual ~PointDensitiesOp();
 
 		/// The Parameter for the input point cloud.
-		ObjectParameterPtr pointParameter();
-		ConstObjectParameterPtr pointParameter() const;
+		ObjectParameter * pointParameter();
+		const ObjectParameter * pointParameter() const;
 
 		/// The Parameter that specifies how many neighbours to use
 		/// in estimating the density.
-		IntParameterPtr numNeighboursParameter();
-		ConstIntParameterPtr numNeighboursParameter() const;
+		IntParameter * numNeighboursParameter();
+		const IntParameter * numNeighboursParameter() const;
 
 		/// The Parameter that specifies a simple multiplier on
 		/// the density value.
-		DoubleParameterPtr multiplierParameter();
-		ConstDoubleParameterPtr multiplierParameter() const;
+		DoubleParameter * multiplierParameter();
+		const DoubleParameter * multiplierParameter() const;
 
 	protected :
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
 

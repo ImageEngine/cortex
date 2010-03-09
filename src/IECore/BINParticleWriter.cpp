@@ -245,212 +245,212 @@ void BINParticleWriter::constructParameters()
 	parameters()->addParameter( m_particleIdPrimVarParameter );
 }
 
-IntParameterPtr BINParticleWriter::fluidTypeParameter()
+IntParameter * BINParticleWriter::fluidTypeParameter()
 {
 	return m_fluidTypeParameter;
 }
 
-ConstIntParameterPtr BINParticleWriter::fluidTypeParameter() const
+const IntParameter * BINParticleWriter::fluidTypeParameter() const
 {
 	return m_fluidTypeParameter;
 }
 
-IntParameterPtr BINParticleWriter::frameNumberParameter()
+IntParameter * BINParticleWriter::frameNumberParameter()
 {
 	return m_frameNumberParameter;
 }
 
-ConstIntParameterPtr BINParticleWriter::frameNumberParameter() const
+const IntParameter * BINParticleWriter::frameNumberParameter() const
 {
 	return m_frameNumberParameter;
 }
 
-FloatParameterPtr BINParticleWriter::radiusParameter()
+FloatParameter * BINParticleWriter::radiusParameter()
 {
 	return m_radiusParameter;
 }
 
-ConstFloatParameterPtr BINParticleWriter::radiusParameter() const
+const FloatParameter * BINParticleWriter::radiusParameter() const
 {
 	return m_radiusParameter;
 }
 
-FloatParameterPtr BINParticleWriter::scaleSceneParameter()
+FloatParameter * BINParticleWriter::scaleSceneParameter()
 {
 	return m_scaleSceneParameter;
 }
 
-ConstFloatParameterPtr BINParticleWriter::scaleSceneParameter() const
+const FloatParameter * BINParticleWriter::scaleSceneParameter() const
 {
 	return m_scaleSceneParameter;
 }
 
-FloatParameterPtr BINParticleWriter::elapsedSimulationTimeParameter()
+FloatParameter * BINParticleWriter::elapsedSimulationTimeParameter()
 {
 	return m_elapsedSimulationTimeParameter;
 }
 
-ConstFloatParameterPtr BINParticleWriter::elapsedSimulationTimeParameter() const
+const FloatParameter * BINParticleWriter::elapsedSimulationTimeParameter() const
 {
 	return m_elapsedSimulationTimeParameter;
 }
 
-IntParameterPtr BINParticleWriter::frameRateParameter()
+IntParameter * BINParticleWriter::frameRateParameter()
 {
 	return m_frameRateParameter;
 }
 
-ConstIntParameterPtr BINParticleWriter::frameRateParameter() const
+const IntParameter * BINParticleWriter::frameRateParameter() const
 {
 	return m_frameRateParameter;
 }
 
-StringParameterPtr BINParticleWriter::positionPrimVarParameter()
+StringParameter * BINParticleWriter::positionPrimVarParameter()
 {
 	return m_positionPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::positionPrimVarParameter() const
+const StringParameter * BINParticleWriter::positionPrimVarParameter() const
 {
 	return m_positionPrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::velocityPrimVarParameter()
+StringParameter * BINParticleWriter::velocityPrimVarParameter()
 {
 	return m_velocityPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::velocityPrimVarParameter() const
+const StringParameter * BINParticleWriter::velocityPrimVarParameter() const
 {
 	return m_velocityPrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::forcePrimVarParameter()
+StringParameter * BINParticleWriter::forcePrimVarParameter()
 {
 	return m_forcePrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::forcePrimVarParameter() const
+const StringParameter * BINParticleWriter::forcePrimVarParameter() const
 {
 	return m_forcePrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::vortisityPrimVarParameter()
+StringParameter * BINParticleWriter::vortisityPrimVarParameter()
 {
 	return m_vortisityPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::vortisityPrimVarParameter() const
+const StringParameter * BINParticleWriter::vortisityPrimVarParameter() const
 {
 	return m_vortisityPrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::normalPrimVarParameter()
+StringParameter * BINParticleWriter::normalPrimVarParameter()
 {
 	return m_normalPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::normalPrimVarParameter() const
+const StringParameter * BINParticleWriter::normalPrimVarParameter() const
 {
 	return m_normalPrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::numNeighboursPrimVarParameter()
+StringParameter * BINParticleWriter::numNeighboursPrimVarParameter()
 {
 	return m_numNeighboursPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::numNeighboursPrimVarParameter() const
+const StringParameter * BINParticleWriter::numNeighboursPrimVarParameter() const
 {
 	return m_numNeighboursPrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::uvwPrimVarParameter()
+StringParameter * BINParticleWriter::uvwPrimVarParameter()
 {
 	return m_uvwPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::uvwPrimVarParameter() const
+const StringParameter * BINParticleWriter::uvwPrimVarParameter() const
 {
 	return m_uvwPrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::agePrimVarParameter()
+StringParameter * BINParticleWriter::agePrimVarParameter()
 {
 	return m_agePrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::agePrimVarParameter() const
+const StringParameter * BINParticleWriter::agePrimVarParameter() const
 {
 	return m_agePrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::isolationTimePrimVarParameter()
+StringParameter * BINParticleWriter::isolationTimePrimVarParameter()
 {
 	return m_isolationTimePrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::isolationTimePrimVarParameter() const
+const StringParameter * BINParticleWriter::isolationTimePrimVarParameter() const
 {
 	return m_isolationTimePrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::viscosityPrimVarParameter()
+StringParameter * BINParticleWriter::viscosityPrimVarParameter()
 {
 	return m_viscosityPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::viscosityPrimVarParameter() const
+const StringParameter * BINParticleWriter::viscosityPrimVarParameter() const
 {
 	return m_viscosityPrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::densityPrimVarParameter()
+StringParameter * BINParticleWriter::densityPrimVarParameter()
 {
 	return m_densityPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::densityPrimVarParameter() const
+const StringParameter * BINParticleWriter::densityPrimVarParameter() const
 {
 	return m_densityPrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::pressurePrimVarParameter()
+StringParameter * BINParticleWriter::pressurePrimVarParameter()
 {
 	return m_pressurePrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::pressurePrimVarParameter() const
+const StringParameter * BINParticleWriter::pressurePrimVarParameter() const
 {
 	return m_pressurePrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::massPrimVarParameter()
+StringParameter * BINParticleWriter::massPrimVarParameter()
 {
 	return m_massPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::massPrimVarParameter() const
+const StringParameter * BINParticleWriter::massPrimVarParameter() const
 {
 	return m_massPrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::temperaturePrimVarParameter()
+StringParameter * BINParticleWriter::temperaturePrimVarParameter()
 {
 	return m_temperaturePrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::temperaturePrimVarParameter() const
+const StringParameter * BINParticleWriter::temperaturePrimVarParameter() const
 {
 	return m_temperaturePrimVarParameter;
 }
 
-StringParameterPtr BINParticleWriter::particleIdPrimVarParameter()
+StringParameter * BINParticleWriter::particleIdPrimVarParameter()
 {
 	return m_particleIdPrimVarParameter;
 }
 
-ConstStringParameterPtr BINParticleWriter::particleIdPrimVarParameter() const
+const StringParameter * BINParticleWriter::particleIdPrimVarParameter() const
 {
 	return m_particleIdPrimVarParameter;
 }
@@ -473,7 +473,7 @@ void writeLittleEndian< Imath::V3f >( std::ostream &f, const Imath::V3f &n )
 }
 
 template<typename T>
-typename T::ConstPtr BINParticleWriter::getPrimVar( ConstStringParameterPtr parameter )
+typename T::ConstPtr BINParticleWriter::getPrimVar( const StringParameter * parameter )
 {
 	assert( parameter );
 
@@ -528,7 +528,7 @@ void BINParticleWriter::writeParticlePrimVar( std::ofstream &f, typename T::Cons
 	writeLittleEndian( f, v );
 }
 
-void BINParticleWriter::getMaxMinAvg( ConstFloatVectorDataPtr data, float &mx, float &mn, float &avg ) const
+void BINParticleWriter::getMaxMinAvg( const FloatVectorData *data, float &mx, float &mn, float &avg ) const
 {
 	if ( !data )
 	{

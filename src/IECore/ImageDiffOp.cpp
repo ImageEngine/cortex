@@ -108,42 +108,42 @@ ImageDiffOp::~ImageDiffOp()
 {
 }
 
-ImagePrimitiveParameterPtr ImageDiffOp::imageAParameter()
+ImagePrimitiveParameter * ImageDiffOp::imageAParameter()
 {
 	return m_imageAParameter;
 }
 
-ConstImagePrimitiveParameterPtr ImageDiffOp::imageAParameter() const
+const ImagePrimitiveParameter * ImageDiffOp::imageAParameter() const
 {
 	return m_imageAParameter;
 }
 
-ImagePrimitiveParameterPtr ImageDiffOp::imageBParameter()
+ImagePrimitiveParameter * ImageDiffOp::imageBParameter()
 {
 	return m_imageBParameter;
 }
 
-ConstImagePrimitiveParameterPtr ImageDiffOp::imageBParameter() const
+const ImagePrimitiveParameter * ImageDiffOp::imageBParameter() const
 {
 	return m_imageBParameter;
 }
 
-FloatParameterPtr ImageDiffOp::maxErrorParameter()
+FloatParameter * ImageDiffOp::maxErrorParameter()
 {
 	return m_maxErrorParameter;
 }
 
-ConstFloatParameterPtr ImageDiffOp::maxErrorParameter() const
+const FloatParameter * ImageDiffOp::maxErrorParameter() const
 {
 	return m_maxErrorParameter;
 }
 
-BoolParameterPtr ImageDiffOp::skipMissingChannels()
+BoolParameter * ImageDiffOp::skipMissingChannels()
 {
 	return m_skipMissingChannelsParameter;
 }
 
-ConstBoolParameterPtr ImageDiffOp::skipMissingChannels() const
+const BoolParameter * ImageDiffOp::skipMissingChannels() const
 {
 	return m_skipMissingChannelsParameter;
 }
@@ -166,7 +166,7 @@ struct ImageDiffOp::FloatConverter
 	};
 };
 
-ObjectPtr ImageDiffOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 {
 	ImagePrimitivePtr imageA = m_imageAParameter->getTypedValue< ImagePrimitive >();
 	ImagePrimitivePtr imageB = m_imageBParameter->getTypedValue< ImagePrimitive >();

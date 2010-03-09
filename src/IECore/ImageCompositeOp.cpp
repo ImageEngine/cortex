@@ -121,52 +121,52 @@ ImageCompositeOp::~ImageCompositeOp()
 {
 }
 
-StringVectorParameterPtr ImageCompositeOp::channelNamesParameter()
+StringVectorParameter * ImageCompositeOp::channelNamesParameter()
 {
 	return m_channelNamesParameter;
 }
 
-ConstStringVectorParameterPtr ImageCompositeOp::channelNamesParameter() const
+const StringVectorParameter * ImageCompositeOp::channelNamesParameter() const
 {
 	return m_channelNamesParameter;
 }
 
-StringParameterPtr ImageCompositeOp::alphaChannelNameParameter()
+StringParameter * ImageCompositeOp::alphaChannelNameParameter()
 {
 	return m_alphaChannelNameParameter;
 }
 
-ConstStringParameterPtr ImageCompositeOp::alphaChannelNameParameter() const
+const StringParameter * ImageCompositeOp::alphaChannelNameParameter() const
 {
 	return m_alphaChannelNameParameter;
 }
 
-ImagePrimitiveParameterPtr ImageCompositeOp::imageAParameter()
+ImagePrimitiveParameter * ImageCompositeOp::imageAParameter()
 {
 	return m_imageAParameter;
 }
 
-ConstImagePrimitiveParameterPtr ImageCompositeOp::imageAParameter() const
+const ImagePrimitiveParameter * ImageCompositeOp::imageAParameter() const
 {
 	return m_imageAParameter;
 }
 
-IntParameterPtr ImageCompositeOp::operationParameter()
+IntParameter * ImageCompositeOp::operationParameter()
 {
 	return m_operationParameter;
 }
 
-ConstIntParameterPtr ImageCompositeOp::operationParameter() const
+const IntParameter * ImageCompositeOp::operationParameter() const
 {
 	return m_operationParameter;
 }
 
-IntParameterPtr ImageCompositeOp::inputModeParameter()
+IntParameter * ImageCompositeOp::inputModeParameter()
 {
 	return m_inputModeParameter;
 }
 
-ConstIntParameterPtr ImageCompositeOp::inputModeParameter() const
+const IntParameter * ImageCompositeOp::inputModeParameter() const
 {
 	return m_inputModeParameter;
 }
@@ -204,7 +204,7 @@ struct ImageCompositeOp::ChannelConverter
 	};
 };
 
-FloatVectorDataPtr ImageCompositeOp::getChannelData( ImagePrimitivePtr image, const std::string &channelName, bool mustExist )
+FloatVectorDataPtr ImageCompositeOp::getChannelData( ImagePrimitive * image, const std::string &channelName, bool mustExist )
 {
 	assert( image );
 
@@ -242,7 +242,7 @@ FloatVectorDataPtr ImageCompositeOp::getChannelData( ImagePrimitivePtr image, co
 		>( it->second.data, converter );
 }
 
-float ImageCompositeOp::readChannelData( ConstImagePrimitivePtr image, ConstFloatVectorDataPtr data, const V2i &pixel )
+float ImageCompositeOp::readChannelData( const ImagePrimitive * image, const FloatVectorData * data, const V2i &pixel )
 {
 	assert( image );
 	assert( data );
@@ -268,7 +268,7 @@ float ImageCompositeOp::readChannelData( ConstImagePrimitivePtr image, ConstFloa
 	return data->readable()[ idx ];
 }
 
-void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePrimitivePtr imageB, ConstCompoundObjectPtr operands )
+void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePrimitive * imageB, const CompoundObject * operands )
 {
 	assert( fn );
 	assert( imageB );
@@ -416,7 +416,7 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 	}
 }
 
-void ImageCompositeOp::modifyTypedPrimitive( ImagePrimitivePtr imageB, ConstCompoundObjectPtr operands )
+void ImageCompositeOp::modifyTypedPrimitive( ImagePrimitive * imageB, const CompoundObject * operands )
 {
 	if ( !imageB->arePrimitiveVariablesValid() )
 	{

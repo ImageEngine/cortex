@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,20 +71,20 @@ class ImageCompositeOp : public ImagePrimitiveOp
 		virtual ~ImageCompositeOp();
 
 		/// \todo Create a new base class containing a channelNames parameter, shared with ChannelOp?
-		StringVectorParameterPtr channelNamesParameter();
-		ConstStringVectorParameterPtr channelNamesParameter() const;
+		StringVectorParameter * channelNamesParameter();
+		const StringVectorParameter * channelNamesParameter() const;
 
-		StringParameterPtr alphaChannelNameParameter();
-		ConstStringParameterPtr alphaChannelNameParameter() const;
+		StringParameter * alphaChannelNameParameter();
+		const StringParameter * alphaChannelNameParameter() const;
 
-		ImagePrimitiveParameterPtr imageAParameter();
-		ConstImagePrimitiveParameterPtr imageAParameter() const;
+		ImagePrimitiveParameter * imageAParameter();
+		const ImagePrimitiveParameter * imageAParameter() const;
 
-		IntParameterPtr operationParameter();
-		ConstIntParameterPtr operationParameter() const;
+		IntParameter * operationParameter();
+		const IntParameter * operationParameter() const;
 
-		IntParameterPtr inputModeParameter();
-		ConstIntParameterPtr inputModeParameter() const;
+		IntParameter * inputModeParameter();
+		const IntParameter * inputModeParameter() const;
 
 	protected :
 
@@ -96,9 +96,9 @@ class ImageCompositeOp : public ImagePrimitiveOp
 
 		typedef float (*CompositeFn)( float, float, float, float );
 
-		void composite( CompositeFn fn, DataWindowResult dwr, ImagePrimitivePtr imageB, ConstCompoundObjectPtr operands );
+		void composite( CompositeFn fn, DataWindowResult dwr, ImagePrimitive * imageB, const CompoundObject * operands );
 
-		virtual void modifyTypedPrimitive( ImagePrimitivePtr imageB, ConstCompoundObjectPtr operands );
+		virtual void modifyTypedPrimitive( ImagePrimitive * imageB, const CompoundObject * operands );
 
 		StringVectorParameterPtr m_channelNamesParameter;
 		StringParameterPtr m_alphaChannelNameParameter;
@@ -109,8 +109,8 @@ class ImageCompositeOp : public ImagePrimitiveOp
 	private :
 		struct ChannelConverter;
 
-		FloatVectorDataPtr getChannelData( ImagePrimitivePtr image, const std::string &channelName, bool mustExist = true );
-		float readChannelData( ConstImagePrimitivePtr image, ConstFloatVectorDataPtr data, const Imath::V2i &pixel );
+		FloatVectorDataPtr getChannelData( ImagePrimitive * image, const std::string &channelName, bool mustExist = true );
+		float readChannelData( const ImagePrimitive * image, const FloatVectorData * data, const Imath::V2i &pixel );
 
 };
 

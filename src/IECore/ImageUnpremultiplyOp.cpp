@@ -59,12 +59,12 @@ ImageUnpremultiplyOp::~ImageUnpremultiplyOp()
 {
 }
 
-StringParameterPtr ImageUnpremultiplyOp::alphaChannelNameParameter()
+StringParameter * ImageUnpremultiplyOp::alphaChannelNameParameter()
 {
 	return m_alphaChannelNameParameter;
 }
 
-ConstStringParameterPtr ImageUnpremultiplyOp::alphaChannelNameParameter() const
+const StringParameter * ImageUnpremultiplyOp::alphaChannelNameParameter() const
 {
 	return m_alphaChannelNameParameter;
 }
@@ -84,9 +84,9 @@ struct ImageUnpremultiplyOp::UnpremultFn
 {
 	typedef void ReturnType;
 
-	ConstFloatVectorDataPtr m_alphaChannel;
+	const FloatVectorData * m_alphaChannel;
 
-	UnpremultFn( ConstFloatVectorDataPtr alphaChannel ) : m_alphaChannel( alphaChannel )
+	UnpremultFn( const FloatVectorData * alphaChannel ) : m_alphaChannel( alphaChannel )
 	{
 		assert( m_alphaChannel );
 	}

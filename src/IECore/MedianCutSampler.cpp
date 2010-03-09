@@ -107,42 +107,42 @@ MedianCutSampler::~MedianCutSampler()
 {
 }
 
-ImagePrimitiveParameterPtr MedianCutSampler::imageParameter()
+ImagePrimitiveParameter * MedianCutSampler::imageParameter()
 {
 	return m_imageParameter;
 }
 
-ConstImagePrimitiveParameterPtr MedianCutSampler::imageParameter() const
+const ImagePrimitiveParameter * MedianCutSampler::imageParameter() const
 {
 	return m_imageParameter;
 }
 
-StringParameterPtr MedianCutSampler::channelNameParameter()
+StringParameter * MedianCutSampler::channelNameParameter()
 {
 	return m_channelNameParameter;
 }
 
-ConstStringParameterPtr MedianCutSampler::channelNameParameter() const
+const StringParameter * MedianCutSampler::channelNameParameter() const
 {
 	return m_channelNameParameter;
 }
 
-IntParameterPtr MedianCutSampler::subdivisionDepthParameter()
+IntParameter * MedianCutSampler::subdivisionDepthParameter()
 {
 	return m_subdivisionDepthParameter;
 }
 
-ConstIntParameterPtr MedianCutSampler::subdivisionDepthParameter() const
+const IntParameter * MedianCutSampler::subdivisionDepthParameter() const
 {
 	return m_subdivisionDepthParameter;
 }
 
-IntParameterPtr MedianCutSampler::projectionParameter()
+IntParameter * MedianCutSampler::projectionParameter()
 {
 	return m_projectionParameter;
 }
 
-ConstIntParameterPtr MedianCutSampler::projectionParameter() const
+const IntParameter * MedianCutSampler::projectionParameter() const
 {
 	return m_projectionParameter;
 }
@@ -212,7 +212,7 @@ static void medianCut( const Array2D &luminance, const Array2D &summedLuminance,
 }
 
 
-ObjectPtr MedianCutSampler::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr MedianCutSampler::doOperation( const CompoundObject * operands )
 {
 	ImagePrimitivePtr image = static_cast<ImagePrimitive *>( imageParameter()->getValue() )->copy();
 	Box2i dataWindow = image->getDataWindow();

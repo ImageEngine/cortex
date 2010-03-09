@@ -212,177 +212,177 @@ ParticleMeshOp::~ParticleMeshOp()
 {
 }
 
-FileNameParameterPtr ParticleMeshOp::fileNameParameter()
+FileNameParameter * ParticleMeshOp::fileNameParameter()
 {
 	return m_fileNameParameter;
 }
 
-ConstFileNameParameterPtr ParticleMeshOp::fileNameParameter() const
+const FileNameParameter * ParticleMeshOp::fileNameParameter() const
 {
 	return m_fileNameParameter;
 }
 
-StringParameterPtr ParticleMeshOp::positionAttributeParameter()
+StringParameter * ParticleMeshOp::positionAttributeParameter()
 {
 	return m_positionAttributeParameter;
 }
 
-ConstStringParameterPtr ParticleMeshOp::positionAttributeParameter() const
+const StringParameter * ParticleMeshOp::positionAttributeParameter() const
 {
 	return m_positionAttributeParameter;
 }
 
-BoolParameterPtr ParticleMeshOp::useRadiusAttributeParameter()
+BoolParameter * ParticleMeshOp::useRadiusAttributeParameter()
 {
 	return m_useRadiusAttributeParameter;
 }
 
-ConstBoolParameterPtr ParticleMeshOp::useRadiusAttributeParameter() const
+const BoolParameter * ParticleMeshOp::useRadiusAttributeParameter() const
 {
 	return m_useRadiusAttributeParameter;
 }
 
-StringParameterPtr ParticleMeshOp::radiusAttributeParameter()
+StringParameter * ParticleMeshOp::radiusAttributeParameter()
 {
 	return m_radiusAttributeParameter;
 }
 
-ConstStringParameterPtr ParticleMeshOp::radiusAttributeParameter() const
+const StringParameter * ParticleMeshOp::radiusAttributeParameter() const
 {
 	return m_radiusAttributeParameter;
 }
 
-FloatParameterPtr ParticleMeshOp::radiusParameter()
+FloatParameter * ParticleMeshOp::radiusParameter()
 {
 	return m_radiusParameter;
 }
 
-ConstFloatParameterPtr ParticleMeshOp::radiusParameter() const
+const FloatParameter * ParticleMeshOp::radiusParameter() const
 {
 	return m_radiusParameter;
 }
 
-FloatParameterPtr ParticleMeshOp::radiusScaleParameter()
+FloatParameter * ParticleMeshOp::radiusScaleParameter()
 {
 	return m_radiusScaleParameter;
 }
 
-ConstFloatParameterPtr ParticleMeshOp::radiusScaleParameter() const
+const FloatParameter * ParticleMeshOp::radiusScaleParameter() const
 {
 	return m_radiusScaleParameter;
 }
 
-BoolParameterPtr ParticleMeshOp::useStrengthAttributeParameter()
+BoolParameter * ParticleMeshOp::useStrengthAttributeParameter()
 {
 	return m_useStrengthAttributeParameter;
 }
 
-ConstBoolParameterPtr ParticleMeshOp::useStrengthAttributeParameter() const
+const BoolParameter * ParticleMeshOp::useStrengthAttributeParameter() const
 {
 	return m_useStrengthAttributeParameter;
 }
 
-StringParameterPtr ParticleMeshOp::strengthAttributeParameter()
+StringParameter * ParticleMeshOp::strengthAttributeParameter()
 {
 	return m_strengthAttributeParameter;
 }
 
-ConstStringParameterPtr ParticleMeshOp::strengthAttributeParameter() const
+const StringParameter * ParticleMeshOp::strengthAttributeParameter() const
 {
 	return m_strengthAttributeParameter;
 }
 
-FloatParameterPtr ParticleMeshOp::strengthParameter()
+FloatParameter * ParticleMeshOp::strengthParameter()
 {
 	return m_strengthParameter;
 }
 
-ConstFloatParameterPtr ParticleMeshOp::strengthParameter() const
+const FloatParameter * ParticleMeshOp::strengthParameter() const
 {
 	return m_strengthParameter;
 }
 
-FloatParameterPtr ParticleMeshOp::strengthScaleParameter()
+FloatParameter * ParticleMeshOp::strengthScaleParameter()
 {
 	return m_strengthScaleParameter;
 }
 
-ConstFloatParameterPtr ParticleMeshOp::strengthScaleParameter() const
+const FloatParameter * ParticleMeshOp::strengthScaleParameter() const
 {
 	return m_strengthScaleParameter;
 }
 
-FloatParameterPtr ParticleMeshOp::thresholdParameter()
+FloatParameter * ParticleMeshOp::thresholdParameter()
 {
 	return m_thresholdParameter;
 }
 
-ConstFloatParameterPtr ParticleMeshOp::thresholdParameter() const
+const FloatParameter * ParticleMeshOp::thresholdParameter() const
 {
 	return m_thresholdParameter;
 }
 
-V3iParameterPtr ParticleMeshOp::resolutionParameter()
+V3iParameter * ParticleMeshOp::resolutionParameter()
 {
 	return m_resolutionParameter;
 }
 
-ConstV3iParameterPtr ParticleMeshOp::resolutionParameter() const
+const V3iParameter * ParticleMeshOp::resolutionParameter() const
 {
 	return m_resolutionParameter;
 }
 
-Box3fParameterPtr ParticleMeshOp::boundParameter()
+Box3fParameter * ParticleMeshOp::boundParameter()
 {
 	return m_boundParameter;
 }
 
-ConstBox3fParameterPtr ParticleMeshOp::boundParameter() const
+const Box3fParameter * ParticleMeshOp::boundParameter() const
 {
 	return m_boundParameter;
 }
 
-BoolParameterPtr ParticleMeshOp::automaticBoundParameter()
+BoolParameter * ParticleMeshOp::automaticBoundParameter()
 {
 	return m_automaticBoundParameter;
 }
 
-BoolParameterPtr ParticleMeshOp::automaticBoundParameter() const
+const BoolParameter * ParticleMeshOp::automaticBoundParameter() const
 {
 	return m_automaticBoundParameter;
 }
 
-IntParameterPtr ParticleMeshOp::gridMethodParameter()
+IntParameter * ParticleMeshOp::gridMethodParameter()
 {
 	return m_gridMethodParameter;
 }
 
-IntParameterPtr ParticleMeshOp::gridMethodParameter() const
+const IntParameter * ParticleMeshOp::gridMethodParameter() const
 {
 	return m_gridMethodParameter;
 }
 
-V3fParameterPtr ParticleMeshOp::divisionSizeParameter()
+V3fParameter * ParticleMeshOp::divisionSizeParameter()
 {
 	return m_divisionSizeParameter;
 }
 
-ConstV3fParameterPtr ParticleMeshOp::divisionSizeParameter() const
+const V3fParameter * ParticleMeshOp::divisionSizeParameter() const
 {
 	return m_divisionSizeParameter;
 }
 
-FloatParameterPtr ParticleMeshOp::boundExtendParameter()
+FloatParameter * ParticleMeshOp::boundExtendParameter()
 {
 	return m_boundExtendParameter;
 }
 
-FloatParameterPtr ParticleMeshOp::boundExtendParameter() const
+const FloatParameter * ParticleMeshOp::boundExtendParameter() const
 {
 	return m_boundExtendParameter;
 }
 
-ObjectPtr ParticleMeshOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr ParticleMeshOp::doOperation( const CompoundObject * operands )
 {
 	MeshPrimitiveBuilderPtr builder = new MeshPrimitiveBuilder();
 

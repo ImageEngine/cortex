@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,17 +65,17 @@ CubeColorTransformOp::~CubeColorTransformOp()
 {
 }
 
-CubeColorLookupfParameterPtr CubeColorTransformOp::cubeParameter()
+CubeColorLookupfParameter * CubeColorTransformOp::cubeParameter()
 {
 	return m_cubeParameter;
 }
 
-ConstCubeColorLookupfParameterPtr CubeColorTransformOp::cubeParameter() const
+const CubeColorLookupfParameter * CubeColorTransformOp::cubeParameter() const
 {
 	return m_cubeParameter;
 }
 
-void CubeColorTransformOp::begin( ConstCompoundObjectPtr operands )
+void CubeColorTransformOp::begin( const CompoundObject * operands )
 {
 	assert( operands );
 

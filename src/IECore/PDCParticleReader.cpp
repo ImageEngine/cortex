@@ -247,7 +247,7 @@ void PDCParticleReader::readElements( T *buffer, std::streampos pos, unsigned lo
 }
 
 template<typename T, typename F>
-typename T::Ptr PDCParticleReader::filterAttr( typename F::ConstPtr attr, float percentage )
+typename T::Ptr PDCParticleReader::filterAttr( const F *attr, float percentage )
 {
 	if( percentage < 100.0f )
 	{
@@ -291,7 +291,7 @@ typename T::Ptr PDCParticleReader::filterAttr( typename F::ConstPtr attr, float 
 	}
 
 	// no filtering of any sort needed
-	return typename T::Ptr( (T *)attr.get() );
+	return typename T::Ptr( (T *)attr );
 }
 
 DataPtr PDCParticleReader::readAttribute( const std::string &name )
@@ -412,7 +412,7 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 	return result;
 }
 
-ConstDoubleVectorDataPtr PDCParticleReader::idAttribute()
+const DoubleVectorData * PDCParticleReader::idAttribute()
 {
 	if( !open() )
 	{

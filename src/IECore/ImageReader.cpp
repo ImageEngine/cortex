@@ -110,7 +110,7 @@ ImageReader::ImageReader( const std::string &description ) :
 	parameters()->addParameter( m_rawChannelsParameter );
 }
 
-ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr ImageReader::doOperation( const CompoundObject *operands )
 {
 	Box2i displayWind = displayWindowParameter()->getTypedValue();
 	if( displayWind.isEmpty() )
@@ -140,9 +140,8 @@ ObjectPtr ImageReader::doOperation( ConstCompoundObjectPtr operands )
 	while( ci != channelNames.end() )
 	{
 		DataPtr d = readChannel( *ci, dataWind, rawChannels );
-
 		assert( d  );
-		assert( !rawChannels || d->typeId()==FloatVectorDataTypeId );
+		assert( rawChannels || d->typeId()==FloatVectorDataTypeId );
 
 		PrimitiveVariable p( PrimitiveVariable::Vertex, d );
 		assert( image->isPrimitiveVariableValid( p ) );
@@ -226,52 +225,52 @@ Imath::Box2i ImageReader::dataWindowToRead()
 	return d;
 }
 
-Box2iParameterPtr ImageReader::dataWindowParameter()
+Box2iParameter * ImageReader::dataWindowParameter()
 {
 	return m_dataWindowParameter;
 }
 
-ConstBox2iParameterPtr ImageReader::dataWindowParameter() const
+const Box2iParameter * ImageReader::dataWindowParameter() const
 {
 	return m_dataWindowParameter;
 }
 
-Box2iParameterPtr ImageReader::displayWindowParameter()
+Box2iParameter * ImageReader::displayWindowParameter()
 {
 	return m_displayWindowParameter;
 }
 
-ConstBox2iParameterPtr ImageReader::displayWindowParameter() const
+const Box2iParameter * ImageReader::displayWindowParameter() const
 {
 	return m_displayWindowParameter;
 }
 
-StringVectorParameterPtr ImageReader::channelNamesParameter()
+StringVectorParameter * ImageReader::channelNamesParameter()
 {
 	return m_channelNamesParameter;
 }
 
-ConstStringVectorParameterPtr ImageReader::channelNamesParameter() const
+const StringVectorParameter * ImageReader::channelNamesParameter() const
 {
 	return m_channelNamesParameter;
 }
 
-StringParameterPtr ImageReader::colorspaceParameter()
+StringParameter * ImageReader::colorspaceParameter()
 {
 	return m_colorspaceParameter;
 }
 
-ConstStringParameterPtr ImageReader::colorspaceParameter() const
+const StringParameter * ImageReader::colorspaceParameter() const
 {
 	return m_colorspaceParameter;
 }
 
-BoolParameterPtr ImageReader::rawChannelsParameter()
+BoolParameter * ImageReader::rawChannelsParameter()
 {
 	return m_rawChannelsParameter;
 }
 
-ConstBoolParameterPtr ImageReader::rawChannelsParameter() const
+const BoolParameter * ImageReader::rawChannelsParameter() const
 {
 	return m_rawChannelsParameter;
 }

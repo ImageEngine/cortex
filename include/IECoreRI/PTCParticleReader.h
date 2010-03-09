@@ -69,7 +69,7 @@ class PTCParticleReader : public IECore::ParticleReader
 		/// with the information available in the pointcloud header file
 		/// (worldToEye, worldToNdc, boundingBox, xResolution, yResolution and aspectRatio, variableTypes).
 		/// This method overwrites the base class implementation.
-		virtual IECore::ObjectPtr doOperation( IECore::ConstCompoundObjectPtr operands );
+		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands );
 
 	private :
 

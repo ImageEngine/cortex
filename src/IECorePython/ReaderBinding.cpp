@@ -146,13 +146,13 @@ class ReaderWrap : public Reader, public Wrapper<Reader>
 			}
 		}
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands )
+		virtual ObjectPtr doOperation( const CompoundObject * operands )
 		{
 			ScopedGILLock gilLock;
 			override o = this->get_override( "doOperation" );
 			if( o )
 			{
-				ObjectPtr r = o( constPointerCast<CompoundObject>( operands ) );
+				ObjectPtr r = o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
 				if( !r )
 				{
 					throw Exception( "doOperation() python method didn't return an Object." );

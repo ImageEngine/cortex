@@ -86,32 +86,32 @@ ImageWriter::ImageWriter( const std::string &description ) :
 	parameters()->addParameter( m_rawChannelsParameter );
 }
 
-StringVectorParameterPtr ImageWriter::channelNamesParameter()
+StringVectorParameter * ImageWriter::channelNamesParameter()
 {
 	return m_channelsParameter;
 }
 
-ConstStringVectorParameterPtr ImageWriter::channelNamesParameter() const
+const StringVectorParameter * ImageWriter::channelNamesParameter() const
 {
 	return m_channelsParameter;
 }
 
-StringParameterPtr ImageWriter::colorspaceParameter()
+StringParameter * ImageWriter::colorspaceParameter()
 {
 	return m_colorspaceParameter;
 }
 
-ConstStringParameterPtr ImageWriter::colorspaceParameter() const
+const StringParameter * ImageWriter::colorspaceParameter() const
 {
 	return m_colorspaceParameter;
 }
 
-BoolParameterPtr ImageWriter::rawChannelsParameter()
+BoolParameter * ImageWriter::rawChannelsParameter()
 {
 	return m_rawChannelsParameter;
 }
 
-ConstBoolParameterPtr ImageWriter::rawChannelsParameter() const
+const BoolParameter * ImageWriter::rawChannelsParameter() const
 {
 	return m_rawChannelsParameter;
 }
@@ -152,7 +152,7 @@ void ImageWriter::imageChannels( vector<string> &names ) const
 	}
 }
 
-ConstImagePrimitivePtr ImageWriter::getImage() const
+const ImagePrimitive *ImageWriter::getImage() const
 {
 	return static_cast<const ImagePrimitive *>( object() );
 }

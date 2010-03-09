@@ -122,83 +122,83 @@ PointMeshOp::~PointMeshOp()
 {
 }
 
-ObjectParameterPtr PointMeshOp::pointParameter()
+ObjectParameter * PointMeshOp::pointParameter()
 {
 	return m_pointParameter;
 }
 
-ConstObjectParameterPtr PointMeshOp::pointParameter() const
+const ObjectParameter * PointMeshOp::pointParameter() const
 {
 	return m_pointParameter;
 }
 
 
-DoubleVectorParameterPtr PointMeshOp::radiusParameter()
+DoubleVectorParameter * PointMeshOp::radiusParameter()
 {
 	return m_radiusParameter;
 }
 
-ConstDoubleVectorParameterPtr PointMeshOp::radiusParameter() const
+const DoubleVectorParameter * PointMeshOp::radiusParameter() const
 {
 	return m_radiusParameter;
 }
 
 
-DoubleVectorParameterPtr PointMeshOp::strengthParameter()
+DoubleVectorParameter * PointMeshOp::strengthParameter()
 {
 	return m_strengthParameter;
 }
 
-ConstDoubleVectorParameterPtr PointMeshOp::strengthParameter() const
+const DoubleVectorParameter * PointMeshOp::strengthParameter() const
 {
 	return m_strengthParameter;
 }
 
 
-FloatParameterPtr PointMeshOp::thresholdParameter()
+FloatParameter * PointMeshOp::thresholdParameter()
 {
 	return m_thresholdParameter;
 }
 
-ConstFloatParameterPtr PointMeshOp::thresholdParameter() const
+const FloatParameter * PointMeshOp::thresholdParameter() const
 {
 	return m_thresholdParameter;
 }
 
 
-V3iParameterPtr PointMeshOp::resolutionParameter()
+V3iParameter * PointMeshOp::resolutionParameter()
 {
 	return m_resolutionParameter;
 }
 
-ConstV3iParameterPtr PointMeshOp::resolutionParameter() const
+const V3iParameter * PointMeshOp::resolutionParameter() const
 {
 	return m_resolutionParameter;
 }
 
 
-Box3fParameterPtr PointMeshOp::boundParameter()
+Box3fParameter * PointMeshOp::boundParameter()
 {
 	return m_boundParameter;
 }
 
-ConstBox3fParameterPtr PointMeshOp::boundParameter() const
+const Box3fParameter * PointMeshOp::boundParameter() const
 {
 	return m_boundParameter;
 }
 
-ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr PointMeshOp::doOperation( const CompoundObject * operands )
 {
 	const float threshold = m_thresholdParameter->getNumericValue();
 
-	ConstObjectPtr points = pointParameter()->getValue();
-	ConstObjectPtr radius = radiusParameter()->getValue();
-	ConstObjectPtr strength = strengthParameter()->getValue();
-	ConstObjectPtr resolutionData = resolutionParameter()->getValue();
-	ConstObjectPtr boundData = boundParameter()->getValue();
+	const Object * points = pointParameter()->getValue();
+	const Object * radius = radiusParameter()->getValue();
+	const Object * strength = strengthParameter()->getValue();
+	const Object * resolutionData = resolutionParameter()->getValue();
+	const Object * boundData = boundParameter()->getValue();
 
-	V3i resolution = staticPointerCast<const V3iData>( resolutionData )->readable();
-	Box3f bound = staticPointerCast<const Box3fData>( boundData )->readable();
+	V3i resolution = static_cast<const V3iData *>( resolutionData )->readable();
+	Box3f bound = static_cast<const Box3fData *>( boundData )->readable();
 
 	/// Calculate a tolerance which is half the size of the smallest grid division
 	double cacheTolerance = ((bound.max.x - bound.min.x) / (double)resolution.x) / 2.0;
@@ -215,9 +215,9 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 
 				BlobbyImplicitSurfaceFunction< V3f, float >::Ptr fn = new BlobbyImplicitSurfaceFunction< V3f, float >
 				(
-					staticPointerCast<const V3fVectorData>( points ),
-					staticPointerCast<const DoubleVectorData>( radius ),
-					staticPointerCast<const DoubleVectorData>( strength )
+					static_cast<const V3fVectorData *>( points ),
+					static_cast<const DoubleVectorData *>( radius ),
+					static_cast<const DoubleVectorData *>( strength )
 				);
 
 				Marcher::Ptr m = new Marcher
@@ -239,9 +239,9 @@ ObjectPtr PointMeshOp::doOperation( ConstCompoundObjectPtr operands )
 
 				BlobbyImplicitSurfaceFunction< V3d, double >::Ptr fn = new BlobbyImplicitSurfaceFunction< V3d, double >
 				(
-					staticPointerCast<const V3dVectorData>( points ),
-					staticPointerCast<const DoubleVectorData>( radius ),
-					staticPointerCast<const DoubleVectorData>( strength )
+					static_cast<const V3dVectorData *>( points ),
+					static_cast<const DoubleVectorData *>( radius ),
+					static_cast<const DoubleVectorData *>( strength )
 				);
 
 				Marcher::Ptr m = new Marcher

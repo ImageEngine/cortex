@@ -68,12 +68,12 @@ WarpOp::~WarpOp()
 {
 }
 
-IntParameterPtr WarpOp::filterParameter()
+IntParameter * WarpOp::filterParameter()
 {
 	return m_filterParameter;
 }
 
-ConstIntParameterPtr WarpOp::filterParameter() const
+const IntParameter * WarpOp::filterParameter() const
 {
 	return m_filterParameter;
 }
@@ -82,7 +82,7 @@ struct WarpOp::Warp
 {
 	typedef void ReturnType;
 
-	Warp( WarpOpPtr warp, WarpOp::FilterType filter, const Imath::Box2i &warpedDataWindow, const Imath::Box2i &originalDataWindow )
+	Warp( WarpOp * warp, WarpOp::FilterType filter, const Imath::Box2i &warpedDataWindow, const Imath::Box2i &originalDataWindow )
 		:	m_warpOp( warp ), m_filter( filter ), m_outputDataWindow( warpedDataWindow ), m_inputDataWindow( originalDataWindow )
 	{
 	}
@@ -129,7 +129,7 @@ struct WarpOp::Warp
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr data )
+	ReturnType operator()( T * data )
 	{
 		typedef typename T::ValueType Container;
 		typedef typename Container::value_type V;
@@ -183,13 +183,13 @@ struct WarpOp::Warp
 	}
 
 	private :
-		WarpOpPtr m_warpOp;
+		WarpOp * m_warpOp;
 		WarpOp::FilterType m_filter;
 		Imath::Box2i m_outputDataWindow;
 		Imath::Box2i m_inputDataWindow;
 };
 
-void WarpOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands )
+void WarpOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundObject * operands )
 {
 	Imath::Box2i originalDataWindow = image->getDataWindow();
 
@@ -221,7 +221,7 @@ Imath::Box2i WarpOp::warpedDataWindow( const Imath::Box2i &dataWindow ) const
 	return dataWindow;
 }
 
-void WarpOp::begin( ConstCompoundObjectPtr operands )
+void WarpOp::begin( const CompoundObject * operands )
 {
 }
 

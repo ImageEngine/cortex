@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,32 +49,32 @@ class MeshTangentsOp : public MeshPrimitiveOp
 		MeshTangentsOp();
 		virtual ~MeshTangentsOp();
 
-		BoolParameterPtr orthogonalizeTangentsParameter();
-		ConstBoolParameterPtr orthogonalizeTangentsParameter() const;
+		BoolParameter * orthogonalizeTangentsParameter();
+		const BoolParameter * orthogonalizeTangentsParameter() const;
 
-		StringParameterPtr pPrimVarNameParameter();
-		ConstStringParameterPtr pPrimVarNameParameter() const;
+		StringParameter * pPrimVarNameParameter();
+		const StringParameter * pPrimVarNameParameter() const;
 
-		StringParameterPtr uPrimVarNameParameter();
-		ConstStringParameterPtr uPrimVarNameParameter() const;
+		StringParameter * uPrimVarNameParameter();
+		const StringParameter * uPrimVarNameParameter() const;
 
-		StringParameterPtr vPrimVarNameParameter();
-		ConstStringParameterPtr vPrimVarNameParameter() const;
+		StringParameter * vPrimVarNameParameter();
+		const StringParameter * vPrimVarNameParameter() const;
 		
-		StringParameterPtr uvIndicesPrimVarNameParameter();
-		ConstStringParameterPtr uvIndicesPrimVarNameParameter() const;
+		StringParameter * uvIndicesPrimVarNameParameter();
+		const StringParameter * uvIndicesPrimVarNameParameter() const;
 
-		StringParameterPtr uTangentPrimVarNameParameter();
-		ConstStringParameterPtr uTangentPrimVarNameParameter() const;
+		StringParameter * uTangentPrimVarNameParameter();
+		const StringParameter * uTangentPrimVarNameParameter() const;
 
-		StringParameterPtr vTangentPrimVarNameParameter();
-		ConstStringParameterPtr vTangentPrimVarNameParameter() const;
+		StringParameter * vTangentPrimVarNameParameter();
+		const StringParameter * vTangentPrimVarNameParameter() const;
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshTangentsOp, MeshPrimitiveOp );
 
 	protected:
 
-		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
+		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
 
 	private :
 

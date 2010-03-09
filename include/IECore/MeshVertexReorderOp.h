@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,12 +55,12 @@ class MeshVertexReorderOp : public MeshPrimitiveOp
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshVertexReorderOp, MeshPrimitiveOp );
 
-		V3iParameterPtr startingVerticesParameter();
-		ConstV3iParameterPtr startingVerticesParameter() const;
+		V3iParameter * startingVerticesParameter();
+		const V3iParameter * startingVerticesParameter() const;
 
 	protected:
 
-		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
+		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
 
 	private :
 
@@ -93,12 +93,12 @@ class MeshVertexReorderOp : public MeshPrimitiveOp
 		int m_numFaces;
 		int m_numVerts;
 
-		void buildInternalTopology( ConstMeshPrimitivePtr mesh );
+		void buildInternalTopology( const MeshPrimitive * mesh );
 
 		int faceDirection( FaceId face, Edge edge );
 
 		void visitFace(
-			ConstMeshPrimitivePtr mesh,
+			const MeshPrimitive * mesh,
 			FaceId currentFace,
 			Edge currentEdge,
 			std::vector<VertexId> &vertexMap,

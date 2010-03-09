@@ -68,7 +68,7 @@ class BGEOParticleReader : public ParticleReader
 
 		/// Returns a PointsPrimitive object containing all the
 		/// This method overwrites the base class implementation.
-		virtual IECore::ObjectPtr doOperation( IECore::ConstCompoundObjectPtr operands );
+		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
 	
 	private :
 

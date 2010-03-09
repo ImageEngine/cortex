@@ -66,37 +66,37 @@ ModifyOp::~ModifyOp()
 {
 }
 
-ParameterPtr ModifyOp::inputParameter()
+Parameter *ModifyOp::inputParameter()
 {
 	return m_inputParameter;
 }
 
-ConstParameterPtr ModifyOp::inputParameter() const
+const Parameter *ModifyOp::inputParameter() const
 {
 	return m_inputParameter;
 }
 
-BoolParameterPtr ModifyOp::copyParameter()
+BoolParameter *ModifyOp::copyParameter()
 {
 	return m_copyParameter;
 }
 
-BoolParameterPtr ModifyOp::copyParameter() const
+const BoolParameter *ModifyOp::copyParameter() const
 {
 	return m_copyParameter;
 }
 
-BoolParameterPtr ModifyOp::enableParameter()
+BoolParameter *ModifyOp::enableParameter()
 {
 	return m_enableParameter;
 }
 
-BoolParameterPtr ModifyOp::enableParameter() const
+const BoolParameter *ModifyOp::enableParameter() const
 {
 	return m_enableParameter;
 }
 
-ObjectPtr ModifyOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr ModifyOp::doOperation( const CompoundObject *operands )
 {
 	ObjectPtr object = m_inputParameter->getValue();
 	if( m_copyParameter->getTypedValue() )

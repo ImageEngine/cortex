@@ -106,52 +106,52 @@ ColorSpaceTransformOp::~ColorSpaceTransformOp()
 {
 }
 
-StringParameterPtr ColorSpaceTransformOp::inputColorSpaceParameter()
+StringParameter *ColorSpaceTransformOp::inputColorSpaceParameter()
 {
 	return m_inputColorSpaceParameter;
 }
 
-ConstStringParameterPtr ColorSpaceTransformOp::inputColorSpaceParameter() const
+const StringParameter *ColorSpaceTransformOp::inputColorSpaceParameter() const
 {
 	return m_inputColorSpaceParameter;
 }
 
-StringParameterPtr ColorSpaceTransformOp::outputColorSpaceParameter()
+StringParameter *ColorSpaceTransformOp::outputColorSpaceParameter()
 {
 	return m_outputColorSpaceParameter;
 }
 
-ConstStringParameterPtr ColorSpaceTransformOp::outputColorSpaceParameter() const
+const StringParameter *ColorSpaceTransformOp::outputColorSpaceParameter() const
 {
 	return m_outputColorSpaceParameter;
 }
 
-StringVectorParameterPtr ColorSpaceTransformOp::channelsParameter()
+StringVectorParameter *ColorSpaceTransformOp::channelsParameter()
 {
 	return m_channelsParameter;
 }
 
-ConstStringVectorParameterPtr ColorSpaceTransformOp::channelsParameter() const
+const StringVectorParameter *ColorSpaceTransformOp::channelsParameter() const
 {
 	return m_channelsParameter;
 }
 
-StringParameterPtr ColorSpaceTransformOp::alphaPrimVarParameter()
+StringParameter *ColorSpaceTransformOp::alphaPrimVarParameter()
 {
 	return m_alphaPrimVarParameter;
 }
 
-ConstStringParameterPtr ColorSpaceTransformOp::alphaPrimVarParameter() const
+const StringParameter *ColorSpaceTransformOp::alphaPrimVarParameter() const
 {
 	return m_alphaPrimVarParameter;
 }
 
-BoolParameterPtr ColorSpaceTransformOp::premultipliedParameter()
+BoolParameter *ColorSpaceTransformOp::premultipliedParameter()
 {
 	return m_premultipliedParameter;
 }
 
-ConstBoolParameterPtr ColorSpaceTransformOp::premultipliedParameter() const
+const BoolParameter *ColorSpaceTransformOp::premultipliedParameter() const
 {
 	return m_premultipliedParameter;
 }
@@ -310,7 +310,7 @@ void ColorSpaceTransformOp::findConversion(
 	}
 }
 
-void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands )
+void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundObject * operands )
 {
 	const InputColorSpace &inputColorSpace = m_inputColorSpaceParameter->getTypedValue();
 	const OutputColorSpace &outputColorSpace = m_outputColorSpaceParameter->getTypedValue();
@@ -444,11 +444,11 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitivePtr image, Const
 
 				}
 				result = runTimeCast< ImagePrimitive >( op->operate() );
-				assert( result.get() == image.get() );
+				assert( result.get() == image );
 			}
 		}
 
-		assert( result.get() == image.get() );
+		assert( result.get() == image );
 		( void ) result;
 
 		previous = current;

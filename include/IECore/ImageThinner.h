@@ -68,8 +68,8 @@ class ImageThinner : public ChannelOp
 		/// either a member of the foreground or background. Pixels with a value
 		/// below the threshold are considered to be background, and those above
 		/// the threshold are considered to be foreground.
-		FloatParameterPtr thresholdParameter();
-		ConstFloatParameterPtr thresholdParameter() const;
+		FloatParameter * thresholdParameter();
+		const FloatParameter * thresholdParameter() const;
 
 	protected :
 

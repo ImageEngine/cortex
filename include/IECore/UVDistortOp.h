@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,14 +52,14 @@ class UVDistortOp : public WarpOp
 		UVDistortOp();
 		virtual ~UVDistortOp();
 
-		ObjectParameterPtr uvMapParameter();
-		ConstObjectParameterPtr uvMapParameter() const;
+		ObjectParameter * uvMapParameter();
+		const ObjectParameter * uvMapParameter() const;
 
 		IE_CORE_DECLARERUNTIMETYPED( UVDistortOp, WarpOp );
 
 	protected :
 
-		virtual void begin( ConstCompoundObjectPtr operands );
+		virtual void begin( const CompoundObject * operands );
 		virtual Imath::Box2i warpedDataWindow( const Imath::Box2i &dataWindow ) const;
 		virtual Imath::V2f warp( const Imath::V2f &p ) const;
 		virtual void end();

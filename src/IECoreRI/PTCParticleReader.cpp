@@ -253,7 +253,7 @@ void PTCParticleReader::attributeNames( std::vector<std::string> &names )
 	}
 }
 
-ObjectPtr PTCParticleReader::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr PTCParticleReader::doOperation( const CompoundObject * operands )
 {
 	vector<string> attributes;
 	particleAttributes( attributes );

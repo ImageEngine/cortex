@@ -57,20 +57,20 @@ class CurveTracer : public Op
 		CurveTracer();
 		virtual ~CurveTracer();
 
-		ImagePrimitiveParameterPtr imageParameter();
-		ConstImagePrimitiveParameterPtr imageParameter() const;
+		ImagePrimitiveParameter * imageParameter();
+		const ImagePrimitiveParameter * imageParameter() const;
 		
-		StringParameterPtr channelNameParameter();
-		ConstStringParameterPtr channelNameParameter() const;
+		StringParameter * channelNameParameter();
+		const StringParameter * channelNameParameter() const;
 		
-		FloatParameterPtr vertexMergeDistanceParameter();
-		ConstFloatParameterPtr vertexMergeDistanceParameter() const;
+		FloatParameter * vertexMergeDistanceParameter();
+		const FloatParameter * vertexMergeDistanceParameter() const;
 		
-		FloatParameterPtr minimumLengthParameter();
-		ConstFloatParameterPtr minimumLengthParameter() const;
+		FloatParameter * minimumLengthParameter();
+		const FloatParameter * minimumLengthParameter() const;
 
-		BoolParameterPtr colorParameter();
-		ConstBoolParameterPtr colorParameter() const;
+		BoolParameter * colorParameter();
+		const BoolParameter * colorParameter() const;
 
 		enum OutputType
 		{
@@ -78,18 +78,18 @@ class CurveTracer : public Op
 			CatmullRom
 		};
 
-		IntParameterPtr outputTypeParameter();
-		ConstIntParameterPtr outputTypeParameter() const;
+		IntParameter * outputTypeParameter();
+		const IntParameter * outputTypeParameter() const;
 
-		IntParameterPtr catmullRomStepParameter();
-		ConstIntParameterPtr catmullRomStepParameter() const;
+		IntParameter * catmullRomStepParameter();
+		const IntParameter * catmullRomStepParameter() const;
 		
-		IntParameterPtr outputSpaceParameter();
-		ConstIntParameterPtr outputSpaceParameter() const;
+		IntParameter * outputSpaceParameter();
+		const IntParameter * outputSpaceParameter() const;
 		
 	protected :
 
-		ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		ObjectPtr doOperation( const CompoundObject * operands );
 		
 	private :
 	
@@ -117,7 +117,7 @@ class CurveTracer : public Op
 		void removeSpurs( Graph &graph, float minimumLength ) const;
 		void mergeVertices( Graph &graph, float mergeDistance ) const;
 		CurvesPrimitivePtr buildCurves( Graph &graph, OutputType type, int catmullRomStep ) const;
-		void colorCurves( CurvesPrimitivePtr curves ) const;
+		void colorCurves( CurvesPrimitive * curves ) const;
 
 };
 

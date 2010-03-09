@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,22 +67,22 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 
 		IE_CORE_DECLARERUNTIMETYPED( ColorSpaceTransformOp, ImagePrimitiveOp );
 
-		StringParameterPtr inputColorSpaceParameter();
-		ConstStringParameterPtr inputColorSpaceParameter() const;
+		StringParameter *inputColorSpaceParameter();
+		const StringParameter *inputColorSpaceParameter() const;
 
-		StringParameterPtr outputColorSpaceParameter();
-		ConstStringParameterPtr outputColorSpaceParameter() const;
+		StringParameter *outputColorSpaceParameter();
+		const StringParameter *outputColorSpaceParameter() const;
 
 		/// The order of the channels listed is important if the conversion is done by a ColorTransformOp.
 		/// In that case it is expected to receive Red,Green,Blue channels respectively.
-		StringVectorParameterPtr channelsParameter();
-		ConstStringVectorParameterPtr channelsParameter() const;
+		StringVectorParameter *channelsParameter();
+		const StringVectorParameter *channelsParameter() const;
 
-		StringParameterPtr alphaPrimVarParameter();
-		ConstStringParameterPtr alphaPrimVarParameter() const;
+		StringParameter *alphaPrimVarParameter();
+		const StringParameter *alphaPrimVarParameter() const;
 
-		BoolParameterPtr premultipliedParameter();
-		ConstBoolParameterPtr premultipliedParameter() const;
+		BoolParameter *premultipliedParameter();
+		const BoolParameter *premultipliedParameter() const;
 
 		/// ModifyOp is the most-derived common base class of ChannelOp and ColorTransformOp
 		typedef ModifyOpPtr (*CreatorFn)( const InputColorSpace &, const OutputColorSpace &, void * );
@@ -114,7 +114,7 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 			std::vector< ConversionInfo > &currentConversion,
 			std::vector< ConversionInfo > &bestConversion
 			);
-	 	virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
+	 	virtual void modifyTypedPrimitive( ImagePrimitive *image, const CompoundObject *operands );
 
 		StringParameterPtr m_inputColorSpaceParameter;
 		StringParameterPtr m_outputColorSpaceParameter;

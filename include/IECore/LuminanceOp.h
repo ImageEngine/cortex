@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,30 +50,30 @@ class LuminanceOp : public PrimitiveOp
 		LuminanceOp();
 		virtual ~LuminanceOp();
 
-		StringParameterPtr colorPrimVarParameter();
-		ConstStringParameterPtr colorPrimVarParameter() const;
+		StringParameter * colorPrimVarParameter();
+		const StringParameter * colorPrimVarParameter() const;
 
-		StringParameterPtr redPrimVarParameter();
-		ConstStringParameterPtr redPrimVarParameter() const;
+		StringParameter * redPrimVarParameter();
+		const StringParameter * redPrimVarParameter() const;
 
-		StringParameterPtr greenPrimVarParameter();
-		ConstStringParameterPtr greenPrimVarParameter() const;
+		StringParameter * greenPrimVarParameter();
+		const StringParameter * greenPrimVarParameter() const;
 
-		StringParameterPtr bluePrimVarParameter();
-		ConstStringParameterPtr bluePrimVarParameter() const;
+		StringParameter * bluePrimVarParameter();
+		const StringParameter * bluePrimVarParameter() const;
 
-		Color3fParameterPtr weightsParameter();
-		ConstColor3fParameterPtr weightsParameter() const;
+		Color3fParameter * weightsParameter();
+		const Color3fParameter * weightsParameter() const;
 
-		StringParameterPtr luminancePrimVarParameter();
-		ConstStringParameterPtr luminancePrimVarParameter() const;
+		StringParameter * luminancePrimVarParameter();
+		const StringParameter * luminancePrimVarParameter() const;
 
-		BoolParameterPtr removeColorPrimVarsParameter();
-		ConstBoolParameterPtr removeColorPrimVarsParameter() const;
+		BoolParameter * removeColorPrimVarsParameter();
+		const BoolParameter * removeColorPrimVarsParameter() const;
 
 	protected :
 
-		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );
+		virtual void modifyPrimitive( Primitive * primitive, const CompoundObject * operands );
 
 	private :
 

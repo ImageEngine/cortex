@@ -61,12 +61,12 @@ CurvesMergeOp::~CurvesMergeOp()
 {
 }
 
-CurvesPrimitiveParameterPtr CurvesMergeOp::curvesParameter()
+CurvesPrimitiveParameter * CurvesMergeOp::curvesParameter()
 {
 	return m_curvesParameter;
 }
 
-ConstCurvesPrimitiveParameterPtr CurvesMergeOp::curvesParameter() const
+const CurvesPrimitiveParameter * CurvesMergeOp::curvesParameter() const
 {
 	return m_curvesParameter;
 }
@@ -75,19 +75,19 @@ struct CurvesMergeOp::AppendPrimVars
 {
 	typedef void ReturnType;
 
-	AppendPrimVars( ConstCurvesPrimitivePtr curves2, const std::string &name )
+	AppendPrimVars( const CurvesPrimitive * curves2, const std::string &name )
 		:	m_curves2( curves2 ), m_name( name )
 	{
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr data )
+	ReturnType operator()( T * data )
 	{
 
 		PrimitiveVariableMap::const_iterator it = m_curves2->variables.find( m_name );
 		if( it!=m_curves2->variables.end() )
 		{
-			typename T::ConstPtr data2 = runTimeCast<const T>( it->second.data );
+			const T *data2 = runTimeCast<const T>( it->second.data );
 			if( data2 )
 			{
 				data->writable().insert( data->writable().end(), data2->readable().begin(), data2->readable().end() );
@@ -97,12 +97,12 @@ struct CurvesMergeOp::AppendPrimVars
 
 	private :
 
-		ConstCurvesPrimitivePtr m_curves2;
+		const CurvesPrimitive * m_curves2;
 		std::string m_name;
 
 };
 
-void CurvesMergeOp::modifyTypedPrimitive( CurvesPrimitivePtr curves, ConstCompoundObjectPtr operands )
+void CurvesMergeOp::modifyTypedPrimitive( CurvesPrimitive * curves, const CompoundObject * operands )
 {
 	const CurvesPrimitive *curves2 = static_cast<const CurvesPrimitive *>( m_curvesParameter->getValue() );
 

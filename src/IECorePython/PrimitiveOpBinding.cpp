@@ -34,6 +34,7 @@
 
 #include "boost/python.hpp"
 
+#include "IECore/Primitive.h"
 #include "IECore/PrimitiveOp.h"
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
@@ -55,10 +56,10 @@ class PrimitiveOpWrap : public PrimitiveOp, public Wrapper<PrimitiveOp>
 
 		PrimitiveOpWrap( PyObject *self, const std::string &description ) : PrimitiveOp( description ), Wrapper<PrimitiveOp>( self, this ) {};
 
-		virtual void modifyPrimitive( PrimitivePtr object, ConstCompoundObjectPtr operands )
+		virtual void modifyPrimitive( Primitive * object, const CompoundObject * operands )
 		{
 			ScopedGILLock gilLock;
-			this->get_override( "modifyPrimitive" )( object, constPointerCast<CompoundObject>( operands ) );
+			this->get_override( "modifyPrimitive" )( PrimitivePtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
 		}
 
 };

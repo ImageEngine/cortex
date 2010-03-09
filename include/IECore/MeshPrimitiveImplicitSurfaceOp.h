@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,31 +65,31 @@ class MeshPrimitiveImplicitSurfaceOp : public TypedPrimitiveOp<MeshPrimitive>
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshPrimitiveImplicitSurfaceOp, MeshPrimitiveOp );
 
-		FloatParameterPtr thresholdParameter();
-		ConstFloatParameterPtr thresholdParameter() const;
+		FloatParameter * thresholdParameter();
+		const FloatParameter * thresholdParameter() const;
 
-		V3iParameterPtr resolutionParameter();
-		ConstV3iParameterPtr resolutionParameter() const;
+		V3iParameter * resolutionParameter();
+		const V3iParameter * resolutionParameter() const;
 
-		Box3fParameterPtr boundParameter();
-		ConstBox3fParameterPtr boundParameter() const;
+		Box3fParameter * boundParameter();
+		const Box3fParameter * boundParameter() const;
 
-		BoolParameterPtr automaticBoundParameter();
-		BoolParameterPtr automaticBoundParameter() const;
+		BoolParameter * automaticBoundParameter();
+		const BoolParameter * automaticBoundParameter() const;
 
-		IntParameterPtr gridMethodParameter();
-		IntParameterPtr gridMethodParameter() const;
+		IntParameter * gridMethodParameter();
+		const IntParameter * gridMethodParameter() const;
 
-		V3fParameterPtr divisionSizeParameter();
-		ConstV3fParameterPtr divisionSizeParameter() const;
+		V3fParameter * divisionSizeParameter();
+		const V3fParameter * divisionSizeParameter() const;
 
-		FloatParameterPtr boundExtendParameter();
-		FloatParameterPtr boundExtendParameter() const;
+		FloatParameter * boundExtendParameter();
+		const FloatParameter * boundExtendParameter() const;
 
 
 	protected:
 
-		virtual void modifyTypedPrimitive( MeshPrimitivePtr typedPrimitive, ConstCompoundObjectPtr operands );
+		virtual void modifyTypedPrimitive( MeshPrimitive * typedPrimitive, const CompoundObject * operands );
 
 	private:
 

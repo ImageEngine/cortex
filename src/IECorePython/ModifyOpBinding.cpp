@@ -58,10 +58,10 @@ class ModifyOpWrap : public ModifyOp, public Wrapper<ModifyOp>
 		{
 		};
 
-		virtual void modify( ObjectPtr object, ConstCompoundObjectPtr operands )
+		virtual void modify( Object * object, const CompoundObject * operands )
 		{
 			ScopedGILLock gilLock;
-			this->get_override( "modify" )( object, constPointerCast<CompoundObject>( operands ) );
+			this->get_override( "modify" )( ObjectPtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
 		};
 
 };

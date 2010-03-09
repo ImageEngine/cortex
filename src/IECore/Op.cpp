@@ -55,13 +55,13 @@ Op::~Op()
 
 ObjectPtr Op::operate()
 {
-	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
+	const CompoundObject *operands = parameters()->getTypedValidatedValue<CompoundObject>();
 	ObjectPtr result = doOperation( operands );
 	m_resultParameter->setValidatedValue( result );
 	return result;
 }
 
-ConstParameterPtr Op::resultParameter() const
+const Parameter * Op::resultParameter() const
 {
 	return m_resultParameter;
 }

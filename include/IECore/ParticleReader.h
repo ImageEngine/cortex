@@ -69,14 +69,14 @@ class ParticleReader : public Reader
 		/// by searching the parameters() structure by hand.
 		/////////////////////////////////////////////////////////
 		//@{
-		FloatParameterPtr percentageParameter();
-		ConstFloatParameterPtr percentageParameter() const;
-		IntParameterPtr percentageSeedParameter();
-		ConstIntParameterPtr percentageSeedParameter() const;
-		StringVectorParameterPtr attributesParameter();
-		ConstStringVectorParameterPtr attributesParameter() const;
-		IntParameterPtr realTypeParameter();
-		ConstIntParameterPtr realTypeParameter() const;
+		FloatParameter * percentageParameter();
+		const FloatParameter * percentageParameter() const;
+		IntParameter * percentageSeedParameter();
+		const IntParameter * percentageSeedParameter() const;
+		StringVectorParameter * attributesParameter();
+		const StringVectorParameter * attributesParameter() const;
+		IntParameter * realTypeParameter();
+		const IntParameter * realTypeParameter() const;
 		//@}
 
 		//! @name Particle specific reading functions.
@@ -107,7 +107,7 @@ class ParticleReader : public Reader
 		/// requested. This is implemented using the virtual methods
 		/// defined above - there is no need to reimplement it
 		/// in derived classes.
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 		/// Convenience functions to access the values held in parameters().
 		/// If called from within doOperation they will never throw, but if

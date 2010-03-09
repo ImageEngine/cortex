@@ -226,7 +226,7 @@ void NParticleReader::attributeNames( std::vector<std::string> &names )
 	}
 }
 
-ConstIntVectorDataPtr NParticleReader::frameTimes()
+const IntVectorData * NParticleReader::frameTimes()
 {
 	if ( !open() )
 	{
@@ -238,7 +238,7 @@ ConstIntVectorDataPtr NParticleReader::frameTimes()
 }
 
 template<typename T, typename F>
-typename T::Ptr NParticleReader::filterAttr( typename F::ConstPtr attr, float percentage )
+typename T::Ptr NParticleReader::filterAttr( const F *attr, float percentage )
 {
 	if( percentage < 100.0f )
 	{
@@ -272,7 +272,7 @@ typename T::Ptr NParticleReader::filterAttr( typename F::ConstPtr attr, float pe
 	}
 
 	// no filtering of any sort needed
-	return typename T::Ptr( (T *)attr.get() );
+	return typename T::Ptr( (T *)attr );
 }
 
 DataPtr NParticleReader::readAttribute( const std::string &name )

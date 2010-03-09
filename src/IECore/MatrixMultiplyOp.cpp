@@ -122,22 +122,22 @@ MatrixMultiplyOp::~MatrixMultiplyOp()
 
 }
 
-ObjectParameterPtr MatrixMultiplyOp::matrixParameter()
+ObjectParameter * MatrixMultiplyOp::matrixParameter()
 {
 	return m_matrixParameter;
 }
 
-ConstObjectParameterPtr MatrixMultiplyOp::matrixParameter() const
+const ObjectParameter * MatrixMultiplyOp::matrixParameter() const
 {
 	return m_matrixParameter;
 }
 
-IntParameterPtr MatrixMultiplyOp::modeParameter()
+IntParameter * MatrixMultiplyOp::modeParameter()
 {
 	return m_modeParameter;
 }
 
-ConstIntParameterPtr MatrixMultiplyOp::modeParameter() const
+const IntParameter * MatrixMultiplyOp::modeParameter() const
 {
 	return m_modeParameter;
 }
@@ -151,7 +151,7 @@ struct MultiplyFunctor
 	MatrixMultiplyOp::Mode mode;
 
 	template< typename T, typename U >
-	void multiply33( typename U::Ptr data, const T &matrix, MatrixMultiplyOp::Mode mode )
+	void multiply33( U * data, const T &matrix, MatrixMultiplyOp::Mode mode )
 	{
 		assert( data );
 
@@ -177,7 +177,7 @@ struct MultiplyFunctor
 	}
 
 	template< typename T, typename U >
-	void multiply( typename U::Ptr data, const T &matrix, MatrixMultiplyOp::Mode mode )
+	void multiply( U * data, const T &matrix, MatrixMultiplyOp::Mode mode )
 	{
 		assert( data );
 
@@ -210,7 +210,7 @@ struct MultiplyFunctor
 	}
 
 	template<typename U>
-	void operator() ( typename U::Ptr data )
+	void operator() ( U * data )
 	{
 		assert( data );
 
@@ -241,9 +241,9 @@ struct MultiplyFunctor
 
 };
 
-void MatrixMultiplyOp::modify( ObjectPtr toModify, ConstCompoundObjectPtr operands )
+void MatrixMultiplyOp::modify( Object * toModify, const CompoundObject * operands )
 {
-	DataPtr data = staticPointerCast< Data >( toModify );
+	Data *data = static_cast< Data * >( toModify );
 	MultiplyFunctor func = { data, m_matrixParameter->getValue(), (Mode)m_modeParameter->getNumericValue() };
 	despatchTypedData< MultiplyFunctor, TypeTraits::IsVec3VectorTypedData >( data, func );
 }

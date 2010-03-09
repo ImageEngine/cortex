@@ -86,18 +86,18 @@ struct DPXImageWriter::ChannelConverter
 	typedef void ReturnType;
 
 	std::string m_channelName;
-	ConstImagePrimitivePtr m_image;
+	const ImagePrimitive *m_image;
 	Box2i m_dataWindow;
 	unsigned int m_bitShift;
 	std::vector<unsigned int> &m_imageBuffer;
 
-	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, unsigned int bitShift, std::vector<unsigned int> &imageBuffer  )
+	ChannelConverter( const std::string &channelName, const ImagePrimitive *image, const Box2i &dataWindow, unsigned int bitShift, std::vector<unsigned int> &imageBuffer  )
 	: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_bitShift( bitShift ), m_imageBuffer( imageBuffer )
 	{
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr dataContainer )
+	ReturnType operator()( T *dataContainer )
 	{
 		assert( dataContainer );
 
@@ -126,7 +126,7 @@ struct DPXImageWriter::ChannelConverter
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T *data, const F& functor )
 		{
 			assert( data );
 
@@ -135,7 +135,7 @@ struct DPXImageWriter::ChannelConverter
 	};
 };
 
-void DPXImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
+void DPXImageWriter::writeImage( const vector<string> &names, const ImagePrimitive *image, const Box2i &dataWindow ) const
 {
 	// write the dpx in the standard 10bit log format
 	ofstream out;

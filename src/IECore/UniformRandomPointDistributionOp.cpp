@@ -125,47 +125,47 @@ UniformRandomPointDistributionOp::~UniformRandomPointDistributionOp()
 {
 }
 
-MeshPrimitiveParameterPtr UniformRandomPointDistributionOp::meshParameter()
+MeshPrimitiveParameter * UniformRandomPointDistributionOp::meshParameter()
 {
 	return m_meshParameter;
 }
 
-ConstMeshPrimitiveParameterPtr UniformRandomPointDistributionOp::meshParameter() const
+const MeshPrimitiveParameter * UniformRandomPointDistributionOp::meshParameter() const
 {
 	return m_meshParameter;
 }
 
-IntParameterPtr UniformRandomPointDistributionOp::numPointsParameter()
+IntParameter * UniformRandomPointDistributionOp::numPointsParameter()
 {
 	return m_numPointsParameter;
 }
 
-ConstIntParameterPtr UniformRandomPointDistributionOp::numPointsParameter() const
+const IntParameter * UniformRandomPointDistributionOp::numPointsParameter() const
 {
 	return m_numPointsParameter;
 }
 
-IntParameterPtr UniformRandomPointDistributionOp::seedParameter()
+IntParameter * UniformRandomPointDistributionOp::seedParameter()
 {
 	return m_seedParameter;
 }
 
-ConstIntParameterPtr UniformRandomPointDistributionOp::seedParameter() const
+const IntParameter * UniformRandomPointDistributionOp::seedParameter() const
 {
 	return m_seedParameter;
 }
 
-BoolParameterPtr UniformRandomPointDistributionOp::addSTParameter()
+BoolParameter * UniformRandomPointDistributionOp::addSTParameter()
 {
 	return m_addSTParameter;
 }
 
-ConstBoolParameterPtr UniformRandomPointDistributionOp::addSTParameter() const
+const BoolParameter * UniformRandomPointDistributionOp::addSTParameter() const
 {
 	return m_addSTParameter;
 }
 
-float UniformRandomPointDistributionOp::density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
+float UniformRandomPointDistributionOp::density( const MeshPrimitive * mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
 {
 	return 1.0f;
 }
@@ -174,21 +174,21 @@ struct UniformRandomPointDistributionOp::DistributeFn
 {
 	typedef PointsPrimitivePtr ReturnType;
 
-	ConstUniformRandomPointDistributionOpPtr m_op;
-	ConstMeshPrimitivePtr m_mesh;
+	const UniformRandomPointDistributionOp * m_op;
+	const MeshPrimitive * m_mesh;
 	const int m_numPoints;
 	const int m_seed;
-	FloatVectorDataPtr m_sData, m_tData;
+	FloatVectorData * m_sData, * m_tData;
 	bool m_addST;
 
-	DistributeFn( UniformRandomPointDistributionOpPtr op, ConstMeshPrimitivePtr mesh, int numPoints, int seed, FloatVectorDataPtr sData, FloatVectorDataPtr tData, bool addST )
+	DistributeFn( UniformRandomPointDistributionOp * op, const MeshPrimitive * mesh, int numPoints, int seed, FloatVectorData * sData, FloatVectorData * tData, bool addST )
 	: m_op( op ), m_mesh( mesh ), m_numPoints( numPoints ), m_seed( seed ), m_sData( sData ), m_tData( tData ), m_addST( addST )
 	{
 		assert( m_mesh );
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::ConstPtr p ) const
+	ReturnType operator()( const T * p ) const
 	{
 		typedef typename T::ValueType::value_type Vec;
 		typedef std::vector<double> ProbabilityVector;
@@ -336,7 +336,7 @@ struct UniformRandomPointDistributionOp::DistributeFn
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T * data, const F& functor )
 		{
 			assert( data );
 
@@ -345,7 +345,7 @@ struct UniformRandomPointDistributionOp::DistributeFn
 	};
 };
 
-ObjectPtr UniformRandomPointDistributionOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr UniformRandomPointDistributionOp::doOperation( const CompoundObject * operands )
 {
 	MeshPrimitivePtr mesh = m_meshParameter->getTypedValue<MeshPrimitive>();
 	assert( mesh );
@@ -353,7 +353,7 @@ ObjectPtr UniformRandomPointDistributionOp::doOperation( ConstCompoundObjectPtr 
 	TriangulateOpPtr op = new TriangulateOp();
 	op->inputParameter()->setValue( mesh );
 	op->toleranceParameter()->setNumericValue( 1.e-3 );
-        mesh = runTimeCast< MeshPrimitive > ( op->operate() );
+	mesh = runTimeCast< MeshPrimitive > ( op->operate() );
 	assert( mesh );
 
 	bool addST = m_addSTParameter->getTypedValue();

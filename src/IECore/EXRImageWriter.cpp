@@ -101,17 +101,17 @@ std::string EXRImageWriter::destinationColorSpace() const
 	return "linear";
 }
 
-IntParameterPtr EXRImageWriter::compressionParameter()
+IntParameter * EXRImageWriter::compressionParameter()
 {
 	return parameters()->parameter< IntParameter >( "compression" );
 }
 
-ConstIntParameterPtr EXRImageWriter::compressionParameter() const
+const IntParameter * EXRImageWriter::compressionParameter() const
 {
 	return parameters()->parameter< IntParameter >( "compression" );
 }
 
-void EXRImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow) const
+void EXRImageWriter::writeImage( const vector<string> &names, const ImagePrimitive * image, const Box2i &dataWindow) const
 {
 	assert( image );
 
@@ -141,7 +141,7 @@ void EXRImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 				throw IOException( ( boost::format("EXRImageWriter: Could not find image channel \"%s\"") % name ).str() );
 			}
 
-			ConstDataPtr channelData = pit->second.data;
+			const Data *channelData = pit->second.data;
 			if (!channelData)
 			{
 				throw IOException( ( boost::format("EXRImageWriter: Channel \"%s\" has no data") % name ).str() );
@@ -151,19 +151,19 @@ void EXRImageWriter::writeImage( const vector<string> &names, ConstImagePrimitiv
 			{
 			case FloatVectorDataTypeId:
 				writeTypedChannel<float>(name, dataWindow,
-				                         staticPointerCast<const FloatVectorData>(channelData)->readable(),
+				                         static_cast<const FloatVectorData *>(channelData)->readable(),
 				                         FLOAT, header, fb);
 				break;
 
 			case UIntVectorDataTypeId:
 				writeTypedChannel<unsigned int>(name, dataWindow,
-				                                staticPointerCast<const UIntVectorData>(channelData)->readable(),
+				                                static_cast<const UIntVectorData *>(channelData)->readable(),
 				                                UINT, header, fb);
 				break;
 
 			case HalfVectorDataTypeId:
 				writeTypedChannel<half>(name, dataWindow,
-				                        staticPointerCast<const HalfVectorData>(channelData)->readable(),
+				                        static_cast<const HalfVectorData *>(channelData)->readable(),
 				                        HALF, header, fb);
 				break;
 

@@ -94,7 +94,7 @@ struct DataPromoteOp::Promote2Fn<T, typename boost::enable_if< TypeTraits::IsVec
 	typedef DataPtr ReturnType;
 
 	template<typename F>
-	ReturnType operator()( typename F::ConstPtr d ) const
+	ReturnType operator()( const F *d ) const
 	{
 		assert( d );
 		typename T::Ptr result = new T;
@@ -116,7 +116,7 @@ struct DataPromoteOp::Promote2Fn<T, typename boost::enable_if< TypeTraits::IsSim
 	typedef DataPtr ReturnType;
 
 	template<typename F>
-	ReturnType operator()( typename F::ConstPtr d ) const
+	ReturnType operator()( const F *d ) const
 	{
 		assert( d );
 		typename T::Ptr result = new T;
@@ -140,7 +140,7 @@ struct DataPromoteOp::Promote1Fn
 	template<typename T, typename Enable = void >
 	struct Func
 	{
-		ReturnType operator()( typename T::ConstPtr d, TypeId ) const
+		ReturnType operator()( const T *d, TypeId ) const
 		{
 			assert( d );
 			throw Exception( "DataPromoteOp: Unsupported source data type \"" + d->typeName() + "\"." );
@@ -148,7 +148,7 @@ struct DataPromoteOp::Promote1Fn
 	};
 
 	template<typename F>
-	ReturnType operator()( typename F::ConstPtr d ) const
+	ReturnType operator()( const F *d ) const
 	{
 		assert( d );
 		Func<F> f;
@@ -160,7 +160,7 @@ struct DataPromoteOp::Promote1Fn
 template<typename F >
 struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits::IsNumericVectorTypedData<F> >::type >
 {
-	ReturnType operator()( typename F::ConstPtr d, TypeId targetType ) const
+	ReturnType operator()( const F *d, TypeId targetType ) const
 	{
 		assert( d );
 		switch ( targetType )
@@ -199,7 +199,7 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 template<typename F >
 struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits::IsNumericSimpleTypedData<F> >::type >
 {
-	ReturnType operator()( typename F::ConstPtr d, TypeId targetType ) const
+	ReturnType operator()( const F *d, TypeId targetType ) const
 	{
 		assert( d );
 		switch ( targetType )
@@ -237,7 +237,7 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 
 } // namespace IECore
 
-ObjectPtr DataPromoteOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr DataPromoteOp::doOperation( const CompoundObject * operands )
 {
 	assert( operands );
 

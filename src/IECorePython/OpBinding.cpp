@@ -59,13 +59,13 @@ class OpWrap : public Op, public Wrapper<Op>
 
 		OpWrap( PyObject *self, const std::string &description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter ) : Op( description, compoundParameter, resultParameter ), Wrapper<Op>( self, this ) {};
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands )
+		virtual ObjectPtr doOperation( const CompoundObject * operands )
 		{
 			ScopedGILLock gilLock;
 			override o = this->get_override( "doOperation" );
 			if( o )
 			{
-				ObjectPtr r = o( constPointerCast<CompoundObject>( operands ) );
+				ObjectPtr r = o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
 				if( !r )
 				{
 					throw Exception( "doOperation() python method didn't return an Object." );
@@ -84,7 +84,7 @@ IE_CORE_DECLAREPTR( OpWrap );
 
 static ParameterPtr resultParameter( const Op &o )
 {
-	return constPointerCast<Parameter>( o.resultParameter() );
+	return const_cast<Parameter *>( o.resultParameter() );
 }
 
 static ObjectPtr operate( Op &op )

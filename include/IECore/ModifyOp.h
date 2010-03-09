@@ -57,23 +57,23 @@ class ModifyOp : public Op
 		ModifyOp( const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter );
 		virtual ~ModifyOp();
 
-		ParameterPtr inputParameter();
-		ConstParameterPtr inputParameter() const;
+		Parameter *inputParameter();
+		const Parameter *inputParameter() const;
 
-		BoolParameterPtr copyParameter();
-		BoolParameterPtr copyParameter() const;
+		BoolParameter *copyParameter();
+		const BoolParameter *copyParameter() const;
 
-		BoolParameterPtr enableParameter();
-		BoolParameterPtr enableParameter() const;
+		BoolParameter *enableParameter();
+		const BoolParameter *enableParameter() const;
 
 	protected :
 
 		/// Implemented to call modify() - implement modify rather than this.
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject *operands );
 
 		/// Should be implemented by all subclasses to modify object.
 		/// This won't be called if the Op is not enabled.
-		virtual void modify( ObjectPtr object, ConstCompoundObjectPtr operands ) = 0;
+		virtual void modify( Object *object, const CompoundObject *operands ) = 0;
 
 	private :
 

@@ -61,32 +61,32 @@ LinearToCineonOp::~LinearToCineonOp()
 {
 }
 
-FloatParameterPtr LinearToCineonOp::filmGammaParameter()
+FloatParameter * LinearToCineonOp::filmGammaParameter()
 {
 	return m_filmGamma;
 }
 
-ConstFloatParameterPtr LinearToCineonOp::filmGammaParameter() const
+const FloatParameter * LinearToCineonOp::filmGammaParameter() const
 {
 	return m_filmGamma;
 }
 
-IntParameterPtr LinearToCineonOp::refWhiteValParameter()
+IntParameter * LinearToCineonOp::refWhiteValParameter()
 {
 	return m_refWhiteVal;
 }
 
-ConstIntParameterPtr LinearToCineonOp::refWhiteValParameter() const
+const IntParameter * LinearToCineonOp::refWhiteValParameter() const
 {
 	return m_refWhiteVal;
 }
 
-IntParameterPtr LinearToCineonOp::refBlackValParameter()
+IntParameter * LinearToCineonOp::refBlackValParameter()
 {
 	return m_refBlackVal;
 }
 
-ConstIntParameterPtr LinearToCineonOp::refBlackValParameter() const
+const IntParameter * LinearToCineonOp::refBlackValParameter() const
 {
 	return m_refBlackVal;
 }
@@ -101,7 +101,7 @@ struct LinearToCineonOp::Converter
 		}
 
 		template<typename T>
-		ReturnType operator()( typename T::Ptr data )
+		ReturnType operator()( T * data )
 		{
 			typedef typename T::ValueType Container;
 			typedef typename Container::value_type V;

@@ -55,17 +55,17 @@ class TruelightColorTransformOp : public IECore::ColorTransformOp
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreTruelight::TruelightColorTransformOp, TruelightColorTransformOpTypeId, IECore::ColorTransformOp );
 
-		IECore::StringParameterPtr profileParameter();
-		IECore::ConstStringParameterPtr profileParameter() const;
+		IECore::StringParameter * profileParameter();
+		const IECore::StringParameter * profileParameter() const;
 
-		IECore::StringParameterPtr displayParameter();
-		IECore::ConstStringParameterPtr displayParameter() const;
+		IECore::StringParameter * displayParameter();
+		const IECore::StringParameter * displayParameter() const;
 
-		IECore::IntParameterPtr inputSpaceParameter();
-		IECore::ConstIntParameterPtr inputSpaceParameter() const;
+		IECore::IntParameter * inputSpaceParameter();
+		const IECore::IntParameter * inputSpaceParameter() const;
 
-		IECore::BoolParameterPtr rawTruelightOutputParameter();
-		IECore::ConstBoolParameterPtr rawTruelightOutputParameter() const;
+		IECore::BoolParameter * rawTruelightOutputParameter();
+		const IECore::BoolParameter * rawTruelightOutputParameter() const;
 
 		/// Returns the actual truelight commands used for the transform.
 		/// This can be of use when debugging.
@@ -73,7 +73,7 @@ class TruelightColorTransformOp : public IECore::ColorTransformOp
 
 	protected :
 
-		virtual void begin( IECore::ConstCompoundObjectPtr operands );
+		virtual void begin( const IECore::CompoundObject * operands );
 		virtual void transform( Imath::Color3f &color ) const;
 
 	private :

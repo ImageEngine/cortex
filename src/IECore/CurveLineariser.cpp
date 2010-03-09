@@ -63,17 +63,17 @@ CurveLineariser::~CurveLineariser()
 {
 }
 
-FloatParameterPtr CurveLineariser::verticesPerSegmentParameter()
+FloatParameter * CurveLineariser::verticesPerSegmentParameter()
 {
 	return parameters()->parameter<FloatParameter>( "verticesPerSegment" );
 }
 
-ConstFloatParameterPtr CurveLineariser::verticesPerSegmentParameter() const
+const FloatParameter * CurveLineariser::verticesPerSegmentParameter() const
 {
 	return parameters()->parameter<FloatParameter>( "verticesPerSegment" );
 }
 		
-void CurveLineariser::modifyTypedPrimitive( CurvesPrimitivePtr curves, ConstCompoundObjectPtr operands )
+void CurveLineariser::modifyTypedPrimitive( CurvesPrimitive * curves, const CompoundObject * operands )
 {
 	if( curves->basis()==CubicBasisf::linear() )
 	{

@@ -136,32 +136,32 @@ std::string YUVImageWriter::destinationColorSpace() const
 	return "srgb";
 }
 
-IntParameterPtr YUVImageWriter::formatParameter()
+IntParameter * YUVImageWriter::formatParameter()
 {
 	return m_formatParameter;
 }
 
-ConstIntParameterPtr YUVImageWriter::formatParameter() const
+const IntParameter * YUVImageWriter::formatParameter() const
 {
 	return m_formatParameter;
 }
 
-V2fParameterPtr YUVImageWriter::kBkRParameter()
+V2fParameter * YUVImageWriter::kBkRParameter()
 {
 	return m_kBkRParameter;
 }
 
-ConstV2fParameterPtr YUVImageWriter::kBkRParameter() const
+const V2fParameter * YUVImageWriter::kBkRParameter() const
 {
 	return m_kBkRParameter;
 }
 
-Box3fParameterPtr YUVImageWriter::rangeParameter()
+Box3fParameter * YUVImageWriter::rangeParameter()
 {
 	return m_rangeParameter;
 }
 
-ConstBox3fParameterPtr YUVImageWriter::rangeParameter() const
+const Box3fParameter * YUVImageWriter::rangeParameter() const
 {
 	return m_rangeParameter;
 }
@@ -171,18 +171,18 @@ struct YUVImageWriter::ChannelConverter
 	typedef void ReturnType;
 
 	std::string m_channelName;
-	ConstImagePrimitivePtr m_image;
+	const ImagePrimitive * m_image;
 	Box2i m_dataWindow;
 	int m_channelOffset;
-	Color3fVectorDataPtr m_rgbData;
+	Color3fVectorData * m_rgbData;
 
-	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, int channelOffset, Color3fVectorDataPtr rgbData  )
+	ChannelConverter( const std::string &channelName, const ImagePrimitive * image, const Box2i &dataWindow, int channelOffset, Color3fVectorData * rgbData  )
 	: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_channelOffset( channelOffset ), m_rgbData( rgbData )
 	{
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr dataContainer )
+	ReturnType operator()( T * dataContainer )
 	{
 		assert( dataContainer );
 
@@ -210,14 +210,14 @@ struct YUVImageWriter::ChannelConverter
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T * data, const F& functor )
 		{
 			throw InvalidArgumentException( ( boost::format( "YUVImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
 		}
 	};
 };
 
-void YUVImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
+void YUVImageWriter::writeImage( const vector<string> &names, const ImagePrimitive * image, const Box2i &dataWindow ) const
 {
 	const V2f &kBkR = m_kBkRParameter->getTypedValue();
 	const Box3f &range = m_rangeParameter->getTypedValue();

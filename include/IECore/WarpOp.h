@@ -55,8 +55,8 @@ class WarpOp : public ImagePrimitiveOp
 		WarpOp( const std::string &description );
 		virtual ~WarpOp();
 
-		IntParameterPtr filterParameter();
-		ConstIntParameterPtr filterParameter() const;
+		IntParameter * filterParameter();
+		const IntParameter * filterParameter() const;
 
 		IE_CORE_DECLARERUNTIMETYPED( WarpOp, ImagePrimitiveOp );
 
@@ -64,11 +64,11 @@ class WarpOp : public ImagePrimitiveOp
 
 		/// Implemented to call begin(), warpedDataWindow(), warp() and end(). Derived classes should implement those functions rather than
 		/// this function.
-		virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
+		virtual void modifyTypedPrimitive( ImagePrimitive * image, const CompoundObject * operands );
 
 		/// Called once per operation before anything else. This is an opportunity to perform any preprocessing
 		/// necessary before warpedDataWindow() and many calls to warp() are made.
-		virtual void begin( ConstCompoundObjectPtr operands );
+		virtual void begin( const CompoundObject * operands );
 		/// Defines the resulting dataWindow.
 		/// This function is called after begin() method. The input Box2i corresponds to the input image data window.
 		/// The default implementation returns the same data window as the original image.

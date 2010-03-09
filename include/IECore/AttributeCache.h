@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,10 +63,10 @@ class AttributeCache : public RefCounted
 		AttributeCache( const std::string &filename, IndexedIO::OpenMode mode );
 
 		///Write a piece of data associated with the specified object and attribute to the cache.
-		void write( const ObjectHandle &obj, const AttributeHandle &attr, ObjectPtr data );
+		void write( const ObjectHandle &obj, const AttributeHandle &attr, const Object *data );
 
 		///Write data associated with the specified header to the cache.
-		void writeHeader( const HeaderHandle &hdr, ObjectPtr data );
+		void writeHeader( const HeaderHandle &hdr, const Object *data );
 
 		///Read a piece of data associated with the specified object and attribute from the cache.
 		///Throws an exception if the requested data is not present in the cache.

@@ -82,27 +82,27 @@ EnvMapSampler::~EnvMapSampler()
 {
 }
 
-ImagePrimitiveParameterPtr EnvMapSampler::imageParameter()
+ImagePrimitiveParameter * EnvMapSampler::imageParameter()
 {
 	return m_imageParameter;
 }
 
-ConstImagePrimitiveParameterPtr EnvMapSampler::imageParameter() const
+const ImagePrimitiveParameter * EnvMapSampler::imageParameter() const
 {
 	return m_imageParameter;
 }
 
-IntParameterPtr EnvMapSampler::subdivisionDepthParameter()
+IntParameter * EnvMapSampler::subdivisionDepthParameter()
 {
 	return m_subdivisionDepthParameter;
 }
 
-ConstIntParameterPtr EnvMapSampler::subdivisionDepthParameter() const
+const IntParameter * EnvMapSampler::subdivisionDepthParameter() const
 {
 	return m_subdivisionDepthParameter;
 }
 
-ObjectPtr EnvMapSampler::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr EnvMapSampler::doOperation( const CompoundObject * operands )
 {
 	ImagePrimitivePtr image = static_cast<ImagePrimitive *>( imageParameter()->getValue() )->copy();
 	Box2i dataWindow = image->getDataWindow();

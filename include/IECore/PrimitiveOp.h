@@ -56,9 +56,9 @@ class PrimitiveOp : public ModifyOp
 	protected :
 
 		/// Implemented to call modifyPrimitive()
-		virtual void modify( ObjectPtr object, ConstCompoundObjectPtr operands );
+		virtual void modify( Object * object, const CompoundObject * operands );
 		/// Must be implemented by all subclasses.
-		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands ) = 0;
+		virtual void modifyPrimitive( Primitive * primitive, const CompoundObject * operands ) = 0;
 
 };
 

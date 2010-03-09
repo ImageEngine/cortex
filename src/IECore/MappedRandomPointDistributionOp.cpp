@@ -88,27 +88,27 @@ MappedRandomPointDistributionOp::~MappedRandomPointDistributionOp()
 {
 }
 
-ImagePrimitiveParameterPtr MappedRandomPointDistributionOp::imageParameter()
+ImagePrimitiveParameter * MappedRandomPointDistributionOp::imageParameter()
 {
 	return m_imageParameter;
 }
 
-ConstImagePrimitiveParameterPtr MappedRandomPointDistributionOp::imageParameter() const
+const ImagePrimitiveParameter * MappedRandomPointDistributionOp::imageParameter() const
 {
 	return m_imageParameter;
 }
 
-StringParameterPtr MappedRandomPointDistributionOp::channelNameParameter()
+StringParameter * MappedRandomPointDistributionOp::channelNameParameter()
 {
 	return m_channelNameParameter;
 }
 
-ConstStringParameterPtr MappedRandomPointDistributionOp::channelNameParameter() const
+const StringParameter * MappedRandomPointDistributionOp::channelNameParameter() const
 {
 	return m_channelNameParameter;
 }
 
-float MappedRandomPointDistributionOp::density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
+float MappedRandomPointDistributionOp::density( const MeshPrimitive * mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
 {
 	assert( m_imageEvaluator );
 	assert( m_imageEvaluator->primitive() );
@@ -150,7 +150,7 @@ float MappedRandomPointDistributionOp::density( ConstMeshPrimitivePtr mesh, cons
 	}
 }
 
-ObjectPtr MappedRandomPointDistributionOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr MappedRandomPointDistributionOp::doOperation( const CompoundObject * operands )
 {
 	ImagePrimitivePtr image = m_imageParameter->getTypedValue<ImagePrimitive>();
 	assert( image );

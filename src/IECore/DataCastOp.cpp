@@ -85,22 +85,22 @@ DataCastOp::~DataCastOp()
 {
 }
 
-ObjectParameterPtr DataCastOp::objectParameter()
+ObjectParameter * DataCastOp::objectParameter()
 {
 	return m_objectParameter;
 }
 
-ConstObjectParameterPtr DataCastOp::objectParameter() const
+const ObjectParameter * DataCastOp::objectParameter() const
 {
 	return m_objectParameter;
 }
 
-IntParameterPtr DataCastOp::targetTypeParameter()
+IntParameter * DataCastOp::targetTypeParameter()
 {
 	return m_targetTypeParameter;
 }
 
-ConstIntParameterPtr DataCastOp::targetTypeParameter() const
+const IntParameter * DataCastOp::targetTypeParameter() const
 {
 	return m_targetTypeParameter;
 }
@@ -118,9 +118,9 @@ struct CastRawData
 
 template< typename S, typename T >
 static typename T::Ptr
-castToData( ConstDataPtr array )
+castToData( const Data *array )
 {
-	typename S::ConstPtr dataArray = staticPointerCast< const S >( array );
+	const S * dataArray = static_cast< const S * >( array );
 	const typename S::BaseType *source = dataArray->baseReadable();
 	unsigned sourceSize = dataArray->baseSize();
 
@@ -139,9 +139,9 @@ castToData( ConstDataPtr array )
 
 template< typename S, typename T >
 static typename T::Ptr
-castToVectorData( DataPtr array )
+castToVectorData( Data * array )
 {
-	typename S::ConstPtr dataArray = staticPointerCast< const S >( array );
+	const S *dataArray = static_cast< const S * >( array );
 	const typename S::BaseType *source = dataArray->baseReadable();
 	unsigned sourceSize = dataArray->baseSize();
 	unsigned targetItemSize = ( sizeof( typename T::ValueType::value_type ) / sizeof( typename T::BaseType ) );
@@ -167,7 +167,7 @@ castToVectorData( DataPtr array )
 				return castToVectorData< SOURCE ## Data, TARGET ## Data >( data );	\
 
 
-ObjectPtr DataCastOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 {
 	const TypeId targetType = (TypeId) m_targetTypeParameter->getNumericValue();
 

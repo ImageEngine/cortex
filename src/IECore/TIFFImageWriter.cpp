@@ -150,20 +150,20 @@ struct TIFFImageWriter::ChannelConverter
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr data )
+	ReturnType operator()( T * data )
 	{
 		assert( data );
 
 		return DataConvert < T, ChannelData, ScaledDataConversion< typename T::ValueType::value_type, typename ChannelData::ValueType::value_type> >()
 		(
-			staticPointerCast<const T>( data )
+			static_cast<const T *>( data )
 		);
 	};
 
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T *data, const F& functor )
 		{
 			assert( data );
 
@@ -173,7 +173,7 @@ struct TIFFImageWriter::ChannelConverter
 };
 
 template<typename T>
-void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector<string> &names, const Imath::Box2i &dataWindow, tiff *tiffImage, size_t bufSize, unsigned int numStrips ) const
+void TIFFImageWriter::encodeChannels( const ImagePrimitive * image, const vector<string> &names, const Imath::Box2i &dataWindow, tiff *tiffImage, size_t bufSize, unsigned int numStrips ) const
 {
 	assert( tiffImage );
 
@@ -238,7 +238,7 @@ void TIFFImageWriter::encodeChannels( ConstImagePrimitivePtr image, const vector
 	}
 }
 
-void TIFFImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &fullDataWindow ) const
+void TIFFImageWriter::writeImage( const vector<string> &names, const ImagePrimitive * image, const Box2i &fullDataWindow ) const
 {
 	ScopedTIFFErrorHandler errorHandler;
 	if ( setjmp( errorHandler.m_jmpBuffer ) )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,14 +72,14 @@ class YUVImageWriter : public ImageWriter
 
 		virtual std::string destinationColorSpace() const ;
 
-		IntParameterPtr formatParameter();
-		ConstIntParameterPtr formatParameter() const;
+		IntParameter * formatParameter();
+		const IntParameter * formatParameter() const;
 
-		V2fParameterPtr kBkRParameter();
-		ConstV2fParameterPtr kBkRParameter() const;
+		V2fParameter * kBkRParameter();
+		const V2fParameter * kBkRParameter() const;
 
-		Box3fParameterPtr rangeParameter();
-		ConstBox3fParameterPtr rangeParameter() const;
+		Box3fParameter * rangeParameter();
+		const Box3fParameter * rangeParameter() const;
 
 	private:
 
@@ -89,7 +89,7 @@ class YUVImageWriter : public ImageWriter
 
 		/// write the image
 		virtual void writeImage( const std::vector<std::string> &names,
-		                         ConstImagePrimitivePtr image,
+		                         const ImagePrimitive * image,
 		                         const Imath::Box2i &dw ) const;
 
 		void constructParameters();

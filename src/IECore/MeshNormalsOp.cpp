@@ -67,22 +67,22 @@ MeshNormalsOp::~MeshNormalsOp()
 {
 }
 
-StringParameterPtr MeshNormalsOp::pPrimVarNameParameter()
+StringParameter * MeshNormalsOp::pPrimVarNameParameter()
 {
 	return parameters()->parameter<StringParameter>( "pPrimVarName" );
 }
 
-ConstStringParameterPtr MeshNormalsOp::pPrimVarNameParameter() const
+const StringParameter * MeshNormalsOp::pPrimVarNameParameter() const
 {
 	return parameters()->parameter<StringParameter>( "pPrimVarName" );
 }
 
-StringParameterPtr MeshNormalsOp::nPrimVarNameParameter()
+StringParameter * MeshNormalsOp::nPrimVarNameParameter()
 {
 	return parameters()->parameter<StringParameter>( "nPrimVarName" );
 }
 
-ConstStringParameterPtr MeshNormalsOp::nPrimVarNameParameter() const
+const StringParameter * MeshNormalsOp::nPrimVarNameParameter() const
 {
 	return parameters()->parameter<StringParameter>( "nPrimVarName" );
 }
@@ -91,13 +91,13 @@ struct MeshNormalsOp::CalculateNormals
 {
 	typedef DataPtr ReturnType;
 
-	CalculateNormals( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds )
+	CalculateNormals( const IntVectorData * vertsPerFace, const IntVectorData * vertIds )
 		:	m_vertsPerFace( vertsPerFace ), m_vertIds( vertIds )
 	{
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr data )
+	ReturnType operator()( T * data )
 	{
 		typedef typename T::ValueType VecContainer;
 		typedef typename VecContainer::value_type Vec;
@@ -147,14 +147,14 @@ struct MeshNormalsOp::CalculateNormals
 struct MeshNormalsOp::HandleErrors
 {
 	template<typename T, typename F>
-	void operator()( typename T::ConstPtr d, const F &f )
+	void operator()( const T *d, const F &f )
 	{
 		string e = boost::str( boost::format( "MeshNormalsOp : pPrimVarName parameter has unsupported data type \"%s\"." ) % d->typeName() );
 		throw InvalidArgumentException( e );
 	}
 };
 
-void MeshNormalsOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
+void MeshNormalsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands )
 {
 	const std::string &pPrimVarName = pPrimVarNameParameter()->getTypedValue();
 	PrimitiveVariableMap::const_iterator pvIt = mesh->variables.find( pPrimVarName );

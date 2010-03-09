@@ -82,7 +82,7 @@ bool SLOReader::canRead( const std::string &fileName )
 	return true;
 }
 
-ObjectPtr SLOReader::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 {
 	if( Slo_SetShader( (char *)fileName().c_str() ) )
 	{

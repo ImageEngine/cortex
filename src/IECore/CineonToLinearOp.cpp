@@ -109,33 +109,33 @@ CompoundParameterPtr CineonToLinearOp::createCineonSettings()
 	return cineonParameters;
 }
 
-FloatParameterPtr CineonToLinearOp::filmGammaParameter()
+FloatParameter *CineonToLinearOp::filmGammaParameter()
 {
 	return m_filmGamma;
 }
 
-ConstFloatParameterPtr CineonToLinearOp::filmGammaParameter() const
+const FloatParameter *CineonToLinearOp::filmGammaParameter() const
 {
 	return m_filmGamma;
 }
 
 
-IntParameterPtr CineonToLinearOp::refWhiteValParameter()
+IntParameter *CineonToLinearOp::refWhiteValParameter()
 {
 	return m_refWhiteVal;
 }
 
-ConstIntParameterPtr CineonToLinearOp::refWhiteValParameter() const
+const IntParameter *CineonToLinearOp::refWhiteValParameter() const
 {
 	return m_refWhiteVal;
 }
 
-IntParameterPtr CineonToLinearOp::refBlackValParameter()
+IntParameter *CineonToLinearOp::refBlackValParameter()
 {
 	return m_refBlackVal;
 }
 
-ConstIntParameterPtr CineonToLinearOp::refBlackValParameter() const
+const IntParameter *CineonToLinearOp::refBlackValParameter() const
 {
 	return m_refBlackVal;
 }

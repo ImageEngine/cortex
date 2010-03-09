@@ -88,7 +88,7 @@ bool ObjectReader::canRead( const std::string &fileName )
 	return io != 0;
 }
 
-ObjectPtr ObjectReader::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr ObjectReader::doOperation( const CompoundObject * operands )
 {
 	IndexedIOInterfacePtr io = open(fileName());
 	return Object::load( io, "object" );

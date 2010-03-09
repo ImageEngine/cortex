@@ -100,10 +100,10 @@ class PDCParticleReader : public ParticleReader
 		void readElements( T *buffer, std::streampos pos, unsigned long n ) const;
 
 		template<typename T, typename F>
-		typename T::Ptr filterAttr( typename F::ConstPtr attr, float percentage );
+		typename T::Ptr filterAttr( const F * attr, float percentage );
 
 		// loads particleId in a completely unfiltered state
-		ConstDoubleVectorDataPtr idAttribute();
+		const DoubleVectorData * idAttribute();
 		DoubleVectorDataPtr m_idAttribute;
 
 };

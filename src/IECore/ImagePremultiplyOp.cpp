@@ -59,12 +59,12 @@ ImagePremultiplyOp::~ImagePremultiplyOp()
 {
 }
 
-StringParameterPtr ImagePremultiplyOp::alphaChannelNameParameter()
+StringParameter * ImagePremultiplyOp::alphaChannelNameParameter()
 {
 	return m_alphaChannelNameParameter;
 }
 
-ConstStringParameterPtr ImagePremultiplyOp::alphaChannelNameParameter() const
+const StringParameter * ImagePremultiplyOp::alphaChannelNameParameter() const
 {
 	return m_alphaChannelNameParameter;
 }
@@ -84,9 +84,9 @@ struct ImagePremultiplyOp::PremultFn
 {
 	typedef void ReturnType;
 
-	ConstFloatVectorDataPtr m_alphaChannel;
+	const FloatVectorData *m_alphaChannel;
 
-	PremultFn( ConstFloatVectorDataPtr alphaChannel ) : m_alphaChannel( alphaChannel )
+	PremultFn( const FloatVectorData *alphaChannel ) : m_alphaChannel( alphaChannel )
 	{
 		assert( m_alphaChannel );
 	}

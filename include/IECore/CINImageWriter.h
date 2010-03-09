@@ -63,7 +63,7 @@ class CINImageWriter : public ImageWriter
 
 		/// write the associated image
 		virtual void writeImage( const std::vector<std::string> &names,
-		                         ConstImagePrimitivePtr image,
+		                         const ImagePrimitive * image,
 		                         const Imath::Box2i &dw ) const;
 
 		struct ChannelConverter;

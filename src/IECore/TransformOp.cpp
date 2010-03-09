@@ -75,47 +75,47 @@ TransformOp::TransformOp()
 	parameters()->addParameter( m_normalPrimVarsParameter );
 }
 
-ObjectParameterPtr TransformOp::matrixParameter()
+ObjectParameter * TransformOp::matrixParameter()
 {
 	return m_multiplyOp->matrixParameter();
 }
 
-ConstObjectParameterPtr TransformOp::matrixParameter() const
+const ObjectParameter * TransformOp::matrixParameter() const
 {
 	return m_multiplyOp->matrixParameter();
 }
 
-StringVectorParameterPtr TransformOp::pointPrimVarsParameter()
+StringVectorParameter * TransformOp::pointPrimVarsParameter()
 {
 	return m_pointPrimVarsParameter;
 }
 
-ConstStringVectorParameterPtr TransformOp::pointPrimVarsParameter() const
+const StringVectorParameter * TransformOp::pointPrimVarsParameter() const
 {
 	return m_pointPrimVarsParameter;
 }
 
-StringVectorParameterPtr TransformOp::vectorPrimVarsParameter()
+StringVectorParameter * TransformOp::vectorPrimVarsParameter()
 {
 	return m_vectorPrimVarsParameter;
 }
 
-ConstStringVectorParameterPtr TransformOp::vectorPrimVarsParameter() const
+const StringVectorParameter * TransformOp::vectorPrimVarsParameter() const
 {
 	return m_vectorPrimVarsParameter;
 }
 
-StringVectorParameterPtr TransformOp::normalPrimVarsParameter()
+StringVectorParameter * TransformOp::normalPrimVarsParameter()
 {
 	return m_normalPrimVarsParameter;
 }
 
-ConstStringVectorParameterPtr TransformOp::normalPrimVarsParameter() const
+const StringVectorParameter * TransformOp::normalPrimVarsParameter() const
 {
 	return m_normalPrimVarsParameter;
 }
 
-void TransformOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands )
+void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject * operands )
 {
 	m_multiplyOp->modeParameter()->setNumericValue( MatrixMultiplyOp::Point );
 	const std::vector<std::string> &p = m_pointPrimVarsParameter->getTypedValue();

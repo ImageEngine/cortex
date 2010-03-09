@@ -53,9 +53,9 @@ PrimitiveOp::~PrimitiveOp()
 {
 }
 
-void PrimitiveOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands )
+void PrimitiveOp::modify( Object * object, const CompoundObject * operands )
 {
 	// static cast is safe as input parameter checks that object is of type primitive
 	// before we're called.
-	modifyPrimitive( staticPointerCast<Primitive>( object ), operands );
+	modifyPrimitive( static_cast<Primitive *>( object ), operands );
 }

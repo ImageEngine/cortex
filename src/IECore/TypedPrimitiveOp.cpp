@@ -56,9 +56,9 @@ TypedPrimitiveOp<T>::~TypedPrimitiveOp()
 }
 
 template<typename T>
-void TypedPrimitiveOp<T>::modify( ObjectPtr primitive, ConstCompoundObjectPtr operands )
+void TypedPrimitiveOp<T>::modify( Object * primitive, const CompoundObject * operands )
 {
-	typename T::Ptr typedPrimitive = dynamicPointerCast<T>( primitive );
+	T * typedPrimitive = runTimeCast< T, Object >( primitive );
 
 	// Parameter validation should ensure that this is object is of the correct type, hence the assertion
 	assert( typedPrimitive );

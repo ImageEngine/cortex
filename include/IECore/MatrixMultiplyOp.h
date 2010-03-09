@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -53,8 +53,8 @@ class MatrixMultiplyOp : public ModifyOp
 		MatrixMultiplyOp();
 		virtual ~MatrixMultiplyOp();
 
-		ObjectParameterPtr matrixParameter();
-		ConstObjectParameterPtr matrixParameter() const;
+		ObjectParameter * matrixParameter();
+		const ObjectParameter * matrixParameter() const;
 
 		/// An enumeration for the different ways of interpreting
 		/// the vectors to be transformed. These are the acceptable
@@ -66,12 +66,12 @@ class MatrixMultiplyOp : public ModifyOp
 			Normal = 2
 		};
 
-		IntParameterPtr modeParameter();
-		ConstIntParameterPtr modeParameter() const;
+		IntParameter * modeParameter();
+		const IntParameter * modeParameter() const;
 
 	protected :
 
-		virtual void modify( ObjectPtr toModify, ConstCompoundObjectPtr operands );
+		virtual void modify( Object * toModify, const CompoundObject * operands );
 
 	private :
 

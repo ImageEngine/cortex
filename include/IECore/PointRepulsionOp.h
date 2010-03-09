@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,31 +60,31 @@ class PointRepulsionOp : public ModifyOp
 		PointRepulsionOp();
 		virtual ~PointRepulsionOp();
 
-		MeshPrimitiveParameterPtr meshParameter();
-		ConstMeshPrimitiveParameterPtr meshParameter() const;
+		MeshPrimitiveParameter * meshParameter();
+		const MeshPrimitiveParameter * meshParameter() const;
 
-		ImagePrimitiveParameterPtr imageParameter();
-		ConstImagePrimitiveParameterPtr imageParameter() const;
+		ImagePrimitiveParameter * imageParameter();
+		const ImagePrimitiveParameter * imageParameter() const;
 
-		StringParameterPtr channelNameParameter();
-		ConstStringParameterPtr channelNameParameter() const;
+		StringParameter * channelNameParameter();
+		const StringParameter * channelNameParameter() const;
 
-		IntParameterPtr numIterationsParameter();
-		ConstIntParameterPtr numIterationsParameter() const;
+		IntParameter * numIterationsParameter();
+		const IntParameter * numIterationsParameter() const;
 
-		FloatParameterPtr magnitudeParameter();
-		ConstFloatParameterPtr magnitudeParameter() const;
+		FloatParameter * magnitudeParameter();
+		const FloatParameter * magnitudeParameter() const;
 
-		StringParameterPtr weightsNameParameter();
-		ConstStringParameterPtr weightsNameParameter() const;
+		StringParameter * weightsNameParameter();
+		const StringParameter * weightsNameParameter() const;
 
 
 	protected :
 
-		void getNearestPointsAndDensities( ImagePrimitiveEvaluatorPtr, const PrimitiveVariable &density, MeshPrimitiveEvaluatorPtr, const PrimitiveVariable &s, const PrimitiveVariable &t, std::vector<Imath::V3f> &points, std::vector<float> &densities );
+		void getNearestPointsAndDensities( ImagePrimitiveEvaluator *, const PrimitiveVariable &density, MeshPrimitiveEvaluator *, const PrimitiveVariable &s, const PrimitiveVariable &t, std::vector<Imath::V3f> &points, std::vector<float> &densities );
 		void calculateForces( std::vector<Imath::V3f> &points, std::vector<float> &radii, std::vector<Imath::Box3f> &bounds, std::vector<Imath::V3f> &forces, Imath::Rand48 &generator, std::vector<float> &densities, float densityInv );
 
-		virtual void modify( ObjectPtr object, ConstCompoundObjectPtr operands );
+		virtual void modify( Object * object, const CompoundObject * operands );
 
 		MeshPrimitiveParameterPtr m_meshParameter;
 		ImagePrimitiveParameterPtr m_imageParameter;

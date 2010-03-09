@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,26 +54,26 @@ class PointBoundsOp : public Op
 		virtual ~PointBoundsOp();
 
 		/// The Parameter for the input point cloud.
-		ObjectParameterPtr pointParameter();
-		ConstObjectParameterPtr pointParameter() const;
+		ObjectParameter * pointParameter();
+		const ObjectParameter * pointParameter() const;
 
 		/// The Parameter for point velocities.
-		ObjectParameterPtr velocityParameter();
-		ConstObjectParameterPtr velocityParameter() const;
+		ObjectParameter * velocityParameter();
+		const ObjectParameter * velocityParameter() const;
 
-		FloatParameterPtr velocityMultiplierParameter();
-		ConstFloatParameterPtr velocityMultiplierParameter() const;
+		FloatParameter * velocityMultiplierParameter();
+		const FloatParameter * velocityMultiplierParameter() const;
 
 		/// The Parameter for optional point radii.
-		ObjectParameterPtr radiusParameter();
-		ConstObjectParameterPtr radiusParameter() const;
+		ObjectParameter * radiusParameter();
+		const ObjectParameter * radiusParameter() const;
 
-		FloatParameterPtr radiusMultiplierParameter();
-		ConstFloatParameterPtr radiusMultiplierParameter() const;
+		FloatParameter * radiusMultiplierParameter();
+		const FloatParameter * radiusMultiplierParameter() const;
 
 	protected :
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
 

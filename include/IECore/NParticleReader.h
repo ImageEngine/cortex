@@ -63,7 +63,7 @@ class NParticleReader : public ParticleReader
 		
 		/// returns IntVectorData of all frames contained in the nCache
 		/// the frameIndex parameter should be set using an index into this IntVectorData
-		ConstIntVectorDataPtr frameTimes();
+		const IntVectorData * frameTimes();
 	
 	private:
 		
@@ -106,7 +106,7 @@ class NParticleReader : public ParticleReader
 		std::map<int, IFFFile::Chunk::ChunkIterator> frameToRootChildren;
 		
 		template<typename T, typename F>
-		typename T::Ptr filterAttr( typename F::ConstPtr attr, float percentage );
+		typename T::Ptr filterAttr( const F * attr, float percentage );
 };
 
 IE_CORE_DECLAREPTR( NParticleReader );

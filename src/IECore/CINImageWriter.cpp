@@ -134,7 +134,7 @@ struct CINImageWriter::ChannelConverter
 	};
 };
 
-void CINImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
+void CINImageWriter::writeImage( const vector<string> &names, const ImagePrimitive * image, const Box2i &dataWindow ) const
 {
 	// write the cineon in the standard 10bit log format
 	std::ofstream out;

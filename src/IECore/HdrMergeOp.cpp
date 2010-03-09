@@ -109,56 +109,56 @@ HdrMergeOp::~HdrMergeOp()
 {
 }
 
-ObjectParameterPtr HdrMergeOp::inputGroupParameter()
+ObjectParameter * HdrMergeOp::inputGroupParameter()
 {
 	return m_inputGroupParameter;
 }
 
-ConstObjectParameterPtr HdrMergeOp::inputGroupParameter() const
+const ObjectParameter * HdrMergeOp::inputGroupParameter() const
 {
 	return m_inputGroupParameter;
 }
 
-FloatParameterPtr HdrMergeOp::exposureStepParameter()
+FloatParameter * HdrMergeOp::exposureStepParameter()
 {
 	return m_exposureStepParameter;
 }
 
-ConstFloatParameterPtr HdrMergeOp::exposureStepParameter() const
+const FloatParameter * HdrMergeOp::exposureStepParameter() const
 {
 	return m_exposureStepParameter;
 }
 
-FloatParameterPtr HdrMergeOp::exposureAdjustmentParameter()
+FloatParameter * HdrMergeOp::exposureAdjustmentParameter()
 {
 	return m_exposureAdjustmentParameter;
 }
 
-ConstFloatParameterPtr HdrMergeOp::exposureAdjustmentParameter() const
+const FloatParameter * HdrMergeOp::exposureAdjustmentParameter() const
 {
 	return m_exposureAdjustmentParameter;
 }
 
-Box2fParameterPtr HdrMergeOp::windowingParameter()
+Box2fParameter * HdrMergeOp::windowingParameter()
 {
 	return m_windowingParameter;
 }
 
-ConstBox2fParameterPtr HdrMergeOp::windowingParameter() const
+const Box2fParameter * HdrMergeOp::windowingParameter() const
 {
 	return m_windowingParameter;
 }
 
 template< typename T >
 inline void merge( bool firstImage, size_t &pixelCount,
-					ImagePrimitivePtr img, ImagePrimitivePtr outImg,
+					const ImagePrimitive * img, ImagePrimitive * outImg,
 					const Imath::Box2f &windowing, float intensityMultiplier,
-					FloatVectorDataPtr outR, FloatVectorDataPtr outG, FloatVectorDataPtr outB, FloatVectorDataPtr outA )
+					FloatVectorData * outR, FloatVectorData * outG, FloatVectorData * outB, FloatVectorData * outA )
 {
 
-	IntrusivePtr< TypedData< std::vector< T > > > inR = img->getChannel< T >( "R" );
-	IntrusivePtr< TypedData< std::vector< T > > > inG = img->getChannel< T >( "G" );
-	IntrusivePtr< TypedData< std::vector< T > > > inB = img->getChannel< T >( "B" );
+	const TypedData< std::vector< T > > *inR = img->getChannel< T >( "R" );
+	const TypedData< std::vector< T > > *inG = img->getChannel< T >( "G" );
+	const TypedData< std::vector< T > > *inB = img->getChannel< T >( "B" );
 
 	if ( firstImage )
 	{
@@ -207,7 +207,7 @@ inline void merge( bool firstImage, size_t &pixelCount,
 	}
 }
 
-ObjectPtr HdrMergeOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr HdrMergeOp::doOperation( const CompoundObject * operands )
 {
 	Group *imageGroup = static_cast<Group *>( m_inputGroupParameter->getValue() );
 
@@ -260,7 +260,7 @@ ObjectPtr HdrMergeOp::doOperation( ConstCompoundObjectPtr operands )
 	bool firstImage = true;
 	for ( Group::ChildContainer::const_iterator it = images.begin(); it != images.end(); it++, firstImage = false )
 	{
-		ImagePrimitivePtr img = staticPointerCast< ImagePrimitive >(*it);
+		const ImagePrimitive *img = staticPointerCast< ImagePrimitive >(*it);
 		float intensityMultiplier = pow( 2.0f, exposure );
 		if ( img->getChannel< float >( "R" ) )
 		{

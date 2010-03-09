@@ -64,7 +64,7 @@ PDCParticleWriter::PDCParticleWriter( ObjectPtr object, const std::string &fileN
 }
 
 template<class T, class E, unsigned int n>
-static void writeAttr( ofstream &oStream, typename T::ConstPtr attr )
+static void writeAttr( ofstream &oStream, const T *attr )
 {
 	if( bigEndian() )
 	{
@@ -86,7 +86,7 @@ static void writeAttr( ofstream &oStream, typename T::ConstPtr attr )
 }
 
 template<class T, class E, unsigned int n>
-static void writeSimpleAttr( ofstream &oStream, typename T::ConstPtr attr )
+static void writeSimpleAttr( ofstream &oStream, const T *attr )
 {
 	if( bigEndian() )
 	{

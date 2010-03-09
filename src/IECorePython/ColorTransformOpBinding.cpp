@@ -54,13 +54,13 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 
 		ColorTransformOpWrap( PyObject *self, const std::string &description ) : ColorTransformOp( description ), Wrapper<ColorTransformOp>( self, this ) {};
 
-		virtual void begin( ConstCompoundObjectPtr operands )
+		virtual void begin( const CompoundObject * operands )
 		{
 			ScopedGILLock gilLock;
 			override o = this->get_override( "begin" );
 			if( o )
 			{
-				o( constPointerCast<CompoundObject>( operands ) );
+				o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
 			}
 		}
 

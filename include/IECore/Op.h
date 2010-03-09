@@ -72,7 +72,7 @@ class Op : public Parameterised
 
 		/// Returns a parameter describing the result of the operation - the
 		/// value of this parameter is always the value last returned by operate.
-		ConstParameterPtr resultParameter() const;
+		const Parameter *resultParameter() const;
 
 	protected :
 
@@ -81,7 +81,7 @@ class Op : public Parameterised
 		/// function will never be called when the contents of the parameters
 		/// are in a bad state.
 		/// \todo This should be const.
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands ) = 0;
+		virtual ObjectPtr doOperation( const CompoundObject *operands ) = 0;
 
 	private :
 

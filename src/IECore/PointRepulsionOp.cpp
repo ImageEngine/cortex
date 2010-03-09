@@ -144,68 +144,68 @@ PointRepulsionOp::~PointRepulsionOp()
 {
 }
 
-MeshPrimitiveParameterPtr PointRepulsionOp::meshParameter()
+MeshPrimitiveParameter * PointRepulsionOp::meshParameter()
 {
 	return m_meshParameter;
 }
 
-ConstMeshPrimitiveParameterPtr PointRepulsionOp::meshParameter() const
+const MeshPrimitiveParameter * PointRepulsionOp::meshParameter() const
 {
 	return m_meshParameter;
 }
 
 
-ImagePrimitiveParameterPtr PointRepulsionOp::imageParameter()
+ImagePrimitiveParameter * PointRepulsionOp::imageParameter()
 {
 	return m_imageParameter;
 }
 
-ConstImagePrimitiveParameterPtr PointRepulsionOp::imageParameter() const
+const ImagePrimitiveParameter * PointRepulsionOp::imageParameter() const
 {
 	return m_imageParameter;
 }
 
-StringParameterPtr PointRepulsionOp::channelNameParameter()
+StringParameter * PointRepulsionOp::channelNameParameter()
 {
 	return m_channelNameParameter;
 }
 
-ConstStringParameterPtr PointRepulsionOp::channelNameParameter() const
+const StringParameter * PointRepulsionOp::channelNameParameter() const
 {
 	return m_channelNameParameter;
 }
 
-IntParameterPtr PointRepulsionOp::numIterationsParameter()
+IntParameter * PointRepulsionOp::numIterationsParameter()
 {
 	return m_numIterationsParameter;
 }
 
-ConstIntParameterPtr PointRepulsionOp::numIterationsParameter() const
+const IntParameter * PointRepulsionOp::numIterationsParameter() const
 {
 	return m_numIterationsParameter;
 }
 
-FloatParameterPtr PointRepulsionOp::magnitudeParameter()
+FloatParameter * PointRepulsionOp::magnitudeParameter()
 {
 	return m_magnitudeParameter;
 }
 
-ConstFloatParameterPtr PointRepulsionOp::magnitudeParameter() const
+const FloatParameter * PointRepulsionOp::magnitudeParameter() const
 {
 	return m_magnitudeParameter;
 }
 
-StringParameterPtr PointRepulsionOp::weightsNameParameter()
+StringParameter * PointRepulsionOp::weightsNameParameter()
 {
 	return m_weightsNameParameter;
 }
 
-ConstStringParameterPtr PointRepulsionOp::weightsNameParameter() const
+const StringParameter * PointRepulsionOp::weightsNameParameter() const
 {
 	return m_weightsNameParameter;
 }
 
-void PointRepulsionOp::getNearestPointsAndDensities( ImagePrimitiveEvaluatorPtr imageEvaluator, const PrimitiveVariable &densityPrimVar, MeshPrimitiveEvaluatorPtr meshEvaluator, const PrimitiveVariable &sPrimVar, const PrimitiveVariable &tPrimVar, std::vector<Imath::V3f> &points, std::vector<float> &densities )
+void PointRepulsionOp::getNearestPointsAndDensities( ImagePrimitiveEvaluator * imageEvaluator, const PrimitiveVariable &densityPrimVar, MeshPrimitiveEvaluator * meshEvaluator, const PrimitiveVariable &sPrimVar, const PrimitiveVariable &tPrimVar, std::vector<Imath::V3f> &points, std::vector<float> &densities )
 {
 	densities.resize( points.size() );
 
@@ -306,9 +306,9 @@ void PointRepulsionOp::calculateForces( std::vector<V3f> &points, std::vector<fl
 }
 
 
-void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands )
+void PointRepulsionOp::modify( Object * object, const CompoundObject * operands )
 {
-	MeshPrimitivePtr mesh = m_meshParameter->getTypedValue<MeshPrimitive>();
+	MeshPrimitive * mesh = m_meshParameter->getTypedValue<MeshPrimitive>();
 	assert( mesh );
 
 	TriangulateOpPtr op = new TriangulateOp();
@@ -317,10 +317,10 @@ void PointRepulsionOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands
 	mesh = runTimeCast< MeshPrimitive > ( op->operate() );
 	assert( mesh );
 
-	PointsPrimitivePtr pointsPrimitive = runTimeCast< PointsPrimitive >( object );
+	PointsPrimitive * pointsPrimitive = runTimeCast< PointsPrimitive, Object >( object );
 	assert( pointsPrimitive );
 
-	ImagePrimitivePtr image = runTimeCast< ImagePrimitive >( m_imageParameter->getValue()->copy() );
+	ImagePrimitive * image = runTimeCast< ImagePrimitive, Object >( m_imageParameter->getValue()->copy() );
 	assert( image );
 
 	const std::string &channelName = m_channelNameParameter->getTypedValue();

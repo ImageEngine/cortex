@@ -89,7 +89,7 @@ class Writer : public Op
 		Writer( const std::string &description, const ObjectParameter::TypeIdSet &writableTypes );
 
 		/// Implemented to call doWrite(), so derived classes need only implement that.
-		ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		ObjectPtr doOperation( const CompoundObject * operands );
 
 		/// Must be implemented by subclasses to write object() to fileName(). Implementations
 		/// should throw an Exception on failure.

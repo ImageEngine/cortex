@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,37 +57,37 @@ class Grade : public ColorTransformOp
 		Grade();
 		virtual ~Grade();
 
-		Color3fParameterPtr blackPointParameter();
-		ConstColor3fParameterPtr blackPointParameter() const;
+		Color3fParameter * blackPointParameter();
+		const Color3fParameter * blackPointParameter() const;
 
-		Color3fParameterPtr whitePointParameter();
-		ConstColor3fParameterPtr whitePointParameter() const;
+		Color3fParameter * whitePointParameter();
+		const Color3fParameter * whitePointParameter() const;
 
-		Color3fParameterPtr liftParameter();
-		ConstColor3fParameterPtr liftParameter() const;
+		Color3fParameter * liftParameter();
+		const Color3fParameter * liftParameter() const;
 
-		Color3fParameterPtr gainParameter();
-		ConstColor3fParameterPtr gainParameter() const;
+		Color3fParameter * gainParameter();
+		const Color3fParameter * gainParameter() const;
 
-		Color3fParameterPtr multiplyParameter();
-		ConstColor3fParameterPtr multiplyParameter() const;
+		Color3fParameter * multiplyParameter();
+		const Color3fParameter * multiplyParameter() const;
 
-		Color3fParameterPtr offsetParameter();
-		ConstColor3fParameterPtr offsetParameter() const;
+		Color3fParameter * offsetParameter();
+		const Color3fParameter * offsetParameter() const;
 
-		Color3fParameterPtr gammaParameter();
-		ConstColor3fParameterPtr gammaParameter() const;
+		Color3fParameter * gammaParameter();
+		const Color3fParameter * gammaParameter() const;
 
-		BoolParameterPtr blackClampParameter();
-		ConstBoolParameterPtr blackClampParameter() const;
+		BoolParameter * blackClampParameter();
+		const BoolParameter * blackClampParameter() const;
 
-		BoolParameterPtr whiteClampParameter();
-		ConstBoolParameterPtr whiteClampParameter() const;
+		BoolParameter * whiteClampParameter();
+		const BoolParameter * whiteClampParameter() const;
 
 	protected :
 
 		/// initializes temporary values A, B and 1/gamma.
-		virtual void begin( ConstCompoundObjectPtr operands );
+		virtual void begin( const CompoundObject * operands );
 		virtual void transform( Imath::Color3f &color ) const;
 
 	private :

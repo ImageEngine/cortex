@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,21 +56,21 @@ class MappedRandomPointDistributionOp : public UniformRandomPointDistributionOp
 		MappedRandomPointDistributionOp();
 		virtual ~MappedRandomPointDistributionOp();
 
-		ImagePrimitiveParameterPtr imageParameter();
-		ConstImagePrimitiveParameterPtr imageParameter() const;
+		ImagePrimitiveParameter * imageParameter();
+		const ImagePrimitiveParameter * imageParameter() const;
 
-		StringParameterPtr channelNameParameter();
-		ConstStringParameterPtr channelNameParameter() const;
+		StringParameter * channelNameParameter();
+		const StringParameter * channelNameParameter() const;
 
 	protected :
 
 		/// Derived classes can override this method and return a number in the range [0,1] defining the
 		/// required density at the given point.
-		virtual float density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const;
+		virtual float density( const MeshPrimitive * mesh, const Imath::V3f &point, const Imath::V2f &uv ) const;
 
 	private :
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 		ImagePrimitiveParameterPtr m_imageParameter;
 		StringParameterPtr m_channelNameParameter;

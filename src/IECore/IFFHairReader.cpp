@@ -192,7 +192,7 @@ bool IFFHairReader::open()
 	return m_header.valid && m_iffFileName == fileName();
 }
 
-ObjectPtr IFFHairReader::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr IFFHairReader::doOperation( const CompoundObject * operands )
 {
 	if( !open() )
 	{
@@ -296,7 +296,7 @@ ObjectPtr IFFHairReader::doOperation( ConstCompoundObjectPtr operands )
 	return curves;
 }
 
-void IFFHairReader::loadData( IFFFile::Chunk::ChunkIterator channel, V3dVectorDataPtr channelData, int numCVs, bool fromFile )
+void IFFHairReader::loadData( IFFFile::Chunk::ChunkIterator channel, V3dVectorData * channelData, int numCVs, bool fromFile )
 {
 	V3dVectorDataPtr data( new V3dVectorData );
 	data->writable().resize( numCVs, V3d( 0 ) );

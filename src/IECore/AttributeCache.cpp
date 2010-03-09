@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -71,7 +71,7 @@ AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode
 	}
 }
 
-void AttributeCache::write( const ObjectHandle &obj, const AttributeHandle &attr, ObjectPtr data)
+void AttributeCache::write( const ObjectHandle &obj, const AttributeHandle &attr, const Object *data)
 {
 	m_io->chdir("/objects");
 	m_io->mkdir(obj);
@@ -79,7 +79,7 @@ void AttributeCache::write( const ObjectHandle &obj, const AttributeHandle &attr
 	data->save( m_io, attr );
 }
 
-void AttributeCache::writeHeader( const HeaderHandle &hdr, ObjectPtr data)
+void AttributeCache::writeHeader( const HeaderHandle &hdr, const Object *data)
 {
 	m_io->chdir("/headers");
 	data->save( m_io, hdr );

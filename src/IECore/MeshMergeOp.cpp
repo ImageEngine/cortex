@@ -61,12 +61,12 @@ MeshMergeOp::~MeshMergeOp()
 {
 }
 
-MeshPrimitiveParameterPtr MeshMergeOp::meshParameter()
+MeshPrimitiveParameter * MeshMergeOp::meshParameter()
 {
 	return m_meshParameter;
 }
 
-ConstMeshPrimitiveParameterPtr MeshMergeOp::meshParameter() const
+const MeshPrimitiveParameter * MeshMergeOp::meshParameter() const
 {
 	return m_meshParameter;
 }
@@ -75,19 +75,19 @@ struct MeshMergeOp::AppendPrimVars
 {
 	typedef void ReturnType;
 
-	AppendPrimVars( ConstMeshPrimitivePtr mesh2, const std::string &name )
+	AppendPrimVars( const MeshPrimitive * mesh2, const std::string &name )
 		:	m_mesh2( mesh2 ), m_name( name )
 	{
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr data )
+	ReturnType operator()( T * data )
 	{
 
 		PrimitiveVariableMap::const_iterator it = m_mesh2->variables.find( m_name );
 		if( it!=m_mesh2->variables.end() )
 		{
-			typename T::ConstPtr data2 = runTimeCast<const T>( it->second.data );
+			const T *data2 = runTimeCast<const T>( it->second.data );
 			if( data2 )
 			{
 				data->writable().insert( data->writable().end(), data2->readable().begin(), data2->readable().end() );
@@ -97,12 +97,12 @@ struct MeshMergeOp::AppendPrimVars
 
 	private :
 
-		ConstMeshPrimitivePtr m_mesh2;
+		const MeshPrimitive * m_mesh2;
 		std::string m_name;
 
 };
 
-void MeshMergeOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
+void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands )
 {
 	const MeshPrimitive *mesh2 = static_cast<const MeshPrimitive *>( m_meshParameter->getValue() );
 

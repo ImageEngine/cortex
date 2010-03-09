@@ -243,7 +243,7 @@ void BGEOParticleReader::attributeNames( std::vector<std::string> &names )
 	}
 }
 
-ObjectPtr BGEOParticleReader::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr BGEOParticleReader::doOperation( const CompoundObject *operands )
 {
 	vector<string> attributes;
 	particleAttributes( attributes );

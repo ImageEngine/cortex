@@ -106,69 +106,69 @@ ColorTransformOp::~ColorTransformOp()
 {
 }
 
-StringParameterPtr ColorTransformOp::colorPrimVarParameter()
+StringParameter * ColorTransformOp::colorPrimVarParameter()
 {
 	return m_colorPrimVarParameter;
 }
 
-ConstStringParameterPtr ColorTransformOp::colorPrimVarParameter() const
+const StringParameter * ColorTransformOp::colorPrimVarParameter() const
 {
 	return m_colorPrimVarParameter;
 }
 
-StringParameterPtr ColorTransformOp::redPrimVarParameter()
+StringParameter * ColorTransformOp::redPrimVarParameter()
 {
 	return m_redPrimVarParameter;
 }
 
-ConstStringParameterPtr ColorTransformOp::redPrimVarParameter() const
+const StringParameter * ColorTransformOp::redPrimVarParameter() const
 {
 	return m_redPrimVarParameter;
 }
 
-StringParameterPtr ColorTransformOp::greenPrimVarParameter()
+StringParameter * ColorTransformOp::greenPrimVarParameter()
 {
 	return m_greenPrimVarParameter;
 }
 
-ConstStringParameterPtr ColorTransformOp::greenPrimVarParameter() const
+const StringParameter * ColorTransformOp::greenPrimVarParameter() const
 {
 	return m_greenPrimVarParameter;
 }
 
-StringParameterPtr ColorTransformOp::bluePrimVarParameter()
+StringParameter * ColorTransformOp::bluePrimVarParameter()
 {
 	return m_bluePrimVarParameter;
 }
 
-ConstStringParameterPtr ColorTransformOp::bluePrimVarParameter() const
+const StringParameter * ColorTransformOp::bluePrimVarParameter() const
 {
 	return m_bluePrimVarParameter;
 }
 
-StringParameterPtr ColorTransformOp::alphaPrimVarParameter()
+StringParameter * ColorTransformOp::alphaPrimVarParameter()
 {
 	return m_alphaPrimVarParameter;
 }
 
-ConstStringParameterPtr ColorTransformOp::alphaPrimVarParameter() const
+const StringParameter * ColorTransformOp::alphaPrimVarParameter() const
 {
 	return m_alphaPrimVarParameter;
 }
 
 
-BoolParameterPtr ColorTransformOp::premultipliedParameter()
+BoolParameter * ColorTransformOp::premultipliedParameter()
 {
 	return m_premultipliedParameter;
 }
 
-ConstBoolParameterPtr ColorTransformOp::premultipliedParameter() const
+const BoolParameter * ColorTransformOp::premultipliedParameter() const
 {
 	return m_premultipliedParameter;
 }
 
 template<typename T>
-const typename T::BaseType *ColorTransformOp::alphaData( PrimitivePtr primitive, size_t requiredElements )
+const typename T::BaseType *ColorTransformOp::alphaData( Primitive * primitive, size_t requiredElements )
 {
 	if( m_premultipliedParameter->getTypedValue()==false )
 	{
@@ -189,7 +189,7 @@ const typename T::BaseType *ColorTransformOp::alphaData( PrimitivePtr primitive,
 		throw Exception( "Alpha data type does not match color data type." );
 	}
 
-	typename T::Ptr d = staticPointerCast<T>( it->second.data );
+	T *d = static_cast<T *>( it->second.data.get() );
 	if( d->baseSize()!=requiredElements )
 	{
 		throw Exception( "Alpha data has incorrect number of elements." );
@@ -199,7 +199,7 @@ const typename T::BaseType *ColorTransformOp::alphaData( PrimitivePtr primitive,
 }
 
 template <typename T>
-void ColorTransformOp::transformSeparate( PrimitivePtr primitive, ConstCompoundObjectPtr operands, typename T::Ptr r, typename T::Ptr g, typename T::Ptr b )
+void ColorTransformOp::transformSeparate( Primitive * primitive, const CompoundObject * operands, T * r, T * g, T * b )
 {
 	size_t n = r->baseSize();
 	const typename T::BaseType *alpha = alphaData<T>( primitive, n );
@@ -239,7 +239,7 @@ void ColorTransformOp::transformSeparate( PrimitivePtr primitive, ConstCompoundO
 }
 
 template<typename T>
-void ColorTransformOp::transformInterleaved( PrimitivePtr primitive, ConstCompoundObjectPtr operands, typename T::Ptr colors )
+void ColorTransformOp::transformInterleaved( Primitive * primitive, const CompoundObject * operands, T * colors )
 {
 	assert( colors->baseSize() %3 == 0 );
 	size_t numElements = colors->baseSize() / 3;
@@ -278,7 +278,7 @@ void ColorTransformOp::transformInterleaved( PrimitivePtr primitive, ConstCompou
 	end();
 }
 
-void ColorTransformOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands )
+void ColorTransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject * operands )
 {
 	PrimitiveVariableMap::iterator colorIt = primitive->variables.find( m_colorPrimVarParameter->getTypedValue() );
 	if( colorIt!=primitive->variables.end() && colorIt->second.data )
@@ -364,7 +364,7 @@ void ColorTransformOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObj
 }
 
 
-void ColorTransformOp::begin( ConstCompoundObjectPtr operands )
+void ColorTransformOp::begin( const CompoundObject * operands )
 {
 }
 

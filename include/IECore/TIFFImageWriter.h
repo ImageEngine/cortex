@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -90,14 +90,14 @@ class TIFFImageWriter : public ImageWriter
 		static const WriterDescription<TIFFImageWriter> m_writerDescription;
 
 		virtual void writeImage( const std::vector<std::string> &names,
-		                         ConstImagePrimitivePtr image,
+		                         const ImagePrimitive * image,
 		                         const Imath::Box2i &dataWindow	) const;
 
 		template<typename ChannelData>
 		struct ChannelConverter;
 
 		template<typename T>
-		void encodeChannels( ConstImagePrimitivePtr image, const std::vector<std::string> &names,
+		void encodeChannels( const ImagePrimitive * image, const std::vector<std::string> &names,
 		                     const Imath::Box2i &dw, tiff *tiffImage, size_t bufSize, unsigned int numStrips ) const;
 
 		IntParameterPtr m_compressionParameter;

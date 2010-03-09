@@ -97,47 +97,47 @@ ParticleReader::ParticleReader( const std::string &description )
 	parameters()->addParameter( m_realTypeParameter );
 }
 
-FloatParameterPtr ParticleReader::percentageParameter()
+FloatParameter * ParticleReader::percentageParameter()
 {
 	return m_percentageParameter;
 }
 
-ConstFloatParameterPtr ParticleReader::percentageParameter() const
+const FloatParameter * ParticleReader::percentageParameter() const
 {
 	return m_percentageParameter;
 }
 
-IntParameterPtr ParticleReader::percentageSeedParameter()
+IntParameter * ParticleReader::percentageSeedParameter()
 {
 	return m_percentageSeedParameter;
 }
 
-ConstIntParameterPtr ParticleReader::percentageSeedParameter() const
+const IntParameter * ParticleReader::percentageSeedParameter() const
 {
 	return m_percentageSeedParameter;
 }
 
-StringVectorParameterPtr ParticleReader::attributesParameter()
+StringVectorParameter * ParticleReader::attributesParameter()
 {
 	return m_attributesParameter;
 }
 
-ConstStringVectorParameterPtr ParticleReader::attributesParameter() const
+const StringVectorParameter * ParticleReader::attributesParameter() const
 {
 	return m_attributesParameter;
 }
 
-IntParameterPtr ParticleReader::realTypeParameter()
+IntParameter * ParticleReader::realTypeParameter()
 {
 	return m_realTypeParameter;
 }
 
-ConstIntParameterPtr ParticleReader::realTypeParameter() const
+const IntParameter * ParticleReader::realTypeParameter() const
 {
 	return m_realTypeParameter;
 }
 
-ObjectPtr ParticleReader::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr ParticleReader::doOperation( const CompoundObject * operands )
 {
 	vector<string> attributes;
 	particleAttributes( attributes );

@@ -54,29 +54,29 @@ class ColorTransformOp : public PrimitiveOp
 		ColorTransformOp( const std::string &description );
 		virtual ~ColorTransformOp();
 
-		StringParameterPtr colorPrimVarParameter();
-		ConstStringParameterPtr colorPrimVarParameter() const;
+		StringParameter * colorPrimVarParameter();
+		const StringParameter * colorPrimVarParameter() const;
 
-		StringParameterPtr redPrimVarParameter();
-		ConstStringParameterPtr redPrimVarParameter() const;
+		StringParameter * redPrimVarParameter();
+		const StringParameter * redPrimVarParameter() const;
 
-		StringParameterPtr greenPrimVarParameter();
-		ConstStringParameterPtr greenPrimVarParameter() const;
+		StringParameter * greenPrimVarParameter();
+		const StringParameter * greenPrimVarParameter() const;
 
-		StringParameterPtr bluePrimVarParameter();
-		ConstStringParameterPtr bluePrimVarParameter() const;
+		StringParameter * bluePrimVarParameter();
+		const StringParameter * bluePrimVarParameter() const;
 
-		StringParameterPtr alphaPrimVarParameter();
-		ConstStringParameterPtr alphaPrimVarParameter() const;
+		StringParameter * alphaPrimVarParameter();
+		const StringParameter * alphaPrimVarParameter() const;
 
-		BoolParameterPtr premultipliedParameter();
-		ConstBoolParameterPtr premultipliedParameter() const;
+		BoolParameter * premultipliedParameter();
+		const BoolParameter * premultipliedParameter() const;
 
 	protected :
 
 		/// Called once per operation. This is an opportunity to perform any preprocessing
 		/// necessary before many calls to transform() are made.
-		virtual void begin( ConstCompoundObjectPtr operands );
+		virtual void begin( const CompoundObject * operands );
 		/// Called once per color element (pixel for ImagePrimitives).
 		/// Must be implemented by subclasses to transform color in place.
 		virtual void transform( Imath::Color3f &color ) const = 0;
@@ -88,14 +88,14 @@ class ColorTransformOp : public PrimitiveOp
 
 		/// Implemented in terms of begin(), transform() and end(), which should be implemented
 		/// appropriately by subclasses.
-		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );
+		virtual void modifyPrimitive( Primitive * primitive, const CompoundObject * operands );
 
 		template<typename T>
-		const typename T::BaseType *alphaData( PrimitivePtr primitive, size_t requiredElements );
+		const typename T::BaseType *alphaData( Primitive * primitive, size_t requiredElements );
 		template <typename T>
-		void transformSeparate( PrimitivePtr primitive, ConstCompoundObjectPtr operands, typename T::Ptr r, typename T::Ptr g, typename T::Ptr b );
+		void transformSeparate( Primitive * primitive, const CompoundObject * operands, T * r, T * g, T * b );
 		template <typename T>
-		void transformInterleaved( PrimitivePtr primitive, ConstCompoundObjectPtr operands, typename T::Ptr colors );
+		void transformInterleaved( Primitive * primitive, const CompoundObject * operands, T * colors );
 
 		StringParameterPtr m_colorPrimVarParameter;
 		StringParameterPtr m_redPrimVarParameter;

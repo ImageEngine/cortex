@@ -68,22 +68,22 @@ TriangulateOp::~TriangulateOp()
 {
 }
 
-FloatParameterPtr TriangulateOp::toleranceParameter()
+FloatParameter * TriangulateOp::toleranceParameter()
 {
 	return m_toleranceParameter;
 }
 
-ConstFloatParameterPtr TriangulateOp::toleranceParameter() const
+const FloatParameter * TriangulateOp::toleranceParameter() const
 {
 	return m_toleranceParameter;
 }
 
-BoolParameterPtr TriangulateOp::throwExceptionsParameter()
+BoolParameter * TriangulateOp::throwExceptionsParameter()
 {
 	return m_throwExceptionsParameter;
 }
 
-ConstBoolParameterPtr TriangulateOp::throwExceptionsParameter() const
+const BoolParameter * TriangulateOp::throwExceptionsParameter() const
 {
 	return m_throwExceptionsParameter;
 }
@@ -93,18 +93,18 @@ struct TriangleDataRemap
 {
 	typedef size_t ReturnType;
 
-	TriangleDataRemap( const std::vector<int> &indices ) : m_indices( indices )
+	TriangleDataRemap( const std::vector<int> &indices ) : m_other(0), m_indices( indices )
 	{
 	}
 
-	ConstDataPtr m_other;
+	const Data * m_other;
 	const std::vector<int> &m_indices;
 
 	template<typename T>
-	size_t operator() ( typename T::Ptr data )
+	size_t operator() ( T * data )
 	{
 		assert( data );
-		typename T::ConstPtr otherData = runTimeCast<const T>( m_other );
+		const T * otherData = runTimeCast<const T, const Data>( m_other );
 		assert( otherData );
 
 		data->writable().clear();
@@ -127,17 +127,17 @@ struct TriangulateOp::TriangulateFn
 {
 	typedef void ReturnType;
 
-	MeshPrimitivePtr m_mesh;
+	MeshPrimitive * m_mesh;
 	float m_tolerance;
 	bool m_throwExceptions;
 
-	TriangulateFn( MeshPrimitivePtr mesh, float tolerance, bool throwExceptions )
+	TriangulateFn( MeshPrimitive * mesh, float tolerance, bool throwExceptions )
 	: m_mesh( mesh ), m_tolerance( tolerance ), m_throwExceptions( throwExceptions )
 	{
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr p )
+	ReturnType operator()( T * p )
 	{
 		typedef typename T::ValueType::value_type Vec;
 
@@ -325,7 +325,7 @@ struct TriangulateOp::TriangulateFn
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T * data, const F& functor )
 		{
 			assert( data );
 
@@ -334,7 +334,7 @@ struct TriangulateOp::TriangulateFn
         };
 };
 
-void TriangulateOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
+void TriangulateOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands )
 {
 
 	if (! mesh->arePrimitiveVariablesValid() )

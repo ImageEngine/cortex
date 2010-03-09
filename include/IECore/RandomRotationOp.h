@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -54,17 +54,17 @@ class RandomRotationOp : public Op
 		RandomRotationOp();
 		virtual ~RandomRotationOp();
 
-		ObjectParameterPtr seedParameter();
-		ConstObjectParameterPtr seedParameter() const;
+		ObjectParameter * seedParameter();
+		const ObjectParameter * seedParameter() const;
 
-		FloatParameterPtr timeParameter();
-		ConstFloatParameterPtr timeParameter() const;
+		FloatParameter * timeParameter();
+		const FloatParameter * timeParameter() const;
 
-		FloatParameterPtr speedMinParameter();
-		ConstFloatParameterPtr speedMinParameter() const;
+		FloatParameter * speedMinParameter();
+		const FloatParameter * speedMinParameter() const;
 
-		FloatParameterPtr speedMaxParameter();
-		ConstFloatParameterPtr speedMaxParameter() const;
+		FloatParameter * speedMaxParameter();
+		const FloatParameter * speedMaxParameter() const;
 
 		/// The core algorithm, for those who want direct access from C++ without
 		/// all the Op wrapping.
@@ -80,7 +80,7 @@ class RandomRotationOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
 

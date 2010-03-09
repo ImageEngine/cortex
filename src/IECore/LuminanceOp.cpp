@@ -111,73 +111,73 @@ LuminanceOp::~LuminanceOp()
 {
 }
 
-StringParameterPtr LuminanceOp::colorPrimVarParameter()
+StringParameter * LuminanceOp::colorPrimVarParameter()
 {
 	return m_colorPrimVarParameter;
 }
 
-ConstStringParameterPtr LuminanceOp::colorPrimVarParameter() const
+const StringParameter * LuminanceOp::colorPrimVarParameter() const
 {
 	return m_colorPrimVarParameter;
 }
 
-StringParameterPtr LuminanceOp::redPrimVarParameter()
+StringParameter * LuminanceOp::redPrimVarParameter()
 {
 	return m_redPrimVarParameter;
 }
 
-ConstStringParameterPtr LuminanceOp::redPrimVarParameter() const
+const StringParameter * LuminanceOp::redPrimVarParameter() const
 {
 	return m_redPrimVarParameter;
 }
 
-StringParameterPtr LuminanceOp::greenPrimVarParameter()
+StringParameter * LuminanceOp::greenPrimVarParameter()
 {
 	return m_greenPrimVarParameter;
 }
 
-ConstStringParameterPtr LuminanceOp::greenPrimVarParameter() const
+const StringParameter * LuminanceOp::greenPrimVarParameter() const
 {
 	return m_greenPrimVarParameter;
 }
 
-StringParameterPtr LuminanceOp::bluePrimVarParameter()
+StringParameter * LuminanceOp::bluePrimVarParameter()
 {
 	return m_bluePrimVarParameter;
 }
 
-ConstStringParameterPtr LuminanceOp::bluePrimVarParameter() const
+const StringParameter * LuminanceOp::bluePrimVarParameter() const
 {
 	return m_bluePrimVarParameter;
 }
 
-Color3fParameterPtr LuminanceOp::weightsParameter()
+Color3fParameter * LuminanceOp::weightsParameter()
 {
 	return m_weightsParameter;
 }
 
-ConstColor3fParameterPtr LuminanceOp::weightsParameter() const
+const Color3fParameter * LuminanceOp::weightsParameter() const
 {
 	return m_weightsParameter;
 }
 
 
-StringParameterPtr LuminanceOp::luminancePrimVarParameter()
+StringParameter * LuminanceOp::luminancePrimVarParameter()
 {
 	return m_luminancePrimVarParameter;
 }
 
-ConstStringParameterPtr LuminanceOp::luminancePrimVarParameter() const
+const StringParameter * LuminanceOp::luminancePrimVarParameter() const
 {
 	return m_luminancePrimVarParameter;
 }
 
-BoolParameterPtr LuminanceOp::removeColorPrimVarsParameter()
+BoolParameter * LuminanceOp::removeColorPrimVarsParameter()
 {
 	return m_removeColorPrimVarsParameter;
 }
 
-ConstBoolParameterPtr LuminanceOp::removeColorPrimVarsParameter() const
+const BoolParameter * LuminanceOp::removeColorPrimVarsParameter() const
 {
 	return m_removeColorPrimVarsParameter;
 }
@@ -195,7 +195,7 @@ void LuminanceOp::calculate( const T *r, const T *g, const T *b, int steps[3], i
 	}
 }
 
-void LuminanceOp::modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands )
+void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject * operands )
 {
 	DataPtr luminanceData = 0;
 	PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Invalid;

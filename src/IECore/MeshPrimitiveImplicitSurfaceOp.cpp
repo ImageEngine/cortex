@@ -114,77 +114,77 @@ MeshPrimitiveImplicitSurfaceOp::~MeshPrimitiveImplicitSurfaceOp()
 {
 }
 
-FloatParameterPtr MeshPrimitiveImplicitSurfaceOp::thresholdParameter()
+FloatParameter * MeshPrimitiveImplicitSurfaceOp::thresholdParameter()
 {
 	return m_thresholdParameter;
 }
 
-ConstFloatParameterPtr MeshPrimitiveImplicitSurfaceOp::thresholdParameter() const
+const FloatParameter * MeshPrimitiveImplicitSurfaceOp::thresholdParameter() const
 {
 	return m_thresholdParameter;
 }
 
-V3iParameterPtr MeshPrimitiveImplicitSurfaceOp::resolutionParameter()
+V3iParameter * MeshPrimitiveImplicitSurfaceOp::resolutionParameter()
 {
 	return m_resolutionParameter;
 }
 
-ConstV3iParameterPtr MeshPrimitiveImplicitSurfaceOp::resolutionParameter() const
+const V3iParameter * MeshPrimitiveImplicitSurfaceOp::resolutionParameter() const
 {
 	return m_resolutionParameter;
 }
 
-Box3fParameterPtr MeshPrimitiveImplicitSurfaceOp::boundParameter()
+Box3fParameter * MeshPrimitiveImplicitSurfaceOp::boundParameter()
 {
 	return m_boundParameter;
 }
 
-ConstBox3fParameterPtr MeshPrimitiveImplicitSurfaceOp::boundParameter() const
+const Box3fParameter * MeshPrimitiveImplicitSurfaceOp::boundParameter() const
 {
 	return m_boundParameter;
 }
 
-BoolParameterPtr MeshPrimitiveImplicitSurfaceOp::automaticBoundParameter()
+BoolParameter * MeshPrimitiveImplicitSurfaceOp::automaticBoundParameter()
 {
 	return m_automaticBoundParameter;
 }
 
-BoolParameterPtr MeshPrimitiveImplicitSurfaceOp::automaticBoundParameter() const
+const BoolParameter * MeshPrimitiveImplicitSurfaceOp::automaticBoundParameter() const
 {
 	return m_automaticBoundParameter;
 }
 
-IntParameterPtr MeshPrimitiveImplicitSurfaceOp::gridMethodParameter()
+IntParameter * MeshPrimitiveImplicitSurfaceOp::gridMethodParameter()
 {
 	return m_gridMethodParameter;
 }
 
-IntParameterPtr MeshPrimitiveImplicitSurfaceOp::gridMethodParameter() const
+const IntParameter * MeshPrimitiveImplicitSurfaceOp::gridMethodParameter() const
 {
 	return m_gridMethodParameter;
 }
 
-V3fParameterPtr MeshPrimitiveImplicitSurfaceOp::divisionSizeParameter()
+V3fParameter * MeshPrimitiveImplicitSurfaceOp::divisionSizeParameter()
 {
 	return m_divisionSizeParameter;
 }
 
-ConstV3fParameterPtr MeshPrimitiveImplicitSurfaceOp::divisionSizeParameter() const
+const V3fParameter * MeshPrimitiveImplicitSurfaceOp::divisionSizeParameter() const
 {
 	return m_divisionSizeParameter;
 }
 
-FloatParameterPtr MeshPrimitiveImplicitSurfaceOp::boundExtendParameter()
+FloatParameter * MeshPrimitiveImplicitSurfaceOp::boundExtendParameter()
 {
 	return m_boundExtendParameter;
 }
 
-FloatParameterPtr MeshPrimitiveImplicitSurfaceOp::boundExtendParameter() const
+const FloatParameter * MeshPrimitiveImplicitSurfaceOp::boundExtendParameter() const
 {
 	return m_boundExtendParameter;
 }
 
-void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitivePtr typedPrimitive, ConstCompoundObjectPtr operands )
+void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitive * typedPrimitive, const CompoundObject * operands )
 {
 	const float threshold = m_thresholdParameter->getNumericValue();
 

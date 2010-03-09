@@ -59,12 +59,12 @@ class TypedPrimitiveOp : public ModifyOp
 	protected :
 
 		/// Must be implemented by all subclasses.
-		virtual void modifyTypedPrimitive( typename T::Ptr typedPrimitive, ConstCompoundObjectPtr operands ) = 0;
+		virtual void modifyTypedPrimitive( T *typedPrimitive, const CompoundObject *operands ) = 0;
 
 	private :
 
 		/// Implemented to call modifyTypedPrimitive
-		void modify( ObjectPtr primitive, ConstCompoundObjectPtr operands );
+		void modify( Object *primitive, const CompoundObject *operands );
 
 		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedPrimitiveOp<T> );
 

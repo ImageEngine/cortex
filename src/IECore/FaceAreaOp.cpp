@@ -107,7 +107,7 @@ struct STTupleToV3f
 	}
 };
 
-void FaceAreaOp::modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands )
+void FaceAreaOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands )
 {
 	string areaPrimVarName = parameters()->parameter<StringParameter>( "areaPrimVar" )->getTypedValue();
 	if( areaPrimVarName!="" )

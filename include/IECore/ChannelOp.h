@@ -52,8 +52,8 @@ class ChannelOp : public ImagePrimitiveOp
 
 		IE_CORE_DECLARERUNTIMETYPED( ChannelOp, ImagePrimitiveOp );
 
-		StringVectorParameterPtr channelNamesParameter();
-		ConstStringVectorParameterPtr channelNamesParameter() const;
+		StringVectorParameter *channelNamesParameter();
+		const StringVectorParameter *channelNamesParameter() const;
 
 	protected :
 
@@ -75,7 +75,7 @@ class ChannelOp : public ImagePrimitiveOp
 	private :
 
 		/// Implemented to call modifyChannels().
-		virtual void modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands );
+		virtual void modifyTypedPrimitive( ImagePrimitive *image, const CompoundObject *operands );
 
 		StringVectorParameterPtr m_channelNamesParameter;
 

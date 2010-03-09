@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,21 +56,21 @@ class HdrMergeOp : public Op
 		virtual ~HdrMergeOp();
 
 		/// The Parameter for the group with input images.
-		ObjectParameterPtr inputGroupParameter();
-		ConstObjectParameterPtr inputGroupParameter() const;
+		ObjectParameter * inputGroupParameter();
+		const ObjectParameter * inputGroupParameter() const;
 
-		FloatParameterPtr exposureStepParameter();
-		ConstFloatParameterPtr exposureStepParameter() const;
+		FloatParameter * exposureStepParameter();
+		const FloatParameter * exposureStepParameter() const;
 
-		FloatParameterPtr exposureAdjustmentParameter();
-		ConstFloatParameterPtr exposureAdjustmentParameter() const;
+		FloatParameter * exposureAdjustmentParameter();
+		const FloatParameter * exposureAdjustmentParameter() const;
 
-		Box2fParameterPtr windowingParameter();
-		ConstBox2fParameterPtr windowingParameter() const;
+		Box2fParameter * windowingParameter();
+		const Box2fParameter * windowingParameter() const;
 
 	protected :
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
 

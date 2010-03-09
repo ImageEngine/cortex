@@ -93,7 +93,7 @@ struct Filter
 	const vector<bool> *filter;
 
 	template<typename T>
-	void operator() ( typename T::Ptr data )
+	void operator() ( T * data )
 	{
 		assert( data );
 		assert( filter );
@@ -120,11 +120,11 @@ struct Filter
 	}
 };
 
-void VectorDataFilterOp::modify( ObjectPtr object, ConstCompoundObjectPtr operands )
+void VectorDataFilterOp::modify( Object * object, const CompoundObject * operands )
 {
 	Filter f;
 	f.invert = operands->member<BoolData>( "invert" )->readable();
 	f.clip = operands->member<BoolData>( "clip" )->readable();
 	f.filter = &( operands->member<BoolVectorData>( "filter" )->readable() );
-	despatchTypedData<Filter, TypeTraits::IsVectorTypedData>( staticPointerCast<Data>( object ), f );
+	despatchTypedData<Filter, TypeTraits::IsVectorTypedData>( static_cast<Data *>( object ), f );
 }

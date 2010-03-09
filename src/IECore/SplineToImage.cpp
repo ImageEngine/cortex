@@ -73,22 +73,22 @@ SplineToImage::~SplineToImage()
 {
 }
 
-ObjectParameterPtr SplineToImage::splineParameter()
+ObjectParameter * SplineToImage::splineParameter()
 {
 	return m_splineParameter;
 }
 
-ConstObjectParameterPtr SplineToImage::splineParameter() const
+const ObjectParameter * SplineToImage::splineParameter() const
 {
 	return m_splineParameter;
 }
 
-V2iParameterPtr SplineToImage::resolutionParameter()
+V2iParameter * SplineToImage::resolutionParameter()
 {
 	return m_resolutionParameter;
 }
 
-ConstV2iParameterPtr SplineToImage::resolutionParameter() const
+const V2iParameter * SplineToImage::resolutionParameter() const
 {
 	return m_resolutionParameter;
 }
@@ -103,7 +103,7 @@ struct SplineToImage::CreateImage
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr data )
+	ReturnType operator()( T * data )
 	{
 		typedef typename T::ValueType SplineType;
 		typedef typename SplineType::YType YType;
@@ -157,7 +157,7 @@ struct SplineToImage::CreateImage
 	SplineToImage *m_parent;
 };
 
-ObjectPtr SplineToImage::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr SplineToImage::doOperation( const CompoundObject * operands )
 {
 
 	CreateImage f( this );

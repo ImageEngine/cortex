@@ -103,12 +103,12 @@ std::string JPEGImageWriter::destinationColorSpace() const
 	return "srgb";
 }
 
-IntParameterPtr JPEGImageWriter::qualityParameter()
+IntParameter * JPEGImageWriter::qualityParameter()
 {
 	return m_qualityParameter;
 }
 
-ConstIntParameterPtr JPEGImageWriter::qualityParameter() const
+const IntParameter * JPEGImageWriter::qualityParameter() const
 {
 	return m_qualityParameter;
 }
@@ -135,19 +135,19 @@ struct JPEGImageWriter::ChannelConverter
 	typedef void ReturnType;
 
 	std::string m_channelName;
-	ConstImagePrimitivePtr m_image;
+	const ImagePrimitive * m_image;
 	Box2i m_dataWindow;
 	int m_numChannels;
 	int m_channelOffset;
 	std::vector<unsigned char> &m_imageBuffer;
 
-	ChannelConverter( const std::string &channelName, ConstImagePrimitivePtr image, const Box2i &dataWindow, int numChannels, int channelOffset, std::vector<unsigned char> &imageBuffer  )
+	ChannelConverter( const std::string &channelName, const ImagePrimitive * image, const Box2i &dataWindow, int numChannels, int channelOffset, std::vector<unsigned char> &imageBuffer  )
 	: m_channelName( channelName ), m_image( image ), m_dataWindow( dataWindow ), m_numChannels( numChannels ), m_channelOffset( channelOffset ), m_imageBuffer( imageBuffer )
 	{
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr dataContainer )
+	ReturnType operator()( T *dataContainer )
 	{
 		assert( dataContainer );
 
@@ -175,14 +175,14 @@ struct JPEGImageWriter::ChannelConverter
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T *data, const F& functor )
 		{
 			throw InvalidArgumentException( ( boost::format( "JPEGImageWriter: Invalid data type \"%s\" for channel \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_channelName ).str() );
 		}
 	};
 };
 
-void JPEGImageWriter::writeImage( const vector<string> &names, ConstImagePrimitivePtr image, const Box2i &dataWindow ) const
+void JPEGImageWriter::writeImage( const vector<string> &names, const ImagePrimitive * image, const Box2i &dataWindow ) const
 {
 	vector<string>::const_iterator rIt = std::find( names.begin(), names.end(), "R" );
 	vector<string>::const_iterator gIt = std::find( names.begin(), names.end(), "G" );

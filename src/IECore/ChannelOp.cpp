@@ -67,17 +67,17 @@ ChannelOp::~ChannelOp()
 {
 }
 
-StringVectorParameterPtr ChannelOp::channelNamesParameter()
+StringVectorParameter * ChannelOp::channelNamesParameter()
 {
 	return m_channelNamesParameter;
 }
 
-ConstStringVectorParameterPtr ChannelOp::channelNamesParameter() const
+const StringVectorParameter * ChannelOp::channelNamesParameter() const
 {
 	return m_channelNamesParameter;
 }
 
-void ChannelOp::modifyTypedPrimitive( ImagePrimitivePtr image, ConstCompoundObjectPtr operands )
+void ChannelOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundObject * operands )
 {
 	if( image->getDataWindow().isEmpty() )
 	{

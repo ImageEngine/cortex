@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,60 +62,60 @@ class ParticleMeshOp : public Op
 		ParticleMeshOp();
 		virtual ~ParticleMeshOp();
 
-		FileNameParameterPtr fileNameParameter();
-		ConstFileNameParameterPtr fileNameParameter() const;
+		FileNameParameter * fileNameParameter();
+		const FileNameParameter * fileNameParameter() const;
 
-		StringParameterPtr positionAttributeParameter();
-		ConstStringParameterPtr positionAttributeParameter() const;
+		StringParameter * positionAttributeParameter();
+		const StringParameter * positionAttributeParameter() const;
 
-		BoolParameterPtr useRadiusAttributeParameter();
-		ConstBoolParameterPtr useRadiusAttributeParameter() const;
+		BoolParameter * useRadiusAttributeParameter();
+		const BoolParameter * useRadiusAttributeParameter() const;
 
-		StringParameterPtr radiusAttributeParameter();
-		ConstStringParameterPtr radiusAttributeParameter() const;
+		StringParameter * radiusAttributeParameter();
+		const StringParameter * radiusAttributeParameter() const;
 
-		FloatParameterPtr radiusParameter();
-		ConstFloatParameterPtr radiusParameter() const;
+		FloatParameter * radiusParameter();
+		const FloatParameter * radiusParameter() const;
 
-		FloatParameterPtr radiusScaleParameter();
-		ConstFloatParameterPtr radiusScaleParameter() const;
+		FloatParameter * radiusScaleParameter();
+		const FloatParameter * radiusScaleParameter() const;
 
-		BoolParameterPtr useStrengthAttributeParameter();
-		ConstBoolParameterPtr useStrengthAttributeParameter() const;
+		BoolParameter * useStrengthAttributeParameter();
+		const BoolParameter * useStrengthAttributeParameter() const;
 
-		StringParameterPtr strengthAttributeParameter();
-		ConstStringParameterPtr strengthAttributeParameter() const;
+		StringParameter * strengthAttributeParameter();
+		const StringParameter * strengthAttributeParameter() const;
 
-		FloatParameterPtr strengthParameter();
-		ConstFloatParameterPtr strengthParameter() const;
+		FloatParameter * strengthParameter();
+		const FloatParameter * strengthParameter() const;
 
-		FloatParameterPtr strengthScaleParameter();
-		ConstFloatParameterPtr strengthScaleParameter() const;
+		FloatParameter * strengthScaleParameter();
+		const FloatParameter * strengthScaleParameter() const;
 
-		FloatParameterPtr thresholdParameter();
-		ConstFloatParameterPtr thresholdParameter() const;
+		FloatParameter * thresholdParameter();
+		const FloatParameter * thresholdParameter() const;
 
-		V3iParameterPtr resolutionParameter();
-		ConstV3iParameterPtr resolutionParameter() const;
+		V3iParameter * resolutionParameter();
+		const V3iParameter * resolutionParameter() const;
 
-		Box3fParameterPtr boundParameter();
-		ConstBox3fParameterPtr boundParameter() const;
+		Box3fParameter * boundParameter();
+		const Box3fParameter * boundParameter() const;
 
-		BoolParameterPtr automaticBoundParameter();
-		BoolParameterPtr automaticBoundParameter() const;
+		BoolParameter * automaticBoundParameter();
+		const BoolParameter * automaticBoundParameter() const;
 
-		IntParameterPtr gridMethodParameter();
-		IntParameterPtr gridMethodParameter() const;
+		IntParameter * gridMethodParameter();
+		const IntParameter * gridMethodParameter() const;
 
-		V3fParameterPtr divisionSizeParameter();
-		ConstV3fParameterPtr divisionSizeParameter() const;
+		V3fParameter * divisionSizeParameter();
+		const V3fParameter * divisionSizeParameter() const;
 
-		FloatParameterPtr boundExtendParameter();
-		FloatParameterPtr boundExtendParameter() const;
+		FloatParameter * boundExtendParameter();
+		const FloatParameter * boundExtendParameter() const;
 
 	protected :
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
 

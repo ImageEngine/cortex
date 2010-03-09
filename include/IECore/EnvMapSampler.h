@@ -55,15 +55,15 @@ class EnvMapSampler : public Op
 		EnvMapSampler();
 		virtual ~EnvMapSampler();
 
-		ImagePrimitiveParameterPtr imageParameter();
-		ConstImagePrimitiveParameterPtr imageParameter() const;
+		ImagePrimitiveParameter * imageParameter();
+		const ImagePrimitiveParameter * imageParameter() const;
 
-		IntParameterPtr subdivisionDepthParameter();
-		ConstIntParameterPtr subdivisionDepthParameter() const;
+		IntParameter * subdivisionDepthParameter();
+		const IntParameter * subdivisionDepthParameter() const;
 
 	protected :
 
-		ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
 

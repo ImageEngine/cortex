@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,17 +57,17 @@ class UniformRandomPointDistributionOp : public Op
 		UniformRandomPointDistributionOp();
 		virtual ~UniformRandomPointDistributionOp();
 
-		MeshPrimitiveParameterPtr meshParameter();
-		ConstMeshPrimitiveParameterPtr meshParameter() const;
+		MeshPrimitiveParameter * meshParameter();
+		const MeshPrimitiveParameter * meshParameter() const;
 
-		IntParameterPtr numPointsParameter();
-		ConstIntParameterPtr numPointsParameter() const;
+		IntParameter * numPointsParameter();
+		const IntParameter * numPointsParameter() const;
 
-		IntParameterPtr seedParameter();
-		ConstIntParameterPtr seedParameter() const;
+		IntParameter * seedParameter();
+		const IntParameter * seedParameter() const;
 
-		BoolParameterPtr addSTParameter();
-		ConstBoolParameterPtr addSTParameter() const;
+		BoolParameter * addSTParameter();
+		const BoolParameter * addSTParameter() const;
 
 
 	protected :
@@ -78,11 +78,11 @@ class UniformRandomPointDistributionOp : public Op
 
 		/// Derived classes can override this method and return a number in the range [0,1] defining the
 		/// required density at the given point.
-		virtual float density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const;
+		virtual float density( const MeshPrimitive * mesh, const Imath::V3f &point, const Imath::V2f &uv ) const;
 
 		struct DistributeFn;
 
-		virtual ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		virtual ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
 

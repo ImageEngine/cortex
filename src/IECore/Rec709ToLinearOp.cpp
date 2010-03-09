@@ -59,7 +59,7 @@ struct Rec709ToLinearOp::Converter
 	typedef void ReturnType;
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr data )
+	ReturnType operator()( T * data )
 	{
 		typedef typename T::ValueType Container;
 		typedef typename Container::value_type V;

@@ -88,12 +88,12 @@ CurveExtrudeOp::~CurveExtrudeOp()
 {
 }
 
-CurvesPrimitiveParameterPtr CurveExtrudeOp::curvesParameter()
+CurvesPrimitiveParameter * CurveExtrudeOp::curvesParameter()
 {
 	return m_curvesParameter;
 }
 
-ConstCurvesPrimitiveParameterPtr CurveExtrudeOp::curvesParameter() const
+const CurvesPrimitiveParameter * CurveExtrudeOp::curvesParameter() const
 {
 	return m_curvesParameter;
 }
@@ -206,17 +206,17 @@ struct CurveExtrudeOp::VertexFn
 	typedef DataPtr ReturnType;
 
 	const std::string &m_primVarName;
-	ConstCurvesPrimitivePtr m_curves;
+	const CurvesPrimitive * m_curves;
 	const unsigned m_curveIndex;
 	const unsigned m_varyingOffset;
 	const V2i &m_resolution;
 
-	VertexFn( const std::string &primVarName, ConstCurvesPrimitivePtr curves, unsigned curveIndex, unsigned varyingOffset, const V2i &resolution ) : m_primVarName( primVarName ), m_curves( curves ), m_curveIndex( curveIndex ), m_varyingOffset( varyingOffset ), m_resolution( resolution )
+	VertexFn( const std::string &primVarName, const CurvesPrimitive * curves, unsigned curveIndex, unsigned varyingOffset, const V2i &resolution ) : m_primVarName( primVarName ), m_curves( curves ), m_curveIndex( curveIndex ), m_varyingOffset( varyingOffset ), m_resolution( resolution )
 	{
 	}
 
 	template<typename T>
-	DataPtr operator() ( typename T::Ptr data ) const
+	DataPtr operator() ( T * data ) const
 	{
 		assert( data );
 		typedef typename T::ValueType::value_type Value;
@@ -272,7 +272,7 @@ struct CurveExtrudeOp::VertexFn
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T *data, const F& functor )
 		{
 			assert( data );
 			throw InvalidArgumentException( ( boost::format( "CurveExtrudeOp: Invalid data type \"%s\" for vertex primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );
@@ -286,10 +286,10 @@ struct CurveExtrudeOp::UniformFn
 	typedef DataPtr ReturnType;
 
 	const std::string &m_primVarName;
-	ConstCurvesPrimitivePtr m_curves;
+	const CurvesPrimitive * m_curves;
 	const unsigned m_curveIndex;
 
-	UniformFn( const std::string &primVarName, ConstCurvesPrimitivePtr curves, unsigned curveIndex ) : m_primVarName( primVarName ), m_curves( curves ), m_curveIndex( curveIndex )
+	UniformFn( const std::string &primVarName, const CurvesPrimitive * curves, unsigned curveIndex ) : m_primVarName( primVarName ), m_curves( curves ), m_curveIndex( curveIndex )
 	{
 	}
 
@@ -312,7 +312,7 @@ struct CurveExtrudeOp::UniformFn
 };
 
 
-PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( ConstCurvesPrimitivePtr curves, unsigned curveIndex, unsigned vertexOffset, unsigned varyingOffset ) const
+PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * curves, unsigned curveIndex, unsigned vertexOffset, unsigned varyingOffset ) const
 {
 	if ( curves->periodic() )
 	{
@@ -554,15 +554,15 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( ConstCurvesPrimitivePtr cu
 	return patchMesh;
 }
 
-ObjectPtr CurveExtrudeOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr CurveExtrudeOp::doOperation( const CompoundObject * operands )
 {
-	CurvesPrimitivePtr curves = m_curvesParameter->getTypedValue<CurvesPrimitive>();
+	CurvesPrimitive * curves = m_curvesParameter->getTypedValue<CurvesPrimitive>();
 	assert( curves );
 	assert( curves->arePrimitiveVariablesValid() );
 
 	GroupPtr group = new Group();
 
-	ConstIntVectorDataPtr verticesPerCurve = curves->verticesPerCurve();
+	const IntVectorData * verticesPerCurve = curves->verticesPerCurve();
 	assert( verticesPerCurve );
 
 	unsigned numCurves = verticesPerCurve->readable().size();

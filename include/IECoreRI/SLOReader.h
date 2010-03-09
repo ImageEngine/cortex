@@ -57,7 +57,7 @@ class SLOReader : public IECore::Reader
 
 	protected :
 
-		virtual IECore::ObjectPtr doOperation( IECore::ConstCompoundObjectPtr operands );
+		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands );
 
 	private :
 

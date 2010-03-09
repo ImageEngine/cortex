@@ -88,32 +88,32 @@ PointDensitiesOp::~PointDensitiesOp()
 {
 }
 
-ObjectParameterPtr PointDensitiesOp::pointParameter()
+ObjectParameter * PointDensitiesOp::pointParameter()
 {
 	return m_pointParameter;
 }
 
-ConstObjectParameterPtr PointDensitiesOp::pointParameter() const
+const ObjectParameter * PointDensitiesOp::pointParameter() const
 {
 	return m_pointParameter;
 }
 
-IntParameterPtr PointDensitiesOp::numNeighboursParameter()
+IntParameter * PointDensitiesOp::numNeighboursParameter()
 {
 	return m_numNeighboursParameter;
 }
 
-ConstIntParameterPtr PointDensitiesOp::numNeighboursParameter() const
+const IntParameter * PointDensitiesOp::numNeighboursParameter() const
 {
 	return m_numNeighboursParameter;
 }
 
-DoubleParameterPtr PointDensitiesOp::multiplierParameter()
+DoubleParameter * PointDensitiesOp::multiplierParameter()
 {
 	return m_multiplierParameter;
 }
 
-ConstDoubleParameterPtr PointDensitiesOp::multiplierParameter() const
+const DoubleParameter * PointDensitiesOp::multiplierParameter() const
 {
 	return m_multiplierParameter;
 }
@@ -141,26 +141,26 @@ static void densities( const vector<Vec3<T> > &points, int numNeighbours, T mult
 
 /// \todo Support 2d point types?
 /// \todo Threading?
-ObjectPtr PointDensitiesOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr PointDensitiesOp::doOperation( const CompoundObject * operands )
 {
 	const int numNeighbours = m_numNeighboursParameter->getNumericValue();
 	const double multiplier = m_multiplierParameter->getNumericValue();
 
-	ConstObjectPtr points = pointParameter()->getValue();
+	const Object * points = pointParameter()->getValue();
 	ObjectPtr result = 0;
 	switch( points->typeId() )
 	{
 		case V3fVectorDataTypeId :
 			{
 				FloatVectorDataPtr resultT = new FloatVectorData;
-				densities<float>( staticPointerCast<const V3fVectorData>( points )->readable(), numNeighbours, multiplier, resultT->writable() );
+				densities<float>( static_cast<const V3fVectorData *>( points )->readable(), numNeighbours, multiplier, resultT->writable() );
 				result = resultT;
 			}
 			break;
 		case V3dVectorDataTypeId :
 			{
 				DoubleVectorDataPtr resultT = new DoubleVectorData;
-				densities<double>( staticPointerCast<const V3dVectorData>( points )->readable(), numNeighbours, multiplier, resultT->writable() );
+				densities<double>( static_cast<const V3dVectorData *>( points )->readable(), numNeighbours, multiplier, resultT->writable() );
 				result = resultT;
 			}
 			break;

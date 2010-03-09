@@ -79,22 +79,22 @@ PointNormalsOp::~PointNormalsOp()
 {
 }
 
-ObjectParameterPtr PointNormalsOp::pointParameter()
+ObjectParameter * PointNormalsOp::pointParameter()
 {
 	return m_pointParameter;
 }
 
-ConstObjectParameterPtr PointNormalsOp::pointParameter() const
+const ObjectParameter * PointNormalsOp::pointParameter() const
 {
 	return m_pointParameter;
 }
 
-IntParameterPtr PointNormalsOp::numNeighboursParameter()
+IntParameter * PointNormalsOp::numNeighboursParameter()
 {
 	return m_numNeighboursParameter;
 }
 
-ConstIntParameterPtr PointNormalsOp::numNeighboursParameter() const
+const IntParameter * PointNormalsOp::numNeighboursParameter() const
 {
 	return m_numNeighboursParameter;
 }
@@ -132,25 +132,25 @@ static void normals( const vector<T> &points, int numNeighbours, vector<T> &resu
 	}
 }
 
-ObjectPtr PointNormalsOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr PointNormalsOp::doOperation( const CompoundObject *operands )
 {
 	const int numNeighbours = m_numNeighboursParameter->getNumericValue();
 
-	ConstObjectPtr points = pointParameter()->getValue();
+	const Object * points = pointParameter()->getValue();
 	ObjectPtr result = 0;
 	switch( points->typeId() )
 	{
 		case V3fVectorDataTypeId :
 			{
 				V3fVectorDataPtr resultT = new V3fVectorData;
-				normals<V3f>( staticPointerCast<const V3fVectorData>( points )->readable(), numNeighbours, resultT->writable() );
+				normals<V3f>( static_cast<const V3fVectorData *>( points )->readable(), numNeighbours, resultT->writable() );
 				result = resultT;
 			}
 			break;
 		case V3dVectorDataTypeId :
 			{
 				V3dVectorDataPtr resultT = new V3dVectorData;
-				normals<V3d>( staticPointerCast<const V3dVectorData>( points )->readable(), numNeighbours, resultT->writable() );
+				normals<V3d>( static_cast<const V3dVectorData *>( points )->readable(), numNeighbours, resultT->writable() );
 				result = resultT;
 			}
 			break;

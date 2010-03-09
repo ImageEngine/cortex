@@ -63,7 +63,7 @@ bool ParticleWriter::canWrite( ConstObjectPtr object, const std::string &fileNam
 	return runTimeCast<const PointsPrimitive>( object );
 }
 
-ConstPointsPrimitivePtr ParticleWriter::particleObject()
+const PointsPrimitive * ParticleWriter::particleObject()
 {
 	/// \todo this cast is no longer ok - once we've adjusted the input object Parameter we can use the validation
 	/// on there to do our work for us.

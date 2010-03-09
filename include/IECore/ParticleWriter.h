@@ -63,7 +63,7 @@ class ParticleWriter : public Writer
 
 		/// ParticleWriters only write objects of the PointsPrimitive type,
 		/// so this function returns object() already cast and ready.
-		ConstPointsPrimitivePtr particleObject();
+		const PointsPrimitive * particleObject();
 
 		/// Convenience functions to access the values held in parameters().
 		/// Fills names with the unions of the attributes requested to be

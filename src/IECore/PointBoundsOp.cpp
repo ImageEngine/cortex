@@ -101,38 +101,38 @@ PointBoundsOp::~PointBoundsOp()
 {
 }
 
-ObjectParameterPtr PointBoundsOp::pointParameter()
+ObjectParameter * PointBoundsOp::pointParameter()
 {
 	return m_pointParameter;
 }
 
-ConstObjectParameterPtr PointBoundsOp::pointParameter() const
+const ObjectParameter * PointBoundsOp::pointParameter() const
 {
 	return m_pointParameter;
 }
 
-ObjectParameterPtr PointBoundsOp::radiusParameter()
+ObjectParameter * PointBoundsOp::radiusParameter()
 {
 	return m_radiusParameter;
 }
 
-ConstObjectParameterPtr PointBoundsOp::radiusParameter() const
+const ObjectParameter * PointBoundsOp::radiusParameter() const
 {
 	return m_radiusParameter;
 }
 
-ObjectParameterPtr PointBoundsOp::velocityParameter()
+ObjectParameter * PointBoundsOp::velocityParameter()
 {
 	return m_velocityParameter;
 }
 
-ConstObjectParameterPtr PointBoundsOp::velocityParameter() const
+const ObjectParameter * PointBoundsOp::velocityParameter() const
 {
 	return m_velocityParameter;
 }
 
 template<typename P, typename R, typename V>
-static Box3fDataPtr bound3( typename P::ConstPtr pData, typename R::ConstPtr rData, float rMult, typename V::ConstPtr vData, float vMult )
+static Box3fDataPtr bound3( const P *pData, const R *rData, float rMult, typename V::ConstPtr vData, float vMult )
 {
 	typedef typename P::ValueType::value_type Point;
 	typedef typename V::ValueType::value_type Vector;
@@ -180,14 +180,14 @@ static Box3fDataPtr bound3( typename P::ConstPtr pData, typename R::ConstPtr rDa
 }
 
 template<typename P, typename R>
-static Box3fDataPtr bound2( typename P::ConstPtr pData, typename R::ConstPtr rData, float rMult, ConstObjectPtr vData, float vMult )
+static Box3fDataPtr bound2( const P *pData, const R *rData, float rMult, const Object * vData, float vMult )
 {
 	switch( vData->typeId() )
 	{
 		case V3fVectorDataTypeId :
-			return bound3<P, R, V3fVectorData>( pData, rData, rMult, staticPointerCast<const V3fVectorData>( vData ), vMult );
+			return bound3<P, R, V3fVectorData>( pData, rData, rMult, static_cast<const V3fVectorData *>( vData ), vMult );
 		case V3dVectorDataTypeId :
-			return bound3<P, R, V3dVectorData>( pData, rData, rMult, staticPointerCast<const V3dVectorData>( vData ), vMult );
+			return bound3<P, R, V3dVectorData>( pData, rData, rMult, static_cast<const V3dVectorData *>( vData ), vMult );
 		default :
 			assert( 0 ); // parameter validation should prevent us getting here
 	}
@@ -195,33 +195,33 @@ static Box3fDataPtr bound2( typename P::ConstPtr pData, typename R::ConstPtr rDa
 }
 
 template<typename P>
-static Box3fDataPtr bound1( typename P::ConstPtr pData, ConstObjectPtr rData, float rMult, ConstObjectPtr vData, float vMult )
+static Box3fDataPtr bound1( const P * pData, const Object * rData, float rMult, const Object * vData, float vMult )
 {
 	switch( rData->typeId() )
 	{
 		case FloatVectorDataTypeId :
-			return bound2<P, FloatVectorData>( pData, staticPointerCast<const FloatVectorData>( rData ), rMult, vData, vMult );
+			return bound2<P, FloatVectorData>( pData, static_cast<const FloatVectorData *>( rData ), rMult, vData, vMult );
 		case DoubleVectorDataTypeId :
-			return bound2<P, DoubleVectorData>( pData, staticPointerCast<const DoubleVectorData>( rData ), rMult, vData, vMult );
+			return bound2<P, DoubleVectorData>( pData, static_cast<const DoubleVectorData *>( rData ), rMult, vData, vMult );
 		default :
 			assert( 0 ); // parameter validation should prevent us getting here
 	}
 	return 0;
 }
 
-ObjectPtr PointBoundsOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr PointBoundsOp::doOperation( const CompoundObject * operands )
 {
-	ConstObjectPtr p = m_pointParameter->getValue();
-	ConstObjectPtr v = m_velocityParameter->getValue();
-	ConstObjectPtr r = m_radiusParameter->getValue();
+	const Object * p = m_pointParameter->getValue();
+	const Object * v = m_velocityParameter->getValue();
+	const Object * r = m_radiusParameter->getValue();
 	float vm = m_velocityMultiplierParameter->getNumericValue();
 	float rm = m_radiusMultiplierParameter->getNumericValue();
 	switch( p->typeId() )
 	{
 		case V3fVectorDataTypeId :
-			return bound1<V3fVectorData>( staticPointerCast<const V3fVectorData>( p ), r, rm, v, vm );
+			return bound1<V3fVectorData>( static_cast<const V3fVectorData *>( p ), r, rm, v, vm );
 		case V3dVectorDataTypeId :
-			return bound1<V3dVectorData>( staticPointerCast<const V3dVectorData>( p ), r, rm, v, vm );
+			return bound1<V3dVectorData>( static_cast<const V3dVectorData *>( p ), r, rm, v, vm );
 		default :
 			assert( 0 ); // parameter validation should prevent us getting here
 	}

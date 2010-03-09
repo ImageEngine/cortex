@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,21 +55,21 @@ class TransformOp : public PrimitiveOp
 
 		TransformOp();
 
-		ObjectParameterPtr matrixParameter();
-		ConstObjectParameterPtr matrixParameter() const;
+		ObjectParameter * matrixParameter();
+		const ObjectParameter * matrixParameter() const;
 
-		StringVectorParameterPtr pointPrimVarsParameter();
-		ConstStringVectorParameterPtr pointPrimVarsParameter() const;
+		StringVectorParameter * pointPrimVarsParameter();
+		const StringVectorParameter * pointPrimVarsParameter() const;
 
-		StringVectorParameterPtr vectorPrimVarsParameter();
-		ConstStringVectorParameterPtr vectorPrimVarsParameter() const;
+		StringVectorParameter * vectorPrimVarsParameter();
+		const StringVectorParameter * vectorPrimVarsParameter() const;
 
-		StringVectorParameterPtr normalPrimVarsParameter();
-		ConstStringVectorParameterPtr normalPrimVarsParameter() const;
+		StringVectorParameter * normalPrimVarsParameter();
+		const StringVectorParameter * normalPrimVarsParameter() const;
 
 	protected :
 
-		virtual void modifyPrimitive( PrimitivePtr primitive, ConstCompoundObjectPtr operands );
+		virtual void modifyPrimitive( Primitive * primitive, const CompoundObject * operands );
 
 	private :
 

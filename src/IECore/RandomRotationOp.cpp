@@ -93,48 +93,48 @@ RandomRotationOp::~RandomRotationOp()
 {
 }
 
-ObjectParameterPtr RandomRotationOp::seedParameter()
+ObjectParameter * RandomRotationOp::seedParameter()
 {
 	return m_seedParameter;
 }
 
-ConstObjectParameterPtr RandomRotationOp::seedParameter() const
+const ObjectParameter * RandomRotationOp::seedParameter() const
 {
 	return m_seedParameter;
 }
 
-FloatParameterPtr RandomRotationOp::timeParameter()
+FloatParameter * RandomRotationOp::timeParameter()
 {
 	return m_timeParameter;
 }
 
-ConstFloatParameterPtr RandomRotationOp::timeParameter() const
+const FloatParameter * RandomRotationOp::timeParameter() const
 {
 	return m_timeParameter;
 }
 
-FloatParameterPtr RandomRotationOp::speedMinParameter()
+FloatParameter * RandomRotationOp::speedMinParameter()
 {
 	return m_speedMinParameter;
 }
 
-ConstFloatParameterPtr RandomRotationOp::speedMinParameter() const
+const FloatParameter * RandomRotationOp::speedMinParameter() const
 {
 	return m_speedMinParameter;
 }
 
-FloatParameterPtr RandomRotationOp::speedMaxParameter()
+FloatParameter * RandomRotationOp::speedMaxParameter()
 {
 	return m_speedMaxParameter;
 }
 
-ConstFloatParameterPtr RandomRotationOp::speedMaxParameter() const
+const FloatParameter * RandomRotationOp::speedMaxParameter() const
 {
 	return m_speedMaxParameter;
 }
 
 template<typename T>
-V3fVectorDataPtr doOp( typename T::ConstPtr seed, float time, float minSpeed, float maxSpeed )
+V3fVectorDataPtr doOp( const T * seed, float time, float minSpeed, float maxSpeed )
 {
 	V3fVectorDataPtr result = new V3fVectorData;
 	vector<V3f> &v = result->writable();
@@ -144,23 +144,23 @@ V3fVectorDataPtr doOp( typename T::ConstPtr seed, float time, float minSpeed, fl
 	return result;
 }
 
-ObjectPtr RandomRotationOp::doOperation( ConstCompoundObjectPtr operands )
+ObjectPtr RandomRotationOp::doOperation( const CompoundObject * operands )
 {
 	float time = m_timeParameter->getNumericValue();
 	float minSpeed = m_speedMinParameter->getNumericValue();
 	float maxSpeed = m_speedMaxParameter->getNumericValue();
 
-	ConstObjectPtr seed = m_seedParameter->getValue();
+	const Object * seed = m_seedParameter->getValue();
 	switch( seed->typeId() )
 	{
 		case FloatVectorDataTypeId :
-			return doOp<FloatVectorData>( staticPointerCast<const FloatVectorData>( seed ), time, minSpeed, maxSpeed );
+			return doOp<FloatVectorData>( static_cast<const FloatVectorData *>( seed ), time, minSpeed, maxSpeed );
 		case DoubleVectorDataTypeId :
-			return doOp<DoubleVectorData>( staticPointerCast<const DoubleVectorData>( seed ), time, minSpeed, maxSpeed );
+			return doOp<DoubleVectorData>( static_cast<const DoubleVectorData *>( seed ), time, minSpeed, maxSpeed );
 		case IntVectorDataTypeId :
-			return doOp<IntVectorData>( staticPointerCast<const IntVectorData>( seed ), time, minSpeed, maxSpeed );
+			return doOp<IntVectorData>( static_cast<const IntVectorData *>( seed ), time, minSpeed, maxSpeed );
 		case UIntVectorDataTypeId :
-			return doOp<UIntVectorData>( staticPointerCast<const UIntVectorData>( seed ), time, minSpeed, maxSpeed );
+			return doOp<UIntVectorData>( static_cast<const UIntVectorData *>( seed ), time, minSpeed, maxSpeed );
 		default :
 			return 0; // shouldn't get here
 	}

@@ -51,7 +51,7 @@ class FaceAreaOp : public MeshPrimitiveOp
 
 	protected:
 
-		virtual void modifyTypedPrimitive( MeshPrimitivePtr mesh, ConstCompoundObjectPtr operands );
+		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
 
 };
 

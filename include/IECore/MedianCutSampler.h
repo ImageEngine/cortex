@@ -59,14 +59,14 @@ class MedianCutSampler : public Op
 		MedianCutSampler();
 		virtual ~MedianCutSampler();
 
-		ImagePrimitiveParameterPtr imageParameter();
-		ConstImagePrimitiveParameterPtr imageParameter() const;
+		ImagePrimitiveParameter * imageParameter();
+		const ImagePrimitiveParameter * imageParameter() const;
 
-		StringParameterPtr channelNameParameter();
-		ConstStringParameterPtr channelNameParameter() const;
+		StringParameter * channelNameParameter();
+		const StringParameter * channelNameParameter() const;
 
-		IntParameterPtr subdivisionDepthParameter();
-		ConstIntParameterPtr subdivisionDepthParameter() const;
+		IntParameter * subdivisionDepthParameter();
+		const IntParameter * subdivisionDepthParameter() const;
 
 		enum Projection
 		{
@@ -75,12 +75,12 @@ class MedianCutSampler : public Op
 			LatLong
 		};
 
-		IntParameterPtr projectionParameter();
-		ConstIntParameterPtr projectionParameter() const;
+		IntParameter * projectionParameter();
+		const IntParameter * projectionParameter() const;
 
 	protected :
 
-		ObjectPtr doOperation( ConstCompoundObjectPtr operands );
+		ObjectPtr doOperation( const CompoundObject * operands );
 
 	private :
 
