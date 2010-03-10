@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,36 +33,71 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <cassert>
-
+#include <stack>
 #include "boost/format.hpp"
 
 #include "IECore/ScopedTIFFErrorHandler.h"
 #include "IECore/Exception.h"
+#include "tbb/enumerable_thread_specific.h"
 
 using namespace IECore;
 
-std::vector< ScopedTIFFErrorHandler * > &ScopedTIFFErrorHandler::handlers()
-{
-	static std::vector< ScopedTIFFErrorHandler * > g_handlers;
-	return g_handlers;
-}
+typedef tbb::enumerable_thread_specific< std::stack< ScopedTIFFErrorHandler * > > HandlerThreadInfo;
+static HandlerThreadInfo handlerThreadInfo;
+
+boost::mutex ScopedTIFFErrorHandler::m_setupMutex;
+TIFFErrorHandler ScopedTIFFErrorHandler::m_previousHandler = 0;
+unsigned int ScopedTIFFErrorHandler::m_handlerCount = 0;
+
 
 ScopedTIFFErrorHandler::ScopedTIFFErrorHandler()
 {
-	m_previousHandler = TIFFSetErrorHandler( &output );
-	handlers().push_back( this );
+	boost::lock_guard<boost::mutex> lock( m_setupMutex );
+
+	if ( !m_handlerCount )
+	{
+		m_previousHandler = TIFFSetErrorHandler( &output );
+	}
+	m_handlerCount++;
+
+	HandlerThreadInfo::reference scopedHandlers = handlerThreadInfo.local();
+	scopedHandlers.push( this );
+
+	if ( setjmp( m_jmpBuffer ) )
+	{
+		throw IOException( m_errorMessage );
+	}
 }
 
 ScopedTIFFErrorHandler::~ScopedTIFFErrorHandler()
 {
-	assert( handlers().back() == this );
-	TIFFSetErrorHandler( m_previousHandler );
-	handlers().pop_back();
+	boost::lock_guard<boost::mutex> lock( m_setupMutex );
+	HandlerThreadInfo::reference scopedHandlers = handlerThreadInfo.local();
+	assert( scopedHandlers.top() == this );
+	m_handlerCount--;
+	if ( !m_handlerCount )
+	{
+		TIFFSetErrorHandler( m_previousHandler );
+	}
+	scopedHandlers.pop();
 }
 
 void ScopedTIFFErrorHandler::output(const char* module, const char* fmt, va_list ap)
 {
-	ScopedTIFFErrorHandler *handler = handlers().back();
+	HandlerThreadInfo::reference scopedHandlers = handlerThreadInfo.local();
+	if ( scopedHandlers.size() == 0 )
+	{
+		// There's a chance that a unknown thread uses libtiff and the error ends up here. So we forward
+		// the error to the previous error handler...
+		if ( m_previousHandler )
+		{
+			m_previousHandler( module, fmt, ap );
+		}
+		return;
+	}
+
+	ScopedTIFFErrorHandler *handler = scopedHandlers.top();
+
 	// Ensure that any variables we allocate here don't get lost due to the longjmp call
 	{
 		/// Reconstruct the actual error in a buffer of (arbitrary) maximum length.

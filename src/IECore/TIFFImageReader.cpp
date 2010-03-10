@@ -316,10 +316,6 @@ DataPtr TIFFImageReader::readTypedChannel( const std::string &name, const Box2i 
 DataPtr TIFFImageReader::readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw )
 {
 	ScopedTIFFErrorHandler errorHandler;
-	if ( setjmp( errorHandler.m_jmpBuffer ) )
-	{
-		throw IOException( errorHandler.m_errorMessage );
-	}
 
 	readCurrentDirectory( true );
 
@@ -514,10 +510,6 @@ bool TIFFImageReader::open( bool throwOnFailure )
 		}
 
 		ScopedTIFFErrorHandler errorHandler;
-		if ( setjmp( errorHandler.m_jmpBuffer ) )
-		{
-			throw IOException( errorHandler.m_errorMessage );
-		}
 
 		m_numDirectories = 1;
 		TIFFSetDirectory( m_tiffImage, 0 );
@@ -560,10 +552,6 @@ bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
 	try
 	{
 		ScopedTIFFErrorHandler errorHandler;
-		if ( setjmp( errorHandler.m_jmpBuffer ) )
-		{
-			throw IOException( errorHandler.m_errorMessage );
-		}
 
 		if ( m_haveDirectory && m_currentDirectoryIndex == TIFFCurrentDirectory( m_tiffImage ) )
 		{

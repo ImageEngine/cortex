@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,31 +38,30 @@
 #include <stdarg.h>
 #include <setjmp.h>
 #include <vector>
+#include "boost/thread.hpp"
 
 #include "tiffio.h"
 
 namespace IECore
 {
 
-/// A class which can temporarily translate errors from libtiff into longjumps to the given buffer -
-/// it registers a new TIFFErrorHandler in its constructor, restoring the previous state in its destructor.
-/// This works a bit like the error handling present in libjpeg.
+/// A class that hides the TIFF error handling mechanism by raising exceptions instead.
+/// The object will catch any TIFF errors until it gets out of scope.
 class ScopedTIFFErrorHandler
 {
 	public:
 		ScopedTIFFErrorHandler( );
 		virtual ~ScopedTIFFErrorHandler();
 
+	protected:
+
 		jmp_buf m_jmpBuffer;
 		std::string m_errorMessage;
 
-	protected:
-
-		static std::vector< ScopedTIFFErrorHandler * > &handlers();
-
+		static boost::mutex m_setupMutex;
 		static void output(const char* module, const char* fmt, va_list ap);
-
-		TIFFErrorHandler m_previousHandler;
+		static TIFFErrorHandler m_previousHandler;
+		static unsigned int m_handlerCount;
 };
 
 } // namespace IECore

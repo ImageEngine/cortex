@@ -241,10 +241,6 @@ void TIFFImageWriter::encodeChannels( const ImagePrimitive * image, const vector
 void TIFFImageWriter::writeImage( const vector<string> &names, const ImagePrimitive * image, const Box2i &fullDataWindow ) const
 {
 	ScopedTIFFErrorHandler errorHandler;
-	if ( setjmp( errorHandler.m_jmpBuffer ) )
-	{
-		throw IOException( errorHandler.m_errorMessage );
-	}
 
 	// create the tiff file
 	TIFF *tiffImage;
