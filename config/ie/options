@@ -261,9 +261,8 @@ if targetApp=="houdini" :
 
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
 	boostVersion = houdiniReg["boostVersion"]
-	boost_Version = boostVersion.replace( ".", "_" )
 	BOOST_INCLUDE_PATH = "/software/tools/include/boost/" + boostVersion
-	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-" + boost_Version
+	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + "-mt-" + boostVersion.replace( ".", "_" )
 	
 	## \todo: debug boost 1.33.1 backward compatibility issues within IECoreGL
 	WITH_GL=0
