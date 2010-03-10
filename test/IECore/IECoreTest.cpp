@@ -74,6 +74,7 @@
 #include "InternedStringTest.h"
 #include "RefCountedThreadingTest.h"
 #include "CurvesPrimitiveEvaluatorThreadingTest.h"
+#include "LRUCacheThreadingTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -115,6 +116,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addInternedStringTest(test);
 		addRefCountedThreadingTest(test);
 		addCurvesPrimitiveEvaluatorThreadingTest(test);
+		addLRUCacheThreadingTest(test);
 	}
 	catch (std::exception &ex)
 	{

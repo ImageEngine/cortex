@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,78 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings
-// regarding redefinition of _POSIX_C_SOURCE
-#include "boost/python.hpp"
+#include <iostream>
 
-#include "IECore/CachedReader.h"
-#include "IECore/Object.h"
-#include "IECorePython/CachedReaderBinding.h"
-#include "IECorePython/RefCountedBinding.h"
-#include "IECorePython/ScopedGILRelease.h"
+#include "tbb/tbb.h"
 
-using namespace boost::python;
-using namespace IECore;
+#include "IECore/LRUCache.h"
 
-namespace IECorePython
+#include "LRUCacheThreadingTest.h"
+
+using namespace boost;
+using namespace boost::unit_test;
+using namespace tbb;
+
+namespace IECore
 {
 
-static ObjectPtr read( CachedReader &r, const std::string &f )
+struct LRUCacheThreadingTest
 {
-	ScopedGILRelease gilRelease;
-	ConstObjectPtr o = r.read( f );
-	if( o )
+	
+	typedef 
+	
+	struct GetFromCache
 	{
-		return o->copy();
-	}
-	else
+		public :
+		
+			GetFromCache( LRUCache<int, int> &cache )
+				:	m_cache( cache )
+			{
+			}
+			
+			void operator()( const blocked_range<size_t> &r ) const
+			{
+				for( size_t i=r.begin(); i!=r.end(); ++i )
+				{
+					m_cache.get( i );
+				}
+			}
+			
+		private :
+		
+			LRUCache<int, int> &m_cache;
+			
+	};
+
+	static int get( int key, size_t &cost )
 	{
-		return 0;
+		cost = 10;
+		return key;
 	}
-}
 
-void bindCachedReader()
+	void test()
+	{
+		LRUCache<int, int> cache( get, 1000 );
+		
+		parallel_for( blocked_range<size_t>( 0, 10000 ), GetFromCache( cache ) );
+	}
+};
+
+
+struct LRUCacheThreadingTestSuite : public boost::unit_test::test_suite
 {
-	RefCountedClass<CachedReader, RefCounted>( "CachedReader" )
-		.def( init<const SearchPath &, size_t>() )
-		.def( "read", &read )
-		.def( "memoryUsage", &CachedReader::memoryUsage )
-		.def( "clear", (void (CachedReader::*)( const std::string &) )&CachedReader::clear )
-		.def( "clear", (void (CachedReader::*)( void ) )&CachedReader::clear )
-		.def( "insert", &CachedReader::insert )
-		.def( "cached", &CachedReader::cached )
-		.add_property( "searchPath", make_function( &CachedReader::getSearchPath, return_value_policy<copy_const_reference>() ), &CachedReader::setSearchPath )
-		.add_property( "maxMemory", &CachedReader::getMaxMemory, &CachedReader::setMaxMemory )
-		.def( "defaultCachedReader", &CachedReader::defaultCachedReader ).staticmethod( "defaultCachedReader" )
-	;
+
+	LRUCacheThreadingTestSuite() : boost::unit_test::test_suite( "LRUCacheThreadingTestSuite" )
+	{
+		boost::shared_ptr<LRUCacheThreadingTest> instance( new LRUCacheThreadingTest() );
+
+		add( BOOST_CLASS_TEST_CASE( &LRUCacheThreadingTest::test, instance ) );
+	}
+};
+
+void addLRUCacheThreadingTest(boost::unit_test::test_suite* test)
+{
+	test->add( new LRUCacheThreadingTestSuite( ) );
 }
 
-}
+} // namespace IECore

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,179 +32,216 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef IECORE_LRUCACHE_INL
+#define IECORE_LRUCACHE_INL
+
 #include <cassert>
+
+#include "tbb/tbb_thread.h"
+
+#include "boost/format.hpp"
+
+#include "IECore/Exception.h"
 
 namespace IECore
 {
 
-template<typename Key, typename Data, typename GetterFn>
-LRUCache<Key, Data, GetterFn>::LRUCache()
-{
-	m_maxCost = 500;
-	m_currentCost = Cost(0);
-}
-
-template<typename Key, typename Data, typename GetterFn>
-LRUCache<Key, Data, GetterFn>::~LRUCache()
+template<typename Key, typename Ptr>
+LRUCache<Key, Ptr>::CacheEntry::CacheEntry()
+	:	cost( 0 ), status( New ), data( 0 )
 {
 }
-
-template<typename Key, typename Data, typename GetterFn>
-void LRUCache<Key, Data, GetterFn>::clear()
+			
+template<typename Key, typename Ptr>
+LRUCache<Key, Ptr>::LRUCache( GetterFunction getter )
+	:	m_getter( getter ), m_maxCost( 500 ), m_currentCost( 0 )
 {
+}
+
+template<typename Key, typename Ptr>
+LRUCache<Key, Ptr>::LRUCache( GetterFunction getter, Cost maxCost )
+	:	m_getter( getter ), m_maxCost( maxCost ), m_currentCost( 0 )
+{
+}
+
+template<typename Key, typename Ptr>
+LRUCache<Key, Ptr>::~LRUCache()
+{
+}
+
+template<typename Key, typename Ptr>
+void LRUCache<Key, Ptr>::clear()
+{
+	Mutex::scoped_lock lock( m_mutex );
+	
 	m_currentCost = Cost(0);
 	m_list.clear();
 	m_cache.clear();
 }
 
 
-template<typename Key, typename Data, typename GetterFn>
-void LRUCache<Key, Data, GetterFn>::setMaxCost( Cost maxCost )
+template<typename Key, typename Ptr>
+void LRUCache<Key, Ptr>::setMaxCost( Cost maxCost )
 {
+	Mutex::scoped_lock lock( m_mutex );
+
 	assert( maxCost >= Cost(0) );
 	m_maxCost = maxCost;
 
 	limitCost( m_maxCost );
 }
 
-template<typename Key, typename Data, typename GetterFn>
-typename LRUCache<Key, Data, GetterFn>::Cost LRUCache<Key, Data, GetterFn>::getMaxCost( ) const
+template<typename Key, typename Ptr>
+typename LRUCache<Key, Ptr>::Cost LRUCache<Key, Ptr>::getMaxCost() const
 {
+	Mutex::scoped_lock lock( m_mutex );
 	return m_maxCost;
 }
 
-template<typename Key, typename Data, typename GetterFn>
-typename LRUCache<Key, Data, GetterFn>::Cost LRUCache<Key, Data, GetterFn>::currentCost() const
+template<typename Key, typename Ptr>
+typename LRUCache<Key, Ptr>::Cost LRUCache<Key, Ptr>::currentCost() const
 {
+	Mutex::scoped_lock lock( m_mutex );
 	return m_currentCost;
 }
 
-template<typename Key, typename Data, typename GetterFn>
-bool LRUCache<Key, Data, GetterFn>::cached( const Key& key ) const
+template<typename Key, typename Ptr>
+bool LRUCache<Key, Ptr>::cached( const Key &key ) const
 {
-	typename Cache::iterator it = m_cache.find( key );
-	return ( it != m_cache.end() );
+	Mutex::scoped_lock lock( m_mutex );
+	ConstCacheIterator it = m_cache.find( key );
+	return ( it != m_cache.end() && it->second.status==Cached );
 }
 
-template<typename Key, typename Data, typename GetterFn>
-bool LRUCache<Key, Data, GetterFn>::get( const Key& key, GetterFn fn, Data &data ) const
+template<typename Key, typename Ptr>
+Ptr LRUCache<Key, Ptr>::get( const Key& key )
 {
-	typename Cache::iterator it = m_cache.find( key );
+	Mutex::scoped_lock lock( m_mutex );
 
-	if ( it == m_cache.end() )
+	CacheEntry &cacheEntry = m_cache[key]; // creates an entry if one doesn't exist yet
+	
+	if( cacheEntry.status==Caching )
 	{
-		/// Not found in the cache, so compute the data and its associated cost
-		Cost cost;
-		bool found = fn.get( key, data, cost );
-
-		assert( cost >= Cost(0) );
-
-		if (found)
+		// another thread is doing the work. we need to wait
+		// until it is done.
+		lock.release();
+			while( cacheEntry.status==Caching )
+			{
+				tbb::this_tbb_thread::yield();	
+			}
+		lock.acquire( m_mutex );
+	}
+	
+	if( cacheEntry.status==New || cacheEntry.status==Erased || cacheEntry.status==TooCostly )
+	{
+		assert( cacheEntry.data==0 );
+		Ptr data = 0;
+		Cost cost = 0;
+		try
 		{
-			cache( key, data, cost );
-			return true;
+			cacheEntry.status = Caching;
+			lock.release(); // allows other threads to do stuff while we're computing the value
+				data = m_getter( key, cost );
+			lock.acquire( m_mutex );
 		}
-		else
+		catch( const std::exception &e )
 		{
-			// Not found
-			return false;
+			lock.acquire( m_mutex );
+			CacheEntry &cacheEntry = m_cache[key]; // in case some other thread erased our entry while we had released the lock
+			cacheEntry.status = Failed;
+			throw e;
 		}
+		assert( data );
+		assert( cacheEntry.status != Cached ); // this would indicate that another thread somehow
+		assert( cacheEntry.status != Failed ); // loaded the same thing as us, which is not the intention.
+		set( key, data, cost );
+		return data;
+	}
+	else if( cacheEntry.status==Cached )
+	{
+		// move the entry to the front of the list
+		m_list.erase( cacheEntry.listIterator );
+		m_list.push_front( key );
+		cacheEntry.listIterator = m_list.begin();
+		return cacheEntry.data;
 	}
 	else
 	{
-		/// Move the entry to the front of the list
-		std::pair<Key, DataCost> listEntry = *(it->second);
-		m_list.erase( it->second );
-		m_list.push_front( listEntry );
-
-		assert( m_list.size() == m_cache.size() );
-
-		/// Update the map to reflect the change in list position
-		it->second = m_list.begin();
-
-		/// Return the actual data
-		data = (it->second)->second.first;
-
-		return true;
+		assert( cacheEntry.status==Failed );
+		throw Exception( boost::str( boost::format( "Previous attempt to get \"%1%\" failed." ) % key ) );
 	}
 }
 
-template<typename Key, typename Data, typename GetterFn>
-void LRUCache<Key, Data, GetterFn>::set( const Key& key, Data data, Cost cost )
+template<typename Key, typename Ptr>
+bool LRUCache<Key, Ptr>::set( const Key &key, const Ptr &data, Cost cost )
 {
-	erase( key );
-	cache( key, data, cost );
-}
+	Mutex::scoped_lock lock( m_mutex );
 
-template<typename Key, typename Data, typename GetterFn>
-void LRUCache<Key, Data, GetterFn>::cache( const Key& key, Data data, Cost cost ) const
-{
-	if (cost > m_maxCost)
+	CacheEntry &cacheEntry = m_cache[key]; // creates an entry if one doesn't exist yet
+	
+	if( cacheEntry.status==Cached )
 	{
-		/// Don't store as we'll exceed the maximum cost immediately.
-		return;
+		m_currentCost -= cacheEntry.cost;
+		cacheEntry.data = 0;
+		m_list.erase( cacheEntry.listIterator );
 	}
-
-	/// If necessary, clear out any data with a least-recently-used strategy until we
-	/// have enough remaining "cost" to store.
+	
+	if( cost > m_maxCost )
+	{
+		cacheEntry.status = TooCostly;
+		return false;
+	}
+	
 	limitCost( m_maxCost - cost );
-
-	/// If there's still room to store.....
-	if (m_currentCost + cost <= m_maxCost )
-	{
-		/// Update the cost to reflect the storage of the new item
-		m_currentCost += cost;
-
-		/// Insert the item at the front of the list
-		std::pair<Key, DataCost> listEntry( key, DataCost( data, cost ) );
-		m_list.push_front( listEntry );
-
-		/// Add the item to the map
-		std::pair<typename Cache::iterator, bool> it  = m_cache.insert( typename Cache::value_type( key, m_list.begin() ) );
-		assert( it.second );
-		assert( m_list.size() == m_cache.size() );
-
-		assert( data == (it.first->second)->second.first );
-	}
+	
+	cacheEntry.data = data;
+	cacheEntry.cost = cost;
+	cacheEntry.status = Cached;
+	m_list.push_front( key );
+	cacheEntry.listIterator = m_list.begin();
+	
+	m_currentCost += cost;
+	
+	return true;
 }
 
-template<typename Key, typename Data, typename GetterFn>
-void LRUCache<Key, Data, GetterFn>::limitCost( Cost cost ) const
+template<typename Key, typename Ptr>
+void LRUCache<Key, Ptr>::limitCost( Cost cost )
 {
-	assert( cost > Cost(0) );
-	assert( m_list.size() == m_cache.size() );
+	Mutex::scoped_lock lock( m_mutex );
 
-	while (m_currentCost > cost && m_list.size() )
+	assert( cost >= Cost(0) );
+
+	while( m_currentCost > cost && m_list.size() )
 	{
-		m_currentCost -= m_list.back().second.second;
-
-		/// The back of the list contains the LRU entry.
-		m_cache.erase( m_list.back().first );
-		m_list.pop_back();
+		bool erased = erase( m_list.back() );
+		assert( erased ); (void)erased;
 	}
-
-	assert( m_list.size() == m_cache.size() );
+	
+	assert( m_currentCost <= cost );
 }
 
 
-template<typename Key, typename Data, typename GetterFn>
-bool LRUCache<Key, Data, GetterFn>::erase( const Key &key )
+template<typename Key, typename Ptr>
+bool LRUCache<Key, Ptr>::erase( const Key &key )
 {
+	Mutex::scoped_lock lock( m_mutex );
+
 	typename Cache::iterator it = m_cache.find( key );
 
-	if ( it == m_cache.end() )
+	if( it == m_cache.end() )
 	{
 		return false;
 	}
 
-	m_currentCost -= (it->second )->second.second;
-	m_list.erase( it->second );
-	m_cache.erase( it );
-
-	assert( m_list.size() == m_cache.size() );
-
+	m_currentCost -= it->second.cost;
+	m_list.erase( it->second.listIterator );
+	it->second.data = 0;
+	it->second.status = Erased;
+	
 	return true;
 }
 
-
 } // namespace IECore
+
+#endif // IECORE_LRUCACHE_INL

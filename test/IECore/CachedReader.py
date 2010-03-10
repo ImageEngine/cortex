@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -46,12 +46,17 @@ class CachedReaderTest( unittest.TestCase ) :
 		o = r.read( "test/IECore/data/cobFiles/compoundData.cob" )
 		self.assertEqual( o.typeName(), "CompoundData" )
 		self.assertEqual( r.memoryUsage(), o.memoryUsage() )
+		self.failUnless( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
 
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( r.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
+		self.failUnless( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
+		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
 
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( r.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
+		self.failUnless( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
+		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
 
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
@@ -60,23 +65,30 @@ class CachedReaderTest( unittest.TestCase ) :
 		# recently used) leaving us with just "oo"
 		r.maxMemory = oo.memoryUsage() + ( o.memoryUsage() / 2 )
 		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )
+		self.failIf( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
+		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
 
 		# Here, the cache should throw away "oo" (because there isn't enough room for it, and it was the least
 		# recently used) leaving us empty
 		r.maxMemory = oo.memoryUsage() / 2
 		self.assertEqual( r.memoryUsage(), 0 )
+		self.failIf( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
 
 		r.maxMemory = oo.memoryUsage() * 2
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		r.clear()
 		self.assertEqual( r.memoryUsage(), 0 )
+		self.failIf( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
 
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )
+		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
 		r.clear( "I don't exist" )
+		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
 		self.assertEqual( r.memoryUsage(), oo.memoryUsage() )
 		r.clear( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( r.memoryUsage(), 0 )
+		self.failIf( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
 
 		# testing insert.
 		r.insert( "test/IECore/data/pdcFiles/particleShape1.250.pdc", oo )
@@ -88,6 +100,58 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assertEqual( r.memoryUsage(), o.memoryUsage() )
 		o2 = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( o, o2 )
+
+	def testRepeatedFailures( self ) :
+	
+		def check( fileName ) :
+		
+			r = CachedReader( SearchPath( "./", ":" ), 100 * 1024 * 1024 )
+			firstException = None
+			try :
+				r.read( fileName )		
+			except Exception, e :
+				firstException = str( e )
+
+			self.assert_( firstException )
+
+			secondException = None
+			try :
+				r.read( fileName )		
+			except Exception, e :
+				secondException = str( e )
+
+			self.assert_( secondException )
+
+			# we want the second exception to be different, as the CachedReader
+			# shouldn't be wasting time attempting to load files again when
+			# it failed the first time
+			self.assertNotEqual( firstException, secondException )
+			
+		check( "iDontExist" )
+		check( "include/IECore/IECore.h" )
+
+	def testChangeSearchPaths( self ) :
+	
+		# read a file from one path
+		r = CachedReader( SearchPath( "./test/IECore/data/cachedReaderPath1", ":" ), 100 * 1024 * 1024 )
+		
+		o1 = r.read( "file.cob" )
+		
+		self.assertEqual( o1.value, 1 )
+		self.failUnless( r.cached( "file.cob" ) )
+		
+		# read a file of the same name from a different path
+		r.searchPath = SearchPath( "./test/IECore/data/cachedReaderPath2", ":" )
+		self.failIf( r.cached( "file.cob" ) )
+		
+		o2 = r.read( "file.cob" )
+		
+		self.assertEqual( o2.value, 2 )
+		self.failUnless( r.cached( "file.cob" ) )
+		
+		# set the paths to the same as before and check we didn't obliterate the cache unecessarily
+		r.searchPath = SearchPath( "./test/IECore/data/cachedReaderPath2", ":" )
+		self.failUnless( r.cached( "file.cob" ) )		
 
 	def testDefault( self ) :
 

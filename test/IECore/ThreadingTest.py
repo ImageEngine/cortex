@@ -169,7 +169,7 @@ class ThreadingTest( unittest.TestCase ) :
 		self.callSomeThings( calls, args, threaded=True )
 		threadedTime = time.time() - tStart
 				
-		self.failUnless( threadedTime, nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
+		self.failUnless( threadedTime < nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
 
 	def testWritingGains( self ) :
 	
@@ -192,8 +192,55 @@ class ThreadingTest( unittest.TestCase ) :
 		self.callSomeThings( calls, threaded=True )
 		threadedTime = time.time() - tStart
 		
-		self.failUnless( threadedTime, nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
+		self.failUnless( threadedTime < nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
+
+	def testCachedReaderConcurrency( self ) :
 	
+		args = [
+			( "test/IECore/data/idxFiles/test.idx", ),
+			( "test/IECore/data/idxFiles/test.idx", ),
+			( "test/IECore/data/cobFiles/intDataTen.cob", ),
+			( "test/IECore/data/cobFiles/intDataTen.cob", ),
+			( "test/IECore/data/cobFiles/pSphereShape1.cob", ),
+			( "test/IECore/data/cobFiles/pSphereShape1.cob", ),
+			( "test/IECore/data/cobFiles/pSphereShape1.cob", ),
+			( "test/IECore/data/cobFiles/pSphereShape1.cob", ),
+		] 
+	
+		cachedReader = IECore.CachedReader( IECore.SearchPath( "./", ":" ), 1024 * 1024 * 50 )
+		
+		calls = [ lambda f : cachedReader.read( f ) ] * len( args )
+
+		for i in range( 0, 5 ) :
+			cachedReader.clear()
+			self.callSomeThings( calls, args=args, threaded=True )
+
+	def testCachedReaderGains( self ) :
+	
+		args = [
+			( "test/IECore/data/jpg/21mm.jpg", ),
+			( "test/IECore/data/jpg/exif.jpg", ),
+			( "test/IECore/data/jpg/greyscaleCheckerBoard.jpg", ),
+			( "test/IECore/data/dpx/ramp.dpx", ),
+		] * 4
+	
+		cachedReader = IECore.CachedReader( IECore.SearchPath( "./", ":" ), 1024 * 1024 * 50 )
+		
+		calls = [ lambda f : cachedReader.read( f ) ] * len( args )
+
+		tStart = time.time()
+		cachedReader.clear()
+		self.callSomeThings( calls, args=args, threaded=False )
+		nonThreadedTime = time.time() - tStart
+
+		tStart = time.time()
+		cachedReader.clear()
+		self.callSomeThings( calls, args=args, threaded=True )
+		threadedTime = time.time() - tStart
+				
+		self.failUnless( threadedTime < nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
+
+
 	def tearDown( self ) :
 		
 		for i in range( 0, 4 ) :

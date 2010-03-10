@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -73,6 +73,8 @@ class CachedReader : public RefCounted
 		/// it actually refers to an object within the cache - you must
 		/// call the copy() function on it if you wish to have something
 		/// you are free to modify.
+		/// \threading It is safe to call this method from multiple
+		/// concurrent threads.
 		ConstObjectPtr read( const std::string &file );
 
 		/// Returns the amount of memory currently occupied by
@@ -113,20 +115,17 @@ class CachedReader : public RefCounted
 
 	private :
 
-		struct CacheFn
+		struct Getter
 		{
-			typedef size_t Cost;
-			SearchPath m_paths;
-			std::set<std::string> m_unreadables;
-
-			// Returns true if the "data" and "cost" arguments were computed from the "key", otherwise returns false
-			bool get( const std::string &key, ConstObjectPtr &data, Cost &cost );
+			Getter( const SearchPath &paths );
+			
+			const SearchPath &m_paths; // references CachedReader::m_paths
+			
+			ConstObjectPtr operator()( const std::string &key, size_t &cost );
 		};
 
-		typedef LRUCache< std::string, ConstObjectPtr, CacheFn> Cache;
-
-		CacheFn m_fn;
-
+		typedef LRUCache<std::string, ConstObjectPtr> Cache;
+		SearchPath m_paths;
 		Cache m_cache;
 
 };

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,11 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_LRUCACHE_H
-#define IE_CORE_LRUCACHE_H
+#ifndef IECORE_LRUCACHE_H
+#define IECORE_LRUCACHE_H
 
 #include <map>
 #include <list>
+
+#include "tbb/recursive_mutex.h"
+
+#include "boost/noncopyable.hpp"
+#include "boost/function.hpp"
 
 namespace IECore
 {
@@ -44,26 +49,25 @@ namespace IECore
 /// A templated cache with a Least-Recently-Used disposal mechanism. Each item to be retrieved is "calculated"
 /// by a function which can also state the "cost" of that piece of data. The cache has a maximum cost, and
 /// attempts to add any data which would exceed this results in the LRU items being discarded.
-/// Template parameters are the Key to which access the Data, and a GetterFn type which should be a model of:
-/// \code
-///	struct GetterFn
-///	{
-///		typedef int Cost;
-///		// Returns true if the "data" and "cost" arguments were computed from the "key", otherwise returns false
-///		bool get( const Key &key, Data &data, Cost &cost );
-///	};
-/// \endcode
-template<typename Key, typename Data, typename GetterFn>
-class LRUCache
+/// Template parameters are the key by which the data is accessed and a smart pointer type which can be used
+/// to point to the data.
+/// \threading It should be safe to call the methods of LRUCache from concurrent threads.
+template<typename Key, typename Ptr>
+class LRUCache : private boost::noncopyable
 {
 	public:
+	
 		typedef Key KeyType;
-		typedef Data DataType;
-		typedef GetterFn GetterFnType;
+		typedef Ptr PtrType;
+		typedef size_t Cost;
+		
+		/// The GetterFunction is responsible for computing the value and cost for a cache entry
+		/// when given the key. It should throw a descriptive exception if it can't get the data for
+		/// any reason.
+		typedef boost::function<Ptr ( const Key &key, Cost &cost )> GetterFunction;
 
-		typedef typename GetterFn::Cost Cost;
-
-		LRUCache();
+		LRUCache( GetterFunction getter );
+		LRUCache( GetterFunction getter, Cost maxCost );
 		virtual ~LRUCache();
 
 		void clear();
@@ -71,7 +75,7 @@ class LRUCache
 		// Erases the given key if it is contained in the cache. Returns whether any item was removed.
 		bool erase( const Key &key );
 
-		/// Set the maximum cost of the items held in the cache, discarding any if necessary
+		/// Set the maximum cost of the items held in the cache, discarding any items if necessary.
 		void setMaxCost( Cost maxCost );
 
 		/// Get the maximum possible cost of cacheable items
@@ -80,41 +84,63 @@ class LRUCache
 		/// Returns the current cost of items held in the cache
 		Cost currentCost() const;
 
-		/// Retrieve the item from the cache, computing it if necessary. Returns true if successful and "data" has been set, else
-		/// returns false and the value of "data" is undefined.
-		/// \todo Why is the GetterFn passed in here? Wouldn't it be better to be
-		/// provided to the LRUCache constructor?
-		bool get( const Key& key, GetterFn fn, Data &data ) const;
+		/// Retrieves the item from the cache, computing it if necessary. Throws if the item can not be
+		/// computed.
+		Ptr get( const Key &key );
 
-		/// Forces registration of an object on the cache.
-		void set( const Key& key, Data data, Cost cost );
+		/// Registers an object in the cache directly. Returns true for success and false on failure -
+		/// failure can occur if the cost exceeds the maximum cost for the cache.
+		bool set( const Key &key, const Ptr &data, Cost cost );
 
 		/// Returns true if the object is in the cache.
-		bool cached( const Key& key ) const;
+		bool cached( const Key &key ) const;
 
 	protected:
+		
+		typedef std::list<Key> List;
+		typedef typename std::list<Key>::iterator ListIterator;
+				
+		typedef tbb::recursive_mutex Mutex;
+		
+		enum Status
+		{
+			New, // brand new unpopulated entry
+			Caching, // unpopulated entry which is waiting for m_getter to return
+			Cached, // entry complete with value
+			Erased, // entry once had value but removed by limitCost
+			TooCostly, // entry cost exceeds m_maxCost and therefore isn't stored
+			Failed // m_getter failed when computing entry
+		};
+		
+		struct CacheEntry
+		{
+			CacheEntry();
+			
+			Cost cost;
+			ListIterator listIterator;
+			Status status;
+			Ptr data;
+		};
 
-		typedef std::pair<Data, Cost> DataCost;
-
-		typedef std::list< std::pair<Key, DataCost> > List;
-
-		typedef std::map< Key, typename List::iterator > Cache;
+		typedef std::map<Key, CacheEntry> Cache;
+		typedef typename std::map<Key, CacheEntry>::const_iterator ConstCacheIterator;
 
 		/// Clear out any data with a least-recently-used strategy until the current cost does not exceed the specified cost.
-		void limitCost( Cost cost ) const;
+		void limitCost( Cost cost );
 
-		void cache( const Key& key, Data data, Cost cost ) const;
+		GetterFunction m_getter;
+
+		mutable Mutex m_mutex;
 
 		Cost m_maxCost;
-		mutable Cost m_currentCost;
-
-		mutable List m_list;
-		mutable Cache m_cache;
+		Cost m_currentCost;
+		
+		List m_list;
+		Cache m_cache;
 };
-
 
 } // namespace IECore
 
 #include "IECore/LRUCache.inl"
 
-#endif // IE_CORE_LRUCACHE_H
+#endif // IECORE_LRUCACHE_H

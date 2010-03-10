@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings
-// regarding redefinition of _POSIX_C_SOURCE
-#include "boost/python.hpp"
+#ifndef IECORE_LRUCACHETHREADINGTEST_H
+#define IECORE_LRUCACHETHREADINGTEST_H
 
-#include "IECore/CachedReader.h"
-#include "IECore/Object.h"
-#include "IECorePython/CachedReaderBinding.h"
-#include "IECorePython/RefCountedBinding.h"
-#include "IECorePython/ScopedGILRelease.h"
+#include "boost/test/unit_test.hpp"
 
-using namespace boost::python;
-using namespace IECore;
-
-namespace IECorePython
+namespace IECore
 {
 
-static ObjectPtr read( CachedReader &r, const std::string &f )
-{
-	ScopedGILRelease gilRelease;
-	ConstObjectPtr o = r.read( f );
-	if( o )
-	{
-		return o->copy();
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-void bindCachedReader()
-{
-	RefCountedClass<CachedReader, RefCounted>( "CachedReader" )
-		.def( init<const SearchPath &, size_t>() )
-		.def( "read", &read )
-		.def( "memoryUsage", &CachedReader::memoryUsage )
-		.def( "clear", (void (CachedReader::*)( const std::string &) )&CachedReader::clear )
-		.def( "clear", (void (CachedReader::*)( void ) )&CachedReader::clear )
-		.def( "insert", &CachedReader::insert )
-		.def( "cached", &CachedReader::cached )
-		.add_property( "searchPath", make_function( &CachedReader::getSearchPath, return_value_policy<copy_const_reference>() ), &CachedReader::setSearchPath )
-		.add_property( "maxMemory", &CachedReader::getMaxMemory, &CachedReader::setMaxMemory )
-		.def( "defaultCachedReader", &CachedReader::defaultCachedReader ).staticmethod( "defaultCachedReader" )
-	;
-}
+void addLRUCacheThreadingTest( boost::unit_test::test_suite *test );
 
 }
+
+#endif // IECORE_LRUCACHETHREADINGTEST_H
+
