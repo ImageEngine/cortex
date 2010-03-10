@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,11 +38,12 @@
 #include <list>
 #include <functional>
 
-#include "IECore/GraphDependency.h"
+#include "IECore/private/GraphDependency.h"
 
 namespace IECore
 {
 
+///This class is not generic and useful enough to be used outside HierarchicalCache. 
 ///Abstract template class for lazy computation of dependencies on a tree graph.
 ///The templated type specifies the key used to identify graph nodes.
 ///It assumes the compute function will propagate the dirty flag to the parent nodes if that is the case.
@@ -97,6 +98,6 @@ class TreeGraphDependency : public GraphDependency<T>
 
 } // namespace IECore
 
-#include <IECore/TreeGraphDependency.inl>
+#include <IECore/private/TreeGraphDependency.inl>
 
 #endif //IE_CORE_TREEGRAPHDEPENDENCY_H

@@ -44,7 +44,6 @@
 #include "IECore/RefCounted.h"
 #include "IECore/IndexedIO.h"
 #include "IECore/VisibleRenderable.h"
-#include "IECore/TreeGraphDependency.h"
 
 namespace IECore
 {
@@ -53,6 +52,8 @@ IE_CORE_FORWARDDECLARE( Object );
 IE_CORE_FORWARDDECLARE( CompoundObject );
 IE_CORE_FORWARDDECLARE( Group );
 IE_CORE_FORWARDDECLARE( IndexedIOInterface );
+
+IE_CORE_FORWARDDECLARE( HierarchicalCacheDependency );
 
 ///A simple means of storing VisibleRenderable objects in a hierarchical way.
 ///Uses an IndexedIOInterface object to access the file. The file is organized as following:
@@ -192,32 +193,9 @@ class HierarchicalCache : public RefCounted
 
 		IndexedIOInterfacePtr m_io;
 
-		///Internal dependency graph for lazy computation of bounding boxes.
-		///Parent nodes are dependent on their child nodes.
-		class CacheDependency : public TreeGraphDependency< std::string >
-		{
-			public:
-				CacheDependency( HierarchicalCache *cache ) : m_cache( cache ) {};
+		HierarchicalCacheDependencyPtr m_dependency;
 
-				///Returns the root node name
-				virtual std::string rootNode() const;
-
-				///Returns true if node1 is parented directly or indirectly to node2.
-				///Throws Exception if the node names are not full path.
-				virtual bool isDescendant( const std::string &node1, const std::string &node2 ) const;
-
-				///Updates a node. It's guarantee that all dependent nodes are updated.
-				virtual void compute( const std::string &node );
-
-			private:
-
-				HierarchicalCache *m_cache;
-
-		};
-		IE_CORE_DECLAREPTR( CacheDependency );
-		CacheDependencyPtr m_dependency;
-
-		friend class CacheDependency;
+		friend class HierarchicalCacheDependency;
 
 		///Utility function used by globalTransformMatrix().
 		Imath::M44f recursiveTransformMatrix( const ObjectHandle &obj, const Imath::M44f &world );

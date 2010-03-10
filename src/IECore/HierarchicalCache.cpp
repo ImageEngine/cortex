@@ -48,44 +48,63 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/MatrixTransform.h"
 #include "IECore/HeaderGenerator.h"
+#include "IECore/private/TreeGraphDependency.h"
+
+namespace IECore
+{
+	class HierarchicalCacheDependency : public TreeGraphDependency< std::string >
+	{
+		public:
+			HierarchicalCacheDependency( HierarchicalCache *cache ) : m_cache( cache ) {};
+
+			///Returns the root node name
+			virtual std::string rootNode() const
+			{
+				return HierarchicalCache::rootName();
+			}
+
+			///Returns true if node1 is parented directly or indirectly to node2.
+			///Throws Exception if the node names are not full path.
+			virtual bool isDescendant( const std::string &node1, const std::string &node2 ) const
+			{
+				if ( node1.compare( 0, node2.size(), node2 ) == 0 )
+				{
+					if ( node1.size() == node2.size() )
+					{
+						return true;
+					}
+					if ( node2.size() > 1 )
+					{
+						if ( node1[ node2.size() ]  == '/' )
+						{
+							return true;
+						}
+					}
+					else if ( node2.size() == 1 )
+					{
+						//  node2 is "/"...
+						return true;
+					}
+				}
+				return false;
+			}
+
+			///Updates a node. It's guarantee that all dependent nodes are updated.
+			virtual void compute( const std::string &node )
+			{
+				m_cache->updateNode( node );
+			}
+
+		private:
+
+			HierarchicalCache *m_cache;
+	};
+
+}
 
 using namespace IECore;
 
-void HierarchicalCache::CacheDependency::compute( const std::string &node )
-{
-	m_cache->updateNode( node );
-}
-
-std::string HierarchicalCache::CacheDependency::rootNode( ) const
-{
-	return HierarchicalCache::rootName();
-}
-
-bool HierarchicalCache::CacheDependency::isDescendant( const std::string &node1, const std::string &node2 ) const
-{
-	if ( node1.compare( 0, node2.size(), node2 ) == 0 )
-	{
-		if ( node1.size() == node2.size() )
-		{
-			return true;
-		}
-		if ( node2.size() > 1 )
-		{
-			if ( node1[ node2.size() ]  == '/' )
-			{
-				return true;
-			}
-		}
-		else if ( node2.size() == 1 )
-		{
-			//  node2 is "/"...
-			return true;
-		}
-	}
-	return false;
-}
-
-HierarchicalCache::HierarchicalCache( const std::string &filename, IndexedIO::OpenMode mode ) : m_dependency( new CacheDependency( this ) )
+HierarchicalCache::HierarchicalCache( const std::string &filename, IndexedIO::OpenMode mode ) : m_dependency( new HierarchicalCacheDependency( this ) )
 {
 	m_io = IndexedIOInterface::create(filename, "/", mode );
 
