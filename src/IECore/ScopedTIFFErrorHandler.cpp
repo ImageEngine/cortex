@@ -45,14 +45,14 @@ using namespace IECore;
 typedef tbb::enumerable_thread_specific< std::stack< ScopedTIFFErrorHandler * > > HandlerThreadInfo;
 static HandlerThreadInfo handlerThreadInfo;
 
-boost::mutex ScopedTIFFErrorHandler::m_setupMutex;
+tbb::mutex ScopedTIFFErrorHandler::m_setupMutex;
 TIFFErrorHandler ScopedTIFFErrorHandler::m_previousHandler = 0;
 unsigned int ScopedTIFFErrorHandler::m_handlerCount = 0;
 
 
 ScopedTIFFErrorHandler::ScopedTIFFErrorHandler()
 {
-	boost::lock_guard<boost::mutex> lock( m_setupMutex );
+	tbb::mutex::scoped_lock lock( m_setupMutex );
 
 	if ( !m_handlerCount )
 	{
@@ -71,7 +71,7 @@ ScopedTIFFErrorHandler::ScopedTIFFErrorHandler()
 
 ScopedTIFFErrorHandler::~ScopedTIFFErrorHandler()
 {
-	boost::lock_guard<boost::mutex> lock( m_setupMutex );
+	tbb::mutex::scoped_lock lock( m_setupMutex );
 	HandlerThreadInfo::reference scopedHandlers = handlerThreadInfo.local();
 	assert( scopedHandlers.top() == this );
 	m_handlerCount--;

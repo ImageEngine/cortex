@@ -38,7 +38,7 @@
 #include <stdarg.h>
 #include <setjmp.h>
 #include <vector>
-#include "boost/thread.hpp"
+#include "tbb/mutex.h"
 
 #include "tiffio.h"
 
@@ -58,7 +58,7 @@ class ScopedTIFFErrorHandler
 		jmp_buf m_jmpBuffer;
 		std::string m_errorMessage;
 
-		static boost::mutex m_setupMutex;
+		static tbb::mutex m_setupMutex;
 		static void output(const char* module, const char* fmt, va_list ap);
 		static TIFFErrorHandler m_previousHandler;
 		static unsigned int m_handlerCount;
