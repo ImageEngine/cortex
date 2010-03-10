@@ -156,7 +156,7 @@ const BoolParameter *ColorSpaceTransformOp::premultipliedParameter() const
 	return m_premultipliedParameter;
 }
 
-void ColorSpaceTransformOp::registerConversion( const InputColorSpace &inputColorSpace, const OutputColorSpace &outputColorSpace, CreatorFn creator, void *data )
+void ColorSpaceTransformOp::registerConversion( const InputColorSpace &inputColorSpace, const OutputColorSpace &outputColorSpace, const CreatorFn &creator )
 {
 	if ( inputColorSpace != outputColorSpace )
 	{
@@ -168,9 +168,11 @@ void ColorSpaceTransformOp::registerConversion( const InputColorSpace &inputColo
 		}
 		conversionsSet().insert( conversion );
 
-		converterTypes()[ creator ] = conversion;
+		CreatorFn *pCreator = new CreatorFn( creator );
 
-		ConversionInfo info( creator, inputColorSpace, outputColorSpace, data );
+		converterTypes()[ pCreator ] = conversion;
+
+		ConversionInfo info( pCreator, inputColorSpace, outputColorSpace );
 
 		converters().insert(
 			ConvertersMap::value_type(
@@ -392,7 +394,7 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitive * image, const 
 		{
 			assert( previous.get<2>() == current.get<1>() );
 		}
-		ModifyOpPtr currentConversion = (current.get<0>())( current.get<1>(), current.get<2>(), current.get<3>() );
+		ModifyOpPtr currentConversion = (*current.get<0>())( current.get<1>(), current.get<2>() );
 		assert( currentConversion );
 
 		if ( !currentConversion->isInstanceOf( ChannelOpTypeId ) && !currentConversion->isInstanceOf( ColorTransformOpTypeId ) )

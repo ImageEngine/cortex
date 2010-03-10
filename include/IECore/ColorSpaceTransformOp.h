@@ -42,6 +42,7 @@
 
 #include "boost/tuple/tuple.hpp"
 #include "boost/tuple/tuple_comparison.hpp"
+#include "boost/function.hpp"
 
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/SimpleTypedParameter.h"
@@ -84,9 +85,11 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 		BoolParameter *premultipliedParameter();
 		const BoolParameter *premultipliedParameter() const;
 
+		/// Definition of a function which can create a Color space converter when given the color spaces.
 		/// ModifyOp is the most-derived common base class of ChannelOp and ColorTransformOp
-		typedef ModifyOpPtr (*CreatorFn)( const InputColorSpace &, const OutputColorSpace &, void * );
-		static void registerConversion( const InputColorSpace &, const OutputColorSpace &, CreatorFn fn, void *data = 0 );
+		typedef boost::function<ModifyOpPtr ( const InputColorSpace &, const OutputColorSpace & )> CreatorFn;
+
+		static void registerConversion( const InputColorSpace &, const OutputColorSpace &, const CreatorFn &creator );
 
 		static void inputColorSpaces( std::vector< InputColorSpace > &colorSpaces );
 		static void outputColorSpaces( std::vector< OutputColorSpace > &colorSpaces );
@@ -98,13 +101,13 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 			public:
 				ColorSpaceDescription( const InputColorSpace &, const OutputColorSpace & );
 			protected :
-				static ModifyOpPtr createOp( const InputColorSpace &, const OutputColorSpace &, void * );
+				static ModifyOpPtr createOp( const InputColorSpace &, const OutputColorSpace & );
 		};
 
 	protected :
 
 		typedef std::pair< InputColorSpace, OutputColorSpace > Conversion;
-		typedef boost::tuple< CreatorFn, InputColorSpace, OutputColorSpace, void* > ConversionInfo;
+		typedef boost::tuple< CreatorFn *, InputColorSpace, OutputColorSpace > ConversionInfo;
 
 		void findConversion( const InputColorSpace &, const OutputColorSpace &, std::vector< ConversionInfo > &conversions );
 		void findConversion(
@@ -123,7 +126,7 @@ class ColorSpaceTransformOp : public ImagePrimitiveOp
 		BoolParameterPtr m_premultipliedParameter;
 
 		typedef std::multimap< InputColorSpace, ConversionInfo > ConvertersMap;
-		typedef std::map< CreatorFn, Conversion > ConverterTypesMap;
+		typedef std::map< CreatorFn *, Conversion > ConverterTypesMap;
 		typedef std::set< Conversion > ConversionsSet;
 
 		static ConvertersMap &converters();

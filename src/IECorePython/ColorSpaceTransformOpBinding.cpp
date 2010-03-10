@@ -76,19 +76,30 @@ static list colorSpaces()
 	return vectorToList( x );
 }
 
-
-static ModifyOpPtr creator( const std::string &inputColorSpace, const std::string &outputColorSpace, void *data )
+struct ColorConverterCreator
 {
-        assert( data );
-        PyObject *d = (PyObject *)( data );
 
-        return call< ModifyOpPtr >( d, inputColorSpace, outputColorSpace );
-}
+	ColorConverterCreator( object fn )
+		:	m_fn( fn )
+	{
+	}
+	
+	ModifyOpPtr operator()( const std::string &inputColorSpace, const std::string &outputColorSpace ) 
+	{
+		ScopedGILLock gilLock;
+		ModifyOpPtr result = extract<ModifyOpPtr>( m_fn( inputColorSpace, outputColorSpace ) );
+		return result;
+	}
 
-static void registerConversion( const std::string &inputColorSpace, const std::string &outputColorSpace, PyObject *createFn )
+	private :
+	
+		object m_fn;
+
+};
+
+static void registerConversion( const std::string &inputColorSpace, const std::string &outputColorSpace, object creator )
 {
-	Py_INCREF( createFn );
-	ColorSpaceTransformOp::registerConversion( inputColorSpace, outputColorSpace, &creator, (void*)createFn );
+	ColorSpaceTransformOp::registerConversion( inputColorSpace, outputColorSpace, ColorConverterCreator( creator ) );
 }
 
 void bindColorSpaceTransformOp()
