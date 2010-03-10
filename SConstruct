@@ -256,6 +256,12 @@ o.Add(
 	"/usr/local/foundry/nuke"
 )
 
+o.Add(
+	"NUKE_LICENSE_FILE",
+	"The path to the FlexLM license file to use for Nuke. This is necessary to run the tests.",
+	"/usr/local/foundry/FLEXlm",
+)
+
 # Truelight options
 
 o.Add(
@@ -1508,6 +1514,7 @@ nukeEnv.Prepend( LIBS = [ "GLEW" ] )
 nukePythonEnv = pythonEnv.Copy( IECORE_NAME = "IECoreNuke" )
 
 nukeTestEnv = testEnv.Copy()
+nukeTestEnv["ENV"]["LM_LICENSE_FILE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
 
 if doConfigure :
 

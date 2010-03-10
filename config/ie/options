@@ -249,8 +249,13 @@ if IEEnv.platform() != "osx104.i686" and IEEnv.platform() != "osx105.i686" and t
 		nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
 		if compiler==nukeReg["compiler"] and compilerVersion==nukeReg["compilerVersion"] :
 			NUKE_ROOT = nukeReg["location"]
+			NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
 			INSTALL_NUKELIB_NAME = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/lib/" + platform + "/$IECORE_NAME-$IECORE_MAJORMINORPATCH_VERSION"
 			INSTALL_NUKEPYTHON_DIR = "$INSTALL_PREFIX/tools/nuke/" + nukeVersion + "/python/" + platform + "/cortexBase/$IECORE_MAJORMINORPATCH_VERSION"
+			boostVersion = "1.38.0"
+			boostVersionSuffix = "-mt-1_38"
+			BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
+			BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
 	except :
 		pass
 
