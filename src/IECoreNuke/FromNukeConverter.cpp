@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,8 +37,8 @@
 using namespace IECore;
 using namespace IECoreNuke;
 
-FromNukeConverter::FromNukeConverter( const std::string &name, const std::string &description )
-	:	ToCoreConverter( name, description )
+FromNukeConverter::FromNukeConverter( const std::string &description )
+	:	ToCoreConverter( description )
 {
 }
 
