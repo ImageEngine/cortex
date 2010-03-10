@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,7 +68,7 @@ namespace IECore
 *    the resulting scanLineOrderOnly value.
 *    For imageData messages there will be no confirmation message to not compromise performance.
 *
-* The server object creates a thread to control the socket connection. The thread dies when the object is destructed.
+* The server object creates a thread to control the socket connection. The thread dies when the object is destroyed.
 */
 class DisplayDriverServer : public RunTimeTyped
 {
@@ -78,8 +78,6 @@ class DisplayDriverServer : public RunTimeTyped
 
 		DisplayDriverServer( int portNumber );
 		virtual ~DisplayDriverServer();
-
-		boost::mutex &displayDriverMutex();
 
 	public:
 
@@ -130,7 +128,7 @@ class DisplayDriverServer : public RunTimeTyped
 		{
 			public:
 
-				Session( boost::asio::io_service& io_service, boost::mutex &mutex );
+				Session( boost::asio::io_service& io_service );
 				~Session();
 
 				boost::asio::ip::tcp::socket& socket();
@@ -145,7 +143,6 @@ class DisplayDriverServer : public RunTimeTyped
 				void sendException( const char *message );
 
 			private:
-				boost::mutex &m_mutex;
 				boost::asio::ip::tcp::socket m_socket;
 				DisplayDriverPtr m_displayDriver;
 				Header m_header;
@@ -156,7 +153,6 @@ class DisplayDriverServer : public RunTimeTyped
 		void serverThread();
 		void handleAccept( DisplayDriverServer::SessionPtr session, const boost::system::error_code& error);
 
-		boost::mutex m_mutex;
 		boost::asio::ip::tcp::endpoint m_endpoint;
 		boost::asio::io_service m_service;
 		boost::asio::ip::tcp::acceptor m_acceptor;
