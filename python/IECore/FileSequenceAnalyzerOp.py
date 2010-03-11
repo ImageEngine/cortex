@@ -199,4 +199,4 @@ class FileSequenceAnalyzerOp( Op ):
 		return copy.deepcopy( self.__frameInfo )
 
 
-registerRunTimeTyped( FileSequenceAnalyzerOp, 100019, Op )
+registerRunTimeTyped( FileSequenceAnalyzerOp )

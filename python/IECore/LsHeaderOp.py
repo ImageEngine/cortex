@@ -129,4 +129,4 @@ class LsHeaderOp( Op ) :
 		else :
 			return StringVectorData( headerLines )
 
-registerRunTimeTyped( LsHeaderOp, 100015, Op )
+registerRunTimeTyped( LsHeaderOp )

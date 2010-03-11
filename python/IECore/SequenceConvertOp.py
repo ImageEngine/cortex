@@ -99,4 +99,4 @@ class SequenceConvertOp( Op ) :
 
 		return StringData(str(dst))
 
-registerRunTimeTyped( SequenceConvertOp, 100014, Op )
+registerRunTimeTyped( SequenceConvertOp )

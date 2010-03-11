@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -115,4 +115,4 @@ class OptionalCompoundParameter( IECore.CompoundParameter ):
 		else:
 			parameter.smartSetValue( attrValue )
 
-registerObject( OptionalCompoundParameter, 100009, IECore.CompoundParameter )
+registerObject( OptionalCompoundParameter, 100009 )

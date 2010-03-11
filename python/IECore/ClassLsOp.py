@@ -117,4 +117,4 @@ class ClassLsOp( Op ) :
 		else :
 			return StringVectorData( classes )
 
-registerRunTimeTyped( ClassLsOp, 100008, Op )
+registerRunTimeTyped( ClassLsOp )

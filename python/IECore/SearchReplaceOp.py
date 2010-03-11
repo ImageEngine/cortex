@@ -133,4 +133,4 @@ class SearchReplaceOp( Op ) :
 
 		return StringData( destination )
 
-registerRunTimeTyped( SearchReplaceOp, 100016, Op )
+registerRunTimeTyped( SearchReplaceOp )

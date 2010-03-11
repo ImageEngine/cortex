@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -69,4 +69,4 @@ class VisualiserProcedural( IECore.ParameterisedProcedural ) :
 
 		args["renderable"].render( renderer )
 
-IECore.registerObject( VisualiserProcedural, 100027, IECore.ParameterisedProcedural )
+IECore.registerObject( VisualiserProcedural, 100027 )

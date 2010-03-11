@@ -92,4 +92,4 @@ class SequenceRenumberOp( Op ) :
 
 		return StringData( dst.fileName )
 
-registerRunTimeTyped( SequenceRenumberOp, 100004, Op )
+registerRunTimeTyped( SequenceRenumberOp )

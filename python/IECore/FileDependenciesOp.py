@@ -92,4 +92,4 @@ class FileDependenciesOp( Op ) :
 		else :
 			return StringVectorData( [str(s) for s in files] )
 
-registerRunTimeTyped( FileDependenciesOp, 100010, Op )
+registerRunTimeTyped( FileDependenciesOp )

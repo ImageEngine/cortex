@@ -108,4 +108,4 @@ class SequenceMergeOp( Op ) :
 
 		return StringVectorData( resultFiles )
 
-registerRunTimeTyped( SequenceMergeOp, 100024, Op )
+registerRunTimeTyped( SequenceMergeOp )

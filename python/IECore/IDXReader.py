@@ -112,5 +112,5 @@ class IDXReader( IECore.Reader ) :
 		
 		return result
 		
-IECore.registerRunTimeTyped( IDXReader, 100028, IECore.Reader )
+IECore.registerRunTimeTyped( IDXReader )
 IECore.Reader.registerReader( "idx", IDXReader.canRead, IDXReader, IDXReader.staticTypeId() )

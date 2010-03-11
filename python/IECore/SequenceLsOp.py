@@ -382,4 +382,4 @@ class SequenceLsOp( Op ) :
 		else :
 			return StringVectorData( sequences )
 
-registerRunTimeTyped( SequenceLsOp, 100006, Op )
+registerRunTimeTyped( SequenceLsOp )

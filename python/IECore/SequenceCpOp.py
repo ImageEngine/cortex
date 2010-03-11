@@ -79,4 +79,4 @@ class SequenceCpOp( Op ) :
 
 		return StringData( str(dst) )
 
-registerRunTimeTyped( SequenceCpOp, 100007, Op )
+registerRunTimeTyped( SequenceCpOp )

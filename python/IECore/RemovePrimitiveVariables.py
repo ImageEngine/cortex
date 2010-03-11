@@ -74,4 +74,4 @@ class RemovePrimitiveVariables( PrimitiveOp ) :
 				if (m and not keep) or (not m and keep) :
 					del primitive[key]
 
-registerRunTimeTyped( RemovePrimitiveVariables, 100001, PrimitiveOp )
+registerRunTimeTyped( RemovePrimitiveVariables )

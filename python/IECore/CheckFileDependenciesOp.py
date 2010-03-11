@@ -108,4 +108,4 @@ class CheckFileDependenciesOp( Op ) :
 		else :
 			return StringVectorData( [str(s) for s in missingFiles] )
 
-registerRunTimeTyped( CheckFileDependenciesOp, 100011, Op )
+registerRunTimeTyped( CheckFileDependenciesOp )

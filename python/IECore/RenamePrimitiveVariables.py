@@ -62,4 +62,4 @@ class RenamePrimitiveVariables( PrimitiveOp ) :
 			primitive[ns[1]] = primitive[ns[0]]
 			del primitive[ns[0]]
 
-registerRunTimeTyped( RenamePrimitiveVariables, 100002, PrimitiveOp )
+registerRunTimeTyped( RenamePrimitiveVariables )

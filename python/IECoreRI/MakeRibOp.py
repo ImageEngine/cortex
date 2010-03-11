@@ -94,3 +94,5 @@ class MakeRibOp( IECore.Op ) :
 			renderer.worldEnd()
 
 		return operands.dst
+
+IECore.registerRunTimeTyped( MakeRibOp )

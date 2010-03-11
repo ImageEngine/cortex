@@ -64,4 +64,4 @@ class SequenceCatOp( Op ) :
 
 		return IntData( len( src.fileNames() ) )
 
-registerRunTimeTyped( SequenceCatOp, 100023, Op )
+registerRunTimeTyped( SequenceCatOp )

@@ -128,3 +128,5 @@ class BakeTransform( IECore.Op ) :
 			self.lockTransform( dst )
 
 		return IECore.StringData( dstPath )
+
+IECore.registerRunTimeTyped( BakeTransform )

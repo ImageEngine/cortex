@@ -142,4 +142,4 @@ class PointsExpressionOp( ModifyOp ) :
 
 			pointsPrim.numPoints = newNumPoints
 
-registerRunTimeTyped( PointsExpressionOp, 100013, ModifyOp )
+registerRunTimeTyped( PointsExpressionOp )

@@ -79,4 +79,4 @@ class SequenceMvOp( Op ) :
 
 		return StringData( str(dst) )
 
-registerRunTimeTyped( SequenceMvOp, 100005, Op )
+registerRunTimeTyped( SequenceMvOp )

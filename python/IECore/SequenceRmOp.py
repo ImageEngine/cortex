@@ -66,4 +66,4 @@ class SequenceRmOp( Op ) :
 
 		return StringData( operands["seq"].value )
 
-registerRunTimeTyped( SequenceRmOp, 100003, Op )
+registerRunTimeTyped( SequenceRmOp )

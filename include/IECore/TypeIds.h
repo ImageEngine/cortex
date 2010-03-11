@@ -385,6 +385,10 @@ enum TypeId
 	FirstIERenderTypeId = 110000,
 	LastIERenderTypeId = 110499,
 
+	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
+	FirstDynamicTypeId = 300000,
+	LastDynamicTypeId = 399999,
+
 	LastExtensionTypeId = 399999,
 	// Any TypeIds beyond this point can be considered safe for private internal use.
 

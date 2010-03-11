@@ -86,4 +86,4 @@ class ImageSequenceCompositeOp( SequenceMergeOp ) :
 
 		return True
 
-registerRunTimeTyped( ImageSequenceCompositeOp, 100025, SequenceMergeOp )
+registerRunTimeTyped( ImageSequenceCompositeOp )
