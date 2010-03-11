@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,7 +36,7 @@
 #define IECORENUKE_CURVELOOKUP_H
 
 #include "DDImage/Description.h"
-#if DD_IMAGE_VERSION_MAJOR >= 5 && DD_IMAGE_VERSION_MINOR > 0
+#if ( DD_IMAGE_VERSION_MAJOR >= 5 && DD_IMAGE_VERSION_MINOR > 0 ) || DD_IMAGE_VERSION_MAJOR >= 6
 #define IECORENUKE_NO_ANIMATION
 #endif
 

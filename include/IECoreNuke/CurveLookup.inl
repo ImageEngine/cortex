@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,7 +59,7 @@ CurveLookup<T>::~CurveLookup()
 {
 #ifdef IECORENUKE_NO_ANIMATION
 	delete m_curves;
-	// Note that we're not deliberately not deleting m_namesAndDefaultsStrings
+	// Note that we're deliberately not deleting m_namesAndDefaultsStrings
 	// or m_curveDescriptions - the nuke docs say that they have to remain forever, so
 	// we're effectively forced into leaking memory here.
 #endif
@@ -103,6 +103,11 @@ void CurveLookup<T>::knob( DD::Image::Knob_Callback f )
 			DD::Image::CurveDescription d;
 			d.name = (*m_namesAndDefaultsStrings)[i].c_str();
 			d.defaultValue = (*m_namesAndDefaultsStrings)[i+1].c_str();
+			d.flags = 0;
+#if (DD_IMAGE_VERSION_MAJOR >= 5 && DD_IMAGE_VERSION_MINOR >= 2) || DD_IMAGE_VERSION_MAJOR >= 6
+			// nuke 5.2 introduced this special "it's-not-for-you-but-if-you-don't-set-it-to-0-then-i-will-crash" field
+			d.buildCallback = 0;
+#endif
 			m_curveDescriptions->push_back( d );
 		}
 		DD::Image::CurveDescription endMarker = { 0 };
