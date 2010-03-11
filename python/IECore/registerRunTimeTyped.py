@@ -67,6 +67,7 @@ __nextDynamicRunTimeTypedId = None
 # be called once for all python classes inheriting from RunTimeTyped. It also
 # calls registerTypeId() for you.
 # baseClass is deprecated.
+# \todo Remove deprecation warning and baseClass parameter on Cortex 6.
 # typId is optional and if not defined, this function will associate a dynamic Id
 #       in the range FirstDynamicTypeId and LastDynamicTypeId from TypeIds.h.
 #       It's necessary to specify type Id for Object derived class or anything that
