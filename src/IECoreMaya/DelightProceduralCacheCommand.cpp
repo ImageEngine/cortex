@@ -154,7 +154,13 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 				return MStatus::kFailure;
 			}
 			cachedProcedural.bound = IECore::convert<Imath::Box3f>( fnDagNode.boundingBox() );
-			
+			IECore::ObjectPtr values = cachedProcedural.procedural->parameters()->getValue();
+			if( !values )
+			{
+				displayError( "DelightProceduralCacheCommand::doIt : failed to get parameter values from \"" + objectNames[0] + "\"." );
+				return MStatus::kFailure;
+			}
+			cachedProcedural.values = values->copy();				
 			g_procedurals[objectNames[0].asChar()] = cachedProcedural;
 		}
 
@@ -192,23 +198,32 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 		// and output it
 		try
 		{
-			// we first get an object referencing the serialise result and then make an extractor for it.
-			// making the extractor directly from the return of the serialise call seems to result
-			// in the python object dying before we properly extract the value, which results in corrupted
-			// strings, and therefore malformed ribs.
+			IECore::ObjectPtr currentValues = it->second.procedural->parameters()->getValue();			
+			it->second.procedural->parameters()->setValue( it->second.values );			
+			
 			std::string pythonString;
-			object serialisedResultObject = PythonCmd::globalContext()["IECore"].attr("ParameterParser")().attr("serialise")( it->second.procedural->parameters() );
-			extract<std::string> serialisedResultExtractor( serialisedResultObject );
-			if( serialisedResultExtractor.check() )
+			try 
 			{
+				// we first get an object referencing the serialise result and then make an extractor for it.
+				// making the extractor directly from the return of the serialise call seems to result
+				// in the python object dying before we properly extract the value, which results in corrupted
+				// strings, and therefore malformed ribs.
+				object serialisedResultObject = PythonCmd::globalContext()["IECore"].attr("ParameterParser")().attr("serialise")( it->second.procedural->parameters() );
+				extract<std::string> serialisedResultExtractor( serialisedResultObject );
+				
 				std::string serialisedParameters = serialisedResultExtractor();
 				pythonString = boost::str( boost::format( "IECoreRI.executeProcedural( \"%s\", %d, \"%s\" )" ) % it->second.className % it->second.classVersion % serialisedParameters );
 			}
-			else
+			catch( ... )
 			{
+				// Make sure we don't lose the 'current' values if we except.
+				it->second.procedural->parameters()->setValue( currentValues );			
 				displayError( "DelightProceduralCacheCommand::doIt : could not get parameters from \"" + objectNames[0] + "\"." );
 				return MStatus::kFailure;
 			}
+			
+			// Put the current values back.
+			it->second.procedural->parameters()->setValue( currentValues );	
 			
 			if( it->second.bound.isEmpty() )
 			{
