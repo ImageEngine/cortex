@@ -628,7 +628,7 @@ void bindMatrix44()
 		.def("removeScalingAndShear", &removeScalingAndShear<Matrix44<T> > )
 		.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear44<T> )
 		.def("extractEulerXYZ", &extractEulerXYZ<Matrix44<T>, Vec3<T> > )
-		.def("extractEulerXYZ", &extractEulerZYX<Matrix44<T>, Vec3<T> > )
+		.def("extractEulerZYX", &extractEulerZYX<Matrix44<T>, Vec3<T> > )
 		.def("extractQuat", &extractQuat<T> )
 		.def("extractSHRT", &extractSHRT44<T> )
 
