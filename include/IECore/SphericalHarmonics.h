@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,6 +60,9 @@ class SphericalHarmonics
 		~SphericalHarmonics();
 
 		const SphericalHarmonics & operator =( const SphericalHarmonics &sh );
+
+		// assign the same value to all coefficients
+		const SphericalHarmonics & operator =( const V &v );
 
 		// return number of spherical harmonics bands represented by this object
 		unsigned int bands() const

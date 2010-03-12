@@ -59,6 +59,16 @@ SphericalHarmonics<V>::~SphericalHarmonics()
 }
 
 template < typename V >
+const SphericalHarmonics<V> & SphericalHarmonics<V>::operator =( const V &v )
+{
+	for (typename SphericalHarmonics<V>::CoefficientVector::iterator rit = m_coefficients.begin(); rit != m_coefficients.end(); rit++ )
+	{
+		*rit = v;
+	}
+	return *this;
+}
+
+template < typename V >
 const SphericalHarmonics<V> & SphericalHarmonics<V>::operator =( const SphericalHarmonics<V> &sh )
 {
 	m_bands = sh.bands();

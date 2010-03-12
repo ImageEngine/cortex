@@ -129,10 +129,7 @@ void SphericalHarmonicsProjector<V>::operator()( unsigned int coordinateIndex, c
 		computeSamples( result.bands() );
 
 		// zero coefficients to start accumulation.
-		for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
-		{
-			*rit = U(0);
-		}
+		result = U(0);
 	}
 
 	assert( coordinateIndex < m_shEvaluations.size() );
@@ -172,10 +169,8 @@ void SphericalHarmonicsProjector<V>::polarProjection( T functor, SphericalHarmon
 	computeSamples( result.bands() );
 
 	// zero coefficients to start accumulation.
-	for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
-	{
-		*rit = U(0);
-	}
+	result = U(0);
+
 	typename std::vector< Imath::Vec2<V> >::const_iterator cit = m_sphericalCoordinates.begin();
 	if ( m_weights.size() )
 	{
@@ -210,12 +205,9 @@ void SphericalHarmonicsProjector<V>::euclideanProjection( T functor, SphericalHa
 
 	// make sure our internal object is created.
 	euclideanCoordinates();
-	
+
 	// zero coefficients to start accumulation.
-	for (typename SphericalHarmonics<U>::CoefficientVector::iterator rit = result.coefficients().begin(); rit != result.coefficients().end(); rit++ )
-	{
-		*rit = U(0);
-	}
+	result = U(0);
 	typename std::vector< Imath::Vec3<V> >::const_iterator cit = m_euclideanCoordinates.begin();
 	if ( m_weights.size() )
 	{
