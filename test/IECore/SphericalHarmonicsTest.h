@@ -41,6 +41,8 @@
 #include "IECore/SphericalHarmonics.h"
 #include "IECore/SphericalHarmonicsProjector.h"
 #include "IECore/SphericalHarmonicsRotationMatrix.h"
+#include "IECore/SphericalHarmonicsAlgo.h"
+#include "IECore/SphericalHarmonicsTransferMatrix.h"
 
 namespace IECore
 {
@@ -55,6 +57,7 @@ class SphericalHarmonicsTest
 		void testConstruction();
 		void testDotProduct();
 		void testArithmeticOperations();
+		void testSHProduct();
 };
 
 template<typename T, int bands, unsigned int samples >
@@ -107,6 +110,15 @@ class SphericalHarmonicsRotationMatrixTest
 
 };
 
+template< typename T >
+class SphericalHarmonicsTransferMatrixTest
+{
+	public:
+
+		template< typename S > void testTransfer();
+
+};
+
 struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 {
 
@@ -149,6 +161,15 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsRotationMatrixTest< T >::testRotation), instance ) );
 		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsRotationMatrixTest< T >::testRotation3D), instance ) );
+	}
+
+	template< typename T >
+	void addSphericalHarmonicsTransferMatrixTest()
+	{
+		static boost::shared_ptr< SphericalHarmonicsTransferMatrixTest< T > > instance(new SphericalHarmonicsTransferMatrixTest<T>());
+
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTransferMatrixTest< T >::template testTransfer< T >), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTransferMatrixTest< T >::template testTransfer< Imath::Vec3< T > > ), instance ) );
 	}
 
 };

@@ -40,6 +40,7 @@
 #include "IECore/EuclideanToSphericalTransform.h"
 #include "IECore/Interpolator.h"
 
+#include <stdlib.h>
 #include <algorithm>
 #include <vector>
 
@@ -621,4 +622,103 @@ void SphericalHarmonicsRotationMatrixTest<T>::testRotation3D()
 	}
 }
 
+template< typename S, typename T >
+class ProductFunction
+{
+	public:
+		ProductFunction( SphericalHarmonics< S > &shA, SphericalHarmonics< T > &shB ) : 
+				m_shA( shA ), m_shB( shB )
+		{
+		}
+
+		S operator()( const Imath::V3f &p ) const
+		{
+			return m_shA( p ) * m_shB( p );
+		}
+
+	private:
+
+		SphericalHarmonics< T > &m_shA;
+		SphericalHarmonics< S > &m_shB;
+};
+
+
+template< typename T >
+template< typename S >
+void SphericalHarmonicsTransferMatrixTest<T>::testTransfer()
+{
+	// this tests create two SH objects shA and shB, then it creates a transfer matrix with shA and applies to shB.
+	// results should be the same as doing the product of the two functions, so we compare with the brute force solution.
+
+	unsigned int bands = 5;
+	SphericalHarmonics< S > shA( bands );
+	SphericalHarmonics< T > shB( bands );
+	SphericalHarmonics< S > shRes( bands );
+	typename SphericalHarmonics< S >::CoefficientVector::iterator itA, itRes;
+	typename SphericalHarmonics< T >::CoefficientVector::iterator itB;
+
+	// create normal distribution of samples
+	SphericalHarmonicsProjectorExt<T> projector( 5000 );
+
+	// initialize A and B with random coefficients
+	for ( itB = shB.coefficients().begin(), itA = shA.coefficients().begin(); itB != shB.coefficients().end(); itB++, itA++ )
+	{
+		*itA = S( ( random() % 1024 ) / 1024. );
+		*itB = T( ( random() % 1024 ) / 1024. );
+	}
+
+	ProductFunction< S, T > productFunction( shA, shB );
+	projector.euclideanProjection( productFunction, shRes );
+
+	// create and apply transfer matrix
+	SphericalHarmonicsTransferMatrix<T> transfer( shB );
+	shA *= transfer;
+
+	S e = 0.0001;
+	int i = 0;
+
+	for ( itRes = shRes.coefficients().begin(), itA = shA.coefficients().begin(); itRes != shRes.coefficients().end(); itRes++, itA++, i++ )
+	{
+		if (!Imath::equalWithAbsError ( *itRes, *itA, e))
+		{
+			cout << "Failed on coefficient " << i << endl;
+			BOOST_CHECK_EQUAL( *itRes, *itA );
+		}
+	}
 }
+
+template<typename T >
+void SphericalHarmonicsTest< T >::testSHProduct()
+{
+	SphericalHarmonics< T > sh1( 3 ), sh2( 3 ), shRes( 3 );
+	typename SphericalHarmonics< T >::CoefficientVector::iterator it1, itRes;
+
+	for ( int i = 0; i < 3*3; i++ )
+	{
+		sh1.coefficients()[i] = T( ( random() % 1024 ) / 1024. );
+		sh2.coefficients()[i] = T( ( random() % 1024 ) / 1024. );
+	}
+
+	// create normal distribution of samples
+	SphericalHarmonicsProjectorExt<T> projector( 5000 );
+
+	ProductFunction< T, T > productFunction( sh1, sh2 );
+	projector.euclideanProjection( productFunction, shRes );
+
+	T e = 0.0001;
+	int i = 0;
+
+	sh1 *= sh2;
+
+	for ( it1 = sh1.coefficients().begin(), itRes = shRes.coefficients().begin(); it1 != sh1.coefficients().end(); it1++, itRes++, i++ )
+	{
+		if (!Imath::equalWithAbsError ( *it1, *itRes, e))
+		{
+			cout << "Failed on coefficient " << i << endl;
+			BOOST_CHECK_EQUAL( *it1, *itRes );
+		}
+	}
+}
+
+}	// namespace
+
