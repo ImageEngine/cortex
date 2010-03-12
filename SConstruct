@@ -889,14 +889,14 @@ if doConfigure :
 		coreSources.remove( "src/IECore/DisplayDriver.cpp" )
 		coreSources.remove( "src/IECore/ImageDisplayDriver.cpp" )
 		coreSources.remove( "src/IECore/DisplayDriverServer.cpp" )
-		corePythonSources.remove( "src/IECore/bindings/ClientDisplayDriverBinding.cpp" )
-		corePythonSources.remove( "src/IECore/bindings/DisplayDriverServerBinding.cpp" )
-		corePythonSources.remove( "src/IECore/bindings/DisplayDriverBinding.cpp" )
-		corePythonSources.remove( "src/IECore/bindings/ImageDisplayDriverBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/ClientDisplayDriverBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/DisplayDriverServerBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/DisplayDriverBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/ImageDisplayDriverBinding.cpp" )
 		## \todo: OBJReader needs a version of boost::bind that doesn't give warnings when some
 		## placeholders aren't bound (which is true of any boost version that includes asio.hpp)
 		coreSources.remove( "src/IECore/OBJReader.cpp" )
-		corePythonSources.remove( "src/IECore/bindings/OBJReaderBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/OBJReaderBinding.cpp" )
 	
 	if c.CheckCXXHeader( "boost/math/special_functions/factorials.hpp" ) :
 		for e in allCoreEnvs :
@@ -905,7 +905,9 @@ if doConfigure :
 		sys.stderr.write( "WARNING: boost/math/special_functions/factorials.hpp not found, some functionality will be disabled.\n" )
 		coreSources.remove( "src/IECore/AssociatedLegendre.cpp" )
 		coreSources.remove( "src/IECore/SphericalHarmonics.cpp" )
+		coreSources.remove( "src/IECore/SphericalHarmonicsTensor.cpp" )
 		coreSources.remove( "src/IECore/SphericalHarmonicsRotationMatrix.cpp" )
+		coreSources.remove( "src/IECore/SphericalHarmonicsTransferMatrix.cpp" )
 		coreSources.remove( "src/IECore/SphericalHarmonicsProjector.cpp" )
 	
 	if c.CheckLibWithHeader( "tiff", "tiff.h", "CXX" ) :
@@ -916,8 +918,8 @@ if doConfigure :
 		coreSources.remove( "src/IECore/TIFFImageWriter.cpp" )
 		coreSources.remove( "src/IECore/TIFFImageReader.cpp" )
 		coreSources.remove( "src/IECore/ScopedTIFFErrorHandler.cpp" )		
-		corePythonSources.remove( "src/IECore/bindings/TIFFImageReaderBinding.cpp" )
-		corePythonSources.remove( "src/IECore/bindings/TIFFImageWriterBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/TIFFImageReaderBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/TIFFImageWriterBinding.cpp" )
 		
 	if c.CheckLibWithHeader( "jpeg", ["stdio.h", "jpeglib.h"], "CXX" ) :
 		for e in allCoreEnvs :
@@ -926,8 +928,8 @@ if doConfigure :
 		sys.stderr.write( "WARNING: no JPEG library found, no JPEG support, check JPEG_INCLUDE_PATH and JPEG_LIB_PATH.\n" )
 		coreSources.remove( "src/IECore/JPEGImageWriter.cpp" )
 		coreSources.remove( "src/IECore/JPEGImageReader.cpp" )
-		corePythonSources.remove( "src/IECore/bindings/JPEGImageReaderBinding.cpp" )
-		corePythonSources.remove( "src/IECore/bindings/JPEGImageWriterBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/JPEGImageReaderBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/JPEGImageWriterBinding.cpp" )
 	
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
 		for e in allCoreEnvs :
@@ -935,7 +937,7 @@ if doConfigure :
 	else :
 		sys.stderr.write( "WARNING: no FreeType library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
 		coreSources.remove( "src/IECore/Font.cpp" )
-		corePythonSources.remove( "src/IECore/bindings/FontBinding.cpp" )
+		corePythonSources.remove( "src/IECorePython/FontBinding.cpp" )
 				
 	c.Finish()
 
