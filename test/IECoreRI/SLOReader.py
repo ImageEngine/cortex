@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,6 +35,8 @@
 import os
 import glob
 import unittest
+import threading
+
 from IECore import *
 from IECoreRI import *
 
@@ -120,6 +122,32 @@ class TestSLOReader( unittest.TestCase ) :
 		for p in expectedParams :
 
 			self.assertEqual( s.parameters[p[0]], p[1] )
+
+	def testThreading( self ) :
+	
+		shaders = [
+			"spotlight.sdl",
+			"plastic.sdl",
+			"matte.sdl",
+			"distantlight.sdl",
+		]
+		
+		def read( shader ) :
+		
+			SLOReader( shader ).read()
+		
+		for i in range( 0, 100 ) :
+
+			threads = []
+			for shader in shaders :
+				t = threading.Thread( target = curry( read, os.path.join( self.shaderPath(), shader ) ) )
+				threads.append( t )
+
+			for t in threads :
+				t.start()
+
+			for t in threads :
+				t.join()		
 
 	def tearDown( self ) :
 

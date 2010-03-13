@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "tbb/mutex.h"
+
 #include "IECoreRI/SLOReader.h"
 
 #include "IECore/Shader.h"
@@ -56,6 +58,7 @@ using namespace std;
 using namespace Imath;
 
 const Reader::ReaderDescription<SLOReader> SLOReader::m_readerDescription( "sdl" );
+static tbb::mutex g_mutex;
 
 SLOReader::SLOReader()
 	:	Reader( "Reads compiled renderman shaders.", new ObjectParameter( "result", "The loaded shader", new NullObject, Shader::staticTypeId() ) )
@@ -74,6 +77,8 @@ SLOReader::~SLOReader()
 
 bool SLOReader::canRead( const std::string &fileName )
 {
+	tbb::mutex::scoped_lock lock( g_mutex );
+	
 	if( Slo_SetShader( (char *)fileName.c_str() ) )
 	{
 		return false;
@@ -84,6 +89,8 @@ bool SLOReader::canRead( const std::string &fileName )
 
 ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 {
+	tbb::mutex::scoped_lock lock( g_mutex );
+	
 	if( Slo_SetShader( (char *)fileName().c_str() ) )
 	{
 		return 0;
