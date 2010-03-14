@@ -1074,7 +1074,19 @@ if doConfigure :
 		if c.CheckFunc( "RiObjectBeginV" ) :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
+		
+		if c.CheckHeader( "sx.h" ) :
+		
+			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
+			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
 			
+		else :
+		
+			riSources.remove( "src/IECoreRI/SXRenderer.cpp" )
+			riSources.remove( "src/IECoreRI/SXRendererImplementation.cpp" )
+			riSources.remove( "src/IECoreRI/SXExecutor.cpp" )
+			riPythonSources.remove( "src/IECoreRI/bindings/SXRendererBinding.cpp" )
+		
 		c.Finish()	
 
 		# we can't append this before configuring, as then it gets built as

@@ -54,5 +54,7 @@ BOOST_PYTHON_MODULE( _IECoreRI )
 	bindPTCParticleWriter();
 #endif // IECORERI_WITH_PTC
 	bindRIBWriter();
+#ifdef IECORERI_WITH_SX
 	bindSXRenderer();	
+#endif // IECORERI_WITH_SX
 }
