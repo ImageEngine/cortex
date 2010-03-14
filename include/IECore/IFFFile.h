@@ -68,6 +68,7 @@ class IFFFile : public RefCounted
 			public :
 
 				Tag( );
+				/// \todo Should be const char *
 				Tag( char *buffer );
 				Tag( std::string str );
 				std::string name();
