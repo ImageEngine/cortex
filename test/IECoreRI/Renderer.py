@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -81,12 +81,6 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreRI.Renderer()
 		self.assertEqual( r.typeName(), "IECoreRI::Renderer" )
 
-	## \todo Make this test actually test something
-	def testNoContext( self ) :
-
-		r = IECoreRI.Renderer()
-
-	## \todo Make this test actually test something
 	def test( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
@@ -110,6 +104,12 @@ class RendererTest( unittest.TestCase ) :
 
 		r.worldEnd()
 
+		l = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() ).replace( "\n", "" )
+		
+		self.failUnless( 'Option "render" "string bucketorder" [ "zigzag" ]' in l )
+		self.failUnless( 'Option "user" "int magicNumber"' in l )
+		self.failUnless( 'PixelSamples 8 8' in l )
+		
 	def testAttributes( self ) :
 
 		tests = [
@@ -172,7 +172,6 @@ class RendererTest( unittest.TestCase ) :
 
 		r.worldEnd()
 
-	## \todo Make this test actually test something
 	def testDisplay( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testDisplay.rib" )
@@ -182,7 +181,10 @@ class RendererTest( unittest.TestCase ) :
 		r.worldBegin()
 		r.worldEnd()
 
-	## \todo Make this test actually test something
+		l = "".join( file( "test/IECoreRI/output/testDisplay.rib" ).readlines() ).replace( "\n", "" )
+		
+		self.failUnless( 'Display "test.tif" "tiff" "rgba"   "float quantize[4]" [ 0 1 0 1 ]' in l )
+
 	def testSubDivs( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/subdiv.rib" )
@@ -199,7 +201,14 @@ class RendererTest( unittest.TestCase ) :
 
 		r.worldEnd()
 
-	## \todo Make this test actually test something
+		l = "".join( file( "test/IECoreRI/output/subdiv.rib" ).readlines() ).replace( "\n", "" )
+		
+		self.failUnless( 'SubdivisionMesh "catmull-clark" [ 4 4 4 4 4 ]' in l )
+		self.failUnless( '[ "interpolateboundary" ] [ 0 0 ] [ ] [ ]' in l )
+		self.failUnless( 'vertex point P' in l )
+		self.failUnless( 'facevarying float s' in l )
+		self.failUnless( 'facevarying float t' in l )
+
 	def testCommands( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/commands.rib" )
@@ -210,7 +219,10 @@ class RendererTest( unittest.TestCase ) :
 
 		r.worldEnd()
 
-	## \todo Make this test actually test something
+		l = "".join( file( "test/IECoreRI/output/commands.rib" ).readlines() ).replace( "\n", "" )
+		
+		self.failUnless( 'ReadArchive "nameOfArchive"' in l )
+		
 	def testMotion( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/motion.rib" )
@@ -225,7 +237,15 @@ class RendererTest( unittest.TestCase ) :
 
 		r.worldEnd()
 
-	## \todo Make this test actually test something
+		l = "".join( file( "test/IECoreRI/output/motion.rib" ).readlines() ).replace( "\n", "" )
+
+		self.failUnless( "MotionBegin [ 0 1 ]" in l )
+		self.assertEqual( l.count( "ConcatTransform" ), 2 )
+		self.failUnless( "MotionEnd" in l )
+		
+		self.failUnless( l.index( "MotionBegin" ) < l.index( "ConcatTransform" ) )
+		self.failUnless( l.index( "ConcatTransform" ) < l.index( "MotionEnd" ) )
+		
 	def testStringPrimVars( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/stringPrimVars.rib" )
@@ -237,6 +257,12 @@ class RendererTest( unittest.TestCase ) :
 
 		r.worldEnd()
 
+		l = "".join( file( "test/IECoreRI/output/stringPrimVars.rib" ).readlines() ).replace( "\n", "" )
+		
+		self.failUnless( '"constant string ieGeneric_diffuse_Color_Textures" [ "woodTrain/woodTrainRed_v001_color_LIN.tdl" ]' in l ) 
+		self.failUnless( '"constant string ieGeneric_displacement_Textures" [ "woodTrain/woodTrain_v001_bump_LIN.tdl" ]' in l ) 
+		self.failUnless( '"constant string ieGeneric_reflection_Textures" [ "woodTrain/woodTrain_v001_bump_LIN.tdl" ]' in l ) 
+		
 	def testGetTransform( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/transform.rib" )
