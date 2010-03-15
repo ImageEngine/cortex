@@ -55,8 +55,8 @@ class RendererImplementation : public IECore::Renderer
 
 	public :
 
-		RendererImplementation( IECoreRI::Renderer *parent );
-		RendererImplementation( IECoreRI::Renderer *parent, const std::string &name );
+		RendererImplementation();
+		RendererImplementation( const std::string &name );
 
 		virtual ~RendererImplementation();
 
@@ -119,7 +119,6 @@ class RendererImplementation : public IECore::Renderer
 		// Does things common to both constructors
 		void constructCommon();
 
-		IECoreRI::Renderer *m_parent;
 		RtContextHandle m_context;
 
 		typedef void (RendererImplementation::*SetOptionHandler)( const std::string &name, IECore::ConstDataPtr d );

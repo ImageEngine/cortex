@@ -40,12 +40,12 @@ using namespace IECoreRI;
 IE_CORE_DEFINERUNTIMETYPED( Renderer );
 
 Renderer::Renderer()
-	:	m_implementation( new RendererImplementation( this ) )
+	:	m_implementation( new RendererImplementation() )
 {
 }
 
 Renderer::Renderer( const std::string &name )
-	:	m_implementation( new RendererImplementation( this, name ) )
+	:	m_implementation( new RendererImplementation( name ) )
 {
 }
 

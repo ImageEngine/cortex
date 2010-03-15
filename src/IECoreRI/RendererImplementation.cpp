@@ -80,14 +80,13 @@ IECoreRI::RendererImplementation::AttributeState::AttributeState( const Attribut
 const unsigned int IECoreRI::RendererImplementation::g_shaderCacheSize = 10 * 1024 * 1024;
 std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
-IECoreRI::RendererImplementation::RendererImplementation( IECoreRI::Renderer *parent )
-	:	m_parent( parent ), m_context( 0 )
+IECoreRI::RendererImplementation::RendererImplementation()
+	:	m_context( 0 )
 {
 	constructCommon();
 }
 
-IECoreRI::RendererImplementation::RendererImplementation( IECoreRI::Renderer *parent, const std::string &name )
-	:	m_parent( parent )
+IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
 {
 	constructCommon();
 	if( name!="" )
