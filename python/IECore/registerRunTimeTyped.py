@@ -80,24 +80,39 @@ def registerRunTimeTyped( typ, typId = None, baseClass = None ) :
 	typeName = typ.__name__
 	runTypedBaseClass = filter( lambda c: issubclass( c, IECore.RunTimeTyped ), typ.__bases__ )[0]
 
-	if typId is None :
+	# constants below are the same as in TypeIds.h
+	FirstDynamicTypeId = 300000
+	LastDynamicTypeId = 399999
 
-		# constants below are the same as in TypeIds.h
-		FirstDynamicTypeId = 300000
-		LastDynamicTypeId = 399999
-		
-		global __nextDynamicRunTimeTypedId
+	# check if overwritting registration.
+	if not hasattr( IECore.TypeId, typeName ) :
 
-		if __nextDynamicRunTimeTypedId is None :
-			__nextDynamicRunTimeTypedId = FirstDynamicTypeId
-		elif __nextDynamicRunTimeTypedId > LastDynamicTypeId:
-			raise Exception, "Too many dynamic RunTimeTyped registered classes! You must change TypeIds.h and rebuild Cortex."
+		if typId is None :
 
-		typId = __nextDynamicRunTimeTypedId
+			global __nextDynamicRunTimeTypedId
 
-		__nextDynamicRunTimeTypedId += 1
+			if __nextDynamicRunTimeTypedId is None :
+				__nextDynamicRunTimeTypedId = FirstDynamicTypeId
+			elif __nextDynamicRunTimeTypedId > LastDynamicTypeId:
+				raise Exception, "Too many dynamic RunTimeTyped registered classes! You must change TypeIds.h and rebuild Cortex."
 
-	__registerTypeId( IECore.TypeId( typId ), typeName, IECore.TypeId( runTypedBaseClass.staticTypeId() ) )
+			typId = __nextDynamicRunTimeTypedId
+
+			__nextDynamicRunTimeTypedId += 1
+
+		__registerTypeId( IECore.TypeId( typId ), typeName, IECore.TypeId( runTypedBaseClass.staticTypeId() ) )
+
+	else :
+		# check if the new type Id is compatible with the previously registered one.
+		prevTypId = getattr( IECore.TypeId, typeName )
+		if prevTypId in xrange( FirstDynamicTypeId, LastDynamicTypeId+1 ) :
+			if not typId is None :
+				raise Exception, "Trying to set a type ID for %s previously registered as a dynamic type Id!" % typeName
+		else :
+			if typId is None :
+				raise Exception, "Trying to re-register type %s as dynamic type Id!" % typeName
+			elif typId != prevTypId :
+				raise Exception, "Trying to re-register %s under different type Id: %s != %s" % ( typeName, str(typId), prevTypId )
 
 	# Retrieve the correct value from the enum
 	tId = getattr( IECore.TypeId, typeName )
