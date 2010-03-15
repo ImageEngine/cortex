@@ -1075,7 +1075,7 @@ if doConfigure :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
 		
-		if c.CheckHeader( "sx.h" ) :
+		if c.CheckCXXHeader( "sx.h" ) :
 		
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
