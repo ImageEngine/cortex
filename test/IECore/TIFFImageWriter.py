@@ -220,7 +220,7 @@ class TestTIFFImageWriter(unittest.TestCase):
 			w = Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
 			self.assertEqual( type(w), TIFFImageWriter )
 
-			w.parameters().bitdepth = b
+			w["bitdepth"] = b
 			w.write()
 
 			self.assert_( os.path.exists( "test/IECore/data/tiff/output.tif" ) )

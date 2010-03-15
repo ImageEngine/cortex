@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -177,12 +177,12 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 		op = TriangulateOp()
 
-		op.parameters().input = m
+		op["input"] = m
 
 		# Non-planar faces not supported by default
 		self.assertRaises( RuntimeError, op )
 
-		op.parameters().throwExceptions = False
+		op["throwExceptions"] = False
 		result = op()
 
 
@@ -209,12 +209,12 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 		op = TriangulateOp()
 
-		op.parameters().input = m
+		op["input"] = m
 
 		# Concave faces not supported by default
 		self.assertRaises( RuntimeError, op )
 
-		op.parameters().throwExceptions = False
+		op.parameters()["throwExceptions"] = False
 		result = op()
 
 	def testErrors( self ):
@@ -240,7 +240,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 		op = TriangulateOp()
 
-		op.parameters().input = m
+		op["input"] = m
 
 		# FloatVectorData not valid for "P"
 		self.assertRaises( RuntimeError, op )

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -68,16 +68,24 @@ def __compoundParameterSmartSetValue( self, value ):
 	else:
 		raise TypeError, "Invalid parameter type"
 
-def __compoundParameterSetItem( self, attrName, attrValue ):
+def __compoundParameterSetItem( self, itemName, itemValue ):
 	"""
-	Smart __setattr__/__setitem__ operator. Uses copyFrom function for type convertion.
+	Smart __setitem__ operator.
 	"""
-	self[ attrName ].smartSetValue( attrValue )
+	self[ itemName ].smartSetValue( itemValue )
+
+## \todo Remove this function entirely when we're done testing everything against cortex 5.
+def __compoundParameterSetAttr( self, attrName, attrValue ) :
+
+	if attrName in self :
+		raise RuntimeError( "Can no longer set child parameter values using attribute syntax." )
+	
+	setattr( attrName, attrValue )
 
 # expand class definitions
 IECore.Parameter.smartSetValue = __parameterSmartSetValue
 IECore.CompoundParameter.smartSetValue = __compoundParameterSmartSetValue
-IECore.CompoundParameter.__setattr__ = __compoundParameterSetItem
+IECore.CompoundParameter.__setattr__ = __compoundParameterSetAttr
 IECore.CompoundParameter.__setitem__ = __compoundParameterSetItem
 
 __all__ = []

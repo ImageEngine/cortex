@@ -177,7 +177,7 @@ class TestJPEGImageWriter(unittest.TestCase):
 		lastSize = None
 		for q in [ 0, 10, 50, 80, 100 ]:
 
-			w.parameters().quality = q
+			w["quality"] = q
 
 			if os.path.exists( "test/IECore/data/jpg/output.jpg" ) :
 
