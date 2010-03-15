@@ -80,7 +80,7 @@ def __compoundParameterSetAttr( self, attrName, attrValue ) :
 	if attrName in self :
 		raise RuntimeError( "Can no longer set child parameter values using attribute syntax." )
 	
-	setattr( attrName, attrValue )
+	IECore.Parameter.__setattr__( self, attrName, attrValue )
 
 # expand class definitions
 IECore.Parameter.smartSetValue = __parameterSmartSetValue
