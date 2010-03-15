@@ -35,15 +35,17 @@
 #ifndef IECORERI_RENDERERIMPLEMENTATION_H
 #define IECORERI_RENDERERIMPLEMENTATION_H
 
+#include <stack>
+
+#include "tbb/queuing_rw_mutex.h"
+
+#include "ri.h"
+
 #include "IECore/CachedReader.h"
 #include "IECore/Camera.h"
 #include "IECore/Font.h"
 
 #include "IECoreRI/Renderer.h"
-
-#include "ri.h"
-
-#include <stack>
 
 namespace IECoreRI
 {
@@ -197,6 +199,7 @@ class RendererImplementation : public IECore::Renderer
 		FontMap m_fonts;
 #endif
 
+		static tbb::queuing_rw_mutex g_nLoopsMutex;
 		static std::vector<int> g_nLoops;
 
 		/// Renderman treats curve basis as an attribute, whereas we want to treat it as

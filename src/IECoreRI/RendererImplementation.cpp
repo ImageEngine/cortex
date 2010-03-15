@@ -78,6 +78,7 @@ IECoreRI::RendererImplementation::AttributeState::AttributeState( const Attribut
 ////////////////////////////////////////////////////////////////////////
 
 const unsigned int IECoreRI::RendererImplementation::g_shaderCacheSize = 10 * 1024 * 1024;
+tbb::queuing_rw_mutex IECoreRI::RendererImplementation::g_nLoopsMutex;
 std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
 IECoreRI::RendererImplementation::RendererImplementation()
@@ -1167,9 +1168,15 @@ void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr verts
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", boost::format( "Unsupported interpolation type \"%s\" - rendering as polygons." ) % interpolation );
 	}
 
+	tbb::queuing_rw_mutex::scoped_lock lock( g_nLoopsMutex, false /* read only */ );
 	if( g_nLoops.size()<vertsPerFace->readable().size() )
 	{
-		g_nLoops.resize( vertsPerFace->readable().size(), 1 );
+		lock.upgrade_to_writer();
+			if( g_nLoops.size()<vertsPerFace->readable().size() ) // checking again as i think g_nLoops may have been resized by another thread getting the write lock first
+			{
+				g_nLoops.resize( vertsPerFace->readable().size(), 1 );
+			}
+		lock.downgrade_to_reader();
 	}
 
 	vector<int> &vertsPerFaceV = const_cast<vector<int> &>( vertsPerFace->readable() );
