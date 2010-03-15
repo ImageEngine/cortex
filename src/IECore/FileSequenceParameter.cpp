@@ -78,6 +78,16 @@ void FileSequenceParameter::setExtensions( const ExtensionList &extensions )
 	m_extensions = extensions;
 }
 
+size_t FileSequenceParameter::getMinSequenceSize() const
+{
+	return m_minSequenceSize;
+}
+
+void FileSequenceParameter::setMinSequenceSize( size_t size )
+{
+	m_minSequenceSize = size;
+}
+		
 bool FileSequenceParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	/// we can't call PathParameter::valueValid() because that would do existence checking on
@@ -201,6 +211,7 @@ void FileSequenceParameter::copyFrom( const Object *other, CopyContext *context 
 	PathParameter::copyFrom( other, context );
 	const FileSequenceParameter *tOther = static_cast<const FileSequenceParameter *>( other );
 	m_extensions = tOther->m_extensions;
+	m_minSequenceSize = tOther->m_minSequenceSize;
 }
 
 void FileSequenceParameter::save( SaveContext *context ) const
@@ -211,6 +222,7 @@ void FileSequenceParameter::save( SaveContext *context ) const
 	std::string extensions = join( m_extensions.begin(), m_extensions.end(), " " );
 	
 	container->write( "extensions", extensions );
+	container->write( "minSequenceSize", m_minSequenceSize );
 }
 
 void FileSequenceParameter::load( LoadContextPtr context )
@@ -226,6 +238,7 @@ void FileSequenceParameter::load( LoadContextPtr context )
 	{
 		split( m_extensions, extensions, is_any_of( " " ) );
 	}
+	container->read( "minSequenceSize", m_minSequenceSize );
 }
 
 bool FileSequenceParameter::isEqualTo( const Object *other ) const
@@ -235,7 +248,7 @@ bool FileSequenceParameter::isEqualTo( const Object *other ) const
 		return false;
 	}
 	const FileSequenceParameter *tOther = static_cast<const FileSequenceParameter *>( other );
-	return m_extensions == tOther->m_extensions;
+	return m_extensions == tOther->m_extensions && m_minSequenceSize == tOther->m_minSequenceSize;
 }
 
 void FileSequenceParameter::memoryUsage( Object::MemoryAccumulator &a ) const

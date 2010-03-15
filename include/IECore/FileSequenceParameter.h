@@ -66,6 +66,9 @@ class FileSequenceParameter : public PathParameter
 		const ExtensionList &getExtensions() const;
 		void setExtensions( const ExtensionList &extensions );
 
+		size_t getMinSequenceSize() const;
+		void setMinSequenceSize( size_t size );
+
 		/// Returns true only if the value is StringData and matches the FileSequence::fileNameValidator
 		/// regex. Also checks that the sequence exists or doesn't exist based on the CheckType passed to
  		/// the constructor.

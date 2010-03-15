@@ -184,6 +184,8 @@ void bindFileSequenceParameter()
 		)
 		.def( "getFileSequenceValue", &FileSequenceParameter::getFileSequenceValue )
 		.def( "setFileSequenceValue", &FileSequenceParameter::setFileSequenceValue )
+		.def( "setMinSequenceSize", &FileSequenceParameter::setMinSequenceSize )
+		.def( "getMinSequenceSize", &FileSequenceParameter::getMinSequenceSize )
 		.add_property( "extensions",&FileSequenceParameterWrap::getExtensionsWrap, &FileSequenceParameterWrap::setExtensionsWrap )
 		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( FileSequenceParameter )
 	;
