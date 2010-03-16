@@ -75,7 +75,6 @@ class TypedStateComponent : public StateComponent
 		////////////////////////////////////////////////////
 		//@{
 		virtual void bind() const;
-		virtual GLbitfield mask() const;
 		//@}
 
 		const T &value() const;
@@ -122,8 +121,6 @@ class TypedStateComponent : public StateComponent
 typedef TypedStateComponent<Imath::Color4f, ColorTypeId> Color;
 template<>
 void Color::bind() const;
-template<>
-GLbitfield Color::mask() const;
 
 typedef TypedStateComponent<bool, PrimitiveBoundTypeId> PrimitiveBound;
 typedef TypedStateComponent<bool, PrimitiveWireframeTypeId> PrimitiveWireframe;
@@ -172,56 +169,40 @@ struct BlendFactors
 typedef TypedStateComponent<BlendFactors, BlendFuncStateComponentTypeId> BlendFuncStateComponent;
 template<>
 void BlendFuncStateComponent::bind() const;
-template<>
-GLbitfield BlendFuncStateComponent::mask() const;
 
 typedef TypedStateComponent<Imath::Color4f, BlendColorStateComponentTypeId> BlendColorStateComponent;
 template<>
 void BlendColorStateComponent::bind() const;
-template<>
-GLbitfield BlendColorStateComponent::mask() const;
 
 typedef TypedStateComponent<GLenum, BlendEquationStateComponentTypeId> BlendEquationStateComponent;
 template<>
 void BlendEquationStateComponent::bind() const;
-template<>
-GLbitfield BlendEquationStateComponent::mask() const;
 
 /// Used to specify enable state of GL_CULL_FACE
 typedef TypedStateComponent<bool, DoubleSidedStateComponentTypeId> DoubleSidedStateComponent;
 template<>
 void DoubleSidedStateComponent::bind() const;
-template<>
-GLbitfield DoubleSidedStateComponent::mask() const;
 
 /// Used to implement the "rightHandedOrientation" Renderer attribute. Implemented by calling
 /// glFrontFace( GL_CCW ) when true and glFrontFace( GL_CW ) when false.
 typedef TypedStateComponent<bool, RightHandedOrientationStateComponentTypeId> RightHandedOrientationStateComponent;
 template<>
 void RightHandedOrientationStateComponent::bind() const;
-template<>
-GLbitfield RightHandedOrientationStateComponent::mask() const;
 
 /// Used to specify enable state of GL_LINE_SMOOTH
 typedef TypedStateComponent<bool, LineSmoothingStateComponentTypeId> LineSmoothingStateComponent;
 template<>
 void LineSmoothingStateComponent::bind() const;
-template<>
-GLbitfield LineSmoothingStateComponent::mask() const;
 
 /// Used to specify enable state of GL_POINT_SMOOTH
 typedef TypedStateComponent<bool, PointSmoothingStateComponentTypeId> PointSmoothingStateComponent;
 template<>
 void PointSmoothingStateComponent::bind() const;
-template<>
-GLbitfield PointSmoothingStateComponent::mask() const;
 
 /// Used to specify enable state of GL_POLYGON_SMOOTH
 typedef TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId> PolygonSmoothingStateComponent;
 template<>
 void PolygonSmoothingStateComponent::bind() const;
-template<>
-GLbitfield PolygonSmoothingStateComponent::mask() const;
 
 IE_CORE_DECLAREPTR( Color );
 IE_CORE_DECLAREPTR( PrimitiveBound );

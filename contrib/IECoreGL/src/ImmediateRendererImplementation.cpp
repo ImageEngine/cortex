@@ -35,6 +35,7 @@
 #include "IECoreGL/private/ImmediateRendererImplementation.h"
 #include "IECoreGL/private/Display.h"
 #include "IECoreGL/StateComponent.h"
+#include "IECoreGL/ShaderStateComponent.h"
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/FrameBuffer.h"
 #include "IECoreGL/ColorTexture.h"
@@ -136,14 +137,13 @@ void ImmediateRendererImplementation::concatTransform( const Imath::M44f &matrix
 void ImmediateRendererImplementation::attributeBegin()
 {
 	transformBegin();
-	glPushAttrib( GL_ALL_ATTRIB_BITS );
 	m_stateStack.push( new State( *(m_stateStack.top()) ) );
 }
 
 void ImmediateRendererImplementation::attributeEnd()
 {
 	m_stateStack.pop();
-	glPopAttrib();
+	m_stateStack.top()->bind();
 	transformEnd();
 }
 

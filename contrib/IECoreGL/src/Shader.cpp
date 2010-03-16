@@ -127,11 +127,6 @@ void Shader::bind() const
 	glUseProgram( m_program );
 }
 
-GLbitfield Shader::mask() const
-{
-	return 0;
-}
-
 void Shader::compile( const std::string &source, GLenum type, GLuint &shader )
 {
 
@@ -273,6 +268,76 @@ IECore::TypeId Shader::parameterType( GLint parameterIndex ) const
 IECore::TypeId Shader::parameterType( const std::string &parameterName ) const
 {
 	return parameterType( parameterIndex( parameterName ) );
+}
+
+IECore::DataPtr Shader::getDefaultParameter( const std::string &parameterName ) const
+{
+	return getDefaultParameter( parameterIndex( parameterName ) );
+}
+
+IECore::DataPtr Shader::getDefaultParameter( GLint parameterIndex ) const
+{
+	const ParameterDescription &p = parameterDescription( parameterIndex );
+	if( p.size==1 )
+	{
+		switch( p.type )
+		{
+			case GL_BOOL :
+				{
+					return new IECore::BoolData( 0 );
+				}
+			case GL_INT :
+				{
+					return new IECore::IntData( 0 );
+				}
+			case GL_FLOAT :
+				{
+					return new IECore::FloatData( 0 );
+				}
+			case GL_BOOL_VEC2 :
+				{
+					return new IECore::V2iData( Imath::V2i( 0 ) );
+				}
+			case GL_INT_VEC2 :
+				{
+					return new IECore::V2iData( Imath::V2i( 0 ) );
+				}
+			case GL_FLOAT_VEC2 :
+				{
+					return new IECore::V2fData( Imath::V2f( 0.0f ) );
+				}
+			case GL_BOOL_VEC3 :
+				{
+					return new IECore::V3iData( Imath::V3i( 0 ) );
+				}
+			case GL_INT_VEC3 :
+				{
+					return new IECore::V3iData( Imath::V3i( 0 ) );
+				}
+			case GL_FLOAT_VEC3 :
+				{
+					return new IECore::V3fData( Imath::V3f( 0.0f ) );
+				}
+			case GL_FLOAT_VEC4 :
+				{
+					return new IECore::Color4fData( Imath::Color4f( 0.0f ) );
+				}
+			case GL_FLOAT_MAT3 :
+				{
+					return new IECore::M33fData( Imath::M33f( 0.0f ) );
+				}
+			case GL_FLOAT_MAT4 :
+				{
+					return new IECore::M44fData( Imath::M44f( 0.0f ) );
+				}
+			default :
+				throw Exception( "Unsupported parameter type." );
+		}
+	}
+	else
+	{
+		throw Exception( "Array parameters not supported yet." );
+	}
 }
 
 IECore::DataPtr Shader::getParameter( GLint parameterIndex ) const

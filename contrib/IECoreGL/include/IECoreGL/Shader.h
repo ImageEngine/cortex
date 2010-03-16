@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,10 +65,6 @@ class Shader : public Bindable
 		bool operator==( const Shader &other ) const;
 
 		virtual void bind() const;
-		/// \bug This returns 0, as I haven't yet found a way of pushing/popping
-		/// the current shader in GL. This is worked around by pushing and popping
-		/// the current program by hand in Group::render().
-		virtual GLbitfield mask() const;
 
 		/// Fills the passed vector with the names of all shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
@@ -89,6 +85,17 @@ class Shader : public Bindable
 		IECore::TypeId parameterType( GLint parameterIndex ) const;
 		/// As above but by specifying the parameter by name.
 		IECore::TypeId parameterType( const std::string &parameterName ) const;
+
+		//! @name getDefaultParameter
+		/// Returns a new data object containing the suggested default value (zero)
+		/// to be set on the given parameter.
+		/// The default values are not supported by OpenGL. So the shader does not
+		/// have to be bound at the time of calling.
+		//////////////////////////////////////////////////////////////////////
+		//@{
+		IECore::DataPtr getDefaultParameter( GLint parameterIndex ) const;
+		IECore::DataPtr getDefaultParameter( const std::string &parameterName ) const;
+		//@}
 
 		//! @name Parameter getting
 		/// These calls return the current values of shader parameters. Unlike

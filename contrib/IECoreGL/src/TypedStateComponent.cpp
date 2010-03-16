@@ -50,12 +50,6 @@ void Color::bind() const
 	glColor4f( m_value.r, m_value.g, m_value.b, m_value.a );
 }
 
-template<>
-GLbitfield Color::mask() const
-{
-	return GL_CURRENT_BIT;
-}
-
 template class TypedStateComponent<Color4f, ColorTypeId>;
 
 // blending specialisations and instantiations
@@ -67,12 +61,6 @@ template<>
 void BlendColorStateComponent::bind() const
 {
 	glBlendColor( m_value.r, m_value.g, m_value.b, m_value.a );
-}
-
-template<>
-GLbitfield BlendColorStateComponent::mask() const
-{
-	return GL_COLOR_BUFFER_BIT;
 }
 
 template class TypedStateComponent<Color4f, BlendColorStateComponentTypeId>;
@@ -95,12 +83,6 @@ void BlendFuncStateComponent::bind() const
 	glBlendFunc( m_value.src, m_value.dst );
 }
 
-template<>
-GLbitfield BlendFuncStateComponent::mask() const
-{
-	return GL_COLOR_BUFFER_BIT;
-}
-
 template class TypedStateComponent<BlendFactors, BlendFuncStateComponentTypeId>;
 
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( BlendEquationStateComponent, GLenum, GL_FUNC_ADD );
@@ -109,12 +91,6 @@ template<>
 void BlendEquationStateComponent::bind() const
 {
 	glBlendEquation( m_value );
-}
-
-template<>
-GLbitfield BlendEquationStateComponent::mask() const
-{
-	return GL_COLOR_BUFFER_BIT;
 }
 
 template class TypedStateComponent<GLenum, BlendEquationStateComponentTypeId>;
@@ -137,12 +113,6 @@ void DoubleSidedStateComponent::bind() const
 	}
 }
 
-template<>
-GLbitfield DoubleSidedStateComponent::mask() const
-{
-	return GL_ENABLE_BIT;
-}
-
 template class TypedStateComponent<bool, DoubleSidedStateComponentTypeId>;
 
 // RightHandedOrientation specialisations and instantiations
@@ -154,12 +124,6 @@ template<>
 void RightHandedOrientationStateComponent::bind() const
 {
 	glFrontFace( m_value ? GL_CCW : GL_CW );
-}
-
-template<>
-GLbitfield RightHandedOrientationStateComponent::mask() const
-{
-	return GL_POLYGON_BIT;
 }
 
 template class TypedStateComponent<bool, RightHandedOrientationStateComponentTypeId>;
@@ -182,12 +146,6 @@ void LineSmoothingStateComponent::bind() const
 	}
 }
 
-template<>
-GLbitfield LineSmoothingStateComponent::mask() const
-{
-	return GL_ENABLE_BIT;
-}
-
 template class TypedStateComponent<bool, LineSmoothingStateComponentTypeId>;
 
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( PointSmoothingStateComponent, bool, false );
@@ -203,12 +161,6 @@ void PointSmoothingStateComponent::bind() const
 	{
 		glDisable( GL_POINT_SMOOTH );
 	}
-}
-
-template<>
-GLbitfield PointSmoothingStateComponent::mask() const
-{
-	return GL_ENABLE_BIT;
 }
 
 template class TypedStateComponent<bool, PointSmoothingStateComponentTypeId>;
@@ -228,15 +180,9 @@ void PolygonSmoothingStateComponent::bind() const
 	}
 }
 
-template<>
-GLbitfield PolygonSmoothingStateComponent::mask() const
-{
-	return GL_ENABLE_BIT;
-}
-
 template class TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId>;
 
-// instantiation of simple mask()==0 types
+// instantiation of simple types
 //////////////////////////////////////////////////////////////////////
 
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveBound, PrimitiveBoundTypeId, bool, false );

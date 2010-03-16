@@ -36,7 +36,6 @@
 #define IECOREGL_BINDABLE_H
 
 #include "IECoreGL/TypeIds.h"
-#include "IECoreGL/GL.h"
 
 #include "IECore/RunTimeTyped.h"
 
@@ -60,9 +59,6 @@ class Bindable : public IECore::RunTimeTyped
 		/// is relevant to that object (install a shader, make a texture current, enable/disable
 		/// something etc.).
 		virtual void bind() const = 0;
-		/// Returns the bitmask that would have to be used with glPushAttrib() in order to
-		/// save the state that will be modified by bind().
-		virtual GLbitfield mask() const = 0;
 
 };
 

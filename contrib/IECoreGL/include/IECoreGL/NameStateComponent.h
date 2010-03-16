@@ -65,7 +65,6 @@ class NameStateComponent : public StateComponent
 
 		/// Calls glLoadName().
 		virtual void bind() const;
-		virtual GLbitfield mask() const;
 
 		/// Returns the public (string) name from the internal OpenGL name value, which
 		/// typically will come from the contents of the select buffer. Raises an Exception

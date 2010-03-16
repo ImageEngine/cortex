@@ -48,7 +48,6 @@ void bindBindable()
 {
 	IECorePython::RunTimeTypedClass<Bindable>()
 		.def( "bind", &Bindable::bind )
-		.def( "mask", &Bindable::mask )
 	;
 }
 

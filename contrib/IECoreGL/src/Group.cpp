@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreGL/GL.h"
 #include "IECoreGL/Group.h"
 #include "IECoreGL/State.h"
 
@@ -85,36 +86,17 @@ void Group::setState( StatePtr state )
 void Group::render( ConstStatePtr state ) const
 {
 	glPushMatrix();
-		glMultMatrixf( m_transform.getValue() );
-		GLbitfield mask = m_state->mask();
-		// can't find a way of pushing the current program as part
-		// of the attribute state, so we have to do it by hand.
-		/// \todo Perhaps Bindable should have both bind() and unbind()
-		/// methods to make this possible without hacks?
-		GLint oldProgram = 0;
-		if( GLEW_VERSION_2_0 )
+	glMultMatrixf( m_transform.getValue() );
+	{
+		State::ScopedBinding scope( *m_state, *state );
+
+		StatePtr s = new State( *state );
+		s->add( m_state );
+		for( ChildContainer::const_iterator it=m_children.begin(); it!=m_children.end(); it++ )
 		{
-			glGetIntegerv( GL_CURRENT_PROGRAM, &oldProgram );
+			(*it)->render( s );
 		}
-		if( mask )
-		{
-			glPushAttrib( mask );
-		}
-			m_state->bind();
-			StatePtr s = new State( *state );
-			s->add( m_state );
-			for( ChildContainer::const_iterator it=m_children.begin(); it!=m_children.end(); it++ )
-			{
-				(*it)->render( s );
-			}
-		if( mask )
-		{
-			glPopAttrib();
-		}
-		if( GLEW_VERSION_2_0 )
-		{
-			glUseProgram( oldProgram );
-		}
+	}
 	glPopMatrix();
 }
 

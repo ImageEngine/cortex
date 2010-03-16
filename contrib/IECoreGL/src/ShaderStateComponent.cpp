@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,6 +60,46 @@ ShaderStateComponent::ShaderStateComponent( ShaderPtr shader, IECore::ConstCompo
 	{
 		m_textureParameters = *textureParameterValues;
 	}
+	if ( m_shader )
+	{
+		vector<string> allParameters;
+		m_shader->parameterNames( allParameters );
+
+		if ( allParameters.size() && !m_parameterData )
+		{
+			// creates an empty parameter map.
+			m_parameterData = new IECore::CompoundData();
+		}
+
+		const IECore::CompoundDataMap &d = m_parameterData->readable();
+
+		// Add shader parameters not provided in the constructor parameters.
+		for ( vector<string>::const_iterator it = allParameters.begin(); it != allParameters.end(); it++ )
+		{
+			// if the parameter name is already defined, then skip it.
+			if ( d.find( *it ) != d.end() )
+				continue;
+
+			if ( m_textureParameters.find( *it ) != m_textureParameters.end() )
+				continue;
+			
+			IECore::DataPtr paramValue;
+			try
+			{
+				paramValue = m_shader->getDefaultParameter( *it );
+			}
+			catch( ... )
+			{
+				// ignore unsupported parameters.
+				continue;
+			}
+
+			m_parameterData->writable()[ *it ] = paramValue;
+
+		}
+
+	}
+
 }
 
 void ShaderStateComponent::bind() const
@@ -105,18 +145,7 @@ void ShaderStateComponent::bind() const
 		{
 			glUseProgram( 0 );
 		}
-	}
-}
-
-GLbitfield ShaderStateComponent::mask() const
-{
-	if( m_shader )
-	{
-		return m_shader->mask() | GL_TEXTURE_BIT;
-	}
-	else
-	{
-		return 0;
+		glDisable( GL_TEXTURE_2D );
 	}
 }
 

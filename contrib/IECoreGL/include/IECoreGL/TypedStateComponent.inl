@@ -121,12 +121,6 @@ void TypedStateComponent<T,TId>::bind() const
 {
 }
 
-template<typename T, unsigned int TId>
-GLbitfield TypedStateComponent<T,TId>::mask() const
-{
-	return 0;
-}
-
 } // namespace IECoreGL
 
 #endif // IECOREGL_TYPEDSTATECOMPONENT_INL
