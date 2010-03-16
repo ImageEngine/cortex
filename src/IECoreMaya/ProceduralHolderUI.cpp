@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -261,9 +261,7 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 			{
 				IECoreGL::ConstStatePtr wireframeState = m_displayStyle.baseState( M3dView::kWireFrame );
 				m_boxPrimitive->setBox( IECore::convert<Imath::Box3f>( proceduralHolder->boundingBox() ) );
-				glPushAttrib( wireframeState->mask() );
-					(IECore::staticPointerCast<IECoreGL::Renderable>( m_boxPrimitive ))->render( wireframeState );
-				glPopAttrib();
+				IECore::staticPointerCast<IECoreGL::Renderable>( m_boxPrimitive )->render( wireframeState );
 			}
 
 			// draw the scene if asked
