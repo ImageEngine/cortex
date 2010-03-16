@@ -43,20 +43,28 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( State );
 
-State::ScopedBinding::ScopedBinding( const State &s, const State &currentState )
+State::ScopedBinding::ScopedBinding( State &s, const State &currentState )
 {
-	savedComponents.reserve( s.m_components.size() );
+	m_savedComponents.reserve( s.m_components.size() );
 
 	for( ComponentMap::const_iterator it=s.m_components.begin(); it!=s.m_components.end(); it++ )
 	{
-		savedComponents.push_back( currentState.get( it->first ) );
+		m_savedComponents.push_back( currentState.get( it->first ) );
 	}
 	s.bind();
+
+	m_boundState = new State( currentState );
+	m_boundState->add( &s );
+}
+
+ConstStatePtr State::ScopedBinding::boundState() const
+{
+	return m_boundState;
 }
 
 State::ScopedBinding::~ScopedBinding()
 {
-	for( std::vector< ConstStateComponentPtr >::const_iterator it=savedComponents.begin(); it!=savedComponents.end(); it++ )
+	for( std::vector< ConstStateComponentPtr >::const_iterator it=m_savedComponents.begin(); it!=m_savedComponents.end(); it++ )
 	{
 		(*it)->bind();
 	}

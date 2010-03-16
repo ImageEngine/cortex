@@ -57,14 +57,17 @@ class State : public Bindable
 		{
 			public :
 				// binds the given state s and saving the modified values from current state.
-				ScopedBinding( const State &s, const State &currentState );
+				ScopedBinding( State &s, const State &currentState );
 
+				ConstStatePtr boundState() const;
+	
 				// reverts the state changes.
 				~ScopedBinding();
 
 			private :
 
-				std::vector< ConstStateComponentPtr > savedComponents;
+				std::vector< ConstStateComponentPtr > m_savedComponents;
+				StatePtr m_boundState;
 		};
 
 		State( bool complete );

@@ -90,8 +90,8 @@ void Group::render( ConstStatePtr state ) const
 	{
 		State::ScopedBinding scope( *m_state, *state );
 
-		StatePtr s = new State( *state );
-		s->add( m_state );
+		ConstStatePtr s = scope.boundState();
+
 		for( ChildContainer::const_iterator it=m_children.begin(); it!=m_children.end(); it++ )
 		{
 			(*it)->render( s );
