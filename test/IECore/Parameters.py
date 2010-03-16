@@ -722,6 +722,28 @@ class TestCompoundParameter( unittest.TestCase ) :
 		else:
 			raise Exception, "Should have generated an exception."
 
+	def testDelParameters( self ) :
+	
+		a = CompoundParameter( "a", "a desc",
+				members = [
+					StringParameter( "b", "b desc", "test 1 ok!"),
+					StringParameter( "d", "d desc", "test 2 failed!"),
+				]
+			)
+		
+		c = a.getValue()
+		r = a.defaultValue
+		
+		del a["d"]
+		self.assert_( not "d" in a )
+
+		r = a.defaultValue
+		self.assert_( not "d" in r )
+
+		r = a.getValue()
+		self.assert_( not "d" in r )
+
+
 	def testAddParametersPresets( self ) :
 
 		p = CompoundParameter(
