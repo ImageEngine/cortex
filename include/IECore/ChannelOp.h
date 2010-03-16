@@ -57,7 +57,7 @@ class ChannelOp : public ImagePrimitiveOp
 
 	protected :
 
-		typedef std::vector<DataPtr> ChannelVector;
+		typedef std::vector<FloatVectorDataPtr> ChannelVector;
 
 		/// Should be implemented by derived classes to modify the data in the passes channels in place.
 		/// The base class will already have verified the following :
