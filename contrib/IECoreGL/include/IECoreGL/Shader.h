@@ -86,15 +86,15 @@ class Shader : public Bindable
 		/// As above but by specifying the parameter by name.
 		IECore::TypeId parameterType( const std::string &parameterName ) const;
 
-		//! @name getDefaultParameter
+		//! @name getParameterDefault
 		/// Returns a new data object containing the suggested default value (zero)
 		/// to be set on the given parameter.
 		/// The default values are not supported by OpenGL. So the shader does not
 		/// have to be bound at the time of calling.
 		//////////////////////////////////////////////////////////////////////
 		//@{
-		IECore::DataPtr getDefaultParameter( GLint parameterIndex ) const;
-		IECore::DataPtr getDefaultParameter( const std::string &parameterName ) const;
+		IECore::DataPtr getParameterDefault( GLint parameterIndex ) const;
+		IECore::DataPtr getParameterDefault( const std::string &parameterName ) const;
 		//@}
 
 		//! @name Parameter getting

@@ -86,7 +86,7 @@ ShaderStateComponent::ShaderStateComponent( ShaderPtr shader, IECore::ConstCompo
 			IECore::DataPtr paramValue;
 			try
 			{
-				paramValue = m_shader->getDefaultParameter( *it );
+				paramValue = m_shader->getParameterDefault( *it );
 			}
 			catch( ... )
 			{

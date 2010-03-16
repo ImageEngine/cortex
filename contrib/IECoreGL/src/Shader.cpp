@@ -270,12 +270,12 @@ IECore::TypeId Shader::parameterType( const std::string &parameterName ) const
 	return parameterType( parameterIndex( parameterName ) );
 }
 
-IECore::DataPtr Shader::getDefaultParameter( const std::string &parameterName ) const
+IECore::DataPtr Shader::getParameterDefault( const std::string &parameterName ) const
 {
 	return getDefaultParameter( parameterIndex( parameterName ) );
 }
 
-IECore::DataPtr Shader::getDefaultParameter( GLint parameterIndex ) const
+IECore::DataPtr Shader::getParameterDefault( GLint parameterIndex ) const
 {
 	const ParameterDescription &p = parameterDescription( parameterIndex );
 	if( p.size==1 )
