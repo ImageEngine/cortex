@@ -46,6 +46,11 @@ SphericalHarmonics<S> operator * ( const SphericalHarmonics<S> &sh1, const Spher
 template <class S, class T>
 const SphericalHarmonics<S> operator *= ( SphericalHarmonics<S> &sh1, const SphericalHarmonics<T> &sh2 );
 
+/// Creates a SphericalHarmonics kernel that represents the lambert cosine rule
+/// From "On the Relationship between Radiance and Irradiance: Determining the illumination from images of a convex Lambertian object" by
+/// by Ramamoorthi, Ravi and Hanrahan, Pat - 2001.
+template < class T >
+SphericalHarmonics<T> lambertianKernel( unsigned int bands );
 
 } // namespace IECore
 

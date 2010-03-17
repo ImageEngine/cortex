@@ -111,7 +111,7 @@ class SphericalHarmonics
 		}
 
 		// convolves a given SH kernel on the current SH object.
-		// The kernel should be a function dependent only on theta.
+		// The kernel should be a function dependent only on theta (non-zero coefficients at i*(i+1) for i in [0 to bands-1]).
 		template < typename T >
 		void convolve( const SphericalHarmonics<T> &s );
 

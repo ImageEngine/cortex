@@ -61,7 +61,7 @@ class ImageConvolveOp : public ChannelOp
 
 		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
 
-		void processChannels( SHProjectorf &projector, int imgWidth, int imgHeight, unsigned bands,  std::vector<float> &channel0, std::vector<float> &channel1, std::vector<float> &channel2 ) const;
+		void processChannels( SHProjectorf &projector, const SHf &kernel, int imgWidth, int imgHeight, unsigned bands,  std::vector<float> &channel0, std::vector<float> &channel1, std::vector<float> &channel2 ) const;
 
 		IntParameterPtr m_bands;
 		IntParameterPtr m_samples;

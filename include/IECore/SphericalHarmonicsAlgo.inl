@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/SphericalHarmonicsTensor.h"
+#include "boost/math/special_functions/factorials.hpp"
 
 namespace IECore
 {
@@ -77,6 +78,28 @@ const SphericalHarmonics<S> operator *= ( SphericalHarmonics<S> &sh1, const Sphe
 {
 	sh1 = sh1 * sh2;
 	return sh1;
+}
+
+template < class T >
+SphericalHarmonics<T> lambertianKernel( unsigned int bands )
+{
+	SphericalHarmonics<T> sh( bands );
+	typename SphericalHarmonics<T>::CoefficientVector::iterator it;
+	for ( unsigned int b = 0; b < bands; b++ )
+	{
+		T &coeff = sh.coefficients()[ b*(b+1) ];
+		if ( b == 0 )
+			coeff = T( M_PI / sqrt( 4 * M_PI ) );
+		else if ( b == 1 )
+			coeff = T( sqrt( M_PI / 3 ) );
+		else if ( !(b & 1) )
+		{
+			double facHalfB = boost::math::factorial<double>( b/2 );
+			coeff = T( 2*M_PI * sqrt((2*b+1)/(4*M_PI)) * ((b & 2 ? 1.0 : -1.0) / ((b+2)*(b-1))) * 
+						( boost::math::factorial<double>( b ) / ( (1<<b) * facHalfB * facHalfB ) ) );
+		}
+	}
+	return sh;
 }
 
 } // namespace IECore

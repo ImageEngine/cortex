@@ -35,6 +35,7 @@
 #include "IECore/ImageConvolveOp.h"
 #include "IECore/CompoundParameter.h"
 #include "tbb/parallel_for.h"
+#include "IECore/SphericalHarmonicsAlgo.h"
 
 using namespace tbb;
 using namespace IECore;
@@ -101,7 +102,7 @@ struct ImageConvolveOp::ParallelTask
 		std::vector<float> &m_channel2;
 };
 
-void ImageConvolveOp::processChannels( SHProjectorf &projector, int imgWidth, int imgHeight, unsigned bands,  std::vector<float> &channel0, std::vector<float> &channel1, std::vector<float> &channel2 ) const
+void ImageConvolveOp::processChannels( SHProjectorf &projector, const SHf &kernel, int imgWidth, int imgHeight, unsigned bands,  std::vector<float> &channel0, std::vector<float> &channel1, std::vector<float> &channel2 ) const
 {
 	const std::vector< Imath::V2f > &directions = projector.sphericalCoordinates();
 	std::vector< Imath::V2f >::const_iterator cit;
@@ -122,6 +123,9 @@ void ImageConvolveOp::processChannels( SHProjectorf &projector, int imgWidth, in
 		int offset = iy * imgWidth + ix;
 		projector( i, Imath::V3f( channel0[ offset ], channel1[ offset ], channel2[ offset ] ), sh );
 	}
+
+	// convolve with lambertian kernel
+	sh.convolve( kernel );
 
 	// SH to image
 	ParallelTask task( sh, imgWidth, imgHeight, channel0, channel1, channel2 );
@@ -148,6 +152,11 @@ void ImageConvolveOp::modifyChannels( const Imath::Box2i &displayWindow, const I
 	IECore::SHProjectorf projector( samples );
 	projector.computeSamples( bands );
 
+	SHf kernel = lambertianKernel<float>( bands );
+	// when convolving the lambertian kernel with the env light and 
+	// reconstructing the image it increased intensity by PI, so we compensate it here.
+	kernel *= 1/M_PI;
+
 	ChannelVector::iterator it = channels.begin();
 	while( it != channels.end() )
 	{
@@ -170,6 +179,6 @@ void ImageConvolveOp::modifyChannels( const Imath::Box2i &displayWindow, const I
 				ch2 = ch1;
 			}
 		}
-		processChannels( projector, imgWidth, imgHeight, bands, *ch0, *ch1, *ch2 );
+		processChannels( projector, kernel, imgWidth, imgHeight, bands, *ch0, *ch1, *ch2 );
 	}
 }
