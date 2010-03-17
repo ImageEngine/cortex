@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -81,7 +81,7 @@ def __serialiseDateTime( parameter ) :
 	# strptime does not support fractional seconds
 	dt = dt.replace( microsecond = 0 )
 
-	return "'" + str( dt ) + "'"
+	return [ str( dt ) ]
 
 IECore.ParameterParser.registerType( IECore.DateTimeParameter.staticTypeId(), __parseDateTime, __serialiseDateTime )
 

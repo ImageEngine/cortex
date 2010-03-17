@@ -209,10 +209,12 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 				// in the python object dying before we properly extract the value, which results in corrupted
 				// strings, and therefore malformed ribs.
 				object serialisedResultObject = PythonCmd::globalContext()["IECore"].attr("ParameterParser")().attr("serialise")( it->second.procedural->parameters() );
-				extract<std::string> serialisedResultExtractor( serialisedResultObject );
+				object serialisedResultStringObject = serialisedResultObject.attr( "__str__" )();
+				
+				extract<std::string> serialisedResultExtractor( serialisedResultStringObject );
 				
 				std::string serialisedParameters = serialisedResultExtractor();
-				pythonString = boost::str( boost::format( "IECoreRI.executeProcedural( \"%s\", %d, \"%s\" )" ) % it->second.className % it->second.classVersion % serialisedParameters );
+				pythonString = boost::str( boost::format( "IECoreRI.executeProcedural( \"%s\", %d, %s )" ) % it->second.className % it->second.classVersion % serialisedParameters );
 			}
 			catch( ... )
 			{
