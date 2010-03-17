@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,17 +41,17 @@ ParameterHandler::~ParameterHandler()
 {
 }
 
-ConstParameterHandlerPtr ParameterHandler::get( IECore::ConstParameterPtr parameter )
+ConstParameterHandlerPtr ParameterHandler::create( IECore::ConstParameterPtr parameter )
 {
-	return get( parameter->typeId() );
+	return create( parameter->typeId() );
 }
 
-ConstParameterHandlerPtr ParameterHandler::get( IECore::ConstObjectPtr object )
+ConstParameterHandlerPtr ParameterHandler::create( IECore::ConstObjectPtr object )
 {
-	return get( object->typeId() );
+	return create( object->typeId() );
 }
 
-ConstParameterHandlerPtr ParameterHandler::get( IECore::TypeId id )
+ConstParameterHandlerPtr ParameterHandler::create( IECore::TypeId id )
 {
 	const HandlerMap &h = handlers();
 	

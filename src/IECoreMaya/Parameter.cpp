@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,7 +48,7 @@ MObject Parameter::create( IECore::ConstParameterPtr parameter, const MString &a
 	assert( parameter );
 	assert( attributeName.length() );
 
-	ConstParameterHandlerPtr h = ParameterHandler::get( parameter );
+	ConstParameterHandlerPtr h = ParameterHandler::create( parameter );
 	if( !h )
 	{
 		return MObject::kNullObj;
@@ -60,7 +60,7 @@ MStatus Parameter::update( IECore::ConstParameterPtr parameter, MObject &attribu
 {
 	assert( parameter );
 
-	ConstParameterHandlerPtr h = ParameterHandler::get( parameter );
+	ConstParameterHandlerPtr h = ParameterHandler::create( parameter );
 	if( !h )
 	{
 		return MS::kFailure;
@@ -75,7 +75,7 @@ MStatus Parameter::setValue( IECore::ConstParameterPtr parameter, MPlug &plug )
 
 	if ( plug.isFreeToChange( false, true ) == MPlug::kFreeToChange )
 	{
-		ConstParameterHandlerPtr h = ParameterHandler::get( parameter );
+		ConstParameterHandlerPtr h = ParameterHandler::create( parameter );
 		if( !h )
 		{
 			return MS::kFailure;
@@ -93,7 +93,7 @@ MStatus Parameter::setValue( const MPlug &plug, IECore::ParameterPtr parameter )
 	assert( parameter );
 	assert( ! plug.isNull() );
 
-	ConstParameterHandlerPtr h = ParameterHandler::get( IECore::staticPointerCast< const IECore::Parameter > (parameter) );
+	ConstParameterHandlerPtr h = ParameterHandler::create( IECore::staticPointerCast< const IECore::Parameter > (parameter) );
 	if( !h )
 	{
 		return MS::kFailure;

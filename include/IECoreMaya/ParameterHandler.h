@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -60,16 +60,14 @@ class ParameterHandler : public IECore::RefCounted
 
 	public :
 
-		/// \todo This should be called create() to match every other factory
-		/// interface we have elsewhere.
 		/// Return a handler which can deal with the given parameter
-		static ConstParameterHandlerPtr get( IECore::ConstParameterPtr parameter );
+		static ConstParameterHandlerPtr create( IECore::ConstParameterPtr parameter );
 
 		/// Return a handler which can deal with the given object
-		static ConstParameterHandlerPtr get( IECore::ConstObjectPtr object );
+		static ConstParameterHandlerPtr create( IECore::ConstObjectPtr object );
 
 		/// Return a handler which can deal with an object or parameter of the given type id
-		static ConstParameterHandlerPtr get( IECore::TypeId id );
+		static ConstParameterHandlerPtr create( IECore::TypeId id );
 
 		virtual ~ParameterHandler();
 

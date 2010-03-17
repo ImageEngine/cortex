@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -70,7 +70,7 @@ MStatus ObjectParameterHandler::update( IECore::ConstParameterPtr parameter, MOb
 
 	for (IECore::ObjectParameter::TypeIdSet::const_iterator it = p->validTypes().begin(); it != p->validTypes().end(); ++it)
 	{
-		ConstParameterHandlerPtr h = ParameterHandler::get( *it );
+		ConstParameterHandlerPtr h = ParameterHandler::create( *it );
 		if (h)
 		{
 			if ( !h->update( parameter, attribute) )
@@ -111,7 +111,7 @@ MStatus ObjectParameterHandler::setValue( IECore::ConstParameterPtr parameter, M
 	/// \todo Investigate whether we can do a parameter->getValue() here and just get the handler which represents it
 	for (IECore::ObjectParameter::TypeIdSet::const_iterator it = p->validTypes().begin(); it != p->validTypes().end(); ++it)
 	{
-		ConstParameterHandlerPtr h = ParameterHandler::get( *it );
+		ConstParameterHandlerPtr h = ParameterHandler::create( *it );
 		if (h)
 		{
 			if ( h->setValue( parameter, plug) )
@@ -149,7 +149,7 @@ MStatus ObjectParameterHandler::setValue( const MPlug &plug, IECore::ParameterPt
 	/// Keep trying all the available handlers until we find one that works
 	for (IECore::ObjectParameter::TypeIdSet::const_iterator it = p->validTypes().begin(); it != p->validTypes().end(); ++it)
 	{
-		ConstParameterHandlerPtr h = ParameterHandler::get( *it );
+		ConstParameterHandlerPtr h = ParameterHandler::create( *it );
 		if (h)
 		{
 			if ( h->setValue( plug, parameter ) )
