@@ -352,6 +352,7 @@ enum TypeId
 	ImageThinnerTypeId = 309,
 	CurveLineariserTypeId = 310,
 	CompoundDataBaseTypeId = 311,
+	ImageConvolveOpTypeId = 312,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

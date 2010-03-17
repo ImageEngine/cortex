@@ -355,6 +355,7 @@ void bindTypeId()
 		.value( "ImageThinner", ImageThinnerTypeId )
 		.value( "CurveLineariser", CurveLineariserTypeId )
 		.value( "CompoundDataBase", CompoundDataBaseTypeId )
+		.value( "ImageConvolveOp", ImageConvolveOpTypeId )
 	;
 }
 

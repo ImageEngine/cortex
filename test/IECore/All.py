@@ -210,6 +210,7 @@ from CurveLineariserTest import CurveLineariserTest
 from PresetManagerTest import PresetManagerTest
 from IDXReaderTest import IDXReaderTest
 from ThreadingTest import ThreadingTest
+from ImageConvolveOpTest import *
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
