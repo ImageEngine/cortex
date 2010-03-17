@@ -144,7 +144,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 		}
 		else
 		{
-			pHolder->setParameterisedValues(); // we're relying on nothing setting different values between now and the time we emit the procedural
+			pHolder->setParameterisedValues();
 			
 			CachedProcedural cachedProcedural;
 			cachedProcedural.procedural = pHolder->getProcedural( &cachedProcedural.className, &cachedProcedural.classVersion );
