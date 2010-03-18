@@ -45,8 +45,7 @@ class ParameterParser :
 	__typesToSerialisers = {}
 
 	## Parses the args to set the values of the parameters
-	# held by a CompoundParameter object. args may either be a list of strings or a string
-	# itself, in which case it will be tokenised using shlex.split().
+	# held by a CompoundParameter object. args must be a list of strings.
 	#
 	# Parsing expects a series of entries of the form -parameterName value(s). It
 	# is also possible to specify a series of child parameters which can be parsed without
