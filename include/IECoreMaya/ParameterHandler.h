@@ -52,7 +52,8 @@ namespace IECoreMaya
 class ParameterHandler;
 IE_CORE_DECLAREPTR( ParameterHandler );
 
-/// \todo Documentation!
+/// The ParameterHandler class provides a mapping between IECore::Parameters and maya attributes. It
+/// is used by the IECoreMaya::ParameterisedHolder classes.
 class ParameterHandler : public IECore::RefCounted
 {
 	friend class Parameter;
