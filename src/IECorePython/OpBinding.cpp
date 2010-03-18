@@ -78,7 +78,8 @@ class OpWrap : public Op, public Wrapper<Op>
 			}
 		};
 
-
+		IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( Op );
+		
 };
 IE_CORE_DECLAREPTR( OpWrap );
 
