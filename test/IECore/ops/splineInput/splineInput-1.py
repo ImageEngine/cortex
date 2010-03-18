@@ -68,3 +68,5 @@ class splineInput( IECore.Op ) :
 	def doOperation( self, args ) :
 	
 		return IECore.IntData( len( args["spline"].value.points() ) )
+
+IECore.registerRunTimeTyped( splineInput )

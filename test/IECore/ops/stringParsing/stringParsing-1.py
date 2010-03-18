@@ -82,3 +82,5 @@ class stringParsing( Op ) :
 		assert args["stringWithManySpaces"].value == "hello there old chap"
 
 		return IntData( 1 )
+
+registerRunTimeTyped( stringParsing )

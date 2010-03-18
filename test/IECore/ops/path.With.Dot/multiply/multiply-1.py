@@ -70,3 +70,4 @@ class multiply( Op ) :
 
 		return IECore.IntData( operands.a.value * operands.b.value )
 
+registerRunTimeTyped( multiply )

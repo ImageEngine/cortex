@@ -241,3 +241,4 @@ class parameterTypes( Op ) :
 
 		return IntData( 1 )
 
+registerRunTimeTyped( parameterTypes )

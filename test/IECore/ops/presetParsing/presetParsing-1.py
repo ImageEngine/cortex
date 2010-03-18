@@ -115,3 +115,4 @@ class presetParsing( Op ) :
 
 		return IntData( 1 )
 
+registerRunTimeTyped( presetParsing )
