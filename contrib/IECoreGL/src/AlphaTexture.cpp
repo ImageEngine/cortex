@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -140,7 +140,7 @@ void AlphaTexture::construct( unsigned int width, unsigned int height, IECore::C
 
 ImagePrimitivePtr AlphaTexture::imagePrimitive() const
 {
-	glPushAttrib( mask() );
+	glPushAttrib( GL_TEXTURE_BIT );
 
 		bind();
 
