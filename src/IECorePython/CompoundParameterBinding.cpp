@@ -53,19 +53,16 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 
 		IE_CORE_DECLAREMEMBERPTR( CompoundParameterWrap );
 
-	protected:
-
-		static std::vector<ParameterPtr> getMembers( const object &members )
+		CompoundParameterWrap( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = 0 )
+			:	CompoundParameter( name, description, userData ), Wrapper< CompoundParameter >( self, this )
 		{
-			std::vector<ParameterPtr> m;
-			for( int i=0; i<members.attr("__len__")(); i++ )
-			{
-				object o = members[i];
-				Parameter &p = extract<Parameter &>( o );
-				m.push_back( &p );
-			}
-			return m;
+			addParametersFromMembers( members );
 		}
+
+		IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( CompoundParameter );
+		IECOREPYTHON_PARAMETERWRAPPERFNS( CompoundParameter );
+
+	protected:
 
 		void addParametersFromMembers( const object &members )
 		{
@@ -77,15 +74,6 @@ class CompoundParameterWrap : public CompoundParameter, public Wrapper< Compound
 			}
 		}
 
-	public :
-
-		CompoundParameterWrap( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = 0 )
-			:	CompoundParameter( name, description, userData ), Wrapper< CompoundParameter >( self, this )
-		{
-			addParametersFromMembers( members );
-		}
-
-		IECOREPYTHON_PARAMETERWRAPPERFNS( CompoundParameter );
 };
 
 static unsigned int compoundParameterLen( const CompoundParameter &o )
