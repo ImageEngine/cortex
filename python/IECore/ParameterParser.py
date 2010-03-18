@@ -58,8 +58,8 @@ class ParameterParser :
 	# If parsing fails at any time then a descriptive exception is raised.
 	def parse(self, args, parameters):
 
-		if type( args ) is str :
-			args = shlex.split( args )
+		if not type( args ) is list :
+			raise TypeError, "args must be a python list!"
 
 		flagless = None
 		flaglessIndex = 0
