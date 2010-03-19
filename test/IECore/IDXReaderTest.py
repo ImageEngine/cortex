@@ -51,27 +51,29 @@ class IDXReaderTest( unittest.TestCase ) :
 		
 		o = r.read()
 		
-		self.failUnless( o.isInstanceOf( IECore.PointsPrimitive.staticTypeId() ) )
+		self.failUnless( o.isInstanceOf( IECore.Group.staticTypeId() ) )
 		
-		self.assertEqual( o.numPoints, 6 )
+		self.assertEqual( len(o.children()), 1 )	
 		
-		self.assertEqual( o["PointID"].data, IECore.StringVectorData( [ "000", "001", "002", "003", "004", "005" ] ) )
+		c = o.children()[0]
+
+		self.assertEqual( c.numPoints, 6 )
 		
-		self.assertEqual(
+		# We're not order preserving
 		
-			o["P"].data,
-			
-			IECore.V3fVectorData( [
-				IECore.V3f( 63.204863, 0.831837, 33.969296 ),
-				IECore.V3f( 62.345470, 0.707662, 34.099882 ),
-				IECore.V3f( 63.104346, 0.708060, 34.025762 ),
-				IECore.V3f( 63.096101, -0.973316, 34.031914 ),
-				IECore.V3f( 62.338136, -0.974567, 34.112893 ),
-				IECore.V3f( 54.252821, 0.716216, 34.849839 ),
-			] )
-		
-		)
+		for k in [ "000", "001", "002", "003", "004", "005" ] :
+			self.failUnless( k in c["PointID"].data )
 	
+		for p in [
+				IECore.V3f( 63.204863, 0.831837, -33.969296 ),
+				IECore.V3f( 62.345470, 0.707662, -34.099882 ),
+				IECore.V3f( 63.104346, 0.708060, -34.025762 ),
+				IECore.V3f( 63.096101, -0.973316, -34.031914 ),
+				IECore.V3f( 62.338136, -0.974567, -34.112893 ),
+				IECore.V3f( 54.252821, 0.716216, -34.849839 ),
+			]:
+				self.failUnless( p in c["P"].data )
+			
 	def testCanRead( self ) :
 	
 		self.failUnless( IECore.IDXReader.canRead( "test/IECore/data/idxFiles/test.idx" ) )
