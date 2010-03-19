@@ -532,7 +532,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 				}
 				catch( ... )
 				{
-					msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught exception while setting parameter value from %s" ) % p.name().asChar() );
+					msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Caught unknown exception while setting parameter value from %s" ) % p.name().asChar() );
 					status = MS::kFailure;
 				}
 			}
