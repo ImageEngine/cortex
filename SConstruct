@@ -909,6 +909,8 @@ if doConfigure :
 		coreSources.remove( "src/IECore/SphericalHarmonicsRotationMatrix.cpp" )
 		coreSources.remove( "src/IECore/SphericalHarmonicsTransferMatrix.cpp" )
 		coreSources.remove( "src/IECore/SphericalHarmonicsProjector.cpp" )
+		coreSources.remove( "src/IECore/ImageConvolveOp.cpp" )
+		corePythonSources.remove( "src/IECorePython/ImageConvolveOpBinding.cpp" )
 	
 	if c.CheckLibWithHeader( "tiff", "tiff.h", "CXX" ) :
 		for e in allCoreEnvs :

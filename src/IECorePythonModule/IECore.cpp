@@ -516,7 +516,12 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurveTracer();
 	bindImageThinner();
 	bindCurveLineariser();
+	
+#ifdef IECORE_WITH_BOOSTFACTORIAL	
+
 	bindImageConvolveOp();
+
+#endif
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
