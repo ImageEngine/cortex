@@ -423,6 +423,8 @@ class TestRenderer( unittest.TestCase ) :
 		r.worldEnd()
 
 		s = r.scene()
+
+		s.render( State( True ) )
 		
 	def testRemoveObject( self ) :
 	
@@ -467,6 +469,9 @@ class TestRenderer( unittest.TestCase ) :
 
 		while len(allScenes) < 100 :
 			pass
+
+		for s in allScenes :
+			s.render( State( True ) )
 
 	def tearDown( self ) :
 
