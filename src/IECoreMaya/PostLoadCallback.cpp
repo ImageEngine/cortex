@@ -70,10 +70,17 @@ class PostLoadCallback::PostLoadCallbackData
 		static void afterLoad(void *clientData)
 		{
 			assert( clientData );
-			PostLoadCallbackData* data = static_cast<PostLoadCallbackData *>( clientData );
+			
+			// we only emit the callback when isReadingFile() is false, as this indicates that all
+			// loading is complete. otherwise we would emit a whole series of callbacks when loading a scene
+			// with lots of references in.
+			if( !MFileIO::isReadingFile() )
+			{
+				PostLoadCallbackData* data = static_cast<PostLoadCallbackData *>( clientData );
 
-			assert( data->m_plcb );
-			data->m_plcb->postLoad();
+				assert( data->m_plcb );
+				data->m_plcb->postLoad();
+			}
 		}
 
 	private:

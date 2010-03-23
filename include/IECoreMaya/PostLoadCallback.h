@@ -42,9 +42,11 @@
 namespace IECoreMaya
 {
 
-/// A base class which executes a callback whenever a Maya scene is opened, referenced, or imported. User-defined
-/// classes should derive from this, and implement any custom behaviour in the postLoad() method. Refcounting
-/// ensures that all Maya callbacks are removed when the instance is deleted.
+/// A base class which executes a callback whenever a Maya scene is opened, referenced, or imported. In the case
+/// of opening a scene with many references, care is taken that only one callback is made once the entire scene
+/// is loaded, rather than a whole series of callbacks with the scene in various stages of validity.
+/// User-defined classes should derive from this, and implement any custom behaviour in the postLoad() method.
+/// All Maya callbacks are removed when the instance is deleted.
 class PostLoadCallback : public IECore::RefCounted
 {
 	friend class PostLoadCallbackData;
