@@ -1119,7 +1119,7 @@ void IECoreGL::Renderer::setAttribute( const std::string &name, IECore::ConstDat
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-		m_data->implementation->addCustomState( name, value->copy() );
+		m_data->implementation->addUserAttribute( name, value->copy() );
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
 	{
@@ -1141,7 +1141,7 @@ IECore::ConstDataPtr IECoreGL::Renderer::getAttribute( const std::string &name )
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-		return m_data->implementation->getCustomState( name );
+		return m_data->implementation->getUserAttribute( name );
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
 	{

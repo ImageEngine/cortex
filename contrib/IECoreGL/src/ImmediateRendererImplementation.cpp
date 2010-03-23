@@ -163,16 +163,16 @@ StateComponentPtr ImmediateRendererImplementation::getState( IECore::TypeId type
 	return m_stateStack.top()->get( type );
 }
 
-void ImmediateRendererImplementation::addCustomState( const IECore::InternedString &name, IECore::DataPtr value )
+void ImmediateRendererImplementation::addUserAttribute( const IECore::InternedString &name, IECore::DataPtr value )
 {
-	m_stateStack.top()->customAttributes()[ name ] = value;
+	m_stateStack.top()->userAttributes()[ name ] = value;
 }
 
-IECore::DataPtr ImmediateRendererImplementation::getCustomState( const IECore::InternedString &name )
+IECore::DataPtr ImmediateRendererImplementation::getUserAttribute( const IECore::InternedString &name )
 {
 	State *curState = m_stateStack.top();
-	State::CustomAttributesMap::iterator attrIt = curState->customAttributes().find( name );
-	if( attrIt != curState->customAttributes().end() )
+	State::UserAttributesMap::iterator attrIt = curState->userAttributes().find( name );
+	if( attrIt != curState->userAttributes().end() )
 	{
 		return attrIt->second;
 	}

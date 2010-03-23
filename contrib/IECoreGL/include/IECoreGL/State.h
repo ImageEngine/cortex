@@ -54,7 +54,7 @@ class State : public Bindable
 {
 	public :
 
-		typedef IECore::CompoundDataMap CustomAttributesMap;
+		typedef IECore::CompoundDataMap UserAttributesMap;
 
 		// class that binds a state on the constructor and revert the changes on the destructor.
 		struct ScopedBinding : private boost::noncopyable
@@ -96,8 +96,8 @@ class State : public Bindable
 		void remove( IECore::TypeId componentType );
 
 		// custom state attributes
-		CustomAttributesMap &customAttributes();
-		const CustomAttributesMap &customAttributes() const;
+		UserAttributesMap &userAttributes();
+		const UserAttributesMap &userAttributes() const;
 
 		bool isComplete() const;
 
@@ -133,7 +133,7 @@ class State : public Bindable
 
 		typedef std::map<IECore::TypeId, StateComponentPtr> ComponentMap;
 		ComponentMap m_components;
-		CustomAttributesMap m_customAttributes;
+		UserAttributesMap m_userAttributes;
 };
 
 } // namespace IECoreGL

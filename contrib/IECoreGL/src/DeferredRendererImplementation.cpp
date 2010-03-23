@@ -164,17 +164,17 @@ StateComponentPtr DeferredRendererImplementation::getState( IECore::TypeId type 
 	return IECore::constPointerCast<StateComponent>( State::defaultState()->get( type ) );
 }
 
-void DeferredRendererImplementation::addCustomState( const IECore::InternedString &name, IECore::DataPtr value )
+void DeferredRendererImplementation::addUserAttribute( const IECore::InternedString &name, IECore::DataPtr value )
 {
-	(*m_stateStack.rbegin())->customAttributes()[ name ] = value;
+	(*m_stateStack.rbegin())->userAttributes()[ name ] = value;
 }
 
-IECore::DataPtr DeferredRendererImplementation::getCustomState( const IECore::InternedString &name )
+IECore::DataPtr DeferredRendererImplementation::getUserAttribute( const IECore::InternedString &name )
 {
 	for( StateStack::reverse_iterator it=m_stateStack.rbegin(); it!=m_stateStack.rend(); it++ )
 	{
-		State::CustomAttributesMap::iterator attrIt = (*it)->customAttributes().find( name );
-		if( attrIt != (*it)->customAttributes().end() )
+		State::UserAttributesMap::iterator attrIt = (*it)->userAttributes().find( name );
+		if( attrIt != (*it)->userAttributes().end() )
 		{
 			return attrIt->second;
 		}

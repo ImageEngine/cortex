@@ -53,12 +53,12 @@ class RendererImplementation : public IECore::RunTimeTyped
 		typename T::Ptr getState();
 
 		// Set a custom state
-		virtual void addCustomState( const IECore::InternedString &name, IECore::DataPtr value ) = 0;
+		virtual void addUserAttribute( const IECore::InternedString &name, IECore::DataPtr value ) = 0;
 		// Get a custom state or 0 if not defined.
-		virtual IECore::DataPtr getCustomState( const IECore::InternedString &name ) = 0;
+		virtual IECore::DataPtr getUserAttribute( const IECore::InternedString &name ) = 0;
 		// Get a casted custom state or 0 if not present or incompatible type.
 		template <class T>
-		typename T::Ptr getCustomState( const IECore::InternedString &name );
+		typename T::Ptr getUserAttribute( const IECore::InternedString &name );
 
 		virtual void addPrimitive( PrimitivePtr primitive ) = 0;
 

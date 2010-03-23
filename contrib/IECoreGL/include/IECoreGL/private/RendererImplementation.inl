@@ -11,9 +11,9 @@ typename T::Ptr RendererImplementation::getState()
 }
 
 template <class T>
-typename T::Ptr RendererImplementation::getCustomState( const IECore::InternedString &name )
+typename T::Ptr RendererImplementation::getUserAttribute( const IECore::InternedString &name )
 {
-	return IECore::dynamicPointerCast<T>( getCustomState( name ) );
+	return IECore::dynamicPointerCast<T>( getUserAttribute( name ) );
 }
 
 } // namespace IECoreGL
