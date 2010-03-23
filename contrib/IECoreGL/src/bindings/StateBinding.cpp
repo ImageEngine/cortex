@@ -53,6 +53,7 @@ static StatePtr defaultState()
 
 void bindState()
 {
+	// \todo: add custom attribute get/add/remove/list? access functions
 	IECorePython::RunTimeTypedClass<State>()
 		.def( init<bool>() )
 		.def( "add", (void (State::*)( StatePtr ) )&State::add )

@@ -39,6 +39,9 @@ class DeferredRendererImplementation : public RendererImplementation
 		virtual void addState( StateComponentPtr state );
 		virtual StateComponentPtr getState( IECore::TypeId type );
 
+		virtual void addCustomState( const IECore::InternedString &name, IECore::DataPtr value );
+		virtual IECore::DataPtr getCustomState( const IECore::InternedString &name );
+
 		virtual void addPrimitive( PrimitivePtr primitive );
 
 		ScenePtr scene();

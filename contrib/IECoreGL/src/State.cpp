@@ -85,6 +85,7 @@ State::State( bool complete )
 State::State( const State &other )
 {
 	m_components = other.m_components;
+	m_customAttributes = other.m_customAttributes;
 }
 
 State::~State()
@@ -140,6 +141,16 @@ void State::remove( IECore::TypeId componentType )
 		return;
 	}
 	m_components.erase( it );
+}
+
+State::CustomAttributesMap &State::customAttributes()
+{
+	return m_customAttributes;
+}
+
+const State::CustomAttributesMap &State::customAttributes() const
+{
+	return m_customAttributes;
 }
 
 bool State::isComplete() const

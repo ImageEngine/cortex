@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@ import math
 
 class UserAtributesTest( unittest.TestCase ) :
 
-	def testUserAttributes( self ) :
+	def testUserAttributesInDeferredMode( self ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
@@ -66,6 +66,32 @@ class UserAtributesTest( unittest.TestCase ) :
 		self.assertEqual( r.getAttribute( "user:test2" ), None )
 
 		r.worldEnd()
+
+	def testUserAttributesInImmediateMode( self ) :
+
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.worldBegin()
+
+		self.assertEqual( r.getAttribute( "user:notSetYet" ), None )
+
+		r.setAttribute( "user:test", IECore.FloatData( 1 ) )
+		self.assertEqual( r.getAttribute( "user:test" ), IECore.FloatData( 1 ) )
+
+		r.attributeBegin()
+
+		self.assertEqual( r.getAttribute( "user:test" ), IECore.FloatData( 1 ) )
+
+		r.setAttribute( "user:test2", IECore.IntData( 10 ) )
+		self.assertEqual( r.getAttribute( "user:test2" ), IECore.IntData( 10 ) )
+
+		r.attributeEnd()
+
+		self.assertEqual( r.getAttribute( "user:test" ), IECore.FloatData( 1 ) )
+		self.assertEqual( r.getAttribute( "user:test2" ), None )
+
+		r.worldEnd()
+
 
 if __name__ == "__main__":
     unittest.main()

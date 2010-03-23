@@ -191,12 +191,6 @@ struct IECoreGL::Renderer::MemberData
 	/// After worldBegin the transform stack is taken care of by the backend implementations.
 	std::stack<Imath::M44f> transformStack;
 
-	struct Attributes
-	{
-		IECore::CompoundDataMap userAttributes;
-	};
-	std::stack<Attributes> attributeStack;
-
 	bool inWorld;
 	RendererImplementationPtr implementation;
 	ShaderManagerPtr shaderManager;
@@ -230,7 +224,6 @@ IECoreGL::Renderer::Renderer()
 	m_data->options.textureSearchPath = m_data->options.textureSearchPathDefault = texturePath ? texturePath : "";
 
 	m_data->transformStack.push( M44f() );
-	m_data->attributeStack.push( MemberData::Attributes() );
 
 	m_data->inWorld = false;
 	m_data->implementation = 0;
@@ -1109,17 +1102,10 @@ static const AttributeGetterMap *attributeGetters()
 void IECoreGL::Renderer::attributeBegin()
 {
 	m_data->implementation->attributeBegin();
-	m_data->attributeStack.push( m_data->attributeStack.top() );
 }
 
 void IECoreGL::Renderer::attributeEnd()
 {
-	if( !m_data->attributeStack.size() )
-	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::Renderer::attributeEnd", "No matching attributeBegin." );
-		return;
-	}
-	m_data->attributeStack.pop();
 	m_data->implementation->attributeEnd();
 }
 
@@ -1133,7 +1119,7 @@ void IECoreGL::Renderer::setAttribute( const std::string &name, IECore::ConstDat
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-		m_data->attributeStack.top().userAttributes[name] = value->copy();
+		m_data->implementation->addCustomState( name, value->copy() );
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
 	{
@@ -1155,13 +1141,7 @@ IECore::ConstDataPtr IECoreGL::Renderer::getAttribute( const std::string &name )
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-		MemberData::Attributes &attributes = m_data->attributeStack.top();
-		IECore::CompoundDataMap::const_iterator it = attributes.userAttributes.find( name );
-		if( it != attributes.userAttributes.end() )
-		{
-			return it->second;
-		}
-		return 0;
+		return m_data->implementation->getCustomState( name );
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
 	{

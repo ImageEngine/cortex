@@ -142,6 +142,11 @@ void ImmediateRendererImplementation::attributeBegin()
 
 void ImmediateRendererImplementation::attributeEnd()
 {
+	if( m_stateStack.size()<=1 )
+	{
+		IECore::msg( IECore::Msg::Warning, "ImmediateRendererImplementation::attributeEnd", "Bad nesting." );
+		return;
+	}
 	m_stateStack.pop();
 	m_stateStack.top()->bind();
 	transformEnd();
@@ -156,6 +161,22 @@ void ImmediateRendererImplementation::addState( StateComponentPtr state )
 StateComponentPtr ImmediateRendererImplementation::getState( IECore::TypeId type )
 {
 	return m_stateStack.top()->get( type );
+}
+
+void ImmediateRendererImplementation::addCustomState( const IECore::InternedString &name, IECore::DataPtr value )
+{
+	m_stateStack.top()->customAttributes()[ name ] = value;
+}
+
+IECore::DataPtr ImmediateRendererImplementation::getCustomState( const IECore::InternedString &name )
+{
+	State *curState = m_stateStack.top();
+	State::CustomAttributesMap::iterator attrIt = curState->customAttributes().find( name );
+	if( attrIt != curState->customAttributes().end() )
+	{
+		return attrIt->second;
+	}
+	return 0;
 }
 
 void ImmediateRendererImplementation::addPrimitive( PrimitivePtr primitive )

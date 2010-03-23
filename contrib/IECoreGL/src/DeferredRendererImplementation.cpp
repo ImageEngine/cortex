@@ -164,6 +164,24 @@ StateComponentPtr DeferredRendererImplementation::getState( IECore::TypeId type 
 	return IECore::constPointerCast<StateComponent>( State::defaultState()->get( type ) );
 }
 
+void DeferredRendererImplementation::addCustomState( const IECore::InternedString &name, IECore::DataPtr value )
+{
+	(*m_stateStack.rbegin())->customAttributes()[ name ] = value;
+}
+
+IECore::DataPtr DeferredRendererImplementation::getCustomState( const IECore::InternedString &name )
+{
+	for( StateStack::reverse_iterator it=m_stateStack.rbegin(); it!=m_stateStack.rend(); it++ )
+	{
+		State::CustomAttributesMap::iterator attrIt = (*it)->customAttributes().find( name );
+		if( attrIt != (*it)->customAttributes().end() )
+		{
+			return attrIt->second;
+		}
+	}
+	return 0;
+}
+
 void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )
 {
 	GroupPtr g = new Group;
