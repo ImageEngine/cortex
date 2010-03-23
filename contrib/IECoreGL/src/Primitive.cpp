@@ -70,10 +70,21 @@ void Primitive::render( ConstStatePtr state ) const
 		throw Exception( "Primitive::render called with incomplete state object." );
 	}
 
-	Shader *shader = const_cast<Shader *>( state->get<ShaderStateComponent>()->shader().get() );
-	// get ready in case the derived class wants to call setVertexAttributesAsUniforms
-	setupVertexAttributesAsUniform( shader );
+	const ShaderStateComponent *shaderState = state->get<ShaderStateComponent>();
 
+	// get ready in case the derived class wants to call setVertexAttributesAsUniforms
+	setupVertexAttributesAsUniform( shaderState->shader() );
+
+	// add primitive parameters on the new ShaderStateComponent
+	ShaderStateComponentPtr newShaderState = new ShaderStateComponent( *shaderState );
+	for ( AttributeMap::const_iterator it = m_uniformAttributes.begin(); it != m_uniformAttributes.end(); it++ )
+	{
+		newShaderState->addShaderParameterValue( it->first, it->second );
+	}
+	// bind the temporary shader state
+	newShaderState->bind();
+
+	// \todo: consider binding at the end the whole original state. Check if that is enough to eliminate these push/pop calls.
 	glPushAttrib( GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
 	glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
 
@@ -93,14 +104,9 @@ void Primitive::render( ConstStatePtr state ) const
 		glDisable( GL_LIGHTING );
 		glActiveTexture( textureUnits()[0] );
 		glDisable( GL_TEXTURE_2D );
-		GLint program = 0;
-		// annoyingly i can't find a way of pushing and popping the
-		// current program so we have to do that ourselves
+
+		// turn off shader for other render modes.
 		if( GLEW_VERSION_2_0 )
-		{
-			glGetIntegerv( GL_CURRENT_PROGRAM, &program );
-		}
-		if( program )
 		{
 			glUseProgram( 0 );
 		}
@@ -171,18 +177,21 @@ void Primitive::render( ConstStatePtr state ) const
 				glEnd();
 			}
 
-		if( program )
-		{
-			glUseProgram( program );
-		}
-
 	glPopClientAttrib();
 	glPopAttrib();
+
+	// revert to the original shader state.
+	shaderState->bind();
 }
 
 size_t Primitive::vertexAttributeSize() const
 {
 	return 0;
+}
+
+void Primitive::addUniformAttribute( const std::string &name, IECore::ConstDataPtr data )
+{
+	m_uniformAttributes[name] = data->copy();
 }
 
 void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPtr data )
@@ -265,7 +274,7 @@ void Primitive::setVertexAttributes( ConstStatePtr state ) const
 		glGetActiveAttrib( shader->m_program, i, maxAttributeNameLength, 0, &size, &type, &name[0] );
 		if( size==1 )
 		{
-			VertexAttributeMap::const_iterator it = m_vertexAttributes.find( &name[0] );
+			AttributeMap::const_iterator it = m_vertexAttributes.find( &name[0] );
 			if( it!=m_vertexAttributes.end() )
 			{
 				SetVertexAttribute a( glGetAttribLocation( shader->m_program, &name[0] ) ) ;
@@ -295,7 +304,7 @@ void Primitive::setVertexAttributesAsUniforms( unsigned int vertexIndex ) const
 	}
 }
 
-void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
+void Primitive::setupVertexAttributesAsUniform( const Shader *s ) const
 {
 	if( !s )
 	{
@@ -310,7 +319,7 @@ void Primitive::setupVertexAttributesAsUniform( Shader *s ) const
 
 	m_vertexToUniform.intDataMap.clear();
 
-	for( VertexAttributeMap::const_iterator it=m_vertexAttributes.begin(); it!=m_vertexAttributes.end(); it++ )
+	for( AttributeMap::const_iterator it=m_vertexAttributes.begin(); it!=m_vertexAttributes.end(); it++ )
 	{
 		try
 		{

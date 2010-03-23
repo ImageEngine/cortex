@@ -32,27 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include "IECoreGL/ShaderLoader.h"
-#include "IECoreGL/Shader.h"
-#include "IECoreGL/bindings/ShaderLoaderBinding.h"
-#include "IECorePython/RefCountedBinding.h"
-
-using namespace boost::python;
+#ifndef IE_COREGL_SHADERLOADERBINDING_H
+#define IE_COREGL_SHADERLOADERBINDING_H
 
 namespace IECoreGL
 {
 
-void bindShaderLoader()
-{
-	IECorePython::RefCountedClass<ShaderLoader, IECore::RefCounted>( "ShaderLoader" )
-		.def( init<const IECore::SearchPath &>() )
-		.def( init<const IECore::SearchPath &, const IECore::SearchPath *>() )
-		.def( "load", &ShaderLoader::load )
-		.def( "clear", &ShaderLoader::clear )
-		.def( "defaultShaderLoader", &ShaderLoader::defaultShaderLoader ).staticmethod( "defaultShaderLoader" )
-	;
-}
+void bindShaderManager();
 
 }
+
+#endif // IE_COREGL_SHADERLOADERBINDING_H

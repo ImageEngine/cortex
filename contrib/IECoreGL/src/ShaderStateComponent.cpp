@@ -37,7 +37,10 @@
 #include "IECoreGL/Texture.h"
 #include "IECoreGL/Exception.h"
 #include "IECoreGL/TextureUnits.h"
+#include "IECoreGL/ToGLTextureConverter.h"
+#include "IECoreGL/SplineToGLTextureConverter.h"
 
+#include "IECore/SplineData.h"
 #include "IECore/MessageHandler.h"
 
 #include <iostream>
@@ -48,80 +51,101 @@ using namespace std;
 StateComponent::Description<ShaderStateComponent> ShaderStateComponent::g_description;
 
 ShaderStateComponent::ShaderStateComponent()
-	:	m_shader( 0 ), m_parameterData( 0 )
+	:	m_shaderManager(0), m_textureLoader(0), m_fragmentShader(""), m_vertexShader( "" ), m_parameterMap( 0 ), m_shader( 0 )
 {
 }
 
-ShaderStateComponent::ShaderStateComponent( ShaderPtr shader, IECore::ConstCompoundDataPtr parameterValues,
-	const TexturesMap *textureParameterValues )
-	:	m_shader( shader ), m_parameterData( parameterValues ? parameterValues->copy() : 0 )
+ShaderStateComponent::ShaderStateComponent( const ShaderStateComponent &other ) :
+	m_shaderManager( other.m_shaderManager ), m_textureLoader( other.m_textureLoader ), m_fragmentShader( other.m_fragmentShader ), 
+	m_vertexShader( other.m_vertexShader ), m_parameterMap( other.m_parameterMap ? other.m_parameterMap->copy() : IECore::CompoundObjectPtr( new IECore::CompoundObject() ) ), 
+	m_shader( other.m_shader )
 {
-	if( textureParameterValues )
-	{
-		m_textureParameters = *textureParameterValues;
-	}
-	if ( m_shader )
-	{
-		vector<string> allParameters;
-		m_shader->parameterNames( allParameters );
+}
 
-		if ( allParameters.size() && !m_parameterData )
-		{
-			// creates an empty parameter map.
-			m_parameterData = new IECore::CompoundData();
-		}
-
-		const IECore::CompoundDataMap &d = m_parameterData->readable();
-
-		// Add shader parameters not provided in the constructor parameters.
-		for ( vector<string>::const_iterator it = allParameters.begin(); it != allParameters.end(); it++ )
-		{
-			// if the parameter name is already defined, then skip it.
-			if ( d.find( *it ) != d.end() )
-				continue;
-
-			if ( m_textureParameters.find( *it ) != m_textureParameters.end() )
-				continue;
-			
-			IECore::DataPtr paramValue;
-			try
-			{
-				paramValue = m_shader->getParameterDefault( *it );
-			}
-			catch( ... )
-			{
-				// ignore unsupported parameters.
-				continue;
-			}
-
-			m_parameterData->writable()[ *it ] = paramValue;
-
-		}
-
-	}
-
+ShaderStateComponent::ShaderStateComponent( ShaderManagerPtr shaderManager, TextureLoaderPtr textureLoader, const std::string vertexShader, const std::string fragmentShader, IECore::ConstCompoundObjectPtr parameterValues ) :
+	m_shaderManager( shaderManager ), m_textureLoader( textureLoader ), m_fragmentShader( fragmentShader ), 
+	m_vertexShader( vertexShader ), m_parameterMap( parameterValues ? parameterValues->copy() : IECore::CompoundObjectPtr(new IECore::CompoundObject()) ), 
+	m_shader( 0 )
+{
 }
 
 void ShaderStateComponent::bind() const
 {
-	if( m_shader )
+	ConstShaderPtr s = shader();
+
+	if ( s )
 	{
-		m_shader->bind();
-		if( m_parameterData )
+		s->bind();
+
+		// deallocate dirty textures.
+		for ( std::set<std::string>::const_iterator sit = m_dirtyTextures.begin(); sit != m_dirtyTextures.end(); sit++ )
 		{
-			const IECore::CompoundDataMap &d = m_parameterData->readable();
-			for( IECore::CompoundDataMap::const_iterator it = d.begin(); it!=d.end(); it++ )
+			m_textureParameters.erase( *sit );
+		}
+		m_dirtyTextures.clear();
+
+		const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
+
+		for( IECore::CompoundObject::ObjectMap::const_iterator it = d.begin(); it!=d.end(); it++ )
+		{
+			// \todo: Consider shader caching the parameter list and returning a reference for the internal cached list.
+			GLint paramIndex;
+			try 
 			{
-				m_shader->setParameter( it->first, it->second );
+				paramIndex = s->parameterIndex( it->first );
+			}
+			catch( ... )
+			{
+				// silently ignore non-existent parameters.
+				// \todo: Maybe it should raise exceptions for parameters that were defined on the shader call like the original implementation...
+				continue;
+			}
+
+			// test if a given parameter is supposed to be a texture and do the proper conversion
+			if ( s->parameterType( paramIndex ) == Texture::staticTypeId() )
+			{
+				// make sure our texture local cache has the texture
+				if ( m_textureParameters.find( it->first ) == m_textureParameters.end() )
+				{
+					if ( it->second->typeId() == IECore::ImagePrimitiveTypeId || it->second->typeId() == IECore::CompoundDataTypeId )
+					{
+						m_textureParameters[ it->first ] = IECore::staticPointerCast<Texture>( ToGLTextureConverter( IECore::staticPointerCast<IECore::ImagePrimitive>(it->second) ).convert() );
+					}
+					else if ( it->second->typeId() == IECore::SplineffData::staticTypeId() || it->second->typeId() == IECore::SplinefColor3fData::staticTypeId() )
+					{
+						m_textureParameters[ it->first ] = IECore::staticPointerCast<Texture>( SplineToGLTextureConverter( it->second ).convert() );
+					}
+					else if ( it->second->typeId() == IECore::StringData::staticTypeId() )
+					{
+						m_textureParameters[ it->first ] = m_textureLoader->load( IECore::staticPointerCast<IECore::StringData>(it->second)->readable() );
+					}
+					else
+					{
+						throw Exception( "Invalid data type!" );
+					}
+				}
+			}
+			else
+			{
+				IECore::DataPtr data = IECore::dynamicPointerCast< IECore::Data >( it->second );
+				if ( data )
+				{
+					m_shader->setParameter( paramIndex, data );
+				}
+				else
+					throw Exception( boost::str( boost::format( "Non-Data type assigned to parameter %s!" ) % it->first.value()) );
 			}
 		}
+
 		if( m_textureParameters.size() )
 		{
 			unsigned int i=0;
 			const std::vector<GLenum> &texUnits = textureUnits();
+
+			glEnable( GL_TEXTURE_2D );
+
 			for( TexturesMap::const_iterator it=m_textureParameters.begin(); it!=m_textureParameters.end(); it++ )
 			{
-				glEnable( GL_TEXTURE_2D );
 				if( i>=texUnits.size() )
 				{
 					IECore::msg( IECore::Msg::Warning, "ShaderStateComponent::bind", boost::format( "Not enough texture units - skipping texture for \"%s\"." ) % it->first );
@@ -149,32 +173,66 @@ void ShaderStateComponent::bind() const
 	}
 }
 
+void ShaderStateComponent::addShaderParameterValue( const std::string &paramName, IECore::ConstObjectPtr paramValue )
+{
+	if ( m_parameterMap )
+	{
+		// add to internal dict.
+		m_parameterMap->members()[ paramName ] = paramValue->copy();
+
+		// also check if the old parameter being replaced was already bound as a texture and mark the texture for removal in that case.
+		TexturesMap::const_iterator it = m_textureParameters.find( paramName );
+		if ( it != m_textureParameters.end() )
+		{
+			m_dirtyTextures.insert( paramName );
+		}
+	}
+}
+
 ConstShaderPtr ShaderStateComponent::shader() const
 {
-	return m_shader;
+	// \todo Can we break const? Necessary on the bind() const method...
+	return const_cast< ShaderStateComponent * >(this)->shader();
 }
 
 ShaderPtr ShaderStateComponent::shader()
 {
+	if( !m_shader )
+	{
+		if ( m_shaderManager )
+		{
+			// load the shader
+			m_shader = m_shaderManager->create( m_vertexShader, m_fragmentShader );
+			// query default parameters
+			vector<string> allParameters;
+			m_shader->parameterNames( allParameters );
+
+			const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
+
+			// Add shader parameters not provided before with default values.
+			for ( vector<string>::const_iterator it = allParameters.begin(); it != allParameters.end(); it++ )
+			{
+				// if the parameter name is already defined, then skip it.
+				if ( d.find( *it ) != d.end() )
+					continue;
+
+				IECore::DataPtr paramValue;
+				try
+				{
+					paramValue = m_shader->getParameterDefault( *it );
+				}
+				catch( ... )
+				{
+					// ignore unsupported parameters.
+					continue;
+				}
+				m_parameterMap->members()[ *it ] = paramValue;
+			}
+		}
+		else if ( m_vertexShader.size() || m_fragmentShader.size() )
+		{
+			IECore::msg( IECore::Msg::Warning, "ShaderStateComponent::shader", "No ShaderManager defined while requesting for shader." );
+		}
+	}
 	return m_shader;
-}
-
-IECore::ConstCompoundDataPtr ShaderStateComponent::parameterValues() const
-{
-	return m_parameterData;
-}
-
-IECore::CompoundDataPtr ShaderStateComponent::parameterValues()
-{
-	return m_parameterData;
-}
-
-const ShaderStateComponent::TexturesMap &ShaderStateComponent::textureValues() const
-{
-	return m_textureParameters;
-}
-
-ShaderStateComponent::TexturesMap &ShaderStateComponent::textureValues()
-{
-	return m_textureParameters;
 }

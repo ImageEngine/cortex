@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_SHADERLOADERBINDING_H
-#define IE_COREGL_SHADERLOADERBINDING_H
+#ifndef IECOREGL_SPLINETOGLTEXTURECONVERTER_H
+#define IECOREGL_SPLINETOGLTEXTURECONVERTER_H
+
+#include "IECoreGL/ToGLConverter.h"
+#include "IECore/SimpleTypedParameter.h"
+
+namespace IECore
+{
+	IE_CORE_FORWARDDECLARE( ImagePrimitive );
+}
 
 namespace IECoreGL
 {
 
-void bindShaderLoader();
+/// Converts IECore::SplineData objects into IECoreGL::Texture objects.
+/// The default conversion gives an image of 8x512 and it can return a ColorTexture or a LuminanceTexture.
+class SplineToGLTextureConverter : public ToGLConverter
+{
 
-}
+	public :
 
-#endif // IE_COREGL_SHADERLOADERBINDING_H
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::SplineToGLTextureConverter, SplineToGLTextureConverterTypeId, ToGLConverter );
+
+		SplineToGLTextureConverter( IECore::ConstObjectPtr toConvert = 0 );
+		virtual ~SplineToGLTextureConverter();
+
+	protected :
+
+		IECore::V2iParameterPtr m_resolutionParameter;
+		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+	
+	
+};
+
+IE_CORE_DECLAREPTR( SplineToGLTextureConverter );
+
+} // namespace IECoreGL
+
+#endif // IECOREGL_SPLINETOGLTEXTURECONVERTER_H

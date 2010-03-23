@@ -106,6 +106,7 @@ enum TypeId
 	TextPrimitiveTypeTypeId = 105063,
 	ToGLCurvesConverterTypeId = 105064,
 	ToGLTextureConverterTypeId = 105065,
+	SplineToGLTextureConverterTypeId = 105066,
 	LastCoreGLTypeId = 105999,
 };
 

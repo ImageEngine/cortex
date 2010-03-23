@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,54 +32,38 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TEXTURELOADER_H
-#define IECOREGL_TEXTURELOADER_H
+#include <boost/python.hpp>
 
-#include "IECore/RefCounted.h"
-#include "IECore/SearchPath.h"
+#include "IECoreGL/ShaderManager.h"
+#include "IECoreGL/Shader.h"
+#include "IECoreGL/bindings/ShaderManagerBinding.h"
+#include "IECorePython/RefCountedBinding.h"
 
-#include <map>
-#include <string>
+using namespace boost::python;
 
 namespace IECoreGL
 {
 
-IE_CORE_FORWARDDECLARE( Texture );
-IE_CORE_FORWARDDECLARE( TextureLoader );
-
-/// \todo At some point we'll need to deal with the fact that
-/// there's limited texture memory and we can't just keep loading
-/// things forever without getting rid of something.
-class TextureLoader : public IECore::RefCounted
+static tuple loadShaderCode( const ShaderManager &s, const std::string &name )
 {
+	boost::python::list p;
+	std::string vertShader, fragShader;
+	s.loadShaderCode( name, vertShader, fragShader );
+	p.append( vertShader );
+	p.append( fragShader );
+	return tuple( p );
+}
 
-	public :
+void bindShaderManager()
+{
+	IECorePython::RefCountedClass<ShaderManager, IECore::RefCounted>( "ShaderManager" )
+		.def( init<const IECore::SearchPath &>() )
+		.def( init<const IECore::SearchPath &, const IECore::SearchPath *>() )
+		.def( "loadShaderCode", &loadShaderCode )
+		.def( "create", &ShaderManager::create )
+		.def( "load", &ShaderManager::load )
+		.def( "defaultShaderManager", &ShaderManager::defaultShaderManager ).staticmethod( "defaultShaderManager" )
+	;
+}
 
-		IE_CORE_DECLAREMEMBERPTR( TextureLoader );
-
-		TextureLoader( const IECore::SearchPath &searchPaths );
-
-		TexturePtr load( const std::string &name );
-
-		/// Removes any cached textures.
-		void clear();
-
-		/// Returns a static TextureLoader instance that everyone
-		/// can use. This has searchpaths set using the
-		/// IECOREGL_TEXTURE_PATHS environment variable.
-		static TextureLoaderPtr defaultTextureLoader();
-
-	private :
-
-		void freeUnusedTextures();
-
-		typedef std::map<std::string, TexturePtr> TexturesMap;
-		TexturesMap m_loadedTextures;
-
-		IECore::SearchPath m_searchPaths;
-
-};
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_TEXTURELOADER_H
+}

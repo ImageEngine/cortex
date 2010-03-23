@@ -173,6 +173,10 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 			{
 				glMesh->addVertexAttribute( pIt->first, pIt->second.data );
 			}
+			else if ( pIt->second.interpolation==IECore::PrimitiveVariable::Constant )
+			{
+				glMesh->addUniformAttribute( pIt->first, pIt->second.data );
+			}
 		}
 		else
 		{

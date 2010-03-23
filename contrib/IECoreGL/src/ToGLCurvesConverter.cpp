@@ -35,6 +35,7 @@
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreGL/ToGLCurvesConverter.h"
 #include "IECoreGL/CurvesPrimitive.h"
@@ -76,5 +77,21 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 	IECore::Color3fVectorData::ConstPtr colorData = curves->variableData<IECore::Color3fVectorData>( "Cs", IECore::PrimitiveVariable::Uniform );
 
 	CurvesPrimitive::Ptr result = new CurvesPrimitive( curves->basis(), curves->periodic(), curves->verticesPerCurve(), points, width, colorData );
+
+	for ( IECore::PrimitiveVariableMap::const_iterator pIt = curves->variables.begin(); pIt != curves->variables.end(); ++pIt )
+	{
+		if ( pIt->second.data )
+		{
+			if ( pIt->second.interpolation==IECore::PrimitiveVariable::Constant )
+			{
+				result->addUniformAttribute( pIt->first, pIt->second.data );
+			}
+		}
+		else
+		{
+			IECore::msg( IECore::Msg::Warning, "ToGLCurvesConverter", boost::format( "No data given for primvar \"%s\"" ) % pIt->first );
+		}
+	}
+
 	return result;
 }

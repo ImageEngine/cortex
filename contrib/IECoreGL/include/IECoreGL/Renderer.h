@@ -38,6 +38,8 @@
 #include "IECoreGL/TypeIds.h"
 
 #include "IECore/Renderer.h"
+#include "IECoreGL/TextureLoader.h"
+#include "IECoreGL/ShaderManager.h"
 
 namespace IECoreGL
 {
@@ -391,6 +393,14 @@ class Renderer : public IECore::Renderer
 		/// \todo Consider generalising an interface for scene edits and making it a standard part of the documentation
 		/// in IECore. Any such interface should take into account support for PRMan's new rerendering API.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
+
+		/// Returns the internal ShaderManager object used to manage the shaders from this renderer.
+		/// If called before worldBegin it returns 0.
+		ShaderManager *shaderManager();
+
+		/// Returns the internal TextureLoader object.
+		/// If called before worldBegin it returns 0.
+		TextureLoader *textureLoader();
 
 		struct MemberData;
 

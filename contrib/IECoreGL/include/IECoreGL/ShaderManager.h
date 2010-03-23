@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SHADERLOADER_H
-#define IECOREGL_SHADERLOADER_H
+#ifndef IECOREGL_SHADERMANAGER_H
+#define IECOREGL_SHADERMANAGER_H
 
 #include "IECore/RefCounted.h"
 #include "IECore/SearchPath.h"
@@ -45,44 +45,54 @@ namespace IECoreGL
 {
 
 IE_CORE_FORWARDDECLARE( Shader );
-IE_CORE_FORWARDDECLARE( ShaderLoader );
+IE_CORE_FORWARDDECLARE( ShaderManager );
 
-/// This simple class creates shaders based on files
-/// found on disk. Asked to load a shader named "name"
-/// it will attempt to locate and load source from
-/// the files "name.vert" and "name.frag", and return
-/// a Shader object compiled from them. If either file
-/// is not found then the standard OpenGL fixed functionality
-/// is used for that component of the Shader. The ShaderLoader
-/// keeps a cache of loaded shaders, so repeatedly asking
-/// for the same name will always return the same Shader
-/// instance.
-class ShaderLoader : public IECore::RefCounted
+/// This class manages shaders by keeping track of their
+/// reference counters and also provides read methods,
+/// preprocessing and shader creation. 
+/// The ShaderManager keeps a cache of created shaders based on 
+/// their source code, so repeatedly asking for the same code 
+/// will always return the same Shader instance.
+class ShaderManager : public IECore::RefCounted
 {
 
 	public :
 
-		IE_CORE_DECLAREMEMBERPTR( ShaderLoader );
+		IE_CORE_DECLAREMEMBERPTR( ShaderManager );
 
-		/// Creates a ShaderLoader which will search for
+		/// Creates a ShaderManager which will search for
 		/// source files on the given search paths. If preprocessorSearchPaths is
 		/// specified, then source preprocessing will be performed using boost::wave.
-		ShaderLoader( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths=0 );
+		ShaderManager( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths=0 );
 
-		/// Loads the Shader of the specified name. Returns 0
-		/// if no such Shader can be found.
+		/// Loads the Shader code of the specified name.
+		/// It will attempt to locate and load source from the files 
+		/// "name.vert" and "name.frag". If either file
+		/// is not found then return empty strings representing that
+		/// the standard OpenGL fixed functionality should be used instead.
+		void loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader ) const;
+
+		/// Creates a new Shader if necessary or returns a previously compiled shader from the cache.
+		/// In case the given shader was not in the cache it will do preprocessing (adding include files)
+		/// and then return a new instance os Shader object.
+		/// This function will also eliminate any shader from the cache that is not being used.
+		ShaderPtr create( const std::string &vertexShader, const std::string &fragmentShader );
+
+		/// Loads the shader code and creates the Shader object.
+		/// This function can only be called when the OpenGL context is defined.
 		ShaderPtr load( const std::string &name );
 
-		/// Removes any cached shaders.
-		void clear();
+		/// Frees unused shaders.
+		/// Automatically called by create() function.
+		void clearUnused();
 
-		/// Returns a static ShaderLoader instance that everyone
+		/// Returns a static ShaderManager instance that everyone
 		/// can use. This has searchpaths set using the
 		/// IECOREGL_SHADER_PATHS environment variable,
 		/// and preprocessor searchpaths set using the
 		/// IECOREGL_SHADER_INCLUDE_PATHS environment
 		/// variable.
-		static ShaderLoaderPtr defaultShaderLoader();
+		static ShaderManagerPtr defaultShaderManager();
 
 	private :
 
@@ -93,10 +103,11 @@ class ShaderLoader : public IECore::RefCounted
 		bool m_preprocess;
 		IECore::SearchPath m_preprocessorSearchPaths;
 
-		std::string readFile( const std::string &fileName );
+		std::string readFile( const std::string &fileName ) const;
+		std::string preprocessShader( const std::string &fileName, const std::string &source ) const;
 
 };
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SHADERLOADER_H
+#endif // IECOREGL_SHADERMANAGER_H

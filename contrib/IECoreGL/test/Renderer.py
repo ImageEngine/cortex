@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@ from __future__ import with_statement
 import unittest
 import os
 import os.path
+import threading
 
 from IECore import *
 
@@ -416,10 +417,13 @@ class TestRenderer( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 
 		r.worldBegin()
-		r.shader( "surface", "failWithoutPreprocessing", {} )
+		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.geometry( "sphere", {}, {} )
 		r.worldEnd()
 
+		s = r.scene()
+		
 	def testRemoveObject( self ) :
 	
 		r = Renderer()
@@ -440,6 +444,29 @@ class TestRenderer( unittest.TestCase ) :
 		commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
 		self.assertEqual( commandResult, BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 1 )
+
+	def testMultithread( self ):
+
+		allScenes = []
+		
+		def threadedRendering():
+			r = Renderer()
+			r.setOption( "gl:mode", StringData( "deferred" ) )
+			r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+			r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+
+			r.worldBegin()
+			r.shader( "surface", "failWithoutPreprocessing", {} )
+			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+			r.worldEnd()
+			allScenes.append( r.scene() )
+
+		for i in xrange( 0, 100 ):
+			newThread = threading.Thread(target=threadedRendering)
+			newThread.start()
+
+		while len(allScenes) < 100 :
+			pass
 
 	def tearDown( self ) :
 

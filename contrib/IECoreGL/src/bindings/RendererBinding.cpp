@@ -45,11 +45,23 @@ using namespace IECore;
 namespace IECoreGL
 {
 
+static ShaderManagerPtr shaderManager( Renderer &r )
+{
+	return r.shaderManager();
+}
+
+static TextureLoaderPtr textureLoader( Renderer &r )
+{
+	return r.textureLoader();
+}
+
 void bindRenderer()
 {
 	IECorePython::RunTimeTypedClass<Renderer>()
 		.def( init<>() )
 		.def( "scene", &Renderer::scene )
+		.def( "shaderManager", &shaderManager )
+		.def( "textureLoader", &textureLoader )
 	;
 }
 

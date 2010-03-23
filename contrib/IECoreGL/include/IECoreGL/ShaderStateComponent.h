@@ -36,10 +36,12 @@
 #define IECOREGL_SHADERSTATECOMPONENT_H
 
 #include "IECoreGL/StateComponent.h"
-
-#include "IECore/CompoundData.h"
+#include "IECoreGL/ShaderManager.h"
+#include "IECoreGL/TextureLoader.h"
+#include "IECore/CompoundObject.h"
 
 #include <map>
+#include <set>
 #include <string>
 
 namespace IECoreGL
@@ -58,13 +60,13 @@ class ShaderStateComponent : public StateComponent
 
 	public :
 
-		typedef std::map<std::string, ConstTexturePtr> TexturesMap;
-
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ShaderStateComponent, ShaderStateComponentTypeId, StateComponent );
 
+		// default constructor uses no shader.
 		ShaderStateComponent();
-		ShaderStateComponent( ShaderPtr shader, IECore::ConstCompoundDataPtr parameterValues = 0,
-			const TexturesMap *textureParameterValues = 0 );
+		ShaderStateComponent( const ShaderStateComponent &other );
+		// Creates a ShaderStateComponent with the given parameters.
+		ShaderStateComponent( ShaderManagerPtr shaderManager, TextureLoaderPtr textureLoader, const std::string vertexShader, const std::string fragmentShader, IECore::ConstCompoundObjectPtr parameterValues = 0 );
 
 		//! @name Bindable interface
 		////////////////////////////////////////////////////
@@ -72,21 +74,35 @@ class ShaderStateComponent : public StateComponent
 		virtual void bind() const;
 		//@}
 
+		//! @name shader
+		// Returns the shader object.
+		// This function can only be called from a thread 
+		// with the valid GL context loaded.
+		////////////////////////////////////////////////////
+		//@{
 		ShaderPtr shader();
 		ConstShaderPtr shader() const;
-		IECore::CompoundDataPtr parameterValues();
-		IECore::ConstCompoundDataPtr parameterValues() const;
-		TexturesMap &textureValues();
-		const TexturesMap &textureValues() const;
+		//@}
+
+		// Adds or replaces a shader parameter in the ShaderStateComponent.
+		// this function can be called even if there's no GL context.
+		void addShaderParameterValue( const std::string &paramName, IECore::ConstObjectPtr paramValue );
 
 	protected :
 
+		typedef std::map<std::string, ConstTexturePtr> TexturesMap;
+
+		ShaderManagerPtr m_shaderManager;
+		TextureLoaderPtr m_textureLoader;
+		std::string m_fragmentShader;
+		std::string m_vertexShader;
+		IECore::CompoundObjectPtr m_parameterMap;
 		ShaderPtr m_shader;
-		IECore::CompoundDataPtr m_parameterData;
-		TexturesMap m_textureParameters;
+
+		mutable std::set< std::string > m_dirtyTextures;
+		mutable TexturesMap m_textureParameters;
 
 		static Description<ShaderStateComponent> g_description;
-
 };
 
 IE_CORE_DECLAREPTR( ShaderStateComponent );

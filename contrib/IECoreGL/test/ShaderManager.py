@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,13 +40,13 @@ from IECore import *
 from IECoreGL import *
 init( False )
 
-class TestShaderLoader( unittest.TestCase ) :
+class TestShaderManager( unittest.TestCase ) :
 
 	def test( self ) :
 
 		sp = SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
 
-		l = ShaderLoader( sp )
+		l = ShaderManager( sp )
 
 		s = l.load( "3dLabs/Toon" )
 		self.assert_( s.typeName()=="IECoreGL::Shader" )
@@ -58,7 +58,7 @@ class TestShaderLoader( unittest.TestCase ) :
 		s = l.load( "3dLabs/Mandel" )
 		self.assert_( s.typeName()=="IECoreGL::Shader" )
 
-		self.assert_( ShaderLoader.defaultShaderLoader().isSame( ShaderLoader.defaultShaderLoader() ) )
+		self.assert_( ShaderManager.defaultShaderManager().isSame( ShaderManager.defaultShaderManager() ) )
 
 	def testPreprocessing( self ) :
 
@@ -66,11 +66,11 @@ class TestShaderLoader( unittest.TestCase ) :
 		psp = SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
 
 		# this should work
-		l = ShaderLoader( sp, psp )
+		l = ShaderManager( sp, psp )
 		s = l.load( "failWithoutPreprocessing" )
 
 		# but turning off preprocessing should cause a throw
-		l = ShaderLoader( sp )
+		l = ShaderManager( sp )
 		self.assertRaises( RuntimeError, l.load, "failWithoutPreprocessing" )
 
 if __name__ == "__main__":

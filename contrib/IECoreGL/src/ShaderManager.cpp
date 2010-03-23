@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/ShaderManager.h"
 #include "IECoreGL/Shader.h"
 
 #include "IECore/MessageHandler.h"
@@ -50,57 +50,75 @@ using namespace IECore;
 using namespace boost::filesystem;
 using namespace std;
 
-ShaderLoader::ShaderLoader( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths )
+ShaderManager::ShaderManager( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths )
 	:	m_searchPaths( searchPaths ), m_preprocess( preprocessorSearchPaths ), m_preprocessorSearchPaths( preprocessorSearchPaths ? *preprocessorSearchPaths : SearchPath() )
 {
 }
 
-ShaderPtr ShaderLoader::load( const std::string &name )
+void ShaderManager::loadShaderCode( const std::string &name, std::string &vertexShader, std::string &fragmentShader ) const
 {
-	ShaderMap::iterator it = m_loadedShaders.find( name );
+	path vertexPath = m_searchPaths.find( name + ".vert" );
+	path fragmentPath = m_searchPaths.find( name + ".frag" );
+
+	vertexShader = "";
+	fragmentShader = "";
+
+	if( vertexPath.empty() && fragmentPath.empty() )
+	{
+		IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderManager::loadShaderCode", boost::format( "Couldn't find \"%s\"." ) % name );
+	}
+
+	if( !vertexPath.empty() )
+	{
+		vertexShader = readFile( vertexPath.string() );
+	}
+
+	if( !fragmentPath.empty() )
+	{
+		fragmentShader = readFile( fragmentPath.string() );
+	}
+}
+
+ShaderPtr ShaderManager::create( const std::string &vertexShader, const std::string &fragmentShader )
+{
+	std::string uniqueName = vertexShader + "\n## Fragment ##\n" + fragmentShader;
+
+	ShaderMap::iterator it = m_loadedShaders.find( uniqueName );
 	if( it!=m_loadedShaders.end() )
 	{
 		return it->second;
 	}
 
-	path vertexPath = m_searchPaths.find( name + ".vert" );
-	path fragmentPath = m_searchPaths.find( name + ".frag" );
+	clearUnused();
 
-	if( vertexPath.empty() && fragmentPath.empty() )
-	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderLoader::load", boost::format( "Couldn't find \"%s\"." ) % name );
-		return 0;
-	}
-
-	string vertexSrc = "";
-	if( !vertexPath.empty() )
-	{
-		vertexSrc = readFile( vertexPath.string() );
-	}
-
-	string fragmentSrc = "";
-	if( !fragmentPath.empty() )
-	{
-		fragmentSrc = readFile( fragmentPath.string() );
-	}
-
-	if( vertexSrc=="" && fragmentSrc=="" )
-	{
-		return 0;
-	}
-
-	ShaderPtr s = new Shader( vertexSrc, fragmentSrc );
-	m_loadedShaders[name] = s;
+	ShaderPtr s = new Shader( preprocessShader( "<Vertex Shader>", vertexShader), preprocessShader( "<Fragment Shader>", fragmentShader) );
+	m_loadedShaders[ uniqueName ] = s;
 
 	return s;
 }
 
-void ShaderLoader::clear()
+void ShaderManager::clearUnused( )
 {
-	m_loadedShaders.clear();
+	ShaderMap::iterator it = m_loadedShaders.begin();
+	while( it != m_loadedShaders.end() )
+	{
+		if ( it->second->refCount() == 1 )
+		{
+			m_loadedShaders.erase( it++ );
+		}
+		else
+			++it;
+	}
 }
 
-std::string ShaderLoader::readFile( const std::string &fileName )
+ShaderPtr ShaderManager::load( const std::string &name )
+{
+	std::string vertShader, fragShader;
+	loadShaderCode( name, vertShader, fragShader );
+	return create( vertShader, fragShader );
+}
+
+std::string ShaderManager::readFile( const std::string &fileName ) const
 {
 	ifstream f( fileName.c_str() );
 
@@ -116,6 +134,18 @@ std::string ShaderLoader::readFile( const std::string &fileName )
 		getline( f, line );
 		result += line + "\n";
 	}
+
+	return result;
+}
+
+std::string ShaderManager::preprocessShader( const std::string &fileName, const std::string &source ) const
+{
+	if ( source == "" )
+	{
+		return source;
+	}
+
+	string result = source + "\n";
 
 	if( m_preprocess )
 	{
@@ -150,22 +180,21 @@ std::string ShaderLoader::readFile( const std::string &fileName )
 		catch( boost::wave::cpp_exception &e )
 		{
 			// rethrow but in a nicely formatted form
-			throw Exception( boost::str( boost::format( "Error during preprocessing : %s line %d : %s" ) % e.file_name() % e.line_no() % e.description() ) );
+			throw Exception( boost::str( boost::format( "Error during preprocessing : %s line %d : %s" ) % fileName % e.line_no() % e.description() ) );
 		}
 	}
 	return result;
 }
 
-
-ShaderLoaderPtr ShaderLoader::defaultShaderLoader()
+ShaderManagerPtr ShaderManager::defaultShaderManager()
 {
-	static ShaderLoaderPtr t = 0;
+	static ShaderManagerPtr t = 0;
 	if( !t )
 	{
 		const char *e = getenv( "IECOREGL_SHADER_PATHS" );
 		const char *p = getenv( "IECOREGL_SHADER_INCLUDE_PATHS" );
 		IECore::SearchPath pp( p ? p : "", ":" );
-		t = new ShaderLoader( IECore::SearchPath( e ? e : "", ":" ), p ? &pp : 0 );
+		t = new ShaderManager( IECore::SearchPath( e ? e : "", ":" ), p ? &pp : 0 );
 	}
 	return t;
 }
