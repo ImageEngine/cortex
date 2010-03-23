@@ -6,6 +6,7 @@
 #include "IECore/RunTimeTyped.h"
 #include "IECore/Interned.h"
 #include "IECore/Data.h"
+#include "IECore/Renderer.h"
 
 #include "OpenEXR/ImathMatrix.h"
 
@@ -60,6 +61,8 @@ class RendererImplementation : public IECore::RunTimeTyped
 		typename T::Ptr getCustomState( const IECore::InternedString &name );
 
 		virtual void addPrimitive( PrimitivePtr primitive ) = 0;
+
+		virtual void procedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer ) = 0;
 
 };
 

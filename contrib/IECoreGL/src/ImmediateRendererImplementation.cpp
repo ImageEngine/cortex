@@ -183,3 +183,8 @@ void ImmediateRendererImplementation::addPrimitive( PrimitivePtr primitive )
 {
 	primitive->render( m_stateStack.top() );
 }
+
+void ImmediateRendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer )
+{
+	proc->render( renderer );
+}

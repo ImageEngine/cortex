@@ -1563,7 +1563,7 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 {
 	/// \todo Frustum culling, with an option to enable/disable it (we'd need to disable it when
 	/// building scenes for interactive display).
-	proc->render( this );
+	m_data->implementation->procedural( proc, this );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

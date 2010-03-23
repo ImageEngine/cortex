@@ -44,6 +44,8 @@ class DeferredRendererImplementation : public RendererImplementation
 
 		virtual void addPrimitive( PrimitivePtr primitive );
 
+		virtual void procedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer );
+
 		ScenePtr scene();
 
 	private :

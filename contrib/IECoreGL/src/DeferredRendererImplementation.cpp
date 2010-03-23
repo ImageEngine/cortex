@@ -192,6 +192,11 @@ void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )
 	m_groupStack.top()->addChild( g );
 }
 
+void DeferredRendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer )
+{
+	proc->render( renderer );
+}
+
 ScenePtr DeferredRendererImplementation::scene()
 {
 	return m_scene;
