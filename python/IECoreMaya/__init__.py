@@ -66,3 +66,4 @@ from FnParameterisedHolderSet import FnParameterisedHolderSet
 from TemporaryAttributeValues import TemporaryAttributeValues
 from GenericParameterUI import GenericParameterUI
 from FnDagNode import FnDagNode  
+from PresetManagerUI import PresetManagerUI
