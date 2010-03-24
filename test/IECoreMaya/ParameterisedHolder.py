@@ -314,7 +314,37 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		i2 = p.parameters()["image"].getValue()
 		
 		self.assertEqual( p.parameters()["image"].getValue(), image )
-			
+
+	def testOpHolder( self ) :
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "maths/multiply", 2 )
+		op = fnOH.getOp()
+		
+		self.assertEqual( cmds.attributeQuery( "result", node="opHolder", storable=True ), False )
+		self.assertEqual( cmds.attributeQuery( "result", node="opHolder", writable=True ), False )
+		
+		aPlug = fnOH.parameterPlugPath( op["a"] )
+		bPlug = fnOH.parameterPlugPath( op["b"] )
+		
+		cmds.setAttr( aPlug, 20 )
+		cmds.setAttr( bPlug, 100 )
+		
+		self.failUnless( cmds.getAttr( "opHolder.result" ), 2000 )
+
+	def testParameterTypes( self ) :
+	
+		node = cmds.createNode( "ieOpHolderNode" )
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+
+		op = IECore.ClassLoader.defaultOpLoader().load( "parameterTypes", 1 )()
+		op.parameters().removeParameter( "m" ) # no color4f support in maya
+
+		fnPH.setParameterised( op )
+		
+		for parameter in op.parameters().values() :
+		
+			self.failUnless( cmds.objExists( fnPH.parameterPlugPath( parameter ) ) )
+		
 	def tearDown( self ) :
 
 		for f in [

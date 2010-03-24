@@ -116,6 +116,8 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		/// As for setParameterisedValues(), but when lazy==true, the work is only done for parameters whose
 		/// plug value has changed since the last time the value was set.
 		MStatus setParameterisedValues( bool lazy );
+		/// Creates an attribute to represent the specified parameter, or updates an existing attribute.
+		MStatus createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName );
 
 	private:
 
