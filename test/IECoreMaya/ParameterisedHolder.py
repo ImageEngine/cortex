@@ -345,9 +345,32 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		
 			self.failUnless( cmds.objExists( fnPH.parameterPlugPath( parameter ) ) )
 		
+	def testCompoundObjectConnections( self ) :
+	
+		fnOHA = IECoreMaya.FnOpHolder.create( "opA", "compoundObjectInOut", 1 )
+				
+		fnOHB = IECoreMaya.FnOpHolder.create( "opB", "compoundObjectInOut", 1 )
+		opB = fnOHB.getOp()
+				
+		inputPlug = fnOHB.parameterPlugPath( opB["input"] )
+		cmds.connectAttr( "opA.result", inputPlug )
+		
+		self.assertEqual( cmds.listConnections( inputPlug, source=True, destination=False, plugs=True ), [ "opA.result" ] )
+		self.assertEqual( cmds.listConnections( inputPlug, source=False, destination=True, plugs=True ), None )
+				
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "compoundObjectConnections.ma" ) )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+				
+		cmds.file( new = True, force = True )
+		cmds.file( scene, open = True )
+				
+		self.assertEqual( cmds.listConnections( inputPlug, source=True, destination=False, plugs=True ), [ "opA.result" ] )
+		self.assertEqual( cmds.listConnections( inputPlug, source=False, destination=True, plugs=True ), None )
+					
 	def tearDown( self ) :
 
 		for f in [
+			"test/IECoreMaya/compoundObjectConnections.ma" ,
 			"test/IECoreMaya/reference.ma" ,
 			"test/IECoreMaya/referenceMaster.ma",
 			"test/IECoreMaya/objectParameterIO.ma",

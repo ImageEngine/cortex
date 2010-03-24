@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@ class TestClassLoader( unittest.TestCase ) :
 
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 
-		self.assertEqual( l.classNames(), ["bad", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing'] )
+		self.assertEqual( l.classNames(), ["bad", "compoundObjectInOut", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing'] )
 		self.assertEqual( l.classNames( "p*" ), ["parameterTypes", "path.With.Dot/multiply", "presetParsing"] )
 		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
 		self.assertEqual( l.getDefaultVersion( "presetParsing" ), 1 )
@@ -56,7 +56,7 @@ class TestClassLoader( unittest.TestCase ) :
 	def testFinalSlash( self ) :
 
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops/", ":" ) )
-		self.assertEqual( l.classNames(), ["bad", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing'] )
+		self.assertEqual( l.classNames(), ["bad", "compoundObjectInOut", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing'] )
 
 	def testStaticLoaders( self ) :
 

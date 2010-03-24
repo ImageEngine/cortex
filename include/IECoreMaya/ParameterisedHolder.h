@@ -136,6 +136,8 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		AttributeNameToParameterMap	m_attributeNamesToParameters;
 
 		MStatus removeUnecessaryAttributes();
+		
+		void nonNetworkedConnections( const MPlug &plug, MPlugArray &connectionsFromPlug, MPlugArray &connectionsToPlug ) const;
 
 		typedef std::set<IECore::ParameterPtr> ParameterSet;
 		/// Parameters for which the node value has changed since the last time they were set.

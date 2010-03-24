@@ -707,11 +707,11 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 		// code
 
 		// remember connections so we can remake them for the new
-		// attribute.
+		// attribute. we have to be careful to only store non-networked plugs as
+		// networked plugs are invalidated by the removal of the attribute.
 		MPlug plug( B::thisMObject(), attribute );
-		plug.connectedTo( connectionsFromMe, false, true );
-		plug.connectedTo( connectionsToMe, true, false );
-
+		nonNetworkedConnections( plug, connectionsFromMe, connectionsToMe );
+		
 		// remember value so we can set it again for the new attribute.
 		// we only do this for ObjectParameters to work around a maya bug which prevents
 		// ObjectParameterHandler::update from working correctly. after saving and loading
@@ -848,6 +848,31 @@ MStatus ParameterisedHolder<B>::removeUnecessaryAttributes()
 	}
 
 	return MStatus::kSuccess;
+}
+
+template<typename B>
+void ParameterisedHolder<B>::nonNetworkedConnections( const MPlug &plug, MPlugArray &connectionsFromPlug, MPlugArray &connectionsToPlug ) const
+{
+	MPlugArray from;
+	MPlugArray to;
+	
+	// the MPlug.connectedTo() method is documented as always returning networked plugs.
+	plug.connectedTo( from, false, true );
+	plug.connectedTo( to, true, false );
+
+	connectionsFromPlug.clear(); connectionsFromPlug.setLength( from.length() );
+	connectionsToPlug.clear(); connectionsToPlug.setLength( to.length() );
+
+	for( unsigned i=0; i<from.length(); i++ )
+	{
+		// the MPlug( node, attribute ) constructor is documented as always returning non-networked plugs.
+		connectionsFromPlug.set( MPlug( from[i].node(), from[i].attribute() ), i );
+	}
+	
+	for( unsigned i=0; i<to.length(); i++ )
+	{
+		connectionsToPlug.set( MPlug( to[i].node(), to[i].attribute() ), i );
+	}
 }
 
 // specialisations of the different typeIds
