@@ -56,11 +56,6 @@ template<typename T>
 TypedObjectParameter<T>::TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
 
 template<typename T>
-TypedObjectParameter<T>::TypedObjectParameter()
-{
-}
-
-template<typename T>
 TypedObjectParameter<T>::TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	: ObjectParameter(  name, description, defaultValue, T::staticTypeId(), makePresets( presets) , presetsOnly, userData )
 {
@@ -74,12 +69,6 @@ Parameter::PresetsContainer TypedObjectParameter<T>::makePresets( const ObjectPr
 	result.insert( result.end(), presets.begin(), presets.end() );
 
 	return result;
-}
-
-template<typename T>
-typename TypedObjectParameter<T>::Ptr TypedObjectParameter<T>::copy() const
-{
-	return staticPointerCast<TypedObjectParameter<T> >( copy() );
 }
 
 template<typename T>

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -87,7 +87,6 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		virtual void postConstructor();
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus shouldSave( const MPlug &plug, bool &isSaving );
-		virtual void copyInternalData( MPxNode *node );
 
 		//! @name ParameterisedHolderInterface implementation
 		/////////////////////////////////////////////////////////////////////////////////////////
@@ -97,7 +96,6 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		/// save/load - this becomes your responsibility if it's necessary.
 		virtual MStatus setParameterised( IECore::RunTimeTypedPtr p );
 		virtual MStatus setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar );
-		virtual MStatus updateParameterised();
 		virtual IECore::RunTimeTypedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
 		virtual MStatus setNodeValues();
 		virtual MStatus setNodeValue( IECore::ParameterPtr pa );
@@ -112,7 +110,6 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		static MObject aParameterisedClassName;
 		static MObject aParameterisedVersion;
 		static MObject aParameterisedSearchPathEnvVar;
-		static MObject aDynamicParameters;
 		//@}
 
 	protected :
@@ -126,19 +123,18 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		IECore::RunTimeTypedPtr loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar );
 	
 		/// Creates (or updates existing) attributes for each parameter. Removes any old attributes no longer
-		/// needed. If dynamicParameterStorage is specified then any new Parameters for which attributes must be
-		/// created are placed in there - this is used by updateParameterised() to store dynamic parameters.
-		MStatus createAndRemoveAttributes( IECore::CompoundObjectPtr dynamicParameterStorage=0 );
+		/// needed.
+		MStatus createAndRemoveAttributes();
 		// Makes (or updates existing) attributes for each parameter. Also fills in the two maps below.
 		// This method is called by getParameterised(), so you should call that before expecting the maps
 		// to be up to date.
-		MStatus createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName, IECore::CompoundObjectPtr dynamicParameterStorage );
+		MStatus createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName );
 		typedef std::map<IECore::ParameterPtr, MString> ParameterToAttributeNameMap;
 		ParameterToAttributeNameMap m_parametersToAttributeNames;
 		typedef std::map<MString, IECore::ParameterPtr> AttributeNameToParameterMap;
 		AttributeNameToParameterMap	m_attributeNamesToParameters;
 
-		MStatus removeUnecessaryAttributes( IECore::CompoundObjectPtr dynamicParameterStorage );
+		MStatus removeUnecessaryAttributes();
 
 		typedef std::set<IECore::ParameterPtr> ParameterSet;
 		/// Parameters for which the node value has changed since the last time they were set.
@@ -146,18 +142,6 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		ParameterSet &dirtyParameters();
 
 		bool setParameterisedValuesWalk( bool lazy, IECore::ParameterPtr parameter, MStatus &status, const ParameterSet &dirtyParms );
-		
-		// We store the Parameters which were added dynamically inside a CompoundObject within a plug
-		// value on the node. This allows us to recreate those Parameters when the node is copied or
-		// saved and then loaded. The keys in the CompoundObject are the names of the parameters which
-		// are parents of dynamic parameters. The values are ObjectVectors containing all the Parameters
-		// which belong to that parent.
-		IECore::CompoundObjectPtr getDynamicParameters();
-		void setDynamicParameters( IECore::CompoundObjectPtr dynamicParameters );
-		// This function takes the stored dynamic parameters and adds them to the currently held
-		// Parameterised object. This means parameters can be added on the fly and they'll survive
-		// node duplication and file save/load.
-		void addDynamicParameters();
 
 		class PLCB : public PostLoadCallback
 		{

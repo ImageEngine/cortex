@@ -45,7 +45,7 @@ class FrameListParameter : public StringParameter
 {
 	public:
 
-		IE_CORE_DECLAREOBJECT( FrameListParameter, StringParameter );
+		IE_CORE_DECLARERUNTIMETYPED( FrameListParameter, StringParameter );
 
 		FrameListParameter( const std::string &name, const std::string &description, const std::string &defaultValue = std::string(), bool allowEmptyList = true,
 			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
@@ -60,17 +60,9 @@ class FrameListParameter : public StringParameter
 		void setFrameListValue( ConstFrameListPtr frameList );
 		FrameListPtr getFrameListValue() const;
 
-	protected :
-
-		// for io and copying
-		FrameListParameter();
-		friend class TypeDescription<FrameListParameter>;
-
-		bool m_allowEmptyList;
-
 	private :
 
-		static const unsigned int g_ioVersion;
+		bool m_allowEmptyList;
 
 };
 

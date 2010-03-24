@@ -148,51 +148,7 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		)
 
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/test with   spaces  .#.tif 5-10" ) )
-
-	def testCopyAndSave( self ) :
-	
-		p = IECore.FileSequenceParameter(
-			name = "inputImageSequence",
-			description = "",
-			check = IECore.FileSequenceParameter.CheckType.MustExist,
-			extensions = [ "bgeo" ]
-		)
-		self.assertEqual( p.getMinSequenceSize(), 2 )
-	
-		p.setTypedValue( "test/IECore/data/bgeoFiles/particleTest.####.bgeo" )
 		
-		p.getValidatedValue()
-		
-		p2 = p.copy()
-		
-		p2.getValidatedValue()
-		self.assertEqual( p2.getMinSequenceSize(), 2 )
-		
-		IECore.ObjectWriter( p2, "test/IECore/data/fileSequenceParameter.cob" ).write()
-		p3 = IECore.ObjectReader( "test/IECore/data/fileSequenceParameter.cob" ).read()
-		
-		self.assertEqual( p3, p2 )
-		self.assertEqual( p3.getMinSequenceSize(), 2 )
-		p3.getValidatedValue()
-		
-	def testMinSequenceSize( self ) :
-	
-		p = IECore.FileSequenceParameter(
-			name = "inputImageSequence",
-			description = "",
-			check = IECore.FileSequenceParameter.CheckType.MustExist,
-			extensions = [ "bgeo" ]
-		)
-		self.assertEqual( p.getMinSequenceSize(), 2 )
-		
-		p2 = p.copy()
-		self.assertEqual( p2.getMinSequenceSize(), 2 )
-		self.failUnless( p2 == p )
-		
-		p2.setMinSequenceSize( 1 )
-		self.assertEqual( p2.getMinSequenceSize(), 1 )
-		self.failIf( p2 == p )
-
 	def tearDown( self ) :
 		
 		directory = "test/sequences"

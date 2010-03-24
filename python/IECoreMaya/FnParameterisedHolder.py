@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -73,11 +73,6 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 			c( self )
 
 		return result
-
-	## Updates the node to reflect any addition or removal of parameters.
-	def updateParameterised( self ) :
-
-		return _IECoreMaya._parameterisedHolderUpdateParameterised( self )
 
 	## Returns a tuple of the form (parameterised, className, classVersion, searchPathEnvVar).
 	def getParameterised( self ) :

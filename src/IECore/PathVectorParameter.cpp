@@ -46,12 +46,7 @@ using namespace boost;
 using namespace std;
 using namespace IECore;
 
-IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( PathVectorParameter );
-const unsigned int PathVectorParameter::g_ioVersion = 1;
-
-PathVectorParameter::PathVectorParameter()
-{
-}
+IE_CORE_DEFINERUNTIMETYPED( PathVectorParameter );
 
 PathVectorParameter::PathVectorParameter( const std::string &name, const std::string &description,
                               const std::vector<std::string> &defaultValue, bool allowEmptyList, CheckType check,
@@ -157,59 +152,4 @@ bool PathVectorParameter::valueValid( const Object *value, std::string *reason )
 	}
 
 	return true;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Object implementation
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void PathVectorParameter::copyFrom( const Object *other, CopyContext *context )
-{
-	StringVectorParameter::copyFrom( other, context );
-	const PathVectorParameter *tOther = static_cast<const PathVectorParameter *>( other );
-
-	m_allowEmptyList = tOther->m_allowEmptyList;
-	m_check = tOther->m_check;
-}
-
-void PathVectorParameter::save( SaveContext *context ) const
-{
-	StringVectorParameter::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-
-	unsigned char tmp = m_allowEmptyList;
-	container->write( "m_allowEmptyList", tmp );
-	tmp = m_check;
-	container->write( "check", tmp );
-}
-
-void PathVectorParameter::load( LoadContextPtr context )
-{
-	StringVectorParameter::load( context );
-	unsigned int v = g_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-
-	unsigned char tmp;
-	container->read( "m_allowEmptyList", tmp );
-	m_allowEmptyList = tmp;
-	container->read( "check", tmp );
-	m_check = (CheckType)tmp;
-
-}
-
-bool PathVectorParameter::isEqualTo( const Object *other ) const
-{
-	if( !StringVectorParameter::isEqualTo( other ) )
-	{
-		return false;
-	}
-
-	const PathVectorParameter *tOther = static_cast<const PathVectorParameter *>( other );
-	return m_allowEmptyList==tOther->m_allowEmptyList && m_check==tOther->m_check;
-}
-
-void PathVectorParameter::memoryUsage( Object::MemoryAccumulator &a ) const
-{
-	StringVectorParameter::memoryUsage( a );
-	a.accumulate( sizeof( m_allowEmptyList ) + sizeof( m_check ) );
 }

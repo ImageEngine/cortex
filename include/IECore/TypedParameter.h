@@ -66,13 +66,6 @@ class TypedParameter : public Parameter
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedParameter<T>, Parameter );
 
-		//! @name Object functions
-		////////////////////////////////////
-		//@{
-		typename TypedParameter<T>::Ptr copy() const;
-		virtual bool isEqualTo( const Object *other ) const;
-		//@}
-
 		/// Implemented to return true only if value is of type TypedData<T>.
 		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
 
@@ -91,19 +84,9 @@ class TypedParameter : public Parameter
 		/// and calls Parameter::setValue().
 		void setTypedValue( const T &value );
 
-	protected :
-
-		TypedParameter();
-
-		virtual void copyFrom( const Object *other, CopyContext *context );
-		virtual void save( SaveContext *context ) const;
-		virtual void load( LoadContextPtr context );
-		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
-
 	private :
 
 		static const TypeDescription<TypedParameter<T> > g_typeDescription;
-		friend class TypeDescription<TypedParameter<T> >;
 
 };
 

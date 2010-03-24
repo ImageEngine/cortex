@@ -85,8 +85,6 @@ template<typename B>
 MObject ParameterisedHolder<B>::aParameterisedVersion;
 template<typename B>
 MObject ParameterisedHolder<B>::aParameterisedSearchPathEnvVar;
-template<typename B>
-MObject ParameterisedHolder<B>::aDynamicParameters;
 
 template<typename B>
 ClassData<ParameterisedHolder<B>, typename ParameterisedHolder<B>::ParameterSet> ParameterisedHolder<B>::g_dirtyParameters;
@@ -200,15 +198,6 @@ MStatus ParameterisedHolder<B>::shouldSave( const MPlug &plug, bool &isSaving )
 }
 
 template<typename B>
-void ParameterisedHolder<B>::copyInternalData( MPxNode *node )
-{
-	// take a full copy so we don't end up referring to dynamic parameters on the source node.
-	ParameterisedHolder<B> *tNode = static_cast<ParameterisedHolder<B> *>( node );
-	CompoundObjectPtr dp = tNode->getDynamicParameters();
-	setDynamicParameters( dp->copy() );
-}
-
-template<typename B>
 void *ParameterisedHolder<B>::creator()
 {
 	return new ParameterisedHolder<B>();
@@ -252,17 +241,6 @@ MStatus ParameterisedHolder<B>::initialize()
 
 	s = B::addAttribute( aParameterisedSearchPathEnvVar );
 	assert(s);
-
-	aDynamicParameters = tAttr.create( "dynamicParameters", "dprm", ObjectData::id );
-	tAttr.setKeyable( false );
-	tAttr.setReadable( true );
-	tAttr.setWritable( true );
-	tAttr.setStorable( true );
-	tAttr.setConnectable( false );
-	tAttr.setHidden( true );
-
-	s = B::addAttribute( aDynamicParameters );
-	assert( s );
 
 	return MS::kSuccess;
 }
@@ -312,15 +290,6 @@ MStatus ParameterisedHolder<B>::setParameterised( const std::string &className, 
 }
 
 template<typename B>
-MStatus ParameterisedHolder<B>::updateParameterised()
-{
-	IECore::CompoundObjectPtr dynamicParameters = getDynamicParameters();
-	MStatus s = createAndRemoveAttributes( dynamicParameters );
-	setDynamicParameters( dynamicParameters );
-	return s;
-}
-
-template<typename B>
 IECore::RunTimeTypedPtr ParameterisedHolder<B>::getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut )
 {
 	MPlug pClassName( B::thisMObject(), aParameterisedClassName );
@@ -348,7 +317,6 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::getParameterised( std::string *c
 				// this avoids the situation where the loading fails due to some
 				// correctable error, but we've just deleted all the attributes with
 				// all the settings and connections important to the user.
-				addDynamicParameters();
 				if( createAndRemoveAttributes() )
 				{
 					m_failedToLoad = false;
@@ -661,7 +629,7 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::loadClass( const MString &classN
 }
 
 template<typename B>
-MStatus ParameterisedHolder<B>::createAndRemoveAttributes( IECore::CompoundObjectPtr dynamicParameterStorage  )
+MStatus ParameterisedHolder<B>::createAndRemoveAttributes()
 {
 	m_attributeNamesToParameters.clear();
 	m_parametersToAttributeNames.clear();
@@ -670,7 +638,7 @@ MStatus ParameterisedHolder<B>::createAndRemoveAttributes( IECore::CompoundObjec
 	if( m_parameterised )
 	{
 		ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
-		s = createAttributesWalk( parameterisedInterface->parameters(), "parm", dynamicParameterStorage );
+		s = createAttributesWalk( parameterisedInterface->parameters(), "parm" );
 		if( !s )
 		{
 			msg( Msg::Error, "ParameterisedHolder::createAndRemoveAttributes", boost::format( "Unable to create attributes to represent class." ) );
@@ -678,7 +646,7 @@ MStatus ParameterisedHolder<B>::createAndRemoveAttributes( IECore::CompoundObjec
 		}
 	}
 
-	s = removeUnecessaryAttributes( dynamicParameterStorage );
+	s = removeUnecessaryAttributes();
 	if( !s )
 	{
 		msg( Msg::Error, "ParameterisedHolder::createAndRemoveAttributes", "Failed to remove unecessary attributes." );
@@ -689,7 +657,7 @@ MStatus ParameterisedHolder<B>::createAndRemoveAttributes( IECore::CompoundObjec
 }
 
 template<typename B>
-MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName, IECore::CompoundObjectPtr dynamicParameterStorage )
+MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParameterPtr parameter, const std::string &rootName )
 {
 	MFnDependencyNode fnDN( B::thisMObject() );
 
@@ -762,20 +730,6 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 			{
 				msg( Msg::Error, "ParameterisedHolder::createAttributesWalk", boost::format( "Failed to create attribute to represent parameter \"%s\" of type \"%s\"" ) % children[i]->name() % children[i]->typeName() );
 				return s;
-			}
-
-			// if it's a dynamic parameter then remember it for later
-			if( dynamicParameterStorage )
-			{
-
-				IECore::ObjectVectorPtr ov = dynamicParameterStorage->member<IECore::ObjectVector>( rootName );
-				if( !ov )
-				{
-					ov = new ObjectVector;
-					dynamicParameterStorage->members()[rootName] = ov;
-				}
-
-				ov->members().push_back( children[i] );
 			}
 
 			// restore any existing connections
@@ -852,25 +806,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 		CompoundParameterPtr compoundChild = runTimeCast<CompoundParameter>( children[i] );
 		if( compoundChild )
 		{
-			// in the case of a hierarchy of dynamic attributes, we don't want to store all the children in the dynamicParameterStorage - we
-			// just want to store the root of the dynamic hierarchy. so if this compound parameter is already in the dynamic storage then we'll stop
-			// storing dynamic parameters for the walk below this point.
-			CompoundObjectPtr dynamicParameterStorageForWalk = dynamicParameterStorage;
-			if( dynamicParameterStorageForWalk )
-			{
-				CompoundObject::ObjectMap::const_iterator it = dynamicParameterStorageForWalk->members().find( rootName );
-				if( it!=dynamicParameterStorageForWalk->members().end() )
-				{
-					ConstObjectVectorPtr dpo = IECore::runTimeCast<const IECore::ObjectVector>( it->second );
-					const ObjectVector::MemberContainer &dp = dpo->members();
-					if( find( dp.begin(), dp.end(), compoundChild )!=dp.end() )
-					{
-						dynamicParameterStorageForWalk = 0;
-					}
-				}
-			}
-
-			MStatus s = createAttributesWalk( compoundChild, rootName + "_" + compoundChild->name(), dynamicParameterStorageForWalk );
+			MStatus s = createAttributesWalk( compoundChild, rootName + "_" + compoundChild->name() );
 			if( !s )
 			{
 				return s;
@@ -882,7 +818,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 }
 
 template<typename B>
-MStatus ParameterisedHolder<B>::removeUnecessaryAttributes( IECore::CompoundObjectPtr dynamicParameterStorage )
+MStatus ParameterisedHolder<B>::removeUnecessaryAttributes()
 {
 	/// \todo Make this a parameter, but only when the library's major version is incremented
 	const std::string &rootName = "parm_";
@@ -920,131 +856,7 @@ MStatus ParameterisedHolder<B>::removeUnecessaryAttributes( IECore::CompoundObje
 		}
 	}
 
-	// remove dynamic parameters from our stash if they've been removed from the held object
-	if( dynamicParameterStorage )
-	{
-		IECore::CompoundObject::ObjectMap &dynParms = dynamicParameterStorage->members();
-		for( IECore::CompoundObject::ObjectMap::iterator pIt=dynParms.begin(); pIt!=dynParms.end(); )
-		{
-			ObjectVectorPtr parametersO = IECore::runTimeCast<IECore::ObjectVector>( pIt->second );
-			if( !parametersO )
-			{
-				continue;
-			}
-
-			IECore::ObjectVector::MemberContainer &parameters = parametersO->members();
-			for( IECore::ObjectVector::MemberContainer::iterator cIt=parameters.begin(); cIt!=parameters.end();  )
-			{
-				IECore::ParameterPtr parameter = IECore::runTimeCast<IECore::Parameter>( *cIt );
-				if( parameter )
-				{
-					if( m_parametersToAttributeNames.find( parameter )==m_parametersToAttributeNames.end() )
-					{
-						cIt = parameters.erase( cIt );
-						continue; // skip increment of cIt
-					}
-				}
-				cIt++;
-			}
-
-			if( !parameters.size() )
-			{
-				IECore::CompoundObject::ObjectMap::iterator nIt = pIt; nIt++;
-				dynParms.erase( pIt );
-				pIt = nIt;
-			}
-			else
-			{
-				pIt++;
-			}
-		}
-	}
-
 	return MStatus::kSuccess;
-}
-
-template<typename B>
-CompoundObjectPtr ParameterisedHolder<B>::getDynamicParameters()
-{
-	MPlug pDynamicParameters( B::thisMObject(), aDynamicParameters );
-	MObject oDynamicParameters = pDynamicParameters.asMObject();
-	MFnPluginData fnDynamicParameters( oDynamicParameters );
-	ObjectData *oData = static_cast<ObjectData *>( fnDynamicParameters.data() );
-	if( oData )
-	{
-		return IECore::runTimeCast<IECore::CompoundObject>( oData->getObject() );
-	}
-	else
-	{
-		return new IECore::CompoundObject;
-	}
-}
-
-template<typename B>
-void ParameterisedHolder<B>::setDynamicParameters( IECore::CompoundObjectPtr dynamicParameters )
-{
-	MPlug pDynamicParameters( B::thisMObject(), aDynamicParameters );
-	MFnPluginData fnPD;
-	MObject o = fnPD.create( ObjectData::id );
-	ObjectData *oData = static_cast<ObjectData *>( fnPD.data() );
-	oData->setObject( dynamicParameters );
-	oData->setCopyMode( ObjectData::Shallow ); // so we keep the exact same parameter objects help by m_parameterised
-	pDynamicParameters.setValue( o );
-}
-
-template<typename B>
-void ParameterisedHolder<B>::addDynamicParameters()
-{
-	if( !m_parameterised )
-	{
-		return;
-	}
-
-	IECore::CompoundObjectPtr dynParmsO = getDynamicParameters();
-	IECore::CompoundObject::ObjectMap &dynParms = dynParmsO->members();
-	for( IECore::CompoundObject::ObjectMap::iterator it=dynParms.begin(); it!=dynParms.end(); it++ )
-	{
-		// find the parent parameter we should add to
-		IECore::CompoundParameterPtr parentParameter = dynamic_cast<IECore::ParameterisedInterface *>( m_parameterised.get() )->parameters();
-
-		typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-		Tokenizer nameParts( it->first.value(), char_separator<char>( "_" ) );
-		Tokenizer::const_iterator tIt = nameParts.begin();
-		while( ++tIt!=nameParts.end() && parentParameter )
-		{
-			parentParameter = parentParameter->parameter<IECore::CompoundParameter>( *tIt );
-			if( !parentParameter )
-			{
-				break;
-			}
-		}
-
-		if( !parentParameter  )
-		{
-			IECore::msg( IECore::Msg::Warning, "ParameterisedHolder::addDynamicParameters", boost::format( "Unable to find parent parameter for dynamic parameters below \"%s\"." ) % it->first.value() );
-			continue;
-		}
-
-		// add the parameters
-
-		ObjectVectorPtr parametersO = IECore::runTimeCast<IECore::ObjectVector>( it->second );
-
-		if( !parametersO )
-		{
-			IECore::msg( IECore::Msg::Warning, "ParameterisedHolder::addDynamicParameters", boost::format( "Unable to find any dynamic children for \"%s\"." ) % it->first.value() );
-			continue;
-		}
-
-		IECore::ObjectVector::MemberContainer &parameters = parametersO->members();
-		for( IECore::ObjectVector::MemberContainer::iterator it=parameters.begin(); it!=parameters.end(); it++ )
-		{
-			IECore::ParameterPtr parameter = IECore::runTimeCast<IECore::Parameter>( *it );
-			if( parameter )
-			{
-				parentParameter->addParameter( parameter );
-			}
-		}
-	}
 }
 
 // specialisations of the different typeIds

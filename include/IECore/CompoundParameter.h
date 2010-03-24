@@ -47,7 +47,7 @@ class CompoundParameter : public Parameter
 {
 	public :
 
-		IE_CORE_DECLAREOBJECT( CompoundParameter, Parameter );
+		IE_CORE_DECLARERUNTIMETYPED( CompoundParameter, Parameter );
 
 		/// A type to map from names to Parameters.
 		typedef std::map<InternedString, ParameterPtr> ParameterMap;
@@ -154,8 +154,6 @@ class CompoundParameter : public Parameter
 
 		ParameterMap m_namesToParameters;
 		ParameterVector m_parameters;
-
-		static const unsigned int g_ioVersion;
 
 };
 

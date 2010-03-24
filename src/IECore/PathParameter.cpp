@@ -46,12 +46,7 @@ using namespace boost;
 using namespace std;
 using namespace IECore;
 
-IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( PathParameter );
-const unsigned int PathParameter::g_ioVersion = 1;
-
-PathParameter::PathParameter()
-{
-}
+IE_CORE_DEFINERUNTIMETYPED( PathParameter );
 
 PathParameter::PathParameter( const std::string &name, const std::string &description,
 			const std::string &defaultValue, bool allowEmptyString,	CheckType check,
@@ -128,59 +123,4 @@ bool PathParameter::valueValid( const Object *value, std::string *reason ) const
 	}
 
 	return true;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Object implementation
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void PathParameter::copyFrom( const Object *other, CopyContext *context )
-{
-	StringParameter::copyFrom( other, context );
-	const PathParameter *tOther = static_cast<const PathParameter *>( other );
-
-	m_allowEmptyString = tOther->m_allowEmptyString;
-	m_check = tOther->m_check;
-}
-
-void PathParameter::save( SaveContext *context ) const
-{
-	StringParameter::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-
-	unsigned char tmp = m_allowEmptyString;
-	container->write( "allowEmptyString", tmp );
-	tmp = m_check;
-	container->write( "check", tmp );
-}
-
-void PathParameter::load( LoadContextPtr context )
-{
-	StringParameter::load( context );
-	unsigned int v = g_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-
-	unsigned char tmp;
-	container->read( "allowEmptyString", tmp );
-	m_allowEmptyString = tmp;
-	container->read( "check", tmp );
-	m_check = (CheckType)tmp;
-
-}
-
-bool PathParameter::isEqualTo( const Object *other ) const
-{
-	if( !StringParameter::isEqualTo( other ) )
-	{
-		return false;
-	}
-
-	const PathParameter *tOther = static_cast<const PathParameter *>( other );
-	return m_allowEmptyString==tOther->m_allowEmptyString && m_check==tOther->m_check;
-}
-
-void PathParameter::memoryUsage( Object::MemoryAccumulator &a ) const
-{
-	StringParameter::memoryUsage( a );
-	a.accumulate( sizeof( m_allowEmptyString ) + sizeof( m_check ) );
 }

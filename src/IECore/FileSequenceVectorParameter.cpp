@@ -48,12 +48,7 @@
 using namespace IECore;
 using namespace boost;
 
-IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( FileSequenceVectorParameter );
-const unsigned int FileSequenceVectorParameter::g_ioVersion = 1;
-
-FileSequenceVectorParameter::FileSequenceVectorParameter()
-{
-}
+IE_CORE_DEFINERUNTIMETYPED( FileSequenceVectorParameter );
 
 FileSequenceVectorParameter::FileSequenceVectorParameter( const std::string &name, const std::string &description,
 	const std::vector< std::string > &defaultValue, bool allowEmptyList, CheckType check,
@@ -265,59 +260,4 @@ FileSequencePtr FileSequenceVectorParameter::parseFileSequence( const std::strin
 
 	return new FileSequence( filename, frameList );
 
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Object implementation
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void FileSequenceVectorParameter::copyFrom( const Object *other, CopyContext *context )
-{
-	PathVectorParameter::copyFrom( other, context );
-	const FileSequenceVectorParameter *tOther = static_cast<const FileSequenceVectorParameter *>( other );
-	m_extensions = tOther->m_extensions;
-}
-
-void FileSequenceVectorParameter::save( SaveContext *context ) const
-{
-	PathVectorParameter::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	
-	std::string extensions = join( m_extensions.begin(), m_extensions.end(), " " );
-	
-	container->write( "extensions", extensions );
-}
-
-void FileSequenceVectorParameter::load( LoadContextPtr context )
-{
-	PathVectorParameter::load( context );
-	unsigned int v = g_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-
-	m_extensions.clear();
-	std::string extensions;
-	container->read( "extensions", extensions );
-	if( extensions!="" )
-	{
-		split( m_extensions, extensions, is_any_of( " " ) );
-	}
-}
-
-bool FileSequenceVectorParameter::isEqualTo( const Object *other ) const
-{
-	if( !PathVectorParameter::isEqualTo( other ) )
-	{
-		return false;
-	}
-	const FileSequenceVectorParameter *tOther = static_cast<const FileSequenceVectorParameter *>( other );
-	return m_extensions == tOther->m_extensions;
-}
-
-void FileSequenceVectorParameter::memoryUsage( Object::MemoryAccumulator &a ) const
-{
-	PathVectorParameter::memoryUsage( a );
-	for( std::vector<std::string>::const_iterator it=m_extensions.begin(); it!=m_extensions.end(); it++ )
-	{
-		a.accumulate( it->capacity() );
-	}
 }

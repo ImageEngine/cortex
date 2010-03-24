@@ -45,8 +45,7 @@ using namespace std;
 using namespace IECore;
 using namespace boost;
 
-IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CompoundParameter );
-const unsigned int CompoundParameter::g_ioVersion = 1;
+IE_CORE_DEFINERUNTIMETYPED( CompoundParameter );
 
 CompoundParameter::CompoundParameter( const std::string &name, const std::string &description, ConstCompoundObjectPtr userData )
 	:	Parameter( name, description, new CompoundObject, PresetsContainer(), false, userData )
@@ -385,95 +384,4 @@ bool CompoundParameter::parameterPath( const Parameter *child, std::vector<std::
 		}
 	}
 	return false;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Object implementation
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CompoundParameter::copyFrom( const Object *other, CopyContext *context )
-{
-	Parameter::copyFrom( other, context );
-	const CompoundParameter *tOther = static_cast<const CompoundParameter *>( other );
-
-	m_namesToParameters.clear();
-	m_parameters.clear();
-	for( ParameterVector::const_iterator it=tOther->m_parameters.begin(); it!=tOther->m_parameters.end(); it++ )
-	{
-		addParameter( (*it)->copy() );
-	}
-}
-
-void CompoundParameter::save( SaveContext *context ) const
-{
-	Parameter::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-
-	container->mkdir( "parameters" );
-	container->chdir( "parameters" );
-		unsigned i = 0;
-		for( ParameterVector::const_iterator it=m_parameters.begin(); it!=m_parameters.end(); it++, i++ )
-		{
-			string name = str( boost::format( "%d" ) % i );
-			context->save( *it, container, name );
-		}
-	container->chdir( ".." );
-}
-
-void CompoundParameter::load( LoadContextPtr context )
-{
-	Parameter::load( context );
-	unsigned int v = g_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-
-	m_namesToParameters.clear();
-	m_parameters.clear();
-	container->chdir( "parameters" );
-		IndexedIO::EntryList l = container->ls();
-		m_parameters.resize( l.size() );
-		for( IndexedIO::EntryList::const_iterator it=l.begin(); it!=l.end(); it++ )
-		{
-			ParameterPtr parameter = context->load<Parameter>( container, it->id() );
-			size_t i = boost::lexical_cast<size_t>( it->id() );
-			m_namesToParameters.insert( ParameterMap::value_type( parameter->internedName(), parameter ) );
-			m_parameters[i] = parameter;
-		}
-	container->chdir( ".." );
-}
-
-bool CompoundParameter::isEqualTo( const Object  *other ) const
-{
-	if( !Parameter::isEqualTo( other ) )
-	{
-		return false;
-	}
-
-
-	const CompoundParameter *tOther = static_cast<const CompoundParameter *>( other );
-	if( tOther->m_parameters.size()!=m_parameters.size() )
-	{
-		return false;
-	}
-
-	for( unsigned i=0; i<m_parameters.size(); i++ )
-	{
-		if( !m_parameters[i]->isEqualTo( tOther->m_parameters[i] ) )
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-void CompoundParameter::memoryUsage( Object::MemoryAccumulator &a ) const
-{
-	Parameter::memoryUsage( a );
-	a.accumulate( m_parameters.capacity() * sizeof( ParameterVector::value_type ) );
-	for( ParameterVector::const_iterator it=m_parameters.begin(); it!=m_parameters.end(); it++ )
-	{
-		a.accumulate( *it );
-	}
-	
-	a.accumulate( m_namesToParameters.size() * sizeof( ParameterMap::value_type ) );
 }

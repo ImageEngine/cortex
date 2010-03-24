@@ -49,11 +49,11 @@ IE_CORE_FORWARDDECLARE( CompoundObject );
 
 /// The Parameter base class represents a means of describing data to be passed
 /// to some process.
-class Parameter : public Object
+class Parameter : public RunTimeTyped
 {
 	public :
 
-		IE_CORE_DECLAREOBJECT( Parameter, Object );
+		IE_CORE_DECLARERUNTIMETYPED( Parameter, RunTimeTyped );
 
 		/// A type which associates a value for the Parameter with
 		/// a name.
@@ -181,14 +181,7 @@ class Parameter : public Object
 		std::string getCurrentPresetName() const;
 		//@}
 
-	protected :
-
-		// constructor for use during load/copy
-		Parameter();
-
 	private :
-
-		friend class TypeDescription<Parameter>;
 
 		InternedString m_name;
 		InternedString m_description;
@@ -200,8 +193,6 @@ class Parameter : public Object
 		bool m_presetsOnly;
 
 		mutable CompoundObjectPtr m_userData;
-
-		static const unsigned int g_ioVersion;
 
 };
 

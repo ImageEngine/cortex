@@ -1373,27 +1373,5 @@ class TestFileSequenceVectorParameter( unittest.TestCase ) :
 		self.assertEqual( p.valueValid()[0], True )
 		p.validate()
 
-class TestObjectMethods( unittest.TestCase ) :
-
-	def test( self ) :
-
-		o = ClassLoader( SearchPath( "test/IECore/ops", ":" ) ).load( "parameterTypes" )()
-
-		p = o.parameters()
-		pp = p.copy()
-
-		self.assertEqual( p, pp )
-
-		ObjectWriter( p, "test/parameters.cob" ).write()
-		ppp = ObjectReader( "test/parameters.cob" ).read()
-
-		self.assertEqual( ppp, p )
-		self.assertEqual( ppp, pp )
-
-	def tearDown( self ) :
-
-		if os.path.exists( "test/parameters.cob" ) :
-			os.remove( "test/parameters.cob" )
-
 if __name__ == "__main__":
         unittest.main()

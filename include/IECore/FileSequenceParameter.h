@@ -53,7 +53,7 @@ class FileSequenceParameter : public PathParameter
 
 		typedef std::vector< std::string > ExtensionList;
 
-		IE_CORE_DECLAREOBJECT( FileSequenceParameter, PathParameter );
+		IE_CORE_DECLARERUNTIMETYPED( FileSequenceParameter, PathParameter );
 
 		/// Constructs a FileSequenceParameter
 		/// \param minSequenceSize Specifies how many files must exist on the file sequence in order to validate the parameter (only used if check type is MustExist).
@@ -87,15 +87,8 @@ class FileSequenceParameter : public PathParameter
 
 	protected :
 
-		FileSequenceParameter();
-		friend class TypeDescription<FileSequenceParameter>;
-
 		ExtensionList m_extensions;
 		size_t m_minSequenceSize;
-
-	private :
-
-		static const unsigned int g_ioVersion;
 
 };
 

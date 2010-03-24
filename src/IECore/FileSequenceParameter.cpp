@@ -48,12 +48,7 @@
 using namespace IECore;
 using namespace boost;
 
-IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( FileSequenceParameter );
-const unsigned int FileSequenceParameter::g_ioVersion = 1;
-
-FileSequenceParameter::FileSequenceParameter()
-{
-}
+IE_CORE_DEFINERUNTIMETYPED( FileSequenceParameter );
 
 FileSequenceParameter::FileSequenceParameter(
 	const std::string &name, const std::string &description, const std::string &defaultValue,
@@ -200,62 +195,4 @@ FileSequencePtr FileSequenceParameter::getFileSequenceValue() const
 		}
 	}
 	return new FileSequence( fileSequenceStr );
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Object implementation
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void FileSequenceParameter::copyFrom( const Object *other, CopyContext *context )
-{
-	PathParameter::copyFrom( other, context );
-	const FileSequenceParameter *tOther = static_cast<const FileSequenceParameter *>( other );
-	m_extensions = tOther->m_extensions;
-	m_minSequenceSize = tOther->m_minSequenceSize;
-}
-
-void FileSequenceParameter::save( SaveContext *context ) const
-{
-	PathParameter::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	
-	std::string extensions = join( m_extensions.begin(), m_extensions.end(), " " );
-	
-	container->write( "extensions", extensions );
-	container->write( "minSequenceSize", m_minSequenceSize );
-}
-
-void FileSequenceParameter::load( LoadContextPtr context )
-{
-	PathParameter::load( context );
-	unsigned int v = g_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-
-	m_extensions.clear();
-	std::string extensions;
-	container->read( "extensions", extensions );
-	if( extensions!="" )
-	{
-		split( m_extensions, extensions, is_any_of( " " ) );
-	}
-	container->read( "minSequenceSize", m_minSequenceSize );
-}
-
-bool FileSequenceParameter::isEqualTo( const Object *other ) const
-{
-	if( !PathParameter::isEqualTo( other ) )
-	{
-		return false;
-	}
-	const FileSequenceParameter *tOther = static_cast<const FileSequenceParameter *>( other );
-	return m_extensions == tOther->m_extensions && m_minSequenceSize == tOther->m_minSequenceSize;
-}
-
-void FileSequenceParameter::memoryUsage( Object::MemoryAccumulator &a ) const
-{
-	PathParameter::memoryUsage( a );
-	for( std::vector<std::string>::const_iterator it=m_extensions.begin(); it!=m_extensions.end(); it++ )
-	{
-		a.accumulate( it->capacity() );
-	}
 }

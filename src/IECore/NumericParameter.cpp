@@ -43,10 +43,7 @@ using namespace IECore;
 using namespace boost;
 
 template<class T>
-Object::TypeDescription<NumericParameter<T> > NumericParameter<T>::g_typeDescription;
-
-template<class T>
-const unsigned int NumericParameter<T>::g_ioVersion = 1;
+RunTimeTyped::TypeDescription<NumericParameter<T> > NumericParameter<T>::g_typeDescription;
 
 /////////////////////////////////////////////////////////////////////////////////////
 // constructor stuff
@@ -61,12 +58,6 @@ static Parameter::PresetsContainer convertPresets( const typename NumericParamet
 		result.push_back( typename Parameter::PresetsContainer::value_type( it->first, new TypedData<T>( it->second ) ) );
 	}
 	return result;
-}
-
-template<typename T>
-NumericParameter<T>::NumericParameter()
-	:	m_min( Imath::limits<T>::min() ), m_max( Imath::limits<T>::max() )
-{
 }
 
 template<typename T>
@@ -85,62 +76,6 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 	const PresetsContainer &presets, ConstCompoundObjectPtr userData )
 	: Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), true, userData ), m_min( Imath::limits<T>::min() ), m_max( Imath::limits<T>::max() )
 {
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
-// object stuff
-/////////////////////////////////////////////////////////////////////////////////////
-
-template <class T>
-typename NumericParameter<T>::Ptr NumericParameter<T>::copy() const
-{
-	return staticPointerCast<NumericParameter<T> >( copy() );
-}
-
-template<class T>
-void NumericParameter<T>::copyFrom( const Object *other, CopyContext *context )
-{
-	Parameter::copyFrom( other, context );
-	const NumericParameter<T> *tOther = static_cast<const NumericParameter<T> *>( other );
-	m_min = tOther->m_min;
-	m_max = tOther->m_max;
-}
-
-template<class T>
-void NumericParameter<T>::save( SaveContext *context ) const
-{
-	Parameter::save( context );
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), g_ioVersion );
-	container->write( "min", m_min );
-	container->write( "max", m_max );
-}
-
-template<class T>
-void NumericParameter<T>::load( LoadContextPtr context )
-{
-	Parameter::load( context );
-	unsigned int v = g_ioVersion;
-	IndexedIOInterfacePtr container = context->container( staticTypeName(), v );
-	container->read( "min", m_min );
-	container->read( "max", m_max );
-}
-
-template<class T>
-bool NumericParameter<T>::isEqualTo( const Object *other ) const
-{
-	if( !Parameter::isEqualTo( other ) )
-	{
-		return false;
-	}
-	const NumericParameter<T> *tOther = static_cast<const NumericParameter<T> *>( other );
-	return m_min==tOther->m_min && m_max==tOther->m_max;
-}
-
-template<class T>
-void NumericParameter<T>::memoryUsage( Object::MemoryAccumulator &a ) const
-{
-	Parameter::memoryUsage( a );
-	a.accumulate( 2 * sizeof( T ) );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

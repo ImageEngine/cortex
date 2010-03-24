@@ -138,8 +138,6 @@ class TestRunTimeTyped( unittest.TestCase ) :
 
 		# should not raise because SequenceLsOp was already registered with a dynamic type id
 		IECore.registerRunTimeTyped( IECore.SequenceLsOp )
-		# should not raise too
-		IECore.registerRunTimeTyped( IECore.OptionalCompoundParameter, IECore.TypeId.OptionalCompoundParameter )
 
 		self.assertEqual( IECore.TypeId.OptionalCompoundParameter, IECore.OptionalCompoundParameter.staticTypeId() )
 		self.assertEqual( IECore.TypeId.OptionalCompoundParameter, IECore.OptionalCompoundParameter( "", "" ).typeId() )

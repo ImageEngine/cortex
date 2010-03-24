@@ -70,25 +70,16 @@ class TypedObjectParameter : public ObjectParameter
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedObjectParameter<T>, ObjectParameter );
 
-		//! @name Object functions
-		////////////////////////////////////
-		//@{
-		typename TypedObjectParameter<T>::Ptr copy() const;
-		//@}
-
 		/// Implemented to return true only if value is of type T.
 		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
 
 	protected:
-
-		TypedObjectParameter();
 
 		static PresetsContainer makePresets( const ObjectPresetsContainer &presets );
 
 	private :
 
 		static TypeDescription<TypedObjectParameter<T> > g_typeDescription;
-		friend class TypeDescription<TypedObjectParameter<T> >;
 
 };
 
