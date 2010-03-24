@@ -33,7 +33,7 @@
 ##########################################################################
 
 import os
-from IECore import warning, error, Writer, CompoundParameter, ClassLoader, SearchPath
+from IECore import warning, msg, Msg, error, Writer, CompoundParameter, ClassLoader, SearchPath
 
 ## This class manages loading and saving named preset values for Parameterised objects.
 # It uses a given SearchPath to locate the presets. The presets must be classes which the
@@ -58,7 +58,8 @@ class PresetManager :
 
 	## Returns the preset names available for a given parameterised object.
 	def presets( self, parameterised ):
-		return self.__classLoader.classNames( self.__presetName( parameterised, "*" ) )
+		presets = self.__classLoader.classNames( self.__presetName( parameterised, "*" ) )
+		return [ p.split("/")[-1] for p in presets ]
 
 	## Converts from user preset name to class name
 	def __presetName( self, parameterised, name ):

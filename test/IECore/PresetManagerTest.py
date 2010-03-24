@@ -66,7 +66,7 @@ class PresetManagerTest( unittest.TestCase ) :
 		mgr.savePreset( op, [ op.parameters() ], self.presetPath, 'testC' )
 
 		# check if the three presets are listed.
-		self.assertEqual( mgr.presets( op ), [ 'parameterTypes/testA', 'parameterTypes/testB', 'parameterTypes/testC' ] )
+		self.assertEqual( mgr.presets( op ), [ 'testA', 'testB', 'testC' ] )
 
 		op['a'] = 4
 		op['b'] = 6
