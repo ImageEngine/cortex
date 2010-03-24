@@ -113,6 +113,10 @@ def registerRunTimeTyped( typ, typId = None, baseClass = None ) :
 				raise Exception, "Trying to re-register type %s as dynamic type Id!" % typeName
 			elif typId != prevTypId :
 				raise Exception, "Trying to re-register %s under different type Id: %s != %s" % ( typeName, str(typId), prevTypId )
+		# necessary when the typeid is defined in IECore/TypeIds.h and bound in TypeIdBinding.cpp, but then
+		# the class for that typeid is implemented in python (currently ClassParameter does this).
+		if IECore.RunTimeTyped.typeNameFromTypeId( prevTypId )=="" :
+			IECore.RunTimeTyped.registerType( prevTypId, typeName, IECore.TypeId( runTypedBaseClass.staticTypeId() ) )
 
 	# Retrieve the correct value from the enum
 	tId = getattr( IECore.TypeId, typeName )
