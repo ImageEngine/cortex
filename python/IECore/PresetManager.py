@@ -72,8 +72,7 @@ class PresetManager :
 	# to find the correspondent presetName and update the parameterised parameters that match.
 	# It assumes the given parameterised object was loaded by ClassLoader and so, have the attributes 'path' and 'version'.
 	def loadPreset( self, parameterised, presetName ) :
-
-		preset = self.__classLoader.load( self.__presetName( parameterised, presetName ) )()
+		preset = self.__classLoader.load( self.__presetName( parameterised, str(presetName) ) )()		
 		preset( parameterised )
 
 	# Saves the parameter values for the given Parameterised object only for the given Parameter list as a named preset.
