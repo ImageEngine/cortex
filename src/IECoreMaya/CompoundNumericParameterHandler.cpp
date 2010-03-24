@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreMaya/Parameter.h"
 #include "IECoreMaya/NumericTraits.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
@@ -63,7 +62,7 @@ static ParameterHandler::Description< CompoundNumericParameterHandler<V3d> > v3d
 static ParameterHandler::Description< CompoundNumericParameterHandler<Color3f> > color3fRegistrar( IECore::Color3fParameter::staticTypeId() );
 
 template<typename T>
-MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus CompoundNumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
 	typename IECore::TypedParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::TypedParameter<T> >( parameter );
 	if( !p )
@@ -169,7 +168,7 @@ MStatus CompoundNumericParameterHandler<T>::update( IECore::ConstParameterPtr pa
 }
 
 template<typename T>
-MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MObject CompoundNumericParameterHandler<T>::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
 	typename IECore::TypedParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::TypedParameter<T> >( parameter );
 	if( !p )
@@ -212,7 +211,7 @@ MObject CompoundNumericParameterHandler<T>::create( IECore::ConstParameterPtr pa
 }
 
 template<typename T>
-MStatus CompoundNumericParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+MStatus CompoundNumericParameterHandler<T>::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	typename IECore::TypedParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::TypedParameter<T> >( parameter );
 	if( !p )
@@ -239,7 +238,7 @@ MStatus CompoundNumericParameterHandler<T>::setValue( IECore::ConstParameterPtr 
 }
 
 template<typename T>
-MStatus CompoundNumericParameterHandler<T>::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
+MStatus CompoundNumericParameterHandler<T>::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
 	typename IECore::TypedParameter<T>::Ptr p = IECore::runTimeCast<IECore::TypedParameter<T> >( parameter );
 	if( !p )

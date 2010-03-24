@@ -32,13 +32,70 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-
 #include "IECoreMaya/ParameterHandler.h"
 
 using namespace IECoreMaya;
 
 ParameterHandler::~ParameterHandler()
 {
+}
+
+MObject ParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &attributeName )
+{
+	assert( parameter );
+	assert( attributeName.length() );
+
+	ConstParameterHandlerPtr h = create( parameter );
+	if( !h )
+	{
+		return MObject::kNullObj;
+	}
+	return h->doCreate( parameter, attributeName );
+}
+
+MStatus ParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute )
+{
+	assert( parameter );
+
+	ConstParameterHandlerPtr h = ParameterHandler::create( parameter );
+	if( !h )
+	{
+		return MS::kFailure;
+	}
+	return h->doUpdate( parameter, attribute );
+}
+
+MStatus ParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug )
+{
+	assert( parameter );
+	assert( ! plug.isNull() );
+
+	if ( plug.isFreeToChange( false, true ) == MPlug::kFreeToChange )
+	{
+		ConstParameterHandlerPtr h = ParameterHandler::create( parameter );
+		if( !h )
+		{
+			return MS::kFailure;
+		}
+		return h->doSetValue( parameter, plug );
+	}
+	else
+	{
+		return MS::kSuccess;
+	}
+}
+
+MStatus ParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter )
+{
+	assert( parameter );
+	assert( ! plug.isNull() );
+
+	ConstParameterHandlerPtr h = ParameterHandler::create( IECore::staticPointerCast< const IECore::Parameter > (parameter) );
+	if( !h )
+	{
+		return MS::kFailure;
+	}
+	return h->doSetValue( plug, parameter );
 }
 
 ConstParameterHandlerPtr ParameterHandler::create( IECore::ConstParameterPtr parameter )

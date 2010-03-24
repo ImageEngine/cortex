@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreMaya/Parameter.h"
 #include "IECoreMaya/NumericTraits.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
@@ -49,7 +48,7 @@ using namespace boost;
 
 static ParameterHandler::Description< BoolParameterHandler > registrar( IECore::BoolParameter::staticTypeId() );
 
-MStatus BoolParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus BoolParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
 	IECore::ConstBoolParameterPtr p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
 	if( !p )
@@ -98,7 +97,7 @@ MStatus BoolParameterHandler::update( IECore::ConstParameterPtr parameter, MObje
 	return MS::kSuccess;
 }
 
-MObject BoolParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MObject BoolParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
 	IECore::ConstBoolParameterPtr p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
 	if( !p )
@@ -112,7 +111,7 @@ MObject BoolParameterHandler::create( IECore::ConstParameterPtr parameter, const
 	return result;
 }
 
-MStatus BoolParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+MStatus BoolParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstBoolParameterPtr p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
 	if( !p )
@@ -123,7 +122,7 @@ MStatus BoolParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPl
 	return plug.setValue( p->getTypedValue() );
 }
 
-MStatus BoolParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
+MStatus BoolParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
 	IECore::BoolParameterPtr p = IECore::runTimeCast<IECore::BoolParameter>( parameter );
 	if( !p )

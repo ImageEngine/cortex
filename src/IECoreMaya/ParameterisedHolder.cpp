@@ -59,7 +59,7 @@
 #include "maya/MFnGenericAttribute.h"
 
 #include "IECoreMaya/ParameterisedHolder.h"
-#include "IECoreMaya/Parameter.h"
+#include "IECoreMaya/ParameterHandler.h"
 #include "IECoreMaya/PythonCmd.h"
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/ObjectData.h"
@@ -361,7 +361,7 @@ MStatus ParameterisedHolder<B>::setNodeValues()
 		}
 		try
 		{
-			MStatus s = Parameter::setValue( it->first, p );
+			MStatus s = ParameterHandler::setValue( it->first, p );
 			if( !s )
 			{
 				return s;
@@ -394,7 +394,7 @@ MStatus ParameterisedHolder<B>::setNodeValue( ParameterPtr pa )
 
 	try
 	{
-		s = IECoreMaya::Parameter::setValue( pa, p );
+		s = IECoreMaya::ParameterHandler::setValue( pa, p );
 	}
 	catch ( std::exception &e )
 	{
@@ -473,7 +473,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 			{
 				try
 				{
-					MStatus s = Parameter::setValue( p, parameter );
+					MStatus s = ParameterHandler::setValue( p, parameter );
 					if( !s )
 					{
 						msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Failed to set parameter value from %s" ) % p.name().asChar() );
@@ -532,7 +532,7 @@ MStatus ParameterisedHolder<B>::setParameterisedValue( ParameterPtr pa )
 
 	try
 	{
-		s = IECoreMaya::Parameter::setValue( p, pa );
+		s = IECoreMaya::ParameterHandler::setValue( p, pa );
 		if( s )
 		{
 			m_dirtyParameters.erase( pa );
@@ -696,7 +696,7 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 	MObject attribute = fnDN.attribute( attributeName );
 	if( !attribute.isNull() )
 	{
-		MStatus s = IECoreMaya::Parameter::update( parameter, attribute );
+		MStatus s = IECoreMaya::ParameterHandler::update( parameter, attribute );
 		if( s )
 		{
 			return MS::kSuccess;
@@ -734,7 +734,7 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 
 	// reuse failed - create a new attribute
 
-	attribute = IECoreMaya::Parameter::create( parameter, attributeName );
+	attribute = IECoreMaya::ParameterHandler::create( parameter, attributeName );
 	MStatus s = fnDN.addAttribute( attribute );
 	if( !s )
 	{
@@ -808,7 +808,7 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 	}
 
 	/// and set the value of the attribute, in case it differs from the default
-	return IECoreMaya::Parameter::setValue( parameter, plug );
+	return IECoreMaya::ParameterHandler::setValue( parameter, plug );
 }
 
 template<typename B>

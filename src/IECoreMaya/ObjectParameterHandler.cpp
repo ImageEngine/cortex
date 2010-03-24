@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreMaya/Parameter.h"
 #include "IECoreMaya/NumericTraits.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
@@ -52,7 +51,7 @@ using namespace boost;
 
 static ParameterHandler::Description< ObjectParameterHandler > registrar( IECore::ObjectParameter::staticTypeId() );
 
-MStatus ObjectParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus ObjectParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
 	IECore::ConstObjectParameterPtr p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
@@ -83,7 +82,7 @@ MStatus ObjectParameterHandler::update( IECore::ConstParameterPtr parameter, MOb
 	return MS::kSuccess;
 }
 
-MObject ObjectParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MObject ObjectParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
 	IECore::ConstObjectParameterPtr p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
@@ -99,7 +98,7 @@ MObject ObjectParameterHandler::create( IECore::ConstParameterPtr parameter, con
 	return result;
 }
 
-MStatus ObjectParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+MStatus ObjectParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstObjectParameterPtr p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
@@ -138,7 +137,7 @@ MStatus ObjectParameterHandler::setValue( IECore::ConstParameterPtr parameter, M
 	return plug.setValue( plugData );
 }
 
-MStatus ObjectParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
+MStatus ObjectParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
 	IECore::ObjectParameterPtr p = IECore::runTimeCast<IECore::ObjectParameter>( parameter );
 	if( !p )

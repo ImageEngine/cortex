@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,10 +49,10 @@ template< typename S >
 class FloatSplineParameterHandler : public ParameterHandler
 {
 	protected :
-		virtual MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const;
-		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const;
-		virtual MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
-		virtual MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
+		virtual MObject doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const;
+		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const;
+		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
+		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
 
 	private :
 

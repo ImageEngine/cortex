@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,7 +35,6 @@
 #include <cassert>
 #include <algorithm>
 
-#include "IECoreMaya/Parameter.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/FloatSplineParameterHandler.h"
@@ -61,7 +60,7 @@ template<> ParameterHandler::Description< FloatSplineParameterHandler<  IECore::
 	FloatSplineParameterHandler<  IECore::Splinedd >::g_registrar( IECore::SplineddParameter::staticTypeId() );
 
 template<typename S>
-MStatus FloatSplineParameterHandler<S>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus FloatSplineParameterHandler<S>::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
 	assert( parameter );
 
@@ -84,7 +83,7 @@ MStatus FloatSplineParameterHandler<S>::update( IECore::ConstParameterPtr parame
 }
 
 template<typename S>
-MObject FloatSplineParameterHandler<S>::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MObject FloatSplineParameterHandler<S>::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
 	assert( parameter );
 
@@ -102,7 +101,7 @@ MObject FloatSplineParameterHandler<S>::create( IECore::ConstParameterPtr parame
 }
 
 template<typename S>
-MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+MStatus FloatSplineParameterHandler<S>::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	assert( parameter );
 	typename IECore::TypedParameter< S >::ConstPtr p = IECore::runTimeCast<const IECore::TypedParameter< S > >( parameter );
@@ -245,7 +244,7 @@ MStatus FloatSplineParameterHandler<S>::setValue( IECore::ConstParameterPtr para
 }
 
 template<typename S>
-MStatus FloatSplineParameterHandler<S>::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
+MStatus FloatSplineParameterHandler<S>::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
 	assert( parameter );
 

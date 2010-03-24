@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreMaya/Parameter.h"
 #include "IECoreMaya/NumericTraits.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
@@ -54,7 +53,7 @@ static ParameterHandler::Description< NumericParameterHandler<float> > floatRegi
 static ParameterHandler::Description< NumericParameterHandler<double> > doubleRegistrar( IECore::DoubleParameter::staticTypeId() );
 
 template<typename T>
-MStatus NumericParameterHandler<T>::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
 	typename IECore::NumericParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
 	if( !p )
@@ -106,7 +105,7 @@ MStatus NumericParameterHandler<T>::update( IECore::ConstParameterPtr parameter,
 }
 
 template<typename T>
-MObject NumericParameterHandler<T>::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MObject NumericParameterHandler<T>::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
 	typename IECore::NumericParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
 	if( !p )
@@ -121,7 +120,7 @@ MObject NumericParameterHandler<T>::create( IECore::ConstParameterPtr parameter,
 }
 
 template<typename T>
-MStatus NumericParameterHandler<T>::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+MStatus NumericParameterHandler<T>::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	typename IECore::NumericParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
 	if( !p )
@@ -133,7 +132,7 @@ MStatus NumericParameterHandler<T>::setValue( IECore::ConstParameterPtr paramete
 }
 
 template<typename T>
-MStatus NumericParameterHandler<T>::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
+MStatus NumericParameterHandler<T>::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
 	typename IECore::NumericParameter<T>::Ptr p = IECore::runTimeCast<IECore::NumericParameter<T> >( parameter );
 	if( !p )

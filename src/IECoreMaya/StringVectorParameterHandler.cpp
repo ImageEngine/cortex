@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreMaya/Parameter.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/StringVectorParameterHandler.h"
@@ -57,7 +56,7 @@ using namespace boost;
 
 static ParameterHandler::Description< StringVectorParameterHandler > registrar( IECore::StringVectorParameter::staticTypeId() );
 
-MStatus StringVectorParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus StringVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
 {
 	IECore::ConstStringVectorParameterPtr p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
 	if( !p )
@@ -84,7 +83,7 @@ MStatus StringVectorParameterHandler::update( IECore::ConstParameterPtr paramete
 	return MS::kSuccess;
 }
 
-MObject StringVectorParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MObject StringVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
 {
 	IECore::ConstStringVectorParameterPtr p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
 	if( !p )
@@ -106,7 +105,7 @@ MObject StringVectorParameterHandler::create( IECore::ConstParameterPtr paramete
 	return result;
 }
 
-MStatus StringVectorParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+MStatus StringVectorParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstStringVectorParameterPtr p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
 	if( !p )
@@ -128,7 +127,7 @@ MStatus StringVectorParameterHandler::setValue( IECore::ConstParameterPtr parame
 	return plug.setValue( data );
 }
 
-MStatus StringVectorParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
+MStatus StringVectorParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
 	IECore::StringVectorParameterPtr p = IECore::runTimeCast<IECore::StringVectorParameter>( parameter );
 	if( !p )

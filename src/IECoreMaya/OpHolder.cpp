@@ -46,7 +46,7 @@
 #include "maya/MGlobal.h"
 
 #include "IECoreMaya/OpHolder.h"
-#include "IECoreMaya/Parameter.h"
+#include "IECoreMaya/ParameterHandler.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
 #include "IECore/MessageHandler.h"
@@ -143,7 +143,7 @@ MStatus OpHolder<B>::compute( const MPlug &plug, MDataBlock &block )
 		}
 
 		assert( result );
-		MStatus s = Parameter::setValue( op->resultParameter(), resultPlug );
+		MStatus s = ParameterHandler::setValue( op->resultParameter(), resultPlug );
 
 		block.setClean( resultPlug );
 

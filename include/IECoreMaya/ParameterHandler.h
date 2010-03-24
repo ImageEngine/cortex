@@ -56,19 +56,22 @@ IE_CORE_DECLAREPTR( ParameterHandler );
 /// is used by the IECoreMaya::ParameterisedHolder classes.
 class ParameterHandler : public IECore::RefCounted
 {
-	friend class Parameter;
-	friend class ObjectParameterHandler;
 
 	public :
 
-		/// Return a handler which can deal with the given parameter
-		static ConstParameterHandlerPtr create( IECore::ConstParameterPtr parameter );
-
-		/// Return a handler which can deal with the given object
-		static ConstParameterHandlerPtr create( IECore::ConstObjectPtr object );
-
-		/// Return a handler which can deal with an object or parameter of the given type id
-		static ConstParameterHandlerPtr create( IECore::TypeId id );
+		/// Creates and returns an attribute of the specified name, which is capable of representing
+		/// the specified parameter. Returns MObject::kNullObject on failure.
+		static MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName );
+		/// Updates a previously created attribute to reflect changes on the specified parameter.
+		/// Returns MStatus::kFailure if the attribute is not suitable for the parameter.
+		/// \bug Maya doesn't seem to correctly store default values for dynamic string attributes
+		/// when saving the scene - so this method doesn't set the default value appropriately for
+		/// StringParameter and its derived classes (tested in maya 7.0.1).
+		static MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute );
+		/// Sets the value of plug to reflect the value of parameter.
+		static MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug );
+		/// Sets the value of parameer to reflect the value of plug.
+		static MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter );
 
 		virtual ~ParameterHandler();
 
@@ -83,10 +86,17 @@ class ParameterHandler : public IECore::RefCounted
 
 	protected:
 
-		virtual MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName ) const = 0;
-		virtual MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute ) const = 0;
-		virtual MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const = 0;
-		virtual MStatus setValue( const MPlug &plug, IECore::ParameterPtr parameter ) const = 0;
+		/// Return a handler which can deal with the given parameter
+		static ConstParameterHandlerPtr create( IECore::ConstParameterPtr parameter );
+		/// Return a handler which can deal with the given object
+		static ConstParameterHandlerPtr create( IECore::ConstObjectPtr object );
+		/// Return a handler which can deal with an object or parameter of the given type id
+		static ConstParameterHandlerPtr create( IECore::TypeId id );
+
+		virtual MObject doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const = 0;
+		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const = 0;
+		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const = 0;
+		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const = 0;
 
 	private:
 
