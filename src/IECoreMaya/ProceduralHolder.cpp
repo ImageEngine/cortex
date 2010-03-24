@@ -75,17 +75,14 @@ MObject ProceduralHolder::aGLPreview;
 MObject ProceduralHolder::aTransparent;
 MObject ProceduralHolder::aDrawBound;
 MObject ProceduralHolder::aProceduralComponents;
-ClassData<ProceduralHolder, IECoreGL::RendererPtr> ProceduralHolder::g_lastRenderer;
 
 ProceduralHolder::ProceduralHolder()
-	:	m_boundDirty( true ), m_sceneDirty( true )
+	:	m_boundDirty( true ), m_sceneDirty( true ), m_lastRenderer( 0 )
 {
-	g_lastRenderer.create( this, 0 );
 }
 
 ProceduralHolder::~ProceduralHolder()
 {
-	g_lastRenderer.erase( this );
 }
 
 void ProceduralHolder::postConstructor()
@@ -243,7 +240,6 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 		setParameterisedValues( true /* lazy */ );
 		try
 		{
-			IECoreGL::RendererPtr &m_lastRenderer = lastRenderer();
 			IECoreGL::RendererPtr rendererToReuse = 0;
 			boost::python::object pythonProcedural( p );
 			if( m_lastRenderer && PyObject_HasAttrString( pythonProcedural.ptr(), "willRerender" ) )
@@ -483,10 +479,4 @@ void ProceduralHolder::buildComponents()
 	}
 
 #endif
-}
-
-
-IECoreGL::RendererPtr &ProceduralHolder::lastRenderer()
-{
-	return g_lastRenderer[this];
 }
