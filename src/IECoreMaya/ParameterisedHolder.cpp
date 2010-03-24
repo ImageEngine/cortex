@@ -87,9 +87,6 @@ template<typename B>
 MObject ParameterisedHolder<B>::aParameterisedSearchPathEnvVar;
 
 template<typename B>
-ClassData<ParameterisedHolder<B>, typename ParameterisedHolder<B>::ParameterSet> ParameterisedHolder<B>::g_dirtyParameters;
-
-template<typename B>
 const std::string ParameterisedHolder<B>::g_attributeNamePrefix = "parm_";
 
 template<typename B>
@@ -109,13 +106,11 @@ ParameterisedHolder<B>::ParameterisedHolder()
 	:	m_parameterised( 0 ), m_failedToLoad( false )
 {
 	m_plcb = new PLCB( this );
-	g_dirtyParameters.create( this );
 }
 
 template<typename B>
 ParameterisedHolder<B>::~ParameterisedHolder()
 {
-	g_dirtyParameters.erase( this );
 }
 
 template<typename B>
@@ -165,7 +160,7 @@ MStatus ParameterisedHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArra
 			} while( !parameter && !p.isNull() );
 			if( parameter )
 			{
-				dirtyParameters().insert( parameter );
+				m_dirtyParameters.insert( parameter );
 			}
 		}
 	}
@@ -422,12 +417,6 @@ MStatus ParameterisedHolder<B>::setParameterisedValues()
 }
 
 template<typename B>
-typename ParameterisedHolder<B>::ParameterSet &ParameterisedHolder<B>::dirtyParameters()
-{
-	return g_dirtyParameters[this];
-}
-
-template<typename B>
 MStatus ParameterisedHolder<B>::setParameterisedValues( bool lazy )
 {
 	ParameterisedInterface *parameterisedInterface = getParameterisedInterface();
@@ -437,12 +426,12 @@ MStatus ParameterisedHolder<B>::setParameterisedValues( bool lazy )
 	}
 	
 	MStatus s;
-	setParameterisedValuesWalk( lazy, parameterisedInterface->parameters(), s, dirtyParameters() );
+	setParameterisedValuesWalk( lazy, parameterisedInterface->parameters(), s );
 	return s;
 }
 
 template<typename B>
-bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::ParameterPtr parameter, MStatus &status, const ParameterSet &dirtyParms )
+bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::ParameterPtr parameter, MStatus &status )
 {
 	MFnDependencyNode fnDN( B::thisMObject() );
 	
@@ -455,7 +444,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 		for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 		{
-			bool b = setParameterisedValuesWalk( lazy, *cIt, status, dirtyParms );
+			bool b = setParameterisedValuesWalk( lazy, *cIt, status );
 			childParametersWereSet = childParametersWereSet || b;
 		}
 	}
@@ -463,7 +452,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 	// then set this parameter if necessary
 	
 	bool thisParameterWasSet = false;
-	if( parameter->name()!="" && (!lazy || dirtyParms.find( parameter )!=dirtyParms.end()) )
+	if( parameter->name()!="" && (!lazy || m_dirtyParameters.find( parameter )!=m_dirtyParameters.end()) )
 	{
 		ParameterToAttributeNameMap::const_iterator nIt = m_parametersToAttributeNames.find( parameter );
 		if( nIt==m_parametersToAttributeNames.end() )
@@ -492,7 +481,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 					}
 					else
 					{
-						dirtyParameters().erase( parameter );
+						m_dirtyParameters.erase( parameter );
 						thisParameterWasSet = true;
 					}
 				}
@@ -546,7 +535,7 @@ MStatus ParameterisedHolder<B>::setParameterisedValue( ParameterPtr pa )
 		s = IECoreMaya::Parameter::setValue( p, pa );
 		if( s )
 		{
-			dirtyParameters().erase( pa );
+			m_dirtyParameters.erase( pa );
 		}
 	}
 	catch ( std::exception &e )
@@ -679,7 +668,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 
 		m_attributeNamesToParameters[mAttributeName] = children[i];
 		m_parametersToAttributeNames[children[i]] = mAttributeName;
-		dirtyParameters().insert( children[i] );
+		m_dirtyParameters.insert( children[i] );
 
 		MPlugArray connectionsFromMe, connectionsToMe;
 		ObjectPtr valueBeforeAttributeRemoval = 0;

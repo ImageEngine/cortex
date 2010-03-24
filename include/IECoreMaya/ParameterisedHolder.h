@@ -45,7 +45,6 @@ class MPxComponentShape;
 class MPxImagePlane;
 
 #include "IECore/Parameterised.h"
-#include "IECore/ClassData.h"
 
 #include "IECoreMaya/ParameterisedHolderInterface.h"
 #include "IECoreMaya/MStringLess.h"
@@ -138,10 +137,9 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 
 		typedef std::set<IECore::ParameterPtr> ParameterSet;
 		/// Parameters for which the node value has changed since the last time they were set.
-		static IECore::ClassData<ParameterisedHolder, ParameterSet> g_dirtyParameters;
-		ParameterSet &dirtyParameters();
+		ParameterSet m_dirtyParameters;
 
-		bool setParameterisedValuesWalk( bool lazy, IECore::ParameterPtr parameter, MStatus &status, const ParameterSet &dirtyParms );
+		bool setParameterisedValuesWalk( bool lazy, IECore::ParameterPtr parameter, MStatus &status );
 
 		class PLCB : public PostLoadCallback
 		{
