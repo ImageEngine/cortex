@@ -87,7 +87,7 @@ MStatus OpHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArray &plugArra
 	/// This isn't the best way of doing it, but at this point we can't even be sure that the Op has been loaded,
 	/// so calling plugParameter() may not work. We can't call getOp() or getParameterised() here, as it seems
 	/// we can't do things such as adding/removing attributes within this function
-	if( std::string( plug.partialName().substring( 0, 4 ).asChar() ) == "parm_" )
+	if( std::string( plug.partialName().substring( 0, 4 ).asChar() ) == ParameterisedHolder<B>::g_attributeNamePrefix )
 	{
 		MFnDependencyNode fnDN( B::thisMObject() );
 		MStatus s;

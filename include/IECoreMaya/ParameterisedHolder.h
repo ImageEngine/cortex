@@ -161,6 +161,8 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 
 		IECore::RunTimeTypedPtr m_parameterised;
 		bool m_failedToLoad; // to avoid constantly trying to reload things that aren't there
+		
+		static const std::string g_attributeNamePrefix; // a prefix used to denote attributes that represent parameters
 
 };
 

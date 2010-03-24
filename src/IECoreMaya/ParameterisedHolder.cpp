@@ -90,6 +90,9 @@ template<typename B>
 ClassData<ParameterisedHolder<B>, typename ParameterisedHolder<B>::ParameterSet> ParameterisedHolder<B>::g_dirtyParameters;
 
 template<typename B>
+const std::string ParameterisedHolder<B>::g_attributeNamePrefix = "parm_";
+
+template<typename B>
 ParameterisedHolder<B>::PLCB::PLCB( ParameterisedHolder<B> *node) : m_node(node)
 {
 }
@@ -820,9 +823,6 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 template<typename B>
 MStatus ParameterisedHolder<B>::removeUnecessaryAttributes()
 {
-	/// \todo Make this a parameter, but only when the library's major version is incremented
-	const std::string &rootName = "parm_";
-
 	MObjectArray toRemove;
 	MFnDependencyNode fnDN( B::thisMObject() );
 	for( unsigned i=0; i<fnDN.attributeCount(); i++ )
@@ -831,7 +831,7 @@ MStatus ParameterisedHolder<B>::removeUnecessaryAttributes()
 		MFnAttribute fnAttr( attr );
 
 		MString attrName = fnAttr.name();
-		if( 0==strncmp( attrName.asChar(), rootName.c_str(), rootName.size() ) )
+		if( 0==strncmp( attrName.asChar(), g_attributeNamePrefix.c_str(), g_attributeNamePrefix.size() ) )
 		{
 			if( m_attributeNamesToParameters.find( fnAttr.name() )==m_attributeNamesToParameters.end() )
 			{
