@@ -60,7 +60,7 @@ class PresetManagerUI() :
 	def save( self ) :
 		SaveUI( self.__node )
 	
-	### Call to load a preser
+	### Call to load a preset.
 	def load( self ) :
 		LoadUI( self.__node )
 
