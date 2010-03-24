@@ -212,6 +212,7 @@ from IDXReaderTest import IDXReaderTest
 from ThreadingTest import ThreadingTest
 from ImageConvolveOpTest import *
 from StringUtilTest import *
+from ClassParameterTest import ClassParameterTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

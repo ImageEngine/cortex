@@ -150,35 +150,40 @@ class ParameterParser :
 	def __serialiseWalk(self, parameter, rootName):
 
 		parmType = parameter.typeId()
-		if not parmType in self.__typesToSerialisers :
-			# no registered serialiser
-			if parameter.isInstanceOf( IECore.CompoundParameter.staticTypeId() ) :
-				# but it's a CompoundParameter so we can just recurse.
-				path = rootName
-				if parameter.name :
-					path = path + parameter.name + '.'
-				# recurse
-				result = []
-				for childParm in parameter.values() :
-					result += self.__serialiseWalk( childParm, path )
-				return result
-			else :
-				# no serialiser available and not a CompoundParameter - bail
-				raise RuntimeError("No serialiser available for parameter \"%s\"" % parameter.name)
-		else :
+		if not parmType in self.__typesToSerialisers and not isinstance( parameter, IECore.CompoundParameter ) :
+			# bail if no serialiser available, unless it's a CompoundParameter in which case we'll content
+			# ourselves with serialising the children if no serialiser is available.
+			raise RuntimeError( "No serialiser available for parameter \"%s\"" % parameter.name )
+		
+		result = []
+		if parmType in self.__typesToSerialisers :
 			# we have a registered serialiser - use it
 			f = self.__typesToSerialisers[parmType]
 			try:
 				s = f( parameter )
-				assert( isinstance( s, list ) )
+				if not isinstance( s, list ) :
+					raise RuntimeError( "Serialiser did not return a list." )
 				for ss in s :
-					assert( isinstance( ss, str ) )
+					if not isinstance( ss, str ) :
+						raise RuntimeError( "Serialiser returned a list with an element which is not a string." )
 			except Exception, e:
 				raise RuntimeError("Problem serialising parameter \"%s\" : %s" % (parameter.name, e))
 
 			# serialize
-			return [ '-' + rootName + parameter.name ] + s
+			result += [ '-' + rootName + parameter.name ] + s
 
+		# recurse to children of CompoundParameters
+		if parameter.isInstanceOf( IECore.CompoundParameter.staticTypeId() ) :
+			# but it's a CompoundParameter so we can just recurse.
+			path = rootName
+			if parameter.name :
+				path = path + parameter.name + '.'
+			# recurse
+			for childParm in parameter.values() :
+				result += self.__serialiseWalk( childParm, path )
+		
+		return result
+		
 	@classmethod
 	## Registers a parser and serialiser for a new Parameter type.
 	def registerType( cls, typeId, parser, serialiser ) :

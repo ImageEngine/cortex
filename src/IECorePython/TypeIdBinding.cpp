@@ -356,6 +356,7 @@ void bindTypeId()
 		.value( "CurveLineariser", CurveLineariserTypeId )
 		.value( "CompoundDataBase", CompoundDataBaseTypeId )
 		.value( "ImageConvolveOp", ImageConvolveOpTypeId )
+		.value( "ClassParameter", ClassParameterTypeId )
 	;
 }
 

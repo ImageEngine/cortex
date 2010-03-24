@@ -41,7 +41,7 @@ class TestClassLoader( unittest.TestCase ) :
 
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 
-		self.assertEqual( l.classNames(), ["bad", "compoundObjectInOut", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing'] )
+		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "compoundObjectInOut", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing'] )
 		self.assertEqual( l.classNames( "p*" ), ["parameterTypes", "path.With.Dot/multiply", "presetParsing"] )
 		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
 		self.assertEqual( l.getDefaultVersion( "presetParsing" ), 1 )
@@ -56,7 +56,7 @@ class TestClassLoader( unittest.TestCase ) :
 	def testFinalSlash( self ) :
 
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops/", ":" ) )
-		self.assertEqual( l.classNames(), ["bad", "compoundObjectInOut", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing'] )
+		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "compoundObjectInOut", "maths/multiply", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing'] )
 
 	def testStaticLoaders( self ) :
 

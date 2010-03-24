@@ -99,6 +99,7 @@ from SubstitutedDict import SubstitutedDict
 from VisualiserProcedural import VisualiserProcedural
 from PresetManager import PresetManager
 from IDXReader import IDXReader
+from ClassParameter import ClassParameter
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *
