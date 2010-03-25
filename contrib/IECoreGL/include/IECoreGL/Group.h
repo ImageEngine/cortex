@@ -39,7 +39,9 @@
 
 #include "OpenEXR/ImathMatrix.h"
 
+#include "tbb/queuing_rw_mutex.h"
 #include <list>
+
 
 namespace IECoreGL
 {
@@ -73,9 +75,12 @@ class Group : public Renderable
 		virtual void render( ConstStatePtr state ) const;
 		virtual Imath::Box3f bound() const;
 
+		// thread-safe methods that change the child container.
 		void addChild( RenderablePtr child );
 		void removeChild( RenderablePtr child );
 		void clearChildren();
+
+		// Not thread-safe
 		const ChildContainer &children() const;
 
 	private :
@@ -83,6 +88,8 @@ class Group : public Renderable
 		StatePtr m_state;
 		Imath::M44f m_transform;
 		ChildContainer m_children;
+		typedef tbb::queuing_rw_mutex ChildMutex;
+		mutable ChildMutex m_childMutex;
 
 };
 

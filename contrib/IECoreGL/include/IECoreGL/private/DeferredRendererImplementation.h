@@ -6,6 +6,8 @@
 #include <stack>
 #include <vector>
 
+#include "tbb/enumerable_thread_specific.h"
+
 namespace IECoreGL
 {
 
@@ -53,14 +55,34 @@ class DeferredRendererImplementation : public RendererImplementation
 		ScenePtr m_scene;
 
 		typedef std::stack<Imath::M44f> TransformStack;
-		TransformStack m_transformStack;
-
 		typedef std::vector<StatePtr> StateStack;
-		StateStack m_stateStack;
-
 		typedef std::stack<GroupPtr> GroupStack;
-		GroupStack m_groupStack;
 
+		struct RenderContext : public RefCounted
+		{
+			TransformStack transformStack;
+			StateStack stateStack;
+			GroupStack groupStack;
+		};
+		IE_CORE_DECLAREPTR( RenderContext );
+
+		// render context used by renderer outside procedural rendering.		
+		RenderContextPtr m_defaultContext;
+
+		typedef tbb::enumerable_thread_specific< std::stack< RenderContextPtr > > ThreadRenderContext;
+
+		// render contexts used by renderer while running procedurals in multiple threads.
+		ThreadRenderContext m_threadContextPool;
+
+		// returns at any given thread, the current context ( from procedural or not ).
+		RenderContext *currentContext();
+		// push method for procedural's context
+		void pushContext( RenderContextPtr context );
+		// pop method for procedural's context
+		RenderContextPtr popContext();
+
+		class ProceduralTask;
+		struct ScopedRenderContext;
 };
 
 IE_CORE_DECLAREPTR( DeferredRendererImplementation );

@@ -38,6 +38,7 @@ import unittest
 import os
 import os.path
 import threading
+import math
 
 from IECore import *
 
@@ -447,7 +448,7 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( commandResult, BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 1 )
 
-	def testMultithread( self ):
+	def testParallelRenders( self ):
 
 		allScenes = []
 		
@@ -472,6 +473,88 @@ class TestRenderer( unittest.TestCase ) :
 
 		for s in allScenes :
 			s.render( State( True ) )
+
+	class RecursiveProcedural( Renderer.Procedural ):
+
+		maxLevel = 5
+		threadsUsed = set()
+
+		def __init__( self, level = 0 ):
+			Renderer.Procedural.__init__( self )
+			self.__level = level
+			if level == 0 :
+				self.threadsUsed.clear()
+
+		def bound( self ) :
+			return Box3f( V3f( -1 ), V3f( 1 ) )
+
+		def render( self, renderer ):
+			# registers this thread id
+			self.threadsUsed.add( threading.current_thread().ident )
+			renderer.attributeBegin()
+			renderer.setAttribute( "color", Color3fData( Color3f( float(self.__level)/self.maxLevel, 0, 1 - float(self.__level)/self.maxLevel ) ) )
+			renderer.transformBegin()
+			m = M44f()
+			m.translate( V3f( 0, 0.5, 0 ) )
+			renderer.concatTransform( m )
+			renderer.geometry( "sphere", {}, {} )
+			renderer.transformEnd()
+			# end of recursion
+			if self.__level < self.maxLevel :
+				renderer.transformBegin()
+				m = M44f()
+				m.translate( V3f( 0, -0.5, 0 ) )
+				renderer.concatTransform( m )
+				m = M44f()
+				m.scale( V3f( 0.5 ) )
+				renderer.concatTransform( m )
+				for i in xrange( 0, 2 ) :
+					renderer.transformBegin()
+					m = M44f()
+					m.translate( V3f( 0.5 * (i - 0.5) , 0, 0) )
+					renderer.concatTransform( m )
+					proc = TestRenderer.RecursiveProcedural( self.__level + 1 )
+					renderer.procedural( proc )
+					renderer.transformEnd()
+				renderer.transformEnd()
+			renderer.attributeEnd()
+
+	def testMultithreadedProcedural( self ):
+
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		r.worldBegin()
+		p = self.RecursiveProcedural()
+		r.procedural( p )
+		r.worldEnd()
+
+		self.assert_( len(self.RecursiveProcedural.threadsUsed) > 1 )
+
+	def testParallelMultithreadedProcedurals( self ):
+
+		renders = []
+
+		def newRender():
+			r = Renderer()
+			r.setOption( "gl:mode", StringData( "deferred" ) )
+			r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+			r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+			r.worldBegin()
+			p = self.RecursiveProcedural()
+			r.procedural( p )
+			r.worldEnd()
+			renders.append( 0 )
+
+		threads = []
+		for i in xrange( 0,10 ):
+			newThread = threading.Thread(target=newRender)
+			newThread.start()
+			threads.append( newThread )
+		
+		for t in threads :
+			t.join()
 
 	def tearDown( self ) :
 

@@ -34,6 +34,7 @@
 
 #include <boost/python.hpp>
 
+#include "IECore/SimpleTypedData.h"
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/bindings/RendererBinding.h"
@@ -55,10 +56,25 @@ static TextureLoaderPtr textureLoader( Renderer &r )
 	return r.textureLoader();
 }
 
+static void worldBegin( Renderer &r )
+{
+	if ( IECore::staticPointerCast<const IECore::StringData>(r.getOption( "gl:mode" ))->readable() == "deferred" )
+	{
+		// The deferred render uses multiple threads when rendering procedurals. So we enable threads for python here.
+		// \todo Consider moving this to IECore::Renderer::worldBegin binding (assuming all decent renderers are multithreaded).
+		if ( !PyEval_ThreadsInitialized() )
+		{
+			PyEval_InitThreads();
+		}
+	}
+	r.worldBegin();
+}
+
 void bindRenderer()
 {
 	IECorePython::RunTimeTypedClass<Renderer>()
 		.def( init<>() )
+		.def("worldBegin", &worldBegin )
 		.def( "scene", &Renderer::scene )
 		.def( "shaderManager", &shaderManager )
 		.def( "textureLoader", &textureLoader )

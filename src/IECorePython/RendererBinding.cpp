@@ -284,6 +284,12 @@ static IECore::DataPtr command( Renderer &r, const std::string &name, const dict
 	return r.command( name, p );
 }
 
+static void procedural( Renderer &r, Renderer::ProceduralPtr proc )
+{
+	ScopedGILRelease gilRelease;
+	r.procedural( proc );
+}
+
 static void worldEnd( Renderer &r )
 {
 	ScopedGILRelease gilRelease;
@@ -334,7 +340,7 @@ void bindRenderer()
 		.def("patchMesh", &patchMesh)
 		.def("geometry", &geometry)
 
-		.def("procedural", &Renderer::procedural)
+		.def("procedural", &procedural)
 
 		.def("instanceBegin", &instanceBegin)
 		.def("instanceEnd", &Renderer::instanceEnd)

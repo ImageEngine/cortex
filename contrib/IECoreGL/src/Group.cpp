@@ -92,6 +92,8 @@ void Group::render( ConstStatePtr state ) const
 
 		ConstStatePtr s = scope.boundState();
 
+		ChildMutex::scoped_lock lock( m_childMutex, false );
+
 		for( ChildContainer::const_iterator it=m_children.begin(); it!=m_children.end(); it++ )
 		{
 			(*it)->render( s );
@@ -102,6 +104,8 @@ void Group::render( ConstStatePtr state ) const
 
 Imath::Box3f Group::bound() const
 {
+	ChildMutex::scoped_lock lock( m_childMutex, false );
+
 	Box3f result;
 	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
 	{
@@ -112,16 +116,19 @@ Imath::Box3f Group::bound() const
 
 void Group::addChild( RenderablePtr child )
 {
+	ChildMutex::scoped_lock lock( m_childMutex, true );
 	m_children.push_back( child );
 }
 
 void Group::removeChild( RenderablePtr child )
 {
+	ChildMutex::scoped_lock lock( m_childMutex, true );
 	m_children.remove( child );
 }
 
 void Group::clearChildren()
 {
+	ChildMutex::scoped_lock lock( m_childMutex, true );
 	m_children.clear();
 }
 
