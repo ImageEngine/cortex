@@ -45,6 +45,7 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -159,6 +160,18 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 
 IE_CORE_DECLAREPTR( ParameterisedProceduralWrap );
 
+static void render( ParameterisedProcedural &o, Renderer *renderer )
+{
+	ScopedGILRelease gilRelease;
+	o.render( renderer );
+}
+
+static void render2( ParameterisedProcedural &o, Renderer *renderer, bool inAttributeBlock, bool withState, bool withGeometry, bool immediateGeometry )
+{
+	ScopedGILRelease gilRelease;
+	o.render( renderer, inAttributeBlock, withState, withGeometry, immediateGeometry );
+}
+
 static ParameterPtr parameterisedProceduralGetItem( ParameterisedProcedural &o, const std::string &n )
 {
 	ParameterPtr p = o.parameters()->parameter<Parameter>( n );
@@ -177,8 +190,8 @@ void bindParameterisedProcedural()
 		.def( init< const std::string >( arg( "description") ) )
 		.add_property( "description", make_function( &ParameterisedProcedural::description, return_value_policy<copy_const_reference>() ) )
 		.def( "parameters", (CompoundParameterPtr (ParameterisedProcedural::*)())&ParameterisedProcedural::parameters )
-		.def( "render", (void (ParameterisedProcedural::*)( Renderer * ) const )&ParameterisedProcedural::render )
-		.def( "render", (void (ParameterisedProcedural::*)( Renderer *, bool, bool, bool, bool ) const )&ParameterisedProcedural::render, ( arg( "renderer" ), arg( "inAttributeBlock" ) = true, arg( "withState" ) = true, arg( "withGeometry" ) = true, arg( "immediateGeometry" ) = false ) )
+		.def( "render", &render )
+		.def( "render", &render2, ( arg( "renderer" ), arg( "inAttributeBlock" ) = true, arg( "withState" ) = true, arg( "withGeometry" ) = true, arg( "immediateGeometry" ) = false ) )
 		.def( "__getitem__", &parameterisedProceduralGetItem )
 	;
 

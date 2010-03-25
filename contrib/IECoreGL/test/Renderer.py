@@ -519,20 +519,49 @@ class TestRenderer( unittest.TestCase ) :
 				renderer.transformEnd()
 			renderer.attributeEnd()
 
-	def testMultithreadedProcedural( self ):
+	class RecursiveParameterisedProcedural( ParameterisedProcedural ):
+
+		maxLevel = 5
+		threadsUsed = set()
+
+		def __init__( self, level = 0 ):
+			ParameterisedProcedural.__init__( self )
+			self.__level = level
+			if level == 0 :
+				self.threadsUsed.clear()
+
+		def doRenderState( self, renderer, args ):
+			pass
+
+		def doBound( self, args ) :
+			return Box3f( V3f( -1 ), V3f( 1 ) )
+
+		def doRender( self, renderer, args ):
+			# registers this thread id
+			self.threadsUsed.add( threading.current_thread().ident )
+			# end of recursion
+			if self.__level < self.maxLevel :
+				for i in xrange( 0, 2 ) :
+					proc = TestRenderer.RecursiveParameterisedProcedural( self.__level + 1 )
+					proc.render( renderer )
+
+	def __testMultithreadedProcedural( self, procType ):
 
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 		r.worldBegin()
-		p = self.RecursiveProcedural()
-		r.procedural( p )
+		p = procType()
+		if isinstance( p, Renderer.Procedural ):
+			r.procedural( p )
+		else:
+			p.render( r )
 		r.worldEnd()
 
-		self.assert_( len(self.RecursiveProcedural.threadsUsed) > 1 )
+		self.assert_( len(procType.threadsUsed) > 1 )
 
-	def testParallelMultithreadedProcedurals( self ):
+	def __testParallelMultithreadedProcedurals( self, procType ):
 
 		renders = []
 
@@ -542,8 +571,11 @@ class TestRenderer( unittest.TestCase ) :
 			r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 			r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 			r.worldBegin()
-			p = self.RecursiveProcedural()
-			r.procedural( p )
+			p = procType()
+			if isinstance( p, Renderer.Procedural ):
+				r.procedural( p )
+			else:
+				p.render( r )
 			r.worldEnd()
 			renders.append( 0 )
 
@@ -555,6 +587,19 @@ class TestRenderer( unittest.TestCase ) :
 		
 		for t in threads :
 			t.join()
+
+	def testMultithreadedProcedural( self ):
+		self.__testMultithreadedProcedural( self.RecursiveProcedural )
+
+	def testMultithreadedParameterisedProcedural( self ):
+		self.__testMultithreadedProcedural( self.RecursiveParameterisedProcedural )
+
+	def testParallelMultithreadedProcedurals( self ):
+		self.__testParallelMultithreadedProcedurals( self.RecursiveProcedural )
+
+	def testParallelMultithreadedProcedurals( self ):
+		self.__testParallelMultithreadedProcedurals( self.RecursiveParameterisedProcedural )
+
 
 	def tearDown( self ) :
 
