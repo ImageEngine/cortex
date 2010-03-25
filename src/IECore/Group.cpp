@@ -321,7 +321,10 @@ bool Group::isEqualTo( const Object *other ) const
 void Group::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	VisibleRenderable::memoryUsage( a );
-	a.accumulate( m_transform );
+	if( m_transform )
+	{
+		a.accumulate( m_transform );
+	}
 	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
 	{
 		a.accumulate( *it );

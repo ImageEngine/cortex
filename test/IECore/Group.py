@@ -174,6 +174,12 @@ class TestGroup( unittest.TestCase ) :
 		for i in range( 0, sys.getrefcount( None ) + 100 ) :
 			p = g.parent()
 
+	def testMemoryUsage( self ) :
+	
+		# this used to crash if the group didn't have a transform
+		g = Group()
+		self.failUnless( g.memoryUsage() > 0 )
+
 	def tearDown( self ) :
 
 		if os.path.isfile("test/group.cob"):
