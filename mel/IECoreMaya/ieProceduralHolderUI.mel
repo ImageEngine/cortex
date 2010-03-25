@@ -62,6 +62,7 @@ global proc AEieProceduralHolderTemplate( string $nodeName )
 	
 		editorTemplate -beginLayout "Class";
 			ieParameterisedHolderUIClassControl();
+			ieParameterisedHolderUIParameterPresetsControl();
 		editorTemplate -endLayout;
 
 		editorTemplate -beginLayout "Display";

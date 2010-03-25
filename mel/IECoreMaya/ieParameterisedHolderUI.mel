@@ -41,6 +41,7 @@ global proc AEieParameterisedHolderTemplate( string $nodeName )
 	
 		editorTemplate -beginLayout "Class";
 			ieParameterisedHolderUIClassControl();
+			ieParameterisedHolderUIParameterPresetsControl();
 		editorTemplate -endLayout;
 		
 		editorTemplate -beginLayout "Parameters";
@@ -172,6 +173,42 @@ global proc ieParameterisedHolderUIClassControlVersionCallback( string $node, st
 	/// appreciate us doing this right in the middle of a menu callback.
 	evalDeferred( "AEbuildControls()" );
 }
+
+global proc ieParameterisedHolderUIParameterPresetsControl()
+{
+	editorTemplate -callCustom "ieParameterisedHolderUIParameterPresetsControlNewAndReplace" "ieParameterisedHolderUIParameterPresetsControlNewAndReplace" "iDontExist";
+}
+
+global proc ieParameterisedHolderUIParameterPresetsControlNewAndReplace( string $attrName )
+{
+	string $node = ieAttrNode( $attrName );
+	
+	string $pyStub = "import IECoreMaya; IECoreMaya.PresetManagerUI( '" + $node + "' )";
+	
+	string $controlName = "ieParameterisedHolderUIAEParameterPresetsControl";
+	if( `control -exists $controlName` )
+	{
+		deleteUI $controlName;
+	}
+	
+	columnLayout -adj 1 $controlName;
+	
+		separator -style "none" -h 3;
+		
+		rowLayout -nc 4 -adj 4 -cw 2 60 -cw 3 60;
+
+			text -align right -label "Parameter Values" -ann "Load and Save presets for the node's parameters, or a sub-set of them.";
+
+			button -label "Save..." -w 60 -command ( "python( \"" + $pyStub + ".save()\" );" );
+			button -label "Load..." -w 60 -command ( "python( \"" + $pyStub + ".load()\" );" );
+
+		setParent ..;
+
+		separator -style "none" -h 3;
+
+	setParent ..;	
+}
+
 
 global proc ieParameterisedHolderUIExtraAttributesControl()
 {

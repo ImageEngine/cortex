@@ -38,6 +38,7 @@ global proc AEieOpHolderNodeTemplate( string $nodeName )
 	
 		editorTemplate -beginLayout "Class";
 			ieParameterisedHolderUIClassControl();
+			ieParameterisedHolderUIParameterPresetsControl();
 		editorTemplate -endLayout;
 		
 		editorTemplate -beginLayout "Parameters";
