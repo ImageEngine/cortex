@@ -193,6 +193,10 @@ FileSequencePtr FileSequenceParameter::getFileSequenceValue() const
 			ls( fileSequenceStr, result, m_minSequenceSize );
 			return result;
 		}
+		else if ( fileSequenceStr.size() == 0 )
+		{
+			return 0;
+		}	
 	}
 	return new FileSequence( fileSequenceStr );
 }
