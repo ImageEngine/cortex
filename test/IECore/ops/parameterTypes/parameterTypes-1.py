@@ -242,6 +242,13 @@ class parameterTypes( Op ) :
 					description = "",
 					defaultValue = PointsPrimitive(0)
 				),
+
+				ObjectParameter(
+					name = "p7",
+					description = "",
+					defaultValue = MeshPrimitive(),
+					types = [ TypeId.MeshPrimitive ]
+				),
 			]
 		)
 
