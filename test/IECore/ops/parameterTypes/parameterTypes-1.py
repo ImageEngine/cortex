@@ -211,6 +211,37 @@ class parameterTypes( Op ) :
 					description = "A FrameList",
 					defaultValue = "",
 				),
+
+				ImagePrimitiveParameter(
+					name = "p1",
+					description = "",
+					defaultValue = ImagePrimitive()
+				),
+				MotionPrimitiveParameter(
+					name = "p2",
+					description = "",
+					defaultValue = MotionPrimitive()
+				),
+				PrimitiveParameter(
+					name = "p3",
+					description = "",
+					defaultValue = ImagePrimitive()
+				),
+				MeshPrimitiveParameter(
+					name = "p4",
+					description = "",
+					defaultValue = MeshPrimitive()
+				),
+				CurvesPrimitiveParameter(
+					name = "p5",
+					description = "",
+					defaultValue = CurvesPrimitive()
+				),
+				PointsPrimitiveParameter(
+					name = "p6",
+					description = "",
+					defaultValue = PointsPrimitive(0)
+				),
 			]
 		)
 
