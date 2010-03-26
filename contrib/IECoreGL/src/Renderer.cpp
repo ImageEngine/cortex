@@ -1599,17 +1599,18 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 	{
 		if( parent )
 		{
-			parent->removeChild( child );
+			parent->safeRemoveChild( child );
 		}
 		else
 		{
 			// no parent, ie we're at the root of the Scene. just remove all the children.
-			child->clearChildren();
+			child->safeClearChildren();
 		}
 		return true;
 	}
 	
 	bool result = false;
+	IECoreGL::Group::ScopedChildAccess childAccess( *child );
 	IECoreGL::Group::ChildContainer::const_iterator it = child->children().begin();
 	while( it!=child->children().end() )
 	{

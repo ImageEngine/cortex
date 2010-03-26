@@ -48,6 +48,7 @@ namespace IECoreGL
 list children( const Group &g )
 {
 	list result;
+	Group::ScopedChildAccess childAccess( g );
 	Group::ChildContainer::const_iterator it;
 	for( it=g.children().begin(); it!=g.children().end(); it++ )
 	{
@@ -64,9 +65,10 @@ void bindGroup()
 		.def( "getTransform", &Group::getTransform, return_value_policy<copy_const_reference>() )
 		.def( "setState", &Group::setState )
 		.def( "getState", (StatePtr(Group::*)())&Group::getState )
-		.def( "addChild", &Group::addChild )
-		.def( "removeChild", &Group::removeChild )
-		.def( "clearChildren", &Group::clearChildren )
+		.def( "addChild", &Group::safeAddChild )
+		.def( "removeChild", &Group::safeRemoveChild )
+		.def( "clearChildren", &Group::safeClearChildren )
+		.def( "bound", &Group::safeBound )	// Bounds agains thread-safe version of bound
 		.def( "children", &children, "Returns a list referencing the children of the group - modifying the list has no effect on the Group." )
 	;
 }

@@ -124,7 +124,7 @@ void DeferredRendererImplementation::transformBegin()
 
 	GroupPtr g = new Group;
 	g->setTransform( curContext->transformStack.top() );
-	curContext->groupStack.top()->addChild( g );
+	curContext->groupStack.top()->safeAddChild( g );
 	curContext->groupStack.push( g );
 
 	curContext->transformStack.push( M44f() );
@@ -159,7 +159,7 @@ void DeferredRendererImplementation::attributeBegin()
 	GroupPtr g = new Group;
 	g->setTransform( curContext->transformStack.top() );
 	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
-	curContext->groupStack.top()->addChild( g );
+	curContext->groupStack.top()->safeAddChild( g );
 	curContext->groupStack.push( g );
 
 	curContext->transformStack.push( M44f() );
@@ -234,7 +234,7 @@ void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )
 	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
 	g->addChild( primitive );
 
-	curContext->groupStack.top()->addChild( g );
+	curContext->groupStack.top()->safeAddChild( g );
 }
 
 // Class that sets the scope of a RenderContext on the renderer thread.
