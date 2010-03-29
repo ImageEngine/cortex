@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,17 +32,45 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_LIGHTS_H
-#define IECOREGL_LIGHTS_H
+#ifndef IECOREGL_HSVTORGB_H
+#define IECOREGL_HSVTORGB_H
 
-#include "IECoreGL/light.h"
-
-void lights( vec3 p, out vec3 Cl[gl_MaxLights], out vec3 L[gl_MaxLights], int n )
+vec3 ieHsvToRGB( vec3 hsv )
 {
-	for( int i=0; i<n; i++ )
+	if( hsv.b == 0.0 )
 	{
-		Cl[i] = light( p, i, L[i] );
+		return hsv.ggg;
 	}
+
+	float h = hsv.r * 6.0;
+	int i = int( floor( h ) );
+	float f = h - float( i );
+	float p = hsv.b * ( 1.0 - hsv.g );
+	float q = hsv.b * ( 1.0 - hsv.g * f );
+	float t = hsv.b * ( 1.0 - hsv.g * ( 1.0 - f ) );
+
+	if( i==0 )
+	{
+		return vec3( hsv.b, t, p );
+	}
+	else if( i==1 )
+	{
+		return vec3( q, hsv.b, p );
+	}
+	else if( i==2 )
+	{
+		return vec3( p, hsv.b, t );
+	}
+	else if( i==3 )
+	{
+		return vec3( p, q, hsv.b );
+	}
+	else if( i==4 )
+	{
+		return vec3( t, p, hsv.b );
+	}
+
+	return vec3( hsv.b, p, q );
 }
 
-#endif // IECOREGL_LIGHTS_H
+#endif // IECOREGL_HSVTORGB_H

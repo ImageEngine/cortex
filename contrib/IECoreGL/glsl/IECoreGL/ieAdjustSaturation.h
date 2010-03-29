@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,29 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_LINTOSRGB_H
-#define IECOREGL_LINTOSRGB_H
+#ifndef IECOREGL_ADJUSTSATURATION_H
+#define IECOREGL_ADJUSTSATURATION_H
 
-float ieLinToSRGB( float f )
+#include "IECoreGL/ieLuminance.h"
+
+/// Saturation value of 1 return c, 0 returns a fully desaturated
+/// color and > 1 returns a color with increased saturation.
+vec3 ieAdjustSaturation( vec3 c, float saturation )
 {
-	const float phi = 12.92;
-	const float cutoff = 0.003130805;
-
-	if( f <= cutoff )
-	{
-		return f * phi;
-	}
-	else
-	{
-		const float alpha = 0.055;
-		const float exponent = 2.4;
-		return ( 1.0 + alpha ) * pow( f, 1.0 / exponent ) - alpha;
-	}
+	float l = ieLuminance( c );
+	return mix( vec3( l, l, l ), c, saturation );
 }
 
-vec3 ieLinToSRGB( vec3 f )
-{
-	return vec3( ieLinToSRGB( f.x ), ieLinToSRGB( f.y ), ieLinToSRGB( f.z ) );
-}
-
-#endif // IECOREGL_LINTOSRGB_H
+#endif // IECOREGL_ADJUSTSATURATION_H

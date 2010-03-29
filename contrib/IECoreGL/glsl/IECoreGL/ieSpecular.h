@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,19 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_INTENSITY_H
-#define IECOREGL_INTENSITY_H
+#ifndef IECOREGL_SPECULAR_H
+#define IECOREGL_SPECULAR_H
 
-/// \todo These should be called ieLuminance to match the method
-/// in IECoreRI/ColorAlgo.h.
-float intensity( vec3 color, vec3 weights )
+vec3 ieSpecular( vec3 P, vec3 N, vec3 V, float roughness, vec3 Cl[gl_MaxLights], vec3 L[gl_MaxLights], int nLights )
 {
-	return dot( color, weights );
+	vec3 result;
+	for( int i=0 ; i<nLights; i++ )
+	{
+		vec3 H = normalize( normalize( L[i] ) + V );
+		result += Cl[i] * pow( max( 0.0, dot( N, H ) ), 1.0/roughness );
+	}
+	return result;
 }
 
-float intensity( vec3 color )
-{
-	return intensity( color, vec3( 0.212671, 0.715160, 0.072169 ) );
-}
-
-#endif // IECOREGL_INTENSITY_H
+#endif // IECOREGL_SPECULAR_H

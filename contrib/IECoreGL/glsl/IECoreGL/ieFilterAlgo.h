@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,17 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DIFFUSE_H
-#define IECOREGL_DIFFUSE_H
+#ifndef IECOREGL_FILTERALGO_H
+#define IECOREGL_FILTERALGO_H
 
-vec3 diffuse( vec3 P, vec3 N, vec3 Cl[gl_MaxLights], vec3 L[gl_MaxLights], int nLights )
+float ieFilteredStep( float edge, float x, float w )
 {
-	vec3 result;
-	for( int i=0 ; i<nLights; i++ )
-	{
-		result += Cl[i] * max( 0.0, dot( N, normalize( L[i] ) ) );
-	}
-	return result;
+	return clamp( ( x + w/2.0 - edge ) / w, 0.0, 1.0 );
 }
 
-#endif // IECOREGL_DIFFUSE_H
+float ieFilteredStep( float edge, float x )
+{
+	return ieFilteredStep( edge, x, max( 1.0e-6, fwidth( x ) ) );
+}
+
+float ieFilteredPulse( float edge0, float edge1, float x, float w )
+{
+	float x0 = x - w / 2.0;
+	float x1 = x + w;
+	return max( 0.0, ( min( x1, edge1 ) - max( x0, edge0 ) ) / w );
+}
+
+float ieFilteredPulse( float edge0, float edge1, float x )
+{
+	return ieFilteredPulse( edge0, edge1, x, max( 1.0e-6, fwidth( x ) ) );
+}
+
+#endif // IECOREGL_FILTERALGO_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_LIGHT_H
-#define IECOREGL_LIGHT_H
+#ifndef IECOREGL_LINTOSRGB_H
+#define IECOREGL_LINTOSRGB_H
 
-/// \todo All the functions in the glsl source need the ie prefix on them.
-vec3 light( vec3 p, int lightIndex, out vec3 L )
+float ieLinToSRGB( float f )
 {
-	vec3 Cl = gl_LightSource[lightIndex].diffuse.rgb;
+	const float phi = 12.92;
+	const float cutoff = 0.003130805;
 
-	if( gl_LightSource[lightIndex].position.w==0.0 )
+	if( f <= cutoff )
 	{
-		// directional light
-		L = normalize( gl_LightSource[lightIndex].position.xyz );
+		return f * phi;
 	}
 	else
 	{
-		// pointlight or spotlight
-
-		L = gl_LightSource[lightIndex].position.xyz - p;
-		float d = length( L );
-		vec3 Ln = L/d;
-
-		float falloff = 1.0 /
-			(	gl_LightSource[lightIndex].constantAttenuation +
-				gl_LightSource[lightIndex].linearAttenuation * d +
-				gl_LightSource[lightIndex].quadraticAttenuation * d * d );
-
-		if( gl_LightSource[lightIndex].spotCutoff!=180.0 )
-		{
-			// spotlight
-			float cosA = dot( -Ln, normalize( gl_LightSource[lightIndex].spotDirection.xyz ) );
-			if( cosA < gl_LightSource[lightIndex].spotCosCutoff )
-			{
-				falloff = 0.0;
-			}
-			else
-			{
-				falloff *= pow( cosA, gl_LightSource[lightIndex].spotExponent );
-			}
-		}
-
-		Cl *= falloff;
+		const float alpha = 0.055;
+		const float exponent = 2.4;
+		return ( 1.0 + alpha ) * pow( f, 1.0 / exponent ) - alpha;
 	}
-	return Cl;
 }
 
+vec3 ieLinToSRGB( vec3 f )
+{
+	return vec3( ieLinToSRGB( f.x ), ieLinToSRGB( f.y ), ieLinToSRGB( f.z ) );
+}
 
-#endif // IECOREGL_LIGHT_H
+#endif // IECOREGL_LINTOSRGB_H

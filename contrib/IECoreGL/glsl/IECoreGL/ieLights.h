@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,29 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_FILTERALGO_H
-#define IECOREGL_FILTERALGO_H
+#ifndef IECOREGL_LIGHTS_H
+#define IECOREGL_LIGHTS_H
 
-float ieFilteredStep( float edge, float x, float w )
+#include "IECoreGL/ieLight.h"
+
+void lights( vec3 p, out vec3 Cl[gl_MaxLights], out vec3 L[gl_MaxLights], int n )
 {
-	return clamp( ( x + w/2.0 - edge ) / w, 0.0, 1.0 );
+	for( int i=0; i<n; i++ )
+	{
+		Cl[i] = ieLight( p, i, L[i] );
+	}
 }
 
-float ieFilteredStep( float edge, float x )
-{
-	return ieFilteredStep( edge, x, max( 1.0e-6, fwidth( x ) ) );
-}
-
-float ieFilteredPulse( float edge0, float edge1, float x, float w )
-{
-	float x0 = x - w / 2.0;
-	float x1 = x + w;
-	return max( 0.0, ( min( x1, edge1 ) - max( x0, edge0 ) ) / w );
-}
-
-float ieFilteredPulse( float edge0, float edge1, float x )
-{
-	return ieFilteredPulse( edge0, edge1, x, max( 1.0e-6, fwidth( x ) ) );
-}
-
-#endif // IECOREGL_FILTERALGO_H
+#endif // IECOREGL_LIGHTS_H

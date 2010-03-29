@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,45 +32,49 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_HSVTORGB_H
-#define IECOREGL_HSVTORGB_H
+#ifndef IECOREGL_LIGHT_H
+#define IECOREGL_LIGHT_H
 
-vec3 hsvToRGB( vec3 hsv )
+vec3 ieLight( vec3 p, int lightIndex, out vec3 L )
 {
-	if( hsv.b == 0.0 )
-	{
-		return hsv.ggg;
-	}
+	vec3 Cl = gl_LightSource[lightIndex].diffuse.rgb;
 
-	float h = hsv.r * 6.0;
-	int i = int( floor( h ) );
-	float f = h - float( i );
-	float p = hsv.b * ( 1.0 - hsv.g );
-	float q = hsv.b * ( 1.0 - hsv.g * f );
-	float t = hsv.b * ( 1.0 - hsv.g * ( 1.0 - f ) );
+	if( gl_LightSource[lightIndex].position.w==0.0 )
+	{
+		// directional light
+		L = normalize( gl_LightSource[lightIndex].position.xyz );
+	}
+	else
+	{
+		// pointlight or spotlight
 
-	if( i==0 )
-	{
-		return vec3( hsv.b, t, p );
-	}
-	else if( i==1 )
-	{
-		return vec3( q, hsv.b, p );
-	}
-	else if( i==2 )
-	{
-		return vec3( p, hsv.b, t );
-	}
-	else if( i==3 )
-	{
-		return vec3( p, q, hsv.b );
-	}
-	else if( i==4 )
-	{
-		return vec3( t, p, hsv.b );
-	}
+		L = gl_LightSource[lightIndex].position.xyz - p;
+		float d = length( L );
+		vec3 Ln = L/d;
 
-	return vec3( hsv.b, p, q );
+		float falloff = 1.0 /
+			(	gl_LightSource[lightIndex].constantAttenuation +
+				gl_LightSource[lightIndex].linearAttenuation * d +
+				gl_LightSource[lightIndex].quadraticAttenuation * d * d );
+
+		if( gl_LightSource[lightIndex].spotCutoff!=180.0 )
+		{
+			// spotlight
+			float cosA = dot( -Ln, normalize( gl_LightSource[lightIndex].spotDirection.xyz ) );
+			if( cosA < gl_LightSource[lightIndex].spotCosCutoff )
+			{
+				falloff = 0.0;
+			}
+			else
+			{
+				falloff *= pow( cosA, gl_LightSource[lightIndex].spotExponent );
+			}
+		}
+
+		Cl *= falloff;
+	}
+	return Cl;
 }
 
-#endif // IECOREGL_HSVTORGB_H
+
+#endif // IECOREGL_LIGHT_H

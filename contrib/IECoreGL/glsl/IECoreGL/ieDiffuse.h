@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,58 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_RGBTOHSV_H
-#define IECOREGL_RGBTOHSV_H
+#ifndef IECOREGL_DIFFUSE_H
+#define IECOREGL_DIFFUSE_H
 
-vec3 rgbToHSV( vec3 rgb )
+vec3 ieDiffuse( vec3 P, vec3 N, vec3 Cl[gl_MaxLights], vec3 L[gl_MaxLights], int nLights )
 {
 	vec3 result;
-
-	float minc = min( min( rgb.r, rgb.g ), rgb.b );
-	float maxc = max( max( rgb.r, rgb.g ), rgb.b );
-
-	result.b = maxc; // v
-
-	float delta = maxc - minc;
-	if( maxc != 0.0 )
+	for( int i=0 ; i<nLights; i++ )
 	{
-		result.g = delta/maxc; // s
+		result += Cl[i] * max( 0.0, dot( N, normalize( L[i] ) ) );
 	}
-	else
-	{
-		result.g = 0.0;
-		result.r = 0.0;
-		return result;
-	}
-
-	if( delta==0.0 )
-	{
-		result.r = 0;
-	}
-	else
-	{
-		if( rgb.r == maxc )
-		{
-			result.r = (rgb.g - rgb.b) / delta;
-		}
-		else if( rgb.g == maxc )
-		{
-			result.r = 2.0 + (rgb.b - rgb.r) / delta;
-		}
-		else
-		{
-			result.r = 4.0 + (rgb.r - rgb.g) / delta;
-		}
-	}
-
-	result.r /= 6.0; // we'll keep hue in the 0-1 range
-
-	if( result.r < 0.0 )
-	{
-		result.r += 1.0;
-	}
-
 	return result;
 }
 
-#endif // IECOREGL_RGBTOHSV_H
+#endif // IECOREGL_DIFFUSE_H
