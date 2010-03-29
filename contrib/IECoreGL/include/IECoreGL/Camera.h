@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,8 +51,6 @@ class Camera : public Renderable
 		/// If screenWindow is specified as an empty box (the default),
 		/// then it'll be calculated to be -1,1 in width and to preserve
 		/// aspect ratio (based on resolution) in height.
-		/// \todo Should make default screenWindow behaviour match that
-		/// in IECore::Camera::addStandardParameters().
 		Camera( const Imath::M44f &transform = Imath::M44f(),
 			const Imath::V2i &resolution = Imath::V2i( 640, 480 ),
 			const Imath::Box2f &screenWindow = Imath::Box2f(),

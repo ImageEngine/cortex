@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -51,11 +51,22 @@ Camera::Camera( const Imath::M44f &transform,
 {
 	if( m_screenWindow.isEmpty() )
 	{
-		m_screenWindow.min.x = -1.0f;
-		m_screenWindow.max.x = 1.0f;
-		float y = (float)resolution.y / (float)resolution.x;
-		m_screenWindow.min.y = -y;
-		m_screenWindow.max.y = y;
+		float aspectRatio = (float)resolution.x/(float)resolution.y;
+		if( aspectRatio < 1.0f )
+		{
+			m_screenWindow.min.x = -1;
+			m_screenWindow.max.x = 1;
+			m_screenWindow.min.y = -1.0f / aspectRatio;
+			m_screenWindow.max.y = 1.0f / aspectRatio;
+		}
+		else
+		{
+			m_screenWindow.min.y = -1;
+			m_screenWindow.max.y = 1;
+			m_screenWindow.min.x = -aspectRatio;
+			m_screenWindow.max.x = aspectRatio;
+		}
+
 	}
 }
 
