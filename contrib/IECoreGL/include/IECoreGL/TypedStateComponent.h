@@ -38,6 +38,7 @@
 #include "IECoreGL/StateComponent.h"
 
 #include "OpenEXR/ImathColor.h"
+#include "OpenEXR/ImathBox.h"
 
 namespace IECoreGL
 {
@@ -204,6 +205,17 @@ typedef TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId> PolygonS
 template<>
 void PolygonSmoothingStateComponent::bind() const;
 
+// \todo: implement CurrentSpace, ShaderSpace, WorldSpace, CameraSpace, ScreenSpace, RasterSpace and NDCSpace like in Renderman interface.
+enum RendererSpace
+{
+	ObjectSpace
+};
+// Used to specify which space the culling bounding box is defined. Culling is applied to primitives and procedurals.
+typedef TypedStateComponent<RendererSpace, CullingSpaceStateComponentTypeId> CullingSpaceStateComponent;
+
+// Defines the bounding box for culling. The space it is defined on is given by CullingSpaceStateComponent.
+typedef TypedStateComponent<Imath::Box3f, CullingBoxStateComponentTypeId> CullingBoxStateComponent;
+
 IE_CORE_DECLAREPTR( Color );
 IE_CORE_DECLAREPTR( PrimitiveBound );
 IE_CORE_DECLAREPTR( PrimitiveWireframe );
@@ -225,6 +237,8 @@ IE_CORE_DECLAREPTR( PointsPrimitiveGLPointWidth );
 IE_CORE_DECLAREPTR( DoubleSidedStateComponent );
 IE_CORE_DECLAREPTR( LineSmoothingStateComponent );
 IE_CORE_DECLAREPTR( PointSmoothingStateComponent );
+IE_CORE_DECLAREPTR( CullingSpaceStateComponent );
+IE_CORE_DECLAREPTR( CullingBoxStateComponent );
 
 } // namespace IECoreGL
 

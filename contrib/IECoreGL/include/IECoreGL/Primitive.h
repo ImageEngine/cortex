@@ -77,6 +77,8 @@ class Primitive : public Renderable
 		/// present in state.
 		virtual void render( ConstStatePtr state ) const;
 
+		virtual Imath::Box3f bound() const = 0;
+
 		/// Returns the number of expected data values for
 		/// vertex attributes. Returns 0 if vertex attributes
 		/// are not supported. The default implementation

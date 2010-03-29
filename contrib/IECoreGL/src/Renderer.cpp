@@ -1015,6 +1015,42 @@ static void textPrimitiveTypeSetter( const std::string &name, IECore::ConstDataP
 
 }
 
+template<class T>
+static IECore::ConstDataPtr rendererSpaceGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
+{
+	typename T::ConstPtr b = memberData->implementation->getState< T >();
+	switch( b->value() )
+	{
+		case ObjectSpace :
+			return new StringData( "object" );
+		default :
+			msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
+			return new StringData( "invalid" );
+	}
+}
+
+template<class T>
+static void rendererSpaceSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
+{
+	ConstStringDataPtr d = castWithWarning<const StringData>( value, name, "Renderer::setAttribute" );
+	if( !d )
+	{
+		return;
+	}
+	RendererSpace s;
+	const std::string &v = d->readable();
+	if( v=="object" )
+	{
+		s = ObjectSpace;
+	}
+	else
+	{
+		msg( Msg::Error, "Renderer::setAttribute", boost::format( "Unsupported value \"%s\" for attribute \"%s\"." ) % v % name );
+		return;
+	}
+	memberData->implementation->addState( new T( s ) );
+}
+
 static const AttributeSetterMap *attributeSetters()
 {
 	static AttributeSetterMap *a = new AttributeSetterMap;
@@ -1053,6 +1089,8 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:smoothing:lines"] = typedAttributeSetter<LineSmoothingStateComponent>;
 		(*a)["gl:smoothing:polygons"] = typedAttributeSetter<PolygonSmoothingStateComponent>;
 		(*a)["gl:textPrimitive:type"] = textPrimitiveTypeSetter;
+		(*a)["gl:cullingSpace"] = rendererSpaceSetter<CullingSpaceStateComponent>;
+		(*a)["gl:cullingBox"] = typedAttributeSetter<CullingBoxStateComponent>;
 	}
 	return a;
 }
@@ -1095,6 +1133,8 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:smoothing:lines"] = typedAttributeGetter<LineSmoothingStateComponent>;
 		(*a)["gl:smoothing:polygons"] = typedAttributeGetter<PolygonSmoothingStateComponent>;
 		(*a)["gl:textPrimitive:type"] = textPrimitiveTypeGetter;
+		(*a)["gl:cullingSpace"] = rendererSpaceGetter<CullingSpaceStateComponent>;
+		(*a)["gl:cullingBox"] = typedAttributeGetter<CullingBoxStateComponent>;
 	}
 	return a;
 }
@@ -1216,6 +1256,28 @@ void IECoreGL::Renderer::motionEnd()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // primitives
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template< typename T >
+static bool checkCulling( RendererImplementation *r, const T *p )
+{
+	Imath::Box3f b = p->bound();
+	const Imath::Box3f &cullBox = r->getState<CullingBoxStateComponent>()->value();
+	if ( cullBox.isEmpty() )
+	{
+		// culling is disabled... p should be rendered.
+		return true;
+	}
+	switch( r->getState<CullingSpaceStateComponent>()->value() )
+	{
+		case ObjectSpace :
+			// if in local space we don't have to transform bounding box of p.
+			break;
+		default :
+			msg( Msg::Warning, "Renderer::checkCulling", "Unnexpected culling space!" );
+			return true;
+	}
+	return cullBox.intersects( b );
+}
 
 static void addPrimVarsToPrimitive( IECoreGL::PrimitivePtr primitive, const IECore::PrimitiveVariableMap &primVars )
 {
@@ -1371,15 +1433,21 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 
 	// make the primitive
 	PointsPrimitivePtr prim = new PointsPrimitive( type, points, colors, 0, widths, heights, rotations );
-	addPrimVarsToPrimitive( prim, primVars );
-	m_data->implementation->addPrimitive( prim );
+	if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	{
+		addPrimVarsToPrimitive( prim, primVars );
+		m_data->implementation->addPrimitive( prim );
+	}
 }
 
 void IECoreGL::Renderer::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
 {
 	DiskPrimitivePtr prim = new DiskPrimitive( radius, z, thetaMax );
-	addPrimVarsToPrimitive( prim, primVars );
-	m_data->implementation->addPrimitive( prim );
+	if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	{
+		addPrimVarsToPrimitive( prim, primVars );
+		m_data->implementation->addPrimitive( prim );
+	}
 }
 
 void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
@@ -1389,7 +1457,10 @@ void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic
 		IECore::CurvesPrimitivePtr c = new IECore::CurvesPrimitive( numVertices, basis, periodic );
 		c->variables = primVars;
 		CurvesPrimitivePtr prim = IECore::staticPointerCast<CurvesPrimitive>( ToGLCurvesConverter( c ).convert() );
-		m_data->implementation->addPrimitive( prim );
+		if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+		{
+			m_data->implementation->addPrimitive( prim );
+		}
 	}
 	catch( const std::exception &e )
 	{
@@ -1437,9 +1508,11 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 	f->coreFont()->setKerning( kerning );
 
 	TextPrimitivePtr prim = new TextPrimitive( text, f );
-	addPrimVarsToPrimitive( prim, primVars );
-	m_data->implementation->addPrimitive( prim );
-
+	if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	{
+		addPrimVarsToPrimitive( prim, primVars );
+		m_data->implementation->addPrimitive( prim );
+	}
 #else
 	IECore::msg( IECore::Msg::Warning, "Renderer::text", "IECore was not built with FreeType support." );
 #endif // IECORE_WITH_FREETYPE
@@ -1448,8 +1521,11 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 void IECoreGL::Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
 {
 	SpherePrimitivePtr prim = new SpherePrimitive( radius, zMin, zMax, thetaMax );
-	addPrimVarsToPrimitive( prim, primVars );
-	m_data->implementation->addPrimitive( prim );
+	if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	{
+		addPrimVarsToPrimitive( prim, primVars );
+		m_data->implementation->addPrimitive( prim );
+	}
 }
 
 static const std::string &imageFragmentShader()
@@ -1471,6 +1547,12 @@ static const std::string &imageFragmentShader()
 void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
 {
 	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );
+
+	if ( !checkCulling<IECore::Primitive>( m_data->implementation, image ) )
+	{
+		return;
+	}
+
 	image->variables = primVars;
 
 	IECore::CompoundObjectPtr params = new IECore::CompoundObject();
@@ -1524,7 +1606,10 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 		}
 
 		MeshPrimitivePtr prim = IECore::staticPointerCast<MeshPrimitive>( ToGLMeshConverter( m ).convert() );
-		m_data->implementation->addPrimitive( prim );
+		if ( checkCulling<IECoreGL::Primitive>( m_data->implementation, prim ) )
+		{
+			m_data->implementation->addPrimitive( prim );
+		}
 	}
 	catch( const std::exception &e )
 	{
@@ -1561,9 +1646,10 @@ void IECoreGL::Renderer::geometry( const std::string &type, const IECore::Compou
 
 void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 {
-	/// \todo Frustum culling, with an option to enable/disable it (we'd need to disable it when
-	/// building scenes for interactive display).
-	m_data->implementation->procedural( proc, this );
+	if ( checkCulling<IECore::Renderer::Procedural>( m_data->implementation, proc ) )
+	{
+		m_data->implementation->procedural( proc, this );
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

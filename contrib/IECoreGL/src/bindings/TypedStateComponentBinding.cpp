@@ -72,6 +72,8 @@ void bindTypedStateComponents()
 	bindTypedStateComponent< BlendFuncStateComponent >( "BlendFuncStateComponent" );
 	bindTypedStateComponent< DoubleSidedStateComponent >( "DoubleSidedStateComponent" );
 	bindTypedStateComponent< RightHandedOrientationStateComponent >( "RightHandedOrientationStateComponent" );
+	bindTypedStateComponent< CullingSpaceStateComponent >( "CullingSpaceStateComponent" );
+	bindTypedStateComponent< CullingBoxStateComponent >( "CullingBoxStateComponent" );
 }
 
 template< typename T >

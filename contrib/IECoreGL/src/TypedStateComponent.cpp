@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -201,5 +201,7 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( OutlineColorStateComponen
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointColorStateComponent, PointColorStateComponentTypeId, Color4f, Color4f( 0.85, 0.45, 0, 1 ) );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitiveUseGLPoints, PointsPrimitiveUseGLPointsTypeId, UseGLPoints, ForPointsOnly );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitiveGLPointWidth, PointsPrimitiveGLPointWidthTypeId, float, 1.0f );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CullingSpaceStateComponent, CullingSpaceStateComponentTypeId, RendererSpace, ObjectSpace );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CullingBoxStateComponent, CullingBoxStateComponentTypeId, Imath::Box3f, Imath::Box3f() );
 
 } // namespace IECoreGL

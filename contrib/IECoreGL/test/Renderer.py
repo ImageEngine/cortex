@@ -600,7 +600,40 @@ class TestRenderer( unittest.TestCase ) :
 	def testParallelMultithreadedProcedurals( self ):
 		self.__testParallelMultithreadedProcedurals( self.RecursiveParameterisedProcedural )
 
+	def testObjectSpaceCulling( self ):
 
+		p = self.RecursiveProcedural()
+
+		def countChildrenRecursive( g ) :
+			if not isinstance( g, Group ):
+				return 1
+			count = 0
+			for c in g.children():
+				count += countChildrenRecursive( c )
+			return count
+
+		def renderWithCulling( box ):
+			r = Renderer()
+			r.setOption( "gl:mode", StringData( "deferred" ) )
+			r.worldBegin()
+			r.sphere( 1.5, 0, 1, 360, {} )
+			r.procedural( p )
+			r.attributeBegin()
+			if True:
+				r.setAttribute( "gl:cullingSpace", StringData( "object" ) )
+				r.setAttribute( "gl:cullingBox", Box3fData( box ) )
+				# everything in this block is culled
+				r.sphere( 1.5, 0, 1, 360, {} )
+				r.procedural( p )
+			r.attributeEnd()
+			r.worldEnd()
+			return countChildrenRecursive( r.scene().root() )
+
+		noCullingCounter = renderWithCulling( Box3f() )
+
+		# verify that only half of the things are renderer when the giving culling box is defined.
+		self.assertEqual( renderWithCulling( Box3f( V3f(2,-1,-1), V3f(3,1,1)  ) ) * 2, noCullingCounter )
+	
 	def tearDown( self ) :
 
 		files = [
