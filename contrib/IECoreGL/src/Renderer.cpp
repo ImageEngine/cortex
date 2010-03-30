@@ -594,7 +594,14 @@ void IECoreGL::Renderer::transformEnd()
 
 void IECoreGL::Renderer::setTransform( const Imath::M44f &m )
 {
-	m_data->implementation->setTransform( m );
+	if( m_data->inWorld )
+	{
+		m_data->implementation->setTransform( m );
+	}
+	else
+	{
+		m_data->transformStack.top() = m;
+	}
 }
 
 void IECoreGL::Renderer::setTransform( const std::string &coordinateSystem )
@@ -604,7 +611,14 @@ void IECoreGL::Renderer::setTransform( const std::string &coordinateSystem )
 
 Imath::M44f IECoreGL::Renderer::getTransform() const
 {
-	return m_data->implementation->getTransform();
+	if( m_data->inWorld )
+	{
+		return m_data->implementation->getTransform();
+	}
+	else
+	{
+		return m_data->transformStack.top();
+	}
 }
 
 Imath::M44f IECoreGL::Renderer::getTransform( const std::string &coordinateSystem ) const
