@@ -75,10 +75,10 @@ class DeferredRendererImplementation : public RendererImplementation
 		virtual void attributeEnd();
 
 		virtual void addState( StateComponentPtr state );
-		virtual StateComponentPtr getState( IECore::TypeId type );
+		virtual StateComponent *getState( IECore::TypeId type );
 
 		virtual void addUserAttribute( const IECore::InternedString &name, IECore::DataPtr value );
-		virtual IECore::DataPtr getUserAttribute( const IECore::InternedString &name );
+		virtual IECore::Data *getUserAttribute( const IECore::InternedString &name );
 
 		virtual void addPrimitive( PrimitivePtr primitive );
 

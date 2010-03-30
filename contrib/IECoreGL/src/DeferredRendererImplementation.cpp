@@ -212,7 +212,7 @@ void DeferredRendererImplementation::addState( StateComponentPtr state )
 	(*(curContext->stateStack).rbegin())->add( state );
 }
 
-StateComponentPtr DeferredRendererImplementation::getState( IECore::TypeId type )
+StateComponent *DeferredRendererImplementation::getState( IECore::TypeId type )
 {
 	RenderContext *curContext = currentContext();
 
@@ -234,7 +234,7 @@ void DeferredRendererImplementation::addUserAttribute( const IECore::InternedStr
 	(*(curContext->stateStack).rbegin())->userAttributes()[ name ] = value;
 }
 
-IECore::DataPtr DeferredRendererImplementation::getUserAttribute( const IECore::InternedString &name )
+IECore::Data *DeferredRendererImplementation::getUserAttribute( const IECore::InternedString &name )
 {
 	RenderContext *curContext = currentContext();
 

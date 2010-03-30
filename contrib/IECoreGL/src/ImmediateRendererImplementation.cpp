@@ -170,7 +170,7 @@ void ImmediateRendererImplementation::addState( StateComponentPtr state )
 	state->bind();
 }
 
-StateComponentPtr ImmediateRendererImplementation::getState( IECore::TypeId type )
+StateComponent *ImmediateRendererImplementation::getState( IECore::TypeId type )
 {
 	return m_stateStack.top()->get( type );
 }
@@ -180,7 +180,7 @@ void ImmediateRendererImplementation::addUserAttribute( const IECore::InternedSt
 	m_stateStack.top()->userAttributes()[ name ] = value;
 }
 
-IECore::DataPtr ImmediateRendererImplementation::getUserAttribute( const IECore::InternedString &name )
+IECore::Data *ImmediateRendererImplementation::getUserAttribute( const IECore::InternedString &name )
 {
 	State *curState = m_stateStack.top();
 	State::UserAttributesMap::iterator attrIt = curState->userAttributes().find( name );
