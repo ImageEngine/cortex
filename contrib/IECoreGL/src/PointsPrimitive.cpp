@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,6 +52,14 @@ using namespace IECoreGL;
 using namespace IECore;
 using namespace Imath;
 using namespace std;
+
+namespace IECoreGL
+{
+
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitive::UseGLPoints, PointsPrimitiveUseGLPointsTypeId, GLPointsUsage, ForPointsOnly );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitive::GLPointWidth, PointsPrimitiveGLPointWidthTypeId, float, 1.0f );
+
+}
 
 IE_CORE_DEFINERUNTIMETYPED( PointsPrimitive );
 
@@ -111,7 +119,7 @@ void PointsPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 	}
 
 	Type type = m_type;
-	switch( state->get<PointsPrimitiveUseGLPoints>()->value() )
+	switch( state->get<UseGLPoints>()->value() )
 	{
 		case ForPointsOnly :
 			break;
@@ -190,10 +198,10 @@ void PointsPrimitive::renderPoints( ConstStatePtr state, IECore::TypeId style ) 
 {
 	const std::vector<V3f> &p = m_points->readable();
 
-	glPointSize( state->get<PointsPrimitiveGLPointWidth>()->value() );
+	glPointSize( state->get<GLPointWidth>()->value() );
 
 	const Color3f *c = setOrReturnColor();
-	if( style==PrimitiveSolid::staticTypeId() )
+	if( style==Primitive::DrawSolid::staticTypeId() )
 	{
 		setVertexAttributes( state );
 	}
@@ -237,7 +245,7 @@ void PointsPrimitive::renderDisks( ConstStatePtr state, IECore::TypeId style ) c
 	{
 		unsigned int i = m_renderSorted ? m_depthOrder[j] : j;
 
-		if( style==PrimitiveSolid::staticTypeId() )
+		if( style==Primitive::DrawSolid::staticTypeId() )
 		{
 			setVertexAttributesAsUniforms( i );
 			if( c )
@@ -296,7 +304,7 @@ void PointsPrimitive::renderQuads( ConstStatePtr state, IECore::TypeId style ) c
 	{
 		unsigned int i = m_renderSorted ? m_depthOrder[j] : j;
 
-		if( style==PrimitiveSolid::staticTypeId() )
+		if( style==Primitive::DrawSolid::staticTypeId() )
 		{
 			setVertexAttributesAsUniforms( i );
 			if( c )
@@ -344,7 +352,7 @@ void PointsPrimitive::renderSpheres( ConstStatePtr state, IECore::TypeId style )
 	{
 		unsigned int i = m_renderSorted ? m_depthOrder[j] : j;
 
-		if( style==PrimitiveSolid::staticTypeId() )
+		if( style==Primitive::DrawSolid::staticTypeId() )
 		{
 			setVertexAttributesAsUniforms( i );
 			if( c )

@@ -114,31 +114,16 @@ class TypedStateComponent : public StateComponent
 	IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )								\
 	template class TypedStateComponent<BASETYPE, TYPEID>;										\
 
-/// \todo Now there are loads of these typedefs I think they should really be defined in the places
-/// they're used - so PrimitiveBound would be a typedef member in Primitive etc. This would help people
-/// see where StateComponents have effect, and also provide a better location for documenting them. Otherwise
-/// this file has a massive influence over all sorts of disparate bits of the library.
-/// The CurvesPrimitive specific StateComponents have already been implemented this way so use that for reference.
 typedef TypedStateComponent<Imath::Color4f, ColorTypeId> Color;
 template<>
 void Color::bind() const;
 
-typedef TypedStateComponent<bool, PrimitiveBoundTypeId> PrimitiveBound;
-typedef TypedStateComponent<bool, PrimitiveWireframeTypeId> PrimitiveWireframe;
-typedef TypedStateComponent<float, PrimitiveWireframeWidthTypeId> PrimitiveWireframeWidth;
-typedef TypedStateComponent<bool, PrimitiveSolidTypeId> PrimitiveSolid;
-typedef TypedStateComponent<bool, PrimitiveOutlineTypeId> PrimitiveOutline;
-typedef TypedStateComponent<float, PrimitiveOutlineWidthTypeId> PrimitiveOutlineWidth;
-typedef TypedStateComponent<bool, PrimitivePointsTypeId> PrimitivePoints;
-typedef TypedStateComponent<float, PrimitivePointWidthTypeId> PrimitivePointWidth;
+/// \todo Consider also moving the following state components to Primitive header since the renderer maps then to "gl:primitive:*"
 /// Used to signify that the shading for a primitive may produce transparent values. The Renderer
 /// maps the "gl:shade:transparent" attribute directly to this state. Note that this information
 /// is provided as a separate state item rather than as a query on the Shader class as the values
-/// of variables on Primitives may change the the transparency of a shader.
+/// of variables on Primitives may change the transparency of a shader.
 typedef TypedStateComponent<bool, TransparentShadingStateComponentTypeId> TransparentShadingStateComponent;
-/// Used to trigger sorting of the components of a primitive when the TransparentShadingStateComponent has
-/// a value of true.
-typedef TypedStateComponent<bool, PrimitiveTransparencySortStateComponentTypeId> PrimitiveTransparencySortStateComponent;
 /// Specifies the color to draw bounding boxes in
 typedef TypedStateComponent<Imath::Color4f, BoundColorStateComponentTypeId> BoundColorStateComponent;
 /// Specifies the color to draw wireframes in
@@ -148,16 +133,12 @@ typedef TypedStateComponent<Imath::Color4f, OutlineColorStateComponentTypeId> Ou
 /// Specifies the color to draw points in
 typedef TypedStateComponent<Imath::Color4f, PointColorStateComponentTypeId> PointColorStateComponent;
 
-enum UseGLPoints
+enum GLPointsUsage
 {
 	ForPointsOnly,
 	ForPointsAndDisks,
 	ForAll
 };
-/// Specifies an override for rendering PointsPrimitives with gl points.
-typedef TypedStateComponent<UseGLPoints, PointsPrimitiveUseGLPointsTypeId> PointsPrimitiveUseGLPoints;
-/// Specifies an attribute for defining the glPointSize of PointsPrimitives rendered as gl points.
-typedef TypedStateComponent<float, PointsPrimitiveGLPointWidthTypeId> PointsPrimitiveGLPointWidth;
 
 struct BlendFactors
 {
@@ -217,14 +198,6 @@ typedef TypedStateComponent<RendererSpace, CullingSpaceStateComponentTypeId> Cul
 typedef TypedStateComponent<Imath::Box3f, CullingBoxStateComponentTypeId> CullingBoxStateComponent;
 
 IE_CORE_DECLAREPTR( Color );
-IE_CORE_DECLAREPTR( PrimitiveBound );
-IE_CORE_DECLAREPTR( PrimitiveWireframe );
-IE_CORE_DECLAREPTR( PrimitiveWireframeWidth );
-IE_CORE_DECLAREPTR( PrimitiveSolid );
-IE_CORE_DECLAREPTR( PrimitiveOutline );
-IE_CORE_DECLAREPTR( PrimitiveOutlineWidth );
-IE_CORE_DECLAREPTR( PrimitivePoints );
-IE_CORE_DECLAREPTR( PrimitivePointWidth );
 IE_CORE_DECLAREPTR( BlendColorStateComponent );
 IE_CORE_DECLAREPTR( BlendFuncStateComponent );
 IE_CORE_DECLAREPTR( BlendEquationStateComponent );
@@ -232,8 +205,6 @@ IE_CORE_DECLAREPTR( BoundColorStateComponent );
 IE_CORE_DECLAREPTR( WireframeColorStateComponent );
 IE_CORE_DECLAREPTR( OutlineColorStateComponent );
 IE_CORE_DECLAREPTR( PointColorStateComponent );
-IE_CORE_DECLAREPTR( PointsPrimitiveUseGLPoints );
-IE_CORE_DECLAREPTR( PointsPrimitiveGLPointWidth );
 IE_CORE_DECLAREPTR( DoubleSidedStateComponent );
 IE_CORE_DECLAREPTR( LineSmoothingStateComponent );
 IE_CORE_DECLAREPTR( PointSmoothingStateComponent );

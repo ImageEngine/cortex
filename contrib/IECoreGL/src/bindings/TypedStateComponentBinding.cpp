@@ -51,24 +51,13 @@ template< typename T >void bindTypedStateComponent(const char *);
 void bindTypedStateComponents()
 {
 	bindTypedStateComponent< Color >( "Color" );
-	bindTypedStateComponent< PrimitiveBound >( "PrimitiveBound" );
-	bindTypedStateComponent< PrimitiveWireframe >( "PrimitiveWireframe" );
-	bindTypedStateComponent< PrimitiveWireframeWidth >( "PrimitiveWireframeWidth" );
-	bindTypedStateComponent< PrimitiveSolid >( "PrimitiveSolid" );
-	bindTypedStateComponent< PrimitiveOutline >( "PrimitiveOutline" );
-	bindTypedStateComponent< PrimitiveOutlineWidth >( "PrimitiveOutlineWidth" );
-	bindTypedStateComponent< PrimitivePoints >( "PrimitivePoints" );
-	bindTypedStateComponent< PrimitivePointWidth >( "PrimitivePointWidth" );
 	bindTypedStateComponent< BlendColorStateComponent >( "BlendColorStateComponent" );
 	bindTypedStateComponent< BlendEquationStateComponent >( "BlendEquationStateComponent" );
 	bindTypedStateComponent< TransparentShadingStateComponent >( "TransparentShadingStateComponent" );
-	bindTypedStateComponent< PrimitiveTransparencySortStateComponent >( "PrimitiveTransparencySortStateComponent" );
 	bindTypedStateComponent< BoundColorStateComponent >( "BoundColorStateComponent" );
 	bindTypedStateComponent< WireframeColorStateComponent >( "WireframeColorStateComponent" );
 	bindTypedStateComponent< OutlineColorStateComponent >( "OutlineColorStateComponent" );
 	bindTypedStateComponent< PointColorStateComponent >( "PointColorStateComponent" );
-	bindTypedStateComponent< PointsPrimitiveUseGLPoints >( "PointsPrimitiveUseGLPoints" );
-	bindTypedStateComponent< PointsPrimitiveGLPointWidth >( "PointsPrimitiveGLPointWidth" );
 	bindTypedStateComponent< BlendFuncStateComponent >( "BlendFuncStateComponent" );
 	bindTypedStateComponent< DoubleSidedStateComponent >( "DoubleSidedStateComponent" );
 	bindTypedStateComponent< RightHandedOrientationStateComponent >( "RightHandedOrientationStateComponent" );

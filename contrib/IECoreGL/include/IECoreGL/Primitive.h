@@ -37,6 +37,7 @@
 
 #include "IECoreGL/Renderable.h"
 #include "IECoreGL/GL.h"
+#include "IECoreGL/TypedStateComponent.h"
 
 #include "IECore/Primitive.h"
 #include "IECore/VectorTypedData.h"
@@ -94,6 +95,32 @@ class Primitive : public Renderable
 
 		/// Takes a copy of data. Throws an Exception if the data supplied is not suitable.
 		void addUniformAttribute( const std::string &name, IECore::ConstDataPtr data );
+
+		//! @name StateComponents
+		/// The following StateComponent classes have an effect only on
+		/// CurvesPrimitive objects.
+		//////////////////////////////////////////////////////////////////////////////
+		//@{
+		typedef TypedStateComponent<bool, PrimitiveBoundTypeId> DrawBound;
+		IE_CORE_DECLAREPTR( DrawBound );
+		typedef TypedStateComponent<bool, PrimitiveWireframeTypeId> DrawWireframe;
+		IE_CORE_DECLAREPTR( DrawWireframe );
+		typedef TypedStateComponent<float, PrimitiveWireframeWidthTypeId> WireframeWidth;
+		IE_CORE_DECLAREPTR( WireframeWidth );
+		typedef TypedStateComponent<bool, PrimitiveSolidTypeId> DrawSolid;
+		IE_CORE_DECLAREPTR( DrawSolid );
+		typedef TypedStateComponent<bool, PrimitiveOutlineTypeId> DrawOutline;
+		IE_CORE_DECLAREPTR( DrawOutline );
+		typedef TypedStateComponent<float, PrimitiveOutlineWidthTypeId> OutlineWidth;
+		IE_CORE_DECLAREPTR( OutlineWidth );
+		typedef TypedStateComponent<bool, PrimitivePointsTypeId> DrawPoints;
+		IE_CORE_DECLAREPTR( DrawPoints );
+		typedef TypedStateComponent<float, PrimitivePointWidthTypeId> PointWidth;
+		IE_CORE_DECLAREPTR( PointWidth );
+		/// Used to trigger sorting of the components of a primitive when the TransparentShadingStateComponent has a value of true.
+		typedef TypedStateComponent<bool, PrimitiveTransparencySortStateComponentTypeId> TransparencySort;
+		IE_CORE_DECLAREPTR( TransparencySort );
+		//@}
 
 	protected :
 

@@ -52,6 +52,21 @@ using namespace std;
 using namespace boost;
 using namespace Imath;
 
+namespace IECoreGL
+{
+
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::DrawBound, PrimitiveBoundTypeId, bool, false );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::DrawWireframe, PrimitiveWireframeTypeId, bool, false );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::WireframeWidth, PrimitiveWireframeWidthTypeId, float, 1.0f );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::DrawSolid, PrimitiveSolidTypeId, bool, true );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::DrawOutline, PrimitiveOutlineTypeId, bool, false );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::OutlineWidth, PrimitiveOutlineWidthTypeId, float, 1.0f );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::DrawPoints, PrimitivePointsTypeId, bool, false );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::PointWidth, PrimitivePointWidthTypeId, float, 1.0f );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::TransparencySort, PrimitiveTransparencySortStateComponentTypeId, bool, true );
+
+}
+
 IE_CORE_DEFINERUNTIMETYPED( Primitive );
 
 Primitive::Primitive() : m_points( 0 ), m_normals( 0 ), m_colors( 0 ), m_texCoords( 0 )
@@ -93,12 +108,12 @@ void Primitive::render( ConstStatePtr state ) const
 			glDepthMask( false );
 		}
 
-		if( state->get<PrimitiveSolid>()->value() )
+		if( state->get<Primitive::DrawSolid>()->value() )
 		{
 			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 			glEnable( GL_LIGHTING );
 			glDisable( GL_POLYGON_OFFSET_FILL );
-			render( state, PrimitiveSolid::staticTypeId() );
+			render( state, Primitive::DrawSolid::staticTypeId() );
 		}
 
 		glDisable( GL_LIGHTING );
@@ -111,43 +126,43 @@ void Primitive::render( ConstStatePtr state ) const
 			glUseProgram( 0 );
 		}
 
-			if( state->get<PrimitiveOutline>()->value() )
+			if( state->get<Primitive::DrawOutline>()->value() )
 			{
 				glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 				glEnable( GL_POLYGON_OFFSET_LINE );
-				float width = 2 * state->get<PrimitiveOutlineWidth>()->value();
+				float width = 2 * state->get<Primitive::OutlineWidth>()->value();
 				glPolygonOffset( 2 * width, 1 );
 				glLineWidth( width );
 				Color4f c = state->get<OutlineColorStateComponent>()->value();
 				glColor4f( c[0], c[1], c[2], c[3] );
-				render( state, PrimitiveOutline::staticTypeId() );
+				render( state, Primitive::DrawOutline::staticTypeId() );
 			}
 
-			if( state->get<PrimitiveWireframe>()->value() )
+			if( state->get<Primitive::DrawWireframe>()->value() )
 			{
 				glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-				float width = state->get<PrimitiveWireframeWidth>()->value();
+				float width = state->get<Primitive::WireframeWidth>()->value();
 				glEnable( GL_POLYGON_OFFSET_LINE );
 				glPolygonOffset( -1 * width, -1 );
 				Color4f c = state->get<WireframeColorStateComponent>()->value();
 				glColor4f( c[0], c[1], c[2], c[3] );
 				glLineWidth( width );
-				render( state, PrimitiveWireframe::staticTypeId() );
+				render( state, Primitive::DrawWireframe::staticTypeId() );
 			}
 
-			if( state->get<PrimitivePoints>()->value() )
+			if( state->get<Primitive::DrawPoints>()->value() )
 			{
 				glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
-				float width = state->get<PrimitivePointWidth>()->value();
+				float width = state->get<Primitive::PointWidth>()->value();
 				glEnable( GL_POLYGON_OFFSET_POINT );
 				glPolygonOffset( -2 * width, -1 );
 				glPointSize( width );
 				Color4f c = state->get<PointColorStateComponent>()->value();
 				glColor4f( c[0], c[1], c[2], c[3] );
-				render( state, PrimitivePoints::staticTypeId() );
+				render( state, Primitive::DrawPoints::staticTypeId() );
 			}
 
-			if( state->get<PrimitiveBound>()->value() )
+			if( state->get<Primitive::DrawBound>()->value() )
 			{
 				Box3f b = bound();
 				Color4f c = state->get<BoundColorStateComponent>()->value();
@@ -361,6 +376,6 @@ void Primitive::setupVertexAttributesAsUniform( const Shader *s ) const
 
 bool Primitive::depthSortRequested( ConstStatePtr state ) const
 {
-	return state->get<PrimitiveTransparencySortStateComponent>()->value() &&
+	return state->get<Primitive::TransparencySort>()->value() &&
 		state->get<TransparentShadingStateComponent>()->value();
 }

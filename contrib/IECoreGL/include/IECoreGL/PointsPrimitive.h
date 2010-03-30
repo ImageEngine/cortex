@@ -77,6 +77,20 @@ class PointsPrimitive : public Primitive
 
 		virtual size_t vertexAttributeSize() const;
 
+		//! @name StateComponents
+		/// The following StateComponent classes have an effect only on
+		/// PointsPrimitive objects.
+		//////////////////////////////////////////////////////////////////////////////
+		//@{
+		///
+		/// Specifies an override for rendering PointsPrimitives with gl points.
+		typedef TypedStateComponent<GLPointsUsage, PointsPrimitiveUseGLPointsTypeId> UseGLPoints;
+		IE_CORE_DECLAREPTR( UseGLPoints );
+		/// Specifies an attribute for defining the glPointSize of PointsPrimitives rendered as gl points.
+		typedef TypedStateComponent<float, PointsPrimitiveGLPointWidthTypeId> GLPointWidth;
+		IE_CORE_DECLAREPTR( GLPointWidth );
+		//@}
+
 	protected :
 
 		virtual void render( ConstStatePtr state, IECore::TypeId style ) const;

@@ -185,22 +185,11 @@ template class TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId>;
 // instantiation of simple types
 //////////////////////////////////////////////////////////////////////
 
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveBound, PrimitiveBoundTypeId, bool, false );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveWireframe, PrimitiveWireframeTypeId, bool, false );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveWireframeWidth, PrimitiveWireframeWidthTypeId, float, 1.0f );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveSolid, PrimitiveSolidTypeId, bool, true );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveOutline, PrimitiveOutlineTypeId, bool, false );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveOutlineWidth, PrimitiveOutlineWidthTypeId, float, 1.0f );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitivePoints, PrimitivePointsTypeId, bool, false );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitivePointWidth, PrimitivePointWidthTypeId, float, 1.0f );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PrimitiveTransparencySortStateComponent, PrimitiveTransparencySortStateComponentTypeId, bool, true );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( TransparentShadingStateComponent, TransparentShadingStateComponentTypeId, bool, false );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( BoundColorStateComponent, BoundColorStateComponentTypeId, Color4f, Color4f( 0.36, 0.8, 0.85, 1 ) );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( WireframeColorStateComponent, WireframeColorStateComponentTypeId, Color4f, Color4f( 0.25, 0.6, 0.85, 1 ) );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( OutlineColorStateComponent, OutlineColorStateComponentTypeId, Color4f, Color4f( 0.85, 0.75, 0.45, 1 ) );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointColorStateComponent, PointColorStateComponentTypeId, Color4f, Color4f( 0.85, 0.45, 0, 1 ) );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitiveUseGLPoints, PointsPrimitiveUseGLPointsTypeId, UseGLPoints, ForPointsOnly );
-IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitiveGLPointWidth, PointsPrimitiveGLPointWidthTypeId, float, 1.0f );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CullingSpaceStateComponent, CullingSpaceStateComponentTypeId, RendererSpace, ObjectSpace );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CullingBoxStateComponent, CullingBoxStateComponentTypeId, Imath::Box3f, Imath::Box3f() );
 

@@ -36,7 +36,6 @@
 #define IECOREGL_CURVESPRIMITIVE_H
 
 #include "IECoreGL/Primitive.h"
-#include "IECoreGL/TypedStateComponent.h"
 
 #include "IECore/VectorTypedData.h"
 #include "IECore/CubicBasis.h"

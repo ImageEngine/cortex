@@ -676,7 +676,7 @@ template<class T>
 static IECore::ConstDataPtr typedAttributeGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
 	typedef IECore::TypedData<typename T::ValueType> DataType;
-	typename T::ConstPtr a = memberData->implementation->template getState<T>();
+	const T *a = memberData->implementation->template getState<T>();
 	return new DataType( a->value() );
 }
 
@@ -696,14 +696,14 @@ static void colorAttributeSetter( const std::string &name, IECore::ConstDataPtr 
 
 static IECore::ConstDataPtr colorAttributeGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
-	IECoreGL::ConstColorPtr a = memberData->implementation->getState<Color>();
+	const IECoreGL::Color *a = memberData->implementation->getState<Color>();
 	Color4f c = a->value();
 	return new Color3fData( Color3f( c[0], c[1], c[2] ) );
 }
 
 static IECore::ConstDataPtr opacityAttributeGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
-	IECoreGL::ConstColorPtr a = memberData->implementation->getState<Color>();
+	const IECoreGL::Color *a = memberData->implementation->getState<Color>();
 	Color4f c = a->value();
 	return new Color3fData( Color3f( c[3] ) );
 }
@@ -713,7 +713,7 @@ static void opacityAttributeSetter( const std::string &name, IECore::ConstDataPt
 	ConstColor3fDataPtr d = castWithWarning<const Color3fData>( value, name, "Renderer::setAttribute" );
 	if( d )
 	{
-		Color::ConstPtr c = memberData->implementation->getState<Color>();
+		const Color *c = memberData->implementation->getState<Color>();
 		Color4f cc = c->value();
 		cc[3] = (d->readable()[0] + d->readable()[1] + d->readable()[2]) / 3.0f;
 		memberData->implementation->addState( new Color( cc ) );
@@ -722,7 +722,7 @@ static void opacityAttributeSetter( const std::string &name, IECore::ConstDataPt
 
 static IECore::ConstDataPtr blendFactorGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
-	ConstBlendFuncStateComponentPtr b = memberData->implementation->getState<BlendFuncStateComponent>();
+	const BlendFuncStateComponent *b = memberData->implementation->getState<BlendFuncStateComponent>();
 	GLenum f = name=="gl:blend:srcFactor" ? b->value().src : b->value().dst;
 	switch( f )
 	{
@@ -831,7 +831,7 @@ static void blendFactorSetter( const std::string &name, IECore::ConstDataPtr val
 		msg( Msg::Error, "Renderer::setAttribute", boost::format( "Unsupported value \"%s\" for attribute \"%s\"." ) % v % name );
 		return;
 	}
-	ConstBlendFuncStateComponentPtr b = memberData->implementation->getState<BlendFuncStateComponent>();
+	const BlendFuncStateComponent *b = memberData->implementation->getState<BlendFuncStateComponent>();
 	BlendFactors bf = b->value();
 	if( name=="gl:blend:srcFactor" )
 	{
@@ -846,7 +846,7 @@ static void blendFactorSetter( const std::string &name, IECore::ConstDataPtr val
 
 static IECore::ConstDataPtr blendEquationGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
-	ConstBlendEquationStateComponentPtr b = memberData->implementation->getState<BlendEquationStateComponent>();
+	const BlendEquationStateComponent *b = memberData->implementation->getState<BlendEquationStateComponent>();
 	switch( b->value() )
 	{
 		case GL_FUNC_ADD :
@@ -906,7 +906,7 @@ static void blendEquationSetter( const std::string &name, IECore::ConstDataPtr v
 
 static IECore::ConstDataPtr pointsPrimitiveUseGLPointsGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
-	ConstPointsPrimitiveUseGLPointsPtr b = memberData->implementation->getState<PointsPrimitiveUseGLPoints>();
+	const IECoreGL::PointsPrimitive::UseGLPoints *b = memberData->implementation->getState<IECoreGL::PointsPrimitive::UseGLPoints>();
 	switch( b->value() )
 	{
 		case ForPointsOnly :
@@ -929,7 +929,7 @@ static void pointsPrimitiveUseGLPointsSetter( const std::string &name, IECore::C
 	{
 		return;
 	}
-	UseGLPoints u;
+	GLPointsUsage u;
 	const std::string &v = d->readable();
 	if( v=="forGLPoints" )
 	{
@@ -948,12 +948,12 @@ static void pointsPrimitiveUseGLPointsSetter( const std::string &name, IECore::C
 		msg( Msg::Error, "Renderer::setAttribute", boost::format( "Unsupported value \"%s\" for attribute \"%s\"." ) % v % name );
 		return;
 	}
-	memberData->implementation->addState( new PointsPrimitiveUseGLPoints( u ) );
+	memberData->implementation->addState( new IECoreGL::PointsPrimitive::UseGLPoints( u ) );
 }
 
 static IECore::ConstDataPtr nameGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
 {
-	ConstNameStateComponentPtr n = memberData->implementation->getState<NameStateComponent>();
+	const NameStateComponent *n = memberData->implementation->getState<NameStateComponent>();
 	return new StringData( n->name() );
 }
 
@@ -972,7 +972,7 @@ static IECore::ConstDataPtr textPrimitiveTypeGetter( const std::string &name, co
 
 #ifdef IECORE_WITH_FREETYPE
 
-	TextPrimitive::ConstTypePtr b = memberData->implementation->getState<TextPrimitive::Type>();
+	const TextPrimitive::Type *b = memberData->implementation->getState<TextPrimitive::Type>();
 	switch( b->value() )
 	{
 		case TextPrimitive::Mesh :
@@ -1069,15 +1069,15 @@ static const AttributeSetterMap *attributeSetters()
 	static AttributeSetterMap *a = new AttributeSetterMap;
 	if( !a->size() )
 	{
-		(*a)["gl:primitive:wireframe"] = typedAttributeSetter<PrimitiveWireframe>;
-		(*a)["gl:primitive:wireframeWidth"] = typedAttributeSetter<PrimitiveWireframeWidth>;
-		(*a)["gl:primitive:bound"] = typedAttributeSetter<PrimitiveBound>;
-		(*a)["gl:primitive:solid"] = typedAttributeSetter<PrimitiveSolid>;
-		(*a)["gl:primitive:outline"] = typedAttributeSetter<PrimitiveOutline>;
-		(*a)["gl:primitive:outlineWidth"] = typedAttributeSetter<PrimitiveOutlineWidth>;
-		(*a)["gl:primitive:points"] = typedAttributeSetter<PrimitivePoints>;
-		(*a)["gl:primitive:pointWidth"] = typedAttributeSetter<PrimitivePointWidth>;
-		(*a)["gl:primitive:sortForTransparency"] = typedAttributeSetter<PrimitiveTransparencySortStateComponent>;
+		(*a)["gl:primitive:wireframe"] = typedAttributeSetter<IECoreGL::Primitive::DrawWireframe>;
+		(*a)["gl:primitive:wireframeWidth"] = typedAttributeSetter<IECoreGL::Primitive::WireframeWidth>;
+		(*a)["gl:primitive:bound"] = typedAttributeSetter<IECoreGL::Primitive::DrawBound>;
+		(*a)["gl:primitive:solid"] = typedAttributeSetter<IECoreGL::Primitive::DrawSolid>;
+		(*a)["gl:primitive:outline"] = typedAttributeSetter<IECoreGL::Primitive::DrawOutline>;
+		(*a)["gl:primitive:outlineWidth"] = typedAttributeSetter<IECoreGL::Primitive::OutlineWidth>;
+		(*a)["gl:primitive:points"] = typedAttributeSetter<IECoreGL::Primitive::DrawPoints>;
+		(*a)["gl:primitive:pointWidth"] = typedAttributeSetter<IECoreGL::Primitive::PointWidth>;
+		(*a)["gl:primitive:sortForTransparency"] = typedAttributeSetter<IECoreGL::Primitive::TransparencySort>;
 		(*a)["gl:primitive:wireframeColor"] = typedAttributeSetter<WireframeColorStateComponent>;
 		(*a)["gl:primitive:boundColor"] = typedAttributeSetter<BoundColorStateComponent>;
 		(*a)["gl:primitive:outlineColor"] = typedAttributeSetter<OutlineColorStateComponent>;
@@ -1091,7 +1091,7 @@ static const AttributeSetterMap *attributeSetters()
 		(*a)["gl:blend:equation"] = blendEquationSetter;
 		(*a)["gl:shade:transparent"] = typedAttributeSetter<TransparentShadingStateComponent>;
 		(*a)["gl:pointsPrimitive:useGLPoints"] = pointsPrimitiveUseGLPointsSetter;
-		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeSetter<PointsPrimitiveGLPointWidth>;
+		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeSetter<PointsPrimitive::GLPointWidth>;
 		(*a)["name"] = nameSetter;
 		(*a)["doubleSided"] = typedAttributeSetter<DoubleSidedStateComponent>;
 		(*a)["rightHandedOrientation"] = typedAttributeSetter<RightHandedOrientationStateComponent>;
@@ -1113,15 +1113,15 @@ static const AttributeGetterMap *attributeGetters()
 	static AttributeGetterMap *a = new AttributeGetterMap;
 	if( !a->size() )
 	{
-		(*a)["gl:primitive:wireframe"] = typedAttributeGetter<PrimitiveWireframe>;
-		(*a)["gl:primitive:wireframeWidth"] = typedAttributeGetter<PrimitiveWireframeWidth>;
-		(*a)["gl:primitive:bound"] = typedAttributeGetter<PrimitiveBound>;
-		(*a)["gl:primitive:solid"] = typedAttributeGetter<PrimitiveSolid>;
-		(*a)["gl:primitive:outline"] = typedAttributeGetter<PrimitiveOutline>;
-		(*a)["gl:primitive:outlineWidth"] = typedAttributeGetter<PrimitiveOutlineWidth>;
-		(*a)["gl:primitive:points"] = typedAttributeGetter<PrimitivePoints>;
-		(*a)["gl:primitive:pointWidth"] = typedAttributeGetter<PrimitivePointWidth>;
-		(*a)["gl:primitive:sortForTransparency"] = typedAttributeGetter<PrimitiveTransparencySortStateComponent>;
+		(*a)["gl:primitive:wireframe"] = typedAttributeGetter<IECoreGL::Primitive::DrawWireframe>;
+		(*a)["gl:primitive:wireframeWidth"] = typedAttributeGetter<IECoreGL::Primitive::WireframeWidth>;
+		(*a)["gl:primitive:bound"] = typedAttributeGetter<IECoreGL::Primitive::DrawBound>;
+		(*a)["gl:primitive:solid"] = typedAttributeGetter<IECoreGL::Primitive::DrawSolid>;
+		(*a)["gl:primitive:outline"] = typedAttributeGetter<IECoreGL::Primitive::DrawOutline>;
+		(*a)["gl:primitive:outlineWidth"] = typedAttributeGetter<IECoreGL::Primitive::OutlineWidth>;
+		(*a)["gl:primitive:points"] = typedAttributeGetter<IECoreGL::Primitive::DrawPoints>;
+		(*a)["gl:primitive:pointWidth"] = typedAttributeGetter<IECoreGL::Primitive::PointWidth>;
+		(*a)["gl:primitive:sortForTransparency"] = typedAttributeGetter<IECoreGL::Primitive::TransparencySort>;
 		(*a)["gl:primitive:wireframeColor"] = typedAttributeGetter<WireframeColorStateComponent>;
 		(*a)["gl:primitive:boundColor"] = typedAttributeGetter<BoundColorStateComponent>;
 		(*a)["gl:primitive:outlineColor"] = typedAttributeGetter<OutlineColorStateComponent>;
@@ -1135,7 +1135,7 @@ static const AttributeGetterMap *attributeGetters()
 		(*a)["gl:blend:equation"] = blendEquationGetter;
 		(*a)["gl:shade:transparent"] = typedAttributeGetter<TransparentShadingStateComponent>;
 		(*a)["gl:pointsPrimitive:useGLPoints"] = pointsPrimitiveUseGLPointsGetter;
-		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeGetter<PointsPrimitiveGLPointWidth>;
+		(*a)["gl:pointsPrimitive:glPointWidth"] = typedAttributeGetter<IECoreGL::PointsPrimitive::GLPointWidth>;
 		(*a)["name"] = nameGetter;
 		(*a)["doubleSided"] = typedAttributeGetter<DoubleSidedStateComponent>;
 		(*a)["rightHandedOrientation"] = typedAttributeGetter<RightHandedOrientationStateComponent>;
