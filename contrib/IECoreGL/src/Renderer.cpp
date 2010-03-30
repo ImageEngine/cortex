@@ -75,6 +75,8 @@
 #include "IECore/SplineToImage.h"
 #include "IECore/CurvesPrimitive.h"
 
+#include "OpenEXR/ImathBoxAlgo.h"
+
 #include <stack>
 
 using namespace IECore;
@@ -1036,6 +1038,8 @@ static IECore::ConstDataPtr rendererSpaceGetter( const std::string &name, const 
 	{
 		case ObjectSpace :
 			return new StringData( "object" );
+		case WorldSpace :
+			return new StringData( "world" );
 		default :
 			msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
 			return new StringData( "invalid" );
@@ -1055,6 +1059,10 @@ static void rendererSpaceSetter( const std::string &name, IECore::ConstDataPtr v
 	if( v=="object" )
 	{
 		s = ObjectSpace;
+	}
+	else if ( v == "world" )
+	{
+		s = WorldSpace;
 	}
 	else
 	{
@@ -1284,6 +1292,10 @@ static bool checkCulling( RendererImplementation *r, const T *p )
 	{
 		case ObjectSpace :
 			// if in local space we don't have to transform bounding box of p.
+			break;
+		case WorldSpace :
+			// transform procedural bounding box to world space to match culling box space.
+			b = Imath::transform( b, r->getTransform() );
 			break;
 		default :
 			msg( Msg::Warning, "Renderer::checkCulling", "Unnexpected culling space!" );

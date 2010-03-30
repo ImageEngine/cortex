@@ -186,10 +186,11 @@ typedef TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId> PolygonS
 template<>
 void PolygonSmoothingStateComponent::bind() const;
 
-// \todo: implement CurrentSpace, ShaderSpace, WorldSpace, CameraSpace, ScreenSpace, RasterSpace and NDCSpace like in Renderman interface.
+// \todo: implement CurrentSpace, ShaderSpace, CameraSpace, ScreenSpace, RasterSpace and NDCSpace like in Renderman interface.
 enum RendererSpace
 {
-	ObjectSpace
+	ObjectSpace,
+	WorldSpace
 };
 // Used to specify which space the culling bounding box is defined. Culling is applied to primitives and procedurals.
 typedef TypedStateComponent<RendererSpace, CullingSpaceStateComponentTypeId> CullingSpaceStateComponent;

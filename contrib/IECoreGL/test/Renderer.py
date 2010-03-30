@@ -475,6 +475,7 @@ class TestRenderer( unittest.TestCase ) :
 			s.render( State( True ) )
 
 	class RecursiveProcedural( Renderer.Procedural ):
+		"""Creates a pyramid of spheres"""
 
 		maxLevel = 5
 		threadsUsed = set()
@@ -494,25 +495,18 @@ class TestRenderer( unittest.TestCase ) :
 			renderer.attributeBegin()
 			renderer.setAttribute( "color", Color3fData( Color3f( float(self.__level)/self.maxLevel, 0, 1 - float(self.__level)/self.maxLevel ) ) )
 			renderer.transformBegin()
-			m = M44f()
-			m.translate( V3f( 0, 0.5, 0 ) )
-			renderer.concatTransform( m )
+			renderer.concatTransform( M44f.createTranslated(V3f( 0, 0.5, 0 )) )
+			renderer.concatTransform( M44f.createScaled( V3f(0.5) ) )
 			renderer.geometry( "sphere", {}, {} )
 			renderer.transformEnd()
 			# end of recursion
 			if self.__level < self.maxLevel :
 				renderer.transformBegin()
-				m = M44f()
-				m.translate( V3f( 0, -0.5, 0 ) )
-				renderer.concatTransform( m )
-				m = M44f()
-				m.scale( V3f( 0.5 ) )
-				renderer.concatTransform( m )
+				renderer.concatTransform( M44f.createTranslated(V3f( 0, -0.5, 0 )) )
 				for i in xrange( 0, 2 ) :
 					renderer.transformBegin()
-					m = M44f()
-					m.translate( V3f( 0.5 * (i - 0.5) , 0, 0) )
-					renderer.concatTransform( m )
+					renderer.concatTransform( M44f.createTranslated(V3f( (i - 0.5) , 0, 0)) )
+					renderer.concatTransform( M44f.createScaled( V3f(0.5) ) )
 					proc = TestRenderer.RecursiveProcedural( self.__level + 1 )
 					renderer.procedural( proc )
 					renderer.transformEnd()
@@ -600,17 +594,17 @@ class TestRenderer( unittest.TestCase ) :
 	def testParallelMultithreadedProcedurals( self ):
 		self.__testParallelMultithreadedProcedurals( self.RecursiveParameterisedProcedural )
 
+	def __countChildrenRecursive( self, g ) :
+		if not isinstance( g, Group ):
+			return 1
+		count = 0
+		for c in g.children():
+			count += self.__countChildrenRecursive( c )
+		return count
+
 	def testObjectSpaceCulling( self ):
 
 		p = self.RecursiveProcedural()
-
-		def countChildrenRecursive( g ) :
-			if not isinstance( g, Group ):
-				return 1
-			count = 0
-			for c in g.children():
-				count += countChildrenRecursive( c )
-			return count
 
 		def renderWithCulling( box ):
 			r = Renderer()
@@ -627,12 +621,34 @@ class TestRenderer( unittest.TestCase ) :
 				r.procedural( p )
 			r.attributeEnd()
 			r.worldEnd()
-			return countChildrenRecursive( r.scene().root() )
+			return self.__countChildrenRecursive( r.scene().root() )
 
 		noCullingCounter = renderWithCulling( Box3f() )
 
 		# verify that only half of the things are renderer when the giving culling box is defined.
 		self.assertEqual( renderWithCulling( Box3f( V3f(2,-1,-1), V3f(3,1,1)  ) ) * 2, noCullingCounter )
+
+	def testWorldSpaceCulling( self ):
+
+		p = self.RecursiveProcedural()
+		box = Box3f( V3f(0.001,-1,-1), V3f(1,1,1) )
+
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.worldBegin()
+		r.setAttribute( "gl:cullingSpace", StringData( "world" ) )
+		r.setAttribute( "gl:cullingBox", Box3fData( box ) )
+		r.sphere( 1, 0, 1, 360, {} )	# half-inside : 1 element
+		r.procedural( p )	# half-inside: 32 elements (full procedural renders 63 elements)
+		r.transformBegin()
+		if True:
+			r.concatTransform( M44f.createTranslated( V3f(-2, 0, 0) ) )
+			# everything in this block is culled
+			r.sphere( 1, 0, 1, 360, {} )
+			r.procedural( p )
+		r.transformEnd()
+		r.worldEnd()
+		self.assertEqual( self.__countChildrenRecursive( r.scene().root() ), 33 )
 
 	def testTransformsInImmediateRenderer( self ):
 		r = Renderer()
@@ -670,6 +686,9 @@ class TestRenderer( unittest.TestCase ) :
 			# confirm that concatenate transform works
 			r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
 			self.assert_( r.getTransform().equalWithAbsError( M44f.createTranslated( V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
+			r.concatTransform( M44f.createScaled( V3f(0.5) ) )
+			self.assert_( r.getTransform().equalWithAbsError( M44f.createScaled( V3f(0.5) ) * M44f.createTranslated( V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
+
 			# confirm that setting the world space transform works too
 			m2 = M44f.createTranslated( V3f( 0, 1, 0 ) )
 			r.setTransform( m2 )
