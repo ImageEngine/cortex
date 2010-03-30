@@ -576,10 +576,8 @@ void IECoreGL::Renderer::transformEnd()
 {
 	if( m_data->inWorld )
 	{
-		/// \todo We need to reverse the rightHandedOrientation oojamaflip here if the
-		/// old transform is flipped relative to the new one. to do that we have to implement
-		/// getTransform() properly.
 		m_data->implementation->transformEnd();
+		m_data->implementation->addState( new RightHandedOrientationStateComponent( determinant( m_data->implementation->getTransform() ) >= 0 ) );
 	}
 	else
 	{
@@ -599,6 +597,7 @@ void IECoreGL::Renderer::setTransform( const Imath::M44f &m )
 	if( m_data->inWorld )
 	{
 		m_data->implementation->setTransform( m );
+		m_data->implementation->addState( new RightHandedOrientationStateComponent( determinant( m ) >= 0 ) );
 	}
 	else
 	{
