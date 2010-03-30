@@ -576,8 +576,15 @@ void IECoreGL::Renderer::transformEnd()
 {
 	if( m_data->inWorld )
 	{
+		bool wasRight = ( determinant( m_data->implementation->getTransform() ) >= 0 );
 		m_data->implementation->transformEnd();
-		m_data->implementation->addState( new RightHandedOrientationStateComponent( determinant( m_data->implementation->getTransform() ) >= 0 ) );
+		bool isRight = ( determinant( m_data->implementation->getTransform() ) >= 0 );
+
+		if ( wasRight != isRight )
+		{
+			bool l = m_data->implementation->getState<RightHandedOrientationStateComponent>()->value();
+			m_data->implementation->addState( new RightHandedOrientationStateComponent( !l ) );
+		}
 	}
 	else
 	{
@@ -597,7 +604,12 @@ void IECoreGL::Renderer::setTransform( const Imath::M44f &m )
 	if( m_data->inWorld )
 	{
 		m_data->implementation->setTransform( m );
-		m_data->implementation->addState( new RightHandedOrientationStateComponent( determinant( m ) >= 0 ) );
+
+		if( determinant( m ) < 0.0f )
+		{
+			bool l = m_data->implementation->getState<RightHandedOrientationStateComponent>()->value();
+			m_data->implementation->addState( new RightHandedOrientationStateComponent( !l ) );
+		}
 	}
 	else
 	{
