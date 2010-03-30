@@ -86,6 +86,7 @@ void DeferredRendererImplementation::worldBegin()
 		IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::worldBegin", "Mismatched attributeBegin/attributeEnd detected." );
 	}
 
+	m_defaultContext->localTransform = M44f();
 	m_defaultContext->transformStack = TransformStack();
 	m_defaultContext->transformStack.push( M44f() );
 
@@ -112,6 +113,7 @@ void DeferredRendererImplementation::worldEnd()
 		IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::worldEnd", "Bad nesting of attributeBegin/attributeEnd detected." );
 	}
 
+	m_defaultContext->localTransform = M44f();
 	m_defaultContext->transformStack = TransformStack();
 	m_defaultContext->transformStack.push( M44f() );
 
@@ -123,11 +125,12 @@ void DeferredRendererImplementation::transformBegin()
 	RenderContext *curContext = currentContext();
 
 	GroupPtr g = new Group;
-	g->setTransform( curContext->transformStack.top() );
+	g->setTransform( curContext->localTransform );
 	curContext->groupStack.top()->safeAddChild( g );
 	curContext->groupStack.push( g );
 
-	curContext->transformStack.push( M44f() );
+	curContext->transformStack.push( curContext->localTransform * curContext->transformStack.top() );
+	curContext->localTransform = Imath::M44f();
 }
 
 void DeferredRendererImplementation::transformEnd()
@@ -140,29 +143,34 @@ void DeferredRendererImplementation::transformEnd()
 		return;
 	}
 
+	// recover local transform from group and remove group from stack
 	curContext->transformStack.pop();
+	curContext->localTransform = curContext->groupStack.top()->getTransform();
 	curContext->groupStack.pop();
 
 }
 
 void DeferredRendererImplementation::setTransform( const Imath::M44f &m )
 {
-	// \todo: implement this!
-	IECore::msg( IECore::Msg::Warning, "DeferredRendererImplementation::setTransform", "Not implemented!" );
+	RenderContext *curContext = currentContext();
+
+	// figure out the local transformation from the last group that lead us to the given matrix.
+	curContext->localTransform = m * curContext->transformStack.top().inverse();
+
 }
 
 Imath::M44f DeferredRendererImplementation::getTransform() const
 {
-	// \todo: implement this!
-	IECore::msg( IECore::Msg::Warning, "DeferredRendererImplementation::getTransform", "Not implemented!" );
-	return Imath::M44f();
+	const RenderContext *curContext = currentContext();
+	// return the current world matrix
+	return curContext->localTransform * curContext->transformStack.top();
 }
 
 void DeferredRendererImplementation::concatTransform( const Imath::M44f &matrix )
 {
 	RenderContext *curContext = currentContext();
 
-	curContext->transformStack.top() = matrix * curContext->transformStack.top();
+	curContext->localTransform = matrix * curContext->localTransform;
 }
 
 void DeferredRendererImplementation::attributeBegin()
@@ -170,12 +178,13 @@ void DeferredRendererImplementation::attributeBegin()
 	RenderContext *curContext = currentContext();
 
 	GroupPtr g = new Group;
-	g->setTransform( curContext->transformStack.top() );
+	g->setTransform( curContext->localTransform );
 	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
 	curContext->groupStack.top()->safeAddChild( g );
 	curContext->groupStack.push( g );
 
-	curContext->transformStack.push( M44f() );
+	curContext->transformStack.push( curContext->localTransform * curContext->transformStack.top() );
+	curContext->localTransform = Imath::M44f();
 	curContext->stateStack.push_back( new State( false ) );
 }
 
@@ -188,9 +197,11 @@ void DeferredRendererImplementation::attributeEnd()
 		IECore::msg( IECore::Msg::Warning, "DeferredRendererImplementation::attributeEnd", "Bad nesting." );
 		return;
 	}
-
-	curContext->transformStack.pop();
 	curContext->stateStack.pop_back();
+
+	// recover local transform from group and remove group from stack
+	curContext->transformStack.pop();
+	curContext->localTransform = curContext->groupStack.top()->getTransform();
 	curContext->groupStack.pop();
 }
 
@@ -243,7 +254,7 @@ void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )
 	RenderContext *curContext = currentContext();
 
 	GroupPtr g = new Group;
-	g->setTransform( curContext->transformStack.top() );
+	g->setTransform( curContext->localTransform );
 	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
 	g->addChild( primitive );
 
@@ -314,6 +325,7 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 				completeState->add( *it );
 			}
 			m_proceduralContext = new RenderContext();
+			m_proceduralContext->localTransform = curContext->localTransform;
 			m_proceduralContext->transformStack.push( curContext->transformStack.top() );
 			m_proceduralContext->stateStack.push_back( completeState );
 			m_proceduralContext->groupStack.push( curContext->groupStack.top() );
@@ -405,7 +417,7 @@ ScenePtr DeferredRendererImplementation::scene()
 	return m_scene;
 }
 
-DeferredRendererImplementation::RenderContext *DeferredRendererImplementation::currentContext()
+const DeferredRendererImplementation::RenderContext *DeferredRendererImplementation::currentContext() const
 {
 	if ( m_threadContextPool.size() == 0 )
 	{
@@ -422,6 +434,14 @@ DeferredRendererImplementation::RenderContext *DeferredRendererImplementation::c
 	}
 
 	return myThreadContext.top();
+}
+
+DeferredRendererImplementation::RenderContext *DeferredRendererImplementation::currentContext()
+{
+	// get the const version of current context and avoid code duplication.
+	return const_cast< RenderContext * >(
+				static_cast< const DeferredRendererImplementation & >(*this).currentContext()
+			);
 }
 
 void DeferredRendererImplementation::pushContext( RenderContextPtr context )

@@ -634,9 +634,7 @@ class TestRenderer( unittest.TestCase ) :
 		# verify that only half of the things are renderer when the giving culling box is defined.
 		self.assertEqual( renderWithCulling( Box3f( V3f(2,-1,-1), V3f(3,1,1)  ) ) * 2, noCullingCounter )
 
-	def testTransforms( self ):
-
-		# Test immediate mode first.
+	def testTransformsInImmediateRenderer( self ):
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "immediate" ) )
 		r.transformBegin()
@@ -650,6 +648,48 @@ class TestRenderer( unittest.TestCase ) :
 		# confirm that setting the world space transform does not affect the camera matrix (that was already set in openGL )
 		r.setTransform( M44f.createTranslated( V3f( 0, 1, 0 ) ) )
 		self.assert_( r.getTransform().equalWithAbsError( M44f.createTranslated( V3f( 0, 1, 0 ) ), 1e-4 ) )
+		r.worldEnd()
+
+	def testTransformsInDeferredRenderer( self ):
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.transformBegin()
+		r.concatTransform( M44f.createRotated( V3f( 1, 1, 1 ) ) )
+		r.camera( "main", { "resolution" : V2iData( V2i( 512 ) ), "projection" : StringData( "perspective" ) } )
+		r.transformEnd()
+		r.worldBegin()
+		# confirm that the camera transformation is not affecting the world space matrix
+		self.assert_( r.getTransform().equalWithAbsError( M44f(), 1e-4 ) )
+		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
+		r.concatTransform( M44f.createRotated( V3f( 1, 1, 1 ) ) )
+		m = r.getTransform()
+		r.transformBegin()
+		if True:
+			# confirm that the transformBegin did not change the current transform
+			self.assert_( r.getTransform().equalWithAbsError( m, 1e-4 ) )
+			# confirm that concatenate transform works
+			r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
+			self.assert_( r.getTransform().equalWithAbsError( M44f.createTranslated( V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
+			# confirm that setting the world space transform works too
+			m2 = M44f.createTranslated( V3f( 0, 1, 0 ) )
+			r.setTransform( m2 )
+			self.assert_( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
+
+			r.attributeBegin()
+			if True:
+				# confirm that the attributeBegin did not change the current transform
+				self.assert_( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
+				# confirm that setting the world space transform works too
+				r.setTransform( M44f.createRotated( V3f( 3, 1, 0 ) ) )
+				self.assert_( r.getTransform().equalWithAbsError( M44f.createRotated( V3f( 3, 1, 0 ) ), 1e-4 ) )
+			r.attributeEnd()
+			# confirms that attributeEnd recovers the matrix.
+			self.assert_( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
+
+		r.transformEnd()
+		# confirms that transformEnd recovers the matrix.
+		self.assert_( r.getTransform().equalWithAbsError( m, 1e-4 ) )
+		
 		r.worldEnd()
 	
 	def tearDown( self ) :
