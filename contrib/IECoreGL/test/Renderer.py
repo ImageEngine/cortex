@@ -633,6 +633,24 @@ class TestRenderer( unittest.TestCase ) :
 
 		# verify that only half of the things are renderer when the giving culling box is defined.
 		self.assertEqual( renderWithCulling( Box3f( V3f(2,-1,-1), V3f(3,1,1)  ) ) * 2, noCullingCounter )
+
+	def testTransforms( self ):
+
+		# Test immediate mode first.
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "immediate" ) )
+		r.transformBegin()
+		r.concatTransform( M44f.createRotated( V3f( 1, 1, 1 ) ) )
+		r.camera( "main", { "resolution" : V2iData( V2i( 512 ) ), "projection" : StringData( "perspective" ) } )
+		r.transformEnd()
+		r.worldBegin()
+		# confirm that the camera transformation is not affecting the world space matrix
+		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
+		self.assert_( r.getTransform().equalWithAbsError( M44f.createTranslated( V3f( 1, 0, 0 ) ), 1e-4 ) )
+		# confirm that setting the world space transform does not affect the camera matrix (that was already set in openGL )
+		r.setTransform( M44f.createTranslated( V3f( 0, 1, 0 ) ) )
+		self.assert_( r.getTransform().equalWithAbsError( M44f.createTranslated( V3f( 0, 1, 0 ) ), 1e-4 ) )
+		r.worldEnd()
 	
 	def tearDown( self ) :
 

@@ -42,6 +42,9 @@ class RendererImplementation : public IECore::RunTimeTyped
 		/// Transform calls guaranteed only to be called after worldBegin().
 		virtual void transformBegin() = 0;
 		virtual void transformEnd() = 0;
+
+		virtual void setTransform( const Imath::M44f &m ) = 0;
+		virtual Imath::M44f getTransform() const = 0;
 		virtual void concatTransform( const Imath::M44f &matrix ) = 0;
 
 		virtual void attributeBegin() = 0;

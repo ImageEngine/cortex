@@ -33,6 +33,8 @@ class DeferredRendererImplementation : public RendererImplementation
 
 		virtual void transformBegin();
 		virtual void transformEnd();
+		virtual void setTransform( const Imath::M44f &m );
+		virtual Imath::M44f getTransform() const;
 		virtual void concatTransform( const Imath::M44f &matrix );
 
 		virtual void attributeBegin();

@@ -145,6 +145,19 @@ void DeferredRendererImplementation::transformEnd()
 
 }
 
+void DeferredRendererImplementation::setTransform( const Imath::M44f &m )
+{
+	// \todo: implement this!
+	IECore::msg( IECore::Msg::Warning, "DeferredRendererImplementation::setTransform", "Not implemented!" );
+}
+
+Imath::M44f DeferredRendererImplementation::getTransform() const
+{
+	// \todo: implement this!
+	IECore::msg( IECore::Msg::Warning, "DeferredRendererImplementation::getTransform", "Not implemented!" );
+	return Imath::M44f();
+}
+
 void DeferredRendererImplementation::concatTransform( const Imath::M44f &matrix )
 {
 	RenderContext *curContext = currentContext();

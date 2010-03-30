@@ -129,6 +129,18 @@ void ImmediateRendererImplementation::transformEnd()
 	glPopMatrix();
 }
 
+void ImmediateRendererImplementation::setTransform( const Imath::M44f &m )
+{
+	// assumes world coordinate system is the identity matrix.
+	glLoadMatrixf( ( m * m_camera->getTransform().inverse() ).getValue() );
+}
+
+Imath::M44f ImmediateRendererImplementation::getTransform() const
+{
+	// get the current open GL model-view matrix and take the camera out of it to return the world space matrix.
+	return Camera::matrix() * m_camera->getTransform();
+}
+
 void ImmediateRendererImplementation::concatTransform( const Imath::M44f &matrix )
 {
 	glMultMatrixf( matrix.getValue() );

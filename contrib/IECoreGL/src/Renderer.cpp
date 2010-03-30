@@ -594,7 +594,7 @@ void IECoreGL::Renderer::transformEnd()
 
 void IECoreGL::Renderer::setTransform( const Imath::M44f &m )
 {
-	msg( Msg::Warning, "Renderer::setTransform", "Not implemented" );
+	m_data->implementation->setTransform( m );
 }
 
 void IECoreGL::Renderer::setTransform( const std::string &coordinateSystem )
@@ -604,8 +604,7 @@ void IECoreGL::Renderer::setTransform( const std::string &coordinateSystem )
 
 Imath::M44f IECoreGL::Renderer::getTransform() const
 {
-	msg( Msg::Warning, "Renderer::getTransform", "Not implemented" );
-	return M44f();
+	return m_data->implementation->getTransform();
 }
 
 Imath::M44f IECoreGL::Renderer::getTransform( const std::string &coordinateSystem ) const
