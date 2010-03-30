@@ -99,7 +99,7 @@ class RendererImplementation : public IECore::RunTimeTyped
 
 		virtual void addPrimitive( PrimitivePtr primitive ) = 0;
 
-		virtual void procedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer ) = 0;
+		virtual void addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer ) = 0;
 
 };
 

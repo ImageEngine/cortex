@@ -81,7 +81,7 @@ class ImmediateRendererImplementation : public RendererImplementation
 
 		virtual void addPrimitive( PrimitivePtr primitive );
 
-		virtual void procedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer );
+		virtual void addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer );
 
 	private :
 

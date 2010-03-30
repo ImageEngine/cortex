@@ -1661,7 +1661,7 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 {
 	if ( checkCulling<IECore::Renderer::Procedural>( m_data->implementation, proc ) )
 	{
-		m_data->implementation->procedural( proc, this );
+		m_data->implementation->addProcedural( proc, this );
 	}
 }
 

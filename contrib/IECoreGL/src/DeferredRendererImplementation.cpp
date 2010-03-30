@@ -374,7 +374,7 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 
 
 
-void DeferredRendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer )
+void DeferredRendererImplementation::addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer )
 {
 	bool mainProcedural = ( m_threadContextPool.size() == 0 );
 
