@@ -145,6 +145,9 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 
 		bool setParameterisedValuesWalk( bool lazy, IECore::ParameterPtr parameter, MStatus &status );
 
+		// We use this callback to instantiate the held Parameterised object once a scene had loaded.
+		// We need to do it at this point as things like the OpHolder need it in place before compute()
+		// is called (we can't instantiate it during compute as it may mean adding or removing attributes).
 		class PLCB : public PostLoadCallback
 		{
 			public:
