@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/TypedStateComponent.h"
+#include "IECoreGL/Primitive.h"
 
 #include "IECoreMaya/DisplayStyle.h"
 
@@ -54,15 +55,15 @@ DisplayStyle::DisplayStyle()
 	m_data->pointsState = new IECoreGL::State( true );
 	m_data->boundsState = new IECoreGL::State( true );
 
-	m_data->wireframeState->add( new IECoreGL::PrimitiveSolid( false ) );
-	m_data->wireframeState->add( new IECoreGL::PrimitiveWireframe( true ) );
+	m_data->wireframeState->add( new IECoreGL::Primitive::DrawSolid( false ) );
+	m_data->wireframeState->add( new IECoreGL::Primitive::DrawWireframe( true ) );
 
-	m_data->pointsState->add( new IECoreGL::PrimitiveSolid( false ) );
-	m_data->pointsState->add( new IECoreGL::PrimitivePoints( true ) );
-	m_data->pointsState->add( new IECoreGL::PrimitivePointWidth( 2.0f ) );
+	m_data->pointsState->add( new IECoreGL::Primitive::DrawSolid( false ) );
+	m_data->pointsState->add( new IECoreGL::Primitive::DrawPoints( true ) );
+	m_data->pointsState->add( new IECoreGL::Primitive::PointWidth( 2.0f ) );
 
-	m_data->boundsState->add( new IECoreGL::PrimitiveSolid( false ) );
-	m_data->boundsState->add( new IECoreGL::PrimitiveBound( true ) );
+	m_data->boundsState->add( new IECoreGL::Primitive::DrawSolid( false ) );
+	m_data->boundsState->add( new IECoreGL::Primitive::DrawBound( true ) );
 }
 
 DisplayStyle::~DisplayStyle()
