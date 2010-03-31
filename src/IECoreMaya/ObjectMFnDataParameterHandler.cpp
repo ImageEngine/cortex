@@ -64,13 +64,14 @@ ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::DoubleVect
 ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::IntVectorParameter,    MFnData::kIntArray > >    intVectorRegistrar( IECore::IntVectorParameter::staticTypeId(), IECore::IntVectorData::staticTypeId() );
 
 template<typename T, MFnData::Type D>
-MStatus ObjectMFnDataParameterHandler<T, D>::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus ObjectMFnDataParameterHandler<T, D>::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	if (!IECore::runTimeCast<const IECore::ObjectParameter>( parameter ) && !IECore::runTimeCast<const T>( parameter ))
 	{
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnGenericAttribute fnGAttr( attribute );
 	if( !fnGAttr.hasObj( attribute ) )
 	{
@@ -83,22 +84,20 @@ MStatus ObjectMFnDataParameterHandler<T, D>::doUpdate( IECore::ConstParameterPtr
 }
 
 template<typename T, MFnData::Type D>
-MObject ObjectMFnDataParameterHandler<T, D>::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug ObjectMFnDataParameterHandler<T, D>::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	if (!IECore::runTimeCast<const IECore::ObjectParameter>( parameter ) && !IECore::runTimeCast<const T>( parameter ))
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	/// Use a generic attribute, so we could eventually accept other ObjectParamter types, too.
 	MStatus s;
 	MFnGenericAttribute fnGAttr;
-	MObject result = fnGAttr.create( attributeName, attributeName, &s );
+	MObject attribute = fnGAttr.create( plugName, plugName, &s );
 
-	if ( !ObjectMFnDataParameterHandler<T, D>::update( parameter, result ) )
-	{
-		return MObject::kNullObj;
-	}
+	MPlug result = finishCreating( parameter, attribute, node );
+	doUpdate( parameter, result );
 
 	return result;
 }

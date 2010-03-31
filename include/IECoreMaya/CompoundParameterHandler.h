@@ -48,8 +48,8 @@ class CompoundParameterHandler : public ParameterHandler
 
 	protected:
 
-		virtual MObject doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const;
-		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const;
+		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;
+		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
 

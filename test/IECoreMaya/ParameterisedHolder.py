@@ -366,10 +366,80 @@ class TestParameterisedHolder( unittest.TestCase ) :
 				
 		self.assertEqual( cmds.listConnections( inputPlug, source=True, destination=False, plugs=True ), [ "opA.result" ] )
 		self.assertEqual( cmds.listConnections( inputPlug, source=False, destination=True, plugs=True ), None )
-					
+	
+	def testDefaultConnections( self ) :
+	
+		# make an opholder for an op with default connections
+		# and make sure they are made.
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opA", "mayaUserData", 1 )
+		op = fnOH.getOp()
+
+		tPlug = fnOH.parameterPlugPath( op["t"] )
+		
+		self.assertEqual( cmds.listConnections( tPlug, source=True, destination=False, plugs=True, skipConversionNodes=True ), [ "time1.outTime" ] )
+		self.assertEqual( cmds.listConnections( tPlug, source=False, destination=True, plugs=True ), None )
+		
+		ePlug = fnOH.parameterPlugPath( op["e"] )
+		
+		eInputPlugs = cmds.listConnections( ePlug, source=True, destination=False, plugs=True )
+		eInputNodes = cmds.listConnections( ePlug, source=True, destination=False )
+		self.assertEqual( len( eInputNodes ), 1 )
+		self.assertEqual( cmds.nodeType( eInputNodes[0] ), "expression" )
+		
+		# save the file
+		
+		cmds.file( rename = os.getcwd() + "/test/IECoreMaya/defaultConnections.ma" )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+
+		# load it again and check the connections are still there
+
+		cmds.file( new = True, force = True )
+		cmds.file( scene, open = True )
+
+		self.assertEqual( cmds.listConnections( tPlug, source=True, destination=False, plugs=True, skipConversionNodes=True ), [ "time1.outTime" ] )
+		self.assertEqual( cmds.listConnections( tPlug, source=False, destination=True, plugs=True ), None )
+		
+		eInputNodes = cmds.listConnections( ePlug, source=True, destination=False )
+		self.assertEqual( len( eInputNodes ), 1 )
+		self.assertEqual( cmds.nodeType( eInputNodes[0] ), "expression" )
+		
+		# remove the connections and save
+		
+		cmds.disconnectAttr( "time1.outTime", tPlug )
+		cmds.disconnectAttr( eInputPlugs[0], ePlug )
+
+		self.assertEqual( cmds.listConnections( tPlug, source=True, destination=False, plugs=True, skipConversionNodes=True ), None )
+		self.assertEqual( cmds.listConnections( ePlug, source=True, destination=False, plugs=True, skipConversionNodes=True ), None )
+		
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+
+		# load again and check they remain disconnected
+		
+		cmds.file( new = True, force = True )
+		cmds.file( scene, open = True )
+
+		self.assertEqual( cmds.listConnections( tPlug, source=True, destination=False, plugs=True, skipConversionNodes=True ), None )
+		self.assertEqual( cmds.listConnections( ePlug, source=True, destination=False, plugs=True, skipConversionNodes=True ), None )	
+	
+	def testConnectedNodeNameValueProvider( self ) :
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "opA", "mayaUserData", 1 )
+		op = fnOH.getOp()
+		
+		fnOH.setParameterisedValues()
+		self.assertEqual( op["s"].getTypedValue(), "" )
+		
+		sPlug = fnOH.parameterPlugPath( op["s"] )
+		cmds.connectAttr( "time1.outTime", sPlug )
+		
+		fnOH.setParameterisedValues()
+		self.assertEqual( op["s"].getTypedValue(), "time1" )
+		
 	def tearDown( self ) :
 
 		for f in [
+			"test/IECoreMaya/defaultConnections.ma" ,
 			"test/IECoreMaya/compoundObjectConnections.ma" ,
 			"test/IECoreMaya/reference.ma" ,
 			"test/IECoreMaya/referenceMaster.ma",

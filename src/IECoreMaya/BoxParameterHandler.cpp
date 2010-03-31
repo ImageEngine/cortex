@@ -54,7 +54,7 @@ static ParameterHandler::Description< BoxParameterHandler<V2d> > box2dRegistrar(
 static ParameterHandler::Description< BoxParameterHandler<V3d> > box3dRegistrar( IECore::Box3dParameter::staticTypeId() );
 
 template<typename T>
-MStatus BoxParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus BoxParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	typename IECore::TypedParameter<Box<T> >::ConstPtr p = IECore::runTimeCast<const IECore::TypedParameter<Box<T> > >( parameter );
 	if( !p )
@@ -62,6 +62,7 @@ MStatus BoxParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, M
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnCompoundAttribute fnCAttr( attribute );
 	if( !fnCAttr.hasObj( attribute ) )
 	{
@@ -134,12 +135,12 @@ MStatus BoxParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, M
 }
 
 template<typename T>
-MObject BoxParameterHandler<T>::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug BoxParameterHandler<T>::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	typename IECore::TypedParameter<Box<T> >::ConstPtr p = IECore::runTimeCast<const IECore::TypedParameter<Box<T > > >( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	MFnNumericAttribute fnNAttr;
@@ -149,27 +150,30 @@ MObject BoxParameterHandler<T>::doCreate( IECore::ConstParameterPtr parameter, c
 	{
 		case 2 :
 			{
-				MObject oMinX = fnNAttr.create( attributeName + "MinX", attributeName + "MinX", NumericTraits<T>::baseDataType() );
-				MObject oMinY = fnNAttr.create( attributeName + "MinY", attributeName + "MinY", NumericTraits<T>::baseDataType() );
-				oMin = fnNAttr.create( attributeName + "Min", attributeName + "Min", oMinX, oMinY );
+				MObject oMinX = fnNAttr.create( plugName + "MinX", plugName + "MinX", NumericTraits<T>::baseDataType() );
+				MObject oMinY = fnNAttr.create( plugName + "MinY", plugName + "MinY", NumericTraits<T>::baseDataType() );
+				oMin = fnNAttr.create( plugName + "Min", plugName + "Min", oMinX, oMinY );
 
-				MObject oMaxX = fnNAttr.create( attributeName + "MaxX", attributeName + "MaxX", NumericTraits<T>::baseDataType() );
-				MObject oMaxY = fnNAttr.create( attributeName + "MaxY", attributeName + "MaxY", NumericTraits<T>::baseDataType() );
-				oMax = fnNAttr.create( attributeName + "Max", attributeName + "Max", oMaxX, oMaxY );
+				MObject oMaxX = fnNAttr.create( plugName + "MaxX", plugName + "MaxX", NumericTraits<T>::baseDataType() );
+				MObject oMaxY = fnNAttr.create( plugName + "MaxY", plugName + "MaxY", NumericTraits<T>::baseDataType() );
+				oMax = fnNAttr.create( plugName + "Max", plugName + "Max", oMaxX, oMaxY );
 			}
 			break;
 		case 3 :
-			oMin = fnNAttr.createPoint( attributeName + "Min", attributeName + "Min" );
-			oMax = fnNAttr.createPoint( attributeName + "Max", attributeName + "Max" );
+			oMin = fnNAttr.createPoint( plugName + "Min", plugName + "Min" );
+			oMax = fnNAttr.createPoint( plugName + "Max", plugName + "Max" );
 			break;
 		default :
-			return MObject::kNullObj;
+			return MPlug();
 	}
 
-	MObject result = fnCAttr.create( attributeName, attributeName );
+	MObject attribute = fnCAttr.create( plugName, plugName );
 	fnCAttr.addChild( oMin );
 	fnCAttr.addChild( oMax );
-	update( parameter, result );
+	
+	MPlug result = finishCreating( parameter, attribute, node );
+	doUpdate( parameter, result );
+	
 	return result;
 }
 

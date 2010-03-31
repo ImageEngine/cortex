@@ -56,7 +56,7 @@ using namespace boost;
 
 static ParameterHandler::Description< StringVectorParameterHandler > registrar( IECore::StringVectorParameter::staticTypeId() );
 
-MStatus StringVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus StringVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstStringVectorParameterPtr p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
 	if( !p )
@@ -64,6 +64,7 @@ MStatus StringVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parame
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnTypedAttribute fnTAttr( attribute );
 	if( !fnTAttr.hasObj( attribute ) )
 	{
@@ -83,12 +84,12 @@ MStatus StringVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parame
 	return MS::kSuccess;
 }
 
-MObject StringVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug StringVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	IECore::ConstStringVectorParameterPtr p = IECore::runTimeCast<const IECore::StringVectorParameter>( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	const IECore::StringVectorParameter::ValueType &value = p->typedDefaultValue();
@@ -100,8 +101,11 @@ MObject StringVectorParameterHandler::doCreate( IECore::ConstParameterPtr parame
 	}
 
 	MFnTypedAttribute fnTAttr;
-	MObject result = fnTAttr.create( attributeName, attributeName, MFnData::kStringArray, MFnStringArrayData().create( defaultValue ) );
-	update( parameter, result );
+	MObject attribute = fnTAttr.create( plugName, plugName, MFnData::kStringArray, MFnStringArrayData().create( defaultValue ) );
+	
+	MPlug result = finishCreating( parameter, attribute, node );
+	doUpdate( parameter, result );
+	
 	return result;
 }
 

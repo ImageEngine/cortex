@@ -49,7 +49,7 @@ using namespace boost;
 
 static ParameterHandler::Description< MeshParameterHandler > registrar( IECore::MeshPrimitiveParameter::staticTypeId(), IECore::MeshPrimitive::staticTypeId() );
 
-MStatus MeshParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus MeshParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstObjectParameterPtr p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
@@ -57,6 +57,7 @@ MStatus MeshParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MOb
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnGenericAttribute fnGAttr( attribute );
 	if( !fnGAttr.hasObj( attribute ) )
 	{
@@ -68,23 +69,21 @@ MStatus MeshParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MOb
 	return MS::kSuccess;
 }
 
-MObject MeshParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug MeshParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	IECore::ConstObjectParameterPtr p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	/// Use a generic attribute, so we could eventually accept other ObjectParamter types, too.
 	MFnGenericAttribute fnGAttr;
-	MObject result = fnGAttr.create( attributeName, attributeName );
+	MObject attribute = fnGAttr.create( plugName, plugName );
 
-	if ( !update( parameter, result ) )
-	{
-		return MObject::kNullObj;
-	}
-
+	MPlug result = finishCreating( parameter, attribute, node );
+	doUpdate( parameter, result );
+	
 	return result;
 }
 

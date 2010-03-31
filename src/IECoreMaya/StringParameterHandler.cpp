@@ -69,7 +69,7 @@ static ParameterHandler::Description< StringParameterHandler > validatedStringRe
 static ParameterHandler::Description< StringParameterHandler > fileSequenceRegistrar( IECore::FileSequenceParameter::staticTypeId() );
 static ParameterHandler::Description< StringParameterHandler > frameListRegistrar( IECore::FrameListParameter::staticTypeId() );
 
-MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstStringParameterPtr p = IECore::runTimeCast<const IECore::StringParameter>( parameter );
 	if( !p )
@@ -101,12 +101,12 @@ MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 	return MS::kSuccess;
 }
 
-MObject StringParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug StringParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	IECore::ConstStringParameterPtr p = IECore::runTimeCast<const IECore::StringParameter>( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
@@ -119,17 +119,17 @@ MObject StringParameterHandler::doCreate( IECore::ConstParameterPtr parameter, c
 		if (valueProvider && valueProvider->readable() == "connectedNodeName")
 		{
 			MFnMessageAttribute fnMAttr;
-			MObject result = fnMAttr.create( attributeName, attributeName );
+			MObject attribute = fnMAttr.create( plugName, plugName );
 
-			return result;
+			return finishCreating( parameter, attribute, node );
 
 		}
 	}
 
 	MFnTypedAttribute fnTAttr;
-	MObject result = fnTAttr.create( attributeName, attributeName, MFnData::kString /* see comments in stringUpdate for why we don't specify a default here */ );
-	update( parameter, result );
-	return result;
+	MObject attribute = fnTAttr.create( plugName, plugName, MFnData::kString /* see comments in stringUpdate for why we don't specify a default here */ );
+	
+	return finishCreating( parameter, attribute, node );
 }
 
 MStatus StringParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const

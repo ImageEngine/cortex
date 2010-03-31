@@ -51,7 +51,7 @@ using namespace boost;
 
 static ParameterHandler::Description< ObjectParameterHandler > registrar( IECore::ObjectParameter::staticTypeId() );
 
-MStatus ObjectParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus ObjectParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstObjectParameterPtr p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
@@ -59,6 +59,7 @@ MStatus ObjectParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnGenericAttribute fnGAttr( attribute );
 	if( !fnGAttr.hasObj( attribute ) )
 	{
@@ -72,7 +73,7 @@ MStatus ObjectParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 		ConstParameterHandlerPtr h = ParameterHandler::create( *it );
 		if (h)
 		{
-			if ( !h->update( parameter, attribute) )
+			if ( !h->doUpdate( parameter, plug ) )
 			{
 				return MS::kFailure;
 			}
@@ -82,19 +83,20 @@ MStatus ObjectParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 	return MS::kSuccess;
 }
 
-MObject ObjectParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug ObjectParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	IECore::ConstObjectParameterPtr p = IECore::runTimeCast<const IECore::ObjectParameter>( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	MFnGenericAttribute fnGAttr;
+	MObject attribute = fnGAttr.create( plugName, plugName );
 
-	MObject result = fnGAttr.create( attributeName, attributeName );
-
-	update( parameter, result );
+	MPlug result = finishCreating( parameter, attribute, node );
+	doUpdate( parameter, result );
+	
 	return result;
 }
 

@@ -53,7 +53,7 @@ static ParameterHandler::Description< NumericParameterHandler<float> > floatRegi
 static ParameterHandler::Description< NumericParameterHandler<double> > doubleRegistrar( IECore::DoubleParameter::staticTypeId() );
 
 template<typename T>
-MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	typename IECore::NumericParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
 	if( !p )
@@ -61,6 +61,7 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnNumericAttribute fnNAttr( attribute );
 	if( !fnNAttr.hasObj( attribute ) )
 	{
@@ -105,17 +106,20 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 }
 
 template<typename T>
-MObject NumericParameterHandler<T>::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug NumericParameterHandler<T>::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	typename IECore::NumericParameter<T>::ConstPtr p = IECore::runTimeCast<const IECore::NumericParameter<T> >( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	MFnNumericAttribute fnNAttr;
-	MObject result = fnNAttr.create( attributeName, attributeName, NumericTraits<T>::dataType(), p->numericDefaultValue() );
-	update( parameter, result );
+	MObject attribute = fnNAttr.create( plugName, plugName, NumericTraits<T>::dataType(), p->numericDefaultValue() );
+	
+	MPlug result = finishCreating( parameter, attribute, node );
+	doUpdate( parameter, result );
+	
 	return result;
 }
 

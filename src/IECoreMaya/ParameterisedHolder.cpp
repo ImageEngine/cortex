@@ -52,8 +52,6 @@
 #include "maya/MPlugArray.h"
 #include "maya/MDGModifier.h"
 #include "maya/MNodeMessage.h"
-#include "maya/MFnExpression.h"
-#include "maya/MFnDagNode.h"
 #include "maya/MFnPluginData.h"
 #include "maya/MFnMesh.h"
 #include "maya/MFnGenericAttribute.h"
@@ -687,16 +685,17 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 template<typename B>
 MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr parameter, const MString &attributeName )
 {
-	MFnDependencyNode fnDN( B::thisMObject() );
+	MObject node =  B::thisMObject();
+	MFnDependencyNode fnDN( node );
 
 	MPlugArray connectionsFromMe, connectionsToMe;
 	ObjectPtr valueBeforeAttributeRemoval = 0;
 
-	// try to reuse the old attribute if we can
-	MObject attribute = fnDN.attribute( attributeName );
-	if( !attribute.isNull() )
+	// try to reuse an old plug if we can
+	MPlug plug = fnDN.findPlug( attributeName, false /* no networked plugs please */ );
+	if( !plug.isNull() )
 	{
-		MStatus s = IECoreMaya::ParameterHandler::update( parameter, attribute );
+		MStatus s = IECoreMaya::ParameterHandler::update( parameter, plug );
 		if( s )
 		{
 			return MS::kSuccess;
@@ -709,7 +708,6 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 		// remember connections so we can remake them for the new
 		// attribute. we have to be careful to only store non-networked plugs as
 		// networked plugs are invalidated by the removal of the attribute.
-		MPlug plug( B::thisMObject(), attribute );
 		nonNetworkedConnections( plug, connectionsFromMe, connectionsToMe );
 		
 		// remember value so we can set it again for the new attribute.
@@ -729,24 +727,21 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 			}
 		}
 
-		fnDN.removeAttribute( attribute );
+		fnDN.removeAttribute( plug.attribute() );
 	}
 
 	// reuse failed - create a new attribute
-
-	attribute = IECoreMaya::ParameterHandler::create( parameter, attributeName );
-	MStatus s = fnDN.addAttribute( attribute );
-	if( !s )
+	plug = IECoreMaya::ParameterHandler::create( parameter, attributeName, node );
+	if( plug.isNull() )
 	{
 		msg( Msg::Error, "ParameterisedHolder::createOrUpdateAttribute", boost::format( "Failed to create attribute to represent parameter \"%s\" of type \"%s\"" ) % parameter->name() % parameter->typeName() );
-		return s;
+		return MS::kFailure;
 	}
 
 	// restore any existing connections
 	if( connectionsFromMe.length() || connectionsToMe.length() )
 	{
 		MDGModifier dgMod;
-		MPlug plug( B::thisMObject(), attribute );
 		for (unsigned i = 0; i < connectionsFromMe.length(); i++)
 		{
 			dgMod.connect( plug, connectionsFromMe[i] );
@@ -757,47 +752,6 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 		}
 
 		dgMod.doIt();
-	}
-
-	// make any connections requested in userData.
-	// \todo I think this section should actually be performed by the parameter handlers themselves in the create() method.
-	MPlug plug( B::thisMObject(), attribute );
-	connectionsToMe.clear();
-	plug.connectedTo( connectionsToMe, true, false );
-
-	if ( connectionsToMe.length() == 0 )
-	{
-		// creates default connections based on userData["maya"]["defaultConnection"] value...
-		MString thisNodeName = B::name();
-		MFnDagNode fnDAGN( B::thisMObject() );
-		if( fnDAGN.hasObj( B::thisMObject() ) )
-		{
-			thisNodeName = fnDAGN.fullPathName();
-		}
-
-		CompoundObject::ObjectMap &userData = parameter->userData()->members();
-		CompoundObject::ObjectMap::const_iterator it = userData.find( "maya" );
-		if ( it != userData.end() && it->second->typeId() == CompoundObjectTypeId )
-		{
-			CompoundObject::ObjectMap &mayaUserData = staticPointerCast<CompoundObject>(it->second)->members();
-			it = mayaUserData.find( "defaultConnection" );
-			if ( it != mayaUserData.end() && it->second->typeId() == StringDataTypeId )
-			{
-				std::string defaultConnection = staticPointerCast<StringData>(it->second)->readable();
-				std::string cmd = string( "connectAttr " ) + defaultConnection + " " + thisNodeName.asChar() + "." + plug.partialName().asChar();
-				MDGModifier dgMod;
-				dgMod.commandToExecute( cmd.c_str() );
-				dgMod.doIt();
-			}
-			it = mayaUserData.find( "defaultExpression" );
-			if ( it != mayaUserData.end() && it->second->typeId() == StringDataTypeId )
-			{
-				std::string defaultExpression = staticPointerCast<StringData>(it->second)->readable();
-				MString cmd = thisNodeName + "." + plug.partialName() + defaultExpression.c_str();
-				MFnExpression expFn;
-				expFn.create( cmd );
-			}
-		}
 	}
 
 	// restore any parameter value from a deleted-and-remade attribute if it is still valid for the

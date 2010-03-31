@@ -59,15 +59,16 @@ class ParameterHandler : public IECore::RefCounted
 
 	public :
 
-		/// Creates and returns an attribute of the specified name, which is capable of representing
-		/// the specified parameter. Returns MObject::kNullObject on failure.
-		static MObject create( IECore::ConstParameterPtr parameter, const MString &attributeName );
-		/// Updates a previously created attribute to reflect changes on the specified parameter.
-		/// Returns MStatus::kFailure if the attribute is not suitable for the parameter.
+		/// Creates and returns an MPlug capable of representing the specified parameter.
+		/// The plug will have the specified name and be added to the specified node.
+		/// In the case of a failure MPlug::isNull() will true for the return value.
+		static MPlug create( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node );
+		/// Updates a previously created plug to reflect changes on the specified parameter.
+		/// Returns MStatus::kFailure if the plug is not suitable for the parameter.
 		/// \bug Maya doesn't seem to correctly store default values for dynamic string attributes
 		/// when saving the scene - so this method doesn't set the default value appropriately for
 		/// StringParameter and its derived classes (tested in maya 7.0.1).
-		static MStatus update( IECore::ConstParameterPtr parameter, MObject &attribute );
+		static MStatus update( IECore::ConstParameterPtr parameter, MPlug &plug );
 		/// Sets the value of plug to reflect the value of parameter.
 		static MStatus setValue( IECore::ConstParameterPtr parameter, MPlug &plug );
 		/// Sets the value of parameer to reflect the value of plug.
@@ -86,6 +87,8 @@ class ParameterHandler : public IECore::RefCounted
 
 	protected:
 
+		friend class ObjectParameterHandler;
+
 		/// Return a handler which can deal with the given parameter
 		static ConstParameterHandlerPtr create( IECore::ConstParameterPtr parameter );
 		/// Return a handler which can deal with the given object
@@ -93,8 +96,15 @@ class ParameterHandler : public IECore::RefCounted
 		/// Return a handler which can deal with an object or parameter of the given type id
 		static ConstParameterHandlerPtr create( IECore::TypeId id );
 
-		virtual MObject doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const = 0;
-		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const = 0;
+		/// Performs common actions which all handlers should apply to newly created plugs, including
+		/// creating any default connections requested in the parameter userData. This function should
+		/// be called at the end of all doCreate() implementations.
+		MPlug finishCreating( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
+		/// An overload for the above function which accepts an attribute for which a plug needs to be made.
+		MPlug finishCreating( IECore::ConstParameterPtr parameter, MObject &attribute, MObject &node ) const;
+	
+		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const = 0;
+		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const = 0;
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const = 0;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const = 0;
 

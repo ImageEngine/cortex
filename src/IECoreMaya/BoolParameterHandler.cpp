@@ -48,7 +48,7 @@ using namespace boost;
 
 static ParameterHandler::Description< BoolParameterHandler > registrar( IECore::BoolParameter::staticTypeId() );
 
-MStatus BoolParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus BoolParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstBoolParameterPtr p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
 	if( !p )
@@ -56,6 +56,7 @@ MStatus BoolParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MOb
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnNumericAttribute fnNAttr( attribute );
 	if( !fnNAttr.hasObj( attribute ) )
 	{
@@ -70,6 +71,8 @@ MStatus BoolParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MOb
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
 	assert( userData );
 
+	/// \todo This stuff could be consolidated into one place as it appears to be duplicated in several
+	/// ParameterHandlers
 	const IECore::ConstCompoundObjectPtr maya = userData->member<const IECore::CompoundObject>("maya");
 	if (maya)
 	{
@@ -97,17 +100,19 @@ MStatus BoolParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MOb
 	return MS::kSuccess;
 }
 
-MObject BoolParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug BoolParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	IECore::ConstBoolParameterPtr p = IECore::runTimeCast<const IECore::BoolParameter>( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	MFnNumericAttribute fnNAttr;
-	MObject result = fnNAttr.create( attributeName, attributeName, MFnNumericData::kBoolean, p->typedDefaultValue() );
-	update( parameter, result );
+	MObject attribute = fnNAttr.create( plugName, plugName, MFnNumericData::kBoolean, p->typedDefaultValue() );
+	
+	MPlug result = finishCreating( parameter, attribute, node );
+	doUpdate( parameter, result );
 	return result;
 }
 

@@ -63,7 +63,7 @@ template<> ParameterHandler::Description< ColorSplineParameterHandler< IECore::S
 		( IECore::SplinefColor4fParameter::staticTypeId() );
 
 template<typename S>
-MStatus ColorSplineParameterHandler<S>::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus ColorSplineParameterHandler<S>::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	assert( parameter );
 
@@ -73,33 +73,39 @@ MStatus ColorSplineParameterHandler<S>::doUpdate( IECore::ConstParameterPtr para
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnCompoundAttribute fnCAttr( attribute );
 	if( !fnCAttr.hasObj( attribute ) )
 	{
 		return MS::kFailure;
 	}
 
-	/// \todo See if the attribute is of type ColorRamp - can't do this yet as we can't construct
-	/// an MRampAttribute from just the MObject. We need either the node, too, or an MPlug
+	MRampAttribute fnRAttr( plug );
+	if( !fnRAttr.isColorRamp() )
+	{
+		return MS::kFailure;
+	}
 
 	return MS::kSuccess;
 }
 
 template<typename S>
-MObject ColorSplineParameterHandler<S>::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug ColorSplineParameterHandler<S>::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	assert( parameter );
 
 	typename IECore::TypedParameter< S >::ConstPtr p = IECore::runTimeCast<const IECore::TypedParameter< S > >( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	MRampAttribute fnRAttr;
-	MObject result = fnRAttr.createColorRamp( attributeName, attributeName );
+	MObject attribute = fnRAttr.createColorRamp( plugName, plugName );
 
-	update( parameter, result );
+	MPlug result = finishCreating( parameter, attribute, node );
+	doUpdate( parameter, result );
+	
 	return result;
 }
 

@@ -32,6 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "maya/MFnExpression.h"
+#include "maya/MFnDagNode.h"
+#include "maya/MDGModifier.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/SimpleTypedData.h"
+
 #include "IECoreMaya/ParameterHandler.h"
 
 using namespace IECoreMaya;
@@ -40,20 +47,20 @@ ParameterHandler::~ParameterHandler()
 {
 }
 
-MObject ParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &attributeName )
+MPlug ParameterHandler::create( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node )
 {
 	assert( parameter );
-	assert( attributeName.length() );
+	assert( plugName.length() );
 
 	ConstParameterHandlerPtr h = create( parameter );
 	if( !h )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
-	return h->doCreate( parameter, attributeName );
+	return h->doCreate( parameter, plugName, node );
 }
 
-MStatus ParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &attribute )
+MStatus ParameterHandler::update( IECore::ConstParameterPtr parameter, MPlug &plug )
 {
 	assert( parameter );
 
@@ -62,7 +69,7 @@ MStatus ParameterHandler::update( IECore::ConstParameterPtr parameter, MObject &
 	{
 		return MS::kFailure;
 	}
-	return h->doUpdate( parameter, attribute );
+	return h->doUpdate( parameter, plug );
 }
 
 MStatus ParameterHandler::setValue( IECore::ConstParameterPtr parameter, MPlug &plug )
@@ -140,4 +147,49 @@ void ParameterHandler::registerHandler( IECore::TypeId parameterType, IECore::Ty
 	{
 		handlers()[dataType] = handler;
 	}
+}
+
+MPlug ParameterHandler::finishCreating( IECore::ConstParameterPtr parameter, MPlug &plug ) const
+{
+	// create default connections and expressions
+
+	IECore::ConstCompoundObjectPtr mayaUserData = parameter->userData()->member<IECore::CompoundObject>( "maya" );
+	if( mayaUserData )
+	{
+		MObject node = plug.node();
+
+		MFnDependencyNode fnDN( node );
+		MString nodeName = fnDN.name();
+		MFnDagNode fnDAGN( node );
+		if( fnDAGN.hasObj( node ) )
+		{
+			nodeName = fnDAGN.fullPathName();
+		}
+	
+		IECore::ConstStringDataPtr defaultConnection = mayaUserData->member<IECore::StringData>( "defaultConnection" );
+		if( defaultConnection )
+		{
+			std::string cmd = std::string( "connectAttr " ) + defaultConnection->readable() + " " + nodeName.asChar() + "." + plug.partialName().asChar();
+			MDGModifier dgMod;
+			dgMod.commandToExecute( cmd.c_str() );
+			dgMod.doIt();
+		}
+		IECore::ConstStringDataPtr defaultExpression = mayaUserData->member<IECore::StringData>( "defaultExpression" );
+		if( defaultExpression )
+		{
+			MString cmd = nodeName + "." + plug.partialName() + defaultExpression->readable().c_str();
+			MFnExpression expFn;
+			expFn.create( cmd );
+		}
+	}
+	
+	return plug;
+}
+
+MPlug ParameterHandler::finishCreating( IECore::ConstParameterPtr parameter, MObject &attribute, MObject &node ) const
+{
+	MFnDependencyNode fnNode( node );
+	fnNode.addAttribute( attribute );
+	MPlug plug( node, attribute );
+	return finishCreating( parameter, plug );
 }

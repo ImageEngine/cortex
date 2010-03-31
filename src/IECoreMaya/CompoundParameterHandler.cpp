@@ -42,7 +42,7 @@ using namespace IECoreMaya;
 
 static ParameterHandler::Description<CompoundParameterHandler> registrar( IECore::CompoundParameter::staticTypeId() );
 
-MStatus CompoundParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus CompoundParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	IECore::ConstCompoundParameterPtr p = IECore::runTimeCast<const IECore::CompoundParameter>( parameter );
 	if( !p )
@@ -50,6 +50,7 @@ MStatus CompoundParameterHandler::doUpdate( IECore::ConstParameterPtr parameter,
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnMessageAttribute fnMAttr( attribute );
 	if( !fnMAttr.hasObj( attribute ) )
 	{
@@ -59,17 +60,17 @@ MStatus CompoundParameterHandler::doUpdate( IECore::ConstParameterPtr parameter,
 	return MS::kSuccess;
 }
 
-MObject CompoundParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug CompoundParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	IECore::ConstCompoundParameterPtr p = IECore::runTimeCast<const IECore::CompoundParameter>( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	MFnMessageAttribute fnMAttr;
-	MObject result = fnMAttr.create( attributeName, attributeName );
-	return result;
+	MObject attribute = fnMAttr.create( plugName, plugName );
+	return finishCreating( parameter, attribute, node );
 }
 
 MStatus CompoundParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const

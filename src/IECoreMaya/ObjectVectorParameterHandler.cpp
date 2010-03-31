@@ -48,23 +48,23 @@ using namespace IECoreMaya;
 
 static ParameterHandler::Description< ObjectVectorParameterHandler > registrar( ObjectVectorParameter::staticTypeId() );
 
-MObject ObjectVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &attributeName ) const
+MPlug ObjectVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
 {
 	ConstObjectVectorParameterPtr p = IECore::runTimeCast< const ObjectVectorParameter >( parameter );
 	if( !p )
 	{
-		return MObject::kNullObj;
+		return MPlug();
 	}
 
 	MFnTypedAttribute fnTAttr;
-	MObject result = fnTAttr.create( attributeName, attributeName, ObjectData::id );
+	MObject attribute = fnTAttr.create( plugName, plugName, ObjectData::id );
 	fnTAttr.setArray( true );
 	fnTAttr.setDisconnectBehavior( MFnAttribute::kDelete );
-
-	return result;
+	
+	return finishCreating( parameter, attribute, node );
 }
 
-MStatus ObjectVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MObject &attribute ) const
+MStatus ObjectVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	ConstObjectVectorParameterPtr p = IECore::runTimeCast< const ObjectVectorParameter >( parameter );
 	if( !p )
@@ -72,6 +72,7 @@ MStatus ObjectVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parame
 		return MS::kFailure;
 	}
 
+	MObject attribute = plug.attribute();
 	MFnTypedAttribute fnTAttr( attribute );
 	if( !fnTAttr.hasObj( attribute ) )
 	{
