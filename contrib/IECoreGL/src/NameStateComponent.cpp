@@ -43,12 +43,13 @@ using namespace IECoreGL;
 IE_CORE_DEFINERUNTIMETYPED( NameStateComponent );
 
 NameStateComponent::NameMap NameStateComponent::g_nameMap;
+tbb::spin_rw_mutex NameStateComponent::g_nameMapMutex;
 StateComponent::Description<NameStateComponent> NameStateComponent::g_description;
 
 NameStateComponent::NameStateComponent( const std::string &name )
 {
-	NameMap::iterator it = g_nameMap.push_back( name );
-	m_id = ( it - g_nameMap.begin() );
+	Mutex::scoped_lock lock( g_nameMapMutex, true ); // write lock
+	m_it = g_nameMap.insert( NamePair( name, g_nameMap.size() ) ).first;
 }
 
 NameStateComponent::~NameStateComponent()
@@ -57,20 +58,33 @@ NameStateComponent::~NameStateComponent()
 
 const std::string &NameStateComponent::name() const
 {
-	return g_nameMap[ m_id ];
+	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
+	return (*m_it).first.value();
 }
 
 GLuint NameStateComponent::glName() const
 {
-	return m_id;
+	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
+	return m_it->second;
 }
 
 void NameStateComponent::bind() const
 {
-	glLoadName( m_id );
+	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
+	glLoadName( m_it->second );
 }
 
 const std::string &NameStateComponent::nameFromGLName( GLuint glName )
 {
-	return g_nameMap[ glName ];
+	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
+	const NameMap::nth_index<1>::type &index = g_nameMap.get<1>();
+	NameMap::nth_index<1>::type::const_iterator it = index.find( glName );
+	if( it==index.end() )
+	{
+		throw IECore::InvalidArgumentException( boost::str(
+				boost::format( "NameStateComponent::nameFromGLName : Invalid glName (%1%)" ) % glName 
+			)
+		);
+	}
+	return it->first.value();
 }

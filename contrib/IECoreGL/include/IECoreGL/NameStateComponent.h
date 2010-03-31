@@ -38,7 +38,10 @@
 #include "IECoreGL/StateComponent.h"
 #include "IECore/Interned.h"
 
-#include "tbb/concurrent_vector.h"
+#include "boost/multi_index_container.hpp"
+#include "boost/multi_index/member.hpp"
+#include "boost/multi_index/ordered_index.hpp"
+#include "tbb/spin_rw_mutex.h"
 
 #include <set>
 
@@ -71,11 +74,25 @@ class NameStateComponent : public StateComponent
 
 	private :
 
-		typedef tbb::concurrent_vector< IECore::InternedString > NameMap;
+		typedef std::pair<IECore::InternedString, unsigned int> NamePair;
+		typedef boost::multi_index::multi_index_container<
+			NamePair,
+			boost::multi_index::indexed_by<
+				boost::multi_index::ordered_unique<
+					boost::multi_index::member<NamePair, IECore::InternedString, &NamePair::first>
+				>,
+				boost::multi_index::ordered_unique<
+					boost::multi_index::member<NamePair, unsigned int, &NamePair::second>
+				>
+			>
+		> NameMap;
+		typedef NameMap::nth_index_const_iterator<0>::type ConstNameIterator;
 
-		GLuint m_id;
+		ConstNameIterator m_it;
 
 		static NameMap g_nameMap;
+		typedef tbb::spin_rw_mutex Mutex;
+		static Mutex g_nameMapMutex;
 
 		static Description<NameStateComponent> g_description;
 
