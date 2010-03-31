@@ -84,6 +84,8 @@ class DeferredRendererImplementation : public RendererImplementation
 
 		virtual void addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer );
 
+		virtual void addInstance( GroupPtr grp );
+
 		ScenePtr scene();
 
 	private :

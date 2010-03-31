@@ -198,6 +198,10 @@ struct IECoreGL::Renderer::MemberData
 	ShaderManagerPtr shaderManager;
 	TextureLoaderPtr textureLoader;
 
+	typedef std::map<std::string, GroupPtr> InstanceMap;
+	InstanceMap instances;
+	Group *currentInstance;
+
 #ifdef IECORE_WITH_FREETYPE
 	typedef std::map<std::string, FontPtr> FontMap;
 	FontMap fonts;
@@ -228,6 +232,7 @@ IECoreGL::Renderer::Renderer()
 	m_data->transformStack.push( M44f() );
 
 	m_data->inWorld = false;
+	m_data->currentInstance = 0;
 	m_data->implementation = 0;
 	m_data->shaderManager = 0;
 }
@@ -441,6 +446,11 @@ void IECoreGL::Renderer::camera( const std::string &name, const IECore::Compound
 		msg( Msg::Warning, "IECoreGL::Renderer::camera", "Cameras can not be specified after worldBegin." );
 		return;
 	}
+	if ( m_data->currentInstance )
+	{
+		msg( Msg::Warning, "IECoreGL::Renderer::camera", "Cameras can not be specified during instance definition." );
+		return;
+	}
 
 	try
 	{
@@ -465,6 +475,16 @@ void IECoreGL::Renderer::display( const std::string &name, const std::string &ty
 {
 	// we store displays till worldbegin, as until that point we don't have a renderer implementation to pass
 	// them to
+	if( m_data->inWorld )
+	{
+		msg( Msg::Warning, "IECoreGL::Renderer::display", "Displays can not be specified after worldBegin." );
+		return;
+	}
+	if ( m_data->currentInstance )
+	{
+		msg( Msg::Warning, "IECoreGL::Renderer::display", "Displays can not be specified during instance definition." );
+		return;
+	}
 	m_data->options.displays.push_back( new Display( name, type, data, parameters ) );
 }
 
@@ -477,6 +497,11 @@ void IECoreGL::Renderer::worldBegin()
 	if( m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::worldBegin", "Cannot call worldBegin() again before worldEnd()." );
+		return;
+	}
+	if ( m_data->currentInstance )
+	{
+		msg( Msg::Warning, "IECoreGL::Renderer::worldBegin", "worldBegin can not be called during instance definition." );
 		return;
 	}
 
@@ -540,6 +565,11 @@ void IECoreGL::Renderer::worldEnd()
 	if( !m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::worldEnd", "Cannot call worldEnd() before worldBegin()." );
+		return;
+	}
+	if ( m_data->currentInstance )
+	{
+		msg( Msg::Warning, "IECoreGL::Renderer::worldEnd", "worldEnd can not be called during instance definition." );
 		return;
 	}
 	m_data->implementation->worldEnd();
@@ -654,7 +684,6 @@ void IECoreGL::Renderer::concatTransform( const Imath::M44f &m )
 	else
 	{
 		m_data->transformStack.top() = m * m_data->transformStack.top();
-
 	}
 }
 
@@ -1173,16 +1202,31 @@ static const AttributeGetterMap *attributeGetters()
 
 void IECoreGL::Renderer::attributeBegin()
 {
+	if ( !m_data->inWorld )
+	{
+		msg( Msg::Warning, "Renderer::attributeBegin", "Unsupported attributeBegin outside world begin/end blocks." );
+		return;	
+	}
 	m_data->implementation->attributeBegin();
 }
 
 void IECoreGL::Renderer::attributeEnd()
 {
+	if ( !m_data->inWorld )
+	{
+		msg( Msg::Warning, "Renderer::attributeBegin", "Unsupported attributeBegin outside world begin/end blocks." );
+		return;	
+	}
 	m_data->implementation->attributeEnd();
 }
 
 void IECoreGL::Renderer::setAttribute( const std::string &name, IECore::ConstDataPtr value )
 {
+	if ( !m_data->inWorld )
+	{
+		msg( Msg::Warning, "Renderer::setAttribute", "Unsupported setAttribute outside world begin/end blocks." );
+		return;	
+	}
 	const AttributeSetterMap *s = attributeSetters();
 	AttributeSetterMap::const_iterator it = s->find( name );
 	if( it!=s->end() )
@@ -1205,6 +1249,12 @@ void IECoreGL::Renderer::setAttribute( const std::string &name, IECore::ConstDat
 
 IECore::ConstDataPtr IECoreGL::Renderer::getAttribute( const std::string &name ) const
 {
+	if ( !m_data->inWorld )
+	{
+		msg( Msg::Warning, "Renderer::getAttribute", "Unsupported getAttribute outside world begin/end blocks." );
+		return 0;	
+	}
+
 	const AttributeGetterMap *g = attributeGetters();
 	AttributeGetterMap::const_iterator it = g->find( name );
 	if( it!=g->end() )
@@ -1229,6 +1279,12 @@ IECore::ConstDataPtr IECoreGL::Renderer::getAttribute( const std::string &name )
 
 void IECoreGL::Renderer::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
 {
+	if ( !m_data->inWorld )
+	{
+		msg( Msg::Warning, "Renderer::shader", "Unsupported shader call outside world begin/end blocks." );
+		return;	
+	}
+
 	if( type=="surface" || type=="gl:surface" )
 	{
 		if ( !m_data->shaderManager )
@@ -1353,6 +1409,14 @@ static void addPrimVarsToPrimitive( IECoreGL::PrimitivePtr primitive, const IECo
 	}
 }
 
+static void addCurrentInstanceChild( IECoreGL::Renderer::MemberData *data, IECoreGL::Renderable *child )
+{
+	IECoreGL::GroupPtr childGroup = new IECoreGL::Group();
+	childGroup->setTransform( data->transformStack.top() );
+	childGroup->addChild( child );
+	data->currentInstance->addChild( childGroup );
+}
+
 void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
 	// get positions
@@ -1469,9 +1533,14 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 
 	// make the primitive
 	PointsPrimitivePtr prim = new PointsPrimitive( type, points, colors, 0, widths, heights, rotations );
-	if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	addPrimVarsToPrimitive( prim, primVars );
+
+	if ( m_data->currentInstance )
 	{
-		addPrimVarsToPrimitive( prim, primVars );
+		addCurrentInstanceChild( m_data, prim );
+	}
+	else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	{
 		m_data->implementation->addPrimitive( prim );
 	}
 }
@@ -1479,9 +1548,13 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 void IECoreGL::Renderer::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
 {
 	DiskPrimitivePtr prim = new DiskPrimitive( radius, z, thetaMax );
-	if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	addPrimVarsToPrimitive( prim, primVars );
+	if ( m_data->currentInstance )
 	{
-		addPrimVarsToPrimitive( prim, primVars );
+		addCurrentInstanceChild( m_data, prim );
+	}
+	else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	{
 		m_data->implementation->addPrimitive( prim );
 	}
 }
@@ -1493,7 +1566,11 @@ void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic
 		IECore::CurvesPrimitivePtr c = new IECore::CurvesPrimitive( numVertices, basis, periodic );
 		c->variables = primVars;
 		CurvesPrimitivePtr prim = IECore::staticPointerCast<CurvesPrimitive>( ToGLCurvesConverter( c ).convert() );
-		if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+		if ( m_data->currentInstance )
+		{
+			addCurrentInstanceChild( m_data, prim );
+		}
+		else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
 		{
 			m_data->implementation->addPrimitive( prim );
 		}
@@ -1544,9 +1621,13 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 	f->coreFont()->setKerning( kerning );
 
 	TextPrimitivePtr prim = new TextPrimitive( text, f );
-	if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	addPrimVarsToPrimitive( prim, primVars );
+	if ( m_data->currentInstance )
 	{
-		addPrimVarsToPrimitive( prim, primVars );
+		addCurrentInstanceChild( m_data, prim );
+	}
+	else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	{
 		m_data->implementation->addPrimitive( prim );
 	}
 #else
@@ -1557,9 +1638,13 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 void IECoreGL::Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
 {
 	SpherePrimitivePtr prim = new SpherePrimitive( radius, zMin, zMax, thetaMax );
-	if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	addPrimVarsToPrimitive( prim, primVars );
+	if ( m_data->currentInstance )
 	{
-		addPrimVarsToPrimitive( prim, primVars );
+		addCurrentInstanceChild( m_data, prim );
+	}
+	else if ( checkCulling< IECoreGL::Primitive >( m_data->implementation, prim ) )
+	{
 		m_data->implementation->addPrimitive( prim );
 	}
 }
@@ -1582,6 +1667,12 @@ static const std::string &imageFragmentShader()
 /// displayWindow.
 void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
 {
+	if ( m_data->currentInstance )
+	{
+		IECore::msg( IECore::Msg::Warning, "Renderer::image", "Images currently not supported inside instances." );
+		return;
+	}
+
 	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );
 
 	if ( !checkCulling<IECore::Primitive>( m_data->implementation, image ) )
@@ -1642,7 +1733,11 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 		}
 
 		MeshPrimitivePtr prim = IECore::staticPointerCast<MeshPrimitive>( ToGLMeshConverter( m ).convert() );
-		if ( checkCulling<IECoreGL::Primitive>( m_data->implementation, prim ) )
+		if ( m_data->currentInstance )
+		{
+			addCurrentInstanceChild( m_data, prim );
+		}
+		else if ( checkCulling<IECoreGL::Primitive>( m_data->implementation, prim ) )
 		{
 			m_data->implementation->addPrimitive( prim );
 		}
@@ -1682,6 +1777,11 @@ void IECoreGL::Renderer::geometry( const std::string &type, const IECore::Compou
 
 void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 {
+	if ( m_data->currentInstance )
+	{
+		IECore::msg( IECore::Msg::Warning, "Renderer::procedural", "Procedurals currently not supported inside instances." );
+		return;
+	}
 	if ( checkCulling<IECore::Renderer::Procedural>( m_data->implementation, proc ) )
 	{
 		m_data->implementation->addProcedural( proc, this );
@@ -1694,17 +1794,62 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 
 void IECoreGL::Renderer::instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "Renderer::instanceBegin", "Not implemented" );
+	if ( m_data->inWorld )
+	{
+		msg( Msg::Warning, "Renderer::instanceBegin", "Unsupported instanceBegin call after worldBegin." );
+		return;	
+	}
+	if ( m_data->currentInstance )
+	{
+		IECore::msg( IECore::Msg::Warning, "Renderer::instanceBegin", "Instance already being defined!" );
+		return;
+	}
+	MemberData::InstanceMap::const_iterator it = m_data->instances.find( name );
+	if ( it != m_data->instances.end() )
+	{
+		msg( Msg::Warning, "Renderer::instance", boost::format( "Overwriting instance named \"%s\"." ) % name );
+		return;
+	}
+	m_data->currentInstance = new Group();
+	m_data->instances[ name ] = m_data->currentInstance;
 }
 
 void IECoreGL::Renderer::instanceEnd()
 {
-	msg( Msg::Warning, "Renderer::instanceEnd", "Not implemented" );
+	if ( m_data->inWorld )
+	{
+		msg( Msg::Warning, "Renderer::instanceEnd", "Unsupported instanceEnd call after worldBegin." );
+		return;	
+	}
+	if ( !m_data->currentInstance )
+	{
+		IECore::msg( IECore::Msg::Warning, "Renderer::instanceEnd", "instanceEnd called when no instances are being defined!" );
+		return;
+	}
+	m_data->currentInstance = 0;
 }
 
 void IECoreGL::Renderer::instance( const std::string &name )
 {
-	msg( Msg::Warning, "Renderer::instance", "Not implemented" );
+	MemberData::InstanceMap::iterator it = m_data->instances.find( name );
+	if ( it == m_data->instances.end() )
+	{
+		msg( Msg::Warning, "Renderer::instance", boost::format( "No instance named \"%s\" was found." ) % name );
+		return;
+	}
+	if ( m_data->currentInstance )
+	{
+		// instance called within another instance
+		addCurrentInstanceChild( m_data, it->second );
+	}
+	else if ( m_data->inWorld )
+	{
+		m_data->implementation->addInstance( it->second );
+	}
+	else
+	{
+		msg( Msg::Warning, "Renderer::instance", "Unsupported call to instance outside world and instance block!" );
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1780,6 +1925,11 @@ static const CommandMap &commands()
 
 IECore::DataPtr IECoreGL::Renderer::command( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
+	if ( m_data->currentInstance )
+	{
+		IECore::msg( IECore::Msg::Warning, "Renderer::command", "Commands not supported inside instances." );
+		return 0;
+	}
 	const CommandMap &c = commands();
 	CommandMap::const_iterator it = c.find( name );
 	if( it!=c.end() )

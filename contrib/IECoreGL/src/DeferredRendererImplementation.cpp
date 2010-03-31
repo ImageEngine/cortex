@@ -261,6 +261,18 @@ void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )
 	curContext->groupStack.top()->safeAddChild( g );
 }
 
+void DeferredRendererImplementation::addInstance( GroupPtr grp )
+{
+	RenderContext *curContext = currentContext();
+
+	GroupPtr g = new Group;
+	g->setTransform( curContext->localTransform );
+	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
+	g->addChild( grp );
+
+	curContext->groupStack.top()->safeAddChild( g );
+}
+
 // Class that sets the scope of a RenderContext on the renderer thread.
 struct DeferredRendererImplementation::ScopedRenderContext : private boost::noncopyable
 {

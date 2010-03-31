@@ -51,6 +51,7 @@ IE_CORE_FORWARDDECLARE( StateComponent );
 IE_CORE_FORWARDDECLARE( Primitive );
 IE_CORE_FORWARDDECLARE( Camera );
 IE_CORE_FORWARDDECLARE( Display );
+IE_CORE_FORWARDDECLARE( Group );
 
 /// RendererImplementation classes are used by the Renderer
 /// class to do some of it's work.
@@ -101,6 +102,7 @@ class RendererImplementation : public IECore::RunTimeTyped
 
 		virtual void addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer ) = 0;
 
+		virtual void addInstance( IECoreGL::GroupPtr grp ) = 0;
 };
 
 IE_CORE_DECLAREPTR( RendererImplementation );

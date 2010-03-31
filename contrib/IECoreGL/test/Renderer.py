@@ -710,6 +710,42 @@ class TestRenderer( unittest.TestCase ) :
 		self.assert_( r.getTransform().equalWithAbsError( m, 1e-4 ) )
 		
 		r.worldEnd()
+
+	def testInstances(self):
+		
+		r = Renderer()
+		r.instanceBegin( "instanceA", {} )
+		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
+		r.transformBegin()
+		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
+		r.geometry( "sphere", {}, {} )
+		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
+		r.geometry( "sphere", {}, {} )
+		r.transformEnd()
+		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
+		r.geometry( "sphere", {}, {} )
+		r.instanceEnd()
+
+		r.instanceBegin( "instanceB", {} )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 10 ) ) )
+		r.instance( "instanceA" )
+		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 20 ) ) )
+		r.instance( "instanceA" )
+		r.instanceEnd()
+
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.worldBegin()
+		r.concatTransform( M44f.createTranslated( V3f( 0, 5, 0 ) ) )
+		r.instance( "instanceB" )
+		r.setTransform( M44f.createTranslated( V3f( 0, 10, 0 ) ) )
+		r.instance( "instanceB" )
+		r.worldEnd()
+
+		g = r.scene().root()
+
+		self.assertEqual( self.__countChildrenRecursive( g ), 12 )
+		self.assert_( g.bound().min.equalWithAbsError( V3f( -1, 4, 9 ), 0.001 ) )
+		self.assert_( g.bound().max.equalWithAbsError( V3f( 4, 11, 31 ), 0.001 ) )
 	
 	def tearDown( self ) :
 

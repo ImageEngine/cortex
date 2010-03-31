@@ -83,6 +83,8 @@ class ImmediateRendererImplementation : public RendererImplementation
 
 		virtual void addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer );
 
+		virtual void addInstance( GroupPtr grp );
+
 	private :
 
 		CameraPtr m_camera;

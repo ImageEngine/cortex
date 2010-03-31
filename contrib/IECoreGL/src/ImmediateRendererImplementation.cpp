@@ -43,6 +43,7 @@
 #include "IECoreGL/Exception.h"
 #include "IECoreGL/State.h"
 #include "IECoreGL/PerspectiveCamera.h"
+#include "IECoreGL/Group.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/Writer.h"
@@ -199,4 +200,9 @@ void ImmediateRendererImplementation::addPrimitive( PrimitivePtr primitive )
 void ImmediateRendererImplementation::addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer )
 {
 	proc->render( renderer );
+}
+
+void ImmediateRendererImplementation::addInstance( GroupPtr grp )
+{
+	grp->render( m_stateStack.top() );
 }
