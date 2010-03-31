@@ -47,7 +47,8 @@ StateComponent::Description<NameStateComponent> NameStateComponent::g_descriptio
 
 NameStateComponent::NameStateComponent( const std::string &name )
 {
-	m_it = g_nameMap.insert( NamePair( name, g_nameMap.size() ) ).first;
+	NameMap::iterator it = g_nameMap.push_back( name );
+	m_id = ( it - g_nameMap.begin() );
 }
 
 NameStateComponent::~NameStateComponent()
@@ -56,29 +57,20 @@ NameStateComponent::~NameStateComponent()
 
 const std::string &NameStateComponent::name() const
 {
-	return (*m_it).first.value();
+	return g_nameMap[ m_id ];
 }
 
 GLuint NameStateComponent::glName() const
 {
-	return m_it->second;
+	return m_id;
 }
 
 void NameStateComponent::bind() const
 {
-	glLoadName( m_it->second );
+	glLoadName( m_id );
 }
 
 const std::string &NameStateComponent::nameFromGLName( GLuint glName )
 {
-	const NameMap::nth_index<1>::type &index = g_nameMap.get<1>();
-	NameMap::nth_index<1>::type::const_iterator it = index.find( glName );
-	if( it==index.end() )
-	{
-		throw IECore::InvalidArgumentException( boost::str(
-				boost::format( "NameStateComponent::nameFromGLName : Invalid glName (%1%)" ) % glName 
-			)
-		);
-	}
-	return it->first.value();
+	return g_nameMap[ glName ];
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,9 +38,7 @@
 #include "IECoreGL/StateComponent.h"
 #include "IECore/Interned.h"
 
-#include "boost/multi_index_container.hpp"
-#include "boost/multi_index/member.hpp"
-#include "boost/multi_index/ordered_index.hpp"
+#include "tbb/concurrent_vector.h"
 
 #include <set>
 
@@ -73,21 +71,9 @@ class NameStateComponent : public StateComponent
 
 	private :
 
-		typedef std::pair<IECore::InternedString, unsigned int> NamePair;
-		typedef boost::multi_index::multi_index_container<
-			NamePair,
-			boost::multi_index::indexed_by<
-				boost::multi_index::ordered_unique<
-					boost::multi_index::member<NamePair, IECore::InternedString, &NamePair::first>
-				>,
-				boost::multi_index::ordered_unique<
-					boost::multi_index::member<NamePair, unsigned int, &NamePair::second>
-				>
-			>
-		> NameMap;
-		typedef NameMap::nth_index_const_iterator<0>::type ConstNameIterator;
+		typedef tbb::concurrent_vector< IECore::InternedString > NameMap;
 
-		ConstNameIterator m_it;
+		GLuint m_id;
 
 		static NameMap g_nameMap;
 
