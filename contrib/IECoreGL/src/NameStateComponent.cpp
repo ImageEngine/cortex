@@ -48,8 +48,19 @@ StateComponent::Description<NameStateComponent> NameStateComponent::g_descriptio
 
 NameStateComponent::NameStateComponent( const std::string &name )
 {
-	Mutex::scoped_lock lock( g_nameMapMutex, true ); // write lock
-	m_it = g_nameMap.insert( NamePair( name, g_nameMap.size() ) ).first;
+	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
+	const NameMap::nth_index<0>::type &index = g_nameMap.get<0>();
+	NameMap::nth_index<0>::type::const_iterator it = index.find( name );
+	if( it!=g_nameMap.end() )
+	{
+		m_it = it;
+	}
+	else
+	{
+		lock.upgrade_to_writer();
+		m_it = g_nameMap.insert( NamePair( name, g_nameMap.size() ) ).first;
+	}
+
 }
 
 NameStateComponent::~NameStateComponent()
@@ -58,19 +69,16 @@ NameStateComponent::~NameStateComponent()
 
 const std::string &NameStateComponent::name() const
 {
-	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
 	return (*m_it).first.value();
 }
 
 GLuint NameStateComponent::glName() const
 {
-	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
 	return m_it->second;
 }
 
 void NameStateComponent::bind() const
 {
-	Mutex::scoped_lock lock( g_nameMapMutex, false ); // read-only lock
 	glLoadName( m_it->second );
 }
 
