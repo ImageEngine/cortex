@@ -97,6 +97,8 @@ void ParameterisedHolder<B>::PLCB::postLoad()
 {
 	assert(m_node);
 	m_node->getParameterised();
+	// remove the callback so we don't do this again later when other files are imported etc.
+	m_node->m_plcb = 0;
 }
 
 template<typename B>
