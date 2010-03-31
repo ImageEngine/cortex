@@ -247,7 +247,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 				/// \todo Consider how we might modify the ParameterisedProcedural (and possibly Renderer::Procedural?) interface
 				/// to properly support rerendering. Do this in conjunction with the todo in IECoreGL::Renderer::command() (about formalising a
 				/// proper interface for specifying scene edits to a Renderer).
-				bool rerender = boost::python::extract<bool>( pythonProcedural.attr( "willRerender" )( m_lastRenderer, p->parameters()->getValue() ) );
+				bool rerender = boost::python::extract<bool>( pythonProcedural.attr( "willRerender" )( m_lastRenderer, IECore::ObjectPtr( p->parameters()->getValue() ) ) );
 				if( rerender )
 				{
 					rendererToReuse = m_lastRenderer;
