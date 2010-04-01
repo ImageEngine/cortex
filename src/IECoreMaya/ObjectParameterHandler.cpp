@@ -115,7 +115,7 @@ MStatus ObjectParameterHandler::doSetValue( IECore::ConstParameterPtr parameter,
 		ConstParameterHandlerPtr h = ParameterHandler::create( *it );
 		if (h)
 		{
-			if ( h->setValue( parameter, plug) )
+			if ( h->doSetValue( parameter, plug) )
 			{
 				return MS::kSuccess;
 			}
@@ -153,7 +153,7 @@ MStatus ObjectParameterHandler::doSetValue( const MPlug &plug, IECore::Parameter
 		ConstParameterHandlerPtr h = ParameterHandler::create( *it );
 		if (h)
 		{
-			if ( h->setValue( plug, parameter ) )
+			if ( h->doSetValue( plug, parameter ) )
 			{
 				return MS::kSuccess;
 			}
