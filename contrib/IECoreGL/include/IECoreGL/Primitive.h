@@ -98,7 +98,7 @@ class Primitive : public Renderable
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
-		/// CurvesPrimitive objects.
+		/// Primitive objects.
 		//////////////////////////////////////////////////////////////////////////////
 		//@{
 		typedef TypedStateComponent<bool, PrimitiveBoundTypeId> DrawBound;
