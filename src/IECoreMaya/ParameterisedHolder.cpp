@@ -288,6 +288,12 @@ MStatus ParameterisedHolder<B>::setParameterised( const std::string &className, 
 }
 
 template<typename B>
+MStatus ParameterisedHolder<B>::updateParameterised()
+{
+	return createAndRemoveAttributes();
+}
+
+template<typename B>
 IECore::RunTimeTypedPtr ParameterisedHolder<B>::getParameterised( std::string *classNameOut, int *classVersionOut, std::string *searchPathEnvVarOut )
 {
 	MPlug pClassName( B::thisMObject(), aParameterisedClassName );

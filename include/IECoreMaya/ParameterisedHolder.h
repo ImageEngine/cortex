@@ -95,6 +95,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		/// save/load - this becomes your responsibility if it's necessary.
 		virtual MStatus setParameterised( IECore::RunTimeTypedPtr p );
 		virtual MStatus setParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar );
+		virtual MStatus updateParameterised();
 		virtual IECore::RunTimeTypedPtr getParameterised( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
 		virtual MStatus setNodeValues();
 		virtual MStatus setNodeValue( IECore::ParameterPtr pa );

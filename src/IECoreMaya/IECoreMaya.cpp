@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -66,6 +66,7 @@
 #include "IECoreMaya/ImageFile.h"
 #include "IECoreMaya/ImagePlaneHolder.h"
 #include "IECoreMaya/ParameterisedHolderSetValueCmd.h"
+#include "IECoreMaya/ParameterisedHolderSetClassParameterCmd.h"
 #include "IECoreMaya/DelightProceduralCacheCommand.h"
 #include "IECoreMaya/CurveCombiner.h"
 
@@ -155,6 +156,8 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerCommand( "ieSystemExit", SystemExitCmd::creator );
 
 		s = plugin.registerCommand( "ieParameterisedHolderSetValue", ParameterisedHolderSetValueCmd::creator, ParameterisedHolderSetValueCmd::newSyntax );
+
+		s = plugin.registerCommand( "ieParameterisedHolderSetClassParameter", ParameterisedHolderSetClassParameterCmd::creator, ParameterisedHolderSetClassParameterCmd::newSyntax );
 
 #ifdef IECOREMAYA_WITH_RI
 		s = plugin.registerCommand( "ieDelightProceduralCache", DelightProceduralCacheCommand::creator, DelightProceduralCacheCommand::newSyntax );

@@ -314,7 +314,7 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		i2 = p.parameters()["image"].getValue()
 		
 		self.assertEqual( p.parameters()["image"].getValue(), image )
-
+	
 	def testOpHolder( self ) :
 	
 		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "maths/multiply", 2 )
@@ -436,15 +436,369 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		fnOH.setParameterisedValues()
 		self.assertEqual( op["s"].getTypedValue(), "time1" )
 		
+	def testClassParameter( self ) :
+	
+		class TestOp( IECore.Op ) :
+		
+			def __init__( self ) :
+
+				IECore.Op.__init__( self,
+					"",
+					IECore.FloatParameter(
+						"result",
+						"",
+						0.0
+					),
+				)
+				
+				self.parameters().addParameter(
+
+					IECore.ClassParameter(
+						"cp",
+						"",
+						"IECORE_OP_PATHS"
+					)
+
+				)
+				
+			def doOperation( self, operands ) :
+			
+				return IECore.FloatData( 1 )
+				
+		node = cmds.createNode( "ieOpHolderNode" )
+		fnOH = IECoreMaya.FnParameterisedHolder( str( node ) )
+
+		op = TestOp()
+		fnOH.setParameterised( op )
+		
+		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
+		
+		aPlugPath = fnOH.parameterPlugPath( op["cp"]["a"] )
+		bPlugPath = fnOH.parameterPlugPath( op["cp"]["b"] )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 1 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 2 )
+		
+		fnOH.setClassParameterClass( op["cp"], "stringParsing", 1, "IECORE_OP_PATHS" )
+		
+		self.failIf( cmds.objExists( aPlugPath ) )
+		self.failIf( cmds.objExists( bPlugPath ) )
+		
+		emptyStringPlugPath = fnOH.parameterPlugPath( op["cp"]["emptyString"] )
+		self.assertEqual( cmds.getAttr( emptyStringPlugPath ), "notEmpty" )
+
+	def testClassParameterSaveAndLoad( self ) :
+	
+		# make an opholder with a ClassParameter, and set the held class
+		####################################################################
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
+
+		op = fnOH.getOp()
+		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
+		
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "multiply" )
+		self.assertEqual( className, "maths/multiply" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+										
+		# check that maya has appropriate attributes for the held class,
+		# and that the held class hasn't changed in the process.
+		####################################################################
+		
+		heldClass2, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "multiply" )
+		self.assertEqual( className, "maths/multiply" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		self.failUnless( heldClass is heldClass2 )
+				
+		# change some parameter values and push them into maya.
+		####################################################################
+		
+		op["cp"]["a"].setNumericValue( 10 )
+		op["cp"]["b"].setNumericValue( 20 )
+		fnOH.setNodeValues()
+			
+		self.assertEqual( cmds.getAttr( fnOH.parameterPlugPath( op["cp"]["a"] ) ), 10 )
+		self.assertEqual( cmds.getAttr( fnOH.parameterPlugPath( op["cp"]["b"] ) ), 20 )	
+		
+		# save the scene
+		####################################################################
+		
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "classParameter.ma" ) )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+		cmds.file( new = True, force = True )
+		
+		# reload it and check we have the expected class and attributes
+		####################################################################
+		
+		cmds.file( scene, open = True )
+				
+		fnOH = IECoreMaya.FnOpHolder( "node" )
+
+		op = fnOH.getOp()
+
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "multiply" )
+		self.assertEqual( className, "maths/multiply" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+
+		self.assertEqual( cmds.getAttr( fnOH.parameterPlugPath( op["cp"]["a"] ) ), 10 )
+		self.assertEqual( cmds.getAttr( fnOH.parameterPlugPath( op["cp"]["b"] ) ), 20 )		
+	
+	def testClassParameterUndo( self ) :
+	
+		# make an opholder with a ClassParameter, and check that there is
+		# no class loaded
+		####################################################################
+		
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass, None )
+		self.assertEqual( className, "" )
+		self.assertEqual( classVersion, 0 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+	
+		# check that undo is enabled
+		####################################################################
+		
+		self.assert_( cmds.undoInfo( query=True, state=True ) )
+
+		# set the class and verify it worked
+		####################################################################
+		
+		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
+				
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "multiply" )
+		self.assertEqual( className, "maths/multiply" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		aPlugPath = fnOH.parameterPlugPath( heldClass["a"] )
+		bPlugPath = fnOH.parameterPlugPath( heldClass["b"] )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 1 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 2 )
+		
+		# undo and check the class is unset
+		#####################################################################
+					
+		cmds.undo()
+
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+
+		self.assertEqual( heldClass, None )
+		self.assertEqual( className, "" )
+		self.assertEqual( classVersion, 0 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		self.failIf( cmds.objExists( aPlugPath ) )
+		self.failIf( cmds.objExists( bPlugPath ) )
+	
+	def testClassParameterUndoWithPreviousValues( self ) :
+	
+		# make an opholder with a ClassParameter, and check that there is
+		# no class loaded
+		####################################################################
+		
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass, None )
+		self.assertEqual( className, "" )
+		self.assertEqual( classVersion, 0 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+	
+		# set the class and check it worked
+		####################################################################
+		
+		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
+				
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "multiply" )
+		self.assertEqual( className, "maths/multiply" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		aPlugPath = fnOH.parameterPlugPath( heldClass["a"] )
+		bPlugPath = fnOH.parameterPlugPath( heldClass["b"] )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 1 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 2 )
+		
+		# change some attribute values
+		####################################################################
+		
+		cmds.setAttr( aPlugPath, 10 )
+		cmds.setAttr( bPlugPath, 20 )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
+		
+		# check that undo is enabled
+		####################################################################
+		
+		self.assert_( cmds.undoInfo( query=True, state=True ) )
+
+		# change the class to something else and check it worked
+		####################################################################
+		
+		fnOH.setClassParameterClass( op["cp"], "stringParsing", 1, "IECORE_OP_PATHS" )
+				
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "stringParsing" )
+		self.assertEqual( className, "stringParsing" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		plugPaths = []
+		for p in heldClass.parameters().values() :
+		
+			plugPath = fnOH.parameterPlugPath( p )
+			self.failUnless( cmds.objExists( plugPath ) )
+			plugPaths.append( plugPath )
+			
+		self.failIf( cmds.objExists( aPlugPath ) )
+		self.failIf( cmds.objExists( bPlugPath ) )
+		
+		# undo and check the previous class reappears, along with the
+		# previous attribute values
+		#####################################################################
+					
+		cmds.undo()
+
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "multiply" )
+		self.assertEqual( className, "maths/multiply" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		aPlugPath = fnOH.parameterPlugPath( heldClass["a"] )
+		bPlugPath = fnOH.parameterPlugPath( heldClass["b"] )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
+				
+		for p in plugPaths :
+		
+			self.failIf( cmds.objExists( plugPath ) )
+		
+	def testClassParameterReferenceEdits( self ) :
+	
+		# make a file with a class parameter with no held class
+		#######################################################################
+		
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
+		op = fnOH.getOp()
+
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass, None )
+		self.assertEqual( className, "" )
+		self.assertEqual( classVersion, 0 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "classParameterReference.ma" ) )
+		referenceScene = cmds.file( force = True, type = "mayaAscii", save = True )
+
+		# make a new scene referencing that file
+		#######################################################################
+	
+		cmds.file( new = True, force = True )
+		cmds.file( referenceScene, reference = True, namespace = "ns1" )
+
+		# set the held class and change some attribute values
+		#######################################################################
+		
+		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
+		op = fnOH.getOp()
+				
+		fnOH.setClassParameterClass( op["cp"], "maths/multiply", 1, "IECORE_OP_PATHS" )
+				
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "multiply" )
+		self.assertEqual( className, "maths/multiply" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		aPlugPath = fnOH.parameterPlugPath( heldClass["a"] )
+		bPlugPath = fnOH.parameterPlugPath( heldClass["b"] )
+		
+		cmds.setAttr( aPlugPath, 10 )
+		cmds.setAttr( bPlugPath, 20 )
+		
+		# save the scene
+		#######################################################################
+		
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "classParameterReferencer.ma" ) )
+		referencerScene = cmds.file( force = True, type = "mayaAscii", save = True )
+
+		# reload it and check all is well
+		#######################################################################
+
+		cmds.file( new = True, force = True )
+		cmds.file( referencerScene, force = True, open = True )
+	
+		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
+		op = fnOH.getOp()
+				
+		heldClass, className, classVersion, searchPath = op["cp"].getClass( True )
+		self.assertEqual( heldClass.typeName(), "multiply" )
+		self.assertEqual( className, "maths/multiply" )
+		self.assertEqual( classVersion, 1 )
+		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
+		
+		aPlugPath = fnOH.parameterPlugPath( heldClass["a"] )
+		bPlugPath = fnOH.parameterPlugPath( heldClass["b"] )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
+	
+	def testOpHolderImport( self ) :
+	
+		# make a file with an op holder in it
+		#######################################################################
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "maths/multiply", 2 )
+		op = fnOH.getOp()
+		
+		aPlugPath = fnOH.parameterPlugPath( op["a"] )
+		bPlugPath = fnOH.parameterPlugPath( op["b"] )
+		
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "op.ma" ) )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		# import it into a new scene
+		#######################################################################
+		
+		cmds.file( new = True, force = True )
+		cmds.file( scene, i = True )
+		
+		cmds.setAttr( aPlugPath, 10 )
+		cmds.setAttr( bPlugPath, 12 )
+
+		self.assertEqual( cmds.getAttr( "node.result" ), 120 )
+		
 	def tearDown( self ) :
 
 		for f in [
+			"test/IECoreMaya/op.ma" ,
 			"test/IECoreMaya/defaultConnections.ma" ,
 			"test/IECoreMaya/compoundObjectConnections.ma" ,
 			"test/IECoreMaya/reference.ma" ,
 			"test/IECoreMaya/referenceMaster.ma",
+			"test/IECoreMaya/classParameterReference.ma" ,
+			"test/IECoreMaya/classParameterReferencer.ma" ,
 			"test/IECoreMaya/objectParameterIO.ma",
 			"test/IECoreMaya/imageProcedural.ma",
+			"test/IECoreMaya/classParameter.ma",
 		] :
 
 			if os.path.exists( f ) :

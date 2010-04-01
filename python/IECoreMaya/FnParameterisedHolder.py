@@ -79,6 +79,19 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 
 		return _IECoreMaya._parameterisedHolderGetParameterised( self )
 
+	## Calls parameter.setClass() for a ClassParameter. This method should always be used
+	# in preference to calling parameter.setClass() directly, as it correctly updates the
+	# maya state and also implements undo.
+	def setClassParameterClass( self, parameter, className, classVersion, searchPathEnvVar ) :
+		
+		maya.cmds.ieParameterisedHolderSetClassParameter(
+			self.fullPathName(), 
+			plug = self.parameterPlug( parameter ).partialName(),
+			className = className,
+			classVersion = classVersion,
+			searchPathEnvVar = searchPathEnvVar
+		)
+		
 	## Sets the values of the plugs representing the parameterised object,
 	# using the current values of the parameters. If the undoable parameter is True
 	# then this method is undoable using the standard maya undo mechanism.
@@ -114,6 +127,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	def parameterPlug( self, parameter ) :
 
 		plugName = _IECoreMaya._parameterisedHolderParameterPlug( self, parameter )
+		
 		return StringUtil.plugFromString( self.fullPathName() + "." + plugName )
 
 	## Returns a string containing a full pathname for the plug representing the given parameter.
