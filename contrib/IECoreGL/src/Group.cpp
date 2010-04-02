@@ -115,7 +115,7 @@ void Group::addChild( RenderablePtr child )
 	m_children.push_back( child );
 }
 
-void Group::removeChild( RenderablePtr child )
+void Group::removeChild( Renderable *child )
 {
 	m_children.remove( child );
 }
@@ -130,36 +130,8 @@ const Group::ChildContainer &Group::children() const
 	return m_children;
 }
 
-Group::ScopedChildAccess::ScopedChildAccess( const Group &g ) : m_group(g)
+Group::Mutex &Group::mutex() const
 {
-	m_group.m_childMutex.lock();
+	return m_mutex;
 }
 
-Group::ScopedChildAccess::~ScopedChildAccess()
-{
-	m_group.m_childMutex.unlock();
-}
-
-Imath::Box3f Group::safeBound()
-{
-	ChildMutex::scoped_lock lock( m_childMutex );
-	return bound();
-}
-
-void Group::safeAddChild( RenderablePtr child )
-{
-	ChildMutex::scoped_lock lock( m_childMutex );
-	addChild( child );
-}
-
-void Group::safeRemoveChild( RenderablePtr child )
-{
-	ChildMutex::scoped_lock lock( m_childMutex );
-	removeChild( child );
-}
-
-void Group::safeClearChildren()
-{
-	ChildMutex::scoped_lock lock( m_childMutex );
-	clearChildren();
-}

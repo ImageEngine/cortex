@@ -1866,18 +1866,20 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 	{
 		if( parent )
 		{
-			parent->safeRemoveChild( child );
+			IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
+			parent->removeChild( child );
 		}
 		else
 		{
 			// no parent, ie we're at the root of the Scene. just remove all the children.
-			child->safeClearChildren();
+			IECoreGL::Group::Mutex::scoped_lock lock( child->mutex() );
+			child->clearChildren();
 		}
 		return true;
 	}
 	
 	bool result = false;
-	IECoreGL::Group::ScopedChildAccess childAccess( *child );
+	IECoreGL::Group::Mutex::scoped_lock lock( child->mutex() );
 	IECoreGL::Group::ChildContainer::const_iterator it = child->children().begin();
 	while( it!=child->children().end() )
 	{

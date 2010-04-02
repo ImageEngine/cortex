@@ -126,7 +126,10 @@ void DeferredRendererImplementation::transformBegin()
 
 	GroupPtr g = new Group;
 	g->setTransform( curContext->localTransform );
-	curContext->groupStack.top()->safeAddChild( g );
+	{
+		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
+		curContext->groupStack.top()->addChild( g );
+	}
 	curContext->groupStack.push( g );
 
 	curContext->transformStack.push( curContext->localTransform * curContext->transformStack.top() );
@@ -180,7 +183,10 @@ void DeferredRendererImplementation::attributeBegin()
 	GroupPtr g = new Group;
 	g->setTransform( curContext->localTransform );
 	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
-	curContext->groupStack.top()->safeAddChild( g );
+	{
+		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
+		curContext->groupStack.top()->addChild( g );
+	}
 	curContext->groupStack.push( g );
 
 	curContext->transformStack.push( curContext->localTransform * curContext->transformStack.top() );
@@ -258,7 +264,10 @@ void DeferredRendererImplementation::addPrimitive( PrimitivePtr primitive )
 	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
 	g->addChild( primitive );
 
-	curContext->groupStack.top()->safeAddChild( g );
+	{
+		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
+		curContext->groupStack.top()->addChild( g );
+	}
 }
 
 void DeferredRendererImplementation::addInstance( GroupPtr grp )
@@ -270,7 +279,10 @@ void DeferredRendererImplementation::addInstance( GroupPtr grp )
 	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
 	g->addChild( grp );
 
-	curContext->groupStack.top()->safeAddChild( g );
+	{
+		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
+		curContext->groupStack.top()->addChild( g );
+	}
 }
 
 // Class that sets the scope of a RenderContext on the renderer thread.

@@ -53,6 +53,7 @@ class Group : public Renderable
 
 	public :
 
+		typedef tbb::recursive_mutex Mutex;
 		typedef std::list<RenderablePtr> ChildContainer;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Group, GroupTypeId, Renderable );
@@ -77,39 +78,20 @@ class Group : public Renderable
 		virtual Imath::Box3f bound() const;
 
 		void addChild( RenderablePtr child );
-		void removeChild( RenderablePtr child );
+		void removeChild( Renderable *child );
 		void clearChildren();
 		const ChildContainer &children() const;
 
-		// Structure to be instantiated before any non thread safe
-		// access to the children of a given group.
-		// You should try to destroy this object as quick as possible
-		// to enable access to the group from other threads.
-		struct ScopedChildAccess : private boost::noncopyable
-		{
-			ScopedChildAccess( const Group &g );
-			~ScopedChildAccess();
-
-			private:
-				const Group &m_group;
-		};
-
-		// thread-safe version of bound.
-		Imath::Box3f safeBound();
-		// thread-safe version of addChild.
-		void safeAddChild( RenderablePtr child );
-		// thread-safe version of removeChild.
-		void safeRemoveChild( RenderablePtr child );
-		// thread-safe version of clearChildren.
-		void safeClearChildren();
+		// Returns a mutex for this group object.
+		// It should be used if the group is manipulated from different threads. 
+		Mutex &mutex() const;
 
 	private :
 
 		StatePtr m_state;
 		Imath::M44f m_transform;
 		ChildContainer m_children;
-		typedef tbb::recursive_mutex ChildMutex;
-		mutable ChildMutex m_childMutex;
+		mutable Mutex m_mutex;
 
 };
 
