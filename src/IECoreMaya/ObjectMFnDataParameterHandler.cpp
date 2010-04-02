@@ -51,10 +51,6 @@ using namespace IECoreMaya;
 using namespace Imath;
 using namespace boost;
 
-/// \todo This doesn't work as we want it to, as none of the userData (which for example StringVectorParameter and StringVectorParameterHandler implement)
-/// is going to be honored!
-//ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::StringVectorParameter, MFnData::kStringArray > > stringVectorRegistrar( IECore::StringVectorParameter::staticTypeId(), IECore::StringVectorData::staticTypeId() );
-//ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::StringParameter,       MFnData::kString > >      stringRegistrar( IECore::StringParameter::staticTypeId(), IECore::StringData::staticTypeId() );
 ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::V3fVectorParameter,    MFnData::kVectorArray > > v3fVectorRegistrar( IECore::V3fVectorParameter::staticTypeId(), IECore::V3fVectorData::staticTypeId() );
 ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::V3dVectorParameter,    MFnData::kVectorArray > > v3dVectorRegistrar( IECore::V3dVectorParameter::staticTypeId(), IECore::V3dVectorData::staticTypeId() );
 ParameterHandler::Description< ObjectMFnDataParameterHandler< IECore::M44fParameter,         MFnData::kMatrix > >      m44fRegistrar( IECore::M44fParameter::staticTypeId(), IECore::M44fData::staticTypeId() );
