@@ -131,5 +131,19 @@ SphericalHarmonics<T> rotatedKernel( const SphericalHarmonics<T> &kernel, const 
 	return sh;
 }
 
+template < class T >
+void windowingFilter( SphericalHarmonics<T> &sh, float windowSize )
+{
+	typename SphericalHarmonics<T>::CoefficientVector::iterator it = sh.coefficients().begin();
+	for ( unsigned int l = 0; l < sh.bands(); l++ )
+	{
+		typename SphericalHarmonics<T>::BaseType factor = cos(M_PI/2.0 * ((float)l/windowSize));
+		for ( unsigned m = 0; m < l*2+1; m++, it++ )
+		{
+			*it *= factor;
+		}
+	}
+}
+
 
 } // namespace IECore

@@ -59,6 +59,13 @@ SphericalHarmonics<T> lambertianKernel( unsigned int bands );
 template < class T >
 SphericalHarmonics<T> rotatedKernel( const SphericalHarmonics<T> &kernel, const Imath::V3f &direction );
 
+/// Applies windowing filter to attenuate "ringing" artifacts.
+/// Based on "Real-time Soft Shadows in Dynamic Scenes using Spherical Harmonic Exponentiation" by
+/// Zhong Ren and Rui Wang and John Snyder and Kun Zhou and Xinguo Liu and Bo Sun and Peter-pike Sloan and Hujun Bao and Qunsheng Peng and Baining Guo - 2006.
+/// The authors suggest using windowSize = 2*bands
+template < class T >
+void windowingFilter( SphericalHarmonics<T> &sh, float windowSize );
+
 } // namespace IECore
 
 #include "SphericalHarmonicsAlgo.inl"
