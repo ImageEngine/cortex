@@ -136,7 +136,7 @@ vec3 ieRgbToHSV( vec3 rgb )
 
 	if( delta==0.0 )
 	{
-		result.r = 0;
+		result.r = 0.0;
 	}
 	else
 	{
