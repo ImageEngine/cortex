@@ -214,10 +214,10 @@ class ParameterUI :
 			for m in existingMenus :
 				maya.cmds.deleteUI( m, menu=True )
 
-		cmds.popupMenu( parent = parentUI, postMenuCommand = IECore.curry( self.buildPopupMenu, **kw ) )
+		cmds.popupMenu( parent = parentUI, postMenuCommand = IECore.curry( self.__buildPopupMenu, **kw ) )
 
 		if "button1" in kw and kw["button1"] :
-			cmds.popupMenu( parent = parentUI, button=1, postMenuCommand = IECore.curry( self.buildPopupMenu, **kw ) )
+			cmds.popupMenu( parent = parentUI, button=1, postMenuCommand = IECore.curry( self.__buildPopupMenu, **kw ) )
 
 
 	def __buildConnectionsPopupMenu( self, popupMenu, ownerControl, **kw ):
@@ -283,7 +283,7 @@ class ParameterUI :
 
 			return False
 
-	def buildPopupMenu( self, popupMenu, ownerControl, **kw ):
+	def __buildPopupMenu( self, popupMenu, ownerControl, **kw ):
 
 		cmds.popupMenu(
 			popupMenu,
@@ -302,7 +302,7 @@ class ParameterUI :
 					cmds.menuItem(
 						parent = popupMenu,
 						label = k,
-						command = IECore.curry( self.selectValue, selection = k )
+						command = IECore.curry( self.__selectValue, selection = k )
 					)
 
 				if len( self.parameter.presetNames() ) > 0:
@@ -314,7 +314,7 @@ class ParameterUI :
 				cmds.menuItem(
 						parent = popupMenu,
 						label = "Default",
-						command = IECore.curry( self.selectValue, selection = self.parameter.defaultValue )
+						command = IECore.curry( self.__selectValue, selection = self.parameter.defaultValue )
 				)
 
 				cmds.menuItem(
@@ -329,7 +329,7 @@ class ParameterUI :
 					cmds.menuItem(
 						parent = popupMenu,
 						label = "Set Key",
-						command = IECore.curry(self.setKey, **kw)
+						command = IECore.curry( self.__setKey, **kw )
 					)
 
 				expressions = cmds.listConnections(
@@ -365,7 +365,7 @@ class ParameterUI :
 						parent = popupMenu,
 						label = "Delete Expression",
 
-						command = IECore.curry( self.deleteNode, nodeName = expressions[0] )
+						command = IECore.curry( self.__deleteNode, nodeName = expressions[0] )
 					)
 
 			else:
@@ -375,7 +375,7 @@ class ParameterUI :
 			cmds.menuItem(
 					parent = popupMenu,
 					label = "Lock attribute",
-					command = IECore.curry(self.lock, **kw)
+					command = IECore.curry( self.__lock, **kw )
 			)
 
 		else:
@@ -383,7 +383,7 @@ class ParameterUI :
 			cmds.menuItem(
 					parent = popupMenu,
 					label = "Unlock attribute",
-					command = IECore.curry(self.unlock, **kw)
+					command = IECore.curry( self.__unlock, **kw )
 			)
 
 	def showEditor( self, args, attributeName = None ):
@@ -395,7 +395,7 @@ class ParameterUI :
 
 		IECoreMaya.mel( melCmd.encode('ascii') )
 
-	def deleteNode( self, args, nodeName = None ):
+	def __deleteNode( self, args, nodeName = None ):
 
 		cmds.delete( nodeName )
 
@@ -432,27 +432,27 @@ class ParameterUI :
 			maya.mel.eval( 'evalDeferred( "updateAE %s;")' % refreshAE )
 
 
-	def setKey( self, args, **kw ):
+	def __setKey( self, args, **kw ):
 
 		cmds.setKeyframe(
 			kw['attributeName']
 		)
 
-	def lock( self, args, **kw ):
+	def __lock( self, args, **kw ):
 
 		cmds.setAttr(
 			kw['attributeName'],
 			lock = True
 		)
 
-	def unlock( self, args, **kw  ):
+	def __unlock( self, args, **kw  ):
 
 		cmds.setAttr(
 			kw['attributeName'],
 			lock = False
 		)
 
-	def selectValue( self, args, selection = None):
+	def __selectValue( self, args, selection = None):
 
 		self.parameter.setValue( selection )
 		IECoreMaya.FnParameterisedHolder( self.__node ).setNodeValue( self.parameter )
@@ -463,7 +463,6 @@ class ParameterUI :
 				edit = True,
 				label = self.parameter.getCurrentPresetName()
 			)
-
 
 	@staticmethod
 	def registerUI( parameterTypeId, handlerType, uiTypeHint = None ):
