@@ -67,3 +67,4 @@ from TemporaryAttributeValues import TemporaryAttributeValues
 from GenericParameterUI import GenericParameterUI
 from FnDagNode import FnDagNode  
 from PresetManagerUI import PresetManagerUI
+from ClassParameterUI import ClassParameterUI

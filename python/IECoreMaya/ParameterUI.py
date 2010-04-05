@@ -201,12 +201,6 @@ class ParameterUI :
 			dragCallback = IECore.curry( ParameterUI._defaultDragCallback, nodeName = self.nodeName(), layoutName = self.layout(), **kw )
 		)
 
-	## \deprecated Use _addPopupMenu instead.
-	def addPopupMenu( self, parentUI=None, **kw ):
-
-		IECore.msg( IECore.Msg.Level.Warning, self.__class__.__name__ + ".addPopupMenu", "Deprecated method called." )
-		self._addPopupMenu( parentUI = maya.cmds.setParent( query=True ), **kw )
-
 	## Can be called by derived classes to add a useful popup menu to the specified ui element. This
 	# will replace any existing popup menus that are already there.
 	## \todo Understand and document the available keyword arguments. I think the only one is "attributeName",
