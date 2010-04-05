@@ -62,6 +62,7 @@ enum MayaTypeId
 	ParameterisedHolderImagePlaneId = 0x00110DCD,
 	ImagePlaneHolderId = 0x00110DCE,
 	CurveCombinerId = 0x00110DCF,
+	DummyDataId = 0x00110DD0,
 
 	/// Don't forget to update MayaTypeIdsBinding.cpp
 

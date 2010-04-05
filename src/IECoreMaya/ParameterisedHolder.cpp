@@ -697,7 +697,6 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 	MFnDependencyNode fnDN( node );
 
 	MPlugArray connectionsFromMe, connectionsToMe;
-	ObjectPtr valueBeforeAttributeRemoval = 0;
 
 	// try to reuse an old plug if we can
 	MPlug plug = fnDN.findPlug( attributeName, false /* no networked plugs please */ );
@@ -718,23 +717,6 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 		// networked plugs are invalidated by the removal of the attribute.
 		nonNetworkedConnections( plug, connectionsFromMe, connectionsToMe );
 		
-		// remember value so we can set it again for the new attribute.
-		// we only do this for ObjectParameters to work around a maya bug which prevents
-		// ObjectParameterHandler::update from working correctly. after saving and loading
-		// a file, maya has somehow transformed the generic attribute into a typed attribute,
-		// so we have to accept that the ObjectParameterHandler will fail and then just
-		// stick the value back in once the attribute is remade.
-		if( parameter->isInstanceOf( IECore::ObjectParameter::staticTypeId() ) )
-		{
-			MObject plugData = plug.asMObject();
-			MFnPluginData fnData( plugData );
-			ObjectData *data = dynamic_cast<ObjectData *>( fnData.data() );
-			if( data )
-			{
-				valueBeforeAttributeRemoval = data->getObject();
-			}
-		}
-
 		fnDN.removeAttribute( plug.attribute() );
 	}
 
@@ -760,13 +742,6 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 		}
 
 		dgMod.doIt();
-	}
-
-	// restore any parameter value from a deleted-and-remade attribute if it is still valid for the
-	// parameter.
-	if( valueBeforeAttributeRemoval && parameter->valueValid( valueBeforeAttributeRemoval.get() ) )
-	{
-		parameter->setValue( valueBeforeAttributeRemoval );
 	}
 
 	/// and set the value of the attribute, in case it differs from the default

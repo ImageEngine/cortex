@@ -37,6 +37,7 @@
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/ObjectParameterHandler.h"
 #include "IECoreMaya/ObjectData.h"
+#include "IECoreMaya/MayaTypeIds.h"
 
 #include "IECore/ObjectParameter.h"
 #include "IECore/MeshPrimitive.h"
@@ -67,6 +68,11 @@ MStatus ObjectParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 	}
 
 	fnGAttr.addAccept( ObjectData::id );
+	// maya has an odd behaviour whereby a generic attribute with only one accepted datatype will
+	// transform itself into a typed attribute after file save and load. here we add an accept
+	// for a second dummy datatype to ensure that the attribute will still be a generic attribute
+	// when saved and loaded.
+	fnGAttr.addAccept( DummyDataId );
 
 	for (IECore::ObjectParameter::TypeIdSet::const_iterator it = p->validTypes().begin(); it != p->validTypes().end(); ++it)
 	{

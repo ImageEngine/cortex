@@ -69,6 +69,17 @@
 #include "IECoreMaya/ParameterisedHolderSetClassParameterCmd.h"
 #include "IECoreMaya/DelightProceduralCacheCommand.h"
 #include "IECoreMaya/CurveCombiner.h"
+#include "IECoreMaya/MayaTypeIds.h"
+
+// see ObjectParameterHandler::doUpdate() for an explanation of the necessity for dummy data
+static void *dummyDataCreator()
+{
+	// we never want to create dummy data, we just need the type to be registered.
+	// we therefore treat any creation attempt as a failure.
+	std::cerr << "IECoreMaya::dummyDataCreator : unexpected attempt to make dummy data." << std::endl;
+	exit( EXIT_FAILURE );
+	return 0;
+}
 
 namespace IECoreMaya
 {
@@ -90,6 +101,7 @@ MStatus initialize(MFnPlugin &plugin)
 		// register plugin
 
 		s = plugin.registerData( ObjectData::typeName, ObjectData::id, ObjectData::creator);
+		s = plugin.registerData( "ieDummyData", DummyDataId, dummyDataCreator );
 
 		s = plugin.registerNode( "ieCacheSet", CacheSet::id, CacheSet::creator, CacheSet::initialize,
 			MPxNode::kObjectSet );
@@ -225,6 +237,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterCommand( "ieDelightProceduralCache" );
 #endif
 
+		s = plugin.deregisterData( DummyDataId );
 		s = plugin.deregisterData( ObjectData::id );
 
 		s = plugin.deregisterImageFile( "ieImageFile" );
