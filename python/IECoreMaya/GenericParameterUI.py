@@ -110,15 +110,7 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 		)
 		
 		maya.cmds.setParent( ".." )
-
-	def __showAE( self, plugName ) :
-	
-		import maya.mel
-		maya.mel.eval( "showEditor \"" + plugName.split(".")[0] + "\"" ) 
-
-		
-		
-		
+				
 import IECore					   
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Parameter, GenericParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Parameter, GenericParameterUI, 'generic' )
