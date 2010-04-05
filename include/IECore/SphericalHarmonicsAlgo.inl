@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/SphericalHarmonics.h"
 #include "IECore/SphericalHarmonicsTensor.h"
 #include "boost/math/special_functions/factorials.hpp"
 
@@ -101,5 +102,34 @@ SphericalHarmonics<T> lambertianKernel( unsigned int bands )
 	}
 	return sh;
 }
+
+template < class T >
+SphericalHarmonics<T> rotatedKernel( const SphericalHarmonics<T> &kernel, const Imath::V3f &direction )
+{
+	IECore::EuclideanToSphericalTransform3f2f euc2sph;
+	Imath::V2f sph = euc2sph.transform( direction );
+	// evaluate harmonics at the given direction
+	std::vector< double > evaluations;
+	IECore::RealSphericalHarmonicFunction<double>::evaluate( sph[0], sph[1], kernel.bands(), evaluations );
+	std::vector< double >::const_iterator evIt = evaluations.begin();
+	// rotate kernel taking advantage of it's rotation symmetry on Z.
+	int l = 0;
+	int m = 0;
+	Imath::V3f basis = kernel.coefficients()[0] * sqrt( (4*M_PI)/(2*l+1) );
+	SphericalHarmonics<T> sh( kernel.bands() );
+	for ( typename SphericalHarmonics<T>::CoefficientVector::iterator shIt = sh.coefficients().begin(); shIt != sh.coefficients().end(); shIt++, evIt++ )
+	{
+		*shIt = basis * (*evIt);
+		m++;
+		if ( m > l )
+		{
+			l++;
+			m = -l;
+			basis = kernel.coefficients()[ l*(l+1) ] * sqrt( (4*M_PI)/(2*l+1) );
+		}
+	}
+	return sh;
+}
+
 
 } // namespace IECore

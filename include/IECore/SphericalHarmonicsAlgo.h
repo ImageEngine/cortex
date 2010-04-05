@@ -52,6 +52,13 @@ const SphericalHarmonics<S> operator *= ( SphericalHarmonics<S> &sh1, const Sphe
 template < class T >
 SphericalHarmonics<T> lambertianKernel( unsigned int bands );
 
+/// Creates a SphericalHarmonics object by pointing a given SH kernel to a given direction.
+/// The rotation is a lot faster than SHRotation because it takes in consideration the kernel symmetries on the Z axis.
+/// Based on "Real-time Soft Shadows in Dynamic Scenes using Spherical Harmonic Exponentiation" by
+/// Zhong Ren and Rui Wang and John Snyder and Kun Zhou and Xinguo Liu and Bo Sun and Peter-pike Sloan and Hujun Bao and Qunsheng Peng and Baining Guo - 2006.
+template < class T >
+SphericalHarmonics<T> rotatedKernel( const SphericalHarmonics<T> &kernel, const Imath::V3f &direction );
+
 } // namespace IECore
 
 #include "SphericalHarmonicsAlgo.inl"
