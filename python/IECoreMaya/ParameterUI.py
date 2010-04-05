@@ -46,6 +46,9 @@ import IECoreMaya
 # held on an IECoreMaya.ParameterisedHolder node.
 # \todo Make member functions protected or private as necessary - do this for the derived classes too.
 # \todo Split derived classes out into their own files.
+# \todo Separate control drawing from labelling and layout, so these classes just create the right
+# hand side of what they're doing at the moment. Then we can use them in different layouts like spreadsheets
+# and wotnot.
 class ParameterUI :
 
 	textColumnWidthIndex = 145
