@@ -39,30 +39,20 @@ import IECoreMaya
 
 class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
+	## Supports the following keyword arguments :
+	#
+	# bool "withCompoundFrame"
+	# May be specified as False to suppress the creation of a
+	# frameLayout when this parameter is the toplevel parameter
+	# for the node.
+	#
+	# list "visibleOnly"
+	# A list of strings specifying the full parameter paths for
+	# parameters which should be displayed. Any parameters not in
+	# this list will not be visible.
 	def __init__( self, node, parameter, **kw  ) :
 
 		IECoreMaya.ParameterUI.__init__( self, node, parameter, **kw )
-
-		visible = True
-		try:
-			visible = parameter.userData()['UI']['visible'].value
-		except:
-			pass
-
-		if 'visibleOnly' in kw :
-
-			visible = False
-
-			for i in kw['visibleOnly'] :
-
-				if kw['longParameterName'] == "" or i.startswith( kw['longParameterName'] + "." ) :
-
-					visible = True
-
- 
-		if not visible :
-
-			return
 			
 		if 'hierarchyDepth' in kw :
 			kw['hierarchyDepth'] += 1 
@@ -76,9 +66,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 
-		withCompoundFrame = False
-		if 'withCompoundFrame' in kw :
-			withCompoundFrame = kw['withCompoundFrame']
+		withCompoundFrame = kw.get( "withCompoundFrame", False )
 
 		if not withCompoundFrame and parameter.isSame( fnPH.getParameterised()[0].parameters() ) :
 			self._layout = maya.cmds.columnLayout()
@@ -162,6 +150,9 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			except :
 				pass
 
+			## \todo Figure out what this draggable stuff is all about and document it.
+			# I think it's intended to allow parameters to be dragged and dropped onto
+			# an IECoreMaya.ParameterPanel but I can't get that to work right now.
 			if draggable :
 
 				maya.cmds.rowLayout(
