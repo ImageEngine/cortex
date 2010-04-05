@@ -343,7 +343,7 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 			RenderContext *curContext = m_renderer.currentContext();
 			
 			// create a RenderContext for a new Procedural based on the current context
-			StatePtr completeState = new State( true );
+			StatePtr completeState = new State( false );
 			for ( StateStack::iterator it = curContext->stateStack.begin(); it != curContext->stateStack.end(); it++ )
 			{
 				completeState->add( *it );
