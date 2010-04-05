@@ -62,7 +62,9 @@ class ParameterUI :
 	# and leave the parent layout unchanged on exit.
 	# \todo Document the expected behaviour of derived classes with respect to setting up self._layout,
 	# or provide a more explicit mechanism for the same thing.
-	# \todo Document the meaning of the various keyword arguments.
+	# \todo Document the meaning of the various keyword arguments - perhaps the names of these should be
+	# prefixed with the name of the class which implements each argument so as to make it easier to find
+	# the documentation too.
 	def __init__( self, parameterisedHolderNode, parameter, **kw ) :
 
 		self.__node = parameterisedHolderNode
