@@ -42,7 +42,7 @@ float ieLuminance( vec3 color, vec3 weights )
 
 float ieLuminance( vec3 color )
 {
-	return intensity( color, vec3( 0.212671, 0.715160, 0.072169 ) );
+	return ieLuminance( color, vec3( 0.212671, 0.715160, 0.072169 ) );
 }
 
 /// Saturation value of 1 return c, 0 returns a fully desaturated
