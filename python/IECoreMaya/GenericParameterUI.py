@@ -76,11 +76,6 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 		
 		
 		maya.cmds.setParent( currentParent )
-
-
-	def __openConnectionEditor( self ) :
-		return
-		
 		
 	def __drawConnection( self, plugName ) :
 	
