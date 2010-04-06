@@ -32,6 +32,10 @@
 #
 ##########################################################################
 
+from __future__ import with_statement
+
+import traceback
+
 import maya.cmds
 
 import IECore
@@ -59,25 +63,24 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		else :
 			kw['hierarchyDepth'] = 0	
 		
-		self.__childUIsLayout = None
 		self.__childUIs = {}
-
-		self._layout = None
-
+		self.__headerCreated = False
+		self.__kw = kw.copy()
+		
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 
-		collapsable = kw.get( "withCompoundFrame", False ) or not parameter.isSame( fnPH.getParameterised()[0].parameters() )
+		collapsable = self.__kw.get( "withCompoundFrame", False ) or not parameter.isSame( fnPH.getParameterised()[0].parameters() )
 		
 		# \todo Retrieve the "collapsed" state
 		collapsed = collapsable
 
 		font = "boldLabelFont"			
-		if kw['hierarchyDepth'] == 2 :
+		if self.__kw['hierarchyDepth'] == 2 :
 			font = "smallBoldLabelFont"
-		elif kw['hierarchyDepth'] >= 3 :
+		elif self.__kw['hierarchyDepth'] >= 3 :
 			font = "tinyBoldLabelFont"
 
-		labelIndent = 5 + ( 8 * max( 0, kw['hierarchyDepth']-1 ) )
+		labelIndent = 5 + ( 8 * max( 0, self.__kw['hierarchyDepth']-1 ) )
 		
 		self._layout = maya.cmds.frameLayout(
 			label = self.label(),
@@ -85,33 +88,95 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			labelIndent = labelIndent,
 			labelVisible = collapsable,
 			borderVisible = False,
-			preExpandCommand = IECore.curry( self.__createChildUIs, **kw),
+			preExpandCommand = self.__preExpand,
 			collapseCommand = self.__collapse,
 			collapsable = collapsable,
 			collapse = collapsed,
 		)
+		
+		self.__columnLayout = maya.cmds.columnLayout(
+			parent = self._layout,
+			width = 381
+		)
 
-		if not collapsed:
-			self.__createChildUIs( **kw )
-
+		if not collapsed :
+			self.__preExpand()
+			
+		maya.cmds.setParent("..")
 		maya.cmds.setParent("..")
 
 	def replace( self, node, parameter ) :
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
 
-		for pName in self.__childUIs.keys():
-			ui = self.__childUIs[pName]
-			p = self.parameter[pName]
+		if len( self.__childUIs ) :
+		
+			for pName in self.__childUIs.keys() :
 
-			ui.replace( node, p )
+				ui = self.__childUIs[pName]
+				p = self.parameter[pName]
+
+				ui.replace( node, p )
+				
+		else :
+		
+			with IECoreMaya.UITemplate( "attributeEditorTemplate" ) :
+				self.__createChildUIs()
+
+	## May be implemented by derived classes to present some custom ui at the
+	# top of the list of child parameters. Implementations should first call the
+	# base class method and then perform their custom behaviour, placing ui elements
+	# into the provided columnLayout.
+	def _createHeader( self, columnLayout, **kw ) :
+	
+		draggable = False
+		try:
+			draggable = self.parameter.userData()['UI']['draggable'].value
+		except :
+			pass
+
+		## \todo Figure out what this draggable stuff is all about and document it.
+		# I think it's intended to allow parameters to be dragged and dropped onto
+		# an IECoreMaya.ParameterPanel but I can't get that to work right now.
+		if draggable :
+
+			maya.cmds.rowLayout(
+				numberOfColumns = 2,
+				columnWidth2 = ( 361, 20 ),
+				parent = columnLayout
+
+			)
+
+			maya.cmds.text( label = "" )
+
+			dragIcon = maya.cmds.iconTextStaticLabel(
+				image = "pick.xpm",
+				height = 20
+			)
+			self.addDragCallback( dragIcon, **kw )
+		
+		self.__headerCreated = True
+	
+	## May be called by derived classes if for any reason the child parameter
+	# uis are deemed invalid - for instance if the child parameters have changed.
+	# The uis will then be rebuilt during the next call to replace().	
+	def _deleteChildParameterUIs( self ) :
+	
+		maya.cmds.control( self.__columnLayout, edit=True, manage=False )
+		
+		for ui in self.__childUIs.values() :
+			maya.cmds.deleteUI( ui.layout() )
+
+		self.__childUIs = {}
+			
+		maya.cmds.control( self.__columnLayout, edit=True, manage=True )
 
 	def __collapse(self):
 		# \todo Store collapsed state of self._layout
 		pass
 
-	def __createChildUIs(self, **kw):
-
+	def __preExpand( self ) :
+			
 		# this is the most common entry point into the ui
 		# creation code, and unfortunately it's called from
 		# a maya ui callback. maya appears to suppress all
@@ -119,95 +184,52 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		# have to wrap with our own exception handling to
 		# make sure any errors become visible.
 		try :
-
-			if self.__childUIsLayout:
-				return
-
-			kw['labelWithNodeName'] = False
-
-			# \todo Store collapsed state of self._layout
-
-			maya.cmds.setUITemplate(
-				"attributeEditorTemplate",
-				pushTemplate = True
-			)
-
-			self.__childUIsLayout = maya.cmds.columnLayout(
-				parent = self._layout,
-				width = 381
-			)
-
-			draggable = False
-			try:
-				draggable = self.parameter.userData()['UI']['draggable'].value
-			except :
-				pass
-
-			## \todo Figure out what this draggable stuff is all about and document it.
-			# I think it's intended to allow parameters to be dragged and dropped onto
-			# an IECoreMaya.ParameterPanel but I can't get that to work right now.
-			if draggable :
-
-				maya.cmds.rowLayout(
-					numberOfColumns = 2,
-					columnWidth2 = ( 361, 20 )
-
-				)
-
-				maya.cmds.text( label = "" )
-
-				dragIcon = maya.cmds.iconTextStaticLabel(
-					image = "pick.xpm",
-					height = 20
-				)
-				self.addDragCallback( dragIcon, **kw )
-
-			for pName in self.parameter.keys():
-
-				p = self.parameter[pName]
-
-				visible = True
-				try:
-					visible = p.userData()['UI']['visible'].value
-				except:
-					pass
-
-				if 'visibleOnly' in kw :
-
-					fullChildName = kw['longParameterName']
-
-					if len( fullChildName ) :
-						fullChildName += "."
-
-					fullChildName += pName
-					
-					visible = fullChildName in kw['visibleOnly']
-
-					if not visible and p.isInstanceOf( IECore.TypeId.CompoundParameter ) :
-
-						for i in kw['visibleOnly'] :
-
-							if i.startswith( fullChildName + "." ) :
-
-								visible = True
-
-				if visible:
-					maya.cmds.setParent( self.__childUIsLayout )
-
-					ui = IECoreMaya.ParameterUI.create( self.node(), p, **kw )
-
-					if ui:
-						self.__childUIs[pName] = ui
-
-			maya.cmds.setParent("..")
-
-			maya.cmds.setUITemplate(
-				"attributeEditorTemplate",
-				popTemplate = True
-			)
-
+			with IECoreMaya.UITemplate( "attributeEditorTemplate" ) :
+				if not self.__headerCreated :
+					self._createHeader( self.__columnLayout, **self.__kw )
+				if not len( self.__childUIs ) :
+					self.__createChildUIs()
 		except :
 
 			IECore.msg( IECore.Msg.Level.Error, "IECoreMaya.ParameterUI", traceback.format_exc() )
+
+	def __createChildUIs( self ) :
+						
+		self.__kw['labelWithNodeName'] = False
+
+		for pName in self.parameter.keys():
+
+			p = self.parameter[pName]
+
+			visible = True
+			try:
+				visible = p.userData()['UI']['visible'].value
+			except:
+				pass
+
+			if 'visibleOnly' in self.__kw :
+
+				fullChildName = self.__kw['longParameterName']
+				if fullChildName :
+					fullChildName += "."
+				fullChildName += pName
+
+				visible = fullChildName in self.__kw['visibleOnly']
+
+				if not visible and p.isInstanceOf( IECore.TypeId.CompoundParameter ) :
+
+					for i in self.__kw['visibleOnly'] :
+						if i.startswith( fullChildName + "." ) :
+							visible = True
+							break
+
+			if visible:
+
+				maya.cmds.setParent( self.__columnLayout )
+
+				ui = IECoreMaya.ParameterUI.create( self.node(), p, **self.__kw )
+
+				if ui:
+					self.__childUIs[pName] = ui
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.CompoundParameter, CompoundParameterUI )

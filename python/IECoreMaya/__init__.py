@@ -68,3 +68,4 @@ from GenericParameterUI import GenericParameterUI
 from FnDagNode import FnDagNode  
 from PresetManagerUI import PresetManagerUI
 from CompoundParameterUI import CompoundParameterUI
+from ClassParameterUI import ClassParameterUI
