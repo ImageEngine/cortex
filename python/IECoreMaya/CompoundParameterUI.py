@@ -42,8 +42,8 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 	## Supports the following keyword arguments :
 	#
 	# bool "withCompoundFrame"
-	# May be specified as False to suppress the creation of a
-	# frameLayout when this parameter is the toplevel parameter
+	# May be specified as True to force the creation of a
+	# frameLayout even when this parameter is the toplevel parameter
 	# for the node.
 	#
 	# list "visibleOnly"
@@ -66,42 +66,35 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 
-		withCompoundFrame = kw.get( "withCompoundFrame", False )
+		collapsable = kw.get( "withCompoundFrame", False ) or not parameter.isSame( fnPH.getParameterised()[0].parameters() )
+		
+		# \todo Retrieve the "collapsed" state
+		collapsed = collapsable
 
-		if not withCompoundFrame and parameter.isSame( fnPH.getParameterised()[0].parameters() ) :
-			self._layout = maya.cmds.columnLayout()
+		font = "boldLabelFont"			
+		if kw['hierarchyDepth'] == 2 :
+			font = "smallBoldLabelFont"
+		elif kw['hierarchyDepth'] >= 3 :
+			font = "tinyBoldLabelFont"
+
+		labelIndent = 5 + ( 8 * max( 0, kw['hierarchyDepth']-1 ) )
+		
+		self._layout = maya.cmds.frameLayout(
+			label = self.label(),
+			font = font,
+			labelIndent = labelIndent,
+			labelVisible = collapsable,
+			borderVisible = False,
+			preExpandCommand = IECore.curry( self.__createChildUIs, **kw),
+			collapseCommand = self.__collapse,
+			collapsable = collapsable,
+			collapse = collapsed,
+		)
+
+		if not collapsed:
 			self.__createChildUIs( **kw )
-			maya.cmds.setParent("..")
-		else:
-			# \todo Retrieve the "collapsed" state
-			collapsed = True
-			
-			font = "boldLabelFont"			
-			labelIndent = 5 + ( 8 * max( 0, kw['hierarchyDepth']-1 ) )
-										
-			if kw['hierarchyDepth'] == 2 :
-			
-				font = "smallBoldLabelFont"
-				
-			elif kw['hierarchyDepth'] >= 3 :
-			
-				font = "tinyBoldLabelFont"
-				
-			self._layout = maya.cmds.frameLayout(
-				label = self.label(),
-				font = font,
-				labelIndent = labelIndent,
-				borderVisible = False,
-				preExpandCommand = IECore.curry( self.__createChildUIs, **kw),
-				collapseCommand = self.__collapse,
-				collapsable = True,
-				collapse = collapsed,
-			)
-			
-			if not collapsed:
-				self.__createChildUIs( **kw )
 
-			maya.cmds.setParent("..")
+		maya.cmds.setParent("..")
 
 	def replace( self, node, parameter ) :
 
