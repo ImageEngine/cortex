@@ -451,6 +451,8 @@ class TestRenderer( unittest.TestCase ) :
 
 			with AttributeBlock( r ) :
 
+				r.sphere( 1, -1, 1, 360, {} )
+
 				r.setAttribute( "name", "sphereOne" )
 		
 				r.sphere( 1, -1, 1, 360, {} )
@@ -463,7 +465,7 @@ class TestRenderer( unittest.TestCase ) :
 		commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
 		self.assertEqual( commandResult, BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 2 )
-		self.assertEqual( self.__countChildrenRecursive( s.root() ), 1 )
+		self.assertEqual( self.__countChildrenRecursive( s.root() ), 2 )
 
 		# now we test that either the sphere and the following attribute block ( instantiates as a Group ) are removed
 		commandResult = r.command( "removeObject", { "name" : StringData( "sphereTwo" ) } )

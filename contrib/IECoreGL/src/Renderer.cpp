@@ -1890,6 +1890,12 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 			result = result | removeObjectWalk( child, g, objectName );
 		}
 	}
+	if ( result && child->children().size() == 0 && parent )
+	{
+		// group after removal became empty, remove it too.
+		IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
+		parent->removeChild( child );
+	}
 	return result;
 }
 
