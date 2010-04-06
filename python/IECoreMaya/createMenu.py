@@ -50,6 +50,10 @@ import maya.mel
 # radialPosition :
 # specifies the radial position of the submenu (if the parent is a marking menu).
 #
+# button :
+# specifies the mouse button which may be used to raise a popup menu, in the same format as
+# expected by the maya.cmds.popupMenu() command.
+#
 # \bug This leaks the MenuDefinition, because maya leaks the postMenuCommand object. This could
 # be a problem if the menu definition references methods on objects which are significant in terms
 # of memory use - for instance ParameterUI objects (which reference Parameter values). This code
@@ -76,7 +80,7 @@ import maya.mel
 # with keys to some dictionary which stores the MenuDefinitions. Then we can remove the
 # definitions from some uiDeleted scriptjob for the menu. Alternatively Alias could fix the damn
 # thing themselves.
-def createMenu( definition, parent, label="", insertAfter=None, radialPosition=None ) :
+def createMenu( definition, parent, label="", insertAfter=None, radialPosition=None, button = 3 ) :
 
 	menu = None
 	if maya.cmds.window( parent, query=True, exists=True ) :
@@ -92,7 +96,7 @@ def createMenu( definition, parent, label="", insertAfter=None, radialPosition=N
 		menu = maya.cmds.menuItem( label=label, parent=parent, tearOff=True, subMenu=True, **kw )
 	else :
 		# assume parent is a control which can accept a popup menu
-		menu = maya.cmds.popupMenu( parent=parent )
+		menu = maya.cmds.popupMenu( parent=parent, button=button )
 
 	maya.cmds.menu( menu, edit=True, postMenuCommand = lambda : __postMenu( menu, definition ) )
 	return menu
