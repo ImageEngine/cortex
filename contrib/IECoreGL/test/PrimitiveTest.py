@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,35 +32,40 @@
 #
 ##########################################################################
 
+import unittest
+import random
 import IECore
+import IECoreGL
 
-from Shader import *
-from State import *
-from ShaderManager import *
-from Renderer import *
-from Group import *
-from Texture import *
-from ImmediateRenderer import *
-from NameStateComponent import *
-from HitRecord import *
-from Selection import *
-from Camera import *
-from Image import *
-from PointsPrimitive import *
-from Orientation import *
-from CurvesPrimitiveTest import *
-from MeshPrimitiveTest import *
-from AlphaTextureTest import *
-from LuminanceTextureTest import *
-from UserAttributesTest import *
-from DeferredRenderer import *
-from DiskPrimitiveTest import DiskPrimitiveTest
-from ToGLTextureConverter import TestToGLTexureConverter
-from PrimitiveTest import *
 
-if IECore.withFreeType() :
+IECoreGL.init( False )
 
-	from TextTest import *
+class TestPrimitive( unittest.TestCase ) :
+
+	def testStateComponentsInstantiation( self ):
+
+		IECoreGL.Primitive.DrawBound( False )
+		IECoreGL.Primitive.DrawWireframe( True )
+		IECoreGL.Primitive.WireframeWidth( 1.2 )
+		IECoreGL.Primitive.DrawSolid( True )
+		IECoreGL.Primitive.DrawOutline( True )
+		IECoreGL.Primitive.OutlineWidth( 2.2 )
+		IECoreGL.Primitive.DrawPoints( True )
+		IECoreGL.Primitive.PointWidth( 2.2 )
+		IECoreGL.Primitive.TransparencySort( True )
+
+	def testStateComponentsUsage( self ):
+
+		g = IECoreGL.Group()
+		g.getState().add( IECoreGL.Primitive.DrawBound( False ) )
+		g.getState().add( IECoreGL.Primitive.DrawWireframe( True ) )
+		g.getState().add( IECoreGL.Primitive.WireframeWidth( 1.2 ) )
+		g.getState().add( IECoreGL.Primitive.DrawSolid( True ) )
+		g.getState().add( IECoreGL.Primitive.DrawOutline( True ) )
+		g.getState().add( IECoreGL.Primitive.OutlineWidth( 2.2 ) )
+		g.getState().add( IECoreGL.Primitive.DrawPoints( True ) )
+		g.getState().add( IECoreGL.Primitive.PointWidth( 2.2 ) )
+		g.getState().add( IECoreGL.Primitive.TransparencySort( True ) )
 
 if __name__ == "__main__":
     unittest.main()

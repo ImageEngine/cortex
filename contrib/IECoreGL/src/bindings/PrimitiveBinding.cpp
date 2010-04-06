@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,36 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include <boost/python.hpp>
 
-#include "IECore/MessageHandler.h"
+#include "IECoreGL/Primitive.h"
+#include "IECoreGL/State.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECoreGL/StateComponent.h"
-#include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/bindings/TypedStateComponentBinding.h"
+#include "IECoreGL/bindings/PrimitiveBinding.h"
 #include "IECoreGL/bindings/TypedStateComponentBinding.inl"
+
 
 using namespace boost::python;
 
 namespace IECoreGL
 {
 
-void bindTypedStateComponents()
+void bindPrimitive()
 {
-	bindTypedStateComponent< Color >( "Color" );
-	bindTypedStateComponent< BlendColorStateComponent >( "BlendColorStateComponent" );
-	bindTypedStateComponent< BlendEquationStateComponent >( "BlendEquationStateComponent" );
-	bindTypedStateComponent< TransparentShadingStateComponent >( "TransparentShadingStateComponent" );
-	bindTypedStateComponent< BoundColorStateComponent >( "BoundColorStateComponent" );
-	bindTypedStateComponent< WireframeColorStateComponent >( "WireframeColorStateComponent" );
-	bindTypedStateComponent< OutlineColorStateComponent >( "OutlineColorStateComponent" );
-	bindTypedStateComponent< PointColorStateComponent >( "PointColorStateComponent" );
-	bindTypedStateComponent< BlendFuncStateComponent >( "BlendFuncStateComponent" );
-	bindTypedStateComponent< DoubleSidedStateComponent >( "DoubleSidedStateComponent" );
-	bindTypedStateComponent< RightHandedOrientationStateComponent >( "RightHandedOrientationStateComponent" );
-	bindTypedStateComponent< CullingSpaceStateComponent >( "CullingSpaceStateComponent" );
-	bindTypedStateComponent< CullingBoxStateComponent >( "CullingBoxStateComponent" );
+	scope s = IECorePython::RunTimeTypedClass<Primitive>()
+		.def( "vertexAttributeSize", &Primitive::vertexAttributeSize )
+		.def( "addVertexAttribute", &Primitive::addVertexAttribute )
+		.def( "addUniformAttribute", &Primitive::addUniformAttribute )
+	;
+	bindTypedStateComponent< Primitive::DrawBound >( "DrawBound" );
+	bindTypedStateComponent< Primitive::DrawWireframe >( "DrawWireframe" );
+	bindTypedStateComponent< Primitive::WireframeWidth >( "WireframeWidth" );
+	bindTypedStateComponent< Primitive::DrawSolid >( "DrawSolid" );
+	bindTypedStateComponent< Primitive::DrawOutline >( "DrawOutline" );
+	bindTypedStateComponent< Primitive::OutlineWidth >( "OutlineWidth" );
+	bindTypedStateComponent< Primitive::DrawPoints >( "DrawPoints" );
+	bindTypedStateComponent< Primitive::PointWidth >( "PointWidth" );
+	bindTypedStateComponent< Primitive::TransparencySort >( "TransparencySort" );
 }
 
-} // namespace IECoreGL
+}

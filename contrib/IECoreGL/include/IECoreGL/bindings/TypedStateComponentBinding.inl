@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,36 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
-#include "IECore/MessageHandler.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECoreGL/StateComponent.h"
-#include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/bindings/TypedStateComponentBinding.h"
-#include "IECoreGL/bindings/TypedStateComponentBinding.inl"
-
-using namespace boost::python;
+#ifndef IE_COREGL_TYPEDSTATECOMPONENTBINDING_INL
+#define IE_COREGL_TYPEDSTATECOMPONENTBINDING_INL
 
 namespace IECoreGL
 {
 
-void bindTypedStateComponents()
+template< typename T >
+void bindTypedStateComponent( const char *className )
 {
-	bindTypedStateComponent< Color >( "Color" );
-	bindTypedStateComponent< BlendColorStateComponent >( "BlendColorStateComponent" );
-	bindTypedStateComponent< BlendEquationStateComponent >( "BlendEquationStateComponent" );
-	bindTypedStateComponent< TransparentShadingStateComponent >( "TransparentShadingStateComponent" );
-	bindTypedStateComponent< BoundColorStateComponent >( "BoundColorStateComponent" );
-	bindTypedStateComponent< WireframeColorStateComponent >( "WireframeColorStateComponent" );
-	bindTypedStateComponent< OutlineColorStateComponent >( "OutlineColorStateComponent" );
-	bindTypedStateComponent< PointColorStateComponent >( "PointColorStateComponent" );
-	bindTypedStateComponent< BlendFuncStateComponent >( "BlendFuncStateComponent" );
-	bindTypedStateComponent< DoubleSidedStateComponent >( "DoubleSidedStateComponent" );
-	bindTypedStateComponent< RightHandedOrientationStateComponent >( "RightHandedOrientationStateComponent" );
-	bindTypedStateComponent< CullingSpaceStateComponent >( "CullingSpaceStateComponent" );
-	bindTypedStateComponent< CullingBoxStateComponent >( "CullingBoxStateComponent" );
+	IECorePython::RunTimeTypedClass<T>()
+		.def( boost::python::init< const typename T::ValueType & >() )
+		.add_property( "value", boost::python::make_function( &T::value, boost::python::return_value_policy<boost::python::copy_const_reference>() ) )
+	;
 }
 
-} // namespace IECoreGL
+}
+
+#endif // IE_COREGL_TYPEDSTATECOMPONENTBINDING_INL

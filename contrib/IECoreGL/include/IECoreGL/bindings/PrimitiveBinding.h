@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,36 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
-#include "IECore/MessageHandler.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECoreGL/StateComponent.h"
-#include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/bindings/TypedStateComponentBinding.h"
-#include "IECoreGL/bindings/TypedStateComponentBinding.inl"
-
-using namespace boost::python;
+#ifndef IE_COREGL_PRIMITIVEBINDING_H
+#define IE_COREGL_PRIMITIVEBINDING_H
 
 namespace IECoreGL
 {
 
-void bindTypedStateComponents()
-{
-	bindTypedStateComponent< Color >( "Color" );
-	bindTypedStateComponent< BlendColorStateComponent >( "BlendColorStateComponent" );
-	bindTypedStateComponent< BlendEquationStateComponent >( "BlendEquationStateComponent" );
-	bindTypedStateComponent< TransparentShadingStateComponent >( "TransparentShadingStateComponent" );
-	bindTypedStateComponent< BoundColorStateComponent >( "BoundColorStateComponent" );
-	bindTypedStateComponent< WireframeColorStateComponent >( "WireframeColorStateComponent" );
-	bindTypedStateComponent< OutlineColorStateComponent >( "OutlineColorStateComponent" );
-	bindTypedStateComponent< PointColorStateComponent >( "PointColorStateComponent" );
-	bindTypedStateComponent< BlendFuncStateComponent >( "BlendFuncStateComponent" );
-	bindTypedStateComponent< DoubleSidedStateComponent >( "DoubleSidedStateComponent" );
-	bindTypedStateComponent< RightHandedOrientationStateComponent >( "RightHandedOrientationStateComponent" );
-	bindTypedStateComponent< CullingSpaceStateComponent >( "CullingSpaceStateComponent" );
-	bindTypedStateComponent< CullingBoxStateComponent >( "CullingBoxStateComponent" );
+void bindPrimitive();
+
 }
 
-} // namespace IECoreGL
+#endif // IE_COREGL_PRIMITIVEBINDING_H
