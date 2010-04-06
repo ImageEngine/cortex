@@ -1887,7 +1887,7 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 		it++;
 		if( g )
 		{
-			result = result || removeObjectWalk( child, g, objectName );
+			result = result | removeObjectWalk( child, g, objectName );
 		}
 	}
 	return result;

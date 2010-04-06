@@ -465,6 +465,11 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( len( s.root().children() ), 2 )
 		self.assertEqual( self.__countChildrenRecursive( s.root() ), 1 )
 
+		# now we test that either the sphere and the following attribute block ( instantiates as a Group ) are removed
+		commandResult = r.command( "removeObject", { "name" : StringData( "sphereTwo" ) } )
+		self.assertEqual( commandResult, BoolData( True ) )
+		self.assertEqual( len( s.root().children() ), 0 )
+
 	def testRemoveObjectDuringProcedural( self ) :
 	
 		r = Renderer()
