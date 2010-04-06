@@ -426,8 +426,46 @@ class TestRenderer( unittest.TestCase ) :
 		s = r.scene()
 
 		s.render( State( True ) )
+
+	def __countChildrenRecursive( self, g ) :
+		if not isinstance( g, Group ):
+			return 1
+		count = 0
+		for c in g.children():
+			count += self.__countChildrenRecursive( c )
+		return count
 		
 	def testRemoveObject( self ) :
+	
+		r = Renderer()
+		r.setOption( "gl:mode", StringData( "deferred" ) )
+		with WorldBlock( r ) :
+		
+			r.setAttribute( "name", "sphereOne" )
+		
+			r.sphere( 1, -1, 1, 360, {} )
+
+			r.setAttribute( "name", "sphereTwo" )
+		
+			r.sphere( 1, -1, 1, 360, {} )
+
+			with AttributeBlock( r ) :
+
+				r.setAttribute( "name", "sphereOne" )
+		
+				r.sphere( 1, -1, 1, 360, {} )
+				r.sphere( 1, -1, 1, 360, {} )
+				r.sphere( 1, -1, 1, 360, {} )
+
+		s = r.scene()
+		self.assertEqual( len( s.root().children() ), 3 )
+		
+		commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
+		self.assertEqual( commandResult, BoolData( True ) )
+		self.assertEqual( len( s.root().children() ), 2 )
+		self.assertEqual( self.__countChildrenRecursive( s.root() ), 1 )
+
+	def testRemoveObjectDuringProcedural( self ) :
 	
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
@@ -443,10 +481,22 @@ class TestRenderer( unittest.TestCase ) :
 
 		s = r.scene()
 		self.assertEqual( len( s.root().children() ), 2 )
-		
-		commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
-		self.assertEqual( commandResult, BoolData( True ) )
+
+		class RemovalProcedural( Renderer.Procedural ):
+
+			def __init__( proc ):
+				Renderer.Procedural.__init__( proc )
+
+			def bound( proc ) :
+				return Box3f( V3f( -1 ), V3f( 1 ) )
+
+			def render( proc, renderer ):
+				commandResult = renderer.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
+				self.assertEqual( commandResult, BoolData( True ) )
+
+		r.procedural( RemovalProcedural() )
 		self.assertEqual( len( s.root().children() ), 1 )
+		self.assertEqual( self.__countChildrenRecursive( r.scene().root() ), 1 )
 
 	def testParallelRenders( self ):
 
@@ -593,14 +643,6 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testParallelMultithreadedProcedurals( self ):
 		self.__testParallelMultithreadedProcedurals( self.RecursiveParameterisedProcedural )
-
-	def __countChildrenRecursive( self, g ) :
-		if not isinstance( g, Group ):
-			return 1
-		count = 0
-		for c in g.children():
-			count += self.__countChildrenRecursive( c )
-		return count
 
 	def testObjectSpaceCulling( self ):
 
