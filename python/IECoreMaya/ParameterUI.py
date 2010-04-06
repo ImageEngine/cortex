@@ -72,16 +72,8 @@ class ParameterUI :
 		self.__popupControl = None
 		self._layout = None
 
-		self.labelWithNodeName = False
-
-		if "labelWithNodeName" in kw :
-
-			self.labelWithNodeName = kw['labelWithNodeName']
-
-		self.longParameterName = parameter.name
-		if "longParameterName" in kw :
-
-			self.longParameterName = kw['longParameterName']
+		self.__labelWithNodeName = kw.get( "labelWithNodeName", False )
+		self.__longParameterName = kw.get( "longParameterName", parameter.name )
 
 	## Derived classes should override this method. The override should first call the base class method and
 	# then reconnect all created widgets to the new node/parameter. The node and parameter arguments are as
@@ -134,10 +126,10 @@ class ParameterUI :
 	## Computes a nice label for the ui.
 	def label( self ):
 
-		if self.labelWithNodeName :
+		if self.__labelWithNodeName :
 
-			n = self.nodeName() + "." + self.longParameterName
-			if not self.longParameterName :
+			n = self.nodeName() + "." + self.__longParameterName
+			if not self.__longParameterName :
 				# Top-level parameter comes through into here without a name
 				n = self.nodeName() + ".parameters"
 
