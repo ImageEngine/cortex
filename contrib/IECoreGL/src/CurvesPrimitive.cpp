@@ -104,12 +104,23 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 
 	if( m_basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
 	{
-		glEnableClientState( GL_VERTEX_ARRAY );
 
 		if ( style == Primitive::DrawSolid::staticTypeId() );
+		{
 			setVertexAttributes();
+		}
 
+		glEnableClientState( GL_VERTEX_ARRAY );
 		glVertexPointer( 3, GL_FLOAT, 0, p );
+
+		if( c && m_colors->readable().size() == vertexAttributeSize() )
+		{
+			// we have color for each vertex.
+			glEnableClientState( GL_COLOR_ARRAY );
+			glColorPointer( 3, GL_FLOAT, 0, c );
+			// clear c so color is not set in the loop on each hair.
+			c = 0;
+		}
 
 		int offset = 0;
 		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++ )
