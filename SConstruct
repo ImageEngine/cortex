@@ -1289,7 +1289,7 @@ if env["WITH_GL"] and doConfigure :
 			if e in os.environ :
 				glTestEnv["ENV"][e] = os.environ[e]
 		
-		glTest = glTestEnv.Command( "contrib/IECoreGL/test/results.txt", glPythonModule, pythonExecutable + " $TEST_GL_SCRIPT" )
+		glTest = glTestEnv.Command( "contrib/IECoreGL/test/results.txt", glPythonModule, pythonExecutable + " $TEST_GL_SCRIPT --verbose" )
 		NoCache( glTest )
 		glTestEnv.Depends( glTest, corePythonModule )
 		glTestEnv.Depends( glTest, glob.glob( "contrib/IECoreGL/test/*.py" ) )

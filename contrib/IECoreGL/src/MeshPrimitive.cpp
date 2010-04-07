@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -80,7 +80,10 @@ void MeshPrimitive::render( ConstStatePtr state, IECore::TypeId style ) const
 {
 	assert( m_points );
 
-	setVertexAttributes( state );
+	if( style==Primitive::DrawSolid::staticTypeId() )
+	{
+		setVertexAttributes();
+	}
 
 	const vector<V3f> &points = m_points->readable();
 	glEnableClientState(GL_VERTEX_ARRAY);

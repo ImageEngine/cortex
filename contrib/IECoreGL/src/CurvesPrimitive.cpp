@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -104,21 +104,25 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 
 	if( m_basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value() )
 	{
-		
 		glEnableClientState( GL_VERTEX_ARRAY );
 
-			for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++ )
-			{
-				if( c )
-				{
-					glColor3f( c->x, c->y, c->z );
-					c++;
-				}
+		if ( style == Primitive::DrawSolid::staticTypeId() );
+			setVertexAttributes();
 
-				glVertexPointer( 3, GL_FLOAT, 0, p );
-				glDrawArrays( m_periodic ? GL_LINE_LOOP : GL_LINE_STRIP, 0, *vIt );
-				p += *vIt;
+		glVertexPointer( 3, GL_FLOAT, 0, p );
+
+		int offset = 0;
+		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++ )
+		{
+			if( c )
+			{
+				glColor3f( c->x, c->y, c->z );
+				c++;
 			}
+
+			glDrawArrays( m_periodic ? GL_LINE_LOOP : GL_LINE_STRIP, offset, *vIt );
+			offset += *vIt;
+		}
 
 		glDisableClientState( GL_VERTEX_ARRAY );
 

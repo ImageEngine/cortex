@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -137,7 +137,7 @@ class Primitive : public Renderable
 		/// data from vertex attributes. This must /not/ be called unless the style
 		/// parameter passed to render is PrimitiveSolid - in all other cases no shader
 		/// is bound and an Exception will result.
-		void setVertexAttributes( ConstStatePtr state ) const;
+		void setVertexAttributes( ) const;
 		/// Can be called from a derived class' render() method to
 		/// set uniform parameters of the current shader based on a single element of
 		/// data from the vertex attributes. This must /not/ be called unless the
@@ -164,28 +164,26 @@ class Primitive : public Renderable
 
 	private :
 
-		struct SetVertexAttribute;
-
 		struct IntData
 		{
-			IntData() {};
+			IntData() : data(0) {};
 			IntData( const int *d, unsigned int dim ) : data( d ), dimensions( dim ) {};
 			const int *data;
 			unsigned int dimensions;
 		};
 		struct FloatData
 		{
-			FloatData() {};
+			FloatData() : data(0) {};
 			FloatData( const float *d, unsigned int dim ) : data( d ), dimensions( dim ) {};
 			const float *data;
 			unsigned int dimensions;
 		};
-		void setupVertexAttributesAsUniform( const Shader *s ) const;
+		void setupVertexAttributes( const Shader *s ) const;
 		mutable struct {
 			const Shader *shader;
 			std::map<GLint, IntData> intDataMap;
 			std::map<GLint, FloatData> floatDataMap;
-		} m_vertexToUniform;
+		} m_vertexToUniform, m_vertexToVertex;
 
 		typedef std::map<std::string, IECore::ConstDataPtr> AttributeMap;
 		AttributeMap m_vertexAttributes;

@@ -203,7 +203,7 @@ void PointsPrimitive::renderPoints( ConstStatePtr state, IECore::TypeId style ) 
 	const Color3f *c = setOrReturnColor();
 	if( style==Primitive::DrawSolid::staticTypeId() )
 	{
-		setVertexAttributes( state );
+		setVertexAttributes( );
 	}
 
 	glEnableClientState( GL_VERTEX_ARRAY );
