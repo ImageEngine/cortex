@@ -63,3 +63,4 @@ class compoundObjectInOut( IECore.Op ) :
 		
 		return IECore.CompoundObject()
 
+IECore.registerRunTimeTyped( compoundObjectInOut )
