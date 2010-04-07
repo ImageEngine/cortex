@@ -354,6 +354,7 @@ enum TypeId
 	CompoundDataBaseTypeId = 311,
 	ImageConvolveOpTypeId = 312,
 	ClassParameterTypeId = 313,
+	ClassVectorParameterTypeId = 314,
 
 	// Remember to update TypeIdBinding.cpp !!!
 

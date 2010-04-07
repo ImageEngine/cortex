@@ -357,6 +357,7 @@ void bindTypeId()
 		.value( "CompoundDataBase", CompoundDataBaseTypeId )
 		.value( "ImageConvolveOp", ImageConvolveOpTypeId )
 		.value( "ClassParameter", ClassParameterTypeId )
+		.value( "ClassVectorParameter", ClassVectorParameterTypeId )
 	;
 }
 

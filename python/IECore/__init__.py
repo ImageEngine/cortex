@@ -100,6 +100,7 @@ from VisualiserProcedural import VisualiserProcedural
 from PresetManager import PresetManager
 from IDXReader import IDXReader
 from ClassParameter import ClassParameter
+from ClassVectorParameter import ClassVectorParameter
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *

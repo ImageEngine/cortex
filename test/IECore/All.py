@@ -213,6 +213,7 @@ from ThreadingTest import ThreadingTest
 from ImageConvolveOpTest import *
 from StringUtilTest import *
 from ClassParameterTest import ClassParameterTest
+from ClassVectorParameterTest import ClassVectorParameterTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
