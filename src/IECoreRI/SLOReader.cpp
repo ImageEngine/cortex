@@ -77,6 +77,7 @@ SLOReader::~SLOReader()
 
 bool SLOReader::canRead( const std::string &fileName )
 {
+	// Avoid seg faults from 3delight if we pass arbitrary files.
 	if ( fileName.size() < 4 || fileName.substr( fileName.size() - 5, 4 ) != ".sdl" )
 	{
 		return false;
