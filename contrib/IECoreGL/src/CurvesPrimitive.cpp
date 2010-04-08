@@ -98,7 +98,17 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 	const V3f *p = &(m_points->readable()[0]);
 	const std::vector<int> &v = m_vertsPerCurve->readable();
 
-	const Color3f *c = m_colors ? &(m_colors->readable()[0]) : 0;
+	bool colorPerVertex = false;
+	const Color3f *c = 0;
+	if( m_colors )
+	{
+		c = &(m_colors->readable()[0]);
+
+		if ( m_colors->readable().size() == vertexAttributeSize() )
+		{
+			colorPerVertex = true;
+		}
+	}
 
 	glLineWidth( state->get<GLLineWidth>()->value() );
 
@@ -113,19 +123,16 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 		glEnableClientState( GL_VERTEX_ARRAY );
 		glVertexPointer( 3, GL_FLOAT, 0, p );
 
-		if( c && m_colors->readable().size() == vertexAttributeSize() )
+		if( colorPerVertex )
 		{
-			// we have color for each vertex.
 			glEnableClientState( GL_COLOR_ARRAY );
 			glColorPointer( 3, GL_FLOAT, 0, c );
-			// clear c so color is not set in the loop on each hair.
-			c = 0;
 		}
 
 		int offset = 0;
 		for( std::vector<int>::const_iterator vIt = v.begin(); vIt!=v.end(); vIt++ )
 		{
-			if( c )
+			if( c && !colorPerVertex )
 			{
 				glColor3f( c->x, c->y, c->z );
 				c++;
@@ -133,6 +140,11 @@ void CurvesPrimitive::renderLines( ConstStatePtr state, IECore::TypeId style ) c
 
 			glDrawArrays( m_periodic ? GL_LINE_LOOP : GL_LINE_STRIP, offset, *vIt );
 			offset += *vIt;
+		}
+
+		if( colorPerVertex )
+		{
+			glDisableClientState( GL_COLOR_ARRAY );
 		}
 
 		glDisableClientState( GL_VERTEX_ARRAY );
