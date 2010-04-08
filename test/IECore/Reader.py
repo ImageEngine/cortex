@@ -76,9 +76,9 @@ class TestReader(unittest.TestCase):
 		this should definitely NOT create a valid reader
 		"""
 
+		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/empty' )
 		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null' )
 		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null.cin' )
-
 
 if __name__ == "__main__":
 	unittest.main()
