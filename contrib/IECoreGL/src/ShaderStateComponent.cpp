@@ -189,7 +189,7 @@ void ShaderStateComponent::addShaderParameterValue( const std::string &paramName
 	}
 }
 
-ConstShaderPtr ShaderStateComponent::shader() const
+ShaderPtr ShaderStateComponent::shader() const
 {
 	// \todo Can we break const? Necessary on the bind() const method...
 	return const_cast< ShaderStateComponent * >(this)->shader();

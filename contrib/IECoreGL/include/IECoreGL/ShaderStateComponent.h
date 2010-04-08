@@ -81,7 +81,7 @@ class ShaderStateComponent : public StateComponent
 		////////////////////////////////////////////////////
 		//@{
 		ShaderPtr shader();
-		ConstShaderPtr shader() const;
+		ShaderPtr shader() const;
 		//@}
 
 		// Adds or replaces a shader parameter in the ShaderStateComponent.

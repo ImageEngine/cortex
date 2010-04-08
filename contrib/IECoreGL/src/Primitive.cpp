@@ -86,19 +86,22 @@ void Primitive::render( ConstStatePtr state ) const
 		throw Exception( "Primitive::render called with incomplete state object." );
 	}
 
-	const ShaderStateComponent *shaderState = state->get<ShaderStateComponent>();
+	Shader *shader = state->get<ShaderStateComponent>()->shader();
 
 	// get ready in case the derived class calls setVertexAttributesAsUniforms or setVertexAttributes.
-	setupVertexAttributes( shaderState->shader() );
+	setupVertexAttributes( shader );
 
-	// add primitive parameters on the new ShaderStateComponent
-	ShaderStateComponentPtr newShaderState = new ShaderStateComponent( *shaderState );
+	// set constant primVars on the uniform shader parameters
 	for ( AttributeMap::const_iterator it = m_uniformAttributes.begin(); it != m_uniformAttributes.end(); it++ )
 	{
-		newShaderState->addShaderParameterValue( it->first, it->second );
+		try
+		{
+			shader->setParameter( it->first, it->second );
+		}
+		catch( ... )
+		{
+		}
 	}
-	// bind the temporary shader state
-	newShaderState->bind();
 
 	// \todo: consider binding at the end the whole original state. Check if that is enough to eliminate these push/pop calls.
 	glPushAttrib( GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_LIGHTING_BIT );
@@ -197,7 +200,7 @@ void Primitive::render( ConstStatePtr state ) const
 	glPopAttrib();
 
 	// revert to the original shader state.
-	shaderState->bind();
+	state->get<ShaderStateComponent>()->bind();
 }
 
 size_t Primitive::vertexAttributeSize() const
