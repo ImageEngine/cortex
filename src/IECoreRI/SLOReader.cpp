@@ -77,6 +77,11 @@ SLOReader::~SLOReader()
 
 bool SLOReader::canRead( const std::string &fileName )
 {
+	if ( fileName.size() < 4 || fileName.substr( fileName.size() - 5, 4 ) != ".sdl" )
+	{
+		return false;
+	}
+
 	tbb::mutex::scoped_lock lock( g_mutex );
 	
 	if( Slo_SetShader( (char *)fileName.c_str() ) )
