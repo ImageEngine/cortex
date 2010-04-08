@@ -64,7 +64,7 @@ def quoteCmdLineArg( arg ):
 		return "''"
 
 	# eliminate characters we know that works on shell command lines
-	exceptions = [ ":", " " ]
+	exceptions = [ ":", " ", "#" ]
 	simpleArg = arg
 	for exception in exceptions :
 		simpleArg = simpleArg.replace( exception, "" )
