@@ -43,6 +43,7 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 			
 		IECoreMaya.CompoundParameterUI.__init__( self, node, parameter, **kw )
 	
+		self.__menuParent = None
 		self.__currentClassInfo = parameter.getClass( True )[1:]
 	
 	def _createHeader( self, columnLayout, **kw ) :
@@ -73,7 +74,8 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 		
 		IECoreMaya.CompoundParameterUI.replace( self, node, parameter )
 
-		maya.cmds.iconTextStaticLabel( self.__menuParent, edit=True, label=self.__menuParentLabel() )
+		if self.__menuParent :
+			maya.cmds.iconTextStaticLabel( self.__menuParent, edit=True, label=self.__menuParentLabel() )
 
 		self.__currentClassInfo = newClassInfo
 
