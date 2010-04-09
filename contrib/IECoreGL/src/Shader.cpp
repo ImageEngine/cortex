@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -96,7 +96,7 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 		IECore::msg( IECore::Msg::Warning, "IECoreGL::Shader", message );
 	}
 
-	// build the parameter description map
+	// build the uniform parameter description map
 	GLint numUniforms = 0;
 	glGetProgramiv( m_program, GL_ACTIVE_UNIFORMS, &numUniforms );
 	GLint maxUniformNameLength = 0;
@@ -108,7 +108,7 @@ Shader::Shader( const std::string &vertexSource, const std::string &fragmentSour
 		glGetActiveUniform( m_program, i, maxUniformNameLength, 0, &d.size, &d.type, &name[0] );
 		d.name = &name[0];
 		GLint location = glGetUniformLocation( m_program, &name[0] );
-		m_parameters[location] = d;
+		m_uniformParameters[location] = d;
 	}
 }
 
@@ -173,7 +173,7 @@ void Shader::release()
 	glDeleteProgram( m_program );
 }
 
-void Shader::parameterNames( std::vector<std::string> &names ) const
+void Shader::uniformParameterNames( std::vector<std::string> &names ) const
 {
 	GLint numUniforms = 0;
 	glGetProgramiv( m_program, GL_ACTIVE_UNIFORMS, &numUniforms );
@@ -192,7 +192,7 @@ void Shader::parameterNames( std::vector<std::string> &names ) const
 	}
 }
 
-GLint Shader::parameterIndex( const std::string &parameterName ) const
+GLint Shader::uniformParameterIndex( const std::string &parameterName ) const
 {
 	GLint location = glGetUniformLocation( m_program, parameterName.c_str() );
 	if( location==-1 )
@@ -202,13 +202,13 @@ GLint Shader::parameterIndex( const std::string &parameterName ) const
 	return location;
 }
 
-bool Shader::hasParameter( const std::string &parameterName ) const
+bool Shader::hasUniformParameter( const std::string &parameterName ) const
 {
 	GLint location = glGetUniformLocation( m_program, parameterName.c_str() );
 	return location != -1;
 }
 
-IECore::TypeId Shader::parameterType( GLint parameterIndex ) const
+IECore::TypeId Shader::uniformParameterType( GLint parameterIndex ) const
 {
 	const ParameterDescription &p = parameterDescription( parameterIndex );
 	if( p.size==1 )
@@ -265,17 +265,17 @@ IECore::TypeId Shader::parameterType( GLint parameterIndex ) const
 	}
 }
 
-IECore::TypeId Shader::parameterType( const std::string &parameterName ) const
+IECore::TypeId Shader::uniformParameterType( const std::string &parameterName ) const
 {
-	return parameterType( parameterIndex( parameterName ) );
+	return uniformParameterType( uniformParameterIndex( parameterName ) );
 }
 
-IECore::DataPtr Shader::getParameterDefault( const std::string &parameterName ) const
+IECore::DataPtr Shader::getUniformParameterDefault( const std::string &parameterName ) const
 {
-	return getParameterDefault( parameterIndex( parameterName ) );
+	return getUniformParameterDefault( uniformParameterIndex( parameterName ) );
 }
 
-IECore::DataPtr Shader::getParameterDefault( GLint parameterIndex ) const
+IECore::DataPtr Shader::getUniformParameterDefault( GLint parameterIndex ) const
 {
 	const ParameterDescription &p = parameterDescription( parameterIndex );
 	if( p.size==1 )
@@ -340,7 +340,7 @@ IECore::DataPtr Shader::getParameterDefault( GLint parameterIndex ) const
 	}
 }
 
-IECore::DataPtr Shader::getParameter( GLint parameterIndex ) const
+IECore::DataPtr Shader::getUniformParameter( GLint parameterIndex ) const
 {
 	const ParameterDescription &p = parameterDescription( parameterIndex );
 	if( p.size==1 )
@@ -429,14 +429,14 @@ IECore::DataPtr Shader::getParameter( GLint parameterIndex ) const
 	}
 }
 
-IECore::DataPtr Shader::getParameter( const std::string &parameterName ) const
+IECore::DataPtr Shader::getUniformParameter( const std::string &parameterName ) const
 {
-	return getParameter( parameterIndex( parameterName ) );
+	return getUniformParameter( uniformParameterIndex( parameterName ) );
 }
 
-bool Shader::valueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const
+bool Shader::uniformValueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const
 {
-	IECore::TypeId pt = parameterType( parameterIndex );
+	IECore::TypeId pt = uniformParameterType( parameterIndex );
 	if( pt==Texture::staticTypeId() )
 	{
 		return false;
@@ -454,12 +454,12 @@ bool Shader::valueValid( GLint parameterIndex, IECore::ConstDataPtr value ) cons
 	return t==pt;
 }
 
-bool Shader::valueValid( const std::string &parameterName, IECore::ConstDataPtr value ) const
+bool Shader::uniformValueValid( const std::string &parameterName, IECore::ConstDataPtr value ) const
 {
-	return valueValid( parameterIndex( parameterName ), value );
+	return uniformValueValid( uniformParameterIndex( parameterName ), value );
 }
 
-void Shader::setParameter( GLint parameterIndex, IECore::ConstDataPtr value )
+void Shader::setUniformParameter( GLint parameterIndex, IECore::ConstDataPtr value )
 {
 	/// \todo We either need to do type checking below before all those casts, or
 	/// state in the documentation that this function will blow up with invalid data.
@@ -514,12 +514,12 @@ void Shader::setParameter( GLint parameterIndex, IECore::ConstDataPtr value )
 	Exception::throwIfError();
 }
 
-void Shader::setParameter( const std::string &parameterName, IECore::ConstDataPtr value )
+void Shader::setUniformParameter( const std::string &parameterName, IECore::ConstDataPtr value )
 {
-	setParameter( parameterIndex( parameterName ), value );
+	setUniformParameter( uniformParameterIndex( parameterName ), value );
 }
 
-void Shader::setParameter( GLint parameterIndex, unsigned int textureUnit )
+void Shader::setUniformParameter( GLint parameterIndex, unsigned int textureUnit )
 {
 	glUniform1i( parameterIndex, textureUnit );
 	/// \todo Might it be quicker to check the gl type ourselves beforehand rather than checking
@@ -527,26 +527,26 @@ void Shader::setParameter( GLint parameterIndex, unsigned int textureUnit )
 	Exception::throwIfError();
 }
 
-void Shader::setParameter( const std::string &parameterName, unsigned int textureUnit )
+void Shader::setUniformParameter( const std::string &parameterName, unsigned int textureUnit )
 {
-	setParameter( parameterIndex( parameterName ), textureUnit );
+	setUniformParameter( uniformParameterIndex( parameterName ), textureUnit );
 }
 
-void Shader::setParameter( GLint parameterIndex, int value )
+void Shader::setUniformParameter( GLint parameterIndex, int value )
 {
 	glUniform1i( parameterIndex, value );
 	Exception::throwIfError();
 }
 
-void Shader::setParameter( const std::string &parameterName, int value )
+void Shader::setUniformParameter( const std::string &parameterName, int value )
 {
-	setParameter( parameterIndex( parameterName ), value );
+	setUniformParameter( uniformParameterIndex( parameterName ), value );
 }
 
 const Shader::ParameterDescription &Shader::parameterDescription( GLint parameterIndex ) const
 {
-	ParameterMap::const_iterator it = m_parameters.find( parameterIndex );
-	if( it==m_parameters.end() )
+	ParameterMap::const_iterator it = m_uniformParameters.find( parameterIndex );
+	if( it==m_uniformParameters.end() )
 	{
 		throw Exception( "Parameter doesn't exist." );
 	}

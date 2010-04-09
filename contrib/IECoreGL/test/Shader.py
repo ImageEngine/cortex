@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -135,13 +135,13 @@ class TestShader( unittest.TestCase ) :
 			"mat4Parm" : TypeId.M44fData,
 		}
 
-		parameterNames = s.parameterNames()
+		parameterNames = s.uniformParameterNames()
 		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndTypes ) )
 		for n in expectedParameterNamesAndTypes.keys() :
 			self.assert_( n in parameterNames )
-			self.assert_( s.hasParameter( n ) )
-			self.assert_( not s.hasParameter( n + "VeryUnlikelySuffix" ) )
-			self.assertEqual( s.parameterType( n ), expectedParameterNamesAndTypes[n] )
+			self.assert_( s.hasUniformParameter( n ) )
+			self.assert_( not s.hasUniformParameter( n + "VeryUnlikelySuffix" ) )
+			self.assertEqual( s.uniformParameterType( n ), expectedParameterNamesAndTypes[n] )
 
 		expectedNamesAndValues = {
 			"boolParm" : BoolData( 0 ),
@@ -157,77 +157,77 @@ class TestShader( unittest.TestCase ) :
 		}
 		# Initial values are not necessarily zero. So we just test for the value type here.
 		for name, value in expectedNamesAndValues.items() :
-			self.assertEqual( type(s.getParameter( name )), type(value) )
+			self.assertEqual( type(s.getUniformParameter( name )), type(value) )
 
 		# must bind a shader before setting parameters
 		s.bind()
 
-		s.setParameter( "intParm", IntData( 1 ) )
-		self.assertEqual( s.getParameter( "intParm" ), IntData( 1 ) )
+		s.setUniformParameter( "intParm", IntData( 1 ) )
+		self.assertEqual( s.getUniformParameter( "intParm" ), IntData( 1 ) )
 
-		s.setParameter( "boolParm", IntData( 2 ) )
-		self.assertEqual( s.getParameter( "boolParm" ), BoolData( 1 ) )
+		s.setUniformParameter( "boolParm", IntData( 2 ) )
+		self.assertEqual( s.getUniformParameter( "boolParm" ), BoolData( 1 ) )
 
-		s.setParameter( "boolParm", BoolData( False ) )
-		self.assertEqual( s.getParameter( "boolParm" ), BoolData( False ) )
+		s.setUniformParameter( "boolParm", BoolData( False ) )
+		self.assertEqual( s.getUniformParameter( "boolParm" ), BoolData( False ) )
 
-		s.setParameter( "boolParm", BoolData( True ) )
-		self.assertEqual( s.getParameter( "boolParm" ), BoolData( True ) )
+		s.setUniformParameter( "boolParm", BoolData( True ) )
+		self.assertEqual( s.getUniformParameter( "boolParm" ), BoolData( True ) )
 
-		s.setParameter( "boolParm", BoolData( 2 ) )
-		self.assertEqual( s.getParameter( "boolParm" ), BoolData( 1 ) )
+		s.setUniformParameter( "boolParm", BoolData( 2 ) )
+		self.assertEqual( s.getUniformParameter( "boolParm" ), BoolData( 1 ) )
 
-		s.setParameter( "floatParm", FloatData( 1 ) )
-		self.assertEqual( s.getParameter( "floatParm" ), FloatData( 1 ) )
+		s.setUniformParameter( "floatParm", FloatData( 1 ) )
+		self.assertEqual( s.getUniformParameter( "floatParm" ), FloatData( 1 ) )
 
-		s.setParameter( "bvec2Parm", V2iData( V2i( 0, 1 ) ) )
-		self.assertEqual( s.getParameter( "bvec2Parm" ), V2iData( V2i( 0, 1 ) ) )
+		s.setUniformParameter( "bvec2Parm", V2iData( V2i( 0, 1 ) ) )
+		self.assertEqual( s.getUniformParameter( "bvec2Parm" ), V2iData( V2i( 0, 1 ) ) )
 
-		s.setParameter( "bvec3Parm", V3iData( V3i( 1 ) ) )
-		self.assertEqual( s.getParameter( "bvec3Parm" ), V3iData( V3i( 1 ) ) )
+		s.setUniformParameter( "bvec3Parm", V3iData( V3i( 1 ) ) )
+		self.assertEqual( s.getUniformParameter( "bvec3Parm" ), V3iData( V3i( 1 ) ) )
 
-		s.setParameter( "ivec2Parm", V2iData( V2i( 1, 2 ) ) )
-		self.assertEqual( s.getParameter( "ivec2Parm" ), V2iData( V2i( 1, 2 ) ) )
+		s.setUniformParameter( "ivec2Parm", V2iData( V2i( 1, 2 ) ) )
+		self.assertEqual( s.getUniformParameter( "ivec2Parm" ), V2iData( V2i( 1, 2 ) ) )
 
-		s.setParameter( "ivec3Parm", V3iData( V3i( 1 ) ) )
-		self.assertEqual( s.getParameter( "ivec3Parm" ), V3iData( V3i( 1 ) ) )
+		s.setUniformParameter( "ivec3Parm", V3iData( V3i( 1 ) ) )
+		self.assertEqual( s.getUniformParameter( "ivec3Parm" ), V3iData( V3i( 1 ) ) )
 
-		s.setParameter( "vec2Parm", V2fData( V2f( 1, 2 ) ) )
-		self.assertEqual( s.getParameter( "vec2Parm" ), V2fData( V2f( 1, 2 ) ) )
+		s.setUniformParameter( "vec2Parm", V2fData( V2f( 1, 2 ) ) )
+		self.assertEqual( s.getUniformParameter( "vec2Parm" ), V2fData( V2f( 1, 2 ) ) )
 
-		s.setParameter( "vec3Parm", Color3fData( Color3f( 1 ) ) )
-		self.assertEqual( s.getParameter( "vec3Parm" ), V3fData( V3f( 1 ) ) )
+		s.setUniformParameter( "vec3Parm", Color3fData( Color3f( 1 ) ) )
+		self.assertEqual( s.getUniformParameter( "vec3Parm" ), V3fData( V3f( 1 ) ) )
 
-		s.setParameter( "vec4Parm", Color4fData( Color4f( 1 ) ) )
-		self.assertEqual( s.getParameter( "vec4Parm" ), Color4fData( Color4f( 1 ) ) )
+		s.setUniformParameter( "vec4Parm", Color4fData( Color4f( 1 ) ) )
+		self.assertEqual( s.getUniformParameter( "vec4Parm" ), Color4fData( Color4f( 1 ) ) )
 
-		s.setParameter( "s.i", IntData( 1 ) )
-		self.assertEqual( s.getParameter( "s.i" ), IntData( 1 ) )
+		s.setUniformParameter( "s.i", IntData( 1 ) )
+		self.assertEqual( s.getUniformParameter( "s.i" ), IntData( 1 ) )
 
-		s.setParameter( "s.f", FloatData( 1 ) )
-		self.assertEqual( s.getParameter( "s.f" ), FloatData( 1 ) )
+		s.setUniformParameter( "s.f", FloatData( 1 ) )
+		self.assertEqual( s.getUniformParameter( "s.f" ), FloatData( 1 ) )
 
-		s.setParameter( "mat3Parm", M33fData( M33f.createTranslated( V2f( 1, 2 ) ) ) )
-		self.assertEqual( s.getParameter( "mat3Parm" ), M33fData( M33f.createTranslated( V2f( 1, 2 ) ) ) )
+		s.setUniformParameter( "mat3Parm", M33fData( M33f.createTranslated( V2f( 1, 2 ) ) ) )
+		self.assertEqual( s.getUniformParameter( "mat3Parm" ), M33fData( M33f.createTranslated( V2f( 1, 2 ) ) ) )
 
-		s.setParameter( "mat4Parm", M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
-		self.assertEqual( s.getParameter( "mat4Parm" ), M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
+		s.setUniformParameter( "mat4Parm", M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
+		self.assertEqual( s.getUniformParameter( "mat4Parm" ), M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 
 		# check that setting invalid values throws an Exception
-		self.assertRaises( Exception, s.setParameter, "iDontExist", FloatData( 2 ) )
-		self.assertRaises( Exception, s.setParameter, "boolParm", FloatData( 2 ) )
-		self.assertRaises( Exception, s.setParameter, "intParm", FloatData( 2 ) )
-		self.assertRaises( Exception, s.setParameter, "floatParm", IntData( 2 ) )
-		self.assertRaises( Exception, s.setParameter, "ivec2Parm", V3iData( V3i( 2 ) ) )
-		self.assertRaises( Exception, s.setParameter, "ivec3Parm", V3fData( V3f( 2 ) ) )
-		self.assertRaises( Exception, s.setParameter, "vec2Parm", V3fData( V3f( 2 ) ) )
-		self.assertRaises( Exception, s.setParameter, "vec3Parm", V2fData( V2f( 2 ) ) )
-		self.assertRaises( Exception, s.setParameter, "vec4Parm", V3fData( V3f( 2 ) ) )
-		self.assertRaises( Exception, s.setParameter, "mat4Parm", V3fData( V3f( 2 ) ) )
-		self.assertRaises( Exception, s.setParameter, "mat3Parm", V3fData( V3f( 2 ) ) )
+		self.assertRaises( Exception, s.setUniformParameter, "iDontExist", FloatData( 2 ) )
+		self.assertRaises( Exception, s.setUniformParameter, "boolParm", FloatData( 2 ) )
+		self.assertRaises( Exception, s.setUniformParameter, "intParm", FloatData( 2 ) )
+		self.assertRaises( Exception, s.setUniformParameter, "floatParm", IntData( 2 ) )
+		self.assertRaises( Exception, s.setUniformParameter, "ivec2Parm", V3iData( V3i( 2 ) ) )
+		self.assertRaises( Exception, s.setUniformParameter, "ivec3Parm", V3fData( V3f( 2 ) ) )
+		self.assertRaises( Exception, s.setUniformParameter, "vec2Parm", V3fData( V3f( 2 ) ) )
+		self.assertRaises( Exception, s.setUniformParameter, "vec3Parm", V2fData( V2f( 2 ) ) )
+		self.assertRaises( Exception, s.setUniformParameter, "vec4Parm", V3fData( V3f( 2 ) ) )
+		self.assertRaises( Exception, s.setUniformParameter, "mat4Parm", V3fData( V3f( 2 ) ) )
+		self.assertRaises( Exception, s.setUniformParameter, "mat3Parm", V3fData( V3f( 2 ) ) )
 
 		# check that both booldata is valid for bools
-		self.assert_( s.valueValid( "boolParm", BoolData( True ) ) )
+		self.assert_( s.uniformValueValid( "boolParm", BoolData( True ) ) )
 
 	def testRendererCall( self ) :
 

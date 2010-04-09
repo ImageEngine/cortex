@@ -96,7 +96,7 @@ void Primitive::render( ConstStatePtr state ) const
 	{
 		try
 		{
-			shader->setParameter( it->first, it->second );
+			shader->setUniformParameter( it->first, it->second );
 		}
 		catch( ... )
 		{
@@ -356,7 +356,7 @@ void Primitive::setupVertexAttributes( const Shader *s ) const
 			else
 			{
 				// uniform shader variable
-				parameterIndex = s->parameterIndex( it->first );
+				parameterIndex = s->uniformParameterIndex( it->first );
 				if ( floatData.data )
 				{
 					m_vertexToUniform.floatDataMap[ parameterIndex ] = floatData;

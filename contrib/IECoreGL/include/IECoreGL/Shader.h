@@ -66,75 +66,75 @@ class Shader : public Bindable
 
 		virtual void bind() const;
 
-		/// Fills the passed vector with the names of all shader parameters.
+		/// Fills the passed vector with the names of all uniform shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
 		/// Arrays will be returned as a single name, rather than the list array[0],
 		/// array[n] names used internally in OpenGL.
-		void parameterNames( std::vector<std::string> &names ) const;
-		/// Returns a numeric index for the named parameter. This can be
+		void uniformParameterNames( std::vector<std::string> &names ) const;
+		/// Returns a numeric index for the named uniform parameter. This can be
 		/// used in the calls below to avoid more expensive lookups by name.
 		/// Throws an Exception if parameter does not exist.
-		GLint parameterIndex( const std::string &parameterName ) const;
-		/// Returns true if the Shader has a parameter of the given name.
-		bool hasParameter( const std::string &parameterName ) const;
+		GLint uniformParameterIndex( const std::string &parameterName ) const;
+		/// Returns true if the Shader has a uniform parameter of the given name.
+		bool hasUniformParameter( const std::string &parameterName ) const;
 
-		/// Returns the type of a named parameter, described in terms of the
+		/// Returns the type of a named uniform parameter, described in terms of the
 		/// most closely related IECore datatype. The type here is the type of
-		/// data returned by the getParameter() function below, except in the case
+		/// data returned by the getUniformParameter() function below, except in the case
 		/// of 2d samplers, where TextureTypeId will be returned.
-		IECore::TypeId parameterType( GLint parameterIndex ) const;
+		IECore::TypeId uniformParameterType( GLint parameterIndex ) const;
 		/// As above but by specifying the parameter by name.
-		IECore::TypeId parameterType( const std::string &parameterName ) const;
+		IECore::TypeId uniformParameterType( const std::string &parameterName ) const;
 
-		//! @name getParameterDefault
+		//! @name getUniformParameterDefault
 		/// Returns a new data object containing the suggested default value (zero)
 		/// to be set on the given parameter.
 		/// The default values are not supported by OpenGL. So the shader does not
 		/// have to be bound at the time of calling.
 		//////////////////////////////////////////////////////////////////////
 		//@{
-		IECore::DataPtr getParameterDefault( GLint parameterIndex ) const;
-		IECore::DataPtr getParameterDefault( const std::string &parameterName ) const;
+		IECore::DataPtr getUniformParameterDefault( GLint parameterIndex ) const;
+		IECore::DataPtr getUniformParameterDefault( const std::string &parameterName ) const;
 		//@}
 
-		//! @name Parameter getting
-		/// These calls return the current values of shader parameters. Unlike
+		//! @name Uniform Parameter getting
+		/// These calls return the current values of shader uniform parameters. Unlike
 		/// the calls to set values (see below) the shader does not have to be
 		/// bound at the time of calling.
 		//////////////////////////////////////////////////////////////////////
 		//@{
-		IECore::DataPtr getParameter( GLint parameterIndex ) const;
-		IECore::DataPtr getParameter( const std::string &parameterName ) const;
+		IECore::DataPtr getUniformParameter( GLint parameterIndex ) const;
+		IECore::DataPtr getUniformParameter( const std::string &parameterName ) const;
 		//@}
 
-		//! @name Parameter setting
+		//! @name Uniform Parameter setting
 		/// These calls set shader parameters. They can only be called while
 		/// the Shader is bound (using bind()) as the current shader - Exceptions
 		/// will result if this is not the case.
 		//////////////////////////////////////////////////////////////////////
 		//@{
 		/// Returns true if the specified value is valid for setting the
-		/// specified parameter, and false if not.
-		bool valueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const;
-		/// As above, but specifying the parameter by name.
-		bool valueValid( const std::string &parameterName, IECore::ConstDataPtr value ) const;
-		/// Sets the specified parameter to the value specified. value must
+		/// specified uniform parameter, and false if not.
+		bool uniformValueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const;
+		/// As above, but specifying the uniform parameter by name.
+		bool uniformValueValid( const std::string &parameterName, IECore::ConstDataPtr value ) const;
+		/// Sets the specified uniform parameter to the value specified. value must
 		/// be of an appropriate type for the parameter - an Exception is thrown
 		/// if this is not the case.
-		void setParameter( GLint parameterIndex, IECore::ConstDataPtr value );
+		void setUniformParameter( GLint parameterIndex, IECore::ConstDataPtr value );
 		/// Sets the specified parameter to the value specified. value must
 		/// be of an appropriate type for the parameter - an Exception is thrown
 		/// if this is not the case. This call may be slower than the overload based
 		/// on parameter indexes.
-		void setParameter( const std::string &parameterName, IECore::ConstDataPtr value );
+		void setUniformParameter( const std::string &parameterName, IECore::ConstDataPtr value );
 		/// Sets the specified sampler parameter to use the texture unit indicated.
-		void setParameter( GLint parameterIndex, unsigned int textureUnit );
+		void setUniformParameter( GLint parameterIndex, unsigned int textureUnit );
 		/// Sets the specified sampler parameter to use the texture unit indicated.
 		/// This call may be slower than the overload based
 		/// on parameter indexes.
-		void setParameter( const std::string &parameterName, unsigned int textureUnit );
-		void setParameter( GLint parameterIndex, int value );
-		void setParameter( const std::string &parameterName, int value );
+		void setUniformParameter( const std::string &parameterName, unsigned int textureUnit );
+		void setUniformParameter( GLint parameterIndex, int value );
+		void setUniformParameter( const std::string &parameterName, int value );
 		//@}
 
 		//! @name Built in shaders
@@ -173,7 +173,7 @@ class Shader : public Bindable
 		};
 		/// Maps from the uniform location to the parameter details.
 		typedef std::map<GLint, ParameterDescription> ParameterMap;
-		ParameterMap m_parameters;
+		ParameterMap m_uniformParameters;
 		/// Throws an Exception if the parameter doesn't exist.
 		const ParameterDescription &parameterDescription( GLint parameterIndex ) const;
 };

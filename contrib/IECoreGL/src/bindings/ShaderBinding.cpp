@@ -46,10 +46,10 @@ using namespace std;
 namespace IECoreGL
 {
 
-boost::python::list parameterNames( const Shader &s )
+boost::python::list uniformParameterNames( const Shader &s )
 {
 	vector<string> n;
-	s.parameterNames( n );
+	s.uniformParameterNames( n );
 	boost::python::list result;
 	for( unsigned int i=0; i<n.size(); i++ )
 	{
@@ -62,21 +62,21 @@ void bindShader()
 {
 	IECorePython::RunTimeTypedClass<Shader>()
 		.def( init<const std::string &, const std::string &>() )
-		.def( "parameterNames", &parameterNames )
-		.def( "parameterIndex", &Shader::parameterIndex )
-		.def( "hasParameter", &Shader::hasParameter )
-		.def( "parameterType", (IECore::TypeId (Shader::*)( GLint ) const )&Shader::parameterType )
-		.def( "parameterType", (IECore::TypeId (Shader::*)( const std::string & ) const )&Shader::parameterType )
-		.def( "getParameter", (IECore::DataPtr (Shader::*)( GLint ) const )&Shader::getParameter )
-		.def( "getParameter", (IECore::DataPtr (Shader::*)( const std::string & ) const )&Shader::getParameter )
-		.def( "valueValid", (bool (Shader::*)( GLint, IECore::ConstDataPtr ) const )&Shader::valueValid )
-		.def( "valueValid", (bool (Shader::*)( const std::string &, IECore::ConstDataPtr ) const )&Shader::valueValid )
-		.def( "setParameter", (void (Shader::*)( GLint, IECore::ConstDataPtr ))&Shader::setParameter )
-		.def( "setParameter", (void (Shader::*)( const std::string &, IECore::ConstDataPtr ))&Shader::setParameter )
-		.def( "setParameter", (void (Shader::*)( GLint, unsigned int ))&Shader::setParameter )
-		.def( "setParameter", (void (Shader::*)( const std::string &, unsigned int ))&Shader::setParameter )
-		.def( "setParameter", (void (Shader::*)( const std::string &, int ))&Shader::setParameter )
-		.def( "setParameter", (void (Shader::*)( GLint, int ))&Shader::setParameter )
+		.def( "uniformParameterNames", &uniformParameterNames )
+		.def( "uniformParameterIndex", &Shader::uniformParameterIndex )
+		.def( "hasUniformParameter", &Shader::hasUniformParameter )
+		.def( "uniformParameterType", (IECore::TypeId (Shader::*)( GLint ) const )&Shader::uniformParameterType )
+		.def( "uniformParameterType", (IECore::TypeId (Shader::*)( const std::string & ) const )&Shader::uniformParameterType )
+		.def( "getUniformParameter", (IECore::DataPtr (Shader::*)( GLint ) const )&Shader::getUniformParameter )
+		.def( "getUniformParameter", (IECore::DataPtr (Shader::*)( const std::string & ) const )&Shader::getUniformParameter )
+		.def( "uniformValueValid", (bool (Shader::*)( GLint, IECore::ConstDataPtr ) const )&Shader::uniformValueValid )
+		.def( "uniformValueValid", (bool (Shader::*)( const std::string &, IECore::ConstDataPtr ) const )&Shader::uniformValueValid )
+		.def( "setUniformParameter", (void (Shader::*)( GLint, IECore::ConstDataPtr ))&Shader::setUniformParameter )
+		.def( "setUniformParameter", (void (Shader::*)( const std::string &, IECore::ConstDataPtr ))&Shader::setUniformParameter )
+		.def( "setUniformParameter", (void (Shader::*)( GLint, unsigned int ))&Shader::setUniformParameter )
+		.def( "setUniformParameter", (void (Shader::*)( const std::string &, unsigned int ))&Shader::setUniformParameter )
+		.def( "setUniformParameter", (void (Shader::*)( const std::string &, int ))&Shader::setUniformParameter )
+		.def( "setUniformParameter", (void (Shader::*)( GLint, int ))&Shader::setUniformParameter )
 		.def( "constant", &Shader::constant ).staticmethod( "constant" )
 		.def( "facingRatio", &Shader::facingRatio ).staticmethod( "facingRatio" )
 		.def( self==self )

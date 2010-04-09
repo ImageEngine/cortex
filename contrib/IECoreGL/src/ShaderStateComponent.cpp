@@ -92,7 +92,7 @@ void ShaderStateComponent::bind() const
 			GLint paramIndex;
 			try 
 			{
-				paramIndex = s->parameterIndex( it->first );
+				paramIndex = s->uniformParameterIndex( it->first );
 			}
 			catch( ... )
 			{
@@ -102,7 +102,7 @@ void ShaderStateComponent::bind() const
 			}
 
 			// test if a given parameter is supposed to be a texture and do the proper conversion
-			if ( s->parameterType( paramIndex ) == Texture::staticTypeId() )
+			if ( s->uniformParameterType( paramIndex ) == Texture::staticTypeId() )
 			{
 				// make sure our texture local cache has the texture
 				if ( m_textureParameters.find( it->first ) == m_textureParameters.end() )
@@ -130,7 +130,7 @@ void ShaderStateComponent::bind() const
 				IECore::DataPtr data = IECore::dynamicPointerCast< IECore::Data >( it->second );
 				if ( data )
 				{
-					m_shader->setParameter( paramIndex, data );
+					m_shader->setUniformParameter( paramIndex, data );
 				}
 				else
 					throw Exception( boost::str( boost::format( "Non-Data type assigned to parameter %s!" ) % it->first.value()) );
@@ -154,7 +154,7 @@ void ShaderStateComponent::bind() const
 
 				glActiveTexture( texUnits[i] );
 				it->second->bind();
-				m_shader->setParameter( it->first, i );
+				m_shader->setUniformParameter( it->first, i );
 				i++;
 			}
 		}
@@ -205,7 +205,7 @@ ShaderPtr ShaderStateComponent::shader()
 			m_shader = m_shaderManager->create( m_vertexShader, m_fragmentShader );
 			// query default parameters
 			vector<string> allParameters;
-			m_shader->parameterNames( allParameters );
+			m_shader->uniformParameterNames( allParameters );
 
 			const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
 
@@ -219,7 +219,7 @@ ShaderPtr ShaderStateComponent::shader()
 				IECore::DataPtr paramValue;
 				try
 				{
-					paramValue = m_shader->getParameterDefault( *it );
+					paramValue = m_shader->getUniformParameterDefault( *it );
 				}
 				catch( ... )
 				{
