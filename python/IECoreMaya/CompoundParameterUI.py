@@ -120,9 +120,10 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 				
 		else :
 		
-			with IECoreMaya.UITemplate( "attributeEditorTemplate" ) :
-				self.__createChildUIs()
-
+			if not maya.cmds.frameLayout( self._layout, query=True, collapse=True ) :
+				with IECoreMaya.UITemplate( "attributeEditorTemplate" ) :
+					self.__createChildUIs()
+				
 	## May be implemented by derived classes to present some custom ui at the
 	# top of the list of child parameters. Implementations should first call the
 	# base class method and then perform their custom behaviour, placing ui elements
