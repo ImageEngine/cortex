@@ -48,6 +48,11 @@ class ClassVectorParameter( IECore.CompoundParameter ) :
 		
 		self.setClasses( classes )
 	
+	## Returns the name of the environment variable which defines paths to search for child classes on.
+	def searchPathEnvVar( self ) :
+		
+		return self.__searchPathEnvVar
+	
 	## Returns a list of the classes held as children. These are returned in the same order
 	# as the child parameters holding them. If withClassLoaderArgs is True then a list of
 	# tuples is returned, with each tuple being of the form ( classInstance, parameterName, className, classVersion ).
@@ -69,17 +74,23 @@ class ClassVectorParameter( IECore.CompoundParameter ) :
 	# of the same thing.
 	def setClasses( self, classes ) :
 	
+		# validate arguments and figure out what child parameter names we need
+	
 		assert( isinstance( classes, list ) )
+		
+		neededNames = set()
 		for c in classes :
 			assert( isinstance( c, tuple ) )
 			assert( len( c ) == 3 )
 			assert( isinstance( c[0], str ) )
 			assert( isinstance( c[1], str ) )
 			assert( isinstance( c[2], int ) )
+			if c[0] in neededNames :
+				raise ValueError( "Duplicate parameter name \"%s\"" % c[0] )
+			neededNames.add( c[0] )
 			
 		# first remove any existing parameters which we don't need
 		
-		neededNames = set( [ x[0] for x in classes ] )
 		for parameter in self.values() :
 			if parameter.name not in neededNames :
 				self.removeParameter( parameter )

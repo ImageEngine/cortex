@@ -51,6 +51,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( c.userData(), IECore.CompoundObject() )
 		self.assertEqual( c.getClasses(), [] )
 		self.assertEqual( c.getClasses( True ), [] )
+		self.assertEqual( c.searchPathEnvVar(), "IECORE_OP_PATHS" )
 		
 		c = IECore.ClassVectorParameter(
 			"n",
@@ -66,6 +67,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( c.userData(), IECore.CompoundObject( { "a" : IECore.IntData( 10 ) } ) )
 		self.assertEqual( c.getClasses(), [] )
 		self.assertEqual( c.getClasses( True ), [] )
+		self.assertEqual( c.searchPathEnvVar(), "IECORE_OP_PATHS" )
 	
 	def testSetAndGetClasses( self ) :
 	
@@ -371,6 +373,28 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		
 		self.assertEqual( p["n"]["mult"]["a"].getTypedValue(), 10 )
 		self.assertEqual( p["n"]["mult"]["b"].getTypedValue(), 20 )
+		
+	def testDuplicateParameterNames( self ) :
+	
+		c = IECore.ClassVectorParameter(
+			"n",
+			"d",
+			"IECORE_OP_PATHS",
+		)
+		
+		self.assertRaises(
+		
+			ValueError,
+			c.setClasses, 
+			[
+				( "p1", "maths/multiply", 1 ),
+				( "p2", "stringParsing", 1 ),
+				( "p1", "maths/multiply", 1 ),
+			]
+			
+		)
+		
+		self.assertEqual( len( c.getClasses() ), 0 )
 		
 if __name__ == "__main__" :
 	unittest.main()
