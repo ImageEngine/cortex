@@ -85,11 +85,25 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	def setClassParameterClass( self, parameter, className, classVersion, searchPathEnvVar ) :
 		
 		maya.cmds.ieParameterisedHolderSetClassParameter(
-			self.fullPathName(), 
-			plug = self.parameterPlug( parameter ).partialName(),
-			className = className,
-			classVersion = classVersion,
-			searchPathEnvVar = searchPathEnvVar
+			self.parameterPlugPath( parameter ),
+			className,
+			classVersion,
+			searchPathEnvVar
+		)
+		
+	## Calls parameter.setClasses() for a ClassVectorParameter. This method should always be used
+	# in preference to calling parameter.setClasses() directly, as it correctly updates the
+	# maya state and also implements undo.
+	def setClassVectorParameterClasses( self, parameter, classes ) :
+		
+		args = []
+		for c in classes :
+			args.extend( c )
+		
+		maya.cmds.ieParameterisedHolderSetClassParameter(
+			self.parameterPlugPath( parameter ),
+			len( classes ),
+			*args
 		)
 		
 	## Sets the values of the plugs representing the parameterised object,

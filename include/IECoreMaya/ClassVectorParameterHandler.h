@@ -32,57 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_PARAMETERISEDHOLDERSETCLASSPARAMETERCMD_H
-#define IECOREMAYA_PARAMETERISEDHOLDERSETCLASSPARAMETERCMD_H
+#ifndef IECOREMAYA_CLASSVECTORPARAMETERHANDLER_H
+#define IECOREMAYA_CLASSVECTORPARAMETERHANDLER_H
 
-#include "maya/MPxCommand.h"
-#include "maya/MSyntax.h"
-
-#include "IECoreMaya/ParameterisedHolderInterface.h"
+#include "IECoreMaya/ParameterHandler.h"
 
 namespace IECoreMaya
 {
 
-/// This command is used to set the classes held by both the IECore.ClassParameter
-/// and IECore.ClassVectorParameter in an undoable way. It should never be used
-/// directly - instead the methods of IECoreMaya.FnParameterisedHolder should be
-/// used.
-class ParameterisedHolderSetClassParameterCmd : public MPxCommand
+/// A ParameterHandler which deals with ClassVectorParameters. Note that no attempt is made to represent the child
+/// parameters - separate calls to other parameter handlers should be used to do that.
+class ClassVectorParameterHandler : public ParameterHandler
 {
 
 	public :
+	
+		/// This is the only way to set the classes held by a ClassVectorParameter and have the maya state
+		/// updated correctly. Typically this shouldn't be called directly, instead the
+		/// ieParameterisedHolderSetClassParameter command should be used, as this allows the operation
+		/// to be undone as well.
+		static MStatus setClasses( IECore::ParameterPtr parameter, MPlug &plug,
+			const MStringArray &parameterNames, const MStringArray &classNames, const MIntArray &classVersions );
+	
+	protected:
 
-		ParameterisedHolderSetClassParameterCmd();
-		virtual ~ParameterisedHolderSetClassParameterCmd();
-
-		static void *creator();
-
-		virtual bool isUndoable() const;
-		virtual bool hasSyntax() const;
-
-		virtual MStatus doIt( const MArgList &argList );
-		virtual MStatus undoIt();
-		virtual MStatus redoIt();
-
+		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;
+		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
+		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
+		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
+		
 	private :
-
-		ParameterisedHolderInterface *m_parameterisedHolder;
-		IECore::ParameterPtr m_parameter;
-		
-		IECore::ObjectPtr m_originalValues;
-		
-		MStringArray m_originalParameterNames;
-		MStringArray m_originalClassNames;
-		MIntArray m_originalClassVersions;
-		MString m_originalSearchPathEnvVar;
-		
-		MStringArray m_newParameterNames;
-		MStringArray m_newClassNames;
-		MIntArray m_newClassVersions;
-		MString m_newSearchPathEnvVar;
-		
+	
+		static MStatus setClasses( IECore::ParameterPtr parameter, const MStringArray &parameterNames, const MStringArray &classNames, const MIntArray &classVersions );
+				
 };
 
-}
+} // namespace IECoreMaya
 
-#endif // IECOREMAYA_PARAMETERISEDHOLDERSETCLASSPARAMETERCMD_H
+#endif // IECOREMAYA_CLASSVECTORPARAMETERHANDLER_H

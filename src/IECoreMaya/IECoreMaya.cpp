@@ -169,7 +169,7 @@ MStatus initialize(MFnPlugin &plugin)
 
 		s = plugin.registerCommand( "ieParameterisedHolderSetValue", ParameterisedHolderSetValueCmd::creator, ParameterisedHolderSetValueCmd::newSyntax );
 
-		s = plugin.registerCommand( "ieParameterisedHolderSetClassParameter", ParameterisedHolderSetClassParameterCmd::creator, ParameterisedHolderSetClassParameterCmd::newSyntax );
+		s = plugin.registerCommand( "ieParameterisedHolderSetClassParameter", ParameterisedHolderSetClassParameterCmd::creator );
 
 #ifdef IECOREMAYA_WITH_RI
 		s = plugin.registerCommand( "ieDelightProceduralCache", DelightProceduralCacheCommand::creator, DelightProceduralCacheCommand::newSyntax );

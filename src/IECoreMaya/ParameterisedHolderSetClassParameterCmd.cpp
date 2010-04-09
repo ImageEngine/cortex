@@ -38,6 +38,8 @@
 #include "maya/MSelectionList.h"
 #include "maya/MFnDependencyNode.h"
 #include "maya/MStringArray.h"
+#include "maya/MFnStringArrayData.h"
+#include "maya/MFnIntArrayData.h"
 
 #include "IECore/Object.h"
 #include "IECore/Parameter.h"
@@ -45,6 +47,7 @@
 
 #include "IECoreMaya/ParameterisedHolderSetClassParameterCmd.h"
 #include "IECoreMaya/ClassParameterHandler.h"
+#include "IECoreMaya/ClassVectorParameterHandler.h"
 
 using namespace IECoreMaya;
 
@@ -62,35 +65,30 @@ void *ParameterisedHolderSetClassParameterCmd::creator()
 	return new ParameterisedHolderSetClassParameterCmd;
 }
 
-MSyntax ParameterisedHolderSetClassParameterCmd::newSyntax()
-{
-	MSyntax s;
-
-	s.addFlag( "p", "plug", MSyntax::kString );
-	s.addFlag( "c", "className", MSyntax::kString );
-	s.addFlag( "v", "classVersion", MSyntax::kString );
-	s.addFlag( "s", "searchPathEnvVar", MSyntax::kString );
-
-	s.setObjectType( MSyntax::kSelectionList, 1, 1 );
-
-	return s;
-}
-
 bool ParameterisedHolderSetClassParameterCmd::isUndoable() const
 {
 	return true;
 }
 
-MStatus ParameterisedHolderSetClassParameterCmd::doIt( const MArgList &argList )
+bool ParameterisedHolderSetClassParameterCmd::hasSyntax() const
 {
-	MArgDatabase args( syntax(), argList );
+	return false;
+}
+
+MStatus ParameterisedHolderSetClassParameterCmd::doIt( const MArgList &argList )
+{	
+	// get the node and plug we're operating on
+	MSelectionList plugSelection;
+	plugSelection.add( argList.asString( 0 ) );
 	
-	// get the node we're operating on
-	MSelectionList objects;
-	args.getObjects( objects );
+	MPlug plug;
+	plugSelection.getPlug( 0, plug );
+	if( plug.isNull() )
+	{
+		return MS::kFailure;
+	}
 	
-	MObject node;
-	objects.getDependNode( 0, node );
+	MObject node = plug.node();
 	MFnDependencyNode fnNode( node );
 	MPxNode *userNode = fnNode.userNode();
 	ParameterisedHolderInterface *parameterisedHolder = dynamic_cast<ParameterisedHolderInterface *>( userNode );
@@ -100,39 +98,71 @@ MStatus ParameterisedHolderSetClassParameterCmd::doIt( const MArgList &argList )
 	}
 
 	// get the ClassParameter we're operating on
-	MString plugName = args.flagArgumentString( "plug", 0 );
-	if( plugName=="" )
-	{
-		return MStatus::kFailure;
-	}
-	
-	MPlug plug = fnNode.findPlug( plugName );
-	if( plug.isNull() )
-	{
-		return MS::kFailure;
-	}
 	IECore::ParameterPtr parameter = parameterisedHolder->plugParameter( plug );
 	if( !parameter )
 	{
 		return MS::kFailure;
 	}
-	if( !parameter->isInstanceOf( IECore::ClassParameterTypeId ) )
+	if( !parameter->isInstanceOf( IECore::ClassParameterTypeId ) && !parameter->isInstanceOf( IECore::ClassVectorParameterTypeId ) )
 	{
 		return MS::kFailure;
 	}
 
-	// store the details of the class we're about to replace
-
-	m_originalClassName = plug.child( 0 ).asString();
-	m_originalClassVersion = plug.child( 1 ).asInt();
-	m_originalSearchPathEnvVar = plug.child( 2 ).asString();
-
 	// store the details of the class we want to set
 	
-	m_newClassName = args.flagArgumentString( "className", 0 );
-	m_newClassVersion = args.flagArgumentInt( "classVersion", 0 );
-	m_newSearchPathEnvVar = args.flagArgumentString( "searchPathEnvVar", 0 );
-	
+	if( parameter->isInstanceOf( IECore::ClassParameterTypeId ) )
+	{
+		if( argList.length() != 4 )
+		{
+			displayError( "ieParameterisedHolderSetClassParameter : wrong number of arguments." );
+			return MS::kFailure;
+		}
+		
+		m_newClassNames.append( argList.asString( 1 ) );
+		m_newClassVersions.append( argList.asInt( 2 ) );
+		m_newSearchPathEnvVar = argList.asString( 3 );
+	}
+	else
+	{
+		// ClassVectorParameter
+		
+		int numClasses = argList.asInt( 1 );
+		if( (int)argList.length() != numClasses * 3 + 2 )
+		{
+			displayError( "ieParameterisedHolderSetClassParameter : wrong number of arguments." );
+			return MS::kFailure;		
+		}
+		
+		int argIndex = 2;
+		for( int classIndex=0; classIndex<numClasses; classIndex++ )
+		{
+			m_newParameterNames.append( argList.asString( argIndex++ ) );
+			m_newClassNames.append( argList.asString( argIndex++ ) );
+			m_newClassVersions.append( argList.asInt( argIndex++ ) );
+		}
+	}
+
+	// store the details of the class we're about to replace
+
+	if( parameter->isInstanceOf( IECore::ClassParameterTypeId ) )
+	{
+		m_originalClassNames.append( plug.child( 0 ).asString() );
+		m_originalClassVersions.append( plug.child( 1 ).asInt() );
+		m_originalSearchPathEnvVar = plug.child( 2 ).asString();
+	}
+	else
+	{
+		// ClassVectorParameter
+		MFnStringArrayData fnSAD( plug.child( 0 ).asMObject() );
+		fnSAD.copyTo( m_originalParameterNames );
+		
+		fnSAD.setObject( plug.child( 1 ).asMObject() );
+		fnSAD.copyTo( m_originalClassNames );
+		
+		MFnIntArrayData fnIAD( plug.child( 2 ).asMObject() );
+		fnIAD.copyTo( m_originalClassVersions );
+	}
+		
 	parameterisedHolder->setParameterisedValues();
 	
 	m_originalValues = parameter->getValue()->copy();
@@ -151,9 +181,19 @@ MStatus ParameterisedHolderSetClassParameterCmd::redoIt()
 	}
 
 	MPlug plug = m_parameterisedHolder->parameterPlug( m_parameter );
-	MStatus s = ClassParameterHandler::setClass( m_parameter, plug,
-		m_newClassName, m_newClassVersion, m_newSearchPathEnvVar );
-		
+	
+	MStatus s;
+	if( m_parameter->isInstanceOf( IECore::ClassParameterTypeId ) )
+	{
+		s = ClassParameterHandler::setClass( m_parameter, plug,
+			m_newClassNames[0], m_newClassVersions[0], m_newSearchPathEnvVar );
+	}
+	else
+	{
+		// ClassVectorParameter
+		s = ClassVectorParameterHandler::setClasses( m_parameter, plug,
+			m_newParameterNames, m_newClassNames, m_newClassVersions );
+	}
 	if( !s )
 	{
 		return s;
@@ -170,8 +210,20 @@ MStatus ParameterisedHolderSetClassParameterCmd::undoIt()
 	}
 
 	MPlug plug = m_parameterisedHolder->parameterPlug( m_parameter );
-	MStatus s = ClassParameterHandler::setClass( m_parameter, plug,
-		m_originalClassName, m_originalClassVersion, m_originalSearchPathEnvVar );
+	
+	MStatus s;
+	if( m_parameter->isInstanceOf( IECore::ClassParameterTypeId ) )
+	{
+		s = ClassParameterHandler::setClass( m_parameter, plug,
+			m_originalClassNames[0], m_originalClassVersions[0], m_originalSearchPathEnvVar );
+	}
+	else
+	{
+		// ClassVectorParameter
+				
+		s = ClassVectorParameterHandler::setClasses( m_parameter, plug,
+			m_originalParameterNames, m_originalClassNames, m_originalClassVersions );
+	}
 		
 	if( !s )
 	{

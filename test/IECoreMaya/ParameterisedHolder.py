@@ -42,6 +42,15 @@ import IECoreMaya
 
 class TestParameterisedHolder( unittest.TestCase ) :
 
+	def __checkAllParameterPlugs( self, fnOH, parameter ) :
+	
+		plug = fnOH.parameterPlug( parameter )
+		self.failIf( plug.isNull() )
+				
+		if parameter.isInstanceOf( IECore.CompoundParameter.staticTypeId() ) :
+			for p in parameter.values() :
+				self.__checkAllParameterPlugs( fnOH, p )
+
 	def testNode( self ):
 		""" Test ParameterisedHolderNode """
 		n = cmds.createNode( "ieParameterisedHolderNode" )
@@ -785,6 +794,266 @@ class TestParameterisedHolder( unittest.TestCase ) :
 		cmds.setAttr( bPlugPath, 12 )
 
 		self.assertEqual( cmds.getAttr( "node.result" ), 120 )
+	
+	def testClassVectorParameter( self ) :
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classVectorParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		c = op["cv"]
+		self.assertEqual( c.typeName(), "ClassVectorParameter" )
+		
+		self.assertEqual( len( c.getClasses() ), 0 )
+				
+		fnOH.setClassVectorParameterClasses(
+		
+			c,
+			
+			[
+				( "mult", "maths/multiply", 1 ),
+				( "coIO", "compoundObjectInOut", 1 ),
+			]
+			
+		)
+		
+		cl = c.getClasses()
+		self.failUnless( isinstance( cl, list ) )
+		self.assertEqual( len( cl ), 2 )
+		self.assertEqual( cl[0].typeName(), "multiply" )
+		self.assertEqual( cl[1].typeName(), "compoundObjectInOut" )
+		
+		self.assertEqual( len( c ), 2 )
+		self.assertEqual( c.keys(), [ "mult", "coIO" ] )
+		self.assertEqual( c["mult"].keys(), [ "a", "b" ] )
+		self.assertEqual( c["coIO"].keys(), [ "input" ] )
+
+		cl = c.getClasses( True )
+		self.failUnless( isinstance( cl, list ) )
+		self.assertEqual( len( cl ), 2 )
+		self.assertEqual( cl[0][0].typeName(), "multiply" )
+		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
+		self.assertEqual( cl[0][1], "mult" )
+		self.assertEqual( cl[1][1], "coIO" )
+		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[1][2], "compoundObjectInOut" )
+		self.assertEqual( cl[0][3], 1 )
+		self.assertEqual( cl[1][3], 1 )
+		
+		self.__checkAllParameterPlugs( fnOH, c )
+	
+	def testClassVectorParameterSaveAndLoad( self ) :
+	
+		# make an opholder with a ClassVectorParameter, and modify some plug
+		# values
+		#####################################################################
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classVectorParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		c = op["cv"]
+		self.assertEqual( c.typeName(), "ClassVectorParameter" )
+		
+		self.assertEqual( len( c.getClasses() ), 0 )
+				
+		fnOH.setClassVectorParameterClasses(
+		
+			c,
+			
+			[
+				( "mult", "maths/multiply", 1 ),
+				( "coIO", "compoundObjectInOut", 1 ),
+			]
+			
+		)
+		
+		cl = c.getClasses()
+		self.failUnless( isinstance( cl, list ) )
+		self.assertEqual( len( cl ), 2 )
+		self.assertEqual( cl[0].typeName(), "multiply" )
+		self.assertEqual( cl[1].typeName(), "compoundObjectInOut" )
+		
+		self.__checkAllParameterPlugs( fnOH, c )
+
+		aPlugPath = fnOH.parameterPlugPath( c["mult"]["a"] )
+		bPlugPath = fnOH.parameterPlugPath( c["mult"]["b"] )
+		
+		cmds.setAttr( aPlugPath, 10 )
+		cmds.setAttr( bPlugPath, 20 )
+		
+		# save the scene
+		####################################################################
+		
+		cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "classVectorParameter.ma" ) )
+		scene = cmds.file( force = True, type = "mayaAscii", save = True )
+		
+		# reload it and check we still have what we expect
+		####################################################################
+		
+		cmds.file( new = True, force = True )
+		cmds.file( scene, open = True )
+				
+		fnOH = IECoreMaya.FnOpHolder( "node" )
+		
+		op = fnOH.getOp()
+
+		cl = op["cv"].getClasses()
+		self.failUnless( isinstance( cl, list ) )
+		self.assertEqual( len( cl ), 2 )
+		self.assertEqual( cl[0].typeName(), "multiply" )
+		self.assertEqual( cl[1].typeName(), "compoundObjectInOut" )
+		
+		self.__checkAllParameterPlugs( fnOH, op["cv"] )
+		
+		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
+
+	def testClassVectorParameterUndo( self ) :
+
+		# make an opholder and set a ClassVectorParameter 
+		##########################################################################
+
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classVectorParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		c = op["cv"]
+		self.assertEqual( c.typeName(), "ClassVectorParameter" )
+		
+		self.assertEqual( len( c.getClasses() ), 0 )
+				
+		self.assert_( cmds.undoInfo( query=True, state=True ) )
+
+		fnOH.setClassVectorParameterClasses(
+		
+			c,
+			
+			[
+				( "mult", "maths/multiply", 1 ),
+				( "str", "stringParsing", 1 ),
+			]
+			
+		)
+		
+		cl = c.getClasses()
+		self.failUnless( isinstance( cl, list ) )
+		self.assertEqual( len( cl ), 2 )
+		self.assertEqual( cl[0].typeName(), "multiply" )
+		self.assertEqual( cl[1].typeName(), "stringParsing" )
+		
+		self.assertEqual( len( c ), 2 )
+		self.assertEqual( c.keys(), [ "mult", "str" ] )
+		self.assertEqual( c["mult"].keys(), [ "a", "b" ] )
+		self.assertEqual( c["str"].keys(), [ "emptyString", "normalString", "stringWithSpace", "stringWithManySpaces" ] )
+
+		cl = c.getClasses( True )
+		self.failUnless( isinstance( cl, list ) )
+		self.assertEqual( len( cl ), 2 )
+		self.assertEqual( cl[0][0].typeName(), "multiply" )
+		self.assertEqual( cl[1][0].typeName(), "stringParsing" )
+		self.assertEqual( cl[0][1], "mult" )
+		self.assertEqual( cl[1][1], "str" )
+		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[1][2], "stringParsing" )
+		self.assertEqual( cl[0][3], 1 )
+		self.assertEqual( cl[1][3], 1 )
+		
+		self.__checkAllParameterPlugs( fnOH, c )
+		
+		# undo and check we're back to square one
+		##########################################################################
+
+		cmds.undo()
+		
+		self.assertEqual( c.getClasses(), [] )
+
+	def testClassVectorParameterUndoWithPreviousValues( self ) :
+	
+		# make an opholder with a ClassVectorParameter, and modify some plug
+		# values
+		#####################################################################
+	
+		fnOH = IECoreMaya.FnOpHolder.create( "node", "classVectorParameterTest", 1 )
+		op = fnOH.getOp()
+		
+		c = op["cv"]
+		self.assertEqual( c.typeName(), "ClassVectorParameter" )
+		
+		self.assertEqual( len( c.getClasses() ), 0 )
+				
+		fnOH.setClassVectorParameterClasses(
+		
+			c,
+			
+			[
+				( "mult", "maths/multiply", 1 ),
+			]
+			
+		)
+		
+		cl = c.getClasses( True )
+		self.failUnless( isinstance( cl, list ) )
+		self.assertEqual( len( cl ), 1 )
+		self.assertEqual( cl[0][0].typeName(), "multiply" )
+		self.assertEqual( cl[0][1], "mult" )
+		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][3], 1 )
+		
+		self.__checkAllParameterPlugs( fnOH, c )
+
+		aPlugPath = fnOH.parameterPlugPath( c["mult"]["a"] )
+		bPlugPath = fnOH.parameterPlugPath( c["mult"]["b"] )
+		
+		cmds.setAttr( aPlugPath, 10 )
+		cmds.setAttr( bPlugPath, 20 )
+
+		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
+		
+		# change set of held classes to something totally different
+		# and check that it worked
+		#####################################################################
+
+		fnOH.setClassVectorParameterClasses(
+		
+			c,
+			
+			[
+				( "str", "stringParsing", 1 ),
+				( "spl", "splineInput", 1 ),
+			]
+			
+		)
+		
+		cl = c.getClasses( True )
+		self.failUnless( isinstance( cl, list ) )
+		self.assertEqual( len( cl ), 2 )
+		self.assertEqual( cl[0][0].typeName(), "stringParsing" )
+		self.assertEqual( cl[1][0].typeName(), "splineInput" )
+		self.assertEqual( cl[0][1], "str" )
+		self.assertEqual( cl[1][1], "spl" )
+		self.assertEqual( cl[0][2], "stringParsing" )
+		self.assertEqual( cl[1][2], "splineInput" )
+		self.assertEqual( cl[0][3], 1 )
+		self.assertEqual( cl[1][3], 1 )
+		
+		self.__checkAllParameterPlugs( fnOH, c )
+		
+		# undo and check we're back where we want to be
+		#####################################################################
+
+		cmds.undo()
+
+		cl = c.getClasses( True )
+		self.failUnless( isinstance( cl, list ) )
+		self.assertEqual( len( cl ), 1 )
+		self.assertEqual( cl[0][0].typeName(), "multiply" )
+		self.assertEqual( cl[0][1], "mult" )
+		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][3], 1 )
+		
+		self.__checkAllParameterPlugs( fnOH, c )
+
+		self.assertEqual( cmds.getAttr( aPlugPath ), 10 )
+		self.assertEqual( cmds.getAttr( bPlugPath ), 20 )
 		
 	def tearDown( self ) :
 
@@ -799,6 +1068,7 @@ class TestParameterisedHolder( unittest.TestCase ) :
 			"test/IECoreMaya/objectParameterIO.ma",
 			"test/IECoreMaya/imageProcedural.ma",
 			"test/IECoreMaya/classParameter.ma",
+			"test/IECoreMaya/classVectorParameter.ma",
 		] :
 
 			if os.path.exists( f ) :
