@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -63,6 +63,20 @@ bool IFFFile::open()
 		
 		delete m_root;
 		std::streampos begin = m_iStream->tellg();
+		
+		char id[4];
+		m_iStream->read( id, 4 );
+		if( !m_iStream->good() )
+		{
+			return false;
+		}
+		
+		IFFFile::Tag testTag( id );
+		if( !testTag.isGroup() )
+		{
+			return false;
+		}
+		
 		m_iStream->seekg( 0, std::ios_base::end );
 		std::streampos end = m_iStream->tellg();
 		m_root = new IFFFile::Chunk( "FOR4", end - begin, this, begin, 4 );
@@ -103,16 +117,7 @@ unsigned int IFFFile::Chunk::dataSize()
 
 bool IFFFile::Chunk::isGroup()
 {
-	int id = m_type.id();
-	
-	if ( id == IFFFile::Tag::kFORM || id == IFFFile::Tag::kFOR4 || id == IFFFile::Tag::kFOR8 )
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return m_type.isGroup();
 }
 
 IFFFile::Tag IFFFile::Chunk::groupName()
@@ -274,3 +279,14 @@ char IFFFile::Tag::alignmentByte()
 	return m_d;
 }
 
+bool IFFFile::Tag::isGroup()
+{
+	if ( m_id == IFFFile::Tag::kFORM || m_id == IFFFile::Tag::kFOR4 || m_id == IFFFile::Tag::kFOR8 )
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}

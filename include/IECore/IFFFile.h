@@ -74,6 +74,7 @@ class IFFFile : public RefCounted
 				std::string name();
 				int id();
 				char alignmentByte();
+				bool isGroup();
 
 				// FORM is currently the only accepted group type.
 				// CAT, LIST, and PROP have not been implemented.
