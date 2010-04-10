@@ -292,6 +292,10 @@ typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &fu
 			typename Detail::DespatchTypedData< Functor, TimeDurationData, ErrorHandler >
 			::template Func<Enabler>()( staticPointerCast<TimeDurationData>( data ), functor, errorHandler );
 
+		case BoolVectorDataTypeId :
+			return
+			typename Detail::DespatchTypedData< Functor, BoolVectorData, ErrorHandler >
+			::template Func<Enabler>()( staticPointerCast<BoolVectorData>( data ), functor, errorHandler );
 		case FloatVectorDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, FloatVectorData, ErrorHandler >
@@ -497,41 +501,11 @@ struct TypedDataAddress
 {
 	typedef const void *ReturnType;
 
-	template<typename T, typename Enable = void>
-	struct TypedDataAddressHelper
-	{
-		ReturnType operator()( typename T::ConstPtr data ) const
-		{
-			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
-			return 0;
-		}
-	};
-
 	template<typename T>
 	ReturnType operator()( typename T::ConstPtr data ) const
 	{
 		assert( data );
-		return TypedDataAddressHelper<T>()( data );
-	}
-};
-
-template<typename T>
-struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< TypeTraits::IsSimpleTypedData<T> >::type >
-{
-	const void *operator()( typename T::ConstPtr data ) const
-	{
-		assert( data );
-		return &( data->readable() );
-	}
-};
-
-template<typename T>
-struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< TypeTraits::IsVectorTypedData<T> >::type >
-{
-	const void *operator()( typename T::ConstPtr data ) const
-	{
-		assert( data );
-		return &*(data->readable().begin());
+		return data->baseReadable();
 	}
 };
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -194,13 +194,13 @@ template< typename T > struct IsVecTypedData : boost::mpl::or_< IsVec2TypedData<
 template< typename T > struct IsVecVectorTypedData : boost::mpl::or_< IsVec2VectorTypedData<T>, IsVec3VectorTypedData<T> > {};
 
 /// IsNumericVectorTypedData
-template< typename T > struct IsNumericVectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, boost::is_arithmetic< typename VectorValueType<T>::type > > {};
+template< typename T > struct IsNumericVectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, boost::is_arithmetic< typename VectorValueType<T>::type >, boost::mpl::not_< boost::is_same< typename VectorValueType<T>::type, bool > > > {};
 
 /// IsFloatVectorTypedData
 template< typename T > struct IsFloatVectorTypedData : boost::mpl::and_< IsVectorTypedData<T>, boost::is_floating_point< typename VectorValueType<T>::type > > {};
 
 /// IsNumericSimpleTypedData
-template< typename T > struct IsNumericSimpleTypedData : boost::mpl::and_< IsSimpleTypedData<T>, boost::is_arithmetic< typename ValueType<T>::type > > {};
+template< typename T > struct IsNumericSimpleTypedData : boost::mpl::and_< IsSimpleTypedData<T>, boost::is_arithmetic< typename ValueType<T>::type >, boost::mpl::not_< boost::is_same< typename ValueType<T>::type, bool > > > {};
 
 /// IsNumericTypedData
 template< typename T > struct IsNumericTypedData : boost::mpl::or_< IsNumericSimpleTypedData<T>, IsNumericVectorTypedData<T> > {};
