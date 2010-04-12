@@ -66,6 +66,12 @@ class Shader : public Bindable
 
 		virtual void bind() const;
 
+		/////////////////////////////////////////////////////////////
+		///
+		/// Uniform Parameters
+		///
+		/////////////////////////////////////////////////////////////
+	
 		/// Fills the passed vector with the names of all uniform shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
 		/// Arrays will be returned as a single name, rather than the list array[0],
@@ -113,6 +119,9 @@ class Shader : public Bindable
 		/// will result if this is not the case.
 		//////////////////////////////////////////////////////////////////////
 		//@{
+		/// Returns true if the specified data type is valid for setting the
+		/// specified uniform parameter, and false if not.
+		bool uniformValueValid( GLint parameterIndex, IECore::TypeId type ) const;
 		/// Returns true if the specified value is valid for setting the
 		/// specified uniform parameter, and false if not.
 		bool uniformValueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const;
@@ -135,7 +144,46 @@ class Shader : public Bindable
 		void setUniformParameter( const std::string &parameterName, unsigned int textureUnit );
 		void setUniformParameter( GLint parameterIndex, int value );
 		void setUniformParameter( const std::string &parameterName, int value );
+		/// Returns true if the specified vector data is valid for setting one of it's items to the
+		/// specified uniform parameter, and false if not.
+		bool uniformVectorValueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const;
+		/// As above, but specifying the uniform parameter by name.
+		bool uniformVectorValueValid( const std::string &parameterName, IECore::ConstDataPtr value ) const;
+		/// Sets the specified uniform parameter to a single item from a vector Data type.
+		/// Raises an exception if the type is not compatible.
+		void setUniformParameterFromVector( GLint parameterIndex, IECore::ConstDataPtr vector, unsigned int item );
+		void setUniformParameterFromVector( const std::string &parameterName, IECore::ConstDataPtr vector, unsigned int item );
 		//@}
+
+		/////////////////////////////////////////////////////////////
+		///
+		/// Vertex Parameters
+		///
+		/////////////////////////////////////////////////////////////
+		
+		/// Fills the passed vector with the names of all vertex shader parameters.
+		void vertexParameterNames( std::vector<std::string> &names ) const;
+		/// Returns a numeric index for the named vertex parameter. This can be
+		/// used in the calls below to avoid more expensive lookups by name.
+		/// Throws an Exception if parameter does not exist.
+		GLint vertexParameterIndex( const std::string &parameterName ) const;
+		/// Returns true if the Shader has a vertex parameter of the given name.
+		bool hasVertexParameter( const std::string &parameterName ) const;
+		/// Returns true if the specified vertex data object is valid for setting the
+		/// specified vertex parameter, and false if not.
+		bool vertexValueValid( GLint parameterIndex, IECore::ConstDataPtr value ) const;
+		/// As above, but specifying the vertex parameter by name.
+		bool vertexValueValid( const std::string &parameterName, IECore::ConstDataPtr value ) const;
+		/// Sets the specified vertex parameter to the value specified. value must
+		/// be of an appropriate type for the parameter - an Exception is thrown
+		/// if this is not the case.
+		/// Derived classes can set normalize to true when they know a integer typed
+		/// vector should be normalized to [-1,1] or [0,1] when passed to the shader.
+		void setVertexParameter( GLint parameterIndex, IECore::ConstDataPtr value, bool normalize = false );
+		/// As above, but specifying the vertex parameter by name.
+		void setVertexParameter( const std::string &parameterName, IECore::ConstDataPtr value, bool normalize = false );
+		/// Unsets all vertex parameters from the shader.
+		void unsetVertexParameters();
 
 		//! @name Built in shaders
 		/// These functions provide access to static instances of
@@ -151,15 +199,13 @@ class Shader : public Bindable
 
 	private :
 
-		// The Primitive class needs access to the internals of the Shader so it
-		// can set vertex attributes for shader attributes. This functionality
-		// isn't provided as a public method because there's no way that the Shader
-		// can validate that the right amount of data is being passed - whereas
-		// the Primitive is in a position to do this.
-		friend class Primitive;
+		struct VectorValueValid;
+		struct VectorSetValue;
 
 		void compile( const std::string &source, GLenum type, GLuint &shader );
 		void release();
+
+		void setUniformParameter( GLint parameterIndex, IECore::TypeId type, const void *p );
 
 		GLuint m_vertexShader;
 		GLuint m_fragmentShader;
@@ -174,8 +220,11 @@ class Shader : public Bindable
 		/// Maps from the uniform location to the parameter details.
 		typedef std::map<GLint, ParameterDescription> ParameterMap;
 		ParameterMap m_uniformParameters;
+		ParameterMap m_vertexParameters;
 		/// Throws an Exception if the parameter doesn't exist.
-		const ParameterDescription &parameterDescription( GLint parameterIndex ) const;
+		const ParameterDescription &uniformParameterDescription( GLint parameterIndex ) const;
+		/// Throws an Exception if the parameter doesn't exist.
+		const ParameterDescription &vertexParameterDescription( GLint parameterIndex ) const;
 };
 
 } // namespace IECoreGL

@@ -71,8 +71,7 @@ IE_CORE_DEFINERUNTIMETYPED( Primitive );
 
 Primitive::Primitive() : m_points( 0 ), m_normals( 0 ), m_colors( 0 ), m_texCoords( 0 )
 {
-	m_vertexToUniform.shader = 0;
-	m_vertexToVertex.shader = 0;
+	m_shaderSetup = 0;
 }
 
 Primitive::~Primitive()
@@ -111,7 +110,6 @@ void Primitive::render( ConstStatePtr state ) const
 		{
 			glDepthMask( false );
 		}
-
 		if( state->get<Primitive::DrawSolid>()->value() )
 		{
 			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -201,6 +199,12 @@ void Primitive::render( ConstStatePtr state ) const
 
 	// revert to the original shader state.
 	state->get<ShaderStateComponent>()->bind();
+
+	if ( shader )
+	{
+		// disable all vertex shader parameters
+		shader->unsetVertexParameters();
+	}
 }
 
 size_t Primitive::vertexAttributeSize() const
@@ -250,130 +254,80 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 
 void Primitive::setVertexAttributes( ) const
 {
-	if( !m_vertexToVertex.shader )
+	if( !m_shaderSetup )
 	{
 		return;
 	}
-	std::map<GLint, IntData>::const_iterator it;
-	for( it=m_vertexToVertex.intDataMap.begin(); it!=m_vertexToVertex.intDataMap.end(); it++ )
+
+	// \todo: consider getting requiredSize as a parameter or filtering them while creating m_vertexMap.
+	size_t requiredSize = vertexAttributeSize();
+
+	VertexDataMap::const_iterator it;
+	for( it=m_vertexMap.begin(); it!=m_vertexMap.end(); it++ )
 	{
-		glEnableVertexAttribArray( it->first );
-		glVertexAttribPointer( it->first, it->second.dimensions, NumericTraits<GLint>::glType(), false, 0, it->second.data );
-	}
-	std::map<GLint, FloatData>::const_iterator fit;
-	for( fit=m_vertexToVertex.floatDataMap.begin(); fit!=m_vertexToVertex.floatDataMap.end(); fit++ )
-	{
-		glEnableVertexAttribArray( fit->first );
-		glVertexAttribPointer( fit->first, fit->second.dimensions, NumericTraits<GLfloat>::glType(), false, 0, fit->second.data );
+		if ( boost::get<1>(it->second) == requiredSize )
+		{
+			m_shaderSetup->setVertexParameter( it->first, boost::get<0>(it->second) );
+		}
 	}
 }
 
 void Primitive::setVertexAttributesAsUniforms( unsigned int vertexIndex ) const
 {
-	if( !m_vertexToUniform.shader )
+	if( !m_shaderSetup )
 	{
 		return;
 	}
-	std::map<GLint, IntData>::const_iterator it;
-	for( it=m_vertexToUniform.intDataMap.begin(); it!=m_vertexToUniform.intDataMap.end(); it++ )
+	UniformDataMap::const_iterator it;
+	for( it=m_uniformMap.begin(); it!=m_uniformMap.end(); it++ )
 	{
-		assert( sizeof( int )==sizeof( GLint ) );
-		uniformIntFunctions()[it->second.dimensions]( it->first, 1, ((const GLint *)it->second.data) + vertexIndex * it->second.dimensions );
-	}
-	std::map<GLint, FloatData>::const_iterator fit;
-	for( fit=m_vertexToUniform.floatDataMap.begin(); fit!=m_vertexToUniform.floatDataMap.end(); fit++ )
-	{
-		uniformFloatFunctions()[fit->second.dimensions]( fit->first, 1, fit->second.data + vertexIndex * fit->second.dimensions );
+		m_shaderSetup->setUniformParameterFromVector( it->first, it->second, vertexIndex );
 	}
 }
 
-void Primitive::setupVertexAttributes( const Shader *s ) const
+void Primitive::setupVertexAttributes( ShaderPtr s ) const
 {
 	if( !s )
 	{
-		m_vertexToUniform.shader = 0;
-		m_vertexToVertex.shader = 0;
+		m_shaderSetup = 0;
 		return;
 	}
 
-	if( s==m_vertexToUniform.shader && (*s)==(*m_vertexToUniform.shader) )
+	if( m_shaderSetup && (*s)==(*m_shaderSetup) )
 	{
 		return;
 	}
 
-	m_vertexToUniform.intDataMap.clear();
-	m_vertexToUniform.floatDataMap.clear();
-	m_vertexToVertex.intDataMap.clear();
-	m_vertexToVertex.floatDataMap.clear();
+	m_uniformMap.clear();
+	m_vertexMap.clear();
+	IECore::TypedDataSize size;
 
 	for( AttributeMap::const_iterator it=m_vertexAttributes.begin(); it!=m_vertexAttributes.end(); it++ )
 	{
-		IntData intData;
-		FloatData floatData;
-		switch( it->second->typeId() )
+		if ( s->hasVertexParameter( it->first ) )
 		{
-			case IECore::IntVectorDataTypeId :
-				intData = IntData( IECore::staticPointerCast<const IECore::IntVectorData>( it->second )->baseReadable(), 1 );
-				break;
-			case IECore::V2iVectorDataTypeId :
-				intData = IntData( IECore::staticPointerCast<const IECore::V2iVectorData>( it->second )->baseReadable(), 2 );
-				break;
-			case IECore::V3iVectorDataTypeId :
-				intData = IntData( IECore::staticPointerCast<const IECore::V3iVectorData>( it->second )->baseReadable(), 3 );
-				break;
-			case IECore::FloatVectorDataTypeId :
-				floatData = FloatData( IECore::staticPointerCast<const IECore::FloatVectorData>( it->second )->baseReadable(), 1 );
-				break;
-			case IECore::V2fVectorDataTypeId :
-				floatData = FloatData( IECore::staticPointerCast<const IECore::V2fVectorData>( it->second )->baseReadable(), 2 );
-				break;
-			case IECore::V3fVectorDataTypeId :
-				floatData = FloatData( IECore::staticPointerCast<const IECore::V3fVectorData>( it->second )->baseReadable(), 3 );
-				break;
-			case IECore::Color3fVectorDataTypeId :
-				floatData = FloatData( IECore::staticPointerCast<const IECore::Color3fVectorData>( it->second )->baseReadable(), 3 );
-				break;
-			default :
-				// ignore other data types...
-				continue;
-		}
-		
-		try
-		{
-			GLint parameterIndex = glGetAttribLocation( s->m_program, it->first.c_str() );
-			if ( parameterIndex != -1 )
+			// vertex shader variable
+			GLint parameterIndex = s->vertexParameterIndex( it->first );
+			if ( s->vertexValueValid( parameterIndex, it->second ) )
 			{
-				// vertex shader variable
-				if ( floatData.data )
-				{
-					m_vertexToVertex.floatDataMap[ parameterIndex ] = floatData;
-				}
-				else
-				{
-					m_vertexToVertex.intDataMap[ parameterIndex ] = intData;
-				}
-			}
-			else
-			{
-				// uniform shader variable
-				parameterIndex = s->uniformParameterIndex( it->first );
-				if ( floatData.data )
-				{
-					m_vertexToUniform.floatDataMap[ parameterIndex ] = floatData;
-				}
-				else
-				{
-					m_vertexToUniform.intDataMap[ parameterIndex ] = intData;
-				}
+				m_vertexMap[ parameterIndex ] = 
+					boost::tuple< IECore::ConstDataPtr, size_t >(
+						it->second,
+						IECore::despatchTypedData< IECore::TypedDataSize, IECore::TypeTraits::IsVectorTypedData >( IECore::constPointerCast<IECore::Data>( it->second ), size )
+					);
 			}
 		}
-		catch( ... )
+		else if ( s->hasUniformParameter( it->first ) )
 		{
+			// uniform shader variable
+			GLint parameterIndex = s->uniformParameterIndex( it->first );
+			if ( s->uniformVectorValueValid( parameterIndex, it->second ) )
+			{
+				m_uniformMap[ parameterIndex ] = it->second;
+			}
 		}
 	}
-
-	m_vertexToUniform.shader = s;
-	m_vertexToVertex.shader = s;
+	m_shaderSetup = s;
 }
 
 bool Primitive::depthSortRequested( ConstStatePtr state ) const

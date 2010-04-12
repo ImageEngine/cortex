@@ -35,6 +35,8 @@
 #ifndef IECOREGL_PRIMITIVE_H
 #define IECOREGL_PRIMITIVE_H
 
+#include "boost/tuple/tuple.hpp"
+
 #include "IECoreGL/Renderable.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/TypedStateComponent.h"
@@ -133,7 +135,7 @@ class Primitive : public Renderable
 		virtual void render( ConstStatePtr state, IECore::TypeId style ) const = 0;
 
 		/// Can be called from a derived class' render() method to set
-		/// varying parameters of the current shader based on the
+		/// vertex parameters of the current shader based on the
 		/// data from vertex attributes. This must /not/ be called unless the style
 		/// parameter passed to render is PrimitiveSolid - in all other cases no shader
 		/// is bound and an Exception will result.
@@ -164,26 +166,14 @@ class Primitive : public Renderable
 
 	private :
 
-		struct IntData
-		{
-			IntData() : data(0) {};
-			IntData( const int *d, unsigned int dim ) : data( d ), dimensions( dim ) {};
-			const int *data;
-			unsigned int dimensions;
-		};
-		struct FloatData
-		{
-			FloatData() : data(0) {};
-			FloatData( const float *d, unsigned int dim ) : data( d ), dimensions( dim ) {};
-			const float *data;
-			unsigned int dimensions;
-		};
-		void setupVertexAttributes( const Shader *s ) const;
-		mutable struct {
-			const Shader *shader;
-			std::map<GLint, IntData> intDataMap;
-			std::map<GLint, FloatData> floatDataMap;
-		} m_vertexToUniform, m_vertexToVertex;
+		typedef std::map<GLint, IECore::ConstDataPtr> UniformDataMap;
+		typedef std::map<GLint, boost::tuple< IECore::ConstDataPtr, size_t > > VertexDataMap;
+
+		void setupVertexAttributes( ShaderPtr s ) const;
+
+		mutable ShaderPtr m_shaderSetup;
+		mutable UniformDataMap m_uniformMap;	// holds the uniform shader attributes that match non-const prim vars.
+		mutable VertexDataMap m_vertexMap;	// holds the vertex shader attributes that match non-const prim vars.
 
 		typedef std::map<std::string, IECore::ConstDataPtr> AttributeMap;
 		AttributeMap m_vertexAttributes;

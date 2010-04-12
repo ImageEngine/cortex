@@ -62,7 +62,7 @@ class TestShader( unittest.TestCase ) :
 
 		Shader( vertexSource, fragmentSource )
 
-	def testParameters( self ) :
+	def testUniformParameters( self ) :
 
 		vertexSource = """
 		attribute float floatAttrib;
@@ -228,6 +228,71 @@ class TestShader( unittest.TestCase ) :
 
 		# check that both booldata is valid for bools
 		self.assert_( s.uniformValueValid( "boolParm", BoolData( True ) ) )
+
+		# check uniform parameters defined from vector items
+		self.assert_( s.uniformVectorValueValid( "vec2Parm", V2fVectorData() ) )
+		self.assert_( not s.uniformVectorValueValid( "vec2Parm", FloatVectorData() ) )
+		self.assert_( s.uniformVectorValueValid( "floatParm", FloatVectorData() ) )
+		self.assert_( not s.uniformVectorValueValid( "floatParm", IntVectorData() ) )
+		self.assert_( s.uniformVectorValueValid( "vec3Parm", V3fVectorData() ) )
+		self.assert_( s.uniformVectorValueValid( "vec3Parm", Color3fVectorData() ) )
+		self.assert_( not s.uniformVectorValueValid( "vec3Parm", V2fVectorData() ) )
+
+		v = V2fVectorData( [ V2f(9,9), V2f(1,2), V2f(9,9) ] )
+		s.setUniformParameterFromVector( "vec2Parm", v, 1 )
+		self.assertEqual( s.getUniformParameter( "vec2Parm" ), V2fData( V2f( 1, 2 ) ) )
+
+	def testVertexParameters( self ) :
+
+		vertexSource = """
+		attribute float floatParm;
+		attribute vec2 vec2Parm;
+		attribute vec3 vec3Parm;
+		attribute vec4 vec4Parm;
+
+		varying vec4 myColor;
+
+		void main()
+		{
+			myColor = vec4( floatParm + vec2Parm.x, vec3Parm.y, vec4Parm.r, 1 );
+			gl_Position = ftransform();
+		}
+		"""
+
+		fragmentSource = """
+
+		varying vec4 myColor;
+
+		void main()
+		{
+			gl_FragColor = myColor;
+		}
+		"""
+
+		s = Shader( vertexSource, fragmentSource )
+		self.assert_( s==s )
+
+		expectedParameterNamesAndValues = {
+			"floatParm" : FloatVectorData(),
+			"vec2Parm" : V2fVectorData(),
+			"vec3Parm" : V3fVectorData(),
+			"vec4Parm" : Color4fVectorData(),
+		}
+
+		parameterNames = s.vertexParameterNames()
+		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndValues ) )
+		for n in expectedParameterNamesAndValues.keys() :
+			self.assert_( n in parameterNames )
+			self.assert_( s.hasVertexParameter( n ) )
+			self.assert_( not s.hasVertexParameter( n + "VeryUnlikelySuffix" ) )
+			self.assert_( s.vertexValueValid( n, expectedParameterNamesAndValues[n] ) )
+
+		s.setVertexParameter( "floatParm", FloatVectorData( [ 1 ] ), False )
+		s.setVertexParameter( "vec2Parm", V2fVectorData( [ V2f( 1, 2 ) ] ), False )
+		s.setVertexParameter( "vec3Parm", Color3fVectorData( [ Color3f( 1 ) ] ), True )
+		s.setVertexParameter( "vec4Parm", Color4fVectorData( [ Color4f( 1 ) ] ) )
+
+		s.unsetVertexParameters()
 
 	def testRendererCall( self ) :
 

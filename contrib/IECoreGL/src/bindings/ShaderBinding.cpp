@@ -58,6 +58,18 @@ boost::python::list uniformParameterNames( const Shader &s )
 	return result;
 }
 
+boost::python::list vertexParameterNames( const Shader &s )
+{
+	vector<string> n;
+	s.vertexParameterNames( n );
+	boost::python::list result;
+	for( unsigned int i=0; i<n.size(); i++ )
+	{
+		result.append( n[i] );
+	}
+	return result;
+}
+
 void bindShader()
 {
 	IECorePython::RunTimeTypedClass<Shader>()
@@ -77,6 +89,18 @@ void bindShader()
 		.def( "setUniformParameter", (void (Shader::*)( const std::string &, unsigned int ))&Shader::setUniformParameter )
 		.def( "setUniformParameter", (void (Shader::*)( const std::string &, int ))&Shader::setUniformParameter )
 		.def( "setUniformParameter", (void (Shader::*)( GLint, int ))&Shader::setUniformParameter )
+		.def( "uniformVectorValueValid", (bool (Shader::*)( GLint, IECore::ConstDataPtr) const)&Shader::uniformVectorValueValid )
+		.def( "uniformVectorValueValid", (bool (Shader::*)( const std::string &, IECore::ConstDataPtr) const)&Shader::uniformVectorValueValid )
+		.def( "setUniformParameterFromVector", (void (Shader::*)( GLint, IECore::ConstDataPtr, unsigned int ))&Shader::setUniformParameterFromVector )
+		.def( "setUniformParameterFromVector", (void (Shader::*)( const std::string &, IECore::ConstDataPtr, unsigned int ))&Shader::setUniformParameterFromVector )
+		.def( "vertexParameterNames", &vertexParameterNames )
+		.def( "vertexParameterIndex", &Shader::vertexParameterIndex )
+		.def( "hasVertexParameter", &Shader::hasVertexParameter )
+		.def( "vertexValueValid", (bool (Shader::*)( GLint, IECore::ConstDataPtr ) const)&Shader::vertexValueValid )
+		.def( "vertexValueValid", (bool (Shader::*)( const std::string &, IECore::ConstDataPtr) const)&Shader::vertexValueValid )
+		.def( "setVertexParameter", (void (Shader::*)( GLint, IECore::ConstDataPtr, bool) )&Shader::setVertexParameter, (arg_("parameterIndex"),arg_("value"),arg_("normalize")=false) )
+		.def( "setVertexParameter", (void (Shader::*)( const std::string &, IECore::ConstDataPtr, bool) )&Shader::setVertexParameter, (arg_("parameterName"),arg_("value"),arg_("normalize")=false) )
+		.def( "unsetVertexParameters", &Shader::unsetVertexParameters )
 		.def( "constant", &Shader::constant ).staticmethod( "constant" )
 		.def( "facingRatio", &Shader::facingRatio ).staticmethod( "facingRatio" )
 		.def( self==self )
