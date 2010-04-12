@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,41 +32,61 @@
 #
 ##########################################################################
 
-from _IECoreMaya import *
+import maya.cmds
+import maya.OpenMayaUI
 
-from ParameterUI import ParameterUI
-from SplineParameterUI import SplineParameterUI
-from NodeParameter import NodeParameter
-from DAGPathParameter import DAGPathParameter
-from DAGPathVectorParameter import DAGPathVectorParameter
-from mayaDo import mayaDo
-from createMenu import createMenu
-from BakeTransform import BakeTransform
-from MeshOpHolderUtil import create
-from MeshOpHolderUtil import createUI
-from ScopedSelection import ScopedSelection
-from FnParameterisedHolder import FnParameterisedHolder
-from TransientParameterisedHolderNode import TransientParameterisedHolderNode
-from FnConverterHolder import FnConverterHolder
-from StringUtil import *
-from MayaTypeId import MayaTypeId
-from ParameterPanel import ParameterPanel
-from AttributeEditorControl import AttributeEditorControl
-from FnProceduralHolder import FnProceduralHolder
-from UIElement import UIElement
-from OpWindow import OpWindow
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
-from UndoDisabled import UndoDisabled
-from ModalDialogue import ModalDialogue
-from Panel import Panel
-from WaitCursor import WaitCursor
-from FnOpHolder import FnOpHolder
-from UITemplate import UITemplate
-from FnParameterisedHolderSet import FnParameterisedHolderSet
-from TemporaryAttributeValues import TemporaryAttributeValues
-from GenericParameterUI import GenericParameterUI
-from FnDagNode import FnDagNode  
-from PresetManagerUI import PresetManagerUI
-from CompoundParameterUI import CompoundParameterUI
-from ClassParameterUI import ClassParameterUI
-from PresetsOnlyParameterUI import PresetsOnlyParameterUI
+import IECoreMaya
+
+## A ui for any parameter for which parameter.presetsOnly is True.
+class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
+
+	def __init__( self, node, parameter, **kw  ) :
+
+		IECoreMaya.ParameterUI.__init__( self, node, parameter, **kw )
+		
+		self._layout = maya.cmds.rowLayout(
+			numberOfColumns = 2,
+		)
+
+		maya.cmds.text(
+			label = self.label(),
+			font = "smallPlainLabelFont",
+			align = "right",
+			annotation = self.description(),
+		)
+
+		self.__popupControl = maya.cmds.iconTextStaticLabel(
+			image = "arrowDown.xpm",
+			font = "smallBoldLabelFont",
+			style = "iconAndTextHorizontal",
+			height = 23
+		)
+
+		self.replace( node, parameter )
+				
+	def replace( self, node, parameter ) :
+
+		IECoreMaya.ParameterUI.replace( self, node, parameter )
+
+		self.__updateLabel()
+
+		self._addPopupMenu( parentUI=self.__popupControl, attributeName = self.plugName(), button1=True )
+		
+		self.__attributeChangedCallbackId = IECoreMaya.CallbackId(
+			maya.OpenMaya.MNodeMessage.addAttributeChangedCallback( self.node(), self.__attributeChanged )
+		)
+	
+	def __attributeChanged( self, changeType, plug, otherPlug, userData ) :
+		
+		if plug == self.plug() :			
+			self.__updateLabel()
+		
+	def __updateLabel( self ) :
+	
+		IECoreMaya.FnParameterisedHolder( self.node() ).setParameterisedValue( self.parameter )
+
+		maya.cmds.iconTextStaticLabel(
+			self.__popupControl,
+			edit = True,
+			label = self.parameter.getCurrentPresetName(),
+		)

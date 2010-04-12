@@ -69,7 +69,6 @@ class ParameterUI :
 
 		self.__node = parameterisedHolderNode
 		self.parameter = parameter #IECore.Parameter
-		self.__popupControl = None
 		self._layout = None
 
 		self.__labelWithNodeName = kw.get( "labelWithNodeName", False )
@@ -82,18 +81,6 @@ class ParameterUI :
 
 		self.__node = node
 		self.parameter = parameter
-
-		if self.__popupControl:
-
-			IECoreMaya.FnParameterisedHolder( self.node() ).setParameterisedValue( self.parameter )
-
-			cmds.iconTextStaticLabel(
-				self.__popupControl,
-				edit = True,
-				label = self.parameter.getCurrentPresetName(),
-			)
-
-			self._addPopupMenu( parentUI=self.__popupControl, attributeName = self.plugName() )
 
 	## Returns the Maya node associated with this UI in the form of an OpenMaya.MObject
 	def node( self ) :
@@ -144,45 +131,6 @@ class ParameterUI :
 		
 		extended = "%s\n\n%s" % ( self.plugName().split(".")[1], self.parameter.description )
 		return IECore.StringUtil.wrap( extended, 48 )
-
-	## Creates a drop-down selection list and returns True if the parameter is set to "presets only". Otherwise returns False.
-	## \todo This needs some sort of attribute changed callback so the menu updates when the attribute changes for some other reason.
-	def presetsOnly( self ):
-
-		self.__popupControl = None
-
-		if self.parameter.presetsOnly:
-
-			IECoreMaya.FnParameterisedHolder( self.node() ).setParameterisedValue( self.parameter )
-
-			self._layout = cmds.rowLayout(
-				numberOfColumns = 2,
-			)
-
-			cmds.text(
-				label = self.label(),
-				font = "smallPlainLabelFont",
-				align = "right",
-				annotation = self.description(),
-			)
-
-			self.__popupControl = cmds.iconTextStaticLabel(
-				image = "arrowDown.xpm",
-				font = "smallBoldLabelFont",
-				label = self.parameter.getCurrentPresetName(),
-				style = "iconAndTextHorizontal",
-				height = 23 #\ todo
-			)
-
-			self._addPopupMenu( parentUI=self.__popupControl, attributeName = self.plugName(), button1 = True )
-
-			cmds.setParent("..")
-
-			return True
-
-		else:
-
-			return False
 
 	@staticmethod
 	def _defaultDragCallback( dragControl, x, y, modifiers, **kw ):
@@ -454,13 +402,6 @@ class ParameterUI :
 		self.parameter.setValue( selection )
 		IECoreMaya.FnParameterisedHolder( self.__node ).setNodeValue( self.parameter )
 
-		if self.__popupControl:
-			cmds.iconTextStaticLabel(
-				self.__popupControl,
-				edit = True,
-				label = self.parameter.getCurrentPresetName()
-			)
-
 	@staticmethod
 	def registerUI( parameterTypeId, handlerType, uiTypeHint = None ):
 
@@ -482,6 +423,9 @@ class ParameterUI :
 
 		if not parameter.isInstanceOf( IECore.Parameter.staticTypeId() ) :
 			raise TypeError( "Parameter argument must derive from IECore.Parameter." )
+
+		if parameter.presetsOnly :
+			return IECoreMaya.PresetsOnlyParameterUI( parameterisedHolderNode, parameter, **kw )
 
 		uiTypeHint = None
 		try:
@@ -548,10 +492,6 @@ class StringParameterUI( ParameterUI ) :
 	def __init__( self, node, parameter, **kw ):
 		ParameterUI.__init__( self, node, parameter, **kw )
 
-		self.__textField = None
-		if self.presetsOnly():
-			return
-
 		self._layout = cmds.rowLayout(
 			numberOfColumns = 2,
 		)
@@ -573,19 +513,14 @@ class StringParameterUI( ParameterUI ) :
 
 		ParameterUI.replace( self, node, parameter )
 
-		if self.__textField:
-			self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
-			cmds.connectControl( self.__textField, self.plugName() )
+		self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
+		cmds.connectControl( self.__textField, self.plugName() )
 
 
 class PathParameterUI( ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ):
 		ParameterUI.__init__( self, node, parameter, **kw )
-
-		self.__textField = None
-		if self.presetsOnly():
-			return
 
 		self._layout = cmds.rowLayout(
 			numberOfColumns = 3,
@@ -617,9 +552,8 @@ class PathParameterUI( ParameterUI ) :
 
 		ParameterUI.replace( self, node, parameter )
 
-		if self.__textField:
-			self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
-			cmds.connectControl( self.__textField, self.plugName() )
+		self._addPopupMenu( parentUI=self.__textField, attributeName = self.plugName() )
+		cmds.connectControl( self.__textField, self.plugName() )
 
 	def openDialog( self ) :
 		
@@ -736,10 +670,6 @@ class NumericParameterUI( ParameterUI ) :
 		self.__field = None
 		self.__slider = None
 
-
-		if self.presetsOnly():
-			return
-
 		if parameter.hasMinValue() and parameter.hasMaxValue():
 
 			self._layout = cmds.rowLayout(
@@ -813,21 +743,15 @@ class NumericParameterUI( ParameterUI ) :
 		else:
 			raise RuntimeError("Invalid parameter type for NumericParameterUI")
 
-
-
 	def replace( self, node, parameter ) :
 
 		ParameterUI.replace( self, node, parameter )
 
-		if self.__field:
+		cmds.connectControl( self.__field, self.plugName() )
+		self._addPopupMenu( parentUI = self.__field, attributeName = self.plugName() )
 
-			cmds.connectControl( self.__field, self.plugName() )
-			self._addPopupMenu( parentUI = self.__field, attributeName = self.plugName() )
-
-			if self.__slider:
-				cmds.connectControl( self.__slider, self.plugName() )
-
-
+		if self.__slider:
+			cmds.connectControl( self.__slider, self.plugName() )
 
 class VectorParameterUI( ParameterUI ) :
 
@@ -835,9 +759,6 @@ class VectorParameterUI( ParameterUI ) :
 		ParameterUI.__init__( self, node, parameter, **kw )
 
 		self.__fields = []
-
-		if self.presetsOnly():
-			return
 
 		self.__dim = parameter.getTypedValue().dimensions()
 
@@ -884,24 +805,17 @@ class VectorParameterUI( ParameterUI ) :
 
 		ParameterUI.replace( self, node, parameter )
 
-		if len(self.__fields) and len(self.__fields) == self.__dim:
+		plug = self.plug()
+		for i in range(0, self.__dim):
 
-			plug = self.plug()
-			for i in range(0, self.__dim):
-
-				childPlugName = self.nodeName() + "." + plug.child(i).partialName()
-				cmds.connectControl( self.__fields[i], childPlugName )
-				self._addPopupMenu( parentUI = self.__fields[i], attributeName = childPlugName )
+			childPlugName = self.nodeName() + "." + plug.child(i).partialName()
+			cmds.connectControl( self.__fields[i], childPlugName )
+			self._addPopupMenu( parentUI = self.__fields[i], attributeName = childPlugName )
 
 class ColorParameterUI( ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ):
 		ParameterUI.__init__( self, node, parameter, **kw )
-
-		self.__canvas = None
-
-		if self.presetsOnly():
-			return
 
 		self.__dim = parameter.getTypedValue().dimensions()
 
@@ -935,9 +849,6 @@ class BoxParameterUI( ParameterUI ) :
 		ParameterUI.__init__( self, node, parameter, **kw )
 
 		self.__fields = []
-
-		if self.presetsOnly():
-			return
 
 		self.__dim = parameter.getTypedValue().dimensions()
 
@@ -995,21 +906,19 @@ class BoxParameterUI( ParameterUI ) :
 
 		ParameterUI.replace( self, node, parameter )
 
-		if len(self.__fields) == self.__dim * 2:
+		fieldNum = 0
+		plug = self.plug()
+		for childIndex in range( 0, 2 ) :
 
-			fieldNum = 0
-			plug = self.plug()
-			for childIndex in range( 0, 2 ) :
+			vectorPlug = plug.child( childIndex )
+			for i in range( 0, self.__dim ) :
 
-				vectorPlug = plug.child( childIndex )
-				for i in range( 0, self.__dim ) :
+				vectorPlugChild = vectorPlug.child( i )
+				vectorPlugChildName = self.nodeName() + "." + vectorPlugChild.partialName()
+				cmds.connectControl( self.__fields[ fieldNum ], vectorPlugChildName )
+				self._addPopupMenu( parentUI = self.__fields[fieldNum], attributeName = vectorPlugChildName )
 
-					vectorPlugChild = vectorPlug.child( i )
-					vectorPlugChildName = self.nodeName() + "." + vectorPlugChild.partialName()
-					cmds.connectControl( self.__fields[ fieldNum ], vectorPlugChildName )
-					self._addPopupMenu( parentUI = self.__fields[fieldNum], attributeName = vectorPlugChildName )
-
-					fieldNum += 1
+				fieldNum += 1
 
 ParameterUI.registerUI( IECore.TypeId.FloatParameter, NumericParameterUI )
 ParameterUI.registerUI( IECore.TypeId.DoubleParameter, NumericParameterUI )
