@@ -123,6 +123,21 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			if not maya.cmds.frameLayout( self._layout, query=True, collapse=True ) :
 				with IECoreMaya.UITemplate( "attributeEditorTemplate" ) :
 					self.__createChildUIs()
+	
+	## Gets the collapsed state for the frame holding the child parameter uis.
+	def getCollapsed( self ) :
+	
+		return maya.cmds.frameLayout( self.layout(), query=True, collapse=True )
+		
+	## Sets the collapsed state for the frame holding the child parameter uis.
+	def setCollapsed( self, collapsed ) :
+	
+		if not collapsed :
+			# maya only calls preexpand when the ui is expanded by user action,
+			# not by a script - how annoying.
+			self.__preExpand()
+			
+		maya.cmds.frameLayout( self.layout(), edit=True, collapse=collapsed )
 				
 	## May be implemented by derived classes to present some custom ui at the
 	# top of the list of child parameters. Implementations should first call the
