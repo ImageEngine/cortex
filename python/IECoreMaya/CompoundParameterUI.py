@@ -56,8 +56,21 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 	# this list will not be visible.
 	def __init__( self, node, parameter, **kw  ) :
 
-		IECoreMaya.ParameterUI.__init__( self, node, parameter, **kw )
+		fnPH = IECoreMaya.FnParameterisedHolder( node )
+		collapsable = kw.get( "withCompoundFrame", False ) or not parameter.isSame( fnPH.getParameterised()[0].parameters() )		
+				
+		IECoreMaya.ParameterUI.__init__( self,
 			
+			node,
+			parameter,
+			maya.cmds.frameLayout(
+				collapsable = collapsable,
+				manage = False,
+			),
+			**kw
+			
+		)	
+
 		if 'hierarchyDepth' in kw :
 			kw['hierarchyDepth'] += 1 
 		else :
@@ -66,10 +79,6 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		self.__childUIs = {}
 		self.__headerCreated = False
 		self.__kw = kw.copy()
-		
-		fnPH = IECoreMaya.FnParameterisedHolder( node )
-
-		collapsable = self.__kw.get( "withCompoundFrame", False ) or not parameter.isSame( fnPH.getParameterised()[0].parameters() )
 		
 		# \todo Retrieve the "collapsed" state
 		collapsed = collapsable
@@ -82,7 +91,9 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 
 		labelIndent = 5 + ( 8 * max( 0, self.__kw['hierarchyDepth']-1 ) )
 		
-		self._layout = maya.cmds.frameLayout(
+		maya.cmds.frameLayout(
+			self._topLevelUI(),
+			edit = True,
 			label = self.label(),
 			font = font,
 			labelIndent = labelIndent,
@@ -92,10 +103,11 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 			collapseCommand = self.__collapse,
 			collapsable = collapsable,
 			collapse = collapsed,
+			manage = True,
 		)
 		
 		self.__columnLayout = maya.cmds.columnLayout(
-			parent = self._layout,
+			parent = self._topLevelUI(),
 			width = 381
 		)
 
@@ -120,7 +132,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 				
 		else :
 		
-			if not maya.cmds.frameLayout( self._layout, query=True, collapse=True ) :
+			if not maya.cmds.frameLayout( self._topLevelUI(), query=True, collapse=True ) :
 				with IECoreMaya.UITemplate( "attributeEditorTemplate" ) :
 					self.__createChildUIs()
 	
@@ -188,7 +200,7 @@ class CompoundParameterUI( IECoreMaya.ParameterUI ) :
 		maya.cmds.control( self.__columnLayout, edit=True, manage=True )
 
 	def __collapse(self):
-		# \todo Store collapsed state of self._layout
+		# \todo Store collapse state
 		pass
 
 	def __preExpand( self ) :

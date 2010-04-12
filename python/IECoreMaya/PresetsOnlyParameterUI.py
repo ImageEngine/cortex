@@ -42,12 +42,18 @@ class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw  ) :
 
-		IECoreMaya.ParameterUI.__init__( self, node, parameter, **kw )
+		IECoreMaya.ParameterUI.__init__(
 		
-		self._layout = maya.cmds.rowLayout(
-			numberOfColumns = 2,
+			self,
+			node,
+			parameter,
+			maya.cmds.rowLayout(
+				numberOfColumns = 2,
+			),
+			**kw
+			
 		)
-
+		
 		maya.cmds.text(
 			label = self.label(),
 			font = "smallPlainLabelFont",

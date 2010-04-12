@@ -34,6 +34,7 @@
 
 from _IECoreMaya import *
 
+from UIElement import UIElement
 from ParameterUI import ParameterUI
 from SplineParameterUI import SplineParameterUI
 from NodeParameter import NodeParameter
@@ -53,7 +54,6 @@ from MayaTypeId import MayaTypeId
 from ParameterPanel import ParameterPanel
 from AttributeEditorControl import AttributeEditorControl
 from FnProceduralHolder import FnProceduralHolder
-from UIElement import UIElement
 from OpWindow import OpWindow
 from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
 from UndoDisabled import UndoDisabled

@@ -8,13 +8,19 @@ class GenericParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
 	
-		IECoreMaya.ParameterUI.__init__( self, node, parameter, **kw )
+		IECoreMaya.ParameterUI.__init__(
 		
-		self.__layout1 = maya.cmds.rowLayout(
-			numberOfColumns = 2,
-			columnWidth2 = [ self.textColumnWidthIndex, IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 + 25 + 25 ]
+			self,
+			node,
+			parameter,
+			maya.cmds.rowLayout(
+				numberOfColumns = 2,
+				columnWidth2 = [ self.textColumnWidthIndex, IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 + 25 + 25 ]
+			),
+			**kw
+			
 		)
-		
+				
 		maya.cmds.text( label = self.label(), font="smallPlainLabelFont", align="right", annotation=self.description() )
 		
 		self.__connectionsLayout = maya.cmds.columnLayout()

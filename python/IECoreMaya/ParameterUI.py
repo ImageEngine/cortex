@@ -49,7 +49,7 @@ import IECoreMaya
 # \todo Separate control drawing from labelling and layout, so these classes just create the right
 # hand side of what they're doing at the moment. Then we can use them in different layouts like spreadsheets
 # and wotnot.
-class ParameterUI :
+class ParameterUI( IECoreMaya.UIElement ) :
 
 	textColumnWidthIndex = 145
 	singleWidgetWidthIndex = 70
@@ -58,18 +58,17 @@ class ParameterUI :
 	handlers = {}
 
 	## The parameterisedHolderNode is an MObject specifying the node holding the specified IECore.Parameter.
-	# Derived class __init__ implementations should create relevant widgets in the current ui layout,
-	# and leave the parent layout unchanged on exit.
-	# \todo Document the expected behaviour of derived classes with respect to setting up self._layout,
-	# or provide a more explicit mechanism for the same thing.
+	# Derived class __init__ implementations must create a layout to hold all their contents and pass this
+	# in the topLevelUI parameter (as for all UIElement derived classes).
 	# \todo Document the meaning of the various keyword arguments - perhaps the names of these should be
 	# prefixed with the name of the class which implements each argument so as to make it easier to find
 	# the documentation too.
-	def __init__( self, parameterisedHolderNode, parameter, **kw ) :
+	def __init__( self, parameterisedHolderNode, parameter, topLevelUI, **kw ) :
+
+		IECoreMaya.UIElement.__init__( self, topLevelUI )
 
 		self.__node = parameterisedHolderNode
 		self.parameter = parameter #IECore.Parameter
-		self._layout = None
 
 		self.__labelWithNodeName = kw.get( "labelWithNodeName", False )
 		self.__longParameterName = kw.get( "longParameterName", parameter.name )
@@ -108,7 +107,7 @@ class ParameterUI :
 
 	def layout( self ) :
 
-		return self._layout
+		return self._topLevelUI()
 
 	## Computes a nice label for the ui.
 	def label( self ):
@@ -458,12 +457,19 @@ class ParameterUI :
 
 class BoolParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter, **kw ):
-		ParameterUI.__init__( self, node, parameter, **kw )
-
-		self._layout = cmds.rowLayout(
-			numberOfColumns = 2,
-			columnWidth2 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex * 3 ]
+	def __init__( self, node, parameter, **kw ) :
+		
+		ParameterUI.__init__(
+			
+			self,
+			node,
+			parameter,
+			cmds.rowLayout(
+				numberOfColumns = 2,
+				columnWidth2 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex * 3 ]
+			),
+			**kw
+		
 		)
 
 		cmds.text(
@@ -490,11 +496,8 @@ class BoolParameterUI( ParameterUI ) :
 class StringParameterUI( ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ):
-		ParameterUI.__init__( self, node, parameter, **kw )
-
-		self._layout = cmds.rowLayout(
-			numberOfColumns = 2,
-		)
+	
+		ParameterUI.__init__( self, node, parameter, cmds.rowLayout( numberOfColumns = 2 ), **kw )
 
 		cmds.text(
 			label = self.label(),
@@ -519,12 +522,19 @@ class StringParameterUI( ParameterUI ) :
 
 class PathParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter, **kw ):
-		ParameterUI.__init__( self, node, parameter, **kw )
-
-		self._layout = cmds.rowLayout(
-			numberOfColumns = 3,
-			columnWidth3 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex * 3, 26 ]
+	def __init__( self, node, parameter, **kw ) :
+	
+		ParameterUI.__init__(
+			
+			self,
+			node,
+			parameter,
+			cmds.rowLayout(
+				numberOfColumns = 3,
+				columnWidth3 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex * 3, 26 ]
+			),
+			**kw
+		
 		)
 
 		cmds.text(
@@ -635,26 +645,26 @@ class FileSequenceParameterUI( PathParameterUI ) :
 
 class NumericParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter, **kw ):
-		ParameterUI.__init__( self, node, parameter, **kw )
-
-		self.__field = None
-		self.__slider = None
-
+	def __init__( self, node, parameter, **kw ) :
+	
 		if parameter.hasMinValue() and parameter.hasMaxValue():
 
-			self._layout = cmds.rowLayout(
+			layout = cmds.rowLayout(
 				numberOfColumns = 3,
 				columnWidth3 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex, ParameterUI.sliderWidgetWidthIndex ]
 			)
 
 		else:
 
-			self._layout = cmds.rowLayout(
+			layout = cmds.rowLayout(
 				numberOfColumns = 2,
 				columnWidth2 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex ]
 			)
+			
+		ParameterUI.__init__( self, node, parameter, layout, **kw )
 
+		self.__field = None
+		self.__slider = None
 
 		cmds.text(
 			label = self.label(),
@@ -726,25 +736,25 @@ class NumericParameterUI( ParameterUI ) :
 
 class VectorParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter, **kw ):
-		ParameterUI.__init__( self, node, parameter, **kw )
-
-		self.__fields = []
-
+	def __init__( self, node, parameter, **kw ) :
+	
 		self.__dim = parameter.getTypedValue().dimensions()
-
 		if self.__dim == 2:
-			self._layout = cmds.rowLayout(
+			layout = cmds.rowLayout(
 				numberOfColumns = 3,
 				columnWidth3 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex, ParameterUI.singleWidgetWidthIndex ]
 			)
 		elif self.__dim == 3:
-			self._layout = cmds.rowLayout(
+			layout = cmds.rowLayout(
 				numberOfColumns = 4,
 				columnWidth4 = [ ParameterUI.textColumnWidthIndex, ParameterUI.singleWidgetWidthIndex, ParameterUI.singleWidgetWidthIndex, ParameterUI.singleWidgetWidthIndex ]
 			)
 		else:
 			raise RuntimeError("Unsupported vector dimension in VectorParameterUI")
+		
+		ParameterUI.__init__( self, node, parameter, layout, **kw )
+
+		self.__fields = []
 
 		cmds.text(
 			label = self.label(),
@@ -785,19 +795,17 @@ class VectorParameterUI( ParameterUI ) :
 
 class ColorParameterUI( ParameterUI ) :
 
-	def __init__( self, node, parameter, **kw ):
-		ParameterUI.__init__( self, node, parameter, **kw )
-
-		self.__dim = parameter.getTypedValue().dimensions()
-
-		self.__colorSlider = cmds.attrColorSliderGrp(
-			label = self.label(),
-			annotation = self.description(),
-			attribute = self.plugName(),
-			showButton = False
+	def __init__( self, node, parameter, **kw ) :
+	
+		ParameterUI.__init__(
+			
+			self,
+			node,
+			parameter,
+			cmds.attrColorSliderGrp(),
+			**kw
+			
 		)
-
-		self._layout = self.__colorSlider
 
 		self.replace( self.node(), self.parameter )
 
@@ -806,24 +814,25 @@ class ColorParameterUI( ParameterUI ) :
 		ParameterUI.replace( self, node, parameter )
 
 		cmds.attrColorSliderGrp(
-			self.__colorSlider,
+			self._topLevelUI(),
 			edit = True,
-			attribute = self.plugName()
+			attribute = self.plugName(),
+			annotation = self.description(),
+			label = self.label(),
+			showButton = False,
 		)
 
-		self._addPopupMenu( parentUI = self.__colorSlider, attributeName = self.plugName() )
+		self._addPopupMenu( parentUI = self._topLevelUI(), attributeName = self.plugName() )
 
 class BoxParameterUI( ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
 
-		ParameterUI.__init__( self, node, parameter, **kw )
+		ParameterUI.__init__( self, node, parameter, cmds.columnLayout(), **kw )
 
 		self.__fields = []
 
 		self.__dim = parameter.getTypedValue().dimensions()
-
-		self._layout = cmds.columnLayout()
 
 		plug = self.plug()
 		for childIndex in range( 0, 2 ) :

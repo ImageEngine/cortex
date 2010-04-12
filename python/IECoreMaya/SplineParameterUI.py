@@ -41,11 +41,17 @@ class SplineParameterUI( ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
 
-		ParameterUI.__init__( self, node, parameter, **kw )
-
-		self._layout = maya.cmds.rowLayout(
-			numberOfColumns = 3,
-			rowAttach = [ ( 1, "top", 0 ), ( 2, "both", 0 ), ( 3, "both", 0 ) ]
+		ParameterUI.__init__(
+			
+			self,
+			node,
+			parameter,
+			maya.cmds.rowLayout(
+				numberOfColumns = 3,
+				rowAttach = [ ( 1, "top", 0 ), ( 2, "both", 0 ), ( 3, "both", 0 ) ]
+			),
+			**kw
+			
 		)
 
 		maya.cmds.text(
