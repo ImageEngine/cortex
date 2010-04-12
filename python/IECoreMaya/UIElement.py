@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -61,6 +61,17 @@ class UIElement :
 		UIElement.__instances[topLevelUI] = instanceRecord
 
 		self.__topLevelUI = topLevelUI
+
+	## Returns the UIElement which forms the parent for this one.
+	def parent( self ) :
+	
+		melUI = self._topLevelUI()
+		while 1 :
+			melUI = melUI.rpartition( "|" )[0]
+			if melUI in self.__instances :
+				return self.__instances[melUI].instance
+			if not melUI :
+				return None
 
 	## Returns the name of the top level ui element for this instance.
 	def _topLevelUI( self ) :
