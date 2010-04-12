@@ -633,35 +633,6 @@ class FileSequenceParameterUI( PathParameterUI ) :
 
 						return
 
-# Specialized interface for nodes like kiwiRenderer that get the full path plus the file name prefix of a FIO file sequence.
-# \todo Get rid of this once kiwiRenderer and the cache nodes uses FileSequenceParameter instead.
-class CachePathPrefixParameterUI( PathParameterUI ) :
-
-	def __init__( self, node, parameter, **kw ):
-
-		PathParameterUI.__init__( self, node, parameter, **kw )
-
-	def openDialog( self ):
-
-		selection = cmds.fileDialog( dm='*.fio' ).encode('ascii')
-
-		if len(selection):
-			d = os.path.dirname(selection)
-			sequences = ls(d)
-
-			if sequences:
-
-				for seq in sequences:
-
-					if os.path.basename(selection) in seq.fileNames():
-						newValue = seq.getPrefix()
-						if newValue.endswith('.'):
-							self.parameter.setValue( IECore.StringData( os.path.join( d, newValue[:len(newValue)-1] ) ) )
-							fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
-							fnPH.setNodeValue( self.parameter )
-							return
-
-
 class NumericParameterUI( ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ):
@@ -949,5 +920,3 @@ ParameterUI.registerUI( IECore.TypeId.Color3fParameter, ColorParameterUI )
 ParameterUI.registerUI( IECore.TypeId.FileSequenceParameter, FileSequenceParameterUI )
 ParameterUI.registerUI( IECore.TypeId.DirNameParameter, DirNameParameterUI )
 ParameterUI.registerUI( IECore.TypeId.FileNameParameter, FileNameParameterUI )
-
-ParameterUI.registerUI( IECore.TypeId.StringParameter, CachePathPrefixParameterUI, 'cachePathPrefix' )
