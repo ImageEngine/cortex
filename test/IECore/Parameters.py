@@ -627,6 +627,14 @@ class TestCompoundParameter( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.presetsOnly, True )
+		
+		p = CompoundParameter(
+			name = "c",
+			description = "d",
+		)
+		
+		self.assertEqual( p.presetsOnly, False )
+		self.assertEqual( len( p.presets() ), 0 )
 
 	def testLateValidation( self ) :
 

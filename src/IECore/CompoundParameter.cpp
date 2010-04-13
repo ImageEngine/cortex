@@ -142,6 +142,11 @@ const Parameter::PresetsContainer &CompoundParameter::presets() const
 
 bool CompoundParameter::presetsOnly() const
 {
+	if( !m_parameters.size() )
+	{
+		return false;
+	}
+	
 	for( ParameterVector::const_iterator it=m_parameters.begin(); it!=m_parameters.end(); it++ )
 	{
 		if( !(*it)->presetsOnly() )
