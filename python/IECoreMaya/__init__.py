@@ -36,6 +36,16 @@ from _IECoreMaya import *
 
 from UIElement import UIElement
 from ParameterUI import ParameterUI
+from BoolParameterUI import BoolParameterUI
+from StringParameterUI import StringParameterUI
+from PathParameterUI import PathParameterUI
+from FileNameParameterUI import FileNameParameterUI
+from DirNameParameterUI import DirNameParameterUI
+from FileSequenceParameterUI import FileSequenceParameterUI
+from NumericParameterUI import NumericParameterUI
+from VectorParameterUI import VectorParameterUI
+from ColorParameterUI import ColorParameterUI
+from BoxParameterUI import BoxParameterUI
 from SplineParameterUI import SplineParameterUI
 from NodeParameter import NodeParameter
 from DAGPathParameter import DAGPathParameter
