@@ -396,5 +396,51 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		
 		self.assertEqual( len( c.getClasses() ), 0 )
 		
+	def testSetGetAndRemoveIndividualClasses( self ) :
+	
+		c = IECore.ClassVectorParameter(
+			"n",
+			"d",
+			"IECORE_OP_PATHS",
+		)
+		
+		c.setClass( "new", "maths/multiply", 1 )
+		
+		cl = c.getClasses( True )
+		
+		self.assertEqual( len( cl ), 1 )
+		self.assertEqual( cl[0][0].typeName(), "multiply" )
+		self.assertEqual( cl[0][1], "new" )
+		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][3], 1 )
+		
+		self.assertEqual( len( c.keys() ), 1 )
+		self.assertEqual( len( c["new"].keys() ), 2 )
+		
+		cl = c.getClass( "new" )
+		self.assertEqual( cl.typeName(), "multiply" )
+		
+		cl = c.getClass( "new", True )
+		self.assertEqual( cl[0].typeName(), "multiply" )
+		self.assertEqual( cl[1], "maths/multiply" )
+		self.assertEqual( cl[2], 1 )	 
+
+		c.setClass( "new", "stringParsing", 1 )
+
+		cl = c.getClasses( True )
+		
+		self.assertEqual( len( cl ), 1 )
+		self.assertEqual( cl[0][0].typeName(), "stringParsing" )
+		self.assertEqual( cl[0][1], "new" )
+		self.assertEqual( cl[0][2], "stringParsing" )
+		self.assertEqual( cl[0][3], 1 )
+		
+		c.removeClass( "new" )
+
+		cl = c.getClasses( True )
+		self.assertEqual( len( cl ), 0 )
+		self.assertEqual( len( c ), 0 )
+		
+				
 if __name__ == "__main__" :
 	unittest.main()

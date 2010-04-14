@@ -91,51 +91,77 @@ class ClassVectorParameter( IECore.CompoundParameter ) :
 			
 		# first remove any existing parameters which we don't need
 		
-		for parameter in self.values() :
-			if parameter.name not in neededNames :
-				self.removeParameter( parameter )
-				del self.__namesToInstances[parameter.name]
+		for parameterName in self.keys() :
+			if parameterName not in neededNames :
+				self.removeClass( parameterName )
 		
 		# and then create any new ones we need and reload and reorder existing
 		# ones as necessary
 		
-		loader = IECore.ClassLoader.defaultLoader( self.__searchPathEnvVar )
 		for i in range( 0, len( classes ) ) :
 		
-			requestedParameterName = classes[i][0]
-			requestedClassName = classes[i][1]
-			requestedClassVersion = classes[i][2]
-		
-			parameter = self.parameter( requestedParameterName )
-			if not parameter :
-				parameter = IECore.CompoundParameter( requestedParameterName, "" )
+			# modify or add a parameter for this class
 			
-			instance = self.__namesToInstances.setdefault( requestedParameterName, [ None, "", 0 ] )
-			
-			if [ requestedClassName, requestedClassVersion ] != instance[1:] :
-						
-				instance[0] = loader.load( requestedClassName, requestedClassVersion )()
-				instance[1] = requestedClassName
-				instance[2] = requestedClassVersion
-				
-				parameter.clearParameters()
-				parameter.addParameters( instance[0].parameters().values() )
+			self.setClass( classes[i][0], classes[i][1], classes[i][2] )
+			parameter = self[classes[i][0]]
 			
 			# make sure the parameter has the right order within the whole
 			
-			if len( self ) == i :	
+			self.removeParameter( parameter )
+			if len( self ) == i :
 				self.addParameter( parameter )
 			else :
 				keys = self.keys()
-				currentIndex = -1
-				try :
-					currentIndex = keys.index( requestedParameterName )
-				except :
-					pass
-				if currentIndex != i :
-					if currentIndex!=-1 :
-						self.removeParameter( parameter )
-					self.insertParameter( parameter, self[keys[i]] )
+				self.insertParameter( parameter, self[keys[i]] )
+
+	## Returns the class instance that the named parameter represents,
+	# or if withClassLoaderArgs is True, then returns a tuple of the
+	# form ( classInstance, className, classVersion ).
+	def getClass( self, parameterOrParameterName, withClassLoaderArgs=False ) :
+	
+		if isinstance( parameterOrParameterName, basestring ) :
+			parameterName = parameterOrParameterName
+		else :
+			parameterName = parameterOrParameterName.name
+		
+		if withClassLoaderArgs :
+			return tuple( self.__namesToInstances[parameterName] )
+		else :
+			return self.__namesToInstances[parameterName][0]
+	
+	## Sets the class held by the named parameter, if no such
+	# parameter exists then one will be appended. To insert 
+	# a parameter somewhere other than the end, use getClasses()
+	# and setClasses().
+	def setClass( self, parameterOrParameterName, className, classVersion ) :
+	
+		if isinstance( parameterOrParameterName, basestring ) :
+			parameterName = parameterOrParameterName
+			parameter = self.parameter( parameterOrParameterName )
+			if not parameter :
+				parameter = IECore.CompoundParameter( parameterName, "" )
+				self.addParameter( parameter )
+		else :
+			parameter = parameterOrParameterName
+			parameterName = parameter.name
+		
+		instance = self.__namesToInstances.setdefault( parameterName, [ None, "", 0 ] )
+
+		if [ className, classVersion ] != instance[1:] :
+
+			loader = IECore.ClassLoader.defaultLoader( self.__searchPathEnvVar )
+			instance[0] = loader.load( className, classVersion )()
+			instance[1] = className
+			instance[2] = classVersion
+
+			parameter.clearParameters()
+			parameter.addParameters( instance[0].parameters().values() )
+	
+	## Removes the class held by the named parameter.
+	def removeClass( self, parameterName ) :
+	
+		self.removeParameter( parameterName )
+		del self.__namesToInstances[parameterName]
 
 	@staticmethod
 	def _serialise( parameter ) :
