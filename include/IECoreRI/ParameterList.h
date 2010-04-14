@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,7 +65,7 @@ class ParameterList
 		ParameterList( const IECore::CompoundDataMap &parameters, const std::string &prefix,
 			const std::map<std::string, std::string> *typeHints = 0 );
 		/// Convenience function for constructing a ParameterList of length 1.
-		ParameterList( const std::string &name, IECore::ConstDataPtr parameter,
+		ParameterList( const std::string &name, const IECore::Data *parameter,
 			const std::map<std::string, std::string> *typeHints = 0 );
 
 		/// Returns the number of parameters, to be passed as the
@@ -82,15 +82,15 @@ class ParameterList
 
 	private :
 
-		const char *type( const std::string &name, IECore::ConstDataPtr d, bool &isArray, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
-		const void *value( IECore::ConstDataPtr d );
+		const char *type( const std::string &name, const IECore::Data *d, bool &isArray, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
+		const void *value( const IECore::Data *d );
 
 		// Call one of these to reserve enough space in the arrays below to represent all the parameters.
 		void reserve( const IECore::CompoundDataMap &parameters );
-		void reserve( IECore::ConstDataPtr &parameter );
-		void accumulateReservations( const IECore::ConstDataPtr d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats );
+		void reserve( const IECore::Data *parameter );
+		void accumulateReservations( const IECore::Data *d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats );
 		// Then call this n times to populate the member data
-		void appendParameter( const std::string &name, IECore::ConstDataPtr d, const std::map<std::string, std::string> *typeHints );
+		void appendParameter( const std::string &name, const IECore::Data *d, const std::map<std::string, std::string> *typeHints );
 		std::vector<const char *> m_charPtrs;
 		std::vector<std::string> m_strings;
 		std::vector<int> m_ints;

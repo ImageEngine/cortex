@@ -68,7 +68,7 @@ ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const s
 	}
 }
 
-ParameterList::ParameterList( const std::string &name, IECore::ConstDataPtr parameter, const std::map<std::string, std::string> *typeHints )
+ParameterList::ParameterList( const std::string &name, const IECore::Data *parameter, const std::map<std::string, std::string> *typeHints )
 {
 	reserve( parameter );
 	appendParameter( name, parameter, typeHints );
@@ -89,7 +89,7 @@ void **ParameterList::values()
 	return (void **)&*(m_values.begin());
 }
 
-const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d, bool &isArray, size_t &arraySize, const std::map<std::string, std::string> *typeHints )
+const char *ParameterList::type( const std::string &name, const IECore::Data *d, bool &isArray, size_t &arraySize, const std::map<std::string, std::string> *typeHints )
 {
 	arraySize = 0;
 	isArray = false;
@@ -97,7 +97,7 @@ const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d
 	{
 		case V3fVectorDataTypeId :
 			isArray = true;
-			arraySize = staticPointerCast<const V3fVectorData>( d )->readable().size();
+			arraySize = static_cast<const V3fVectorData *>( d )->readable().size();
 		case V3fDataTypeId :
 			if( typeHints )
 			{
@@ -110,23 +110,23 @@ const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d
 			return "vector";
 		case Color3fVectorDataTypeId :
 			isArray = true;
-			arraySize = staticPointerCast<const Color3fVectorData>( d )->readable().size();
+			arraySize = static_cast<const Color3fVectorData *>( d )->readable().size();
 		case Color3fDataTypeId :
 			return "color";
 		case FloatVectorDataTypeId :
 			isArray = true;
-			arraySize = staticPointerCast<const FloatVectorData>( d )->readable().size();
+			arraySize = static_cast<const FloatVectorData *>( d )->readable().size();
 		case FloatDataTypeId :
 			return "float";
 		case IntVectorDataTypeId :
 			isArray = true;
-			arraySize = staticPointerCast<const IntVectorData>( d )->readable().size();
+			arraySize = static_cast<const IntVectorData *>( d )->readable().size();
 		case IntDataTypeId :
 		case BoolDataTypeId :
 			return "int";
 		case StringVectorDataTypeId :
 			isArray = true;
-			arraySize = staticPointerCast<const StringVectorData>( d )->readable().size();
+			arraySize = static_cast<const StringVectorData *>( d )->readable().size();
 		case StringDataTypeId :
 			return "string";
 		case M44fDataTypeId :
@@ -137,21 +137,21 @@ const char *ParameterList::type( const std::string &name, IECore::ConstDataPtr d
 	}
 }
 
-const void *ParameterList::value( IECore::ConstDataPtr d )
+const void *ParameterList::value( const IECore::Data *d )
 {
 	if( d->typeId()==StringData::staticTypeId() )
 	{
-		const char *v = staticPointerCast<const StringData>( d )->readable().c_str();
+		const char *v = static_cast<const StringData *>( d )->readable().c_str();
 		m_charPtrs.push_back( v );
 		return &*(m_charPtrs.rbegin());
 	}
 	if( d->typeId()==BoolData::staticTypeId() )
 	{
-		m_ints.push_back( staticPointerCast<const BoolData>( d )->readable() );
+		m_ints.push_back( static_cast<const BoolData *>( d )->readable() );
 		return &*(m_ints.rbegin());
 	}
 
-	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( constPointerCast<Data>( d ) );
+	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d ) );
 }
 
 void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
@@ -170,7 +170,7 @@ void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
 	m_floats.reserve( numFloats );
 }
 
-void ParameterList::reserve( IECore::ConstDataPtr &parameter )
+void ParameterList::reserve( const IECore::Data *parameter )
 {
 	size_t numStrings = 0;
 	size_t numCharPtrs = 0;
@@ -183,7 +183,7 @@ void ParameterList::reserve( IECore::ConstDataPtr &parameter )
 	m_floats.reserve( numFloats );
 }
 
-void ParameterList::accumulateReservations( const IECore::ConstDataPtr d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats )
+void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats )
 {
 	numStrings++; // for the formatted parameter name
 	IECore::TypeId t = d->typeId();
@@ -197,14 +197,14 @@ void ParameterList::accumulateReservations( const IECore::ConstDataPtr d, size_t
 			break;
 		case SplineffDataTypeId :
 			{
-				size_t s = static_cast<const SplineffData *>( d.get() )->readable().points.size();
+				size_t s = static_cast<const SplineffData *>( d )->readable().points.size();
 				numFloats += s * 2; // one for each position and one for each value
 				numStrings++; // for the second formatted parameter name (splines become two array parameters)
 			}
 			break;
 		case SplinefColor3fDataTypeId :
 			{
-				size_t s = static_cast<const SplinefColor3fData *>( d.get() )->readable().points.size();
+				size_t s = static_cast<const SplinefColor3fData *>( d )->readable().points.size();
 				numFloats += s * 4; // one for each position and three for each value
 				numStrings++; // for the second formatted parameter name (splines become two array parameters)
 			}
@@ -215,13 +215,13 @@ void ParameterList::accumulateReservations( const IECore::ConstDataPtr d, size_t
 	}
 }
 
-void ParameterList::appendParameter( const std::string &name, IECore::ConstDataPtr d, const std::map<std::string, std::string> *typeHints )
+void ParameterList::appendParameter( const std::string &name, const IECore::Data *d, const std::map<std::string, std::string> *typeHints )
 {
 	// we have to deal with the spline types separately, as they map to two shader parameters rather than one.
 	IECore::TypeId typeId = d->typeId();
 	if( typeId==SplineffDataTypeId )
 	{
-		const IECore::Splineff &spline = static_cast<const SplineffData *>( d.get() )->readable();
+		const IECore::Splineff &spline = static_cast<const SplineffData *>( d )->readable();
 		size_t size = spline.points.size();
 		if ( size )
 		{
@@ -250,7 +250,7 @@ void ParameterList::appendParameter( const std::string &name, IECore::ConstDataP
 	}
 	else if( typeId==SplinefColor3fDataTypeId )
 	{
-		const IECore::SplinefColor3f &spline = static_cast<const SplinefColor3fData *>( d.get() )->readable();
+		const IECore::SplinefColor3f &spline = static_cast<const SplinefColor3fData *>( d )->readable();
 		size_t size = spline.points.size();
 		if ( size )
 		{
