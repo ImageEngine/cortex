@@ -114,6 +114,21 @@ class UIElement :
 
 		pass
 
+	## Returns a list of all the active instances derived from the specified type.
+	@staticmethod
+	def instances( type = None ) :
+	
+		if type is None :
+			type = UIElement
+	
+		result = []
+		for v in UIElement.__instances.values() :
+			instance = v.instance
+			if isinstance( instance, type ) :
+				result.append( instance )
+				
+		return result
+
 	@staticmethod
 	def __uiDeleted( topLevelUI ) :
 
