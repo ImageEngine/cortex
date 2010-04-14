@@ -82,14 +82,14 @@ class NumericParameterUI( IECoreMaya.ParameterUI ) :
 
 			kw['precision'] = 12
 
-		self.__field = self.fieldType()(
+		self.__field = self.__fieldType()(
 			value = parameter.getNumericValue(),
 			**kw
 		)
 
 		if parameter.hasMinValue() and parameter.hasMaxValue():
 
-			self.__slider = self.sliderType()(
+			self.__slider = self.__sliderType()(
 				minValue = parameter.minValue,
 				maxValue = parameter.maxValue,
 
@@ -100,24 +100,6 @@ class NumericParameterUI( IECoreMaya.ParameterUI ) :
 
 		self.replace( self.node(), self.parameter )
 
-	def sliderType( self ):
-
-		if self.parameter.isInstanceOf( IECore.TypeId.FloatParameter ) or self.parameter.isInstanceOf( IECore.TypeId.DoubleParameter ):
-			return maya.cmds.floatSlider
-		elif self.parameter.isInstanceOf( IECore.TypeId.IntParameter ):
-			return maya.cmds.intSlider
-		else:
-			raise RuntimeError("Invalid parameter type for NumericParameterUI")
-
-	def fieldType( self ):
-
-		if self.parameter.isInstanceOf( IECore.TypeId.FloatParameter ) or self.parameter.isInstanceOf( IECore.TypeId.DoubleParameter ):
-			return maya.cmds.floatField
-		elif self.parameter.isInstanceOf( IECore.TypeId.IntParameter ):
-			return maya.cmds.intField
-		else:
-			raise RuntimeError("Invalid parameter type for NumericParameterUI")
-
 	def replace( self, node, parameter ) :
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
@@ -127,6 +109,25 @@ class NumericParameterUI( IECoreMaya.ParameterUI ) :
 
 		if self.__slider:
 			maya.cmds.connectControl( self.__slider, self.plugName() )
+
+	def __sliderType( self ):
+
+		if self.parameter.isInstanceOf( IECore.TypeId.FloatParameter ) or self.parameter.isInstanceOf( IECore.TypeId.DoubleParameter ):
+			return maya.cmds.floatSlider
+		elif self.parameter.isInstanceOf( IECore.TypeId.IntParameter ):
+			return maya.cmds.intSlider
+		else:
+			raise RuntimeError("Invalid parameter type for NumericParameterUI")
+
+	def __fieldType( self ):
+
+		if self.parameter.isInstanceOf( IECore.TypeId.FloatParameter ) or self.parameter.isInstanceOf( IECore.TypeId.DoubleParameter ):
+			return maya.cmds.floatField
+		elif self.parameter.isInstanceOf( IECore.TypeId.IntParameter ):
+			return maya.cmds.intField
+		else:
+			raise RuntimeError("Invalid parameter type for NumericParameterUI")
+
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.FloatParameter, NumericParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.DoubleParameter, NumericParameterUI )

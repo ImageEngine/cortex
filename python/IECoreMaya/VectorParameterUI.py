@@ -69,7 +69,7 @@ class VectorParameterUI( IECoreMaya.ParameterUI ) :
 		plug = self.plug()
 		for i in range(0, self.__dim) :
 			self.__fields.append(
-				self.fieldType()(
+				self.__fieldType()(
 					value = parameter.getTypedValue()[i]
 				)
 			)
@@ -77,13 +77,6 @@ class VectorParameterUI( IECoreMaya.ParameterUI ) :
 		maya.cmds.setParent("..")
 
 		self.replace( self.node(), self.parameter )
-
-	def fieldType( self ):
-
-		if self.parameter.isInstanceOf( IECore.TypeId.V2iParameter ) or self.parameter.isInstanceOf( IECore.TypeId.V3iParameter ):
-			return maya.cmds.intField
-		else:
-			return maya.cmds.floatField
 
 	def replace( self, node, parameter ) :
 
@@ -95,6 +88,13 @@ class VectorParameterUI( IECoreMaya.ParameterUI ) :
 			childPlugName = self.nodeName() + "." + plug.child(i).partialName()
 			maya.cmds.connectControl( self.__fields[i], childPlugName )
 			self._addPopupMenu( parentUI = self.__fields[i], attributeName = childPlugName )
+
+	def __fieldType( self ):
+
+		if self.parameter.isInstanceOf( IECore.TypeId.V2iParameter ) or self.parameter.isInstanceOf( IECore.TypeId.V3iParameter ):
+			return maya.cmds.intField
+		else:
+			return maya.cmds.floatField
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.V2iParameter, VectorParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.V3iParameter, VectorParameterUI )

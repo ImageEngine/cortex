@@ -80,20 +80,13 @@ class BoxParameterUI( IECoreMaya.ParameterUI ) :
 
 			for i in range( 0, self.__dim ) :
 
-				self.__fields.append( self.fieldType()() )
+				self.__fields.append( self.__fieldType()() )
 
 			maya.cmds.setParent("..")
 
 		maya.cmds.setParent("..")
 
 		self.replace( self.node(), self.parameter )
-
-	def fieldType( self ):
-
-		if self.parameter.isInstanceOf( IECore.TypeId.Box2iParameter ) or self.parameter.isInstanceOf( IECore.TypeId.Box3iParameter ):
-			return maya.cmds.intField
-		else:
-			return maya.cmds.floatField
 
 	def replace( self, node, parameter ) :
 
@@ -112,6 +105,13 @@ class BoxParameterUI( IECoreMaya.ParameterUI ) :
 				self._addPopupMenu( parentUI = self.__fields[fieldNum], attributeName = vectorPlugChildName )
 
 				fieldNum += 1
+
+	def __fieldType( self ):
+
+		if self.parameter.isInstanceOf( IECore.TypeId.Box2iParameter ) or self.parameter.isInstanceOf( IECore.TypeId.Box3iParameter ):
+			return maya.cmds.intField
+		else:
+			return maya.cmds.floatField
 
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Box2iParameter, BoxParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.Box2fParameter, BoxParameterUI )
