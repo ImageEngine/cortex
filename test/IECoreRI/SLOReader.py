@@ -147,7 +147,13 @@ class TestSLOReader( unittest.TestCase ) :
 				t.start()
 
 			for t in threads :
-				t.join()		
+				t.join()	
+
+	def testCantReadEmpty( self ) :
+	
+		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/empty' )
+		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null' )
+		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null.cin' )
 
 	def tearDown( self ) :
 
