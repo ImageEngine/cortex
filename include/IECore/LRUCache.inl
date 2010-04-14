@@ -146,7 +146,6 @@ Ptr LRUCache<Key, Ptr>::get( const Key& key )
 		}
 		catch( const std::exception &e )
 		{
-			std::cerr << "LRUCACHE CAUGHT " << e.what() << std::endl;
 			lock.acquire( m_mutex );
 			CacheEntry &cacheEntry = m_cache[key]; // in case some other thread erased our entry while we had released the lock
 			cacheEntry.status = Failed;
