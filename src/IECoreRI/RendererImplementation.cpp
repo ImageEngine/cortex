@@ -966,32 +966,54 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 			}
 		}
 	}
-	ParameterList pl( parameters, &state.primVarTypeHints );
 	if( type=="surface" || type=="ri:surface" )
 	{
+		ParameterList pl( parameters, &state.primVarTypeHints );
 		RiSurfaceV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
 	else if( type=="displacement" || type=="ri:displacement" )
 	{
+		ParameterList pl( parameters, &state.primVarTypeHints );
 		RiDisplacementV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
 	else if( type=="atmosphere" || type=="ri:atmosphere" )
 	{
+		ParameterList pl( parameters, &state.primVarTypeHints );
 		RiAtmosphereV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
 	else if( type=="interior" || type=="ri:interior" )
 	{
+		ParameterList pl( parameters, &state.primVarTypeHints );
 		RiInteriorV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
 	else if( type=="exterior" || type=="ri:exterior" )
 	{
+		ParameterList pl( parameters, &state.primVarTypeHints );
 		RiExteriorV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
 	else if( type=="deformation" || type=="ri:deformation" )
 	{
+		ParameterList pl( parameters, &state.primVarTypeHints );
 		RiDeformationV( (char *)name.c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
-
+	else if( type=="shader" || type=="ri:shader" )
+	{
+		const StringData *handleData = 0;
+		CompoundDataMap::const_iterator it = parameters.find( "__handle" );
+		if( it!=parameters.end() )
+		{
+			handleData = runTimeCast<const StringData>( it->second );
+		}
+		if( !handleData )
+		{
+			msg( Msg::Error, "IECoreRI::RendererImplementation::shader", "Must specify StringData \"__handle\" parameter for coshaders." );
+			return;
+		}
+		CompoundDataMap parametersCopy = parameters;
+		parametersCopy.erase( "__handle" );
+		ParameterList pl( parametersCopy, &state.primVarTypeHints );
+		RiShaderV( (char *)name.c_str(), (char *)handleData->readable().c_str(), pl.n(), pl.tokens(), pl.values() );
+	}
 }
 
 void IECoreRI::RendererImplementation::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )

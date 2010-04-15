@@ -211,6 +211,14 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ri:*:*"</b><br>
 		/// Supports all attributes for which the RxAttribute query works.
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
+		/// If type is "surface" or "ri:surface" then calls RiSurfaceV.
+		/// If type is "displacement" or "ri:displacement" then calls RiDisplacementV.
+		/// If type is "atmosphere" or "ri:atmosphere" then calls RiDisplacementV.
+		/// If type is "interior" or "ri:interior" then calls RiInteriorV.
+		/// If type is "exterior" or "ri:exterior" then calls RiExteriorV.
+		/// If type is "deformation" or "ri:deformation" then calls RiDeformationV.
+		/// If type is "shader" or "ri:shader" then calls RiShader. In this case you must specify a handle
+		/// as a StringData parameter named "__handle".
 		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters );
 		virtual void illuminate( const std::string &lightHandle, bool on );

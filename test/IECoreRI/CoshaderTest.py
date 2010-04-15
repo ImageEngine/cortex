@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,56 +32,57 @@
 #
 ##########################################################################
 
-import sys
+from __future__ import with_statement
+
+import unittest
+import os
+
 import IECore
+import IECoreRI
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
-from Orientation import *
-from MultipleContextsTest import *
-from Camera import *
-from CurvesTest import *
-from TextureOrientationTest import *
-from ArrayPrimVarTest import *
-from CoordinateSystemTest import *
-from IlluminateTest import *
-from SubsurfaceTest import *
-from PatchMeshTest import *
-from RIBWriterTest import *
-from ParameterisedProcedural import *
-from MotionTest import MotionTest
-from PythonProceduralTest import PythonProceduralTest
-from DetailTest import DetailTest
-from SXRendererTest import SXRendererTest
-from ProceduralThreadingTest import ProceduralThreadingTest
-from StringArrayParameterTest import StringArrayParameterTest
-from CoshaderTest import CoshaderTest
+class CoshaderTest( unittest.TestCase ) :
 
-if IECore.withFreeType() :
+	def testRendererSupport( self ) :
 
-	from TextTest import *
-
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
-
-	def __init__( self ) :
-
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/coshaderTest.sdl test/IECoreRI/shaders/coshaderTest.sl" ), 0 )
 		
-	def flush( self ) :
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testCoshader.rib" )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "shader", "test/IECoreRI/shaders/coshaderTest", { "f" : 1.0, "s" : "hello", "__handle" : "h" } )
+
+		r = "".join( file( "test/IECoreRI/output/testCoshader.rib" ).readlines() )
+				
+		self.failUnless( 'Shader "test/IECoreRI/shaders/coshaderTest" "h"' in r )
+		self.failUnless( '"string s" [ "hello" ]' in r )
+		self.failUnless( '"float f" [ 1 ]' in r )
+		self.failIf( "__handle" in r )
+
+	def testSLOReaderSupport( self ) :
 	
-		sys.stderr.flush()
-		self.__f.flush()
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/coshaderTest.sdl test/IECoreRI/shaders/coshaderTest.sl" ), 0 )
 		
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+		s = IECoreRI.SLOReader( "test/IECoreRI/shaders/coshaderTest.sdl" ).read()
+		
+		# this for sure isn't what we really want, but that's all the information the Slo library
+		# gives us.
+		self.assertEqual( s.type, "<unknown>" )
+	
+		k = s.parameters.keys()
+		self.assertEqual( len( k ), 2 )
+		self.failUnless( "f" in k )
+		self.failUnless( "s" in k )
+		
+	def tearDown( self ) :
+	
+		for f in [
+			"test/IECoreRI/shaders/coshaderTest.sdl",
+			"test/IECoreRI/output/testCoshader.rib",
+		] :
+		
+			if os.path.exists( f ) :
+				os.remove( f )
+		
+if __name__ == "__main__":
+    unittest.main()
