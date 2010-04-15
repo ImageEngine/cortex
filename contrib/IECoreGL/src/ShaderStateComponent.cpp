@@ -234,7 +234,7 @@ ShaderPtr ShaderStateComponent::shader()
 		else if ( m_vertexShader.size() == 0 && m_fragmentShader.size() == 0 )
 		{
 			// get the default shader.
-			m_shader = Shader::constant();
+			m_shader = Shader::facingRatio();
 		}
 		else
 		{

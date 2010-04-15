@@ -996,9 +996,10 @@ ShaderPtr Shader::facingRatio()
 	""
 	"void main()"
 	"{"
-	"	gl_Position = ftransform();"
+	"	vec4 pCam = gl_ModelViewMatrix * gl_Vertex;"
+	"	gl_Position = gl_ProjectionMatrix * pCam;"
 	"	N = normalize( gl_NormalMatrix * gl_Normal );"
-	"	I = normalize( -gl_Position.xyz );"
+	"	I = normalize( -pCam.xyz );"
 	"}";
 
 	static const char *fragmentSource =
@@ -1008,7 +1009,7 @@ ShaderPtr Shader::facingRatio()
 	"void main()"
 	"{"
 	"	N = faceforward( N, -I, N );"
-	"	float f = dot( I, N );"
+	"	float f = dot( normalize(I), normalize(N) );"
 	"	gl_FragColor = vec4( f, f, f, 1 );"
 	"}";
 
