@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,55 +32,53 @@
 #
 ##########################################################################
 
-import sys
+from __future__ import with_statement
+
+import unittest
+import os
+
 import IECore
+import IECoreRI
 
-from SLOReader import *
-from Renderer import *
-from Instancing import *
-from PTCParticleReader import *
-from PTCParticleWriter import *
-from ArchiveRecord import *
-from DoubleSided import *
-from Orientation import *
-from MultipleContextsTest import *
-from Camera import *
-from CurvesTest import *
-from TextureOrientationTest import *
-from ArrayPrimVarTest import *
-from CoordinateSystemTest import *
-from IlluminateTest import *
-from SubsurfaceTest import *
-from PatchMeshTest import *
-from RIBWriterTest import *
-from ParameterisedProcedural import *
-from MotionTest import MotionTest
-from PythonProceduralTest import PythonProceduralTest
-from DetailTest import DetailTest
-from SXRendererTest import SXRendererTest
-from ProceduralThreadingTest import ProceduralThreadingTest
-from StringArrayParameterTest import StringArrayParameterTest
+class StringArrayParameterTest( unittest.TestCase ) :
 
-if IECore.withFreeType() :
-
-	from TextTest import *
-
-## \todo Should share this class with the other tests rather
-# than duplicating it
-class SplitStream :
-
-	def __init__( self ) :
-
-		self.__f = open( "test/IECoreRI/results.txt", 'w' )
-
-	def write( self, l ) :
-
-		sys.stderr.write( l )
-		self.__f.write( l )
-		
-	def flush( self ) :
+	def test( self ) :
 	
-		sys.stderr.flush()
-		self.__f.flush()
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
 		
-unittest.TestProgram( testRunner = unittest.TextTestRunner( stream = SplitStream(), verbosity = 2 ) )
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testStringArrayParameter.rib" )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/types", { "sa" : IECore.StringVectorData( [ "a", "b" ] ) } )
+
+		r = "".join( file( "test/IECoreRI/output/testStringArrayParameter.rib" ).readlines() )
+		
+		self.failUnless( '"string sa[2]" [ "a" "b" ]' in r )
+
+	def testEmptyString( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
+		
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testStringArrayParameter.rib" )
+		
+		with IECore.WorldBlock( r ) :
+		
+			r.shader( "surface", "test/IECoreRI/shaders/types", { "sa" : IECore.StringVectorData( [] ) } )
+
+		r = "".join( file( "test/IECoreRI/output/testStringArrayParameter.rib" ).readlines() )
+		
+		self.failUnless( '"string sa[0]" [ ]' in r )
+
+	def tearDown( self ) :
+	
+		for f in [
+			"test/IECoreRI/shaders/types.sdl",
+			"test/IECoreRI/output/testStringArrayParameter.rib",
+		] :
+		
+			if os.path.exists( f ) :
+				os.remove( f )
+		
+if __name__ == "__main__":
+    unittest.main()

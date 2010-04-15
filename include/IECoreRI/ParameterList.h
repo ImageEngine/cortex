@@ -41,8 +41,7 @@ namespace IECoreRI
 {
 
 /// This class provides a means of converting from an IECore::CompoundDataMap
-/// to the nasty form passable through the Renderman Interface.
-/// \bug I believe this fails for StringVectorData parameters with no elements.
+/// to the form passable through the Renderman Interface.
 class ParameterList
 {
 

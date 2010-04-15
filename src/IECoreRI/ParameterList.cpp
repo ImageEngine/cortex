@@ -139,19 +139,46 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 
 const void *ParameterList::value( const IECore::Data *d )
 {
-	if( d->typeId()==StringData::staticTypeId() )
+	
+	switch( d->typeId() )
 	{
-		const char *v = static_cast<const StringData *>( d )->readable().c_str();
-		m_charPtrs.push_back( v );
-		return &*(m_charPtrs.rbegin());
-	}
-	if( d->typeId()==BoolData::staticTypeId() )
-	{
-		m_ints.push_back( static_cast<const BoolData *>( d )->readable() );
-		return &*(m_ints.rbegin());
-	}
+		case StringDataTypeId :
+		{
+			const char *v = static_cast<const StringData *>( d )->readable().c_str();
+			m_charPtrs.push_back( v );
+			return &*(m_charPtrs.rbegin());
+		}
+		case StringVectorDataTypeId :
+		{
+			const vector<string> &v = static_cast<const StringVectorData *>( d )->readable();
+			for( vector<string>::const_iterator it=v.begin(); it!=v.end(); it++ )
+			{
+				m_charPtrs.push_back( it->c_str() );
+			}
+			if( v.size() )
+			{
+				return (&*(m_charPtrs.rbegin())) - ( v.size() - 1 );			
+			}
+			else
+			{
+				// you'd think it'd be ok to pass 3delight a NULL pointer when we're trying to
+				// send an array of size 0, but that doesn't work. we have to pass a valid pointer
+				// of some sort even though it appears to be unused. here we're just choosing totally
+				// arbitrarily to use "this" for the purpose.
+				return this;
+			}
+		}
+		case BoolDataTypeId :
+		
+			m_ints.push_back( static_cast<const BoolData *>( d )->readable() );
+			return &*(m_ints.rbegin());
 
-	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d ) );
+		default :
+		
+			return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d ) );
+
+	
+	}
 }
 
 void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
@@ -192,6 +219,8 @@ void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numSt
 		case StringDataTypeId :
 			numCharPtrs++;
 			break;
+		case StringVectorDataTypeId :
+			numCharPtrs += static_cast<const StringVectorData *>( d )->readable().size();
 		case BoolDataTypeId :
 			numInts++;
 			break;
@@ -289,15 +318,7 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		{
 			if( isArray )
 			{
-				if ( arraySize )
-				{
-					m_strings.push_back( boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ) );
-				}
-				else
-				{
-					msg( Msg::Warning, "ParameterList::appendParameter", format( "Array \"%s\" has zero length and will be ignored." ) % name );
-					return;
-				}
+				m_strings.push_back( boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ) );
 			}
 			else
 			{
