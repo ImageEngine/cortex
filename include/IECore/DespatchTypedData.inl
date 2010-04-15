@@ -501,8 +501,49 @@ struct TypedDataAddress
 {
 	typedef const void *ReturnType;
 
+	template<typename T, typename Enable = void>
+
+	struct TypedDataAddressHelper
+	{
+		ReturnType operator()( typename T::ConstPtr data ) const
+		{
+			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+			return 0;
+		}
+	};
+ 	
 	template<typename T>
 	ReturnType operator()( typename T::ConstPtr data ) const
+	{
+		assert( data );
+		return TypedDataAddressHelper<T>()( data );
+	}
+};
+
+template<typename T>
+struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< TypeTraits::IsSimpleTypedData<T> >::type >
+{
+	const void *operator()( typename T::ConstPtr data ) const
+	{
+		assert( data );
+		return &( data->readable() );
+	}
+};
+
+template<typename T>
+struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< boost::mpl::and_< TypeTraits::IsVectorTypedData<T>, boost::mpl::not_< boost::is_same< typename TypeTraits::VectorValueType<T>::type, bool > > > >::type >
+{
+	const void *operator()( typename T::ConstPtr data ) const
+	{
+		assert( data );
+		return &*(data->readable().begin());
+	}
+};
+
+template<typename T>
+struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< boost::mpl::and_< TypeTraits::IsVectorTypedData<T>, boost::is_same< typename TypeTraits::VectorValueType<T>::type, bool > > >::type >
+{
+	const void *operator()( typename T::ConstPtr data ) const
 	{
 		assert( data );
 		return data->baseReadable();
